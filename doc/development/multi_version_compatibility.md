@@ -6,43 +6,92 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 
 # Compatibility with multiple versions of the application running at the same time
 
-When adding or changing features, we must be aware that there may be multiple versions of the application running
-at the same time and connected to the same PostgreSQL and Redis databases. This could happen during a rolling deploy
-when the servers are updated one by one.
+GitLab deployments can be broken down into many components. Upgrading GitLab is not atomic. Therefore, **many components must be backwards-compatible**.
 
-During a rolling deploy, post-deployment DB migrations are run after all the servers have been updated. This means the
-servers could be in these intermediate states:
+## How long must code be backwards-compatible?
 
-1. Old application code running with new DB migrations already executed
-1. New application code running with new DB migrations but without new post-deployment DB migrations
+For users following [zero-downtime upgrade instructions](../update/index.md#upgrading-without-downtime), the answer is one minor version. For example:
 
-We must make sure that the application works properly in these states.
+* 13.11 => 13.12
+* 13.12 => 14.0
+* 14.0 => 14.1
 
-For GitLab.com, we also run a set of canary servers which run a more recent version of the application. Users with
-the canary cookie set would be handled by these servers. Some URL patterns may also be forced to the canary servers,
-even without the cookie being set. This also means that some pages may match the pattern and get handled by canary servers,
-but AJAX requests to URLs (like the GraphQL endpoint) fail to match the pattern.
+For GitLab.com, there can be multiple tiny version upgrades per day, so GitLab.com doesn't constrain how far changes must be backwards-compatible.
 
-With this canary setup, we'd be in this mixed-versions state for an extended period of time until canary is promoted to
-production and post-deployment migrations run.
+Many users upgrade jump to the latest minor version, for example:
 
-Also be aware that during a deployment to production, Web, API, and
-Sidekiq nodes are updated in parallel, but they may finish at
-different times. That means there may be a window of time when the
-application code is not in sync across the whole fleet. Changes that
-cut across Sidekiq, Web, and/or the API may [introduce unexpected
-errors until the deployment is complete](#builds-failing-due-to-varying-deployment-times-across-node-types).
+* 13.0 => 13.12
+
+These users accept some downtime during the upgrade. Unfortunately we can't ignore this case completely. For example, 13.12 may execute Sidekiq jobs from 13.0, which illustrates why [we avoid removing arguments from jobs until a major release](sidekiq_style_guide.md#deprecate-and-remove-an-argument). The main question is: Will the deployment get to a good state after the upgrade is complete?
+
+## What kind of components can GitLab be broken down into?
+
+The [50,000 reference architecture] runs GitLab on 48+ nodes. GitLab.com is [bigger than that](https://about.gitlab.com/handbook/engineering/infrastructure/production/architecture/), plus a portion of the [infrastructure runs on Kubernetes](https://about.gitlab.com/handbook/engineering/infrastructure/production/kubernetes/gitlab-com/), plus there is a ["canary" stage which receives upgrades first](https://about.gitlab.com/handbook/engineering/#sts=Canary%20Testing).
+
+But the problem isn't just that there are many nodes. The bigger problem is that a deployment can be divided into different contexts. And it's not just GitLab.com that does this. Some notable potential divisions:
+
+* "Canary web app nodes": Handle non-API requests from a subset of users
+* "Git app nodes": Handle Git requests
+* "Web app nodes": Handle web requests
+* "API app nodes": Handle API requests
+* "Sidekiq app nodes": Handle Sidekiq jobs
+* "Postgres database": Handle internal Postgres calls
+* "Redis database": Handle internal Redis calls
+* "Gitaly nodes": Handle internal Gitaly calls
+
+During an upgrade, there will be different versions of GitLab running in different contexts. For example, a web node may enqueue jobs which get run on an old Sidekiq node!
+
+## Doesn't the order of upgrade steps matter?
+
+Yes! We have specific instructions for [zero-downtime upgrades](../update/index.md#upgrading-without-downtime) because it allows us to ignore some permutations of compatibility. This is why we don't worry about Rails code making DB calls to an old Postgres database schema.
+
+## How can we identify problems during development?
+
+These problems are often very subtle. This is why it is worth familiarizing yourself with upgrades and architectures. Other than that, it is helpful to remember the most common gotchas. To illustrate some of them, take a look at this example of an upgrade.
+
+* 🚢 New version
+* 🙂 Old version
+
+We worry most about minor version jumps. But refer to [How long must code be backwards-compatible?](#how-long-must-code-be-backwards-compatible).
+
+| Upgrade step | Postgres DB | Web nodes | API nodes | Sidekiq nodes | Compatibility concerns |
+| --- | --- | --- | --- | --- | --- |
+| Initial state | 🙂 | 🙂 | 🙂 | 🙂 | |
+| Ran pre-deployment migrations | 🚢 except post-deploy migrations | 🙂 | 🙂 | 🙂 | Rails code in 🙂 is making DB calls to 🚢 |
+| Upgrade web nodes | 🚢 except post-deploy migrations | 🚢 | 🙂 | 🙂 | JS code in 🚢 is making API calls to 🙂. Rails code in 🚢 is enqueuing jobs that are getting run by Sidekiq nodes in 🙂 |
+| Upgrade API and Sidekiq nodes | 🚢 except post-deploy migrations | 🚢 | 🚢 | 🚢 | Rails code in 🚢 is making DB calls without post-deployment migrations or background migrations |
+| Run post-deployment migrations | 🚢 | 🚢 | 🚢 | 🚢 | Rails code in 🚢 is making DB calls without background migrations |
+| Background migrations finish | 🚢 | 🚢 | 🚢 | 🚢 | |
+
+This example is meant to be illustrative, not exhaustive. GitLab can be deployed in many different ways. Even each upgrade step is not atomic. For example, with rolling deploys, nodes within a group are temporarily on different versions. Assume that a lot of time passes between upgrade steps. This is often true on GitLab.com.
+
+From this table, we can list a number of gotchas.
+
+### List of common gotchas
+
+* New pre-deployment migrations must work when only the previous version of Rails and JS is running
+* Changes to jobs must work when Sidekiq is only running on the previous version
+* New Sidekiq worker classes won't get run at all for a period of time (i.e. GitLab.com canary stage)
+* Changes to JS must work with the previous version's API
+* New post-deployment migrations cannot be depended on by Rails changes
+* New background migrations cannot be depended on by Rails changes
+
+## I've identified a potential multi-version compatibility problem, what can I do about it?
+
+### Feature flags
 
 One way to handle this is to use a feature flag that is disabled by
 default. The feature flag can be enabled when the deployment is in a
-consistent state. However, this method of synchronization doesn't
-guarantee that customers with on-premise instances can [upgrade with
+consistent state. However, this method of synchronization **does not
+guarantee** that customers with on-premise instances can [upgrade with
 zero downtime](https://docs.gitlab.com/omnibus/update/#zero-downtime-updates)
-because point releases bundle many changes together. Minimizing the time
-between when versions are out of sync across the fleet may help mitigate
-errors caused by upgrades.
+because point releases bundle many changes together.
 
-## Requirements for zero downtime upgrades
+### Graceful degradation
+
+As an example, when adding a new feature with frontend and API changes, it may be possible to write the frontend such that the new feature degrades gracefully against old API responses. This may help avoid needing to spread a change over 3 releases.
+
+### Expand and contract pattern
 
 One way to guarantee zero downtime upgrades for on-premise instances is following the
 [expand and contract pattern](https://martinfowler.com/bliki/ParallelChange.html).
