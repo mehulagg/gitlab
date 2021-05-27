@@ -3,7 +3,8 @@
     - prm
   # For scheduling dast job
   extends:
-    - .reports:rules:schedule-dast
+    # - .reports:rules:schedule-dast #Commented for testing
+    - .reports:rules:dast #Added for testing
   image:
     name: "registry.gitlab.com/gitlab-org/security-products/dast:$DAST_VERSION"
   resource_group: dast_scan
