@@ -1204,19 +1204,18 @@ no accessible through Praefect to prevent serving stale data which may break aut
 
 ### Check for data loss
 
-The Praefect `dataloss` sub-command identifies replicas that are likely to be outdated. This can help
-identify potential data loss after a failover. The following parameters are
-available:
+The Praefect `dataloss` sub-command identifies repositories which are unavailable. This helps identifying
+potential data loss and repositories which are no longer accesible as all of their up to date replicas are unavailable. The following parameters are available:
 
 - `-virtual-storage` that specifies which virtual storage to check. The default behavior is to
-  display outdated replicas of read-only repositories as they might require administrator action.
-- In GitLab 13.3 and later, `-partially-replicated` that specifies whether to display a list of
-  [outdated replicas of writable repositories](#outdated-replicas-of-writable-repositories).
+  display unavailable repositories as they might require administrator action.
+- [`-partially-unavailable`](#outdated-replicas-of-writable-repositories) that specifies whether to include in
+  the output repositories which are available but have some assigned replicas which are not available.
 
 NOTE:
 `dataloss` is still in beta and the output format is subject to change.
 
-To check for repositories with outdated primaries, run:
+To check for unavailable repositories, run:
 
 ```shell
 sudo /opt/gitlab/embedded/bin/praefect -config /var/opt/gitlab/praefect/config.toml dataloss [-virtual-storage <virtual-storage>]
@@ -1228,13 +1227,12 @@ Every configured virtual storage is checked if none is specified:
 sudo /opt/gitlab/embedded/bin/praefect -config /var/opt/gitlab/praefect/config.toml dataloss
 ```
 
-Repositories which have assigned storage nodes that contain an outdated copy of the repository are listed
-in the output. This information is printed for each repository:
+Repositories which have no healthy, fully up to date replicas available are listed in the output. This information
+is printed for each repository:
 
 - A repository's relative path to the storage directory identifies each repository and groups the related
   information.
-- The repository's current status is printed in parentheses next to the disk path. If the repository's primary
-  is outdated, the repository is in `read-only` mode and can't accept writes. Otherwise, the mode is `writable`.
+- `(unavailable)` is printed next to the disk path if the repository is currently unavailable.
 - The primary field lists the repository's current primary. If the repository has no primary, the field shows
   `No Primary`.
 - The In-Sync Storages lists replicas which have replicated the latest successful write and all writes
@@ -1249,39 +1247,39 @@ next to replicas which are assigned to store the repository. The text is omitted
 the repository but is not assigned to store the repository. Such replicas aren't kept in-sync by Praefect, but may
 act as replication sources to bring assigned replicas up to date.
 
+Finally, `unhealthy` is printed next to the replicas which are located unhealthy Gitaly nodes.
+
 Example output:
 
 ```shell
 Virtual storage: default
   Outdated repositories:
-    @hashed/3f/db/3fdba35f04dc8c462986c992bcf875546257113072a909c162f7e470e581e278.git (read-only):
+    @hashed/3f/db/3fdba35f04dc8c462986c992bcf875546257113072a909c162f7e470e581e278.git (unvailable):
       Primary: gitaly-1
       In-Sync Storages:
-        gitaly-2, assigned host
+        gitaly-2, assigned host, unhealthy
       Outdated Storages:
         gitaly-1 is behind by 3 changes or less, assigned host
         gitaly-3 is behind by 3 changes or less
 ```
 
-A confirmation is printed out when every repository is writable. For example:
+A confirmation is printed out when every repository is available. For example:
 
 ```shell
 Virtual storage: default
-  All repositories are writable!
+  All repositories are available!
 ```
 
-#### Outdated replicas of writable repositories
+#### Unavailable replicas of available repositories
 
-> [Introduced](https://gitlab.com/gitlab-org/gitaly/-/issues/3019) in GitLab 13.3.
+To also list information of repositories which are available but are unavailable from some of the assigned nodes,
+use the `-partially-replicated` flag.
 
-To also list information of repositories whose primary is up to date but one or more assigned
-replicas are outdated, use the `-partially-replicated` flag.
-
-A repository is writable if the primary has the latest changes. Secondaries might be temporarily
-outdated while they are waiting to replicate the latest changes.
+A repository is available if there is a healthy, up to date replica available. Some of the assigned secondary
+replicas may be temporarily unavailable for access while they are waiting to replicate the latest changes.
 
 ```shell
-sudo /opt/gitlab/embedded/bin/praefect -config /var/opt/gitlab/praefect/config.toml dataloss [-virtual-storage <virtual-storage>] [-partially-replicated]
+sudo /opt/gitlab/embedded/bin/praefect -config /var/opt/gitlab/praefect/config.toml dataloss [-virtual-storage <virtual-storage>] [-partially-unavailable]
 ```
 
 Example output:
@@ -1289,7 +1287,7 @@ Example output:
 ```shell
 Virtual storage: default
   Outdated repositories:
-    @hashed/3f/db/3fdba35f04dc8c462986c992bcf875546257113072a909c162f7e470e581e278.git (writable):
+    @hashed/3f/db/3fdba35f04dc8c462986c992bcf875546257113072a909c162f7e470e581e278.git:
       Primary: gitaly-1
       In-Sync Storages:
         gitaly-1, assigned host
@@ -1298,14 +1296,14 @@ Virtual storage: default
         gitaly-3 is behind by 3 changes or less
 ```
 
-With the `-partially-replicated` flag set, a confirmation is printed out if every assigned replica is fully up to
-date.
+With the `-partially-unavailable` flag set, a confirmation is printed out if every assigned replica is fully up to
+date and healthy.
 
 For example:
 
 ```shell
 Virtual storage: default
-  All repositories are up to date!
+  All repositories are fully available on all assigned storages!
 ```
 
 ### Check repository checksums
