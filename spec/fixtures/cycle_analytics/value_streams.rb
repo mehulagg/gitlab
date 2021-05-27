@@ -109,7 +109,7 @@ RSpec.describe 'Analytics (JavaScript fixtures)', :sidekiq_inline do
     clean_frontend_fixtures('analytics/value_stream_analytics/')
   end
 
-  describe Projects::Analytics::CycleAnalytics::StagesController, type: :controller do
+  describe Groups::Analytics::CycleAnalytics::StagesController, type: :controller do
     render_views
 
     let(:params) { { created_after: 3.months.ago, created_before: Time.now, group_id: group.full_path } }
