@@ -15,6 +15,10 @@ module Ci
         next unless job
 
         validate_job!(job)
+
+        if job.user && Feature.enabled?(:ci_scoped_job_token, job.project, default_enabled: :yaml)
+          job.user.ci_job_token_scope = Ci::JobToken::Scope.new(job.project)
+        end
       end
     end
 
