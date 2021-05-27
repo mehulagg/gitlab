@@ -97,6 +97,7 @@ export const mockAlerts = [
     assignees: {
       nodes: [
         {
+          id: 'Alert:1',
           name: 'Administrator',
           username: 'root',
           avatarUrl: '/test-avatar-url',

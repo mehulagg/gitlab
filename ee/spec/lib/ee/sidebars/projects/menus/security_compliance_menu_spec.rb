@@ -80,6 +80,7 @@ RSpec.describe Sidebars::Projects::Menus::SecurityComplianceMenu do
             projects/security/configuration#show
             projects/security/sast_configuration#show
             projects/security/api_fuzzing_configuration#show
+            projects/security/dast_configuration#show
             projects/security/dast_profiles#show
             projects/security/dast_site_profiles#new
             projects/security/dast_site_profiles#edit

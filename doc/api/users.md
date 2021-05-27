@@ -207,7 +207,7 @@ Users on GitLab [Premium or higher](https://about.gitlab.com/pricing/) also see 
 ```
 
 Users on GitLab [Premium or higher](https://about.gitlab.com/pricing/) also see
-the `group_saml` provider option:
+the `group_saml` provider option and `provisioned_by_group_id` parameter:
 
 ```json
 [
@@ -220,6 +220,7 @@ the `group_saml` provider option:
       {"provider": "google_oauth2", "extern_uid": "8776128412476123468721346"},
       {"provider": "group_saml", "extern_uid": "123789", "saml_provider_id": 10}
     ],
+    "provisioned_by_group_id": 123789
     ...
   }
 ]
@@ -374,7 +375,7 @@ the `shared_runners_minutes_limit`, `is_auditor`, and `extra_shared_runners_minu
 ```
 
 Users on GitLab.com [Premium or higher](https://about.gitlab.com/pricing/) also
-see the `group_saml` option:
+see the `group_saml` option and `provisioned_by_group_id` parameter:
 
 ```json
 {
@@ -388,6 +389,7 @@ see the `group_saml` option:
     {"provider": "google_oauth2", "extern_uid": "8776128412476123468721346"},
     {"provider": "group_saml", "extern_uid": "123789", "saml_provider_id": 10}
   ],
+  "provisioned_by_group_id": 123789
   ...
 }
 ```
@@ -451,6 +453,7 @@ Parameters:
 | `twitter`                            | No       | Twitter account                                                                                                                                         |
 | `username`                           | Yes      | Username                                                                                                                                                |
 | `view_diffs_file_by_file`            | No       | Flag indicating the user sees only one file diff per page                                                                                               |
+| `show_whitespace_in_diffs`           | No       | Flag indicating the user sees whitespace changes in diffs
 | `website_url`                        | No       | Website URL                                                                                                                                             |
 
 ## User modification
@@ -630,7 +633,14 @@ GET /user
 }
 ```
 
-Users on GitLab [Premium or higher](https://about.gitlab.com/pricing/) also see the `shared_runners_minutes_limit`, `extra_shared_runners_minutes_limit`, `is_auditor`, and `using_license_seat` parameters.
+Users on GitLab [Premium or higher](https://about.gitlab.com/pricing/) also see these
+parameters:
+
+- `shared_runners_minutes_limit`
+- `extra_shared_runners_minutes_limit`
+- `is_auditor`
+- `provisioned_by_group_id`
+- `using_license_seat`
 
 ## User status
 

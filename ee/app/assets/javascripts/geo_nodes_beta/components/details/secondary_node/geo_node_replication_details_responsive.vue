@@ -19,6 +19,8 @@ export default {
     nA: __('N/A'),
     progressBarSyncTitle: s__('Geo|%{component} synced'),
     progressBarVerifTitle: s__('Geo|%{component} verified'),
+    verified: s__('Geo|Verified'),
+    nothingToVerify: s__('Geo|Nothing to verify'),
   },
   components: {
     GlIcon,
@@ -94,6 +96,8 @@ export default {
             :title="sprintf($options.i18n.progressBarVerifTitle, { component: item.component })"
             :target="`verification-progress-${item.component}`"
             :values="item.verificationValues"
+            :success-label="$options.i18n.verified"
+            :unavailable-label="$options.i18n.nothingToVerify"
           />
           <span v-else class="gl-text-gray-400 gl-font-sm">{{ $options.i18n.nA }}</span>
         </div>

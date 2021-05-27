@@ -25,6 +25,22 @@ export const mockIteration2 = {
   state: 'opened',
 };
 
+export const mockEpic1 = {
+  __typename: 'Epic',
+  id: 'gid://gitlab/Epic/1',
+  title: 'Foobar Epic',
+  webUrl: 'http://gdk.test:3000/groups/gitlab-org/-/epics/1',
+  state: 'opened',
+};
+
+export const mockEpic2 = {
+  __typename: 'Epic',
+  id: 'gid://gitlab/Epic/2',
+  title: 'Awesome Epic',
+  webUrl: 'http://gdk.test:3000/groups/gitlab-org/-/epics/2',
+  state: 'opened',
+};
+
 export const mockGroupIterationsResponse = {
   data: {
     workspace: {
@@ -32,6 +48,18 @@ export const mockGroupIterationsResponse = {
         nodes: [mockIteration1, mockIteration2],
       },
       __typename: 'IterationConnection',
+    },
+    __typename: 'Group',
+  },
+};
+
+export const mockGroupEpicsResponse = {
+  data: {
+    workspace: {
+      attributes: {
+        nodes: [mockEpic1, mockEpic2],
+      },
+      __typename: 'EpicConnection',
     },
     __typename: 'Group',
   },
@@ -49,6 +77,18 @@ export const emptyGroupIterationsResponse = {
   },
 };
 
+export const emptyGroupEpicsResponse = {
+  data: {
+    workspace: {
+      attributes: {
+        nodes: [],
+      },
+      __typename: 'EpicConnection',
+    },
+    __typename: 'Group',
+  },
+};
+
 export const noCurrentIterationResponse = {
   data: {
     workspace: {
@@ -58,7 +98,16 @@ export const noCurrentIterationResponse = {
   },
 };
 
-export const mockMutationResponse = {
+export const noCurrentEpicResponse = {
+  data: {
+    workspace: {
+      issuable: { id: mockIssueId, attribute: null, __typename: 'Issue' },
+      __typename: 'Project',
+    },
+  },
+};
+
+export const mockIterationMutationResponse = {
   data: {
     issuableSetIteration: {
       errors: [],
@@ -73,6 +122,25 @@ export const mockMutationResponse = {
         __typename: 'Issue',
       },
       __typename: 'IssueSetIterationPayload',
+    },
+  },
+};
+
+export const mockEpicMutationResponse = {
+  data: {
+    issuableSetAttribute: {
+      errors: [],
+      issuable: {
+        id: 'gid://gitlab/Issue/1',
+        attribute: {
+          id: 'gid://gitlab/Epic/2',
+          title: 'Awesome Epic',
+          state: 'opened',
+          __typename: 'Epic',
+        },
+        __typename: 'Issue',
+      },
+      __typename: 'IssueSetEpicPayload',
     },
   },
 };

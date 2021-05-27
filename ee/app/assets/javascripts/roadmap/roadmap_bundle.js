@@ -79,7 +79,7 @@ export default () => {
         }),
 
         ...(rawFilterParams.epicIid && {
-          epicIid: parseInt(rawFilterParams.epicIid, 10),
+          epicIid: rawFilterParams.epicIid,
         }),
       };
       const timeframe = getTimeframeForPreset(

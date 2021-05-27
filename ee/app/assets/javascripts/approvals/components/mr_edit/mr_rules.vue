@@ -134,7 +134,11 @@ export default {
             <div ref="indicator" class="text-muted">{{ indicatorText(rule) }}</div>
           </td>
           <td class="js-members" :class="settings.allowMultiRule ? 'd-none d-sm-table-cell' : null">
-            <user-avatar-list :items="rule.approvers" :img-size="24" />
+            <user-avatar-list
+              :items="rule.approvers"
+              :img-size="24"
+              :empty-text="__('Approvers from private group(s) not shown')"
+            />
           </td>
           <td class="js-approvals-required">
             <rule-input :rule="rule" />

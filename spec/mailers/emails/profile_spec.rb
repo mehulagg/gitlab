@@ -264,7 +264,7 @@ RSpec.describe Emails::Profile do
         include_examples 'valid use case'
 
         it_behaves_like 'has the correct subject', /Your SSH key has expired/
-        it_behaves_like 'has the correct body text', /Your SSH keys with the following fingerprints has expired/
+        it_behaves_like 'has the correct body text', /Your SSH keys with the following fingerprints have expired/
       end
 
       context 'when invalid' do
@@ -337,7 +337,7 @@ RSpec.describe Emails::Profile do
     end
 
     it 'mentioned the time' do
-      is_expected.to have_body_text current_time.strftime('%Y-%m-%d %l:%M:%S %p %Z')
+      is_expected.to have_body_text current_time.strftime('%Y-%m-%d %k:%M:%S %Z')
     end
 
     it 'includes a link to the change password documentation' do

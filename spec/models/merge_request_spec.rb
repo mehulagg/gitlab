@@ -317,6 +317,38 @@ RSpec.describe MergeRequest, factory_default: :keep do
         expect(merge_request.target_project_id).to eq(merge_request.metrics.target_project_id)
       end
     end
+
+    describe '#set_draft_status' do
+      let(:merge_request) { create(:merge_request) }
+
+      context 'MR is a draft' do
+        before do
+          expect(merge_request.draft).to be_falsy
+
+          merge_request.title = "Draft: #{merge_request.title}"
+        end
+
+        it 'sets draft to true' do
+          merge_request.save!
+
+          expect(merge_request.draft).to be_truthy
+        end
+      end
+
+      context 'MR is not a draft' do
+        before do
+          expect(merge_request.draft).to be_falsey
+
+          merge_request.title = "This is not a draft"
+        end
+
+        it 'sets draft to true' do
+          merge_request.save!
+
+          expect(merge_request.draft).to be_falsey
+        end
+      end
+    end
   end
 
   describe 'respond to' do
@@ -3880,14 +3912,6 @@ RSpec.describe MergeRequest, factory_default: :keep do
       let(:service_class) { 'Ci::CompareMetricsReportsService' }
 
       it { is_expected.to be_truthy }
-
-      context 'with the metrics report flag disabled' do
-        before do
-          stub_feature_flags(merge_base_pipeline_for_metrics_comparison: false)
-        end
-
-        it { is_expected.to be_falsey }
-      end
     end
 
     context 'when service class is Ci::CompareCodequalityReportsService' do

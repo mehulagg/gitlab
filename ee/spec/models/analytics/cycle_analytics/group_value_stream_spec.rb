@@ -45,4 +45,28 @@ RSpec.describe Analytics::CycleAnalytics::GroupValueStream, type: :model do
       end
     end
   end
+
+  describe '#custom?' do
+    context 'when value stream is not persisted' do
+      subject(:value_stream) { build(:cycle_analytics_group_value_stream, name: value_stream_name) }
+
+      context 'when the name of the value stream is default' do
+        let(:value_stream_name) { Analytics::CycleAnalytics::Stages::BaseService::DEFAULT_VALUE_STREAM_NAME }
+
+        it { is_expected.not_to be_custom }
+      end
+
+      context 'when the name of the value stream is not default' do
+        let(:value_stream_name) { 'value_stream_1' }
+
+        it { is_expected.to be_custom }
+      end
+    end
+
+    context 'when value stream is persisted' do
+      subject(:value_stream) { create(:cycle_analytics_group_value_stream, name: 'value_stream_1') }
+
+      it { is_expected.to be_custom }
+    end
+  end
 end

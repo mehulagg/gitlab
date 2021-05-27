@@ -1,12 +1,13 @@
 <script>
 import { GlAlert, GlButton, GlDrawer, GlLink, GlSkeletonLoader } from '@gitlab/ui';
 import * as Sentry from '@sentry/browser';
+import getAlertDetailsQuery from '~/graphql_shared/queries/alert_details.query.graphql';
 import { capitalizeFirstCharacter, splitCamelCase } from '~/lib/utils/text_utility';
 import { visitUrl } from '~/lib/utils/url_utility';
 import { __ } from '~/locale';
+import SidebarAssigneesWidget from '~/sidebar/components/assignees/sidebar_assignees_widget.vue';
 import SidebarStatus from '~/vue_shared/alert_details/components/sidebar/sidebar_status.vue';
 import createIssueMutation from '~/vue_shared/alert_details/graphql/mutations/alert_issue_create.mutation.graphql';
-import getAlertDetailsQuery from '~/vue_shared/alert_details/graphql/queries/alert_details.query.graphql';
 import { getContentWrapperHeight } from '../../utils';
 import { ALERT_DETAILS_LOADING_ROWS, DRAWER_ERRORS, HIDDEN_VALUES } from './constants';
 
@@ -23,7 +24,9 @@ export default {
     GlDrawer,
     GlLink,
     GlSkeletonLoader,
+    SidebarAssigneesWidget,
   },
+  provide: { canUpdate: true },
   inject: ['projectPath'],
   apollo: {
     alertDetails: {
@@ -159,6 +162,13 @@ export default {
     <gl-alert v-if="errored" variant="danger" :dismissible="false" contained>
       {{ errorMessage }}
     </gl-alert>
+    <sidebar-assignees-widget
+      issuable-type="alert"
+      :iid="selectedAlert.iid"
+      :full-path="projectPath"
+      :allow-multiple-assignees="false"
+      @assignees-updated="handleAlertUpdate"
+    />
     <sidebar-status
       :alert="selectedAlert"
       :project-path="projectPath"

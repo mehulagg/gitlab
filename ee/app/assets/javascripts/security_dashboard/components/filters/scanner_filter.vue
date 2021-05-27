@@ -70,8 +70,17 @@ export default {
       return groups;
     },
     filterObject() {
-      const ids = this.selectedOptions.flatMap((x) => x.scannerIds);
-      return { scannerId: ids.map((x) => `${SCANNER_ID_PREFIX}${x}`) };
+      if (this.isNoOptionsSelected) {
+        return { scannerId: [] };
+      }
+
+      const ids = this.selectedOptions.flatMap(({ scannerIds, reportType }) => {
+        return scannerIds.length
+          ? scannerIds.map((id) => `${SCANNER_ID_PREFIX}${id}`)
+          : [`${SCANNER_ID_PREFIX}${reportType}:null`];
+      });
+
+      return { scannerId: ids };
     },
   },
   methods: {

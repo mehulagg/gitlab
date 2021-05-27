@@ -27,7 +27,7 @@ import {
   mockIssue,
   mockGroupIterationsResponse,
   mockIteration2,
-  mockMutationResponse,
+  mockIterationMutationResponse,
   emptyGroupIterationsResponse,
   noCurrentIterationResponse,
 } from '../mock_data';
@@ -379,7 +379,7 @@ describe('SidebarIterationWidget', () => {
       describe('when dropdown is expanded and user can edit', () => {
         let iterationMutationSpy;
         beforeEach(async () => {
-          iterationMutationSpy = jest.fn().mockResolvedValue(mockMutationResponse);
+          iterationMutationSpy = jest.fn().mockResolvedValue(mockIterationMutationResponse);
 
           await createComponentWithApollo({
             requestHandlers: [[projectIssueIterationMutation, iterationMutationSpy]],

@@ -428,8 +428,7 @@ RSpec.describe 'geo rake tasks', :geo do
     end
 
     it 'removes orphaned registries taking into account TO_PROJECT_ID' do
-      allow(ENV).to receive(:[]).with('FROM_PROJECT_ID').and_return(nil)
-      allow(ENV).to receive(:[]).with('TO_PROJECT_ID').and_return(@orphaned.project_id)
+      stub_env('FROM_PROJECT_ID' => nil, 'TO_PROJECT_ID' => @orphaned.project_id)
 
       run_rake_task('geo:run_orphaned_project_registry_cleaner')
 
@@ -439,8 +438,7 @@ RSpec.describe 'geo rake tasks', :geo do
     end
 
     it 'removes orphaned registries taking into account FROM_PROJECT_ID' do
-      allow(ENV).to receive(:[]).with('FROM_PROJECT_ID').and_return(@orphaned1.project_id)
-      allow(ENV).to receive(:[]).with('TO_PROJECT_ID').and_return(nil)
+      stub_env('FROM_PROJECT_ID' => @orphaned1.project_id, 'TO_PROJECT_ID' => nil)
 
       run_rake_task('geo:run_orphaned_project_registry_cleaner')
 

@@ -77,6 +77,7 @@ constraints(::Constraints::ProjectUrlConstrainer.new) do
               resources :dast_site_profiles, only: [:new, :edit]
               resources :dast_scanner_profiles, only: [:new, :edit]
             end
+            resource :dast, only: :show, controller: :dast_configuration
           end
 
           resource :discover, only: [:show], controller: :discover

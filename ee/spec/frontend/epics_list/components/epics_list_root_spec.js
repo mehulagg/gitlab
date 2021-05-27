@@ -170,6 +170,7 @@ describe('EpicsListRoot', () => {
     const getIssuableList = () => wrapper.find(IssuableList);
 
     it('renders issuable-list component', async () => {
+      jest.spyOn(wrapper.vm, 'getFilteredSearchTokens');
       wrapper.setData({
         filterParams: {
           search: 'foo',
@@ -191,6 +192,10 @@ describe('EpicsListRoot', () => {
         urlParams: wrapper.vm.urlParams,
         issuableSymbol: '&',
         recentSearchesStorageKey: 'epics',
+      });
+
+      expect(wrapper.vm.getFilteredSearchTokens).toHaveBeenCalledWith({
+        supportsEpic: false,
       });
     });
 

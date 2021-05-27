@@ -10,7 +10,7 @@ export default {
     otherInfo: __('Other information'),
     dbReplicationLag: s__('Geo|Data replication lag'),
     lastEventId: s__('Geo|Last event ID from primary'),
-    lastEvent: s__('Geo|%{eventId} (%{timeAgo})'),
+    lastEventTime: s__('Geo|(%{timeAgo})'),
     lastCursorEventId: s__('Geo|Last event ID processed by cursor'),
     storageConfig: s__('Geo|Storage config'),
     shardsNotMatched: s__('Geo|Does not match the primary storage configuration'),
@@ -58,6 +58,12 @@ export default {
       // Converting timestamp to ms
       return this.node.cursorLastEventTimestamp * 1000;
     },
+    hasEventInfo() {
+      return this.node.lastEventId || this.lastEventTimestamp;
+    },
+    hasCursorEventInfo() {
+      return this.node.cursorLastEventId || this.lastCursorEventTimestamp;
+    },
   },
 };
 </script>
@@ -75,31 +81,31 @@ export default {
     </div>
     <div class="gl-display-flex gl-flex-direction-column gl-mb-5">
       <span>{{ $options.i18n.lastEventId }}</span>
-      <span class="gl-font-weight-bold gl-mt-2" data-testid="last-event">
-        <gl-sprintf v-if="node.lastEventId" :message="$options.i18n.lastEvent">
-          <template #eventId>
-            {{ node.lastEventId }}
-          </template>
-          <template #timeAgo>
-            <time-ago :time="lastEventTimestamp" />
-          </template>
-        </gl-sprintf>
+      <div class="gl-font-weight-bold gl-mt-2" data-testid="last-event">
+        <template v-if="hasEventInfo">
+          <span v-if="node.lastEventId">{{ node.lastEventId }}</span>
+          <gl-sprintf v-if="lastEventTimestamp" :message="$options.i18n.lastEventTime">
+            <template #timeAgo>
+              <time-ago :time="lastEventTimestamp" />
+            </template>
+          </gl-sprintf>
+        </template>
         <span v-else>{{ $options.i18n.unknown }}</span>
-      </span>
+      </div>
     </div>
     <div class="gl-display-flex gl-flex-direction-column gl-mb-5">
       <span>{{ $options.i18n.lastCursorEventId }}</span>
-      <span class="gl-font-weight-bold gl-mt-2" data-testid="last-cursor-event">
-        <gl-sprintf v-if="node.cursorLastEventId" :message="$options.i18n.lastEvent">
-          <template #eventId>
-            {{ node.cursorLastEventId }}
-          </template>
-          <template #timeAgo>
-            <time-ago :time="lastCursorEventTimestamp" />
-          </template>
-        </gl-sprintf>
+      <div class="gl-font-weight-bold gl-mt-2" data-testid="last-cursor-event">
+        <template v-if="hasCursorEventInfo">
+          <span v-if="node.cursorLastEventId">{{ node.cursorLastEventId }}</span>
+          <gl-sprintf v-if="lastCursorEventTimestamp" :message="$options.i18n.lastEventTime">
+            <template #timeAgo>
+              <time-ago :time="lastCursorEventTimestamp" />
+            </template>
+          </gl-sprintf>
+        </template>
         <span v-else>{{ $options.i18n.unknown }}</span>
-      </span>
+      </div>
     </div>
     <div class="gl-display-flex gl-flex-direction-column gl-mb-5">
       <span>{{ $options.i18n.storageConfig }}</span>

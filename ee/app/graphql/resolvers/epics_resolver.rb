@@ -54,6 +54,10 @@ module Resolvers
              required: false,
              description: 'Filter by reaction emoji applied by the current user.'
 
+    argument :not, ::Types::Epics::NegatedEpicFilterInputType,
+             required: false,
+             description: 'Negated epic arguments.'
+
     type Types::EpicType, null: true
 
     def ready?(**args)

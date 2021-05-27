@@ -202,7 +202,7 @@ page:
 
 ### Customizing the SAST settings
 
-The SAST settings can be changed through [CI/CD variables](#available-variables)
+The SAST settings can be changed through [CI/CD variables](#available-cicd-variables)
 by using the
 [`variables`](../../../ci/yaml/README.md#variables) parameter in `.gitlab-ci.yml`.
 In the following example, we include the SAST template and at the same time we
@@ -411,7 +411,7 @@ the vendored directory. This configuration can vary per analyzer but in the case
 can use `MAVEN_REPO_PATH`. See
 [Analyzer settings](#analyzer-settings) for the complete list of available options.
 
-### Available variables
+### Available CI/CD variables
 
 SAST can be [configured](#customizing-the-sast-settings) using CI/CD variables.
 
@@ -455,7 +455,6 @@ The following are Docker image-related CI/CD variables.
 |---------------------------|---------------------------------------------------------------------------------------------------------------------------------------|
 | `SECURE_ANALYZERS_PREFIX` | Override the name of the Docker registry providing the default images (proxy). Read more about [customizing analyzers](analyzers.md). |
 | `SAST_ANALYZER_IMAGE_TAG` | **DEPRECATED:** Override the Docker tag of the default images. Read more about [customizing analyzers](analyzers.md).                 |
-| `SAST_DEFAULT_ANALYZERS`  | **DEPRECATED:** Override the names of default images. Scheduled for [removal in GitLab 14.0](https://gitlab.com/gitlab-org/gitlab/-/issues/290777). |
 | `SAST_EXCLUDED_ANALYZERS` | Names of default images that should never run. Read more about [customizing analyzers](analyzers.md).                                 |
 
 #### Vulnerability filters
@@ -494,7 +493,8 @@ Some analyzers can be customized with CI/CD variables.
 | `FAIL_NEVER`                | SpotBugs   | Set to `1` to ignore compilation failure.                                                                                                                                                                                          |
 | `SAST_GOSEC_CONFIG`         | Gosec      | Path to configuration for Gosec (optional).                                                                                                                                                                                        |
 | `PHPCS_SECURITY_AUDIT_PHP_EXTENSIONS` | phpcs-security-audit | Comma separated list of additional PHP Extensions.                                                                                                                                                             |
-| `SAST_DISABLE_BABEL`        | NodeJsScan | Disable Babel processing for the NodeJsScan scanner. Set to `true` to disable Babel processing. [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/33065) in GitLab 13.2.                                                  |
+| `SAST_DISABLE_BABEL`        | NodeJsScan | Disable Babel processing for the NodeJsScan scanner. Set to `true` to disable Babel processing. [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/33065) in GitLab 13.2.                                                  
+| `SAST_SEMGREP_METRICS` | Semgrep | Set to `"false"` to disable sending anonymized scan metrics to [r2c](https://r2c.dev/). Default: `true`. [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/330565) in GitLab 14.0.      |
 
 #### Custom CI/CD variables
 
@@ -772,3 +772,7 @@ For Maven builds, add the following to your `pom.xml` file:
 ### Flawfinder encoding error
 
 This occurs when Flawfinder encounters an invalid UTF-8 character. To fix this, convert all source code in your project to UTF-8 character encoding. This can be done with [`cvt2utf`](https://github.com/x1angli/cvt2utf) or [`iconv`](https://www.gnu.org/software/libiconv/documentation/libiconv-1.13/iconv.1.html) either over the entire project or per job using the [`before_script`](../../../ci/yaml/README.md#before_script) feature.
+
+### Semgrep slowness, unexpected results, or other errors
+
+If Semgrep is slow, reports too many false positives or false negatives, crashes, fails, or is otherwise broken, see the Semgrep docs for [troubleshooting GitLab SAST](https://semgrep.dev/docs/troubleshooting/gitlab-sast/).

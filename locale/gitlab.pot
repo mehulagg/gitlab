@@ -558,9 +558,6 @@ msgstr ""
 msgid "%{global_id} is not a valid ID for %{expected_types}."
 msgstr ""
 
-msgid "%{group_docs_link_start}Groups%{group_docs_link_end} allow you to manage and collaborate across multiple projects. Members of a group have access to all of its projects."
-msgstr ""
-
 msgid "%{group_name} activity"
 msgstr ""
 
@@ -1483,6 +1480,9 @@ msgstr ""
 msgid "A rebase is already in progress."
 msgstr ""
 
+msgid "A rule must be provided to create an escalation policy"
+msgstr ""
+
 msgid "A secure token that identifies an external storage request."
 msgstr ""
 
@@ -2350,9 +2350,6 @@ msgstr ""
 msgid "AdminSettings|Feed token"
 msgstr ""
 
-msgid "AdminSettings|Go to General Settings"
-msgstr ""
-
 msgid "AdminSettings|Keep the latest artifacts for all jobs in the latest successful pipelines"
 msgstr ""
 
@@ -2363,9 +2360,6 @@ msgid "AdminSettings|Moved to integrations"
 msgstr ""
 
 msgid "AdminSettings|No required pipeline"
-msgstr ""
-
-msgid "AdminSettings|PlantUML, Slack application, Third party offers, Snowplow, Amazon EKS have moved to Settings &gt; General."
 msgstr ""
 
 msgid "AdminSettings|Required pipeline configuration"
@@ -2390,9 +2384,6 @@ msgid "AdminSettings|Session duration for Git operations when 2FA is enabled (mi
 msgstr ""
 
 msgid "AdminSettings|Set an instance-wide auto included %{link_start}pipeline configuration%{link_end}. This pipeline configuration will be run after the project's own configuration."
-msgstr ""
-
-msgid "AdminSettings|Some settings have moved"
 msgstr ""
 
 msgid "AdminSettings|Specify a domain to use by default for every project's Auto Review Apps and Auto Deploy stages."
@@ -4191,6 +4182,9 @@ msgid "Approver"
 msgstr ""
 
 msgid "Approvers"
+msgstr ""
+
+msgid "Approvers from private group(s) not shown"
 msgstr ""
 
 msgid "Apr"
@@ -6782,72 +6776,6 @@ msgid "Closes this %{quick_action_target}."
 msgstr ""
 
 msgid "Cloud licenses can not be removed."
-msgstr ""
-
-msgid "CloudLicense|Activate"
-msgstr ""
-
-msgid "CloudLicense|Activate subscription"
-msgstr ""
-
-msgid "CloudLicense|Activation code"
-msgstr ""
-
-msgid "CloudLicense|Billable users"
-msgstr ""
-
-msgid "CloudLicense|Buy subscription"
-msgstr ""
-
-msgid "CloudLicense|Enter activation code"
-msgstr ""
-
-msgid "CloudLicense|Free trial"
-msgstr ""
-
-msgid "CloudLicense|Get help for the most common connectivity issues by %{linkStart}troubleshooting the activation code%{linkEnd}."
-msgstr ""
-
-msgid "CloudLicense|I agree that my use of the GitLab Software is subject to the Subscription Agreement located at the %{linkStart}Terms of Service%{linkEnd}, unless otherwise agreed to in writing with GitLab."
-msgstr ""
-
-msgid "CloudLicense|Maximum users"
-msgstr ""
-
-msgid "CloudLicense|Paste your activation code"
-msgstr ""
-
-msgid "CloudLicense|Ready to get started? A GitLab plan is ideal for scaling organizations and for multi team usage."
-msgstr ""
-
-msgid "CloudLicense|Start free trial"
-msgstr ""
-
-msgid "CloudLicense|Subscription"
-msgstr ""
-
-msgid "CloudLicense|This is the highest peak of users on your installation since the license started."
-msgstr ""
-
-msgid "CloudLicense|This is the number of %{billableUsersLinkStart}billable users%{billableUsersLinkEnd} on your installation, and this is the minimum number you need to purchase when you renew your license."
-msgstr ""
-
-msgid "CloudLicense|To activate your subscription, connect to GitLab servers through the %{linkStart}Cloud Sync service%{linkEnd}, a hassle-free way to manage your subscription."
-msgstr ""
-
-msgid "CloudLicense|Users in subscription"
-msgstr ""
-
-msgid "CloudLicense|Users over subscription"
-msgstr ""
-
-msgid "CloudLicense|Users with a Guest role or those who don't belong to a Project or Group will not use a seat from your license."
-msgstr ""
-
-msgid "CloudLicense|You can start a free trial of GitLab Ultimate without any obligation or payment details."
-msgstr ""
-
-msgid "CloudLicense|You'll be charged for %{trueUpLinkStart}users over license%{trueUpLinkEnd} on a quarterly or annual basis, depending on the terms of your agreement."
 msgstr ""
 
 msgid "Cluster"
@@ -10060,7 +9988,13 @@ msgstr ""
 msgid "DAG visualization requires at least 3 dependent jobs."
 msgstr ""
 
+msgid "DAST Configuration"
+msgstr ""
+
 msgid "DAST Scans"
+msgstr ""
+
+msgid "DAST Settings"
 msgstr ""
 
 msgid "DNS"
@@ -11839,6 +11773,24 @@ msgstr ""
 msgid "Drop your files to start your upload."
 msgstr ""
 
+msgid "DropdownWidget|An error occurred while fetching the assigned %{issuableAttribute} of the selected %{issuableType}."
+msgstr ""
+
+msgid "DropdownWidget|Assign %{issuableAttribute}"
+msgstr ""
+
+msgid "DropdownWidget|Failed to fetch the %{issuableAttribute} for this %{issuableType}. Please try again."
+msgstr ""
+
+msgid "DropdownWidget|Failed to set %{issuableAttribute} on this %{issuableType}. Please try again."
+msgstr ""
+
+msgid "DropdownWidget|No %{issuableAttribute}"
+msgstr ""
+
+msgid "DropdownWidget|No %{issuableAttribute} found"
+msgstr ""
+
 msgid "Due Date"
 msgstr ""
 
@@ -13108,6 +13060,9 @@ msgstr ""
 msgid "Escalation policies"
 msgstr ""
 
+msgid "Escalation policies are not supported for this project"
+msgstr ""
+
 msgid "EscalationPolicies|+ Add an additional rule"
 msgstr ""
 
@@ -13847,6 +13802,9 @@ msgstr ""
 msgid "FeatureFlags|Feature Flag User List Details"
 msgstr ""
 
+msgid "FeatureFlags|Feature Flag User Lists"
+msgstr ""
+
 msgid "FeatureFlags|Feature Flag behavior is built up by creating a set of rules to define the status of target environments. A default wildcard rule %{codeStart}*%{codeEnd} for %{boldStart}All Environments%{boldEnd} is set, and you are able to add as many rules as you need by choosing environment specs below. You can toggle the behavior for each of your rules to set them %{boldStart}Active%{boldEnd} or %{boldStart}Inactive%{boldEnd}."
 msgstr ""
 
@@ -13869,9 +13827,6 @@ msgid "FeatureFlags|Flag is read-only"
 msgstr ""
 
 msgid "FeatureFlags|Get started with feature flags"
-msgstr ""
-
-msgid "FeatureFlags|Get started with user lists"
 msgstr ""
 
 msgid "FeatureFlags|GitLab is moving to a new way of managing feature flags. This feature flag is read-only, and it will be removed in 14.0. Please create a new feature flag."
@@ -13901,9 +13856,6 @@ msgstr ""
 msgid "FeatureFlags|Loading feature flags"
 msgstr ""
 
-msgid "FeatureFlags|Loading user lists"
-msgstr ""
-
 msgid "FeatureFlags|More information"
 msgstr ""
 
@@ -13920,9 +13872,6 @@ msgid "FeatureFlags|New User List"
 msgstr ""
 
 msgid "FeatureFlags|New feature flag"
-msgstr ""
-
-msgid "FeatureFlags|New user list"
 msgstr ""
 
 msgid "FeatureFlags|No user list selected"
@@ -13967,9 +13916,6 @@ msgstr ""
 msgid "FeatureFlags|There was an error fetching the feature flags."
 msgstr ""
 
-msgid "FeatureFlags|There was an error fetching the user lists."
-msgstr ""
-
 msgid "FeatureFlags|To prevent accidental actions we ask you to confirm your intention. Please type %{projectName} to proceed or close this modal to cancel."
 msgstr ""
 
@@ -13985,7 +13931,7 @@ msgstr ""
 msgid "FeatureFlags|User Lists"
 msgstr ""
 
-msgid "FeatureFlags|User lists allow you to define a set of users to use with Feature Flags."
+msgid "FeatureFlags|View user lists"
 msgstr ""
 
 msgid "FeatureFlag|Percentage"
@@ -14674,9 +14620,6 @@ msgstr ""
 msgid "Geo|%{component} verified"
 msgstr ""
 
-msgid "Geo|%{eventId} (%{timeAgo})"
-msgstr ""
-
 msgid "Geo|%{itemTitle} checksum progress"
 msgstr ""
 
@@ -14704,6 +14647,9 @@ msgstr ""
 msgid "Geo|%{title} checksum progress"
 msgstr ""
 
+msgid "Geo|(%{timeAgo})"
+msgstr ""
+
 msgid "Geo|Add site"
 msgstr ""
 
@@ -14729,6 +14675,9 @@ msgid "Geo|Allowed Geo IP should be between 1 and 255 characters"
 msgstr ""
 
 msgid "Geo|Allowed Geo IP should contain valid IP addresses"
+msgstr ""
+
+msgid "Geo|Checksummed"
 msgstr ""
 
 msgid "Geo|Connection timeout can't be blank"
@@ -14833,6 +14782,9 @@ msgstr ""
 msgid "Geo|Next sync scheduled at"
 msgstr ""
 
+msgid "Geo|No available replication slots"
+msgstr ""
+
 msgid "Geo|Node name can't be blank"
 msgstr ""
 
@@ -14845,10 +14797,13 @@ msgstr ""
 msgid "Geo|Not synced yet"
 msgstr ""
 
+msgid "Geo|Nothing to checksum"
+msgstr ""
+
 msgid "Geo|Nothing to synchronize"
 msgstr ""
 
-msgid "Geo|Number of %{title}"
+msgid "Geo|Nothing to verify"
 msgstr ""
 
 msgid "Geo|Offline"
@@ -15038,6 +14993,9 @@ msgid "Geo|Verification information"
 msgstr ""
 
 msgid "Geo|Verification status"
+msgstr ""
+
+msgid "Geo|Verified"
 msgstr ""
 
 msgid "Geo|Waiting for scheduler"
@@ -15419,9 +15377,6 @@ msgid "Go back to configuration"
 msgstr ""
 
 msgid "Go full screen"
-msgstr ""
-
-msgid "Go to Webhooks"
 msgstr ""
 
 msgid "Go to commits"
@@ -16150,9 +16105,6 @@ msgstr ""
 msgid "Groups and subgroups"
 msgstr ""
 
-msgid "Groups can also be nested by creating %{subgroup_docs_link_start}subgroups%{subgroup_docs_link_end}."
-msgstr ""
-
 msgid "Groups to synchronize"
 msgstr ""
 
@@ -16189,22 +16141,31 @@ msgstr ""
 msgid "GroupsEmptyState|You can manage your group member’s permissions and access to each project in the group."
 msgstr ""
 
+msgid "GroupsNew|%{linkStart}Groups%{linkEnd} allow you to manage and collaborate across multiple projects. Members of a group have access to all of its projects. Groups can also be nested by creating subgroups."
+msgstr ""
+
+msgid "GroupsNew|Assemble related projects together and grant members access to several projects at once."
+msgstr ""
+
 msgid "GroupsNew|Connect instance"
 msgstr ""
 
 msgid "GroupsNew|Contact an administrator to enable options for importing your group."
 msgstr ""
 
-msgid "GroupsNew|Create"
+msgid "GroupsNew|Create group"
 msgstr ""
 
-msgid "GroupsNew|Create group"
+msgid "GroupsNew|Create new group"
+msgstr ""
+
+msgid "GroupsNew|Export groups with all their related data and move to a new GitLab instance."
 msgstr ""
 
 msgid "GroupsNew|GitLab source URL"
 msgstr ""
 
-msgid "GroupsNew|Import"
+msgid "GroupsNew|Groups can also be nested by creating %{linkStart}subgroups%{linkEnd}."
 msgstr ""
 
 msgid "GroupsNew|Import group"
@@ -16291,6 +16252,9 @@ msgstr ""
 msgid "Hashed storage can't be disabled anymore for new projects"
 msgstr ""
 
+msgid "Header cannot be associated with both a request and a response"
+msgstr ""
+
 msgid "Header logo"
 msgstr ""
 
@@ -16301,6 +16265,18 @@ msgid "Header logo will be removed. Are you sure?"
 msgstr ""
 
 msgid "Header message"
+msgstr ""
+
+msgid "Header must be associated with a request or response"
+msgstr ""
+
+msgid "Heading 1"
+msgstr ""
+
+msgid "Heading 2"
+msgstr ""
+
+msgid "Heading 3"
 msgstr ""
 
 msgid "Headings"
@@ -16557,9 +16533,6 @@ msgid "ID:"
 msgstr ""
 
 msgid "IDE"
-msgstr ""
-
-msgid "IDE|Allow live previews of JavaScript projects in the Web IDE using CodeSandbox Live Preview."
 msgstr ""
 
 msgid "IDE|Back"
@@ -18349,12 +18322,6 @@ msgstr ""
 msgid "IssueAnalytics|Weight"
 msgstr ""
 
-msgid "IssueBoards|An error occurred while assigning the selected epic to the issue."
-msgstr ""
-
-msgid "IssueBoards|An error occurred while fetching the assigned epic of the selected issue."
-msgstr ""
-
 msgid "IssueBoards|An error occurred while setting notifications status. Please try again."
 msgstr ""
 
@@ -20078,7 +20045,7 @@ msgstr ""
 msgid "Manage"
 msgstr ""
 
-msgid "Manage Web IDE features"
+msgid "Manage Web IDE features."
 msgstr ""
 
 msgid "Manage access"
@@ -22540,6 +22507,9 @@ msgstr ""
 msgid "None of the group milestones have the same project as the release"
 msgstr ""
 
+msgid "Normal text"
+msgstr ""
+
 msgid "Not Implemented"
 msgstr ""
 
@@ -23348,6 +23318,9 @@ msgstr ""
 msgid "Otherwise, click the link below to complete the process:"
 msgstr ""
 
+msgid "Our team has been notified. Please try again."
+msgstr ""
+
 msgid "Out-of-compliance with this project's policies and should be removed"
 msgstr ""
 
@@ -23967,6 +23940,9 @@ msgid "PerformanceBar|Frontend resources"
 msgstr ""
 
 msgid "PerformanceBar|Gitaly calls"
+msgstr ""
+
+msgid "PerformanceBar|Memory"
 msgstr ""
 
 msgid "PerformanceBar|Redis calls"
@@ -24698,9 +24674,6 @@ msgstr ""
 msgid "Please provide a valid URL"
 msgstr ""
 
-msgid "Please provide a valid URL ending with .git"
-msgstr ""
-
 msgid "Please provide a valid URL."
 msgstr ""
 
@@ -24972,6 +24945,9 @@ msgid "Prevent users from performing write operations on GitLab while performing
 msgstr ""
 
 msgid "Preview"
+msgstr ""
+
+msgid "Preview JavaScript projects in the Web IDE with CodeSandbox Live Preview. %{link_start}Learn more.%{link_end} "
 msgstr ""
 
 msgid "Preview Markdown"
@@ -26214,9 +26190,6 @@ msgid "Projects contributed to"
 msgstr ""
 
 msgid "Projects shared with %{group_name}"
-msgstr ""
-
-msgid "Projects that belong to a group are prefixed with the group namespace. Existing projects may be moved into a group."
 msgstr ""
 
 msgid "Projects to index"
@@ -28370,6 +28343,18 @@ msgid "Runners|Name"
 msgstr ""
 
 msgid "Runners|New runner, has not connected yet"
+msgstr ""
+
+msgid "Runners|Not connected"
+msgstr ""
+
+msgid "Runners|Offline"
+msgstr ""
+
+msgid "Runners|Online"
+msgstr ""
+
+msgid "Runners|Paused"
 msgstr ""
 
 msgid "Runners|Platform"
@@ -31110,6 +31095,9 @@ msgstr ""
 msgid "StatusCheck|Add status check"
 msgstr ""
 
+msgid "StatusCheck|An error occurred deleting the %{name} status check."
+msgstr ""
+
 msgid "StatusCheck|An error occurred fetching the status checks."
 msgstr ""
 
@@ -31150,6 +31138,9 @@ msgid "StatusCheck|Status to check"
 msgstr ""
 
 msgid "StatusCheck|Target branch"
+msgstr ""
+
+msgid "StatusCheck|Update status check"
 msgstr ""
 
 msgid "StatusCheck|You are about to remove the %{name} status check."
@@ -31602,13 +31593,40 @@ msgstr ""
 msgid "Sunday"
 msgstr ""
 
+msgid "SuperSonics|Activate"
+msgstr ""
+
+msgid "SuperSonics|Activate subscription"
+msgstr ""
+
 msgid "SuperSonics|Activated on"
+msgstr ""
+
+msgid "SuperSonics|Activation code"
 msgstr ""
 
 msgid "SuperSonics|An error occurred while activating your subscription."
 msgstr ""
 
+msgid "SuperSonics|Billable users"
+msgstr ""
+
+msgid "SuperSonics|Buy subscription"
+msgstr ""
+
+msgid "SuperSonics|Enter activation code"
+msgstr ""
+
 msgid "SuperSonics|Expires on"
+msgstr ""
+
+msgid "SuperSonics|Free trial"
+msgstr ""
+
+msgid "SuperSonics|Get help for the most common connectivity issues by %{linkStart}troubleshooting the activation code%{linkEnd}."
+msgstr ""
+
+msgid "SuperSonics|I agree that my use of the GitLab Software is subject to the Subscription Agreement located at the %{linkStart}Terms of Service%{linkEnd}, unless otherwise agreed to in writing with GitLab."
 msgstr ""
 
 msgid "SuperSonics|ID"
@@ -31626,7 +31644,16 @@ msgstr ""
 msgid "SuperSonics|Manage"
 msgstr ""
 
+msgid "SuperSonics|Maximum users"
+msgstr ""
+
+msgid "SuperSonics|Paste your activation code"
+msgstr ""
+
 msgid "SuperSonics|Plan"
+msgstr ""
+
+msgid "SuperSonics|Ready to get started? A GitLab plan is ideal for scaling organizations and for multi team usage."
 msgstr ""
 
 msgid "SuperSonics|Renews"
@@ -31635,7 +31662,13 @@ msgstr ""
 msgid "SuperSonics|Seats"
 msgstr ""
 
+msgid "SuperSonics|Start free trial"
+msgstr ""
+
 msgid "SuperSonics|Started"
+msgstr ""
+
+msgid "SuperSonics|Subscription"
 msgstr ""
 
 msgid "SuperSonics|Subscription details"
@@ -31653,10 +31686,28 @@ msgstr ""
 msgid "SuperSonics|This field is required."
 msgstr ""
 
+msgid "SuperSonics|This is the highest peak of users on your installation since the license started."
+msgstr ""
+
+msgid "SuperSonics|This is the number of %{billableUsersLinkStart}billable users%{billableUsersLinkEnd} on your installation, and this is the minimum number you need to purchase when you renew your license."
+msgstr ""
+
+msgid "SuperSonics|To activate your subscription, connect to GitLab servers through the %{linkStart}Cloud Licensing%{linkEnd} service, a hassle-free way to manage your subscription."
+msgstr ""
+
 msgid "SuperSonics|Type"
 msgstr ""
 
 msgid "SuperSonics|Upload a legacy license"
+msgstr ""
+
+msgid "SuperSonics|Users in subscription"
+msgstr ""
+
+msgid "SuperSonics|Users over subscription"
+msgstr ""
+
+msgid "SuperSonics|Users with a Guest role or those who don't belong to a Project or Group will not use a seat from your license."
 msgstr ""
 
 msgid "SuperSonics|Valid From"
@@ -31665,7 +31716,13 @@ msgstr ""
 msgid "SuperSonics|You can no longer sync your subscription details with GitLab. Get help for the most common connectivity issues by %{connectivityHelpLinkStart}troubleshooting the activation code%{connectivityHelpLinkEnd}."
 msgstr ""
 
+msgid "SuperSonics|You can start a free trial of GitLab Ultimate without any obligation or payment details."
+msgstr ""
+
 msgid "SuperSonics|You do not have an active subscription"
+msgstr ""
+
+msgid "SuperSonics|You'll be charged for %{trueUpLinkStart}users over license%{trueUpLinkEnd} on a quarterly or annual basis, depending on the terms of your agreement."
 msgstr ""
 
 msgid "SuperSonics|Your subscription"
@@ -32202,6 +32259,9 @@ msgid "TestReports|You can configure your job to use unit test reports, and GitL
 msgstr ""
 
 msgid "Tests"
+msgstr ""
+
+msgid "Text style"
 msgstr ""
 
 msgid "Thank you for signing up for your free trial! You will get additional instructions in your inbox shortly."
@@ -34932,6 +34992,9 @@ msgstr ""
 msgid "Until"
 msgstr ""
 
+msgid "Unused"
+msgstr ""
+
 msgid "Unused, previous indices: %{index_names} will be deleted after %{time} automatically."
 msgstr ""
 
@@ -35415,6 +35478,9 @@ msgstr ""
 msgid "Use your smart card to authenticate with the LDAP server."
 msgstr ""
 
+msgid "Used"
+msgstr ""
+
 msgid "Used by members to sign in to your group in GitLab"
 msgstr ""
 
@@ -35535,7 +35601,13 @@ msgstr ""
 msgid "UserLists|Feature flag user list"
 msgstr ""
 
+msgid "UserLists|Get started with user lists"
+msgstr ""
+
 msgid "UserLists|Lists allow you to define a set of users to be used with feature flags. %{linkStart}Read more about feature flag lists.%{linkEnd}"
+msgstr ""
+
+msgid "UserLists|Loading user lists"
 msgstr ""
 
 msgid "UserLists|Name"
@@ -35544,16 +35616,28 @@ msgstr ""
 msgid "UserLists|New list"
 msgstr ""
 
+msgid "UserLists|New user list"
+msgstr ""
+
 msgid "UserLists|Save"
 msgstr ""
 
 msgid "UserLists|There are no users"
 msgstr ""
 
+msgid "UserLists|There was an error fetching the user lists."
+msgstr ""
+
 msgid "UserLists|User ID"
 msgstr ""
 
 msgid "UserLists|User IDs"
+msgstr ""
+
+msgid "UserLists|User Lists"
+msgstr ""
+
+msgid "UserLists|User lists allow you to define a set of users to use with Feature Flags."
 msgstr ""
 
 msgid "UserList|Delete %{name}?"
@@ -36391,9 +36475,6 @@ msgstr ""
 msgid "We don't have enough data to show this stage."
 msgstr ""
 
-msgid "We encountered an error and our team has been notified. Please try again."
-msgstr ""
-
 msgid "We have found the following errors:"
 msgstr ""
 
@@ -36512,9 +36593,6 @@ msgid "Webhooks Help"
 msgstr ""
 
 msgid "Webhooks allow you to trigger a URL if, for example, new code is pushed or a new issue is created. You can configure webhooks to listen for specific events like pushes, issues or merge requests. Group webhooks will apply to all projects in a group, allowing you to standardize webhook functionality across your entire group."
-msgstr ""
-
-msgid "Webhooks have moved. They can now be found under the Settings menu."
 msgstr ""
 
 msgid "Webhooks|Comments"
@@ -37431,6 +37509,9 @@ msgstr ""
 msgid "You have insufficient permissions to create an HTTP integration for this project"
 msgstr ""
 
+msgid "You have insufficient permissions to create an escalation policy for this project"
+msgstr ""
+
 msgid "You have insufficient permissions to create an on-call schedule for this project"
 msgstr ""
 
@@ -37716,10 +37797,10 @@ msgstr ""
 msgid "Your SSH keys (%{count})"
 msgstr ""
 
-msgid "Your SSH keys with the following fingerprints are scheduled to expire soon:"
+msgid "Your SSH keys with the following fingerprints are scheduled to expire soon. Expired SSH keys will not be usable in future versions of GitLab:"
 msgstr ""
 
-msgid "Your SSH keys with the following fingerprints has expired:"
+msgid "Your SSH keys with the following fingerprints have expired. Expired SSH keys will not be usable in future versions of GitLab:"
 msgstr ""
 
 msgid "Your To-Do List"
@@ -38847,9 +38928,6 @@ msgstr ""
 msgid "mrWidget|Added to the merge train. There are %{mergeTrainPosition} merge requests waiting to be merged"
 msgstr ""
 
-msgid "mrWidget|Allows commits from members who can merge to the target branch"
-msgstr ""
-
 msgid "mrWidget|An error occurred while removing your approval."
 msgstr ""
 
@@ -38919,9 +38997,6 @@ msgstr ""
 msgid "mrWidget|Fast-forward merge is not possible. To merge this request, first rebase locally."
 msgstr ""
 
-msgid "mrWidget|Fork project merge requests do not create merge request pipelines that validate a post merge result unless invoked by a project member."
-msgstr ""
-
 msgid "mrWidget|If the %{missingBranchName} branch exists in your local repository, you can merge this merge request manually using the command line"
 msgstr ""
 
@@ -38935,6 +39010,9 @@ msgid "mrWidget|Loading deployment statistics"
 msgstr ""
 
 msgid "mrWidget|Mark as ready"
+msgstr ""
+
+msgid "mrWidget|Members who can merge are allowed to add commits."
 msgstr ""
 
 msgid "mrWidget|Mentions"

@@ -11,6 +11,9 @@ export default {
     replicationSlotWAL: s__('Geo|Replication slot WAL'),
     replicationSlots: s__('Geo|Replication slots'),
     unknown: __('Unknown'),
+    used: __('Used'),
+    unused: __('Unused'),
+    noAvailableSlots: s__('Geo|No available replication slots'),
   },
   components: {
     GlCard,
@@ -52,6 +55,9 @@ export default {
         class="gl-mt-3"
         :title="replicationSlots.title"
         :values="replicationSlots.values"
+        :success-label="$options.i18n.used"
+        :queued-label="$options.i18n.unused"
+        :unavailable-label="$options.i18n.noAvailableSlots"
       />
     </div>
     <div class="gl-display-flex gl-flex-direction-column gl-mb-5">

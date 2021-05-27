@@ -1,6 +1,9 @@
 import { IssuableType } from '~/issue_show/constants';
 import { s__, __ } from '~/locale';
+import groupEpicsQuery from './queries/group_epics.query.graphql';
 import groupIterationsQuery from './queries/group_iterations.query.graphql';
+import projectIssueEpicMutation from './queries/project_issue_epic.mutation.graphql';
+import projectIssueEpicQuery from './queries/project_issue_epic.query.graphql';
 import projectIssueIterationMutation from './queries/project_issue_iteration.mutation.graphql';
 import projectIssueIterationQuery from './queries/project_issue_iteration.query.graphql';
 
@@ -31,6 +34,7 @@ export const iterationSelectTextMap = {
 };
 
 export const noIteration = null;
+export const noAttributeId = null;
 
 export const iterationDisplayState = 'opened';
 
@@ -74,5 +78,39 @@ export const issuableIterationQueries = {
 export const iterationsQueries = {
   [IssuableType.Issue]: {
     query: groupIterationsQuery,
+  },
+};
+
+const issuableEpicQueries = {
+  [IssuableType.Issue]: {
+    query: projectIssueEpicQuery,
+    mutation: projectIssueEpicMutation,
+  },
+};
+
+const epicsQueries = {
+  [IssuableType.Issue]: {
+    query: groupEpicsQuery,
+  },
+};
+
+export const IssuableAttributeType = {
+  Iteration: 'iteration',
+  Epic: 'epic',
+};
+
+export const IssuableAttributeState = {
+  [IssuableAttributeType.Iteration]: 'opened',
+  [IssuableAttributeType.Epic]: 'opened',
+};
+
+export const issuableAttributesQueries = {
+  [IssuableAttributeType.Iteration]: {
+    current: issuableIterationQueries,
+    list: iterationsQueries,
+  },
+  [IssuableAttributeType.Epic]: {
+    current: issuableEpicQueries,
+    list: epicsQueries,
   },
 };

@@ -174,8 +174,7 @@ module EE
       end
 
       def triggered_for_ondemand_dast_scan?
-        ondemand_dast_scan? && parameter_source? &&
-          ::Feature.enabled?(:security_dast_site_profiles_additional_fields, project, default_enabled: :yaml)
+        ondemand_dast_scan? && parameter_source?
       end
 
       private

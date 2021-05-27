@@ -13,11 +13,11 @@ RSpec.describe 'User views iteration cadences', :js do
 
   before do
     stub_licensed_features(iterations: true)
+
+    visit group_iteration_cadences_path(group)
   end
 
   it 'shows iteration cadences with iterations when expanded', :aggregate_failures do
-    visit group_iteration_cadences_path(group)
-
     expect(page).to have_title('Iteration cadences')
     expect(page).to have_content(cadence.title)
     expect(page).to have_content(other_cadence.title)
@@ -29,11 +29,10 @@ RSpec.describe 'User views iteration cadences', :js do
     expect(page).to have_content(iteration_in_cadence.title)
     expect(page).not_to have_content(iteration_in_other_cadence.title)
     expect(page).not_to have_content(closed_iteration_in_cadence.title)
+  end
 
+  it 'only shows completed iterations on Done tab', :aggregate_failures do
     click_link 'Done'
-
-    expect(page).not_to have_content(iteration_in_cadence.title)
-
     click_button cadence.title
 
     expect(page).not_to have_content(iteration_in_cadence.title)

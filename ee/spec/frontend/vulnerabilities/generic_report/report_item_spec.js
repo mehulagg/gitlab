@@ -25,6 +25,10 @@ const TEST_DATA = {
     name: 'some-numeric-field',
     value: 15,
   },
+  [REPORT_TYPES.moduleName]: {
+    'module-name': 'foo.c',
+    offset: 15,
+  },
 };
 
 describe('ee/vulnerabilities/components/generic_report/report_item.vue', () => {

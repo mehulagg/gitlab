@@ -330,11 +330,7 @@ class ProjectsController < Projects::ApplicationController
         experiment(:empty_repo_upload, project: @project).track(:view_project_show, property: property)
       end
 
-      if @project.empty_repo?
-        record_experiment_user(:invite_members_empty_project_version_a)
-
-        render 'projects/empty'
-      end
+      render 'projects/empty' if @project.empty_repo?
     else
       if can?(current_user, :read_wiki, @project)
         @wiki = @project.wiki
@@ -510,7 +506,7 @@ class ProjectsController < Projects::ApplicationController
 
     # `project` calls `find_routable!`, so this will trigger the usual not-found
     # behaviour when the user isn't authorized to see the project
-    return unless project
+    return if project.nil? || performed?
 
     redirect_to(request.original_url.sub(%r{\.git/?\Z}, ''))
   end

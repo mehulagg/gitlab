@@ -177,7 +177,7 @@ module Types
     end
 
     def health_status
-      Epics::DescendantCountService.new(object, context[:current_user])
+      ::Epics::DescendantCountService.new(object, context[:current_user])
     end
   end
 end

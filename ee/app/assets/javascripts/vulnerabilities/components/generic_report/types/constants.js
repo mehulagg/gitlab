@@ -7,6 +7,7 @@ export const REPORT_TYPES = {
   namedList: 'named-list',
   text: 'text',
   value: 'value',
+  moduleLocation: 'module-location',
 };
 
 const REPORT_TYPE_TO_COMPONENT_MAP = {
@@ -16,6 +17,7 @@ const REPORT_TYPE_TO_COMPONENT_MAP = {
   [REPORT_TYPES.namedList]: () => import('./named_list.vue'),
   [REPORT_TYPES.text]: () => import('./value.vue'),
   [REPORT_TYPES.value]: () => import('./value.vue'),
+  [REPORT_TYPES.moduleLocation]: () => import('./module_location.vue'),
 };
 
 export const getComponentNameForType = (reportType) =>

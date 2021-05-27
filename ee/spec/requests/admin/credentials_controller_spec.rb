@@ -85,6 +85,8 @@ RSpec.describe Admin::CredentialsController, type: :request do
               create(:gpg_key, user: control_user, key: GpgHelpers::User1.public_key)
               create(:gpg_key, user: control_user, key: GpgHelpers::User1.public_key2)
 
+              get admin_credentials_path(filter: 'gpg_keys')
+
               control = ActiveRecord::QueryRecorder.new(skip_cached: false) do
                 get admin_credentials_path(filter: 'gpg_keys')
               end.count

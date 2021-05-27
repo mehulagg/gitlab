@@ -10,4 +10,5 @@ RSpec.describe MergeRequests::StatusCheckResponse, type: :model do
 
   it { is_expected.to validate_presence_of(:merge_request) }
   it { is_expected.to validate_presence_of(:external_approval_rule) }
+  it { is_expected.to validate_presence_of(:sha) }
 end

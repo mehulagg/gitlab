@@ -127,45 +127,6 @@ RSpec.describe Mutations::DastSiteProfiles::Create do
           end
         end
 
-        context 'when the feature flag security_dast_site_profiles_additional_fields is disabled' do
-          before do
-            stub_feature_flags(security_dast_site_profiles_additional_fields: false)
-          end
-
-          it 'does not set the request_headers or the password dast_site_profile_secret_variables' do
-            subject
-
-            expect(dast_site_profile.secret_variables).to be_empty
-          end
-
-          it 'does not set non-secret auth fields' do
-            subject
-
-            expect(dast_site_profile).to have_attributes(
-              auth_enabled: false,
-              auth_url: nil,
-              auth_username_field: nil,
-              auth_password_field: nil,
-              auth_username: nil
-            )
-          end
-        end
-
-        context 'when the feature flag security_dast_site_profiles_api_option is disabled' do
-          before do
-            stub_feature_flags(security_dast_site_profiles_api_option: false)
-          end
-
-          it 'ignores target_type and uses the default target_type', :aggregate_failures do
-            subject
-
-            default_target_type = dast_site_profile.class.new.target_type
-
-            expect(default_target_type).not_to eq(target_type)
-            expect(dast_site_profile.target_type).to eq(default_target_type)
-          end
-        end
-
         context 'when variable creation fails' do
           it 'returns an error and the dast_site_profile' do
             service = double(Dast::SiteProfileSecretVariables::CreateOrUpdateService)

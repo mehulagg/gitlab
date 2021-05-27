@@ -29,11 +29,6 @@ export default {
       required: false,
       default: () => [],
     },
-    showValidation: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
     statusCheck: {
       type: Object,
       required: false,
@@ -41,51 +36,36 @@ export default {
     },
   },
   data() {
-    const { protectedBranches, name, externalUrl: url } = this.statusCheck;
+    const { protectedBranches: branches, name, externalUrl: url } = this.statusCheck;
 
     return {
-      branches: protectedBranches,
+      branches,
       branchesToAdd: [],
       branchesApiFailed: false,
       name,
+      showValidation: false,
       url,
     };
   },
   computed: {
-    formData() {
-      const { branches, name, url } = this;
-
-      return {
-        branches: branches.map(({ id }) => id),
-        name,
-        url,
-      };
-    },
     isValid() {
-      return this.isValidBranches && this.isValidName && this.isValidUrl;
-    },
-    isValidBranches() {
-      return this.branches.every((branch) => isEqual(branch, ANY_BRANCH) || isNumber(branch?.id));
-    },
-    isValidName() {
-      return Boolean(this.name);
-    },
-    isValidUrl() {
-      return Boolean(this.url) && isSafeURL(this.url);
+      return this.nameState && this.urlState && this.branchesState;
     },
     branchesState() {
-      return !this.showValidation || this.isValidBranches;
+      return !this.showValidation || this.checkBranchesValidity(this.branches);
     },
     nameState() {
       return (
         !this.showValidation ||
-        (this.isValidName && !this.serverValidationErrors.includes(NAME_TAKEN_SERVER_ERROR))
+        (this.checkNameValidity(this.name) &&
+          !this.serverValidationErrors.includes(NAME_TAKEN_SERVER_ERROR))
       );
     },
     urlState() {
       return (
         !this.showValidation ||
-        (this.isValidUrl && !this.serverValidationErrors.includes(URL_TAKEN_SERVER_ERROR))
+        (this.checkUrlValidity(this.url) &&
+          !this.serverValidationErrors.includes(URL_TAKEN_SERVER_ERROR))
       );
     },
     invalidNameMessage() {
@@ -109,12 +89,30 @@ export default {
     },
   },
   methods: {
+    submit() {
+      this.showValidation = true;
+
+      if (this.isValid) {
+        const { branches, name, url } = this;
+
+        this.$emit('submit', { branches, name, url });
+      }
+    },
     setBranchApiError(hasErrored, error) {
       if (!this.branchesApiFailed && error) {
         Sentry.captureException(error);
       }
 
       this.branchesApiFailed = hasErrored;
+    },
+    checkBranchesValidity(branches) {
+      return branches.every((branch) => isEqual(branch, ANY_BRANCH) || isNumber(branch?.id));
+    },
+    checkNameValidity(name) {
+      return Boolean(name);
+    },
+    checkUrlValidity(url) {
+      return Boolean(url) && isSafeURL(url);
     },
   },
   i18n: {
@@ -148,7 +146,7 @@ export default {
     <gl-alert v-if="branchesApiFailed" class="gl-mb-5" :dismissible="false" variant="danger">
       {{ $options.i18n.validations.branchesApiFailure }}
     </gl-alert>
-    <form novalidate>
+    <form novalidate @submit.prevent.stop="submit">
       <gl-form-group
         :label="$options.i18n.form.nameLabel"
         :description="$options.i18n.form.nameDescription"

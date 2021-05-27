@@ -90,15 +90,6 @@ RSpec.describe Dast::SiteProfileSecretVariables::CreateOrUpdateService do
           expect(dast_site_profile_secret_variable.reload.value).to eq(Base64.strict_encode64(params[:raw_value]))
         end
       end
-
-      context 'when the feature is disabled' do
-        it 'communicates failure', :aggregate_failures do
-          stub_feature_flags(security_dast_site_profiles_additional_fields: false)
-
-          expect(subject.status).to eq(:error)
-          expect(subject.message).to include('Insufficient permissions')
-        end
-      end
     end
   end
 end

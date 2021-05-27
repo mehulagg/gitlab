@@ -129,40 +129,14 @@ class Project < ApplicationRecord
   after_create :check_repository_absence!
 
   acts_as_ordered_taggable_on :topics
-  # The 'tag_list' alias and the 'has_many' associations are required during the 'tags -> topics' migration
-  # TODO: eliminate 'tag_list', 'topic_taggings' and 'tags' in the further process of the migration
-  # https://gitlab.com/gitlab-org/gitlab/-/issues/331081
+  # The 'tag_list' alias and the 'tags' association are required during the 'tags -> topics' migration
+  # TODO: eliminate 'tag_list' and 'tags' in the further process of the migration
+  # https://gitlab.com/gitlab-org/gitlab/-/issues/328226
   alias_attribute :tag_list, :topic_list
-  has_many :topic_taggings, -> { includes(:tag).order("#{ActsAsTaggableOn::Tagging.table_name}.id") },
-                     as: :taggable,
-                     class_name: 'ActsAsTaggableOn::Tagging',
-                     after_add: :dirtify_tag_list,
-                     after_remove: :dirtify_tag_list
-  has_many :topics, -> { order("#{ActsAsTaggableOn::Tagging.table_name}.id") },
-                     class_name: 'ActsAsTaggableOn::Tag',
-                     through: :topic_taggings,
-                     source: :tag
   has_many :tags, -> { order("#{ActsAsTaggableOn::Tagging.table_name}.id") },
                      class_name: 'ActsAsTaggableOn::Tag',
                      through: :topic_taggings,
                      source: :tag
-
-  # Overwriting 'topic_list' and 'topic_list=' is necessary to ensure functionality during the background migration [1].
-  # [1] https://gitlab.com/gitlab-org/gitlab/-/merge_requests/61237
-  # TODO: remove 'topic_list' and 'topic_list=' once the background migration is complete
-  # https://gitlab.com/gitlab-org/gitlab/-/issues/331081
-  def topic_list
-    # Return both old topics (context 'tags') and new topics (context 'topics')
-    tag_list_on('tags') + tag_list_on('topics')
-  end
-
-  def topic_list=(new_tags)
-    # Old topics with context 'tags' are added as new topics with context 'topics'
-    super(new_tags)
-
-    # Remove old topics with context 'tags'
-    set_tag_list_on('tags', '')
-  end
 
   attr_accessor :old_path_with_namespace
   attr_accessor :template_name
@@ -187,33 +161,33 @@ class Project < ApplicationRecord
   has_one :assembla_service, class_name: 'Integrations::Assembla'
   has_one :bamboo_service, class_name: 'Integrations::Bamboo'
   has_one :bugzilla_service, class_name: 'Integrations::Bugzilla'
+  has_one :buildkite_service, class_name: 'Integrations::Buildkite'
   has_one :campfire_service, class_name: 'Integrations::Campfire'
   has_one :confluence_service, class_name: 'Integrations::Confluence'
   has_one :custom_issue_tracker_service, class_name: 'Integrations::CustomIssueTracker'
   has_one :datadog_service, class_name: 'Integrations::Datadog'
+  has_one :drone_ci_service, class_name: 'Integrations::DroneCi'
   has_one :emails_on_push_service, class_name: 'Integrations::EmailsOnPush'
   has_one :ewm_service, class_name: 'Integrations::Ewm'
   has_one :external_wiki_service, class_name: 'Integrations::ExternalWiki'
   has_one :flowdock_service, class_name: 'Integrations::Flowdock'
   has_one :irker_service, class_name: 'Integrations::Irker'
+  has_one :jenkins_service, class_name: 'Integrations::Jenkins'
   has_one :jira_service, class_name: 'Integrations::Jira'
+  has_one :mock_ci_service, class_name: 'Integrations::MockCi'
   has_one :packagist_service, class_name: 'Integrations::Packagist'
   has_one :pipelines_email_service, class_name: 'Integrations::PipelinesEmail'
   has_one :pivotaltracker_service, class_name: 'Integrations::Pivotaltracker'
   has_one :redmine_service, class_name: 'Integrations::Redmine'
+  has_one :teamcity_service, class_name: 'Integrations::Teamcity'
   has_one :youtrack_service, class_name: 'Integrations::Youtrack'
   has_one :discord_service
-  has_one :drone_ci_service
   has_one :mattermost_slash_commands_service
   has_one :mattermost_service
   has_one :slack_slash_commands_service
   has_one :slack_service
-  has_one :buildkite_service
-  has_one :teamcity_service
   has_one :pushover_service
-  has_one :jenkins_service
   has_one :prometheus_service, inverse_of: :project
-  has_one :mock_ci_service
   has_one :mock_monitoring_service
   has_one :microsoft_teams_service
   has_one :hangouts_chat_service
@@ -260,7 +234,15 @@ class Project < ApplicationRecord
   has_many :events
   has_many :milestones
   has_many :iterations
-  has_many :notes
+
+  # Projects with a very large number of notes may time out destroying them
+  # through the foreign key. Additionally, the deprecated attachment uploader
+  # for notes requires us to use dependent: :destroy to avoid orphaning uploaded
+  # files.
+  #
+  # https://gitlab.com/gitlab-org/gitlab/-/issues/207222
+  has_many :notes, dependent: :destroy # rubocop:disable Cop/ActiveRecordDependent
+
   has_many :snippets, class_name: 'ProjectSnippet'
   has_many :hooks, class_name: 'ProjectHook'
   has_many :protected_branches
@@ -286,7 +268,7 @@ class Project < ApplicationRecord
   has_many :users_star_projects
   has_many :starrers, through: :users_star_projects, source: :user
   has_many :releases
-  has_many :lfs_objects_projects, dependent: :destroy # rubocop:disable Cop/ActiveRecordDependent
+  has_many :lfs_objects_projects
   has_many :lfs_objects, -> { distinct }, through: :lfs_objects_projects
   has_many :lfs_file_locks
   has_many :project_group_links
@@ -636,6 +618,12 @@ class Project < ApplicationRecord
   scope :with_tracing_enabled, -> { joins(:tracing_setting) }
   scope :with_enabled_error_tracking, -> { joins(:error_tracking_setting).where(project_error_tracking_settings: { enabled: true }) }
 
+  scope :with_service_desk_key, -> (key) do
+    # project_key is not indexed for now
+    # see https://gitlab.com/gitlab-org/gitlab/-/merge_requests/24063#note_282435524 for details
+    joins(:service_desk_setting).where('service_desk_settings.project_key' => key)
+  end
+
   enum auto_cancel_pending_pipelines: { disabled: 0, enabled: 1 }
 
   chronic_duration_attr :build_timeout_human_readable, :build_timeout,
@@ -836,12 +824,6 @@ class Project < ApplicationRecord
       with_merge_requests_enabled = with_merge_requests_available_for_user(user).select(:id)
 
       from_union([with_issues_enabled, with_merge_requests_enabled]).select(:id)
-    end
-
-    def find_by_service_desk_project_key(key)
-      # project_key is not indexed for now
-      # see https://gitlab.com/gitlab-org/gitlab/-/merge_requests/24063#note_282435524 for details
-      joins(:service_desk_setting).find_by('service_desk_settings.project_key' => key)
     end
   end
 

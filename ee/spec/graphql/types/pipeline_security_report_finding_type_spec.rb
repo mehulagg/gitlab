@@ -15,7 +15,8 @@ RSpec.describe GitlabSchema.types['PipelineSecurityReportFinding'] do
        project
        description
        location
-       solution]
+       solution
+       state]
   end
 
   specify { expect(described_class.graphql_name).to eq('PipelineSecurityReportFinding') }

@@ -35,3 +35,9 @@ export const postStatusCheck = ({ dispatch, rootState }, statusCheck) => {
 
   return axios.post(statusChecksPath, data).then(() => dispatch('fetchStatusChecks'));
 };
+
+export const deleteStatusCheck = ({ rootState, dispatch }, id) => {
+  const { statusChecksPath } = rootState.settings;
+
+  return axios.delete(`${statusChecksPath}/${id}`).then(() => dispatch('fetchStatusChecks'));
+};

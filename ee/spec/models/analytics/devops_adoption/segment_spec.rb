@@ -8,23 +8,14 @@ RSpec.describe Analytics::DevopsAdoption::Segment, type: :model do
 
     it { is_expected.to have_many(:snapshots) }
     it { is_expected.to belong_to(:namespace) }
+    it { is_expected.to belong_to(:display_namespace) }
   end
 
   describe 'validation' do
     subject { build(:devops_adoption_segment) }
 
     it { is_expected.to validate_presence_of(:namespace) }
-    it { is_expected.to validate_uniqueness_of(:namespace) }
-  end
-
-  describe '#display_namespace' do
-    subject { build(:devops_adoption_segment) }
-
-    it 'fills display_namespace with namespace on save' do
-      expect do
-        subject.save!
-      end.to change { subject.display_namespace }.to(subject.namespace)
-    end
+    it { is_expected.to validate_uniqueness_of(:namespace).scoped_to(:display_namespace_id) }
   end
 
   describe '.ordered_by_name' do
@@ -70,9 +61,9 @@ RSpec.describe Analytics::DevopsAdoption::Segment, type: :model do
   describe '.latest_snapshot' do
     it 'loads the latest snapshot' do
       segment = create(:devops_adoption_segment)
-      latest_snapshot = create(:devops_adoption_snapshot, segment: segment, recorded_at: 2.days.ago)
-      create(:devops_adoption_snapshot, segment: segment, recorded_at: 5.days.ago)
-      create(:devops_adoption_snapshot, segment: create(:devops_adoption_segment), recorded_at: 1.hour.ago)
+      latest_snapshot = create(:devops_adoption_snapshot, namespace: segment.namespace, end_time: 2.days.ago)
+      create(:devops_adoption_snapshot, namespace: segment.namespace, end_time: 5.days.ago)
+      create(:devops_adoption_snapshot, end_time: 1.hour.ago)
 
       expect(segment.latest_snapshot).to eq(latest_snapshot)
     end

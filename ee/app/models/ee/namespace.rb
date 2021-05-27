@@ -370,6 +370,10 @@ module EE
       ::Plan::PLANS_ELIGIBLE_FOR_TRIAL.include?(actual_plan_name)
     end
 
+    def free_personal?
+      user? && !paid?
+    end
+
     def use_elasticsearch?
       ::Gitlab::CurrentSettings.elasticsearch_indexes_namespace?(self)
     end

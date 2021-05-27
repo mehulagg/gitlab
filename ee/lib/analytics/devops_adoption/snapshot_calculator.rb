@@ -30,7 +30,7 @@ module Analytics
       end
 
       def calculate
-        params = { recorded_at: Time.zone.now, end_time: range_end, segment: segment }
+        params = { recorded_at: Time.zone.now, end_time: range_end, namespace: segment.namespace }
 
         BOOLEAN_METRICS.each do |metric|
           params[metric] = snapshot&.public_send(metric) || send(metric) # rubocop:disable GitlabSecurity/PublicSend

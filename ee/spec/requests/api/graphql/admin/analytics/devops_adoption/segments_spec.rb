@@ -9,9 +9,11 @@ RSpec.describe 'DevopsAdoptionSegments' do
   let_it_be(:group) { create(:group, name: 'my-group') }
 
   let_it_be(:segment) do
-    create(:devops_adoption_segment, namespace: group).tap do |segment|
-      create(:devops_adoption_snapshot, segment: segment, issue_opened: true, merge_request_opened: false)
-    end
+    create(:devops_adoption_segment, namespace: group)
+  end
+
+  let_it_be(:snapshot) do
+    create(:devops_adoption_snapshot, namespace: group, issue_opened: true, merge_request_opened: false)
   end
 
   let(:query) do
