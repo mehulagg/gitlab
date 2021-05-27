@@ -25,6 +25,7 @@ export default {
         return data;
       },
       result({ data }) {
+        this.selectedPlanId = data.selectedPlanId;
         this.subscription = data.subscription;
         this.namespaces = data.namespaces;
         this.isSetupForCompany = data.isSetupForCompany;
@@ -35,6 +36,7 @@ export default {
   },
   data() {
     return {
+      selectedPlandId: null,
       subscription: {},
       namespaces: [],
       isSetupForCompany: false,
@@ -45,7 +47,7 @@ export default {
   },
   computed: {
     selectedPlan() {
-      return this.plans.find((plan) => plan.code === this.subscription.planId);
+      return this.plans.find((plan) => plan.id === this.selectedPlanId);
     },
     selectedPlanPrice() {
       return this.selectedPlan.pricePerYear;
@@ -63,7 +65,7 @@ export default {
       return this.totalExVat + this.vat;
     },
     usersPresent() {
-      return this.subscription.quantity > 0;
+      return this. subscription.quantity > 0;
     },
     isGroupSelected() {
       return this.subscription.namespaceId && this.subscription.namespaceId !== NEW_GROUP;
@@ -92,6 +94,9 @@ export default {
     titleWithName() {
       return sprintf(this.$options.i18n.title, { name: this.name });
     },
+    isLoading() {
+      return this.$apollo.loading || (!this.isGroupSelected || this.isSelectedGroupPresent) && this.selectedPlan;
+    },
   },
   methods: {
     toggleCollapse() {
@@ -106,7 +111,7 @@ export default {
 </script>
 <template>
   <div
-    v-if="!$apollo.loading && (!isGroupSelected || isSelectedGroupPresent)"
+    v-if="!isLoading"
     class="order-summary gl-display-flex gl-flex-direction-column gl-flex-grow-1 gl-mt-2 mt-lg-5"
   >
     <div class="d-lg-none">

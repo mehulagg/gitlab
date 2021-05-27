@@ -15,7 +15,7 @@ export function writeInitialDataToApolloCache(apolloProvider, dataset) {
   // eslint-disable-next-line @gitlab/require-i18n-strings
   const namespaces = arrayToGraphqlArray(JSON.parse(groupData), 'Namespace');
   const isNewUser = parseBoolean(newUser);
-  const isSetupForCompany = parseBoolean(setupForCompany) || !isNewUser;
+  const isSetupForCompany = parseBoolean(setupForCompany) || isNewUser;
 
   apolloProvider.clients.defaultClient.cache.writeQuery({
     query: stateQuery,
@@ -24,8 +24,8 @@ export function writeInitialDataToApolloCache(apolloProvider, dataset) {
       isSetupForCompany,
       namespaces,
       fullName,
+      selectedPlanId: planId,
       subscription: {
-        planId,
         paymentMethodId: null,
         quantity: 1,
         namespaceId: null,

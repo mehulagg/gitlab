@@ -69,10 +69,10 @@ export default {
   computed: {
     selectedPlanModel: {
       get() {
-        return this.subscription.planId || this.plans[0].code;
+        return this.selectedPlanId || this.plans[0].id;
       },
       set(planId) {
-        this.updateSubscription({ subscription: { planId } });
+        this.updateSubscription({ selectedPlanId: planId });
       },
     },
     selectedGroupModel: {
@@ -103,7 +103,7 @@ export default {
       },
     },
     selectedPlan() {
-      const selectedPlan = this.plans.find((plan) => plan.code === this.subscription.planId);
+      const selectedPlan = this.plans.find((plan) => plan.code === this.selectedPlanId);
       if (!selectedPlan) {
         return this.plans[0];
       }
@@ -130,13 +130,13 @@ export default {
     isValid() {
       if (this.isSetupForCompany) {
         return (
-          !isEmpty(this.subscription.planId) &&
+          !isEmpty(this.selectedPlanId) &&
           (!isEmpty(this.customer.company) || this.isNewGroupSelected) &&
           this.isNumberOfUsersValid
         );
       }
 
-      return !isEmpty(this.subscription.planId) && this.subscription.quantity === 1;
+      return !isEmpty(this.selectedPlanId) && this.subscription.quantity === 1;
     },
     isShowingGroupSelector() {
       return !this.isNewUser && this.namespaces.length;
@@ -213,7 +213,7 @@ export default {
           v-model="selectedPlanModel"
           v-autofocusonshow
           :options="plans"
-          value-field="code"
+          value-field="id"
           text-field="name"
           data-qa-selector="plan_name"
         />

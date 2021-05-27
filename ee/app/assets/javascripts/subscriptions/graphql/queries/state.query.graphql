@@ -1,4 +1,4 @@
-query state {
+query State {
   namespaces @client {
     id
     name
@@ -17,11 +17,11 @@ query state {
     company
   }
   subscription @client {
-    planId
     paymentMethodId
     quantity
     namespaceId
   }
+  selectedPlanId @client
   activeStep @client {
     id
   }
