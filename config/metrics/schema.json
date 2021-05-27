@@ -81,5 +81,17 @@
     "value_json_schema": {
       "type": "string"
     }
-  }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "status": { "const": "broken" }
+        }
+      },
+      "then": {
+        "required": ["repair_issue_url"]
+      }
+    }
+  ]
 }
