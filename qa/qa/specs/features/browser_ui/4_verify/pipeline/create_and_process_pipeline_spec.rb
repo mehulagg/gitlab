@@ -31,7 +31,8 @@ module QA
         Runtime::Feature.disable(feature_flag, project: project)
       end
 
-      it 'users creates a pipeline which gets processed', :smoke, testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/1849' do
+      it 'users creates a pipeline which gets processed', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/1849' do
+        # TODO: Convert back to :smoke once proved to be stable. Related issue: https://gitlab.com/gitlab-org/gitlab/-/issues/300909
         Flow::Login.sign_in
 
         Resource::Repository::Commit.fabricate_via_api! do |commit|
