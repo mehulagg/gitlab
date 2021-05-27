@@ -47,13 +47,13 @@ RSpec.describe 'Jobs/Browser-Performance-Testing.gitlab-ci.yml' do
 
     shared_examples_for 'browser_performance job on tag or branch' do
       it 'by default' do
-        expect(build_names).to include('performance')
+        expect(build_names).to include('browser_performance')
       end
 
-      it 'when PERFORMANCE_DISABLED' do
-        create(:ci_variable, project: project, key: 'PERFORMANCE_DISABLED', value: '1')
+      it 'when BROWSER_PERFORMANCE_DISABLED' do
+        create(:ci_variable, project: project, key: 'BROWSER_PERFORMANCE_DISABLED', value: '1')
 
-        expect(build_names).not_to include('performance')
+        expect(build_names).not_to include('browser_performance')
       end
     end
 
