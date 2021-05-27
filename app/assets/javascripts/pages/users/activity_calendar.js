@@ -42,8 +42,6 @@ function formatTooltipText({ date, count }) {
   return `${contribText}<br /><span class="gl-text-gray-300">${dateDayName} ${dateText}</span>`;
 }
 
-const initColorKey = () => d3.scaleLinear().range(['#acd5f2', '#254e77']).domain([0, 3]);
-
 export default class ActivityCalendar {
   constructor(
     container,
@@ -111,10 +109,6 @@ export default class ActivityCalendar {
       innerArray.push({ count, date, day });
     }
 
-    // Init color functions
-    this.colorKey = initColorKey();
-    this.color = this.initColor();
-
     // Init the svg element
     this.svg = this.renderSvg(container, group);
     this.renderDays();
@@ -180,9 +174,7 @@ export default class ActivityCalendar {
       .attr('y', (stamp) => this.dayYPos(stamp.day))
       .attr('width', this.daySize)
       .attr('height', this.daySize)
-      .attr('fill', (stamp) =>
-        stamp.count !== 0 ? this.color(Math.min(stamp.count, 40)) : '#ededed',
-      )
+      .attr('data-l', (stamp) => (stamp.count === 0 ? 0 : Math.min(Math.ceil(stamp.count / 10), 4)))
       .attr('title', (stamp) => formatTooltipText(stamp))
       .attr('class', 'user-contrib-cell has-tooltip')
       .attr('data-html', true)
@@ -247,47 +239,29 @@ export default class ActivityCalendar {
 
   renderKey() {
     const keyValues = [
-      __('No contributions'),
-      __('1-9 contributions'),
-      __('10-19 contributions'),
-      __('20-29 contributions'),
-      __('30+ contributions'),
-    ];
-    const keyColors = [
-      '#ededed',
-      this.colorKey(0),
-      this.colorKey(1),
-      this.colorKey(2),
-      this.colorKey(3),
+      __('No contributions'), // .user-contrib-cell[data-l='0']
+      __('1-9 contributions'), // .user-contrib-cell[data-l='1']
+      __('10-19 contributions'), // .user-contrib-cell[data-l='2']
+      __('20-29 contributions'), // .user-contrib-cell[data-l='3']
+      __('30+ contributions'), // .user-contrib-cell[data-l='4']
     ];
 
     this.svg
       .append('g')
       .attr('transform', `translate(18, ${this.daySizeWithSpace * 8 + 16})`)
       .selectAll('rect')
-      .data(keyColors)
+      .data(Array(5))
       .enter()
       .append('rect')
       .attr('width', this.daySize)
       .attr('height', this.daySize)
-      .attr('x', (color, i) => this.daySizeWithSpace * i)
+      .attr('x', (_, i) => this.daySizeWithSpace * i)
       .attr('y', 0)
-      .attr('fill', (color) => color)
-      .attr('class', 'has-tooltip')
-      .attr('title', (color, i) => keyValues[i])
+      .attr('data-l', (_, i) => i)
+      .attr('class', 'user-contrib-cell has-tooltip')
+      .attr('title', (_, i) => keyValues[i])
       .attr('data-container', 'body')
       .attr('data-html', true);
-  }
-
-  initColor() {
-    const colorRange = [
-      '#ededed',
-      this.colorKey(0),
-      this.colorKey(1),
-      this.colorKey(2),
-      this.colorKey(3),
-    ];
-    return d3.scaleThreshold().domain([0, 10, 20, 30]).range(colorRange);
   }
 
   clickDay(stamp) {

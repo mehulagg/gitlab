@@ -30,6 +30,26 @@
     cursor: pointer;
     stroke: $black;
   }
+
+  &[data-l='0'] {
+    fill: #ededed;
+  }
+
+  &[data-l='1'] {
+    fill: #acd5f2;
+  }
+
+  &[data-l='2'] {
+    fill: #7fa8c9;
+  }
+
+  &[data-l='3'] {
+    fill: #527ba0;
+  }
+
+  &[data-l='4'] {
+    fill: #254e77;
+  }
 }
 
 .user-contrib-text {
