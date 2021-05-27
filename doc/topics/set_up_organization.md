@@ -5,6 +5,8 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 ---
 
 # Set up your organization **(FREE)**
+Configure your organization and its users. Determine user roles
+and give everyone access to the projects they need.
 
 - [Members](../user/project/members/index.md)
 - [Groups](../user/group/index.md)
