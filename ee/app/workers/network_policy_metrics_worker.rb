@@ -12,7 +12,7 @@ class NetworkPolicyMetricsWorker # rubocop:disable Scalability/IdempotentWorker
   feature_category :container_network_security
 
   def perform
-    services = PrometheusService
+    services = ::Integrations::Prometheus
                  .preload_project
                  .with_clusters_with_cilium
     service_metrics = count_adapter_metrics(services)

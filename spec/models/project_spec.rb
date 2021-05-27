@@ -5791,7 +5791,7 @@ RSpec.describe Project, factory_default: :keep do
 
     context 'without an exisiting integration, nor instance-level or template' do
       it 'builds the service if instance or template does not exists' do
-        expect(subject.find_or_initialize_service('prometheus')).to be_a(PrometheusService)
+        expect(subject.find_or_initialize_service('prometheus')).to be_a(::Integrations::Prometheus)
         expect(subject.find_or_initialize_service('prometheus').api_url).to be_nil
       end
     end

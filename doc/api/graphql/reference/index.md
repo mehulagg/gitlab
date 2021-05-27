@@ -15141,9 +15141,9 @@ Represents untyped JSON.
 
 ### `JobID`
 
-A `CommitStatusID` is a global ID. It is encoded as a string.
+A `JobID` is a global ID. It is encoded as a string.
 
-An example `CommitStatusID` is: `"gid://gitlab/CommitStatus/1"`.
+An example `JobID` is: `"gid://gitlab/CommitStatus/1"`.
 
 ### `JsonString`
 
@@ -15253,7 +15253,7 @@ An example `ProjectID` is: `"gid://gitlab/Project/1"`.
 
 A `PrometheusServiceID` is a global ID. It is encoded as a string.
 
-An example `PrometheusServiceID` is: `"gid://gitlab/PrometheusService/1"`.
+An example `PrometheusServiceID` is: `"gid://gitlab/Integrations::Prometheus/1"`.
 
 ### `ReleasesLinkID`
 

@@ -3,6 +3,8 @@
 require 'spec_helper'
 
 RSpec.describe Types::GlobalIDType do
+  include ::Gitlab::Graphql::Laziness
+
   let_it_be(:project) { create(:project) }
 
   let(:gid) { project.to_global_id }
@@ -96,6 +98,42 @@ RSpec.describe Types::GlobalIDType do
 
       expect { type.coerce_isolated_input(invalid_gid) }
         .to raise_error(GraphQL::CoercionError, /does not represent an instance of Project/)
+    end
+
+    context 'when a model name has been deprecated' do
+      before do
+        stub_const("#{described_class.name}::ADAPTED_MODEL_NAMES", {'OldProject' => 'Project'})
+      end
+
+      it 'retains the deprecated model name in its graphql name' do
+        expect(type.to_graphql.name).to eq('OldProjectID')
+      end
+
+      describe 'coercion' do
+        let(:gid) { Gitlab::GlobalId.build(model_name: 'OldProject', id: project.id) }
+
+        subject(:result) { type.coerce_isolated_input(gid.to_s) }
+
+        it 'changes the model_name to the adapted model name' do
+          expect(result.model_name).to eq('Project')
+        end
+
+        it 'changes the model_class to the adapted model class' do
+          expect(result.model_class).to eq(Project)
+        end
+
+        it 'returns the correct adapted resource' do
+          expect(result.find).to eq(project)
+        end
+
+        it 'returns the correct adapted resource when using GitlabSchema' do
+          expect(force(GitlabSchema.object_from_id(result, expected_class: Project))).to eq(project)
+        end
+
+        it 'does not change the GlobalID when presented as a String' do
+          expect(result.to_s).to eq(gid.to_s)
+        end
+      end
     end
   end
 

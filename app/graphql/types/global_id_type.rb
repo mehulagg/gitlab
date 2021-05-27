@@ -18,6 +18,18 @@ end
 
 module Types
   class GlobalIDType < BaseScalar
+    # better name, like adapter or something
+    # or perhaps a yaml file?
+    DEPRECATED = [
+      {
+        old_model_name: 'PrometheusService',
+        new_model_name: 'Integrations::Prometheus',
+        deprecated_in: '14.0'
+      }
+    ].freeze
+
+    ADAPTED_MODEL_NAMES = DEPRECATED.map { |d| d.values_at(:old_model_name, :new_model_name) }.to_h.freeze
+
     graphql_name 'GlobalID'
     description <<~DESC
       A global identifier.
@@ -43,6 +55,11 @@ module Types
       raise GraphQL::CoercionError, "#{value.inspect} is not a valid Global ID" if gid.nil?
       raise GraphQL::CoercionError, "#{value.inspect} is not a Gitlab Global ID" unless gid.app == GlobalID.app
 
+      if adapted_model_name = ADAPTED_MODEL_NAMES[gid.model_name]
+        # TODO log a deprecation alert?
+        gid.uri.instance_variable_set(:@model_name, adapted_model_name)
+      end
+
       gid
     end
 
@@ -51,13 +68,21 @@ module Types
     def self.[](model_class)
       @id_types ||= {}
 
-      @id_types[model_class] ||= Class.new(self) do
-        graphql_name "#{model_class.name.gsub(/::/, '')}ID"
-        description <<~MD
-          A `#{graphql_name}` is a global ID. It is encoded as a string.
+      @id_types[model_class] ||= define_id_type(model_class)
+    end
 
-          An example `#{graphql_name}` is: `"#{::Gitlab::GlobalId.build(model_name: model_class.name, id: 1)}"`.
-        MD
+    def self.define_id_type(model_class)
+      id_type = Class.new(self) do
+        define_singleton_method(:description_string) do
+          <<~MD
+            A `#{graphql_name}` is a global ID. It is encoded as a string.
+
+            An example `#{graphql_name}` is: `"#{::Gitlab::GlobalId.build(model_name: model_class.name, id: 1)}"`.
+          MD
+        end
+
+        graphql_name "#{model_class.name.gsub(/::/, '')}ID"
+        description description_string
 
         define_singleton_method(:to_s) do
           graphql_name
@@ -75,6 +100,7 @@ module Types
 
           @renamed = true
           graphql_name(new_name)
+          description(description_string)
           self
         end
 
@@ -100,6 +126,13 @@ module Types
           raise GraphQL::CoercionError, "#{string.inspect} does not represent an instance of #{model_class.name}"
         end
       end
+
+      if old_model_name = ADAPTED_MODEL_NAMES.invert[model_class.name]
+        id_type.as("#{old_model_name}ID")
+      end
+
+      id_type
     end
+    private_class_method :define_id_type
   end
 end

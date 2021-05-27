@@ -794,6 +794,7 @@ module API
           ::Integrations::Packagist,
           ::Integrations::PipelinesEmail,
           ::Integrations::Pivotaltracker,
+          ::Integrations::Prometheus,
           ::Integrations::Redmine,
           ::Integrations::Teamcity,
           ::Integrations::Youtrack,
@@ -801,7 +802,6 @@ module API
           ::HangoutsChatService,
           ::MattermostSlashCommandsService,
           ::SlackSlashCommandsService,
-          ::PrometheusService,
           ::PushoverService,
           ::SlackService,
           ::MattermostService,
@@ -812,7 +812,7 @@ module API
       def self.development_service_classes
         [
           ::Integrations::MockCi,
-          ::MockMonitoringService
+          ::Integrations::MockMonitoring
         ]
       end
     end

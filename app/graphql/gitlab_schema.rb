@@ -124,7 +124,7 @@ class GitlabSchema < GraphQL::Schema
     # ```
     def parse_gid(global_id, ctx = {})
       expected_types = Array(ctx[:expected_type])
-      gid = GlobalID.parse(global_id)
+      gid = Gitlab::GlobalId.build(global_id)
 
       raise Gitlab::Graphql::Errors::ArgumentError, "#{global_id} is not a valid GitLab ID." unless gid
 

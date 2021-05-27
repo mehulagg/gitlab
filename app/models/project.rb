@@ -175,9 +175,11 @@ class Project < ApplicationRecord
   has_one :jenkins_service, class_name: 'Integrations::Jenkins'
   has_one :jira_service, class_name: 'Integrations::Jira'
   has_one :mock_ci_service, class_name: 'Integrations::MockCi'
+  has_one :mock_monitoring_service, class_name: 'Integrations::MockMonitoring'
   has_one :packagist_service, class_name: 'Integrations::Packagist'
   has_one :pipelines_email_service, class_name: 'Integrations::PipelinesEmail'
   has_one :pivotaltracker_service, class_name: 'Integrations::Pivotaltracker'
+  has_one :prometheus_service, class_name: 'Integrations::Prometheus', inverse_of: :project
   has_one :redmine_service, class_name: 'Integrations::Redmine'
   has_one :teamcity_service, class_name: 'Integrations::Teamcity'
   has_one :youtrack_service, class_name: 'Integrations::Youtrack'
@@ -187,8 +189,6 @@ class Project < ApplicationRecord
   has_one :slack_slash_commands_service
   has_one :slack_service
   has_one :pushover_service
-  has_one :prometheus_service, inverse_of: :project
-  has_one :mock_monitoring_service
   has_one :microsoft_teams_service
   has_one :hangouts_chat_service
   has_one :unify_circuit_service

@@ -121,9 +121,9 @@ RSpec.describe API::Services do
       end
 
       def deactive_service!
-        return initialized_service.update!(active: false) unless initialized_service.is_a?(PrometheusService)
+        return initialized_service.update!(active: false) unless initialized_service.is_a?(::Integrations::Prometheus)
 
-        # PrometheusService sets `#active` itself within a `before_save`:
+        # Integrations::Prometheus sets `#active` itself within a `before_save`:
         initialized_service.manual_configuration = false
         initialized_service.save!
       end
