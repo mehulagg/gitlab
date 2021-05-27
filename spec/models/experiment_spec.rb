@@ -251,7 +251,7 @@ RSpec.describe Experiment do
 
     context 'when an existing experiment_subject exists for the given subject' do
       let_it_be(:experiment_subject) do
-        create(:experiment_subject, experiment: experiment, group: subject_to_record, user: nil, variant: :experimental)
+        create(:experiment_subject, experiment: experiment, namespace: subject_to_record, user: nil, variant: :experimental)
       end
 
       context 'when it belongs to the same variant' do
@@ -274,7 +274,7 @@ RSpec.describe Experiment do
     describe 'providing a subject to record' do
       context 'when given a group as subject' do
         it 'saves the namespace owner as experiment_subject user' do
-          expect(record_subject_and_variant!.group).to eq(subject_to_record)
+          expect(record_subject_and_variant!.namespace).to eq(subject_to_record)
         end
       end
 
@@ -282,7 +282,7 @@ RSpec.describe Experiment do
         let_it_be(:subject_to_record) { build(:namespace) }
 
         it 'saves the namespace owner as experiment_subject user' do
-          expect(record_subject_and_variant!.user).to eq(subject_to_record.owner)
+          expect(record_subject_and_variant!.namespace).to eq(subject_to_record)
         end
       end
 
