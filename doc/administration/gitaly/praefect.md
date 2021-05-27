@@ -1107,10 +1107,15 @@ The `per_repository` election strategy solves this problem by electing a primary
 repository. Combined with [configurable replication factors](#configure-replication-factor), you can
 horizontally scale storage capacity and distribute write load across Gitaly nodes.
 
-Primary elections are run when:
+Praefect elects primaries for repositories lazily. This means that Praefect doesn't immediately elect a new
+primary if the current one is unhealthy. New primary would only be elected if it is necessary to serve a request
+while the current primary is unavailable.
 
-- Praefect starts up.
-- The cluster's consensus of a Gitaly node's health changes.
+A valid primary candidate is a healthy Gitaly node with a fully up to date replica of the repository. If there
+are multiple primary candidates, Praefect picks one of them randomly. Praefect prioritizes promoting a Gitaly
+node that is an assigned to host the repository. If there are no assigned Gitaly nodes to elect as the primary,
+Praefect may temporarily elect an unassigned one. The unassigned primary is demoted in favor of an assigned one
+when one becomes available.
 
 A Gitaly node is considered:
 
@@ -1118,13 +1123,7 @@ A Gitaly node is considered:
   previous ten seconds.
 - Unhealthy otherwise.
 
-During an election run, Praefect elects a new primary Gitaly node for each repository that has
-an unhealthy primary Gitaly node. The election is made:
-
-- Randomly from healthy secondary Gitaly nodes that are the most up to date.
-- Only from Gitaly nodes assigned to the host repository.
-
-If there are no healthy secondary nodes for a repository:
+If there are no valid primary candidates for a repository:
 
 - The unhealthy primary node is demoted and the repository is left without a primary node.
 - Operations that require a primary node fail until a primary is successfully elected.
