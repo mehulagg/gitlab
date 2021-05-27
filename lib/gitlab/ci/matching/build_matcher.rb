@@ -23,7 +23,13 @@ module Gitlab
         def has_tags?
           tag_list.present?
         end
+
+        def not_matched_failure_reason
+          :no_matching_runner
+        end
       end
     end
   end
 end
+
+Gitlab::Ci::Matching::BuildMatcher.prepend_mod_with('Gitlab::Ci::Matching::BuildMatcher')

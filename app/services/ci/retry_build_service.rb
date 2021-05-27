@@ -14,7 +14,8 @@ module Ci
       build.ensure_scheduling_type!
 
       reprocess!(build).tap do |new_build|
-        Gitlab::OptimisticLocking.retry_lock(new_build, name: 'retry_build', &:enqueue)
+        check_assignable_runners!(new_build)
+        Gitlab::OptimisticLocking.retry_lock(new_build, name: 'retry_build', &:enqueue) unless new_build.failed?
         AfterRequeueJobService.new(project, current_user).execute(build)
 
         ::MergeRequests::AddTodoWhenBuildFailsService
@@ -53,6 +54,18 @@ module Ci
     def check_access!(build)
       unless can?(current_user, :update_build, build)
         raise Gitlab::Access::AccessDeniedError
+      end
+    end
+
+    def check_assignable_runners!(build)
+      return if build_can_be_picked?(build)
+
+      build.drop!(build.build_matcher.not_matched_failure_reason)
+    end
+
+    def build_can_be_picked?(build)
+      build.project.all_available_runner_matchers.any? do |matcher|
+        matcher.full_match?(build.build_matcher)
       end
     end
 

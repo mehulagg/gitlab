@@ -1750,6 +1750,10 @@ class Project < ApplicationRecord
     Ci::Runner.from_union([runners, group_runners, shared_runners])
   end
 
+  def all_available_runner_matchers
+    all_runners.active.online.runner_matchers
+  end
+
   def all_available_runners
     Ci::Runner.from_union([runners, group_runners, available_shared_runners])
   end

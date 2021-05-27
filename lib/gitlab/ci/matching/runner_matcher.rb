@@ -41,6 +41,10 @@ module Gitlab
           accepting_tags?(build_matcher)
         end
 
+        def full_match?(build_matcher)
+          matches?(build_matcher)
+        end
+
         def instance_type?
           runner_type.to_sym == :instance_type
         end

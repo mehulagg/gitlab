@@ -5,6 +5,10 @@ module EE
     module Ci
       module Matching
         module RunnerMatcher
+          def full_match?(build_matcher)
+            super && matches_quota?(build_matcher)
+          end
+
           def matches_quota?(build_matcher)
             cost_factor = minutes_cost_factor(build_matcher.project.visibility_level)
 
