@@ -30,3 +30,20 @@ export const SORT_OPTIONS = [
     label: __('Created date'),
   },
 ];
+
+export const RELEASED_AT_ASC = 'RELEASED_AT_ASC';
+export const RELEASED_AT_DESC = 'RELEASED_AT_DESC';
+export const CREATED_ASC = 'CREATED_ASC';
+export const CREATED_DESC = 'CREATED_DESC';
+export const ALL_SORTS = [RELEASED_AT_ASC, RELEASED_AT_DESC, CREATED_ASC, CREATED_DESC];
+
+export const SORT_MAP = {
+  [RELEASED_AT]: {
+    [ASCENDING_ODER]: RELEASED_AT_ASC,
+    [DESCENDING_ORDER]: RELEASED_AT_DESC,
+  },
+  [CREATED_AT]: {
+    [ASCENDING_ODER]: CREATED_ASC,
+    [DESCENDING_ORDER]: CREATED_DESC,
+  },
+};
