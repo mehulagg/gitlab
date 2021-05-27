@@ -29,7 +29,7 @@ For a full list of reference architectures, see
 
 > **Table Footnotes:**
 >
-> - (1) can be optionally run as reputable third party external PaaS PostgreSQL solutions. Google Cloud SQL and AWS RDS are known to work. Consul is primarily used for PostgreSQL high availability so can be ignored when using a PostgreSQL PaaS setup. However it is also used optionally by Prometheus for Omnibus auto host discovery.
+> - (1) can be optionally run as reputable third party external PaaS PostgreSQL solutions. Google Cloud SQL and AWS RDS are known to work, however Azure Database for PostgreSQL is [not recommended](https://gitlab.com/gitlab-org/quality/reference-architectures/-/issues/61) due to performance issues. Consul is primarily used for PostgreSQL high availability so can be ignored when using a PostgreSQL PaaS setup. However it is also used optionally by Prometheus for Omnibus auto host discovery.
 > - (2) can be optionally run as reputable third party external PaaS Redis solutions. Google Memorystore and AWS Elasticache are known to work.
 > - (3) can be optionally run as reputable third party load balancing services (LB PaaS). AWS ELB is known to work.
 > - (4) can be optionally run as reputable third party object storage (storage PaaS). Google Cloud Storage and AWS S3 are known to work.
