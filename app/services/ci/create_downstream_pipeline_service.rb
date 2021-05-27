@@ -121,15 +121,11 @@ module Ci
 
       if Feature.enabled?(:ci_drop_cyclical_triggered_pipelines, @bridge.project, default_enabled: :yaml)
         pipeline_checksums = @bridge.pipeline.base_and_ancestors.filter_map do |pipeline|
-          config_checksum(pipeline) if multiproject_pipeline?(pipeline)
+          config_checksum(pipeline) unless pipeline.child?
         end
 
         pipeline_checksums.uniq.length != pipeline_checksums.length
       end
-    end
-
-    def multiproject_pipeline?(pipeline)
-      !pipeline.parent? && !pipeline.child?
     end
 
     def has_max_descendants_depth?
