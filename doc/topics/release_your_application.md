@@ -6,5 +6,8 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 
 # Release your application **(FREE)**
 
+Release your application internally or to the public. Use
+flags to release features incrementally.
+
 - [Releases](../user/project/releases/index.md)
 - [Feature flags](../operations/feature_flags.md)
