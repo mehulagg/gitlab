@@ -3,8 +3,8 @@ import { createLocalVue, shallowMount } from '@vue/test-utils';
 import { nextTick } from 'vue';
 import VueApollo from 'vue-apollo';
 import createMockApollo from 'helpers/mock_apollo_helper';
+import getUserCallouts from '~/graphql_shared/queries/get_user_callouts.query.graphql';
 import PipelineNotification from '~/pipelines/components/notification/pipeline_notification.vue';
-import getUserCallouts from '~/pipelines/graphql/queries/get_user_callouts.query.graphql';
 
 describe('Pipeline notification', () => {
   const localVue = createLocalVue();

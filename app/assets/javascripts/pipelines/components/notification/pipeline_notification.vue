@@ -1,9 +1,9 @@
 <script>
 import { GlBanner, GlLink, GlSprintf } from '@gitlab/ui';
 import createFlash from '~/flash';
+import getUserCallouts from '~/graphql_shared/queries/get_user_callouts.query.graphql';
 import { __ } from '~/locale';
 import DismissPipelineGraphCallout from '../../graphql/mutations/dismiss_pipeline_notification.graphql';
-import getUserCallouts from '../../graphql/queries/get_user_callouts.query.graphql';
 
 const featureName = 'pipeline_needs_banner';
 const enumFeatureName = featureName.toUpperCase();
