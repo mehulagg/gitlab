@@ -296,18 +296,29 @@ module Gitlab
         read_trace_artifact(job) { job.job_artifacts_trace }
       end
 
-      ##
-      # Overridden in EE
-      #
-      def destroy_stream(job)
+      def destroy_stream(build)
+        if consistent_archived_trace?(build)
+          ::Gitlab::Database::LoadBalancing::Sticking
+            .stick('ci/build/trace', build.id)
+        end
+
         yield
       end
 
       ##
       # Overriden in EE
       #
-      def read_trace_artifact(job)
+      def read_trace_artifact(build)
+        if consistent_archived_trace?(build)
+          ::Gitlab::Database::LoadBalancing::Sticking
+            .unstick_or_continue_sticking('ci/build/trace', build.id)
+        end
+
         yield
+      end
+
+      def consistent_archived_trace?(build)
+        ::Feature.enabled?(:gitlab_ci_archived_trace_consistent_reads, build.project, default_enabled: false)
       end
 
       def being_watched_cache_key
@@ -316,5 +327,3 @@ module Gitlab
     end
   end
 end
-
-::Gitlab::Ci::Trace.prepend_mod_with('Gitlab::Ci::Trace')
