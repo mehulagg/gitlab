@@ -1031,7 +1031,8 @@
       allow_failure: true
     - <<: *if-dot-com-gitlab-org-merge-request
       changes: *code-qa-patterns
-      when: manual
+      # when: manual # Commented for testing
+      when: always # Added for testing
       allow_failure: true
 
 .reports:rules:schedule-dast:
