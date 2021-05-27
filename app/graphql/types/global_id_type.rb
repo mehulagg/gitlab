@@ -28,7 +28,7 @@ module Types
       }
     ].freeze
 
-    ADAPTED_MODEL_NAMES = DEPRECATED.map { |d| d.values_at(:old_model_name, :new_model_name) }.to_h.freeze
+    ADAPTED_MODEL_NAMES = DEPRECATED.to_h { |d| d.values_at(:old_model_name, :new_model_name) }.freeze
 
     graphql_name 'GlobalID'
     description <<~DESC

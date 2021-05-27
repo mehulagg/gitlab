@@ -102,7 +102,7 @@ RSpec.describe Types::GlobalIDType do
 
     context 'when a model name has been deprecated' do
       before do
-        stub_const("#{described_class.name}::ADAPTED_MODEL_NAMES", {'OldProject' => 'Project'})
+        stub_const("#{described_class.name}::ADAPTED_MODEL_NAMES", { 'OldProject' => 'Project' })
       end
 
       it 'retains the deprecated model name in its graphql name' do
