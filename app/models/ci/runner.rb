@@ -163,6 +163,8 @@ module Ci
       numericality: { greater_than_or_equal_to: 0.0,
                       message: 'needs to be non-negative' }
 
+    validates :config, json_schema: { filename: 'ci_runner_config' }
+
     # Searches for runners matching the given query.
     #
     # This method uses ILIKE on PostgreSQL.
@@ -353,7 +355,7 @@ module Ci
     end
 
     def heartbeat(values)
-      values = values&.slice(:version, :revision, :platform, :architecture, :ip_address) || {}
+      values = values&.slice(:version, :revision, :platform, :architecture, :ip_address, :config) || {}
       values[:contacted_at] = Time.current
 
       cache_attributes(values)
@@ -363,11 +365,7 @@ module Ci
     end
 
     def pick_build!(build)
-      if Feature.enabled?(:ci_reduce_queries_when_ticking_runner_queue, self, default_enabled: :yaml)
-        tick_runner_queue if matches_build?(build)
-      else
-        tick_runner_queue if can_pick?(build)
-      end
+      tick_runner_queue if matches_build?(build)
     end
 
     def uncached_contacted_at
@@ -433,13 +431,7 @@ module Ci
     end
 
     def matches_build?(build)
-      return false if self.ref_protected? && !build.protected?
-
-      accepting_tags?(build)
-    end
-
-    def accepting_tags?(build)
-      (run_untagged? || build.has_tags?) && (build.tag_list - tag_list).empty?
+      runner_matcher.matches?(build.build_matcher)
     end
   end
 end

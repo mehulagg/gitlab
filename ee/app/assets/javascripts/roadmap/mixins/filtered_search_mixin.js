@@ -36,13 +36,13 @@ export default {
         milestone_title: milestoneTitle,
         confidential,
         my_reaction_emoji: myReactionEmoji,
-        epic_iid: epicIid && Number(epicIid),
+        epic_iid: epicIid,
         search,
       };
     },
   },
   methods: {
-    getFilteredSearchTokens() {
+    getFilteredSearchTokens({ supportsEpic = true } = {}) {
       const tokens = [
         {
           type: 'author_username',
@@ -113,7 +113,10 @@ export default {
             { icon: 'eye', value: false, title: __('No') },
           ],
         },
-        {
+      ];
+
+      if (supportsEpic) {
+        tokens.push({
           type: 'epic_iid',
           icon: 'epic',
           title: __('Epic'),
@@ -121,16 +124,28 @@ export default {
           symbol: '&',
           token: EpicToken,
           operators: OPERATOR_IS_ONLY,
-          idProperty: 'iid',
           defaultEpics: [],
-          fetchEpics: (search = '') => {
-            const number = Number(search);
-            return !search || Number.isNaN(number)
-              ? axios.get(this.listEpicsPath, { params: { search } })
-              : axios.get(joinPaths(this.listEpicsPath, search)).then(({ data }) => [data]);
+          fetchEpics: ({ epicPath = '', search = '' }) => {
+            const epicId = Number(search) || null;
+
+            // No search criteria or path has been provided, fetch all epics.
+            if (!epicPath && !search) {
+              return axios.get(this.listEpicsPath);
+            } else if (epicPath) {
+              // Just epicPath has been provided, fetch a specific epic.
+              return axios.get(epicPath).then(({ data }) => [data]);
+            } else if (!epicPath && epicId) {
+              // Exact epic ID provided, fetch the epic.
+              return axios
+                .get(joinPaths(this.listEpicsPath, String(epicId)))
+                .then(({ data }) => [data]);
+            }
+
+            // Search for an epic.
+            return axios.get(this.listEpicsPath, { params: { search } });
           },
-        },
-      ];
+        });
+      }
 
       if (gon.current_user_id) {
         // Appending to tokens only when logged-in

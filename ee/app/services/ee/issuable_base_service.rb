@@ -58,5 +58,15 @@ module EE
         end
       end
     end
+
+    override :allowed_create_params
+    def allowed_create_params(params)
+      super(params).except(:epic)
+    end
+
+    override :allowed_update_params
+    def allowed_update_params(params)
+      super(params).except(:epic)
+    end
   end
 end

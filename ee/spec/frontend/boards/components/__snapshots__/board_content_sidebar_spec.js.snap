@@ -3,82 +3,57 @@
 exports[`ee/BoardContentSidebar matches the snapshot 1`] = `
 <div>
   Issue details
-  <board-sidebar-title-stub />
+  <boardsidebartitle-stub />
    
-  <sidebar-assignees-widget-stub
+  <sidebarassigneeswidget-stub
     fullpath="gitlab-org/gitlab-test"
     iid="27"
     initialassignees="[object Object],[object Object]"
     issuabletype="issue"
   />
    
-  <board-editable-item-stub
-    class="epic"
+  <sidebardropdownwidget-stub
+    attr-workspace-path="gitlab-org"
     data-testid="sidebar-epic"
-    handleoffclick="true"
-    title="Epic"
-  >
-     
-    <epics-select-stub
-      canedit="true"
-      class="gl-w-full"
-      epicissueid="0"
-      groupid="1"
-      initialepic="[object Object]"
-      issueid="0"
-      variant="standalone"
-    />
-  </board-editable-item-stub>
+    iid="27"
+    issuable-attribute="epic"
+    issuable-type="issue"
+    workspace-path="gitlab-org/gitlab-test"
+  />
    
   <div>
-    <board-sidebar-milestone-select-stub />
+    <boardsidebarmilestoneselect-stub />
      
-    <div
+    <sidebariterationwidget-stub
       class="gl-mt-5"
-      data-qa-selector="iteration_container"
-    >
-      <sidebar-editable-item-stub
-        canedit="true"
-        data-testid="iteration-edit-link"
-        title="Iteration"
-        tracking="[object Object]"
-      />
-    </div>
+      iid="27"
+      issuable-type="issue"
+      iterations-workspace-path="gitlab-org"
+      workspace-path="gitlab-org/gitlab-test"
+    />
   </div>
    
-  <board-sidebar-time-tracker-stub
+  <boardsidebartimetracker-stub
     class="swimlanes-sidebar-time-tracker"
   />
    
-  <board-sidebar-due-date-stub />
+  <boardsidebarduedate-stub />
    
-  <board-sidebar-labels-select-stub
+  <boardsidebarlabelsselect-stub
     class="labels"
   />
    
-  <board-editable-item-stub
+  <boardsidebarweightinput-stub
     class="weight"
-    data-testid="sidebar-weight"
-    handleoffclick="true"
-    title="Weight"
-  >
-     
-    <gl-form-stub>
-      <gl-form-input-stub
-        min="0"
-        placeholder="Enter a number"
-        type="number"
-      />
-    </gl-form-stub>
-  </board-editable-item-stub>
+  />
    
-  <sidebar-confidentiality-widget-stub
+  <sidebarconfidentialitywidget-stub
     fullpath="gitlab-org/gitlab-test"
     iid="27"
     issuabletype="issue"
   />
    
-  <sidebar-subscriptions-widget-stub
+  <sidebarsubscriptionswidget-stub
     data-testid="sidebar-notifications"
     fullpath="gitlab-org/gitlab-test"
     iid="27"

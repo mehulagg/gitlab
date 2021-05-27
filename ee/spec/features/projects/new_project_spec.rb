@@ -74,7 +74,7 @@ RSpec.describe 'New project', :js do
         page.within '#import-project-pane' do
           first('.js-import-git-toggle-button').click
 
-          fill_in 'project_import_url', with: 'http://foo/bar.git'
+          fill_in 'project_import_url', with: 'http://foo.git'
           fill_in 'project_name', with: 'import-project-with-features1'
           fill_in 'project_path', with: 'import-project-with-features1'
           choose 'project_visibility_level_20'
@@ -94,7 +94,7 @@ RSpec.describe 'New project', :js do
         page.within '#ci-cd-project-pane' do
           find('.js-import-git-toggle-button').click
 
-          fill_in 'project_import_url', with: 'http://foo/bar.git'
+          fill_in 'project_import_url', with: 'http://foo.git'
           fill_in 'project_name', with: 'CI CD Project1'
           fill_in 'project_path', with: 'ci-cd-project1'
           choose 'project_visibility_level_20'

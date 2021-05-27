@@ -67,7 +67,7 @@ module Mutations
       private
 
       def find_object(parent:, id:)
-        params = IterationsFinder.params_for_parent(parent).merge!(id: id)
+        params = { parent: parent, id: id }
 
         IterationsFinder.new(context[:current_user], params).execute.first
       end

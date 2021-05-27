@@ -99,6 +99,21 @@ RSpec.describe Security::ReportSummaryService, '#execute' do
     end
   end
 
+  context 'when scanned resources are not requested' do
+    let(:selection_information) do
+      {
+        dast: [:vulnerabilities_count],
+        container_scanning: [:vulnerabilities_count]
+      }
+    end
+
+    it 'does not download the artifact' do
+      expect(pipeline).not_to receive(:security_reports)
+
+      result
+    end
+  end
+
   context 'when the scans is requested' do
     let(:selection_information) { { dast: [:scans] } }
 
@@ -155,6 +170,47 @@ RSpec.describe Security::ReportSummaryService, '#execute' do
       it 'returns nil' do
         expect(result[:dast]).to be_nil
       end
+    end
+  end
+
+  context 'When only the DAST scan ran' do
+    let_it_be(:pipeline) { create(:ci_pipeline, :success) }
+    let_it_be(:build_dast) { create(:ci_build, :success, name: 'dast', pipeline: pipeline) }
+    let_it_be(:artifact_dast) { create(:ee_ci_job_artifact, :dast_large_scanned_resources_field, job: build_dast) }
+    let_it_be(:report_dast) { create(:ci_reports_security_report, type: :dast) }
+    let_it_be(:scan_dast) { create(:security_scan, scan_type: :dast, build: build_dast) }
+
+    before do
+      stub_licensed_features(sast: true, dependency_scanning: true, container_scanning: true, dast: true)
+
+      dast_content = File.read(artifact_dast.file.path)
+      Gitlab::Ci::Parsers::Security::Dast.parse!(dast_content, report_dast)
+      report_dast.merge!(report_dast)
+
+      { artifact_dast => report_dast }.each do |artifact, report|
+        report.findings.each do |finding|
+          create(:security_finding,
+                severity: finding.severity,
+                confidence: finding.confidence,
+                project_fingerprint: finding.project_fingerprint,
+                deduplicated: true,
+                scan: artifact.job.security_scans.first)
+        end
+      end
+    end
+
+    let(:selection_information) do
+      {
+        dast: [:scanned_resources_count, :vulnerabilities_count],
+        sast: [:vulnerabilities_count]
+      }
+    end
+
+    it 'returns nil for the other scans' do
+      expect(result[:dast]).not_to be_nil
+      expect(result[:sast]).to be_nil
+      expect(result[:container_scanning]).to be_nil
+      expect(result[:dependency_scanning]).to be_nil
     end
   end
 end

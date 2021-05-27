@@ -22,6 +22,7 @@
     "labels": { "type": ["array", "null"] },
     "group_name": { "type": "string" },
     "group_full_name": { "type": "string" },
+    "group_full_path": { "type": "string" },
     "current_user": {
       "can_create_note": { "type": "boolean" }
     },
@@ -49,6 +50,7 @@
     "labels",
     "group_name",
     "group_full_name",
+    "group_full_path",
     "current_user",
     "create_note_path",
     "preview_note_path"

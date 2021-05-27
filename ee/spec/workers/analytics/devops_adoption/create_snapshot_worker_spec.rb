@@ -10,14 +10,14 @@ RSpec.describe Analytics::DevopsAdoption::CreateSnapshotWorker do
 
     let!(:pending_snapshot) do
       create(:devops_adoption_snapshot,
-             segment: segment,
+             namespace: segment.namespace,
              end_time: DateTime.parse('2020-10-01').end_of_month,
              recorded_at: DateTime.parse('2020-10-20')).reload
     end
 
     let!(:finalized_snapshot) do
       create(:devops_adoption_snapshot,
-             segment: segment,
+             namespace: segment.namespace,
              end_time: DateTime.parse('2020-09-01').end_of_month,
              recorded_at: DateTime.parse('2020-10-20')).reload
     end

@@ -4272,7 +4272,7 @@ Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.projects_creating_incidents`
 
-Counts of Projects that have created incidents
+Counts of Projects that have incident issues, regardless of status
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216180453_projects_creating_incidents.yml)
 
@@ -7084,11 +7084,11 @@ Whether gravatar is enabled
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/settings/20210204124904_gravatar_enabled.yml)
 
-Group: `group::product intelligence`
+Group: `group::access`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `historical_max_users`
 
@@ -16778,15 +16778,15 @@ Tiers: `free`
 
 ### `usage_activity_by_stage.manage.value_stream_management_customized_group_stages`
 
-Missing description
+Number of custom value stream analytics stages.
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_all/20210216180803_value_stream_management_customized_group_stages.yml)
 
-Group: `group::manage`
+Group: `group::optimize`
 
 Status: `data_available`
 
-Tiers:
+Tiers: `premium`, `ultimate`
 
 ### `usage_activity_by_stage.monitor.clusters`
 

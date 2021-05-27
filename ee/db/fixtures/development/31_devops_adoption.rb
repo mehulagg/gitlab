@@ -9,8 +9,8 @@ Gitlab::Seeder.quiet do
 
   ActiveRecord::Base.transaction do
     segments = [
-      Analytics::DevopsAdoption::Segment.create(namespace: groups.first),
-      Analytics::DevopsAdoption::Segment.create(namespace: groups.last)
+      Analytics::DevopsAdoption::Segment.create(namespace: groups.first, display_namespace: groups.first),
+      Analytics::DevopsAdoption::Segment.create(namespace: groups.last, display_namespace: groups.last)
     ]
 
     if segments.any?(&:invalid?)
@@ -27,7 +27,7 @@ Gitlab::Seeder.quiet do
 
       segments.each do |segment|
         calculated_data = {
-          segment: segment,
+          namespace: segment.namespace,
           issue_opened: booleans.sample,
           merge_request_opened: booleans.sample,
           merge_request_approved: booleans.sample,

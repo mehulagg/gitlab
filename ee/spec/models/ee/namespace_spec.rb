@@ -63,6 +63,25 @@ RSpec.describe Namespace do
     end
   end
 
+  describe '#free_personal?' do
+    where(:user, :paid, :expected) do
+      true  | false | true
+      false | false | false
+      false | true  | false
+    end
+
+    with_them do
+      before do
+        allow(namespace).to receive(:user?).and_return(user)
+        allow(namespace).to receive(:paid?).and_return(paid)
+      end
+
+      it 'returns expected boolean value' do
+        expect(namespace.free_personal?).to eq(expected)
+      end
+    end
+  end
+
   describe '#use_elasticsearch?' do
     let(:namespace) { create :namespace }
 

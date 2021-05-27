@@ -6,7 +6,7 @@ class Integration < ApplicationRecord
   include Sortable
   include Importable
   include ProjectServicesLoggable
-  include DataFields
+  include Integrations::HasDataFields
   include FromUnion
   include EachBatch
 
@@ -478,10 +478,6 @@ class Integration < ApplicationRecord
     return unless supported_events.include?(data[:object_kind])
 
     ProjectServiceWorker.perform_async(id, data)
-  end
-
-  def external_wiki?
-    type == 'ExternalWikiService' && active?
   end
 
   # override if needed

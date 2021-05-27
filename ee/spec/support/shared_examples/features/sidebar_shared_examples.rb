@@ -2,6 +2,8 @@
 
 RSpec.shared_examples 'issue boards sidebar EE' do
   context 'epics' do
+    let(:epic_widget) { find('[data-testid="sidebar-epic"]') }
+
     context 'when epic feature available' do
       let_it_be(:epic1) { create(:epic, group: group) }
       let_it_be(:epic2) { create(:epic, group: group) }
@@ -13,25 +15,25 @@ RSpec.shared_examples 'issue boards sidebar EE' do
           stub_licensed_features(epics: true)
 
           first_card_with_epic.click
+          wait_for_requests
         end
 
         it 'displays name of epic and links to it' do
-          page.within('[data-testid="sidebar-epic"]') do
-            expect(page).to have_link(epic1.title, href: epic_path(epic1))
+          within(epic_widget) do
+            expect(page).to have_link(epic1.title)
+            expect(find_link(epic1.title)[:href]).to end_with(epic_path(epic1))
           end
         end
 
         it 'updates the epic associated with the issue' do
-          page.within('[data-testid="sidebar-epic"]') do
-            find("[data-testid='edit-button']").click
-
+          within(epic_widget) do
+            click_button 'Edit'
             wait_for_requests
 
             find('.gl-new-dropdown-item', text: epic2.title).click
-
             wait_for_requests
 
-            expect(page).to have_link(epic2.title, href: epic_path(epic2))
+            expect(page).to have_content(epic2.title)
           end
         end
 

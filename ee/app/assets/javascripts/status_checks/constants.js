@@ -9,7 +9,7 @@ export const ANY_BRANCH = {
 export const EMPTY_STATUS_CHECK = {
   name: '',
   protectedBranches: [],
-  url: '',
+  externalUrl: '',
 };
 
 export const URL_TAKEN_SERVER_ERROR = 'External url has already been taken';

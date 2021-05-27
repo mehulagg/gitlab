@@ -1,5 +1,5 @@
 import { GlDrawer } from '@gitlab/ui';
-import { shallowMount } from '@vue/test-utils';
+import { mount } from '@vue/test-utils';
 import Vuex from 'vuex';
 import { stubComponent } from 'helpers/stub_component';
 import BoardContentSidebar from '~/boards/components/board_content_sidebar.vue';
@@ -34,12 +34,12 @@ describe('ee/BoardContentSidebar', () => {
   const createComponent = () => {
     /*
       Dynamically imported components (in our case ee imports)
-      aren't stubbed automatically in VTU v1:
+      aren't stubbed automatically when using shallow mount in VTU v1:
       https://github.com/vuejs/vue-test-utils/issues/1279.
 
-      This requires us to additionally mock apollo or vuex stores.
+      This requires us to use mount and additionally mock components.
     */
-    wrapper = shallowMount(BoardContentSidebar, {
+    wrapper = mount(BoardContentSidebar, {
       provide: {
         canUpdate: true,
         rootPath: '/',
@@ -53,21 +53,18 @@ describe('ee/BoardContentSidebar', () => {
         GlDrawer: stubComponent(GlDrawer, {
           template: '<div><slot name="header"></slot><slot></slot></div>',
         }),
-      },
-      mocks: {
-        $apollo: {
-          queries: {
-            participants: {
-              loading: false,
-            },
-            currentIteration: {
-              loading: false,
-            },
-            iterations: {
-              loading: false,
-            },
-          },
-        },
+        BoardEditableItem: true,
+        BoardSidebarTitle: true,
+        BoardSidebarTimeTracker: true,
+        BoardSidebarLabelsSelect: true,
+        SidebarAssigneesWidget: true,
+        SidebarConfidentialityWidget: true,
+        BoardSidebarDueDate: true,
+        SidebarSubscriptionsWidget: true,
+        BoardSidebarMilestoneSelect: true,
+        BoardSidebarWeightInput: true,
+        SidebarIterationWidget: true,
+        SidebarDropdownWidget: true,
       },
     });
   };

@@ -12,16 +12,17 @@ module Types
           field :id, GraphQL::ID_TYPE, null: false,
                 description: "ID of the segment."
 
-          field :namespace, Types::NamespaceType, null: true, description: 'Segment namespace.'
+          field :namespace, Types::NamespaceType, null: true,
+                description: 'Namespace which should be calculated.'
 
           field :latest_snapshot, SnapshotType, null: true,
                 description: 'The latest adoption metrics for the segment.'
 
           def latest_snapshot
-            BatchLoader::GraphQL.for(object.id).batch(key: :devops_adoption_latest_snapshots) do |ids, loader, args|
+            BatchLoader::GraphQL.for(object.namespace_id).batch(key: :devops_adoption_latest_snapshots) do |ids, loader, args|
               snapshots = ::Analytics::DevopsAdoption::Snapshot
-                .latest_snapshot_for_segment_ids(ids)
-                .index_by(&:segment_id)
+                .latest_snapshot_for_namespace_ids(ids)
+                .index_by(&:namespace_id)
 
               ids.each do |id|
                 loader.call(id, snapshots[id])

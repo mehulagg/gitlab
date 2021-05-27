@@ -17,16 +17,15 @@ RSpec.describe Analytics::DevopsAdoption::Snapshots::CreateService do
 
     params[:recorded_at] = Time.zone.now
     params[:end_time] = 1.month.ago.end_of_month
-    params[:segment] = segment
+    params[:namespace] = segment.namespace
     params
   end
 
-  let(:segment) { create(:devops_adoption_segment, last_recorded_at: 1.year.ago) }
+  let(:segment) { create(:devops_adoption_segment) }
 
-  it 'persists the snapshot & updates segment last recorded at date' do
+  it 'persists the snapshot' do
     expect(subject).to be_success
     expect(snapshot).to have_attributes(params)
-    expect(snapshot.segment.reload.last_recorded_at).to be_like_time(snapshot.recorded_at)
   end
 
   context 'when params are invalid' do
@@ -36,7 +35,6 @@ RSpec.describe Analytics::DevopsAdoption::Snapshots::CreateService do
       expect(subject).to be_error
       expect(subject.message).to eq('Validation error')
       expect(snapshot).not_to be_persisted
-      expect(snapshot.segment.reload.last_recorded_at).not_to eq nil
     end
   end
 end

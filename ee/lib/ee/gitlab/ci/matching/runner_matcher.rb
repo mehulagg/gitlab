@@ -5,24 +5,21 @@ module EE
     module Ci
       module Matching
         module RunnerMatcher
-          def matches_quota?(build_matcher)
-            cost_factor = minutes_cost_factor(build_matcher.project.visibility_level)
+          include ::Gitlab::Utils::StrongMemoize
 
-            cost_factor == 0 || (cost_factor > 0 && !minutes_used_up?(build_matcher))
+          def matches_quota?(build_matcher)
+            cost_factor_disabled?(build_matcher) || !minutes_used_up?(build_matcher)
           end
 
           private
 
-          def minutes_cost_factor(visibility_level)
-            return 0.0 unless instance_type?
+          def cost_factor_disabled?(build_matcher)
+            cost_factor.disabled?(build_matcher.project.visibility_level)
+          end
 
-            case visibility_level
-            when ::Gitlab::VisibilityLevel::PUBLIC
-              public_projects_minutes_cost_factor
-            when ::Gitlab::VisibilityLevel::PRIVATE, ::Gitlab::VisibilityLevel::INTERNAL
-              private_projects_minutes_cost_factor
-            else
-              raise ArgumentError, 'Invalid visibility level'
+          def cost_factor
+            strong_memoize(:cost_factor) do
+              ::Gitlab::Ci::Minutes::CostFactor.new(self)
             end
           end
 

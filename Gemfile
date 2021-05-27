@@ -185,7 +185,6 @@ gem 'rack-timeout', '~> 0.5.1', require: 'rack/timeout/base'
 
 group :unicorn do
   gem 'unicorn', '~> 5.5'
-  gem 'unicorn-worker-killer', '~> 0.4.4'
 end
 
 group :puma do
@@ -306,7 +305,7 @@ gem 'gitlab-license', '~> 1.5'
 gem 'rack-attack', '~> 6.3.0'
 
 # Sentry integration
-gem 'sentry-raven', '~> 3.0'
+gem 'sentry-raven', '~> 3.1'
 
 # PostgreSQL query parsing
 gem 'pg_query', '~> 2.0.3'

@@ -270,7 +270,7 @@ RSpec.describe Gitlab::UsageData do
         projects_slack_slash_active: 2,
         projects_with_prometheus_alerts: 2
       )
-      expect(described_class.usage_activity_by_stage_configure(described_class.last_28_days_time_period)).to include(
+      expect(described_class.usage_activity_by_stage_configure(described_class.monthly_time_range_db_params)).to include(
         projects_slack_notifications_active: 1,
         projects_slack_slash_active: 1,
         projects_with_prometheus_alerts: 1
@@ -341,7 +341,7 @@ RSpec.describe Gitlab::UsageData do
         total_number_of_path_locks: 20,
         total_number_of_locked_files: 14
       )
-      expect(described_class.usage_activity_by_stage_create(described_class.last_28_days_time_period)).to include(
+      expect(described_class.usage_activity_by_stage_create(described_class.monthly_time_range_db_params)).to include(
         approval_project_rules: 10,
         approval_project_rules_with_target_branch: 2,
         approval_project_rules_with_more_approvers_than_required: 2,
@@ -385,7 +385,7 @@ RSpec.describe Gitlab::UsageData do
       end
 
       subject do
-        described_class.usage_activity_by_stage_enablement(described_class.last_28_days_time_period)
+        described_class.usage_activity_by_stage_enablement(described_class.monthly_time_range_db_params)
       end
 
       it 'excludes data outside of the date range' do
@@ -431,7 +431,7 @@ RSpec.describe Gitlab::UsageData do
         ldap_admin_sync_enabled: true,
         group_saml_enabled: true
       )
-      expect(described_class.usage_activity_by_stage_manage(described_class.last_28_days_time_period)).to include(
+      expect(described_class.usage_activity_by_stage_manage(described_class.monthly_time_range_db_params)).to include(
         ldap_keys: 1,
         ldap_users: 1,
         value_stream_management_customized_group_stages: 2,
@@ -476,7 +476,7 @@ RSpec.describe Gitlab::UsageData do
         operations_dashboard_users_with_projects_added: 2,
         projects_incident_sla_enabled: 2
       )
-      expect(described_class.usage_activity_by_stage_monitor(described_class.last_28_days_time_period)).to include(
+      expect(described_class.usage_activity_by_stage_monitor(described_class.monthly_time_range_db_params)).to include(
         operations_dashboard_users_with_projects_added: 1,
         projects_incident_sla_enabled: 2
       )
@@ -503,7 +503,7 @@ RSpec.describe Gitlab::UsageData do
         label_lists: 2,
         milestone_lists: 2
       )
-      expect(described_class.usage_activity_by_stage_plan(described_class.last_28_days_time_period)).to include(
+      expect(described_class.usage_activity_by_stage_plan(described_class.monthly_time_range_db_params)).to include(
         assignee_lists: 1,
         epics: 1,
         label_lists: 1,
@@ -521,7 +521,7 @@ RSpec.describe Gitlab::UsageData do
       expect(described_class.usage_activity_by_stage_release({})).to include(
         projects_mirrored_with_pipelines_enabled: 2
       )
-      expect(described_class.usage_activity_by_stage_release(described_class.last_28_days_time_period)).to include(
+      expect(described_class.usage_activity_by_stage_release(described_class.monthly_time_range_db_params)).to include(
         projects_mirrored_with_pipelines_enabled: 1
       )
     end
@@ -549,7 +549,7 @@ RSpec.describe Gitlab::UsageData do
     end
 
     it 'includes accurate usage_activity_by_stage data' do
-      expect(described_class.usage_activity_by_stage_secure(described_class.last_28_days_time_period)).to include(
+      expect(described_class.usage_activity_by_stage_secure(described_class.monthly_time_range_db_params)).to include(
         user_preferences_group_overview_security_dashboard: 3,
         user_container_scanning_jobs: 1,
         user_api_fuzzing_jobs: 1,
@@ -611,7 +611,7 @@ RSpec.describe Gitlab::UsageData do
         coverage_fuzzing_scans: 0
       )
 
-      expect(described_class.usage_activity_by_stage_secure(described_class.last_28_days_time_period)).to include(
+      expect(described_class.usage_activity_by_stage_secure(described_class.monthly_time_range_db_params)).to include(
         user_preferences_group_overview_security_dashboard: 3,
         user_api_fuzzing_jobs: 1,
         user_api_fuzzing_dnd_jobs: 1,
@@ -647,7 +647,7 @@ RSpec.describe Gitlab::UsageData do
         create(:ci_build, name: 'dast', user: user3)
       end
 
-      expect(described_class.usage_activity_by_stage_secure(described_class.last_28_days_time_period)).to include(
+      expect(described_class.usage_activity_by_stage_secure(described_class.monthly_time_range_db_params)).to include(
         user_preferences_group_overview_security_dashboard: 3,
         user_api_fuzzing_jobs: 1,
         user_api_fuzzing_dnd_jobs: 1,
@@ -681,7 +681,7 @@ RSpec.describe Gitlab::UsageData do
         create(:ci_build, name: 'license_scanning', user: user)
       end
 
-      expect(described_class.usage_activity_by_stage_secure(described_class.last_28_days_time_period)).to include(
+      expect(described_class.usage_activity_by_stage_secure(described_class.monthly_time_range_db_params)).to include(
         user_preferences_group_overview_security_dashboard: 3,
         user_api_fuzzing_jobs: 1,
         user_api_fuzzing_dnd_jobs: 1,
@@ -720,7 +720,7 @@ RSpec.describe Gitlab::UsageData do
       allow(Gitlab::Database::PostgresHll::BatchDistinctCounter).to receive(:new).and_raise(ActiveRecord::StatementInvalid)
       allow(::Ci::Build).to receive(:distinct_count_by).and_raise(ActiveRecord::StatementInvalid)
 
-      expect(described_class.usage_activity_by_stage_secure(described_class.last_28_days_time_period)).to include(
+      expect(described_class.usage_activity_by_stage_secure(described_class.monthly_time_range_db_params)).to include(
         user_preferences_group_overview_security_dashboard: -1,
         user_api_fuzzing_jobs: -1,
         user_api_fuzzing_dnd_jobs: -1,
@@ -765,7 +765,7 @@ RSpec.describe Gitlab::UsageData do
         create(:ee_ci_build, :secret_detection, :failed, user: user2)
       end
 
-      expect(described_class.usage_activity_by_stage_secure(described_class.last_28_days_time_period)).to include(
+      expect(described_class.usage_activity_by_stage_secure(described_class.monthly_time_range_db_params)).to include(
         user_api_fuzzing_scans: be_within(error_rate).percent_of(1),
         user_container_scanning_scans: be_within(error_rate).percent_of(1),
         user_coverage_fuzzing_scans: be_within(error_rate).percent_of(1),
@@ -794,7 +794,7 @@ RSpec.describe Gitlab::UsageData do
           create(:ee_ci_build, :secret_detection, :failed, user: user3)
         end
 
-        expect(described_class.usage_activity_by_stage_secure(described_class.last_28_days_time_period)).not_to include(
+        expect(described_class.usage_activity_by_stage_secure(described_class.monthly_time_range_db_params)).not_to include(
           :user_api_fuzzing_scans,
           :user_container_scanning_scans,
           :user_coverage_fuzzing_scans,
@@ -806,7 +806,7 @@ RSpec.describe Gitlab::UsageData do
       end
 
       it 'includes accurate usage_activity_by_stage data' do
-        expect(described_class.usage_activity_by_stage_secure(described_class.last_28_days_time_period)).to include(
+        expect(described_class.usage_activity_by_stage_secure(described_class.monthly_time_range_db_params)).to include(
           user_preferences_group_overview_security_dashboard: 3,
           user_container_scanning_jobs: 1,
           user_api_fuzzing_jobs: 1,
@@ -868,7 +868,7 @@ RSpec.describe Gitlab::UsageData do
           coverage_fuzzing_scans: 0
         )
 
-        expect(described_class.usage_activity_by_stage_secure(described_class.last_28_days_time_period)).to include(
+        expect(described_class.usage_activity_by_stage_secure(described_class.monthly_time_range_db_params)).to include(
           user_preferences_group_overview_security_dashboard: 3,
           user_api_fuzzing_jobs: 1,
           user_api_fuzzing_dnd_jobs: 1,
@@ -904,7 +904,7 @@ RSpec.describe Gitlab::UsageData do
           create(:ci_build, name: 'dast', user: user3)
         end
 
-        expect(described_class.usage_activity_by_stage_secure(described_class.last_28_days_time_period)).to include(
+        expect(described_class.usage_activity_by_stage_secure(described_class.monthly_time_range_db_params)).to include(
           user_preferences_group_overview_security_dashboard: 3,
           user_api_fuzzing_jobs: 1,
           user_api_fuzzing_dnd_jobs: 1,
@@ -938,7 +938,7 @@ RSpec.describe Gitlab::UsageData do
           create(:ci_build, name: 'license_scanning', user: user)
         end
 
-        expect(described_class.usage_activity_by_stage_secure(described_class.last_28_days_time_period)).to include(
+        expect(described_class.usage_activity_by_stage_secure(described_class.monthly_time_range_db_params)).to include(
           user_preferences_group_overview_security_dashboard: 3,
           user_api_fuzzing_jobs: 1,
           user_api_fuzzing_dnd_jobs: 1,
@@ -972,7 +972,7 @@ RSpec.describe Gitlab::UsageData do
         allow(Gitlab::Database::BatchCount).to receive(:batch_count).and_raise(ActiveRecord::StatementInvalid)
         allow(::Ci::Build).to receive(:distinct_count_by).and_raise(ActiveRecord::StatementInvalid)
 
-        expect(described_class.usage_activity_by_stage_secure(described_class.last_28_days_time_period)).to eq(
+        expect(described_class.usage_activity_by_stage_secure(described_class.monthly_time_range_db_params)).to eq(
           user_preferences_group_overview_security_dashboard: -1,
           user_api_fuzzing_jobs: -1,
           user_api_fuzzing_dnd_jobs: -1,
@@ -1012,7 +1012,7 @@ RSpec.describe Gitlab::UsageData do
       expect(described_class.usage_activity_by_stage_verify({})).to include(
         projects_reporting_ci_cd_back_to_github: 2
       )
-      expect(described_class.usage_activity_by_stage_verify(described_class.last_28_days_time_period)).to include(
+      expect(described_class.usage_activity_by_stage_verify(described_class.monthly_time_range_db_params)).to include(
         projects_reporting_ci_cd_back_to_github: 1
       )
     end

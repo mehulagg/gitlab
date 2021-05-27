@@ -7,9 +7,10 @@ import { DRAWER_ERRORS } from 'ee/threat_monitoring/components/alerts/constants'
 import createMockApollo from 'helpers/mock_apollo_helper';
 import { mountExtended, shallowMountExtended } from 'helpers/vue_test_utils_helper';
 import waitForPromises from 'helpers/wait_for_promises';
+import getAlertDetailsQuery from '~/graphql_shared/queries/alert_details.query.graphql';
 import { visitUrl } from '~/lib/utils/url_utility';
+import SidebarAssigneesWidget from '~/sidebar/components/assignees/sidebar_assignees_widget.vue';
 import SidebarStatus from '~/vue_shared/alert_details/components/sidebar/sidebar_status.vue';
-import getAlertDetailsQuery from '~/vue_shared/alert_details/graphql/queries/alert_details.query.graphql';
 import {
   erroredGetAlertDetailsQuerySpy,
   getAlertDetailsQueryErrorMessage,
@@ -44,6 +45,7 @@ describe('Alert Drawer', () => {
   });
 
   const findAlert = () => wrapper.findComponent(GlAlert);
+  const findAssignee = () => wrapper.findComponent(SidebarAssigneesWidget);
   const findCreateIssueButton = () => wrapper.findByTestId('create-issue-button');
   const findDrawer = () => wrapper.findComponent(GlDrawer);
   const findIssueLink = () => wrapper.findByTestId('issue-link');
@@ -84,7 +86,7 @@ describe('Alert Drawer', () => {
       provide: {
         projectPath: DEFAULT_PROJECT_PATH,
       },
-      stubs: { GlDrawer },
+      stubs: { GlDrawer, SidebarAssigneesWidget: true, SidebarStatus: true },
       ...apolloOptions,
     });
   };
@@ -94,6 +96,8 @@ describe('Alert Drawer', () => {
       component                  | status                | findComponent            | state    | mount
       ${'alert'}                 | ${'does not display'} | ${findAlert}             | ${false} | ${undefined}
       ${'"Create Issue" button'} | ${'does not display'} | ${findCreateIssueButton} | ${false} | ${undefined}
+      ${'assignee widget'}       | ${'does display'}     | ${findAssignee}          | ${true}  | ${undefined}
+      ${'status widget'}         | ${'does display'}     | ${findStatus}            | ${true}  | ${undefined}
       ${'details list'}          | ${'does display'}     | ${findDetails}           | ${true}  | ${undefined}
       ${'drawer'}                | ${'does display'}     | ${findDrawer}            | ${true}  | ${undefined}
       ${'issue link'}            | ${'does display'}     | ${findIssueLink}         | ${true}  | ${undefined}
@@ -161,6 +165,13 @@ describe('Alert Drawer', () => {
       expect(captureExceptionSpy).toHaveBeenCalledTimes(1);
       expect(captureExceptionSpy.mock.calls[0][0].message).toBe(errorMessage);
     });
+  });
+
+  it('handles an alert assignee update', () => {
+    createWrapper({ props: { selectedAlert: mockAlerts[0] } });
+    expect(wrapper.emitted('alert-update')).toBeUndefined();
+    findAssignee().vm.$emit('assignees-updated');
+    expect(wrapper.emitted('alert-update')).toEqual([[]]);
   });
 
   it('handles an alert status update', () => {

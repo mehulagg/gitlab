@@ -26,7 +26,8 @@ RSpec.describe BillingPlansHelper do
                  plan_renew_href: renew_href,
                  customer_portal_url: customer_portal_url,
                  billable_seats_href: billable_seats_href,
-                 plan_name: plan.name)
+                 plan_name: plan.name,
+                 free_personal_namespace: 'false')
       end
     end
 
@@ -54,7 +55,8 @@ RSpec.describe BillingPlansHelper do
                  namespace_name: group.name,
                  plan_renew_href: renew_href,
                  plan_upgrade_href: nil,
-                 plan_name: nil)
+                 plan_name: nil,
+                 free_personal_namespace: 'false')
       end
     end
 
@@ -74,7 +76,8 @@ RSpec.describe BillingPlansHelper do
                  add_seats_href: add_seats_href,
                  plan_renew_href: renew_href,
                  plan_upgrade_href: nil,
-                 plan_name: plan.name)
+                 plan_name: plan.name,
+                 free_personal_namespace: 'false')
       end
     end
 
@@ -94,6 +97,27 @@ RSpec.describe BillingPlansHelper do
 
         it 'returns billable_seats_href for group' do
           expect(subject).to include(billable_seats_href: helper.group_seat_usage_path(namespace))
+        end
+      end
+    end
+
+    context 'when the namespace belongs to a user' do
+      let(:group) { build(:group, type: 'user') }
+
+      context 'when the namespace is free plan' do
+        it 'returns attributes with free_personal_namespace true' do
+          expect(helper.subscription_plan_data_attributes(group, plan))
+            .to include(free_personal_namespace: 'true')
+        end
+      end
+
+      context 'when the namespace is paid plan' do
+        let(:group) { build(:group, type: 'user') }
+        let!(:gitlab_subscription) { build(:gitlab_subscription, :ultimate, namespace: group) }
+
+        it 'returns attributes with free_personal_namespace false' do
+          expect(helper.subscription_plan_data_attributes(group, plan))
+            .to include(free_personal_namespace: 'false')
         end
       end
     end
@@ -337,7 +361,7 @@ RSpec.describe BillingPlansHelper do
     end
   end
 
-  describe '#upgrade_button_css_classe' do
+  describe '#upgrade_button_css_classes' do
     using RSpec::Parameterized::TableSyntax
 
     let(:plan) { double('Plan', deprecated?: false) }
@@ -451,6 +475,62 @@ RSpec.describe BillingPlansHelper do
       current_plan = Hashie::Mash.new(current_subscription_plan: false, code: 'premium')
 
       expect(helper.subscription_plan_info([other_plan, current_plan], 'premium')).to eq(current_plan)
+    end
+  end
+
+  describe '#show_plans?' do
+    using RSpec::Parameterized::TableSyntax
+
+    let(:group) { build(:group) }
+
+    where(:free_personal, :trial_active, :gold_plan, :ultimate_plan, :expectations) do
+      false |  false | false | false | true
+      false |  true  | false | false | true
+      false |  false | true  | false | false
+      false |  true  | true  | false | true
+      false |  false | false | true  | false
+      false |  true  | false | true  | true
+      false |  false | true  | true  | false
+      false |  true  | true  | true  | true
+      false |  true  | true  | true  | true
+      false |  true  | true  | true  | true
+      true  |  true  | true  | true  | false
+    end
+
+    with_them do
+      before do
+        allow(group).to receive(:trial_active?).and_return(trial_active)
+        allow(group).to receive(:gold_plan?).and_return(gold_plan)
+        allow(group).to receive(:ultimate_plan?).and_return(ultimate_plan)
+        allow(group).to receive(:free_personal?).and_return(free_personal)
+      end
+
+      it 'returns boolean' do
+        expect(helper.show_plans?(group)).to eql(expectations)
+      end
+    end
+  end
+
+  describe '#show_start_free_trial_messages?' do
+    using RSpec::Parameterized::TableSyntax
+
+    let(:namespace) { build(:namespace) }
+
+    where(:free_personal, :eligible_for_trial, :expected) do
+      false  | true   | true
+      true   | true   | false
+      false  | false  | false
+    end
+
+    with_them do
+      before do
+        allow(namespace).to receive(:free_personal?).and_return(free_personal)
+        allow(namespace).to receive(:eligible_for_trial?).and_return(eligible_for_trial)
+      end
+
+      it 'returns correct boolean value' do
+        expect(helper.show_start_free_trial_messages?(namespace)).to eql(expected)
+      end
     end
   end
 end

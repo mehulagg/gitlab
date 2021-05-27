@@ -11,10 +11,11 @@ module Analytics
           @current_user = current_user
         end
 
+        # rubocop: disable CodeReuse/ActiveRecord
         def execute
           authorize!
 
-          segment = Analytics::DevopsAdoption::Segment.find_by_namespace_id(namespace.id)
+          segment = Analytics::DevopsAdoption::Segment.find_by(namespace_id: namespace.id, display_namespace_id: namespace.id)
 
           if segment
             ServiceResponse.success(payload: { segment: segment })
@@ -22,6 +23,7 @@ module Analytics
             create_service.execute
           end
         end
+        # rubocop: enable CodeReuse/ActiveRecord
 
         def authorize!
           create_service.authorize!

@@ -14,9 +14,9 @@ export const subscriptionActivationInsertCode = __(
 export const howToActivateSubscription = s__(
   'SuperSonics|Learn how to %{linkStart}activate your subscription%{linkEnd}.',
 );
-export const activateLabel = s__('CloudLicense|Activate');
-export const activateSubscription = s__('CloudLicense|Activate subscription');
-export const enterActivationCode = s__('CloudLicense|Enter activation code');
+export const activateLabel = s__('SuperSonics|Activate');
+export const activateSubscription = s__('SuperSonics|Activate subscription');
+export const enterActivationCode = s__('SuperSonics|Enter activation code');
 export const noActiveSubscription = s__(`SuperSonics|You do not have an active subscription`);
 export const subscriptionDetailsHeaderText = s__('SuperSonics|Subscription details');
 export const licensedToHeaderText = s__('SuperSonics|Licensed to');
@@ -41,21 +41,21 @@ export const removeLicense = __('Remove license');
 export const removeLicenseConfirm = __('Are you sure you want to remove the license?');
 export const uploadLicense = __('Upload license');
 export const uploadLegacyLicense = s__('SuperSonics|Upload a legacy license');
-export const billableUsersTitle = s__('CloudLicense|Billable users');
-export const maximumUsersTitle = s__('CloudLicense|Maximum users');
-export const usersInSubscriptionTitle = s__('CloudLicense|Users in subscription');
-export const usersOverSubscriptionTitle = s__('CloudLicense|Users over subscription');
+export const billableUsersTitle = s__('SuperSonics|Billable users');
+export const maximumUsersTitle = s__('SuperSonics|Maximum users');
+export const usersInSubscriptionTitle = s__('SuperSonics|Users in subscription');
+export const usersOverSubscriptionTitle = s__('SuperSonics|Users over subscription');
 export const billableUsersText = s__(
-  'CloudLicense|This is the number of %{billableUsersLinkStart}billable users%{billableUsersLinkEnd} on your installation, and this is the minimum number you need to purchase when you renew your license.',
+  'SuperSonics|This is the number of %{billableUsersLinkStart}billable users%{billableUsersLinkEnd} on your installation, and this is the minimum number you need to purchase when you renew your license.',
 );
 export const maximumUsersText = s__(
-  'CloudLicense|This is the highest peak of users on your installation since the license started.',
+  'SuperSonics|This is the highest peak of users on your installation since the license started.',
 );
 export const usersInSubscriptionText = s__(
-  `CloudLicense|Users with a Guest role or those who don't belong to a Project or Group will not use a seat from your license.`,
+  `SuperSonics|Users with a Guest role or those who don't belong to a Project or Group will not use a seat from your license.`,
 );
 export const usersOverSubscriptionText = s__(
-  `CloudLicense|You'll be charged for %{trueUpLinkStart}users over license%{trueUpLinkEnd} on a quarterly or annual basis, depending on the terms of your agreement.`,
+  `SuperSonics|You'll be charged for %{trueUpLinkStart}users over license%{trueUpLinkEnd} on a quarterly or annual basis, depending on the terms of your agreement.`,
 );
 export const subscriptionTable = {
   activatedAt: s__('SuperSonics|Activated on'),
@@ -74,10 +74,10 @@ export const manualSyncFailureText = s__(
 );
 
 export const subscriptionActivationForm = {
-  activationCode: s__('CloudLicense|Activation code'),
-  pasteActivationCode: s__('CloudLicense|Paste your activation code'),
+  activationCode: s__('SuperSonics|Activation code'),
+  pasteActivationCode: s__('SuperSonics|Paste your activation code'),
   acceptTerms: s__(
-    'CloudLicense|I agree that my use of the GitLab Software is subject to the Subscription Agreement located at the %{linkStart}Terms of Service%{linkEnd}, unless otherwise agreed to in writing with GitLab.',
+    'SuperSonics|I agree that my use of the GitLab Software is subject to the Subscription Agreement located at the %{linkStart}Terms of Service%{linkEnd}, unless otherwise agreed to in writing with GitLab.',
   ),
 };
 
@@ -100,19 +100,19 @@ export const subscriptionHistoryQueries = {
 };
 
 export const trialCard = {
-  title: s__('CloudLicense|Free trial'),
+  title: s__('SuperSonics|Free trial'),
   description: s__(
-    'CloudLicense|You can start a free trial of GitLab Ultimate without any obligation or payment details.',
+    'SuperSonics|You can start a free trial of GitLab Ultimate without any obligation or payment details.',
   ),
-  startTrial: s__('CloudLicense|Start free trial'),
+  startTrial: s__('SuperSonics|Start free trial'),
 };
 
 export const buySubscriptionCard = {
-  title: s__('CloudLicense|Subscription'),
+  title: s__('SuperSonics|Subscription'),
   description: s__(
-    'CloudLicense|Ready to get started? A GitLab plan is ideal for scaling organizations and for multi team usage.',
+    'SuperSonics|Ready to get started? A GitLab plan is ideal for scaling organizations and for multi team usage.',
   ),
-  buttonLabel: s__('CloudLicense|Buy subscription'),
+  buttonLabel: s__('SuperSonics|Buy subscription'),
 };
 
 export const CONNECTIVITY_ERROR = 'CONNECTIVITY_ERROR';
@@ -121,9 +121,9 @@ export const generalActivationError = s__(
 );
 export const connectivityErrorAlert = {
   subtitle: s__(
-    'CloudLicense|To activate your subscription, connect to GitLab servers through the %{linkStart}Cloud Sync service%{linkEnd}, a hassle-free way to manage your subscription.',
+    'SuperSonics|To activate your subscription, connect to GitLab servers through the %{linkStart}Cloud Licensing%{linkEnd} service, a hassle-free way to manage your subscription.',
   ),
   helpText: s__(
-    'CloudLicense|Get help for the most common connectivity issues by %{linkStart}troubleshooting the activation code%{linkEnd}.',
+    'SuperSonics|Get help for the most common connectivity issues by %{linkStart}troubleshooting the activation code%{linkEnd}.',
   ),
 };

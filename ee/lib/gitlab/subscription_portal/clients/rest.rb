@@ -36,18 +36,7 @@ module Gitlab
           private
 
           def error_message
-            _('We encountered an error and our team has been notified. Please try again.')
-          end
-
-          def reparse_response(response)
-            result = parse_response(response)
-
-            if !result[:success] && result[:data]
-              track_exception(result[:data][:errors])
-              result[:data][:errors] = error_message
-            end
-
-            result
+            _('Our team has been notified. Please try again.')
           end
 
           def track_exception(message)
@@ -61,7 +50,7 @@ module Gitlab
           def http_get(path, headers)
             response = Gitlab::HTTP.get("#{base_url}/#{path}", headers: headers)
 
-            reparse_response(response)
+            parse_response(response)
           rescue *Gitlab::HTTP::HTTP_ERRORS => e
             track_exception(e.message)
             { success: false, data: { errors: error_message } }
@@ -70,7 +59,7 @@ module Gitlab
           def http_post(path, headers, params = {})
             response = Gitlab::HTTP.post("#{base_url}/#{path}", body: params.to_json, headers: headers)
 
-            reparse_response(response)
+            parse_response(response)
           rescue *Gitlab::HTTP::HTTP_ERRORS => e
             track_exception(e.message)
             { success: false, data: { errors: error_message } }
@@ -79,7 +68,7 @@ module Gitlab
           def http_put(path, headers, params = {})
             response = Gitlab::HTTP.put("#{base_url}/#{path}", body: params.to_json, headers: headers)
 
-            reparse_response(response)
+            parse_response(response)
           rescue *Gitlab::HTTP::HTTP_ERRORS => e
             track_exception(e.message)
             { success: false, data: { errors: error_message } }

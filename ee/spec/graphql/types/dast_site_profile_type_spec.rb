@@ -41,18 +41,8 @@ RSpec.describe GitlabSchema.types['DastSiteProfile'] do
   end
 
   describe 'targetType field' do
-    context 'when the feature flag is disabled' do
-      it 'is nil' do
-        stub_feature_flags(security_dast_site_profiles_api_option: false)
-
-        expect(resolve_field(:target_type, object, current_user: user)).to be_nil
-      end
-    end
-
-    context 'when the feature flag is enabled' do
-      it 'is the target type' do
-        expect(resolve_field(:target_type, object, current_user: user)).to eq('website')
-      end
+    it 'is the target type' do
+      expect(resolve_field(:target_type, object, current_user: user)).to eq('website')
     end
   end
 
@@ -65,59 +55,29 @@ RSpec.describe GitlabSchema.types['DastSiteProfile'] do
   end
 
   describe 'auth field' do
-    context 'when the feature flag is disabled' do
-      it 'is nil' do
-        stub_feature_flags(security_dast_site_profiles_additional_fields: false)
-
-        expect(resolve_field(:auth, object, current_user: user)).to be_nil
-      end
-    end
-
-    context 'when the feature flag is enabled' do
-      it 'is the dast_site_profile' do
-        expect(resolve_field(:auth, object, current_user: user)).to eq(object)
-      end
+    it 'is the dast_site_profile' do
+      expect(resolve_field(:auth, object, current_user: user)).to eq(object)
     end
   end
 
   describe 'excludedUrls field' do
-    context 'when the feature flag is disabled' do
-      it 'is nil' do
-        stub_feature_flags(security_dast_site_profiles_additional_fields: false)
-
-        expect(resolve_field(:excluded_urls, object, current_user: user)).to be_nil
-      end
-    end
-
-    context 'when the feature flag is enabled' do
-      it 'is the excluded urls' do
-        expect(resolve_field(:excluded_urls, object, current_user: user)).to eq(object.excluded_urls)
-      end
+    it 'is the excluded urls' do
+      expect(resolve_field(:excluded_urls, object, current_user: user)).to eq(object.excluded_urls)
     end
   end
 
   describe 'requestHeaders field' do
-    context 'when the feature flag is disabled' do
+    context 'when there is no associated secret variable' do
       it 'is nil' do
-        stub_feature_flags(security_dast_site_profiles_additional_fields: false)
-
         expect(resolve_field(:request_headers, object, current_user: user)).to be_nil
       end
     end
 
-    context 'when the feature flag is enabled' do
-      context 'when there is no associated secret variable' do
-        it 'is nil' do
-          expect(resolve_field(:request_headers, object, current_user: user)).to be_nil
-        end
-      end
+    context 'when there an associated secret variable' do
+      it 'is redacted' do
+        create(:dast_site_profile_secret_variable, dast_site_profile: object, key: Dast::SiteProfileSecretVariable::REQUEST_HEADERS)
 
-      context 'when there an associated secret variable' do
-        it 'is redacted' do
-          create(:dast_site_profile_secret_variable, dast_site_profile: object, key: Dast::SiteProfileSecretVariable::REQUEST_HEADERS)
-
-          expect(resolve_field(:request_headers, object, current_user: user)).to eq('••••••••')
-        end
+        expect(resolve_field(:request_headers, object, current_user: user)).to eq('••••••••')
       end
     end
   end

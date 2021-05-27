@@ -6,11 +6,11 @@ import { store } from '~/notes/stores';
 import { apolloProvider } from '~/sidebar/graphql';
 import * as CEMountSidebar from '~/sidebar/mount_sidebar';
 import CveIdRequest from './components/cve_id_request/cve_id_request_sidebar.vue';
-import SidebarItemEpicsSelect from './components/sidebar_item_epics_select.vue';
+import SidebarDropdownWidget from './components/sidebar_dropdown_widget.vue';
 import SidebarIterationWidget from './components/sidebar_iteration_widget.vue';
 import SidebarStatus from './components/status/sidebar_status.vue';
 import SidebarWeight from './components/weight/sidebar_weight.vue';
-import SidebarStore from './stores/sidebar_store';
+import { IssuableAttributeType } from './constants';
 
 Vue.use(VueApollo);
 
@@ -75,31 +75,35 @@ function mountCveIdRequestComponent() {
   });
 }
 
-const mountEpicsSelect = () => {
+function mountEpicsSelect() {
   const el = document.querySelector('#js-vue-sidebar-item-epics-select');
 
   if (!el) return false;
 
-  const { groupId, issueId, epicIssueId, canEdit } = el.dataset;
-  const sidebarStore = new SidebarStore();
+  const { groupPath, canEdit, projectPath, issueIid } = el.dataset;
 
   return new Vue({
     el,
+    apolloProvider,
     components: {
-      SidebarItemEpicsSelect,
+      SidebarDropdownWidget,
+    },
+    provide: {
+      canUpdate: parseBoolean(canEdit),
+      isClassicSidebar: true,
     },
     render: (createElement) =>
-      createElement('sidebar-item-epics-select', {
+      createElement('sidebar-dropdown-widget', {
         props: {
-          sidebarStore,
-          groupId: Number(groupId),
-          issueId: Number(issueId),
-          epicIssueId: Number(epicIssueId),
-          canEdit: parseBoolean(canEdit),
+          attrWorkspacePath: groupPath,
+          workspacePath: projectPath,
+          iid: issueIid,
+          issuableType: IssuableType.Issue,
+          issuableAttribute: IssuableAttributeType.Epic,
         },
       }),
   });
-};
+}
 
 function mountIterationSelect() {
   const el = document.querySelector('.js-iteration-select');

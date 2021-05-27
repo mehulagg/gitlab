@@ -941,15 +941,6 @@
   :weight: 1
   :idempotent:
   :tags: []
-- :name: elastic_indexer
-  :worker_name: ElasticIndexerWorker
-  :feature_category: :global_search
-  :has_external_dependencies:
-  :urgency: :throttled
-  :resource_boundary: :unknown
-  :weight: 1
-  :idempotent:
-  :tags: []
 - :name: elastic_indexing_control
   :worker_name: ElasticIndexingControlWorker
   :feature_category: :global_search

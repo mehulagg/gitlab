@@ -15,6 +15,10 @@ module ApprovalRules
       ApprovalRules::ExternalApprovalRulePayloadWorker.perform_async(self.id, payload_data(data))
     end
 
+    def approved?(merge_request, sha)
+      merge_request.status_check_responses.where(external_approval_rule: self, sha: sha).exists?
+    end
+
     def to_h
       {
         id: self.id,

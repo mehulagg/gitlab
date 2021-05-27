@@ -138,14 +138,6 @@ RSpec.describe AppSec::Dast::SiteProfiles::CreateService do
 
           expect(Base64.strict_decode64(variable.value)).to eq(raw_value)
         end
-
-        context 'when the feature flag is disabled' do
-          it 'does not create a secret variable' do
-            stub_feature_flags(security_dast_site_profiles_additional_fields: false)
-
-            expect { subject }.not_to change { Dast::SiteProfileSecretVariable.count }
-          end
-        end
       end
 
       shared_examples 'it handles secret variable creation failure' do

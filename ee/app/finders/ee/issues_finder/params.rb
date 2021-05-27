@@ -30,19 +30,6 @@ module EE
         params[:weight].to_s.downcase == ::IssuableFinder::Params::FILTER_ANY
       end
 
-      override :assignees
-      # rubocop: disable CodeReuse/ActiveRecord
-      def assignees
-        strong_memoize(:assignees) do
-          if assignee_ids?
-            ::User.where(id: params[:assignee_ids])
-          else
-            super
-          end
-        end
-      end
-      # rubocop: enable CodeReuse/ActiveRecord
-
       def epics
         if params[:include_subepics]
           ::Gitlab::ObjectHierarchy.new(::Epic.id_in(params[:epic_id])).base_and_descendants.select(:id)

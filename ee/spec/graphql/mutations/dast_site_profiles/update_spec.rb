@@ -155,37 +155,6 @@ RSpec.describe Mutations::DastSiteProfiles::Update do
             expect(subject).to include(errors: ['Oops'])
           end
         end
-
-        context 'when the feature flag security_dast_site_profiles_additional_fields is disabled' do
-          before do
-            stub_feature_flags(security_dast_site_profiles_additional_fields: false)
-          end
-
-          it 'does not update the feature flagged attributes', :aggregate_failures do
-            dast_site_profile = subject[:id].find
-
-            expect(dast_site_profile).not_to have_attributes(
-              excluded_urls: new_excluded_urls,
-              auth_enabled: new_auth[:enabled],
-              auth_url: new_auth[:url],
-              auth_username_field: new_auth[:username_field],
-              auth_password_field: new_auth[:password_field],
-              auth_username: new_auth[:username]
-            )
-
-            expect(dast_site_profile.secret_variables).to be_empty
-          end
-        end
-
-        context 'when the feature flag security_dast_site_profiles_api_option is disabled' do
-          before do
-            stub_feature_flags(security_dast_site_profiles_api_option: false)
-          end
-
-          it 'does not update the target_type' do
-            expect { subject }.not_to change { dast_site_profile.reload.target_type }
-          end
-        end
       end
     end
   end

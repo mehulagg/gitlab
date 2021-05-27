@@ -4,7 +4,6 @@ import {
   TARGET_TYPES,
 } from 'ee/security_configuration/dast_site_profiles_form/constants';
 import { s__ } from '~/locale';
-import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import ProfileSelectorSummaryCell from './summary_cell.vue';
 
 export default {
@@ -23,7 +22,6 @@ export default {
   components: {
     ProfileSelectorSummaryCell,
   },
-  mixins: [glFeatureFlagsMixin()],
   props: {
     profile: {
       type: Object,
@@ -55,47 +53,41 @@ export default {
         :label="$options.i18n.targetUrl"
         :value="profile.targetUrl"
       />
-      <profile-selector-summary-cell
-        v-if="glFeatures.securityDastSiteProfilesApiOption"
-        :label="$options.i18n.targetType"
-        :value="targetTypeValue"
-      />
+      <profile-selector-summary-cell :label="$options.i18n.targetType" :value="targetTypeValue" />
     </div>
-    <template v-if="glFeatures.securityDastSiteProfilesAdditionalFields">
-      <template v-if="profile.auth.enabled">
-        <div class="row">
-          <profile-selector-summary-cell :label="$options.i18n.authUrl" :value="profile.auth.url" />
-        </div>
-        <div class="row">
-          <profile-selector-summary-cell
-            :label="$options.i18n.username"
-            :value="profile.auth.username"
-          />
-          <profile-selector-summary-cell :label="$options.i18n.password" value="••••••••" />
-        </div>
-        <div class="row">
-          <profile-selector-summary-cell
-            :label="$options.i18n.usernameField"
-            :value="profile.auth.usernameField"
-          />
-          <profile-selector-summary-cell
-            :label="$options.i18n.passwordField"
-            :value="profile.auth.passwordField"
-          />
-        </div>
-      </template>
+    <template v-if="profile.auth.enabled">
+      <div class="row">
+        <profile-selector-summary-cell :label="$options.i18n.authUrl" :value="profile.auth.url" />
+      </div>
       <div class="row">
         <profile-selector-summary-cell
-          v-if="hasExcludedUrls"
-          :label="$options.i18n.excludedUrls"
-          :value="profile.excludedUrls.join($options.EXCLUDED_URLS_SEPARATOR)"
+          :label="$options.i18n.username"
+          :value="profile.auth.username"
+        />
+        <profile-selector-summary-cell :label="$options.i18n.password" value="••••••••" />
+      </div>
+      <div class="row">
+        <profile-selector-summary-cell
+          :label="$options.i18n.usernameField"
+          :value="profile.auth.usernameField"
         />
         <profile-selector-summary-cell
-          v-if="profile.requestHeaders"
-          :label="$options.i18n.requestHeaders"
-          :value="__('[Redacted]')"
+          :label="$options.i18n.passwordField"
+          :value="profile.auth.passwordField"
         />
       </div>
     </template>
+    <div class="row">
+      <profile-selector-summary-cell
+        v-if="hasExcludedUrls"
+        :label="$options.i18n.excludedUrls"
+        :value="profile.excludedUrls.join($options.EXCLUDED_URLS_SEPARATOR)"
+      />
+      <profile-selector-summary-cell
+        v-if="profile.requestHeaders"
+        :label="$options.i18n.requestHeaders"
+        :value="__('[Redacted]')"
+      />
+    </div>
   </div>
 </template>

@@ -130,12 +130,6 @@ describe('DastSiteProfileForm', () => {
       {},
       {
         propsData: defaultProps,
-        provide: {
-          glFeatures: {
-            securityDastSiteProfilesAdditionalFields: true,
-            securityDastSiteProfilesApiOption: true,
-          },
-        },
       },
       options,
       {
@@ -413,60 +407,6 @@ describe('DastSiteProfileForm', () => {
         it('emits cancel event', () => {
           findCancelModal().vm.$emit('ok');
           expect(wrapper.emitted('cancel')).toBeTruthy();
-        });
-      });
-    });
-  });
-
-  describe('when all feature flags are off', () => {
-    const mountOpts = {
-      provide: {
-        glFeatures: {
-          securityDastSiteProfilesAdditionalFields: false,
-          securityDastSiteProfilesApiOption: false,
-        },
-      },
-    };
-
-    const fillRequiredFieldsAndSubmitForm = async () => {
-      await setFieldValue(findProfileNameInput(), profileName);
-      await setFieldValue(findTargetUrlInput(), targetUrl);
-      submitForm();
-    };
-
-    it('should not render additional fields', () => {
-      createFullComponent(mountOpts);
-
-      expect(findAuthSection().exists()).toBe(false);
-      expect(findExcludedUrlsInput().exists()).toBe(false);
-      expect(findRequestHeadersInput().exists()).toBe(false);
-      expect(findTargetTypeOption().exists()).toBe(false);
-    });
-
-    describe.each`
-      title                  | siteProfile       | mutationVars                 | mutationKind
-      ${'New site profile'}  | ${null}           | ${{}}                        | ${'dastSiteProfileCreate'}
-      ${'Edit site profile'} | ${siteProfileOne} | ${{ id: siteProfileOne.id }} | ${'dastSiteProfileUpdate'}
-    `('$title', ({ siteProfile, mutationVars, mutationKind }) => {
-      beforeEach(() => {
-        createFullComponent({
-          propsData: {
-            siteProfile,
-          },
-          ...mountOpts,
-        });
-        fillRequiredFieldsAndSubmitForm();
-      });
-
-      it('form submission triggers correct GraphQL mutation', async () => {
-        await fillRequiredFieldsAndSubmitForm();
-        expect(requestHandlers[mutationKind]).toHaveBeenCalledWith({
-          input: {
-            profileName,
-            targetUrl,
-            fullPath,
-            ...mutationVars,
-          },
         });
       });
     });

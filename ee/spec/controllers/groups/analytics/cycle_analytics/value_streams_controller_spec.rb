@@ -178,17 +178,6 @@ RSpec.describe Groups::Analytics::CycleAnalytics::ValueStreamsController do
       delete :destroy, params: { group_id: group, id: value_stream }
     end
 
-    context 'when it is a default value stream' do
-      let!(:value_stream) { create(:cycle_analytics_group_value_stream, group: group, name: 'default') }
-
-      it 'returns an unprocessable entity 422 response without deleting the value stream' do
-        expect { destroy_value_stream }.not_to change { Analytics::CycleAnalytics::GroupValueStream.count }
-
-        expect(response).to have_gitlab_http_status(:unprocessable_entity)
-        expect(json_response["message"]).to eq('The Default Value Stream cannot be deleted')
-      end
-    end
-
     context 'when it is a custom value stream' do
       let!(:value_stream) { create(:cycle_analytics_group_value_stream, group: group, name: 'some custom value stream') }
       let!(:stage) { create(:cycle_analytics_group_stage, value_stream: value_stream) }

@@ -29,22 +29,48 @@ RSpec.describe Ci::ProcessPipelineService, '#execute' do
       stub_ci_pipeline_to_return_yaml_file
     end
 
-    it 'creates a downstream cross-project pipeline' do
-      service.execute
-      Sidekiq::Worker.drain_all
+    context 'when there is a runner available' do
+      let_it_be(:runner) do
+        create(:ci_runner, :online, tag_list: %w[ruby postgres mysql])
+      end
 
-      expect_statuses(%w[test pending], %w[cross created], %w[deploy created])
+      it 'creates a downstream cross-project pipeline' do
+        service.execute
+        Sidekiq::Worker.drain_all
 
-      update_build_status(:test, :success)
-      Sidekiq::Worker.drain_all
+        expect_statuses(%w[test pending], %w[cross created], %w[deploy created])
 
-      expect_statuses(%w[test success], %w[cross success], %w[deploy pending])
+        update_build_status(:test, :success)
+        Sidekiq::Worker.drain_all
 
-      expect(downstream.ci_pipelines).to be_one
-      expect(downstream.ci_pipelines.first).to be_pending
-      expect(downstream.builds).not_to be_empty
-      expect(downstream.builds.first.variables)
-        .to include(key: 'BRIDGE', value: 'cross', public: false, masked: false)
+        expect_statuses(%w[test success], %w[cross success], %w[deploy pending])
+
+        expect(downstream.ci_pipelines).to be_one
+        expect(downstream.ci_pipelines.first).to be_pending
+        expect(downstream.builds).not_to be_empty
+        expect(downstream.builds.first.variables)
+          .to include(key: 'BRIDGE', value: 'cross', public: false, masked: false)
+      end
+    end
+
+    context 'with no runners' do
+      it 'creates a failed downstream cross-project pipeline' do
+        service.execute
+        Sidekiq::Worker.drain_all
+
+        expect_statuses(%w[test pending], %w[cross created], %w[deploy created])
+
+        update_build_status(:test, :success)
+        Sidekiq::Worker.drain_all
+
+        expect_statuses(%w[test success], %w[cross success], %w[deploy pending])
+
+        expect(downstream.ci_pipelines).to be_one
+        expect(downstream.ci_pipelines.first).to be_failed
+        expect(downstream.builds).not_to be_empty
+        expect(downstream.builds).to all be_failed
+        expect(downstream.builds.map(&:failure_reason)).to all eq('no_matching_runner')
+      end
     end
   end
 

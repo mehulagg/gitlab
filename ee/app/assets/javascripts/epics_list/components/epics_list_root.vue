@@ -207,7 +207,7 @@ export default {
     :current-tab="currentState"
     :tab-counts="epicsCount"
     :search-input-placeholder="__('Search or filter results...')"
-    :search-tokens="getFilteredSearchTokens()"
+    :search-tokens="getFilteredSearchTokens({ supportsEpic: false })"
     :sort-options="$options.EpicsSortOptions"
     :initial-filter-value="getFilteredSearchValue()"
     :initial-sort-by="sortedBy"

@@ -75,6 +75,22 @@ RSpec.describe Ci::Runner do
         expect { create(:group, runners: [project_runner]) }
           .to raise_error(ActiveRecord::RecordInvalid)
       end
+
+      context 'when runner has config' do
+        it 'is valid' do
+          runner = build(:ci_runner, config: { gpus: "all" })
+
+          expect(runner).to be_valid
+        end
+      end
+
+      context 'when runner has an invalid config' do
+        it 'is invalid' do
+          runner = build(:ci_runner, config: { test: 1 })
+
+          expect(runner).not_to be_valid
+        end
+      end
     end
 
     context 'cost factors validations' do
@@ -653,7 +669,7 @@ RSpec.describe Ci::Runner do
   describe '#heartbeat' do
     let(:runner) { create(:ci_runner, :project) }
 
-    subject { runner.heartbeat(architecture: '18-bit') }
+    subject { runner.heartbeat(architecture: '18-bit', config: { gpus: "all" }) }
 
     context 'when database was updated recently' do
       before do
@@ -701,6 +717,7 @@ RSpec.describe Ci::Runner do
     def does_db_update
       expect { subject }.to change { runner.reload.read_attribute(:contacted_at) }
         .and change { runner.reload.read_attribute(:architecture) }
+        .and change { runner.reload.read_attribute(:config) }
     end
   end
 
@@ -919,25 +936,9 @@ RSpec.describe Ci::Runner do
       end
     end
 
-    context 'build picking improvement enabled' do
-      before do
-        stub_feature_flags(ci_reduce_queries_when_ticking_runner_queue: true)
-      end
-
+    context 'build picking improvement' do
       it 'does not check if the build is assignable to a runner' do
         expect(runner).not_to receive(:can_pick?)
-
-        runner.pick_build!(build)
-      end
-    end
-
-    context 'build picking improvement disabled' do
-      before do
-        stub_feature_flags(ci_reduce_queries_when_ticking_runner_queue: false)
-      end
-
-      it 'checks if the build is assignable to a runner' do
-        expect(runner).to receive(:can_pick?).and_call_original
 
         runner.pick_build!(build)
       end

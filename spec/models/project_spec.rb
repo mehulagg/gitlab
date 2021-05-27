@@ -28,7 +28,7 @@ RSpec.describe Project, factory_default: :keep do
     it { is_expected.to have_many(:project_members).dependent(:delete_all) }
     it { is_expected.to have_many(:users).through(:project_members) }
     it { is_expected.to have_many(:requesters).dependent(:delete_all) }
-    it { is_expected.to have_many(:notes) }
+    it { is_expected.to have_many(:notes).dependent(:destroy) }
     it { is_expected.to have_many(:snippets).class_name('ProjectSnippet') }
     it { is_expected.to have_many(:deploy_keys_projects) }
     it { is_expected.to have_many(:deploy_keys) }
@@ -1584,19 +1584,20 @@ RSpec.describe Project, factory_default: :keep do
     end
   end
 
-  describe '.find_by_service_desk_project_key' do
-    it 'returns the correct project' do
+  describe '.with_service_desk_key' do
+    it 'returns projects with given key' do
       project1 = create(:project)
       project2 = create(:project)
       create(:service_desk_setting, project: project1, project_key: 'key1')
-      create(:service_desk_setting, project: project2, project_key: 'key2')
+      create(:service_desk_setting, project: project2, project_key: 'key1')
+      create(:service_desk_setting, project_key: 'key2')
+      create(:service_desk_setting)
 
-      expect(Project.find_by_service_desk_project_key('key1')).to eq(project1)
-      expect(Project.find_by_service_desk_project_key('key2')).to eq(project2)
+      expect(Project.with_service_desk_key('key1')).to contain_exactly(project1, project2)
     end
 
-    it 'returns nil if there is no project with the key' do
-      expect(Project.find_by_service_desk_project_key('some_key')).to be_nil
+    it 'returns empty if there is no project with the key' do
+      expect(Project.with_service_desk_key('key1')).to be_empty
     end
   end
 
@@ -6452,6 +6453,14 @@ RSpec.describe Project, factory_default: :keep do
           expect(subject).to eq([lfs_object.oid])
         end
       end
+
+      it 'lfs_objects_projects associations are deleted along with project' do
+        expect { project.delete }.to change(LfsObjectsProject, :count).by(-2)
+      end
+
+      it 'lfs_objects associations are unchanged when the assicated project is removed' do
+        expect { project.delete }.not_to change(LfsObject, :count)
+      end
     end
 
     context 'when project has no associated LFS objects' do
@@ -6886,31 +6895,6 @@ RSpec.describe Project, factory_default: :keep do
       it 'tags returns correct tag records' do
         expect(project.tags.first.class.name).to eq('ActsAsTaggableOn::Tag')
         expect(project.tags.map(&:name)).to match_array(%w[topic1 topic2 topic3])
-      end
-    end
-
-    context 'intermediate state during background migration' do
-      before do
-        project.taggings.first.update!(context: 'tags')
-        project.instance_variable_set("@tag_list", nil)
-        project.reload
-      end
-
-      it 'tag_list returns string array including old and new topics' do
-        expect(project.tag_list).to match_array(%w[topic1 topic2 topic3])
-      end
-
-      it 'tags returns old and new tag records' do
-        expect(project.tags.first.class.name).to eq('ActsAsTaggableOn::Tag')
-        expect(project.tags.map(&:name)).to match_array(%w[topic1 topic2 topic3])
-        expect(project.taggings.map(&:context)).to match_array(%w[tags topics topics])
-      end
-
-      it 'update tag_list adds new topics and removes old topics' do
-        project.update!(tag_list: 'topic1, topic2, topic3, topic4')
-
-        expect(project.tags.map(&:name)).to match_array(%w[topic1 topic2 topic3 topic4])
-        expect(project.taggings.map(&:context)).to match_array(%w[topics topics topics topics])
       end
     end
   end

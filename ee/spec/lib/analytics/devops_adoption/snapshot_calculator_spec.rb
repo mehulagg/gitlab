@@ -169,7 +169,7 @@ RSpec.describe Analytics::DevopsAdoption::SnapshotCalculator do
   context 'when snapshot already exists' do
     subject(:data) { described_class.new(segment: segment, range_end: range_end, snapshot: snapshot).calculate }
 
-    let(:snapshot) { create :devops_adoption_snapshot, segment: segment, issue_opened: true, merge_request_opened: false, total_projects_count: 1 }
+    let(:snapshot) { create :devops_adoption_snapshot, namespace: segment.namespace, issue_opened: true, merge_request_opened: false, total_projects_count: 1 }
 
     context 'for boolean metrics' do
       let!(:fresh_merge_request) { create(:merge_request, source_project: project, created_at: 3.weeks.ago(range_end)) }

@@ -24,12 +24,11 @@ const scanners = [
   createScannerConfig(DEFAULT_SCANNER, 'SAST', 4),
   createScannerConfig(DEFAULT_SCANNER, 'SECRET_DETECTION', 5),
   createScannerConfig(DEFAULT_SCANNER, 'CONTAINER_SCANNING', 6),
-  createScannerConfig(DEFAULT_SCANNER, 'COVERAGE_FUZZING', 7),
+  createScannerConfig(DEFAULT_SCANNER, 'DAST', 7),
   createScannerConfig(DEFAULT_SCANNER, 'DAST', 8),
-  createScannerConfig(DEFAULT_SCANNER, 'DAST', 9),
+  createScannerConfig('Custom', 'SAST', 9),
   createScannerConfig('Custom', 'SAST', 10),
-  createScannerConfig('Custom', 'SAST', 11),
-  createScannerConfig('Custom', 'DAST', 12),
+  createScannerConfig('Custom', 'DAST', 11),
 ];
 
 describe('Scanner Filter component', () => {
@@ -104,14 +103,18 @@ describe('Scanner Filter component', () => {
   });
 
   it('emits filter-changed event with expected data for selected options', async () => {
-    const ids = ['GitLab.SAST', 'Custom.SAST'];
+    const ids = ['GitLab.SAST', 'Custom.SAST', 'GitLab.API_FUZZING', 'GitLab.COVERAGE_FUZZING'];
     router.replace({ query: { [scannerFilter.id]: ids } });
     const selectedScanners = scanners.filter((x) => ids.includes(`${x.vendor}.${x.report_type}`));
     createWrapper();
     await wrapper.vm.$nextTick();
 
     expect(wrapper.emitted('filter-changed')[0][0]).toEqual({
-      scannerId: selectedScanners.map((x) => `${SCANNER_ID_PREFIX}${x.id}`),
+      scannerId: expect.arrayContaining([
+        ...selectedScanners.map((x) => `${SCANNER_ID_PREFIX}${x.id}`),
+        `${SCANNER_ID_PREFIX}COVERAGE_FUZZING:null`,
+        `${SCANNER_ID_PREFIX}API_FUZZING:null`,
+      ]),
     });
   });
 });

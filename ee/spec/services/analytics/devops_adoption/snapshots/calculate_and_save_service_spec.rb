@@ -25,7 +25,7 @@ RSpec.describe Analytics::DevopsAdoption::Snapshots::CalculateAndSaveService do
   end
 
   context 'when a snapshot for given range already exists' do
-    let(:snapshot) { create :devops_adoption_snapshot, end_time: range_end, segment: segment }
+    let(:snapshot) { create :devops_adoption_snapshot, end_time: range_end, namespace: segment.namespace }
 
     it 'updates the snapshot with whatever snapshot calculator returns' do
       expect_next_instance_of(Analytics::DevopsAdoption::Snapshots::UpdateService, snapshot: snapshot, params: 'calculated_data') do |service|

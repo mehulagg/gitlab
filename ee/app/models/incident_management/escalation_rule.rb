@@ -10,6 +10,7 @@ module IncidentManagement
     enum status: AlertManagement::Alert::STATUSES.slice(:acknowledged, :resolved)
 
     validates :status, presence: true
+    validates :oncall_schedule, presence: true
     validates :elapsed_time_seconds,
               presence: true,
               numericality: { only_integer: true, greater_than_or_equal_to: 1, less_than_or_equal_to: 24.hours }

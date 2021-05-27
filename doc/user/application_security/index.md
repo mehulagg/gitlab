@@ -92,7 +92,9 @@ For more details about each of the security scanning tools, see their respective
 
 By default, GitLab security scanners use `registry.gitlab.com/gitlab-org/security-products/analyzers` as the
 base address for Docker images. You can override this globally by setting the CI/CD variable
-`SECURE_ANALYZERS_PREFIX` to another location. Note that this affects all scanners at once.
+`SECURE_ANALYZERS_PREFIX` to another location. Note that this affects all scanners at once, except
+the container-scanning analyzer which uses
+`registry.gitlab.com/security-products/container-scanning` as its registry.
 
 ### Use security scanning tools with Pipelines for Merge Requests
 
@@ -381,7 +383,7 @@ For more details about which findings or vulnerabilities you can view in each of
 - Change the status.
 - Create an issue.
 - Link it to an existing issue.
-- In some cases, [apply an automatic remediation for a vulnerability](vulnerabilities/index.md#remediate-a-vulnerability-automatically).
+- [Resolve the vulnerability](vulnerabilities/index.md#resolve-a-vulnerability), if a solution is known.
 
 ## Troubleshooting
 

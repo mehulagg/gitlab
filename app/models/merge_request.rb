@@ -37,7 +37,7 @@ class MergeRequest < ApplicationRecord
   SORTING_PREFERENCE_FIELD = :merge_requests_sort
 
   ALLOWED_TO_USE_MERGE_BASE_PIPELINE_FOR_COMPARISON = {
-    'Ci::CompareMetricsReportsService'     => ->(project) { ::Gitlab::Ci::Features.merge_base_pipeline_for_metrics_comparison?(project) },
+    'Ci::CompareMetricsReportsService'     => ->(project) { true },
     'Ci::CompareCodequalityReportsService' => ->(project) { true }
   }.freeze
 
@@ -124,6 +124,8 @@ class MergeRequest < ApplicationRecord
     :sha
   ].freeze
   serialize :merge_params, Hash # rubocop:disable Cop/ActiveRecordSerialize
+
+  before_validation :set_draft_status
 
   after_create :ensure_merge_request_diff
   after_update :clear_memoized_shas
@@ -1907,6 +1909,10 @@ class MergeRequest < ApplicationRecord
   end
 
   private
+
+  def set_draft_status
+    self.draft = draft?
+  end
 
   def missing_report_error(report_type)
     { status: :error, status_reason: "This merge request does not have #{report_type} reports" }

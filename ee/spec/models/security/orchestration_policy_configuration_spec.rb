@@ -399,6 +399,32 @@ RSpec.describe Security::OrchestrationPolicyConfiguration do
     end
   end
 
+  describe '#policy_last_updated_at' do
+    let(:last_commit_updated_at) { Time.zone.now }
+    let(:commit) { create(:commit) }
+
+    subject(:policy_last_updated_at) { security_orchestration_policy_configuration.policy_last_updated_at }
+
+    before do
+      allow(security_policy_management_project).to receive(:repository).and_return(repository)
+      allow(repository).to receive(:last_commit_for_path).and_return(commit)
+    end
+
+    context 'when last commit to policy file exists' do
+      it "returns commit's updated date" do
+        commit.committed_date = last_commit_updated_at
+
+        is_expected.to eq(policy_last_updated_at)
+      end
+    end
+
+    context 'when last commit to policy file does not exist' do
+      let(:commit) {}
+
+      it { is_expected.to be_nil }
+    end
+  end
+
   describe '#delete_all_schedules' do
     let(:rule_schedule) { create(:security_orchestration_policy_rule_schedule, security_orchestration_policy_configuration: security_orchestration_policy_configuration) }
 

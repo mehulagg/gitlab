@@ -10,7 +10,7 @@ import {
   GlIcon,
   GlTooltipDirective,
 } from '@gitlab/ui';
-import { mapState } from 'vuex';
+import { mapGetters, mapState } from 'vuex';
 import { s__ } from '~/locale';
 import { defaultJiraIssueTypeId } from '../constants';
 
@@ -80,12 +80,16 @@ export default {
     };
   },
   computed: {
+    ...mapGetters(['isInheriting']),
     ...mapState([
       'isTesting',
       'jiraIssueTypes',
       'isLoadingJiraIssueTypes',
       'loadingJiraIssueTypesErrorMessage',
     ]),
+    checkboxDisabled() {
+      return !this.showFullFeature || this.isInheriting;
+    },
     initialJiraIssueType() {
       return this.jiraIssueTypes?.find(({ id }) => id === this.initialIssueTypeId) || {};
     },
@@ -134,7 +138,7 @@ export default {
     <gl-form-checkbox
       v-model="isJiraVulnerabilitiesEnabled"
       data-testid="enable-jira-vulnerabilities"
-      :disabled="!showFullFeature"
+      :disabled="checkboxDisabled"
     >
       {{ $options.i18n.checkbox.label }}
       <template #help>

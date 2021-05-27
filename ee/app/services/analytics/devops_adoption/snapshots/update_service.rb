@@ -5,8 +5,8 @@ module Analytics
     module Snapshots
       class UpdateService
         ALLOWED_ATTRIBUTES = ([
-          :segment,
-          :segment_id,
+          :namespace,
+          :namespace_id,
           :end_time,
           :recorded_at
         ] + SnapshotCalculator::ADOPTION_METRICS).freeze
@@ -17,17 +17,9 @@ module Analytics
         end
 
         def execute
-          success = false
+          snapshot.assign_attributes(attributes)
 
-          ActiveRecord::Base.transaction do
-            snapshot.assign_attributes(attributes)
-
-            success = snapshot.save && snapshot.segment.update(last_recorded_at: snapshot.recorded_at)
-
-            raise ActiveRecord::Rollback unless success
-          end
-
-          if success
+          if snapshot.save
             ServiceResponse.success(payload: response_payload)
           else
             ServiceResponse.error(message: 'Validation error', payload: response_payload)
