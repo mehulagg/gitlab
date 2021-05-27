@@ -339,7 +339,7 @@ to transfer a project.
 
 You can transfer an existing project into a [group](../../group/index.md) if:
 
-- You have at least **Maintainer** [permissions](../../permissions.md#project-members-permissions) to that group.
+- You have at least the [**Maintainer** role](../../permissions.md#project-members-permissions) in that group.
 - You're at least an **Owner** of the project to be transferred.
 - The group to which the project is being transferred to must allow creation of new projects.
 

@@ -28,8 +28,8 @@ immediate update, unless:
 - The mirror is already being updated.
 - The [limit for pull mirroring interval seconds](../../../administration/instance_limits.md#pull-mirroring-interval) has not elapsed since its last update.
 
-For security reasons, the URL to the original repository is only displayed to users with
-Maintainer or Owner permissions to the mirrored project.
+For security reasons, the URL to the original repository is only displayed to users with the
+Maintainer role or the Owner role to the mirrored project.
 
 ## Use cases
 

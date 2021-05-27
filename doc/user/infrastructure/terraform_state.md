@@ -351,8 +351,8 @@ location. You can then go back to running it in GitLab CI/CD.
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/273592) in GitLab 13.8.
 
 Users with Developer and greater [permissions](../permissions.md) can view the
-state files attached to a project at **Operations > Terraform**. Users with
-Maintainer permissions can perform commands on the state files. The user interface
+state files attached to a project at **Operations > Terraform**. Users with the
+Maintainer role can perform commands on the state files. The user interface
 contains these fields:
 
 ![Terraform state list](img/terraform_list_view_v13_8.png)
