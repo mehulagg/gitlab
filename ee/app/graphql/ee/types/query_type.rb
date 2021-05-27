@@ -57,10 +57,10 @@ module EE
               resolver: ::Resolvers::InstanceSecurityDashboardResolver,
               description: 'Fields related to Instance Security Dashboard.'
 
-        field :devops_adoption_segments, ::Types::Admin::Analytics::DevopsAdoption::SegmentType.connection_type,
+        field :devops_adoption_enabled_namespaces, ::Types::Analytics::DevopsAdoption::EnabledNamespaceType.connection_type,
               null: true,
-              description: 'Get configured DevOps adoption segments on the instance. **BETA** This endpoint is subject to change without notice.',
-              resolver: ::Resolvers::Admin::Analytics::DevopsAdoption::SegmentsResolver
+              description: 'Get configured DevOps adoption namespaces. **BETA** This endpoint is subject to change without notice.',
+              resolver: ::Resolvers::Analytics::DevopsAdoption::EnabledNamespacesResolver
 
         field :current_license, ::Types::Admin::CloudLicenses::CurrentLicenseType,
               null: true,

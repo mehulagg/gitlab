@@ -4,10 +4,10 @@ module Analytics
   module DevopsAdoption
     module Snapshots
       class CalculateAndSaveService
-        attr_reader :segment, :range_end
+        attr_reader :enabled_namespace, :range_end
 
-        def initialize(segment:, range_end:)
-          @segment = segment
+        def initialize(enabled_namespace:, range_end:)
+          @enabled_namespace = enabled_namespace
           @range_end = range_end
         end
 
@@ -20,11 +20,11 @@ module Analytics
         end
 
         def snapshot
-          @snapshot ||= segment.snapshots.for_month(range_end).first
+          @snapshot ||= enabled_namespace.snapshots.for_month(range_end).first
         end
 
         def calculated_data
-          @calculated_data ||= SnapshotCalculator.new(segment: segment, range_end: range_end, snapshot: snapshot).calculate
+          @calculated_data ||= SnapshotCalculator.new(enabled_namespace: enabled_namespace, range_end: range_end, snapshot: snapshot).calculate
         end
       end
     end

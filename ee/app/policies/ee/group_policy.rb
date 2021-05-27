@@ -185,12 +185,12 @@ module EE
       end
 
       rule { reporter & group_devops_adoption_enabled & group_devops_adoption_available }.policy do
-        enable :manage_devops_adoption_segments
+        enable :manage_devops_adoption_namespaces
         enable :view_group_devops_adoption
       end
 
       rule { admin & group_devops_adoption_enabled }.policy do
-        enable :manage_devops_adoption_segments
+        enable :manage_devops_adoption_namespaces
       end
 
       rule { owner & ~has_parent & prevent_group_forking_available }.policy do

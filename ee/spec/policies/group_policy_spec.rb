@@ -1613,9 +1613,9 @@ RSpec.describe GroupPolicy do
     end
   end
 
-  describe 'manage_devops_adoption_segments' do
+  describe 'manage_devops_adoption_namespaces' do
     let(:current_user) { owner }
-    let(:policy) { :manage_devops_adoption_segments }
+    let(:policy) { :manage_devops_adoption_namespaces }
 
     context 'when feature is disabled' do
       before do
