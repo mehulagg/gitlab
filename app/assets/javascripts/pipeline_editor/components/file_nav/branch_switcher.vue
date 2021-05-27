@@ -7,6 +7,7 @@ import {
   GlLoadingIcon,
   GlSearchBoxByType,
 } from '@gitlab/ui';
+import produce from 'immer';
 import { historyPushState } from '~/lib/utils/common_utils';
 import { setUrlParams } from '~/lib/utils/url_utility';
 import { s__ } from '~/locale';
@@ -49,6 +50,7 @@ export default {
         offset: 0,
         searchTerm: '',
       },
+      pageCounter: 0,
     };
   },
   apollo: {
@@ -67,11 +69,8 @@ export default {
       },
       result({ data }) {
         const newBranches = data.project?.repository?.branchNames || [];
-
-        // check that we're not re-concatenating existing fetch results
-        if (!this.branches.includes(newBranches[0])) {
-          this.branches = this.branches.concat(newBranches);
-        }
+        this.branches = this.branches.concat(newBranches);
+        this.pageCounter += 1;
       },
       error() {
         this.$emit('showError', {
@@ -110,11 +109,17 @@ export default {
         return;
       }
 
-      this.page = {
-        ...this.page,
-        limit: this.paginationLimit,
-        offset: this.page.offset + this.paginationLimit,
-      };
+      this.$apollo.queries.availableBranches.fetchMore({
+        variables: {
+          ...this.page,
+          limit: this.paginationLimit,
+          offset: this.page.offset + (this.pageCounter * this.paginationLimit),
+        },
+        updateQuery(previousResult, { fetchMoreResult }) {
+          console.log('fetchMoreResult', fetchMoreResult.project.repository.branchNames);
+          return fetchMoreResult;
+        },
+      });
     },
     async selectBranch(newBranch) {
       if (newBranch === this.currentBranch) {
@@ -133,6 +138,7 @@ export default {
     },
     setSearchTerm(newSearchTerm) {
       this.branches = [];
+      this.pageCounter = 0;
       this.page = {
         limit: newSearchTerm.trim() === '' ? this.paginationLimit : this.totalBranches,
         offset: 0,
