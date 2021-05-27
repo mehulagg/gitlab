@@ -36,6 +36,7 @@ module Gitlab
         settings_hash['directives']['child_src'] = settings_hash['directives']['frame_src']
 
         allow_webpack_dev_server(settings_hash) if Rails.env.development?
+        allow_snowplow_micro_server(settings_hash) if Gitlab::Tracking.use_snowplow_micro?
         allow_cdn(settings_hash) if ENV['GITLAB_CDN_HOST'].present?
 
         settings_hash
@@ -72,6 +73,10 @@ module Gitlab
         ws_url = "#{secure ? 'wss' : 'ws'}://#{host_and_port}"
 
         append_to_directive(settings_hash, 'connect_src', "#{http_url} #{ws_url}")
+      end
+
+      def self.allow_snowplow_micro_server(settings_hash)
+        append_to_directive(settings_hash, 'connect_src', Gitlab::Tracking.snowplow_micro_uri.to_s)
       end
 
       def self.allow_cdn(settings_hash)

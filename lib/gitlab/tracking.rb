@@ -20,14 +20,26 @@ module Gitlab
 
       def snowplow_options(group)
         additional_features = Feature.enabled?(:additional_snowplow_tracking, group)
-        {
+        options = {
           namespace: SNOWPLOW_NAMESPACE,
           hostname: Gitlab::CurrentSettings.snowplow_collector_hostname,
           cookie_domain: Gitlab::CurrentSettings.snowplow_cookie_domain,
           app_id: Gitlab::CurrentSettings.snowplow_app_id,
           form_tracking: additional_features,
           link_click_tracking: additional_features
-        }.transform_keys! { |key| key.to_s.camelize(:lower).to_sym }
+        }
+
+        add_snowplow_micro_options(options) if use_snowplow_micro?
+
+        options.transform_keys! { |key| key.to_s.camelize(:lower).to_sym }
+      end
+
+      def use_snowplow_micro?
+        Rails.env.development? && Gitlab::Utils.to_boolean(ENV['USE_SNOWPLOW_MICRO'])
+      end
+
+      def snowplow_micro_uri
+        URI('http://localhost:9090')
       end
 
       private
@@ -38,6 +50,15 @@ module Gitlab
 
       def product_analytics
         @product_analytics ||= Gitlab::Tracking::Destinations::ProductAnalytics.new
+      end
+
+      def add_snowplow_micro_options(options)
+        options.update(
+          hostname: "#{snowplow_micro_uri.host}:#{snowplow_micro_uri.port}",
+          protocol: snowplow_micro_uri.scheme,
+          port: snowplow_micro_uri.port,
+          force_secure_tracker: false
+        )
       end
     end
   end

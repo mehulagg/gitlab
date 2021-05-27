@@ -31,9 +31,19 @@ module Gitlab
         end
 
         def emitter
+          return snowplow_micro_emitter if Gitlab::Tracking.use_snowplow_micro?
+
           SnowplowTracker::AsyncEmitter.new(
             Gitlab::CurrentSettings.snowplow_collector_hostname,
             protocol: 'https'
+          )
+        end
+
+        def snowplow_micro_emitter
+          SnowplowTracker::AsyncEmitter.new(
+            Gitlab::Tracking.snowplow_micro_uri.host,
+            port: Gitlab::Tracking.snowplow_micro_uri.port,
+            protocol: Gitlab::Tracking.snowplow_micro_uri.scheme
           )
         end
       end
