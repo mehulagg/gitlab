@@ -10769,6 +10769,13 @@ CREATE SEQUENCE ci_job_artifacts_id_seq
 
 ALTER SEQUENCE ci_job_artifacts_id_seq OWNED BY ci_job_artifacts.id;
 
+CREATE TABLE ci_job_token_scope_links (
+    source_project_id bigint NOT NULL,
+    target_project_id bigint NOT NULL,
+    added_by_id bigint,
+    created_at timestamp with time zone NOT NULL
+);
+
 CREATE TABLE ci_job_variables (
     id bigint NOT NULL,
     key character varying NOT NULL,
@@ -22273,6 +22280,8 @@ CREATE INDEX finding_evidences_on_vulnerability_occurrence_id ON vulnerability_f
 
 CREATE INDEX finding_links_on_vulnerability_occurrence_id ON vulnerability_finding_links USING btree (vulnerability_occurrence_id);
 
+CREATE UNIQUE INDEX i_ci_job_token_scope_links_on_source_and_target_project ON ci_job_token_scope_links USING btree (source_project_id, target_project_id);
+
 CREATE INDEX idx_audit_events_part_on_entity_id_desc_author_id_created_at ON ONLY audit_events USING btree (entity_id, entity_type, id DESC, author_id, created_at);
 
 CREATE INDEX idx_award_emoji_on_user_emoji_name_awardable_type_awardable_id ON award_emoji USING btree (user_id, name, awardable_type, awardable_id);
@@ -26768,6 +26777,9 @@ ALTER TABLE ONLY vulnerability_finding_evidence_headers
 ALTER TABLE ONLY geo_hashed_storage_migrated_events
     ADD CONSTRAINT fk_rails_687ed7d7c5 FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE;
 
+ALTER TABLE ONLY ci_job_token_scope_links
+    ADD CONSTRAINT fk_rails_6931565a7e FOREIGN KEY (source_project_id) REFERENCES projects(id) ON DELETE CASCADE;
+
 ALTER TABLE ONLY plan_limits
     ADD CONSTRAINT fk_rails_69f8b6184f FOREIGN KEY (plan_id) REFERENCES plans(id) ON DELETE CASCADE;
 
@@ -27095,6 +27107,9 @@ ALTER TABLE ONLY operations_feature_flag_scopes
 ALTER TABLE ONLY packages_helm_file_metadata
     ADD CONSTRAINT fk_rails_a559865345 FOREIGN KEY (package_file_id) REFERENCES packages_package_files(id) ON DELETE CASCADE;
 
+ALTER TABLE ONLY ci_job_token_scope_links
+    ADD CONSTRAINT fk_rails_a562b502cf FOREIGN KEY (added_by_id) REFERENCES users(id) ON DELETE SET NULL;
+
 ALTER TABLE ONLY cluster_projects
     ADD CONSTRAINT fk_rails_a5a958bca1 FOREIGN KEY (cluster_id) REFERENCES clusters(id) ON DELETE CASCADE;
 
@@ -27382,6 +27397,9 @@ ALTER TABLE ONLY merge_request_reviewers
 
 ALTER TABLE ONLY jira_imports
     ADD CONSTRAINT fk_rails_da617096ce FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL;
+
+ALTER TABLE ONLY ci_job_token_scope_links
+    ADD CONSTRAINT fk_rails_dae96135e0 FOREIGN KEY (target_project_id) REFERENCES projects(id) ON DELETE CASCADE;
 
 ALTER TABLE ONLY dependency_proxy_blobs
     ADD CONSTRAINT fk_rails_db58bbc5d7 FOREIGN KEY (group_id) REFERENCES namespaces(id) ON DELETE CASCADE;
