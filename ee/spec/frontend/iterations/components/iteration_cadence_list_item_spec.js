@@ -82,6 +82,7 @@ describe('Iteration cadence list item', () => {
   function createComponent({
     props = {},
     canCreateCadence,
+    canEditCadence,
     resolverMock = jest.fn().mockResolvedValue(querySuccessResponse),
   } = {}) {
     apolloProvider = createMockApolloProvider([[iterationsInCadenceQuery, resolverMock]]);
@@ -98,6 +99,7 @@ describe('Iteration cadence list item', () => {
       provide: {
         groupPath,
         canCreateCadence,
+        canEditCadence,
       },
       propsData: {
         title: cadence.title,
