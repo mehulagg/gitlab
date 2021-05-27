@@ -12,15 +12,15 @@ GitLab deployments can be broken down into many components. Upgrading GitLab is 
 
 For users following [zero-downtime upgrade instructions](../update/index.md#upgrading-without-downtime), the answer is one minor version. For example:
 
-* 13.11 => 13.12
-* 13.12 => 14.0
-* 14.0 => 14.1
+- 13.11 => 13.12
+- 13.12 => 14.0
+- 14.0 => 14.1
 
 For GitLab.com, there can be multiple tiny version upgrades per day, so GitLab.com doesn't constrain how far changes must be backwards-compatible.
 
 Many users upgrade jump to the latest minor version, for example:
 
-* 13.0 => 13.12
+- 13.0 => 13.12
 
 These users accept some downtime during the upgrade. Unfortunately we can't ignore this case completely. For example, 13.12 may execute Sidekiq jobs from 13.0, which illustrates why [we avoid removing arguments from jobs until a major release](sidekiq_style_guide.md#deprecate-and-remove-an-argument). The main question is: Will the deployment get to a good state after the upgrade is complete?
 
@@ -30,14 +30,14 @@ The [50,000 reference architecture] runs GitLab on 48+ nodes. GitLab.com is [big
 
 But the problem isn't just that there are many nodes. The bigger problem is that a deployment can be divided into different contexts. And it's not just GitLab.com that does this. Some notable potential divisions:
 
-* "Canary web app nodes": Handle non-API requests from a subset of users
-* "Git app nodes": Handle Git requests
-* "Web app nodes": Handle web requests
-* "API app nodes": Handle API requests
-* "Sidekiq app nodes": Handle Sidekiq jobs
-* "Postgres database": Handle internal Postgres calls
-* "Redis database": Handle internal Redis calls
-* "Gitaly nodes": Handle internal Gitaly calls
+- "Canary web app nodes": Handle non-API requests from a subset of users
+- "Git app nodes": Handle Git requests
+- "Web app nodes": Handle web requests
+- "API app nodes": Handle API requests
+- "Sidekiq app nodes": Handle Sidekiq jobs
+- "Postgres database": Handle internal Postgres calls
+- "Redis database": Handle internal Redis calls
+- "Gitaly nodes": Handle internal Gitaly calls
 
 During an upgrade, there will be different versions of GitLab running in different contexts. For example, a web node may enqueue jobs which get run on an old Sidekiq node!
 
@@ -49,8 +49,8 @@ Yes! We have specific instructions for [zero-downtime upgrades](../update/index.
 
 These problems are often very subtle. This is why it is worth familiarizing yourself with upgrades and architectures. Other than that, it is helpful to remember the most common gotchas. To illustrate some of them, take a look at this example of an upgrade.
 
-* 🚢 New version
-* 🙂 Old version
+- 🚢 New version
+- 🙂 Old version
 
 We worry most about minor version jumps. But refer to [How long must code be backwards-compatible?](#how-long-must-code-be-backwards-compatible).
 
@@ -69,12 +69,12 @@ From this table, we can list a number of gotchas.
 
 ### List of common gotchas
 
-* New pre-deployment migrations must work when only the previous version of Rails and JS is running
-* Changes to jobs must work when Sidekiq is only running on the previous version
-* New Sidekiq worker classes won't get run at all for a period of time (i.e. GitLab.com canary stage)
-* Changes to JS must work with the previous version's API
-* New post-deployment migrations cannot be depended on by Rails changes
-* New background migrations cannot be depended on by Rails changes
+- New pre-deployment migrations must work when only the previous version of Rails and JS is running
+- Changes to jobs must work when Sidekiq is only running on the previous version
+- New Sidekiq worker classes won't get run at all for a period of time (i.e. GitLab.com canary stage)
+- Changes to JS must work with the previous version's API
+- New post-deployment migrations cannot be depended on by Rails changes
+- New background migrations cannot be depended on by Rails changes
 
 ## I've identified a potential multi-version compatibility problem, what can I do about it?
 
