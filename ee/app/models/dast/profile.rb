@@ -32,7 +32,7 @@ module Dast
       Dast::Branch.new(self)
     end
 
-    def ci_variables
+    def secret_ci_variables
       ::Gitlab::Ci::Variables::Collection.new(secret_variables)
     end
 

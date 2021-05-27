@@ -195,9 +195,63 @@ RSpec.describe DastSiteProfile, type: :model do
     end
 
     describe '#ci_variables' do
+      let(:collection) { subject.ci_variables }
+      let(:keys) { subject.ci_variables.map { |variable| variable[:key] } }
+      let(:excluded_urls) { subject.excluded_urls.join(',') }
+
+      it 'returns a collection of variables' do
+        expected_variables = [
+          { key: 'DAST_WEBSITE', value: subject.dast_site.url, public: true, masked: false },
+          { key: 'DAST_EXCLUDE_URLS', value: excluded_urls, public: true, masked: false },
+          { key: 'DAST_AUTH_URL', value: subject.auth_url, public: true, masked: false },
+          { key: 'DAST_USERNAME', value: subject.auth_username, public: true, masked: false },
+          { key: 'DAST_USERNAME_FIELD', value: subject.auth_username_field, public: true, masked: false },
+          { key: 'DAST_PASSWORD_FIELD', value: subject.auth_password_field, public: true, masked: false }
+        ]
+
+        expect(collection.to_runner_variables).to eq(expected_variables)
+      end
+
+      context 'when target_type=api' do
+        subject { build(:dast_site_profile, target_type: :api) }
+
+        it 'returns a collection of variables with api configuration only', :aggregate_failures do
+          expect(keys).not_to include('DAST_WEBSITE')
+
+          expect(collection).to include(key: 'DAST_API_SPECIFICATION', value: subject.dast_site.url, public: true)
+          expect(collection).to include(key: 'DAST_API_HOST_OVERRIDE', value: URI(subject.dast_site.url).host, public: true)
+        end
+      end
+
+      context 'when auth is disabled' do
+        subject { build(:dast_site_profile, auth_enabled: false) }
+
+        it 'returns a collection of variables excluding any auth variables', :aggregate_failures do
+          expect(keys).not_to include('DAST_AUTH_URL', 'DAST_USERNAME', 'DAST_USERNAME_FIELD', 'DAST_PASSWORD_FIELD')
+        end
+      end
+
+      context 'when a excluded_urls is empty' do
+        subject { build(:dast_site_profile, excluded_urls: []) }
+
+        it 'is removed from the collection' do
+          expect(keys).not_to include('DAST_EXCLUDE_URLS')
+        end
+      end
+
+      context 'when a variable is set to nil' do
+        subject { build(:dast_site_profile, auth_enabled: true, auth_username_field: nil) }
+
+        it 'is removed from the collection' do
+          expect(keys).not_to include('DAST_USERNAME_FIELD')
+        end
+      end
+    end
+
+    describe '#secret_ci_variables' do
       context 'when there are no secret_variables' do
         it 'returns an empty collection' do
-          expect(subject.ci_variables.size).to be_zero
+          expect(subject.secret_ci_variables.size).to be_zero
         end
       end
 
@@ -205,7 +259,7 @@ RSpec.describe DastSiteProfile, type: :model do
         it 'returns a collection containing that variable' do
           variable = create(:dast_site_profile_secret_variable, dast_site_profile: subject)
 
-          expect(subject.ci_variables.to_runner_variables).to include(key: variable.key, value: variable.value, public: false, masked: true)
+          expect(subject.secret_ci_variables.to_runner_variables).to include(key: variable.key, value: variable.value, public: false, masked: true)
         end
       end
     end

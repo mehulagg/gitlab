@@ -52,7 +52,7 @@ module EE
               # Subject to change. Please see gitlab-org/gitlab#330950 for more info.
               profile = pipeline.dast_profile || pipeline.dast_site_profile
 
-              collection.concat(profile.ci_variables)
+              collection.concat(profile.secret_ci_variables)
             end
           end
         end

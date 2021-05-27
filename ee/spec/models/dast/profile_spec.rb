@@ -122,10 +122,10 @@ RSpec.describe Dast::Profile, type: :model do
       end
     end
 
-    describe '#ci_variables' do
+    describe '#secret_ci_variables' do
       context 'when there are no secret_variables' do
         it 'returns an empty collection' do
-          expect(subject.ci_variables.size).to be_zero
+          expect(subject.secret_ci_variables.size).to be_zero
         end
       end
 
@@ -133,7 +133,7 @@ RSpec.describe Dast::Profile, type: :model do
         it 'returns a collection containing that variable' do
           variable = create(:dast_site_profile_secret_variable, dast_site_profile: subject.dast_site_profile)
 
-          expect(subject.ci_variables.to_runner_variables).to include(key: variable.key, value: variable.value, public: false, masked: true)
+          expect(subject.secret_ci_variables.to_runner_variables).to include(key: variable.key, value: variable.value, public: false, masked: true)
         end
       end
     end
