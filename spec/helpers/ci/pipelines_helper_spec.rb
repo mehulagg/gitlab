@@ -71,4 +71,32 @@ RSpec.describe Ci::PipelinesHelper do
       it { expect(has_gitlab_ci?).to eq(result) }
     end
   end
+
+  describe 'show_cc_validation_alert?' do
+    using RSpec::Parameterized::TableSyntax
+
+    subject(:show_cc_validation_alert?) { helper.show_cc_validation_alert?(pipeline) }
+
+    let(:pipeline) { double(:pipeline, failed?: pipeline_failed?, user_not_verified?: user_not_verified?, project: project) }
+    let(:project) { double(:project) }
+
+    where(:pipeline_failed?, :user_not_verified?, :requires_cc_to_run_pipelines?, :result) do
+      true                 | true               | true                          | true
+      true                 | false              | false                         | false
+      true                 | true               | true                          | true
+      true                 | false              | true                          | false
+      false                | true               | false                         | false
+      false                | false              | true                          | false
+    end
+
+    with_them do
+      before do
+        allow(pipeline).to receive_message_chain(:user, :requires_credit_card_to_run_pipelines?)
+                           .with(project)
+                           .and_return(requires_cc_to_run_pipelines?)
+      end
+
+      it { expect(show_cc_validation_alert?).to eq(result) }
+    end
+  end
 end

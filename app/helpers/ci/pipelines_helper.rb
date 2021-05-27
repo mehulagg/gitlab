@@ -69,6 +69,10 @@ module Ci
       ]
     end
 
+    def show_cc_validation_alert?(pipeline)
+      pipeline.failed? && pipeline.user_not_verified? && pipeline.user.requires_credit_card_to_run_pipelines?(pipeline.project)
+    end
+
     private
 
     def warning_markdown(pipeline)
