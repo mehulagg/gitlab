@@ -57,7 +57,7 @@ describe('CloudLicenseApp', () => {
     });
 
     it('shows a link when provided', () => {
-      expect(findUploadLink().text()).toBe('Upload a legacy license');
+      expect(findUploadLink().text()).toBe('Upload a license file');
     });
 
     it('shows an help link', () => {
