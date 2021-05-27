@@ -39,7 +39,7 @@ module QA
           group.api_client = api_client
           group.sandbox = sandbox
           group.path = source_group.path
-        end.reload!
+        end
       end
 
       let(:imported_subgroup) do
@@ -47,7 +47,7 @@ module QA
           group.api_client = api_client
           group.sandbox = imported_group
           group.path = subgroup.path
-        end.reload!
+        end
       end
 
       def staging?
@@ -80,8 +80,8 @@ module QA
           aggregate_failures do
             expect(import_page).to have_imported_group(source_group.path, wait: 120)
 
-            expect(imported_group).to eq(source_group)
-            expect(imported_subgroup).to eq(subgroup)
+            expect { imported_group.reload! }.to eventually_eq(source_group).within(duration: 10)
+            expect { imported_subgroup.reload! }.to eventually_eq(subgroup).within(duration: 10)
           end
         end
       end

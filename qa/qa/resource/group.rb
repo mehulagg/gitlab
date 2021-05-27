@@ -57,7 +57,7 @@ module QA
       end
 
       def api_get_path
-        "/groups/#{CGI.escape("#{determine_full_path}")}"
+        "/groups/#{CGI.escape(determine_full_path)}"
       end
 
       def api_post_body
