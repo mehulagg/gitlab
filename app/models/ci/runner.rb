@@ -338,6 +338,14 @@ module Ci
     end
 
     def tick_runner_queue
+      ##
+      # We only stick a runner to primary database to be able to detect the
+      # replication lag in `EE::Ci::RegisterJobService#execute`. The
+      # intention here is not to execute `Ci::RegisterJobService#execute` on
+      # the primary database.
+      #
+      ::Gitlab::Database::LoadBalancing::Sticking.stick(:runner, id)
+
       SecureRandom.hex.tap do |new_update|
         ::Gitlab::Workhorse.set_key_and_notify(runner_queue_key, new_update,
           expire: RUNNER_QUEUE_EXPIRY_TIME, overwrite: true)
@@ -355,13 +363,20 @@ module Ci
     end
 
     def heartbeat(values)
-      values = values&.slice(:version, :revision, :platform, :architecture, :ip_address, :config) || {}
-      values[:contacted_at] = Time.current
+      ##
+      # We can safely ignore writes performed by a runner heartbeat. We do
+      # not want to upgrade database connection proxy to use the primary
+      # database after heartbeat write happens.
+      #
+      ::Gitlab::Database::LoadBalancing::Session.without_sticky_writes do
+        values = values&.slice(:version, :revision, :platform, :architecture, :ip_address, :config) || {}
+        values[:contacted_at] = Time.current
 
-      cache_attributes(values)
+        cache_attributes(values)
 
-      # We save data without validation, it will always change due to `contacted_at`
-      self.update_columns(values) if persist_cached_data?
+        # We save data without validation, it will always change due to `contacted_at`
+        self.update_columns(values) if persist_cached_data?
+      end
     end
 
     def pick_build!(build)
