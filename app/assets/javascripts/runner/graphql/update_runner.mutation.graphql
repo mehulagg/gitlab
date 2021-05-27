@@ -1,0 +1,8 @@
+mutation updateRunner($input: UpdateRunnerInput!) {
+  updateRunner(input: $input) {
+    runner {
+      active
+    }
+    errors
+  }
+}
