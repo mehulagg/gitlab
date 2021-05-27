@@ -1385,4 +1385,54 @@ RSpec.describe ProjectPolicy do
       end
     end
   end
+
+  describe 'when user is authenticated via CI_JOB_TOKEN' do
+    let_it_be(:current_user) { developer }
+
+    let(:job) { build_stubbed(:ci_build, project: scope_project, user: current_user) }
+
+    before do
+      current_user.ci_job_token_scope = Ci::JobToken::Scope.new(scope_project)
+    end
+
+    context 'when accessing a private project' do
+      let(:project) { private_project }
+
+      context 'when the job token comes from the same project' do
+        let(:scope_project) { project }
+
+        it { is_expected.to be_allowed(:developer_access) }
+      end
+
+      context 'when the job token comes from another project' do
+        let(:scope_project) { create(:project, :private) }
+
+        before do
+          scope_project.add_developer(current_user)
+        end
+
+        it { is_expected.to be_disallowed(:guest_access) }
+      end
+    end
+
+    context 'when accessing a public project' do
+      let(:project) { public_project }
+
+      context 'when the job token comes from the same project' do
+        let(:scope_project) { project }
+
+        it { is_expected.to be_allowed(:developer_access) }
+      end
+
+      context 'when the job token comes from another project' do
+        let(:scope_project) { create(:project, :private) }
+
+        before do
+          scope_project.add_developer(current_user)
+        end
+
+        it { is_expected.to be_disallowed(:public_access) }
+      end
+    end
+  end
 end
