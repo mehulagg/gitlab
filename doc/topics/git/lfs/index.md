@@ -167,14 +167,19 @@ As the error indicates, the file(s) are expected to be tracked by LFS, but for s
 To resolve this, you need to migrate these file(s) and push back to the repository:
 
 1. Migrate the file to LFS:
+
    ```shell
    git lfs migrate import --yes --no-rewrite "<your-file>"
    ```
+
 1. Push back to your repository
+
    ```shell
    git push
    ```
+
 1. Optional: Clean up your `.git` folder
+
    ```shell
    git reflog expire --expire-unreachable=now --all
    git gc --prune=now
