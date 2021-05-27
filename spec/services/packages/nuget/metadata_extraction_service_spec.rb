@@ -3,7 +3,8 @@
 require 'spec_helper'
 
 RSpec.describe Packages::Nuget::MetadataExtractionService do
-  let(:package_file) { create(:nuget_package).package_files.first }
+  let_it_be(:package_file) { create(:nuget_package).package_files.first }
+
   let(:service) { described_class.new(package_file.id) }
 
   describe '#execute' do
