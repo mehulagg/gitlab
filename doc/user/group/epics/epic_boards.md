@@ -141,12 +141,12 @@ You can't move the **Open** and **Closed** lists, but you can hide them when edi
 When you drag epics between lists, the result is different depending on the source list
 and the target list.
 
-|                              | To Open          | To Closed    | To label B list                   | To assignee Bob list              |
-| ---------------------------- | ---------------- | ------------ | --------------------------------- | --------------------------------- |
-| **From Open**                | -                | Issue closed | Label B added                     | Bob assigned                      |
-| **From Closed**              | Issue reopened   | -            | Issue reopened and label B added  | Issue reopened and Bob assigned   |
-| **From label A list**        | Label A removed  | Issue closed | Label A removed and label B added | Bob assigned                      |
-| **From assignee Alice list** | Alice unassigned | Issue closed | Label B added                     | Alice unassigned and Bob assigned |
+|                       | To Open        | To Closed  | To label B list                |
+| --------------------- | -------------- | ---------- | ------------------------------ |
+| **From Open**         | -              | Close epic | Add label B                    |
+| **From Closed**       | Reopen epic    | -          | Reopen epic and add label B    |
+| **From label A list** | Remove label A | Close epic | Remove label A and add label B |
+
 
 ### Edit the scope of an epic board
 

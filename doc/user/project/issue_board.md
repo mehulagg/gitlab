@@ -591,12 +591,12 @@ To move an issue to another list, select the issue card and drag it onto that li
 When you drag issues between lists, the result is different depending on the source list
 and the target list.
 
-|                              | To Open          | To Closed    | To label B list                   | To assignee Bob list              |
-| ---------------------------- | ---------------- | ------------ | --------------------------------- | --------------------------------- |
-| **From Open**                | -                | Issue closed | Label B added                     | Bob assigned                      |
-| **From Closed**              | Issue reopened   | -            | Issue reopened and label B added  | Issue reopened and Bob assigned   |
-| **From label A list**        | Label A removed  | Issue closed | Label A removed and label B added | Bob assigned                      |
-| **From assignee Alice list** | Alice unassigned | Issue closed | Label B added                     | Alice unassigned and Bob assigned |
+|                              | To Open        | To Closed   | To label B list                | To assignee Bob list          |
+| ---------------------------- | -------------- | ----------- | ------------------------------ | ----------------------------- |
+| **From Open**                | -              | Close issue | Add label B                    | Assign Bob                    |
+| **From Closed**              | Reopen issue   | -           | Reopen issue and add label B   | Reopen issue and assign Bob   |
+| **From label A list**        | Remove label A | Close issue | Remove label A and add label B | Assign Bob                    |
+| **From assignee Alice list** | Unassign Alice | Close issue | Add label B                    | Unassign Alice and assign Bob |
 
 ### Multi-select issue cards
 
