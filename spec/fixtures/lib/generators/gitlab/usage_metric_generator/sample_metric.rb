@@ -6,7 +6,6 @@ module Gitlab
       module Instrumentations
         class CountFooMetric < RedisHLLMetric
           def value
-
           end
         end
       end

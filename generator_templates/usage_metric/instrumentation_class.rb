@@ -6,7 +6,6 @@ module Gitlab
       module Instrumentations
         class <%= class_name %>Metric < <%= metric_superclass %>Metric
           def value
-
           end
         end
       end
