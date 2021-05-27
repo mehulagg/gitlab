@@ -22,16 +22,17 @@ module QA
         end
       end
 
-      before do
-        Runtime::Feature.enable(feature_flag, project: project)
-      end
-
       after do
         runner.remove_via_api!
-        Runtime::Feature.disable(feature_flag, project: project)
       end
 
       it 'users creates a pipeline which gets processed', :smoke, testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/1849' do
+        tags_mismatch_status = if Runtime::Feature.enabled?(feature_flag, project: project)
+                                 :failed
+                               else
+                                 :pending
+                               end
+
         Flow::Login.sign_in
 
         Resource::Repository::Commit.fabricate_via_api! do |commit|
@@ -77,7 +78,7 @@ module QA
         {
           'test-success': :passed,
           'test-failure': :failed,
-          'test-tags-mismatch': :failed,
+          'test-tags-mismatch': tags_mismatch_status,
           'test-artifacts': :passed
         }.each do |job, status|
           Page::Project::Pipeline::Show.perform do |pipeline|
