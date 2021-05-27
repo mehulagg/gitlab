@@ -50,7 +50,7 @@ module IncidentManagement
 
     def rotations
       strong_memoize(:rotations) do
-        schedule ? schedule.incident_management_oncall_rotations : project.incident_management_oncall_rotations
+        schedule ? schedule.rotations : project.incident_management_oncall_rotations
       end
     end
 
