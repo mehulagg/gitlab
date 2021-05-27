@@ -279,19 +279,20 @@ p.each do |project|
 end
 ```
 
-## Bulk update to change Jira project-level integrations for _all_ projects to Jira instance-level integration
+## Bulk update to change all the Jira integrations to Jira instance-level values
 
-To change all Jira project to use the instance-level integration settings, do:
+To change all Jira project to use the instance-level integration settings:
 
-```ruby
-jira_service_instance_id = JiraService.find_by(instance: true).id
-JiraService.where(active: true, instance: false, template: false, inherit_from_id: nil).find_each do |service|
-  service.update_attribute(inherit_from_id: jira_service_instance_id)
-end
-```
+1. In a Rails console:
 
-WARNING:
-After running the script, modify and save again the instance-level integration from the UI to propagate the changes to all the group-level and project-level integrations.
+   ```ruby
+   jira_service_instance_id = JiraService.find_by(instance: true).id
+   JiraService.where(active: true, instance: false, template: false, inherit_from_id: nil).find_each do |service|
+     service.update_attribute(inherit_from_id: jira_service_instance_id)
+   end
+   ```
+
+1. Modify and save again the instance-level integration from the UI to propagate the changes to all the group-level and project-level integrations.
 
 ### Bulk update to disable the Slack Notification service
 
