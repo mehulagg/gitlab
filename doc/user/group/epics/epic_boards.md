@@ -147,7 +147,6 @@ and the target list.
 | **From Closed**       | Reopen epic    | -          | Reopen epic and add label B    |
 | **From label A list** | Remove label A | Close epic | Remove label A and add label B |
 
-
 ### Edit the scope of an epic board
 
 Prerequisites:
