@@ -1,4 +1,10 @@
-import { GlInfiniteScroll, GlSkeletonLoader } from '@gitlab/ui';
+import {
+  GlDropdown,
+  GlDropdownItem,
+  GlInfiniteScroll,
+  GlModal,
+  GlSkeletonLoader,
+} from '@gitlab/ui';
 import { createLocalVue, RouterLinkStub } from '@vue/test-utils';
 import { nextTick } from 'vue';
 import VueApollo from 'vue-apollo';
@@ -82,6 +88,7 @@ describe('Iteration cadence list item', () => {
   function createComponent({
     props = {},
     canCreateCadence,
+    canEditCadence,
     resolverMock = jest.fn().mockResolvedValue(querySuccessResponse),
   } = {}) {
     apolloProvider = createMockApolloProvider([[iterationsInCadenceQuery, resolverMock]]);
@@ -98,6 +105,7 @@ describe('Iteration cadence list item', () => {
       provide: {
         groupPath,
         canCreateCadence,
+        canEditCadence,
       },
       propsData: {
         title: cadence.title,
@@ -184,5 +192,55 @@ describe('Iteration cadence list item', () => {
         }),
       }),
     );
+  });
+
+  describe('deleting cadence', () => {
+    describe('canEditCadence = false', () => {
+      beforeEach(async () => {
+        await createComponent({
+          canEditCadence: false,
+        });
+      });
+
+      it('hides dropdown and delete button', () => {
+        expect(wrapper.find(GlDropdown).exists()).toBe(false);
+      });
+    });
+
+    describe('canEditCadence = true', () => {
+      beforeEach(async () => {
+        await createComponent({
+          canEditCadence: true,
+        });
+      });
+
+      it('shows delete button', () => {
+        expect(wrapper.find(GlDropdown).exists()).toBe(true);
+      });
+
+      // eslint-disable-next-line jest/no-test-prefixes
+      xit('opens confirmation modal to delete cadence', async () => {
+        expect(wrapper.find(GlModal).isVisible()).toBe(false);
+
+        wrapper.findComponent(GlDropdown).trigger('click');
+        // wrapper.findByRole('button', { text: 'Delete cadence' }).trigger('click');
+        wrapper.findAll(GlDropdownItem).at(0).vm.$emit('click');
+
+        await nextTick();
+
+        expect(wrapper.find(GlModal).isVisible()).toBe(true);
+      });
+
+      // eslint-disable-next-line jest/no-test-prefixes
+      xit('re-focuses dropdown when delete modal closed', () => {});
+
+      // eslint-disable-next-line jest/no-test-prefixes
+      xit('emits delete-cadence event with cadence ID', async () => {
+        wrapper.findByRole('button', { text: 'Delete cadence' }).trigger('click');
+        await nextTick();
+
+        expect(wrapper.emitted('delete-cadence')).toEqual([[cadence.id]]);
+      });
+    });
   });
 });

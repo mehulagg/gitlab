@@ -185,6 +185,7 @@ export default {
         {{ n__('Every week', 'Every %d weeks', durationInWeeks) }}</span
       >
       <gl-dropdown
+        v-if="canEditCadence"
         ref="menu"
         icon="ellipsis_v"
         category="tertiary"

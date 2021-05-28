@@ -2,7 +2,9 @@ import { GlKeysetPagination, GlLoadingIcon } from '@gitlab/ui';
 import { createLocalVue } from '@vue/test-utils';
 import { nextTick } from 'vue';
 import VueApollo from 'vue-apollo';
+import IterationCadenceListItem from 'ee/iterations/components/iteration_cadence_list_item.vue';
 import IterationCadencesList from 'ee/iterations/components/iteration_cadences_list.vue';
+import destroyIterationCadence from 'ee/iterations/queries/destroy_cadence.mutation.graphql';
 import cadencesListQuery from 'ee/iterations/queries/iteration_cadences_list.query.graphql';
 import createMockApollo from 'helpers/mock_apollo_helper';
 import { TEST_HOST } from 'helpers/test_constants';
@@ -82,9 +84,16 @@ describe('Iteration cadences list', () => {
 
   function createComponent({
     canCreateCadence,
+    canEditCadence,
     resolverMock = jest.fn().mockResolvedValue(querySuccessResponse),
+    destroyMutationMock = jest
+      .fn()
+      .mockResolvedValue({ data: { iterationCadenceDestroy: { errors: [] } } }),
   } = {}) {
-    apolloProvider = createMockApolloProvider([[cadencesListQuery, resolverMock]]);
+    apolloProvider = createMockApolloProvider([
+      [cadencesListQuery, resolverMock],
+      [destroyIterationCadence, destroyMutationMock],
+    ]);
 
     wrapper = mount(IterationCadencesList, {
       localVue,
@@ -96,6 +105,7 @@ describe('Iteration cadences list', () => {
         groupPath,
         cadencesListPath,
         canCreateCadence,
+        canEditCadence,
       },
     });
 
@@ -182,9 +192,9 @@ describe('Iteration cadences list', () => {
         resolverMock.mockReset();
       });
 
-      it('correctly disables pagination buttons', async () => {
-        expect(findNextPageButton().element.disabled).toBe(false);
-        expect(findPrevPageButton().element.disabled).toBe(true);
+      it('correctly disables pagination buttons', () => {
+        expect(findNextPageButton().element).not.toBeDisabled();
+        expect(findPrevPageButton().element).toBeDisabled();
       });
 
       it('updates query when next page clicked', async () => {
@@ -211,6 +221,31 @@ describe('Iteration cadences list', () => {
             afterCursor: '',
           }),
         );
+      });
+    });
+
+    describe('deleting cadence', () => {
+      beforeEach(async () => {
+        await createComponent({
+          canEditCadence: true,
+        });
+      });
+
+      it('removes item from list', async () => {
+        await createComponent();
+
+        await waitForPromises();
+
+        // 3 cadences * 3 tabs, so 9 in total
+        expect(wrapper.findAllComponents(IterationCadenceListItem).length).toBe(9);
+        expect(wrapper.text()).toContain(cadences[0].title);
+
+        wrapper.findComponent(IterationCadenceListItem).vm.$emit('delete-cadence', cadences[0].id);
+
+        await waitForPromises();
+
+        expect(wrapper.findAllComponents(IterationCadenceListItem).length).toBe(6);
+        expect(wrapper.text()).not.toContain(cadences[0].title);
       });
     });
   });
