@@ -1,4 +1,4 @@
-import { GlFormCheckbox, GlFormGroup } from '@gitlab/ui';
+import { GlAlert, GlFormCheckbox, GlFormGroup } from '@gitlab/ui';
 import { mount } from '@vue/test-utils';
 import Vue, { nextTick } from 'vue';
 import VueApollo from 'vue-apollo';
@@ -70,10 +70,22 @@ describe('Iteration cadence form', () => {
   const findDurationGroup = () => wrapper.findAllComponents(GlFormGroup).at(3);
   const findFutureIterationsGroup = () => wrapper.findAllComponents(GlFormGroup).at(4);
 
+  const findError = () => wrapper.findComponent(GlAlert);
+
   const findTitle = () => wrapper.find('#cadence-title');
   const findStartDate = () => wrapper.find('#cadence-start-date');
   const findFutureIterations = () => wrapper.find('#cadence-schedule-future-iterations');
   const findDuration = () => wrapper.find('#cadence-duration');
+
+  const setTitle = (value) => findTitle().vm.$emit('input', value);
+  const setStartDate = (value) => findStartDate().vm.$emit('input', value);
+  const setFutureIterations = (value) => findFutureIterations().vm.$emit('input', value);
+  const setDuration = (value) => findDuration().vm.$emit('input', value);
+  const setAutomaticValue = (value) => {
+    const checkbox = findAutomatedSchedulingGroup().find(GlFormCheckbox).vm;
+    checkbox.$emit('input', value);
+    checkbox.$emit('change', value);
+  };
 
   const findAllFields = () => [
     findTitle(),
@@ -102,19 +114,20 @@ describe('Iteration cadence form', () => {
     });
 
     describe('save', () => {
-      it('triggers mutation with form data', () => {
-        const title = 'Iteration 5';
-        const startDate = '2020-05-05';
-        const durationInWeeks = 2;
-        const iterationsInAdvance = 6;
+      const title = 'Iteration 5';
+      const startDate = '2020-05-05';
+      const durationInWeeks = 2;
+      const iterationsInAdvance = 6;
 
-        findTitle().vm.$emit('input', title);
-        findStartDate().vm.$emit('input', startDate);
-        findDuration().vm.$emit('input', durationInWeeks);
-        findFutureIterations().vm.$emit('input', iterationsInAdvance);
+      it('triggers mutation with form data', () => {
+        setTitle(title);
+        setStartDate(startDate);
+        setDuration(durationInWeeks);
+        setFutureIterations(iterationsInAdvance);
 
         clickSave();
 
+        expect(findError().exists()).toBe(false);
         expect(resolverMock).toHaveBeenCalledWith({
           input: {
             groupPath,
@@ -129,15 +142,10 @@ describe('Iteration cadence form', () => {
       });
 
       it('redirects to Iteration page on success', async () => {
-        const title = 'Iteration 5';
-        const startDate = '2020-05-05';
-        const durationInWeeks = 2;
-        const iterationsInAdvance = 6;
-
-        findTitle().vm.$emit('input', title);
-        findStartDate().vm.$emit('input', startDate);
-        findDuration().vm.$emit('input', durationInWeeks);
-        findFutureIterations().vm.$emit('input', iterationsInAdvance);
+        setTitle(title);
+        setStartDate(startDate);
+        setDuration(durationInWeeks);
+        setFutureIterations(iterationsInAdvance);
 
         clickSave();
 
@@ -169,22 +177,28 @@ describe('Iteration cadence form', () => {
     });
 
     describe('automated scheduling disabled', () => {
-      beforeEach(() => {
-        findAutomatedSchedulingGroup().find(GlFormCheckbox).vm.$emit('input', false);
-      });
+      it('disables future iterations', async () => {
+        setAutomaticValue(false);
 
-      it('disables future iterations', () => {
+        await nextTick();
+
         expect(findFutureIterations().attributes('disabled')).toBe('disabled');
       });
 
-      it('does not require future iterations ', () => {
+      it('sets future iterations to 0', async () => {
         const title = 'Iteration 5';
         const startDate = '2020-05-05';
         const durationInWeeks = 2;
 
-        findTitle().vm.$emit('input', title);
-        findStartDate().vm.$emit('input', startDate);
-        findDuration().vm.$emit('input', durationInWeeks);
+        setFutureIterations(10);
+
+        setAutomaticValue(false);
+
+        await nextTick();
+
+        setTitle(title);
+        setStartDate(startDate);
+        setDuration(durationInWeeks);
 
         clickSave();
 
@@ -195,6 +209,7 @@ describe('Iteration cadence form', () => {
             automatic: false,
             startDate,
             durationInWeeks,
+            iterationsInAdvance: 0,
             active: true,
           },
         });
@@ -246,5 +261,8 @@ describe('Iteration cadence form', () => {
         expect(element).not.toBeDisabled();
       });
     });
+
+    // should 0 be the default, and always sent?
+    // how to handle invalid values? i.e. iterationsInAdvance == 1
   });
 });

@@ -52,9 +52,10 @@ const i18n = Object.freeze({
 });
 
 export default {
-  availableDurations: [{ value: null, text: i18n.duration.placeholder }, 1, 2, 3, 4, 5, 6],
+  availableDurations: [{ value: 0, text: i18n.duration.placeholder }, 1, 2, 3, 4, 5, 6],
   availableFutureIterations: [
     { value: null, text: i18n.futureIterations.placeholder },
+    0,
     2,
     4,
     6,
@@ -82,9 +83,9 @@ export default {
       title: '',
       automatic: true,
       startDate: null,
-      durationInWeeks: null,
+      durationInWeeks: 0,
       rollOverIssues: false,
-      iterationsInAdvance: null,
+      iterationsInAdvance: 0,
       validationState: {
         title: null,
         startDate: null,
@@ -122,7 +123,7 @@ export default {
           startDate: this.startDate,
           durationInWeeks: this.durationInWeeks,
           active: true,
-          iterationsInAdvance: this.automatic ? this.iterationsInAdvance : undefined,
+          iterationsInAdvance: this.iterationsInAdvance,
         },
       };
 
@@ -147,6 +148,10 @@ export default {
           }
 
           const cadence = group?.iterationCadences?.nodes?.[0];
+
+          if (!cadence) {
+            throw new Error(s__("Iterations|Couldn't find iteration cadence"));
+          }
 
           this.title = cadence.title;
           this.automatic = cadence.automatic;
@@ -184,6 +189,12 @@ export default {
       this.validationState.startDate = null;
       this.validationState.durationInWeeks = null;
       this.validationState.iterationsInAdvance = null;
+    },
+    updateAutomatic(value) {
+      this.clearValidation();
+      if (!value) {
+        this.iterationsInAdvance = 0;
+      }
     },
     save() {
       this.validateAllFields();
@@ -276,7 +287,7 @@ export default {
           id="cadence-automated-scheduling"
           v-model="automatic"
           :disabled="loadingCadence"
-          @change="clearValidation"
+          @change="updateAutomatic"
         >
           <span class="gl-font-weight-bold">{{ i18n.automatedScheduling.label }}</span>
         </gl-form-checkbox>
