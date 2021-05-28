@@ -10,7 +10,7 @@ You can read more about [project access tokens](../user/project/settings/project
 
 ## List project access tokens
 
-> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/238991) in GitLab 13.9.
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/238991) in GitLab 13.10.
 
 Get a list of project access tokens.
 
