@@ -1,6 +1,5 @@
 import { GlTable, GlDrawer } from '@gitlab/ui';
 import NetworkPolicyList from 'ee/threat_monitoring/components/network_policy_list.vue';
-import PolicyDrawer from 'ee/threat_monitoring/components/policy_editor/policy_drawer.vue';
 import createStore from 'ee/threat_monitoring/store';
 import { mountExtended } from 'helpers/vue_test_utils_helper';
 import { convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
@@ -57,10 +56,6 @@ describe('NetworkPolicyList component', () => {
   it('renders the new policy button', () => {
     const button = wrapper.find('[data-testid="new-policy"]');
     expect(button.exists()).toBe(true);
-  });
-
-  it('does not render the new policy drawer', () => {
-    expect(wrapper.find(PolicyDrawer).exists()).toBe(false);
   });
 
   it('fetches policies', () => {

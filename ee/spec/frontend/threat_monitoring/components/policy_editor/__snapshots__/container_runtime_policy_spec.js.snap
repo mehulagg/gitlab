@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`PolicyDrawer component supported YAML renders policy preview tabs 1`] = `
+exports[`ContainerRuntimePolicy component supported YAML renders policy preview tabs 1`] = `
 <div>
   <h5
     class="gl-mt-3"
@@ -54,7 +54,7 @@ spec:
 </div>
 `;
 
-exports[`PolicyDrawer component unsupported YAML renders policy preview tabs 1`] = `
+exports[`ContainerRuntimePolicy component unsupported YAML renders policy preview tabs 1`] = `
 <div>
   <h5
     class="gl-mt-3"
