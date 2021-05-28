@@ -23819,7 +23819,9 @@ CREATE INDEX index_namespaces_on_traversal_ids ON namespaces USING gin (traversa
 
 CREATE INDEX index_namespaces_on_type_and_id_partial ON namespaces USING btree (type, id) WHERE (type IS NOT NULL);
 
-CREATE INDEX index_non_requested_project_members_on_source_id_and_type ON members USING btree (source_id, source_type) WHERE ((requested_at IS NULL) AND ((type)::text = 'ProjectMember'::text));
+CREATE INDEX index_non_requested_project_members_on_source_id_and_type1 ON members USING btree (source_id, source_type) INCLUDE (user_id, invite_token, access_level) WHERE ((requested_at IS NULL) AND ((type)::text = 'ProjectMember'::text));
+
+COMMENT ON INDEX index_non_requested_project_members_on_source_id_and_type1 IS 'Included attributes help with the billed_project_members query';
 
 CREATE UNIQUE INDEX index_note_diff_files_on_diff_note_id ON note_diff_files USING btree (diff_note_id);
 
