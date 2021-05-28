@@ -101,15 +101,7 @@ RSpec.describe Ci::BuildTraceChunk, :clean_gitlab_redis_shared_state do
     subject { described_class.all_stores }
 
     it 'returns a correctly ordered array' do
-      is_expected.to eq(%i[redis database fog])
-    end
-
-    it 'returns redis store as the lowest precedence' do
-      expect(subject.first).to eq(:redis)
-    end
-
-    it 'returns fog store as the highest precedence' do
-      expect(subject.last).to eq(:fog)
+      is_expected.to eq(%i[redis database fog redis_trace_chunks])
     end
   end
 
