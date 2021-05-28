@@ -1,0 +1,8 @@
+query BoardList(
+  $id: ID!
+) {
+  boardList(id: $id) {
+    totalWeight
+    issuesCount
+  }
+}

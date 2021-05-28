@@ -17,6 +17,12 @@ module Types
           resolver: Resolvers::ProjectsResolver,
           description: "Find projects visible to the current user."
 
+    field :board_list, ::Types::BoardListType,
+          null: true,
+          description: "Find a list." do
+            argument :id, ::Types::GlobalIDType[List], required: true, description: 'Find a board list by its ID.'
+          end
+
     field :group, Types::GroupType,
           null: true,
           resolver: Resolvers::GroupResolver,
@@ -149,6 +155,13 @@ module Types
       # TODO: remove this line when the compatibility layer is removed
       # See: https://gitlab.com/gitlab-org/gitlab/-/issues/257883
       id = ::Types::GlobalIDType[Milestone].coerce_isolated_input(id)
+      GitlabSchema.find_by_gid(id)
+    end
+
+    def board_list(id:)
+      # TODO: remove this line when the compatibility layer is removed
+      # See: https://gitlab.com/gitlab-org/gitlab/-/issues/257883
+      id = ::Types::GlobalIDType[List].coerce_isolated_input(id)
       GitlabSchema.find_by_gid(id)
     end
 

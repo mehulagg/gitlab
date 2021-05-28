@@ -17,6 +17,7 @@ import sidebarEventHub from '~/sidebar/event_hub';
 import AccessorUtilities from '../../lib/utils/accessor';
 import { inactiveId, LIST, ListType } from '../constants';
 import eventHub from '../eventhub';
+import listQuery from '../graphql/board_lists_deferred.query.graphql';
 import ItemCount from './item_count.vue';
 
 export default {
@@ -98,14 +99,11 @@ export default {
     showListDetails() {
       return !this.list.collapsed || !this.isSwimlanesHeader;
     },
-    itemsCount() {
-      return this.list.issuesCount;
-    },
     countIcon() {
       return 'issues';
     },
     itemsTooltipLabel() {
-      return n__(`%d issue`, `%d issues`, this.itemsCount);
+      return n__(`%d issue`, `%d issues`, this.boardLists.issuesCount);
     },
     chevronTooltip() {
       return this.list.collapsed ? this.$options.i18n.expand : this.$options.i18n.collapse;
@@ -133,6 +131,16 @@ export default {
     },
     userCanDrag() {
       return !this.disabled && isListDraggable(this.list);
+    },
+  },
+  apollo: {
+    boardList: {
+      query: listQuery,
+      variables() {
+        return {
+          id: this.list.id,
+        };
+      },
     },
   },
   created() {
@@ -317,10 +325,10 @@ export default {
           </gl-sprintf>
         </div>
         <div v-else>• {{ itemsTooltipLabel }}</div>
-        <div v-if="weightFeatureAvailable">
+        <div v-if="weightFeatureAvailable && !$apollo.loading">
           •
           <gl-sprintf :message="__('%{totalWeight} total weight')">
-            <template #totalWeight>{{ list.totalWeight }}</template>
+            <template #totalWeight>{{ boardList.totalWeight }}</template>
           </gl-sprintf>
         </div>
       </gl-tooltip>
@@ -338,14 +346,18 @@ export default {
           <gl-tooltip :target="() => $refs.itemCount" :title="itemsTooltipLabel" />
           <span ref="itemCount" class="issue-count-badge-count">
             <gl-icon class="gl-mr-2" :name="countIcon" />
-            <item-count :items-size="itemsCount" :max-issue-count="list.maxIssueCount" />
+            <item-count
+              v-if="!$apollo.loading"
+              :items-size="boardList.issuesCount"
+              :max-issue-count="list.maxIssueCount"
+            />
           </span>
           <!-- EE start -->
-          <template v-if="weightFeatureAvailable && !isEpicBoard">
+          <template v-if="weightFeatureAvailable && !isEpicBoard && !$apollo.loading">
             <gl-tooltip :target="() => $refs.weightTooltip" :title="weightCountToolTip" />
             <span ref="weightTooltip" class="gl-display-inline-flex gl-ml-3">
               <gl-icon class="gl-mr-2" name="weight" />
-              {{ list.totalWeight }}
+              {{ boardList.totalWeight }}
             </span>
           </template>
           <!-- EE end -->
