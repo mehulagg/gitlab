@@ -72,7 +72,7 @@ export default {
   },
 
   methods: {
-    handleLabelClick(labels = []) {
+    handleLabelClick(labels) {
       // eslint-disable-next-line vue/no-mutating-props
       this.board.labels = labels;
       // eslint-disable-next-line vue/no-mutating-props
@@ -128,9 +128,7 @@ export default {
           variant="embedded"
           class="gl-display-block labels gl-w-full"
           @updateSelectedLabels="handleLabelClick"
-        >
-          {{ __('Any Label') }}
-        </labels-select>
+        />
       </div>
 
       <assignee-select

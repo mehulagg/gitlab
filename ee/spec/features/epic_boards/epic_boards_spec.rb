@@ -329,7 +329,7 @@ RSpec.describe 'epic boards', :js do
     page.within(".#{filter}") do
       if filter == 'labels'
         click_button 'Choose labels'
-        else
+      else
         click_button 'Edit'
       end
 

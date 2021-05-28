@@ -55,20 +55,11 @@ describe('BoardScope', () => {
         text_color: '#FFFFFF',
       };
 
-      it('initializes `board.labels` as empty array when `label.isAny` is `true`', () => {
-        const labelIsAny = { isAny: true };
-        vm.handleLabelClick(labelIsAny);
-
-        expect(Array.isArray(vm.board.labels)).toBe(true);
-        expect(vm.board.labels).toHaveLength(0);
-      });
-
       it('adds provided `label` to board.labels', () => {
         vm.handleLabelClick([label]);
 
         expect(vm.board.labels).toHaveLength(1);
         expect(vm.board.labels[0].id).toBe(label.id);
-        vm.handleLabelClick(label);
       });
     });
   });
