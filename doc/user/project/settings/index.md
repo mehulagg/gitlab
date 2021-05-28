@@ -80,59 +80,49 @@ Example `.compliance-gitlab-ci.yml`
 # Allows compliance team to control the ordering and interweaving of stages/jobs.
 # Stages without jobs defined will remain hidden.
 stages: 
-- pre-compliance
-- build
-- test
-- pre-deploy-compliance
-- deploy
-- post-compliance
+  - pre-compliance
+  - build
+  - test
+  - pre-deploy-compliance
+  - deploy
+  - post-compliance
 
-variables: # can be overriden by a developer's local .gitlab-ci.yml
+variables: # can be overriden by setting a job-specific variable in developer's local .gitlab-ci.yml
   FOO: sast
 
-sast: # none of these attributes can be overriden by a developer's local .gitlab-ci.yml
+security scan: # none of these attributes can be overriden by a developer's local .gitlab-ci.yml
   variables:
     FOO: sast
   image: ruby:2.6
   stage: pre-compliance
-  rules:
-        - when: always
-  allow_failure: false
   before_script:
-  - "# No before scripts."
+    - "# No before scripts."
   script:
-  - echo "running $FOO"
+    - echo "running $FOO"
   after_script:
-  - "# No after scripts."
+    - "# No after scripts."
 
 sanity check:
   image: ruby:2.6
   stage: pre-deploy-compliance
-  rules:
-        - when: always
-  allow_failure: false
   before_script:
-  - "# No before scripts."  
+    - "# No before scripts."  
   script:
-  - echo "running $FOO"
+    - echo "running $FOO"
   after_script:
-  - "# No after scripts."
-
+    - "# No after scripts."
 
 audit trail:
   image: ruby:2.6
   stage: post-compliance
-  rules:
-        - when: always
-  allow_failure: false
   before_script:
-  - "# No before scripts."
+    - "# No before scripts."
   script:
-  - echo "running $FOO"
+    - echo "running $FOO"
   after_script:
-  - "# No after scripts."
+    - "# No after scripts."
 
-include: # Execute individual project's configuration
+include: # Execute individual project's configuration (if project contains .gitlab-ci.yml)
   project: '$CI_PROJECT_PATH'
   file: '$CI_PROJECT_CONFIG_PATH'
 ```
@@ -183,24 +173,23 @@ to **Only Project Members**. In addition, you can select the option to
 
 Use the switches to enable or disable the following features:
 
-| Option                            | More access limit options | Description                                                                                                                                                                                    |
-|:----------------------------------|:--------------------------|:-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| **Issues**                        | ✓                         | Activates the GitLab issues tracker                                                                                                                                                            |
-| **Repository**                    | ✓                         | Enables [repository](../repository/) functionality                                                                                                                                             |
-| **Merge Requests**                | ✓                         | Enables [merge request](../merge_requests/) functionality; also see [Merge request settings](#merge-request-settings)                                                                          |
-| **Forks**                         | ✓                         | Enables [forking](../working_with_projects.md#fork-a-project) functionality                                                                                                                                    |
-| **Pipelines**                     | ✓                         | Enables [CI/CD](../../../ci/README.md) functionality                                                                                                                                           |
-| **Container Registry**            |                           | Activates a [registry](../../packages/container_registry/) for your Docker images                                                                                                              |
-| **Git Large File Storage**        |                           | Enables the use of [large files](../../../topics/git/lfs/index.md#git-large-file-storage-lfs)                                                                                    |
-| **Packages**                      |                           | Supports configuration of a [package registry](../../../administration/packages/index.md#gitlab-package-registry-administration) functionality                                    |
-| **Analytics**                     | ✓                         | Enables [analytics](../../analytics/)                                                                                                                                                          |
-| **Wiki**                          | ✓                         | Enables a separate system for [documentation](../wiki/)                                                                                                                                        |
-| **Snippets**                      | ✓                         | Enables [sharing of code and text](../../snippets.md)                                                                                                                                          |
-| **Pages**                         | ✓                         | Allows you to [publish static websites](../pages/)                                                                                                                                             |
-| **Metrics Dashboard**             | ✓                         | Control access to [metrics dashboard](../integrations/prometheus.md)
-| **Requirements**                  | ✓                         | Control access to [Requirements Management](../requirements/index.md) |
-| **Operations Dashboard**          | ✓                         | Control access to [operations dashboard](../../../operations/index.md)
-
+| Option                     | More access limit options | Description                                                                                                                                    |
+| :------------------------- | :------------------------ | :--------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Issues**                 | ✓                         | Activates the GitLab issues tracker                                                                                                            |
+| **Repository**             | ✓                         | Enables [repository](../repository/) functionality                                                                                             |
+| **Merge Requests**         | ✓                         | Enables [merge request](../merge_requests/) functionality; also see [Merge request settings](#merge-request-settings)                          |
+| **Forks**                  | ✓                         | Enables [forking](../working_with_projects.md#fork-a-project) functionality                                                                    |
+| **Pipelines**              | ✓                         | Enables [CI/CD](../../../ci/README.md) functionality                                                                                           |
+| **Container Registry**     |                           | Activates a [registry](../../packages/container_registry/) for your Docker images                                                              |
+| **Git Large File Storage** |                           | Enables the use of [large files](../../../topics/git/lfs/index.md#git-large-file-storage-lfs)                                                  |
+| **Packages**               |                           | Supports configuration of a [package registry](../../../administration/packages/index.md#gitlab-package-registry-administration) functionality |
+| **Analytics**              | ✓                         | Enables [analytics](../../analytics/)                                                                                                          |
+| **Wiki**                   | ✓                         | Enables a separate system for [documentation](../wiki/)                                                                                        |
+| **Snippets**               | ✓                         | Enables [sharing of code and text](../../snippets.md)                                                                                          |
+| **Pages**                  | ✓                         | Allows you to [publish static websites](../pages/)                                                                                             |
+| **Metrics Dashboard**      | ✓                         | Control access to [metrics dashboard](../integrations/prometheus.md)                                                                           |
+| **Requirements**           | ✓                         | Control access to [Requirements Management](../requirements/index.md)                                                                          |
+| **Operations Dashboard**   | ✓                         | Control access to [operations dashboard](../../../operations/index.md)                                                                         |
 Some features depend on others:
 
 - If you disable the **Issues** option, GitLab also removes the following
