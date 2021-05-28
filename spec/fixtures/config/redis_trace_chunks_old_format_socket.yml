@@ -1,0 +1,3 @@
+development: unix:/path/to/old/redis.trace_chunks.sock
+test: unix:/path/to/old/redis.trace_chunks.sock
+production: unix:/path/to/old/redis.trace_chunks.sock
