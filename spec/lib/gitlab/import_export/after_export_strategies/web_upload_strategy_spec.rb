@@ -34,11 +34,11 @@ RSpec.describe Gitlab::ImportExport::AfterExportStrategies::WebUploadStrategy do
   end
 
   describe '#execute' do
-    it 'removes the exported project file after the upload' do
+    it 'does not remove the exported project file after the upload' do
       allow(strategy).to receive(:send_file)
       allow(strategy).to receive(:handle_response_error)
 
-      expect(project).to receive(:remove_exports)
+      expect(project).not_to receive(:remove_exports)
 
       strategy.execute(user, project)
     end
