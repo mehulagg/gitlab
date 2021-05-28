@@ -131,7 +131,6 @@ list.
 
    ```shell
    sudo gitlab-ctl reconfigure
-   sudo gitlab-ctl restart
    ```
 
 1. Verify that everything is configured correctly:
