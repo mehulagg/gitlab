@@ -14,7 +14,13 @@ module Ci
 
     belongs_to :build, class_name: "Ci::Build", foreign_key: :build_id
 
-    default_value_for :data_store, :redis
+    default_value_for :data_store do
+      if false # feature enabled?
+        :redis_trace_chunks
+      else
+        :redis
+      end
+    end
 
     after_create { metrics.increment_trace_operation(operation: :chunked) }
 
@@ -28,19 +34,20 @@ module Ci
     # Note: The ordering of this hash is related to the precedence of persist store.
     # The bottom item takes the highest precedence, and the top item takes the lowest precedence.
     DATA_STORES = {
+      redis_trace_chunks: 4,
       redis: 1,
       database: 2,
       fog: 3
     }.freeze
 
     STORE_TYPES = DATA_STORES.keys.to_h do |store|
-      [store, "Ci::BuildTraceChunks::#{store.capitalize}".constantize]
+      [store, "Ci::BuildTraceChunks::#{store.to_s.camelize}".constantize]
     end.freeze
 
     enum data_store: DATA_STORES
 
-    scope :live, -> { redis }
-    scope :persisted, -> { not_redis.order(:chunk_index) }
+    scope :live, -> { where(data_store: [:redis, :redis_trace_chunks]) }
+    scope :persisted, -> { where.not(data_store: [:redis, :redis_trace_chunks]).order(:chunk_index) }
 
     class << self
       def all_stores
@@ -201,7 +208,7 @@ module Ci
     end
 
     def flushed?
-      !redis?
+      !redis? && !redis_trace_chunks?
     end
 
     def migrated?
@@ -209,7 +216,7 @@ module Ci
     end
 
     def live?
-      redis?
+      redis? || redis_trace_chunks?
     end
 
     def <=>(other)
