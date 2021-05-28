@@ -1,6 +1,7 @@
 import { GlButton } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
 import BlobHeaderEdit from '~/repository/components/blob_header_edit.vue';
+import WebIdeLink from '~/vue_shared/components/web_ide_link.vue';
 
 const DEFAULT_PROPS = {
   editPath: 'some_file.js/edit',
@@ -27,6 +28,7 @@ describe('BlobHeaderEdit component', () => {
   const findButtons = () => wrapper.findAll(GlButton);
   const findEditButton = () => findButtons().at(0);
   const findWebIdeButton = () => findButtons().at(1);
+  const findWebIdeLink = () => wrapper.find(WebIdeLink);
 
   it('renders component', () => {
     createComponent();
@@ -59,5 +61,21 @@ describe('BlobHeaderEdit component', () => {
     expect(findWebIdeButton().attributes('href')).toBe(DEFAULT_PROPS.webIdePath);
     expect(findWebIdeButton().text()).toBe('Web IDE');
     expect(findWebIdeButton()).not.toBeDisabled();
+  });
+
+  it('renders WebIdeLink component', () => {
+    window.gon.features = {
+      consolidatedEditButton: true,
+    };
+
+    createComponent();
+
+    const { editPath: editUrl, webIdePath: webIdeUrl } = DEFAULT_PROPS;
+
+    expect(findWebIdeLink().props()).toMatchObject({
+      editUrl,
+      webIdeUrl,
+      isBlob: true,
+    });
   });
 });
