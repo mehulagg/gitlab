@@ -551,9 +551,13 @@ module EE
 
     # Members belonging directly to Projects within Group or Projects within subgroups
     def billed_project_members
-      ::ProjectMember.active_without_invites_and_requests.without_project_bots.where(
+      user_ids = ::ProjectMember.without_invites_and_requests.where(
         source_id: ::Project.joins(:group).where(namespace: self_and_descendants)
       )
+      .distinct
+      .select(:user_id)
+
+      ::User.with_state(:active).without_project_bot.where(id: user_ids)
     end
 
     # Members belonging to Groups invited to collaborate with Projects
