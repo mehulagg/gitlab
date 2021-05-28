@@ -30,7 +30,7 @@ RSpec.describe IncidentManagement::Escalations::ProcessService do
       it_behaves_like 'does not send on-call notification'
 
       specify do
-        expect { subject }.not_to change(escalation, :updated_at)
+        expect { subject }.to change(escalation, :updated_at)
       end
     end
 
@@ -52,7 +52,11 @@ RSpec.describe IncidentManagement::Escalations::ProcessService do
           stub_feature_flags(escalation_policies_mvc: false)
         end
 
-        it_behaves_like 'it does not escalate'
+        it_behaves_like 'does not send on-call notification'
+
+        it 'does not update the escalation' do
+          expect { subject }.not_to change(escalation, :updated_at)
+        end
       end
     end
 
@@ -85,9 +89,24 @@ RSpec.describe IncidentManagement::Escalations::ProcessService do
 
       context 'time past second rule' do
         let(:escalation_params) { { created_at: rule_2.elapsed_time_seconds.seconds.ago, updated_at: rule_1.elapsed_time_seconds.seconds.ago } }
-        let(:users) { potential_oncall_users_for_rule(rule_2) }
+        let(:users) { potential_oncall_users_for_rule(rule_2) + potential_oncall_users_for_rule(rule_1) }
 
-        it_behaves_like 'it escalates'
+        it 'escalates both escalation rules' do
+          notification_async = double(NotificationService::Async)
+          allow(NotificationService).to receive_message_chain(:new, :async).and_return(notification_async)
+
+          expect(notification_async).to receive(:notify_oncall_users_of_alert).with(
+            potential_oncall_users_for_rule(rule_1),
+            alert
+          ).once
+
+          expect(notification_async).to receive(:notify_oncall_users_of_alert).with(
+            potential_oncall_users_for_rule(rule_2),
+            alert
+          ).once
+
+          execute
+        end
 
         context 'second rule status not valid' do
           let(:alert_params) { { status: AlertManagement::Alert::STATUSES[:resolved], ended_at: Time.current } }

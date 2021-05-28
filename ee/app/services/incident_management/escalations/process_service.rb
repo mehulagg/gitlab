@@ -5,30 +5,31 @@ module IncidentManagement
     class ProcessService < BaseService
       include ::AlertManagement::AlertProcessing
 
-      def initialize(escalation, zero_minute_escalation: false)
+      def initialize(escalation)
         @escalation = escalation
         @project = escalation.project
         @escalation_policy = escalation.policy
         @alert = escalation.alert
-        @zero_minute_escalation = zero_minute_escalation
       end
 
       def execute
         return unless ::Gitlab::IncidentManagement.escalation_policies_available?(project)
 
-        # Rules, with largest escalation time offset first i.e 100, 60, 30, 20
-        rules = escalation_policy.rules.ordered_by_elapsed_time_seconds
+        rules = escalation_policy.rules
 
-        @rule_to_escalate = find_rule_to_escalate(rules) # TODO find zero min escalation if set
-        escalate_rule!
+        find_rules_to_escalate(rules).each do |rule|
+          escalate_rule!(rule)
+        end
+
+        mark_escalation_as_updated!
       end
 
       private
 
-      attr_reader :project, :escalation, :escalation_policy, :alert, :zero_minute_escalation, :rule_to_escalate
+      attr_reader :project, :escalation, :escalation_policy, :alert, :rule_to_escalate
 
-      def find_rule_to_escalate(rules)
-        rules.detect do |rule|
+      def find_rules_to_escalate(rules)
+        rules.select do |rule|
           status_not_surpassed?(rule) &&
             escalation_time_surpassed_threshold?(rule) &&
             not_previously_escalated?(rule)
@@ -49,11 +50,11 @@ module IncidentManagement
         escalation.updated_at.to_i <= (escalation.created_at + rule.elapsed_time_seconds).to_i
       end
 
-      def escalate_rule!
-        return unless rule_to_escalate
+      def escalate_rule!(rule)
+        @rule_to_escalate = rule
 
         notify_oncall if oncall_notification_recipients.any?
-        mark_escalation_as_updated!
+        clear_memoization(:oncall_notification_recipients)
       end
 
       def oncall_notification_recipients
