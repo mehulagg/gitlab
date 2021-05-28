@@ -20,7 +20,7 @@ module Resolvers
       end
 
       def resolve(link_type: nil, **)
-        issue_links_by_link_type(link_type)
+        issue_links_by_link_type(link_type).select(&method(:allowed_to_read?))
       end
 
       private
@@ -43,6 +43,10 @@ module Resolvers
         else
           args[:link_type].nil?
         end
+      end
+
+      def allowed_to_read?(issue_link)
+        Ability.allowed?(current_user, :read_issue, issue_link.issue)
       end
     end
   end
