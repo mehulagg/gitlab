@@ -24,6 +24,14 @@ module QA
             element :create_new_board_button
           end
 
+          view 'app/assets/javascripts/vue_shared/components/sidebar/labels_select_vue/labels_select_vue_root.vue' do
+            element :labels_dropdown_content
+          end
+
+          view 'app/assets/javascripts/vue_shared/components/sidebar/labels_select_vue/dropdown_title.vue' do
+            element :labels_edit_button
+          end
+
           view 'app/assets/javascripts/boards/components/board_content.vue' do
             element :boards_list
           end

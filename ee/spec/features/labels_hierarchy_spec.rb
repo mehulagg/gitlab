@@ -35,9 +35,7 @@ RSpec.describe 'Labels Hierarchy', :js do
           find('button', text: "Edit board").click
         end
 
-        page.within('.js-labels-block') do
-          find('.edit-link').click
-        end
+        click_button 'Choose labels'
 
         wait_for_requests
 

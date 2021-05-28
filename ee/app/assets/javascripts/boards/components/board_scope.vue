@@ -72,11 +72,11 @@ export default {
   },
 
   methods: {
-    handleLabelClick(labels) {
-      if (labels.length) {
-        // eslint-disable-next-line vue/no-mutating-props
-        this.board.labels = labels;
-      }
+    handleLabelClick(labels = []) {
+      // eslint-disable-next-line vue/no-mutating-props
+      this.board.labels = labels;
+      // eslint-disable-next-line vue/no-mutating-props
+      this.board.label_ids = labels.map(({ id }) => id);
     },
   },
 };
@@ -109,12 +109,11 @@ export default {
         @set-iteration="$emit('set-iteration', $event)"
       />
 
-      <div class="block labels">
-        <p class="title hide-collapsed gl-display-flex gl-justify-content-space-between gl-mb-3">
+      <div class="block">
+        <p class="title gl-display-flex gl-justify-content-space-between gl-mb-3">
           <span>{{ __('Labels') }}</span>
         </p>
         <labels-select
-          ref="labelsSelect"
           :key="labelsPath"
           :allow-label-edit="canAdminBoard"
           :allow-label-create="canAdminBoard"

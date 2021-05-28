@@ -115,8 +115,8 @@ RSpec.describe 'Scoped issue boards', :js do
           click_button 'Expand'
 
           page.within('.labels') do
-            click_button 'Edit'
-            page.within('.dropdown') do
+            click_button 'Choose labels'
+            page.within('.labels-select-contents-list') do
               expect(page).to have_content(group_label.title)
               expect(page).not_to have_content(project_label.title)
             end
@@ -357,8 +357,8 @@ RSpec.describe 'Scoped issue boards', :js do
             edit_board.click
 
             page.within('.labels') do
-              click_button 'Edit'
-              page.within('.dropdown') do
+              click_button 'Choose labels'
+              page.within('.labels-select-contents-list') do
                 expect(page).to have_content(group_label.title)
                 expect(page).not_to have_content(project_label.title)
               end
@@ -555,7 +555,11 @@ RSpec.describe 'Scoped issue boards', :js do
       end
     else
       page.within(".#{filter}") do
-        click_button 'Edit'
+        if filter == 'labels'
+          find('.labels-select-dropdown-button').click
+        else
+          click_button 'Edit'
+        end
 
         if value.is_a?(Array)
           value.each { |value| click_link value }
@@ -584,7 +588,11 @@ RSpec.describe 'Scoped issue boards', :js do
 
     click_value(filter, value)
 
-    click_on_board_modal
+    if filter == 'labels'
+      find('.labels-select-dropdown-button').click
+    else
+      click_on_board_modal
+    end
 
     click_button 'Save changes'
 
