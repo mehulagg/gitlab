@@ -4,6 +4,7 @@ import Vue, { nextTick } from 'vue';
 import VueApollo from 'vue-apollo';
 import IterationCadenceForm from 'ee/iterations/components/iteration_cadence_form.vue';
 import createCadence from 'ee/iterations/queries/cadence_create.mutation.graphql';
+import getCadence from 'ee/iterations/queries/iteration_cadence.query.graphql';
 import createMockApollo from 'helpers/mock_apollo_helper';
 import { TEST_HOST } from 'helpers/test_constants';
 import { extendedWrapper } from 'helpers/vue_test_utils_helper';
@@ -30,9 +31,12 @@ describe('Iteration cadence form', () => {
   const iterationCadence = {
     id: `gid://gitlab/Iterations::Cadence/${id}`,
     title: 'An iteration',
+    automatic: true,
     description: 'The words',
+    duration: '3',
     startDate: '2020-06-28',
     dueDate: '2020-07-05',
+    iterationsInAdvance: '2',
   };
 
   const createMutationSuccess = {
@@ -41,6 +45,28 @@ describe('Iteration cadence form', () => {
   const createMutationFailure = {
     data: {
       iterationCadenceCreate: { iterationCadence, errors: ['alas, your data is unchanged'] },
+    },
+  };
+  const getCadenceSuccess = {
+    data: {
+      group: {
+        __typename: 'group',
+        iterationCadences: {
+          nodes: [
+            {
+              id: `gid://gitlab/Iterations::Cadence/${id}`,
+              title: 'An iteration',
+              description: 'The words',
+              startDate: '2020-06-28',
+              dueDate: '2020-07-05',
+              automatic: true,
+              durationInWeeks: 3,
+              rollOver: true,
+              iterationsInAdvance: 2,
+            },
+          ],
+        },
+      },
     },
   };
 
@@ -68,7 +94,7 @@ describe('Iteration cadence form', () => {
   const findAutomatedSchedulingGroup = () => wrapper.findAllComponents(GlFormGroup).at(1);
   const findStartDateGroup = () => wrapper.findAllComponents(GlFormGroup).at(2);
   const findDurationGroup = () => wrapper.findAllComponents(GlFormGroup).at(3);
-  const findFutureIterationsGroup = () => wrapper.findAllComponents(GlFormGroup).at(4);
+  const findFutureIterationsGroup = () => wrapper.findAllComponents(GlFormGroup).at(5);
 
   const findError = () => wrapper.findComponent(GlAlert);
 
@@ -76,6 +102,7 @@ describe('Iteration cadence form', () => {
   const findStartDate = () => wrapper.find('#cadence-start-date');
   const findFutureIterations = () => wrapper.find('#cadence-schedule-future-iterations');
   const findDuration = () => wrapper.find('#cadence-duration');
+  const findDescription = () => wrapper.find('#cadence-description');
 
   const setTitle = (value) => findTitle().vm.$emit('input', value);
   const setStartDate = (value) => findStartDate().vm.$emit('input', value);
@@ -137,6 +164,7 @@ describe('Iteration cadence form', () => {
             durationInWeeks,
             iterationsInAdvance,
             active: true,
+            description: '',
           },
         });
       });
@@ -210,6 +238,7 @@ describe('Iteration cadence form', () => {
             startDate,
             durationInWeeks,
             iterationsInAdvance: 0,
+            description: '',
             active: true,
           },
         });
@@ -218,8 +247,13 @@ describe('Iteration cadence form', () => {
   });
 
   describe('Edit cadence', () => {
+    const query = getCadence;
+
     beforeEach(() => {
       $router.currentRoute.params.cadenceId = id;
+
+      const resolverMock = jest.fn().mockResolvedValue(getCadenceSuccess);
+      createComponent({ query, resolverMock });
     });
 
     afterEach(() => {
@@ -227,19 +261,11 @@ describe('Iteration cadence form', () => {
     });
 
     it('shows correct title and button text', () => {
-      const resolverMock = jest.fn().mockResolvedValue(createMutationSuccess);
-      createComponent({ resolverMock });
-
       expect(wrapper.text()).toContain(wrapper.vm.i18n.edit.title);
       expect(wrapper.text()).toContain(wrapper.vm.i18n.edit.save);
     });
 
     it('disables fields while loading', async () => {
-      const resolverMock = jest.fn().mockResolvedValue(createMutationSuccess);
-      createComponent({ resolverMock });
-
-      await nextTick();
-
       findAllFields().forEach(({ element }) => {
         expect(element).toBeDisabled();
       });
@@ -252,17 +278,13 @@ describe('Iteration cadence form', () => {
     });
 
     it('fills fields with existing cadence info after loading', async () => {
-      const resolverMock = jest.fn().mockResolvedValue(createMutationSuccess);
-      createComponent({ resolverMock });
-
       await waitForPromises();
 
-      findAllFields().forEach(({ element }) => {
-        expect(element).not.toBeDisabled();
-      });
+      expect(findTitle().element.value).toBe(iterationCadence.title);
+      expect(findStartDate().element.value).toBe(iterationCadence.startDate);
+      expect(findFutureIterations().element.value).toBe(`${iterationCadence.iterationsInAdvance}`);
+      expect(findDuration().element.value).toBe(iterationCadence.duration);
+      expect(findDescription().element.value).toBe(iterationCadence.description);
     });
-
-    // should 0 be the default, and always sent?
-    // how to handle invalid values? i.e. iterationsInAdvance == 1
   });
 });

@@ -3,6 +3,12 @@ mutation updateIterationCadence($input: IterationCadenceUpdateInput!) {
     iterationCadence {
       id
       title
+      automatic
+      startDate
+      durationInWeeks
+      rollOver
+      iterationsInAdvance
+      description
     }
     errors
   }
