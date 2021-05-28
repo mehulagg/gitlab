@@ -51,14 +51,6 @@ export default {
 
       return this.policiesWithDefaults.find((policy) => policy.name === this.selectedPolicyName);
     },
-    hasPolicyChanges() {
-      if (!this.hasSelectedPolicy) return false;
-
-      return (
-        this.selectedPolicy.manifest !== this.initialManifest ||
-        this.selectedPolicy.isEnabled !== this.initialEnforcementStatus
-      );
-    },
     hasAutoDevopsPolicy() {
       return this.policiesWithDefaults.some((policy) => policy.isAutodevops);
     },
