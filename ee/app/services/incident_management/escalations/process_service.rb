@@ -46,7 +46,7 @@ module IncidentManagement
       end
 
       def not_previously_escalated?(rule)
-        escalation.updated_at < (escalation.created_at + rule.elapsed_time_seconds)
+        escalation.updated_at.to_i <= (escalation.created_at + rule.elapsed_time_seconds).to_i
       end
 
       def escalate_rule!
