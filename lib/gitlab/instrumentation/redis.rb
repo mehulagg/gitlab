@@ -8,6 +8,7 @@ module Gitlab
       Cache = Class.new(RedisBase).enable_redis_cluster_validation
       Queues = Class.new(RedisBase)
       SharedState = Class.new(RedisBase).enable_redis_cluster_validation
+      TraceChunks = Class.new(RedisBase).enable_redis_cluster_validation
 
       STORAGES = [ActionCable, Cache, Queues, SharedState].freeze
 
