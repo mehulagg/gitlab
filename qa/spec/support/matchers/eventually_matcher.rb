@@ -58,7 +58,7 @@ module Matchers
           sleep_interval: 0.5
         ) do
           public_send(expectation_name, actual)
-        rescue RSpec::Expectations::ExpectationNotMetError
+        rescue RSpec::Expectations::ExpectationNotMetError, QA::Resource::ApiFabricator::ResourceNotFoundError
           false
         end
       rescue QA::Support::Repeater::RetriesExceededError, QA::Support::Repeater::WaitExceededError => e
