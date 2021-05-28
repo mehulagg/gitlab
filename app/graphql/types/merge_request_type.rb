@@ -83,6 +83,9 @@ module Types
           description: 'Indicates if the project settings will lead to source branch deletion after merge.'
     field :merge_status, GraphQL::STRING_TYPE, method: :public_merge_status, null: true,
           description: 'Status of the merge request.'
+    field :merge_status_enum, ::Types::MergeRequests::MergeStatusEnum,
+          method: :public_merge_status, null: true,
+          description: 'Merge status of the merge request.'
     field :in_progress_merge_commit_sha, GraphQL::STRING_TYPE, null: true,
           description: 'Commit SHA of the merge request if merge is in progress.'
     field :merge_error, GraphQL::STRING_TYPE, null: true,
