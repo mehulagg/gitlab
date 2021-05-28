@@ -1,27 +1,22 @@
 <script>
-import { GlTable, GlEmptyState, GlDrawer, GlButton, GlAlert, GlSprintf, GlLink } from '@gitlab/ui';
+import { GlTable, GlEmptyState, GlButton, GlAlert, GlSprintf, GlLink } from '@gitlab/ui';
 import { mapState, mapActions, mapGetters } from 'vuex';
 import { getTimeago } from '~/lib/utils/datetime_utility';
 import { setUrlFragment, mergeUrlParams } from '~/lib/utils/url_utility';
 import { s__ } from '~/locale';
-import { getContentWrapperHeight } from '../utils';
 import EnvironmentPicker from './environment_picker.vue';
-import { CiliumNetworkPolicyKind } from './policy_editor/constants';
-import PolicyDrawer from './policy_editor/policy_drawer.vue';
+import NetworkPolicyDrawer from './network_policy_drawer.vue';
 
 export default {
   components: {
     GlTable,
     GlEmptyState,
-    GlDrawer,
     GlButton,
     GlAlert,
     GlSprintf,
     GlLink,
     EnvironmentPicker,
-    NetworkPolicyEditor: () =>
-      import(/* webpackChunkName: 'network_policy_editor' */ './network_policy_editor.vue'),
-    PolicyDrawer,
+    NetworkPolicyDrawer,
   },
   props: {
     documentationPath: {
@@ -53,11 +48,6 @@ export default {
     },
     hasAutoDevopsPolicy() {
       return this.policiesWithDefaults.some((policy) => policy.isAutodevops);
-    },
-    hasCiliumSelectedPolicy() {
-      return this.hasSelectedPolicy
-        ? this.selectedPolicy.manifest.includes(CiliumNetworkPolicyKind)
-        : false;
     },
     editPolicyPath() {
       return this.hasSelectedPolicy
@@ -106,9 +96,6 @@ export default {
   },
   methods: {
     ...mapActions('networkPolicies', ['fetchPolicies', 'createPolicy', 'updatePolicy']),
-    getDrawerHeaderHeight() {
-      return getContentWrapperHeight('.js-threat-monitoring-container-wrapper');
-    },
     getTimeAgoString(creationTimestamp) {
       if (!creationTimestamp) return '';
       return getTimeago().format(creationTimestamp);
@@ -208,44 +195,11 @@ export default {
       </template>
     </gl-table>
 
-    <gl-drawer
-      ref="editorDrawer"
-      :z-index="252"
+    <network-policy-drawer
       :open="hasSelectedPolicy"
-      :header-height="getDrawerHeaderHeight()"
-      @close="deselectPolicy"
-    >
-      <template #header>
-        <div>
-          <h3 class="gl-mb-5 gl-mt-0">{{ selectedPolicy.name }}</h3>
-          <div>
-            <gl-button
-              data-testid="edit-button"
-              category="primary"
-              variant="info"
-              :href="editPolicyPath"
-              >{{ s__('NetworkPolicies|Edit policy') }}</gl-button
-            >
-          </div>
-        </div>
-      </template>
-      <div v-if="hasSelectedPolicy">
-        <policy-drawer v-if="hasCiliumSelectedPolicy" v-model="selectedPolicy.manifest" />
-
-        <div v-else>
-          <h5>{{ s__('NetworkPolicies|Policy definition') }}</h5>
-          <p>
-            {{ s__("NetworkPolicies|Define this policy's location, conditions and actions.") }}
-          </p>
-          <div class="gl-p-3 gl-bg-gray-50">
-            <network-policy-editor
-              ref="policyEditor"
-              v-model="selectedPolicy.manifest"
-              class="network-policy-editor"
-            />
-          </div>
-        </div>
-      </div>
-    </gl-drawer>
+      :policy="selectedPolicy"
+      :edit-policy-path="editPolicyPath"
+      data-testid="policyDrawer"
+    />
   </div>
 </template>
