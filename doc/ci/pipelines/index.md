@@ -148,7 +148,7 @@ The pipeline now executes the jobs as configured.
 
 You can use the [`value` and `description`](../yaml/README.md#prefill-variables-in-manual-pipelines)
 keywords to define
-[top-level variables](../variables/README.md#create-a-custom-cicd-variable-in-the-gitlab-ciyml-file)
+[pipeline-level (global) variables](../variables/README.md#create-a-custom-cicd-variable-in-the-gitlab-ciyml-file)
 that are prefilled when running a pipeline manually.
 
 In pipelines triggered manually, the **Run pipelines** page displays all top-level variables
@@ -165,7 +165,7 @@ variables:
     description: "The deployment target. Change this variable to 'canary' or 'production' if needed."
 ```
 
-This feature does not work with job-level variables.
+You cannot set job-level variables to be pre-filled when you run a pipeline manually.
 
 ### Run a pipeline by using a URL query string
 
