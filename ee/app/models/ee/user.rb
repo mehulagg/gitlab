@@ -124,6 +124,7 @@ module EE
         unique_internal(where(user_type: :visual_review_bot), 'visual-review-bot', email_pattern) do |u|
           u.bio = 'The Gitlab Visual Review feedback bot'
           u.name = 'Gitlab Visual Review Bot'
+          u.website_url = ::Gitlab::Routing.url_helpers.help_page_url('ci/review_apps/index.md')
         end
       end
 

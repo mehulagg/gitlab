@@ -1335,6 +1335,45 @@ RSpec.describe User do
     end
   end
 
+  context 'bot users' do
+    shared_examples 'bot users' do |bot_type|
+
+      it 'creates the bot user if it does not exist' do
+        expect do
+          described_class.public_send(bot_type)
+        end.to change { User.bots.count }.by(1)
+      end
+
+      it 'creates a route for the namespace of the created bot user' do
+        bot_user = described_class.public_send(bot_type)
+
+        expect(bot_user.namespace.route).to be_present
+      end
+
+      it 'does not create a new bot user if it already exists' do
+        described_class.public_send(bot_type)
+
+        expect do
+          described_class.public_send(bot_type)
+        end.not_to change { User.count }
+      end
+    end
+
+    shared_examples 'bot documentation urls' do |bot_type, documentation_path|
+      it 'sets the documentation url for the created bot' do
+        bot_user = described_class.public_send(bot_type)
+
+        expect(bot_user.website_url).to be_present
+        expect(bot_user.website_url).to end_with(documentation_path)
+      end
+    end
+
+    it_behaves_like 'bot users', :visual_review_bot
+
+    it_behaves_like 'bot documentation urls', :visual_review_bot, 'ci/review_apps/index.md'
+
+  end
+
   context 'paid namespaces' do
     let_it_be(:user) { create(:user) }
     let_it_be(:ultimate_group) { create(:group_with_plan, plan: :ultimate_plan) }
