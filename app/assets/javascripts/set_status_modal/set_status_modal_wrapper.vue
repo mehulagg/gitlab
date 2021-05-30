@@ -13,7 +13,7 @@ import $ from 'jquery';
 import Vue from 'vue';
 import GfmAutoComplete from 'ee_else_ce/gfm_auto_complete';
 import * as Emoji from '~/emoji';
-import { deprecatedCreateFlash as createFlash } from '~/flash';
+import createFlash from '~/flash';
 import { BV_SHOW_MODAL, BV_HIDE_MODAL } from '~/lib/utils/constants';
 import { __, s__, sprintf } from '~/locale';
 import { updateUserStatus } from '~/rest_api';
@@ -138,7 +138,9 @@ export default {
 
           this.setDefaultEmoji();
         })
-        .catch(() => createFlash(__('Failed to load emoji list.')));
+        .catch(() => createFlash({
+        message: __('Failed to load emoji list.')
+      }));
     },
     showEmojiMenu(e) {
       e.stopPropagation();
@@ -218,7 +220,9 @@ export default {
     },
     onUpdateFail() {
       createFlash(
-        s__("SetStatusModal|Sorry, we weren't able to set your status. Please try again later."),
+        {
+          message: s__("SetStatusModal|Sorry, we weren't able to set your status. Please try again later.")
+        },
       );
 
       this.closeModal();

@@ -3,7 +3,7 @@ import { GlButton, GlModalDirective, GlTooltipDirective, GlIcon } from '@gitlab/
 import Mousetrap from 'mousetrap';
 import VueDraggable from 'vuedraggable';
 import { mapActions, mapState, mapGetters } from 'vuex';
-import { deprecatedCreateFlash as createFlash } from '~/flash';
+import createFlash from '~/flash';
 import invalidUrl from '~/lib/utils/invalid_url';
 import { ESC_KEY } from '~/lib/utils/keys';
 import { mergeUrlParams, updateHistory } from '~/lib/utils/url_utility';
@@ -177,9 +177,11 @@ export default {
         }
       } catch {
         createFlash(
-          s__(
-            'Metrics|Link contains invalid chart information, please verify the link to see the expanded panel.',
-          ),
+          {
+            message: s__(
+              'Metrics|Link contains invalid chart information, please verify the link to see the expanded panel.',
+            )
+          },
         );
       }
     },
@@ -201,12 +203,13 @@ export default {
        * This watcher is set for future SPA behaviour of the dashboard
        */
       if (hasWarnings) {
-        createFlash(
-          s__(
+        createFlash({
+          message: s__(
             'Metrics|Your dashboard schema is invalid. Edit the dashboard to correct the YAML schema.',
           ),
-          'warning',
-        );
+
+          type: 'warning'
+        });
       }
     },
   },
@@ -319,9 +322,11 @@ export default {
     },
     onDateTimePickerInvalid() {
       createFlash(
-        s__(
-          'Metrics|Link contains an invalid time window, please verify the link to see the requested time range.',
-        ),
+        {
+          message: s__(
+            'Metrics|Link contains an invalid time window, please verify the link to see the requested time range.',
+          )
+        },
       );
       // As a fallback, switch to default time range instead
       this.selectedTimeRange = defaultTimeRange;

@@ -10,7 +10,7 @@ import notify from '~/lib/utils/notify';
 import { sprintf, s__, __ } from '~/locale';
 import Project from '~/pages/projects/project';
 import SmartInterval from '~/smart_interval';
-import { deprecatedCreateFlash as createFlash } from '../flash';
+import createFlash from '../flash';
 import { setFaviconOverlay } from '../lib/utils/favicon';
 import GroupedAccessibilityReportsApp from '../reports/accessibility_report/grouped_accessibility_reports_app.vue';
 import GroupedCodequalityReportsApp from '../reports/codequality_report/grouped_codequality_reports_app.vue';
@@ -217,7 +217,9 @@ export default {
         this.initWidget(data);
       })
       .catch(() =>
-        createFlash(__('Unable to load the merge request widget. Try reloading the page.')),
+        createFlash({
+          message: __('Unable to load the merge request widget. Try reloading the page.')
+        }),
       );
   },
   beforeDestroy() {
@@ -298,7 +300,9 @@ export default {
             cb.call(null, data);
           }
         })
-        .catch(() => createFlash(__('Something went wrong. Please try again.')));
+        .catch(() => createFlash({
+        message: __('Something went wrong. Please try again.')
+      }));
     },
     setFaviconHelper() {
       if (this.mr.ciStatusFaviconPath) {
@@ -353,9 +357,11 @@ export default {
     },
     throwDeploymentsError() {
       createFlash(
-        __(
-          'Something went wrong while fetching the environments for this merge request. Please try again.',
-        ),
+        {
+          message: __(
+            'Something went wrong while fetching the environments for this merge request. Please try again.',
+          )
+        },
       );
     },
     fetchActionsContent() {
@@ -370,7 +376,9 @@ export default {
             Project.initRefSwitcher();
           }
         })
-        .catch(() => createFlash(__('Something went wrong. Please try again.')));
+        .catch(() => createFlash({
+        message: __('Something went wrong. Please try again.')
+      }));
     },
     handleNotification(data) {
       if (data.ci_status === this.mr.ciStatus) return;

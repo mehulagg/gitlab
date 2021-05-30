@@ -3,7 +3,7 @@
 import { GlLoadingIcon, GlFormInput, GlFormGroup, GlButton } from '@gitlab/ui';
 import { escape, debounce } from 'lodash';
 import { mapActions, mapState } from 'vuex';
-import { deprecatedCreateFlash as createFlash } from '~/flash';
+import createFlash from '~/flash';
 import { s__, sprintf } from '~/locale';
 import createEmptyBadge from '../empty_badge';
 import Badge from './badge.vue';
@@ -134,12 +134,17 @@ export default {
       if (this.isEditing) {
         return this.saveBadge()
           .then(() => {
-            createFlash(s__('Badges|Badge saved.'), 'notice');
+            createFlash({
+              message: s__('Badges|Badge saved.'),
+              type: 'notice'
+            });
             this.wasValidated = false;
           })
           .catch((error) => {
             createFlash(
-              s__('Badges|Saving the badge failed, please check the entered URLs and try again.'),
+              {
+                message: s__('Badges|Saving the badge failed, please check the entered URLs and try again.')
+              },
             );
             throw error;
           });
@@ -147,12 +152,17 @@ export default {
 
       return this.addBadge()
         .then(() => {
-          createFlash(s__('Badges|New badge added.'), 'notice');
+          createFlash({
+            message: s__('Badges|New badge added.'),
+            type: 'notice'
+          });
           this.wasValidated = false;
         })
         .catch((error) => {
           createFlash(
-            s__('Badges|Adding the badge failed, please check the entered URLs and try again.'),
+            {
+              message: s__('Badges|Adding the badge failed, please check the entered URLs and try again.')
+            },
           );
           throw error;
         });
