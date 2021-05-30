@@ -250,4 +250,19 @@ describe('User Popover Component', () => {
       expect(securityBotDocsLink.attributes('href')).toBe(SECURITY_BOT_USER.websiteUrl);
     });
   });
+
+  describe('bot user without website_url', () => {
+    const SECURITY_BOT_USER = {
+      ...DEFAULT_PROPS.user,
+      name: 'GitLab Security Bot',
+      username: 'GitLab-Security-Bot',
+      bot: true,
+    };
+
+    it("does not show a link to the bot's documentation", () => {
+      createWrapper({ user: SECURITY_BOT_USER });
+      const securityBotDocsLink = findSecurityBotDocsLink();
+      expect(securityBotDocsLink.exists()).toBe(false);
+    });
+  });
 });
