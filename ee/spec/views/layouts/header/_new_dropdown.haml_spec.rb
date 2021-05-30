@@ -81,10 +81,12 @@ This project
 <li><a data-track-event="click_link_new_snippet_project" data-track-label="plus_menu_dropdown" href="/namespace1/project1/-/snippets/new">New snippet</a></li>
 
 <li class="divider"></li>
-<li class="dropdown-bold-header">GitLab</li>
-<li><a class="qa-global-new-project-link" data-track-experiment="new_repo" data-track-event="click_link_new_project" data-track-label="plus_menu_dropdown" href="/projects/new">/projects/new</a></li>
+<li class="dropdown-bold-header">
+GitLab
+</li>
+<li><a class="qa-global-new-project-link" data-track-experiment="new_repo" data-track-event="click_link_new_project" data-track-label="plus_menu_dropdown" href="/projects/new">New project</a></li>
 <li><a data-track-event="click_link_new_group" data-track-label="plus_menu_dropdown" href="/groups/new">New group</a></li>
-<li><a data-track-event="click_link_new_snippet_parent" data-track-label="plus_menu_dropdown" class="qa-global-new-snippet-link" href="/-/snippets/new">New snippet</a></li>
+<li><a class="qa-global-new-snippet-link" data-track-event="click_link_new_snippet_parent" data-track-label="plus_menu_dropdown" href="/-/snippets/new">New snippet</a></li>
 </ul>
 </div>
 </li>
@@ -107,15 +109,17 @@ This project
 <li class="dropdown-bold-header">
 This group
 </li>
-<li><a data-track-experiment="new_repo" data-track-event="click_link_new_project_group" data-track-label="plus_menu_dropdown" href="/projects/new?namespace_id=2">/projects/new?namespace_id=2</a></li>
+<li><a data-track-experiment="new_repo" data-track-event="click_link_new_project_group" data-track-label="plus_menu_dropdown" href="/projects/new?namespace_id=2">New project</a></li>
 <li><a data-track-event="click_link_new_subgroup" data-track-label="plus_menu_dropdown" href="/groups/new?parent_id=2">New subgroup</a></li>
 <li><a data-track-event="click_link_new_epic" data-track-label="plus_menu_dropdown" href="/groups/group1/-/epics/new">New epic</a></li>
 
 <li class="divider"></li>
-<li class="dropdown-bold-header">GitLab</li>
-<li><a class="qa-global-new-project-link" data-track-experiment="new_repo" data-track-event="click_link_new_project" data-track-label="plus_menu_dropdown" href="/projects/new">/projects/new</a></li>
+<li class="dropdown-bold-header">
+GitLab
+</li>
+<li><a class="qa-global-new-project-link" data-track-experiment="new_repo" data-track-event="click_link_new_project" data-track-label="plus_menu_dropdown" href="/projects/new">New project</a></li>
 <li><a data-track-event="click_link_new_group" data-track-label="plus_menu_dropdown" href="/groups/new">New group</a></li>
-<li><a data-track-event="click_link_new_snippet_parent" data-track-label="plus_menu_dropdown" class="qa-global-new-snippet-link" href="/-/snippets/new">New snippet</a></li>
+<li><a class="qa-global-new-snippet-link" data-track-event="click_link_new_snippet_parent" data-track-label="plus_menu_dropdown" href="/-/snippets/new">New snippet</a></li>
 </ul>
 </div>
 </li>
@@ -151,10 +155,12 @@ This project
 <li><a data-track-event="click_link" data-track-label="tracking_label" data-track-property="tracking_category_and_group_invite_members_new_dropdown" href="/namespace1/project1/-/project_members">Invite members <gl-emoji title="handshake" data-name="handshake" data-unicode-version="9.0" aria-hidden="true" class="gl-font-base gl-vertical-align-baseline">🤝</gl-emoji></a></li>
 
 <li class="divider"></li>
-<li class="dropdown-bold-header">GitLab</li>
-<li><a class="qa-global-new-project-link" data-track-experiment="new_repo" data-track-event="click_link_new_project" data-track-label="plus_menu_dropdown" href="/projects/new">/projects/new</a></li>
+<li class="dropdown-bold-header">
+GitLab
+</li>
+<li><a class="qa-global-new-project-link" data-track-experiment="new_repo" data-track-event="click_link_new_project" data-track-label="plus_menu_dropdown" href="/projects/new">New project</a></li>
 <li><a data-track-event="click_link_new_group" data-track-label="plus_menu_dropdown" href="/groups/new">New group</a></li>
-<li><a data-track-event="click_link_new_snippet_parent" data-track-label="plus_menu_dropdown" class="qa-global-new-snippet-link" href="/-/snippets/new">New snippet</a></li>
+<li><a class="qa-global-new-snippet-link" data-track-event="click_link_new_snippet_parent" data-track-label="plus_menu_dropdown" href="/-/snippets/new">New snippet</a></li>
 </ul>
 </div>
 </li>
@@ -177,17 +183,19 @@ This project
 <li class="dropdown-bold-header">
 This group
 </li>
-<li><a data-track-experiment="new_repo" data-track-event="click_link_new_project_group" data-track-label="plus_menu_dropdown" href="/projects/new?namespace_id=2">/projects/new?namespace_id=2</a></li>
+<li><a data-track-experiment="new_repo" data-track-event="click_link_new_project_group" data-track-label="plus_menu_dropdown" href="/projects/new?namespace_id=2">New project</a></li>
 <li><a data-track-event="click_link_new_subgroup" data-track-label="plus_menu_dropdown" href="/groups/new?parent_id=2">New subgroup</a></li>
 <li><a data-track-event="click_link_new_epic" data-track-label="plus_menu_dropdown" href="/groups/group1/-/epics/new">New epic</a></li>
 
 <li><a data-track-event="click_link" data-track-label="tracking_label" data-track-property="tracking_category_and_group_invite_members_new_dropdown" href="/groups/group1/-/group_members">Invite members <gl-emoji title="handshake" data-name="handshake" data-unicode-version="9.0" aria-hidden="true" class="gl-font-base gl-vertical-align-baseline">🤝</gl-emoji></a></li>
 
 <li class="divider"></li>
-<li class="dropdown-bold-header">GitLab</li>
-<li><a class="qa-global-new-project-link" data-track-experiment="new_repo" data-track-event="click_link_new_project" data-track-label="plus_menu_dropdown" href="/projects/new">/projects/new</a></li>
+<li class="dropdown-bold-header">
+GitLab
+</li>
+<li><a class="qa-global-new-project-link" data-track-experiment="new_repo" data-track-event="click_link_new_project" data-track-label="plus_menu_dropdown" href="/projects/new">New project</a></li>
 <li><a data-track-event="click_link_new_group" data-track-label="plus_menu_dropdown" href="/groups/new">New group</a></li>
-<li><a data-track-event="click_link_new_snippet_parent" data-track-label="plus_menu_dropdown" class="qa-global-new-snippet-link" href="/-/snippets/new">New snippet</a></li>
+<li><a class="qa-global-new-snippet-link" data-track-event="click_link_new_snippet_parent" data-track-label="plus_menu_dropdown" href="/-/snippets/new">New snippet</a></li>
 </ul>
 </div>
 </li>
