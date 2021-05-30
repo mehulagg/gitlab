@@ -6,7 +6,7 @@ require Rails.root.join('db', 'post_migrate', '20210530185710_add_bot_documentat
 RSpec.describe AddBotDocumentationLinks, :migration do
   let(:users) { table(:users) }
 
-  ALL_USER_TYPES = [
+  all_user_types = [
     [described_class::User::USER_TYPE_SUPPORT_BOT, 'support_bot'],
     [described_class::User::USER_TYPE_ALERT_BOT, 'alert_bot'],
     [described_class::User::USER_TYPE_VISUAL_REVIEW_BOT, 'visual_review_bot'],
@@ -17,9 +17,7 @@ RSpec.describe AddBotDocumentationLinks, :migration do
   ].freeze
 
   context 'bot users without website_url set' do
-    
-    ALL_USER_TYPES.each do |(user_type, user_prefix, _)|
-
+    all_user_types.each do |(user_type, user_prefix, _)|
       let!("#{user_prefix}_empty".to_sym) do
         create_user!(
           name: "#{user_prefix}_empty",
@@ -28,7 +26,6 @@ RSpec.describe AddBotDocumentationLinks, :migration do
           website_url: ''
         )
       end
-
     end
 
     it 'updates their `website_url` attribute' do
@@ -56,8 +53,7 @@ RSpec.describe AddBotDocumentationLinks, :migration do
   end
 
   context 'bot users with website_url already set' do
-    ALL_USER_TYPES.each do |(user_type, user_prefix, website_url)|
-
+    all_user_types.each do |(user_type, user_prefix, website_url)|
       let!("#{user_prefix}_preset".to_sym) do
         create_user!(
           name: "#{user_prefix}_preset",
@@ -66,7 +62,6 @@ RSpec.describe AddBotDocumentationLinks, :migration do
           website_url: 'http://localhost/something/previously/set'
         )
       end
-
     end
 
     it 'does not update their `website_url` attribute' do
@@ -83,7 +78,6 @@ RSpec.describe AddBotDocumentationLinks, :migration do
   end
 
   context 'human users that are with or without website_url defined' do
-
     let!(:human_with_website_empty) do
       create_user!(
         name: 'human_empty',

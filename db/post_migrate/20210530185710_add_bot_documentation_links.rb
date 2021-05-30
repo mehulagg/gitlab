@@ -19,7 +19,7 @@ class AddBotDocumentationLinks < ActiveRecord::Migration[6.0]
     USER_TYPE_PROJECT_BOT = 6
 
     USER_TYPE_GHOST = 5
-    
+
     scope :support_bots, -> { where(user_type: USER_TYPE_SUPPORT_BOT) }
     scope :alert_bots, -> { where(user_type: USER_TYPE_ALERT_BOT) }
     scope :visual_review_bots, -> { where(user_type: USER_TYPE_VISUAL_REVIEW_BOT) }
@@ -29,7 +29,7 @@ class AddBotDocumentationLinks < ActiveRecord::Migration[6.0]
     scope :project_bots, -> { where(user_type: USER_TYPE_PROJECT_BOT) }
 
     scope :ghost_users, -> { where(user_type: USER_TYPE_GHOST) }
-    
+
     scope :no_website_url, -> { where(website_url: '') }
   end
 

@@ -1337,7 +1337,6 @@ RSpec.describe User do
 
   context 'bot users' do
     shared_examples 'bot users' do |bot_type|
-
       it 'creates the bot user if it does not exist' do
         expect do
           described_class.public_send(bot_type)
@@ -1371,7 +1370,6 @@ RSpec.describe User do
     it_behaves_like 'bot users', :visual_review_bot
 
     it_behaves_like 'bot documentation urls', :visual_review_bot, 'ci/review_apps/index.md'
-
   end
 
   context 'paid namespaces' do
