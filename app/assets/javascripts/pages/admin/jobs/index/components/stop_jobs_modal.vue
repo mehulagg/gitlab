@@ -32,7 +32,7 @@ export default {
         })
         .catch((error) => {
           createFlash({
-            message: s__('AdminArea|Stopping jobs failed')
+            message: s__('AdminArea|Stopping jobs failed'),
           });
           throw error;
         });

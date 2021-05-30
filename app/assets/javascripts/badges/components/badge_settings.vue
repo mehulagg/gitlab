@@ -42,12 +42,12 @@ export default {
         .then(() => {
           createFlash({
             message: s__('Badges|The badge was deleted.'),
-            type: 'notice'
+            type: 'notice',
           });
         })
         .catch((error) => {
           createFlash({
-            message: s__('Badges|Deleting the badge failed, please try again.')
+            message: s__('Badges|Deleting the badge failed, please try again.'),
           });
           throw error;
         });

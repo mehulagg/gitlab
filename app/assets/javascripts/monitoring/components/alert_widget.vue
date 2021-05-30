@@ -131,7 +131,7 @@ export default {
         })
         .catch(() => {
           createFlash({
-            message: s__('PrometheusAlerts|Error fetching alert')
+            message: s__('PrometheusAlerts|Error fetching alert'),
           });
           this.isLoading = false;
         });

@@ -317,7 +317,7 @@ export default {
         })
         .catch(() => {
           createFlash({
-            message: this.defaultErrorMessage
+            message: this.defaultErrorMessage,
           });
         });
     },
@@ -344,7 +344,7 @@ export default {
         })
         .catch(() => {
           createFlash({
-            message: this.defaultErrorMessage
+            message: this.defaultErrorMessage,
           });
           this.updateAndShowForm();
         });
@@ -411,7 +411,7 @@ export default {
           }
 
           this.flashContainer = createFlash({
-            message: errMsg
+            message: errMsg,
           });
         });
     },
@@ -427,11 +427,11 @@ export default {
           visitUrl(data.web_url);
         })
         .catch(() => {
-          createFlash(
-            {
-              message: sprintf(s__('Error deleting %{issuableType}'), { issuableType: this.issuableType })
-            },
-          );
+          createFlash({
+            message: sprintf(s__('Error deleting %{issuableType}'), {
+              issuableType: this.issuableType,
+            }),
+          });
         });
     },
 

@@ -66,7 +66,7 @@ export default {
         })
         .catch(() => {
           createFlash({
-            message: __('Failed to reset key. Please try again.')
+            message: __('Failed to reset key. Please try again.'),
           });
         });
     },

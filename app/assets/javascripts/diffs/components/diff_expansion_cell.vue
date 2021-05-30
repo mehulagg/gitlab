@@ -96,7 +96,7 @@ export default {
         })
         .catch(() => {
           createFlash({
-            message: s__('Diffs|Something went wrong while fetching diff lines.')
+            message: s__('Diffs|Something went wrong while fetching diff lines.'),
           });
           this.isRequesting = false;
         });

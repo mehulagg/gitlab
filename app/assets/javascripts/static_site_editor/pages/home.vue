@@ -46,7 +46,7 @@ export default {
       },
       error() {
         createFlash({
-          message: LOAD_CONTENT_ERROR
+          message: LOAD_CONTENT_ERROR,
         });
       },
     },

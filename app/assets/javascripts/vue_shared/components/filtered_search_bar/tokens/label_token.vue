@@ -78,9 +78,11 @@ export default {
           // return response differently.
           this.labels = Array.isArray(res) ? res : res.data;
         })
-        .catch(() => createFlash({
-        message: __('There was a problem fetching labels.')
-      }))
+        .catch(() =>
+          createFlash({
+            message: __('There was a problem fetching labels.'),
+          }),
+        )
         .finally(() => {
           this.loading = false;
         });

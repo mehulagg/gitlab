@@ -71,7 +71,7 @@ export default {
             successful: false,
           });
           createFlash({
-            message: error
+            message: error,
           });
         });
     },

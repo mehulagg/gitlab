@@ -44,9 +44,11 @@ export default {
         .then((response) => {
           this.namespaces = response.data.namespaces;
         })
-        .catch(() => createFlash({
-        message: __('There was a problem fetching groups.')
-      }));
+        .catch(() =>
+          createFlash({
+            message: __('There was a problem fetching groups.'),
+          }),
+        );
     },
   },
 

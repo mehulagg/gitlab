@@ -88,7 +88,7 @@ export default {
           this.isLoading = false;
           this.closeSuggestions();
           createFlash({
-            message: __('Something went wrong on our end. Please try again.')
+            message: __('Something went wrong on our end. Please try again.'),
           });
         });
     }, 250),

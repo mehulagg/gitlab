@@ -80,7 +80,7 @@ export default {
         })
         .catch((e) => {
           createFlash({
-            message: __('Error fetching forked projects. Please try again.')
+            message: __('Error fetching forked projects. Please try again.'),
           });
           throw e;
         });

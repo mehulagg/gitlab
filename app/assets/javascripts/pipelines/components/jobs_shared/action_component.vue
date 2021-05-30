@@ -82,7 +82,7 @@ export default {
           reportToSentry('action_component', err);
 
           createFlash({
-            message: __('An error occurred while making the request.')
+            message: __('An error occurred while making the request.'),
           });
         });
     },

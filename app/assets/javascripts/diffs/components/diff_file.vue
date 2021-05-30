@@ -271,7 +271,7 @@ export default {
         .catch(() => {
           this.isLoadingCollapsedDiff = false;
           createFlash({
-            message: this.$options.i18n.genericError
+            message: this.$options.i18n.genericError,
           });
         });
     },

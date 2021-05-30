@@ -129,7 +129,7 @@ export default {
           })
           .catch(() => {
             createFlash({
-              message: errorMessage
+              message: errorMessage,
             });
           })
           .finally(() => {

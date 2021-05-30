@@ -92,18 +92,16 @@ export default {
     },
 
     taskListUpdateError() {
-      createFlash(
-        {
-          message: sprintf(
-            s__(
-              'Someone edited this %{issueType} at the same time you did. The description has been updated and you will need to make your changes again.',
-            ),
-            {
-              issueType: this.issuableType,
-            },
-          )
-        },
-      );
+      createFlash({
+        message: sprintf(
+          s__(
+            'Someone edited this %{issueType} at the same time you did. The description has been updated and you will need to make your changes again.',
+          ),
+          {
+            issueType: this.issuableType,
+          },
+        ),
+      });
 
       this.$emit('taskListUpdateFailed');
     },

@@ -35,7 +35,7 @@ export default {
       },
       error(error) {
         createFlash({
-          message: this.$options.i18n.loadCountsError
+          message: this.$options.i18n.loadCountsError,
         });
         Sentry.captureException(error);
       },

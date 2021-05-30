@@ -120,9 +120,11 @@ export default {
       .then(() => {
         this.fetchingApprovals = false;
       })
-      .catch(() => createFlash({
-      message: FETCH_ERROR
-    }));
+      .catch(() =>
+        createFlash({
+          message: FETCH_ERROR,
+        }),
+      );
   },
   methods: {
     approve() {
@@ -133,9 +135,10 @@ export default {
 
       this.updateApproval(
         () => this.service.approveMergeRequest(),
-        () => createFlash({
-          message: APPROVE_ERROR
-        }),
+        () =>
+          createFlash({
+            message: APPROVE_ERROR,
+          }),
       );
     },
     approveWithAuth(data) {
@@ -147,7 +150,7 @@ export default {
             return;
           }
           createFlash({
-            message: APPROVE_ERROR
+            message: APPROVE_ERROR,
           });
         },
       );
@@ -155,9 +158,10 @@ export default {
     unapprove() {
       this.updateApproval(
         () => this.service.unapproveMergeRequest(),
-        () => createFlash({
-          message: UNAPPROVE_ERROR
-        }),
+        () =>
+          createFlash({
+            message: UNAPPROVE_ERROR,
+          }),
       );
     },
     updateApproval(serviceFn, errFn) {

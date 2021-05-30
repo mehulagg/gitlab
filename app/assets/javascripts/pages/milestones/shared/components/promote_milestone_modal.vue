@@ -64,7 +64,7 @@ export default {
         })
         .catch((error) => {
           createFlash({
-            message: error
+            message: error,
           });
         })
         .finally(() => {

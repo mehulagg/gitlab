@@ -136,16 +136,16 @@ export default {
           .then(() => {
             createFlash({
               message: s__('Badges|Badge saved.'),
-              type: 'notice'
+              type: 'notice',
             });
             this.wasValidated = false;
           })
           .catch((error) => {
-            createFlash(
-              {
-                message: s__('Badges|Saving the badge failed, please check the entered URLs and try again.')
-              },
-            );
+            createFlash({
+              message: s__(
+                'Badges|Saving the badge failed, please check the entered URLs and try again.',
+              ),
+            });
             throw error;
           });
       }
@@ -154,16 +154,16 @@ export default {
         .then(() => {
           createFlash({
             message: s__('Badges|New badge added.'),
-            type: 'notice'
+            type: 'notice',
           });
           this.wasValidated = false;
         })
         .catch((error) => {
-          createFlash(
-            {
-              message: s__('Badges|Adding the badge failed, please check the entered URLs and try again.')
-            },
-          );
+          createFlash({
+            message: s__(
+              'Badges|Adding the badge failed, please check the entered URLs and try again.',
+            ),
+          });
           throw error;
         });
     },

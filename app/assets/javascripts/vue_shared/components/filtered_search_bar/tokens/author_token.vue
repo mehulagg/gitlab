@@ -80,9 +80,11 @@ export default {
           // return response differently.
           this.authors = Array.isArray(res) ? res : res.data;
         })
-        .catch(() => createFlash({
-        message: __('There was a problem fetching users.')
-      }))
+        .catch(() =>
+          createFlash({
+            message: __('There was a problem fetching users.'),
+          }),
+        )
         .finally(() => {
           this.loading = false;
         });

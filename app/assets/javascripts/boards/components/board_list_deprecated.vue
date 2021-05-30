@@ -296,7 +296,7 @@ export default {
 
         if (!toList) {
           createFlash({
-            message: __('Something went wrong while performing the action.')
+            message: __('Something went wrong while performing the action.'),
           });
         }
 

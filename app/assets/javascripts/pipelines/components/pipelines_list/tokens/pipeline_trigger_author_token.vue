@@ -62,7 +62,7 @@ export default {
         })
         .catch((err) => {
           createFlash({
-            message: FETCH_AUTHOR_ERROR_MESSAGE
+            message: FETCH_AUTHOR_ERROR_MESSAGE,
           });
           this.loading = false;
           throw err;

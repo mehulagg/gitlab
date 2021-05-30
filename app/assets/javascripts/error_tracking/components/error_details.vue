@@ -88,9 +88,10 @@ export default {
       },
       pollInterval: 2000,
       update: (data) => data.project.sentryErrors.detailedError,
-      error: () => createFlash({
-        message: __('Failed to load error details from Sentry.')
-      }),
+      error: () =>
+        createFlash({
+          message: __('Failed to load error details from Sentry.'),
+        }),
       result(res) {
         if (res.data.project?.sentryErrors?.detailedError) {
           this.$apollo.queries.error.stopPolling();
@@ -229,7 +230,7 @@ export default {
         this.errorLoading = false;
         createFlash({
           message: __('Could not connect to Sentry. Refresh the page to try again.'),
-          type: 'warning'
+          type: 'warning',
         });
       }
     },

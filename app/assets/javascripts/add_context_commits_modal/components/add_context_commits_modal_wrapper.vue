@@ -192,11 +192,11 @@ export default {
             window.location.reload();
           }
           if (!values[0] && !values[1]) {
-            createFlash(
-              {
-                message: s__('ContextCommits|Failed to create/remove context commits. Please try again.')
-              },
-            );
+            createFlash({
+              message: s__(
+                'ContextCommits|Failed to create/remove context commits. Please try again.',
+              ),
+            });
           }
         });
       } else if (this.uniqueCommits.length > 0) {

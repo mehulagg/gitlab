@@ -176,13 +176,11 @@ export default {
           this.setExpandedPanel(expandedPanel);
         }
       } catch {
-        createFlash(
-          {
-            message: s__(
-              'Metrics|Link contains invalid chart information, please verify the link to see the expanded panel.',
-            )
-          },
-        );
+        createFlash({
+          message: s__(
+            'Metrics|Link contains invalid chart information, please verify the link to see the expanded panel.',
+          ),
+        });
       }
     },
     expandedPanel: {
@@ -208,7 +206,7 @@ export default {
             'Metrics|Your dashboard schema is invalid. Edit the dashboard to correct the YAML schema.',
           ),
 
-          type: 'warning'
+          type: 'warning',
         });
       }
     },
@@ -321,13 +319,11 @@ export default {
       this.isRearrangingPanels = isRearrangingPanels;
     },
     onDateTimePickerInvalid() {
-      createFlash(
-        {
-          message: s__(
-            'Metrics|Link contains an invalid time window, please verify the link to see the requested time range.',
-          )
-        },
-      );
+      createFlash({
+        message: s__(
+          'Metrics|Link contains an invalid time window, please verify the link to see the requested time range.',
+        ),
+      });
       // As a fallback, switch to default time range instead
       this.selectedTimeRange = defaultTimeRange;
     },

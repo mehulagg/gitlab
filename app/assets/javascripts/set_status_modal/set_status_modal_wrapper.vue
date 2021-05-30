@@ -138,9 +138,11 @@ export default {
 
           this.setDefaultEmoji();
         })
-        .catch(() => createFlash({
-        message: __('Failed to load emoji list.')
-      }));
+        .catch(() =>
+          createFlash({
+            message: __('Failed to load emoji list.'),
+          }),
+        );
     },
     showEmojiMenu(e) {
       e.stopPropagation();
@@ -219,11 +221,11 @@ export default {
       window.location.reload();
     },
     onUpdateFail() {
-      createFlash(
-        {
-          message: s__("SetStatusModal|Sorry, we weren't able to set your status. Please try again later.")
-        },
-      );
+      createFlash({
+        message: s__(
+          "SetStatusModal|Sorry, we weren't able to set your status. Please try again later.",
+        ),
+      });
 
       this.closeModal();
     },

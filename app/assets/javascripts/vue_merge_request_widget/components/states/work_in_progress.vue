@@ -77,7 +77,7 @@ export default {
           ) {
             if (errors?.length) {
               createFlash({
-                message: __('Something went wrong. Please try again.')
+                message: __('Something went wrong. Please try again.'),
               });
 
               return;
@@ -125,14 +125,16 @@ export default {
           }) => {
             createFlash({
               message: __('The merge request can now be merged.'),
-              type: 'notice'
+              type: 'notice',
             });
             $('.merge-request .detail-page-description .title').text(title);
           },
         )
-        .catch(() => createFlash({
-        message: __('Something went wrong. Please try again.')
-      }))
+        .catch(() =>
+          createFlash({
+            message: __('Something went wrong. Please try again.'),
+          }),
+        )
         .finally(() => {
           this.isMakingRequest = false;
         });
@@ -152,7 +154,7 @@ export default {
           .catch(() => {
             this.isMakingRequest = false;
             createFlash({
-              message: __('Something went wrong. Please try again.')
+              message: __('Something went wrong. Please try again.'),
             });
           });
       }

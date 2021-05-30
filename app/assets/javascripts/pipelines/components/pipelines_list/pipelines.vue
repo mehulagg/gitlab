@@ -251,13 +251,13 @@ export default {
           this.isResetCacheButtonLoading = false;
           createFlash({
             message: s__('Pipelines|Project cache successfully reset.'),
-            type: 'notice'
+            type: 'notice',
           });
         })
         .catch(() => {
           this.isResetCacheButtonLoading = false;
           createFlash({
-            message: s__('Pipelines|Something went wrong while cleaning runners cache.')
+            message: s__('Pipelines|Something went wrong while cleaning runners cache.'),
           });
         });
     },
@@ -285,7 +285,7 @@ export default {
         if (!filter.type) {
           createFlash({
             message: RAW_TEXT_WARNING,
-            type: 'warning'
+            type: 'warning',
           });
         }
       });

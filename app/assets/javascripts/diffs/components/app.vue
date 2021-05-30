@@ -425,7 +425,7 @@ export default {
         })
         .catch(() => {
           createFlash({
-            message: __('Something went wrong on our end. Please try again!')
+            message: __('Something went wrong on our end. Please try again!'),
           });
         });
 
@@ -440,7 +440,7 @@ export default {
         })
         .catch(() => {
           createFlash({
-            message: __('Something went wrong on our end. Please try again!')
+            message: __('Something went wrong on our end. Please try again!'),
           });
         });
 

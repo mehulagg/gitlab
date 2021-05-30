@@ -65,9 +65,11 @@ export default {
         .then((res) => {
           this.emojis = Array.isArray(res) ? res : res.data;
         })
-        .catch(() => createFlash({
-        message: __('There was a problem fetching emojis.')
-      }))
+        .catch(() =>
+          createFlash({
+            message: __('There was a problem fetching emojis.'),
+          }),
+        )
         .finally(() => {
           this.loading = false;
         });

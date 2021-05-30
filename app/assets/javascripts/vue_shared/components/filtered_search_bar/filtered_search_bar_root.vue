@@ -212,7 +212,7 @@ export default {
           if (error.name === 'RecentSearchesServiceError') return undefined;
 
           createFlash({
-            message: __('An error occurred while parsing recent searches')
+            message: __('An error occurred while parsing recent searches'),
           });
 
           // Gracefully fail to empty array

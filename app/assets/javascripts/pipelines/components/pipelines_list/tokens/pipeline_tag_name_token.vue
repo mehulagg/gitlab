@@ -39,7 +39,7 @@ export default {
         })
         .catch((err) => {
           createFlash({
-            message: FETCH_TAG_ERROR_MESSAGE
+            message: FETCH_TAG_ERROR_MESSAGE,
           });
           this.loading = false;
           throw err;

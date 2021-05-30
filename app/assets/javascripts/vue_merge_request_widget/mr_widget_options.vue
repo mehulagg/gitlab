@@ -218,7 +218,7 @@ export default {
       })
       .catch(() =>
         createFlash({
-          message: __('Unable to load the merge request widget. Try reloading the page.')
+          message: __('Unable to load the merge request widget. Try reloading the page.'),
         }),
       );
   },
@@ -300,9 +300,11 @@ export default {
             cb.call(null, data);
           }
         })
-        .catch(() => createFlash({
-        message: __('Something went wrong. Please try again.')
-      }));
+        .catch(() =>
+          createFlash({
+            message: __('Something went wrong. Please try again.'),
+          }),
+        );
     },
     setFaviconHelper() {
       if (this.mr.ciStatusFaviconPath) {
@@ -356,13 +358,11 @@ export default {
         .catch(() => this.throwDeploymentsError());
     },
     throwDeploymentsError() {
-      createFlash(
-        {
-          message: __(
-            'Something went wrong while fetching the environments for this merge request. Please try again.',
-          )
-        },
-      );
+      createFlash({
+        message: __(
+          'Something went wrong while fetching the environments for this merge request. Please try again.',
+        ),
+      });
     },
     fetchActionsContent() {
       this.service
@@ -376,9 +376,11 @@ export default {
             Project.initRefSwitcher();
           }
         })
-        .catch(() => createFlash({
-        message: __('Something went wrong. Please try again.')
-      }));
+        .catch(() =>
+          createFlash({
+            message: __('Something went wrong. Please try again.'),
+          }),
+        );
     },
     handleNotification(data) {
       if (data.ci_status === this.mr.ciStatus) return;
