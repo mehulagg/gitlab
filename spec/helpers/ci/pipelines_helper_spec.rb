@@ -77,8 +77,9 @@ RSpec.describe Ci::PipelinesHelper do
 
     subject(:show_cc_validation_alert?) { helper.show_cc_validation_alert?(pipeline) }
 
-    let(:pipeline) { double(:pipeline, failed?: pipeline_failed?, user_not_verified?: user_not_verified?, project: project) }
+    let(:current_user) { create(:user) }
     let(:project) { double(:project) }
+    let(:pipeline) { double(:pipeline, failed?: pipeline_failed?, user_not_verified?: user_not_verified?, project: project, user: current_user) }
 
     where(:pipeline_failed?, :user_not_verified?, :requires_cc_to_run_pipelines?, :result) do
       true                 | true               | true                          | true
@@ -91,12 +92,23 @@ RSpec.describe Ci::PipelinesHelper do
 
     with_them do
       before do
-        allow(pipeline).to receive_message_chain(:user, :requires_credit_card_to_run_pipelines?)
-                           .with(project)
-                           .and_return(requires_cc_to_run_pipelines?)
+        allow(helper).to receive(:current_user).and_return(current_user)
+        allow(current_user).to receive(:has_required_credit_card_to_run_pipelines?)
+                                 .with(project)
+                                 .and_return(requires_cc_to_run_pipelines?)
       end
 
       it { expect(show_cc_validation_alert?).to eq(result) }
+    end
+
+    context 'without current user' do
+      let(:pipeline) { double(:pipeline, user: nil) }
+
+      before do
+        allow(helper).to receive(:current_user).and_return(nil)
+      end
+
+      it { expect(show_cc_validation_alert?).to be_falsy }
     end
   end
 end
