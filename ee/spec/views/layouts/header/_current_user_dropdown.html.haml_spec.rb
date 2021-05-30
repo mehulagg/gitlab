@@ -93,4 +93,87 @@ RSpec.describe 'layouts/header/_current_user_dropdown' do
       end
     end
   end
+
+  context 'pinning test' do
+    before do
+      allow(view).to receive(:current_user).and_return(user)
+      allow(view).to receive(:show_upgrade_link?).and_return(true)
+      allow(view).to receive(:show_buy_pipeline_minutes?).and_return(true)
+      allow(view).to receive(:show_pipeline_minutes_notification_dot?).and_return(true)
+      allow(view).to receive(:show_buy_pipeline_with_subtext?).and_return(true)
+      allow(view).to receive(:trials_allowed?).and_return(true)
+      allow(view).to receive(:root_ancestor_namespace).and_return(user.namespace)
+    end
+
+    def clean_str(str)
+      str.strip.gsub(/\n{2,}/,"\n")
+    end
+
+    it 'matches snapshot' do
+      expected = <<-EOF
+<ul>
+<li class="current-user">
+<a class="gl-line-height-20!" data-user="user1" data-testid="user-profile-link" data-qa-selector="user_profile_link" href="/user1"><div class="gl-font-weight-bold">
+John Doe2
+</div>
+@user1
+</a></li>
+<li class="divider"></li>
+<li>
+<button class="gl-button btn btn-link menu-item js-set-status-modal-trigger" type="button">
+Set status
+</button>
+</li>
+<li>
+<a class="trial-link" href="/-/trial_registrations/new?glm_content=top-right-dropdown&amp;glm_source=gitlab.com">
+Start an Ultimate trial
+<gl-emoji title="rocket" data-name="rocket" data-unicode-version="6.0">🚀</gl-emoji>
+</a>
+</li>
+<li>
+<a data-qa-selector="edit_profile_link" href="/-/profile">Edit profile</a>
+</li>
+<li>
+<a href="/-/profile/preferences">Preferences</a>
+</li>
+<li class="js-buy-pipeline-minutes-notification-callout" data-dismiss-endpoint="/-/user_callouts" data-feature-id="buy_pipeline_minutes_notification_dot">
+<a class="ci-minutes-emoji js-buy-pipeline-minutes-link js-follow-link" data-track-event="click_buy_ci_minutes" data-track-label="default" data-track-property="user_dropdown" href="/-/profile/usage_quotas"><div class="gl-pb-2">
+Buy Pipeline minutes
+<gl-emoji title="clock face nine oclock" data-name="clock9" data-unicode-version="6.0" aria-hidden="true">🕘</gl-emoji>
+</div>
+<span class="small gl-pb-3 gl-text-orange-800">
+One of your groups is running out
+</span>
+</a></li>
+<li>
+<a class="upgrade-plan-link js-upgrade-plan-link" data-track-event="click_upgrade_link" data-track-label="default" data-track-property="user_dropdown" href="https://customers.stg.gitlab.com/plans">Upgrade
+<gl-emoji title="rocket" data-name="rocket" data-unicode-version="6.0" aria-hidden="true">🚀</gl-emoji>
+</a></li>
+<li class="divider d-md-none"></li>
+<li class="d-md-none">
+<a href="/help">Help</a>
+</li>
+<li class="d-md-none">
+<a href="https://about.gitlab.com/getting-help/">Support</a>
+</li>
+<li class="d-md-none">
+<a target="_blank" class="text-nowrap" rel="noopener noreferrer" data-track-event="click_forum" data-track-property="question_menu" href="https://forum.gitlab.com/">Community forum</a>
+</li>
+<li class="d-md-none">
+<a href="https://about.gitlab.com/submit-feedback">Submit feedback</a>
+</li>
+<li class="d-md-none">
+</li>
+<li class="divider"></li>
+<li>
+<a class="sign-out-link" data-qa-selector="sign_out_link" rel="nofollow" data-method="post" href="/users/sign_out">Sign out</a>
+</li>
+</ul>
+      EOF
+
+      render
+
+      expect(clean_str(rendered)).to eql(clean_str(expected))
+    end
+  end
 end
