@@ -742,6 +742,7 @@ class User < ApplicationRecord
       unique_internal(where(user_type: :ghost), 'ghost', email) do |u|
         u.bio = _('This is a "Ghost User", created to hold all issues authored by users that have since been deleted. This user cannot be removed.')
         u.name = 'Ghost User'
+        u.website_url = Gitlab::Routing.url_helpers.help_page_url('user/profile/account/delete_account.md')
       end
     end
 
@@ -751,6 +752,7 @@ class User < ApplicationRecord
       unique_internal(where(user_type: :alert_bot), 'alert-bot', email_pattern) do |u|
         u.bio = 'The GitLab alert bot'
         u.name = 'GitLab Alert Bot'
+        u.website_url = Gitlab::Routing.url_helpers.help_page_url('operations/incident_management/alerts.md')
         u.avatar = bot_avatar(image: 'alert-bot.png')
       end
     end
@@ -760,6 +762,7 @@ class User < ApplicationRecord
 
       unique_internal(where(user_type: :migration_bot), 'migration-bot', email_pattern) do |u|
         u.bio = 'The GitLab migration bot'
+        u.website_url = Gitlab::Routing.url_helpers.help_page_url('development/internal_users.md')
         u.name = 'GitLab Migration Bot'
         u.confirmed_at = Time.zone.now
       end
@@ -783,6 +786,7 @@ class User < ApplicationRecord
       unique_internal(where(user_type: :support_bot), 'support-bot', email_pattern) do |u|
         u.bio = 'The GitLab support bot used for Service Desk'
         u.name = 'GitLab Support Bot'
+        u.website_url = Gitlab::Routing.url_helpers.help_page_url('user/project/service_desk.md')
         u.avatar = bot_avatar(image: 'support-bot.png')
         u.confirmed_at = Time.zone.now
       end

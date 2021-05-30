@@ -5580,6 +5580,15 @@ RSpec.describe User do
       end
     end
 
+    shared_examples 'bot documentation urls' do |bot_type, documentation_path|
+      it 'sets the documentation url for the created bot' do
+        bot_user = described_class.public_send(bot_type)
+
+        expect(bot_user.website_url).to be_present
+        expect(bot_user.website_url).to end_with(documentation_path)
+      end
+    end
+
     it_behaves_like 'bot users', :alert_bot
     it_behaves_like 'bot users', :support_bot
     it_behaves_like 'bot users', :migration_bot
@@ -5589,6 +5598,12 @@ RSpec.describe User do
     it_behaves_like 'bot user avatars', :alert_bot, 'alert-bot.png'
     it_behaves_like 'bot user avatars', :support_bot, 'support-bot.png'
     it_behaves_like 'bot user avatars', :security_bot, 'security-bot.png'
+
+    it_behaves_like 'bot documentation urls', :support_bot, 'user/project/service_desk.md'
+    it_behaves_like 'bot documentation urls', :alert_bot, 'operations/incident_management/alerts.md'
+    it_behaves_like 'bot documentation urls', :ghost, 'user/profile/account/delete_account.md'
+    it_behaves_like 'bot documentation urls', :migration_bot, 'development/internal_users.md'
+    it_behaves_like 'bot documentation urls', :security_bot, 'user/application_security/security_bot/index.md'
 
     context 'when bot is the support_bot' do
       subject { described_class.support_bot }
