@@ -29,6 +29,10 @@ const TEST_DATA = {
     'module-name': 'foo.c',
     offset: 15,
   },
+  [REPORT_TYPES.markdown]: {
+    name: 'Wilma:',
+    value: "Hi Fred. Checkout [GitLab](http://gitlab.com)",
+  },  
 };
 
 describe('ee/vulnerabilities/components/generic_report/report_item.vue', () => {
