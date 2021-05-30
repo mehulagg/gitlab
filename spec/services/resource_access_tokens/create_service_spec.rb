@@ -24,7 +24,7 @@ RSpec.describe ResourceAccessTokens::CreateService do
     end
 
     shared_examples 'allows creation of bot with valid params' do
-      it { expect { subject }.to change { User.count }.by(1) }
+      it { expect { subject }.to change { User.bots.count }.by(1) }
 
       it 'creates resource bot user' do
         response = subject
@@ -33,6 +33,7 @@ RSpec.describe ResourceAccessTokens::CreateService do
 
         expect(access_token.user.reload.user_type).to eq("#{resource_type}_bot")
         expect(access_token.user.created_by_id).to eq(user.id)
+        expect(access_token.user.website_url).to end_with('security/token_overview.md')
       end
 
       context 'email confirmation status' do

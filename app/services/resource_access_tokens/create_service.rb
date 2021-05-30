@@ -16,6 +16,10 @@ module ResourceAccessTokens
 
       return error(user.errors.full_messages.to_sentence) unless user.persisted?
 
+      # We update this outside of create_user because setting
+      # website_url as a parameter via the Users::CreateService is only permitted for admins
+      user.update!(website_url: Gitlab::Routing.url_helpers.help_page_url('security/token_overview.md'))
+
       member = create_membership(resource, user)
 
       unless member.persisted?
