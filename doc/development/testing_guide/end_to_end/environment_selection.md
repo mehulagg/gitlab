@@ -4,10 +4,9 @@ group: unassigned
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
-# Environment selection
+# Execution context selection
 
-Some tests are designed to be run against specific environments or [pipelines](https://about.gitlab.com/handbook/engineering/quality/guidelines/debugging-qa-test-failures/#scheduled-qa-test-pipelines).
-We can specify what environments or pipelines to run tests against using the `only` metadata.
+Some tests are designed to be run against specific environments, or in specific [pipelines](https://about.gitlab.com/handbook/engineering/quality/guidelines/debugging-qa-test-failures/#scheduled-qa-test-pipelines) or jobs. We can specify the test execution context using the `only` and `except` metadata.
 
 ## Available switches
 
@@ -16,8 +15,9 @@ We can specify what environments or pipelines to run tests against using the `on
 | `tld`  | Set the top-level domain matcher | `String` |
 | `subdomain` | Set the subdomain matcher | `Array` or `String` |
 | `domain` | Set the domain matcher | `String` |
-| `production` | Match against production | `Static` |
-| `pipeline` | Match against a pipeline | `Array` or `Static`|
+| `production` | Match the production environment | `Static` |
+| `pipeline` | Match a pipeline | `Array` or `Static`|
+| `job` | Match a job | `Array` or `Static`|
 
 WARNING:
 You cannot specify `:production` and `{ <switch>: 'value' }` simultaneously.
@@ -26,21 +26,25 @@ can control the `tld` and `domain` independently.
 
 ## Examples
 
-| Environment or pipeline                  | Key | Matches (regex for environments, string matching for pipelines)            |
+### Only
+
+Run tests in only the specified context.
+
+| Test execution context                   | Key | Matches (regex for environments, string matching for pipelines, either for jobs) |
 | ----------------                         | --- | ---------------                                                            |
-| `any`                                    | ``  | `.+.com`                                                                   |
 | `gitlab.com`                             | `only: :production` | `gitlab.com`                                               |
 | `staging.gitlab.com`                     | `only: { subdomain: :staging }` | `(staging).+.com`                              |
 | `gitlab.com and staging.gitlab.com`      | `only: { subdomain: /(staging.)?/, domain: 'gitlab' }` | `(staging.)?gitlab.com` |
 | `dev.gitlab.org`                         | `only: { tld: '.org', domain: 'gitlab', subdomain: 'dev' }` | `(dev).gitlab.org` |
-| `staging.gitlab.com & domain.gitlab.com` | `only: { subdomain: %i[staging domain] }` | `(staging|domain).+.com`             |
-| `nightly`                                | `only: { pipeline: :nightly }` | "nightly" |
-| `nightly`, `canary` | `only: { pipeline: [:nightly, :canary] }` | ["nightly"](https://gitlab.com/gitlab-org/quality/nightly) and ["canary"](https://gitlab.com/gitlab-org/quality/canary) |
+| `staging.gitlab.com and domain.gitlab.com` | `only: { subdomain: %i[staging domain] }` | `(staging\|domain).+.com`             |
+| The `nightly` pipeline                     | `only: { pipeline: :nightly }` | "nightly" |
+| Pipelines `nightly` and `canary` | `only: { pipeline: [:nightly, :canary] }` | ["nightly"](https://gitlab.com/gitlab-org/quality/nightly) and ["canary"](https://gitlab.com/gitlab-org/quality/canary) |
+| The `ee:instance` job | `only: { job: 'ee:instance' }` | The `ee:instance` job in any pipeline |
+| Any `quarantine` job | `only: { job: '.*quarantine' }` | Any job ending in `quarantine` in any pipeline |
 
 ```ruby
 RSpec.describe 'Area' do
   it 'runs in any environment or pipeline' do; end
-
   it 'runs only in production environment', only: :production do; end
 
   it 'runs only in staging environment', only: { subdomain: :staging } do; end
@@ -55,10 +59,45 @@ RSpec.describe 'Area' do
 end
 ```
 
-If the test has a `before` or `after`, you must add the `only` metadata
-to the outer `RSpec.describe`.
+### Except
 
-If you want to run an `only: { :pipeline }` tagged test on your local GDK make sure either the `CI_PROJECT_NAME` CI/CD variable is unset, or that the `CI_PROJECT_NAME` variable matches the specified pipeline in the `only: { :pipeline }` tag, or just delete the `only: { :pipeline }` tag.
+Run tests in their typical contexts _except_ as specified.
+
+| Test execution context                   | Key | Matches (regex for environments, string matching for pipelines, either for jobs) |
+| ----------------                         | --- | ---------------                                                            |
+| `gitlab.com`                             | `except: :production` | `gitlab.com`                                               |
+| `staging.gitlab.com`                     | `except: { subdomain: :staging }` | `(staging).+.com`                              |
+| `gitlab.com and staging.gitlab.com`      | `except: { subdomain: /(staging.)?/, domain: 'gitlab' }` | `(staging.)?gitlab.com` |
+| `dev.gitlab.org`                         | `except: { tld: '.org', domain: 'gitlab', subdomain: 'dev' }` | `(dev).gitlab.org` |
+| `staging.gitlab.com and domain.gitlab.com` | `except: { subdomain: %i[staging domain] }` | `(staging\|domain).+.com`             |
+| The `nightly` pipeline                     | `except: { pipeline: :nightly }` | ["nightly"](https://gitlab.com/gitlab-org/quality/nightly) |
+| Pipelines `nightly` and `canary` | `except: { pipeline: [:nightly, :canary] }` | ["nightly"](https://gitlab.com/gitlab-org/quality/nightly) and ["canary"](https://gitlab.com/gitlab-org/quality/canary) |
+| The `ee:instance` job | `except: { job: 'ee:instance' }` | The `ee:instance` job in any pipeline |
+| Any `quarantine` job | `except: { job: '.*quarantine' }` | Any job ending in `quarantine` in any pipeline |
+
+```ruby
+RSpec.describe 'Area' do
+  it 'runs in any execution context except the production environment', except: :production do; end
+
+  it 'runs in any execution context except the staging environment', except: { subdomain: :staging } do; end
+
+  it 'runs in any execution context except the nightly pipeline', except: { pipeline: :nightly } do; end
+
+  it 'runs in any execution context except the ee:instance job', except: { job: 'ee:instance' } do; end
+end
+```
+
+## Usage notes
+
+If the test has a `before` or `after` block, you must add the `only` or `except` metadata to the outer `RSpec.describe` block.
+
+If you want to run an `only` tagged test on your local GitLab instance, you can do one of the following:
+
+  - make sure you **do not** have environment variables `CI_PROJECT_NAME` or `CI_JOB_NAME` set, or
+  - set the appropriate variable to match the metadata. For example, if the metadata is `only: { pipeline: :nightly }` then you can set `CI_PROJECT_NAME=nightly`, or if the metadata is `only: { job: 'ee:instance' }` then you can set `CI_JOB_NAME=ee:instance`, or
+  - temporarily remove the metadata.
+
+Similarly, if you want to run an `except` tagged test locally, make sure you **do not** have environment variables `CI_PROJECT_NAME` or `CI_JOB_NAME` set, or you can temporarily remove the metadata.
 
 ## Quarantining a test for a specific environment
 
