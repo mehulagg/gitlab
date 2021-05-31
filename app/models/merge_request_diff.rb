@@ -390,7 +390,7 @@ class MergeRequestDiff < ApplicationRecord
   def diffs_in_batch(batch_page, batch_size, diff_options:)
     fetching_repository_diffs(diff_options) do |comparison|
       if comparison
-        comparison.diffs_in_batch(batch_page, batch_size, diff_options: diff_options)
+        comparison.diffs_in_batch(batch_page, batch_size, diff_options: diff_options, modified_paths: modified_paths)
       else
         reorder_diff_files!
         diffs_in_batch_collection(batch_page, batch_size, diff_options: diff_options)

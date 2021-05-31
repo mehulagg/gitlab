@@ -19,6 +19,7 @@ module Gitlab
 
           @diffable = diffable
           @include_stats = diff_options.delete(:include_stats)
+          @total_pages = diff_options.delete(:total_pages)
           @project = project
           @diff_options = diff_options
           @diff_refs = diff_refs
@@ -50,7 +51,7 @@ module Gitlab
           {
             current_page: nil,
             next_page: nil,
-            total_pages: nil
+            total_pages: @total_pages
           }
         end
 
