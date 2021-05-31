@@ -714,3 +714,35 @@ Example response:
 
 A release with a `released_at` attribute set to a future date is labeled
 as an **Upcoming Release** [in the UI](../../user/project/releases/index.md#upcoming-releases).
+
+## `description_html` field removal
+
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/299447) in GitLab 13.12.
+
+`description_html` field was removed from the API payload.
+At the beginning, the field was exposed along side with `description` field,
+because our frontend was fetching release data from the API to render Release index/detail pages.
+However, they have already switched to GraphQL API for that purpose,
+so the field is no longer necessary from Product standpoint.
+Rather, exposing this field requires intensive computation process in Ruby,
+therefore removal of this field significantly improves the performance on the APIs.
+
+This field was removed, however, if you're on-premises users,
+[GitLab administrators with access to the GitLab Rails console](../../user/feature_flags.md)
+can opt to disable it.
+
+To disable it:
+
+```ruby
+Feature.disable(:remove_description_html_in_release_api)
+```
+
+To enable it:
+
+```ruby
+Feature.enable(:remove_description_html_in_release_api)
+```
+
+**WARNING**
+We'll remove this feature flag in GitLab 14.0 in order to make it permanent change.
+If you're depending on the field, consider switching to [Markdown API](../markdown.md).
