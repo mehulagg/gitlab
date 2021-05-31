@@ -80,8 +80,8 @@ module QA
           aggregate_failures do
             expect(import_page).to have_imported_group(source_group.path, wait: 120)
 
-            expect { imported_group.reload! }.to eventually_eq(source_group).within(duration: 10)
-            expect { imported_subgroup.reload! }.to eventually_eq(subgroup).within(duration: 10)
+            expect { imported_group.reload! }.to eventually_eq(source_group).within(duration: 30)
+            expect { imported_subgroup.reload! }.to eventually_eq(subgroup).within(duration: 30)
           end
         end
       end
@@ -110,8 +110,8 @@ module QA
             expect(import_page).to have_imported_group(source_group.path, wait: 120)
 
             # Poll for labels within specific duration
-            expect { imported_group.labels }.to eventually_include(*source_group.labels).within(duration: 10)
-            expect { imported_subgroup.labels }.to eventually_include(*subgroup.labels).within(duration: 10)
+            expect { imported_group.labels }.to eventually_include(*source_group.labels).within(duration: 30)
+            expect { imported_subgroup.labels }.to eventually_include(*subgroup.labels).within(duration: 30)
           end
         end
       end
