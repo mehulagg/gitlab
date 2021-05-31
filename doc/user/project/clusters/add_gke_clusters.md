@@ -24,6 +24,8 @@ requirements are met:
 Starting from [GitLab 12.4](https://gitlab.com/gitlab-org/gitlab/-/issues/25925), all the GKE clusters
 provisioned by GitLab are [VPC-native](https://cloud.google.com/kubernetes-engine/docs/how-to/alias-ips).
 
+
+
 Note the following:
 
 - The [Google authentication integration](../../../integration/google.md) must be enabled in GitLab
