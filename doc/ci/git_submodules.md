@@ -59,3 +59,25 @@ To make submodules work correctly in CI/CD jobs:
    variables:
      GIT_SUBMODULE_STRATEGY: recursive
    ```
+
+### Sync / Exclude specific submodules from CI jobs
+
+This feature uses the same path syntax of the [`git submodule`](https://git-scm.com/docs/git-submodule#Documentation/git-submodule.txt-ltpathgt82308203).
+
+Some projects that have a large number of submodules, and not all of them need to be
+synced or updated in all CI jobs. Use the `GIT_SUBMODULE_PATHS` variable to control this.
+The path syntax is the same as [`git submodule`](https://git-scm.com/docs/git-submodule#Documentation/git-submodule.txt-ltpathgt82308203):
+
+- To sync and update specific paths:
+
+   ```yaml
+   variables:
+      GIT_SUBMODULE_PATHS: submoduleA submoduleB
+   ```
+
+- To exclude specific paths:
+
+   ```yaml
+   variables:
+      GIT_SUBMODULE_PATHS: :(exclude)submoduleA :(exclude)submoduleB
+   ```

@@ -482,6 +482,7 @@ globally or for individual jobs:
 
 - [`GIT_STRATEGY`](#git-strategy)
 - [`GIT_SUBMODULE_STRATEGY`](#git-submodule-strategy)
+- [`GIT_SUBMODULE_PATHS`](../git_submodules.md#sync-exclude-specific-submodules-from-ci-jobs)
 - [`GIT_CHECKOUT`](#git-checkout)
 - [`GIT_CLEAN_FLAGS`](#git-clean-flags)
 - [`GIT_FETCH_EXTRA_FLAGS`](#git-fetch-extra-flags)
