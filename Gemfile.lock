@@ -1,3 +1,10 @@
+GIT
+  remote: https://gitlab.com/gitlab-org/declarative-policy.git
+  revision: 5df3a12c082db700f0a8a387fa0f4d780c307d72
+  branch: ajk-remove-activesupport
+  specs:
+    declarative_policy (1.0.0)
+
 PATH
   remote: vendor/gems/mail-smtp_pool
   specs:
@@ -251,7 +258,6 @@ GEM
       html-pipeline
     declarative (0.0.20)
     declarative-option (0.1.0)
-    declarative_policy (1.0.0)
     default_value_for (3.4.0)
       activerecord (>= 3.2.0, < 7.0)
     deprecation_toolkit (1.5.1)
@@ -1428,7 +1434,7 @@ DEPENDENCIES
   crystalball (~> 0.7.0)
   database_cleaner (~> 1.7.0)
   deckar01-task_list (= 2.3.1)
-  declarative_policy (~> 1.0.0)
+  declarative_policy!
   default_value_for (~> 3.4.0)
   deprecation_toolkit (~> 1.5.1)
   derailed_benchmarks
