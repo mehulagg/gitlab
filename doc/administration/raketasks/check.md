@@ -248,13 +248,14 @@ p "#{uploads_deleted} remote objects were destroyed."
 
 ### Delete references to missing artifacts
 
-`gitlab-rake gitlab:artifacts:check VERBOSE=1` detects missing artifacts (or `job.log` files) from the file system because they were
-deleted externally where their references still exist in the GitLab database.
+`gitlab-rake gitlab:artifacts:check VERBOSE=1` detects when artifacts (or `job.log` files):
 
-Example output with error message:
+- Are deleted outside of GitLab.
+- Have references still in the GitLab database.
+
+When this scenario is detected, the Rake task displays an error message. For example:
 
 ```shell
-$ sudo  gitlab-rake gitlab:artifacts:check VERBOSE=1
 Checking integrity of Job artifacts
 - 3..8: Failures: 2
   - Job artifact: 3: #<Errno::ENOENT: No such file or directory @ rb_sysopen - /var/opt/gitlab/gitlab-rails/shared/artifacts/4e/07/4e07408562bedb8b60ce05c1decfe3ad16b72230967de01f640b7e4729b49fce/2021_05_26/5/3/job.log>
