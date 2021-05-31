@@ -25,6 +25,7 @@ module API
       end
       params do
         use :pagination
+        optional :render_html, type: Boolean, desc: 'If `true`, response includes rendered HTML for description.'
         optional :order_by, type: String, values: %w[released_at created_at], default: 'released_at',
                             desc: 'Return releases ordered by `released_at` or `created_at`.'
         optional :sort, type: String, values: %w[asc desc], default: 'desc',
@@ -43,7 +44,8 @@ module API
                         # context is unnecessary here.
                         cache_context: -> (_) { "user:{#{current_user&.id}}" },
                         expires_in: 5.minutes,
-                        current_user: current_user
+                        current_user: current_user,
+                        render_html: params[:render_html]
       end
 
       desc 'Get a single project release' do
