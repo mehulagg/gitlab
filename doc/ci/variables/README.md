@@ -16,9 +16,9 @@ CI/CD variables are a type of environment variable. You can use them to:
 You can use [predefined CI/CD variables](#predefined-cicd-variables) or define custom:
 
 - [Variables in the `.gitlab-ci.yml` file](#create-a-custom-cicd-variable-in-the-gitlab-ciyml-file).
-- [Project CI/CD variables](#project-cicd-variables).
-- [Group CI/CD variables](#group-cicd-variables).
-- [Instance CI/CD variables](#instance-cicd-variables).
+- [Project CI/CD variables](#add-a-cicd-variable-to-a-project).
+- [Group CI/CD variables](#add-a-cicd-variable-to-a-group).
+- [Instance CI/CD variables](#add-a-cicd-variable-to-an-instance).
 
 > For more information about advanced use of GitLab CI/CD:
 >
@@ -56,10 +56,10 @@ You can create custom CI/CD variables:
 
 - For a project:
   - [In the project's `.gitlab-ci.yml` file](#create-a-custom-cicd-variable-in-the-gitlab-ciyml-file).
-  - [In the project's settings](#project-cicd-variables).
+  - [In the project's settings](#add-a-cicd-variable-to-a-project).
   - [With the API](../../api/project_level_variables.md).
-- For all projects in a group [in the group's setting](#group-cicd-variables).
-- For all projects in a GitLab instance [in the instance's settings](#instance-cicd-variables).
+- For all projects in a group [in the group's setting](#add-a-cicd-variable-to-a-group).
+- For all projects in a GitLab instance [in the instance's settings](#add-a-cicd-variable-to-an-instance).
 
 You can [override variable values manually for a specific pipeline](../jobs/index.md#specifying-variables-when-running-manual-jobs),
 or have them [prefilled in manual pipelines](../pipelines/index.md#prefill-variables-in-manual-pipelines).
@@ -199,7 +199,7 @@ inherited.
 
 ![CI/CD settings - inherited variables](img/inherited_group_variables_v12_5.png)
 
-### Add a CI/CD variables to an instance
+### Add a CI/CD variable to an instance
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/14108) in GitLab 13.0.
 > - [Feature flag removed](https://gitlab.com/gitlab-org/gitlab/-/issues/299879) in GitLab 13.11.
@@ -549,8 +549,8 @@ The order of precedence for variables is (from highest to lowest):
    [scheduled pipeline variables](../pipelines/schedules.md#using-variables),
    and [manual pipeline run variables](#override-a-variable-when-running-a-pipeline-manually).
 1. Project [variables](#custom-cicd-variables).
-1. Group [variables](#group-cicd-variables).
-1. Instance [variables](#instance-cicd-variables).
+1. Group [variables](#add-a-cicd-variable-to-a-group).
+1. Instance [variables](#add-a-cicd-variable-to-an-instance).
 1. [Inherited variables](#pass-an-environment-variable-to-another-job).
 1. Variables defined in jobs in the `.gitlab-ci.yml` file.
 1. Variables defined outside of jobs (globally) in the `.gitlab-ci.yml` file.
