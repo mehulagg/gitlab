@@ -61,7 +61,7 @@ RSpec.describe 'Users' do
 
       let(:query) { graphql_query_for(:users, { admins: true }, 'nodes { id }') }
 
-      context 'current user is not an admin' do
+      context 'when current user is not an admin' do
         let(:post_query) { post_graphql(query, current_user: current_user) }
 
         it_behaves_like 'a working users query'
@@ -69,13 +69,13 @@ RSpec.describe 'Users' do
         it 'includes all non-admin users', :aggregate_failures do
           post_graphql(query)
 
-          expect(graphql_data.dig('users', 'nodes')).to include(
-            { "id" => user1.to_global_id.to_s },
-            { "id" => user2.to_global_id.to_s },
-            { "id" => user3.to_global_id.to_s },
-            { "id" => current_user.to_global_id.to_s },
-            { "id" => admin.to_global_id.to_s },
-            { "id" => another_admin.to_global_id.to_s }
+          expect(graphql_data_at(:users, :nodes, :id)).to include(
+            global_id_of(user1),
+            global_id_of(user2),
+            global_id_of(user3),
+            global_id_of(current_user),
+            global_id_of(admin),
+            global_id_of(another_admin)
           )
         end
       end
@@ -85,17 +85,18 @@ RSpec.describe 'Users' do
 
         it 'includes only admins', :aggregate_failures do
           post_graphql(query, current_user: admin)
+          ids = graphql_data_at(:users, :nodes, :id)
 
-          expect(graphql_data.dig('users', 'nodes')).to include(
-            { "id" => another_admin.to_global_id.to_s },
-            { "id" => admin.to_global_id.to_s }
+          expect(ids).to include(
+            global_id_of(another_admin),
+            global_id_of(admin)
           )
 
-          expect(graphql_data.dig('users', 'nodes')).not_to include(
-            { "id" => user1.to_global_id.to_s },
-            { "id" => user2.to_global_id.to_s },
-            { "id" => user3.to_global_id.to_s },
-            { "id" => current_user.to_global_id.to_s }
+          expect(ids).not_to include(
+            global_id_of(user1),
+            global_id_of(user2),
+            global_id_of(user3),
+            global_id_of(current_user)
           )
         end
       end
