@@ -341,8 +341,8 @@ describe('Tracking', () => {
     beforeEach(() => {
       eventSpy = jest.spyOn(Tracking, 'event');
       setHTMLFixture(`
-        <input data-track-${term}="render" data-track-label="label1" value="_value_" data-track-property="_property_"/>
-        <span data-track-${term}="render" data-track-label="label2" data-track-value="_value_">
+        <input data-track-${term}="render" data-track-label="label1" value="1" data-track-property="_property_"/>
+        <span data-track-${term}="render" data-track-label="label2" data-track-value=1>
           Something
         </span>
         <input data-track-${term}="_render_bogus_" data-track-label="label3" value="_value_" data-track-property="_property_"/>
@@ -357,7 +357,7 @@ describe('Tracking', () => {
           'render',
           {
             label: 'label1',
-            value: '_value_',
+            value: '1',
             property: '_property_',
           },
         ],
@@ -366,7 +366,7 @@ describe('Tracking', () => {
           'render',
           {
             label: 'label2',
-            value: '_value_',
+            value: '1',
           },
         ],
       ]);
