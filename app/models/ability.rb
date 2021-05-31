@@ -74,7 +74,10 @@ class Ability
 
     def policy_for(user, subject = :global)
       cache = Gitlab::SafeRequestStore.active? ? Gitlab::SafeRequestStore : {}
-      DeclarativePolicy.policy_for(user, subject, cache: cache)
+
+      ActiveSupport::Dependencies.interlock.permit_concurrent_loads do
+        DeclarativePolicy.policy_for(user, subject, cache: cache)
+      end
     end
 
     private
