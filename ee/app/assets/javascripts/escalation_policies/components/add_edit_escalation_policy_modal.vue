@@ -63,14 +63,6 @@ export default {
     isFormValid() {
       return this.validationState.name && this.validationState.rules.every(Boolean);
     },
-    serializedData() {
-      const rules = this.form.rules.map(({ status, elapsedTimeSeconds, oncallScheduleIid }) => ({
-        status,
-        elapsedTimeSeconds,
-        oncallScheduleIid,
-      }));
-      return { ...this.form, rules };
-    },
   },
   methods: {
     updateForm({ field, value }) {
@@ -86,7 +78,7 @@ export default {
           variables: {
             input: {
               projectPath,
-              ...this.serializedData,
+              ...this.getRequestParams(),
             },
           },
         })
@@ -112,6 +104,15 @@ export default {
         .finally(() => {
           this.loading = false;
         });
+    },
+    getRequestParams() {
+      const rules = this.form.rules.map(({ status, elapsedTimeSeconds, oncallScheduleIid }) => ({
+        status,
+        elapsedTimeSeconds,
+        oncallScheduleIid,
+      }));
+
+      return { ...this.form, rules };
     },
     validateForm(field) {
       if (field === 'name') {
