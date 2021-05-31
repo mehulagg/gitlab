@@ -132,6 +132,10 @@ module Gitlab
         end
       end
 
+      def unshift(element)
+        @array.unshift(element)
+      end
+
       alias_method :to_ary, :to_a
 
       private
