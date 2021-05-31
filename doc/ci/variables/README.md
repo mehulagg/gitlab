@@ -397,7 +397,7 @@ job_name:
     - D:\\qislsf\\apache-ant-1.10.5\\bin\\ant.bat "-DsosposDailyUsr=$env:SOSPOS_DAILY_USR" portal_test
 ```
 
-### Use variables wtih Windows Batch
+### Use variables with Windows Batch
 
 To access CI/CD variables in Windows Batch, surround the variable
 with `%`:
