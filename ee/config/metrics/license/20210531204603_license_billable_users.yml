@@ -6,7 +6,7 @@ product_section: growth
 product_stage: growth
 product_group: group::product intelligence
 product_category: collection
-value_type: string
+value_type: number
 status: implemented
 milestone: "14.0"
 introduced_by_url: https://gitlab.com/gitlab-org/gitlab/-/merge_requests/62850
