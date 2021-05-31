@@ -1561,7 +1561,6 @@ To configure the Praefect nodes, on each one:
    praefect['listen_addr'] = '0.0.0.0:2305'
 
    # Prevent database migrations from running on upgrade automatically
-   praefect['auto_migrate'] = false
    gitlab_rails['auto_migrate'] = false
 
    # Configure the Consul agent
