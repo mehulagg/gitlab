@@ -74,17 +74,17 @@ export default {
   methods: {
     addRule() {
       this.rules.push({ ...cloneDeep(defaultEscalationRule), key: this.getUid() });
-      this.emitUpdate();
+      this.emitRulesUpdate();
     },
     updateEscalationRules(index, rule) {
       this.rules[index] = rule;
-      this.emitUpdate();
+      this.emitRulesUpdate();
     },
     removeEscalationRule(index) {
       this.rules.splice(index, 1);
-      this.emitUpdate();
+      this.emitRulesUpdate();
     },
-    emitUpdate() {
+    emitRulesUpdate() {
       this.$emit('update-escalation-policy-form', { field: 'rules', value: this.rules });
     },
     getUid() {

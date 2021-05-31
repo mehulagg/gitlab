@@ -28,6 +28,7 @@ export default {
   i18n,
   ALERT_STATUSES,
   ACTIONS,
+  MINUTES_PATTERN: /^\d+$/,
   components: {
     GlFormGroup,
     GlFormInput,
@@ -132,7 +133,8 @@ export default {
               class="gl-mx-3 gl-inset-border-1-gray-200! rule-elapsed-minutes"
               type="number"
               min="0"
-              @change="emitUpdate"
+              :pattern="$options.MINUTES_PATTERN"
+              @input="emitUpdate"
             />
           </template>
         </gl-sprintf>

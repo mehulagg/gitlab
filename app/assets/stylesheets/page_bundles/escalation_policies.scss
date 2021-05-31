@@ -8,6 +8,16 @@
 
 .rule-elapsed-minutes {
   width: 56px;
+
+  /* stylelint-disable property-no-vendor-prefix */
+  &::-webkit-outer-spin-button,
+  &::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+
+  -moz-appearance: textfield;
+  /* stylelint-enable property-no-vendor-prefix */
 }
 
 .rule-close-icon {
