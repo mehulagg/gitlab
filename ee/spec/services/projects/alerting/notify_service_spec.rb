@@ -16,6 +16,10 @@ RSpec.describe Projects::Alerting::NotifyService do
       }
     end
 
+    before do
+      stub_feature_flags(escalation_policies_mvc: false)
+    end
+
     subject { service.execute(token, integration) }
 
     context 'existing alert with same payload fingerprint' do
@@ -80,6 +84,19 @@ RSpec.describe Projects::Alerting::NotifyService do
       end
 
       include_examples 'oncall users are correctly notified of firing alert'
+
+      context 'with escalation policies ready' do
+        let_it_be(:project) { schedule.project }
+        let_it_be(:policy) { create(:incident_management_escalation_policy, project: project) }
+
+        before do
+          stub_licensed_features(oncall_schedules: true, escalation_policies: true)
+          stub_feature_flags(escalation_policies_mvc: project)
+        end
+
+        include_examples 'oncall users are correctly notified of firing alert'
+        include_examples 'creates and processes an escalation'
+      end
 
       context 'with resolving payload' do
         let(:payload) do

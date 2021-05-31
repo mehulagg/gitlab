@@ -16,7 +16,5 @@ module IncidentManagement
               numericality: { only_integer: true, greater_than_or_equal_to: 0, less_than_or_equal_to: 24.hours }
 
     validates :policy_id, uniqueness: { scope: [:oncall_schedule_id, :status, :elapsed_time_seconds], message: _('Must have a unique policy, status, and elapsed time') }
-
-    scope :ordered_by_elapsed_time_seconds, -> { order(elapsed_time_seconds: :desc) }
   end
 end
