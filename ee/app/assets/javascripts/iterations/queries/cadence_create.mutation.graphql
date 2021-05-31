@@ -1,8 +1,9 @@
+#import "./iteration_cadence.fragment.graphql"
+
 mutation createIterationCadence($input: IterationCadenceCreateInput!) {
-  iterationCadenceCreate(input: $input) {
+  result: iterationCadenceCreate(input: $input) {
     iterationCadence {
-      id
-      title
+      ...IterationCadence
     }
     errors
   }

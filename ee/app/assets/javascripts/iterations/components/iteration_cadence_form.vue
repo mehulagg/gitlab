@@ -54,8 +54,7 @@ const i18n = Object.freeze({
 export default {
   availableDurations: [{ value: 0, text: i18n.duration.placeholder }, 1, 2, 3, 4, 5, 6],
   availableFutureIterations: [
-    { value: null, text: i18n.futureIterations.placeholder },
-    0,
+    { value: 0, text: i18n.futureIterations.placeholder },
     2,
     4,
     6,
@@ -104,6 +103,9 @@ export default {
     },
     page() {
       return this.isEdit ? 'edit' : 'new';
+    },
+    mutation() {
+      return this.isEdit ? updateCadence : createCadence;
     },
     valid() {
       return !Object.values(this.validationState).includes(false);
@@ -212,7 +214,7 @@ export default {
     createCadence() {
       return this.$apollo
         .mutate({
-          mutation: this.isEdit ? updateCadence : createCadence,
+          mutation: this.mutation,
           variables: this.variables,
         })
         .then(({ data, errors: topLevelErrors = [] }) => {
@@ -221,9 +223,7 @@ export default {
             return;
           }
 
-          const { errors } = this.isEdit
-            ? data.iterationCadenceUpdate
-            : data.iterationCadenceCreate;
+          const { errors } = data.result;
 
           if (errors.length > 0) {
             [this.errorMessage] = errors;

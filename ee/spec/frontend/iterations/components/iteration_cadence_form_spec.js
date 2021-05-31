@@ -36,11 +36,11 @@ describe('Iteration cadence form', () => {
   };
 
   const createMutationSuccess = {
-    data: { iterationCadenceCreate: { iterationCadence, errors: [] } },
+    data: { result: { iterationCadence, errors: [] } },
   };
   const createMutationFailure = {
     data: {
-      iterationCadenceCreate: { iterationCadence, errors: ['alas, your data is unchanged'] },
+      result: { iterationCadence, errors: ['alas, your data is unchanged'] },
     },
   };
 
