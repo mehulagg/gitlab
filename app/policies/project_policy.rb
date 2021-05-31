@@ -653,7 +653,7 @@ class ProjectPolicy < BasePolicy
     enable :set_pipeline_variables
   end
 
-  rule { ~security_and_compliance_disabled & can?(:developer_access) }.policy do
+  rule { ~security_and_compliance_disabled & (auditor | can?(:developer_access)) }.policy do
     enable :access_security_and_compliance
   end
 
