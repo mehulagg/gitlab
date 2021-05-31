@@ -10,7 +10,7 @@ export default (Vue, VueApollo) => {
 
   const defaultClient = createDefaultClient();
 
-  const { emptyStateImage, defaultBranchName, projectPath } = el.dataset;
+  const { emptyStateImage, defaultBranchName, projectPath, kasAddress } = el.dataset;
 
   return new Vue({
     el,
@@ -21,6 +21,7 @@ export default (Vue, VueApollo) => {
           emptyStateImage,
           defaultBranchName,
           projectPath,
+          kasAddress,
         },
       });
     },

@@ -3,6 +3,7 @@ import { GlAlert, GlKeysetPagination, GlLoadingIcon } from '@gitlab/ui';
 import { MAX_LIST_COUNT } from '../constants';
 import getAgentsQuery from '../graphql/queries/get_agents.query.graphql';
 import AgentEmptyState from './agent_empty_state.vue';
+import InstallAgentModal from './install_agent_modal.vue';
 import AgentTable from './agent_table.vue';
 
 export default {
@@ -24,6 +25,7 @@ export default {
   },
   components: {
     AgentEmptyState,
+    InstallAgentModal,
     AgentTable,
     GlAlert,
     GlKeysetPagination,
@@ -40,6 +42,10 @@ export default {
       type: String,
     },
     projectPath: {
+      required: true,
+      type: String,
+    },
+    kasAddress: {
       required: true,
       type: String,
     },
@@ -122,6 +128,7 @@ export default {
     </div>
 
     <AgentEmptyState v-else :image="emptyStateImage" />
+    <InstallAgentModal :projectPath="projectPath" :kasAddress="kasAddress" />
   </section>
 
   <gl-alert v-else variant="danger" :dismissible="false">

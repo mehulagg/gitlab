@@ -1,12 +1,17 @@
 <script>
-import { GlButton, GlEmptyState, GlLink, GlSprintf } from '@gitlab/ui';
+import { GlButton, GlEmptyState, GlLink, GlSprintf, GlModalDirective } from '@gitlab/ui';
+import { INSTALL_AGENT_MODAL_ID } from '../constants';
 
 export default {
+  modalId: INSTALL_AGENT_MODAL_ID,
   components: {
     GlButton,
     GlEmptyState,
     GlLink,
     GlSprintf,
+  },
+  directives: {
+    GlModalDirective,
   },
   props: {
     image: {
@@ -61,12 +66,13 @@ export default {
 
     <template #actions>
       <gl-button
-        category="primary"
+        ref="install-agent"
+        v-gl-modal-directive="$options.modalId"
+        class="gl-mr-3"
+        data-qa-selector="TODO"
         variant="success"
-        href="https://docs.gitlab.com/ee/user/clusters/agent/#get-started-with-gitops-and-the-gitlab-agent"
-        target="_blank"
-      >
-        {{ s__('ClusterAgents|Integrate with the GitLab Agent') }}
+        category="primary"
+        >{{ s__('ClusterAgents|Integrate with the GitLab Agent') }}
       </gl-button>
     </template>
   </gl-empty-state>

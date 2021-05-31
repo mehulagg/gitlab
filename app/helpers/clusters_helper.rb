@@ -20,7 +20,8 @@ module ClustersHelper
     {
       default_branch_name: clusterable_project.default_branch,
       empty_state_image: image_path('illustrations/clusters_empty.svg'),
-      project_path: clusterable_project.full_path
+      project_path: clusterable_project.full_path,
+      kas_address: Gitlab::Kas.external_url
     }
   end
 
