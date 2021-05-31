@@ -39,11 +39,11 @@ module Matchers
       end
 
       failure_message do
-        "#{e}:\nexpected to #{description}, last attempt was #{@result}"
+        "#{e}:\nexpected to #{description}, last attempt was #{@result.nil? ? 'nil' : @result}"
       end
 
       failure_message_when_negated do
-        "#{e}:\nexpected not to #{description}, last attempt was #{@result}"
+        "#{e}:\nexpected not to #{description}, last attempt was #{@result.nil? ? 'nil' : @result}"
       end
 
       # Execute rspec expectation within retrier
