@@ -10,6 +10,7 @@ module IncidentManagement
         @project = escalation.project
         @escalation_policy = escalation.policy
         @alert = escalation.alert
+        @process_time = Time.current
       end
 
       def execute
@@ -26,7 +27,7 @@ module IncidentManagement
 
       private
 
-      attr_reader :project, :escalation, :escalation_policy, :alert, :rule_to_escalate
+      attr_reader :project, :escalation, :escalation_policy, :alert, :process_time, :rule_to_escalate
 
       def find_rules_to_escalate(rules)
         rules.select do |rule|
@@ -64,7 +65,7 @@ module IncidentManagement
       end
 
       def mark_escalation_as_updated!
-        escalation.touch
+        escalation.touch(time: process_time)
       end
     end
   end

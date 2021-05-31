@@ -61,11 +61,11 @@ RSpec.describe IncidentManagement::Escalations::ProcessService do
     end
 
     context 'zero min escalation rule' do
-      let(:rule_1) { build(:incident_management_escalation_rule, oncall_schedule: schedule_1, status: AlertManagement::Alert::STATUSES[:acknowledged], elapsed_time_seconds: 0) }
-      let(:rules) { [rule_1] }
+      let(:rule) { build(:incident_management_escalation_rule, oncall_schedule: schedule_1, status: AlertManagement::Alert::STATUSES[:acknowledged], elapsed_time_seconds: 0) }
+      let(:rules) { [rule] }
       let(:escalation_policy) { create(:incident_management_escalation_policy, project: project, rules: rules) }
       let(:escalation_params) { { created_at: Time.current, updated_at: Time.current } }
-      let(:users) { potential_oncall_users_for_rule(rule_1) }
+      let(:users) { potential_oncall_users_for_rule(rule) }
 
       it_behaves_like 'it escalates'
 

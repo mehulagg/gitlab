@@ -44,6 +44,19 @@ RSpec.describe AlertManagement::ProcessPrometheusAlertService do
 
           include_examples 'oncall users are correctly notified of recovery alert'
         end
+
+        context 'with escalation policies ready' do
+          let_it_be(:project) { schedule.project }
+          let_it_be(:policy) { create(:incident_management_escalation_policy, project: project) }
+
+          before do
+            stub_licensed_features(oncall_schedules: true, escalation_policies: true)
+            stub_feature_flags(escalation_policies_mvc: project)
+          end
+
+          include_examples 'oncall users are correctly notified of firing alert'
+          include_examples 'creates and processes an escalation'
+        end
       end
     end
   end

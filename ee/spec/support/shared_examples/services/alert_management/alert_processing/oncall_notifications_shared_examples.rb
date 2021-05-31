@@ -27,7 +27,7 @@ RSpec.shared_examples 'sends on-call notification if enabled' do
   end
 end
 
-RSpec.shared_examples 'sends on-call notification' do |count: 1|
+RSpec.shared_examples 'sends on-call notification' do
   let(:notification_async) { double(NotificationService::Async) }
 
   specify do
@@ -35,7 +35,7 @@ RSpec.shared_examples 'sends on-call notification' do |count: 1|
     expect(notification_async).to receive(:notify_oncall_users_of_alert).with(
       users,
       alert
-    ).at_least(:once)
+    )
 
     subject
   end
