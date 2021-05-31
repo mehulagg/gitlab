@@ -9,6 +9,7 @@ import {
   GlDropdown,
   GlDropdownItem,
 } from '@gitlab/ui';
+import IncidentsSettingsService from '~/incidents_settings/incidents_settings_service';
 import {
   I18N_ALERT_SETTINGS_FORM,
   NO_ISSUE_TEMPLATE_SELECTED,
@@ -27,7 +28,11 @@ export default {
     GlDropdown,
     GlDropdownItem,
   },
-  inject: ['service', 'alertSettings'],
+  inject: ['alertSettings'],
+  service: new IncidentsSettingsService(
+    this.alertSettings.operationsSettingsEndpoint,
+    this.alertSettings.pagerdutyResetKeyPath,
+  ),
   data() {
     return {
       templates: [NO_ISSUE_TEMPLATE_SELECTED, ...this.alertSettings.templates],

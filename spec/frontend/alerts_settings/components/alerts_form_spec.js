@@ -1,5 +1,5 @@
 import { shallowMount } from '@vue/test-utils';
-import AlertsSettingsForm from '~/incidents_settings/components/alerts_form.vue';
+import AlertsSettingsForm from '~/alerts_settings/components/alerts_form.vue';
 
 describe('Alert integration settings form', () => {
   let wrapper;
