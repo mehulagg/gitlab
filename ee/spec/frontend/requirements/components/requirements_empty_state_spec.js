@@ -11,7 +11,7 @@ const createComponent = (props = {}) =>
       emptyStatePath: '/assets/illustrations/empty-state/requirements.svg',
       requirementsCount: {
         OPENED: 0,
-        ARCHIVED: 0,
+        CLOSED: 0,
         ALL: 0,
       },
       canCreateRequirement: true,
@@ -37,7 +37,7 @@ describe('RequirementsEmptyState', () => {
         wrapper.setProps({
           requirementsCount: {
             OPENED: 0,
-            ARCHIVED: 2,
+            CLOSED: 2,
             ALL: 2,
           },
         });
@@ -47,18 +47,18 @@ describe('RequirementsEmptyState', () => {
         });
       });
 
-      it('returns string "There are no archived requirements" when value of `filterBy` prop is "ARCHIVED" and project has some requirements', () => {
+      it('returns string "There are no closed requirements" when value of `filterBy` prop is "CLOSED" and project has some requirements', () => {
         wrapper.setProps({
-          filterBy: FilterState.archived,
+          filterBy: FilterState.closed,
           requirementsCount: {
             OPENED: 2,
-            ARCHIVED: 0,
+            CLOSED: 0,
             ALL: 2,
           },
         });
 
         return wrapper.vm.$nextTick(() => {
-          expect(wrapper.vm.emptyStateTitle).toBe('There are no archived requirements');
+          expect(wrapper.vm.emptyStateTitle).toBe('There are no closed requirements');
         });
       });
 
@@ -80,7 +80,7 @@ describe('RequirementsEmptyState', () => {
         wrapper.setProps({
           requirementsCount: {
             OPENED: 2,
-            ARCHIVED: 0,
+            CLOSED: 0,
             ALL: 2,
           },
         });
@@ -113,7 +113,7 @@ describe('RequirementsEmptyState', () => {
       wrapper.setProps({
         requirementsCount: {
           OPENED: 2,
-          ARCHIVED: 0,
+          CLOSED: 0,
           ALL: 2,
         },
       });

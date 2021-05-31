@@ -41,8 +41,8 @@ export default {
     isOpenTab() {
       return this.filterBy === FilterState.opened;
     },
-    isArchivedTab() {
-      return this.filterBy === FilterState.archived;
+    isClosedTab() {
+      return this.filterBy === FilterState.closed;
     },
     isAllTab() {
       return this.filterBy === FilterState.all;
@@ -65,14 +65,14 @@ export default {
         </template>
       </gl-tab>
       <gl-tab
-        :title-link-attributes="{ 'data-testid': 'state-archived' }"
-        :active="isArchivedTab"
-        @click="$emit('click-tab', { filterBy: $options.FilterState.archived })"
+        :title-link-attributes="{ 'data-testid': 'state-closed' }"
+        :active="isClosedTab"
+        @click="$emit('click-tab', { filterBy: $options.FilterState.closed })"
       >
         <template #title>
-          <span>{{ __('Archived') }}</span>
+          <span>{{ __('Closed') }}</span>
           <gl-badge size="sm" class="gl-tab-counter-badge">{{
-            requirementsCount.ARCHIVED
+            requirementsCount.CLOSED
           }}</gl-badge>
         </template>
       </gl-tab>

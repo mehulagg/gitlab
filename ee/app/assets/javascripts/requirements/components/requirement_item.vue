@@ -9,7 +9,7 @@ import RequirementStatusBadge from './requirement_status_badge.vue';
 
 export default {
   i18n: {
-    archiveLabel: __('Archive'),
+    closeLabel: __('Close'),
     editLabel: __('Edit'),
   },
   components: {
@@ -52,7 +52,7 @@ export default {
   },
   computed: {
     showIssuableMetaActions() {
-      return Boolean(this.canUpdate || this.canArchive || this.testReport);
+      return Boolean(this.canUpdate || this.canClose || this.testReport);
     },
   },
   methods: {
@@ -67,10 +67,10 @@ export default {
       }
       return '';
     },
-    handleArchiveClick() {
-      this.$emit('archiveClick', {
+    handleCloseClick() {
+      this.$emit('closeClick', {
         iid: this.requirement.iid,
-        state: FilterState.archived,
+        state: FilterState.closed,
       });
     },
     handleReopenClick() {
@@ -131,7 +131,7 @@ export default {
             element-type="li"
             class="d-none d-sm-block"
           />
-          <li v-if="canUpdate && !isArchived" class="requirement-edit d-sm-block">
+          <li v-if="canUpdate && !isClosed" class="requirement-edit d-sm-block">
             <gl-button
               v-gl-tooltip
               icon="pencil"
@@ -140,18 +140,18 @@ export default {
               @click="$emit('edit-click', requirement)"
             />
           </li>
-          <li v-if="canArchive && !isArchived" class="requirement-archive d-sm-block">
+          <li v-if="canClose && !isClosed" class="requirement-close d-sm-block">
             <gl-button
               v-if="!stateChangeRequestActive"
               v-gl-tooltip
-              icon="archive"
+              icon="close"
               :loading="stateChangeRequestActive"
-              :title="$options.i18n.archiveLabel"
-              :aria-label="$options.i18n.archiveLabel"
-              @click.stop="handleArchiveClick"
+              :title="$options.i18n.closeLabel"
+              :aria-label="$options.i18n.closeLabel"
+              @click.stop="handleCloseClick"
             />
           </li>
-          <li v-if="canArchive && isArchived" class="requirement-reopen d-sm-block">
+          <li v-if="canClose && isClosed" class="requirement-reopen d-sm-block">
             <gl-button :loading="stateChangeRequestActive" @click="handleReopenClick">{{
               __('Reopen')
             }}</gl-button>

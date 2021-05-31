@@ -42,22 +42,22 @@ describe('RequirementMeta Mixin', () => {
       });
     });
 
-    describe('isArchived', () => {
-      it('returns true when `requirement.state` is "ARCHIVED"', async () => {
+    describe('isClosed', () => {
+      it('returns true when `requirement.state` is "CLOSED"', async () => {
         wrapper.setProps({
           requirement: {
             ...mockRequirement,
-            state: FilterState.archived,
+            state: FilterState.closed,
           },
         });
 
         await wrapper.vm.$nextTick();
 
-        expect(wrapper.vm.isArchived).toBe(true);
+        expect(wrapper.vm.isClosed).toBe(true);
       });
 
       it('returns false when `requirement.state` is "OPENED"', () => {
-        expect(wrapper.vm.isArchived).toBe(false);
+        expect(wrapper.vm.isClosed).toBe(false);
       });
     });
 
@@ -95,9 +95,9 @@ describe('RequirementMeta Mixin', () => {
       });
     });
 
-    describe('canArchive', () => {
+    describe('canClose', () => {
       it('returns value of `requirement.userPermissions.updateRequirement`', () => {
-        expect(wrapper.vm.canArchive).toBe(mockRequirement.userPermissions.adminRequirement);
+        expect(wrapper.vm.canClose).toBe(mockRequirement.userPermissions.adminRequirement);
       });
     });
   });

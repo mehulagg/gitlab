@@ -8,13 +8,13 @@
 -# keeping them in HAML view makes more sense.
 - page_size = 20
 - requirements_count = Hash.new(0).merge(@project.requirements.counts_by_state)
-- total_requirements = requirements_count['opened'] + requirements_count['archived']
+- total_requirements = requirements_count['opened'] + requirements_count['closed']
 - is_open_tab = params[:state].nil? || params[:state] == 'opened'
 
 - if is_open_tab
   - current_tab_count = requirements_count['opened'] > page_size ? page_size : requirements_count['opened']
-- elsif params[:state] == 'archived'
-  - current_tab_count = requirements_count['archived'] > page_size ? page_size : requirements_count['archived']
+- elsif params[:state] == 'closed'
+  - current_tab_count = requirements_count['closed'] > page_size ? page_size : requirements_count['closed']
 - else
   - current_tab_count = total_requirements > page_size ? page_size : total_requirements
 
@@ -28,7 +28,7 @@
   sort_by: params[:sort],
   project_path: @project.full_path,
   opened: requirements_count['opened'],
-  archived: requirements_count['archived'],
+  closed: requirements_count['closed'],
   all: total_requirements,
   current_user_email: current_user&.email,
   requirements_web_url: project_requirements_management_requirements_path(@project),

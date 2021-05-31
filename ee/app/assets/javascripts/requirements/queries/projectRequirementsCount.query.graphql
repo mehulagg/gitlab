@@ -2,7 +2,7 @@ query projectRequirements($projectPath: ID!) {
   project(fullPath: $projectPath) {
     requirementStatesCount {
       opened
-      archived
+      closed
     }
   }
 }

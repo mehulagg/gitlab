@@ -194,7 +194,7 @@ RSpec.describe Ci::Build do
       end
 
       it 'is not included if there are no open requirements' do
-        create(:requirement, project: project, state: :archived)
+        create(:requirement, :closed, project: project)
 
         requirement_variable = subject.find { |var| var[:key] == 'CI_HAS_OPEN_REQUIREMENTS' }
 

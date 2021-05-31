@@ -6,7 +6,7 @@ import RequirementStatusBadge from 'ee/requirements/components/requirement_statu
 
 import {
   requirement1,
-  requirementArchived,
+  requirementClosed,
   mockUserPermissions,
   mockTestReport,
 } from '../mock_data';
@@ -20,29 +20,29 @@ const createComponent = (requirement = requirement1) =>
 
 describe('RequirementItem', () => {
   let wrapper;
-  let wrapperArchived;
+  let wrapperClosed;
 
   beforeEach(() => {
     wrapper = createComponent();
-    wrapperArchived = createComponent(requirementArchived);
+    wrapperClosed = createComponent(requirementClosed);
   });
 
   afterEach(() => {
     wrapper.destroy();
-    wrapperArchived.destroy();
+    wrapperClosed.destroy();
   });
 
   describe('methods', () => {
-    describe('handleArchiveClick', () => {
-      it('emits `archiveClick` event on component with object containing `requirement.iid` & `state` as "ARCHIVED" as param', () => {
-        wrapper.vm.handleArchiveClick();
+    describe('handleCloseClick', () => {
+      it('emits `closeClick` event on component with object containing `requirement.iid` & `state` as "CLOSED" as param', () => {
+        wrapper.vm.handleCloseClick();
 
         return wrapper.vm.$nextTick(() => {
-          expect(wrapper.emitted('archiveClick')).toBeTruthy();
-          expect(wrapper.emitted('archiveClick')[0]).toEqual([
+          expect(wrapper.emitted('closeClick')).toBeTruthy();
+          expect(wrapper.emitted('closeClick')[0]).toEqual([
             {
               iid: requirement1.iid,
-              state: 'ARCHIVED',
+              state: 'CLOSED',
             },
           ]);
         });
@@ -51,13 +51,13 @@ describe('RequirementItem', () => {
 
     describe('handleReopenClick', () => {
       it('emits `reopenClick` event on component with object containing `requirement.iid` & `state` as "OPENED" as param', () => {
-        wrapperArchived.vm.handleReopenClick();
+        wrapperClosed.vm.handleReopenClick();
 
-        return wrapperArchived.vm.$nextTick(() => {
-          expect(wrapperArchived.emitted('reopenClick')).toBeTruthy();
-          expect(wrapperArchived.emitted('reopenClick')[0]).toEqual([
+        return wrapperClosed.vm.$nextTick(() => {
+          expect(wrapperClosed.emitted('reopenClick')).toBeTruthy();
+          expect(wrapperClosed.emitted('reopenClick')[0]).toEqual([
             {
-              iid: requirementArchived.iid,
+              iid: requirementClosed.iid,
               state: 'OPENED',
             },
           ]);
@@ -156,15 +156,15 @@ describe('RequirementItem', () => {
       wrapperNoEdit.destroy();
     });
 
-    it('renders element containing requirement `Archive` button when `requirement.userPermissions.adminRequirement` is true', () => {
-      const archiveButtonEl = wrapper.find('.controls .requirement-archive').find(GlButton);
+    it('renders element containing requirement `Close` button when `requirement.userPermissions.adminRequirement` is true', () => {
+      const closeButtonEl = wrapper.find('.controls .requirement-close').find(GlButton);
 
-      expect(archiveButtonEl.exists()).toBe(true);
-      expect(archiveButtonEl.attributes('title')).toBe('Archive');
+      expect(closeButtonEl.exists()).toBe(true);
+      expect(closeButtonEl.attributes('title')).toBe('Close');
     });
 
-    it('does not render element containing requirement `Archive` button when `requirement.userPermissions.adminRequirement` is false', () => {
-      const wrapperNoArchive = createComponent({
+    it('does not render element containing requirement `Close` button when `requirement.userPermissions.adminRequirement` is false', () => {
+      const wrapperNoClose = createComponent({
         ...requirement1,
         userPermissions: {
           ...mockUserPermissions,
@@ -172,23 +172,23 @@ describe('RequirementItem', () => {
         },
       });
 
-      expect(wrapperNoArchive.find('.controls .requirement-archive').exists()).toBe(false);
+      expect(wrapperNoClose.find('.controls .requirement-close').exists()).toBe(false);
 
-      wrapperNoArchive.destroy();
+      wrapperNoClose.destroy();
     });
 
-    it('renders `Reopen` button when current requirement is archived and `requirement.userPermissions.adminRequirement` is true', () => {
-      const reopenButton = wrapperArchived.find('.requirement-reopen').find(GlButton);
+    it('renders `Reopen` button when current requirement is closed and `requirement.userPermissions.adminRequirement` is true', () => {
+      const reopenButton = wrapperClosed.find('.requirement-reopen').find(GlButton);
 
       expect(reopenButton.exists()).toBe(true);
       expect(reopenButton.props('loading')).toBe(false);
       expect(reopenButton.text()).toBe('Reopen');
     });
 
-    it('does not render `Reopen` button when current requirement is archived and `requirement.userPermissions.adminRequirement` is false', () => {
-      wrapperArchived.setProps({
+    it('does not render `Reopen` button when current requirement is closed and `requirement.userPermissions.adminRequirement` is false', () => {
+      wrapperClosed.setProps({
         requirement: {
-          ...requirementArchived,
+          ...requirementClosed,
           userPermissions: {
             ...mockUserPermissions,
             adminRequirement: false,
@@ -196,8 +196,8 @@ describe('RequirementItem', () => {
         },
       });
 
-      return wrapperArchived.vm.$nextTick(() => {
-        expect(wrapperArchived.find('.controls .requirement-reopen').exists()).toBe(false);
+      return wrapperClosed.vm.$nextTick(() => {
+        expect(wrapperClosed.find('.controls .requirement-reopen').exists()).toBe(false);
       });
     });
   });

@@ -87,7 +87,7 @@ export default {
       type: Object,
       required: true,
       validator: (value) =>
-        ['OPENED', 'ARCHIVED', 'ALL'].every((prop) => typeof value[prop] === 'number'),
+        ['OPENED', 'CLOSED', 'ALL'].every((prop) => typeof value[prop] === 'number'),
     },
     page: {
       type: Number,
@@ -144,7 +144,7 @@ export default {
         }
 
         // Include `state` only if `filterBy` is not `ALL`.
-        // as Grqph query only supports `OPEN` and `ARCHIVED`.
+        // as Grqph query only supports `OPEN` and `CLOSED`.
         if (this.filterBy !== FilterState.all) {
           queryVariables.state = this.filterBy;
         }
@@ -197,12 +197,12 @@ export default {
         };
       },
       update({ project = {} }) {
-        const { opened = 0, archived = 0 } = project.requirementStatesCount;
+        const { opened = 0, closed = 0 } = project.requirementStatesCount;
 
         return {
           OPENED: opened,
-          ARCHIVED: archived,
-          ALL: opened + archived,
+          CLOSED: closed,
+          ALL: opened + closed,
         };
       },
       error() {
@@ -235,7 +235,7 @@ export default {
       },
       requirementsCount: {
         OPENED: this.initialRequirementsCount[FilterState.opened],
-        ARCHIVED: this.initialRequirementsCount[FilterState.archived],
+        CLOSED: this.initialRequirementsCount[FilterState.closed],
         ALL: this.initialRequirementsCount[FilterState.all],
       },
       alert: null,
@@ -584,7 +584,7 @@ export default {
         errorFlashMessage:
           requirement.state === FilterState.opened
             ? __('Something went wrong while reopening a requirement.')
-            : __('Something went wrong while archiving a requirement.'),
+            : __('Something went wrong while closing a requirement.'),
       })
         .then((res) => {
           const updateReqMutation = res?.data?.updateRequirement || {};
@@ -598,13 +598,13 @@ export default {
                 reference,
               });
             } else {
-              toastMessage = sprintf(__('Requirement %{reference} has been archived'), {
+              toastMessage = sprintf(__('Requirement %{reference} has been closed'), {
                 reference,
               });
             }
             this.$toast.show(toastMessage);
           } else {
-            throw new Error(`Error archiving a requirement ${res.message}`);
+            throw new Error(`Error closing a requirement ${res.message}`);
           }
         })
         .finally(() => {
@@ -765,7 +765,7 @@ export default {
         :active="editedRequirement && editedRequirement.iid === requirement.iid"
         @show-click="handleShowRequirementClick"
         @edit-click="handleEditRequirementClick"
-        @archiveClick="handleRequirementStateChange"
+        @closeClick="handleRequirementStateChange"
         @reopenClick="handleRequirementStateChange"
       />
     </ul>

@@ -94,7 +94,7 @@ export const requirement3 = {
   },
 };
 
-export const requirementArchived = {
+export const requirementClosed = {
   iid: '23',
   title: 'Cuius quidem, quoniam Stoicus fuit',
   titleHtml: 'Cuius quidem, quoniam Stoicus fuit',
@@ -102,7 +102,7 @@ export const requirementArchived = {
   descriptionHtml: 'quoniam <i>Stoicus</i> fuit.',
   createdAt: '2020-03-31T13:31:40Z',
   updatedAt: '2020-03-31T13:31:40Z',
-  state: 'ARCHIVED',
+  state: 'CLOSED',
   userPermissions: mockUserPermissions,
   author: mockAuthor,
   lastTestReportState: null,
@@ -115,19 +115,19 @@ export const requirementArchived = {
 
 export const mockRequirementsOpen = [requirement1, requirement2, requirement3];
 
-export const mockRequirementsArchived = [requirementArchived];
+export const mockRequirementsClosed = [requirementClosed];
 
-export const mockRequirementsAll = [...mockRequirementsOpen, ...mockRequirementsArchived];
+export const mockRequirementsAll = [...mockRequirementsOpen, ...mockRequirementsClosed];
 
 export const mockRequirementsCount = {
   OPENED: 3,
-  ARCHIVED: 1,
+  CLOSED: 1,
   ALL: 4,
 };
 
 export const FilterState = {
   opened: 'OPENED',
-  archived: 'ARCHIVED',
+  closed: 'CLOSED',
   all: 'ALL',
 };
 
@@ -181,7 +181,7 @@ export const mockStatusToken = {
 */
 
 export const mockInitialRequirementCounts = {
-  ARCHIVED: 0,
+  CLOSED: 0,
   OPENED: 1,
   ALL: 1,
 };
@@ -191,7 +191,7 @@ export const mockProjectRequirementCounts = {
     project: {
       requirementStatesCount: {
         opened: mockInitialRequirementCounts.OPENED,
-        archived: mockInitialRequirementCounts.ARCHIVED,
+        closed: mockInitialRequirementCounts.CLOSED,
         __typename: 'RequirementStatesCount',
       },
       __typename: 'Project',

@@ -9,7 +9,7 @@ jest.mock('ee/requirements/constants', () => ({
   DEFAULT_PAGE_SIZE: 2,
   FilterState: {
     opened: 'OPENED',
-    archived: 'ARCHIVED',
+    closed: 'CLOSED',
     all: 'ALL',
   },
 }));
@@ -65,7 +65,7 @@ describe('RequirementsLoading', () => {
           currentPage: 1,
           requirementsCount: {
             OPENED: 1,
-            ARCHIVED: 0,
+            CLOSED: 0,
             ALL: 2,
           },
         });
@@ -89,7 +89,7 @@ describe('RequirementsLoading', () => {
       wrapper.setProps({
         requirementsCount: {
           OPENED: 0,
-          ARCHIVED: 0,
+          CLOSED: 0,
           ALL: 0,
         },
       });

@@ -55,7 +55,7 @@ export default () => {
         projectPath,
         emptyStatePath,
         opened,
-        archived,
+        closed,
         all,
         canCreateRequirement,
         requirementsWebUrl,
@@ -65,7 +65,7 @@ export default () => {
       const stateFilterBy = filterBy ? FilterState[filterBy] : FilterState.opened;
 
       const OPENED = parseInt(opened, 10);
-      const ARCHIVED = parseInt(archived, 10);
+      const CLOSED = parseInt(closed, 10);
       const ALL = parseInt(all, 10);
 
       return {
@@ -76,7 +76,7 @@ export default () => {
         initialSortBy: sortBy,
         initialRequirementsCount: {
           OPENED,
-          ARCHIVED,
+          CLOSED,
           ALL,
         },
         page,

@@ -27,11 +27,11 @@ RSpec.describe RequirementsManagement::Requirement do
   describe 'scopes' do
     describe '.counts_by_state' do
       let_it_be(:opened) { create(:requirement, project: project, state: :opened) }
-      let_it_be(:archived) { create(:requirement, project: project, state: :archived) }
+      let_it_be(:closed) { create(:requirement, :closed, project: project) }
 
       subject { described_class.counts_by_state }
 
-      it { is_expected.to contain_exactly(['archived', 1], ['opened', 1]) }
+      it { is_expected.to contain_exactly(['closed', 1], ['opened', 1]) }
     end
 
     describe '.with_author' do

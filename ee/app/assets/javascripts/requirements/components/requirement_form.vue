@@ -78,7 +78,7 @@ export default {
       return this.isCreate ? __('Create requirement') : __('Save changes');
     },
     canEditRequirement() {
-      return this.isCreate || (this.canUpdate && !this.isArchived);
+      return this.isCreate || (this.canUpdate && !this.isClosed);
     },
     requirementObject() {
       return this.isCreate

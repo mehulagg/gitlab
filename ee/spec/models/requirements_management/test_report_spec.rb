@@ -73,7 +73,7 @@ RSpec.describe RequirementsManagement::TestReport do
           requirement1 = create(:requirement, state: :opened, project: project)
           requirement2 = create(:requirement, state: :opened, project: project)
           create(:requirement, state: :opened) # different project
-          create(:requirement, state: :archived, project: project) # archived
+          create(:requirement, state: :closed, project: project) # closed
 
           expect { subject }.to change { RequirementsManagement::TestReport.count }.by(2)
 

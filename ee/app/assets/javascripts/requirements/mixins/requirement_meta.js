@@ -14,8 +14,8 @@ export default {
     descriptionHtml() {
       return this.requirement?.descriptionHtml;
     },
-    isArchived() {
-      return this.requirement?.state === FilterState.archived;
+    isClosed() {
+      return this.requirement?.state === FilterState.closed;
     },
     author() {
       return this.requirement?.author;
@@ -36,7 +36,7 @@ export default {
     canUpdate() {
       return this.requirement?.userPermissions.updateRequirement;
     },
-    canArchive() {
+    canClose() {
       return this.requirement?.userPermissions.adminRequirement;
     },
   },

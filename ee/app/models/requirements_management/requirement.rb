@@ -30,7 +30,7 @@ module RequirementsManagement
     validates :title, length: { maximum: Issuable::TITLE_LENGTH_MAX }
     validates :title_html, length: { maximum: Issuable::TITLE_HTML_LENGTH_MAX }, allow_blank: true
 
-    enum state: { opened: 1, archived: 2 }
+    enum state: { opened: 1, closed: 2 }
 
     scope :for_iid, -> (iid) { where(iid: iid) }
     scope :for_state, -> (state) { where(state: state) }

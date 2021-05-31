@@ -18,7 +18,7 @@ Requirements are long-lived and don't disappear unless manually cleared.
 
 If an industry standard *requires* that your application has a certain feature or behavior, you can
 [create a requirement](#create-a-requirement) to reflect this.
-When a feature is no longer necessary, you can [archive the related requirement](#archive-a-requirement).
+When a feature is no longer necessary, you can [close the related requirement](#close-a-requirement).
 
 <i class="fa fa-youtube-play youtube" aria-hidden="true"></i>
 For an overview, see [GitLab 12.10 Introduces Requirements Management](https://www.youtube.com/watch?v=uSS7oUNSEoU).
@@ -71,28 +71,32 @@ To edit a requirement:
    requirement as satisfied in the edit form by using the check box **Satisfied**.
 1. Select **Save changes**.
 
-## Archive a requirement
+## Close a requirement
 
-You can archive an open requirement while
+NOTE:
+From GitLab 14.0, the action and state _archive_ has been renamed to _close_.
+Requirements can be _closed_ and this is equivalent to the previous nomenclature _archived_.
+
+You can close an open requirement while
 you're in the **Open** tab.
 
-Users with Reporter or higher [permissions](../../permissions.md) can archive requirements.
+Users with Reporter or higher [permissions](../../permissions.md) can close requirements.
 
-To archive a requirement, select **Archive** (**{archive}**).
+To close a requirement, select **Close** (**{close}**).
 
-As soon as a requirement is archived, it no longer appears in the **Open** tab.
+As soon as a requirement is closed, it no longer appears in the **Open** tab.
 
 ## Reopen a requirement
 
-You can view the list of archived requirements in the **Archived** tab.
+You can view the list of closed requirements in the **Closed** tab.
 
-Users with Reporter or higher [permissions](../../permissions.md) can reopen archived requirements.
+Users with Reporter or higher [permissions](../../permissions.md) can reopen closed requirements.
 
-![archived requirements list](img/requirements_archived_list_view_v13_1.png)
+![closed requirements list](img/requirements_closed_list_view_v13_1.png)
 
-To reopen an archived requirement, select **Reopen**.
+To reopen an closed requirement, select **Reopen**.
 
-As soon as a requirement is reopened, it no longer appears in the **Archived** tab.
+As soon as a requirement is reopened, it no longer appears in the **Closed** tab.
 
 ## Search for a requirement
 

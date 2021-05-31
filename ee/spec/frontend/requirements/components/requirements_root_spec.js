@@ -754,20 +754,20 @@ describe('RequirementsRoot', () => {
           });
       });
 
-      it('calls `updateRequirement` with object containing params and errorFlashMessage when `params.state` is "ARCHIVED"', () => {
+      it('calls `updateRequirement` with object containing params and errorFlashMessage when `params.state` is "CLOSED"', () => {
         return wrapper.vm
           .handleRequirementStateChange({
             iid: '1',
-            state: FilterState.archived,
+            state: FilterState.closed,
           })
           .then(() => {
             expect(wrapper.vm.updateRequirement).toHaveBeenCalledWith(
               expect.objectContaining({
                 iid: '1',
-                state: FilterState.archived,
+                state: FilterState.closed,
               }),
               expect.objectContaining({
-                errorFlashMessage: 'Something went wrong while archiving a requirement.',
+                errorFlashMessage: 'Something went wrong while closing a requirement.',
               }),
             );
           });
@@ -812,15 +812,15 @@ describe('RequirementsRoot', () => {
           });
       });
 
-      it('calls `$toast.show` with string "Requirement has been archived" when `params.state` is "ARCHIVED" and request is successful', () => {
+      it('calls `$toast.show` with string "Requirement has been closed" when `params.state` is "CLOSED" and request is successful', () => {
         return wrapper.vm
           .handleRequirementStateChange({
             iid: '1',
-            state: FilterState.archived,
+            state: FilterState.closed,
           })
           .then(() => {
             expect(wrapper.vm.$toast.show).toHaveBeenCalledWith(
-              'Requirement REQ-1 has been archived',
+              'Requirement REQ-1 has been closed',
             );
           });
       });

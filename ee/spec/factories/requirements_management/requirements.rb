@@ -6,5 +6,9 @@ FactoryBot.define do
     author
     title { generate(:title) }
     title_html { "<h2>#{title}</h2>" }
+
+    trait :closed do
+      state { :closed }
+    end
   end
 end

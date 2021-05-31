@@ -44,11 +44,11 @@ describe('RequirementsTabs', () => {
       expect(tabEl.find(GlBadge).text()).toBe(`${mockRequirementsCount.OPENED}`);
     });
 
-    it('renders "Archived" tab', () => {
+    it('renders "Closed" tab', () => {
       const tabEl = wrapper.findAll(GlTab).at(1);
 
-      expect(tabEl.text()).toContain('Archived');
-      expect(tabEl.find(GlBadge).text()).toBe(`${mockRequirementsCount.ARCHIVED}`);
+      expect(tabEl.text()).toContain('Closed');
+      expect(tabEl.find(GlBadge).text()).toBe(`${mockRequirementsCount.CLOSED}`);
     });
 
     it('renders "All" tab', () => {
@@ -79,7 +79,7 @@ describe('RequirementsTabs', () => {
 
     it('does not render "New requirement" button when current tab is not "Open" tab', () => {
       wrapper.setProps({
-        filterBy: FilterState.archived,
+        filterBy: FilterState.closed,
       });
 
       return wrapper.vm.$nextTick(() => {
