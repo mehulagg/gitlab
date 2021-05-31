@@ -10,11 +10,6 @@ export default {
       type: String,
       required: true,
     },
-    markdownEndpoint: {
-      type: String,
-      default: '/api/v4/markdown',
-      required: false,
-    },
   },
   data() {
     return {
@@ -24,22 +19,31 @@ export default {
       error: false,
     };
   },
+  markdownEndpoint: '/api/v4/markdown',
+  computed: {
+    isLoading() {
+      return this.loading && !this.error;
+    },
+    isLoaded() {
+      return !this.loading && !this.error;
+    },
+  },
   mounted() {
     this.renderMarkdown();
   },
   methods: {
     renderMarkdown() {
       axios
-        .post(this.markdownEndpoint, {
+        .post(this.$options.markdownEndpoint, {
           text: this.value,
           gfm: true,
         })
-        .then(res => res.data)
-        .then(data => {
+        .then((res) => res.data)
+        .then((data) => {
           this.markdown = data.html;
           this.loading = false;
         })
-        .catch(e => {
+        .catch((e) => {
           if (e.status !== 200) {
             this.loadError = true;
           }
@@ -52,9 +56,9 @@ export default {
 
 <template>
   <div>
-    <div v-if="loading && !error" class="text-center loading">
+    <div v-if="isLoading" class="text-center loading">
       <gl-loading-icon class="mt-5" size="lg" />
     </div>
-    <div v-if="!loading && !error" v-html="markdown"></div>
+    <div v-if="isLoaded" data-testid="markdown" v-html="markdown"></div>
   </div>
 </template>
