@@ -19,7 +19,7 @@ Prerequisites:
   - `kubectl` [installed and configured](https://docs.aws.amazon.com/eks/latest/userguide/getting-started.html#get-started-kubectl)
     for access to the EKS cluster.
 
-For instance-level clusters, see [Additional requirements for self-managed instances](#additional-requirements-for-self-managed-instances).
+For instance-level clusters, see [additional requirements for self-managed instances](#additional-requirements-for-self-managed-instances).
 
 ## Create a new EKS cluster
 
