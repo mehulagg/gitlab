@@ -774,33 +774,14 @@ For more details see this [blog post](https://about.gitlab.com/blog/2020/08/03/h
 
 ### Deprecated `domain_config_source`
 
-WARNING:
-The flag `gitlab_pages['domain_config_source']` is deprecated for use in [GitLab 13.9](https://gitlab.com/gitlab-org/gitlab/-/issues/217913),
-and is planned for removal in GitLab 14.0.
-
-GitLab 13.0 introduced the special flag `domain_config_source` to support manual opt-in to
-[API-based configuration](#gitlab-api-based-configuration).
-GitLab 13.7 introduced the [`auto` value](https://gitlab.com/gitlab-org/gitlab/-/issues/218358)
-to support a smoother transition to API-based configuration.
-
-Starting with GitLab 14.0, GitLab Pages only supports API-based configuration, and
-[disk source configuration is removed](https://gitlab.com/gitlab-org/gitlab-pages/-/issues/382).
-Therefore, GitLab 14.0 also removes `domain_config_source`.
-
 GitLab Pages fails to start if it can't connect to the GitLab API. For other common issues, see the
 [troubleshooting section](#failed-to-connect-to-the-internal-gitlab-api)
 or report an issue.
 
 ### GitLab API-based configuration
 
-WARNING:
-The flag `gitlab_pages['domain_config_source']` is deprecated for use in [GitLab 13.9](https://gitlab.com/gitlab-org/gitlab/-/issues/217913),
-and is planned for removal in GitLab 14.0. In GitLab 14.0 and later, GitLab Pages attempts to
-connect to the API automatically, without requiring the manual configuration steps shown here. Pages
-fails to start if this automatic connection fails.
-
-GitLab Pages can use an API-based configuration. This replaces disk source configuration, which
-was used prior to GitLab 13.0. Follow these steps to enable it:
+GitLab Pages can use an API-based configuration. This replaces disk source configuration.
+Follow these steps to enable it:
 
 1. Add the following to your `/etc/gitlab/gitlab.rb` file:
 
