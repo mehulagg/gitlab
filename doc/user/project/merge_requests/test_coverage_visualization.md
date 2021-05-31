@@ -72,7 +72,7 @@ the generated Cobertura XML has the `filename` path relative to the class packag
 To make an intelligent guess on the project root relative `class` path, the Cobertura XML parser
 attempts to build the full path by:
 
-- Extracting a portion of the `source` paths from the `sources` element and combine them with the
+- Extracting a portion of the `source` paths from the `sources` element and combining them with the
   class `filename` path.
 - Checking if the candidate path exists in the project.
 - Using the first candidate that matches as the class full path.
@@ -93,7 +93,7 @@ As an example, a project with:
 In the:
 
 - Cobertura XML, the `filename` attribute in the `class` element assumes the value is a relative
-  path to project's root:
+  path to the project's root:
 
   ```xml
   <class name="packet.name" filename="src/main/java" line-rate="0.0" branch-rate="0.0" complexity="5">
@@ -111,7 +111,7 @@ In the:
 
 The parser:
 
-- Extracts `Auth` and `Lib/Utils` from the `sources` and use these to determine the `class` path
+- Extracts `Auth` and `Lib/Utils` from the `sources` and uses these to determine the `class` path
   relative to the project root.
 - Combines these extracted `sources` and the class filename. For example, if there is a `class`
   element with the `filename` value of `User.cs`, the parser takes the first candidate path that
