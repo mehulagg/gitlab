@@ -232,7 +232,7 @@ describe('Tracking', () => {
       Tracking.bindDocument('_category_'); // only happens once
       setHTMLFixture(`
         <input data-track-${term}="click_input1" data-track-label="_label_" value=0 />
-        <input data-track-${term}="click_input2" data-track-value="_value_override_" value="_value_"/>
+        <input data-track-${term}="click_input2" data-track-value=0 value="_value_"/>
         <input type="checkbox" data-track-${term}="toggle_checkbox" value="_value_" checked/>
         <input class="dropdown" data-track-${term}="toggle_dropdown"/>
         <div data-track-${term}="nested_event"><span class="nested"></span></div>
@@ -262,7 +262,7 @@ describe('Tracking', () => {
       document.querySelector(`[data-track-${term}="click_input2"]`).click();
 
       expect(eventSpy).toHaveBeenCalledWith('_category_', 'click_input2', {
-        value: '_value_override_',
+        value: '0',
       });
     });
 
