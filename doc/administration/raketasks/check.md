@@ -264,19 +264,22 @@ Done!
 
 ```
 
-To delete these references to missing local artifacts (or explicitly `job.log` files) that were deleted externally, open the [GitLab Rails Console](../operations/rails_console.md#starting-a-rails-console-session) and run:
+To delete these references to missing local artifacts (`job.log` files):
 
-```ruby
-artifacts_deleted = 0
-::Ci::JobArtifact.all.each do |artifact|                       ### Iterate artifacts
-#  next if artifact.file.filename != "job.log"                 ### Uncomment if only `job.log` files' references are to be processed
-  next if artifact.file.exists?                                ### Skip if the file reference is valid
-  artifacts_deleted += 1
-  puts "#{artifact.id}  #{artifact.file.path} is missing."     ### Allow verification before destroy
-#  artifact.destroy!                                           ### Uncomment to actually destroy
-end
-puts "Count of identified/destroyed invalid references: #{artifacts_deleted}" 
-```
+1. Open the [GitLab Rails Console](../operations/rails_console.md#starting-a-rails-console-session).
+1. Run the following Ruby code:
+
+   ```ruby
+   artifacts_deleted = 0
+   ::Ci::JobArtifact.all.each do |artifact|                       ### Iterate artifacts
+   #  next if artifact.file.filename != "job.log"                 ### Uncomment if only `job.log` files' references are to be processed
+     next if artifact.file.exists?                                ### Skip if the file reference is valid
+     artifacts_deleted += 1
+     puts "#{artifact.id}  #{artifact.file.path} is missing."     ### Allow verification before destroy
+   #  artifact.destroy!                                           ### Uncomment to actually destroy
+   end
+   puts "Count of identified/destroyed invalid references: #{artifacts_deleted}" 
+   ```
 
 ### Delete references to missing LFS objects
 
