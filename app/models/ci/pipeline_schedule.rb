@@ -57,6 +57,19 @@ module Ci
 
     private
 
+    def cron_worker_next_run_from(start_time)
+      return super unless ::Feature.enabled?(:ci_daily_limit_for_pipeline_schedules, project, default_enabled: :yaml)
+
+      daily_scheduled_pipeline_limit = project.actual_limits.limit_for(:daily_pipeline_schedule_triggers)
+
+      if daily_scheduled_pipeline_limit
+        minutes_in_a_day = 24 * 60
+        start_time + (minutes_in_a_day / daily_scheduled_pipeline_limit).minutes
+      else
+        super
+      end
+    end
+
     def worker_cron_expression
       Settings.cron_jobs['pipeline_schedule_worker']['cron']
     end
