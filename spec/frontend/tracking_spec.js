@@ -231,7 +231,7 @@ describe('Tracking', () => {
       eventSpy = jest.spyOn(Tracking, 'event');
       Tracking.bindDocument('_category_'); // only happens once
       setHTMLFixture(`
-        <input data-track-${term}="click_input1" data-track-label="_label_" value="_value_"/>
+        <input data-track-${term}="click_input1" data-track-label="_label_" value=0 />
         <input data-track-${term}="click_input2" data-track-value="_value_override_" value="_value_"/>
         <input type="checkbox" data-track-${term}="toggle_checkbox" value="_value_" checked/>
         <input class="dropdown" data-track-${term}="toggle_dropdown"/>
@@ -248,7 +248,7 @@ describe('Tracking', () => {
 
       expect(eventSpy).toHaveBeenCalledWith('_category_', 'click_input1', {
         label: '_label_',
-        value: '_value_',
+        value: '0',
       });
     });
 
