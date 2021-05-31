@@ -497,6 +497,8 @@ export default {
           boardId: fullEpicBoardId(boardId),
           fromListId,
           toListId,
+          moveAfterId: moveAfterId ? fullEpicId(moveAfterId) : undefined,
+          moveBeforeId: moveBeforeId ? fullEpicId(moveBeforeId) : undefined,
         },
       })
       .then(({ data }) => {

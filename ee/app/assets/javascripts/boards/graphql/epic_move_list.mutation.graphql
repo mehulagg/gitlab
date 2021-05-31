@@ -3,9 +3,18 @@ mutation EpicMoveList(
   $boardId: BoardsEpicBoardID!
   $fromListId: BoardsEpicListID!
   $toListId: BoardsEpicListID!
+  $moveAfterId: EpicID
+  $moveBeforeId: EpicID
 ) {
   epicMoveList(
-    input: { epicId: $epicId, boardId: $boardId, fromListId: $fromListId, toListId: $toListId }
+    input: {
+      epicId: $epicId
+      boardId: $boardId
+      fromListId: $fromListId
+      toListId: $toListId
+      moveAfterId: $moveAfterId
+      moveBeforeId: $moveBeforeId
+    }
   ) {
     errors
   }
