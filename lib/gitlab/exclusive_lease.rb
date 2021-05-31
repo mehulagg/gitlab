@@ -36,6 +36,12 @@ module Gitlab
       end
     end
 
+    # yield to the block at most once per period
+    def self.throttle(key, period, &block)
+      lease = new(key, timeout: period)
+      yield if lease.try_obtain
+    end
+
     def self.cancel(key, uuid)
       return unless key.present?
 
