@@ -46,15 +46,15 @@ export default {
   <gl-dropdown
     v-gl-tooltip
     icon="settings"
-    :title="$options.i18n.viewPreferences"
-    :text="$options.i18n.viewPreferences"
+    :title="$options.i18n.preferences"
+    :text="$options.i18n.preferences"
     :text-sr-only="true"
-    :aria-label="$options.i18n.viewPreferences"
+    :aria-label="$options.i18n.preferences"
     toggle-class="js-show-diff-settings"
     right
   >
     <div class="gl-new-dropdown-header gl-border-b-0!">
-      <p class="gl-new-dropdown-header-top">{{ $options.i18n.viewPreferences }}</p>
+      <p class="gl-new-dropdown-header-top">{{ $options.i18n.preferences }}</p>
     </div>
     <div class="gl-px-3">
       <span class="gl-font-weight-bold gl-display-block gl-mb-2">{{ __('File browser') }}</span>
