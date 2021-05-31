@@ -1,5 +1,5 @@
 <script>
-import { GlButton, GlAlert } from '@gitlab/ui';
+import { GlButton, GlAlert, GlTabs, GlTab } from '@gitlab/ui';
 import createHttpIntegrationMutation from 'ee_else_ce/alerts_settings/graphql/mutations/create_http_integration.mutation.graphql';
 import updateHttpIntegrationMutation from 'ee_else_ce/alerts_settings/graphql/mutations/update_http_integration.mutation.graphql';
 import createFlash, { FLASH_TYPES } from '~/flash';
@@ -39,8 +39,10 @@ export default {
   components: {
     IntegrationsList,
     AlertSettingsForm,
-    GlButton,
     GlAlert,
+    GlButton,
+    GlTab,
+    GlTabs,
   },
   inject: {
     projectPath: {
