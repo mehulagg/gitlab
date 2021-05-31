@@ -5,7 +5,7 @@
   %a.gl-sr-only.gl-accessibility{ href: "#content-body" } Skip to content
   .container-fluid
     .header-content
-      .title-container
+      .title-container{ class: ('hide-when-menu-expanded' if !Feature.enabled?(:combined_menu, current_user)) }
         %h1.title
           %span.gl-sr-only GitLab
           = link_to root_path, title: _('Dashboard'), id: 'logo', **tracking_attrs('main_navigation', 'click_gitlab_logo_link', 'navigation') do
@@ -34,7 +34,8 @@
           - if header_link?(:search)
             %li.nav-item.d-none.d-lg-block.m-auto
               = render 'layouts/search' unless current_controller?(:search)
-            %li.nav-item.d-inline-block.d-lg-none
+            - search_icon_class = Feature.enabled?(:combined_menu, current_user) ? "d-none d-sm-inline-block d-lg-none" : "d-inline-block d-lg-none"
+            %li.nav-item{ class: search_icon_class }
               = link_to search_context.search_url, title: _('Search'), aria: { label: _('Search') }, data: {toggle: 'tooltip', placement: 'bottom', container: 'body'} do
                 = sprite_icon('search')
           - if header_link?(:issues)
@@ -115,10 +116,15 @@
                 - sign_in_text = allow_signup? ? _('Sign in / Register') : _('Sign in')
                 = link_to sign_in_text, new_session_path(:user, redirect_to_referer: 'yes'), class: 'gl-button btn btn-default btn-sign-in'
 
-      %button.navbar-toggler.d-block.d-sm-none{ type: 'button' }
+      %button.navbar-toggler.d-block.d-sm-none{ type: 'button', class: ('navbar-toggler-border' if !Feature.enabled?(:combined_menu, current_user)) }
         %span.sr-only= _('Toggle navigation')
-        = sprite_icon('ellipsis_h', size: 12, css_class: 'more-icon js-navbar-toggle-right')
-        = sprite_icon('close', size: 12, css_class: 'close-icon js-navbar-toggle-left')
+        - if Feature.enabled?(:combined_menu, current_user)
+          %span.more-icon.gl-px-3
+            %span.gl-pr-1= s_('TopNav|Menu')
+            = sprite_icon('dot-grid', size: 16, css_class: 'more-icon')
+        - else
+          = sprite_icon('ellipsis_h', size: 12, css_class: 'more-icon')
+        = sprite_icon('close', size: 12, css_class: 'close-icon')
 
 - if display_whats_new?
   #whats-new-app{ data: { version_digest: whats_new_version_digest } }
