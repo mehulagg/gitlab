@@ -10,6 +10,8 @@ const HTML_TO_REMOVE = [
   '#js-peek',
   '.modal',
   '.feature-highlight',
+  // We don't want to capture all the children of a dropdown-menu
+  '.dropdown-menu',
 ];
 const CSS_TO_REMOVE = [
   '.tooltip',
@@ -47,7 +49,12 @@ const OUTPUTS = [
       path.join(FIXTURES_ROOT, 'startup_css/project-general-signed-out.html'),
     ],
     cssKeys: [APPLICATION_CSS_PREFIX, UTILITIES_CSS_PREFIX],
-    purgeOptions: {},
+    // We want to include the root dropdown-menu style since it should be hidden by default
+    purgeOptions: {
+      safelist: {
+        standard: ['dropdown-menu'],
+      },
+    },
   },
   {
     outFile: 'startup-dark',
@@ -57,7 +64,12 @@ const OUTPUTS = [
       path.join(FIXTURES_ROOT, 'startup_css/project-dark-signed-out.html'),
     ],
     cssKeys: [APPLICATION_DARK_CSS_PREFIX, UTILITIES_DARK_CSS_PREFIX],
-    purgeOptions: {},
+    // We want to include the root dropdown-menu styles since it should be hidden by default
+    purgeOptions: {
+      safelist: {
+        standard: ['dropdown-menu'],
+      },
+    },
   },
   {
     outFile: 'startup-signin',

@@ -14,7 +14,7 @@ RSpec.describe 'Startup CSS fixtures', type: :controller do
     clean_frontend_fixtures('startup_css/')
   end
 
-  shared_examples 'startup css project fixutres' do |type|
+  shared_examples 'startup css project fixtures' do |type|
     let(:user) { create(:user, :admin) }
     let(:project) { create(:project, :public, :repository, description: 'Code and stuff', avatar: fixture_file_upload('spec/fixtures/dk.png', 'image/png'), creator: user) }
 
