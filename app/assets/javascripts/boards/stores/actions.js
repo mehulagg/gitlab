@@ -7,7 +7,6 @@ import {
   ISSUABLE,
   titleQueries,
   subscriptionQueries,
-  SupportedFilters,
   deleteListQueries,
   listsQuery,
   updateListQueries,
@@ -26,10 +25,9 @@ import {
   formatIssue,
   formatIssueInput,
   updateListPosition,
-  transformNotFilters,
   moveItemListHelper,
   getMoveData,
-  getSupportedParams,
+  validFilters,
 } from '../boards_util';
 import boardLabelsQuery from '../graphql/board_labels.query.graphql';
 import groupProjectsQuery from '../graphql/group_projects.query.graphql';
@@ -61,12 +59,7 @@ export default {
   },
 
   setFilters: ({ commit }, filters) => {
-    const filterParams = {
-      ...getSupportedParams(filters, SupportedFilters),
-      not: transformNotFilters(filters),
-    };
-
-    commit(types.SET_FILTERS, filterParams);
+    commit(types.SET_FILTERS, validFilters(filters, issuableType));
   },
 
   performSearch({ dispatch }) {

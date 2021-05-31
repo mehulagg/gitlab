@@ -1,6 +1,7 @@
 import { sortBy, cloneDeep } from 'lodash';
+import { filter } from 'vue/types/umd';
 import { getIdFromGraphQLId } from '~/graphql_shared/utils';
-import { ListType, NOT_FILTER, AssigneeIdParamValues } from './constants';
+import { ListType } from './constants';
 
 export function getMilestone() {
   return null;
@@ -175,19 +176,16 @@ export function isListDraggable(list) {
   return list.listType !== ListType.backlog && list.listType !== ListType.closed;
 }
 
-export function transformNotFilters(filters) {
-  return Object.keys(filters)
-    .filter((key) => key.startsWith(NOT_FILTER))
-    .reduce((obj, key) => {
-      return {
-        ...obj,
-        [key.substring(4, key.length - 1)]: filters[key],
-      };
-    }, {});
+// EE-specific feature. Find the implementation in the `ee/`-folder
+export function transformBoardConfig() {
+  return '';
 }
 
-export function getSupportedParams(filters, supportedFilters) {
-  return supportedFilters.reduce((acc, f) => {
+export const FiltersInfo = {
+  assigneeUsername: {
+    negatedSupport: true,
+  },
+  assigneeId: {
     /**
      * TODO the API endpoint for the classic boards
      * accepts assignee wildcard value as 'assigneeId' param -
@@ -195,30 +193,80 @@ export function getSupportedParams(filters, supportedFilters) {
      * Once we deprecate the classics boards,
      * we should change the filtered search bar to use 'asssigneeWildcardId' as a token name.
      */
-    if (f === 'assigneeId' && filters[f]) {
-      return AssigneeIdParamValues.includes(filters[f])
+    transform: (val) => {
+      return AssigneeIdParamValues.includes(val)
         ? {
-            ...acc,
-            assigneeWildcardId: filters[f].toUpperCase(),
+            assigneeWildcardId: val.toUpperCase(),
           }
-        : acc;
-    }
+        : {};
+    },
+    negatedSupport: false,
+  },
+  authorUsername: {
+    negatedSupport: true,
+  },
+  labelName: {
+    negatedSupport: true,
+  },
+  milestoneTitle: {
+    negatedSupport: true,
+  },
+  myReactionEmoji: {
+    negatedSupport: true,
+  },
+  releaseTag: {
+    negatedSupport: true,
+  },
+  search: {
+    negatedSupport: false,
+  },
+};
 
-    if (filters[f]) {
-      return {
+// Example input/output
+// - input: { search: "foobar", "not[authorUsername]": "root", }
+// - output: [ ["search", "foobar", false], ["authorUsername", "root", true], ]
+const parseFilters = (rawFilters) => {
+  return rawFilters.keys().map((k) => {
+    const f = rawFilters[k];
+    const isNegated = (f) => f.slice(0, 4) === 'not[' && f.slice(-1) === ']';
+    const filterKey = isNegated ? f.slice(4, -1) : f;
+
+    return [filterKey, isNegated];
+  });
+};
+
+const negateFilter = (k, v) => ({
+  [`not[${k}]`]: v,
+});
+
+export const validFilters = (rawFilters, issuableType, FiltersInfo, ValidFilters) =>
+  parseFilters(rawFilters)
+    .filter(([k, _, isNegated]) => {
+      const isValid = ValidFilters[issuableType].includes(f);
+      if (isNegated) {
+        return isValid && FiltersInfo[k].negatedSupport;
+      }
+
+      return isValid;
+    })
+    .map(([k, v, isNegated]) => {
+      const filter = FiltersInfo[k].transform
+        // If the filter needs a special transformation, apply it
+        // e.g., if the filter uses a different name in a GraphQL request.
+        ? FiltersInfo[k].transform(v)
+        : {
+            k: v,
+          };
+
+      return isNegated ? negateFilter(filter) : filter;
+    })
+    .reduce(
+      (acc, cur) => ({
         ...acc,
-        [f]: filters[f],
-      };
-    }
-
-    return acc;
-  }, {});
-}
-
-// EE-specific feature. Find the implementation in the `ee/`-folder
-export function transformBoardConfig() {
-  return '';
-}
+        ...cur,
+      }),
+      {},
+    );
 
 export default {
   getMilestone,
@@ -228,5 +276,4 @@ export default {
   fullLabelId,
   fullIterationId,
   isListDraggable,
-  transformNotFilters,
 };

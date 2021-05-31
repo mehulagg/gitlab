@@ -2,11 +2,10 @@ import {
   formatListIssues,
   formatListsPageInfo,
   fullBoardId,
-  transformNotFilters,
   getMoveData,
-  getSupportedParams,
+  validFilters,
 } from '~/boards/boards_util';
-import { BoardType, SupportedFilters } from '~/boards/constants';
+import { BoardType } from '~/boards/constants';
 import eventHub from '~/boards/eventhub';
 import listsIssuesQuery from '~/boards/graphql/lists_issues.query.graphql';
 import actionsCE, { gqlClient } from '~/boards/stores/actions';
@@ -28,9 +27,7 @@ import {
 
 import {
   EpicFilterType,
-  IterationFilterType,
   GroupByParamType,
-  SupportedFiltersEE,
 } from '../constants';
 import epicQuery from '../graphql/epic.query.graphql';
 import createEpicBoardListMutation from '../graphql/epic_board_list_create.mutation.graphql';
@@ -107,35 +104,12 @@ export { gqlClient };
 export default {
   ...actionsCE,
 
-  setFilters: ({ commit, dispatch, getters }, filters) => {
-    const supportedFilters = [...SupportedFilters, ...SupportedFiltersEE];
-    const filterParams = getSupportedParams(filters, supportedFilters);
-
-    filterParams.not = transformNotFilters(filters);
-
+  setFilters: ({ commit, dispatch, state: { issuableType } }, filters) => {
     if (filters.groupBy === GroupByParamType.epic) {
       dispatch('setEpicSwimlanes');
     }
 
-    if (filterParams.epicId === EpicFilterType.any || filterParams.epicId === EpicFilterType.none) {
-      filterParams.epicWildcardId = filterParams.epicId.toUpperCase();
-      filterParams.epicId = undefined;
-    } else if (filterParams.epicId) {
-      filterParams.epicId = fullEpicId(filterParams.epicId);
-    }
-    if (!getters.isEpicBoard && filterParams.not.epicId) {
-      filterParams.not.epicId = fullEpicId(filterParams.not.epicId);
-    }
-
-    if (
-      filters.iterationId === IterationFilterType.any ||
-      filters.iterationId === IterationFilterType.none ||
-      filters.iterationId === IterationFilterType.current
-    ) {
-      filterParams.iterationWildcardId = filters.iterationId.toUpperCase();
-    }
-
-    commit(types.SET_FILTERS, filterParams);
+    commit(types.SET_FILTERS, validFilters(filters, issuableType));
   },
 
   performSearch({ dispatch, getters }) {

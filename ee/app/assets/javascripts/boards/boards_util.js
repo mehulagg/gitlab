@@ -2,6 +2,7 @@ import { sortBy } from 'lodash';
 import { getIdFromGraphQLId } from '~/graphql_shared/utils';
 import { urlParamsToObject } from '~/lib/utils/common_utils';
 import { objectToQuery } from '~/lib/utils/url_utility';
+import { FiltersInfo as FiltersInfoCE } from '~/boards/boards_util';
 import {
   EPIC_LANE_BASE_HEIGHT,
   IterationFilterType,
@@ -133,6 +134,49 @@ export function transformBoardConfig(boardConfig) {
   updatedFilterPath = filterPath.join('&');
   return updatedFilterPath;
 }
+
+export const FiltersInfo = {
+  ...FiltersInfoCE,
+  epicId: {
+    negatedSupport: true,
+    transform: function(val) {
+      if (val === EpicFilterType.any || val === EpicFilterType.none) {
+        return {
+          epicWildcardId: val.toUpperCase()
+        };
+      }
+
+      return {
+        epicId: fullEpicId(val)
+      };
+    },
+  },
+  iterationTitle:{
+    negatedSupport: true,
+  },
+  iterationId: {
+    negatedSupport: true,
+    transform: function(val) {
+      if (
+        val === IterationFilterType.any ||
+        val === IterationFilterType.none ||
+        val === IterationFilterType.current
+      ) {
+        filterParams.iterationWildcardId = filters.iterationId.toUpperCase();
+        return {
+          iterationWildcardId: val.toUpperCase()
+        }
+      }
+
+      return {
+       iterationId: val
+      }
+    },
+  },
+  weight: {
+    negatedSupport: true,
+  },
+};
 
 export default {
   getMilestone,
