@@ -77,18 +77,10 @@ describe('AddEscalationPolicyForm', () => {
       expect(rules.at(1).props('rule')).toMatchObject(defaultEscalationRule);
     });
 
-    it('should emit updates when rule is added', async () => {
+    it('should NOT emit updates when rule is added', async () => {
       findAddRuleLink().vm.$emit('click');
       await wrapper.vm.$nextTick();
-      expect(wrapper.emitted('update-escalation-policy-form')[0]).toMatchObject([
-        {
-          field: 'rules',
-          value: [
-            expect.objectContaining(defaultEscalationRule),
-            expect.objectContaining(defaultEscalationRule),
-          ],
-        },
-      ]);
+      expect(wrapper.emitted('update-escalation-policy-form')).toBeUndefined();
     });
 
     it('on rule update emitted should update rules array and emit updates up', () => {

@@ -5,7 +5,7 @@ import {
   GlDropdown,
   GlDropdownItem,
   GlCard,
-  GlIcon,
+  GlButton,
   GlSprintf,
 } from '@gitlab/ui';
 import { s__ } from '~/locale';
@@ -20,6 +20,7 @@ export const i18n = {
       validationMsg: s__(
         'EscalationPolicies|A schedule is required for adding an escalation policy.',
       ),
+      removeRuleLabel: s__('EscalationPolicies|Remove escalation rule'),
     },
   },
 };
@@ -34,7 +35,7 @@ export default {
     GlDropdown,
     GlDropdownItem,
     GlCard,
-    GlIcon,
+    GlButton,
     GlSprintf,
   },
   props: {
@@ -96,9 +97,12 @@ export default {
 
 <template>
   <gl-card class="gl-border-gray-400 gl-bg-gray-10 gl-mb-3 gl-relative">
-    <gl-icon
+    <gl-button
       v-if="index !== 0"
-      name="close"
+      category="tertiary"
+      size="small"
+      icon="close"
+      :aria-label="$options.i18n.fields.rules.removeRuleLabel"
       class="gl-absolute rule-close-icon"
       @click="$emit('remove-escalation-rule', index)"
     />

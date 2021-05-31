@@ -98,6 +98,22 @@ describe('AddEscalationPolicyModal', () => {
         description: '',
         rules: [],
       });
+
+      expect(wrapper.vm.validationState).toEqual({
+        name: true,
+        rules: [],
+      });
+    });
+
+    it('clears the validation state on modal close', () => {
+      expect(wrapper.vm.validationState.name).toBe(true);
+      findEscalationPolicyForm().vm.$emit('update-escalation-policy-form', {
+        field: 'name',
+        value: '',
+      });
+      expect(wrapper.vm.validationState.name).toBe(false);
+      findModal().vm.$emit('cancel', { preventDefault: jest.fn() });
+      expect(wrapper.vm.validationState.name).toBe(true);
     });
   });
 

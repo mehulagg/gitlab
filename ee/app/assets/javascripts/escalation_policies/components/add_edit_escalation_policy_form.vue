@@ -74,7 +74,6 @@ export default {
   methods: {
     addRule() {
       this.rules.push({ ...cloneDeep(defaultEscalationRule), key: this.getUid() });
-      this.emitUpdate();
     },
     updateEscalationRules(index, rule) {
       this.rules[index] = rule;

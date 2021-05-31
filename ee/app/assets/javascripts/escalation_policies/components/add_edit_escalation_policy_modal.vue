@@ -103,7 +103,7 @@ export default {
             }
             this.$refs.addUpdateEscalationPolicyModal.hide();
             this.$emit('policyCreated');
-            this.clearForm();
+            this.resetForm();
           },
         )
         .catch((error) => {
@@ -124,12 +124,17 @@ export default {
     hideErrorAlert() {
       this.error = null;
     },
-    clearForm() {
+    resetForm() {
       this.form = {
         name: '',
         description: '',
         rules: [],
       };
+      this.validationState = {
+        name: true,
+        rules: [],
+      };
+      this.hideErrorAlert();
     },
   },
 };
@@ -144,7 +149,7 @@ export default {
     :action-primary="actionsProps.primary"
     :action-cancel="actionsProps.cancel"
     @primary.prevent="createEscalationPolicy"
-    @cancel="clearForm"
+    @cancel="resetForm"
   >
     <gl-alert v-if="error" variant="danger" class="gl-mt-n3 gl-mb-3" @dismiss="hideErrorAlert">
       {{ error }}
