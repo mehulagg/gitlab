@@ -756,32 +756,38 @@ Pages server.
 
 ## Domain source configuration
 
-> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/217912) in GitLab 13.3.
+When GitLab Pages daemon serves pages requests it firstly needs to identify which project should be used to
+serve requested URL and how it's content is stored.
 
-GitLab Pages can use different sources to get domain configuration.
-The default value for Omnibus installations is `nil`.
+Before GitLab 13.3 all pages content was extracted to the special shared directory,
+and each project had a special configuration file.
+Pages daemon was reading these configuration files and stored their content in memory.
 
-   ```ruby
-   gitlab_pages['domain_config_source'] = nil
-   ```
+This approach had several disadvantages and was replaced with GitLab Pages using internal GitLab API
+every time new domain is requested.
+Domain information is also cached by Pages daemon to speed up subsequent requests.
 
-If left unchanged, GitLab Pages tries to use any available source (either `gitlab` or `disk`). The
-preferred source is `gitlab`, which uses [API-based configuration](#gitlab-api-based-configuration).
+From [GitLab 13.3 to GitLab 14.0](#domain-source-configuration-before-140) GitLab Pages supported both ways of obtaining domain information.
 
-On large GitLab instances, using the API-based configuration significantly improves the pages daemon startup time, as there is no need to load all custom domains configuration into memory.
+Starting from [GitLab 14.0](https://gitlab.com/gitlab-org/omnibus-gitlab/-/issues/5993) GitLab Pages uses API
+by default and fails to start if it can't connect to it.
+For common issues, see the [troubleshooting section](#failed-to-connect-to-the-internal-gitlab-api).
 
 For more details see this [blog post](https://about.gitlab.com/blog/2020/08/03/how-gitlab-pages-uses-the-gitlab-api-to-serve-content/).
 
-### Deprecated `domain_config_source`
+### Domain source configuration before 14.0
 
-GitLab Pages fails to start if it can't connect to the GitLab API. For other common issues, see the
-[troubleshooting section](#failed-to-connect-to-the-internal-gitlab-api)
-or report an issue.
+-> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/217912) in GitLab 13.3.
 
-### GitLab API-based configuration
+WARNING:
+`domain_config_source` parameter is removed and has no effect starting from [GitLab 14.0](https://gitlab.com/gitlab-org/omnibus-gitlab/-/issues/5993)
 
-GitLab Pages can use an API-based configuration. This replaces disk source configuration.
-Follow these steps to enable it:
+
+From [GitLab 13.3](https://gitlab.com/gitlab-org/gitlab/-/issues/217912) to [GitLab 14.0](https://gitlab.com/gitlab-org/omnibus-gitlab/-/issues/5993) GitLab Pages can either use `disk` or `gitlab` domain configuration source.
+
+We highly advise you to use `gitlab` configuration source as it will make transition to newer versions easier.
+
+To explicitly enable API source:
 
 1. Add the following to your `/etc/gitlab/gitlab.rb` file:
 
@@ -791,14 +797,15 @@ Follow these steps to enable it:
 
 1. [Reconfigure GitLab](../restart_gitlab.md#omnibus-gitlab-reconfigure) for the changes to take effect.
 
-If you encounter an issue, you can disable it by choosing `disk`:
+Or if you want to use legacy confiration source you can:
 
-```ruby
-gitlab_pages['domain_config_source'] = "disk"
-```
+1. Add the following to your `/etc/gitlab/gitlab.rb` file:
 
-For other common issues, see the [troubleshooting section](#failed-to-connect-to-the-internal-gitlab-api)
-or report an issue.
+   ```ruby
+   gitlab_pages['domain_config_source'] = "disk"
+   ```
+
+1. [Reconfigure GitLab](../restart_gitlab.md#omnibus-gitlab-reconfigure) for the changes to take effect.
 
 ### GitLab API cache configuration
 
@@ -1197,7 +1204,7 @@ Alternatively, run the CI pipelines of those projects that contain a `pages` job
 
 ### Failed to connect to the internal GitLab API
 
-If you have enabled [API-based configuration](#gitlab-api-based-configuration) and see the following error:
+If you see the following error:
 
 ```plaintext
 ERRO[0010] Failed to connect to the internal GitLab API after 0.50s  error="failed to connect to internal Pages API: HTTP status: 401"
