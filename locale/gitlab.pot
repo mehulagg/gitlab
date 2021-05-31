@@ -35870,9 +35870,6 @@ msgstr ""
 msgid "View performance dashboard."
 msgstr ""
 
-msgid "View preferences"
-msgstr ""
-
 msgid "View project"
 msgstr ""
 
