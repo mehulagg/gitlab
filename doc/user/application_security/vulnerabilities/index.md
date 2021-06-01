@@ -89,7 +89,6 @@ fields are pre-populated from the vulnerability's details.
 
 Unlike GitLab issues, the status of whether a Jira issue is Open or Closed does not display in GitLab UI.
 
-
 ## Linked issues
 
 NOTE:
