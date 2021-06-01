@@ -2591,7 +2591,7 @@ For more information, see
 
 NOTE:
 Kubernetes configuration is not supported for Kubernetes clusters
-that are [managed by GitLab](../../user/project/clusters/index.md#gitlab-managed-clusters).
+that are [managed by GitLab](../../user/project/clusters/add_remove_clusters.md#gitlab-managed-clusters).
 To follow progress on support for GitLab-managed clusters, see the
 [relevant issue](https://gitlab.com/gitlab-org/gitlab/-/issues/38054).
 
