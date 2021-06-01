@@ -49,21 +49,8 @@ describe('Iteration cadence form', () => {
   const getCadenceSuccess = {
     data: {
       group: {
-        __typename: 'group',
         iterationCadences: {
-          nodes: [
-            {
-              id: `gid://gitlab/Iterations::Cadence/${id}`,
-              title: 'An iteration',
-              description: 'The words',
-              startDate: '2020-06-28',
-              dueDate: '2020-07-05',
-              automatic: true,
-              durationInWeeks: 3,
-              rollOver: true,
-              iterationsInAdvance: 2,
-            },
-          ],
+          nodes: [iterationCadence],
         },
       },
     },

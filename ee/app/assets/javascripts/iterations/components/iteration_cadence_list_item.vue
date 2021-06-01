@@ -181,7 +181,6 @@ export default {
       >
       <gl-dropdown
         v-if="canEditCadence"
-        ref="menu"
         icon="ellipsis_v"
         category="tertiary"
         right

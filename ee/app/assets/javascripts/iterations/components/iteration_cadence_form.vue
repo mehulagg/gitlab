@@ -145,7 +145,7 @@ export default {
         })
         .then(({ data: { group, errors } }) => {
           if (errors?.length) {
-            throw errors[0];
+            throw new Error(errors[0]);
           }
 
           const cadence = group?.iterationCadences?.nodes?.[0];
