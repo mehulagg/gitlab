@@ -24,6 +24,8 @@ export default function createRouter(base, baseRef) {
     }),
   };
 
+  console.log('ROUTEERRRR');
+
   return new VueRouter({
     mode: 'history',
     base: joinPaths(gon.relative_url_root || '', base),

@@ -7,6 +7,7 @@ export default {
       manual: true,
       result({ data, loading }) {
         if (!loading) {
+          console.log('data', data);
           this.ref = data.ref;
           this.escapedRef = data.escapedRef;
         }

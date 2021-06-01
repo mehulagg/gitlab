@@ -6,16 +6,20 @@ import BlobHeader from '~/blob/components/blob_header.vue';
 import { SIMPLE_BLOB_VIEWER, RICH_BLOB_VIEWER } from '~/blob/components/constants';
 import createFlash from '~/flash';
 import { __ } from '~/locale';
+import getRefMixin from '../mixins/get_ref';
 import blobInfoQuery from '../queries/blob_info.query.graphql';
 import BlobHeaderEdit from './blob_header_edit.vue';
+import BlobReplace from './blob_replace.vue';
 
 export default {
   components: {
     BlobHeader,
     BlobHeaderEdit,
+    BlobReplace,
     BlobContent,
     GlLoadingIcon,
   },
+  mixins: [getRefMixin],
   apollo: {
     project: {
       query: blobInfoQuery,
@@ -127,6 +131,7 @@ export default {
       >
         <template #actions>
           <blob-header-edit :edit-path="blobInfo.editBlobPath" />
+          <blob-replace :name="blobInfo.name" />
         </template>
       </blob-header>
       <blob-content
