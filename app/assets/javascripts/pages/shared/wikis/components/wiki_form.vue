@@ -14,7 +14,17 @@ import axios from '~/lib/utils/axios_utils';
 import csrf from '~/lib/utils/csrf';
 import { setUrlFragment } from '~/lib/utils/url_utility';
 import { s__, sprintf } from '~/locale';
+import Tracking from '~/tracking';
 import MarkdownField from '~/vue_shared/components/markdown/field.vue';
+
+const WIKI_CONTENT_EDITOR_TRACKING_LABEL = 'wiki_content_editor';
+
+const CONTENT_EDITOR_LOADED_ACTION = 'content_editor_loaded';
+const SAVED_USING_CONTENT_EDITOR_ACTION = 'saved_using_content_editor';
+
+const trackingMixin = Tracking.mixin({
+  label: WIKI_CONTENT_EDITOR_TRACKING_LABEL,
+});
 
 const MARKDOWN_LINK_TEXT = {
   markdown: '[Link Title](page-slug)',
@@ -104,6 +114,7 @@ export default {
     GlModalDirective,
   },
   inject: ['formatOptions', 'pageInfo'],
+  mixins: [trackingMixin],
   data() {
     return {
       title: this.pageInfo.title?.trim() || '',
@@ -183,9 +194,14 @@ export default {
         .then(({ data }) => data.body);
     },
 
-    handleFormSubmit() {
+    async handleFormSubmit(event, preventDefault = true) {
+      if (preventDefault) event.preventDefault();
+
       if (this.useContentEditor) {
         this.content = this.contentEditor.getSerializedContent();
+
+        await this.trackFormSubmit();
+        this.handleFormSubmit(event, false);
       }
 
       this.isDirty = false;
@@ -234,6 +250,8 @@ export default {
       try {
         await this.contentEditor.setSerializedContent(this.content);
         this.isContentEditorLoading = false;
+
+        this.trackContentEditorLoaded();
       } catch (e) {
         this.contentEditorRenderFailed = true;
       }
@@ -254,6 +272,16 @@ export default {
         this.switchToOldEditor();
       } else {
         this.$refs.confirmSwitchToOldEditorModal.show();
+      }
+    },
+
+    async trackContentEditorLoaded() {
+      return this.track(CONTENT_EDITOR_LOADED_ACTION);
+    },
+
+    async trackFormSubmit() {
+      if (this.isContentEditorActive) {
+        return this.track(SAVED_USING_CONTENT_EDITOR_ACTION);
       }
     },
   },
