@@ -8,45 +8,52 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/22392) in GitLab 12.5.
 
-GitLab supports adding new and existing EKS clusters.
+You can create new clusters and add existing clusters hosted on
+Amazon Elastic Kubernetes Service (EKS) through GitLab.
+
+<!-- ADD ADVANTAGES AND WHY GO THIS WAY -->
 
 Prerequisites:
 
 - An [Amazon Web Services](https://aws.amazon.com/) account.
 - Permissions to manage IAM resources.
-- If you want to use an [existing EKS cluster](#existing-eks-cluster):
-  - An Amazon EKS cluster with worker nodes properly configured.
-  - `kubectl` [installed and configured](https://docs.aws.amazon.com/eks/latest/userguide/getting-started.html#get-started-kubectl)
-    for access to the EKS cluster.
 
-For instance-level clusters, see [additional requirements for self-managed instances](#additional-requirements-for-self-managed-instances).
+For instance-level clusters, see [additional requirements for self-managed instances](#additional-requirements-for-self-managed-instances). **(FREE SELF)**
+<!-- QUESTION: is this needed for instance-level clusters or to any clusters in a self-managed GL instance? -->
+
+## Add an existing EKS cluster
+
+If you already have an EKS cluster and want to integrate it with GitLab,
+see how to [add an existing cluster](add_existing_cluster.md).
 
 ## Create a new EKS cluster
 
-To create and add a new Kubernetes cluster for your project, group, or instance, follow the steps below.
+To create and add a new Kubernetes cluster for your project, group, or instance through the certificat-based method:
 
 1. [Define the access control (RBAC or ABAC) for your cluster](cluster_access.md).
-1. [Create a cluster in GitLab]().
-1. [Prepare the cluster in Amazon]().
-1. [Configure your cluster's data in GitLab]().
+1. [Create a cluster in GitLab](#create-a-new-eks-cluster-in-gitlab).
+1. [Prepare the cluster in Amazon](#prepare-the-cluster-in-amazon).
+1. [Configure your cluster's data in GitLab](#configure-your-clusters-data-in-gitlab).
 
 Further steps:
 
-1. [Create a default Storage Class]().
-1. [Deploy the app to EKS]().
+1. [Create a default Storage Class](#create-a-default-storage-class).
+1. [Deploy the app to EKS](#deploy-the-app-to-eks).
 
-### Create a new cluster in GitLab
+### Create a new EKS cluster in GitLab
+
+To create a new EKS cluster:
 
 1. Go to your:
    - Project's **Operations > Kubernetes** page, for a project-level cluster.
    - Group's **Kubernetes** page, for a group-level cluster.
    - **Admin Area > Kubernetes**, for an instance-level cluster.
-1. Click **Integrate with a cluster certificate**.
+1. Select **Integrate with a cluster certificate**.
 1. Under the **Create new cluster** tab, click **Amazon EKS** to display an
    `Account ID` and `External ID` needed for later steps.
 1. In the [IAM Management Console](https://console.aws.amazon.com/iam/home), create an IAM policy:
    1. From the left panel, select **Policies**.
-   1. Click **Create Policy**, which opens a new window.
+   1. Select **Create Policy**, which opens a new window.
    1. Select the **JSON** tab, and paste the following snippet in place of the
       existing content. These permissions give GitLab the ability to create
       resources, but not delete them:
@@ -97,21 +104,20 @@ Further steps:
       }
       ```
 
-      If an error is encountered during the creation process, changes will
-      not be rolled back and you must remove resources manually. You can do this by deleting
-      the relevant [CloudFormation stack](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/cfn-console-delete-stack.html)
+      **Note:** If you get an error during this process, GitLab does not roll back the changes. You must remove resources manually. You can do this by deleting
+      the relevant [CloudFormation stack](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/cfn-console-delete-stack.html).
 
    1. Click **Review policy**.
    1. Enter a suitable name for this policy, and click **Create Policy**. You can now close this window.
 
 ### Prepare the cluster in Amazon
 
-1. [Create an **EKS IAM role** for your cluster]() (role A).
-1. [Create **another EKS IAM role** for GitLab's authentication with Amazon]() (role B).
+1. [Create an **EKS IAM role** for your cluster](l#create-an-eks-iam-role-for-your-cluster) (**role A**).
+1. [Create **another EKS IAM role** for GitLab's authentication with Amazon](#create-another-eks-iam-role-for-gitlabs-authentication-with-amazon) (**role B**).
 
 #### Create an **EKS IAM role** for your cluster
 
-In the [IAM Management Console](https://console.aws.amazon.com/iam/home), create an **EKS IAM role** following the [Amazon EKS cluster IAM role instructions](https://docs.aws.amazon.com/eks/latest/userguide/service_IAM_role.html). This role should exist so that Kubernetes clusters managed by Amazon EKS can make calls to other AWS services on your behalf to manage the resources that you use with the service.
+In the [IAM Management Console](https://console.aws.amazon.com/iam/home), create an **EKS IAM role** (**role A**) following the [Amazon EKS cluster IAM role instructions](https://docs.aws.amazon.com/eks/latest/userguide/service_IAM_role.html). This role is necessary so that Kubernetes clusters managed by Amazon EKS can make calls to other AWS services on your behalf to manage the resources that you use with the service.
 
 In addition to the policies that guide suggests, you must also include the `AmazonEKSClusterPolicy`
 policy for this role in order for GitLab to manage the EKS cluster correctly.
@@ -119,7 +125,7 @@ policy for this role in order for GitLab to manage the EKS cluster correctly.
 #### Create **another EKS IAM role** for GitLab's authentication with Amazon
 
 In the [IAM Management Console](https://console.aws.amazon.com/iam/home),
-create another IAM role for GitLab's authentication with AWS:
+create another IAM role (**role B**) for GitLab's authentication with AWS:
 
 1. On the AWS IAM console, select **Roles** from the left panel.
 1. Click **Create role**.
@@ -135,17 +141,17 @@ create another IAM role for GitLab's authentication with AWS:
 
 ### Configure your cluster's data in GitLab
 
-1. In GitLab, enter the copied role ARN into the **Role ARN** field.
+1. Back in GitLab, enter the copied role ARN into the **Role ARN** field.
 1. In the **Cluster Region** field, enter the [region](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/using-regions-availability-zones.html) you plan to use for your new cluster. GitLab confirms you have access to this region when authenticating your role.
-1. Click **Authenticate with AWS**.
-1. Choose your [cluster's settings]().
-1. Finally, click the **Create Kubernetes cluster** button.
+1. Select **Authenticate with AWS**.
+1. Adjust your [cluster's settings](#cluster-settings).
+1. Select the **Create Kubernetes cluster** button.
 
 After about 10 minutes, your cluster is ready to go. You can now proceed
 to install some [pre-defined applications](index.md#installing-applications).
 
 NOTE:
-If you have [installed and configured](https://docs.aws.amazon.com/eks/latest/userguide/getting-started.html#get-started-kubectl)  `kubectl`  and you would like to manage your cluster with it, you must add your AWS external ID in the AWS configuration. For more information on how to configure AWS CLI, see [using an IAM role in the AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-role.html#cli-configure-role-xaccount).
+If you have [installed and configured](https://docs.aws.amazon.com/eks/latest/userguide/getting-started.html#get-started-kubectl) `kubectl` and you would like to manage your cluster with it, you must add your AWS external ID in the AWS configuration. For more information on how to configure AWS CLI, see [using an IAM role in the AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-role.html#cli-configure-role-xaccount).
 
 #### Cluster settings
 
@@ -155,7 +161,7 @@ Setting | Description
 --|--
 **Kubernetes cluster name** | Your cluster's name.
 **Environment scope** | The [associated environment](index.md#setting-the-environment-scope).
-**Service role** | The **EKS IAM role** (role A).
+**Service role** | The **EKS IAM role** (**role A**).
 **Kubernetes version** | The [Kubernetes version](index.md#supported-cluster-versions) for your cluster.
 **Key pair name** | The [key pair](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-key-pairs.html) that you can use to connect to your worker nodes.
 **VPC** | The [VPC](https://docs.aws.amazon.com/vpc/latest/userguide/what-is-amazon-vpc.html) to use for your EKS Cluster resources.
@@ -205,9 +211,10 @@ on the running pod.
 
 ## Additional requirements for self-managed instances **(FREE SELF)**
 
-If you are using a self-managed GitLab instance, GitLab must first be configured with a set of
-Amazon credentials. These credentials are used to assume an Amazon IAM role provided by the user
-creating the cluster. Create an IAM user and ensure it has permissions to assume the role(s) that
+If you are using a self-managed GitLab instance, you need to configure
+Amazon credentials. GitLab uses these credentials to assume an Amazon IAM role to create your cluster.
+
+Create an IAM user and ensure it has permissions to assume the role(s) that
 your users need to create EKS clusters.
 
 For example, the following policy document allows assuming a role whose name starts with
@@ -223,7 +230,8 @@ For example, the following policy document allows assuming a role whose name sta
   }
 }
 ```
-### Configure Amazon authentication **(FREE SELF)**
+
+### Configure Amazon authentication
 
 To configure Amazon authentication in GitLab, generate an access key for the
 IAM user in the Amazon AWS console, and following the steps below.
@@ -240,12 +248,10 @@ IAM user in the Amazon AWS console, and following the steps below.
 
 If you're using GitLab 13.7 or later, you can use instance profiles to
 dynamically retrieve temporary credentials from AWS when needed.
-
-With this option, leave `Access key ID` and `Secret access key` fields blank
+In this case, leave `Access key ID` and `Secret access key` fields blank
 and [pass an IAM role to an EC2 instance](https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_use_switch-role-ec2_instance-profiles.html).
 
-Alternativelly, enter your access key credentials into **Access key ID** and **Secret access key**.
-
+Otherwise, enter your access key credentials into **Access key ID** and **Secret access key**.
 
 ## Troubleshooting
 
