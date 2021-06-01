@@ -71,7 +71,7 @@ RSpec.describe Users::ApproveService do
 
         it 'emails the user on approval' do
           expect(DeviseMailer).to receive(:user_admin_approval).with(user).and_call_original
-          expect { subject }.to have_enqueued_mail(DeviseMailer, :user_admin_approval)
+          expect { subject }.to have_enqueued_sidekiq_mail(DeviseMailer, :user_admin_approval)
         end
 
         context 'email confirmation status' do
@@ -80,14 +80,14 @@ RSpec.describe Users::ApproveService do
 
             it 'sends confirmation instructions' do
               expect { subject }
-                .to have_enqueued_mail(DeviseMailer, :confirmation_instructions)
+                .to have_enqueued_sidekiq_mail(DeviseMailer, :confirmation_instructions)
             end
           end
 
           context 'user is confirmed' do
             it 'does not send a confirmation email' do
               expect { subject }
-                .not_to have_enqueued_mail(DeviseMailer, :confirmation_instructions)
+                .not_to have_enqueued_sidekiq_mail(DeviseMailer, :confirmation_instructions)
             end
           end
 

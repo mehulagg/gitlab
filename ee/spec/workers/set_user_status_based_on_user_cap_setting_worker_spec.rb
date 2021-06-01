@@ -76,7 +76,7 @@ RSpec.describe SetUserStatusBasedOnUserCapSettingWorker, type: :worker do
 
       it 'notifies the approval to the user' do
         expect(DeviseMailer).to receive(:user_admin_approval).with(user).and_call_original
-        expect { subject }.to have_enqueued_mail(DeviseMailer, :user_admin_approval)
+        expect { subject }.to have_enqueued_sidekiq_mail(DeviseMailer, :user_admin_approval)
       end
 
       include_examples 'does not send emails to active admins'
@@ -86,14 +86,14 @@ RSpec.describe SetUserStatusBasedOnUserCapSettingWorker, type: :worker do
 
         it 'sends confirmation instructions' do
           expect { subject }
-            .to have_enqueued_mail(DeviseMailer, :confirmation_instructions)
+            .to have_enqueued_sidekiq_mail(DeviseMailer, :confirmation_instructions)
         end
       end
 
       context 'when user has confirmed their email' do
         it 'does not send a confirmation email' do
           expect { subject }
-            .not_to have_enqueued_mail(DeviseMailer, :confirmation_instructions)
+            .not_to have_enqueued_sidekiq_mail(DeviseMailer, :confirmation_instructions)
         end
       end
 

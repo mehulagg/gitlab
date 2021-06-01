@@ -112,7 +112,7 @@ RSpec.describe Gitlab::Auth::GroupSaml::User do
 
         it 'does not send user confirmation email' do
           expect { find_and_update }
-            .not_to have_enqueued_mail(DeviseMailer, :confirmation_instructions)
+            .not_to have_enqueued_sidekiq_mail(DeviseMailer, :confirmation_instructions)
         end
       end
 

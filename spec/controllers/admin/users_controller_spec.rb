@@ -199,7 +199,7 @@ RSpec.describe Admin::UsersController do
 
       it 'emails the user on approval' do
         expect(DeviseMailer).to receive(:user_admin_approval).with(user).and_call_original
-        expect { subject }.to have_enqueued_mail(DeviseMailer, :user_admin_approval)
+        expect { subject }.to have_enqueued_sidekiq_mail(DeviseMailer, :user_admin_approval)
       end
     end
 
@@ -220,7 +220,7 @@ RSpec.describe Admin::UsersController do
       end
 
       it 'does not email the pending user' do
-        expect { subject }.not_to have_enqueued_mail(DeviseMailer, :user_admin_approval)
+        expect { subject }.not_to have_enqueued_sidekiq_mail(DeviseMailer, :user_admin_approval)
       end
     end
   end
@@ -537,12 +537,12 @@ RSpec.describe Admin::UsersController do
 
           it 'does not enqueue the `admin changed your password` email' do
             expect { update_password(admin) }
-              .not_to have_enqueued_mail(DeviseMailer, :password_change_by_admin)
+              .not_to have_enqueued_sidekiq_mail(DeviseMailer, :password_change_by_admin)
           end
 
           it 'enqueues the `password changed` email' do
             expect { update_password(admin) }
-              .to have_enqueued_mail(DeviseMailer, :password_change)
+              .to have_enqueued_sidekiq_mail(DeviseMailer, :password_change)
           end
         end
       end
@@ -567,12 +567,12 @@ RSpec.describe Admin::UsersController do
 
           it 'enqueues the `admin changed your password` email' do
             expect { update_password(user) }
-              .to have_enqueued_mail(DeviseMailer, :password_change_by_admin)
+              .to have_enqueued_sidekiq_mail(DeviseMailer, :password_change_by_admin)
           end
 
           it 'does not enqueue the `password changed` email' do
             expect { update_password(user) }
-              .not_to have_enqueued_mail(DeviseMailer, :password_change)
+              .not_to have_enqueued_sidekiq_mail(DeviseMailer, :password_change)
           end
         end
       end

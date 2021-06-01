@@ -1123,12 +1123,12 @@ RSpec.describe API::Users do
 
         it 'does not enqueue the `admin changed your password` email' do
           expect { update_password(admin, admin) }
-            .not_to have_enqueued_mail(DeviseMailer, :password_change_by_admin)
+            .not_to have_enqueued_sidekiq_mail(DeviseMailer, :password_change_by_admin)
         end
 
         it 'enqueues the `password changed` email' do
           expect { update_password(admin, admin) }
-            .to have_enqueued_mail(DeviseMailer, :password_change)
+            .to have_enqueued_sidekiq_mail(DeviseMailer, :password_change)
         end
       end
 
@@ -1142,12 +1142,12 @@ RSpec.describe API::Users do
 
         it 'enqueues the `admin changed your password` email' do
           expect { update_password(user, admin) }
-            .to have_enqueued_mail(DeviseMailer, :password_change_by_admin)
+            .to have_enqueued_sidekiq_mail(DeviseMailer, :password_change_by_admin)
         end
 
         it 'does not enqueue the `password changed` email' do
           expect { update_password(user, admin) }
-            .not_to have_enqueued_mail(DeviseMailer, :password_change)
+            .not_to have_enqueued_sidekiq_mail(DeviseMailer, :password_change)
         end
       end
     end

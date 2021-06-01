@@ -208,13 +208,13 @@ RSpec.describe User do
           it 'enqueues the `password changed` email' do
             user.password = User.random_password
 
-            expect { user.save! }.to have_enqueued_mail(DeviseMailer, :password_change)
+            expect { user.save! }.to have_enqueued_sidekiq_mail(DeviseMailer, :password_change)
           end
 
           it 'does not enqueue the `admin changed your password` email' do
             user.password = User.random_password
 
-            expect { user.save! }.not_to have_enqueued_mail(DeviseMailer, :password_change_by_admin)
+            expect { user.save! }.not_to have_enqueued_sidekiq_mail(DeviseMailer, :password_change_by_admin)
           end
         end
 
@@ -223,14 +223,14 @@ RSpec.describe User do
             user.password = User.random_password
             user.send_only_admin_changed_your_password_notification!
 
-            expect { user.save! }.to have_enqueued_mail(DeviseMailer, :password_change_by_admin)
+            expect { user.save! }.to have_enqueued_sidekiq_mail(DeviseMailer, :password_change_by_admin)
           end
 
           it '`password changed` email is not enqueued if it is explicitly allowed' do
             user.password = User.random_password
             user.send_only_admin_changed_your_password_notification!
 
-            expect { user.save! }.not_to have_enqueued_mail(DeviseMailer, :password_changed)
+            expect { user.save! }.not_to have_enqueued_sidekiq_mail(DeviseMailer, :password_changed)
           end
 
           it 'is not enqueued if sending notifications on password updates is turned off as per Devise config' do
@@ -239,7 +239,7 @@ RSpec.describe User do
 
             allow(Devise).to receive(:send_password_change_notification).and_return(false)
 
-            expect { user.save! }.not_to have_enqueued_mail(DeviseMailer, :password_change_by_admin)
+            expect { user.save! }.not_to have_enqueued_sidekiq_mail(DeviseMailer, :password_change_by_admin)
           end
         end
       end
@@ -249,7 +249,7 @@ RSpec.describe User do
           user.name = 'John'
           user.send_only_admin_changed_your_password_notification!
 
-          expect { user.save! }.not_to have_enqueued_mail(DeviseMailer, :password_change_by_admin)
+          expect { user.save! }.not_to have_enqueued_sidekiq_mail(DeviseMailer, :password_change_by_admin)
         end
       end
     end

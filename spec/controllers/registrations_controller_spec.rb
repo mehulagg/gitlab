@@ -74,7 +74,7 @@ RSpec.describe RegistrationsController do
 
             it 'does not send a confirmation email' do
               expect { subject }
-                .not_to have_enqueued_mail(DeviseMailer, :confirmation_instructions)
+                .not_to have_enqueued_sidekiq_mail(DeviseMailer, :confirmation_instructions)
             end
           end
         end
@@ -121,7 +121,7 @@ RSpec.describe RegistrationsController do
 
             it 'sends a confirmation email' do
               expect { subject }
-                .to have_enqueued_mail(DeviseMailer, :confirmation_instructions)
+                .to have_enqueued_sidekiq_mail(DeviseMailer, :confirmation_instructions)
             end
           end
         end
@@ -133,7 +133,7 @@ RSpec.describe RegistrationsController do
         it 'signs the user in' do
           stub_application_setting(send_user_confirmation_email: false)
 
-          expect { subject }.not_to have_enqueued_mail(DeviseMailer, :confirmation_instructions)
+          expect { subject }.not_to have_enqueued_sidekiq_mail(DeviseMailer, :confirmation_instructions)
           expect(controller.current_user).not_to be_nil
         end
       end
@@ -150,7 +150,7 @@ RSpec.describe RegistrationsController do
           end
 
           it 'does not authenticate the user and sends a confirmation email' do
-            expect { subject }.to have_enqueued_mail(DeviseMailer, :confirmation_instructions)
+            expect { subject }.to have_enqueued_sidekiq_mail(DeviseMailer, :confirmation_instructions)
             expect(controller.current_user).to be_nil
           end
 
@@ -223,7 +223,7 @@ RSpec.describe RegistrationsController do
               let(:session_params) { { invite_email: user_params.dig(:user, :email) } }
 
               it 'signs the user in without sending a confirmation email', :aggregate_failures do
-                expect { subject }.not_to have_enqueued_mail(DeviseMailer, :confirmation_instructions)
+                expect { subject }.not_to have_enqueued_sidekiq_mail(DeviseMailer, :confirmation_instructions)
                 expect(controller.current_user).to be_confirmed
               end
             end
@@ -232,7 +232,7 @@ RSpec.describe RegistrationsController do
               let(:session_params) { { invite_email: 'bogus@email.com' } }
 
               it 'does not authenticate the user and sends a confirmation email', :aggregate_failures do
-                expect { subject }.to have_enqueued_mail(DeviseMailer, :confirmation_instructions)
+                expect { subject }.to have_enqueued_sidekiq_mail(DeviseMailer, :confirmation_instructions)
                 expect(controller.current_user).to be_nil
               end
             end
@@ -246,7 +246,7 @@ RSpec.describe RegistrationsController do
           end
 
           it 'authenticates the user and sends a confirmation email' do
-            expect { subject }.to have_enqueued_mail(DeviseMailer, :confirmation_instructions)
+            expect { subject }.to have_enqueued_sidekiq_mail(DeviseMailer, :confirmation_instructions)
             expect(controller.current_user).to be_present
             expect(response).to redirect_to(users_sign_up_welcome_path)
           end
@@ -255,7 +255,7 @@ RSpec.describe RegistrationsController do
             let(:session_params) { { invite_email: user_params.dig(:user, :email) } }
 
             it 'signs the user in without sending a confirmation email', :aggregate_failures do
-              expect { subject }.not_to have_enqueued_mail(DeviseMailer, :confirmation_instructions)
+              expect { subject }.not_to have_enqueued_sidekiq_mail(DeviseMailer, :confirmation_instructions)
               expect(controller.current_user).to be_confirmed
             end
           end
@@ -264,7 +264,7 @@ RSpec.describe RegistrationsController do
             let(:session_params) { { invite_email: 'bogus@email.com' } }
 
             it 'authenticates the user and sends a confirmation email without confirming', :aggregate_failures do
-              expect { subject }.to have_enqueued_mail(DeviseMailer, :confirmation_instructions)
+              expect { subject }.to have_enqueued_sidekiq_mail(DeviseMailer, :confirmation_instructions)
               expect(controller.current_user).not_to be_confirmed
             end
           end
