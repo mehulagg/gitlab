@@ -3,27 +3,23 @@
 class CopyPendingBuildsToPendingBuildsTable < ActiveRecord::Migration[6.0]
   include Gitlab::Database::MigrationHelpers
 
-  TEMP_INDEX = 'ci_builds_pending_migration'
-
   disable_ddl_transaction!
 
-  class PendingBuild < ActiveRecord::Base
+  class Build < ActiveRecord::Base
     include EachBatch
 
     self.table_name = 'ci_builds'
     self.inheritance_column = :_type_disabled
-
-    default_scope { where(status: 'pending', type: 'Ci::Build') }
   end
 
   def up
-    add_concurrent_index :ci_builds, %i(id project_id), where: "status = 'pending' AND type = 'Ci::Build'", name: TEMP_INDEX
-
-    # For testing only
+    # testing only
     execute 'TRUNCATE ci_pending_builds'
 
-    PendingBuild.each_batch(of: 1000) do |batch|
-      min_id, max_id = batch.pluck('MIN(id)', 'MAX(id)')
+    start_id = Build.where(status: 'pending', type: 'Ci::Build').where('updated_at > ?', 1.day.ago).pluck('MIN(id)')
+
+    Build.where('id > ?', start_id).each_batch(of: 1000) do |batch|
+      min_id, max_id = batch.pluck('MIN(id)', 'MAX(id)').first
 
       execute <<~SQL
         WITH builds AS (
@@ -38,12 +34,9 @@ class CopyPendingBuildsToPendingBuildsTable < ActiveRecord::Migration[6.0]
           ON CONFLICT DO NOTHING
       SQL
     end
-
-    # Commented for testing
-    # remove_concurrent_index_by_name :ci_builds, name: TEMP_INDEX
   end
 
   def down
-    remove_concurrent_index_by_name :ci_builds, name: TEMP_INDEX
+    # no-op
   end
 end
