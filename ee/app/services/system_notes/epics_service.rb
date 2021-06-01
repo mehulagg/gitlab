@@ -65,10 +65,10 @@ module SystemNotes
     # Returns the created Note object
     def change_epic_date_note(date_type, date)
       body = if date
-                "changed #{date_type} to #{date.strftime('%b %-d, %Y')}"
-              else
-                "removed the #{date_type}"
-              end
+               "changed #{date_type} to #{date.strftime('%b %-d, %Y')}"
+             else
+               "removed the #{date_type}"
+             end
 
       create_note(NoteSummary.new(noteable, nil, author, body, action: 'epic_date_changed'))
     end
