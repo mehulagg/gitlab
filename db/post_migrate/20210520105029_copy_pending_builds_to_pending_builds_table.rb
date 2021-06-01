@@ -3,46 +3,47 @@
 class CopyPendingBuildsToPendingBuildsTable < ActiveRecord::Migration[6.0]
   include Gitlab::Database::MigrationHelpers
 
-  BUILDS_MAX_SIZE = 1 << (32 - 1)
-  PENDING_BUILDS_BATCH_SIZE = 1000
-  PENDING_BUILDS_MAX_BATCHES = BUILDS_MAX_SIZE / PENDING_BUILDS_BATCH_SIZE
+  TEMP_INDEX = 'ci_builds_pending_migration'
 
   disable_ddl_transaction!
 
+  class PendingBuild < ActiveRecord::Base
+    include EachBatch
+
+    self.table_name = 'ci_builds'
+    self.inheritance_column = :_type_disabled
+
+    default_scope { where(status: 'pending', type: 'Ci::Build') }
+  end
+
   def up
-    1.step do |i|
-      inserts = execute <<~SQL
-        WITH pending_builds AS (
-          SELECT id,
-                 project_id
+    add_concurrent_index :ci_builds, %i(id project_id), where: "status = 'pending' AND type = 'Ci::Build'", name: TEMP_INDEX
+
+    # For testing only
+    execute 'TRUNCATE ci_pending_builds'
+
+    PendingBuild.each_batch(of: 1000) do |batch|
+      min_id, max_id = batch.pluck('MIN(id)', 'MAX(id)')
+
+      execute <<~SQL
+        WITH builds AS (
+          SELECT id AS build_id, project_id
           FROM ci_builds
           WHERE status = 'pending'
             AND type = 'Ci::Build'
-            AND NOT EXISTS (
-              SELECT 1 FROM ci_pending_builds
-                WHERE ci_pending_builds.build_id = ci_builds.id
-            )
-          LIMIT #{PENDING_BUILDS_BATCH_SIZE}
-        ), inserts AS (
-          INSERT INTO ci_pending_builds (build_id, project_id)
-            SELECT id,
-                   project_id
-            FROM pending_builds
-            ON CONFLICT DO NOTHING
-            RETURNING id
+            AND id BETWEEN #{min_id} AND #{max_id}
         )
-        SELECT COUNT(*) FROM inserts;
+        INSERT INTO ci_pending_builds (build_id, project_id)
+          SELECT * FROM builds
+          ON CONFLICT DO NOTHING
       SQL
-
-      break if inserts.values.flatten.first.to_i == 0
-
-      if i > PENDING_BUILDS_MAX_BATCHES
-        raise 'There are too many pending builds in your database! Aborting.'
-      end
     end
+
+    # Commented for testing
+    # remove_concurrent_index_by_name :ci_builds, name: TEMP_INDEX
   end
 
   def down
-    # noop
+    remove_concurrent_index_by_name :ci_builds, name: TEMP_INDEX
   end
 end
