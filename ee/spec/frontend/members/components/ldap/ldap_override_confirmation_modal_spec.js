@@ -138,6 +138,6 @@ describe('LdapOverrideConfirmationModal', () => {
   it('modal does not show when `ldapOverrideConfirmationModalVisible` is `false`', () => {
     createComponent({ ldapOverrideConfirmationModalVisible: false });
 
-    expect(findModal().vm.$attrs.visible).toBe(false);
+    expect(findModal().props().visible).toBe(false);
   });
 });
