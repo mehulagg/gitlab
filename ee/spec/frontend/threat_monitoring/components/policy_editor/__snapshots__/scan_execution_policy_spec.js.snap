@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`ContainerRuntimePolicy component supported YAML renders policy preview tabs 1`] = `
+exports[`ScanExecutionPolicy component supported YAML renders policy preview tabs 1`] = `
 <div
   value="apiVersion: cilium.io/v2
 kind: CiliumNetworkPolicy
@@ -20,7 +20,7 @@ spec:
   </h5>
    
   <p>
-    Container runtime
+    Scan execution
   </p>
    
   <div>
@@ -31,32 +31,22 @@ spec:
       test description
     </policy-info-row-stub>
      
+    <!---->
+     
+    <!---->
+     
     <policy-info-row-stub
       label="Enforcement status"
     >
       Disabled
     </policy-info-row-stub>
+     
+    <!---->
   </div>
-   
-  <policy-preview-stub
-    class="gl-mt-4"
-    initialtab="0"
-    policydescription="Deny all traffic"
-    policyyaml="apiVersion: cilium.io/v2
-kind: CiliumNetworkPolicy
-description: test description
-metadata:
-  name: test-policy
-spec:
-  endpointSelector:
-    matchLabels:
-      network-policy.gitlab.com/disabled_by: gitlab
-"
-  />
 </div>
 `;
 
-exports[`ContainerRuntimePolicy component unsupported YAML renders policy preview tabs 1`] = `
+exports[`ScanExecutionPolicy component unsupported YAML renders policy preview tabs 1`] = `
 <div
   value="unsupportedPrimaryKey: test"
 >
@@ -67,15 +57,8 @@ exports[`ContainerRuntimePolicy component unsupported YAML renders policy previe
   </h5>
    
   <p>
-    Container runtime
+    Scan execution
   </p>
    
-  <!---->
-   
-  <policy-preview-stub
-    class="gl-mt-4"
-    initialtab="1"
-    policyyaml="unsupportedPrimaryKey: test"
-  />
 </div>
 `;

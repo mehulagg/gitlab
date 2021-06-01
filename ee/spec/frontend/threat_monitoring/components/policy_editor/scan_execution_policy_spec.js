@@ -1,10 +1,9 @@
 import BasePolicy from 'ee/threat_monitoring/components/policy_editor/base_policy.vue';
-import ContainerRuntimePolicy from 'ee/threat_monitoring/components/policy_editor/container_runtime_policy.vue';
 import toYaml from 'ee/threat_monitoring/components/policy_editor/lib/to_yaml';
-import PolicyPreview from 'ee/threat_monitoring/components/policy_editor/policy_preview.vue';
+import ScanExecutionPolicy from 'ee/threat_monitoring/components/policy_editor/scan_execution_policy.vue';
 import { shallowMountExtended } from 'helpers/vue_test_utils_helper';
 
-describe('ContainerRuntimePolicy component', () => {
+describe('ScanExecutionPolicy component', () => {
   let wrapper;
   const policy = {
     name: 'test-policy',
@@ -14,11 +13,10 @@ describe('ContainerRuntimePolicy component', () => {
   };
   const unsupportedYaml = 'unsupportedPrimaryKey: test';
 
-  const findPolicyPreview = () => wrapper.findComponent(PolicyPreview);
   const findDescription = () => wrapper.findByTestId('description');
 
   const factory = ({ propsData } = {}) => {
-    wrapper = shallowMountExtended(ContainerRuntimePolicy, {
+    wrapper = shallowMountExtended(ScanExecutionPolicy, {
       propsData: {
         ...propsData,
       },
@@ -45,15 +43,6 @@ describe('ContainerRuntimePolicy component', () => {
       expect(findDescription().exists()).toBe(true);
       expect(findDescription().text()).toContain('test description');
     });
-
-    it('does render the policy preview', () => {
-      expect(findPolicyPreview().exists()).toBe(true);
-      expect(findPolicyPreview().props()).toStrictEqual({
-        initialTab: 0,
-        policyDescription: 'Deny all traffic',
-        policyYaml: toYaml(policy),
-      });
-    });
   });
 
   describe('unsupported YAML', () => {
@@ -67,15 +56,6 @@ describe('ContainerRuntimePolicy component', () => {
 
     it('does not render the policy description', () => {
       expect(findDescription().exists()).toBe(false);
-    });
-
-    it('does render the policy preview', () => {
-      expect(findPolicyPreview().exists()).toBe(true);
-      expect(findPolicyPreview().props()).toStrictEqual({
-        initialTab: 1,
-        policyDescription: null,
-        policyYaml: unsupportedYaml,
-      });
     });
   });
 });

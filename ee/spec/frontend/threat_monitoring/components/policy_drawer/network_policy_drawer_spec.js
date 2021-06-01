@@ -1,7 +1,12 @@
 import NetworkPolicyDrawer from 'ee/threat_monitoring/components/policy_drawer/network_policy_drawer.vue';
 import ContainerRuntimePolicy from 'ee/threat_monitoring/components/policy_editor/container_runtime_policy.vue';
+import ScanExecutionPolicy from 'ee/threat_monitoring/components/policy_editor/scan_execution_policy.vue';
 import { mountExtended } from 'helpers/vue_test_utils_helper';
-import { mockPoliciesResponse, mockCiliumPolicy } from '../../mocks/mock_data';
+import {
+  mockPoliciesResponse,
+  mockCiliumPolicy,
+  mockScanExecutionPolicy,
+} from '../../mocks/mock_data';
 
 const [mockGenericPolicy] = mockPoliciesResponse;
 
@@ -22,7 +27,8 @@ describe('NetworkPolicyDrawer component', () => {
   // Finders
   const findEditButton = () => wrapper.findByTestId('edit-button');
   const findPolicyEditor = () => wrapper.findByTestId('policyEditor');
-  const findCiliumPolicy = () => wrapper.findComponent(ContainerRuntimePolicy);
+  const findContainerRuntimePolicy = () => wrapper.findComponent(ContainerRuntimePolicy);
+  const findScanExecutionPolicy = () => wrapper.findComponent(ScanExecutionPolicy);
 
   // Shared assertions
   const itRendersEditButton = () => {
@@ -66,17 +72,21 @@ describe('NetworkPolicyDrawer component', () => {
     itRendersEditButton();
   });
 
-  describe('given a cilium policy', () => {
+  describe.each`
+    policyKind             | mock                       | finder
+    ${'container runtime'} | ${mockCiliumPolicy}        | ${findContainerRuntimePolicy}
+    ${'scan execution'}    | ${mockScanExecutionPolicy} | ${findScanExecutionPolicy}
+  `('given a $policyKind policy', ({ policyKind, mock, finder }) => {
     beforeEach(() => {
       factory({
         propsData: {
-          policy: mockCiliumPolicy,
+          policy: mock,
         },
       });
     });
 
-    it('renders the container runtime component', () => {
-      expect(findCiliumPolicy().exists()).toBe(true);
+    it(`renders the ${policyKind} component`, () => {
+      expect(finder().exists()).toBe(true);
     });
 
     itRendersEditButton();

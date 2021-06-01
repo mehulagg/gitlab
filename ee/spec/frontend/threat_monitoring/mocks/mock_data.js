@@ -52,6 +52,16 @@ spec:
   endpointSelector: {}`,
 };
 
+export const mockScanExecutionPolicy = {
+  name: 'Scheduled DAST scan',
+  creationTimestamp: new Date(),
+  manifest: `kind: ScanExecutionPolicy
+metadata:
+  name: policy
+spec:
+  endpointSelector: {}`,
+};
+
 export const mockNominalHistory = [
   ['2019-12-04T00:00:00.000Z', 56],
   ['2019-12-05T00:00:00.000Z', 2647],

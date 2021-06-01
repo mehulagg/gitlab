@@ -35,6 +35,7 @@ export const PortMatchModePortProtocol = 'port/protocol';
 export const DisabledByLabel = 'network-policy.gitlab.com/disabled_by';
 
 export const CiliumNetworkPolicyKind = 'CiliumNetworkPolicy';
+export const ScanExecutionPolicyKind = 'ScanExecutionPolicy';
 
 export const ProjectIdLabel = 'app.gitlab.com/proj';
 
