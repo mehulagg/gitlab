@@ -218,7 +218,7 @@ For offline or closed network customers, the existing [true-up model](#users-ove
 <details>
 <summary>Click here to view example content of a Seat Link POST request.</summary>
 
-<pre><code>
+```json
 {
   date: '2020-01-29',
   license_key: 'ZXlKa1lYUmhJam9pWm5WNmVsTjVZekZ2YTJoV2NucDBh
@@ -258,7 +258,7 @@ Sg0KU1hNMGExaE9SVGR2V2pKQlBUMWNiaUo5DQo=',
   max_historical_user_count: 10,
   active_users: 6
 }
-</code></pre>
+```
 
 </details>
 
