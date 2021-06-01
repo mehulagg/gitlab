@@ -1,4 +1,4 @@
-#######################
+######################
 # rspec job base specs
 .rails-job-base:
   extends:
