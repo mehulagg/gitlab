@@ -1301,6 +1301,8 @@ If you had v1 images in the GitLab Container Registry, but you did not upgrade t
 
 For self-managed instances, you can regain access to these images by temporarily downgrading the GitLab Container Registry to a version lower than `v3.0.0-gitlab`, namely [`v2.13.1-gitlab`](https://gitlab.com/gitlab-org/container-registry/-/releases/v2.13.1-gitlab), upgrade any v1 images, and then revert the registry downgrade.
 
+There is no need to put the registry in read-only mode during the image upgrade process. Just ensure that you are not relying on any new feature introduced since `v3.0.0-gitlab`, as those would be unavailable during the upgrade process. You can see the complete registry changelog [here](https://gitlab.com/gitlab-org/container-registry/-/blob/master/CHANGELOG.md).
+
 See below for additional information about each installation method.
 
 #### Helm Charts installs
@@ -1326,8 +1328,6 @@ For Source installs, you should locate your `registry` binary and temporarily re
 #### Images upgrade
 
 You can follow the [recommended steps by Docker to upgrade v1 images](https://docs.docker.com/registry/spec/deprecated-schema-v1/) you might still have. The most straightforward option is to pull those images, re-tag and push them once again to the registry, using a Docker client version above v1.12. Docker will take care of converting images automatically before pushing them to the registry.  Once done, all your v1 images should now be available as v2 images.
-
-There is no need to put the registry in read-only mode during this process.
 
 ### Advanced Troubleshooting
 
