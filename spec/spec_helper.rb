@@ -187,6 +187,7 @@ RSpec.configure do |config|
   config.include ExpectRequestWithStatus, type: :request
   config.include IdempotentWorkerHelper, type: :worker
   config.include RailsHelpers
+  config.include SidekiqHelpers
   config.include SidekiqMiddleware
   config.include StubActionCableConnection, type: :channel
 
