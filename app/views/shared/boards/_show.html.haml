@@ -15,5 +15,6 @@
 = render 'shared/issuable/search_bar', type: :boards, board: board
 #board-app.boards-app.position-relative{ "v-cloak" => "true", data: board_data, ":class" => "{ 'is-compact': detailIssueVisible }" }
   %board-content{ ":lists" => "state.lists", ":disabled" => "disabled" }
-  = render "shared/boards/components/sidebar", group: group
+  - if !Feature.enabled?(:epic_boards, @group) && !Feature.enabled?(:graphql_board_lists, @group)
+    = render "shared/boards/components/sidebar", group: group
   %board-settings-sidebar
