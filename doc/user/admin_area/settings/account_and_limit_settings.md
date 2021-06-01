@@ -18,7 +18,7 @@ You can increase or decrease that `Default projects limit` value.
 
 ## Max attachment size
 
-You can change the maximum file size for attachments in comments and replies in GitLab.
+You can change the maximum file size for attachments in comments and replies in GitLab,
 Navigate to **Admin Area > Settings > General**, then expand **Account and Limit**.
 From here, you can increase or decrease by changing the value in `Maximum attachment size (MB)`.
 
@@ -32,6 +32,11 @@ details.
 You can change the maximum push size for your repository.
 Navigate to **Admin Area > Settings > General**, then expand **Account and Limit**.
 From here, you can increase or decrease by changing the value in `Maximum push size (MB)`.
+
+NOTE:
+When [adding files to a repository](../../project/repository/web_editor.md#create-a-file)
+via the web UI, the maximum _attachment_ size is the limiting factor,
+because the web server needs to receive the file before the commit can be generated.
 
 ## Max import size
 
