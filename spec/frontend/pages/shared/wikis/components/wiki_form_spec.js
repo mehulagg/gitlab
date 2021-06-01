@@ -60,10 +60,7 @@ describe('WikiForm', () => {
     path: '/project/path/-/wikis/home',
   };
 
-  function createWrapper(
-    persisted = false,
-    { pageInfo, glFeatures } = { glFeatures: { wikiContentEditor: false } },
-  ) {
+  function createWrapper(persisted = false, { pageInfo } = {}) {
     wrapper = extendedWrapper(
       mount(
         WikiForm,
@@ -79,7 +76,6 @@ describe('WikiForm', () => {
               ...(persisted ? pageInfoPersisted : pageInfoNew),
               ...pageInfo,
             },
-            glFeatures,
           },
         },
         { attachToDocument: true },
@@ -251,9 +247,9 @@ describe('WikiForm', () => {
     );
   });
 
-  describe('when feature flag wikiContentEditor is enabled', () => {
+  describe('wiki content editor', () => {
     beforeEach(() => {
-      createWrapper(true, { glFeatures: { wikiContentEditor: true } });
+      createWrapper(true);
     });
 
     it.each`

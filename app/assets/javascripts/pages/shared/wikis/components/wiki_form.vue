@@ -15,7 +15,6 @@ import csrf from '~/lib/utils/csrf';
 import { setUrlFragment } from '~/lib/utils/url_utility';
 import { s__, sprintf } from '~/locale';
 import MarkdownField from '~/vue_shared/components/markdown/field.vue';
-import glFeatureFlagMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 
 const MARKDOWN_LINK_TEXT = {
   markdown: '[Link Title](page-slug)',
@@ -104,7 +103,6 @@ export default {
   directives: {
     GlModalDirective,
   },
-  mixins: [glFeatureFlagMixin()],
   inject: ['formatOptions', 'pageInfo'],
   data() {
     return {
@@ -161,7 +159,7 @@ export default {
       return this.format === 'markdown';
     },
     showContentEditorButton() {
-      return this.isMarkdownFormat && !this.useContentEditor && this.glFeatures.wikiContentEditor;
+      return this.isMarkdownFormat && !this.useContentEditor;
     },
     disableSubmitButton() {
       return !this.content || !this.title || this.contentEditorRenderFailed;
