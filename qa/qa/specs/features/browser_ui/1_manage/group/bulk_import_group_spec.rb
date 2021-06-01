@@ -68,11 +68,12 @@ module QA
         Page::Group::New.new.connect_gitlab_instance(Runtime::Scenario.gitlab_address, personal_access_token)
       end
 
+      # Non blocking issues:
+      # https://gitlab.com/gitlab-org/gitlab/-/issues/331252
       it(
         'imports group with subgroups',
         testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/1785',
-        quarantine: { only: { job: 'relative_url' }, issue: 'https://gitlab.com/gitlab-org/gitlab/-/issues/330344' },
-        issue_2: 'https://gitlab.com/gitlab-org/gitlab/-/issues/331252'
+        quarantine: { only: { job: 'relative_url' }, issue: 'https://gitlab.com/gitlab-org/gitlab/-/issues/330344' }
       ) do
         Page::Group::BulkImport.perform do |import_page|
           import_page.import_group(source_group.path, sandbox.path)
@@ -86,11 +87,12 @@ module QA
         end
       end
 
+      # Issues:
+      # https://gitlab.com/gitlab-org/gitlab/-/issues/331704
       it(
         'imports group labels',
         testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/1785',
-        only: { job: 'review-qa-all' },
-        issue: 'https://gitlab.com/gitlab-org/gitlab/-/issues/331704'
+        only: { job: 'review-qa-all' }
       ) do
         Resource::GroupLabel.fabricate_via_api! do |label|
           label.api_client = api_client
