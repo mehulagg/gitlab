@@ -7,7 +7,6 @@ import { apolloProvider } from '~/sidebar/graphql';
 import * as CEMountSidebar from '~/sidebar/mount_sidebar';
 import CveIdRequest from './components/cve_id_request/cve_id_request_sidebar.vue';
 import SidebarDropdownWidget from './components/sidebar_dropdown_widget.vue';
-import SidebarIterationWidget from './components/sidebar_iteration_widget.vue';
 import SidebarStatus from './components/status/sidebar_status.vue';
 import SidebarWeight from './components/weight/sidebar_weight.vue';
 import { IssuableAttributeType } from './constants';
@@ -118,19 +117,20 @@ function mountIterationSelect() {
     el,
     apolloProvider,
     components: {
-      SidebarIterationWidget,
+      SidebarDropdownWidget,
     },
     provide: {
       canUpdate: parseBoolean(canEdit),
       isClassicSidebar: true,
     },
     render: (createElement) =>
-      createElement('sidebar-iteration-widget', {
+      createElement('sidebar-dropdown-widget', {
         props: {
-          iterationsWorkspacePath: groupPath,
+          attrWorkspacePath: groupPath,
           workspacePath: projectPath,
           iid: issueIid,
           issuableType: IssuableType.Issue,
+          issuableAttribute: IssuableAttributeType.Iteration,
         },
       }),
   });
