@@ -2380,7 +2380,7 @@ msgstr ""
 msgid "AdminSettings|Session duration for Git operations when 2FA is enabled (minutes)"
 msgstr ""
 
-msgid "AdminSettings|Set a CI/CD template as the required pipeline configuration for all projects in the instance. Project CI/CD configuration is merged into the required pipeline configuration when the pipeline runs. %{link_start}What is a required pipeline configuration?%{link_end}"
+msgid "AdminSettings|Set a CI/CD template as the required pipeline configuration for all projects in the instance. Project CI/CD configuration merges into the required pipeline configuration when the pipeline runs. %{link_start}What is a required pipeline configuration?%{link_end}"
 msgstr ""
 
 msgid "AdminSettings|Specify a domain to use by default for every project's Auto Review Apps and Auto Deploy stages."
