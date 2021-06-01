@@ -19,7 +19,7 @@
 
   li.active {
     background-color: transparent;
-    box-shadow: none;
+    box-shadow: none !important; // TODO: This should be updated in `theme_helper.scss`
   }
 }
 
@@ -137,6 +137,32 @@
   }
 }
 
+@mixin context-header {
+  @include gl-pl-2;
+  @include gl-py-2;
+  @include gl-mb-2;
+
+  .avatar-container {
+    flex: 0 0 $sidebar-avatar-size;
+    border-color: $t-gray-a-08;
+  }
+}
+
+@mixin top-level-item {
+  @include gl-px-4;
+  @include gl-py-3;
+  @include gl-display-flex;
+  @include gl-align-items-center;
+  @include gl-rounded-base;
+  @include gl-w-auto;
+  transition: padding $sidebar-transition-duration;
+  margin: $sidebar-top-item-tb-margin $sidebar-top-item-lr-margin;
+
+  &:hover {
+    background-color: $indigo-900-alpha-008;
+  }
+}
+
 //
 // PAGE-LAYOUT
 //
@@ -206,19 +232,7 @@
     }
 
     > a {
-      @include gl-mx-2;
-      @include gl-px-4;
-      @include gl-py-3;
-      @include gl-display-flex;
-      @include gl-align-items-center;
-      @include gl-rounded-base;
-      @include gl-w-auto;
-      transition: padding $sidebar-transition-duration;
-      margin-bottom: 1px;
-
-      &:hover {
-        background-color: $indigo-900-alpha-008;
-      }
+      @include top-level-item;
     }
 
     &.active {
@@ -250,11 +264,6 @@
     display: none;
   }
 
-  svg {
-    height: 16px;
-    width: 16px;
-  }
-
   @media (min-width: map-get($grid-breakpoints, md)) and (max-width: map-get($grid-breakpoints, xl) - 1px) {
     &:not(.sidebar-expanded-mobile) {
       @include collapse-contextual-sidebar;
@@ -264,13 +273,27 @@
 }
 
 .nav-sidebar-inner-scroll {
-  height: 100%;
-  width: 100%;
-  overflow: auto;
+  @include gl-h-full;
+  @include gl-w-full;
+  @include gl-overflow-auto;
+
+  > div.context-header {
+    @include gl-mt-2;
+
+    a {
+      @include top-level-item;
+      @include context-header;
+    }
+  }
 }
 
 .sidebar-top-level-items {
+  @include gl-mt-2;
   margin-bottom: 60px;
+
+  .context-header a {
+    @include context-header;
+  }
 
   > li {
     .badge.badge-pill {
