@@ -261,8 +261,7 @@ describe('User Popover Component', () => {
 
     it("does not show a link to the bot's documentation", () => {
       createWrapper({ user: SECURITY_BOT_USER });
-      const securityBotDocsLink = findSecurityBotDocsLink();
-      expect(securityBotDocsLink.exists()).toBe(false);
+      expect(findSecurityBotDocsLink().exists()).toBe(false);
     });
   });
 });

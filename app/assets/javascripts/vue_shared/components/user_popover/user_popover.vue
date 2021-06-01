@@ -49,6 +49,9 @@ export default {
     availabilityStatus() {
       return this.user?.status?.availability || '';
     },
+    shouldShowBotDocumentation() {
+      return this.user.bot && this.user.websiteUrl;
+    },
   },
 };
 </script>
@@ -93,7 +96,7 @@ export default {
           <div v-if="statusHtml" class="js-user-status gl-mt-3">
             <span v-html="statusHtml"></span>
           </div>
-          <div v-if="user.bot && user.websiteUrl" class="gl-text-blue-500">
+          <div v-if="shouldShowBotDocumentation" class="gl-text-blue-500">
             <gl-icon name="question" />
             <gl-link data-testid="user-popover-bot-docs-link" :href="user.websiteUrl">
               {{ sprintf(__('Learn more about %{username}'), { username: user.name }) }}
