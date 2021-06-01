@@ -53,7 +53,7 @@ Rails.application.configure do
 
   config.cache_store = :null_store
 
-  config.active_job.queue_adapter = :test
+  config.active_job.queue_adapter = :sidekiq
 
   if ENV['CI'] && !ENV['RAILS_ENABLE_TEST_LOG']
     config.logger = ActiveSupport::TaggedLogging.new(Logger.new(nil))
