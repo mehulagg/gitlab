@@ -26,17 +26,17 @@ The following table summarizes the supported GitLab features with the integratio
 Feature | GitLab Kubernetes Agent | Certificate-based connection
 --------|-------------------------|------------------------------
 Auto DevOps | Partial [support planned](https://gitlab.com/groups/gitlab-org/-/epics/5528) | [Supported](#auto-devops)
-Pull based deployments | [Supported](./agent/) | Not supported
-Network security alerts | [Supported](./agent/#kubernetes-network-security-alerts) | Not supported
+Pull based deployments | [Supported](agent/) | Not supported
+Network security alerts | [Supported](agent/#kubernetes-network-security-alerts) | Not supported
 Review apps | [Planned](https://gitlab.com/gitlab-org/gitlab/-/issues/273656) | [Supported](../../../ci/review_apps/index.md)
 Push based deployments | [Planned](https://gitlab.com/groups/gitlab-org/-/epics/5528) | [Supported](../../../ci/pipelines/index.md)
-Group level clusters |[ Planned](https://gitlab.com/groups/gitlab-org/-/epics/5784) | [Supported](../../group/clusters/index.md)
+Group level clusters | [Planned](https://gitlab.com/groups/gitlab-org/-/epics/5784) | [Supported](../../group/clusters/index.md)
 Instance level clusters | Not planned | [Supported](../../instance/clusters/index.md)
 GitLab integrated applications | [Planned](https://gitlab.com/groups/gitlab-org/-/epics/5528) | [Supported](#installing-applications)
 Kubernetes monitoring | Not supported | [Supported](#monitoring-your-kubernetes-cluster)
 Log explorer | Not supported | [Supported](#viewing-pod-logs)
 Web terminals | [Planned](https://gitlab.com/groups/gitlab-org/-/epics/6097) | [Supported](#web-terminals)
-Deploy boards | Partial [support planned](https://gitlab.com/groups/gitlab-org/-/epics/5528) | [Supported](#deploy-boards)
+Deploy boards | Partial [support planned](https://gitlab.com/groups/gitlab-org/-/epics/5528) | [Supported](#deploy-boards)
 Canary Deployments **(PREMIUM)** | [Planned](https://gitlab.com/groups/gitlab-org/-/epics/5528) | [Supported](#canary-deployments)
 [Deployment variables](#deployment-variables) | [Planned](https://gitlab.com/gitlab-org/gitlab/-/issues/324275) | Supported
 Role or attribute based access controls | Supported | [Supported](add_remove_clusters.md#access-controls)
@@ -73,7 +73,7 @@ NOTE:
 
 ### Adding and removing clusters
 
-The recommended way to connect a Kubernetes cluster with GitLab is using the GitLab Kubernetes Agent. You can read more on [how to set up a GitLab to Kubernetes connection using the GitLab Kubernetes Agent](./agent/).
+The recommended way to connect a Kubernetes cluster with GitLab is using the GitLab Kubernetes Agent. You can read more on [how to set up a GitLab to Kubernetes connection using the GitLab Kubernetes Agent](agent/).
 
 For connecting to a cluster with certificates, see [Adding and removing Kubernetes clusters](add_remove_clusters.md) on how
 to:
