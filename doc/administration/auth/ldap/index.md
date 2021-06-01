@@ -220,7 +220,7 @@ the user's LDAP sign-in is the attribute specified as `uid` above.
 
 If you want to limit all GitLab access to a subset of the LDAP users on your
 LDAP server, the first step should be to narrow the configured `base`. However,
-it's sometimes necessary to additionally filter users. In this case, you can set
+it's sometimes necessary to further filter users. In this case, you can set
 up an LDAP user filter. The filter must comply with
 [RFC 4515](https://tools.ietf.org/search/rfc4515).
 
@@ -787,8 +787,8 @@ This section outlines what LDAP queries are executed and what behavior you
 can expect from group sync.
 
 Group member access are downgraded from a higher level if their LDAP group
-membership changes. For example, if a user has Owner rights in a group and the
-next group sync reveals they should only have Developer privileges, their
+membership changes. For example, if a user the Owner role in a group and the
+next group sync reveals they should only have the Developer role, their
 access is adjusted accordingly. The only exception is if the user is the
 last owner in a group. Groups need at least one owner to fulfill
 administrative duties.
