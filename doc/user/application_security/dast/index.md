@@ -72,7 +72,7 @@ the site during a scan could lead to inaccurate results.
 ## Prerequisites
 
 - [GitLab Runner](../../../ci/runners/README.md), with the
-[`docker` executor](../runner/executors/docker.html).
+[`docker` executor](https://docs.gitlab.com/runner/executors/docker.html).
 - Target application deployed. For more details, see [Deployment options](#deployment-options).
 
 ### Deployment options
