@@ -80,7 +80,7 @@ RSpec.describe 'Users' do
         end
       end
 
-      context 'when current user is an admin' do
+      context 'when current user is an admin', :enable_admin_mode do
         it_behaves_like 'a working users query'
 
         it 'includes only admins', :aggregate_failures do

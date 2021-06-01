@@ -96,7 +96,7 @@ RSpec.describe 'getting group information' do
         expect(graphql_data['group']).to be_nil
       end
 
-      it 'avoids N+1 queries' do
+      it 'avoids N+1 queries', :enable_admin_mode do
         pending('See: https://gitlab.com/gitlab-org/gitlab/-/issues/245272')
 
         queries = [{ query: group_query(group1) },
@@ -107,7 +107,7 @@ RSpec.describe 'getting group information' do
       end
     end
 
-    context "when authenticated as admin" do
+    context "when authenticated as admin", :enable_admin_mode do
       it "returns any existing group" do
         post_graphql(group_query(private_group), current_user: admin)
 

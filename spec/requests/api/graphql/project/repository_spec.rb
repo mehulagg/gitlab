@@ -51,7 +51,7 @@ RSpec.describe 'getting a repository in a project' do
     end
   end
 
-  context 'as an admin' do
+  context 'as an admin', :enable_admin_mode do
     it 'returns diskPath' do
       post_graphql(query, current_user: create(:admin))
 

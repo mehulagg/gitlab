@@ -87,7 +87,7 @@ RSpec.describe 'Getting starredProjects of the user' do
       end
     end
 
-    context 'the current user has access to view the private profile of the user' do
+    context 'the current user has access to view the private profile of the user', :enable_admin_mode do
       let(:current_user) { create(:admin) }
 
       it 'finds all projects starred by the user, which the current user has access to' do

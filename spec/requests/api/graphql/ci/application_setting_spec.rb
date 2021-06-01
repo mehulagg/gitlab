@@ -32,7 +32,7 @@ RSpec.describe 'getting Application Settings' do
     specify { expect(settings_data).to be nil }
   end
 
-  context 'with admin permissions' do
+  context 'with admin permissions', :enable_admin_mode do
     let(:user) { create(:user, :admin) }
 
     before do

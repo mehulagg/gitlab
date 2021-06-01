@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe 'Query.runner(id)' do
+RSpec.describe 'Query.runner(id)', :enable_admin_mode do
   include GraphqlHelpers
 
   let_it_be(:user) { create_default(:user, :admin) }

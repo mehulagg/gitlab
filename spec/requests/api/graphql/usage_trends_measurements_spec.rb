@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe 'UsageTrendsMeasurements' do
+RSpec.describe 'UsageTrendsMeasurements', :enable_admin_mode do
   include GraphqlHelpers
 
   let(:current_user) { create(:user, :admin) }

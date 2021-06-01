@@ -49,7 +49,7 @@ RSpec.describe 'Mark snippet as spam' do
       it_behaves_like 'does not mark the snippet as spam'
     end
 
-    context 'when user can mark snippet as spam' do
+    context 'when user can mark snippet as spam', :enable_admin_mode do
       let(:current_user) { admin }
 
       before do
