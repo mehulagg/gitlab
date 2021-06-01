@@ -1309,21 +1309,21 @@ For Helm Chart installs, you can override the [`image.tag`](https://docs.gitlab.
 
 #### Omnibus installs
 
- For Omnibus installs, you will have to temporarily replace the registry binary that ships with 13.9+ for one prior to `v3.0.0-gitlab`. To do so, you can pull a previous version of the Docker image for the GitLab Container Registry, such as `v2.13.1-gitlab`:
+For Omnibus installs, you will have to temporarily replace the registry binary that ships with 13.9+ for one prior to `v3.0.0-gitlab`. To do so, you can pull a previous version of the Docker image for the GitLab Container Registry, such as `v2.13.1-gitlab`:
 
  ```sh
  docker pull registry.gitlab.com/gitlab-org/build/cng/gitlab-container-registry:v2.13.1-gitlab
  ```
 
- You can then grab the `registry` binary from within this image, located at `/bin/registry`, and use it to replace the one embedded in the Omnibus install, located at `/opt/gitlab/embedded/bin/registry`.
+You can then grab the `registry` binary from within this image, located at `/bin/registry`, and use it to replace the one embedded in the Omnibus install, located at `/opt/gitlab/embedded/bin/registry`.
 
 Please make sure to start by backing up the original registry binary embedded in the Omnibus install, and restore it after performing the [images upgrade](#image-upgrade)) steps. You should [stop](https://docs.gitlab.com/omnibus/maintenance/#starting-and-stopping) the registry service before replacing its binary and start it right after. No registry configuration changes are required.
  
- #### Source installs
+#### Source installs
 
- For Source installs, you should locate your `registry` binary and temporarily replace it with the one obtained from the `v3.0.0-gitlab`, as explained for [Omnibus installs](#omnibus-installs). Please make sure to start by backing up the original registry binary and restore it after performing the [images upgrade](#image-upgrade)) steps.
+For Source installs, you should locate your `registry` binary and temporarily replace it with the one obtained from the `v3.0.0-gitlab`, as explained for [Omnibus installs](#omnibus-installs). Please make sure to start by backing up the original registry binary and restore it after performing the [images upgrade](#image-upgrade)) steps.
 
- #### Images upgrade
+#### Images upgrade
 
 You can follow the [recommended steps by Docker to upgrade v1 images](https://docs.docker.com/registry/spec/deprecated-schema-v1/) you might still have. The most straightforward option is to pull those images, re-tag and push them once again to the registry, using a Docker client version above v1.12. Docker will take care of converting images automatically before pushing them to the registry.  Once done, all your v1 images should now be available as v2 images.
 
