@@ -1,8 +1,27 @@
 ---
-stage: Monitor
-group: Monitor
+stage: Configure
+group: Configure
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
+
+# Manage your infrastructure with GitLab
+
+GitLab supports infrastructure management tasks for generic infrastructure using its Terraform integrations, and for Kubernetes using its extensive integration options.
+
+## Generic infrastructure management
+
+As Terraform is the __de facto__ standard for provisioning infrastructure, GitLab created various integration points to support Terraform-based workflows. Using GitLab's Terraform integrations you can:
+
+- collaborate easily around infrastructure changes using the Terraform merge request widget
+- ignore the state file management aspects of Terraform using the GitLab Managed Terraform states
+
+## Kubernetes integrations
+
+The recommended way to connect a Kubernetes cluster with GitLab is using the GitLab Kubernetes Agent. Traditionally, GitLab's Kubernetes integration was enabled by connecting a cluster to GitLab using cluster certificates and opening the Kube API to be accessible by GitLab. The GitLab Kubernetes Agent is our new direction to enable experienced Kubernetes users as well to leverage GitLab's Kubernetes integration features.
+
+As we roll out support for more features under the GitLab Kubernetes Agent, there is a disparitiy of features supported between these two approaches.
+
+The following table should drive you ...
 
 # Kubernetes clusters **(FREE)**
 
