@@ -83,7 +83,6 @@ export default {
       automatic: true,
       startDate: null,
       durationInWeeks: 0,
-      rollOverIssues: false,
       iterationsInAdvance: 0,
       validationState: {
         title: null,
@@ -159,7 +158,6 @@ export default {
           this.automatic = cadence.automatic;
           this.startDate = cadence.startDate;
           this.durationInWeeks = cadence.durationInWeeks;
-          this.rollOverIssues = cadence.rollOverIssues;
           this.iterationsInAdvance = cadence.iterationsInAdvance;
         })
         .catch((err) => {
@@ -217,15 +215,15 @@ export default {
           mutation: this.mutation,
           variables: this.variables,
         })
-        .then(({ data, errors: topLevelErrors = [] }) => {
+        .then(({ data, errors: topLevelErrors = [] } = {}) => {
           if (topLevelErrors.length > 0) {
             this.errorMessage = topLevelErrors[0].message;
             return;
           }
 
-          const { errors } = data.result;
+          const { errors } = data?.result || {};
 
-          if (errors.length > 0) {
+          if (errors?.length > 0) {
             [this.errorMessage] = errors;
             return;
           }

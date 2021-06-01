@@ -1,4 +1,4 @@
-import { GlInfiniteScroll, GlSkeletonLoader } from '@gitlab/ui';
+import { GlDropdown, GlInfiniteScroll, GlSkeletonLoader } from '@gitlab/ui';
 import { createLocalVue, RouterLinkStub } from '@vue/test-utils';
 import { nextTick } from 'vue';
 import VueApollo from 'vue-apollo';
@@ -186,5 +186,17 @@ describe('Iteration cadence list item', () => {
         }),
       }),
     );
+  });
+
+  it('hides dropdown when canEditCadence is false', async () => {
+    await createComponent({ canEditCadence: false });
+
+    expect(wrapper.find(GlDropdown).exists()).toBe(false);
+  });
+
+  it('shows dropdown when canEditCadence is true', async () => {
+    await createComponent({ canEditCadence: true });
+
+    expect(wrapper.find(GlDropdown).exists()).toBe(true);
   });
 });

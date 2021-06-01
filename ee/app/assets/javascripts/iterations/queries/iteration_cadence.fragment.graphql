@@ -4,7 +4,5 @@ fragment IterationCadence on IterationCadence {
   automatic
   startDate
   durationInWeeks
-  rollOver
   iterationsInAdvance
-  description
 }
