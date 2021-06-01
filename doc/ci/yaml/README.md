@@ -1550,7 +1550,11 @@ In this example, if the first rule matches, then the job has `when: manual` and 
 
 Use [`variables`](#variables) in `rules:` to define variables for specific conditions.
 
-For example:
+**Keyword type**: Job-specific. You can use it only as part of a job.
+
+**Possible inputs**: A hash of variables in the format `VARIABLE-NAME: value`
+
+**Example of `rules:variables`**:
 
 ```yaml
 job:
