@@ -96,8 +96,8 @@
     - if job.try(:coverage)
       #{job.coverage}%
 
-  %td
-    .gl-display-flex
+  %td{ class: 'gl-pr-0!' }
+    .gl-display-flex.gl-justify-content-end
       .btn-group
         - if can?(current_user, :read_job_artifacts, job) && job.artifacts?
           = link_to download_project_job_artifacts_path(job.project, job), rel: 'nofollow', download: '', title: _('Download artifacts'), class: 'gl-button btn btn-default btn-icon' do
