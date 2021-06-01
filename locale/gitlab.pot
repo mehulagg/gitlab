@@ -5720,6 +5720,9 @@ msgstr ""
 msgid "CICDAnalytics|Deployment frequency"
 msgstr ""
 
+msgid "CICDAnalytics|Lead time"
+msgstr ""
+
 msgid "CICDAnalytics|Projects with releases"
 msgstr ""
 
