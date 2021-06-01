@@ -4,24 +4,36 @@ group: Configure
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
-## Add an existing Kubernetes cluster
+# Add an existing Kubernetes cluster
 
 If you have an existing Kubernetes cluster, you can add it to a project, group,
-or instance.
+or instance and benefit from the integration with GitLab.
+
+## Prerequisites
 
 Kubernetes integration isn't supported for `arm64` clusters. See the issue
 [Helm Tiller fails to install on `arm64` cluster](https://gitlab.com/gitlab-org/gitlab/-/issues/29838)
 for details.
 
-After adding an existing cluster, you can install runners for it as described in
-[GitLab Managed Apps](../../clusters/applications.md).
+To add an existing **EKS** cluster, you need:
 
-If you are adding an existing Kubernetes cluster,
-ensure the token of the account has administrator privileges for the cluster.
+- An Amazon EKS cluster with worker nodes properly configured.
+- `kubectl` [installed and configured](https://docs.aws.amazon.com/eks/latest/userguide/getting-started.html#get-started-kubectl)
+for access to the EKS cluster.
+- Ensure the token of the account has administrator privileges for the cluster.
 
-## Steps
+To add an existing **GKE** cluster, you need:
+
+- The `container.clusterRoleBindings.create` permission to create a cluster
+role binding. You can follow the [Google Cloud documentation](https://cloud.google.com/iam/docs/granting-changing-revoking-access)
+to grant access.
+
+## Add an EKS or GKE cluster
 
 <!-- (REVISE -  BREAK INTO SMALLER STEPS) -->
+
+You need Maintainer permissions to add clusters to your projects or groups,
+and access to the GitLab Admin area to add instance-level clusters.
 
 To add a Kubernetes cluster to your project, group, or instance:
 
@@ -148,13 +160,6 @@ To add a Kubernetes cluster to your project, group, or instance:
          token:      <authentication_token>
          ```
 
-      NOTE:
-      For GKE clusters, you need the
-      `container.clusterRoleBindings.create` permission to create a cluster
-      role binding. You can follow the [Google Cloud
-      documentation](https://cloud.google.com/iam/docs/granting-changing-revoking-access)
-      to grant access.
-
    1. **GitLab-managed cluster** - Leave this checked if you want GitLab to manage namespaces and service accounts for this cluster.
       See the [Managed clusters section](index.md#gitlab-managed-clusters) for more information.
    1. **Project namespace** (optional) - You don't have to fill it in; by leaving
@@ -167,12 +172,12 @@ To add a Kubernetes cluster to your project, group, or instance:
         with limited permissions, the secret's namespace and project namespace may
         be the same.
 
-1. Finally, click the **Create Kubernetes cluster** button.
+1. Select the **Create Kubernetes cluster** button.
 
-After a couple of minutes, your cluster is ready. You can now proceed
+After about 10 minutes, your cluster is ready. You can now proceed
 to install some [pre-defined applications](index.md#installing-applications).
 
-#### Disable Role-Based Access Control (RBAC) (optional)
+## Disable Role-Based Access Control (RBAC) (optional)
 
 When connecting a cluster via GitLab integration, you may specify whether the
 cluster is RBAC-enabled or not. This affects how GitLab interacts with the

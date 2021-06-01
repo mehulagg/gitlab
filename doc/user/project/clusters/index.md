@@ -12,13 +12,33 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/issues/39840) in
 >   GitLab 11.11 for [instances](../../instance/clusters/index.md).
 
-Using the GitLab project Kubernetes integration, you can:
+You can use GitLab to manage your cluster and [benefit from the GitLab-Kubernetes integration](#benefit-from-the-gitlab-kubernetes-integration).
+To do so, you can [create a new cluster](add_remove_clusters.md)
+directly from GitLab, or [add an existing cluster](add_existing_cluster.md)
+to GitLab.
 
-- Use [Review Apps](../../../ci/review_apps/index.md).
-- Run [pipelines](../../../ci/pipelines/index.md).
+You can integrate GitLab to your cluster:
+
+- To deploy your clusters themselves.
+- To deploy your apps to your cluster.
+- To install and manage third-party apps in your cluster.
+
+You can create and manage your clusters:
+
+- On the project-level, to have a cluster dedicated to a project.
+- On the [group level](../../group/clusters/index.md), to use the same cluster across multiple projects.
+- On the [instance level](../../instance/clusters/index.md), to use the same cluster across multiple groups and projects. **(FREE SELF)**
+
+## Benefit from the GitLab-Kubernetes integration
+
+Using the GitLab-Kubernetes integration, you can benefit of using GitLab's
+features to manage your clusters, such as:
+
+- Preview your applications with [Review Apps](../../../ci/review_apps/index.md).
+- Create GitLab CI/CD [Pipelines](../../../ci/pipelines/index.md) to build, test, and deploy to your cluster.
 - [Deploy](#deploying-to-a-kubernetes-cluster) your applications.
-- Detect and [monitor Kubernetes](#monitoring-your-kubernetes-cluster).
-- Use it with [Auto DevOps](#auto-devops).
+- Detect and [monitor](#monitoring-your-kubernetes-cluster) your clusters.
+- Use [Auto DevOps](#auto-devops) to automate the CI/CD process.
 - Use [Web terminals](#web-terminals).
 - Use [Deploy Boards](#deploy-boards).
 - Use [Canary Deployments](#canary-deployments). **(PREMIUM)**
@@ -26,21 +46,9 @@ Using the GitLab project Kubernetes integration, you can:
 - Use [role-based or attribute-based access controls](add_remove_clusters.md#access-controls).
 - View [Logs](#viewing-pod-logs).
 - Run serverless workloads on [Kubernetes with Knative](serverless/index.md).
+- Install and manage third-party apps in your cluster through [cluster integrations](../../clusters/integrations.md).
 
-Besides integration at the project level, Kubernetes clusters can also be
-integrated at the [group level](../../group/clusters/index.md) or
-[GitLab instance level](../../instance/clusters/index.md).
-
-To view your project level Kubernetes clusters, navigate to **Operations > Kubernetes**
-from your project. On this page, you can [add a new cluster](#adding-and-removing-clusters)
-and view information about your existing clusters, such as:
-
-- Nodes count.
-- Rough estimates of memory and CPU usage.
-
-## Setting up
-
-### Supported cluster versions
+## Supported cluster versions
 
 GitLab is committed to support at least two production-ready Kubernetes minor
 versions at any given time. We regularly review the versions we support, and
@@ -64,16 +72,20 @@ Some GitLab features may support versions outside the range provided here.
 NOTE:
 [GKE Cluster creation](add_remove_clusters.md#create-new-cluster) by GitLab is currently not supported for Kubernetes 1.19+. For these versions you can create the cluster through GCP, then [Add existing cluster](add_remove_clusters.md#add-existing-cluster). See [the related issue](https://gitlab.com/gitlab-org/gitlab/-/issues/331922) for more information.
 
-### Adding and removing clusters
+## Add and remove clusters
 
-See [Adding and removing Kubernetes clusters](add_remove_clusters.md) for details on how
-to:
+See [Create Kubernetes clusters](add_remove_clusters.md).
 
-- Create a cluster in Google Cloud Platform (GCP) or Amazon Elastic Kubernetes Service
-  (EKS) using the GitLab UI.
-- Add an integration to an existing cluster from any Kubernetes platform.
+## View your clusters
 
-### Multiple Kubernetes clusters
+To view your project-level Kubernetes clusters, navigate to **Operations > Kubernetes**
+from your project. On this page, you can [add a new cluster](#adding-and-removing-clusters)
+and view information about your existing clusters, such as:
+
+- Nodes count.
+- Rough estimates of memory and CPU usage.
+
+## Multiple Kubernetes clusters
 
 > - Introduced in [GitLab Premium](https://about.gitlab.com/pricing/) 10.3
 > - [Moved](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/35094) to GitLab Free in 13.2.
@@ -85,7 +97,7 @@ Add another cluster, like you did the first time, and make sure to
 [set an environment scope](#setting-the-environment-scope) that
 differentiates the new cluster from the rest.
 
-#### Setting the environment scope
+### Setting the environment scope
 
 When adding more than one Kubernetes cluster to your project, you need to differentiate
 them with an environment scope. The environment scope associates clusters with [environments](../../../ci/environments/index.md) similar to how the
@@ -262,6 +274,11 @@ This list provides a generic solution, and some GitLab-specific approaches:
 
 If you see a trailing `%` on some Kubernetes versions, do not include it.
 
+## Cluster integrations
+
+See the available [cluster integrations](../clusters/integrations.md)
+to integrate third-party applications with your clusters through GitLab.
+
 ## Installing applications
 
 GitLab can install and manage some applications like Helm, GitLab Runner, Ingress,
@@ -270,16 +287,10 @@ installing, upgrading, uninstalling, and troubleshooting applications for
 your project cluster, see
 [GitLab Managed Apps](../../clusters/applications.md).
 
-## Auto DevOps
+## Deploy applications with Auto DevOps
 
-Auto DevOps automatically detects, builds, tests, deploys, and monitors your
-applications.
-
-To make full use of Auto DevOps (Auto Deploy, Auto Review Apps, and
-Auto Monitoring) the Kubernetes project integration must be enabled. However,
-Kubernetes clusters can be used without Auto DevOps.
-
-[Read more about Auto DevOps](../../../topics/autodevops/index.md).
+You can use [Auto DevOps](../../../topics/autodevops/index.md) to automatically
+detect, build, test, deploy, and monitor your applications.
 
 ## Deploying to a Kubernetes cluster
 

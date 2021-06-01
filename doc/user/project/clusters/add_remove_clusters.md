@@ -6,8 +6,10 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 
 # Adding and removing Kubernetes clusters **(FREE)**
 
+<!-- TBA: re-think this doc title -->
+
 NOTE:
-Promotion: Every new Google Cloud Platform (GCP) account receives
+Every new Google Cloud Platform (GCP) account receives
 [$300 in credit upon sign up](https://console.cloud.google.com/freetrial).
 In partnership with Google, GitLab is able to offer an additional $200 for new GCP
 accounts to get started with the GitLab integration with Google Kubernetes Engine.
@@ -21,61 +23,64 @@ in a few clicks.
 
 ## Create a new cluster
 
-You can create your Kubernetes cluster with GitLab either:
+You can create your Kubernetes cluster with GitLab through the following methods:
 
-- Through the [GitLab Kubernetes Agent]() (recommended).
-- Through a certificate-based process, hosted on-premises or in:
-  - [Google Kubernetes Engine (GKE)]().
-  - [Amazon Elastic Kubernetes Service (EKS)]().
+- [GitLab Kubernetes Agent](../../clusters/agent/index.md) (recommended).
+- Certificate-based process:
+  - [New cluster hosted on Google Kubernetes Engine (GKE)](add_eks_clusters.md).
+  - [New cluster hosted on Amazon Elastic Kubernetes Service (EKS)](add_gke_clusters.md).
 
-To integrate your cluster with GitLab, you need:
+You can also host your cluster on premises and with other providers. To do so,
+use the certificate-based method to guide you through and enter the cluster
+settings manually.
 
-- Either a GitLab.com account or a self-managed installation running GitLab 12.5
-or later.
+Prerequisites:
+
+- Either a GitLab.com account or an account for a self-managed installation
+running GitLab 12.5 or later.
 - Maintainer permissions for group-level and project-level clusters.
 - Access to the Admin area for instance-level clusters. **(FREE SELF)**
 
 ## Add an existing cluster
 
-See how to [add an existing cluster](add_existing_cluster.md) to GitLab.
+If you already have a cluster and want to integrate it with GitLab, see how to
+[add an existing cluster](add_existing_cluster.md).
 
-## Cluster integrations
+## Disable a cluster
 
-<!-- [link to cluster integrations] -->
+When you successfully create a new Kubernetes cluster or add an existing
+one to GitLab, the cluster connection to GitLab becomes enabled. To disable it:
 
-## Enabling or disabling integration
-
-The Kubernetes cluster integration enables after you have successfully either created
-a new cluster or added an existing one. To disable Kubernetes cluster integration:
-
-1. Navigate to your:
+1. Go to your:
    - Project's **{cloud-gear}** **Operations > Kubernetes** page, for a project-level cluster.
    - Group's **{cloud-gear}** **Kubernetes** page, for a group-level cluster.
    - **Admin Area >** **{cloud-gear}** **Kubernetes** page, for an instance-level cluster.
-1. Click on the name of the cluster.
-1. Click the **GitLab Integration** toggle.
+1. Select the name of the cluster you want to disable.
+1. Toggle **GitLab Integration** off (in gray).
 1. Click **Save changes**.
 
-## Removing integration
+## Remove a cluster
 
-To remove the Kubernetes cluster integration from your project, first navigate to the **Advanced Settings** tab of the cluster details page and either:
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/26815) in GitLab 12.6, you can remove cluster integrations and resources.
 
-- Select **Remove integration**, to remove only the Kubernetes integration.
-- [From GitLab 12.6](https://gitlab.com/gitlab-org/gitlab/-/issues/26815), select
-  **Remove integration and resources**, to also remove all related GitLab cluster resources (for
-  example, namespaces, roles, and bindings) when removing the integration.
+When you remove a cluster integration, you only remove the cluster relationship
+to GitLab, not the cluster. To remove the cluster itself, visit your cluster's
+GKE or EKS dashboard to do it from their UI or use `kubectl`.
 
-When removing the cluster integration, note:
+You need at least Maintainer [permissions](../../permissions.md) to your
+project or group to remove the integration with GitLab.
 
-- You need Maintainer [permissions](../../permissions.md) and above to remove a Kubernetes cluster
-  integration.
-- When you remove a cluster, you only remove its relationship to GitLab, not the cluster itself. To
-  remove the cluster, you can do so by visiting the GKE or EKS dashboard, or using `kubectl`.
+When removing a cluster integration, you have two options:
 
-## Learn more
+- **Remove integration**: remove only the Kubernetes integration.
+- **Remove integration and resources**: remove the cluster integration and
+all GitLab cluster-related resources such as namespaces, roles, and bindings.
 
-To learn more on automatically deploying your applications,
-read about [Auto DevOps](../../../topics/autodevops/index.md).
+To remove the Kubernetes cluster integration:
+
+1. Go to your cluster details page.
+1. Select the **Advanced Settings** tab.
+1. Select either **Remove integration** or **Remove integration and resources**.
 
 ## Troubleshooting
 
