@@ -1,3 +1,11 @@
+GIT
+  remote: https://gitlab.com/gitlab-org/gitlab-dangerfiles
+  revision: 7486156d67d451897bdeb3cf6dd1319a433ce58d
+  branch: import-commit-messages-dangerfile
+  specs:
+    gitlab-dangerfiles (2.0.0)
+      danger-gitlab
+
 PATH
   remote: vendor/gems/mail-smtp_pool
   specs:
@@ -447,8 +455,6 @@ GEM
       terminal-table (~> 1.5, >= 1.5.1)
     gitlab-chronic (0.10.5)
       numerizer (~> 0.2)
-    gitlab-dangerfiles (2.0.0)
-      danger-gitlab
     gitlab-experiment (0.5.4)
       activesupport (>= 3.0)
       request_store (>= 1.0)
@@ -1473,7 +1479,7 @@ DEPENDENCIES
   gitaly (~> 13.12.0.pre.rc1)
   github-markup (~> 1.7.0)
   gitlab-chronic (~> 0.10.5)
-  gitlab-dangerfiles (~> 2.0.0)
+  gitlab-dangerfiles!
   gitlab-experiment (~> 0.5.4)
   gitlab-fog-azure-rm (~> 1.0.1)
   gitlab-fog-google (~> 1.13)

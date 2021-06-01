@@ -406,7 +406,7 @@ group :development, :test do
 end
 
 group :development, :test, :danger do
-  gem 'gitlab-dangerfiles', '~> 2.0.0', require: false
+  gem 'gitlab-dangerfiles', git: 'https://gitlab.com/gitlab-org/gitlab-dangerfiles', branch: 'import-commit-messages-dangerfile', require: false
 end
 
 group :development, :test, :coverage do
