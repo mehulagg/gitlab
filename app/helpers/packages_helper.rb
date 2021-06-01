@@ -19,10 +19,9 @@ module PackagesHelper
     expose_url(package_registry_project_path)
   end
 
-  def package_from_presenter(package)
+  def package_from_presenter(package, user)
     presenter = ::Packages::Detail::PackagePresenter.new(package)
-
-    presenter.detail_view.to_json
+    presenter.detail_view(user).to_json
   end
 
   def pypi_registry_url(project_id)

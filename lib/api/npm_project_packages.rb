@@ -32,6 +32,8 @@ module API
         package_file = ::Packages::PackageFileFinder
           .new(package, params[:file_name]).execute!
 
+        not_found!('Package') unless package_file.pipeline&.success?
+
         track_package_event('pull_package', package, category: 'API::NpmPackages')
 
         present_carrierwave_file!(package_file.file)
@@ -53,16 +55,12 @@ module API
         created_package = ::Packages::Npm::CreatePackageService
           .new(project, current_user, params.merge(build: current_authenticated_job)).execute
 
-        push = ::Packages::Push.create!(
-          package_file_id: created_package.package_files.first.id
-        )
-
-        ::Packages::CreatePipelineService.new(container: project, current_user: current_user)
-                                         .execute(push)
-
         if created_package[:status] == :error
           render_api_error!(created_package[:message], created_package[:http_status])
         else
+          push = ::Packages::Push.create!(package_file_id: created_package.package_files.first.id)
+          ::Packages::CreatePipelineService.new(container: push, current_user: current_user).execute
+
           created_package
         end
       end

@@ -6,7 +6,7 @@
 
 .row
   .col-12
-    #js-vue-packages-detail{ data: { package: package_from_presenter(@package),
+    #js-vue-packages-detail{ data: { package: package_from_presenter(@package, current_user),
       can_delete: can?(current_user, :destroy_package, @project).to_s,
       svg_path: image_path('illustrations/no-packages.svg'),
       npm_path: package_registry_instance_url(:npm),

@@ -2,7 +2,8 @@
 class Packages::Push < ApplicationRecord
   delegate :project, to: :package_file
 
-  belongs_to :package_file
+  belongs_to :package_file, inverse_of: :push
+  has_one :pipeline, class_name: 'Ci::Pipeline', foreign_key: :sha, primary_key: :sha
 
   validates :sha, presence: true
 

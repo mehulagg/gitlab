@@ -7,7 +7,7 @@ module Packages
         @package = package
       end
 
-      def detail_view
+      def detail_view(user)
         name = @package.name
         name = @package.conan_recipe if @package.conan?
 
@@ -15,7 +15,7 @@ module Packages
           id: @package.id,
           created_at: @package.created_at,
           name: name,
-          package_files: @package.package_files.map { |pf| build_package_file_view(pf) },
+          package_files: @package.package_files.map { |pf| build_package_file_view(pf, user) },
           package_type: @package.package_type,
           status: @package.status,
           project_id: @package.project_id,
@@ -38,7 +38,7 @@ module Packages
 
       private
 
-      def build_package_file_view(package_file)
+      def build_package_file_view(package_file, user)
         file_view = {
           created_at: package_file.created_at,
           download_path: package_file.download_path,
@@ -47,10 +47,24 @@ module Packages
           file_md5: package_file.file_md5,
           file_sha1: package_file.file_sha1,
           file_sha256: package_file.file_sha256
-
         }
 
         file_view[:pipelines] = build_pipeline_infos(package_file.pipelines) if package_file.pipelines.present?
+        if package_file.push
+          pipeline = package_file.push.pipeline
+
+          detailed_status = pipeline.detailed_status(user)
+
+          file_view[:package_pipeline_detailed_status] = {
+            icon: detailed_status.icon,
+            text: detailed_status.text,
+            has_details: detailed_status.has_details?,
+            details_path: detailed_status.details_path,
+            label: detailed_status.label,
+            group: detailed_status.group,
+            tooltip: detailed_status.status_tooltip
+          }
+        end
 
         file_view
       end

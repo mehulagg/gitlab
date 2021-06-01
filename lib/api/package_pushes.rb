@@ -17,7 +17,7 @@ module API
 
         not_found!("Package push") unless can?(current_user, :read_package, push&.project)
 
-        present_carrierwave_file!(push.package_file.file, supports_direct_download: true)
+        present_carrierwave_file!(push.package_file.file, supports_direct_download: false)
       end
     end
   end

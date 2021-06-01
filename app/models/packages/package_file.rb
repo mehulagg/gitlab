@@ -15,6 +15,7 @@ class Packages::PackageFile < ApplicationRecord
   has_many :pipelines, through: :package_file_build_infos
   has_one :debian_file_metadatum, inverse_of: :package_file, class_name: 'Packages::Debian::FileMetadatum'
   has_one :helm_file_metadatum, inverse_of: :package_file, class_name: 'Packages::Helm::FileMetadatum'
+  has_one :push, inverse_of: :package_file, class_name: 'Packages::Push'
 
   accepts_nested_attributes_for :conan_file_metadatum
   accepts_nested_attributes_for :debian_file_metadatum
