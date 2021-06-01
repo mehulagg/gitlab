@@ -87,12 +87,10 @@ module QA
         end
       end
 
-      # Issues:
-      # https://gitlab.com/gitlab-org/gitlab/-/issues/331704
       it(
         'imports group labels',
         testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/1785',
-        only: { job: 'review-qa-all' }
+        quarantine: { issue: 'https://gitlab.com/gitlab-org/gitlab/-/issues/331704', type: :bug }
       ) do
         Resource::GroupLabel.fabricate_via_api! do |label|
           label.api_client = api_client
@@ -111,9 +109,8 @@ module QA
           aggregate_failures do
             expect(import_page).to have_imported_group(source_group.path, wait: 120)
 
-            # Poll for labels within specific duration
-            expect { imported_group.labels }.to eventually_include(*source_group.labels).within(duration: 30)
-            expect { imported_subgroup.labels }.to eventually_include(*subgroup.labels).within(duration: 30)
+            expect { imported_group.labels }.to eventually_include(*source_group.labels).within(duration: 10)
+            expect { imported_subgroup.labels }.to eventually_include(*subgroup.labels).within(duration: 10)
           end
         end
       end

@@ -20,7 +20,7 @@ module Matchers
     be_falsey
     be_empty
   ].each do |op|
-    RSpec::Matchers.define(:"eventually_#{op}") do |expected|
+    RSpec::Matchers.define(:"eventually_#{op}") do |*expected|
       chain(:within) do |options = {}|
         @duration = options[:duration]
         @attempts = options[:attempts]
