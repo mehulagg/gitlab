@@ -226,7 +226,7 @@ If you are seeing two pipelines when using `only/except`, please see the caveats
 related to using `only/except` above (or, consider moving to `rules`).
 
 In [GitLab 13.7](https://gitlab.com/gitlab-org/gitlab/-/issues/201845) and later,
-you can add `workflow:rules` to [Switch from branch pipelines to merge request pipelines](../yaml/README.md#switch-between-branch-pipelines-and-merge-request-pipelines)
+you can add `workflow:rules` to [switch from branch pipelines to merge request pipelines](../yaml/README.md#switch-between-branch-pipelines-and-merge-request-pipelines)
 after a merge request is open on the branch.
 
 ### Two pipelines created when pushing an invalid CI configuration file
