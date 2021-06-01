@@ -144,14 +144,21 @@ module WorkerAttributes
       class_attributes[:resource_boundary] || :unknown
     end
 
-    def idempotent!
+    def idempotent!(feature_flag: nil)
       set_class_attribute(:idempotent, true)
+      set_class_attribute(:idempotent_feature_flag, feature_flag) if feature_flag
 
       validate_worker_attributes!
     end
 
     def idempotent?
-      class_attributes[:idempotent]
+      class_attributes[:idempotent] && idempotent_feature_flag_enabled?
+    end
+
+    def idempotent_feature_flag_enabled?
+      return true unless class_attributes[:idempotent_feature_flag]
+
+      Feature.enabled?(class_attributes[:idempotent_feature_flag], default_enabled: :yaml)
     end
 
     def weight(value)
