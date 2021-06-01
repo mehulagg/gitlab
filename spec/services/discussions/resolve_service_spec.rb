@@ -121,5 +121,21 @@ RSpec.describe Discussions::ResolveService do
         service.execute
       end
     end
+
+    context 'when discussion is for a design' do
+      let_it_be(:design) { create(:design, :with_file, issue: create(:issue, project: project)) }
+      let(:discussion) { create(:diff_note_on_design, noteable: design, project: project).to_discussion }
+      let(:user) { discussion.notes.first.author }
+
+      context 'when user resolving discussion has open todos' do
+        let!(:todo) { create(:todo, :pending, user: user, target: design, note: discussion.notes.first) }
+
+        it 'marks user todos as done' do
+          service.execute
+
+          expect(todo.reload).to be_done
+        end
+      end
+    end
   end
 end

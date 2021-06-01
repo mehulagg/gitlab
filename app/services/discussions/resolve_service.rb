@@ -47,6 +47,7 @@ module Discussions
         MergeRequests::ResolvedDiscussionNotificationService.new(project: project, current_user: current_user).execute(merge_request)
       end
 
+      # TodoService.new.resolve_todos_for_target(discussion.noteable, current_user) # unless other discussions remain for that target
       SystemNoteService.discussion_continued_in_issue(discussion, project, current_user, follow_up_issue) if follow_up_issue
     end
 
