@@ -348,6 +348,14 @@ RSpec.describe 'gitlab:db namespace rake task' do
 
       expect(File.read(File.join(directory, filename))).to eq(observations.to_json)
     end
+
+    it 'still writes observations to JSON if a migration raises an exception' do
+      allow(ActiveRecord::Migrator).to receive_message_chain('new.run').with(any_args).with(no_args).and_raise(ActiveRecord::QueryCanceled, 'test')
+
+      subject
+
+      expect(File.read(File.join(directory, filename))).to eq(observations.to_json)
+    end
   end
 
   describe '#execute_batched_migrations' do

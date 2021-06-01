@@ -256,20 +256,24 @@ namespace :gitlab do
 
       instrumentation = Gitlab::Database::Migrations::Instrumentation.new
 
-      pending_migrations.each do |migration|
-        instrumentation.observe(migration.version) do
-          ActiveRecord::Migrator.new(:up, ctx.migrations, ctx.schema_migration, migration.version).run
+      begin
+        pending_migrations.each do |migration|
+          instrumentation.observe(migration.version) do
+            ActiveRecord::Migrator.new(:up, ctx.migrations, ctx.schema_migration, migration.version).run
+          end
         end
-      end
-    ensure
-      if instrumentation
-        File.open(File.join(result_dir, Gitlab::Database::Migrations::Instrumentation::STATS_FILENAME), 'wb+') do |io|
+      rescue StandardError => e
+        puts "ERROR executing a migration: #{e}"
+      ensure
+        stats_file = File.join(result_dir, Gitlab::Database::Migrations::Instrumentation::STATS_FILENAME)
+        puts "Writing statistics to #{stats_file}"
+        File.open(stats_file, 'wb+') do |io|
           io << instrumentation.observations.to_json
         end
-      end
 
-      ActiveRecord::Base.clear_cache!
-      ActiveRecord::Migration.verbose = verbose_was
+        ActiveRecord::Base.clear_cache!
+        ActiveRecord::Migration.verbose = verbose_was
+      end
     end
 
     desc 'Run all pending batched migrations'
