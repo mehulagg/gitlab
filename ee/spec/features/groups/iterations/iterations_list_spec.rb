@@ -7,7 +7,7 @@ RSpec.describe 'Iterations list', :js do
   let_it_be(:group) { create(:group) }
   let_it_be(:subgroup) { create(:group, parent: group) }
   let_it_be(:user) { create(:user) }
-  let_it_be(:started_iteration) { create(:iteration, :skip_future_date_validation, group: group, start_date: now - 1.day, due_date: now, title: 'Started iteration') }
+  let_it_be(:current_iteration) { create(:iteration, :skip_future_date_validation, group: group, start_date: now - 1.day, due_date: now, title: 'Started iteration') }
   let_it_be(:upcoming_iteration) { create(:iteration, group: group, start_date: now + 1.day, due_date: now + 2.days) }
   let_it_be(:closed_iteration) { create(:closed_iteration, :skip_future_date_validation, group: group, start_date: now - 3.days, due_date: now - 2.days) }
   let_it_be(:subgroup_iteration) { create(:iteration, :skip_future_date_validation, group: subgroup, start_date: now - 3.days, due_date: now + 4.days) }
@@ -25,7 +25,7 @@ RSpec.describe 'Iterations list', :js do
 
       it 'shows iterations on each tab' do
         aggregate_failures do
-          expect(page).to have_link(started_iteration.title)
+          expect(page).to have_link(current_iteration.title)
           expect(page).to have_link(upcoming_iteration.title)
           expect(page).not_to have_link(closed_iteration.title)
           expect(page).not_to have_link(subgroup_iteration.title)
@@ -36,7 +36,7 @@ RSpec.describe 'Iterations list', :js do
 
         aggregate_failures do
           expect(page).to have_link(closed_iteration.title)
-          expect(page).not_to have_link(started_iteration.title)
+          expect(page).not_to have_link(current_iteration.title)
           expect(page).not_to have_link(upcoming_iteration.title)
           expect(page).not_to have_link(subgroup_iteration.title)
           expect(page).not_to have_link(subgroup_closed_iteration.title)
@@ -45,7 +45,7 @@ RSpec.describe 'Iterations list', :js do
         click_link('All')
 
         aggregate_failures do
-          expect(page).to have_link(started_iteration.title)
+          expect(page).to have_link(current_iteration.title)
           expect(page).to have_link(upcoming_iteration.title)
           expect(page).to have_link(closed_iteration.title)
           expect(page).not_to have_link(subgroup_iteration.title)
@@ -59,7 +59,7 @@ RSpec.describe 'Iterations list', :js do
 
           wait_for_requests
 
-          expect(page).to have_current_path(group_iteration_path(group, started_iteration.id))
+          expect(page).to have_current_path(group_iteration_path(group, current_iteration.id))
         end
       end
     end
@@ -71,7 +71,7 @@ RSpec.describe 'Iterations list', :js do
 
       it 'shows iterations on each tab including ancestor iterations' do
         aggregate_failures do
-          expect(page).to have_link(started_iteration.title)
+          expect(page).to have_link(current_iteration.title)
           expect(page).to have_link(upcoming_iteration.title)
           expect(page).not_to have_link(closed_iteration.title)
           expect(page).to have_link(subgroup_iteration.title)
@@ -83,7 +83,7 @@ RSpec.describe 'Iterations list', :js do
         aggregate_failures do
           expect(page).to have_link(closed_iteration.title)
           expect(page).to have_link(subgroup_closed_iteration.title)
-          expect(page).not_to have_link(started_iteration.title)
+          expect(page).not_to have_link(current_iteration.title)
           expect(page).not_to have_link(upcoming_iteration.title)
           expect(page).not_to have_link(subgroup_iteration.title)
         end
@@ -91,7 +91,7 @@ RSpec.describe 'Iterations list', :js do
         click_link('All')
 
         aggregate_failures do
-          expect(page).to have_link(started_iteration.title)
+          expect(page).to have_link(current_iteration.title)
           expect(page).to have_link(upcoming_iteration.title)
           expect(page).to have_link(closed_iteration.title)
           expect(page).to have_link(subgroup_iteration.title)

@@ -11,7 +11,7 @@ RSpec.describe 'getting iterations' do
   let_it_be(:iteration_cadence1) { create(:iterations_cadence, group: group, active: true, duration_in_weeks: 1, title: 'one week iterations') }
   let_it_be(:iteration_cadence2) { create(:iterations_cadence, group: group, active: true, duration_in_weeks: 2, title: 'two week iterations') }
 
-  let_it_be(:started_group_iteration) { create(:started_iteration, :skip_future_date_validation, iterations_cadence: iteration_cadence1, group: iteration_cadence1.group, title: 'one test', start_date: now - 1.day, due_date: now) }
+  let_it_be(:started_group_iteration) { create(:current_iteration, :skip_future_date_validation, iterations_cadence: iteration_cadence1, group: iteration_cadence1.group, title: 'one test', start_date: now - 1.day, due_date: now) }
   let_it_be(:upcoming_group_iteration) { create(:iteration, iterations_cadence: iteration_cadence2, group: iteration_cadence2.group, start_date: 1.day.from_now, due_date: 2.days.from_now) }
   let_it_be(:closed_group_iteration) { create(:closed_iteration, :skip_project_validation, iterations_cadence: iteration_cadence1, group: iteration_cadence1.group, start_date: 3.days.from_now, due_date: 4.days.from_now) }
 

@@ -6,7 +6,7 @@ module EE
 
     STATE_ENUM_MAP = {
       upcoming: 1,
-      started: 2,
+      current: 2,
       closed: 3
     }.with_indifferent_access.freeze
 
@@ -50,7 +50,7 @@ module EE
       before_destroy :check_if_can_be_destroyed
 
       scope :upcoming, -> { with_state(:upcoming) }
-      scope :started, -> { with_state(:started) }
+      scope :current, -> { with_state(:current) }
       scope :closed, -> { with_state(:closed) }
       scope :by_iteration_cadence_ids, ->(cadence_ids) { where(iterations_cadence_id: cadence_ids) }
       scope :with_start_date_after, ->(date) { where('start_date > :date', date: date) }
@@ -64,15 +64,15 @@ module EE
 
       state_machine :state_enum, initial: :upcoming do
         event :start do
-          transition upcoming: :started
+          transition upcoming: :current
         end
 
         event :close do
-          transition [:upcoming, :started] => :closed
+          transition [:upcoming, :current] => :closed
         end
 
         state :upcoming, value: Iteration::STATE_ENUM_MAP[:upcoming]
-        state :started, value: Iteration::STATE_ENUM_MAP[:started]
+        state :current, value: Iteration::STATE_ENUM_MAP[:current]
         state :closed, value: Iteration::STATE_ENUM_MAP[:closed]
       end
 
@@ -109,9 +109,9 @@ module EE
       def filter_by_state(iterations, state)
         case state
         when 'closed' then iterations.closed
-        when 'started' then iterations.started
+        when 'current' then iterations.current
         when 'upcoming' then iterations.upcoming
-        when 'opened' then iterations.started.or(iterations.upcoming)
+        when 'opened' then iterations.current.or(iterations.upcoming)
         when 'all' then iterations
         else raise ArgumentError, "Unknown state filter: #{state}"
         end
@@ -209,7 +209,7 @@ module EE
       elsif due_date < today
         :closed
       else
-        :started
+        :current
       end
     end
 

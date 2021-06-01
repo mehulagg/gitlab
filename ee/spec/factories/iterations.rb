@@ -22,8 +22,8 @@ FactoryBot.define do
       state_enum { Iteration::STATE_ENUM_MAP[:upcoming] }
     end
 
-    trait :started do
-      state_enum { Iteration::STATE_ENUM_MAP[:started] }
+    trait :current do
+      state_enum { Iteration::STATE_ENUM_MAP[:current] }
     end
 
     trait :closed do
@@ -60,7 +60,7 @@ FactoryBot.define do
     end
 
     factory :upcoming_iteration, traits: [:upcoming]
-    factory :started_iteration, traits: [:started]
+    factory :current_iteration, traits: [:current]
     factory :closed_iteration, traits: [:closed]
   end
 end
