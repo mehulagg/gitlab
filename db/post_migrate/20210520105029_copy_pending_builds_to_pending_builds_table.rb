@@ -16,7 +16,8 @@ class CopyPendingBuildsToPendingBuildsTable < ActiveRecord::Migration[6.0]
     # testing only
     execute 'TRUNCATE ci_pending_builds'
 
-    start_id = Build.where(status: 'pending', type: 'Ci::Build').where('updated_at > ?', 1.day.ago).pluck('MIN(id)')
+    # For testing, we're operating on an older state - so we need to go back one more day
+    start_id = Build.where(status: 'pending', type: 'Ci::Build').where('updated_at > ?', 2.days.ago).pluck('MIN(id)')
 
     Build.where('id > ?', start_id).each_batch(of: 1000) do |batch|
       min_id, max_id = batch.pluck('MIN(id)', 'MAX(id)').first
