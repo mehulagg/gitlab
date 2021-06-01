@@ -24,5 +24,10 @@ module Geo
     def checksummable?
       model_record.stored_externally? && super
     end
+
+    override :verification_feature_flag_enabled?
+    def self.verification_feature_flag_enabled?
+      Feature.enabled?(:geo_merge_request_diff_verification, default_enabled: :yaml)
+    end
   end
 end
