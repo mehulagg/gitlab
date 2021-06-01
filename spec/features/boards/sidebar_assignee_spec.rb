@@ -28,7 +28,7 @@ RSpec.describe 'Project issue boards sidebar assignee', :js do
     wait_for_requests
   end
 
-  context 'assignee' do
+  context 'assignee', quarantine: 'https://gitlab.com/gitlab-org/gitlab/-/issues/332078' do
     let(:assignees_widget) { '[data-testid="issue-boards-sidebar"] [data-testid="assignees-widget"]' }
 
     it 'updates the issues assignee' do
