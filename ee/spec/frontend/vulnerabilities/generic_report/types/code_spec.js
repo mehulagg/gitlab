@@ -1,4 +1,3 @@
-import { GlLink } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
 import Code from 'ee/vulnerabilities/components/generic_report/types/code.vue';
 import CodeBlock from '~/vue_shared/components/code_block.vue';
