@@ -23,7 +23,7 @@ RSpec.describe Gitlab::ContentSecurityPolicy::ConfigLoader do
     it 'returns defaults for all keys' do
       settings = described_class.default_settings_hash
 
-      expect(settings['enabled']).to be_truthy
+      expect(settings['enabled']).to be_falsey
       expect(settings['report_only']).to be_falsey
 
       directives = settings['directives']
