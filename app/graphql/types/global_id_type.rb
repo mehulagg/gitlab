@@ -18,6 +18,13 @@ end
 
 module Types
   class GlobalIDType < BaseScalar
+    DEPRECATED = {
+      'PrometheusService' => {
+        replacement: 'Integrations::Prometheus',
+        milestone: '14.0'
+      }
+    }.freeze
+
     graphql_name 'GlobalID'
     description <<~DESC
       A global identifier.
@@ -43,6 +50,13 @@ module Types
       raise GraphQL::CoercionError, "#{value.inspect} is not a valid Global ID" if gid.nil?
       raise GraphQL::CoercionError, "#{value.inspect} is not a Gitlab Global ID" unless gid.app == GlobalID.app
 
+      # To support GlobalID arguments that present a model with its old "deprecated" name
+      # we alter the GlobalID so it will correctly find the record with its new model name.
+      if deprecated?(gid.model_name)
+        new_model_name = deprecation_for(gid.model_name)[:replacement]
+        gid.uri.instance_variable_set(:@model_name, new_model_name)
+      end
+
       gid
     end
 
@@ -52,11 +66,22 @@ module Types
       @id_types ||= {}
 
       @id_types[model_class] ||= Class.new(self) do
-        graphql_name "#{model_class.name.gsub(/::/, '')}ID"
-        description <<~MD
+        # To support old "deprecated" GlobalID arguments we need to keep using the old model name
+        # in the `graphql_name`.
+        model_name = new_model_name_to_old(model_class.name) || model_class.name
+
+        graphql_name "#{model_name.gsub(/::/, '')}ID"
+        description <<~MD.strip
           A `#{graphql_name}` is a global ID. It is encoded as a string.
 
           An example `#{graphql_name}` is: `"#{::Gitlab::GlobalId.build(model_name: model_class.name, id: 1)}"`.
+          #{
+            if deprecated?(model_name)
+              'The older format `"' +
+              ::Gitlab::GlobalId.build(model_name: model_name, id: 1).to_s +
+              '"` was deprecated in ' +  deprecation_for(model_name)[:milestone] + '.'
+            end}
+
         MD
 
         define_singleton_method(:to_s) do
@@ -69,7 +94,7 @@ module Types
 
         define_singleton_method(:as) do |new_name|
           if @renamed && graphql_name != new_name
-            raise "Conflicting names for ID of #{model_class.name}: " \
+            raise "Conflicting names for ID of #{model_name}: " \
                   "#{graphql_name} and #{new_name}"
           end
 
@@ -79,11 +104,11 @@ module Types
         end
 
         define_singleton_method(:coerce_result) do |gid, ctx|
-          global_id = ::Gitlab::GlobalId.as_global_id(gid, model_name: model_class.name)
+          global_id = ::Gitlab::GlobalId.as_global_id(gid, model_name: model_name)
 
           next global_id.to_s if suitable?(global_id)
 
-          raise GraphQL::CoercionError, "Expected a #{model_class.name} ID, got #{global_id}"
+          raise GraphQL::CoercionError, "Expected a #{model_name} ID, got #{global_id}"
         end
 
         define_singleton_method(:suitable?) do |gid|
@@ -97,9 +122,25 @@ module Types
           gid = super(string, ctx)
           next gid if suitable?(gid)
 
-          raise GraphQL::CoercionError, "#{string.inspect} does not represent an instance of #{model_class.name}"
+          raise GraphQL::CoercionError, "#{string.inspect} does not represent an instance of #{model_name}"
         end
       end
     end
+
+    def self.deprecated?(model_name)
+      deprecation_for(model_name).present?
+    end
+    private_class_method :deprecated?
+
+    def self.deprecation_for(model_name)
+      DEPRECATED[model_name]
+    end
+    private_class_method :deprecation_for
+
+    def self.new_model_name_to_old(model_name)
+      @new_to_old_map ||= DEPRECATED.to_h { |k, v| [v[:replacement], k] }
+      @new_to_old_map[model_name]
+    end
+    private_class_method :new_model_name_to_old
   end
 end

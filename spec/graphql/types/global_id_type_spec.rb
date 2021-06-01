@@ -3,6 +3,8 @@
 require 'spec_helper'
 
 RSpec.describe Types::GlobalIDType do
+  include ::Gitlab::Graphql::Laziness
+
   let_it_be(:project) { create(:project) }
 
   let(:gid) { project.to_global_id }
@@ -96,6 +98,61 @@ RSpec.describe Types::GlobalIDType do
 
       expect { type.coerce_isolated_input(invalid_gid) }
         .to raise_error(GraphQL::CoercionError, /does not represent an instance of Project/)
+    end
+
+    context 'when a model name has been deprecated' do
+      before(:all) do
+        @previous_id_types = Types::GlobalIDType.instance_variable_get(:@id_types)
+        # Unset all previously built (and memoized) GlobalIDs to allow us to define one
+        # that will use constant we stub in the `before` block.
+        Types::GlobalIDType.instance_variable_set(:@id_types, {})
+      end
+
+      after(:all) do
+        Types::GlobalIDType.instance_variable_set(:@id_types, @previous_id_types)
+      end
+
+      before do
+        stub_const("#{described_class.name}::DEPRECATED", { 'OldProject' => { replacement: 'Project', milestone: '10.0' } })
+      end
+
+      it 'retains the deprecated model name in its graphql name' do
+        expect(type.to_graphql.name).to eq('OldProjectID')
+      end
+
+      it 'uses the new GID in the description' do
+        expect(type.to_graphql.description).to include('An example `OldProjectID` is: `"gid://gitlab/Project/1"`.')
+      end
+
+      it 'appends the description with a deprecation notice for the old GID' do
+        expect(type.to_graphql.description).to include('The older format `"gid://gitlab/OldProject/1"` was deprecated in 10.0')
+      end
+
+      describe 'coercing the input' do
+        let(:gid) { Gitlab::GlobalId.build(model_name: 'OldProject', id: project.id) }
+
+        subject(:result) { type.coerce_isolated_input(gid.to_s) }
+
+        it 'changes the model_name to the new model name' do
+          expect(result.model_name).to eq('Project')
+        end
+
+        it 'changes the model_class to the new model class' do
+          expect(result.model_class).to eq(Project)
+        end
+
+        it 'returns the correct resource' do
+          expect(result.find).to eq(project)
+        end
+
+        it 'returns the correct resource when using GitlabSchema' do
+          expect(force(GitlabSchema.object_from_id(result, expected_class: Project))).to eq(project)
+        end
+
+        it 'does not change the GlobalID when presented as a String' do
+          expect(result.to_s).to eq(gid.to_s)
+        end
+      end
     end
   end
 
