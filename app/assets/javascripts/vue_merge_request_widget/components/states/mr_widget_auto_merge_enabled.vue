@@ -197,7 +197,7 @@ export default {
               @click.prevent="removeSourceBranch"
             >
               <gl-loading-icon v-if="isRemovingSourceBranch" inline class="gl-mr-1" />
-              {{ s__('mrWidget|Delete source branch') }}
+              {{ s__('mrWidget|The source branch will be deleted') }}
             </a>
           </p>
         </section>

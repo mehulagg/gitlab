@@ -4,7 +4,7 @@ import { __ } from '../../locale';
 
 export default {
   i18n: {
-    removesBranchText: __('%{strongStart}Deletes%{strongEnd} source branch'),
+    removesBranchText: __('The source branch will be deleted'),
     tooltipTitle: __('A user with write access to the source branch selected this option'),
   },
   components: {

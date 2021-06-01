@@ -854,9 +854,6 @@ msgstr ""
 msgid "%{state} epics"
 msgstr ""
 
-msgid "%{strongStart}Deletes%{strongEnd} source branch"
-msgstr ""
-
 msgid "%{strongStart}Tip:%{strongEnd} You can also checkout merge requests locally by %{linkStart}following these guidelines%{linkEnd}"
 msgstr ""
 
@@ -32758,6 +32755,9 @@ msgid "The snippet is visible only to project members."
 msgstr ""
 
 msgid "The snippet is visible to any logged in user except external users."
+msgstr ""
+
+msgid "The source branch will be deleted"
 msgstr ""
 
 msgid "The specified tab is invalid, please select another"
