@@ -71,14 +71,6 @@ The issue is then opened so you can take further action.
 ### Create a Jira issue for a vulnerability
 
 > - [Introduced](https://gitlab.com/groups/gitlab-org/-/epics/4677) in GitLab 13.9.
-> - It's [deployed behind a feature flag](../../../user/feature_flags.md), enabled by default.
-> - It's enabled on GitLab.com.
-> - It's recommended for production use.
-> - For GitLab self-managed instances, GitLab administrators can opt to
->   [disable it](#enable-or-disable-jira-integration-for-vulnerabilities).
-
-WARNING:
-This feature might not be available to you. Check the **version history** note above for details.
 
 Prerequisites:
 
@@ -95,24 +87,8 @@ To create a Jira issue for a vulnerability:
 The Jira issue is created and opened in a new browser tab. The **Summary** and **Description**
 fields are pre-populated from the vulnerability's details.
 
-### Enable or disable Jira integration for vulnerabilities **(ULTIMATE SELF)**
+Unlike GitLab issues, the status of whether a Jira issue is Open or Closed does not display in GitLab UI.
 
-The option to create a Jira issue for a vulnerability is under development but ready for production
-use. It is deployed behind a feature flag that is **enabled by default**.
-[GitLab administrators with access to the GitLab Rails console](../../../administration/feature_flags.md)
-can opt to disable it.
-
-To enable it:
-
-```ruby
-Feature.enable(:jira_for_vulnerabilities)
-```
-
-To disable it:
-
-```ruby
-Feature.disable(:jira_for_vulnerabilities)
-```
 
 ## Linked issues
 
@@ -123,8 +99,6 @@ You can link one or more existing GitLab issues to a vulnerability. Adding a lin
 the issue that resolves or mitigates a vulnerability.
 
 Issues linked to a vulnerability are shown in the Vulnerability Report and the vulnerability's page.
-
-NOTE:
 
 - The vulnerability page shows related issues, but the issue page doesn't show the vulnerability it's related to.
 - An issue can only be related to one vulnerability at a time.
