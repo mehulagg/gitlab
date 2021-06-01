@@ -11142,6 +11142,23 @@ CREATE SEQUENCE ci_runners_id_seq
 
 ALTER SEQUENCE ci_runners_id_seq OWNED BY ci_runners.id;
 
+CREATE TABLE ci_shared_runner_builds (
+    id bigint NOT NULL,
+    build_id bigint NOT NULL,
+    project_id bigint NOT NULL,
+    runner_id bigint NOT NULL,
+    created_at timestamp with time zone DEFAULT now() NOT NULL
+);
+
+CREATE SEQUENCE ci_shared_runner_builds_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE ci_shared_runner_builds_id_seq OWNED BY ci_shared_runner_builds.id;
+
 CREATE TABLE ci_sources_pipelines (
     id integer NOT NULL,
     project_id integer,
@@ -19663,6 +19680,8 @@ ALTER TABLE ONLY ci_runner_projects ALTER COLUMN id SET DEFAULT nextval('ci_runn
 
 ALTER TABLE ONLY ci_runners ALTER COLUMN id SET DEFAULT nextval('ci_runners_id_seq'::regclass);
 
+ALTER TABLE ONLY ci_shared_runner_builds ALTER COLUMN id SET DEFAULT nextval('ci_shared_runner_builds_id_seq'::regclass);
+
 ALTER TABLE ONLY ci_sources_pipelines ALTER COLUMN id SET DEFAULT nextval('ci_sources_pipelines_id_seq'::regclass);
 
 ALTER TABLE ONLY ci_sources_projects ALTER COLUMN id SET DEFAULT nextval('ci_sources_projects_id_seq'::regclass);
@@ -20859,6 +20878,9 @@ ALTER TABLE ONLY ci_runner_projects
 
 ALTER TABLE ONLY ci_runners
     ADD CONSTRAINT ci_runners_pkey PRIMARY KEY (id);
+
+ALTER TABLE ONLY ci_shared_runner_builds
+    ADD CONSTRAINT ci_shared_runner_builds_pkey PRIMARY KEY (id);
 
 ALTER TABLE ONLY ci_sources_pipelines
     ADD CONSTRAINT ci_sources_pipelines_pkey PRIMARY KEY (id);
@@ -22842,6 +22864,12 @@ CREATE INDEX index_ci_runners_on_runner_type ON ci_runners USING btree (runner_t
 CREATE INDEX index_ci_runners_on_token ON ci_runners USING btree (token);
 
 CREATE INDEX index_ci_runners_on_token_encrypted ON ci_runners USING btree (token_encrypted);
+
+CREATE UNIQUE INDEX index_ci_shared_runner_builds_on_build_id ON ci_shared_runner_builds USING btree (build_id);
+
+CREATE INDEX index_ci_shared_runner_builds_on_project_id ON ci_shared_runner_builds USING btree (project_id);
+
+CREATE INDEX index_ci_shared_runner_builds_on_runner_id ON ci_shared_runner_builds USING btree (runner_id);
 
 CREATE INDEX index_ci_sources_pipelines_on_pipeline_id ON ci_sources_pipelines USING btree (pipeline_id);
 
@@ -26339,6 +26367,9 @@ ALTER TABLE ONLY onboarding_progresses
 ALTER TABLE ONLY protected_branch_unprotect_access_levels
     ADD CONSTRAINT fk_rails_2d2aba21ef FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE;
 
+ALTER TABLE ONLY ci_shared_runner_builds
+    ADD CONSTRAINT fk_rails_2de6fdddcb FOREIGN KEY (runner_id) REFERENCES ci_runners(id) ON DELETE CASCADE;
+
 ALTER TABLE ONLY ci_freeze_periods
     ADD CONSTRAINT fk_rails_2e02bbd1a6 FOREIGN KEY (project_id) REFERENCES projects(id);
 
@@ -26735,6 +26766,9 @@ ALTER TABLE ONLY plan_limits
 ALTER TABLE ONLY operations_feature_flags_issues
     ADD CONSTRAINT fk_rails_6a8856ca4f FOREIGN KEY (feature_flag_id) REFERENCES operations_feature_flags(id) ON DELETE CASCADE;
 
+ALTER TABLE ONLY ci_shared_runner_builds
+    ADD CONSTRAINT fk_rails_6b0c3012c9 FOREIGN KEY (build_id) REFERENCES ci_builds(id) ON DELETE CASCADE;
+
 ALTER TABLE ONLY prometheus_alerts
     ADD CONSTRAINT fk_rails_6d9b283465 FOREIGN KEY (environment_id) REFERENCES environments(id) ON DELETE CASCADE;
 
@@ -26929,6 +26963,9 @@ ALTER TABLE ONLY alert_management_alert_user_mentions
 
 ALTER TABLE ONLY project_daily_statistics
     ADD CONSTRAINT fk_rails_8e549b272d FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE;
+
+ALTER TABLE ONLY ci_shared_runner_builds
+    ADD CONSTRAINT fk_rails_8f43a1469c FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE;
 
 ALTER TABLE ONLY ci_pipelines_config
     ADD CONSTRAINT fk_rails_906c9a2533 FOREIGN KEY (pipeline_id) REFERENCES ci_pipelines(id) ON DELETE CASCADE;
