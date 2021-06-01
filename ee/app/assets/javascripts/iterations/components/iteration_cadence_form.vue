@@ -76,7 +76,12 @@ export default {
   inject: ['groupPath', 'cadencesListPath'],
   data() {
     return {
-      loadingCadence: false,
+      group: {
+        loading: false,
+        iterationCadences: {
+          nodes: [],
+        },
+      },
       loading: false,
       errorMessage: '',
       title: '',
@@ -94,6 +99,9 @@ export default {
     };
   },
   computed: {
+    loadingCadence() {
+      return this.$apollo.queries.group.loading;
+    },
     cadenceId() {
       return this.$router.currentRoute.params.cadenceId;
     },
@@ -131,42 +139,41 @@ export default {
       return vars;
     },
   },
-  mounted() {
-    if (this.isEdit) {
-      this.loadingCadence = true;
+  apollo: {
+    group: {
+      skip() {
+        return !this.isEdit;
+      },
+      query: readCadence,
+      variables() {
+        return {
+          fullPath: this.groupPath,
+          id: this.cadenceId,
+        };
+      },
+      result({ data: { group, errors } }) {
+        if (errors?.length) {
+          [this.errorMessage] = errors;
+          return;
+        }
 
-      this.$apollo
-        .query({
-          query: readCadence,
-          variables: {
-            fullPath: this.groupPath,
-            id: this.cadenceId,
-          },
-        })
-        .then(({ data: { group, errors } }) => {
-          if (errors?.length) {
-            throw new Error(errors[0]);
-          }
+        const cadence = group?.iterationCadences?.nodes?.[0];
 
-          const cadence = group?.iterationCadences?.nodes?.[0];
+        if (!cadence) {
+          this.errorMessage = s__("Iterations|Couldn't find iteration cadence");
+          return;
+        }
 
-          if (!cadence) {
-            throw new Error(s__("Iterations|Couldn't find iteration cadence"));
-          }
-
-          this.title = cadence.title;
-          this.automatic = cadence.automatic;
-          this.startDate = cadence.startDate;
-          this.durationInWeeks = cadence.durationInWeeks;
-          this.iterationsInAdvance = cadence.iterationsInAdvance;
-        })
-        .catch((err) => {
-          this.errorMessage = err;
-        })
-        .finally(() => {
-          this.loadingCadence = false;
-        });
-    }
+        this.title = cadence.title;
+        this.automatic = cadence.automatic;
+        this.startDate = cadence.startDate;
+        this.durationInWeeks = cadence.durationInWeeks;
+        this.iterationsInAdvance = cadence.iterationsInAdvance;
+      },
+      error(error) {
+        this.errorMessage = error;
+      },
+    },
   },
   methods: {
     validate(field) {

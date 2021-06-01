@@ -231,12 +231,10 @@ describe('Iteration cadence form', () => {
 
   describe('Edit cadence', () => {
     const query = readCadence;
+    const resolverMock = jest.fn().mockResolvedValue(getCadenceSuccess);
 
     beforeEach(() => {
       $router.currentRoute.params.cadenceId = id;
-
-      const resolverMock = jest.fn().mockResolvedValue(getCadenceSuccess);
-      createComponent({ query, resolverMock });
     });
 
     afterEach(() => {
@@ -244,12 +242,14 @@ describe('Iteration cadence form', () => {
     });
 
     it('shows correct title and button text', () => {
+      createComponent({ query, resolverMock });
+
       expect(wrapper.text()).toContain(wrapper.vm.i18n.edit.title);
       expect(wrapper.text()).toContain(wrapper.vm.i18n.edit.save);
     });
 
     it('disables fields while loading', async () => {
-      await nextTick();
+      createComponent({ query, resolverMock });
 
       findAllFields().forEach(({ element }) => {
         expect(element).toBeDisabled();
@@ -263,6 +263,8 @@ describe('Iteration cadence form', () => {
     });
 
     it('fills fields with existing cadence info after loading', async () => {
+      createComponent({ query, resolverMock });
+
       await waitForPromises();
 
       await nextTick();
