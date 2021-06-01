@@ -63,18 +63,6 @@ RSpec.describe GroupsHelper do
 
       expect(helper.open_epics_count(group)).to eq('2.5k')
     end
-
-    context 'when cached_sidebar_open_epics_count feature flag is disabled' do
-      before do
-        stub_feature_flags(cached_sidebar_open_epics_count: false)
-      end
-
-      it 'returns not cached epics count' do
-        allow(helper).to receive(:group_epics_count).and_return(2500)
-
-        expect(helper.open_epics_count(group)).to eq('2,500')
-      end
-    end
   end
 
   describe '#cached_issuables_count' do
