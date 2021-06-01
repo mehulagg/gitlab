@@ -131,7 +131,10 @@ list.
 
    ```shell
    sudo gitlab-ctl reconfigure
-   sudo gitlab-ctl restart # needed for initial enabling or disabling but not password changes, see https://gitlab.com/gitlab-org/gitlab-foss/-/issues/23560#note_61966788
+
+   # Needed when enabling or disabling for the first time but not for password changes.
+   # See https://gitlab.com/gitlab-org/gitlab-foss/-/issues/23560#note_61966788
+   sudo gitlab-ctl restart
    ```
 
 1. Verify that everything is configured correctly:
