@@ -30,7 +30,6 @@ to protect your organization, download our
 ["A Seismic Shift in Application Security"](https://about.gitlab.com/resources/whitepaper-seismic-shift-application-security/)
 whitepaper.
 
-
 ## DAST application analysis
 
 DAST can analyze applications in two ways:
@@ -275,71 +274,6 @@ GitLab has released a new browser-based crawler, an add-on to DAST that uses a b
 The browser-based crawler crawls websites by browsing web pages as a user would. This approach works well with web applications that make heavy use of JavaScript, such as Single Page Applications.
 
 For more details, including setup instructions, see [DAST browser-based crawler](browser_based.md).
-
-
-### Hide sensitive information
-
-> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/36332) in GitLab 13.1.
-
-HTTP request and response headers may contain sensitive information, including cookies and
-authorization credentials. By default, the following headers are masked:
-
-- `Authorization`.
-- `Proxy-Authorization`.
-- `Set-Cookie` (values only).
-- `Cookie` (values only).
-
-Using the [`DAST_MASK_HTTP_HEADERS` CI/CD variable](#available-cicd-variables), you can list the
-headers whose values you want masked. For details on how to mask headers, see
-[Customizing the DAST settings](#customizing-the-dast-settings).
-
-### Authentication
-
-It's also possible to authenticate the user before performing the DAST checks.
-
-NOTE:
-We highly recommended that you configure the scanner to authenticate to the application,
-otherwise it cannot check most of the application for security risks, as most
-of your application is likely not accessible without authentication. It is also recommended
-that you periodically confirm the scanner's authentication is still working as this tends to break over
-time due to authentication changes to the application.
-
-Create masked CI/CD variables to pass the credentials that DAST uses.
-To create masked variables for the username and password, see [Create a custom variable in the UI](../../../ci/variables/README.md#custom-cicd-variables).
-Note that the key of the username variable must be `DAST_USERNAME`
-and the key of the password variable must be `DAST_PASSWORD`.
-
-After DAST has authenticated with the application, all cookies are collected from the web browser.
-For each cookie a matching session token is created for use by ZAP. This ensures ZAP is recognized
-by the application as correctly authenticated.
-
-Other variables that are related to authenticated scans are:
-
-```yaml
-include:
-  - template: DAST.gitlab-ci.yml
-
-variables:
-  DAST_WEBSITE: https://example.com
-  DAST_AUTH_URL: https://example.com/sign-in
-  DAST_USERNAME_FIELD: session[user]  # the name of username field at the sign-in HTML form
-  DAST_PASSWORD_FIELD: session[password]  # the name of password field at the sign-in HTML form
-  DAST_SUBMIT_FIELD: login # the `id` or `name` of the element that when clicked will submit the login form or the password form of a multi-page login process
-  DAST_FIRST_SUBMIT_FIELD: next # the `id` or `name` of the element that when clicked will submit the username form of a multi-page login process
-  DAST_EXCLUDE_URLS: http://example.com/sign-out,http://example.com/sign-out-2  # optional, URLs to skip during the authenticated scan; comma-separated, no spaces in between
-  DAST_AUTH_VERIFICATION_URL: http://example.com/loggedin_page  # optional, a URL only accessible to logged in users that DAST can use to confirm successful authentication
-```
-
-The results are saved as a
-[DAST report artifact](../../../ci/yaml/README.md#artifactsreportsdast)
-that you can later download and analyze.
-Due to implementation limitations, we always take the latest DAST artifact available.
-
-WARNING:
-**NEVER** run an authenticated scan against a production server. When an authenticated
-scan is run, it may perform *any* function that the authenticated user can. This
-includes actions like modifying and deleting data, submitting forms, and following links.
-Only run an authenticated scan against a test server.
 
 ### Full scan
 
@@ -712,6 +646,65 @@ DAST scan with both configured exits with an error.
 By default, several rules are disabled because they either take a long time to
 run or frequently generate false positives. The complete list of disabled rules
 can be found in [exclude_rules.yml](https://gitlab.com/gitlab-org/security-products/dast/-/blob/master/src/config/exclude_rules.yml).
+
+### Hide sensitive information
+
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/36332) in GitLab 13.1.
+
+HTTP request and response headers may contain sensitive information, including cookies and
+authorization credentials. By default, the following headers are masked:
+
+- `Authorization`.
+- `Proxy-Authorization`.
+- `Set-Cookie` (values only).
+- `Cookie` (values only).
+
+Using the [`DAST_MASK_HTTP_HEADERS` CI/CD variable](#available-cicd-variables), you can list the
+headers whose values you want masked. For details on how to mask headers, see
+[Customizing the DAST settings](#customizing-the-dast-settings).
+
+### Authentication
+
+It's also possible to authenticate the user before performing the DAST checks.
+
+NOTE:
+We highly recommended that you configure the scanner to authenticate to the application,
+otherwise it cannot check most of the application for security risks, as most
+of your application is likely not accessible without authentication. It is also recommended
+that you periodically confirm the scanner's authentication is still working as this tends to break over
+time due to authentication changes to the application.
+
+Create masked CI/CD variables to pass the credentials that DAST uses.
+To create masked variables for the username and password, see [Create a custom variable in the UI](../../../ci/variables/README.md#custom-cicd-variables).
+Note that the key of the username variable must be `DAST_USERNAME`
+and the key of the password variable must be `DAST_PASSWORD`.
+
+After DAST has authenticated with the application, all cookies are collected from the web browser.
+For each cookie a matching session token is created for use by ZAP. This ensures ZAP is recognized
+by the application as correctly authenticated.
+
+Other variables that are related to authenticated scans are:
+
+```yaml
+include:
+  - template: DAST.gitlab-ci.yml
+
+variables:
+  DAST_WEBSITE: https://example.com
+  DAST_AUTH_URL: https://example.com/sign-in
+  DAST_USERNAME_FIELD: session[user]  # the name of username field at the sign-in HTML form
+  DAST_PASSWORD_FIELD: session[password]  # the name of password field at the sign-in HTML form
+  DAST_SUBMIT_FIELD: login # the `id` or `name` of the element that when clicked will submit the login form or the password form of a multi-page login process
+  DAST_FIRST_SUBMIT_FIELD: next # the `id` or `name` of the element that when clicked will submit the username form of a multi-page login process
+  DAST_EXCLUDE_URLS: http://example.com/sign-out,http://example.com/sign-out-2  # optional, URLs to skip during the authenticated scan; comma-separated, no spaces in between
+  DAST_AUTH_VERIFICATION_URL: http://example.com/loggedin_page  # optional, a URL only accessible to logged in users that DAST can use to confirm successful authentication
+```
+
+WARNING:
+**NEVER** run an authenticated scan against a production server. When an authenticated
+scan is run, it may perform *any* function that the authenticated user can. This
+includes actions like modifying and deleting data, submitting forms, and following links.
+Only run an authenticated scan against a test server.
 
 ### Available CI/CD variables
 
