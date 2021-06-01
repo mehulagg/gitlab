@@ -73,7 +73,7 @@ NOTE:
 
 ### Adding and removing clusters
 
-The recommended way to connect a Kubernetes cluster with GitLab is using the GitLab Kubernetes Agent. You can read more on [how to set up a GitLab to Kubernetes connection using the GitLab Kubernetes Agent](agent/).
+The recommended way to connect a Kubernetes cluster with GitLab is using the GitLab Kubernetes Agent. You can read more on [how to set up a GitLab to Kubernetes connection using the GitLab Kubernetes Agent](../../clusters/agent/).
 
 For connecting to a cluster with certificates, see [Adding and removing Kubernetes clusters](add_remove_clusters.md) on how
 to:
