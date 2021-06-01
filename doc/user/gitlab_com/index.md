@@ -612,6 +612,12 @@ dropped and users get
 
 To help avoid abuse, project and group imports, exports, and export downloads are rate limited. See [Project import/export rate limits](../../user/project/settings/import_export.md#rate-limits) and [Group import/export rate limits](../../user/group/settings/import_export.md#rate-limits) for details.
 
+### Webhook calls **(FREE ONLY)**
+
+For Free users on GitLab.com, project and group webhooks are limited to **120** calls per minute, for each configured webhook.
+
+See [Webhook calls](../../administration/instance_limits.md#webhook-calls) for administrator documentation.
+
 ### Non-configurable limits
 
 See [non-configurable limits](../../security/rate_limits.md#non-configurable-limits) for information on
