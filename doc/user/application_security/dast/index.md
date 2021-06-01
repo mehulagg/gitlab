@@ -16,17 +16,6 @@ Dynamic Application Security Testing (DAST) examines applications for
 vulnerabilities like these in deployed environments. DAST uses the open source
 tool [OWASP Zed Attack Proxy](https://www.zaproxy.org/) for analysis.
 
-NOTE:
-To learn how four of the top six attacks were application-based and how
-to protect your organization, download our
-["A Seismic Shift in Application Security"](https://about.gitlab.com/resources/whitepaper-seismic-shift-application-security/)
-whitepaper.
-
-You can use DAST to examine your web applications:
-
-- When initiated by a merge request, running as CI/CD pipeline job.
-- On demand, outside the CI/CD pipeline.
-
 After DAST creates its report, GitLab evaluates it for discovered
 vulnerabilities between the source and target branches. Relevant
 findings are noted in the merge request.
@@ -35,21 +24,156 @@ The comparison logic uses only the latest pipeline executed for the target
 branch's base commit. Running the pipeline on other commits has no effect on
 the merge request.
 
-## Prerequisite
+NOTE:
+To learn how four of the top six attacks were application-based and how
+to protect your organization, download our
+["A Seismic Shift in Application Security"](https://about.gitlab.com/resources/whitepaper-seismic-shift-application-security/)
+whitepaper.
 
-To use DAST, ensure you're using GitLab Runner with the
+
+## DAST application analysis
+
+DAST can analyze applications in two ways:
+
+- Passive scan only (DAST default). DAST executes
+  [ZAP's Baseline Scan](https://www.zaproxy.org/docs/docker/baseline-scan/) and doesn't
+  actively attack your application.
+- Passive and active scan. DAST can be [configured](#full-scan) to also perform an active scan
+  to attack your application and produce a more extensive security report. It can be very
+  useful when combined with [Review Apps](../../../ci/review_apps/index.md).
+
+Note that a pipeline may consist of multiple jobs, including SAST and DAST scanning. If any job
+fails to finish for any reason, the security dashboard doesn't show DAST scanner output. For
+example, if the DAST job finishes but the SAST job fails, the security dashboard doesn't show DAST
+results. On failure, the analyzer outputs an
+[exit code](../../../development/integrations/secure.md#exit-code).
+
+### DAST job order
+
+When using the `DAST.gitlab-ci.yml` template, the `dast` job is run last as shown in
+the example below. To ensure DAST is scanning the latest code, your CI pipeline
+should deploy changes to the web server in one of the jobs preceding the `dast` job.
+
+```yaml
+stages:
+  - build
+  - test
+  - deploy
+  - dast
+```
+
+Be aware that if your pipeline is configured to deploy to the same webserver in
+each run, running a pipeline while another is still running could cause a race condition
+where one pipeline overwrites the code from another pipeline. The site to be scanned
+should be excluded from changes for the duration of a DAST scan.
+The only changes to the site should be from the DAST scanner. Be aware that any
+changes that users, scheduled tasks, database changes, code changes, other pipelines, or other scanners make to
+the site during a scan could lead to inaccurate results.
+
+## Prerequisites
+
+- [GitLab Runner](https://docs.gitlab.com/ee/ci/runners/README.html), with the
 [`docker` executor](https://docs.gitlab.com/runner/executors/docker.html).
+- Target application deployed. For more details, see [Deployment options](#deployment-options).
 
-## Enable DAST
+### Deployment options
 
-To enable DAST, either:
+Depending on the complexity of the target application, there are a few options as to how to deploy and configure
+the DAST template. A set of example applications with their configurations have been made available in our
+[DAST demonstrations](https://gitlab.com/gitlab-org/security-products/demos/dast/) project.
+
+#### Review Apps
+
+Review Apps are the most involved method of deploying your DAST target application. To assist in the process,
+we created a Review App deployment using Google Kubernetes Engine (GKE). This example can be found in our
+[Review Apps - GKE](https://gitlab.com/gitlab-org/security-products/demos/dast/review-app-gke) project along with detailed
+instructions in the [README.md](https://gitlab.com/gitlab-org/security-products/demos/dast/review-app-gke/-/blob/master/README.md)
+on how to configure Review Apps for DAST.
+
+#### Docker Services
+
+If your application utilizes Docker containers you have another option for deploying and scanning with DAST.
+After your Docker build job completes and your image is added to your container registry, you can utilize the image as a
+[service](../../../ci/services/index.md).
+
+By using service definitions in your `gitlab-ci.yml`, you can scan services with the DAST analyzer.
+
+```yaml
+stages:
+  - build
+  - dast
+
+include:
+  - template: DAST.gitlab-ci.yml
+
+# Deploys the container to the GitLab container registry
+deploy:
+  services:
+  - name: docker:dind
+    alias: dind
+  image: docker:19.03.5
+  stage: build
+  script:
+    - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
+    - docker pull $CI_REGISTRY_IMAGE:latest || true
+    - docker build --tag $CI_REGISTRY_IMAGE:$CI_COMMIT_SHA --tag $CI_REGISTRY_IMAGE:latest .
+    - docker push $CI_REGISTRY_IMAGE:$CI_COMMIT_SHA
+    - docker push $CI_REGISTRY_IMAGE:latest
+
+services: # use services to link your app container to the dast job
+  - name: $CI_REGISTRY_IMAGE:$CI_COMMIT_SHA
+    alias: yourapp
+
+variables:
+  DAST_FULL_SCAN_ENABLED: "true" # do a full scan
+  DAST_ZAP_USE_AJAX_SPIDER: "true" # use the ajax spider
+```
+
+Most applications depend on multiple services such as databases or caching services. By default, services defined in the services fields cannot communicate
+with each another. To allow communication between services, enable the `FF_NETWORK_PER_BUILD` [feature flag](https://docs.gitlab.com/runner/configuration/feature-flags.html#available-feature-flags).
+
+```yaml
+variables:
+  FF_NETWORK_PER_BUILD: "true" # enable network per build so all services can communicate on the same network
+
+services: # use services to link the container to the dast job
+  - name: mongo:latest
+    alias: mongo
+  - name: $CI_REGISTRY_IMAGE:$CI_COMMIT_SHA
+    alias: yourapp
+```
+
+## DAST run options
+
+You can use DAST to examine your web application:
+
+- Automatically, initiated by a merge request.
+- Manually, initiated on demand.
+
+An automatic DAST scan is initiated by a merge request. The DAST configuration is defined in the
+`.gitlab-ci.yml` CI/CD file.
+
+A manual, or on-demand, DAST scan is initiated outside the DevOps life cycle. In the GitLab user
+interface you define what's to be scanned, and how, then initiate the scan.
+
+The following table describes some of the differences:
+
+| Automatic scan                                     | Manual scan                                    |
+|:---------------------------------------------------|:-----------------------------------------------|
+| CI/CD variables are sourced from `.gitlab-ci.yml`. | CI/CD variables are sourced from the database. |
+| All CI/CD variables available.                     | Subset of CI/CD variables available.           |
+| `DAST.gitlab-ci.yml` template.                     | `DAST-On-Demand-Scan.gitlab-ci.yml` template.  |
+
+### Enable automatic DAST run
+
+To enable DAST to run automatically, either:
 
 - Enable [Auto DAST](../../../topics/autodevops/stages.md#auto-dast) (provided
   by [Auto DevOps](../../../topics/autodevops/index.md)).
 - Manually [include the DAST template](#include-the-dast-template) in your existing
   `.gitlab-ci.yml` file.
 
-### Include the DAST template
+#### Include the DAST template
 
 If you want to manually add DAST to your application, the DAST job is defined
 in a CI/CD template file. Updates to the template are provided with GitLab
@@ -152,111 +276,6 @@ The browser-based crawler crawls websites by browsing web pages as a user would.
 
 For more details, including setup instructions, see [DAST browser-based crawler](browser_based.md).
 
-## Deployment options
-
-Depending on the complexity of the target application, there are a few options as to how to deploy and configure
-the DAST template. A set of example applications with their configurations have been made available in our
-[DAST demonstrations](https://gitlab.com/gitlab-org/security-products/demos/dast/) project.
-
-### Review Apps
-
-Review Apps are the most involved method of deploying your DAST target application. To assist in the process,
-we created a Review App deployment using Google Kubernetes Engine (GKE). This example can be found in our
-[Review Apps - GKE](https://gitlab.com/gitlab-org/security-products/demos/dast/review-app-gke) project along with detailed
-instructions in the [README.md](https://gitlab.com/gitlab-org/security-products/demos/dast/review-app-gke/-/blob/master/README.md)
-on how to configure Review Apps for DAST.
-
-### Docker Services
-
-If your application utilizes Docker containers you have another option for deploying and scanning with DAST.
-After your Docker build job completes and your image is added to your container registry, you can utilize the image as a
-[service](../../../ci/services/index.md).
-
-By using service definitions in your `gitlab-ci.yml`, you can scan services with the DAST analyzer.
-
-```yaml
-stages:
-  - build
-  - dast
-
-include:
-  - template: DAST.gitlab-ci.yml
-
-# Deploys the container to the GitLab container registry
-deploy:
-  services:
-  - name: docker:dind
-    alias: dind
-  image: docker:19.03.5
-  stage: build
-  script:
-    - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
-    - docker pull $CI_REGISTRY_IMAGE:latest || true
-    - docker build --tag $CI_REGISTRY_IMAGE:$CI_COMMIT_SHA --tag $CI_REGISTRY_IMAGE:latest .
-    - docker push $CI_REGISTRY_IMAGE:$CI_COMMIT_SHA
-    - docker push $CI_REGISTRY_IMAGE:latest
-
-services: # use services to link your app container to the dast job
-  - name: $CI_REGISTRY_IMAGE:$CI_COMMIT_SHA
-    alias: yourapp
-
-variables:
-  DAST_FULL_SCAN_ENABLED: "true" # do a full scan
-  DAST_ZAP_USE_AJAX_SPIDER: "true" # use the ajax spider
-```
-
-Most applications depend on multiple services such as databases or caching services. By default, services defined in the services fields cannot communicate
-with each another. To allow communication between services, enable the `FF_NETWORK_PER_BUILD` [feature flag](https://docs.gitlab.com/runner/configuration/feature-flags.html#available-feature-flags).
-
-```yaml
-variables:
-  FF_NETWORK_PER_BUILD: "true" # enable network per build so all services can communicate on the same network
-
-services: # use services to link the container to the dast job
-  - name: mongo:latest
-    alias: mongo
-  - name: $CI_REGISTRY_IMAGE:$CI_COMMIT_SHA
-    alias: yourapp
-```
-
-### DAST application analysis
-
-DAST can analyze applications in two ways:
-
-- Passive scan only (DAST default). DAST executes
-  [ZAP's Baseline Scan](https://www.zaproxy.org/docs/docker/baseline-scan/) and doesn't
-  actively attack your application.
-- Passive and active scan. DAST can be [configured](#full-scan) to also perform an active scan
-  to attack your application and produce a more extensive security report. It can be very
-  useful when combined with [Review Apps](../../../ci/review_apps/index.md).
-
-Note that a pipeline may consist of multiple jobs, including SAST and DAST scanning. If any job
-fails to finish for any reason, the security dashboard doesn't show DAST scanner output. For
-example, if the DAST job finishes but the SAST job fails, the security dashboard doesn't show DAST
-results. On failure, the analyzer outputs an
-[exit code](../../../development/integrations/secure.md#exit-code).
-
-#### DAST job order
-
-When using the `DAST.gitlab-ci.yml` template, the `dast` job is run last as shown in
-the example below. To ensure DAST is scanning the latest code, your CI pipeline
-should deploy changes to the web server in one of the jobs preceding the `dast` job.
-
-```yaml
-stages:
-  - build
-  - test
-  - deploy
-  - dast
-```
-
-Be aware that if your pipeline is configured to deploy to the same webserver in
-each run, running a pipeline while another is still running could cause a race condition
-where one pipeline overwrites the code from another pipeline. The site to be scanned
-should be excluded from changes for the duration of a DAST scan.
-The only changes to the site should be from the DAST scanner. Be aware that any
-changes that users, scheduled tasks, database changes, code changes, other pipelines, or other scanners make to
-the site during a scan could lead to inaccurate results.
 
 ### Hide sensitive information
 
