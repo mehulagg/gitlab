@@ -18520,15 +18520,6 @@ msgstr ""
 msgid "Iterations|Create cadence"
 msgstr ""
 
-msgid "Iterations|Delete cadence"
-msgstr ""
-
-msgid "Iterations|Delete iteration cadence"
-msgstr ""
-
-msgid "Iterations|Deleting an iteration cadence also deletes the iterations"
-msgstr ""
-
 msgid "Iterations|Duration"
 msgstr ""
 
