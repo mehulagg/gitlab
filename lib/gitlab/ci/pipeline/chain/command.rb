@@ -51,7 +51,7 @@ module Gitlab
 
           def sha
             strong_memoize(:sha) do
-              break package_push.sha if package_push
+              next package_push.sha if package_push
 
               project.commit(origin_sha || origin_ref).try(:id)
             end
