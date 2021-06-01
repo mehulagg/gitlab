@@ -1307,7 +1307,7 @@ See below for additional information about each installation method.
 
 #### Helm Charts installs
 
-For Helm Chart installs, you can override the [`image.tag`](https://docs.gitlab.com/charts/charts/registry/#configuration) configuration parameter with `v2.13.1-gitlab` and restart. After performing the [images upgrade](#image-upgrade)) steps, you should revert the `image.tag` parameter to the previous value. No other registry configuration changes are required.
+For Helm Chart installs, you can override the [`image.tag`](https://docs.gitlab.com/charts/charts/registry/#configuration) configuration parameter with `v2.13.1-gitlab` and restart. After performing the [images upgrade](#images-upgrade)) steps, you should revert the `image.tag` parameter to the previous value. No other registry configuration changes are required.
 
 #### Omnibus installs
 
@@ -1319,11 +1319,11 @@ For Omnibus installs, you will have to temporarily replace the registry binary t
 
 You can then grab the `registry` binary from within this image, located at `/bin/registry`, and use it to replace the one embedded in the Omnibus install, located at `/opt/gitlab/embedded/bin/registry`.
 
-Please make sure to start by backing up the original registry binary embedded in the Omnibus install, and restore it after performing the [images upgrade](#image-upgrade)) steps. You should [stop](https://docs.gitlab.com/omnibus/maintenance/#starting-and-stopping) the registry service before replacing its binary and start it right after. No registry configuration changes are required.
+Please make sure to start by backing up the original registry binary embedded in the Omnibus install, and restore it after performing the [images upgrade](#images-upgrade)) steps. You should [stop](https://docs.gitlab.com/omnibus/maintenance/#starting-and-stopping) the registry service before replacing its binary and start it right after. No registry configuration changes are required.
  
 #### Source installs
 
-For Source installs, you should locate your `registry` binary and temporarily replace it with the one obtained from the `v3.0.0-gitlab`, as explained for [Omnibus installs](#omnibus-installs). Please make sure to start by backing up the original registry binary and restore it after performing the [images upgrade](#image-upgrade)) steps.
+For Source installs, you should locate your `registry` binary and temporarily replace it with the one obtained from the `v3.0.0-gitlab`, as explained for [Omnibus installs](#omnibus-installs). Please make sure to start by backing up the original registry binary and restore it after performing the [images upgrade](#images-upgrade)) steps.
 
 #### Images upgrade
 
