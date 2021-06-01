@@ -325,7 +325,7 @@ export default {
           </gl-sprintf>
         </div>
         <div v-else>• {{ itemsTooltipLabel }}</div>
-        <div v-if="weightFeatureAvailable && !$apollo.loading">
+        <div v-if="weightFeatureAvailable && !$apollo.queries.boardList.loading">
           •
           <gl-sprintf :message="__('%{totalWeight} total weight')">
             <template #totalWeight>{{ boardList.totalWeight }}</template>
@@ -347,13 +347,15 @@ export default {
           <span ref="itemCount" class="issue-count-badge-count">
             <gl-icon class="gl-mr-2" :name="countIcon" />
             <item-count
-              v-if="!$apollo.loading"
+              v-if="!$apollo.queries.boardList.loading"
               :items-size="boardList.issuesCount"
               :max-issue-count="list.maxIssueCount"
             />
           </span>
           <!-- EE start -->
-          <template v-if="weightFeatureAvailable && !isEpicBoard && !$apollo.loading">
+          <template
+            v-if="weightFeatureAvailable && !isEpicBoard && !$apollo.queries.boardList.loading"
+          >
             <gl-tooltip :target="() => $refs.weightTooltip" :title="weightCountToolTip" />
             <span ref="weightTooltip" class="gl-display-inline-flex gl-ml-3">
               <gl-icon class="gl-mr-2" name="weight" />
