@@ -1170,7 +1170,7 @@ you can deploy one.
 
 The deployed runner is set as **privileged**. Root access to the underlying
 server is required to build Docker images, so it's the default. Be sure to read
-the [security implications](../project/clusters/index.md#security-implications)
+the [security implications](../project/clusters/add_remove_clusters.md#security-implications)
 before deploying one.
 
 The [`runner/gitlab-runner`](https://gitlab.com/gitlab-org/charts/gitlab-runner)
@@ -1240,7 +1240,7 @@ determine the endpoint of your Ingress or Knative application, you can
 
 #### Determining the external endpoint manually
 
-See the [Base domain section](../project/clusters/index.md#base-domain) for a
+See the [Base domain section](../project/clusters/add_remove_clusters.md#base-domain) for a
 guide on how to determine the external endpoint manually.
 
 #### Using a static IP

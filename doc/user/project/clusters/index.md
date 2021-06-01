@@ -26,8 +26,8 @@ The following table summarizes the supported GitLab features with the integratio
 Feature | GitLab Kubernetes Agent | Certificate-based connection
 --------|-------------------------|------------------------------
 Auto DevOps | Partial [support planned](https://gitlab.com/groups/gitlab-org/-/epics/5528) | [Supported](#auto-devops)
-Pull based deployments | [Supported](agent/) | Not supported
-Network security alerts | [Supported](agent/#kubernetes-network-security-alerts) | Not supported
+Pull based deployments | [Supported](../../clusters/agent/) | Not supported
+Network security alerts | [Supported](../../clusters/agent/#kubernetes-network-security-alerts) | Not supported
 Review apps | [Planned](https://gitlab.com/gitlab-org/gitlab/-/issues/273656) | [Supported](../../../ci/review_apps/index.md)
 Push based deployments | [Planned](https://gitlab.com/groups/gitlab-org/-/epics/5528) | [Supported](../../../ci/pipelines/index.md)
 Group level clusters | [Planned](https://gitlab.com/groups/gitlab-org/-/epics/5784) | [Supported](../../group/clusters/index.md)
@@ -145,7 +145,7 @@ GitLab CI/CD build environment to deployment jobs. Deployment jobs have
 | `KUBE_CA_PEM_FILE`         | Path to a file containing PEM data. Only present if a custom CA bundle was specified. |
 | `KUBE_CA_PEM`              | (**deprecated**) Raw PEM data. Only if a custom CA bundle was specified. |
 | `KUBECONFIG`               | Path to a file containing `kubeconfig` for this deployment. CA bundle would be embedded if specified. This configuration also embeds the same token defined in `KUBE_TOKEN` so you likely need only this variable. This variable name is also automatically picked up by `kubectl` so you don't need to reference it explicitly if using `kubectl`. |
-| `KUBE_INGRESS_BASE_DOMAIN` | From GitLab 11.8, this variable can be used to set a domain per cluster. See [cluster domains](#base-domain) for more information. |
+| `KUBE_INGRESS_BASE_DOMAIN` | From GitLab 11.8, this variable can be used to set a domain per cluster. See [cluster domains](add_remove_clusters.md#base-domain) for more information. |
 
 ### Custom namespace
 
@@ -172,7 +172,7 @@ You can customize the deployment namespace in a few ways:
   in `.gitlab-ci.yml`.
 
 When you customize the namespace, existing environments remain linked to their current
-namespaces until you [clear the cluster cache](#clearing-the-cluster-cache).
+namespaces until you [clear the cluster cache](add_remove_clusters.md#clearing-the-cluster-cache).
 
 #### Protecting credentials
 

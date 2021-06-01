@@ -160,7 +160,7 @@ To create and add a new Kubernetes cluster to your project, group, or instance:
 1. Click **Authenticate with AWS**.
 1. Choose your cluster's settings:
    - **Kubernetes cluster name** - The name you wish to give the cluster.
-   - **Environment scope** - The [associated environment](index.md#setting-the-environment-scope) to this cluster.
+   - **Environment scope** - The [associated environment](add_remove_clusters.md#setting-the-environment-scope) to this cluster.
    - **Kubernetes version** - The [Kubernetes version](index.md#supported-cluster-versions) to use.
    - **Service role** - Select the **EKS IAM role** you created earlier to allow Amazon EKS
      and the Kubernetes control plane to manage AWS resources on your behalf.
@@ -181,7 +181,7 @@ To create and add a new Kubernetes cluster to your project, group, or instance:
    - **Instance type** - The [instance type](https://aws.amazon.com/ec2/instance-types/) of your worker nodes.
    - **Node count** - The number of worker nodes.
    - **GitLab-managed cluster** - Leave this checked if you want GitLab to manage namespaces and service accounts for this cluster.
-     See the [Managed clusters section](index.md#gitlab-managed-clusters) for more information.
+     See the [Managed clusters section](add_remove_clusters.md#gitlab-managed-clusters) for more information.
 1. Finally, click the **Create Kubernetes cluster** button.
 
 After about 10 minutes, your cluster is ready to go. You can now proceed

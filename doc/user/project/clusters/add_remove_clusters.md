@@ -76,7 +76,7 @@ The resources created by GitLab differ depending on the type of cluster.
 Note the following about access controls:
 
 - Environment-specific resources are only created if your cluster is
-  [managed by GitLab](index.md#gitlab-managed-clusters).
+  [managed by GitLab](#gitlab-managed-clusters).
 - If your cluster was created before GitLab 12.2, it uses a single namespace for all project
   environments.
 
@@ -180,7 +180,7 @@ To add a Kubernetes cluster to your project, group, or instance:
 1. Click the **Add existing cluster** tab and fill in the details:
    1. **Kubernetes cluster name** (required) - The name you wish to give the cluster.
    1. **Environment scope** (required) - The
-      [associated environment](index.md#setting-the-environment-scope) to this cluster.
+      [associated environment](#setting-the-environment-scope) to this cluster.
    1. **API URL** (required) -
       It's the URL that GitLab uses to access the Kubernetes API. Kubernetes
       exposes several APIs, we want the "base" URL that is common to all of them.
@@ -333,7 +333,7 @@ integration to work properly.
 WARNING:
 Disabling RBAC means that any application running in the cluster,
 or user who can authenticate to the cluster, has full API access. This is a
-[security concern](index.md#security-implications), and may not be desirable.
+[security concern](#security-implications), and may not be desirable.
 
 To effectively disable RBAC, global permissions can be applied granting full access:
 
@@ -373,14 +373,14 @@ details about the created resources.
 
 If you choose to manage your own cluster, project-specific resources aren't created
 automatically. If you are using [Auto DevOps](../../../topics/autodevops/index.md), you must
-explicitly provide the `KUBE_NAMESPACE` [deployment variable](#deployment-variables)
+explicitly provide the `KUBE_NAMESPACE` [deployment variable](index.md#deployment-variables)
 for your deployment jobs to use. Otherwise, a namespace is created for you.
 
 #### Important notes
 
 Note the following with GitLab and clusters:
 
-- If you [install applications](#installing-applications) on your cluster, GitLab will
+- If you [install applications](index.md#installing-applications) on your cluster, GitLab will
   create the resources required to run these even if you have chosen to manage your own
   cluster.
 - Be aware that manually managing resources that have been created by GitLab, like
