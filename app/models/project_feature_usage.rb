@@ -25,7 +25,7 @@ class ProjectFeatureUsage < ApplicationRecord
 
       # The feature usage is used only once later to query the feature usage in a
       # long date range. Therefore, we just need to update the timestamp once per
-      # eay
+      # day
       break if persisted? && updated_today?(integration_field)
 
       persist_jira_dvcs_usage(integration_field)
