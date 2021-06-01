@@ -8,9 +8,11 @@ RSpec.describe 'Admin updates settings' do
   include UsageDataHelpers
 
   let(:admin) { create(:admin) }
+  let(:dot_com?) { false }
 
   context 'application setting :admin_mode is enabled', :request_store do
     before do
+      allow(Gitlab).to receive(:com?).and_return(dot_com?)
       stub_env('IN_MEMORY_APPLICATION_SETTINGS', 'false')
       sign_in(admin)
       gitlab_enable_admin_mode_sign_in(admin)
@@ -125,6 +127,33 @@ RSpec.describe 'Admin updates settings' do
 
         expect(user_internal_regex).not_to be_readonly
         expect(user_internal_regex['placeholder']).to eq 'Regex pattern'
+      end
+
+      context 'Dormant users' do
+        context 'when Gitlab.com' do
+          let(:dot_com?) { true }
+
+          it 'doesn not expose the setting' do
+            expect(page).to have_no_selector('#application_setting_deactivate_dormant_users')
+          end
+        end
+
+        context 'when not Gitlab.com' do
+          let(:dot_com?) { false }
+
+          it 'change Dormant users' do
+            expect(find('#application_setting_deactivate_dormant_users')).not_to be_checked
+
+            page.within('.as-account-limit') do
+              check 'application_setting_deactivate_dormant_users'
+              click_button 'Save changes'
+            end
+
+            expect(current_settings.deactivate_dormant_users).to be_truthy
+            expect(find('#application_setting_deactivate_dormant_users')).to be_checked
+            expect(page).to have_content "Application settings saved successfully"
+          end
+        end
       end
 
       context 'Change Sign-up restrictions' do
