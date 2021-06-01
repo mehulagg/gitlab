@@ -10,6 +10,7 @@ import {
   GlSprintf,
 } from '@gitlab/ui';
 import { mapState, mapActions } from 'vuex';
+import { slugifyWithUnderscore } from '~/lib/utils/text_utility';
 import { sprintf, __, s__ } from '~/locale';
 import { generateInitialStageData } from './create_value_stream_form/utils';
 import ValueStreamForm from './value_stream_form.vue';
@@ -113,6 +114,9 @@ export default {
         stages: generateInitialStageData(this.defaultStageConfig, this.selectedValueStreamStages),
       };
     },
+    slugify(valueStreamTitle) {
+      return slugifyWithUnderscore(valueStreamTitle);
+    },
   },
   i18n,
 };
@@ -123,6 +127,8 @@ export default {
       v-if="isCustomValueStream"
       v-gl-modal-directive="'value-stream-form-modal'"
       data-testid="edit-value-stream"
+      data-track-action="click_button"
+      data-track-label="edit_value_stream_form_open"
       @click="onEdit"
       >{{ $options.i18n.EDIT_VALUE_STREAM }}</gl-button
     >
@@ -137,6 +143,8 @@ export default {
         :key="id"
         :is-check-item="true"
         :is-checked="isSelected(id)"
+        data-track-action="click_dropdown"
+        :data-track-label="slugify(streamName)"
         @click="onSelect(id)"
         >{{ streamName }}</gl-dropdown-item
       >
@@ -162,6 +170,8 @@ export default {
       v-else
       v-gl-modal-directive="'value-stream-form-modal'"
       data-testid="create-value-stream-button"
+      data-track-action="click_button"
+      data-track-label="create_value_stream_form_open"
       @click="onCreate"
       >{{ $options.i18n.CREATE_VALUE_STREAM }}</gl-button
     >
@@ -182,6 +192,8 @@ export default {
         attributes: [{ variant: 'danger' }, { loading: isDeleting }],
       }"
       :action-cancel="{ text: $options.i18n.CANCEL }"
+      data-track-action="click_button"
+      data-track-label="delete_value_stream_form_open"
       @primary.prevent="onDelete"
     >
       <gl-alert v-if="deleteValueStreamError" variant="danger">{{
