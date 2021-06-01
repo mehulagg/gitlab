@@ -303,7 +303,7 @@ To add a Kubernetes cluster to your project, group, or instance:
       to grant access.
 
    1. **GitLab-managed cluster** - Leave this checked if you want GitLab to manage namespaces and service accounts for this cluster.
-      See the [Managed clusters section](index.md#gitlab-managed-clusters) for more information.
+      See the [Managed clusters section](#gitlab-managed-clusters) for more information.
    1. **Project namespace** (optional) - You don't have to fill it in; by leaving
       it blank, GitLab creates one for you. Also:
       - Each project should have a unique namespace.
@@ -407,14 +407,14 @@ To clear the cache:
 > [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/24580) in GitLab 11.8.
 
 You do not need to specify a base domain on cluster settings when using GitLab Serverless. The domain in that case
-is specified as part of the Knative installation. See [Installing Applications](#installing-applications).
+is specified as part of the Knative installation. See [Installing Applications](index.md#installing-applications).
 
 Specifying a base domain automatically sets `KUBE_INGRESS_BASE_DOMAIN` as an deployment variable.
 If you are using [Auto DevOps](../../../topics/autodevops/index.md), this domain is used for the different
 stages. For example, Auto Review Apps and Auto Deploy.
 
 The domain should have a wildcard DNS configured to the Ingress IP address.
-After Ingress has been installed (see [Installing Applications](#installing-applications)),
+After Ingress has been installed (see [Installing Applications](index.md#installing-applications)),
 you can either:
 
 - Create an `A` record that points to the Ingress IP address with your domain provider.
