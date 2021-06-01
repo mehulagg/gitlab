@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe EE::SystemNotes::EpicsService do
+RSpec.describe SystemNotes::EpicsService do
   let_it_be(:group)   { create(:group) }
   let_it_be(:project) { create(:project, :repository, group: group) }
   let_it_be(:author)  { create(:user) }

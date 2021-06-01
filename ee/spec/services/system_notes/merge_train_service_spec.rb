@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe EE::SystemNotes::MergeTrainService do
+RSpec.describe SystemNotes::MergeTrainService do
   let_it_be(:author) { create(:user) }
   let_it_be(:project) { create(:project) }
 
