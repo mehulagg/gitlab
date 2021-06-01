@@ -115,7 +115,7 @@ on an existing group's page.
 
 ### Selecting which groups to import
 
-After you have authorized access to GitLab instance, you are redirected to the GitLab Group Migration importer page and your remote GitLab groups are listed.
+After you have authorized access to GitLab instance, you are redirected to the GitLab Group Migration importer page and your remote GitLab groups are listed, to which you have `owner` access to.
 
 1. By default, the proposed group namespaces match the names as they exist in remote instance, but based on your permissions, you can choose to edit these names before you proceed to import any of them.
 
