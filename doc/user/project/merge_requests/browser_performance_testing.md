@@ -70,7 +70,7 @@ using Docker-in-Docker.
    include:
      template: Verify/Browser-Performance.gitlab-ci.yml
 
-   brwoser_performance:
+   browser_performance:
      variables:
        URL: https://example.com
    ```
