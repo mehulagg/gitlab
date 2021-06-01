@@ -1313,7 +1313,7 @@ For Helm Chart installs, you can override the [`image.tag`](https://docs.gitlab.
 
 For Omnibus installs, you will have to temporarily replace the registry binary that ships with 13.9+ for one prior to `v3.0.0-gitlab`. To do so, you can pull a previous version of the Docker image for the GitLab Container Registry, such as `v2.13.1-gitlab`:
 
- ```sh
+ ```shell
  docker pull registry.gitlab.com/gitlab-org/build/cng/gitlab-container-registry:v2.13.1-gitlab
  ```
 
