@@ -4,11 +4,11 @@ group: Ecosystem
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
-# Getting started with GitLab GraphQL API
+# Get started with GitLab GraphQL API
 
 This guide demonstrates basic usage of the GitLab GraphQL API.
 
-See the [GraphQL API style guide](../../development/api_graphql_styleguide.md) for implementation details
+Read the [GraphQL API style guide](../../development/api_graphql_styleguide.md) for implementation details
 aimed at developers who wish to work on developing the API itself.
 
 ## Running examples
@@ -48,10 +48,10 @@ If you want to run the queries locally, or on a self-managed instance,
 you must either:
 
 - Create the `gitlab-org` group with a project called `graphql-sandbox` under it. Create
-several issues within the project.
+several issues in the project.
 - Edit the queries to replace `gitlab-org/graphql-sandbox` with your own group and project.
 
-Please refer to [running GraphiQL](index.md#graphiql) for more information.
+Refer to [running GraphiQL](index.md#graphiql) for more information.
 
 NOTE:
 If you are running GitLab 11.0 to 12.0, enable the `graphql`
@@ -72,7 +72,7 @@ which is an object identifier in the format of `"gid://gitlab/Issue/123"`.
 [GitLab GraphQL Schema](reference/index.md) outlines which objects and fields are
 available for clients to query and their corresponding data types.
 
-Example: Get only the names of all the projects the currently logged in user can access (up to a limit, more on that later)
+Example: Get only the names of all the projects the currently logged in user can access (up to a limit)
 in the group `gitlab-org`.
 
 ```graphql
@@ -111,7 +111,7 @@ When retrieving child nodes use:
 
 Underneath it all is a graph we are traversing, hence the name GraphQL.
 
-Example: Get a project (only its name) and the titles of all its issues.
+Example: Get the name of a project, and the titles of all its issues.
 
 ```graphql
 query {
@@ -128,12 +128,12 @@ query {
 ```
 
 More about queries:
-[GraphQL docs](https://graphql.org/learn/queries/)
+[GraphQL documentation](https://graphql.org/learn/queries/)
 
 ### Authorization
 
-Authorization uses the same engine as the GitLab application (and GitLab.com). So if you've signed in to GitLab
-and use GraphiQL, all queries are performed as you, the signed in user. For more information, see the
+Authorization uses the same engine as the GitLab application (and GitLab.com). If you've signed in to GitLab
+and use GraphiQL, all queries are performed as you, the signed in user. For more information, read the
 [GitLab API documentation](../README.md#authentication).
 
 ### Mutations
@@ -144,7 +144,7 @@ generally use InputTypes and variables, neither of which appear here.
 Mutations have:
 
 - Inputs. For example, arguments, such as which emoji you'd like to award,
-and to which object.
+  and to which object.
 - Return statements. That is, what you'd like to get back when it's successful.
 - Errors. Always ask for what went wrong, just in case.
 
@@ -172,8 +172,8 @@ mutation {
 }
 ```
 
-Example: Add a comment to the issue (we're using the ID of the `GitLab.com` issue - but
-if you're using a local instance, you must get the ID of an issue you can write to).
+Example: Add a comment to the issue. In this example, we use the ID of the `GitLab.com` issue.
+If you're using a local instance, you must get the ID of an issue you can write to.
 
 ```graphql
 mutation {
@@ -194,7 +194,7 @@ mutation {
 
 #### Update mutations
 
-When you see the result `id` of the note you created - take a note of it. Now let's edit it to sip faster!
+When you see the result `id` of the note you created, take a note of it. Let's edit it to sip faster!
 
 ```graphql
 mutation {
@@ -212,7 +212,7 @@ mutation {
 
 #### Deletion mutations
 
-Let's delete the comment, since our tea is all gone.
+Let's delete the comment, because our tea is all gone.
 
 ```graphql
 mutation {
@@ -242,16 +242,18 @@ You should get something like the following output:
 We've asked for the note details, but it doesn't exist anymore, so we get `null`.
 
 More about mutations:
-[GraphQL Docs](https://graphql.org/learn/queries/#mutations).
+[GraphQL Documentation](https://graphql.org/learn/queries/#mutations).
 
 ### Introspective queries
 
 Clients can query the GraphQL endpoint for information about its own schema.
 by making an [introspective query](https://graphql.org/learn/introspection/).
+The [GraphiQL Query Explorer](https://gitlab.com/-/graphql-explorer) uses an introspection query
+to:
 
-It is through an introspection query that the [GraphiQL Query Explorer](https://gitlab.com/-/graphql-explorer)
-gets all of its knowledge about our GraphQL schema to do autocompletion and provide
-its interactive `Docs` tab.
+- Gain knowledge about our GraphQL schema.
+- Do autocompletion.
+- Provide its interactive `Docs` tab.
 
 Example: Get all the type names in the schema.
 
@@ -285,12 +287,12 @@ query IssueTypes {
 ```
 
 More about introspection:
-[GraphQL docs](https://graphql.org/learn/introspection/)
+[GraphQL documentation](https://graphql.org/learn/introspection/)
 
 ## Sorting
 
-Some of the GitLab GraphQL endpoints allow you to specify how you'd like a collection of
-objects to be sorted. You can only sort by what the schema allows you to.
+Some of the GitLab GraphQL endpoints allow you to specify how to sort a collection of
+objects. You can only sort by what the schema allows you to.
 
 Example: Issues can be sorted by creation date:
 
@@ -310,14 +312,14 @@ query {
 
 ## Pagination
 
-Pagination is a way of only asking for a subset of the records (say, the first 10).
+Pagination is a way of only asking for a subset of the records, such as the first 10.
 If we want more of them, we can make another request for the next 10 from the server
-(in the form of something like "please give me the next 10 records").
+in the form of something like `please give me the next 10 records`.
 
 By default, the GitLab GraphQL API returns 100 records per page.
-This can be changed by using `first` or `last` arguments. Both arguments take a value,
+To change this behavior, use `first` or `last` arguments. Both arguments take a value,
 so `first: 10` returns the first 10 records, and `last: 10` the last 10 records.
-There is a limit on how many records will be returned per page, which is generally `100`.
+There is a limit on how many records are returned per page, which is generally `100`.
 
 Example: Retrieve only the first 2 issues (slicing). The `cursor` field gives us a position from which
 we can retrieve further records relative to that one.
@@ -366,4 +368,4 @@ query {
 ```
 
 More on pagination and cursors:
-[GraphQL docs](https://graphql.org/learn/pagination/)
+[GraphQL documentation](https://graphql.org/learn/pagination/)
