@@ -587,7 +587,7 @@ openssl x509 -inform pem -noout -text
 
 Note that the `-connect` argument expects a `host:port` combination. For example, `https://kubernetes.example.com` would be `kubernetes.example.com:443`.
 
-### This job failed because the necessary resources were not successfully created.
+### This job failed because the necessary resources were not successfully created
 
 Before the deployment jobs starts, GitLab creates the following specifically for
 the deployment job:
