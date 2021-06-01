@@ -54,12 +54,8 @@ class DeploymentsFinder
       raise InefficientQueryError, 'Both `updated_at` filter and `finished_at` filter can not be specified'
     end
 
-    # Currently, the inefficient parameters are allowed in order to avoid breaking changes in Deployment API.
-    # We'll switch to a hard error in https://gitlab.com/gitlab-org/gitlab/-/issues/328500.
     if (filter_by_updated_at? && !order_by_updated_at?) || (!filter_by_updated_at? && order_by_updated_at?)
-      Gitlab::ErrorTracking.track_and_raise_for_dev_exception(
-        InefficientQueryError.new('`updated_at` filter and `updated_at` sorting must be paired')
-      )
+      raise InefficientQueryError, '`updated_at` filter and `updated_at` sorting must be paired'
     end
 
     if (filter_by_finished_at? && !order_by_finished_at?) || (!filter_by_finished_at? && order_by_finished_at?)
@@ -133,13 +129,6 @@ class DeploymentsFinder
   def optimize_sort_params!(sort_params)
     sort_direction = sort_params.each_value.first
 
-    # Implicitly enforce the ordering when filtered by `updated_at` column for performance optimization.
-    # See https://gitlab.com/gitlab-org/gitlab/-/issues/325627#note_552417509.
-    # We remove this in https://gitlab.com/gitlab-org/gitlab/-/issues/328500.
-    if filter_by_updated_at? && implicitly_enforce_ordering_for_updated_at_filter?
-      sort_params.replace('updated_at' => sort_direction)
-    end
-
     if sort_params['created_at'] || sort_params['iid']
       # Sorting by `id` produces the same result as sorting by `created_at` or `iid`
       sort_params.replace(id: sort_direction)
@@ -168,15 +157,6 @@ class DeploymentsFinder
 
   def order_by_finished_at?
     params[:order_by].to_s == 'finished_at'
-  end
-
-  def implicitly_enforce_ordering_for_updated_at_filter?
-    return false unless params[:project].present?
-
-    ::Feature.enabled?(
-      :deployments_finder_implicitly_enforce_ordering_for_updated_at_filter,
-      params[:project],
-      default_enabled: :yaml)
   end
 
   # rubocop: disable CodeReuse/ActiveRecord
