@@ -157,7 +157,7 @@ interface you define what's to be scanned, and how, then initiate the scan.
 
 The following table describes some of the differences:
 
-| Automatic scan                                     | Manual scan                                    |
+| Automatic scan                                     | On-demand scan                                 |
 |:---------------------------------------------------|:-----------------------------------------------|
 | CI/CD variables are sourced from `.gitlab-ci.yml`. | CI/CD variables are sourced from the database. |
 | All CI/CD variables available.                     | Subset of CI/CD variables available.           |
@@ -169,7 +169,7 @@ To enable DAST to run automatically, either:
 
 - Enable [Auto DAST](../../../topics/autodevops/stages.md#auto-dast) (provided
   by [Auto DevOps](../../../topics/autodevops/index.md)).
-- Manually [include the DAST template](#include-the-dast-template) in your existing
+- [Include the DAST template](#include-the-dast-template) in your existing
   `.gitlab-ci.yml` file.
 
 #### Include the DAST template
