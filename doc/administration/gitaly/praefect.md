@@ -161,6 +161,24 @@ node, using `psql` which is installed by Omnibus GitLab.
 
 The database used by Praefect is now configured.
 
+NOTE:
+By default Praefect database tables are created by the automated process of the `gitlab-ctl reconfigure` task, however, if the `gitlab-ctl reconfigure` was not executed or there were some errors during the execution then the Praefect database tables will not be created on initial reconfigure and may throw errors about relations not existing. 
+Examples: 
+> `ERROR:  relation "node_status" does not exist at character 13`
+> `ERROR:  relation "replication_queue_lock" does not exist at character 40`
+
+> `{"level":"error","msg":"Error updating node: pq: relation \"node_status\" does not exist","pid":210882,"praefectName":"gitlab1x4m:0.0.0.0:2305","time":"2021-04-01T19:26:19.473Z","virtual_storage":"praefect-cluster-1"}`
+
+The database schema migration can be done by the `sql-migrate` subcommand of the `praefect` binary.
+
+```
+$ sudo /opt/gitlab/embedded/bin/praefect -config /var/opt/gitlab/praefect/config.toml sql-migrate
+praefect sql-migrate: OK (applied 21 migrations)
+```
+
+
+
+
 #### PgBouncer
 
 To reduce PostgreSQL resource consumption, we recommend setting up and configuring
