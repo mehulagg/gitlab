@@ -20,8 +20,11 @@ const i18n = Object.freeze({
   noResults: s__('Iterations|No iterations in cadence.'),
   error: __('Error loading iterations'),
 
+  deleteCadence: s__('Iterations|Delete cadence'),
   modalTitle: s__('Iterations|Delete iteration cadence'),
-  modalText: s__('Iterations|Deleting an iteration cadence also deletes the iterations'),
+  modalText: s__(
+    'Iterations|Are you sure you want to delete this iteration cadence? This will delete all the iterations in the cadence.',
+  ),
   modalConfirm: s__('Iterations|Delete cadence'),
   modalCancel: __('Cancel'),
 });
@@ -190,12 +193,11 @@ export default {
         icon="ellipsis_v"
         category="tertiary"
         right
-        lazy
         text-sr-only
         no-caret
       >
         <gl-dropdown-item @click="showModal">
-          {{ s__('Iterations|Delete cadence') }}
+          {{ i18n.deleteCadence }}
         </gl-dropdown-item>
       </gl-dropdown>
       <gl-modal

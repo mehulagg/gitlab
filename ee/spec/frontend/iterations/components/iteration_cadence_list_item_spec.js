@@ -209,35 +209,29 @@ describe('Iteration cadence list item', () => {
 
     describe('canEditCadence = true', () => {
       beforeEach(async () => {
-        await createComponent({
+        createComponent({
           canEditCadence: true,
         });
+
+        wrapper.vm.$refs.modal.show = jest.fn();
       });
 
       it('shows delete button', () => {
         expect(wrapper.find(GlDropdown).exists()).toBe(true);
       });
 
-      // eslint-disable-next-line jest/no-test-prefixes
-      xit('opens confirmation modal to delete cadence', async () => {
-        expect(wrapper.find(GlModal).isVisible()).toBe(false);
+      it('opens confirmation modal to delete cadence', async () => {
+        wrapper
+          .findAll(GlDropdownItem)
+          .filter((item) => item.text() === 'Delete cadence')
+          .at(0)
+          .vm.$emit('click');
 
-        wrapper.findComponent(GlDropdown).trigger('click');
-        // wrapper.findByRole('button', { text: 'Delete cadence' }).trigger('click');
-        wrapper.findAll(GlDropdownItem).at(0).vm.$emit('click');
-
-        await nextTick();
-
-        expect(wrapper.find(GlModal).isVisible()).toBe(true);
+        expect(wrapper.vm.$refs.modal.show).toHaveBeenCalled();
       });
 
-      // eslint-disable-next-line jest/no-test-prefixes
-      xit('re-focuses dropdown when delete modal closed', () => {});
-
-      // eslint-disable-next-line jest/no-test-prefixes
-      xit('emits delete-cadence event with cadence ID', async () => {
-        wrapper.findByRole('button', { text: 'Delete cadence' }).trigger('click');
-        await nextTick();
+      it('emits delete-cadence event with cadence ID', () => {
+        wrapper.find(GlModal).vm.$emit('ok');
 
         expect(wrapper.emitted('delete-cadence')).toEqual([[cadence.id]]);
       });
