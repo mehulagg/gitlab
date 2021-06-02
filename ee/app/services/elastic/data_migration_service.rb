@@ -26,7 +26,11 @@ module Elastic
       end
 
       def find_by_name!(name)
-        migrations.find { |migration| migration.name_for_key == name.to_s.underscore } || (raise ArgumentError, "Couldn't find Elastic::Migration with name='#{name}'")
+        migration = migrations.find { |migration| migration.name_for_key == name.to_s.underscore }
+        raise ArgumentError, "Couldn't find Elastic::Migration with name='#{name}'" unless migration
+        raise ArgumentError, "Elastic::Migration with name='#{name}' is marked as obsolete" if migration.obsolete?
+
+        migration
       end
 
       def drop_migration_has_finished_cache!(migration)

@@ -335,20 +335,10 @@ For every migration that was created 2 minor versions before the major version
 being upgraded to, we do the following:
 
 1. Confirm the migration has actually completed successfully for GitLab.com.
-1. Replace the content of `migrate` and `completed?` methods as follows:
+1. Replace the content of the migration with:
 
    ```ruby
-   def migrate
-     log "Migration has been deleted in the last major version upgrade." \
-       "Migrations are supposed to be finished before upgrading major version https://docs.gitlab.com/ee/update/#upgrading-to-a-new-major-version ." \
-       "To correct this issue, recreate your index from scratch: https://docs.gitlab.com/ee/integration/elasticsearch.html#last-resort-to-recreate-an-index."
-
-     fail_migration_halt_error!
-   end
-
-   def completed?
-     false
-   end
+   include Elastic::MigrationObsolete
    ```
 
 1. Delete any spec files to support this migration.
