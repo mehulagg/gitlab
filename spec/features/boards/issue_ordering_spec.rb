@@ -157,9 +157,11 @@ RSpec.describe 'Issue Boards', :js do
     end
 
     it 'moves to bottom of another list' do
-      drag(list_from_index: 1, list_to_index: 2, to_index: 2, duration: 1020)
+      drag(list_from_index: 1, list_to_index: 2, to_index: 3, duration: 1020)
 
       wait_for_requests
+
+      live_debug
 
       expect(find('.board:nth-child(2)')).to have_selector('.board-card', count: 2)
       expect(all('.board')[2]).to have_selector('.board-card', count: 4)

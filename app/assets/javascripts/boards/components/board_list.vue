@@ -151,11 +151,18 @@ export default {
     },
     handleDragOnEnd(params) {
       sortableEnd();
-      const { newIndex, oldIndex, from, to, item } = params;
+      const { oldIndex, from, to, item } = params;
+      let { newIndex } = params;
       const { itemId, itemIid, itemPath } = item.dataset;
-      const { children } = to;
+      let { children } = to;
       let moveBeforeId;
       let moveAfterId;
+
+      children = Array.from(children).filter((card) => card.classList.contains('board-card'));
+
+      if (newIndex > children.length) {
+        newIndex = children.length;
+      }
 
       const getItemId = (el) => Number(el.dataset.itemId);
 
@@ -219,6 +226,7 @@ export default {
       :data-board="list.id"
       :data-board-type="list.listType"
       :class="{ 'bg-danger-100': boardItemsSizeExceedsMax }"
+      draggable=".board-card"
       class="board-list gl-w-full gl-h-full gl-list-style-none gl-mb-0 gl-p-2 js-board-list"
       data-testid="tree-root-wrapper"
       @start="handleDragOnStart"
@@ -233,8 +241,8 @@ export default {
         :item="item"
         :disabled="disabled"
       />
-      <gl-intersection-observer @appear="onReachingListBottom">
-        <li v-if="showCount" class="board-list-count gl-text-center" data-issue-id="-1">
+      <gl-intersection-observer data-issue-id="-1" @appear="onReachingListBottom">
+        <li v-if="showCount" class="board-list-count gl-text-center">
           <gl-loading-icon
             v-if="loadingMore"
             :label="$options.i18n.loadingMoreboardItems"
