@@ -1297,7 +1297,7 @@ curl "localhost:5001/debug/vars"
 
 Following the [footsteps from Docker](https://www.docker.com/blog/registry-v1-api-deprecation/), support for the Docker registry v1 API, including [schema v1 image manifests](https://docs.docker.com/registry/spec/manifest-v2-1/), has been [deprecated in 13.7](https://about.gitlab.com/releases/2020/12/22/gitlab-13-7-released/#deprecate-pulls-that-use-v1-of-the-docker-registry-api)). It was then [removed in 13.9](https://about.gitlab.com/releases/2021/02/22/gitlab-13-9-released/#deprecate-pulls-that-use-v1-of-the-docker-registry-api). Since then, it is no longer possible to push or pull v1 images from the GitLab Container Registry.
 
-If you had v1 images in the GitLab Container Registry, but you did not upgrade them (following the [steps recommended by Docker](https://docs.docker.com/registry/spec/deprecated-schema-v1/)) ahead of the 13.9 upgrade, these images will no longer be accessible.
+If you had v1 images in the GitLab Container Registry, but you did not upgrade them (following the [steps recommended by Docker](https://docs.docker.com/registry/spec/deprecated-schema-v1/)) ahead of the 13.9 upgrade, these images will no longer be accessible, and you will see `Error response from daemon: manifest invalid: Schema 1 manifest not supported` when trying to pull them.
 
 For self-managed instances, you can regain access to these images by temporarily downgrading the GitLab Container Registry to a version lower than `v3.0.0-gitlab`, namely [`v2.13.1-gitlab`](https://gitlab.com/gitlab-org/container-registry/-/releases/v2.13.1-gitlab), upgrade any v1 images, and then revert the registry downgrade.
 
