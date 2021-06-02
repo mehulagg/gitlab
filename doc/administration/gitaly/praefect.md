@@ -259,8 +259,8 @@ application server, or a Gitaly node.
    praefect['enable'] = true
 
    # Prevent database connections during 'gitlab-ctl reconfigure'
-   gitlab_rails['rake_cache_clear'] = false
    gitlab_rails['auto_migrate'] = false
+   praefect['auto_migrate'] = false
    ```
 
 1. Configure **Praefect** to listen on network interfaces by editing
@@ -599,8 +599,8 @@ documentation](configure_gitaly.md#configure-gitaly-servers).
    prometheus['enable'] = true
 
    # Prevent database connections during 'gitlab-ctl reconfigure'
-   gitlab_rails['rake_cache_clear'] = false
    gitlab_rails['auto_migrate'] = false
+   praefect['auto_migrate'] = false
    ```
 
 1. Configure **Gitaly** to listen on network interfaces by editing
