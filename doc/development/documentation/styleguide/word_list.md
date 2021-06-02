@@ -5,9 +5,9 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 description: 'Writing styles, markup, formatting, and other standards for GitLab Documentation.'
 ---
 
-# Terms list
+# Word list
 
-To help with consistency in the documentation, follow this guidance for specific terms.
+To help ensure consistency in the documentation, follow this guidance.
 
 <!-- vale off -->
 
