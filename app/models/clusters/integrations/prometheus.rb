@@ -43,6 +43,10 @@ module Clusters
         enabled?
       end
 
+      def alert_manager_token_changed?
+        attribute_changed?(:alert_manager_token)
+      end
+
       private
 
       def activate_project_services

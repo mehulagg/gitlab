@@ -100,6 +100,10 @@ module Clusters
         files.merge('values.yaml': replaced_values)
       end
 
+      def alert_manager_token_changed?
+        attribute_changed?(:alert_manager_token)
+      end
+
       private
 
       def install_knative_metrics
