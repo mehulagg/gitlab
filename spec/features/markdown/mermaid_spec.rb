@@ -44,7 +44,7 @@ RSpec.describe 'Mermaid rendering', :js do
     wait_for_requests
     wait_for_mermaid
 
-    expected = '<text style=""><tspan xml:space="preserve" dy="1em" x="1">Line 1</tspan><tspan xml:space="preserve" dy="1em" x="1">Line 2</tspan></text>'
+    expected = %(<div xmlns="http://www.w3.org/1999/xhtml" style="display: inline-block; white-space: nowrap;">Line 1<br>Line 2</div>)
     expect(page.html.scan(expected).count).to be(4)
   end
 
@@ -106,7 +106,7 @@ RSpec.describe 'Mermaid rendering', :js do
 
       expect(svg[:style]).to match(/max-width/)
       expect(svg[:width].to_i).to eq(100)
-      expect(svg[:height].to_i).to be_within(5).of(220)
+      expect(svg[:height].to_i).to be_within(6).of(220)
     end
   end
 
