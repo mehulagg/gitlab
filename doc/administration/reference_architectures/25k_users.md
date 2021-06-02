@@ -32,7 +32,7 @@ full list of reference architectures, see
 | Sidekiq                                  | 4           | 4 vCPU, 15 GB memory    | `n1-standard-4`  | `m5.xlarge`  | `D4s v3`  |
 | GitLab Rails                             | 5           | 32 vCPU, 28.8 GB memory | `n1-highcpu-32`  | `c5.9xlarge` | `F32s v2` |
 | Monitoring node                          | 1           | 4 vCPU, 3.6 GB memory   | `n1-highcpu-4`   | `c5.xlarge`  | `F4s v2`  |
-| Object storage                           | n/a         | n/a                     | n/a              | n/a          | n/a       |
+| Object storage(4)                        | n/a         | n/a                     | n/a              | n/a          | n/a       |
 | NFS server (optional, not recommended)   | 1           | 4 vCPU, 3.6 GB memory   | `n1-highcpu-4`   | `c5.xlarge`  | `F4s v2`  |
 
 <!-- Disable ordered list rule https://github.com/DavidAnson/markdownlint/blob/main/doc/Rules.md#md029---ordered-list-item-prefix -->
@@ -40,6 +40,7 @@ full list of reference architectures, see
 1. Can be optionally run on reputable third-party external PaaS PostgreSQL solutions. Google Cloud SQL and AWS RDS are known to work, however Azure Database for PostgreSQL is [not recommended](https://gitlab.com/gitlab-org/quality/reference-architectures/-/issues/61) due to performance issues. Consul is primarily used for PostgreSQL high availability so can be ignored when using a PostgreSQL PaaS setup. However it is also used optionally by Prometheus for Omnibus auto host discovery.
 2. Can be optionally run on reputable third-party external PaaS Redis solutions. Google Memorystore and AWS Elasticache are known to work.
 3. Can be optionally run on reputable third-party load balancing services (LB PaaS). AWS ELB is known to work.
+4. Should be run on reputable third party object storage (storage PaaS) for cloud implementations. Google Cloud Storage and AWS S3 are known to work.
 <!-- markdownlint-enable MD029 -->
 
 NOTE:
