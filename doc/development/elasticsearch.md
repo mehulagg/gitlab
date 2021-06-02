@@ -308,14 +308,15 @@ We choose to use GitLab major version upgrades as a safe time to remove
 backwards compatibility for indices that have not been fully migrated. We
 [document this in our upgrade
 documentation](../update/index.md#upgrading-to-a-new-major-version). We also
-choose to remove the migration code and tests so that:
+choose to remove the migration code by replacing it with the halted migration
+and remove tests so that:
 
 - We don't need to maintain any code that is called from our Advanced Search
   migrations.
 - We don't waste CI time running tests for migrations that we don't support
   anymore.
 
-To be extra safe, we will not delete migrations that were created in the last
+To be extra safe, we will not deprecate migrations that were created in the last
 minor version before the major upgrade. So, if we are upgrading to `%14.0`,
 we should not delete migrations that were only added in `%13.12`. This is an
 extra safety net as we expect there are migrations that get merged that may
