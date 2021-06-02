@@ -219,3 +219,31 @@ If you want to see the workflow in action, we've recorded a pairing session on c
 available on [GitLab Unfiltered](https://youtu.be/shEd_eiUjdI).
 
 For deeper customization and more complicated metrics, visit the [Grafonnet lib](https://github.com/grafana/grafonnet-lib) project and the [GitLab Prometheus Metrics](../administration/monitoring/prometheus/gitlab_metrics.md#gitlab-prometheus-metrics) documentation.
+
+### Optional Graphs
+
+Some Graphs aren't relevant for all groups, so they aren't added to
+the dashboard by default. They can be added by customizing the
+dasbhoard.
+
+By default metrics only metrics the `web`, `api` and `sidekiq` are
+shown. If you wish to see the metrics from the `git` fleet (or any
+other component that might be added in the future). This could be
+configured as follows:
+
+```jsonnet
+stageGroupDashboards
+.dashboard('source_code', components=stageGroupDashboards.supportedComponents)
+.stageGroupDashboardTrailer()
+```
+
+If your group is interested Sidekiq job durations and their
+thresholds, these graphs can be added by calling the
+`.addSidekiqJobDurationByUrgency` function:
+
+```jsonnet
+stageGroupDashboards
+.dashboard('access')
+.addSidekiqJobDurationByUrgency()
+.stageGroupDashboardTrailer()
+```
