@@ -25,9 +25,8 @@ of the merge request.
 
 In [GitLab 13.7 and later](https://gitlab.com/gitlab-org/gitlab/-/issues/23308),
 this setting is enabled by default. It can be changed by users with the
-[Developer role](../../permissions.md#project-members-permissions) for the source
-project. After it's enabled, upstream members can retry the pipelines and jobs of
-the merge request:
+[Developer role](../../permissions.md) for the source project. After it's enabled,
+upstream members can retry the pipelines and jobs of the merge request:
 
 1. While creating or editing a merge request, scroll to **Contribution** and
    then select the **Allow commits from members who can merge to the target branch**.
