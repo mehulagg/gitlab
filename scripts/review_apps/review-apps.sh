@@ -40,7 +40,7 @@ function previous_deploy_failed() {
 }
 
 function delete_release() {
-  local namespace="${KUBE_NAMESPACE}"
+  local namespace=$(namespace_for_release "$CI_ENVIRONMENT_SLUG")
   local release="${CI_ENVIRONMENT_SLUG}"
 
   if [ -z "${release}" ]; then
@@ -80,7 +80,7 @@ function kubectl_cleanup_release() {
 }
 
 function delete_failed_release() {
-  local namespace="${KUBE_NAMESPACE}"
+  local namespace=$(namespace_for_release "$CI_ENVIRONMENT_SLUG")
   local release="${CI_ENVIRONMENT_SLUG}"
 
   if [ -z "${release}" ]; then
@@ -102,7 +102,7 @@ function delete_failed_release() {
 }
 
 function get_pod() {
-  local namespace="${KUBE_NAMESPACE}"
+  local namespace=$(namespace_for_release "$CI_ENVIRONMENT_SLUG")
   local release="${CI_ENVIRONMENT_SLUG}"
   local app_name="${1}"
   local status="${2-Running}"
@@ -133,7 +133,7 @@ function get_pod() {
 }
 
 function run_task() {
-  local namespace="${KUBE_NAMESPACE}"
+  local namespace=$(namespace_for_release "$CI_ENVIRONMENT_SLUG")
   local ruby_cmd="${1}"
   local task_runner_pod=$(get_pod "task-runner")
 
@@ -245,7 +245,7 @@ function install_certmanager() {
 }
 
 function create_application_secret() {
-  local namespace="${KUBE_NAMESPACE}"
+  local namespace=$(namespace_for_release "$CI_ENVIRONMENT_SLUG")
   local release="${CI_ENVIRONMENT_SLUG}"
   local initial_root_password_shared_secret
   local gitlab_license_shared_secret
@@ -306,7 +306,7 @@ function parse_gitaly_image_tag() {
 }
 
 function deploy() {
-  local namespace="${KUBE_NAMESPACE}"
+  local namespace=$(namespace_for_release "$CI_ENVIRONMENT_SLUG")
   local release="${CI_ENVIRONMENT_SLUG}"
   local base_config_file_ref="${CI_DEFAULT_BRANCH}"
   if [[ "$(base_config_changed)" == "true" ]]; then base_config_file_ref="${CI_COMMIT_SHA}"; fi
@@ -329,6 +329,7 @@ function deploy() {
 HELM_CMD=$(cat << EOF
   helm upgrade \
     --namespace="${namespace}" \
+    --create-namespace \
     --install \
     --wait \
     --timeout "${HELM_INSTALL_TIMEOUT:-20m}" \
@@ -382,7 +383,7 @@ EOF
 }
 
 function display_deployment_debug() {
-  local namespace="${KUBE_NAMESPACE}"
+  local namespace=$(namespace_for_release "$CI_ENVIRONMENT_SLUG")
   local release="${CI_ENVIRONMENT_SLUG}"
 
   # Get all pods for this release
@@ -392,4 +393,8 @@ function display_deployment_debug() {
   # Get all non-completed jobs
   echoinfo "Unsuccessful Jobs for release ${release}"
   kubectl get jobs --namespace "${namespace}" -lrelease=${release} --field-selector=status.successful!=1
+}
+
+function namespace_for_release() {
+  echo "review-app-${1}"
 }
