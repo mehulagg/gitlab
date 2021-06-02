@@ -818,7 +818,7 @@ describe('Dashboard', () => {
     });
   });
 
-  describe('deprecation notice', () => {
+  describe.only('alerts deprecation', () => {
     beforeEach(() => {
       setupStoreWithData(store);
     });
@@ -826,16 +826,29 @@ describe('Dashboard', () => {
     const findDeprecationNotice = () =>
       wrapper.find(AlertDeprecationWarning).findComponent(GlAlert);
 
-    it('shows the deprecation notice when available', () => {
-      createMountedWrapper({}, { provide: { hasManagedPrometheus: true } });
-
-      expect(findDeprecationNotice().exists()).toBe(true);
+    it.each`
+      managedAlertsDeprecation | hasManagedPrometheus | isVisible
+      ${false}                 | ${false}             | ${false}
+      ${false}                 | ${true}              | ${true}
+      ${true}                  | ${false}             | ${false}
+      ${true}                  | ${true}              | ${false}
+    `(({ hasManagedPrometheus, managedAlertsDeprecation, isVisible }) => {
+      createMountedWrapper(
+        {},
+        { provide: { hasManagedPrometheus }, glFeatures: { managedAlertsDeprecation } },
+      );
+      expect(findDeprecationNotice().exists()).toBe(isVisible);
     });
+    // it('shows the deprecation notice when available', () => {
+    //   createMountedWrapper({}, { provide: { hasManagedPrometheus: true } });
 
-    it('hides the deprecation notice when not available', () => {
-      createMountedWrapper();
+    //   expect(findDeprecationNotice().exists()).toBe(true);
+    // });
 
-      expect(findDeprecationNotice().exists()).toBe(false);
-    });
+    // it('hides the deprecation notice when not available', () => {
+    //   createMountedWrapper();
+
+    //   expect(findDeprecationNotice().exists()).toBe(false);
+    // });
   });
 });
