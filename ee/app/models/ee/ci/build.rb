@@ -31,6 +31,12 @@ module EE
 
         has_many :security_scans, class_name: 'Security::Scan'
 
+        has_one :dast_site_profiles_build, class_name: 'Dast::SiteProfilesBuild', foreign_key: :ci_build_id, inverse_of: :ci_build
+        has_one :dast_site_profile, class_name: 'DastSiteProfile', through: :dast_site_profiles_build
+
+        has_one :dast_scanner_profiles_build, class_name: 'Dast::ScannerProfilesBuild', foreign_key: :ci_build_id, inverse_of: :ci_build
+        has_one :dast_scanner_profile, class_name: 'DastScannerProfile', through: :dast_scanner_profiles_build
+
         after_commit :track_ci_secrets_management_usage, on: :create
         delegate :service_specification, to: :runner_session, allow_nil: true
 
@@ -52,6 +58,17 @@ module EE
               profile = pipeline.dast_profile || pipeline.dast_site_profile
 
               collection.concat(profile.secret_ci_variables(pipeline.user))
+            end
+
+            if ::Feature.enabled?(:dast_configuration_ui, project)
+              if dast_site_profile
+                collection.concat(dast_site_profile.ci_variables)
+                collection.concat(dast_site_profile.secret_ci_variables(pipeline.user))
+              end
+
+              if dast_scanner_profile
+                collection.concat(dast_scanner_profile.ci_variables)
+              end
             end
           end
         end

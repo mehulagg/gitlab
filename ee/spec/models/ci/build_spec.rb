@@ -135,59 +135,132 @@ RSpec.describe Ci::Build do
         end
       end
 
-      context 'when there is a dast_profile associated with the pipeline' do
+      context 'dast' do
         let_it_be(:project) { create(:project, :repository) }
         let_it_be(:user) { create(:user, developer_projects: [project]) }
-        let_it_be(:dast_profile) { create(:dast_profile, project: project) }
-        let_it_be(:dast_site_profile_secret_variable) { create(:dast_site_profile_secret_variable, key: 'DAST_PASSWORD_BASE64', dast_site_profile: dast_profile.dast_site_profile) }
-
-        let(:pipeline) { create(:ci_pipeline, pipeline_params.merge!(project: project, dast_profile: dast_profile, user: user) ) }
-
-        let(:key) { dast_site_profile_secret_variable.key }
-        let(:value) { dast_site_profile_secret_variable.value }
+        let_it_be(:dast_site_profile) { create(:dast_site_profile, project: project) }
+        let_it_be(:dast_scanner_profile) { create(:dast_scanner_profile, project: project) }
+        let_it_be(:dast_profile) { create(:dast_profile, project: project, dast_site_profile: dast_site_profile, dast_scanner_profile: dast_scanner_profile) }
+        let_it_be(:dast_site_profile_secret_variable) { create(:dast_site_profile_secret_variable, key: 'DAST_PASSWORD_BASE64', dast_site_profile: dast_site_profile) }
 
         before do
           stub_licensed_features(security_on_demand_scans: true)
         end
 
-        shared_examples 'a pipeline with no dast on-demand variables' do
-          it 'does not include variables associated with the profile' do
-            keys = subject.to_runner_variables.map { |var| var[:key] }
-
-            expect(keys).not_to include(key)
+        shared_examples 'it includes variables' do
+          it 'includes variables from the profile' do
+            expect(subject.to_runner_variables).to include(*expected_variables.to_runner_variables)
           end
         end
 
-        it_behaves_like 'a pipeline with no dast on-demand variables' do
-          let(:pipeline_params) { { config_source: :parameter_source } }
+        shared_examples 'it excludes variables' do
+          it 'excludes variables from the profile' do
+            expect(subject.to_runner_variables).not_to include(*expected_variables.to_runner_variables)
+          end
         end
 
-        it_behaves_like 'a pipeline with no dast on-demand variables' do
-          let(:pipeline_params) { { source: :ondemand_dast_scan } }
-        end
+        context 'when there is a dast_site_profile associated with the job' do
+          let(:pipeline) { create(:ci_pipeline, project: project, user: user) }
+          let(:job) { create(:ci_build, :running, pipeline: pipeline, dast_site_profile: dast_site_profile) }
 
-        context 'when the dast on-demand pipeline is correctly configured' do
-          let(:pipeline_params) { { source: :ondemand_dast_scan, config_source: :parameter_source } }
+          context 'when feature is enabled' do
+            it_behaves_like 'it includes variables' do
+              let(:expected_variables) { dast_site_profile.ci_variables }
+            end
 
-          it 'includes variables associated with the profile' do
-            expect(subject.to_runner_variables).to include(key: key, value: value, public: false, masked: true)
+            context 'when user has permission' do
+              it_behaves_like 'it includes variables' do
+                let(:expected_variables) { dast_site_profile.secret_ci_variables(user) }
+              end
+            end
+
+            context 'when does not have permission' do
+              let_it_be(:user) { nil }
+
+              it_behaves_like 'it excludes variables' do
+                let(:expected_variables) { dast_site_profile.secret_ci_variables(user) }
+              end
+            end
           end
 
-          context 'when user cannot read secrets' do
+          context 'when feature is disabled' do
             before do
-              stub_licensed_features(security_on_demand_scans: false)
+              stub_feature_flags(dast_configuration_ui: false)
             end
 
-            it 'does not include variables associated with the profile' do
-              expect(subject.to_runner_variables).not_to include(key: key, value: value, public: false, masked: true)
+            it_behaves_like 'it excludes variables' do
+              let(:expected_variables) { dast_site_profile.ci_variables.concat(dast_site_profile.secret_ci_variables(user)) }
+            end
+          end
+        end
+
+        context 'when there is a dast_scanner_profile associated with the job' do
+          let(:pipeline) { create(:ci_pipeline, project: project, user: user) }
+          let(:job) { create(:ci_build, :running, pipeline: pipeline, dast_scanner_profile: dast_scanner_profile) }
+
+          context 'when feature is enabled' do
+            it_behaves_like 'it includes variables' do
+              let(:expected_variables) { dast_scanner_profile.ci_variables }
             end
           end
 
-          context 'when there is no user associated with the pipeline' do
-            let_it_be(:user) { nil }
+          context 'when feature is disabled' do
+            before do
+              stub_feature_flags(dast_configuration_ui: false)
+            end
 
+            it_behaves_like 'it excludes variables' do
+              let(:expected_variables) { dast_scanner_profile.ci_variables }
+            end
+          end
+        end
+
+        context 'when there is a dast_profile associated with the pipeline' do
+          let(:pipeline) { create(:ci_pipeline, pipeline_params.merge!(project: project, dast_profile: dast_profile, user: user) ) }
+          let(:key) { dast_site_profile_secret_variable.key }
+          let(:value) { dast_site_profile_secret_variable.value }
+
+          shared_examples 'a record with no associated dast variables' do
             it 'does not include variables associated with the profile' do
-              expect(subject.to_runner_variables).not_to include(key: key, value: value, public: false, masked: true)
+              keys = subject.to_runner_variables.map { |var| var[:key] }
+
+              expect(keys).not_to include(key)
+            end
+          end
+
+          context 'when the on-demand pipeline is incorrectly configured' do
+            it_behaves_like 'a record with no associated dast variables' do
+              let(:pipeline_params) { { config_source: :parameter_source } }
+            end
+
+            it_behaves_like 'a record with no associated dast variables' do
+              let(:pipeline_params) { { source: :ondemand_dast_scan } }
+            end
+          end
+
+          context 'when the dast on-demand pipeline is correctly configured' do
+            let(:pipeline_params) { { source: :ondemand_dast_scan, config_source: :parameter_source } }
+
+            it 'includes variables associated with the profile' do
+              expect(subject.to_runner_variables).to include(key: key, value: value, public: false, masked: true)
+            end
+
+            context 'when user cannot read secrets' do
+              before do
+                stub_licensed_features(security_on_demand_scans: false)
+              end
+
+              it 'does not include variables associated with the profile' do
+                expect(subject.to_runner_variables).not_to include(key: key, value: value, public: false, masked: true)
+              end
+            end
+
+            context 'when there is no user associated with the pipeline' do
+              let_it_be(:user) { nil }
+
+              it 'does not include variables associated with the profile' do
+                expect(subject.to_runner_variables).not_to include(key: key, value: value, public: false, masked: true)
+              end
             end
           end
         end
