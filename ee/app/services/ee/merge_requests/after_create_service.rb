@@ -15,7 +15,7 @@ module EE
       private
 
       def schedule_sync_for(pipeline_id)
-        ::SyncSecurityReportsToReportApprovalRulesWorker.perform_async(pipeline_id) if pipeline_id
+        ::Ci::SyncReportsToReportApprovalRulesWorker.perform_async(pipeline_id) if pipeline_id
       end
     end
   end

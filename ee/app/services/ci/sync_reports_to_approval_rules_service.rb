@@ -1,8 +1,6 @@
 # frozen_string_literal: true
 
-module Security
-  # Service for syncing security reports results to report_approver approval rules
-  #
+module Ci
   class SyncReportsToApprovalRulesService < ::BaseService
     def initialize(pipeline)
       @pipeline = pipeline
@@ -11,6 +9,7 @@ module Security
     def execute
       sync_license_scanning_rules
       sync_vulnerability_rules
+      sync_coverage_rules
       success
     rescue StandardError => error
       log_error(
@@ -42,14 +41,35 @@ module Security
       # If we don't have reports, then we should wait until pipeline stops.
       return if reports.empty? && !pipeline.complete?
 
-      remove_required_approvals_for(ApprovalMergeRequestRule.vulnerability_report, sync_required_merge_requests)
+      remove_required_approvals_for(ApprovalMergeRequestRule.vulnerability_report, merge_requests_approved_security_reports)
+    end
+
+    def sync_coverage_rules
+      return unless pipeline.complete?
+
+      pipeline.update_builds_coverage
+      remove_required_approvals_for(ApprovalMergeRequestRule.code_coverage, merge_requests_approved_coverage)
     end
 
     def reports
       @reports ||= pipeline.security_reports
     end
 
-    def sync_required_merge_requests
+    def merge_requests_approved_coverage
+      pipeline.merge_requests_as_head_pipeline.reject do |merge_request|
+        base_pipeline = merge_request.base_pipeline
+
+        if base_pipeline.present?
+          pipeline.coverage < base_pipeline.coverage
+        else
+          # base pipeline is missing so we can't make an assumption
+          # if the coverage is better or not. We default to require approval.
+          true
+        end
+      end
+    end
+
+    def merge_requests_approved_security_reports
       pipeline.merge_requests_as_head_pipeline.reject do |merge_request|
         reports.violates_default_policy_against?(merge_request.base_pipeline&.security_reports)
       end

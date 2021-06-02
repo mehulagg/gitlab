@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe SyncSecurityReportsToReportApprovalRulesWorker do
+RSpec.describe Ci::SyncReportsToReportApprovalRulesWorker do
   describe '#perform' do
     let(:pipeline) { double(:pipeline, id: 42) }
     let(:sync_service) { double(:service, execute: true) }
@@ -13,7 +13,7 @@ RSpec.describe SyncSecurityReportsToReportApprovalRulesWorker do
       end
 
       it "executes SyncReportsToApprovalRulesService for given pipeline" do
-        expect(Security::SyncReportsToApprovalRulesService).to receive(:new)
+        expect(Ci::SyncReportsToApprovalRulesService).to receive(:new)
           .with(pipeline).once.and_return(sync_service)
 
         described_class.new.perform(pipeline.id)
@@ -22,7 +22,7 @@ RSpec.describe SyncSecurityReportsToReportApprovalRulesWorker do
 
     context 'when pipeline is missing' do
       it 'does not execute SyncReportsToApprovalRulesService' do
-        expect(Security::SyncReportsToApprovalRulesService).not_to receive(:new)
+        expect(Ci::SyncReportsToApprovalRulesService).not_to receive(:new)
 
         described_class.new.perform(pipeline.id)
       end

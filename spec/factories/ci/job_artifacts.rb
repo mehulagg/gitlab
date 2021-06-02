@@ -87,6 +87,16 @@ FactoryBot.define do
       end
     end
 
+    trait :trace_with_coverage do
+      file_type { :trace }
+      file_format { :raw }
+
+      after(:build) do |artifact, evaluator|
+        artifact.file = fixture_file_upload(
+          Rails.root.join('spec/fixtures/trace/trace_with_coverage'), 'text/plain')
+      end
+    end
+
     trait :junit do
       file_type { :junit }
       file_format { :gzip }
