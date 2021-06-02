@@ -56,15 +56,21 @@ module Mentionable
     end
 
     self.class.mentionable_attrs.each do |attr, options|
-      text    = __send__(attr) # rubocop:disable GitlabSecurity/PublicSend
+      attr_sym = attr.to_sym
+      text = __send__(attr) # rubocop:disable GitlabSecurity/PublicSend
       options = options.merge(
-        cache_key: [self, attr],
         author: author,
         skip_project_check: skip_project_check?
       ).merge(mentionable_params)
 
-      cached_html = self.try(:updated_cached_html_for, attr.to_sym)
-      options[:rendered] = cached_html if cached_html
+      if self.class.cached_markdown_fields.key?(attr_sym)
+        cached_html = self.updated_cached_html_for(attr_sym)
+
+        options[:rendered] = cached_html if cached_html
+        options = options.merge(banzai_render_context(attr_sym))
+      else
+        options = options.merge(cache_key: [self, attr])
+      end
 
       extractor.analyze(text, options)
     end
