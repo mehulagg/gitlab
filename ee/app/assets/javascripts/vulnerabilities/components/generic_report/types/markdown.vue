@@ -1,10 +1,13 @@
 <script>
-/* eslint-disable vue/no-v-html */
-import { GlLoadingIcon } from '@gitlab/ui';
+import { GlSkeletonLoader, GlSafeHtmlDirective as SafeHtml } from '@gitlab/ui';
 import axios from '~/lib/utils/axios_utils';
 
 export default {
-  components: { GlLoadingIcon },
+  components: { GlSkeletonLoader },
+  directives: {
+    SafeHtml,
+  },
+  inheritAttrs: false,
   props: {
     value: {
       type: String,
@@ -15,7 +18,6 @@ export default {
     return {
       markdown: '',
       loading: true,
-      loadError: false,
       error: false,
     };
   },
@@ -38,15 +40,11 @@ export default {
           text: this.value,
           gfm: true,
         })
-        .then((res) => res.data)
-        .then((data) => {
+        .then(({ data }) => {
           this.markdown = data.html;
           this.loading = false;
         })
-        .catch((e) => {
-          if (e.status !== 200) {
-            this.loadError = true;
-          }
+        .catch(() => {
           this.error = true;
         });
     },
@@ -56,9 +54,7 @@ export default {
 
 <template>
   <div>
-    <div v-if="isLoading" class="text-center loading">
-      <gl-loading-icon class="mt-5" size="lg" />
-    </div>
-    <div v-if="isLoaded" data-testid="markdown" v-html="markdown"></div>
+    <gl-skeleton-loader v-if="isLoading" :width="200" :lines="2" />
+    <div v-if="isLoaded" v-safe-html="markdown" data-testid="markdown"></div>
   </div>
 </template>
