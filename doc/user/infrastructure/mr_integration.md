@@ -15,6 +15,12 @@ you can expose details from `terraform plan` runs directly into a merge request 
 enabling you to see statistics about the resources that Terraform creates,
 modifies, or destroys.
 
+WARNING:
+Like any other job artifact, Terraform plan data is [viewable by anyone with Guest access](../permissions.md) to the repository.
+Neither Terraform nor GitLab encrypts the plan file by default. If your Terraform plan
+includes sensitive data such as passwords, access tokens, or certificates, GitLab strongly
+recommends encrypting plan output or modifying the project visibility settings.
+
 ## Setup
 
 NOTE:

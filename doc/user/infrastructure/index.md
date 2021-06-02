@@ -68,13 +68,13 @@ Amazon S3 or Google Cloud Storage. Its features include:
 
 Read more on setting up and [using GitLab Managed Terraform states](terraform_state.md)
 
+## Terraform integration in Merge Requests
+
 WARNING:
 Like any other job artifact, Terraform plan data is [viewable by anyone with Guest access](../permissions.md) to the repository.
 Neither Terraform nor GitLab encrypts the plan file by default. If your Terraform plan
 includes sensitive data such as passwords, access tokens, or certificates, GitLab strongly
 recommends encrypting plan output or modifying the project visibility settings.
-
-## Terraform integration in Merge Requests
 
 Collaborating around Infrastructure as Code (IaC) changes requires both code changes
 and expected infrastructure changes to be checked and approved. GitLab provides a
