@@ -16,6 +16,33 @@
 RSpec.shared_examples 'a replicable model' do
   include EE::GeoHelpers
 
+  context 'state machine' do
+    context 'when synced' do
+      let(:registry_class_factory) { replicator.registry_class.underscore.tr('/', '_').to_sym }
+      let(:registry) { create(registry_class_factory, :started) }
+
+      context 'when replication is enabled' do
+        it 'marks verification as pending' do
+          allow(replicator_class).to receive(:verification_enabled?).and_return(true)
+
+          expect(registry).to receive(:verification_pending!).once
+
+          registry.synced!
+        end
+      end
+
+      context 'when replication is disabled' do
+        it 'does not mark verification as pending' do
+          allow(replicator_class).to receive(:verification_enabled?).and_return(false)
+
+          expect(registry).not_to receive(:verification_pending!)
+
+          registry.synced!
+        end
+      end
+    end
+  end
+
   describe '#replicator' do
     it 'is defined and does not raise error' do
       expect(model_record.replicator).to be_a(Gitlab::Geo::Replicator)

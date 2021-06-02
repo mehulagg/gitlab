@@ -86,6 +86,12 @@ module Geo::ReplicableRegistry
         registry.retry_at = nil
       end
 
+      after_transition any => :synced do |registry, _|
+        next unless registry.class.replicator_class.verification_enabled?
+
+        registry.verification_pending!
+      end
+
       event :start do
         transition [:pending, :synced, :failed] => :started
       end
