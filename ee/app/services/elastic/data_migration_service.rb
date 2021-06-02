@@ -25,8 +25,8 @@ module Elastic
         migrations.find { |m| m.version == version }
       end
 
-      def find_by_name(name)
-        migrations.find { |migration| migration.name_for_key == name.to_s.underscore }
+      def find_by_name!(name)
+        migrations.find { |migration| migration.name_for_key == name.to_s.underscore } || (raise ArgumentError, "Couldn't find Elastic::Migration with name='#{name}'")
       end
 
       def drop_migration_has_finished_cache!(migration)
@@ -40,7 +40,7 @@ module Elastic
       end
 
       def migration_has_finished_uncached?(name)
-        migration = find_by_name(name)
+        migration = find_by_name!(name)
 
         !!migration&.load_from_index&.dig('_source', 'completed')
       end
