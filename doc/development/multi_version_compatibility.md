@@ -10,7 +10,7 @@ GitLab deployments can be broken down into many components. Upgrading GitLab is 
 
 ## How long must code be backwards-compatible?
 
-For users following [zero-downtime upgrade instructions](../update/index.md#upgrading-without-downtime), the answer is one minor version. For example:
+For users following [zero-downtime upgrade instructions](../update/index.md#upgrading-without-downtime), the answer is one monthly release. For example:
 
 - 13.11 => 13.12
 - 13.12 => 14.0
@@ -18,7 +18,7 @@ For users following [zero-downtime upgrade instructions](../update/index.md#upgr
 
 For GitLab.com, there can be multiple tiny version upgrades per day, so GitLab.com doesn't constrain how far changes must be backwards-compatible.
 
-Many users upgrade jump to the latest minor version, for example:
+Many users skip some monthly releases, for example:
 
 - 13.0 => 13.12
 
@@ -26,7 +26,7 @@ These users accept some downtime during the upgrade. Unfortunately we can't igno
 
 ## What kind of components can GitLab be broken down into?
 
-The [50,000 reference architecture] runs GitLab on 48+ nodes. GitLab.com is [bigger than that](https://about.gitlab.com/handbook/engineering/infrastructure/production/architecture/), plus a portion of the [infrastructure runs on Kubernetes](https://about.gitlab.com/handbook/engineering/infrastructure/production/kubernetes/gitlab-com/), plus there is a ["canary" stage which receives upgrades first](https://about.gitlab.com/handbook/engineering/#sts=Canary%20Testing).
+The [50,000 reference architecture](https://docs.gitlab.com/ee/administration/reference_architectures/50k_users.html) runs GitLab on 48+ nodes. GitLab.com is [bigger than that](https://about.gitlab.com/handbook/engineering/infrastructure/production/architecture/), plus a portion of the [infrastructure runs on Kubernetes](https://about.gitlab.com/handbook/engineering/infrastructure/production/kubernetes/gitlab-com/), plus there is a ["canary" stage which receives upgrades first](https://about.gitlab.com/handbook/engineering/#sts=Canary%20Testing).
 
 But the problem isn't just that there are many nodes. The bigger problem is that a deployment can be divided into different contexts. And it's not just GitLab.com that does this. Some notable potential divisions:
 
@@ -52,7 +52,7 @@ These problems are often very subtle. This is why it is worth familiarizing your
 - 🚢 New version
 - 🙂 Old version
 
-We worry most about minor version jumps. But refer to [How long must code be backwards-compatible?](#how-long-must-code-be-backwards-compatible).
+We worry most about monthly release jumps. But refer to [How long must code be backwards-compatible?](#how-long-must-code-be-backwards-compatible).
 
 | Upgrade step | Postgres DB | Web nodes | API nodes | Sidekiq nodes | Compatibility concerns |
 | --- | --- | --- | --- | --- | --- |
@@ -70,9 +70,9 @@ From this table, we can list a number of gotchas.
 ### List of common gotchas
 
 - New pre-deployment migrations must work when only the previous version of Rails and JS is running
-- Changes to jobs must work when Sidekiq is only running on the previous version
-- New Sidekiq worker classes won't get run at all for a period of time (i.e. GitLab.com canary stage)
-- Changes to JS must work with the previous version's API
+- [Changes to jobs](sidekiq_style_guide.md#changing-the-arguments-for-a-worker) must work when Sidekiq is only running on the previous version
+- [New Sidekiq worker classes](sidekiq_style_guide.md#adding-new-workers) won't run at all for a period of time (i.e. GitLab.com canary stage)
+- Changes to JS must work with the previous version's API: this includes the REST API, the GraphQL API, and any internal APIs in controllers
 - New post-deployment migrations cannot be depended on by Rails changes
 - New background migrations cannot be depended on by Rails changes
 
