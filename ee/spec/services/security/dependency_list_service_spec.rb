@@ -5,10 +5,16 @@ require 'spec_helper'
 RSpec.describe Security::DependencyListService do
   describe '#execute' do
     let_it_be(:pipeline) { create(:ee_ci_pipeline, :with_dependency_list_report) }
-    let_it_be(:nokogiri_finding) { create(:vulnerabilities_finding, :detected, :with_dependency_scanning_metadata, :with_pipeline) }
+    let_it_be(:nokogiri_finding) { create(:vulnerabilities_finding, :detected, :with_dependency_scanning_metadata, :with_pipeline, raw_severity: 'High') }
     let_it_be(:nokogiri_pipeline) { create(:vulnerabilities_finding_pipeline, finding: nokogiri_finding, pipeline: pipeline) }
-    let_it_be(:other_finding) { create(:vulnerabilities_finding, :detected, :with_dependency_scanning_metadata, package: 'saml2-js', file: 'yarn/yarn.lock', version: '1.5.0', raw_severity: 'Unknown') }
-    let_it_be(:other_pipeline) { create(:vulnerabilities_finding_pipeline, finding: other_finding, pipeline: pipeline) }
+
+    let_it_be(:unknown_severity_finding) { create(:vulnerabilities_finding, :detected, :with_dependency_scanning_metadata, package: 'saml2-js', file: 'yarn/yarn.lock', version: '1.5.0', raw_severity: 'Unknown') }
+    let_it_be(:medium_severity_finding) { create(:vulnerabilities_finding, :detected, :with_dependency_scanning_metadata, package: 'saml2-js', file: 'yarn/yarn.lock',  version: '1.5.0', raw_severity: 'Medium') }
+    let_it_be(:critical_severity_finding) { create(:vulnerabilities_finding, :detected, :with_dependency_scanning_metadata, package: 'saml2-js', file: 'yarn/yarn.lock', version: '1.5.0', raw_severity: 'Critical') }
+
+    let_it_be(:unknown_severity_pipeline) { create(:vulnerabilities_finding_pipeline, finding: unknown_severity_finding, pipeline: pipeline) }
+    let_it_be(:medium_severity_pipeline) { create(:vulnerabilities_finding_pipeline, finding: medium_severity_finding, pipeline: pipeline) }
+    let_it_be(:critical_severity_pipeline) { create(:vulnerabilities_finding_pipeline, finding: critical_severity_finding, pipeline: pipeline) }
 
     subject { described_class.new(pipeline: pipeline, params: params).execute }
 
@@ -99,12 +105,17 @@ RSpec.describe Security::DependencyListService do
           }
         end
 
-        it 'returns array of data properly sorted' do
+        it 'returns array of data sorted by package severity level' do
           nokogiri_index = subject.find_index { |dep| dep[:name] == 'nokogiri' }
           saml2js_index = subject.find_index { |dep| dep[:name] == 'saml2-js' }
 
-          expect(nokogiri_index).to be > saml2js_index
-          expect(subject).to end_with(subject[nokogiri_index])
+          expect(nokogiri_index).to be < saml2js_index
+          expect(subject).to end_with(subject[saml2js_index])
+        end
+
+        it 'returns array of data with package vulnerabilities properly sorted' do
+          saml2js_severities = subject.find { |dep| dep[:name] == 'saml2-js' }[:vulnerabilities].map {|v| v[:severity] }
+          expect(saml2js_severities).to eql(["critical", "medium", "unknown"])
         end
       end
     end
