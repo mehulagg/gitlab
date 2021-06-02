@@ -2732,6 +2732,31 @@ RSpec.describe Ci::Pipeline, :mailer, factory_default: :keep do
         expect(control2.count).to eq(control1.count + extra_update_queries + extra_generic_commit_status_validation_queries)
       end
     end
+
+    context 'when the first try cannot get an exclusive lock' do
+      before do
+        create(:ci_build, :running, pipeline: pipeline)
+
+        expect_any_instance_of(Ci::Build).to receive(:cancel).once.and_raise(ActiveRecord::StaleObjectError) # rubocop:disable RSpec/AnyInstanceOf
+      end
+
+      it 'retries again and cancels the build' do
+        # the retry
+        expect_any_instance_of(Ci::Build).to receive(:cancel).once.and_call_original # rubocop:disable RSpec/AnyInstanceOf
+
+        pipeline.cancel_running
+
+        expect(latest_status).to contain_exactly('canceled')
+      end
+
+      context 'when the retries parameter is 0' do
+        it 'raises error' do
+          expect do
+            pipeline.cancel_running(retries: 0)
+          end.to raise_error(ActiveRecord::StaleObjectError)
+        end
+      end
+    end
   end
 
   describe '#retry_failed' do
