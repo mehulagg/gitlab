@@ -161,23 +161,31 @@ node, using `psql` which is installed by Omnibus GitLab.
 
 The database used by Praefect is now configured.
 
-NOTE:
-By default Praefect database tables are created by the automated process of the `gitlab-ctl reconfigure` task, however, if the `gitlab-ctl reconfigure` was not executed or there were some errors during the execution then the Praefect database tables will not be created on initial reconfigure and may throw errors about relations not existing. 
-Examples: 
-> `ERROR:  relation "node_status" does not exist at character 13`
-> `ERROR:  relation "replication_queue_lock" does not exist at character 40`
+If you see Praefect database errors after configuring PostgreSQL, see
+[troubleshooting steps below](#relation-does-not-exist-errors).
 
-> `{"level":"error","msg":"Error updating node: pq: relation \"node_status\" does not exist","pid":210882,"praefectName":"gitlab1x4m:0.0.0.0:2305","time":"2021-04-01T19:26:19.473Z","virtual_storage":"praefect-cluster-1"}`
+#### Relation does not exist errors
 
-The database schema migration can be done by the `sql-migrate` subcommand of the `praefect` binary.
+By default Praefect database tables are created automatically by `gitlab-ctl reconfigure` task.
+However, if the `gitlab-ctl reconfigure` command isn't executed or there are errors during the
+execution, the Praefect database tables are not created on initial reconfigure and can throw
+errors that relations do not exist.
 
-```
+For example:
+
+- `ERROR:  relation "node_status" does not exist at character 13`
+- `ERROR:  relation "replication_queue_lock" does not exist at character 40`
+- ```json
+  {"level":"error","msg":"Error updating node: pq: relation \"node_status\" does not exist","pid":210882,"praefectName":"gitlab1x4m:0.0.0.0:2305","time":"2021-04-01T19:26:19.473Z","virtual_storage":"praefect-cluster-1"}
+  ```
+
+To solve this, the database schema migration can be done using `sql-migrate` subcommand of
+the `praefect` command:
+
+```shell
 $ sudo /opt/gitlab/embedded/bin/praefect -config /var/opt/gitlab/praefect/config.toml sql-migrate
 praefect sql-migrate: OK (applied 21 migrations)
 ```
-
-
-
 
 #### PgBouncer
 
