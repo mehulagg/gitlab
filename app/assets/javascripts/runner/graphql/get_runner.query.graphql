@@ -1,6 +1,13 @@
 query getRunner($id: CiRunnerID!) {
   runner(id: $id) {
     id
+    active
+    accessLevel
+    runUntagged
+    ipAddress
+    description
+    maximumTimeout
+    tagList
     runnerType
   }
 }

@@ -25,7 +25,8 @@ export default {
   props: {
     type: {
       type: String,
-      required: true,
+      required: false,
+      default: null,
     },
   },
   computed: {
@@ -39,7 +40,7 @@ export default {
 };
 </script>
 <template>
-  <gl-badge v-if="text" :variant="variant" v-bind="$attrs">
+  <gl-badge v-if="type && text" :variant="variant" v-bind="$attrs">
     {{ text }}
   </gl-badge>
 </template>
