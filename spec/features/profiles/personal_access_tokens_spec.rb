@@ -123,7 +123,6 @@ RSpec.describe 'Profile > Personal Access Tokens', :js do
         allow(Gitlab::CurrentSettings).to receive(:disable_feed_token).and_return(false)
         visit profile_personal_access_tokens_path
 
-        expect(page).to have_content("Your feed token is used to authenticate you when your RSS reader loads a personalized RSS feed or when your calendar application loads a personalized calendar, and is included in those feed URLs.")
         expect(feed_token).to eq(user.feed_token)
       end
     end
@@ -133,7 +132,6 @@ RSpec.describe 'Profile > Personal Access Tokens', :js do
         allow(Gitlab::CurrentSettings).to receive(:disable_feed_token).and_return(true)
         visit profile_personal_access_tokens_path
 
-        expect(page).not_to have_content("Your feed token is used to authenticate you when your RSS reader loads a personalized RSS feed or when your calendar application loads a personalized calendar, and is included in those feed URLs.")
         expect(page).not_to have_css("#feed_token")
       end
     end

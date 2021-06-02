@@ -47,7 +47,7 @@
       = label_tag :feed_token, s_('AccessTokens|Feed token'), class: 'label-bold'
       = text_field_tag :feed_token, current_user.feed_token, class: 'form-control gl-form-input js-select-on-focus', readonly: true
       %p.form-text.text-muted
-        - reset_link = link_to s_('AccessTokens|reset this token'), [:reset, :feed_token, :profile], method: :put, data: { confirm: s_('AccessTokens|Are you sure? Any RSS or calendar URLs currently in use will stop working.') }
+        - reset_link = link_to s_('AccessTokens|reset this token'), [:reset, :feed_token, :profile], method: :put, data: { confirm: s_('AccessTokens|Are you sure? Any RSS or calendar URLs currently in use will stop working.'), testid: :reset_feed_token_link }
         - reset_message = s_('AccessTokens|Keep this token secret. Anyone who has it can read activity and issue RSS feeds or your calendar feed as if they were you. If that happens, %{link_reset_it}.') % { link_reset_it: reset_link }
         = reset_message.html_safe
 
@@ -66,7 +66,7 @@
       = label_tag :incoming_email_token, s_('AccessTokens|Incoming email token'), class: 'label-bold'
       = text_field_tag :incoming_email_token, current_user.incoming_email_token, class: 'form-control gl-form-input js-select-on-focus', readonly: true
       %p.form-text.text-muted
-        - reset_link = link_to s_('AccessTokens|reset this token'), [:reset, :incoming_email_token, :profile], method: :put, data: { confirm: s_('AccessTokens|Are you sure? Any issue email addresses currently in use will stop working.') }
+        - reset_link = link_to s_('AccessTokens|reset this token'), [:reset, :incoming_email_token, :profile], method: :put, data: { confirm: s_('AccessTokens|Are you sure? Any issue email addresses currently in use will stop working.'), testid: :reset_email_token_link }
         - reset_message = s_('AccessTokens|Keep this token secret. Anyone who has it can create issues as if they were you. If that happens, %{link_reset_it}.') % { link_reset_it: reset_link }
         = reset_message.html_safe
 

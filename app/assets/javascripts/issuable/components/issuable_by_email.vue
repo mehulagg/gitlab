@@ -150,12 +150,18 @@ export default {
           "
         >
           <template #helpIcon>
-            <gl-link :href="emailsHelpPagePath" target="_blank"
-              ><gl-icon class="gl-text-blue-600" name="question-o"
-            /></gl-link>
+            <gl-link :href="emailsHelpPagePath" target="_blank">
+              <gl-icon class="gl-text-blue-600" name="question-o" />
+            </gl-link>
           </template>
           <template #resetLink="{ content }">
-            <gl-button variant="link" @click="resetIncomingEmailToken">{{ content }}</gl-button>
+            <gl-button
+              variant="link"
+              @click="resetIncomingEmailToken"
+              data-testid="reset_email_token_link"
+            >
+              {{ content }}
+            </gl-button>
           </template>
         </gl-sprintf>
       </p>
