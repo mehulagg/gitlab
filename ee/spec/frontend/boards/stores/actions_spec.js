@@ -41,62 +41,60 @@ afterEach(() => {
 });
 
 describe('setFilters', () => {
-  it('should commit mutation SET_FILTERS, updates epicId with global id', () => {
-    const state = {
+  let state;
+
+  beforeEach(() => {
+    state = {
       filters: {},
+      issuableType: issuableTypes.issue,
     };
-
-    const filters = { labelName: 'label', epicId: 1 };
-    const updatedFilters = { labelName: 'label', epicId: 'gid://gitlab/Epic/1', not: {} };
-
-    return testAction(
-      actions.setFilters,
-      filters,
-      state,
-      [{ type: types.SET_FILTERS, payload: updatedFilters }],
-      [],
-    );
   });
 
-  it('should commit mutation SET_FILTERS, updates epicWildcardId', () => {
-    const state = {
-      filters: {},
-    };
-
-    const filters = { labelName: 'label', epicId: 'None' };
-    const updatedFilters = { labelName: 'label', epicWildcardId: 'NONE', not: {} };
-
-    return testAction(
+  it.each([
+    [
+      'with correct EE filters as payload',
+      {
+        filters: { weight: 3, 'not[iterationId]': 1 },
+        filterVariables: {
+          weight: 3,
+          not: {
+            iterationId: 1,
+          },
+        },
+      },
+    ],
+    [
+      'and update epicId with global id',
+      {
+        filters: { epicId: 1 },
+        filterVariables: { epicId: 'gid://gitlab/Epic/1', not: {} },
+      },
+    ],
+    [
+      "and use 'epicWildcardId' as filter variable when epic wildcard is used",
+      {
+        filters: { epicId: 'None' },
+        filterVariables: { epicWildcardId: 'NONE', not: {} },
+      },
+    ],
+    [
+      "and use 'iterationWildcardId' as filter variable when iteration wildcard is used",
+      {
+        filters: { iterationId: 'None' },
+        filterVariables: { iterationWildcardId: 'NONE', not: {} },
+      },
+    ],
+  ])('should commit mutation SET_FILTERS %s', (_, { filters, filterVariables }) => {
+    testAction(
       actions.setFilters,
       filters,
       state,
-      [{ type: types.SET_FILTERS, payload: updatedFilters }],
-      [],
-    );
-  });
-
-  it('should commit mutation SET_FILTERS, updates iterationWildcardId', () => {
-    const state = {
-      filters: {},
-    };
-
-    const filters = { labelName: 'label', iterationId: 'None' };
-    const updatedFilters = { labelName: 'label', iterationWildcardId: 'NONE', not: {} };
-
-    return testAction(
-      actions.setFilters,
-      filters,
-      state,
-      [{ type: types.SET_FILTERS, payload: updatedFilters }],
+      [{ type: types.SET_FILTERS, payload: filterVariables }],
       [],
     );
   });
 
   it('should commit mutation SET_FILTERS, dispatches setEpicSwimlanes action if filters contain groupBy epic', () => {
-    const state = {
-      filters: {},
-    };
-
     const filters = { labelName: 'label', epicId: 1, groupBy: 'epic' };
     const updatedFilters = { labelName: 'label', epicId: 'gid://gitlab/Epic/1', not: {} };
 

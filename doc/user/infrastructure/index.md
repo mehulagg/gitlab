@@ -68,6 +68,13 @@ Amazon S3 or Google Cloud Storage. Its features include:
 
 Read more on setting up and [using GitLab Managed Terraform states](terraform_state.md)
 
+=======
+## Terraform module registry
+
+GitLab can be used as a [Terraform module registry](../packages/terraform_module_registry/index.md)
+to create and publish Terraform modules to a private registry specific to your
+top-level namespace.
+
 ## Terraform integration in Merge Requests
 
 WARNING:

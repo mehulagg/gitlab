@@ -7,6 +7,7 @@ exports[`AddEditScheduleForm renders form layout 1`] = `
     label="Name"
     label-for="schedule-name"
     label-size="sm"
+    labeldescription=""
     required=""
     state="true"
   >
@@ -20,6 +21,7 @@ exports[`AddEditScheduleForm renders form layout 1`] = `
     label="Description (optional)"
     label-for="schedule-description"
     label-size="sm"
+    labeldescription=""
   >
     <gl-form-input-stub
       id="schedule-description"
@@ -33,6 +35,7 @@ exports[`AddEditScheduleForm renders form layout 1`] = `
     label="Timezone"
     label-for="schedule-timezone"
     label-size="sm"
+    labeldescription=""
     required=""
     state="true"
   >

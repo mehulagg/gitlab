@@ -42,7 +42,7 @@ exports[`OnDemandScansSiteProfileSelector renders properly with profiles 1`] = `
         role="group"
         tabindex="-1"
       >
-         
+          
         <div
           class="dropdown b-dropdown gl-new-dropdown mw-460 btn-group"
           data-testid="profiles-dropdown"

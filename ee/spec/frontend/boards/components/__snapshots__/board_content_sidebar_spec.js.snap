@@ -24,11 +24,14 @@ exports[`ee/BoardContentSidebar matches the snapshot 1`] = `
   <div>
     <boardsidebarmilestoneselect-stub />
      
-    <sidebariterationwidget-stub
+    <sidebardropdownwidget-stub
+      attr-workspace-path="gitlab-org"
       class="gl-mt-5"
+      data-qa-selector="iteration_container"
+      data-testid="iteration-edit"
       iid="27"
+      issuable-attribute="iteration"
       issuable-type="issue"
-      iterations-workspace-path="gitlab-org"
       workspace-path="gitlab-org/gitlab-test"
     />
   </div>
