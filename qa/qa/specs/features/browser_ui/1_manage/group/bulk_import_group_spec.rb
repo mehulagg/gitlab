@@ -71,7 +71,7 @@ module QA
       # Non blocking issues:
       # https://gitlab.com/gitlab-org/gitlab/-/issues/331252
       it(
-        'imports group with subgroups',
+        'imports group with subgroups and labels',
         testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/1785',
         quarantine: {
           only: { job: 'relative_url' },
@@ -79,19 +79,6 @@ module QA
           type: :bug
         }
       ) do
-        Page::Group::BulkImport.perform do |import_page|
-          import_page.import_group(source_group.path, sandbox.path)
-
-          aggregate_failures do
-            expect(import_page).to have_imported_group(source_group.path, wait: 120)
-
-            expect { imported_group.reload! }.to eventually_eq(source_group).within(duration: 10)
-            expect { imported_subgroup.reload! }.to eventually_eq(subgroup).within(duration: 10)
-          end
-        end
-      end
-
-      it 'imports group labels', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/1785' do
         Resource::GroupLabel.fabricate_via_api! do |label|
           label.api_client = api_client
           label.group = source_group
@@ -108,6 +95,9 @@ module QA
 
           aggregate_failures do
             expect(import_page).to have_imported_group(source_group.path, wait: 120)
+
+            expect { imported_group.reload! }.to eventually_eq(source_group).within(duration: 10)
+            expect { imported_subgroup.reload! }.to eventually_eq(subgroup).within(duration: 10)
 
             expect { imported_group.labels }.to eventually_include(*source_group.labels).within(duration: 10)
             expect { imported_subgroup.labels }.to eventually_include(*subgroup.labels).within(duration: 10)
