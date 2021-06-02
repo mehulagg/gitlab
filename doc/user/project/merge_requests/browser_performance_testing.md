@@ -40,7 +40,7 @@ Consider the following workflow:
 ## How browser performance testing works
 
 First, define a job in your `.gitlab-ci.yml` file that generates the
-[Browser Performance report artifact](../../../ci/yaml/README.md#artifactsreportsbrowserperformance).
+[Browser Performance report artifact](../../../ci/yaml/README.md#artifactsreportsbrowser_performance).
 GitLab then checks this report, compares key performance metrics for each page
 between the source and target branches, and shows the information in the merge request.
 
