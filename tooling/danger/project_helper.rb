@@ -25,6 +25,7 @@ module Tooling
         metadata
         feature_flag
         roulette
+        security_merge_request
         sidekiq_queues
         specialization_labels
         specs
