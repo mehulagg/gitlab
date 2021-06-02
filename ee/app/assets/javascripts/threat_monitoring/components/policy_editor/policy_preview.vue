@@ -40,9 +40,10 @@ export default {
 <template>
   <gl-tabs v-model="selectedTab" content-class="gl-pt-0">
     <gl-tab :title="s__('NetworkPolicies|.yaml')">
-      <pre class="gl-bg-white gl-rounded-top-left-none gl-rounded-top-right-none">{{
-        policyYaml
-      }}</pre>
+      <pre
+        class="gl-bg-white gl-rounded-top-left-none gl-rounded-top-right-none gl-border-t-none"
+        >{{ policyYaml }}</pre
+      >
     </gl-tab>
     <gl-tab :title="s__('NetworkPolicies|Rule')">
       <div

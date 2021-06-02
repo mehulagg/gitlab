@@ -10,6 +10,8 @@
   align-items: flex-start;
 }
 
-.policy-editor .policy-table-left {
-  flex: 4;
+.policy-editor .policy-table-right {
+  @media (max-width: $breakpoint-md) {
+    border-left-style: none;
+  }
 }
