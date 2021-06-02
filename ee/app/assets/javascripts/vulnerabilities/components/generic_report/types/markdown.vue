@@ -1,6 +1,6 @@
 <script>
 import { GlSkeletonLoader, GlSafeHtmlDirective as SafeHtml } from '@gitlab/ui';
-import axios from '~/lib/utils/axios_utils';
+import { getMarkdown } from '~/rest_api';
 
 export default {
   components: { GlSkeletonLoader },
@@ -21,7 +21,6 @@ export default {
       error: false,
     };
   },
-  markdownEndpoint: '/api/v4/markdown',
   computed: {
     isLoading() {
       return this.loading && !this.error;
@@ -35,11 +34,10 @@ export default {
   },
   methods: {
     renderMarkdown() {
-      axios
-        .post(this.$options.markdownEndpoint, {
-          text: this.value,
-          gfm: true,
-        })
+      getMarkdown({
+        text: this.value,
+        gfm: true,
+      })
         .then(({ data }) => {
           this.markdown = data.html;
           this.loading = false;

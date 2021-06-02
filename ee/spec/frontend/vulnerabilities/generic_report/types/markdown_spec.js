@@ -2,8 +2,11 @@ import { GlSkeletonLoader } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
 import MockAdapter from 'axios-mock-adapter';
 import Markdown from 'ee/vulnerabilities/components/generic_report/types/markdown.vue';
+import { buildApiUrl } from '~/api/api_utils';
 import axios from '~/lib/utils/axios_utils';
 import httpStatusCodes from '~/lib/utils/http_status';
+
+const MARKDOWN_PATH = '/api/:version/markdown';
 
 // Original markdown
 const MARKDOWN = 'Checkout [GitLab](http://gitlab.com) "><script>alert(1)</script>';
@@ -30,8 +33,9 @@ describe('ee/vulnerabilities/components/generic_report/types/markdown.vue', () =
   const findMarkdown = () => wrapper.find('[data-testid="markdown"]');
 
   const setUpMockMarkdown = () => {
+    const url = buildApiUrl(MARKDOWN_PATH);
     mock
-      .onPost('/api/v4/markdown', {
+      .onPost(url, {
         text: MARKDOWN,
         gfm: true,
       })
@@ -52,8 +56,7 @@ describe('ee/vulnerabilities/components/generic_report/types/markdown.vue', () =
   });
 
   describe('when loading', () => {
-    it('shows the loading icon', async () => {
-      await wrapper.setData({ loading: true });
+    it('shows the loading icon', () => {
       expect(findSkeletonLoader().exists()).toBe(true);
     });
   });
