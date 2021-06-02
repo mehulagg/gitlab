@@ -73,7 +73,11 @@ module QA
       it(
         'imports group with subgroups',
         testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/1785',
-        quarantine: { only: { job: 'relative_url' }, issue: 'https://gitlab.com/gitlab-org/gitlab/-/issues/330344' }
+        quarantine: {
+          only: { job: 'relative_url' },
+          issue: 'https://gitlab.com/gitlab-org/gitlab/-/issues/330344',
+          type: :bug
+        }
       ) do
         Page::Group::BulkImport.perform do |import_page|
           import_page.import_group(source_group.path, sandbox.path)
