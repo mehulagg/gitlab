@@ -274,7 +274,7 @@ The following table lists group permissions available for each role:
 | Publish [packages](packages/index.md)                  | **{dotted-circle}** No | **{dotted-circle}** No | **{check-circle}** Yes | **{check-circle}** Yes | **{check-circle}** Yes |
 | View metrics dashboard annotations                     | **{dotted-circle}** No | **{check-circle}** Yes | **{check-circle}** Yes | **{check-circle}** Yes | **{check-circle}** Yes |
 | Create project in group                                | **{dotted-circle}** No | **{dotted-circle}** No | **{check-circle}** Yes (3)(5) | **{check-circle}** Yes (3) | **{check-circle}** Yes (3) |
-| Share (invite) groups with groups                      | **{dotted-circle}** No | **{dotted-circle}** No |** {dotted-circle}** No | **{dotted-circle}** No | **{check-circle}** Yes |
+| Share (invite) groups with groups                      | **{dotted-circle}** No | **{dotted-circle}** No | **{dotted-circle}** No | **{dotted-circle}** No | **{check-circle}** Yes |
 | Create/edit/delete group milestones                    | **{dotted-circle}** No | **{dotted-circle}** No | **{check-circle}** Yes | **{check-circle}** Yes | **{check-circle}** Yes |
 | Create/edit/delete iterations                          | **{dotted-circle}** No | **{dotted-circle}** No | **{check-circle}** Yes | **{check-circle}** Yes | **{check-circle}** Yes |
 | Enable/disable a dependency proxy                      | **{dotted-circle}** No | **{dotted-circle}** No | **{check-circle}** Yes | **{check-circle}** Yes | **{check-circle}** Yes |
