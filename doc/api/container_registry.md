@@ -350,23 +350,27 @@ Examples:
    and remove ones that are older than 2 days:
 
    ```shell
-   curl --request DELETE --data 'name_regex_delete=[0-9a-z]{40}' --data 'keep_n=5' --data 'older_than=2d' --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/projects/5/registry/repositories/2/tags"
+   curl --request DELETE --data 'name_regex_delete=[0-9a-z]{40}' --data 'keep_n=5' --data 'older_than=2d' \
+     --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/projects/5/registry/repositories/2/tags"
    ```
 
 1. Remove all tags, but keep always the latest 5:
 
    ```shell
-   curl --request DELETE --data 'name_regex_delete=.*' --data 'keep_n=5' --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/projects/5/registry/repositories/2/tags"
+   curl --request DELETE --data 'name_regex_delete=.*' --data 'keep_n=5' \
+     --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/projects/5/registry/repositories/2/tags"
    ```
 
 1. Remove all tags, but keep always tags beginning with `stable`:
 
    ```shell
-   curl --request DELETE --data 'name_regex_delete=.*' --data 'name_regex_keep=stable.*' --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/projects/5/registry/repositories/2/tags"
+   curl --request DELETE --data 'name_regex_delete=.*' --data 'name_regex_keep=stable.*' \
+     --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/projects/5/registry/repositories/2/tags"
    ```
 
 1. Remove all tags that are older than 1 month:
 
    ```shell
-   curl --request DELETE --data 'name_regex_delete=.*' --data 'older_than=1month' --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/projects/5/registry/repositories/2/tags"
+   curl --request DELETE --data 'name_regex_delete=.*' --data 'older_than=1month' \
+     --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/projects/5/registry/repositories/2/tags"
    ```
