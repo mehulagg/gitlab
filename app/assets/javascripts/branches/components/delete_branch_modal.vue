@@ -81,13 +81,13 @@ export default {
       this.deletePath = deletePath;
       this.merged = merged;
 
-      this.$root.$emit(BV_SHOW_MODAL, this.modalId);
+      this.$bvModal.show(this.modalId);
     },
     submitForm() {
       this.$refs.form.submit();
     },
     closeModal() {
-      this.$root.$emit(BV_HIDE_MODAL, this.modalId);
+      this.$bvModal.hide(this.modalId);
     },
   },
   i18n: {
