@@ -12,7 +12,7 @@ RSpec.describe Groups::GroupLinks::CreateService, '#execute' do
   let_it_be(:group_child) { create(:group, :private, parent: group) }
 
   let_it_be(:shared_group_parent) { create(:group, :private) }
-  let_it_be(:shared_group) { create(:group, :private, parent: shared_group_parent) }
+  let_it_be(:shared_group, refind: true) { create(:group, :private, parent: shared_group_parent) }
   let_it_be(:shared_group_child) { create(:group, :private, parent: shared_group) }
 
   let_it_be(:project_parent) { create(:project, group: shared_group_parent) }
@@ -125,6 +125,30 @@ RSpec.describe Groups::GroupLinks::CreateService, '#execute' do
           expect(Ability.allowed?(user, :read_project, project_child)).to be_falsey
         end
       end
+    end
+  end
+
+  context 'sharing outside the hierarchy is disabled' do
+    before do
+      shared_group_parent.namespace_settings.update!(prevent_sharing_groups_outside_hierarchy: true)
+    end
+
+    it 'prevents sharing with a group outside the hierarchy' do
+      result = subject.execute(shared_group)
+
+      expect(group.reload.shared_group_links.count).to eq(0)
+      expect(result[:status]).to eq(:error)
+      expect(result[:http_status]).to eq(404)
+    end
+
+    it 'allows sharing with a group within the hierarchy' do
+      sibling_group = create(:group, :private, parent: shared_group_parent)
+      sibling_group.add_guest(group_user)
+
+      result = described_class.new(sibling_group, user, opts).execute(shared_group)
+
+      expect(sibling_group.reload.shared_group_links.count).to eq(1)
+      expect(result[:status]).to eq(:success)
     end
   end
 end

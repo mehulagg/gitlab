@@ -442,6 +442,10 @@ class Group < Namespace
     end
   end
 
+  def self_and_descendants_ids
+    self_and_descendants.pluck(:id)
+  end
+
   def direct_members
     GroupMember.active_without_invites_and_requests
                .non_minimal_access
