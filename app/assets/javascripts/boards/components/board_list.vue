@@ -141,7 +141,9 @@ export default {
       this.showIssueForm = !this.showIssueForm;
     },
     onReachingListBottom() {
+      console.log(this.hasNextPage);
       if (!this.loadingMore && this.hasNextPage) {
+        this.showCount = true;
         this.loadNextPage();
       }
     },
@@ -232,17 +234,17 @@ export default {
         :item="item"
         :disabled="disabled"
       />
-      <li v-if="showCount" class="board-list-count gl-text-center" data-issue-id="-1">
-        <gl-loading-icon
-          v-if="loadingMore"
-          :label="$options.i18n.loadingMoreboardItems"
-          data-testid="count-loading-icon"
-        />
-        <span v-if="showingAllItems">{{ showingAllItemsText }}</span>
-        <gl-intersection-observer v-else @appear="onReachingListBottom">
-          <span>{{ paginatedIssueText }}</span>
-        </gl-intersection-observer>
-      </li>
+      <gl-intersection-observer @appear="onReachingListBottom">
+        <li v-if="showCount" class="board-list-count gl-text-center" data-issue-id="-1">
+          <gl-loading-icon
+            v-if="loadingMore"
+            :label="$options.i18n.loadingMoreboardItems"
+            data-testid="count-loading-icon"
+          />
+          <span v-if="showingAllItems">{{ showingAllItemsText }}</span>
+          <span v-else>{{ paginatedIssueText }}</span>
+        </li>
+      </gl-intersection-observer>
     </component>
   </div>
 </template>
