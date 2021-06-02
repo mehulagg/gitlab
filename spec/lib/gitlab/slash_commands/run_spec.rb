@@ -27,25 +27,11 @@ RSpec.describe Gitlab::SlashCommands::Run do
     it 'returns true when builds are enabled for the project' do
       project = double(:project, builds_enabled?: true)
 
-      allow(Gitlab::Chat)
-        .to receive(:available?)
-        .and_return(true)
-
       expect(described_class.available?(project)).to eq(true)
     end
 
     it 'returns false when builds are disabled for the project' do
       project = double(:project, builds_enabled?: false)
-
-      expect(described_class.available?(project)).to eq(false)
-    end
-
-    it 'returns false when chatops is not available' do
-      allow(Gitlab::Chat)
-        .to receive(:available?)
-        .and_return(false)
-
-      project = double(:project, builds_enabled?: true)
 
       expect(described_class.available?(project)).to eq(false)
     end
