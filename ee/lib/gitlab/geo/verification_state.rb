@@ -54,9 +54,16 @@ module Gitlab
             instance.verification_started_at = Time.current
           end
 
-          before_transition any => :verification_pending do |instance, _|
+          before_transition [:verification_pending, :verification_started, :verification_succeeded] => :verification_pending do |instance, _|
             instance.verification_retry_count = 0
             instance.verification_retry_at = nil
+            instance.verification_failure = nil
+          end
+
+          before_transition :verification_failed => any do |instance, _|
+            # If transitioning from verification_failed, then don't clear
+            # verification_retry_count and verification_retry_at to ensure
+            # progressive backoff of syncs-due-to-verification-failures
             instance.verification_failure = nil
           end
 
