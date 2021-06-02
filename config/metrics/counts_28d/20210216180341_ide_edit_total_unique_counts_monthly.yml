@@ -15,4 +15,4 @@ tier:
 - free
 - premium
 - ultimate
-skip_validation: false
+skip_validation: true
