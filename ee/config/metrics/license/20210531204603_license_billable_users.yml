@@ -1,7 +1,7 @@
 ---
 key_path: license_billable_users
 name: billable_users
-description: Count of all billable users (active users excluding bots and guests).
+description: Number of all billable users (active users excluding bots and guests).
 product_section: growth
 product_stage: growth
 product_group: group::product intelligence

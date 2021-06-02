@@ -7176,7 +7176,7 @@ Tiers: `free`
 
 ### `license_billable_users`
 
-Count of all billable users (active users excluding bots and guests).
+Number of all billable users (active users excluding bots and guests).
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/license/20210531204603_license_billable_users.yml)
 
