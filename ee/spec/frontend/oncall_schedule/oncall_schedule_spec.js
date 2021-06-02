@@ -161,13 +161,13 @@ describe('On-call schedule', () => {
 
   it('renders a open card for the first in the list by default', () => {
     expect(findCollapsible().attributes('visible')).toBe('true');
-    expect(findCollapsibleIcon().props('name')).toBe('angle-up');
+    expect(findCollapsibleIcon().props('name')).toBe('angle-down');
   });
 
   it('renders a collapsed card if not the first in the list by default', () => {
     createComponent({ scheduleIndex: 1 });
     expect(findCollapsible().attributes('visible')).toBeUndefined();
-    expect(findCollapsibleIcon().props('name')).toBe('angle-down');
+    expect(findCollapsibleIcon().props('name')).toBe('angle-right');
   });
 
   describe('Timeframe shift preset type', () => {

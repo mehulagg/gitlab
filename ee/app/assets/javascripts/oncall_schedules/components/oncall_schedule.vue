@@ -179,7 +179,7 @@ export default {
         : this.$options.i18n.scheduleClose;
     },
     scheduleVisibleAngleIcon() {
-      return this.scheduleVisible ? 'angle-up' : 'angle-down';
+      return this.scheduleVisible ? 'angle-down' : 'angle-right';
     },
     selectedTimezone() {
       return this.timezones.find((tz) => tz.identifier === this.schedule.timezone);
