@@ -302,7 +302,10 @@ describe('DevopsAdoptionSegmentModal', () => {
 
           if (expectedAddGroupGids.length) {
             it('submits the correct add request variables', () => {
-              expect(mutate).toHaveBeenCalledWith({ namespaceIds: expectedAddGroupGids });
+              expect(mutate).toHaveBeenCalledWith({
+                displayNamespaceId: null,
+                namespaceIds: expectedAddGroupGids,
+              });
             });
 
             it('emits segmentsAdded with the correct variables', () => {

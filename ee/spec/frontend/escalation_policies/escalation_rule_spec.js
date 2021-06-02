@@ -1,4 +1,4 @@
-import { GlDropdownItem, GlSprintf } from '@gitlab/ui';
+import { GlDropdownItem, GlFormGroup, GlSprintf } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
 import { cloneDeep } from 'lodash';
 import EscalationRule from 'ee/escalation_policies/components/escalation_rule.vue';
@@ -19,6 +19,9 @@ describe('EscalationRule', () => {
         propsData: {
           rule: cloneDeep(defaultEscalationRule),
           schedules: mockSchedules,
+          schedulesLoading: false,
+          index: 0,
+          isValid: false,
           ...props,
         },
         stubs: {
@@ -44,6 +47,10 @@ describe('EscalationRule', () => {
 
   const findSchedulesDropdown = () => wrapper.findByTestId('schedules-dropdown');
   const findSchedulesDropdownOptions = () => findSchedulesDropdown().findAll(GlDropdownItem);
+
+  const findFormGroup = () => wrapper.findComponent(GlFormGroup);
+
+  const findNoSchedulesInfoIcon = () => wrapper.findByTestId('no-schedules-info-icon');
 
   describe('Status dropdown', () => {
     it('should have correct alert status options', () => {
@@ -74,6 +81,32 @@ describe('EscalationRule', () => {
       expect(findSchedulesDropdownOptions().wrappers.map((w) => w.text())).toStrictEqual(
         mockSchedules.map(({ name }) => name),
       );
+    });
+
+    it('should NOT disable the dropdown OR show the info icon when schedules are loaded and provided', () => {
+      expect(findSchedulesDropdown().attributes('disabled')).toBeUndefined();
+      expect(findNoSchedulesInfoIcon().exists()).toBe(false);
+    });
+
+    it('should disable the dropdown and show the info icon when no schedules provided', () => {
+      createComponent({ props: { schedules: [], schedulesLoading: false } });
+      expect(findSchedulesDropdown().attributes('disabled')).toBe('true');
+      expect(findNoSchedulesInfoIcon().exists()).toBe(true);
+    });
+  });
+
+  describe('Validation', () => {
+    it.each`
+      isValid  | state
+      ${true}  | ${'true'}
+      ${false} | ${undefined}
+    `('when $isValid sets from group state to $state', ({ isValid, state }) => {
+      createComponent({
+        props: {
+          isValid,
+        },
+      });
+      expect(findFormGroup().attributes('state')).toBe(state);
     });
   });
 });

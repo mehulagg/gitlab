@@ -5,8 +5,12 @@ import {
   CONNECTIVITY_ERROR,
   connectivityErrorAlert,
   connectivityIssue,
-  generalActivationError,
+  generalActivationErrorMessage,
+  generalActivationErrorTitle,
   howToActivateSubscription,
+  INVALID_CODE_ERROR,
+  invalidActivationCode,
+  supportLink,
 } from '../constants';
 
 export const troubleshootingHelpLink = helpPagePath('user/admin_area/license.html', {
@@ -20,11 +24,14 @@ export default {
     connectivityIssueTitle: connectivityIssue,
     connectivityIssueSubtitle: connectivityErrorAlert.subtitle,
     connectivityIssueHelpText: connectivityErrorAlert.helpText,
-    generalActivationError,
+    generalActivationErrorMessage,
+    generalActivationErrorTitle,
     howToActivateSubscription,
+    invalidActivationCode,
   },
   links: {
     subscriptionActivationHelpLink,
+    supportLink,
     troubleshootingHelpLink,
   },
   components: {
@@ -40,20 +47,26 @@ export default {
     },
   },
   computed: {
-    hasConnectivityIssue() {
+    hasConnectivityIssueError() {
       return this.error === CONNECTIVITY_ERROR;
     },
+    hasError() {
+      return this.error;
+    },
     hasGeneralError() {
-      return this.error && !this.hasConnectivityIssue;
+      return ![CONNECTIVITY_ERROR, INVALID_CODE_ERROR].includes(this.error);
+    },
+    hasInvalidCodeError() {
+      return this.error === INVALID_CODE_ERROR;
     },
   },
 };
 </script>
 
 <template>
-  <div>
+  <div v-if="hasError" data-testid="root">
     <gl-alert
-      v-if="hasConnectivityIssue"
+      v-if="hasConnectivityIssueError"
       variant="danger"
       :title="$options.i18n.connectivityIssueTitle"
       :dismissible="false"
@@ -81,17 +94,35 @@ export default {
       </gl-sprintf>
     </gl-alert>
     <gl-alert
-      v-if="hasGeneralError"
+      v-if="hasInvalidCodeError"
       variant="danger"
-      :title="$options.i18n.generalActivationError"
+      :title="$options.i18n.generalActivationErrorTitle"
       :dismissible="false"
-      data-testid="general-error-alert"
+      data-testid="invalid-activation-error-alert"
     >
-      <gl-sprintf :message="$options.i18n.howToActivateSubscription">
+      <gl-sprintf :message="$options.i18n.invalidActivationCode">
         <template #link="{ content }">
           <gl-link :href="$options.links.subscriptionActivationHelpLink" target="_blank">{{
             content
           }}</gl-link>
+        </template>
+      </gl-sprintf>
+    </gl-alert>
+    <gl-alert
+      v-if="hasGeneralError"
+      variant="danger"
+      :title="$options.i18n.generalActivationErrorTitle"
+      :dismissible="false"
+      data-testid="general-error-alert"
+    >
+      <gl-sprintf :message="$options.i18n.generalActivationErrorMessage">
+        <template #activationLink="{ content }">
+          <gl-link :href="$options.links.subscriptionActivationHelpLink" target="_blank">{{
+            content
+          }}</gl-link>
+        </template>
+        <template #supportLink="{ content }">
+          <gl-link :href="$options.links.supportLink" target="_blank">{{ content }}</gl-link>
         </template>
       </gl-sprintf>
     </gl-alert>

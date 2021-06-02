@@ -63,7 +63,6 @@ describe('ee/BoardContentSidebar', () => {
         SidebarSubscriptionsWidget: true,
         BoardSidebarMilestoneSelect: true,
         BoardSidebarWeightInput: true,
-        SidebarIterationWidget: true,
         SidebarDropdownWidget: true,
       },
     });

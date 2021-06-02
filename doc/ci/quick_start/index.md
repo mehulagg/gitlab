@@ -13,7 +13,7 @@ GitLab [continuous integration](https://about.gitlab.com/stages-devops-lifecycle
 Before you start, make sure you have:
 
 - A project in GitLab that you would like to use CI/CD for.
-- Maintainer or owner access for the project.
+- The [Maintainer or Owner role](../../user/permissions.md) for the project.
 
 If you are migrating from another CI/CD tool, view this documentation:
 
@@ -150,7 +150,7 @@ When you committed your changes, a pipeline started.
 
 To view your pipeline:
 
-- Go **CI/CD > Pipelines**.
+- Go to **CI/CD > Pipelines**.
 
   A pipeline with three stages should be displayed:
 

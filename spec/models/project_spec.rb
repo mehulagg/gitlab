@@ -472,6 +472,23 @@ RSpec.describe Project, factory_default: :keep do
     end
   end
 
+  describe '#merge_requests_author_approval' do
+    where(:attribute_value, :return_value) do
+      true  | true
+      false | false
+      nil   | false
+    end
+
+    with_them do
+      let(:project) { create(:project, merge_requests_author_approval: attribute_value) }
+
+      it 'returns expected value' do
+        expect(project.merge_requests_author_approval).to eq(return_value)
+        expect(project.merge_requests_author_approval?).to eq(return_value)
+      end
+    end
+  end
+
   describe '#all_pipelines' do
     let_it_be(:project) { create(:project) }
 
@@ -1753,13 +1770,13 @@ RSpec.describe Project, factory_default: :keep do
     end
   end
 
-  describe '#shared_runners' do
-    let!(:runner) { create(:ci_runner, :instance) }
+  shared_examples 'shared_runners' do
+    let_it_be(:runner) { create(:ci_runner, :instance) }
 
     subject { project.shared_runners }
 
     context 'when shared runners are enabled for project' do
-      let!(:project) { create(:project, shared_runners_enabled: true) }
+      let(:project) { build_stubbed(:project, shared_runners_enabled: true) }
 
       it "returns a list of shared runners" do
         is_expected.to eq([runner])
@@ -1767,11 +1784,21 @@ RSpec.describe Project, factory_default: :keep do
     end
 
     context 'when shared runners are disabled for project' do
-      let!(:project) { create(:project, shared_runners_enabled: false) }
+      let(:project) { build_stubbed(:project, shared_runners_enabled: false) }
 
       it "returns a empty list" do
         is_expected.to be_empty
       end
+    end
+  end
+
+  describe '#shared_runners' do
+    it_behaves_like 'shared_runners'
+  end
+
+  describe '#available_shared_runners' do
+    it_behaves_like 'shared_runners' do
+      subject { project.available_shared_runners }
     end
   end
 
@@ -5223,7 +5250,7 @@ RSpec.describe Project, factory_default: :keep do
     it 'executes services with the specified scope' do
       data = 'any data'
 
-      expect_next_found_instance_of(SlackService) do |instance|
+      expect_next_found_instance_of(Integrations::Slack) do |instance|
         expect(instance).to receive(:async_execute).with(data).once
       end
 
@@ -5231,7 +5258,7 @@ RSpec.describe Project, factory_default: :keep do
     end
 
     it 'does not execute services that don\'t match the specified scope' do
-      expect(SlackService).not_to receive(:allocate).and_wrap_original do |method|
+      expect(Integrations::Slack).not_to receive(:allocate).and_wrap_original do |method|
         method.call.tap do |instance|
           expect(instance).not_to receive(:async_execute)
         end
@@ -6202,14 +6229,16 @@ RSpec.describe Project, factory_default: :keep do
     let_it_be(:project) { create(:project, group: create(:group, :public)) }
 
     it 'returns a maximum of ten maintainers of the project in recent_sign_in descending order' do
-      users = create_list(:user, 12, :with_sign_ins)
+      limit = 2
+      stub_const("Member::ACCESS_REQUEST_APPROVERS_TO_BE_NOTIFIED_LIMIT", limit)
+      users = create_list(:user, limit + 1, :with_sign_ins)
       active_maintainers = users.map do |user|
         create(:project_member, :maintainer, user: user, project: project)
       end
 
       active_maintainers_in_recent_sign_in_desc_order = project.members_and_requesters
                                                                .id_in(active_maintainers)
-                                                               .order_recent_sign_in.limit(10)
+                                                               .order_recent_sign_in.limit(limit)
 
       expect(project.access_request_approvers_to_be_notified).to eq(active_maintainers_in_recent_sign_in_desc_order)
     end
@@ -6896,6 +6925,67 @@ RSpec.describe Project, factory_default: :keep do
         expect(project.tags.first.class.name).to eq('ActsAsTaggableOn::Tag')
         expect(project.tags.map(&:name)).to match_array(%w[topic1 topic2 topic3])
       end
+    end
+  end
+
+  shared_examples 'all_runners' do
+    let_it_be_with_refind(:project) { create(:project, group: create(:group)) }
+    let_it_be(:instance_runner) { create(:ci_runner, :instance) }
+    let_it_be(:group_runner) { create(:ci_runner, :group, groups: [project.group]) }
+    let_it_be(:other_group_runner) { create(:ci_runner, :group) }
+    let_it_be(:project_runner) { create(:ci_runner, :project, projects: [project]) }
+    let_it_be(:other_project_runner) { create(:ci_runner, :project) }
+
+    subject { project.all_runners }
+
+    context 'when shared runners are enabled for project' do
+      before do
+        project.update!(shared_runners_enabled: true)
+      end
+
+      it 'returns a list with all runners' do
+        is_expected.to match_array([instance_runner, group_runner, project_runner])
+      end
+    end
+
+    context 'when shared runners are disabled for project' do
+      before do
+        project.update!(shared_runners_enabled: false)
+      end
+
+      it 'returns a list without shared runners' do
+        is_expected.to match_array([group_runner, project_runner])
+      end
+    end
+
+    context 'when group runners are enabled for project' do
+      before do
+        project.update!(group_runners_enabled: true)
+      end
+
+      it 'returns a list with all runners' do
+        is_expected.to match_array([instance_runner, group_runner, project_runner])
+      end
+    end
+
+    context 'when group runners are disabled for project' do
+      before do
+        project.update!(group_runners_enabled: false)
+      end
+
+      it 'returns a list without group runners' do
+        is_expected.to match_array([instance_runner, project_runner])
+      end
+    end
+  end
+
+  describe '#all_runners' do
+    it_behaves_like 'all_runners'
+  end
+
+  describe '#all_available_runners' do
+    it_behaves_like 'all_runners' do
+      subject { project.all_available_runners }
     end
   end
 

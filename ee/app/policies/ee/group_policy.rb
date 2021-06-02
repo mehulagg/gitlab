@@ -147,6 +147,7 @@ module EE
       rule { maintainer }.policy do
         enable :maintainer_access
         enable :admin_wiki
+        enable :admin_protected_environment
       end
 
       rule { owner | admin }.policy do

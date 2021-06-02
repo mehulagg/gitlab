@@ -8,7 +8,7 @@ RSpec.describe API::Iterations do
   let_it_be(:group) { create(:group, :private, parent: parent_group) }
 
   let_it_be(:iteration) { create(:iteration, group: group, title: 'search_title') }
-  let_it_be(:closed_iteration) { create(:iteration, :closed, group: group) }
+  let_it_be(:closed_iteration) { create(:iteration, :closed, group: group, start_date: 2.weeks.ago, due_date: 1.week.ago) }
   let_it_be(:ancestor_iteration) { create(:iteration, group: parent_group) }
 
   before_all do

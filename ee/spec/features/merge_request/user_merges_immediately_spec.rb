@@ -35,7 +35,7 @@ RSpec.describe 'Merge requests > User merges immediately', :js do
 
   context 'when the merge request is on the merge train' do
     def merge_button
-      find('.mr-widget-body .accept-merge-request.btn-info')
+      find('.mr-widget-body .accept-merge-request.btn-confirm')
     end
 
     def open_warning_dialog

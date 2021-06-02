@@ -343,8 +343,7 @@ describe('DevopsAdoptionApp', () => {
               expect.anything(),
               [devopsAdoptionSegmentsData.nodes[0]],
               {
-                parentNamespaceId: groupGid,
-                directDescendantsOnly: false,
+                displayNamespaceId: groupGid,
               },
             );
           });

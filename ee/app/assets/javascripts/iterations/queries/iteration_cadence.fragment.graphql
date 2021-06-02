@@ -1,0 +1,8 @@
+fragment IterationCadence on IterationCadence {
+  id
+  title
+  automatic
+  startDate
+  durationInWeeks
+  iterationsInAdvance
+}

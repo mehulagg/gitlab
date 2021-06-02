@@ -151,13 +151,18 @@ RSpec.describe Ci::Build do
 
       context 'when there is a dast_profile associated with the pipeline' do
         let_it_be(:project) { create(:project, :repository) }
+        let_it_be(:user) { create(:user, developer_projects: [project]) }
         let_it_be(:dast_profile) { create(:dast_profile, project: project) }
         let_it_be(:dast_site_profile_secret_variable) { create(:dast_site_profile_secret_variable, key: 'DAST_PASSWORD_BASE64', dast_site_profile: dast_profile.dast_site_profile) }
 
-        let(:pipeline) { create(:ci_pipeline, pipeline_params.merge!(project: project, dast_profile: dast_profile) ) }
+        let(:pipeline) { create(:ci_pipeline, pipeline_params.merge!(project: project, dast_profile: dast_profile, user: user) ) }
 
         let(:key) { dast_site_profile_secret_variable.key }
         let(:value) { dast_site_profile_secret_variable.value }
+
+        before do
+          stub_licensed_features(security_on_demand_scans: true)
+        end
 
         shared_examples 'a pipeline with no dast on-demand variables' do
           it 'does not include variables associated with the profile' do
@@ -180,6 +185,24 @@ RSpec.describe Ci::Build do
 
           it 'includes variables associated with the profile' do
             expect(subject.to_runner_variables).to include(key: key, value: value, public: false, masked: true)
+          end
+
+          context 'when user cannot read secrets' do
+            before do
+              stub_licensed_features(security_on_demand_scans: false)
+            end
+
+            it 'does not include variables associated with the profile' do
+              expect(subject.to_runner_variables).not_to include(key: key, value: value, public: false, masked: true)
+            end
+          end
+
+          context 'when there is no user associated with the pipeline' do
+            let_it_be(:user) { nil }
+
+            it 'does not include variables associated with the profile' do
+              expect(subject.to_runner_variables).not_to include(key: key, value: value, public: false, masked: true)
+            end
           end
         end
       end

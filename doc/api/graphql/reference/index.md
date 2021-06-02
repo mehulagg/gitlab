@@ -97,8 +97,7 @@ four standard [pagination arguments](#connection-pagination-arguments):
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
-| <a id="querydevopsadoptionsegmentsdirectdescendantsonly"></a>`directDescendantsOnly` | [`Boolean`](#boolean) | Limits segments to direct descendants of specified parent. |
-| <a id="querydevopsadoptionsegmentsparentnamespaceid"></a>`parentNamespaceId` | [`NamespaceID`](#namespaceid) | Filter by ancestor namespace. |
+| <a id="querydevopsadoptionsegmentsdisplaynamespaceid"></a>`displayNamespaceId` | [`NamespaceID`](#namespaceid) | Filter by display namespace. |
 
 ### `Query.echo`
 
@@ -770,6 +769,7 @@ Input type: `BulkFindOrCreateDevopsAdoptionSegmentsInput`
 | Name | Type | Description |
 | ---- | ---- | ----------- |
 | <a id="mutationbulkfindorcreatedevopsadoptionsegmentsclientmutationid"></a>`clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
+| <a id="mutationbulkfindorcreatedevopsadoptionsegmentsdisplaynamespaceid"></a>`displayNamespaceId` | [`NamespaceID`](#namespaceid) | Display namespace ID. |
 | <a id="mutationbulkfindorcreatedevopsadoptionsegmentsnamespaceids"></a>`namespaceIds` | [`[NamespaceID!]!`](#namespaceid) | List of Namespace IDs for the segments. |
 
 #### Fields
@@ -1105,6 +1105,7 @@ Input type: `CreateDevopsAdoptionSegmentInput`
 | Name | Type | Description |
 | ---- | ---- | ----------- |
 | <a id="mutationcreatedevopsadoptionsegmentclientmutationid"></a>`clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
+| <a id="mutationcreatedevopsadoptionsegmentdisplaynamespaceid"></a>`displayNamespaceId` | [`NamespaceID`](#namespaceid) | Display namespace ID. |
 | <a id="mutationcreatedevopsadoptionsegmentnamespaceid"></a>`namespaceId` | [`NamespaceID!`](#namespaceid) | Namespace ID to set for the segment. |
 
 #### Fields
@@ -2174,6 +2175,25 @@ Input type: `EscalationPolicyCreateInput`
 | <a id="mutationescalationpolicycreateclientmutationid"></a>`clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 | <a id="mutationescalationpolicycreateerrors"></a>`errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 | <a id="mutationescalationpolicycreateescalationpolicy"></a>`escalationPolicy` | [`EscalationPolicyType`](#escalationpolicytype) | The escalation policy. |
+
+### `Mutation.escalationPolicyDestroy`
+
+Input type: `EscalationPolicyDestroyInput`
+
+#### Arguments
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| <a id="mutationescalationpolicydestroyclientmutationid"></a>`clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
+| <a id="mutationescalationpolicydestroyid"></a>`id` | [`IncidentManagementEscalationPolicyID!`](#incidentmanagementescalationpolicyid) | The escalation policy internal ID to remove. |
+
+#### Fields
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| <a id="mutationescalationpolicydestroyclientmutationid"></a>`clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
+| <a id="mutationescalationpolicydestroyerrors"></a>`errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
+| <a id="mutationescalationpolicydestroyescalationpolicy"></a>`escalationPolicy` | [`EscalationPolicyType`](#escalationpolicytype) | The escalation policy. |
 
 ### `Mutation.exportRequirements`
 
@@ -3548,6 +3568,34 @@ Input type: `RunDASTScanInput`
 | <a id="mutationrundastscanclientmutationid"></a>`clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 | <a id="mutationrundastscanerrors"></a>`errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 | <a id="mutationrundastscanpipelineurl"></a>`pipelineUrl` | [`String`](#string) | URL of the pipeline that was created. |
+
+### `Mutation.runnerUpdate`
+
+Available only when feature flag `runner_graphql_query` is enabled.
+
+Input type: `RunnerUpdateInput`
+
+#### Arguments
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| <a id="mutationrunnerupdateaccesslevel"></a>`accessLevel` | [`CiRunnerAccessLevel`](#cirunneraccesslevel) | Access level of the runner. |
+| <a id="mutationrunnerupdateactive"></a>`active` | [`Boolean`](#boolean) | Indicates the runner is allowed to receive jobs. |
+| <a id="mutationrunnerupdateclientmutationid"></a>`clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
+| <a id="mutationrunnerupdatedescription"></a>`description` | [`String`](#string) | Description of the runner. |
+| <a id="mutationrunnerupdateid"></a>`id` | [`CiRunnerID!`](#cirunnerid) | ID of the runner to update. |
+| <a id="mutationrunnerupdatelocked"></a>`locked` | [`Boolean`](#boolean) | Indicates the runner is locked. |
+| <a id="mutationrunnerupdatemaximumtimeout"></a>`maximumTimeout` | [`Int`](#int) | Maximum timeout (in seconds) for jobs processed by the runner. |
+| <a id="mutationrunnerupdaterununtagged"></a>`runUntagged` | [`Boolean`](#boolean) | Indicates the runner is able to run untagged jobs. |
+| <a id="mutationrunnerupdatetaglist"></a>`tagList` | [`[String!]`](#string) | Tags associated with the runner. |
+
+#### Fields
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| <a id="mutationrunnerupdateclientmutationid"></a>`clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
+| <a id="mutationrunnerupdateerrors"></a>`errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
+| <a id="mutationrunnerupdaterunner"></a>`runner` | [`CiRunner`](#cirunner) | The runner after mutation. |
 
 ### `Mutation.terraformStateDelete`
 
@@ -7823,6 +7871,7 @@ Represents the current license.
 | ---- | ---- | ----------- |
 | <a id="currentlicenseactivatedat"></a>`activatedAt` | [`Date`](#date) | Date when the license was activated. |
 | <a id="currentlicensebillableuserscount"></a>`billableUsersCount` | [`Int`](#int) | Number of billable users on the system. |
+| <a id="currentlicenseblockchangesat"></a>`blockChangesAt` | [`Date`](#date) | Date, including grace period, when licensed features will be blocked. |
 | <a id="currentlicensecompany"></a>`company` | [`String`](#string) | Company of the licensee. |
 | <a id="currentlicenseemail"></a>`email` | [`String`](#string) | Email of the licensee. |
 | <a id="currentlicenseexpiresat"></a>`expiresAt` | [`Date`](#date) | Date when the license expires. |
@@ -8228,6 +8277,7 @@ Segment.
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
+| <a id="devopsadoptionsegmentdisplaynamespace"></a>`displayNamespace` | [`Namespace`](#namespace) | Namespace where data should be displayed. |
 | <a id="devopsadoptionsegmentid"></a>`id` | [`ID!`](#id) | ID of the segment. |
 | <a id="devopsadoptionsegmentlatestsnapshot"></a>`latestSnapshot` | [`DevopsAdoptionSnapshot`](#devopsadoptionsnapshot) | The latest adoption metrics for the segment. |
 | <a id="devopsadoptionsegmentnamespace"></a>`namespace` | [`Namespace`](#namespace) | Namespace which should be calculated. |
@@ -9871,6 +9921,7 @@ Represents an entry from the Cloud License history.
 | Name | Type | Description |
 | ---- | ---- | ----------- |
 | <a id="licensehistoryentryactivatedat"></a>`activatedAt` | [`Date`](#date) | Date when the license was activated. |
+| <a id="licensehistoryentryblockchangesat"></a>`blockChangesAt` | [`Date`](#date) | Date, including grace period, when licensed features will be blocked. |
 | <a id="licensehistoryentrycompany"></a>`company` | [`String`](#string) | Company of the licensee. |
 | <a id="licensehistoryentryemail"></a>`email` | [`String`](#string) | Email of the licensee. |
 | <a id="licensehistoryentryexpiresat"></a>`expiresAt` | [`Date`](#date) | Date when the license expires. |
@@ -9941,7 +9992,8 @@ Maven metadata.
 | <a id="mergerequestmergecommitsha"></a>`mergeCommitSha` | [`String`](#string) | SHA of the merge request commit (set once merged). |
 | <a id="mergerequestmergeerror"></a>`mergeError` | [`String`](#string) | Error message due to a merge error. |
 | <a id="mergerequestmergeongoing"></a>`mergeOngoing` | [`Boolean!`](#boolean) | Indicates if a merge is currently occurring. |
-| <a id="mergerequestmergestatus"></a>`mergeStatus` | [`String`](#string) | Status of the merge request. |
+| <a id="mergerequestmergestatus"></a>`mergeStatus` **{warning-solid}** | [`String`](#string) | **Deprecated** in 14.0. This was renamed. Use: [`MergeRequest.mergeStatusEnum`](#mergerequestmergestatusenum). |
+| <a id="mergerequestmergestatusenum"></a>`mergeStatusEnum` | [`MergeStatus`](#mergestatus) | Merge status of the merge request. |
 | <a id="mergerequestmergetrainscount"></a>`mergeTrainsCount` | [`Int`](#int) | Number of merge requests in the merge train. |
 | <a id="mergerequestmergeuser"></a>`mergeUser` | [`UserCore`](#usercore) | User who merged this merge request. |
 | <a id="mergerequestmergewhenpipelinesucceeds"></a>`mergeWhenPipelineSucceeds` | [`Boolean`](#boolean) | Indicates if the merge has been set to be merged when its pipeline succeeds (MWPS). |
@@ -14373,6 +14425,18 @@ State of a GitLab merge request.
 | <a id="mergerequeststatelocked"></a>`locked` | Discussion has been locked. |
 | <a id="mergerequeststatemerged"></a>`merged` | Merge request has been merged. |
 | <a id="mergerequeststateopened"></a>`opened` | In open state. |
+
+### `MergeStatus`
+
+Representation of whether a GitLab merge request can be merged.
+
+| Value | Description |
+| ----- | ----------- |
+| <a id="mergestatuscannot_be_merged"></a>`CANNOT_BE_MERGED` | There are conflicts between the source and target branches. |
+| <a id="mergestatuscannot_be_merged_recheck"></a>`CANNOT_BE_MERGED_RECHECK` | Currently unchecked. The previous state was `CANNOT_BE_MERGED`. |
+| <a id="mergestatuscan_be_merged"></a>`CAN_BE_MERGED` | There are no conflicts between the source and target branches. |
+| <a id="mergestatuschecking"></a>`CHECKING` | Currently checking for mergeability. |
+| <a id="mergestatusunchecked"></a>`UNCHECKED` | Merge status has not been checked. |
 
 ### `MergeStrategyEnum`
 

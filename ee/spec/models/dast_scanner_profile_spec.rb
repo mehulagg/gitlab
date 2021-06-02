@@ -33,6 +33,29 @@ RSpec.describe DastScannerProfile, type: :model do
     end
   end
 
+  describe '#ci_variables' do
+    let(:collection) { subject.ci_variables }
+
+    it 'returns a collection of variables' do
+      expected_variables = [
+        { key: 'DAST_FULL_SCAN_ENABLED', value: 'false', public: true, masked: false },
+        { key: 'DAST_USE_AJAX_SPIDER', value: 'false', public: true, masked: false },
+        { key: 'DAST_DEBUG', value: 'false', public: true, masked: false }
+      ]
+
+      expect(collection.to_runner_variables).to eq(expected_variables)
+    end
+
+    context 'when optional fields are set' do
+      subject { build(:dast_scanner_profile, spider_timeout: 1, target_timeout: 2) }
+
+      it 'returns a collection of variables including these', :aggregate_failures do
+        expect(collection).to include(key: 'DAST_SPIDER_MINS', value: String(subject.spider_timeout), public: true)
+        expect(collection).to include(key: 'DAST_TARGET_AVAILABILITY_TIMEOUT', value: String(subject.target_timeout), public: true)
+      end
+    end
+  end
+
   describe 'full_scan_enabled?' do
     describe 'when is active scan' do
       subject { create(:dast_scanner_profile, scan_type: :active).full_scan_enabled? }

@@ -32,7 +32,7 @@ module EE
       end
 
       def log_audit_event
-        EE::AuditEvents::ImpersonationAuditEventService.new(current_user, request.remote_ip, 'Started Impersonation')
+        AuditEvents::ImpersonationAuditEventService.new(current_user, request.remote_ip, 'Started Impersonation')
           .for_user(full_path: user.username, entity_id: user.id).security_event
       end
 

@@ -145,6 +145,7 @@ export default {
             mutation: bulkFindOrCreateDevopsAdoptionSegmentsMutation,
             variables: {
               namespaceIds,
+              displayNamespaceId: this.groupGid,
             },
             update: (store, { data }) => {
               const {

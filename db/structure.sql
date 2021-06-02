@@ -9110,25 +9110,6 @@ CREATE SEQUENCE analytics_cycle_analytics_project_value_streams_id_seq
 
 ALTER SEQUENCE analytics_cycle_analytics_project_value_streams_id_seq OWNED BY analytics_cycle_analytics_project_value_streams.id;
 
-CREATE TABLE analytics_devops_adoption_segment_selections (
-    id bigint NOT NULL,
-    segment_id bigint NOT NULL,
-    group_id bigint,
-    project_id bigint,
-    created_at timestamp with time zone NOT NULL,
-    updated_at timestamp with time zone NOT NULL,
-    CONSTRAINT segment_selection_project_id_or_group_id_required CHECK ((((project_id <> NULL::bigint) AND (group_id IS NULL)) OR ((group_id <> NULL::bigint) AND (project_id IS NULL))))
-);
-
-CREATE SEQUENCE analytics_devops_adoption_segment_selections_id_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-ALTER SEQUENCE analytics_devops_adoption_segment_selections_id_seq OWNED BY analytics_devops_adoption_segment_selections.id;
-
 CREATE TABLE analytics_devops_adoption_segments (
     id bigint NOT NULL,
     last_recorded_at timestamp with time zone,
@@ -9174,22 +9155,6 @@ CREATE SEQUENCE analytics_devops_adoption_snapshots_id_seq
 
 ALTER SEQUENCE analytics_devops_adoption_snapshots_id_seq OWNED BY analytics_devops_adoption_snapshots.id;
 
-CREATE TABLE analytics_instance_statistics_measurements (
-    id bigint NOT NULL,
-    count bigint NOT NULL,
-    recorded_at timestamp with time zone NOT NULL,
-    identifier smallint NOT NULL
-);
-
-CREATE SEQUENCE analytics_instance_statistics_measurements_id_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-ALTER SEQUENCE analytics_instance_statistics_measurements_id_seq OWNED BY analytics_instance_statistics_measurements.id;
-
 CREATE TABLE analytics_language_trend_repository_languages (
     file_count integer DEFAULT 0 NOT NULL,
     programming_language_id bigint NOT NULL,
@@ -9199,6 +9164,22 @@ CREATE TABLE analytics_language_trend_repository_languages (
     percentage smallint DEFAULT 0 NOT NULL,
     snapshot_date date NOT NULL
 );
+
+CREATE TABLE analytics_usage_trends_measurements (
+    id bigint NOT NULL,
+    count bigint NOT NULL,
+    recorded_at timestamp with time zone NOT NULL,
+    identifier smallint NOT NULL
+);
+
+CREATE SEQUENCE analytics_usage_trends_measurements_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE analytics_usage_trends_measurements_id_seq OWNED BY analytics_usage_trends_measurements.id;
 
 CREATE TABLE appearances (
     id integer NOT NULL,
@@ -16997,7 +16978,7 @@ CREATE TABLE projects (
     pages_https_only boolean DEFAULT true,
     external_webhook_token character varying,
     packages_enabled boolean,
-    merge_requests_author_approval boolean,
+    merge_requests_author_approval boolean DEFAULT false,
     pool_repository_id bigint,
     runners_token_encrypted character varying,
     bfg_object_map character varying,
@@ -17187,10 +17168,12 @@ ALTER SEQUENCE protected_environment_deploy_access_levels_id_seq OWNED BY protec
 
 CREATE TABLE protected_environments (
     id integer NOT NULL,
-    project_id integer NOT NULL,
+    project_id integer,
     created_at timestamp with time zone NOT NULL,
     updated_at timestamp with time zone NOT NULL,
-    name character varying NOT NULL
+    name character varying NOT NULL,
+    group_id bigint,
+    CONSTRAINT protected_environments_project_or_group_existence CHECK (((project_id IS NULL) <> (group_id IS NULL)))
 );
 
 CREATE SEQUENCE protected_environments_id_seq
@@ -19520,13 +19503,11 @@ ALTER TABLE ONLY analytics_cycle_analytics_project_stages ALTER COLUMN id SET DE
 
 ALTER TABLE ONLY analytics_cycle_analytics_project_value_streams ALTER COLUMN id SET DEFAULT nextval('analytics_cycle_analytics_project_value_streams_id_seq'::regclass);
 
-ALTER TABLE ONLY analytics_devops_adoption_segment_selections ALTER COLUMN id SET DEFAULT nextval('analytics_devops_adoption_segment_selections_id_seq'::regclass);
-
 ALTER TABLE ONLY analytics_devops_adoption_segments ALTER COLUMN id SET DEFAULT nextval('analytics_devops_adoption_segments_id_seq'::regclass);
 
 ALTER TABLE ONLY analytics_devops_adoption_snapshots ALTER COLUMN id SET DEFAULT nextval('analytics_devops_adoption_snapshots_id_seq'::regclass);
 
-ALTER TABLE ONLY analytics_instance_statistics_measurements ALTER COLUMN id SET DEFAULT nextval('analytics_instance_statistics_measurements_id_seq'::regclass);
+ALTER TABLE ONLY analytics_usage_trends_measurements ALTER COLUMN id SET DEFAULT nextval('analytics_usage_trends_measurements_id_seq'::regclass);
 
 ALTER TABLE ONLY appearances ALTER COLUMN id SET DEFAULT nextval('appearances_id_seq'::regclass);
 
@@ -20611,20 +20592,17 @@ ALTER TABLE ONLY analytics_cycle_analytics_project_stages
 ALTER TABLE ONLY analytics_cycle_analytics_project_value_streams
     ADD CONSTRAINT analytics_cycle_analytics_project_value_streams_pkey PRIMARY KEY (id);
 
-ALTER TABLE ONLY analytics_devops_adoption_segment_selections
-    ADD CONSTRAINT analytics_devops_adoption_segment_selections_pkey PRIMARY KEY (id);
-
 ALTER TABLE ONLY analytics_devops_adoption_segments
     ADD CONSTRAINT analytics_devops_adoption_segments_pkey PRIMARY KEY (id);
 
 ALTER TABLE ONLY analytics_devops_adoption_snapshots
     ADD CONSTRAINT analytics_devops_adoption_snapshots_pkey PRIMARY KEY (id);
 
-ALTER TABLE ONLY analytics_instance_statistics_measurements
-    ADD CONSTRAINT analytics_instance_statistics_measurements_pkey PRIMARY KEY (id);
-
 ALTER TABLE ONLY analytics_language_trend_repository_languages
     ADD CONSTRAINT analytics_language_trend_repository_languages_pkey PRIMARY KEY (programming_language_id, project_id, snapshot_date);
+
+ALTER TABLE ONLY analytics_usage_trends_measurements
+    ADD CONSTRAINT analytics_usage_trends_measurements_pkey PRIMARY KEY (id);
 
 ALTER TABLE ONLY appearances
     ADD CONSTRAINT appearances_pkey PRIMARY KEY (id);
@@ -22273,6 +22251,8 @@ CREATE INDEX finding_evidences_on_vulnerability_occurrence_id ON vulnerability_f
 
 CREATE INDEX finding_links_on_vulnerability_occurrence_id ON vulnerability_finding_links USING btree (vulnerability_occurrence_id);
 
+CREATE INDEX idx_analytics_devops_adoption_segments_on_namespace_id ON analytics_devops_adoption_segments USING btree (namespace_id);
+
 CREATE INDEX idx_audit_events_part_on_entity_id_desc_author_id_created_at ON ONLY audit_events USING btree (entity_id, entity_type, id DESC, author_id, created_at);
 
 CREATE INDEX idx_award_emoji_on_user_emoji_name_awardable_type_awardable_id ON award_emoji USING btree (user_id, name, awardable_type, awardable_id);
@@ -22458,8 +22438,6 @@ CREATE INDEX index_analytics_ca_project_stages_on_value_stream_id ON analytics_c
 CREATE UNIQUE INDEX index_analytics_ca_project_value_streams_on_project_id_and_name ON analytics_cycle_analytics_project_value_streams USING btree (project_id, name);
 
 CREATE INDEX index_analytics_cycle_analytics_group_stages_custom_only ON analytics_cycle_analytics_group_stages USING btree (id) WHERE (custom = true);
-
-CREATE UNIQUE INDEX index_analytics_devops_adoption_segments_on_namespace_id ON analytics_devops_adoption_segments USING btree (namespace_id);
 
 CREATE INDEX index_application_settings_on_custom_project_templates_group_id ON application_settings USING btree (custom_project_templates_group_id);
 
@@ -23875,7 +23853,7 @@ CREATE INDEX index_on_id_partial_with_legacy_storage ON projects USING btree (id
 
 CREATE INDEX index_on_identities_lower_extern_uid_and_provider ON identities USING btree (lower((extern_uid)::text), provider);
 
-CREATE UNIQUE INDEX index_on_instance_statistics_recorded_at_and_identifier ON analytics_instance_statistics_measurements USING btree (identifier, recorded_at);
+CREATE UNIQUE INDEX index_on_instance_statistics_recorded_at_and_identifier ON analytics_usage_trends_measurements USING btree (identifier, recorded_at);
 
 CREATE INDEX index_on_label_links_all_columns ON label_links USING btree (target_id, label_id, target_type);
 
@@ -23898,12 +23876,6 @@ CREATE UNIQUE INDEX index_on_project_id_escalation_policy_name_unique ON inciden
 CREATE INDEX index_on_projects_lower_path ON projects USING btree (lower((path)::text));
 
 CREATE INDEX index_on_routes_lower_path ON routes USING btree (lower((path)::text));
-
-CREATE UNIQUE INDEX index_on_segment_selections_group_id_segment_id ON analytics_devops_adoption_segment_selections USING btree (group_id, segment_id);
-
-CREATE UNIQUE INDEX index_on_segment_selections_project_id_segment_id ON analytics_devops_adoption_segment_selections USING btree (project_id, segment_id);
-
-CREATE INDEX index_on_segment_selections_segment_id ON analytics_devops_adoption_segment_selections USING btree (segment_id);
 
 CREATE INDEX index_on_snapshots_segment_id_end_time ON analytics_devops_adoption_snapshots USING btree (segment_id, end_time);
 
@@ -24314,6 +24286,8 @@ CREATE INDEX index_protected_environment_deploy_access ON protected_environment_
 CREATE INDEX index_protected_environment_deploy_access_levels_on_group_id ON protected_environment_deploy_access_levels USING btree (group_id);
 
 CREATE INDEX index_protected_environment_deploy_access_levels_on_user_id ON protected_environment_deploy_access_levels USING btree (user_id);
+
+CREATE UNIQUE INDEX index_protected_environments_on_group_id_and_name ON protected_environments USING btree (group_id, name) WHERE (group_id IS NOT NULL);
 
 CREATE INDEX index_protected_environments_on_project_id ON protected_environments USING btree (project_id);
 
@@ -24796,6 +24770,8 @@ CREATE INDEX index_users_on_username_trigram ON users USING gin (username gin_tr
 CREATE INDEX index_users_ops_dashboard_projects_on_project_id ON users_ops_dashboard_projects USING btree (project_id);
 
 CREATE UNIQUE INDEX index_users_ops_dashboard_projects_on_user_id_and_project_id ON users_ops_dashboard_projects USING btree (user_id, project_id);
+
+CREATE INDEX index_users_require_two_factor_authentication_from_group_false ON users USING btree (require_two_factor_authentication_from_group) WHERE (require_two_factor_authentication_from_group = false);
 
 CREATE INDEX index_users_security_dashboard_projects_on_user_id ON users_security_dashboard_projects USING btree (user_id);
 
@@ -25748,6 +25724,9 @@ ALTER TABLE ONLY issues
 ALTER TABLE ONLY epics
     ADD CONSTRAINT fk_9d480c64b2 FOREIGN KEY (start_date_sourcing_epic_id) REFERENCES epics(id) ON DELETE SET NULL;
 
+ALTER TABLE ONLY protected_environments
+    ADD CONSTRAINT fk_9e112565b7 FOREIGN KEY (group_id) REFERENCES namespaces(id) ON DELETE CASCADE;
+
 ALTER TABLE ONLY alert_management_alerts
     ADD CONSTRAINT fk_9e49e5c2b7 FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE;
 
@@ -25955,9 +25934,6 @@ ALTER TABLE ONLY project_group_links
 ALTER TABLE ONLY epics
     ADD CONSTRAINT fk_dccd3f98fc FOREIGN KEY (assignee_id) REFERENCES users(id) ON DELETE SET NULL;
 
-ALTER TABLE ONLY analytics_devops_adoption_segment_selections
-    ADD CONSTRAINT fk_ded7fe0344 FOREIGN KEY (group_id) REFERENCES namespaces(id) ON DELETE CASCADE;
-
 ALTER TABLE ONLY issues
     ADD CONSTRAINT fk_df75a7c8b8 FOREIGN KEY (promoted_to_epic_id) REFERENCES epics(id) ON DELETE SET NULL;
 
@@ -26026,9 +26002,6 @@ ALTER TABLE ONLY vulnerability_external_issue_links
 
 ALTER TABLE ONLY epics
     ADD CONSTRAINT fk_f081aa4489 FOREIGN KEY (group_id) REFERENCES namespaces(id) ON DELETE CASCADE;
-
-ALTER TABLE ONLY analytics_devops_adoption_segment_selections
-    ADD CONSTRAINT fk_f1472b95f3 FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE;
 
 ALTER TABLE ONLY boards
     ADD CONSTRAINT fk_f15266b5f9 FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE;
@@ -26119,9 +26092,6 @@ ALTER TABLE ONLY ip_restrictions
 
 ALTER TABLE ONLY terraform_state_versions
     ADD CONSTRAINT fk_rails_04f176e239 FOREIGN KEY (terraform_state_id) REFERENCES terraform_states(id) ON DELETE CASCADE;
-
-ALTER TABLE ONLY analytics_devops_adoption_segment_selections
-    ADD CONSTRAINT fk_rails_053f00a9da FOREIGN KEY (segment_id) REFERENCES analytics_devops_adoption_segments(id) ON DELETE CASCADE;
 
 ALTER TABLE ONLY ci_build_report_results
     ADD CONSTRAINT fk_rails_056d298d48 FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE;

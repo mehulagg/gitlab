@@ -29,13 +29,11 @@ module EE
       end
 
       def retrieve_queue(queue_query_proc)
-        if ::Feature.enabled?(:ci_runner_builds_queue_on_replicas, runner, default_enabled: :yaml)
-          ##
-          # We want to reset a load balancing session to discard the side
-          # effects of writes that could have happened prior to this moment.
-          #
-          ::Gitlab::Database::LoadBalancing::Session.clear_session
-        end
+        ##
+        # We want to reset a load balancing session to discard the side
+        # effects of writes that could have happened prior to this moment.
+        #
+        ::Gitlab::Database::LoadBalancing::Session.clear_session
 
         super
       end

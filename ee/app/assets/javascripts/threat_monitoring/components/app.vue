@@ -28,10 +28,6 @@ export default {
       type: Number,
       required: true,
     },
-    wafNoDataSvgPath: {
-      type: String,
-      required: true,
-    },
     networkPolicyNoDataSvgPath: {
       type: String,
       required: true,
@@ -62,15 +58,6 @@ export default {
       return Number.isInteger(id) && id >= 0;
     },
   },
-  chartEmptyStateDescription: s__(
-    `ThreatMonitoring|While it's rare to have no traffic coming to your
-    application, it can happen. In any event, we ask that you double check your
-    settings to make sure you've set up the WAF correctly.`,
-  ),
-  wafChartEmptyStateDescription: s__(
-    `ThreatMonitoring|The firewall is not installed or has been disabled. To view
-     this data, ensure the web application firewall is installed and enabled for your cluster.`,
-  ),
   networkPolicyChartEmptyStateDescription: s__(
     `ThreatMonitoring|Container Network Policies are not installed or have been disabled. To view
      this data, ensure your Network Policies are installed and enabled for your cluster.`,
@@ -82,10 +69,11 @@ export default {
 <template>
   <section>
     <header class="my-3">
-      <h2 class="h3 mb-1">
+      <h2 class="h3 mb-1 gl-display-flex gl-align-items-center">
         {{ s__('ThreatMonitoring|Threat Monitoring') }}
         <gl-link
           ref="helpLink"
+          class="gl-ml-3"
           target="_blank"
           :href="documentationPath"
           :aria-label="s__('ThreatMonitoring|Threat Monitoring help page link')"
@@ -117,23 +105,6 @@ export default {
         <no-environment-empty-state v-if="!isSetUpMaybe" />
         <template v-else>
           <threat-monitoring-filters />
-
-          <threat-monitoring-section
-            ref="wafSection"
-            store-namespace="threatMonitoringWaf"
-            :title="s__('ThreatMonitoring|Web Application Firewall')"
-            :subtitle="s__('ThreatMonitoring|Requests')"
-            :anomalous-title="s__('ThreatMonitoring|Anomalous Requests')"
-            :nominal-title="s__('ThreatMonitoring|Total Requests')"
-            :y-legend="s__('ThreatMonitoring|Requests')"
-            :chart-empty-state-title="s__('ThreatMonitoring|Application firewall not detected')"
-            :chart-empty-state-text="$options.wafChartEmptyStateDescription"
-            :chart-empty-state-svg-path="wafNoDataSvgPath"
-            :documentation-path="documentationPath"
-            documentation-anchor="web-application-firewall"
-          />
-
-          <hr />
 
           <threat-monitoring-section
             ref="networkPolicySection"

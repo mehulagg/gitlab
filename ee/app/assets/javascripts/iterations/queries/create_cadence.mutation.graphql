@@ -1,9 +1,0 @@
-mutation createIterationCadence($input: IterationCadenceCreateInput!) {
-  iterationCadenceCreate(input: $input) {
-    iterationCadence {
-      id
-      title
-    }
-    errors
-  }
-}

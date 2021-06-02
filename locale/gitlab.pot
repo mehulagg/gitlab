@@ -5051,6 +5051,9 @@ msgstr ""
 msgid "BillingPlans|Learn more about each plan by visiting our %{pricing_page_link}."
 msgstr ""
 
+msgid "BillingPlans|Looking to purchase or manage a subscription for your group? Navigate to your %{groups_link} and go to %{strong_open}Settings &gt; Billing.%{strong_close}"
+msgstr ""
+
 msgid "BillingPlans|Manage plan"
 msgstr ""
 
@@ -5085,6 +5088,9 @@ msgid "BillingPlans|for the remainder of your subscription"
 msgstr ""
 
 msgid "BillingPlans|frequently asked questions"
+msgstr ""
+
+msgid "BillingPlans|group"
 msgstr ""
 
 msgid "BillingPlans|monthly"
@@ -5381,6 +5387,9 @@ msgstr ""
 msgid "Branches|All"
 msgstr ""
 
+msgid "Branches|Cancel, keep branch"
+msgstr ""
+
 msgid "Branches|Cant find HEAD commit for this branch"
 msgstr ""
 
@@ -5393,6 +5402,9 @@ msgstr ""
 msgid "Branches|Delete branch"
 msgstr ""
 
+msgid "Branches|Delete branch. Are you ABSOLUTELY SURE?"
+msgstr ""
+
 msgid "Branches|Delete merged branches"
 msgstr ""
 
@@ -5400,6 +5412,12 @@ msgid "Branches|Delete protected branch"
 msgstr ""
 
 msgid "Branches|Delete protected branch '%{branch_name}'?"
+msgstr ""
+
+msgid "Branches|Delete protected branch. Are you ABSOLUTELY SURE?"
+msgstr ""
+
+msgid "Branches|Deleting the %{strongStart}%{branchName}%{strongEnd} branch cannot be undone. Are you sure?"
 msgstr ""
 
 msgid "Branches|Deleting the '%{branch_name}' branch cannot be undone. Are you sure?"
@@ -5423,10 +5441,16 @@ msgstr ""
 msgid "Branches|Once you confirm and press %{delete_protected_branch}, it cannot be undone or recovered."
 msgstr ""
 
+msgid "Branches|Once you confirm and press %{strongStart}%{buttonText},%{strongEnd} it cannot be undone or recovered."
+msgstr ""
+
 msgid "Branches|Only a project maintainer or owner can delete a protected branch"
 msgstr ""
 
 msgid "Branches|Overview"
+msgstr ""
+
+msgid "Branches|Please type the following to confirm:"
 msgstr ""
 
 msgid "Branches|Protected branches can be managed in %{project_settings_link}."
@@ -5462,6 +5486,9 @@ msgstr ""
 msgid "Branches|The default branch cannot be deleted"
 msgstr ""
 
+msgid "Branches|This branch hasn’t been merged into %{defaultBranchName}. To avoid data loss, consider merging this branch before deleting it."
+msgstr ""
+
 msgid "Branches|This branch hasn’t been merged into %{default_branch}."
 msgstr ""
 
@@ -5472,6 +5499,18 @@ msgid "Branches|To confirm, type %{branch_name_confirmation}:"
 msgstr ""
 
 msgid "Branches|To discard the local changes and overwrite the branch with the upstream version, delete it here and choose 'Update Now' above."
+msgstr ""
+
+msgid "Branches|Yes, delete branch"
+msgstr ""
+
+msgid "Branches|Yes, delete protected branch"
+msgstr ""
+
+msgid "Branches|You're about to permanently delete the branch %{strongStart}%{branchName}.%{strongEnd}"
+msgstr ""
+
+msgid "Branches|You're about to permanently delete the protected branch %{strongStart}%{branchName}.%{strongEnd}"
 msgstr ""
 
 msgid "Branches|You’re about to permanently delete the protected branch %{branch_name}."
@@ -6988,9 +7027,6 @@ msgstr ""
 msgid "ClusterIntegration|Base domain"
 msgstr ""
 
-msgid "ClusterIntegration|Blocking mode"
-msgstr ""
-
 msgid "ClusterIntegration|CA Certificate"
 msgstr ""
 
@@ -7039,7 +7075,7 @@ msgstr ""
 msgid "ClusterIntegration|Cluster Region"
 msgstr ""
 
-msgid "ClusterIntegration|Cluster management project (alpha)"
+msgid "ClusterIntegration|Cluster management project"
 msgstr ""
 
 msgid "ClusterIntegration|Cluster name is required."
@@ -7240,9 +7276,6 @@ msgstr ""
 msgid "ClusterIntegration|GitLab-managed cluster"
 msgstr ""
 
-msgid "ClusterIntegration|Global default"
-msgstr ""
-
 msgid "ClusterIntegration|Google Cloud Platform project"
 msgstr ""
 
@@ -7399,9 +7432,6 @@ msgstr ""
 msgid "ClusterIntegration|Loading subnetworks"
 msgstr ""
 
-msgid "ClusterIntegration|Logging mode"
-msgstr ""
-
 msgid "ClusterIntegration|Machine type"
 msgstr ""
 
@@ -7412,9 +7442,6 @@ msgid "ClusterIntegration|Make sure your account %{link_to_requirements} to crea
 msgstr ""
 
 msgid "ClusterIntegration|Manage your Kubernetes cluster by visiting %{provider_link}"
-msgstr ""
-
-msgid "ClusterIntegration|ModSecurity enabled"
 msgstr ""
 
 msgid "ClusterIntegration|Namespace per environment"
@@ -7511,9 +7538,6 @@ msgid "ClusterIntegration|Read our %{linkStart}help page%{linkEnd} on Kubernetes
 msgstr ""
 
 msgid "ClusterIntegration|Read our %{link_start}help page%{link_end} on Kubernetes cluster integration."
-msgstr ""
-
-msgid "ClusterIntegration|Real-time web application monitoring, logging and access control. %{linkStart}More information%{linkEnd}"
 msgstr ""
 
 msgid "ClusterIntegration|Remove Kubernetes cluster integration"
@@ -7654,9 +7678,6 @@ msgstr ""
 msgid "ClusterIntegration|Send Container Network Policies Logs"
 msgstr ""
 
-msgid "ClusterIntegration|Send Web Application Firewall Logs"
-msgstr ""
-
 msgid "ClusterIntegration|Service Token"
 msgstr ""
 
@@ -7667,9 +7688,6 @@ msgid "ClusterIntegration|Service token is required."
 msgstr ""
 
 msgid "ClusterIntegration|Set a prefix for your namespaces. If not set, defaults to your project path. If modified, existing environments will use their current namespaces until the cluster cache is cleared."
-msgstr ""
-
-msgid "ClusterIntegration|Set the global mode for the WAF in this cluster. This can be overridden at the environmental level."
 msgstr ""
 
 msgid "ClusterIntegration|Something went wrong on our end."
@@ -12109,9 +12127,6 @@ msgstr ""
 msgid "Enable"
 msgstr ""
 
-msgid "Enable %{linkStart}Gitpod%{linkEnd} integration to launch a development environment in your browser directly from GitLab."
-msgstr ""
-
 msgid "Enable Auto DevOps"
 msgstr ""
 
@@ -13057,6 +13072,9 @@ msgstr ""
 msgid "Errors:"
 msgstr ""
 
+msgid "Escalation Policies"
+msgstr ""
+
 msgid "Escalation policies"
 msgstr ""
 
@@ -13064,6 +13082,12 @@ msgid "Escalation policies are not supported for this project"
 msgstr ""
 
 msgid "EscalationPolicies|+ Add an additional rule"
+msgstr ""
+
+msgid "EscalationPolicies|A schedule is required for adding an escalation policy."
+msgstr ""
+
+msgid "EscalationPolicies|A schedule is required for adding an escalation policy. Please create an on-call schedule first."
 msgstr ""
 
 msgid "EscalationPolicies|Add an escalation policy"
@@ -13082,6 +13106,9 @@ msgid "EscalationPolicies|Email on-call user in schedule"
 msgstr ""
 
 msgid "EscalationPolicies|Escalation rules"
+msgstr ""
+
+msgid "EscalationPolicies|Failed to load oncall-schedules"
 msgstr ""
 
 msgid "EscalationPolicies|IF alert is not %{alertStatus} in %{minutes} minutes"
@@ -14296,6 +14323,9 @@ msgstr ""
 msgid "ForkProject|A fork is a copy of a project."
 msgstr ""
 
+msgid "ForkProject|An error occurred while forking the project. Please try again."
+msgstr ""
+
 msgid "ForkProject|Cancel"
 msgstr ""
 
@@ -14312,6 +14342,9 @@ msgid "ForkProject|Internal"
 msgstr ""
 
 msgid "ForkProject|Please select a namespace"
+msgstr ""
+
+msgid "ForkProject|Please select a visibility level"
 msgstr ""
 
 msgid "ForkProject|Private"
@@ -15337,16 +15370,19 @@ msgstr ""
 msgid "Gitpod"
 msgstr ""
 
-msgid "Gitpod|Add the URL to your Gitpod instance configured to read your GitLab projects."
-msgstr ""
-
 msgid "Gitpod|Enable Gitpod integration"
 msgstr ""
 
 msgid "Gitpod|Gitpod URL"
 msgstr ""
 
-msgid "Gitpod|e.g. https://gitpod.example.com"
+msgid "Gitpod|The URL to your Gitpod instance configured to read your GitLab projects, such as https://gitpod.example.com."
+msgstr ""
+
+msgid "Gitpod|To use the integration, each user must also enable Gitpod on their GitLab account. %{link_start}How do I enable it?%{link_end} "
+msgstr ""
+
+msgid "Gitpod|https://gitpod.example.com"
 msgstr ""
 
 msgid "Given access %{time_ago}"
@@ -15715,13 +15751,16 @@ msgstr ""
 msgid "GroupActivityMetrics|Issues opened"
 msgstr ""
 
+msgid "GroupActivityMetrics|Last 90 days"
+msgstr ""
+
 msgid "GroupActivityMetrics|Members added"
 msgstr ""
 
 msgid "GroupActivityMetrics|Merge Requests opened"
 msgstr ""
 
-msgid "GroupActivityMetrics|Recent activity (last 90 days)"
+msgid "GroupActivityMetrics|Recent activity"
 msgstr ""
 
 msgid "GroupImport|Failed to import group."
@@ -17327,6 +17366,9 @@ msgstr ""
 msgid "IncidentManagement|%{minutes} minutes remaining"
 msgstr ""
 
+msgid "IncidentManagement|Achieved SLA"
+msgstr ""
+
 msgid "IncidentManagement|All"
 msgstr ""
 
@@ -17364,6 +17406,9 @@ msgid "IncidentManagement|Low - S4"
 msgstr ""
 
 msgid "IncidentManagement|Medium - S3"
+msgstr ""
+
+msgid "IncidentManagement|Missed SLA"
 msgstr ""
 
 msgid "IncidentManagement|No incidents to display."
@@ -17707,9 +17752,6 @@ msgstr ""
 msgid "Integrations|All projects inheriting these settings will also be reset."
 msgstr ""
 
-msgid "Integrations|As a GitLab administrator, you can set default configuration parameters for a given integration that all projects can inherit and use. When you set these parameters, your changes update the integration for all projects that are not already using custom settings. Learn more about %{integrations_link_start}Project integration management%{link_end}."
-msgstr ""
-
 msgid "Integrations|Browser limitations"
 msgstr ""
 
@@ -17747,6 +17789,9 @@ msgid "Integrations|Failed to load namespaces. Please try again."
 msgstr ""
 
 msgid "Integrations|Failed to unlink namespace. Please try again."
+msgstr ""
+
+msgid "Integrations|GitLab administrators can set up integrations that all projects inherit and use by default. These integrations apply to all projects that don't already use custom settings. You can override custom settings for a group or project if the settings are necessary at that level. Learn more about %{integrations_link_start}project integration management%{link_end}."
 msgstr ""
 
 msgid "Integrations|Includes Standard, plus the entire commit message, commit hash, and issue IDs"
@@ -18517,6 +18562,9 @@ msgstr ""
 msgid "Iterations|Cadence name"
 msgstr ""
 
+msgid "Iterations|Couldn't find iteration cadence"
+msgstr ""
+
 msgid "Iterations|Create cadence"
 msgstr ""
 
@@ -18527,6 +18575,12 @@ msgid "Iterations|Delete iteration cadence"
 msgstr ""
 
 msgid "Iterations|Duration"
+msgstr ""
+
+msgid "Iterations|Edit cadence"
+msgstr ""
+
+msgid "Iterations|Edit iteration cadence"
 msgstr ""
 
 msgid "Iterations|Error loading iteration cadences."
@@ -18548,6 +18602,9 @@ msgid "Iterations|No iterations in cadence."
 msgstr ""
 
 msgid "Iterations|Number of future iterations you would like to have scheduled"
+msgstr ""
+
+msgid "Iterations|Save cadence"
 msgstr ""
 
 msgid "Iterations|Select duration"
@@ -20429,9 +20486,6 @@ msgstr ""
 msgid "Measured in bytes of code. Excludes generated and vendored code."
 msgstr ""
 
-msgid "Median"
-msgstr ""
-
 msgid "Medium Timeout Period"
 msgstr ""
 
@@ -21812,9 +21866,6 @@ msgstr ""
 msgid "NetworkPolicies|Edit policy"
 msgstr ""
 
-msgid "NetworkPolicies|Editor mode"
-msgstr ""
-
 msgid "NetworkPolicies|Enforcement status"
 msgstr ""
 
@@ -21912,9 +21963,6 @@ msgid "NetworkPolicies|Traffic that does not match any rule will be blocked."
 msgstr ""
 
 msgid "NetworkPolicies|Unable to parse policy"
-msgstr ""
-
-msgid "NetworkPolicies|YAML editor"
 msgstr ""
 
 msgid "NetworkPolicies|all DNS names"
@@ -24368,9 +24416,6 @@ msgstr ""
 msgid "Pipelines|Visualize"
 msgstr ""
 
-msgid "Pipelines|Write pipeline configuration"
-msgstr ""
-
 msgid "Pipelines|invalid"
 msgstr ""
 
@@ -25641,9 +25686,6 @@ msgid "ProjectFileTree|Show more"
 msgstr ""
 
 msgid "ProjectLastActivity|Never"
-msgstr ""
-
-msgid "ProjectLifecycle|Stage"
 msgstr ""
 
 msgid "ProjectOverview|Fork"
@@ -27051,6 +27093,9 @@ msgid "Recovery Codes"
 msgstr ""
 
 msgid "Redirect to SAML provider to test configuration"
+msgstr ""
+
+msgid "Redirecting"
 msgstr ""
 
 msgid "Redis"
@@ -28940,6 +28985,9 @@ msgstr ""
 msgid "SecurityConfiguration|By default, all analyzers are applied in order to cover all languages across your project, and only run if the language is detected in the Merge Request."
 msgstr ""
 
+msgid "SecurityConfiguration|Compliance"
+msgstr ""
+
 msgid "SecurityConfiguration|Configuration guide"
 msgstr ""
 
@@ -28979,6 +29027,9 @@ msgstr ""
 msgid "SecurityConfiguration|Manage"
 msgstr ""
 
+msgid "SecurityConfiguration|Manage scans"
+msgstr ""
+
 msgid "SecurityConfiguration|More information"
 msgstr ""
 
@@ -28994,10 +29045,16 @@ msgstr ""
 msgid "SecurityConfiguration|Security Control"
 msgstr ""
 
+msgid "SecurityConfiguration|Security testing"
+msgstr ""
+
 msgid "SecurityConfiguration|Status"
 msgstr ""
 
 msgid "SecurityConfiguration|Testing & Compliance"
+msgstr ""
+
+msgid "SecurityConfiguration|The status of the tools only applies to the default branch and is based on the %{linkStart}latest pipeline%{linkEnd}. Once you've enabled a scan for the default branch, any subsequent feature branch you create will include the scan."
 msgstr ""
 
 msgid "SecurityConfiguration|Using custom settings. You won't receive automatic updates on this variable. %{anchorStart}Restore to default%{anchorEnd}"
@@ -29331,6 +29388,9 @@ msgid "Select a reason"
 msgstr ""
 
 msgid "Select a repository"
+msgstr ""
+
+msgid "Select a shared template repository for all projects on this instance."
 msgstr ""
 
 msgid "Select a template repository"
@@ -29721,9 +29781,6 @@ msgid "Set default and restrict visibility levels. Configure import sources and 
 msgstr ""
 
 msgid "Set due date"
-msgstr ""
-
-msgid "Set instance-wide template repository"
 msgstr ""
 
 msgid "Set iteration"
@@ -31677,6 +31734,9 @@ msgstr ""
 msgid "SuperSonics|Sync subscription details"
 msgstr ""
 
+msgid "SuperSonics|The activation code is not valid. Please make sure to copy it exactly from the Customers Portal or confirmation email. Learn more about %{linkStart}activating your subscription%{linkEnd}."
+msgstr ""
+
 msgid "SuperSonics|The subscription details synced successfully."
 msgstr ""
 
@@ -31711,6 +31771,9 @@ msgid "SuperSonics|Users with a Guest role or those who don't belong to a Projec
 msgstr ""
 
 msgid "SuperSonics|Valid From"
+msgstr ""
+
+msgid "SuperSonics|You can learn more about %{activationLinkStart}activating your subscription%{activationLinkEnd}. If you need further assistance, please %{supportLinkStart}contact GitLab Support%{supportLinkEnd}."
 msgstr ""
 
 msgid "SuperSonics|You can no longer sync your subscription details with GitLab. Get help for the most common connectivity issues by %{connectivityHelpLinkStart}troubleshooting the activation code%{connectivityHelpLinkEnd}."
@@ -31966,6 +32029,9 @@ msgid "Template"
 msgstr ""
 
 msgid "Template to append to all Service Desk issues"
+msgstr ""
+
+msgid "TemplateRepository|Select a repository to make its templates available to all projects. %{link_start}What should the repository contain?%{link_end} "
 msgstr ""
 
 msgid "Templates"
@@ -32619,9 +32685,6 @@ msgstr ""
 msgid "The password for your GitLab account on %{link_to_gitlab} has successfully been changed."
 msgstr ""
 
-msgid "The phase of the development lifecycle."
-msgstr ""
-
 msgid "The pipeline has been deleted"
 msgstr ""
 
@@ -32764,9 +32827,6 @@ msgid "The user you are trying to deactivate has been active in the past %{minim
 msgstr ""
 
 msgid "The username for the Jenkins server."
-msgstr ""
-
-msgid "The value lying at the midpoint of a series of observed values. E.g., between 3, 5, 9, the median is 5. Between 3, 5, 7, 8, the median is (5+7)/2 = 6."
 msgstr ""
 
 msgid "The value of the provided variable exceeds the %{count} character limit"
@@ -33690,9 +33750,6 @@ msgstr ""
 msgid "ThreatMonitoring|Anomalous Requests"
 msgstr ""
 
-msgid "ThreatMonitoring|Application firewall not detected"
-msgstr ""
-
 msgid "ThreatMonitoring|Container Network Policies are not installed or have been disabled. To view this data, ensure your Network Policies are installed and enabled for your cluster."
 msgstr ""
 
@@ -33771,9 +33828,6 @@ msgstr ""
 msgid "ThreatMonitoring|Status"
 msgstr ""
 
-msgid "ThreatMonitoring|The firewall is not installed or has been disabled. To view this data, ensure the web application firewall is installed and enabled for your cluster."
-msgstr ""
-
 msgid "ThreatMonitoring|There was an error displaying the alerts. Confirm your endpoint's configuration details to ensure alerts appear."
 msgstr ""
 
@@ -33802,12 +33856,6 @@ msgid "ThreatMonitoring|Unreviewed"
 msgstr ""
 
 msgid "ThreatMonitoring|View documentation"
-msgstr ""
-
-msgid "ThreatMonitoring|Web Application Firewall"
-msgstr ""
-
-msgid "ThreatMonitoring|While it's rare to have no traffic coming to your application, it can happen. In any event, we ask that you double check your settings to make sure you've set up the WAF correctly."
 msgstr ""
 
 msgid "Throughput"
@@ -34316,9 +34364,6 @@ msgid "Too many namespaces enabled. You will need to manage them via the console
 msgstr ""
 
 msgid "Too many projects enabled. You will need to manage them via the console or the API."
-msgstr ""
-
-msgid "TopNav|Switch to..."
 msgstr ""
 
 msgid "Topics (optional)"
@@ -35796,6 +35841,9 @@ msgstr ""
 msgid "Users"
 msgstr ""
 
+msgid "Users can launch a development environment from a GitLab browser tab when the %{linkStart}Gitpod%{linkEnd} integration is enabled."
+msgstr ""
+
 msgid "Users in License"
 msgstr ""
 
@@ -36521,9 +36569,6 @@ msgid "We'll continuously validate your pipeline configuration. The validation r
 msgstr ""
 
 msgid "We've found no vulnerabilities"
-msgstr ""
-
-msgid "Web Application Firewall"
 msgstr ""
 
 msgid "Web IDE"
@@ -37513,6 +37558,9 @@ msgid "You have insufficient permissions to create an escalation policy for this
 msgstr ""
 
 msgid "You have insufficient permissions to create an on-call schedule for this project"
+msgstr ""
+
+msgid "You have insufficient permissions to remove an escalation policy from this project"
 msgstr ""
 
 msgid "You have insufficient permissions to remove an on-call rotation from this project"

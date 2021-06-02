@@ -28,7 +28,7 @@ RSpec.describe Projects::Settings::IntegrationsController do
   end
 
   context 'sets correct services list' do
-    let(:active_services) { assigns(:services).map(&:type) }
+    let(:active_services) { assigns(:integrations).map(&:type) }
     let(:disabled_services) { %w[GithubService] }
 
     it 'enables SlackSlashCommandsService and disables GitlabSlackApplication' do

@@ -125,7 +125,7 @@ RSpec.describe Gitlab::UsageData do
         network_policy_drops
       ))
 
-      expect(count_data[:projects_with_prometheus_alerts]).to eq(2)
+      expect(count_data[:projects_with_prometheus_alerts]).to eq(Gitlab::UsageData::DEPRECATED_VALUE)
       expect(count_data[:feature_flags]).to eq(1)
       expect(count_data[:status_page_projects]).to eq(1)
       expect(count_data[:status_page_issues]).to eq(1)
@@ -268,12 +268,12 @@ RSpec.describe Gitlab::UsageData do
       expect(described_class.usage_activity_by_stage_configure({})).to include(
         projects_slack_notifications_active: 2,
         projects_slack_slash_active: 2,
-        projects_with_prometheus_alerts: 2
+        projects_with_prometheus_alerts: Gitlab::UsageData::DEPRECATED_VALUE
       )
       expect(described_class.usage_activity_by_stage_configure(described_class.monthly_time_range_db_params)).to include(
         projects_slack_notifications_active: 1,
         projects_slack_slash_active: 1,
-        projects_with_prometheus_alerts: 1
+        projects_with_prometheus_alerts: Gitlab::UsageData::DEPRECATED_VALUE
       )
     end
   end

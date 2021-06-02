@@ -60,6 +60,7 @@ RSpec.describe 'Activate a subscription' do
         'company' => created_license.licensee_company,
         'startsAt' => created_license.starts_at.to_s,
         'expiresAt' => created_license.expires_at.to_s,
+        'blockChangesAt' => created_license.block_changes_at.to_s,
         'activatedAt' => created_license.created_at.to_date.to_s,
         'lastSync' => nil,
         'usersInLicenseCount' => nil,

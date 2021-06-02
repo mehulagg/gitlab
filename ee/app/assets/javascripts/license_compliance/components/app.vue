@@ -121,9 +121,9 @@ export default {
     </gl-alert>
 
     <header class="my-3">
-      <h2 class="h4 mb-1">
+      <h2 class="h4 mb-1 gl-display-flex gl-align-items-center">
         {{ s__('Licenses|License Compliance') }}
-        <gl-link :href="documentationPath" class="vertical-align-middle" target="_blank">
+        <gl-link :href="documentationPath" class="gl-ml-3" target="_blank">
           <gl-icon name="question" />
         </gl-link>
       </h2>

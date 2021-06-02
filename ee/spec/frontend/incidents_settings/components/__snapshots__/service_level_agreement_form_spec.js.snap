@@ -2,6 +2,7 @@
 
 exports[`Alert integration settings form should match the default snapshot 1`] = `
 <gl-tab-stub
+  active=""
   title="Incident settings"
   titlelinkclass=""
 >

@@ -81,6 +81,15 @@ export const activateLicenseMutationResponse = {
       },
     },
   },
+  INVALID_CODE_ERROR: {
+    data: {
+      gitlabSubscriptionActivate: {
+        license: null,
+        errors: ['invalid activation code'],
+        __typename: 'GitlabSubscriptionActivatePayload',
+      },
+    },
+  },
   ERRORS_AS_DATA: {
     data: {
       gitlabSubscriptionActivate: {

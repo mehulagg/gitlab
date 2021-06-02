@@ -3718,6 +3718,18 @@ Status: `data_available`
 
 Tiers: `free`
 
+### `counts.package_events_i_package_helm_pull_package`
+
+Total count of pull Helm packages events
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210517073546_package_events_i_package_helm_pull_package.yml)
+
+Group: `group::package`
+
+Status: `implemented`
+
+Tiers: `free`, `premium`, `ultimate`
+
 ### `counts.package_events_i_package_maven_delete_package`
 
 Missing description
@@ -4108,9 +4120,9 @@ Count the total number of log views
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216175021_pod_logs_usages_total.yml)
 
-Group: `group::apm`
+Group: `group::monitor`
 
-Status: `data_available`
+Status: `deprecated`
 
 Tiers: `free`
 
@@ -4272,7 +4284,7 @@ Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.projects_creating_incidents`
 
-Counts of Projects that have incident issues, regardless of status
+Counts of Projects that have incident issues, regardless of status.
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216180453_projects_creating_incidents.yml)
 
@@ -5488,9 +5500,9 @@ Projects with Prometheus alerting enabled
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216175019_projects_with_prometheus_alerts.yml)
 
-Group: `group::apm`
+Group: `group::monitor`
 
-Status: `data_available`
+Status: `deprecated`
 
 Tiers: `free`
 
@@ -5630,13 +5642,13 @@ Tiers: `ultimate`
 
 Count of requirements created
 
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216175028_requirements_created.yml)
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_all/20210216175028_requirements_created.yml)
 
 Group: `group::certify`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `ultimate`
 
 ### `counts.requirements_with_test_report`
 
@@ -7652,7 +7664,7 @@ Group: `group::product intelligence`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `prometheus_metrics_enabled`
 
@@ -7664,7 +7676,7 @@ Group: `group::product intelligence`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `recorded_at`
 
@@ -10197,6 +10209,30 @@ Group: ``
 Status: `data_available`
 
 Tiers:
+
+### `redis_hll_counters.deploy_token_packages.i_package_helm_deploy_token_monthly`
+
+Distinct Helm pakages deployed in recent 28 days
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210517074859_i_package_helm_deploy_token_monthly.yml)
+
+Group: `group::package`
+
+Status: `implemented`
+
+Tiers: `free`, `premium`, `ultimate`
+
+### `redis_hll_counters.deploy_token_packages.i_package_helm_deploy_token_weekly`
+
+Distinct Helm pakages deployed in recent 7 days
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_7d/20210517074851_i_package_helm_deploy_token_weekly.yml)
+
+Group: `group::package`
+
+Status: `implemented`
+
+Tiers: `free`, `premium`, `ultimate`
 
 ### `redis_hll_counters.deploy_token_packages.i_package_maven_deploy_token_monthly`
 
@@ -15286,6 +15322,30 @@ Status: `data_available`
 
 Tiers:
 
+### `redis_hll_counters.user_packages.i_package_helm_user_monthly`
+
+Distinct user count events for Helm packages in recent 28 days
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210517075259_i_package_helm_user_monthly.yml)
+
+Group: `group::package`
+
+Status: `implemented`
+
+Tiers: `free`, `premium`, `ultimate`
+
+### `redis_hll_counters.user_packages.i_package_helm_user_weekly`
+
+Distinct user count events for Helm packages in recent 7 days
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_7d/20210517075252_i_package_helm_user_weekly.yml)
+
+Group: `group::package`
+
+Status: `implemented`
+
+Tiers: `free`, `premium`, `ultimate`
+
 ### `redis_hll_counters.user_packages.i_package_maven_user_monthly`
 
 Missing description
@@ -15836,7 +15896,7 @@ Projects with Prometheus alerting enabled
 
 Group: `group::configure`
 
-Status: `data_available`
+Status: `deprecated`
 
 Tiers: `free`, `premium`, `ultimate`
 
@@ -17698,7 +17758,7 @@ Projects with Prometheus alerting enabled
 
 Group: `group::monitor`
 
-Status: `data_available`
+Status: `deprecated`
 
 Tiers: `free`, `premium`, `ultimate`
 

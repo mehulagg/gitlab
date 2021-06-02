@@ -18,8 +18,6 @@ module EE
       end
 
       def heartbeat(values)
-        return super unless ::Feature.enabled?(:ci_runner_builds_queue_on_replicas, self, default_enabled: :yaml)
-
         ##
         # We can safely ignore writes performed by a runner heartbeat. We do
         # not want to upgrade database connection proxy to use the primary

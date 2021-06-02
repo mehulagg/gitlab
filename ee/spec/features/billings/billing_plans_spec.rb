@@ -210,6 +210,13 @@ RSpec.describe 'Billing plan pages', :feature, :js do
         visit page_path
       end
 
+      it 'displays the correct call to action', :js do
+        page.within('.billing-plan-header') do
+          expect(page).to have_content('Looking to purchase or manage a subscription for your group? Navigate to your group and go to Settings > Billing')
+          expect(page).to have_link('group', href: dashboard_groups_path)
+        end
+      end
+
       it_behaves_like 'does not display the billing plans'
       it_behaves_like 'plan with subscription table'
     end

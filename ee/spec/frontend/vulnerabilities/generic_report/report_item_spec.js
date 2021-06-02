@@ -26,8 +26,13 @@ const TEST_DATA = {
     value: 15,
   },
   [REPORT_TYPES.moduleName]: {
-    'module-name': 'foo.c',
+    moduleName: 'foo.c',
     offset: 15,
+  },
+  [REPORT_TYPES.fileLocation]: {
+    fileName: 'index.js',
+    lineStart: '1',
+    lineEnd: '2',
   },
 };
 

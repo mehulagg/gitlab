@@ -27,19 +27,3 @@ exports[`ThreatMonitoringApp component given there is a default environment with
   />
 </gl-tab-stub>
 `;
-
-exports[`ThreatMonitoringApp component given there is a default environment with data renders the waf section 1`] = `
-<threat-monitoring-section-stub
-  anomaloustitle="Anomalous Requests"
-  chartemptystatesvgpath="/waf-no-data-svg"
-  chartemptystatetext="The firewall is not installed or has been disabled. To view this data, ensure the web application firewall is installed and enabled for your cluster."
-  chartemptystatetitle="Application firewall not detected"
-  documentationanchor="web-application-firewall"
-  documentationpath="/docs"
-  nominaltitle="Total Requests"
-  storenamespace="threatMonitoringWaf"
-  subtitle="Requests"
-  title="Web Application Firewall"
-  ylegend="Requests"
-/>
-`;

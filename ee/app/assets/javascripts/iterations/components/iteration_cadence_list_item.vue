@@ -115,6 +115,14 @@ export default {
     loading() {
       return this.$apollo.queries.group.loading;
     },
+    editCadence() {
+      return {
+        name: 'edit',
+        params: {
+          cadenceId: getIdFromGraphQLId(this.cadenceId),
+        },
+      };
+    },
   },
   methods: {
     fetchMore() {
@@ -196,6 +204,9 @@ export default {
         text-sr-only
         no-caret
       >
+        <gl-dropdown-item :to="editCadence">
+          {{ s__('Iterations|Edit cadence') }}
+        </gl-dropdown-item>
         <gl-dropdown-item @click="showModal">
           {{ i18n.deleteCadence }}
         </gl-dropdown-item>

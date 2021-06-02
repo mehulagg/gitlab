@@ -9,8 +9,11 @@ module Gitlab
         # Part of FileUploader::MARKDOWN_PATTERN but with a non-greedy file name matcher (?<file>.*) vs (?<file>.*?)
         NON_GREEDY_UPLOAD_FILE_PATH_PATTERN = %r{/uploads/(?<secret>[0-9a-f]{32})/(?<file>.*)}.freeze
 
+        CSS   = 'img'
+        XPATH = Gitlab::Utils::Nokogiri.css_to_xpath(CSS).freeze
+
         def call
-          doc.css('img').each do |image_node|
+          doc.xpath(XPATH).each do |image_node|
             image_node['class'] = 'gl-image'
 
             original_src = image_node.delete('data-src').value

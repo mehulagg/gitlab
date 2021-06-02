@@ -8,6 +8,8 @@ module Gitlab
     class Indexer
       include Gitlab::Utils::StrongMemoize
 
+      TIMEOUT = 1.day.to_i
+
       Error = Class.new(StandardError)
 
       class << self
@@ -73,11 +75,13 @@ module Gitlab
         vars = build_envvars(base_sha, to_sha, target)
         path_to_indexer = Gitlab.config.elasticsearch.indexer_path
 
+        timeout_argument = "--timeout=#{TIMEOUT}s"
+
         command =
           if index_wiki?
-            [path_to_indexer, "--blob-type=wiki_blob", "--skip-commits", "--project-path=#{project.full_path}", project.id.to_s, repository_path]
+            [path_to_indexer, timeout_argument, "--blob-type=wiki_blob", "--skip-commits", "--project-path=#{project.full_path}", project.id.to_s, repository_path]
           else
-            [path_to_indexer, "--project-path=#{project.full_path}", project.id.to_s, repository_path]
+            [path_to_indexer, timeout_argument, "--project-path=#{project.full_path}", project.id.to_s, repository_path]
           end
 
         output, status = Gitlab::Popen.popen(command, nil, vars)

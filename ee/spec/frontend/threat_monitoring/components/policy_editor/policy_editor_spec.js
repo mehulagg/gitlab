@@ -72,12 +72,11 @@ spec:
   };
 
   const findRuleEditor = () => wrapper.findByTestId('rule-editor');
-  const findYamlEditor = () => wrapper.findByTestId('yaml-editor');
-  const findPreview = () => wrapper.find(PolicyPreview);
+  const findPreview = () => wrapper.findComponent(PolicyPreview);
   const findAddRuleButton = () => wrapper.findByTestId('add-rule');
   const findYAMLParsingAlert = () => wrapper.findByTestId('parsing-alert');
   const findNetworkPolicyEditor = () => wrapper.findByTestId('network-policy-editor');
-  const findPolicyAlertPicker = () => wrapper.find(PolicyAlertPicker);
+  const findPolicyAlertPicker = () => wrapper.findComponent(PolicyAlertPicker);
   const findPolicyDescription = () => wrapper.find("[id='policyDescription']");
   const findPolicyEnableContainer = () => wrapper.findByTestId('policy-enable');
   const findPolicyName = () => wrapper.find("[id='policyName']");
@@ -104,12 +103,10 @@ spec:
     wrapper = null;
   });
 
-  it('renders the policy editor layout', () => {
-    expect(wrapper.find('section').element).toMatchSnapshot();
-  });
-
   it('renders toggle with label', () => {
-    expect(wrapper.findComponent(GlToggle).props('label')).toBe(PolicyEditorApp.i18n.toggleLabel);
+    const policyEnableToggle = findPolicyEnableContainer().findComponent(GlToggle);
+    expect(policyEnableToggle.exists()).toBe(true);
+    expect(policyEnableToggle.props('label')).toBe(PolicyEditorApp.i18n.toggleLabel);
   });
 
   it('renders a default rule with label', () => {
@@ -120,20 +117,19 @@ spec:
     });
   });
 
-  it('renders the policy alert picker', () => {
-    expect(findPolicyAlertPicker().exists()).toBe(true);
-  });
-
-  it('does not render yaml editor', () => {
-    expect(findYamlEditor().exists()).toBe(false);
-  });
-
-  it('does not render parsing error alert', () => {
-    expect(findYAMLParsingAlert().exists()).toBe(false);
-  });
-
-  it('does not render delete button', () => {
-    expect(findDeletePolicy().exists()).toBe(false);
+  it.each`
+    component                | status                | findComponent              | state
+    ${'policy alert picker'} | ${'does display'}     | ${findPolicyAlertPicker}   | ${true}
+    ${'editor mode toggle'}  | ${'does display'}     | ${findEditorModeToggle}    | ${true}
+    ${'policy name input'}   | ${'does display'}     | ${findPolicyName}          | ${true}
+    ${'rule editor'}         | ${'does display'}     | ${findRuleEditor}          | ${true}
+    ${'add rule button'}     | ${'does display'}     | ${findAddRuleButton}       | ${true}
+    ${'policy preview'}      | ${'does display'}     | ${findPreview}             | ${true}
+    ${'yaml editor'}         | ${'does not display'} | ${findNetworkPolicyEditor} | ${false}
+    ${'parsing error alert'} | ${'does not display'} | ${findYAMLParsingAlert}    | ${false}
+    ${'delete button'}       | ${'does not display'} | ${findDeletePolicy}        | ${false}
+  `('$status the $component', async ({ findComponent, state }) => {
+    expect(findComponent().exists()).toBe(state);
   });
 
   describe('given .yaml editor mode is enabled', () => {
@@ -145,14 +141,13 @@ spec:
       });
     });
 
-    it('does not render rule editor', () => {
-      expect(findRuleEditor().exists()).toBe(false);
-    });
-
-    it('renders yaml editor', () => {
-      const editor = findYamlEditor();
-      expect(editor.exists()).toBe(true);
-      expect(editor.element).toMatchSnapshot();
+    it.each`
+      component               | status                | findComponent              | state
+      ${'editor mode toggle'} | ${'does display'}     | ${findEditorModeToggle}    | ${true}
+      ${'rule editor'}        | ${'does not display'} | ${findRuleEditor}          | ${false}
+      ${'yaml editor'}        | ${'does display'}     | ${findNetworkPolicyEditor} | ${true}
+    `('$status the $component', async ({ findComponent, state }) => {
+      expect(findComponent().exists()).toBe(state);
     });
 
     it('updates policy on yaml editor value change', async () => {
@@ -418,7 +413,7 @@ spec:
     });
 
     it('removes policy and redirects to a threat monitoring path on secondary modal button click', async () => {
-      wrapper.find(GlModal).vm.$emit('secondary');
+      wrapper.findComponent(GlModal).vm.$emit('secondary');
       await wrapper.vm.$nextTick();
 
       expect(store.dispatch).toHaveBeenCalledWith('networkPolicies/deletePolicy', {

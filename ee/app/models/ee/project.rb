@@ -359,7 +359,11 @@ module EE
     end
 
     def shared_runners_available?
-      super && !::Ci::Minutes::Quota.new(shared_runners_limit_namespace).minutes_used_up?
+      super && !ci_minutes_quota.minutes_used_up?
+    end
+
+    def shared_runners_enabled_but_unavailable?
+      shared_runners_enabled? && !shared_runners_available?
     end
 
     def link_pool_repository

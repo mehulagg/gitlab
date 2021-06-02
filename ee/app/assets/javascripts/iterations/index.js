@@ -114,6 +114,7 @@ export function initCadenceApp() {
     router,
     apolloProvider,
     provide: {
+      fullPath: groupPath,
       groupPath,
       cadencesListPath,
       canCreateCadence: parseBoolean(canCreateCadence),

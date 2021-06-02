@@ -27,7 +27,7 @@ RSpec.describe 'Boards licensed features', :js do
       end
 
       it "hides iteration widget" do
-        expect(page).not_to have_selector('[data-testid="iteration-edit-link"]')
+        expect(page).not_to have_selector('[data-testid="iteration-edit"]')
       end
     end
 

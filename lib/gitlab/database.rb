@@ -9,7 +9,6 @@ module Gitlab
     #   'old_name' => 'new_name'
     # }.freeze
     TABLES_TO_BE_RENAMED = {
-      'analytics_instance_statistics_measurements' => 'analytics_usage_trends_measurements',
       'services' => 'integrations'
     }.freeze
 
@@ -61,7 +60,7 @@ module Gitlab
     end
 
     def self.config
-      default_config_hash = ActiveRecord::Base.configurations.find_db_config(Rails.env)&.config || {}
+      default_config_hash = ActiveRecord::Base.configurations.find_db_config(Rails.env)&.configuration_hash || {}
 
       default_config_hash.with_indifferent_access.tap do |hash|
         # Match config/initializers/database_config.rb

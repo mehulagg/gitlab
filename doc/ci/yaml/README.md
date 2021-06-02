@@ -1251,8 +1251,11 @@ causes duplicated pipelines.
 
 To avoid duplicate pipelines, you can:
 
-- Use [`workflow`](#workflow) to specify which types of pipelines
-  can run.
+- Use the `CI_OPEN_MERGE_REQUESTS` CI/CD variable in [`workflow:rules`](#workflow) to
+  [switch between branch and merge request pipelines](#switch-between-branch-pipelines-and-merge-request-pipelines)
+  without duplication. You can also use this variable in individual job rules.
+- Use [`workflow`](#workflow) to specify that only branch pipelines or only merge request
+  pipelines should run.
 - Rewrite the rules to run the job only in very specific cases,
   and avoid a final `when:` rule:
 
@@ -4781,7 +4784,7 @@ You can use [YAML anchors for variables](#yaml-anchors-for-variables).
 
 > [Introduced in](https://gitlab.com/gitlab-org/gitlab/-/issues/30101) GitLab 13.7.
 
-Use the `value` and `description` keywords to define [variables that are prefilled](../pipelines/index.md#prefill-variables-in-manual-pipelines)
+Use the `value` and `description` keywords to define [pipeline-level (global) variables that are prefilled](../pipelines/index.md#prefill-variables-in-manual-pipelines)
 when [running a pipeline manually](../pipelines/index.md#run-a-pipeline-manually):
 
 ```yaml
@@ -4790,6 +4793,8 @@ variables:
     value: "staging"  # Deploy to staging by default
     description: "The deployment target. Change this variable to 'canary' or 'production' if needed."
 ```
+
+You cannot set job-level variables to be pre-filled when you run a pipeline manually.
 
 ### Configure runner behavior with variables
 

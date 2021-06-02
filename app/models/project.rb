@@ -63,8 +63,6 @@ class Project < ApplicationRecord
   VALID_MIRROR_PORTS = [22, 80, 443].freeze
   VALID_MIRROR_PROTOCOLS = %w(http https ssh git).freeze
 
-  ACCESS_REQUEST_APPROVERS_TO_BE_NOTIFIED_LIMIT = 10
-
   SORTING_PREFERENCE_FIELD = :projects_sort
   MAX_BUILD_TIMEOUT = 1.month
 
@@ -166,33 +164,33 @@ class Project < ApplicationRecord
   has_one :confluence_service, class_name: 'Integrations::Confluence'
   has_one :custom_issue_tracker_service, class_name: 'Integrations::CustomIssueTracker'
   has_one :datadog_service, class_name: 'Integrations::Datadog'
+  has_one :discord_service, class_name: 'Integrations::Discord'
   has_one :drone_ci_service, class_name: 'Integrations::DroneCi'
   has_one :emails_on_push_service, class_name: 'Integrations::EmailsOnPush'
   has_one :ewm_service, class_name: 'Integrations::Ewm'
   has_one :external_wiki_service, class_name: 'Integrations::ExternalWiki'
   has_one :flowdock_service, class_name: 'Integrations::Flowdock'
+  has_one :hangouts_chat_service, class_name: 'Integrations::HangoutsChat'
   has_one :irker_service, class_name: 'Integrations::Irker'
   has_one :jenkins_service, class_name: 'Integrations::Jenkins'
   has_one :jira_service, class_name: 'Integrations::Jira'
+  has_one :mattermost_service, class_name: 'Integrations::Mattermost'
+  has_one :microsoft_teams_service, class_name: 'Integrations::MicrosoftTeams'
   has_one :mock_ci_service, class_name: 'Integrations::MockCi'
   has_one :packagist_service, class_name: 'Integrations::Packagist'
   has_one :pipelines_email_service, class_name: 'Integrations::PipelinesEmail'
   has_one :pivotaltracker_service, class_name: 'Integrations::Pivotaltracker'
+  has_one :pushover_service, class_name: 'Integrations::Pushover'
   has_one :redmine_service, class_name: 'Integrations::Redmine'
+  has_one :slack_service, class_name: 'Integrations::Slack'
   has_one :teamcity_service, class_name: 'Integrations::Teamcity'
+  has_one :unify_circuit_service, class_name: 'Integrations::UnifyCircuit'
+  has_one :webex_teams_service, class_name: 'Integrations::WebexTeams'
   has_one :youtrack_service, class_name: 'Integrations::Youtrack'
-  has_one :discord_service
   has_one :mattermost_slash_commands_service
-  has_one :mattermost_service
   has_one :slack_slash_commands_service
-  has_one :slack_service
-  has_one :pushover_service
   has_one :prometheus_service, inverse_of: :project
   has_one :mock_monitoring_service
-  has_one :microsoft_teams_service
-  has_one :hangouts_chat_service
-  has_one :unify_circuit_service
-  has_one :webex_teams_service
 
   has_one :root_of_fork_network,
           foreign_key: 'root_project_id',
@@ -901,6 +899,10 @@ class Project < ApplicationRecord
   end
 
   alias_method :ancestors, :ancestors_upto
+
+  def ancestors_upto_ids(...)
+    ancestors_upto(...).pluck(:id)
+  end
 
   def emails_disabled?
     strong_memoize(:emails_disabled) do
@@ -1717,7 +1719,11 @@ class Project < ApplicationRecord
   end
 
   def shared_runners
-    @shared_runners ||= shared_runners_available? ? Ci::Runner.instance_type : Ci::Runner.none
+    @shared_runners ||= shared_runners_enabled? ? Ci::Runner.instance_type : Ci::Runner.none
+  end
+
+  def available_shared_runners
+    @available_shared_runners ||= shared_runners_available? ? shared_runners : Ci::Runner.none
   end
 
   def group_runners
@@ -1728,9 +1734,13 @@ class Project < ApplicationRecord
     Ci::Runner.from_union([runners, group_runners, shared_runners])
   end
 
+  def all_available_runners
+    Ci::Runner.from_union([runners, group_runners, available_shared_runners])
+  end
+
   def active_runners
     strong_memoize(:active_runners) do
-      all_runners.active
+      all_available_runners.active
     end
   end
 
@@ -2431,7 +2441,7 @@ class Project < ApplicationRecord
   end
 
   def access_request_approvers_to_be_notified
-    members.maintainers.connected_to_user.order_recent_sign_in.limit(ACCESS_REQUEST_APPROVERS_TO_BE_NOTIFIED_LIMIT)
+    members.maintainers.connected_to_user.order_recent_sign_in.limit(Member::ACCESS_REQUEST_APPROVERS_TO_BE_NOTIFIED_LIMIT)
   end
 
   def pages_lookup_path(trim_prefix: nil, domain: nil)
@@ -2592,10 +2602,6 @@ class Project < ApplicationRecord
     Projects::GitGarbageCollectWorker
   end
 
-  def inherited_issuable_templates_enabled?
-    Feature.enabled?(:inherited_issuable_templates, self, default_enabled: :yaml)
-  end
-
   def activity_path
     Gitlab::Routing.url_helpers.activity_project_path(self)
   end
@@ -2604,6 +2610,10 @@ class Project < ApplicationRecord
     return if pending_delete?
 
     ProjectStatistics.increment_statistic(self, statistic, delta)
+  end
+
+  def merge_requests_author_approval
+    !!read_attribute(:merge_requests_author_approval)
   end
 
   private

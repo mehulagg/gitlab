@@ -113,7 +113,6 @@ export default {
         }),
         visibility: initFormField({
           value: this.projectVisibility,
-          skipValidation: true,
         }),
       },
     };
@@ -222,7 +221,11 @@ export default {
         redirectTo(data.web_url);
         return;
       } catch (error) {
-        createFlash({ message: error });
+        createFlash({
+          message: s__(
+            'ForkProject|An error occurred while forking the project. Please try again.',
+          ),
+        });
       }
     },
   },
@@ -322,7 +325,11 @@ export default {
       />
     </gl-form-group>
 
-    <gl-form-group>
+    <gl-form-group
+      v-validation:[form.showValidation]
+      :invalid-feedback="s__('ForkProject|Please select a visibility level')"
+      :state="form.fields.visibility.state"
+    >
       <label>
         {{ s__('ForkProject|Visibility level') }}
         <gl-link :href="visibilityHelpPath" target="_blank">

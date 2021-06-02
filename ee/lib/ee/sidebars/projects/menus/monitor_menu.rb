@@ -38,7 +38,7 @@ module EE
             end
 
             ::Sidebars::MenuItem.new(
-              title: _('Escalation policies'),
+              title: _('Escalation Policies'),
               link: project_incident_management_escalation_policies_path(context.project),
               active_routes: { controller: :escalation_policies },
               item_id: :escalation_policies

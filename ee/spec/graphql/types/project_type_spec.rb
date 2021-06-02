@@ -52,7 +52,6 @@ RSpec.describe GitlabSchema.types['Project'] do
       create(:ci_build, :success, :sast, pipeline: pipeline)
       create(:ci_build, :success, :dast, pipeline: pipeline)
       create(:ci_build, :success, :license_scanning, pipeline: pipeline)
-      create(:ci_build, :success, :license_management, pipeline: pipeline)
       create(:ci_build, :pending, :secret_detection, pipeline: pipeline)
     end
 

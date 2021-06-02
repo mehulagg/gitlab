@@ -4,11 +4,13 @@ require 'spec_helper'
 RSpec.describe JobEntity do
   using RSpec::Parameterized::TableSyntax
 
+  let_it_be(:group) { create(:group) }
+  let_it_be(:project) { create(:project, :repository, group: group) }
+
   let(:user) { create(:user) }
-  let(:project) { create(:project, :repository) }
   let(:request) { double('request') }
   let(:entity) { described_class.new(job, request: request) }
-  let(:environment) { create(:environment, project: project) }
+  let(:environment) { create(:environment, :production, project: project) }
 
   before do
     allow(request).to receive(:current_user).and_return(user)

@@ -13,8 +13,6 @@ RSpec.describe BulkImports::Stage do
       [1, BulkImports::Groups::Pipelines::BadgesPipeline],
       [1, BulkImports::Groups::Pipelines::IterationsPipeline],
       [2, BulkImports::Groups::Pipelines::EpicsPipeline],
-      [3, BulkImports::Groups::Pipelines::EpicAwardEmojiPipeline],
-      [3, BulkImports::Groups::Pipelines::EpicEventsPipeline],
       [4, BulkImports::Groups::Pipelines::EntityFinisher]
     ]
   end

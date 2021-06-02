@@ -1,5 +1,7 @@
-mutation($namespaceIds: [NamespaceID!]!) {
-  bulkFindOrCreateDevopsAdoptionSegments(input: { namespaceIds: $namespaceIds }) {
+mutation($namespaceIds: [NamespaceID!]!, $displayNamespaceId: NamespaceID) {
+  bulkFindOrCreateDevopsAdoptionSegments(
+    input: { namespaceIds: $namespaceIds, displayNamespaceId: $displayNamespaceId }
+  ) {
     segments {
       id
       latestSnapshot {
@@ -11,6 +13,7 @@ mutation($namespaceIds: [NamespaceID!]!) {
         deploySucceeded
         securityScanSucceeded
         recordedAt
+        codeOwnersUsedCount
       }
       namespace {
         fullName

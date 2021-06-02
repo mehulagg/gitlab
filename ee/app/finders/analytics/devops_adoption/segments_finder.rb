@@ -12,28 +12,13 @@ module Analytics
 
       def execute
         scope = ::Analytics::DevopsAdoption::Segment.ordered_by_name
-
-        if direct_descendants_only?
-          scope = scope.for_namespaces(parent_with_direct_descendants)
-        else
-          scope = scope.for_parent(parent_namespace) if parent_namespace
-        end
-
-        scope
+        by_display_namespace(scope)
       end
 
       private
 
-      def parent_with_direct_descendants
-        parent_namespace ? [parent_namespace] + parent_namespace.children : ::Group.top_most
-      end
-
-      def parent_namespace
-        params[:parent_namespace]
-      end
-
-      def direct_descendants_only?
-        params[:direct_descendants_only]
+      def by_display_namespace(scope)
+        scope.for_display_namespaces(params[:display_namespace])
       end
     end
   end

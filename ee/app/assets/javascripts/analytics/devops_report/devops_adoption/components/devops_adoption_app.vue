@@ -76,12 +76,9 @@ export default {
         pageInfo: null,
       },
       pollingTableData: null,
-      segmentsQueryVariables: this.isGroup
-        ? {
-            parentNamespaceId: this.groupGid,
-            directDescendantsOnly: false,
-          }
-        : {},
+      segmentsQueryVariables: {
+        displayNamespaceId: this.isGroup ? this.groupGid : null,
+      },
       adoptionTabClicked: false,
       devopsScoreTabClicked: false,
       selectedTab: 0,

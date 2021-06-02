@@ -1,17 +1,18 @@
 <script>
 import { GlEmptyState } from '@gitlab/ui';
 import { mapActions, mapState, mapGetters } from 'vuex';
+import PathNavigation from '~/cycle_analytics/components/path_navigation.vue';
+import { OVERVIEW_STAGE_ID } from '~/cycle_analytics/constants';
 import UrlSync from '~/vue_shared/components/url_sync.vue';
 import DateRange from '../../shared/components/daterange.vue';
 import ProjectsDropdownFilter from '../../shared/components/projects_dropdown_filter.vue';
 import { DATE_RANGE_LIMIT } from '../../shared/constants';
 import { toYmd } from '../../shared/utils';
-import { PROJECTS_PER_PAGE, OVERVIEW_STAGE_ID } from '../constants';
+import { PROJECTS_PER_PAGE } from '../constants';
 import DurationChart from './duration_chart.vue';
 import FilterBar from './filter_bar.vue';
 import Metrics from './metrics.vue';
-import PathNavigation from './path_navigation.vue';
-import StageTableNew from './stage_table_new.vue';
+import StageTable from './stage_table.vue';
 import TypeOfWorkCharts from './type_of_work_charts.vue';
 import ValueStreamSelect from './value_stream_select.vue';
 
@@ -23,7 +24,7 @@ export default {
     GlEmptyState,
     ProjectsDropdownFilter,
     TypeOfWorkCharts,
-    StageTableNew,
+    StageTable,
     PathNavigation,
     FilterBar,
     ValueStreamSelect,
@@ -57,7 +58,6 @@ export default {
       'errorCode',
       'startDate',
       'endDate',
-      'medians',
       'isLoadingValueStreams',
       'selectedStageError',
       'selectedValueStream',
@@ -94,6 +94,17 @@ export default {
     },
     query() {
       const selectedProjectIds = this.selectedProjectIds?.length ? this.selectedProjectIds : null;
+      const paginationUrlParams = !this.isOverviewStageSelected
+        ? {
+            sort: this.pagination?.sort || null,
+            direction: this.pagination?.direction || null,
+            page: this.pagination?.page || null,
+          }
+        : {
+            sort: null,
+            direction: null,
+            page: null,
+          };
 
       return {
         value_stream_id: this.selectedValueStream?.id || null,
@@ -101,8 +112,7 @@ export default {
         created_after: toYmd(this.startDate),
         created_before: toYmd(this.endDate),
         stage_id: (!this.isOverviewStageSelected && this.selectedStage?.id) || null, // the `overview` stage is always the default, so dont persist the id if its selected
-        sort: (!this.isOverviewStageSelected && this.pagination?.sort) || null,
-        direction: (!this.isOverviewStageSelected && this.pagination?.direction) || null,
+        ...paginationUrlParams,
       };
     },
     stageCount() {
@@ -134,7 +144,7 @@ export default {
         this.setDefaultSelectedStage();
       } else {
         this.setSelectedStage(stage);
-        this.fetchStageData(stage.slug);
+        this.updateStageTablePagination({ ...this.pagination, page: 1 });
       }
     },
     onHandleUpdatePagination(data) {
@@ -167,7 +177,6 @@ export default {
     <div v-if="!shouldRenderEmptyState" class="gl-max-w-full">
       <path-navigation
         v-if="selectedStageReady"
-        :key="`path_navigation_key_${pathNavigationData.length}`"
         class="js-path-navigation gl-w-full gl-pb-2"
         :loading="isLoading"
         :stages="pathNavigationData"
@@ -227,7 +236,7 @@ export default {
           />
           <type-of-work-charts />
         </template>
-        <stage-table-new
+        <stage-table
           v-else
           :is-loading="isLoading || isLoadingStage"
           :stage-events="currentStageEvents"

@@ -115,9 +115,17 @@ export const buySubscriptionCard = {
   buttonLabel: s__('SuperSonics|Buy subscription'),
 };
 
+export const INVALID_CODE_ERROR_MESSAGE = 'invalid activation code';
 export const CONNECTIVITY_ERROR = 'CONNECTIVITY_ERROR';
-export const generalActivationError = s__(
+export const INVALID_CODE_ERROR = 'INVALID_CODE_ERROR';
+export const generalActivationErrorTitle = s__(
   'SuperSonics|An error occurred while activating your subscription.',
+);
+export const generalActivationErrorMessage = s__(
+  'SuperSonics|You can learn more about %{activationLinkStart}activating your subscription%{activationLinkEnd}. If you need further assistance, please %{supportLinkStart}contact GitLab Support%{supportLinkEnd}.',
+);
+export const invalidActivationCode = s__(
+  'SuperSonics|The activation code is not valid. Please make sure to copy it exactly from the Customers Portal or confirmation email. Learn more about %{linkStart}activating your subscription%{linkEnd}.',
 );
 export const connectivityErrorAlert = {
   subtitle: s__(
@@ -127,3 +135,4 @@ export const connectivityErrorAlert = {
     'SuperSonics|Get help for the most common connectivity issues by %{linkStart}troubleshooting the activation code%{linkEnd}.',
   ),
 };
+export const supportLink = 'https://about.gitlab.com/support/#contact-support';
