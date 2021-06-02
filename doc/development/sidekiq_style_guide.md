@@ -464,8 +464,34 @@ for a review.
 
 ## Job data consistency
 
-In order to utilize [Sidekiq read-only database replicas capabilities](../administration/database_load_balancing.md#enable-the-load-balancer-for-sidekiq), 
-set the `data_consistency` attribute of the job to `:always`, `:sticky`, or `:delayed`. 
+Prior to GitLab 13.12, Sidekiq workers would always send database queries to the primary database node,
+regardless of whether they were reads or writes. This ensured that the highest level of data integrity
+is guaranteed, since in a single-node scenario it is impossible to encounter stale reads in workers that read their own writes
+even across several transactions. If, however, the worker writes to the primary, but reads from a replica, the possibility
+of reading a stale record increases due to replicas lagging behind the primary.
+
+However, with the number of jobs that rely on the database increasing, ensuring this level of consistency
+can put unsustainable load on the primary database server. We therefore added the ability to utilize
+[database load-balancing in Sidekiq workers](../administration/database_load_balancing.md#enable-the-load-balancer-for-sidekiq)
+by defining a `data_consistency` expectation that allows the scheduler to target read replicas instead.
+
+Allowing for less strict consistency settings allows developers to take the following trade-off:
+Either ensure consistent reads, but increase load on the primary database, or utilize read replicas to add
+relief to the primary, but increase the likelihood of stale reads.
+
+By default, any worker will have a data consistency requirement of `:always`, meaning that as before, all
+database operations will target the primary. In order to allow for reads to be served from replicas instead,
+two additional consistency modes were added: `:sticky` and `:delayed`.
+
+When either `:sticky` or `:delayed` consistency are declared, jobs will be enqueued with a short delay.
+This is to minimize the likelihood of encountering replication lag after a write. The difference is in
+what happens when replication lag is still encountered after the delay: `sticky` workers will switch over to the
+primary right away, whereas `delayed` workers will fail fast and enter a retry loop until they either encounter
+no more replication lag, or exhaust their retries.
+**If your worker never performs any writes, it is strongly advised to apply one of these consistency settings,
+since it will never need to rely on the primary database node.**
+
+The `data_consistency` attribute and its values are summarized below:
 
 | **Data Consistency**  | **Description**  |
 |--------------|-----------------------------|
@@ -499,8 +525,8 @@ When `feature_flag` is disabled, the job defaults to `:always`, which means that
 The `feature_flag` property does not allow the use of
 [feature gates based on actors](../development/feature_flags/index.md).
 This means that the feature flag cannot be toggled only for particular
-projects, groups, or users, but instead, you can safely use [percentage of time rollout](../development/feature_flags/index.md). 
-Note that since we check the feature flag on both Sidekiq client and server, rolling out a 10% of the time, 
+projects, groups, or users, but instead, you can safely use [percentage of time rollout](../development/feature_flags/index.md).
+Note that since we check the feature flag on both Sidekiq client and server, rolling out a 10% of the time,
 will likely results in 1% (0.1 [from client]*0.1 [from server]) of effective jobs using replicas.
 
 Example:
@@ -518,7 +544,7 @@ end
 ### Delayed job execution
 
 Scheduling workers that utilize [Sidekiq read-only database replicas capabilities](#job-data-consistency),
-(workers with `data_consistency` attribute set to `:sticky` or `:delayed`), 
+(workers with `data_consistency` attribute set to `:sticky` or `:delayed`),
 by calling `SomeWorker.perform_async` results in a worker performing in the future (1 second in the future).
 
 This way, the replica has a chance to catch up, and the job will likely use the replica.
