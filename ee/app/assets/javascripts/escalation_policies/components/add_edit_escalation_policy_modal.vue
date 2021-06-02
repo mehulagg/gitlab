@@ -61,7 +61,12 @@ export default {
       };
     },
     isFormValid() {
-      return this.validationState.name && this.validationState.rules.every(Boolean);
+      return (
+        this.validationState.name &&
+        this.validationState.rules.every(
+          ({ isTimeValid, isScheduleValid }) => isTimeValid && isScheduleValid,
+        )
+      );
     },
   },
   methods: {

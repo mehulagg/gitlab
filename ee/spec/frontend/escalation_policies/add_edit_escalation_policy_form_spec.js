@@ -46,22 +46,8 @@ describe('AddEscalationPolicyForm', () => {
     wrapper.destroy();
   });
 
-  const findPolicyName = () => wrapper.findByTestId('escalation-policy-name');
   const findRules = () => wrapper.findAllComponents(EscalationRule);
   const findAddRuleLink = () => wrapper.findComponent(GlLink);
-
-  describe('Escalation policy form validation', () => {
-    it('should set correct validation state for validated controls', async () => {
-      createComponent({
-        props: {
-          validationState: { name: false, rules: [false] },
-        },
-      });
-      await wrapper.vm.$nextTick();
-      expect(findPolicyName().attributes('state')).toBeUndefined();
-      expect(findRules().at(0).attributes('is-valid')).toBeUndefined();
-    });
-  });
 
   describe('Escalation rules', () => {
     it('should render one default rule', () => {
@@ -96,7 +82,7 @@ describe('AddEscalationPolicyForm', () => {
       };
       findRules().at(0).vm.$emit('update-escalation-rule', 0, updatedRule);
       expect(wrapper.emitted('update-escalation-policy-form')[0]).toEqual([
-        { field: 'rules', value: [updatedRule] },
+        { field: 'rules', value: [expect.objectContaining(updatedRule)] },
       ]);
     });
 

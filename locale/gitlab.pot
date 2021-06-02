@@ -13102,6 +13102,9 @@ msgstr ""
 msgid "EscalationPolicies|Edit escalation policy"
 msgstr ""
 
+msgid "EscalationPolicies|Elapsed time must be greater than or equal to zero."
+msgstr ""
+
 msgid "EscalationPolicies|Email on-call user in schedule"
 msgstr ""
 

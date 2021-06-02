@@ -146,7 +146,7 @@ export default {
         :index="index"
         :schedules="schedules"
         :schedules-loading="schedulesLoading"
-        :is-valid="validationState.rules[index]"
+        :validation-state="validationState.rules[index]"
         @update-escalation-rule="updateEscalationRules"
         @remove-escalation-rule="removeEscalationRule"
       />

@@ -15,5 +15,10 @@ export const isNameFieldValid = (name) => {
  * @returns {Array}
  */
 export const getRulesValidationState = (rules) => {
-  return rules.map((rule) => Boolean(rule.oncallScheduleIid));
+  return rules.map((rule) => {
+    return {
+      isTimeValid: parseInt(rule.elapsedTimeSeconds, 10) >= 0,
+      isScheduleValid: Boolean(rule.oncallScheduleIid),
+    };
+  });
 };
