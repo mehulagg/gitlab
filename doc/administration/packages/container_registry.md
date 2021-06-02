@@ -1327,7 +1327,7 @@ For Source installs, you should locate your `registry` binary and temporarily re
 
 #### Images upgrade
 
-You can follow the [recommended steps by Docker to upgrade v1 images](https://docs.docker.com/registry/spec/deprecated-schema-v1/) you might still have. The most straightforward option is to pull those images, re-tag and push them once again to the registry, using a Docker client version above v1.12. Docker will take care of converting images automatically before pushing them to the registry. Once done, all your v1 images should now be available as v2 images.
+You can follow the [recommended steps by Docker to upgrade v1 images](https://docs.docker.com/registry/spec/deprecated-schema-v1/) you might still have. The most straightforward option is to pull those images and push them once again to the registry, using a Docker client version above v1.12. Docker will take care of converting images automatically before pushing them to the registry. Once done, all your v1 images should now be available as v2 images.
 
 ### Advanced Troubleshooting
 
