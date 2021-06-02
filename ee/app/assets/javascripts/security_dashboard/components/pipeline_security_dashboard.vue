@@ -18,6 +18,26 @@ export default {
     VulnerabilityReport,
   },
   mixins: [glFeatureFlagMixin()],
+  inject: ['projectFullPath', 'pipeline', 'dashboardDocumentation', 'emptyStateSvgPath'],
+  props: {
+    projectId: {
+      type: Number,
+      required: true,
+    },
+    vulnerabilitiesEndpoint: {
+      type: String,
+      required: true,
+    },
+    loadingErrorIllustrations: {
+      type: Object,
+      required: true,
+    },
+  },
+  data() {
+    return {
+      securityReportSummary: {},
+    };
+  },
   apollo: {
     securityReportSummary: {
       query: pipelineSecurityReportSummaryQuery,
@@ -32,21 +52,6 @@ export default {
         const summary = data?.project?.pipeline?.securityReportSummary;
         return summary && Object.keys(summary).length ? summary : null;
       },
-    },
-  },
-  inject: ['projectFullPath', 'pipeline', 'dashboardDocumentation', 'emptyStateSvgPath'],
-  props: {
-    projectId: {
-      type: Number,
-      required: true,
-    },
-    vulnerabilitiesEndpoint: {
-      type: String,
-      required: true,
-    },
-    loadingErrorIllustrations: {
-      type: Object,
-      required: true,
     },
   },
   computed: {
@@ -64,6 +69,30 @@ export default {
         primaryButtonText: s__('SecurityReports|Learn more about setting up your dashboard'),
       };
     },
+    scannerErrors() {
+      const securityReportSummary = {
+        dast: {
+          scans: [{ errors: ['dastyo', 'dastya'], name: 'dast' }],
+        },
+        sast: null,
+        foo: {
+          scans: [{ errors: ['fooyo', 'foobar'], name: 'dast' }],
+        },
+      };
+
+      // TODO: make this more readable
+      return Object.entries(securityReportSummary).flatMap(([scannerName, scannerSummary]) => {
+        const scans = scannerSummary?.scans || [];
+
+        if (!scans.length) {
+          return [];
+        }
+
+        const scannerErrors = scans.flatMap((scan) => scan.errors);
+
+        return scannerErrors.length ? [{ scannerName, scannerErrors }] : [];
+      });
+    },
   },
   created() {
     this.setSourceBranch(this.pipeline.sourceBranch);
@@ -79,6 +108,9 @@ export default {
 
 <template>
   <div>
+    <!-- Errors alert goes here please -->
+    {{ scannerErrors }}
+    <!-- /Errors alert goes here please -->
     <security-reports-summary
       v-if="securityReportSummary"
       :summary="securityReportSummary"
