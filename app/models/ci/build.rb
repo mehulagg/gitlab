@@ -39,6 +39,7 @@ module Ci
     has_one :deployment, as: :deployable, class_name: 'Deployment'
     has_one :pending_state, class_name: 'Ci::BuildPendingState', inverse_of: :build
     has_one :queuing_entry, class_name: 'Ci::PendingBuild', foreign_key: :build_id
+    has_one :shared_runner_metadata, class_name: 'Ci::SharedRunnerBuild', foreign_key: :build_id
     has_many :trace_sections, class_name: 'Ci::BuildTraceSection'
     has_many :trace_chunks, class_name: 'Ci::BuildTraceChunk', foreign_key: :build_id, inverse_of: :build
     has_many :report_results, class_name: 'Ci::BuildReportResult', inverse_of: :build
@@ -1064,12 +1065,18 @@ module Ci
       options.dig(:allow_failure_criteria, :exit_codes).present?
     end
 
+    ##
+    # We can have only one queuing entry or shared runner build tracking entry,
+    # because there is a unique index on `build_id` in each table, but we need
+    # a relation to remove these entries more efficiently in a single statement
+    # without actually loading data.
+    #
     def all_queuing_entries
-      # We can have only one queuing entry, because there is a unique index on
-      # `build_id`, but we need a relation to remove this single queuing entry
-      # more efficiently in a single statement without actually load data.
-
       ::Ci::PendingBuild.where(build_id: self.id)
+    end
+
+    def all_shared_runner_metadata
+      ::Ci::SharedRunnerBuild.where(build_id: self.id)
     end
 
     protected
