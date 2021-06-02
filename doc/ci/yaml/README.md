@@ -3306,7 +3306,7 @@ job:
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/49775) in GitLab 13.8
 > - It's [deployed behind a feature flag](../../user/feature_flags.md), disabled by default.
-> - It's enabled on GitLab.com.
+> - It's disabled on GitLab.com.
 > - It's recommended for production use.
 
 Use `artifacts:public` to determine whether the job artifacts should be
