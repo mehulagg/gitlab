@@ -17,6 +17,10 @@ module Resolvers
                required: false,
                description: 'Filter by tags associated with the runner (comma-separated or array).'
 
+      argument :search, GraphQL::STRING_TYPE,
+               required: false,
+               description: 'Filter by text present in token or description fields.'
+
       argument :sort, ::Types::Ci::RunnerSortEnum,
                required: false,
                description: 'Sort order of results.'
