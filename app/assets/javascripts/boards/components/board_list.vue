@@ -141,7 +141,6 @@ export default {
       this.showIssueForm = !this.showIssueForm;
     },
     onReachingListBottom() {
-      console.log(this.hasNextPage);
       if (!this.loadingMore && this.hasNextPage) {
         this.showCount = true;
         this.loadNextPage();
