@@ -1558,7 +1558,7 @@ GitLab users are [assigned roles](../../../user/permissions.md) that confer spec
 - _Maintainer_ is an example of a role.
 - _Create new issue_ is an example of a permission.
 
-[Do not use](terms_list.md) these terms interchangeably.
+[Do not use](word_list.md) these terms interchangeably.
 
 ## GitLab versions
 
