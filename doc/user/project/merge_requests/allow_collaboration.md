@@ -24,12 +24,14 @@ of the merge request.
 ## Enabling commit edits from upstream members
 
 In [GitLab 13.7 and later](https://gitlab.com/gitlab-org/gitlab/-/issues/23308),
-this setting is enabled by default. It can be changed by users with Developer
-permissions to the source project. Once enabled, upstream members can
-retry the pipelines and jobs of the merge request:
+this setting is enabled by default. It can be changed by users with the
+[Developer role](../../permissions.md#project-members-permissions) for the source
+project. After it's enabled, upstream members can retry the pipelines and jobs of
+the merge request:
 
 1. While creating or editing a merge request, scroll to **Contribution** and
-   select **Allow commits from members who can merge to the target branch**.
+   then select the **Allow commits from members who can merge to the target branch**.
+   checkbox.
 1. Finish creating your merge request.
 
 After you create the merge request, the merge request widget displays a message:
@@ -52,7 +54,7 @@ To find and work with the changes from the fork:
    ![Check out branch button](img/commit-button_v13_12.png)
 1. In the modal window, select **{copy-to-clipboard}** (**Copy**) for step 1
    to copy the `git fetch` and `git checkout` instructions to your clipboard.
-   Paste the commands, which look like this example, into your terminal:
+   Paste the commands (which look like this example) into your terminal:
 
    ```shell
    git fetch git@gitlab.com:thedude/awesome-project.git update-docs
@@ -62,7 +64,7 @@ To find and work with the changes from the fork:
    These commands fetch the branch from the forked project, and create a local branch
    based off the fetched branch.
 
-1. Make your changes to the local copy of the branch, and commit them.
+1. Make your changes to the local copy of the branch, and then commit them.
 1. In your terminal, push your local changes back up to the forked project. This
    command pushes the local branch `thedude-awesome-project-update-docs` to the
    `update-docs` branch of the `git@gitlab.com:thedude/awesome-project.git` repository:
@@ -77,7 +79,7 @@ To find and work with the changes from the fork:
 
 ### Pipeline status unavailable from MR page of forked project
 
-When a user forks a project, the permissions on the forked copy are not copied over
+When a user forks a project, the permissions of the forked copy are not copied over
 from the original project. The creator of the fork must grant permissions to the
 forked copy before members in the upstream project can view or merge the changes
 in the merge request.
