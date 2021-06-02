@@ -1,5 +1,5 @@
 <script>
-import { GlEmptyState } from '@gitlab/ui';
+import { GlAccordion, GlAccordionItem, GlAlert, GlEmptyState } from '@gitlab/ui';
 import { mapActions } from 'vuex';
 import { fetchPolicies } from '~/lib/graphql';
 import { s__ } from '~/locale';
@@ -12,6 +12,9 @@ import VulnerabilityReport from './vulnerability_report.vue';
 export default {
   name: 'PipelineSecurityDashboard',
   components: {
+    GlAccordion, // TODO: lazy load these inside separate component
+    GlAccordionItem,
+    GlAlert,
     GlEmptyState,
     SecurityReportsSummary,
     SecurityDashboard,
@@ -88,10 +91,13 @@ export default {
           return [];
         }
 
-        const scannerErrors = scans.flatMap((scan) => scan.errors);
+        const errors = scans.flatMap((scan) => scan.errors);
 
-        return scannerErrors.length ? [{ scannerName, scannerErrors }] : [];
+        return errors.length ? [{ scannerName, errors }] : [];
       });
+    },
+    hasScannerErrors() {
+      return this.scannerErrors.length > 0;
     },
   },
   created() {
@@ -108,9 +114,25 @@ export default {
 
 <template>
   <div>
-    <!-- Errors alert goes here please -->
-    {{ scannerErrors }}
-    <!-- /Errors alert goes here please -->
+    <gl-alert v-if="hasScannerErrors" variant="danger" :dismissible="false" class="gl-my-5">
+      <h2>{{ __('Error parsing security reports') }}</h2>
+      <p>
+        {{
+          __(
+            'The security reports below contain one or more vulnerability findings that could not be parsed and were not recorded. Download the artifacts in the job output to investigate. Ensure any security report created conforms to the relevant JSON schema.',
+          )
+        }}
+      </p>
+      <gl-accordion :header-level="3">
+        <gl-accordion-item
+          v-for="{ scannerName, errors } in scannerErrors"
+          :key="scannerName"
+          :title="scannerName"
+        >
+          {{ errors }}
+        </gl-accordion-item>
+      </gl-accordion>
+    </gl-alert>
     <security-reports-summary
       v-if="securityReportSummary"
       :summary="securityReportSummary"
