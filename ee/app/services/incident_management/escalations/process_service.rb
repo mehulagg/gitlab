@@ -14,39 +14,25 @@ module IncidentManagement
       def execute
         return unless ::Gitlab::IncidentManagement.escalation_policies_available?(project)
 
-        rules = escalation_policy.rules
+        current_elapsed_time = process_time - escalation.created_at
+        notified_elapsed_time = escalation.updated_at - escalation.created_at
 
-        find_rules_to_escalate(rules).each do |rule|
-          escalate_rule(rule)
-        end
+        escalation_rules
+          .for_status_above(alert.status)
+          .for_elapsed_time_between(notified_elapsed_time, current_elapsed_time)
+          .each { |rule| escalate_rule(rule) }
 
         mark_escalation_as_updated!
       end
 
       private
 
-      attr_reader :project, :escalation, :escalation_policy, :alert, :process_time, :rule_to_escalate
+      attr_reader :project, :escalation, :escalation_policy, :alert, :process_time
 
-      def find_rules_to_escalate(rules)
-        rules.select do |rule|
-          status_not_surpassed?(rule) &&
-            escalation_time_surpassed_threshold?(rule) &&
-            not_previously_escalated?(rule)
-        end
-      end
-
-      # Compares the enum value of the status
-      # A lower value is more urgent than a higher value.
-      def status_not_surpassed?(rule)
-        IncidentManagement::EscalationRule.statuses[rule.status] > alert.status
-      end
-
-      def escalation_time_surpassed_threshold?(rule)
-        escalation.elapsed_time(time_to: process_time) >= rule.elapsed_time_seconds
-      end
-
-      def not_previously_escalated?(rule)
-        escalation.updated_at.to_i <= (escalation.created_at + rule.elapsed_time_seconds).to_i
+      def escalation_rules
+        escalation_policy
+          .rules
+          .includes(:oncall_schedule) # rubocop: disable CodeReuse/ActiveRecord
       end
 
       def escalate_rule(rule)
