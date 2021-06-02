@@ -4,7 +4,7 @@ group: Configure
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
-# Adding and removing Kubernetes clusters - Deprecated **(FREE) -**
+# Adding and removing Kubernetes clusters **(FREE)**
 
 NOTE:
 Attaching a cluster to GitLab is no longer recommended. Kubernetes cluster, similar to any other infrastructure, should be created, updated, maintained using Infrastructure as Code. GitLab plans to enable the capability to create clusters with Terraform, all within GitLab. You can follow along in this [epic](https://gitlab.com/groups/gitlab-org/-/epics/6049). 
