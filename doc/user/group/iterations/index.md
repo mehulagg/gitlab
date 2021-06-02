@@ -32,20 +32,44 @@ In GitLab, iterations are similar to milestones, with a few differences:
 - Iterations require both a start and an end date.
 - Iteration date ranges cannot overlap.
 
+## Iteration cadences
+
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/TODO) in GitLab 14.0.
+> - Deployed behind a feature flag, disabled by default.
+
+Iteration cadences automate some common iteration tasks. They can be used to
+automatically create iterations every 1, 2, 3, 4, or 6 weeks. They can also
+be configured to automatically roll over incomplete issues to the next iteration.
+
 ## View the iterations list
 
-To view the iterations list, in a group, go to **{issues}** **Issues > Iterations**.
+To view the iterations list, go to **{issues}** **Issues > Iterations**.
+Click an iteration cadence to view all the iterations in that cadence, ordered by descending date.
 From there you can create a new iteration or click an iteration to get a more detailed view.
+
+## Create an iteration cadence
+
+NOTE:
+You need Developer [permissions](../../permissions.md) or higher to create an iteration cadence.
+
+To create an iteration:
+
+1. In a group, go to **{issues}** **Issues > Iterations**.
+1. Click **New iteration cadence**.
+1. Fill out required fields, and click **Create iteration cadence**. The cadence list page opens.
+
 
 ## Create an iteration
 
 NOTE:
 You need Developer [permissions](../../permissions.md) or higher to create an iteration.
 
+For manually scheduled iteration cadences, you create and add iterations yourself.
+
 To create an iteration:
 
 1. In a group, go to **{issues}** **Issues > Iterations**.
-1. Click **New iteration**.
+1. Click the three-dot menu (**{ellipsis_v}**) > **Add iteration** for the cadence you want to add to.
 1. Enter the title, a description (optional), a start date, and a due date.
 1. Click **Create iteration**. The iteration details page opens.
 
