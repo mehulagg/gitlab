@@ -340,7 +340,7 @@ startup-css-check as-if-foss:
   extends:
     - .startup-css-check-base
     - .as-if-foss
-    - .frontend:rules:startup-css-check-as-if-foss
+    - .frontend:rules:default-frontend-jobs-as-if-foss
   needs:
     - job: "compile-test-assets as-if-foss"
     - job: "rspec frontend_fixture as-if-foss"

@@ -21,7 +21,12 @@ Startup CSS changes detected!
 It looks like there have been recent changes which require
 regenerating the Startup CSS files.
 
-Consider one of the following options:
+**What should I do now?**
+
+IMPORTANT: Please make sure to also run the `as-if-foss` pipeline
+if this fails in EE.
+
+To fix this job, consider one of the following options:
 
   1. Regenerating locally with "yarn run generate:startup_css".
   2. Copy and apply the following diff:
