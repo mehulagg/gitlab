@@ -1,6 +1,5 @@
 <script>
 import { GlButton, GlFormInput, GlModal, GlSprintf, GlAlert } from '@gitlab/ui';
-import { BV_SHOW_MODAL, BV_HIDE_MODAL } from '~/lib/utils/constants';
 import csrf from '~/lib/utils/csrf';
 import { sprintf, s__ } from '~/locale';
 import eventHub from '../event_hub';
@@ -16,7 +15,6 @@ export default {
   },
   data() {
     return {
-      visible: false,
       isProtectedBranch: false,
       branchName: '',
       defaultBranchName: '',
@@ -81,13 +79,13 @@ export default {
       this.deletePath = deletePath;
       this.merged = merged;
 
-      this.$bvModal.show(this.modalId);
+      this.$refs.modal.show();
     },
     submitForm() {
       this.$refs.form.submit();
     },
     closeModal() {
-      this.$bvModal.hide(this.modalId);
+      this.$refs.modal.hide();
     },
   },
   i18n: {
@@ -117,7 +115,7 @@ export default {
 </script>
 
 <template>
-  <gl-modal :visible="visible" size="sm" :modal-id="modalId" :title="title">
+  <gl-modal ref="modal" size="sm" :modal-id="modalId" :title="title">
     <gl-alert class="gl-mb-5" variant="danger" :dismissible="false">
       <div data-testid="modal-message">
         <gl-sprintf :message="message">
@@ -175,7 +173,7 @@ export default {
 
     <template #modal-footer>
       <div class="gl-display-flex gl-flex-direction-row gl-justify-content-end gl-flex-wrap gl-m-0">
-        <gl-button @click="closeModal">
+        <gl-button data-testid="delete_branch_cancel_button" @click="closeModal">
           {{ $options.i18n.cancelButtonText }}
         </gl-button>
         <div class="gl-mr-3"></div>
