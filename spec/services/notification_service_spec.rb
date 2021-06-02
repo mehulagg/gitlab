@@ -13,10 +13,6 @@ RSpec.describe NotificationService, :mailer do
   let(:notification) { described_class.new }
 
   around(:example, :deliver_mails_inline) do |example|
-    # This is a temporary `around` hook until all the examples check the
-    # background jobs queue instead of the delivered emails array.
-    # `perform_enqueued_jobs` makes the ActiveJob jobs (e.g. mailer jobs) run inline
-    # compared to `Sidekiq::Testing.inline!` which makes the Sidekiq jobs run inline.
     perform_enqueued_jobs { example.run }
   end
 
@@ -223,14 +219,14 @@ RSpec.describe NotificationService, :mailer do
       subject { notification.new_key(key) }
 
       it "sends email to key owner" do
-        expect { subject }.to have_enqueued_email(key.id, mail: "new_ssh_key_email")
+        expect { subject }.to have_enqueued_sidekiq_mail(Notify, "new_ssh_key_email", key.id)
       end
 
       describe "never emails the ghost user" do
         let(:key_options) { { user: User.ghost } }
 
         it "does not send email to key owner" do
-          expect { subject }.not_to have_enqueued_email(key.id, mail: "new_ssh_key_email")
+          expect { subject }.not_to have_enqueued_sidekiq_mail(Notify, "new_ssh_key_email", key.id)
         end
       end
     end
@@ -244,14 +240,14 @@ RSpec.describe NotificationService, :mailer do
       subject { notification.new_gpg_key(key) }
 
       it "sends email to key owner" do
-        expect { subject }.to have_enqueued_email(key.id, mail: "new_gpg_key_email")
+        expect { subject }.to have_enqueued_sidekiq_mail(Notify, "new_gpg_key_email", key.id)
       end
 
       describe "never emails the ghost user" do
         let(:key_options) { { user: User.ghost } }
 
         it "does not send email to key owner" do
-          expect { subject }.not_to have_enqueued_email(key.id, mail: "new_gpg_key_email")
+          expect { subject }.not_to have_enqueued_sidekiq_mail(Notify, "new_gpg_key_email", key.id)
         end
       end
     end
@@ -265,7 +261,7 @@ RSpec.describe NotificationService, :mailer do
       subject { notification.access_token_about_to_expire(user, [pat.name]) }
 
       it 'sends email to the token owner' do
-        expect { subject }.to have_enqueued_email(user, [pat.name], mail: "access_token_about_to_expire_email")
+        expect { subject }.to have_enqueued_sidekiq_mail(Notify, "access_token_about_to_expire_email", user, [pat.name])
       end
     end
 
@@ -275,7 +271,7 @@ RSpec.describe NotificationService, :mailer do
       subject { notification.access_token_expired(user) }
 
       it 'sends email to the token owner' do
-        expect { subject }.to have_enqueued_email(user, mail: "access_token_expired_email")
+        expect { subject }.to have_enqueued_sidekiq_mail(Notify, "access_token_expired_email", user)
       end
 
       context 'when user is not allowed to receive notifications' do
@@ -284,7 +280,7 @@ RSpec.describe NotificationService, :mailer do
         end
 
         it 'does not send email to the token owner' do
-          expect { subject }.not_to have_enqueued_email(user, mail: "access_token_expired_email")
+          expect { subject }.not_to have_enqueued_sidekiq_mail(Notify, "access_token_expired_email", user)
         end
       end
     end
@@ -304,14 +300,14 @@ RSpec.describe NotificationService, :mailer do
       subject { notification.ssh_key_expired(user, fingerprints) }
 
       it 'sends email to the token owner' do
-        expect { subject }.to have_enqueued_email(user, fingerprints, mail: "ssh_key_expired_email")
+        expect { subject }.to have_enqueued_sidekiq_mail(Notify, "ssh_key_expired_email", user, fingerprints)
       end
 
       context 'when user is not allowed to receive notifications' do
         include_context 'block user'
 
         it 'does not send email to the token owner' do
-          expect { subject }.not_to have_enqueued_email(user, fingerprints, mail: "ssh_key_expired_email")
+          expect { subject }.not_to have_enqueued_sidekiq_mail(Notify, "ssh_key_expired_email", user, fingerprints)
         end
       end
     end
@@ -320,14 +316,14 @@ RSpec.describe NotificationService, :mailer do
       subject { notification.ssh_key_expiring_soon(user, fingerprints) }
 
       it 'sends email to the token owner' do
-        expect { subject }.to have_enqueued_email(user, fingerprints, mail: "ssh_key_expiring_soon_email")
+        expect { subject }.to have_enqueued_sidekiq_mail(Notify, "ssh_key_expiring_soon_email", user, fingerprints)
       end
 
       context 'when user is not allowed to receive notifications' do
         include_context 'block user'
 
         it 'does not send email to the token owner' do
-          expect { subject }.not_to have_enqueued_email(user, fingerprints, mail: "ssh_key_expiring_soon_email")
+          expect { subject }.not_to have_enqueued_sidekiq_mail(Notify, "ssh_key_expiring_soon_email", user, fingerprints)
         end
       end
     end
@@ -341,7 +337,7 @@ RSpec.describe NotificationService, :mailer do
     subject { notification.unknown_sign_in(user, ip, time) }
 
     it 'sends email to the user' do
-      expect { subject }.to have_enqueued_email(user, ip, time, mail: 'unknown_sign_in_email')
+      expect { subject }.to have_enqueued_sidekiq_mail(Notify, 'unknown_sign_in_email', user, ip, time)
     end
   end
 
@@ -351,7 +347,7 @@ RSpec.describe NotificationService, :mailer do
     subject { notification.disabled_two_factor(user) }
 
     it 'sends email to the user' do
-      expect { subject }.to have_enqueued_email(user, mail: 'disabled_two_factor_email')
+      expect { subject }.to have_enqueued_sidekiq_mail(Notify, 'disabled_two_factor_email', user)
     end
   end
 
@@ -464,24 +460,20 @@ RSpec.describe NotificationService, :mailer do
             add_user_subscriptions(issue)
           end
 
-          before do
-            reset_delivered_emails!
-          end
-
           it 'sends emails to recipients', :aggregate_failures do
             subject
 
             expect_delivery_jobs_count(10)
-            expect_enqueud_email(@u_watcher.id, note.id, nil, mail: "note_issue_email")
-            expect_enqueud_email(note.noteable.author.id, note.id, nil, mail: "note_issue_email")
-            expect_enqueud_email(note.noteable.assignees.first.id, note.id, nil, mail: "note_issue_email")
-            expect_enqueud_email(@u_custom_global.id, note.id, nil, mail: "note_issue_email")
-            expect_enqueud_email(@u_mentioned.id, note.id, "mentioned", mail: "note_issue_email")
-            expect_enqueud_email(@subscriber.id, note.id, "subscribed", mail: "note_issue_email")
-            expect_enqueud_email(@watcher_and_subscriber.id, note.id, "subscribed", mail: "note_issue_email")
-            expect_enqueud_email(@subscribed_participant.id, note.id, "subscribed", mail: "note_issue_email")
-            expect_enqueud_email(@u_custom_off.id, note.id, nil, mail: "note_issue_email")
-            expect_enqueud_email(@unsubscribed_mentioned.id, note.id, "mentioned", mail: "note_issue_email")
+            expect(mailers_queue).to have_mailer_job(Notify, "note_issue_email", @u_watcher.id, note.id, nil)
+            expect(mailers_queue).to have_mailer_job(Notify, "note_issue_email", note.noteable.author.id, note.id, nil)
+            expect(mailers_queue).to have_mailer_job(Notify, "note_issue_email", note.noteable.assignees.first.id, note.id, nil)
+            expect(mailers_queue).to have_mailer_job(Notify, "note_issue_email", @u_custom_global.id, note.id, nil)
+            expect(mailers_queue).to have_mailer_job(Notify, "note_issue_email", @u_mentioned.id, note.id, "mentioned")
+            expect(mailers_queue).to have_mailer_job(Notify, "note_issue_email", @subscriber.id, note.id, "subscribed")
+            expect(mailers_queue).to have_mailer_job(Notify, "note_issue_email", @watcher_and_subscriber.id, note.id, "subscribed")
+            expect(mailers_queue).to have_mailer_job(Notify, "note_issue_email", @subscribed_participant.id, note.id, "subscribed")
+            expect(mailers_queue).to have_mailer_job(Notify, "note_issue_email", @u_custom_off.id, note.id, nil)
+            expect(mailers_queue).to have_mailer_job(Notify, "note_issue_email", @unsubscribed_mentioned.id, note.id, "mentioned")
           end
 
           it "emails the note author if they've opted into notifications about their activity", :deliver_mails_inline do
@@ -515,7 +507,7 @@ RSpec.describe NotificationService, :mailer do
               note.save!
             end
 
-            it { expect { subject }.not_to have_enqueued_email(@u_lazy_participant.id, note.id, mail: "note_issue_email") }
+            it { expect { subject }.not_to have_enqueued_sidekiq_mail(Notify, 'note_issue_email', @u_lazy_participant.id, note.id) }
           end
         end
 
@@ -579,7 +571,7 @@ RSpec.describe NotificationService, :mailer do
 
               notification.new_note(note)
 
-              expect_enqueud_email(user.id, note.id, nil, mail: "note_issue_email")
+              expect(mailers_queue).to have_mailer_job(Notify, "note_issue_email", user.id, note.id, nil)
             end
           end
         end
@@ -608,10 +600,10 @@ RSpec.describe NotificationService, :mailer do
         subject
 
         expect_delivery_jobs_count(4)
-        expect_enqueud_email(author.id, note.id, "mentioned", mail: "note_issue_email")
-        expect_enqueud_email(assignee.id, note.id, "mentioned", mail: "note_issue_email")
-        expect_enqueud_email(member.id, note.id, "mentioned", mail: "note_issue_email")
-        expect_enqueud_email(admin.id, note.id, "mentioned", mail: "note_issue_email")
+        expect(mailers_queue).to have_mailer_job(Notify, "note_issue_email", author.id, note.id, "mentioned")
+        expect(mailers_queue).to have_mailer_job(Notify, "note_issue_email", assignee.id, note.id, "mentioned")
+        expect(mailers_queue).to have_mailer_job(Notify, "note_issue_email", member.id, note.id, "mentioned")
+        expect(mailers_queue).to have_mailer_job(Notify, "note_issue_email", admin.id, note.id, "mentioned")
       end
 
       context 'on project that belongs to subgroup' do
@@ -633,8 +625,8 @@ RSpec.describe NotificationService, :mailer do
           it 'does not email guest user' do
             subject
 
-            expect_enqueud_email(group_reporter.id, note.id, nil, mail: "note_issue_email")
-            expect_not_enqueud_email(group_guest.id, "mentioned", mail: "note_issue_email")
+            expect(mailers_queue).to have_mailer_job(Notify, "note_issue_email", group_reporter.id, note.id, nil)
+            expect(mailers_queue).not_to have_mailer_job(Notify, "note_issue_email", group_guest.id, "mentioned")
           end
         end
       end
@@ -930,6 +922,10 @@ RSpec.describe NotificationService, :mailer do
       end
 
       context 'design management is disabled' do
+        before do
+          enable_design_management(false)
+        end
+
         it 'does not notify anyone' do
           notification.new_note(note)
 
@@ -2578,7 +2574,7 @@ RSpec.describe NotificationService, :mailer do
       subject
 
       expect_delivery_jobs_count(1)
-      expect_enqueud_email('Group', group_member.id, 'token', 0, mail: 'member_invited_reminder_email')
+      expect(mailers_queue).to have_mailer_job(Notify, 'member_invited_reminder_email', 'Group', group_member.id, 'token', 0)
     end
   end
 

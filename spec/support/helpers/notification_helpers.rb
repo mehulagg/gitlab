@@ -37,27 +37,19 @@ module NotificationHelpers
     setting.update!(event => value)
   end
 
+  def mailers_queue
+    Sidekiq::Queues['mailers']
+  end
+
   def expect_delivery_jobs_count(count)
-    expect(ActionMailer::MailDeliveryJob).to have_been_enqueued.exactly(count).times
+    expect(mailers_queue.length).to eq(count)
   end
 
   def expect_no_delivery_jobs
-    expect(ActionMailer::MailDeliveryJob).not_to have_been_enqueued
+    expect(mailers_queue).to be_empty
   end
 
   def expect_any_delivery_jobs
-    expect(ActionMailer::MailDeliveryJob).to have_been_enqueued.at_least(:once)
-  end
-
-  def have_enqueued_email(*args, mailer: "Notify", mail: "", delivery: "deliver_now")
-    have_enqueued_job(ActionMailer::MailDeliveryJob).with(mailer, mail, delivery, args: args)
-  end
-
-  def expect_enqueud_email(*args, mailer: "Notify", mail: "", delivery: "deliver_now")
-    expect(ActionMailer::MailDeliveryJob).to have_been_enqueued.with(mailer, mail, delivery, args: args)
-  end
-
-  def expect_not_enqueud_email(*args, mailer: "Notify", mail: "")
-    expect(ActionMailer::MailDeliveryJob).not_to have_been_enqueued.with(mailer, mail, args: any_args)
+    expect(mailers_queue).not_to be_empty
   end
 end

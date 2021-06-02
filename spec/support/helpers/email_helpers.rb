@@ -11,7 +11,7 @@ module EmailHelpers
     ActionMailer::Base.deliveries.clear
     # We should only check that the mailer jobs are enqueued in Sidekiq, hence
     # clearing the background jobs queue
-    ActiveJob::Base.queue_adapter.enqueued_jobs.clear
+    Sidekiq::Worker.clear_all
   end
 
   def should_only_email(*users, kind: :to)
