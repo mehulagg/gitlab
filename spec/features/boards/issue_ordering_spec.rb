@@ -161,8 +161,6 @@ RSpec.describe 'Issue Boards', :js do
 
       wait_for_requests
 
-      live_debug
-
       expect(find('.board:nth-child(2)')).to have_selector('.board-card', count: 2)
       expect(all('.board')[2]).to have_selector('.board-card', count: 4)
 
