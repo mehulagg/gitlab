@@ -50,6 +50,17 @@ RSpec.describe 'getting project members information' do
       invited_group.add_guest(invited_user)
     end
 
+    context 'when a member is invited only via email' do
+      it 'returns null in the user field' do
+        invites_project = create(:project, :public, group: parent_group)
+        invited_member = create(:project_member, :invited, source: invites_project)
+        invites_project.add_maintainer(user)
+
+        fetch_members(project: invites_project, args: { relations: [:DIRECT] })
+        expect(graphql_errors).to be_nil
+      end
+    end
+
     it 'returns direct members' do
       fetch_members(project: child_project, args: { relations: [:DIRECT] })
 
