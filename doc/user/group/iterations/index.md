@@ -34,7 +34,7 @@ In GitLab, iterations are similar to milestones, with a few differences:
 
 ## Iteration cadences
 
-> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/TODO) in GitLab 14.0.
+> - [Introduced](https://gitlab.com/groups/gitlab-org/-/epics/5077) in GitLab 14.0.
 > - Deployed behind a feature flag, disabled by default.
 
 Iteration cadences automate some common iteration tasks. They can be used to
