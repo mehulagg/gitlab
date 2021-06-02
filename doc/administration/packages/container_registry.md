@@ -1311,15 +1311,15 @@ For Helm Chart installs, you can override the [`image.tag`](https://docs.gitlab.
 
 #### Omnibus installs
 
-For Omnibus installs, you will have to temporarily replace the registry binary that ships with 13.9+ for one prior to `v3.0.0-gitlab`. To do so, you can pull a previous version of the Docker image for the GitLab Container Registry, such as `v2.13.1-gitlab`:
+For Omnibus installs, you will have to temporarily replace the registry binary that ships with 13.9+ for one prior to `v3.0.0-gitlab`. To do so, you can pull a previous version of the Docker image for the GitLab Container Registry, such as `v2.13.1-gitlab`. You can then grab the `registry` binary from within this image, located at `/bin/registry`:
 
- ```shell
- docker pull registry.gitlab.com/gitlab-org/build/cng/gitlab-container-registry:v2.13.1-gitlab
- ```
+```shell
+id=$(docker create registry.gitlab.com/gitlab-org/build/cng/gitlab-container-registry:v2.13.1-gitlab)
+docker cp $id:/bin/registry registry-2.13.1-gitlab
+docker rm $id
+```
 
-You can then grab the `registry` binary from within this image, located at `/bin/registry`, and use it to replace the one embedded in the Omnibus install, located at `/opt/gitlab/embedded/bin/registry`.
-
-Please make sure to start by backing up the original registry binary embedded in the Omnibus install, and restore it after performing the [images upgrade](#images-upgrade)) steps. You should [stop](https://docs.gitlab.com/omnibus/maintenance/#starting-and-stopping) the registry service before replacing its binary and start it right after. No registry configuration changes are required.
+Finally, replace the binary embedded in the Omnibus install, located at `/opt/gitlab/embedded/bin/registry`, with `registry-2.13.1-gitlab`. Please make sure to start by backing up the original binary embedded in Omnibus, and restore it after performing the [image upgrade](#images-upgrade)) steps. You should [stop](https://docs.gitlab.com/omnibus/maintenance/#starting-and-stopping) the registry service before replacing its binary and start it right after. No registry configuration changes are required.
  
 #### Source installs
 
