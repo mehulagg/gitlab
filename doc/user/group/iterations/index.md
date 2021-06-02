@@ -58,7 +58,6 @@ To create an iteration:
 1. Click **New iteration cadence**.
 1. Fill out required fields, and click **Create iteration cadence**. The cadence list page opens.
 
-
 ## Create an iteration
 
 NOTE:
