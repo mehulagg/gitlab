@@ -22,7 +22,7 @@ RSpec.describe Packages::DestroyService do
         allow(package).to receive(:destroy!).and_raise(StandardError, "test")
       end
 
-      it 'it throws an error' do
+      it 'throws an error' do
         expect { subject }.to raise_error(StandardError, "test")
       end
     end

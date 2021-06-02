@@ -23,7 +23,6 @@ RSpec.describe 'Destroying a package' do
   let(:mutation) { graphql_mutation(:destroy_package, params, query) }
   let(:mutation_response) { graphql_mutation_response(:destroyPackage) }
 
-
   shared_examples 'destroying the package' do
     it 'destroy the package' do
       expect(::Packages::DestroyService)
