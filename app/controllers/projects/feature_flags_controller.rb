@@ -63,6 +63,7 @@ class Projects::FeatureFlagsController < Projects::ApplicationController
   end
 
   def edit
+    not_found if exclude_legacy_flags?
   end
 
   def update
@@ -157,5 +158,11 @@ class Projects::FeatureFlagsController < Projects::ApplicationController
   def render_error_json(messages, status = :bad_request)
     render json: { message: messages },
            status: status
+  end
+
+  def exclude_legacy_flags?
+    Feature.enabled?(:remove_legacy_flags, project, default_enabled: :yaml) &&
+      Feature.disabled?(:remove_legacy_flags_override, project, default_enabled: :yaml) &&
+      feature_flag.legacy_flag?
   end
 end
