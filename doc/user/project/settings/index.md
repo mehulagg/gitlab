@@ -87,10 +87,10 @@ stages:
   - deploy
   - post-compliance
 
-variables: # can be overriden by setting a job-specific variable in developer's local .gitlab-ci.yml
+variables: # Can be overriden by setting a job-specific variable in project's local .gitlab-ci.yml
   FOO: sast
 
-security scan: # none of these attributes can be overriden by a developer's local .gitlab-ci.yml
+security scan: # None of these attributes can be overriden by a project's local .gitlab-ci.yml
   variables:
     FOO: sast
   image: ruby:2.6
