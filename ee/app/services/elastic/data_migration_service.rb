@@ -25,8 +25,13 @@ module Elastic
         migrations.find { |m| m.version == version }
       end
 
+      def find_by_name(name)
+        migrations.find { |migration| migration.name_for_key == name.to_s.underscore }
+      end
+
       def find_by_name!(name)
-        migration = migrations.find { |migration| migration.name_for_key == name.to_s.underscore }
+        migration = find_by_name(name)
+
         raise ArgumentError, "Couldn't find Elastic::Migration with name='#{name}'" unless migration
         raise ArgumentError, "Elastic::Migration with name='#{name}' is marked as obsolete" if migration.obsolete?
 
@@ -44,7 +49,7 @@ module Elastic
       end
 
       def migration_has_finished_uncached?(name)
-        migration = find_by_name!(name)
+        migration = find_by_name(name)
 
         !!migration&.load_from_index&.dig('_source', 'completed')
       end
