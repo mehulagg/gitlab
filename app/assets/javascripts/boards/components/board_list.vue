@@ -241,8 +241,8 @@ export default {
         :item="item"
         :disabled="disabled"
       />
-      <gl-intersection-observer data-issue-id="-1" @appear="onReachingListBottom">
-        <li v-if="showCount" class="board-list-count gl-text-center">
+      <gl-intersection-observer @appear="onReachingListBottom">
+        <li v-if="showCount" class="board-list-count gl-text-center" data-issue-id="-1">
           <gl-loading-icon
             v-if="loadingMore"
             :label="$options.i18n.loadingMoreboardItems"
