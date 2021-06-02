@@ -3,6 +3,8 @@
 require 'spec_helper'
 
 RSpec.describe 'Mermaid rendering', :js do
+  let_it_be(:project) { create(:project, :public) }
+
   it 'renders Mermaid diagrams correctly' do
     description = <<~MERMAID
       ```mermaid
@@ -14,7 +16,6 @@ RSpec.describe 'Mermaid rendering', :js do
       ```
     MERMAID
 
-    project = create(:project, :public)
     issue = create(:issue, project: project, description: description)
 
     visit project_issue_path(project, issue)
@@ -36,7 +37,6 @@ RSpec.describe 'Mermaid rendering', :js do
       ```
     MERMAID
 
-    project = create(:project, :public)
     issue = create(:issue, project: project, description: description)
 
     visit project_issue_path(project, issue)
@@ -64,7 +64,6 @@ RSpec.describe 'Mermaid rendering', :js do
     ```
     MERMAID
 
-    project = create(:project, :public)
     issue = create(:issue, project: project, description: description)
 
     visit project_issue_path(project, issue)
@@ -94,7 +93,6 @@ RSpec.describe 'Mermaid rendering', :js do
       </details>
     MERMAID
 
-    project = create(:project, :public)
     issue = create(:issue, project: project, description: description)
 
     visit project_issue_path(project, issue)
@@ -112,6 +110,36 @@ RSpec.describe 'Mermaid rendering', :js do
     end
   end
 
+  it 'renders V2 state diagrams' do
+    description = <<~MERMAID
+    ```mermaid
+    stateDiagram-v2
+    [*] --> Idle
+    Idle --> Active : CONTINUE
+    state Active {
+        [*] --> Run
+        Run--> Stop: CONTINUE
+        Stop--> Run: CONTINUE
+
+        Run: Run
+        Run: entry/start
+        Run: check
+    }
+    ```
+    MERMAID
+
+    issue = create(:issue, project: project, description: description)
+
+    visit project_issue_path(project, issue)
+
+    wait_for_requests
+    wait_for_mermaid
+
+    page.within('.description') do
+      expect(page).to have_selector('svg')
+    end
+  end
+
   it 'correctly sizes mermaid diagram block' do
     description = <<~MERMAID
       ```mermaid
@@ -123,7 +151,6 @@ RSpec.describe 'Mermaid rendering', :js do
       ```
     MERMAID
 
-    project = create(:project, :public)
     issue = create(:issue, project: project, description: description)
 
     visit project_issue_path(project, issue)
@@ -144,7 +171,6 @@ RSpec.describe 'Mermaid rendering', :js do
     ```
     MERMAID
 
-    project = create(:project, :public)
     issue = create(:issue, project: project, description: description)
 
     visit project_issue_path(project, issue)
@@ -182,8 +208,6 @@ RSpec.describe 'Mermaid rendering', :js do
     MERMAID
 
     description *= 51
-
-    project = create(:project, :public)
 
     issue = create(:issue, project: project, description: description)
 
