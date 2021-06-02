@@ -195,7 +195,7 @@ the tracking database on port 5432.
 1. Set up PostgreSQL according to the
    [database requirements document](../../../install/requirements.md#database).
 1. Set up a `gitlab_geo` user with a password of your choice, create the `gitlabhq_geo_production` database, and make the user an owner of the database. You can see an example of this setup in the [installation from source documentation](../../../install/installation.md#6-database).
-1. If you are **not** using a cloud managed PostgreSQL database, ensure that your secondary 
+1. If you are **not** using a cloud-managed PostgreSQL database, ensure that your secondary 
    node can communicate with your tracking database by manually changing the 
    `pg_hba.conf` that is associated with your tracking database.
    Remember to restart PostgreSQL afterwards for the changes to take effect:
@@ -229,10 +229,14 @@ the tracking database on port 5432.
 
 1. Save the file and [reconfigure GitLab](../../restart_gitlab.md#omnibus-gitlab-reconfigure)
 
-1. The reconfigure should automatically migrate the database. If required, you can run these
-   tasks manually:
+1. The reconfigure should automatically create the tables and enable the `plpgsql` extension. If needed, you can perform this task manually. Note that this task (whether run by itself or during reconfigure) requires the database user to be a superuser.
 
    ```shell
    gitlab-rake geo:db:create
+   ```
+
+1. The reconfigure should automatically migrate the database. You can migrate the database manually if needed, for example if `gitlab_rails['auto_migrate'] = false`:
+
+   ```shell
    gitlab-rake geo:db:migrate
    ```
