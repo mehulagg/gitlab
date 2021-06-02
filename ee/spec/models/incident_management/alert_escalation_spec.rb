@@ -11,4 +11,6 @@ RSpec.describe IncidentManagement::AlertEscalation do
     it { is_expected.to belong_to(:policy) }
     it { is_expected.to belong_to(:alert) }
   end
+
+  it { is_expected.to delegate_method(:project).to(:policy) }
 end

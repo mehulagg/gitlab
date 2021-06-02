@@ -3,8 +3,6 @@
 module IncidentManagement
   module Escalations
     class ProcessService < BaseService
-      include ::AlertManagement::AlertProcessing
-
       def initialize(escalation)
         @escalation = escalation
         @project = escalation.project
@@ -19,7 +17,7 @@ module IncidentManagement
         rules = escalation_policy.rules
 
         find_rules_to_escalate(rules).each do |rule|
-          escalate_rule!(rule)
+          escalate_rule(rule)
         end
 
         mark_escalation_as_updated!
@@ -40,28 +38,32 @@ module IncidentManagement
       # Compares the enum value of the status
       # A lower value is more urgent than a higher value.
       def status_not_surpassed?(rule)
-        rule.status_before_type_cast > alert.status
+        IncidentManagement::EscalationRule.statuses[rule.status] > alert.status
       end
 
       def escalation_time_surpassed_threshold?(rule)
-        escalation.elapsed_time >= rule.elapsed_time_seconds
+        escalation.elapsed_time(time_to: process_time) >= rule.elapsed_time_seconds
       end
 
       def not_previously_escalated?(rule)
         escalation.updated_at.to_i <= (escalation.created_at + rule.elapsed_time_seconds).to_i
       end
 
-      def escalate_rule!(rule)
-        @rule_to_escalate = rule
+      def escalate_rule(rule)
+        recipients = oncall_notification_recipients(rule)
 
-        notify_oncall if oncall_notification_recipients.any?
-        clear_memoization(:oncall_notification_recipients)
+        notify_oncall(recipients) if recipients.any?
       end
 
-      def oncall_notification_recipients
-        strong_memoize(:oncall_notification_recipients) do
-          ::IncidentManagement::OncallUsersFinder.new(project, schedule: rule_to_escalate.oncall_schedule).execute
-        end
+      def notify_oncall(recipients)
+        NotificationService
+          .new
+          .async
+          .notify_oncall_users_of_alert(recipients.to_a, alert)
+      end
+
+      def oncall_notification_recipients(rule)
+        ::IncidentManagement::OncallUsersFinder.new(project, schedule: rule.oncall_schedule).execute
       end
 
       def mark_escalation_as_updated!

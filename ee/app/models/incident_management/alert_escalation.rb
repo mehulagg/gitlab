@@ -9,8 +9,8 @@ module IncidentManagement
 
     delegate :project, to: :policy
 
-    def elapsed_time
-      Time.current - created_at
+    def elapsed_time(time_to: Time.current)
+      time_to - created_at
     end
   end
 end

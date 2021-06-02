@@ -86,7 +86,6 @@ RSpec.describe Projects::Alerting::NotifyService do
       include_examples 'oncall users are correctly notified of firing alert'
 
       context 'with escalation policies ready' do
-        let_it_be(:project) { schedule.project }
         let_it_be(:policy) { create(:incident_management_escalation_policy, project: project) }
 
         before do
