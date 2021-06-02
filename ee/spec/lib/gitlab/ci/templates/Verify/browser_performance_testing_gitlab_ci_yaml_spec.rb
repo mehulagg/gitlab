@@ -42,7 +42,7 @@ RSpec.describe 'Verify/Browser-Performance.gitlab-ci.yml' do
 
     shared_examples_for 'browser_performance job on tag or branch' do
       it 'by default' do
-        expect(build_names).to include('performance')
+        expect(build_names).to include('browser_performance')
       end
     end
 
