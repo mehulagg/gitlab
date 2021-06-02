@@ -2,6 +2,8 @@
 
 class ImportExportCleanUpService
   LAST_MODIFIED_TIME_IN_MINUTES = 1440
+  DIR_DEPTH = 5
+  CleanUpError = Class.new(StandardError)
 
   attr_reader :mmin, :path
 
@@ -27,7 +29,16 @@ class ImportExportCleanUpService
   end
 
   def clean_up_export_files
-    Gitlab::Popen.popen(%W(find #{path} -not -path #{path} -mmin +#{mmin} -delete))
+    old_directories do |dir|
+      if dir.start_with?(path)
+        FileUtils.remove_entry(dir)
+
+        logger.info(
+          message: 'Removed Import/Export tmp directory',
+          dir_path: dir
+        )
+      end
+    end
   end
 
   # rubocop: disable CodeReuse/ActiveRecord
@@ -35,7 +46,29 @@ class ImportExportCleanUpService
     ImportExportUpload.where('updated_at < ?', mmin.minutes.ago).each do |upload|
       upload.remove_export_file!
       upload.save!
+
+      logger.info(
+        message: 'Removed ImportExportUpload#export_file',
+        project_id: upload.project_id,
+        group_id: upload.group_id
+      )
     end
   end
   # rubocop: enable CodeReuse/ActiveRecord
+
+  def old_directories
+    IO.popen(directories_cmd) do |find|
+      find.each_line do |directory|
+        yield directory
+      end
+    end
+  end
+
+  def directories_cmd
+    %W(find #{path} -not -path #{path} -type d -mindepth #{DIR_DEPTH} -maxdepth #{DIR_DEPTH} -mmin +#{mmin})
+  end
+
+  def logger
+    @logger ||= Gitlab::Import::Logger.build
+  end
 end
