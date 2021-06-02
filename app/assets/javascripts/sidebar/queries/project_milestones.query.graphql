@@ -1,0 +1,12 @@
+query projectMilestones($fullPath: ID!, $state: MilestoneStateEnum) {
+  workspace: project(fullPath: $fullPath) {
+    __typename
+    attributes: milestones(state: $state) {
+      nodes {
+        id
+        title
+        webPath
+      }
+    }
+  }
+}
