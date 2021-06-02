@@ -29,27 +29,47 @@ RSpec.describe Gitlab::Database::PostgresqlAdapter::ForceDisconnectableMixin do
 
   describe 'disconnecting from the database' do
     let(:connection) { ActiveRecord::Base.connection_pool.connection }
-    let(:timer) { connection.force_disconnect_timer }
 
-    context 'when the timer is expired' do
-      it 'disconnects from the database' do
-        allow(timer).to receive(:expired?).and_return(true)
+    context 'when the connection is not a primary connection' do
+      it 'does not disconnect from the database' do
+        expect(Gitlab::Database::LoadBalancing).to receive(:db_role_for_connection)
+          .with(connection).and_return(:replica)
 
-        expect(connection).to receive(:disconnect!).and_call_original
-        expect(timer).to receive(:reset!).and_call_original
+        expect(connection).not_to receive(:disconnect!)
+        expect(connection).not_to receive(:force_disconnect_timer)
 
         connection.force_disconnect_if_old!
       end
     end
 
-    context 'when the timer is not expired' do
-      it 'does not disconnect from the database' do
-        allow(timer).to receive(:expired?).and_return(false)
+    context 'when the connection is a primary connection' do
+      let(:timer) { connection.force_disconnect_timer }
 
-        expect(connection).not_to receive(:disconnect!)
-        expect(timer).not_to receive(:reset!)
+      before do
+        allow(Gitlab::Database::LoadBalancing).to receive(:db_role_for_connection)
+          .with(connection).and_return(:primary)
+      end
 
-        connection.force_disconnect_if_old!
+      context 'when the timer is expired' do
+        it 'disconnects from the database' do
+          allow(timer).to receive(:expired?).and_return(true)
+
+          expect(connection).to receive(:disconnect!).and_call_original
+          expect(timer).to receive(:reset!).and_call_original
+
+          connection.force_disconnect_if_old!
+        end
+      end
+
+      context 'when the timer is not expired' do
+        it 'does not disconnect from the database' do
+          allow(timer).to receive(:expired?).and_return(false)
+
+          expect(connection).not_to receive(:disconnect!)
+          expect(timer).not_to receive(:reset!)
+
+          connection.force_disconnect_if_old!
+        end
       end
     end
   end

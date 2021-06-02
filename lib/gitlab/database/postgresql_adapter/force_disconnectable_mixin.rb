@@ -11,10 +11,14 @@ module Gitlab
         end
 
         def force_disconnect_if_old!
-          if force_disconnect_timer.expired?
+          if primary_connection? && force_disconnect_timer.expired?
             disconnect!
             reset_force_disconnect_timer!
           end
+        end
+
+        def primary_connection?
+          Gitlab::Database::LoadBalancing.db_role_for_connection(self) == :primary
         end
 
         def reset_force_disconnect_timer!
