@@ -13,7 +13,14 @@ module Mutations
 
       argument :iid, GraphQL::STRING_TYPE,
                required: true,
-               description: 'The IID of the requirement to update.'
+               description: 'The IID of the requirement to update.',
+               prepare: ->(iid, ctx) {
+                 return iid if iid.match?(/^\d+$/)
+
+                 raise Gitlab::Graphql::Errors::ArgumentError, "Requirement IIDs are either numeric or start with 'REQ-', for example REQ-1" unless ::RequirementsManagement::Requirement.matches_requirement_iid?(iid)
+
+                 ::RequirementsManagement::Requirement.requirement_iid_to_numeric_iid(iid.dup)
+               }
 
       argument :last_test_report_state, Types::RequirementsManagement::TestReportStateEnum,
                required: false,

@@ -18,6 +18,8 @@ module RequirementsManagement
 
     strip_attributes :title
 
+    VALID_IID_PATTERN = /^REQ-\d+/
+
     belongs_to :author, inverse_of: :requirements, class_name: 'User'
     belongs_to :project, inverse_of: :requirements
 
@@ -90,6 +92,22 @@ module RequirementsManagement
 
     def last_test_report_manually_created?
       latest_report&.build.nil?
+    end
+
+    def self.requirement_iid_to_numeric_iid(iid)
+      return unless iid
+      return iid unless matches_requirement_iid?(iid.to_s)
+
+      iid.slice!('REQ-')
+      iid
+    end
+
+    def requirement_iid
+      "REQ-#{iid}"
+    end
+
+    def self.matches_requirement_iid?(value)
+      !!value.match(VALID_IID_PATTERN)
     end
   end
 end

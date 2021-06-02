@@ -13,8 +13,8 @@ module Types
       field :id, GraphQL::ID_TYPE, null: false,
             description: 'ID of the requirement.'
 
-      field :iid, GraphQL::ID_TYPE, null: false,
-            description: 'Internal ID of the requirement.'
+      field :iid, GraphQL::STRING_TYPE, null: false,
+            description: 'Internal ID of the requirement. Starts with `REQ-`.'
 
       field :title, GraphQL::STRING_TYPE, null: true,
             description: 'Title of the requirement.'
@@ -58,6 +58,10 @@ module Types
 
       def author
         Gitlab::Graphql::Loaders::BatchModelLoader.new(User, object.author_id).find
+      end
+
+      def iid
+        object.requirement_iid
       end
     end
   end

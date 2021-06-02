@@ -10,11 +10,20 @@ module Resolvers
 
       argument :iid, GraphQL::ID_TYPE,
                required: false,
-               description: 'IID of the requirement, e.g., "1".'
+               description: 'IID of the requirement, e.g., "REQ-1".',
+               prepare: ->(iid, ctx) {
+                 return iid if iid.match?(/^\d+$/)
+
+                 raise Gitlab::Graphql::Errors::ArgumentError, "Requirement IIDs are either numeric or start with 'REQ-', for example REQ-1" unless ::RequirementsManagement::Requirement.matches_requirement_iid?(iid)
+
+                 ::RequirementsManagement::Requirement.requirement_iid_to_numeric_iid(iid.dup)
+               }
 
       argument :iids, [GraphQL::ID_TYPE],
                required: false,
-               description: 'List of IIDs of requirements, e.g., [1, 2].'
+               description: 'List of IIDs of requirements, e.g., ["REQ-1", "REQ-2"].', prepare: ->(iids, ctx) {
+                 iids.dup.map{ |iid| ::RequirementsManagement::Requirement.requirement_iid_to_numeric_iid(iid) }
+               }
 
       argument :last_test_report_state, ::Types::RequirementsManagement::RequirementStatusFilterEnum,
                required: false,
@@ -28,7 +37,7 @@ module Resolvers
         return ::RequirementsManagement::Requirement.none if project.nil?
 
         args[:project_id] = project.id
-        args[:iids] ||= [args[:iid]].compact
+        args[:iids] ||= Array.wrap(args[:iid])
 
         apply_lookahead(find_requirements(args))
       end
