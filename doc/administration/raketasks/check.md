@@ -36,8 +36,9 @@ exactly which repositories are causing the trouble.
 
 ### Check all GitLab repositories
 
-This task loops through all repositories on the GitLab server and runs the
+This task loops through the project code repositories and runs the
 integrity check described previously.
+[Other types of git respositories are not checked](https://gitlab.com/gitlab-org/gitaly/-/issues/3643).
 
 **Omnibus Installation**
 
