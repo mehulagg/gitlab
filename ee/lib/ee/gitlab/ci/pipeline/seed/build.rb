@@ -10,11 +10,11 @@ module EE
 
             override :recalculate_yaml_variables!
             def recalculate_yaml_variables!
-              variables = dast_variables
+              additional_variables = dast_variables
 
               super
 
-              seed_attributes[:yaml_variables].concat(variables)
+              seed_attributes[:yaml_variables].concat(additional_variables)
             end
 
             private
