@@ -48,6 +48,11 @@ export default {
       required: false,
       default: () => [],
     },
+    preloadedTokenValues: {
+      type: Array,
+      required: false,
+      default: () => [],
+    },
     recentTokenValuesStorageKey: {
       type: String,
       required: false,
@@ -157,6 +162,9 @@ export default {
         <gl-dropdown-section-header>{{ __('Recently used') }}</gl-dropdown-section-header>
         <slot name="token-values-list" :token-values="recentTokenValues"></slot>
         <gl-dropdown-divider />
+      </template>
+      <template v-if="preloadedTokenValues.length">
+        <slot name="token-values-list" :token-values="preloadedTokenValues"></slot>
       </template>
       <gl-loading-icon v-if="tokensListLoading" />
       <template v-else>
