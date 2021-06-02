@@ -372,7 +372,7 @@ Capitalize names of:
 - Methods or methodologies. For example, Continuous Integration,
   Continuous Deployment, Scrum, and Agile.
 
-Follow the capitalization style listed at the [authoritative source](#links-to-external-documentation)
+Follow the capitalization style listed at the authoritative source
 for the entity, which may use non-standard case styles. For example: GitLab and
 npm.
 
