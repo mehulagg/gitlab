@@ -1,4 +1,4 @@
-1# frozen_string_literal: true
+# frozen_string_literal: true
 
 module Gitlab
   module Usage
@@ -53,10 +53,6 @@ module Gitlab
               relation: relation,
               column: self.class.column
             )
-          end
-
-          def relation
-            self.class.metric_relation.call.where(time_constraints)
           end
 
           private
