@@ -4,7 +4,7 @@ group: Access
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
-# Permissions and roles
+# Permissions and roles **(FREE)**
 
 Users have different abilities depending on the role they have in a
 particular group or project. If a user is both in a project's group and the
@@ -16,7 +16,7 @@ On public and internal projects, the Guest role is not enforced. All users can:
 - Leave comments.
 - Clone or download the project code.
 
-When a member leaves a team's project, all the assigned [Issues](project/issues/index.md) and [Merge Requests](project/merge_requests/index.md)
+When a member leaves a team's project, all the assigned [Issues](project/issues/index.md) and [merge requests](project/merge_requests/index.md)
 are unassigned automatically.
 
 GitLab [administrators](../administration/index.md) receive all permissions.
@@ -45,154 +45,154 @@ For more information, see [projects members documentation](project/members/index
 
 The following table lists project permissions available for each role:
 
-| Action                                            | Guest   | Reporter   | Developer   |Maintainer| Owner  |
-|---------------------------------------------------|---------|------------|-------------|----------|--------|
-| Download project                                  | ✓ (*1*) | ✓          | ✓           | ✓        | ✓      |
-| Leave comments                                    | ✓       | ✓          | ✓           | ✓        | ✓      |
-| View allowed and denied licenses **(ULTIMATE)**   | ✓ (*1*) | ✓          | ✓           | ✓        | ✓      |
-| View License Compliance reports **(ULTIMATE)**    | ✓ (*1*) | ✓          | ✓           | ✓        | ✓      |
-| View Security reports **(ULTIMATE)**              | ✓ (*3*) | ✓          | ✓           | ✓        | ✓      |
-| View Dependency list **(ULTIMATE)**               | ✓ (*1*) | ✓          | ✓           | ✓        | ✓      |
-| View License list **(ULTIMATE)**                  | ✓ (*1*) | ✓          | ✓           | ✓        | ✓      |
-| View licenses in Dependency list **(ULTIMATE)**   | ✓ (*1*) | ✓          | ✓           | ✓        | ✓      |
-| View [Design Management](project/issues/design_management.md) pages | ✓   | ✓   | ✓    | ✓        | ✓      |
-| View project code                                 | ✓ (*1*) | ✓          | ✓           | ✓        | ✓      |
-| Pull project code                                 | ✓ (*1*) | ✓          | ✓           | ✓        | ✓      |
-| View GitLab Pages protected by [access control](project/pages/introduction.md#gitlab-pages-access-control) | ✓       | ✓          | ✓           | ✓        | ✓      |
-| View wiki pages                                   | ✓       | ✓          | ✓           | ✓        | ✓      |
-| See a list of jobs                                | ✓ (*3*) | ✓          | ✓           | ✓        | ✓      |
-| See a job log                                     | ✓ (*3*) | ✓          | ✓           | ✓        | ✓      |
-| See a job with [debug logging](../ci/variables/README.md#debug-logging) |         |            | ✓           | ✓        | ✓      |
-| Download and browse job artifacts                 | ✓ (*3*) | ✓          | ✓           | ✓        | ✓      |
-| Create confidential issue                         | ✓       | ✓          | ✓           | ✓        | ✓      |
-| Create new issue                                  | ✓       | ✓          | ✓           | ✓        | ✓      |
-| See linked issues                                 | ✓       | ✓          | ✓           | ✓        | ✓      |
-| View [Releases](project/releases/index.md)        | ✓ (*6*) | ✓          | ✓           | ✓        | ✓      |
-| View requirements **(ULTIMATE)**                  | ✓       | ✓          | ✓           | ✓        | ✓      |
-| View Insights **(ULTIMATE)**                      | ✓       | ✓          | ✓           | ✓        | ✓      |
-| View Issue analytics **(PREMIUM)**                | ✓       | ✓          | ✓           | ✓        | ✓      |
-| View Merge Request analytics **(STARTER)**        | ✓       | ✓          | ✓           | ✓        | ✓      |
-| View Value Stream analytics                       | ✓       | ✓          | ✓           | ✓        | ✓      |
-| Manage user-starred metrics dashboards (*7*)      | ✓       | ✓          | ✓           | ✓        | ✓      |
-| View confidential issues                          | (*2*)   | ✓          | ✓           | ✓        | ✓      |
-| Assign issues                                     |         | ✓          | ✓           | ✓        | ✓      |
-| Assign reviewers                                  |         | ✓          | ✓           | ✓        | ✓      |
-| Label issues                                      |         | ✓          | ✓           | ✓        | ✓      |
-| Set issue weight                                  |         | ✓          | ✓           | ✓        | ✓      |
-| [Set issue estimate and record time spent](project/time_tracking.md) | | ✓ | ✓         | ✓        | ✓      |
-| View a time tracking report                       | ✓ (*1*) | ✓          | ✓           | ✓        | ✓      |
-| Lock issue threads                                |         | ✓          | ✓           | ✓        | ✓      |
-| Manage issue tracker                              |         | ✓          | ✓           | ✓        | ✓      |
-| Manage linked issues                              |         | ✓          | ✓           | ✓        | ✓      |
-| Manage labels                                     |         | ✓          | ✓           | ✓        | ✓      |
-| Create code snippets                              |         | ✓          | ✓           | ✓        | ✓      |
-| See a commit status                               |         | ✓          | ✓           | ✓        | ✓      |
-| See a container registry                          |         | ✓          | ✓           | ✓        | ✓      |
-| See environments                                  |         | ✓          | ✓           | ✓        | ✓      |
-| See [DORA metrics](analytics/ci_cd_analytics.md)  |         | ✓          | ✓           | ✓        | ✓      |
-| See a list of merge requests                      |         | ✓          | ✓           | ✓        | ✓      |
-| View CI/CD analytics                              |         | ✓          | ✓           | ✓        | ✓      |
-| View Code Review analytics **(STARTER)**          |         | ✓          | ✓           | ✓        | ✓      |
-| View Repository analytics                         |         | ✓          | ✓           | ✓        | ✓      |
-| View Error Tracking list                          |         | ✓          | ✓           | ✓        | ✓      |
-| View metrics dashboard annotations                |         | ✓          | ✓           | ✓        | ✓      |
-| Archive/reopen requirements **(ULTIMATE)**        |         | ✓          | ✓           | ✓        | ✓      |
-| Create/edit requirements **(ULTIMATE)**           |         | ✓          | ✓           | ✓        | ✓      |
-| Import/export requirements **(ULTIMATE)**         |         | ✓          | ✓           | ✓        | ✓      |
-| Create new [test case](../ci/test_cases/index.md) |         | ✓          | ✓           | ✓        | ✓      |
-| Archive [test case](../ci/test_cases/index.md)    |         | ✓          | ✓           | ✓        | ✓      |
-| Move [test case](../ci/test_cases/index.md)       |         | ✓          | ✓           | ✓        | ✓      |
-| Reopen [test case](../ci/test_cases/index.md)     |         | ✓          | ✓           | ✓        | ✓      |
-| Pull [packages](packages/index.md)                |         | ✓          | ✓           | ✓        | ✓      |
-| Publish [packages](packages/index.md)             |         |            | ✓           | ✓        | ✓      |
-| Create/edit/delete a Cleanup policy               |         |            | ✓           | ✓        | ✓      |
-| Upload [Design Management](project/issues/design_management.md) files |  |  | ✓        | ✓        | ✓      |
-| Create/edit [releases](project/releases/index.md)|   |            | ✓           | ✓        | ✓      |
-| Delete [releases](project/releases/index.md)|   |            |            | ✓        | ✓      |
-| Manage merge approval rules (project settings)    |         |            |             | ✓        | ✓      |
-| Create new merge request                          |         |            | ✓           | ✓        | ✓      |
-| Create new branches                               |         |            | ✓           | ✓        | ✓      |
-| Push to non-protected branches                    |         |            | ✓           | ✓        | ✓      |
-| Force push to non-protected branches              |         |            | ✓           | ✓        | ✓      |
-| Remove non-protected branches                     |         |            | ✓           | ✓        | ✓      |
-| Assign merge requests                             |         |            | ✓           | ✓        | ✓      |
-| Label merge requests                              |         |            | ✓           | ✓        | ✓      |
-| Lock merge request threads                        |         |            | ✓           | ✓        | ✓      |
-| Approve merge requests (*9*)                      |         |            | ✓           | ✓        | ✓      |
-| Manage/Accept merge requests                      |         |            | ✓           | ✓        | ✓      |
-| View project statistics                           |         |            | ✓           | ✓        | ✓      |
-| Create new environments                           |         |            | ✓           | ✓        | ✓      |
-| Stop environments                                 |         |            | ✓           | ✓        | ✓      |
-| Enable Review Apps                                |         |            | ✓           | ✓        | ✓      |
-| View Pods logs                                    |         |            | ✓           | ✓        | ✓      |
-| Read Terraform state                              |         |            | ✓           | ✓        | ✓      |
-| Add tags                                          |         |            | ✓           | ✓        | ✓      |
-| Cancel and retry jobs                             |         |            | ✓           | ✓        | ✓      |
-| Create or update commit status                    |         |            | ✓ (*5*)     | ✓        | ✓      |
-| Update a container registry                       |         |            | ✓           | ✓        | ✓      |
-| Remove a container registry image                 |         |            | ✓           | ✓        | ✓      |
-| Create/edit/delete project milestones             |         |            | ✓           | ✓        | ✓      |
-| Use security dashboard **(ULTIMATE)**             |         |            | ✓           | ✓        | ✓      |
-| View vulnerability findings in Dependency list **(ULTIMATE)** |    |     | ✓           | ✓        | ✓      |
-| Create issue from vulnerability finding **(ULTIMATE)** |    |            | ✓           | ✓        | ✓      |
-| Dismiss vulnerability finding **(ULTIMATE)**      |         |            | ✓           | ✓        | ✓      |
-| View vulnerability **(ULTIMATE)**                 |         |            | ✓           | ✓        | ✓      |
-| Create vulnerability from vulnerability finding **(ULTIMATE)** |   |     | ✓           | ✓        | ✓      |
-| Resolve vulnerability **(ULTIMATE)**              |         |            | ✓           | ✓        | ✓      |
-| Dismiss vulnerability **(ULTIMATE)**              |         |            | ✓           | ✓        | ✓      |
-| Revert vulnerability to detected state **(ULTIMATE)** |     |            | ✓           | ✓        | ✓      |
-| Apply code change suggestions                     |         |            | ✓           | ✓        | ✓      |
-| Create and edit wiki pages                        |         |            | ✓           | ✓        | ✓      |
-| Rewrite/remove Git tags                           |         |            | ✓           | ✓        | ✓      |
-| Manage Feature Flags **(PREMIUM)**                |         |            | ✓           | ✓        | ✓      |
-| Create/edit/delete metrics dashboard annotations  |         |            | ✓           | ✓        | ✓      |
-| Run CI/CD pipeline against a protected branch     |         |            | ✓ (*5*)     | ✓        | ✓      |
-| Delete [packages](packages/index.md)              |         |            |             | ✓        | ✓      |
-| Request a CVE ID **(FREE SAAS)**                  |         |            |             | ✓        | ✓      |
-| Use environment terminals                         |         |            |             | ✓        | ✓      |
-| Run Web IDE's Interactive Web Terminals **(ULTIMATE SELF)** |     |      |             | ✓        | ✓      |
-| Add new team members                              |         |            |             | ✓        | ✓      |
-| Enable/disable branch protection                  |         |            |             | ✓        | ✓      |
-| Push to protected branches                        |         |            |             | ✓        | ✓      |
-| Turn on/off protected branch push for developers  |         |            |             | ✓        | ✓      |
-| Enable/disable tag protections                    |         |            |             | ✓        | ✓      |
-| Edit project settings                             |         |            |             | ✓        | ✓      |
-| Edit project badges                               |         |            |             | ✓        | ✓      |
-| Export project                                    |         |            |             | ✓        | ✓      |
-| Share (invite) projects with groups               |         |            |             | ✓ (*8*)  | ✓ (*8*)|
-| Add deploy keys to project                        |         |            |             | ✓        | ✓      |
-| Configure project hooks                           |         |            |             | ✓        | ✓      |
-| Manage runners                                    |         |            |             | ✓        | ✓      |
-| Manage job triggers                               |         |            |             | ✓        | ✓      |
-| Manage CI/CD variables                            |         |            |             | ✓        | ✓      |
-| Manage GitLab Pages                               |         |            |             | ✓        | ✓      |
-| Manage GitLab Pages domains and certificates      |         |            |             | ✓        | ✓      |
-| Remove GitLab Pages                               |         |            |             | ✓        | ✓      |
-| Manage clusters                                   |         |            |             | ✓        | ✓      |
-| Manage Project Operations                         |         |            |             | ✓        | ✓      |
-| Manage Terraform state                            |         |            |             | ✓        | ✓      |
-| Manage license policy **(ULTIMATE)**              |         |            |             | ✓        | ✓      |
-| Edit comments (posted by any user)                |         |            |             | ✓        | ✓      |
-| Reposition comments on images (posted by any user)|✓ (*10*) | ✓ (*10*)   |  ✓ (*10*)   | ✓        | ✓      |
-| Manage Error Tracking                             |         |            |             | ✓        | ✓      |
-| Delete wiki pages                                 |         |            |             | ✓        | ✓      |
-| View project Audit Events                         |         |            |  ✓ (*11*)   | ✓        | ✓      |
-| Manage [push rules](../push_rules/push_rules.md)  |         |            |             | ✓        | ✓      |
-| Manage [project access tokens](project/settings/project_access_tokens.md) **(FREE SELF)** **(PREMIUM SAAS)** (*12*) |         |            |             | ✓        | ✓      |
-| View 2FA status of members                        |         |            |             | ✓        | ✓      |
-| Switch visibility level                           |         |            |             |          | ✓      |
-| Transfer project to another namespace             |         |            |             |          | ✓      |
-| Rename project                                    |         |            |             |          | ✓      |
-| Remove fork relationship                          |         |            |             |          | ✓      |
-| Delete project                                    |         |            |             |          | ✓      |
-| Archive project                                   |         |            |             |          | ✓      |
-| Delete issues                                     |         |            |             |          | ✓      |
-| Delete pipelines                                  |         |            |             |          | ✓      |
-| Delete merge request                              |         |            |             |          | ✓      |
-| Disable notification emails                       |         |            |             |          | ✓      |
-| Administer project compliance frameworks          |         |            |             |          | ✓      |
-| Force push to protected branches (*4*)            |         |            |             |          |        |
-| Remove protected branches (*4*)                   |         |            |             |          |        |
+| Action                                            | Guest | Reporter | Developer | Maintainer | Owner |
+|---------------------------------------------------|-------|----------|-----------|------------|-------|
+| Download project                                  | **{check-circle}** Yes (*1*) | **{check-circle}** Yes | **{check-circle}** Yes | **{check-circle}** Yes | **{check-circle}** Yes |
+| Leave comments                                    | **{check-circle}** Yes | **{check-circle}** Yes | **{check-circle}** Yes | **{check-circle}** Yes | **{check-circle}** Yes |
+| View allowed and denied licenses **(ULTIMATE)**   | **{check-circle}** Yes (*1*) | **{check-circle}** Yes | **{check-circle}** Yes | **{check-circle}** Yes | **{check-circle}** Yes |
+| View License Compliance reports **(ULTIMATE)**    | **{check-circle}** Yes (*1*) | **{check-circle}** Yes | **{check-circle}** Yes | **{check-circle}** Yes | **{check-circle}** Yes |
+| View Security reports **(ULTIMATE)**              | **{check-circle}** Yes (*3*) | **{check-circle}** Yes | **{check-circle}** Yes | **{check-circle}** Yes | **{check-circle}** Yes |
+| View Dependency list **(ULTIMATE)**               | **{check-circle}** Yes (*1*) | **{check-circle}** Yes | **{check-circle}** Yes | **{check-circle}** Yes | **{check-circle}** Yes |
+| View License list **(ULTIMATE)**                  | **{check-circle}** Yes (*1*) | **{check-circle}** Yes | **{check-circle}** Yes | **{check-circle}** Yes | **{check-circle}** Yes |
+| View licenses in Dependency list **(ULTIMATE)**   | **{check-circle}** Yes (*1*) | **{check-circle}** Yes | **{check-circle}** Yes | **{check-circle}** Yes | **{check-circle}** Yes |
+| View [Design Management](project/issues/design_management.md) pages | **{check-circle}** Yes | **{check-circle}** Yes | **{check-circle}** Yes | **{check-circle}** Yes | **{check-circle}** Yes |
+| View project code                                 | **{check-circle}** Yes (*1*) | **{check-circle}** Yes | **{check-circle}** Yes | **{check-circle}** Yes | **{check-circle}** Yes |
+| Pull project code                                 | **{check-circle}** Yes (*1*) | **{check-circle}** Yes | **{check-circle}** Yes | **{check-circle}** Yes | **{check-circle}** Yes |
+| View GitLab Pages protected by [access control](project/pages/introduction.md#gitlab-pages-access-control) | **{check-circle}** Yes | **{check-circle}** Yes | **{check-circle}** Yes | **{check-circle}** Yes | **{check-circle}** Yes |
+| View wiki pages                                   | **{check-circle}** Yes | **{check-circle}** Yes | **{check-circle}** Yes | **{check-circle}** Yes | **{check-circle}** Yes |
+| See a list of jobs                                | **{check-circle}** Yes (*3*) | **{check-circle}** Yes | **{check-circle}** Yes | **{check-circle}** Yes | **{check-circle}** Yes |
+| See a job log                                     | **{check-circle}** Yes (*3*) | **{check-circle}** Yes | **{check-circle}** Yes | **{check-circle}** Yes | **{check-circle}** Yes |
+| See a job with [debug logging](../ci/variables/README.md#debug-logging) | **{dotted-circle}** No | **{dotted-circle}** No | **{check-circle}** Yes | **{check-circle}** Yes | **{check-circle}** Yes |
+| Download and browse job artifacts                 | **{check-circle}** Yes (*3*) | **{check-circle}** Yes | **{check-circle}** Yes | **{check-circle}** Yes | **{check-circle}** Yes |
+| Create confidential issue                         | **{check-circle}** Yes | **{check-circle}** Yes | **{check-circle}** Yes | **{check-circle}** Yes | **{check-circle}** Yes |
+| Create new issue                                  | **{check-circle}** Yes | **{check-circle}** Yes | **{check-circle}** Yes | **{check-circle}** Yes | **{check-circle}** Yes |
+| See linked issues                                 | **{check-circle}** Yes | **{check-circle}** Yes | **{check-circle}** Yes | **{check-circle}** Yes | **{check-circle}** Yes |
+| View [Releases](project/releases/index.md)        | **{check-circle}** Yes (*6*) | **{check-circle}** Yes | **{check-circle}** Yes | **{check-circle}** Yes | **{check-circle}** Yes |
+| View requirements **(ULTIMATE)**                  | **{check-circle}** Yes | **{check-circle}** Yes | **{check-circle}** Yes | **{check-circle}** Yes | **{check-circle}** Yes |
+| View Insights **(ULTIMATE)**                      | **{check-circle}** Yes | **{check-circle}** Yes | **{check-circle}** Yes | **{check-circle}** Yes | **{check-circle}** Yes |
+| View issue analytics **(PREMIUM)**                | **{check-circle}** Yes | **{check-circle}** Yes | **{check-circle}** Yes | **{check-circle}** Yes | **{check-circle}** Yes |
+| View merge request analytics **(STARTER)**        | **{check-circle}** Yes | **{check-circle}** Yes | **{check-circle}** Yes | **{check-circle}** Yes | **{check-circle}** Yes |
+| View Value Stream analytics                       | **{check-circle}** Yes | **{check-circle}** Yes | **{check-circle}** Yes | **{check-circle}** Yes | **{check-circle}** Yes |
+| Manage user-starred metrics dashboards (*7*)      | **{check-circle}** Yes | **{check-circle}** Yes | **{check-circle}** Yes | **{check-circle}** Yes | **{check-circle}** Yes |
+| View confidential issues                          | **{check-circle}** Yes (*2*) | **{check-circle}** Yes | **{check-circle}** Yes | **{check-circle}** Yes | **{check-circle}** Yes |
+| Assign issues                                     | **{dotted-circle}** No | **{check-circle}** Yes | **{check-circle}** Yes | **{check-circle}** Yes | **{check-circle}** Yes |
+| Assign reviewers                                  | **{dotted-circle}** No | **{check-circle}** Yes | **{check-circle}** Yes | **{check-circle}** Yes | **{check-circle}** Yes |
+| Label issues                                      | **{dotted-circle}** No | **{check-circle}** Yes | **{check-circle}** Yes | **{check-circle}** Yes | **{check-circle}** Yes |
+| Set issue weight                                  | **{dotted-circle}** No | **{check-circle}** Yes | **{check-circle}** Yes | **{check-circle}** Yes | **{check-circle}** Yes |
+| [Set issue estimate and record time spent](project/time_tracking.md) | **{dotted-circle}** No | **{check-circle}** Yes | **{check-circle}** Yes | **{check-circle}** Yes | **{check-circle}** Yes |
+| View a time tracking report                       | **{check-circle}** Yes (*1*) | **{check-circle}** Yes | **{check-circle}** Yes | **{check-circle}** Yes | **{check-circle}** Yes |
+| Lock issue threads                                | **{dotted-circle}** No | **{check-circle}** Yes | **{check-circle}** Yes | **{check-circle}** Yes | **{check-circle}** Yes |
+| Manage issue tracker                              | **{dotted-circle}** No | **{check-circle}** Yes | **{check-circle}** Yes | **{check-circle}** Yes | **{check-circle}** Yes |
+| Manage linked issues                              | **{dotted-circle}** No | **{check-circle}** Yes | **{check-circle}** Yes | **{check-circle}** Yes | **{check-circle}** Yes |
+| Manage labels                                     | **{dotted-circle}** No | **{check-circle}** Yes | **{check-circle}** Yes | **{check-circle}** Yes | **{check-circle}** Yes |
+| Create code snippets                              | **{dotted-circle}** No | **{check-circle}** Yes | **{check-circle}** Yes | **{check-circle}** Yes | **{check-circle}** Yes |
+| See a commit status                               | **{dotted-circle}** No | **{check-circle}** Yes | **{check-circle}** Yes | **{check-circle}** Yes | **{check-circle}** Yes |
+| See a container registry                          | **{dotted-circle}** No | **{check-circle}** Yes | **{check-circle}** Yes | **{check-circle}** Yes | **{check-circle}** Yes |
+| See environments                                  | **{dotted-circle}** No | **{check-circle}** Yes | **{check-circle}** Yes | **{check-circle}** Yes | **{check-circle}** Yes |
+| See [DORA metrics](analytics/ci_cd_analytics.md)  | **{dotted-circle}** No | **{check-circle}** Yes | **{check-circle}** Yes | **{check-circle}** Yes | **{check-circle}** Yes |
+| See a list of merge requests                      | **{dotted-circle}** No | **{check-circle}** Yes | **{check-circle}** Yes | **{check-circle}** Yes | **{check-circle}** Yes |
+| View CI/CD analytics                              | **{dotted-circle}** No | **{check-circle}** Yes | **{check-circle}** Yes | **{check-circle}** Yes | **{check-circle}** Yes |
+| View Code Review analytics **(STARTER)**          | **{dotted-circle}** No | **{check-circle}** Yes | **{check-circle}** Yes | **{check-circle}** Yes | **{check-circle}** Yes |
+| View Repository analytics                         | **{dotted-circle}** No | **{check-circle}** Yes | **{check-circle}** Yes | **{check-circle}** Yes | **{check-circle}** Yes |
+| View Error Tracking list                          | **{dotted-circle}** No | **{check-circle}** Yes | **{check-circle}** Yes | **{check-circle}** Yes | **{check-circle}** Yes |
+| View metrics dashboard annotations                | **{dotted-circle}** No | **{check-circle}** Yes | **{check-circle}** Yes | **{check-circle}** Yes | **{check-circle}** Yes |
+| Archive/reopen requirements **(ULTIMATE)**        | **{dotted-circle}** No | **{check-circle}** Yes | **{check-circle}** Yes | **{check-circle}** Yes | **{check-circle}** Yes |
+| Create/edit requirements **(ULTIMATE)**           | **{dotted-circle}** No | **{check-circle}** Yes | **{check-circle}** Yes | **{check-circle}** Yes | **{check-circle}** Yes |
+| Import/export requirements **(ULTIMATE)**         | **{dotted-circle}** No | **{check-circle}** Yes | **{check-circle}** Yes | **{check-circle}** Yes | **{check-circle}** Yes |
+| Create new [test case](../ci/test_cases/index.md) | **{dotted-circle}** No | **{check-circle}** Yes | **{check-circle}** Yes | **{check-circle}** Yes | **{check-circle}** Yes |
+| Archive [test case](../ci/test_cases/index.md)    | **{dotted-circle}** No | **{check-circle}** Yes | **{check-circle}** Yes | **{check-circle}** Yes | **{check-circle}** Yes |
+| Move [test case](../ci/test_cases/index.md)       | **{dotted-circle}** No | **{check-circle}** Yes | **{check-circle}** Yes | **{check-circle}** Yes | **{check-circle}** Yes |
+| Reopen [test case](../ci/test_cases/index.md)     | **{dotted-circle}** No | **{check-circle}** Yes | **{check-circle}** Yes | **{check-circle}** Yes | **{check-circle}** Yes |
+| Pull [packages](packages/index.md)                | **{dotted-circle}** No | **{check-circle}** Yes | **{check-circle}** Yes | **{check-circle}** Yes | **{check-circle}** Yes |
+| Publish [packages](packages/index.md)             | **{dotted-circle}** No | **{dotted-circle}** No | **{check-circle}** Yes | **{check-circle}** Yes | **{check-circle}** Yes |
+| Create/edit/delete a Cleanup policy               | **{dotted-circle}** No | **{dotted-circle}** No | **{check-circle}** Yes | **{check-circle}** Yes | **{check-circle}** Yes |
+| Upload [Design Management](project/issues/design_management.md) files | **{dotted-circle}** No | **{dotted-circle}** No | **{check-circle}** Yes | **{check-circle}** Yes | **{check-circle}** Yes |
+| Create/edit [releases](project/releases/index.md) | **{dotted-circle}** No | **{dotted-circle}** No | **{check-circle}** Yes | **{check-circle}** Yes | **{check-circle}** Yes |
+| Delete [releases](project/releases/index.md)      | **{dotted-circle}** No | **{dotted-circle}** No | **{dotted-circle}** No | **{check-circle}** Yes | **{check-circle}** Yes |
+| Manage merge approval rules (project settings)    | **{dotted-circle}** No | **{dotted-circle}** No | **{dotted-circle}** No | **{check-circle}** Yes | **{check-circle}** Yes |
+| Create new merge request                          | **{dotted-circle}** No | **{dotted-circle}** No | **{check-circle}** Yes | **{check-circle}** Yes | **{check-circle}** Yes |
+| Create new branches                               | **{dotted-circle}** No | **{dotted-circle}** No | **{check-circle}** Yes | **{check-circle}** Yes | **{check-circle}** Yes |
+| Push to non-protected branches                    | **{dotted-circle}** No | **{dotted-circle}** No | **{check-circle}** Yes | **{check-circle}** Yes | **{check-circle}** Yes |
+| Force push to non-protected branches              | **{dotted-circle}** No | **{dotted-circle}** No | **{check-circle}** Yes | **{check-circle}** Yes | **{check-circle}** Yes |
+| Remove non-protected branches                     | **{dotted-circle}** No | **{dotted-circle}** No | **{check-circle}** Yes | **{check-circle}** Yes | **{check-circle}** Yes |
+| Assign merge requests                             | **{dotted-circle}** No | **{dotted-circle}** No | **{check-circle}** Yes | **{check-circle}** Yes | **{check-circle}** Yes |
+| Label merge requests                              | **{dotted-circle}** No | **{dotted-circle}** No | **{check-circle}** Yes | **{check-circle}** Yes | **{check-circle}** Yes |
+| Lock merge request threads                        | **{dotted-circle}** No | **{dotted-circle}** No | **{check-circle}** Yes | **{check-circle}** Yes | **{check-circle}** Yes |
+| Approve merge requests (*9*)                      | **{dotted-circle}** No | **{dotted-circle}** No | **{check-circle}** Yes | **{check-circle}** Yes | **{check-circle}** Yes |
+| Manage/Accept merge requests                      | **{dotted-circle}** No | **{dotted-circle}** No | **{check-circle}** Yes | **{check-circle}** Yes | **{check-circle}** Yes |
+| View project statistics                           | **{dotted-circle}** No | **{dotted-circle}** No | **{check-circle}** Yes | **{check-circle}** Yes | **{check-circle}** Yes |
+| Create new environments                           | **{dotted-circle}** No | **{dotted-circle}** No | **{check-circle}** Yes | **{check-circle}** Yes | **{check-circle}** Yes |
+| Stop environments                                 | **{dotted-circle}** No | **{dotted-circle}** No | **{check-circle}** Yes | **{check-circle}** Yes | **{check-circle}** Yes |
+| Enable Review Apps                                | **{dotted-circle}** No | **{dotted-circle}** No | **{check-circle}** Yes | **{check-circle}** Yes | **{check-circle}** Yes |
+| View Pods logs                                    | **{dotted-circle}** No | **{dotted-circle}** No | **{check-circle}** Yes | **{check-circle}** Yes | **{check-circle}** Yes |
+| Read Terraform state                              | **{dotted-circle}** No | **{dotted-circle}** No | **{check-circle}** Yes | **{check-circle}** Yes | **{check-circle}** Yes |
+| Add tags                                          | **{dotted-circle}** No | **{dotted-circle}** No | **{check-circle}** Yes | **{check-circle}** Yes | **{check-circle}** Yes |
+| Cancel and retry jobs                             | **{dotted-circle}** No | **{dotted-circle}** No | **{check-circle}** Yes | **{check-circle}** Yes | **{check-circle}** Yes |
+| Create or update commit status                    | **{dotted-circle}** No | **{dotted-circle}** No | **{check-circle}** Yes (*5*) | **{check-circle}** Yes | **{check-circle}** Yes |
+| Update a container registry                       | **{dotted-circle}** No | **{dotted-circle}** No | **{check-circle}** Yes | **{check-circle}** Yes | **{check-circle}** Yes |
+| Remove a container registry image                 | **{dotted-circle}** No | **{dotted-circle}** No | **{check-circle}** Yes | **{check-circle}** Yes | **{check-circle}** Yes |
+| Create/edit/delete project milestones             | **{dotted-circle}** No | **{dotted-circle}** No | **{check-circle}** Yes | **{check-circle}** Yes | **{check-circle}** Yes |
+| Use security dashboard **(ULTIMATE)**             | **{dotted-circle}** No | **{dotted-circle}** No | **{check-circle}** Yes | **{check-circle}** Yes | **{check-circle}** Yes |
+| View vulnerability findings in Dependency list **(ULTIMATE)** | **{dotted-circle}** No | **{dotted-circle}** No | **{check-circle}** Yes | **{check-circle}** Yes | **{check-circle}** Yes |
+| Create issue from vulnerability finding **(ULTIMATE)** | **{dotted-circle}** No | **{dotted-circle}** No | **{check-circle}** Yes | **{check-circle}** Yes | **{check-circle}** Yes |
+| Dismiss vulnerability finding **(ULTIMATE)**      | **{dotted-circle}** No | **{dotted-circle}** No | **{check-circle}** Yes | **{check-circle}** Yes | **{check-circle}** Yes |
+| View vulnerability **(ULTIMATE)**                 | **{dotted-circle}** No | **{dotted-circle}** No | **{check-circle}** Yes | **{check-circle}** Yes | **{check-circle}** Yes |
+| Create vulnerability from vulnerability finding **(ULTIMATE)** | **{dotted-circle}** No | **{dotted-circle}** No | **{check-circle}** Yes | **{check-circle}** Yes | **{check-circle}** Yes |
+| Resolve vulnerability **(ULTIMATE)**              | **{dotted-circle}** No | **{dotted-circle}** No | **{check-circle}** Yes | **{check-circle}** Yes | **{check-circle}** Yes |
+| Dismiss vulnerability **(ULTIMATE)**              | **{dotted-circle}** No | **{dotted-circle}** No | **{check-circle}** Yes | **{check-circle}** Yes | **{check-circle}** Yes |
+| Revert vulnerability to detected state **(ULTIMATE)** | **{dotted-circle}** No | **{dotted-circle}** No | **{check-circle}** Yes | **{check-circle}** Yes | **{check-circle}** Yes |
+| Apply code change suggestions                     | **{dotted-circle}** No | **{dotted-circle}** No | **{check-circle}** Yes | **{check-circle}** Yes | **{check-circle}** Yes |
+| Create and edit wiki pages                        | **{dotted-circle}** No | **{dotted-circle}** No | **{check-circle}** Yes | **{check-circle}** Yes | **{check-circle}** Yes |
+| Rewrite/remove Git tags                           | **{dotted-circle}** No | **{dotted-circle}** No | **{check-circle}** Yes | **{check-circle}** Yes | **{check-circle}** Yes |
+| Manage Feature Flags **(PREMIUM)**                | **{dotted-circle}** No | **{dotted-circle}** No | **{check-circle}** Yes | **{check-circle}** Yes | **{check-circle}** Yes |
+| Create/edit/delete metrics dashboard annotations  | **{dotted-circle}** No | **{dotted-circle}** No | **{check-circle}** Yes | **{check-circle}** Yes | **{check-circle}** Yes |
+| Run CI/CD pipeline against a protected branch     | **{dotted-circle}** No | **{dotted-circle}** No | **{check-circle}** Yes (*5*) | **{check-circle}** Yes | **{check-circle}** Yes |
+| Delete [packages](packages/index.md)              | **{dotted-circle}** No | **{dotted-circle}** No | **{dotted-circle}** No | **{check-circle}** Yes | **{check-circle}** Yes |
+| Request a CVE ID **(FREE SAAS)**                  | **{dotted-circle}** No | **{dotted-circle}** No | **{dotted-circle}** No | **{check-circle}** Yes | **{check-circle}** Yes |
+| Use environment terminals                         | **{dotted-circle}** No | **{dotted-circle}** No | **{dotted-circle}** No | **{check-circle}** Yes | **{check-circle}** Yes |
+| Run Web IDE's Interactive Web Terminals **(ULTIMATE SELF)** | **{dotted-circle}** No | **{dotted-circle}** No | **{dotted-circle}** No | **{check-circle}** Yes | **{check-circle}** Yes |
+| Add new team members                              | **{dotted-circle}** No | **{dotted-circle}** No | **{dotted-circle}** No | **{check-circle}** Yes | **{check-circle}** Yes |
+| Enable/disable branch protection                  | **{dotted-circle}** No | **{dotted-circle}** No | **{dotted-circle}** No | **{check-circle}** Yes | **{check-circle}** Yes |
+| Push to protected branches                        | **{dotted-circle}** No | **{dotted-circle}** No | **{dotted-circle}** No | **{check-circle}** Yes | **{check-circle}** Yes |
+| Turn on/off protected branch push for developers  | **{dotted-circle}** No | **{dotted-circle}** No | **{dotted-circle}** No | **{check-circle}** Yes | **{check-circle}** Yes |
+| Enable/disable tag protections                    | **{dotted-circle}** No | **{dotted-circle}** No | **{dotted-circle}** No | **{check-circle}** Yes | **{check-circle}** Yes |
+| Edit project settings                             | **{dotted-circle}** No | **{dotted-circle}** No | **{dotted-circle}** No | **{check-circle}** Yes | **{check-circle}** Yes |
+| Edit project badges                               | **{dotted-circle}** No | **{dotted-circle}** No | **{dotted-circle}** No | **{check-circle}** Yes | **{check-circle}** Yes |
+| Export project                                    | **{dotted-circle}** No | **{dotted-circle}** No | **{dotted-circle}** No | **{check-circle}** Yes | **{check-circle}** Yes |
+| Share (invite) projects with groups               | **{dotted-circle}** No | **{dotted-circle}** No |**{dotted-circle}** No| **{check-circle}** Yes (*8*) | **{check-circle}** Yes (*8*) |
+| Add deploy keys to project                        | **{dotted-circle}** No | **{dotted-circle}** No | **{dotted-circle}** No | **{check-circle}** Yes | **{check-circle}** Yes |
+| Configure project hooks                           | **{dotted-circle}** No | **{dotted-circle}** No | **{dotted-circle}** No | **{check-circle}** Yes | **{check-circle}** Yes |
+| Manage runners                                    | **{dotted-circle}** No | **{dotted-circle}** No | **{dotted-circle}** No | **{check-circle}** Yes | **{check-circle}** Yes |
+| Manage job triggers                               | **{dotted-circle}** No | **{dotted-circle}** No | **{dotted-circle}** No | **{check-circle}** Yes | **{check-circle}** Yes |
+| Manage CI/CD variables                            | **{dotted-circle}** No | **{dotted-circle}** No | **{dotted-circle}** No | **{check-circle}** Yes | **{check-circle}** Yes |
+| Manage GitLab Pages                               | **{dotted-circle}** No | **{dotted-circle}** No | **{dotted-circle}** No | **{check-circle}** Yes | **{check-circle}** Yes |
+| Manage GitLab Pages domains and certificates      | **{dotted-circle}** No | **{dotted-circle}** No | **{dotted-circle}** No | **{check-circle}** Yes | **{check-circle}** Yes |
+| Remove GitLab Pages                               | **{dotted-circle}** No | **{dotted-circle}** No | **{dotted-circle}** No | **{check-circle}** Yes | **{check-circle}** Yes |
+| Manage clusters                                   | **{dotted-circle}** No | **{dotted-circle}** No | **{dotted-circle}** No | **{check-circle}** Yes | **{check-circle}** Yes |
+| Manage Project Operations                         | **{dotted-circle}** No | **{dotted-circle}** No | **{dotted-circle}** No | **{check-circle}** Yes | **{check-circle}** Yes |
+| Manage Terraform state                            | **{dotted-circle}** No | **{dotted-circle}** No | **{dotted-circle}** No | **{check-circle}** Yes | **{check-circle}** Yes |
+| Manage license policy **(ULTIMATE)**              | **{dotted-circle}** No | **{dotted-circle}** No | **{dotted-circle}** No | **{check-circle}** Yes | **{check-circle}** Yes |
+| Edit comments (posted by any user)                | **{dotted-circle}** No | **{dotted-circle}** No | **{dotted-circle}** No | **{check-circle}** Yes | **{check-circle}** Yes |
+| Reposition comments on images (posted by any user) | **{check-circle}** Yes (*10*) | **{check-circle}** Yes (*10*) | **{check-circle}** Yes (*10*) | **{check-circle}** Yes | **{check-circle}** Yes |
+| Manage Error Tracking                             | **{dotted-circle}** No | **{dotted-circle}** No | **{dotted-circle}** No | **{check-circle}** Yes | **{check-circle}** Yes |
+| Delete wiki pages                                 | **{dotted-circle}** No | **{dotted-circle}** No | **{dotted-circle}** No | **{check-circle}** Yes | **{check-circle}** Yes |
+| View project Audit Events                         | **{dotted-circle}** No | **{dotted-circle}** No | **{check-circle}** Yes (*11*) | **{check-circle}** Yes | **{check-circle}** Yes |
+| Manage [push rules](../push_rules/push_rules.md)  | **{dotted-circle}** No | **{dotted-circle}** No | **{dotted-circle}** No | **{check-circle}** Yes | **{check-circle}** Yes |
+| Manage [project access tokens](project/settings/project_access_tokens.md) **(FREE SELF)** **(PREMIUM SAAS)** (*12*) | **{dotted-circle}** No | **{dotted-circle}** No | **{dotted-circle}** No | **{check-circle}** Yes | **{check-circle}** Yes |
+| View 2FA status of members                        | **{dotted-circle}** No | **{dotted-circle}** No | **{dotted-circle}** No | **{check-circle}** Yes | **{check-circle}** Yes |
+| Switch visibility level                           | **{dotted-circle}** No | **{dotted-circle}** No | **{dotted-circle}** No | **{dotted-circle}** No | **{check-circle}** Yes |
+| Transfer project to another namespace             | **{dotted-circle}** No | **{dotted-circle}** No | **{dotted-circle}** No | **{dotted-circle}** No | **{check-circle}** Yes |
+| Rename project                                    | **{dotted-circle}** No | **{dotted-circle}** No | **{dotted-circle}** No | **{dotted-circle}** No | **{check-circle}** Yes |
+| Remove fork relationship                          | **{dotted-circle}** No | **{dotted-circle}** No | **{dotted-circle}** No | **{dotted-circle}** No | **{check-circle}** Yes |
+| Delete project                                    | **{dotted-circle}** No | **{dotted-circle}** No | **{dotted-circle}** No | **{dotted-circle}** No | **{check-circle}** Yes |
+| Archive project                                   | **{dotted-circle}** No | **{dotted-circle}** No | **{dotted-circle}** No | **{dotted-circle}** No | **{check-circle}** Yes |
+| Delete issues                                     | **{dotted-circle}** No | **{dotted-circle}** No | **{dotted-circle}** No | **{dotted-circle}** No | **{check-circle}** Yes |
+| Delete pipelines                                  | **{dotted-circle}** No | **{dotted-circle}** No | **{dotted-circle}** No | **{dotted-circle}** No | **{check-circle}** Yes |
+| Delete merge request                              | **{dotted-circle}** No | **{dotted-circle}** No | **{dotted-circle}** No | **{dotted-circle}** No | **{check-circle}** Yes |
+| Disable notification emails                       | **{dotted-circle}** No | **{dotted-circle}** No | **{dotted-circle}** No | **{dotted-circle}** No | **{check-circle}** Yes |
+| Administer project compliance frameworks          | **{dotted-circle}** No | **{dotted-circle}** No | **{dotted-circle}** No | **{dotted-circle}** No | **{check-circle}** Yes |
+| Force push to protected branches (*4*)            | **{dotted-circle}** No | **{dotted-circle}** No | **{dotted-circle}** No | **{dotted-circle}** No | **{dotted-circle}** No |
+| Remove protected branches (*4*)                   | **{dotted-circle}** No | **{dotted-circle}** No | **{dotted-circle}** No | **{dotted-circle}** No | **{dotted-circle}** No |
 
 1. Guest users are able to perform this action on public and internal projects, but not private projects. This doesn't apply to [external users](#external-users) where explicit access must be given even if the project is internal.
 1. Guest users can only view the confidential issues they created themselves.
@@ -263,50 +263,50 @@ The following table lists group permissions available for each role:
 
 | Action                                                 | Guest | Reporter | Developer | Maintainer | Owner |
 |--------------------------------------------------------|-------|----------|-----------|------------|-------|
-| Browse group                                           | ✓     | ✓        | ✓         | ✓          | ✓     |
-| View group wiki pages **(PREMIUM)**                    | ✓ (6) | ✓        | ✓         | ✓          | ✓     |
-| View Insights charts **(ULTIMATE)**                    | ✓     | ✓        | ✓         | ✓          | ✓     |
-| View group epic **(PREMIUM)**                         | ✓     | ✓        | ✓         | ✓          | ✓     |
-| Create/edit group epic **(PREMIUM)**                  |       | ✓        | ✓         | ✓          | ✓     |
-| Manage group labels                                    |       | ✓        | ✓         | ✓          | ✓     |
-| See a container registry                               |       | ✓        | ✓         | ✓          | ✓     |
-| Pull [packages](packages/index.md)                     |       | ✓        | ✓         | ✓          | ✓     |
-| Publish [packages](packages/index.md)                  |       |          | ✓         | ✓          | ✓     |
-| View metrics dashboard annotations                     |       | ✓        | ✓         | ✓          | ✓     |
-| Create project in group                                |       |          | ✓ (3)(5)  | ✓ (3)      | ✓ (3) |
-| Share (invite) groups with groups                      |       |          |           |            | ✓     |
-| Create/edit/delete group milestones                    |       |          | ✓         | ✓          | ✓     |
-| Create/edit/delete iterations                          |       |          | ✓         | ✓          | ✓     |
-| Enable/disable a dependency proxy                      |       |          | ✓         | ✓          | ✓     |
-| Create and edit group wiki pages **(PREMIUM)**         |       |          | ✓         | ✓          | ✓     |
-| Use security dashboard **(ULTIMATE)**                  |       |          | ✓         | ✓          | ✓     |
-| Create/edit/delete metrics dashboard annotations       |       |          | ✓         | ✓          | ✓     |
-| View/manage group-level Kubernetes cluster             |       |          |           | ✓          | ✓     |
-| Create subgroup                                        |       |          |           | ✓ (1)      | ✓     |
-| Delete group wiki pages **(PREMIUM)**                  |       |          |           | ✓          | ✓     |
-| Edit epic comments (posted by any user) **(ULTIMATE)** |       |          |           | ✓ (2)      | ✓ (2) |
-| Edit group settings                                    |       |          |           |            | ✓     |
-| Manage group level CI/CD variables                     |       |          |           |            | ✓     |
-| List group deploy tokens                               |       |          |           | ✓          | ✓     |
-| Create/Delete group deploy tokens                      |       |          |           |            | ✓     |
-| Manage group members                                   |       |          |           |            | ✓     |
-| Delete group                                           |       |          |           |            | ✓     |
-| Delete group epic **(PREMIUM)**                       |       |          |           |            | ✓     |
-| Edit SAML SSO Billing **(PREMIUM SAAS)**                | ✓     | ✓        | ✓         | ✓          | ✓ (4) |
-| View group Audit Events                                |       |          | ✓ (7)     | ✓ (7)      | ✓     |
-| Disable notification emails                            |       |          |           |            | ✓     |
-| View Contribution analytics                            | ✓     | ✓        | ✓         | ✓          | ✓     |
-| View Group DevOps Adoption **(ULTIMATE)**              |       | ✓        | ✓         | ✓          | ✓     |
-| View Insights **(ULTIMATE)**                           | ✓     | ✓        | ✓         | ✓          | ✓     |
-| View Issue analytics **(PREMIUM)**                     | ✓     | ✓        | ✓         | ✓          | ✓     |
-| View Productivity analytics **(PREMIUM)**              |       | ✓        | ✓         | ✓          | ✓     |
-| View Value Stream analytics                            | ✓     | ✓        | ✓         | ✓          | ✓     |
-| View Billing **(FREE SAAS)**                           |       |          |           |            | ✓ (4) |
-| View Usage Quotas **(FREE SAAS)**                      |       |          |           |            | ✓ (4) |
-| Manage [group push rules](group/index.md#group-push-rules) **(PREMIUM)** |         |            |             | ✓        | ✓      |
-| View 2FA status of members                             |       |          |           |            | ✓     |
-| Filter members by 2FA status                           |       |          |           |            | ✓     |
-| Administer project compliance frameworks               |       |          |           |            | ✓     |
+| Browse group                                           | **{check-circle}** Yes | **{check-circle}** Yes | **{check-circle}** Yes | **{check-circle}** Yes | **{check-circle}** Yes |
+| View group wiki pages **(PREMIUM)**                    | **{check-circle}** Yes (6) | **{check-circle}** Yes | **{check-circle}** Yes | **{check-circle}** Yes | **{check-circle}** Yes |
+| View Insights charts **(ULTIMATE)**                    | **{check-circle}** Yes | **{check-circle}** Yes | **{check-circle}** Yes | **{check-circle}** Yes | **{check-circle}** Yes |
+| View group epic **(PREMIUM)**                          | **{check-circle}** Yes | **{check-circle}** Yes | **{check-circle}** Yes | **{check-circle}** Yes | **{check-circle}** Yes |
+| Create/edit group epic **(PREMIUM)**                   | **{dotted-circle}** No | **{check-circle}** Yes | **{check-circle}** Yes | **{check-circle}** Yes | **{check-circle}** Yes |
+| Manage group labels                                    | **{dotted-circle}** No | **{check-circle}** Yes | **{check-circle}** Yes | **{check-circle}** Yes | **{check-circle}** Yes |
+| See a container registry                               | **{dotted-circle}** No | **{check-circle}** Yes | **{check-circle}** Yes | **{check-circle}** Yes | **{check-circle}** Yes |
+| Pull [packages](packages/index.md)                     | **{dotted-circle}** No | **{check-circle}** Yes | **{check-circle}** Yes | **{check-circle}** Yes | **{check-circle}** Yes |
+| Publish [packages](packages/index.md)                  | **{dotted-circle}** No | **{dotted-circle}** No | **{check-circle}** Yes | **{check-circle}** Yes | **{check-circle}** Yes |
+| View metrics dashboard annotations                     | **{dotted-circle}** No | **{check-circle}** Yes | **{check-circle}** Yes | **{check-circle}** Yes | **{check-circle}** Yes |
+| Create project in group                                | **{dotted-circle}** No | **{dotted-circle}** No | **{check-circle}** Yes (3)(5) | **{check-circle}** Yes (3) | **{check-circle}** Yes (3) |
+| Share (invite) groups with groups                      | **{dotted-circle}** No | **{dotted-circle}** No |** {dotted-circle}** No | **{dotted-circle}** No | **{check-circle}** Yes |
+| Create/edit/delete group milestones                    | **{dotted-circle}** No | **{dotted-circle}** No | **{check-circle}** Yes | **{check-circle}** Yes | **{check-circle}** Yes |
+| Create/edit/delete iterations                          | **{dotted-circle}** No | **{dotted-circle}** No | **{check-circle}** Yes | **{check-circle}** Yes | **{check-circle}** Yes |
+| Enable/disable a dependency proxy                      | **{dotted-circle}** No | **{dotted-circle}** No | **{check-circle}** Yes | **{check-circle}** Yes | **{check-circle}** Yes |
+| Create and edit group wiki pages **(PREMIUM)**         | **{dotted-circle}** No | **{dotted-circle}** No | **{check-circle}** Yes | **{check-circle}** Yes | **{check-circle}** Yes |
+| Use security dashboard **(ULTIMATE)**                  | **{dotted-circle}** No | **{dotted-circle}** No | **{check-circle}** Yes | **{check-circle}** Yes | **{check-circle}** Yes |
+| Create/edit/delete metrics dashboard annotations       | **{dotted-circle}** No | **{dotted-circle}** No | **{check-circle}** Yes | **{check-circle}** Yes | **{check-circle}** Yes |
+| View/manage group-level Kubernetes cluster             | **{dotted-circle}** No | **{dotted-circle}** No | **{dotted-circle}** No | **{check-circle}** Yes | **{check-circle}** Yes |
+| Create subgroup                                        | **{dotted-circle}** No | **{dotted-circle}** No | **{dotted-circle}** No | **{check-circle}** Yes (1) | **{check-circle}** Yes |
+| Delete group wiki pages **(PREMIUM)**                  | **{dotted-circle}** No | **{dotted-circle}** No | **{dotted-circle}** No | **{check-circle}** Yes | **{check-circle}** Yes |
+| Edit epic comments (posted by any user) **(ULTIMATE)** | **{dotted-circle}** No | **{dotted-circle}** No | **{dotted-circle}** No | **{check-circle}** Yes (2) | **{check-circle}** Yes (2) |
+| Edit group settings                                    | **{dotted-circle}** No | **{dotted-circle}** No | **{dotted-circle}** No | **{dotted-circle}** No | **{check-circle}** Yes |
+| Manage group level CI/CD variables                     | **{dotted-circle}** No | **{dotted-circle}** No | **{dotted-circle}** No | **{dotted-circle}** No | **{check-circle}** Yes |
+| List group deploy tokens                               | **{dotted-circle}** No | **{dotted-circle}** No | **{dotted-circle}** No | **{check-circle}** Yes | **{check-circle}** Yes |
+| Create/Delete group deploy tokens                      | **{dotted-circle}** No | **{dotted-circle}** No | **{dotted-circle}** No | **{dotted-circle}** No | **{check-circle}** Yes |
+| Manage group members                                   | **{dotted-circle}** No | **{dotted-circle}** No | **{dotted-circle}** No | **{dotted-circle}** No | **{check-circle}** Yes |
+| Delete group                                           | **{dotted-circle}** No | **{dotted-circle}** No | **{dotted-circle}** No | **{dotted-circle}** No | **{check-circle}** Yes |
+| Delete group epic **(PREMIUM)**                        | **{dotted-circle}** No | **{dotted-circle}** No | **{dotted-circle}** No | **{dotted-circle}** No | **{check-circle}** Yes |
+| Edit SAML SSO Billing **(PREMIUM SAAS)**               | **{check-circle}** Yes | **{check-circle}** Yes | **{check-circle}** Yes | **{check-circle}** Yes | **{check-circle}** Yes (4) |
+| View group Audit Events                                | **{dotted-circle}** No | **{dotted-circle}** No | **{check-circle}** Yes (7) | **{check-circle}** Yes (7) | **{check-circle}** Yes |
+| Disable notification emails                            | **{dotted-circle}** No | **{dotted-circle}** No | **{dotted-circle}** No | **{dotted-circle}** No | **{check-circle}** Yes |
+| View Contribution analytics                            | **{check-circle}** Yes | **{check-circle}** Yes | **{check-circle}** Yes | **{check-circle}** Yes | **{check-circle}** Yes |
+| View Group DevOps Adoption **(ULTIMATE)**              | **{dotted-circle}** No | **{check-circle}** Yes | **{check-circle}** Yes | **{check-circle}** Yes | **{check-circle}** Yes |
+| View Insights **(ULTIMATE)**                           | **{check-circle}** Yes | **{check-circle}** Yes | **{check-circle}** Yes | **{check-circle}** Yes | **{check-circle}** Yes |
+| View Issue analytics **(PREMIUM)**                     | **{check-circle}** Yes | **{check-circle}** Yes | **{check-circle}** Yes | **{check-circle}** Yes | **{check-circle}** Yes |
+| View Productivity analytics **(PREMIUM)**              | **{dotted-circle}** No | **{check-circle}** Yes | **{check-circle}** Yes | **{check-circle}** Yes | **{check-circle}** Yes |
+| View Value Stream analytics                            | **{check-circle}** Yes | **{check-circle}** Yes | **{check-circle}** Yes | **{check-circle}** Yes | **{check-circle}** Yes |
+| View Billing **(FREE SAAS)**                           | **{dotted-circle}** No | **{dotted-circle}** No | **{dotted-circle}** No | **{dotted-circle}** No | **{check-circle}** Yes (4) |
+| View Usage Quotas **(FREE SAAS)**                      | **{dotted-circle}** No | **{dotted-circle}** No | **{dotted-circle}** No | **{dotted-circle}** No | **{check-circle}** Yes (4) |
+| Manage [group push rules](group/index.md#group-push-rules) **(PREMIUM)** | **{dotted-circle}** No | **{dotted-circle}** No | **{dotted-circle}** No | **{check-circle}** Yes | **{check-circle}** Yes |
+| View 2FA status of members                             | **{dotted-circle}** No | **{dotted-circle}** No | **{dotted-circle}** No | **{dotted-circle}** No | **{check-circle}** Yes |
+| Filter members by 2FA status                           | **{dotted-circle}** No | **{dotted-circle}** No | **{dotted-circle}** No | **{dotted-circle}** No | **{check-circle}** Yes |
+| Administer project compliance frameworks               | **{dotted-circle}** No | **{dotted-circle}** No | **{dotted-circle}** No | **{dotted-circle}** No | **{check-circle}** Yes |
 
 1. Groups can be set to [allow either Owners or Owners and
   Maintainers to create subgroups](group/subgroups/index.md#creating-a-subgroup)
