@@ -155,7 +155,6 @@ review-stop:
     - |
       allure-report-publisher upload gcs \
         --results-glob="qa/gitlab-qa-run-*/**/allure-results/*" \
-        --bucket="gitlab-qa-allure-reports" \
         --prefix="$ALLURE_REPORT_PATH_PREFIX/$CI_COMMIT_REF_SLUG" \
         --update-pr="comment" \
         --copy-latest \
