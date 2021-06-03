@@ -175,7 +175,9 @@ For example:
 
 - `ERROR:  relation "node_status" does not exist at character 13`
 - `ERROR:  relation "replication_queue_lock" does not exist at character 40`
-- ```json
+- This error:
+
+  ```json
   {"level":"error","msg":"Error updating node: pq: relation \"node_status\" does not exist","pid":210882,"praefectName":"gitlab1x4m:0.0.0.0:2305","time":"2021-04-01T19:26:19.473Z","virtual_storage":"praefect-cluster-1"}
   ```
 
