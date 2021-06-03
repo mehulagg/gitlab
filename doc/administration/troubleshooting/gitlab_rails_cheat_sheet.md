@@ -1193,11 +1193,11 @@ Among other attributes, in the output you will notice that all the settings avai
 You can then set anyone of Elasticsearch integration settings by issuing a command similar to:
 
 ```ruby
-ApplicationSetting.last.update_attributes(elasticsearch_url: '<your ES URL and port>')
+ApplicationSetting.last.update(elasticsearch_url: '<your ES URL and port>')
 
 #or
 
-ApplicationSetting.last.update_attributes(elasticsearch_indexing: false)
+ApplicationSetting.last.update(elasticsearch_indexing: false)
 ```
 
 #### Getting attributes
