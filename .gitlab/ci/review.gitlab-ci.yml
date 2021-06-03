@@ -35,6 +35,8 @@ review-build-cng:
       artifacts: false
   script:
     - ./scripts/trigger-build cng
+  rules:
+    - when: never
 
 .review-workflow-base:
   extends:
@@ -55,8 +57,7 @@ review-deploy:
     - .review-workflow-base
     - .review:rules:review-deploy
   retry: 2
-  stage: review
-  needs: ["review-build-cng"]
+  stage: prepare
   resource_group: "review/${CI_COMMIT_REF_NAME}"
   before_script:
     - export GITLAB_SHELL_VERSION=$(<GITLAB_SHELL_VERSION)
