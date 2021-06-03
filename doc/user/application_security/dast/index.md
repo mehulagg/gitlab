@@ -150,17 +150,12 @@ You can use DAST to examine your web application:
 - Automatically, initiated by a merge request.
 - Manually, initiated on demand.
 
-An automatic DAST scan is initiated by a merge request. The DAST configuration is defined in the
-`.gitlab-ci.yml` CI/CD file.
-
-A manual, or on-demand, DAST scan is initiated outside the DevOps life cycle. In the GitLab user
-interface you define what's to be scanned, and how, then initiate the scan.
-
-The following table describes some of the differences:
+Some of the differences between these run options:
 
 | Automatic scan                                                   | On-demand scan                |
 |:-----------------------------------------------------------------|:------------------------------|
-| CI/CD variables are sourced from `.gitlab-ci.yml`.               | CI/CD variables are sourced from the GitLab internal database. |
+| DAST scan is initiated by a merge request.                       | DAST scan is initiated manually, outside the DevOps life cycle. |
+| CI/CD variables are sourced from `.gitlab-ci.yml`.               | CI/CD variables are provided in the UI. |
 | All [DAST CI/CD variables](#available-cicd-variables) available. | Subset of [DAST CI/CD variables](#available-cicd-variables) available. |
 | `DAST.gitlab-ci.yml` template.                                   | `DAST-On-Demand-Scan.gitlab-ci.yml` template. |
 
