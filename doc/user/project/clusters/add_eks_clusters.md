@@ -187,8 +187,49 @@ To create and add a new Kubernetes cluster to your project, group, or instance:
 After about 10 minutes, your cluster is ready to go. You can now proceed
 to install some [pre-defined applications](index.md#installing-applications).
 
-NOTE:
-If you have [installed and configured](https://docs.aws.amazon.com/eks/latest/userguide/getting-started.html#get-started-kubectl)  `kubectl`  and you would like to manage your cluster with it, you must add your AWS external ID in the AWS configuration. For more information on how to configure AWS CLI, see [using an IAM role in the AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-role.html#cli-configure-role-xaccount).
+### Using kubectl with a GitLab integrated EKS cluster
+
+If you have [installed and configured](https://docs.aws.amazon.com/eks/latest/userguide/getting-started.html#get-started-kubectl)  `kubectl`  and you would like to manage your cluster with it, here is one way to configure AWS CLI:
+
+1. On the IAM role you created above (to be used by GitLab to authenticate with AWS):
+   1. Go to the "Trust relationships" tab and click "Edit trust relationship"
+   1. Add you user ARN to the trust relationship (which will allow your user to be able to Assume that role). The Trust Relationship statement will look something like this:
+
+      ```
+      {
+        "Version": "2012-10-17",
+        "Statement": [
+        {
+          "Effect": "Allow",
+          "Principal": {
+            "AWS": [
+              "arn:aws:iam::855262394183:root",
+              "arn:aws:iam::244822794642:user/myusername-123abc45"
+            ]
+          },
+          "Action": "sts:AssumeRole",
+          "Condition": {
+            "StringEquals": {
+              "sts:ExternalId": "<the external ID used to create the role>"
+              }
+            }
+          }
+        ]
+      }
+      ```
+
+  1. Once this is done and saved, on the terminal where AWS CLI (and kubectl) is installed run the following command: `aws sts assume-role --role-arn <arn of the role> --role-session-name <some session name> --external-id <the external ID used to create the role>
+  1. Export the following credentials that are printed by the command above:
+
+      ```
+      export AWS_ACCESS_KEY_ID=<AccessKeyId>
+      export AWS_SECRET_ACCESS_KEY=<SecretAccessKey>
+      export AWS_SESSION_TOKEN=<SessionToken>
+      ```
+
+  1. Update your AWS EKS kubeconfig file: `aws eks --region <region of EKS cluster> update-kubeconfig --name <name of EKS cluster>`
+  1. You should now be able to use kubectl on that cluster.
+
 
 ### Cluster creation flow
 
