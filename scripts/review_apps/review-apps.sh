@@ -48,35 +48,7 @@ function delete_release() {
     return
   fi
 
-  # Check if helm release exists before attempting to delete
-  # There may be situation where k8s resources exist, but helm release does not,
-  # for example, following a failed helm install.
-  # In such cases, we still want to continue to clean up k8s resources.
-  if deploy_exists "${namespace}" "${release}"; then
-    helm_delete_release "${namespace}" "${release}"
-  fi
-  kubectl_cleanup_release "${namespace}" "${release}"
-}
-
-function helm_delete_release() {
-  local namespace="${1}"
-  local release="${2}"
-
-  echoinfo "Deleting Helm release '${release}'..." true
-
-  helm uninstall --namespace "${namespace}" "${release}"
-}
-
-function kubectl_cleanup_release() {
-  local namespace="${1}"
-  local release="${2}"
-
-  echoinfo "Deleting all K8s resources matching '${release}'..." true
-  kubectl --namespace "${namespace}" get ingress,svc,pdb,hpa,deploy,statefulset,job,pod,secret,configmap,pvc,clusterrole,clusterrolebinding,role,rolebinding,sa 2>&1 \
-    | grep "${release}" \
-    | awk '{print $1}' \
-    | xargs kubectl --namespace "${namespace}" delete --ignore-not-found \
-    || true
+  delete_k8s_release_namespace
 }
 
 function delete_failed_release() {
@@ -93,12 +65,18 @@ function delete_failed_release() {
   else
     # Cleanup and previous installs, as FAILED and PENDING_UPGRADE will cause errors with `upgrade`
     if previous_deploy_failed "${namespace}" "${release}" ; then
-      echoinfo "Review App deployment in bad state, cleaning up ${release}"
+      echoinfo "Review App deployment in bad state, cleaning up namespace ${release}"
       delete_release
     else
       echoinfo "Review App deployment in good state"
     fi
   fi
+}
+
+function delete_k8s_release_namespace() {
+  local namespace="${CI_ENVIRONMENT_SLUG}"
+
+  kubectl delete --namespace "${namespace}" --wait
 }
 
 function get_pod() {
