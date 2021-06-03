@@ -576,7 +576,6 @@ profile increases as the number of tests increases.
 |[`FUZZAPI_OVERRIDES_ENV`](#overrides)                        | JSON string containing headers to override. |
 |[`FUZZAPI_OVERRIDES_CMD`](#overrides)                        | Overrides command. |
 |[`FUZZAPI_OVERRIDES_INTERVAL`](#overrides)                   | How often to run overrides command in seconds. Defaults to `0` (once). |
-|[`FUZZAPI_EXCLUDE_PATHS`](#exclude-paths)                    | Exclude path from fuzzing. |
 |[`FUZZAPI_HTTP_USERNAME`](#http-basic-authentication)        | Username for HTTP authentication. |
 |[`FUZZAPI_HTTP_PASSWORD`](#http-basic-authentication)        | Password for HTTP authentication. |
 
