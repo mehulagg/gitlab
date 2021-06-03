@@ -150,4 +150,36 @@ RSpec.describe "Admin views license" do
       end
     end
   end
+
+  shared_examples 'a visible alert' do
+    it 'displays an alert' do
+      expect(page).to have_selector('[data-testid="qrtly-reconciliation-alert"]')
+    end
+  end
+
+  shared_examples 'a hidden alert' do
+    it 'does not display an alert' do
+      expect(page).not_to have_selector('[data-testid="qrtly-reconciliation-alert"]')
+    end
+  end
+
+  context 'qrtly reconciliation alert', :js do
+    context 'on dotcom' do
+      before do
+        allow(Gitlab).to receive(:com?).and_return(true)
+        visit(admin_license_path)
+      end
+
+      it_behaves_like 'a hidden alert'
+    end
+
+    context 'on self-managed' do
+      before do
+        allow(Gitlab).to receive(:ee?).and_return(true)
+        visit(admin_license_path)
+      end
+
+      it_behaves_like 'a visible alert'
+    end
+  end
 end
