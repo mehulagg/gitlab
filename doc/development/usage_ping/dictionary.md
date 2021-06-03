@@ -1296,15 +1296,15 @@ Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.groups_datadog_active`
 
-Missing description
+Count of groups with active integrations for Datadog
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216182549_groups_datadog_active.yml)
 
-Group: ``
+Group: `group::ecosystem`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.groups_discord_active`
 
@@ -1344,15 +1344,15 @@ Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.groups_ewm_active`
 
-Missing description
+Count of groups with active integrations for EWM
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216182616_groups_ewm_active.yml)
 
-Group: ``
+Group: `group::ecosystem`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.groups_external_wiki_active`
 
@@ -1512,15 +1512,15 @@ Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.groups_inheriting_datadog_active`
 
-Missing description
+Count of active groups inheriting integrations for Datadog
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216182557_groups_inheriting_datadog_active.yml)
 
-Group: ``
+Group: `group::ecosystem`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.groups_inheriting_discord_active`
 
@@ -1560,15 +1560,15 @@ Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.groups_inheriting_ewm_active`
 
-Missing description
+Count of active groups inheriting integrations for EWM
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216182623_groups_inheriting_ewm_active.yml)
 
-Group: ``
+Group: `group::ecosystem`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.groups_inheriting_external_wiki_active`
 
@@ -1701,30 +1701,6 @@ Group: `group::ecosystem`
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
-
-### `counts.groups_inheriting_mock_ci_active`
-
-Missing description
-
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216182732_groups_inheriting_mock_ci_active.yml)
-
-Group: ``
-
-Status: `data_available`
-
-Tiers: `free`
-
-### `counts.groups_inheriting_mock_monitoring_active`
-
-Missing description
-
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216182743_groups_inheriting_mock_monitoring_active.yml)
-
-Group: ``
-
-Status: `data_available`
-
-Tiers: `free`
 
 ### `counts.groups_inheriting_packagist_active`
 
@@ -1941,30 +1917,6 @@ Group: `group::ecosystem`
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
-
-### `counts.groups_mock_ci_active`
-
-Missing description
-
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216182724_groups_mock_ci_active.yml)
-
-Group: ``
-
-Status: `data_available`
-
-Tiers: `free`
-
-### `counts.groups_mock_monitoring_active`
-
-Missing description
-
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216182736_groups_mock_monitoring_active.yml)
-
-Group: ``
-
-Status: `data_available`
-
-Tiers: `free`
 
 ### `counts.groups_packagist_active`
 
@@ -2652,15 +2604,15 @@ Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.instances_datadog_active`
 
-Missing description
+Count of active instance-level integrations for Datadog
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216182553_instances_datadog_active.yml)
 
-Group: ``
+Group: `group::ecosystem`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.instances_discord_active`
 
@@ -2700,15 +2652,15 @@ Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.instances_ewm_active`
 
-Missing description
+Count of active instance-level integrations for EWM
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216182620_instances_ewm_active.yml)
 
-Group: ``
+Group: `group::ecosystem`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.instances_external_wiki_active`
 
@@ -2841,30 +2793,6 @@ Group: `group::ecosystem`
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
-
-### `counts.instances_mock_ci_active`
-
-Missing description
-
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216182728_instances_mock_ci_active.yml)
-
-Group: ``
-
-Status: `data_available`
-
-Tiers: `free`
-
-### `counts.instances_mock_monitoring_active`
-
-Missing description
-
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216182739_instances_mock_monitoring_active.yml)
-
-Group: ``
-
-Status: `data_available`
-
-Tiers: `free`
 
 ### `counts.instances_packagist_active`
 
@@ -4308,15 +4236,15 @@ Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.projects_datadog_active`
 
-Missing description
+Count of projects with active integrations for Datadog
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216182547_projects_datadog_active.yml)
 
-Group: ``
+Group: `group::ecosystem`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.projects_discord_active`
 
@@ -4356,15 +4284,15 @@ Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.projects_ewm_active`
 
-Missing description
+Count of projects with active integrations for EWM
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216182614_projects_ewm_active.yml)
 
-Group: ``
+Group: `group::ecosystem`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.projects_external_wiki_active`
 
@@ -4536,15 +4464,15 @@ Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.projects_inheriting_datadog_active`
 
-Missing description
+Count of active projects inheriting integrations for Datadog
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216182555_projects_inheriting_datadog_active.yml)
 
-Group: ``
+Group: `group::ecosystem`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.projects_inheriting_discord_active`
 
@@ -4584,15 +4512,15 @@ Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.projects_inheriting_ewm_active`
 
-Missing description
+Count of active projects inheriting integrations for EWM
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216182622_projects_inheriting_ewm_active.yml)
 
-Group: ``
+Group: `group::ecosystem`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.projects_inheriting_external_wiki_active`
 
@@ -4725,30 +4653,6 @@ Group: `group::ecosystem`
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
-
-### `counts.projects_inheriting_mock_ci_active`
-
-Missing description
-
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216182730_projects_inheriting_mock_ci_active.yml)
-
-Group: ``
-
-Status: `data_available`
-
-Tiers: `free`
-
-### `counts.projects_inheriting_mock_monitoring_active`
-
-Missing description
-
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216182741_projects_inheriting_mock_monitoring_active.yml)
-
-Group: ``
-
-Status: `data_available`
-
-Tiers: `free`
 
 ### `counts.projects_inheriting_packagist_active`
 
@@ -5037,30 +4941,6 @@ Group: `group::continuous integration`
 Status: `data_available`
 
 Tiers: `premium`, `ultimate`
-
-### `counts.projects_mock_ci_active`
-
-Missing description
-
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216182722_projects_mock_ci_active.yml)
-
-Group: ``
-
-Status: `data_available`
-
-Tiers: `free`
-
-### `counts.projects_mock_monitoring_active`
-
-Missing description
-
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216182734_projects_mock_monitoring_active.yml)
-
-Group: ``
-
-Status: `data_available`
-
-Tiers: `free`
 
 ### `counts.projects_packagist_active`
 
@@ -5988,15 +5868,15 @@ Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.templates_datadog_active`
 
-Missing description
+Count of active service templates for Datadog
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216182551_templates_datadog_active.yml)
 
-Group: ``
+Group: `group::ecosystem`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.templates_discord_active`
 
@@ -6036,15 +5916,15 @@ Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.templates_ewm_active`
 
-Missing description
+Count of active service templates for EWM
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216182618_templates_ewm_active.yml)
 
-Group: ``
+Group: `group::ecosystem`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.templates_external_wiki_active`
 
@@ -6177,30 +6057,6 @@ Group: `group::ecosystem`
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
-
-### `counts.templates_mock_ci_active`
-
-Missing description
-
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216182726_templates_mock_ci_active.yml)
-
-Group: ``
-
-Status: `data_available`
-
-Tiers: `free`
-
-### `counts.templates_mock_monitoring_active`
-
-Missing description
-
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216182738_templates_mock_monitoring_active.yml)
-
-Group: ``
-
-Status: `data_available`
-
-Tiers: `free`
 
 ### `counts.templates_packagist_active`
 
@@ -10404,123 +10260,123 @@ Tiers: `free`, `premium`, `ultimate`
 
 ### `redis_hll_counters.ecosystem.ecosystem_total_unique_counts_monthly`
 
-Missing description
+Count of Jira events by month
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216184957_ecosystem_total_unique_counts_monthly.yml)
 
-Group: ``
+Group: `group::ecosystem`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `redis_hll_counters.ecosystem.ecosystem_total_unique_counts_weekly`
 
-Missing description
+Count of Jira events by week
 
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_7d/20210216184955_ecosystem_total_unique_counts_weekly.yml)
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_7d/20210216184955_ecosystem_total_unique_counts_weekly.yml)
 
-Group: ``
+Group: `group::ecosystem`
 
 Status: `data_available`
 
-Tiers:
+Tiers: `free`, `premium`, `ultimate`
 
 ### `redis_hll_counters.ecosystem.i_ecosystem_jira_service_close_issue_monthly`
 
-Missing description
+Count of Jira issues closed by month
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216184941_i_ecosystem_jira_service_close_issue_monthly.yml)
 
-Group: ``
+Group: `group::ecosystem`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `redis_hll_counters.ecosystem.i_ecosystem_jira_service_close_issue_weekly`
 
-Missing description
+Count of Jira issues closed by week
 
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_7d/20210216184939_i_ecosystem_jira_service_close_issue_weekly.yml)
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_7d/20210216184939_i_ecosystem_jira_service_close_issue_weekly.yml)
 
-Group: ``
+Group: `group::ecosystem`
 
 Status: `data_available`
 
-Tiers:
+Tiers: `free`, `premium`, `ultimate`
 
 ### `redis_hll_counters.ecosystem.i_ecosystem_jira_service_create_issue_monthly`
 
-Missing description
+Count of Jira issues created by month
 
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216184953_i_ecosystem_jira_service_create_issue_monthly.yml)
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210216184953_i_ecosystem_jira_service_create_issue_monthly.yml)
 
-Group: ``
+Group: `group::ecosystem`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `premium`, `ultimate`
 
 ### `redis_hll_counters.ecosystem.i_ecosystem_jira_service_create_issue_weekly`
 
-Missing description
+Count of Jira issues created by week
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_7d/20210216184951_i_ecosystem_jira_service_create_issue_weekly.yml)
 
-Group: ``
+Group: `group::ecosystem`
 
 Status: `data_available`
 
-Tiers:
+Tiers: `premium`, `ultimate`
 
 ### `redis_hll_counters.ecosystem.i_ecosystem_jira_service_cross_reference_monthly`
 
-Missing description
+Count of Jira issues cross referenced by month
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216184945_i_ecosystem_jira_service_cross_reference_monthly.yml)
 
-Group: ``
+Group: `group::ecosystem`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `redis_hll_counters.ecosystem.i_ecosystem_jira_service_cross_reference_weekly`
 
-Missing description
+Count of Jira issues cross referenced by week
 
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_7d/20210216184943_i_ecosystem_jira_service_cross_reference_weekly.yml)
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_7d/20210216184943_i_ecosystem_jira_service_cross_reference_weekly.yml)
 
-Group: ``
+Group: `group::ecosystem`
 
 Status: `data_available`
 
-Tiers:
+Tiers: `free`, `premium`, `ultimate`
 
 ### `redis_hll_counters.ecosystem.i_ecosystem_jira_service_list_issues_monthly`
 
-Missing description
+Count of Jira Issue List visits by month
 
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216184949_i_ecosystem_jira_service_list_issues_monthly.yml)
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210216184949_i_ecosystem_jira_service_list_issues_monthly.yml)
 
-Group: ``
+Group: `group::ecosystem`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `premium`, `ultimate`
 
 ### `redis_hll_counters.ecosystem.i_ecosystem_jira_service_list_issues_weekly`
 
-Missing description
+Count of Jira Issue List visits by week
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_7d/20210216184947_i_ecosystem_jira_service_list_issues_weekly.yml)
 
-Group: ``
+Group: `group::ecosystem`
 
 Status: `data_available`
 
-Tiers:
+Tiers: `premium`, `ultimate`
 
 ### `redis_hll_counters.ecosystem.i_ecosystem_slack_service_confidential_issue_notification_monthly`
 
