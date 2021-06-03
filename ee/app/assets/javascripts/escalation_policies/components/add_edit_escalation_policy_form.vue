@@ -3,7 +3,7 @@ import { GlLink, GlForm, GlFormGroup, GlFormInput } from '@gitlab/ui';
 import { cloneDeep } from 'lodash';
 import createFlash from '~/flash';
 import { s__, __ } from '~/locale';
-import { defaultEscalationRule } from '../constants';
+import { defaultAction, defaultEscalationRule } from '../constants';
 import getOncallSchedulesQuery from '../graphql/queries/get_oncall_schedules.query.graphql';
 import EscalationRule from './escalation_rule.vue';
 
@@ -74,7 +74,25 @@ export default {
     },
   },
   mounted() {
-    this.rules.push({ ...cloneDeep(defaultEscalationRule), key: this.getUid() });
+    this.rules = this.form.rules.map((rule) => {
+      const {
+        status,
+        elapsedTimeSeconds,
+        oncallSchedule: { iid: oncallScheduleIid },
+      } = rule;
+
+      return {
+        status,
+        elapsedTimeSeconds,
+        action: defaultAction,
+        oncallScheduleIid,
+        key: this.getUid(),
+      };
+    });
+
+    if (!this.rules.length) {
+      this.rules.push({ ...cloneDeep(defaultEscalationRule), key: this.getUid() });
+    }
   },
   methods: {
     addRule() {

@@ -5,8 +5,10 @@ export const ALERT_STATUSES = {
   RESOLVED: s__('AlertManagement|Resolved'),
 };
 
+export const defaultAction = 'EMAIL_ONCALL_SCHEDULE_USER';
+
 export const ACTIONS = {
-  EMAIL_ONCALL_SCHEDULE_USER: s__('EscalationPolicies|Email on-call user in schedule'),
+  [defaultAction]: s__('EscalationPolicies|Email on-call user in schedule'),
 };
 
 export const defaultEscalationRule = {
@@ -17,3 +19,4 @@ export const defaultEscalationRule = {
 };
 
 export const addEscalationPolicyModalId = 'addEscalationPolicyModal';
+export const editEscalationPolicyModalId = 'editEscalationPolicyModal';

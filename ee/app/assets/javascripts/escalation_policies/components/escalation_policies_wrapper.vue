@@ -1,8 +1,11 @@
 <script>
 import { GlEmptyState, GlButton, GlModalDirective } from '@gitlab/ui';
+import * as Sentry from '@sentry/browser';
 import { s__ } from '~/locale';
 import { addEscalationPolicyModalId } from '../constants';
+import getEscalationPoliciesQuery from '../graphql/queries/get_escalatin_policies.query.graphql';
 import AddEscalationPolicyModal from './add_edit_escalation_policy_modal.vue';
+import EscalationPolicy from './escalation_policy.vue';
 
 export const i18n = {
   emptyState: {
@@ -21,17 +24,46 @@ export default {
     GlEmptyState,
     GlButton,
     AddEscalationPolicyModal,
+    EscalationPolicy,
   },
   directives: {
     GlModal: GlModalDirective,
   },
-  inject: ['emptyEscalationPoliciesSvgPath'],
+  inject: ['projectPath', 'emptyEscalationPoliciesSvgPath'],
+  data() {
+    return {
+      escalationPolicies: [],
+    };
+  },
+  apollo: {
+    escalationPolicies: {
+      query: getEscalationPoliciesQuery,
+      variables() {
+        return {
+          projectPath: this.projectPath,
+        };
+      },
+      update(data) {
+        const nodes = data.project?.incidentManagementEscalationPolicies?.nodes ?? [];
+
+        return nodes;
+      },
+      error(error) {
+        Sentry.captureException(error);
+      },
+    },
+  },
 };
 </script>
 
 <template>
   <div>
+    <template v-if="escalationPolicies.length">
+      <escalation-policy v-for="policy in escalationPolicies" :key="policy.id" :policy="policy" />
+    </template>
+
     <gl-empty-state
+      v-else
       :title="$options.i18n.emptyState.title"
       :description="$options.i18n.emptyState.description"
       :svg-path="emptyEscalationPoliciesSvgPath"
@@ -42,6 +74,6 @@ export default {
         </gl-button>
       </template>
     </gl-empty-state>
-    <add-escalation-policy-modal />
+    <add-escalation-policy-modal :modal-id="$options.addEscalationPolicyModalId" />
   </div>
 </template>

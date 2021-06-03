@@ -2,8 +2,8 @@
 import { GlModal, GlAlert } from '@gitlab/ui';
 import { set } from 'lodash';
 import { s__, __ } from '~/locale';
-import { addEscalationPolicyModalId } from '../constants';
 import createEscalationPolicyMutation from '../graphql/mutations/create_escalation_policy.mutation.graphql';
+import updateEscalationPolicyMutation from '../graphql/mutations/update_escalation_policy.mutation.graphql';
 import { isNameFieldValid, getRulesValidationState } from '../utils';
 import AddEditEscalationPolicyForm from './add_edit_escalation_policy_form.vue';
 
@@ -15,7 +15,6 @@ export const i18n = {
 
 export default {
   i18n,
-  addEscalationPolicyModalId,
   components: {
     GlModal,
     GlAlert,
@@ -28,6 +27,15 @@ export default {
       required: false,
       default: () => ({}),
     },
+    isEditMode: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
+    modalId: {
+      type: String,
+      required: true,
+    },
   },
   data() {
     return {
@@ -35,7 +43,7 @@ export default {
       form: {
         name: this.escalationPolicy.name,
         description: this.escalationPolicy.description,
-        rules: [],
+        rules: this.escalationPolicy.rules,
       },
       validationState: {
         name: null,
@@ -45,10 +53,13 @@ export default {
     };
   },
   computed: {
+    title() {
+      return this.isEditMode ? i18n.editEscalationPolicy : i18n.addEscalationPolicy;
+    },
     actionsProps() {
       return {
         primary: {
-          text: i18n.addEscalationPolicy,
+          text: this.title,
           attributes: [
             { variant: 'info' },
             { loading: this.loading },
@@ -110,6 +121,41 @@ export default {
           this.loading = false;
         });
     },
+    updateEscalationPolicy() {
+      this.loading = true;
+      const { projectPath } = this;
+      this.$apollo
+        .mutate({
+          mutation: updateEscalationPolicyMutation,
+          variables: {
+            input: {
+              projectPath,
+              ...this.getRequestParams(),
+            },
+          },
+        })
+        .then(
+          ({
+            data: {
+              escalationPolicyUpdate: {
+                errors: [error],
+              },
+            },
+          }) => {
+            if (error) {
+              throw error;
+            }
+            this.$refs.addUpdateEscalationPolicyModal.hide();
+            this.resetForm();
+          },
+        )
+        .catch((error) => {
+          this.error = error;
+        })
+        .finally(() => {
+          this.loading = false;
+        });
+    },
     getRequestParams() {
       const rules = this.form.rules.map(({ status, elapsedTimeSeconds, oncallScheduleIid }) => ({
         status,
@@ -117,7 +163,8 @@ export default {
         oncallScheduleIid,
       }));
 
-      return { ...this.form, rules };
+      const id = this.isEditMode ? { id: this.escalationPolicy.id } : {};
+      return { ...this.form, ...id, rules };
     },
     validateForm(field) {
       if (field === 'name') {
@@ -150,11 +197,11 @@ export default {
   <gl-modal
     ref="addUpdateEscalationPolicyModal"
     class="escalation-policy-modal"
-    :modal-id="$options.addEscalationPolicyModalId"
-    :title="$options.i18n.addEscalationPolicy"
+    :modal-id="modalId"
+    :title="title"
     :action-primary="actionsProps.primary"
     :action-cancel="actionsProps.cancel"
-    @primary.prevent="createEscalationPolicy"
+    @primary.prevent="isEditMode ? updateEscalationPolicy() : createEscalationPolicy()"
     @canceled="resetForm"
     @close="resetForm"
   >

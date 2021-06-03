@@ -1,0 +1,18 @@
+mutation escalationPolicyUpdate($input: EscalationPolicyUpdateInput!) {
+  escalationPolicyUpdate(input: $input) {
+    escalationPolicy {
+      id
+      name
+      description
+      rules {
+        status
+        elapsedTimeSeconds
+        oncallSchedule {
+          iid
+          name
+        }
+      }
+    }
+    errors
+  }
+}
