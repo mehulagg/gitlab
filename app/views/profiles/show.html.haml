@@ -110,6 +110,7 @@
       - else
         = f.text_field :location, label: s_('Profiles|Location'), class: 'input-lg gl-form-input', placeholder: s_("Profiles|City, country")
       = f.text_field :job_title, class: 'input-md gl-form-input'
+      = f.text_field :pronouns, class: 'input-md gl-form-input'
       = f.text_field :organization, label: s_('Profiles|Organization'), class: 'input-md gl-form-input', help: s_("Profiles|Who you represent or work for")
       = f.text_area :bio, class: 'gl-form-input', label: s_('Profiles|Bio'), rows: 4, maxlength: 250, help: s_("Profiles|Tell us about yourself in fewer than 250 characters")
       %hr
