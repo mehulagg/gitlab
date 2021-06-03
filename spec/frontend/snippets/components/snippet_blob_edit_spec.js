@@ -125,11 +125,9 @@ describe('Snippet Blob Edit component', () => {
     it('should call flash', async () => {
       await waitForPromises();
 
-      expect(createFlash).toHaveBeenCalledWith(
-        {
-          message: "Can't fetch content for the blob: Error: Request failed with status code 500"
-        },
-      );
+      expect(createFlash).toHaveBeenCalledWith({
+        message: "Can't fetch content for the blob: Error: Request failed with status code 500",
+      });
     });
   });
 

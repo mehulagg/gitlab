@@ -81,6 +81,8 @@ Emoji.initEmojiMap()
       }
     });
   })
-  .catch(() => createFlash({
-  message: __('Failed to load emoji list.')
-}));
+  .catch(() =>
+    createFlash({
+      message: __('Failed to load emoji list.'),
+    }),
+  );

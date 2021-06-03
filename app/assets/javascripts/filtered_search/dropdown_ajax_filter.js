@@ -28,7 +28,7 @@ export default class DropdownAjaxFilter extends FilteredSearchDropdown {
       loadingTemplate: this.loadingTemplate,
       onError() {
         createFlash({
-          message: __('An error occurred fetching the dropdown data.')
+          message: __('An error occurred fetching the dropdown data.'),
         });
       },
     };

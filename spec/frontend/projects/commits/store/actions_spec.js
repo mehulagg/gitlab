@@ -40,7 +40,7 @@ describe('Project commits actions', () => {
 
       expect(createFlash).toHaveBeenCalledTimes(1);
       expect(createFlash).toHaveBeenCalledWith({
-        message: 'An error occurred fetching the project authors.'
+        message: 'An error occurred fetching the project authors.',
       });
     });
   });

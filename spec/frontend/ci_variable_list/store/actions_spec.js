@@ -241,7 +241,7 @@ describe('CI variable list store actions', () => {
 
       testAction(actions.fetchVariables, {}, state, [], [{ type: 'requestVariables' }], () => {
         expect(createFlash).toHaveBeenCalledWith({
-          message: 'There was an error fetching the variables.'
+          message: 'There was an error fetching the variables.',
         });
         done();
       });
@@ -280,11 +280,9 @@ describe('CI variable list store actions', () => {
         [],
         [{ type: 'requestEnvironments' }],
         () => {
-          expect(createFlash).toHaveBeenCalledWith(
-            {
-              message: 'There was an error fetching the environments information.'
-            },
-          );
+          expect(createFlash).toHaveBeenCalledWith({
+            message: 'There was an error fetching the environments information.',
+          });
           done();
         },
       );

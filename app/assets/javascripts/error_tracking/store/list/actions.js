@@ -34,7 +34,7 @@ export function startPolling({ state, commit, dispatch }) {
     errorCallback: () => {
       commit(types.SET_LOADING, false);
       createFlash({
-        message: __('Failed to load errors from Sentry.')
+        message: __('Failed to load errors from Sentry.'),
       });
     },
   });

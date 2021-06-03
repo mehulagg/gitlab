@@ -242,7 +242,7 @@ describe('Actions Package list store', () => {
       testAction(actions.requestDeletePackage, actionPayload, null, [], []).catch((e) => {
         expect(e).toEqual(new Error(MISSING_DELETE_PATH_ERROR));
         expect(createFlash).toHaveBeenCalledWith({
-          message: DELETE_PACKAGE_ERROR_MESSAGE
+          message: DELETE_PACKAGE_ERROR_MESSAGE,
         });
         done();
       });

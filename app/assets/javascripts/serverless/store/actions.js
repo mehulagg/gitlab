@@ -60,7 +60,7 @@ export const fetchFunctions = ({ dispatch }, { functionsPath }) => {
       if (data === TIMEOUT) {
         dispatch('receiveFunctionsTimeout');
         createFlash({
-          message: __('Loading functions timed out. Please reload the page to try again.')
+          message: __('Loading functions timed out. Please reload the page to try again.'),
         });
       } else if (data.functions !== null && data.functions.length) {
         dispatch('receiveFunctionsSuccess', data);
@@ -71,7 +71,7 @@ export const fetchFunctions = ({ dispatch }, { functionsPath }) => {
     .catch((error) => {
       dispatch('receiveFunctionsError', error);
       createFlash({
-        message: error
+        message: error,
       });
     });
 };
@@ -125,7 +125,7 @@ export const fetchMetrics = ({ dispatch }, { metricsPath, hasPrometheus }) => {
     .catch((error) => {
       dispatch('receiveMetricsError', error);
       createFlash({
-        message: error
+        message: error,
       });
     });
 };

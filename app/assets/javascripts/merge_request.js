@@ -36,13 +36,11 @@ function MergeRequest(opts) {
         document.querySelector('#task_status_short').innerText = result.task_status_short;
       },
       onError: () => {
-        createFlash(
-          {
-            message: __(
-              'Someone edited this merge request at the same time you did. Please refresh the page to see changes.',
-            )
-          },
-        );
+        createFlash({
+          message: __(
+            'Someone edited this merge request at the same time you did. Please refresh the page to see changes.',
+          ),
+        });
       },
     });
   }
@@ -96,7 +94,7 @@ MergeRequest.prototype.initMRBtnListeners = function () {
           .catch(() => {
             draftToggle.removeAttribute('disabled');
             createFlash({
-              message: __('Something went wrong. Please try again.')
+              message: __('Something went wrong. Please try again.'),
             });
           });
       });
@@ -175,7 +173,7 @@ MergeRequest.toggleDraftStatus = function (title, isReady) {
   if (isReady) {
     createFlash({
       message: __('The merge request can now be merged.'),
-      type: 'notice'
+      type: 'notice',
     });
   }
   const titleEl = document.querySelector('.merge-request .detail-page-description .title');

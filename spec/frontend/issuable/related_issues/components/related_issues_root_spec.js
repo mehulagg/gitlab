@@ -196,7 +196,7 @@ describe('RelatedIssuesRoot', () => {
 
         return waitForPromises().then(() => {
           expect(createFlash).toHaveBeenCalledWith({
-            message: message
+            message,
           });
         });
       });

@@ -13,7 +13,7 @@ export const fetchSummary = ({ state, commit, dispatch }) => {
     })
     .catch(() => {
       createFlash({
-        message: s__('TestReports|There was an error fetching the summary.')
+        message: s__('TestReports|There was an error fetching the summary.'),
       });
     })
     .finally(() => {
@@ -39,7 +39,7 @@ export const fetchTestSuite = ({ state, commit, dispatch }, index) => {
     .then(({ data }) => commit(types.SET_SUITE, { suite: data, index }))
     .catch(() => {
       createFlash({
-        message: s__('TestReports|There was an error fetching the test suite.')
+        message: s__('TestReports|There was an error fetching the test suite.'),
       });
     })
     .finally(() => {

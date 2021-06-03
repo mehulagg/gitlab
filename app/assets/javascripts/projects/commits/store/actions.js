@@ -14,7 +14,7 @@ export default {
   },
   receiveAuthorsError() {
     createFlash({
-      message: __('An error occurred fetching the project authors.')
+      message: __('An error occurred fetching the project authors.'),
     });
   },
   fetchAuthors({ dispatch, state }, author = null) {

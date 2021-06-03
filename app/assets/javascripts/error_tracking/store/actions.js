@@ -17,9 +17,11 @@ export const updateStatus = ({ commit }, { endpoint, redirectUrl, status }) =>
 
       return resp.data.result;
     })
-    .catch(() => createFlash({
-    message: __('Failed to update issue status')
-  }));
+    .catch(() =>
+      createFlash({
+        message: __('Failed to update issue status'),
+      }),
+    );
 
 export const updateResolveStatus = ({ commit, dispatch }, params) => {
   commit(types.SET_UPDATING_RESOLVE_STATUS, true);

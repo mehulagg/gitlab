@@ -43,7 +43,7 @@ export default {
         })
         .catch(() => {
           createFlash({
-            message: s__('MergeRequests|An error occurred while saving the draft comment.')
+            message: s__('MergeRequests|An error occurred while saving the draft comment.'),
           });
         });
     },
@@ -83,7 +83,7 @@ export default {
         })
         .catch(() => {
           createFlash({
-            message: s__('MergeRequests|An error occurred while saving the draft comment.')
+            message: s__('MergeRequests|An error occurred while saving the draft comment.'),
           });
         });
     },

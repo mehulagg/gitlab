@@ -75,23 +75,19 @@ const fetchReposFactory = ({ reposPath = isRequired() }) => ({ state, commit }) 
       if (hasRedirectInError(e)) {
         redirectToUrlInError(e);
       } else if (tooManyRequests(e)) {
-        createFlash(
-          {
-            message: sprintf(s__('ImportProjects|%{provider} rate limit exceeded. Try again later'), {
-              provider: capitalizeFirstCharacter(provider),
-            })
-          },
-        );
+        createFlash({
+          message: sprintf(s__('ImportProjects|%{provider} rate limit exceeded. Try again later'), {
+            provider: capitalizeFirstCharacter(provider),
+          }),
+        });
 
         commit(types.RECEIVE_REPOS_ERROR);
       } else {
-        createFlash(
-          {
-            message: sprintf(s__('ImportProjects|Requesting your %{provider} repositories failed'), {
-              provider,
-            })
-          },
-        );
+        createFlash({
+          message: sprintf(s__('ImportProjects|Requesting your %{provider} repositories failed'), {
+            provider,
+          }),
+        });
 
         commit(types.RECEIVE_REPOS_ERROR);
       }
@@ -131,7 +127,7 @@ const fetchImportFactory = (importPath = isRequired()) => ({ state, commit, gett
         : s__('ImportProjects|Importing the project failed');
 
       createFlash({
-        message: flashMessage
+        message: flashMessage,
       });
 
       commit(types.RECEIVE_IMPORT_ERROR, repoId);
@@ -156,7 +152,7 @@ export const fetchJobsFactory = (jobsPath = isRequired()) => ({ state, commit, d
         redirectToUrlInError(e);
       } else {
         createFlash({
-          message: s__('ImportProjects|Update of imported projects with realtime changes failed')
+          message: s__('ImportProjects|Update of imported projects with realtime changes failed'),
         });
       }
     },
@@ -184,7 +180,7 @@ const fetchNamespacesFactory = (namespacesPath = isRequired()) => ({ commit }) =
     )
     .catch(() => {
       createFlash({
-        message: s__('ImportProjects|Requesting namespaces failed')
+        message: s__('ImportProjects|Requesting namespaces failed'),
       });
 
       commit(types.RECEIVE_NAMESPACES_ERROR);

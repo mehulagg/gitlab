@@ -52,7 +52,7 @@ export default (endpoint, defaultBranch) => {
     })
     .catch(() =>
       createFlash({
-        message: __('Error fetching diverging counts for branches. Please try again.')
+        message: __('Error fetching diverging counts for branches. Please try again.'),
       }),
     );
 };

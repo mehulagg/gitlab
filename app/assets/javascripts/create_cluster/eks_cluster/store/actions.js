@@ -103,7 +103,7 @@ export const createClusterSuccess = (_, location) => {
 export const createClusterError = ({ commit }, error) => {
   commit(types.CREATE_CLUSTER_ERROR, error);
   createFlash({
-    message: getErrorMessage(error)
+    message: getErrorMessage(error),
   });
 };
 

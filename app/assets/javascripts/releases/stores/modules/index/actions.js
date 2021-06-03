@@ -58,7 +58,7 @@ export const fetchReleases = ({ dispatch, commit, state }, { before, after }) =>
 export const receiveReleasesError = ({ commit }) => {
   commit(types.RECEIVE_RELEASES_ERROR);
   createFlash({
-    message: __('An error occurred while fetching the releases. Please try again.')
+    message: __('An error occurred while fetching the releases. Please try again.'),
   });
 };
 

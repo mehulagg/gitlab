@@ -359,7 +359,7 @@ describe('EKS Cluster Store Actions', () => {
         { type: CREATE_CLUSTER_ERROR, payload },
       ]).then(() => {
         expect(createFlash).toHaveBeenCalledWith({
-          message: payload.name[0]
+          message: payload.name[0],
         });
       }));
   });

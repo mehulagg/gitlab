@@ -84,9 +84,11 @@ export default () => {
         initPopovers();
         initCodeQualityWalkthroughStep();
       })
-      .catch((e) => createFlash({
-      message: e
-    }));
+      .catch((e) =>
+        createFlash({
+          message: e,
+        }),
+      );
 
     cancelLink.on('click', () => {
       window.onbeforeunload = null;

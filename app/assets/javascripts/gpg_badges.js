@@ -16,9 +16,10 @@ export default class GpgBadges {
     badges.html('<span class="gl-spinner gl-spinner-orange gl-spinner-sm"></span>');
     badges.children().attr('aria-label', __('Loading'));
 
-    const displayError = () => createFlash({
-      message: __('An error occurred while loading commit signatures')
-    });
+    const displayError = () =>
+      createFlash({
+        message: __('An error occurred while loading commit signatures'),
+      });
 
     const endpoint = tag.data('signaturesPath');
     if (!endpoint) {

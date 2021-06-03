@@ -40,7 +40,7 @@ export const fetchRelease = async ({ commit, state }) => {
   } catch (error) {
     commit(types.RECEIVE_RELEASE_ERROR, error);
     createFlash({
-      message: s__('Release|Something went wrong while getting the release details.')
+      message: s__('Release|Something went wrong while getting the release details.'),
     });
   }
 };
@@ -127,7 +127,7 @@ export const createRelease = async ({ commit, dispatch, state, getters }) => {
   } catch (error) {
     commit(types.RECEIVE_SAVE_RELEASE_ERROR, error);
     createFlash({
-      message: s__('Release|Something went wrong while creating a new release.')
+      message: s__('Release|Something went wrong while creating a new release.'),
     });
   }
 };
@@ -219,7 +219,7 @@ export const updateRelease = async ({ commit, dispatch, state, getters }) => {
   } catch (error) {
     commit(types.RECEIVE_SAVE_RELEASE_ERROR, error);
     createFlash({
-      message: s__('Release|Something went wrong while saving the release details.')
+      message: s__('Release|Something went wrong while saving the release details.'),
     });
   }
 };

@@ -22,6 +22,6 @@ export const receiveStatisticsSuccess = ({ commit }, statistics) =>
 export const receiveStatisticsError = ({ commit }, error) => {
   commit(types.RECEIVE_STATISTICS_ERROR, error);
   createFlash({
-    message: s__('AdminDashboard|Error loading the statistics. Please try again')
+    message: s__('AdminDashboard|Error loading the statistics. Please try again'),
   });
 };

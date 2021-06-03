@@ -21,9 +21,11 @@ export default class EditBlob {
           this.editor.use(new MarkdownExtension());
           addEditorMarkdownListeners(this.editor);
         })
-        .catch((e) => createFlash({
-        message: `${BLOB_EDITOR_ERROR}: ${e}`
-      }));
+        .catch((e) =>
+          createFlash({
+            message: `${BLOB_EDITOR_ERROR}: ${e}`,
+          }),
+        );
     }
 
     this.initModePanesAndLinks();
@@ -96,9 +98,11 @@ export default class EditBlob {
           currentPane.empty().append(data);
           currentPane.renderGFM();
         })
-        .catch(() => createFlash({
-        message: BLOB_PREVIEW_ERROR
-      }));
+        .catch(() =>
+          createFlash({
+            message: BLOB_PREVIEW_ERROR,
+          }),
+        );
     }
 
     this.$toggleButton.show();

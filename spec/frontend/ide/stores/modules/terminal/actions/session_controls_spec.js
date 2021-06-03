@@ -90,7 +90,7 @@ describe('IDE store terminal session controls actions', () => {
       actions.receiveStartSessionError({ dispatch });
 
       expect(createFlash).toHaveBeenCalledWith({
-        message: messages.UNEXPECTED_ERROR_STARTING
+        message: messages.UNEXPECTED_ERROR_STARTING,
       });
     });
 
@@ -164,7 +164,7 @@ describe('IDE store terminal session controls actions', () => {
       actions.receiveStopSessionError({ dispatch });
 
       expect(createFlash).toHaveBeenCalledWith({
-        message: messages.UNEXPECTED_ERROR_STOPPING
+        message: messages.UNEXPECTED_ERROR_STOPPING,
       });
     });
 
