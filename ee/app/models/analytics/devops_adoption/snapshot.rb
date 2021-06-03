@@ -36,7 +36,15 @@ class Analytics::DevopsAdoption::Snapshot < ApplicationRecord
   scope :not_finalized, -> { where(arel_table[:recorded_at].lteq(arel_table[:end_time])) }
   scope :by_end_time, -> { order(end_time: :desc) }
 
+  scope :for_timespan, -> (after: nil, before: nil) {
+    result = self
+    result = result.where(arel_table[:end_time].gteq(after)) if after
+    result = result.where(arel_table[:end_time].lteq(before)) if before
+    result
+  }
+
   def start_time
     end_time.beginning_of_month
   end
+
 end

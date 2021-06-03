@@ -5150,6 +5150,29 @@ The edge type for [`DevopsAdoptionSegment`](#devopsadoptionsegment).
 | <a id="devopsadoptionsegmentedgecursor"></a>`cursor` | [`String!`](#string) | A cursor for use in pagination. |
 | <a id="devopsadoptionsegmentedgenode"></a>`node` | [`DevopsAdoptionSegment`](#devopsadoptionsegment) | The item at the end of the edge. |
 
+#### `DevopsAdoptionSnapshotConnection`
+
+The connection type for [`DevopsAdoptionSnapshot`](#devopsadoptionsnapshot).
+
+##### Fields
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| <a id="devopsadoptionsnapshotconnectionedges"></a>`edges` | [`[DevopsAdoptionSnapshotEdge]`](#devopsadoptionsnapshotedge) | A list of edges. |
+| <a id="devopsadoptionsnapshotconnectionnodes"></a>`nodes` | [`[DevopsAdoptionSnapshot]`](#devopsadoptionsnapshot) | A list of nodes. |
+| <a id="devopsadoptionsnapshotconnectionpageinfo"></a>`pageInfo` | [`PageInfo!`](#pageinfo) | Information to aid in pagination. |
+
+#### `DevopsAdoptionSnapshotEdge`
+
+The edge type for [`DevopsAdoptionSnapshot`](#devopsadoptionsnapshot).
+
+##### Fields
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| <a id="devopsadoptionsnapshotedgecursor"></a>`cursor` | [`String!`](#string) | A cursor for use in pagination. |
+| <a id="devopsadoptionsnapshotedgenode"></a>`node` | [`DevopsAdoptionSnapshot`](#devopsadoptionsnapshot) | The item at the end of the edge. |
+
 #### `DiscussionConnection`
 
 The connection type for [`Discussion`](#discussion).
@@ -8299,8 +8322,26 @@ Enabled namespace for DevopsAdoption.
 | ---- | ---- | ----------- |
 | <a id="devopsadoptionsegmentdisplaynamespace"></a>`displayNamespace` | [`Namespace`](#namespace) | Namespace where data should be displayed. |
 | <a id="devopsadoptionsegmentid"></a>`id` | [`ID!`](#id) | ID of the enabled namespace. |
-| <a id="devopsadoptionsegmentlatestsnapshot"></a>`latestSnapshot` | [`DevopsAdoptionSnapshot`](#devopsadoptionsnapshot) | The latest adoption metrics for the enabled namespace. |
 | <a id="devopsadoptionsegmentnamespace"></a>`namespace` | [`Namespace`](#namespace) | Namespace which should be calculated. |
+
+#### Fields with arguments
+
+##### `DevopsAdoptionSegment.snapshots`
+
+Data snapshots of the namespace.
+
+Returns [`DevopsAdoptionSnapshotConnection`](#devopsadoptionsnapshotconnection).
+
+This field returns a [connection](#connections). It accepts the
+four standard [pagination arguments](#connection-pagination-arguments):
+`before: String`, `after: String`, `first: Int`, `last: Int`.
+
+###### Arguments
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| <a id="devopsadoptionsegmentsnapshotsendtimeafter"></a>`endTimeAfter` | [`Time`](#time) | Filter by end time. |
+| <a id="devopsadoptionsegmentsnapshotsendtimebefore"></a>`endTimeBefore` | [`Time`](#time) | Filter by end time. |
 
 ### `DevopsAdoptionSnapshot`
 
