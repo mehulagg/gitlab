@@ -284,6 +284,19 @@ RSpec.describe API::Commits do
           end
         end
       end
+
+      context 'with the optional trailers parameter' do
+        it 'includes the Git trailers' do
+          get api("/projects/#{project_id}/repository/commits?trailers=true&per_page=100", current_user)
+
+          commit = json_response[-2]
+
+          expect(commit['id']).to eq('6d394385cf567f80a8fd85055db1ab4c5295806f')
+          expect(commit['trailers']).to eq(
+            'Signed-off-by' => 'Dmitriy Zaporozhets <dmitriy.zaporozhets@gmail.com>'
+          )
+        end
+      end
     end
   end
 
