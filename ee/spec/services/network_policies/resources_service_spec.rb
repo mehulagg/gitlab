@@ -56,7 +56,7 @@ RSpec.describe NetworkPolicies::ResourcesService do
       end
     end
 
-    context 'with Kubeclient::HttpError' do
+    context 'with Kubeclient::HttpError related to network policies' do
       before do
         allow(kubeclient).to receive(:get_network_policies).and_raise(Kubeclient::HttpError.new(500, 'system failure', nil))
       end
@@ -66,6 +66,20 @@ RSpec.describe NetworkPolicies::ResourcesService do
         expect(subject.http_status).to eq(:bad_request)
         expect(subject.message).not_to be_nil
         expect(subject.payload).to be_empty
+      end
+    end
+
+    context 'with Kubeclient::HttpError related to cilium network policies' do
+      before do
+        allow(kubeclient).to receive(:get_network_policies) { [policy.generate] }
+        allow(kubeclient).to receive(:get_cilium_network_policies).and_raise(Kubeclient::HttpError.new(400, 'not found', nil))
+      end
+
+      it 'returns error response' do
+        expect(subject).to be_error
+        expect(subject.http_status).to eq(:bad_request)
+        expect(subject.message).not_to be_nil
+        expect(subject.payload.first.as_json).to eq(policy.as_json)
       end
     end
 
