@@ -9502,7 +9502,7 @@ Represents a Group Membership.
 | <a id="groupmembergroup"></a>`group` | [`Group`](#group) | Group that a User is a member of. |
 | <a id="groupmemberid"></a>`id` | [`ID!`](#id) | ID of the member. |
 | <a id="groupmemberupdatedat"></a>`updatedAt` | [`Time`](#time) | Date and time the membership was last updated. |
-| <a id="groupmemberuser"></a>`user` | [`UserCore!`](#usercore) | User that is associated with the member object. |
+| <a id="groupmemberuser"></a>`user` | [`UserCore`](#usercore) | User that is associated with the member object. |
 | <a id="groupmemberuserpermissions"></a>`userPermissions` | [`GroupPermissions!`](#grouppermissions) | Permissions for the current user on the resource. |
 
 ### `GroupPermissions`
@@ -11917,7 +11917,7 @@ Represents a Project Membership.
 | <a id="projectmemberid"></a>`id` | [`ID!`](#id) | ID of the member. |
 | <a id="projectmemberproject"></a>`project` | [`Project`](#project) | Project that User is a member of. |
 | <a id="projectmemberupdatedat"></a>`updatedAt` | [`Time`](#time) | Date and time the membership was last updated. |
-| <a id="projectmemberuser"></a>`user` | [`UserCore!`](#usercore) | User that is associated with the member object. |
+| <a id="projectmemberuser"></a>`user` | [`UserCore`](#usercore) | User that is associated with the member object. |
 | <a id="projectmemberuserpermissions"></a>`userPermissions` | [`ProjectPermissions!`](#projectpermissions) | Permissions for the current user on the resource. |
 
 ### `ProjectPermissions`
@@ -15688,7 +15688,7 @@ Implementations:
 | <a id="memberinterfaceexpiresat"></a>`expiresAt` | [`Time`](#time) | Date and time the membership expires. |
 | <a id="memberinterfaceid"></a>`id` | [`ID!`](#id) | ID of the member. |
 | <a id="memberinterfaceupdatedat"></a>`updatedAt` | [`Time`](#time) | Date and time the membership was last updated. |
-| <a id="memberinterfaceuser"></a>`user` | [`UserCore!`](#usercore) | User that is associated with the member object. |
+| <a id="memberinterfaceuser"></a>`user` | [`UserCore`](#usercore) | User that is associated with the member object. |
 
 #### `Noteable`
 
