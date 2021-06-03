@@ -1,9 +1,9 @@
 ---
 key_path: reply_by_email_enabled
 description: Whether incoming email is setup
-product_section: growth
-product_stage: growth
-product_group: group::product intelligence
+product_section: dev
+product_stage: plan
+product_group: plan::project management
 product_category: collection
 value_type: boolean
 status: data_available
@@ -13,4 +13,3 @@ distribution:
 - ce
 tier:
 - free
-skip_validation: true
