@@ -1,16 +1,34 @@
 <script>
-import { GlSearchBoxByType, GlDropdown, GlDropdownItem, GlButton } from '@gitlab/ui';
+import {
+  GlSearchBoxByType,
+  GlDropdown,
+  GlDropdownItem,
+  GlButton,
+  GlModal,
+  GlSprintf,
+  GlModalDirective,
+} from '@gitlab/ui';
 import { mapActions, mapState, mapGetters } from 'vuex';
-import { __, sprintf } from '~/locale';
+import { s__, __, sprintf } from '~/locale';
 import { DEFAULT_SEARCH_DELAY, ACTION_TYPES, FILTER_STATES } from '../constants';
 
 export default {
   name: 'GeoReplicableFilterBar',
+  i18n: {
+    modalBody: s__(
+      'Geo|This will resync all %{replicableType}. It may take some time to complete. Are you sure you want to continue?',
+    ),
+  },
   components: {
     GlSearchBoxByType,
     GlDropdown,
     GlDropdownItem,
     GlButton,
+    GlModal,
+    GlSprintf,
+  },
+  directives: {
+    GlModalDirective,
   },
   computed: {
     ...mapState(['currentFilterIndex', 'filterOptions', 'searchFilter']),
@@ -40,6 +58,13 @@ export default {
   actionTypes: ACTION_TYPES,
   filterStates: FILTER_STATES,
   debounce: DEFAULT_SEARCH_DELAY,
+  MODAL_PRIMARY_ACTION: {
+    text: s__('Geo|Resync all'),
+  },
+  MODAL_CANCEL_ACTION: {
+    text: __('Cancel'),
+  },
+  MODAL_ID: 'resync-all-geo',
 };
 </script>
 
@@ -71,10 +96,20 @@ export default {
         </div>
       </div>
       <div class="col col-sm-5 d-flex justify-content-end my-1 my-sm-0 w-100">
-        <gl-button @click="initiateAllReplicableSyncs($options.actionTypes.RESYNC)">{{
-          __('Resync all')
-        }}</gl-button>
+        <gl-button v-gl-modal-directive="$options.MODAL_ID">{{ __('Resync all') }}</gl-button>
       </div>
     </div>
+    <gl-modal
+      :modal-id="$options.MODAL_ID"
+      :title="resyncText"
+      :action-primary="$options.MODAL_PRIMARY_ACTION"
+      :action-cancel="$options.MODAL_CANCEL_ACTION"
+      size="sm"
+      @primary="initiateAllReplicableSyncs($options.actionTypes.RESYNC)"
+    >
+      <gl-sprintf :message="$options.i18n.modalBody">
+        <template #replicableType>{{ replicableTypeName }}</template>
+      </gl-sprintf>
+    </gl-modal>
   </nav>
 </template>
