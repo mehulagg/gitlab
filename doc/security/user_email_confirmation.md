@@ -14,6 +14,10 @@ they confirm their email address.
 In **Admin Area > Settings** (`/admin/application_settings/general`), go to the section
 **Sign-up Restrictions** and look for the **Send confirmation email on sign-up** option.
 
+## Confirmation token expiry
+
+By default, a user can confirm their account within 24 hours after the confirmation email was sent. Beyond this time frame, the confirmation token will be invalidated.
+
 <!-- ## Troubleshooting
 
 Include any troubleshooting steps that you can foresee. If you know beforehand what issues
