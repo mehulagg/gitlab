@@ -1,7 +1,7 @@
 - page_title _('License')
 
-- if Gitlab.ee? && !Gitlab.com?
-  #js-qrtly-reconciliation-alert{ data: { date: Date.current } }
+- if display_upcoming_reconciliation_alert?
+  #js-qrtly-reconciliation-alert{ data: upcoming_reconciliation_hash }
 
 %h3.page-title
   = _('Your License')

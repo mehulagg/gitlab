@@ -9,8 +9,8 @@
       dismissible: true.to_s } }
       = notice[:message].html_safe
 
-- if Gitlab.ee? && !Gitlab.com?
-  #js-qrtly-reconciliation-alert{ data: { date: Date.current } }
+- if Gitlab.ee? && !Gitlab.com? && display_upcoming_reconciliation_alert?
+  #js-qrtly-reconciliation-alert{ data: upcoming_reconciliation_hash }
 
 - if @license.present?
   .license-panel.gl-mt-5

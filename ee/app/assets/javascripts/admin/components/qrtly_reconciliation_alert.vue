@@ -1,5 +1,7 @@
 <script>
 import { GlAlert, GlSprintf } from '@gitlab/ui';
+import Cookie from 'js-cookie';
+import { formatDate, getDayDifference } from '~/lib/utils/datetime_utility';
 import { s__, __, sprintf } from '~/locale';
 
 const i18n = {
@@ -27,10 +29,21 @@ export default {
       type: Date,
       required: true,
     },
+    cookieId: {
+      type: String,
+      required: true,
+    },
   },
   computed: {
     alertTitle() {
       return sprintf(this.$options.i18n.title, { qrtlyDate: this.date });
+    },
+  },
+  methods: {
+    handleDismiss() {
+      Cookie.set(this.cookieKey, true, {
+        expires: getDayDifference(new Date(), new Date(this.date)),
+      });
     },
   },
   i18n,
@@ -40,12 +53,14 @@ export default {
 
 <template>
   <gl-alert
+    ref="alert"
     data-testid="qrtly-reconciliation-alert"
     variant="info"
     :title="alertTitle"
     :primary-button-text="$options.i18n.learnMore"
     :secondary-button-text="$options.i18n.contactSupport"
     :secondary-button-link="$options.CONTACT_SUPPORT_URL"
+    @dismiss="handleDismiss"
   >
     <gl-sprintf :message="$options.i18n.description">
       <template #qrtlyDate>
