@@ -38,7 +38,7 @@ You don't need a GitLab account to use Git locally, but for the purpose of this 
 recommend registering and signing into your account before starting. Some commands need a
 connection between the files on your computer and their version on a remote server.
 
-You must also open a [terminal](#terminal) and have
+You must also open a [terminal](#open-a-terminal) and have
 [Git installed](#install-git) on your computer.
 
 ### Open a terminal
@@ -132,7 +132,7 @@ in the [Git Credentials documentation](https://git-scm.com/book/en/v2/Git-Tools-
 ## Git terminology
 
 If you're familiar with Git terminology, you may want to jump directly
-into the [basic commands](#basic-git-commands).
+into [setting up a repository](#set-up-a-repository).
 
 ### Repository
 
@@ -201,8 +201,8 @@ it into your namespace to make it available under `https://gitlab.com/<your-name
 ### Clone a repository
 
 To start working locally on an existing remote repository, clone it with the
-command `git clone <repository path>`. You can either clone it using [HTTPS](#clone-via-https)
-or [SSH](#clone-via-ssh), according to your preferred [authentication method](#git-authentication-methods).
+command `git clone <repository path>`. You can either clone it using [HTTPS](#clone-using-https)
+or [SSH](#clone-using-ssh), according to your preferred [authentication method](#git-authentication-methods).
 
 You can find both paths (HTTPS and SSH) by navigating to your project's landing page
 and clicking **Clone**. GitLab prompts you with both paths, from which you can copy
