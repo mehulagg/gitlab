@@ -23,9 +23,16 @@ module QA
         #
         # @return [void]
         def configure_allure
+          env_matcher = /^(?<env>\w{2}:\S+)/
+
           AllureRspec.configure do |config|
             config.results_directory = 'tmp/allure-results'
             config.clean_results_directory = true
+
+            # Set custom environmen name to separate same specs executed on different environments
+            if ENV["CI"] && ENV["CI_JOB_NAME"].match?(env_matcher)
+              config.environment = ENV["CI_JOB_NAME"].match(env_matcher).named_captures[:env]
+            end
           end
         end
 
