@@ -89,7 +89,7 @@ The above example:
   GitLab 12.3 or earlier, you must [add the configuration manually](#gitlab-versions-132-and-earlier).
 
 The template uses the [GitLab plugin for sitespeed.io](https://gitlab.com/gitlab-org/gl-performance),
-and it saves the full HTML sitespeed.io report as a [Browser Performance report artifact](../../../ci/yaml/README.md#artifactsreportsperformance)
+and it saves the full HTML sitespeed.io report as a [Browser Performance report artifact](../../../ci/yaml/README.md#artifactsreportsbrowser_performance)
 that you can later download and analyze. This implementation always takes the latest
 Browser Performance artifact available. If [GitLab Pages](../pages/index.md) is enabled,
 you can view the report directly in your browser.
