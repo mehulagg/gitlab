@@ -1,7 +1,7 @@
 import MockAdapter from 'axios-mock-adapter';
 import { backoffMockImplementation } from 'helpers/backoff_helper';
 import testAction from 'helpers/vuex_action_helper';
-import { deprecatedCreateFlash as createFlash } from '~/flash';
+import createFlash from '~/flash';
 import axios from '~/lib/utils/axios_utils';
 import * as commonUtils from '~/lib/utils/common_utils';
 import statusCodes from '~/lib/utils/http_status';
@@ -258,7 +258,9 @@ describe('Monitoring store actions', () => {
               new Error('Request failed with status code 500'),
             );
             expect(createFlash).toHaveBeenCalledWith(
-              expect.stringContaining(mockDashboardsErrorResponse.message),
+              {
+                message: expect.stringContaining(mockDashboardsErrorResponse.message)
+              },
             );
             done();
           })
@@ -1149,7 +1151,9 @@ describe('Monitoring store actions', () => {
         () => {
           expect(createFlash).toHaveBeenCalledTimes(1);
           expect(createFlash).toHaveBeenCalledWith(
-            expect.stringContaining('error getting options for variable "label1"'),
+            {
+              message: expect.stringContaining('error getting options for variable "label1"')
+            },
           );
         },
       );

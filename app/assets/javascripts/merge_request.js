@@ -1,7 +1,7 @@
 /* eslint-disable func-names, no-underscore-dangle, consistent-return */
 
 import $ from 'jquery';
-import { deprecatedCreateFlash as createFlash } from '~/flash';
+import createFlash from '~/flash';
 import { __ } from '~/locale';
 import eventHub from '~/vue_merge_request_widget/event_hub';
 import axios from './lib/utils/axios_utils';
@@ -37,9 +37,11 @@ function MergeRequest(opts) {
       },
       onError: () => {
         createFlash(
-          __(
-            'Someone edited this merge request at the same time you did. Please refresh the page to see changes.',
-          ),
+          {
+            message: __(
+              'Someone edited this merge request at the same time you did. Please refresh the page to see changes.',
+            )
+          },
         );
       },
     });
@@ -93,7 +95,9 @@ MergeRequest.prototype.initMRBtnListeners = function () {
           })
           .catch(() => {
             draftToggle.removeAttribute('disabled');
-            createFlash(__('Something went wrong. Please try again.'));
+            createFlash({
+              message: __('Something went wrong. Please try again.')
+            });
           });
       });
     });
@@ -169,7 +173,10 @@ MergeRequest.hideCloseButton = function () {
 
 MergeRequest.toggleDraftStatus = function (title, isReady) {
   if (isReady) {
-    createFlash(__('The merge request can now be merged.'), 'notice');
+    createFlash({
+      message: __('The merge request can now be merged.'),
+      type: 'notice'
+    });
   }
   const titleEl = document.querySelector('.merge-request .detail-page-description .title');
 
