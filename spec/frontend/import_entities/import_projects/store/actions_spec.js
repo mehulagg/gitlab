@@ -169,7 +169,7 @@ describe('import_projects store actions', () => {
         );
 
         expect(createFlash).toHaveBeenCalledWith({
-          message: 'Provider rate limit exceeded. Try again later'
+          message: 'Provider rate limit exceeded. Try again later',
         });
       });
     });
@@ -248,7 +248,7 @@ describe('import_projects store actions', () => {
       );
 
       expect(createFlash).toHaveBeenCalledWith({
-        message: 'Importing the project failed'
+        message: 'Importing the project failed',
       });
     });
 
@@ -271,7 +271,7 @@ describe('import_projects store actions', () => {
       );
 
       expect(createFlash).toHaveBeenCalledWith({
-        message: `Importing the project failed: ${ERROR_MESSAGE}`
+        message: `Importing the project failed: ${ERROR_MESSAGE}`,
       });
     });
   });
@@ -372,7 +372,7 @@ describe('import_projects store actions', () => {
       );
 
       expect(createFlash).toHaveBeenCalledWith({
-        message: 'Requesting namespaces failed'
+        message: 'Requesting namespaces failed',
       });
     });
   });

@@ -188,7 +188,7 @@ describe('new file modal component', () => {
         parent: expect.anything(),
         actionConfig: null,
         fadeTransition: false,
-        addBodyClass: true
+        addBodyClass: true,
       });
     });
 

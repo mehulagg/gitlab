@@ -189,11 +189,9 @@ describe('deploy freeze store actions', () => {
         [{ type: types.REQUEST_FREEZE_PERIODS }],
         [],
         () =>
-          expect(createFlash).toHaveBeenCalledWith(
-            {
-              message: 'There was an error fetching the deploy freezes.'
-            },
-          ),
+          expect(createFlash).toHaveBeenCalledWith({
+            message: 'There was an error fetching the deploy freezes.',
+          }),
       );
     });
   });

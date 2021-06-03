@@ -257,11 +257,9 @@ describe('Monitoring store actions', () => {
               'receiveMetricsDashboardFailure',
               new Error('Request failed with status code 500'),
             );
-            expect(createFlash).toHaveBeenCalledWith(
-              {
-                message: expect.stringContaining(mockDashboardsErrorResponse.message)
-              },
-            );
+            expect(createFlash).toHaveBeenCalledWith({
+              message: expect.stringContaining(mockDashboardsErrorResponse.message),
+            });
             done();
           })
           .catch(done.fail);
@@ -1150,11 +1148,9 @@ describe('Monitoring store actions', () => {
       return testAction(fetchVariableMetricLabelValues, { defaultQueryParams }, state, [], []).then(
         () => {
           expect(createFlash).toHaveBeenCalledTimes(1);
-          expect(createFlash).toHaveBeenCalledWith(
-            {
-              message: expect.stringContaining('error getting options for variable "label1"')
-            },
-          );
+          expect(createFlash).toHaveBeenCalledWith({
+            message: expect.stringContaining('error getting options for variable "label1"'),
+          });
         },
       );
     });

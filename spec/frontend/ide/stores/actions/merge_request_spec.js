@@ -563,7 +563,7 @@ describe('IDE store merge request actions', () => {
       openMergeRequest(store, mr)
         .catch(() => {
           expect(createFlash).toHaveBeenCalledWith({
-            message: expect.any(String)
+            message: expect.any(String),
           });
         })
         .then(done)

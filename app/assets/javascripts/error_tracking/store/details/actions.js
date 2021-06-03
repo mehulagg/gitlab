@@ -27,7 +27,7 @@ export function startPollingStacktrace({ commit }, endpoint) {
     errorCallback: () => {
       commit(types.SET_LOADING_STACKTRACE, false);
       createFlash({
-        message: __('Failed to load stacktrace.')
+        message: __('Failed to load stacktrace.'),
       });
     },
   });

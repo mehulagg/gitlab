@@ -49,7 +49,7 @@ export const addVariable = ({ state, dispatch }) => {
     })
     .catch((error) => {
       createFlash({
-        message: error.response.data[0]
+        message: error.response.data[0],
       });
       dispatch('receiveAddVariableError', error);
     });
@@ -81,7 +81,7 @@ export const updateVariable = ({ state, dispatch }) => {
     })
     .catch((error) => {
       createFlash({
-        message: error.response.data[0]
+        message: error.response.data[0],
       });
       dispatch('receiveUpdateVariableError', error);
     });
@@ -110,7 +110,7 @@ export const fetchVariables = ({ dispatch, state }) => {
     })
     .catch(() => {
       createFlash({
-        message: __('There was an error fetching the variables.')
+        message: __('There was an error fetching the variables.'),
       });
     });
 };
@@ -140,7 +140,7 @@ export const deleteVariable = ({ dispatch, state }) => {
     })
     .catch((error) => {
       createFlash({
-        message: error.response.data[0]
+        message: error.response.data[0],
       });
       dispatch('receiveDeleteVariableError', error);
     });
@@ -163,7 +163,7 @@ export const fetchEnvironments = ({ dispatch, state }) => {
     })
     .catch(() => {
       createFlash({
-        message: __('There was an error fetching the environments information.')
+        message: __('There was an error fetching the environments information.'),
       });
     });
 };

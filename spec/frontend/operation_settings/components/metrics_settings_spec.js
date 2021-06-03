@@ -205,7 +205,7 @@ describe('operation settings external dashboard component', () => {
           .then(() =>
             expect(createFlash).toHaveBeenCalledWith({
               message: `There was an error saving your changes. ${message}`,
-              type: 'alert'
+              type: 'alert',
             }),
           );
       });

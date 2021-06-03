@@ -134,18 +134,16 @@ export const fetchDashboard = ({ state, commit, dispatch, getters }) => {
       if (state.showErrorBanner) {
         if (error.response.data && error.response.data.message) {
           const { message } = error.response.data;
-          createFlash(
-            {
-              message: sprintf(
-                s__('Metrics|There was an error while retrieving metrics. %{message}'),
-                { message },
-                false,
-              )
-            },
-          );
+          createFlash({
+            message: sprintf(
+              s__('Metrics|There was an error while retrieving metrics. %{message}'),
+              { message },
+              false,
+            ),
+          });
         } else {
           createFlash({
-            message: s__('Metrics|There was an error while retrieving metrics')
+            message: s__('Metrics|There was an error while retrieving metrics'),
           });
         }
       }
@@ -180,7 +178,7 @@ export const fetchDashboardData = ({ state, dispatch, getters }) => {
   if (!state.timeRange) {
     createFlash({
       message: s__(`Metrics|Invalid time range, please verify.`),
-      type: 'warning'
+      type: 'warning',
     });
     return Promise.reject();
   }
@@ -211,7 +209,7 @@ export const fetchDashboardData = ({ state, dispatch, getters }) => {
     .catch(() => {
       createFlash({
         message: s__(`Metrics|There was an error while retrieving metrics`),
-        type: 'warning'
+        type: 'warning',
       });
     });
 };
@@ -265,7 +263,7 @@ export const fetchDeploymentsData = ({ state, dispatch }) => {
     .then((response) => {
       if (!response || !response.deployments) {
         createFlash({
-          message: s__('Metrics|Unexpected deployment data response from prometheus endpoint')
+          message: s__('Metrics|Unexpected deployment data response from prometheus endpoint'),
         });
       }
 
@@ -275,7 +273,7 @@ export const fetchDeploymentsData = ({ state, dispatch }) => {
       Sentry.captureException(error);
       dispatch('receiveDeploymentsDataFailure');
       createFlash({
-        message: s__('Metrics|There was an error getting deployment information.')
+        message: s__('Metrics|There was an error getting deployment information.'),
       });
     });
 };
@@ -304,11 +302,11 @@ export const fetchEnvironmentsData = ({ state, dispatch }) => {
     )
     .then((environments) => {
       if (!environments) {
-        createFlash(
-          {
-            message: s__('Metrics|There was an error fetching the environments data, please try again')
-          },
-        );
+        createFlash({
+          message: s__(
+            'Metrics|There was an error fetching the environments data, please try again',
+          ),
+        });
       }
 
       dispatch('receiveEnvironmentsDataSuccess', environments);
@@ -317,7 +315,7 @@ export const fetchEnvironmentsData = ({ state, dispatch }) => {
       Sentry.captureException(err);
       dispatch('receiveEnvironmentsDataFailure');
       createFlash({
-        message: s__('Metrics|There was an error getting environments information.')
+        message: s__('Metrics|There was an error getting environments information.'),
       });
     });
 };
@@ -351,7 +349,7 @@ export const fetchAnnotations = ({ state, dispatch, getters }) => {
     .then((annotations) => {
       if (!annotations) {
         createFlash({
-          message: s__('Metrics|There was an error fetching annotations. Please try again.')
+          message: s__('Metrics|There was an error fetching annotations. Please try again.'),
         });
       }
 
@@ -361,7 +359,7 @@ export const fetchAnnotations = ({ state, dispatch, getters }) => {
       Sentry.captureException(err);
       dispatch('receiveAnnotationsFailure');
       createFlash({
-        message: s__('Metrics|There was an error getting annotations information.')
+        message: s__('Metrics|There was an error getting annotations information.'),
       });
     });
 };
@@ -399,11 +397,11 @@ export const fetchDashboardValidationWarnings = ({ state, dispatch, getters }) =
     .catch((err) => {
       Sentry.captureException(err);
       dispatch('receiveDashboardValidationWarningsFailure');
-      createFlash(
-        {
-          message: s__('Metrics|There was an error getting dashboard validation warnings information.')
-        },
-      );
+      createFlash({
+        message: s__(
+          'Metrics|There was an error getting dashboard validation warnings information.',
+        ),
+      });
     });
 };
 
@@ -504,13 +502,14 @@ export const fetchVariableMetricLabelValues = ({ state, commit }, { defaultQuery
           commit(types.UPDATE_VARIABLE_METRIC_LABEL_VALUES, { variable, label, data });
         })
         .catch(() => {
-          createFlash(
-            {
-              message: sprintf(s__('Metrics|There was an error getting options for variable "%{name}".'), {
+          createFlash({
+            message: sprintf(
+              s__('Metrics|There was an error getting options for variable "%{name}".'),
+              {
                 name: variable.name,
-              })
-            },
-          );
+              },
+            ),
+          });
         });
       optionsRequests.push(optionsRequest);
     }

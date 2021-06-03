@@ -116,7 +116,7 @@ describe('IDE store terminal session controls actions', () => {
       actions.receiveSessionStatusError({ dispatch });
 
       expect(createFlash).toHaveBeenCalledWith({
-        message: messages.UNEXPECTED_ERROR_STATUS
+        message: messages.UNEXPECTED_ERROR_STATUS,
       });
     });
 

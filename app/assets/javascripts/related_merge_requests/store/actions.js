@@ -30,7 +30,7 @@ export const fetchMergeRequests = ({ state, dispatch }) => {
     .catch(() => {
       dispatch('receiveDataError');
       createFlash({
-        message: s__('Something went wrong while fetching related merge requests.')
+        message: s__('Something went wrong while fetching related merge requests.'),
       });
     });
 };

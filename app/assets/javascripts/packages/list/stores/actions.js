@@ -44,7 +44,7 @@ export const requestPackagesList = ({ dispatch, state }, params = {}) => {
     })
     .catch(() => {
       createFlash({
-        message: FETCH_PACKAGES_LIST_ERROR_MESSAGE
+        message: FETCH_PACKAGES_LIST_ERROR_MESSAGE,
       });
     })
     .finally(() => {
@@ -55,7 +55,7 @@ export const requestPackagesList = ({ dispatch, state }, params = {}) => {
 export const requestDeletePackage = ({ dispatch, state }, { _links }) => {
   if (!_links || !_links.delete_api_path) {
     createFlash({
-      message: DELETE_PACKAGE_ERROR_MESSAGE
+      message: DELETE_PACKAGE_ERROR_MESSAGE,
     });
     const error = new Error(MISSING_DELETE_PATH_ERROR);
     return Promise.reject(error);
@@ -71,13 +71,13 @@ export const requestDeletePackage = ({ dispatch, state }, { _links }) => {
       dispatch('requestPackagesList', { page });
       createFlash({
         message: DELETE_PACKAGE_SUCCESS_MESSAGE,
-        type: 'success'
+        type: 'success',
       });
     })
     .catch(() => {
       dispatch('setLoading', false);
       createFlash({
-        message: DELETE_PACKAGE_ERROR_MESSAGE
+        message: DELETE_PACKAGE_ERROR_MESSAGE,
       });
     });
 };

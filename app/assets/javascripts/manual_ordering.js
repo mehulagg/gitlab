@@ -16,7 +16,7 @@ const updateIssue = (url, issueList, { move_before_id, move_after_id }) =>
     })
     .catch(() => {
       createFlash({
-        message: s__("ManualOrdering|Couldn't save the order of the issues")
+        message: s__("ManualOrdering|Couldn't save the order of the issues"),
       });
     });
 

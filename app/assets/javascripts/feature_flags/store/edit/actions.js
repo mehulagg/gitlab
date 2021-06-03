@@ -56,7 +56,7 @@ export const receiveFeatureFlagSuccess = ({ commit }, response) =>
 export const receiveFeatureFlagError = ({ commit }) => {
   commit(types.RECEIVE_FEATURE_FLAG_ERROR);
   createFlash({
-    message: __('Something went wrong on our end. Please try again!')
+    message: __('Something went wrong on our end. Please try again!'),
   });
 };
 

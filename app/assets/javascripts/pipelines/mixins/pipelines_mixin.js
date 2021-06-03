@@ -169,9 +169,11 @@ export default {
       this.service
         .postAction(endpoint)
         .then(() => this.updateTable())
-        .catch(() => createFlash({
-        message: __('An error occurred while making the request.')
-      }));
+        .catch(() =>
+          createFlash({
+            message: __('An error occurred while making the request.'),
+          }),
+        );
     },
 
     /**
@@ -191,11 +193,11 @@ export default {
         .runMRPipeline(options)
         .then(() => this.updateTable())
         .catch(() => {
-          createFlash(
-            {
-              message: __('An error occurred while trying to run a new pipeline for this merge request.')
-            },
-          );
+          createFlash({
+            message: __(
+              'An error occurred while trying to run a new pipeline for this merge request.',
+            ),
+          });
         })
         .finally(() => this.store.toggleIsRunningPipeline(false));
     },

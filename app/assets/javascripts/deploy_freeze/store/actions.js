@@ -27,7 +27,7 @@ const receiveFreezePeriod = (store, request) => {
     })
     .catch((error) => {
       createFlash({
-        message: __('Error: Unable to create deploy freeze')
+        message: __('Error: Unable to create deploy freeze'),
       });
       dispatch('receiveFreezePeriodError', error);
     });
@@ -61,7 +61,7 @@ export const fetchFreezePeriods = ({ commit, state }) => {
     })
     .catch(() => {
       createFlash({
-        message: __('There was an error fetching the deploy freezes.')
+        message: __('There was an error fetching the deploy freezes.'),
       });
     });
 };

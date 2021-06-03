@@ -101,7 +101,7 @@ describe('RelatedMergeRequest store actions', () => {
           () => {
             expect(createFlash).toHaveBeenCalledTimes(1);
             expect(createFlash).toHaveBeenCalledWith({
-              message: expect.stringMatching('Something went wrong')
+              message: expect.stringMatching('Something went wrong'),
             });
 
             done();

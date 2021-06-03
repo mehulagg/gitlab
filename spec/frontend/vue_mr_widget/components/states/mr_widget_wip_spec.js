@@ -65,7 +65,7 @@ describe('Wip', () => {
           expect(eventHub.$emit).toHaveBeenCalledWith('UpdateWidgetData', mrObj);
           expect(createFlash).toHaveBeenCalledWith({
             message: 'The merge request can now be merged.',
-            type: 'notice'
+            type: 'notice',
           });
           done();
         });

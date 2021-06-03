@@ -72,7 +72,7 @@ export const createContextCommits = ({ state }, { commits, forceReload = false }
     .catch(() => {
       if (forceReload) {
         createFlash({
-          message: s__('ContextCommits|Failed to create context commits. Please try again.')
+          message: s__('ContextCommits|Failed to create context commits. Please try again.'),
         });
       }
 
@@ -114,7 +114,7 @@ export const removeContextCommits = ({ state }, forceReload = false) =>
     .catch(() => {
       if (forceReload) {
         createFlash({
-          message: s__('ContextCommits|Failed to delete context commits. Please try again.')
+          message: s__('ContextCommits|Failed to delete context commits. Please try again.'),
         });
       }
 

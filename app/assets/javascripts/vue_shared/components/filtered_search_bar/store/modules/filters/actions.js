@@ -25,7 +25,7 @@ export function fetchBranches({ commit, state }, search = '') {
       const { status } = response;
       commit(types.RECEIVE_BRANCHES_ERROR, status);
       createFlash({
-        message: __('Failed to load branches. Please try again.')
+        message: __('Failed to load branches. Please try again.'),
       });
     });
 }
@@ -44,7 +44,7 @@ export const fetchMilestones = ({ commit, state }, search_title = '') => {
       const { status } = response;
       commit(types.RECEIVE_MILESTONES_ERROR, status);
       createFlash({
-        message: __('Failed to load milestones. Please try again.')
+        message: __('Failed to load milestones. Please try again.'),
       });
     });
 };
@@ -62,7 +62,7 @@ export const fetchLabels = ({ commit, state }, search = '') => {
       const { status } = response;
       commit(types.RECEIVE_LABELS_ERROR, status);
       createFlash({
-        message: __('Failed to load labels. Please try again.')
+        message: __('Failed to load labels. Please try again.'),
       });
     });
 };
@@ -87,7 +87,7 @@ function fetchUser(options = {}) {
       const { status } = response;
       commit(`RECEIVE_${action}_ERROR`, status);
       createFlash({
-        message: errorMessage
+        message: errorMessage,
       });
     });
 }

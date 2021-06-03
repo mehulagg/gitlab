@@ -96,7 +96,7 @@ export default class SingleFileDiff {
       })
       .catch(() => {
         createFlash({
-          message: __('An error occurred while retrieving diff')
+          message: __('An error occurred while retrieving diff'),
         });
       });
   }
