@@ -177,7 +177,7 @@ function check_kube_domain() {
 }
 
 function ensure_namespace() {
-  local namespace="${KUBE_NAMESPACE}"
+  local namespace="${1}"
 
   echoinfo "Ensuring the ${namespace} namespace exists..." true
 
@@ -323,6 +323,8 @@ function deploy() {
   gitaly_image_tag=$(parse_gitaly_image_tag)
   gitlab_shell_image_repository="${IMAGE_REPOSITORY}/gitlab-shell"
   gitlab_workhorse_image_repository="${IMAGE_REPOSITORY}/gitlab-workhorse-ee"
+
+  ensure_namespace namespace
 
   create_application_secret
 
