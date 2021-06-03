@@ -170,18 +170,18 @@ for example: <code>15 days</code>, <code>1 month</code>, <code>2 years</code>.
 
 As of June 22, 2020 the [value is set](../../gitlab_com/index.md#gitlab-cicd) to 3 months on GitLab.com. Jobs created before that date were archived after September 22, 2020.
 
-## Default CI configuration path
+## Default CI/CD configuration file
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/18073) in GitLab 12.5.
 
-The default CI configuration file path for new projects can be set in the Admin
-Area of your GitLab instance (`.gitlab-ci.yml` if not set):
+The default CI/CD configuration file and path for new projects can be set in the Admin Area
+of your GitLab instance (`.gitlab-ci.yml` if not set):
 
 1. Go to **Admin Area > Settings > CI/CD**.
-1. Input the new path in the **Default CI configuration path** field.
+1. Input the new file and path in the **Default CI/CD configuration file** field.
 1. Hit **Save changes** for the changes to take effect.
 
-It is also possible to specify a [custom CI/CD configuration path for a specific project](../../../ci/pipelines/settings.md#custom-cicd-configuration-path).
+It is also possible to specify a [custom CI/CD configuration file for a specific project](../../../ci/pipelines/settings.md#custom-cicd-configuration-file).
 
 ## Required pipeline configuration **(PREMIUM SELF)**
 
