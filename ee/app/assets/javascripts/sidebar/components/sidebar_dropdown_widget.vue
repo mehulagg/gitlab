@@ -270,6 +270,7 @@ export default {
     ref="editable"
     :title="attributeTypeTitle"
     :data-testid="`${issuableAttribute}-edit`"
+    :data-qa-selector="`${issuableAttribute}_container`"
     :tracking="tracking"
     :loading="updating || loading"
     @open="handleOpen"
@@ -288,7 +289,12 @@ export default {
         <span v-else-if="!currentAttribute" class="gl-text-gray-500">
           {{ $options.i18n.none }}
         </span>
-        <gl-link v-else class="gl-text-gray-900! gl-font-weight-bold" :href="attributeUrl">
+        <gl-link
+          v-else
+          class="gl-text-gray-900! gl-font-weight-bold"
+          :data-qa-selector="`${issuableAttribute}_link`"
+          :href="attributeUrl"
+        >
           {{ attributeTitle }}
         </gl-link>
       </div>

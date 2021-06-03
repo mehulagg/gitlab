@@ -107,7 +107,6 @@ export default {
           :issuable-type="issuableType"
           class="gl-mt-5"
           data-testid="iteration-edit"
-          data-qa-selector="iteration_container"
         />
       </div>
       <board-sidebar-time-tracker class="swimlanes-sidebar-time-tracker" />
