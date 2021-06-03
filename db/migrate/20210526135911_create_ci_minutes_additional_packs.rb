@@ -9,7 +9,7 @@ class CreateCiMinutesAdditionalPacks < ActiveRecord::Migration[6.0]
     create_table_with_constraints :ci_minutes_additional_packs, if_not_exists: true do |t|
       t.timestamps_with_timezone
       t.date        :expires_at, null: true
-      t.references  :namespace, index: true, null: false, foreign_key: { on_delete: :cascade }
+      t.references  :namespace, index: false, null: false, foreign_key: { on_delete: :cascade }
       t.integer     :number_of_minutes, null: false
       t.text        :purchase_xid, null: true
       t.text_limit  :purchase_xid, 32
