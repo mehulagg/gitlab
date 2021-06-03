@@ -902,7 +902,7 @@ When testing an API it can be useful to exclude certain paths. For example, you 
 
 To verify the paths are being excluded you can review the `Tested Operations` and `Excluded Operations` portion of the job output. You should not see any excluded paths listed under `Tested Operations`.
 
-```
+```plaintext
 2021-05-27 21:51:08 [INF] API Security: --[ Tested Operations ]-------------------------
 2021-05-27 21:51:08 [INF] API Security: 201 POST http://target:7777/api/users CREATED
 2021-05-27 21:51:08 [INF] API Security: ------------------------------------------------
