@@ -15544,7 +15544,7 @@ Whether incoming email is setup
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/settings/20210204124916_reply_by_email_enabled.yml)
 
-Group: `group::product intelligence`
+Group: `plan::project management`
 
 Status: `data_available`
 
