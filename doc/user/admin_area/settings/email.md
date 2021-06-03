@@ -13,6 +13,49 @@ You can customize some of the content in emails sent from your GitLab instance.
 
 The logo in the header of some emails can be customized, see the [logo customization section](../appearance.md#navigation-bar).
 
+## Include author name in email notification email body **(PREMIUM SELF)**
+
+By default, GitLab overrides the email address in notification emails. Enable this option to instead
+include the author's email address for notification emails for issues, merge requests, or comments.
+
+To include the author's email address:
+
+1. Go to **Admin Area > Settings > Preferences** (`/admin/application_settings/preferences`).
+1. Expand the **Email** section.
+1. Select the **Include author name in email notification email body** checkbox.
+1. Select **Save changes**.
+
+## Enable multipart email **(PREMIUM SELF)**
+
+By default, GitLab sends email in plain text format only. Enable this option to instead send email
+in both multipart and plain text format.
+
+To select multipart email:
+
+1. Go to **Admin Area > Settings > Preferences** (`/admin/application_settings/preferences`).
+1. Expand the **Email** section.
+1. Select **Enable multipart email**.
+1. Select **Save changes**.
+
+## Custom hostname for private commit emails **(PREMIUM SELF)**
+
+> [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/22560) in GitLab 11.5.
+
+This configuration option sets the email hostname for [private commit emails](../../profile/index.md#use-an-automatically-generated-private-commit-email).
+ By default it is set to `users.noreply.YOUR_CONFIGURED_HOSTNAME`.
+
+To change the hostname used in private commit emails:
+
+1. Go to **Admin Area > Settings > Preferences** (`/admin/application_settings/preferences`).
+1. Expand the **Email** section.
+1. Enter the desired hostname in the **Custom hostname (for private commit emails)** field.
+1. Select **Save changes**.
+
+NOTE:
+After the hostname is configured, every private commit email using the previous hostname is not
+recognized by GitLab. This can directly conflict with certain [Push rules](../../../push_rules/push_rules.md) such as
+`Check whether author is a GitLab user` and `Check whether committer is the current authenticated user`.
+
 ## Custom additional text **(PREMIUM SELF)**
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/5031) in [GitLab Premium](https://about.gitlab.com/pricing/) 10.7.
@@ -24,25 +67,6 @@ legal/auditing/compliance reasons.
 1. Expand the **Email** section.
 1. Enter your text in the **Additional text** field.
 1. Click **Save**.
-
-## Custom hostname for private commit emails
-
-> [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/22560) in GitLab 11.5.
-
-This configuration option sets the email hostname for [private commit emails](../../profile/index.md#use-an-automatically-generated-private-commit-email).
- By default it is set to `users.noreply.YOUR_CONFIGURED_HOSTNAME`.
-
-In order to change this option:
-
-1. Go to **Admin Area > Settings > Preferences** (`/admin/application_settings/preferences`).
-1. Expand the **Email** section.
-1. Enter the desired hostname in the **Custom hostname (for private commit emails)** field.
-1. Select **Save changes**.
-
-NOTE:
-After the hostname gets configured, every private commit email using the previous hostname is not
-recognized by GitLab. This can directly conflict with certain [Push rules](../../../push_rules/push_rules.md) such as
-`Check whether author is a GitLab user` and `Check whether committer is the current authenticated user`.
 
 <!-- ## Troubleshooting
 
