@@ -201,7 +201,7 @@ Dangerfile @gl-quality/eng-prod
 [Templates]
 /lib/gitlab/ci/templates/ @nolith @shinya.maeda @matteeyah
 /lib/gitlab/ci/templates/Auto-DevOps.gitlab-ci.yml @DylanGriffith @mayra-cabrera @tkuah
-/lib/gitlab/ci/templates/Security/ @gitlab-org/secure/managers
+/lib/gitlab/ci/templates/Security/ @gonzoyumo @twoodham @sethgitlab @thiagocsf 
 /lib/gitlab/ci/templates/Security/Container-Scanning.*.yml @gitlab-org/protect/container-security-backend
 
 [Project Alias]
