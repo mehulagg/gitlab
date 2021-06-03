@@ -2,6 +2,7 @@
 import { GlButton, GlButtonGroup, GlTooltipDirective } from '@gitlab/ui';
 import { getIdFromGraphQLId } from '~/graphql_shared/utils';
 import { __ } from '~/locale';
+import deleteRunnerMutation from '../../graphql/delete_runner.mutation.graphql';
 import updateRunnerMutation from '../../graphql/update_runner.mutation.graphql';
 
 export default {
@@ -21,6 +22,7 @@ export default {
   data() {
     return {
       updating: false,
+      deleting: false,
     };
   },
   computed: {
@@ -40,11 +42,15 @@ export default {
     toggleActiveTitle() {
       if (this.updating) {
         // Prevent a "sticky" tooltip: If this button is disabled,
-        // mouseout listeners will not run and the tooltip will
-        // stay stuck on the button.
+        // mouseout listeners don't run leaving the tooltip stuck
         return '';
       }
       return this.isActive ? __('Pause') : __('Resume');
+    },
+    deleteTitle() {
+      // Prevent a "sticky" tooltip: If element gets removed,
+      // mouseout listeners don't run and leaving the tooltip stuck
+      return this.deleting ? '' : __('Remove');
     },
   },
   methods: {
@@ -81,6 +87,39 @@ export default {
       }
     },
 
+    async onDelete() {
+      // TODO Replace confirmation with gl-modal
+      if (!window.confirm(__('Are you sure?'))) {
+        return;
+      }
+
+      this.deleting = true;
+      try {
+        const {
+          data: {
+            runnerDelete: { errors },
+          },
+        } = await this.$apollo.mutate({
+          mutation: deleteRunnerMutation,
+          variables: {
+            input: {
+              id: this.runner.id,
+            },
+          },
+          awaitRefetchQueries: true,
+          // TODO Affix this to the query name in getRunnersQuery
+          refetchQueries: ['getRunners'],
+        });
+        if (errors && errors.length) {
+          this.onError(new Error(errors[0]));
+        }
+      } catch (e) {
+        this.onError(e);
+      } finally {
+        this.deleting = false;
+      }
+    },
+
     onError(error) {
       // TODO Render errors when "delete" action is done
       // `active` toggle would not fail due to user input.
@@ -109,6 +148,15 @@ export default {
       data-testid="toggle-active-runner"
       @click="onToggleActive"
     />
-    <!-- TODO add delete action to update runners -->
+    <gl-button
+      v-gl-tooltip.hover.viewport
+      :title="deleteTitle"
+      :aria-label="deleteTitle"
+      icon="close"
+      :loading="deleting"
+      variant="danger"
+      data-testid="delete-runner"
+      @click="onDelete"
+    />
   </gl-button-group>
 </template>
