@@ -48,31 +48,9 @@ example, if the DAST job finishes but the SAST job fails, the security dashboard
 results. On failure, the analyzer outputs an
 [exit code](../../../development/integrations/secure.md#exit-code).
 
-### DAST job order
-
-When using the `DAST.gitlab-ci.yml` template, the `dast` job is run last as shown in
-the example below. To ensure DAST is scanning the latest code, your CI pipeline
-should deploy changes to the web server in one of the jobs preceding the `dast` job.
-
-```yaml
-stages:
-  - build
-  - test
-  - deploy
-  - dast
-```
-
-Be aware that if your pipeline is configured to deploy to the same webserver in
-each run, running a pipeline while another is still running could cause a race condition
-where one pipeline overwrites the code from another pipeline. The site to be scanned
-should be excluded from changes for the duration of a DAST scan.
-The only changes to the site should be from the DAST scanner. Be aware that any
-changes that users, scheduled tasks, database changes, code changes, other pipelines, or other scanners make to
-the site during a scan could lead to inaccurate results.
-
 ## Prerequisites
 
-- [GitLab Runner](../../../ci/runners/README.md), with the
+- [GitLab Runner](../../../ci/runners/README.md) available, with the
 [`docker` executor](https://docs.gitlab.com/runner/executors/docker.html).
 - Target application deployed. For more details, see [Deployment options](#deployment-options).
 
@@ -167,6 +145,28 @@ To enable DAST to run automatically, either:
   by [Auto DevOps](../../../topics/autodevops/index.md)).
 - [Include the DAST template](#include-the-dast-template) in your existing
   `.gitlab-ci.yml` file.
+
+### DAST job order
+
+When using the `DAST.gitlab-ci.yml` template, the `dast` stage is run last as shown in
+the example below. To ensure DAST scans the latest code, deploy your application
+in a stage before the `dast` stage.
+
+```yaml
+  stages:
+    - build
+    - test
+    - deploy
+    - dast
+```
+
+Be aware that if your pipeline is configured to deploy to the same webserver in
+each run, running a pipeline while another is still running could cause a race condition
+where one pipeline overwrites the code from another pipeline. The site to be scanned
+should be excluded from changes for the duration of a DAST scan.
+The only changes to the site should be from the DAST scanner. Be aware that any
+changes that users, scheduled tasks, database changes, code changes, other pipelines, or other scanners make to
+the site during a scan could lead to inaccurate results.
 
 #### Include the DAST template
 
@@ -744,6 +744,8 @@ DAST can be [configured](#customizing-the-dast-settings) using CI/CD variables.
 | `DAST_ZAP_CLI_OPTIONS`                      | string        | ZAP server command-line options. For example, `-Xmx3072m` would set the Java maximum memory allocation pool size. [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/12652) in GitLab 13.1. |
 | `DAST_ZAP_LOG_CONFIGURATION`                | string        | Set to a semicolon-separated list of additional log4j properties for the ZAP Server. For example, `log4j.logger.org.parosproxy.paros.network.HttpSender=DEBUG;log4j.logger.com.crawljax=DEBUG` |
 | `DAST_AUTH_EXCLUDE_URLS`                    | URLs          | [Deprecated](https://gitlab.com/gitlab-org/gitlab/-/issues/289959) in GitLab 13.8, to be removed in 14.0, and replaced by `DAST_EXCLUDE_URLS`. The URLs to skip during the authenticated scan; comma-separated. Regular expression syntax can be used to match multiple URLs. For example, `.*` matches an arbitrary character sequence. Not supported for API scans. |
+
+1. DAST CI/CD variable available to an on-demand scan.
 
 ### DAST command-line options
 
