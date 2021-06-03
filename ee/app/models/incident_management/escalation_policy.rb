@@ -12,7 +12,5 @@ module IncidentManagement
     validates :rules, presence: true
 
     accepts_nested_attributes_for :rules
-
-    scope :order_created, -> { order(created_at: :desc) }
   end
 end

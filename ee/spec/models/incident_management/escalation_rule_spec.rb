@@ -26,10 +26,10 @@ RSpec.describe IncidentManagement::EscalationRule do
     describe '.for_status_above' do
       subject { described_class.for_status_above(status) }
 
-      let_it_be(:acknowledged_status_rule) { escalation_rule(policy: policy, status: AlertManagement::Alert::STATUSES[:acknowledged]) }
-      let_it_be(:resolved_status_rule) { escalation_rule(policy: policy, status: AlertManagement::Alert::STATUSES[:resolved]) }
+      let_it_be(:acknowledged_status_rule) { escalation_rule(status: IncidentManagement::EscalationRule.statuses[:acknowledged]) }
+      let_it_be(:resolved_status_rule) { escalation_rule(status: IncidentManagement::EscalationRule.statuses[:resolved]) }
 
-      let(:status) { AlertManagement::Alert::STATUSES[:acknowledged] }
+      let(:status) { IncidentManagement::EscalationRule.statuses[:acknowledged] }
 
       it { is_expected.to contain_exactly(resolved_status_rule) }
     end

@@ -8,9 +8,5 @@ module IncidentManagement
     belongs_to :alert, class_name: 'AlertManagement::Alert', foreign_key: 'alert_id'
 
     delegate :project, to: :policy
-
-    def elapsed_time(time_to: Time.current)
-      time_to - created_at
-    end
   end
 end
