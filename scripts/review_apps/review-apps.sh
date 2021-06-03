@@ -72,7 +72,7 @@ function kubectl_cleanup_release() {
   local release="${2}"
 
   echoinfo "Deleting all K8s resources matching '${release}'..." true
-  kubectl --namespace "${namespace}" get ingress,svc,pdb,hpa,deploy,statefulset,job,pod,secret,configmap,pvc,clusterrole,clusterrolebinding,role,rolebinding,sa,crd 2>&1 \
+  kubectl --namespace "${namespace}" get ingress,svc,pdb,hpa,deploy,statefulset,job,pod,secret,configmap,pvc,clusterrole,clusterrolebinding,role,rolebinding,sa 2>&1 \
     | grep "${release}" \
     | awk '{print $1}' \
     | xargs kubectl --namespace "${namespace}" delete --ignore-not-found \
