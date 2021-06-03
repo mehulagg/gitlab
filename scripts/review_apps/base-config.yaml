@@ -5,9 +5,10 @@ global:
   ingress:
     annotations:
       external-dns.alpha.kubernetes.io/ttl: 10
+      cert-manager.io/cluster-issuer: review-apps-route53-dns01-wildcard-cluster-issuer
     configureCertmanager: false
     tls:
-      secretName: review-apps-tls
+      secretName: review-apps-tls-cluster-issuer
   initialRootPassword:
     secret: shared-gitlab-initial-root-password
 certmanager:
