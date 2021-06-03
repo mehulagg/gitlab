@@ -53,16 +53,10 @@ export default {
     },
   },
   async mounted() {
+    this.checkProvidedPaths();
+
     const results = await Promise.allSettled(
       allChartDefinitions.map(async ({ id, requestParams, startDate, endDate }) => {
-        if (this.projectPath && this.groupPath) {
-          throw new Error('Both projectPath and groupPath were provided');
-        }
-
-        if (!this.projectPath && !this.groupPath) {
-          throw new Error('Either projectPath or groupPath must be provided');
-        }
-
         const { data: apiData } = this.projectPath
           ? await DoraApi.getProjectDoraMetrics(
               this.projectPath,
@@ -87,7 +81,7 @@ export default {
       const allErrorMessages = requestErrors.join('\n');
 
       createFlash({
-        message: s__('DORA4Metrics|Something went wrong while getting lead time data.'),
+        message: this.$options.i18n.flashMessage,
         error: new Error(`Something went wrong while getting lead time data:\n${allErrorMessages}`),
         captureError: true,
       });
@@ -100,16 +94,46 @@ export default {
 
       this.tooltipValue = seconds != null ? humanizeTimeInterval(seconds) : null;
     },
+    /**
+     * Validates that exactly one of [this.projectPath, this.groupPath] has been
+     * provided to this component. If not, a flash message is shown and an error
+     * is logged with Sentry. This is mainly intended to be a development aid.
+     */
+    checkProvidedPaths() {
+      let errorMessage = '';
+
+      if (this.projectPath && this.groupPath) {
+        errorMessage = 'Both projectPath and groupPath were provided';
+      }
+
+      if (!this.projectPath && !this.groupPath) {
+        errorMessage = 'Either projectPath or groupPath must be provided';
+      }
+
+      if (errorMessage) {
+        createFlash({
+          message: this.$options.i18n.flashMessage,
+          error: new Error(`Error while rendering lead time charts: ${errorMessage}`),
+          captureError: true,
+        });
+      }
+    },
   },
   areaChartOptions,
   chartDescriptionText,
   chartDocumentationHref,
+  i18n: {
+    flashMessage: s__('DORA4Metrics|Something went wrong while getting lead time data.'),
+    chartHeaderText: s__('DORA4Metrics|Lead time'),
+    medianLeadTime: s__('DORA4Metrics|Median lead time'),
+    noMergeRequestsDeployed: s__('DORA4Metrics|No merge requests were deployed during this period'),
+  },
 };
 </script>
 <template>
   <div>
     <dora-chart-header
-      :header-text="s__('DORA4Metrics|Lead time')"
+      :header-text="$options.i18n.chartHeaderText"
       :chart-description-text="$options.chartDescriptionText"
       :chart-documentation-href="$options.chartDocumentationHref"
     />
@@ -126,10 +150,10 @@ export default {
       <template #tooltip-title> {{ tooltipTitle }} </template>
       <template #tooltip-content>
         <template v-if="tooltipValue === null">
-          {{ s__('DORA4Metrics|No merge requests were deployed during this period') }}
+          {{ $options.i18n.noMergeRequestsDeployed }}
         </template>
         <div v-else class="gl-display-flex gl-align-items-flex-end">
-          <div class="gl-mr-5">{{ s__('DORA4Metrics|Median lead time') }}</div>
+          <div class="gl-mr-5">{{ $options.i18n.medianLeadTime }}</div>
           <div class="gl-font-weight-bold" data-testid="tooltip-value">{{ tooltipValue }}</div>
         </div>
       </template>
