@@ -7,6 +7,8 @@ module UpcomingReconciliations
     end
 
     def execute
+      return ServiceResponse.success
+
       if @preferences.update(@params)
         ServiceResponse.success(
           message: 'Preference was updated',
@@ -17,6 +19,6 @@ module UpcomingReconciliations
     end
 
     private
-    
+
   end
 end

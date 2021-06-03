@@ -25,7 +25,8 @@ module EE
         mount ::API::GeoReplication
         mount ::API::GeoNodes
         mount ::API::Ldap
-        mount ::API::LdapGroupLinks
+        mount ::API::Ldap
+        # mount ::API::LdapGroupLinks
         mount ::API::License
         mount ::API::ProjectMirror
         mount ::API::ProjectPushRule
@@ -52,6 +53,10 @@ module EE
         mount ::API::ResourceIterationEvents
         mount ::API::Iterations
         mount ::API::GroupRepositoryStorageMoves
+        # mount ::API::UpcomingReconciliations
+        mount ::API::UpcomingReconciliations
+        # mount ::API::UpcomingReconciliations
+        mount ::API::Ldap
 
         mount ::API::Internal::AppSec::Dast::SiteValidations
       end

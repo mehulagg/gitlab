@@ -2,18 +2,17 @@
 
 module API
   class UpcomingReconciliations < ::API::Base
-    before { authenticated_as_admin! }
+    # before { authenticated_as_admin! }
 
     feature_category :purchase
 
     resource :upcoming_reconciliations do
       desc 'Update upcoming reconciliations'
       params do
-        requires :upcoming_reconciliations, type: Hash, desc: 'The upcoming reconciliations'
+        requires :data, type: Hash, desc: 'The upcoming reconciliations'
       end
-
       put '/' do
-        service = ::UpcomingReconciliations::UpdateService.new(upcoming_reconciliations)
+        service = ::UpcomingReconciliations::UpdateService.new(params['data'])
         response = service.execute
 
         if response.success?
