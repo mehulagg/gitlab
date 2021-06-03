@@ -224,9 +224,9 @@ For deeper customization and more complicated metrics, visit the [Grafonnet lib]
 
 Some Graphs aren't relevant for all groups, so they aren't added to
 the dashboard by default. They can be added by customizing the
-dasbhoard.
+dashboard.
 
-By default metrics only metrics the `web`, `api` and `sidekiq` are
+By default, only metrics the `web`, `api` and `sidekiq` are
 shown. If you wish to see the metrics from the `git` fleet (or any
 other component that might be added in the future). This could be
 configured as follows:
