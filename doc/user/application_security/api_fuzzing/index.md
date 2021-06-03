@@ -116,8 +116,8 @@ To generate an API Fuzzing configuration snippet:
 > Support for OpenAPI Specification v3.0 was
 > [introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/228652) in GitLab 13.9.
 
-The [OpenAPI Specification](https://www.openapis.org/) (formerly the Swagger Specification) is an API description format for REST APIs. 
-This section shows you how to configure API fuzzing using an OpenAPI Specification to provide information about the target API to test. 
+The [OpenAPI Specification](https://www.openapis.org/) (formerly the Swagger Specification) is an API description format for REST APIs.
+This section shows you how to configure API fuzzing using an OpenAPI Specification to provide information about the target API to test.
 OpenAPI Specifications are provided as a file system resource or URL. Both JSON and YAML OpenAPI formats are supported.
 
 API fuzzing uses an OpenAPI document to generate the request body. When a request body is required,
@@ -567,6 +567,7 @@ profile increases as the number of tests increases.
 | `FUZZAPI_TARGET_URL`                                        | Base URL of API testing target. |
 | `FUZZAPI_CONFIG`                                            | [Deprecated](https://gitlab.com/gitlab-org/gitlab/-/issues/276395) in GitLab 13.12, replaced with default `.gitlab/gitlab-api-fuzzing-config.yml`. API Fuzzing configuration file. |
 |[`FUZZAPI_PROFILE`](#api-fuzzing-profiles)                   | Configuration profile to use during testing. Defaults to `Quick-10`. |
+|[`FUZZAPI_EXCLUDE_PATHS`](#exclude-paths)                    | Exclude API URL paths from testing. |
 |[`FUZZAPI_OPENAPI`](#openapi-specification)                  | OpenAPI Specification file or URL. |
 |[`FUZZAPI_HAR`](#http-archive-har)                           | HTTP Archive (HAR) file. |
 |[`FUZZAPI_POSTMAN_COLLECTION`](#postman-collection)          | Postman Collection file. |
@@ -575,6 +576,7 @@ profile increases as the number of tests increases.
 |[`FUZZAPI_OVERRIDES_ENV`](#overrides)                        | JSON string containing headers to override. |
 |[`FUZZAPI_OVERRIDES_CMD`](#overrides)                        | Overrides command. |
 |[`FUZZAPI_OVERRIDES_INTERVAL`](#overrides)                   | How often to run overrides command in seconds. Defaults to `0` (once). |
+|[`FUZZAPI_EXCLUDE_PATHS`](#exclude-paths)                    | Exclude path from fuzzing. |
 |[`FUZZAPI_HTTP_USERNAME`](#http-basic-authentication)        | Username for HTTP authentication. |
 |[`FUZZAPI_HTTP_PASSWORD`](#http-basic-authentication)        | Password for HTTP authentication. |
 
@@ -822,6 +824,47 @@ variables:
   FUZZAPI_OVERRIDES_FILE: output/api-fuzzing-overrides.json
   FUZZAPI_OVERRIDES_CMD: renew_token.py
   FUZZAPI_OVERRIDES_INTERVAL: 300
+```
+
+### Exclude Paths
+
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/211892) in GitLab 14.0.
+
+When testing an API it can be useful to exclude certain paths. For example, you might exclude testing of an authentication service or an older version of the API. Excluding URLs is done using the `FUZZAPI_EXCLUDE_PATHS` variable. This variable is specified in your `gitlab-ci.yml` file. More than one path can be excluded using the `;` character to separate entries. The provided paths can make use of a single character wildcard `?` and `*` for a multiple character wildcard.
+
+To verify the paths are being excluded you can review the `Tested Operations` and `Excluded Operations` portion of the job output. You should not see any excluded paths listed under `Tested Operations`.
+
+```
+2021-05-27 21:51:08 [INF] API Security: --[ Tested Operations ]-------------------------
+2021-05-27 21:51:08 [INF] API Security: 201 POST http://target:7777/api/users CREATED
+2021-05-27 21:51:08 [INF] API Security: ------------------------------------------------
+2021-05-27 21:51:08 [INF] API Security: --[ Excluded Operations ]-----------------------
+2021-05-27 21:51:08 [INF] API Security: GET http://target:7777/api/messages
+2021-05-27 21:51:08 [INF] API Security: POST http://target:7777/api/messages
+2021-05-27 21:51:08 [INF] API Security: ------------------------------------------------
+```
+
+#### Examples
+
+This example will exclude the `/auth` resource. This will not exclude child resources (`/auth/child`).
+
+```yaml
+variables:
+  FUZZAPI_EXCLUDE_PATHS=/auth
+```
+
+To exclude `/auth`, and child resources (`/auth/child`), we will use a wildcard.
+
+```yaml
+variables:
+  FUZZAPI_EXCLUDE_PATHS=/auth*
+```
+
+To exclude multiple paths we can use the `;` character. In this example we will exclude `/auth*` and also `/v1/*`.
+
+```yaml
+variables:
+  FUZZAPI_EXCLUDE_PATHS=/auth*;/v1/*
 ```
 
 ### Header Fuzzing
@@ -1171,7 +1214,7 @@ The best-suited solution will depend on whether or not your target API changes f
 
 #### Static environment solution
 
-This solution is for pipelines in which the target API URL doesn't change (is static). 
+This solution is for pipelines in which the target API URL doesn't change (is static).
 
 **Add environmental variable**
 
@@ -1188,7 +1231,7 @@ include:
 
 #### Dynamic environment solutions
 
-In a dynamic environment your target API changes for each different deployment. In this case, there is more than one possible solution, we recommend to use the `environment_url.txt` file when dealing with dynamic environments. 
+In a dynamic environment your target API changes for each different deployment. In this case, there is more than one possible solution, we recommend to use the `environment_url.txt` file when dealing with dynamic environments.
 
 **Use environment_url.txt**
 
