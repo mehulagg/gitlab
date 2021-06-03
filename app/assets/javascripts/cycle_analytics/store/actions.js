@@ -4,6 +4,42 @@ import { __ } from '~/locale';
 import { DEFAULT_DAYS_TO_DISPLAY } from '../constants';
 import * as types from './mutation_types';
 
+export const setSelectedValueStream = ({ commit, dispatch }, valueStream) => {
+  commit(types.SET_SELECTED_VALUE_STREAM, valueStream);
+  return dispatch(types.FETCH_VALUE_STREAM_DATA);
+};
+
+export const receiveValueStreamsSuccess = (
+  { state: { selectedValueStream = null }, commit, dispatch },
+  data = [],
+) => {
+  commit(types.RECEIVE_VALUE_STREAMS_SUCCESS, data);
+
+  if (!selectedValueStream && data.length) {
+    const [firstStream] = data;
+    return dispatch('setSelectedValueStream', firstStream);
+  }
+
+  return Promise.resolve();
+  // .then(() => dispatch(types.FETCH_VALUE_STREAM_DATA))
+};
+
+export const fetchValueStreams = ({ commit, dispatch, getters }) => {
+  const { requestPath } = getters;
+
+  commit(types.REQUEST_VALUE_STREAMS);
+
+  return Api.cycleAnalyticsProjectValueStreams(requestPath)
+    .then(({ data }) => dispatch('receiveValueStreamsSuccess', data))
+    .catch((error) => {
+      const {
+        response: { status },
+      } = error;
+      commit(types.RECEIVE_VALUE_STREAMS_ERROR, status);
+      throw error;
+    });
+};
+
 export const fetchCycleAnalyticsData = ({
   state: { requestPath, startDate },
   dispatch,
@@ -54,5 +90,6 @@ export const setDateRange = ({ commit }, { startDate = DEFAULT_DAYS_TO_DISPLAY }
 
 export const initializeVsa = ({ commit, dispatch }, initialData = {}) => {
   commit(types.INITIALIZE_VSA, initialData);
+  dispatch('fetchValueStreams');
   return dispatch('fetchCycleAnalyticsData');
 };
