@@ -7,6 +7,7 @@ type: reference, concepts
 
 # Squash and merge **(FREE)**
 
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/150) in GitLab Premium 8.17.
 > - [Moved](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/18956) to GitLab Free in 11.0.
 
 With squash and merge you can combine all your merge request's commits into one
