@@ -1,6 +1,6 @@
 ---
 key_path: redis_hll_counters.ecosystem.i_ecosystem_jira_service_cross_reference_monthly
-description: 'Count of Jira issues cross referenced by month'
+description: Number of users that cross-referenced Jira issues by month
 product_section: dev
 product_stage: create
 product_group: group::ecosystem
