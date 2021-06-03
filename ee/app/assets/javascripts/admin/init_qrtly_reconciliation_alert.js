@@ -5,7 +5,7 @@ export const initQrtlyReconciliationAlert = (selector = '#js-qrtly-reconciliatio
   const el = document.querySelector(selector);
 
   if (!el) {
-    return;
+    return false;
   }
 
   return new Vue({
