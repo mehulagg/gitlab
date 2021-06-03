@@ -7,6 +7,8 @@ export default () => ({
   summary: [],
   analytics: [],
   stats: [],
+  valueStreams: [],
+  selectedValueStream: [],
   selectedStage: {},
   selectedStageEvents: [],
   medians: {},

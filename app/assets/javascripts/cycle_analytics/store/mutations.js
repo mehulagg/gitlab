@@ -5,6 +5,9 @@ export default {
   [types.INITIALIZE_VSA](state, { requestPath }) {
     state.requestPath = requestPath;
   },
+  [types.SET_SELECTED_VALUE_STREAM](state, selectedValueStream = {}) {
+    state.selectedValueStream = selectedValueStream;
+  },
   [types.SET_SELECTED_STAGE](state, stage) {
     state.isLoadingStage = true;
     state.selectedStage = stage;
@@ -13,7 +16,16 @@ export default {
   [types.SET_DATE_RANGE](state, { startDate }) {
     state.startDate = startDate;
   },
-  [types.REQUEST_CYCLE_ANALYTICS_DATA](state) {
+  [types.REQUEST_VALUE_STREAMS](state) {
+    state.valueStreams = [];
+  },
+  [types.RECEIVE_VALUE_STREAMS_SUCCESS](state, valueStreams = []) {
+    state.valueStreams = valueStreams;
+  },
+  [types.RECEIVE_VALUE_STREAMS_ERROR](state) {
+    state.valueStreams = [];
+  },
+  [types.REQUEST_VALUE_STREAMS](state) {
     state.isLoading = true;
     state.stages = [];
     state.hasError = false;
