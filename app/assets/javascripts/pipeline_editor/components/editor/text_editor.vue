@@ -33,6 +33,7 @@ export default {
         projectNamespace: this.projectNamespace,
         ref: this.commitSha,
       });
+      editorInstance.registerAutocompleteProvider();
     },
   },
   readyEvent: EDITOR_READY_EVENT,
