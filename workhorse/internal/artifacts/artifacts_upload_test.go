@@ -302,6 +302,26 @@ func TestLsifFileProcessing(t *testing.T) {
 	testhelper.RequireResponseHeader(t, response, MetadataHeaderKey, MetadataHeaderPresent)
 }
 
+func TestLsifFileWithMarkdownHoverFormatProcessing(t *testing.T) {
+	tempPath, err := ioutil.TempDir("", "uploads")
+	require.NoError(t, err)
+
+	s := setupWithTmpPath(t, "file", true, "zip", &api.Response{TempPath: tempPath, ProcessLsif: true}, nil)
+	defer s.cleanup()
+
+	file, err := os.Open("../../testdata/lsif/java.lsif.zip")
+	require.NoError(t, err)
+
+	_, err = io.Copy(s.fileWriter, file)
+	require.NoError(t, err)
+	require.NoError(t, file.Close())
+	require.NoError(t, s.writer.Close())
+
+	response := testUploadArtifacts(t, s.writer.FormDataContentType(), s.url, s.buffer)
+	require.Equal(t, http.StatusOK, response.Code)
+	testhelper.RequireResponseHeader(t, response, MetadataHeaderKey, MetadataHeaderPresent)
+}
+
 func TestInvalidLsifFileProcessing(t *testing.T) {
 	tempPath, err := ioutil.TempDir("", "uploads")
 	require.NoError(t, err)
