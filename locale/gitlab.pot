@@ -8370,6 +8370,9 @@ msgstr ""
 msgid "Configuration help"
 msgstr ""
 
+msgid "Configure %{link} to track events. %{link_start}Learn more.%{link_end}"
+msgstr ""
+
 msgid "Configure GitLab runners to start using the Web Terminal. %{helpStart}Learn more.%{helpEnd}"
 msgstr ""
 
@@ -8440,9 +8443,6 @@ msgid "Configure specific limits for Packages API requests that supersede the ge
 msgstr ""
 
 msgid "Configure storage path settings."
-msgstr ""
-
-msgid "Configure the %{link} integration."
 msgstr ""
 
 msgid "Configure the way a user creates a new account."
@@ -32407,6 +32407,9 @@ msgstr ""
 msgid "The GitLab user to which the Jira user %{jiraDisplayName} will be mapped"
 msgstr ""
 
+msgid "The ID of the application."
+msgstr ""
+
 msgid "The Issue Tracker is the place to add things that need to be improved or solved in a project"
 msgstr ""
 
@@ -32414,6 +32417,9 @@ msgid "The Issue Tracker is the place to add things that need to be improved or 
 msgstr ""
 
 msgid "The Prometheus server responded with \"bad request\". Please check your queries are correct and are supported in your Prometheus version. %{documentationLink}"
+msgstr ""
+
+msgid "The Snowplow cookie domain."
 msgstr ""
 
 msgid "The URL defined on the primary node that secondary nodes should use to contact it."
@@ -32587,6 +32593,9 @@ msgid "The group will be placed in 'pending removal' state"
 msgstr ""
 
 msgid "The group_project_ids parameter is only allowed for a group"
+msgstr ""
+
+msgid "The hostname of your Snowplow collector."
 msgstr ""
 
 msgid "The import will time out after %{timeout}. For repositories that take longer, use a clone/push combination."
