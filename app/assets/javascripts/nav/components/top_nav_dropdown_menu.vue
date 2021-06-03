@@ -5,7 +5,7 @@ import TopNavContainerView from './top_nav_container_view.vue';
 import TopNavMenuItem from './top_nav_menu_item.vue';
 
 const ACTIVE_CLASS = 'gl-shadow-none! gl-font-weight-bold! active';
-const SECONDARY_GROUP_CLASS = 'gl-pt-3 gl-mt-3 gl-border-1 gl-border-t-solid gl-border-gray-100';
+const SECONDARY_GROUP_CLASS = 'gl-pt-3 gl-mt-3 gl-border-1 gl-border-t-solid gl-border-gray-50';
 
 export default {
   components: {

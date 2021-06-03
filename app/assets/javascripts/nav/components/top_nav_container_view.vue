@@ -61,7 +61,7 @@ export default {
       v-for="({ key, links }, groupIndex) in linkGroups"
       :key="key"
       :class="{ 'gl-mt-3': groupIndex !== 0 }"
-      class="gl-mt-auto gl-pt-3 gl-border-1 gl-border-t-solid gl-border-gray-100"
+      class="gl-mt-auto gl-pt-3 gl-border-1 gl-border-t-solid gl-border-gray-50"
       data-testid="menu-item-group"
     >
       <top-nav-menu-item

@@ -33,7 +33,7 @@ export default {
     v-on="$listeners"
   >
     <span class="gl-display-flex">
-      <gl-icon v-if="menuItem.icon" :name="menuItem.icon" class="gl-mr-2!" />
+      <gl-icon v-if="menuItem.icon" :name="menuItem.icon" class="gl-mr-3!" />
       {{ menuItem.title }}
       <gl-icon v-if="menuItem.view" name="chevron-right" class="gl-ml-auto" />
     </span>
