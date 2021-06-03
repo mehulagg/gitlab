@@ -39,6 +39,11 @@ export default {
       required: false,
       default: () => [],
     },
+    isLoading: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
   },
   i18n: DEVOPS_ADOPTION_STRINGS.modal,
   data() {
@@ -239,37 +244,40 @@ export default {
     @hidden="resetForm"
     @show="$emit('trackModalOpenState', true)"
   >
-    <gl-alert v-if="errors.length" variant="danger" class="gl-mb-3" @dismiss="clearErrors">
-      {{ displayError }}
-    </gl-alert>
-    <gl-form-group class="gl-mb-3" data-testid="filter">
-      <gl-icon
-        name="search"
-        :size="18"
-        use-deprecated-sizes
-        class="gl-text-gray-300 gl-absolute gl-mt-3 gl-ml-3"
-      />
-      <gl-form-input
-        v-model="filter"
-        class="gl-pl-7!"
-        type="text"
-        :placeholder="$options.i18n.filterPlaceholder"
-        :disabled="loading"
-      />
-    </gl-form-group>
-    <gl-form-group class="gl-mb-0">
-      <gl-form-checkbox-tree
-        v-if="filteredOptions.length"
-        v-model="checkboxValues"
-        data-testid="groups"
-        :options="filteredOptions"
-        :hide-toggle-all="true"
-        :disabled="loading"
-        class="gl-p-3 gl-pb-0 gl-mb-2 gl-border-1 gl-border-solid gl-border-gray-100 gl-rounded-base"
-      />
-      <gl-alert v-else variant="info" :dismissible="false" data-testid="filter-warning">
-        {{ $options.i18n.noResults }}
+    <div v-if="isLoading">{{ __('Loading') }}</div>
+    <div v-else>
+      <gl-alert v-if="errors.length" variant="danger" class="gl-mb-3" @dismiss="clearErrors">
+        {{ displayError }}
       </gl-alert>
-    </gl-form-group>
+      <gl-form-group class="gl-mb-3" data-testid="filter">
+        <gl-icon
+          name="search"
+          :size="18"
+          use-deprecated-sizes
+          class="gl-text-gray-300 gl-absolute gl-mt-3 gl-ml-3"
+        />
+        <gl-form-input
+          v-model="filter"
+          class="gl-pl-7!"
+          type="text"
+          :placeholder="$options.i18n.filterPlaceholder"
+          :disabled="loading"
+        />
+      </gl-form-group>
+      <gl-form-group class="gl-mb-0">
+        <gl-form-checkbox-tree
+          v-if="filteredOptions.length"
+          v-model="checkboxValues"
+          data-testid="groups"
+          :options="filteredOptions"
+          :hide-toggle-all="true"
+          :disabled="loading"
+          class="gl-p-3 gl-pb-0 gl-mb-2 gl-border-1 gl-border-solid gl-border-gray-100 gl-rounded-base"
+        />
+        <gl-alert v-else variant="info" :dismissible="false" data-testid="filter-warning">
+          {{ $options.i18n.noResults }}
+        </gl-alert>
+      </gl-form-group>
+    </div>
   </gl-modal>
 </template>

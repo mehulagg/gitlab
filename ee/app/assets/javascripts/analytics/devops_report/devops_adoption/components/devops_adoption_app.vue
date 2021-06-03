@@ -87,6 +87,9 @@ export default {
   apollo: {
     devopsAdoptionEnabledNamespaces: {
       query: devopsAdoptionEnabledNamespacesQuery,
+      context: {
+        isSingleRequest: true,
+      },
       variables() {
         return this.segmentsQueryVariables;
       },
@@ -130,6 +133,11 @@ export default {
         this.isLoadingGroups ||
         this.isLoadingEnableGroup ||
         this.$apollo.queries.devopsAdoptionEnabledNamespaces.loading
+      );
+    },
+    isLoadingAdoptionData() {
+      return (
+        this.isLoadingEnableGroup || this.$apollo.queries.devopsAdoptionEnabledNamespaces.loading
       );
     },
     segmentLimitReached() {
@@ -214,6 +222,9 @@ export default {
       this.$apollo
         .query({
           query: getGroupsQuery,
+          context: {
+            isSingleRequest: true,
+          },
           variables: {
             nextPage,
           },
@@ -304,7 +315,7 @@ export default {
 
         <devops-adoption-section
           v-else
-          :is-loading="isLoading"
+          :is-loading="isLoadingAdoptionData"
           :has-segments-data="hasSegmentsData"
           :timestamp="timestamp"
           :has-group-data="hasGroupData"
@@ -324,10 +335,10 @@ export default {
     </gl-tabs>
 
     <devops-adoption-segment-modal
-      v-if="canRenderModal"
       ref="addRemoveModal"
       :groups="groups.nodes"
       :enabled-groups="devopsAdoptionEnabledNamespaces.nodes"
+      :is-loading="isLoading"
       @segmentsAdded="addSegmentsToCache"
       @segmentsRemoved="deleteSegmentsFromCache"
       @trackModalOpenState="trackModalOpenState"
