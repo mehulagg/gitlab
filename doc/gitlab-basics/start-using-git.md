@@ -32,7 +32,7 @@ NOTE:
 To help you visualize what you're doing locally, there are
 [Git GUI apps](https://git-scm.com/download/gui/) you can install.
 
-## Requirements
+## Prerequisites
 
 You don't need a GitLab account to use Git locally, but for the purpose of this guide we
 recommend registering and signing into your account before starting. Some commands need a
@@ -41,7 +41,7 @@ connection between the files on your computer and their version on a remote serv
 You must also open a [terminal](#terminal) and have
 [Git installed](#install-git) on your computer.
 
-### Terminal
+### Open a terminal
 
 To execute Git commands on your computer, you must open a terminal (also known as command
 prompt, command shell, and command line) of your preference. Here are some suggestions:
@@ -126,23 +126,13 @@ to our computer:
   - If you don't have 2FA enabled, use your account's password.
 
 NOTE:
-Authenticating via SSH is the GitLab recommended method. You can read more about credential storage
+Authenticating through SSH is the GitLab recommended method. You can read more about credential storage
 in the [Git Credentials documentation](https://git-scm.com/book/en/v2/Git-Tools-Credential-Storage).
 
-## Git related terminology
+## Git terminology
 
 If you're familiar with Git terminology, you may want to jump directly
 into the [basic commands](#basic-git-commands).
-
-### Namespace
-
-In GitLab, a **namespace** is either a **username** or a **group**.
-
-For example, suppose Jo is a GitLab.com user and they chose their user name as
-`jo`. You can see Jo's profile at `https://gitlab.com/jo`. `jo` is a namespace.
-
-Jo also created a group in GitLab, and chose the path `test-group` for their
-group. The group can be accessed under `https://gitlab.com/test-group`. `test-group` is a namespace.
 
 ### Repository
 
@@ -164,7 +154,7 @@ A **project** in GitLab is what holds a repository.
 
 When you want to copy someone else's repository, you [**fork**](../user/project/repository/forking_workflow.md#creating-a-fork)
 the project. By forking it, you create a copy of the project into your own
-namespace to have read and write permissions to modify the project files
+[namespace](../user/group/#namespaces) to have read and write permissions to modify the project files
 and settings.
 
 For example, if you fork this project, <https://gitlab.com/gitlab-tests/sample-project/> into your namespace,
@@ -172,7 +162,7 @@ you create your own copy of the repository in your namespace (`https://gitlab.co
 From there, you can clone the repository, work on the files, and (optionally) submit proposed changes back to the
 original repository.
 
-### Download vs clone
+### Difference between download and clone
 
 To create a copy of a remote repository's files on your computer, you can either
 **download** or **clone** the repository. If you download it, you cannot sync the repository with the
@@ -193,7 +183,7 @@ changes in the remote repository.
 This is referred to as **pulling** from the remote, as this is achieved by the command
 [`git pull`](#download-the-latest-changes-in-the-project).
 
-## Basic Git commands
+## Set up a repository
 
 Git commands will work with any Git repository.
 
@@ -211,7 +201,7 @@ it into your namespace to make it available under `https://gitlab.com/<your-name
 ### Clone a repository
 
 To start working locally on an existing remote repository, clone it with the
-command `git clone <repository path>`. You can either clone it via [HTTPS](#clone-via-https)
+command `git clone <repository path>`. You can either clone it using [HTTPS](#clone-via-https)
 or [SSH](#clone-via-ssh), according to your preferred [authentication method](#git-authentication-methods).
 
 You can find both paths (HTTPS and SSH) by navigating to your project's landing page
@@ -232,9 +222,9 @@ name and preserve the connection with the remote repository.
 You can then navigate to the new directory with `cd sample-project` and start working on it
 locally.
 
-#### Clone via HTTPS
+#### Clone using HTTPS
 
-To clone `https://gitlab.com/gitlab-tests/sample-project/` via HTTPS:
+To clone `https://gitlab.com/gitlab-tests/sample-project/` using HTTPS:
 
 ```shell
 git clone https://gitlab.com/gitlab-tests/sample-project.git
@@ -245,9 +235,9 @@ On Windows, if you enter your password incorrectly multiple times and GitLab is 
 add your namespace (username or group):
 `git clone https://namespace@gitlab.com/gitlab-org/gitlab.git`.
 
-#### Clone via SSH
+#### Clone using SSH
 
-To clone `git@gitlab.com:gitlab-org/gitlab.git` via SSH:
+To clone `git@gitlab.com:gitlab-org/gitlab.git` using SSH:
 
 ```shell
 git clone git@gitlab.com:gitlab-org/gitlab.git
@@ -335,7 +325,7 @@ used in your project (such as `main`).
 A new branch is often called **feature branch** to differentiate from the
 [default branch](../user/project/repository/branches/default.md).
 
-### Create a branch
+### Create and work in a branch
 
 To create a new feature branch to work with:
 
@@ -347,10 +337,10 @@ Note that Git does **not** accept empty spaces and special characters in branch
 names, so use only lowercase letters, numbers, hyphens (`-`), and underscores
 (`_`). Do not use capital letters, as it may cause duplications.
 
-### Switch to another branch
+### Switch to a branch
 
 You are always in a branch when working with Git.
-You can switch between branches to see the state of the files in a branch, and work in that branch.
+You can switch between branches to see the state of the files and work in that branch.
 
 To switch to an existing branch:
 
@@ -376,7 +366,7 @@ git diff
 ### View the files that have changes
 
 It's important to be aware of what's happening and the status of your changes. When
-you add, change, or delete files/folders, Git knows about the changes.
+you add, change, or delete files or folders, Git knows about the changes.
 To check which files have been changed use:
 
 ```shell
@@ -408,6 +398,12 @@ git commit -m "COMMENT TO DESCRIBE THE INTENTION OF THE COMMIT"
 
 NOTE:
 The `.` character means _all file changes in the current directory and all subdirectories_.
+
+To run `git add .` as part of the commit command, use the `-a` option:
+
+```shell
+git commit -a -m "COMMENT TO DESCRIBE THE INTENTION OF THE COMMIT"
+```
 
 ### Send changes to GitLab.com
 
@@ -443,7 +439,7 @@ Any untracked (new) files are untouched.
 
 ### Unstage all changes that have been added to the staging area
 
-To unadd all files that have not been committed, use:
+To unstage (remove) all files that have not been committed from being committed, use:
 
 ```shell
 git reset
