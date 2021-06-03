@@ -4,6 +4,8 @@ module Subscriptions
   class CreateService
     attr_reader :current_user, :customer_params, :subscription_params
 
+    CUSTOMERS_OAUTH_APP_ID_CACHE_KEY = 'customers_oauth_app_id'
+
     def initialize(current_user, group:, customer_params:, subscription_params:)
       @current_user = current_user
       @group = group
@@ -44,7 +46,9 @@ module Subscriptions
     # Return an empty hash for now, because the Customers API requires the credentials attribute to be present,
     # although it does not require the actual values. Remove this once the Customers API has been updated.
     def credentials_attrs
-      {}
+      {
+        token: oauth_token
+      }
     end
 
     def customer_attrs
@@ -88,6 +92,20 @@ module Subscriptions
 
     def client
       Gitlab::SubscriptionPortal::Client
+    end
+
+    def customers_oauth_app_id
+      Rails.cache.fetch('customers_oauth_app_id', expires_in: 1.hour) do
+        response = client.customers_oauth_app_id
+
+        response.dig(:data, 'customers_oauth_app_id')
+      end
+    end
+
+    def oauth_token
+      return unless customers_oauth_app_id
+
+      Doorkeeper::AccessToken.create(application_id: customers_oauth_app_id, resource_owner_id: current_user.id)&.token
     end
   end
 end
