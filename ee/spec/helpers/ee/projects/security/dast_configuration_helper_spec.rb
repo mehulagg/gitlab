@@ -7,7 +7,6 @@ RSpec.describe Projects::Security::DastConfigurationHelper do
 
   let(:security_configuration_path) { project_security_configuration_path(project) }
   let(:full_path) { project.full_path }
-  let(:dast_documentation_path) { help_page_path('user/application_security/dast/index') }
   let(:gitlab_ci_yaml_edit_path) { Rails.application.routes.url_helpers.project_ci_pipeline_editor_path(project) }
 
   describe '#dast_configuration_data' do
@@ -17,7 +16,6 @@ RSpec.describe Projects::Security::DastConfigurationHelper do
       is_expected.to eq({
         security_configuration_path: security_configuration_path,
         full_path: full_path,
-        dast_documentation_path: dast_documentation_path,
         gitlab_ci_yaml_edit_path: gitlab_ci_yaml_edit_path
       })
     }

@@ -16,12 +16,7 @@ export default function init() {
     defaultClient: createDefaultClient(),
   });
 
-  const {
-    securityConfigurationPath,
-    fullPath,
-    dastDocumentationPath,
-    gitlabCiYamlEditPath,
-  } = el.dataset;
+  const { securityConfigurationPath, fullPath, gitlabCiYamlEditPath } = el.dataset;
 
   return new Vue({
     el,
@@ -29,7 +24,6 @@ export default function init() {
     provide: {
       securityConfigurationPath,
       fullPath,
-      dastDocumentationPath,
       gitlabCiYamlEditPath,
     },
     render(createElement) {

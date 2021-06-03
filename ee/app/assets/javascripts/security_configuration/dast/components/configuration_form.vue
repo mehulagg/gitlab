@@ -1,21 +1,18 @@
 <script>
 import { GlLink, GlSprintf } from '@gitlab/ui';
 import { s__ } from '~/locale';
+import { DAST_HELP_PATH } from '~/security_configuration/components/constants';
 
 export default {
   components: {
     GlLink,
     GlSprintf,
   },
-  inject: {
-    dastDocumentationPath: {
-      from: 'dastDocumentationPath',
-    },
-  },
   i18n: {
     helpText: s__(`
-      DastConfig|Customize DAST settings to suit your requirements. Configuration changes made here override these provided by GitLab and are excluded from updates. For details of more advanced configuration options, see the %{docsLinkStart}GitLab DAST documentation%{docsLinkEnd}.`),
+      DastConfig|Customize DAST settings to suit your requirements. Configuration changes made here override those provided by GitLab and are excluded from updates. For details of more advanced configuration options, see the %{docsLinkStart}GitLab DAST documentation%{docsLinkEnd}.`),
   },
+  DAST_HELP_PATH,
 };
 </script>
 
@@ -24,7 +21,7 @@ export default {
     <p>
       <gl-sprintf :message="$options.i18n.helpText">
         <template #docsLink="{ content }">
-          <gl-link :href="dastDocumentationPath" target="_blank">{{ content }}</gl-link>
+          <gl-link :href="$options.DAST_HELP_PATH" target="_blank">{{ content }}</gl-link>
         </template>
       </gl-sprintf>
     </p>

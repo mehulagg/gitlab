@@ -9,15 +9,12 @@ export default {
     GlTab,
     GlTabs,
   },
+  data() {
+    return {
+      tabIndex: 0,
+    };
+  },
   computed: {
-    tabIndex: {
-      get() {
-        return 0;
-      },
-      set(newTabIndex) {
-        return newTabIndex;
-      },
-    },
     dastSettings() {
       return [
         {
@@ -41,10 +38,10 @@ export default {
     <gl-tabs v-model="tabIndex">
       <gl-tab v-for="(tab, index) in dastSettings" :key="index">
         <template #title>
-          <span>{{ tab.title }}</span>
+          {{ tab.title }}
         </template>
 
-        <component :is="dastSettings[index].component" />
+        <component :is="tab.component" />
       </gl-tab>
     </gl-tabs>
   </article>

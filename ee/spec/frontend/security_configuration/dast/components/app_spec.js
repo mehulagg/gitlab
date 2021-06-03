@@ -19,23 +19,25 @@ describe('EE - DAST Configuration App', () => {
   const findTabs = () => wrapper.findAllComponents(GlTab);
   const findTabsContainer = () => wrapper.findComponent(GlTabs);
 
-  it('mounts', () => {
+  beforeEach(() => {
     createComponent();
+  });
 
+  afterEach(() => {
+    wrapper.destroy();
+  });
+
+  it('mounts', () => {
     expect(wrapper.exists()).toBe(true);
     expect(wrapper.text()).toContain('DAST Settings');
   });
 
   it('shows the tabs correctly', () => {
-    createComponent();
-
     expect(findTabsContainer().exists()).toBe(true);
     expect(findTabs()).toHaveLength(1);
   });
 
-  it('loads the scan configuration by default', () => {
-    createComponent();
-
+  it('loads the scan configuration form by default', () => {
     expect(findForm().exists()).toBe(true);
   });
 });
