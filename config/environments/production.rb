@@ -79,4 +79,13 @@ Rails.application.configure do
   config.action_mailer.raise_delivery_errors = true
 
   config.eager_load = true
+
+  # Set these settings in order to make the cookies backwards compatible with previous Rails versions
+  #
+  # https://github.com/rails/rails/blob/38998af1d9035d529e553251ae441f0c09b7e8ab/railties/lib/rails/generators/rails/app/templates/config/initializers/new_framework_defaults_6_1.rb.tt#L22-L26
+  #
+  # It's best enabled when your entire app is migrated and stable on 6.1.
+  #
+  config.action_dispatch.cookies_same_site_protection = nil
+  config.action_controller.urlsafe_csrf_tokens = false
 end
