@@ -209,7 +209,6 @@ Settings.gitlab.default_projects_features['visibility_level']   = Settings.__sen
 Settings.gitlab['domain_allowlist'] ||= []
 Settings.gitlab['import_sources'] ||= Gitlab::ImportSources.values
 Settings.gitlab['trusted_proxies'] ||= []
-Settings.gitlab['content_security_policy'] ||= Gitlab::ContentSecurityPolicy::ConfigLoader.default_settings_hash
 Settings.gitlab['allowed_hosts'] ||= []
 Settings.gitlab['no_todos_messages'] ||= YAML.load_file(Rails.root.join('config', 'no_todos_messages.yml'))
 Settings.gitlab['impersonation_enabled'] ||= true if Settings.gitlab['impersonation_enabled'].nil?
@@ -938,3 +937,6 @@ if Rails.env.test?
   Settings.gitlab['default_can_create_group'] = true
   Settings.gitlab['default_can_create_team']  = false
 end
+
+# See https://gitlab.com/gitlab-org/gitlab-development-kit/-/issues/1244
+Settings.gitlab['content_security_policy'] ||= Gitlab::ContentSecurityPolicy::ConfigLoader.default_settings_hash
