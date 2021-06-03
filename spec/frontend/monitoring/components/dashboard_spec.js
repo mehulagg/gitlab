@@ -3,6 +3,7 @@ import { shallowMount, mount } from '@vue/test-utils';
 import MockAdapter from 'axios-mock-adapter';
 import VueDraggable from 'vuedraggable';
 import { TEST_HOST } from 'helpers/test_constants';
+import { mountExtended, shallowMountExtended } from 'helpers/vue_test_utils_helper';
 import createFlash from '~/flash';
 import axios from '~/lib/utils/axios_utils';
 import { ESC_KEY } from '~/lib/utils/keys';
@@ -41,7 +42,7 @@ describe('Dashboard', () => {
   let mock;
 
   const createShallowWrapper = (props = {}, options = {}) => {
-    wrapper = shallowMount(Dashboard, {
+    wrapper = shallowMountExtended(Dashboard, {
       propsData: { ...dashboardProps, ...props },
       store,
       stubs: {
@@ -53,7 +54,7 @@ describe('Dashboard', () => {
   };
 
   const createMountedWrapper = (props = {}, options = {}) => {
-    wrapper = mount(Dashboard, {
+    wrapper = mountExtended(Dashboard, {
       propsData: { ...dashboardProps, ...props },
       store,
       stubs: {
@@ -818,13 +819,12 @@ describe('Dashboard', () => {
     });
   });
 
-  describe.only('alerts deprecation', () => {
+  describe('alerts deprecation', () => {
     beforeEach(() => {
       setupStoreWithData(store);
     });
 
-    const findDeprecationNotice = () =>
-      wrapper.find(AlertDeprecationWarning).findComponent(GlAlert);
+    const findDeprecationNotice = () => wrapper.findByTestId('alerts-deprecation-warning');
 
     it.each`
       managedAlertsDeprecation | hasManagedPrometheus | isVisible
@@ -832,23 +832,15 @@ describe('Dashboard', () => {
       ${false}                 | ${true}              | ${true}
       ${true}                  | ${false}             | ${false}
       ${true}                  | ${true}              | ${false}
-    `(({ hasManagedPrometheus, managedAlertsDeprecation, isVisible }) => {
-      createMountedWrapper(
-        {},
-        { provide: { hasManagedPrometheus }, glFeatures: { managedAlertsDeprecation } },
-      );
-      expect(findDeprecationNotice().exists()).toBe(isVisible);
-    });
-    // it('shows the deprecation notice when available', () => {
-    //   createMountedWrapper({}, { provide: { hasManagedPrometheus: true } });
-
-    //   expect(findDeprecationNotice().exists()).toBe(true);
-    // });
-
-    // it('hides the deprecation notice when not available', () => {
-    //   createMountedWrapper();
-
-    //   expect(findDeprecationNotice().exists()).toBe(false);
-    // });
+    `(
+      'when the deprecation feature flag is $managedAlertsDeprecation and has managed prometheus is $hasManagedPrometheus',
+      ({ hasManagedPrometheus, managedAlertsDeprecation, isVisible }) => {
+        createMountedWrapper(
+          {},
+          { provide: { hasManagedPrometheus, glFeatures: { managedAlertsDeprecation } } },
+        );
+        expect(findDeprecationNotice().exists()).toBe(isVisible);
+      },
+    );
   });
 });
