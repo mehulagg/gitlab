@@ -12169,6 +12169,9 @@ msgstr ""
 msgid "Enable Seat Link"
 msgstr ""
 
+msgid "Enable Snowplow tracking"
+msgstr ""
+
 msgid "Enable Spam Check via external API endpoint"
 msgstr ""
 
@@ -12284,9 +12287,6 @@ msgid "Enable smartcn custom analyzer: Indexing"
 msgstr ""
 
 msgid "Enable smartcn custom analyzer: Search"
-msgstr ""
-
-msgid "Enable snowplow tracking"
 msgstr ""
 
 msgid "Enable two-factor authentication"
