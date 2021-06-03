@@ -42,7 +42,7 @@ DAST can analyze applications in two ways:
   useful when combined with [Review Apps](../../../ci/review_apps/index.md).
 
 NOTE:
-Note that a pipeline may consist of multiple jobs, including SAST and DAST scanning. If any job
+A pipeline may consist of multiple jobs, including SAST and DAST scanning. If any job
 fails to finish for any reason, the security dashboard doesn't show DAST scanner output. For
 example, if the DAST job finishes but the SAST job fails, the security dashboard doesn't show DAST
 results. On failure, the analyzer outputs an
@@ -52,19 +52,19 @@ results. On failure, the analyzer outputs an
 
 - [GitLab Runner](../../../ci/runners/README.md) available, with the
 [`docker` executor](https://docs.gitlab.com/runner/executors/docker.html).
-- Target application deployed. For more details, see [Deployment options](#deployment-options).
+- Target application deployed. For more details, read [Deployment options](#deployment-options).
 
 ### Deployment options
 
 Depending on the complexity of the target application, there are a few options as to how to deploy and configure
-the DAST template. A set of example applications with their configurations have been made available in our
+the DAST template. We provided a set of example applications with their configurations in our
 [DAST demonstrations](https://gitlab.com/gitlab-org/security-products/demos/dast/) project.
 
 #### Review Apps
 
 Review Apps are the most involved method of deploying your DAST target application. To assist in the process,
 we created a Review App deployment using Google Kubernetes Engine (GKE). This example can be found in our
-[Review Apps - GKE](https://gitlab.com/gitlab-org/security-products/demos/dast/review-app-gke) project along with detailed
+[Review Apps - GKE](https://gitlab.com/gitlab-org/security-products/demos/dast/review-app-gke) project, along with detailed
 instructions in the [README.md](https://gitlab.com/gitlab-org/security-products/demos/dast/review-app-gke/-/blob/master/README.md)
 on how to configure Review Apps for DAST.
 
@@ -664,15 +664,14 @@ headers whose values you want masked. For details on how to mask headers, see
 It's also possible to authenticate the user before performing the DAST checks.
 
 NOTE:
-We highly recommended that you configure the scanner to authenticate to the application,
-otherwise it cannot check most of the application for security risks, as most
-of your application is likely not accessible without authentication. It is also recommended
-that you periodically confirm the scanner's authentication is still working as this tends to break over
+We highly recommend you configure the scanner to authenticate to the application. If you don't, it cannot check most of the application for security risks, as most
+of your application is likely not accessible without authentication. We also recommend
+you periodically confirm the scanner's authentication is still working, as this tends to break over
 time due to authentication changes to the application.
 
 Create masked CI/CD variables to pass the credentials that DAST uses.
 To create masked variables for the username and password, see [Create a custom variable in the UI](../../../ci/variables/README.md#custom-cicd-variables).
-Note that the key of the username variable must be `DAST_USERNAME`
+The key of the username variable must be `DAST_USERNAME`,
 and the key of the password variable must be `DAST_PASSWORD`.
 
 After DAST has authenticated with the application, all cookies are collected from the web browser.
@@ -730,7 +729,7 @@ DAST can be [configured](#customizing-the-dast-settings) using CI/CD variables.
 | `DAST_ONLY_INCLUDE_RULES`                   | string        | Set to a comma-separated list of Vulnerability Rule IDs to configure the scan to run only them. Rule IDs are numbers and can be found from the DAST log or on the [ZAP project](https://www.zaproxy.org/docs/alerts/). Cannot be used when `DAST_EXCLUDE_RULES` is set. [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/250651) in GitLab 13.12. |
 | `DAST_REQUEST_HEADERS` (**1**)              | string        | Set to a comma-separated list of request header names and values. Headers are added to every request made by DAST. For example, `Cache-control: no-cache,User-Agent: DAST/1.0` |
 | `DAST_DEBUG` (**1**)                        | boolean       | Enable debug message output. Default: `false`. [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/12652) in GitLab 13.1. |
-| `DAST_TARGET_AVAILABILITY_TIMEOUT` (**1**)  | number        | Time limit in seconds to wait for target availability. 
+| `DAST_TARGET_AVAILABILITY_TIMEOUT` (**1**)  | number        | Time limit in seconds to wait for target availability.
 | `DAST_SPIDER_MINS` (**1**)                  | number        | The maximum duration of the spider scan in minutes. Set to `0` for unlimited. Default: One minute, or unlimited when the scan is a full scan. [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/12652) in GitLab 13.1. |
 | `DAST_HTML_REPORT`                          | string        | The filename of the HTML report written at the end of a scan. [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/12652) in GitLab 13.1. |
 | `DAST_MARKDOWN_REPORT`                      | string        | The filename of the Markdown report written at the end of a scan. [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/12652) in GitLab 13.1. |
@@ -1021,7 +1020,7 @@ A site profile contains the following:
 - **Target URL**: The URL that DAST runs against.
 - **Excluded URLs**: A comma-separated list of URLs to exclude from the scan.
 - **Request headers**: A comma-separated list of HTTP request headers, including names and values. These headers are added to every request made by DAST.
-- **Authentication**:  
+- **Authentication**:
   - **Authenticated URL**: The URL of the page containing the sign-in HTML form on the target website. The username and password are submitted with the login form to create an authenticated scan.
   - **Username**: The username used to authenticate to the website.
   - **Password**: The password used to authenticate to the website.
