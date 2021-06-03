@@ -203,8 +203,8 @@ read_secrets:
 ```
 
 NOTE:
-If you're following along with a HashiCorp Cloud Platform provided Vault instance, 
-you will also need to export the `VAULT_NAMESPACE` variable. The default namespace is `admin`.
+If you're using a Vault instance provided by HashiCorp Cloud Platform, 
+you need to export the `VAULT_NAMESPACE` variable. Its default value is `admin`.
 
 ![read_secrets staging](img/vault-read-secrets-staging.png)
 
