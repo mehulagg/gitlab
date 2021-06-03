@@ -73,49 +73,13 @@ To run Knative on GitLab, you need:
 1. **Logging** (optional): Configuring logging allows you to view and search request logs for your serverless function/application.
    See [Configuring logging](#configuring-logging) for more information.
 
-## Installing Knative via the GitLab Kubernetes integration
-
-The minimum recommended cluster size to run Knative is 3-nodes, 6 vCPUs, and 22.50 GB
-memory. **RBAC must be enabled.**
-
-1. [Add a Kubernetes cluster](../add_remove_clusters.md).
-1. Select the **Applications** tab and scroll down to the Knative app section. Enter the domain to be used with
-   your application/functions (e.g. `example.com`) and click **Install**.
-
-   ![install-knative](img/install-knative.png)
-
-1. After the Knative installation has finished, you can wait for the IP address or hostname to be displayed in the
-   **Knative Endpoint** field or [retrieve the Istio Ingress Endpoint manually](../../../clusters/applications.md#determining-the-external-endpoint-manually).
-
-   NOTE:
-   Running `kubectl` commands on your cluster requires setting up access to the cluster first.
-   For clusters created on GKE, see [GKE Cluster Access](https://cloud.google.com/kubernetes-engine/docs/how-to/cluster-access-for-kubectl),
-   for other platforms [Install kubectl](https://kubernetes.io/docs/tasks/tools/).
-
-1. The Ingress is now available at this address and routes incoming requests to the proper service based on the DNS
-   name in the request. To support this, a wildcard DNS record should be created for the desired domain name. For example,
-   if your Knative base domain is `knative.info` then you need to create an A record or CNAME record with domain `*.knative.info`
-   pointing the IP address or hostname of the Ingress.
-
-   ![DNS entry](img/dns-entry.png)
-
-You can deploy either [functions](#deploying-functions) or [serverless applications](#deploying-serverless-applications)
-on a given project, but not both. The current implementation makes use of a
-`serverless.yml` file to signal a FaaS project.
-
-## Using an existing installation of Knative
+## Configuring Knative
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/issues/58941) in GitLab 12.0.
 
-The _invocations_ monitoring feature of GitLab serverless is unavailable when
-adding an existing installation of Knative.
-
-It's also possible to use GitLab Serverless with an existing Kubernetes cluster
-which already has Knative installed. You must do the following:
-
 1. Follow the steps to
-   [add an existing Kubernetes
-   cluster](../add_remove_clusters.md#add-existing-cluster).
+   [add a Kubernetes
+   cluster](../add_remove_clusters.md).
 
 1. Ensure GitLab can manage Knative:
    - For a non-GitLab managed cluster, ensure that the service account for the token
@@ -164,12 +128,16 @@ which already has Knative installed. You must do the following:
      kubectl apply -f knative-serving-only-role.yaml
      ```
 
-     If you would rather grant permissions on a per service account basis, you can do this
-     using a `Role` and `RoleBinding` specific to the service account and namespace.
+     Alternatively, permissions can be granted on a per-service account basis
+     using `Role`s and `RoleBinding`s (see the [Kubernetes RBAC
+     documentation](https://kubernetes.io/docs/reference/access-authn-authz/rbac/)
+     for more information).
 
 1. Follow the steps to deploy [functions](#deploying-functions)
    or [serverless applications](#deploying-serverless-applications) onto your
    cluster.
+
+1. **Optional:** For invocation metrics to show in GitLab, additional Istio metrics need to be configured in your cluster. For example, with Knative v0.9.0, you can use [this manifest](https://gitlab.com/gitlab-org/charts/knative/-/raw/v0.10.0/vendor/istio-metrics.yml).
 
 ## Supported runtimes
 
@@ -183,7 +151,7 @@ If a runtime is not available for the required programming language, consider de
 
 ### GitLab-managed runtimes
 
-Currently the following GitLab-managed [runtimes](https://gitlab.com/gitlab-org/serverless/runtimes)
+The following GitLab-managed [runtimes](https://gitlab.com/gitlab-org/serverless/runtimes)
 are available:
 
 - `go` (proof of concept)

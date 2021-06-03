@@ -200,19 +200,15 @@ To clear the cache:
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/24580) in GitLab 11.8.
 
-You do not need to specify a base domain on cluster settings when using GitLab Serverless. The domain in that case
-is specified as part of the Knative installation. See [Installing Applications](#installing-applications).
-
 Specifying a base domain automatically sets `KUBE_INGRESS_BASE_DOMAIN` as an deployment variable.
 If you are using [Auto DevOps](../../../topics/autodevops/index.md), this domain is used for the different
 stages. For example, Auto Review Apps and Auto Deploy.
 
 The domain should have a wildcard DNS configured to the Ingress IP address.
-After Ingress has been installed (see [Installing Applications](#installing-applications)),
-you can either:
+You can either:
 
 - Create an `A` record that points to the Ingress IP address with your domain provider.
-- Enter a wildcard DNS address using a service such as nip.io or xip.io. For example, `192.168.1.1.xip.io`.
+- Enter a wildcard DNS address using a service such as `nip.io` or `xip.io`. For example, `192.168.1.1.xip.io`.
 
 To determine the external Ingress IP address, or external Ingress hostname:
 
@@ -262,13 +258,11 @@ This list provides a generic solution, and some GitLab-specific approaches:
 
 If you see a trailing `%` on some Kubernetes versions, do not include it.
 
-## Installing applications
+## Cluster management project
 
-GitLab can install and manage some applications like Helm, GitLab Runner, Ingress,
-Prometheus, and so on, in your project-level cluster. For more information on
-installing, upgrading, uninstalling, and troubleshooting applications for
-your project cluster, see
-[GitLab Managed Apps](../../clusters/applications.md).
+Attach a [Cluster management project](../../clusters/management_project.md)
+to your cluster to manage shared resources requiring `cluster-admin` privileges for
+installation, such as an Ingress controller.
 
 ## Auto DevOps
 

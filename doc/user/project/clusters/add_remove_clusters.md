@@ -153,20 +153,20 @@ Amazon Elastic Kubernetes Service (EKS) at the project, group, or instance level
    - [Amazon EKS](add_eks_clusters.md#new-eks-cluster).
    - [Google GKE](add_gke_clusters.md#creating-the-cluster-on-gke).
 
-After creating a cluster, you can install runners for it as described in
-[GitLab Managed Apps](../../clusters/applications.md).
+After creating a cluster, you can [install runners](https://docs.gitlab.com/runner/install/kubernetes.html),
+add a [cluster management project](../../clusters/management_project.md),
+configure [Auto DevOps](../../../topics/autodevops/index.md),
+or start [deploying right away](index.md#-deploying-to-a-kubernetes-cluster).
 
 ## Add existing cluster
 
 If you have an existing Kubernetes cluster, you can add it to a project, group,
-or instance.
+or instance, and [install runners](https://docs.gitlab.com/runner/install/kubernetes.html)
+on it (the cluster does not need to be added to GitLab first).
 
-Kubernetes integration isn't supported for arm64 clusters. See the issue
-[Helm Tiller fails to install on arm64 cluster](https://gitlab.com/gitlab-org/gitlab/-/issues/29838)
-for details.
-
-After adding an existing cluster, you can install runners for it as described in
-[GitLab Managed Apps](../../clusters/applications.md).
+After adding a cluster, you can add a [cluster management project](../../clusters/management_project.md),
+configure [Auto DevOps](../../../topics/autodevops/index.md),
+or start [deploying right away](index.md#-deploying-to-a-kubernetes-cluster).
 
 ### Existing Kubernetes cluster
 

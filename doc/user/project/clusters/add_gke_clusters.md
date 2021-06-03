@@ -79,8 +79,8 @@ to install some [pre-defined applications](index.md#installing-applications).
 
 You can choose to use Cloud Run for Anthos in place of installing Knative and Istio
 separately after the cluster has been created. This means that Cloud Run
-(Knative), Istio, and HTTP Load Balancing are enabled on the cluster at
-create time and cannot be [installed or uninstalled](../../clusters/applications.md) separately.
+(Knative), Istio, and HTTP Load Balancing are enabled on the cluster
+from the start, and cannot be installed or uninstalled.
 
 ## Existing GKE cluster
 
