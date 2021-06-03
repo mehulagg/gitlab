@@ -5,6 +5,16 @@ module Gitlab
     class GitlabCiYmlTemplate < BaseTemplate
       BASE_EXCLUDED_PATTERNS = [%r{\.latest\.}].freeze
 
+      TEMPLATES_WITH_LATEST_VERSION = %w[
+        Verify/Browser-Performance
+        Jobs/Deploy
+        Jobs/Browser-Performance-Testing
+        Security/API-Fuzzing
+        Security/DAST
+        Terraform
+        Terraform/Base
+      ].freeze
+
       def description
         "# This file is a template, and might need editing before it works on your project."
       end
@@ -53,6 +63,26 @@ module Gitlab
             self.include_categories_for_file,
             excluded_patterns: self.excluded_patterns
           )
+        end
+
+        def find(key, project = nil)
+          if try_redirect_to_latest?(key, project)
+            key += '.latest'
+          end
+
+          super(key, project)
+        end
+
+        # For measuring the impact of the breaking change,
+        # you can redirect the stable template inclusion to the latest template
+        # by enabling the feature flag.
+        # See https://docs.gitlab.com/ee/development/cicd/templates.html#versioning
+        # for more information.
+        def try_redirect_to_latest?(key, project)
+          return false unless TEMPLATES_WITH_LATEST_VERSION[key]
+
+          flag_name = "redirect_to_latest_template_#{key.underscore.gsub('/', '_')}"
+          ::Feature.enabled?(flag_name, project, default_enabled: :yaml)
         end
       end
     end
