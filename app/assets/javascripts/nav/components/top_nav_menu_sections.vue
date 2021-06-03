@@ -27,7 +27,16 @@ export default {
 
       this.$emit('menu-item-click', menuItem);
     },
+    getMenuSectionClasses(index) {
+      // This is a method instead of a computed so we don't have to incur the cost of
+      // creating a whole new array/object.
+      return {
+        [BORDER_CLASSES]: this.withTopBorder || index > 0,
+        'gl-mt-3': index > 0,
+      };
+    },
   },
+  // Expose for unit tests
   BORDER_CLASSES,
 };
 </script>
@@ -37,10 +46,7 @@ export default {
     <div
       v-for="({ id, menuItems }, sectionIndex) in sections"
       :key="id"
-      :class="{
-        [$options.BORDER_CLASSES]: withTopBorder || sectionIndex > 0,
-        'gl-mt-3': sectionIndex > 0,
-      }"
+      :class="getMenuSectionClasses(sectionIndex)"
       data-testid="menu-section"
     >
       <top-nav-menu-item
