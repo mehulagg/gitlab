@@ -5,6 +5,8 @@ user_args = {
   admin:    true
 }
 
+display_initial_root_password = ::Settings.gitlab['display_initial_root_password']
+
 if ENV['GITLAB_ROOT_PASSWORD'].blank?
   user_args[:password_automatically_set] = true
   user_args[:force_random_password] = true
@@ -23,7 +25,11 @@ if user.persisted?
   puts "login:    root".color(:green)
 
   if user_args.key?(:password)
-    puts "password: #{user_args[:password]}".color(:green)
+    if display_initial_root_password
+      puts "password: #{user_args[:password]}".color(:green)
+    else
+      puts "password: You opted not to print password to STDOUT."
+    end
   else
     puts "password: You'll be prompted to create one on your first visit.".color(:green)
   end

@@ -12,6 +12,7 @@ Settings['encrypted_settings'] ||= Settingslogic.new({})
 Settings.encrypted_settings['path'] ||= File.join(Settings.shared['path'], "encrypted_settings")
 Settings.encrypted_settings['path'] = Settings.absolute(Settings.encrypted_settings['path'])
 
+
 Settings['ldap'] ||= Settingslogic.new({})
 Settings.ldap['enabled'] = false if Settings.ldap['enabled'].nil?
 Settings.ldap['servers'] ||= Settingslogic.new({})
@@ -215,6 +216,8 @@ Settings.gitlab['no_todos_messages'] ||= YAML.load_file(Rails.root.join('config'
 Settings.gitlab['impersonation_enabled'] ||= true if Settings.gitlab['impersonation_enabled'].nil?
 Settings.gitlab['usage_ping_enabled'] = true if Settings.gitlab['usage_ping_enabled'].nil?
 Settings.gitlab['max_request_duration_seconds'] ||= 57
+
+Settings.gitlab['display_initial_root_password'] = true if Settings.gitlab['display_initial_root_password'].nil?
 
 Gitlab.ee do
   Settings.gitlab['mirror_max_delay'] ||= 300
