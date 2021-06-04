@@ -607,7 +607,9 @@ export default {
       })
       .then(({ data }) => {
         const [firstError] = data.workspace.errors || [];
-        const assignees = data.workspace.assignees.nodes.map(({ user }) => user);
+        const assignees = data.workspace.assignees.nodes
+          .filter((x) => x?.user)
+          .map(({ user }) => user);
 
         if (firstError) {
           throw new Error(firstError);
@@ -615,7 +617,7 @@ export default {
         commit(
           types.RECEIVE_ASSIGNEES_SUCCESS,
           // User field is nullable and we only want to display non-null users
-          assignees.filter((u) => u),
+          assignees,
         );
       })
       .catch((e) => {
