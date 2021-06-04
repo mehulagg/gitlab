@@ -10,13 +10,19 @@ MAIL_ROOM_CONFIG_ENABLED_SAMPLE =
   "      :port: 143\n"\
   ""
 
+MAIL_ROOM_CONFIG_DISABLED_SAMPLE = ":mailboxes:\n"
+
 RSpec.describe SystemCheck::IncomingEmail::ImapAuthenticationCheck do
   subject(:system_check) { described_class.new }
 
   describe '#load_config' do
     subject { system_check.send(:load_config) }
 
-    context 'returns no mailbox configurations with mailroom default configuration' do
+    context 'returns no mailbox configurations with empty mailroom configuration' do
+      before do
+        allow(File).to receive(:read).and_return(MAIL_ROOM_CONFIG_DISABLED_SAMPLE)
+      end
+
       it { is_expected.to be_nil }
     end
 
