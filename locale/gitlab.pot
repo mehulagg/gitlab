@@ -38009,6 +38009,9 @@ msgstr ""
 msgid "can't be enabled because signed commits are required for this project"
 msgstr ""
 
+msgid "can't be the same as the source project"
+msgstr ""
+
 msgid "can't include: %{invalid_storages}"
 msgstr ""
 

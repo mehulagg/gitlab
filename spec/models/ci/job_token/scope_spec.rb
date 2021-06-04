@@ -17,10 +17,11 @@ RSpec.describe Ci::JobToken::Scope do
     end
 
     context 'when other projects are added to the scope' do
-      let(:scoped_project) { create(:project) }
-      let(:unscoped_project) { create(:project) }
-      let!(:link_in_scope) { create(:ci_job_token_scope_link, source_project: project, target_project: scoped_project) }
-      let!(:link_out_of_scope) { create(:ci_job_token_scope_link, target_project: unscoped_project) }
+      let_it_be(:scoped_project) { create(:project) }
+      let_it_be(:unscoped_project) { create(:project) }
+
+      let!(:link_in_scope) { create(:ci_job_token_project_scope_link, source_project: project, target_project: scoped_project) }
+      let!(:link_out_of_scope) { create(:ci_job_token_project_scope_link, target_project: unscoped_project) }
 
       it 'returns all projects that can be accessed from a given scope' do
         expect(subject).to contain_exactly(project, scoped_project)
@@ -38,14 +39,14 @@ RSpec.describe Ci::JobToken::Scope do
     end
 
     context 'when param is a project in scope' do
-      let(:target_link) { create(:ci_job_token_scope_link, source_project: project) }
+      let(:target_link) { create(:ci_job_token_project_scope_link, source_project: project) }
       let(:target_project) { target_link.target_project }
 
       it { is_expected.to be_truthy }
     end
 
     context 'when param is a project in another scope' do
-      let(:scope_link) { create(:ci_job_token_scope_link) }
+      let(:scope_link) { create(:ci_job_token_project_scope_link) }
       let(:target_project) { scope_link.target_project }
 
       it { is_expected.to be_falsey }

@@ -23,13 +23,17 @@ module Ci
 
       def includes?(target_project)
         target_project.id == source_project.id ||
-          Ci::JobToken::ScopeLink.from_project(source_project).to_project(target_project).exists?
+          Ci::JobToken::ProjectScopeLink.from_project(source_project).to_project(target_project).exists?
       end
 
       def all_projects
-        Project
-          .id_in(Ci::JobToken::ScopeLink.from_project(source_project).select(:target_project_id))
-          .or(Project.id_in(source_project))
+        Project.from_union([
+          Project.id_in(source_project),
+          Project.where_exists(
+            Ci::JobToken::ProjectScopeLink
+              .from_project(source_project)
+              .where('projects.id = ci_job_token_project_scope_links.target_project_id'))
+        ], remove_duplicates: false)
       end
     end
   end
