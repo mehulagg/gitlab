@@ -19,6 +19,14 @@ class ProjectSetting < ApplicationRecord
   def squash_readonly?
     %w[always never].include?(squash_option)
   end
+
+  def boo?
+    if Feature.enabled?(:test_feature_flag, project)
+      true
+    else
+      false
+    end
+  end
 end
 
 ProjectSetting.prepend_mod
