@@ -112,7 +112,7 @@ module Gitlab
             # `BackgroundMigrationWorker.bulk_perform_in` schedules all jobs for
             # the same time, which is not helpful in most cases where we wish to
             # spread the work over time.
-            final_delay = initial_delay + delay_interval * index
+            final_delay = initial_delay + delay_interval * (index-1)
             full_job_arguments = [start_id, end_id] + other_job_arguments
 
             track_in_database(job_class_name, full_job_arguments) if track_jobs
@@ -128,7 +128,7 @@ module Gitlab
             The migration is expected to take at least #{duration} seconds. Expect all jobs to have completed after #{Time.zone.now + duration}."
           SAY
 
-          final_delay
+          duration
         end
 
         # Creates a batched background migration for the given table. A batched migration runs one job

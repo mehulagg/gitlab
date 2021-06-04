@@ -117,9 +117,9 @@ RSpec.describe Gitlab::Database::Migrations::BackgroundMigrationHelpers do
             model.queue_background_migration_jobs_by_range_at_intervals(User, 'FooJob', 10.minutes, batch_size: 2)
 
             expect(BackgroundMigrationWorker.jobs[0]['args']).to eq(['FooJob', [id1, id2]])
-            expect(BackgroundMigrationWorker.jobs[0]['at']).to eq(10.minutes.from_now.to_f)
+            expect(BackgroundMigrationWorker.jobs[0]['at']).to be_nil
             expect(BackgroundMigrationWorker.jobs[1]['args']).to eq(['FooJob', [id3, id3]])
-            expect(BackgroundMigrationWorker.jobs[1]['at']).to eq(20.minutes.from_now.to_f)
+            expect(BackgroundMigrationWorker.jobs[1]['at']).to eq(10.minutes.from_now.to_f)
           end
         end
       end
@@ -130,7 +130,7 @@ RSpec.describe Gitlab::Database::Migrations::BackgroundMigrationHelpers do
             model.queue_background_migration_jobs_by_range_at_intervals(User, 'FooJob', 10.minutes)
 
             expect(BackgroundMigrationWorker.jobs[0]['args']).to eq(['FooJob', [id1, id3]])
-            expect(BackgroundMigrationWorker.jobs[0]['at']).to eq(10.minutes.from_now.to_f)
+            expect(BackgroundMigrationWorker.jobs[0]['at']).to be_nil
           end
         end
       end
@@ -141,7 +141,7 @@ RSpec.describe Gitlab::Database::Migrations::BackgroundMigrationHelpers do
             model.queue_background_migration_jobs_by_range_at_intervals(User, 'FooJob', 10.minutes, other_job_arguments: [1, 2])
 
             expect(BackgroundMigrationWorker.jobs[0]['args']).to eq(['FooJob', [id1, id3, 1, 2]])
-            expect(BackgroundMigrationWorker.jobs[0]['at']).to eq(10.minutes.from_now.to_f)
+            expect(BackgroundMigrationWorker.jobs[0]['at']).to be_nil
           end
         end
       end
@@ -152,7 +152,7 @@ RSpec.describe Gitlab::Database::Migrations::BackgroundMigrationHelpers do
             model.queue_background_migration_jobs_by_range_at_intervals(User, 'FooJob', 10.minutes, other_job_arguments: [1, 2], initial_delay: 10.minutes)
 
             expect(BackgroundMigrationWorker.jobs[0]['args']).to eq(['FooJob', [id1, id3, 1, 2]])
-            expect(BackgroundMigrationWorker.jobs[0]['at']).to eq(20.minutes.from_now.to_f)
+            expect(BackgroundMigrationWorker.jobs[0]['at']).to eq(10.minutes.from_now.to_f)
           end
         end
       end
@@ -210,9 +210,9 @@ RSpec.describe Gitlab::Database::Migrations::BackgroundMigrationHelpers do
 
           expect(final_delay.to_f).to eq(20.minutes.to_f)
           expect(BackgroundMigrationWorker.jobs[0]['args']).to eq(['FooJob', [id1, id2]])
-          expect(BackgroundMigrationWorker.jobs[0]['at']).to eq(10.minutes.from_now.to_f)
+          expect(BackgroundMigrationWorker.jobs[0]['at']).to be_nil
           expect(BackgroundMigrationWorker.jobs[1]['args']).to eq(['FooJob', [id3, id3]])
-          expect(BackgroundMigrationWorker.jobs[1]['at']).to eq(20.minutes.from_now.to_f)
+          expect(BackgroundMigrationWorker.jobs[1]['at']).to eq(10.minutes.from_now.to_f)
         end
       end
 
