@@ -16,13 +16,13 @@ WebSockets are a relatively new technology in GitLab and supporting them at
 scale introduces some challenges. For that reason, new features should be rolled 
 out carefully in collaboration with the Plan and Scalability teams.
 
-## Features reusing an existing WebSocket connection
+## Reusing an existing WebSocket connection
 
 Features reusing an existing connection incur minimal risk. Feature flag rollout
 is recommended. However, it is not necessary to roll out in percentages or to
 estimate new capacity required.
 
-## Features introducing a new WebSocket connection
+## Introducing a new WebSocket connection
 
 Any change that introduces a WebSocket connection to part of the GitLab site
 incurs some scalability risk, both to nodes responsible for maintaining open 
@@ -62,21 +62,21 @@ is feature flagged and defaulted to 'off'. A careful, percentage-based roll-out
 of the feature flag will ensure that impact can be observed on the [WebSocket
 dashboard](https://dashboards.gitlab.net/d/websockets-main/websockets-overview?orgId=1)
 
-### Backwards compatibility
+## Backwards compatibility
 
 For the period of the feature flag roll-out and indefinitely thereafter,
 real-time features will need to be backwards compatible, or at least degrade
 gracefully. Not all customers will have Action Cable enabled and further work
 needs to be done before Action Cable can be enabled by default.
 
-### Enabling Real-Time by default
+## Enabling Real-Time by default
 
-Simply mounting the Action Cable library adds minimal memory footprint. However,
+Mounting the Action Cable library adds minimal memory footprint. However,
 serving WebSocket requests introduces additional memory requirements. For this
 reason, enabling Action Cable by default will require additional work; perhaps
 to reduce overall memory usage, including a known issue with Workhorse, but at
 least to revise Reference Architectures.
 
-### Real-time infrastructure
+## Real-time infrastructure on GitLab.com
 
 
