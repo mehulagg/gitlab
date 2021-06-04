@@ -20,7 +20,7 @@ module EE
               return {} unless @seed_attributes[:stage] == 'dast'
               return {} unless ::Feature.enabled?(:dast_configuration_ui, @pipeline.project)
 
-              result = AppSec::Dast::Variables::FetchService.new(
+              result = AppSec::Dast::Profiles::FetchService.new(
                 container: @pipeline.project,
                 params: {
                   dast_site_profile: fetch_job_variable('DAST_SITE_PROFILE'),
@@ -30,7 +30,8 @@ module EE
 
               return {} unless result.success?
 
-              result.payload
+              { dast_site_profile: result.payload[:dast_site_profile] }
+
             end
             # rubocop:enable Gitlab/ModuleWithInstanceVariables
 

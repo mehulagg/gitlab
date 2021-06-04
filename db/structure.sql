@@ -12070,6 +12070,23 @@ CREATE TABLE dast_site_profiles (
     CONSTRAINT check_f22f18002a CHECK ((char_length(auth_username) <= 255))
 );
 
+CREATE TABLE dast_site_profiles_builds (
+    id bigint NOT NULL,
+    dast_site_profile_id bigint NOT NULL,
+    ci_build_id bigint NOT NULL
+);
+
+COMMENT ON TABLE dast_site_profiles_builds IS '{"owner":"group::dynamic analysis","description":"Join table between DAST Site Profiles and CI Builds"}';
+
+CREATE SEQUENCE dast_site_profiles_builds_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE dast_site_profiles_builds_id_seq OWNED BY dast_site_profiles_builds.id;
+
 CREATE SEQUENCE dast_site_profiles_id_seq
     START WITH 1
     INCREMENT BY 1
@@ -19747,6 +19764,8 @@ ALTER TABLE ONLY dast_site_profile_secret_variables ALTER COLUMN id SET DEFAULT 
 
 ALTER TABLE ONLY dast_site_profiles ALTER COLUMN id SET DEFAULT nextval('dast_site_profiles_id_seq'::regclass);
 
+ALTER TABLE ONLY dast_site_profiles_builds ALTER COLUMN id SET DEFAULT nextval('dast_site_profiles_builds_id_seq'::regclass);
+
 ALTER TABLE ONLY dast_site_tokens ALTER COLUMN id SET DEFAULT nextval('dast_site_tokens_id_seq'::regclass);
 
 ALTER TABLE ONLY dast_site_validations ALTER COLUMN id SET DEFAULT nextval('dast_site_validations_id_seq'::regclass);
@@ -20994,6 +21013,9 @@ ALTER TABLE ONLY dast_scanner_profiles
 ALTER TABLE ONLY dast_site_profile_secret_variables
     ADD CONSTRAINT dast_site_profile_secret_variables_pkey PRIMARY KEY (id);
 
+ALTER TABLE ONLY dast_site_profiles_builds
+    ADD CONSTRAINT dast_site_profiles_builds_pkey PRIMARY KEY (id);
+
 ALTER TABLE ONLY dast_site_profiles_pipelines
     ADD CONSTRAINT dast_site_profiles_pipelines_pkey PRIMARY KEY (dast_site_profile_id, ci_pipeline_id);
 
@@ -22230,6 +22252,8 @@ CREATE INDEX code_owner_approval_required ON protected_branches USING btree (pro
 CREATE INDEX commit_id_and_note_id_index ON commit_user_mentions USING btree (commit_id, note_id);
 
 CREATE INDEX composer_cache_files_index_on_deleted_at ON packages_composer_cache_files USING btree (delete_at, id);
+
+CREATE UNIQUE INDEX dast_site_profiles_builds_on_ci_build_id ON dast_site_profiles_builds USING btree (ci_build_id);
 
 CREATE UNIQUE INDEX design_management_designs_versions_uniqueness ON design_management_designs_versions USING btree (design_id, version_id);
 
@@ -25685,6 +25709,9 @@ ALTER TABLE ONLY ci_pipeline_schedules
 ALTER TABLE ONLY todos
     ADD CONSTRAINT fk_91d1f47b13 FOREIGN KEY (note_id) REFERENCES notes(id) ON DELETE CASCADE;
 
+ALTER TABLE ONLY dast_site_profiles_builds
+    ADD CONSTRAINT fk_94e80df60e FOREIGN KEY (dast_site_profile_id) REFERENCES dast_site_profiles(id) ON DELETE CASCADE;
+
 ALTER TABLE ONLY vulnerability_feedback
     ADD CONSTRAINT fk_94f7c8a81e FOREIGN KEY (comment_author_id) REFERENCES users(id) ON DELETE SET NULL;
 
@@ -25747,6 +25774,9 @@ ALTER TABLE ONLY ci_builds
 
 ALTER TABLE ONLY ci_pipelines
     ADD CONSTRAINT fk_a23be95014 FOREIGN KEY (merge_request_id) REFERENCES merge_requests(id) ON DELETE CASCADE;
+
+ALTER TABLE ONLY dast_site_profiles_builds
+    ADD CONSTRAINT fk_a325505e99 FOREIGN KEY (ci_build_id) REFERENCES ci_builds(id) ON DELETE CASCADE;
 
 ALTER TABLE ONLY bulk_import_entities
     ADD CONSTRAINT fk_a44ff95be5 FOREIGN KEY (parent_id) REFERENCES bulk_import_entities(id) ON DELETE CASCADE;
