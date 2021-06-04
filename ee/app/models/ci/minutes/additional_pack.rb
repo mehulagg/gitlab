@@ -14,6 +14,7 @@ module Ci
 
       validates :namespace, :number_of_minutes, presence: true
       validates :expires_at, :purchase_xid, presence: true, if: -> { Gitlab.com? }
+      validates :purchase_xid, length: { maximum: 32 }
     end
   end
 end

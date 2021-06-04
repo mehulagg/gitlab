@@ -10,14 +10,15 @@ RSpec.describe Ci::Minutes::AdditionalPack do
   describe 'validations' do
     it { is_expected.to validate_presence_of(:namespace) }
     it { is_expected.to validate_presence_of(:number_of_minutes) }
+    it { is_expected.to validate_length_of(:purchase_xid).is_at_most(32) }
 
     context 'when GitLab.com' do
       before do
         allow(Gitlab).to receive(:com?).and_return(true)
       end
 
-      it { is_expected.to validate_presence_of(:purchase_xid) }
       it { is_expected.to validate_presence_of(:expires_at) }
+      it { is_expected.to validate_presence_of(:purchase_xid) }
     end
 
     context 'when self-managed' do
