@@ -9,6 +9,7 @@ import initBlob from '~/pages/projects/init_blob';
 import initWebIdeLink from '~/pages/projects/shared/web_ide_link';
 import commitPipelineStatus from '~/projects/tree/components/commit_pipeline_status_component.vue';
 import BlobContentViewer from '~/repository/components/blob_content_viewer.vue';
+import BlobNavBlock from '~/repository/components/blob_nav_block.vue';
 import '~/sourcegraph/load';
 
 Vue.use(VueApollo);
@@ -18,6 +19,34 @@ const apolloProvider = new VueApollo({
 });
 
 const viewBlobEl = document.querySelector('#js-view-blob-app');
+const blobNavBlockEl = document.querySelector('#js-blob-nav-block');
+
+if (blobNavBlockEl) {
+  const {
+    findFilePath,
+    blamePath,
+    commitsPath,
+    permalinkPath,
+    isReadableText,
+  } = blobNavBlockEl.dataset;
+
+  // eslint-disable-next-line no-new
+  new Vue({
+    el: blobNavBlockEl,
+    apolloProvider,
+    render(createElement) {
+      return createElement(BlobNavBlock, {
+        props: {
+          findFilePath,
+          blamePath,
+          commitsPath,
+          permalinkPath,
+          isReadableText,
+        },
+      });
+    },
+  });
+}
 
 if (viewBlobEl) {
   const { blobPath, projectPath } = viewBlobEl.dataset;
