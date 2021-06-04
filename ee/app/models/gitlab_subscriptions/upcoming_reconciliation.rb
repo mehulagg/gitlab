@@ -10,6 +10,12 @@ module GitlabSubscriptions
       self.find_by(namespace_id: nil)
     end
 
+    def self.for_saas(namespace_id)
+      return unless namespace_id
+
+      self.find_by(namespace_id: namespace_id)
+    end
+
     def display_alert?
       next_reconciliation_date >= Date.current && display_alert_from <= Date.current
     end

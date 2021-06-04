@@ -76,4 +76,24 @@ RSpec.describe GitlabSubscriptions::UpcomingReconciliation do
       expect(described_class.for_self_managed).to eq(nil)
     end
   end
+
+  describe '.for_saas' do
+    let_it_be(:upcoming_reconciliation) { create(:upcoming_reconciliation, :saas) }
+
+    let(:namespace_id) { upcoming_reconciliation.namespace_id }
+
+    it 'returns row for given namespace' do
+      expect(described_class.for_saas(namespace_id)).to eq(upcoming_reconciliation)
+    end
+
+    it 'returns nil when there is no row with given namespace_id' do
+      expect(described_class.for_saas(non_existing_record_id)).to eq(nil)
+    end
+
+    it 'returns nil if namespace_id is nil' do
+      create(:upcoming_reconciliation, :self_managed)
+
+      expect(described_class.for_saas(nil)).to eq(nil)
+    end
+  end
 end
