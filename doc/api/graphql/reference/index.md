@@ -454,30 +454,6 @@ four standard [pagination arguments](#connection-pagination-arguments):
 | <a id="queryvulnerabilitiescountbydayenddate"></a>`endDate` | [`ISO8601Date!`](#iso8601date) | Last day for which to fetch vulnerability history. |
 | <a id="queryvulnerabilitiescountbydaystartdate"></a>`startDate` | [`ISO8601Date!`](#iso8601date) | First day for which to fetch vulnerability history. |
 
-### `Query.vulnerabilitiesCountByDayAndSeverity`
-
-Number of vulnerabilities per severity level, per day, for the projects on the
-current user's instance security dashboard.
-.
-
-WARNING:
-**Deprecated** in 13.3.
-Use of this is not recommended.
-Use: [`Query.vulnerabilitiesCountByDay`](#queryvulnerabilitiescountbyday).
-
-Returns [`VulnerabilitiesCountByDayAndSeverityConnection`](#vulnerabilitiescountbydayandseverityconnection).
-
-This field returns a [connection](#connections). It accepts the
-four standard [pagination arguments](#connection-pagination-arguments):
-`before: String`, `after: String`, `first: Int`, `last: Int`.
-
-#### Arguments
-
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| <a id="queryvulnerabilitiescountbydayandseverityenddate"></a>`endDate` | [`ISO8601Date!`](#iso8601date) | Last day for which to fetch vulnerability history. |
-| <a id="queryvulnerabilitiescountbydayandseveritystartdate"></a>`startDate` | [`ISO8601Date!`](#iso8601date) | First day for which to fetch vulnerability history. |
-
 ### `Query.vulnerability`
 
 Find a vulnerability.
@@ -508,30 +484,6 @@ mutation($id: NoteableID!, $body: String!) {
   }
 }
 ```
-
-### `Mutation.addAwardEmoji`
-
-WARNING:
-**Deprecated** in 13.2.
-Use awardEmojiAdd.
-
-Input type: `AddAwardEmojiInput`
-
-#### Arguments
-
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| <a id="mutationaddawardemojiawardableid"></a>`awardableId` | [`AwardableID!`](#awardableid) | The global ID of the awardable resource. |
-| <a id="mutationaddawardemojiclientmutationid"></a>`clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
-| <a id="mutationaddawardemojiname"></a>`name` | [`String!`](#string) | The emoji name. |
-
-#### Fields
-
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| <a id="mutationaddawardemojiawardemoji"></a>`awardEmoji` | [`AwardEmoji`](#awardemoji) | The award emoji after mutation. |
-| <a id="mutationaddawardemojiclientmutationid"></a>`clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
-| <a id="mutationaddawardemojierrors"></a>`errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 
 ### `Mutation.addProjectToSecurityDashboard`
 
@@ -1457,7 +1409,6 @@ Input type: `DastScannerProfileCreateInput`
 | ---- | ---- | ----------- |
 | <a id="mutationdastscannerprofilecreateclientmutationid"></a>`clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 | <a id="mutationdastscannerprofilecreateerrors"></a>`errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
-| <a id="mutationdastscannerprofilecreateglobalid"></a>`globalId` **{warning-solid}** | [`DastScannerProfileID`](#dastscannerprofileid) | **Deprecated:** Use `id`. Deprecated in 13.6. |
 | <a id="mutationdastscannerprofilecreateid"></a>`id` | [`DastScannerProfileID`](#dastscannerprofileid) | ID of the scanner profile. |
 
 ### `Mutation.dastScannerProfileDelete`
@@ -1914,31 +1865,6 @@ Input type: `DiscussionToggleResolveInput`
 | <a id="mutationdiscussiontoggleresolveclientmutationid"></a>`clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 | <a id="mutationdiscussiontoggleresolvediscussion"></a>`discussion` | [`Discussion`](#discussion) | The discussion after mutation. |
 | <a id="mutationdiscussiontoggleresolveerrors"></a>`errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
-
-### `Mutation.dismissVulnerability`
-
-WARNING:
-**Deprecated** in 13.5.
-Use vulnerabilityDismiss.
-
-Input type: `DismissVulnerabilityInput`
-
-#### Arguments
-
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| <a id="mutationdismissvulnerabilityclientmutationid"></a>`clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
-| <a id="mutationdismissvulnerabilitycomment"></a>`comment` | [`String`](#string) | Comment why vulnerability should be dismissed. |
-| <a id="mutationdismissvulnerabilitydismissalreason"></a>`dismissalReason` | [`VulnerabilityDismissalReason`](#vulnerabilitydismissalreason) | Reason why vulnerability should be dismissed. |
-| <a id="mutationdismissvulnerabilityid"></a>`id` | [`VulnerabilityID!`](#vulnerabilityid) | ID of the vulnerability to be dismissed. |
-
-#### Fields
-
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| <a id="mutationdismissvulnerabilityclientmutationid"></a>`clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
-| <a id="mutationdismissvulnerabilityerrors"></a>`errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
-| <a id="mutationdismissvulnerabilityvulnerability"></a>`vulnerability` | [`Vulnerability`](#vulnerability) | The vulnerability after dismissal. |
 
 ### `Mutation.enableDevopsAdoptionNamespace`
 
@@ -3457,30 +3383,6 @@ Input type: `ReleaseUpdateInput`
 | <a id="mutationreleaseupdateerrors"></a>`errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 | <a id="mutationreleaseupdaterelease"></a>`release` | [`Release`](#release) | The release after mutation. |
 
-### `Mutation.removeAwardEmoji`
-
-WARNING:
-**Deprecated** in 13.2.
-Use awardEmojiRemove.
-
-Input type: `RemoveAwardEmojiInput`
-
-#### Arguments
-
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| <a id="mutationremoveawardemojiawardableid"></a>`awardableId` | [`AwardableID!`](#awardableid) | The global ID of the awardable resource. |
-| <a id="mutationremoveawardemojiclientmutationid"></a>`clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
-| <a id="mutationremoveawardemojiname"></a>`name` | [`String!`](#string) | The emoji name. |
-
-#### Fields
-
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| <a id="mutationremoveawardemojiawardemoji"></a>`awardEmoji` | [`AwardEmoji`](#awardemoji) | The award emoji after mutation. |
-| <a id="mutationremoveawardemojiclientmutationid"></a>`clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
-| <a id="mutationremoveawardemojierrors"></a>`errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
-
 ### `Mutation.removeProjectFromSecurityDashboard`
 
 Input type: `RemoveProjectFromSecurityDashboardInput`
@@ -3520,55 +3422,6 @@ Input type: `RepositionImageDiffNoteInput`
 | <a id="mutationrepositionimagediffnoteclientmutationid"></a>`clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 | <a id="mutationrepositionimagediffnoteerrors"></a>`errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 | <a id="mutationrepositionimagediffnotenote"></a>`note` | [`Note`](#note) | The note after mutation. |
-
-### `Mutation.revertVulnerabilityToDetected`
-
-WARNING:
-**Deprecated** in 13.5.
-Use vulnerabilityRevertToDetected.
-
-Input type: `RevertVulnerabilityToDetectedInput`
-
-#### Arguments
-
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| <a id="mutationrevertvulnerabilitytodetectedclientmutationid"></a>`clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
-| <a id="mutationrevertvulnerabilitytodetectedid"></a>`id` | [`VulnerabilityID!`](#vulnerabilityid) | ID of the vulnerability to be reverted. |
-
-#### Fields
-
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| <a id="mutationrevertvulnerabilitytodetectedclientmutationid"></a>`clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
-| <a id="mutationrevertvulnerabilitytodetectederrors"></a>`errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
-| <a id="mutationrevertvulnerabilitytodetectedvulnerability"></a>`vulnerability` | [`Vulnerability`](#vulnerability) | The vulnerability after revert. |
-
-### `Mutation.runDastScan`
-
-WARNING:
-**Deprecated** in 13.4.
-Use DastOnDemandScanCreate.
-
-Input type: `RunDASTScanInput`
-
-#### Arguments
-
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| <a id="mutationrundastscanbranch"></a>`branch` | [`String!`](#string) | The branch to be associated with the scan. |
-| <a id="mutationrundastscanclientmutationid"></a>`clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
-| <a id="mutationrundastscanprojectpath"></a>`projectPath` | [`ID!`](#id) | The project the DAST scan belongs to. |
-| <a id="mutationrundastscanscantype"></a>`scanType` | [`DastScanTypeEnum!`](#dastscantypeenum) | The type of scan to be run. |
-| <a id="mutationrundastscantargeturl"></a>`targetUrl` | [`String!`](#string) | The URL of the target to be scanned. |
-
-#### Fields
-
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| <a id="mutationrundastscanclientmutationid"></a>`clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
-| <a id="mutationrundastscanerrors"></a>`errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
-| <a id="mutationrundastscanpipelineurl"></a>`pipelineUrl` | [`String`](#string) | URL of the pipeline that was created. |
 
 ### `Mutation.runnerDelete`
 
@@ -3747,7 +3600,6 @@ Input type: `TodoRestoreManyInput`
 | <a id="mutationtodorestoremanyclientmutationid"></a>`clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 | <a id="mutationtodorestoremanyerrors"></a>`errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 | <a id="mutationtodorestoremanytodos"></a>`todos` | [`[Todo!]!`](#todo) | Updated to-do items. |
-| <a id="mutationtodorestoremanyupdatedids"></a>`updatedIds` **{warning-solid}** | [`[TodoID!]!`](#todoid) | **Deprecated:** Use to-do items. Deprecated in 13.2. |
 
 ### `Mutation.todosMarkAllDone`
 
@@ -3766,32 +3618,6 @@ Input type: `TodosMarkAllDoneInput`
 | <a id="mutationtodosmarkalldoneclientmutationid"></a>`clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 | <a id="mutationtodosmarkalldoneerrors"></a>`errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 | <a id="mutationtodosmarkalldonetodos"></a>`todos` | [`[Todo!]!`](#todo) | Updated to-do items. |
-| <a id="mutationtodosmarkalldoneupdatedids"></a>`updatedIds` **{warning-solid}** | [`[TodoID!]!`](#todoid) | **Deprecated:** Use to-do items. Deprecated in 13.2. |
-
-### `Mutation.toggleAwardEmoji`
-
-WARNING:
-**Deprecated** in 13.2.
-Use awardEmojiToggle.
-
-Input type: `ToggleAwardEmojiInput`
-
-#### Arguments
-
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| <a id="mutationtoggleawardemojiawardableid"></a>`awardableId` | [`AwardableID!`](#awardableid) | The global ID of the awardable resource. |
-| <a id="mutationtoggleawardemojiclientmutationid"></a>`clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
-| <a id="mutationtoggleawardemojiname"></a>`name` | [`String!`](#string) | The emoji name. |
-
-#### Fields
-
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| <a id="mutationtoggleawardemojiawardemoji"></a>`awardEmoji` | [`AwardEmoji`](#awardemoji) | The award emoji after mutation. |
-| <a id="mutationtoggleawardemojiclientmutationid"></a>`clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
-| <a id="mutationtoggleawardemojierrors"></a>`errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
-| <a id="mutationtoggleawardemojitoggledon"></a>`toggledOn` | [`Boolean!`](#boolean) | Indicates the status of the emoji. True if the toggle awarded the emoji, and false if the toggle removed the emoji. |
 
 ### `Mutation.updateAlertStatus`
 
@@ -6819,29 +6645,6 @@ The edge type for [`UserCore`](#usercore).
 | <a id="usercoreedgecursor"></a>`cursor` | [`String!`](#string) | A cursor for use in pagination. |
 | <a id="usercoreedgenode"></a>`node` | [`UserCore`](#usercore) | The item at the end of the edge. |
 
-#### `VulnerabilitiesCountByDayAndSeverityConnection`
-
-The connection type for [`VulnerabilitiesCountByDayAndSeverity`](#vulnerabilitiescountbydayandseverity).
-
-##### Fields
-
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| <a id="vulnerabilitiescountbydayandseverityconnectionedges"></a>`edges` | [`[VulnerabilitiesCountByDayAndSeverityEdge]`](#vulnerabilitiescountbydayandseverityedge) | A list of edges. |
-| <a id="vulnerabilitiescountbydayandseverityconnectionnodes"></a>`nodes` | [`[VulnerabilitiesCountByDayAndSeverity]`](#vulnerabilitiescountbydayandseverity) | A list of nodes. |
-| <a id="vulnerabilitiescountbydayandseverityconnectionpageinfo"></a>`pageInfo` | [`PageInfo!`](#pageinfo) | Information to aid in pagination. |
-
-#### `VulnerabilitiesCountByDayAndSeverityEdge`
-
-The edge type for [`VulnerabilitiesCountByDayAndSeverity`](#vulnerabilitiescountbydayandseverity).
-
-##### Fields
-
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| <a id="vulnerabilitiescountbydayandseverityedgecursor"></a>`cursor` | [`String!`](#string) | A cursor for use in pagination. |
-| <a id="vulnerabilitiescountbydayandseverityedgenode"></a>`node` | [`VulnerabilitiesCountByDayAndSeverity`](#vulnerabilitiescountbydayandseverity) | The item at the end of the edge. |
-
 #### `VulnerabilitiesCountByDayConnection`
 
 The connection type for [`VulnerabilitiesCountByDay`](#vulnerabilitiescountbyday).
@@ -7334,7 +7137,6 @@ four standard [pagination arguments](#connection-pagination-arguments):
 | ---- | ---- | ----------- |
 | <a id="boardepicchildrenauthorusername"></a>`authorUsername` | [`String`](#string) | Filter epics by author. |
 | <a id="boardepicchildrenconfidential"></a>`confidential` | [`Boolean`](#boolean) | Filter epics by given confidentiality. |
-| <a id="boardepicchildrenenddate"></a>`endDate` **{warning-solid}** | [`Time`](#time) | **Deprecated** in 13.5. Use timeframe.end. |
 | <a id="boardepicchildreniid"></a>`iid` | [`ID`](#id) | IID of the epic, e.g., "1". |
 | <a id="boardepicchildreniidstartswith"></a>`iidStartsWith` | [`String`](#string) | Filter epics by IID for autocomplete. |
 | <a id="boardepicchildreniids"></a>`iids` | [`[ID!]`](#id) | List of IIDs of epics, e.g., [1, 2]. |
@@ -7345,7 +7147,6 @@ four standard [pagination arguments](#connection-pagination-arguments):
 | <a id="boardepicchildrennot"></a>`not` | [`NegatedEpicFilterInput`](#negatedepicfilterinput) | Negated epic arguments. |
 | <a id="boardepicchildrensearch"></a>`search` | [`String`](#string) | Search query for epic title or description. |
 | <a id="boardepicchildrensort"></a>`sort` | [`EpicSort`](#epicsort) | List epics by sort order. |
-| <a id="boardepicchildrenstartdate"></a>`startDate` **{warning-solid}** | [`Time`](#time) | **Deprecated** in 13.5. Use timeframe.start. |
 | <a id="boardepicchildrenstate"></a>`state` | [`EpicState`](#epicstate) | Filter epics by state. |
 | <a id="boardepicchildrentimeframe"></a>`timeframe` | [`Timeframe`](#timeframe) | List items overlapping the given timeframe. |
 
@@ -7955,7 +7756,6 @@ Represents a DAST scanner profile.
 | Name | Type | Description |
 | ---- | ---- | ----------- |
 | <a id="dastscannerprofileeditpath"></a>`editPath` | [`String`](#string) | Relative web path to the edit page of a scanner profile. |
-| <a id="dastscannerprofileglobalid"></a>`globalId` **{warning-solid}** | [`DastScannerProfileID!`](#dastscannerprofileid) | **Deprecated** in 13.6. Use `id`. |
 | <a id="dastscannerprofileid"></a>`id` | [`DastScannerProfileID!`](#dastscannerprofileid) | ID of the DAST scanner profile. |
 | <a id="dastscannerprofileprofilename"></a>`profileName` | [`String`](#string) | Name of the DAST scanner profile. |
 | <a id="dastscannerprofilereferencedinsecuritypolicies"></a>`referencedInSecurityPolicies` | [`[String!]`](#string) | List of security policy names that are referencing given project. |
@@ -8492,7 +8292,6 @@ four standard [pagination arguments](#connection-pagination-arguments):
 | ---- | ---- | ----------- |
 | <a id="epicchildrenauthorusername"></a>`authorUsername` | [`String`](#string) | Filter epics by author. |
 | <a id="epicchildrenconfidential"></a>`confidential` | [`Boolean`](#boolean) | Filter epics by given confidentiality. |
-| <a id="epicchildrenenddate"></a>`endDate` **{warning-solid}** | [`Time`](#time) | **Deprecated** in 13.5. Use timeframe.end. |
 | <a id="epicchildreniid"></a>`iid` | [`ID`](#id) | IID of the epic, e.g., "1". |
 | <a id="epicchildreniidstartswith"></a>`iidStartsWith` | [`String`](#string) | Filter epics by IID for autocomplete. |
 | <a id="epicchildreniids"></a>`iids` | [`[ID!]`](#id) | List of IIDs of epics, e.g., [1, 2]. |
@@ -8503,7 +8302,6 @@ four standard [pagination arguments](#connection-pagination-arguments):
 | <a id="epicchildrennot"></a>`not` | [`NegatedEpicFilterInput`](#negatedepicfilterinput) | Negated epic arguments. |
 | <a id="epicchildrensearch"></a>`search` | [`String`](#string) | Search query for epic title or description. |
 | <a id="epicchildrensort"></a>`sort` | [`EpicSort`](#epicsort) | List epics by sort order. |
-| <a id="epicchildrenstartdate"></a>`startDate` **{warning-solid}** | [`Time`](#time) | **Deprecated** in 13.5. Use timeframe.start. |
 | <a id="epicchildrenstate"></a>`state` | [`EpicState`](#epicstate) | Filter epics by state. |
 | <a id="epicchildrentimeframe"></a>`timeframe` | [`Timeframe`](#timeframe) | List items overlapping the given timeframe. |
 
@@ -9093,7 +8891,6 @@ Returns [`Epic`](#epic).
 | ---- | ---- | ----------- |
 | <a id="groupepicauthorusername"></a>`authorUsername` | [`String`](#string) | Filter epics by author. |
 | <a id="groupepicconfidential"></a>`confidential` | [`Boolean`](#boolean) | Filter epics by given confidentiality. |
-| <a id="groupepicenddate"></a>`endDate` **{warning-solid}** | [`Time`](#time) | **Deprecated** in 13.5. Use timeframe.end. |
 | <a id="groupepiciid"></a>`iid` | [`ID`](#id) | IID of the epic, e.g., "1". |
 | <a id="groupepiciidstartswith"></a>`iidStartsWith` | [`String`](#string) | Filter epics by IID for autocomplete. |
 | <a id="groupepiciids"></a>`iids` | [`[ID!]`](#id) | List of IIDs of epics, e.g., [1, 2]. |
@@ -9104,7 +8901,6 @@ Returns [`Epic`](#epic).
 | <a id="groupepicnot"></a>`not` | [`NegatedEpicFilterInput`](#negatedepicfilterinput) | Negated epic arguments. |
 | <a id="groupepicsearch"></a>`search` | [`String`](#string) | Search query for epic title or description. |
 | <a id="groupepicsort"></a>`sort` | [`EpicSort`](#epicsort) | List epics by sort order. |
-| <a id="groupepicstartdate"></a>`startDate` **{warning-solid}** | [`Time`](#time) | **Deprecated** in 13.5. Use timeframe.start. |
 | <a id="groupepicstate"></a>`state` | [`EpicState`](#epicstate) | Filter epics by state. |
 | <a id="groupepictimeframe"></a>`timeframe` | [`Timeframe`](#timeframe) | List items overlapping the given timeframe. |
 
@@ -9136,7 +8932,6 @@ four standard [pagination arguments](#connection-pagination-arguments):
 | ---- | ---- | ----------- |
 | <a id="groupepicsauthorusername"></a>`authorUsername` | [`String`](#string) | Filter epics by author. |
 | <a id="groupepicsconfidential"></a>`confidential` | [`Boolean`](#boolean) | Filter epics by given confidentiality. |
-| <a id="groupepicsenddate"></a>`endDate` **{warning-solid}** | [`Time`](#time) | **Deprecated** in 13.5. Use timeframe.end. |
 | <a id="groupepicsiid"></a>`iid` | [`ID`](#id) | IID of the epic, e.g., "1". |
 | <a id="groupepicsiidstartswith"></a>`iidStartsWith` | [`String`](#string) | Filter epics by IID for autocomplete. |
 | <a id="groupepicsiids"></a>`iids` | [`[ID!]`](#id) | List of IIDs of epics, e.g., [1, 2]. |
@@ -9147,7 +8942,6 @@ four standard [pagination arguments](#connection-pagination-arguments):
 | <a id="groupepicsnot"></a>`not` | [`NegatedEpicFilterInput`](#negatedepicfilterinput) | Negated epic arguments. |
 | <a id="groupepicssearch"></a>`search` | [`String`](#string) | Search query for epic title or description. |
 | <a id="groupepicssort"></a>`sort` | [`EpicSort`](#epicsort) | List epics by sort order. |
-| <a id="groupepicsstartdate"></a>`startDate` **{warning-solid}** | [`Time`](#time) | **Deprecated** in 13.5. Use timeframe.start. |
 | <a id="groupepicsstate"></a>`state` | [`EpicState`](#epicstate) | Filter epics by state. |
 | <a id="groupepicstimeframe"></a>`timeframe` | [`Timeframe`](#timeframe) | List items overlapping the given timeframe. |
 
@@ -9242,12 +9036,10 @@ four standard [pagination arguments](#connection-pagination-arguments):
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
-| <a id="groupiterationsenddate"></a>`endDate` **{warning-solid}** | [`Time`](#time) | **Deprecated** in 13.5. Use timeframe.end. |
 | <a id="groupiterationsid"></a>`id` | [`ID`](#id) | Global ID of the Iteration to look up. |
 | <a id="groupiterationsiid"></a>`iid` | [`ID`](#id) | Internal ID of the Iteration to look up. |
 | <a id="groupiterationsincludeancestors"></a>`includeAncestors` | [`Boolean`](#boolean) | Whether to include ancestor iterations. Defaults to true. |
 | <a id="groupiterationsiterationcadenceids"></a>`iterationCadenceIds` | [`[IterationsCadenceID!]`](#iterationscadenceid) | Global iteration cadence IDs by which to look up the iterations. |
-| <a id="groupiterationsstartdate"></a>`startDate` **{warning-solid}** | [`Time`](#time) | **Deprecated** in 13.5. Use timeframe.start. |
 | <a id="groupiterationsstate"></a>`state` | [`IterationState`](#iterationstate) | Filter iterations by state. |
 | <a id="groupiterationstimeframe"></a>`timeframe` | [`Timeframe`](#timeframe) | List items overlapping the given timeframe. |
 | <a id="groupiterationstitle"></a>`title` | [`String`](#string) | Fuzzy search by title. |
@@ -9326,12 +9118,10 @@ four standard [pagination arguments](#connection-pagination-arguments):
 | Name | Type | Description |
 | ---- | ---- | ----------- |
 | <a id="groupmilestonescontainingdate"></a>`containingDate` | [`Time`](#time) | A date that the milestone contains. |
-| <a id="groupmilestonesenddate"></a>`endDate` **{warning-solid}** | [`Time`](#time) | **Deprecated** in 13.5. Use timeframe.end. |
 | <a id="groupmilestonesids"></a>`ids` | [`[ID!]`](#id) | Array of global milestone IDs, e.g., `"gid://gitlab/Milestone/1"`. |
 | <a id="groupmilestonesincludeancestors"></a>`includeAncestors` | [`Boolean`](#boolean) | Include milestones from all parent groups. |
 | <a id="groupmilestonesincludedescendants"></a>`includeDescendants` | [`Boolean`](#boolean) | Include milestones from all subgroups and subprojects. |
 | <a id="groupmilestonessearchtitle"></a>`searchTitle` | [`String`](#string) | A search string for the title. |
-| <a id="groupmilestonesstartdate"></a>`startDate` **{warning-solid}** | [`Time`](#time) | **Deprecated** in 13.5. Use timeframe.start. |
 | <a id="groupmilestonesstate"></a>`state` | [`MilestoneStateEnum`](#milestonestateenum) | Filter milestones by state. |
 | <a id="groupmilestonestimeframe"></a>`timeframe` | [`Timeframe`](#timeframe) | List items overlapping the given timeframe. |
 | <a id="groupmilestonestitle"></a>`title` | [`String`](#string) | The title of the milestone. |
@@ -9436,27 +9226,6 @@ four standard [pagination arguments](#connection-pagination-arguments):
 | ---- | ---- | ----------- |
 | <a id="groupvulnerabilitiescountbydayenddate"></a>`endDate` | [`ISO8601Date!`](#iso8601date) | Last day for which to fetch vulnerability history. |
 | <a id="groupvulnerabilitiescountbydaystartdate"></a>`startDate` | [`ISO8601Date!`](#iso8601date) | First day for which to fetch vulnerability history. |
-
-##### `Group.vulnerabilitiesCountByDayAndSeverity`
-
-Number of vulnerabilities per severity level, per day, for the projects in the group and its subgroups.
-
-WARNING:
-**Deprecated** in 13.3.
-Use `vulnerabilitiesCountByDay`.
-
-Returns [`VulnerabilitiesCountByDayAndSeverityConnection`](#vulnerabilitiescountbydayandseverityconnection).
-
-This field returns a [connection](#connections). It accepts the
-four standard [pagination arguments](#connection-pagination-arguments):
-`before: String`, `after: String`, `first: Int`, `last: Int`.
-
-###### Arguments
-
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| <a id="groupvulnerabilitiescountbydayandseverityenddate"></a>`endDate` | [`ISO8601Date!`](#iso8601date) | Last day for which to fetch vulnerability history. |
-| <a id="groupvulnerabilitiescountbydayandseveritystartdate"></a>`startDate` | [`ISO8601Date!`](#iso8601date) | First day for which to fetch vulnerability history. |
 
 ##### `Group.vulnerabilityGrades`
 
@@ -11520,12 +11289,10 @@ four standard [pagination arguments](#connection-pagination-arguments):
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
-| <a id="projectiterationsenddate"></a>`endDate` **{warning-solid}** | [`Time`](#time) | **Deprecated** in 13.5. Use timeframe.end. |
 | <a id="projectiterationsid"></a>`id` | [`ID`](#id) | Global ID of the Iteration to look up. |
 | <a id="projectiterationsiid"></a>`iid` | [`ID`](#id) | Internal ID of the Iteration to look up. |
 | <a id="projectiterationsincludeancestors"></a>`includeAncestors` | [`Boolean`](#boolean) | Whether to include ancestor iterations. Defaults to true. |
 | <a id="projectiterationsiterationcadenceids"></a>`iterationCadenceIds` | [`[IterationsCadenceID!]`](#iterationscadenceid) | Global iteration cadence IDs by which to look up the iterations. |
-| <a id="projectiterationsstartdate"></a>`startDate` **{warning-solid}** | [`Time`](#time) | **Deprecated** in 13.5. Use timeframe.start. |
 | <a id="projectiterationsstate"></a>`state` | [`IterationState`](#iterationstate) | Filter iterations by state. |
 | <a id="projectiterationstimeframe"></a>`timeframe` | [`Timeframe`](#timeframe) | List items overlapping the given timeframe. |
 | <a id="projectiterationstitle"></a>`title` | [`String`](#string) | Fuzzy search by title. |
@@ -11630,11 +11397,9 @@ four standard [pagination arguments](#connection-pagination-arguments):
 | Name | Type | Description |
 | ---- | ---- | ----------- |
 | <a id="projectmilestonescontainingdate"></a>`containingDate` | [`Time`](#time) | A date that the milestone contains. |
-| <a id="projectmilestonesenddate"></a>`endDate` **{warning-solid}** | [`Time`](#time) | **Deprecated** in 13.5. Use timeframe.end. |
 | <a id="projectmilestonesids"></a>`ids` | [`[ID!]`](#id) | Array of global milestone IDs, e.g., `"gid://gitlab/Milestone/1"`. |
 | <a id="projectmilestonesincludeancestors"></a>`includeAncestors` | [`Boolean`](#boolean) | Also return milestones in the project's parent group and its ancestors. |
 | <a id="projectmilestonessearchtitle"></a>`searchTitle` | [`String`](#string) | A search string for the title. |
-| <a id="projectmilestonesstartdate"></a>`startDate` **{warning-solid}** | [`Time`](#time) | **Deprecated** in 13.5. Use timeframe.start. |
 | <a id="projectmilestonesstate"></a>`state` | [`MilestoneStateEnum`](#milestonestateenum) | Filter milestones by state. |
 | <a id="projectmilestonestimeframe"></a>`timeframe` | [`Timeframe`](#timeframe) | List items overlapping the given timeframe. |
 | <a id="projectmilestonestitle"></a>`title` | [`String`](#string) | The title of the milestone. |
@@ -12287,18 +12052,6 @@ Counts of requirements by their state.
 | <a id="rootstoragestatisticsuploadssize"></a>`uploadsSize` | [`Float!`](#float) | The uploads size in bytes. |
 | <a id="rootstoragestatisticswikisize"></a>`wikiSize` | [`Float!`](#float) | The wiki size in bytes. |
 
-### `RunDASTScanPayload`
-
-Autogenerated return type of RunDASTScan.
-
-#### Fields
-
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| <a id="rundastscanpayloadclientmutationid"></a>`clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
-| <a id="rundastscanpayloaderrors"></a>`errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
-| <a id="rundastscanpayloadpipelineurl"></a>`pipelineUrl` | [`String`](#string) | URL of the pipeline that was created. |
-
 ### `RunnerArchitecture`
 
 #### Fields
@@ -12641,7 +12394,6 @@ Represents a snippet entry.
 | Name | Type | Description |
 | ---- | ---- | ----------- |
 | <a id="snippetauthor"></a>`author` | [`UserCore`](#usercore) | The owner of the snippet. |
-| <a id="snippetblob"></a>`blob` **{warning-solid}** | [`SnippetBlob!`](#snippetblob) | **Deprecated** in 13.3. Use `blobs`. |
 | <a id="snippetcreatedat"></a>`createdAt` | [`Time!`](#time) | Timestamp this snippet was created. |
 | <a id="snippetdescription"></a>`description` | [`String`](#string) | Description of the snippet. |
 | <a id="snippetdescriptionhtml"></a>`descriptionHtml` | [`String`](#string) | The GitLab Flavored Markdown rendering of `description`. |
@@ -13258,18 +13010,6 @@ Represents the count of vulnerabilities by severity on a particular day. This da
 | <a id="vulnerabilitiescountbydaymedium"></a>`medium` | [`Int!`](#int) | Total number of vulnerabilities on a particular day with medium severity. |
 | <a id="vulnerabilitiescountbydaytotal"></a>`total` | [`Int!`](#int) | Total number of vulnerabilities on a particular day. |
 | <a id="vulnerabilitiescountbydayunknown"></a>`unknown` | [`Int!`](#int) | Total number of vulnerabilities on a particular day with unknown severity. |
-
-### `VulnerabilitiesCountByDayAndSeverity`
-
-Represents the number of vulnerabilities for a particular severity on a particular day. This data is retained for 365 days.
-
-#### Fields
-
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| <a id="vulnerabilitiescountbydayandseveritycount"></a>`count` | [`Int`](#int) | Number of vulnerabilities. |
-| <a id="vulnerabilitiescountbydayandseverityday"></a>`day` | [`ISO8601Date`](#iso8601date) | Date for the count. |
-| <a id="vulnerabilitiescountbydayandseverityseverity"></a>`severity` | [`VulnerabilitySeverity`](#vulnerabilityseverity) | Severity of the counted vulnerabilities. |
 
 ### `Vulnerability`
 
