@@ -1,6 +1,6 @@
 ---
 key_path: web_ide_clientside_preview_enabled
-description: Whether web ide clientside preview is enabled
+description: Whether Web IDE clientside preview is enabled
 product_section: growth
 product_stage: growth
 product_group: group::product intelligence
@@ -13,4 +13,6 @@ distribution:
 - ce
 tier:
 - free
-skip_validation: true
+- premium
+- ultimate
+skip_validation: false
