@@ -32,20 +32,23 @@ connections and on downstream services; such as Redis and the primary database.
 
 The first real-time feature to be fully enabled on GitLab.com was [real-time
 assignees](https://gitlab.com/gitlab-org/gitlab/-/issues/17589). By comparing
-peak throughput to the issue page against peak WebSocket connections it is
-possible to crudely estimate that each 1 request per second, at peak, adds 
-approximately 4200 WebSocket connections, at peak.
+peak throughput to the issue page against peak simultaneous WebSocket connections it is
+possible to crudely estimate that each 1 request per second adds 
+approximately 4200 WebSocket connections.
 
 To understand the impact a new feature might have, sum the peak throughput (RPS) 
 to the pages it will originate from (`n`) and apply the formula:
 
 ```
-(n * 4200) / peak current connections
+(n * 4200) / peak active connections
 ```
 
+Current active connections are visible on 
+[this Grafana chart](https://dashboards.gitlab.net/d/websockets-main/websockets-overview?viewPanel=1357460996&orgId=1).
+
 This calculation is crude and will need to be revised as new features are
-deployed but it will yield a rough estimate of the proportion of existing
-capacity that will need to be added.
+deployed but it will yield a rough estimate of the capacity that will need to
+be supported, as a proportion of existing capacity.
 
 ### Graduated roll-out
 
