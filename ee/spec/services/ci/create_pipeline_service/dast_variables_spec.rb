@@ -4,12 +4,19 @@ require 'spec_helper'
 
 RSpec.describe Ci::CreatePipelineService do
   let_it_be(:project) { create(:project, :repository) }
-  let_it_be(:developer) { create(:user, developer_projects: [project]) }
+  let_it_be(:user) { create(:user, developer_projects: [project]) }
   let_it_be(:dast_site_profile) { create(:dast_site_profile, project: project) }
   let_it_be(:dast_scanner_profile) { create(:dast_scanner_profile, project: project) }
 
-  let_it_be(:expected_variables) do
-    dast_site_profile.ci_variables.concat(dast_scanner_profile.ci_variables).to_runner_variables
+  let(:ci_variables) do
+    dast_site_profile.ci_variables
+      .concat(dast_scanner_profile.ci_variables)
+      .to_runner_variables
+  end
+
+  let(:secret_ci_variables) do
+    dast_site_profile.secret_ci_variables(user)
+      .to_runner_variables
   end
 
   let(:config) do
@@ -48,7 +55,7 @@ RSpec.describe Ci::CreatePipelineService do
       .to_runner_variables
   end
 
-  subject { described_class.new(project, developer, ref: 'refs/heads/master').execute(:push) }
+  subject { described_class.new(project, user, ref: 'refs/heads/master').execute(:push) }
 
   before do
     stub_ci_pipeline_yaml_file(config)
@@ -56,7 +63,7 @@ RSpec.describe Ci::CreatePipelineService do
 
   shared_examples 'it does not expand the dast variables' do
     it 'does not include the profile variables' do
-      expect(test_variables).not_to include(*expected_variables)
+      expect(test_variables).not_to include(*ci_variables)
     end
   end
 
@@ -84,7 +91,21 @@ RSpec.describe Ci::CreatePipelineService do
 
       context 'when the stage is dast' do
         it 'expands the dast variables' do
-          expect(dast_variables).to include(*expected_variables)
+          expect(dast_variables).to include(*ci_variables)
+        end
+
+        context 'when the user has permission' do
+          it 'expands the secret dast variables' do
+            expect(dast_variables).to include(*secret_ci_variables)
+          end
+        end
+
+        context 'when the user does not have permission' do
+          let_it_be(:user) { create(:user) }
+
+          it 'is not possible to create a pipeline' do
+            expect(subject).not_to be_persisted
+          end
         end
       end
 
