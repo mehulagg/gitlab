@@ -43,8 +43,6 @@ module Subscriptions
       }
     end
 
-    # Return an empty hash for now, because the Customers API requires the credentials attribute to be present,
-    # although it does not require the actual values. Remove this once the Customers API has been updated.
     def credentials_attrs
       {
         token: oauth_token
@@ -105,7 +103,16 @@ module Subscriptions
     def oauth_token
       return unless customers_oauth_app_id
 
-      Doorkeeper::AccessToken.create(application_id: customers_oauth_app_id, resource_owner_id: current_user.id)&.token
+      application = Doorkeeper::Application.find_by_uid(customers_oauth_app_id)
+      existing_token = Doorkeeper::AccessToken.matching_token_for(application, current_user.id, application.scopes)
+
+      return existing_token if existing_token
+
+      Doorkeeper::AccessToken.create!(
+        application_id: customers_oauth_app_id,
+        resource_owner_id: current_user.id,
+        scopes: application.scopes.to_s
+      ).token
     end
   end
 end
