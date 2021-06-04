@@ -53,7 +53,9 @@ export default {
     },
   },
   async mounted() {
-    this.checkProvidedPaths();
+    if (!this.checkProvidedPaths()) {
+      return;
+    }
 
     const results = await Promise.allSettled(
       allChartDefinitions.map(async ({ id, requestParams, startDate, endDate }) => {
@@ -98,6 +100,8 @@ export default {
      * Validates that exactly one of [this.projectPath, this.groupPath] has been
      * provided to this component. If not, a flash message is shown and an error
      * is logged with Sentry. This is mainly intended to be a development aid.
+
+     * @returns {Boolean} Whether or not the paths are valid
      */
     checkProvidedPaths() {
       let errorMessage = '';
@@ -116,7 +120,11 @@ export default {
           error: new Error(`Error while rendering lead time charts: ${errorMessage}`),
           captureError: true,
         });
+
+        return false;
       }
+
+      return true;
     },
   },
   areaChartOptions,
