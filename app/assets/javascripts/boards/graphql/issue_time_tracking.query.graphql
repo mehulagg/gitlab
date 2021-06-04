@@ -1,0 +1,9 @@
+query IssueTimeTracking($id: IssueID!) {
+  issue(id: $id) {
+    id
+    timeEstimate
+    totalTimeSpent
+    humanTimeEstimate
+    humanTotalTimeSpent
+  }
+}

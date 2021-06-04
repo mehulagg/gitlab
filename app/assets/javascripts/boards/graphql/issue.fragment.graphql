@@ -1,19 +1,8 @@
 #import "~/graphql_shared/fragments/user.fragment.graphql"
+#import "~/graphql_shared/fragments/board_issue.fragment.graphql"
 
 fragment IssueNode on Issue {
-  id
-  iid
-  title
-  referencePath: reference(full: true)
-  dueDate
-  timeEstimate
-  totalTimeSpent
-  humanTimeEstimate
-  humanTotalTimeSpent
-  emailsDisabled
-  confidential
-  webUrl
-  relativePosition
+  ...BoardIssueNode
   milestone {
     id
     title

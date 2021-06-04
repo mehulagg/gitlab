@@ -1,0 +1,13 @@
+fragment BoardIssueNode on Issue {
+  id
+  iid
+  title
+  referencePath: reference(full: true)
+  dueDate
+  emailsDisabled
+  confidential
+  webUrl
+  blocked
+  blockedByCount
+  relativePosition
+}
