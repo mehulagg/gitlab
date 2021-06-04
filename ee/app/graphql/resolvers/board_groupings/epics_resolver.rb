@@ -3,7 +3,7 @@
 module Resolvers
   module BoardGroupings
     class EpicsResolver < BaseResolver
-      include ::BoardIssueFilterable
+      include ::BoardItemFilterable
 
       alias_method :board, :object
 

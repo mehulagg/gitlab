@@ -2,7 +2,7 @@
 
 module Resolvers
   class BoardListsResolver < BaseResolver
-    include BoardIssueFilterable
+    include BoardItemFilterable
     include Gitlab::Graphql::Authorize::AuthorizeResource
     include LooksAhead
 
