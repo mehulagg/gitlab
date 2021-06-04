@@ -113,9 +113,7 @@ export default {
       update(data) {
         // TODO Remove null filter (BE fix required)
         // https://gitlab.com/gitlab-org/gitlab/-/issues/329750
-        const users = data.workspace?.users?.nodes.filter((x) => x).map(({ user }) => user) || [];
-        // User field is nullable and we only want to display non-null users
-        return users.filter((u) => u);
+        return data.workspace?.users?.nodes.filter((x) => x?.user).map(({ user }) => user) || [];
       },
       debounce: ASSIGNEES_DEBOUNCE_DELAY,
       error({ graphQLErrors }) {
