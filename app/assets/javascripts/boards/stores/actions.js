@@ -16,7 +16,6 @@ import {
 import createBoardListMutation from 'ee_else_ce/boards/graphql/board_list_create.mutation.graphql';
 import issueMoveListMutation from 'ee_else_ce/boards/graphql/issue_move_list.mutation.graphql';
 import { getIdFromGraphQLId } from '~/graphql_shared/utils';
-import createGqClient, { fetchPolicies } from '~/lib/graphql';
 import { convertObjectPropsToCamelCase, urlParamsToObject } from '~/lib/utils/common_utils';
 import { s__ } from '~/locale';
 import {
@@ -31,6 +30,7 @@ import {
   getMoveData,
   getSupportedParams,
 } from '../boards_util';
+import gqlClient from '../graphql';
 import boardLabelsQuery from '../graphql/board_labels.query.graphql';
 import groupProjectsQuery from '../graphql/group_projects.query.graphql';
 import issueCreateMutation from '../graphql/issue_create.mutation.graphql';
@@ -40,12 +40,7 @@ import issueSetMilestoneMutation from '../graphql/issue_set_milestone.mutation.g
 import listsIssuesQuery from '../graphql/lists_issues.query.graphql';
 import * as types from './mutation_types';
 
-export const gqlClient = createGqClient(
-  {},
-  {
-    fetchPolicy: fetchPolicies.NO_CACHE,
-  },
-);
+import totalCountAndWeightQuery from '~/boards/graphql/board_lists_deferred.query.graphql';
 
 export default {
   setInitialBoardData: ({ commit }, data) => {
@@ -440,6 +435,55 @@ export default {
           moveAfterId,
           // 'mutationVariables' allows EE code to pass in extra parameters.
           ...mutationVariables,
+        },
+        update(
+          cache,
+          {
+            data: {
+              issueMoveList: {
+                issue: { weight },
+              },
+            },
+          },
+        ) {
+          const fromList = cache.readQuery({
+            query: totalCountAndWeightQuery,
+            variables: { id: fromListId },
+          });
+          const toList = cache.readQuery({
+            query: totalCountAndWeightQuery,
+            variables: { id: toListId },
+          });
+
+          const updatedFromList = {
+            boardList: {
+              __typename: 'BoardList',
+              id: fromList.boardList.id,
+              issuesCount: fromList.boardList.issuesCount - 1,
+              totalWeight: fromList.boardList.totalWeight - Number(weight),
+            },
+          };
+
+          const updatedToList = {
+            boardList: {
+              __typename: 'BoardList',
+              id: toList.boardList.id,
+              issuesCount: toList.boardList.issuesCount + 1,
+              totalWeight: toList.boardList.totalWeight + Number(weight),
+            },
+          };
+
+          cache.writeQuery({
+            query: totalCountAndWeightQuery,
+            variables: { id: fromListId },
+            data: updatedFromList,
+          });
+
+          cache.writeQuery({
+            query: totalCountAndWeightQuery,
+            variables: { id: toListId },
+            data: updatedToList,
+          });
         },
       });
 

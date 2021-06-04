@@ -8,8 +8,9 @@ import {
 } from '~/boards/boards_util';
 import { BoardType, SupportedFilters } from '~/boards/constants';
 import eventHub from '~/boards/eventhub';
+import gqlClient from '~/boards/graphql';
 import listsIssuesQuery from '~/boards/graphql/lists_issues.query.graphql';
-import actionsCE, { gqlClient } from '~/boards/stores/actions';
+import actionsCE from '~/boards/stores/actions';
 import boardsStore from '~/boards/stores/boards_store';
 import * as typesCE from '~/boards/stores/mutation_types';
 import axios from '~/lib/utils/axios_utils';
