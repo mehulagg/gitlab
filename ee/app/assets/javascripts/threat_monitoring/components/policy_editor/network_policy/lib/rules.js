@@ -5,7 +5,7 @@ import {
   RuleTypeFQDN,
   RuleDirectionInbound,
   PortMatchModeAny,
-} from '../constants';
+} from './constants';
 import { portSelectors, labelSelector, splitItems } from './utils';
 
 /*

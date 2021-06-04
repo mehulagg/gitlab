@@ -11,7 +11,7 @@ import {
   RuleTypeEntity,
   RuleTypeCIDR,
   RuleTypeFQDN,
-} from '../constants';
+} from './constants';
 import { buildRule } from './rules';
 
 /*

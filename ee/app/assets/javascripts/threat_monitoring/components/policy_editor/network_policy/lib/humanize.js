@@ -6,7 +6,7 @@ import {
   RuleTypeEntity,
   RuleTypeCIDR,
   RuleTypeFQDN,
-} from '../constants';
+} from './constants';
 import { portSelectors, labelSelector, splitItems } from './utils';
 
 const strongArgs = { strongOpen: '<strong>', strongClose: '</strong>' };

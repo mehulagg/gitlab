@@ -6,7 +6,7 @@ import { setUrlFragment, mergeUrlParams } from '~/lib/utils/url_utility';
 import { s__ } from '~/locale';
 import { getContentWrapperHeight } from '../utils';
 import EnvironmentPicker from './environment_picker.vue';
-import { CiliumNetworkPolicyKind } from './policy_editor/constants';
+import { CiliumNetworkPolicyKind } from './policy_editor/network_policy/lib/constants';
 import PolicyDrawer from './policy_editor/policy_drawer.vue';
 
 export default {
@@ -19,8 +19,8 @@ export default {
     GlSprintf,
     GlLink,
     EnvironmentPicker,
-    NetworkPolicyEditor: () =>
-      import(/* webpackChunkName: 'network_policy_editor' */ './network_policy_editor.vue'),
+    PolicyYamlEditor: () =>
+      import(/* webpackChunkName: 'policy_yaml_editor' */ './policy_yaml_editor.vue'),
     PolicyDrawer,
   },
   props: {
@@ -238,7 +238,7 @@ export default {
             {{ s__("NetworkPolicies|Define this policy's location, conditions and actions.") }}
           </p>
           <div class="gl-p-3 gl-bg-gray-50">
-            <network-policy-editor
+            <policy-yaml-editor
               ref="policyEditor"
               v-model="selectedPolicy.manifest"
               class="network-policy-editor"

@@ -1,4 +1,4 @@
-import { PortMatchModeAny } from '../constants';
+import { PortMatchModeAny } from './constants';
 
 /*
  Convert space separated list of labels into a kubernetes selector.

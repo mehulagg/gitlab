@@ -13,7 +13,7 @@ import {
   RuleTypeFQDN,
   PortMatchModeAny,
   PortMatchModePortProtocol,
-} from './constants';
+} from './lib';
 import PolicyRuleCIDR from './policy_rule_cidr.vue';
 import PolicyRuleEndpoint from './policy_rule_endpoint.vue';
 import PolicyRuleEntity from './policy_rule_entity.vue';

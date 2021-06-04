@@ -1,5 +1,5 @@
 import { safeDump } from 'js-yaml';
-import { EndpointMatchModeAny, DisabledByLabel, CiliumNetworkPolicyKind } from '../constants';
+import { EndpointMatchModeAny, DisabledByLabel, CiliumNetworkPolicyKind } from './constants';
 import { ruleSpec } from './rules';
 import { labelSelector } from './utils';
 

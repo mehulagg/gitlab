@@ -1,7 +1,7 @@
 <script>
 import { GlDropdown, GlDropdownItem } from '@gitlab/ui';
 import { sprintf, s__ } from '~/locale';
-import { EntityTypes } from './constants';
+import { EntityTypes } from './lib';
 
 export default {
   components: {
