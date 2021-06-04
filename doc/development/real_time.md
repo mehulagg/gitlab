@@ -10,21 +10,22 @@ This guide contains instructions on how to safely roll out new real-time
 features.
 
 Real-time features are implemented using GraphQL Subscriptions. [Developer 
-documentation](api_graphql_styleguide.md#subscriptions) is available. 
+documentation](api_graphql_styleguide.md#subscriptions) is available.
 
-WebSockets are a relatively new technology in GitLab and supporting them at
+WebSockets are a relatively new technology at GitLab and supporting them at
 scale introduces some challenges. For that reason, new features should be rolled 
 out carefully in collaboration with the Plan and Scalability teams.
 
 ## Reusing an existing WebSocket connection
 
 Features reusing an existing connection incur minimal risk. Feature flag rollout
-is recommended. However, it is not necessary to roll out in percentages or to
-estimate new capacity required.
+is recommended in order to give more control to self-hosting customers. However, 
+it is not necessary to roll out in percentages or to estimate new connections for
+GitLab.com.
 
 ## Introducing a new WebSocket connection
 
-Any change that introduces a WebSocket connection to part of the GitLab site
+Any change that introduces a WebSocket connection to part of the GitLab application
 incurs some scalability risk, both to nodes responsible for maintaining open 
 connections and on downstream services; such as Redis and the primary database.
 
@@ -71,10 +72,13 @@ roll-out plan.
 
 ## Backwards compatibility
 
-For the period of the feature flag roll-out and indefinitely thereafter,
+For the duration of the feature flag roll-out and indefinitely thereafter,
 real-time features will need to be backwards compatible, or at least degrade
 gracefully. Not all customers will have Action Cable enabled and further work
-needs to be done before Action Cable can be enabled by default.
+needs to be done before Action Cable will be enabled by default.
+
+Making real-time a requirement represents a breaking change, therefore the next
+opportunity to do this is version 15.0.
 
 ## Enabling Real-Time by default
 
@@ -86,3 +90,8 @@ least to revise Reference Architectures.
 
 ## Real-time infrastructure on GitLab.com
 
+On GitLab.com, WebSocket connections are served from dedicated infrastructure,
+entirely separate from the regular Web fleet and deployed with Kubernetes. This
+limits risk to nodes handling requests but not to shared services. For more
+information on the WebSockets Kubernetes deployment see
+[this epic](https://gitlab.com/groups/gitlab-com/gl-infra/-/epics/355).
