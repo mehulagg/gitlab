@@ -12,7 +12,7 @@
         .form-text.text-muted.gl-mb-3
           = _('Group sharing provides access to all group members (including members who inherited group membership from a parent group).')
       .form-group
-        = label_tag group_access_field, _("Max access level"), class: "label-bold"
+        = label_tag group_access_field, _("Max role"), class: "label-bold"
         .select-wrapper
           = select_tag group_access_field, options_for_select(access_levels, default_access_level), data: { qa_selector: 'group_access_field' }, class: "form-control select-control"
           = sprite_icon('chevron-down', css_class: "gl-icon gl-absolute gl-top-3 gl-right-3 gl-text-gray-200")
