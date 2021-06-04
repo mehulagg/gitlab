@@ -87,7 +87,7 @@ Returns [`DesignManagement!`](#designmanagement).
 
 Get configured DevOps adoption namespaces. **BETA** This endpoint is subject to change without notice.
 
-Returns [`DevopsAdoptionSegmentConnection`](#devopsadoptionsegmentconnection).
+Returns [`DevopsAdoptionEnabledNamespaceConnection`](#devopsadoptionenablednamespaceconnection).
 
 This field returns a [connection](#connections). It accepts the
 four standard [pagination arguments](#connection-pagination-arguments):
@@ -778,7 +778,7 @@ Input type: `BulkEnableDevopsAdoptionNamespacesInput`
 | Name | Type | Description |
 | ---- | ---- | ----------- |
 | <a id="mutationbulkenabledevopsadoptionnamespacesclientmutationid"></a>`clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
-| <a id="mutationbulkenabledevopsadoptionnamespacesenablednamespaces"></a>`enabledNamespaces` | [`[DevopsAdoptionSegment!]`](#devopsadoptionsegment) | Enabled namespaces after mutation. |
+| <a id="mutationbulkenabledevopsadoptionnamespacesenablednamespaces"></a>`enabledNamespaces` | [`[DevopsAdoptionEnabledNamespace!]`](#devopsadoptionenablednamespace) | Enabled namespaces after mutation. |
 | <a id="mutationbulkenabledevopsadoptionnamespaceserrors"></a>`errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 
 ### `Mutation.ciCdSettingsUpdate`
@@ -1959,7 +1959,7 @@ Input type: `EnableDevopsAdoptionNamespaceInput`
 | Name | Type | Description |
 | ---- | ---- | ----------- |
 | <a id="mutationenabledevopsadoptionnamespaceclientmutationid"></a>`clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
-| <a id="mutationenabledevopsadoptionnamespaceenablednamespace"></a>`enabledNamespace` | [`DevopsAdoptionSegment`](#devopsadoptionsegment) | Enabled namespace after mutation. |
+| <a id="mutationenabledevopsadoptionnamespaceenablednamespace"></a>`enabledNamespace` | [`DevopsAdoptionEnabledNamespace`](#devopsadoptionenablednamespace) | Enabled namespace after mutation. |
 | <a id="mutationenabledevopsadoptionnamespaceerrors"></a>`errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 
 ### `Mutation.environmentsCanaryIngressUpdate`
@@ -5128,28 +5128,28 @@ The edge type for [`DesignVersion`](#designversion).
 | <a id="designversionedgecursor"></a>`cursor` | [`String!`](#string) | A cursor for use in pagination. |
 | <a id="designversionedgenode"></a>`node` | [`DesignVersion`](#designversion) | The item at the end of the edge. |
 
-#### `DevopsAdoptionSegmentConnection`
+#### `DevopsAdoptionEnabledNamespaceConnection`
 
-The connection type for [`DevopsAdoptionSegment`](#devopsadoptionsegment).
-
-##### Fields
-
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| <a id="devopsadoptionsegmentconnectionedges"></a>`edges` | [`[DevopsAdoptionSegmentEdge]`](#devopsadoptionsegmentedge) | A list of edges. |
-| <a id="devopsadoptionsegmentconnectionnodes"></a>`nodes` | [`[DevopsAdoptionSegment]`](#devopsadoptionsegment) | A list of nodes. |
-| <a id="devopsadoptionsegmentconnectionpageinfo"></a>`pageInfo` | [`PageInfo!`](#pageinfo) | Information to aid in pagination. |
-
-#### `DevopsAdoptionSegmentEdge`
-
-The edge type for [`DevopsAdoptionSegment`](#devopsadoptionsegment).
+The connection type for [`DevopsAdoptionEnabledNamespace`](#devopsadoptionenablednamespace).
 
 ##### Fields
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
-| <a id="devopsadoptionsegmentedgecursor"></a>`cursor` | [`String!`](#string) | A cursor for use in pagination. |
-| <a id="devopsadoptionsegmentedgenode"></a>`node` | [`DevopsAdoptionSegment`](#devopsadoptionsegment) | The item at the end of the edge. |
+| <a id="devopsadoptionenablednamespaceconnectionedges"></a>`edges` | [`[DevopsAdoptionEnabledNamespaceEdge]`](#devopsadoptionenablednamespaceedge) | A list of edges. |
+| <a id="devopsadoptionenablednamespaceconnectionnodes"></a>`nodes` | [`[DevopsAdoptionEnabledNamespace]`](#devopsadoptionenablednamespace) | A list of nodes. |
+| <a id="devopsadoptionenablednamespaceconnectionpageinfo"></a>`pageInfo` | [`PageInfo!`](#pageinfo) | Information to aid in pagination. |
+
+#### `DevopsAdoptionEnabledNamespaceEdge`
+
+The edge type for [`DevopsAdoptionEnabledNamespace`](#devopsadoptionenablednamespace).
+
+##### Fields
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| <a id="devopsadoptionenablednamespaceedgecursor"></a>`cursor` | [`String!`](#string) | A cursor for use in pagination. |
+| <a id="devopsadoptionenablednamespaceedgenode"></a>`node` | [`DevopsAdoptionEnabledNamespace`](#devopsadoptionenablednamespace) | The item at the end of the edge. |
 
 #### `DiscussionConnection`
 
@@ -8290,7 +8290,7 @@ four standard [pagination arguments](#connection-pagination-arguments):
 | <a id="detailedstatustext"></a>`text` | [`String`](#string) | Text of the status. |
 | <a id="detailedstatustooltip"></a>`tooltip` | [`String`](#string) | Tooltip associated with the status. |
 
-### `DevopsAdoptionSegment`
+### `DevopsAdoptionEnabledNamespace`
 
 Enabled namespace for DevopsAdoption.
 
@@ -8298,10 +8298,10 @@ Enabled namespace for DevopsAdoption.
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
-| <a id="devopsadoptionsegmentdisplaynamespace"></a>`displayNamespace` | [`Namespace`](#namespace) | Namespace where data should be displayed. |
-| <a id="devopsadoptionsegmentid"></a>`id` | [`ID!`](#id) | ID of the enabled namespace. |
-| <a id="devopsadoptionsegmentlatestsnapshot"></a>`latestSnapshot` | [`DevopsAdoptionSnapshot`](#devopsadoptionsnapshot) | The latest adoption metrics for the enabled namespace. |
-| <a id="devopsadoptionsegmentnamespace"></a>`namespace` | [`Namespace`](#namespace) | Namespace which should be calculated. |
+| <a id="devopsadoptionenablednamespacedisplaynamespace"></a>`displayNamespace` | [`Namespace`](#namespace) | Namespace where data should be displayed. |
+| <a id="devopsadoptionenablednamespaceid"></a>`id` | [`ID!`](#id) | ID of the enabled namespace. |
+| <a id="devopsadoptionenablednamespacelatestsnapshot"></a>`latestSnapshot` | [`DevopsAdoptionSnapshot`](#devopsadoptionsnapshot) | The latest adoption metrics for the enabled namespace. |
+| <a id="devopsadoptionenablednamespacenamespace"></a>`namespace` | [`Namespace`](#namespace) | Namespace which should be calculated. |
 
 ### `DevopsAdoptionSnapshot`
 

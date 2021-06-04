@@ -5,7 +5,7 @@ module Types
   module Analytics
     module DevopsAdoption
       class EnabledNamespaceType < BaseObject
-        graphql_name 'DevopsAdoptionSegment'
+        graphql_name 'DevopsAdoptionEnabledNamespace'
         description 'Enabled namespace for DevopsAdoption'
 
         field :id, GraphQL::ID_TYPE, null: false,
