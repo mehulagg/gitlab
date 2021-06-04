@@ -4104,7 +4104,7 @@ Tiers: `free`
 
 ### `counts.personal_snippets`
 
-Count of Personal Snippets
+Count of personal Snippets
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216180239_personal_snippets.yml)
 
@@ -4176,7 +4176,7 @@ Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.project_snippets`
 
-Count of Project Snippetss
+Count of project Snippets
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216180241_project_snippets.yml)
 
@@ -5772,7 +5772,7 @@ Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.static_site_editor_commits`
 
-Count of commits created via Static Site Editor
+Count of commits created from the Static Site Editor
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216180301_static_site_editor_commits.yml)
 
@@ -5780,7 +5780,7 @@ Group: `group::editor`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.static_site_editor_merge_requests`
 
@@ -5792,11 +5792,11 @@ Group: `group::editor`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.static_site_editor_views`
 
-Missing description
+Count of Static Site Editor views
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216180259_static_site_editor_views.yml)
 
@@ -6420,7 +6420,7 @@ Tiers: `ultimate`
 
 ### `counts.user_preferences_user_gitpod_enabled`
 
-Count all users with their GitPod setting enabled
+Count of users with the GitPod integration enabled
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216180304_user_preferences_user_gitpod_enabled.yml)
 
@@ -6444,7 +6444,7 @@ Tiers: `free`
 
 ### `counts.web_ide_commits`
 
-Count of Commits made from Web IDE
+Count of commits made from the Web IDE
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216180242_web_ide_commits.yml)
 
@@ -6456,7 +6456,7 @@ Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.web_ide_merge_requests`
 
-Count of merge requests created from Web IDE
+Count of merge requests created from the Web IDE
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216180246_web_ide_merge_requests.yml)
 
@@ -6468,7 +6468,7 @@ Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.web_ide_pipelines`
 
-Count of Pipeline tab views in Web IDE
+Count of Pipeline tab views in the Web IDE
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216180252_web_ide_pipelines.yml)
 
@@ -6480,7 +6480,7 @@ Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.web_ide_previews`
 
-Count of Live Preview tab views in Web IDE
+Count of Live Preview tab views in the Web IDE
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216180248_web_ide_previews.yml)
 
@@ -6492,7 +6492,7 @@ Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.web_ide_terminals`
 
-Count of Web Terminal Tab views in Web IDE
+Count of Web Terminal tab views in the Web IDE
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216180250_web_ide_terminals.yml)
 
@@ -6504,7 +6504,7 @@ Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.web_ide_views`
 
-Count of Views of the Web IDE
+Count of views of the Web IDE
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216180244_web_ide_views.yml)
 
@@ -6516,39 +6516,39 @@ Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.wiki_pages_create`
 
-Missing description
+Count of all Wiki pages created
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216180734_wiki_pages_create.yml)
 
-Group: `group::knowledge`
+Group: `group::editor`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.wiki_pages_delete`
 
-Missing description
+Count of all Wiki pages deleted
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216180738_wiki_pages_delete.yml)
 
-Group: `group::knowledge`
+Group: `group::editor`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.wiki_pages_update`
 
-Missing description
+Count of all Wiki page updates
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216180736_wiki_pages_update.yml)
 
-Group: `group::knowledge`
+Group: `group::editor`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.wiki_pages_view`
 
@@ -6708,7 +6708,7 @@ Tiers: `free`, `premium`, `ultimate`
 
 ### `counts_monthly.personal_snippets`
 
-Monthly count of Personal Snippets
+Monthly count of personal Snippets
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216180308_personal_snippets.yml)
 
@@ -6720,7 +6720,7 @@ Tiers: `free`, `premium`, `ultimate`
 
 ### `counts_monthly.project_snippets`
 
-Monthly count of Project Snippets
+Monthly count of project Snippets
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216180310_project_snippets.yml)
 
@@ -7068,7 +7068,7 @@ Tiers: `free`, `premium`, `ultimate`
 
 ### `gitpod_enabled`
 
-Whether gitpod is enabled in the instance
+Whether Gitpod is enabled in the instance
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/settings/20210216180314_gitpod_enabled.yml)
 
@@ -11532,7 +11532,7 @@ Tiers: `premium`, `ultimate`
 
 ### `redis_hll_counters.ide_edit.g_edit_by_sfe_monthly`
 
-Missing description
+Count of monthly edits to a file from the single file editor
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216180334_g_edit_by_sfe_monthly.yml)
 
@@ -11540,11 +11540,11 @@ Group: `group::editor`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `redis_hll_counters.ide_edit.g_edit_by_sfe_weekly`
 
-Missing description
+Count of weekly edits from the single file editor
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_7d/20210216180332_g_edit_by_sfe_weekly.yml)
 
@@ -11552,11 +11552,11 @@ Group: `group::editor`
 
 Status: `data_available`
 
-Tiers:
+Tiers: `free`, `premium`, `ultimate`
 
 ### `redis_hll_counters.ide_edit.g_edit_by_snippet_ide_monthly`
 
-Missing description
+Count of monthly edits to a snippet
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216180338_g_edit_by_snippet_ide_monthly.yml)
 
@@ -11564,11 +11564,11 @@ Group: `group::editor`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `redis_hll_counters.ide_edit.g_edit_by_snippet_ide_weekly`
 
-Missing description
+Count of weekly edits to a Snippet
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_7d/20210216180336_g_edit_by_snippet_ide_weekly.yml)
 
@@ -11576,35 +11576,35 @@ Group: `group::editor`
 
 Status: `data_available`
 
-Tiers:
+Tiers: `free`, `premium`, `ultimate`
 
 ### `redis_hll_counters.ide_edit.g_edit_by_sse_monthly`
 
-Missing description
+Monthly count of edits made using the Static Site Editor
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216184024_g_edit_by_sse_monthly.yml)
 
-Group: ``
+Group: `group::editor`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `redis_hll_counters.ide_edit.g_edit_by_sse_weekly`
 
-Missing description
+Weekly count of edits made using the Static Site Editor
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_7d/20210216184022_g_edit_by_sse_weekly.yml)
 
-Group: ``
+Group: `group::editor`
 
 Status: `data_available`
 
-Tiers:
+Tiers: `free`, `premium`, `ultimate`
 
 ### `redis_hll_counters.ide_edit.g_edit_by_web_ide_monthly`
 
-Missing description
+Count of monthly edits to a file from the Web IDE
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216180330_g_edit_by_web_ide_monthly.yml)
 
@@ -11612,11 +11612,11 @@ Group: `group::editor`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `redis_hll_counters.ide_edit.g_edit_by_web_ide_weekly`
 
-Missing description
+Count of weekly edits from the Web IDE
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_7d/20210216180328_g_edit_by_web_ide_weekly.yml)
 
@@ -11624,11 +11624,11 @@ Group: `group::editor`
 
 Status: `data_available`
 
-Tiers:
+Tiers: `free`, `premium`, `ultimate`
 
 ### `redis_hll_counters.ide_edit.ide_edit_total_unique_counts_monthly`
 
-Missing description
+Count of unique users per month who edited a file from the Web IDE
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216180341_ide_edit_total_unique_counts_monthly.yml)
 
@@ -11636,11 +11636,11 @@ Group: `group::editor`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `redis_hll_counters.ide_edit.ide_edit_total_unique_counts_weekly`
 
-Missing description
+Count of unique users per week who edited a file from the Web IDE
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_7d/20210216180339_ide_edit_total_unique_counts_weekly.yml)
 
@@ -11648,7 +11648,7 @@ Group: `group::editor`
 
 Status: `data_available`
 
-Tiers:
+Tiers: `free`, `premium`, `ultimate`
 
 ### `redis_hll_counters.incident_management.incident_management_alert_assigned_monthly`
 
@@ -14700,27 +14700,27 @@ Tiers: `free`, `premium`, `ultimate`
 
 ### `redis_hll_counters.snippets.i_snippets_show_monthly`
 
-Missing description
+Monthly count of Snippet views
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216184255_i_snippets_show_monthly.yml)
 
-Group: ``
+Group: `group::editor`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `redis_hll_counters.snippets.i_snippets_show_weekly`
 
-Missing description
+Weekly count of Snippet views
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_7d/20210216184253_i_snippets_show_weekly.yml)
 
-Group: ``
+Group: `group::editor`
 
 Status: `data_available`
 
-Tiers:
+Tiers: `free`, `premium`, `ultimate`
 
 ### `redis_hll_counters.source_code.design_action_monthly`
 
@@ -16142,7 +16142,7 @@ Tiers: `free`, `premium`, `ultimate`
 
 ### `usage_activity_by_stage.create.snippets`
 
-Snippets
+Count of all Snippets
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216180316_snippets.yml)
 
@@ -17788,7 +17788,7 @@ Tiers: `free`, `premium`, `ultimate`
 
 ### `usage_activity_by_stage_monthly.create.action_monthly_active_users_ide_edit`
 
-Count unique edit actions when users used an IDE, no matter which one
+Count of unique users per month who edited a file from any web editor
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216180327_action_monthly_active_users_ide_edit.yml)
 
@@ -17796,7 +17796,7 @@ Group: `group::editor`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `usage_activity_by_stage_monthly.create.action_monthly_active_users_project_repo`
 
@@ -17812,7 +17812,7 @@ Tiers: `free`, `premium`, `ultimate`
 
 ### `usage_activity_by_stage_monthly.create.action_monthly_active_users_sfe_edit`
 
-Count unique edit actions using the single file editor
+Count of unique edit actions using the single file editor
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216180321_action_monthly_active_users_sfe_edit.yml)
 
@@ -17820,7 +17820,7 @@ Group: `group::editor`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `usage_activity_by_stage_monthly.create.action_monthly_active_users_snippet_editor_edit`
 
@@ -17832,11 +17832,11 @@ Group: `group::editor`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `usage_activity_by_stage_monthly.create.action_monthly_active_users_sse_edit`
 
-Count unique edit actions using the static site editor
+Count of unique edit actions using the static site editor
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216180325_action_monthly_active_users_sse_edit.yml)
 
@@ -17844,11 +17844,11 @@ Group: `group::editor`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `usage_activity_by_stage_monthly.create.action_monthly_active_users_web_ide_edit`
 
-Count unique edit actions using the web IDE
+Count of unique edit actions using the web IDE
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216180319_action_monthly_active_users_web_ide_edit.yml)
 
@@ -17856,19 +17856,19 @@ Group: `group::editor`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `usage_activity_by_stage_monthly.create.action_monthly_active_users_wiki_repo`
 
-Missing description
+Unique monthly active users of the Wiki
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216180747_action_monthly_active_users_wiki_repo.yml)
 
-Group: `group::knowledge`
+Group: `group::editor`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `usage_activity_by_stage_monthly.create.approval_project_rules`
 
@@ -18124,7 +18124,7 @@ Tiers: `free`, `premium`, `ultimate`
 
 ### `usage_activity_by_stage_monthly.create.snippets`
 
-Monthly Snippets
+Monthly count of Snippets
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216180317_snippets.yml)
 
@@ -19600,12 +19600,12 @@ Tiers: `free`, `premium`, `ultimate`
 
 ### `web_ide_clientside_preview_enabled`
 
-Whether web ide clientside preview is enabled
+Whether Web IDE clientside preview is enabled
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/settings/20210204124920_web_ide_clientside_preview_enabled.yml)
 
-Group: `group::product intelligence`
+Group: `group::editor`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`

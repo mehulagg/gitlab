@@ -1,6 +1,6 @@
 ---
 key_path: redis_hll_counters.snippets.i_snippets_show_weekly
-description: Weekly count of Snippet views 
+description: Weekly count of Snippet views
 product_section: dev
 product_stage: create
 product_group: group::editor
@@ -11,7 +11,7 @@ time_frame: 7d
 data_source: redis_hll
 distribution:
 - ee
-tier: 
+tier:
 - free
 - premium
 - ultimate
