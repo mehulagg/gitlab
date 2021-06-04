@@ -30,8 +30,7 @@ module EE
 
               return {} unless result.success?
 
-              { dast_site_profile: result.payload[:dast_site_profile] }
-
+              result.payload
             end
             # rubocop:enable Gitlab/ModuleWithInstanceVariables
 

@@ -34,6 +34,9 @@ module EE
         has_one :dast_site_profiles_build, class_name: 'Dast::SiteProfilesBuild', foreign_key: :ci_build_id, inverse_of: :ci_build
         has_one :dast_site_profile, class_name: 'DastSiteProfile', through: :dast_site_profiles_build
 
+        has_one :dast_scanner_profiles_build, class_name: 'Dast::ScannerProfilesBuild', foreign_key: :ci_build_id, inverse_of: :ci_build
+        has_one :dast_scanner_profile, class_name: 'DastScannerProfile', through: :dast_scanner_profiles_build
+
         after_save :stick_build_if_status_changed
         after_commit :track_ci_secrets_management_usage, on: :create
         delegate :service_specification, to: :runner_session, allow_nil: true
@@ -51,6 +54,7 @@ module EE
       def variables
         strong_memoize(:variables) do
           super.tap do |collection|
+            # TODO removal
             if pipeline.triggered_for_ondemand_dast_scan?
               # Subject to change. Please see gitlab-org/gitlab#330950 for more info.
               profile = pipeline.dast_profile || pipeline.dast_site_profile
@@ -61,6 +65,10 @@ module EE
             if dast_site_profile
               collection.concat(dast_site_profile.ci_variables)
               collection.concat(dast_site_profile.secret_ci_variables(user))
+            end
+
+            if dast_scanner_profile
+              collection.concat(dast_scanner_profile.ci_variables)
             end
           end
         end
