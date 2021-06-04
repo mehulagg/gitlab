@@ -1,5 +1,3 @@
-import { GlAlert } from '@gitlab/ui';
-import { shallowMount, mount } from '@vue/test-utils';
 import MockAdapter from 'axios-mock-adapter';
 import VueDraggable from 'vuedraggable';
 import { TEST_HOST } from 'helpers/test_constants';
@@ -18,7 +16,6 @@ import LinksSection from '~/monitoring/components/links_section.vue';
 import { dashboardEmptyStates, metricStates } from '~/monitoring/constants';
 import { createStore } from '~/monitoring/stores';
 import * as types from '~/monitoring/stores/mutation_types';
-import AlertDeprecationWarning from '~/vue_shared/components/alerts_deprecation_warning.vue';
 import {
   metricsDashboardViewModel,
   metricsDashboardPanelCount,
