@@ -4342,6 +4342,29 @@ Some of the types in the schema exist solely to model connections. Each connecti
 has a distinct, named type, with a distinct named edge type. These are listed separately
 below.
 
+#### `AgentConfigurationConnection`
+
+The connection type for [`AgentConfiguration`](#agentconfiguration).
+
+##### Fields
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| <a id="agentconfigurationconnectionedges"></a>`edges` | [`[AgentConfigurationEdge]`](#agentconfigurationedge) | A list of edges. |
+| <a id="agentconfigurationconnectionnodes"></a>`nodes` | [`[AgentConfiguration]`](#agentconfiguration) | A list of nodes. |
+| <a id="agentconfigurationconnectionpageinfo"></a>`pageInfo` | [`PageInfo!`](#pageinfo) | Information to aid in pagination. |
+
+#### `AgentConfigurationEdge`
+
+The edge type for [`AgentConfiguration`](#agentconfiguration).
+
+##### Fields
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| <a id="agentconfigurationedgecursor"></a>`cursor` | [`String!`](#string) | A cursor for use in pagination. |
+| <a id="agentconfigurationedgenode"></a>`node` | [`AgentConfiguration`](#agentconfiguration) | The item at the end of the edge. |
+
 #### `AlertManagementAlertConnection`
 
 The connection type for [`AlertManagementAlert`](#alertmanagementalert).
@@ -6980,6 +7003,16 @@ Represents the access level of a relationship between a User and object that it 
 | ---- | ---- | ----------- |
 | <a id="accesslevelintegervalue"></a>`integerValue` | [`Int`](#int) | Integer representation of access level. |
 | <a id="accesslevelstringvalue"></a>`stringValue` | [`AccessLevelEnum`](#accesslevelenum) | String representation of access level. |
+
+### `AgentConfiguration`
+
+Configuration details for an Agent.
+
+#### Fields
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| <a id="agentconfigurationagentname"></a>`agentName` | [`String`](#string) | Name of the agent. |
 
 ### `AlertManagementAlert`
 
@@ -11057,6 +11090,7 @@ Represents vulnerability finding of a security report on the pipeline.
 | Name | Type | Description |
 | ---- | ---- | ----------- |
 | <a id="projectactualrepositorysizelimit"></a>`actualRepositorySizeLimit` | [`Float`](#float) | Size limit for the repository in bytes. |
+| <a id="projectagentconfigurations"></a>`agentConfigurations` | [`AgentConfigurationConnection`](#agentconfigurationconnection) | Agent configurations defined by the project. (see [Connections](#connections)) |
 | <a id="projectallowmergeonskippedpipeline"></a>`allowMergeOnSkippedPipeline` | [`Boolean`](#boolean) | If `only_allow_merge_if_pipeline_succeeds` is true, indicates if merge requests of the project can also be merged with skipped jobs. |
 | <a id="projectapifuzzingciconfiguration"></a>`apiFuzzingCiConfiguration` | [`ApiFuzzingCiConfiguration`](#apifuzzingciconfiguration) | API fuzzing configuration for the project. |
 | <a id="projectarchived"></a>`archived` | [`Boolean`](#boolean) | Indicates the archived status of the project. |

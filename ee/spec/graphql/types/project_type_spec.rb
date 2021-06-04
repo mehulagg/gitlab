@@ -101,6 +101,40 @@ RSpec.describe GitlabSchema.types['Project'] do
     end
   end
 
+  describe 'agent_configurations' do
+    let_it_be(:query) do
+      %(
+        query {
+          project(fullPath: "#{project.full_path}") {
+            agentConfigurations {
+              nodes {
+                agentName
+              }
+            }
+          }
+        }
+      )
+    end
+
+    let(:agent_name) { 'example-agent-name' }
+    let(:kas_client) { instance_double(Gitlab::Kas::Client, list_agent_config_files: [double(agent_name: agent_name)]) }
+
+    subject { GitlabSchema.execute(query, context: { current_user: user }).as_json }
+
+    before do
+      stub_licensed_features(cluster_agents: true)
+
+      allow(Gitlab::Kas::Client).to receive(:new).and_return(kas_client)
+    end
+
+    it 'returns associated cluster agents' do
+      agents = subject.dig('data', 'project', 'agentConfigurations', 'nodes')
+
+      expect(agents.count).to be(1)
+      expect(agents.first['agentName']).to eq(agent_name)
+    end
+  end
+
   describe 'cluster_agents' do
     let_it_be(:cluster_agent) { create(:cluster_agent, project: project, name: 'agent-name') }
     let_it_be(:query) do

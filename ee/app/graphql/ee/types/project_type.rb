@@ -89,6 +89,12 @@ module EE
               resolver: ::Resolvers::DastSiteValidationResolver,
               description: 'DAST Site Validations associated with the project.'
 
+        field :agent_configurations,
+              ::Types::Kas::AgentConfigurationType.connection_type,
+              null: true,
+              description: 'Agent configurations defined by the project',
+              resolver: ::Resolvers::Kas::AgentConfigurationsResolver
+
         field :cluster_agent,
               ::Types::Clusters::AgentType,
               null: true,
