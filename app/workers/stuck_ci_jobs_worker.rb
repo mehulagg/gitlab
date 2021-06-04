@@ -22,7 +22,10 @@ class StuckCiJobsWorker # rubocop:disable Scalability/IdempotentWorker
 
     Gitlab::AppLogger.info "#{self.class}: Cleaning stuck builds"
 
-    drop(running_timed_out_builds, failure_reason: :stuck_or_timeout_failure)
+    drop(
+      Ci::Build.running.updated_before(lookback: BUILD_LOOKBACK.ago, timeout: BUILD_RUNNING_OUTDATED_TIMEOUT.ago),
+      failure_reason: :stuck_or_timeout_failure
+    )
 
     drop(
       Ci::Build.pending.updated_before(lookback: BUILD_LOOKBACK.ago, timeout: BUILD_PENDING_OUTDATED_TIMEOUT.ago),
