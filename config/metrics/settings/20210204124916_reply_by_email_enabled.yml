@@ -3,7 +3,7 @@ key_path: reply_by_email_enabled
 description: Whether incoming email is setup
 product_section: dev
 product_stage: plan
-product_group: plan::project management
+product_group: group::certify
 product_category: collection
 value_type: boolean
 status: data_available
