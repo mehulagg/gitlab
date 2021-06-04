@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-module BoardIssueFilterable
+module BoardItemFilterable
   extend ActiveSupport::Concern
 
   private
@@ -32,4 +32,4 @@ module BoardIssueFilterable
   end
 end
 
-::BoardIssueFilterable.prepend_mod_with('Resolvers::BoardIssueFilterable')
+::BoardItemFilterable.prepend_mod_with('Resolvers::BoardItemFilterable')

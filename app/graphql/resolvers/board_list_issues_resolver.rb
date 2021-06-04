@@ -2,7 +2,7 @@
 
 module Resolvers
   class BoardListIssuesResolver < BaseResolver
-    include BoardIssueFilterable
+    include BoardItemFilterable
 
     argument :filters, Types::Boards::BoardIssueInputType,
              required: false,

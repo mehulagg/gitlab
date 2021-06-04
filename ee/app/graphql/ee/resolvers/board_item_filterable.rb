@@ -2,7 +2,7 @@
 
 module EE
   module Resolvers
-    module BoardIssueFilterable
+    module BoardItemFilterable
       extend ActiveSupport::Concern
       extend ::Gitlab::Utils::Override
 
