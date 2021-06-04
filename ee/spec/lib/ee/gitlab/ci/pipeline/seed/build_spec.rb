@@ -4,8 +4,9 @@ require 'spec_helper'
 
 RSpec.describe Gitlab::Ci::Pipeline::Seed::Build do
   let_it_be(:project) { create(:project, :repository) }
+  let_it_be(:user) { create(:user, developer_projects: [project]) }
 
-  let(:pipeline) { build(:ci_empty_pipeline, project: project) }
+  let(:pipeline) { build(:ci_empty_pipeline, project: project, user: user) }
   let(:seed_context) { double(pipeline: pipeline, root_variables: []) }
   let(:stage) { 'dast' }
   let(:attributes) { { name: 'rspec', ref: 'master', scheduling_type: :stage, stage: stage, job_variables: job_variables } }
@@ -29,14 +30,14 @@ RSpec.describe Gitlab::Ci::Pipeline::Seed::Build do
         ]
       end
 
-      shared_examples 'a permission error' do
-        it 'does not expand the variables' do
-          expect(subject[:yaml_variables]).to eq(job_variables)
+      shared_examples 'it does not change build attributes' do
+        it 'does not add dast_site_profile or dast_scanner_profile' do
+          expect(subject.keys).not_to include(:dast_site_profile, :dast_scanner_profile)
         end
       end
 
       context 'when the feature is not licensed' do
-        it_behaves_like 'a permission error'
+        it_behaves_like 'it does not change build attributes'
       end
 
       context 'when the feature is licensed' do
@@ -49,7 +50,7 @@ RSpec.describe Gitlab::Ci::Pipeline::Seed::Build do
             stub_feature_flags(dast_configuration_ui: false)
           end
 
-          it_behaves_like 'a permission error'
+          it_behaves_like 'it does not change build attributes'
         end
 
         context 'when the feature is enabled' do
@@ -57,50 +58,48 @@ RSpec.describe Gitlab::Ci::Pipeline::Seed::Build do
             stub_feature_flags(dast_configuration_ui: true)
           end
 
-          shared_examples 'variable expansion' do |key|
-            let(:expected_variables) { Gitlab::Ci::Variables::Helpers.transform_to_yaml_variables(profile.ci_variables.to_hash) }
-
+          shared_examples 'it looks up dast profiles in the database' do |key|
             context 'when the profile exists' do
-              it 'expands the variables and adds them to the yaml_variables' do
-                expect(subject[:yaml_variables]).to include(*expected_variables)
+              it 'adds the profile to the build attributes' do
+                expect(subject).to include(profile.class.underscore.to_sym => profile)
+              end
+            end
+
+            shared_examples 'it has no effect' do
+              it 'does not add the profile to the build attributes' do
+                expect(subject).not_to include(profile.class.underscore.to_sym => profile)
               end
             end
 
             context 'when the profile is not provided' do
               let(key) { nil }
 
-              it 'does not expand the variables' do
-                expect(subject[:yaml_variables]).not_to include(*expected_variables)
-              end
+              it_behaves_like 'it has no effect'
             end
 
             context 'when the profile does not exist' do
               let(key) { SecureRandom.hex }
 
-              it 'does not expand the variables' do
-                expect(subject[:yaml_variables]).not_to include(*expected_variables)
-              end
+              it_behaves_like 'it has no effect'
             end
 
             context 'when the stage is not dast' do
               let(:stage) { 'test' }
 
-              it 'does not expand the variables' do
-                expect(subject[:yaml_variables]).not_to include(*expected_variables)
-              end
+              it_behaves_like 'it has no effect'
             end
           end
 
           context 'dast_site_profile' do
             let(:profile) { dast_site_profile }
 
-            it_behaves_like 'variable expansion', :dast_site_profile_name
+            it_behaves_like 'it looks up dast profiles in the database', :dast_site_profile_name
           end
 
           context 'dast_scanner_profile' do
             let(:profile) { dast_scanner_profile }
 
-            it_behaves_like 'variable expansion', :dast_scanner_profile_name
+            it_behaves_like 'it looks up dast profiles in the database', :dast_scanner_profile_name
           end
         end
       end

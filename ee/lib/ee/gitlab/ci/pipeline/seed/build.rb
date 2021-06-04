@@ -22,6 +22,7 @@ module EE
 
               result = AppSec::Dast::Profiles::FetchService.new(
                 container: @pipeline.project,
+                current_user: @pipeline.user,
                 params: {
                   dast_site_profile: fetch_job_variable('DAST_SITE_PROFILE'),
                   dast_scanner_profile: fetch_job_variable('DAST_SCANNER_PROFILE')
