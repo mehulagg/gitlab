@@ -26786,9 +26786,6 @@ msgstr ""
 msgid "Protocol"
 msgstr ""
 
-msgid "Provide feedback"
-msgstr ""
-
 msgid "Provider"
 msgstr ""
 
@@ -32994,9 +32991,6 @@ msgstr ""
 msgid "There was a problem communicating with your device."
 msgstr ""
 
-msgid "There was a problem dismissing this notification."
-msgstr ""
-
 msgid "There was a problem fetching branches."
 msgstr ""
 
@@ -36133,9 +36127,6 @@ msgstr ""
 msgid "View job"
 msgstr ""
 
-msgid "View job dependencies in the pipeline graph!"
-msgstr ""
-
 msgid "View job log"
 msgstr ""
 
@@ -37390,9 +37381,6 @@ msgid "You can now close this window."
 msgstr ""
 
 msgid "You can now export your security dashboard to a CSV report."
-msgstr ""
-
-msgid "You can now group jobs in the pipeline graph based on which jobs are configured to run first, if you use the %{codeStart}needs:%{codeEnd} keyword to establish job dependencies in your CI/CD pipelines. %{linkStart}Learn how to speed up your pipeline with needs.%{linkEnd}"
 msgstr ""
 
 msgid "You can now submit a merge request to get this change into the original branch."
