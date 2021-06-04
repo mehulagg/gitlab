@@ -14,7 +14,7 @@ documentation](api_graphql_styleguide.md#subscriptions) is available.
 
 WebSockets are a relatively new technology at GitLab and supporting them at
 scale introduces some challenges. For that reason, new features should be rolled 
-out carefully in collaboration with the Plan and Scalability teams.
+out using the instructions below.
 
 ## Reusing an existing WebSocket connection
 
