@@ -9483,6 +9483,7 @@ Returns [`VulnerabilitySeveritiesCount`](#vulnerabilityseveritiescount).
 | <a id="groupvulnerabilityseveritiescountprojectid"></a>`projectId` | [`[ID!]`](#id) | Filter vulnerabilities by project. |
 | <a id="groupvulnerabilityseveritiescountreporttype"></a>`reportType` | [`[VulnerabilityReportType!]`](#vulnerabilityreporttype) | Filter vulnerabilities by report type. |
 | <a id="groupvulnerabilityseveritiescountscanner"></a>`scanner` | [`[String!]`](#string) | Filter vulnerabilities by scanner. |
+| <a id="groupvulnerabilityseveritiescountscannerid"></a>`scannerId` | [`[VulnerabilitiesScannerID!]`](#vulnerabilitiesscannerid) | Filter vulnerabilities by scanner ID. |
 | <a id="groupvulnerabilityseveritiescountseverity"></a>`severity` | [`[VulnerabilitySeverity!]`](#vulnerabilityseverity) | Filter vulnerabilities by severity. |
 | <a id="groupvulnerabilityseveritiescountstate"></a>`state` | [`[VulnerabilityState!]`](#vulnerabilitystate) | Filter vulnerabilities by state. |
 
@@ -9651,6 +9652,7 @@ Returns [`VulnerabilitySeveritiesCount`](#vulnerabilityseveritiescount).
 | <a id="instancesecuritydashboardvulnerabilityseveritiescountprojectid"></a>`projectId` | [`[ID!]`](#id) | Filter vulnerabilities by project. |
 | <a id="instancesecuritydashboardvulnerabilityseveritiescountreporttype"></a>`reportType` | [`[VulnerabilityReportType!]`](#vulnerabilityreporttype) | Filter vulnerabilities by report type. |
 | <a id="instancesecuritydashboardvulnerabilityseveritiescountscanner"></a>`scanner` | [`[String!]`](#string) | Filter vulnerabilities by scanner. |
+| <a id="instancesecuritydashboardvulnerabilityseveritiescountscannerid"></a>`scannerId` | [`[VulnerabilitiesScannerID!]`](#vulnerabilitiesscannerid) | Filter vulnerabilities by scanner ID. |
 | <a id="instancesecuritydashboardvulnerabilityseveritiescountseverity"></a>`severity` | [`[VulnerabilitySeverity!]`](#vulnerabilityseverity) | Filter vulnerabilities by severity. |
 | <a id="instancesecuritydashboardvulnerabilityseveritiescountstate"></a>`state` | [`[VulnerabilityState!]`](#vulnerabilitystate) | Filter vulnerabilities by state. |
 
@@ -11887,6 +11889,7 @@ Returns [`VulnerabilitySeveritiesCount`](#vulnerabilityseveritiescount).
 | <a id="projectvulnerabilityseveritiescountprojectid"></a>`projectId` | [`[ID!]`](#id) | Filter vulnerabilities by project. |
 | <a id="projectvulnerabilityseveritiescountreporttype"></a>`reportType` | [`[VulnerabilityReportType!]`](#vulnerabilityreporttype) | Filter vulnerabilities by report type. |
 | <a id="projectvulnerabilityseveritiescountscanner"></a>`scanner` | [`[String!]`](#string) | Filter vulnerabilities by scanner. |
+| <a id="projectvulnerabilityseveritiescountscannerid"></a>`scannerId` | [`[VulnerabilitiesScannerID!]`](#vulnerabilitiesscannerid) | Filter vulnerabilities by scanner ID. |
 | <a id="projectvulnerabilityseveritiescountseverity"></a>`severity` | [`[VulnerabilitySeverity!]`](#vulnerabilityseverity) | Filter vulnerabilities by severity. |
 | <a id="projectvulnerabilityseveritiescountstate"></a>`state` | [`[VulnerabilityState!]`](#vulnerabilitystate) | Filter vulnerabilities by state. |
 
