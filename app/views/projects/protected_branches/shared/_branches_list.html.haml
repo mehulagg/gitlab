@@ -25,8 +25,8 @@
 
           - if ::Feature.enabled?(:allow_force_push_to_protected_branches, @project, default_enabled: :yaml)
             %th
-              = s_("ProtectedBranch|Allow force push")
-              %span.has-tooltip{ data: { container: 'body' }, title: s_('ProtectedBranch|Allow force push for all users with push access.'), 'aria-hidden': 'true' }
+              = s_("ProtectedBranch|Allowed to force push")
+              %span.has-tooltip{ data: { container: 'body' }, title: s_('ProtectedBranch|Allow all users with push access to force push.'), 'aria-hidden': 'true' }
                 = sprite_icon('question', size: 16, css_class: 'gl-text-gray-500')
 
           = render_if_exists 'projects/protected_branches/ee/code_owner_approval_table_head'
