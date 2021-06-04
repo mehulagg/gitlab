@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 class SmartcardController < ApplicationController
+  include AcceptsPendingInvitations
+
   skip_before_action :authenticate_user!
   skip_before_action :verify_authenticity_token
 
@@ -63,6 +65,7 @@ class SmartcardController < ApplicationController
       return
     end
 
+    accept_pending_invitations
     store_active_session
     log_audit_event(user, with: certificate.auth_method, ip_address: request.remote_ip)
     sign_in_and_redirect(user)
