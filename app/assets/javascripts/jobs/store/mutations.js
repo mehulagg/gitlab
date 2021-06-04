@@ -1,6 +1,6 @@
 import Vue from 'vue';
 import * as types from './mutation_types';
-import { logLinesParser, updateIncrementalTrace } from './utils';
+import { logLinesParserTest } from './utils';
 
 export default {
   [types.SET_JOB_ENDPOINT](state, endpoint) {
@@ -25,7 +25,15 @@ export default {
     }
 
     if (log.append) {
-      state.trace = log.lines ? updateIncrementalTrace(log.lines, state.trace) : state.trace;
+      // state.trace = log.lines ? updateIncrementalTrace(log.lines, state.trace) : state.trace;
+
+      const parsedResult = logLinesParserTest(
+        log.lines,
+        state.auxiliaryPartialTraceHelpers,
+        state.trace,
+      );
+      state.trace = parsedResult.parsedLines;
+      state.auxiliaryPartialTraceHelpers = parsedResult.auxiliaryPartialTraceHelpers;
 
       state.traceSize += log.size;
     } else {
@@ -33,7 +41,10 @@ export default {
       // the trace response will not have a defined
       // html or size. We keep the old value otherwise these
       // will be set to `null`
-      state.trace = log.lines ? logLinesParser(log.lines) : state.trace;
+
+      const parsedResult = logLinesParserTest(log.lines);
+      state.trace = parsedResult.parsedLines;
+      state.auxiliaryPartialTraceHelpers = parsedResult.auxiliaryPartialTraceHelpers;
 
       state.traceSize = log.size || state.traceSize;
     }

@@ -7,6 +7,7 @@ export default {
   components: {
     LogLine,
     LogLineHeader,
+    CollapsibleLogSection: () => import('./collapsible_section.vue'),
   },
   props: {
     section: {
@@ -40,12 +41,16 @@ export default {
       @toggleLine="handleOnClickCollapsibleLine(section)"
     />
     <template v-if="!section.isClosed">
-      <log-line
-        v-for="line in section.lines"
-        :key="line.offset"
-        :line="line"
-        :path="traceEndpoint"
-      />
+      <template v-for="line in section.lines">
+        <collapsible-log-section
+          v-if="line.isHeader"
+          :key="line.line.offset"
+          :section="line"
+          :trace-endpoint="traceEndpoint"
+          @onClickCollapsibleLine="handleOnClickCollapsibleLine"
+        />
+        <log-line v-else :key="line.offset" :line="line" :path="traceEndpoint" />
+      </template>
     </template>
   </div>
 </template>
