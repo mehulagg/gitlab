@@ -1,4 +1,5 @@
 import $ from 'jquery';
+import initDismissibleAlertWithButton from '~/vue_shared/init_dismissible_alert_with_button';
 import NoEmojiValidator from '../../../emoji/no_emoji_validator';
 import LengthValidator from './length_validator';
 import OAuthRememberMe from './oauth_remember_me';
@@ -19,4 +20,5 @@ document.addEventListener('DOMContentLoaded', () => {
   // Save the URL fragment from the current window location. This will be present if the user was
   // redirected to sign-in after attempting to access a protected URL that included a fragment.
   preserveUrlFragment(window.location.hash);
+  initDismissibleAlertWithButton();
 });
