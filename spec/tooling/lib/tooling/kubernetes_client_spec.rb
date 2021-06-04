@@ -135,6 +135,39 @@ RSpec.describe Tooling::KubernetesClient do
     end
   end
 
+  describe '#delete_namespace' do
+    let(:wait) { true }
+
+    shared_examples 'a kubectl command to delete namespace' do
+      specify do
+        expect(Gitlab::Popen).to receive(:popen_with_detail)
+                                   .with(["kubectl delete namespace #{namespace} " +
+                                            %(--now --ignore-not-found --wait=#{wait})])
+                                   .and_return(Gitlab::Popen::Result.new([], '', '', double(success?: true)))
+
+        # We're not verifying the output here, just silencing it
+        expect { subject.delete_namespace(wait: wait) }.to output.to_stdout
+      end
+    end
+
+    it 'raises an error if the Kubernetes command fails' do
+      expect(Gitlab::Popen).to receive(:popen_with_detail)
+                                 .with(["kubectl delete namespace #{namespace} " +
+                                          %(--now --ignore-not-found --wait=#{wait})])
+                                 .and_return(Gitlab::Popen::Result.new([], '', '', double(success?: false)))
+
+      expect { subject.delete_namespace }.to raise_error(described_class::CommandFailedError)
+    end
+
+    it_behaves_like 'a kubectl command to delete namespace'
+
+    context 'with wait false' do
+      let(:wait) { false }
+
+      it_behaves_like 'a kubectl command to delete namespace'
+    end
+  end
+
   describe '#raw_resource_names' do
     it 'calls kubectl to retrieve the resource names' do
       expect(Gitlab::Popen).to receive(:popen_with_detail)

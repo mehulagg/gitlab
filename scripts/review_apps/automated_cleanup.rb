@@ -158,10 +158,19 @@ class AutomatedCleanup
       print_release_state(subject: 'Release', release_name: release.name, release_status: release.status, release_date: release.last_update, action: 'cleaning')
     end
 
+    # TODO: remove clean up by helm release and kubernetes
+    # when all releases have been deployed into dedicated namespace
     releases_names = releases.map(&:name)
     helm.delete(release_name: releases_names)
     kubernetes.cleanup_by_release(release_name: releases_names, wait: false)
 
+    releases.each do |release|
+      Tooling::KubernetesClient.new(namespace: release.name).delete_namespace(wait: false)
+    rescue Tooling::KubernetesClient::CommandFailedError => ex
+      raise ex unless ignore_exception?(ex.message, IGNORED_KUBERNETES_ERRORS)
+
+      puts "Ignoring the following Kubernetes error:\n#{ex}\n"
+    end
   rescue Tooling::Helm3Client::CommandFailedError => ex
     raise ex unless ignore_exception?(ex.message, IGNORED_HELM_ERRORS)
 
