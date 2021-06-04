@@ -166,7 +166,7 @@ GitLab offers Linux and Windows shared runners hosted on GitLab.com for executin
 NOTE:
 Shared runners provided by GitLab are **not** configurable. Consider [installing your own runner](https://docs.gitlab.com/runner/install/) if you have specific configuration needs.
 
-Shared runner usage is called a "usage quota". For more information on how the quota works, [shared runner pipeline minutes quota](https://docs.gitlab.com/ee/user/admin_area/settings/continuous_integration.html#shared-runners-pipeline-minutes-quota). 
+Shared runner usage is called a "usage quota". For more information on how the quota works, [shared runner pipeline minutes quota](/ee/user/admin_area/settings/continuous_integration.html#shared-runners-pipeline-minutes-quota). 
 
 ### Linux shared runners
 
