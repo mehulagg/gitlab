@@ -1,8 +1,9 @@
 <script>
-import { GlLink, GlTable, GlDropdownItem, GlDropdown, GlIcon } from '@gitlab/ui';
+import { GlLink, GlTable, GlDropdownItem, GlDropdown, GlIcon, GlButton } from '@gitlab/ui';
 import { last } from 'lodash';
 import { numberToHumanSize } from '~/lib/utils/number_utils';
 import { __ } from '~/locale';
+import FileSha from '~/packages/details/components/file_sha.vue';
 import Tracking from '~/tracking';
 import FileIcon from '~/vue_shared/components/file_icon.vue';
 import TimeAgoTooltip from '~/vue_shared/components/time_ago_tooltip.vue';
@@ -15,8 +16,10 @@ export default {
     GlIcon,
     GlDropdown,
     GlDropdownItem,
+    GlButton,
     FileIcon,
     TimeAgoTooltip,
+    FileSha,
   },
   mixins: [Tracking.mixin()],
   props: {
@@ -91,7 +94,13 @@ export default {
       :items="filesTableRows"
       :tbody-tr-attr="{ 'data-testid': 'file-row' }"
     >
-      <template #cell(name)="{ item }">
+      <template #cell(name)="{ item, toggleDetails, detailsShowing }">
+        <gl-button
+          :icon="detailsShowing ? 'angle-up' : 'angle-down'"
+          category="tertiary"
+          size="small"
+          @click="toggleDetails"
+        />
         <gl-link
           :href="item.download_path"
           class="gl-text-gray-500"
@@ -130,6 +139,21 @@ export default {
             {{ $options.i18n.deleteFile }}
           </gl-dropdown-item>
         </gl-dropdown>
+      </template>
+
+      <template #row-details="{ item }">
+        <div
+          class="gl-display-flex gl-flex-direction-column gl-flex-fill-1 gl-bg-gray-10 gl-rounded-base gl-inset-border-1-gray-100"
+        >
+          <file-sha
+            v-if="item.file_sha256"
+            data-testid="sha-256"
+            title="SHA256"
+            :sha="item.file_sha256"
+          />
+          <file-sha v-if="item.file_md5" data-testid="md5" title="MD5" :sha="item.file_md5" />
+          <file-sha v-if="item.file_sha1" data-testid="sha-1" title="SHA1" :sha="item.file_sha1" />
+        </div>
       </template>
     </gl-table>
   </div>

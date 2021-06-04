@@ -1,5 +1,6 @@
-import { GlDropdown } from '@gitlab/ui';
+import { GlDropdown, GlButton } from '@gitlab/ui';
 import { mount } from '@vue/test-utils';
+import { nextTick } from 'vue/';
 import stubChildren from 'helpers/stub_children';
 import component from '~/packages/details/components/package_files.vue';
 import FileIcon from '~/vue_shared/components/file_icon.vue';
@@ -20,6 +21,8 @@ describe('Package Files', () => {
   const findFirstRowCreatedAt = () => findFirstRow().find(TimeAgoTooltip);
   const findFirstActionMenu = () => findFirstRow().findComponent(GlDropdown);
   const findActionMenuDelete = () => findFirstActionMenu().find('[data-testid="delete-file"]');
+  const findFirstToggleDetailsButton = () => findFirstRow().findComponent(GlButton);
+  const findFirstRowShaComponent = (id) => wrapper.find(`[data-testid="${id}"]`);
 
   const createComponent = ({ packageFiles = npmFiles, canDelete = true } = {}) => {
     wrapper = mount(component, {
@@ -178,6 +181,65 @@ describe('Package Files', () => {
 
           expect(findFirstActionMenu().exists()).toBe(false);
         });
+      });
+    });
+  });
+
+  describe('additional details', () => {
+    describe('details toggle button', () => {
+      it('exists', () => {
+        createComponent();
+
+        expect(findFirstToggleDetailsButton().exists()).toBe(true);
+      });
+
+      it('toggles the details row', async () => {
+        createComponent();
+
+        expect(findFirstToggleDetailsButton().props('icon')).toBe('angle-down');
+
+        findFirstToggleDetailsButton().vm.$emit('click');
+        await nextTick();
+
+        expect(findFirstRowShaComponent('sha-256').exists()).toBe(true);
+        expect(findFirstToggleDetailsButton().props('icon')).toBe('angle-up');
+
+        findFirstToggleDetailsButton().vm.$emit('click');
+        await nextTick();
+
+        expect(findFirstRowShaComponent('sha-256').exists()).toBe(false);
+        expect(findFirstToggleDetailsButton().props('icon')).toBe('angle-down');
+      });
+    });
+
+    describe('file shas', () => {
+      const showShaFiles = () => {
+        findFirstToggleDetailsButton().vm.$emit('click');
+        return nextTick();
+      };
+
+      it.each`
+        selector     | title       | sha
+        ${'sha-256'} | ${'SHA256'} | ${'file_sha256'}
+        ${'md5'}     | ${'MD5'}    | ${'file_md5'}
+        ${'sha-1'}   | ${'SHA1'}   | ${'file_sha1'}
+      `('has a $title row', async ({ selector, title, sha }) => {
+        createComponent();
+
+        await showShaFiles();
+
+        expect(findFirstRowShaComponent(selector).props()).toMatchObject({
+          title,
+          sha,
+        });
+      });
+
+      it('does not display a row when the data is missing', async () => {
+        createComponent({ packageFiles: mavenFiles });
+
+        await showShaFiles();
+
+        expect(findFirstRowShaComponent('sha-256').exists()).toBe(false);
       });
     });
   });
