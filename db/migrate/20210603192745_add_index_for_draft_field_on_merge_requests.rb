@@ -2,7 +2,6 @@
 
 class AddIndexForDraftFieldOnMergeRequests < ActiveRecord::Migration[6.1]
   include Gitlab::Database::MigrationHelpers
-
   DOWNTIME = false
 
   INDEX_NAME = "index_merge_requests_on_target_project_id_and_draft"
