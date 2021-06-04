@@ -62,6 +62,13 @@ is feature flagged and defaulted to 'off'. A careful, percentage-based roll-out
 of the feature flag will ensure that impact can be observed on the [WebSocket
 dashboard](https://dashboards.gitlab.net/d/websockets-main/websockets-overview?orgId=1)
 
+1. Create a 
+[feature flag roll-out](https://gitlab.com/gitlab-org/gitlab/-/blob/master/.gitlab/issue_templates/Feature%20Flag%20Roll%20Out.md)
+issue.
+1. Add the estimated new connections required under the **What are we expecting to happen** section.
+1. Copy in a member of the Plan and Scalability teams to estimate a percentage-based
+roll-out plan.
+
 ## Backwards compatibility
 
 For the period of the feature flag roll-out and indefinitely thereafter,
@@ -78,5 +85,4 @@ to reduce overall memory usage, including a known issue with Workhorse, but at
 least to revise Reference Architectures.
 
 ## Real-time infrastructure on GitLab.com
-
 
