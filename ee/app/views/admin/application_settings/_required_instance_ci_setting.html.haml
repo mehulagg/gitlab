@@ -19,7 +19,8 @@
       %fieldset
         .form-group
           = f.label :required_instance_ci_template, s_('AdminSettings|Select a pipeline configuration file'), class: 'text-muted'
-          = dropdown_tag(s_('AdminSettings|No required pipeline'), options: { toggle_class: 'js-ci-template-dropdown dropdown-select', title: s_('AdminSettings|Select a template'), filter: true, placeholder: _("Filter"), data: { data: gitlab_ci_ymls(nil) } } )
+          -# = dropdown_tag(s_('AdminSettings|No required pipeline'), options: { toggle_class: 'js-ci-template-dropdown dropdown-select', title: s_('AdminSettings|Select a template'), filter: true, placeholder: _("Filter"), data: { data: gitlab_ci_ymls(nil) } } )
+          .js-ci-template-dropdown{ data: { gitlab_ci_ymls: gitlab_ci_ymls(nil).to_json } }
           = f.text_field :required_instance_ci_template, value: @application_setting.required_instance_ci_template, id: 'required_instance_ci_template_name', class: 'hidden'
 
       = f.submit _('Save changes'), class: "gl-button btn btn-confirm"
