@@ -5,6 +5,15 @@ require 'spec_helper'
 RSpec.describe Gitlab::Database::LoadBalancing::SidekiqServerMiddleware do
   let(:middleware) { described_class.new }
 
+  let(:load_balancer) { double }
+  let(:has_replication_lag) { false }
+
+  before do
+    allow(::Gitlab::Database::LoadBalancing).to receive_message_chain(:proxy, :load_balancer).and_return(load_balancer)
+    allow(load_balancer).to receive(:release_host)
+    allow(load_balancer).to receive_message_chain(:host, :caught_up?).and_return(!has_replication_lag)
+  end
+
   after do
     Gitlab::Database::LoadBalancing::Session.clear_session
   end
@@ -31,10 +40,22 @@ RSpec.describe Gitlab::Database::LoadBalancing::SidekiqServerMiddleware do
       end
     end
 
-    shared_examples_for 'stick to the primary' do
+    shared_examples_for 'stick to the primary' do |data_consistency|
       it 'sticks to the primary' do
         middleware.call(worker, job, double(:queue)) do
           expect(Gitlab::Database::LoadBalancing::Session.current.use_primary?).to be_truthy
+        end
+      end
+
+      it 'updates job hash with primary database chosen', :aggregate_failures do
+        middleware.call(worker, job, double(:queue)) do
+          expect(job[:database_chosen]).to eq('primary')
+        end
+      end
+
+      it "updates job hash with data_consistency :#{data_consistency}" do
+        middleware.call(worker, job, double(:queue)) do
+          expect(job).to include(data_consistency: data_consistency.to_s)
         end
       end
     end
@@ -49,12 +70,6 @@ RSpec.describe Gitlab::Database::LoadBalancing::SidekiqServerMiddleware do
 
         expect(job[:database_chosen]).to eq('replica')
       end
-
-      it "updates job hash with data_consistency :#{data_consistency}" do
-        middleware.call(worker, job, double(:queue)) do
-          expect(job).to include(data_consistency: data_consistency.to_s)
-        end
-      end
     end
 
     shared_examples_for 'sticks based on data consistency' do |data_consistency|
@@ -65,7 +80,7 @@ RSpec.describe Gitlab::Database::LoadBalancing::SidekiqServerMiddleware do
           stub_feature_flags(load_balancing_for_test_data_consistency_worker: false)
         end
 
-        include_examples 'stick to the primary'
+        include_examples 'stick to the primary', data_consistency
       end
 
       context 'when database replica location is set' do
@@ -91,7 +106,13 @@ RSpec.describe Gitlab::Database::LoadBalancing::SidekiqServerMiddleware do
       context 'when database location is not set' do
         let(:job) { { 'job_id' => 'a180b47c-3fd6-41b8-81e9-34da61c3400e' } }
 
-        it_behaves_like 'stick to the primary', nil
+        it_behaves_like 'stick to the primary', data_consistency
+      end
+
+      it "updates job hash with data_consistency :#{data_consistency}" do
+        middleware.call(worker, job, double(:queue)) do
+          expect(job).to include(data_consistency: data_consistency.to_s)
+        end
       end
     end
 
@@ -111,23 +132,20 @@ RSpec.describe Gitlab::Database::LoadBalancing::SidekiqServerMiddleware do
     context 'when worker class does not include ApplicationWorker' do
       let(:worker) { ActiveJob::QueueAdapters::SidekiqAdapter::JobWrapper.new }
 
-      include_examples 'stick to the primary'
+      include_examples 'stick to the primary', :always
     end
 
     context 'when worker data consistency is :always' do
       include_context 'data consistency worker class', :always, :load_balancing_for_test_data_consistency_worker
 
-      include_examples 'stick to the primary'
+      include_examples 'stick to the primary', :always
     end
 
     context 'when worker data consistency is :delayed' do
       include_examples 'sticks based on data consistency', :delayed
 
       context 'when replica is not up to date' do
-        before do
-          allow(::Gitlab::Database::LoadBalancing).to receive_message_chain(:proxy, :load_balancer, :release_host)
-          allow(::Gitlab::Database::LoadBalancing).to receive_message_chain(:proxy, :load_balancer, :host, :caught_up?).and_return(false)
-        end
+        let(:has_replication_lag) { true }
 
         around do |example|
           with_sidekiq_server_middleware do |chain|
@@ -168,13 +186,7 @@ RSpec.describe Gitlab::Database::LoadBalancing::SidekiqServerMiddleware do
           allow(middleware).to receive(:replica_caught_up?).and_return(false)
         end
 
-        include_examples 'stick to the primary'
-
-        it 'updates job hash with primary database chosen', :aggregate_failures do
-          expect { |b| middleware.call(worker, job, double(:queue), &b) }.to yield_control
-
-          expect(job[:database_chosen]).to eq('primary')
-        end
+        include_examples 'stick to the primary', :sticky
       end
     end
   end

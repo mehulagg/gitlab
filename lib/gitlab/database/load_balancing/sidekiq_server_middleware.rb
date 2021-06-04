@@ -7,8 +7,20 @@ module Gitlab
         JobReplicaNotUpToDate = Class.new(StandardError)
 
         def call(worker, job, _queue)
-          if requires_primary?(worker.class, job)
+          worker_class = worker.class
+          db_strategy = select_database_strategy(worker_class, job)
+
+          job[:database_chosen] = db_strategy.to_s
+          job[:data_consistency] = safe_get_data_consistency(worker_class).to_s
+
+          case db_strategy
+          when :primary then
             Session.current.use_primary!
+          when :retry
+            raise JobReplicaNotUpToDate, "Sidekiq job #{worker_class} JID-#{job['jid']} couldn't use the replica."\
+               "  Replica was not up to date."
+          else
+            # this means we selected an up-to-date replica, but there is nothing to do in this case.
           end
 
           yield
@@ -23,29 +35,29 @@ module Gitlab
           Session.clear_session
         end
 
-        def requires_primary?(worker_class, job)
-          return true unless worker_class.include?(::ApplicationWorker)
-          return true unless worker_class.utilizes_load_balancing_capabilities?
-          return true unless worker_class.get_data_consistency_feature_flag_enabled?
+        def safe_get_data_consistency(worker_class)
+          worker_class.try(:get_data_consistency) || :always
+        end
+
+        def select_database_strategy(worker_class, job)
+          return :primary unless load_balancing_available?(worker_class)
 
           location = job['database_write_location'] || job['database_replica_location']
-
-          return true unless location
-
-          job_data_consistency = worker_class.get_data_consistency
-          job[:data_consistency] = job_data_consistency.to_s
+          return :primary unless location
 
           if replica_caught_up?(location)
-            job[:database_chosen] = 'replica'
-            false
-          elsif job_data_consistency == :delayed && not_yet_retried?(job)
-            job[:database_chosen] = 'retry'
-            raise JobReplicaNotUpToDate, "Sidekiq job #{worker_class} JID-#{job['jid']} couldn't use the replica."\
-               "  Replica was not up to date."
+            :replica
+          elsif worker_class.get_data_consistency == :delayed && not_yet_retried?(job)
+            :retry
           else
-            job[:database_chosen] = 'primary'
-            true
+            :primary
           end
+        end
+
+        def load_balancing_available?(worker_class)
+          worker_class.include?(::ApplicationWorker) &&
+            worker_class.utilizes_load_balancing_capabilities? &&
+            worker_class.get_data_consistency_feature_flag_enabled?
         end
 
         def not_yet_retried?(job)
