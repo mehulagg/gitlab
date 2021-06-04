@@ -23561,6 +23561,9 @@ msgstr ""
 msgid "PackageRegistry|Copy require package include"
 msgstr ""
 
+msgid "PackageRegistry|Copy sha"
+msgstr ""
+
 msgid "PackageRegistry|Copy yarn command"
 msgstr ""
 
