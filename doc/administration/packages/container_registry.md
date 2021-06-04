@@ -1311,7 +1311,7 @@ this error appears:
 
 - `Error response from daemon: manifest invalid: Schema 1 manifest not supported`
 
-For self-managed GitLab instances, you can regain access to these images by temporarily downgrading
+For Self-Managed GitLab instances, you can regain access to these images by temporarily downgrading
 the GitLab Container Registry to a version lower than `v3.0.0-gitlab`. Follow these steps to regain
 access to these images:
 
@@ -1370,7 +1370,10 @@ steps.
 
 #### Images upgrade
 
-You can follow the [recommended steps by Docker to upgrade v1 images](https://docs.docker.com/registry/spec/deprecated-schema-v1/) you might still have. The most straightforward option is to pull those images and push them once again to the registry, using a Docker client version above v1.12. Docker will take care of converting images automatically before pushing them to the registry. Once done, all your v1 images should now be available as v2 images.
+Follow the [steps that Docker recommends to upgrade v1 images](https://docs.docker.com/registry/spec/deprecated-schema-v1/).
+The most straightforward option is to pull those images and push them once again to the registry,
+using a Docker client version above v1.12. Docker converts images automatically before pushing them
+to the registry. Once done, all your v1 images should now be available as v2 images.
 
 ### Advanced Troubleshooting
 
