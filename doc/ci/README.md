@@ -10,11 +10,13 @@ type: index
 # GitLab CI/CD **(FREE)**
 
 GitLab CI/CD is a tool built into GitLab for software development
-through the [continuous methodologies](introduction/index.md):
+through the [continuous methodologies](introduction/index.html):
 
 - Continuous Integration (CI)
 - Continuous Delivery (CD)
 - Continuous Deployment (CD)
+
+This is a GitLabber.
 
 NOTE:
 Out-of-the-box management systems can decrease hours spent on maintaining toolchains by 10% or more.
