@@ -11,11 +11,16 @@ const DEFAULT_PROPS = {
 describe('BlobHeaderEdit component', () => {
   let wrapper;
 
-  const createComponent = (props = {}) => {
+  const createComponent = (consolidatedEditButton = false, props = {}) => {
     wrapper = shallowMount(BlobHeaderEdit, {
       propsData: {
         ...DEFAULT_PROPS,
         ...props,
+      },
+      provide: {
+        glFeatures: {
+          consolidatedEditButton,
+        },
       },
     });
   };
@@ -64,11 +69,7 @@ describe('BlobHeaderEdit component', () => {
   });
 
   it('renders WebIdeLink component', () => {
-    window.gon.features = {
-      consolidatedEditButton: true,
-    };
-
-    createComponent();
+    createComponent(true);
 
     const { editPath: editUrl, webIdePath: webIdeUrl } = DEFAULT_PROPS;
 

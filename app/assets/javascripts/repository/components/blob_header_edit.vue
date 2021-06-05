@@ -2,6 +2,7 @@
 import { GlButton } from '@gitlab/ui';
 import { __ } from '~/locale';
 import WebIdeLink from '~/vue_shared/components/web_ide_link.vue';
+import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 
 export default {
   i18n: {
@@ -12,6 +13,7 @@ export default {
     GlButton,
     WebIdeLink,
   },
+  mixins: [glFeatureFlagsMixin()],
   props: {
     editPath: {
       type: String,
@@ -22,17 +24,12 @@ export default {
       required: true,
     },
   },
-  computed: {
-    isFeatureEnabled() {
-      return Boolean(gon.features?.consolidatedEditButton);
-    },
-  },
 };
 </script>
 
 <template>
   <web-ide-link
-    v-if="isFeatureEnabled"
+    v-if="glFeatures.consolidatedEditButton"
     class="gl-mr-3"
     :edit-url="editPath"
     :web-ide-url="webIdePath"
