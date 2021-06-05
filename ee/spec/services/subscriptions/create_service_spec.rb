@@ -7,6 +7,7 @@ RSpec.describe Subscriptions::CreateService do
 
   let_it_be(:user) { create(:user, id: 111, first_name: 'First name', last_name: 'Last name', email: 'first.last@gitlab.com') }
   let_it_be(:group) { create(:group, id: 222, name: 'Group name') }
+  let_it_be(:oauth_app) { create(:oauth_application) }
 
   let_it_be(:customer_params) do
     {
@@ -33,6 +34,11 @@ RSpec.describe Subscriptions::CreateService do
   let_it_be(:create_service_params) { Gitlab::Json.parse(fixture_file('create_service_params.json', dir: 'ee')).deep_symbolize_keys }
 
   describe '#execute' do
+    before do
+      allow(client).to receive(:customers_oauth_app_id).and_return( { data: { 'customers_oauth_app_id' => oauth_app.uid } } )
+      allow(Doorkeeper::OAuth::Helpers::UniqueToken).to receive(:generate).and_return('foo_token')
+    end
+
     context 'when failing to create a customer' do
       before do
         allow(client).to receive(:create_customer).and_return(success: false, data: { errors: 'failed to create customer' })
@@ -40,6 +46,10 @@ RSpec.describe Subscriptions::CreateService do
 
       it 'returns the response hash' do
         expect(execute).to eq(success: false, data: { errors: 'failed to create customer' })
+      end
+
+      it 'does not save oauth token' do
+        expect { execute }.not_to change { Doorkeeper::AccessToken.count }
       end
     end
 
@@ -55,6 +65,10 @@ RSpec.describe Subscriptions::CreateService do
           .and_return(success: true, data: { success: true, subscription_id: 'xxx' })
 
         execute
+      end
+
+      it 'saves oauth token' do
+        expect { execute }.to change { Doorkeeper::AccessToken.count }.by(1)
       end
 
       context 'when failing to create a subscription' do

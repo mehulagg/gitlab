@@ -18,6 +18,8 @@ module Subscriptions
 
       return response unless response[:success]
 
+      oauth_token&.save
+
       # We can't use an email from GL.com because it may differ from the billing email.
       # Instead we use the email received from the CustomersDot as a billing email.
       customer_data = response.with_indifferent_access[:data][:customer]
@@ -45,7 +47,7 @@ module Subscriptions
 
     def credentials_attrs
       {
-        token: oauth_token
+        token: oauth_token&.token
       }
     end
 
@@ -101,18 +103,21 @@ module Subscriptions
     end
 
     def oauth_token
-      return unless customers_oauth_app_id
+      @oauth_token ||= begin
+        return unless customers_oauth_app_id
 
-      application = Doorkeeper::Application.find_by_uid(customers_oauth_app_id)
-      existing_token = Doorkeeper::AccessToken.matching_token_for(application, current_user.id, application.scopes)
+        application = Doorkeeper::Application.find_by_uid(customers_oauth_app_id)
+        existing_token = Doorkeeper::AccessToken.matching_token_for(application, current_user.id, application.scopes)
 
-      return existing_token if existing_token
+        return existing_token if existing_token
 
-      Doorkeeper::AccessToken.create!(
-        application_id: customers_oauth_app_id,
-        resource_owner_id: current_user.id,
-        scopes: application.scopes.to_s
-      ).token
+        Doorkeeper::AccessToken.new(
+          application_id: customers_oauth_app_id,
+          resource_owner_id: current_user.id,
+          token: Doorkeeper::OAuth::Helpers::UniqueToken.generate,
+          scopes: application.scopes.to_s
+        )
+      end
     end
   end
 end
