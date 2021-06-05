@@ -86,7 +86,7 @@ RSpec.describe 'OpenID Connect requests' do
   shared_examples 'cross-origin GET request' do
     it 'allows cross-origin request' do
       expect(response.headers['Access-Control-Allow-Origin']).to eq '*'
-      expect(response.headers['Access-Control-Allow-Methods']).to eq 'GET'
+      expect(response.headers['Access-Control-Allow-Methods']).to eq 'GET, HEAD'
       expect(response.headers['Access-Control-Allow-Headers']).to be_nil
       expect(response.headers['Access-Control-Allow-Credentials']).to be_nil
     end
@@ -204,6 +204,14 @@ RSpec.describe 'OpenID Connect requests' do
 
         it_behaves_like 'cross-origin GET request'
       end
+
+      context 'with a cross-origin preflight OPTIONS request' do
+        before do
+          options '/oauth/discovery/keys', headers: cors_request_headers
+        end
+
+        it_behaves_like 'cross-origin GET request'
+      end
     end
 
     context 'OpenID WebFinger endpoint' do
@@ -219,6 +227,14 @@ RSpec.describe 'OpenID Connect requests' do
 
         it_behaves_like 'cross-origin GET request'
       end
+    end
+
+    context 'with a cross-origin preflight OPTIONS request' do
+      before do
+        options '/.well-known/webfinger', headers: cors_request_headers, params: { resource: 'user@example.com' }
+      end
+
+      it_behaves_like 'cross-origin GET request'
     end
   end
 
@@ -240,6 +256,14 @@ RSpec.describe 'OpenID Connect requests' do
         expect(json_response['issuer']).to eq('http://localhost')
         expect(json_response['jwks_uri']).to eq('http://www.example.com/oauth/discovery/keys')
         expect(json_response['scopes_supported']).to eq(%w[api read_user read_api read_repository write_repository sudo openid profile email])
+      end
+
+      it_behaves_like 'cross-origin GET request'
+    end
+
+    context 'with a cross-origin preflight OPTIONS request' do
+      before do
+        options '/.well-known/openid-configuration', headers: cors_request_headers
       end
 
       it_behaves_like 'cross-origin GET request'
@@ -275,6 +299,14 @@ RSpec.describe 'OpenID Connect requests' do
       context 'with a cross-origin request' do
         before do
           get '/oauth/userinfo', headers: cors_request_headers
+        end
+
+        it_behaves_like 'cross-origin GET request'
+      end
+
+      context 'with a cross-origin preflight OPTIONS request' do
+        before do
+          options '/oauth/userinfo', headers: cors_request_headers
         end
 
         it_behaves_like 'cross-origin GET request'
