@@ -16,6 +16,7 @@ namespace :gitlab do
       Rake::Task['gitlab:backup:artifacts:create'].invoke
       Rake::Task['gitlab:backup:pages:create'].invoke
       Rake::Task['gitlab:backup:lfs:create'].invoke
+      Rake::Task['gitlab:backup:terraform_states:create'].invoke
       Rake::Task['gitlab:backup:registry:create'].invoke
 
       backup = Backup::Manager.new(progress)
@@ -83,6 +84,7 @@ namespace :gitlab do
       Rake::Task['gitlab:backup:artifacts:restore'].invoke unless backup.skipped?('artifacts')
       Rake::Task['gitlab:backup:pages:restore'].invoke unless backup.skipped?('pages')
       Rake::Task['gitlab:backup:lfs:restore'].invoke unless backup.skipped?('lfs')
+      Rake::Task['gitlab:backup:terraform_states:restore'].invoke unless backup.skipped?('terraform_states')
       Rake::Task['gitlab:backup:registry:restore'].invoke unless backup.skipped?('registry')
       Rake::Task['gitlab:shell:setup'].invoke
       Rake::Task['cache:clear'].invoke
@@ -248,6 +250,25 @@ namespace :gitlab do
       task restore: :gitlab_environment do
         puts_time "Restoring lfs objects ... ".color(:blue)
         Backup::Lfs.new(progress).restore
+        puts_time "done".color(:green)
+      end
+    end
+
+    namespace :terraform_states do
+      task create: :gitlab_environment do
+        puts_time "Dumping terraform_states objects ... ".color(:blue)
+
+        if ENV["SKIP"] && ENV["SKIP"].include?("terraform_states")
+          puts_time "[SKIPPED]".color(:cyan)
+        else
+          Backup::TerraformStates.new(progress).dump
+          puts_time "done".color(:green)
+        end
+      end
+
+      task restore: :gitlab_environment do
+        puts_time "Restoring terraform_states objects ... ".color(:blue)
+        Backup::TerraformStates.new(progress).restore
         puts_time "done".color(:green)
       end
     end

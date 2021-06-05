@@ -15,7 +15,7 @@ RSpec.describe 'gitlab:app namespace rake task', :delete do
   end
 
   def backup_files
-    %w(backup_information.yml artifacts.tar.gz builds.tar.gz lfs.tar.gz pages.tar.gz)
+    %w(backup_information.yml artifacts.tar.gz builds.tar.gz lfs.tar.gz terraform_states.tar.gz pages.tar.gz)
   end
 
   def backup_directories
@@ -56,7 +56,7 @@ RSpec.describe 'gitlab:app namespace rake task', :delete do
   end
 
   def reenable_backup_sub_tasks
-    %w{db repo uploads builds artifacts pages lfs registry}.each do |subtask|
+    %w{db repo uploads builds artifacts pages lfs terraform_states registry}.each do |subtask|
       Rake::Task["gitlab:backup:#{subtask}:create"].reenable
     end
   end
@@ -87,6 +87,7 @@ RSpec.describe 'gitlab:app namespace rake task', :delete do
           expect(Rake::Task['gitlab:backup:artifacts:restore']).to receive(:invoke)
           expect(Rake::Task['gitlab:backup:pages:restore']).to receive(:invoke)
           expect(Rake::Task['gitlab:backup:lfs:restore']).to receive(:invoke)
+          expect(Rake::Task['gitlab:backup:terraform_states:restore']).to receive(:invoke)
           expect(Rake::Task['gitlab:backup:registry:restore']).to receive(:invoke)
           expect(Rake::Task['gitlab:shell:setup']).to receive(:invoke)
         end
@@ -104,7 +105,7 @@ RSpec.describe 'gitlab:app namespace rake task', :delete do
     context 'when the restore directory is not empty' do
       before do
         # We only need a backup of the repositories for this test
-        stub_env('SKIP', 'db,uploads,builds,artifacts,lfs,registry')
+        stub_env('SKIP', 'db,uploads,builds,artifacts,lfs,terraform_states,registry')
       end
 
       it 'removes stale data' do
@@ -145,11 +146,12 @@ RSpec.describe 'gitlab:app namespace rake task', :delete do
         expect(Rake::Task['gitlab:backup:artifacts:restore']).to receive(:invoke)
         expect(Rake::Task['gitlab:backup:pages:restore']).to receive(:invoke)
         expect(Rake::Task['gitlab:backup:lfs:restore']).to receive(:invoke)
+        expect(Rake::Task['gitlab:backup:terraform_states:restore']).to receive(:invoke)
         expect(Rake::Task['gitlab:backup:registry:restore']).to receive(:invoke)
         expect(Rake::Task['gitlab:shell:setup']).to receive(:invoke)
 
         # We only need a backup of the repositories for this test
-        stub_env('SKIP', 'db,uploads,builds,artifacts,lfs,registry')
+        stub_env('SKIP', 'db,uploads,builds,artifacts,lfs,terraform_states,registry')
       end
 
       it 'restores the data' do
@@ -206,7 +208,7 @@ RSpec.describe 'gitlab:app namespace rake task', :delete do
       end
 
       context 'specific backup tasks' do
-        let(:task_list) { %w(db repo uploads builds artifacts pages lfs registry) }
+        let(:task_list) { %w(db repo uploads builds artifacts pages lfs terraform_states registry) }
 
         it 'prints a progress message to stdout' do
           task_list.each do |task|
@@ -242,7 +244,7 @@ RSpec.describe 'gitlab:app namespace rake task', :delete do
         expect { run_rake_task('gitlab:backup:create') }.to output.to_stdout
 
         tar_contents, exit_status = Gitlab::Popen.popen(
-          %W{tar -tvf #{backup_tar} db uploads.tar.gz repositories builds.tar.gz artifacts.tar.gz pages.tar.gz lfs.tar.gz registry.tar.gz}
+          %W{tar -tvf #{backup_tar} db uploads.tar.gz repositories builds.tar.gz artifacts.tar.gz pages.tar.gz lfs.tar.gz terraform_states.tar.gz registry.tar.gz}
         )
 
         expect(exit_status).to eq(0)
@@ -253,6 +255,7 @@ RSpec.describe 'gitlab:app namespace rake task', :delete do
         expect(tar_contents).to match('artifacts.tar.gz')
         expect(tar_contents).to match('pages.tar.gz')
         expect(tar_contents).to match('lfs.tar.gz')
+        expect(tar_contents).to match('terraform_states.tar.gz')
         expect(tar_contents).to match('registry.tar.gz')
         expect(tar_contents).not_to match(%r{^.{4,9}[rwx].* (database.sql.gz|uploads.tar.gz|repositories|builds.tar.gz|pages.tar.gz|artifacts.tar.gz|registry.tar.gz)/$})
       end
@@ -261,7 +264,7 @@ RSpec.describe 'gitlab:app namespace rake task', :delete do
         expect { run_rake_task('gitlab:backup:create') }.to output.to_stdout
 
         temp_dirs = Dir.glob(
-          File.join(Gitlab.config.backup.path, '{db,repositories,uploads,builds,artifacts,pages,lfs,registry}')
+          File.join(Gitlab.config.backup.path, '{db,repositories,uploads,builds,artifacts,pages,lfs,terraform_states,registry}')
         )
 
         expect(temp_dirs).to be_empty
@@ -291,7 +294,7 @@ RSpec.describe 'gitlab:app namespace rake task', :delete do
 
       before do
         # We only need a backup of the repositories for this test
-        stub_env('SKIP', 'db,uploads,builds,artifacts,lfs,registry')
+        stub_env('SKIP', 'db,uploads,builds,artifacts,lfs,terraform_states,registry')
         stub_storage_settings( second_storage_name => {
           'gitaly_address' => Gitlab.config.repositories.storages.default.gitaly_address,
           'path' => TestEnv::SECOND_STORAGE_PATH
@@ -365,7 +368,7 @@ RSpec.describe 'gitlab:app namespace rake task', :delete do
     context 'concurrency settings' do
       before do
         # We only need a backup of the repositories for this test
-        stub_env('SKIP', 'db,uploads,builds,artifacts,lfs,registry')
+        stub_env('SKIP', 'db,uploads,builds,artifacts,lfs,terraform_states,registry')
 
         create(:project, :repository)
       end
@@ -405,7 +408,7 @@ RSpec.describe 'gitlab:app namespace rake task', :delete do
       expect { run_rake_task('gitlab:backup:create') }.to output.to_stdout
 
       tar_contents, _exit_status = Gitlab::Popen.popen(
-        %W{tar -tvf #{backup_tar} db uploads.tar.gz repositories builds.tar.gz artifacts.tar.gz pages.tar.gz lfs.tar.gz registry.tar.gz}
+        %W{tar -tvf #{backup_tar} db uploads.tar.gz repositories builds.tar.gz artifacts.tar.gz pages.tar.gz lfs.tar.gz terraform_states.tar.gz registry.tar.gz}
       )
 
       expect(tar_contents).to match('db/')
@@ -413,6 +416,7 @@ RSpec.describe 'gitlab:app namespace rake task', :delete do
       expect(tar_contents).to match('builds.tar.gz')
       expect(tar_contents).to match('artifacts.tar.gz')
       expect(tar_contents).to match('lfs.tar.gz')
+      expect(tar_contents).to match('terraform_states.tar.gz')
       expect(tar_contents).to match('pages.tar.gz')
       expect(tar_contents).to match('registry.tar.gz')
       expect(tar_contents).not_to match('repositories/')
@@ -432,6 +436,7 @@ RSpec.describe 'gitlab:app namespace rake task', :delete do
       expect(Rake::Task['gitlab:backup:artifacts:restore']).to receive :invoke
       expect(Rake::Task['gitlab:backup:pages:restore']).to receive :invoke
       expect(Rake::Task['gitlab:backup:lfs:restore']).to receive :invoke
+      expect(Rake::Task['gitlab:backup:terraform_states:restore']).to receive :invoke
       expect(Rake::Task['gitlab:backup:registry:restore']).to receive :invoke
       expect(Rake::Task['gitlab:shell:setup']).to receive :invoke
       expect { run_rake_task('gitlab:backup:restore') }.to output.to_stdout
@@ -455,6 +460,7 @@ RSpec.describe 'gitlab:app namespace rake task', :delete do
         'builds.tar.gz',
         'artifacts.tar.gz',
         'lfs.tar.gz',
+        'terraform_states.tar.gz',
         'pages.tar.gz',
         'registry.tar.gz',
         'repositories',
@@ -476,6 +482,7 @@ RSpec.describe 'gitlab:app namespace rake task', :delete do
       expect(Rake::Task['gitlab:backup:artifacts:restore']).to receive :invoke
       expect(Rake::Task['gitlab:backup:pages:restore']).to receive :invoke
       expect(Rake::Task['gitlab:backup:lfs:restore']).to receive :invoke
+      expect(Rake::Task['gitlab:backup:terraform_states:restore']).to receive :invoke
       expect(Rake::Task['gitlab:backup:registry:restore']).to receive :invoke
       expect(Rake::Task['gitlab:shell:setup']).to receive :invoke
       expect { run_rake_task("gitlab:backup:restore") }.to output.to_stdout
