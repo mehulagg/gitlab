@@ -8,15 +8,19 @@ package upstream
 
 import (
 	"fmt"
+	"os"
 
 	"net/http"
+	"net/url"
 	"strings"
 
 	"github.com/sirupsen/logrus"
 	"gitlab.com/gitlab-org/labkit/correlation"
 
+	apipkg "gitlab.com/gitlab-org/gitlab-workhorse/internal/api"
 	"gitlab.com/gitlab-org/gitlab-workhorse/internal/config"
 	"gitlab.com/gitlab-org/gitlab-workhorse/internal/helper"
+	"gitlab.com/gitlab-org/gitlab-workhorse/internal/log"
 	"gitlab.com/gitlab-org/gitlab-workhorse/internal/rejectmethods"
 	"gitlab.com/gitlab-org/gitlab-workhorse/internal/upload"
 	"gitlab.com/gitlab-org/gitlab-workhorse/internal/upstream/roundtripper"
@@ -82,6 +86,7 @@ func (u *upstream) configureURLPrefix() {
 }
 
 func (u *upstream) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	logWithRequest := log.WithRequest(r)
 	helper.FixRemoteAddr(r)
 
 	helper.DisableResponseBuffering(w)
@@ -106,12 +111,28 @@ func (u *upstream) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Look for a matching route
 	var route *routeEntry
-	for _, ro := range u.Routes {
-		if ro.isMatch(prefix.Strip(URIPath), r) {
-			route = &ro
-			break
+	cleanedPath := prefix.Strip(URIPath)
+
+	// Developing behind GEO_SECONDARY_PROXY environment variable
+	// See https://gitlab.com/groups/gitlab-org/-/epics/5914#note_564974130
+	if os.Getenv("GEO_SECONDARY_PROXY") == "1" {
+		geoProxyURL, err := getGeoProxyURL(u)
+		if err != nil {
+			logWithRequest.WithError(err).Error("Geo Proxy: Error calling Geo Proxy API. Falling back to normal routing.")
+		} else if geoProxyURL != nil {
+			logWithRequest.Info("Geo Proxy: Set route according to Geo Proxy logic.")
+			// route = matchGeoProxyRoute(cleanedPath, r, u, geoProxyURL, logWithRequest)
+		}
+	}
+
+	// Look for a matching normal route if one is not already found
+	if route == nil {
+		for _, ro := range u.Routes {
+			if ro.isMatch(cleanedPath, r) {
+				route = &ro
+				break
+			}
 		}
 	}
 
@@ -127,4 +148,30 @@ func (u *upstream) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 
 	route.handler.ServeHTTP(w, r)
+}
+
+// TODO: Cache the result of the API requests
+// See https://gitlab.com/gitlab-org/gitlab/-/issues/329671
+func getGeoProxyURL(u *upstream) (geoProxyURL *url.URL, err error) {
+	api := apipkg.NewAPI(
+		u.Backend,
+		u.Version,
+		u.RoundTripper,
+	)
+
+	geoProxyURLString, err := api.GetGeoProxyURL()
+	if err != nil {
+		return nil, err
+	}
+	if geoProxyURLString == "" {
+		return nil, nil
+	}
+
+	geoProxyURL, err = url.Parse(geoProxyURLString)
+	if err != nil {
+		log.WithError(err).WithFields(log.Fields{"url": geoProxyURLString}).Info("Geo Proxy: Could not parse Geo proxy URL")
+		return nil, err
+	}
+
+	return geoProxyURL, nil
 }

@@ -29,6 +29,8 @@ const (
 	ResponseContentType = "application/vnd.gitlab-workhorse+json"
 
 	failureResponseLimit = 32768
+
+	geoProxyEndpointPath = "/api/v4/geo/proxy"
 )
 
 type API struct {
@@ -59,6 +61,10 @@ func NewAPI(myURL *url.URL, version string, roundTripper http.RoundTripper) *API
 		URL:     myURL,
 		Version: version,
 	}
+}
+
+type GeoProxyEndpointResponse struct {
+	GeoProxyURL string `json:"geo_proxy_url"`
 }
 
 type HandleFunc func(http.ResponseWriter, *http.Request, *Response)
@@ -388,4 +394,31 @@ func bufferResponse(r io.Reader) (*bytes.Buffer, error) {
 
 func validResponseContentType(resp *http.Response) bool {
 	return helper.IsContentType(ResponseContentType, resp.Header.Get("Content-Type"))
+}
+
+func (api *API) GetGeoProxyURL() (geoProxyURL string, outErr error) {
+	geoProxyApiUrl := *api.URL
+	geoProxyApiUrl.Path, geoProxyApiUrl.RawPath = joinURLPath(api.URL, geoProxyEndpointPath)
+	geoProxyApiReq := &http.Request{
+		Method: "GET",
+		URL:    &geoProxyApiUrl,
+		Header: make(http.Header),
+	}
+
+	httpResponse, err := api.doRequestWithoutRedirects(geoProxyApiReq)
+	if err != nil {
+		return "", fmt.Errorf("GetGeoProxyURL: do request: %v", err)
+	}
+	defer httpResponse.Body.Close()
+
+	if httpResponse.StatusCode != http.StatusOK {
+		return "", nil
+	}
+
+	response := &GeoProxyEndpointResponse{}
+	if err := json.NewDecoder(httpResponse.Body).Decode(response); err != nil {
+		return "", fmt.Errorf("GetGeoProxyURL: decode response: %v", err)
+	}
+
+	return response.GeoProxyURL, nil
 }
