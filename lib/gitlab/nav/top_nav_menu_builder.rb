@@ -16,6 +16,12 @@ module Gitlab
         add_menu_item(dest: @secondary, **args)
       end
 
+      def reset_active
+        [@primary, @secondary].each do |items|
+          items.each { |x| x[:active] = false }
+        end
+      end
+
       def build
         {
           primary: @primary,

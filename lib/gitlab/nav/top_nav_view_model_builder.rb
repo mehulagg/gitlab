@@ -19,6 +19,10 @@ module Gitlab
         @menu_builder.add_secondary_menu_item(**args)
       end
 
+      def reset_active
+        @menu_builder.reset_active
+      end
+
       def add_shortcut(**args)
         item = ::Gitlab::Nav::TopNavMenuItem.build(**args)
 

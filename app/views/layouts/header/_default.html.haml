@@ -33,12 +33,13 @@
         %ul.nav.navbar-nav
           - if current_user
             = render 'layouts/header/new_dropdown', class: ('gl-display-none gl-sm-display-block' if use_top_nav_redesign)
-          - if header_link?(:search)
+          - if top_nav_show_search
+            - search_menu_item = top_nav_search_menu_item_attrs
             %li.nav-item.d-none.d-lg-block.m-auto
               = render 'layouts/search' unless current_controller?(:search)
             %li.nav-item{ class: use_top_nav_redesign ? "gl-display-none gl-sm-display-inline-block gl-lg-display-none" : "gl-display-inline-block gl-lg-display-none" }
-              = link_to search_context.search_url, title: _('Search'), aria: { label: _('Search') }, data: {toggle: 'tooltip', placement: 'bottom', container: 'body'} do
-                = sprite_icon('search')
+              = link_to search_menu_item.fetch(:href), title: search_menu_item.fetch(:title), aria: { label: search_menu_item.fetch(:title) }, data: {toggle: 'tooltip', placement: 'bottom', container: 'body'} do
+                = sprite_icon(search_menu_item.fetch(:icon))
           - if header_link?(:issues)
             = nav_link(path: 'dashboard#issues', html_options: { class: "user-counter" }) do
               = link_to assigned_issues_dashboard_path, title: _('Issues'), class: 'dashboard-shortcuts-issues', aria: { label: _('Issues') },

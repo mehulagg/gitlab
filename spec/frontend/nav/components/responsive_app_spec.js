@@ -1,7 +1,9 @@
 import { shallowMount } from '@vue/test-utils';
 import { range } from 'lodash';
 import ResponsiveApp from '~/nav/components/responsive_app.vue';
+import ResponsiveHome from '~/nav/components/responsive_home.vue';
 import eventHub, { EVENT_RESPONSIVE_TOGGLE } from '~/nav/event_hub';
+import KeepAliveSlots from '~/vue_shared/components/keep_alive_slots.vue';
 import { TEST_NAV_DATA } from '../mock_data';
 
 describe('~/nav/components/responsive_app.vue', () => {
@@ -12,10 +14,14 @@ describe('~/nav/components/responsive_app.vue', () => {
       propsData: {
         navData: TEST_NAV_DATA,
       },
+      stubs: {
+        KeepAliveSlots,
+      },
     });
   };
   const triggerResponsiveToggle = () => eventHub.$emit(EVENT_RESPONSIVE_TOGGLE);
 
+  const findHome = () => wrapper.findComponent(ResponsiveHome);
   const hasBodyResponsiveOpen = () => document.body.classList.contains('top-nav-responsive-open');
 
   beforeEach(() => {
@@ -30,6 +36,13 @@ describe('~/nav/components/responsive_app.vue', () => {
   describe('default', () => {
     beforeEach(() => {
       createComponent();
+    });
+
+    it('shows home by default', () => {
+      expect(findHome().isVisible()).toBe(true);
+      expect(findHome().props()).toEqual({
+        navData: TEST_NAV_DATA,
+      });
     });
 
     it.each`
