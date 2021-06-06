@@ -1,11 +1,12 @@
 - has_impersonation_link = header_link?(:admin_impersonation)
 - user_status_data = user_status_properties(current_user)
+- use_top_nav_redesign = Feature.enabled?(:combined_menu, current_user, default_enabled: :yaml)
 
 %header.navbar.navbar-gitlab.navbar-expand-sm.js-navbar{ data: { qa_selector: 'navbar' } }
   %a.gl-sr-only.gl-accessibility{ href: "#content-body" } Skip to content
   .container-fluid
     .header-content
-      .title-container
+      .title-container{ class: ('hide-when-menu-expanded' if !use_top_nav_redesign) }
         %h1.title
           %span.gl-sr-only GitLab
           = link_to root_path, title: _('Dashboard'), id: 'logo', **tracking_attrs('main_navigation', 'click_gitlab_logo_link', 'navigation') do
@@ -19,7 +20,7 @@
               %span.gl-badge.gl-bg-green-500.gl-text-white.gl-rounded-pill.gl-font-weight-bold.gl-py-1
                 = _('Next')
 
-        - if Feature.enabled?(:combined_menu, current_user, default_enabled: :yaml)
+        - if use_top_nav_redesign
           = render "layouts/nav/top_nav"
         - else
           - if current_user
@@ -115,10 +116,15 @@
                 - sign_in_text = allow_signup? ? _('Sign in / Register') : _('Sign in')
                 = link_to sign_in_text, new_session_path(:user, redirect_to_referer: 'yes'), class: 'gl-button btn btn-default btn-sign-in'
 
-      %button.navbar-toggler.d-block.d-sm-none{ type: 'button' }
+      %button.navbar-toggler.d-block.d-sm-none{ type: 'button', class: ('navbar-toggler-border' if !use_top_nav_redesign) }
         %span.sr-only= _('Toggle navigation')
-        = sprite_icon('ellipsis_h', size: 12, css_class: 'more-icon js-navbar-toggle-right')
-        = sprite_icon('close', size: 12, css_class: 'close-icon js-navbar-toggle-left')
+        - if use_top_nav_redesign
+          %span.more-icon.gl-px-3
+            %span.gl-pr-1= s_('TopNav|Menu')
+            = sprite_icon('dot-grid', size: 16)
+        - else
+          = sprite_icon('ellipsis_h', size: 12, css_class: 'more-icon')
+        = sprite_icon('close', size: 12, css_class: 'close-icon')
 
 - if display_whats_new?
   #whats-new-app{ data: { version_digest: whats_new_version_digest } }
