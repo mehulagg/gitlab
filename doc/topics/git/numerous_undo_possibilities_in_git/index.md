@@ -323,11 +323,6 @@ or a branch that might be used by other developers.
 When you contribute to large open source repositories, like [GitLab](https://gitlab.com/gitlab-org/gitlab),
 you can squash your commits into a single one.
 
-A feature branch of a merge request is a public branch and might be used by
-other developers. However, the project rules might require
-you to use `git rebase` to reduce the number of
-displayed commits on target branch after reviews are done. 
-
 To squash commits on a feature branch to a single commit on a target branch
 at merge, use `git merge --squash`.
 
@@ -335,6 +330,11 @@ NOTE:
 Never modify the commit history of your [default branch](../../../user/project/repository/branches/default.md) or shared branch.
 
 ### How to change history
+
+A feature branch of a merge request is a public branch and might be used by
+other developers. However, the project rules might require
+you to use `git rebase` to reduce the number of
+displayed commits on target branch after reviews are done.
 
 You can modify history by using `git rebase -i`. Use this command to modify, squash,
 and delete commits.
