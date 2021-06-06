@@ -26,8 +26,8 @@ To help you visualize what you're doing locally, you can install a
 
 ## Git terminology
 
-If you're familiar with Git terminology, you may want to skip this section and
-go directly to [setting up a repository](#set-up-a-repository).
+If you're familiar with Git terminology, you might want to skip this section and
+go directly to [prerequisites](#prerequisites).
 
 ### Repository
 
