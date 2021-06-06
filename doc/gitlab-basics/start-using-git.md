@@ -90,7 +90,7 @@ To start using GitLab with Git, complete the following tasks:
 - [Open a terminal](#open-a-terminal).
 - [Install Git](#install-git) on your computer.
 - [Configure Git](#configure-git).
-- [Choose a repository](#set-up-a-repository).
+- [Choose a repository](#choose-a-repository).
 
 ### Open a terminal
 
