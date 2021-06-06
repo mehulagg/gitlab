@@ -16,15 +16,23 @@ staging and canary deployments,
 
 ## Custom buildpacks
 
-If the automatic buildpack detection fails for your project, or if you want to
-use a custom buildpack, you can override the buildpack using a project CI/CD variable
-or a `.buildpacks` file in your project:
+If the automatic buildpack detection fails for your project, or if you
+need more control over your build, you can customize the buildpacks
+used for the build.
 
-- **Project variable** - Create a project variable `BUILDPACK_URL` with the URL
-  of the buildpack to use.
-- **`.buildpacks` file** - Add a file in your project's repository called `.buildpacks`,
-  and add the URL of the buildpack to use on a line in the file. If you want to
-  use multiple buildpacks, enter one buildpack per line.
+### Custom buildpacks with Cloud Native Buildpacks
+
+Specify either
+
+- the CI variable `BUILDPACK_URL` according to [`pack`'s specifications](https://buildpacks.io/docs/app-developer-guide/specific-buildpacks/), or
+- a [`project.toml` project descriptor](https://buildpacks.io/docs/app-developer-guide/using-project-descriptor/) with the buildpacks you would like to include.
+
+### Custom buildpacks with Herokuish
+
+Specify either
+
+- the CI variable `BUILDPACK_URL`, or
+- a `.buildpacks` file at the root of your project, containing one buildpack URL per line.
 
 The buildpack URL can point to either a Git repository URL or a tarball URL.
 For Git repositories, you can point to a specific Git reference (such as
@@ -358,7 +366,7 @@ applications.
 | `AUTO_DEVOPS_CHART_REPOSITORY_PASSWORD` | From GitLab 11.11, used to set a password to connect to the Helm repository. Defaults to no credentials. Also set `AUTO_DEVOPS_CHART_REPOSITORY_USERNAME`. |
 | `AUTO_DEVOPS_DEPLOY_DEBUG`              | From GitLab 13.1, if this variable is present, Helm outputs debug logs. |
 | `AUTO_DEVOPS_ALLOW_TO_FORCE_DEPLOY_V<N>` | From [auto-deploy-image](https://gitlab.com/gitlab-org/cluster-integration/auto-deploy-image) v1.0.0, if this variable is present, a new major version of chart is forcibly deployed. For more information, see [Ignore warnings and continue deploying](upgrading_auto_deploy_dependencies.md#ignore-warnings-and-continue-deploying). |
-| `BUILDPACK_URL`                         | Buildpack's full URL. Can point to either [a Git repository URL or a tarball URL](#custom-buildpacks). |
+| `BUILDPACK_URL`                         | Buildpack's full URL. [Must point to a URL supported by Pack or Herokuish](#custom-buildpacks). |
 | `CANARY_ENABLED`                        | From GitLab 11.0, used to define a [deploy policy for canary environments](#deploy-policy-for-canary-environments). |
 | `CANARY_PRODUCTION_REPLICAS`            | Number of canary replicas to deploy for [Canary Deployments](../../user/project/canary_deployments.md) in the production environment. Takes precedence over `CANARY_REPLICAS`. Defaults to 1. |
 | `CANARY_REPLICAS`                       | Number of canary replicas to deploy for [Canary Deployments](../../user/project/canary_deployments.md). Defaults to 1. |
