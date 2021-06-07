@@ -3,8 +3,11 @@ import ensureSingleLine from './ensure_single_line';
 import sprintf from './sprintf';
 
 const languageCode = () => document.querySelector('html').getAttribute('lang') || 'en';
-const locale = new Jed(window.translations || {});
-delete window.translations;
+const locale = new Jed(window?.translations || {});
+
+if (window) {
+  delete window.translations;
+}
 
 /**
   Translates `text`
