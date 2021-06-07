@@ -91,58 +91,18 @@ export const transformScatterData = (data, startDate, endDate) => {
   const startDateUtc = new Date(startDate.toUTCString());
   const endDateUtc = new Date(endDate.toUTCString());
   const result = initDateArray(startDateUtc, endDateUtc);
-  console.log(
-    'transformScatterData :: startDate / endDate : ',
-    startDateUtc,
-    startDateUtc.toISOString(),
-    endDateUtc,
-  );
-  console.log('transformScatterData :: result.length : ', result.length);
   const totalItems = result.length;
 
   Object.keys(data).forEach((id) => {
     const mergedAtDate = new Date(data[id].merged_at);
     const dayDiff = getDayDifference(mergedAtDate, endDateUtc);
-    console.log(
-      'transformScatterData :: ',
-      dayDiff,
-      mergedAtDate,
-      endDateUtc,
-      endDateUtc.toISOString(),
-    );
+
     if (dayDiff > -1 && dayDiff + 1 <= totalItems) {
       const idx = totalItems - (dayDiff + 1);
-
-      // 8 (totalItems) - 8 (dayDiff) => 0
-      // 8 (totalItems) - 0 (dayDiff)
-
-      console.log('transformScatterData :: result : ', result);
-      /*
-      console.log(
-        'transformScatterData :: mergedAtDate / endDate : ',
-        mergedAtDate,
-        data[id].merged_at,
-        endDate,
-        dayDiff,
-      );
-      */
-      // console.log('transformScatterData :: idx : ', idx);
-
-      // When dealing with different time zones (merged_at is in UTC but endDate is in the browser's timezone)
-      // the computed idx might be out of bounds because the result array (and its length) is initialized
-      // via initDateArray (which takes only the browser's timezone into account)
-      // This would lead to result[idx] being undefined, thus we need a sanity check here
-      // if (result[idx]) {
       result[idx].push(data[id]);
-      // }
     }
   });
 
-  console.log(
-    'transformScatterData :: data : ',
-    Object.keys(data).map((id) => data[id].merged_at),
-  );
-  console.log('transformScatterData :: result : ', result);
   return result;
 };
 
