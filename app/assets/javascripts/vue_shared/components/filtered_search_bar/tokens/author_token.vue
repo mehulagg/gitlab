@@ -78,9 +78,9 @@ export default {
 
 <template>
   <base-token
-    :token-config="config"
-    :token-value="value"
-    :token-active="active"
+    :config="config"
+    :value="value"
+    :active="active"
     :tokens-list-loading="loading"
     :token-values="authors"
     :fn-active-token-value="getActiveAuthor"

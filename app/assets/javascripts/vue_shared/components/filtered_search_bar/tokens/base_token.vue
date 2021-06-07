@@ -19,29 +19,34 @@ export default {
     GlLoadingIcon,
   },
   props: {
-    tokenConfig: {
+    config: {
       type: Object,
       required: true,
     },
-    tokenValue: {
+    value: {
       type: Object,
       required: true,
     },
-    tokenActive: {
+    active: {
       type: Boolean,
       required: true,
     },
     tokensListLoading: {
       type: Boolean,
-      required: true,
+      required: false,
+      default: false,
     },
     tokenValues: {
       type: Array,
-      required: true,
+      required: false,
+      default: () => [],
     },
     fnActiveTokenValue: {
       type: Function,
-      required: true,
+      required: false,
+      default: (tokenValues, currentTokenValue) => {
+        return tokenValues.find(({ data }) => data === currentTokenValue);
+      },
     },
     defaultTokenValues: {
       type: Array,
@@ -87,9 +92,9 @@ export default {
     },
     currentTokenValue() {
       if (this.fnCurrentTokenValue) {
-        return this.fnCurrentTokenValue(this.tokenValue.data);
+        return this.fnCurrentTokenValue(this.value.data);
       }
-      return this.tokenValue.data.toLowerCase();
+      return this.value.data.toLowerCase();
     },
     activeTokenValue() {
       return this.fnActiveTokenValue(this.tokenValues, this.currentTokenValue);
@@ -108,11 +113,11 @@ export default {
     },
   },
   watch: {
-    tokenActive: {
+    active: {
       immediate: true,
       handler(newValue) {
         if (!newValue && !this.tokenValues.length) {
-          this.$emit('fetch-token-values', this.tokenValue.data);
+          this.$emit('fetch-token-values', this.value.data);
         }
       },
     },
@@ -135,9 +140,11 @@ export default {
 
 <template>
   <gl-filtered-search-token
-    :config="tokenConfig"
-    v-bind="{ ...this.$parent.$props, ...this.$parent.$attrs }"
-    v-on="this.$parent.$listeners"
+    :config="config"
+    :value="value"
+    :active="active"
+    v-bind="$attrs"
+    v-on="$listeners"
     @input="handleInput"
     @select="handleTokenValueSelected(activeTokenValue)"
   >
