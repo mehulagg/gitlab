@@ -69,6 +69,11 @@ module QA
       end
 
       def fabricate!
+        if Runtime::Env.large_setup?
+          fabricate_large_merge_request
+          return
+        end
+
         populate_target_and_source_if_required
 
         project.visit!
@@ -89,6 +94,11 @@ module QA
       end
 
       def fabricate_via_api!
+        if Runtime::Env.large_setup?
+          fabricate_large_merge_request
+          return current_url
+        end
+
         raise ResourceNotFoundError unless id
 
         resource_web_url(api_get)
@@ -139,6 +149,11 @@ module QA
 
           result
         end
+      end
+
+      def fabricate_large_merge_request
+        project = Resource::ImportProject.fabricate_via_browser_ui!
+        visit("#{project.web_url}/-/merge_requests/9")
       end
 
       def reload!

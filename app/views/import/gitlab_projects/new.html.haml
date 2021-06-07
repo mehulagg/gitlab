@@ -16,9 +16,9 @@
   .row
     .form-group.col-sm-12
       = label_tag :file, _('GitLab project export'), class: 'label-bold'
-      .form-group
+      .form-group{ data: { qa_selector: 'exported_file_container' } }
         = file_field_tag :file, class: ''
   .row
     .form-actions.col-sm-12
-      = submit_tag _('Import project'), class: 'gl-button btn btn-confirm'
+      = submit_tag _('Import project'), class: 'gl-button btn btn-confirm', data: { qa_selector: 'import_project_button' }
       = link_to _('Cancel'), new_project_path, class: 'gl-button btn btn-default btn-cancel'

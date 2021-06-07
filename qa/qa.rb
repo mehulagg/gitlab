@@ -106,6 +106,7 @@ module QA
     autoload :RegistryRepository, 'qa/resource/registry_repository'
     autoload :Package, 'qa/resource/package'
     autoload :PipelineSchedules, 'qa/resource/pipeline_schedules'
+    autoload :ImportProject, 'qa/resource/import_project'
 
     module KubernetesCluster
       autoload :Base, 'qa/resource/kubernetes_cluster/base'
@@ -287,6 +288,8 @@ module QA
 
       module Import
         autoload :Github, 'qa/page/project/import/github'
+        autoload :Gitlab, 'qa/page/project/import/gitlab'
+        autoload :Selection, 'qa/page/project/import/selection'
       end
 
       module Pipeline

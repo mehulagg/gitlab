@@ -385,6 +385,10 @@ module QA
         ENV.fetch('GITLAB_QA_TRANSIENT_TRIALS', 10).to_i
       end
 
+      def large_setup?
+        enabled?(ENV['QA_LARGE_SETUP'], default: false)
+      end
+
       private
 
       def remote_grid_credentials
