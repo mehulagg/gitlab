@@ -5,7 +5,7 @@ module BoardItemFilterable
 
   private
 
-  def issue_filters(args)
+  def item_filters(args)
     filters = args.to_h
 
     set_filter_values(filters)
