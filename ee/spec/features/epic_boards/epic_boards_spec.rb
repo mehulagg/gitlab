@@ -59,7 +59,6 @@ RSpec.describe 'epic boards', :js do
     end
 
     it 'displays one epic in Label list' do
-      # here for spec
       expect(list_header(label_list)).to have_content('1')
 
       page.within("[data-board-type='label']") do
