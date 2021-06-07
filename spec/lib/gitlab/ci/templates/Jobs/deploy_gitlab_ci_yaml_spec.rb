@@ -207,14 +207,28 @@ RSpec.describe 'Jobs/Deploy.gitlab-ci.yml' do
         it_behaves_like 'review app deployment'
       end
 
+      context 'on branch pipeline with an open merge request' do
+        let(:service) { Ci::CreatePipelineService.new(project, user, ref: pipeline_ref) }
+        let(:merge_request) { create(:merge_request, :simple, source_project: project) }
+        let(:pipeline) { service.execute!(:push) }
+
+        before do
+          create(:ci_variable, project: project, key: 'CI_OPEN_MERGE_REQUESTS', value: 'true')
+        end
+
+        it 'has no jobs' do
+           expect { pipeline }.to raise_error(Ci::CreatePipelineService::CreateError, 'No stages / jobs for this pipeline.')
+        end
+      end
+
       context 'on merge request' do
         let(:service) { MergeRequests::CreatePipelineService.new(project: project, current_user: user) }
         let(:merge_request) { create(:merge_request, :simple, source_project: project) }
         let(:pipeline) { service.execute(merge_request) }
 
-        it 'has no jobs' do
+        it 'creates the build job' do
           expect(pipeline).to be_merge_request_event
-          expect(build_names).to be_empty
+          expect(build_names).to contain_exactly('build')
         end
       end
     end
