@@ -1,0 +1,20 @@
+query getEscalationPolicies($projectPath: ID!) {
+  project(fullPath: $projectPath) {
+    incidentManagementEscalationPolicies {
+      nodes {
+        id
+        name
+        description
+        rules {
+          id
+          status
+          elapsedTimeSeconds
+          oncallSchedule {
+            iid
+            name
+          }
+        }
+      }
+    }
+  }
+}
