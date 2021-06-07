@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require 'request_store'
+
 class Ability
   class << self
     # Given a list of users and a project this method returns the users that can
@@ -73,11 +75,23 @@ class Ability
     end
 
     def policy_for(user, subject = :global)
-      cache = Gitlab::SafeRequestStore.active? ? Gitlab::SafeRequestStore : {}
-
       ActiveSupport::Dependencies.interlock.permit_concurrent_loads do
-        DeclarativePolicy.policy_for(user, subject, cache: cache)
+        DeclarativePolicy.policy_for(user, subject, cache: ::Gitlab::SafeRequestStore.storage)
       end
+    end
+
+    def forgetting(pattern, &block)
+      keys_before = ::Gitlab::SafeRequestStore.storage.keys
+
+      r = yield
+
+      keys_after = ::Gitlab::SafeRequestStore.storage.keys
+
+      added_keys = keys_after - keys_before
+      forgettable = added_keys.select { |key| key.is_a?(String) && key.start_with?('/dp') && key =~ pattern }
+      forgettable.each { ::Gitlab::SafeRequestStore.delete(_1) }
+
+      r
     end
 
     private
