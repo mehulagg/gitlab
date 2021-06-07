@@ -36,7 +36,7 @@ was released.
 
 ### `active_user_count`
 
-This is named the instance_user_count in the Versions application.
+The number of active users existing in the instance. This is named the instance_user_count in the Versions application.
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/license/20210204124829_active_user_count.yml)
 
@@ -7104,11 +7104,11 @@ Tiers: `free`, `premium`, `ultimate`
 
 ### `historical_max_users`
 
-The maximum active user count. Active is defined in UsersStatistics model.
+The peak active user count. Active is defined in UsersStatistics model.
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/license/20210204124835_historical_max_users.yml)
 
-Group: `group::product intelligence`
+Group: `group::license`
 
 Status: `data_available`
 
@@ -7180,7 +7180,7 @@ The date the license ends
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/license/20210204124847_license_expires_at.yml)
 
-Group: `group::product intelligence`
+Group: `group::license`
 
 Status: `data_available`
 
@@ -7192,7 +7192,7 @@ The ID of the license
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/license/20210204124833_license_id.yml)
 
-Group: `group::product intelligence`
+Group: `group::license`
 
 Status: `data_available`
 
@@ -7200,15 +7200,15 @@ Tiers: `premium`, `ultimate`
 
 ### `license_md5`
 
-The license key of the GitLab instance
+The MD5 hash of license key of the GitLab instance
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/license/20210204124831_license_md5.yml)
 
-Group: `group::product intelligence`
+Group: `group::license`
 
 Status: `data_available`
 
-Tiers: `free`, `premium`, `ultimate`
+Tiers: `premium`, `ultimate`
 
 ### `license_plan`
 
@@ -7216,7 +7216,7 @@ The plan of the GitLab license
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/license/20210204124849_license_plan.yml)
 
-Group: `group::product intelligence`
+Group: `group::license`
 
 Status: `data_available`
 
@@ -7228,7 +7228,7 @@ The date the license starts
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/license/20210204124845_license_starts_at.yml)
 
-Group: `group::product intelligence`
+Group: `group::license`
 
 Status: `data_available`
 
@@ -7240,7 +7240,7 @@ Licese zuora_subscription_id
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/license/20210204124852_license_subscription_id.yml)
 
-Group: `group::product intelligence`
+Group: `group::license`
 
 Status: `data_available`
 
@@ -7260,23 +7260,23 @@ Tiers: `premium`, `ultimate`
 
 ### `license_trial_ends_on`
 
-Date the license ends on
+Date the trial license ends on
 
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/license/20210204124926_license_trial_ends_on.yml)
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/license/20210204124926_license_trial_ends_on.yml)
 
-Group: `group::product intelligence`
+Group: `group::license`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `license_user_count`
 
-The number of users included in the license
+The number of seats included in the license
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/license/20210204124843_license_user_count.yml)
 
-Group: `group::product intelligence`
+Group: `group::license`
 
 Status: `data_available`
 
@@ -7288,7 +7288,7 @@ Company on the GitLab license
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/license/20210204124841_company.yml)
 
-Group: `group::product intelligence`
+Group: `group::license`
 
 Status: `data_available`
 
@@ -7300,7 +7300,7 @@ Email on the GitLab license
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/license/20210204124839_email.yml)
 
-Group: `group::product intelligence`
+Group: `group::license`
 
 Status: `data_available`
 
@@ -7312,7 +7312,7 @@ Name on the GitLab license
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/license/20210204124837_name.yml)
 
-Group: `group::product intelligence`
+Group: `group::license`
 
 Status: `data_available`
 
