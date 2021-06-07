@@ -87,7 +87,7 @@ export const initDateArray = (startDate, endDate) => {
  * @param {Date} endDate - The end date selected by the user.
  * @returns {Array} The transformed data array (first item corresponds to start date, last item to end date)
  */
-export const transformScatterData = (startDate, startDate, endDate) => {
+export const transformScatterData = (data, startDate, endDate) => {
   const result = initDateArray(startDate, endDate);
   const totalItems = result.length;
 
@@ -96,7 +96,6 @@ export const transformScatterData = (startDate, startDate, endDate) => {
     const dayDiff = getDayDifference(mergedAtDate, endDate);
     if (dayDiff > -1 && dayDiff + 1 <= totalItems) {
       const idx = totalItems - (dayDiff + 1);
-
       result[idx].push(data[id]);
     }
   });
