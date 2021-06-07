@@ -829,9 +829,9 @@ variables:
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/211892) in GitLab 14.0.
 
-When testing an API it can be useful to exclude certain paths. For example, you might exclude testing of an authentication service or an older version of the API. Excluding URLs is done using the `FUZZAPI_EXCLUDE_PATHS` variable. This variable is specified in your `gitlab-ci.yml` file. More than one path can be excluded using the `;` character to separate entries. The provided paths can make use of a single character wildcard `?` and `*` for a multiple character wildcard.
+When testing an API it can be useful to exclude certain paths. For example, you might exclude testing of an authentication service or an older version of the API. To exclude paths, use the `FUZZAPI_EXCLUDE_PATHS` CI/CD variable . This variable is specified in your `.gitlab-ci.yml` file. To exclude multiple paths, separate entries using the `;` character. In the provided paths you can use a single character wildcard `?` and `*` for a multiple character wildcard.
 
-To verify the paths are being excluded you can review the `Tested Operations` and `Excluded Operations` portion of the job output. You should not see any excluded paths listed under `Tested Operations`.
+To verify the paths are excluded, review the `Tested Operations` and `Excluded Operations` portion of the job output. You should not see any excluded paths listed under `Tested Operations`.
 
 ```plaintext
 2021-05-27 21:51:08 [INF] API Security: --[ Tested Operations ]-------------------------
@@ -845,21 +845,21 @@ To verify the paths are being excluded you can review the `Tested Operations` an
 
 #### Examples
 
-This example will exclude the `/auth` resource. This will not exclude child resources (`/auth/child`).
+This example excludes the `/auth` resource. This does not exclude child resources (`/auth/child`).
 
 ```yaml
 variables:
   FUZZAPI_EXCLUDE_PATHS=/auth
 ```
 
-To exclude `/auth`, and child resources (`/auth/child`), we will use a wildcard.
+To exclude `/auth`, and child resources (`/auth/child`), we use a wildcard.
 
 ```yaml
 variables:
   FUZZAPI_EXCLUDE_PATHS=/auth*
 ```
 
-To exclude multiple paths we can use the `;` character. In this example we will exclude `/auth*` and also `/v1/*`.
+To exclude multiple paths we can use the `;` character. In this example we exclude `/auth*` and `/v1/*`.
 
 ```yaml
 variables:
