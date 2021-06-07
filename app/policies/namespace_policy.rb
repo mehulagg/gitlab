@@ -16,6 +16,7 @@ class NamespacePolicy < BasePolicy
     enable :create_jira_connect_subscription
     enable :create_package_settings
     enable :read_package_settings
+    enable :reset_runners_registration_token
   end
 
   rule { personal_project & ~can_create_personal_project }.prevent :create_projects
