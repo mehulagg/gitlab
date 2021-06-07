@@ -10782,8 +10782,8 @@ CREATE TABLE ci_minutes_additional_packs (
     id bigint NOT NULL,
     created_at timestamp with time zone NOT NULL,
     updated_at timestamp with time zone NOT NULL,
-    expires_at date,
     namespace_id bigint NOT NULL,
+    expires_at date,
     number_of_minutes integer NOT NULL,
     purchase_xid text,
     CONSTRAINT check_d7ef254af0 CHECK ((char_length(purchase_xid) <= 32))
