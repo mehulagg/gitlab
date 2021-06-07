@@ -73,8 +73,10 @@ module Gitlab
         @user = user
       end
 
-      def admin_mode?
+      def admin_mode?(force: false)
         return false unless user
+
+        Gitlab::SafeRequestStore.delete(admin_mode_rs_key) if force
 
         Gitlab::SafeRequestStore.fetch(admin_mode_rs_key) do
           user.admin? && (privileged_runtime? || session_with_admin_mode?)
