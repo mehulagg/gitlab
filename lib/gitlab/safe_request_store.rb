@@ -20,6 +20,15 @@ module Gitlab
       end
     end
 
+    # Access to the backing storage of the request store. This returns an object
+    # with `[]` and `[]=` methods that does not discard values.
+    #
+    # This can be useful if storage is needed for a delimited purpose, and the
+    # forgetful nature of the null store is undesirable.
+    def self.storage
+      store.store
+    end
+
     # This method accept an options hash to be compatible with
     # ActiveSupport::Cache::Store#write method. The options are
     # not passed to the underlying cache implementation because
