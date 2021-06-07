@@ -1,5 +1,7 @@
 # GitLab
 
+DONT MERGE THIS!
+
 ## Canonical source
 
 The canonical source of GitLab where all development takes place is [hosted on GitLab.com](https://gitlab.com/gitlab-org/gitlab).
