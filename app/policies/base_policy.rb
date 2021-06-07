@@ -5,7 +5,7 @@ class BasePolicy < DeclarativePolicy::Base
   with_options scope: :user, score: 0
   condition(:admin) do
     if Gitlab::CurrentSettings.admin_mode
-      Gitlab::Auth::CurrentUserMode.new(@user).admin_mode?
+      Gitlab::Auth::CurrentUserMode.new(@user).admin_mode?(force: true)
     else
       @user&.admin?
     end
