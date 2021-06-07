@@ -1,8 +1,8 @@
 import axios from '~/lib/utils/axios_utils';
 import { buildApiUrl } from './api_utils';
 
-const PROJECT_VSA_PATH_BASE = '/:project_path/-/value_stream_analytics';
-const PROJECT_VSA_PATH = '/:project_path/-/value_stream_analytics/:value_stream_id';
+const PROJECT_VSA_PATH_BASE = '/:project_path/-/analytics/value_stream_analytics/value_streams';
+const PROJECT_VSA_PATH = `${PROJECT_VSA_PATH_BASE}/:value_stream_id`;
 
 const buildProjectValueStreamPath = (projectPath, valueStreamId = null) => {
   if (valueStreamId) {
