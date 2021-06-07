@@ -1,5 +1,4 @@
 <script>
-/* eslint-disable vue/no-v-html */
 import { GlButton, GlIcon } from '@gitlab/ui';
 import { isString } from 'lodash';
 import highlight from '~/lib/utils/highlight';

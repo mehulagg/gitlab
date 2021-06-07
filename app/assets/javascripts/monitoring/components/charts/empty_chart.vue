@@ -1,5 +1,4 @@
 <script>
-/* eslint-disable vue/no-v-html */
 import chartEmptyStateIllustration from '@gitlab/svgs/dist/illustrations/chart-empty-state.svg';
 import { chartHeight } from '../../constants';
 

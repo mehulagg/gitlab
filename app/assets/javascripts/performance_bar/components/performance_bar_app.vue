@@ -1,5 +1,4 @@
 <script>
-/* eslint-disable vue/no-v-html */
 import { glEmojiTag } from '~/emoji';
 
 import { s__ } from '~/locale';

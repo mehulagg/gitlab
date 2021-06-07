@@ -1,5 +1,4 @@
 <script>
-/* eslint-disable vue/no-v-html */
 import { GlIcon, GlLoadingIcon, GlTooltipDirective } from '@gitlab/ui';
 import { mapActions } from 'vuex';
 import timeAgoTooltip from '~/vue_shared/components/time_ago_tooltip.vue';

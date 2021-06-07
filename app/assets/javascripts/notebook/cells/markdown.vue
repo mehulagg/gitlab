@@ -1,5 +1,4 @@
 <script>
-/* eslint-disable vue/no-v-html */
 import katex from 'katex';
 import marked from 'marked';
 import { sanitize } from '~/lib/dompurify';

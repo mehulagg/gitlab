@@ -1,5 +1,4 @@
 <script>
-/* eslint-disable vue/no-v-html */
 import { GlButtonGroup, GlButton, GlTooltipDirective } from '@gitlab/ui';
 
 import CommitPipelineStatus from '~/projects/tree/components/commit_pipeline_status_component.vue';

@@ -1,5 +1,4 @@
 <script>
-/* eslint-disable vue/no-v-html */
 import { GlTooltipDirective, GlButton, GlIcon } from '@gitlab/ui';
 import { throttle } from 'lodash';
 import { mapActions, mapState } from 'vuex';

@@ -1,5 +1,4 @@
 <script>
-/* eslint-disable vue/no-v-html */
 import { GlButton, GlSprintf, GlLink } from '@gitlab/ui';
 import emptyStateSVG from 'icons/_mr_widget_empty_state.svg';
 import { helpPagePath } from '~/helpers/help_page_helper';

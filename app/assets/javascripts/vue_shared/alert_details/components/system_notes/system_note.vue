@@ -1,5 +1,4 @@
 <script>
-/* eslint-disable vue/no-v-html */
 import { GlIcon } from '@gitlab/ui';
 import NoteHeader from '~/notes/components/note_header.vue';
 

@@ -1,5 +1,4 @@
 <script>
-/* eslint-disable vue/no-v-html */
 import '~/commons/bootstrap';
 import { GlIcon, GlTooltip, GlTooltipDirective, GlButton } from '@gitlab/ui';
 import IssueDueDate from '~/boards/components/issue_due_date.vue';

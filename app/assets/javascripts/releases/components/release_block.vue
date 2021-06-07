@@ -1,5 +1,4 @@
 <script>
-/* eslint-disable vue/no-v-html */
 import $ from 'jquery';
 import { isEmpty } from 'lodash';
 import { scrollToElement } from '~/lib/utils/common_utils';

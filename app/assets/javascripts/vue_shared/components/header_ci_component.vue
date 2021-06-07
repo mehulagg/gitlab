@@ -1,5 +1,4 @@
 <script>
-/* eslint-disable vue/no-v-html */
 import { GlTooltipDirective, GlLink, GlButton, GlTooltip } from '@gitlab/ui';
 import { glEmojiTag } from '../../emoji';
 import { __, sprintf } from '../../locale';

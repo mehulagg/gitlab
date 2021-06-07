@@ -1,5 +1,4 @@
 <script>
-/* eslint-disable vue/no-v-html */
 import { GlLink, GlModal } from '@gitlab/ui';
 import { isEmpty } from 'lodash';
 import { __, s__, sprintf } from '~/locale';

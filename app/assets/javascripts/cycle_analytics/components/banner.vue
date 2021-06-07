@@ -1,5 +1,4 @@
 <script>
-/* eslint-disable vue/no-v-html */
 import { GlIcon } from '@gitlab/ui';
 import iconCycleAnalyticsSplash from 'icons/_icon_cycle_analytics_splash.svg';
 

@@ -1,5 +1,4 @@
 <script>
-/* eslint-disable vue/no-v-html */
 import { GlAlert } from '@gitlab/ui';
 
 export default {

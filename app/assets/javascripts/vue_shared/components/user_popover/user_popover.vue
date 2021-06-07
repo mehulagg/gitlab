@@ -1,5 +1,4 @@
 <script>
-/* eslint-disable vue/no-v-html */
 import { GlPopover, GlLink, GlSkeletonLoader, GlIcon } from '@gitlab/ui';
 import UserNameWithStatus from '~/sidebar/components/assignees/user_name_with_status.vue';
 import { glEmojiTag } from '../../../emoji';

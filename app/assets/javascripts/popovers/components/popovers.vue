@@ -3,7 +3,7 @@
 // be stripped by the directive's sanitizer. Instead, we fallback on v-html and we use GitLab's
 // dompurify config that lets SVGs be rendered properly.
 // Context: https://gitlab.com/gitlab-org/gitlab/-/issues/247207
-/* eslint-disable vue/no-v-html */
+
 import { GlPopover } from '@gitlab/ui';
 import { sanitize } from '~/lib/dompurify';
 

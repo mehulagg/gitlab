@@ -1,5 +1,4 @@
 <script>
-/* eslint-disable vue/no-v-html */
 import { GlButton } from '@gitlab/ui';
 import { escape } from 'lodash';
 import { __, n__, sprintf, s__ } from '~/locale';

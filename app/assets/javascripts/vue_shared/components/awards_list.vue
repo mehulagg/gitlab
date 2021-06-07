@@ -1,5 +1,4 @@
 <script>
-/* eslint-disable vue/no-v-html */
 import { GlIcon, GlButton, GlTooltipDirective } from '@gitlab/ui';
 import { groupBy } from 'lodash';
 import EmojiPicker from '~/emoji/components/picker.vue';

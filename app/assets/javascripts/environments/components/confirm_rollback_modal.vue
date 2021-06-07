@@ -1,5 +1,4 @@
 <script>
-/* eslint-disable vue/no-v-html */
 /**
  * Render modal to confirm rollback/redeploy.
  */

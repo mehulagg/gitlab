@@ -1,5 +1,4 @@
 <script>
-/* eslint-disable vue/no-v-html */
 import { GlButton } from '@gitlab/ui';
 import { mapGetters, mapActions, mapState } from 'vuex';
 import { getDraft, updateDraft } from '~/lib/utils/autosave';

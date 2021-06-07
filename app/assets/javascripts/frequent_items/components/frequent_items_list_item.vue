@@ -1,5 +1,5 @@
 <script>
-/* eslint-disable vue/require-default-prop, vue/no-v-html */
+/* eslint-disable vue/require-default-prop */
 import highlight from '~/lib/utils/highlight';
 import { truncateNamespace } from '~/lib/utils/text_utility';
 import { mapVuexModuleState } from '~/lib/utils/vuex_module_mappers';

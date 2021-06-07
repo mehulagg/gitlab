@@ -1,5 +1,4 @@
 <script>
-/* eslint-disable vue/no-v-html */
 import MarkdownFieldView from '~/vue_shared/components/markdown/field_view.vue';
 
 export default {

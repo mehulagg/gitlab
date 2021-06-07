@@ -1,5 +1,4 @@
 <script>
-/* eslint-disable vue/no-v-html */
 import { GlLoadingIcon, GlLink, GlTooltip, GlIcon } from '@gitlab/ui';
 import { escape } from 'lodash';
 
