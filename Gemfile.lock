@@ -1,6 +1,6 @@
 GIT
   remote: https://gitlab.com/gitlab-org/declarative-policy.git
-  revision: fe5a061452c33043017bc2fb93f2ec609b730c3f
+  revision: f0a23d2a0f16fcbb6c8c95098dccbf9f3a0d67f1
   branch: ajk-remove-activesupport
   specs:
     declarative_policy (1.0.0)
