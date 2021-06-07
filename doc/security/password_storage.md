@@ -11,8 +11,7 @@ GitLab stores user passwords in a hashed format to prevent passwords from being
 stored as plain text.
 
 GitLab uses the [Devise](https://github.com/heartcombo/devise) authentication
-library to hash user user passwords. Created password hashes have these
-attributes:
+library to hash user passwords. Created password hashes have these attributes:
 
 - **Hashing**: The [`bcrypt`](https://en.wikipedia.org/wiki/Bcrypt) hashing
   function is used to generate the hash of the provided password. This is a
