@@ -5,6 +5,8 @@ import { secondsToMilliseconds } from './datetime_utility';
 
 const MINIMUM_DATE = new Date(0);
 
+window.df = dateformat;
+
 const DEFAULT_DIRECTION = 'before';
 
 const durationToMillis = (duration) => {
@@ -26,14 +28,7 @@ const isValidDateString = (dateString) => {
     return false;
   }
 
-  try {
-    // dateformat throws error that can be caught.
-    // This is better than using `new Date()`
-    dateformat(dateString, 'isoUtcDateTime');
-    return true;
-  } catch (e) {
-    return false;
-  }
+  return !Number.isNaN(Date.parse(dateformat(dateString, 'isoUtcDateTime')));
 };
 
 const handleRangeDirection = ({ direction = DEFAULT_DIRECTION, anchorDate, minDate, maxDate }) => {

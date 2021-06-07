@@ -14,7 +14,7 @@ describe('spec/helpers/fake_date', () => {
 
     it('should use default args when called as a function', () => {
       expect(FakeDate()).toMatchInlineSnapshot(
-        `"Mon Jul 06 2020 00:00:00 UTC (Greenwich Mean Time)"`,
+        `"Mon Jul 06 2020 00:00:00 GMT+0000 (Greenwich Mean Time)"`,
       );
     });
 
