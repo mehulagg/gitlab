@@ -1937,6 +1937,9 @@ body.sidebar-refactoring
   margin-left: 0 !important;
   margin-right: 0 !important;
 }
+.do-not-merge {
+  display: block;
+}
 
 @import "startup/cloaking";
 @include cloak-startup-scss(none);
