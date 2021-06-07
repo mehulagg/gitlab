@@ -1022,8 +1022,6 @@ module Ci
     end
 
     def can_generate_codequality_reports?
-      return false unless ::Gitlab::Ci::Features.display_quality_on_mr_diff?(project)
-
       has_reports?(Ci::JobArtifact.codequality_reports)
     end
 
