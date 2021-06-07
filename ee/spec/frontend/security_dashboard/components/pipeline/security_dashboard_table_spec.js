@@ -1,19 +1,16 @@
 import { GlEmptyState, GlFormCheckbox } from '@gitlab/ui';
 import { shallowMount, createLocalVue } from '@vue/test-utils';
 import Vuex from 'vuex';
-
-import SecurityDashboardTable from 'ee/security_dashboard/components/security_dashboard_table.vue';
-import SecurityDashboardTableRow from 'ee/security_dashboard/components/security_dashboard_table_row.vue';
+import SecurityDashboardTable from 'ee/security_dashboard/components/pipeline/security_dashboard_table.vue';
+import SecurityDashboardTableRow from 'ee/security_dashboard/components/pipeline/security_dashboard_table_row.vue';
 import createStore from 'ee/security_dashboard/store';
-
 import {
   RECEIVE_VULNERABILITIES_ERROR,
   RECEIVE_VULNERABILITIES_SUCCESS,
   REQUEST_VULNERABILITIES,
 } from 'ee/security_dashboard/store/modules/vulnerabilities/mutation_types';
 import { shallowMountExtended } from 'helpers/vue_test_utils_helper';
-
-import mockDataVulnerabilities from '../store/modules/vulnerabilities/data/mock_data_vulnerabilities';
+import mockDataVulnerabilities from '../../store/modules/vulnerabilities/data/mock_data_vulnerabilities';
 
 const localVue = createLocalVue();
 localVue.use(Vuex);

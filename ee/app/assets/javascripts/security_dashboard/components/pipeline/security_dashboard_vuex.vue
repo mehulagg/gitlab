@@ -4,10 +4,10 @@ import PipelineArtifactDownload from 'ee/vue_shared/security_reports/components/
 import IssueModal from 'ee/vue_shared/security_reports/components/modal.vue';
 import { securityReportTypeEnumToReportType } from 'ee/vue_shared/security_reports/constants';
 import { vulnerabilityModalMixin } from 'ee/vue_shared/security_reports/mixins/vulnerability_modal_mixin';
+import VulnerabilityReportLayout from '../vulnerability_report_layout.vue';
 import Filters from './filters.vue';
 import LoadingError from './loading_error.vue';
 import SecurityDashboardTable from './security_dashboard_table.vue';
-import VulnerabilityReportLayout from './vulnerability_report_layout.vue';
 
 export default {
   components: {

@@ -1,7 +1,7 @@
 <script>
 import { GlEmptyState } from '@gitlab/ui';
+import { LOADING_VULNERABILITIES_ERROR_CODES as ERROR_CODES } from 'ee/security_dashboard/store/modules/vulnerabilities/constants';
 import { s__, __ } from '~/locale';
-import { LOADING_VULNERABILITIES_ERROR_CODES as ERROR_CODES } from '../store/modules/vulnerabilities/constants';
 
 const description = s__(
   'SecurityReports|Security reports can only be accessed by authorized users.',

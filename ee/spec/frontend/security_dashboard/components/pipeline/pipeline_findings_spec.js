@@ -1,11 +1,11 @@
 import { GlAlert, GlIntersectionObserver, GlLoadingIcon } from '@gitlab/ui';
 import { shallowMount, createLocalVue } from '@vue/test-utils';
 import VueApollo from 'vue-apollo';
-import PipelineFindings from 'ee/security_dashboard/components/pipeline_findings.vue';
+import PipelineFindings from 'ee/security_dashboard/components/pipeline/pipeline_findings.vue';
 import VulnerabilityList from 'ee/security_dashboard/components/vulnerability_list.vue';
 import pipelineFindingsQuery from 'ee/security_dashboard/graphql/queries/pipeline_findings.query.graphql';
 import createMockApollo from 'helpers/mock_apollo_helper';
-import { mockPipelineFindingsResponse } from '../mock_data';
+import { mockPipelineFindingsResponse } from '../../mock_data';
 
 describe('Pipeline findings', () => {
   let wrapper;

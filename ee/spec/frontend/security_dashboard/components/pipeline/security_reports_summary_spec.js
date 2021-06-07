@@ -1,6 +1,6 @@
 import { GlSprintf } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
-import SecurityReportsSummary from 'ee/security_dashboard/components/security_reports_summary.vue';
+import SecurityReportsSummary from 'ee/security_dashboard/components/pipeline/security_reports_summary.vue';
 import Modal from 'ee/vue_shared/security_reports/components/dast_modal.vue';
 import { useLocalStorageSpy } from 'helpers/local_storage_helper';
 import { trimText } from 'helpers/text_helper';

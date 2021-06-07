@@ -1,7 +1,7 @@
 import { GlToggle } from '@gitlab/ui';
 import { shallowMount, mount, createLocalVue } from '@vue/test-utils';
 import Vuex from 'vuex';
-import Filters from 'ee/security_dashboard/components/filters.vue';
+import Filters from 'ee/security_dashboard/components/pipeline/filters.vue';
 import { pipelineScannerFilter } from 'ee/security_dashboard/helpers';
 import createStore from 'ee/security_dashboard/store';
 import state from 'ee/security_dashboard/store/modules/filters/state';

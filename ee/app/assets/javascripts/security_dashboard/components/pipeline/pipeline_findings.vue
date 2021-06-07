@@ -1,10 +1,10 @@
 <script>
 import { GlAlert, GlIntersectionObserver, GlLoadingIcon } from '@gitlab/ui';
 import { produce } from 'immer';
-import findingsQuery from '../graphql/queries/pipeline_findings.query.graphql';
-import { preparePageInfo } from '../helpers';
-import { VULNERABILITIES_PER_PAGE } from '../store/constants';
-import VulnerabilityList from './vulnerability_list.vue';
+import findingsQuery from 'ee/security_dashboard/graphql/queries/pipeline_findings.query.graphql';
+import { preparePageInfo } from 'ee/security_dashboard/helpers';
+import { VULNERABILITIES_PER_PAGE } from 'ee/security_dashboard/store/constants';
+import VulnerabilityList from '../vulnerability_list.vue';
 
 export default {
   name: 'PipelineFindings',

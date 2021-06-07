@@ -8,11 +8,11 @@ import {
   GlModalDirective,
   GlLink,
 } from '@gitlab/ui';
+import { COLLAPSE_SECURITY_REPORTS_SUMMARY_LOCAL_STORAGE_KEY as LOCAL_STORAGE_KEY } from 'ee/security_dashboard/constants';
+import { getFormattedSummary } from 'ee/security_dashboard/helpers';
 import Modal from 'ee/vue_shared/security_reports/components/dast_modal.vue';
 import AccessorUtilities from '~/lib/utils/accessor';
 import { __ } from '~/locale';
-import { COLLAPSE_SECURITY_REPORTS_SUMMARY_LOCAL_STORAGE_KEY as LOCAL_STORAGE_KEY } from '../constants';
-import { getFormattedSummary } from '../helpers';
 
 export default {
   name: 'SecurityReportsSummary',

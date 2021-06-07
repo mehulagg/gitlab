@@ -1,7 +1,6 @@
 import { GlEmptyState } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
-
-import LoadingError from 'ee/security_dashboard/components/loading_error.vue';
+import LoadingError from 'ee/security_dashboard/components/pipeline/loading_error.vue';
 
 const illustrations = {
   401: '/401.svg',

@@ -1,14 +1,14 @@
 import { GlFormCheckbox } from '@gitlab/ui';
 import { mount, shallowMount, createLocalVue } from '@vue/test-utils';
 import Vuex from 'vuex';
-import SecurityDashboardTableRow from 'ee/security_dashboard/components/security_dashboard_table_row.vue';
+import SecurityDashboardTableRow from 'ee/security_dashboard/components/pipeline/security_dashboard_table_row.vue';
 import createStore from 'ee/security_dashboard/store';
 import { DASHBOARD_TYPES } from 'ee/security_dashboard/store/constants';
 import { VULNERABILITY_MODAL_ID } from 'ee/vue_shared/security_reports/components/constants';
 import SeverityBadge from 'ee/vue_shared/security_reports/components/severity_badge.vue';
 import { trimText } from 'helpers/text_helper';
 import { BV_SHOW_MODAL } from '~/lib/utils/constants';
-import mockDataVulnerabilities from '../store/modules/vulnerabilities/data/mock_data_vulnerabilities';
+import mockDataVulnerabilities from '../../store/modules/vulnerabilities/data/mock_data_vulnerabilities';
 
 const localVue = createLocalVue();
 localVue.use(Vuex);

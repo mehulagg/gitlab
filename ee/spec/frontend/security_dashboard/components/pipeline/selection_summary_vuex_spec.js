@@ -3,7 +3,7 @@ import { mount, createLocalVue } from '@vue/test-utils';
 import axios from 'axios';
 import MockAdapter from 'axios-mock-adapter';
 import Vuex from 'vuex';
-import SelectionSummary from 'ee/security_dashboard/components/selection_summary_vuex.vue';
+import SelectionSummary from 'ee/security_dashboard/components/pipeline/selection_summary_vuex.vue';
 import createStore from 'ee/security_dashboard/store/index';
 import {
   SELECT_VULNERABILITY,
@@ -11,7 +11,7 @@ import {
 } from 'ee/security_dashboard/store/modules/vulnerabilities/mutation_types';
 import waitForPromises from 'helpers/wait_for_promises';
 import httpStatus from '~/lib/utils/http_status';
-import mockDataVulnerabilities from '../store/modules/vulnerabilities/data/mock_data_vulnerabilities';
+import mockDataVulnerabilities from '../../store/modules/vulnerabilities/data/mock_data_vulnerabilities';
 
 const localVue = createLocalVue();
 localVue.use(Vuex);
