@@ -8575,17 +8575,22 @@ moment-mini@^2.22.1:
   resolved "https://registry.yarnpkg.com/moment-mini/-/moment-mini-2.22.1.tgz#bc32d73e43a4505070be6b53494b17623183420d"
   integrity sha512-OUCkHOz7ehtNMYuZjNciXUfwTuz8vmF1MTbAy59ebf+ZBYZO5/tZKuChVWCX+uDo+4idJBpGltNfV8st+HwsGw==
 
-monaco-editor-webpack-plugin@^1.9.1:
-  version "1.9.1"
-  resolved "https://registry.yarnpkg.com/monaco-editor-webpack-plugin/-/monaco-editor-webpack-plugin-1.9.1.tgz#eb4bbb1c5e5bfb554541c1ae1542e74c2a9f43fd"
-  integrity sha512-x7fx1w3i/uwZERIgztHAAK3VQMsL8+ku0lFXXbO81hKDg8IieACqjGEa2mqEueg0c/fX+wd0oI+75wB19KJAsA==
+monaco-editor-webpack-plugin@^3.1.0:
+  version "3.1.0"
+  resolved "https://registry.yarnpkg.com/monaco-editor-webpack-plugin/-/monaco-editor-webpack-plugin-3.1.0.tgz#972efc47a91b3bf3bd977885684a3180eb8f341b"
+  integrity sha512-TP5NkCAV0OeFTry5k/d60KR7CkhTXL4kgJKtE3BzjgbDb5TGEPEhoKmHBrSa6r7Oc0sNbPLZhKD/TP2ig7A+/A==
   dependencies:
-    loader-utils "^1.2.3"
+    loader-utils "^2.0.0"
 
-monaco-editor@0.20.0, monaco-editor@^0.20.0:
+monaco-editor@0.20.0:
   version "0.20.0"
   resolved "https://registry.yarnpkg.com/monaco-editor/-/monaco-editor-0.20.0.tgz#5d5009343a550124426cb4d965a4d27a348b4dea"
   integrity sha512-hkvf4EtPJRMQlPC3UbMoRs0vTAFAYdzFQ+gpMb8A+9znae1c43q8Mab9iVsgTcg/4PNiLGGn3SlDIa8uvK1FIQ==
+
+monaco-editor@^0.24.0:
+  version "0.24.0"
+  resolved "https://registry.yarnpkg.com/monaco-editor/-/monaco-editor-0.24.0.tgz#990b55096bcc95d08d8d28e55264c6eb17707269"
+  integrity sha512-o1f0Lz6ABFNTtnEqqqvlY9qzNx24rQZx1RgYNQ8SkWkE+Ka63keHH/RqxQ4QhN4fs/UYOnvAtEUZsPrzccH++A==
 
 monaco-yaml@^2.5.1:
   version "2.5.1"
