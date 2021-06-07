@@ -59,7 +59,7 @@ module Gitlab
         end
 
         def replica_caught_up?(location)
-          load_balancer.host.caught_up?(location)
+          load_balancer.select_caught_up_hosts(location)
         end
       end
     end
