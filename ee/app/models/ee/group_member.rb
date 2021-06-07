@@ -152,9 +152,5 @@ module EE
     def send_welcome_email?
       !provisioned_by_this_group?
     end
-
-    def provisioned_by_this_group?
-      user.user_detail.provisioned_by_group_id == source_id
-    end
   end
 end

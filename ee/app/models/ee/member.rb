@@ -54,5 +54,9 @@ module EE
     def source_kind
       source.is_a?(Group) && source.parent.present? ? 'Sub group' : source.class.to_s
     end
+
+    def provisioned_by_this_group?
+      user.user_detail.provisioned_by_group_id == source_id
+    end
   end
 end

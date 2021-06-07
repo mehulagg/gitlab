@@ -32,6 +32,11 @@ export const generateBadges = ({ member, isCurrentUser, canManageMembers }) => [
     text: __('LDAP'),
     variant: 'info',
   },
+  {
+    show: member.provisionedByThisGroup,
+    text: __('Enterprise'),
+    variant: 'info',
+  },
 ];
 
 export const canOverride = (member) => member.canOverride && isDirectMember(member);

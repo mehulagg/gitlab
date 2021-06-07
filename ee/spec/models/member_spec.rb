@@ -67,4 +67,20 @@ RSpec.describe Member, type: :model do
       it { is_expected.to eq('Project') }
     end
   end
+
+  describe '#provisioned_by_this_group?' do
+    subject { member.provisioned_by_this_group? }
+
+    context 'when user is provisioned by the group' do
+      let(:user_details) { create(:user_details, user: user, provisioned_by_group_id: group.id) }
+
+      it { is_expected.to eq(true) }
+    end
+
+    context 'when user is not provisioned by the group' do
+      let(:user_details) { create(:user_details, user: user, provisioned_by_group_id: nil) }
+
+      it { is_expected.to eq(false) }
+    end
+  end
 end
