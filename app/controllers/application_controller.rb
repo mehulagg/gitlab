@@ -263,7 +263,6 @@ class ApplicationController < ActionController::Base
     headers['X-XSS-Protection'] = '1; mode=block'
     headers['X-UA-Compatible'] = 'IE=edge'
     headers['X-Content-Type-Options'] = 'nosniff'
-    headers[Gitlab::Metrics::RequestsRackMiddleware::FEATURE_CATEGORY_HEADER] = feature_category
   end
 
   def default_cache_headers
@@ -456,7 +455,7 @@ class ApplicationController < ActionController::Base
   end
 
   def set_current_context(&block)
-    Gitlab::ApplicationContext.with_context(
+    Gitlab::ApplicationContext.push(
       # Avoid loading the auth_user again after the request. Otherwise calling
       # `auth_user` again would also trigger the Warden callbacks again
       user: -> { auth_user if strong_memoized?(:auth_user) },
