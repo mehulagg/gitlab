@@ -36,10 +36,28 @@ module Gitlab
       end
     end
 
-    # yield to the block at most once per period
-    def self.throttle(key, period, &block)
-      lease = new(key, timeout: period)
-      yield if lease.try_obtain
+    # yield to the {block} at most {count} per {period}
+    #
+    # For example:
+    #
+    #   # toot the train horn at most every 20min
+    #   throttle("some_unique_key", count: 3, period: 1.hour) { toot_train_horn }
+    #   # Brake suddenly at most once every hour
+    #   throttle("some_unique_key", period: 1.hour) { brake_suddenly }
+    #
+    def self.throttle(key, period:, count: 1, &block)
+      lease = new("el:throttle:#{key}", timeout: period.to_i / count)
+      yield unless lease.waiting?
+    end
+
+    def self.unthrottle!
+      return unless ::Gitlab.dev_or_test_env?
+
+      Gitlab::Redis::SharedState.with do |redis|
+        redis.scan_each(match: redis_shared_state_key("el:throttle:*")).each do |key|
+          redis.del(key)
+        end
+      end
     end
 
     def self.cancel(key, uuid)
@@ -83,6 +101,11 @@ module Gitlab
       Gitlab::Redis::SharedState.with do |redis|
         redis.set(@redis_shared_state_key, @uuid, nx: true, ex: @timeout) && @uuid
       end
+    end
+
+    # This lease is waiting to obtain
+    def waiting?
+      !try_obtain
     end
 
     # Try to renew an existing lease. Return lease UUID on success,
