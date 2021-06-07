@@ -25,6 +25,11 @@ dast_environment_deploy:
       when: never
     - if: $DAST_WEBSITE  # we don't need to create a review app if a URL is already given
       when: never
+    - if: $CI_MERGE_REQUEST_IID &&
+          $CI_KUBERNETES_ACTIVE &&
+          $GITLAB_FEATURES =~ /\bdast\b/
+    - if: $CI_OPEN_MERGE_REQUESTS  # If it's a branch pipeline with open MRs, don't add it to a *branch* pipeline.
+      when: never
     - if: $CI_COMMIT_BRANCH &&
           $CI_KUBERNETES_ACTIVE &&
           $GITLAB_FEATURES =~ /\bdast\b/
@@ -47,6 +52,12 @@ stop_dast_environment:
     - if: $DAST_DISABLED || $DAST_DISABLED_FOR_DEFAULT_BRANCH
       when: never
     - if: $DAST_WEBSITE  # we don't need to create a review app if a URL is already given
+      when: never
+    - if: $CI_MERGE_REQUEST_IID &&
+          $CI_KUBERNETES_ACTIVE &&
+          $GITLAB_FEATURES =~ /\bdast\b/
+      when: always
+    - if: $CI_OPEN_MERGE_REQUESTS  # If it's a branch pipeline with open MRs, don't add it to a *branch* pipeline.
       when: never
     - if: $CI_COMMIT_BRANCH &&
           $CI_KUBERNETES_ACTIVE &&
