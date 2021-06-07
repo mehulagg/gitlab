@@ -353,6 +353,11 @@ RSpec.configure do |config|
     RequestStore.clear!
   end
 
+  # previous test runs may have left some resources throttled
+  config.before do
+    Gitlab::ExclusiveLease.unthrottle!
+  end
+
   config.around do |example|
     # Wrap each example in it's own context to make sure the contexts don't
     # leak
