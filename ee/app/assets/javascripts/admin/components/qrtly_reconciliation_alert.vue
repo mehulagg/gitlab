@@ -1,5 +1,4 @@
 <script>
-import Cookie from 'js-cookie';
 import { GlAlert, GlSprintf } from '@gitlab/ui';
 import Cookie from 'js-cookie';
 import { formatDate, getDayDifference } from '~/lib/utils/datetime_utility';
