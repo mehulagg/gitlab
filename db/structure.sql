@@ -10573,6 +10573,8 @@ CREATE TABLE ci_builds (
     CONSTRAINT check_1e2fbd1b39 CHECK ((lock_version IS NOT NULL))
 );
 
+COMMENT ON TABLE ci_builds IS '{"owner":"group::verify","description":null,"version":"1.0"}';
+
 CREATE SEQUENCE ci_builds_id_seq
     START WITH 1
     INCREMENT BY 1
@@ -16463,6 +16465,15 @@ CREATE SEQUENCE postgres_reindex_actions_id_seq
 
 ALTER SEQUENCE postgres_reindex_actions_id_seq OWNED BY postgres_reindex_actions.id;
 
+CREATE VIEW postgres_table_comments AS
+ SELECT (((pg_namespace.nspname)::text || '.'::text) || (pg_class.relname)::text) AS identifier,
+    pg_namespace.nspname AS schema,
+    pg_class.relname,
+    obj_description(pg_class.oid, 'pg_class'::name) AS comment
+   FROM (pg_class
+     JOIN pg_namespace ON ((pg_class.relnamespace = pg_namespace.oid)))
+  WHERE ((pg_class.relkind = 'r'::"char") AND (pg_namespace.nspname <> 'pg_catalog'::name) AND (pg_namespace.nspname = ANY (ARRAY["current_schema"(), 'gitlab_partitions_dynamic'::name, 'gitlab_partitions_static'::name])) AND (obj_description(pg_class.oid, 'pg_class'::name) IS NOT NULL));
+
 CREATE TABLE programming_languages (
     id integer NOT NULL,
     name character varying NOT NULL,
@@ -17637,6 +17648,8 @@ CREATE TABLE schema_migrations (
     version character varying NOT NULL
 );
 
+COMMENT ON TABLE schema_migrations IS '{"owner":"group::database","description":null,"version":"1.0"}';
+
 CREATE TABLE scim_identities (
     id bigint NOT NULL,
     group_id bigint NOT NULL,
@@ -18759,6 +18772,8 @@ CREATE TABLE users (
     role smallint,
     user_type smallint
 );
+
+COMMENT ON TABLE users IS '{"owner":"group::database","description":null,"version":"1.0"}';
 
 CREATE SEQUENCE users_id_seq
     START WITH 1
