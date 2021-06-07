@@ -32,7 +32,7 @@ RSpec.shared_examples GroupInviteMembers do
       it 'tracks the event' do
         subject
 
-        expect_snowplow_event(category: anything, action: 'invite_members', label: 'new_group_form')
+        expect_snowplow_event(category: anything, action: 'invite_members', label: 'new_group_form', user: user)
       end
     end
   end
