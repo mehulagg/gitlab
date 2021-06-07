@@ -285,5 +285,83 @@ namespace :gitlab do
     Rake::Task['db:migrate'].enhance do
       Rake::Task['gitlab:db:execute_batched_migrations'].invoke if Rails.env.development?
     end
+
+    class TableOwnershipDetector
+
+      attr_reader :tables, :current_migration
+
+      def initialize
+        @tables = {}
+      end
+
+      def execute_migrations
+        ctx = ActiveRecord::Base.connection.migration_context
+        existing_versions = ctx.get_all_versions.to_set
+
+        pending_migrations = ctx.migrations.reject do |migration|
+          existing_versions.include?(migration.version)
+        end
+
+        pending_migrations.each do |migration|
+          @current_migration = migration.version
+          ActiveRecord::Migrator.new(:up, ctx.migrations, ctx.schema_migration, migration.version).run
+        end
+      end
+
+      def collect_table_owner(table)
+        (@tables[table] ||= []) << @current_migration
+      end
+    end
+
+    task table_ownership: :environment do
+      detector = TableOwnershipDetector.new
+
+      ActiveSupport::Notifications.subscribe('sql.active_record') do |event|
+        payload = event.payload
+
+        if payload[:sql] =~ /^(ALTER|CREATE) TABLE "([^"]+)"/
+          detector.collect_table_owner($2)
+        elsif payload[:sql] =~ /^(CREATE|DROP) INDEX CONCURRENTLY "[^"]+" ON "([^"]+)"/
+          detector.collect_table_owner($2)
+        end
+      end
+
+      detector.execute_migrations
+
+      # detector.tables examples:
+      # "iterations_cadences"=>[20201228110136, 20201228110136, 20210427194958, 20210427194958],
+      # "onboarding_progresses"=>[20201230180202, 20210114142443, 20210114142443, 20210114142443, 20210114142443, 20210208103243],
+      # "dast_profiles"=>[20210111051045, 20210111051045, 20210223053451],
+      # "packages_composer_cache_files"=>[20210112202949, 20210112202949, 20210203222620, 20210203223551],
+      # "group_repository_storage_moves"=>[20210115090452],
+      # "analytics_devops_adoption_segments"=>[20210121100038, 20210121121102, 20210430124212, 20210430130259, 20210521073920],
+      # "dependency_proxy_manifests"=>[20210128140157],
+      # "batched_background_migrations"=>[20210128172149, 20210128172149, 20210308190413, 20210406140057, 20210413155324],
+      # "batched_background_migration_jobs"=>[20210128172149, 20210311120152, 20210414045322, 20210427062807, 20210427094931],
+      # "packages_rubygems_metadata"=>[20210203221631, 20210203221631],
+      # "external_approval_rules"=>[20210209110019],
+      # "external_approval_rules_protected_branches"=>[20210209110019],
+      # "security_orchestration_policy_configurations"=>[20210209160510, 20210302160544, 20210412172030],
+      # "boards_epic_list_user_preferences"=>[20210217101901],
+      # "backup_labels"=>[20210222185538, 20210222185538],
+      # "dast_site_profile_secret_variables"=>[20210305031822, 20210305031822],
+      # "ci_unit_tests"=>[20210305180331],
+      # "ci_unit_test_failures"=>[20210305182855],
+      # "web_hook_logs_part_0c5294f417"=>[20210306121300, 20210306121300, 20210306121300, 20210306121300, 20210413130011],
+      # "packages_helm_file_metadata"=>[20210316171009, 20210316171009],
+      # "dast_profiles_pipelines"=>[20210317035357],
+      # "elastic_index_settings"=>[20210317100520, 20210317100520],
+      # "in_product_marketing_emails"=>[20210317104301],
+      # "status_check_responses"=>[20210323125809, 20210510083845],
+      # "vulnerability_finding_evidences"=>[20210326190903, 20210326190903],
+
+      # next step:
+      # for each version/migration, find the associated MR and its group label
+      # generate ownership migration
+
+      binding.pry
+
+      exit 0
+    end
   end
 end
