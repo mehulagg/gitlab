@@ -69,9 +69,11 @@ export default {
       <span v-if="!isFetching" class="collapse-truncated-title">{{ tooltipText }}</span>
     </div>
 
+    <!-- eslint-disable vue/no-v-html -->
     <gl-tooltip :target="() => $refs.sidebarIcon" placement="left" boundary="viewport">
       <span v-html="tooltipText"></span>
     </gl-tooltip>
+    <!-- eslint-enable vue/no-v-html -->
     <div class="title hide-collapsed">{{ __('Ancestors') }}</div>
 
     <ul v-if="!isFetching && ancestors.length" class="vertical-timeline hide-collapsed">

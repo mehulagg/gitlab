@@ -204,6 +204,7 @@ export default {
 <template>
   <div class="cell text-cell">
     <prompt />
+    <!-- eslint-disable-next-line vue/no-v-html -->
     <div class="markdown" v-html="markdown"></div>
   </div>
 </template>

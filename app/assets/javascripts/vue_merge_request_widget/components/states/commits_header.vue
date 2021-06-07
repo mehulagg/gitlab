@@ -74,6 +74,7 @@ export default {
 
 <template>
   <div>
+    <!-- eslint-disable vue/no-v-html -->
     <div
       class="js-mr-widget-commits-count mr-widget-extension clickable d-flex align-items-center px-3 py-2"
       @click="toggle()"
@@ -94,6 +95,7 @@ export default {
         </gl-button>
       </span>
     </div>
+    <!-- eslint-enable vue/no-v-html -->
     <div v-show="expanded"><slot></slot></div>
   </div>
 </template>

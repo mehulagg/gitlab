@@ -130,6 +130,7 @@ export default {
     </div>
     <div class="settings-content">
       <form name="self-monitoring-form">
+        <!-- eslint-disable-next-line vue/no-v-html -->
         <p ref="selfMonitoringFormText" v-html="selfMonitoringFormText"></p>
         <gl-form-group>
           <gl-toggle

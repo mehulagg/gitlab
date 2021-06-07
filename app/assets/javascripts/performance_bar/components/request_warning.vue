@@ -33,9 +33,11 @@ export default {
   },
 };
 </script>
+<!-- eslint-disable vue/no-v-html -->
 <template>
   <span v-if="hasWarnings" class="gl-cursor-default">
     <span :id="htmlId" v-html="glEmojiTag('warning')"></span>
     <gl-popover placement="bottom" :target="htmlId" :content="warningMessage" />
   </span>
 </template>
+<!-- eslint-enable vue/no-v-html -->

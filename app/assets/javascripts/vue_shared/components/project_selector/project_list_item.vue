@@ -57,11 +57,13 @@ export default {
         {{ truncatedNamespace }}
         <span v-if="truncatedNamespace" class="text-secondary">/&nbsp;</span>
       </div>
+      <!-- eslint-disable vue/no-v-html -->
       <div
         :title="project.name"
         class="js-project-name text-truncate"
         v-html="highlightedProjectName"
       ></div>
+      <!-- eslint-enable vue/no-v-html -->
     </div>
   </gl-button>
 </template>

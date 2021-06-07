@@ -80,6 +80,7 @@ export default {
 
 <template>
   <div>
+    <!-- eslint-disable vue/no-v-html -->
     <gl-popover v-for="(popover, index) in popovers" :key="index" v-bind="popover">
       <template #title>
         <span v-if="popover.html" v-html="getSafeHtml(popover.title)"></span>
@@ -88,5 +89,6 @@ export default {
       <span v-if="popover.html" v-html="getSafeHtml(popover.content)"></span>
       <span v-else>{{ popover.content }}</span>
     </gl-popover>
+    <!-- eslint-enable vue/no-v-html -->
   </div>
 </template>

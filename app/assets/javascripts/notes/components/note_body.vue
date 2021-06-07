@@ -162,6 +162,7 @@ export default {
       @addToBatch="addSuggestionToBatch"
       @removeFromBatch="removeSuggestionFromBatch"
     />
+    <!-- eslint-disable-next-line vue/no-v-html -->
     <div v-else class="note-text md" v-html="note.note_html"></div>
     <note-form
       v-if="isEditing"

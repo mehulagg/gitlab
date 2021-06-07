@@ -47,6 +47,7 @@ export default {
 </script>
 
 <template>
+  <!-- eslint-disable vue/no-v-html -->
   <gl-alert
     data-qa-selector="flash_alert"
     variant="danger"
@@ -58,4 +59,5 @@ export default {
     <span v-html="message.text"></span>
     <gl-loading-icon v-show="isLoading" inline class="vertical-align-middle ml-1" />
   </gl-alert>
+  <!-- eslint-enable vue/no-v-html -->
 </template>

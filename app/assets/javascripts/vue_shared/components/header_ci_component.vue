@@ -113,6 +113,7 @@ export default {
 
       {{ __('by') }}
 
+      <!-- eslint-disable vue/no-v-html -->
       <template v-if="user">
         <gl-link
           v-gl-tooltip
@@ -133,6 +134,7 @@ export default {
           v-html="statusTooltipHTML"
         ></span>
       </template>
+      <!-- eslint-enable vue/no-v-html -->
     </section>
 
     <section

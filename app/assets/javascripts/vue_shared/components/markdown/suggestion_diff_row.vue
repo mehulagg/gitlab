@@ -26,6 +26,7 @@ export default {
     <td class="diff-line-num new_line border-top-0 border-bottom-0" :class="lineType">
       {{ line.new_line }}
     </td>
+    <!-- eslint-disable vue/no-v-html -->
     <td
       class="line_content"
       :class="[{ 'd-table-cell': displayAsCell }, lineType]"
@@ -35,5 +36,6 @@ export default {
       <span v-else-if="line.text" class="line">{{ line.text }}</span>
       <span v-else class="line"></span>
     </td>
+    <!-- eslint-enable vue/no-v-html -->
   </tr>
 </template>

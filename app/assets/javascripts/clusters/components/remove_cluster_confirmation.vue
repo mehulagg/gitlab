@@ -123,6 +123,7 @@ export default {
     >
       {{ s__('ClusterIntegration|Remove integration') }}
     </gl-button>
+    <!-- eslint-disable vue/no-v-html -->
     <gl-modal
       ref="modal"
       size="lg"
@@ -199,5 +200,6 @@ export default {
         </template>
       </template>
     </gl-modal>
+    <!-- eslint-enable vue/no-v-html -->
   </div>
 </template>

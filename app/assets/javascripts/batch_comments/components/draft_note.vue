@@ -100,11 +100,13 @@ export default {
     </ul>
 
     <template v-if="!isEditingDraft">
+      <!-- eslint-disable vue/no-v-html -->
       <div
         v-if="draftCommands"
         class="referenced-commands draft-note-commands"
         v-html="draftCommands"
       ></div>
+      <!-- eslint-enable vue/no-v-html -->
 
       <p class="draft-note-actions d-flex">
         <publish-button :show-count="true" :should-publish="false" category="secondary" />

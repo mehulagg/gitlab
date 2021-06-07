@@ -45,6 +45,7 @@ export default {
 };
 </script>
 <template>
+  <!-- eslint-disable vue/no-v-html -->
   <div id="peek-request-selector" data-qa-selector="request_dropdown" class="view">
     <select v-model="currentRequestId">
       <option
@@ -66,4 +67,5 @@ export default {
       />
     </span>
   </div>
+  <!-- eslint-enable vue/no-v-html -->
 </template>

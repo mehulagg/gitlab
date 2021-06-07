@@ -98,12 +98,14 @@ export default {
       <div class="normal">
         <strong>
           {{ s__('mrWidget|Request to merge') }}
+          <!-- eslint-disable vue/no-v-html -->
           <tooltip-on-truncate
             :title="mr.sourceBranch"
             truncate-target="child"
             class="label-branch label-truncate js-source-branch"
             v-html="mr.sourceBranchLink"
-          /><clipboard-button
+          />
+          <!-- eslint-enable vue/no-v-html --><clipboard-button
             data-testid="mr-widget-copy-clipboard"
             :text="branchNameClipboardData"
             :title="__('Copy branch name')"
@@ -118,11 +120,13 @@ export default {
             <a :href="mr.targetBranchTreePath" class="js-target-branch"> {{ mr.targetBranch }} </a>
           </tooltip-on-truncate>
         </strong>
+        <!-- eslint-disable vue/no-v-html -->
         <div
           v-if="shouldShowCommitsBehindText"
           class="diverged-commits-count"
           v-html="commitsBehindText"
         ></div>
+        <!-- eslint-enable vue/no-v-html -->
       </div>
 
       <div class="branch-actions d-flex">

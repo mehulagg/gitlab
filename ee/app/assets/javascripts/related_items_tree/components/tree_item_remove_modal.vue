@@ -65,6 +65,7 @@ export default {
       })
     "
   >
+    <!-- eslint-disable-next-line vue/no-v-html -->
     <p v-html="modalBody"></p>
   </gl-modal>
 </template>

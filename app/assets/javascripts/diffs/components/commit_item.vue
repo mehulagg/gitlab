@@ -99,6 +99,7 @@ export default {
       <div
         class="commit-actions flex-row d-none d-sm-flex align-items-start flex-wrap justify-content-end"
       >
+        <!-- eslint-disable-next-line vue/no-v-html -->
         <div v-if="commit.signature_html" v-html="commit.signature_html"></div>
         <commit-pipeline-status
           v-if="commit.pipeline_status_path"
@@ -137,6 +138,7 @@ export default {
           />
         </div>
         <div class="commit-detail flex-list">
+          <!-- eslint-disable vue/no-v-html -->
           <div class="commit-content" data-qa-selector="commit_content">
             <a
               :href="commit.commit_url"
@@ -165,16 +167,19 @@ export default {
               <time-ago-tooltip :time="commit.authored_date" />
             </div>
           </div>
+          <!-- eslint-enable vue/no-v-html -->
         </div>
       </div>
     </div>
     <div>
+      <!-- eslint-disable vue/no-v-html -->
       <pre
         v-if="commit.description_html"
         :class="{ 'js-toggle-content': collapsible, 'd-block': !collapsible }"
         class="commit-row-description gl-mb-3 gl-text-body"
         v-html="commitDescription"
       ></pre>
+      <!-- eslint-enable vue/no-v-html -->
     </div>
   </li>
 </template>

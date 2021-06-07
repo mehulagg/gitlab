@@ -26,5 +26,6 @@ export default {
 </script>
 
 <template>
+  <!-- eslint-disable-next-line vue/no-v-html -->
   <div data-testid="spentOnlyPane" v-html="timeSpent"></div>
 </template>

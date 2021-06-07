@@ -23,5 +23,6 @@ export default {
 </script>
 
 <template>
+  <!-- eslint-disable-next-line vue/no-v-html -->
   <div class="alert alert-danger" v-html="alertMessage"></div>
 </template>

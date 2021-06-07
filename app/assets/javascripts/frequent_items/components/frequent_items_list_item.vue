@@ -75,12 +75,14 @@ export default {
         />
       </div>
       <div ref="frequentItemsItemMetadataContainer" class="frequent-items-item-metadata-container">
+        <!-- eslint-disable vue/no-v-html -->
         <div
           ref="frequentItemsItemTitle"
           :title="itemName"
           class="frequent-items-item-title"
           v-html="highlightedItemName"
         ></div>
+        <!-- eslint-enable vue/no-v-html -->
         <div
           v-if="namespace"
           ref="frequentItemsItemNamespace"

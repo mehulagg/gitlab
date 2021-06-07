@@ -26,11 +26,13 @@ export default {
 <template>
   <div class="mr-widget-body mr-widget-empty-state">
     <div class="row">
+      <!-- eslint-disable vue/no-v-html -->
       <div
         class="artwork col-md-5 order-md-last col-12 text-center d-flex justify-content-center align-items-center"
       >
         <span v-html="emptyStateSVG"></span>
       </div>
+      <!-- eslint-enable vue/no-v-html -->
       <div class="text col-md-7 order-md-first col-12">
         <p class="highlight">
           {{ s__('mrWidgetNothingToMerge|This merge request contains no changes.') }}

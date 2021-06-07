@@ -38,9 +38,11 @@ export default {
       </div>
 
       <div class="note-header">
+        <!-- eslint-disable vue/no-v-html -->
         <note-header :author="noteAuthor" :created-at="note.createdAt" :note-id="note.id">
           <span v-html="note.bodyHtml"></span>
         </note-header>
+        <!-- eslint-enable vue/no-v-html -->
       </div>
     </div>
   </li>

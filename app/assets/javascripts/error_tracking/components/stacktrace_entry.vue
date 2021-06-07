@@ -128,11 +128,13 @@ export default {
             <td class="diff-line-num" :class="{ old: isHighlighted(lineNum(line)) }">
               {{ lineNum(line) }}
             </td>
+            <!-- eslint-disable vue/no-v-html -->
             <td
               class="line_content"
               :class="{ old: isHighlighted(lineNum(line)) }"
               v-html="lineCode(line)"
             ></td>
+            <!-- eslint-enable vue/no-v-html -->
           </tr>
         </template>
       </tbody>

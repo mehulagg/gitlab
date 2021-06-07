@@ -318,11 +318,13 @@ export default {
 
 <template>
   <div ref="editNoteForm" class="note-edit-form current-note-edit-form js-discussion-note-form">
+    <!-- eslint-disable vue/no-v-html -->
     <div
       v-if="conflictWhileEditing"
       class="js-conflict-edit-warning alert alert-danger"
       v-html="changedCommentText"
     ></div>
+    <!-- eslint-enable vue/no-v-html -->
     <div class="flash-container timeline-content"></div>
     <form :data-line-code="lineCode" class="edit-note common-note-form js-quick-submit gfm-form">
       <comment-field-layout :noteable-data="getNoteableData">

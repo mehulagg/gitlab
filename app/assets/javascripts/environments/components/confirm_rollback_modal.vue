@@ -103,6 +103,7 @@ export default {
     ok-variant="danger"
     @ok="onOk"
   >
+    <!-- eslint-disable-next-line vue/no-v-html -->
     <p v-html="modalText"></p>
   </gl-modal>
 </template>

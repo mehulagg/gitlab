@@ -172,9 +172,12 @@ export default {
       size="lg"
       class="text-2 ws-normal"
     >
+      <!-- eslint-disable-next-line vue/no-v-html -->
       <p v-html="instructionText.intro.p1"></p>
+      <!-- eslint-disable-next-line vue/no-v-html -->
       <p v-html="instructionText.intro.p2"></p>
       <div>
+        <!-- eslint-disable-next-line vue/no-v-html -->
         <p v-html="instructionText.step1"></p>
         <div class="flex align-items-start">
           <pre> {{ copyString.script }} </pre>
@@ -186,7 +189,9 @@ export default {
           />
         </div>
       </div>
+      <!-- eslint-disable-next-line vue/no-v-html -->
       <p v-html="instructionText.step2"></p>
+      <!-- eslint-disable vue/no-v-html -->
       <p>
         <span v-html="instructionText.step3"></span>
         <modal-copy-button
@@ -196,6 +201,8 @@ export default {
           css-classes="border-0 gl-pt-0 gl-pr-0 gl-pl-2 gl-pb-0"
         />
       </p>
+      <!-- eslint-enable vue/no-v-html -->
+      <!-- eslint-disable-next-line vue/no-v-html -->
       <p v-html="instructionText.step4"></p>
       <template #modal-footer>
         <gl-button category="secondary" @click="cancel">

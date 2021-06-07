@@ -155,6 +155,7 @@ export default {
     <template v-else>
       <status-icon :status="status" :show-disabled-button="showDisabledButton" />
 
+      <!-- eslint-disable vue/no-v-html -->
       <div class="rebase-state-find-class-convention media media-body space-children">
         <span
           v-if="rebaseInProgress || isMakingRequest"
@@ -196,6 +197,7 @@ export default {
           }}</span>
         </div>
       </div>
+      <!-- eslint-enable vue/no-v-html -->
     </template>
   </div>
 </template>

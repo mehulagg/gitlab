@@ -290,6 +290,7 @@ export default {
             :codequality="line.left.codequality"
           />
         </div>
+        <!-- eslint-disable vue/no-v-html -->
         <div
           :id="line.left.line_code"
           :key="line.left.line_code"
@@ -301,6 +302,7 @@ export default {
           <strong v-if="isLeftConflictMarker">{{ conflictText(line.left) }}</strong>
           <span v-else v-html="line.left.rich_text"></span>
         </div>
+        <!-- eslint-enable vue/no-v-html -->
       </template>
       <template v-else-if="!inline || (line.left && line.left.type === $options.CONFLICT_MARKER)">
         <div
@@ -405,6 +407,7 @@ export default {
             :codequality="line.right.codequality"
           />
         </div>
+        <!-- eslint-disable vue/no-v-html -->
         <div
           :id="line.right.line_code"
           :key="line.right.rich_text"
@@ -424,6 +427,7 @@ export default {
           }}</strong>
           <span v-else v-html="line.right.rich_text"></span>
         </div>
+        <!-- eslint-enable vue/no-v-html -->
       </template>
       <template v-else>
         <div

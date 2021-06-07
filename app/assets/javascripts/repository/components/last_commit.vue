@@ -120,12 +120,14 @@ export default {
       </span>
       <div class="commit-detail flex-list">
         <div class="commit-content qa-commit-content">
+          <!-- eslint-disable vue/no-v-html -->
           <gl-link
             :href="commit.webPath"
             :class="{ 'font-italic': !commit.message }"
             class="commit-row-message item-title"
             v-html="commit.titleHtml"
           />
+          <!-- eslint-enable vue/no-v-html -->
           <gl-button
             v-if="commit.descriptionHtml"
             :class="{ open: showDescription }"
@@ -148,14 +150,17 @@ export default {
             {{ s__('LastCommit|authored') }}
             <timeago-tooltip :time="commit.authoredDate" tooltip-placement="bottom" />
           </div>
+          <!-- eslint-disable vue/no-v-html -->
           <pre
             v-if="commitDescription"
             :class="{ 'd-block': showDescription }"
             class="commit-row-description gl-mb-3"
             v-html="commitDescription"
           ></pre>
+          <!-- eslint-enable vue/no-v-html -->
         </div>
         <div class="commit-actions flex-row">
+          <!-- eslint-disable-next-line vue/no-v-html -->
           <div v-if="commit.signatureHtml" v-html="commit.signatureHtml"></div>
           <div v-if="commit.pipeline" class="ci-status-link">
             <gl-link

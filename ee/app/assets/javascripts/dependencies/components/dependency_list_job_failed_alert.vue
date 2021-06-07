@@ -35,6 +35,7 @@ export default {
 </script>
 
 <template>
+  <!-- eslint-disable vue/no-v-html -->
   <gl-alert
     variant="danger"
     :title="s__('Dependencies|Job failed to generate the dependency list')"
@@ -44,4 +45,5 @@ export default {
   >
     <span v-html="$options.message"></span>
   </gl-alert>
+  <!-- eslint-enable vue/no-v-html -->
 </template>

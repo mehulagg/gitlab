@@ -34,6 +34,7 @@ export default {
     >
       <gl-icon name="close" />
     </button>
+    <!-- eslint-disable-next-line vue/no-v-html -->
     <div class="svg-container" v-html="iconCycleAnalyticsSplash"></div>
     <div class="inner-content">
       <h4>{{ __('Introducing Value Stream Analytics') }}</h4>

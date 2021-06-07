@@ -27,6 +27,7 @@ export default {
 
 <template>
   <gl-alert v-if="!isDismissed" v-bind="$attrs" @dismiss="dismiss" v-on="$listeners">
+    <!-- eslint-disable-next-line vue/no-v-html -->
     <div v-html="html"></div>
   </gl-alert>
 </template>

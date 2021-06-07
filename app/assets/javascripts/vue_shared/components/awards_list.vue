@@ -178,9 +178,11 @@ export default {
       data-testid="award-button"
       @click="handleAward(awardList.name)"
     >
+      <!-- eslint-disable vue/no-v-html -->
       <template #emoji>
         <span class="award-emoji-block" data-testid="award-html" v-html="awardList.html"></span>
       </template>
+      <!-- eslint-enable vue/no-v-html -->
       <span class="js-counter">{{ awardList.list.length }}</span>
     </gl-button>
     <div v-if="canAwardEmoji" class="award-menu-holder gl-my-2">

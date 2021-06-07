@@ -257,6 +257,7 @@ export default {
         name="user[status][emoji]"
       />
       <div ref="userStatusForm" class="form-group position-relative m-0">
+        <!-- eslint-disable vue/no-v-html -->
         <div class="input-group gl-mb-5">
           <span class="input-group-prepend">
             <emoji-picker
@@ -324,6 +325,7 @@ export default {
             </button>
           </span>
         </div>
+        <!-- eslint-enable vue/no-v-html -->
         <div class="form-group">
           <div class="gl-display-flex">
             <gl-form-checkbox

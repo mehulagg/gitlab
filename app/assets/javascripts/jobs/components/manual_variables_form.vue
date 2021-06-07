@@ -188,6 +188,7 @@ export default {
       </div>
     </div>
     <div class="d-flex gl-mt-3 justify-content-center">
+      <!-- eslint-disable-next-line vue/no-v-html -->
       <p class="text-muted" data-testid="form-help-text" v-html="helpText"></p>
     </div>
     <div class="d-flex justify-content-center">

@@ -16,6 +16,7 @@ export default {
 </script>
 <template>
   <markdown-field-view class="snippet-description" data-qa-selector="snippet_description_content">
+    <!-- eslint-disable-next-line vue/no-v-html -->
     <div class="md js-snippet-description" v-html="description"></div>
   </markdown-field-view>
 </template>

@@ -84,6 +84,7 @@ export default {
       </p>
     </div>
     <div class="col-lg-9">
+      <!-- eslint-disable-next-line vue/no-v-html -->
       <p v-html="sectionDescription"></p>
       <gl-form-group :label="__('URL')" label-for="notify-url" label-class="label-bold">
         <div class="input-group">

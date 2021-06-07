@@ -58,6 +58,7 @@ export default {
     :title="__('Merge immediately')"
     @shown="focusCancelButton"
   >
+    <!-- eslint-disable-next-line vue/no-v-html -->
     <p v-html="bodyText"></p>
     <p>{{ __('Are you sure you want to merge immediately?') }}</p>
     <template #modal-footer>

@@ -97,6 +97,7 @@ export default {
         <scroll-button :disabled="isScrolledToBottom" direction="down" @click="scrollDown" />
       </div>
     </div>
+    <!-- eslint-disable vue/no-v-html -->
     <pre ref="buildTrace" class="build-trace mb-0 h-100 mr-3" @scroll="scrollBuildLog">
       <code
         v-show="!detailJob.isLoading"
@@ -113,5 +114,6 @@ export default {
         <div class="dot"></div>
       </div>
     </pre>
+    <!-- eslint-enable vue/no-v-html -->
   </div>
 </template>

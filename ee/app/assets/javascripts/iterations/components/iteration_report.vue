@@ -221,6 +221,7 @@ export default {
         </gl-dropdown>
       </div>
       <h3 ref="title" class="page-title">{{ iteration.title }}</h3>
+      <!-- eslint-disable-next-line vue/no-v-html -->
       <div ref="description" v-html="iteration.descriptionHtml"></div>
       <burn-charts
         :start-date="iteration.startDate"

@@ -183,6 +183,7 @@ export default {
 
     <div class="form-group">
       <label for="badge-link-url" class="label-bold">{{ s__('Badges|Link') }}</label>
+      <!-- eslint-disable-next-line vue/no-v-html -->
       <p v-html="helpText"></p>
       <input
         id="badge-link-url"
@@ -198,6 +199,7 @@ export default {
 
     <div class="form-group">
       <label for="badge-image-url" class="label-bold">{{ s__('Badges|Badge image URL') }}</label>
+      <!-- eslint-disable-next-line vue/no-v-html -->
       <p v-html="helpText"></p>
       <input
         id="badge-image-url"

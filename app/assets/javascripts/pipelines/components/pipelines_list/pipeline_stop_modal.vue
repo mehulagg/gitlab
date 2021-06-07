@@ -71,6 +71,7 @@ export default {
     :action-cancel="cancelProps"
     @primary="emitSubmit($event)"
   >
+    <!-- eslint-disable-next-line vue/no-v-html -->
     <p v-html="modalText"></p>
 
     <p v-if="pipeline">

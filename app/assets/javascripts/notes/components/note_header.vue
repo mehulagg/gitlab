@@ -147,6 +147,7 @@ export default {
         {{ __('Toggle thread') }}
       </button>
     </div>
+    <!-- eslint-disable vue/no-v-html -->
     <template v-if="hasAuthor">
       <a
         ref="authorNameLink"
@@ -182,6 +183,7 @@ export default {
         <gitlab-team-member-badge v-if="author && author.is_gitlab_employee" />
       </span>
     </template>
+    <!-- eslint-enable vue/no-v-html -->
     <span v-else>{{ __('A deleted user') }}</span>
     <span class="note-headline-light note-headline-meta">
       <span class="system-note-message" data-qa-selector="system_note_content">

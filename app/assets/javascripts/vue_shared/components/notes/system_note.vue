@@ -104,6 +104,7 @@ export default {
     :class="{ target: isTargetNote, 'pr-0': shouldShowDescriptionVersion }"
     class="note system-note note-wrapper"
   >
+    <!-- eslint-disable-next-line vue/no-v-html -->
     <div class="timeline-icon" v-html="iconHtml"></div>
     <div class="timeline-content">
       <div class="note-header">

@@ -306,19 +306,24 @@ export default {
       </div>
     </template>
     <template v-else>
+      <!-- eslint-disable vue/no-v-html -->
       <div
         v-show="previewMarkdown"
         ref="markdown-preview"
         class="js-vue-md-preview md md-preview-holder"
         v-html="markdownPreview"
       ></div>
+      <!-- eslint-enable vue/no-v-html -->
     </template>
     <template v-if="previewMarkdown && !markdownPreviewLoading">
+      <!-- eslint-disable-next-line vue/no-v-html -->
       <div v-if="referencedCommands" class="referenced-commands" v-html="referencedCommands"></div>
+      <!-- eslint-disable vue/no-v-html -->
       <div v-if="shouldShowReferencedUsers" class="referenced-users">
         <gl-icon name="warning-solid" />
         <span v-html="addMultipleToDiscussionWarning"></span>
       </div>
+      <!-- eslint-enable vue/no-v-html -->
     </template>
   </div>
 </template>
