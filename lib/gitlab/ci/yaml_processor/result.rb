@@ -112,7 +112,9 @@ module Gitlab
         end
 
         def yaml_variables_for(job_name)
-          job = jobs.fetch(job_name)
+          job = jobs.fetch(job_name, {})
+
+          return [] if job.blank?
 
           Gitlab::Ci::Variables::Helpers.inherit_yaml_variables(
             from: root_variables,
@@ -122,7 +124,7 @@ module Gitlab
         end
 
         def stage_for(job_name)
-          job = jobs.fetch(job_name)
+          job = jobs.fetch(job_name, {})
 
           job[:stage]
         end
