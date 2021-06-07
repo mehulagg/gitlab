@@ -6,7 +6,12 @@ code_intelligence_go:
   rules:
     - if: $CODE_INTELLIGENCE_DISABLED
       when: never
-    - if: $CI_COMMIT_BRANCH
+    - if: '$CI_MERGE_REQUEST_IID'  # Add the job to MR pipelines.
+      exists:
+        - '**/*.go'
+    - if: '$CI_OPEN_MERGE_REQUESTS'  # If it's a branch pipeline with open MRs, don't add it to a *branch* pipeline.
+      when: never
+    - if: '$CI_COMMIT_BRANCH'  # If it's a branch pipeline with no open MRs, add it to a *branch* pipeline.
       exists:
         - '**/*.go'
   script:
