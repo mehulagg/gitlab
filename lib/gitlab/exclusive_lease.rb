@@ -42,14 +42,20 @@ module Gitlab
     #
     # For example:
     #
-    #   # toot the train horn at most every 20min
-    #   throttle("some_unique_key", count: 3, period: 1.hour) { toot_train_horn }
-    #   # Brake suddenly at most once every minute
-    #   throttle("some_unique_key", period: 1.minute) { brake_suddenly }
+    #   # toot the train horn at most every 20min:
+    #   throttle(locomotive.id, count: 3, period: 1.hour) { toot_train_horn }
+    #   # Brake suddenly at most once every minute:
+    #   throttle(locomotive.id, period: 1.minute) { brake_suddenly }
+    #   # Specify a uniqueness group:
+    #   throttle(locomotive.id, group: :locomotive_brake) { brake_suddenly }
     #
-    def self.throttle(key, period: 1.hour, count: 1, &block)
+    # If a group is not specified, each block will get a separate group to itself.
+    def self.throttle(key, group: nil, period: 1.hour, count: 1, &block)
       return if ::Gitlab::SafeRequestStore[:assume_excluse_lease_throttled]
-      return if new("el:throttle:#{key}", timeout: period.to_i / count).waiting?
+
+      group ||= block.source_location.join(':')
+
+      return if new("el:throttle:#{group}:#{key}", timeout: period.to_i / count).waiting?
 
       yield
     end
