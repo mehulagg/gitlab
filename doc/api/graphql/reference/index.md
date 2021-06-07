@@ -1270,6 +1270,26 @@ Input type: `CreateRequirementInput`
 | <a id="mutationcreaterequirementerrors"></a>`errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 | <a id="mutationcreaterequirementrequirement"></a>`requirement` | [`Requirement`](#requirement) | Requirement after mutation. |
 
+### `Mutation.createScanExecutionPolicy`
+
+Input type: `CreateScanExecutionPolicyInput`
+
+#### Arguments
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| <a id="mutationcreatescanexecutionpolicyclientmutationid"></a>`clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
+| <a id="mutationcreatescanexecutionpolicypolicyyaml"></a>`policyYaml` | [`String!`](#string) | YAML snippet of the policy.. |
+| <a id="mutationcreatescanexecutionpolicyprojectpath"></a>`projectPath` | [`ID!`](#id) | Full path of the project. |
+
+#### Fields
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| <a id="mutationcreatescanexecutionpolicyclientmutationid"></a>`clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
+| <a id="mutationcreatescanexecutionpolicyerrors"></a>`errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
+| <a id="mutationcreatescanexecutionpolicymergerequesturl"></a>`mergeRequestUrl` | [`String`](#string) | URL for the merge request. |
+
 ### `Mutation.createSnippet`
 
 Input type: `CreateSnippetInput`

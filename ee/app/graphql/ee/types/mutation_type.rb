@@ -78,6 +78,7 @@ module EE
         mount_mutation ::Mutations::IncidentManagement::EscalationPolicy::Create
         mount_mutation ::Mutations::IncidentManagement::EscalationPolicy::Destroy
         mount_mutation ::Mutations::AppSec::Fuzzing::Api::CiConfiguration::Create
+        mount_mutation ::Mutations::SecurityPolicy::CreateScanExecutionPolicy
 
         prepend(Types::DeprecatedMutations)
       end

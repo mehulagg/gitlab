@@ -43,10 +43,10 @@ module Security
       policy_hash.present?
     end
 
-    def policy_configuration_valid?
+    def policy_configuration_valid?(policy = policy_hash)
       JSONSchemer
         .schema(Rails.root.join(POLICY_SCHEMA_PATH))
-        .valid?(policy_hash.to_h.deep_stringify_keys)
+        .valid?(policy.to_h.deep_stringify_keys)
     end
 
     def active_policies
@@ -92,14 +92,20 @@ module Security
       policy_hash.fetch(:scan_execution_policy, [])
     end
 
-    private
+    def policy_hash
+      return if policy_blob.blank?
 
-    def policy_repo
-      security_policy_management_project.repository
+      Gitlab::Config::Loader::Yaml.new(policy_blob).load!
     end
 
     def default_branch_or_main
       security_policy_management_project.default_branch_or_main
+    end
+
+    private
+
+    def policy_repo
+      security_policy_management_project.repository
     end
 
     def active_policy_names_with_dast_profiles
@@ -117,12 +123,6 @@ module Security
 
         profiles
       end
-    end
-
-    def policy_hash
-      return if policy_blob.blank?
-
-      Gitlab::Config::Loader::Yaml.new(policy_blob).load!
     end
 
     def policy_blob
