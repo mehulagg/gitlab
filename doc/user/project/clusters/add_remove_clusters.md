@@ -11,7 +11,7 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 WARNING:
 Creating a new cluster or adding an existing cluster to GitLab through the certificate-based method
 is deprecated and no longer recommended. Kubernetes cluster, similar to any other
-infrastructure, should be created, updated, maintained using [Infrastructure as Code](../../infrastructure/index.md).
+infrastructure, should be created, updated, and maintained using [Infrastructure as Code](../../infrastructure/index.md).
 GitLab is developing a built-in capability to create clusters with Terraform.
 You can follow along in this [epic](https://gitlab.com/groups/gitlab-org/-/epics/6049). 
 
