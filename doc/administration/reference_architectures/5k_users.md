@@ -1272,20 +1272,22 @@ To configure the Praefect nodes, on each one:
    # Name of storage hash must match storage name in git_data_dirs on GitLab
    # server ('praefect') and in git_data_dirs on Gitaly nodes ('gitaly-1')
    praefect['virtual_storages'] = {
-     'default' => {
-       'gitaly-1' => {
-         'address' => 'tcp://10.6.0.91:8075',
-         'token'   => '<praefect_internal_token>',
-         'primary' => true
-       },
-       'gitaly-2' => {
-         'address' => 'tcp://10.6.0.92:8075',
-         'token'   => '<praefect_internal_token>'
-       },
-       'gitaly-3' => {
-         'address' => 'tcp://10.6.0.93:8075',
-         'token'   => '<praefect_internal_token>'
-       },
+     'nodes' => {
+       'default' => {
+         'gitaly-1' => {
+           'address' => 'tcp://10.6.0.91:8075',
+           'token'   => '<praefect_internal_token>',
+           'primary' => true
+         },
+         'gitaly-2' => {
+           'address' => 'tcp://10.6.0.92:8075',
+           'token'   => '<praefect_internal_token>'
+         },
+         'gitaly-3' => {
+           'address' => 'tcp://10.6.0.93:8075',
+           'token'   => '<praefect_internal_token>'
+         },
+       }
      }
    }
 
