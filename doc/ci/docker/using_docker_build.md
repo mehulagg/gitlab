@@ -841,3 +841,25 @@ This issue occurs because Docker starts on TLS automatically.
   [use the Docker executor with the Docker image](#use-the-docker-executor-with-the-docker-image-docker-in-docker).
 - If you are upgrading from v18.09 or earlier, read our
   [upgrade guide](https://about.gitlab.com/blog/2019/07/31/docker-in-docker-with-docker-19-dot-03/).
+
+### `docker: error during connect: Post https://docker:2376/v1.40/containers/create: dial tcp: lookup docker on x.x.x.x:53: no such host.`
+
+This issue can occur when using the service's image name [carries a registry portion](../..//ci/services/index.md#available-settings-for-services) in the CI configuration, such as:
+
+```
+image: docker:19.03.12
+
+services:
+  - registry.hub.docker.com/library/docker:19.03.12-dind
+```
+
+Since a service's hostname is [derived from the full image name](../../ci/services/index.md#accessing-the-services) and the shorter service hostname `docker` is instead expected during use,
+an explicit alias of the service name to `docker` is necessary to allow this service to be resolved correctly:
+
+```
+image: docker:19.03.12
+
+services:
+  - name: registry.hub.docker.com/library/docker:19.03.12-dind
+    alias: docker
+```
