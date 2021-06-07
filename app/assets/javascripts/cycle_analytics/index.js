@@ -8,6 +8,7 @@ Vue.use(Translate);
 export default () => {
   const store = createStore();
   const el = document.querySelector('#js-cycle-analytics');
+  console.log('el.dataset', el.dataset);
   const { noAccessSvgPath, noDataSvgPath, requestPath } = el.dataset;
 
   store.dispatch('initializeVsa', {
