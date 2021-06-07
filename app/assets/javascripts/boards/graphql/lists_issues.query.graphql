@@ -15,8 +15,8 @@ query ListIssues(
       lists(id: $id) {
         nodes {
           id
+          issuesCount
           issues(first: $first, filters: $filters, after: $after) {
-            count
             edges {
               node {
                 ...IssueNode
@@ -36,8 +36,8 @@ query ListIssues(
       lists(id: $id) {
         nodes {
           id
+          issuesCount
           issues(first: $first, filters: $filters, after: $after) {
-            count
             edges {
               node {
                 ...IssueNode
