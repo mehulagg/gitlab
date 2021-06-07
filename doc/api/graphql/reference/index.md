@@ -13747,10 +13747,6 @@ Values for sorting alerts.
 | <a id="alertmanagementalertsortupdated_desc"></a>`UPDATED_DESC` | Updated at descending order. |
 | <a id="alertmanagementalertsortupdated_time_asc"></a>`UPDATED_TIME_ASC` | Created time by ascending order. |
 | <a id="alertmanagementalertsortupdated_time_desc"></a>`UPDATED_TIME_DESC` | Created time by descending order. |
-| <a id="alertmanagementalertsortcreated_asc"></a>`created_asc` **{warning-solid}** | **Deprecated** in 13.5. This was renamed. Use: `CREATED_ASC`. |
-| <a id="alertmanagementalertsortcreated_desc"></a>`created_desc` **{warning-solid}** | **Deprecated** in 13.5. This was renamed. Use: `CREATED_DESC`. |
-| <a id="alertmanagementalertsortupdated_asc"></a>`updated_asc` **{warning-solid}** | **Deprecated** in 13.5. This was renamed. Use: `UPDATED_ASC`. |
-| <a id="alertmanagementalertsortupdated_desc"></a>`updated_desc` **{warning-solid}** | **Deprecated** in 13.5. This was renamed. Use: `UPDATED_DESC`. |
 
 ### `AlertManagementDomainFilter`
 
@@ -14020,10 +14016,6 @@ Values for sorting container repositories.
 | <a id="containerrepositorysortname_desc"></a>`NAME_DESC` | Name by descending order. |
 | <a id="containerrepositorysortupdated_asc"></a>`UPDATED_ASC` | Updated at ascending order. |
 | <a id="containerrepositorysortupdated_desc"></a>`UPDATED_DESC` | Updated at descending order. |
-| <a id="containerrepositorysortcreated_asc"></a>`created_asc` **{warning-solid}** | **Deprecated** in 13.5. This was renamed. Use: `CREATED_ASC`. |
-| <a id="containerrepositorysortcreated_desc"></a>`created_desc` **{warning-solid}** | **Deprecated** in 13.5. This was renamed. Use: `CREATED_DESC`. |
-| <a id="containerrepositorysortupdated_asc"></a>`updated_asc` **{warning-solid}** | **Deprecated** in 13.5. This was renamed. Use: `UPDATED_ASC`. |
-| <a id="containerrepositorysortupdated_desc"></a>`updated_desc` **{warning-solid}** | **Deprecated** in 13.5. This was renamed. Use: `UPDATED_DESC`. |
 
 ### `ContainerRepositoryStatus`
 
@@ -14277,10 +14269,6 @@ Values for sorting issues.
 | <a id="issuesortupdated_desc"></a>`UPDATED_DESC` | Updated at descending order. |
 | <a id="issuesortweight_asc"></a>`WEIGHT_ASC` | Weight by ascending order. |
 | <a id="issuesortweight_desc"></a>`WEIGHT_DESC` | Weight by descending order. |
-| <a id="issuesortcreated_asc"></a>`created_asc` **{warning-solid}** | **Deprecated** in 13.5. This was renamed. Use: `CREATED_ASC`. |
-| <a id="issuesortcreated_desc"></a>`created_desc` **{warning-solid}** | **Deprecated** in 13.5. This was renamed. Use: `CREATED_DESC`. |
-| <a id="issuesortupdated_asc"></a>`updated_asc` **{warning-solid}** | **Deprecated** in 13.5. This was renamed. Use: `UPDATED_ASC`. |
-| <a id="issuesortupdated_desc"></a>`updated_desc` **{warning-solid}** | **Deprecated** in 13.5. This was renamed. Use: `UPDATED_DESC`. |
 
 ### `IssueState`
 
@@ -14430,10 +14418,6 @@ Values for sorting merge requests.
 | <a id="mergerequestsortpriority_desc"></a>`PRIORITY_DESC` | Priority by descending order. |
 | <a id="mergerequestsortupdated_asc"></a>`UPDATED_ASC` | Updated at ascending order. |
 | <a id="mergerequestsortupdated_desc"></a>`UPDATED_DESC` | Updated at descending order. |
-| <a id="mergerequestsortcreated_asc"></a>`created_asc` **{warning-solid}** | **Deprecated** in 13.5. This was renamed. Use: `CREATED_ASC`. |
-| <a id="mergerequestsortcreated_desc"></a>`created_desc` **{warning-solid}** | **Deprecated** in 13.5. This was renamed. Use: `CREATED_DESC`. |
-| <a id="mergerequestsortupdated_asc"></a>`updated_asc` **{warning-solid}** | **Deprecated** in 13.5. This was renamed. Use: `UPDATED_ASC`. |
-| <a id="mergerequestsortupdated_desc"></a>`updated_desc` **{warning-solid}** | **Deprecated** in 13.5. This was renamed. Use: `UPDATED_DESC`. |
 
 ### `MergeRequestState`
 
@@ -14779,10 +14763,6 @@ Common sort values.
 | <a id="sortcreated_desc"></a>`CREATED_DESC` | Created at descending order. |
 | <a id="sortupdated_asc"></a>`UPDATED_ASC` | Updated at ascending order. |
 | <a id="sortupdated_desc"></a>`UPDATED_DESC` | Updated at descending order. |
-| <a id="sortcreated_asc"></a>`created_asc` **{warning-solid}** | **Deprecated** in 13.5. This was renamed. Use: `CREATED_ASC`. |
-| <a id="sortcreated_desc"></a>`created_desc` **{warning-solid}** | **Deprecated** in 13.5. This was renamed. Use: `CREATED_DESC`. |
-| <a id="sortupdated_asc"></a>`updated_asc` **{warning-solid}** | **Deprecated** in 13.5. This was renamed. Use: `UPDATED_ASC`. |
-| <a id="sortupdated_desc"></a>`updated_desc` **{warning-solid}** | **Deprecated** in 13.5. This was renamed. Use: `UPDATED_DESC`. |
 
 ### `TestCaseStatus`
 
