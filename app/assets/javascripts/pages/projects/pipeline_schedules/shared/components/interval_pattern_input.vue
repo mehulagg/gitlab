@@ -1,7 +1,14 @@
 <script>
-import { GlFormRadio, GlFormRadioGroup, GlLink, GlSprintf } from '@gitlab/ui';
+import {
+  GlFormRadio,
+  GlFormRadioGroup,
+  GlIcon,
+  GlLink,
+  GlSprintf,
+  GlTooltipDirective,
+} from '@gitlab/ui';
 import { getWeekdayNames } from '~/lib/utils/datetime_utility';
-import { s__, sprintf } from '~/locale';
+import { __, s__, sprintf } from '~/locale';
 
 const KEY_EVERY_DAY = 'everyDay';
 const KEY_EVERY_WEEK = 'everyWeek';
@@ -9,11 +16,20 @@ const KEY_EVERY_MONTH = 'everyMonth';
 const KEY_CUSTOM = 'custom';
 
 export default {
+  i18n: {
+    cronInfo: __(
+      'Scheduled pipelines cannot run more frequently than once per hour. A pipeline configured to run more frequently only starts after one hour has elapsed since the last time it ran.',
+    ),
+  },
   components: {
     GlFormRadio,
     GlFormRadioGroup,
+    GlIcon,
     GlLink,
     GlSprintf,
+  },
+  directives: {
+    GlTooltip: GlTooltipDirective,
   },
   props: {
     initialCronInterval: {
@@ -74,6 +90,7 @@ export default {
           value: KEY_CUSTOM,
           text: s__('PipelineScheduleIntervalPattern|Custom (%{linkStart}Cron syntax%{linkEnd})'),
           link: this.cronSyntaxUrl,
+          helpText: this.$options.i18n.cronInfo,
         },
       ];
     },
@@ -131,7 +148,15 @@ export default {
             </gl-link>
           </template>
         </gl-sprintf>
+
         <template v-else>{{ option.text }}</template>
+
+        <gl-icon
+          v-if="option.helpText"
+          v-gl-tooltip.hover
+          name="question"
+          :title="option.helpText"
+        />
       </gl-form-radio>
     </gl-form-radio-group>
     <input

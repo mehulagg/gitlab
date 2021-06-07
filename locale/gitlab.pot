@@ -28648,6 +28648,9 @@ msgstr ""
 msgid "Scheduled a rebase of branch %{branch}."
 msgstr ""
 
+msgid "Scheduled pipelines cannot run more frequently than once per hour. A pipeline configured to run more frequently only starts after one hour has elapsed since the last time it ran."
+msgstr ""
+
 msgid "Scheduled to merge this merge request (%{strategy})."
 msgstr ""
 
