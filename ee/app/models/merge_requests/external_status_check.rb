@@ -16,6 +16,9 @@ module MergeRequests
     validates :name, uniqueness: { scope: :project_id }, presence: true
 
     def async_execute(data)
+      puts data.inspect
+      return unless protected_branches.none? || protected_branches.map(&:name).include?(data[:object_attributes][:target_branch])
+
       ApprovalRules::ExternalApprovalRulePayloadWorker.perform_async(self.id, payload_data(data))
     end
 

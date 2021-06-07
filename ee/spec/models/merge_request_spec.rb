@@ -138,6 +138,17 @@ RSpec.describe MergeRequest do
     end
   end
 
+  describe '#applicable_external_status_checks' do
+    let!(:check_belonging_to_different_project) { create(:external_status_check) }
+    let!(:check_with_no_protected_branches) { create(:external_status_check, project: merge_request.project, protected_branches: []) }
+    let!(:check_with_applicable_protected_branches) { create(:external_status_check, project: merge_request.project, protected_branches: [create(:protected_branch, name: merge_request.target_branch)]) }
+    let!(:check_with_non_applicable_protected_branches) { create(:external_status_check, project: merge_request.project, protected_branches: [create(:protected_branch, name: 'testbranch')]) }
+
+    it 'returns the correct collection of checks' do
+      expect(merge_request.applicable_external_status_checks).to contain_exactly(check_with_no_protected_branches, check_with_applicable_protected_branches)
+    end
+  end
+
   it_behaves_like 'an editable mentionable with EE-specific mentions' do
     subject { create(:merge_request, :simple) }
 

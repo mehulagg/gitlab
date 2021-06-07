@@ -78,6 +78,11 @@ module EE
       def merge_requests_disable_committers_approval?
         !!target_project&.merge_requests_disable_committers_approval?
       end
+
+      def applicable_external_status_checks
+        project.external_status_checks.includes(:protected_branches).where(protected_branches: { id: nil }).or(
+          project.external_status_checks.includes(:protected_branches).where(protected_branches: { name: target_branch }))
+      end
     end
 
     class_methods do

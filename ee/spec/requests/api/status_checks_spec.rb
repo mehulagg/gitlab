@@ -51,6 +51,8 @@ RSpec.describe API::StatusChecks do
       end
 
       context 'when merge request has received status check responses' do
+        let!(:non_applicable_check) { create(:external_status_check, project: project, protected_branches: [create(:protected_branch, name: 'different-branch')]) }
+        let!(:branch_specific_check) { create(:external_status_check, project: project, protected_branches: [create(:protected_branch, name: merge_request.target_branch)]) }
         let!(:status_check_response) { create(:status_check_response, external_status_check: rule, merge_request: merge_request, sha: sha) }
 
         it 'returns a 200' do
@@ -62,7 +64,7 @@ RSpec.describe API::StatusChecks do
         it 'returns the total number of status checks for the MRs project' do
           subject
 
-          expect(json_response.size).to eq(2)
+          expect(json_response.size).to eq(3)
         end
 
         it 'has the correct status values' do
@@ -70,6 +72,7 @@ RSpec.describe API::StatusChecks do
 
           expect(json_response[0]["status"]).to eq('approved')
           expect(json_response[1]["status"]).to eq('pending')
+          expect(json_response[2]["status"]).to eq('pending')
         end
       end
     end

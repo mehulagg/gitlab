@@ -135,7 +135,7 @@ module API
 
           merge_request = find_merge_request_with_access(params[:merge_request_iid], :approve_merge_request)
 
-          present(paginate(merge_request.project.external_status_checks.all), with: Entities::MergeRequests::StatusCheck, merge_request: merge_request, sha: merge_request.source_branch_sha)
+          present(paginate(merge_request.applicable_external_status_checks.all), with: Entities::MergeRequests::StatusCheck, merge_request: merge_request, sha: merge_request.source_branch_sha)
         end
       end
     end

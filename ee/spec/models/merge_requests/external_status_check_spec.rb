@@ -22,6 +22,51 @@ RSpec.describe MergeRequests::ExternalStatusCheck, type: :model do
     end
   end
 
+  describe 'async_execute' do
+    # let_it_be(:check) { create(:external_status_check, protected_branches: [create(:protected_branch, name: 'new-branch-name')]) }
+    let_it_be(:merge_request) { create(:merge_request) }
+
+    let(:data) do
+      {
+        object_attributes: {
+          target_branch: 'test'
+        }
+      }
+    end
+
+    subject { check.async_execute(data) }
+
+    context 'when list of protected branches is empty' do
+      let_it_be(:check) { create(:external_status_check, project: merge_request.project) }
+
+      it 'enqueues the status check' do
+        expect(ApprovalRules::ExternalApprovalRulePayloadWorker).to receive(:perform_async).once
+
+        subject
+      end
+    end
+
+    context 'when data target branch matches a protected branch' do
+      let_it_be(:check) { create(:external_status_check, project: merge_request.project, protected_branches: [create(:protected_branch, name: 'test')]) }
+
+      it 'does not enqueue the status check' do
+        expect(ApprovalRules::ExternalApprovalRulePayloadWorker).to receive(:perform_async).once
+
+        subject
+      end
+    end
+
+    context 'when data target branch does not match a protected branch' do
+      let_it_be(:check) { create(:external_status_check, project: merge_request.project, protected_branches: [create(:protected_branch, name: 'new-branch')]) }
+
+      it 'does not enqueue the status check' do
+        expect(ApprovalRules::ExternalApprovalRulePayloadWorker).to receive(:perform_async).never
+
+        subject
+      end
+    end
+  end
+
   describe 'approved?' do
     let_it_be(:rule) { create(:external_status_check) }
     let_it_be(:merge_request) { create(:merge_request) }

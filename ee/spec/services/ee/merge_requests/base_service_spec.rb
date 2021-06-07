@@ -19,7 +19,6 @@ RSpec.describe MergeRequests::BaseService do
 
   subject { MergeRequests::CreateService.new(project: project, current_user: project.owner, params: params) }
 
-  context 'project has external status checks' do
     let_it_be(:status_checks) { create_list(:external_status_check, 3, project: project) }
 
     it 'fires the correct number of compliance hooks' do
