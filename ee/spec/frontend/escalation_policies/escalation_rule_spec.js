@@ -2,7 +2,7 @@ import { GlDropdownItem, GlFormGroup, GlSprintf } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
 import { cloneDeep } from 'lodash';
 import EscalationRule, { i18n } from 'ee/escalation_policies/components/escalation_rule.vue';
-import { defaultEscalationRule, ACTIONS, ALERT_STATUSES } from 'ee/escalation_policies/constants';
+import { DEFAULT_ESCALATION_RULE, ACTIONS, ALERT_STATUSES } from 'ee/escalation_policies/constants';
 import { extendedWrapper } from 'helpers/vue_test_utils_helper';
 
 const mockSchedules = [
@@ -20,7 +20,7 @@ describe('EscalationRule', () => {
     wrapper = extendedWrapper(
       shallowMount(EscalationRule, {
         propsData: {
-          rule: cloneDeep(defaultEscalationRule),
+          rule: cloneDeep(DEFAULT_ESCALATION_RULE),
           schedules: mockSchedules,
           schedulesLoading: false,
           index: 0,

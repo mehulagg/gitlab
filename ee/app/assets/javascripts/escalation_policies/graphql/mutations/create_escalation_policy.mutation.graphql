@@ -5,6 +5,7 @@ mutation escalationPolicyCreate($input: EscalationPolicyCreateInput!) {
       name
       description
       rules {
+        id
         status
         elapsedTimeSeconds
         oncallSchedule {

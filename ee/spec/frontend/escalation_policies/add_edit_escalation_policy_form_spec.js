@@ -4,7 +4,7 @@ import AddEscalationPolicyForm, {
   i18n,
 } from 'ee/escalation_policies/components/add_edit_escalation_policy_form.vue';
 import EscalationRule from 'ee/escalation_policies/components/escalation_rule.vue';
-import { defaultEscalationRule } from 'ee/escalation_policies/constants';
+import { DEFAULT_ESCALATION_RULE } from 'ee/escalation_policies/constants';
 import { extendedWrapper } from 'helpers/vue_test_utils_helper';
 import mockPolicy from './mocks/mockPolicy.json';
 
@@ -65,7 +65,7 @@ describe('AddEscalationPolicyForm', () => {
       await wrapper.vm.$nextTick();
       const rules = findRules();
       expect(rules.length).toBe(2);
-      expect(rules.at(1).props('rule')).toMatchObject(defaultEscalationRule);
+      expect(rules.at(1).props('rule')).toMatchObject(DEFAULT_ESCALATION_RULE);
     });
 
     it('should NOT emit updates when rule is added', async () => {

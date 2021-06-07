@@ -60,14 +60,23 @@ describe('AddEscalationPolicyModal', () => {
     it('makes a request with form data to create an escalation policy', () => {
       mutate.mockResolvedValueOnce({});
       findModal().vm.$emit('primary', { preventDefault: jest.fn() });
+      const rules = mockPolicy.rules.map(
+        ({ status, elapsedTimeSeconds, oncallSchedule: { id } }) => ({
+          status,
+          elapsedTimeSeconds,
+          oncallScheduleIid: id,
+        }),
+      );
       expect(mutate).toHaveBeenCalledWith(
         expect.objectContaining({
           variables: {
             input: {
               projectPath,
               ...mockPolicy,
+              rules,
             },
           },
+          update: expect.any(Function),
         }),
       );
     });
