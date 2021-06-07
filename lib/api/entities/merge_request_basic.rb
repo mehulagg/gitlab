@@ -36,7 +36,7 @@ module API
           merge_request.labels.map(&:title).sort
         end
       end
-      expose :work_in_progress?, as: :work_in_progress
+      expose :draft?, as: :draft
       expose :milestone, using: Entities::Milestone
       expose :merge_when_pipeline_succeeds
 
