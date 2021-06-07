@@ -2,28 +2,23 @@
 
 module EE
   module TestEnv
-    extend ::Gitlab::Utils::Override
-
-    override :setup_methods
-    def setup_methods
-      (super + [:setup_indexer]).freeze
-    end
-
-    override :post_init
-    def post_init
+    def init(*args, &blk)
       super
 
-      Settings.elasticsearch['indexer_path'] = indexer_bin_path
+      setup_indexer
     end
 
     def setup_indexer
+      indexer_args = [indexer_path, indexer_url].compact.join(',')
+
       component_timed_setup(
         'GitLab Elasticsearch Indexer',
         install_dir: indexer_path,
         version: indexer_version,
-        task: "gitlab:indexer:install",
-        task_args: [indexer_path, indexer_url].compact
+        task: "gitlab:indexer:install[#{indexer_args}]"
       )
+
+      Settings.elasticsearch['indexer_path'] = indexer_bin_path
     end
 
     def indexer_path
