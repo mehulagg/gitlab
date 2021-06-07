@@ -58,7 +58,7 @@ module Gitlab
 
           subject(:yaml_variables_for) { result.yaml_variables_for(job_name) }
 
-          it do
+          it 'returns calculated variables with root and job variables' do
             is_expected.to match_array([
               { key: 'VAR1', value: 'value 11', public: true },
               { key: 'VAR2', value: 'value 2', public: true }
