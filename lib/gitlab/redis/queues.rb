@@ -12,7 +12,9 @@ module Gitlab
       private
 
       def raw_config_hash
-        super || { url: 'redis://localhost:6381' }
+        config = super
+        config[:url] = 'redis://localhost:6381' if config[:url] == ''
+        config
       end
     end
   end

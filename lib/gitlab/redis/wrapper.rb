@@ -133,6 +133,8 @@ module Gitlab
 
         if config_data
           config_data.is_a?(String) ? { url: config_data } : config_data.deep_symbolize_keys
+        else
+          { url: '' }
         end
       end
 
