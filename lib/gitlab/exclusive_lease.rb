@@ -36,30 +36,31 @@ module Gitlab
       end
     end
 
-    # yield to the {block} at most {count} per {period}
+    # yield to the {block} at most {count} times per {period}
+    #
+    # Defaults to once per hour.
     #
     # For example:
     #
     #   # toot the train horn at most every 20min
     #   throttle("some_unique_key", count: 3, period: 1.hour) { toot_train_horn }
-    #   # Brake suddenly at most once every hour
-    #   throttle("some_unique_key", period: 1.hour) { brake_suddenly }
+    #   # Brake suddenly at most once every minute
+    #   throttle("some_unique_key", period: 1.minute) { brake_suddenly }
     #
-    def self.throttle(key, period:, count: 1, &block)
+    def self.throttle(key, period: 1.hour, count: 1, &block)
       return if ::Gitlab::SafeRequestStore[:assume_excluse_lease_throttled]
       return if new("el:throttle:#{key}", timeout: period.to_i / count).waiting?
 
       yield
     end
 
+    # Remove all rate-limiting applied with `::throttle`.
+    #
+    # This may only be called in a dev or test environment.
     def self.unthrottle!
       return unless ::Gitlab.dev_or_test_env?
 
-      Gitlab::Redis::SharedState.with do |redis|
-        redis.scan_each(match: redis_shared_state_key("el:throttle:*")).each do |key|
-          redis.del(key)
-        end
-      end
+      reset_all!("el:throttle:*")
     end
 
     def self.cancel(key, uuid)
