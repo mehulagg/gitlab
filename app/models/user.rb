@@ -84,7 +84,7 @@ class User < ApplicationRecord
 
     update_tracked_fields(request)
 
-    Gitlab::ExclusiveLease.throttle("user_update_tracked_fields:#{id}", 1.hour.to_i) do
+    Gitlab::ExclusiveLease.throttle("user_update_tracked_fields:#{id}", period: 1.hour) do
       ::Ability.forgetting(/admin/) do
         Users::UpdateService.new(self, user: self).execute(validate: false)
       end
