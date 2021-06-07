@@ -351,6 +351,17 @@ RSpec.configure do |config|
     Gitlab::ExclusiveLease.unthrottle!
   end
 
+  config.around(:example, :assume_throttled) do |example|
+    Gitlab::WithRequestStore.with_request_store do
+      previous_value = ::Gitlab::SafeRequestStore[:assume_excluse_lease_throttled]
+      ::Gitlab::SafeRequestStore[:assume_excluse_lease_throttled] = true
+
+      example.run
+
+      ::Gitlab::SafeRequestStore[:assume_excluse_lease_throttled] = previous_value
+    end
+  end
+
   config.before(:example, :request_store) do
     # Clear request store before actually starting the spec (the
     # `around` above will have the request store enabled for all
