@@ -843,7 +843,7 @@ To verify the paths are excluded, review the `Tested Operations` and `Excluded O
 2021-05-27 21:51:08 [INF] API Security: ------------------------------------------------
 ```
 
-#### Examples
+#### Examples of excluding paths
 
 This example excludes the `/auth` resource. This does not exclude child resources (`/auth/child`).
 
