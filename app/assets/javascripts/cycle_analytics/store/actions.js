@@ -1,3 +1,4 @@
+import { getProjectValueStreamData, getProjectValueStreams } from '~/api/analytics_api';
 import createFlash from '~/flash';
 import axios from '~/lib/utils/axios_utils';
 import { __ } from '~/locale';
@@ -6,7 +7,22 @@ import * as types from './mutation_types';
 
 export const setSelectedValueStream = ({ commit, dispatch }, valueStream) => {
   commit(types.SET_SELECTED_VALUE_STREAM, valueStream);
-  return dispatch(types.FETCH_VALUE_STREAM_DATA);
+  return dispatch('fetchValueStreamData');
+};
+
+export const fetchValueStreamData = ({ commit, dispatch, getters, state }) => {
+  const { requestPath, selectedValueStream } = state;
+  commit(types.REQUEST_VALUE_STREAMS);
+
+  return getProjectValueStreamData(requestPath, selectedValueStream.id)
+    .then(({ data }) => dispatch('receiveValueStreamDataSuccess', data))
+    .catch((error) => {
+      const {
+        response: { status },
+      } = error;
+      commit(types.RECEIVE_VALUE_STREAM_DATA_ERROR, status);
+      throw error;
+    });
 };
 
 export const receiveValueStreamsSuccess = (
@@ -24,12 +40,13 @@ export const receiveValueStreamsSuccess = (
   // .then(() => dispatch(types.FETCH_VALUE_STREAM_DATA))
 };
 
-export const fetchValueStreams = ({ commit, dispatch, getters }) => {
-  const { requestPath } = getters;
-
+// TODO: add getters for common request params
+// TODO: calculate date range from that
+export const fetchValueStreams = ({ commit, dispatch, state }) => {
+  const { requestPath } = state;
   commit(types.REQUEST_VALUE_STREAMS);
 
-  return Api.cycleAnalyticsProjectValueStreams(requestPath)
+  return getProjectValueStreams(requestPath)
     .then(({ data }) => dispatch('receiveValueStreamsSuccess', data))
     .catch((error) => {
       const {
