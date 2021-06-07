@@ -56,15 +56,17 @@ RSpec.describe Subscriptions::CreateService do
     context 'when successfully creating a customer' do
       before do
         allow(client).to receive(:create_customer).and_return(success: true, data: { success: true, 'customer' => { 'authentication_token' => 'token', 'email' => customer_email } })
-      end
 
-      it 'creates a subscription with the returned authentication token' do
-        expect(client)
+        allow(client)
           .to receive(:create_subscription)
           .with(anything, customer_email, 'token')
           .and_return(success: true, data: { success: true, subscription_id: 'xxx' })
+      end
 
+      it 'creates a subscription with the returned authentication token' do
         execute
+
+        expect(client).to have_received(:create_subscription).with(anything, customer_email, 'token')
       end
 
       it 'saves oauth token' do
