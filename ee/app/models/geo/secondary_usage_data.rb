@@ -37,12 +37,9 @@ class Geo::SecondaryUsageData < Geo::TrackingBase
   end
 
   def collect_prometheus_metrics
-    self.git_fetch_event_count_weekly = with_prometheus_client(fallback: nil, verify: false) do |client|
-      client.query(GIT_FETCH_EVENT_COUNT_WEEKLY_QUERY).dig(0, "value", 1)&.to_i
-    end
-
-    self.git_push_event_count_weekly = with_prometheus_client(fallback: nil, verify: false) do |client|
-      client.query(GIT_PUSH_EVENT_COUNT_WEEKLY_QUERY).dig(0, "value", 1)&.to_i
+    with_prometheus_client(fallback: nil, verify: false) do |client|
+      self.git_fetch_event_count_weekly = client.query(GIT_FETCH_EVENT_COUNT_WEEKLY_QUERY).dig(0, "value", 1)&.to_i
+      self.git_push_event_count_weekly = client.query(GIT_PUSH_EVENT_COUNT_WEEKLY_QUERY).dig(0, "value", 1)&.to_i
     end
   end
 end
