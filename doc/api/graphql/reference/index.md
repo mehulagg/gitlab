@@ -3527,6 +3527,27 @@ Input type: `RunnerUpdateInput`
 | <a id="mutationrunnerupdateerrors"></a>`errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 | <a id="mutationrunnerupdaterunner"></a>`runner` | [`CiRunner`](#cirunner) | The runner after mutation. |
 
+### `Mutation.runnersRegistrationTokenReset`
+
+Available only when feature flag `runner_graphql_query` is enabled.
+
+Input type: `RunnersRegistrationTokenResetInput`
+
+#### Arguments
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| <a id="mutationrunnersregistrationtokenresetclientmutationid"></a>`clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
+| <a id="mutationrunnersregistrationtokenresetfullpath"></a>`fullPath` | [`ID`](#id) | Full path of the project or group to reset the token for. Omit if resetting instance runner token. |
+
+#### Fields
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| <a id="mutationrunnersregistrationtokenresetclientmutationid"></a>`clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
+| <a id="mutationrunnersregistrationtokenreseterrors"></a>`errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
+| <a id="mutationrunnersregistrationtokenresettoken"></a>`token` | [`String`](#string) | The runner token after mutation. |
+
 ### `Mutation.terraformStateDelete`
 
 Input type: `TerraformStateDeleteInput`
