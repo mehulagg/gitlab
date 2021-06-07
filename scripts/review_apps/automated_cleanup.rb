@@ -95,27 +95,6 @@ class AutomatedCleanup
     delete_helm_releases(releases_to_delete)
   end
 
-  def perform_helm_releases_cleanup!(days:)
-    puts "Checking for Helm releases that are failed or not updated in the last #{days} days..."
-
-    threshold = threshold_time(days: days)
-
-    releases_to_delete = []
-
-    helm_releases.each do |release|
-      # Prevents deleting `dns-gitlab-review-app` releases or other unrelated releases
-      next unless release.name.start_with?('review-')
-
-      if release.status == 'failed' || release.last_update < threshold
-        releases_to_delete << release
-      else
-        print_release_state(subject: 'Release', release_name: release.name, release_date: release.last_update, action: 'leaving')
-      end
-    end
-
-    delete_helm_releases(releases_to_delete)
-  end
-
   private
 
   def fetch_environment(environment)
@@ -141,40 +120,18 @@ class AutomatedCleanup
     puts "Review app '#{environment.name}' / '#{environment.slug}' (##{environment.id}) is forbidden: skipping it"
   end
 
-  def helm_releases
-    args = ['--all', '--date']
-
-    helm.releases(args: args)
-  end
-
   def delete_helm_releases(releases)
     return if releases.empty?
 
     releases.each do |release|
       print_release_state(subject: 'Release', release_name: release.name, release_status: release.status, release_date: release.last_update, action: 'cleaning')
-    end
 
-    # TODO: remove clean up by helm release and kubernetes
-    # when all releases have been deployed into dedicated namespace
-    releases_names = releases.map(&:name)
-    helm.delete(release_name: releases_names)
-    kubernetes.cleanup_by_release(release_name: releases_names, wait: false)
-
-    releases.each do |release|
       Tooling::KubernetesClient.new(namespace: release.name).delete_namespace(wait: false)
     rescue Tooling::KubernetesClient::CommandFailedError => ex
       raise ex unless ignore_exception?(ex.message, IGNORED_KUBERNETES_ERRORS)
 
       puts "Ignoring the following Kubernetes error:\n#{ex}\n"
     end
-  rescue Tooling::Helm3Client::CommandFailedError => ex
-    raise ex unless ignore_exception?(ex.message, IGNORED_HELM_ERRORS)
-
-    puts "Ignoring the following Helm error:\n#{ex}\n"
-  rescue Tooling::KubernetesClient::CommandFailedError => ex
-    raise ex unless ignore_exception?(ex.message, IGNORED_KUBERNETES_ERRORS)
-
-    puts "Ignoring the following Kubernetes error:\n#{ex}\n"
   end
 
   def threshold_time(days:)
@@ -200,12 +157,6 @@ automated_cleanup = AutomatedCleanup.new
 
 timed('Review Apps cleanup') do
   automated_cleanup.perform_gitlab_environment_cleanup!(days_for_stop: 5, days_for_delete: 6)
-end
-
-puts
-
-timed('Helm releases cleanup') do
-  automated_cleanup.perform_helm_releases_cleanup!(days: 7)
 end
 
 exit(0)
