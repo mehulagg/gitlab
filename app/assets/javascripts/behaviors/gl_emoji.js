@@ -1,4 +1,4 @@
-import 'document-register-element';
+import '@ungap/custom-elements';
 import {
   initEmojiMap,
   getEmojiInfo,
