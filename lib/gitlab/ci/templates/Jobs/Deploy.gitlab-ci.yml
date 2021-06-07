@@ -27,7 +27,10 @@ review:
       when: never
     - if: '$REVIEW_DISABLED'
       when: never
-    - if: '$CI_COMMIT_TAG || $CI_COMMIT_BRANCH'
+    - if: '$CI_MERGE_REQUEST_IID'  # Add the job to MR pipelines.
+    - if: '$CI_OPEN_MERGE_REQUESTS'  # If it's a branch pipeline with open MRs, don't add it to a *branch* pipeline.
+      when: never
+    - if: '$CI_COMMIT_TAG || $CI_COMMIT_BRANCH'  # If it's a branch or tag pipeline with no open MRs, add it to a *branch* or *tag* pipeline.
 
 stop_review:
   extends: .auto-deploy
@@ -48,7 +51,11 @@ stop_review:
       when: never
     - if: '$REVIEW_DISABLED'
       when: never
-    - if: '$CI_COMMIT_TAG || $CI_COMMIT_BRANCH'
+    - if: '$CI_MERGE_REQUEST_IID'  # Add the job to MR pipelines.
+      when: manual
+    - if: '$CI_OPEN_MERGE_REQUESTS'  # If it's a branch pipeline with open MRs, don't add it to a *branch* pipeline.
+      when: never
+    - if: '$CI_COMMIT_TAG || $CI_COMMIT_BRANCH'  # If it's a branch pipeline with no open MRs, add it to a *branch* pipeline.
       when: manual
 
 # Staging deploys are disabled by default since

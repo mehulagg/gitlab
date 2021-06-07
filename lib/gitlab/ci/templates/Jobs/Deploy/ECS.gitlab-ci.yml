@@ -48,7 +48,10 @@ review_ecs:
       when: never
     - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
       when: never
-    - if: '$CI_COMMIT_TAG || $CI_COMMIT_BRANCH'
+    - if: '$CI_MERGE_REQUEST_IID'  # Add the job to MR pipelines.
+    - if: '$CI_OPEN_MERGE_REQUESTS'  # If it's a branch pipeline with open MRs, don't add it to a *branch* pipeline.
+      when: never
+    - if: '$CI_COMMIT_TAG || $CI_COMMIT_BRANCH'  # If it's a branch or tag pipeline with no open MRs, add it to a *branch* or *tag* pipeline.
 
 stop_review_ecs:
   extends: .stop_review_ecs_base
@@ -64,7 +67,11 @@ stop_review_ecs:
       when: never
     - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
       when: never
-    - if: '$CI_COMMIT_TAG || $CI_COMMIT_BRANCH'
+    - if: '$CI_MERGE_REQUEST_IID'  # Add the job to MR pipelines.
+      when: manual
+    - if: '$CI_OPEN_MERGE_REQUESTS'  # If it's a branch pipeline with open MRs, don't add it to a *branch* pipeline.
+      when: never
+    - if: '$CI_COMMIT_TAG || $CI_COMMIT_BRANCH'  # If it's a branch or tag pipeline with no open MRs, add it to a *branch* or *tag* pipeline.
       when: manual
 
 review_fargate:
@@ -83,7 +90,10 @@ review_fargate:
       when: never
     - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
       when: never
-    - if: '$CI_COMMIT_TAG || $CI_COMMIT_BRANCH'
+    - if: '$CI_MERGE_REQUEST_IID'  # Add the job to MR pipelines.
+    - if: '$CI_OPEN_MERGE_REQUESTS'  # If it's a branch pipeline with open MRs, don't add it to a *branch* pipeline.
+      when: never
+    - if: '$CI_COMMIT_TAG || $CI_COMMIT_BRANCH'  # If it's a branch or tag pipeline with no open MRs, add it to a *branch* or *tag* pipeline.
 
 stop_review_fargate:
   extends: .stop_review_ecs_base
@@ -99,7 +109,11 @@ stop_review_fargate:
       when: never
     - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
       when: never
-    - if: '$CI_COMMIT_TAG || $CI_COMMIT_BRANCH'
+    - if: '$CI_MERGE_REQUEST_IID'  # Add the job to MR pipelines.
+      when: manual
+    - if: '$CI_OPEN_MERGE_REQUESTS'  # If it's a branch pipeline with open MRs, don't add it to a *branch* pipeline.
+      when: never
+    - if: '$CI_COMMIT_TAG || $CI_COMMIT_BRANCH'  # If it's a branch or tag pipeline with no open MRs, add it to a *branch* or *tag* pipeline.
       when: manual
 
 production_ecs:
@@ -111,7 +125,10 @@ production_ecs:
       when: never
     - if: '$CI_COMMIT_BRANCH != $CI_DEFAULT_BRANCH'
       when: never
-    - if: '$CI_COMMIT_TAG || $CI_COMMIT_BRANCH'
+    - if: '$CI_MERGE_REQUEST_IID'  # Add the job to MR pipelines.
+    - if: '$CI_OPEN_MERGE_REQUESTS'  # If it's a branch pipeline with open MRs, don't add it to a *branch* pipeline.
+      when: never
+    - if: '$CI_COMMIT_TAG || $CI_COMMIT_BRANCH'  # If it's a branch or tag pipeline with no open MRs, add it to a *branch* or *tag* pipeline.
 
 production_fargate:
   extends: .production_ecs_base
@@ -122,4 +139,7 @@ production_fargate:
       when: never
     - if: '$CI_COMMIT_BRANCH != $CI_DEFAULT_BRANCH'
       when: never
-    - if: '$CI_COMMIT_TAG || $CI_COMMIT_BRANCH'
+    - if: '$CI_MERGE_REQUEST_IID'  # Add the job to MR pipelines.
+    - if: '$CI_OPEN_MERGE_REQUESTS'  # If it's a branch pipeline with open MRs, don't add it to a *branch* pipeline.
+      when: never
+    - if: '$CI_COMMIT_TAG || $CI_COMMIT_BRANCH'  # If it's a branch or tag pipeline with no open MRs, add it to a *branch* or *tag* pipeline.
