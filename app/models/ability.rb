@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require 'request_store'
-
 class Ability
   class << self
     # Given a list of users and a project this method returns the users that can
