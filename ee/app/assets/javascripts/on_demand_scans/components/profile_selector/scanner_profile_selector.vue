@@ -1,7 +1,38 @@
 <script>
+import * as Sentry from '@sentry/browser';
+import {
+  ERROR_RUN_SCAN,
+  ERROR_FETCH_SCANNER_PROFILES,
+  ERROR_FETCH_SITE_PROFILES,
+  ERROR_MESSAGES,
+  SCANNER_PROFILES_QUERY,
+  SITE_PROFILES_QUERY,
+  TYPE_SITE_PROFILE,
+  TYPE_SCANNER_PROFILE,
+} from 'ee/on_demand_scans/settings';
 import { SCAN_TYPE_LABEL } from 'ee/security_configuration/dast_scanner_profiles/constants';
 import ProfileSelector from './profile_selector.vue';
 import ScannerProfileSummary from './scanner_profile_summary.vue';
+
+const createProfilesApolloOptions = (name, field, { fetchQuery, fetchError }) => ({
+  query: fetchQuery,
+  variables() {
+    return {
+      fullPath: this.fullPath,
+    };
+  },
+  update(data) {
+    const edges = data?.project?.[name]?.edges ?? [];
+    if (edges.length === 1) {
+      this[field] = edges[0].node.id;
+    }
+    return edges.map(({ node }) => node);
+  },
+  error(e) {
+    Sentry.captureException(e);
+    // this.showErrors(fetchError);
+  },
+});
 
 export default {
   name: 'OnDemandScansScannerProfileSelector',
@@ -9,6 +40,7 @@ export default {
     ProfileSelector,
     ScannerProfileSummary,
   },
+  // inject: ['scannerProfilesLibraryPath', 'newScannerProfilePath', 'fullPath'],
   inject: {
     scannerProfilesLibraryPath: {
       default: '',
@@ -16,6 +48,16 @@ export default {
     newScannerProfilePath: {
       default: '',
     },
+    fullPath: {
+      default: '',
+    },
+  },
+  apollo: {
+    scannerProfiles: createProfilesApolloOptions(
+      'scannerProfiles',
+      'selectedScannerProfileId',
+      SCANNER_PROFILES_QUERY,
+    ),
   },
   props: {
     profiles: {
@@ -36,7 +78,7 @@ export default {
   },
   computed: {
     formattedProfiles() {
-      return this.profiles.map((profile) => {
+      return this.scannerProfiles?.map((profile) => {
         const addSuffix = (str) => `${str} (${SCAN_TYPE_LABEL[profile.scanType]})`;
         return {
           ...profile,

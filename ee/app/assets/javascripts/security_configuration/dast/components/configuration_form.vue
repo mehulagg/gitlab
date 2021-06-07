@@ -1,5 +1,7 @@
 <script>
 import { GlLink, GlSprintf, GlButton, GlForm } from '@gitlab/ui';
+import ScannerProfileSelector from 'ee/on_demand_scans/components/profile_selector/scanner_profile_selector.vue';
+import SiteProfileSelector from 'ee/on_demand_scans/components/profile_selector/site_profile_selector.vue';
 import ConfigurationSnippetModal from 'ee/security_configuration/components/configuration_snippet_modal.vue';
 import { CONFIGURATION_SNIPPET_MODAL_ID } from 'ee/security_configuration/components/constants';
 import { s__ } from '~/locale';
@@ -17,11 +19,19 @@ export default {
     GlButton,
     GlForm,
     ConfigurationSnippetModal,
+    SiteProfileSelector,
+    ScannerProfileSelector,
   },
-  inject: ['gitlabCiYamlEditPath', 'securityConfigurationPath'],
+  inject: ['gitlabCiYamlEditPath', 'securityConfigurationPath', 'fullPath'],
   i18n: {
     helpText: s__(`
       DastConfig|Customize DAST settings to suit your requirements. Configuration changes made here override those provided by GitLab and are excluded from updates. For details of more advanced configuration options, see the %{docsLinkStart}GitLab DAST documentation%{docsLinkEnd}.`),
+  },
+  data() {
+    return {
+      selectedScannerProfileId: '',
+      isLoading: false,
+    };
   },
   computed: {
     configurationYaml() {
@@ -51,29 +61,22 @@ export default {
       </p>
     </section>
 
-    <scanner-profile-selector
-      v-model="selectedScannerProfileId"
-      class="gl-mb-5"
-      :profiles="scannerProfiles"
-      :selected-profile="selectedScannerProfile"
-      :has-conflict="hasProfilesConflict"
-    />
-    <site-profile-selector
+    <scanner-profile-selector v-model="selectedScannerProfileId" class="gl-mb-5" />
+    <!-- <site-profile-selector
       v-model="selectedSiteProfileId"
       class="gl-mb-5"
       :profiles="siteProfiles"
       :selected-profile="selectedSiteProfile"
-      :has-conflict="hasProfilesConflict"
-    />
+    /> -->
 
     <gl-button
-      :disabled="someFieldEmpty"
+      :disabled="!selectedScannerProfileId"
       :loading="isLoading"
       type="submit"
       variant="confirm"
       class="js-no-auto-disable"
       data-testid="dast-configuration-submit-button"
-      >{{ s__('APIFuzzing|Generate code snippet') }}</gl-button
+      >{{ s__('DastConfig|Generate code snippet') }}</gl-button
     >
     <gl-button
       :disabled="isLoading"

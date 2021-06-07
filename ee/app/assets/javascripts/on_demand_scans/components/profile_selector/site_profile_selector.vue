@@ -1,7 +1,6 @@
 <script>
 import { DAST_SITE_VALIDATION_STATUS } from 'ee/security_configuration/dast_site_validation/constants';
 import { s__ } from '~/locale';
-import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import ProfileSelector from './profile_selector.vue';
 import SiteProfileSummary from './site_profile_summary.vue';
 
@@ -11,7 +10,6 @@ export default {
     ProfileSelector,
     SiteProfileSummary,
   },
-  mixins: [glFeatureFlagsMixin()],
   inject: {
     siteProfilesLibraryPath: {
       default: '',
