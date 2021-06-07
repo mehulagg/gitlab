@@ -11546,7 +11546,7 @@ Tiers: `free`, `premium`, `ultimate`
 
 Count of weekly edits from the single file editor
 
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_7d/20210216180332_g_edit_by_sfe_weekly.yml)
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_7d/20210216180332_g_edit_by_sfe_weekly.yml)
 
 Group: `group::editor`
 
@@ -11570,7 +11570,7 @@ Tiers: `free`, `premium`, `ultimate`
 
 Count of weekly edits to a Snippet
 
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_7d/20210216180336_g_edit_by_snippet_ide_weekly.yml)
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_7d/20210216180336_g_edit_by_snippet_ide_weekly.yml)
 
 Group: `group::editor`
 
@@ -11594,7 +11594,7 @@ Tiers: `free`, `premium`, `ultimate`
 
 Weekly count of edits made using the Static Site Editor
 
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_7d/20210216184022_g_edit_by_sse_weekly.yml)
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_7d/20210216184022_g_edit_by_sse_weekly.yml)
 
 Group: `group::editor`
 
@@ -11618,7 +11618,7 @@ Tiers: `free`, `premium`, `ultimate`
 
 Count of weekly edits from the Web IDE
 
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_7d/20210216180328_g_edit_by_web_ide_weekly.yml)
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_7d/20210216180328_g_edit_by_web_ide_weekly.yml)
 
 Group: `group::editor`
 
@@ -11642,7 +11642,7 @@ Tiers: `free`, `premium`, `ultimate`
 
 Count of unique users per week who edited a file from the Web IDE
 
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_7d/20210216180339_ide_edit_total_unique_counts_weekly.yml)
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_7d/20210216180339_ide_edit_total_unique_counts_weekly.yml)
 
 Group: `group::editor`
 
@@ -14714,7 +14714,7 @@ Tiers: `free`, `premium`, `ultimate`
 
 Weekly count of Snippet views
 
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_7d/20210216184253_i_snippets_show_weekly.yml)
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_7d/20210216184253_i_snippets_show_weekly.yml)
 
 Group: `group::editor`
 
