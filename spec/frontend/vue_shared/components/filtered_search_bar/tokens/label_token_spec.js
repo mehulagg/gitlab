@@ -40,6 +40,7 @@ function createComponent(options = {}) {
     value = { data: '' },
     active = false,
     stubs = defaultStubs,
+    listeners = {},
   } = options;
   return mount(LabelToken, {
     propsData: {
@@ -53,6 +54,7 @@ function createComponent(options = {}) {
       suggestionsListClass: 'custom-class',
     },
     stubs,
+    listeners,
   });
 }
 
@@ -223,6 +225,20 @@ describe('LabelToken', () => {
       DEFAULT_LABELS.forEach((label, index) => {
         expect(suggestions.at(index).text()).toBe(label.text);
       });
+    });
+
+    it('emits listeners in the base-token', async () => {
+      const mockInput = jest.fn();
+      wrapper = createComponent({
+        listeners: {
+          input: mockInput,
+        },
+      });
+      wrapper.findComponent(BaseToken).vm.$emit('input', [{ data: 'mockData', operator: '=' }]);
+
+      await wrapper.vm.$nextTick();
+
+      expect(mockInput).toHaveBeenLastCalledWith([{ data: 'mockData', operator: '=' }]);
     });
   });
 });

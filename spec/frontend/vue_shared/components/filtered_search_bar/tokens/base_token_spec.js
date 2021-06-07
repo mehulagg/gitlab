@@ -46,12 +46,11 @@ const defaultSlots = {
 };
 
 const mockProps = {
-  tokenConfig: mockLabelToken,
-  tokenValue: { data: '' },
-  tokenActive: false,
-  tokensListLoading: false,
+  config: mockLabelToken,
+  value: { data: '' },
+  active: false,
   tokenValues: [],
-  fnActiveTokenValue: jest.fn(),
+  tokensListLoading: false,
   defaultTokenValues: DEFAULT_LABELS,
   recentTokenValuesStorageKey: mockStorageKey,
   fnCurrentTokenValue: jest.fn(),
@@ -83,7 +82,7 @@ describe('BaseToken', () => {
     wrapper = createComponent({
       props: {
         ...mockProps,
-        tokenValue: { data: `"${mockRegularLabel.title}"` },
+        value: { data: `"${mockRegularLabel.title}"` },
         tokenValues: mockLabels,
       },
     });
@@ -112,7 +111,10 @@ describe('BaseToken', () => {
 
     describe('activeTokenValue', () => {
       it('calls `fnActiveTokenValue` when it is provided', async () => {
+        const mockFnActiveTokenValue = jest.fn();
+
         wrapper.setProps({
+          fnActiveTokenValue: mockFnActiveTokenValue,
           fnCurrentTokenValue: undefined,
         });
 
@@ -122,7 +124,7 @@ describe('BaseToken', () => {
         // eslint-disable-next-line no-unused-vars
         const { activeTokenValue } = wrapper.vm;
 
-        expect(wrapper.vm.fnActiveTokenValue).toHaveBeenCalledWith(
+        expect(mockFnActiveTokenValue).toHaveBeenCalledWith(
           mockLabels,
           `"${mockRegularLabel.title.toLowerCase()}"`,
         );
@@ -131,15 +133,15 @@ describe('BaseToken', () => {
   });
 
   describe('watch', () => {
-    describe('tokenActive', () => {
+    describe('active', () => {
       let wrapperWithTokenActive;
 
       beforeEach(() => {
         wrapperWithTokenActive = createComponent({
           props: {
             ...mockProps,
-            tokenActive: true,
-            tokenValue: { data: `"${mockRegularLabel.title}"` },
+            value: { data: `"${mockRegularLabel.title}"` },
+            active: true,
           },
         });
       });
@@ -150,7 +152,7 @@ describe('BaseToken', () => {
 
       it('emits `fetch-token-values` event on the component when value of this prop is changed to false and `tokenValues` array is empty', async () => {
         wrapperWithTokenActive.setProps({
-          tokenActive: false,
+          active: false,
         });
 
         await wrapperWithTokenActive.vm.$nextTick();
@@ -221,7 +223,7 @@ describe('BaseToken', () => {
         jest.runAllTimers();
 
         expect(wrapperWithNoStubs.emitted('fetch-token-values')).toBeTruthy();
-        expect(wrapperWithNoStubs.emitted('fetch-token-values')[1]).toEqual(['foo']);
+        expect(wrapperWithNoStubs.emitted('fetch-token-values')[2]).toEqual(['foo']);
       });
     });
   });

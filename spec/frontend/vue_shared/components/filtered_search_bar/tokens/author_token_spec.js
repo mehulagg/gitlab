@@ -37,6 +37,7 @@ function createComponent(options = {}) {
     active = false,
     stubs = defaultStubs,
     data = {},
+    listeners = {},
   } = options;
   return mount(AuthorToken, {
     propsData: {
@@ -53,6 +54,7 @@ function createComponent(options = {}) {
       return { ...data };
     },
     stubs,
+    listeners,
   });
 }
 
@@ -251,6 +253,20 @@ describe('AuthorToken', () => {
 
       expect(suggestions).toHaveLength(1 + currentUserLength);
       expect(suggestions.at(0).text()).toBe(DEFAULT_LABEL_ANY.text);
+    });
+
+    it('emits listeners in the base-token', async () => {
+      const mockInput = jest.fn();
+      wrapper = createComponent({
+        listeners: {
+          input: mockInput,
+        },
+      });
+      wrapper.findComponent(BaseToken).vm.$emit('input', [{ data: 'mockData', operator: '=' }]);
+
+      await wrapper.vm.$nextTick();
+
+      expect(mockInput).toHaveBeenLastCalledWith([{ data: 'mockData', operator: '=' }]);
     });
 
     describe('when loading', () => {
