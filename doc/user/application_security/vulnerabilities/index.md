@@ -88,7 +88,7 @@ To create a Jira issue for a vulnerability:
 The Jira issue is created and opened in a new browser tab. The **Summary** and **Description**
 fields are pre-populated from the vulnerability's details.
 
-Unlike GitLab issues, the status of whether a Jira issue is open or closed does not display in GitLab UI.
+Unlike GitLab issues, the status of whether a Jira issue is open or closed does not display in the GitLab user interface.
 
 ## Linked issues
 
