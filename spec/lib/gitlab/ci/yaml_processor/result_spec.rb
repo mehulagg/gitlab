@@ -68,9 +68,7 @@ module Gitlab
           context 'when an absent job is sent' do
             let(:job_name) { :invalid_job }
 
-            it do
-              is_expected.to eq([])
-            end
+            it { is_expected.to eq([]) }
           end
         end
 
@@ -86,16 +84,12 @@ module Gitlab
 
           subject(:stage_for) { result.stage_for(job_name) }
 
-          it do
-            is_expected.to eq('test')
-          end
+          it { is_expected.to eq('test') }
 
           context 'when an absent job is sent' do
             let(:job_name) { :invalid_job }
 
-            it do
-              is_expected.to be_nil
-            end
+            it { is_expected.to be_nil }
           end
         end
       end
