@@ -46,8 +46,10 @@ module Gitlab
     #   throttle("some_unique_key", period: 1.hour) { brake_suddenly }
     #
     def self.throttle(key, period:, count: 1, &block)
-      lease = new("el:throttle:#{key}", timeout: period.to_i / count)
-      yield unless lease.waiting?
+      return if ::Gitlab::SafeRequestStore[:assume_excluse_lease_throttled]
+      return if new("el:throttle:#{key}", timeout: period.to_i / count).waiting?
+
+      yield
     end
 
     def self.unthrottle!
