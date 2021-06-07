@@ -31,6 +31,11 @@ export default {
       required: false,
       default: false,
     },
+    canAdminIssue: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
   },
   data() {
     return {
@@ -110,7 +115,12 @@ export default {
       class="board-inner gl-display-flex gl-flex-direction-column gl-relative gl-h-full gl-rounded-base"
       :class="{ 'board-column-highlighted': list.highlighted }"
     >
-      <board-list-header :can-admin-list="canAdminList" :list="list" :disabled="disabled" />
+      <board-list-header
+        :can-admin-list="canAdminList"
+        :can-admin-issue="canAdminIssue"
+        :list="list"
+        :disabled="disabled"
+      />
       <board-list ref="board-list" :disabled="disabled" :issues="listIssues" :list="list" />
     </div>
   </div>

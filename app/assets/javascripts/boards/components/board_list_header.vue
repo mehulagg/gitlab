@@ -53,6 +53,16 @@ export default {
     },
   },
   props: {
+    canAdminList: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
+    canAdminIssue: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
     list: {
       type: Object,
       default: () => ({}),
@@ -97,6 +107,12 @@ export default {
     },
     showListDetails() {
       return !this.list.collapsed || !this.isSwimlanesHeader;
+    },
+    showListHeaderActions() {
+      if (this.canAdminList && this.canAdminIssue) {
+        return this.isNewIssueShown || this.isSettingsShown;
+      }
+      return false;
     },
     itemsCount() {
       return this.list.issuesCount;
@@ -351,10 +367,7 @@ export default {
           <!-- EE end -->
         </span>
       </div>
-      <gl-button-group
-        v-if="isNewIssueShown || isSettingsShown"
-        class="board-list-button-group pl-2"
-      >
+      <gl-button-group v-if="showListHeaderActions" class="board-list-button-group pl-2">
         <gl-button
           v-if="isNewIssueShown"
           v-show="!list.collapsed"

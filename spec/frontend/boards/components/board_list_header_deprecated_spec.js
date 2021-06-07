@@ -31,6 +31,8 @@ describe('Board List Header Component', () => {
     listType = ListType.backlog,
     collapsed = false,
     withLocalStorage = true,
+    canAdminList = true,
+    canAdminIssue = true,
   } = {}) => {
     const boardId = '1';
 
@@ -59,6 +61,8 @@ describe('Board List Header Component', () => {
       propsData: {
         disabled: false,
         list,
+        canAdminList,
+        canAdminIssue,
       },
       provide: {
         boardId,
@@ -100,10 +104,13 @@ describe('Board List Header Component', () => {
       });
     });
 
-    it('does render when logged out', () => {
-      createComponent();
+    it('does not render when logged out', () => {
+      createComponent({
+        canAdminList: false,
+        canAdminIssue: false,
+      });
 
-      expect(findAddIssueButton().exists()).toBe(true);
+      expect(findAddIssueButton().exists()).toBe(false);
     });
   });
 

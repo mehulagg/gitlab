@@ -23,7 +23,7 @@ export default {
     GlAlert,
   },
   mixins: [glFeatureFlagMixin()],
-  inject: ['canAdminList'],
+  inject: ['canAdminList', 'canAdminIssue'],
   props: {
     lists: {
       type: Array,
@@ -107,6 +107,7 @@ export default {
         :key="index"
         ref="board"
         :can-admin-list="canAdminList"
+        :can-admin-issue="canAdminIssue"
         :list="list"
         :disabled="disabled"
       />

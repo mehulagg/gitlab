@@ -33,6 +33,8 @@ describe('Board List Header Component', () => {
     withLocalStorage = true,
     isSwimlanesHeader = false,
     weightFeatureAvailable = false,
+    canAdminList = true,
+    canAdminIssue = true,
   } = {}) => {
     const boardId = '1';
 
@@ -61,6 +63,8 @@ describe('Board List Header Component', () => {
         disabled: false,
         list: listMock,
         isSwimlanesHeader,
+        canAdminList,
+        canAdminIssue,
       },
       provide: {
         boardId,

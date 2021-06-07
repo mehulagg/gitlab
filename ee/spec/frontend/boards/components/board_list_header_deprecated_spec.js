@@ -41,6 +41,8 @@ describe('Board List Header Component', () => {
     listType = ListType.backlog,
     collapsed = false,
     withLocalStorage = true,
+    canAdminList = true,
+    canAdminIssue = true,
   } = {}) => {
     const boardId = '1';
 
@@ -71,6 +73,8 @@ describe('Board List Header Component', () => {
       propsData: {
         disabled: false,
         list,
+        canAdminList,
+        canAdminIssue,
       },
       provide: {
         boardId,

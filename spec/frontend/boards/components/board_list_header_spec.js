@@ -29,6 +29,8 @@ describe('Board List Header Component', () => {
     collapsed = false,
     withLocalStorage = true,
     currentUserId = null,
+    canAdminList = true,
+    canAdminIssue = true,
   } = {}) => {
     const boardId = '1';
 
@@ -63,6 +65,8 @@ describe('Board List Header Component', () => {
         propsData: {
           disabled: false,
           list: listMock,
+          canAdminList,
+          canAdminIssue,
         },
         provide: {
           boardId,
@@ -109,10 +113,13 @@ describe('Board List Header Component', () => {
       });
     });
 
-    it('does render when logged out', () => {
-      createComponent();
+    it('does not render when logged out', () => {
+      createComponent({
+        canAdminList: false,
+        canAdminIssue: false,
+      });
 
-      expect(findAddIssueButton().exists()).toBe(true);
+      expect(findAddIssueButton().exists()).toBe(false);
     });
   });
 

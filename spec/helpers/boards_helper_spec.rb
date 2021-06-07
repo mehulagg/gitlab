@@ -135,6 +135,19 @@ RSpec.describe BoardsHelper do
           expect(helper.board_data[:can_admin_list]).to eq('true')
         end
       end
+
+      context 'can_admin_issue' do
+        it 'returns can_admin_issue as false by default' do
+          allow(helper).to receive(:can?).with(user, :admin_issue, project).and_return(false)
+
+          expect(helper.board_data[:can_admin_issue]).to eq('false')
+        end
+        it 'returns can_admin_issue as true when user can admin the board' do
+          allow(helper).to receive(:can?).with(user, :admin_issue, project).and_return(true)
+
+          expect(helper.board_data[:can_admin_issue]).to eq('true')
+        end
+      end
     end
 
     context 'group board' do
