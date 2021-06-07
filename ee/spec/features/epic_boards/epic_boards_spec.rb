@@ -59,6 +59,7 @@ RSpec.describe 'epic boards', :js do
     end
 
     it 'displays one epic in Label list' do
+      # here for spec
       expect(list_header(label_list)).to have_content('1')
 
       page.within("[data-board-type='label']") do
@@ -235,6 +236,7 @@ RSpec.describe 'epic boards', :js do
 
       wait_for_requests
 
+      expect(list_header(label_list)).to have_content('0')
       expect(page).not_to have_content('Epic1')
       expect(page).to have_content('Epic2')
       expect(page).to have_content('Epic3')
@@ -251,6 +253,7 @@ RSpec.describe 'epic boards', :js do
 
       wait_for_requests
 
+      expect(list_header(label_list)).to have_content('1')
       expect(page).to have_content('Epic1')
       expect(page).not_to have_content('Epic2')
       expect(page).not_to have_content('Epic3')
@@ -267,6 +270,7 @@ RSpec.describe 'epic boards', :js do
 
       wait_for_requests
 
+      expect(list_header(label_list)).to have_content('1')
       expect(page).to have_content('Epic1')
       expect(page).not_to have_content('Epic2')
       expect(page).not_to have_content('Epic3')
@@ -283,6 +287,7 @@ RSpec.describe 'epic boards', :js do
 
       wait_for_requests
 
+      expect(list_header(label_list)).to have_content('0')
       expect(page).not_to have_content('Epic1')
       expect(page).to have_content('Epic2')
       expect(page).to have_content('Epic3')
@@ -297,6 +302,7 @@ RSpec.describe 'epic boards', :js do
 
       wait_for_requests
 
+      expect(list_header(label_list)).to have_content('1')
       expect(page).to have_content('Epic1')
       expect(page).not_to have_content('Epic2')
       expect(page).not_to have_content('Epic3')
