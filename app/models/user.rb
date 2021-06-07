@@ -84,10 +84,11 @@ class User < ApplicationRecord
 
     update_tracked_fields(request)
 
-    lease = Gitlab::ExclusiveLease.new("user_update_tracked_fields:#{id}", timeout: 1.hour.to_i)
-    return unless lease.try_obtain
-
-    Users::UpdateService.new(self, user: self).execute(validate: false)
+    Gitlab::ExclusiveLease.throttle("user_update_tracked_fields:#{id}", 1.hour.to_i) do
+      ::Ability.forgetting(/admin/) do
+        Users::UpdateService.new(self, user: self).execute(validate: false)
+      end
+    end
   end
   # rubocop: enable CodeReuse/ServiceClass
 
