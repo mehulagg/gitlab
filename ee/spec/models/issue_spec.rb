@@ -14,6 +14,8 @@ RSpec.describe Issue do
     it { is_expected.to have_many(:resource_iteration_events) }
     it { is_expected.to have_one(:issuable_sla) }
     it { is_expected.to have_many(:metric_images) }
+    it { is_expected.to have_many(:incident_management_issuable_escalations) }
+    it { is_expected.to have_many(:incident_management_issuable_escalation_statuses) }
   end
 
   describe 'modules' do

@@ -66,6 +66,9 @@ module EE
       has_many :feature_flag_issues
       has_many :feature_flags, through: :feature_flag_issues, class_name: '::Operations::FeatureFlag'
 
+      has_many :incident_management_issuable_escalations, class_name: 'IncidentManagement::IssuableEscalation', inverse_of: :issue
+      has_many :incident_management_issuable_escalation_statuses, class_name: 'IncidentManagement::IssuableEscalationStatus'
+
       validates :weight, allow_nil: true, numericality: { greater_than_or_equal_to: 0 }
       validate :validate_confidential_epic
 
