@@ -5,16 +5,16 @@ require 'spec_helper'
 RSpec.describe 'Epic in issue sidebar', :js do
   let_it_be(:user) { create(:user) }
   let_it_be(:group) { create(:group, :public) }
-  let_it_be(:epic1) { create(:epic, group: group, title: 'Foo') }
-  let_it_be(:epic2) { create(:epic, group: group, title: 'Bar') }
-  let_it_be(:epic3) { create(:epic, group: group, title: 'Baz') }
+  let_it_be(:epic1) { create(:epic, group: group, title: 'Epic Foo') }
+  let_it_be(:epic2) { create(:epic, group: group, title: 'Epic Bar') }
+  let_it_be(:epic3) { create(:epic, group: group, title: 'Epic Baz') }
   let_it_be(:project) { create(:project, :public, group: group) }
   let_it_be(:issue) { create(:issue, project: project) }
   let_it_be(:epic_issue) { create(:epic_issue, epic: epic1, issue: issue) }
 
   let_it_be(:subgroup) { create(:group, :public, parent: group) }
   let_it_be(:subproject) { create(:project, :public, group: subgroup) }
-  let_it_be(:subepic) { create(:epic, group: subgroup, title: 'Xyz') }
+  let_it_be(:subepic) { create(:epic, group: subgroup, title: 'Subgroup epic') }
   let_it_be(:subissue) { create(:issue, project: subproject) }
 
   let_it_be(:sidebar_epic_selector) { '[data-testid="sidebar-epic"]' }
@@ -43,7 +43,13 @@ RSpec.describe 'Epic in issue sidebar', :js do
         page.within(sidebar_epic_selector) do
           click_edit
 
-          expect(page).to have_selector('.gl-new-dropdown-contents .gl-new-dropdown-item', count: 4) # `No Epic` + 3 epics
+          aggregate_failures do
+            expect(page).to have_selector('.gl-new-dropdown-contents .gl-new-dropdown-item', count: 4)
+            expect(page).to have_content 'No epic'
+            expect(page).to have_content epic1.title
+            expect(page).to have_content epic2.title
+            expect(page).to have_content epic3.title
+          end
         end
       end
 
@@ -55,7 +61,11 @@ RSpec.describe 'Epic in issue sidebar', :js do
 
           wait_for_all_requests
 
-          expect(page).to have_selector('.gl-new-dropdown-contents .gl-new-dropdown-item', count: 2) # `No Epic` + 1 matching epic
+          aggregate_failures do
+            expect(page).to have_selector('.gl-new-dropdown-contents .gl-new-dropdown-item', count: 2)
+            expect(page).to have_content 'No epic'
+            expect(page).to have_content epic1.title
+          end
         end
       end
 
@@ -82,7 +92,14 @@ RSpec.describe 'Epic in issue sidebar', :js do
         page.within(sidebar_epic_selector) do
           click_edit
 
-          expect(page).to have_selector('.gl-new-dropdown-contents .gl-new-dropdown-item', count: 5) # `No Epic` + 3 root epics + 1 epic
+          aggregate_failures do
+            expect(page).to have_selector('.gl-new-dropdown-contents .gl-new-dropdown-item', count: 5)
+            expect(page).to have_content 'No epic'
+            expect(page).to have_content epic1.title
+            expect(page).to have_content epic2.title
+            expect(page).to have_content epic3.title
+            expect(page).to have_content subepic.title
+          end
         end
       end
     end
