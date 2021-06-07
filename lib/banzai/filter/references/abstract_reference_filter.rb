@@ -36,6 +36,7 @@ module Banzai
         #
         # Returns a String replaced with the return of the block.
         def references_in(text, pattern = object_class.reference_pattern)
+          binding.pry
           text.gsub(pattern) do |match|
             if ident = identifier($~)
               yield match, ident, $~[:project], $~[:namespace], $~
