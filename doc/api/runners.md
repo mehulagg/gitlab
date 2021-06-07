@@ -62,8 +62,9 @@ Example response:
         "active": true,
         "description": "test-1-20150125",
         "id": 6,
-        "is_shared": false,
         "ip_address": "127.0.0.1",
+        "is_shared": false,
+        "runner_type": "project_type",
         "name": null,
         "online": true,
         "status": "online"
@@ -74,6 +75,7 @@ Example response:
         "id": 8,
         "ip_address": "127.0.0.1",
         "is_shared": false,
+        "runner_type": "group_type",
         "name": null,
         "online": false,
         "status": "offline"
@@ -115,6 +117,7 @@ Example response:
         "id": 1,
         "ip_address": "127.0.0.1",
         "is_shared": true,
+        "runner_type": "instance_type",
         "name": null,
         "online": true,
         "status": "online"
@@ -125,6 +128,7 @@ Example response:
         "id": 3,
         "ip_address": "127.0.0.1",
         "is_shared": true,
+        "runner_type": "instance_type",
         "name": null,
         "online": false,
         "status": "offline"
@@ -135,6 +139,7 @@ Example response:
         "id": 6,
         "ip_address": "127.0.0.1",
         "is_shared": false,
+        "runner_type": "project_type",
         "name": null,
         "online": true,
         "status": "paused"
@@ -145,6 +150,7 @@ Example response:
         "id": 8,
         "ip_address": "127.0.0.1",
         "is_shared": false,
+        "runner_type": "group_type",
         "name": null,
         "online": false,
         "status": "offline"
@@ -156,7 +162,8 @@ Example response:
 
 Get details of a runner.
 
-[Maintainer access or higher](../user/permissions.md) is required to get runner details at the project and group level.
+The [Maintainer role or higher](../user/permissions.md) is required to get runner details at the
+project and group level.
 
 Instance-level runner details via this endpoint are available to all signed in users.
 
@@ -186,6 +193,7 @@ Example response:
     "id": 6,
     "ip_address": "127.0.0.1",
     "is_shared": false,
+    "runner_type": "project_type",
     "contacted_at": "2016-01-25T16:39:48.066Z",
     "name": null,
     "online": true,
@@ -231,7 +239,8 @@ PUT /runners/:id
 | `maximum_timeout` | integer | no   | Maximum timeout set when this runner handles the job |
 
 ```shell
-curl --request PUT --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/runners/6" --form "description=test-1-20150125-test" --form "tag_list=ruby,mysql,tag1,tag2"
+curl --request PUT --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/runners/6" \
+     --form "description=test-1-20150125-test" --form "tag_list=ruby,mysql,tag1,tag2"
 ```
 
 NOTE:
@@ -248,6 +257,7 @@ Example response:
     "id": 6,
     "ip_address": "127.0.0.1",
     "is_shared": false,
+    "runner_type": "group_type",
     "contacted_at": "2016-01-25T16:39:48.066Z",
     "name": null,
     "online": true,
@@ -288,7 +298,8 @@ PUT --form "active=false"  /runners/:runner_id
 | `runner_id` | integer | yes      | The ID of a runner  |
 
 ```shell
-curl --request PUT --header "PRIVATE-TOKEN: <your_access_token>" --form "active=false"  "https://gitlab.example.com/api/v4/runners/6"
+curl --request PUT --header "PRIVATE-TOKEN: <your_access_token>" \
+     --form "active=false"  "https://gitlab.example.com/api/v4/runners/6"
 ```
 
 ## List runner's jobs
@@ -417,6 +428,7 @@ Example response:
         "id": 8,
         "ip_address": "127.0.0.1",
         "is_shared": false,
+        "runner_type": "project_type",
         "name": null,
         "online": false,
         "status": "offline"
@@ -427,6 +439,7 @@ Example response:
         "id": 5,
         "ip_address": "127.0.0.1",
         "is_shared": true,
+        "runner_type": "instance_type",
         "name": null,
         "online": true,
         "status": "paused"
@@ -448,7 +461,8 @@ POST /projects/:id/runners
 | `runner_id` | integer | yes      | The ID of a runner  |
 
 ```shell
-curl --request POST --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/projects/9/runners" --form "runner_id=9"
+curl --request POST --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/projects/9/runners" \
+     --form "runner_id=9"
 ```
 
 Example response:
@@ -460,6 +474,7 @@ Example response:
     "id": 9,
     "ip_address": "127.0.0.1",
     "is_shared": false,
+    "runner_type": "project_type",
     "name": null,
     "online": true,
     "status": "online"
@@ -518,6 +533,7 @@ Example response:
     "ip_address": "127.0.0.1",
     "active": true,
     "is_shared": true,
+    "runner_type": "instance_type",
     "name": "gitlab-runner",
     "online": null,
     "status": "not_connected"
@@ -528,6 +544,7 @@ Example response:
     "ip_address": "127.0.0.1",
     "active": true,
     "is_shared": true,
+    "runner_type": "instance_type",
     "name": "gitlab-runner",
     "online": false,
     "status": "offline"
@@ -538,6 +555,7 @@ Example response:
     "ip_address": "127.0.0.1",
     "active": true,
     "is_shared": false,
+    "runner_type": "group_type",
     "name": "gitlab-runner",
     "online": null,
     "status": "not_connected"
@@ -566,7 +584,9 @@ POST /runners
 | `maximum_timeout` | integer | no  | Maximum timeout set when this runner handles the job |
 
 ```shell
-curl --request POST "https://gitlab.example.com/api/v4/runners" --form "token=<registration_token>" --form "description=test-1-20150125-test" --form "tag_list=ruby,mysql,tag1,tag2"
+curl --request POST "https://gitlab.example.com/api/v4/runners" \
+     --form "token=<registration_token>" --form "description=test-1-20150125-test" \
+     --form "tag_list=ruby,mysql,tag1,tag2"
 ```
 
 Response:
@@ -620,7 +640,8 @@ DELETE /runners
 | `token`     | string  | yes      | The runner's [authentication token](#registration-and-authentication-tokens). |
 
 ```shell
-curl --request DELETE "https://gitlab.example.com/api/v4/runners" --form "token=<authentication_token>"
+curl --request DELETE "https://gitlab.example.com/api/v4/runners" \
+     --form "token=<authentication_token>"
 ```
 
 Response:
@@ -642,7 +663,8 @@ POST /runners/verify
 | `token`     | string  | yes      | Runner's [authentication token](#registration-and-authentication-tokens).  |
 
 ```shell
-curl --request POST "https://gitlab.example.com/api/v4/runners/verify" --form "token=<authentication_token>"
+curl --request POST "https://gitlab.example.com/api/v4/runners/verify" \
+     --form "token=<authentication_token>"
 ```
 
 Response:

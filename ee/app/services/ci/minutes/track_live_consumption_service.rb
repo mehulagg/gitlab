@@ -77,8 +77,6 @@ module Ci
           ServiceResponse.error(message: 'Feature not enabled')
         elsif !build.running?
           ServiceResponse.error(message: 'Build is not running')
-        elsif !free_or_trial_plan?
-          ServiceResponse.error(message: 'Project is not on Free or trial plan')
         elsif !build.shared_runners_minutes_limit_enabled?
           ServiceResponse.error(message: 'CI minutes limit not enabled for build')
         else
@@ -88,10 +86,6 @@ module Ci
 
       def feature_enabled?
         Feature.enabled?(:ci_minutes_track_live_consumption, build.project, default_enabled: :yaml)
-      end
-
-      def free_or_trial_plan?
-        Gitlab.com? && (root_namespace.free_plan? || root_namespace.trial?)
       end
 
       def consumption_since_last_update

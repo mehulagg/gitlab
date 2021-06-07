@@ -1,6 +1,6 @@
 - return unless group_sidebar_link?(:epics)
 
-- epics_count = open_epics_count(group)
+- epics_count = cached_issuables_count(group, type: :epics)
 - epics_items = ['epics#show', 'epics#index', 'epic_boards#index', 'epic_boards#show', 'roadmap#show']
 
 = nav_link(path: epics_items) do

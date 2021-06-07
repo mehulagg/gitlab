@@ -12,10 +12,8 @@ const defaultEnvironmentId = 3;
 const documentationPath = '/docs';
 const newPolicyPath = '/policy/new';
 const emptyStateSvgPath = '/svgs';
-const wafNoDataSvgPath = '/waf-no-data-svg';
 const networkPolicyNoDataSvgPath = '/network-policy-no-data-svg';
 const environmentsEndpoint = `${TEST_HOST}/environments`;
-const wafStatisticsEndpoint = `${TEST_HOST}/waf`;
 const networkPolicyStatisticsEndpoint = `${TEST_HOST}/network_policy`;
 
 describe('ThreatMonitoringApp component', () => {
@@ -26,7 +24,6 @@ describe('ThreatMonitoringApp component', () => {
     store = createStore();
     Object.assign(store.state.threatMonitoring, {
       environmentsEndpoint,
-      wafStatisticsEndpoint,
       networkPolicyStatisticsEndpoint,
       ...state,
     });
@@ -38,7 +35,6 @@ describe('ThreatMonitoringApp component', () => {
         propsData: {
           defaultEnvironmentId,
           emptyStateSvgPath,
-          wafNoDataSvgPath,
           networkPolicyNoDataSvgPath,
           newPolicyPath,
           ...propsData,
@@ -56,7 +52,6 @@ describe('ThreatMonitoringApp component', () => {
   const findAlertsView = () => wrapper.find(ThreatMonitoringAlerts);
   const findNetworkPolicyList = () => wrapper.find(NetworkPolicyList);
   const findFilters = () => wrapper.find(ThreatMonitoringFilters);
-  const findWafSection = () => wrapper.find({ ref: 'wafSection' });
   const findNetworkPolicySection = () => wrapper.find({ ref: 'networkPolicySection' });
   const findNoEnvironmentEmptyStates = () => wrapper.findAll(NoEnvironmentEmptyState);
   const findNetworkPolicyTab = () => wrapper.find({ ref: 'networkPolicyTab' });
@@ -117,10 +112,6 @@ describe('ThreatMonitoringApp component', () => {
 
     it('shows the filter bar', () => {
       expect(findFilters().exists()).toBe(true);
-    });
-
-    it('renders the waf section', () => {
-      expect(findWafSection().element).toMatchSnapshot();
     });
 
     it('renders the network policy section', () => {

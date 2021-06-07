@@ -92,16 +92,6 @@ export default {
     }
   },
 
-  [mutationTypes.UPDATE_CACHED_EPICS]: (state, epics) => {
-    epics.forEach((e) => {
-      Vue.set(state.epicsCacheById, e.id, e);
-    });
-  },
-
-  [mutationTypes.SET_EPIC_FETCH_IN_PROGRESS]: (state, val) => {
-    state.epicFetchInProgress = val;
-  },
-
   [mutationTypes.RESET_EPICS]: (state) => {
     Vue.set(state, 'epics', []);
   },

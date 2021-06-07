@@ -19,10 +19,6 @@ fragment IssueNode on Issue {
   relativePosition
   epic {
     id
-    iid
-    group {
-      fullPath
-    }
   }
   milestone {
     id

@@ -23,7 +23,7 @@ RSpec.describe ProjectPolicy do
     let(:additional_developer_permissions) do
       %i[
         admin_vulnerability_feedback read_project_audit_events read_project_security_dashboard
-        read_vulnerability read_vulnerability_scanner create_vulnerability create_vulnerability_export admin_vulnerability
+        read_security_resource read_vulnerability_scanner create_vulnerability create_vulnerability_export admin_vulnerability
         admin_vulnerability_issue_link admin_vulnerability_external_issue_link read_merge_train
       ]
     end
@@ -41,7 +41,7 @@ RSpec.describe ProjectPolicy do
         read_pipeline read_build read_commit_status read_container_image
         read_environment read_deployment read_merge_request read_pages
         create_merge_request_in award_emoji
-        read_project_security_dashboard read_vulnerability read_vulnerability_scanner
+        read_project_security_dashboard read_security_resource read_vulnerability_scanner
         read_software_license_policy
         read_threat_monitoring read_merge_train
         read_release
@@ -452,6 +452,28 @@ RSpec.describe ProjectPolicy do
         let(:project) { create(:project, :repository, namespace: current_user.namespace) }
 
         it { is_expected.to be_allowed(:read_project) }
+      end
+    end
+  end
+
+  describe 'access_security_and_compliance' do
+    context 'when the user is auditor' do
+      let(:current_user) { create(:user, :auditor) }
+
+      before do
+        project.project_feature.update!(security_and_compliance_access_level: access_level)
+      end
+
+      context 'when the "Security & Compliance" is not enabled' do
+        let(:access_level) { Featurable::DISABLED }
+
+        it { is_expected.to be_disallowed(:access_security_and_compliance) }
+      end
+
+      context 'when the "Security & Compliance" is enabled' do
+        let(:access_level) { Featurable::PRIVATE }
+
+        it { is_expected.to be_allowed(:access_security_and_compliance) }
       end
     end
   end

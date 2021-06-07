@@ -8,15 +8,13 @@ RSpec.describe 'User sees new onboarding flow', :js do
 
   before do
     allow(Gitlab).to receive(:com?).and_return(true)
-    stub_experiment(trial_during_signup: true)
-    stub_experiment_for_subject(trial_during_signup: true)
     stub_feature_flags(registrations_group_invite: false)
     sign_in(user)
     visit users_sign_up_welcome_path
 
     expect(page).to have_content('Welcome to GitLab')
 
-    choose 'Just me'
+    choose 'My company or team'
     click_on 'Continue'
 
     expect(page).to have_content('GitLab Ultimate trial (optional)')

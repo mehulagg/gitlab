@@ -1,7 +1,7 @@
 <script>
 import { GlToggle } from '@gitlab/ui';
 import { mapState, mapActions } from 'vuex';
-import { severityFilter, scannerFilter } from 'ee/security_dashboard/helpers';
+import { severityFilter, pipelineScannerFilter } from 'ee/security_dashboard/helpers';
 import { s__ } from '~/locale';
 import { DISMISSAL_STATES } from '../store/modules/filters/constants';
 import StandardFilter from './filters/standard_filter.vue';
@@ -16,7 +16,7 @@ export default {
   },
   data() {
     return {
-      filterConfigs: [severityFilter, scannerFilter],
+      filterConfigs: [severityFilter, pipelineScannerFilter],
     };
   },
   computed: {
@@ -44,6 +44,7 @@ export default {
         :key="filter.id"
         class="col-sm-6 col-md-4 col-lg-2 p-2 js-filter"
         :filter="filter"
+        :data-testid="filter.id"
         @filter-changed="setFilter"
       />
       <div class="gl-display-flex ml-lg-auto p-2">

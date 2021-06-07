@@ -37,6 +37,9 @@ export default {
     planName: {
       default: '',
     },
+    freePersonalNamespace: {
+      default: false,
+    },
   },
   computed: {
     ...mapState(['isLoadingSubscription', 'hasErrorSubscription', 'plan', 'tables', 'endpoint']),
@@ -54,7 +57,7 @@ export default {
       return this.isSubscription && !this.plan.trial;
     },
     canUpgrade() {
-      return this.isFreePlan || this.plan.upgradable;
+      return !this.freePersonalNamespace && (this.isFreePlan || this.plan.upgradable);
     },
     canUpgradeEEPlan() {
       return this.isSubscription && this.planUpgradeHref;

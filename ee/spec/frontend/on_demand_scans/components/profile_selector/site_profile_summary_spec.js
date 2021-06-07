@@ -13,12 +13,6 @@ describe('DastSiteProfileSummary', () => {
         profile,
         ...props,
       },
-      provide: {
-        glFeatures: {
-          securityDastSiteProfilesAdditionalFields: true,
-          securityDastSiteProfilesApiOption: true,
-        },
-      },
     });
   };
 

@@ -12,6 +12,11 @@ module Gitlab
           #   events:
           #     - g_analytics_valuestream
           # end
+          class << self
+            attr_reader :metric_operation
+            @metric_operation = :redis
+          end
+
           def initialize(time_frame:, options: {})
             super
 
@@ -30,14 +35,20 @@ module Gitlab
             end
           end
 
+          def suggested_name
+            Gitlab::Usage::Metrics::NameSuggestion.for(
+              self.class.metric_operation
+            )
+          end
+
           private
 
           def time_constraints
             case time_frame
             when '28d'
-              { start_date: 4.weeks.ago.to_date, end_date: Date.current }
+              monthly_time_range
             when '7d'
-              { start_date: 7.days.ago.to_date, end_date: Date.current }
+              weekly_time_range
             else
               raise "Unknown time frame: #{time_frame} for RedisHLLMetric"
             end

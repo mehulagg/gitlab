@@ -1,14 +1,17 @@
 <script>
-import { GlButton, GlTable } from '@gitlab/ui';
+import { GlTable } from '@gitlab/ui';
 import { mapState } from 'vuex';
 import { DEFAULT_TH_CLASSES } from '~/lib/utils/constants';
 import { thWidthClass } from '~/lib/utils/table_utility';
 import { __, s__ } from '~/locale';
+import { EMPTY_STATUS_CHECK } from '../constants';
 import Actions from './actions.vue';
 import Branch from './branch.vue';
+import ModalCreate from './modal_create.vue';
+import ModalDelete from './modal_delete.vue';
+import ModalUpdate from './modal_update.vue';
 
 export const i18n = {
-  addButton: s__('StatusCheck|Add status check'),
   apiHeader: __('API'),
   branchHeader: __('Target branch'),
   emptyTableText: s__('StatusCheck|No status checks are defined yet.'),
@@ -19,11 +22,29 @@ export default {
   components: {
     Actions,
     Branch,
-    GlButton,
     GlTable,
+    ModalCreate,
+    ModalDelete,
+    ModalUpdate,
+  },
+  data() {
+    return {
+      statusCheckToDelete: EMPTY_STATUS_CHECK,
+      statusCheckToUpdate: EMPTY_STATUS_CHECK,
+    };
   },
   computed: {
     ...mapState(['statusChecks']),
+  },
+  methods: {
+    openDeleteModal(statusCheck) {
+      this.statusCheckToDelete = statusCheck;
+      this.$refs.deleteModal.show();
+    },
+    openUpdateModal(statusCheck) {
+      this.statusCheckToUpdate = statusCheck;
+      this.$refs.updateModal.show();
+    },
   },
   fields: [
     {
@@ -65,13 +86,17 @@ export default {
       <template #cell(protectedBranches)="{ item }">
         <branch :branches="item.protectedBranches" />
       </template>
-      <template #cell(actions)>
-        <actions />
+      <template #cell(actions)="{ item }">
+        <actions
+          :status-check="item"
+          @open-delete-modal="openDeleteModal"
+          @open-update-modal="openUpdateModal"
+        />
       </template>
     </gl-table>
 
-    <gl-button category="secondary" variant="confirm" size="small">
-      {{ $options.i18n.addButton }}
-    </gl-button>
+    <modal-create />
+    <modal-delete ref="deleteModal" :status-check="statusCheckToDelete" />
+    <modal-update ref="updateModal" :status-check="statusCheckToUpdate" />
   </div>
 </template>

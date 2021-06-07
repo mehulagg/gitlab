@@ -20,7 +20,8 @@ class ClearSharedRunnersMinutesWorker # rubocop:disable Scalability/IdempotentWo
       start_id = Namespace.minimum(:id)
       last_id = Namespace.maximum(:id)
 
-      execution_offset = TIME_SPREAD / ((last_id - start_id) / BATCH_SIZE)
+      batches = [(last_id - start_id) / BATCH_SIZE, 1].max
+      execution_offset = (TIME_SPREAD / batches).to_i
 
       (start_id..last_id).step(BATCH_SIZE).with_index do |batch_start_id, batch_index|
         batch_end_id = batch_start_id + BATCH_SIZE - 1

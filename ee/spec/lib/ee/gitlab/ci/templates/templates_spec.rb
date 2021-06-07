@@ -11,6 +11,14 @@ RSpec.describe "CI YML Templates" do
     Gitlab::Template::GitlabCiYmlTemplate.all.map(&:full_name)
   end
 
+  before do
+    stub_feature_flags(
+      redirect_to_latest_template_terraform: false,
+      redirect_to_latest_template_security_dast: false,
+      redirect_to_latest_template_security_api_fuzzing: false,
+      redirect_to_latest_template_jobs_browser_performance_testing: false)
+  end
+
   with_them do
     let(:content) do
       if template_name == 'Security/DAST-API.gitlab-ci.yml'

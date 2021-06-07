@@ -1,9 +1,10 @@
+import { GlDeprecatedSkeletonLoading as GlSkeletonLoading } from '@gitlab/ui';
+import { GlSingleStat } from '@gitlab/ui/dist/charts';
 import { mount } from '@vue/test-utils';
 import MockAdapter from 'axios-mock-adapter';
 import GroupActivityCard from 'ee/analytics/group_analytics/components/group_activity_card.vue';
 import Api from 'ee/api';
 import waitForPromises from 'helpers/wait_for_promises';
-import MetricCard from '~/analytics/shared/components/metric_card.vue';
 import axios from '~/lib/utils/axios_utils';
 
 const TEST_GROUP_ID = 'gitlab-org';
@@ -44,20 +45,10 @@ describe('GroupActivity component', () => {
     mock.restore();
   });
 
-  const findMetricCard = () => wrapper.find(MetricCard);
+  const findAllSkeletonLoaders = () => wrapper.findAllComponents(GlSkeletonLoading);
+  const findAllSingleStats = () => wrapper.findAllComponents(GlSingleStat);
 
-  it('matches the snapshot', () => {
-    createComponent();
-
-    return wrapper.vm
-      .$nextTick()
-      .then(waitForPromises)
-      .then(() => {
-        expect(wrapper.element).toMatchSnapshot();
-      });
-  });
-
-  it('fetches MR and issue count and updates isLoading properly', () => {
+  it('fetches the metrics and updates isLoading properly', () => {
     createComponent();
 
     expect(wrapper.vm.isLoading).toBe(true);
@@ -79,18 +70,39 @@ describe('GroupActivity component', () => {
       });
   });
 
-  it('passes the metrics array to the metric card', () => {
+  it('updates the loading state properly', () => {
     createComponent();
+
+    expect(findAllSkeletonLoaders()).toHaveLength(3);
 
     return wrapper.vm
       .$nextTick()
       .then(waitForPromises)
       .then(() => {
-        expect(findMetricCard().props('metrics')).toEqual([
-          { key: 'mergeRequests', value: 10, label: 'Merge Requests opened' },
-          { key: 'issues', value: 20, label: 'Issues opened' },
-          { key: 'newMembers', value: 30, label: 'Members added' },
-        ]);
+        expect(findAllSkeletonLoaders()).toHaveLength(0);
       });
+  });
+
+  describe('metrics', () => {
+    beforeEach(() => {
+      createComponent();
+    });
+
+    it.each`
+      index | value | title
+      ${0}  | ${10} | ${'Merge Requests opened'}
+      ${1}  | ${20} | ${'Issues opened'}
+      ${2}  | ${30} | ${'Members added'}
+    `('renders a GlSingleStat for "$title"', ({ index, value, title }) => {
+      const singleStat = findAllSingleStats().at(index);
+
+      return wrapper.vm
+        .$nextTick()
+        .then(waitForPromises)
+        .then(() => {
+          expect(singleStat.props('value')).toBe(`${value}`);
+          expect(singleStat.props('title')).toBe(title);
+        });
+    });
   });
 });

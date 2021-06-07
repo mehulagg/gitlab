@@ -60,6 +60,11 @@ export default {
       required: false,
       default: 'issue',
     },
+    isEditing: {
+      type: Boolean,
+      required: false,
+      default: true,
+    },
   },
   data() {
     return {
@@ -73,6 +78,9 @@ export default {
     participants: {
       query() {
         return participantsQueries[this.issuableType].query;
+      },
+      skip() {
+        return Boolean(participantsQueries[this.issuableType].skipQuery) || !this.isEditing;
       },
       variables() {
         return {
@@ -98,6 +106,9 @@ export default {
           search: this.search,
           first: 20,
         };
+      },
+      skip() {
+        return !this.isEditing;
       },
       update(data) {
         // TODO Remove null filter (BE fix required)

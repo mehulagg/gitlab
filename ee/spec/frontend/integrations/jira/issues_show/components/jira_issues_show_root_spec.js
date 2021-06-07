@@ -89,7 +89,7 @@ describe('JiraIssuesShow', () => {
     state                 | statusIcon              | statusBadgeClass             | badgeText
     ${issueStates.OPENED} | ${'issue-open-m'}       | ${'status-box-open'}         | ${'Open'}
     ${issueStates.CLOSED} | ${'mobile-issue-close'} | ${'status-box-issue-closed'} | ${'Closed'}
-  `('when issue state is `$state`', async ({ state, statusIcon, statusBadgeClass, badgeText }) => {
+  `('when issue state is `$state`', ({ state, statusIcon, statusBadgeClass, badgeText }) => {
     beforeEach(async () => {
       mockAxios.onGet(mockJiraIssuesShowPath).replyOnce(200, { ...mockJiraIssue, state });
       createComponent();

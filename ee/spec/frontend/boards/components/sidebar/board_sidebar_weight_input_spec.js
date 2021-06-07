@@ -3,12 +3,9 @@ import { shallowMount } from '@vue/test-utils';
 import BoardSidebarWeightInput from 'ee/boards/components/sidebar/board_sidebar_weight_input.vue';
 import BoardEditableItem from '~/boards/components/sidebar/board_editable_item.vue';
 import { createStore } from '~/boards/stores';
-import createFlash from '~/flash';
 
 const TEST_WEIGHT = 1;
 const TEST_ISSUE = { id: 'gid://gitlab/Issue/1', iid: 9, weight: 0, referencePath: 'h/b#2' };
-
-jest.mock('~/flash');
 
 describe('ee/boards/components/sidebar/board_sidebar_weight_input.vue', () => {
   let wrapper;
@@ -115,6 +112,7 @@ describe('ee/boards/components/sidebar/board_sidebar_weight_input.vue', () => {
       jest.spyOn(wrapper.vm, 'setActiveIssueWeight').mockImplementation(() => {
         throw new Error(['failed mutation']);
       });
+      jest.spyOn(wrapper.vm, 'setError').mockImplementation(() => {});
       findWeightInput().vm.$emit('input', -1);
       findWeightForm().vm.$emit('submit', { preventDefault: () => {} });
       await wrapper.vm.$nextTick();
@@ -123,7 +121,7 @@ describe('ee/boards/components/sidebar/board_sidebar_weight_input.vue', () => {
     it('collapses sidebar and renders former issue weight', () => {
       expect(findCollapsed().isVisible()).toBe(true);
       expect(findCollapsed().text()).toContain(TEST_WEIGHT);
-      expect(createFlash).toHaveBeenCalled();
+      expect(wrapper.vm.setError).toHaveBeenCalled();
     });
   });
 });

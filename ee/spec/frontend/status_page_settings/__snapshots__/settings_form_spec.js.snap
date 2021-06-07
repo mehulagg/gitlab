@@ -46,6 +46,7 @@ exports[`Status Page settings form default state should match the default snapsh
     <form>
       <gl-form-group-stub
         class="gl-pl-0 mb-3"
+        labeldescription=""
       >
         <gl-form-checkbox-stub>
           <span
@@ -61,6 +62,7 @@ exports[`Status Page settings form default state should match the default snapsh
         label="Status page URL"
         label-for="status-page-url"
         label-size="sm"
+        labeldescription=""
       >
         <gl-form-input-stub
           id="status-page-url"
@@ -86,6 +88,7 @@ exports[`Status Page settings form default state should match the default snapsh
         label="S3 Bucket name"
         label-for="status-page-s3-bucket-name"
         label-size="sm"
+        labeldescription=""
       >
         <gl-form-input-stub
           id="status-page-s3-bucket-name"
@@ -106,6 +109,7 @@ exports[`Status Page settings form default state should match the default snapsh
         label="AWS region"
         label-for="status-page-aws-region"
         label-size="sm"
+        labeldescription=""
       >
         <gl-form-input-stub
           id="status-page-aws-region"
@@ -127,6 +131,7 @@ exports[`Status Page settings form default state should match the default snapsh
         label="AWS access key ID"
         label-for="status-page-aws-access-key"
         label-size="sm"
+        labeldescription=""
       >
         <gl-form-input-stub
           id="status-page-aws-access-key "
@@ -139,6 +144,7 @@ exports[`Status Page settings form default state should match the default snapsh
         label="AWS Secret access key"
         label-for="status-page-aws-secret-access-key"
         label-size="sm"
+        labeldescription=""
       >
         <gl-form-input-stub
           id="status-page-aws-secret-access-key "

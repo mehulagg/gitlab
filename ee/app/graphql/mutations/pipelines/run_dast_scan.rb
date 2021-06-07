@@ -32,11 +32,17 @@ module Mutations
       def resolve(project_path:, target_url:, branch:, scan_type:)
         project = authorized_find!(project_path)
 
-        service = ::Ci::RunDastScanService.new(project, current_user)
-        result = service.execute(branch: branch, target_url: target_url)
+        result = ::DastOnDemandScans::CreateService.new(
+          container: project,
+          current_user: current_user,
+          params: {
+            branch: branch,
+            dast_site_profile: DastSiteProfile.new(dast_site: DastSite.new(url: target_url))
+          }
+        ).execute
 
         if result.success?
-          success_response(project: project, pipeline: result.payload)
+          success_response(project: project, pipeline: result.payload[:pipeline])
         else
           error_response(result.message)
         end

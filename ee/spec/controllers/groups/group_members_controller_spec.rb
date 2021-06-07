@@ -20,15 +20,15 @@ RSpec.describe Groups::GroupMembersController do
       let!(:invited) { create(:group_member, :invited, :developer, group: group) }
       let!(:requested) { create(:group_member, :access_request, group: group) }
 
-      it 'records queries', :use_sql_query_cache do
+      it 'records queries', :request_store, :use_sql_query_cache do
         get :index, params: { group_id: group }
 
         control = ActiveRecord::QueryRecorder.new(skip_cached: false) { get :index, params: { group_id: group } }
         create_list(:group_member, 5, group: group, created_by: user)
         create_list(:group_member, 5, :invited, group: group, created_by: user)
         create_list(:group_member, 5, :access_request, group: group)
-        # locally 47 vs 52 GDK vs 57 CI
-        unresolved_n_plus_ones = 5 # still have a few queries created by can_update/can_remove that should be reduced
+        # locally 39 vs 43 GDK vs 48 CI
+        unresolved_n_plus_ones = 4 # still have a few queries created by can_update/can_remove that could be reduced
         multiple_members_threshold = 5 # GDK vs CI difference
 
         expect do

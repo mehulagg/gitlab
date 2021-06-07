@@ -18,7 +18,7 @@ class MergeRequestResetApprovalsWorker # rubocop:disable Scalability/IdempotentW
     user = User.find_by(id: user_id)
     return unless user
 
-    EE::MergeRequests::ResetApprovalsService.new(project: project, current_user: user).execute(ref, newrev)
+    MergeRequests::ResetApprovalsService.new(project: project, current_user: user).execute(ref, newrev)
   end
   # rubocop: enable CodeReuse/ActiveRecord
 end

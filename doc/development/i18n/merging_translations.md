@@ -11,7 +11,7 @@ newly added externalized strings to the community of translators.
 
 The [GitLab CrowdIn Bot](https://gitlab.com/gitlab-crowdin-bot) also creates merge requests
 to take newly approved translation submissions and merge them into the `locale/<language>/gitlab.po`
-files. Check the [merge requests created by `gitlab-crowdin-bot`](https://gitlab.com/gitlab-org/gitlab/-/merge_requests?scope=all&utf8=%E2%9C%93&state=opened&author_username=gitlab-crowdin-bot)
+files. Check the [merge requests created by `gitlab-crowdin-bot`](https://gitlab.com/gitlab-org/gitlab/-/merge_requests?scope=all&state=opened&author_username=gitlab-crowdin-bot)
 to see new and merged merge requests.
 
 ## Validation
@@ -53,7 +53,7 @@ We are discussing [automating this entire process](https://gitlab.com/gitlab-org
 
 CrowdIn creates a new merge request as soon as the old one is closed
 or merged. But it does not recreate the `master-i18n` branch every
-time. To force CrowdIn to recreate the branch, close any [open merge requests](https://gitlab.com/gitlab-org/gitlab/-/merge_requests?scope=all&utf8=%E2%9C%93&state=opened&author_username=gitlab-crowdin-bot)
+time. To force CrowdIn to recreate the branch, close any [open merge requests](https://gitlab.com/gitlab-org/gitlab/-/merge_requests?scope=all&state=opened&author_username=gitlab-crowdin-bot)
 and delete the [`master-18n`](https://gitlab.com/gitlab-org/gitlab/-/branches/all?utf8=✓&search=master-i18n) branch.
 
 This might be needed when the merge request contains failures that
@@ -82,3 +82,9 @@ There's no automated way to pull the translation levels from CrowdIn, to display
 this information in the language selection dropdown. Therefore, the translation
 levels are hard-coded in the `TRANSLATION_LEVELS` constant in [`i18n.rb`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/i18n.rb),
 and must be regularly updated.
+
+To update the translation levels:
+
+1. Get the translation levels (percentage of approved words) from [Crowdin](https://crowdin.com/project/gitlab-ee/settings#translations).
+
+1. Update the hard-coded translation levels in [`i18n.rb`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/i18n.rb#L40).

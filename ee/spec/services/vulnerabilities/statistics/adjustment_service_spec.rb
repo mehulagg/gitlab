@@ -3,7 +3,7 @@
 require 'spec_helper'
 
 RSpec.describe Vulnerabilities::Statistics::AdjustmentService do
-  let_it_be(:project) { create(:project) }
+  let_it_be_with_reload(:project) { create(:project) }
 
   describe '.execute' do
     let(:project_ids) { [1, 2, 3] }
@@ -23,8 +23,7 @@ RSpec.describe Vulnerabilities::Statistics::AdjustmentService do
   end
 
   describe '#execute' do
-    let(:project) { create(:project) }
-    let(:statistics) { project.vulnerability_statistic.reload.as_json(except: [:id, :project_id, :created_at, :updated_at]) }
+    let(:statistics) { project.vulnerability_statistic.reload.as_json(only: expected_statistics.keys) }
     let(:project_ids) { [project.id] }
 
     let(:expected_statistics) do
@@ -51,7 +50,7 @@ RSpec.describe Vulnerabilities::Statistics::AdjustmentService do
       let(:project_ids) { (1..1001).to_a }
 
       it 'raises error' do
-        expect {adjust_statistics}.to raise_error(described_class::TooManyProjectsError, 'Cannot adjust statistics for more than 1000 projects')
+        expect { adjust_statistics }.to raise_error(described_class::TooManyProjectsError, 'Cannot adjust statistics for more than 1000 projects')
       end
     end
 

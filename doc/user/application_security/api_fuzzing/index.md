@@ -1,6 +1,6 @@
 ---
 stage: Secure
-group: Fuzz Testing
+group: Dynamic Analysis
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 type: reference, howto
 ---
@@ -48,6 +48,7 @@ Example projects using these methods are available:
 - [Example HTTP Archive (HAR) project](https://gitlab.com/gitlab-org/security-products/demos/api-fuzzing-example/-/tree/har)
 - [Example Postman Collection project](https://gitlab.com/gitlab-org/security-products/demos/api-fuzzing/postman-api-fuzzing-example)
 - [Example GraphQL project](https://gitlab.com/gitlab-org/security-products/demos/api-fuzzing/graphql-api-fuzzing-example)
+- [Example SOAP project](https://gitlab.com/gitlab-org/security-products/demos/api-fuzzing/soap-api-fuzzing-example)
 
 ## Enable Web API fuzzing
 
@@ -116,8 +117,8 @@ To generate an API Fuzzing configuration snippet:
 > Support for OpenAPI Specification v3.0 was
 > [introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/228652) in GitLab 13.9.
 
-The [OpenAPI Specification](https://www.openapis.org/) (formerly the Swagger Specification) is an API description format for REST APIs. 
-This section shows you how to configure API fuzzing using an OpenAPI Specification to provide information about the target API to test. 
+The [OpenAPI Specification](https://www.openapis.org/) (formerly the Swagger Specification) is an API description format for REST APIs.
+This section shows you how to configure API fuzzing using an OpenAPI Specification to provide information about the target API to test.
 OpenAPI Specifications are provided as a file system resource or URL. Both JSON and YAML OpenAPI formats are supported.
 
 API fuzzing uses an OpenAPI document to generate the request body. When a request body is required,
@@ -567,6 +568,7 @@ profile increases as the number of tests increases.
 | `FUZZAPI_TARGET_URL`                                        | Base URL of API testing target. |
 | `FUZZAPI_CONFIG`                                            | [Deprecated](https://gitlab.com/gitlab-org/gitlab/-/issues/276395) in GitLab 13.12, replaced with default `.gitlab/gitlab-api-fuzzing-config.yml`. API Fuzzing configuration file. |
 |[`FUZZAPI_PROFILE`](#api-fuzzing-profiles)                   | Configuration profile to use during testing. Defaults to `Quick-10`. |
+|[`FUZZAPI_EXCLUDE_PATHS`](#exclude-paths)                    | Exclude API URL paths from testing. |
 |[`FUZZAPI_OPENAPI`](#openapi-specification)                  | OpenAPI Specification file or URL. |
 |[`FUZZAPI_HAR`](#http-archive-har)                           | HTTP Archive (HAR) file. |
 |[`FUZZAPI_POSTMAN_COLLECTION`](#postman-collection)          | Postman Collection file. |
@@ -778,7 +780,7 @@ variables:
 ```
 
 In this example `.gitlab-ci.yml`, the `SECRET_OVERRIDES` variable provides the JSON. This is a
-[group or instance level CI/CD variable defined in the UI](../../../ci/variables/README.md#instance-cicd-variables):
+[group or instance level CI/CD variable defined in the UI](../../../ci/variables/README.md#add-a-cicd-variable-to-an-instance):
 
 ```yaml
 stages:
@@ -822,6 +824,47 @@ variables:
   FUZZAPI_OVERRIDES_FILE: output/api-fuzzing-overrides.json
   FUZZAPI_OVERRIDES_CMD: renew_token.py
   FUZZAPI_OVERRIDES_INTERVAL: 300
+```
+
+### Exclude Paths
+
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/211892) in GitLab 14.0.
+
+When testing an API it can be useful to exclude certain paths. For example, you might exclude testing of an authentication service or an older version of the API. To exclude paths, use the `FUZZAPI_EXCLUDE_PATHS` CI/CD variable . This variable is specified in your `.gitlab-ci.yml` file. To exclude multiple paths, separate entries using the `;` character. In the provided paths you can use a single character wildcard `?` and `*` for a multiple character wildcard.
+
+To verify the paths are excluded, review the `Tested Operations` and `Excluded Operations` portion of the job output. You should not see any excluded paths listed under `Tested Operations`.
+
+```plaintext
+2021-05-27 21:51:08 [INF] API Security: --[ Tested Operations ]-------------------------
+2021-05-27 21:51:08 [INF] API Security: 201 POST http://target:7777/api/users CREATED
+2021-05-27 21:51:08 [INF] API Security: ------------------------------------------------
+2021-05-27 21:51:08 [INF] API Security: --[ Excluded Operations ]-----------------------
+2021-05-27 21:51:08 [INF] API Security: GET http://target:7777/api/messages
+2021-05-27 21:51:08 [INF] API Security: POST http://target:7777/api/messages
+2021-05-27 21:51:08 [INF] API Security: ------------------------------------------------
+```
+
+#### Examples of excluding paths
+
+This example excludes the `/auth` resource. This does not exclude child resources (`/auth/child`).
+
+```yaml
+variables:
+  FUZZAPI_EXCLUDE_PATHS=/auth
+```
+
+To exclude `/auth`, and child resources (`/auth/child`), we use a wildcard.
+
+```yaml
+variables:
+  FUZZAPI_EXCLUDE_PATHS=/auth*
+```
+
+To exclude multiple paths we can use the `;` character. In this example we exclude `/auth*` and `/v1/*`.
+
+```yaml
+variables:
+  FUZZAPI_EXCLUDE_PATHS=/auth*;/v1/*
 ```
 
 ### Header Fuzzing
@@ -1171,7 +1214,7 @@ The best-suited solution will depend on whether or not your target API changes f
 
 #### Static environment solution
 
-This solution is for pipelines in which the target API URL doesn't change (is static). 
+This solution is for pipelines in which the target API URL doesn't change (is static).
 
 **Add environmental variable**
 
@@ -1188,7 +1231,7 @@ include:
 
 #### Dynamic environment solutions
 
-In a dynamic environment your target API changes for each different deployment. In this case, there is more than one possible solution, we recommend to use the `environment_url.txt` file when dealing with dynamic environments. 
+In a dynamic environment your target API changes for each different deployment. In this case, there is more than one possible solution, we recommend to use the `environment_url.txt` file when dealing with dynamic environments.
 
 **Use environment_url.txt**
 

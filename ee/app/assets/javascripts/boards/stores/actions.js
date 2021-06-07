@@ -2,11 +2,10 @@ import {
   formatListIssues,
   formatListsPageInfo,
   fullBoardId,
-  transformNotFilters,
   getMoveData,
-  getSupportedParams,
+  filterVariables,
 } from '~/boards/boards_util';
-import { BoardType, SupportedFilters } from '~/boards/constants';
+import { BoardType } from '~/boards/constants';
 import eventHub from '~/boards/eventhub';
 import listsIssuesQuery from '~/boards/graphql/lists_issues.query.graphql';
 import actionsCE, { gqlClient } from '~/boards/stores/actions';
@@ -24,22 +23,16 @@ import {
   fullEpicBoardId,
   formatListEpics,
   formatEpicListsPageInfo,
+  FiltersInfo,
 } from '../boards_util';
 
-import {
-  EpicFilterType,
-  IterationFilterType,
-  GroupByParamType,
-  SupportedFiltersEE,
-} from '../constants';
-import epicQuery from '../graphql/epic.query.graphql';
+import { EpicFilterType, GroupByParamType, FilterFields } from '../constants';
 import createEpicBoardListMutation from '../graphql/epic_board_list_create.mutation.graphql';
 import epicMoveListMutation from '../graphql/epic_move_list.mutation.graphql';
 import epicsSwimlanesQuery from '../graphql/epics_swimlanes.query.graphql';
 import groupBoardAssigneesQuery from '../graphql/group_board_assignees.query.graphql';
 import groupBoardIterationsQuery from '../graphql/group_board_iterations.query.graphql';
 import groupBoardMilestonesQuery from '../graphql/group_board_milestones.query.graphql';
-import issueSetEpicMutation from '../graphql/issue_set_epic.mutation.graphql';
 import issueSetWeightMutation from '../graphql/issue_set_weight.mutation.graphql';
 import listUpdateLimitMetricsMutation from '../graphql/list_update_limit_metrics.mutation.graphql';
 import listsEpicsQuery from '../graphql/lists_epics.query.graphql';
@@ -107,35 +100,20 @@ export { gqlClient };
 export default {
   ...actionsCE,
 
-  setFilters: ({ commit, dispatch, getters }, filters) => {
-    const supportedFilters = [...SupportedFilters, ...SupportedFiltersEE];
-    const filterParams = getSupportedParams(filters, supportedFilters);
-
-    filterParams.not = transformNotFilters(filters);
-
+  setFilters: ({ commit, dispatch, state: { issuableType } }, filters) => {
     if (filters.groupBy === GroupByParamType.epic) {
       dispatch('setEpicSwimlanes');
     }
 
-    if (filterParams.epicId === EpicFilterType.any || filterParams.epicId === EpicFilterType.none) {
-      filterParams.epicWildcardId = filterParams.epicId.toUpperCase();
-      filterParams.epicId = undefined;
-    } else if (filterParams.epicId) {
-      filterParams.epicId = fullEpicId(filterParams.epicId);
-    }
-    if (!getters.isEpicBoard && filterParams.not.epicId) {
-      filterParams.not.epicId = fullEpicId(filterParams.not.epicId);
-    }
-
-    if (
-      filters.iterationId === IterationFilterType.any ||
-      filters.iterationId === IterationFilterType.none ||
-      filters.iterationId === IterationFilterType.current
-    ) {
-      filterParams.iterationWildcardId = filters.iterationId.toUpperCase();
-    }
-
-    commit(types.SET_FILTERS, filterParams);
+    commit(
+      types.SET_FILTERS,
+      filterVariables({
+        filters,
+        issuableType,
+        filterInfo: FiltersInfo,
+        filterFields: FilterFields,
+      }),
+    );
   },
 
   performSearch({ dispatch, getters }) {
@@ -183,7 +161,6 @@ export default {
             epics: epicsFormatted,
             canAdminEpic: epics.edges[0]?.node?.userPermissions?.adminEpic,
           });
-          commit(types.UPDATE_CACHED_EPICS, epicsFormatted);
         }
 
         if (epics.pageInfo?.hasNextPage) {
@@ -284,7 +261,7 @@ export default {
         ? { ...filterParams, epicWildcardId: EpicFilterType.none.toUpperCase() }
         : { ...filterParams, epicId },
       after: fetchNext ? state.pageInfoByListId[listId].endCursor : undefined,
-      first: forSwimlanes ? undefined : 20,
+      first: forSwimlanes ? undefined : 10,
     };
 
     if (getters.isEpicBoard) {
@@ -342,75 +319,6 @@ export default {
 
   resetEpics: ({ commit }) => {
     commit(types.RESET_EPICS);
-  },
-
-  fetchEpicForActiveIssue: async ({ state, commit, getters }) => {
-    if (!getters.activeBoardItem.epic) {
-      return false;
-    }
-
-    const {
-      epic: { id, iid, group: { fullPath } = {} },
-    } = getters.activeBoardItem;
-
-    if (!iid || !fullPath || state.epicsCacheById[id]) {
-      return false;
-    }
-
-    commit(types.SET_EPIC_FETCH_IN_PROGRESS, true);
-
-    try {
-      const {
-        data: {
-          group: { epic },
-        },
-      } = await gqlClient.query({
-        query: epicQuery,
-        variables: {
-          fullPath,
-          iid,
-        },
-      });
-
-      commit(types.UPDATE_CACHED_EPICS, [epic]);
-    } finally {
-      commit(types.SET_EPIC_FETCH_IN_PROGRESS, false);
-    }
-
-    return true;
-  },
-
-  setActiveIssueEpic: async ({ state, commit, getters }, epicId) => {
-    commit(types.SET_EPIC_FETCH_IN_PROGRESS, true);
-
-    const { data } = await gqlClient.mutate({
-      mutation: issueSetEpicMutation,
-      variables: {
-        input: {
-          iid: String(getters.activeBoardItem.iid),
-          epicId,
-          projectPath: getters.projectPathForActiveIssue,
-        },
-      },
-    });
-
-    if (data.issueSetEpic.errors?.length > 0) {
-      throw new Error(data.issueSetEpic.errors);
-    }
-
-    const { epic } = data.issueSetEpic.issue;
-
-    if (epic !== null) {
-      commit(types.RECEIVE_EPICS_SUCCESS, { epics: [epic, ...state.epics] });
-      commit(types.UPDATE_CACHED_EPICS, [epic]);
-    }
-
-    commit(typesCE.UPDATE_BOARD_ITEM_BY_ID, {
-      itemId: getters.activeBoardItem.id,
-      prop: 'epic',
-      value: epic ? { id: epic.id, iid: epic.iid, group: { fullPath: epic.group.fullPath } } : null,
-    });
-    commit(types.SET_EPIC_FETCH_IN_PROGRESS, false);
   },
 
   setActiveIssueWeight: async ({ commit, getters }, input) => {

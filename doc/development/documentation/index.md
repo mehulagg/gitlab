@@ -28,7 +28,7 @@ The source of the documentation exists within the codebase of each GitLab applic
 | Project | Path |
 | --- | --- |
 | [GitLab](https://gitlab.com/gitlab-org/gitlab/) | [`/doc`](https://gitlab.com/gitlab-org/gitlab/tree/master/doc) |
-| [GitLab Runner](https://gitlab.com/gitlab-org/gitlab-runner/) | [`/docs`](https://gitlab.com/gitlab-org/gitlab-runner/tree/master/docs) |
+| [GitLab Runner](https://gitlab.com/gitlab-org/gitlab-runner/) | [`/docs`](https://gitlab.com/gitlab-org/gitlab-runner/-/tree/main/docs) |
 | [Omnibus GitLab](https://gitlab.com/gitlab-org/omnibus-gitlab/) | [`/doc`](https://gitlab.com/gitlab-org/omnibus-gitlab/tree/master/doc) |
 | [Charts](https://gitlab.com/gitlab-org/charts/gitlab) | [`/doc`](https://gitlab.com/gitlab-org/charts/gitlab/tree/master/doc) |
 
@@ -156,7 +156,7 @@ Nanoc layout), which is displayed at the top of the page if defined:
 
 - `reading_time`: If you want to add an indication of the approximate reading
   time of a page, you can set `reading_time` to `true`. This uses a simple
-  [algorithm](https://gitlab.com/gitlab-org/gitlab-docs/-/blob/master/lib/helpers/reading_time.rb)
+  [algorithm](https://gitlab.com/gitlab-org/gitlab-docs/-/blob/main/lib/helpers/reading_time.rb)
   to calculate the reading time based on the number of words.
 
 ## Move or rename a page
@@ -177,8 +177,8 @@ There are two types of redirects:
 - [GitLab Pages redirects](../../user/project/pages/redirects.md),
   for users who view the docs on [`docs.gitlab.com`](https://docs.gitlab.com).
 
-The Technical Writing team manages the [process](https://gitlab.com/gitlab-org/technical-writing/-/blob/master/.gitlab/issue_templates/tw-monthly-tasks.md)
-to regularly update the [`redirects.yaml`](https://gitlab.com/gitlab-org/gitlab-docs/-/blob/master/content/_data/redirects.yaml)
+The Technical Writing team manages the [process](https://gitlab.com/gitlab-org/technical-writing/-/blob/main/.gitlab/issue_templates/tw-monthly-tasks.md)
+to regularly update the [`redirects.yaml`](https://gitlab.com/gitlab-org/gitlab-docs/-/blob/main/content/_data/redirects.yaml)
 file.
 
 To add a redirect:
@@ -229,6 +229,7 @@ To add a redirect:
    ```markdown
    ---
    redirect_to: '../newpath/to/file/index.md'
+   remove_date: 'YYYY-MM-DD'
    ---
 
    This document was moved to [another location](../path/to/file/index.md).
@@ -411,7 +412,7 @@ on how the left-side navigation menu is built and updated.
 
 NOTE:
 To preview your changes to documentation locally, follow this
-[development guide](https://gitlab.com/gitlab-org/gitlab-docs/blob/master/README.md#development-when-contributing-to-gitlab-documentation) or [these instructions for GDK](https://gitlab.com/gitlab-org/gitlab-development-kit/blob/main/doc/howto/gitlab_docs.md).
+[development guide](https://gitlab.com/gitlab-org/gitlab-docs/blob/main/README.md#development-when-contributing-to-gitlab-documentation) or [these instructions for GDK](https://gitlab.com/gitlab-org/gitlab-development-kit/blob/main/doc/howto/gitlab_docs.md).
 
 The live preview is currently enabled for the following projects:
 

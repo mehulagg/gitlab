@@ -2,11 +2,9 @@ import { GlAlert } from '@gitlab/ui';
 import { mount } from '@vue/test-utils';
 import { merge } from 'lodash';
 import ConfigurationForm from 'ee/security_configuration/api_fuzzing/components/configuration_form.vue';
-import ConfigurationSnippetModal from 'ee/security_configuration/api_fuzzing/components/configuration_snippet_modal.vue';
-import {
-  SCAN_MODES,
-  CONFIGURATION_SNIPPET_MODAL_ID,
-} from 'ee/security_configuration/api_fuzzing/constants';
+import { SCAN_MODES } from 'ee/security_configuration/api_fuzzing/constants';
+import ConfigurationSnippetModal from 'ee/security_configuration/components/configuration_snippet_modal.vue';
+import { CONFIGURATION_SNIPPET_MODAL_ID } from 'ee/security_configuration/components/constants';
 import DropdownInput from 'ee/security_configuration/components/dropdown_input.vue';
 import DynamicFields from 'ee/security_configuration/components/dynamic_fields.vue';
 import FormInput from 'ee/security_configuration/components/form_input.vue';
@@ -253,6 +251,7 @@ include:
 variables:
 - FOO: bar`,
         redirectParam: CODE_SNIPPET_SOURCE_API_FUZZING,
+        scanType: 'API Fuzzing',
       });
     });
 

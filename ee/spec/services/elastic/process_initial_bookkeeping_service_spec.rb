@@ -10,7 +10,7 @@ RSpec.describe Elastic::ProcessInitialBookkeepingService do
     it 'calls initial project indexing' do
       expect(described_class).to receive(:maintain_indexed_associations).with(project, Elastic::ProcessInitialBookkeepingService::INDEXED_PROJECT_ASSOCIATIONS)
       expect(ElasticCommitIndexerWorker).to receive(:perform_async).with(project.id)
-      expect(ElasticCommitIndexerWorker).to receive(:perform_async).with(project.id, nil, nil, true)
+      expect(ElasticCommitIndexerWorker).to receive(:perform_async).with(project.id, true)
 
       described_class.backfill_projects!(project)
     end

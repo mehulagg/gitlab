@@ -6,4 +6,12 @@ module OncallHelpers
 
     rotation.active_period.for_date(date)
   end
+
+  def create_schedule_with_user(project, user)
+    create(:incident_management_oncall_schedule, project: project) do |schedule|
+      create(:incident_management_oncall_rotation, schedule: schedule) do |rotation|
+        create(:incident_management_oncall_participant, rotation: rotation, user: user)
+      end
+    end
+  end
 end

@@ -8,9 +8,12 @@ import * as types from 'ee/billings/subscriptions/store/mutation_types';
 import { mockDataSubscription } from 'ee_jest/billings/mock_data';
 import { extendedWrapper } from 'helpers/vue_test_utils_helper';
 
-const namespaceName = 'GitLab.com';
-const customerPortalUrl = 'https://customers.gitlab.com/subscriptions';
-const planName = 'Gold';
+const defaultInjectedProps = {
+  namespaceName: 'GitLab.com',
+  customerPortalUrl: 'https://customers.gitlab.com/subscriptions',
+  planName: 'Gold',
+  freePersonalNamespace: false,
+};
 
 const localVue = createLocalVue();
 localVue.use(Vuex);
@@ -33,9 +36,7 @@ describe('SubscriptionTable component', () => {
         store,
         localVue,
         provide: {
-          customerPortalUrl,
-          namespaceName,
-          planName,
+          ...defaultInjectedProps,
           ...provide,
         },
         propsData: props,
@@ -189,20 +190,27 @@ describe('SubscriptionTable component', () => {
 
   describe('Upgrade button', () => {
     describe.each`
-      planCode    | upgradable | expected | testDescription
-      ${'bronze'} | ${true}    | ${true}  | ${'renders the button'}
-      ${'bronze'} | ${false}   | ${false} | ${'does not render the button'}
-      ${null}     | ${true}    | ${true}  | ${'renders the button'}
-      ${null}     | ${false}   | ${true}  | ${'renders the button'}
-      ${'free'}   | ${true}    | ${true}  | ${'renders the button'}
-      ${'free'}   | ${false}   | ${true}  | ${'renders the button'}
+      planCode    | upgradable | freePersonalNamespace | expected
+      ${null}     | ${false}   | ${false}              | ${true}
+      ${null}     | ${true}    | ${false}              | ${true}
+      ${null}     | ${false}   | ${true}               | ${false}
+      ${null}     | ${true}    | ${true}               | ${false}
+      ${'free'}   | ${false}   | ${false}              | ${true}
+      ${'free'}   | ${true}    | ${false}              | ${true}
+      ${'free'}   | ${false}   | ${true}               | ${false}
+      ${'free'}   | ${true}    | ${true}               | ${false}
+      ${'bronze'} | ${false}   | ${false}              | ${false}
+      ${'bronze'} | ${true}    | ${false}              | ${true}
+      ${'bronze'} | ${false}   | ${true}               | ${false}
+      ${'bronze'} | ${true}    | ${true}               | ${false}
     `(
-      'given a plan with state: planCode = $planCode, upgradable = $upgradable',
-      ({ planCode, upgradable, expected, testDescription }) => {
+      'given a plan with state: planCode = $planCode, upgradable = $upgradable, freePersonalNamespace = $freePersonalNamespace',
+      ({ planCode, upgradable, freePersonalNamespace, expected }) => {
         beforeEach(() => {
           createComponentWithStore({
             provide: {
               planUpgradeHref: '',
+              freePersonalNamespace,
             },
             state: {
               isLoadingSubscription: false,
@@ -213,6 +221,9 @@ describe('SubscriptionTable component', () => {
             },
           });
         });
+
+        const testDescription =
+          expected === true ? 'renders the button' : 'does not render the button';
 
         it(testDescription, () => {
           expect(findUpgradeButton().exists()).toBe(expected);

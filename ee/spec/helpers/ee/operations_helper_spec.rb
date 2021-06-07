@@ -110,9 +110,7 @@ RSpec.describe OperationsHelper, :routing do
       create(
         :project_incident_management_setting,
         project: project,
-        issue_template_key: 'template-key',
-        pagerduty_active: true,
-        auto_close_incident: false
+        pagerduty_active: true
       )
     end
 
@@ -121,11 +119,6 @@ RSpec.describe OperationsHelper, :routing do
     it 'returns the correct set of data' do
       is_expected.to eq(
         operations_settings_endpoint: project_settings_operations_path(project),
-        templates: '[]',
-        create_issue: 'false',
-        issue_template_key: 'template-key',
-        send_email: 'false',
-        auto_close_incident: 'false',
         pagerduty_active: 'true',
         pagerduty_token: operations_settings.pagerduty_token,
         pagerduty_webhook_url: project_incidents_integrations_pagerduty_url(project, token: operations_settings.pagerduty_token),

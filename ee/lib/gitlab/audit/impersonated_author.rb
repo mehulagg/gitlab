@@ -23,6 +23,10 @@ module Gitlab
         impersonator.name
       end
 
+      def impersonated?
+        true
+      end
+
       private
 
       def impersonator

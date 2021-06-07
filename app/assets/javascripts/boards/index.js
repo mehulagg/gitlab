@@ -28,7 +28,6 @@ import initBoardsFilteredSearch from '~/boards/mount_filtered_search_issue_board
 import store from '~/boards/stores';
 import boardsStore from '~/boards/stores/boards_store';
 import toggleFocusMode from '~/boards/toggle_focus';
-import { deprecatedCreateFlash as Flash } from '~/flash';
 import createDefaultClient from '~/lib/graphql';
 import {
   NavigationType,
@@ -206,7 +205,7 @@ export default () => {
       }
     },
     methods: {
-      ...mapActions(['setInitialBoardData', 'performSearch']),
+      ...mapActions(['setInitialBoardData', 'performSearch', 'setError']),
       initialBoardLoad() {
         boardsStore
           .all()
@@ -215,8 +214,11 @@ export default () => {
             lists.forEach((list) => boardsStore.addList(list));
             this.loading = false;
           })
-          .catch(() => {
-            Flash(__('An error occurred while fetching the board lists. Please try again.'));
+          .catch((error) => {
+            this.setError({
+              error,
+              message: __('An error occurred while fetching the board lists. Please try again.'),
+            });
           });
       },
       updateTokens() {
@@ -260,7 +262,7 @@ export default () => {
             .catch(() => {
               newIssue.setFetchingState('subscriptions', false);
               setWeightFetchingState(newIssue, false);
-              Flash(__('An error occurred while fetching sidebar data'));
+              this.setError({ message: __('An error occurred while fetching sidebar data') });
             });
         }
 
@@ -297,7 +299,9 @@ export default () => {
             })
             .catch(() => {
               issue.setFetchingState('subscriptions', false);
-              Flash(__('An error occurred when toggling the notification subscription'));
+              this.setError({
+                message: __('An error occurred when toggling the notification subscription'),
+              });
             });
         }
       },

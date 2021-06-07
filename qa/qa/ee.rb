@@ -211,7 +211,6 @@ module QA
     module Resource
       autoload :License, 'qa/ee/resource/license'
       autoload :Epic, 'qa/ee/resource/epic'
-      autoload :GroupLabel, 'qa/ee/resource/group_label'
       autoload :GroupIteration, 'qa/ee/resource/group_iteration'
       autoload :ImportRepoWithCICD, 'qa/ee/resource/import_repo_with_ci_cd'
       autoload :PipelineSubscriptions, 'qa/ee/resource/pipeline_subscriptions'

@@ -6,14 +6,14 @@ import { securityReportTypeEnumToReportType } from 'ee/vue_shared/security_repor
 import { vulnerabilityModalMixin } from 'ee/vue_shared/security_reports/mixins/vulnerability_modal_mixin';
 import Filters from './filters.vue';
 import LoadingError from './loading_error.vue';
-import SecurityDashboardLayout from './security_dashboard_layout.vue';
 import SecurityDashboardTable from './security_dashboard_table.vue';
+import VulnerabilityReportLayout from './vulnerability_report_layout.vue';
 
 export default {
   components: {
     Filters,
     IssueModal,
-    SecurityDashboardLayout,
+    VulnerabilityReportLayout,
     SecurityDashboardTable,
     LoadingError,
     PipelineArtifactDownload,
@@ -109,7 +109,7 @@ export default {
       :illustrations="loadingErrorIllustrations"
     />
     <template v-else>
-      <security-dashboard-layout>
+      <vulnerability-report-layout>
         <template #header>
           <filters>
             <template v-if="shouldShowDownloadGuidance" #buttons>
@@ -132,7 +132,7 @@ export default {
             <slot name="empty-state"></slot>
           </template>
         </security-dashboard-table>
-      </security-dashboard-layout>
+      </vulnerability-report-layout>
 
       <issue-modal
         :modal="modal"

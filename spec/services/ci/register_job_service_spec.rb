@@ -14,6 +14,34 @@ module Ci
     let!(:pending_job) { create(:ci_build, pipeline: pipeline) }
 
     describe '#execute' do
+      context 'checks database loadbalancing stickiness' do
+        subject { described_class.new(shared_runner).execute }
+
+        before do
+          project.update!(shared_runners_enabled: false)
+        end
+
+        it 'result is valid if replica did caught-up' do
+          allow(Gitlab::Database::LoadBalancing).to receive(:enable?)
+            .and_return(true)
+
+          expect(Gitlab::Database::LoadBalancing::Sticking).to receive(:all_caught_up?)
+            .with(:runner, shared_runner.id) { true }
+
+          expect(subject).to be_valid
+        end
+
+        it 'result is invalid if replica did not caught-up' do
+          allow(Gitlab::Database::LoadBalancing).to receive(:enable?)
+            .and_return(true)
+
+          expect(Gitlab::Database::LoadBalancing::Sticking).to receive(:all_caught_up?)
+            .with(:runner, shared_runner.id) { false }
+
+          expect(subject).not_to be_valid
+        end
+      end
+
       shared_examples 'handles runner assignment' do
         context 'runner follow tag list' do
           it "picks build with the same tag" do
@@ -839,34 +867,13 @@ module Ci
         stub_const("#{described_class}::MAX_QUEUE_DEPTH", 2)
       end
 
-      context 'when feature is enabled' do
-        before do
-          stub_feature_flags(gitlab_ci_builds_queue_limit: true)
-        end
+      it 'returns 409 conflict' do
+        expect(Ci::Build.pending.unstarted.count).to eq 3
 
-        it 'returns 409 conflict' do
-          expect(Ci::Build.pending.unstarted.count).to eq 3
+        result = described_class.new(specific_runner).execute
 
-          result = described_class.new(specific_runner).execute
-
-          expect(result).not_to be_valid
-          expect(result.build).to be_nil
-        end
-      end
-
-      context 'when feature is disabled' do
-        before do
-          stub_feature_flags(gitlab_ci_builds_queue_limit: false)
-        end
-
-        it 'returns a valid result' do
-          expect(Ci::Build.pending.unstarted.count).to eq 3
-
-          result = described_class.new(specific_runner).execute
-
-          expect(result).to be_valid
-          expect(result.build).to eq pending_job_3
-        end
+        expect(result).not_to be_valid
+        expect(result.build).to be_nil
       end
     end
 

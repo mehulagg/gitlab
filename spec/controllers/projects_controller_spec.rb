@@ -243,9 +243,8 @@ RSpec.describe ProjectsController do
             get :show, params: { namespace_id: empty_project.namespace, id: empty_project }
           end
 
-          it "renders the empty project view and records the experiment user", :aggregate_failures do
+          it "renders the empty project view" do
             expect(response).to render_template('empty')
-            expect(controller).to have_received(:record_experiment_user).with(:invite_members_empty_project_version_a)
           end
         end
       end
@@ -372,6 +371,23 @@ RSpec.describe ProjectsController do
           expect(response).to have_gitlab_http_status(expected_status)
           expect(response).to redirect_to(send(expected_redirect)) if expected_status == :found
         end
+      end
+    end
+
+    context 'when project is moved and git format is requested' do
+      let(:old_path) { project.path + 'old' }
+
+      before do
+        project.redirect_routes.create!(path: "#{project.namespace.full_path}/#{old_path}")
+
+        project.add_developer(user)
+        sign_in(user)
+      end
+
+      it 'redirects to new project path' do
+        get :show, params: { namespace_id: project.namespace, id: old_path }, format: :git
+
+        expect(response).to redirect_to(project_path(project, format: :git))
       end
     end
 

@@ -1,6 +1,6 @@
 ---
 stage: Verify
-group: Continuous Integration
+group: Pipeline Execution
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 type: tutorial
 ---
@@ -56,7 +56,7 @@ and it creates a dependent pipeline relation visible on the
 trigger_pipeline:
   stage: deploy
   script:
-    - curl --request POST --form "token=$CI_JOB_TOKEN" --form ref=master "https://gitlab.example.com/api/v4/projects/9/trigger/pipeline"
+    - curl --request POST --form "token=$CI_JOB_TOKEN" --form ref=main "https://gitlab.example.com/api/v4/projects/9/trigger/pipeline"
   only:
     - tags
 ```
@@ -81,7 +81,7 @@ build_submodule:
   stage: test
   script:
     - apt update && apt install -y unzip
-    - curl --location --output artifacts.zip "https://gitlab.example.com/api/v4/projects/1/jobs/artifacts/master/download?job=test&job_token=$CI_JOB_TOKEN"
+    - curl --location --output artifacts.zip "https://gitlab.example.com/api/v4/projects/1/jobs/artifacts/main/download?job=test&job_token=$CI_JOB_TOKEN"
     - unzip artifacts.zip
   only:
     - tags
@@ -140,21 +140,21 @@ By using cURL you can trigger a pipeline rerun with minimal effort, for example:
 ```shell
 curl --request POST \
      --form token=TOKEN \
-     --form ref=master \
+     --form ref=main \
      "https://gitlab.example.com/api/v4/projects/9/trigger/pipeline"
 ```
 
-In this case, the pipeline for the project with ID `9` runs on the `master` branch.
+In this case, the pipeline for the project with ID `9` runs on the `main` branch.
 
 Alternatively, you can pass the `token` and `ref` arguments in the query string:
 
 ```shell
 curl --request POST \
-    "https://gitlab.example.com/api/v4/projects/9/trigger/pipeline?token=TOKEN&ref=master"
+    "https://gitlab.example.com/api/v4/projects/9/trigger/pipeline?token=TOKEN&ref=main"
 ```
 
 You can also benefit by using triggers in your `.gitlab-ci.yml`. Let's say that
-you have two projects, A and B, and you want to trigger a pipeline on the `master`
+you have two projects, A and B, and you want to trigger a pipeline on the `main`
 branch of project B whenever a tag on project A is created. This is the job you
 need to add in project A's `.gitlab-ci.yml`:
 
@@ -162,7 +162,7 @@ need to add in project A's `.gitlab-ci.yml`:
 trigger_pipeline:
   stage: deploy
   script:
-    - 'curl --request POST --form token=TOKEN --form ref=master "https://gitlab.example.com/api/v4/projects/9/trigger/pipeline"'
+    - 'curl --request POST --form token=TOKEN --form ref=main "https://gitlab.example.com/api/v4/projects/9/trigger/pipeline"'
   only:
     - tags
 ```
@@ -178,7 +178,7 @@ To trigger a job from a webhook of another project you need to add the following
 webhook URL for Push and Tag events (change the project ID, ref and token):
 
 ```plaintext
-https://gitlab.example.com/api/v4/projects/9/ref/master/trigger/pipeline?token=TOKEN
+https://gitlab.example.com/api/v4/projects/9/ref/main/trigger/pipeline?token=TOKEN
 ```
 
 You should pass `ref` as part of the URL, to take precedence over `ref` from
@@ -250,7 +250,7 @@ and the script of the `upload_package` job is run:
 ```shell
 curl --request POST \
   --form token=TOKEN \
-  --form ref=master \
+  --form ref=main \
   --form "variables[UPLOAD_TO_S3]=true" \
   "https://gitlab.example.com/api/v4/projects/9/trigger/pipeline"
 ```
@@ -261,11 +261,11 @@ of all types of variables.
 ## Using cron to trigger nightly pipelines
 
 Whether you craft a script or just run cURL directly, you can trigger jobs
-in conjunction with cron. The example below triggers a job on the `master`
+in conjunction with cron. The example below triggers a job on the `main` branch
 branch of project with ID `9` every night at `00:30`:
 
 ```shell
-30 0 * * * curl --request POST --form token=TOKEN --form ref=master "https://gitlab.example.com/api/v4/projects/9/trigger/pipeline"
+30 0 * * * curl --request POST --form token=TOKEN --form ref=main "https://gitlab.example.com/api/v4/projects/9/trigger/pipeline"
 ```
 
 This behavior can also be achieved through the GitLab UI with

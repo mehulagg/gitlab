@@ -34,6 +34,10 @@ RSpec.describe Boards::UpdateService, services: true do
         hide_backlog_list: true, hide_closed_list: true }
     end
 
+    before do
+      project.add_reporter(user)
+    end
+
     context 'with group board' do
       let!(:board) { create(:board, group: group, name: 'Backend') }
 
@@ -46,19 +50,27 @@ RSpec.describe Boards::UpdateService, services: true do
       it_behaves_like 'board update service'
     end
 
-    it_behaves_like 'setting a milestone scope' do
-      subject { board.reload }
+    context 'when setting a timebox' do
+      let(:user) { create(:user) }
 
       before do
-        described_class.new(parent, double, milestone_id: milestone.id).execute(board)
+        parent.add_reporter(user)
       end
-    end
 
-    it_behaves_like 'setting an iteration scope' do
-      subject { board.reload }
+      it_behaves_like 'setting a milestone scope' do
+        subject { board.reload }
 
-      before do
-        described_class.new(parent, nil, iteration_id: iteration.id).execute(board)
+        before do
+          described_class.new(parent, user, milestone_id: milestone.id).execute(board)
+        end
+      end
+
+      it_behaves_like 'setting an iteration scope' do
+        subject { board.reload }
+
+        before do
+          described_class.new(parent, user, iteration_id: iteration.id).execute(board)
+        end
       end
     end
   end

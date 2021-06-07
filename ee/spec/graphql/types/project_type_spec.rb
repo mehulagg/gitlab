@@ -20,7 +20,8 @@ RSpec.describe GitlabSchema.types['Project'] do
       vulnerabilities vulnerability_scanners requirement_states_count
       vulnerability_severities_count packages compliance_frameworks vulnerabilities_count_by_day
       security_dashboard_path iterations iteration_cadences cluster_agents repository_size_excess actual_repository_size_limit
-      code_coverage_summary api_fuzzing_ci_configuration path_locks incident_management_escalation_policies incident_management_escalation_policy
+      code_coverage_summary api_fuzzing_ci_configuration path_locks incident_management_escalation_policies
+      incident_management_escalation_policy scan_execution_policies
     ]
 
     expect(described_class).to include_graphql_fields(*expected_fields)
@@ -51,7 +52,6 @@ RSpec.describe GitlabSchema.types['Project'] do
       create(:ci_build, :success, :sast, pipeline: pipeline)
       create(:ci_build, :success, :dast, pipeline: pipeline)
       create(:ci_build, :success, :license_scanning, pipeline: pipeline)
-      create(:ci_build, :success, :license_management, pipeline: pipeline)
       create(:ci_build, :pending, :secret_detection, pipeline: pipeline)
     end
 
@@ -230,6 +230,48 @@ RSpec.describe GitlabSchema.types['Project'] do
     subject { described_class.fields['pushRules'] }
 
     it { is_expected.to have_graphql_type(Types::PushRulesType) }
+  end
+
+  describe 'scan_execution_policies' do
+    let(:security_policy_management_project) { create(:project) }
+    let(:policy_configuration) { create(:security_orchestration_policy_configuration, project: project, security_policy_management_project: security_policy_management_project) }
+    let(:policy_yaml) { Gitlab::Config::Loader::Yaml.new(fixture_file('security_orchestration.yml', dir: 'ee')).load! }
+    let(:query) do
+      %(
+        query {
+          project(fullPath: "#{project.full_path}") {
+            scanExecutionPolicies {
+              nodes {
+                name
+                description
+                enabled
+                yaml
+                updatedAt
+              }
+            }
+          }
+        }
+      )
+    end
+
+    subject { GitlabSchema.execute(query, context: { current_user: user }).as_json }
+
+    before do
+      allow_next_found_instance_of(Security::OrchestrationPolicyConfiguration) do |policy|
+        allow(policy).to receive(:policy_configuration_valid?).and_return(true)
+        allow(policy).to receive(:policy_hash).and_return(policy_yaml)
+        allow(policy).to receive(:policy_last_updated_at).and_return(Time.now)
+      end
+
+      stub_licensed_features(security_orchestration_policies: true)
+      policy_configuration.security_policy_management_project.add_maintainer(user)
+    end
+
+    it 'returns associated scan execution policies' do
+      policies = subject.dig('data', 'project', 'scanExecutionPolicies', 'nodes')
+
+      expect(policies.count).to be(8)
+    end
   end
 
   private

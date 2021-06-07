@@ -4,13 +4,13 @@ import {
   manualSyncFailureText,
   connectivityIssue,
   manualSyncSuccessfulTitle,
-  notificationType,
+  subscriptionSyncStatus,
 } from '../constants';
 
 export const SUCCESS_ALERT_DISMISSED_EVENT = 'success-alert-dismissed';
 
-const notificationTypeValidator = (value) =>
-  !value || Object.values(notificationType).includes(value);
+const subscriptionSyncStatusValidator = (value) =>
+  !value || Object.values(subscriptionSyncStatus).includes(value);
 
 export default {
   name: 'SubscriptionSyncNotifications',
@@ -26,19 +26,18 @@ export default {
   },
   inject: ['connectivityHelpURL'],
   props: {
-    notification: {
+    syncStatus: {
       type: String,
-      required: false,
-      default: '',
-      validator: notificationTypeValidator,
+      required: true,
+      validator: subscriptionSyncStatusValidator,
     },
   },
   computed: {
     syncDidSuccess() {
-      return this.notification === notificationType.SYNC_SUCCESS;
+      return this.syncStatus === subscriptionSyncStatus.SYNC_SUCCESS;
     },
     syncDidFail() {
-      return this.notification === notificationType.SYNC_FAILURE;
+      return this.syncStatus === subscriptionSyncStatus.SYNC_FAILURE;
     },
   },
   methods: {

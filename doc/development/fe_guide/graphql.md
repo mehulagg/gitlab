@@ -106,6 +106,12 @@ Default client accepts two parameters: `resolvers` and `config`.
   - `assumeImmutableResults` (set to `false` by default) - this setting, when set to `true`, assumes that every single operation on updating Apollo Cache is immutable. It also sets `freezeResults` to `true`, so any attempt on mutating Apollo Cache throws a console warning in development environment. Please ensure you're following the immutability pattern on cache update operations before setting this option to `true`.
   - `fetchPolicy` determines how you want your component to interact with the Apollo cache. Defaults to "cache-first".
 
+### Multiple client queries for the same object
+
+If you are make multiple queries to the same Apollo client object you might encounter the following error: "Store error: the application attempted to write an object with no provided ID but the store already contains an ID of SomeEntity". [This error only should occur when you have made a query with an ID field for a portion, then made another that returns what would be the same object, but is missing the ID field.](https://github.com/apollographql/apollo-client/issues/2510#issue-271829009)
+
+Please note this is being tracked in [this issue](https://gitlab.com/gitlab-org/gitlab/-/issues/326101) and the documentation will be updated when this issue is resolved.
+
 ## GraphQL Queries
 
 To save query compilation at runtime, webpack can directly import `.graphql`
@@ -1091,7 +1097,7 @@ it('renders a loading state', () => {
   const mockApollo = createMockApolloProvider();
   const wrapper = createComponent({ mockApollo });
 
-  expect(wrapper.find(LoadingSpinner).exists()).toBe(true)
+  expect(wrapper.findComponent(LoadingSpinner).exists()).toBe(true)
 });
 
 it('renders designs list', async () => {
@@ -1393,7 +1399,6 @@ describe('My Index test with `createMockApollo`', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
     fetchLocalUserSpy = null;
   });
 

@@ -38,14 +38,14 @@ FactoryBot.define do
     end
   end
 
-  factory :drone_ci_service do
+  factory :drone_ci_service, class: 'Integrations::DroneCi' do
     project
     active { true }
     drone_url { 'https://bamboo.example.com' }
     token { 'test' }
   end
 
-  factory :jira_service do
+  factory :jira_service, class: 'Integrations::Jira' do
     project
     active { true }
     type { 'JiraService' }
@@ -127,9 +127,9 @@ FactoryBot.define do
     end
   end
 
-  factory :external_wiki_service do
+  factory :external_wiki_service, class: 'Integrations::ExternalWiki' do
     project
-    type { ExternalWikiService }
+    type { 'ExternalWikiService' }
     active { true }
     external_wiki_url { 'http://external-wiki-url.com' }
   end
@@ -160,14 +160,20 @@ FactoryBot.define do
     password { 'my-secret-password' }
   end
 
-  factory :slack_service do
+  factory :slack_service, class: 'Integrations::Slack' do
     project
     active { true }
     webhook { 'https://slack.service.url' }
     type { 'SlackService' }
   end
 
-  factory :pipelines_email_service do
+  factory :slack_slash_commands_service, class: 'Integrations::SlackSlashCommands' do
+    project
+    active { true }
+    type { 'SlackSlashCommandsService' }
+  end
+
+  factory :pipelines_email_service, class: 'Integrations::PipelinesEmail' do
     project
     active { true }
     type { 'PipelinesEmailService' }
@@ -182,13 +188,13 @@ FactoryBot.define do
     create_data { false }
 
     after(:build) do
-      Integrations::IssueTracker.skip_callback(:validation, :before, :handle_properties)
+      Integrations::BaseIssueTracker.skip_callback(:validation, :before, :handle_properties)
     end
 
     to_create { |instance| instance.save!(validate: false) }
 
     after(:create) do
-      Integrations::IssueTracker.set_callback(:validation, :before, :handle_properties)
+      Integrations::BaseIssueTracker.set_callback(:validation, :before, :handle_properties)
     end
   end
 

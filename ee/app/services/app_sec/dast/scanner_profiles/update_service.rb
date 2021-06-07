@@ -56,14 +56,13 @@ module AppSec
 
             next if old_value == new_value
 
-            AuditEventService.new(current_user, project, {
-              change: "DAST scanner profile #{property}",
-              from: old_value,
-              to: new_value,
-              target_id: profile.id,
-              target_type: profile.class.name,
-              target_details: profile.name
-            }).security_event
+            ::Gitlab::Audit::Auditor.audit(
+              name: 'dast_scanner_profile_update',
+              author: current_user,
+              scope: project,
+              target: profile,
+              message: "Changed DAST scanner profile #{property} from #{old_value} to #{new_value}"
+            )
           end
         end
       end

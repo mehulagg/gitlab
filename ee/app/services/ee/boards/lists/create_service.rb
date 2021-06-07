@@ -83,7 +83,7 @@ module EE
         end
 
         def find_iteration(board)
-          parent_params = ::IterationsFinder.params_for_parent(board.resource_parent, include_ancestors: true)
+          parent_params = { parent: board.resource_parent, include_ancestors: true }
           ::IterationsFinder.new(current_user, parent_params).find_by(id: params['iteration_id']) # rubocop: disable CodeReuse/ActiveRecord
         end
 

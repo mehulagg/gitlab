@@ -162,10 +162,17 @@ module EE
               description: "The project's path locks.",
               extras: [:lookahead],
               resolver: ::Resolvers::PathLocksResolver
+
+        field :scan_execution_policies,
+              ::Types::ScanExecutionPolicyType.connection_type,
+              calls_gitaly: true,
+              null: true,
+              description: 'Scan Execution Policies of the project',
+              resolver: ::Resolvers::ScanExecutionPolicyResolver
       end
 
       def api_fuzzing_ci_configuration
-        return unless Ability.allowed?(current_user, :read_vulnerability, object)
+        return unless Ability.allowed?(current_user, :read_security_resource, object)
 
         configuration = ::AppSec::Fuzzing::Api::CiConfiguration.new(project: object)
 

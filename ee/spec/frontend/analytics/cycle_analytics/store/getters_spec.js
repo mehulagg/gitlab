@@ -13,12 +13,12 @@ import {
   endDate,
   allowedStages,
   selectedProjects,
-  transformedStagePathData,
   issueStage,
   stageMedians,
   stageCounts,
   basePaginationResult,
   initialPaginationState,
+  transformedStagePathData,
 } from '../mock_data';
 
 let state = null;

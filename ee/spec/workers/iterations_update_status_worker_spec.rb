@@ -15,7 +15,7 @@ RSpec.describe IterationsUpdateStatusWorker do
       it 'updates the status of iterations that require it', :aggregate_failures do
         expect(closed_iteration1.state).to eq('closed')
         expect(closed_iteration2.state).to eq('closed')
-        expect(started_iteration.state).to eq('upcoming')
+        expect(started_iteration.state).to eq('started')
         expect(upcoming_iteration.state).to eq('upcoming')
 
         closed_iteration2.update!(state: 'upcoming')

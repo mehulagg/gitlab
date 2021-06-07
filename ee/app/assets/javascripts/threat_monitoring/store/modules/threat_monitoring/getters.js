@@ -7,11 +7,6 @@ export const currentEnvironmentName = ({ currentEnvironmentId, environments }) =
 
 export const canChangeEnvironment = ({
   isLoadingEnvironments,
-  isLoadingWafStatistics,
   isLoadingNetworkPolicyStatistics,
   environments,
-}) =>
-  !isLoadingEnvironments &&
-  !isLoadingWafStatistics &&
-  !isLoadingNetworkPolicyStatistics &&
-  environments.length > 0;
+}) => !isLoadingEnvironments && !isLoadingNetworkPolicyStatistics && environments.length > 0;

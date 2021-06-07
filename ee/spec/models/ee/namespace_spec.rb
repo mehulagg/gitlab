@@ -17,6 +17,7 @@ RSpec.describe Namespace do
   it { is_expected.to have_one(:namespace_statistics) }
   it { is_expected.to have_one(:namespace_limit) }
   it { is_expected.to have_one(:elasticsearch_indexed_namespace) }
+  it { is_expected.to have_one :upcoming_reconciliation }
 
   it { is_expected.to delegate_method(:shared_runners_seconds).to(:namespace_statistics) }
   it { is_expected.to delegate_method(:shared_runners_seconds_last_reset).to(:namespace_statistics) }
@@ -60,6 +61,25 @@ RSpec.describe Namespace do
   described_class::PLANS.each do |namespace_plan|
     describe "#{namespace_plan}_plan?" do
       it_behaves_like 'plan helper', namespace_plan
+    end
+  end
+
+  describe '#free_personal?' do
+    where(:user, :paid, :expected) do
+      true  | false | true
+      false | false | false
+      false | true  | false
+    end
+
+    with_them do
+      before do
+        allow(namespace).to receive(:user?).and_return(user)
+        allow(namespace).to receive(:paid?).and_return(paid)
+      end
+
+      it 'returns expected boolean value' do
+        expect(namespace.free_personal?).to eq(expected)
+      end
     end
   end
 

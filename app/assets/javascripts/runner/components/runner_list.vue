@@ -3,6 +3,7 @@ import { GlTable, GlTooltipDirective, GlSkeletonLoader } from '@gitlab/ui';
 import { getIdFromGraphQLId } from '~/graphql_shared/utils';
 import { formatNumber, sprintf, __, s__ } from '~/locale';
 import TimeAgo from '~/vue_shared/components/time_ago_tooltip.vue';
+import RunnerActionsCell from './cells/runner_actions_cell.vue';
 import RunnerNameCell from './cells/runner_name_cell.vue';
 import RunnerTypeCell from './cells/runner_type_cell.vue';
 import RunnerTags from './runner_tags.vue';
@@ -32,6 +33,7 @@ export default {
     GlTable,
     GlSkeletonLoader,
     TimeAgo,
+    RunnerActionsCell,
     RunnerNameCell,
     RunnerTags,
     RunnerTypeCell,
@@ -95,8 +97,8 @@ export default {
       stacked="md"
       fixed
     >
-      <template #table-busy>
-        <gl-skeleton-loader />
+      <template v-if="!runners.length" #table-busy>
+        <gl-skeleton-loader v-for="i in 4" :key="i" />
       </template>
 
       <template #cell(type)="{ item }">
@@ -132,11 +134,9 @@ export default {
         <template v-else>{{ __('Never') }}</template>
       </template>
 
-      <template #cell(actions)>
-        <!-- TODO add actions to update runners -->
+      <template #cell(actions)="{ item }">
+        <runner-actions-cell :runner="item" />
       </template>
     </gl-table>
-
-    <!-- TODO implement pagination -->
   </div>
 </template>

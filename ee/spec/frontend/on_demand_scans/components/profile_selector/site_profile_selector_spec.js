@@ -33,10 +33,6 @@ describe('OnDemandScansSiteProfileSelector', () => {
           provide: {
             siteProfilesLibraryPath: TEST_LIBRARY_PATH,
             newSiteProfilePath: TEST_NEW_PATH,
-            glFeatures: {
-              securityDastSiteProfilesAdditionalFields: true,
-              securityDastSiteProfilesApiOption: true,
-            },
           },
           slots: {
             summary: `<div>${profiles[0].profileName}'s summary</div>`,

@@ -20,7 +20,6 @@ export default {
     editorOptions() {
       return {
         lineNumbers: 'off',
-        minimap: { enabled: false },
         folding: false,
         // Investigate the necessity of `glyphMargin` with #326746
         glyphMargin: false,

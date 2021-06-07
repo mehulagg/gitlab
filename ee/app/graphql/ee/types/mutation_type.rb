@@ -66,15 +66,17 @@ module EE
         mount_mutation ::Mutations::DastSiteTokens::Create
         mount_mutation ::Mutations::Namespaces::IncreaseStorageTemporarily
         mount_mutation ::Mutations::QualityManagement::TestCases::Create
-        mount_mutation ::Mutations::Analytics::DevopsAdoption::Segments::Create
-        mount_mutation ::Mutations::Analytics::DevopsAdoption::Segments::BulkFindOrCreate
-        mount_mutation ::Mutations::Analytics::DevopsAdoption::Segments::Delete
+        mount_mutation ::Mutations::Analytics::DevopsAdoption::EnabledNamespaces::Enable
+        mount_mutation ::Mutations::Analytics::DevopsAdoption::EnabledNamespaces::BulkEnable
+        mount_mutation ::Mutations::Analytics::DevopsAdoption::EnabledNamespaces::Disable
         mount_mutation ::Mutations::IncidentManagement::OncallSchedule::Create
         mount_mutation ::Mutations::IncidentManagement::OncallSchedule::Update
         mount_mutation ::Mutations::IncidentManagement::OncallSchedule::Destroy
         mount_mutation ::Mutations::IncidentManagement::OncallRotation::Create
         mount_mutation ::Mutations::IncidentManagement::OncallRotation::Update
         mount_mutation ::Mutations::IncidentManagement::OncallRotation::Destroy
+        mount_mutation ::Mutations::IncidentManagement::EscalationPolicy::Create
+        mount_mutation ::Mutations::IncidentManagement::EscalationPolicy::Destroy
         mount_mutation ::Mutations::AppSec::Fuzzing::Api::CiConfiguration::Create
 
         prepend(Types::DeprecatedMutations)

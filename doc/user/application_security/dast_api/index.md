@@ -59,6 +59,7 @@ Examples of various configurations can be found here:
 - [Example HTTP Archive (HAR) project](https://gitlab.com/gitlab-org/security-products/demos/api-dast/har-example)
 - [Example Postman Collection project](https://gitlab.com/gitlab-org/security-products/demos/api-dast/postman-example)
 - [Example GraphQL project](https://gitlab.com/gitlab-org/security-products/demos/api-dast/graphql-example)
+- [Example SOAP project](https://gitlab.com/gitlab-org/security-products/demos/api-dast/soap-example)
 
 WARNING:
 GitLab 14.0 will require that you place DAST API configuration files (for example,
@@ -71,8 +72,8 @@ starting in GitLab 14.0, GitLab will not check your repository's root for config
 > Support for OpenAPI Specification using YAML format was
 > [introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/330583) in GitLab 14.0.
 
-The [OpenAPI Specification](https://www.openapis.org/) (formerly the Swagger Specification) is an API description format for REST APIs. 
-This section shows you how to configure API fuzzing using an OpenAPI Specification to provide information about the target API to test. 
+The [OpenAPI Specification](https://www.openapis.org/) (formerly the Swagger Specification) is an API description format for REST APIs.
+This section shows you how to configure API fuzzing using an OpenAPI Specification to provide information about the target API to test.
 OpenAPI Specifications are provided as a file system resource or URL. Both JSON and YAML OpenAPI formats are supported.
 
 DAST API uses an OpenAPI document to generate the request body. When a request body is required,
@@ -634,6 +635,7 @@ can be added, removed, and modified by creating a custom configuration.
 | `DAST_API_TARGET_URL`                                 | Base URL of API testing target. |
 |[`DAST_API_CONFIG`](#configuration-files)              | DAST API configuration file. Defaults to `.gitlab-dast-api.yml`. |
 |[`DAST_API_PROFILE`](#configuration-files)             | Configuration profile to use during testing. Defaults to `Quick`. |
+|[`FUZZAPI_EXCLUDE_PATHS`](#exclude-paths)              | Exclude API URL paths from testing. |
 |[`DAST_API_OPENAPI`](#openapi-specification)           | OpenAPI specification file or URL. |
 |[`DAST_API_HAR`](#http-archive-har)                    | HTTP Archive (HAR) file. |
 |[`DAST_API_POSTMAN_COLLECTION`](#postman-collection)   | Postman Collection file. |
@@ -847,7 +849,7 @@ variables:
 ```
 
 In this example `.gitlab-ci.yml`, the `SECRET_OVERRIDES` variable provides the JSON. This is a
-[group or instance level CI/CD variable defined in the UI](../../../ci/variables/README.md#instance-cicd-variables):
+[group or instance level CI/CD variable defined in the UI](../../../ci/variables/README.md#add-a-cicd-variable-to-an-instance):
 
 ```yaml
 stages:
@@ -891,6 +893,47 @@ variables:
   DAST_API_OVERRIDES_FILE: output/dast-api-overrides.json
   DAST_API_OVERRIDES_CMD: renew_token.py
   DAST_API_OVERRIDES_INTERVAL: 300
+```
+
+### Exclude Paths
+
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/211892) in GitLab 14.0.
+
+When testing an API it can be useful to exclude certain paths. For example, you might exclude testing of an authentication service or an older version of the API. To exclude paths, use the `FUZZAPI_EXCLUDE_PATHS` CI/CD variable . This variable is specified in your `.gitlab-ci.yml` file. To exclude multiple paths, separate entries using the `;` character. In the provided paths you can use a single character wildcard `?` and `*` for a multiple character wildcard.
+
+To verify the paths are excluded, review the `Tested Operations` and `Excluded Operations` portion of the job output. You should not see any excluded paths listed under `Tested Operations`.
+
+```plaintext
+2021-05-27 21:51:08 [INF] API Security: --[ Tested Operations ]-------------------------
+2021-05-27 21:51:08 [INF] API Security: 201 POST http://target:7777/api/users CREATED
+2021-05-27 21:51:08 [INF] API Security: ------------------------------------------------
+2021-05-27 21:51:08 [INF] API Security: --[ Excluded Operations ]-----------------------
+2021-05-27 21:51:08 [INF] API Security: GET http://target:7777/api/messages
+2021-05-27 21:51:08 [INF] API Security: POST http://target:7777/api/messages
+2021-05-27 21:51:08 [INF] API Security: ------------------------------------------------
+```
+
+#### Examples
+
+This example excludes the `/auth` resource. This does not exclude child resources (`/auth/child`).
+
+```yaml
+variables:
+  DAST_API_EXCLUDE_PATHS=/auth
+```
+
+To exclude `/auth`, and child resources (`/auth/child`), we use a wildcard.
+
+```yaml
+variables:
+  DAST_API_EXCLUDE_PATHS=/auth*
+```
+
+To exclude multiple paths we use the `;` character. In this example we exclude `/auth*` and `/v1/*`.
+
+```yaml
+variables:
+  DAST_API_EXCLUDE_PATHS=/auth*;/v1/*
 ```
 
 ## Running your first scan
@@ -1088,7 +1131,7 @@ The best-suited solution will depend on whether or not your target API changes f
 
 #### Static environment solution
 
-This solution is for pipelines in which the target API URL doesn't change (is static). 
+This solution is for pipelines in which the target API URL doesn't change (is static).
 
 **Add environmental variable**
 
@@ -1105,7 +1148,7 @@ include:
 
 #### Dynamic environment solutions
 
-In a dynamic environment your target API changes for each different deployment. In this case, there is more than one possible solution, we recommend you use the `environment_url.txt` file when dealing with dynamic environments. 
+In a dynamic environment your target API changes for each different deployment. In this case, there is more than one possible solution, we recommend you use the `environment_url.txt` file when dealing with dynamic environments.
 
 **Use environment_url.txt**
 

@@ -161,6 +161,34 @@ node, using `psql` which is installed by Omnibus GitLab.
 
 The database used by Praefect is now configured.
 
+If you see Praefect database errors after configuring PostgreSQL, see
+[troubleshooting steps below](#relation-does-not-exist-errors).
+
+#### Relation does not exist errors
+
+By default Praefect database tables are created automatically by `gitlab-ctl reconfigure` task.
+However, if the `gitlab-ctl reconfigure` command isn't executed or there are errors during the
+execution, the Praefect database tables are not created on initial reconfigure and can throw
+errors that relations do not exist.
+
+For example:
+
+- `ERROR:  relation "node_status" does not exist at character 13`
+- `ERROR:  relation "replication_queue_lock" does not exist at character 40`
+- This error:
+
+  ```json
+  {"level":"error","msg":"Error updating node: pq: relation \"node_status\" does not exist","pid":210882,"praefectName":"gitlab1x4m:0.0.0.0:2305","time":"2021-04-01T19:26:19.473Z","virtual_storage":"praefect-cluster-1"}
+  ```
+
+To solve this, the database schema migration can be done using `sql-migrate` subcommand of
+the `praefect` command:
+
+```shell
+$ sudo /opt/gitlab/embedded/bin/praefect -config /var/opt/gitlab/praefect/config.toml sql-migrate
+praefect sql-migrate: OK (applied 21 migrations)
+```
+
 #### PgBouncer
 
 To reduce PostgreSQL resource consumption, we recommend setting up and configuring
@@ -1467,8 +1495,10 @@ After creating and configuring Gitaly Cluster:
 1. [Schedule repository storage moves for all projects on a storage shard](../../api/project_repository_storage_moves.md#schedule-repository-storage-moves-for-all-projects-on-a-storage-shard) using the API. For example:
 
    ```shell
-   curl --request POST --header "Private-Token: <your_access_token>" --header "Content-Type: application/json" \
-   --data '{"source_storage_name":"<original_storage_name>","destination_storage_name":"<cluster_storage_name>"}' "https://gitlab.example.com/api/v4/project_repository_storage_moves"
+   curl --request POST --header "Private-Token: <your_access_token>" \
+        --header "Content-Type: application/json" \
+        --data '{"source_storage_name":"<original_storage_name>","destination_storage_name":"<cluster_storage_name>"}' \
+        "https://gitlab.example.com/api/v4/project_repository_storage_moves"
    ```
 
 1. [Query the most recent repository moves](../../api/project_repository_storage_moves.md#retrieve-all-project-repository-storage-moves)
@@ -1500,8 +1530,10 @@ After creating and configuring Gitaly Cluster:
 1. [Schedule repository storage moves for all snippets on a storage shard](../../api/snippet_repository_storage_moves.md#schedule-repository-storage-moves-for-all-snippets-on-a-storage-shard) using the API. For example:
 
    ```shell
-   curl --request POST --header "PRIVATE-TOKEN: <your_access_token>" --header "Content-Type: application/json" \
-   --data '{"source_storage_name":"<original_storage_name>","destination_storage_name":"<cluster_storage_name>"}' "https://gitlab.example.com/api/v4/snippet_repository_storage_moves"
+   curl --request POST --header "PRIVATE-TOKEN: <your_access_token>" \
+        --header "Content-Type: application/json" \
+        --data '{"source_storage_name":"<original_storage_name>","destination_storage_name":"<cluster_storage_name>"}' \
+        "https://gitlab.example.com/api/v4/snippet_repository_storage_moves"
    ```
 
 1. [Query the most recent repository moves](../../api/snippet_repository_storage_moves.md#retrieve-all-snippet-repository-storage-moves)
@@ -1525,8 +1557,10 @@ After creating and configuring Gitaly Cluster:
 1. [Schedule repository storage moves for all groups on a storage shard](../../api/group_repository_storage_moves.md#schedule-repository-storage-moves-for-all-groups-on-a-storage-shard) using the API.
 
     ```shell
-    curl --request POST --header "PRIVATE-TOKEN: <your_access_token>" --header "Content-Type: application/json" \
-    --data '{"source_storage_name":"<original_storage_name>","destination_storage_name":"<cluster_storage_name>"}' "https://gitlab.example.com/api/v4/group_repository_storage_moves"
+    curl --request POST --header "PRIVATE-TOKEN: <your_access_token>" \
+         --header "Content-Type: application/json" \
+         --data '{"source_storage_name":"<original_storage_name>","destination_storage_name":"<cluster_storage_name>"}' \
+         "https://gitlab.example.com/api/v4/group_repository_storage_moves"
     ```
 
 1. [Query the most recent repository moves](../../api/group_repository_storage_moves.md#retrieve-all-group-repository-storage-moves)

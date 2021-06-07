@@ -167,7 +167,6 @@ RSpec.describe Geo::MetricsUpdateService, :geo, :prometheus do
         expect(metric_value(:geo_lfs_objects)).to eq(100)
         expect(metric_value(:geo_lfs_objects_synced)).to eq(50)
         expect(metric_value(:geo_lfs_objects_failed)).to eq(12)
-        expect(metric_value(:geo_lfs_objects_synced_missing_on_primary)).to eq(4)
         expect(metric_value(:geo_job_artifacts)).to eq(100)
         expect(metric_value(:geo_job_artifacts_synced)).to eq(50)
         expect(metric_value(:geo_job_artifacts_failed)).to eq(12)

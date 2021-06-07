@@ -83,9 +83,9 @@ Fields related to design management.
 
 Returns [`DesignManagement!`](#designmanagement).
 
-### `Query.devopsAdoptionSegments`
+### `Query.devopsAdoptionEnabledNamespaces`
 
-Get configured DevOps adoption segments on the instance. **BETA** This endpoint is subject to change without notice.
+Get configured DevOps adoption namespaces. **BETA** This endpoint is subject to change without notice.
 
 Returns [`DevopsAdoptionSegmentConnection`](#devopsadoptionsegmentconnection).
 
@@ -97,8 +97,7 @@ four standard [pagination arguments](#connection-pagination-arguments):
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
-| <a id="querydevopsadoptionsegmentsdirectdescendantsonly"></a>`directDescendantsOnly` | [`Boolean`](#boolean) | Limits segments to direct descendants of specified parent. |
-| <a id="querydevopsadoptionsegmentsparentnamespaceid"></a>`parentNamespaceId` | [`NamespaceID`](#namespaceid) | Filter by ancestor namespace. |
+| <a id="querydevopsadoptionenablednamespacesdisplaynamespaceid"></a>`displayNamespaceId` | [`NamespaceID`](#namespaceid) | Filter by display namespace. |
 
 ### `Query.echo`
 
@@ -284,6 +283,7 @@ four standard [pagination arguments](#connection-pagination-arguments):
 | <a id="queryprojectssearch"></a>`search` | [`String`](#string) | Search query for project name, path, or description. |
 | <a id="queryprojectssearchnamespaces"></a>`searchNamespaces` | [`Boolean`](#boolean) | Include namespace in project search. |
 | <a id="queryprojectssort"></a>`sort` | [`String`](#string) | Sort order of results. |
+| <a id="queryprojectstopics"></a>`topics` | [`[String!]`](#string) | Filters projects by topics. |
 
 ### `Query.runner`
 
@@ -759,26 +759,27 @@ Input type: `BoardListUpdateLimitMetricsInput`
 | <a id="mutationboardlistupdatelimitmetricserrors"></a>`errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 | <a id="mutationboardlistupdatelimitmetricslist"></a>`list` | [`BoardList`](#boardlist) | The updated list. |
 
-### `Mutation.bulkFindOrCreateDevopsAdoptionSegments`
+### `Mutation.bulkEnableDevopsAdoptionNamespaces`
 
 **BETA** This endpoint is subject to change without notice.
 
-Input type: `BulkFindOrCreateDevopsAdoptionSegmentsInput`
+Input type: `BulkEnableDevopsAdoptionNamespacesInput`
 
 #### Arguments
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
-| <a id="mutationbulkfindorcreatedevopsadoptionsegmentsclientmutationid"></a>`clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
-| <a id="mutationbulkfindorcreatedevopsadoptionsegmentsnamespaceids"></a>`namespaceIds` | [`[NamespaceID!]!`](#namespaceid) | List of Namespace IDs for the segments. |
+| <a id="mutationbulkenabledevopsadoptionnamespacesclientmutationid"></a>`clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
+| <a id="mutationbulkenabledevopsadoptionnamespacesdisplaynamespaceid"></a>`displayNamespaceId` | [`NamespaceID`](#namespaceid) | Display namespace ID. |
+| <a id="mutationbulkenabledevopsadoptionnamespacesnamespaceids"></a>`namespaceIds` | [`[NamespaceID!]!`](#namespaceid) | List of Namespace IDs. |
 
 #### Fields
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
-| <a id="mutationbulkfindorcreatedevopsadoptionsegmentsclientmutationid"></a>`clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
-| <a id="mutationbulkfindorcreatedevopsadoptionsegmentserrors"></a>`errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
-| <a id="mutationbulkfindorcreatedevopsadoptionsegmentssegments"></a>`segments` | [`[DevopsAdoptionSegment!]`](#devopsadoptionsegment) | Created segments after mutation. |
+| <a id="mutationbulkenabledevopsadoptionnamespacesclientmutationid"></a>`clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
+| <a id="mutationbulkenabledevopsadoptionnamespacesenablednamespaces"></a>`enabledNamespaces` | [`[DevopsAdoptionSegment!]`](#devopsadoptionsegment) | Enabled namespaces after mutation. |
+| <a id="mutationbulkenabledevopsadoptionnamespaceserrors"></a>`errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 
 ### `Mutation.ciCdSettingsUpdate`
 
@@ -882,6 +883,7 @@ Input type: `CommitCreateInput`
 | <a id="mutationcommitcreateclientmutationid"></a>`clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 | <a id="mutationcommitcreatecommit"></a>`commit` | [`Commit`](#commit) | The commit after mutation. |
 | <a id="mutationcommitcreatecommitpipelinepath"></a>`commitPipelinePath` | [`String`](#string) | ETag path for the commit's pipeline. |
+| <a id="mutationcommitcreatecontent"></a>`content` | [`[String!]`](#string) | Contents of the commit. |
 | <a id="mutationcommitcreateerrors"></a>`errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 
 ### `Mutation.configureSast`
@@ -1092,27 +1094,6 @@ Input type: `CreateCustomEmojiInput`
 | <a id="mutationcreatecustomemojiclientmutationid"></a>`clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 | <a id="mutationcreatecustomemojicustomemoji"></a>`customEmoji` | [`CustomEmoji`](#customemoji) | The new custom emoji. |
 | <a id="mutationcreatecustomemojierrors"></a>`errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
-
-### `Mutation.createDevopsAdoptionSegment`
-
-**BETA** This endpoint is subject to change without notice.
-
-Input type: `CreateDevopsAdoptionSegmentInput`
-
-#### Arguments
-
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| <a id="mutationcreatedevopsadoptionsegmentclientmutationid"></a>`clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
-| <a id="mutationcreatedevopsadoptionsegmentnamespaceid"></a>`namespaceId` | [`NamespaceID!`](#namespaceid) | Namespace ID to set for the segment. |
-
-#### Fields
-
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| <a id="mutationcreatedevopsadoptionsegmentclientmutationid"></a>`clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
-| <a id="mutationcreatedevopsadoptionsegmenterrors"></a>`errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
-| <a id="mutationcreatedevopsadoptionsegmentsegment"></a>`segment` | [`DevopsAdoptionSegment`](#devopsadoptionsegment) | The segment after mutation. |
 
 ### `Mutation.createDiffNote`
 
@@ -1532,13 +1513,13 @@ Input type: `DastSiteProfileCreateInput`
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
-| <a id="mutationdastsiteprofilecreateauth"></a>`auth` | [`DastSiteProfileAuthInput`](#dastsiteprofileauthinput) | Parameters for authentication. Will be ignored if `security_dast_site_profiles_additional_fields` feature flag is disabled. |
+| <a id="mutationdastsiteprofilecreateauth"></a>`auth` | [`DastSiteProfileAuthInput`](#dastsiteprofileauthinput) | Parameters for authentication. |
 | <a id="mutationdastsiteprofilecreateclientmutationid"></a>`clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
-| <a id="mutationdastsiteprofilecreateexcludedurls"></a>`excludedUrls` | [`[String!]`](#string) | The URLs to skip during an authenticated scan. Defaults to `[]`. Will be ignored if `security_dast_site_profiles_additional_fields` feature flag is disabled. |
+| <a id="mutationdastsiteprofilecreateexcludedurls"></a>`excludedUrls` | [`[String!]`](#string) | The URLs to skip during an authenticated scan. Defaults to `[]`. |
 | <a id="mutationdastsiteprofilecreatefullpath"></a>`fullPath` | [`ID!`](#id) | The project the site profile belongs to. |
 | <a id="mutationdastsiteprofilecreateprofilename"></a>`profileName` | [`String!`](#string) | The name of the site profile. |
-| <a id="mutationdastsiteprofilecreaterequestheaders"></a>`requestHeaders` | [`String`](#string) | Comma-separated list of request header names and values to be added to every request made by DAST. Will be ignored if `security_dast_site_profiles_additional_fields` feature flag is disabled. |
-| <a id="mutationdastsiteprofilecreatetargettype"></a>`targetType` | [`DastTargetTypeEnum`](#dasttargettypeenum) | The type of target to be scanned. Will be ignored if `security_dast_site_profiles_api_option` feature flag is disabled. |
+| <a id="mutationdastsiteprofilecreaterequestheaders"></a>`requestHeaders` | [`String`](#string) | Comma-separated list of request header names and values to be added to every request made by DAST. |
+| <a id="mutationdastsiteprofilecreatetargettype"></a>`targetType` | [`DastTargetTypeEnum`](#dasttargettypeenum) | The type of target to be scanned. |
 | <a id="mutationdastsiteprofilecreatetargeturl"></a>`targetUrl` | [`String`](#string) | The URL of the target to be scanned. |
 
 #### Fields
@@ -1576,14 +1557,14 @@ Input type: `DastSiteProfileUpdateInput`
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
-| <a id="mutationdastsiteprofileupdateauth"></a>`auth` | [`DastSiteProfileAuthInput`](#dastsiteprofileauthinput) | Parameters for authentication. Will be ignored if `security_dast_site_profiles_additional_fields` feature flag is disabled. |
+| <a id="mutationdastsiteprofileupdateauth"></a>`auth` | [`DastSiteProfileAuthInput`](#dastsiteprofileauthinput) | Parameters for authentication. |
 | <a id="mutationdastsiteprofileupdateclientmutationid"></a>`clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
-| <a id="mutationdastsiteprofileupdateexcludedurls"></a>`excludedUrls` | [`[String!]`](#string) | The URLs to skip during an authenticated scan. Will be ignored if `security_dast_site_profiles_additional_fields` feature flag is disabled. |
+| <a id="mutationdastsiteprofileupdateexcludedurls"></a>`excludedUrls` | [`[String!]`](#string) | The URLs to skip during an authenticated scan. |
 | <a id="mutationdastsiteprofileupdatefullpath"></a>`fullPath` | [`ID!`](#id) | The project the site profile belongs to. |
 | <a id="mutationdastsiteprofileupdateid"></a>`id` | [`DastSiteProfileID!`](#dastsiteprofileid) | ID of the site profile to be updated. |
 | <a id="mutationdastsiteprofileupdateprofilename"></a>`profileName` | [`String!`](#string) | The name of the site profile. |
-| <a id="mutationdastsiteprofileupdaterequestheaders"></a>`requestHeaders` | [`String`](#string) | Comma-separated list of request header names and values to be added to every request made by DAST. Will be ignored if `security_dast_site_profiles_additional_fields` feature flag is disabled. |
-| <a id="mutationdastsiteprofileupdatetargettype"></a>`targetType` | [`DastTargetTypeEnum`](#dasttargettypeenum) | The type of target to be scanned. Will be ignored if `security_dast_site_profiles_api_option` feature flag is disabled. |
+| <a id="mutationdastsiteprofileupdaterequestheaders"></a>`requestHeaders` | [`String`](#string) | Comma-separated list of request header names and values to be added to every request made by DAST. |
+| <a id="mutationdastsiteprofileupdatetargettype"></a>`targetType` | [`DastTargetTypeEnum`](#dasttargettypeenum) | The type of target to be scanned. |
 | <a id="mutationdastsiteprofileupdatetargeturl"></a>`targetUrl` | [`String`](#string) | The URL of the target to be scanned. |
 
 #### Fields
@@ -1675,26 +1656,6 @@ Input type: `DeleteAnnotationInput`
 | ---- | ---- | ----------- |
 | <a id="mutationdeleteannotationclientmutationid"></a>`clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 | <a id="mutationdeleteannotationerrors"></a>`errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
-
-### `Mutation.deleteDevopsAdoptionSegment`
-
-**BETA** This endpoint is subject to change without notice.
-
-Input type: `DeleteDevopsAdoptionSegmentInput`
-
-#### Arguments
-
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| <a id="mutationdeletedevopsadoptionsegmentclientmutationid"></a>`clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
-| <a id="mutationdeletedevopsadoptionsegmentid"></a>`id` | [`[AnalyticsDevopsAdoptionSegmentID!]!`](#analyticsdevopsadoptionsegmentid) | One or many IDs of the segments to delete. |
-
-#### Fields
-
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| <a id="mutationdeletedevopsadoptionsegmentclientmutationid"></a>`clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
-| <a id="mutationdeletedevopsadoptionsegmenterrors"></a>`errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 
 ### `Mutation.designManagementDelete`
 
@@ -1912,6 +1873,26 @@ Input type: `DestroySnippetInput`
 | <a id="mutationdestroysnippeterrors"></a>`errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 | <a id="mutationdestroysnippetsnippet"></a>`snippet` | [`Snippet`](#snippet) | The snippet after mutation. |
 
+### `Mutation.disableDevopsAdoptionNamespace`
+
+**BETA** This endpoint is subject to change without notice.
+
+Input type: `DisableDevopsAdoptionNamespaceInput`
+
+#### Arguments
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| <a id="mutationdisabledevopsadoptionnamespaceclientmutationid"></a>`clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
+| <a id="mutationdisabledevopsadoptionnamespaceid"></a>`id` | [`[AnalyticsDevopsAdoptionEnabledNamespaceID!]!`](#analyticsdevopsadoptionenablednamespaceid) | One or many IDs of the enabled namespaces to disable. |
+
+#### Fields
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| <a id="mutationdisabledevopsadoptionnamespaceclientmutationid"></a>`clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
+| <a id="mutationdisabledevopsadoptionnamespaceerrors"></a>`errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
+
 ### `Mutation.discussionToggleResolve`
 
 Toggles the resolved state of a discussion.
@@ -1958,6 +1939,28 @@ Input type: `DismissVulnerabilityInput`
 | <a id="mutationdismissvulnerabilityclientmutationid"></a>`clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 | <a id="mutationdismissvulnerabilityerrors"></a>`errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 | <a id="mutationdismissvulnerabilityvulnerability"></a>`vulnerability` | [`Vulnerability`](#vulnerability) | The vulnerability after dismissal. |
+
+### `Mutation.enableDevopsAdoptionNamespace`
+
+**BETA** This endpoint is subject to change without notice.
+
+Input type: `EnableDevopsAdoptionNamespaceInput`
+
+#### Arguments
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| <a id="mutationenabledevopsadoptionnamespaceclientmutationid"></a>`clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
+| <a id="mutationenabledevopsadoptionnamespacedisplaynamespaceid"></a>`displayNamespaceId` | [`NamespaceID`](#namespaceid) | Display namespace ID. |
+| <a id="mutationenabledevopsadoptionnamespacenamespaceid"></a>`namespaceId` | [`NamespaceID!`](#namespaceid) | Namespace ID. |
+
+#### Fields
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| <a id="mutationenabledevopsadoptionnamespaceclientmutationid"></a>`clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
+| <a id="mutationenabledevopsadoptionnamespaceenablednamespace"></a>`enabledNamespace` | [`DevopsAdoptionSegment`](#devopsadoptionsegment) | Enabled namespace after mutation. |
+| <a id="mutationenabledevopsadoptionnamespaceerrors"></a>`errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 
 ### `Mutation.environmentsCanaryIngressUpdate`
 
@@ -2151,6 +2154,47 @@ Input type: `EpicTreeReorderInput`
 | ---- | ---- | ----------- |
 | <a id="mutationepictreereorderclientmutationid"></a>`clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 | <a id="mutationepictreereordererrors"></a>`errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
+
+### `Mutation.escalationPolicyCreate`
+
+Input type: `EscalationPolicyCreateInput`
+
+#### Arguments
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| <a id="mutationescalationpolicycreateclientmutationid"></a>`clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
+| <a id="mutationescalationpolicycreatedescription"></a>`description` | [`String`](#string) | The description of the escalation policy. |
+| <a id="mutationescalationpolicycreatename"></a>`name` | [`String!`](#string) | The name of the escalation policy. |
+| <a id="mutationescalationpolicycreateprojectpath"></a>`projectPath` | [`ID!`](#id) | The project to create the escalation policy for. |
+| <a id="mutationescalationpolicycreaterules"></a>`rules` | [`[EscalationRuleInput!]!`](#escalationruleinput) | The steps of the escalation policy. |
+
+#### Fields
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| <a id="mutationescalationpolicycreateclientmutationid"></a>`clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
+| <a id="mutationescalationpolicycreateerrors"></a>`errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
+| <a id="mutationescalationpolicycreateescalationpolicy"></a>`escalationPolicy` | [`EscalationPolicyType`](#escalationpolicytype) | The escalation policy. |
+
+### `Mutation.escalationPolicyDestroy`
+
+Input type: `EscalationPolicyDestroyInput`
+
+#### Arguments
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| <a id="mutationescalationpolicydestroyclientmutationid"></a>`clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
+| <a id="mutationescalationpolicydestroyid"></a>`id` | [`IncidentManagementEscalationPolicyID!`](#incidentmanagementescalationpolicyid) | The escalation policy internal ID to remove. |
+
+#### Fields
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| <a id="mutationescalationpolicydestroyclientmutationid"></a>`clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
+| <a id="mutationescalationpolicydestroyerrors"></a>`errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
+| <a id="mutationescalationpolicydestroyescalationpolicy"></a>`escalationPolicy` | [`EscalationPolicyType`](#escalationpolicytype) | The escalation policy. |
 
 ### `Mutation.exportRequirements`
 
@@ -3525,6 +3569,54 @@ Input type: `RunDASTScanInput`
 | <a id="mutationrundastscanclientmutationid"></a>`clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 | <a id="mutationrundastscanerrors"></a>`errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 | <a id="mutationrundastscanpipelineurl"></a>`pipelineUrl` | [`String`](#string) | URL of the pipeline that was created. |
+
+### `Mutation.runnerDelete`
+
+Available only when feature flag `runner_graphql_query` is enabled.
+
+Input type: `RunnerDeleteInput`
+
+#### Arguments
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| <a id="mutationrunnerdeleteclientmutationid"></a>`clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
+| <a id="mutationrunnerdeleteid"></a>`id` | [`CiRunnerID!`](#cirunnerid) | ID of the runner to delete. |
+
+#### Fields
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| <a id="mutationrunnerdeleteclientmutationid"></a>`clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
+| <a id="mutationrunnerdeleteerrors"></a>`errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
+
+### `Mutation.runnerUpdate`
+
+Available only when feature flag `runner_graphql_query` is enabled.
+
+Input type: `RunnerUpdateInput`
+
+#### Arguments
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| <a id="mutationrunnerupdateaccesslevel"></a>`accessLevel` | [`CiRunnerAccessLevel`](#cirunneraccesslevel) | Access level of the runner. |
+| <a id="mutationrunnerupdateactive"></a>`active` | [`Boolean`](#boolean) | Indicates the runner is allowed to receive jobs. |
+| <a id="mutationrunnerupdateclientmutationid"></a>`clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
+| <a id="mutationrunnerupdatedescription"></a>`description` | [`String`](#string) | Description of the runner. |
+| <a id="mutationrunnerupdateid"></a>`id` | [`CiRunnerID!`](#cirunnerid) | ID of the runner to update. |
+| <a id="mutationrunnerupdatelocked"></a>`locked` | [`Boolean`](#boolean) | Indicates the runner is locked. |
+| <a id="mutationrunnerupdatemaximumtimeout"></a>`maximumTimeout` | [`Int`](#int) | Maximum timeout (in seconds) for jobs processed by the runner. |
+| <a id="mutationrunnerupdaterununtagged"></a>`runUntagged` | [`Boolean`](#boolean) | Indicates the runner is able to run untagged jobs. |
+| <a id="mutationrunnerupdatetaglist"></a>`tagList` | [`[String!]`](#string) | Tags associated with the runner. |
+
+#### Fields
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| <a id="mutationrunnerupdateclientmutationid"></a>`clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
+| <a id="mutationrunnerupdateerrors"></a>`errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
+| <a id="mutationrunnerupdaterunner"></a>`runner` | [`CiRunner`](#cirunner) | The runner after mutation. |
 
 ### `Mutation.terraformStateDelete`
 
@@ -6287,6 +6379,29 @@ The edge type for [`Scan`](#scan).
 | <a id="scanedgecursor"></a>`cursor` | [`String!`](#string) | A cursor for use in pagination. |
 | <a id="scanedgenode"></a>`node` | [`Scan`](#scan) | The item at the end of the edge. |
 
+#### `ScanExecutionPolicyConnection`
+
+The connection type for [`ScanExecutionPolicy`](#scanexecutionpolicy).
+
+##### Fields
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| <a id="scanexecutionpolicyconnectionedges"></a>`edges` | [`[ScanExecutionPolicyEdge]`](#scanexecutionpolicyedge) | A list of edges. |
+| <a id="scanexecutionpolicyconnectionnodes"></a>`nodes` | [`[ScanExecutionPolicy]`](#scanexecutionpolicy) | A list of nodes. |
+| <a id="scanexecutionpolicyconnectionpageinfo"></a>`pageInfo` | [`PageInfo!`](#pageinfo) | Information to aid in pagination. |
+
+#### `ScanExecutionPolicyEdge`
+
+The edge type for [`ScanExecutionPolicy`](#scanexecutionpolicy).
+
+##### Fields
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| <a id="scanexecutionpolicyedgecursor"></a>`cursor` | [`String!`](#string) | A cursor for use in pagination. |
+| <a id="scanexecutionpolicyedgenode"></a>`node` | [`ScanExecutionPolicy`](#scanexecutionpolicy) | The item at the end of the edge. |
+
 #### `ScannedResourceConnection`
 
 The connection type for [`ScannedResource`](#scannedresource).
@@ -7227,6 +7342,7 @@ four standard [pagination arguments](#connection-pagination-arguments):
 | <a id="boardepicchildrenlabelname"></a>`labelName` | [`[String!]`](#string) | Filter epics by labels. |
 | <a id="boardepicchildrenmilestonetitle"></a>`milestoneTitle` | [`String`](#string) | Filter epics by milestone title, computed from epic's issues. |
 | <a id="boardepicchildrenmyreactionemoji"></a>`myReactionEmoji` | [`String`](#string) | Filter by reaction emoji applied by the current user. |
+| <a id="boardepicchildrennot"></a>`not` | [`NegatedEpicFilterInput`](#negatedepicfilterinput) | Negated epic arguments. |
 | <a id="boardepicchildrensearch"></a>`search` | [`String`](#string) | Search query for epic title or description. |
 | <a id="boardepicchildrensort"></a>`sort` | [`EpicSort`](#epicsort) | List epics by sort order. |
 | <a id="boardepicchildrenstartdate"></a>`startDate` **{warning-solid}** | [`Time`](#time) | **Deprecated** in 13.5. Use timeframe.start. |
@@ -7776,6 +7892,7 @@ Represents the current license.
 | ---- | ---- | ----------- |
 | <a id="currentlicenseactivatedat"></a>`activatedAt` | [`Date`](#date) | Date when the license was activated. |
 | <a id="currentlicensebillableuserscount"></a>`billableUsersCount` | [`Int`](#int) | Number of billable users on the system. |
+| <a id="currentlicenseblockchangesat"></a>`blockChangesAt` | [`Date`](#date) | Date, including grace period, when licensed features will be blocked. |
 | <a id="currentlicensecompany"></a>`company` | [`String`](#string) | Company of the licensee. |
 | <a id="currentlicenseemail"></a>`email` | [`String`](#string) | Email of the licensee. |
 | <a id="currentlicenseexpiresat"></a>`expiresAt` | [`Date`](#date) | Date when the license expires. |
@@ -7856,15 +7973,15 @@ Represents a DAST Site Profile.
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
-| <a id="dastsiteprofileauth"></a>`auth` | [`DastSiteProfileAuth`](#dastsiteprofileauth) | Target authentication details. Will always return `null` if `security_dast_site_profiles_additional_fields` feature flag is disabled. |
+| <a id="dastsiteprofileauth"></a>`auth` | [`DastSiteProfileAuth`](#dastsiteprofileauth) | Target authentication details. |
 | <a id="dastsiteprofileeditpath"></a>`editPath` | [`String`](#string) | Relative web path to the edit page of a site profile. |
-| <a id="dastsiteprofileexcludedurls"></a>`excludedUrls` | [`[String!]`](#string) | The URLs to skip during an authenticated scan. Will always return `null` if `security_dast_site_profiles_additional_fields` feature flag is disabled. |
+| <a id="dastsiteprofileexcludedurls"></a>`excludedUrls` | [`[String!]`](#string) | The URLs to skip during an authenticated scan. |
 | <a id="dastsiteprofileid"></a>`id` | [`DastSiteProfileID!`](#dastsiteprofileid) | ID of the site profile. |
 | <a id="dastsiteprofilenormalizedtargeturl"></a>`normalizedTargetUrl` | [`String`](#string) | Normalized URL of the target to be scanned. |
 | <a id="dastsiteprofileprofilename"></a>`profileName` | [`String`](#string) | The name of the site profile. |
 | <a id="dastsiteprofilereferencedinsecuritypolicies"></a>`referencedInSecurityPolicies` | [`[String!]`](#string) | List of security policy names that are referencing given project. |
-| <a id="dastsiteprofilerequestheaders"></a>`requestHeaders` | [`String`](#string) | Comma-separated list of request header names and values to be added to every request made by DAST. Will always return `null` if `security_dast_site_profiles_additional_fields` feature flag is disabled. |
-| <a id="dastsiteprofiletargettype"></a>`targetType` | [`DastTargetTypeEnum`](#dasttargettypeenum) | The type of target to be scanned. Will always return `null` if `security_dast_site_profiles_api_option` feature flag is disabled. |
+| <a id="dastsiteprofilerequestheaders"></a>`requestHeaders` | [`String`](#string) | Comma-separated list of request header names and values to be added to every request made by DAST. |
+| <a id="dastsiteprofiletargettype"></a>`targetType` | [`DastTargetTypeEnum`](#dasttargettypeenum) | The type of target to be scanned. |
 | <a id="dastsiteprofiletargeturl"></a>`targetUrl` | [`String`](#string) | The URL of the target to be scanned. |
 | <a id="dastsiteprofileuserpermissions"></a>`userPermissions` | [`DastSiteProfilePermissions!`](#dastsiteprofilepermissions) | Permissions for the current user on the resource. |
 | <a id="dastsiteprofilevalidationstatus"></a>`validationStatus` | [`DastSiteProfileValidationStatusEnum`](#dastsiteprofilevalidationstatusenum) | The current validation status of the site profile. |
@@ -8175,15 +8292,16 @@ four standard [pagination arguments](#connection-pagination-arguments):
 
 ### `DevopsAdoptionSegment`
 
-Segment.
+Enabled namespace for DevopsAdoption.
 
 #### Fields
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
-| <a id="devopsadoptionsegmentid"></a>`id` | [`ID!`](#id) | ID of the segment. |
-| <a id="devopsadoptionsegmentlatestsnapshot"></a>`latestSnapshot` | [`DevopsAdoptionSnapshot`](#devopsadoptionsnapshot) | The latest adoption metrics for the segment. |
-| <a id="devopsadoptionsegmentnamespace"></a>`namespace` | [`Namespace`](#namespace) | Segment namespace. |
+| <a id="devopsadoptionsegmentdisplaynamespace"></a>`displayNamespace` | [`Namespace`](#namespace) | Namespace where data should be displayed. |
+| <a id="devopsadoptionsegmentid"></a>`id` | [`ID!`](#id) | ID of the enabled namespace. |
+| <a id="devopsadoptionsegmentlatestsnapshot"></a>`latestSnapshot` | [`DevopsAdoptionSnapshot`](#devopsadoptionsnapshot) | The latest adoption metrics for the enabled namespace. |
+| <a id="devopsadoptionsegmentnamespace"></a>`namespace` | [`Namespace`](#namespace) | Namespace which should be calculated. |
 
 ### `DevopsAdoptionSnapshot`
 
@@ -8382,6 +8500,7 @@ four standard [pagination arguments](#connection-pagination-arguments):
 | <a id="epicchildrenlabelname"></a>`labelName` | [`[String!]`](#string) | Filter epics by labels. |
 | <a id="epicchildrenmilestonetitle"></a>`milestoneTitle` | [`String`](#string) | Filter epics by milestone title, computed from epic's issues. |
 | <a id="epicchildrenmyreactionemoji"></a>`myReactionEmoji` | [`String`](#string) | Filter by reaction emoji applied by the current user. |
+| <a id="epicchildrennot"></a>`not` | [`NegatedEpicFilterInput`](#negatedepicfilterinput) | Negated epic arguments. |
 | <a id="epicchildrensearch"></a>`search` | [`String`](#string) | Search query for epic title or description. |
 | <a id="epicchildrensort"></a>`sort` | [`EpicSort`](#epicsort) | List epics by sort order. |
 | <a id="epicchildrenstartdate"></a>`startDate` **{warning-solid}** | [`Time`](#time) | **Deprecated** in 13.5. Use timeframe.start. |
@@ -8982,6 +9101,7 @@ Returns [`Epic`](#epic).
 | <a id="groupepiclabelname"></a>`labelName` | [`[String!]`](#string) | Filter epics by labels. |
 | <a id="groupepicmilestonetitle"></a>`milestoneTitle` | [`String`](#string) | Filter epics by milestone title, computed from epic's issues. |
 | <a id="groupepicmyreactionemoji"></a>`myReactionEmoji` | [`String`](#string) | Filter by reaction emoji applied by the current user. |
+| <a id="groupepicnot"></a>`not` | [`NegatedEpicFilterInput`](#negatedepicfilterinput) | Negated epic arguments. |
 | <a id="groupepicsearch"></a>`search` | [`String`](#string) | Search query for epic title or description. |
 | <a id="groupepicsort"></a>`sort` | [`EpicSort`](#epicsort) | List epics by sort order. |
 | <a id="groupepicstartdate"></a>`startDate` **{warning-solid}** | [`Time`](#time) | **Deprecated** in 13.5. Use timeframe.start. |
@@ -9024,6 +9144,7 @@ four standard [pagination arguments](#connection-pagination-arguments):
 | <a id="groupepicslabelname"></a>`labelName` | [`[String!]`](#string) | Filter epics by labels. |
 | <a id="groupepicsmilestonetitle"></a>`milestoneTitle` | [`String`](#string) | Filter epics by milestone title, computed from epic's issues. |
 | <a id="groupepicsmyreactionemoji"></a>`myReactionEmoji` | [`String`](#string) | Filter by reaction emoji applied by the current user. |
+| <a id="groupepicsnot"></a>`not` | [`NegatedEpicFilterInput`](#negatedepicfilterinput) | Negated epic arguments. |
 | <a id="groupepicssearch"></a>`search` | [`String`](#string) | Search query for epic title or description. |
 | <a id="groupepicssort"></a>`sort` | [`EpicSort`](#epicsort) | List epics by sort order. |
 | <a id="groupepicsstartdate"></a>`startDate` **{warning-solid}** | [`Time`](#time) | **Deprecated** in 13.5. Use timeframe.start. |
@@ -9380,7 +9501,7 @@ Represents a Group Membership.
 | <a id="groupmembergroup"></a>`group` | [`Group`](#group) | Group that a User is a member of. |
 | <a id="groupmemberid"></a>`id` | [`ID!`](#id) | ID of the member. |
 | <a id="groupmemberupdatedat"></a>`updatedAt` | [`Time`](#time) | Date and time the membership was last updated. |
-| <a id="groupmemberuser"></a>`user` | [`UserCore!`](#usercore) | User that is associated with the member object. |
+| <a id="groupmemberuser"></a>`user` | [`UserCore`](#usercore) | User that is associated with the member object. |
 | <a id="groupmemberuserpermissions"></a>`userPermissions` | [`GroupPermissions!`](#grouppermissions) | Permissions for the current user on the resource. |
 
 ### `GroupPermissions`
@@ -9821,6 +9942,7 @@ Represents an entry from the Cloud License history.
 | Name | Type | Description |
 | ---- | ---- | ----------- |
 | <a id="licensehistoryentryactivatedat"></a>`activatedAt` | [`Date`](#date) | Date when the license was activated. |
+| <a id="licensehistoryentryblockchangesat"></a>`blockChangesAt` | [`Date`](#date) | Date, including grace period, when licensed features will be blocked. |
 | <a id="licensehistoryentrycompany"></a>`company` | [`String`](#string) | Company of the licensee. |
 | <a id="licensehistoryentryemail"></a>`email` | [`String`](#string) | Email of the licensee. |
 | <a id="licensehistoryentryexpiresat"></a>`expiresAt` | [`Date`](#date) | Date when the license expires. |
@@ -9891,7 +10013,8 @@ Maven metadata.
 | <a id="mergerequestmergecommitsha"></a>`mergeCommitSha` | [`String`](#string) | SHA of the merge request commit (set once merged). |
 | <a id="mergerequestmergeerror"></a>`mergeError` | [`String`](#string) | Error message due to a merge error. |
 | <a id="mergerequestmergeongoing"></a>`mergeOngoing` | [`Boolean!`](#boolean) | Indicates if a merge is currently occurring. |
-| <a id="mergerequestmergestatus"></a>`mergeStatus` | [`String`](#string) | Status of the merge request. |
+| <a id="mergerequestmergestatus"></a>`mergeStatus` **{warning-solid}** | [`String`](#string) | **Deprecated** in 14.0. This was renamed. Use: [`MergeRequest.mergeStatusEnum`](#mergerequestmergestatusenum). |
+| <a id="mergerequestmergestatusenum"></a>`mergeStatusEnum` | [`MergeStatus`](#mergestatus) | Merge status of the merge request. |
 | <a id="mergerequestmergetrainscount"></a>`mergeTrainsCount` | [`Int`](#int) | Number of merge requests in the merge train. |
 | <a id="mergerequestmergeuser"></a>`mergeUser` | [`UserCore`](#usercore) | User who merged this merge request. |
 | <a id="mergerequestmergewhenpipelinesucceeds"></a>`mergeWhenPipelineSucceeds` | [`Boolean`](#boolean) | Indicates if the merge has been set to be merged when its pipeline succeeds (MWPS). |
@@ -10924,6 +11047,7 @@ Represents vulnerability finding of a security report on the pipeline.
 | <a id="pipelinesecurityreportfindingscanner"></a>`scanner` | [`VulnerabilityScanner`](#vulnerabilityscanner) | Scanner metadata for the vulnerability. |
 | <a id="pipelinesecurityreportfindingseverity"></a>`severity` | [`VulnerabilitySeverity`](#vulnerabilityseverity) | Severity of the vulnerability finding. |
 | <a id="pipelinesecurityreportfindingsolution"></a>`solution` | [`String`](#string) | URL to the vulnerability's details page. |
+| <a id="pipelinesecurityreportfindingstate"></a>`state` | [`VulnerabilityState`](#vulnerabilitystate) | The finding status. |
 | <a id="pipelinesecurityreportfindinguuid"></a>`uuid` | [`String`](#string) | Name of the vulnerability finding. |
 
 ### `Project`
@@ -10985,6 +11109,7 @@ Represents vulnerability finding of a security report on the pipeline.
 | <a id="projectrequestaccessenabled"></a>`requestAccessEnabled` | [`Boolean`](#boolean) | Indicates if users can request member access to the project. |
 | <a id="projectrequirementstatescount"></a>`requirementStatesCount` | [`RequirementStatesCount`](#requirementstatescount) | Number of requirements for the project by their state. |
 | <a id="projectsastciconfiguration"></a>`sastCiConfiguration` | [`SastCiConfiguration`](#sastciconfiguration) | SAST CI configuration for the project. |
+| <a id="projectscanexecutionpolicies"></a>`scanExecutionPolicies` | [`ScanExecutionPolicyConnection`](#scanexecutionpolicyconnection) | Scan Execution Policies of the project. (see [Connections](#connections)) |
 | <a id="projectsecuritydashboardpath"></a>`securityDashboardPath` | [`String`](#string) | Path to project's security dashboard. |
 | <a id="projectsecurityscanners"></a>`securityScanners` | [`SecurityScanners`](#securityscanners) | Information about security analyzers used in the project. |
 | <a id="projectsentryerrors"></a>`sentryErrors` | [`SentryErrorCollection`](#sentryerrorcollection) | Paginated collection of Sentry errors on the project. |
@@ -11791,7 +11916,7 @@ Represents a Project Membership.
 | <a id="projectmemberid"></a>`id` | [`ID!`](#id) | ID of the member. |
 | <a id="projectmemberproject"></a>`project` | [`Project`](#project) | Project that User is a member of. |
 | <a id="projectmemberupdatedat"></a>`updatedAt` | [`Time`](#time) | Date and time the membership was last updated. |
-| <a id="projectmemberuser"></a>`user` | [`UserCore!`](#usercore) | User that is associated with the member object. |
+| <a id="projectmemberuser"></a>`user` | [`UserCore`](#usercore) | User that is associated with the member object. |
 | <a id="projectmemberuserpermissions"></a>`userPermissions` | [`ProjectPermissions!`](#projectpermissions) | Permissions for the current user on the resource. |
 
 ### `ProjectPermissions`
@@ -11880,6 +12005,17 @@ Represents rules that commit pushes must follow.
 | Name | Type | Description |
 | ---- | ---- | ----------- |
 | <a id="pushrulesrejectunsignedcommits"></a>`rejectUnsignedCommits` | [`Boolean!`](#boolean) | Indicates whether commits not signed through GPG will be rejected. |
+
+### `PypiMetadata`
+
+Pypi metadata.
+
+#### Fields
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| <a id="pypimetadataid"></a>`id` | [`PackagesPypiMetadatumID!`](#packagespypimetadatumid) | ID of the metadatum. |
+| <a id="pypimetadatarequiredpython"></a>`requiredPython` | [`String`](#string) | Required Python version of the Pypi package. |
 
 ### `RecentFailures`
 
@@ -12255,6 +12391,20 @@ Represents the security scan information.
 | ---- | ---- | ----------- |
 | <a id="scanerrors"></a>`errors` | [`[String!]!`](#string) | List of errors. |
 | <a id="scanname"></a>`name` | [`String!`](#string) | Name of the scan. |
+
+### `ScanExecutionPolicy`
+
+Represents the scan execution policy.
+
+#### Fields
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| <a id="scanexecutionpolicydescription"></a>`description` | [`String!`](#string) | Description of the policy. |
+| <a id="scanexecutionpolicyenabled"></a>`enabled` | [`Boolean!`](#boolean) | Indicates whether this policy is enabled. |
+| <a id="scanexecutionpolicyname"></a>`name` | [`String!`](#string) | Name of the policy. |
+| <a id="scanexecutionpolicyupdatedat"></a>`updatedAt` | [`Time!`](#time) | Timestamp of when the policy YAML was last updated. |
+| <a id="scanexecutionpolicyyaml"></a>`yaml` | [`String!`](#string) | YAML definition of the policy. |
 
 ### `ScannedResource`
 
@@ -13597,10 +13747,10 @@ Values for sorting alerts.
 | <a id="alertmanagementalertsortupdated_desc"></a>`UPDATED_DESC` | Updated at descending order. |
 | <a id="alertmanagementalertsortupdated_time_asc"></a>`UPDATED_TIME_ASC` | Created time by ascending order. |
 | <a id="alertmanagementalertsortupdated_time_desc"></a>`UPDATED_TIME_DESC` | Created time by descending order. |
-| <a id="alertmanagementalertsortcreated_asc"></a>`created_asc` **{warning-solid}** | **Deprecated:** This was renamed. Please use `CREATED_ASC`. Deprecated in 13.5. |
-| <a id="alertmanagementalertsortcreated_desc"></a>`created_desc` **{warning-solid}** | **Deprecated:** This was renamed. Please use `CREATED_DESC`. Deprecated in 13.5. |
-| <a id="alertmanagementalertsortupdated_asc"></a>`updated_asc` **{warning-solid}** | **Deprecated:** This was renamed. Please use `UPDATED_ASC`. Deprecated in 13.5. |
-| <a id="alertmanagementalertsortupdated_desc"></a>`updated_desc` **{warning-solid}** | **Deprecated:** This was renamed. Please use `UPDATED_DESC`. Deprecated in 13.5. |
+| <a id="alertmanagementalertsortcreated_asc"></a>`created_asc` **{warning-solid}** | **Deprecated** in 13.5. This was renamed. Use: `CREATED_ASC`. |
+| <a id="alertmanagementalertsortcreated_desc"></a>`created_desc` **{warning-solid}** | **Deprecated** in 13.5. This was renamed. Use: `CREATED_DESC`. |
+| <a id="alertmanagementalertsortupdated_asc"></a>`updated_asc` **{warning-solid}** | **Deprecated** in 13.5. This was renamed. Use: `UPDATED_ASC`. |
+| <a id="alertmanagementalertsortupdated_desc"></a>`updated_desc` **{warning-solid}** | **Deprecated** in 13.5. This was renamed. Use: `UPDATED_DESC`. |
 
 ### `AlertManagementDomainFilter`
 
@@ -13870,10 +14020,10 @@ Values for sorting container repositories.
 | <a id="containerrepositorysortname_desc"></a>`NAME_DESC` | Name by descending order. |
 | <a id="containerrepositorysortupdated_asc"></a>`UPDATED_ASC` | Updated at ascending order. |
 | <a id="containerrepositorysortupdated_desc"></a>`UPDATED_DESC` | Updated at descending order. |
-| <a id="containerrepositorysortcreated_asc"></a>`created_asc` **{warning-solid}** | **Deprecated:** This was renamed. Please use `CREATED_ASC`. Deprecated in 13.5. |
-| <a id="containerrepositorysortcreated_desc"></a>`created_desc` **{warning-solid}** | **Deprecated:** This was renamed. Please use `CREATED_DESC`. Deprecated in 13.5. |
-| <a id="containerrepositorysortupdated_asc"></a>`updated_asc` **{warning-solid}** | **Deprecated:** This was renamed. Please use `UPDATED_ASC`. Deprecated in 13.5. |
-| <a id="containerrepositorysortupdated_desc"></a>`updated_desc` **{warning-solid}** | **Deprecated:** This was renamed. Please use `UPDATED_DESC`. Deprecated in 13.5. |
+| <a id="containerrepositorysortcreated_asc"></a>`created_asc` **{warning-solid}** | **Deprecated** in 13.5. This was renamed. Use: `CREATED_ASC`. |
+| <a id="containerrepositorysortcreated_desc"></a>`created_desc` **{warning-solid}** | **Deprecated** in 13.5. This was renamed. Use: `CREATED_DESC`. |
+| <a id="containerrepositorysortupdated_asc"></a>`updated_asc` **{warning-solid}** | **Deprecated** in 13.5. This was renamed. Use: `UPDATED_ASC`. |
+| <a id="containerrepositorysortupdated_desc"></a>`updated_desc` **{warning-solid}** | **Deprecated** in 13.5. This was renamed. Use: `UPDATED_DESC`. |
 
 ### `ContainerRepositoryStatus`
 
@@ -13995,10 +14145,10 @@ Roadmap sort values.
 | <a id="epicsortend_date_desc"></a>`END_DATE_DESC` | Sort by end date in descending order. |
 | <a id="epicsortstart_date_asc"></a>`START_DATE_ASC` | Sort by start date in ascending order. |
 | <a id="epicsortstart_date_desc"></a>`START_DATE_DESC` | Sort by start date in descending order. |
-| <a id="epicsortend_date_asc"></a>`end_date_asc` **{warning-solid}** | **Deprecated:** Use END_DATE_ASC. Deprecated in 13.11. |
-| <a id="epicsortend_date_desc"></a>`end_date_desc` **{warning-solid}** | **Deprecated:** Use END_DATE_DESC. Deprecated in 13.11. |
-| <a id="epicsortstart_date_asc"></a>`start_date_asc` **{warning-solid}** | **Deprecated:** Use START_DATE_ASC. Deprecated in 13.11. |
-| <a id="epicsortstart_date_desc"></a>`start_date_desc` **{warning-solid}** | **Deprecated:** Use START_DATE_DESC. Deprecated in 13.11. |
+| <a id="epicsortend_date_asc"></a>`end_date_asc` **{warning-solid}** | **Deprecated** in 13.11. Use END_DATE_ASC. |
+| <a id="epicsortend_date_desc"></a>`end_date_desc` **{warning-solid}** | **Deprecated** in 13.11. Use END_DATE_DESC. |
+| <a id="epicsortstart_date_asc"></a>`start_date_asc` **{warning-solid}** | **Deprecated** in 13.11. Use START_DATE_ASC. |
+| <a id="epicsortstart_date_desc"></a>`start_date_desc` **{warning-solid}** | **Deprecated** in 13.11. Use START_DATE_DESC. |
 
 ### `EpicState`
 
@@ -14127,10 +14277,10 @@ Values for sorting issues.
 | <a id="issuesortupdated_desc"></a>`UPDATED_DESC` | Updated at descending order. |
 | <a id="issuesortweight_asc"></a>`WEIGHT_ASC` | Weight by ascending order. |
 | <a id="issuesortweight_desc"></a>`WEIGHT_DESC` | Weight by descending order. |
-| <a id="issuesortcreated_asc"></a>`created_asc` **{warning-solid}** | **Deprecated:** This was renamed. Please use `CREATED_ASC`. Deprecated in 13.5. |
-| <a id="issuesortcreated_desc"></a>`created_desc` **{warning-solid}** | **Deprecated:** This was renamed. Please use `CREATED_DESC`. Deprecated in 13.5. |
-| <a id="issuesortupdated_asc"></a>`updated_asc` **{warning-solid}** | **Deprecated:** This was renamed. Please use `UPDATED_ASC`. Deprecated in 13.5. |
-| <a id="issuesortupdated_desc"></a>`updated_desc` **{warning-solid}** | **Deprecated:** This was renamed. Please use `UPDATED_DESC`. Deprecated in 13.5. |
+| <a id="issuesortcreated_asc"></a>`created_asc` **{warning-solid}** | **Deprecated** in 13.5. This was renamed. Use: `CREATED_ASC`. |
+| <a id="issuesortcreated_desc"></a>`created_desc` **{warning-solid}** | **Deprecated** in 13.5. This was renamed. Use: `CREATED_DESC`. |
+| <a id="issuesortupdated_asc"></a>`updated_asc` **{warning-solid}** | **Deprecated** in 13.5. This was renamed. Use: `UPDATED_ASC`. |
+| <a id="issuesortupdated_desc"></a>`updated_desc` **{warning-solid}** | **Deprecated** in 13.5. This was renamed. Use: `UPDATED_DESC`. |
 
 ### `IssueState`
 
@@ -14280,10 +14430,10 @@ Values for sorting merge requests.
 | <a id="mergerequestsortpriority_desc"></a>`PRIORITY_DESC` | Priority by descending order. |
 | <a id="mergerequestsortupdated_asc"></a>`UPDATED_ASC` | Updated at ascending order. |
 | <a id="mergerequestsortupdated_desc"></a>`UPDATED_DESC` | Updated at descending order. |
-| <a id="mergerequestsortcreated_asc"></a>`created_asc` **{warning-solid}** | **Deprecated:** This was renamed. Please use `CREATED_ASC`. Deprecated in 13.5. |
-| <a id="mergerequestsortcreated_desc"></a>`created_desc` **{warning-solid}** | **Deprecated:** This was renamed. Please use `CREATED_DESC`. Deprecated in 13.5. |
-| <a id="mergerequestsortupdated_asc"></a>`updated_asc` **{warning-solid}** | **Deprecated:** This was renamed. Please use `UPDATED_ASC`. Deprecated in 13.5. |
-| <a id="mergerequestsortupdated_desc"></a>`updated_desc` **{warning-solid}** | **Deprecated:** This was renamed. Please use `UPDATED_DESC`. Deprecated in 13.5. |
+| <a id="mergerequestsortcreated_asc"></a>`created_asc` **{warning-solid}** | **Deprecated** in 13.5. This was renamed. Use: `CREATED_ASC`. |
+| <a id="mergerequestsortcreated_desc"></a>`created_desc` **{warning-solid}** | **Deprecated** in 13.5. This was renamed. Use: `CREATED_DESC`. |
+| <a id="mergerequestsortupdated_asc"></a>`updated_asc` **{warning-solid}** | **Deprecated** in 13.5. This was renamed. Use: `UPDATED_ASC`. |
+| <a id="mergerequestsortupdated_desc"></a>`updated_desc` **{warning-solid}** | **Deprecated** in 13.5. This was renamed. Use: `UPDATED_DESC`. |
 
 ### `MergeRequestState`
 
@@ -14296,6 +14446,18 @@ State of a GitLab merge request.
 | <a id="mergerequeststatelocked"></a>`locked` | Discussion has been locked. |
 | <a id="mergerequeststatemerged"></a>`merged` | Merge request has been merged. |
 | <a id="mergerequeststateopened"></a>`opened` | In open state. |
+
+### `MergeStatus`
+
+Representation of whether a GitLab merge request can be merged.
+
+| Value | Description |
+| ----- | ----------- |
+| <a id="mergestatuscannot_be_merged"></a>`CANNOT_BE_MERGED` | There are conflicts between the source and target branches. |
+| <a id="mergestatuscannot_be_merged_recheck"></a>`CANNOT_BE_MERGED_RECHECK` | Currently unchecked. The previous state was `CANNOT_BE_MERGED`. |
+| <a id="mergestatuscan_be_merged"></a>`CAN_BE_MERGED` | There are no conflicts between the source and target branches. |
+| <a id="mergestatuschecking"></a>`CHECKING` | Currently checking for mergeability. |
+| <a id="mergestatusunchecked"></a>`UNCHECKED` | Merge status has not been checked. |
 
 ### `MergeStrategyEnum`
 
@@ -14617,10 +14779,10 @@ Common sort values.
 | <a id="sortcreated_desc"></a>`CREATED_DESC` | Created at descending order. |
 | <a id="sortupdated_asc"></a>`UPDATED_ASC` | Updated at ascending order. |
 | <a id="sortupdated_desc"></a>`UPDATED_DESC` | Updated at descending order. |
-| <a id="sortcreated_asc"></a>`created_asc` **{warning-solid}** | **Deprecated:** This was renamed. Please use `CREATED_ASC`. Deprecated in 13.5. |
-| <a id="sortcreated_desc"></a>`created_desc` **{warning-solid}** | **Deprecated:** This was renamed. Please use `CREATED_DESC`. Deprecated in 13.5. |
-| <a id="sortupdated_asc"></a>`updated_asc` **{warning-solid}** | **Deprecated:** This was renamed. Please use `UPDATED_ASC`. Deprecated in 13.5. |
-| <a id="sortupdated_desc"></a>`updated_desc` **{warning-solid}** | **Deprecated:** This was renamed. Please use `UPDATED_DESC`. Deprecated in 13.5. |
+| <a id="sortcreated_asc"></a>`created_asc` **{warning-solid}** | **Deprecated** in 13.5. This was renamed. Use: `CREATED_ASC`. |
+| <a id="sortcreated_desc"></a>`created_desc` **{warning-solid}** | **Deprecated** in 13.5. This was renamed. Use: `CREATED_DESC`. |
+| <a id="sortupdated_asc"></a>`updated_asc` **{warning-solid}** | **Deprecated** in 13.5. This was renamed. Use: `UPDATED_ASC`. |
+| <a id="sortupdated_desc"></a>`updated_desc` **{warning-solid}** | **Deprecated** in 13.5. This was renamed. Use: `UPDATED_DESC`. |
 
 ### `TestCaseStatus`
 
@@ -14687,7 +14849,6 @@ Name of the feature that the callout is for.
 | ----- | ----------- |
 | <a id="usercalloutfeaturenameenumaccount_recovery_regular_check"></a>`ACCOUNT_RECOVERY_REGULAR_CHECK` | Callout feature name for account_recovery_regular_check. |
 | <a id="usercalloutfeaturenameenumactive_user_count_threshold"></a>`ACTIVE_USER_COUNT_THRESHOLD` | Callout feature name for active_user_count_threshold. |
-| <a id="usercalloutfeaturenameenumadmin_integrations_moved"></a>`ADMIN_INTEGRATIONS_MOVED` | Callout feature name for admin_integrations_moved. |
 | <a id="usercalloutfeaturenameenumbuy_pipeline_minutes_notification_dot"></a>`BUY_PIPELINE_MINUTES_NOTIFICATION_DOT` | Callout feature name for buy_pipeline_minutes_notification_dot. |
 | <a id="usercalloutfeaturenameenumcanary_deployment"></a>`CANARY_DEPLOYMENT` | Callout feature name for canary_deployment. |
 | <a id="usercalloutfeaturenameenumcluster_security_warning"></a>`CLUSTER_SECURITY_WARNING` | Callout feature name for cluster_security_warning. |
@@ -14711,7 +14872,6 @@ Name of the feature that the callout is for.
 | <a id="usercalloutfeaturenameenumthreat_monitoring_info"></a>`THREAT_MONITORING_INFO` | Callout feature name for threat_monitoring_info. |
 | <a id="usercalloutfeaturenameenumultimate_trial"></a>`ULTIMATE_TRIAL` | Callout feature name for ultimate_trial. |
 | <a id="usercalloutfeaturenameenumunfinished_tag_cleanup_callout"></a>`UNFINISHED_TAG_CLEANUP_CALLOUT` | Callout feature name for unfinished_tag_cleanup_callout. |
-| <a id="usercalloutfeaturenameenumwebhooks_moved"></a>`WEBHOOKS_MOVED` | Callout feature name for webhooks_moved. |
 | <a id="usercalloutfeaturenameenumweb_ide_alert_dismissed"></a>`WEB_IDE_ALERT_DISMISSED` | Callout feature name for web_ide_alert_dismissed. |
 | <a id="usercalloutfeaturenameenumweb_ide_ci_environments_guidance"></a>`WEB_IDE_CI_ENVIRONMENTS_GUIDANCE` | Callout feature name for web_ide_ci_environments_guidance. |
 
@@ -14871,11 +15031,11 @@ A `AlertManagementHttpIntegrationID` is a global ID. It is encoded as a string.
 
 An example `AlertManagementHttpIntegrationID` is: `"gid://gitlab/AlertManagement::HttpIntegration/1"`.
 
-### `AnalyticsDevopsAdoptionSegmentID`
+### `AnalyticsDevopsAdoptionEnabledNamespaceID`
 
-A `AnalyticsDevopsAdoptionSegmentID` is a global ID. It is encoded as a string.
+A `AnalyticsDevopsAdoptionEnabledNamespaceID` is a global ID. It is encoded as a string.
 
-An example `AnalyticsDevopsAdoptionSegmentID` is: `"gid://gitlab/Analytics::DevopsAdoption::Segment/1"`.
+An example `AnalyticsDevopsAdoptionEnabledNamespaceID` is: `"gid://gitlab/Analytics::DevopsAdoption::EnabledNamespace/1"`.
 
 ### `AwardableID`
 
@@ -15234,6 +15394,12 @@ A `PackagesPackageID` is a global ID. It is encoded as a string.
 
 An example `PackagesPackageID` is: `"gid://gitlab/Packages::Package/1"`.
 
+### `PackagesPypiMetadatumID`
+
+A `PackagesPypiMetadatumID` is a global ID. It is encoded as a string.
+
+An example `PackagesPypiMetadatumID` is: `"gid://gitlab/Packages::Pypi::Metadatum/1"`.
+
 ### `PathLockID`
 
 A `PathLockID` is a global ID. It is encoded as a string.
@@ -15365,6 +15531,7 @@ One of:
 - [`ConanMetadata`](#conanmetadata)
 - [`MavenMetadata`](#mavenmetadata)
 - [`NugetMetadata`](#nugetmetadata)
+- [`PypiMetadata`](#pypimetadata)
 
 #### `VulnerabilityDetail`
 
@@ -15520,7 +15687,7 @@ Implementations:
 | <a id="memberinterfaceexpiresat"></a>`expiresAt` | [`Time`](#time) | Date and time the membership expires. |
 | <a id="memberinterfaceid"></a>`id` | [`ID!`](#id) | ID of the member. |
 | <a id="memberinterfaceupdatedat"></a>`updatedAt` | [`Time`](#time) | Date and time the membership was last updated. |
-| <a id="memberinterfaceuser"></a>`user` | [`UserCore!`](#usercore) | User that is associated with the member object. |
+| <a id="memberinterfaceuser"></a>`user` | [`UserCore`](#usercore) | User that is associated with the member object. |
 
 #### `Noteable`
 
@@ -15924,6 +16091,18 @@ A node of an epic tree.
 | <a id="epictreenodefieldsinputtypenewparentid"></a>`newParentId` | [`EpicID`](#epicid) | ID of the new parent epic. |
 | <a id="epictreenodefieldsinputtyperelativeposition"></a>`relativePosition` | [`MoveType`](#movetype) | The type of the switch, after or before allowed. |
 
+### `EscalationRuleInput`
+
+Represents an escalation rule.
+
+#### Arguments
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| <a id="escalationruleinputelapsedtimeseconds"></a>`elapsedTimeSeconds` | [`Int!`](#int) | The time in seconds before the rule is activated. |
+| <a id="escalationruleinputoncallscheduleiid"></a>`oncallScheduleIid` | [`ID!`](#id) | The on-call schedule to notify. |
+| <a id="escalationruleinputstatus"></a>`status` | [`EscalationRuleStatus!`](#escalationrulestatus) | The status required to prevent the rule from activating. |
+
 ### `JiraUsersMappingInputType`
 
 #### Arguments
@@ -15970,6 +16149,16 @@ A node of an epic tree.
 | <a id="negatedepicboardissueinputauthorusername"></a>`authorUsername` | [`String`](#string) | Filter by author username. |
 | <a id="negatedepicboardissueinputlabelname"></a>`labelName` | [`[String]`](#string) | Filter by label name. |
 | <a id="negatedepicboardissueinputmyreactionemoji"></a>`myReactionEmoji` | [`String`](#string) | Filter by reaction emoji applied by the current user. |
+
+### `NegatedEpicFilterInput`
+
+#### Arguments
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| <a id="negatedepicfilterinputauthorusername"></a>`authorUsername` | [`String`](#string) | Filter by author username. |
+| <a id="negatedepicfilterinputlabelname"></a>`labelName` | [`[String]`](#string) | Filter by label name. |
+| <a id="negatedepicfilterinputmyreactionemoji"></a>`myReactionEmoji` | [`String`](#string) | Filter by reaction emoji applied by the current user. |
 
 ### `NegatedIssueFilterInput`
 

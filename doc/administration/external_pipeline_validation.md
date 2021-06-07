@@ -1,6 +1,6 @@
 ---
 stage: Verify
-group: Continuous Integration
+group: Pipeline Execution
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 type: reference, howto
 ---
@@ -74,7 +74,9 @@ required number of seconds.
         "id": { "type": "integer" },
         "username": { "type": "string" },
         "email": { "type": "string" },
-        "created_at": { "type": ["string", "null"], "format": "date-time" }
+        "created_at": { "type": ["string", "null"], "format": "date-time" },
+        "current_sign_in_ip": { "type": ["string", "null"] },
+        "last_sign_in_ip": { "type": ["string", "null"] }
       }
     },
     "pipeline": {

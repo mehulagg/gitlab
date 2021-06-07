@@ -71,7 +71,7 @@ RSpec.describe Projects::Integrations::Jira::IssuesController do
           expect(finder).to receive(:execute).and_return(jira_issues)
         end
 
-        expect_next_instance_of(Integrations::Jira::IssueSerializer) do |serializer|
+        expect_next_instance_of(Integrations::JiraSerializers::IssueSerializer) do |serializer|
           expect(serializer).to receive(:represent).with(jira_issues, project: project)
         end
 
@@ -203,11 +203,11 @@ RSpec.describe Projects::Integrations::Jira::IssuesController do
       before do
         stub_licensed_features(jira_issues_integration: true)
 
-        expect_next_found_instance_of(JiraService) do |service|
+        expect_next_found_instance_of(Integrations::Jira) do |service|
           expect(service).to receive(:find_issue).with('1', rendered_fields: true).and_return(jira_issue)
         end
 
-        expect_next_instance_of(Integrations::Jira::IssueDetailSerializer) do |serializer|
+        expect_next_instance_of(Integrations::JiraSerializers::IssueDetailSerializer) do |serializer|
           expect(serializer).to receive(:represent).with(jira_issue, project: project).and_return(issue_json)
         end
       end

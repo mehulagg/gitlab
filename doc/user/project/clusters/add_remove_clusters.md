@@ -4,7 +4,7 @@ group: Configure
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
-# Adding and removing Kubernetes clusters **(FREE)**
+# Add a cluster using cluster certificates **(FREE)**
 
 GitLab offers integrated cluster creation for the following Kubernetes providers:
 
@@ -35,9 +35,9 @@ Before [adding a Kubernetes cluster](#create-new-cluster) using GitLab, you need
   - A [self-managed installation](https://about.gitlab.com/pricing/#self-managed) with GitLab version
     12.5 or later. This ensures the GitLab UI can be used for cluster creation.
 - The following GitLab access:
-  - [Maintainer access to a project](../../permissions.md#project-members-permissions) for a
+  - [Maintainer role for a project](../../permissions.md#project-members-permissions) for a
     project-level cluster.
-  - [Maintainer access to a group](../../permissions.md#group-members-permissions) for a
+  - [Maintainer role for a group](../../permissions.md#group-members-permissions) for a
     group-level cluster.
   - [Admin Area access](../../admin_area/index.md) for a self-managed instance-level
     cluster. **(FREE SELF)**
@@ -147,7 +147,7 @@ Amazon Elastic Kubernetes Service (EKS) at the project, group, or instance level
    - Project's **{cloud-gear}** **Operations > Kubernetes** page, for a project-level cluster.
    - Group's **{cloud-gear}** **Kubernetes** page, for a group-level cluster.
    - **Admin Area >** **{cloud-gear}** **Kubernetes** page, for an instance-level cluster.
-1. Click **Add Kubernetes cluster**.
+1. Click **Integrate with a cluster certificate**.
 1. Click the **Create new cluster** tab.
 1. Click either **Amazon EKS** or **Google GKE**, and follow the instructions for your desired service:
    - [Amazon EKS](add_eks_clusters.md#new-eks-cluster).

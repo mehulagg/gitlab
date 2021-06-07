@@ -5,7 +5,7 @@ import ServiceLevelAgreement from 'ee_component/vue_shared/components/incidents/
 
 jest.mock('~/lib/utils/datetime_utility');
 
-const defaultProvide = { fullPath: 'test', iid: 1, slaFeatureAvailable: true };
+const defaultProvide = { fullPath: 'test', iid: '1', slaFeatureAvailable: true };
 const mockSlaDueAt = '2020-01-01T00:00:00.000Z';
 
 describe('Incident SLA', () => {

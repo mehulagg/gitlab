@@ -2,18 +2,14 @@
 
 exports[`PolicyDrawer component supported YAML renders policy preview tabs 1`] = `
 <div>
-  <h4>
-    Policy description
-  </h4>
-   
   <h5
-    class="gl-mt-6"
+    class="gl-mt-3"
   >
-    Policy type
+    Type
   </h5>
    
   <p>
-    Network Policy
+    Container runtime
   </p>
    
   <div>
@@ -23,15 +19,26 @@ exports[`PolicyDrawer component supported YAML renders policy preview tabs 1`] =
       Description
     </h5>
      
-    <gl-form-textarea-stub
-      noresize="true"
-      value="test description"
-    />
+    <p
+      data-testid="description"
+    >
+      test description
+    </p>
+     
+    <h5
+      class="gl-mt-6"
+    >
+      Enforcement status
+    </h5>
+     
+    <p>
+      Disabled
+    </p>
   </div>
    
   <policy-preview-stub
     class="gl-mt-4"
-    initialtab="1"
+    initialtab="0"
     policydescription="Deny all traffic"
     policyyaml="apiVersion: cilium.io/v2
 kind: CiliumNetworkPolicy
@@ -49,25 +56,21 @@ spec:
 
 exports[`PolicyDrawer component unsupported YAML renders policy preview tabs 1`] = `
 <div>
-  <h4>
-    Policy description
-  </h4>
-   
   <h5
-    class="gl-mt-6"
+    class="gl-mt-3"
   >
-    Policy type
+    Type
   </h5>
    
   <p>
-    Network Policy
+    Container runtime
   </p>
    
   <!---->
    
   <policy-preview-stub
     class="gl-mt-4"
-    initialtab="0"
+    initialtab="1"
     policyyaml="unsupportedPrimaryKey: test"
   />
 </div>

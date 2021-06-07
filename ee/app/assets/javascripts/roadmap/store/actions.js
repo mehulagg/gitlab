@@ -47,7 +47,7 @@ const fetchGroupEpics = (
     };
 
     if (filterParams?.epicIid) {
-      variables.iid = filterParams.epicIid;
+      variables.iid = filterParams.epicIid.split('::&').pop();
     }
   }
 

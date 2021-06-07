@@ -46,6 +46,12 @@ RSpec.describe 'Billing plan pages', :feature, :js do
     end
   end
 
+  shared_examples 'does not display the billing plans' do
+    it 'does not display the plans' do
+      expect(page).not_to have_css('.billing-plans')
+    end
+  end
+
   shared_examples 'upgradable plan' do
     before do
       visit page_path
@@ -204,41 +210,15 @@ RSpec.describe 'Billing plan pages', :feature, :js do
         visit page_path
       end
 
-      it 'displays all plans' do
-        page.within('.billing-plans') do
-          panels = page.all('.card')
-
-          expect(panels.length).to eq(plans_data.length)
-
-          plans_data.each.with_index do |data, index|
-            expect(panels[index].find('.card-header')).to have_content(data[:name])
-          end
+      it 'displays the correct call to action', :js do
+        page.within('.billing-plan-header') do
+          expect(page).to have_content('Looking to purchase or manage a subscription for your group? Navigate to your group and go to Settings > Billing')
+          expect(page).to have_link('group', href: dashboard_groups_path)
         end
       end
 
-      it 'displays correct plan actions' do
-        expected_actions = plans_data.map { |data| data.fetch(:purchase_link).fetch(:action) }
-        plan_actions = page.all('.billing-plans .card .card-footer')
-        expect(plan_actions.length).to eq(expected_actions.length)
-
-        expected_actions.each_with_index do |expected_action, index|
-          action = plan_actions[index]
-
-          case expected_action
-          when 'downgrade'
-            expect(action).not_to have_link('Upgrade')
-            expect(action).not_to have_css('.disabled')
-          when 'current_plan'
-            expect(action).not_to have_link('Upgrade')
-          when 'upgrade'
-            expect(action).to have_link('Upgrade')
-            expect(action).not_to have_css('.disabled')
-          end
-        end
-      end
-
+      it_behaves_like 'does not display the billing plans'
       it_behaves_like 'plan with subscription table'
-      it_behaves_like 'can contact sales'
     end
 
     context 'on bronze plan' do
@@ -348,40 +328,7 @@ RSpec.describe 'Billing plan pages', :feature, :js do
         visit page_path
       end
 
-      it 'displays all plans' do
-        page.within('.billing-plans') do
-          panels = page.all('.card')
-
-          expect(panels.length).to eq(plans_data.length)
-
-          plans_data.each.with_index do |data, index|
-            expect(panels[index].find('.card-header')).to have_content(data[:name])
-          end
-        end
-      end
-
-      it 'displays correct plan actions' do
-        expected_actions = plans_data.map { |data| data.fetch(:purchase_link).fetch(:action) }
-        plan_actions = page.all('.billing-plans .card .card-footer')
-        expect(plan_actions.length).to eq(expected_actions.length)
-
-        expected_actions.each_with_index do |expected_action, index|
-          action = plan_actions[index]
-
-          case expected_action
-          when 'downgrade'
-            expect(action).not_to have_link('Upgrade')
-            expect(action).not_to have_css('.disabled')
-          when 'current_plan'
-            expect(action).not_to have_css('.disabled')
-          when 'upgrade'
-            expect(action).to have_link('Upgrade')
-            expect(action).not_to have_css('.disabled')
-          end
-        end
-      end
-
-      it_behaves_like 'can contact sales'
+      it_behaves_like 'does not display the billing plans'
     end
 
     context 'on bronze plan' do
@@ -495,7 +442,9 @@ RSpec.describe 'Billing plan pages', :feature, :js do
   end
 
   context 'with unexpected JSON' do
-    let(:plan) { free_plan }
+    let(:plan) { premium_plan }
+
+    let!(:subscription) { create(:gitlab_subscription, namespace: namespace, hosted_plan: plan, seats: 15) }
 
     let(:plans_data) do
       [

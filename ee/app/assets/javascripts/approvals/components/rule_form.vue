@@ -1,11 +1,13 @@
 <script>
 import { GlFormGroup, GlFormInput } from '@gitlab/ui';
-import { groupBy, isNumber } from 'lodash';
+import { groupBy, isEqual, isNumber } from 'lodash';
 import { mapState, mapActions } from 'vuex';
+import ProtectedBranchesSelector from 'ee/vue_shared/components/branches_selector/protected_branches_selector.vue';
 import { isSafeURL } from '~/lib/utils/url_utility';
 import { sprintf, __, s__ } from '~/locale';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import {
+  ANY_BRANCH,
   TYPE_USER,
   TYPE_GROUP,
   TYPE_HIDDEN_GROUPS,
@@ -15,7 +17,6 @@ import {
 import ApproverTypeSelect from './approver_type_select.vue';
 import ApproversList from './approvers_list.vue';
 import ApproversSelect from './approvers_select.vue';
-import BranchesSelect from './branches_select.vue';
 
 const DEFAULT_NAME = 'Default';
 const DEFAULT_NAME_FOR_LICENSE_REPORT = 'License-Check';
@@ -31,9 +32,9 @@ export default {
     ApproverTypeSelect,
     ApproversList,
     ApproversSelect,
-    BranchesSelect,
     GlFormGroup,
     GlFormInput,
+    ProtectedBranchesSelector,
   },
   mixins: [glFeatureFlagsMixin()],
   props: {
@@ -144,7 +145,10 @@ export default {
       return '';
     },
     invalidBranches() {
-      if (!this.isMrEdit && this.branches.some((id) => typeof id !== 'number')) {
+      if (
+        !this.isMrEdit &&
+        !this.branches.every((branch) => isEqual(branch, ANY_BRANCH) || isNumber(branch?.id))
+      ) {
         return this.$options.i18n.validations.branchesRequired;
       }
 
@@ -219,7 +223,7 @@ export default {
         userRecords: this.users,
         groupRecords: this.groups,
         removeHiddenGroups: this.removeHiddenGroups,
-        protectedBranchIds: this.branches,
+        protectedBranchIds: this.branches.map((x) => x.id),
       };
     },
     isEditing() {
@@ -355,7 +359,7 @@ export default {
         return {
           name: this.initRule.name || '',
           externalUrl: this.initRule.externalUrl,
-          branches: this.initRule.protectedBranches?.map((x) => x.id) || [],
+          branches: this.initRule.protectedBranches || [],
           ruleType: this.initRule.ruleType,
           approvers: [],
         };
@@ -365,7 +369,7 @@ export default {
 
       const users = this.initRule.users.map((x) => ({ ...x, type: TYPE_USER }));
       const groups = this.initRule.groups.map((x) => ({ ...x, type: TYPE_GROUP }));
-      const branches = this.initRule.protectedBranches?.map((x) => x.id) || [];
+      const branches = this.initRule.protectedBranches || [];
 
       return {
         name: this.initRule.name || '',
@@ -444,11 +448,11 @@ export default {
       :invalid-feedback="invalidBranches"
       data-testid="branches-group"
     >
-      <branches-select
+      <protected-branches-selector
         v-model="branchesToAdd"
         :project-id="settings.projectId"
         :is-invalid="!isValidBranches"
-        :init-rule="rule"
+        :selected-branches="branches"
       />
     </gl-form-group>
     <gl-form-group v-if="showApproverTypeSelect" :label="$options.i18n.form.approvalTypeLabel">

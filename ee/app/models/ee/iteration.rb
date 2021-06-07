@@ -46,7 +46,7 @@ module EE
       validate :validate_group
 
       before_validation :set_iterations_cadence, unless: -> { project_id.present? }
-      before_create :set_past_iteration_state
+      before_save :set_iteration_state
       before_destroy :check_if_can_be_destroyed
 
       scope :upcoming, -> { with_state(:upcoming) }
@@ -197,10 +197,20 @@ module EE
       errors.add(:project_id, s_("is not allowed. We do not currently support project-level iterations"))
     end
 
-    def set_past_iteration_state
-      # if we create an iteration in the past, we set the state to closed right away,
-      # no need to wait for IterationsUpdateStatusWorker to do so.
-      self.state = :closed if due_date < Date.current
+    def set_iteration_state
+      self.state = compute_state
+    end
+
+    def compute_state
+      today = Date.today
+
+      if start_date > today
+        :upcoming
+      elsif due_date < today
+        :closed
+      else
+        :started
+      end
     end
 
     # TODO: this method should be removed as part of https://gitlab.com/gitlab-org/gitlab/-/issues/296099

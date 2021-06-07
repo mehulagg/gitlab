@@ -33,12 +33,13 @@ module AppSec
         end
 
         def create_audit_event(profile)
-          AuditEventService.new(current_user, project, {
-            add: 'DAST scanner profile',
-            target_id: profile.id,
-            target_type: profile.class.name,
-            target_details: profile.name
-          }).security_event
+          ::Gitlab::Audit::Auditor.audit(
+            name: 'dast_scanner_profile_create',
+            author: current_user,
+            scope: project,
+            target: profile,
+            message: "Added DAST scanner profile"
+          )
         end
       end
     end

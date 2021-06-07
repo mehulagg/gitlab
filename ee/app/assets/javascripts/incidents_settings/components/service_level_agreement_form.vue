@@ -112,6 +112,7 @@ export default {
     v-if="available"
     key="service-level-agreement"
     :title="s__('IncidentSettings|Incident settings')"
+    active
   >
     <gl-form class="gl-pt-3" @submit.prevent="updateServiceLevelAgreementSettings">
       <p class="gl-line-height-20">

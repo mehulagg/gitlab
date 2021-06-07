@@ -2,7 +2,6 @@
 import { GlButton, GlForm, GlFormInput } from '@gitlab/ui';
 import { mapGetters, mapActions } from 'vuex';
 import BoardEditableItem from '~/boards/components/sidebar/board_editable_item.vue';
-import createFlash from '~/flash';
 import { __ } from '~/locale';
 import autofocusonshow from '~/vue_shared/directives/autofocusonshow';
 
@@ -37,7 +36,7 @@ export default {
     },
   },
   methods: {
-    ...mapActions(['setActiveIssueWeight']),
+    ...mapActions(['setActiveIssueWeight', 'setError']),
     handleFormSubmit() {
       this.$refs.sidebarItem.collapse({ emitEvent: false });
       this.setWeight();
@@ -56,7 +55,7 @@ export default {
         this.weight = weight;
       } catch (e) {
         this.weight = this.activeBoardItem.weight;
-        createFlash({ message: __('An error occurred when updating the issue weight') });
+        this.setError({ message: __('An error occurred when updating the issue weight') });
       } finally {
         this.loading = false;
       }

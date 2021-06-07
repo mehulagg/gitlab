@@ -18,7 +18,7 @@ module EE
       end
 
       override :execute
-      def execute(skip_authorization: false)
+      def execute
         super
 
         build_smartcard_identity if ::Gitlab::Auth::Smartcard.enabled?

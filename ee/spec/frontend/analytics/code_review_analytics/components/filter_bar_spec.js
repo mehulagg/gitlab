@@ -101,7 +101,7 @@ describe('Filter bar', () => {
     mock.restore();
   });
 
-  const findFilteredSearch = () => wrapper.find(FilteredSearchBar);
+  const findFilteredSearch = () => wrapper.findComponent(FilteredSearchBar);
   const getSearchToken = (type) =>
     findFilteredSearch()
       .props('tokens')

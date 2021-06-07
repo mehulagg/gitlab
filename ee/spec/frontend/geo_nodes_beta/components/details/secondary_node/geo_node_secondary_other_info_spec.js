@@ -92,13 +92,14 @@ describe('GeoNodeSecondaryOtherInfo', () => {
       describe.each`
         lastEvent                                                | text
         ${{ lastEventId: null, lastEventTimestamp: null }}       | ${'Unknown'}
+        ${{ lastEventId: 1, lastEventTimestamp: 0 }}             | ${'1'}
         ${{ lastEventId: 1, lastEventTimestamp: MOCK_JUST_NOW }} | ${'1 (just now)'}
       `(`last event`, ({ lastEvent, text }) => {
         beforeEach(() => {
           createComponent({ node: { ...lastEvent } });
         });
 
-        it(`renders correctly when lastEventId is ${lastEvent.lastEventId}`, () => {
+        it(`renders correctly when lastEventId is ${lastEvent.lastEventId} and lastEventTimestamp is ${lastEvent.lastEventTimestamp}`, () => {
           expect(findLastEvent().text().replace(/\s+/g, ' ')).toBe(text);
         });
       });
@@ -106,13 +107,14 @@ describe('GeoNodeSecondaryOtherInfo', () => {
       describe.each`
         lastCursorEvent                                                      | text
         ${{ cursorLastEventId: null, cursorLastEventTimestamp: null }}       | ${'Unknown'}
+        ${{ cursorLastEventId: 1, cursorLastEventTimestamp: 0 }}             | ${'1'}
         ${{ cursorLastEventId: 1, cursorLastEventTimestamp: MOCK_JUST_NOW }} | ${'1 (just now)'}
       `(`last cursor event`, ({ lastCursorEvent, text }) => {
         beforeEach(() => {
           createComponent({ node: { ...lastCursorEvent } });
         });
 
-        it(`renders correctly when cursorLastEventId is ${lastCursorEvent.cursorLastEventId}`, () => {
+        it(`renders correctly when cursorLastEventId is ${lastCursorEvent.cursorLastEventId} and cursorLastEventTimestamp is ${lastCursorEvent.cursorLastEventTimestamp}`, () => {
           expect(findLastCursorEvent().text().replace(/\s+/g, ' ')).toBe(text);
         });
       });

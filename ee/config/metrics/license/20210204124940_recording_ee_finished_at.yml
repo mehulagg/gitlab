@@ -11,5 +11,6 @@ time_frame: none
 data_source: system
 distribution:
 - ee
-tier: []
-skip_validation: true
+tier:
+- premium
+- ultimate

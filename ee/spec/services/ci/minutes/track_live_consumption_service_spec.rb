@@ -11,10 +11,6 @@ RSpec.describe Ci::Minutes::TrackLiveConsumptionService do
 
   let(:service) { described_class.new(build) }
 
-  before do
-    allow(Gitlab).to receive(:com?).and_return(true)
-  end
-
   describe '#execute', :clean_gitlab_redis_shared_state do
     subject { service.execute }
 
@@ -76,22 +72,6 @@ RSpec.describe Ci::Minutes::TrackLiveConsumptionService do
       it_behaves_like 'returns early', 'CI minutes limit not enabled for build'
     end
 
-    context 'when project is not on Free plan' do
-      before do
-        create(:gitlab_subscription, :premium, namespace: namespace)
-      end
-
-      it_behaves_like 'returns early', 'Project is not on Free or trial plan'
-    end
-
-    context 'when running on self-hosted' do
-      before do
-        allow(Gitlab).to receive(:com?).and_return(false)
-      end
-
-      it_behaves_like 'returns early', 'Project is not on Free or trial plan'
-    end
-
     context 'when shared runners limit is not enabled for build' do
       before do
         allow(build).to receive(:shared_runners_minutes_limit_enabled?).and_return(false)
@@ -138,6 +118,14 @@ RSpec.describe Ci::Minutes::TrackLiveConsumptionService do
       context 'when namespace is on a trial hosted plan' do
         before do
           create(:gitlab_subscription, :premium, :active_trial, namespace: namespace)
+        end
+
+        it_behaves_like 'limit exceeded'
+      end
+
+      context 'when namespace is on a paid plan' do
+        before do
+          create(:gitlab_subscription, :premium, namespace: namespace)
         end
 
         it_behaves_like 'limit exceeded'

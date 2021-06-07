@@ -311,7 +311,7 @@ RSpec.describe GlobalPolicy do
     end
   end
 
-  describe ':view_instance_devops_adoption & :manage_devops_adoption_segments', :enable_admin_mode do
+  describe ':view_instance_devops_adoption & :manage_devops_adoption_namespaces', :enable_admin_mode do
     let(:current_user) { admin }
 
     context 'when license does not include the feature' do
@@ -319,7 +319,7 @@ RSpec.describe GlobalPolicy do
         stub_licensed_features(instance_level_devops_adoption: false)
       end
 
-      it { is_expected.to be_disallowed(:view_instance_devops_adoption, :manage_devops_adoption_segments) }
+      it { is_expected.to be_disallowed(:view_instance_devops_adoption, :manage_devops_adoption_namespaces) }
     end
 
     context 'when feature is enabled and license include the feature' do
@@ -327,12 +327,12 @@ RSpec.describe GlobalPolicy do
         stub_licensed_features(instance_level_devops_adoption: true)
       end
 
-      it { is_expected.to be_allowed(:view_instance_devops_adoption, :manage_devops_adoption_segments) }
+      it { is_expected.to be_allowed(:view_instance_devops_adoption, :manage_devops_adoption_namespaces) }
 
       context 'for non-admins' do
         let(:current_user) { user }
 
-        it { is_expected.to be_disallowed(:view_instance_devops_adoption, :manage_devops_adoption_segments) }
+        it { is_expected.to be_disallowed(:view_instance_devops_adoption, :manage_devops_adoption_namespaces) }
       end
     end
   end

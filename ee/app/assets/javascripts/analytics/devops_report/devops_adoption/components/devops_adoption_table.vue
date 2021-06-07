@@ -188,7 +188,7 @@ export default {
           v-if="item.latestSnapshot"
           :key="col.key"
           :data-testid="col.testId"
-          :enabled="item.latestSnapshot[col.key]"
+          :enabled="Boolean(item.latestSnapshot[col.key])"
         />
       </template>
 

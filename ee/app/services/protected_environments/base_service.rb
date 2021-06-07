@@ -36,10 +36,10 @@ module ProtectedEnvironments
     def qualified_group_ids
       strong_memoize(:qualified_group_ids) do
         if project_container?
-          container.invited_groups.pluck_primary_key.to_set
+          container.invited_groups
         elsif group_container?
-          raise NotImplementedError
-        end
+          container.self_and_descendants
+        end.pluck_primary_key.to_set
       end
     end
 
@@ -53,11 +53,9 @@ module ProtectedEnvironments
         if project_container?
           container.project_authorizations
             .visible_to_user_and_access_level(user_ids, Gitlab::Access::DEVELOPER)
-            .pluck_user_ids
-            .to_set
         elsif group_container?
-          raise NotImplementedError
-        end
+          container.members_with_parents.owners_and_maintainers
+        end.pluck_user_ids.to_set
       end
     end
   end

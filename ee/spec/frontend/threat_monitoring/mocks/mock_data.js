@@ -7,7 +7,7 @@ export const mockEnvironmentsResponse = {
     },
     {
       id: 1156094,
-      name: 'review/enable-blocking-waf',
+      name: 'review/enable-network-policies',
       state: 'available',
     },
   ],
@@ -51,15 +51,6 @@ export const mockAnomalousHistory = [
   ['2019-12-05T00:00:00.000Z', 83],
 ];
 
-export const mockWafStatisticsResponse = {
-  total_traffic: 2703,
-  anomalous_traffic: 0.03,
-  history: {
-    nominal: mockNominalHistory,
-    anomalous: mockAnomalousHistory,
-  },
-};
-
 export const mockNetworkPolicyStatisticsResponse = {
   ops_total: {
     total: 2703,
@@ -97,6 +88,7 @@ export const mockAlerts = [
     assignees: {
       nodes: [
         {
+          id: 'Alert:1',
           name: 'Administrator',
           username: 'root',
           avatarUrl: '/test-avatar-url',

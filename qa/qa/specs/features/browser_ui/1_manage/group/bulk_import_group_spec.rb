@@ -2,20 +2,21 @@
 
 module QA
   RSpec.describe 'Manage', :requires_admin do
-    describe 'Group bulk import' do
-      let!(:api_client) { Runtime::API::Client.as_admin }
+    describe 'Bulk group import' do
+      let!(:admin_api_client) { Runtime::API::Client.as_admin }
       let!(:user) do
         Resource::User.fabricate_via_api! do |usr|
-          usr.api_client = api_client
+          usr.api_client = admin_api_client
           usr.hard_delete_on_api_removal = true
         end
       end
 
-      let!(:personal_access_token) { Runtime::API::Client.new(user: user).personal_access_token }
+      let!(:api_client) { Runtime::API::Client.new(user: user) }
+      let!(:personal_access_token) { api_client.personal_access_token }
 
       let!(:sandbox) do
         Resource::Sandbox.fabricate_via_api! do |group|
-          group.api_client = api_client
+          group.api_client = admin_api_client
         end
       end
 
@@ -37,6 +38,7 @@ module QA
       let(:imported_group) do
         Resource::Group.new.tap do |group|
           group.api_client = api_client
+          group.sandbox = sandbox
           group.path = source_group.path
         end
       end
@@ -60,34 +62,51 @@ module QA
 
       before do
         sandbox.add_member(user, Resource::Members::AccessLevel::MAINTAINER)
-        source_group.add_member(user, Resource::Members::AccessLevel::MAINTAINER)
 
         Flow::Login.sign_in(as: user)
         Page::Main::Menu.new.go_to_import_group
         Page::Group::New.new.connect_gitlab_instance(Runtime::Scenario.gitlab_address, personal_access_token)
       end
 
+      # Non blocking issues:
+      # https://gitlab.com/gitlab-org/gitlab/-/issues/331252
       it(
-        'performs bulk group import from another gitlab instance',
+        'imports group with subgroups and labels',
         testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/1785',
-        exclude: { job: ['ce:relative_url', 'ee:relative_url'] },
-        issue_1: "https://gitlab.com/gitlab-org/gitlab/-/issues/330344",
-        issue_2: "https://gitlab.com/gitlab-org/gitlab/-/issues/331252"
+        quarantine: {
+          only: { job: 'relative_url' },
+          issue: 'https://gitlab.com/gitlab-org/gitlab/-/issues/330344',
+          type: :bug
+        }
       ) do
+        Resource::GroupLabel.fabricate_via_api! do |label|
+          label.api_client = api_client
+          label.group = source_group
+          label.title = "source-group-#{SecureRandom.hex(4)}"
+        end
+        Resource::GroupLabel.fabricate_via_api! do |label|
+          label.api_client = api_client
+          label.group = subgroup
+          label.title = "subgroup-#{SecureRandom.hex(4)}"
+        end
+
         Page::Group::BulkImport.perform do |import_page|
           import_page.import_group(source_group.path, sandbox.path)
 
           aggregate_failures do
             expect(import_page).to have_imported_group(source_group.path, wait: 120)
-            expect(imported_group).to eq(source_group)
-            expect(imported_subgroup).to eq(subgroup)
+
+            expect { imported_group.reload! }.to eventually_eq(source_group).within(duration: 10)
+            expect { imported_subgroup.reload! }.to eventually_eq(subgroup).within(duration: 10)
+
+            expect { imported_group.labels }.to eventually_include(*source_group.labels).within(duration: 10)
+            expect { imported_subgroup.labels }.to eventually_include(*subgroup.labels).within(duration: 10)
           end
         end
       end
 
       after do
         user.remove_via_api!
-        source_group.remove_via_api!
       end
 
       after(:all) do

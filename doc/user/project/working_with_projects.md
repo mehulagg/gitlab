@@ -84,6 +84,7 @@ Built-in templates are project templates that are:
 - Developed and maintained in the [`project-templates`](https://gitlab.com/gitlab-org/project-templates)
   and [`pages`](https://gitlab.com/pages) groups.
 - Released with GitLab.
+- Anyone can contribute a built-in template by following [these steps](https://about.gitlab.com/community/contribute/project-templates).
 
 To use a built-in template on the **New project** page:
 
@@ -333,7 +334,7 @@ For public projects, and to members of internal and private projects
 with [permissions to view the project's code](../permissions.md#project-members-permissions):
 
 - The content of a
-  [`README` or an index file](repository/#repository-readme-and-index-files)
+  [`README` or an index file](repository/index.md#readme-and-index-files)
   is displayed (if any), followed by the list of directories in the
   project's repository.
 - If the project doesn't contain either of these files, the

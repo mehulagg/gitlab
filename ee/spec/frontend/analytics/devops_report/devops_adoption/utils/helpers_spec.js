@@ -1,8 +1,8 @@
 import { shouldPollTableData } from 'ee/analytics/devops_report/devops_adoption/utils/helpers';
-import { devopsAdoptionSegmentsData } from '../mock_data';
+import { devopsAdoptionNamespaceData } from '../mock_data';
 
 describe('shouldPollTableData', () => {
-  const { nodes: pendingData } = devopsAdoptionSegmentsData;
+  const { nodes: pendingData } = devopsAdoptionNamespaceData;
   const comepleteData = [pendingData[0]];
   const mockDate = '2020-07-06T00:00:00.000Z';
   const previousDay = '2020-07-05T00:00:00.000Z';

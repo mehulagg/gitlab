@@ -117,13 +117,14 @@ the following table) as these were used for development and testing:
 | 10.0           | 9.6                        |
 | 13.0           | 11                         |
 
-You must also ensure the following extensions are [loaded into every
-GitLab database](postgresql_extensions.html):
+You must also ensure the following extensions are loaded into every
+GitLab database. [Read more about this requirement, and troubleshooting](postgresql_extensions.md).
 
 | Extension    | Minimum GitLab version |
 | ------------ | ---------------------- |
 | `pg_trgm`    | 8.6                    |
 | `btree_gist` | 13.1                   |
+| `plpgsql`    | 11.7                   |
 
 NOTE:
 Support for [PostgreSQL 9.6 and 10 was removed in GitLab 13.0](https://about.gitlab.com/releases/2020/05/22/gitlab-13-0-released/#postgresql-11-is-now-the-minimum-required-version-to-install-gitlab) so that GitLab can benefit from PostgreSQL 11 improvements, such as partitioning. For the schedule of transitioning to PostgreSQL 12, see [the related epic](https://gitlab.com/groups/gitlab-org/-/epics/2184).
@@ -135,6 +136,35 @@ recommend running Omnibus GitLab-managed instances, as we actively develop and
 test based on those. We try to be compatible with most external (not managed by
 Omnibus GitLab) databases (for example, [AWS Relational Database Service (RDS)](https://aws.amazon.com/rds/)),
 but we can't guarantee compatibility.
+
+#### Gitaly Cluster database requirements
+
+[Read more in the Gitaly Cluster documentation](../administration/gitaly/praefect.md).
+
+#### Exclusive use of GitLab databases
+
+Databases created or used for GitLab, Geo, Gitaly Cluster, or other components should be for the
+exclusive use of GitLab. Do not make direct changes to the database, schemas, users, or other
+properties except when following procedures in the GitLab documentation or following the directions
+of GitLab Support or other GitLab engineers.
+
+- The main GitLab application currently uses three schemas:
+
+  - The default `public` schema
+  - `gitlab_partitions_static` (automatically created)
+  - `gitlab_partitions_dynamic` (automatically created)
+
+  No other schemas should be manually created.
+
+- GitLab may create new schemas as part of Rails database migrations. This happens when performing
+  a GitLab upgrade. The GitLab database account requires access to do this.
+
+- GitLab creates and modifies tables during the upgrade process, and also as part of normal
+  operations to manage partitioned tables.
+
+- You should not modify the GitLab schema (for example, adding triggers or modifying tables).
+  Database migrations are tested against the schema definition in the GitLab code base. GitLab
+  version upgrades may fail if the schema is modified.
 
 ## Puma settings
 
@@ -170,22 +200,6 @@ of [legacy Rugged code](../administration/gitaly/index.md#direct-access-to-git-i
 - In all other cases, the recommended number of threads is `4`. We don't recommend setting this
 higher, due to how [Ruby MRI multi-threading](https://en.wikipedia.org/wiki/Global_interpreter_lock)
 works.
-
-## Unicorn Workers
-
-For most instances we recommend using: (CPU cores * 1.5) + 1 = Unicorn workers.
-For example a node with 4 cores would have 7 Unicorn workers.
-
-For all machines that have 2GB and up we recommend a minimum of three Unicorn workers.
-If you have a 1GB machine we recommend to configure only two Unicorn workers to prevent excessive
-swapping.
-
-As long as you have enough available CPU and memory capacity, it's okay to increase the number of
-Unicorn workers and this usually helps to reduce the response time of the applications and
-increase the ability to handle parallel requests.
-
-To change the Unicorn workers when you have the Omnibus package (which defaults to the
-recommendation above) please see [the Unicorn settings in the Omnibus GitLab documentation](https://docs.gitlab.com/omnibus/settings/unicorn.html).
 
 ## Redis and Sidekiq
 

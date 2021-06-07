@@ -119,15 +119,15 @@ module EE
     end
 
     def epics_service(noteable, author)
-      EE::SystemNotes::EpicsService.new(noteable: noteable, author: author)
+      ::SystemNotes::EpicsService.new(noteable: noteable, author: author)
     end
 
     def merge_trains_service(noteable, project, author)
-      EE::SystemNotes::MergeTrainService.new(noteable: noteable, project: project, author: author)
+      ::SystemNotes::MergeTrainService.new(noteable: noteable, project: project, author: author)
     end
 
     def vulnerabilities_service(noteable, project, author)
-      EE::SystemNotes::VulnerabilitiesService.new(noteable: noteable, project: project, author: author)
+      ::SystemNotes::VulnerabilitiesService.new(noteable: noteable, project: project, author: author)
     end
   end
 end

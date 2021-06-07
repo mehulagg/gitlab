@@ -2,14 +2,14 @@
 import { GlAlert, GlButton, GlLoadingIcon, GlKeysetPagination, GlTab, GlTabs } from '@gitlab/ui';
 import { __, s__ } from '~/locale';
 import query from '../queries/iteration_cadences_list.query.graphql';
-import IterationCadence from './iteration_cadence.vue';
+import IterationCadenceListItem from './iteration_cadence_list_item.vue';
 
 const pageSize = 20;
 
 export default {
   tabTitles: [__('Open'), __('Done'), __('All')],
   components: {
-    IterationCadence,
+    IterationCadenceListItem,
     GlAlert,
     GlButton,
     GlLoadingIcon,
@@ -32,10 +32,12 @@ export default {
   data() {
     return {
       group: {
-        iterationCadences: [],
-        pageInfo: {
-          hasNextPage: true,
-          hasPreviousPage: false,
+        iterationCadences: {
+          nodes: [],
+          pageInfo: {
+            hasNextPage: true,
+            hasPreviousPage: false,
+          },
         },
       },
       pagination: {},
@@ -48,10 +50,6 @@ export default {
       const vars = {
         fullPath: this.groupPath,
       };
-
-      if (this.active !== undefined) {
-        vars.active = this.active;
-      }
 
       if (this.pagination.beforeCursor) {
         vars.beforeCursor = this.pagination.beforeCursor;
@@ -72,15 +70,15 @@ export default {
     loading() {
       return this.$apollo.queries.group.loading;
     },
-    active() {
+    state() {
       switch (this.tabIndex) {
         default:
         case 0:
-          return true;
+          return 'opened';
         case 1:
-          return false;
+          return 'closed';
         case 2:
-          return undefined;
+          return 'all';
       }
     },
   },
@@ -108,14 +106,23 @@ export default {
       <template #title>
         {{ tab }}
       </template>
-      <gl-loading-icon v-if="loading" class="gl-my-5" size="lg" />
 
-      <gl-alert v-else-if="error" variant="danger" @dismiss="error = ''">
+      <gl-alert v-if="error" variant="danger" @dismiss="error = ''">
         {{ error }}
       </gl-alert>
+
+      <gl-loading-icon v-if="loading" class="gl-my-5" size="lg" />
+
       <template v-else>
         <ul v-if="cadences.length" class="content-list">
-          <iteration-cadence v-for="cadence in cadences" :key="cadence.id" :title="cadence.title" />
+          <iteration-cadence-list-item
+            v-for="cadence in cadences"
+            :key="cadence.id"
+            :cadence-id="cadence.id"
+            :duration-in-weeks="cadence.durationInWeeks"
+            :title="cadence.title"
+            :iteration-state="state"
+          />
         </ul>
         <p v-else class="nothing-here-block">
           {{ s__('Iterations|No iteration cadences to show.') }}

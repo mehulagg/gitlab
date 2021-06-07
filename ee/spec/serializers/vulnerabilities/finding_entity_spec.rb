@@ -102,7 +102,7 @@ RSpec.describe Vulnerabilities::FindingEntity do
 
         before do
           stub_licensed_features(jira_vulnerabilities_integration: true)
-          allow_next_found_instance_of(JiraService) do |jira|
+          allow_next_found_instance_of(Integrations::Jira) do |jira|
             allow(jira).to receive(:jira_project_id).and_return('11223')
           end
         end

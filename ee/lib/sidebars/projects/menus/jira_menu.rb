@@ -46,7 +46,7 @@ module Sidebars
 
         override :render?
         def render?
-          external_issue_tracker.is_a?(JiraService) && context.jira_issues_integration
+          external_issue_tracker.is_a?(Integrations::Jira) && context.jira_issues_integration
         end
 
         private

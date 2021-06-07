@@ -5,9 +5,9 @@ import { nextTick } from 'vue';
 import Vuex from 'vuex';
 import Filters from 'ee/security_dashboard/components/filters.vue';
 import LoadingError from 'ee/security_dashboard/components/loading_error.vue';
-import SecurityDashboardLayout from 'ee/security_dashboard/components/security_dashboard_layout.vue';
 import SecurityDashboardTable from 'ee/security_dashboard/components/security_dashboard_table.vue';
 import SecurityDashboard from 'ee/security_dashboard/components/security_dashboard_vuex.vue';
+import VulnerabilityReportLayout from 'ee/security_dashboard/components/vulnerability_report_layout.vue';
 import { getStoreConfig } from 'ee/security_dashboard/store';
 import { VULNERABILITY_MODAL_ID } from 'ee/vue_shared/security_reports/components/constants';
 import IssueModal from 'ee/vue_shared/security_reports/components/modal.vue';
@@ -48,7 +48,7 @@ describe('Security Dashboard component', () => {
     wrapper = shallowMount(SecurityDashboard, {
       store,
       stubs: {
-        SecurityDashboardLayout,
+        VulnerabilityReportLayout,
       },
       propsData: {
         dashboardDocumentation: '',

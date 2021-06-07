@@ -5,17 +5,9 @@ require 'spec_helper'
 RSpec.describe Ci::RunDastScanService do
   let_it_be(:user) { create(:user) }
   let_it_be(:project) { create(:project, :repository, creator: user) }
-  let_it_be(:dast_profile) { create(:dast_profile) }
-  let_it_be(:dast_site_profile) { dast_profile.dast_site_profile }
-  let_it_be(:branch) { project.default_branch }
-  let_it_be(:spider_timeout) { 42 }
-  let_it_be(:target_timeout) { 21 }
-  let_it_be(:target_url) { generate(:url) }
-  let_it_be(:use_ajax_spider) { true }
-  let_it_be(:show_debug_messages) { false }
-  let_it_be(:full_scan_enabled) { true }
-  let_it_be(:excluded_urls) { "#{target_url}/hello,#{target_url}/world" }
-  let_it_be(:auth_url) { "#{target_url}/login" }
+  let_it_be(:dast_site_profile) { create(:dast_site_profile, project: project) }
+  let_it_be(:dast_scanner_profile) { create(:dast_scanner_profile, project: project, spider_timeout: 42, target_timeout: 21) }
+  let_it_be(:dast_profile) { create(:dast_profile, project: project, dast_site_profile: dast_site_profile, dast_scanner_profile: dast_scanner_profile) }
 
   before do
     stub_licensed_features(security_on_demand_scans: true)
@@ -23,22 +15,17 @@ RSpec.describe Ci::RunDastScanService do
 
   describe '#execute' do
     subject do
-      described_class.new(project, user).execute(
-        branch: branch,
-        target_url: target_url,
-        spider_timeout: spider_timeout,
-        target_timeout: target_timeout,
-        use_ajax_spider: use_ajax_spider,
-        show_debug_messages: show_debug_messages,
-        full_scan_enabled: full_scan_enabled,
-        excluded_urls: excluded_urls,
-        auth_url: auth_url,
-        auth_username_field: 'session[username]',
-        auth_password_field: 'session[password]',
-        auth_username: 'tanuki',
-        dast_profile: dast_profile,
-        dast_site_profile: dast_site_profile
-      )
+      config_result = AppSec::Dast::ScanConfigs::BuildService.new(
+        container: project,
+        current_user: user,
+        params: {
+          branch: project.default_branch,
+          dast_profile: dast_profile,
+          dast_site_profile: dast_site_profile
+        }
+      ).execute
+
+      described_class.new(project, user).execute(**config_result.payload)
     end
 
     let(:status) { subject.status }
@@ -73,7 +60,7 @@ RSpec.describe Ci::RunDastScanService do
       end
 
       it 'sets the pipeline ref to the branch' do
-        expect(pipeline.ref).to eq(branch)
+        expect(pipeline.ref).to eq(project.default_branch)
       end
 
       it 'sets the source to indicate an ondemand scan' do
@@ -117,43 +104,43 @@ RSpec.describe Ci::RunDastScanService do
         expected_variables = [
           {
             'key' => 'DAST_AUTH_URL',
-            'value' => auth_url,
+            'value' => dast_site_profile.auth_url,
             'public' => true
           }, {
             'key' => 'DAST_DEBUG',
-            'value' => 'false',
+            'value' => String(dast_scanner_profile.show_debug_messages?),
             'public' => true
           }, {
             'key' => 'DAST_EXCLUDE_URLS',
-            'value' => excluded_urls,
+            'value' => dast_site_profile.excluded_urls.join(','),
             'public' => true
           }, {
             'key' => 'DAST_FULL_SCAN_ENABLED',
-            'value' => 'true',
+            'value' => String(dast_scanner_profile.full_scan_enabled?),
             'public' => true
           }, {
             'key' => 'DAST_PASSWORD_FIELD',
-            'value' => 'session[password]',
+            'value' => dast_site_profile.auth_password_field,
             'public' => true
           }, {
             'key' => 'DAST_SPIDER_MINS',
-            'value' => spider_timeout.to_s,
+            'value' => String(dast_scanner_profile.spider_timeout),
             'public' => true
           }, {
             'key' => 'DAST_TARGET_AVAILABILITY_TIMEOUT',
-            'value' => target_timeout.to_s,
+            'value' => String(dast_scanner_profile.target_timeout),
             'public' => true
           }, {
             'key' => 'DAST_USERNAME',
-            'value' => 'tanuki',
+            'value' => dast_site_profile.auth_username,
             'public' => true
           }, {
             'key' => 'DAST_USERNAME_FIELD',
-            'value' => 'session[username]',
+            'value' => dast_site_profile.auth_username_field,
             'public' => true
           }, {
             'key' => 'DAST_USE_AJAX_SPIDER',
-            'value' => 'true',
+            'value' => String(dast_scanner_profile.use_ajax_spider?),
             'public' => true
           }, {
             'key' => 'DAST_VERSION',
@@ -161,7 +148,7 @@ RSpec.describe Ci::RunDastScanService do
             'public' => true
           }, {
             'key' => 'DAST_WEBSITE',
-            'value' => target_url,
+            'value' => dast_site_profile.dast_site.url,
             'public' => true
           }, {
             'key' => 'GIT_STRATEGY',
@@ -177,14 +164,6 @@ RSpec.describe Ci::RunDastScanService do
         expect(build.yaml_variables).to contain_exactly(*expected_variables)
       end
 
-      shared_examples 'transactional creation' do
-        let_it_be(:type_mismatch) { build(:dast_scanner_profile) }
-
-        it 'does not create a Ci::Pipeline' do
-          expect { subject }.to raise_error(ActiveRecord::AssociationTypeMismatch).and change { Ci::Pipeline.count }.by(0)
-        end
-      end
-
       context 'when the dast_profile and dast_site_profile are provided' do
         it 'associates the dast_profile with the pipeline' do
           expect(pipeline.dast_profile).to eq(dast_profile)
@@ -193,10 +172,6 @@ RSpec.describe Ci::RunDastScanService do
         it 'does associate the dast_site_profile with the pipeline' do
           expect(pipeline.dast_site_profile).to be_nil
         end
-
-        it_behaves_like 'transactional creation' do
-          let_it_be(:dast_profile) { type_mismatch }
-        end
       end
 
       context 'when the dast_site_profile is provided' do
@@ -204,10 +179,6 @@ RSpec.describe Ci::RunDastScanService do
 
         it 'associates the dast_site_profile with the pipeline' do
           expect(pipeline.dast_site_profile).to eq(dast_site_profile)
-        end
-
-        it_behaves_like 'transactional creation' do
-          let_it_be(:dast_site_profile) { type_mismatch }
         end
       end
 

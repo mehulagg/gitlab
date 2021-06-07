@@ -320,6 +320,20 @@ RSpec.describe Ci::Build do
     end
   end
 
+  describe '#stick_build_if_status_changed' do
+    it 'sticks the build if the status changed' do
+      job = create(:ci_build, :pending)
+
+      allow(Gitlab::Database::LoadBalancing).to receive(:enable?)
+        .and_return(true)
+
+      expect(Gitlab::Database::LoadBalancing::Sticking).to receive(:stick)
+        .with(:build, job.id)
+
+      job.update!(status: :running)
+    end
+  end
+
   describe '#enqueue' do
     let(:build) { create(:ci_build, :created) }
 
@@ -1879,6 +1893,26 @@ RSpec.describe Ci::Build do
           end
 
           it { is_expected.not_to be_retryable }
+        end
+
+        context 'when a canceled build has been retried already' do
+          before do
+            project.add_developer(user)
+            build.cancel!
+            described_class.retry(build, user)
+          end
+
+          context 'when prevent_retry_of_retried_jobs feature flag is enabled' do
+            it { is_expected.not_to be_retryable }
+          end
+
+          context 'when prevent_retry_of_retried_jobs feature flag is disabled' do
+            before do
+              stub_feature_flags(prevent_retry_of_retried_jobs: false)
+            end
+
+            it { is_expected.to be_retryable }
+          end
         end
       end
     end

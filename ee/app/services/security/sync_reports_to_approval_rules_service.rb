@@ -9,7 +9,7 @@ module Security
     end
 
     def execute
-      sync_license_management_rules
+      sync_license_scanning_rules
       sync_vulnerability_rules
       success
     rescue StandardError => error
@@ -27,7 +27,7 @@ module Security
 
     attr_reader :pipeline
 
-    def sync_license_management_rules
+    def sync_license_scanning_rules
       project = pipeline.project
       report = pipeline.license_scanning_report
       return if report.empty? && !pipeline.complete?

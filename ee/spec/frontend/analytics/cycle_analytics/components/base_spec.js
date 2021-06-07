@@ -7,19 +7,16 @@ import Component from 'ee/analytics/cycle_analytics/components/base.vue';
 import DurationChart from 'ee/analytics/cycle_analytics/components/duration_chart.vue';
 import FilterBar from 'ee/analytics/cycle_analytics/components/filter_bar.vue';
 import Metrics from 'ee/analytics/cycle_analytics/components/metrics.vue';
-import PathNavigation from 'ee/analytics/cycle_analytics/components/path_navigation.vue';
-import StageTableNew from 'ee/analytics/cycle_analytics/components/stage_table_new.vue';
+import StageTable from 'ee/analytics/cycle_analytics/components/stage_table.vue';
 import TypeOfWorkCharts from 'ee/analytics/cycle_analytics/components/type_of_work_charts.vue';
 import ValueStreamSelect from 'ee/analytics/cycle_analytics/components/value_stream_select.vue';
-import {
-  PAGINATION_SORT_FIELD_END_EVENT,
-  PAGINATION_SORT_DIRECTION_DESC,
-} from 'ee/analytics/cycle_analytics/constants';
 import createStore from 'ee/analytics/cycle_analytics/store';
 import Daterange from 'ee/analytics/shared/components/daterange.vue';
 import ProjectsDropdownFilter from 'ee/analytics/shared/components/projects_dropdown_filter.vue';
 import { toYmd } from 'ee/analytics/shared/utils';
 import waitForPromises from 'helpers/wait_for_promises';
+import PathNavigation from '~/cycle_analytics/components/path_navigation.vue';
+import { OVERVIEW_STAGE_ID } from '~/cycle_analytics/constants';
 import { getIdFromGraphQLId } from '~/graphql_shared/utils';
 import * as commonUtils from '~/lib/utils/common_utils';
 import { convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
@@ -101,7 +98,7 @@ async function shouldMergeUrlParams(wrapper, result) {
   expect(commonUtils.historyPushState).toHaveBeenCalled();
 }
 
-describe('Value Stream Analytics component', () => {
+describe('EE Value Stream Analytics component', () => {
   let wrapper;
   let mock;
   let store;
@@ -142,7 +139,7 @@ describe('Value Stream Analytics component', () => {
       ...opts,
     });
 
-    if (withStageSelected) {
+    if (withStageSelected || selectedStage) {
       await store.dispatch(
         'receiveGroupStagesSuccess',
         mockData.customizableStagesAndEvents.stages,
@@ -170,7 +167,7 @@ describe('Value Stream Analytics component', () => {
   };
 
   const displaysStageTable = (flag) => {
-    expect(wrapper.findComponent(StageTableNew).exists()).toBe(flag);
+    expect(wrapper.findComponent(StageTable).exists()).toBe(flag);
   };
 
   const displaysDurationChart = (flag) => {
@@ -181,8 +178,10 @@ describe('Value Stream Analytics component', () => {
     expect(wrapper.findComponent(TypeOfWorkCharts).exists()).toBe(flag);
   };
 
+  const findPathNavigation = () => wrapper.findComponent(PathNavigation);
+
   const displaysPathNavigation = (flag) => {
-    expect(wrapper.findComponent(PathNavigation).exists()).toBe(flag);
+    expect(findPathNavigation().exists()).toBe(flag);
   };
 
   const displaysFilterBar = (flag) => {
@@ -350,10 +349,7 @@ describe('Value Stream Analytics component', () => {
       beforeEach(async () => {
         mock = new MockAdapter(axios);
         mockRequiredRoutes(mock);
-        wrapper = await createComponent({
-          withStageSelected: true,
-          selectedStage: mockData.issueStage,
-        });
+        wrapper = await createComponent({ selectedStage: mockData.issueStage });
       });
 
       it('displays the stage table', () => {
@@ -405,7 +401,7 @@ describe('Value Stream Analytics component', () => {
         .onGet(mockData.endpoints.stageData)
         .reply(httpStatusCodes.NOT_FOUND, { response: { status: httpStatusCodes.NOT_FOUND } });
 
-      await createComponent({ withStageSelected: true, selectedStage: mockData.issueStage });
+      await createComponent({ selectedStage: mockData.issueStage });
 
       await findError('There was an error fetching data for the selected stage');
     });
@@ -447,6 +443,48 @@ describe('Value Stream Analytics component', () => {
     });
   });
 
+  describe('Path navigation', () => {
+    const selectedStage = { title: 'Plan', slug: 2 };
+    const overviewStage = { title: 'Overview', slug: OVERVIEW_STAGE_ID };
+    let actionSpies = {};
+
+    beforeEach(async () => {
+      mock = new MockAdapter(axios);
+      mockRequiredRoutes(mock);
+      wrapper = await createComponent();
+      actionSpies = {
+        setDefaultSelectedStage: jest.spyOn(wrapper.vm, 'setDefaultSelectedStage'),
+        setSelectedStage: jest.spyOn(wrapper.vm, 'setSelectedStage'),
+        updateStageTablePagination: jest.spyOn(wrapper.vm, 'updateStageTablePagination'),
+      };
+    });
+
+    afterEach(() => {
+      wrapper.destroy();
+      mock.restore();
+      wrapper = null;
+    });
+
+    it('when a stage is selected', () => {
+      findPathNavigation().vm.$emit('selected', selectedStage);
+
+      expect(actionSpies.setDefaultSelectedStage).not.toHaveBeenCalled();
+      expect(actionSpies.setSelectedStage).toHaveBeenCalledWith(selectedStage);
+      expect(actionSpies.updateStageTablePagination).toHaveBeenCalledWith({
+        ...mockData.initialPaginationQuery,
+        page: 1,
+      });
+    });
+
+    it('when the overview is selected', () => {
+      findPathNavigation().vm.$emit('selected', overviewStage);
+
+      expect(actionSpies.setSelectedStage).not.toHaveBeenCalled();
+      expect(actionSpies.updateStageTablePagination).not.toHaveBeenCalled();
+      expect(actionSpies.setDefaultSelectedStage).toHaveBeenCalled();
+    });
+  });
+
   describe('Url parameters', () => {
     const defaultParams = {
       value_stream_id: selectedValueStream.id,
@@ -456,6 +494,7 @@ describe('Value Stream Analytics component', () => {
       project_ids: null,
       sort: null,
       direction: null,
+      page: null,
     };
 
     const selectedProjectIds = mockData.selectedProjects.map(({ id }) => getIdFromGraphQLId(id));
@@ -527,17 +566,20 @@ describe('Value Stream Analytics component', () => {
 
     describe('with selectedStage set', () => {
       beforeEach(async () => {
-        wrapper = await createComponent();
-        store.dispatch('setSelectedStage', selectedStage);
-        await wrapper.vm.$nextTick();
+        wrapper = await createComponent({
+          initialState: {
+            ...initialCycleAnalyticsState,
+            pagination: mockData.initialPaginationQuery,
+          },
+          selectedStage,
+        });
       });
 
-      it('sets the stage, sort and direction parameters', async () => {
+      it('sets the stage, sort, direction and page parameters', async () => {
         await shouldMergeUrlParams(wrapper, {
           ...defaultParams,
+          ...mockData.initialPaginationQuery,
           stage_id: selectedStage.id,
-          direction: PAGINATION_SORT_DIRECTION_DESC,
-          sort: PAGINATION_SORT_FIELD_END_EVENT,
         });
       });
     });

@@ -34,7 +34,7 @@ Each metric is defined in a separate YAML file consisting of a number of fields:
 | `product_group`     | yes      | The [group](https://gitlab.com/gitlab-com/www-gitlab-com/blob/master/data/stages.yml) that owns the metric. |
 | `product_category`  | no       | The [product category](https://gitlab.com/gitlab-com/www-gitlab-com/blob/master/data/categories.yml) for the metric. |
 | `value_type`        | yes      | `string`; one of [`string`, `number`, `boolean`, `object`](https://json-schema.org/understanding-json-schema/reference/type.html).                                                     |
-| `status`            | yes      | `string`; [status](#metric-statuses) of the metric, may be set to `data_available`, `implemented`, `not_used`, `deprecated`, `removed`. |
+| `status`            | yes      | `string`; [status](#metric-statuses) of the metric, may be set to `data_available`, `implemented`, `not_used`, `deprecated`, `removed`, `broken`. |
 | `time_frame`        | yes      | `string`; may be set to a value like `7d`, `28d`, `all`, `none`. |
 | `data_source`       | yes      | `string`; may be set to a value like `database`, `redis`, `redis_hll`, `prometheus`, `system`. |
 | `instrumentation_class` | no   | `string`; [the class that implements the metric](metrics_instrumentation.md).  |
@@ -43,6 +43,7 @@ Each metric is defined in a separate YAML file consisting of a number of fields:
 | `milestone`         | no       | The milestone when the metric is introduced. |
 | `milestone_removed` | no       | The milestone when the metric is removed. |
 | `introduced_by_url` | no       | The URL to the Merge Request that introduced the metric. |
+| `repair_issue_url`  | no       | The URL of the issue that was created to repair a metric with a `broken` status. |
 | `options`           | no       | `object`: options information needed to calculate the metric value. |
 | `skip_validation`   | no       | This should **not** be set. [Used for imported metrics until we review, update and make them valid](https://gitlab.com/groups/gitlab-org/-/epics/5425). |
 
@@ -53,9 +54,29 @@ Metric definitions can have one of the following statuses:
 - `data_available`: Metric data is available and used in a Sisense dashboard.
 - `implemented`: Metric is implemented but data is not yet available. This is a temporary
   status for newly added metrics awaiting inclusion in a new release.
+- `broken`: Metric reports broken data (for example, -1 fallback), or does not report data at all. A metric marked as `broken` must also have the `repair_issue_url` attribute.
 - `not_used`: Metric is not used in any dashboard.
 - `deprecated`: Metric is deprecated and possibly planned to be removed.
 - `removed`: Metric was removed, but it may appear in Usage Ping payloads sent from instances running on older versions of GitLab.
+
+### Metric value_type
+
+Metric definitions can have one of the following values for `value_type`:
+
+- `boolean`
+- `number`
+- `string`
+- `object`: A metric with `value_type: object` must have `value_json_schema` with a link to the JSON schema for the object.
+In general, we avoid complex objects and prefer one of the `boolean`, `number`, or `string` value types.
+An example of a metric that uses `value_type: object` is `topology` (`/config/metrics/settings/20210323120839_topology.yml`),
+which has a related schema in `/config/metrics/objects_schemas/topology_schema.json`.
+
+### Metric time_frame
+
+- `7d`: The metric data applies to the most recent 7-day interval. For example, the following metric counts the number of users that create epics over a 7-day interval: `ee/config/metrics/counts_7d/20210305145820_g_product_planning_epic_created_weekly.yml`.
+- `28d`: The metric data applies to the most recent 28-day interval. For example, the following metric counts the number of unique users that create issues over a 28-day interval: `config/metrics/counts_28d/20210216181139_issues.yml`.
+- `all`: The metric data applies for the whole time the metric has been active (all-time interval). For example, the following metric counts all users that create issues: `/config/metrics/counts_all/20210216181115_issues.yml`.
+- `none`: The metric collects a type of data that's not tracked over time, such as settings and configuration information. Therefore, a time interval is not applicable. For example, `uuid` has no time interval applicable: `config/metrics/license/20210201124933_uuid.yml`.
 
 ### Metric name
 

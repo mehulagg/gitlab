@@ -2,6 +2,7 @@
 import { GlAlert, GlFormGroup, GlFormInput } from '@gitlab/ui';
 import * as Sentry from '@sentry/browser';
 import { isEqual, isNumber } from 'lodash';
+import ProtectedBranchesSelector from 'ee/vue_shared/components/branches_selector/protected_branches_selector.vue';
 import { isSafeURL } from '~/lib/utils/url_utility';
 import { __, s__ } from '~/locale';
 import {
@@ -10,11 +11,10 @@ import {
   NAME_TAKEN_SERVER_ERROR,
   URL_TAKEN_SERVER_ERROR,
 } from '../constants';
-import BranchesSelect from './branches_select.vue';
 
 export default {
   components: {
-    BranchesSelect,
+    ProtectedBranchesSelector,
     GlAlert,
     GlFormGroup,
     GlFormInput,
@@ -29,11 +29,6 @@ export default {
       required: false,
       default: () => [],
     },
-    showValidation: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
     statusCheck: {
       type: Object,
       required: false,
@@ -41,28 +36,20 @@ export default {
     },
   },
   data() {
-    const { protectedBranches, name, externalUrl: url } = this.statusCheck;
+    const { protectedBranches: branches, name, externalUrl: url } = this.statusCheck;
 
     return {
-      branches: protectedBranches,
+      branches,
       branchesToAdd: [],
       branchesApiFailed: false,
       name,
+      showValidation: false,
       url,
     };
   },
   computed: {
-    formData() {
-      const { branches, name, url } = this;
-
-      return {
-        branches: branches.map(({ id }) => id),
-        name,
-        url,
-      };
-    },
     isValid() {
-      return this.isValidBranches && this.isValidName && this.isValidUrl;
+      return this.isValidName && this.isValidUrl && this.isValidBranches;
     },
     isValidBranches() {
       return this.branches.every((branch) => isEqual(branch, ANY_BRANCH) || isNumber(branch?.id));
@@ -109,6 +96,15 @@ export default {
     },
   },
   methods: {
+    submit() {
+      this.showValidation = true;
+
+      if (this.isValid) {
+        const { branches, name, url } = this;
+
+        this.$emit('submit', { branches, name, url });
+      }
+    },
     setBranchApiError(hasErrored, error) {
       if (!this.branchesApiFailed && error) {
         Sentry.captureException(error);
@@ -148,7 +144,7 @@ export default {
     <gl-alert v-if="branchesApiFailed" class="gl-mb-5" :dismissible="false" variant="danger">
       {{ $options.i18n.validations.branchesApiFailure }}
     </gl-alert>
-    <form novalidate>
+    <form novalidate @submit.prevent.stop="submit">
       <gl-form-group
         :label="$options.i18n.form.nameLabel"
         :description="$options.i18n.form.nameDescription"
@@ -186,7 +182,7 @@ export default {
         :invalid-feedback="$options.i18n.validations.branchesRequired"
         data-testid="branches-group"
       >
-        <branches-select
+        <protected-branches-selector
           v-model="branchesToAdd"
           :project-id="projectId"
           :is-invalid="!branchesState"

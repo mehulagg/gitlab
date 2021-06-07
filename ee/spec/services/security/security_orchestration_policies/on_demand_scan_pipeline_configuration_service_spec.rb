@@ -42,31 +42,8 @@ RSpec.describe Security::SecurityOrchestrationPolicies::OnDemandScanPipelineConf
     end
 
     it 'delegates params creation to DastOnDemandScans::ParamsCreateService' do
-      expect(DastOnDemandScans::ParamsCreateService).to receive(:new).with(container: project, params: { dast_site_profile: site_profile, dast_scanner_profile: scanner_profile }).and_call_original
-      expect(DastOnDemandScans::ParamsCreateService).to receive(:new).with(container: project, params: { dast_site_profile: nil, dast_scanner_profile: nil }).and_call_original
-
-      pipeline_configuration
-    end
-
-    it 'delegates variables preparation to ::Ci::DastScanCiConfigurationService' do
-      expected_params = {
-        auth_password_field: site_profile.auth_password_field,
-        auth_url: site_profile.auth_url,
-        auth_username: site_profile.auth_username,
-        auth_username_field: site_profile.auth_username_field,
-        dast_profile: nil,
-        dast_site_profile: site_profile,
-        branch: project.default_branch,
-        excluded_urls: site_profile.excluded_urls.join(','),
-        full_scan_enabled: false,
-        show_debug_messages: false,
-        spider_timeout: nil,
-        target_timeout: nil,
-        target_url: site_profile.dast_site.url,
-        use_ajax_spider: false
-      }
-
-      expect(::Ci::DastScanCiConfigurationService).to receive(:execute).with(expected_params).and_call_original
+      expect(AppSec::Dast::ScanConfigs::BuildService).to receive(:new).with(container: project, params: { dast_site_profile: site_profile, dast_scanner_profile: scanner_profile }).and_call_original
+      expect(AppSec::Dast::ScanConfigs::BuildService).to receive(:new).with(container: project, params: { dast_site_profile: nil, dast_scanner_profile: nil }).and_call_original
 
       pipeline_configuration
     end

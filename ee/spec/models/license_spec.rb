@@ -165,7 +165,7 @@ RSpec.describe License do
             license.valid?
 
             error_msg = "This GitLab installation currently has 2 active users, exceeding this license's limit of 1 by 1 user. " \
-                        "Please upload a license for at least 2 users or contact sales at renewals@gitlab.com"
+                        "Please upload a license for at least 2 users or contact sales at https://about.gitlab.com/sales/"
 
             expect(license.errors[:base].first).to eq(error_msg)
           end

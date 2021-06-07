@@ -1687,16 +1687,16 @@ RSpec.describe Project do
   end
 
   describe '#latest_pipeline_with_security_reports' do
-    let(:only_successful) { false }
-
-    let_it_be(:project) { create(:project) }
+    let_it_be(:project, refind: true) { create(:project) }
     let_it_be(:pipeline_1) { create(:ci_pipeline, :success, project: project) }
     let_it_be(:pipeline_2) { create(:ci_pipeline, project: project) }
     let_it_be(:pipeline_3) { create(:ci_pipeline, :success, project: project) }
 
     subject { project.latest_pipeline_with_security_reports(only_successful: only_successful) }
 
-    context 'when all pipelines are used' do
+    shared_examples_for 'on-the-fly latest_pipeline_with_security_reports calculation' do |expected:|
+      let(:expected_pipeline) { public_send(expected) }
+
       context 'when legacy reports are used' do
         before do
           create(:ee_ci_build, :legacy_sast, pipeline: pipeline_1)
@@ -1704,7 +1704,7 @@ RSpec.describe Project do
         end
 
         it 'returns the latest pipeline with security reports' do
-          is_expected.to eq(pipeline_2)
+          is_expected.to eq(expected_pipeline)
         end
       end
 
@@ -1715,7 +1715,7 @@ RSpec.describe Project do
         end
 
         it 'returns the latest pipeline with security reports' do
-          is_expected.to eq(pipeline_2)
+          is_expected.to eq(expected_pipeline)
         end
 
         context 'when legacy used' do
@@ -1724,8 +1724,34 @@ RSpec.describe Project do
           end
 
           it 'prefers the new reports' do
-            is_expected.to eq(pipeline_2)
+            is_expected.to eq(expected_pipeline)
           end
+        end
+      end
+    end
+
+    context 'when all pipelines are used' do
+      let(:only_successful) { false }
+
+      context 'when there is no associated `vulnerability_statistic` record with the project' do
+        it_behaves_like 'on-the-fly latest_pipeline_with_security_reports calculation', expected: :pipeline_2
+      end
+
+      context 'when there is an associated `vulnerability_statistic` record with the project' do
+        context 'when the pipeline of `vulnerability_statistic` has not been set' do
+          it_behaves_like 'on-the-fly latest_pipeline_with_security_reports calculation', expected: :pipeline_2 do
+            before do
+              create(:vulnerability_statistic, project: project, pipeline: nil)
+            end
+          end
+        end
+
+        context 'when the pipeline of `vulnerability_statistic` has been set' do
+          before do
+            create(:vulnerability_statistic, project: project, pipeline: pipeline_1)
+          end
+
+          it { is_expected.to eq(pipeline_1) }
         end
       end
     end
@@ -1733,37 +1759,11 @@ RSpec.describe Project do
     context 'when only successful pipelines are used' do
       let(:only_successful) { true }
 
-      context 'when legacy reports are used' do
-        before do
-          create(:ee_ci_build, :legacy_sast, pipeline: pipeline_1)
-          create(:ee_ci_build, :legacy_sast, pipeline: pipeline_2)
-        end
-
-        it "returns the latest succesful pipeline with security reports" do
-          is_expected.to eq(pipeline_1)
-        end
+      before do
+        create(:vulnerability_statistic, project: project, pipeline: pipeline_2)
       end
 
-      context 'when new reports are used' do
-        before do
-          create(:ee_ci_build, :sast, pipeline: pipeline_1)
-          create(:ee_ci_build, :sast, pipeline: pipeline_2)
-        end
-
-        it 'returns the latest successful pipeline with security reports' do
-          is_expected.to eq(pipeline_1)
-        end
-
-        context 'when legacy used' do
-          before do
-            create(:ee_ci_build, :legacy_sast, pipeline: pipeline_3)
-          end
-
-          it 'prefers the new reports' do
-            is_expected.to eq(pipeline_1)
-          end
-        end
-      end
+      it_behaves_like 'on-the-fly latest_pipeline_with_security_reports calculation', expected: :pipeline_1
     end
   end
 
@@ -1888,7 +1888,7 @@ RSpec.describe Project do
         end
 
         it 'schedules a full index of the wiki repository' do
-          expect(ElasticCommitIndexerWorker).to receive(:perform_async).with(project.id, nil, nil, true)
+          expect(ElasticCommitIndexerWorker).to receive(:perform_async).with(project.id, true)
 
           project.after_import
         end
@@ -2717,14 +2717,6 @@ RSpec.describe Project do
     end
   end
 
-  describe '#mark_primary_write_location' do
-    it 'marks the location with project ID' do
-      expect(Gitlab::Database::LoadBalancing::Sticking).to receive(:mark_primary_write_location).with(:project, project.id)
-
-      project.mark_primary_write_location
-    end
-  end
-
   describe '#add_template_export_job' do
     it 'starts project template export job' do
       user = create(:user)
@@ -2806,6 +2798,94 @@ RSpec.describe Project do
 
           project.update!(title: 'The new title')
         end
+      end
+    end
+  end
+
+  describe '#available_shared_runners' do
+    let_it_be(:runner) { create(:ci_runner, :instance) }
+
+    let(:project) { build_stubbed(:project, shared_runners_enabled: true) }
+
+    subject { project.available_shared_runners }
+
+    before do
+      allow(project).to receive(:ci_minutes_quota)
+        .and_return(double('quota', minutes_used_up?: minutes_used_up))
+    end
+
+    context 'when CI minutes are available for project' do
+      let(:minutes_used_up) { false }
+
+      it 'returns a list of shared runners' do
+        is_expected.to eq([runner])
+      end
+    end
+
+    context 'when out of CI minutes for project' do
+      let(:minutes_used_up) { true }
+
+      it 'returns a empty list' do
+        is_expected.to be_empty
+      end
+    end
+  end
+
+  describe '#all_available_runners' do
+    let_it_be_with_refind(:project) do
+      create(:project, group: create(:group), shared_runners_enabled: true)
+    end
+
+    let_it_be(:instance_runner) { create(:ci_runner, :instance) }
+    let_it_be(:group_runner) { create(:ci_runner, :group, groups: [project.group]) }
+    let_it_be(:project_runner) { create(:ci_runner, :project, projects: [project]) }
+
+    subject { project.all_available_runners }
+
+    before do
+      allow(project).to receive(:ci_minutes_quota)
+        .and_return(double('quota', minutes_used_up?: minutes_used_up))
+    end
+
+    context 'when CI minutes are available for project' do
+      let(:minutes_used_up) { false }
+
+      it 'returns a list with all runners' do
+        is_expected.to match_array([instance_runner, group_runner, project_runner])
+      end
+    end
+
+    context 'when out of CI minutes for project' do
+      let(:minutes_used_up) { true }
+
+      it 'returns a list with specific runners' do
+        is_expected.to match_array([group_runner, project_runner])
+      end
+    end
+  end
+
+  describe '#shared_runners_enabled_but_unavailable?' do
+    using RSpec::Parameterized::TableSyntax
+
+    let(:project) do
+      build_stubbed(:project, shared_runners_enabled: shared_runners_enabled)
+    end
+
+    before do
+      allow(project).to receive(:ci_minutes_quota)
+        .and_return(double('quota', minutes_used_up?: minutes_used_up))
+    end
+
+    where(:shared_runners_enabled, :minutes_used_up, :result) do
+      true  | true  | true
+      true  | false | false
+      false | false | false
+      false | true  | false
+    end
+
+    with_them do
+      it 'returns the correct value' do
+        expect(project.shared_runners_enabled_but_unavailable?).to eq(result)
       end
     end
   end

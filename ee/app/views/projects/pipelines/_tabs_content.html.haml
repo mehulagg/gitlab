@@ -20,7 +20,8 @@
     vulnerability_exports_endpoint: vulnerability_exports_endpoint_path,
     empty_state_unauthorized_svg_path: image_path('illustrations/user-not-logged-in.svg'),
     empty_state_forbidden_svg_path: image_path('illustrations/lock_promotion.svg'),
-    project_full_path: project.path_with_namespace } }
+    project_full_path: project.path_with_namespace,
+    can_admin_vulnerability: can?(current_user, :admin_vulnerability, project).to_s } }
 
 - if pipeline.expose_license_scanning_data?
   #js-tab-licenses.tab-pane

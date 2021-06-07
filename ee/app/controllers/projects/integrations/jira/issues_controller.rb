@@ -54,13 +54,13 @@ module Projects
             total_count: finder.total_count
           )
 
-          ::Integrations::Jira::IssueSerializer.new
+          ::Integrations::JiraSerializers::IssueSerializer.new
             .with_pagination(request, response)
             .represent(jira_issues, project: project)
         end
 
         def issue_json
-          ::Integrations::Jira::IssueDetailSerializer.new
+          ::Integrations::JiraSerializers::IssueDetailSerializer.new
             .represent(project.jira_service.find_issue(params[:id], rendered_fields: true), project: project)
         end
 

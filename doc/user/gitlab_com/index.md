@@ -502,25 +502,11 @@ for `shared_buffers` is quite high and as such we are looking into adjusting it.
 More information on this particular change can be found at
 <https://gitlab.com/gitlab-com/infrastructure/-/issues/1555>. An up to date list
 of proposed changes can be found at
-<https://gitlab.com/gitlab-com/infrastructure/-/issues?scope=all&utf8=%E2%9C%93&state=opened&label_name[]=database&label_name[]=change>.
+<https://gitlab.com/gitlab-com/infrastructure/-/issues?scope=all&state=opened&label_name[]=database&label_name[]=change>.
 
 ## Puma
 
 GitLab.com uses the default of 60 seconds for [Puma request timeouts](https://docs.gitlab.com/omnibus/settings/puma.html#worker-timeout).
-
-## Unicorn
-
-GitLab.com adjusts the memory limits for the [unicorn-worker-killer](https://rubygems.org/gems/unicorn-worker-killer) gem.
-
-Base default:
-
-- `memory_limit_min` = 750MiB
-- `memory_limit_max` = 1024MiB
-
-Web front-ends:
-
-- `memory_limit_min` = 1024MiB
-- `memory_limit_max` = 1280MiB
 
 ## GitLab.com-specific rate limits
 

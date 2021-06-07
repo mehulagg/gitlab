@@ -6,6 +6,8 @@ export const MAX_SEGMENTS = 30;
 
 export const MAX_REQUEST_COUNT = 10;
 
+export const PER_PAGE = 100;
+
 export const DEVOPS_ADOPTION_SEGMENT_MODAL_ID = 'devopsSegmentModal';
 
 export const DEVOPS_ADOPTION_SEGMENT_DELETE_MODAL_ID = 'devopsSegmentDeleteModal';
@@ -108,20 +110,26 @@ export const DEVOPS_ADOPTION_TABLE_CONFIGURATION = [
       {
         key: 'issueOpened',
         label: s__('DevopsAdoption|Issues'),
-        tooltip: s__('DevopsAdoption|At least 1 issue opened'),
+        tooltip: s__('DevopsAdoption|At least one issue opened'),
         testId: 'issuesCol',
       },
       {
         key: 'mergeRequestOpened',
         label: s__('DevopsAdoption|MRs'),
-        tooltip: s__('DevopsAdoption|At least 1 MR opened'),
+        tooltip: s__('DevopsAdoption|At least one MR opened'),
         testId: 'mrsCol',
       },
       {
         key: 'mergeRequestApproved',
         label: s__('DevopsAdoption|Approvals'),
-        tooltip: s__('DevopsAdoption|At least 1 approval on an MR'),
+        tooltip: s__('DevopsAdoption|At least one approval on an MR'),
         testId: 'approvalsCol',
+      },
+      {
+        key: 'codeOwnersUsedCount',
+        label: s__('DevopsAdoption|Code owners'),
+        tooltip: s__('DevopsAdoption|Code owners enabled for at least one project'),
+        testId: 'codeownersCol',
       },
     ],
   },
@@ -132,7 +140,7 @@ export const DEVOPS_ADOPTION_TABLE_CONFIGURATION = [
       {
         key: 'securityScanSucceeded',
         label: s__('DevopsAdoption|Scanning'),
-        tooltip: s__('DevopsAdoption|At least 1 security scan of any type run in pipeline'),
+        tooltip: s__('DevopsAdoption|At least one security scan of any type run in pipeline'),
         testId: 'scanningCol',
       },
     ],
@@ -150,13 +158,13 @@ export const DEVOPS_ADOPTION_TABLE_CONFIGURATION = [
       {
         key: 'pipelineSucceeded',
         label: s__('DevopsAdoption|Pipelines'),
-        tooltip: s__('DevopsAdoption|At least 1 pipeline successfully run'),
+        tooltip: s__('DevopsAdoption|At least one pipeline successfully run'),
         testId: 'pipelinesCol',
       },
       {
         key: 'deploySucceeded',
         label: s__('DevopsAdoption|Deploys'),
-        tooltip: s__('DevopsAdoption|At least 1 deploy'),
+        tooltip: s__('DevopsAdoption|At least one deploy'),
         testId: 'deploysCol',
       },
     ],

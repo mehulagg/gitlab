@@ -73,7 +73,7 @@ module Projects
         local_branch = local_branches[name]
 
         if local_branch.nil?
-          result = ::Branches::CreateService.new(project, current_user).execute(name, upstream_branch.dereferenced_target.sha, create_master_if_empty: false)
+          result = ::Branches::CreateService.new(project, current_user).execute(name, upstream_branch.dereferenced_target.sha, create_default_branch_if_empty: false)
           if result[:status] == :error
             errors << result[:message]
           end

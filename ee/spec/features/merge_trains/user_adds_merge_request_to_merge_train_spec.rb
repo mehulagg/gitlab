@@ -64,6 +64,8 @@ RSpec.describe 'User adds a merge request to a merge train', :js do
     end
 
     context 'when pipeline for merge train succeeds', :sidekiq_might_not_need_inline do
+      let_it_be(:runner) { create(:ci_runner, :online) }
+
       before do
         visit project_merge_request_path(project, merge_request)
         merge_request.merge_train.pipeline.builds.map(&:success!)

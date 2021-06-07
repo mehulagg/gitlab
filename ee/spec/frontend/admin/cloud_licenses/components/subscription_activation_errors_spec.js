@@ -1,14 +1,16 @@
 import { GlLink, GlSprintf } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
-import {
+import SubscriptionActivationErrors, {
   subscriptionActivationHelpLink,
   troubleshootingHelpLink,
-} from 'ee/pages/admin/cloud_licenses/components/subscription_activation_card.vue';
-import SubscriptionActivationErrors from 'ee/pages/admin/cloud_licenses/components/subscription_activation_errors.vue';
+} from 'ee/pages/admin/cloud_licenses/components/subscription_activation_errors.vue';
 import {
   CONNECTIVITY_ERROR,
-  connectivityIssue,
-  generalActivationError,
+  generalActivationErrorMessage,
+  generalActivationErrorTitle,
+  invalidActivationCode,
+  INVALID_CODE_ERROR,
+  supportLink,
 } from 'ee/pages/admin/cloud_licenses/constants';
 import { extendedWrapper } from 'helpers/vue_test_utils_helper';
 
@@ -17,6 +19,8 @@ describe('SubscriptionActivationErrors', () => {
 
   const findConnectivityErrorAlert = () => wrapper.findByTestId('connectivity-error-alert');
   const findGeneralErrorAlert = () => wrapper.findByTestId('general-error-alert');
+  const findInvalidActivationCode = () => wrapper.findByTestId('invalid-activation-error-alert');
+  const findRoot = () => wrapper.findByTestId('root');
 
   const createComponent = ({ props = {} } = {}) => {
     wrapper = extendedWrapper(
@@ -33,25 +37,53 @@ describe('SubscriptionActivationErrors', () => {
     wrapper.destroy();
   });
 
+  describe('with no error', () => {
+    beforeEach(() => {
+      createComponent();
+    });
+
+    it('should not render the component', () => {
+      expect(findRoot().exists()).toBe(false);
+    });
+  });
+
   describe('connectivity error', () => {
     beforeEach(() => {
       createComponent({ props: { error: CONNECTIVITY_ERROR } });
     });
 
-    it('shows the alert', () => {
-      expect(findConnectivityErrorAlert().props('title')).toBe(connectivityIssue);
-    });
-
     it('shows some help links', () => {
       const alert = findConnectivityErrorAlert();
 
-      expect(alert.findAllComponents(GlLink).at(0).props('href')).toBe(
+      expect(alert.findAllComponents(GlLink).at(0).attributes('href')).toBe(
         subscriptionActivationHelpLink,
       );
-      expect(alert.findAllComponents(GlLink).at(1).props('href')).toBe(troubleshootingHelpLink);
+      expect(alert.findAllComponents(GlLink).at(1).attributes('href')).toBe(
+        troubleshootingHelpLink,
+      );
     });
 
     it('does not show other alerts', () => {
+      expect(findGeneralErrorAlert().exists()).toBe(false);
+      expect(findInvalidActivationCode().exists()).toBe(false);
+    });
+  });
+
+  describe('invalid activation code error', () => {
+    beforeEach(() => {
+      createComponent({ props: { error: INVALID_CODE_ERROR } });
+    });
+
+    it('shows the alert', () => {
+      expect(findInvalidActivationCode().attributes('title')).toBe(generalActivationErrorTitle);
+    });
+
+    it('shows a text to help the user', () => {
+      expect(findInvalidActivationCode().text()).toMatchInterpolatedText(invalidActivationCode);
+    });
+
+    it('does not show other alerts', () => {
+      expect(findConnectivityErrorAlert().exists()).toBe(false);
       expect(findGeneralErrorAlert().exists()).toBe(false);
     });
   });
@@ -62,21 +94,26 @@ describe('SubscriptionActivationErrors', () => {
     });
 
     it('shows a general error alert', () => {
-      expect(findGeneralErrorAlert().props('title')).toBe(generalActivationError);
+      expect(findGeneralErrorAlert().props('title')).toBe(generalActivationErrorTitle);
     });
 
-    it('shows a help link', () => {
-      expect(findGeneralErrorAlert().findComponent(GlLink).props('href')).toBe(
+    it('shows some help links', () => {
+      const alert = findGeneralErrorAlert();
+
+      expect(alert.findAllComponents(GlLink).at(0).attributes('href')).toBe(
         subscriptionActivationHelpLink,
       );
+
+      expect(alert.findAllComponents(GlLink).at(1).attributes('href')).toBe(supportLink);
     });
 
-    it('shows a a text to help the user', () => {
-      expect(findGeneralErrorAlert().text()).toBe('Learn how to activate your subscription.');
+    it('shows a text to help the user', () => {
+      expect(findGeneralErrorAlert().text()).toMatchInterpolatedText(generalActivationErrorMessage);
     });
 
     it('does not show the connectivity alert', () => {
       expect(findConnectivityErrorAlert().exists()).toBe(false);
+      expect(findInvalidActivationCode().exists()).toBe(false);
     });
   });
 });

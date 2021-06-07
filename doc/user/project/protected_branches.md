@@ -36,7 +36,7 @@ The default branch protection level is set in the [Admin Area](../admin_area/set
 
 Prerequisite:
 
-- You must have at least maintainer permissions.
+- You must have at least the [Maintainer role](../permissions.md).
 
 To protect a branch:
 
@@ -163,7 +163,7 @@ To create a new branch through the user interface:
 ## Delete a protected branch
 
 From time to time, you may need to delete or clean up protected branches.
-User with [Maintainer permissions](../permissions.md) and greater can manually delete protected
+User with the [Maintainer role](../permissions.md) and greater can manually delete protected
 branches by using the GitLab web interface:
 
 1. Go to **Repository > Branches**.
@@ -179,9 +179,7 @@ command line or a Git client application.
 ## Allow force push on protected branches
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/15611) in GitLab 13.10 behind a disabled feature flag.
-> - It's enabled on GitLab.com.
-> - It's recommended for production use.
-> - For GitLab self-managed instances, GitLab administrators can opt to [disable it](#enable-or-disable-allow-force-push-on-protected-branches).
+> - [Feature flag removed](https://gitlab.com/gitlab-org/gitlab/-/issues/323431) in GitLab 14.0.
 
 WARNING:
 This feature might not be available to you. Check the **version history** note above for details.
@@ -248,25 +246,6 @@ run CI/CD pipelines and execute actions on jobs that are related to those branch
 
 See [Security on protected branches](../../ci/pipelines/index.md#pipeline-security-on-protected-branches)
 for details about the pipelines security model.
-
-## Enable or disable allow force push on protected branches **(FREE SELF)**
-
-Allow force push on protected branches is ready for
-production use. It is deployed behind a feature flag that is **enabled by default**.
-[GitLab administrators with access to the GitLab Rails console](../../administration/feature_flags.md)
-can enable it.
-
-To enable it:
-
-```ruby
-Feature.enable(:allow_force_push_to_protected_branches)
-```
-
-To disable it:
-
-```ruby
-Feature.disable(:allow_force_push_to_protected_branches)
-```
 
 ## Changelog
 

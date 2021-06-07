@@ -40,13 +40,14 @@ collected before this feature is available.
 
 The DevOps Adoption tab shows you which groups within your organization are using the most essential features of GitLab:
 
+- Approvals
+- Code owners
+- Deployments
 - Issues
 - Merge Requests
-- Approvals
-- Runners
 - Pipelines
-- Deploys
-- Scanning
+- Runners
+- Scans
 
 Buttons to manage your groups appear in the DevOps Adoption section of the page.
 
@@ -58,18 +59,18 @@ DevOps Adoption allows you to:
 
 ### Disable or enable DevOps Adoption
 
-DevOps Adoption is deployed behind a feature flag that is **disabled by default**.
+DevOps Adoption is deployed behind a feature flag that is **enabled by default**.
 [GitLab administrators with access to the GitLab Rails console](../../../administration/feature_flags.md)
-can opt to enable it.
-
-To enable it:
-
-```ruby
-Feature.enable(:devops_adoption_feature)
-```
+can opt to disable it.
 
 To disable it:
 
 ```ruby
 Feature.disable(:devops_adoption_feature)
+```
+
+To reenable it:
+
+```ruby
+Feature.enable(:devops_adoption_feature)
 ```

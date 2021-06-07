@@ -200,6 +200,17 @@ RSpec.describe 'Epics through GroupQuery' do
           end.not_to exceed_all_query_limit(control_count + 5)
         end
       end
+
+      context 'with negated filters' do
+        it 'returns only matching epics' do
+          filter_params = { not: { author_username: user2.username } }
+          graphql_query = query(filter_params)
+
+          post_graphql(graphql_query, current_user: user)
+
+          expect_array_response([epic.to_global_id.to_s])
+        end
+      end
     end
 
     context 'when error requests' do

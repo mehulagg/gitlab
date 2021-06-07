@@ -4,11 +4,6 @@ module Projects
   class OnDemandScansController < Projects::ApplicationController
     include SecurityAndCompliancePermissions
 
-    before_action do
-      push_frontend_feature_flag(:security_dast_site_profiles_additional_fields, @project, default_enabled: :yaml)
-      push_frontend_feature_flag(:security_dast_site_profiles_api_option, @project, default_enabled: :yaml)
-    end
-
     before_action :authorize_read_on_demand_scans!, only: :index
     before_action :authorize_create_on_demand_dast_scan!, only: [:new, :edit]
 

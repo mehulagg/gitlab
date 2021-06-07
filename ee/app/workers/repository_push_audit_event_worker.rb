@@ -16,7 +16,7 @@ class RepositoryPushAuditEventWorker # rubocop:disable Scalability/IdempotentWor
       after = change['after']
       ref = change['ref']
 
-      service = EE::AuditEvents::RepositoryPushAuditEventService
+      service = AuditEvents::RepositoryPushAuditEventService
         .new(user, project, ref, before, after)
         .tap { |event| event.prepare_security_event }
 
@@ -25,6 +25,6 @@ class RepositoryPushAuditEventWorker # rubocop:disable Scalability/IdempotentWor
       service if service.enabled?
     end.compact!
 
-    EE::AuditEvents::BulkInsertService.new(changes).execute
+    AuditEvents::BulkInsertService.new(changes).execute
   end
 end

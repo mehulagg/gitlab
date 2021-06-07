@@ -279,6 +279,21 @@ p.each do |project|
 end
 ```
 
+## Bulk update to change all the Jira integrations to Jira instance-level values
+
+To change all Jira project to use the instance-level integration settings:
+
+1. In a Rails console:
+
+   ```ruby
+   jira_service_instance_id = JiraService.find_by(instance: true).id
+   JiraService.where(active: true, instance: false, template: false, inherit_from_id: nil).find_each do |service|
+     service.update_attribute(inherit_from_id: jira_service_instance_id)
+   end
+   ```
+
+1. Modify and save again the instance-level integration from the UI to propagate the changes to all the group-level and project-level integrations.
+
 ### Bulk update to disable the Slack Notification service
 
 To disable notifications for all projects that have Slack service enabled, do:
@@ -339,6 +354,16 @@ DeployKeysProject.with_write_access.find_each do |deploy_key_mapping|
        ", Can push to default branch #{project.repository.root_ref}?: " + (can_push_to_default ? 'YES' : 'NO') +
        ", User: #{username}, User state: #{user_state}"
 end
+```
+
+### Find projects using an SQL query
+
+Find and store an array of projects based on an SQL query:
+
+```ruby
+# Finds projects that end with '%ject'
+projects = Project.find_by_sql("SELECT * FROM projects WHERE name LIKE '%ject'")
+=> [#<Project id:12 root/my-first-project>>, #<Project id:13 root/my-second-project>>]
 ```
 
 ## Wikis
@@ -524,7 +549,8 @@ User.billable.count
 Using cURL and jq (up to a max 100, see the [pagination docs](../../api/README.md#pagination)):
 
 ```shell
-curl --silent --header "Private-Token: ********************" "https://gitlab.example.com/api/v4/users?per_page=100&active" | jq --compact-output '.[] | [.id,.name,.username]'
+curl --silent --header "Private-Token: ********************" \
+     "https://gitlab.example.com/api/v4/users?per_page=100&active" | jq --compact-output '.[] | [.id,.name,.username]'
 ```
 
 ### Block or Delete Users that have no projects or groups
@@ -692,6 +718,16 @@ emails = [email1, email2]
 emails.each do |e|
   delete_bad_scim(e,'GROUPPATH')
 end
+```
+
+### Find groups using an SQL query
+
+Find and store an array of groups based on an SQL query:
+
+```ruby
+# Finds groups and subgroups that end with '%oup'
+Group.find_by_sql("SELECT * FROM namespaces WHERE name LIKE '%oup'")
+=> [#<Group id:3 @test-group>, #<Group id:4 @template-group/template-subgroup>]
 ```
 
 ## Routes

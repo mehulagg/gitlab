@@ -13,7 +13,7 @@ RSpec.describe Resolvers::IterationsResolver do
         id: nil,
         iid: nil,
         iteration_cadence_ids: nil,
-        group_ids: nil,
+        parent: nil,
         state: nil,
         start_date: nil,
         end_date: nil,
@@ -43,7 +43,7 @@ RSpec.describe Resolvers::IterationsResolver do
 
       context 'without parameters' do
         it 'calls IterationsFinder to retrieve all iterations' do
-          params = params_list.merge(group_ids: Group.where(id: group.id).select(:id), state: 'all')
+          params = params_list.merge(parent: group, include_ancestors: true, state: 'all')
 
           expect(IterationsFinder).to receive(:new).with(current_user, params).and_call_original
 
@@ -60,7 +60,7 @@ RSpec.describe Resolvers::IterationsResolver do
           iid = 2
           iteration_cadence_ids = ['5']
 
-          params = params_list.merge(id: id, iid: iid, iteration_cadence_ids: iteration_cadence_ids, group_ids: group.id, state: 'closed', start_date: start_date, end_date: end_date, search_title: search)
+          params = params_list.merge(id: id, iid: iid, iteration_cadence_ids: iteration_cadence_ids, parent: group, include_ancestors: nil, state: 'closed', start_date: start_date, end_date: end_date, search_title: search)
 
           expect(IterationsFinder).to receive(:new).with(current_user, params).and_call_original
 
@@ -75,7 +75,7 @@ RSpec.describe Resolvers::IterationsResolver do
           iid = 2
           iteration_cadence_ids = ['5']
 
-          params = params_list.merge(id: id, iid: iid, iteration_cadence_ids: iteration_cadence_ids, group_ids: group.id, state: 'closed', start_date: start_date, end_date: end_date, search_title: search)
+          params = params_list.merge(id: id, iid: iid, iteration_cadence_ids: iteration_cadence_ids, parent: group, include_ancestors: nil, state: 'closed', start_date: start_date, end_date: end_date, search_title: search)
 
           expect(IterationsFinder).to receive(:new).with(current_user, params).and_call_original
 
@@ -85,7 +85,7 @@ RSpec.describe Resolvers::IterationsResolver do
         it 'accepts a raw model id for backward compatibility' do
           id = 1
           iid = 2
-          params = params_list.merge(id: id, iid: iid, group_ids: group.id, state: 'all')
+          params = params_list.merge(id: id, iid: iid, parent: group, include_ancestors: nil, state: 'all')
 
           expect(IterationsFinder).to receive(:new).with(current_user, params).and_call_original
 
@@ -97,7 +97,7 @@ RSpec.describe Resolvers::IterationsResolver do
         let_it_be(:subgroup) { create(:group, :private, parent: group) }
 
         it 'defaults to include_ancestors' do
-          params = params_list.merge(group_ids: subgroup.self_and_ancestors.select(:id), state: 'all')
+          params = params_list.merge(parent: subgroup, include_ancestors: true, state: 'all')
 
           expect(IterationsFinder).to receive(:new).with(current_user, params).and_call_original
 
@@ -105,7 +105,7 @@ RSpec.describe Resolvers::IterationsResolver do
         end
 
         it 'does not default to include_ancestors if IID is supplied' do
-          params = params_list.merge(iid: 1, group_ids: subgroup.id, state: 'all')
+          params = params_list.merge(iid: 1, parent: subgroup, include_ancestors: false, state: 'all')
 
           expect(IterationsFinder).to receive(:new).with(current_user, params).and_call_original
 
@@ -113,7 +113,7 @@ RSpec.describe Resolvers::IterationsResolver do
         end
 
         it 'accepts include_ancestors false' do
-          params = params_list.merge(group_ids: subgroup.id, state: 'all')
+          params = params_list.merge(parent: subgroup, include_ancestors: false, state: 'all')
 
           expect(IterationsFinder).to receive(:new).with(current_user, params).and_call_original
 

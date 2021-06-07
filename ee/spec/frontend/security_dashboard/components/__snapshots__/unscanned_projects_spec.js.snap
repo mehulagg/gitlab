@@ -44,6 +44,7 @@ exports[`UnscannedProjects component header matches the snapshot when the "helpP
         aria-hidden="true"
         class="align-top gl-icon s12"
         data-testid="question-icon"
+        role="img"
       >
         <use
           href="#question"

@@ -1,4 +1,4 @@
-import { GlFormInputGroup, GlFormInput, GlForm } from '@gitlab/ui';
+import { GlFormInputGroup, GlFormInput, GlForm, GlFormRadio, GlFormSelect } from '@gitlab/ui';
 import { mount, shallowMount } from '@vue/test-utils';
 import axios from 'axios';
 import AxiosMockAdapter from 'axios-mock-adapter';
@@ -14,6 +14,13 @@ jest.mock('~/lib/utils/csrf', () => ({ token: 'mock-csrf-token' }));
 describe('ForkForm component', () => {
   let wrapper;
   let axiosMock;
+
+  const PROJECT_VISIBILITY_TYPE = {
+    private:
+      'Private Project access must be granted explicitly to each user. If this project is part of a group, access will be granted to members of the group.',
+    internal: 'Internal The project can be accessed by any logged in user.',
+    public: 'Public The project can be accessed without any authentication.',
+  };
 
   const GON_GITLAB_URL = 'https://gitlab.com';
   const GON_API_VERSION = 'v7';
@@ -61,6 +68,7 @@ describe('ForkForm component', () => {
       stubs: {
         GlFormInputGroup,
         GlFormInput,
+        GlFormRadio,
       },
     });
   };
@@ -81,6 +89,7 @@ describe('ForkForm component', () => {
     axiosMock.restore();
   });
 
+  const findFormSelect = () => wrapper.find(GlFormSelect);
   const findPrivateRadio = () => wrapper.find('[data-testid="radio-private"]');
   const findInternalRadio = () => wrapper.find('[data-testid="radio-internal"]');
   const findPublicRadio = () => wrapper.find('[data-testid="radio-public"]');
@@ -203,6 +212,55 @@ describe('ForkForm component', () => {
   });
 
   describe('visibility level', () => {
+    it('displays the correct description', () => {
+      mockGetRequest();
+      createComponent();
+
+      const formRadios = wrapper.findAll(GlFormRadio);
+
+      Object.keys(PROJECT_VISIBILITY_TYPE).forEach((visibilityType, index) => {
+        expect(formRadios.at(index).text()).toBe(PROJECT_VISIBILITY_TYPE[visibilityType]);
+      });
+    });
+
+    it('displays all 3 visibility levels', () => {
+      mockGetRequest();
+      createComponent();
+
+      expect(wrapper.findAll(GlFormRadio)).toHaveLength(3);
+    });
+
+    it('resets the visibility to default "private" when the namespace is changed', async () => {
+      const namespaces = [
+        {
+          visibility: 'private',
+        },
+        {
+          visibility: 'internal',
+        },
+        {
+          visibility: 'public',
+        },
+      ];
+
+      mockGetRequest();
+      createComponent(
+        {
+          projectVisibility: 'public',
+        },
+        {
+          namespaces,
+        },
+      );
+
+      expect(wrapper.vm.form.fields.visibility.value).toBe('public');
+      findFormSelect().vm.$emit('input', namespaces[1]);
+
+      await wrapper.vm.$nextTick();
+
+      expect(wrapper.vm.form.fields.visibility.value).toBe('private');
+    });
+
     it.each`
       project       | namespace     | privateIsDisabled | internalIsDisabled | publicIsDisabled
       ${'private'}  | ${'private'}  | ${undefined}      | ${'true'}          | ${'true'}
@@ -235,7 +293,7 @@ describe('ForkForm component', () => {
   });
 
   describe('onSubmit', () => {
-    beforeEach(() => {
+    const setupComponent = (fields = {}) => {
       jest.spyOn(urlUtility, 'redirectTo').mockImplementation();
 
       mockGetRequest();
@@ -245,9 +303,14 @@ describe('ForkForm component', () => {
           namespaces: MOCK_NAMESPACES_RESPONSE,
           form: {
             state: true,
+            ...fields,
           },
         },
       );
+    };
+
+    beforeEach(() => {
+      setupComponent();
     });
 
     const selectedMockNamespaceIndex = 1;
@@ -278,6 +341,22 @@ describe('ForkForm component', () => {
         await submitForm();
 
         expect(urlUtility.redirectTo).not.toHaveBeenCalled();
+      });
+
+      it('does not make POST request if no visbility is checked', async () => {
+        jest.spyOn(axios, 'post');
+
+        setupComponent({
+          fields: {
+            visibility: {
+              value: null,
+            },
+          },
+        });
+
+        await submitForm();
+
+        expect(axios.post).not.toHaveBeenCalled();
       });
     });
 
@@ -330,7 +409,7 @@ describe('ForkForm component', () => {
 
         expect(urlUtility.redirectTo).not.toHaveBeenCalled();
         expect(createFlash).toHaveBeenCalledWith({
-          message: dummyError,
+          message: 'An error occurred while forking the project. Please try again.',
         });
       });
     });

@@ -5,6 +5,7 @@ import Vue from 'vue';
 import { mapState, mapActions } from 'vuex';
 import { swapArrayItems } from '~/lib/utils/array_utility';
 import { sprintf } from '~/locale';
+import Tracking from '~/tracking';
 import {
   STAGE_SORT_DIRECTION,
   i18n,
@@ -41,6 +42,7 @@ export default {
     DefaultStageFields,
     CustomStageFields,
   },
+  mixins: [Tracking.mixin()],
   props: {
     initialData: {
       type: Object,
@@ -169,6 +171,9 @@ export default {
           this.nameError = [];
           this.stages = initializeStages(this.defaultStageConfig, this.selectedPreset);
           this.stageErrors = initializeStageErrors(this.defaultStageConfig, this.selectedPreset);
+          this.track('submit_form', {
+            label: this.isEditing ? 'edit_value_stream' : 'create_value_stream',
+          });
         }
       });
     },

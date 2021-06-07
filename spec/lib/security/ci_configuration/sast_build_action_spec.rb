@@ -12,7 +12,6 @@ RSpec.describe Security::CiConfiguration::SastBuildAction do
       [
         { 'field' => 'stage', 'defaultValue' => 'test', 'value' => 'test' },
         { 'field' => 'SEARCH_MAX_DEPTH', 'defaultValue' => 4, 'value' => 4 },
-        { 'field' => 'SAST_ANALYZER_IMAGE_TAG', 'defaultValue' => 2, 'value' => 2 },
         { 'field' => 'SAST_EXCLUDED_PATHS', 'defaultValue' => 'spec, test, tests, tmp', 'value' => 'spec, test, tests, tmp' }
       ] }
   end
@@ -26,7 +25,6 @@ RSpec.describe Security::CiConfiguration::SastBuildAction do
       [
         { 'field' => 'stage', 'defaultValue' => 'test', 'value' => 'security' },
         { 'field' => 'SEARCH_MAX_DEPTH', 'defaultValue' => 4, 'value' => 1 },
-        { 'field' => 'SAST_ANALYZER_IMAGE_TAG', 'defaultValue' => 2, 'value' => 2 },
         { 'field' => 'SAST_EXCLUDED_PATHS', 'defaultValue' => 'spec, test, tests, tmp', 'value' => 'spec,docs' }
       ] }
   end
@@ -176,7 +174,6 @@ RSpec.describe Security::CiConfiguration::SastBuildAction do
           [
             { 'field' => 'stage', 'defaultValue' => 'test', 'value' => 'brand_new_stage' },
             { 'field' => 'SEARCH_MAX_DEPTH', 'defaultValue' => 4, 'value' => 5 },
-            { 'field' => 'SAST_ANALYZER_IMAGE_TAG', 'defaultValue' => 2, 'value' => 2 },
             { 'field' => 'SAST_EXCLUDED_PATHS', 'defaultValue' => 'spec, test, tests, tmp', 'value' => 'spec,docs' }
           ] }
       end
@@ -227,27 +224,27 @@ RSpec.describe Security::CiConfiguration::SastBuildAction do
     def existing_gitlab_ci_and_template_array_without_sast
       { "stages" => %w(test security),
        "variables" => { "RANDOM" => "make sure this persists", "SECURE_ANALYZERS_PREFIX" => "localhost:5000/analyzers" },
-       "sast" => { "variables" => { "SAST_ANALYZER_IMAGE_TAG" => 2, "SEARCH_MAX_DEPTH" => 1 }, "stage" => "security" },
+       "sast" => { "variables" => { "SEARCH_MAX_DEPTH" => 1 }, "stage" => "security" },
        "include" => [{ "template" => "existing.yml" }] }
     end
 
     def existing_gitlab_ci_and_single_template_with_sast_and_default_stage
       { "stages" => %w(test),
        "variables" => { "SECURE_ANALYZERS_PREFIX" => "localhost:5000/analyzers" },
-       "sast" => { "variables" => { "SAST_ANALYZER_IMAGE_TAG" => 2, "SEARCH_MAX_DEPTH" => 1 }, "stage" => "test" },
+       "sast" => { "variables" => { "SEARCH_MAX_DEPTH" => 1 }, "stage" => "test" },
        "include" => { "template" => "Security/SAST.gitlab-ci.yml" } }
     end
 
     def existing_gitlab_ci_and_single_template_without_sast
       { "stages" => %w(test security),
        "variables" => { "RANDOM" => "make sure this persists", "SECURE_ANALYZERS_PREFIX" => "localhost:5000/analyzers" },
-       "sast" => { "variables" => { "SAST_ANALYZER_IMAGE_TAG" => 2, "SEARCH_MAX_DEPTH" => 1 }, "stage" => "security" },
+       "sast" => { "variables" => { "SEARCH_MAX_DEPTH" => 1 }, "stage" => "security" },
        "include" => { "template" => "existing.yml" } }
     end
 
     def existing_gitlab_ci_with_no_variables
       { "stages" => %w(test security),
-       "sast" => { "variables" => { "SAST_ANALYZER_IMAGE_TAG" => 2, "SEARCH_MAX_DEPTH" => 1 }, "stage" => "security" },
+       "sast" => { "variables" => { "SEARCH_MAX_DEPTH" => 1 }, "stage" => "security" },
        "include" => [{ "template" => "Security/SAST.gitlab-ci.yml" }] }
     end
 
@@ -267,7 +264,7 @@ RSpec.describe Security::CiConfiguration::SastBuildAction do
     def existing_gitlab_ci
       { "stages" => %w(test security),
        "variables" => { "RANDOM" => "make sure this persists", "SECURE_ANALYZERS_PREFIX" => "bad_prefix" },
-       "sast" => { "variables" => { "SAST_ANALYZER_IMAGE_TAG" => 2, "SEARCH_MAX_DEPTH" => 1 }, "stage" => "security" },
+       "sast" => { "variables" => { "SEARCH_MAX_DEPTH" => 1 }, "stage" => "security" },
        "include" => [{ "template" => "Security/SAST.gitlab-ci.yml" }] }
     end
   end
@@ -345,7 +342,7 @@ RSpec.describe Security::CiConfiguration::SastBuildAction do
     # SAST customization: https://docs.gitlab.com/ee/user/application_security/sast/#customizing-the-sast-settings
     # Secret Detection customization: https://docs.gitlab.com/ee/user/application_security/secret_detection/#customizing-settings
     # Note that environment variables can be set in several places
-    # See https://docs.gitlab.com/ee/ci/variables/#priority-of-environment-variables
+    # See https://docs.gitlab.com/ee/ci/variables/#cicd-variable-precedence
     stages:
     - test
     sast:
@@ -364,7 +361,7 @@ RSpec.describe Security::CiConfiguration::SastBuildAction do
     # SAST customization: https://docs.gitlab.com/ee/user/application_security/sast/#customizing-the-sast-settings
     # Secret Detection customization: https://docs.gitlab.com/ee/user/application_security/secret_detection/#customizing-settings
     # Note that environment variables can be set in several places
-    # See https://docs.gitlab.com/ee/ci/variables/#priority-of-environment-variables
+    # See https://docs.gitlab.com/ee/ci/variables/#cicd-variable-precedence
     stages:
     - test
     sast:
@@ -380,7 +377,7 @@ RSpec.describe Security::CiConfiguration::SastBuildAction do
       # SAST customization: https://docs.gitlab.com/ee/user/application_security/sast/#customizing-the-sast-settings
       # Secret Detection customization: https://docs.gitlab.com/ee/user/application_security/secret_detection/#customizing-settings
       # Note that environment variables can be set in several places
-      # See https://docs.gitlab.com/ee/ci/variables/#priority-of-environment-variables
+      # See https://docs.gitlab.com/ee/ci/variables/#cicd-variable-precedence
       stages:
       - test
       - security
@@ -402,7 +399,7 @@ RSpec.describe Security::CiConfiguration::SastBuildAction do
       # SAST customization: https://docs.gitlab.com/ee/user/application_security/sast/#customizing-the-sast-settings
       # Secret Detection customization: https://docs.gitlab.com/ee/user/application_security/secret_detection/#customizing-settings
       # Note that environment variables can be set in several places
-      # See https://docs.gitlab.com/ee/ci/variables/#priority-of-environment-variables
+      # See https://docs.gitlab.com/ee/ci/variables/#cicd-variable-precedence
       stages:
       - build
       - test
@@ -437,7 +434,7 @@ RSpec.describe Security::CiConfiguration::SastBuildAction do
       # SAST customization: https://docs.gitlab.com/ee/user/application_security/sast/#customizing-the-sast-settings
       # Secret Detection customization: https://docs.gitlab.com/ee/user/application_security/secret_detection/#customizing-settings
       # Note that environment variables can be set in several places
-      # See https://docs.gitlab.com/ee/ci/variables/#priority-of-environment-variables
+      # See https://docs.gitlab.com/ee/ci/variables/#cicd-variable-precedence
       stages:
       - test
       - security
@@ -461,7 +458,7 @@ RSpec.describe Security::CiConfiguration::SastBuildAction do
       # SAST customization: https://docs.gitlab.com/ee/user/application_security/sast/#customizing-the-sast-settings
       # Secret Detection customization: https://docs.gitlab.com/ee/user/application_security/secret_detection/#customizing-settings
       # Note that environment variables can be set in several places
-      # See https://docs.gitlab.com/ee/ci/variables/#priority-of-environment-variables
+      # See https://docs.gitlab.com/ee/ci/variables/#cicd-variable-precedence
       stages:
       - test
       - security
@@ -483,7 +480,7 @@ RSpec.describe Security::CiConfiguration::SastBuildAction do
       # SAST customization: https://docs.gitlab.com/ee/user/application_security/sast/#customizing-the-sast-settings
       # Secret Detection customization: https://docs.gitlab.com/ee/user/application_security/secret_detection/#customizing-settings
       # Note that environment variables can be set in several places
-      # See https://docs.gitlab.com/ee/ci/variables/#priority-of-environment-variables
+      # See https://docs.gitlab.com/ee/ci/variables/#cicd-variable-precedence
       stages:
       - test
       - security
@@ -506,7 +503,7 @@ RSpec.describe Security::CiConfiguration::SastBuildAction do
       # SAST customization: https://docs.gitlab.com/ee/user/application_security/sast/#customizing-the-sast-settings
       # Secret Detection customization: https://docs.gitlab.com/ee/user/application_security/secret_detection/#customizing-settings
       # Note that environment variables can be set in several places
-      # See https://docs.gitlab.com/ee/ci/variables/#priority-of-environment-variables
+      # See https://docs.gitlab.com/ee/ci/variables/#cicd-variable-precedence
       stages:
       - test
       - security
@@ -529,7 +526,7 @@ RSpec.describe Security::CiConfiguration::SastBuildAction do
       # SAST customization: https://docs.gitlab.com/ee/user/application_security/sast/#customizing-the-sast-settings
       # Secret Detection customization: https://docs.gitlab.com/ee/user/application_security/secret_detection/#customizing-settings
       # Note that environment variables can be set in several places
-      # See https://docs.gitlab.com/ee/ci/variables/#priority-of-environment-variables
+      # See https://docs.gitlab.com/ee/ci/variables/#cicd-variable-precedence
       stages:
       - test
       - security
