@@ -72,6 +72,14 @@ RSpec.describe Resolvers::EpicsResolver do
             expect(epics).to match_array([epic1, epic2])
           end
         end
+
+        context 'when timeframe start and end are present' do
+          it 'returns epics within timeframe' do
+            epics = resolve_epics(timeframe: { start: '2019-08-13', end: '2019-08-21' })
+
+            expect(epics).to match_array([epic1, epic2])
+          end
+        end
       end
 
       context 'with state' do
