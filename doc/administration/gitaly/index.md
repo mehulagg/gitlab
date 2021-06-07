@@ -683,7 +683,7 @@ it's likely that the Gitaly servers are experiencing
 Ensure the Gitaly clients and servers are synchronized, and use an NTP time
 server to keep them synchronized.
 
-### Troubleshoot Gitaly Cluster
+### Troubleshoot Praefect (Gitaly Cluster)
 
 The following sections provide possible solutions to Gitaly Cluster errors.
 
