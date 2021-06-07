@@ -26,7 +26,6 @@ end
 ActiveSupport::Dependencies.autoload_paths << 'lib'
 
 load File.expand_path('../lib/tasks/gitlab/helpers.rake', __dir__)
-load File.expand_path('../lib/tasks/gitlab/gitaly.rake', __dir__)
 
 # Required for config/0_inject_enterprise_edition_module.rb, lib/gitlab/access.rb
 require_dependency File.expand_path('../lib/gitlab', __dir__)

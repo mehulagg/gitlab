@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+load File.expand_path('helpers.rake', __dir__)
+
 namespace :gitlab do
   namespace :gitaly do
     desc 'GitLab | Gitaly | Install or upgrade gitaly'

@@ -155,6 +155,8 @@ module TestEnv
   end
 
   def setup_gitaly
+    load File.expand_path('../../../lib/tasks/gitlab/gitaly.rake', __dir__)
+
     component_timed_setup('Gitaly',
       install_dir: gitaly_dir,
       version: Gitlab::GitalyClient.expected_server_version,

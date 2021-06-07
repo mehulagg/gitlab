@@ -1,7 +1,11 @@
 # frozen_string_literal: true
 
 require 'rainbow/ext/string'
+
+require_relative '../../config/settings'
+
 require_dependency 'gitlab/utils/strong_memoize'
+require_dependency 'gitlab/popen'
 
 # rubocop:disable Rails/Output
 module Gitlab
