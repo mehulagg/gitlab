@@ -35,7 +35,7 @@ RSpec.describe Subscriptions::CreateService do
 
   describe '#execute' do
     before do
-      allow(client).to receive(:customers_oauth_app_id).and_return( { data: { 'customers_oauth_app_id' => oauth_app.uid } } )
+      allow(client).to receive(:customers_oauth_app_id).and_return( { data: { 'oauth_app_id' => oauth_app.uid } } )
       allow(Doorkeeper::OAuth::Helpers::UniqueToken).to receive(:generate).and_return('foo_token')
     end
 

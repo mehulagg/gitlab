@@ -98,7 +98,7 @@ module Subscriptions
       Rails.cache.fetch('customers_oauth_app_id', expires_in: 1.hour) do
         response = client.customers_oauth_app_id
 
-        response.dig(:data, 'customers_oauth_app_id')
+        response.dig(:data, 'oauth_app_id')
       end
     end
 
