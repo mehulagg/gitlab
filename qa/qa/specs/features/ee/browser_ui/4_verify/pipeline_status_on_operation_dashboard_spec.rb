@@ -20,13 +20,6 @@ module QA
         end
       end
 
-      let(:project_with_pending_run) do
-        Resource::Project.fabricate_via_api! do |project|
-          project.name = 'project-with-pending-run'
-          project.group = group
-        end
-      end
-
       let(:project_without_ci) do
         Resource::Project.fabricate_via_api! do |project|
           project.name = 'project-without-ci'
@@ -51,7 +44,8 @@ module QA
 
       after do
         runner.remove_via_api!
-        remove_projects
+        remove_projects_from_dashboard
+        remove_projects_from_api
       end
 
       it 'has many pipelines with appropriate statuses', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/900' do
@@ -61,7 +55,6 @@ module QA
           {
             'project-with-success-run' => 'passed',
             'project-with-failed-run' => 'failed',
-            'project-with-pending-run' => 'pending',
             'project-without-ci' => nil
           }.each do |project_name, status|
             project = operation.find_project_card_by_name(project_name)
@@ -89,19 +82,18 @@ module QA
 
       def setup_projects
         commit_ci_file(project_with_success_run, ci_file_with_tag, 'success')
-        commit_ci_file(project_with_pending_run, ci_file_without_existing_tag, 'pending')
         commit_ci_file(project_with_failed_run, ci_file_failed_run, 'failed')
       end
 
       def wait_for_pipeline(project, status)
-        Support::Waiter.wait_until do
+        Support::Waiter.wait_until(sleep_interval: 5) do
           pipelines = project.pipelines
           !pipelines.empty? && pipelines.last[:status] == status
         end
       end
 
       def add_projects_to_board
-        [project_with_success_run, project_with_pending_run, project_without_ci, project_with_failed_run].each do |project|
+        [project_with_success_run, project_without_ci, project_with_failed_run].each do |project|
           EE::Page::OperationsDashboard.perform do |operation|
             operation.add_project(project.name)
             expect(operation).to have_project_card
@@ -109,10 +101,14 @@ module QA
         end
       end
 
-      def remove_projects
+      def remove_projects_from_dashboard
         EE::Page::OperationsDashboard.perform do |operation|
           operation.remove_all_projects
         end
+      end
+
+      def remove_projects_from_api
+        [project_with_success_run, project_without_ci, project_with_failed_run].each { |project| project.remove_via_api! }
       end
 
       def ci_file_with_tag
@@ -121,17 +117,6 @@ module QA
           content: <<~YAML
             test-success:
               tags: ["#{group.name}"]
-              script: echo 'OK'
-          YAML
-        }
-      end
-
-      def ci_file_without_existing_tag
-        {
-          file_path: '.gitlab-ci.yml',
-          content: <<~YAML
-            test-pending:
-              tags: ['does-not-exist']
               script: echo 'OK'
           YAML
         }
