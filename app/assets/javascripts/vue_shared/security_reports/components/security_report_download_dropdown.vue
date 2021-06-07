@@ -33,7 +33,7 @@ export default {
   <gl-dropdown
     :text="s__('SecurityReports|Download results')"
     :loading="loading"
-    icon="download"
+    size="small"
     right
   >
     <gl-dropdown-item

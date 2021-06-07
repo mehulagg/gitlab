@@ -607,14 +607,15 @@ export default {
               />
             </template>
             <template v-else-if="dastDownloadLink">
-              <gl-link
+              <gl-button
                 download
+                size="small"
                 :href="dastDownloadLink"
                 class="gl-ml-1"
                 data-testid="download-link"
               >
-                ({{ s__('SecurityReports|Download scanned resources') }})
-              </gl-link>
+                {{ s__('SecurityReports|Download scanned resources') }}
+              </gl-button>
             </template>
           </summary-row>
           <grouped-issues-list
