@@ -39,10 +39,9 @@ RSpec.describe Gitlab::Ci::Config::Entry::DastConfiguration do
     context 'when entry config value is correct' do
       let(:config) do
         {
-          vault: {
-            engine: { name: 'kv-v2', path: 'kv-v2' },
-            path: 'production/db',
-            field: 'password'
+          dast_configuration: {
+            site_profile: 'Site profile',
+            scanner_profile: 'Scanner profile'
           }
         }
       end
