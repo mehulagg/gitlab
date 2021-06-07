@@ -5,8 +5,7 @@ query groupEpics(
   $state: EpicState
   $sort: EpicSort
   $iid: ID
-  $startDate: Time
-  $dueDate: Time
+  $timeframe: Timeframe
   $labelName: [String!] = []
   $authorUsername: String = ""
   $milestoneTitle: String = ""
@@ -22,8 +21,6 @@ query groupEpics(
       iid: $iid
       state: $state
       sort: $sort
-      startDate: $startDate
-      endDate: $dueDate
       labelName: $labelName
       authorUsername: $authorUsername
       milestoneTitle: $milestoneTitle
@@ -31,6 +28,7 @@ query groupEpics(
       confidential: $confidential
       search: $search
       first: $first
+      timeframe: $timeframe
     ) {
       edges {
         node {
