@@ -384,7 +384,7 @@ module Gitlab
       end
 
       def can_user_login_with_non_expired_password?(user)
-        user.can?(:log_in) && !user.password_expired?
+        user.can?(:log_in) && !user.password_expired_or_not_applicable?
       end
     end
   end

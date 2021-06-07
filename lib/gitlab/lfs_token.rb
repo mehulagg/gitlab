@@ -52,7 +52,7 @@ module Gitlab
     def valid_user?
       return true unless user?
 
-      !actor.blocked? && (!actor.allow_password_authentication? || !actor.password_expired?)
+      !actor.blocked? && (!actor.allow_password_authentication? || !actor.password_expired_or_not_applicable?)
     end
 
     def authentication_payload(repository_http_path)

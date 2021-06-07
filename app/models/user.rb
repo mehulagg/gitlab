@@ -1857,6 +1857,12 @@ class User < ApplicationRecord
     !!(password_expires_at && password_expires_at < Time.current)
   end
 
+  def password_expired_or_not_applicable?
+    return false if ldap_user?
+
+    password_expired?
+  end
+
   def can_be_deactivated?
     active? && no_recent_activity? && !internal?
   end
