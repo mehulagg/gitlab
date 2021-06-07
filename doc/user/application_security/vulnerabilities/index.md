@@ -71,7 +71,7 @@ The issue is then opened so you can take further action.
 ### Create a Jira issue for a vulnerability
 
 > - [Introduced](https://gitlab.com/groups/gitlab-org/-/epics/4677) in GitLab 13.9.
-- - [Feature flag removed](https://gitlab.com/gitlab-org/gitlab/-/issues/283850) in GitLab 13.12.
+> - [Feature flag removed](https://gitlab.com/gitlab-org/gitlab/-/issues/283850) in GitLab 13.12.
 
 Prerequisites:
 
