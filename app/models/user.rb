@@ -99,10 +99,6 @@ class User < ApplicationRecord
   # Virtual attribute for impersonator
   attr_accessor :impersonator
 
-  # This attribute hosts a Ci::JobToken::Scope object which is set when
-  # the user is authenticated successfully via CI_JOB_TOKEN.
-  attr_accessor :ci_job_token_scope
-
   #
   # Relations
   #
