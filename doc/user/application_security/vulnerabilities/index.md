@@ -71,6 +71,7 @@ The issue is then opened so you can take further action.
 ### Create a Jira issue for a vulnerability
 
 > - [Introduced](https://gitlab.com/groups/gitlab-org/-/epics/4677) in GitLab 13.9.
+- - [Feature flag removed](https://gitlab.com/gitlab-org/gitlab/-/issues/283850) in GitLab 13.12.
 
 Prerequisites:
 
@@ -87,7 +88,7 @@ To create a Jira issue for a vulnerability:
 The Jira issue is created and opened in a new browser tab. The **Summary** and **Description**
 fields are pre-populated from the vulnerability's details.
 
-Unlike GitLab issues, the status of whether a Jira issue is Open or Closed does not display in GitLab UI.
+Unlike GitLab issues, the status of whether a Jira issue is open or closed does not display in GitLab UI.
 
 ## Linked issues
 
@@ -99,6 +100,7 @@ the issue that resolves or mitigates a vulnerability.
 
 Issues linked to a vulnerability are shown in the Vulnerability Report and the vulnerability's page.
 
+NOTE:
 - The vulnerability page shows related issues, but the issue page doesn't show the vulnerability it's related to.
 - An issue can only be related to one vulnerability at a time.
 - Issues can be linked across groups and projects.
