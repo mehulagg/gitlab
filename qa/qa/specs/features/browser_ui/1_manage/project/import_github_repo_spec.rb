@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 module QA
+  # test
   RSpec.describe 'Manage', :github, :requires_admin do
     describe 'Project import' do
       let!(:user) do
