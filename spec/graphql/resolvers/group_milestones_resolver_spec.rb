@@ -44,18 +44,7 @@ RSpec.describe Resolvers::GroupMilestonesResolver do
     end
 
     context 'with parameters' do
-      it 'calls MilestonesFinder with correct parameters' do
-        start_date = now
-        end_date = start_date + 1.hour
-
-        expect(MilestonesFinder).to receive(:new)
-          .with(args(group_ids: group.id, state: 'closed', start_date: start_date, end_date: end_date))
-          .and_call_original
-
-        resolve_group_milestones(start_date: start_date, end_date: end_date, state: 'closed')
-      end
-
-      it 'understands the timeframe argument' do
+      it 'timeframe argument' do
         start_date = now
         end_date = start_date + 1.hour
 
@@ -80,29 +69,13 @@ RSpec.describe Resolvers::GroupMilestonesResolver do
     end
 
     context 'by timeframe' do
-      context 'when start_date and end_date are present' do
-        context 'when start date is after end_date' do
+      context 'when timeframe start and end are present' do
+        context 'when start is after end' do
           it 'raises error' do
             expect do
-              resolve_group_milestones(start_date: now, end_date: now - 2.days)
-            end.to raise_error(Gitlab::Graphql::Errors::ArgumentError, "startDate is after endDate")
+              resolve_group_milestones(timeframe: { start: now, end: now - 2.days })
+            end.to raise_error(Gitlab::Graphql::Errors::ArgumentError, "start must be before end")
           end
-        end
-      end
-
-      context 'when only start_date is present' do
-        it 'raises error' do
-          expect do
-            resolve_group_milestones(start_date: now)
-          end.to raise_error(Gitlab::Graphql::Errors::ArgumentError, /Both startDate and endDate/)
-        end
-      end
-
-      context 'when only end_date is present' do
-        it 'raises error' do
-          expect do
-            resolve_group_milestones(end_date: now)
-          end.to raise_error(Gitlab::Graphql::Errors::ArgumentError, /Both startDate and endDate/)
         end
       end
     end

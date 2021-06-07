@@ -60,25 +60,25 @@ RSpec.describe 'getting epics information' do
 
     context 'when start_date and end_date are present' do
       it 'returns epics within timeframe' do
-        post_graphql(epics_query_by_hash(group, 'startDate' => '2019-08-13', 'endDate' => '2019-08-21'), current_user: user)
+        post_graphql(epics_query_by_hash(group, "timeframe: {#{field_query({ 'start' => '2019-08-13', 'end' => '2019-08-21' })}}"), current_user: user)
 
         expect_epics_response(epic1, epic2)
       end
     end
 
-    context 'when only start_date is present' do
+    context 'when only start is present' do
       it 'raises error' do
-        post_graphql(epics_query(group, 'startDate', '2019-08-13'), current_user: user)
+        post_graphql(epics_query_by_hash(group, "timeframe: {#{field_query({ 'start' => '2019-08-13' })}}"), current_user: user)
 
-        expect(graphql_errors).to include(a_hash_including('message' => 'Both startDate and endDate must be present.'))
+        expect(graphql_errors).to include(a_hash_including('message' => "Argument 'end' on InputObject 'Timeframe' is required. Expected type Date!"))
       end
     end
 
-    context 'when only end_date is present' do
+    context 'when only end is present' do
       it 'raises error' do
-        post_graphql(epics_query(group, 'endDate', '2019-08-13'), current_user: user)
+        post_graphql(epics_query_by_hash(group, "timeframe: {#{field_query({ 'end' => '2019-08-21' })}}"), current_user: user)
 
-        expect(graphql_errors).to include(a_hash_including('message' => 'Both startDate and endDate must be present.'))
+        expect(graphql_errors).to include(a_hash_including('message' => "Argument 'start' on InputObject 'Timeframe' is required. Expected type Date!"))
       end
     end
   end
@@ -127,17 +127,15 @@ RSpec.describe 'getting epics information' do
   end
 
   def epics_query(group, field, value)
-    epics_query_by_hash(group, field => value)
+    epics_query_by_hash(group, field_query(field => value))
   end
 
-  def epics_query_by_hash(group, args)
-    field_queries = args.map { |key, value| "#{key}:\"#{value}\"" }.join(',')
-
+  def epics_query_by_hash(group, query)
     <<~QUERY
       query {
         group(fullPath: "#{group.full_path}") {
           id,
-          epics(#{field_queries}) {
+          epics(#{query}) {
             nodes {
               id
             }
@@ -145,6 +143,10 @@ RSpec.describe 'getting epics information' do
         }
       }
     QUERY
+  end
+
+  def field_query(args)
+    args.map { |key, value| "#{key}:\"#{value}\"" }.join(',')
   end
 
   def expect_epics_response(*epics)

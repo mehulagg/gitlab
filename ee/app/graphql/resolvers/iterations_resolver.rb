@@ -32,8 +32,6 @@ module Resolvers
     type Types::IterationType.connection_type, null: true
 
     def resolve(**args)
-      validate_timeframe_params!(args)
-
       authorize!
 
       args[:id] = id_from_args(args)

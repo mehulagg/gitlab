@@ -15,8 +15,6 @@ RSpec.describe Resolvers::IterationsResolver do
         iteration_cadence_ids: nil,
         parent: nil,
         state: nil,
-        start_date: nil,
-        end_date: nil,
         search_title: nil
       }
     end
@@ -67,21 +65,6 @@ RSpec.describe Resolvers::IterationsResolver do
           resolve_group_iterations(timeframe: { start: start_date, end: end_date }, state: 'closed', title: search, id: 'gid://gitlab/Iteration/1', iteration_cadence_ids: ['gid://gitlab/Iterations::Cadence/5'], iid: iid)
         end
 
-        it 'calls IterationsFinder with correct parameters, using start and end date' do
-          start_date = now
-          end_date = start_date + 1.hour
-          search = 'wow'
-          id = '1'
-          iid = 2
-          iteration_cadence_ids = ['5']
-
-          params = params_list.merge(id: id, iid: iid, iteration_cadence_ids: iteration_cadence_ids, parent: group, include_ancestors: nil, state: 'closed', start_date: start_date, end_date: end_date, search_title: search)
-
-          expect(IterationsFinder).to receive(:new).with(current_user, params).and_call_original
-
-          resolve_group_iterations(start_date: start_date, end_date: end_date, state: 'closed', title: search, id: 'gid://gitlab/Iteration/1', iteration_cadence_ids: ['gid://gitlab/Iterations::Cadence/5'], iid: iid)
-        end
-
         it 'accepts a raw model id for backward compatibility' do
           id = 1
           iid = 2
@@ -122,41 +105,13 @@ RSpec.describe Resolvers::IterationsResolver do
       end
 
       context 'by timeframe' do
-        context 'when start_date and end_date are present' do
+        context 'when timeframe start and end are present' do
           context 'when start date is after end_date' do
             it 'raises error' do
               expect do
                 resolve_group_iterations(timeframe: { start: now, end: now - 2.days })
               end.to raise_error(Gitlab::Graphql::Errors::ArgumentError, "start must be before end")
             end
-          end
-        end
-      end
-
-      context 'by dates' do
-        context 'when start_date and end_date are present' do
-          context 'when start date is after end_date' do
-            it 'raises error' do
-              expect do
-                resolve_group_iterations(start_date: now, end_date: now - 2.days)
-              end.to raise_error(Gitlab::Graphql::Errors::ArgumentError, "startDate is after endDate")
-            end
-          end
-        end
-
-        context 'when only start_date is present' do
-          it 'raises error' do
-            expect do
-              resolve_group_iterations(start_date: now)
-            end.to raise_error(Gitlab::Graphql::Errors::ArgumentError, /Both startDate and endDate/)
-          end
-        end
-
-        context 'when only end_date is present' do
-          it 'raises error' do
-            expect do
-              resolve_group_iterations(end_date: now)
-            end.to raise_error(Gitlab::Graphql::Errors::ArgumentError, /Both startDate and endDate/)
           end
         end
       end

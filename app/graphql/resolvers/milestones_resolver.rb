@@ -28,8 +28,6 @@ module Resolvers
     type Types::MilestoneType.connection_type, null: true
 
     def resolve(**args)
-      validate_timeframe_params!(args)
-
       authorize!
 
       MilestonesFinder.new(milestones_finder_params(args)).execute
