@@ -61,7 +61,6 @@ export default {
     'fullPath',
     'hasScopedLabelsFeature',
     'canEditIteration',
-    'previewMarkdownPath',
     'namespaceType',
     'noIssuesSvgPath',
     'labelsFetchPath',
@@ -75,9 +74,6 @@ export default {
   computed: {
     canEdit() {
       return this.canEditIteration && this.namespaceType === Namespace.Group;
-    },
-    cadenceId() {
-      return this.$router.currentRoute.params.cadenceId;
     },
     loading() {
       return this.$apollo.queries.iteration.loading;
