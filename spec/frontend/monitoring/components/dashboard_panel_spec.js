@@ -779,50 +779,26 @@ describe('Dashboard Panel', () => {
       });
     });
 
-    describe.only('managed alert deprecation feature flag', () => {
+    describe('managed alert deprecation feature flag', () => {
       beforeEach(() => {
         setMetricsSavedToDb([metricId]);
-
-        // ${'with permission and related metrics in db'}    | ${[graphData.metrics[0].metricId]} | ${{}}                                   | ${true}
       });
 
-      // beforeEach(() => {
-      //   setMetricsSavedToDb(metricsSavedToDb);
-      //   createWrapper({
-      //     alertsEndpoint: '/endpoint',
-      //     prometheusAlertsAvailable: true,
-      //     ...props,
-      //   });
-      //   return wrapper.vm.$nextTick();
-      // });
-
-      // it(`${showsDesc} alert widget`, () => {
-      //   expect(findAlertsWidget().exists()).toBe(isShown);
-      // });
-
-      // it(`${showsDesc} alert configuration`, () => {
-      //   expect(findMenuItemByText('Alerts').exists()).toBe(isShown);
-      // });
-
-      it('shows alerts when alerts are not deprecated', async () => {
+      it('shows alerts when alerts are not deprecated', () => {
         createWrapper(
           { alertsEndpoint: '/endpoint', prometheusAlertsAvailable: true },
           { provide: { glFeatures: { managedAlertsDeprecation: false } } },
         );
 
-        await wrapper.vm.$nextTick();
-
         expect(findAlertsWidget().exists()).toBe(true);
         expect(findMenuItemByText('Alerts').exists()).toBe(true);
       });
 
-      it('hides alerts when alerts are deprecated', async () => {
+      it('hides alerts when alerts are deprecated', () => {
         createWrapper(
           { alertsEndpoint: '/endpoint', prometheusAlertsAvailable: true },
-          { provide: { managedAlertsDeprecation: true } },
+          { provide: { glFeatures: { managedAlertsDeprecation: true } } },
         );
-
-        await wrapper.vm.$nextTick();
 
         expect(findAlertsWidget().exists()).toBe(false);
         expect(findMenuItemByText('Alerts').exists()).toBe(false);
