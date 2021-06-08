@@ -168,9 +168,7 @@ export default {
           const msg = this.isEditing
             ? this.$options.i18n.FORM_EDITED
             : this.$options.i18n.FORM_CREATED;
-          this.$toast.show(sprintf(msg, { name: this.name }), {
-            position: 'top-center',
-          });
+          this.$emit('success', sprintf(msg, { name: this.name }));
           this.name = '';
           this.nameError = [];
           this.stages = initializeStages(this.defaultStageConfig, this.selectedPreset);

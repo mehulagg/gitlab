@@ -1,5 +1,7 @@
 <script>
 import { GlAlert, GlModal, GlSprintf } from '@gitlab/ui';
+import { mapState, mapActions } from 'vuex';
+import { sprintf } from '~/locale';
 import { I18N } from '../constants';
 
 export default {
@@ -14,18 +16,35 @@ export default {
       type: Boolean,
       required: true,
     },
-    isDeleting: {
-      type: Boolean,
-      required: true,
+  },
+  computed: {
+    ...mapState({
+      isDeleting: 'isDeletingValueStream',
+      error: 'deleteValueStreamError',
+      selectedValueStream: 'selectedValueStream',
+    }),
+    deleteConfirmationText() {
+      return sprintf(this.$options.I18N.DELETE_CONFIRMATION, {
+        name: this.selectedValueStreamName,
+      });
     },
-    error: {
-      type: String,
-      required: false,
-      default: '',
+    selectedValueStreamName() {
+      return this.selectedValueStream?.name || '';
     },
-    valueStreamName: {
-      type: String,
-      required: true,
+    selectedValueStreamId() {
+      return this.selectedValueStream?.id || '';
+    },
+  },
+  methods: {
+    ...mapActions(['deleteValueStream']),
+    onDelete() {
+      const name = this.selectedValueStreamName;
+      return this.deleteValueStream(this.selectedValueStreamId).then(() => {
+        if (!this.error) {
+          this.$emit('success', sprintf(this.$options.I18N.DELETED, { name }));
+          this.track('delete_value_stream', { extra: { name } });
+        }
+      });
     },
   },
   I18N,
@@ -42,13 +61,13 @@ export default {
     }"
     :action-cancel="{ text: $options.I18N.CANCEL }"
     :visible="isVisible"
-    @primary.prevent="$emit('delete')"
+    @primary.prevent="onDelete"
     @hidden="$emit('hidden')"
   >
     <gl-alert v-if="error" variant="danger">{{ error }}</gl-alert>
     <p>
       <gl-sprintf :message="$options.I18N.DELETE_CONFIRMATION">
-        <template #name>{{ valueStreamName }}</template>
+        <template #name>{{ selectedValueStreamName }}</template>
       </gl-sprintf>
     </p>
   </gl-modal>

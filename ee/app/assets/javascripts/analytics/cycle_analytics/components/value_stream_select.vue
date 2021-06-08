@@ -1,15 +1,7 @@
 <script>
-import {
-  GlButton,
-  GlDropdown,
-  GlDropdownItem,
-  GlDropdownDivider,
-  GlModalDirective,
-  GlSprintf,
-} from '@gitlab/ui';
+import { GlButton, GlDropdown, GlDropdownItem, GlDropdownDivider, GlSprintf } from '@gitlab/ui';
 import { mapState, mapActions } from 'vuex';
 import { slugifyWithUnderscore } from '~/lib/utils/text_utility';
-import { sprintf, __, s__ } from '~/locale';
 import Tracking from '~/tracking';
 import { I18N } from '../constants';
 import { generateInitialStageData } from './create_value_stream_form/utils';
@@ -26,9 +18,6 @@ export default {
     ValueStreamForm,
     DeleteValueStreamModal,
   },
-  directives: {
-    GlModalDirective,
-  },
   mixins: [Tracking.mixin()],
   data() {
     return {
@@ -43,8 +32,6 @@ export default {
   },
   computed: {
     ...mapState({
-      isDeleting: 'isDeletingValueStream',
-      deleteValueStreamError: 'deleteValueStreamError',
       data: 'valueStreams',
       selectedValueStream: 'selectedValueStream',
       selectedValueStreamStages: 'stages',
@@ -63,14 +50,9 @@ export default {
     isCustomValueStream() {
       return this.selectedValueStream?.isCustom || false;
     },
-    deleteConfirmationText() {
-      return sprintf(this.$options.I18N.DELETE_CONFIRMATION, {
-        name: this.selectedValueStreamName,
-      });
-    },
   },
   methods: {
-    ...mapActions(['setSelectedValueStream', 'deleteValueStream']),
+    ...mapActions(['setSelectedValueStream']),
     onSuccess(message) {
       this.$toast.show(message, { position: 'top-center' });
     },
@@ -79,16 +61,6 @@ export default {
     },
     onSelect(selectedId) {
       this.setSelectedValueStream(this.data.find(({ id }) => id === selectedId));
-    },
-    // TODO: move binding into component
-    onDelete() {
-      const name = this.selectedValueStreamName;
-      return this.deleteValueStream(this.selectedValueStreamId).then(() => {
-        if (!this.deleteValueStreamError) {
-          this.onSuccess(sprintf(this.$options.I18N.DELETED, { name }));
-          this.track('delete_value_stream', { extra: { name } });
-        }
-      });
     },
     onCreate() {
       this.showCreateModal = true;
@@ -117,7 +89,6 @@ export default {
   <div>
     <gl-button
       v-if="isCustomValueStream"
-      v-gl-modal-directive="'value-stream-form-modal'"
       data-testid="edit-value-stream"
       data-track-action="click_button"
       data-track-label="edit_value_stream_form_open"
@@ -163,7 +134,6 @@ export default {
     </gl-dropdown>
     <gl-button
       v-else
-      v-gl-modal-directive="'value-stream-form-modal'"
       data-testid="create-value-stream-button"
       data-track-action="click_button"
       data-track-label="create_value_stream_form_open"
@@ -177,14 +147,12 @@ export default {
       :is-editing="isEditing"
       :is-visible="showCreateModal"
       @hidden="showCreateModal = false"
+      @success="onSuccess"
     />
     <delete-value-stream-modal
       :is-visible="showDeleteModal"
-      :is-deleting="isDeleting"
-      :value-stream-name="selectedValueStreamName"
-      :error="deleteValueStreamError"
       @hidden="showDeleteModal = false"
-      @delete="onDelete"
+      @success="onSuccess"
     />
   </div>
 </template>
