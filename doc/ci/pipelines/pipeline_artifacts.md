@@ -17,4 +17,10 @@ Pipeline artifacts are saved to disk or object storage. They count towards a pro
 
 ## When pipeline artifacts are deleted
 
-Pipeline artifacts are deleted 7 days after creation unless they are from the most recent successful pipeline in which case they will be kept until another pipeline runs successfully after which the artifact will be deleted. This deletion may take up to 2 days.
+Pipeline artifacts are deleted either:
+
+- Seven days after creation.
+- After another pipeline runs successfully, if they are from the most recent successful
+  pipeline.
+
+This deletion may take up to two days.
