@@ -1,5 +1,5 @@
-import groupBoardAssignees from 'ee_component/boards/graphql/group_board_assignees.query.graphql';
-import projectBoardAssignees from 'ee_component/boards/graphql/project_board_assignees.query.graphql';
+import groupBoardAssignees from 'ee_else_ce/boards/graphql/group_board_assignees.query.graphql'; // cannot resolve
+import projectBoardAssignees from 'ee_else_ce/boards/graphql/project_board_assignees.query.graphql';
 import { BoardType } from './constants';
 import boardLabels from './graphql/board_labels.query.graphql';
 
