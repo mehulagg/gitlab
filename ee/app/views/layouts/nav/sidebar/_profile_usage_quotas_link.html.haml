@@ -6,6 +6,11 @@
       = s_('UsageQuota|Usage Quotas')
   %ul.sidebar-sub-level-items.is-fly-out-only
     = nav_link(controller: :usage_quotas, html_options: { class: "fly-out-top-item" } ) do
-      = link_to profile_usage_quotas_path do
-        %strong.fly-out-top-item-name
-          = s_('UsageQuota|Usage Quotas')
+      - if sidebar_refactor_disabled?
+        = link_to profile_usage_quotas_path do
+          %strong.fly-out-top-item-name
+            = s_('UsageQuota|Usage Quotas')
+      - else
+        %span.fly-out-top-item-container.no-sub-items
+          %strong.fly-out-top-item-name
+            = s_('UsageQuota|Usage Quotas')

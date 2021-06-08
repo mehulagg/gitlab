@@ -8,6 +8,11 @@
       = _('Push Rules')
   %ul.sidebar-sub-level-items.is-fly-out-only
     = nav_link(controller: :push_rules, html_options: { class: "fly-out-top-item" } ) do
-      = link_to edit_group_push_rules_path(@group), title: _('Push Rules') do
-        %strong.fly-out-top-item-name
-          = _('Push Rules')
+      - if sidebar_refactor_disabled?
+        = link_to edit_group_push_rules_path(@group), title: _('Push Rules') do
+          %strong.fly-out-top-item-name
+            = _('Push Rules')
+      - else
+        %span.fly-out-top-item-container.no-sub-items
+          %strong.fly-out-top-item-name
+            = _('Push Rules')

@@ -17,9 +17,15 @@
             = _('Profile')
         %ul.sidebar-sub-level-items.is-fly-out-only
           = nav_link(path: 'profiles#show', html_options: { class: "fly-out-top-item" } ) do
-            = link_to profile_path do
-              %strong.fly-out-top-item-name
-                = _('Profile')
+            - if sidebar_refactor_disabled?
+              = link_to profile_path do
+                %strong.fly-out-top-item-name
+                  = _('Profile')
+            - else
+              %span.fly-out-top-item-container.no-sub-items
+                %strong.fly-out-top-item-name
+                  = _('Profile')
+
       = nav_link(controller: [:accounts, :two_factor_auths]) do
         = link_to profile_account_path, data: { qa_selector: 'profile_account_link' } do
           .nav-icon-container
@@ -28,9 +34,14 @@
             = _('Account')
         %ul.sidebar-sub-level-items.is-fly-out-only
           = nav_link(controller: [:accounts, :two_factor_auths], html_options: { class: "fly-out-top-item" } ) do
-            = link_to profile_account_path do
-              %strong.fly-out-top-item-name
-                = _('Account')
+            - if sidebar_refactor_disabled?
+              = link_to profile_account_path do
+                %strong.fly-out-top-item-name
+                  = _('Account')
+            - else
+              %span.fly-out-top-item-container.no-sub-items
+                %strong.fly-out-top-item-name
+                  = _('Account')
 
       = render_if_exists 'layouts/nav/sidebar/profile_billing_link'
       = nav_link(controller: 'oauth/applications') do
@@ -41,9 +52,15 @@
             = _('Applications')
         %ul.sidebar-sub-level-items.is-fly-out-only
           = nav_link(controller: 'oauth/applications', html_options: { class: "fly-out-top-item" } ) do
-            = link_to applications_profile_path do
-              %strong.fly-out-top-item-name
-                = _('Applications')
+            - if sidebar_refactor_disabled?
+              = link_to applications_profile_path do
+                %strong.fly-out-top-item-name
+                  = _('Applications')
+            - else
+              %span.fly-out-top-item-container.no-sub-items
+                %strong.fly-out-top-item-name
+                  = _('Applications')
+
       = nav_link(controller: :chat_names) do
         = link_to profile_chat_names_path do
           .nav-icon-container
@@ -52,9 +69,15 @@
             = _('Chat')
         %ul.sidebar-sub-level-items.is-fly-out-only
           = nav_link(controller: :chat_names, html_options: { class: "fly-out-top-item" } ) do
-            = link_to profile_chat_names_path do
-              %strong.fly-out-top-item-name
-                = _('Chat')
+            - if sidebar_refactor_disabled?
+              = link_to profile_chat_names_path do
+                %strong.fly-out-top-item-name
+                  = _('Chat')
+            - else
+              %span.fly-out-top-item-container.no-sub-items
+                %strong.fly-out-top-item-name
+                  = _('Chat')
+
       = nav_link(controller: :personal_access_tokens) do
         = link_to profile_personal_access_tokens_path do
           .nav-icon-container
@@ -63,9 +86,15 @@
             = _('Access Tokens')
         %ul.sidebar-sub-level-items.is-fly-out-only
           = nav_link(controller: :personal_access_tokens, html_options: { class: "fly-out-top-item" } ) do
-            = link_to profile_personal_access_tokens_path do
-              %strong.fly-out-top-item-name
-                = _('Access Tokens')
+            - if sidebar_refactor_disabled?
+              = link_to profile_personal_access_tokens_path do
+                %strong.fly-out-top-item-name
+                  = _('Access Tokens')
+            - else
+              %span.fly-out-top-item-container.no-sub-items
+                %strong.fly-out-top-item-name
+                  = _('Access Tokens')
+
       = nav_link(controller: :emails) do
         = link_to profile_emails_path, data: { qa_selector: 'profile_emails_link' } do
           .nav-icon-container
@@ -74,9 +103,15 @@
             = _('Emails')
         %ul.sidebar-sub-level-items.is-fly-out-only
           = nav_link(controller: :emails, html_options: { class: "fly-out-top-item" } ) do
-            = link_to profile_emails_path do
-              %strong.fly-out-top-item-name
-                = _('Emails')
+            - if sidebar_refactor_disabled?
+              = link_to profile_emails_path do
+                %strong.fly-out-top-item-name
+                  = _('Emails')
+            - else
+              %span.fly-out-top-item-container.no-sub-items
+                %strong.fly-out-top-item-name
+                  = _('Emails')
+
       - if current_user.allow_password_authentication?
         = nav_link(controller: :passwords) do
           = link_to edit_profile_password_path , data: { qa_selector: 'profile_password_link' } do
@@ -86,9 +121,15 @@
               = _('Password')
           %ul.sidebar-sub-level-items.is-fly-out-only
             = nav_link(controller: :passwords, html_options: { class: "fly-out-top-item" } ) do
-              = link_to edit_profile_password_path do
-                %strong.fly-out-top-item-name
-                  = _('Password')
+              - if sidebar_refactor_disabled?
+                = link_to edit_profile_password_path do
+                  %strong.fly-out-top-item-name
+                    = _('Password')
+              - else
+                %span.fly-out-top-item-container.no-sub-items
+                  %strong.fly-out-top-item-name
+                    = _('Password')
+
       = nav_link(controller: :notifications) do
         = link_to profile_notifications_path do
           .nav-icon-container
@@ -97,9 +138,15 @@
             = _('Notifications')
         %ul.sidebar-sub-level-items.is-fly-out-only
           = nav_link(controller: :notifications, html_options: { class: "fly-out-top-item" } ) do
-            = link_to profile_notifications_path do
-              %strong.fly-out-top-item-name
-                = _('Notifications')
+            - if sidebar_refactor_disabled?
+              = link_to profile_notifications_path do
+                %strong.fly-out-top-item-name
+                  = _('Notifications')
+            - else
+              %span.fly-out-top-item-container.no-sub-items
+                %strong.fly-out-top-item-name
+                  = _('Notifications')
+
       = nav_link(controller: :keys) do
         = link_to profile_keys_path do
           .nav-icon-container
@@ -108,9 +155,15 @@
             = _('SSH Keys')
         %ul.sidebar-sub-level-items.is-fly-out-only
           = nav_link(controller: :keys, html_options: { class: "fly-out-top-item" } ) do
-            = link_to profile_keys_path do
-              %strong.fly-out-top-item-name
-                = _('SSH Keys')
+            - if sidebar_refactor_disabled?
+              = link_to profile_keys_path do
+                %strong.fly-out-top-item-name
+                  = _('SSH Keys')
+            - else
+              %span.fly-out-top-item-container.no-sub-items
+                %strong.fly-out-top-item-name
+                  = _('SSH Keys')
+
       = nav_link(controller: :gpg_keys) do
         = link_to profile_gpg_keys_path do
           .nav-icon-container
@@ -119,9 +172,15 @@
             = _('GPG Keys')
         %ul.sidebar-sub-level-items.is-fly-out-only
           = nav_link(controller: :gpg_keys, html_options: { class: "fly-out-top-item" } ) do
-            = link_to profile_gpg_keys_path do
-              %strong.fly-out-top-item-name
-                = _('GPG Keys')
+            - if sidebar_refactor_disabled?
+              = link_to profile_gpg_keys_path do
+                %strong.fly-out-top-item-name
+                  = _('GPG Keys')
+            - else
+              %span.fly-out-top-item-container.no-sub-items
+                %strong.fly-out-top-item-name
+                  = _('GPG Keys')
+
       = nav_link(controller: :preferences) do
         = link_to profile_preferences_path do
           .nav-icon-container
@@ -130,9 +189,15 @@
             = _('Preferences')
         %ul.sidebar-sub-level-items.is-fly-out-only
           = nav_link(controller: :preferences, html_options: { class: "fly-out-top-item" } ) do
-            = link_to profile_preferences_path do
-              %strong.fly-out-top-item-name
-                = _('Preferences')
+            - if sidebar_refactor_disabled?
+              = link_to profile_preferences_path do
+                %strong.fly-out-top-item-name
+                  = _('Preferences')
+            - else
+              %span.fly-out-top-item-container.no-sub-items
+                %strong.fly-out-top-item-name
+                  = _('Preferences')
+
       = nav_link(controller: :active_sessions) do
         = link_to profile_active_sessions_path do
           .nav-icon-container
@@ -141,9 +206,15 @@
             = _('Active Sessions')
         %ul.sidebar-sub-level-items.is-fly-out-only
           = nav_link(controller: :active_sessions, html_options: { class: "fly-out-top-item" } ) do
-            = link_to profile_active_sessions_path do
-              %strong.fly-out-top-item-name
-                = _('Active Sessions')
+            - if sidebar_refactor_disabled?
+              = link_to profile_active_sessions_path do
+                %strong.fly-out-top-item-name
+                  = _('Active Sessions')
+            - else
+              %span.fly-out-top-item-container.no-sub-items
+                %strong.fly-out-top-item-name
+                  = _('Active Sessions')
+
       = nav_link(path: 'profiles#audit_log') do
         = link_to audit_log_profile_path do
           .nav-icon-container
@@ -152,9 +223,15 @@
             = _('Authentication log')
         %ul.sidebar-sub-level-items.is-fly-out-only
           = nav_link(path: 'profiles#audit_log', html_options: { class: "fly-out-top-item" } ) do
-            = link_to audit_log_profile_path do
-              %strong.fly-out-top-item-name
-                = _('Authentication Log')
+            - if sidebar_refactor_disabled?
+              = link_to audit_log_profile_path do
+                %strong.fly-out-top-item-name
+                  = _('Authentication Log')
+            - else
+              %span.fly-out-top-item-container.no-sub-items
+                %strong.fly-out-top-item-name
+                  = _('Authentication Log')
+
         = render_if_exists 'layouts/nav/sidebar/profile_usage_quotas_link'
 
     = render 'shared/sidebar_toggle_button'

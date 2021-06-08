@@ -6,6 +6,11 @@
       = navbar_item_name
   %ul.sidebar-sub-level-items.is-fly-out-only
     = nav_link(controller: controller, html_options: { class: "fly-out-top-item" } ) do
-      = link_to navbar_item_path do
-        %strong.fly-out-top-item-name
-          = navbar_item_name
+      - if sidebar_refactor_disabled?
+        = link_to navbar_item_path do
+          %strong.fly-out-top-item-name
+            = navbar_item_name
+      - else
+        %span.fly-out-top-item-container.no-sub-items
+          %strong.fly-out-top-item-name
+            = navbar_item_name

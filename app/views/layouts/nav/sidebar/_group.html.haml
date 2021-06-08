@@ -112,10 +112,16 @@
             %span.badge.badge-pill.count= merge_requests_count
           %ul.sidebar-sub-level-items.is-fly-out-only
             = nav_link(path: 'groups#merge_requests', html_options: { class: "fly-out-top-item" } ) do
-              = link_to merge_requests_group_path(@group) do
-                %strong.fly-out-top-item-name
-                  = _('Merge requests')
-                %span.badge.badge-pill.count.merge_counter.js-merge-counter.fly-out-badge= merge_requests_count
+              - if sidebar_refactor_disabled?
+                = link_to merge_requests_group_path(@group) do
+                  %strong.fly-out-top-item-name
+                    = _('Merge requests')
+                  %span.badge.badge-pill.count.merge_counter.js-merge-counter.fly-out-badge= merge_requests_count
+              - else
+                %span.fly-out-top-item-container.no-sub-items
+                  %strong.fly-out-top-item-name
+                    = _('Merge requests')
+                  %span.badge.badge-pill.count.merge_counter.js-merge-counter.fly-out-badge= merge_requests_count
 
       = render_if_exists "layouts/nav/ee/security_link" # EE-specific
 
@@ -130,7 +136,12 @@
               = _('Kubernetes')
           %ul.sidebar-sub-level-items.is-fly-out-only
             = nav_link(controller: [:clusters], html_options: { class: "fly-out-top-item" } ) do
-              = link_to group_clusters_path(@group), title: _('Kubernetes'), class: 'shortcuts-kubernetes' do
+              - if sidebar_refactor_disabled?
+                = link_to group_clusters_path(@group), title: _('Kubernetes'), class: 'shortcuts-kubernetes' do
+                  %strong.fly-out-top-item-name
+                    = _('Kubernetes')
+              - else
+              %span.fly-out-top-item-container.no-sub-items.shortcuts-kubernetes
                 %strong.fly-out-top-item-name
                   = _('Kubernetes')
 
