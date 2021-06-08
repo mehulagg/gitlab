@@ -72,3 +72,4 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 
 - [Maintenance operations](maintenance_operations.md)
 - [Update multiple database objects](setting_multiple_values.md)
+- [Database documentation](database_documentation.md)
