@@ -347,17 +347,9 @@ namespace :gitlab do
       end
     end
 
-    Rake::Task['db:structure:dump'].enhance do
-      Rake::Task['gitlab:db:generate_docs_yaml'].invoke
-    end
-
-    # Rails 6.1 deprecates db:structure:dump in favor of db:schema:dump
-    Rake::Task['db:schema:dump'].enhance do
-      Rake::Task['gitlab:db:generate_docs_yaml'].invoke
-    end
-
     Rake::Task['db:migrate'].enhance do
       Rake::Task['gitlab:db:populate_table_comments'].invoke
+      Rake::Task['gitlab:db:generate_docs_yaml'].invoke
     end
 
     Rake::Task['db:structure:load'].enhance do
