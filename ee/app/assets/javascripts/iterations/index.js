@@ -7,6 +7,7 @@ import IterationForm from './components/iteration_form_without_vue_router.vue';
 import IterationReport from './components/iteration_report_without_vue_router.vue';
 import Iterations from './components/iterations.vue';
 import createRouter from './router';
+import { Namespace } from './constants';
 
 Vue.use(VueApollo);
 
@@ -108,6 +109,11 @@ export function initCadenceApp() {
     cadencesListPath,
     canCreateCadence,
     canEditCadence,
+    canEditIteration,
+    hasScopedLabelsFeature,
+    labelsFetchPath,
+    previewMarkdownPath,
+    noIssuesSvgPath,
   } = el.dataset;
   const router = createRouter(cadencesListPath);
 
@@ -121,6 +127,12 @@ export function initCadenceApp() {
       cadencesListPath,
       canCreateCadence: parseBoolean(canCreateCadence),
       canEditCadence: parseBoolean(canEditCadence),
+      namespaceType: Namespace.Group,
+      canEditIteration: parseBoolean(canEditIteration),
+      hasScopedLabelsFeature: parseBoolean(hasScopedLabelsFeature),
+      labelsFetchPath,
+      previewMarkdownPath,
+      noIssuesSvgPath,
     },
     render(createElement) {
       return createElement(App);

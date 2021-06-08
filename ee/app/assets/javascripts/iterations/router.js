@@ -2,7 +2,7 @@ import Vue from 'vue';
 import VueRouter from 'vue-router';
 import IterationCadenceForm from './components/iteration_cadence_form.vue';
 import IterationCadenceList from './components/iteration_cadences_list.vue';
-import IterationReport from './components/iteration_report_without_vue_router.vue';
+import IterationReport from './components/iteration_report.vue';
 
 Vue.use(VueRouter);
 
