@@ -1,7 +1,9 @@
 import { GlBreakpointInstance as bp } from '@gitlab/ui/dist/utils';
 import { SIDEBAR_COLLAPSED_CLASS } from './contextual_sidebar';
 
+const isRefactoring = document.body.classList.contains('sidebar-refactoring');
 const HIDE_INTERVAL_TIMEOUT = 300;
+const COLLAPSED_PANEL_WIDTH = isRefactoring? 48: 50;
 const IS_OVER_CLASS = 'is-over';
 const IS_ABOVE_CLASS = 'is-above';
 const IS_SHOWING_FLY_OUT_CLASS = 'is-showing-fly-out';
@@ -87,14 +89,19 @@ export const hideMenu = (el) => {
 };
 
 export const moveSubItemsToPosition = (el, subItems) => {
+  const header = subItems.querySelector('.fly-out-top-item');
   const boundingRect = el.getBoundingClientRect();
-  const top = calculateTop(boundingRect, subItems.offsetHeight);
-  const left = sidebar ? sidebar.offsetWidth : 50;
+  const left = sidebar ? sidebar.offsetWidth : COLLAPSED_PANEL_WIDTH;
+  let top = calculateTop(boundingRect, subItems.offsetHeight);
+  if(isRefactoring && header.querySelector('.no-sub-items')) {
+    top = boundingRect.top;
+  } else if (isRefactoring) {
+    top -= header.offsetHeight;
+  }
   const isAbove = top < boundingRect.top;
 
   subItems.classList.add('fly-out-list');
-  subItems.style.transform = `translate3d(${left}px, ${Math.floor(top) - headerHeight}px, 0)`; // eslint-disable-line no-param-reassign
-
+  subItems.style.transform = `translate3d(${left}px, ${Math.floor(top) - sidebar.offsetTop}px, 0)`; // eslint-disable-line no-param-reassign
   const subItemsRect = subItems.getBoundingClientRect();
 
   menuCornerLocs = [
