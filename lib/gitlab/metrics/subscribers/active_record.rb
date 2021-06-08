@@ -72,6 +72,9 @@ module Gitlab
               DB_LOAD_BALANCING_DURATIONS.each do |duration|
                 payload[duration] = ::Gitlab::SafeRequestStore[duration].to_f.round(3)
               end
+              ::Gitlab::SafeRequestStore[:duration_by_database].each do |dbname, duration|
+                payload[:"duration_#{dbname}"] = duration.to_f.round(3)
+              end
             end
           end
         end
@@ -96,6 +99,16 @@ module Gitlab
           duration = event.duration / 1000.0
           duration_key = "db_#{db_role}_duration_s".to_sym
           ::Gitlab::SafeRequestStore[duration_key] = (::Gitlab::SafeRequestStore[duration_key].presence || 0) + duration
+
+          # Per database metrics
+          dbname = dbname(event)
+          ::Gitlab::SafeRequestStore[:duration_by_database] ||= {}
+          ::Gitlab::SafeRequestStore[:duration_by_database][dbname] ||= 0
+          ::Gitlab::SafeRequestStore[:duration_by_database][dbname] += duration
+        end
+
+        def dbname(event)
+          event.payload[:connection].instance_variable_get("@config")[:database]
         end
 
         def ignored_query?(payload)
