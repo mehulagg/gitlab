@@ -51,7 +51,7 @@ To enable container scanning in your pipeline, you need the following:
   the Docker image to your project's container registry. If using a third-party container
   registry, you might need to provide authentication credentials using the `DOCKER_USER` and
   `DOCKER_PASSWORD` [configuration variables](#available-cicd-variables).
-- The name of the Docker image to be scanned in the `DOCKER_IMAGE` [configuration variable](#available-cicd-variables).
+- The name of the Docker image to scan, in the `DOCKER_IMAGE` [configuration variable](#available-cicd-variables).
 
 ## Configuration
 
