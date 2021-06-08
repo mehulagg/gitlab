@@ -1,4 +1,4 @@
 ---
 tablename: security_orchestration_policy_rule_schedules
-group:
-description:
+group: group::container security
+description: Schedules used to store relationship between project and security policy repository

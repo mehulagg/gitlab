@@ -11992,8 +11992,6 @@ CREATE TABLE dast_profiles (
     CONSTRAINT check_c34e505c24 CHECK ((char_length(description) <= 255))
 );
 
-COMMENT ON TABLE dast_profiles IS '{"owner":"group::dynamic analysis","description":"Profile used to run a DAST on-demand scan"}';
-
 CREATE SEQUENCE dast_profiles_id_seq
     START WITH 1
     INCREMENT BY 1
@@ -12007,8 +12005,6 @@ CREATE TABLE dast_profiles_pipelines (
     dast_profile_id bigint NOT NULL,
     ci_pipeline_id bigint NOT NULL
 );
-
-COMMENT ON TABLE dast_profiles_pipelines IS '{"owner":"group::dynamic analysis","description":"Join table between DAST Profiles and CI Pipelines"}';
 
 CREATE TABLE dast_scanner_profiles (
     id bigint NOT NULL,
@@ -12046,8 +12042,6 @@ CREATE TABLE dast_site_profile_secret_variables (
     CONSTRAINT check_8cbef204b2 CHECK ((char_length(key) <= 255)),
     CONSTRAINT check_b49080abbf CHECK ((length(encrypted_value_iv) <= 17))
 );
-
-COMMENT ON TABLE dast_site_profile_secret_variables IS '{"owner":"group::dynamic analysis","description":"Secret variables used in DAST on-demand scans"}';
 
 CREATE SEQUENCE dast_site_profile_secret_variables_id_seq
     START WITH 1
@@ -12092,8 +12086,6 @@ CREATE TABLE dast_site_profiles_pipelines (
     dast_site_profile_id bigint NOT NULL,
     ci_pipeline_id bigint NOT NULL
 );
-
-COMMENT ON TABLE dast_site_profiles_pipelines IS '{"owner":"group::dynamic analysis","description":"Join table between DAST Site Profiles and CI Pipelines"}';
 
 CREATE TABLE dast_site_tokens (
     id bigint NOT NULL,
@@ -17704,8 +17696,6 @@ CREATE TABLE security_orchestration_policy_configurations (
     configured_at timestamp with time zone
 );
 
-COMMENT ON TABLE security_orchestration_policy_configurations IS '{"owner":"group::container security","description":"Configuration used to store relationship between project and security policy repository"}';
-
 CREATE SEQUENCE security_orchestration_policy_configurations_id_seq
     START WITH 1
     INCREMENT BY 1
@@ -17726,8 +17716,6 @@ CREATE TABLE security_orchestration_policy_rule_schedules (
     cron text NOT NULL,
     CONSTRAINT check_915825a76e CHECK ((char_length(cron) <= 255))
 );
-
-COMMENT ON TABLE security_orchestration_policy_rule_schedules IS '{"owner":"group::container security","description":"Schedules used to store relationship between project and security policy repository"}';
 
 CREATE SEQUENCE security_orchestration_policy_rule_schedules_id_seq
     START WITH 1

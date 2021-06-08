@@ -1,4 +1,4 @@
 ---
 tablename: security_orchestration_policy_configurations
-group:
-description:
+group: group::container security
+description: Configuration used to store relationship between project and security policy repository

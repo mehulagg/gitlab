@@ -1,4 +1,4 @@
 ---
 tablename: dast_site_profiles_pipelines
-group:
-description:
+group: group::dynamic analysis
+description: Join table between DAST Site Profiles and CI Pipelines
