@@ -8,6 +8,7 @@ module Packages
 
       # used by ExclusiveLeaseGuard
       DEFAULT_LEASE_TIMEOUT = 1.hour.to_i.freeze
+      SYMBOL_PACKAGE_IDENTIFIER = 'SymbolsPackage'
 
       InvalidMetadataError = Class.new(StandardError)
 
@@ -20,7 +21,13 @@ module Packages
 
         try_obtain_lease do
           @package_file.transaction do
-            package = existing_package ? link_to_existing_package : update_linked_package
+            if existing_package
+              package = link_to_existing_package
+            else
+              raise InvalidMetadataError 'symbol package is invalid, matching package does not exist' if symbol_package?
+
+              package = update_linked_package
+            end
 
             update_package(package)
 
@@ -103,6 +110,14 @@ module Packages
         metadata.fetch(:package_tags, [])
       end
 
+      def package_types
+        metadata.fetch(:package_types, [])
+      end
+
+      def symbol_package?
+        package_types.include?(SYMBOL_PACKAGE_IDENTIFIER)
+      end
+
       def metadata
         strong_memoize(:metadata) do
           ::Packages::Nuget::MetadataExtractionService.new(@package_file.id).execute
@@ -110,7 +125,7 @@ module Packages
       end
 
       def package_filename
-        "#{package_name.downcase}.#{package_version.downcase}.nupkg"
+        "#{package_name.downcase}.#{package_version.downcase}.#{symbol_package? ? 'snupkg' : 'nupkg'}"
       end
 
       # used by ExclusiveLeaseGuard

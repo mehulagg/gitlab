@@ -18,6 +18,7 @@ module Packages
       XPATH_DEPENDENCIES = '//xmlns:package/xmlns:metadata/xmlns:dependencies/xmlns:dependency'
       XPATH_DEPENDENCY_GROUPS = '//xmlns:package/xmlns:metadata/xmlns:dependencies/xmlns:group'
       XPATH_TAGS = '//xmlns:package/xmlns:metadata/xmlns:tags'
+      XPATH_PACKAGE_TYPES = '//xmlns:package/xmlns:metadata/xmlns:packageTypes/xmlns:packageType'
 
       MAX_FILE_SIZE = 4.megabytes.freeze
 
@@ -57,6 +58,7 @@ module Packages
               .tap do |metadata|
                 metadata[:package_dependencies] = extract_dependencies(doc)
                 metadata[:package_tags] = extract_tags(doc)
+                metadata[:package_types] = extract_package_types(doc)
               end
       end
 
@@ -125,6 +127,16 @@ module Packages
           zip_file = Zip::File.new(open_file, false, true)
           yield(zip_file)
         end
+      end
+
+      def extract_package_types(doc)
+        package_types = []
+
+        doc.xpath(XPATH_PACKAGE_TYPES).each do |node|
+          package_types << node.attr('name')
+        end
+
+        package_types
       end
     end
   end
