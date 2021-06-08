@@ -17,7 +17,13 @@ export const initStaticSecurityConfiguration = (el) => {
     defaultClient: createDefaultClient(),
   });
 
-  const { projectPath, upgradePath, features, latestPipelinePath } = el.dataset;
+  const {
+    projectPath,
+    upgradePath,
+    features,
+    latestPipelinePath,
+    gitlabCiHistoryPath,
+  } = el.dataset;
 
   if (gon.features.securityConfigurationRedesign) {
     const { augmentedSecurityFeatures, augmentedComplianceFeatures } = augmentFeatures(
@@ -39,6 +45,7 @@ export const initStaticSecurityConfiguration = (el) => {
             augmentedComplianceFeatures,
             augmentedSecurityFeatures,
             latestPipelinePath,
+            gitlabCiHistoryPath,
           },
         });
       },
