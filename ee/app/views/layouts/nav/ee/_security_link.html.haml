@@ -7,6 +7,12 @@
       %span.nav-item-name
         = _('Security & Compliance')
     %ul.sidebar-sub-level-items{ data: { qa_selector: 'group_secure_submenu' } }
+      = nav_link(path: %w[dashboard#show vulnerabilities#index compliance_dashboards#show credentials#index audit_events#index], html_options: { class: "fly-out-top-item" } ) do
+        = link_to main_path do
+          %strong.fly-out-top-item-name
+            = _('Security & Compliance')
+        %li.divider.fly-out-top-item
+
       - if group_level_security_dashboard_available?(@group)
         = nav_link(path: 'dashboard#show') do
           = link_to group_security_dashboard_path(@group), title: _('Security Dashboard'), data: { qa_selector: 'security_dashboard_link' } do

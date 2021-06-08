@@ -6,6 +6,11 @@
       = _('Wiki')
   %ul.sidebar-sub-level-items.is-fly-out-only
     = nav_link(controller: :wikis, html_options: { class: "fly-out-top-item" } ) do
-      = link_to wiki_url do
-        %strong.fly-out-top-item-name
-          = _('Wiki')
+      - if sidebar_refactor_disabled?
+        = link_to wiki_url do
+          %strong.fly-out-top-item-name
+            = _('Wiki')
+      - else
+        %span.fly-out-top-item-container.no-sub-items
+          %strong.fly-out-top-item-name
+            = _('Wiki')
