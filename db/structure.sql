@@ -17437,10 +17437,11 @@ ALTER SEQUENCE requirements_id_seq OWNED BY requirements.id;
 CREATE TABLE requirements_management_test_reports (
     id bigint NOT NULL,
     created_at timestamp with time zone NOT NULL,
-    requirement_id bigint NOT NULL,
+    requirement_id bigint,
     author_id bigint,
     state smallint NOT NULL,
-    build_id bigint
+    build_id bigint,
+    issue_id bigint
 );
 
 CREATE SEQUENCE requirements_management_test_reports_id_seq
@@ -25706,6 +25707,9 @@ ALTER TABLE ONLY vulnerabilities
 
 ALTER TABLE ONLY bulk_import_entities
     ADD CONSTRAINT fk_88c725229f FOREIGN KEY (namespace_id) REFERENCES namespaces(id) ON DELETE CASCADE;
+
+ALTER TABLE ONLY requirements_management_test_reports
+    ADD CONSTRAINT fk_88f30752fc FOREIGN KEY (issue_id) REFERENCES issues(id) ON DELETE CASCADE;
 
 ALTER TABLE ONLY issues
     ADD CONSTRAINT fk_899c8f3231 FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE;

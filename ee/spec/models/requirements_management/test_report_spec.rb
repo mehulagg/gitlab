@@ -8,14 +8,40 @@ RSpec.describe RequirementsManagement::TestReport do
 
     it { is_expected.to belong_to(:author).class_name('User') }
     it { is_expected.to belong_to(:requirement) }
+    it { is_expected.to belong_to(:requirement_issue) }
     it { is_expected.to belong_to(:build) }
   end
 
   describe 'validations' do
     subject { build(:test_report) }
 
-    it { is_expected.to validate_presence_of(:requirement) }
+    let(:requirement_issue) { build(:requirement_issue) }
+    let(:requirement_object) { build(:requirement) }
+    let(:requirement_error) { ['Must be associated with either a RequirementsManagement::Requirement and an Issue of type `requirement`'] }
+    let(:invalid_issue) { build(:issue) }
+
     it { is_expected.to validate_presence_of(:state) }
+
+    context 'requirements associations' do
+      where(:requirement, :requirement_issue, :validity, :errors) do
+        nil                | nil               | false | { base: requirement_error }
+        requirement_object | nil               | false | { base: requirement_error }
+        nil                | requirement_issue | false | { base: requirement_error }
+        requirement_object | requirement_issue | true  | {}
+        nil                | invalid_issue     | false | { requirement_issue: /must be an issue of type `Requirement`/ }
+      end
+
+      with_them do
+        before do
+          model.requirement = requirement
+          model.requirement_issue = requirement_issue
+          model.validate
+        end
+
+        it { expect(model.valid?).to eq(validity) }
+        it { expect(model.errors.messages).to eq(errors) }
+      end
+    end
   end
 
   describe 'scopes' do

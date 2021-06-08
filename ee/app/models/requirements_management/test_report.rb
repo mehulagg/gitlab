@@ -8,8 +8,10 @@ module RequirementsManagement
     belongs_to :requirement, inverse_of: :test_reports
     belongs_to :author, inverse_of: :test_reports, class_name: 'User'
     belongs_to :build, class_name: 'Ci::Build'
+    # belongs_to :requirement_issue, class_name: 'Issue', foreign_key: :issue_id
 
-    validates :requirement, :state, presence: true
+    validates :state, presence: true
+    validate :only_one_requirement_association
 
     enum state: { passed: 1, failed: 2 }
 
@@ -64,6 +66,11 @@ module RequirementsManagement
           end
         end
       end
+    end
+
+    def only_one_requirement_association
+      errors.add(:base, 'Must be associated with either a RequirementsManagement::Requirement and an Issue of type `requirement`') if requirement ^ requirement_issue
+      errors.add(:requirement_issue, 'must be an issue of type `Requirement`') if requirement_issue && requirement_issue.requirement?
     end
   end
 end
