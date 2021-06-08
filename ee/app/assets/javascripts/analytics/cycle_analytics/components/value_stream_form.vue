@@ -143,6 +143,9 @@ export default {
     canRestore() {
       return this.hiddenStages.length || this.isDirtyEditing;
     },
+    defaultValueStreamNames() {
+      return this.defaultStageConfig.map(({ name }) => name);
+    },
   },
   methods: {
     ...mapActions(['createValueStream', 'updateValueStream']),
@@ -194,7 +197,7 @@ export default {
       return current.trim().toLowerCase() !== original.trim().toLowerCase();
     },
     validateStages() {
-      return this.stages.map(validateStage);
+      return this.stages.map(validateStage, this.defaultValueStreamNames);
     },
     validate() {
       const { name } = this;

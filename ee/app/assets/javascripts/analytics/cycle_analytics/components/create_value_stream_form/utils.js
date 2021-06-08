@@ -1,6 +1,5 @@
 import { isEqual, pick } from 'lodash';
 import { convertObjectPropsToSnakeCase } from '~/lib/utils/common_utils';
-import { DEFAULT_STAGE_NAMES } from '../../constants';
 import { isStartEvent, getAllowedEndEvents, eventToOption, eventsByIdentifier } from '../../utils';
 import {
   i18n,
@@ -89,16 +88,17 @@ export const initializeFormData = ({ fields, errors }) => {
  * the name of the field.g
  *
  * @param {Object} fields key value pair of form field values
+ * @param {Object} defaultStageNames array of lower case default value stream names
  * @returns {Object} key value pair of form fields with an array of errors
  */
-export const validateStage = (fields) => {
+export const validateStage = (fields, defaultStageNames = []) => {
   const newErrors = {};
 
   if (fields?.name) {
     if (fields.name.length > NAME_MAX_LENGTH) {
       newErrors.name = [ERRORS.MAX_LENGTH];
     }
-    if (fields?.custom && DEFAULT_STAGE_NAMES.includes(fields.name.toLowerCase())) {
+    if (fields?.custom && defaultStageNames.includes(fields.name.toLowerCase())) {
       newErrors.name = [ERRORS.STAGE_NAME_EXISTS];
     }
   } else {
