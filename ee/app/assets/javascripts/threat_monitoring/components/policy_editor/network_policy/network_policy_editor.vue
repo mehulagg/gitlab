@@ -7,16 +7,15 @@ import {
   GlSegmentedControl,
   GlButton,
   GlAlert,
-  GlModal,
-  GlModalDirective,
 } from '@gitlab/ui';
 import { mapState, mapActions } from 'vuex';
 import { redirectTo } from '~/lib/utils/url_utility';
-import { s__, __, sprintf } from '~/locale';
-import { EditorModeRule, EditorModeYAML, PARSING_ERROR_MESSAGE } from '../constants';
+import { s__ } from '~/locale';
+import { EDITOR_MODES, EditorModeRule, EditorModeYAML, PARSING_ERROR_MESSAGE } from '../constants';
 import DimDisableContainer from '../dim_disable_container.vue';
 import PolicyActionPicker from '../policy_action_picker.vue';
 import PolicyAlertPicker from '../policy_alert_picker.vue';
+import PolicyEditorFormActions from '../policy_editor_form_actions.vue';
 import PolicyPreview from '../policy_preview.vue';
 import {
   DEFAULT_NETWORK_POLICY,
@@ -31,6 +30,7 @@ import {
 import PolicyRuleBuilder from './policy_rule_builder.vue';
 
 export default {
+  EDITOR_MODES,
   i18n: {
     toggleLabel: s__('NetworkPolicies|Policy status'),
     PARSING_ERROR_MESSAGE,
@@ -43,29 +43,30 @@ export default {
     GlSegmentedControl,
     GlButton,
     GlAlert,
-    GlModal,
     PolicyYamlEditor: () =>
       import(/* webpackChunkName: 'policy_yaml_editor' */ '../../policy_yaml_editor.vue'),
     PolicyRuleBuilder,
     PolicyPreview,
     PolicyActionPicker,
     PolicyAlertPicker,
+    PolicyEditorFormActions,
     DimDisableContainer,
   },
-  directives: { GlModal: GlModalDirective },
-  props: {
+  inject: {
     threatMonitoringPath: {
       type: String,
-      required: true,
+      default: '',
     },
+    projectId: {
+      type: String,
+      default: '',
+    },
+  },
+  props: {
     existingPolicy: {
       type: Object,
       required: false,
       default: null,
-    },
-    projectId: {
-      type: String,
-      required: true,
     },
   },
   data() {
@@ -113,14 +114,6 @@ export default {
     },
     isEditing() {
       return Boolean(this.existingPolicy);
-    },
-    saveButtonText() {
-      return this.isEditing
-        ? s__('NetworkPolicies|Save changes')
-        : s__('NetworkPolicies|Create policy');
-    },
-    deleteModalTitle() {
-      return sprintf(s__('NetworkPolicies|Delete policy: %{policy}'), { policy: this.policy.name });
     },
   },
   methods: {
@@ -189,21 +182,6 @@ export default {
       });
     },
   },
-  policyTypes: [{ value: 'networkPolicy', text: s__('NetworkPolicies|Network Policy') }],
-  editorModes: [
-    { value: EditorModeRule, text: s__('NetworkPolicies|Rule mode') },
-    { value: EditorModeYAML, text: s__('NetworkPolicies|.yaml mode') },
-  ],
-  deleteModal: {
-    id: 'delete-modal',
-    secondary: {
-      text: s__('NetworkPolicies|Delete policy'),
-      attributes: { variant: 'danger' },
-    },
-    cancel: {
-      text: __('Cancel'),
-    },
-  },
 };
 </script>
 
@@ -215,7 +193,7 @@ export default {
       >
         <gl-segmented-control
           data-testid="editor-mode"
-          :options="$options.editorModes"
+          :options="$options.EDITOR_MODES"
           :checked="editorMode"
           @input="changeEditorMode"
         />
@@ -328,39 +306,6 @@ export default {
         </section>
       </div>
     </div>
-
-    <div>
-      <gl-button
-        type="submit"
-        variant="success"
-        data-testid="save-policy"
-        :loading="isUpdatingPolicy"
-        @click="savePolicy"
-        >{{ saveButtonText }}</gl-button
-      >
-      <gl-button
-        v-if="isEditing"
-        v-gl-modal="'delete-modal'"
-        category="secondary"
-        variant="danger"
-        data-testid="delete-policy"
-        :loading="isRemovingPolicy"
-        >{{ s__('NetworkPolicies|Delete policy') }}</gl-button
-      >
-      <gl-button category="secondary" :href="threatMonitoringPath">{{ __('Cancel') }}</gl-button>
-    </div>
-    <gl-modal
-      modal-id="delete-modal"
-      :title="deleteModalTitle"
-      :action-secondary="$options.deleteModal.secondary"
-      :action-cancel="$options.deleteModal.cancel"
-      @secondary="removePolicy"
-    >
-      {{
-        s__(
-          'NetworkPolicies|Are you sure you want to delete this policy? This action cannot be undone.',
-        )
-      }}
-    </gl-modal>
+    <policy-editor-form-actions />
   </section>
 </template>

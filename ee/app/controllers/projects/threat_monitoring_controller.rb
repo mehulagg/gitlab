@@ -6,6 +6,10 @@ module Projects
 
     before_action :authorize_read_threat_monitoring!
 
+    before_action do
+      push_frontend_feature_flag(:scan_execution_policy_ui, @project)
+    end
+
     feature_category :web_firewall
 
     # rubocop: disable CodeReuse/ActiveRecord

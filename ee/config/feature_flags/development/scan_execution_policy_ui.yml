@@ -1,0 +1,8 @@
+---
+name: scan_execution_policy_ui
+introduced_by_url:
+rollout_issue_url: https://gitlab.com/gitlab-org/gitlab/-/issues/273791
+milestone: '14.0'
+type: development
+group: group::container_security
+default_enabled: false
