@@ -167,7 +167,7 @@ module EE
 
       return false if has_approved_license_check?
 
-      diff = compare_license_scanning_reports(current_user)
+      diff = compare_license_scanning_reports(nil)
 
       return false unless diff[:data] && diff[:data]['new_licenses']
 
