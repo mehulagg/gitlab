@@ -3,10 +3,6 @@
 require 'spec_helper'
 
 RSpec.describe ApplicationSetting::Term do
-  describe 'validations' do
-    it { is_expected.to validate_presence_of(:terms) }
-  end
-
   describe '.latest' do
     it 'finds the latest terms' do
       terms = create(:term)

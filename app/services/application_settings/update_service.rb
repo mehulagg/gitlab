@@ -67,10 +67,10 @@ module ApplicationSettings
     end
 
     def update_terms(terms)
-      return unless terms.present?
+      return if @application_setting.enforce_terms? && terms.blank?
 
       # Avoid creating a new terms record if the text is exactly the same.
-      terms = terms.strip
+      terms = terms.to_s.strip
       return if terms == @application_setting.terms
 
       ApplicationSetting::Term.create(terms: terms)

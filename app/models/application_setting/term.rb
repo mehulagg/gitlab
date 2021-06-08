@@ -5,8 +5,6 @@ class ApplicationSetting
     include CacheMarkdownField
     has_many :term_agreements
 
-    validates :terms, presence: true
-
     cache_markdown_field :terms
 
     def self.latest
