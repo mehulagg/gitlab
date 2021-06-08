@@ -1644,6 +1644,15 @@ To configure the Sidekiq nodes, one each one:
 
    ```
 
+1. To prevent database migrations from running on upgrade, run:
+
+   ```shell
+   sudo touch /etc/gitlab/skip-auto-reconfigure
+   ```
+
+   Only a single designated node should handle migrations as detailed in the
+   [GitLab Rails post-configuration](#gitlab-rails-post-configuration) section.
+
 1. Save the file and [reconfigure GitLab](../restart_gitlab.md#omnibus-gitlab-reconfigure).
 1. Verify the GitLab services are running:
 
@@ -1829,7 +1838,17 @@ On each node perform the following:
       sudo cp cert.pem /etc/gitlab/trusted-certs/
       ```
 
-1. Save the file and [reconfigure GitLab](../restart_gitlab.md#omnibus-gitlab-reconfigure).
+1. To prevent database migrations from running on upgrade, run:
+
+   ```shell
+   sudo touch /etc/gitlab/skip-auto-reconfigure
+   ```
+
+   Only a single designated node should handle migrations as detailed in the
+   [GitLab Rails post-configuration](#gitlab-rails-post-configuration) section.
+
+1. [Reconfigure GitLab](../restart_gitlab.md#omnibus-gitlab-reconfigure) for the changes to take effect.
+
 1. Run `sudo gitlab-rake gitlab:gitaly:check` to confirm the node can connect to Gitaly.
 1. Tail the logs to see the requests:
 

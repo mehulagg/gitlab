@@ -1324,14 +1324,6 @@ To configure the Sentinel Queues server:
    gitlab_rails['auto_migrate'] = false
    ```
 
-1. To prevent database migrations from running on upgrade, run:
-
-   ```shell
-   sudo touch /etc/gitlab/skip-auto-reconfigure
-   ```
-
-   Only the primary GitLab application server should handle migrations.
-
 1. Copy the `/etc/gitlab/gitlab-secrets.json` file from your Consul server, and replace
    the file of the same name on this server. If that file is not on this server,
    add the file from your Consul server to this server.
@@ -1962,6 +1954,15 @@ To configure the Sidekiq nodes, on each one:
    the file of the same name on this server. If that file is not on this server,
    add the file from your Consul server to this server.
 
+1. To prevent database migrations from running on upgrade, run:
+
+   ```shell
+   sudo touch /etc/gitlab/skip-auto-reconfigure
+   ```
+
+   Only a single designated node should handle migrations as detailed in the
+   [GitLab Rails post-configuration](#gitlab-rails-post-configuration) section.
+
 1. [Reconfigure GitLab](../restart_gitlab.md#omnibus-gitlab-reconfigure) for the changes to take effect.
 
 NOTE:
@@ -2090,7 +2091,6 @@ On each node perform the following:
    gitlab_rails['object_store']['objects']['terraform_state']['bucket'] = "<gcp-terraform-state-bucket-name>"
    ```
 
-1. Save the file and [reconfigure GitLab](../restart_gitlab.md#omnibus-gitlab-reconfigure).
 1. If you're using [Gitaly with TLS support](#gitaly-cluster-tls-support), make sure the
    `git_data_dirs` entry is configured with `tls` instead of `tcp`:
 
@@ -2108,6 +2108,17 @@ On each node perform the following:
       ```shell
       sudo cp cert.pem /etc/gitlab/trusted-certs/
       ```
+
+1. To prevent database migrations from running on upgrade, run:
+
+   ```shell
+   sudo touch /etc/gitlab/skip-auto-reconfigure
+   ```
+
+   Only a single designated node should handle migrations as detailed in the
+   [GitLab Rails post-configuration](#gitlab-rails-post-configuration) section.
+
+1. [Reconfigure GitLab](../restart_gitlab.md#omnibus-gitlab-reconfigure) for the changes to take effect.
 
 1. If you're [using NFS](#configure-nfs-optional):
    1. If necessary, install the NFS client utility packages using the following
@@ -2148,7 +2159,8 @@ On each node perform the following:
       registry['gid'] = 9002
       ```
 
-1. Save the file and [reconfigure GitLab](../restart_gitlab.md#omnibus-gitlab-reconfigure).
+   1. Save the file and [reconfigure GitLab](../restart_gitlab.md#omnibus-gitlab-reconfigure).
+
 1. Confirm the node can connect to Gitaly:
 
    ```shell
