@@ -5,7 +5,7 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 type: reference
 ---
 
-# Configuring a runner
+# Configuring runners
 
 In GitLab CI/CD, runners run the code defined in [`.gitlab-ci.yml`](../yaml/README.md).
 A runner is a lightweight, highly-scalable agent that picks up a CI job through

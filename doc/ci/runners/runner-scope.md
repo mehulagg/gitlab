@@ -5,7 +5,7 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 type: reference
 ---
 
-# The scope of a runner
+# The scope of runners
 
 Runners are available based on who you want to have access:
 

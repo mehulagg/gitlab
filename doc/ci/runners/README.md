@@ -5,7 +5,7 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 type: reference
 ---
 
-# Choosing a runner
+# Choosing runners
 
 When you run a CI job in GitLab, the job is processed by a runner.
 
