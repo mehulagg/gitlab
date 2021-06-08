@@ -15,6 +15,10 @@ RSpec.describe Gitlab::Database::SchemaCleaner do
     expect(subject).not_to include('COMMENT ON EXTENSION')
   end
 
+  it 'removes comments on tables' do
+    expect(subject).not_to include('COMMENT ON TABLE')
+  end
+
   it 'no assumption about public being the default schema' do
     expect(subject).not_to match(/public\.\w+/)
   end

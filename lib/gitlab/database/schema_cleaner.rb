@@ -14,6 +14,7 @@ module Gitlab
 
         # Remove noise
         structure.gsub!(/^COMMENT ON EXTENSION.*/, '')
+        structure.gsub!(/^COMMENT ON TABLE.*/, '')
         structure.gsub!(/^SET.+/, '')
         structure.gsub!(/^SELECT pg_catalog\.set_config\('search_path'.+/, '')
         structure.gsub!(/^--.*/, "\n")

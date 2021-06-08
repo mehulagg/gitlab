@@ -42,6 +42,8 @@ CREATE TABLE public.abuse_reports (
     cached_markdown_version integer
 );
 
+COMMENT ON TABLE public.abuse_reports IS 'test';
+
 
 --
 -- Name: abuse_reports_id_seq; Type: SEQUENCE; Schema: public; Owner: -
