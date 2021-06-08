@@ -285,7 +285,7 @@ Rails.application.routes.draw do
       format: false,
       constraints: { id: /\d+/ }
 
-    Gitlab::Routing.redirect_legacy_paths(self, :profile, :snippets)
+    Gitlab::Routing.redirect_legacy_paths(self, :snippets)
   end
 
   Gitlab.ee do
