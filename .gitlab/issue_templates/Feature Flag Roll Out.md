@@ -112,7 +112,8 @@ To do so, follow these steps:
 - [ ] Close [the feature issue](ISSUE LINK) to indicate the feature will be released in the current milestone.
 - [ ] (Optional) Close this issue and create a separate issue for scheduling the steps below to "Release the feature".
 
-**WARNING:** This approach complicates [clean up](https://docs.gitlab.com/ee/development/feature_flags/controls.html#cleaning-up).
+**WARNING:** This approach has the downside that it makes it difficult for us to
+[clean up](https://docs.gitlab.com/ee/development/feature_flags/controls.html#cleaning-up) the flag.
 For example, on-premise users could disable the feature on their GitLab instance. But when you
 remove the flag at some point, they suddenly see the feature as enabled and they can't roll it back
 to the previous behavior. To avoid this potential breaking change, use this approach only for urgent
