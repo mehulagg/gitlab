@@ -1,6 +1,6 @@
 ---
 key_path: redis_hll_counters.ide_edit.g_edit_by_sfe_weekly
-description: Count of weekly edits from the single file editor
+description: Weekly number of users editing from the single file editor
 product_section: dev
 product_stage: create
 product_group: group::editor
