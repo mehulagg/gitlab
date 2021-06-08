@@ -1,4 +1,4 @@
 ---
 tablename: schema_migrations
-group:
-description:
+group: database
+description: Contains information about executed database migrations
