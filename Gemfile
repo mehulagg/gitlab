@@ -24,9 +24,7 @@ gem 'faraday', '~> 1.0'
 gem 'marginalia', '~> 1.10.0'
 
 # Authorization
-gem 'declarative_policy',
-  git: 'https://gitlab.com/gitlab-org/declarative-policy.git',
-  branch: 'ajk-remove-activesupport'
+gem 'declarative_policy', '~> 1.0.0'
 
 # Authentication libraries
 gem 'devise', '~> 4.7.2'
