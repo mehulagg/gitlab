@@ -318,6 +318,35 @@ namespace :gitlab do
       end
     end
 
+    desc 'Check consistency of database documentation maintained in YAML files'
+    task check_docs: :environment do
+      connection = ActiveRecord::Base.connection
+
+      tables = connection.tables.to_set
+
+      Dir.glob("#{DOCUMENTATION_PATH}/*.yml").each do |file|
+        tablename = File.basename(file).match(/(\w+)\.yml$/)[1]
+
+        meta = OpenStruct.new(YAML.load_file(file)) # rubocop: disable Performance/OpenStruct
+
+        if tablename != meta.tablename
+          raise ArgumentError, "table name does not match file name in file: #{file}"
+        end
+
+        unless tables.include?(tablename)
+          raise ArgumentError, "table #{tablename} does not exist in database: #{file}"
+        end
+      end
+
+      tables.each do |tablename|
+        file = File.join(DOCUMENTATION_PATH, "#{tablename}.yml")
+
+        unless File.exist?(file)
+          raise ArgumentError, "table #{tablename} does not have corresponding documentation file: #{file}"
+        end
+      end
+    end
+
     Rake::Task['db:structure:dump'].enhance do
       Rake::Task['gitlab:db:generate_docs_yaml'].invoke
     end

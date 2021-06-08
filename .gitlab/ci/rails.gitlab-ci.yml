@@ -385,6 +385,12 @@ db:gitlabcom-database-testing:
     - install_gitlab_gem
     - ./scripts/trigger-build gitlab-com-database-testing
 
+db:documentation:
+  extends: .db-job-base
+  allow_failure: false
+  script:
+    - bundle exec rake gitlab:db:check_docs
+
 gitlab:setup:
   extends: .db-job-base
   variables:
