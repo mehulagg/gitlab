@@ -74,7 +74,6 @@ export default {
 
 <template>
   <div>
-    <!-- eslint-disable vue/no-v-html -->
     <div
       class="js-mr-widget-commits-count mr-widget-extension clickable d-flex align-items-center px-3 py-2"
       @click="toggle()"
@@ -89,13 +88,15 @@ export default {
       />
       <span v-if="expanded">{{ __('Collapse') }}</span>
       <span v-else>
-        <span class="vertical-align-middle" v-html="message"></span>
+        <span
+          class="vertical-align-middle"
+          v-html="message /* eslint-disable-line vue/no-v-html */"
+        ></span>
         <gl-button variant="link" class="modify-message-button">
           {{ modifyLinkMessage }}
         </gl-button>
       </span>
     </div>
-    <!-- eslint-enable vue/no-v-html -->
     <div v-show="expanded"><slot></slot></div>
   </div>
 </template>

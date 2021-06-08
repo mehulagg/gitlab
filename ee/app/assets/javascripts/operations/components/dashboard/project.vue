@@ -124,13 +124,11 @@ export default {
       @remove="removeProject"
     />
 
-    <!-- eslint-disable vue/no-v-html -->
     <div
       v-if="project.upgrade_required"
       class="dashboard-card-body card-body bg-secondary"
-      v-html="unlicensedMessage"
+      v-html="unlicensedMessage /* eslint-disable-line vue/no-v-html */"
     ></div>
-    <!-- eslint-enable vue/no-v-html -->
 
     <div v-else :class="cardClasses" class="dashboard-card-body card-body">
       <div v-if="lastPipeline" class="row">

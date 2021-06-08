@@ -83,11 +83,9 @@ export default {
             :aria-label="state"
           />
         </div>
-        <!-- eslint-disable vue/no-v-html -->
         <gl-tooltip :target="() => $refs.iconElementXL">
-          <span v-html="stateTitle"></span>
+          <span v-html="stateTitle /* eslint-disable-line vue/no-v-html */"></span>
         </gl-tooltip>
-        <!-- eslint-enable vue/no-v-html -->
         <gl-icon
           v-if="confidential"
           v-gl-tooltip
@@ -111,11 +109,9 @@ export default {
           <div
             class="item-path-area item-path-id d-flex align-items-center mr-2 mt-2 mt-xl-0 ml-xl-2"
           >
-            <!-- eslint-disable vue/no-v-html -->
             <gl-tooltip :target="() => this.$refs.iconElement">
-              <span v-html="stateTitle"></span>
+              <span v-html="stateTitle /* eslint-disable-line vue/no-v-html */"></span>
             </gl-tooltip>
-            <!-- eslint-enable vue/no-v-html -->
             <span v-gl-tooltip :title="itemPath" class="path-id-text d-inline-block">{{
               itemPath
             }}</span>

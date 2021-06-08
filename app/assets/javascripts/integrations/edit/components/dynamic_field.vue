@@ -131,11 +131,9 @@ export default {
     :invalid-feedback="__('This field is required.')"
     :state="valid"
   >
-    <!-- eslint-disable vue/no-v-html -->
     <template #description>
-      <span v-html="help"></span>
+      <span v-html="help /* eslint-disable-line vue/no-v-html */"></span>
     </template>
-    <!-- eslint-enable vue/no-v-html -->
 
     <template v-if="isCheckbox">
       <input :name="fieldName" type="hidden" :value="model || false" />

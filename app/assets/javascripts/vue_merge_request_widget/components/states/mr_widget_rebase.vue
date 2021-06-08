@@ -155,7 +155,6 @@ export default {
     <template v-else>
       <status-icon :status="status" :show-disabled-button="showDisabledButton" />
 
-      <!-- eslint-disable vue/no-v-html -->
       <div class="rebase-state-find-class-convention media media-body space-children">
         <span
           v-if="rebaseInProgress || isMakingRequest"
@@ -167,7 +166,7 @@ export default {
           v-if="!rebaseInProgress && !canPushToSourceBranch"
           class="gl-font-weight-bold gl-ml-0!"
           data-testid="rebase-message"
-          v-html="fastForwardMergeText"
+          v-html="fastForwardMergeText /* eslint-disable-line vue/no-v-html */"
         ></span>
         <div
           v-if="!rebaseInProgress && canPushToSourceBranch && !isMakingRequest"
@@ -197,7 +196,6 @@ export default {
           }}</span>
         </div>
       </div>
-      <!-- eslint-enable vue/no-v-html -->
     </template>
   </div>
 </template>

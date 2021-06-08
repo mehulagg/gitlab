@@ -45,7 +45,6 @@ export default {
 };
 </script>
 <template>
-  <!-- eslint-disable vue/no-v-html -->
   <div id="peek-request-selector" data-qa-selector="request_dropdown" class="view">
     <select v-model="currentRequestId">
       <option
@@ -59,7 +58,10 @@ export default {
       </option>
     </select>
     <span v-if="requestsWithWarnings.length" class="gl-cursor-default">
-      <span id="performance-bar-request-selector-warning" v-html="glEmojiTag('warning')"></span>
+      <span
+        id="performance-bar-request-selector-warning"
+        v-html="glEmojiTag('warning') /* eslint-disable-line vue/no-v-html */"
+      ></span>
       <gl-popover
         placement="bottom"
         target="performance-bar-request-selector-warning"
@@ -67,5 +69,4 @@ export default {
       />
     </span>
   </div>
-  <!-- eslint-enable vue/no-v-html -->
 </template>

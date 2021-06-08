@@ -183,15 +183,13 @@ export default {
       />
     </td>
     <td class="d-none d-sm-table-cell tree-commit cursor-default">
-      <!-- eslint-disable vue/no-v-html -->
       <gl-link
         v-if="commit"
         :href="commit.commitPath"
         :title="commit.message"
         class="str-truncated-100 tree-commit-link"
-        v-html="commit.titleHtml"
+        v-html="commit.titleHtml /* eslint-disable-line vue/no-v-html */"
       />
-      <!-- eslint-enable vue/no-v-html -->
       <gl-skeleton-loading v-else :lines="1" class="h-auto" />
     </td>
     <td class="tree-time-ago text-right cursor-default">

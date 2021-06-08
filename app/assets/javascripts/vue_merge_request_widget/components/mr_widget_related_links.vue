@@ -30,16 +30,16 @@ export default {
 </script>
 <template>
   <section class="mr-info-list gl-ml-7 gl-pb-5">
-    <!-- eslint-disable vue/no-v-html -->
-    <p v-if="relatedLinks.closing">{{ closesText }} <span v-html="relatedLinks.closing"></span></p>
-    <!-- eslint-enable vue/no-v-html -->
-    <!-- eslint-disable vue/no-v-html -->
-    <p v-if="relatedLinks.mentioned">
-      {{ s__('mrWidget|Mentions') }} <span v-html="relatedLinks.mentioned"></span>
+    <p v-if="relatedLinks.closing">
+      {{ closesText }}
+      <span v-html="relatedLinks.closing /* eslint-disable-line vue/no-v-html */"></span>
     </p>
-    <!-- eslint-enable vue/no-v-html -->
-    <!-- eslint-disable vue/no-v-html -->
-    <p v-if="relatedLinks.assignToMe"><span v-html="relatedLinks.assignToMe"></span></p>
-    <!-- eslint-enable vue/no-v-html -->
+    <p v-if="relatedLinks.mentioned">
+      {{ s__('mrWidget|Mentions') }}
+      <span v-html="relatedLinks.mentioned /* eslint-disable-line vue/no-v-html */"></span>
+    </p>
+    <p v-if="relatedLinks.assignToMe">
+      <span v-html="relatedLinks.assignToMe /* eslint-disable-line vue/no-v-html */"></span>
+    </p>
   </section>
 </template>

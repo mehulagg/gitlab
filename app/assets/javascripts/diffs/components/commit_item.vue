@@ -138,12 +138,11 @@ export default {
           />
         </div>
         <div class="commit-detail flex-list">
-          <!-- eslint-disable vue/no-v-html -->
           <div class="commit-content" data-qa-selector="commit_content">
             <a
               :href="commit.commit_url"
               class="commit-row-message item-title"
-              v-html="commit.title_html"
+              v-html="commit.title_html /* eslint-disable-line vue/no-v-html */"
             ></a>
 
             <span class="commit-row-message d-block d-sm-none">&middot; {{ commit.short_id }}</span>
@@ -167,19 +166,16 @@ export default {
               <time-ago-tooltip :time="commit.authored_date" />
             </div>
           </div>
-          <!-- eslint-enable vue/no-v-html -->
         </div>
       </div>
     </div>
     <div>
-      <!-- eslint-disable vue/no-v-html -->
       <pre
         v-if="commit.description_html"
         :class="{ 'js-toggle-content': collapsible, 'd-block': !collapsible }"
         class="commit-row-description gl-mb-3 gl-text-body"
-        v-html="commitDescription"
+        v-html="commitDescription /* eslint-disable-line vue/no-v-html */"
       ></pre>
-      <!-- eslint-enable vue/no-v-html -->
     </div>
   </li>
 </template>

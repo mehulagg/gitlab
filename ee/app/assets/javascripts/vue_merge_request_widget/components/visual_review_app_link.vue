@@ -191,9 +191,8 @@ export default {
       </div>
       <!-- eslint-disable-next-line vue/no-v-html -->
       <p v-html="instructionText.step2"></p>
-      <!-- eslint-disable vue/no-v-html -->
       <p>
-        <span v-html="instructionText.step3"></span>
+        <span v-html="instructionText.step3 /* eslint-disable-line vue/no-v-html */"></span>
         <modal-copy-button
           :title="copyToClipboard.mrId"
           :text="appMetadata.mergeRequestId.toString()"
@@ -201,7 +200,6 @@ export default {
           css-classes="border-0 gl-pt-0 gl-pr-0 gl-pl-2 gl-pb-0"
         />
       </p>
-      <!-- eslint-enable vue/no-v-html -->
       <!-- eslint-disable-next-line vue/no-v-html -->
       <p v-html="instructionText.step4"></p>
       <template #modal-footer>

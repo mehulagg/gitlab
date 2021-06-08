@@ -123,7 +123,6 @@ export default {
     >
       {{ s__('ClusterIntegration|Remove integration') }}
     </gl-button>
-    <!-- eslint-disable vue/no-v-html -->
     <gl-modal
       ref="modal"
       size="lg"
@@ -153,7 +152,7 @@ export default {
           <!-- eslint-enable @gitlab/vue-require-i18n-strings -->
         </ul>
       </div>
-      <strong v-html="confirmationTextLabel"></strong>
+      <strong v-html="confirmationTextLabel /* eslint-disable-line vue/no-v-html */"></strong>
       <form ref="form" :action="clusterPath" method="post" class="gl-mb-5">
         <input ref="method" type="hidden" name="_method" value="delete" />
         <input :value="csrfToken" type="hidden" name="authenticity_token" />
@@ -200,6 +199,5 @@ export default {
         </template>
       </template>
     </gl-modal>
-    <!-- eslint-enable vue/no-v-html -->
   </div>
 </template>

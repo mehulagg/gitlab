@@ -113,7 +113,6 @@ export default {
 
       {{ __('by') }}
 
-      <!-- eslint-disable vue/no-v-html -->
       <template v-if="user">
         <gl-link
           v-gl-tooltip
@@ -131,10 +130,9 @@ export default {
           v-if="statusTooltipHTML"
           :ref="$options.EMOJI_REF"
           :data-testid="message"
-          v-html="statusTooltipHTML"
+          v-html="statusTooltipHTML /* eslint-disable-line vue/no-v-html */"
         ></span>
       </template>
-      <!-- eslint-enable vue/no-v-html -->
     </section>
 
     <section

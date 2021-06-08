@@ -74,9 +74,9 @@ export default {
         </a>
       </div>
       <div class="blob-content">
-        <!-- eslint-disable vue/no-v-html -->
-        <pre class="code highlight"><code :data-blob-hash="blobHash" v-html="content"></code></pre>
-        <!-- eslint-enable vue/no-v-html -->
+        <pre
+          class="code highlight"
+        ><code :data-blob-hash="blobHash" v-html="content /* eslint-disable-line vue/no-v-html */"></code></pre>
       </div>
     </div>
   </div>

@@ -257,7 +257,6 @@ export default {
         name="user[status][emoji]"
       />
       <div ref="userStatusForm" class="form-group position-relative m-0">
-        <!-- eslint-disable vue/no-v-html -->
         <div class="input-group gl-mb-5">
           <span class="input-group-prepend">
             <emoji-picker
@@ -267,7 +266,7 @@ export default {
               @click="setEmoji"
             >
               <template #button-content>
-                <span v-html="emojiTag"></span>
+                <span v-html="emojiTag /* eslint-disable-line vue/no-v-html */"></span>
                 <span
                   v-show="noEmoji"
                   class="js-no-emoji-placeholder no-emoji-placeholder position-relative"
@@ -289,7 +288,7 @@ export default {
               class="js-toggle-emoji-menu emoji-menu-toggle-button btn"
               @click="showEmojiMenu"
             >
-              <span v-html="emojiTag"></span>
+              <span v-html="emojiTag /* eslint-disable-line vue/no-v-html */"></span>
               <span
                 v-show="noEmoji"
                 class="js-no-emoji-placeholder no-emoji-placeholder position-relative"
@@ -325,7 +324,6 @@ export default {
             </button>
           </span>
         </div>
-        <!-- eslint-enable vue/no-v-html -->
         <div class="form-group">
           <div class="gl-display-flex">
             <gl-form-checkbox

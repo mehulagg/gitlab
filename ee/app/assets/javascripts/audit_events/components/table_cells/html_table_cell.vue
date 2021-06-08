@@ -18,8 +18,6 @@ export default {
 };
 </script>
 
-<!-- eslint-disable vue/no-v-html -->
 <template>
-  <span v-html="sanitizedHtml"></span>
+  <span v-html="sanitizedHtml /* eslint-disable-line vue/no-v-html */"></span>
 </template>
-<!-- eslint-enable vue/no-v-html -->

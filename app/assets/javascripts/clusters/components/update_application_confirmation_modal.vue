@@ -52,7 +52,6 @@ export default {
 };
 </script>
 <template>
-  <!-- eslint-disable vue/no-v-html -->
   <gl-modal
     ok-variant="danger"
     cancel-variant="light"
@@ -61,7 +60,7 @@ export default {
     :title="title"
     @ok="confirmUpdate()"
   >
-    {{ warningText }} <span v-html="customAppWarningText"></span>
+    {{ warningText }}
+    <span v-html="customAppWarningText /* eslint-disable-line vue/no-v-html */"></span>
   </gl-modal>
-  <!-- eslint-enable vue/no-v-html -->
 </template>

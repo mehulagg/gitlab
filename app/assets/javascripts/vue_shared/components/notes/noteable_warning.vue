@@ -87,12 +87,13 @@ export default {
 };
 </script>
 <template>
-  <!-- eslint-disable vue/no-v-html -->
   <div class="issuable-note-warning" data-testid="confidential-warning">
     <gl-icon v-if="!isLockedAndConfidential" :name="warningIcon" :size="16" class="icon inline" />
 
     <span v-if="isLockedAndConfidential" ref="lockedAndConfidential">
-      <span v-html="confidentialAndLockedDiscussionText"></span>
+      <span
+        v-html="confidentialAndLockedDiscussionText /* eslint-disable-line vue/no-v-html */"
+      ></span>
       {{
         __("People without permission will never get a notification and won't be able to comment.")
       }}
@@ -110,5 +111,4 @@ export default {
       <gl-link :href="lockedNoteableDocsPath" target="_blank">{{ __('Learn more') }}</gl-link>
     </span>
   </div>
-  <!-- eslint-enable vue/no-v-html -->
 </template>
