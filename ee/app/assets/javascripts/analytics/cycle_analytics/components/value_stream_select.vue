@@ -183,7 +183,6 @@ export default {
       >{{ $options.i18n.CREATE_VALUE_STREAM }}</gl-button
     >
     <value-stream-form
-      v-if="showCreateModal"
       :initial-data="initialData"
       :initial-form-errors="initialFormErrors"
       :default-stage-config="defaultStageConfig"

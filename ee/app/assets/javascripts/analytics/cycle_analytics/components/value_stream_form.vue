@@ -68,6 +68,11 @@ export default {
       required: false,
       default: false,
     },
+    isVisible: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
   },
   data() {
     const {
@@ -304,6 +309,7 @@ export default {
     :action-primary="primaryProps"
     :action-secondary="secondaryProps"
     :action-cancel="{ text: $options.i18n.BTN_CANCEL }"
+    :visible="isVisible"
     @hidden.prevent="$emit('hidden')"
     @secondary.prevent="onAddStage"
     @primary.prevent="onSubmit"
