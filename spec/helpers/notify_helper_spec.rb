@@ -28,36 +28,6 @@ RSpec.describe NotifyHelper do
     end
   end
 
-  describe '#invited_role_description' do
-    where(:role, :description) do
-      "Guest"          | /As a guest/
-      "Reporter"       | /As a reporter/
-      "Developer"      | /As a developer/
-      "Maintainer"     | /As a maintainer/
-      "Owner"          | /As an owner/
-      "Minimal Access" | /As a user with minimal access/
-    end
-
-    with_them do
-      specify do
-        expect(helper.invited_role_description(role)).to match description
-      end
-    end
-  end
-
-  describe '#invited_to_description' do
-    where(:source, :description) do
-      "project" | /Projects can/
-      "group"   | /Groups assemble/
-    end
-
-    with_them do
-      specify do
-        expect(helper.invited_to_description(source)).to match description
-      end
-    end
-  end
-
   def reference_link(entity, url)
     "<a href=\"#{url}\">#{entity.to_reference}</a>"
   end

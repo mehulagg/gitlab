@@ -145,6 +145,16 @@ table.content {
     padding: 15px 5px;
     text-align: center;
   }
+
+  td.text-content-left {
+    font-family: $mailer-font;
+    color: $mailer-text-color;
+    font-size: 15px;
+    font-weight: 400;
+    line-height: 1.4;
+    padding: 15px 25px;
+    text-align: left;
+  }
 }
 
 tr.footer td {
