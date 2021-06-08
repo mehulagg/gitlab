@@ -51,7 +51,7 @@ module Gitlab
     #
     # If a group is not specified, each block will get a separate group to itself.
     def self.throttle(key, group: nil, period: 1.hour, count: 1, &block)
-      return if ::Gitlab::SafeRequestStore[:assume_excluse_lease_throttled]
+      return if ::Gitlab::SafeRequestStore[:assume_exclusive_lease_throttled]
 
       group ||= block.source_location.join(':')
 

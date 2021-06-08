@@ -353,12 +353,12 @@ RSpec.configure do |config|
 
   config.around(:example, :assume_throttled) do |example|
     Gitlab::WithRequestStore.with_request_store do
-      previous_value = ::Gitlab::SafeRequestStore[:assume_excluse_lease_throttled]
-      ::Gitlab::SafeRequestStore[:assume_excluse_lease_throttled] = true
+      previous_value = ::Gitlab::SafeRequestStore[:assume_exclusive_lease_throttled]
+      ::Gitlab::SafeRequestStore[:assume_exclusive_lease_throttled] = true
 
       example.run
 
-      ::Gitlab::SafeRequestStore[:assume_excluse_lease_throttled] = previous_value
+      ::Gitlab::SafeRequestStore[:assume_exclusive_lease_throttled] = previous_value
     end
   end
 
