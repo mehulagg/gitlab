@@ -15,11 +15,8 @@ export default {
     GlFormInput,
     MarkdownField,
   },
+  inject: ['fullPath'],
   props: {
-    groupPath: {
-      type: String,
-      required: true,
-    },
     previewMarkdownPath: {
       type: String,
       required: false,
@@ -55,7 +52,7 @@ export default {
     variables() {
       return {
         input: {
-          groupPath: this.groupPath,
+          groupPath: this.fullPath,
           title: this.title,
           description: this.description,
           startDate: this.startDate,

@@ -30,11 +30,14 @@ describe('Iteration Form', () => {
   const updateMutationFailure = {
     data: { updateIteration: { iteration: {}, errors: ['alas, your data is unchanged'] } },
   };
-  const defaultProps = { groupPath, iterationsListPath: TEST_HOST };
+  const defaultProps = { iterationsListPath: TEST_HOST };
 
   function createComponent({ mutationResult = createMutationSuccess, props = defaultProps } = {}) {
     wrapper = shallowMount(IterationForm, {
       propsData: props,
+      provide: {
+        fullPath: groupPath,
+      },
       stubs: {
         ApolloMutation,
         MarkdownField: { template: '<div><slot name="textarea"></slot></div>' },
@@ -132,7 +135,6 @@ describe('Iteration Form', () => {
 
   describe('Edit iteration', () => {
     const propsWithIteration = {
-      groupPath,
       isEditing: true,
       iteration,
     };

@@ -44,10 +44,12 @@ export function initIterationForm() {
   return new Vue({
     el,
     apolloProvider,
+    provide: {
+      fullPath: el.dataset.groupFullPath,
+    },
     render(createElement) {
       return createElement(IterationForm, {
         props: {
-          groupPath: el.dataset.groupFullPath,
           previewMarkdownPath: el.dataset.previewMarkdownPath,
           iterationsListPath: el.dataset.iterationsListPath,
         },
