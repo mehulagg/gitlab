@@ -163,7 +163,7 @@ You can [configure](#customizing-the-container-scanning-settings) analyzers by u
 
 ### Supported distributions
 
-Support depends on the Scanner being used:
+Support depends on the scanner:
 
 - [Trivy](https://aquasecurity.github.io/trivy/latest/vuln-detection/os/) (Default).
 
