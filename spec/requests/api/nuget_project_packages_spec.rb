@@ -188,6 +188,10 @@ RSpec.describe API::NugetProjectPackages do
     let(:url) { "/projects/#{target.id}/packages/nuget/symbolpackage/authorize" }
     let(:headers) { {} }
 
+    it_behaves_like 'job token for package uploads' do
+      let_it_be(:job) { create(:ci_build, :running, user: user, project: project) }
+    end
+
     subject { put api(url), headers: headers }
 
     it_behaves_like 'nuget authorize upload endpoint'
