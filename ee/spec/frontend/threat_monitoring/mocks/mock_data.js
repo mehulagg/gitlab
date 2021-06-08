@@ -41,6 +41,17 @@ spec:
   },
 ];
 
+export const mockCiliumPolicy = {
+  name: 'policy',
+  creationTimestamp: new Date('2021-06-07T00:00:00.000Z'),
+  manifest: `apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: policy
+spec:
+  endpointSelector: {}`,
+};
+
 export const mockNominalHistory = [
   ['2019-12-04T00:00:00.000Z', 56],
   ['2019-12-05T00:00:00.000Z', 2647],

@@ -11,7 +11,11 @@ module EE
       override :available_features_for_issue_types
       def available_features_for_issue_types
         strong_memoize(:available_features_for_issue_types) do
-          super.merge(epics: %w(issue), sla: %w(incident))
+          super.tap do |available_features|
+            available_features[:epics] = %w(issue)
+            available_features[:sla] = %w(incident)
+            available_features[:confidentiality] += %w(test_case)
+          end
         end
       end
     end

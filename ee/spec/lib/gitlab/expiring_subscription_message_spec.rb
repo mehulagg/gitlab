@@ -132,7 +132,7 @@ RSpec.describe Gitlab::ExpiringSubscriptionMessage do
                       end
 
                       it 'has an expiration blocking message' do
-                        expect(subject).to include("We tried to automatically renew your subscription for No Limit Records on 2020-03-01 but something went wrong so your subscription was downgraded to the free plan. Don't worry, your data is safe. We suggest you check your payment method and get in touch with our support team (support@gitlab.com). They'll gladly help with your subscription renewal.")
+                        expect(subject).to include("We tried to automatically renew your subscription for No Limit Records on 2020-03-01 but something went wrong so your subscription was downgraded to the free plan. Don't worry, your data is safe. We suggest you check your payment method and get in touch with our support team (support.gitlab.com). They'll gladly help with your subscription renewal.")
                       end
                     end
 

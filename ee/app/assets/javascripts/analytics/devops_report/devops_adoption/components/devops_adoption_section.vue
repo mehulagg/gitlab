@@ -1,6 +1,6 @@
 <script>
-import { GlLoadingIcon, GlTooltipDirective, GlButton, GlSprintf } from '@gitlab/ui';
-import { TABLE_HEADER_TEXT, ADD_REMOVE_BUTTON_TOOLTIP } from '../constants';
+import { GlLoadingIcon, GlButton, GlSprintf } from '@gitlab/ui';
+import { TABLE_HEADER_TEXT } from '../constants';
 import DevopsAdoptionEmptyState from './devops_adoption_empty_state.vue';
 import DevopsAdoptionTable from './devops_adoption_table.vue';
 
@@ -14,9 +14,6 @@ export default {
   },
   i18n: {
     tableHeaderText: TABLE_HEADER_TEXT,
-  },
-  directives: {
-    GlTooltip: GlTooltipDirective,
   },
   props: {
     isLoading: {
@@ -35,10 +32,6 @@ export default {
       type: Boolean,
       required: true,
     },
-    segmentLimitReached: {
-      type: Boolean,
-      required: true,
-    },
     editGroupsButtonLabel: {
       type: String,
       required: true,
@@ -51,11 +44,6 @@ export default {
       type: Object,
       required: false,
       default: () => {},
-    },
-  },
-  computed: {
-    addSegmentButtonTooltipText() {
-      return this.segmentLimitReached ? ADD_REMOVE_BUTTON_TOOLTIP : false;
     },
   },
 };
@@ -72,15 +60,10 @@ export default {
           <template #timestamp>{{ timestamp }}</template>
         </gl-sprintf>
       </span>
-      <span
-        v-if="hasGroupData"
-        v-gl-tooltip.hover="addSegmentButtonTooltipText"
-        data-testid="segmentButtonWrapper"
-      >
-        <gl-button :disabled="segmentLimitReached" @click="$emit('openAddRemoveModal')">{{
-          editGroupsButtonLabel
-        }}</gl-button></span
-      >
+
+      <gl-button v-if="hasGroupData" @click="$emit('openAddRemoveModal')">{{
+        editGroupsButtonLabel
+      }}</gl-button>
     </div>
     <devops-adoption-table
       :cols="cols"

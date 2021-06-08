@@ -23,7 +23,7 @@ RSpec.describe API::Ci::Runner do
           }
         end
 
-        let!(:ci_build) { create(:ci_build, pipeline: pipeline, secrets: secrets) }
+        let!(:ci_build) { create(:ci_build, :pending, :queued, pipeline: pipeline, secrets: secrets) }
 
         context 'when secrets management feature is available' do
           before do

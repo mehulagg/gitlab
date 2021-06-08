@@ -1,10 +1,6 @@
-import { s__, __, sprintf } from '~/locale';
+import { s__, __ } from '~/locale';
 
 export const DEFAULT_POLLING_INTERVAL = 30000;
-
-export const MAX_SEGMENTS = 30;
-
-export const MAX_REQUEST_COUNT = 10;
 
 export const PER_PAGE = 100;
 
@@ -22,13 +18,6 @@ export const DEVOPS_ADOPTION_ERROR_KEYS = {
 
 export const TABLE_HEADER_TEXT = s__(
   'DevopsAdoption|Feature adoption is based on usage in the current calendar month. Last updated: %{timestamp}.',
-);
-
-export const ADD_REMOVE_BUTTON_TOOLTIP = sprintf(
-  s__('DevopsAdoption|Maximum %{maxSegments} groups allowed'),
-  {
-    maxSegments: MAX_SEGMENTS,
-  },
 );
 
 export const DEVOPS_ADOPTION_GROUP_LEVEL_LABEL = s__('DevopsAdoption|Add/remove sub-groups');

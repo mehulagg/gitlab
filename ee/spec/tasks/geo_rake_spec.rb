@@ -2,7 +2,7 @@
 
 require 'rake_helper'
 
-RSpec.describe 'geo rake tasks', :geo do
+RSpec.describe 'geo rake tasks', :geo, :silence_stdout do
   include ::EE::GeoHelpers
 
   before do

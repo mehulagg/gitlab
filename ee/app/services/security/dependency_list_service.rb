@@ -55,7 +55,8 @@ module Security
       when 'packager'
         collection.sort_by! { |a| a[:packager] }
       when 'severity'
-        collection = sort_by_severity(collection)
+        sort_dependency_vulnerabilities_by_severity!(collection) if Feature.enabled?(:sort_dependency_vulnerabilities, @pipeline.project)
+        sort_dependencies_by_severity!(collection)
       else
         collection.sort_by! { |a| a[:name] }
       end
@@ -65,16 +66,25 @@ module Security
       collection
     end
 
-    # vulnerabilities are initially sorted by severity in report
-    # https://gitlab.com/gitlab-org/security-products/analyzers/common/blob/ee9d378f46d9cc4e7b7592786a2a558dcc72b0f5/issue/report.go#L15
-    # So we can assume that first vulnerability in vulnerabilities array
-    # will have highest severity
-    def sort_by_severity(collection)
-      collection.sort do |dep_i, dep_j|
+    def compare_severity_levels(level1, level2)
+      ::Enums::Vulnerability.severity_levels[level2] <=> ::Enums::Vulnerability.severity_levels[level1]
+    end
+
+    def sort_dependency_vulnerabilities_by_severity!(collection)
+      collection.each do |dependency|
+        dependency[:vulnerabilities].sort! do |vulnerability1, vulnerability2|
+          compare_severity_levels(vulnerability1[:severity], vulnerability2[:severity])
+        end
+      end
+    end
+
+    # vulnerabilities are already sorted by severity level so we can assume that first vulnerability in
+    # vulnerabilities array will have highest severity
+    def sort_dependencies_by_severity!(collection)
+      collection.sort! do |dep_i, dep_j|
         level_i = dep_i.dig(:vulnerabilities, 0, :severity) || :info
         level_j = dep_j.dig(:vulnerabilities, 0, :severity) || :info
-
-        ::Enums::Vulnerability.severity_levels[level_j] <=> ::Enums::Vulnerability.severity_levels[level_i]
+        compare_severity_levels(level_i, level_j)
       end
     end
   end

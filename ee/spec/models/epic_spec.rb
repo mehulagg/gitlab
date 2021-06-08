@@ -47,18 +47,43 @@ RSpec.describe Epic do
       end
     end
 
-    describe '.order_relative_position_on_board' do
+    describe 'relative position scopes' do
       let_it_be(:board) { create(:epic_board) }
+      let_it_be(:other_board) { create(:epic_board) }
       let_it_be(:epic1) { create(:epic) }
       let_it_be(:epic2) { create(:epic) }
       let_it_be(:epic3) { create(:epic) }
 
-      it 'returns epics ordered by position on the board, null last' do
-        create(:epic_board_position, epic: epic2, epic_board: board, relative_position: 10)
-        create(:epic_board_position, epic: epic1, epic_board: board, relative_position: 20)
-        create(:epic_board_position, epic: epic3, epic_board: board, relative_position: 20)
+      let_it_be(:position1) { create(:epic_board_position, epic: epic1, epic_board: board, relative_position: 20) }
+      let_it_be(:position2) { create(:epic_board_position, epic: epic2, epic_board: board, relative_position: 10) }
+      let_it_be(:position3) { create(:epic_board_position, epic: epic3, epic_board: board, relative_position: 20) }
+      # this position should be ignored because it's for other board:
+      let_it_be(:position5) { create(:epic_board_position, epic: confidential_epic, epic_board: other_board, relative_position: 5) }
 
-        expect(described_class.order_relative_position_on_board(board.id)).to eq([epic2, epic3, epic1, public_epic, confidential_epic])
+      describe '.order_relative_position_on_board' do
+        it 'returns epics ordered by position on the board, null last' do
+          epics = described_class.order_relative_position_on_board(board.id)
+
+          expect(epics).to eq([epic2, epic3, epic1, public_epic, confidential_epic])
+        end
+      end
+
+      describe 'without_board_position' do
+        it 'returns only epics which do not have position set for the board' do
+          epics = described_class.join_board_position(board.id).without_board_position(board.id)
+
+          expect(epics).to match_array([confidential_epic, public_epic])
+        end
+      end
+
+      describe '.join_board_position' do
+        it 'returns epics with joined position for the board' do
+          positions = described_class.join_board_position(board.id)
+            .select('boards_epic_board_positions.relative_position as pos').map(&:pos)
+
+          # confidential_epic and public_epic should have both nil position for the board
+          expect(positions).to match_array([20, 10, 20, nil, nil])
+        end
       end
     end
 
@@ -74,6 +99,17 @@ RSpec.describe Epic do
         create(:epic_issue, issue: other_issue)
 
         expect(described_class.in_milestone(milestone.id)).to match_array([epic1, epic2])
+      end
+    end
+
+    describe 'from_id' do
+      let_it_be(:max_id) { Epic.maximum(:id) }
+      let_it_be(:epic1) { create(:epic, id: max_id + 1) }
+      let_it_be(:epic2) { create(:epic, id: max_id + 2) }
+      let_it_be(:epic3) { create(:epic, id: max_id + 3) }
+
+      it 'returns records with id bigger or equal to the provided param' do
+        expect(described_class.from_id(epic2.id)).to match_array([epic2, epic3])
       end
     end
   end

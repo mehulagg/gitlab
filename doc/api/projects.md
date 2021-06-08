@@ -1020,7 +1020,7 @@ If the project is a fork, and you provide a valid token to authenticate, the
       "http_url_to_repo":"https://gitlab.com/gitlab-org/gitlab-foss.git",
       "web_url":"https://gitlab.com/gitlab-org/gitlab-foss",
       "avatar_url":"https://assets.gitlab-static.net/uploads/-/system/project/avatar/13083/logo-extra-whitespace.png",
-      "license_url": "https://gitlab.com/gitlab-org/gitlab/blob/master/LICENSE",
+      "license_url": "https://gitlab.com/gitlab-org/gitlab/-/blob/master/LICENSE",
       "license": {
         "key": "mit",
         "name": "MIT License",
@@ -1206,9 +1206,10 @@ POST /projects
 | `show_default_award_emojis`                                 | boolean | **{dotted-circle}** No | Show default award emojis. |
 | `snippets_access_level`                                     | string  | **{dotted-circle}** No | One of `disabled`, `private`, or `enabled`. |
 | `snippets_enabled`                                          | boolean | **{dotted-circle}** No | _(Deprecated)_ Enable snippets for this project. Use `snippets_access_level` instead. |
-| `tag_list`                                                  | array   | **{dotted-circle}** No | The list of tags for a project; put array of tags, that should be finally assigned to a project. |
+| `tag_list`                                                  | array   | **{dotted-circle}** No | _([Deprecated](https://gitlab.com/gitlab-org/gitlab/-/issues/328226) in GitLab 14.0)_ The list of tags for a project; put array of tags, that should be finally assigned to a project. Use `topics` instead. |
 | `template_name`                                             | string  | **{dotted-circle}** No | When used without `use_custom_template`, name of a [built-in project template](../user/project/working_with_projects.md#built-in-templates). When used with `use_custom_template`, name of a custom project template. |
 | `template_project_id` **(PREMIUM)**                         | integer | **{dotted-circle}** No | When used with `use_custom_template`, project ID of a custom project template. This is preferable to using `template_name` since `template_name` may be ambiguous. |
+| `topics`                                                    | array   | **{dotted-circle}** No | The list of topics for a project; put array of topics, that should be finally assigned to a project. _([Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/328226) in GitLab 14.0.)_ |
 | `use_custom_template` **(PREMIUM)**                         | boolean | **{dotted-circle}** No | Use either custom [instance](../user/admin_area/custom_project_templates.md) or [group](../user/group/custom_project_templates.md) (with `group_with_project_templates_id`) project template. |
 | `visibility`                                                | string  | **{dotted-circle}** No | See [project visibility level](#project-visibility-level). |
 | `wiki_access_level`                                         | string  | **{dotted-circle}** No | One of `disabled`, `private`, or `enabled`. |
@@ -1280,8 +1281,9 @@ POST /projects/user/:user_id
 | `snippets_access_level`                                     | string  | **{dotted-circle}** No | One of `disabled`, `private`, or `enabled`. |
 | `snippets_enabled`                                          | boolean | **{dotted-circle}** No | _(Deprecated)_ Enable snippets for this project. Use `snippets_access_level` instead. |
 | `suggestion_commit_message`                                 | string  | **{dotted-circle}** No | The commit message used to apply merge request [suggestions](../user/project/merge_requests/reviews/suggestions.md). |
-| `tag_list`                                                  | array   | **{dotted-circle}** No | The list of tags for a project; put array of tags, that should be finally assigned to a project. |
+| `tag_list`                                                  | array   | **{dotted-circle}** No | _([Deprecated](https://gitlab.com/gitlab-org/gitlab/-/issues/328226) in GitLab 14.0)_ The list of tags for a project; put array of tags, that should be finally assigned to a project. Use `topics` instead. |
 | `template_name`                                             | string  | **{dotted-circle}** No | When used without `use_custom_template`, name of a [built-in project template](../user/project/working_with_projects.md#built-in-templates). When used with `use_custom_template`, name of a custom project template. |
+| `topics`                                                    | array   | **{dotted-circle}** No | The list of topics for the project. _([Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/328226) in GitLab 14.0.)_ |
 | `use_custom_template` **(PREMIUM)**                         | boolean | **{dotted-circle}** No | Use either custom [instance](../user/admin_area/custom_project_templates.md) or [group](../user/group/custom_project_templates.md) (with `group_with_project_templates_id`) project template. |
 | `visibility`                                                | string  | **{dotted-circle}** No | See [project visibility level](#project-visibility-level). |
 | `wiki_access_level`                                         | string  | **{dotted-circle}** No | One of `disabled`, `private`, or `enabled`. |
@@ -1358,7 +1360,8 @@ PUT /projects/:id
 | `snippets_access_level`                                     | string         | **{dotted-circle}** No | One of `disabled`, `private`, or `enabled`. |
 | `snippets_enabled`                                          | boolean        | **{dotted-circle}** No | _(Deprecated)_ Enable snippets for this project. Use `snippets_access_level` instead. |
 | `suggestion_commit_message`                                 | string         | **{dotted-circle}** No | The commit message used to apply merge request suggestions. |
-| `tag_list`                                                  | array          | **{dotted-circle}** No | The list of tags for a project; put array of tags, that should be finally assigned to a project. |
+| `tag_list`                                                  | array          | **{dotted-circle}** No | _([Deprecated](https://gitlab.com/gitlab-org/gitlab/-/issues/328226) in GitLab 14.0)_ The list of tags for a project; put array of tags, that should be finally assigned to a project. Use `topics` instead. |
+| `topics`                                                    | array          | **{dotted-circle}** No | The list of topics for the project. This replaces any existing topics that are already added to the project. _([Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/328226) in GitLab 14.0.)_ |
 | `visibility`                                                | string         | **{dotted-circle}** No | See [project visibility level](#project-visibility-level). |
 | `wiki_access_level`                                         | string         | **{dotted-circle}** No | One of `disabled`, `private`, or `enabled`. |
 | `wiki_enabled`                                              | boolean        | **{dotted-circle}** No | _(Deprecated)_ Enable wiki for this project. Use `wiki_access_level` instead. |
@@ -2083,7 +2086,8 @@ the format in `markdown` is used.
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/57250) in GitLab 13.11.
 
-GitLab 13.11 added enforcement of the [maximum attachment size limit](../user/admin_area/settings/account_and_limit_settings.md#max-attachment-size) behind the `enforce_max_attachment_size_upload_api` feature flag. GitLab 14.0 will enable this by default.
+GitLab 13.11 added enforcement of the [maximum attachment size limit](../user/admin_area/settings/account_and_limit_settings.md#max-attachment-size) behind the `enforce_max_attachment_size_upload_api` feature flag. GitLab 14.0 enables this by default.
+To disable this enforcement:
 
 **In Omnibus installations:**
 
@@ -2093,10 +2097,10 @@ GitLab 13.11 added enforcement of the [maximum attachment size limit](../user/ad
    sudo gitlab-rails console
    ```
 
-1. Enable the feature flag:
+1. Disable the feature flag:
 
    ```ruby
-   Feature.enable(:enforce_max_attachment_size_upload_api)
+   Feature.disable(:enforce_max_attachment_size_upload_api)
    ```
 
 **In installations from source:**
@@ -2108,10 +2112,10 @@ GitLab 13.11 added enforcement of the [maximum attachment size limit](../user/ad
    sudo -u git -H bundle exec rails console -e production
    ```
 
-1. Enable the feature flag to disable the validation:
+1. Disable the feature flag:
 
    ```ruby
-   Feature.enable(:enforce_max_attachment_size_upload_api)
+   Feature.disable(:enforce_max_attachment_size_upload_api)
    ```
 
 ## Upload a project avatar
