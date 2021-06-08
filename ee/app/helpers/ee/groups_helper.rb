@@ -11,6 +11,13 @@ module EE
       ::Groups::EpicsCountService
     end
 
+    override :issuables_finder_class
+    def issuables_finder_class(type)
+      return super unless type == :epics
+
+      EpicsFinder
+    end
+
     def group_nav_link_paths
       %w[saml_providers#show usage_quotas#index billings#index]
     end

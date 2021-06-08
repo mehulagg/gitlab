@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 module GroupsHelper
+  ROUNDED_COUNT_THRESHOLD = 1000
+
   def group_overview_nav_link_paths
     %w[
       groups#activity
@@ -81,26 +83,26 @@ module GroupsHelper
     can?(current_user, :set_emails_disabled, group) && !group.parent&.emails_disabled?
   end
 
-  def group_issues_count(state:)
-    IssuesFinder
-      .new(current_user, group_id: @group.id, state: state, non_archived: true, include_subgroups: true)
-      .execute
-      .count
-  end
-
-  def group_merge_requests_count(state:)
-    MergeRequestsFinder
-      .new(current_user, group_id: @group.id, state: state, non_archived: true, include_subgroups: true)
-      .execute
-      .count
-  end
-
   def cached_issuables_count(group, type: nil)
-    count_service = issuables_count_service_class(type)
-    return unless count_service.present?
+    if ::Feature.enabled?(:cached_issuables_state_count, group, default_enabled: :yaml)
+      cached_open_issuables_count(group, type: type)
+    else
+      count_service = issuables_count_service_class(type)
+      return unless count_service.present?
 
-    issuables_count = count_service.new(group, current_user).count
-    format_issuables_count(count_service, issuables_count)
+      issuables_count = count_service.new(group, current_user).count
+      format_issuables_count(count_service::CACHED_COUNT_THRESHOLD, issuables_count)
+    end
+  end
+
+  def cached_open_issuables_count(group, type: nil)
+    finder_class = issuables_finder_class(type)
+    return unless finder_class.present?
+
+    finder =
+      finder_class.new(current_user, group_id: group.id, non_archived: true, include_subgroups: true)
+    issuables_count = Gitlab::CachedIssuablesCountForState.new(finder, group)["opened"]
+    format_issuables_count(ROUNDED_COUNT_THRESHOLD, issuables_count)
   end
 
   def group_dependency_proxy_url(group)
@@ -320,6 +322,14 @@ module GroupsHelper
     s_("GroupSettings|This setting is applied on %{ancestor_group} and has been overridden on this subgroup.").html_safe % { ancestor_group: ancestor_group(group) }
   end
 
+  def issuables_finder_class(type)
+    if type == :issues
+      IssuesFinder
+    elsif type == :merge_requests
+      MergeRequestsFinder
+    end
+  end
+
   def issuables_count_service_class(type)
     if type == :issues
       Groups::OpenIssuesCountService
@@ -328,8 +338,8 @@ module GroupsHelper
     end
   end
 
-  def format_issuables_count(count_service, count)
-    if count > count_service::CACHED_COUNT_THRESHOLD
+  def format_issuables_count(threshold, count)
+    if count > threshold
       ActiveSupport::NumberHelper
         .number_to_human(
           count,

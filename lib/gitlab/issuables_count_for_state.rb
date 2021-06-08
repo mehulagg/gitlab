@@ -9,7 +9,7 @@ module Gitlab
     # The state values that can be safely casted to a Symbol.
     STATES = %w[opened closed merged all].freeze
 
-    attr_reader :project
+    attr_reader :parent
 
     def self.declarative_policy_class
       'IssuablePolicy'
@@ -18,9 +18,9 @@ module Gitlab
     # finder - The finder class to use for retrieving the issuables.
     # fast_fail - restrict counting to a shorter period, degrading gracefully on
     # failure
-    def initialize(finder, project = nil, fast_fail: false)
+    def initialize(finder, parent = nil, fast_fail: false)
       @finder = finder
-      @project = project
+      @parent = parent
       @fast_fail = fast_fail
       @cache = Gitlab::SafeRequestStore[CACHE_KEY] ||= initialize_cache
     end

@@ -1,0 +1,8 @@
+---
+name: cached_issuables_state_count
+introduced_by_url:
+rollout_issue_url:
+milestone: '14.0'
+type: development
+group: group::product planning
+default_enabled: false

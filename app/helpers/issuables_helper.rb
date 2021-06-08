@@ -279,7 +279,11 @@ module IssuablesHelper
   end
 
   def issuables_count_for_state(issuable_type, state)
-    Gitlab::IssuablesCountForState.new(finder)[state]
+    if ::Feature.enabled?(:cached_issuables_state_count, @group, default_enabled: :yaml)
+      Gitlab::CachedIssuablesCountForState.new(finder, parent)[state]
+    else
+      Gitlab::IssuablesCountForState.new(finder)[state]
+    end
   end
 
   def close_issuable_path(issuable)

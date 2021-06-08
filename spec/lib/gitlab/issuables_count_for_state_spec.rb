@@ -7,7 +7,7 @@ RSpec.describe Gitlab::IssuablesCountForState do
     double(:finder, current_user: nil, params: {}, count_by_state: { opened: 2, closed: 1 })
   end
 
-  let(:project) { nil }
+  let(:project) { build(:project) }
   let(:fast_fail) { nil }
   let(:counter) { described_class.new(finder, project, fast_fail: fast_fail) }
 
@@ -15,8 +15,12 @@ RSpec.describe Gitlab::IssuablesCountForState do
     let(:project) { build(:project) }
 
     it 'provides the project' do
-      expect(counter.project).to eq(project)
+      expect(counter.parent).to eq(project)
     end
+  end
+
+  it 'provides the project' do
+    expect(counter.parent).to eq(project)
   end
 
   describe '.declarative_policy_class' do
