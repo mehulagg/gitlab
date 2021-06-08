@@ -10,6 +10,7 @@ description: 'Writing styles, markup, formatting, and other standards for GitLab
 To help ensure consistency in the documentation, follow this guidance.
 
 <!-- vale off -->
+<!-- markdownlint-disable -->
 
 ## above
 
