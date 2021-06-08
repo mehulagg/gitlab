@@ -55,8 +55,8 @@ review-deploy:
     - .review-workflow-base
     - .review:rules:review-deploy
   retry: 2
-  stage: review
-  needs: ["review-build-cng"]
+  stage: prepare # Shortcut
+  needs: []
   resource_group: "review/${CI_COMMIT_REF_NAME}"
   before_script:
     - export GITLAB_SHELL_VERSION=$(<GITLAB_SHELL_VERSION)
@@ -71,7 +71,7 @@ review-deploy:
     - download_chart
     - date
     - deploy || (display_deployment_debug && exit 1)
-    - disable_sign_ups || (delete_release && exit 1)
+    - disable_sign_ups
   after_script:
     # Run seed-dast-test-data.sh only when DAST_RUN is set to true. This is to pupulate review app with data for DAST scan.
     # Set DAST_RUN to true when jobs are manually scheduled.
