@@ -81,6 +81,8 @@ gosec:
     variables:
       - $SECURE_BINARIES_DOWNLOAD_IMAGES == "true" &&
           $SECURE_BINARIES_ANALYZERS =~ /\bgosec\b/
+  variables:
+    SECURE_BINARIES_ANALYZER_VERSION: "3"
 
 spotbugs:
   extends: .download_images
