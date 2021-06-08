@@ -3,7 +3,7 @@
 class TrialsController < ApplicationController
   include ActionView::Helpers::SanitizeHelper
 
-  layout 'simple_registration'
+  layout 'minimal'
 
   before_action :check_if_gl_com_or_dev
   before_action :authenticate_user!
