@@ -45,6 +45,7 @@ export default {
           token: LabelToken,
           unique: false,
           symbol: '~',
+          defaultLabels: [{ value: __('No label'), text: __('No label') }],
           fetchLabels,
         },
         {
