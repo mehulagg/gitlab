@@ -8,8 +8,8 @@ RSpec.describe Ci::PipelineCreation::StartPipelineService do
   subject(:service) { described_class.new(pipeline) }
 
   describe '#execute' do
-    it 'calls the pipeline process service' do
-      expect(Ci::ProcessPipelineService)
+    it 'calls the pipeline runners matching validation service' do
+      expect(Ci::PipelineCreation::DropNotRunnableBuildsService)
         .to receive(:new)
         .with(pipeline)
         .and_return(double('service', execute: true))
