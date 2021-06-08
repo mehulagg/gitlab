@@ -110,54 +110,25 @@ RSpec.describe Security::DependencyListService do
           }
         end
 
-        context('when the sort_dependency_vulnerabilities feature flag is true') do
-          it 'returns array of data sorted by package severity level in ascending order' do
-            dependencies = subject.last(2).map do |dependency|
-              {
-                name: dependency[:name],
-                vulnerabilities: dependency[:vulnerabilities].map do |vulnerability|
-                  vulnerability[:severity]
-                end
-              }
-            end
-
-            expect(dependencies).to eq([{ name: "nokogiri", vulnerabilities: ["high"] },
-                                        { name: "saml2-js", vulnerabilities: %w(critical medium unknown) }])
+        it 'returns array of data sorted by package severity level in ascending order' do
+          dependencies = subject.last(2).map do |dependency|
+            {
+              name: dependency[:name],
+              vulnerabilities: dependency[:vulnerabilities].map do |vulnerability|
+                vulnerability[:severity]
+              end
+            }
           end
 
-          it 'returns array of data with package vulnerabilities sorted in descending order' do
-            saml2js_dependency = subject.find { |dep| dep[:name] == 'saml2-js' }
-            saml2js_severities = saml2js_dependency[:vulnerabilities].map {|v| v[:severity] }
-
-            expect(saml2js_severities).to eq(%w(critical medium unknown))
-          end
+          expect(dependencies).to eq([{ name: "nokogiri", vulnerabilities: ["high"] },
+                                      { name: "saml2-js", vulnerabilities: %w(critical medium unknown) }])
         end
 
-        context('when the sort_dependency_vulnerabilities feature flag is false') do
-          before do
-            stub_feature_flags(sort_dependency_vulnerabilities: false)
-          end
+        it 'returns array of data with package vulnerabilities sorted in descending order' do
+          saml2js_dependency = subject.find { |dep| dep[:name] == 'saml2-js' }
+          saml2js_severities = saml2js_dependency[:vulnerabilities].map {|v| v[:severity] }
 
-          it 'returns array of data sorted by package severity level in descending order' do
-            dependencies = subject.last(2).map do |dependency|
-              {
-                name: dependency[:name],
-                vulnerabilities: dependency[:vulnerabilities].map do |vulnerability|
-                  vulnerability[:severity]
-                end
-              }
-            end
-
-            expect(dependencies).to eq([{ name: "saml2-js", vulnerabilities: %w(unknown medium critical) },
-                                        { name: "nokogiri", vulnerabilities: ["high"] }])
-          end
-
-          it 'returns array of data with package vulnerabilities sorted in ascending order' do
-            saml2js_dependency = subject.find { |dep| dep[:name] == 'saml2-js' }
-            saml2js_severities = saml2js_dependency[:vulnerabilities].map {|v| v[:severity] }
-
-            expect(saml2js_severities).to eq(%w(unknown medium critical))
-          end
+          expect(saml2js_severities).to eq(%w(critical medium unknown))
         end
       end
     end

@@ -55,7 +55,7 @@ module Security
       when 'packager'
         collection.sort_by! { |a| a[:packager] }
       when 'severity'
-        sort_dependency_vulnerabilities_by_severity!(collection) if Feature.enabled?(:sort_dependency_vulnerabilities, @pipeline.project)
+        sort_dependency_vulnerabilities_by_severity!(collection)
         sort_dependencies_by_severity!(collection)
       else
         collection.sort_by! { |a| a[:name] }
