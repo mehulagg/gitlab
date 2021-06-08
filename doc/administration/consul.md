@@ -66,12 +66,18 @@ on _each_ Consul server node:
 
 ## Upgrade the Consul nodes
 
-To upgrade your Consul nodes, upgrade the GitLab package.
+To upgrade your Consul nodes, upgrade the GitLab package, then do a restart of the Consul service.
+
+To restart Consul:
+
+```shell
+sudo gitlab-ctl restart consul
+```
 
 Nodes should be:
 
 - Members of a healthy cluster prior to upgrading the Omnibus GitLab package.
-- Upgraded one node at a time.
+- Upgraded and restarted one node at a time.
 
 Identify any existing health issues in the cluster by running the following command
 within each node. The command will return an empty array if the cluster is healthy:
