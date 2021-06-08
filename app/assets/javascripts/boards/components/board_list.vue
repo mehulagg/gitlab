@@ -111,6 +111,13 @@ export default {
         this.showCount = this.scrollHeight() > Math.ceil(this.listHeight());
       });
     },
+    'list.id': {
+      handler(id) {
+        if (id) {
+          eventHub.$on(`toggle-issue-form-${this.list.id}`, this.toggleForm);
+        }
+      },
+    },
   },
   created() {
     eventHub.$on(`toggle-issue-form-${this.list.id}`, this.toggleForm);
