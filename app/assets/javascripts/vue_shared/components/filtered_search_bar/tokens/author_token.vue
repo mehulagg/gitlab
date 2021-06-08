@@ -38,6 +38,7 @@ export default {
           name: gon.current_user_fullname,
           username: gon.current_username,
           avatar_url: gon.current_user_avatar_url,
+          avatarUrl: gon.current_user_avatar_url,
         },
       ],
       loading: false,

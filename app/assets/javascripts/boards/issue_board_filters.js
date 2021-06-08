@@ -23,7 +23,16 @@ export default (apollo, fullPath, boardType) => {
           search: authorsSearchTerm,
         },
       })
-      .then(({ data }) => data.workspace?.assignees.nodes.map((item) => item.user));
+      .then(({ data }) => (
+          /*
+            * we need to filter this is only for graphql when bc we
+            * are putting the current_user on top of the list to avoid duplicates
+          */
+
+          data.workspace?.assignees.nodes
+            .map(({ user }) => user)
+            .filter(({ username }) => username !== gon.current_username)
+      ));
   };
 
   const fetchLabels = (labelSearchTerm) => {
