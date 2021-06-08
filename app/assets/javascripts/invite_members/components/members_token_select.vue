@@ -85,7 +85,7 @@ export default {
       this.hasBeenFocused = true;
     },
   },
-  queryOptions: { exclude_internal: true, active: true },
+  queryOptions: { exclude_internal: true, active: true, exclude_external: true },
   i18n: {
     inviteTextMessage: __('Invite "%{email}" by email'),
   },

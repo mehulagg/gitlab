@@ -8,8 +8,8 @@ import MembersTokenSelect from '~/invite_members/components/members_token_select
 
 const label = 'testgroup';
 const placeholder = 'Search for a member';
-const user1 = { id: 1, name: 'John Smith', username: 'one_1', avatar_url: '' };
-const user2 = { id: 2, name: 'Jane Doe', username: 'two_2', avatar_url: '' };
+const user1 = { id: 1, name: 'John Smith', username: 'one_1', avatar_url: '', external: false };
+const user2 = { id: 2, name: 'Jane Doe', username: 'two_2', avatar_url: '', external: false };
 const allUsers = [user1, user2];
 
 const createComponent = () => {
