@@ -350,18 +350,17 @@ Omnibus:
    ## Enable Redis
    redis['enable'] = true
 
-   ## Disable all other services
+   # Avoid running unnecessary services on the Redis server
+   gitaly['enable'] = false
+   postgresql['enable'] = false
+   puma['enable'] = false
    sidekiq['enable'] = false
    gitlab_workhorse['enable'] = false
-   puma['enable'] = false
-   postgresql['enable'] = false
-   nginx['enable'] = false
    prometheus['enable'] = false
    alertmanager['enable'] = false
-   pgbouncer_exporter['enable'] = false
-   gitlab_exporter['enable'] = false
-   gitaly['enable'] = false
    grafana['enable'] = false
+   gitlab_exporter['enable'] = false
+   nginx['enable'] = false
 
    redis['bind'] = '0.0.0.0'
    redis['port'] = 6379
@@ -461,15 +460,14 @@ To configure the Gitaly server, on the server node you want to use for Gitaly:
    # Avoid running unnecessary services on the Gitaly server
    postgresql['enable'] = false
    redis['enable'] = false
-   nginx['enable'] = false
    puma['enable'] = false
    sidekiq['enable'] = false
    gitlab_workhorse['enable'] = false
-   grafana['enable'] = false
-
-   # If you run a separate monitoring node you can disable these services
-   alertmanager['enable'] = false
    prometheus['enable'] = false
+   alertmanager['enable'] = false
+   grafana['enable'] = false
+   gitlab_exporter['enable'] = false
+   nginx['enable'] = false
 
    # Prevent database migrations from running on upgrade automatically
    gitlab_rails['auto_migrate'] = false
@@ -478,6 +476,9 @@ To configure the Gitaly server, on the server node you want to use for Gitaly:
    # fail. This can be your 'front door' GitLab URL or an internal load
    # balancer.
    gitlab_rails['internal_api_url'] = 'https://gitlab.example.com'
+
+   # Gitaly
+   gitaly['enable'] = true
 
    # Make Gitaly accept connections on all network interfaces. You must use
    # firewalls to restrict access to this address/port.
@@ -666,10 +667,7 @@ On each node perform the following:
    gitlab_rails['monitoring_whitelist'] = ['<MONITOR NODE IP>/32', '127.0.0.0/8']
    nginx['status']['options']['allow'] = ['<MONITOR NODE IP>/32', '127.0.0.0/8']
 
-   #############################
-   ###     Object storage    ###
-   #############################
-
+   # Object Storage
    # This is an example for configuring Object Storage on GCP
    # Replace this config with your chosen Object Storage provider as desired
    gitlab_rails['object_store']['connection'] = {
@@ -684,6 +682,13 @@ On each node perform the following:
    gitlab_rails['object_store']['objects']['packages']['bucket'] = "<gcp-packages-bucket-name>"
    gitlab_rails['object_store']['objects']['dependency_proxy']['bucket'] = "<gcp-dependency-proxy-bucket-name>"
    gitlab_rails['object_store']['objects']['terraform_state']['bucket'] = "<gcp-terraform-state-bucket-name>"
+
+   gitlab_rails['backup_upload_connection'] = {
+     'provider' => 'Google',
+     'google_project' => '<gcp-project-name>',
+     'google_json_key_location' => '<path-to-gcp-service-account-key>'
+   }
+   gitlab_rails['backup_upload_remote_directory'] = "<gcp-backups-state-bucket-name>"
 
    ## Uncomment and edit the following options if you have set up NFS
    ##
@@ -795,19 +800,14 @@ running [Prometheus](../monitoring/prometheus/index.md) and
    grafana['enable'] = true
    grafana['admin_password'] = 'toomanysecrets'
 
-   # Disable all other services
-   alertmanager['enable'] = false
+   # Avoid running unnecessary services on the Prometheus server
    gitaly['enable'] = false
-   gitlab_exporter['enable'] = false
-   gitlab_workhorse['enable'] = false
-   nginx['enable'] = true
-   postgres_exporter['enable'] = false
    postgresql['enable'] = false
    redis['enable'] = false
-   redis_exporter['enable'] = false
-   sidekiq['enable'] = false
    puma['enable'] = false
-   node_exporter['enable'] = false
+   sidekiq['enable'] = false
+   gitlab_workhorse['enable'] = false
+   alertmanager['enable'] = false
    gitlab_exporter['enable'] = false
 
    # Prevent database migrations from running on upgrade automatically

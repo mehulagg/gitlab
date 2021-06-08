@@ -1520,18 +1520,18 @@ To configure the Praefect nodes, on each one:
 1. Edit the `/etc/gitlab/gitlab.rb` file to configure Praefect:
 
    ```ruby
-   # Avoid running unnecessary services on the Gitaly server
+   # Avoid running unnecessary services on the Praefect server
+   gitaly['enable'] = false
    postgresql['enable'] = false
    redis['enable'] = false
-   nginx['enable'] = false
    puma['enable'] = false
    sidekiq['enable'] = false
    gitlab_workhorse['enable'] = false
-   grafana['enable'] = false
-
-   # If you run a separate monitoring node you can disable these services
-   alertmanager['enable'] = false
    prometheus['enable'] = false
+   alertmanager['enable'] = false
+   grafana['enable'] = false
+   gitlab_exporter['enable'] = false
+   nginx['enable'] = false
 
    # Praefect Configuration
    praefect['enable'] = true
@@ -1660,20 +1660,17 @@ On each node:
    storage paths, enable the network listener, and to configure the token:
 
    ```ruby
-   # /etc/gitlab/gitlab.rb
-
    # Avoid running unnecessary services on the Gitaly server
    postgresql['enable'] = false
    redis['enable'] = false
-   nginx['enable'] = false
    puma['enable'] = false
    sidekiq['enable'] = false
    gitlab_workhorse['enable'] = false
-   grafana['enable'] = false
-
-   # If you run a separate monitoring node you can disable these services
-   alertmanager['enable'] = false
    prometheus['enable'] = false
+   alertmanager['enable'] = false
+   grafana['enable'] = false
+   gitlab_exporter['enable'] = false
+   nginx['enable'] = false
 
    # Prevent database migrations from running on upgrade automatically
    gitlab_rails['auto_migrate'] = false
@@ -1682,6 +1679,9 @@ On each node:
    # fail. This can be your 'front door' GitLab URL or an internal load
    # balancer.
    gitlab_rails['internal_api_url'] = 'https://gitlab.example.com'
+
+   # Gitaly 
+   gitaly['enable'] = true
 
    # Make Gitaly accept connections on all network interfaces. You must use
    # firewalls to restrict access to this address/port.
@@ -1832,28 +1832,19 @@ To configure the Sidekiq nodes, on each one:
 1. Open `/etc/gitlab/gitlab.rb` with your editor:
 
    ```ruby
-   ########################################
-   #####        Services Disabled       ###
-   ########################################
-
-   nginx['enable'] = false
-   grafana['enable'] = false
-   prometheus['enable'] = false
-   alertmanager['enable'] = false
+   # Avoid running unnecessary services on the Sidekiq server
    gitaly['enable'] = false
-   gitlab_workhorse['enable'] = false
-   nginx['enable'] = false
-   puma['enable'] = false
-   postgres_exporter['enable'] = false
    postgresql['enable'] = false
    redis['enable'] = false
-   redis_exporter['enable'] = false
+   puma['enable'] = false
+   gitlab_workhorse['enable'] = false
+   prometheus['enable'] = false
+   alertmanager['enable'] = false
+   grafana['enable'] = false
    gitlab_exporter['enable'] = false
+   nginx['enable'] = false
 
-   ########################################
-   ####              Redis              ###
-   ########################################
-
+   # Redis
    ## Redis connection details
    ## First cluster that will host the cache
    gitlab_rails['redis_cache_instance'] = 'redis://:<REDIS_PRIMARY_PASSWORD_OF_FIRST_CLUSTER>@gitlab-redis-cache'
@@ -1885,13 +1876,10 @@ To configure the Sidekiq nodes, on each one:
      {host: '10.6.0.83', port: 26379},
    ]
 
-   #######################################
-   ###              Gitaly             ###
-   #######################################
-
-   # git_data_dirs get configured for the Praefect virtual storage
-   # Address is Internal Load Balancer for Praefect
-   # Token is praefect_external_token
+   # Gitaly Cluster
+   ## git_data_dirs get configured for the Praefect virtual storage
+   ## Address is Internal Load Balancer for Praefect
+   ## Token is praefect_external_token
    git_data_dirs({
      "default" => {
        "gitaly_address" => "tcp://10.6.0.40:2305", # internal load balancer IP
@@ -1899,20 +1887,17 @@ To configure the Sidekiq nodes, on each one:
      }
    })
 
-   #######################################
-   ###            Postgres             ###
-   #######################################
+   # PostgreSQL
    gitlab_rails['db_host'] = '10.6.0.40' # internal load balancer IP
    gitlab_rails['db_port'] = 6432
    gitlab_rails['db_password'] = '<postgresql_user_password>'
    gitlab_rails['db_adapter'] = 'postgresql'
    gitlab_rails['db_encoding'] = 'unicode'
-   # Prevent database migrations from running on upgrade automatically
+   ## Prevent database migrations from running on upgrade automatically
    gitlab_rails['auto_migrate'] = false
 
-   #######################################
-   ###      Sidekiq configuration      ###
-   #######################################
+   # Sidekiq
+   sidekiqp['enable'] = true
    sidekiq['listen_address'] = "0.0.0.0"
 
    # Set number of Sidekiq queue processes to the same number as available CPUs
@@ -1921,9 +1906,7 @@ To configure the Sidekiq nodes, on each one:
    # Set number of Sidekiq threads per queue process to the recommend number of 10
    sidekiq['max_concurrency'] = 10
 
-   #######################################
-   ###     Monitoring configuration    ###
-   #######################################
+   # Monitoring
    consul['enable'] = true
    consul['monitoring_service_discovery'] =  true
 
@@ -1931,18 +1914,15 @@ To configure the Sidekiq nodes, on each one:
       retry_join: %w(10.6.0.11 10.6.0.12 10.6.0.13)
    }
 
-   # Set the network addresses that the exporters will listen on
+   ## Set the network addresses that the exporters will listen on
    node_exporter['listen_address'] = '0.0.0.0:9100'
 
-   # Rails Status for prometheus
+   ## Add the monitoring node's IP address to the monitoring whitelist
    gitlab_rails['monitoring_whitelist'] = ['10.6.0.151/32', '127.0.0.0/8']
 
-   #############################
-   ###     Object storage    ###
-   #############################
-
-   # This is an example for configuring Object Storage on GCP
-   # Replace this config with your chosen Object Storage provider as desired
+   # Object Storage
+   ## This is an example for configuring Object Storage on GCP
+   ## Replace this config with your chosen Object Storage provider as desired
    gitlab_rails['object_store']['connection'] = {
      'provider' => 'Google',
      'google_project' => '<gcp-project-name>',
@@ -1955,6 +1935,13 @@ To configure the Sidekiq nodes, on each one:
    gitlab_rails['object_store']['objects']['packages']['bucket'] = "<gcp-packages-bucket-name>"
    gitlab_rails['object_store']['objects']['dependency_proxy']['bucket'] = "<gcp-dependency-proxy-bucket-name>"
    gitlab_rails['object_store']['objects']['terraform_state']['bucket'] = "<gcp-terraform-state-bucket-name>"
+
+   gitlab_rails['backup_upload_connection'] = {
+     'provider' => 'Google',
+     'google_project' => '<gcp-project-name>',
+     'google_json_key_location' => '<path-to-gcp-service-account-key>'
+   }
+   gitlab_rails['backup_upload_remote_directory'] = "<gcp-backups-state-bucket-name>"
    ```
 
 1. Copy the `/etc/gitlab/gitlab-secrets.json` file from the first Omnibus node you configured and add or replace
@@ -2092,6 +2079,13 @@ On each node perform the following:
    gitlab_rails['object_store']['objects']['packages']['bucket'] = "<gcp-packages-bucket-name>"
    gitlab_rails['object_store']['objects']['dependency_proxy']['bucket'] = "<gcp-dependency-proxy-bucket-name>"
    gitlab_rails['object_store']['objects']['terraform_state']['bucket'] = "<gcp-terraform-state-bucket-name>"
+
+   gitlab_rails['backup_upload_connection'] = {
+     'provider' => 'Google',
+     'google_project' => '<gcp-project-name>',
+     'google_json_key_location' => '<path-to-gcp-service-account-key>'
+   }
+   gitlab_rails['backup_upload_remote_directory'] = "<gcp-backups-state-bucket-name>"
    ```
 
 1. If you're using [Gitaly with TLS support](#gitaly-cluster-tls-support), make sure the
@@ -2236,19 +2230,14 @@ To configure the Monitoring node:
    ```ruby
    external_url 'http://gitlab.example.com'
 
-   # Disable all other services
-   alertmanager['enable'] = false
+   # Avoid running unnecessary services on the Prometheus server
    gitaly['enable'] = false
-   gitlab_exporter['enable'] = false
-   gitlab_workhorse['enable'] = false
-   nginx['enable'] = true
-   postgres_exporter['enable'] = false
    postgresql['enable'] = false
    redis['enable'] = false
-   redis_exporter['enable'] = false
-   sidekiq['enable'] = false
    puma['enable'] = false
-   node_exporter['enable'] = false
+   sidekiq['enable'] = false
+   gitlab_workhorse['enable'] = false
+   alertmanager['enable'] = false
    gitlab_exporter['enable'] = false
 
    # Enable Prometheus
@@ -2410,7 +2399,7 @@ future with further specific cloud provider details.
 
 | Service                                               | Nodes | Configuration           | GCP              | Allocatable CPUs and Memory |
 |-------------------------------------------------------|-------|-------------------------|------------------|-----------------------------|
-| Webservice                                            | 4     | 32 vCPU, 28.8 GB memory | `n1-standard-32` | 127.5 vCPU, 118 GB memory   |
+| Webservice                                            | 4     | 32 vCPU, 28.8 GB memory | `n1-highcpu-32` | 127.5 vCPU, 118 GB memory   |
 | Sidekiq                                               | 4     | 4 vCPU, 15 GB memory    | `n1-standard-4`  | 15.5 vCPU, 50 GB memory     |
 | Supporting services such as NGINX, Prometheus, etc... | 2     | 4 vCPU, 15 GB memory    | `n1-standard-4`  | 7.75 vCPU, 25 GB memory     |
 
