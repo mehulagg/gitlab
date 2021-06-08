@@ -7,6 +7,10 @@ module IncidentManagement
     belongs_to :policy, class_name: 'EscalationPolicy', foreign_key: 'policy_id'
     belongs_to :alert, class_name: 'AlertManagement::Alert', foreign_key: 'alert_id'
 
+    default_value_for :last_notified_at do
+      Time.current
+    end
+
     delegate :project, to: :policy
   end
 end

@@ -17,7 +17,7 @@ RSpec.describe IncidentManagement::Escalations::ProcessService do
 
   let(:escalation) { create(:incident_management_alert_escalation, policy: escalation_policy, alert: alert, **escalation_params) }
   let(:current_time) { Time.current }
-  let(:escalation_params) { { created_at: 10.minutes.before(current_time), updated_at: 10.minutes.before(current_time) } }
+  let(:escalation_params) { { created_at: 10.minutes.before(current_time), last_notified_at: 10.minutes.before(current_time) } }
 
   let(:service) { described_class.new(escalation) }
 
@@ -33,7 +33,7 @@ RSpec.describe IncidentManagement::Escalations::ProcessService do
       it_behaves_like 'does not send on-call notification'
 
       it 'updates the escalation time' do
-        expect { subject }.to change(escalation, :updated_at)
+        expect { subject }.to change(escalation, :last_notified_at)
       end
     end
 
@@ -41,7 +41,7 @@ RSpec.describe IncidentManagement::Escalations::ProcessService do
       it_behaves_like 'sends on-call notification'
 
       it 'updates the escalation time' do
-        expect { subject }.to change(escalation, :updated_at)
+        expect { subject }.to change(escalation, :last_notified_at)
       end
     end
 
@@ -58,7 +58,7 @@ RSpec.describe IncidentManagement::Escalations::ProcessService do
         it_behaves_like 'does not send on-call notification'
 
         it 'does not update the escalation' do
-          expect { subject }.not_to change(escalation, :updated_at)
+          expect { subject }.not_to change(escalation, :last_notified_at)
         end
       end
     end
@@ -67,13 +67,13 @@ RSpec.describe IncidentManagement::Escalations::ProcessService do
       let(:rule) { build(:incident_management_escalation_rule, oncall_schedule: schedule_1, status: IncidentManagement::EscalationRule.statuses[:acknowledged], elapsed_time_seconds: 0) }
       let(:rules) { [rule] }
       let(:escalation_policy) { create(:incident_management_escalation_policy, project: project, rules: rules) }
-      let(:escalation_params) { { created_at: current_time, updated_at: current_time } }
+      let(:escalation_params) { { created_at: current_time, last_notified_at: current_time } }
       let(:users) { schedule_1_users }
 
       it_behaves_like 'it escalates'
 
       context 'rule previously escalated' do
-        let(:escalation_params) { { created_at: current_time, updated_at: 1.second.after(current_time) } }
+        let(:escalation_params) { { created_at: current_time, last_notified_at: 1.second.after(current_time) } }
 
         it_behaves_like 'it does not escalate'
       end
@@ -85,13 +85,13 @@ RSpec.describe IncidentManagement::Escalations::ProcessService do
       let(:escalation_policy) { create(:incident_management_escalation_policy, project: project, rules: [rule_1, rule_2]) }
 
       context 'time between rules' do
-        let(:escalation_params) { { created_at: 7.minutes.before(current_time), updated_at: 1.minute.before(current_time) } }
+        let(:escalation_params) { { created_at: 7.minutes.before(current_time), last_notified_at: 1.minute.before(current_time) } }
 
         it_behaves_like 'it does not escalate'
       end
 
       context 'time past second rule' do
-        let(:escalation_params) { { created_at: rule_2.elapsed_time_seconds.seconds.ago, updated_at: rule_1.elapsed_time_seconds.seconds.ago } }
+        let(:escalation_params) { { created_at: rule_2.elapsed_time_seconds.seconds.ago, last_notified_at: rule_1.elapsed_time_seconds.seconds.ago } }
         let(:users) { schedule_1_users + schedule_2_users }
 
         it 'escalates both escalation rules' do
@@ -127,13 +127,13 @@ RSpec.describe IncidentManagement::Escalations::ProcessService do
       end
 
       context 'not enough time elapsed' do
-        let(:escalation_params) { { created_at: current_time, updated_at: current_time } }
+        let(:escalation_params) { { created_at: current_time, last_notified_at: current_time } }
 
         it_behaves_like 'it does not escalate'
       end
 
       context 'rule previously escalated' do
-        let(:escalation_params) { { created_at: 10.minutes.after(current_time), updated_at: 10.minutes.after(current_time) } }
+        let(:escalation_params) { { created_at: 10.minutes.after(current_time), last_notified_at: 10.minutes.after(current_time) } }
 
         it_behaves_like 'it does not escalate'
       end

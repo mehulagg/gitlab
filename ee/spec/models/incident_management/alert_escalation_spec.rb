@@ -13,4 +13,14 @@ RSpec.describe IncidentManagement::AlertEscalation do
   end
 
   it { is_expected.to delegate_method(:project).to(:policy) }
+
+  describe '#last_notified_at' do
+    subject { described_class.new.last_notified_at }
+
+    around do |example|
+      freeze_time { example.run }
+    end
+
+    it { is_expected.to be_like_time(Time.current) }
+  end
 end
