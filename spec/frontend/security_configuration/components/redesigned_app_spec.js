@@ -36,6 +36,8 @@ describe('redesigned App component', () => {
   const findTabs = () => wrapper.findAllComponents(GlTab);
   const findByTestId = (id) => wrapper.findByTestId(id);
   const findFeatureCards = () => wrapper.findAllComponents(FeatureCard);
+  const findComplianceViewHistoryLink = () => findByTestId('compliance-view-history-link');
+  const findSecurityViewHistoryLink = () => findByTestId('security-view-history-link');
 
   const securityFeaturesMock = [
     {
@@ -104,9 +106,9 @@ describe('redesigned App component', () => {
       expect(findByTestId('latest-pipeline-info').exists()).toBe(false);
     });
 
-    it('it should not show configuration History Link when gitlabCiPresent & gitlabCiHistoryPath are not defined', () => {
-      expect(findByTestId('compliance-view-history-link').exists()).toBe(false);
-      expect(findByTestId('security-view-history-link').exists()).toBe(false);
+    it('should not show configuration History Link when gitlabCiPresent & gitlabCiHistoryPath are not defined', () => {
+      expect(findComplianceViewHistoryLink().exists()).toBe(false);
+      expect(findSecurityViewHistoryLink().exists()).toBe(false);
     });
   });
 
@@ -140,7 +142,7 @@ describe('redesigned App component', () => {
     });
   });
 
-  describe('when given gitlabCiPresent & gitlabCiHistoryPath props', () => {
+  describe('given gitlabCiPresent & gitlabCiHistoryPath props', () => {
     beforeEach(() => {
       createComponent({
         augmentedSecurityFeatures: securityFeaturesMock,
@@ -150,15 +152,12 @@ describe('redesigned App component', () => {
       });
     });
 
-    it('it should show configuration History Link', () => {
-      const complianceViewHistoryLink = findByTestId('compliance-view-history-link');
-      const securityViewHistoryLink = findByTestId('security-view-history-link');
+    it('should show configuration History Link', () => {
+      expect(findComplianceViewHistoryLink().exists()).toBe(true);
+      expect(findSecurityViewHistoryLink().exists()).toBe(true);
 
-      expect(complianceViewHistoryLink.exists()).toBe(true);
-      expect(securityViewHistoryLink.exists()).toBe(true);
-
-      expect(complianceViewHistoryLink.attributes('href')).toBe('test/historyPath');
-      expect(securityViewHistoryLink.attributes('href')).toBe('test/historyPath');
+      expect(findComplianceViewHistoryLink().attributes('href')).toBe('test/historyPath');
+      expect(findSecurityViewHistoryLink().attributes('href')).toBe('test/historyPath');
     });
   });
 });

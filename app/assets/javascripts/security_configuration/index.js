@@ -23,6 +23,7 @@ export const initStaticSecurityConfiguration = (el) => {
     features,
     latestPipelinePath,
     gitlabCiHistoryPath,
+    gitlabCiPresent,
   } = el.dataset;
 
   if (gon.features.securityConfigurationRedesign) {
@@ -46,6 +47,7 @@ export const initStaticSecurityConfiguration = (el) => {
             augmentedSecurityFeatures,
             latestPipelinePath,
             gitlabCiHistoryPath,
+            gitlabCiPresent,
           },
         });
       },
