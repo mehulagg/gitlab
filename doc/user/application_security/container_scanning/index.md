@@ -102,7 +102,7 @@ that you can download and analyze later. When downloading, you always receive th
 artifact.
 
 The following is a sample `.gitlab-ci.yml` that builds your Docker image, pushes it to the container
-registry, and scans the containers:
+registry, and scans the image:
 
 ```yaml
 build:
