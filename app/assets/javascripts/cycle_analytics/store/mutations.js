@@ -1,12 +1,14 @@
+import { convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
 import { decorateData, decorateEvents, formatMedianValues } from '../utils';
 import * as types from './mutation_types';
 
 export default {
-  [types.INITIALIZE_VSA](state, { requestPath }) {
+  [types.INITIALIZE_VSA](state, { requestPath, fullPath }) {
     state.requestPath = requestPath;
+    state.fullPath = fullPath;
   },
   [types.SET_SELECTED_VALUE_STREAM](state, selectedValueStream = {}) {
-    state.selectedValueStream = selectedValueStream;
+    state.selectedValueStream = convertObjectPropsToCamelCase(selectedValueStream, { deep: true });
   },
   [types.SET_SELECTED_STAGE](state, stage) {
     state.isLoadingStage = true;
@@ -25,7 +27,16 @@ export default {
   [types.RECEIVE_VALUE_STREAMS_ERROR](state) {
     state.valueStreams = [];
   },
-  [types.REQUEST_VALUE_STREAMS](state) {
+  [types.REQUEST_VALUE_STREAM_STAGES](state) {
+    state.stages = [];
+  },
+  [types.RECEIVE_VALUE_STREAM_STAGES_SUCCESS](state, stages = {}) {
+    state.stages = stages;
+  },
+  [types.RECEIVE_VALUE_STREAM_STAGES_ERROR](state) {
+    state.stages = {};
+  },
+  [types.REQUEST_CYCLE_ANALYTICS_DATA](state) {
     state.isLoading = true;
     state.stages = [];
     state.hasError = false;

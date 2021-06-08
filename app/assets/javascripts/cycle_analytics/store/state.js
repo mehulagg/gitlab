@@ -3,6 +3,7 @@ import { DEFAULT_DAYS_TO_DISPLAY } from '../constants';
 
 export default () => ({
   requestPath: '',
+  fullPath: '',
   startDate: DEFAULT_DAYS_TO_DISPLAY,
   stages: [],
   summary: [],

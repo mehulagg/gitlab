@@ -2,11 +2,11 @@ import axios from '~/lib/utils/axios_utils';
 import { buildApiUrl } from './api_utils';
 
 const PROJECT_VSA_PATH_BASE = '/:project_path/-/analytics/value_stream_analytics/value_streams';
-const PROJECT_VSA_PATH = `${PROJECT_VSA_PATH_BASE}/:value_stream_id`;
+const PROJECT_VSA_STAGES_PATH = `${PROJECT_VSA_PATH_BASE}/:value_stream_id/stages`;
 
 const buildProjectValueStreamPath = (projectPath, valueStreamId = null) => {
   if (valueStreamId) {
-    return buildApiUrl(PROJECT_VSA_PATH)
+    return buildApiUrl(PROJECT_VSA_STAGES_PATH)
       .replace(':project_path', projectPath)
       .replace(':value_stream_id', valueStreamId);
   }
@@ -19,7 +19,7 @@ export const getProjectValueStreams = (projectPath) => {
 };
 
 // TODO: handle filter params?
-export const getProjectValueStreamData = (projectPath, valueStreamId) => {
+export const getProjectValueStreamStages = (projectPath, valueStreamId) => {
   const url = buildProjectValueStreamPath(projectPath, valueStreamId);
   return axios.get(url);
 };

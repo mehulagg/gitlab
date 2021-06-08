@@ -1,8 +1,8 @@
-import { getProjectValueStreamData, getProjectValueStreams } from '~/api/analytics_api';
+import { getProjectValueStreamStages, getProjectValueStreams } from '~/api/analytics_api';
 import createFlash from '~/flash';
 import axios from '~/lib/utils/axios_utils';
 import { __ } from '~/locale';
-import { DEFAULT_DAYS_TO_DISPLAY } from '../constants';
+import { DEFAULT_DAYS_TO_DISPLAY, DEFAULT_VALUE_STREAM } from '../constants';
 import * as types from './mutation_types';
 
 export const setSelectedValueStream = ({ commit, dispatch }, valueStream) => {
@@ -10,43 +10,38 @@ export const setSelectedValueStream = ({ commit, dispatch }, valueStream) => {
   return dispatch('fetchValueStreamData');
 };
 
-export const fetchValueStreamData = ({ commit, dispatch, getters, state }) => {
-  const { requestPath, selectedValueStream } = state;
+export const fetchValueStreamStages = ({ commit, dispatch, state }) => {
+  const { fullPath, selectedValueStream } = state;
   commit(types.REQUEST_VALUE_STREAMS);
 
-  return getProjectValueStreamData(requestPath, selectedValueStream.id)
-    .then(({ data }) => dispatch('receiveValueStreamDataSuccess', data))
+  return getProjectValueStreamStages(fullPath, selectedValueStream.id)
+    .then(({ data }) => commit(types.RECEIVE_VALUE_STREAM_STAGES_SUCCESS, data))
     .catch((error) => {
       const {
         response: { status },
       } = error;
-      commit(types.RECEIVE_VALUE_STREAM_DATA_ERROR, status);
+      commit(types.RECEIVE_VALUE_STREAM_STAGES_ERROR, status);
       throw error;
     });
 };
 
-export const receiveValueStreamsSuccess = (
-  { state: { selectedValueStream = null }, commit, dispatch },
-  data = [],
-) => {
+export const receiveValueStreamsSuccess = ({ commit, dispatch }, data = []) => {
   commit(types.RECEIVE_VALUE_STREAMS_SUCCESS, data);
 
-  if (!selectedValueStream && data.length) {
+  if (data.length) {
     const [firstStream] = data;
     return dispatch('setSelectedValueStream', firstStream);
   }
-
-  return Promise.resolve();
-  // .then(() => dispatch(types.FETCH_VALUE_STREAM_DATA))
+  return dispatch('setSelectedValueStream', DEFAULT_VALUE_STREAM);
 };
 
 // TODO: add getters for common request params
 // TODO: calculate date range from that
 export const fetchValueStreams = ({ commit, dispatch, state }) => {
-  const { requestPath } = state;
+  const { fullPath } = state;
   commit(types.REQUEST_VALUE_STREAMS);
 
-  return getProjectValueStreams(requestPath)
+  return getProjectValueStreams(fullPath)
     .then(({ data }) => dispatch('receiveValueStreamsSuccess', data))
     .catch((error) => {
       const {
@@ -107,6 +102,5 @@ export const setDateRange = ({ commit }, { startDate = DEFAULT_DAYS_TO_DISPLAY }
 
 export const initializeVsa = ({ commit, dispatch }, initialData = {}) => {
   commit(types.INITIALIZE_VSA, initialData);
-  dispatch('fetchValueStreams');
-  return dispatch('fetchCycleAnalyticsData');
+  return Promise.all([dispatch('fetchCycleAnalyticsData'), dispatch('fetchValueStreams')]);
 };
