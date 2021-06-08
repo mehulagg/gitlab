@@ -778,5 +778,55 @@ describe('Dashboard Panel', () => {
         expect(findRunbookLinks().at(0).attributes('href')).toBe(invalidUrl);
       });
     });
+
+    describe.only('managed alert deprecation feature flag', () => {
+      beforeEach(() => {
+        setMetricsSavedToDb([metricId]);
+
+        // ${'with permission and related metrics in db'}    | ${[graphData.metrics[0].metricId]} | ${{}}                                   | ${true}
+      });
+
+      // beforeEach(() => {
+      //   setMetricsSavedToDb(metricsSavedToDb);
+      //   createWrapper({
+      //     alertsEndpoint: '/endpoint',
+      //     prometheusAlertsAvailable: true,
+      //     ...props,
+      //   });
+      //   return wrapper.vm.$nextTick();
+      // });
+
+      // it(`${showsDesc} alert widget`, () => {
+      //   expect(findAlertsWidget().exists()).toBe(isShown);
+      // });
+
+      // it(`${showsDesc} alert configuration`, () => {
+      //   expect(findMenuItemByText('Alerts').exists()).toBe(isShown);
+      // });
+
+      it('shows alerts when alerts are not deprecated', async () => {
+        createWrapper(
+          { alertsEndpoint: '/endpoint', prometheusAlertsAvailable: true },
+          { provide: { glFeatures: { managedAlertsDeprecation: false } } },
+        );
+
+        await wrapper.vm.$nextTick();
+
+        expect(findAlertsWidget().exists()).toBe(true);
+        expect(findMenuItemByText('Alerts').exists()).toBe(true);
+      });
+
+      it('hides alerts when alerts are deprecated', async () => {
+        createWrapper(
+          { alertsEndpoint: '/endpoint', prometheusAlertsAvailable: true },
+          { provide: { managedAlertsDeprecation: true } },
+        );
+
+        await wrapper.vm.$nextTick();
+
+        expect(findAlertsWidget().exists()).toBe(false);
+        expect(findMenuItemByText('Alerts').exists()).toBe(false);
+      });
+    });
   });
 });
