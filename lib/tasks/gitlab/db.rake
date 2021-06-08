@@ -283,5 +283,61 @@ namespace :gitlab do
     Rake::Task['db:migrate'].enhance do
       Rake::Task['gitlab:db:execute_batched_migrations'].invoke if Rails.env.development?
     end
+
+    # Database documentation tasks
+
+    DOCUMENTATION_PATH = File.join(Rails.root, 'db', 'docs', 'tables')
+
+    desc 'Generate missing database docs yaml'
+    task generate_docs_yaml: :environment do
+      template = ERB.new(File.read(File.join(DOCUMENTATION_PATH, '.template.yml.erb')))
+
+      ActiveRecord::Base.connection.tables.each do |tablename|
+        file = File.join(DOCUMENTATION_PATH, "#{tablename}.yml")
+
+        unless File.exist?(file)
+          File.open(file, 'wb+') do |io|
+            io << template.result(binding)
+          end
+        end
+      end
+    end
+
+    desc 'Populate table comments with database documentation'
+    task populate_table_comments: :environment do
+      connection = ActiveRecord::Base.connection
+
+      Dir.glob("#{DOCUMENTATION_PATH}/*.yml").each do |file|
+        meta = OpenStruct.new(YAML.load_file(file)) # rubocop: disable Performance/OpenStruct
+
+        next unless meta.group || meta.description
+
+        comment = [meta.description, "[owned by #{meta.group || '(none)'}]"].compact.join(' ')
+
+        connection.execute("COMMENT ON TABLE #{connection.quote_table_name(meta.tablename)} IS #{connection.quote(comment)}")
+      end
+    end
+
+    Rake::Task['db:structure:dump'].enhance do
+      Rake::Task['gitlab:db:generate_docs_yaml'].invoke
+    end
+
+    # Rails 6.1 deprecates db:structure:dump in favor of db:schema:dump
+    Rake::Task['db:schema:dump'].enhance do
+      Rake::Task['gitlab:db:generate_docs_yaml'].invoke
+    end
+
+    Rake::Task['db:migrate'].enhance do
+      Rake::Task['gitlab:db:populate_table_comments'].invoke
+    end
+
+    Rake::Task['db:structure:load'].enhance do
+      Rake::Task['gitlab:db:populate_table_comments'].invoke
+    end
+
+    # Rails 6.1 deprecates db:structure:load in favor of db:schema:load
+    Rake::Task['db:schema:load'].enhance do
+      Rake::Task['gitlab:db:populate_table_comments'].invoke
+    end
   end
 end
