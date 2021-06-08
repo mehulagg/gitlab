@@ -8,6 +8,7 @@ import {
 import { BoardType } from '~/boards/constants';
 import eventHub from '~/boards/eventhub';
 import listsIssuesQuery from '~/boards/graphql/lists_issues.query.graphql';
+import projectBoardAssigneesQuery from '~/boards/graphql/project_board_assignees.query.graphql';
 import actionsCE, { gqlClient } from '~/boards/stores/actions';
 import boardsStore from '~/boards/stores/boards_store';
 import * as typesCE from '~/boards/stores/mutation_types';
@@ -36,7 +37,6 @@ import groupBoardMilestonesQuery from '../graphql/group_board_milestones.query.g
 import issueSetWeightMutation from '../graphql/issue_set_weight.mutation.graphql';
 import listUpdateLimitMetricsMutation from '../graphql/list_update_limit_metrics.mutation.graphql';
 import listsEpicsQuery from '../graphql/lists_epics.query.graphql';
-import projectBoardAssigneesQuery from '../graphql/project_board_assignees.query.graphql';
 import projectBoardIterationsQuery from '../graphql/project_board_iterations.query.graphql';
 import projectBoardMilestonesQuery from '../graphql/project_board_milestones.query.graphql';
 import updateBoardEpicUserPreferencesMutation from '../graphql/update_board_epic_user_preferences.mutation.graphql';
