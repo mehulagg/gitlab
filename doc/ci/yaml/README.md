@@ -1113,205 +1113,26 @@ Use `rules` to include or exclude jobs in pipelines.
 
 Rules are evaluated *in order* until the first match. When a match is found, the job
 is either included or excluded from the pipeline, depending on the configuration.
-The job can also have [certain attributes](#rules-attributes)
-added to it.
+The rule can also have [certain attributes](#rules-attributes) added to it.
 
 `rules` replaces [`only/except`](#only--except) and they can't be used together
 in the same job. If you configure one job to use both keywords, the linter returns a
 `key may not be used with rules` error.
 
-#### Rules attributes
+`rules` accepts an array of any number rules defined with the following keywords:
 
-The job attributes you can use with `rules` are:
+- `if`
+- `changes`
+- `exists`
 
-- [`when`](#when): If not defined, defaults to `when: on_success`.
-  - If used as `when: delayed`, `start_in` is also required.
-- [`allow_failure`](#allow_failure): If not defined, defaults to `allow_failure: false`.
-- [`variables`](#rulesvariables): If not defined, uses the [variables defined elsewhere](#variables).
+You can combine these rules with the `when`, `allow_failure`, or `variables` keywords.
+When one of the rules matches, the keyword... **TODO**
 
-If a rule evaluates to true, and `when` has any value except `never`, the job is included in the pipeline.
+A rule without any conditional clause, such as a `when` or `allow_failure`
+rule without `if` or `changes`, always matches, and is always used if reached.
 
-For example:
-
-```yaml
-docker build:
-  script: docker build -t my-image:$CI_COMMIT_REF_SLUG .
-  rules:
-    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
-      when: delayed
-      start_in: '3 hours'
-      allow_failure: true
-```
-
-#### Rules clauses
-
-Available rule clauses are:
-
-| Clause                     | Description                                                                                                                        |
-|----------------------------|------------------------------------------------------------------------------------------------------------------------------------|
-| [`if`](#rulesif)           | Add or exclude jobs from a pipeline by evaluating an `if` statement. Similar to [`only:variables`](#onlyvariables--exceptvariables). |
-| [`changes`](#ruleschanges) | Add or exclude jobs from a pipeline based on what files are changed. Same as [`only:changes`](#onlychanges--exceptchanges).          |
-| [`exists`](#rulesexists)   | Add or exclude jobs from a pipeline based on the presence of specific files.                                                       |
-
-Rules are evaluated in order until a match is found. If a match is found, the attributes
-are checked to see if the job should be added to the pipeline. If no attributes are defined,
-the defaults are:
-
-- `when: on_success`
-- `allow_failure: false`
-
-The job is added to the pipeline:
-
-- If a rule matches and has `when: on_success`, `when: delayed` or `when: always`.
-- If no rules match, but the last clause is `when: on_success`, `when: delayed`
-  or `when: always` (with no rule).
-
-The job is not added to the pipeline:
-
-- If no rules match, and there is no standalone `when: on_success`, `when: delayed` or
-  `when: always`.
-- If a rule matches, and has `when: never` as the attribute.
-
-The following example uses `if` to strictly limit when jobs run:
-
-```yaml
-job:
-  script: echo "Hello, Rules!"
-  rules:
-    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
-      when: manual
-      allow_failure: true
-    - if: '$CI_PIPELINE_SOURCE == "schedule"'
-```
-
-- If the pipeline is for a merge request, the first rule matches, and the job
-  is added to the [merge request pipeline](../merge_request_pipelines/index.md)
-  with attributes of:
-  - `when: manual` (manual job)
-  - `allow_failure: true` (the pipeline continues running even if the manual job is not run)
-- If the pipeline is **not** for a merge request, the first rule doesn't match, and the
-  second rule is evaluated.
-- If the pipeline is a scheduled pipeline, the second rule matches, and the job
-  is added to the scheduled pipeline. No attributes were defined, so it is added
-  with:
-  - `when: on_success` (default)
-  - `allow_failure: false` (default)
-- In **all other cases**, no rules match, so the job is **not** added to any other pipeline.
-
-Alternatively, you can define a set of rules to exclude jobs in a few cases, but
-run them in all other cases:
-
-```yaml
-job:
-  script: echo "Hello, Rules!"
-  rules:
-    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
-      when: never
-    - if: '$CI_PIPELINE_SOURCE == "schedule"'
-      when: never
-    - when: on_success
-```
-
-- If the pipeline is for a merge request, the job is **not** added to the pipeline.
-- If the pipeline is a scheduled pipeline, the job is **not** added to the pipeline.
-- In **all other cases**, the job is added to the pipeline, with `when: on_success`.
-
-WARNING:
-If you use a `when:` clause as the final rule (not including `when: never`), two
-simultaneous pipelines may start. Both push pipelines and merge request pipelines can
-be triggered by the same event (a push to the source branch for an open merge request).
-See how to [prevent duplicate pipelines](#avoid-duplicate-pipelines)
-for more details.
-
-#### Avoid duplicate pipelines
-
-If a job uses `rules`, a single action, like pushing a commit to a branch, can trigger
-multiple pipelines. You don't have to explicitly configure rules for multiple types
-of pipeline to trigger them accidentally.
-
-Some configurations that have the potential to cause duplicate pipelines cause a
-[pipeline warning](../troubleshooting.md#pipeline-warnings) to be displayed.
-[Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/219431) in GitLab 13.3.
-
-For example:
-
-```yaml
-job:
-  script: echo "This job creates double pipelines!"
-  rules:
-    - if: '$CUSTOM_VARIABLE == "false"'
-      when: never
-    - when: always
-```
-
-This job does not run when `$CUSTOM_VARIABLE` is false, but it *does* run in **all**
-other pipelines, including **both** push (branch) and merge request pipelines. With
-this configuration, every push to an open merge request's source branch
-causes duplicated pipelines.
-
-To avoid duplicate pipelines, you can:
-
-- Use the `CI_OPEN_MERGE_REQUESTS` CI/CD variable in [`workflow:rules`](#workflow) to
-  [switch between branch and merge request pipelines](#switch-between-branch-pipelines-and-merge-request-pipelines)
-  without duplication. You can also use this variable in individual job rules.
-- Use [`workflow`](#workflow) to specify that only branch pipelines or only merge request
-  pipelines should run.
-- Rewrite the rules to run the job only in very specific cases,
-  and avoid a final `when:` rule:
-
-  ```yaml
-  job:
-    script: echo "This job does NOT create double pipelines!"
-    rules:
-      - if: '$CUSTOM_VARIABLE == "true" && $CI_PIPELINE_SOURCE == "merge_request_event"'
-  ```
-
-You can also avoid duplicate pipelines by changing the job rules to avoid either push (branch)
-pipelines or merge request pipelines. However, if you use a `- when: always` rule without
-`workflow: rules`, GitLab still displays a [pipeline warning](../troubleshooting.md#pipeline-warnings).
-
-For example, the following does not trigger double pipelines, but is not recommended
-without `workflow: rules`:
-
-```yaml
-job:
-  script: echo "This job does NOT create double pipelines!"
-  rules:
-    - if: '$CI_PIPELINE_SOURCE == "push"'
-      when: never
-    - when: always
-```
-
-You should not include both push and merge request pipelines in the same job without
-[`workflow:rules` that prevent duplicate pipelines](#switch-between-branch-pipelines-and-merge-request-pipelines):
-
-```yaml
-job:
-  script: echo "This job creates double pipelines!"
-  rules:
-    - if: '$CI_PIPELINE_SOURCE == "push"'
-    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
-```
-
-Also, do not mix `only/except` jobs with `rules` jobs in the same pipeline.
-It may not cause YAML errors, but the different default behaviors of `only/except`
-and `rules` can cause issues that are difficult to troubleshoot:
-
-```yaml
-job-with-no-rules:
-  script: echo "This job runs in branch pipelines."
-
-job-with-rules:
-  script: echo "This job runs in merge request pipelines."
-  rules:
-    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
-```
-
-For every change pushed to the branch, duplicate pipelines run. One
-branch pipeline runs a single job (`job-with-no-rules`), and one merge request pipeline
-runs the other job (`job-with-rules`). Jobs with no rules default
-to [`except: merge_requests`](#only--except), so `job-with-no-rules`
-runs in all cases except merge requests.
+If none of the provided rules match, the job is set to `when: never` and is
+not included in the pipeline.
 
 #### `rules:if`
 
@@ -1321,110 +1142,55 @@ Use `rules:if` clauses to specify when to add a job to a pipeline:
 - If an `if` statement is true, but it's combined with `when: never`, do not add the job to the pipeline.
 - If no `if` statements are true, do not add the job to the pipeline.
 
-`rules:if` differs slightly from `only:variables` by accepting only a single
-expression string per rule, rather than an array of them. Any set of expressions to be
-evaluated can be [conjoined into a single expression](../variables/README.md#conjunction--disjunction)
-by using `&&` or `||`, and the [variable matching operators (`==`, `!=`, `=~` and `!~`)](../variables/README.md#syntax-of-cicd-variable-expressions).
-
-Unlike variables in [`script`](../variables/README.md#use-cicd-variables-in-job-scripts)
-sections, variables in rules expressions are always formatted as `$VARIABLE`.
-
 `if:` clauses are evaluated based on the values of [predefined CI/CD variables](../variables/predefined_variables.md)
 or [custom CI/CD variables](../variables/README.md#custom-cicd-variables).
 
-For example:
+**Keyword type**: Job-specific and pipeline-specific. You can use it as part of a job
+to configure the job behavior, or with [`workflow`](#workflow) to configure the pipeline behavior.
+
+**Possible inputs**: A variable expression. Expressions can use [variable matching operators (`==`, `!=`, `=~` and `!~`)](../variables/README.md#syntax-of-cicd-variable-expressions).
+Multiple expressions can be [conjoined into a single expression](../variables/README.md#conjunction--disjunction)
+by using `&&` or `||`.
+
+**Example of `rules:if`**:
 
 ```yaml
 job:
   script: echo "Hello, Rules!"
   rules:
-    - if: '$CI_MERGE_REQUEST_SOURCE_BRANCH_NAME =~ /^feature/ && $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == $CI_DEFAULT_BRANCH'
-      when: always
+    - if: '$CI_MERGE_REQUEST_SOURCE_BRANCH_NAME =~ /^feature/ && $CI_MERGE_REQUEST_TARGET_BRANCH_NAME != $CI_DEFAULT_BRANCH'
+      when: never
     - if: '$CI_MERGE_REQUEST_SOURCE_BRANCH_NAME =~ /^feature/'
       when: manual
       allow_failure: true
     - if: '$CI_MERGE_REQUEST_SOURCE_BRANCH_NAME'  # Checking for the presence of a variable is possible
 ```
 
-Some details regarding the logic that determines the `when` for the job:
+**Additional details**:
 
-- If none of the provided rules match, the job is set to `when: never` and is
-  not included in the pipeline.
-- A rule without any conditional clause, such as a `when` or `allow_failure`
-  rule without `if` or `changes`, always matches, and is always used if reached.
 - If a rule matches and has no `when` defined, the rule uses the `when`
   defined for the job, which defaults to `on_success` if not defined.
 - You can define `when` once per rule, or once at the job-level, which applies to
   all rules. You can't mix `when` at the job-level with `when` in rules.
+- Unlike variables in [`script`](../variables/README.md#use-cicd-variables-in-job-scripts)
+  sections, variables in rules expressions are always formatted as `$VARIABLE`.
 
-##### Common `if` clauses for `rules`
+**Related topics**:
 
-For behavior similar to the [`only`/`except` keywords](#only--except), you can
-check the value of the `$CI_PIPELINE_SOURCE` variable:
-
-| Value                         | Description                                                                                                                                                                                                                      |
-|-------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `api`                         | For pipelines triggered by the [pipelines API](../../api/pipelines.md#create-a-new-pipeline).                                                                                                                                    |
-| `chat`                        | For pipelines created by using a [GitLab ChatOps](../chatops/index.md) command.                                                                                                                                                 |
-| `external`                    | When you use CI services other than GitLab.                                                                                                                                                                                        |
-| `external_pull_request_event` | When an external pull request on GitHub is created or updated. See [Pipelines for external pull requests](../ci_cd_for_external_repos/index.md#pipelines-for-external-pull-requests).                                            |
-| `merge_request_event`         | For pipelines created when a merge request is created or updated. Required to enable [merge request pipelines](../merge_request_pipelines/index.md), [merged results pipelines](../merge_request_pipelines/pipelines_for_merged_results/index.md), and [merge trains](../merge_request_pipelines/pipelines_for_merged_results/merge_trains/index.md). |
-| `parent_pipeline`             | For pipelines triggered by a [parent/child pipeline](../parent_child_pipelines.md) with `rules`. Use this pipeline source in the child pipeline configuration so that it can be triggered by the parent pipeline.                |
-| `pipeline`                    | For [multi-project pipelines](../multi_project_pipelines.md) created by [using the API with `CI_JOB_TOKEN`](../multi_project_pipelines.md#triggering-multi-project-pipelines-through-api), or the [`trigger`](#trigger) keyword. |
-| `push`                        | For pipelines triggered by a `git push` event, including for branches and tags.                                                                                                                                                  |
-| `schedule`                    | For [scheduled pipelines](../pipelines/schedules.md).                                                                                                                                                                            |
-| `trigger`                     | For pipelines created by using a [trigger token](../triggers/README.md#trigger-token).                                                                                                                                           |
-| `web`                         | For pipelines created by using **Run pipeline** button in the GitLab UI, from the project's **CI/CD > Pipelines** section.                                                                                                       |
-| `webide`                      | For pipelines created by using the [WebIDE](../../user/project/web_ide/index.md).                                                                                                                                                |
-
-The following example runs the job as a manual job in scheduled pipelines or in push
-pipelines (to branches or tags), with `when: on_success` (default). It does not
-add the job to any other pipeline type.
-
-```yaml
-job:
-  script: echo "Hello, Rules!"
-  rules:
-    - if: '$CI_PIPELINE_SOURCE == "schedule"'
-      when: manual
-      allow_failure: true
-    - if: '$CI_PIPELINE_SOURCE == "push"'
-```
-
-The following example runs the job as a `when: on_success` job in [merge request pipelines](../merge_request_pipelines/index.md)
-and scheduled pipelines. It does not run in any other pipeline type.
-
-```yaml
-job:
-  script: echo "Hello, Rules!"
-  rules:
-    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
-    - if: '$CI_PIPELINE_SOURCE == "schedule"'
-```
-
-Other commonly used variables for `if` clauses:
-
-- `if: $CI_COMMIT_TAG`: If changes are pushed for a tag.
-- `if: $CI_COMMIT_BRANCH`: If changes are pushed to any branch.
-- `if: '$CI_COMMIT_BRANCH == "main"'`: If changes are pushed to `main`.
-- `if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'`: If changes are pushed to the default
-  branch. Use when you want to have the same configuration in multiple
-  projects with different default branches.
-- `if: '$CI_COMMIT_BRANCH =~ /regex-expression/'`: If the commit branch matches a regular expression.
-- `if: '$CUSTOM_VARIABLE !~ /regex-expression/'`: If the [custom variable](../variables/README.md#custom-cicd-variables)
-  `CUSTOM_VARIABLE` does **not** match a regular expression.
-- `if: '$CUSTOM_VARIABLE == "value1"'`: If the custom variable `CUSTOM_VARIABLE` is
-  exactly `value1`.
+- [Common `if` expressions for `rules`](../jobs/job_control.md#common-if-clauses-for-rules)
+- [Avoid duplicate pipelines](../jobs/job_control.md#avoid-duplicate-pipelines)
 
 #### `rules:changes`
 
-Use `rules:changes` to specify when to add a job to a pipeline by checking for
-changes to specific files.
+Use `rules:changes` to specify when to add a job to a pipeline by checking for changes
+to specific files. You should use `rules: changes` only with branch pipelines or
+merge request pipelines.
 
-`rules: changes` works the same way as [`only: changes` and `except: changes`](#onlychanges--exceptchanges).
-It accepts an array of paths. You should use `rules: changes` only with branch
-pipelines or merge request pipelines. For example, it's common to use `rules: changes`
-with merge request pipelines:
+**Possible inputs**:
+
+- An array of file paths. In GitLab 13.6 and later, [file paths can include variables](../jobs/job_control.md#variables-in-ruleschanges).
+
+**Example of `rules:changes`**:
 
 ```yaml
 docker build:
@@ -1437,23 +1203,14 @@ docker build:
       allow_failure: true
 ```
 
-In this example:
-
 - If the pipeline is a merge request pipeline, check `Dockerfile` for changes.
 - If `Dockerfile` has changed, add the job to the pipeline as a manual job, and the pipeline
   continues running even if the job is not triggered (`allow_failure: true`).
 - If `Dockerfile` has not changed, do not add job to any pipeline (same as `when: never`).
 
-To use `rules: changes` with branch pipelines instead of merge request pipelines,
-change the `if:` clause in the previous example to:
+**Additional details**:
 
-```yaml
-rules:
-  - if: $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH
-```
-
-To implement a rule similar to [`except:changes`](#onlychanges--exceptchanges),
-use `when: never`.
+- `rules: changes` works the same way as [`only: changes` and `except: changes`](#onlychanges--exceptchanges).
 
 WARNING:
 You can use `rules: changes` with other pipeline types, but it is not recommended
@@ -1462,36 +1219,18 @@ Tag pipelines, scheduled pipelines, and so on do **not** have a Git `push` event
 associated with them. A `rules: changes` job is **always** added to those pipeline
 if there is no `if:` statement that limits the job to branch or merge request pipelines.
 
-##### Variables in `rules:changes`
-
-> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/34272) in GitLab 13.6.
-> - [Feature flag removed](https://gitlab.com/gitlab-org/gitlab/-/issues/267192) in GitLab 13.7.
-
-You can use CI/CD variables in `rules:changes` expressions to determine when
-to add jobs to a pipeline:
-
-```yaml
-docker build:
-  variables:
-    DOCKERFILES_DIR: 'path/to/files/'
-  script: docker build -t my-image:$CI_COMMIT_REF_SLUG .
-  rules:
-    - changes:
-        - $DOCKERFILES_DIR/*
-```
-
-You can use the `$` character for both variables and paths. For example, if the
-`$DOCKERFILES_DIR` variable exists, its value is used. If it does not exist, the
-`$` is interpreted as being part of a path.
-
 #### `rules:exists`
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/24021) in GitLab 12.4.
 
 Use `exists` to run a job when certain files exist in the repository.
-You can use an array of paths.
 
-In the following example, `job` runs if a `Dockerfile` exists anywhere in the repository:
+**Possible inputs**:
+
+- An array of file paths. Paths are relative to the project directory (`$CI_PROJECT_DIR`)
+  and can't directly link outside it. File paths can use [glob patterns](../jobs/job_control#use-rulesexists-with-glob-patterns)
+
+**Example of `rules:exists`**:
 
 ```yaml
 job:
@@ -1501,24 +1240,7 @@ job:
         - Dockerfile
 ```
 
-Paths are relative to the project directory (`$CI_PROJECT_DIR`) and can't directly link outside it.
-
-You can use [glob](https://en.wikipedia.org/wiki/Glob_(programming))
-patterns to match multiple files in any directory
-in the repository:
-
-```yaml
-job:
-  script: bundle exec rspec
-  rules:
-    - exists:
-        - spec/**.rb
-```
-
-Glob patterns are interpreted with Ruby [`File.fnmatch`](https://docs.ruby-lang.org/en/2.7.0/File.html#method-c-fnmatch)
-with the flags `File::FNM_PATHNAME | File::FNM_DOTMATCH | File::FNM_EXTGLOB`.
-
-For performance reasons, GitLab matches a maximum of 10,000 `exists` patterns. After the 10,000th check, rules with patterned globs always match.
+`job` runs if a `Dockerfile` exists anywhere in the repository:
 
 #### `rules:allow_failure`
 

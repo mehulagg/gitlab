@@ -414,9 +414,10 @@ job:
 
 Paths are relative to the project directory (`$CI_PROJECT_DIR`) and can't directly link outside it.
 
-You can use [glob](https://en.wikipedia.org/wiki/Glob_(programming))
-patterns to match multiple files in any directory
-in the repository:
+#### Use `rules:exists` with glob patterns
+
+You can use [glob](https://en.wikipedia.org/wiki/Glob_(programming)) patterns to
+match multiple files in any directory in the repository:
 
 ```yaml
 job:
