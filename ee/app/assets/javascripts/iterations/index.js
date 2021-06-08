@@ -3,8 +3,8 @@ import VueApollo from 'vue-apollo';
 import createDefaultClient from '~/lib/graphql';
 import { parseBoolean } from '~/lib/utils/common_utils';
 import App from './components/app.vue';
-import IterationForm from './components/iteration_form.vue';
-import IterationReport from './components/iteration_report.vue';
+import IterationForm from './components/iteration_form_without_vue_router.vue';
+import IterationReport from './components/iteration_report_without_vue_router.vue';
 import Iterations from './components/iterations.vue';
 import createRouter from './router';
 

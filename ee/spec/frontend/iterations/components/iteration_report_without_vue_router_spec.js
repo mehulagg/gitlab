@@ -1,9 +1,9 @@
 import { GlDropdown, GlDropdownItem, GlEmptyState, GlLoadingIcon, GlTab, GlTabs } from '@gitlab/ui';
 import { shallowMount, createLocalVue } from '@vue/test-utils';
 import VueApollo from 'vue-apollo';
-import IterationForm from 'ee/iterations/components/iteration_form.vue';
-import IterationReport from 'ee/iterations/components/iteration_report.vue';
+import IterationForm from 'ee/iterations/components/iteration_form_without_vue_router.vue';
 import IterationReportTabs from 'ee/iterations/components/iteration_report_tabs.vue';
+import IterationReport from 'ee/iterations/components/iteration_report_without_vue_router.vue';
 import { Namespace } from 'ee/iterations/constants';
 import query from 'ee/iterations/queries/iteration.query.graphql';
 import createMockApollo from 'helpers/mock_apollo_helper';

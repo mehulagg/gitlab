@@ -16,6 +16,7 @@ import { __ } from '~/locale';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import { Namespace } from '../constants';
 import query from '../queries/iteration.query.graphql';
+import IterationForm from './iteration_form_without_vue_router.vue';
 import IterationReportTabs from './iteration_report_tabs.vue';
 
 const iterationStates = {
