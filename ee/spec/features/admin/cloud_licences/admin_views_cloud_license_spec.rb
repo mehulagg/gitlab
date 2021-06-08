@@ -117,7 +117,29 @@ RSpec.describe 'Admin views Cloud License', :js do
       end
     end
 
-    context 'Upload Legacy License' do
+    context 'activate a new subscription' do
+      it 'activates a new license of type cloud' do
+        gl_license = create(:gitlab_license, { cloud_licensing_enabled: true, plan: License::ULTIMATE_PLAN })
+        license = create(:license, data: gl_license.export)
+
+        stub_request(:post, EE::SUBSCRIPTIONS_GRAPHQL_URL)
+          .to_return(status: 200, body: {
+            "data": {
+              "cloudActivationActivate": {
+                "licenseKey": license.data
+              }
+            }
+          }.to_json, headers: { 'Content-Type' => 'application/json' })
+
+        page.within(find('#content-body', match: :first)) do
+          fill_activation_form
+
+          expect(page).to have_content('Subscription details')
+        end
+      end
+    end
+
+    context 'upload Legacy License' do
       it 'shows a link to upload a legacy license' do
         page.within(find('#content-body', match: :first)) do
           expect(page).to have_link('Upload a legacy license', href: new_admin_license_path)
