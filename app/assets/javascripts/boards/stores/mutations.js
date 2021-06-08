@@ -118,6 +118,9 @@ export default {
   },
 
   [mutationTypes.REQUEST_ITEMS_FOR_LIST]: (state, { listId, fetchNext }) => {
+    if (!fetchNext) {
+      Vue.set(state.boardItemsByListId, listId, []);
+    }
     Vue.set(state.listsFlags, listId, { [fetchNext ? 'isLoadingMore' : 'isLoading']: true });
   },
 

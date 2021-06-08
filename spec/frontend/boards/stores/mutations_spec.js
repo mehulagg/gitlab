@@ -273,6 +273,36 @@ describe('Board Store Mutations', () => {
     });
   });
 
+  describe('REQUEST_ITEMS_FOR_LIST', () => {
+    const listId = 'gid://gitlab/List/1';
+    const boardItemsByListId = {
+      [listId]: [mockIssue.id],
+    };
+
+    it.each`
+      fetchNext | isLoading    | isLoadingMore | listItems
+      ${true}   | ${undefined} | ${true}       | ${boardItemsByListId[listId]}
+      ${false}  | ${true}      | ${undefined}  | ${[]}
+    `(
+      'sets isLoading to $isLoading and isLoadingMore to $isLoadingMore when fetchNext is $fetchNext',
+      ({ fetchNext, isLoading, isLoadingMore, listItems }) => {
+        state = {
+          ...state,
+          boardItemsByListId,
+          listsFlags: {
+            [listId]: {},
+          },
+        };
+
+        mutations[types.REQUEST_ITEMS_FOR_LIST](state, { listId, fetchNext });
+
+        expect(state.listsFlags[listId].isLoading).toBe(isLoading);
+        expect(state.listsFlags[listId].isLoadingMore).toBe(isLoadingMore);
+        expect(state.boardItemsByListId[listId]).toEqual(listItems);
+      },
+    );
+  });
+
   describe('RECEIVE_ITEMS_FOR_LIST_SUCCESS', () => {
     it('updates boardItemsByListId and issues on state', () => {
       const listIssues = {
