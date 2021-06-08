@@ -121,3 +121,4 @@ Do not use. Use **use** instead. It's more succinct and easier for non-native En
 Do not use Latin abbreviations. Use **with**, **through**, or **by using** instead. ([Vale](../testing.md#vale) rule: [`LatinTerms.yml`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/doc/.vale/gitlab/LatinTerms.yml))
 
 <!-- vale on -->
+<!-- markdownlint-enable -->
