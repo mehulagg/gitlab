@@ -312,7 +312,7 @@ namespace :gitlab do
 
           next unless meta.group || meta.description
 
-          comment = [meta.description, "[owned by #{meta.group || '(none)'}]"].compact.join(' ')
+          comment = [meta.description, "[owned by #{meta.group || '(none)'} group]"].compact.join(' ')
 
           connection.execute("COMMENT ON TABLE #{connection.quote_table_name(meta.tablename)} IS #{connection.quote(comment)}")
         end
@@ -349,7 +349,7 @@ namespace :gitlab do
 
       Rake::Task['db:migrate'].enhance do
         Rake::Task['gitlab:db:docs:populate_table_comments'].invoke
-        Rake::Task['gitlab:db:docs:generate_yaml'].invoke
+        Rake::Task['gitlab:db:docs:generate_yaml'].invoke if Rails.env.development?
       end
 
       Rake::Task['db:structure:load'].enhance do
