@@ -348,7 +348,7 @@ RSpec.configure do |config|
 
   # previous test runs may have left some resources throttled
   config.before do
-    Gitlab::ExclusiveLease.unthrottle!
+    ::Gitlab::ExclusiveLease.reset_all!("el:throttle:*")
   end
 
   config.around(:example, :assume_throttled) do |example|

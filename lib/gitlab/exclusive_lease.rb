@@ -60,15 +60,6 @@ module Gitlab
       yield
     end
 
-    # Remove all rate-limiting applied with `::throttle`.
-    #
-    # This may only be called in a dev or test environment.
-    def self.unthrottle!
-      return unless ::Gitlab.dev_or_test_env?
-
-      reset_all!("el:throttle:*")
-    end
-
     def self.cancel(key, uuid)
       return unless key.present?
 
