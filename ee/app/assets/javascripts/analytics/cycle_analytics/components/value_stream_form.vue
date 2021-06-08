@@ -70,8 +70,7 @@ export default {
     },
     isVisible: {
       type: Boolean,
-      required: false,
-      default: false,
+      required: true,
     },
   },
   data() {

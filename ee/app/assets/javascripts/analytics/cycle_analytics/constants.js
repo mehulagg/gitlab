@@ -85,3 +85,16 @@ export const METRICS_POPOVER_CONTENT = {
     description: s__('ValueStreamAnalytics|Average number of deployments to production per day.'),
   },
 };
+
+export const I18N = {
+  DELETE_NAME: s__('DeleteValueStream|Delete %{name}'),
+  DELETE_CONFIRMATION: s__(
+    'DeleteValueStream|Are you sure you want to delete the "%{name}" Value Stream?',
+  ),
+  DELETED: s__("DeleteValueStream|'%{name}' Value Stream deleted"),
+  DELETE: __('Delete'),
+  DELETE_VALUE_STREAM_TITLE: s__('DeleteValueStreamForm|Delete Value Stream'),
+  CREATE_VALUE_STREAM: s__('CreateValueStreamForm|Create new Value Stream'),
+  CANCEL: __('Cancel'),
+  EDIT_VALUE_STREAM: __('Edit'),
+};
