@@ -4,7 +4,7 @@ group: Release
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
-# Exploring GitLab Pages
+# Exploring GitLab Pages **(FREE)**
 
 This document is a user guide to explore the options and settings
 GitLab Pages offers.
