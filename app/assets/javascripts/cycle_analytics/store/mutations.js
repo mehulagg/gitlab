@@ -30,11 +30,11 @@ export default {
   [types.REQUEST_VALUE_STREAM_STAGES](state) {
     state.stages = [];
   },
-  [types.RECEIVE_VALUE_STREAM_STAGES_SUCCESS](state, stages = {}) {
+  [types.RECEIVE_VALUE_STREAM_STAGES_SUCCESS](state, { stages = [] }) {
     state.stages = stages;
   },
   [types.RECEIVE_VALUE_STREAM_STAGES_ERROR](state) {
-    state.stages = {};
+    state.stages = [];
   },
   [types.REQUEST_CYCLE_ANALYTICS_DATA](state) {
     state.isLoading = true;

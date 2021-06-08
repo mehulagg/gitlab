@@ -7,10 +7,10 @@ import * as types from './mutation_types';
 
 export const setSelectedValueStream = ({ commit, dispatch }, valueStream) => {
   commit(types.SET_SELECTED_VALUE_STREAM, valueStream);
-  return dispatch('fetchValueStreamData');
+  return dispatch('fetchValueStreamStages');
 };
 
-export const fetchValueStreamStages = ({ commit, dispatch, state }) => {
+export const fetchValueStreamStages = ({ commit, state }) => {
   const { fullPath, selectedValueStream } = state;
   commit(types.REQUEST_VALUE_STREAMS);
 
@@ -27,7 +27,6 @@ export const fetchValueStreamStages = ({ commit, dispatch, state }) => {
 
 export const receiveValueStreamsSuccess = ({ commit, dispatch }, data = []) => {
   commit(types.RECEIVE_VALUE_STREAMS_SUCCESS, data);
-
   if (data.length) {
     const [firstStream] = data;
     return dispatch('setSelectedValueStream', firstStream);
