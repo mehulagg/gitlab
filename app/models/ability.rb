@@ -71,15 +71,14 @@ class Ability
         policy.allowed?(ability)
       end
     ensure
-      if policy && ::Gitlab::SafeRequestStore[:ability_forgetting]
-        forget_runner_result(policy.runner(ability))
-      end
+      # TODO: replace with runner invalidation:
+      # See: https://gitlab.com/gitlab-org/declarative-policy/-/merge_requests/24
+      # See: https://gitlab.com/gitlab-org/declarative-policy/-/merge_requests/25
+      forget_runner_result(policy.runner(ability)) if policy && ability_forgetting?
     end
 
     def policy_for(user, subject = :global)
-      ActiveSupport::Dependencies.interlock.permit_concurrent_loads do
-        DeclarativePolicy.policy_for(user, subject, cache: ::Gitlab::SafeRequestStore.storage)
-      end
+      DeclarativePolicy.policy_for(user, subject, cache: ::Gitlab::SafeRequestStore.storage)
     end
 
     # This method is something of a band-aid over the problem. The problem is
@@ -102,16 +101,21 @@ class Ability
     # TODO: add some kind of reverse-dependency mapping in DeclarativePolicy
     # See: https://gitlab.com/gitlab-org/declarative-policy/-/issues/14
     def forgetting(pattern, &block)
+      was_forgetting = ability_forgetting?
       ::Gitlab::SafeRequestStore[:ability_forgetting] = true
       keys_before = ::Gitlab::SafeRequestStore.storage.keys
 
       yield
     ensure
-      ::Gitlab::SafeRequestStore[:ability_forgetting] = false
+      ::Gitlab::SafeRequestStore[:ability_forgetting] = was_forgetting
       forget_all_but(keys_before, matching: pattern)
     end
 
     private
+
+    def ability_forgetting?
+      ::Gitlab::SafeRequestStore[:ability_forgetting]
+    end
 
     def forget_all_but(keys_before, matching:)
       keys_after = ::Gitlab::SafeRequestStore.storage.keys
