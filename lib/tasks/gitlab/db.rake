@@ -285,80 +285,81 @@ namespace :gitlab do
     end
 
     # Database documentation tasks
+    namespace :docs do
+      DOCUMENTATION_PATH = File.join(Rails.root, 'db', 'docs', 'tables')
 
-    DOCUMENTATION_PATH = File.join(Rails.root, 'db', 'docs', 'tables')
+      desc 'Generate missing database docs yaml'
+      task generate_yaml: :environment do
+        template = ERB.new(File.read(File.join(DOCUMENTATION_PATH, '.template.yml.erb')))
 
-    desc 'Generate missing database docs yaml'
-    task generate_docs_yaml: :environment do
-      template = ERB.new(File.read(File.join(DOCUMENTATION_PATH, '.template.yml.erb')))
+        ActiveRecord::Base.connection.tables.each do |tablename|
+          file = File.join(DOCUMENTATION_PATH, "#{tablename}.yml")
 
-      ActiveRecord::Base.connection.tables.each do |tablename|
-        file = File.join(DOCUMENTATION_PATH, "#{tablename}.yml")
-
-        unless File.exist?(file)
-          File.open(file, 'wb+') do |io|
-            io << template.result(binding)
+          unless File.exist?(file)
+            File.open(file, 'wb+') do |io|
+              io << template.result(binding)
+            end
           end
         end
       end
-    end
 
-    desc 'Populate table comments with database documentation'
-    task populate_table_comments: :environment do
-      connection = ActiveRecord::Base.connection
+      desc 'Populate table comments with database documentation'
+      task populate_table_comments: :environment do
+        connection = ActiveRecord::Base.connection
 
-      Dir.glob("#{DOCUMENTATION_PATH}/*.yml").each do |file|
-        meta = OpenStruct.new(YAML.load_file(file)) # rubocop: disable Performance/OpenStruct
+        Dir.glob("#{DOCUMENTATION_PATH}/*.yml").each do |file|
+          meta = OpenStruct.new(YAML.load_file(file)) # rubocop: disable Performance/OpenStruct
 
-        next unless meta.group || meta.description
+          next unless meta.group || meta.description
 
-        comment = [meta.description, "[owned by #{meta.group || '(none)'}]"].compact.join(' ')
+          comment = [meta.description, "[owned by #{meta.group || '(none)'}]"].compact.join(' ')
 
-        connection.execute("COMMENT ON TABLE #{connection.quote_table_name(meta.tablename)} IS #{connection.quote(comment)}")
-      end
-    end
-
-    desc 'Check consistency of database documentation maintained in YAML files'
-    task check_docs: :environment do
-      connection = ActiveRecord::Base.connection
-
-      tables = connection.tables.to_set
-
-      Dir.glob("#{DOCUMENTATION_PATH}/*.yml").each do |file|
-        tablename = File.basename(file).match(/(\w+)\.yml$/)[1]
-
-        meta = OpenStruct.new(YAML.load_file(file)) # rubocop: disable Performance/OpenStruct
-
-        if tablename != meta.tablename
-          raise ArgumentError, "table name does not match file name in file: #{file}"
-        end
-
-        unless tables.include?(tablename)
-          raise ArgumentError, "table #{tablename} does not exist in database: #{file}"
+          connection.execute("COMMENT ON TABLE #{connection.quote_table_name(meta.tablename)} IS #{connection.quote(comment)}")
         end
       end
 
-      tables.each do |tablename|
-        file = File.join(DOCUMENTATION_PATH, "#{tablename}.yml")
+      desc 'Check consistency of database documentation maintained in YAML files'
+      task check_consistency: :environment do
+        connection = ActiveRecord::Base.connection
 
-        unless File.exist?(file)
-          raise ArgumentError, "table #{tablename} does not have corresponding documentation file: #{file}"
+        tables = connection.tables.to_set
+
+        Dir.glob("#{DOCUMENTATION_PATH}/*.yml").each do |file|
+          tablename = File.basename(file).match(/(\w+)\.yml$/)[1]
+
+          meta = OpenStruct.new(YAML.load_file(file)) # rubocop: disable Performance/OpenStruct
+
+          if tablename != meta.tablename
+            raise ArgumentError, "table name does not match file name in file: #{file}"
+          end
+
+          unless tables.include?(tablename)
+            raise ArgumentError, "table #{tablename} does not exist in database: #{file}"
+          end
+        end
+
+        tables.each do |tablename|
+          file = File.join(DOCUMENTATION_PATH, "#{tablename}.yml")
+
+          unless File.exist?(file)
+            raise ArgumentError, "table #{tablename} does not have corresponding documentation file: #{file}"
+          end
         end
       end
-    end
 
-    Rake::Task['db:migrate'].enhance do
-      Rake::Task['gitlab:db:populate_table_comments'].invoke
-      Rake::Task['gitlab:db:generate_docs_yaml'].invoke
-    end
+      Rake::Task['db:migrate'].enhance do
+        Rake::Task['gitlab:db:docs:populate_table_comments'].invoke
+        Rake::Task['gitlab:db:docs:generate_yaml'].invoke
+      end
 
-    Rake::Task['db:structure:load'].enhance do
-      Rake::Task['gitlab:db:populate_table_comments'].invoke
-    end
+      Rake::Task['db:structure:load'].enhance do
+        Rake::Task['gitlab:db:populate_table_comments'].invoke
+      end
 
-    # Rails 6.1 deprecates db:structure:load in favor of db:schema:load
-    Rake::Task['db:schema:load'].enhance do
-      Rake::Task['gitlab:db:populate_table_comments'].invoke
+      # Rails 6.1 deprecates db:structure:load in favor of db:schema:load
+      Rake::Task['db:schema:load'].enhance do
+        Rake::Task['gitlab:db:populate_table_comments'].invoke
+      end
     end
   end
 end
