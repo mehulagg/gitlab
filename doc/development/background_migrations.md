@@ -388,12 +388,12 @@ for more details.
 
 ## Additional tips and strategies
 
-A strategy to make the migration run even faster is to schedule larger batches, and then use `EachBatch`
+A strategy to make the migration run faster is to schedule larger batches, and then use `EachBatch`
 within the background migration to perform multiple updates/deletes.
 
 The background migration helpers that queue multiple jobs such as `queue_background_migration_jobs_by_range_at_intervals`
-use `EachBatch`. In the example above, we have batches of 1000, where each queued job takes 2 seconds.
-We may have optimized so that the time for the delete statement is within our query performance guidelines,
+use [EachBatch](iterating_tables_in_batches.md). In the example above, we have batches of 1000, where each queued job takes 2 seconds.
+We may have optimized so that the time for the delete statement is within our [query performance guidelines](query_performance.md),
 so 1000 may be the largest number of records we can delete in a reasonable amount of time.
 
 The minimum and most common interval for delaying jobs is 2 minutes. We are doing 2 seconds of work for each
@@ -426,6 +426,6 @@ a lot of variance in query times, yet the total run time has been cut by 1/10 fr
 to 10 minutes! When dealing with large background migrations, this can cut the
 total migration time by days.
 
-Caution: when batching in this way, it is important to look at query times on the higher end
+When batching in this way, it is important to look at query times on the higher end
 of the table or relation being updated. EachBatch may generate some queries that become much
-slower when dealing with higher id ranges.
+slower when dealing with higher ID ranges.
