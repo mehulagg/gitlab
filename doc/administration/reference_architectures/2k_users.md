@@ -295,6 +295,9 @@ further configuration steps.
    gitlab_rails['auto_migrate'] = false
    ```
 
+1. Copy the `/etc/gitlab/gitlab-secrets.json` file from the first Omnibus node you configured and add or replace
+   the file of the same name on this server. If this is the first Omnibus node you are configuring then you can skip this step.
+
 1. [Reconfigure GitLab](../restart_gitlab.md#omnibus-gitlab-reconfigure) for the changes to take effect.
 1. Note the PostgreSQL node's IP address or hostname, port, and
    plain text password. These will be necessary when configuring the [GitLab
@@ -375,7 +378,11 @@ Omnibus:
    }
    ```
 
+1. Copy the `/etc/gitlab/gitlab-secrets.json` file from the first Omnibus node you configured and add or replace
+   the file of the same name on this server. If this is the first Omnibus node you are configuring then you can skip this step.
+
 1. [Reconfigure Omnibus GitLab](../restart_gitlab.md#omnibus-gitlab-reconfigure) for the changes to take effect.
+
 1. Note the Redis node's IP address or hostname, port, and
    Redis password. These will be necessary when [configuring the GitLab
    application servers](#configure-gitlab-rails) later.
@@ -470,7 +477,6 @@ To configure the Gitaly server, on the server node you want to use for Gitaly:
    # Configure the gitlab-shell API callback URL. Without this, `git push` will
    # fail. This can be your 'front door' GitLab URL or an internal load
    # balancer.
-   # Don't forget to copy `/etc/gitlab/gitlab-secrets.json` from web server to Gitaly server.
    gitlab_rails['internal_api_url'] = 'https://gitlab.example.com'
 
    # Make Gitaly accept connections on all network interfaces. You must use
@@ -492,7 +498,11 @@ To configure the Gitaly server, on the server node you want to use for Gitaly:
    })
    ```
 
-1. Save the file, and then [reconfigure GitLab](../restart_gitlab.md#omnibus-gitlab-reconfigure).
+1. Copy the `/etc/gitlab/gitlab-secrets.json` file from the first Omnibus node you configured and add or replace
+   the file of the same name on this server. If this is the first Omnibus node you are configuring then you can skip this step.
+
+1. [Reconfigure GitLab](../restart_gitlab.md#omnibus-gitlab-reconfigure) for the changes to take effect.
+
 1. Confirm that Gitaly can perform callbacks to the internal API:
 
    ```shell
@@ -708,6 +718,9 @@ On each node perform the following:
       sudo cp cert.pem /etc/gitlab/trusted-certs/
       ```
 
+1. Copy the `/etc/gitlab/gitlab-secrets.json` file from the first Omnibus node you configured and add or replace
+   the file of the same name on this server. If this is the first Omnibus node you are configuring then you can skip this step.
+
 1. To prevent database migrations from running on upgrade, run:
 
    ```shell
@@ -725,11 +738,6 @@ On each node perform the following:
    ```shell
    sudo gitlab-ctl tail gitaly
    ```
-
-1. Save the `/etc/gitlab/gitlab-secrets.json` file from one of the two
-   application nodes and install it on the other application node and the
-   [Gitaly node](#configure-gitaly) and
-   [reconfigure GitLab](../restart_gitlab.md#omnibus-gitlab-reconfigure).
 
 When you specify `https` in the `external_url`, as in the previous example,
 GitLab expects that the SSL certificates are in `/etc/gitlab/ssl/`. If the
