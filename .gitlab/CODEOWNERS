@@ -220,6 +220,8 @@ Dangerfile @gl-quality/eng-prod
 /ee/lib/api/vulnerabilit*.rb @gitlab-org/secure/threat-insights-backend-team
 /ee/spec/policies/vulnerabilities/ @gitlab-org/secure/threat-insights-backend-team
 /ee/spec/policies/vulnerability*.rb @gitlab-org/secure/threat-insights-backend-team
+/ee/lib/gitlab/ci/reports/security/vulnerability_reports_comparer.rb @gitlab-org/secure/threat-insights-backend-team
+/ee/spec/lib/gitlab/ci/reports/security/vulnerability_reports_comparer_spec.rb @gitlab-org/secure/threat-insights-backend-team
 
 [Secure]
 /ee/lib/gitlab/ci/parsers/license_compliance/ @gitlab-org/secure/composition-analysis-be
