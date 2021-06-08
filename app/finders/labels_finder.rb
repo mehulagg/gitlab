@@ -36,8 +36,11 @@ class LabelsFinder < UnionFinder
           labels_table = Label.arel_table
           group_ids = group_ids_for(project.group)
 
+          # `ProjectLabel` can have both a `project_id` and a `group_id`, while a `GroupLabel` can only have
+          # a `group_id`. So optimize for the `index_labels_on_group_id_and_project_id_and_title` when
+          # querying GroupLabel
           item_ids << Label.where(
-            labels_table[:type].eq('GroupLabel').and(labels_table[:group_id].in(group_ids)).or(
+            labels_table[:type].eq('GroupLabel').and(labels_table[:group_id].in(group_ids).and(labels_table[:project_id].eq(nil))).or(
               labels_table[:type].eq('ProjectLabel').and(labels_table[:project_id].eq(project.id))
             )
           )
