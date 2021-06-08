@@ -337,7 +337,7 @@ For more information, see
 
 ### Disable markdownlint tests
 
-To disable all Vale linting rules, add a `<!-- markdownlint-disable -->` tag before the text, and a
+To disable all markdownlint rules, add a `<!-- markdownlint-disable -->` tag before the text, and a
 `<!-- markdownlint-enable -->` tag after the text.
 
 Whenever possible, exclude only the problematic lines.
