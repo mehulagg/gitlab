@@ -53,7 +53,13 @@ module Gitlab
         execute("DROP TRIGGER #{exists_clause} #{name} ON #{table_name}")
       end
 
+      # Note for table comments only:
+      #  Do not use this method to add table comments, this information is maintained through db/docs/tables
       def create_comment(type, name, text)
+        if type.casecmp('table') == 0
+          raise 'Table comments are deprecated in favor of adding metadata through Gitlab::Database::Meta'
+        end
+
         execute("COMMENT ON #{type} #{name} IS '#{text}'")
       end
 
