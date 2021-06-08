@@ -1599,9 +1599,24 @@ To configure the Praefect nodes, on each one:
    ```
 
 1. Copy the `/etc/gitlab/gitlab-secrets.json` file from the first Omnibus node you configured and add or replace
-the file of the same name on this server. If this is the first Omnibus node you are configuring then you can skip this step.
+   the file of the same name on this server. If this is the first Omnibus node you are configuring then you can skip this step.
 
-1. Save the file, and then [reconfigure GitLab](../restart_gitlab.md#omnibus-gitlab-reconfigure).
+1. Praefect requires to run some database migrations, much like the main GitLab application. For this
+   you should select **one Praefect node only to run the migrations**, AKA the _Deploy Node_. This node
+   must be configured first before the others as follows:
+   
+   1. In the `/etc/gitlab/gitlab.rb` file, change the `praefect['auto_migrate']` setting value from `false` to `true`
+
+   1. To ensure database migrations are only run during reconfigure and not automatically on upgrade, run:
+
+   ```shell
+   sudo touch /etc/gitlab/skip-auto-reconfigure
+   ```
+   
+   1. [Reconfigure GitLab](../restart_gitlab.md#omnibus-gitlab-reconfigure) for the changes to take effect and
+      to run the Praefect database migrations.
+
+1. On all other Praefect nodes, [Reconfigure GitLab](../restart_gitlab.md#omnibus-gitlab-reconfigure) for the changes to take effect.
 
 ### Configure Gitaly
 
@@ -1945,7 +1960,7 @@ To configure the Sidekiq nodes, on each one:
 1. Copy the `/etc/gitlab/gitlab-secrets.json` file from the first Omnibus node you configured and add or replace
    the file of the same name on this server. If this is the first Omnibus node you are configuring then you can skip this step.
 
-1. To prevent database migrations from running on upgrade, run:
+1. To ensure database migrations are only run during reconfigure and not automatically on upgrade, run:
 
    ```shell
    sudo touch /etc/gitlab/skip-auto-reconfigure
@@ -2100,7 +2115,7 @@ On each node perform the following:
 1. Copy the `/etc/gitlab/gitlab-secrets.json` file from the first Omnibus node you configured and add or replace
    the file of the same name on this server. If this is the first Omnibus node you are configuring then you can skip this step.
 
-1. To prevent database migrations from running on upgrade, run:
+1. To ensure database migrations are only run during reconfigure and not automatically on upgrade, run:
 
    ```shell
    sudo touch /etc/gitlab/skip-auto-reconfigure

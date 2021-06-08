@@ -721,7 +721,7 @@ On each node perform the following:
 1. Copy the `/etc/gitlab/gitlab-secrets.json` file from the first Omnibus node you configured and add or replace
    the file of the same name on this server. If this is the first Omnibus node you are configuring then you can skip this step.
 
-1. To prevent database migrations from running on upgrade, run:
+1. To ensure database migrations are only run during reconfigure and not automatically on upgrade, run:
 
    ```shell
    sudo touch /etc/gitlab/skip-auto-reconfigure
