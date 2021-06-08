@@ -50,6 +50,7 @@ When a user is being [impersonated](../user/admin_area/index.md#user-impersonati
 ### Group events **(PREMIUM)**
 
 A user with a Owner role (or above) can retrieve group audit events of all users.
+(These do not include project audit events.)
 A user with a Developer or Maintainer role is limited to group audit events based on their individual actions.
 
 To view a group's audit events, navigate to **Group > Security & Compliance > Audit Events**.
@@ -119,11 +120,11 @@ Project event queries are limited to a maximum of 30 days.
 Server-wide audit events introduce the ability to observe user actions across
 the entire instance of your GitLab server, making it easy to understand who
 changed what and when for audit purposes.
+(These do not include group or project audit events.)
 
 To view the server-wide administrator log, visit **Admin Area > Monitoring > Audit Events**.
 
-In addition to the group and project events, the following user actions are also
-recorded:
+The following user actions are recorded:
 
 - Sign-in events and the authentication type (such as standard, LDAP, or OmniAuth)
 - Failed sign-ins
