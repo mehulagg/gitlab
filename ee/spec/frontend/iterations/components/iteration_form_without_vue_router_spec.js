@@ -1,7 +1,7 @@
 import { GlForm } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
 import { ApolloMutation } from 'vue-apollo';
-import IterationForm from 'ee/iterations/components/iteration_form.vue';
+import IterationForm from 'ee/iterations/components/iteration_form_without_vue_router.vue';
 import createIteration from 'ee/iterations/queries/create_iteration.mutation.graphql';
 import updateIteration from 'ee/iterations/queries/update_iteration.mutation.graphql';
 import { TEST_HOST } from 'helpers/test_constants';
