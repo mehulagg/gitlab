@@ -17,6 +17,7 @@ module IncidentManagement
 
     validates :policy_id, uniqueness: { scope: [:oncall_schedule_id, :status, :elapsed_time_seconds], message: _('must have a unique schedule, status, and elapsed time') }
 
+    scope :with_oncall_schedule, -> { includes(:oncall_schedule) }
     scope :for_status_above, ->(status) { where('status > ?', status) }
     scope :for_elapsed_time_between, ->(elapsed_min, elapsed_max) { where(elapsed_time_seconds: elapsed_min..elapsed_max) }
   end

@@ -32,7 +32,7 @@ module IncidentManagement
       def escalation_rules
         escalation_policy
           .rules
-          .includes(:oncall_schedule) # rubocop: disable CodeReuse/ActiveRecord
+          .with_oncall_schedule
       end
 
       def escalate_rule(rule)
