@@ -56,7 +56,7 @@ test:
 
 > Introduced in GitLab Runner 8.9.
 
-By default, GitLab is configured to use the [`fetch` Git strategy](../runners/README.md#git-strategy),
+By default, GitLab is configured to use the [`fetch` Git strategy](../runners/configure-runners.md#git-strategy),
 which is recommended for large repositories.
 This strategy reduces the amount of data to transfer and
 does not really impact the operations that you might do on a repository from CI.
@@ -99,7 +99,7 @@ the incremental builds. This has the biggest effect if you re-use existing
 machines and have an existing worktree that you can re-use for builds.
 
 For exact parameters accepted by
-[`GIT_CLEAN_FLAGS`](../runners/README.md#git-clean-flags), see the documentation
+[`GIT_CLEAN_FLAGS`](../runners/configure-runners.md#git-clean-flags), see the documentation
 for [`git clean`](https://git-scm.com/docs/git-clean). The available parameters
 are dependent on Git version.
 
@@ -107,7 +107,7 @@ are dependent on Git version.
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab-runner/-/issues/4142) in GitLab Runner 13.1.
 
-[`GIT_FETCH_EXTRA_FLAGS`](../runners/README.md#git-fetch-extra-flags) allows you
+[`GIT_FETCH_EXTRA_FLAGS`](../runners/configure-runners.md#git-fetch-extra-flags) allows you
 to modify `git fetch` behavior by passing extra flags.
 
 For example, if your project contains a large number of tags that your CI jobs don't rely on,

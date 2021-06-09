@@ -399,7 +399,7 @@ ERRO[2020-11-18T18:05:52Z] object not found
 [ERRO] [secrets] [2020-11-18T18:05:52Z] ▶ Gitleaks analysis failed: exit status 2
 ```
 
-To resolve the issue, set the [`GIT_DEPTH` CI/CD variable](../../../ci/runners/README.md#shallow-cloning)
+To resolve the issue, set the [`GIT_DEPTH` CI/CD variable](../../../ci/runners/configure-runners.md#shallow-cloning)
 to a higher value. To apply this only to the Secret Detection job, the following can be added to
 your `.gitlab-ci.yml` file:
 
