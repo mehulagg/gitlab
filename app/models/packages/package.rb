@@ -269,6 +269,10 @@ class Packages::Package < ApplicationRecord
     tags.pluck(:name)
   end
 
+  def infrastructure_package?
+    terraform_module?
+  end
+
   def debian_incoming?
     debian? && version.nil?
   end

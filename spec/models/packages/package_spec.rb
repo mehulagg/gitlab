@@ -897,6 +897,26 @@ RSpec.describe Packages::Package, type: :model do
     end
   end
 
+  describe '#infrastructure_package?' do
+    let(:package) { create(:package) }
+
+    subject { package.infrastructure_package? }
+
+    it { is_expected.to eq(false) }
+
+    context 'with generic package' do
+      let(:package) { create(:generic_package) }
+
+      it { is_expected.to eq(false) }
+    end
+
+    context 'with terraform module package' do
+      let(:package) { create(:terraform_module_package) }
+
+      it { is_expected.to eq(true) }
+    end
+  end
+
   describe 'plan_limits' do
     Packages::Package.package_types.keys.without('composer').each do |pt|
       plan_limit_name = if pt == 'generic'
