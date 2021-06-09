@@ -8,7 +8,7 @@ info: "See the Technical Writers assigned to Development Guidelines: https://abo
 # Background migrations
 
 Background migrations should be used to perform data migrations whenever the 
-whole migration takes over `1 hour` to complete. For example, you can use background 
+whole migration takes over `10 minutes` to complete. For example, you can use background 
 migrations to migrate data so that instead of storing data in a single JSON column 
 the data is stored in a separate table.
 
@@ -18,7 +18,7 @@ migrations automatically reschedule themselves for a later point in time.
 ## When To Use Background Migrations
 
 Background migrations should be used when migrating _data_ in tables that have 
-so many rows this process would take over 1 hours when performed in a
+so many rows this process would take over `10 minutes` when performed in a
 regular Rails migration.
 
 Background migrations _may_ also be used when executing numerous single-row queries
