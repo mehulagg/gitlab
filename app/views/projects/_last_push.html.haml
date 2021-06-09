@@ -17,5 +17,5 @@
 
     - if can?(current_user, :create_merge_request_in, event.project.default_merge_request_target)
       .gl-alert-actions
-        = link_to new_mr_path_from_push_event(event), title: _("New merge request"), class: "btn gl-button btn-info qa-create-merge-request" do
+        = link_to new_mr_path_from_push_event(event), title: _("New merge request"), class: "btn gl-button btn-confirm qa-create-merge-request" do
           #{ _('Create merge request') }
