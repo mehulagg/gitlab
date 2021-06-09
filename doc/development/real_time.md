@@ -40,8 +40,8 @@ approximately 4200 WebSocket connections.
 To understand the impact a new feature might have, sum the peak throughput (RPS) 
 to the pages it will originate from (`n`) and apply the formula:
 
-```
-(n * 4200) / peak active connections
+```ruby
+(n * 4200) / peak_active_connections
 ```
 
 Current active connections are visible on 
