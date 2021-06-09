@@ -1,5 +1,5 @@
 import { shallowMount } from '@vue/test-utils';
-import ReportsNotConfigured from 'ee/security_dashboard/components/empty_states/reports_not_configured.vue';
+import ReportsNotConfigured from 'ee/security_dashboard/components/shared/empty_states/reports_not_configured.vue';
 
 describe('reports not configured empty state', () => {
   let wrapper;

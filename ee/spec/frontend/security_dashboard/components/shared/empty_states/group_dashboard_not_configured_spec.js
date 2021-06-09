@@ -1,5 +1,5 @@
 import { shallowMount } from '@vue/test-utils';
-import DashboardNotConfigured from 'ee/security_dashboard/components/empty_states/group_dashboard_not_configured.vue';
+import DashboardNotConfigured from 'ee/security_dashboard/components/shared/empty_states/group_dashboard_not_configured.vue';
 
 describe('Group Security Dashboard Empty State', () => {
   let wrapper;

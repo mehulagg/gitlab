@@ -7,7 +7,7 @@ import createFlash from '~/flash';
 import { formatDate, getDateInPast } from '~/lib/utils/datetime_utility';
 import { getSvgIconPathContent } from '~/lib/utils/icon_utils';
 import { s__, __ } from '~/locale';
-import DashboardNotConfigured from '../empty_states/reports_not_configured.vue';
+import DashboardNotConfigured from '../shared/empty_states/reports_not_configured.vue';
 import SecurityDashboardLayout from '../shared/security_dashboard_layout.vue';
 
 const CHART_DEFAULT_DAYS = 30;

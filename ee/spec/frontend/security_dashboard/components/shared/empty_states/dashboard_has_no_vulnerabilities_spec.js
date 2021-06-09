@@ -1,5 +1,5 @@
 import { mount } from '@vue/test-utils';
-import DashboardHasNoVulnerabilities from 'ee/security_dashboard/components/empty_states/dashboard_has_no_vulnerabilities.vue';
+import DashboardHasNoVulnerabilities from 'ee/security_dashboard/components/shared/empty_states/dashboard_has_no_vulnerabilities.vue';
 
 describe('dashboard has no vulnerabilities empty state', () => {
   let wrapper;
