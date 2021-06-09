@@ -64,7 +64,7 @@ RSpec.describe Ci::AuthJobFinder do
       it { is_expected.to be_nil }
     end
 
-    context 'when job is running' do
+    context 'when job is running', :request_store do
       it 'sets ci_job_token_scope on the job user', :aggregate_failures do
         expect(subject).to eq(job)
         expect(subject.user).to be_from_ci_job_token

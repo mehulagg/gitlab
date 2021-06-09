@@ -1386,13 +1386,12 @@ RSpec.describe ProjectPolicy do
     end
   end
 
-  describe 'when user is authenticated via CI_JOB_TOKEN' do
-    let_it_be(:current_user) { developer }
-
+  describe 'when user is authenticated via CI_JOB_TOKEN', :request_store do
+    let(:current_user) { developer }
     let(:job) { build_stubbed(:ci_build, project: scope_project, user: current_user) }
 
     before do
-      current_user.ci_job_token_scope = Ci::JobToken::Scope.new(scope_project)
+      current_user.set_ci_job_token_scope!(job)
     end
 
     context 'when accessing a private project' do
