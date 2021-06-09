@@ -338,6 +338,7 @@ describe('app_index_apollo_client.vue', () => {
         [expect.objectContaining({ sort: CREATED_ASC })],
       ]);
 
+      // URL manipulation is tested in more detail in the `describe` block below
       expect(historyPushState).toHaveBeenCalled();
     });
 

@@ -156,6 +156,8 @@ export default {
       // This prevents the frontend from requesting the results sorted
       // by one field (e.g. `released_at`) while using a pagination cursor
       // intended for a different field (e.g.) `created_at`).
+      // For more details, see the MR that introduced this change:
+      // https://gitlab.com/gitlab-org/gitlab/-/merge_requests/63434
       historyPushState(
         setUrlParams({
           before: null,
