@@ -85,6 +85,15 @@ RSpec.describe Gitlab::Database::DynamicModelHelpers do
         expect { |b| subject.each_batch_range(table_name, of: 2, &b) }
           .to yield_successive_args([first_project.id, second_project.id])
       end
+
+      it 'makes it possible to apply a scope' do
+        each_batch_limited = ->(&b) do
+          subject.each_batch_range(table_name, scope: ->(table) { table.limit(1) }, of: 1, &b)
+        end
+
+        expect { |b| each_batch_limited.call(&b) }
+          .to yield_successive_args([first_project.id, first_project.id])
+      end
     end
 
     context 'when transaction is open' do
