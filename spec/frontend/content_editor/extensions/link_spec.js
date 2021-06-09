@@ -1,30 +1,61 @@
-import { tiptapExtension as Link } from '~/content_editor/extensions/link';
-import { createTestEditor } from '../test_utils';
+import {
+  markdownLinkSyntaxInputRuleRegExp,
+  urlSyntaxRegExp,
+  extractHrefFromMarkdownLink,
+} from '~/content_editor/extensions/link';
 
 describe('content_editor/extensions/link', () => {
-  let tiptapEditor;
+  describe.each`
+    input                             | matches
+    ${'[gitlab](https://gitlab.com)'} | ${true}
+    ${'[documentation](readme.md)'}   | ${true}
+    ${'[link 123](readme.md)'}        | ${true}
+    ${'[link 123](read me.md)'}       | ${true}
+    ${'text'}                         | ${false}
+    ${'documentation](readme.md'}     | ${false}
+    ${'https://www.google.com'}       | ${false}
+  `('markdownLinkSyntaxInputRuleRegExp', ({ input, matches }) => {
+    it(`${matches ? 'matches' : 'does not match'} ${input}`, () => {
+      const match = new RegExp(markdownLinkSyntaxInputRuleRegExp).exec(input);
 
-  beforeEach(() => {
-    tiptapEditor = createTestEditor({ extensions: [Link] });
+      expect(Boolean(match?.groups.href)).toBe(matches);
+    });
   });
 
-  it.each`
-    input
-    ${'[gitlab](https://gitlab.com)'}
-  `('creates a link when the input rule matches $input', ({ input }) => {
-    const { view } = tiptapEditor;
-    const { selection } = view.state;
+  describe.each`
+    input                        | matches
+    ${'http://example.com '}     | ${true}
+    ${'https://example.com '}    | ${true}
+    ${'www.example.com '}        | ${true}
+    ${'example.com/ab.html '}    | ${false}
+    ${'text'}                    | ${false}
+    ${' http://example.com '}    | ${true}
+    ${'https://www.google.com '} | ${true}
+  `('urlSyntaxRegExp', ({ input, matches }) => {
+    it(`${matches ? 'matches' : 'does not match'} ${input}`, () => {
+      const match = new RegExp(urlSyntaxRegExp).exec(input);
 
-    tiptapEditor.chain().insertContent(input).run();
+      expect(Boolean(match?.groups.href)).toBe(matches);
+    });
+  });
 
-    /**
-     * Calls the event handler that executes the input rule
-     * https://github.com/ProseMirror/prosemirror-inputrules/blob/master/src/inputrules.js#L65
-     * */
-    view.someProp('handleTextInput', (f) => f(view, selection.from, selection.to, input));
+  describe('extractHrefFromMarkdownLink', () => {
+    const input = '[gitlab](https://gitlab.com)';
+    const href = 'https://gitlab.com';
+    let match;
+    let result;
 
-    const serializedDoc = tiptapEditor.getJSON();
+    beforeEach(() => {
+      match = new RegExp(markdownLinkSyntaxInputRuleRegExp).exec(input);
+      result = extractHrefFromMarkdownLink(match);
+    });
 
-    console.log(serializedDoc.content[0].content[0])
+    it('extracts the url from a markdown link captured by markdownLinkSyntaxInputRuleRegExp', () => {
+      expect(result).toEqual({ href });
+    });
+
+    it('makes sure that url text is the last capture group', () => {
+      expect(match[match.length - 1]).toEqual('gitlab');
+    });
   });
 });
