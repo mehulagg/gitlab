@@ -2,6 +2,7 @@
 - page_title _("Dashboard")
 - billable_users_url = help_page_path('subscriptions/self_managed/index', anchor: 'billable-users')
 - billable_users_link_start = '<a href="%{url}" target="_blank" rel="noopener noreferrer nofollow">'.html_safe % { url: billable_users_url }
+- gitlab_ee_and_not_com = Gitlab.ee? && !Gitlab.com?
 
 - if @notices
   - @notices.each do |notice|
@@ -9,7 +10,7 @@
       dismissible: true.to_s } }
       = notice[:message].html_safe
 
-- if display_upcoming_reconciliation_alert?
+- if gitlab_ee_and_not_com && display_upcoming_reconciliation_alert?
   #js-qrtly-reconciliation-alert{ data: upcoming_reconciliation_hash }
 
 - if @license.present?
