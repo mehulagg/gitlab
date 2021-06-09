@@ -1,5 +1,11 @@
 import { queryToObject, setUrlParams } from '~/lib/utils/url_utility';
 import {
+  filterToQueryObject,
+  processFilters,
+  urlQueryToFilter,
+  prepareTokens,
+} from '~/vue_shared/components/filtered_search_bar/filtered_search_utils';
+import {
   PARAM_KEY_STATUS,
   PARAM_KEY_RUNNER_TYPE,
   PARAM_KEY_SORT,
@@ -9,30 +15,6 @@ import {
   DEFAULT_SORT,
   RUNNER_PAGE_SIZE,
 } from '../constants';
-
-const getValuesFromFilters = (paramKey, filters) => {
-  return filters
-    .filter(({ type, value }) => type === paramKey && value.operator === '=')
-    .map(({ value }) => value.data);
-};
-
-const getFilterFromParams = (paramKey, params) => {
-  const value = params[paramKey];
-  if (!value) {
-    return [];
-  }
-
-  const values = Array.isArray(value) ? value : [value];
-  return values.map((data) => {
-    return {
-      type: paramKey,
-      value: {
-        data,
-        operator: '=',
-      },
-    };
-  });
-};
 
 const getPaginationFromParams = (params) => {
   const page = parseInt(params[PARAM_KEY_PAGE], 10);
@@ -53,12 +35,10 @@ const getPaginationFromParams = (params) => {
 
 export const fromUrlQueryToSearch = (query = window.location.search) => {
   const params = queryToObject(query, { gatherArrays: true });
+  const filterParamKeys = [PARAM_KEY_STATUS, PARAM_KEY_RUNNER_TYPE];
 
   return {
-    filters: [
-      ...getFilterFromParams(PARAM_KEY_STATUS, params),
-      ...getFilterFromParams(PARAM_KEY_RUNNER_TYPE, params),
-    ],
+    filters: prepareTokens(urlQueryToFilter(query, filterParamKeys)),
     sort: params[PARAM_KEY_SORT] || DEFAULT_SORT,
     pagination: getPaginationFromParams(params),
   };
@@ -68,9 +48,11 @@ export const fromSearchToUrl = (
   { filters = [], sort = null, pagination = {} },
   url = window.location.href,
 ) => {
+  const queryObj = filterToQueryObject(processFilters(filters));
+
   const urlParams = {
-    [PARAM_KEY_STATUS]: getValuesFromFilters(PARAM_KEY_STATUS, filters),
-    [PARAM_KEY_RUNNER_TYPE]: getValuesFromFilters(PARAM_KEY_RUNNER_TYPE, filters),
+    [PARAM_KEY_STATUS]: queryObj[PARAM_KEY_STATUS] || [],
+    [PARAM_KEY_RUNNER_TYPE]: queryObj[PARAM_KEY_RUNNER_TYPE] || [],
   };
 
   if (sort && sort !== DEFAULT_SORT) {
@@ -94,11 +76,13 @@ export const fromSearchToUrl = (
 export const fromSearchToVariables = ({ filters = [], sort = null, pagination = {} } = {}) => {
   const variables = {};
 
+  const queryObj = filterToQueryObject(processFilters(filters));
+
   // TODO Get more than one value when GraphQL API supports OR for "status"
-  [variables.status] = getValuesFromFilters(PARAM_KEY_STATUS, filters);
+  [variables.status] = queryObj[PARAM_KEY_STATUS] || [];
 
   // TODO Get more than one value when GraphQL API supports OR for "runner type"
-  [variables.type] = getValuesFromFilters(PARAM_KEY_RUNNER_TYPE, filters);
+  [variables.type] = queryObj[PARAM_KEY_RUNNER_TYPE] || [];
 
   if (sort) {
     variables.sort = sort;

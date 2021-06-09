@@ -23,6 +23,30 @@ describe('search_params.js', () => {
       },
       graphqlVariables: { status: 'ACTIVE', sort: 'CREATED_DESC', first: RUNNER_PAGE_SIZE },
     },
+    // TODO These tests should pass
+    {
+      name: 'a two terms text search',
+      urlQuery: '?search=something else',
+      search: {
+        filters: [
+          {
+            type: 'filtered-search-term',
+            value: {
+              data: 'something',
+            },
+          },
+          {
+            type: 'filtered-search-term',
+            value: {
+              data: 'else',
+            },
+          },
+        ],
+        pagination: { page: 1 },
+        sort: 'CREATED_DESC',
+      },
+      graphqlVariables: { search: 'something else', sort: 'CREATED_DESC', first: RUNNER_PAGE_SIZE },
+    },
     {
       name: 'single instance type',
       urlQuery: '?runner_type[]=INSTANCE_TYPE',
