@@ -77,14 +77,6 @@ RSpec.describe ReleasePresenter do
     it 'returns merge requests url with state=open' do
       is_expected.to eq(project_merge_requests_url(project, opened_url_params))
     end
-
-    context 'when release_mr_issue_urls feature flag is disabled' do
-      before do
-        stub_feature_flags(release_mr_issue_urls: false)
-      end
-
-      it { is_expected.to be_nil }
-    end
   end
 
   describe '#merged_merge_requests_url' do
@@ -94,13 +86,6 @@ RSpec.describe ReleasePresenter do
       is_expected.to eq(project_merge_requests_url(project, merged_url_params))
     end
 
-    context 'when release_mr_issue_urls feature flag is disabled' do
-      before do
-        stub_feature_flags(release_mr_issue_urls: false)
-      end
-
-      it { is_expected.to be_nil }
-    end
   end
 
   describe '#closed_merge_requests_url' do
@@ -108,14 +93,6 @@ RSpec.describe ReleasePresenter do
 
     it 'returns merge requests url with state=closed' do
       is_expected.to eq(project_merge_requests_url(project, closed_url_params))
-    end
-
-    context 'when release_mr_issue_urls feature flag is disabled' do
-      before do
-        stub_feature_flags(release_mr_issue_urls: false)
-      end
-
-      it { is_expected.to be_nil }
     end
   end
 
@@ -125,14 +102,6 @@ RSpec.describe ReleasePresenter do
     it 'returns issues url with state=open' do
       is_expected.to eq(project_issues_url(project, opened_url_params))
     end
-
-    context 'when release_mr_issue_urls feature flag is disabled' do
-      before do
-        stub_feature_flags(release_mr_issue_urls: false)
-      end
-
-      it { is_expected.to be_nil }
-    end
   end
 
   describe '#closed_issues_url' do
@@ -140,14 +109,6 @@ RSpec.describe ReleasePresenter do
 
     it 'returns issues url with state=closed' do
       is_expected.to eq(project_issues_url(project, closed_url_params))
-    end
-
-    context 'when release_mr_issue_urls feature flag is disabled' do
-      before do
-        stub_feature_flags(release_mr_issue_urls: false)
-      end
-
-      it { is_expected.to be_nil }
     end
   end
 
