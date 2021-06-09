@@ -80,7 +80,7 @@ RSpec.describe Gitlab::Ci::Pipeline::Chain::Validate::External do
         let(:user) { create(:user) }
 
         before do
-          user.user_detail.provisioned_by_group = group
+          user.provisioned_by_group = group
         end
 
         it 'returns the provisioned group with an Ultimate plan' do
