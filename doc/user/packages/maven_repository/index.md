@@ -616,6 +616,7 @@ the existing package is overwritten. However, you can still access and view the
 files associated with the older version using the UI or API.
 
 To delete these older package versions, consider using the Packages API or the UI.
+
 #### Do not allow duplicate Maven packages
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/296895) in GitLab Free 13.9.
