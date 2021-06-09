@@ -7,20 +7,16 @@ type: reference
 
 # Choosing runners
 
-When you run a CI job in GitLab, the job is processed by a runner.
+If you are using GitLab SaaS (GitLab.com), your CI jobs automatically run on shared runners. No configuration is required.
 
-If you are using GitLab SaaS, you can:
+If you don't want to use the available runners, you can [install and configure your own runners](https://docs.gitlab.com/runner/install/)
+and use them on GitLab.com.
 
-- Choose from one of several available runners.
-- [Install and configure your own runners](https://docs.gitlab.com/runner/install/) and use them on GitLab.com.
+If you are using self-managed GitLab, you can [install and configure your own runners](https://docs.gitlab.com/runner/install/).
 
-If you are using self-managed GitLab, you can:
+## Runners on GitLab.com
 
-- [Install and configure your own runners](https://docs.gitlab.com/runner/install/).
-
-## Shared runners on GitLab.com
-
-The following shared runners are available to all projects on GitLab.com.
+On GitLab.com, your jobs can run on [Linux](#linux-shared-runners) or [Windows](#windows-shared-runners-beta).
 
 ### Linux shared runners
 
