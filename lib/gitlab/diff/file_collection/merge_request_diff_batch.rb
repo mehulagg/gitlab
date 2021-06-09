@@ -13,11 +13,13 @@ module Gitlab
         DEFAULT_BATCH_PAGE = 1
         DEFAULT_BATCH_SIZE = 30
 
-        attr_reader :pagination_data
+        attr_reader :pagination_data, :batch_page, :batch_size
 
         def initialize(merge_request_diff, batch_page, batch_size, diff_options:)
           super(merge_request_diff, diff_options: diff_options)
 
+          @batch_page = batch_page
+          @batch_size = batch_size
           @paginated_collection = load_paginated_collection(batch_page, batch_size, diff_options)
 
           @pagination_data = {
@@ -54,6 +56,10 @@ module Gitlab
               Gitlab::Git::DiffCollection.new(collection.map(&:to_hash), options)
             end
           end
+        end
+
+        def cache_key
+          @merge_request_diff.cache_key
         end
 
         private

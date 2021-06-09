@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 class Projects::MergeRequests::ContentController < Projects::MergeRequests::ApplicationController
+  include API::Helpers::Caching
   # @merge_request.check_mergeability is not executed here since
   # widget serializer calls it via mergeable? method
   # but we might want to call @merge_request.check_mergeability
@@ -18,7 +19,9 @@ class Projects::MergeRequests::ContentController < Projects::MergeRequests::Appl
 
     respond_to do |format|
       format.json do
-        render json: serializer(MergeRequestPollWidgetEntity)
+        #render json: serializer(MergeRequestPollWidgetEntity)
+        serializer = MergeRequestSerializer.new(current_user: current_user, project: merge_request.project)
+        render_cached(serializer, merge_request, opts: { async_mergeability_check: params[:async_mergeability_check] }, entity: MergeRequestPollWidgetEntity)
       end
     end
   end

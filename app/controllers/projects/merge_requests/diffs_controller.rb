@@ -3,6 +3,7 @@
 class Projects::MergeRequests::DiffsController < Projects::MergeRequests::ApplicationController
   include DiffHelper
   include RendersNotes
+  include API::Helpers::Caching
 
   before_action :commit
   before_action :define_diff_vars
@@ -40,7 +41,8 @@ class Projects::MergeRequests::DiffsController < Projects::MergeRequests::Applic
       pagination_data: diffs.pagination_data
     }
 
-    render json: PaginatedDiffSerializer.new(current_user: current_user).represent(diffs, options)
+    render_cached(PaginatedDiffSerializer.new(current_user: current_user), diffs, cache_context: -> (_) { [params[:page], params[:per_page], params[:w], diff_view] }, opts: options)
+    # render json: PaginatedDiffSerializer.new(current_user: current_user).represent(diffs, options)
   end
 
   def diffs_metadata

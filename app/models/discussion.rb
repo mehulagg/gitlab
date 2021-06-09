@@ -158,4 +158,8 @@ class Discussion
   def reply_attributes
     first_note.slice(:type, :noteable_type, :noteable_id, :commit_id, :discussion_id)
   end
+
+  def cache_key
+    "#{id}-#{notes.max { |a, b| a.updated_at <=> b.updated_at }.updated_at}"
+  end
 end

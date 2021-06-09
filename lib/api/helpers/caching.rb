@@ -68,6 +68,33 @@ module API
         body Gitlab::Json::PrecompiledJson.new(json)
       end
 
+      def render_cached(serializer, obj_or_collection, cache_context: -> (_) { current_user&.cache_key }, expires_in: DEFAULT_EXPIRY, opts: {}, entity: nil)
+        json =
+          if obj_or_collection.is_a?(Enumerable)
+            cached_collection(
+              obj_or_collection,
+              presenter: serializer,
+              presenter_args: opts,
+              context: cache_context,
+              expires_in: expires_in,
+              dump: false,
+              entity: entity
+            )
+          else
+            cached_object(
+              obj_or_collection,
+              presenter: serializer,
+              presenter_args: opts,
+              context: cache_context,
+              expires_in: expires_in,
+              dump: false,
+              entity: entity
+            )
+          end
+
+        render json: json
+      end
+
       # Action caching implementation
       #
       # This allows you to wrap an entire API endpoint call in a cache, useful
@@ -127,10 +154,10 @@ module API
       # @param context [Proc] a proc that will be called with the object as an argument, and which should return a
       #                       string or array of strings to be combined into the cache key
       # @return [String]
-      def contextual_cache_key(object, context)
+      def contextual_cache_key(presenter, object, context)
         return object.cache_key if context.nil?
 
-        [object.cache_key, context.call(object)].flatten.join(":")
+        [presenter.class.name, object.cache_key, context.call(object)].flatten.join(":")
       end
 
       # Used for fetching or rendering a single object
@@ -141,9 +168,13 @@ module API
       # @param context [Proc]
       # @param expires_in [ActiveSupport::Duration, Integer] an expiry time for the cache entry
       # @return [String]
-      def cached_object(object, presenter:, presenter_args:, context:, expires_in:)
-        cache.fetch(contextual_cache_key(object, context), expires_in: expires_in) do
-          Gitlab::Json.dump(presenter.represent(object, **presenter_args).as_json)
+      def cached_object(object, presenter:, presenter_args:, context:, expires_in:, dump: true, entity: nil)
+        cache.fetch(contextual_cache_key(presenter, object, context), expires_in: expires_in) do
+          if dump
+            Gitlab::Json.dump(presenter.represent(object, presenter_args, entity).as_json)
+          else
+            presenter.represent(object, presenter_args, entity).as_json
+          end
         end
       end
 
@@ -155,9 +186,13 @@ module API
       # @param context [Proc]
       # @param expires_in [ActiveSupport::Duration, Integer] an expiry time for the cache entry
       # @return [Array<String>]
-      def cached_collection(collection, presenter:, presenter_args:, context:, expires_in:)
-        json = fetch_multi(collection, context: context, expires_in: expires_in) do |obj|
-          Gitlab::Json.dump(presenter.represent(obj, **presenter_args).as_json)
+      def cached_collection(collection, presenter:, presenter_args:, context:, expires_in:, dump: true, entity: nil)
+        json = fetch_multi(presenter, collection, context: context, expires_in: expires_in) do |obj|
+          if dump
+            Gitlab::Json.dump(presenter.represent(obj, presenter_args, entity).as_json)
+          else
+            presenter.represent(obj, presenter_args, entity).as_json
+          end
         end
 
         json.values
@@ -171,9 +206,9 @@ module API
       # block.
       #
       # The result is that this is functionally identical to `#fetch`.
-      def fetch_multi(*objs, context:, **kwargs)
+      def fetch_multi(presenter, *objs, context:, **kwargs)
         objs.flatten!
-        map = multi_key_map(objs, context: context)
+        map = multi_key_map(presenter, objs, context: context)
 
         # TODO: `contextual_cache_key` should be constructed based on the guideline https://docs.gitlab.com/ee/development/redis.html#multi-key-commands.
         Gitlab::Instrumentation::RedisClusterValidator.allow_cross_slot_commands do
@@ -186,9 +221,9 @@ module API
       # @param objects [Enumerable<Object>] objects which _must_ respond to `#cache_key`
       # @param context [Proc] a proc that can be called to help generate each cache key
       # @return [Hash]
-      def multi_key_map(objects, context:)
+      def multi_key_map(presenter, objects, context:)
         objects.index_by do |object|
-          contextual_cache_key(object, context)
+          contextual_cache_key(presenter, object, context)
         end
       end
     end

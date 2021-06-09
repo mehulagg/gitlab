@@ -98,8 +98,6 @@ class Projects::MergeRequestsController < Projects::MergeRequests::ApplicationCo
   end
 
   def show
-    close_merge_request_if_no_source_project
-
     if Feature.disabled?(:check_mergeability_async_in_widget, @project, default_enabled: :yaml)
       @merge_request.check_mergeability(async: true)
     end
@@ -133,7 +131,7 @@ class Projects::MergeRequestsController < Projects::MergeRequests::ApplicationCo
       format.json do
         Gitlab::PollingInterval.set_header(response, interval: 10_000)
 
-        render json: serializer.represent(@merge_request, serializer: params[:serializer])
+        render_cached(serializer, @merge_request, opts: { serializer: params[:serializer] })
       end
 
       format.patch do
