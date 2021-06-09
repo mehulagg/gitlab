@@ -82,6 +82,9 @@ export default {
 
       return { scannerId: ids };
     },
+    hasCustomVendor() {
+      return Object.keys(this.groups).length > 1;
+    },
   },
   methods: {
     toggleGroup(groupName) {
@@ -112,9 +115,10 @@ export default {
     />
 
     <template v-for="[groupName, groupOptions] in Object.entries(groups)">
-      <gl-dropdown-divider :key="`${groupName}:divider`" />
+      <gl-dropdown-divider v-if="hasCustomVendor" :key="`${groupName}:divider`" />
 
       <gl-dropdown-item
+        v-if="hasCustomVendor"
         :key="`${groupName}:header`"
         :data-testid="`${groupName}Header`"
         @click.native.capture.stop="toggleGroup(groupName)"

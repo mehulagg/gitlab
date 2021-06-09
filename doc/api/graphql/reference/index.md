@@ -713,6 +713,28 @@ Input type: `AwardEmojiToggleInput`
 | <a id="mutationawardemojitoggleerrors"></a>`errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 | <a id="mutationawardemojitoggletoggledon"></a>`toggledOn` | [`Boolean!`](#boolean) | Indicates the status of the emoji. True if the toggle awarded the emoji, and false if the toggle removed the emoji. |
 
+### `Mutation.boardEpicCreate`
+
+Input type: `BoardEpicCreateInput`
+
+#### Arguments
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| <a id="mutationboardepiccreateboardid"></a>`boardId` | [`BoardsEpicBoardID!`](#boardsepicboardid) | Global ID of the board that the epic is in. |
+| <a id="mutationboardepiccreateclientmutationid"></a>`clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
+| <a id="mutationboardepiccreategrouppath"></a>`groupPath` | [`ID!`](#id) | Group the epic to create is in. |
+| <a id="mutationboardepiccreatelistid"></a>`listId` | [`BoardsEpicListID!`](#boardsepiclistid) | Global ID of the epic board list in which epic will be created. |
+| <a id="mutationboardepiccreatetitle"></a>`title` | [`String!`](#string) | Title of the epic. |
+
+#### Fields
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| <a id="mutationboardepiccreateclientmutationid"></a>`clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
+| <a id="mutationboardepiccreateepic"></a>`epic` | [`Epic`](#epic) | Epic after creation. |
+| <a id="mutationboardepiccreateerrors"></a>`errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
+
 ### `Mutation.boardListCreate`
 
 Input type: `BoardListCreateInput`
@@ -1205,6 +1227,10 @@ Input type: `CreateIssueInput`
 
 ### `Mutation.createIteration`
 
+WARNING:
+**Deprecated** in 14.0.
+Use iterationCreate.
+
 Input type: `CreateIterationInput`
 
 #### Arguments
@@ -1215,6 +1241,7 @@ Input type: `CreateIterationInput`
 | <a id="mutationcreateiterationdescription"></a>`description` | [`String`](#string) | The description of the iteration. |
 | <a id="mutationcreateiterationduedate"></a>`dueDate` | [`String`](#string) | The end date of the iteration. |
 | <a id="mutationcreateiterationgrouppath"></a>`groupPath` | [`ID`](#id) | Full path of the group with which the resource is associated. |
+| <a id="mutationcreateiterationiterationscadenceid"></a>`iterationsCadenceId` | [`IterationsCadenceID`](#iterationscadenceid) | Global ID of the iterations cadence to be assigned to newly created iteration. |
 | <a id="mutationcreateiterationprojectpath"></a>`projectPath` | [`ID`](#id) | Full path of the project with which the resource is associated. |
 | <a id="mutationcreateiterationstartdate"></a>`startDate` | [`String`](#string) | The start date of the iteration. |
 | <a id="mutationcreateiterationtitle"></a>`title` | [`String`](#string) | The title of the iteration. |
@@ -2105,14 +2132,17 @@ Input type: `EpicMoveListInput`
 | <a id="mutationepicmovelistboardid"></a>`boardId` | [`BoardsEpicBoardID!`](#boardsepicboardid) | Global ID of the board that the epic is in. |
 | <a id="mutationepicmovelistclientmutationid"></a>`clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 | <a id="mutationepicmovelistepicid"></a>`epicId` | [`EpicID!`](#epicid) | ID of the epic to mutate. |
-| <a id="mutationepicmovelistfromlistid"></a>`fromListId` | [`BoardsEpicListID!`](#boardsepiclistid) | ID of the board list that the epic will be moved from. |
-| <a id="mutationepicmovelisttolistid"></a>`toListId` | [`BoardsEpicListID!`](#boardsepiclistid) | ID of the board list that the epic will be moved to. |
+| <a id="mutationepicmovelistfromlistid"></a>`fromListId` | [`BoardsEpicListID`](#boardsepiclistid) | ID of the board list that the epic will be moved from. Required if moving between lists. |
+| <a id="mutationepicmovelistmoveafterid"></a>`moveAfterId` | [`EpicID`](#epicid) | ID of epic that should be placed after the current epic. |
+| <a id="mutationepicmovelistmovebeforeid"></a>`moveBeforeId` | [`EpicID`](#epicid) | ID of epic that should be placed before the current epic. |
+| <a id="mutationepicmovelisttolistid"></a>`toListId` | [`BoardsEpicListID!`](#boardsepiclistid) | ID of the list the epic will be in after mutation. |
 
 #### Fields
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
 | <a id="mutationepicmovelistclientmutationid"></a>`clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
+| <a id="mutationepicmovelistepic"></a>`epic` | [`Epic`](#epic) | The epic after mutation. |
 | <a id="mutationepicmovelisterrors"></a>`errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 
 ### `Mutation.epicSetSubscription`
@@ -2631,6 +2661,31 @@ Input type: `IterationCadenceUpdateInput`
 | <a id="mutationiterationcadenceupdateclientmutationid"></a>`clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 | <a id="mutationiterationcadenceupdateerrors"></a>`errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 | <a id="mutationiterationcadenceupdateiterationcadence"></a>`iterationCadence` | [`IterationCadence`](#iterationcadence) | The updated iteration cadence. |
+
+### `Mutation.iterationCreate`
+
+Input type: `iterationCreateInput`
+
+#### Arguments
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| <a id="mutationiterationcreateclientmutationid"></a>`clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
+| <a id="mutationiterationcreatedescription"></a>`description` | [`String`](#string) | The description of the iteration. |
+| <a id="mutationiterationcreateduedate"></a>`dueDate` | [`String`](#string) | The end date of the iteration. |
+| <a id="mutationiterationcreategrouppath"></a>`groupPath` | [`ID`](#id) | Full path of the group with which the resource is associated. |
+| <a id="mutationiterationcreateiterationscadenceid"></a>`iterationsCadenceId` | [`IterationsCadenceID`](#iterationscadenceid) | Global ID of the iterations cadence to be assigned to newly created iteration. |
+| <a id="mutationiterationcreateprojectpath"></a>`projectPath` | [`ID`](#id) | Full path of the project with which the resource is associated. |
+| <a id="mutationiterationcreatestartdate"></a>`startDate` | [`String`](#string) | The start date of the iteration. |
+| <a id="mutationiterationcreatetitle"></a>`title` | [`String`](#string) | The title of the iteration. |
+
+#### Fields
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| <a id="mutationiterationcreateclientmutationid"></a>`clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
+| <a id="mutationiterationcreateerrors"></a>`errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
+| <a id="mutationiterationcreateiteration"></a>`iteration` | [`Iteration`](#iteration) | The created iteration. |
 
 ### `Mutation.iterationDelete`
 
@@ -7318,6 +7373,38 @@ Represents an epic on an issue board.
 
 #### Fields with arguments
 
+##### `BoardEpic.ancestors`
+
+Ancestors (parents) of the epic.
+
+Returns [`EpicConnection`](#epicconnection).
+
+This field returns a [connection](#connections). It accepts the
+four standard [pagination arguments](#connection-pagination-arguments):
+`before: String`, `after: String`, `first: Int`, `last: Int`.
+
+###### Arguments
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| <a id="boardepicancestorsauthorusername"></a>`authorUsername` | [`String`](#string) | Filter epics by author. |
+| <a id="boardepicancestorsconfidential"></a>`confidential` | [`Boolean`](#boolean) | Filter epics by given confidentiality. |
+| <a id="boardepicancestorsenddate"></a>`endDate` **{warning-solid}** | [`Time`](#time) | **Deprecated** in 13.5. Use timeframe.end. |
+| <a id="boardepicancestorsiid"></a>`iid` | [`ID`](#id) | IID of the epic, e.g., "1". |
+| <a id="boardepicancestorsiidstartswith"></a>`iidStartsWith` | [`String`](#string) | Filter epics by IID for autocomplete. |
+| <a id="boardepicancestorsiids"></a>`iids` | [`[ID!]`](#id) | List of IIDs of epics, e.g., [1, 2]. |
+| <a id="boardepicancestorsincludeancestorgroups"></a>`includeAncestorGroups` | [`Boolean`](#boolean) | Include epics from ancestor groups. |
+| <a id="boardepicancestorsincludedescendantgroups"></a>`includeDescendantGroups` | [`Boolean`](#boolean) | Include epics from descendant groups. |
+| <a id="boardepicancestorslabelname"></a>`labelName` | [`[String!]`](#string) | Filter epics by labels. |
+| <a id="boardepicancestorsmilestonetitle"></a>`milestoneTitle` | [`String`](#string) | Filter epics by milestone title, computed from epic's issues. |
+| <a id="boardepicancestorsmyreactionemoji"></a>`myReactionEmoji` | [`String`](#string) | Filter by reaction emoji applied by the current user. |
+| <a id="boardepicancestorsnot"></a>`not` | [`NegatedEpicFilterInput`](#negatedepicfilterinput) | Negated epic arguments. |
+| <a id="boardepicancestorssearch"></a>`search` | [`String`](#string) | Search query for epic title or description. |
+| <a id="boardepicancestorssort"></a>`sort` | [`EpicSort`](#epicsort) | List epics by sort order. |
+| <a id="boardepicancestorsstartdate"></a>`startDate` **{warning-solid}** | [`Time`](#time) | **Deprecated** in 13.5. Use timeframe.start. |
+| <a id="boardepicancestorsstate"></a>`state` | [`EpicState`](#epicstate) | Filter epics by state. |
+| <a id="boardepicancestorstimeframe"></a>`timeframe` | [`Timeframe`](#timeframe) | List items overlapping the given timeframe. |
+
 ##### `BoardEpic.children`
 
 Children (sub-epics) of the epic.
@@ -8476,6 +8563,38 @@ Represents an epic.
 
 #### Fields with arguments
 
+##### `Epic.ancestors`
+
+Ancestors (parents) of the epic.
+
+Returns [`EpicConnection`](#epicconnection).
+
+This field returns a [connection](#connections). It accepts the
+four standard [pagination arguments](#connection-pagination-arguments):
+`before: String`, `after: String`, `first: Int`, `last: Int`.
+
+###### Arguments
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| <a id="epicancestorsauthorusername"></a>`authorUsername` | [`String`](#string) | Filter epics by author. |
+| <a id="epicancestorsconfidential"></a>`confidential` | [`Boolean`](#boolean) | Filter epics by given confidentiality. |
+| <a id="epicancestorsenddate"></a>`endDate` **{warning-solid}** | [`Time`](#time) | **Deprecated** in 13.5. Use timeframe.end. |
+| <a id="epicancestorsiid"></a>`iid` | [`ID`](#id) | IID of the epic, e.g., "1". |
+| <a id="epicancestorsiidstartswith"></a>`iidStartsWith` | [`String`](#string) | Filter epics by IID for autocomplete. |
+| <a id="epicancestorsiids"></a>`iids` | [`[ID!]`](#id) | List of IIDs of epics, e.g., [1, 2]. |
+| <a id="epicancestorsincludeancestorgroups"></a>`includeAncestorGroups` | [`Boolean`](#boolean) | Include epics from ancestor groups. |
+| <a id="epicancestorsincludedescendantgroups"></a>`includeDescendantGroups` | [`Boolean`](#boolean) | Include epics from descendant groups. |
+| <a id="epicancestorslabelname"></a>`labelName` | [`[String!]`](#string) | Filter epics by labels. |
+| <a id="epicancestorsmilestonetitle"></a>`milestoneTitle` | [`String`](#string) | Filter epics by milestone title, computed from epic's issues. |
+| <a id="epicancestorsmyreactionemoji"></a>`myReactionEmoji` | [`String`](#string) | Filter by reaction emoji applied by the current user. |
+| <a id="epicancestorsnot"></a>`not` | [`NegatedEpicFilterInput`](#negatedepicfilterinput) | Negated epic arguments. |
+| <a id="epicancestorssearch"></a>`search` | [`String`](#string) | Search query for epic title or description. |
+| <a id="epicancestorssort"></a>`sort` | [`EpicSort`](#epicsort) | List epics by sort order. |
+| <a id="epicancestorsstartdate"></a>`startDate` **{warning-solid}** | [`Time`](#time) | **Deprecated** in 13.5. Use timeframe.start. |
+| <a id="epicancestorsstate"></a>`state` | [`EpicState`](#epicstate) | Filter epics by state. |
+| <a id="epicancestorstimeframe"></a>`timeframe` | [`Timeframe`](#timeframe) | List items overlapping the given timeframe. |
+
 ##### `Epic.children`
 
 Children (sub-epics) of the epic.
@@ -8567,6 +8686,7 @@ four standard [pagination arguments](#connection-pagination-arguments):
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
+| <a id="epicboardlistsepicfilters"></a>`epicFilters` | [`EpicFilters`](#epicfilters) | Filters applied when getting epic metadata in the epic board list. |
 | <a id="epicboardlistsid"></a>`id` | [`BoardsEpicListID`](#boardsepiclistid) | Find an epic board list by ID. |
 
 ### `EpicDescendantCount`
@@ -9480,9 +9600,12 @@ Returns [`VulnerabilitySeveritiesCount`](#vulnerabilityseveritiescount).
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
+| <a id="groupvulnerabilityseveritiescounthasissues"></a>`hasIssues` | [`Boolean`](#boolean) | Filter vulnerabilities that do or do not have issues. |
+| <a id="groupvulnerabilityseveritiescounthasresolution"></a>`hasResolution` | [`Boolean`](#boolean) | Filter vulnerabilities that do or do not have a resolution. |
 | <a id="groupvulnerabilityseveritiescountprojectid"></a>`projectId` | [`[ID!]`](#id) | Filter vulnerabilities by project. |
 | <a id="groupvulnerabilityseveritiescountreporttype"></a>`reportType` | [`[VulnerabilityReportType!]`](#vulnerabilityreporttype) | Filter vulnerabilities by report type. |
 | <a id="groupvulnerabilityseveritiescountscanner"></a>`scanner` | [`[String!]`](#string) | Filter vulnerabilities by scanner. |
+| <a id="groupvulnerabilityseveritiescountscannerid"></a>`scannerId` | [`[VulnerabilitiesScannerID!]`](#vulnerabilitiesscannerid) | Filter vulnerabilities by scanner ID. |
 | <a id="groupvulnerabilityseveritiescountseverity"></a>`severity` | [`[VulnerabilitySeverity!]`](#vulnerabilityseverity) | Filter vulnerabilities by severity. |
 | <a id="groupvulnerabilityseveritiescountstate"></a>`state` | [`[VulnerabilityState!]`](#vulnerabilitystate) | Filter vulnerabilities by state. |
 
@@ -9501,7 +9624,7 @@ Represents a Group Membership.
 | <a id="groupmembergroup"></a>`group` | [`Group`](#group) | Group that a User is a member of. |
 | <a id="groupmemberid"></a>`id` | [`ID!`](#id) | ID of the member. |
 | <a id="groupmemberupdatedat"></a>`updatedAt` | [`Time`](#time) | Date and time the membership was last updated. |
-| <a id="groupmemberuser"></a>`user` | [`UserCore!`](#usercore) | User that is associated with the member object. |
+| <a id="groupmemberuser"></a>`user` | [`UserCore`](#usercore) | User that is associated with the member object. |
 | <a id="groupmemberuserpermissions"></a>`userPermissions` | [`GroupPermissions!`](#grouppermissions) | Permissions for the current user on the resource. |
 
 ### `GroupPermissions`
@@ -9648,9 +9771,12 @@ Returns [`VulnerabilitySeveritiesCount`](#vulnerabilityseveritiescount).
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
+| <a id="instancesecuritydashboardvulnerabilityseveritiescounthasissues"></a>`hasIssues` | [`Boolean`](#boolean) | Filter vulnerabilities that do or do not have issues. |
+| <a id="instancesecuritydashboardvulnerabilityseveritiescounthasresolution"></a>`hasResolution` | [`Boolean`](#boolean) | Filter vulnerabilities that do or do not have a resolution. |
 | <a id="instancesecuritydashboardvulnerabilityseveritiescountprojectid"></a>`projectId` | [`[ID!]`](#id) | Filter vulnerabilities by project. |
 | <a id="instancesecuritydashboardvulnerabilityseveritiescountreporttype"></a>`reportType` | [`[VulnerabilityReportType!]`](#vulnerabilityreporttype) | Filter vulnerabilities by report type. |
 | <a id="instancesecuritydashboardvulnerabilityseveritiescountscanner"></a>`scanner` | [`[String!]`](#string) | Filter vulnerabilities by scanner. |
+| <a id="instancesecuritydashboardvulnerabilityseveritiescountscannerid"></a>`scannerId` | [`[VulnerabilitiesScannerID!]`](#vulnerabilitiesscannerid) | Filter vulnerabilities by scanner ID. |
 | <a id="instancesecuritydashboardvulnerabilityseveritiescountseverity"></a>`severity` | [`[VulnerabilitySeverity!]`](#vulnerabilityseverity) | Filter vulnerabilities by severity. |
 | <a id="instancesecuritydashboardvulnerabilityseveritiescountstate"></a>`state` | [`[VulnerabilityState!]`](#vulnerabilitystate) | Filter vulnerabilities by state. |
 
@@ -11884,9 +12010,12 @@ Returns [`VulnerabilitySeveritiesCount`](#vulnerabilityseveritiescount).
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
+| <a id="projectvulnerabilityseveritiescounthasissues"></a>`hasIssues` | [`Boolean`](#boolean) | Filter vulnerabilities that do or do not have issues. |
+| <a id="projectvulnerabilityseveritiescounthasresolution"></a>`hasResolution` | [`Boolean`](#boolean) | Filter vulnerabilities that do or do not have a resolution. |
 | <a id="projectvulnerabilityseveritiescountprojectid"></a>`projectId` | [`[ID!]`](#id) | Filter vulnerabilities by project. |
 | <a id="projectvulnerabilityseveritiescountreporttype"></a>`reportType` | [`[VulnerabilityReportType!]`](#vulnerabilityreporttype) | Filter vulnerabilities by report type. |
 | <a id="projectvulnerabilityseveritiescountscanner"></a>`scanner` | [`[String!]`](#string) | Filter vulnerabilities by scanner. |
+| <a id="projectvulnerabilityseveritiescountscannerid"></a>`scannerId` | [`[VulnerabilitiesScannerID!]`](#vulnerabilitiesscannerid) | Filter vulnerabilities by scanner ID. |
 | <a id="projectvulnerabilityseveritiescountseverity"></a>`severity` | [`[VulnerabilitySeverity!]`](#vulnerabilityseverity) | Filter vulnerabilities by severity. |
 | <a id="projectvulnerabilityseveritiescountstate"></a>`state` | [`[VulnerabilityState!]`](#vulnerabilitystate) | Filter vulnerabilities by state. |
 
@@ -11916,7 +12045,7 @@ Represents a Project Membership.
 | <a id="projectmemberid"></a>`id` | [`ID!`](#id) | ID of the member. |
 | <a id="projectmemberproject"></a>`project` | [`Project`](#project) | Project that User is a member of. |
 | <a id="projectmemberupdatedat"></a>`updatedAt` | [`Time`](#time) | Date and time the membership was last updated. |
-| <a id="projectmemberuser"></a>`user` | [`UserCore!`](#usercore) | User that is associated with the member object. |
+| <a id="projectmemberuser"></a>`user` | [`UserCore`](#usercore) | User that is associated with the member object. |
 | <a id="projectmemberuserpermissions"></a>`userPermissions` | [`ProjectPermissions!`](#projectpermissions) | Permissions for the current user on the resource. |
 
 ### `ProjectPermissions`
@@ -15687,7 +15816,7 @@ Implementations:
 | <a id="memberinterfaceexpiresat"></a>`expiresAt` | [`Time`](#time) | Date and time the membership expires. |
 | <a id="memberinterfaceid"></a>`id` | [`ID!`](#id) | ID of the member. |
 | <a id="memberinterfaceupdatedat"></a>`updatedAt` | [`Time`](#time) | Date and time the membership was last updated. |
-| <a id="memberinterfaceuser"></a>`user` | [`UserCore!`](#usercore) | User that is associated with the member object. |
+| <a id="memberinterfaceuser"></a>`user` | [`UserCore`](#usercore) | User that is associated with the member object. |
 
 #### `Noteable`
 

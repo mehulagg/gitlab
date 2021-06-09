@@ -9,6 +9,12 @@ module Boards
         EpicsFinder.new(current_user, filter_params.merge(group_id: parent.id))
       end
 
+      def filter(items)
+        return super unless params[:from_id].present?
+
+        super.from_id(params[:from_id])
+      end
+
       def board
         @board ||= parent.epic_boards.find(params[:board_id])
       end

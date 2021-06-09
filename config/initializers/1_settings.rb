@@ -216,6 +216,8 @@ Settings.gitlab['impersonation_enabled'] ||= true if Settings.gitlab['impersonat
 Settings.gitlab['usage_ping_enabled'] = true if Settings.gitlab['usage_ping_enabled'].nil?
 Settings.gitlab['max_request_duration_seconds'] ||= 57
 
+Settings.gitlab['display_initial_root_password'] = true if Settings.gitlab['display_initial_root_password'].nil?
+
 Gitlab.ee do
   Settings.gitlab['mirror_max_delay'] ||= 300
   Settings.gitlab['mirror_max_capacity'] ||= 30
@@ -676,9 +678,6 @@ Gitlab.ee do
   Settings.cron_jobs['sync_seat_link_worker'] ||= Settingslogic.new({})
   Settings.cron_jobs['sync_seat_link_worker']['cron'] ||= "#{rand(60)} 3 * * * UTC"
   Settings.cron_jobs['sync_seat_link_worker']['job_class'] = 'SyncSeatLinkWorker'
-  Settings.cron_jobs['web_application_firewall_metrics_worker'] ||= Settingslogic.new({})
-  Settings.cron_jobs['web_application_firewall_metrics_worker']['cron'] ||= '0 1 * * 0'
-  Settings.cron_jobs['web_application_firewall_metrics_worker']['job_class'] = 'IngressModsecurityCounterMetricsWorker'
   Settings.cron_jobs['users_create_statistics_worker'] ||= Settingslogic.new({})
   Settings.cron_jobs['users_create_statistics_worker']['cron'] ||= '2 15 * * *'
   Settings.cron_jobs['users_create_statistics_worker']['job_class'] = 'Users::CreateStatisticsWorker'

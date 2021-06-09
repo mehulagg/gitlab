@@ -101,7 +101,7 @@ export default {
 };
 </script>
 <template>
-  <div>
+  <div data-testid="deployment-frequency-charts">
     <dora-chart-header
       :header-text="s__('DORA4Metrics|Deployment frequency')"
       :chart-description-text="$options.chartDescriptionText"

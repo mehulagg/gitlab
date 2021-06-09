@@ -10,7 +10,7 @@ RSpec.describe AddNewDataToMergeRequestsDocuments, :elastic, :sidekiq_inline do
 
   before do
     stub_ee_application_setting(elasticsearch_search: true, elasticsearch_indexing: true)
-    set_elasticsearch_migration_to :add_permissions_data_to_notes_documents, including: false
+    set_elasticsearch_migration_to :add_new_data_to_merge_requests_documents, including: false
 
     # ensure merge_requests are indexed
     merge_requests

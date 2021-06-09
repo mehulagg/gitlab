@@ -58,10 +58,8 @@ module Resolvers
         iid: args[:iid],
         iteration_cadence_ids: args[:iteration_cadence_ids],
         state: args[:state] || 'all',
-        start_date: args.dig(:timeframe, :start) || args[:start_date],
-        end_date: args.dig(:timeframe, :end) || args[:end_date],
         search_title: args[:title]
-      }
+      }.merge(transform_timeframe_parameters(args))
     end
 
     def parent

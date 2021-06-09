@@ -19,7 +19,7 @@ RSpec.describe Boards::Epics::MoveService do
     let_it_be(:closed) { create(:epic_list, epic_board: board, list_type: :closed, label: nil) }
     let_it_be(:other_board_list) { create(:epic_list, epic_board: other_board, list_type: :closed, label: nil) }
 
-    let(:epic) { create(:epic, group: group) }
+    let_it_be_with_reload(:epic) { create(:epic, group: group) }
 
     let(:params) { { board_id: board.id, from_list_id: from_list.id, to_list_id: to_list.id } }
     let(:from_list) { backlog }
@@ -40,36 +40,6 @@ RSpec.describe Boards::Epics::MoveService do
     context 'when user has permissions to move an epic' do
       before do
         group.add_maintainer(user)
-      end
-
-      context 'when repositioning epics' do
-        let_it_be(:epic1) { create(:epic, group: group) }
-        let_it_be(:epic2) { create(:epic, group: group) }
-
-        let!(:epic_position) { create(:epic_board_position, epic: epic, epic_board: board, relative_position: 10) }
-        let!(:epic1_position) { create(:epic_board_position, epic: epic1, epic_board: board, relative_position: 20) }
-        let!(:epic2_position) { create(:epic_board_position, epic: epic2, epic_board: board, relative_position: 30) }
-
-        let(:params) { { board_id: board.id, move_before_id: epic1.id } }
-
-        context 'with valid params' do
-          it 'moves the epic' do
-            subject
-
-            expect(epic_position.reload.relative_position).to be > epic1_position.relative_position
-            expect(epic_position.relative_position).to be < epic2_position.relative_position
-          end
-        end
-
-        context 'with invalid params' do
-          context 'with board from another group' do
-            let(:board) { create(:epic_board) }
-
-            it 'raises an error' do
-              expect { subject }.to raise_error(ActiveRecord::RecordNotFound)
-            end
-          end
-        end
       end
 
       context 'when moving an epic between lists' do
@@ -128,6 +98,117 @@ RSpec.describe Boards::Epics::MoveService do
 
               expect(epic.labels).to eq([no_board_label])
             end
+          end
+        end
+      end
+
+      context 'when repositioning an epic' do
+        let_it_be(:epic1) { create(:epic, group: group) }
+        let_it_be(:epic2) { create(:epic, group: group) }
+        let_it_be(:epic3) { create(:epic, group: group) }
+
+        def create_positions
+          create(:epic_board_position, epic: epic3, epic_board: board, relative_position: 40)
+          create(:epic_board_position, epic: epic, epic_board: board, relative_position: 50)
+          create(:epic_board_position, epic: epic2, epic_board: board, relative_position: 60)
+          create(:epic_board_position, epic: epic1, epic_board: board, relative_position: 80)
+        end
+
+        let(:params) do
+          {
+            board_id: board.id,
+            to_list_id: backlog.id
+          }
+        end
+
+        def epic_relative_position(epic)
+          epic.epic_board_positions.find_by(epic_board_id: board.id)&.relative_position
+        end
+
+        context 'with invalid params' do
+          context 'with board from another group' do
+            let(:other_group) { create(:group) }
+            let(:board) { create(:epic_board, group: other_group) }
+
+            before do
+              other_group.add_maintainer(user)
+              params[:move_before_id] = epic2.id
+            end
+
+            it 'raises an error' do
+              expect { subject }.to raise_error(ActiveRecord::RecordNotFound)
+            end
+          end
+        end
+
+        shared_examples 'correct positioning' do
+          context 'when both move_before_id and move_after_id are present' do
+            before do
+              params[:move_before_id] = epic2.id
+              params[:move_after_id] = epic1.id
+            end
+
+            it 'moves the epic' do
+              subject
+
+              expect(epic_relative_position(epic)).to be > epic_relative_position(epic2)
+            end
+          end
+
+          context 'when only move_before_id is present' do
+            before do
+              params[:move_before_id] = epic1.id
+            end
+
+            it 'moves the epic' do
+              subject
+
+              expect(epic_relative_position(epic)).to be > epic_relative_position(epic1)
+            end
+          end
+
+          context 'when only move_after_id is present' do
+            before do
+              params[:move_after_id] = epic3.id
+            end
+
+            it 'moves the epic' do
+              subject
+
+              expect(epic_relative_position(epic)).to be < epic_relative_position(epic3)
+            end
+          end
+        end
+
+        context 'in current list' do
+          context 'when all epics have respective position records' do
+            before do
+              create_positions
+            end
+
+            it_behaves_like 'correct positioning'
+          end
+
+          context 'when epics do not have respective position records' do
+            it_behaves_like 'correct positioning'
+          end
+        end
+
+        context 'during a movement to another list' do
+          before do
+            epic.labels = [development]
+          end
+
+          context 'when all epics have respective position records' do
+            before do
+              create_positions
+            end
+
+            it_behaves_like 'correct positioning'
+          end
+
+          context 'when epics do not have respective position records' do
+            it_behaves_like 'correct positioning'
           end
         end
       end

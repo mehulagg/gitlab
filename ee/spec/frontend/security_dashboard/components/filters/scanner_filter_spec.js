@@ -1,4 +1,4 @@
-import { GlDropdownItem } from '@gitlab/ui';
+import { GlDropdownItem, GlDropdownDivider } from '@gitlab/ui';
 import { createLocalVue, shallowMount } from '@vue/test-utils';
 import { sampleSize, cloneDeep } from 'lodash';
 import VueRouter from 'vue-router';
@@ -17,7 +17,7 @@ const createScannerConfig = (vendor, reportType, id) => ({
   id,
 });
 
-const scanners = [
+const defaultScanners = [
   createScannerConfig(DEFAULT_SCANNER, 'DEPENDENCY_SCANNING', 1),
   createScannerConfig(DEFAULT_SCANNER, 'DEPENDENCY_SCANNING', 2),
   createScannerConfig(DEFAULT_SCANNER, 'SAST', 3),
@@ -26,6 +26,10 @@ const scanners = [
   createScannerConfig(DEFAULT_SCANNER, 'CONTAINER_SCANNING', 6),
   createScannerConfig(DEFAULT_SCANNER, 'DAST', 7),
   createScannerConfig(DEFAULT_SCANNER, 'DAST', 8),
+];
+
+const customScanners = [
+  ...defaultScanners,
   createScannerConfig('Custom', 'SAST', 9),
   createScannerConfig('Custom', 'SAST', 10),
   createScannerConfig('Custom', 'DAST', 11),
@@ -35,7 +39,7 @@ describe('Scanner Filter component', () => {
   let wrapper;
   let filter;
 
-  const createWrapper = () => {
+  const createWrapper = ({ scanners = customScanners } = {}) => {
     filter = cloneDeep(scannerFilter);
 
     wrapper = shallowMount(ScannerFilter, {
@@ -46,6 +50,9 @@ describe('Scanner Filter component', () => {
     });
   };
 
+  const getTestIds = (selector) =>
+    wrapper.findAll(selector).wrappers.map((x) => x.attributes('data-testid'));
+
   afterEach(() => {
     wrapper.destroy();
     // Clear out the querystring if one exists, it persists between tests.
@@ -54,67 +61,81 @@ describe('Scanner Filter component', () => {
     }
   });
 
-  it('shows the correct dropdown items', () => {
-    createWrapper();
-    const getTestIds = (selector) =>
-      wrapper.findAll(selector).wrappers.map((x) => x.attributes('data-testid'));
+  describe('default scanners only', () => {
+    it('shows the dropdown items with no headers or dividers', () => {
+      createWrapper({ scanners: defaultScanners });
+      const options = getTestIds(FilterItem);
+      const expectedOptions = ['all', ...filter.options.map((x) => x.id)];
 
-    const options = getTestIds(FilterItem);
-    const expectedOptions = [
-      'all',
-      ...filter.options.map((x) => x.id),
-      'Custom.SAST',
-      'Custom.DAST',
-    ];
-
-    const headers = getTestIds(GlDropdownItem);
-    const expectedHeaders = ['GitLabHeader', 'CustomHeader'];
-
-    expect(options).toEqual(expectedOptions);
-    expect(headers).toEqual(expectedHeaders);
+      expect(options).toEqual(expectedOptions);
+      expect(wrapper.find(GlDropdownDivider).exists()).toBe(false);
+      expect(wrapper.find(GlDropdownItem).exists()).toBe(false);
+    });
   });
 
-  it('toggles selection of all items in a group when the group header is clicked', async () => {
-    createWrapper();
-    const expectSelectedItems = (items) => {
-      const checkedItems = wrapper
-        .findAll(FilterItem)
-        .wrappers.filter((x) => x.props('isChecked'))
-        .map((x) => x.attributes('data-testid'));
-      const expectedItems = items.map((x) => x.id);
+  describe('default and custom scanners', () => {
+    it('shows the correct dropdown items', () => {
+      createWrapper();
 
-      expect(checkedItems.sort()).toEqual(expectedItems.sort());
-    };
+      const options = getTestIds(FilterItem);
+      const expectedOptions = [
+        'all',
+        ...filter.options.map((x) => x.id),
+        'Custom.SAST',
+        'Custom.DAST',
+      ];
 
-    const clickAndCheck = async (expectedOptions) => {
-      await wrapper.find('[data-testid="GitLabHeader"]').trigger('click');
+      const headers = getTestIds(GlDropdownItem);
+      const expectedHeaders = ['GitLabHeader', 'CustomHeader'];
 
-      expectSelectedItems(expectedOptions);
-    };
+      expect(options).toEqual(expectedOptions);
+      expect(headers).toEqual(expectedHeaders);
+    });
 
-    const selectedOptions = sampleSize(filter.options, 3); // Randomly select some options.
-    await wrapper.setData({ selectedOptions });
+    it('toggles selection of all items in a group when the group header is clicked', async () => {
+      createWrapper();
+      const expectSelectedItems = (items) => {
+        const checkedItems = wrapper
+          .findAll(FilterItem)
+          .wrappers.filter((x) => x.props('isChecked'))
+          .map((x) => x.attributes('data-testid'));
+        const expectedItems = items.map((x) => x.id);
 
-    expectSelectedItems(selectedOptions);
+        expect(checkedItems.sort()).toEqual(expectedItems.sort());
+      };
 
-    await clickAndCheck(filter.options); // First click selects all.
-    await clickAndCheck([filter.allOption]); // Second check unselects all.
-    await clickAndCheck(filter.options); // Third click selects all again.
-  });
+      const clickAndCheck = async (expectedOptions) => {
+        await wrapper.find('[data-testid="GitLabHeader"]').trigger('click');
 
-  it('emits filter-changed event with expected data for selected options', async () => {
-    const ids = ['GitLab.SAST', 'Custom.SAST', 'GitLab.API_FUZZING', 'GitLab.COVERAGE_FUZZING'];
-    router.replace({ query: { [scannerFilter.id]: ids } });
-    const selectedScanners = scanners.filter((x) => ids.includes(`${x.vendor}.${x.report_type}`));
-    createWrapper();
-    await wrapper.vm.$nextTick();
+        expectSelectedItems(expectedOptions);
+      };
 
-    expect(wrapper.emitted('filter-changed')[0][0]).toEqual({
-      scannerId: expect.arrayContaining([
-        ...selectedScanners.map((x) => `${SCANNER_ID_PREFIX}${x.id}`),
-        `${SCANNER_ID_PREFIX}COVERAGE_FUZZING:null`,
-        `${SCANNER_ID_PREFIX}API_FUZZING:null`,
-      ]),
+      const selectedOptions = sampleSize(filter.options, 3); // Randomly select some options.
+      await wrapper.setData({ selectedOptions });
+
+      expectSelectedItems(selectedOptions);
+
+      await clickAndCheck(filter.options); // First click selects all.
+      await clickAndCheck([filter.allOption]); // Second check unselects all.
+      await clickAndCheck(filter.options); // Third click selects all again.
+    });
+
+    it('emits filter-changed event with expected data for selected options', async () => {
+      const ids = ['GitLab.SAST', 'Custom.SAST', 'GitLab.API_FUZZING', 'GitLab.COVERAGE_FUZZING'];
+      router.replace({ query: { [scannerFilter.id]: ids } });
+      const selectedScanners = customScanners.filter((x) =>
+        ids.includes(`${x.vendor}.${x.report_type}`),
+      );
+      createWrapper();
+      await wrapper.vm.$nextTick();
+
+      expect(wrapper.emitted('filter-changed')[0][0]).toEqual({
+        scannerId: expect.arrayContaining([
+          ...selectedScanners.map((x) => `${SCANNER_ID_PREFIX}${x.id}`),
+          `${SCANNER_ID_PREFIX}COVERAGE_FUZZING:null`,
+          `${SCANNER_ID_PREFIX}API_FUZZING:null`,
+        ]),
+      });
     });
   });
 });

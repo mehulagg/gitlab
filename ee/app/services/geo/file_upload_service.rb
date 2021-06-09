@@ -27,7 +27,6 @@ module Geo
     def retriever_klass
       return Gitlab::Geo::Replication::FileRetriever if user_upload?
       return Gitlab::Geo::Replication::JobArtifactRetriever if job_artifact?
-      return Gitlab::Geo::Replication::LfsRetriever if lfs?
 
       fail_unimplemented_klass!(type: 'Retriever')
     end

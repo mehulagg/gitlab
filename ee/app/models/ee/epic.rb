@@ -74,6 +74,7 @@ module EE
       scope :in_issues, -> (issues) { joins(:epic_issues).where(epic_issues: { issue_id: issues }).distinct }
       scope :has_parent, -> { where.not(parent_id: nil) }
       scope :iid_starts_with, -> (query) { where("CAST(iid AS VARCHAR) LIKE ?", "#{sanitize_sql_like(query)}%") }
+      scope :from_id, -> (epic_id) { where('epics.id >= ?', epic_id) }
 
       scope :with_web_entity_associations, -> { preload(:author, group: [:ip_restrictions, :route]) }
 
@@ -117,10 +118,23 @@ module EE
         reorder('relative_position ASC', 'id DESC')
       end
 
+      scope :join_board_position, ->(board_id) do
+        epics = ::Epic.arel_table
+        positions = ::Boards::EpicBoardPosition.arel_table
+
+        epic_positions = epics.join(positions, Arel::Nodes::OuterJoin)
+          .on(epics[:id].eq(positions[:epic_id]).and(positions[:epic_board_id].eq(board_id)))
+
+        joins(epic_positions.join_sources)
+      end
+
       scope :order_relative_position_on_board, ->(board_id) do
-        left_joins(:epic_board_positions)
-          .where(boards_epic_board_positions: { epic_board_id: [nil, board_id] })
+        join_board_position(board_id)
           .reorder(::Gitlab::Database.nulls_last_order('boards_epic_board_positions.relative_position', 'ASC'), 'epics.id DESC')
+      end
+
+      scope :without_board_position, ->(board_id) do
+        where(boards_epic_board_positions: { relative_position: nil })
       end
 
       scope :with_api_entity_associations, -> { preload(:author, :labels, group: :route) }

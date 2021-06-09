@@ -36,7 +36,6 @@ module EE
         expose :db_replication_lag_seconds
 
         expose :attachments_replication_enabled
-        expose :lfs_objects_replication_enabled, if: -> (*) { ::Feature.enabled?(:geo_lfs_object_replication, default_enabled: :yaml) }
         expose :job_artifacts_replication_enabled
         expose :container_repositories_replication_enabled
         expose :design_repositories_replication_enabled

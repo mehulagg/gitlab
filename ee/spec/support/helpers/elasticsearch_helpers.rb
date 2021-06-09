@@ -43,7 +43,7 @@ module ElasticsearchHelpers
     version = if name_or_version.is_a?(Numeric)
                 name_or_version
               else
-                Elastic::DataMigrationService.find_by_name(name_or_version).version
+                Elastic::DataMigrationService.find_by_name!(name_or_version).version
               end
 
     Elastic::DataMigrationService.migrations.each do |migration|

@@ -1,7 +1,6 @@
 import dateFormat from 'dateformat';
 import {
   getMonthNames,
-  dateFromParams,
   getDateInPast,
   getDayDifference,
   secondsToDays,
@@ -32,8 +31,8 @@ export const computeMonthRangeData = (startDate, endDate, format = dateFormats.i
     const monthIndex = dateCursor.getMonth();
     const year = dateCursor.getFullYear();
 
-    const mergedAfter = dateFromParams(year, monthIndex, 1);
-    const mergedBefore = dateFromParams(year, monthIndex + 1, 1);
+    const mergedAfter = new Date(year, monthIndex, 1);
+    const mergedBefore = new Date(year, monthIndex + 1, 1);
 
     monthData.unshift({
       year,

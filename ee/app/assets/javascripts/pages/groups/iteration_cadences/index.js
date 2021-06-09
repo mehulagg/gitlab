@@ -1,3 +1,3 @@
-import { initCadenceApp } from 'ee/iterations';
+import { initGroupCadenceApp } from 'ee/iterations';
 
-initCadenceApp();
+initGroupCadenceApp();

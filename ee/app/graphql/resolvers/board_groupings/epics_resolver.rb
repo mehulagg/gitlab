@@ -3,7 +3,7 @@
 module Resolvers
   module BoardGroupings
     class EpicsResolver < BaseResolver
-      include ::BoardIssueFilterable
+      include ::BoardItemFilterable
 
       alias_method :board, :object
 
@@ -25,7 +25,7 @@ module Resolvers
       private
 
       def board_epic_ids(issue_params)
-        params = issue_filters(issue_params).merge(all_lists: true, board_id: board.id)
+        params = item_filters(issue_params).merge(all_lists: true, board_id: board.id)
 
         list_service = ::Boards::Issues::ListService.new(
           board.resource_parent,

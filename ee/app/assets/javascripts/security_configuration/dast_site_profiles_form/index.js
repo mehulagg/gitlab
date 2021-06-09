@@ -10,7 +10,7 @@ export default () => {
     return;
   }
 
-  const { fullPath, profilesLibraryPath, onDemandScansPath } = el.dataset;
+  const { fullPath, profilesLibraryPath, onDemandScansPath, dastConfigurationPath } = el.dataset;
 
   const props = {
     fullPath,
@@ -21,7 +21,7 @@ export default () => {
   }
 
   const factoryParams = {
-    onDemandScansPath,
+    allowedPaths: [onDemandScansPath, dastConfigurationPath],
     profilesLibraryPath,
     urlParamKey: 'site_profile_id',
   };

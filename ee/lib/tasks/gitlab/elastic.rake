@@ -51,7 +51,7 @@ namespace :gitlab do
 
     desc "GitLab | Elasticsearch | Index all snippets"
     task index_snippets: :environment do
-      logger = Logger.new(STDOUT)
+      logger = Logger.new($stdout)
       logger.info("Indexing snippets...")
 
       Snippet.es_import

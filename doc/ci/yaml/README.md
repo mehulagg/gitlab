@@ -15,7 +15,7 @@ This document lists the configuration options for your GitLab `.gitlab-ci.yml` f
 
 - For a quick introduction to GitLab CI/CD, follow the [quick start guide](../quick_start/index.md).
 - For a collection of examples, see [GitLab CI/CD Examples](../examples/README.md).
-- To view a large `.gitlab-ci.yml` file used in an enterprise, see the [`.gitlab-ci.yml` file for `gitlab`](https://gitlab.com/gitlab-org/gitlab/blob/master/.gitlab-ci.yml).
+- To view a large `.gitlab-ci.yml` file used in an enterprise, see the [`.gitlab-ci.yml` file for `gitlab`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/.gitlab-ci.yml).
 
 When you are editing your `.gitlab-ci.yml` file, you can validate it with the
 [CI Lint](../lint.md) tool.
@@ -609,7 +609,7 @@ so you can only `include` public projects or templates.
 > [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/issues/53445) in GitLab 11.7.
 
 Use `include:template` to include `.gitlab-ci.yml` templates that are
-[shipped with GitLab](https://gitlab.com/gitlab-org/gitlab/tree/master/lib/gitlab/ci/templates).
+[shipped with GitLab](https://gitlab.com/gitlab-org/gitlab/-/tree/master/lib/gitlab/ci/templates).
 
 For example:
 
@@ -3306,7 +3306,7 @@ job:
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/49775) in GitLab 13.8
 > - It's [deployed behind a feature flag](../../user/feature_flags.md), disabled by default.
-> - It's enabled on GitLab.com.
+> - It's disabled on GitLab.com.
 > - It's recommended for production use.
 
 Use `artifacts:public` to determine whether the job artifacts should be
@@ -3524,12 +3524,13 @@ as artifacts.
 
 The collected Metrics report uploads to GitLab as an artifact and displays in merge requests.
 
-##### `artifacts:reports:performance` **(PREMIUM)**
+##### `artifacts:reports:browser_performance` **(PREMIUM)**
 
 > - Introduced in GitLab 11.5.
 > - Requires GitLab Runner 11.5 and above.
+> - [Name changed](https://gitlab.com/gitlab-org/gitlab/-/issues/225914) from `artifacts:reports:performance` in GitLab 14.0.
 
-The `performance` report collects [Browser Performance Testing metrics](../../user/project/merge_requests/browser_performance_testing.md)
+The `browser_performance` report collects [Browser Performance Testing metrics](../../user/project/merge_requests/browser_performance_testing.md)
 as artifacts.
 
 The collected Browser Performance report uploads to GitLab as an artifact and displays in merge requests.
@@ -4217,7 +4218,7 @@ finishes.
 
 ### `release`
 
-> [Introduced](https://gitlab.com/gitlab-org/gitlab/merge_requests/19298) in GitLab 13.2.
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/19298) in GitLab 13.2.
 
 Use `release` to create a [release](../../user/project/releases/index.md).
 Requires the [`release-cli`](https://gitlab.com/gitlab-org/release-cli/-/tree/master/docs)

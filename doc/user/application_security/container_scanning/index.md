@@ -76,10 +76,10 @@ To enable container scanning in your pipeline, you need the following:
 How you enable container scanning depends on your GitLab version:
 
 - GitLab 11.9 and later: [Include](../../../ci/yaml/README.md#includetemplate) the
-  [`Container-Scanning.gitlab-ci.yml` template](https://gitlab.com/gitlab-org/gitlab/blob/master/lib/gitlab/ci/templates/Security/Container-Scanning.gitlab-ci.yml)
+  [`Container-Scanning.gitlab-ci.yml` template](https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/Security/Container-Scanning.gitlab-ci.yml)
   that comes with your GitLab installation.
 - GitLab versions earlier than 11.9: Copy and use the job from the
-  [`Container-Scanning.gitlab-ci.yml` template](https://gitlab.com/gitlab-org/gitlab/blob/master/lib/gitlab/ci/templates/Security/Container-Scanning.gitlab-ci.yml).
+  [`Container-Scanning.gitlab-ci.yml` template](https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/Security/Container-Scanning.gitlab-ci.yml).
 - GitLab 13.6 [introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/263482) better support for
   [FIPS](https://csrc.nist.gov/publications/detail/fips/140/2/final) by upgrading the
   `CS_MAJOR_VERSION` from `2` to `3`. Version `3` of the `container_scanning` Docker image uses
@@ -175,7 +175,7 @@ You can [configure](#customizing-the-container-scanning-settings) analyzers by u
 | `CI_APPLICATION_TAG`           | `$CI_COMMIT_SHA` | Docker repository tag for the image to be scanned. | All |
 | `CS_ANALYZER_IMAGE`            | `$SECURE_ANALYZERS_PREFIX/$CS_PROJECT:$CS_MAJOR_VERSION`           | Docker image of the analyzer. | All |
 | `CS_DOCKER_INSECURE`           | `"false"`     | Allow access to secure Docker registries using HTTPS without validating the certificates. | All |
-| `CS_REGISTRY_INSECURE`         | `"false"`     | Allow access to insecure registries (HTTP only). Should only be set to `true` when testing the image locally. | All |
+| `CS_REGISTRY_INSECURE`         | `"false"`     | Allow access to insecure registries (HTTP only). Should only be set to `true` when testing the image locally. | Trivy. The registry must listen on port `80/tcp`. |
 | `CS_SEVERITY_THRESHOLD`        | `UNKNOWN`     | Severity level threshold. The scanner outputs vulnerabilities with severity level higher than or equal to this threshold. Supported levels are Unknown, Low, Medium, High, and Critical. | Trivy |
 | `DOCKER_IMAGE`                 | `$CI_APPLICATION_REPOSITORY:$CI_APPLICATION_TAG` | The Docker image to be scanned. If set, this variable overrides the `$CI_APPLICATION_REPOSITORY` and `$CI_APPLICATION_TAG` variables. | All |
 | `DOCKER_PASSWORD`              | `$CI_REGISTRY_PASSWORD` | Password for accessing a Docker registry requiring authentication. | All |
@@ -225,7 +225,7 @@ your CI file:
 1. If present, remove the `.cs_common` and `container_scanning_new` configuration sections.
 
 1. If the `container_scanning` section is present, it's safer to create one from scratch based on
-   the new version of the [`Container-Scanning.gitlab-ci.yml` template](https://gitlab.com/gitlab-org/gitlab/blob/master/lib/gitlab/ci/templates/Security/Container-Scanning.gitlab-ci.yml).
+   the new version of the [`Container-Scanning.gitlab-ci.yml` template](https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/Security/Container-Scanning.gitlab-ci.yml).
    Once finished, it should not have any variables that are only applicable to Klar or Clair. For a
    complete list of supported variables, see [available variables](#available-cicd-variables).
 

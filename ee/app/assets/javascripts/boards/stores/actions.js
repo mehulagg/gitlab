@@ -245,6 +245,9 @@ export default {
     { state, commit, getters },
     { listId, fetchNext = false, noEpicIssues = false, forSwimlanes = false },
   ) => {
+    if (!fetchNext && !state.isShowingEpicsSwimlanes) {
+      commit(types.RESET_ITEMS_FOR_LIST, listId);
+    }
     commit(types.REQUEST_ITEMS_FOR_LIST, { listId, fetchNext });
 
     const { epicId, ...filterParams } = state.filterParams;
@@ -405,6 +408,8 @@ export default {
           boardId: fullEpicBoardId(boardId),
           fromListId,
           toListId,
+          moveAfterId: moveAfterId ? fullEpicId(moveAfterId) : undefined,
+          moveBeforeId: moveBeforeId ? fullEpicId(moveBeforeId) : undefined,
         },
       })
       .then(({ data }) => {
@@ -535,14 +540,17 @@ export default {
       })
       .then(({ data }) => {
         const [firstError] = data.workspace.errors || [];
-        const assignees = data.workspace.assignees.nodes;
+        const assignees = data.workspace.assignees.nodes
+          .filter((x) => x?.user)
+          .map(({ user }) => user);
 
         if (firstError) {
           throw new Error(firstError);
         }
         commit(
           types.RECEIVE_ASSIGNEES_SUCCESS,
-          assignees.map(({ user }) => user),
+          // User field is nullable and we only want to display non-null users
+          assignees,
         );
       })
       .catch((e) => {

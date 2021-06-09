@@ -20,11 +20,7 @@ class ElasticDeleteProjectWorker
   def indices
     helper = Gitlab::Elastic::Helper.default
 
-    index_names = [helper.target_name]
-
-    if Elastic::DataMigrationService.migration_has_finished?(:migrate_issues_to_separate_index)
-      index_names << helper.standalone_indices_proxies(target_classes: [Issue]).map(&:index_name)
-    end
+    index_names = [helper.target_name] + helper.standalone_indices_proxies(target_classes: [Issue]).map(&:index_name)
 
     if Elastic::DataMigrationService.migration_has_finished?(:migrate_notes_to_separate_index)
       index_names << helper.standalone_indices_proxies(target_classes: [Note]).map(&:index_name)

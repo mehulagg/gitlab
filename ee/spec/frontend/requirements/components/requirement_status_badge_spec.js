@@ -105,7 +105,7 @@ describe('RequirementStatusBadge', () => {
 
           expect(tooltipEl.exists()).toBe(true);
           expect(tooltipEl.find('b').text()).toBe(badgeProps.tooltipTitle);
-          expect(tooltipEl.find('div').text()).toBe('Jun 4, 2020 10:55am GMT+0000');
+          expect(tooltipEl.find('div').text()).toBe('Jun 4, 2020 10:55am UTC');
         });
       });
     });

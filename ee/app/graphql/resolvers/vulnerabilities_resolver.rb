@@ -55,12 +55,6 @@ module Resolvers
 
     private
 
-    def resolve_gids(gids, gid_class)
-      gids.map do |gid|
-        Types::GlobalIDType[gid_class].coerce_isolated_input(gid).model_id
-      end
-    end
-
     def vulnerabilities(params)
       Security::VulnerabilitiesFinder.new(vulnerable, params).execute
     end

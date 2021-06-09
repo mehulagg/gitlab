@@ -9,7 +9,6 @@ import {
   DEVOPS_ADOPTION_STRINGS,
   DEVOPS_ADOPTION_ERROR_KEYS,
   MAX_REQUEST_COUNT,
-  MAX_SEGMENTS,
   DATE_TIME_FORMAT,
   DEFAULT_POLLING_INTERVAL,
   DEVOPS_ADOPTION_GROUP_LEVEL_LABEL,
@@ -58,7 +57,6 @@ export default {
   },
   trackDevopsTabClickEvent: TRACK_ADOPTION_TAB_CLICK_EVENT,
   trackDevopsScoreTabClickEvent: TRACK_DEVOPS_SCORE_TAB_CLICK_EVENT,
-  maxSegments: MAX_SEGMENTS,
   devopsAdoptionTableConfiguration: DEVOPS_ADOPTION_TABLE_CONFIGURATION,
   data() {
     return {
@@ -139,9 +137,6 @@ export default {
       return (
         this.isLoadingEnableGroup || this.$apollo.queries.devopsAdoptionEnabledNamespaces.loading
       );
-    },
-    segmentLimitReached() {
-      return this.devopsAdoptionEnabledNamespaces?.nodes?.length > this.$options.maxSegments;
     },
     editGroupsButtonLabel() {
       return this.isGroup
@@ -322,7 +317,6 @@ export default {
           :has-segments-data="hasSegmentsData"
           :timestamp="timestamp"
           :has-group-data="hasGroupData"
-          :segment-limit-reached="segmentLimitReached"
           :edit-groups-button-label="editGroupsButtonLabel"
           :cols="tab.cols"
           :segments="devopsAdoptionEnabledNamespaces"

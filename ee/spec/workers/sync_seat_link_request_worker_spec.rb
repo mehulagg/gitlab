@@ -23,7 +23,7 @@ RSpec.describe SyncSeatLinkRequestWorker, type: :worker do
           date: '2019-12-31',
           license_key: '123',
           max_historical_user_count: 5,
-          active_users: 4
+          billable_users_count: 4
         }.to_json
       )
     end
@@ -117,7 +117,7 @@ RSpec.describe SyncSeatLinkRequestWorker, type: :worker do
             date: '2020-01-01',
             license_key: '123',
             max_historical_user_count: 5,
-            active_users: 4
+            billable_users_count: 4
           }.to_json
         )
       end

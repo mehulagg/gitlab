@@ -3,13 +3,10 @@
 FactoryBot.define do
   factory :compliance_framework_project_setting, class: 'ComplianceManagement::ComplianceFramework::ProjectSettings' do
     project
+    compliance_management_framework factory: :compliance_framework
 
-    gdpr
-
-    ComplianceManagement::Framework::DEFAULT_FRAMEWORKS.each do |framework|
-      trait framework.identifier do
-        compliance_management_framework { association :compliance_framework, framework.to_framework_params.merge(namespace: project.root_namespace) }
-      end
+    trait :sox do
+      association :compliance_management_framework, :sox, factory: :compliance_framework
     end
   end
 end

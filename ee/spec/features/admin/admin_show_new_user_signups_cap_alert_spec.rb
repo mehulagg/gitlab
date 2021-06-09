@@ -21,7 +21,7 @@ RSpec.describe 'displays new user signups cap alert', :js do
       expect(page).to have_link('usage caps', href: help_page_href)
 
       visit root_dashboard_path
-      find('.js-new-user-signups-cap-reached .gl-alert-dismiss').click
+      find('.js-new-user-signups-cap-reached .gl-dismiss-btn').click
 
       expect(page).not_to have_content(expected_content)
       expect(page).not_to have_link('usage caps', href: help_page_href)

@@ -15,8 +15,6 @@ RSpec.describe Resolvers::IterationsResolver do
         iteration_cadence_ids: nil,
         parent: nil,
         state: nil,
-        start_date: nil,
-        end_date: nil,
         search_title: nil
       }
     end

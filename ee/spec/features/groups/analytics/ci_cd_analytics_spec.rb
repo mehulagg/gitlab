@@ -29,4 +29,24 @@ RSpec.describe 'Group CI/CD Analytics', :js do
       expect(page).to have_content '15 Releases 67% Projects with releases'
     end
   end
+
+  shared_examples 'a DORA chart' do |selector, title|
+    it "render the #{title} charts", :aggregate_failures do
+      click_link(title)
+
+      within selector do
+        expect(page).to have_content title
+
+        expect(page).to have_content 'Last week Last month Last 90 days'
+
+        expect(page).to have_content 'Date range:'
+      end
+    end
+  end
+
+  describe 'DORA charts' do
+    it_behaves_like 'a DORA chart', '[data-testid="deployment-frequency-charts"]', 'Deployment frequency'
+
+    it_behaves_like 'a DORA chart', '[data-testid="lead-time-charts"]', 'Lead time'
+  end
 end
