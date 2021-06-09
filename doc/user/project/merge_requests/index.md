@@ -76,6 +76,34 @@ can assign, categorize, and track progress on a merge request:
 - [**Notifications**](../../profile/notifications.md): A toggle to select whether
   or not to receive notifications for updates to a merge request.
 
+## Close a merge request
+
+When a merge request is merged, it closes, but you can still view it, and the
+pipelines associated with it. If you decide to permanently stop work on a merge request,
+GitLab recommends you close the merge request, rather than
+[delete it](#delete-a-merge-request). To close a merge request:
+
+1. Go to the merge request you want to close.
+1. Scroll to the comment box, at the bottom of the page.
+1. Below the comment box, select **Close merge request**.
+
+GitLab closes the merge request, but preserves records of the merge request,
+its comments, and any associated pipelines.
+
+### Delete a merge request
+
+GitLab recommends you close, rather than delete, merge requests. Delete a merge request
+only in extraordinary circumstances, when you need to completely remove all traces of a
+merge request. When you delete a merge request, GitLab also deletes all comments,
+pipelines, and uploaded assets attached to the merge request. You cannot undo this action.
+
+To delete a merge request:
+
+1. Sign in to GitLab as a user with the project [Owner](../../permissions.md) role.
+   Only users with this role can delete merge requests in a project.
+1. Go to the merge request you want to delete, and select **Edit**.
+1. Scroll to the bottom of the page, and select **Delete merge request**.
+
 ## Merge request workflows
 
 For a software developer working in a team:
