@@ -235,29 +235,6 @@ A hybrid approach can be used in these instances, where each shard is configured
 cluster. [Variable replication factor](https://gitlab.com/groups/gitlab-org/-/epics/3372) is planned
 to provide greater flexibility for extremely large GitLab instances.
 
-### Gitaly Cluster compared to Geo
-
-Gitaly Cluster and [Geo](../geo/index.md) both provide redundancy. However the redundancy of:
-
-- Gitaly Cluster provides fault tolerance for data storage and is invisible to the user. Users are
-  not aware when Gitaly Cluster is used.
-- Geo provides [replication](../geo/index.md) and [disaster recovery](../geo/disaster_recovery/index.md) for
-  an entire instance of GitLab. Users know when they are using Geo for
-  [replication](../geo/index.md). Geo [replicates multiple data types](../geo/replication/datatypes.md#limitations-on-replicationverification),
-  including Git data.
-
-The following table outlines the major differences between Gitaly Cluster and Geo:
-
-| Tool           | Nodes    | Locations | Latency tolerance  | Failover                                                                    | Consistency                              | Provides redundancy for |
-|:---------------|:---------|:----------|:-------------------|:----------------------------------------------------------------------------|:-----------------------------------------|:------------------------|
-| Gitaly Cluster | Multiple | Single    | Approximately 1 ms | [Automatic](praefect.md#automatic-failover-and-primary-election-strategies) | [Strong](praefect.md#strong-consistency) | Data storage in Git     |
-| Geo            | Multiple | Multiple  | Up to one minute   | [Manual](../geo/disaster_recovery/index.md)                                 | Eventual                                 | Entire GitLab instance  |
-
-For more information, see:
-
-- Geo [use cases](../geo/index.md#use-cases).
-- Geo [architecture](../geo/index.md#architecture).
-
 ### Architecture
 
 Praefect is a router and transaction manager for Gitaly, and a required
@@ -406,6 +383,9 @@ We welcome your feedback on this process: raise a support ticket, or [comment on
 ## Troubleshooting
 
 Refer to the information below when troubleshooting Gitaly and Gitaly Cluster.
+
+Before troubleshooting, see the Gitaly and Gitaly Cluster
+[frequently asked questions](faq.md).
 
 ### Troubleshoot Gitaly
 
