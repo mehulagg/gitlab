@@ -22,19 +22,48 @@ export default {
       required: false,
       default: '',
     },
+    pronouns: {
+      type: String,
+      required: false,
+      default: '',
+    },
   },
   computed: {
     isBusy() {
       return isUserBusy(this.availability);
     },
+    hasPronouns() {
+      return Boolean(this.pronouns);
+    },
+    isBusyAndHasPronouns() {
+      return this.isBusy && this.hasPronouns
+    }
   },
 };
 </script>
 <template>
   <span :class="containerClasses">
-    <gl-sprintf v-if="isBusy" :message="s__('UserAvailability|%{author} (Busy)')">
+  <template v-if="isBusyAndHasPronouns">
+    <gl-sprintf :message="s__('UserAvailability|%{author} %{pronouns} (Busy)')">
+      <template #author>{{ name }}</template>
+      <template #pronouns>
+        <span class="gl-font-sm">({{ pronouns }})</span>
+      </template>
+    </gl-sprintf>
+  </template>
+  <template v-else-if="isBusy">
+    <gl-sprintf :message="s__('UserAvailability|%{author} (Busy)')">
       <template #author>{{ name }}</template>
     </gl-sprintf>
-    <template v-else>{{ name }}</template>
+  </template>
+  <template v-else-if="hasPronouns">
+    <gl-sprintf :message="s__('UserAvailability|%{author} %{pronouns}')">
+      <template #author>{{ name }}</template>
+      <template #pronouns>
+        <span class="gl-font-sm">({{ pronouns }})</span>
+      </template>
+    </gl-sprintf>
+  </template>
+  <template v-else>{{ name }}</template>
   </span>
 </template>
