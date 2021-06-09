@@ -7,19 +7,18 @@ info: "See the Technical Writers assigned to Development Guidelines: https://abo
 
 # Background migrations
 
-Background migrations can be used to perform data migrations that would
-otherwise take a very long time (hours, days, years, etc) to complete. For
-example, you can use background migrations to migrate data so that instead of
-storing data in a single JSON column the data is stored in a separate table.
+Background migrations should be used to perform data migrations whenever the 
+whole migration takes over `1 hour` to complete. For example, you can use background 
+migrations to migrate data so that instead of storing data in a single JSON column 
+the data is stored in a separate table.
 
 If the database cluster is considered to be in an unhealthy state, background
 migrations automatically reschedule themselves for a later point in time.
 
 ## When To Use Background Migrations
 
-In the vast majority of cases you will want to use a regular Rails migration
-instead. Background migrations should be used when migrating _data_ in
-tables that have so many rows this process would take hours when performed in a
+Background migrations should be used when migrating _data_ in tables that have 
+so many rows this process would take over 1 hours when performed in a
 regular Rails migration.
 
 Background migrations _may_ also be used when executing numerous single-row queries
