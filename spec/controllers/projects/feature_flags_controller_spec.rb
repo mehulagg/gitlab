@@ -375,7 +375,7 @@ RSpec.describe Projects::FeatureFlagsController do
     subject { get(:edit, params: params) }
 
     context 'with legacy flags' do
-      let!(:feature_flag) { create(:operations_feature_flag, project: project) }
+      let!(:feature_flag) { create(:operations_feature_flag, :legacy_flag, project: project) }
 
       let(:params) do
         {
@@ -385,24 +385,8 @@ RSpec.describe Projects::FeatureFlagsController do
         }
       end
 
-      context 'removed' do
-        before do
-          stub_feature_flags(remove_legacy_flags: true, remove_legacy_flags_override: false)
-        end
-
-        it 'returns not found' do
-          is_expected.to have_gitlab_http_status(:not_found)
-        end
-      end
-
-      context 'removed' do
-        before do
-          stub_feature_flags(remove_legacy_flags: false)
-        end
-
-        it 'returns ok' do
-          is_expected.to have_gitlab_http_status(:ok)
-        end
+      it 'returns ok' do
+        is_expected.to have_gitlab_http_status(:ok)
       end
     end
 

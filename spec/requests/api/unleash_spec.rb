@@ -592,8 +592,6 @@ RSpec.describe API::Unleash do
         end
 
         it 'returns new flags when legacy flags are disabled' do
-          stub_feature_flags(remove_legacy_flags_override: false, remove_legacy_flags: true)
-
           feature_flag_a = create(:operations_feature_flag, :new_version_flag, project: project,
                                   name: 'feature_a', active: true)
           strategy = create(:operations_strategy, feature_flag: feature_flag_a,
