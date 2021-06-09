@@ -499,8 +499,8 @@ export default {
                 class="issuable-status-box status-box gl-my-0"
                 :class="[isClosed ? 'status-box-issue-closed' : 'status-box-open']"
               >
-                <gl-icon :name="statusIcon" class="gl-display-block d-sm-none gl-h-6!" />
-                <span class="gl-display-none d-sm-block">{{ statusText }}</span>
+                <gl-icon :name="statusIcon" class="gl-display-block gl-sm-display-none gl-h-6!" />
+                <span class="gl-display-none gl-sm-display-inline">{{ statusText }}</span>
               </p>
               <span v-if="isLocked" data-testid="locked" class="issuable-warning-icon">
                 <gl-icon name="lock" :aria-label="__('Locked')" />

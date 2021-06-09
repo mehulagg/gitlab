@@ -76,10 +76,10 @@ describe('IssuableShowRoot', () => {
         taskCompletionStatus,
       });
       expect(issuableHeader.find('.issuable-status-box').text()).toContain('Open');
-      expect(issuableHeader.find('.detail-page-header-actions button.js-close').exists()).toBe(
+      expect(issuableHeader.find('[data-testid="header-actions"] button.js-close').exists()).toBe(
         true,
       );
-      expect(issuableHeader.find('.detail-page-header-actions a.js-new').exists()).toBe(true);
+      expect(issuableHeader.find('[data-testid="header-actions"] a.js-new').exists()).toBe(true);
     });
 
     it('renders issuable-body component', () => {

@@ -85,7 +85,7 @@ export default {
               :class="statusBadgeClass"
             >
               <gl-icon :name="statusIcon" class="gl-display-block d-sm-none gl-h-6!" />
-              <span class="gl-display-none d-sm-block"><slot name="status-badge"></slot></span>
+              <span class="gl-display-none gl-sm-display-inline"><slot name="status-badge"></slot></span>
             </p>
             <p
               class="gl-font-weight-bold gl-overflow-hidden gl-white-space-nowrap gl-text-overflow-ellipsis gl-my-0"

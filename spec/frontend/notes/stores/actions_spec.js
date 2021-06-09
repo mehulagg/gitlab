@@ -55,7 +55,7 @@ describe('Actions Notes Store', () => {
 
     // This is necessary as we query Close issue button at the top of issue page when clicking bottom button
     setFixtures(
-      '<div class="detail-page-header-actions"><button class="btn-close btn-grouped"></button></div>',
+      '<div class="js-issuable-actions" data-testid="header-actions"><button class="btn-close btn-grouped"></button></div>',
     );
   });
 

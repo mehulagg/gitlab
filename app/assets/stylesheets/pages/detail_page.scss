@@ -34,16 +34,6 @@
   }
 }
 
-.detail-page-header-actions {
-  align-self: center;
-  flex: 0 0 auto;
-
-  @include media-breakpoint-down(xs) {
-    width: 100%;
-    margin-top: 10px;
-  }
-}
-
 .detail-page-description {
   .title {
     margin: 0 0 16px;

@@ -639,14 +639,12 @@
 
 .issuable-status-box {
   align-self: stretch;
-  display: flex;
   justify-content: center;
   align-items: center;
   margin-top: 0;
   padding: 0 $gl-padding-8;
 
   @include media-breakpoint-up(sm) {
-    display: inline-block;
     height: auto;
     align-self: center;
   }

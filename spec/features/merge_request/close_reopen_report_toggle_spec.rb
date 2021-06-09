@@ -8,7 +8,7 @@ RSpec.describe 'Issuables Close/Reopen/Report toggle' do
   let(:user) { create(:user) }
 
   context 'on a merge request' do
-    let(:container) { find('.detail-page-header-actions') }
+    let(:container) { find('.js-issuable-actions') }
     let(:project) { create(:project, :repository) }
     let(:issuable) { create(:merge_request, source_project: project) }
 

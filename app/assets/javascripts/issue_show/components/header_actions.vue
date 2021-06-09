@@ -187,7 +187,7 @@ export default {
 </script>
 
 <template>
-  <div class="detail-page-header-actions gl-display-flex">
+  <div>
     <gl-dropdown
       class="gl-sm-display-none! w-100"
       block

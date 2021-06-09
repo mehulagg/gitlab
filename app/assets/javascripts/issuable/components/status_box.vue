@@ -91,8 +91,8 @@ export default {
 
 <template>
   <div :class="statusBoxClass" class="issuable-status-box status-box">
-    <gl-icon :name="statusIconName" class="gl-display-block gl-sm-display-none!" />
-    <span class="gl-display-none gl-sm-display-block">
+    <gl-icon :name="statusIconName" class="gl-display-inline gl-sm-display-none!" />
+    <span class="gl-display-none gl-sm-display-inline">
       {{ statusHumanName }}
     </span>
   </div>

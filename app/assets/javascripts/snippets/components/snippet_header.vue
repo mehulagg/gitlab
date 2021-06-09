@@ -212,44 +212,42 @@ export default {
       </div>
     </div>
 
-    <div class="detail-page-header-actions">
-      <div class="d-none d-sm-flex">
-        <template v-for="(action, index) in personalSnippetActions">
-          <div
-            v-if="action.condition"
-            :key="index"
-            v-gl-tooltip
-            :title="action.title"
-            class="d-inline-block"
-          >
-            <gl-button
-              :disabled="action.disabled"
-              :variant="action.variant"
-              :category="action.category"
-              :class="action.cssClass"
-              :href="action.href"
-              data-qa-selector="snippet_action_button"
-              :data-qa-action="action.text"
-              @click="action.click ? action.click() : undefined"
-            >
-              {{ action.text }}
-            </gl-button>
-          </div>
-        </template>
-      </div>
-      <div class="d-block d-sm-none dropdown">
-        <gl-dropdown :text="__('Options')" block>
-          <gl-dropdown-item
-            v-for="(action, index) in personalSnippetActions"
-            :key="index"
+    <div class="d-none d-sm-flex">
+      <template v-for="(action, index) in personalSnippetActions">
+        <div
+          v-if="action.condition"
+          :key="index"
+          v-gl-tooltip
+          :title="action.title"
+          class="d-inline-block"
+        >
+          <gl-button
             :disabled="action.disabled"
-            :title="action.title"
+            :variant="action.variant"
+            :category="action.category"
+            :class="action.cssClass"
             :href="action.href"
+            data-qa-selector="snippet_action_button"
+            :data-qa-action="action.text"
             @click="action.click ? action.click() : undefined"
-            >{{ action.text }}</gl-dropdown-item
           >
-        </gl-dropdown>
-      </div>
+            {{ action.text }}
+          </gl-button>
+        </div>
+      </template>
+    </div>
+    <div class="d-block d-sm-none dropdown">
+      <gl-dropdown :text="__('Options')" block>
+        <gl-dropdown-item
+          v-for="(action, index) in personalSnippetActions"
+          :key="index"
+          :disabled="action.disabled"
+          :title="action.title"
+          :href="action.href"
+          @click="action.click ? action.click() : undefined"
+          >{{ action.text }}</gl-dropdown-item
+        >
+      </gl-dropdown>
     </div>
 
     <gl-modal ref="deleteModal" modal-id="delete-modal" title="Example title">

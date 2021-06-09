@@ -20,7 +20,7 @@ RSpec.describe 'Merge request > User marks merge request as draft', :js do
 
     expect(page).to have_content("Draft: #{merge_request.title}")
 
-    page.within('.detail-page-header-actions') do
+    page.within('.js-issuable-actions') do
       click_link 'Mark as ready'
     end
 

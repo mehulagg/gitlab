@@ -89,8 +89,8 @@ export default {
   <div class="detail-page-header">
     <div class="detail-page-header-body">
       <div data-testid="status" class="issuable-status-box status-box" :class="statusBadgeClass">
-        <gl-icon v-if="statusIcon" :name="statusIcon" class="d-block d-sm-none" />
-        <span class="d-none d-sm-block"><slot name="status-badge"></slot></span>
+        <gl-icon v-if="statusIcon" :name="statusIcon" class="gl-display-inline gl-sm-display-none!" />
+        <span class="gl-display-none gl-sm-display-inline!"><slot name="status-badge"></slot></span>
       </div>
       <div class="issuable-meta gl-display-flex gl-align-items-center d-md-inline-block">
         <div v-if="blocked || confidential" class="gl-display-inline-block">
@@ -142,11 +142,6 @@ export default {
         @click="handleRightSidebarToggleClick"
       />
     </div>
-    <div
-      data-testid="header-actions"
-      class="detail-page-header-actions gl-display-flex gl-md-display-block"
-    >
-      <slot name="header-actions"></slot>
-    </div>
+    <slot name="header-actions" data-testid="header-actions"></slot>
   </div>
 </template>
