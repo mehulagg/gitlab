@@ -7,8 +7,8 @@ info: "See the Technical Writers assigned to Development Guidelines: https://abo
 
 # Background migrations
 
-Background migrations should be used to perform data migrations whenever the 
-whole migration takes over `10 minutes` to complete. For example, you can use background 
+Background migrations should be used to perform data migrations whenever a 
+migration exceeds [the limits in our guidelines](https://docs.gitlab.com/ee/development/database_review.html#timing-guidelines-for-migrations). For example, you can use background 
 migrations to migrate data so that instead of storing data in a single JSON column 
 the data is stored in a separate table.
 
