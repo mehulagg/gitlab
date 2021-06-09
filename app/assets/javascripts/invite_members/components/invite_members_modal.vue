@@ -54,6 +54,16 @@ export default {
       type: Number,
       required: true,
     },
+    groupSelectFilter: {
+      type: String,
+      required: false,
+      default: 'all',
+    },
+    groupSelectParentId: {
+      type: Number,
+      required: false,
+      default: null,
+    },
     helpLink: {
       type: String,
       required: true,
@@ -293,7 +303,12 @@ export default {
           :aria-labelledby="$options.membersTokenSelectLabelId"
           :placeholder="$options.labels[inviteeType].placeHolder"
         />
-        <group-select v-if="isInviteGroup" v-model="groupToBeSharedWith" />
+        <group-select
+          v-if="isInviteGroup"
+          v-model="groupToBeSharedWith"
+          :groups-filter="groupSelectFilter"
+          :parent-group-id="groupSelectParentId"
+        />
       </div>
 
       <label class="gl-font-weight-bold gl-mt-3">{{ $options.labels.accessLevel }}</label>

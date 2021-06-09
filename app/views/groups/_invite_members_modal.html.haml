@@ -1,7 +1,9 @@
+- groups_select_data = group.root_ancestor.namespace_settings.prevent_sharing_groups_outside_hierarchy ? { group_select_filter: 'descendant_groups', group_select_parent_id: group.root_ancestor.id } : {}
+
 - if can?(current_user, :admin_group_member, group)
   .js-invite-members-modal{ data: { id: group.id,
     name: group.name,
     is_project: 'false',
     access_levels: GroupMember.access_level_roles.to_json,
     default_access_level: Gitlab::Access::GUEST,
-    help_link: help_page_url('user/permissions') } }
+    help_link: help_page_url('user/permissions') }.merge(groups_select_data) }

@@ -7,8 +7,8 @@ import {
   GlSearchBoxByType,
 } from '@gitlab/ui';
 import { debounce } from 'lodash';
-import Api from '~/api';
 import { s__ } from '~/locale';
+import { getGroups, getDescendentGroups } from '~/rest_api';
 import { SEARCH_DELAY } from '../constants';
 
 export default {
@@ -22,6 +22,18 @@ export default {
   },
   model: {
     prop: 'selectedGroup',
+  },
+  props: {
+    groupsFilter: {
+      type: String,
+      required: false,
+      default: 'all',
+    },
+    parentGroupId: {
+      type: Number,
+      required: false,
+      default: null,
+    },
   },
   data() {
     return {
@@ -50,7 +62,7 @@ export default {
   methods: {
     retrieveGroups: debounce(function debouncedRetrieveGroups() {
       this.isFetching = true;
-      return Api.groups(this.searchTerm, this.$options.defaultFetchOptions)
+      return this.fetchGroups()
         .then((response) => {
           this.groups = response.map((group) => ({
             id: group.id,
@@ -68,6 +80,18 @@ export default {
       this.selectedGroup = group;
 
       this.$emit('input', this.selectedGroup);
+    },
+    fetchGroups() {
+      switch (this.groupsFilter) {
+        case 'descendant_groups':
+          return getDescendentGroups(
+            this.parentGroupId,
+            this.searchTerm,
+            this.$options.defaultFetchOptions,
+          );
+        default:
+          return getGroups(this.searchTerm, this.$options.defaultFetchOptions);
+      }
     },
   },
   i18n: {

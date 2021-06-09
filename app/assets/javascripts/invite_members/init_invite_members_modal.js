@@ -21,6 +21,7 @@ export default function initInviteMembersModal() {
           isProject: parseBoolean(el.dataset.isProject),
           accessLevels: JSON.parse(el.dataset.accessLevels),
           defaultAccessLevel: parseInt(el.dataset.defaultAccessLevel, 10),
+          groupSelectParentId: parseInt(el.dataset.groupSelectParentId, 10),
         },
       }),
   });
