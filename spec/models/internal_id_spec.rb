@@ -66,19 +66,6 @@ RSpec.describe InternalId do
           expect(subject).to eq(project.issues.size + 1)
         end
       end
-
-      context 'with concurrent inserts on table' do
-        it 'looks up the record if it was created concurrently' do
-          args = { **scope, usage: described_class.usages[usage.to_s] }
-          record = double
-          expect(described_class).to receive(:find_by).with(args).and_return(nil)    # first call, record not present
-          expect(described_class).to receive(:find_by).with(args).and_return(record) # second call, record was created by another process
-          expect(described_class).to receive(:create!).and_raise(ActiveRecord::RecordNotUnique, 'record not unique')
-          expect(record).to receive(:increment_and_save!)
-
-          subject
-        end
-      end
     end
 
     it 'generates a strictly monotone, gapless sequence' do
@@ -102,7 +89,7 @@ RSpec.describe InternalId do
       it 'increments counter with in_transaction: "false"' do
         allow(ActiveRecord::Base.connection).to receive(:transaction_open?) { false }
 
-        expect(InternalId::InternalIdGenerator.internal_id_transactions_total).to receive(:increment)
+        expect(InternalId.internal_id_transactions_total).to receive(:increment)
           .with(operation: :generate, usage: 'issues', in_transaction: 'false').and_call_original
 
         subject
@@ -111,7 +98,7 @@ RSpec.describe InternalId do
 
     context 'when executed within transaction' do
       it 'increments counter with in_transaction: "true"' do
-        expect(InternalId::InternalIdGenerator.internal_id_transactions_total).to receive(:increment)
+        expect(InternalId.internal_id_transactions_total).to receive(:increment)
           .with(operation: :generate, usage: 'issues', in_transaction: 'true').and_call_original
 
         InternalId.transaction { subject }
@@ -161,7 +148,7 @@ RSpec.describe InternalId do
       it 'increments counter with in_transaction: "false"' do
         allow(ActiveRecord::Base.connection).to receive(:transaction_open?) { false }
 
-        expect(InternalId::InternalIdGenerator.internal_id_transactions_total).to receive(:increment)
+        expect(InternalId.internal_id_transactions_total).to receive(:increment)
           .with(operation: :reset, usage: 'issues', in_transaction: 'false').and_call_original
 
         subject
@@ -172,7 +159,7 @@ RSpec.describe InternalId do
       let(:value) { 2 }
 
       it 'increments counter with in_transaction: "true"' do
-        expect(InternalId::InternalIdGenerator.internal_id_transactions_total).to receive(:increment)
+        expect(InternalId.internal_id_transactions_total).to receive(:increment)
           .with(operation: :reset, usage: 'issues', in_transaction: 'true').and_call_original
 
         InternalId.transaction { subject }
@@ -232,7 +219,7 @@ RSpec.describe InternalId do
       it 'increments counter with in_transaction: "false"' do
         allow(ActiveRecord::Base.connection).to receive(:transaction_open?) { false }
 
-        expect(InternalId::InternalIdGenerator.internal_id_transactions_total).to receive(:increment)
+        expect(InternalId.internal_id_transactions_total).to receive(:increment)
           .with(operation: :track_greatest, usage: 'issues', in_transaction: 'false').and_call_original
 
         subject
@@ -241,63 +228,10 @@ RSpec.describe InternalId do
 
     context 'when executed within transaction' do
       it 'increments counter with in_transaction: "true"' do
-        expect(InternalId::InternalIdGenerator.internal_id_transactions_total).to receive(:increment)
+        expect(InternalId.internal_id_transactions_total).to receive(:increment)
           .with(operation: :track_greatest, usage: 'issues', in_transaction: 'true').and_call_original
 
         InternalId.transaction { subject }
-      end
-    end
-  end
-
-  describe '#increment_and_save!' do
-    let(:id) { create(:internal_id) }
-
-    subject { id.increment_and_save! }
-
-    it 'returns incremented iid' do
-      value = id.last_value
-
-      expect(subject).to eq(value + 1)
-    end
-
-    it 'saves the record' do
-      subject
-
-      expect(id.changed?).to be_falsey
-    end
-
-    context 'with last_value=nil' do
-      let(:id) { build(:internal_id, last_value: nil) }
-
-      it 'returns 1' do
-        expect(subject).to eq(1)
-      end
-    end
-  end
-
-  describe '#track_greatest_and_save!' do
-    let(:id) { create(:internal_id) }
-    let(:new_last_value) { 9001 }
-
-    subject { id.track_greatest_and_save!(new_last_value) }
-
-    it 'returns new last value' do
-      expect(subject).to eq new_last_value
-    end
-
-    it 'saves the record' do
-      subject
-
-      expect(id.changed?).to be_falsey
-    end
-
-    context 'when new last value is lower than the max' do
-      it 'does not update the last value' do
-        id.update!(last_value: 10_001)
-
-        subject
-
-        expect(id.reload.last_value).to eq 10_001
       end
     end
   end
