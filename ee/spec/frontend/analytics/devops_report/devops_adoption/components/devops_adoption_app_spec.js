@@ -193,6 +193,20 @@ describe('DevopsAdoptionApp', () => {
       });
     });
 
+    describe('when fetching too many pages of data', () => {
+      beforeEach(async () => {
+        // Always send the same page
+        groupsSpy = jest.fn().mockResolvedValue(initialResponse);
+        const mockApollo = createMockApolloProvider({ groupsSpy });
+        wrapper = createComponent({ mockApollo, data: { requestCount: 2 } });
+        await waitForPromises();
+      });
+
+      it('should fetch data twice', () => {
+        expect(groupsSpy).toHaveBeenCalledTimes(2);
+      });
+    });
+
     describe('when error is thrown in the fetchMore request', () => {
       const error = 'Error: foo!';
 
