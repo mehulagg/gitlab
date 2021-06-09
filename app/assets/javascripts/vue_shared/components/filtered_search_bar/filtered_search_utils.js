@@ -2,7 +2,7 @@ import { isEmpty, uniqWith, isEqual } from 'lodash';
 import AccessorUtilities from '~/lib/utils/accessor';
 import { queryToObject } from '~/lib/utils/url_utility';
 
-import { MAX_RECENT_TOKENS_SIZE } from './constants';
+import { MAX_RECENT_TOKENS_SIZE, FILTERED_SEARCH_TERM } from './constants';
 
 /**
  * Strips enclosing quotations from a string if it has one.
@@ -23,7 +23,7 @@ export const stripQuotes = (value) => value.replace(/^('|")(.*)('|")$/, '$2');
 export const uniqueTokens = (tokens) => {
   const knownTokens = [];
   return tokens.reduce((uniques, token) => {
-    if (typeof token === 'object' && token.type !== 'filtered-search-term') {
+    if (typeof token === 'object' && token.type !== FILTERED_SEARCH_TERM) {
       const tokenString = `${token.type}${token.value.operator}${token.value.data}`;
       if (!knownTokens.includes(tokenString)) {
         uniques.push(token);
@@ -93,14 +93,27 @@ export function processFilters(filters) {
  * { myFilterName: 'foo', 'not[myFilterName]': null }
  * @param  {Object} filters
  * @param  {Object.myFilterName} a single filter value or an array of filters
+ * @param  {Object} options
+ * @param  {Object.filteredSearchTermKey?} if set, 'filtered-search-term' filters are assigned to this key, 'search' is suggested
  * @return {Object} query object with both filter name and not-name with values
  */
-export function filterToQueryObject(filters = {}) {
+export function filterToQueryObject(filters = {}, options = {}) {
+  const { filteredSearchTermKey } = options;
+
   return Object.keys(filters).reduce((memo, key) => {
     const filter = filters[key];
 
     let selected;
     let unselected;
+
+    if (filteredSearchTermKey && key === FILTERED_SEARCH_TERM) {
+      selected = filter
+        .map((item) => item.value)
+        .join(' ')
+        .trim();
+      return { ...memo, [filteredSearchTermKey]: selected };
+    }
+
     if (Array.isArray(filter)) {
       selected = filter.filter((item) => item.operator === '=').map((item) => item.value);
       unselected = filter.filter((item) => item.operator === '!=').map((item) => item.value);
@@ -143,16 +156,34 @@ function extractNameAndOperator(filterName) {
  * gets translated into:
  * { myFilterName: { value: 'foo', operator: '=' } }
  * @param  {String} query URL query string, e.g. from `window.location.search`
+ * @param  {Object} options
+ * @param  {Object.filteredSearchTermKey?} if set, a 'filtered-search-term' filter is created to this parameter. `'search'` is suggested
+ * @param  {Object.filterNamesAllowlist?} if set, only this list of filters names is mapped
+ * @param  {Object.legacySpacesDecode?} if set, plus symbols (+) are not encoded as spaces. `false` is suggested
  * @return {Object} filter object with filter names and their values
  */
-export function urlQueryToFilter(query = '') {
-  const filters = queryToObject(query, { gatherArrays: true, legacySpacesDecode: true });
+export function urlQueryToFilter(query = '', options = {}) {
+  const { filteredSearchTermKey, filterNamesAllowlist, legacySpacesDecode = true } = options;
+
+  const filters = queryToObject(query, { gatherArrays: true, legacySpacesDecode });
   return Object.keys(filters).reduce((memo, key) => {
     const value = filters[key];
     if (!value) {
       return memo;
     }
+    if (key === filteredSearchTermKey) {
+      let terms = Array.isArray(value) ? value : [value];
+      terms = terms.join(' ').trim().split(' ');
+      return {
+        ...memo,
+        [FILTERED_SEARCH_TERM]: terms.map((term) => ({ value: term })),
+      };
+    }
+
     const { filterName, operator } = extractNameAndOperator(key);
+    if (filterNamesAllowlist && !filterNamesAllowlist.includes(filterName)) {
+      return memo;
+    }
     let previousValues = [];
     if (Array.isArray(memo[filterName])) {
       previousValues = memo[filterName];
