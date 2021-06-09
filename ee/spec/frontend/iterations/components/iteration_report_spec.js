@@ -8,7 +8,6 @@ import query from 'ee/iterations/queries/iteration.query.graphql';
 import createMockApollo from 'helpers/mock_apollo_helper';
 import waitForPromises from 'helpers/wait_for_promises';
 import { getIdFromGraphQLId } from '~/graphql_shared/utils';
-import { formatDate } from '~/lib/utils/datetime_utility';
 import { mockIterationNode, mockGroupIterations, mockProjectIterations } from '../mock_data';
 
 const localVue = createLocalVue();

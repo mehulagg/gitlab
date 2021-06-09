@@ -18526,6 +18526,9 @@ msgstr ""
 msgid "Iterations"
 msgstr ""
 
+msgid "Iterations|Add iteration"
+msgstr ""
+
 msgid "Iterations|Automated scheduling"
 msgstr ""
 
