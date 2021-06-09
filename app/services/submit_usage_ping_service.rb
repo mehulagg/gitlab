@@ -20,7 +20,7 @@ class SubmitUsagePingService
     return unless Gitlab::CurrentSettings.usage_ping_enabled?
     return if User.single_user&.requires_usage_stats_consent?
 
-    usage_data = Gitlab::UsageData.data(force_refresh: true)
+    usage_data = Gitlab::Usage::UsageDataInstrumentation.data(force_refresh: true)
 
     raise SubmissionError, 'Usage data is blank' if usage_data.blank?
 

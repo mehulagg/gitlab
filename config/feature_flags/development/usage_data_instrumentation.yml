@@ -1,0 +1,8 @@
+---
+name: usage_data_instrumentation
+introduced_by_url: https://gitlab.com/gitlab-org/gitlab/-/merge_requests/63520
+rollout_issue_url: https://gitlab.com/gitlab-org/gitlab/-/issues/333097
+milestone: '14.0'
+type: development
+group: group::product intelligence
+default_enabled: false
