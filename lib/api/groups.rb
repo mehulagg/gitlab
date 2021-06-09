@@ -22,7 +22,7 @@ module API
         optional :all_available, type: Boolean, desc: 'Show all group that you have access to'
         optional :search, type: String, desc: 'Search for a specific group'
         optional :owned, type: Boolean, default: false, desc: 'Limit by owned by authenticated user'
-        optional :order_by, type: String, values: %w[name path id], default: 'name', desc: 'Order by name, path or id'
+        optional :order_by, type: String, values: %w[name path id similarity], default: 'name', desc: 'Order by name, path, id or similarity if searching'
         optional :sort, type: String, values: %w[asc desc], default: 'asc', desc: 'Sort by asc (ascending) or desc (descending)'
         optional :min_access_level, type: Integer, values: Gitlab::Access.all_values, desc: 'Minimum access level of authenticated user'
         optional :top_level_only, type: Boolean, desc: 'Only include top level groups'
@@ -50,9 +50,8 @@ module API
         groups = GroupsFinder.new(current_user, find_params).execute
         groups = groups.search(params[:search], include_parents: true) if params[:search].present?
         groups = groups.where.not(id: params[:skip_groups]) if params[:skip_groups].present?
-        order_options = { params[:order_by] => params[:sort] }
-        order_options["id"] ||= "asc"
-        groups.reorder(order_options)
+
+        reorder_groups_with_similarity_order_support(groups)
       end
       # rubocop: enable CodeReuse/ActiveRecord
 
@@ -123,6 +122,14 @@ module API
         reorder_projects(projects)
       end
 
+      def reorder_groups_with_similarity_order_support(groups)
+        return handle_group_similarity_order(groups) if params[:order_by] == 'similarity'
+
+        order_options = { params[:order_by] => params[:sort] }
+        order_options["id"] ||= "asc"
+        groups.reorder(order_options) # rubocop: disable CodeReuse/ActiveRecord
+      end
+
       # rubocop: disable CodeReuse/ActiveRecord
       def handle_similarity_order(group, projects)
         if params[:search].present? && Feature.enabled?(:similarity_search, group, default_enabled: true)
@@ -134,6 +141,16 @@ module API
         end
       end
       # rubocop: enable CodeReuse/ActiveRecord
+
+      def handle_group_similarity_order(groups)
+        if params[:search].present?
+          groups.sorted_by_similarity_and_parent_id_desc(params[:search])
+        else
+          order_options = { name: :asc }
+          order_options['id'] ||= params[:sort] || 'asc'
+          groups.reorder(order_options) # rubocop: disable CodeReuse/ActiveRecord
+        end
+      end
 
       def authorize_group_creation!
         authorize! :create_group
