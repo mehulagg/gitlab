@@ -44,11 +44,12 @@ GitLab can seamlessly deploy and manage Prometheus on a
 
 #### Getting started
 
-After you have a connected Kubernetes cluster, you can deploy a managed Prometheus with a single click.
+After you have a connected Kubernetes cluster, you can deploy a managed Prometheus with a single
+click:
 
-1. Go to the **Operations > Kubernetes** page to view your connected clusters
-1. Select the cluster you would like to deploy Prometheus to
-1. Click the **Install** button to deploy Prometheus to the cluster
+1. Go to the **Infrastructure > Kubernetes** page to view your connected clusters.
+1. Select the cluster you would like to deploy Prometheus to.
+1. Click the **Install** button to deploy Prometheus to the cluster.
 
 ![Managed Prometheus Deploy](img/prometheus_deploy.png)
 

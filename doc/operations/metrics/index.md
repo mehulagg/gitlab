@@ -38,14 +38,14 @@ your Prometheus integration depends on where your apps are running:
   [deploy and manage Prometheus](../../user/project/integrations/prometheus.md#managed-prometheus-on-kubernetes) for you.
   You must also complete a code deployment, as described in
   [Deploy code with GitLab-managed Prometheus](#deploy-code-with-gitlab-managed-prometheus),
-  for the **Operations > Metrics** page to contain data.
+  for the **Monitor > Metrics** page to contain data.
 
 ### Deploy code with GitLab-managed Prometheus
 
 For GitLab-managed Prometheus, you can set up [Auto DevOps](../../topics/autodevops/index.md)
 to quickly create a deployment:
 
-1. Navigate to your project's **Operations > Kubernetes** page.
+1. Navigate to your project's **Infrastructure > Kubernetes** page.
 1. Ensure that, in addition to Prometheus, you also have GitLab Runner and Ingress
    installed.
 1. After installing Ingress, copy its endpoint.
@@ -57,7 +57,7 @@ to quickly create a deployment:
 1. Navigate to your project's **{rocket}** **CI/CD > Pipelines** page, and run a
    pipeline on any branch.
 1. When the pipeline has run successfully, graphs are available on the
-   **Operations > Metrics** page.
+   **Monitor > Metrics** page.
 
 ![Monitoring Dashboard](img/prometheus_monitoring_dashboard_v13_3.png)
 
@@ -77,7 +77,7 @@ To view the [default metrics dashboard](dashboards/default.md) for an environmen
 
 1. *If the metrics dashboard is only visible to project members,* sign in to
    GitLab as a member of a project. Learn more about [metrics dashboard visibility](#metrics-dashboard-visibility).
-1. In your project, navigate to **Operations > Metrics**.
+1. In your project, navigate to **Monitor > Metrics**.
 
 GitLab displays the [default metrics dashboard](dashboards/default.md) for the environment,
 like the following example:
