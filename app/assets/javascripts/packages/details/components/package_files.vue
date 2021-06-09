@@ -148,11 +148,11 @@ export default {
           <file-sha
             v-if="item.file_sha256"
             data-testid="sha-256"
-            title="SHA256"
+            title="SHA-256"
             :sha="item.file_sha256"
           />
           <file-sha v-if="item.file_md5" data-testid="md5" title="MD5" :sha="item.file_md5" />
-          <file-sha v-if="item.file_sha1" data-testid="sha-1" title="SHA1" :sha="item.file_sha1" />
+          <file-sha v-if="item.file_sha1" data-testid="sha-1" title="SHA-1" :sha="item.file_sha1" />
         </div>
       </template>
     </gl-table>

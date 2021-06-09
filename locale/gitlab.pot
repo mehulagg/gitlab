@@ -23540,6 +23540,9 @@ msgstr ""
 msgid "PackageRegistry|Copy Pip command"
 msgstr ""
 
+msgid "PackageRegistry|Copy SHA"
+msgstr ""
+
 msgid "PackageRegistry|Copy add Gradle Groovy DSL repository command"
 msgstr ""
 
@@ -23559,9 +23562,6 @@ msgid "PackageRegistry|Copy registry include"
 msgstr ""
 
 msgid "PackageRegistry|Copy require package include"
-msgstr ""
-
-msgid "PackageRegistry|Copy sha"
 msgstr ""
 
 msgid "PackageRegistry|Copy yarn command"
