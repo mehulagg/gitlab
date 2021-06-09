@@ -11,7 +11,7 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 
 WARNING:
 Versions of GitLab prior to 14.0 used Clair as the default container scanning engine. GitLab 14.0
-replaces Clair with Trivy and removes Clair from the product. If you run container scanning with the
+removes Clair from the product and replaces it with two new [scanners](#scanner-selection). If you run container scanning with the
 default settings, GitLab switches you seamlessly and automatically to Trivy in GitLab 14.0. However,
 if you customized the variables in your container scanning job, you should review the
 [migration guide](#migrating-from-clair-to-trivy) and make any necessary updates.
@@ -23,6 +23,7 @@ displays them in a merge request, you can use GitLab to audit your Docker-based 
 GitLab provides integration with open-source tools for vulnerability static analysis in containers:
 
 - [Trivy](https://github.com/aquasecurity/trivy)
+- [Grype](https://github.com/anchore/grype)
 
 To integrate GitLab with security scanners other than those listed here, see
 [Security scanner integration](../../../development/integrations/secure.md).
@@ -80,7 +81,7 @@ Other changes:
   [Trivy](https://github.com/aquasecurity/trivy) by upgrading `CS_MAJOR_VERSION` from `3` to `4`.
 - GitLab 14.0 [introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/61850)
   integration with [Trivy](https://github.com/aquasecurity/trivy)
-  as the default for container scanning.
+  as the default for container scanning, and also [introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/326279) integration with [Grype](https://github.com/anchore/grype) as an alternative scanner.
 
 To include the `Container-Scanning.gitlab-ci.yml` template (GitLab 11.9 and later), add the
 following to your `.gitlab-ci.yml` file:
@@ -142,6 +143,19 @@ variables:
     SECURE_LOG_LEVEL: 'debug'
 ```
 
+#### Scanner selection
+
+The container-scanning analyzer can use different scanners, depending on the value of the `CS_ANALYZER_IMAGE`
+configuration variable.
+
+The following options are available:
+
+| Scanner name | `CS_ANALYZER_IMAGE` |
+| ------------ | ------------------- |
+| Default scanner ([Trivy](https://github.com/aquasecurity/trivy)) | `registry.gitlab.com/security-products/container-scanning:4` |
+| [Grype](https://github.com/anchore/grype)                        | `registry.gitlab.com/security-products/container-scanning/grype:4` |
+| [Trivy](https://github.com/aquasecurity/trivy)                   | `registry.gitlab.com/security-products/container-scanning/trivy:4` |
+
 #### Available CI/CD variables
 
 You can [configure](#customizing-the-container-scanning-settings) analyzers by using the following CI/CD variables:
@@ -151,7 +165,7 @@ You can [configure](#customizing-the-container-scanning-settings) analyzers by u
 | `ADDITIONAL_CA_CERT_BUNDLE`    | `""`          | Bundle of CA certs that you want to trust. See [Using a custom SSL CA certificate authority](#using-a-custom-ssl-ca-certificate-authority) for more details. | All |
 | `CI_APPLICATION_REPOSITORY`    | `$CI_REGISTRY_IMAGE/$CI_COMMIT_REF_SLUG` | Docker repository URL for the image to be scanned. | All |
 | `CI_APPLICATION_TAG`           | `$CI_COMMIT_SHA` | Docker repository tag for the image to be scanned. | All |
-| `CS_ANALYZER_IMAGE`            | `$SECURE_ANALYZERS_PREFIX/$CS_PROJECT:$CS_MAJOR_VERSION`           | Docker image of the analyzer. | All |
+| `CS_ANALYZER_IMAGE`            | `registry.gitlab.com/security-products/container-scanning:4` | Docker image of the analyzer. | All |
 | `CS_DOCKER_INSECURE`           | `"false"`     | Allow access to secure Docker registries using HTTPS without validating the certificates. | All |
 | `CS_REGISTRY_INSECURE`         | `"false"`     | Allow access to insecure registries (HTTP only). Should only be set to `true` when testing the image locally. | Trivy. The registry must listen on port `80/tcp`. |
 | `CS_SEVERITY_THRESHOLD`        | `UNKNOWN`     | Severity level threshold. The scanner outputs vulnerabilities with severity level higher than or equal to this threshold. Supported levels are Unknown, Low, Medium, High, and Critical. | Trivy |
@@ -165,6 +179,7 @@ You can [configure](#customizing-the-container-scanning-settings) analyzers by u
 
 Support depends on the scanner:
 
+- [Grype](https://github.com/anchore/grype#grype)
 - [Trivy](https://aquasecurity.github.io/trivy/latest/vuln-detection/os/) (Default).
 
 ### Overriding the container scanning template
@@ -214,17 +229,22 @@ your CI file:
    complete list of supported variables, see [available variables](#available-cicd-variables).
 
 1. Make any [necessary customizations](#customizing-the-container-scanning-settings)
-   to the `Trivy` scanner. We recommend that you minimize such customizations, as they might require
+   to the chosen scanner. We recommend that you minimize such customizations, as they might require
    changes in future GitLab major releases.
 
 1. Trigger a new run of a pipeline that includes the `container_scanning` job. Inspect the job
    output and ensure that the log messages do not mention Clair.
+   
+#### Migrating to other scanners
+
+The [instructions above](#migrating-from-clair-to-trivy) work for all supported scanners. Please refer to the 
+[scanner selection](#scanner-selection) instructions.
 
 **Troubleshooting**
 
 Prior to the GitLab 14.0 release, any variable defined under the scope `container_scanning` is not
-considered for the Trivy scanner. Verify that all variables for Trivy are
-either defined as a global variable, or under `container_scanning`.
+considered for scanners other than Clair. From 14.0, all variables can be defined either as a global variable, 
+or under `container_scanning`.
 
 ### Using a custom SSL CA certificate authority
 
@@ -362,6 +382,7 @@ Support for custom certificate authorities was introduced in the following versi
 | Scanner | Version |
 | -------- | ------- |
 | `Trivy` | [4.0.0](https://gitlab.com/gitlab-org/security-products/analyzers/container-scanning/-/releases/4.0.0) |
+| `Grype` | [4.2.0](https://gitlab.com/gitlab-org/security-products/analyzers/container-scanning/-/releases/4.2.0) |
 
 #### Make GitLab container scanning analyzer images available inside your Docker registry
 
