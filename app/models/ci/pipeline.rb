@@ -440,6 +440,27 @@ module Ci
       @auto_devops_pipelines_completed_total ||= Gitlab::Metrics.counter(:auto_devops_pipelines_completed_total, 'Number of completed auto devops pipelines')
     end
 
+    # Use this method to add a job to an existing pipeline
+    def add_job!(job)
+      raise "Pipeline must be persisted for this method to be used" unless persisted?
+
+      # these also ensures other invariants such as
+      # a job takes project and ref from the pipeline it belongs to
+      job.pipeline = self
+      job.project = self.project
+      job.ref = self.ref
+
+      self.class.transaction do
+        BulkInsertableAssociations.with_bulk_insert do
+          job.save!
+        end
+
+        job.update_older_statuses_retried! if Feature.enabled?(:ci_fix_commit_status_retried, project, default_enabled: :yaml)
+      end
+
+      job
+    end
+
     def uses_needs?
       builds.where(scheduling_type: :dag).any?
     end
