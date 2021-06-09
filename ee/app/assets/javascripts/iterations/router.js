@@ -2,6 +2,7 @@ import Vue from 'vue';
 import VueRouter from 'vue-router';
 import IterationCadenceForm from './components/iteration_cadence_form.vue';
 import IterationCadenceList from './components/iteration_cadences_list.vue';
+import IterationForm from './components/iteration_form.vue';
 import IterationReport from './components/iteration_report.vue';
 
 Vue.use(VueRouter);
@@ -23,9 +24,19 @@ const routes = [
     component: IterationCadenceList,
   },
   {
+    name: 'newIteration',
+    path: '/:cadenceId/iterations/new',
+    component: IterationForm,
+  },
+  {
     name: 'iteration',
     path: '/:cadenceId/iterations/:iterationId',
     component: IterationReport,
+  },
+  {
+    name: 'editIteration',
+    path: '/:cadenceId/iterations/:iterationId/edit',
+    component: IterationForm,
   },
 ];
 

@@ -1,4 +1,4 @@
-mutation createIteration($input: CreateIterationInput!) {
+mutation createIteration($input: iterationCreateInput!) {
   iterationCreate(input: $input) {
     iteration {
       title
