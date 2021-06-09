@@ -33,12 +33,21 @@ module Gitlab
       class << self
         def configuration_toml(dir, _, _)
           config = { redis: { URL: redis_url } }
+          config[:redis][:DB] = redis_db if redis_db
 
           TomlRB.dump(config)
         end
 
         def redis_url
-          Gitlab::Redis::SharedState.url
+          full_redis_url.tap { |url| url.query = nil }.to_s
+        end
+
+        def redis_db
+          CGI.parse(full_redis_url.query).fetch('db', []).first.to_i
+        end
+
+        def full_redis_url
+          URI.parse(Gitlab::Redis::SharedState.url)
         end
 
         def get_config_path(dir, _)
