@@ -16,14 +16,20 @@ module Gitlab
           # end
           class << self
             def start(&block)
+              return @metric_start&.call unless block_given?
+
               @metric_start = block
             end
 
             def finish(&block)
+              return @metric_finish&.call unless block_given?
+
               @metric_finish = block
             end
 
             def relation(&block)
+              return @metric_relation&.call unless block_given?
+
               @metric_relation = block
             end
 
@@ -36,11 +42,21 @@ module Gitlab
           end
 
           def value
+            key_name = "metric_instrumentation/#{relation.table_name}"
+
+            start = Rails.cache.fetch("#{key_name}_minimum_id", expires_in: 1.day) do
+              self.class.start
+            end
+
+            finish = Rails.cache.fetch("#{key_name}_maximum_id", expires_in: 1.day) do
+              self.class.finish
+            end
+
             method(self.class.metric_operation)
               .call(relation,
                     self.class.column,
-                    start: self.class.metric_start&.call,
-                    finish: self.class.metric_finish&.call)
+                    start: start,
+                    finish: finish)
           end
 
           def to_sql
