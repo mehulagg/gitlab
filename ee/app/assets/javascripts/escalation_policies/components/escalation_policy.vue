@@ -21,6 +21,11 @@ export const i18n = {
   minutes: s__('EscalationPolicies|mins'),
 };
 
+const isRuleValid = ({ status, elapsedTimeSeconds, oncallSchedule: { name } }) =>
+  Object.keys(ALERT_STATUSES).includes(status) &&
+  typeof elapsedTimeSeconds === 'number' &&
+  typeof name === 'string';
+
 export default {
   i18n,
   ACTIONS,
@@ -42,6 +47,9 @@ export default {
     policy: {
       type: Object,
       required: true,
+      validator: ({ name, rules }) => {
+        return typeof name === 'string' && Array.isArray(rules) && rules.every(isRuleValid);
+      },
     },
     index: {
       type: Number,
