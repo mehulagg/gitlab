@@ -80,7 +80,9 @@ can assign, categorize, and track progress on a merge request:
 
 If you decide to permanently stop work on a merge request,
 GitLab recommends you close the merge request, rather than
-[delete it](#delete-a-merge-request). To close a merge request:
+[delete it](#delete-a-merge-request). Users with
+[Developer, Maintainer, or Owner](../../user/permissions.md) roles in a project
+can close merge requests in the project:
 
 1. Go to the merge request you want to close.
 1. Scroll to the comment box, at the bottom of the page.
