@@ -1009,6 +1009,24 @@ RSpec.describe 'Git HTTP requests' do
 
           it_behaves_like 'pulls are allowed'
           it_behaves_like 'pushes are allowed'
+
+          context "when password is expired" do
+            it "responds to downloads with status 200" do
+              user.update!(password_expires_at: 2.days.ago)
+
+              download(path, user: user.username, password: user.password) do |response|
+                expect(response).to have_gitlab_http_status(:ok)
+              end
+            end
+
+            it "responds to uploads with status 200" do
+              user.update!(password_expires_at: 2.days.ago)
+
+              upload(path, user: user.username, password: user.password) do |response|
+                expect(response).to have_gitlab_http_status(:ok)
+              end
+            end
+          end
         end
       end
     end
