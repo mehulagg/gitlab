@@ -5828,6 +5828,29 @@ The edge type for [`Namespace`](#namespace).
 | <a id="namespaceedgecursor"></a>`cursor` | [`String!`](#string) | A cursor for use in pagination. |
 | <a id="namespaceedgenode"></a>`node` | [`Namespace`](#namespace) | The item at the end of the edge. |
 
+#### `NetworkPolicyConnection`
+
+The connection type for [`NetworkPolicy`](#networkpolicy).
+
+##### Fields
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| <a id="networkpolicyconnectionedges"></a>`edges` | [`[NetworkPolicyEdge]`](#networkpolicyedge) | A list of edges. |
+| <a id="networkpolicyconnectionnodes"></a>`nodes` | [`[NetworkPolicy]`](#networkpolicy) | A list of nodes. |
+| <a id="networkpolicyconnectionpageinfo"></a>`pageInfo` | [`PageInfo!`](#pageinfo) | Information to aid in pagination. |
+
+#### `NetworkPolicyEdge`
+
+The edge type for [`NetworkPolicy`](#networkpolicy).
+
+##### Fields
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| <a id="networkpolicyedgecursor"></a>`cursor` | [`String!`](#string) | A cursor for use in pagination. |
+| <a id="networkpolicyedgenode"></a>`node` | [`NetworkPolicy`](#networkpolicy) | The item at the end of the edge. |
+
 #### `NoteConnection`
 
 The connection type for [`Note`](#note).
@@ -10666,6 +10689,21 @@ four standard [pagination arguments](#connection-pagination-arguments):
 | <a id="namespaceprojectssearch"></a>`search` | [`String`](#string) | Search project with most similar names or paths. |
 | <a id="namespaceprojectssort"></a>`sort` | [`NamespaceProjectSort`](#namespaceprojectsort) | Sort projects by this criteria. |
 
+### `NetworkPolicy`
+
+Represents the network policy.
+
+#### Fields
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| <a id="networkpolicyenabled"></a>`enabled` | [`Boolean!`](#boolean) | Indicates whether this policy is enabled. |
+| <a id="networkpolicyfromautodevops"></a>`fromAutoDevops` | [`Boolean!`](#boolean) | Indicates whether this policy is created from AutoDevops. |
+| <a id="networkpolicyname"></a>`name` | [`String!`](#string) | Name of the policy. |
+| <a id="networkpolicynamespace"></a>`namespace` | [`String!`](#string) | Namespace of the policy. |
+| <a id="networkpolicyupdatedat"></a>`updatedAt` | [`Time!`](#time) | Timestamp of when the policy YAML was last updated. |
+| <a id="networkpolicyyaml"></a>`yaml` | [`String!`](#string) | YAML definition of the policy. |
+
 ### `Note`
 
 #### Fields
@@ -11641,6 +11679,22 @@ four standard [pagination arguments](#connection-pagination-arguments):
 | <a id="projectmilestonesstate"></a>`state` | [`MilestoneStateEnum`](#milestonestateenum) | Filter milestones by state. |
 | <a id="projectmilestonestimeframe"></a>`timeframe` | [`Timeframe`](#timeframe) | List items overlapping the given timeframe. |
 | <a id="projectmilestonestitle"></a>`title` | [`String`](#string) | The title of the milestone. |
+
+##### `Project.networkPolicies`
+
+Network Policies of the project.
+
+Returns [`NetworkPolicyConnection`](#networkpolicyconnection).
+
+This field returns a [connection](#connections). It accepts the
+four standard [pagination arguments](#connection-pagination-arguments):
+`before: String`, `after: String`, `first: Int`, `last: Int`.
+
+###### Arguments
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| <a id="projectnetworkpoliciesenvironmentid"></a>`environmentId` | [`EnvironmentID`](#environmentid) | The global ID of the environment to filter policies. |
 
 ##### `Project.packages`
 

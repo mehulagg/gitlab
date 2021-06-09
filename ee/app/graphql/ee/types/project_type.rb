@@ -169,6 +169,12 @@ module EE
               null: true,
               description: 'Scan Execution Policies of the project',
               resolver: ::Resolvers::ScanExecutionPolicyResolver
+
+        field :network_policies,
+              ::Types::NetworkPolicyType.connection_type,
+              null: true,
+              description: 'Network Policies of the project',
+              resolver: ::Resolvers::NetworkPolicyResolver
       end
 
       def api_fuzzing_ci_configuration
