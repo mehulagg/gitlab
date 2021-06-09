@@ -16,7 +16,7 @@ export const setSelectedValueStream = ({ commit, dispatch }, valueStream) => {
 
 export const fetchValueStreamStages = ({ commit, state }) => {
   const { fullPath, selectedValueStream } = state;
-  commit(types.REQUEST_VALUE_STREAMS);
+  commit(types.REQUEST_VALUE_STREAM_STAGES);
 
   return getProjectValueStreamStages(fullPath, selectedValueStream.id)
     .then(({ data }) => commit(types.RECEIVE_VALUE_STREAM_STAGES_SUCCESS, data))
@@ -92,15 +92,19 @@ export const setSelectedStage = ({ dispatch, commit, state: { stages } }, select
   return dispatch('fetchStageData');
 };
 
-const refetchData = (dispatch) =>
-  Promise.all([dispatch('fetchCycleAnalyticsData'), dispatch('fetchValueStreams')]);
+const refetchData = (dispatch, commit) => {
+  commit(types.SET_LOADING, true);
+  return dispatch('fetchValueStreams')
+    .then(() => dispatch('fetchCycleAnalyticsData'))
+    .then(() => commit(types.SET_LOADING, false));
+};
 
-export const setDateRange = ({ commit }, { startDate = DEFAULT_DAYS_TO_DISPLAY }) => {
+export const setDateRange = ({ dispatch, commit }, { startDate = DEFAULT_DAYS_TO_DISPLAY }) => {
   commit(types.SET_DATE_RANGE, { startDate });
-  return refetchData();
+  return refetchData(dispatch, commit);
 };
 
 export const initializeVsa = ({ commit, dispatch }, initialData = {}) => {
   commit(types.INITIALIZE_VSA, initialData);
-  return refetchData(dispatch);
+  return refetchData(dispatch, commit);
 };

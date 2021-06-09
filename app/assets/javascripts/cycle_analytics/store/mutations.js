@@ -7,13 +7,14 @@ export default {
     state.requestPath = requestPath;
     state.fullPath = fullPath;
   },
+  [types.SET_LOADING](state, loadingState) {
+    state.isLoading = loadingState;
+  },
   [types.SET_SELECTED_VALUE_STREAM](state, selectedValueStream = {}) {
     state.selectedValueStream = convertObjectPropsToCamelCase(selectedValueStream, { deep: true });
   },
   [types.SET_SELECTED_STAGE](state, stage) {
-    state.isLoadingStage = true;
     state.selectedStage = stage;
-    state.isLoadingStage = false;
   },
   [types.SET_DATE_RANGE](state, { startDate }) {
     state.startDate = startDate;
@@ -47,8 +48,8 @@ export default {
     state.hasError = false;
   },
   [types.RECEIVE_CYCLE_ANALYTICS_DATA_SUCCESS](state, data) {
-    state.isLoading = false;
     const { summary, medians } = decorateData(data);
+    state.permissions = data.permissions;
     state.summary = summary;
     state.medians = formatMedianValues(medians);
     state.hasError = false;

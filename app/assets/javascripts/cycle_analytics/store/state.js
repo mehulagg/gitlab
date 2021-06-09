@@ -1,4 +1,3 @@
-import { __ } from '~/locale';
 import { DEFAULT_DAYS_TO_DISPLAY } from '../constants';
 
 export default () => ({
@@ -19,4 +18,5 @@ export default () => ({
   isLoading: false,
   isLoadingStage: false,
   isEmptyStage: false,
+  permissions: {},
 });
