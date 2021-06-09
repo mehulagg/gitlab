@@ -3272,7 +3272,7 @@ Group: `group::access`
 
 Status: `data_available`
 
-Tiers: `free`, `premium`, `ultimate`
+Tiers: `premium`, `ultimate`
 
 ### `counts.lfs_objects`
 
@@ -16390,7 +16390,7 @@ Group: `group::access`
 
 Status: `data_available`
 
-Tiers: `premium`
+Tiers: `premium`, `ultimate`
 
 ### `usage_activity_by_stage.manage.ldap_keys`
 
@@ -16402,7 +16402,7 @@ Group: `group::access`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `premium`, `ultimate`
 
 ### `usage_activity_by_stage.manage.ldap_servers`
 
@@ -16426,7 +16426,7 @@ Group: `group::access`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `premium`, `ultimate`
 
 ### `usage_activity_by_stage.manage.omniauth_providers`
 
@@ -18360,7 +18360,7 @@ Group: `group::acess`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `premium`, `ultimate`
 
 ### `usage_activity_by_stage_monthly.manage.ldap_servers`
 
@@ -18384,7 +18384,7 @@ Group: `group::access`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `premium`, `ultimate`
 
 ### `usage_activity_by_stage_monthly.manage.omniauth_providers`
 
