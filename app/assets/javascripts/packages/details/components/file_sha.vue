@@ -20,7 +20,7 @@ export default {
     },
   },
   i18n: {
-    copyButtonTitle: s__('PackageRegistry|Copy sha'),
+    copyButtonTitle: s__('PackageRegistry|Copy SHA'),
   },
 };
 </script>
