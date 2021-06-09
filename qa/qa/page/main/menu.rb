@@ -33,6 +33,8 @@ module QA
         view 'app/views/layouts/nav/projects_dropdown/_show.html.haml' do
           element :projects_dropdown_sidebar
           element :your_projects_link
+          element :create_project_link
+          element :import_project_link
         end
 
         view 'app/views/layouts/nav/groups_dropdown/_show.html.haml' do
@@ -57,12 +59,14 @@ module QA
         end
 
         def go_to_projects
-          within_top_menu do
-            click_element :projects_dropdown
-          end
-
-          page.within('.qa-projects-dropdown-sidebar') do
+          within_projects_menu do
             click_element :your_projects_link
+          end
+        end
+
+        def go_to_import_project
+          within_projects_menu do
+            click_element :import_project_link
           end
         end
 
@@ -88,11 +92,11 @@ module QA
         def go_to_admin_area
           click_admin_area
 
-          if has_text?('Enter Admin Mode', wait: 1.0)
-            Admin::NewSession.perform do |new_session|
-              new_session.set_password(Runtime::User.admin_password)
-              new_session.click_enter_admin_mode
-            end
+          return unless has_text?('Enter Admin Mode', wait: 1.0)
+
+          Admin::NewSession.perform do |new_session|
+            new_session.set_password(Runtime::User.admin_password)
+            new_session.click_enter_admin_mode
           end
         end
 
@@ -164,19 +168,15 @@ module QA
 
         private
 
-        def within_top_menu
-          within_element(:navbar) do
-            yield
-          end
+        def within_top_menu(&block)
+          within_element(:navbar, &block)
         end
 
-        def within_user_menu
+        def within_user_menu(&block)
           within_top_menu do
             click_element :user_avatar
 
-            within_element(:user_menu) do
-              yield
-            end
+            within_element(:user_menu, &block)
           end
         end
 
@@ -186,6 +186,12 @@ module QA
           end
 
           page.within('.qa-groups-dropdown-sidebar', &block)
+        end
+
+        def within_projects_menu(&block)
+          within_top_menu { click_element :projects_dropdown }
+
+          page.within('.qa-projects-dropdown-sidebar', &block)
         end
 
         def click_admin_area

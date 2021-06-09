@@ -7,12 +7,8 @@ module QA
     class ProjectImportedFromGithub < Resource::Project
       def fabricate!
         self.import = true
-        super
 
-        group.visit!
-
-        Page::Group::Show.perform(&:go_to_new_project)
-        go_to_import_page
+        Page::Main::Menu.perform(&:go_to_import_project)
         Page::Project::New.perform(&:click_github_link)
 
         Page::Project::Import::Github.perform do |import_page|
