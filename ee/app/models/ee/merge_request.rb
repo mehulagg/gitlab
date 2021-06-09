@@ -167,19 +167,11 @@ module EE
 
       return false if has_approved_license_check?
 
-      diff = compare_license_scanning_reports(nil)
+      report_diff = compare_license_scanning_reports(nil)
 
-      return false unless diff[:data] && diff[:data]['new_licenses']
+      return false unless report_diff[:data] && report_diff[:data]['new_licenses']
 
-      report = ::Gitlab::Ci::Reports::LicenseScanning::Report.new
-
-      # todo: is there a difference between evaluating license v1 vs v2 when using diff hash?
-      diff[:data]['new_licenses'].each do |license|
-        report.add_license(id: license['id'], name: license['name'], url: license['url'])
-      end
-
-      # actual_head_pipeline.license_scanning_report.violates?(project.software_license_policies)
-      report.violates?(project.software_license_policies)
+      report_diff[:data]['new_licenses'].any? { |l| l.dig('classification', 'approval_status') == 'denied' }
     end
 
     def enabled_reports
