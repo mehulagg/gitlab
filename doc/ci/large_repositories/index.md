@@ -65,7 +65,7 @@ does not really impact the operations that you might do on a repository from CI.
 
 > Introduced in GitLab Runner 11.10.
 
-[`GIT_CLONE_PATH`](../runners/README.md#custom-build-directories) allows you to
+[`GIT_CLONE_PATH`](../runners/configure-runners.md#custom-build-directories) allows you to
 control where you clone your sources. This can have implications if you
 heavily use big repositories with fork workflow.
 
@@ -77,7 +77,7 @@ In such cases, ideally you want to make the GitLab Runner executor be used only
 for the given project and not shared across different projects to make this
 process more efficient.
 
-The [`GIT_CLONE_PATH`](../runners/README.md#custom-build-directories) has to be
+The [`GIT_CLONE_PATH`](../runners/configure-runners.md#custom-build-directories) has to be
 within the `$CI_BUILDS_DIR`. Currently, it is impossible to pick any path
 from disk.
 
@@ -85,12 +85,12 @@ from disk.
 
 > Introduced in GitLab Runner 11.10.
 
-[`GIT_CLEAN_FLAGS`](../runners/README.md#git-clean-flags) allows you to control
+[`GIT_CLEAN_FLAGS`](../runners/configure-runners.md#git-clean-flags) allows you to control
 whether or not you require the `git clean` command to be executed for each CI
 job. By default, GitLab ensures that you have your worktree on the given SHA,
 and that your repository is clean.
 
-[`GIT_CLEAN_FLAGS`](../runners/README.md#git-clean-flags) is disabled when set
+[`GIT_CLEAN_FLAGS`](../runners/configure-runners.md#git-clean-flags) is disabled when set
 to `none`. On very big repositories, this might be desired because `git
 clean` is disk I/O intensive. Controlling that with `GIT_CLEAN_FLAGS: -ffdx
 -e .build/` (for example) allows you to control and disable removal of some

@@ -324,4 +324,4 @@ pages:
       - public
 ```
 
-The `FF_USE_FASTZIP` variable enables the [feature flag](https://docs.gitlab.com/runner/configuration/feature-flags.html#available-feature-flags) which is needed for [`ARTIFACT_COMPRESSION_LEVEL`](../../../ci/runners/README.md#artifact-and-cache-settings).
+The `FF_USE_FASTZIP` variable enables the [feature flag](https://docs.gitlab.com/runner/configuration/feature-flags.html#available-feature-flags) which is needed for [`ARTIFACT_COMPRESSION_LEVEL`](../../../ci/runners/configure-runners.md#artifact-and-cache-settings).

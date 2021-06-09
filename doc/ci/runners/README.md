@@ -145,7 +145,7 @@ sentry_dsn = "X"
 The Windows shared runners are in [beta](https://about.gitlab.com/handbook/product/gitlab-the-product/#beta)
 and shouldn't be used for production workloads.
 
-During this beta period, the [shared runner pipeline quota](../admin_area/settings/continuous_integration.md#shared-runners-pipeline-minutes-quota)
+During this beta period, the [shared runner pipeline quota](../../user/admin_area/settings/continuous_integration.md#shared-runners-pipeline-minutes-quota)
 applies for groups and projects in the same manner as Linux runners. This may
 change when the beta period ends, as discussed in this [related issue](https://gitlab.com/gitlab-org/gitlab/-/issues/30834).
 
