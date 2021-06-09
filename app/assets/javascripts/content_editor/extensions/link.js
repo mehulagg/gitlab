@@ -16,7 +16,7 @@ export const extractHrefFromMarkdownLink = (match) => {
    * tiptap markInputRule expectation of having the content as
    * the last capture group in the match.
    *
-   * https://github.com/ueberdosis/tiptap/blob/main/packages/core/src/inputRules/markInputRule.ts#L11
+   * https://github.com/ueberdosis/tiptap/blob/%40tiptap/core%402.0.0-beta.75/packages/core/src/inputRules/markInputRule.ts#L11
    */
   match.pop();
   return extractHrefFromMatch(match);
