@@ -4,7 +4,6 @@ module Clusters
   module Platforms
     class Kubernetes < ApplicationRecord
       include Gitlab::Kubernetes
-      include EnumWithNil
       include AfterCommitQueue
       include ReactiveCaching
       include NullifyIfBlank

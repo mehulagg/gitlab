@@ -11,7 +11,6 @@ module Ci
     include Gitlab::OptimisticLocking
     include Gitlab::Utils::StrongMemoize
     include AtomicInternalId
-    include EnumWithNil
     include Ci::HasRef
     include ShaAttribute
     include FromUnion
