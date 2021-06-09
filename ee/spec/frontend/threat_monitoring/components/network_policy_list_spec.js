@@ -1,10 +1,9 @@
-import { GlTable } from '@gitlab/ui';
-import { mount } from '@vue/test-utils';
+import { GlTable, GlDrawer } from '@gitlab/ui';
 import NetworkPolicyList from 'ee/threat_monitoring/components/network_policy_list.vue';
-import PolicyDrawer from 'ee/threat_monitoring/components/policy_editor/policy_drawer.vue';
 import createStore from 'ee/threat_monitoring/store';
+import { mountExtended } from 'helpers/vue_test_utils_helper';
 import { convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
-import { mockPoliciesResponse } from '../mocks/mock_data';
+import { mockPoliciesResponse, mockCiliumPolicy } from '../mocks/mock_data';
 
 const mockData = mockPoliciesResponse.map((policy) => convertObjectPropsToCamelCase(policy));
 
@@ -22,7 +21,7 @@ describe('NetworkPolicyList component', () => {
 
     jest.spyOn(store, 'dispatch').mockImplementation(() => Promise.resolve());
 
-    wrapper = mount(NetworkPolicyList, {
+    wrapper = mountExtended(NetworkPolicyList, {
       propsData: {
         documentationPath: 'documentation_path',
         newPolicyPath: '/policies/new',
@@ -31,16 +30,15 @@ describe('NetworkPolicyList component', () => {
       data,
       store,
       provide,
-      stubs: { NetworkPolicyEditor: true },
+      stubs: { NetworkPolicyDrawer: GlDrawer },
     });
   };
 
   const findEnvironmentsPicker = () => wrapper.find({ ref: 'environmentsPicker' });
   const findPoliciesTable = () => wrapper.find(GlTable);
   const findTableEmptyState = () => wrapper.find({ ref: 'tableEmptyState' });
-  const findEditorDrawer = () => wrapper.find({ ref: 'editorDrawer' });
-  const findPolicyEditor = () => wrapper.find({ ref: 'policyEditor' });
-  const findAutodevopsAlert = () => wrapper.find('[data-testid="autodevopsAlert"]');
+  const findPolicyDrawer = () => wrapper.findByTestId('policyDrawer');
+  const findAutodevopsAlert = () => wrapper.findByTestId('autodevopsAlert');
 
   beforeEach(() => {
     factory({});
@@ -60,10 +58,6 @@ describe('NetworkPolicyList component', () => {
     expect(button.exists()).toBe(true);
   });
 
-  it('does not render the new policy drawer', () => {
-    expect(wrapper.find(PolicyDrawer).exists()).toBe(false);
-  });
-
   it('fetches policies', () => {
     expect(store.dispatch).toHaveBeenCalledWith('networkPolicies/fetchPolicies', -1);
   });
@@ -75,41 +69,18 @@ describe('NetworkPolicyList component', () => {
     expect(store.dispatch).toHaveBeenCalledWith('networkPolicies/fetchPolicies', 2);
   });
 
-  it('does not render edit button', () => {
-    expect(wrapper.find('[data-testid="edit-button"]').exists()).toBe(false);
-  });
-
   describe('given selected policy is a cilium policy', () => {
-    const manifest = `apiVersion: cilium.io/v2
-kind: CiliumNetworkPolicy
-metadata:
-  name: policy
-spec:
-  endpointSelector: {}`;
-
     beforeEach(() => {
       factory({
         data: () => ({ selectedPolicyName: 'policy' }),
         state: {
-          policies: [
-            {
-              name: 'policy',
-              creationTimestamp: new Date(),
-              manifest,
-            },
-          ],
+          policies: [mockCiliumPolicy],
         },
       });
     });
 
     it('renders the new policy drawer', () => {
-      expect(wrapper.find(PolicyDrawer).exists()).toBe(true);
-    });
-
-    it('renders edit button', () => {
-      const button = wrapper.find('[data-testid="edit-button"]');
-      expect(button.exists()).toBe(true);
-      expect(button.attributes().href).toBe('/policies/policy/edit?environment_id=-1');
+      expect(findPolicyDrawer().exists()).toBe(true);
     });
   });
 
@@ -129,7 +100,7 @@ spec:
   });
 
   it('renders closed editor drawer', () => {
-    const editorDrawer = findEditorDrawer();
+    const editorDrawer = findPolicyDrawer();
     expect(editorDrawer.exists()).toBe(true);
     expect(editorDrawer.props('open')).toBe(false);
   });
@@ -138,7 +109,7 @@ spec:
     findPoliciesTable().find('td').trigger('click');
 
     return wrapper.vm.$nextTick().then(() => {
-      const editorDrawer = findEditorDrawer();
+      const editorDrawer = findPolicyDrawer();
       expect(editorDrawer.exists()).toBe(true);
       expect(editorDrawer.props('open')).toBe(true);
     });
@@ -160,15 +131,9 @@ spec:
     });
 
     it('renders opened editor drawer', () => {
-      const editorDrawer = findEditorDrawer();
+      const editorDrawer = findPolicyDrawer();
       expect(editorDrawer.exists()).toBe(true);
       expect(editorDrawer.props('open')).toBe(true);
-    });
-
-    it('renders network policy editor with manifest', () => {
-      const policyEditor = findPolicyEditor();
-      expect(policyEditor.exists()).toBe(true);
-      expect(policyEditor.attributes('value')).toBe(mockData[0].manifest);
     });
   });
 

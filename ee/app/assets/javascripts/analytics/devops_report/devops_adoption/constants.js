@@ -6,6 +6,8 @@ export const MAX_SEGMENTS = 30;
 
 export const MAX_REQUEST_COUNT = 10;
 
+export const PER_PAGE = 100;
+
 export const DEVOPS_ADOPTION_SEGMENT_MODAL_ID = 'devopsSegmentModal';
 
 export const DEVOPS_ADOPTION_SEGMENT_DELETE_MODAL_ID = 'devopsSegmentDeleteModal';

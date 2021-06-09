@@ -97,6 +97,7 @@ module EE
             # rubocop: enable UsageData/LargeTable
             usage_data[:licensee] = license.licensee
             usage_data[:license_user_count] = license.restricted_user_count
+            usage_data[:license_billable_users] = alt_usage_data { license.daily_billable_users_count }
             usage_data[:license_starts_at] = license.starts_at
             usage_data[:license_expires_at] = license.expires_at
             usage_data[:license_plan] = license.plan

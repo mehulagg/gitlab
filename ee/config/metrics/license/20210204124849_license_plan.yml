@@ -1,14 +1,14 @@
 ---
 key_path: license_plan
 description: The plan of the GitLab license
-product_section: growth
-product_stage: growth
-product_group: group::product intelligence
-product_category: collection
+product_section: fulfillment
+product_stage: fulfillment
+product_group: group::license
+product_category: license
 value_type: string
 status: data_available
 time_frame: none
-data_source: system
+data_source: license
 distribution:
 - ee
 tier:

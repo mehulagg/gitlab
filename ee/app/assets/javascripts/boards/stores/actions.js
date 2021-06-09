@@ -535,14 +535,17 @@ export default {
       })
       .then(({ data }) => {
         const [firstError] = data.workspace.errors || [];
-        const assignees = data.workspace.assignees.nodes;
+        const assignees = data.workspace.assignees.nodes
+          .filter((x) => x?.user)
+          .map(({ user }) => user);
 
         if (firstError) {
           throw new Error(firstError);
         }
         commit(
           types.RECEIVE_ASSIGNEES_SUCCESS,
-          assignees.map(({ user }) => user),
+          // User field is nullable and we only want to display non-null users
+          assignees,
         );
       })
       .catch((e) => {

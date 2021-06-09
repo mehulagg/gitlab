@@ -366,18 +366,6 @@ RSpec.describe 'geo rake tasks', :geo do
           expect { run_rake_task('geo:status') }.not_to output(/Health Status Summary/).to_stdout
         end
 
-        context 'with legacy LFS replication enabled' do
-          before do
-            stub_feature_flags(geo_lfs_object_replication: false)
-          end
-
-          it 'prints messages for all the checks' do
-            (checks << /LFS Objects: /).each do |text|
-              expect { run_rake_task('geo:status') }.to output(text).to_stdout
-            end
-          end
-        end
-
         context 'with SSF LFS replication eneabled' do
           it 'prints messages for all the checks' do
             checks.each do |text|

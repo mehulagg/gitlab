@@ -79,6 +79,7 @@ RSpec.describe Gitlab::UsageData do
         elasticsearch_enabled
         geo_enabled
         license_trial_ends_on
+        license_billable_users
       ))
     end
 
@@ -180,6 +181,7 @@ RSpec.describe Gitlab::UsageData do
       expect(subject[:license_add_ons]).to eq(license.add_ons)
       expect(subject[:license_trial]).to eq(license.trial?)
       expect(subject[:license_subscription_id]).to eq(license.subscription_id)
+      expect(subject[:license_billable_users]).to eq(license.daily_billable_users_count)
     end
   end
 

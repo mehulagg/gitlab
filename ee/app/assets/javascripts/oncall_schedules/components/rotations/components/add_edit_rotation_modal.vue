@@ -94,7 +94,7 @@ export default {
         };
       },
       update({ project: { projectMembers: { nodes = [] } = {} } = {} } = {}) {
-        return nodes.map(({ user }) => ({ ...user }));
+        return nodes.filter((x) => x?.user).map(({ user }) => ({ ...user }));
       },
       error(error) {
         this.error = error;

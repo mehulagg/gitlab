@@ -13,26 +13,33 @@ exports[`ee/BoardContentSidebar matches the snapshot 1`] = `
   />
    
   <sidebardropdownwidget-stub
-    attr-workspace-path="gitlab-org"
+    attrworkspacepath="gitlab-org"
     data-testid="sidebar-epic"
     iid="27"
-    issuable-attribute="epic"
-    issuable-type="issue"
-    workspace-path="gitlab-org/gitlab-test"
+    issuableattribute="epic"
+    issuabletype="issue"
+    workspacepath="gitlab-org/gitlab-test"
   />
    
   <div>
-    <boardsidebarmilestoneselect-stub />
+    <sidebardropdownwidget-stub
+      attrworkspacepath="gitlab-org/gitlab-test"
+      data-testid="sidebar-milestones"
+      iid="27"
+      issuableattribute="milestone"
+      issuabletype="issue"
+      workspacepath="gitlab-org/gitlab-test"
+    />
      
     <sidebardropdownwidget-stub
-      attr-workspace-path="gitlab-org"
+      attrworkspacepath="gitlab-org"
       class="gl-mt-5"
       data-qa-selector="iteration_container"
       data-testid="iteration-edit"
       iid="27"
-      issuable-attribute="iteration"
-      issuable-type="issue"
-      workspace-path="gitlab-org/gitlab-test"
+      issuableattribute="iteration"
+      issuabletype="issue"
+      workspacepath="gitlab-org/gitlab-test"
     />
   </div>
    

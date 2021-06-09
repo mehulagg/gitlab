@@ -114,7 +114,6 @@ describe('Group Security Dashboard Vulnerabilities Component', () => {
       expect(findVulnerabilities().props()).toEqual({
         filters: {},
         isLoading: false,
-        shouldShowSelection: true,
         shouldShowProjectNamespace: true,
         vulnerabilities,
       });
