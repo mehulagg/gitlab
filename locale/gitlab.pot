@@ -18553,7 +18553,7 @@ msgstr ""
 msgid "Iterations"
 msgstr ""
 
-msgid "Iterations|Are you sure you want to delete this iteration cadence? This will delete all the iterations in the cadence."
+msgid "Iterations|This will delete the cadence as well as all of the iterations within it."
 msgstr ""
 
 msgid "Iterations|Automated scheduling"
@@ -18571,7 +18571,7 @@ msgstr ""
 msgid "Iterations|Delete cadence"
 msgstr ""
 
-msgid "Iterations|Delete iteration cadence"
+msgid "Iterations|Delete iteration cadence?"
 msgstr ""
 
 msgid "Iterations|Duration"

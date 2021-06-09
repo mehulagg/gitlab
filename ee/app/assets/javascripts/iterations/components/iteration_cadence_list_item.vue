@@ -21,9 +21,9 @@ const i18n = Object.freeze({
   error: __('Error loading iterations'),
 
   deleteCadence: s__('Iterations|Delete cadence'),
-  modalTitle: s__('Iterations|Delete iteration cadence'),
+  modalTitle: s__('Iterations|Delete iteration cadence?'),
   modalText: s__(
-    'Iterations|Are you sure you want to delete this iteration cadence? This will delete all the iterations in the cadence.',
+    'Iterations|This will delete the cadence as well as all of the iterations within it.',
   ),
   modalConfirm: s__('Iterations|Delete cadence'),
   modalCancel: __('Cancel'),
