@@ -2,9 +2,15 @@
 - current_plan = subscription_plan_info(@plans_data, @group.actual_plan_name)
 
 - if @top_most_group
+  - if display_upcoming_reconciliation_alert?(@top_most_group)
+    #js-qrtly-reconciliation-alert{ data: upcoming_reconciliation_hash(@top_most_group) }
+
   - top_most_group_plan = subscription_plan_info(@plans_data, @top_most_group.actual_plan_name)
   = render 'shared/billings/billing_plan_header', namespace: @group, plan: top_most_group_plan, parent_group: @top_most_group
 - else
+  - if display_upcoming_reconciliation_alert?(@group)
+    #js-qrtly-reconciliation-alert{ data: upcoming_reconciliation_hash(@group) }
+
   = render 'shared/billings/billing_plans', plans_data: @plans_data, namespace: @group, current_plan: current_plan
 
 

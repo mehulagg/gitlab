@@ -17,6 +17,7 @@ module GitlabSubscriptions
     end
 
     def display_upcoming_reconciliation_alert?(namespace = nil)
+      binding.pry
       return false unless has_permissions?(namespace)
 
       reconciliation = upcoming_reconciliation(namespace&.id)
@@ -66,7 +67,8 @@ module GitlabSubscriptions
     end
 
     def saas?
-      ::Gitlab.com?
+      true
+      # ::Gitlab.com?
     end
   end
 end
