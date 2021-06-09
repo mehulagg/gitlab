@@ -1,7 +1,7 @@
 ---
 name: better_pipeline_processing
-introduced_by_url:
-rollout_issue_url:
+introduced_by_url: https://gitlab.com/gitlab-org/gitlab/-/merge_requests/63684
+rollout_issue_url: https://gitlab.com/gitlab-org/gitlab/-/issues/333181
 milestone: '14.0'
 type: development
 group: group::testing
