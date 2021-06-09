@@ -1,10 +1,10 @@
 <script>
 import { GlBadge, GlButton, GlLoadingIcon, GlTooltipDirective } from '@gitlab/ui';
+import projectsQuery from 'ee/security_dashboard/graphql/queries/instance_projects.query.graphql';
 import { PROJECT_LOADING_ERROR_MESSAGE } from 'ee/security_dashboard/helpers';
 import createFlash from '~/flash';
 import { s__ } from '~/locale';
 import ProjectAvatar from '~/vue_shared/components/project_avatar/default.vue';
-import projectsQuery from '../../graphql/queries/instance_projects.query.graphql';
 
 export default {
   i18n: {

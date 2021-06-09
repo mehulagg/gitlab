@@ -1,7 +1,7 @@
 import { GlBadge, GlLoadingIcon } from '@gitlab/ui';
 import { createLocalVue, shallowMount } from '@vue/test-utils';
 import VueApollo from 'vue-apollo';
-import ProjectList from 'ee/security_dashboard/components/first_class_project_manager/project_list.vue';
+import ProjectList from 'ee/security_dashboard/components/instance/project_list.vue';
 import projectsQuery from 'ee/security_dashboard/graphql/queries/instance_projects.query.graphql';
 import createMockApollo from 'helpers/mock_apollo_helper';
 import { extendedWrapper } from 'helpers/vue_test_utils_helper';

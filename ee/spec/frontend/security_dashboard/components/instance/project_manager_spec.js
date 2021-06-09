@@ -1,8 +1,7 @@
 import { GlButton } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
-
-import ProjectList from 'ee/security_dashboard/components/first_class_project_manager/project_list.vue';
-import ProjectManager from 'ee/security_dashboard/components/first_class_project_manager/project_manager.vue';
+import ProjectList from 'ee/security_dashboard/components/instance/project_list.vue';
+import ProjectManager from 'ee/security_dashboard/components/instance/project_manager.vue';
 import getProjects from 'ee/security_dashboard/graphql/queries/get_projects.query.graphql';
 import waitForPromises from 'helpers/wait_for_promises';
 import createFlash from '~/flash';
