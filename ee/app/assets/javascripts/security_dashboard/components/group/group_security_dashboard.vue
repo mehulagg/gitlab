@@ -6,7 +6,7 @@ import vulnerabilityHistoryQuery from 'ee/security_dashboard/graphql/queries/gro
 import { PROJECT_LOADING_ERROR_MESSAGE } from 'ee/security_dashboard/helpers';
 import createFlash from '~/flash';
 import DashboardNotConfigured from '../empty_states/group_dashboard_not_configured.vue';
-import VulnerabilitySeverities from '../first_class_vulnerability_severities.vue';
+import VulnerabilitySeverities from '../shared/project_security_status_chart.vue';
 import SecurityDashboardLayout from '../shared/security_dashboard_layout.vue';
 import VulnerabilitiesOverTimeChart from '../shared/vulnerabilities_over_time_chart.vue';
 

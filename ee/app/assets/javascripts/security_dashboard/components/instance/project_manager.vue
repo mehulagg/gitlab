@@ -5,7 +5,7 @@ import addProjectToSecurityDashboard from 'ee/security_dashboard/graphql/mutatio
 import deleteProjectFromSecurityDashboard from 'ee/security_dashboard/graphql/mutations/delete_project_from_security_dashboard.mutation.graphql';
 import getProjects from 'ee/security_dashboard/graphql/queries/get_projects.query.graphql';
 import instanceProjectsQuery from 'ee/security_dashboard/graphql/queries/instance_projects.query.graphql';
-import { createInvalidProjectMessage } from 'ee/security_dashboard/utils/first_class_project_manager_utils';
+import { createInvalidProjectMessage } from 'ee/security_dashboard/utils/project_manager_utils';
 import createFlash from '~/flash';
 import { __, s__, sprintf } from '~/locale';
 import ProjectSelector from '~/vue_shared/components/project_selector/project_selector.vue';

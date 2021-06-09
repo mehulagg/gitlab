@@ -5,7 +5,7 @@ import pipelineSecurityReportSummaryQuery from 'ee/security_dashboard/graphql/qu
 import { fetchPolicies } from '~/lib/graphql';
 import { s__ } from '~/locale';
 import glFeatureFlagMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
-import VulnerabilityReport from '../vulnerability_report.vue';
+import VulnerabilityReport from '../shared/vulnerability_report.vue';
 import SecurityDashboard from './security_dashboard_vuex.vue';
 import SecurityReportsSummary from './security_reports_summary.vue';
 

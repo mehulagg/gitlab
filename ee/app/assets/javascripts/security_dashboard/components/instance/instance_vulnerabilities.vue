@@ -5,7 +5,7 @@ import vulnerabilitiesQuery from 'ee/security_dashboard/graphql/queries/instance
 import { preparePageInfo } from 'ee/security_dashboard/helpers';
 import { VULNERABILITIES_PER_PAGE } from 'ee/security_dashboard/store/constants';
 import { fetchPolicies } from '~/lib/graphql';
-import VulnerabilityList from '../vulnerability_list.vue';
+import VulnerabilityList from '../shared/vulnerability_list.vue';
 
 export default {
   components: {
