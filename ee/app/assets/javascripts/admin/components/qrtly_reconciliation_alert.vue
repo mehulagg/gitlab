@@ -1,6 +1,7 @@
 <script>
 import { GlAlert, GlSprintf } from '@gitlab/ui';
 import Cookie from 'js-cookie';
+import { helpPagePath } from '~/helpers/help_page_helper';
 import { formatDate, getDayDifference } from '~/lib/utils/datetime_utility';
 import { s__, __, sprintf } from '~/locale';
 
@@ -18,6 +19,10 @@ it will be charged. Otherwise, you will receive an invoice.`),
 
 const CONTACT_SUPPORT_URL = 'https://about.gitlab.com/support/#contact-support';
 
+const qrtlyReconciliationHelpPageUrl = helpPagePath('subscriptions/self_managed/index', {
+  anchor: 'quarterly-subscription-reconciliation',
+});
+
 export default {
   name: 'QrtlyReconciliationAlert',
   components: {
@@ -26,7 +31,7 @@ export default {
   },
   props: {
     date: {
-      type: Number,
+      type: Date,
       required: true,
     },
     cookieKey: {
@@ -51,6 +56,7 @@ export default {
   },
   i18n,
   CONTACT_SUPPORT_URL,
+  qrtlyReconciliationHelpPageUrl,
 };
 </script>
 
@@ -60,6 +66,7 @@ export default {
     variant="info"
     :title="alertTitle"
     :primary-button-text="$options.i18n.learnMore"
+    :primary-button-link="$options.qrtlyReconciliationHelpPageUrl"
     :secondary-button-text="$options.i18n.contactSupport"
     :secondary-button-link="$options.CONTACT_SUPPORT_URL"
     @dismiss="handleDismiss"

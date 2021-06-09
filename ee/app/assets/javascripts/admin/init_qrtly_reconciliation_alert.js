@@ -13,7 +13,7 @@ export const initQrtlyReconciliationAlert = (selector = '#js-qrtly-reconciliatio
     render(createElement) {
       return createElement(QrtlyReconciliationAlert, {
         props: {
-          date: Date.parse(el.dataset.reconciliationDate),
+          date: new Date(el.dataset.reconciliationDate),
           cookieKey: el.dataset.cookieKey,
         },
       });
