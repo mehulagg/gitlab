@@ -3,6 +3,7 @@
 require 'spec_helper'
 
 RSpec.describe Git::BranchPushService, services: true do
+  include RedisHelpers
   include RepoHelpers
 
   let_it_be(:user) { create(:user) }
@@ -558,9 +559,9 @@ RSpec.describe Git::BranchPushService, services: true do
 
     before do
       # Flush any raw key-value data stored by the housekeeping code.
-      Gitlab::Redis::Cache.with { |conn| conn.flushall }
-      Gitlab::Redis::Queues.with { |conn| conn.flushall }
-      Gitlab::Redis::SharedState.with { |conn| conn.flushall }
+      redis_cache_cleanup!
+      redis_queues_cleanup!
+      redis_shared_state_cleanup!
 
       allow(Repositories::HousekeepingService).to receive(:new).and_return(housekeeping)
     end
