@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 class CleanUpPendingBuildsTable < ActiveRecord::Migration[6.0]
-  include ::Gitlab::Database::MigrationHelpers
+  include ::Gitlab::Database::DynamicModelHelpers
 
   BATCH_SIZE = 1000
 
