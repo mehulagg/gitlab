@@ -119,7 +119,7 @@ tags, `--no-tags` can [make a big difference in some
 cases](https://gitlab.com/gitlab-com/gl-infra/scalability/-/issues/746).
 If your CI builds do not depend on Git tags it is worth trying.
 
-See the [`GIT_FETCH_EXTRA_FLAGS` documentation](../runners/README.md#git-fetch-extra-flags)
+See the [`GIT_FETCH_EXTRA_FLAGS` documentation](../runners/configure-runners.md#git-fetch-extra-flags)
 for more information.
 
 ## Fork-based workflow
