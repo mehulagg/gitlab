@@ -26,7 +26,7 @@ When you are optimizing your SQL queries, there are two dimensions to pay attent
 - When analyzing your query's performance, pay attention to if the time you are seeing is on a [cold or warm cache](#cold-and-warm-cache). These guidelines apply for both cache types.
 - When working with batched queries, change the range and batch size to see how it effects the query timing and caching.
 - If an existing query is not performing well, make an effort to improve it. If it is too complex or would stall development, create a follow-up so it can be addressed in a timely manner. You can always ask the database reviewer or maintainer for help and guidance.
-- When checking the performance of queries in a migration, check the results of the gitlabcom-database testing pipeline powered by the [migration testing](https://gitlab.com/gitlab-org/database-team/gitlab-com-database-testing) project, for each query. Make sure the "max time" reported for each query is compliant with our [query performance guidelines](https://docs.gitlab.com/ee/development/query_performance.html#timing-guidelines-for-queries).
+- When checking the performance of queries in a migration, check the results of the gitlabcom-database testing pipeline powered by the [migration testing](https://gitlab.com/gitlab-org/database-team/gitlab-com-database-testing) project, for each query. Make sure the "max time" reported for each query is compliant with our [query performance guidelines](#timing-guidelines-for-queries).
 
 ## Cold and warm cache
 
