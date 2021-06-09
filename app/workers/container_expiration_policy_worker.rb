@@ -16,9 +16,27 @@ class ContainerExpirationPolicyWorker # rubocop:disable Scalability/IdempotentWo
   def perform
     process_stale_ongoing_cleanups
     throttling_enabled? ? perform_throttled : perform_unthrottled
+    log_counts
   end
 
   private
+
+  def log_counts
+    use_replica_if_available do
+      required_count = ContainerRepository.requiring_cleanup.count
+      unfinished_count = ContainerRepository.with_unfinished_cleanup.count
+
+      log_extra_metadata_on_done(:cleanup_required_count, required_count)
+      log_extra_metadata_on_done(:cleanup_unfinished_count, unfinished_count)
+      log_extra_metadata_on_done(:cleanup_total_count, required_count + unfinished_count)
+    end
+  end
+
+  def use_replica_if_available(&blk)
+    return yield unless ::Gitlab::Database::LoadBalancing.enable?
+
+    ::Gitlab::Database::LoadBalancing::Session.current.use_replicas_for_read_queries(&blk)
+  end
 
   def process_stale_ongoing_cleanups
     threshold = delete_tags_service_timeout.seconds + 30.minutes

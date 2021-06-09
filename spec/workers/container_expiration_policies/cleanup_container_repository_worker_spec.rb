@@ -509,23 +509,37 @@ RSpec.describe ContainerExpirationPolicies::CleanupContainerRepositoryWorker do
   end
 
   describe '#remaining_work_count' do
+    let(:capacity) { 10 }
+
     subject { worker.remaining_work_count }
 
+    before do
+      stub_application_setting(container_registry_expiration_policies_worker_capacity: capacity)
+    end
+
     shared_examples 'handling all conditions' do
+      where(:scheduled_count, :unfinished_count, :capacity, :expected_count) do
+        2 | 2 | 10 | 4
+        2 | 0 | 10 | 2
+        0 | 2 | 10 | 2
+        4 | 2 | 2  | 4
+        4 | 0 | 2  | 4
+        0 | 4 | 2  | 4
+      end
+
+      with_them do
+        before do
+          allow(worker).to receive(:cleanup_scheduled_count).and_return(scheduled_count)
+          allow(worker).to receive(:cleanup_unfinished_count).and_return(unfinished_count)
+        end
+
+        it { is_expected.to eq(expected_count) }
+      end
+
       context 'with container repositories waiting for cleanup' do
         let_it_be(:unfinished_repositories) { create_list(:container_repository, 2, :cleanup_unfinished) }
 
         it { is_expected.to eq(3) }
-
-        it 'logs the work count' do
-          expect_log_info(
-            cleanup_scheduled_count: 1,
-            cleanup_unfinished_count: 2,
-            cleanup_total_count: 3
-          )
-
-          subject
-        end
       end
 
       context 'with no container repositories waiting for cleanup' do
@@ -535,27 +549,14 @@ RSpec.describe ContainerExpirationPolicies::CleanupContainerRepositoryWorker do
         end
 
         it { is_expected.to eq(0) }
-
-        it 'logs 0 work count' do
-          expect_log_info(
-            cleanup_scheduled_count: 0,
-            cleanup_unfinished_count: 0,
-            cleanup_total_count: 0
-          )
-
-          subject
-        end
       end
     end
 
     context 'with loopless enabled' do
       let_it_be(:disabled_repository) { create(:container_repository, :cleanup_scheduled) }
 
-      let(:capacity) { 10 }
-
       before do
         stub_feature_flags(container_registry_expiration_policies_loopless: true)
-        stub_application_setting(container_registry_expiration_policies_worker_capacity: capacity)
 
         # loopless mode is more accurate that non loopless: policies need to be enabled
         ContainerExpirationPolicy.update_all(enabled: true)
@@ -593,11 +594,6 @@ RSpec.describe ContainerExpirationPolicies::CleanupContainerRepositoryWorker do
 
       it { is_expected.to eq(0) }
     end
-  end
-
-  def expect_log_info(structure)
-    expect(worker.logger)
-      .to receive(:info).with(worker.structured_payload(structure))
   end
 
   def loopless_enabled?
