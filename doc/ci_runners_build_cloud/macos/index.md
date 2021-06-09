@@ -66,4 +66,5 @@ test:
 - Builds
 - VM images and available software
 - Code signing
+- Settings
 
