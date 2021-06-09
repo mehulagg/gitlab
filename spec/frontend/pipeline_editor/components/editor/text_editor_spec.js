@@ -110,7 +110,7 @@ describe('Pipeline Editor | Text editor component', () => {
         findEditor().vm.$emit(EDITOR_READY_EVENT);
       });
 
-      it('configures editor with syntax highlight', async () => {
+      it('configures editor with syntax highlight', () => {
         expect(mockUse).toHaveBeenCalledTimes(1);
         expect(mockRegisterCiSchema).toHaveBeenCalledTimes(1);
         expect(mockRegisterCiSchema).toHaveBeenCalledWith({
@@ -120,6 +120,7 @@ describe('Pipeline Editor | Text editor component', () => {
         });
       });
     });
+
     describe('when `schema_linting` feature flag is off', () => {
       beforeEach(() => {
         createComponent();
