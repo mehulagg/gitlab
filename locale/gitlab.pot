@@ -38168,6 +38168,9 @@ msgstr ""
 msgid "can only be changed by a group admin."
 msgstr ""
 
+msgid "can only have one escalation policy"
+msgstr ""
+
 msgid "can't be enabled because signed commits are required for this project"
 msgstr ""
 

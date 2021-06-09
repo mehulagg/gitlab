@@ -78,6 +78,14 @@ RSpec.describe IncidentManagement::EscalationPolicies::CreateService do
 
         it_behaves_like 'error response', "Rules[0] oncall schedule can't be blank"
       end
+
+      context 'project has an existing escalation policy' do
+        before do
+          create(:incident_management_escalation_policy, project: project)
+        end
+
+        it_behaves_like 'error response', "Project can only have one escalation policy"
+      end
     end
 
     context 'valid params' do

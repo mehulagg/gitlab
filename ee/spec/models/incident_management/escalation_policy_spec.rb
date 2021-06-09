@@ -17,6 +17,7 @@ RSpec.describe IncidentManagement::EscalationPolicy do
   describe 'validations' do
     it { is_expected.to validate_presence_of(:name) }
     it { is_expected.to validate_presence_of(:rules) }
+    it { is_expected.to validate_uniqueness_of(:project_id).with_message(/can only have one escalation policy/) }
     it { is_expected.to validate_uniqueness_of(:name).scoped_to(:project_id) }
     it { is_expected.to validate_length_of(:name).is_at_most(72) }
     it { is_expected.to validate_length_of(:description).is_at_most(160) }
