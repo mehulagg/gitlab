@@ -79,7 +79,8 @@ the `users` table maps to the `User` class, while the `application_settings`
 table maps to the `ApplicationSetting` class.
 
 You can find a list of tables and column names in the Rails database schema,
-available at `/opt/gitlab/embedded/service/gitlab-rails/db/schema.rb`.
+available at `/opt/gitlab/embedded/service/gitlab-rails/db/structure.sql`
+(or in `/opt/gitlab/embedded/service/gitlab-rails/db/schema.rb` before 12.10).
 
 You can also look up an object from the database by attribute name:
 
