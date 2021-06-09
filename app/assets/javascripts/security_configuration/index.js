@@ -1,6 +1,7 @@
 import Vue from 'vue';
 import VueApollo from 'vue-apollo';
 import createDefaultClient from '~/lib/graphql';
+import { parseBooleanDataAttributes } from '~/lib/utils/dom_utils';
 import SecurityConfigurationApp from './components/app.vue';
 import { securityFeatures, complianceFeatures } from './components/constants';
 import RedesignedSecurityConfigurationApp from './components/redesigned_app.vue';
@@ -23,7 +24,6 @@ export const initStaticSecurityConfiguration = (el) => {
     features,
     latestPipelinePath,
     gitlabCiHistoryPath,
-    gitlabCiPresent,
   } = el.dataset;
 
   if (gon.features.securityConfigurationRedesign) {
@@ -47,7 +47,7 @@ export const initStaticSecurityConfiguration = (el) => {
             augmentedSecurityFeatures,
             latestPipelinePath,
             gitlabCiHistoryPath,
-            gitlabCiPresent,
+            ...parseBooleanDataAttributes(el, ['gitlabCiPresent']),
           },
         });
       },
