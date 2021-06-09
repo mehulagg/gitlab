@@ -219,10 +219,10 @@ describe('Package Files', () => {
       };
 
       it.each`
-        selector     | title       | sha
-        ${'sha-256'} | ${'SHA256'} | ${'file_sha256'}
-        ${'md5'}     | ${'MD5'}    | ${'file_md5'}
-        ${'sha-1'}   | ${'SHA1'}   | ${'file_sha1'}
+        selector     | title        | sha
+        ${'sha-256'} | ${'SHA-256'} | ${'file_sha256'}
+        ${'md5'}     | ${'MD5'}     | ${'file_md5'}
+        ${'sha-1'}   | ${'SHA-1'}   | ${'file_sha1'}
       `('has a $title row', async ({ selector, title, sha }) => {
         createComponent();
 
