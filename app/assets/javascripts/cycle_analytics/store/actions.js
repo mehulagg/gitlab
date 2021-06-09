@@ -52,11 +52,7 @@ export const fetchValueStreams = ({ commit, dispatch, state }) => {
     });
 };
 
-export const fetchCycleAnalyticsData = ({
-  state: { requestPath, startDate },
-  dispatch,
-  commit,
-}) => {
+export const fetchCycleAnalyticsData = ({ state: { requestPath, startDate }, commit }) => {
   commit(types.REQUEST_CYCLE_ANALYTICS_DATA);
 
   return axios
@@ -67,7 +63,7 @@ export const fetchCycleAnalyticsData = ({
     .catch(() => {
       commit(types.RECEIVE_CYCLE_ANALYTICS_DATA_ERROR);
       createFlash({
-        message: __('There was an error while fetching value stream analytics data.'),
+        message: __('There was an error while fetching value stream summary data.'),
       });
     });
 };
@@ -92,8 +88,6 @@ export const fetchStageData = ({ state: { requestPath, selectedStage, startDate 
 };
 
 export const setSelectedStage = ({ dispatch, commit, state: { stages } }, selectedStage = null) => {
-  console.log('setSelectedStage::stages', stages);
-  console.log('setSelectedStage::selectedStage', selectedStage);
   const stage = selectedStage || stages[0];
   commit(types.SET_SELECTED_STAGE, stage);
   return dispatch('fetchStageData');

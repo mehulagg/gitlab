@@ -92,20 +92,14 @@ export default {
     ]),
     handleDateSelect(startDate) {
       this.setDateRange({ startDate });
+      this.fetchStageData();
       this.fetchCycleAnalyticsData();
     },
     isActiveStage(stage) {
       return stage.slug === this.selectedStage.slug;
     },
     onSelectStage(stage) {
-      console.log('onSelectStage', stage);
-      if (this.isLoadingStage || this.selectedStage?.slug === stage?.slug) return;
       this.setSelectedStage(stage);
-      // if (!stage.isUserAllowed) {
-      //   return;
-      // }
-
-      // this.fetchStageData();
     },
     dismissOverviewDialog() {
       this.isOverviewDialogDismissed = true;
