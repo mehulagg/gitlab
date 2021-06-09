@@ -58,7 +58,7 @@ module GitlabSubscriptions
     end
 
     def user_is_admin?
-      current_user.can_admin_all_resources?
+      current_user&.can_admin_all_resources?
     end
 
     def user_can_admin?(namespace)
