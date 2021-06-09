@@ -25,7 +25,7 @@ these restrictions on the branch.
 | Force push to the branch | No one. |
 | Delete the branch        | No one. |
 
-(*) Users with developer permissions can create a project in a group,
+(*) Users with the Developer role can create a project in a group,
 but might not be allowed to initially push to the [default branch](repository/branches/default.md).
 
 ### Set the branch protection default level
@@ -43,37 +43,29 @@ To protect a branch:
 1. Go to your project and select **Settings > Repository**.
 1. Expand **Protected branches**.
 1. From the **Branch** dropdown menu, select the branch you want to protect.
+1. From the **Allowed to merge:** list, select a role, group, or user that can merge into this branch.
+1. From the **Allowed to push:** list, select a role, group, or user that can push to this branch.
 1. Select **Protect**.
 
 The protected branch displays in the **Protected branches** list.
 
-## Using the Allowed to merge and Allowed to push settings
+### Make everyone submit a merge requests for a branch
 
-In GitLab 8.11 and later, we added another layer of branch protection which provides
-more granular management of protected branches. The **Developers can push**
-option was replaced by **Allowed to push**. You can set this value to allow
-or prohibit Maintainers and/or Developers to push to a protected branch.
+If you set:
 
-Using the **Allowed to push** and **Allowed to merge** settings, you can control
-the actions that different roles can perform with the protected branch.
-For example, you could set **Allowed to push** to "No one", and **Allowed to merge**
-to "Developers + Maintainers", to require everyone to submit a merge request for
-changes going into the protected branch. This is compatible with workflows like
-the [GitLab workflow](../../topics/gitlab_flow.md).
+- **Allowed to push** to "No one".
+- **Allowed to merge** to "Developers + Maintainers".
 
-However, there are workflows where that is not needed, and only protecting from
-force pushes and branch removal is useful. For those workflows, you can allow
-everyone with write access to push to a protected branch by setting
-**Allowed to push** to "Developers + Maintainers".
+Everyone must submit a merge request for changes going into the protected branch.
+This is compatible with workflows like the [GitLab workflow](../../topics/gitlab_flow.md).
 
-You can set the **Allowed to push** and **Allowed to merge** options while creating
-a protected branch or afterwards by selecting the option you want from the
-dropdown list in the **Already protected** area.
+### Allow everyone to push directly to a branch
 
-![Developers can push](img/protected_branches_devs_can_push_v12_3.png)
+If you set:
 
-If you don't choose any of those options while creating a protected branch,
-they are set to Maintainers by default.
+- **Allowed to push** to  "Developers + Maintainers".
+
+Then everyone with write access can push to the protected branch.
 
 ### Allow deploy keys to push to a protected branch
 
@@ -81,45 +73,29 @@ they are set to Maintainers by default.
 > - This feature is being selectively deployed in GitLab.com 13.7, and may not be available for all users.
 > - This feature is available for all users in GitLab 13.9.
 
-You can allow specific machines to access protected branches in your repository with
-[deploy keys](deploy_keys/index.md). This can be useful for your CI/CD workflow,
-for example.
+You can permit the owner of a [deploy key](deploy_keys/index.md) can push to a protected branch,
+even if they aren't a member of the related project. The owner of the deploy
+key must have at least read access to the project.
 
-Deploy keys can be selected in the **Allowed to push** dropdown when:
+Prerequisites:
 
-- Defining a protected branch.
-- Updating an existing branch.
+- The deploy key must be [enabled for your project](deploy_keys/index.md#how-to-enable-deploy-keys).
+- The deploy key must have [write access](deploy_keys/index.md#deploy-keys-permissions) to your project repository.
 
-Select a deploy key to allow the key's owner to push to the chosen protected branch,
-even if they aren't a member of the related project. The owner of the selected deploy
-key must have at least read access to the given project.
+To allow a deploy key to push to a protected branch:
 
-For a deploy key to be selectable:
-
-- It must be [enabled for your project](deploy_keys/index.md#how-to-enable-deploy-keys).
-- It must have [write access](deploy_keys/index.md#deploy-keys-permissions) to your project repository.
+1. Go to your project and select **Settings > Repository**.
+1. Expand **Protected branches**.
+1. From the **Branch** dropdown menu, select the branch you want to protect.
+1. From the **Allowed to push:** list, select the deploy key.
+1. Select **Protect**.
 
 Deploy keys are not available in the **Allowed to merge** dropdown.
 
-![Deploy keys on protected branches](img/protected_branches_deploy_keys_v13_5.png)
-
-## Restricting push and merge access to certain users **(PREMIUM)**
-
-With GitLab Premium you can restrict access to protected branches
-by choosing a role (Maintainers, Developers) and certain users. From the
-dropdown menu select the role and/or the users you want to have merge or push
-access.
-
-![Select roles and users](img/protected_branches_select_roles_and_users.png)
-
-Click **Protect** and the branch displays in the **Protected branch** list.
-
-![Roles and users list](img/protected_branches_select_roles_and_users_list.png)
-
 ## Wildcard protected branches
 
-You can specify a wildcard protected branch, which protects all branches
-matching the wildcard. For example:
+You can use a wildcard to protect all branches that
+match the wildcard. For example:
 
 | Wildcard Protected Branch | Matching Branches                                      |
 |---------------------------|--------------------------------------------------------|
@@ -133,12 +109,7 @@ branches.
 Two different wildcards can potentially match the same branch. For example,
 `*-stable` and `production-*` would both match a `production-stable` branch.
 In that case, if _any_ of these protected branches have a setting like
-"Allowed to push", then `production-stable` also inherit this setting.
-
-If you click on a protected branch's name, GitLab displays a list of
-all matching branches:
-
-![Protected branch matches](img/protected_branches_matches.png)
+"Allowed to push," then `production-stable` also inherit this setting.
 
 ## Create a protected branch
 
