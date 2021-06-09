@@ -12,10 +12,5 @@ module Geo
     def self.model
       ::Terraform::StateVersion
     end
-
-    override :verification_feature_flag_enabled?
-    def self.verification_feature_flag_enabled?
-      Feature.enabled?(:geo_terraform_state_version_verification, default_enabled: :yaml)
-    end
   end
 end
