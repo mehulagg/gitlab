@@ -37,20 +37,6 @@ module EE
         unauthorized! unless ::Gitlab::Geo.allowed_ip?(request.ip)
       end
 
-      override :current_user
-      def current_user
-        strong_memoize(:current_user) do
-          user = super
-
-          if user
-            ::Gitlab::Database::LoadBalancing::RackMiddleware
-              .stick_or_unstick(env, :user, user.id)
-          end
-
-          user
-        end
-      end
-
       def authorization_header_valid?
         return unless gitlab_geo_node_token?
 

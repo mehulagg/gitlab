@@ -5,7 +5,7 @@ class Analytics::DevopsAdoption::Snapshot < ApplicationRecord
 
   belongs_to :namespace
 
-  has_many :segments, foreign_key: :namespace_id, primary_key: :namespace_id
+  has_many :enabled_namespaces, foreign_key: :namespace_id, primary_key: :namespace_id
 
   validates :namespace, presence: true
   validates :recorded_at, presence: true

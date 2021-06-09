@@ -1543,16 +1543,7 @@ msgstr ""
 msgid "APIFuzzing|Code snippet could not be generated. Try again later."
 msgstr ""
 
-msgid "APIFuzzing|Code snippet for the API Fuzzing configuration"
-msgstr ""
-
 msgid "APIFuzzing|Configure HTTP basic authentication values. Other authentication methods are supported. %{linkStart}Learn more%{linkEnd}."
-msgstr ""
-
-msgid "APIFuzzing|Copy code and open .gitlab-ci.yml file"
-msgstr ""
-
-msgid "APIFuzzing|Copy code only"
 msgstr ""
 
 msgid "APIFuzzing|Customize common API fuzzing settings to suit your requirements. For details of more advanced configuration options, see the %{docsLinkStart}GitLab API Fuzzing documentation%{docsLinkEnd}."
@@ -3027,10 +3018,16 @@ msgstr ""
 msgid "AlertSettings|Add new integration"
 msgstr ""
 
+msgid "AlertSettings|Alert settings"
+msgstr ""
+
 msgid "AlertSettings|Authorization key"
 msgstr ""
 
 msgid "AlertSettings|Configure details"
+msgstr ""
+
+msgid "AlertSettings|Current integrations"
 msgstr ""
 
 msgid "AlertSettings|Customize alert payload mapping (optional)"
@@ -3157,9 +3154,6 @@ msgid "AlertsIntegrations|Alerts will be created through this integration"
 msgstr ""
 
 msgid "AlertsIntegrations|Alerts will not be created through this integration"
-msgstr ""
-
-msgid "AlertsIntegrations|Current integrations"
 msgstr ""
 
 msgid "AlertsIntegrations|If you delete the %{integrationName} integration, alerts are no longer sent from this endpoint. This action cannot be undone."
@@ -4039,9 +4033,6 @@ msgid "Apply a label"
 msgstr ""
 
 msgid "Apply a template"
-msgstr ""
-
-msgid "Apply changes"
 msgstr ""
 
 msgid "Apply suggestion"
@@ -9690,6 +9681,12 @@ msgstr ""
 msgid "CredentialsInventory|SSH Keys"
 msgstr ""
 
+msgid "Credit card validated at:"
+msgstr ""
+
+msgid "Credit card validated:"
+msgstr ""
+
 msgid "Critical vulnerabilities present"
 msgstr ""
 
@@ -10440,9 +10437,6 @@ msgstr ""
 msgid "Date range"
 msgstr ""
 
-msgid "Date range cannot exceed %{maxDateRange} days."
-msgstr ""
-
 msgid "Date range must be shorter than %{max_range} days."
 msgstr ""
 
@@ -10465,6 +10459,9 @@ msgid "Days"
 msgstr ""
 
 msgid "Days to merge"
+msgstr ""
+
+msgid "Deactivate dormant users after 90 days of inactivity. Users can return to active status by signing in to their account. While inactive, a user is not counted as an active user in the instance."
 msgstr ""
 
 msgid "Deactivate this user"
@@ -10618,6 +10615,9 @@ msgid "Delete comment"
 msgstr ""
 
 msgid "Delete domain"
+msgstr ""
+
+msgid "Delete file"
 msgstr ""
 
 msgid "Delete image repository"
@@ -11459,9 +11459,6 @@ msgstr ""
 msgid "Diff limits"
 msgstr ""
 
-msgid "Diff view settings"
-msgstr ""
-
 msgid "Difference between start date and now"
 msgstr ""
 
@@ -11705,6 +11702,9 @@ msgid "Don't show again"
 msgstr ""
 
 msgid "Done"
+msgstr ""
+
+msgid "Dormant users"
 msgstr ""
 
 msgid "Download"
@@ -13102,6 +13102,9 @@ msgstr ""
 msgid "EscalationPolicies|Edit escalation policy"
 msgstr ""
 
+msgid "EscalationPolicies|Elapsed time must be greater than or equal to zero."
+msgstr ""
+
 msgid "EscalationPolicies|Email on-call user in schedule"
 msgstr ""
 
@@ -13112,6 +13115,9 @@ msgid "EscalationPolicies|Failed to load oncall-schedules"
 msgstr ""
 
 msgid "EscalationPolicies|IF alert is not %{alertStatus} in %{minutes} minutes"
+msgstr ""
+
+msgid "EscalationPolicies|Remove escalation rule"
 msgstr ""
 
 msgid "EscalationPolicies|Select schedule"
@@ -13305,7 +13311,7 @@ msgstr ""
 msgid "Experienced"
 msgstr ""
 
-msgid "ExperimentSubject|Must have exactly one of User, Group, or Project."
+msgid "ExperimentSubject|Must have exactly one of User, Namespace, or Project."
 msgstr ""
 
 msgid "Expiration"
@@ -16129,6 +16135,9 @@ msgstr ""
 msgid "GroupSettings|remove the share with group lock from %{ancestor_group_name}"
 msgstr ""
 
+msgid "GroupTemplate|The selected group's repositories and databases are copied into the projects created in this group. %{link_start}What should I add to my template group?%{link_end} "
+msgstr ""
+
 msgid "Groups"
 msgstr ""
 
@@ -17357,7 +17366,7 @@ msgstr ""
 msgid "Incident Management Limits"
 msgstr ""
 
-msgid "Incident template (optional)"
+msgid "Incident template (optional)."
 msgstr ""
 
 msgid "IncidentManagement|%{hours} hours, %{minutes} minutes remaining"
@@ -17445,9 +17454,6 @@ msgid "IncidentManagement|Unpublished"
 msgstr ""
 
 msgid "IncidentSettings|Activate \"time to SLA\" countdown timer"
-msgstr ""
-
-msgid "IncidentSettings|Alert integration"
 msgstr ""
 
 msgid "IncidentSettings|Fine-tune incident settings and set up integrations with external tools to help better manage incidents."
@@ -18592,6 +18598,9 @@ msgstr ""
 msgid "Iterations|Iteration scheduling will be handled automatically"
 msgstr ""
 
+msgid "Iterations|Move incomplete issues to the next iteration"
+msgstr ""
+
 msgid "Iterations|New iteration cadence"
 msgstr ""
 
@@ -18602,6 +18611,9 @@ msgid "Iterations|No iterations in cadence."
 msgstr ""
 
 msgid "Iterations|Number of future iterations you would like to have scheduled"
+msgstr ""
+
+msgid "Iterations|Roll over issues"
 msgstr ""
 
 msgid "Iterations|Save cadence"
@@ -21842,7 +21854,7 @@ msgstr ""
 msgid "NetworkPolicies|Are you sure you want to delete this policy? This action cannot be undone."
 msgstr ""
 
-msgid "NetworkPolicies|Choose whether to enforce this policy."
+msgid "NetworkPolicies|Container runtime"
 msgstr ""
 
 msgid "NetworkPolicies|Create policy"
@@ -23558,6 +23570,9 @@ msgstr ""
 msgid "PackageRegistry|Created by commit %{link} on branch %{branch}"
 msgstr ""
 
+msgid "PackageRegistry|Delete Package File"
+msgstr ""
+
 msgid "PackageRegistry|Delete Package Version"
 msgstr ""
 
@@ -23636,6 +23651,9 @@ msgstr ""
 msgid "PackageRegistry|Package Registry"
 msgstr ""
 
+msgid "PackageRegistry|Package file deleted successfully"
+msgstr ""
+
 msgid "PackageRegistry|Package has %{number} archived update"
 msgstr ""
 
@@ -23699,6 +23717,12 @@ msgstr ""
 msgid "PackageRegistry|Show Yarn commands"
 msgstr ""
 
+msgid "PackageRegistry|Something went wrong while deleting the package file."
+msgstr ""
+
+msgid "PackageRegistry|Something went wrong while deleting the package."
+msgstr ""
+
 msgid "PackageRegistry|Sorry, your filter produced no results"
 msgstr ""
 
@@ -23727,6 +23751,9 @@ msgid "PackageRegistry|Unable to fetch package version information."
 msgstr ""
 
 msgid "PackageRegistry|Unable to load package"
+msgstr ""
+
+msgid "PackageRegistry|You are about to delete %{filename}. This is a destructive action that may render your package unusable. Are you sure?"
 msgstr ""
 
 msgid "PackageRegistry|You are about to delete %{name}, this operation is irreversible, are you sure?"
@@ -26768,9 +26795,6 @@ msgstr ""
 msgid "Protocol"
 msgstr ""
 
-msgid "Provide feedback"
-msgstr ""
-
 msgid "Provider"
 msgstr ""
 
@@ -28985,6 +29009,9 @@ msgstr ""
 msgid "SecurityConfiguration|By default, all analyzers are applied in order to cover all languages across your project, and only run if the language is detected in the Merge Request."
 msgstr ""
 
+msgid "SecurityConfiguration|Code snippet for the %{scanType} configuration"
+msgstr ""
+
 msgid "SecurityConfiguration|Compliance"
 msgstr ""
 
@@ -28998,6 +29025,12 @@ msgid "SecurityConfiguration|Configure %{feature}"
 msgstr ""
 
 msgid "SecurityConfiguration|Configure via Merge Request"
+msgstr ""
+
+msgid "SecurityConfiguration|Copy code and open .gitlab-ci.yml file"
+msgstr ""
+
+msgid "SecurityConfiguration|Copy code only"
 msgstr ""
 
 msgid "SecurityConfiguration|Could not retrieve configuration data. Please refresh the page, or try again later."
@@ -29393,6 +29426,9 @@ msgstr ""
 msgid "Select a shared template repository for all projects on this instance."
 msgstr ""
 
+msgid "Select a subgroup to use as a template when creating new projects in the group."
+msgstr ""
+
 msgid "Select a template repository"
 msgstr ""
 
@@ -29493,9 +29529,6 @@ msgid "Select subscription"
 msgstr ""
 
 msgid "Select target branch"
-msgstr ""
-
-msgid "Select the custom project template source group."
 msgstr ""
 
 msgid "Select timezone"
@@ -30159,6 +30192,9 @@ msgstr ""
 msgid "Showing all issues"
 msgstr ""
 
+msgid "Showing data for workflow items created in this date range. Date range cannot exceed %{maxDateRange} days."
+msgstr ""
+
 msgid "Showing graphs based on events of the last %{timerange} days."
 msgstr ""
 
@@ -30490,9 +30526,6 @@ msgid "Something went wrong while creating a requirement."
 msgstr ""
 
 msgid "Something went wrong while deleting description changes. Please try again."
-msgstr ""
-
-msgid "Something went wrong while deleting the package."
 msgstr ""
 
 msgid "Something went wrong while deleting the source branch. Please try again."
@@ -32968,9 +33001,6 @@ msgid "There is too much data to calculate. Please change your selection."
 msgstr ""
 
 msgid "There was a problem communicating with your device."
-msgstr ""
-
-msgid "There was a problem dismissing this notification."
 msgstr ""
 
 msgid "There was a problem fetching branches."
@@ -36109,9 +36139,6 @@ msgstr ""
 msgid "View job"
 msgstr ""
 
-msgid "View job dependencies in the pipeline graph!"
-msgstr ""
-
 msgid "View job log"
 msgstr ""
 
@@ -36214,7 +36241,10 @@ msgstr ""
 msgid "Visit settings page"
 msgstr ""
 
-msgid "Visual Studio Code"
+msgid "Visual Studio Code (HTTPS)"
+msgstr ""
+
+msgid "Visual Studio Code (SSH)"
 msgstr ""
 
 msgid "VisualReviewApp|%{stepStart}Step 1%{stepEnd}. Copy the following script:"
@@ -37368,9 +37398,6 @@ msgstr ""
 msgid "You can now export your security dashboard to a CSV report."
 msgstr ""
 
-msgid "You can now group jobs in the pipeline graph based on which jobs are configured to run first, if you use the %{codeStart}needs:%{codeEnd} keyword to establish job dependencies in your CI/CD pipelines. %{linkStart}Learn how to speed up your pipeline with needs.%{linkEnd}"
-msgstr ""
-
 msgid "You can now submit a merge request to get this change into the original branch."
 msgstr ""
 
@@ -37788,12 +37815,6 @@ msgstr ""
 msgid "Your CSV import for project"
 msgstr ""
 
-msgid "Your Commit Email will be used for web based operations, such as edits and merges."
-msgstr ""
-
-msgid "Your Default Notification Email will be used for account notifications if a %{openingTag}group-specific email address%{closingTag} is not set."
-msgstr ""
-
 msgid "Your DevOps Report gives an overview of how you are using GitLab from a feature perspective. View how you compare with other organizations, discover features you are not using, and learn best practices through blog posts and white papers."
 msgstr ""
 
@@ -37821,16 +37842,10 @@ msgstr ""
 msgid "Your Personal Access Token was revoked"
 msgstr ""
 
-msgid "Your Primary Email will be used for avatar detection."
-msgstr ""
-
 msgid "Your Projects (default)"
 msgstr ""
 
 msgid "Your Projects' Activity"
-msgstr ""
-
-msgid "Your Public Email will be displayed on your public profile."
 msgstr ""
 
 msgid "Your SSH key has expired"
@@ -37920,10 +37935,16 @@ msgstr ""
 msgid "Your comment will be discarded."
 msgstr ""
 
+msgid "Your commit email is used for web based operations, such as edits and merges."
+msgstr ""
+
 msgid "Your dashboard has been copied. You can %{web_ide_link_start}edit it here%{web_ide_link_end}."
 msgstr ""
 
 msgid "Your dashboard has been updated. You can %{web_ide_link_start}edit it here%{web_ide_link_end}."
+msgstr ""
+
+msgid "Your default notification email is used for account notifications if a %{openingTag}group-specific email address%{closingTag} is not set."
 msgstr ""
 
 msgid "Your deployment services will be broken, you will need to manually fix the services after renaming."
@@ -38010,6 +38031,9 @@ msgstr ""
 msgid "Your personal access tokens will expire in %{days_to_expire} days or less"
 msgstr ""
 
+msgid "Your primary email is used for avatar detection. You can change it in your %{openingTag}profile settings%{closingTag}."
+msgstr ""
+
 msgid "Your profile"
 msgstr ""
 
@@ -38017,6 +38041,9 @@ msgid "Your project limit is %{limit} projects! Please contact your administrato
 msgstr ""
 
 msgid "Your projects"
+msgstr ""
+
+msgid "Your public email will be displayed on your public profile."
 msgstr ""
 
 msgid "Your request for access could not be processed: %{error_meesage}"

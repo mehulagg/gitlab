@@ -4,6 +4,7 @@ import {
   GlButtonGroup,
   GlCard,
   GlCollapse,
+  GlIcon,
   GlModalDirective,
   GlTooltipDirective,
 } from '@gitlab/ui';
@@ -63,6 +64,7 @@ export default {
     GlButtonGroup,
     GlCard,
     GlCollapse,
+    GlIcon,
     AddEditRotationModal,
     DeleteRotationModal,
     DeleteScheduleModal,
@@ -177,7 +179,7 @@ export default {
         : this.$options.i18n.scheduleClose;
     },
     scheduleVisibleAngleIcon() {
-      return this.scheduleVisible ? 'angle-up' : 'angle-down';
+      return this.scheduleVisible ? 'angle-down' : 'angle-right';
     },
     selectedTimezone() {
       return this.timezones.find((tz) => tz.identifier === this.schedule.timezone);
@@ -231,13 +233,28 @@ export default {
 
 <template>
   <div>
-    <gl-card class="gl-mt-5" header-class="gl-py-3">
+    <gl-card
+      class="gl-mt-5"
+      :class="{ 'gl-border-bottom-0': !scheduleVisible }"
+      :body-class="{ 'gl-p-0': !scheduleVisible }"
+      header-class="gl-py-3"
+    >
       <template #header>
         <div
           class="gl-display-flex gl-justify-content-space-between gl-align-items-center gl-m-0"
           data-testid="scheduleHeader"
         >
-          <span class="gl-font-weight-bold gl-font-lg">{{ schedule.name }}</span>
+          <div class="gl-font-weight-bold gl-font-lg">
+            <gl-icon
+              v-gl-tooltip
+              class="gl-hover-cursor-pointer"
+              :aria-label="scheduleVisibleAriaLabel"
+              :size="12"
+              :name="scheduleVisibleAngleIcon"
+              @click="scheduleVisible = !scheduleVisible"
+            />
+            <span class="gl-pl-2">{{ schedule.name }}</span>
+          </div>
           <gl-button-group>
             <gl-button
               v-gl-modal="editScheduleModalId"
@@ -252,12 +269,6 @@ export default {
               :title="$options.i18n.deleteScheduleLabel"
               icon="remove"
               :aria-label="$options.i18n.deleteScheduleLabel"
-            />
-            <gl-button
-              v-gl-tooltip
-              :icon="scheduleVisibleAngleIcon"
-              :aria-label="scheduleVisibleAriaLabel"
-              @click="scheduleVisible = !scheduleVisible"
             />
           </gl-button-group>
         </div>

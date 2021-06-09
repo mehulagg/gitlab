@@ -230,6 +230,10 @@ RSpec.configure do |config|
     Gitlab::Database.set_open_transactions_baseline
   end
 
+  config.append_before do
+    Thread.current[:current_example_group] = ::RSpec.current_example.metadata[:example_group]
+  end
+
   config.append_after do
     Gitlab::Database.reset_open_transactions_baseline
   end
@@ -285,9 +289,6 @@ RSpec.configure do |config|
       # It's done in order to preserve the concistency in tests
       # As we're ready to change `master` usages to `main`, let's enable it
       stub_feature_flags(main_branch_over_master: false)
-
-      # Selectively disable by actor https://docs.gitlab.com/ee/development/feature_flags/#selectively-disable-by-actor
-      stub_feature_flags(remove_description_html_in_release_api_override: false)
 
       # Disable issue respositioning to avoid heavy load on database when importing big projects.
       # This is only turned on when app is handling heavy project imports.

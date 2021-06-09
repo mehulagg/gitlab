@@ -10,7 +10,7 @@ RSpec.describe Gitlab::Template::GitlabCiYmlTemplate do
       expect(templates).to include('Container-Scanning')
       expect(templates).to include('DAST')
       expect(templates).to include('Dependency-Scanning')
-      expect(templates).to include('License-Management')
+      expect(templates).to include('License-Scanning')
       expect(templates).to include('SAST')
     end
 

@@ -7,7 +7,7 @@ import DevopsAdoptionTable from 'ee/analytics/devops_report/devops_adoption/comp
 import { DEVOPS_ADOPTION_TABLE_CONFIGURATION } from 'ee/analytics/devops_report/devops_adoption/constants';
 import { createMockDirective, getBinding } from 'helpers/vue_mock_directive';
 import { extendedWrapper } from 'helpers/vue_test_utils_helper';
-import { devopsAdoptionSegmentsData } from '../mock_data';
+import { devopsAdoptionNamespaceData } from '../mock_data';
 
 describe('DevopsAdoptionSection', () => {
   let wrapper;
@@ -23,7 +23,7 @@ describe('DevopsAdoptionSection', () => {
           segmentLimitReached: false,
           editGroupsButtonLabel: 'Add/Remove groups',
           cols: DEVOPS_ADOPTION_TABLE_CONFIGURATION[0].cols,
-          segments: devopsAdoptionSegmentsData,
+          segments: devopsAdoptionNamespaceData,
           addSegmentButtonTooltipText: 'Maximum 30 groups allowed',
           ...props,
         },

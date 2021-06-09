@@ -90,7 +90,7 @@ RSpec.describe BulkImports::Groups::Pipelines::EpicsPipeline do
       expect(described_class.get_extractor)
         .to eq(
           klass: BulkImports::Common::Extractors::NdjsonExtractor,
-          options: { relation: described_class::RELATION }
+          options: { relation: described_class.relation }
         )
     end
   end

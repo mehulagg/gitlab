@@ -16,7 +16,7 @@ import SubscriptionSyncNotifications, {
 } from 'ee/pages/admin/cloud_licenses/components/subscription_sync_notifications.vue';
 import {
   licensedToHeaderText,
-  notificationType,
+  subscriptionSyncStatus,
   subscriptionDetailsHeaderText,
   subscriptionType,
 } from 'ee/pages/admin/cloud_licenses/constants';
@@ -101,18 +101,22 @@ describe('Subscription Breakdown', () => {
     it('provides the correct props to the cards', () => {
       const props = findDetailsCards().wrappers.map((w) => w.props());
 
-      expect(props).toEqual([
-        {
-          detailsFields: subscriptionDetailsFields,
-          headerText: subscriptionDetailsHeaderText,
-          subscription: license.ULTIMATE,
-        },
-        {
-          detailsFields: licensedToFields,
-          headerText: licensedToHeaderText,
-          subscription: license.ULTIMATE,
-        },
-      ]);
+      expect(props).toEqual(
+        expect.arrayContaining([
+          {
+            detailsFields: subscriptionDetailsFields,
+            headerText: subscriptionDetailsHeaderText,
+            subscription: license.ULTIMATE,
+            syncDidFail: false,
+          },
+          {
+            detailsFields: licensedToFields,
+            headerText: licensedToHeaderText,
+            subscription: license.ULTIMATE,
+            syncDidFail: false,
+          },
+        ]),
+      );
     });
 
     it('shows the user info', () => {
@@ -276,9 +280,13 @@ describe('Subscription Breakdown', () => {
       });
 
       it('shows a success notification', () => {
-        expect(findSubscriptionSyncNotifications().props('notification')).toBe(
-          notificationType.SYNC_SUCCESS,
+        expect(findSubscriptionSyncNotifications().props('syncStatus')).toBe(
+          subscriptionSyncStatus.SYNC_SUCCESS,
         );
+      });
+
+      it('provides the sync status to the details card', () => {
+        expect(findDetailsCards().at(0).props('syncDidFail')).toBe(false);
       });
 
       it('dismisses the success notification', async () => {
@@ -298,9 +306,13 @@ describe('Subscription Breakdown', () => {
       });
 
       it('shows a failure notification', () => {
-        expect(findSubscriptionSyncNotifications().props('notification')).toBe(
-          notificationType.SYNC_FAILURE,
+        expect(findSubscriptionSyncNotifications().props('syncStatus')).toBe(
+          subscriptionSyncStatus.SYNC_FAILURE,
         );
+      });
+
+      it('provides the sync status to the details card', () => {
+        expect(findDetailsCards().at(0).props('syncDidFail')).toBe(true);
       });
 
       it('dismisses the failure notification when retrying to sync', async () => {

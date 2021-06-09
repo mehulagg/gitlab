@@ -240,23 +240,6 @@ export const mockEpic = {
   labels: [],
 };
 
-export const mockEpic2 = {
-  id: 'gid://gitlab/Epic/42',
-  iid: '2',
-  group: { fullPath: 'gitlab-org' },
-  title: 'Epic title 2',
-};
-
-export const mockIssueWithEpic = {
-  ...mockIssue3,
-  epic: {
-    id: mockEpic.id,
-    iid: mockEpic.iid,
-    webPath: '/gitlab-org/-/epics/41',
-  },
-};
-export const mockAssignedEpic = { ...mockIssueWithEpic.epic, title: mockEpic.title };
-
 export const mockEpics = [
   {
     id: 'gid://gitlab/Epic/41',

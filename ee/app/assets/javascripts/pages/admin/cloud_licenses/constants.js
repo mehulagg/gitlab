@@ -81,7 +81,7 @@ export const subscriptionActivationForm = {
   ),
 };
 
-export const notificationType = {
+export const subscriptionSyncStatus = {
   SYNC_FAILURE: 'SYNC_FAILURE',
   SYNC_SUCCESS: 'SYNC_SUCCESS',
 };

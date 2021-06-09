@@ -117,7 +117,7 @@ module EE
       end
 
       def populate_vulnerability_id
-        self.vulnerability_id = params[:vulnerability_id] if can?(current_user, :read_vulnerability, project)
+        self.vulnerability_id = params[:vulnerability_id] if can?(current_user, :read_security_resource, project)
       end
 
       def redirect_if_test_case

@@ -4,13 +4,13 @@ require 'spec_helper'
 
 RSpec.describe Analytics::DevopsAdoption::SnapshotCalculator do
   let_it_be(:group1) { create(:group) }
-  let_it_be(:segment) { create(:devops_adoption_segment, namespace: group1) }
+  let_it_be(:enabled_namespace) { create(:devops_adoption_enabled_namespace, namespace: group1) }
   let_it_be(:subgroup) { create(:group, parent: group1) }
   let_it_be(:project) { create(:project, group: group1) }
   let_it_be(:subproject) { create(:project, group: subgroup) }
   let_it_be(:range_end) { Time.zone.parse('2020-12-01').end_of_month }
 
-  subject(:data) { described_class.new(segment: segment, range_end: range_end).calculate }
+  subject(:data) { described_class.new(enabled_namespace: enabled_namespace, range_end: range_end).calculate }
 
   describe 'end_time' do
     it 'equals to range_end' do
@@ -98,7 +98,7 @@ RSpec.describe Analytics::DevopsAdoption::SnapshotCalculator do
     let!(:deployment) { create(:deployment, :success, updated_at: deployed_at) }
     let(:deployed_at) { 100.days.ago(range_end) }
 
-    let(:segment) { create(:devops_adoption_segment, namespace: group) }
+    let(:enabled_namespace) { create(:devops_adoption_enabled_namespace, namespace: group) }
     let!(:group) do
       create(:group).tap do |g|
         g.projects << deployment.project
@@ -167,9 +167,9 @@ RSpec.describe Analytics::DevopsAdoption::SnapshotCalculator do
   end
 
   context 'when snapshot already exists' do
-    subject(:data) { described_class.new(segment: segment, range_end: range_end, snapshot: snapshot).calculate }
+    subject(:data) { described_class.new(enabled_namespace: enabled_namespace, range_end: range_end, snapshot: snapshot).calculate }
 
-    let(:snapshot) { create :devops_adoption_snapshot, namespace: segment.namespace, issue_opened: true, merge_request_opened: false, total_projects_count: 1 }
+    let(:snapshot) { create :devops_adoption_snapshot, namespace: enabled_namespace.namespace, issue_opened: true, merge_request_opened: false, total_projects_count: 1 }
 
     context 'for boolean metrics' do
       let!(:fresh_merge_request) { create(:merge_request, source_project: project, created_at: 3.weeks.ago(range_end)) }

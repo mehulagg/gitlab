@@ -3,7 +3,7 @@
 module Analytics
   module DevopsAdoption
     class SnapshotCalculator
-      attr_reader :segment, :range_end, :range_start, :snapshot
+      attr_reader :enabled_namespace, :range_end, :range_start, :snapshot
 
       BOOLEAN_METRICS = [
         :issue_opened,
@@ -22,15 +22,15 @@ module Analytics
 
       ADOPTION_METRICS = BOOLEAN_METRICS + NUMERIC_METRICS
 
-      def initialize(segment:, range_end:, snapshot: nil)
-        @segment = segment
+      def initialize(enabled_namespace:, range_end:, snapshot: nil)
+        @enabled_namespace = enabled_namespace
         @range_end = range_end
         @range_start = Snapshot.new(end_time: range_end).start_time
         @snapshot = snapshot
       end
 
       def calculate
-        params = { recorded_at: Time.zone.now, end_time: range_end, namespace: segment.namespace }
+        params = { recorded_at: Time.zone.now, end_time: range_end, namespace: enabled_namespace.namespace }
 
         BOOLEAN_METRICS.each do |metric|
           params[metric] = snapshot&.public_send(metric) || send(metric) # rubocop:disable GitlabSecurity/PublicSend
@@ -46,7 +46,7 @@ module Analytics
       private
 
       def snapshot_groups
-        @snapshot_groups ||= segment.namespace.self_and_descendants
+        @snapshot_groups ||= enabled_namespace.namespace.self_and_descendants
       end
 
       # rubocop: disable CodeReuse/ActiveRecord
@@ -105,7 +105,7 @@ module Analytics
       end
 
       def code_owners_used_count
-        return unless Feature.enabled?(:analytics_devops_adoption_codeowners, segment.namespace, default_enabled: :yaml)
+        return unless Feature.enabled?(:analytics_devops_adoption_codeowners, enabled_namespace.namespace, default_enabled: :yaml)
 
         snapshot_projects.count do |project|
           !Gitlab::CodeOwners::Loader.new(project, project.default_branch || 'HEAD').empty_code_owners?

@@ -38,7 +38,7 @@ export default {
         rules: [],
       },
       validationState: {
-        name: true,
+        name: null,
         rules: [],
       },
       error: null,
@@ -61,15 +61,12 @@ export default {
       };
     },
     isFormValid() {
-      return this.validationState.name && this.validationState.rules.every(Boolean);
-    },
-    serializedData() {
-      const rules = this.form.rules.map(({ status, elapsedTimeSeconds, oncallScheduleIid }) => ({
-        status,
-        elapsedTimeSeconds,
-        oncallScheduleIid,
-      }));
-      return { ...this.form, rules };
+      return (
+        this.validationState.name &&
+        this.validationState.rules.every(
+          ({ isTimeValid, isScheduleValid }) => isTimeValid && isScheduleValid,
+        )
+      );
     },
   },
   methods: {
@@ -86,7 +83,7 @@ export default {
           variables: {
             input: {
               projectPath,
-              ...this.serializedData,
+              ...this.getRequestParams(),
             },
           },
         })
@@ -103,7 +100,7 @@ export default {
             }
             this.$refs.addUpdateEscalationPolicyModal.hide();
             this.$emit('policyCreated');
-            this.clearForm();
+            this.resetForm();
           },
         )
         .catch((error) => {
@@ -112,6 +109,15 @@ export default {
         .finally(() => {
           this.loading = false;
         });
+    },
+    getRequestParams() {
+      const rules = this.form.rules.map(({ status, elapsedTimeSeconds, oncallScheduleIid }) => ({
+        status,
+        elapsedTimeSeconds,
+        oncallScheduleIid,
+      }));
+
+      return { ...this.form, rules };
     },
     validateForm(field) {
       if (field === 'name') {
@@ -124,12 +130,17 @@ export default {
     hideErrorAlert() {
       this.error = null;
     },
-    clearForm() {
+    resetForm() {
       this.form = {
         name: '',
         description: '',
         rules: [],
       };
+      this.validationState = {
+        name: null,
+        rules: [],
+      };
+      this.hideErrorAlert();
     },
   },
 };
@@ -144,7 +155,8 @@ export default {
     :action-primary="actionsProps.primary"
     :action-cancel="actionsProps.cancel"
     @primary.prevent="createEscalationPolicy"
-    @cancel="clearForm"
+    @canceled="resetForm"
+    @close="resetForm"
   >
     <gl-alert v-if="error" variant="danger" class="gl-mt-n3 gl-mb-3" @dismiss="hideErrorAlert">
       {{ error }}

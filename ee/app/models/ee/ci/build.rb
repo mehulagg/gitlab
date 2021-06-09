@@ -31,7 +31,6 @@ module EE
 
         has_many :security_scans, class_name: 'Security::Scan'
 
-        after_save :stick_build_if_status_changed
         after_commit :track_ci_secrets_management_usage, on: :create
         delegate :service_specification, to: :runner_session, allow_nil: true
 
@@ -60,13 +59,6 @@ module EE
 
       def shared_runners_minutes_limit_enabled?
         project.shared_runners_minutes_limit_enabled? && runner&.minutes_cost_factor(project.visibility_level)&.positive?
-      end
-
-      def stick_build_if_status_changed
-        return unless saved_change_to_status?
-        return unless running?
-
-        ::Gitlab::Database::LoadBalancing::Sticking.stick(:build, id)
       end
 
       def log_geo_deleted_event

@@ -41,8 +41,8 @@ module EE
       has_one :push_rule, ->(project) { project&.feature_available?(:push_rules) ? all : none }, inverse_of: :project
       has_one :index_status
 
-      has_one :github_service
-      has_one :gitlab_slack_application_service
+      has_one :github_service, class_name: 'Integrations::Github'
+      has_one :gitlab_slack_application_service, class_name: 'Integrations::GitlabSlackApplication'
 
       has_one :status_page_setting, inverse_of: :project, class_name: 'StatusPage::ProjectSetting'
       has_one :compliance_framework_setting, class_name: 'ComplianceManagement::ComplianceFramework::ProjectSettings', inverse_of: :project
@@ -151,7 +151,7 @@ module EE
 
       scope :with_security_reports_stored, -> { where('EXISTS (?)', ::Vulnerabilities::Finding.scoped_project.select(1)) }
       scope :with_security_reports, -> { where('EXISTS (?)', ::Ci::JobArtifact.security_reports.scoped_project.select(1)) }
-      scope :with_github_service_pipeline_events, -> { joins(:github_service).merge(GithubService.pipeline_hooks) }
+      scope :with_github_service_pipeline_events, -> { joins(:github_service).merge(::Integrations::Github.pipeline_hooks) }
       scope :with_active_prometheus_service, -> { joins(:prometheus_service).merge(PrometheusService.active) }
       scope :with_enabled_incident_sla, -> { joins(:incident_management_setting).where(project_incident_management_settings: { sla_timer: true }) }
       scope :mirrored_with_enabled_pipelines, -> do
@@ -305,12 +305,11 @@ module EE
       namespace.store_security_reports_available? || public?
     end
 
+    # The `only_successful` flag is wrong here and will be addressed by
+    # https://gitlab.com/gitlab-org/gitlab/-/issues/331950
+    # We will also remove the fallback to `latest_not_ingested_security_pipeline` method with that issue.
     def latest_pipeline_with_security_reports(only_successful: false)
-      pipeline_scope = all_pipelines.newest_first(ref: default_branch)
-      pipeline_scope = pipeline_scope.success if only_successful
-
-      pipeline_scope.with_reports(::Ci::JobArtifact.security_reports).first ||
-        pipeline_scope.with_legacy_security_reports.first
+      (!only_successful && latest_ingested_security_pipeline) || latest_not_ingested_security_pipeline(only_successful)
     end
 
     def latest_pipeline_with_reports(reports)
@@ -408,11 +407,6 @@ module EE
       mirror? &&
         feature_available?(:ci_cd_projects) &&
         feature_available?(:github_project_service_integration)
-    end
-
-    override :mark_primary_write_location
-    def mark_primary_write_location
-      ::Gitlab::Database::LoadBalancing::Sticking.mark_primary_write_location(:project, self.id)
     end
 
     override :add_import_job
@@ -849,6 +843,18 @@ module EE
     # Return the group's setting for delayed deletion, false for user namespace projects
     def group_deletion_mode_configured?
       group && group.namespace_settings.delayed_project_removal?
+    end
+
+    def latest_ingested_security_pipeline
+      vulnerability_statistic&.pipeline
+    end
+
+    def latest_not_ingested_security_pipeline(only_successful)
+      pipeline_scope = all_pipelines.newest_first(ref: default_branch)
+      pipeline_scope = pipeline_scope.success if only_successful
+
+      pipeline_scope.with_reports(::Ci::JobArtifact.security_reports).first ||
+        pipeline_scope.with_legacy_security_reports.first
     end
   end
 end

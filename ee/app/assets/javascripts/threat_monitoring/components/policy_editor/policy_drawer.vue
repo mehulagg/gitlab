@@ -1,13 +1,11 @@
 <script>
-import { GlFormTextarea } from '@gitlab/ui';
+import { __ } from '~/locale';
 import fromYaml, { removeUnnecessaryDashes } from './lib/from_yaml';
 import humanizeNetworkPolicy from './lib/humanize';
-import toYaml from './lib/to_yaml';
 import PolicyPreview from './policy_preview.vue';
 
 export default {
   components: {
-    GlFormTextarea,
     PolicyPreview,
   },
   props: {
@@ -18,7 +16,7 @@ export default {
   },
   computed: {
     initialTab() {
-      return this.policy ? 1 : 0;
+      return this.policy ? 0 : 1;
     },
     policy() {
       const policy = fromYaml(this.value);
@@ -30,11 +28,11 @@ export default {
     policyYaml() {
       return removeUnnecessaryDashes(this.value);
     },
-  },
-  methods: {
-    updateManifest(description) {
-      const manifest = toYaml({ ...this.policy, description });
-      this.$emit('input', manifest);
+    enforcementStatusLabel() {
+      if (this.policy) {
+        return this.policy.isEnabled ? __('Enabled') : __('Disabled');
+      }
+      return null;
     },
   },
 };
@@ -42,14 +40,17 @@ export default {
 
 <template>
   <div>
-    <h4>{{ s__('NetworkPolicies|Policy description') }}</h4>
-
-    <h5 class="gl-mt-6">{{ s__('NetworkPolicies|Policy type') }}</h5>
-    <p>{{ s__('NetworkPolicies|Network Policy') }}</p>
+    <h5 class="gl-mt-3">{{ __('Type') }}</h5>
+    <p>{{ s__('NetworkPolicies|Container runtime') }}</p>
 
     <div v-if="policy">
-      <h5 class="gl-mt-6">{{ s__('NetworkPolicies|Description') }}</h5>
-      <gl-form-textarea :value="policy.description" @input="updateManifest" />
+      <template v-if="policy.description">
+        <h5 class="gl-mt-6">{{ s__('NetworkPolicies|Description') }}</h5>
+        <p data-testid="description">{{ policy.description }}</p>
+      </template>
+
+      <h5 class="gl-mt-6">{{ s__('NetworkPolicies|Enforcement status') }}</h5>
+      <p>{{ enforcementStatusLabel }}</p>
     </div>
 
     <policy-preview

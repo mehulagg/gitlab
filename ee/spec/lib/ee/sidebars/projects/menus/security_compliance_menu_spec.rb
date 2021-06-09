@@ -10,44 +10,20 @@ RSpec.describe Sidebars::Projects::Menus::SecurityComplianceMenu do
   let(:show_discover_project_security) { true }
   let(:context) { Sidebars::Projects::Context.new(current_user: user, container: project, show_promotions: show_promotions, show_discover_project_security: show_discover_project_security) }
 
-  subject(:menu) { described_class.new(context) }
-
-  describe 'render?' do
-    subject { menu.render? }
-
-    context 'when user is not authenticated' do
-      let(:user) { nil }
-
-      it { is_expected.to be_falsey }
-    end
-
-    context 'when user is authenticated' do
-      context 'when the Security & Compliance is disabled' do
-        before do
-          allow(Ability).to receive(:allowed?).with(user, :access_security_and_compliance, project).and_return(false)
-        end
-
-        it { is_expected.to be_falsey }
-      end
-
-      context 'when the Security & Compliance is not disabled' do
-        it { is_expected.to be_truthy }
-      end
-    end
-  end
-
   describe '#link' do
+    subject { described_class.new(context) }
+
     let(:show_promotions) { false }
     let(:show_discover_project_security) { false }
 
     using RSpec::Parameterized::TableSyntax
 
-    where(:security_dashboard_feature, :audit_events_feature, :dependency_scanning_feature, :show_discover_project_security, :expected_link) do
-      true  | true  | true  | false | "/-/security/dashboard"
-      false | true  | true  | false | "/-/audit_events"
-      false | false | true  | false | "/-/dependencies"
-      false | false | true  | true  | "/-/security/discover"
-      false | false | false | false | "/-/security/configuration"
+    where(:show_discover_project_security, :security_dashboard_feature, :dependency_scanning_feature, :audit_events_feature, :expected_link) do
+      true  | true  | true  | true  | '/-/security/discover'
+      false | true  | true  | true  | '/-/security/dashboard'
+      false | false | true  | true  | '/-/dependencies'
+      false | false | false | true  | '/-/audit_events'
+      false | false | false | false | '/-/security/configuration'
     end
 
     with_them do

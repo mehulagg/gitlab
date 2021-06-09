@@ -43,7 +43,7 @@ FactoryBot.define do
 
     trait :started do
       state { Geo::LfsObjectRegistry.state_value(:started) }
-      last_synced_at { 1.day_ago }
+      last_synced_at { 1.day.ago }
       retry_count { 0 }
     end
   end

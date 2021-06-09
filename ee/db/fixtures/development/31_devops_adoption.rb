@@ -8,14 +8,14 @@ Gitlab::Seeder.quiet do
   groups = groups.sample(2)
 
   ActiveRecord::Base.transaction do
-    segments = [
-      Analytics::DevopsAdoption::Segment.create(namespace: groups.first, display_namespace: groups.first),
-      Analytics::DevopsAdoption::Segment.create(namespace: groups.last, display_namespace: groups.last)
+    enabled_namespaces = [
+      Analytics::DevopsAdoption::EnabledNamespace.create(namespace: groups.first, display_namespace: groups.first),
+      Analytics::DevopsAdoption::EnabledNamespace.create(namespace: groups.last, display_namespace: groups.last)
     ]
 
-    if segments.any?(&:invalid?)
-      puts "Error creating segments"
-      puts "#{segments.map(&:errors)}"
+    if enabled_namespaces.any?(&:invalid?)
+      puts "Error creating enabled_namespaces"
+      puts "#{enabled_namespaces.map(&:errors)}"
       next
     end
 
@@ -25,9 +25,9 @@ Gitlab::Seeder.quiet do
     4.downto(0).each do |index|
       end_time = index.months.ago.at_end_of_month
 
-      segments.each do |segment|
+      enabled_namespaces.each do |enabled_namespace|
         calculated_data = {
-          namespace: segment.namespace,
+          namespace: enabled_namespace.namespace,
           issue_opened: booleans.sample,
           merge_request_opened: booleans.sample,
           merge_request_approved: booleans.sample,

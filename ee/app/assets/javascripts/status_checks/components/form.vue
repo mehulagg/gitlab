@@ -2,6 +2,7 @@
 import { GlAlert, GlFormGroup, GlFormInput } from '@gitlab/ui';
 import * as Sentry from '@sentry/browser';
 import { isEqual, isNumber } from 'lodash';
+import ProtectedBranchesSelector from 'ee/vue_shared/components/branches_selector/protected_branches_selector.vue';
 import { isSafeURL } from '~/lib/utils/url_utility';
 import { __, s__ } from '~/locale';
 import {
@@ -10,11 +11,10 @@ import {
   NAME_TAKEN_SERVER_ERROR,
   URL_TAKEN_SERVER_ERROR,
 } from '../constants';
-import BranchesSelect from './branches_select.vue';
 
 export default {
   components: {
-    BranchesSelect,
+    ProtectedBranchesSelector,
     GlAlert,
     GlFormGroup,
     GlFormInput,
@@ -184,7 +184,7 @@ export default {
         :invalid-feedback="$options.i18n.validations.branchesRequired"
         data-testid="branches-group"
       >
-        <branches-select
+        <protected-branches-selector
           v-model="branchesToAdd"
           :project-id="projectId"
           :is-invalid="!branchesState"

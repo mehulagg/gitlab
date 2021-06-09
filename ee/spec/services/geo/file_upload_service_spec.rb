@@ -238,7 +238,7 @@ RSpec.describe Geo::FileUploadService do
     context 'bulk imports export file' do
       let_it_be(:type) { :'bulk_imports/export' }
       let_it_be(:export) { create(:bulk_import_export) }
-      let_it_be(:file) { fixture_file_upload('spec/fixtures/bulk_imports/labels.ndjson.gz') }
+      let_it_be(:file) { fixture_file_upload('spec/fixtures/bulk_imports/gz/labels.ndjson.gz') }
 
       let(:upload) { Upload.find_by(model: export, uploader: 'BulkImports::ExportUploader') }
       let(:request_data) { Gitlab::Geo::Replication::FileTransfer.new(type, upload).request_data }

@@ -9,6 +9,7 @@ import {
   GlBadge,
 } from '@gitlab/ui';
 import { __ } from '~/locale';
+import Tracking from '~/tracking';
 import {
   NOT_ENOUGH_DATA_ERROR,
   PAGINATION_SORT_FIELD_END_EVENT,
@@ -42,6 +43,7 @@ export default {
     GlBadge,
     TotalTime,
   },
+  mixins: [Tracking.mixin()],
   props: {
     selectedStage: {
       type: Object,
@@ -140,15 +142,15 @@ export default {
     },
     onSelectPage(page) {
       const { sort, direction } = this.pagination;
+      this.track('click_button', { label: 'pagination' });
       this.$emit('handleUpdatePagination', { sort, direction, page });
     },
     onSort({ sortBy, sortDesc }) {
+      const direction = sortDesc ? PAGINATION_SORT_DIRECTION_DESC : PAGINATION_SORT_DIRECTION_ASC;
       this.sort = sortBy;
       this.sortDesc = sortDesc;
-      this.$emit('handleUpdatePagination', {
-        sort: sortBy,
-        direction: sortDesc ? PAGINATION_SORT_DIRECTION_DESC : PAGINATION_SORT_DIRECTION_ASC,
-      });
+      this.$emit('handleUpdatePagination', { sort: sortBy, direction });
+      this.track('click_button', { label: `sort_${sortBy}_${direction}` });
     },
   },
 };

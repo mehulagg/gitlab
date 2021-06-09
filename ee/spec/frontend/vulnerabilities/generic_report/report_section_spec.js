@@ -6,24 +6,25 @@ import { extendedWrapper } from 'helpers/vue_test_utils_helper';
 
 const TEST_DATA = {
   supportedTypes: {
-    one: {
-      name: 'one',
+    url: {
+      name: 'url',
       type: REPORT_TYPES.url,
       href: 'http://foo.com',
     },
-    two: {
-      name: 'two',
-      type: REPORT_TYPES.url,
-      href: 'http://bar.com',
-    },
-    three: {
+    table: {
+      name: 'table',
       type: REPORT_TYPES.table,
       header: [],
       rows: [],
     },
+    code: {
+      name: 'code',
+      type: REPORT_TYPES.code,
+      value: '<h1>Foo</h1>',
+    },
   },
   unsupportedTypes: {
-    four: {
+    unsupported: {
       name: 'four',
       type: 'not-supported',
     },

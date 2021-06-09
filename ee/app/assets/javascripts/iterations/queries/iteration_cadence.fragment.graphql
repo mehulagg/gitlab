@@ -3,6 +3,8 @@ fragment IterationCadence on IterationCadence {
   title
   automatic
   startDate
+  rollOver
   durationInWeeks
   iterationsInAdvance
+  description
 }

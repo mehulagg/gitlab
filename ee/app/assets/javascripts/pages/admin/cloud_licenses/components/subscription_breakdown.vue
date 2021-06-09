@@ -5,7 +5,7 @@ import {
   enterActivationCode,
   licensedToHeaderText,
   manageSubscriptionButtonText,
-  notificationType,
+  subscriptionSyncStatus,
   removeLicense,
   removeLicenseConfirm,
   subscriptionDetailsHeaderText,
@@ -63,7 +63,8 @@ export default {
     return {
       hasAsyncActivity: false,
       licensedToFields,
-      notification: null,
+      shouldShowNotifications: false,
+      subscriptionSyncStatus: null,
       subscriptionDetailsFields,
     };
   },
@@ -103,23 +104,27 @@ export default {
     subscriptionHistory() {
       return this.hasSubscriptionHistory ? this.subscriptionList : [this.subscription];
     },
+    syncDidFail() {
+      return this.subscriptionSyncStatus === subscriptionSyncStatus.SYNC_FAILURE;
+    },
   },
   methods: {
     didDismissSuccessAlert() {
-      this.notification = null;
+      this.shouldShowNotifications = false;
     },
     syncSubscription() {
       this.hasAsyncActivity = true;
-      this.notification = null;
+      this.shouldShowNotifications = false;
       axios
         .post(this.subscriptionSyncPath)
         .then(() => {
-          this.notification = notificationType.SYNC_SUCCESS;
+          this.subscriptionSyncStatus = subscriptionSyncStatus.SYNC_SUCCESS;
         })
         .catch(() => {
-          this.notification = notificationType.SYNC_FAILURE;
+          this.subscriptionSyncStatus = subscriptionSyncStatus.SYNC_FAILURE;
         })
         .finally(() => {
+          this.shouldShowNotifications = true;
           this.hasAsyncActivity = false;
         });
     },
@@ -131,9 +136,9 @@ export default {
   <div>
     <subscription-activation-modal v-if="hasSubscription" :modal-id="$options.modal.id" />
     <subscription-sync-notifications
-      v-if="notification"
+      v-if="shouldShowNotifications"
       class="mb-4"
-      :notification="notification"
+      :sync-status="subscriptionSyncStatus"
       @success-alert-dismissed="didDismissSuccessAlert"
     />
     <section class="row gl-mb-5">
@@ -142,6 +147,7 @@ export default {
           :details-fields="subscriptionDetailsFields"
           :header-text="$options.i18n.subscriptionDetailsHeaderText"
           :subscription="subscription"
+          :sync-did-fail="syncDidFail"
         >
           <template v-if="shouldShowFooter" #footer>
             <gl-button

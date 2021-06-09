@@ -3,7 +3,7 @@ import { shallowMount } from '@vue/test-utils';
 import Approvals from 'ee/vue_merge_request_widget/components/approvals/approvals.vue';
 import ApprovalsAuth from 'ee/vue_merge_request_widget/components/approvals/approvals_auth.vue';
 import ApprovalsFooter from 'ee/vue_merge_request_widget/components/approvals/approvals_footer.vue';
-import { deprecatedCreateFlash as createFlash } from '~/flash';
+import createFlash from '~/flash';
 import ApprovalsFoss from '~/vue_merge_request_widget/components/approvals/approvals.vue';
 import ApprovalsSummary from '~/vue_merge_request_widget/components/approvals/approvals_summary.vue';
 import ApprovalsSummaryOptional from '~/vue_merge_request_widget/components/approvals/approvals_summary_optional.vue';
@@ -147,7 +147,7 @@ describe('EE MRWidget approvals', () => {
     });
 
     it('flashes error', () => {
-      expect(createFlash).toHaveBeenCalledWith(FETCH_ERROR);
+      expect(createFlash).toHaveBeenCalledWith({ message: FETCH_ERROR });
     });
   });
 
@@ -302,7 +302,7 @@ describe('EE MRWidget approvals', () => {
           });
 
           it('flashes error message', () => {
-            expect(createFlash).toHaveBeenCalledWith(APPROVE_ERROR);
+            expect(createFlash).toHaveBeenCalledWith({ message: APPROVE_ERROR });
           });
         });
       });
@@ -355,7 +355,7 @@ describe('EE MRWidget approvals', () => {
             });
 
             it('shows flash if general error', () => {
-              expect(createFlash).toHaveBeenCalledWith(APPROVE_ERROR);
+              expect(createFlash).toHaveBeenCalledWith({ message: APPROVE_ERROR });
             });
           });
         });
@@ -414,7 +414,7 @@ describe('EE MRWidget approvals', () => {
           });
 
           it('flashes error message', () => {
-            expect(createFlash).toHaveBeenCalledWith(UNAPPROVE_ERROR);
+            expect(createFlash).toHaveBeenCalledWith({ message: UNAPPROVE_ERROR });
           });
         });
       });

@@ -25,9 +25,8 @@ describe('DevopsAdoptionTableCellFlag', () => {
   describe('enabled', () => {
     beforeEach(() => createComponent());
 
-    it('contains the circle-enabled class', () => {
-      expect(wrapper.classes()).toContain('circle');
-      expect(wrapper.classes()).toContain('circle-enabled');
+    it('matches the snapshot', () => {
+      expect(wrapper.element).toMatchSnapshot();
     });
 
     it('contains a tooltip', () => {
@@ -36,14 +35,32 @@ describe('DevopsAdoptionTableCellFlag', () => {
       expect(tooltip).toBeDefined();
       expect(tooltip.value).toBe('Adopted');
     });
+
+    describe('when the enabled flag is changed to false', () => {
+      beforeEach(async () => {
+        wrapper.setProps({ enabled: false });
+
+        await wrapper.vm.$nextTick();
+      });
+
+      it('matches the snapshot', () => {
+        expect(wrapper.element).toMatchSnapshot();
+      });
+
+      it('displays the correct tooltip', () => {
+        const tooltip = getBinding(wrapper.element, 'gl-tooltip');
+
+        expect(tooltip).toBeDefined();
+        expect(tooltip.value).toBe('Not adopted');
+      });
+    });
   });
 
   describe('disabled', () => {
     beforeEach(() => createComponent({ enabled: false }));
 
-    it('does not contain the circle-enabled class', () => {
-      expect(wrapper.classes()).toContain('circle');
-      expect(wrapper.classes()).not.toContain('circle-enabled');
+    it('matches the snapshot', () => {
+      expect(wrapper.element).toMatchSnapshot();
     });
 
     it('contains a tooltip', () => {
@@ -51,6 +68,25 @@ describe('DevopsAdoptionTableCellFlag', () => {
 
       expect(tooltip).toBeDefined();
       expect(tooltip.value).toBe('Not adopted');
+    });
+
+    describe('when the enabled flag is changed to true', () => {
+      beforeEach(async () => {
+        wrapper.setProps({ enabled: true });
+
+        await wrapper.vm.$nextTick();
+      });
+
+      it('matches the snapshot', () => {
+        expect(wrapper.element).toMatchSnapshot();
+      });
+
+      it('displays the correct tooltip', () => {
+        const tooltip = getBinding(wrapper.element, 'gl-tooltip');
+
+        expect(tooltip).toBeDefined();
+        expect(tooltip.value).toBe('Adopted');
+      });
     });
   });
 });

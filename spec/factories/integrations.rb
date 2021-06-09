@@ -167,6 +167,12 @@ FactoryBot.define do
     type { 'SlackService' }
   end
 
+  factory :slack_slash_commands_service, class: 'Integrations::SlackSlashCommands' do
+    project
+    active { true }
+    type { 'SlackSlashCommandsService' }
+  end
+
   factory :pipelines_email_service, class: 'Integrations::PipelinesEmail' do
     project
     active { true }
@@ -182,13 +188,13 @@ FactoryBot.define do
     create_data { false }
 
     after(:build) do
-      Integrations::IssueTracker.skip_callback(:validation, :before, :handle_properties)
+      Integrations::BaseIssueTracker.skip_callback(:validation, :before, :handle_properties)
     end
 
     to_create { |instance| instance.save!(validate: false) }
 
     after(:create) do
-      Integrations::IssueTracker.set_callback(:validation, :before, :handle_properties)
+      Integrations::BaseIssueTracker.set_callback(:validation, :before, :handle_properties)
     end
   end
 

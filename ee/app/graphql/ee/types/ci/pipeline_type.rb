@@ -26,7 +26,7 @@ module EE
             description: 'Code Quality degradations reported on the pipeline.'
 
           def code_quality_reports
-            pipeline.codequality_reports.all_degradations.presence
+            pipeline.codequality_reports.sort_degradations!.values.presence
           end
         end
       end
