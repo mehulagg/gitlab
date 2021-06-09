@@ -26,28 +26,22 @@ class ReleasePresenter < Gitlab::View::Presenter::Delegated
   end
 
   def opened_merge_requests_url
-
     project_merge_requests_url(project, params_for_issues_and_mrs)
   end
 
   def merged_merge_requests_url
-    
-
     project_merge_requests_url(project, params_for_issues_and_mrs(state: 'merged'))
   end
 
   def closed_merge_requests_url
-
     project_merge_requests_url(project, params_for_issues_and_mrs(state: 'closed'))
   end
 
   def opened_issues_url
-
     project_issues_url(project, params_for_issues_and_mrs)
   end
 
   def closed_issues_url
-
     project_issues_url(project, params_for_issues_and_mrs(state: 'closed'))
   end
 

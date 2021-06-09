@@ -85,7 +85,6 @@ RSpec.describe ReleasePresenter do
     it 'returns merge requests url with state=merged' do
       is_expected.to eq(project_merge_requests_url(project, merged_url_params))
     end
-
   end
 
   describe '#closed_merge_requests_url' do
