@@ -7,7 +7,6 @@ class Key < ApplicationRecord
   include Sortable
   include Sha256Attribute
   include Expirable
-  include EachBatch
 
   sha256_attribute :fingerprint_sha256
 

@@ -15,8 +15,8 @@ module SshKeys
       return unless ::Feature.enabled?(:ssh_key_expiration_email_notification, default_enabled: :yaml)
 
       # rubocop:disable CodeReuse/ActiveRecord
-      Key.expired_and_not_notified.each_batch(of: 1000) do |relation| # rubocop:disable Cop/InBatches
-        users = User.where(id: relation.select(:user_id))
+      Key.expired_and_not_notified.find_in_batches(batch_size: 1000) do |relation|
+        users = User.where(id: relation.pluck(:user_id))
 
         users.each do |user|
           with_context(user: user) do
