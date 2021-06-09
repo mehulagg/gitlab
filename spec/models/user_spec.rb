@@ -5219,6 +5219,7 @@ RSpec.describe User do
     let(:user) { build(:user, password_expires_at: password_expires_at) }
 
     subject { user.password_expired_or_not_applicable? }
+
     context 'when user is not ldap user' do
       context 'when password_expires_at is not set' do
         let(:password_expires_at) {}
