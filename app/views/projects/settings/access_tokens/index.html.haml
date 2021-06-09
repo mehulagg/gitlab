@@ -33,12 +33,16 @@
       = render 'shared/access_tokens/form',
           type: type,
           path: project_settings_access_tokens_path(@project),
+          project: @project,
           token: @project_access_token,
           scopes: @scopes,
+          access_levels: ProjectMember.access_level_roles,
+          default_access_level: 40,
           prefix: :project_access_token
 
     = render 'shared/access_tokens/table',
         active_tokens: @active_project_access_tokens,
+        project: @project,
         type: type,
         type_plural: type_plural,
         revoke_route_helper: ->(token) { revoke_namespace_project_settings_access_token_path(id: token) },
