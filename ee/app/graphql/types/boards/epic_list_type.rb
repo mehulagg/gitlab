@@ -48,8 +48,10 @@ module Types
 
       def metadata
         strong_memoize(:metadata) do
+          params = (context[:epic_filters] || {}).merge(board_id: list.epic_board_id, id: list.id)
+
           ::Boards::Epics::ListService
-              .new(list.epic_board.resource_parent, current_user, { board_id: list.epic_board_id, id: list.id })
+              .new(list.epic_board.resource_parent, current_user, params)
               .metadata
         end
       end

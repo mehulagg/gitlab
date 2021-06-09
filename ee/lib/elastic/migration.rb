@@ -23,6 +23,10 @@ module Elastic
       raise NotImplementedError, 'Please extend Elastic::Migration'
     end
 
+    def obsolete?
+      false
+    end
+
     private
 
     def helper

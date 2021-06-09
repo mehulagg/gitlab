@@ -1,5 +1,5 @@
 import CiliumNetworkPolicy from 'ee/threat_monitoring/components/policy_drawer/cilium_network_policy.vue';
-import toYaml from 'ee/threat_monitoring/components/policy_editor/lib/to_yaml';
+import { toYaml } from 'ee/threat_monitoring/components/policy_editor/network_policy/lib';
 import PolicyPreview from 'ee/threat_monitoring/components/policy_editor/policy_preview.vue';
 import { shallowMountExtended } from 'helpers/vue_test_utils_helper';
 

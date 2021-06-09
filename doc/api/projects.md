@@ -313,7 +313,7 @@ When the user is authenticated and `simple` is not set this returns something li
 ```
 
 NOTE:
-The `tag_list` attribute has been deprecated 
+The `tag_list` attribute has been deprecated
 and is removed in API v5 in favor of the `topics` attribute.
 
 NOTE:
@@ -977,7 +977,7 @@ GET /projects/:id
 ```
 
 NOTE:
-The `tag_list` attribute has been deprecated 
+The `tag_list` attribute has been deprecated
 and is removed in API v5 in favor of the `topics` attribute.
 
 Users of [GitLab Premium or higher](https://about.gitlab.com/pricing/)
@@ -1020,7 +1020,7 @@ If the project is a fork, and you provide a valid token to authenticate, the
       "http_url_to_repo":"https://gitlab.com/gitlab-org/gitlab-foss.git",
       "web_url":"https://gitlab.com/gitlab-org/gitlab-foss",
       "avatar_url":"https://assets.gitlab-static.net/uploads/-/system/project/avatar/13083/logo-extra-whitespace.png",
-      "license_url": "https://gitlab.com/gitlab-org/gitlab/blob/master/LICENSE",
+      "license_url": "https://gitlab.com/gitlab-org/gitlab/-/blob/master/LICENSE",
       "license": {
         "key": "mit",
         "name": "MIT License",
@@ -2046,7 +2046,8 @@ POST /projects/:id/restore
 ## Upload a file
 
 Uploads a file to the specified project to be used in an issue or merge request
-description, or a comment.
+description, or a comment. GitLab versions 14.0 and later
+[enforce](#max-attachment-size-enforcement) this limit.
 
 ```plaintext
 POST /projects/:id/uploads

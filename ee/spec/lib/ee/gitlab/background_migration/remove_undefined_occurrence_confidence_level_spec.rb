@@ -20,7 +20,7 @@ RSpec.describe Gitlab::BackgroundMigration::RemoveUndefinedOccurrenceConfidenceL
                           name: 'SECURITY_IDENTIFIER 0')
     end
 
-    scanners.create!(id: 6, project_id: 123, external_id: 'clair', name: 'Security Scanner')
+    scanners.create!(id: 6, project_id: 123, external_id: 'trivy', name: 'Security Scanner')
 
     vul1 = vulnerabilities.create!(vuln_params(1))
     vulnerabilities.create!(vuln_params(2))

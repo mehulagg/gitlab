@@ -7262,9 +7262,9 @@ Tiers: `premium`, `ultimate`
 
 Whether this is a trial license or not
 
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/settings/20210204124851_license_trial.yml)
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/license/20210204124851_license_trial.yml)
 
-Group: `group::product intelligence`
+Group: `group::license`
 
 Status: `data_available`
 
@@ -8611,6 +8611,30 @@ Count of unique users per week who interact with a merge request
 Group: `group::code review`
 
 Status: `data_available`
+
+Tiers: `free`, `premium`, `ultimate`
+
+### `redis_hll_counters.code_review.i_code_review_click_diff_view_setting_monthly`
+
+Count of users clicking diff view setting
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210607113556_i_code_review_click_diff_view_setting_monthly.yml)
+
+Group: `group::code review`
+
+Status: `implemented`
+
+Tiers: `free`, `premium`, `ultimate`
+
+### `redis_hll_counters.code_review.i_code_review_click_diff_view_setting_weekly`
+
+Count of users clicking diff view setting
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_7d/20210607113552_i_code_review_click_diff_view_setting_weekly.yml)
+
+Group: `group::code review`
+
+Status: `implemented`
 
 Tiers: `free`, `premium`, `ultimate`
 
@@ -15556,11 +15580,11 @@ Whether incoming email is setup
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/settings/20210204124916_reply_by_email_enabled.yml)
 
-Group: `group::product intelligence`
+Group: `group::certify`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `search_unique_visits.i_search_advanced`
 

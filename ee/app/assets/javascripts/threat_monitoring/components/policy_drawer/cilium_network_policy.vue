@@ -1,7 +1,10 @@
 <script>
 import { __ } from '~/locale';
-import fromYaml, { removeUnnecessaryDashes } from '../policy_editor/lib/from_yaml';
-import humanizeNetworkPolicy from '../policy_editor/lib/humanize';
+import {
+  fromYaml,
+  humanizeNetworkPolicy,
+  removeUnnecessaryDashes,
+} from '../policy_editor/network_policy/lib';
 import PolicyPreview from '../policy_editor/policy_preview.vue';
 
 export default {

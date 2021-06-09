@@ -7,7 +7,7 @@ import SubscriptionActivationErrors from 'ee/pages/admin/cloud_licenses/componen
 import SubscriptionActivationForm, {
   SUBSCRIPTION_ACTIVATION_FAILURE_EVENT,
 } from 'ee/pages/admin/cloud_licenses/components/subscription_activation_form.vue';
-import { CONNECTIVITY_ERROR } from 'ee/pages/admin/cloud_licenses/constants';
+import { CONNECTIVITY_ERROR, uploadLicenseFile } from 'ee/pages/admin/cloud_licenses/constants';
 import { extendedWrapper } from 'helpers/vue_test_utils_helper';
 
 describe('CloudLicenseApp', () => {
@@ -57,7 +57,7 @@ describe('CloudLicenseApp', () => {
     });
 
     it('shows a link when provided', () => {
-      expect(findUploadLink().text()).toBe('Upload a legacy license');
+      expect(findUploadLink().text()).toBe(uploadLicenseFile);
     });
 
     it('shows an help link', () => {

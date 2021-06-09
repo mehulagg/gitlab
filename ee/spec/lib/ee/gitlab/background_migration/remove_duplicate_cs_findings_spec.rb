@@ -22,7 +22,7 @@ RSpec.describe Gitlab::BackgroundMigration::RemoveDuplicateCsFindings, :migratio
   let!(:project) { projects.create!(id: 12058473, namespace_id: group.id, name: 'gitlab', path: 'gitlab') }
   let!(:user) { users.create!(id: 13, email: 'author@example.com', username: 'author', projects_limit: 10) }
   let!(:scanner) do
-    scanners.create!(id: 6, project_id: project.id, external_id: 'clair', name: 'Security Scanner')
+    scanners.create!(id: 6, project_id: project.id, external_id: 'trivy', name: 'Security Scanner')
   end
 
   it 'removes duplicate findings and vulnerabilities' do

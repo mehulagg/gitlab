@@ -1,7 +1,7 @@
 <script>
 import { GlForm, GlFormSelect, GlSprintf } from '@gitlab/ui';
 import { s__ } from '~/locale';
-import { RuleActionTypeAllow } from './constants';
+import { RuleActionTypeAllow } from './network_policy/lib';
 
 export default {
   components: {

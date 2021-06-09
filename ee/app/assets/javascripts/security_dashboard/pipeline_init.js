@@ -1,6 +1,6 @@
 import Vue from 'vue';
 import { parseBoolean } from '~/lib/utils/common_utils';
-import PipelineSecurityDashboard from './components/pipeline_security_dashboard.vue';
+import PipelineSecurityDashboard from './components/pipeline/pipeline_security_dashboard.vue';
 import apolloProvider from './graphql/provider';
 import createDashboardStore from './store';
 import { DASHBOARD_TYPES } from './store/constants';

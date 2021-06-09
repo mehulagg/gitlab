@@ -1,15 +1,15 @@
 <script>
 import { GlButton, GlDrawer } from '@gitlab/ui';
 import { getContentWrapperHeight } from '../../utils';
-import { CiliumNetworkPolicyKind } from '../policy_editor/constants';
+import { CiliumNetworkPolicyKind } from '../policy_editor/network_policy/lib';
 import CiliumNetworkPolicy from './cilium_network_policy.vue';
 
 export default {
   components: {
     GlButton,
     GlDrawer,
-    NetworkPolicyEditor: () =>
-      import(/* webpackChunkName: 'network_policy_editor' */ '../network_policy_editor.vue'),
+    PolicyYamlEditor: () =>
+      import(/* webpackChunkName: 'policy_yaml_editor' */ '../policy_yaml_editor.vue'),
     CiliumNetworkPolicy,
   },
   props: {
@@ -70,9 +70,9 @@ export default {
           {{ s__("NetworkPolicies|Define this policy's location, conditions and actions.") }}
         </p>
         <div class="gl-p-3 gl-bg-gray-50">
-          <network-policy-editor
+          <policy-yaml-editor
             :value="policy.manifest"
-            data-testid="policyEditor"
+            data-testid="policy-yaml-editor"
             class="network-policy-editor"
           />
         </div>

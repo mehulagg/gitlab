@@ -15,13 +15,13 @@ describe('NetworkPolicyDrawer component', () => {
         open: true,
         ...propsData,
       },
-      stubs: { NetworkPolicyEditor: true },
+      stubs: { PolicyYamlEditor: true },
     });
   };
 
   // Finders
   const findEditButton = () => wrapper.findByTestId('edit-button');
-  const findPolicyEditor = () => wrapper.findByTestId('policyEditor');
+  const findPolicyEditor = () => wrapper.findByTestId('policy-yaml-editor');
   const findCiliumNetworkPolicy = () => wrapper.findComponent(CiliumNetworkPolicy);
 
   // Shared assertions

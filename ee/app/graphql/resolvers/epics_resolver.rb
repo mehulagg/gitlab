@@ -102,10 +102,15 @@ module Resolvers
     def transform_args(args)
       transformed               = args.dup
       transformed[:group_id]    = group
-      transformed[:parent_id]   = parent.id if parent
       transformed[:iids]      ||= [args[:iid]].compact
 
-      transformed
+      set_relative_param(transformed)
+    end
+
+    def set_relative_param(args)
+      args[:parent_id] = parent.id if parent
+
+      args
     end
 
     # `resolver_object` refers to the object we're currently querying on, and is usually a `Group`

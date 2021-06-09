@@ -357,7 +357,7 @@ RSpec.describe 'epic boards', :js do
 
     click_value(filter, value)
 
-    click_on_board_modal
+    send_keys :escape
 
     click_button 'Create board'
 
@@ -371,7 +371,7 @@ RSpec.describe 'epic boards', :js do
 
     click_value(filter, value)
 
-    click_on_board_modal
+    send_keys :escape
 
     click_button 'Save changes'
 
@@ -382,12 +382,6 @@ RSpec.describe 'epic boards', :js do
 
   def update_board_label(label_title)
     update_board_scope('labels', label_title)
-  end
-
-  # Click on modal to make sure the dropdown is closed (e.g. label scenario)
-  #
-  def click_on_board_modal
-    find('.board-config-modal .modal-content').click
   end
 
   # This isnt the "best" matcher but because we have opts

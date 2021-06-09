@@ -2,7 +2,7 @@
 
 require 'rake_helper'
 
-RSpec.describe 'gitlab:license namespace rake tasks' do
+RSpec.describe 'gitlab:license namespace rake tasks', :silence_stdout do
   let(:default_license_path) { Settings.source.dirname + 'Gitlab.gitlab-license' }
 
   before do
