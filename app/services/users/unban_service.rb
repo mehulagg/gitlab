@@ -1,15 +1,15 @@
 # frozen_string_literal: true
 
 module Users
-  class BanService < BaseService
+  class UnbanService < BaseService
     def initialize(current_user)
       @current_user = current_user
     end
 
     def execute(user)
-      if user.ban
+      if user.activate
         log_event(user)
-        hide_issues(user)
+        unhide_issues(user)
 
         success
       else
@@ -20,12 +20,12 @@ module Users
 
     private
 
-    def hide_issues(user)
-      user.issues.update_all(hidden: true)
+    def unhide_issues(user)
+      user.issues.update_all(hidden: false)
     end
 
     def log_event(user)
-      Gitlab::AppLogger.info(message: "User banned", user: "#{user.username}", email: "#{user.email}", banned_by: "#{current_user.username}", ip_address: "#{current_user.current_sign_in_ip}")
+      Gitlab::AppLogger.info(message: "User unbanned", user: "#{user.username}", email: "#{user.email}", unbanned_by: "#{current_user.username}", ip_address: "#{current_user.current_sign_in_ip}")
     end
   end
 end

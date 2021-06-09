@@ -92,6 +92,7 @@ class Issue < ApplicationRecord
   }
 
   alias_method :issuing_parent, :project
+  alias_attribute :hidden?, :hidden
 
   alias_attribute :external_author, :service_desk_reply_to
 

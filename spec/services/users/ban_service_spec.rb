@@ -23,6 +23,12 @@ RSpec.describe Users::BanService do
         expect { operation }.to change { user.blocked? }.from(false).to(true)
       end
 
+      it "hides issues authored by the user" do
+        issue = create(:issue, author: user)
+
+        expect { operation }.to change { issue.reload.hidden? }.from(false).to(true)
+      end
+
       it 'logs ban in application logs' do
         allow(Gitlab::AppLogger).to receive(:info)
 
@@ -34,6 +40,7 @@ RSpec.describe Users::BanService do
 
     context 'when failed' do
       let(:user) { create(:user, :blocked) }
+      let(:issue) { create(:issue, author: user) }
 
       it 'returns error result' do
         aggregate_failures 'error result' do
@@ -44,6 +51,10 @@ RSpec.describe Users::BanService do
 
       it "does not change the user's state" do
         expect { operation }.not_to change { user.state }
+      end
+
+      it "does not hide the issue" do
+        expect { operation }.not_to change { issue.hidden? }
       end
     end
   end
