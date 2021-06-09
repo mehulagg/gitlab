@@ -93,10 +93,7 @@ its comments, and any associated pipelines.
 
 ### Delete a merge request
 
-GitLab recommends you close, rather than delete, merge requests. Delete a merge request
-only in extraordinary circumstances, when you need to completely remove all traces of a
-merge request. When you delete a merge request, GitLab also deletes all comments,
-pipelines, and uploaded assets attached to the merge request. You cannot undo this action.
+GitLab recommends you close, rather than delete, merge requests. Deleting a merge request can not be undone.
 
 To delete a merge request:
 
