@@ -24011,6 +24011,12 @@ msgstr ""
 msgid "PipelineEditorTutorial|🚀 Run your first pipeline"
 msgstr ""
 
+msgid "PipelineEditor|Branches"
+msgstr ""
+
+msgid "PipelineEditor|Switch branch"
+msgstr ""
+
 msgid "PipelineEditor|The CI/CD configuration is continuously validated. Errors and warnings are displayed when the CI/CD configuration file is not empty."
 msgstr ""
 
@@ -24021,6 +24027,9 @@ msgid "PipelineEditor|The pipeline visualization is displayed when the CI/CD con
 msgstr ""
 
 msgid "PipelineEditor|This tab will be usable when the CI/CD configuration file is populated with valid syntax."
+msgstr ""
+
+msgid "PipelineEditor|Unable to fetch branch list for this project."
 msgstr ""
 
 msgid "PipelineScheduleIntervalPattern|Custom (%{linkStart}Cron syntax%{linkEnd})"
@@ -31629,9 +31638,6 @@ msgstr ""
 msgid "Survey Response"
 msgstr ""
 
-msgid "Switch Branch"
-msgstr ""
-
 msgid "Switch branch/tag"
 msgstr ""
 
@@ -34609,9 +34615,6 @@ msgid "Unable to convert Kubernetes logs encoding to UTF-8"
 msgstr ""
 
 msgid "Unable to create link to vulnerability"
-msgstr ""
-
-msgid "Unable to fetch branch list for this project."
 msgstr ""
 
 msgid "Unable to fetch branches list, please close the form and try again"
