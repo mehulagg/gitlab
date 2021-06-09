@@ -5,14 +5,16 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 type: reference
 ---
 
-# Choosing runners
+# Runners
+
+In GitLab CI/CD, runners run the code defined in [`.gitlab-ci.yml`](../yaml/README.md).
+A runner is a lightweight, highly-scalable agent that picks up a CI job through
+the coordinator API of GitLab CI/CD, runs the job, and sends the result back to the GitLab instance.
 
 If you are using GitLab SaaS (GitLab.com), your CI jobs automatically run on shared runners. No configuration is required.
 
-If you don't want to use the available runners, you can [install and configure your own runners](https://docs.gitlab.com/runner/install/)
-and use them on GitLab.com.
-
-If you are using self-managed GitLab, you can [install and configure your own runners](https://docs.gitlab.com/runner/install/).
+If you are using self-managed GitLab or you want to use your own runners on GitLab.com, you can
+[install and configure your own runners](https://docs.gitlab.com/runner/install/).
 
 ## Runners on GitLab.com
 

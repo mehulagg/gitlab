@@ -7,16 +7,10 @@ type: reference
 
 # Configuring runners
 
-In GitLab CI/CD, runners run the code defined in [`.gitlab-ci.yml`](../yaml/README.md).
-A runner is a lightweight, highly-scalable agent that picks up a CI job through
-the coordinator API of GitLab CI/CD, runs the job, and sends the result back to the GitLab instance.
+If you have installed your own runners, you can configure and secure them in GitLab.
 
-Runners are created by an administrator and are visible in the GitLab UI.
-Runners can be specific to certain projects or available to all projects.
-
-This documentation is focused on using runners in GitLab.
-If you need to install and configure GitLab Runner, see
-[the GitLab Runner documentation](https://docs.gitlab.com/runner/).
+If you need to configure runners on the machine where you installed GitLab Runner, see
+[the GitLab Runner documentation](https://docs.gitlab.com/runner/configuration).
 
 ## Manually clear the runner cache
 
