@@ -15,9 +15,8 @@ as a Terraform module registry.
 
 To authenticate to the Terraform module registry, you need either:
 
-- A [personal access token](../../../api/README.md#personalproject-access-tokens).
+- A [personal access token](../../../api/README.md#personalproject-access-tokens) with at least `read_api` rights.
 - A [CI/CD job token](../../../api/README.md#gitlab-cicd-job-token).
-- A [deploy token](../../project/deploy_tokens/index.md).
 
 ## Publish a Terraform Module
 
@@ -78,9 +77,9 @@ Example response:
 
 Prerequisites:
 
-- You need to [authenticate with the API](../../../api/README.md#authentication). If authenticating with a deploy token, it must be configured with the `read_package_registry` and/or `write_package_registry` scope.
+- You need to [authenticate with the API](../../../api/README.md#authentication). If authenticating with a personal access token, it must be configured with the `read_api` scope.
 
-Authentication tokens (Deploy Token, Job Token, or Personal Access Token) can be provided for `terraform` in your `~/.terraformrc` file:
+Authentication tokens (Job Token or Personal Access Token) can be provided for `terraform` in your `~/.terraformrc` file:
 
 ```plaintext
 credentials "gitlab.com" {
@@ -116,3 +115,10 @@ upload:
   script:
     - 'curl --header "JOB-TOKEN: $CI_JOB_TOKEN" --upload-file path/to/file.tgz "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/terraform/modules/my-module/my-system/0.0.1/file"'
 ```
+
+## Example projects
+
+Two example project show the above documentation in action.
+
+- The [GitLab local file](https://gitlab.com/mattkasa/gitlab-local-file) project creates a simple Terraform module, and uploads it into the Terraform module registry using GitLab CI.
+- The [Terraform module test](https://gitlab.com/mattkasa/terraform-module-test) project uses the above module.
