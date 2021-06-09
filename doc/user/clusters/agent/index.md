@@ -654,3 +654,49 @@ Alternatively, you can mount the certificate file at a different location and in
    ```shell
    kubectl delete -n gitlab-kubernetes-agent -f ./resources.yml
    ```
+
+## CI Tunnel using the Kubernetes Agent
+
+The GitLab CI tunnel enables users to easily run CI jobs against their Kubernetes cluster without opening up the cluster to the Public internet.
+
+### Using the CI Tunnel
+
+The CI Tunnel assumes the following prerequisites
+
+1. A running [Kas instance](#set-up-the-kubernetes-agent-server)
+1. A [Configuration repository](#define-a-configuration-repository) with a Agent config file installed (`.gitlab/agents/<agent-name>/config.yaml`)
+1. An Agent record [has been created](#create-an-agent-record-in-gitlab)
+1. The agent is [installed in the cluster](#install-the-agent-into-the-cluster)
+
+Once the above is in place, accomplish these steps:
+
+1. Create a yaml file, such as `kubecontext.yml` with the following content:
+
+```yaml
+apiVersion: v1
+clusters:
+- cluster:
+  name: kas
+contexts:
+- context:
+    cluster: kas
+    user: kas
+  name: kas
+current-context: kas
+kind: Config
+preferences: {}
+users:
+- name: kas
+  user:
+    token: <YOUR-AGENT-TOKEN>
+```
+
+<YOUR-AGENT-TOKEN> should be the same token you recieved when you created the Agent record.
+
+1. Next apply that file to your cluster.
+
+```bash
+kubectl -n <YOUR-NAMESPACE> apply -f kubecontext.yml
+```
+
+1. Then from a CI job you should be able to execute `kubectl` commands directly against the cluster.
