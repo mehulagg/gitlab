@@ -1,6 +1,10 @@
-import { getProjectValueStreamStages, getProjectValueStreams } from '~/api/analytics_api';
+import {
+  getProjectValueStreamStages,
+  getProjectValueStreams,
+  getProjectValueStreamStageData,
+  getProjectValueStreamMetrics,
+} from '~/api/analytics_api';
 import createFlash from '~/flash';
-import axios from '~/lib/utils/axios_utils';
 import { __ } from '~/locale';
 import { DEFAULT_DAYS_TO_DISPLAY, DEFAULT_VALUE_STREAM } from '../constants';
 import * as types from './mutation_types';
@@ -34,8 +38,6 @@ export const receiveValueStreamsSuccess = ({ commit, dispatch }, data = []) => {
   return dispatch('setSelectedValueStream', DEFAULT_VALUE_STREAM);
 };
 
-// TODO: add getters for common request params
-// TODO: calculate date range from that
 export const fetchValueStreams = ({ commit, dispatch, state }) => {
   const { fullPath } = state;
   commit(types.REQUEST_VALUE_STREAMS);
@@ -55,10 +57,7 @@ export const fetchValueStreams = ({ commit, dispatch, state }) => {
 export const fetchCycleAnalyticsData = ({ state: { requestPath, startDate }, commit }) => {
   commit(types.REQUEST_CYCLE_ANALYTICS_DATA);
 
-  return axios
-    .get(requestPath, {
-      params: { 'cycle_analytics[start_date]': startDate },
-    })
+  return getProjectValueStreamMetrics(requestPath, { 'cycle_analytics[start_date]': startDate })
     .then(({ data }) => commit(types.RECEIVE_CYCLE_ANALYTICS_DATA_SUCCESS, data))
     .catch(() => {
       commit(types.RECEIVE_CYCLE_ANALYTICS_DATA_ERROR);
@@ -71,11 +70,11 @@ export const fetchCycleAnalyticsData = ({ state: { requestPath, startDate }, com
 export const fetchStageData = ({ state: { requestPath, selectedStage, startDate }, commit }) => {
   commit(types.REQUEST_STAGE_DATA);
 
-  // TODO: move to api
-  return axios
-    .get(`${requestPath}/events/${selectedStage.id}`, {
-      params: { 'cycle_analytics[start_date]': startDate },
-    })
+  return getProjectValueStreamStageData({
+    requestPath,
+    stageId: selectedStage.id,
+    params: { 'cycle_analytics[start_date]': startDate },
+  })
     .then(({ data }) => {
       // when there's a query timeout, the request succeeds but the error is encoded in the response data
       if (data?.error) {
@@ -93,10 +92,15 @@ export const setSelectedStage = ({ dispatch, commit, state: { stages } }, select
   return dispatch('fetchStageData');
 };
 
-export const setDateRange = ({ commit }, { startDate = DEFAULT_DAYS_TO_DISPLAY }) =>
+const refetchData = (dispatch) =>
+  Promise.all([dispatch('fetchCycleAnalyticsData'), dispatch('fetchValueStreams')]);
+
+export const setDateRange = ({ commit }, { startDate = DEFAULT_DAYS_TO_DISPLAY }) => {
   commit(types.SET_DATE_RANGE, { startDate });
+  return refetchData();
+};
 
 export const initializeVsa = ({ commit, dispatch }, initialData = {}) => {
   commit(types.INITIALIZE_VSA, initialData);
-  return Promise.all([dispatch('fetchCycleAnalyticsData'), dispatch('fetchValueStreams')]);
+  return refetchData(dispatch);
 };

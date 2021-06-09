@@ -67,10 +67,6 @@ export default {
     displayNotEnoughData() {
       return this.selectedStageReady && this.isEmptyStage;
     },
-    // TODO: double check if we need to still check this ??
-    // displayNoAccess() {
-    //   return this.selectedStageReady && !this.selectedStage.isUserAllowed;
-    // },
     selectedStageReady() {
       return !this.isLoadingStage && this.selectedStage;
     },
@@ -92,8 +88,6 @@ export default {
     ]),
     handleDateSelect(startDate) {
       this.setDateRange({ startDate });
-      this.fetchStageData();
-      this.fetchCycleAnalyticsData();
     },
     isActiveStage(stage) {
       return stage.slug === this.selectedStage.slug;
@@ -199,14 +193,6 @@ export default {
             <section class="stage-events gl-overflow-auto gl-w-full">
               <gl-loading-icon v-if="isLoadingStage" size="lg" />
               <template v-else>
-                <!--<gl-empty-state
-                  v-if="displayNoAccess"
-                  class="js-empty-state"
-                  :title="__('You need permission.')"
-                  :svg-path="noAccessSvgPath"
-                  :description="__('Want to see the data? Please ask an administrator for access.')"
-                />
-                <template v-else>-->
                 <gl-empty-state
                   v-if="displayNotEnoughData"
                   class="js-empty-state"
@@ -221,7 +207,6 @@ export default {
                   :items="selectedStageEvents"
                   data-testid="stage-table-events"
                 />
-                <!--</template>-->
               </template>
             </section>
           </div>

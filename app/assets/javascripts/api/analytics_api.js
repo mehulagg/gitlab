@@ -18,8 +18,15 @@ export const getProjectValueStreams = (projectPath) => {
   return axios.get(url);
 };
 
-// TODO: handle filter params?
 export const getProjectValueStreamStages = (projectPath, valueStreamId) => {
   const url = buildProjectValueStreamPath(projectPath, valueStreamId);
   return axios.get(url);
 };
+
+// NOTE: legacy VSA request use a different path
+// the `requestPath` provides a full url for th request
+export const getProjectValueStreamStageData = ({ requestPath, stageId, params }) =>
+  axios.get(`${requestPath}/events/${stageId}`, { params });
+
+export const getProjectValueStreamMetrics = (requestPath, params) =>
+  axios.get(requestPath, { params });
