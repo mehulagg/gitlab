@@ -31,27 +31,28 @@ export default {
     state.stages = [];
   },
   [types.RECEIVE_VALUE_STREAM_STAGES_SUCCESS](state, { stages = [] }) {
-    state.stages = stages;
+    // TODO: set metric / medians
+    state.stages = stages.map((s) => ({
+      ...convertObjectPropsToCamelCase(s, { deep: true }),
+      component: `stage-${s.id}-component`,
+    }));
   },
   [types.RECEIVE_VALUE_STREAM_STAGES_ERROR](state) {
     state.stages = [];
   },
   [types.REQUEST_CYCLE_ANALYTICS_DATA](state) {
     state.isLoading = true;
-    state.stages = [];
     state.hasError = false;
   },
   [types.RECEIVE_CYCLE_ANALYTICS_DATA_SUCCESS](state, data) {
     state.isLoading = false;
-    const { stages, summary, medians } = decorateData(data);
-    state.stages = stages;
+    const { summary, medians } = decorateData(data);
     state.summary = summary;
     state.medians = formatMedianValues(medians);
     state.hasError = false;
   },
   [types.RECEIVE_CYCLE_ANALYTICS_DATA_ERROR](state) {
     state.isLoading = false;
-    state.stages = [];
     state.hasError = true;
   },
   [types.REQUEST_STAGE_DATA](state) {

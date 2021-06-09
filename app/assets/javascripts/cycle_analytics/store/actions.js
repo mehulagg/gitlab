@@ -42,6 +42,7 @@ export const fetchValueStreams = ({ commit, dispatch, state }) => {
 
   return getProjectValueStreams(fullPath)
     .then(({ data }) => dispatch('receiveValueStreamsSuccess', data))
+    .then(() => dispatch('setSelectedStage'))
     .catch((error) => {
       const {
         response: { status },
@@ -63,8 +64,6 @@ export const fetchCycleAnalyticsData = ({
       params: { 'cycle_analytics[start_date]': startDate },
     })
     .then(({ data }) => commit(types.RECEIVE_CYCLE_ANALYTICS_DATA_SUCCESS, data))
-    .then(() => dispatch('setSelectedStage'))
-    .then(() => dispatch('fetchStageData'))
     .catch(() => {
       commit(types.RECEIVE_CYCLE_ANALYTICS_DATA_ERROR);
       createFlash({
@@ -76,8 +75,9 @@ export const fetchCycleAnalyticsData = ({
 export const fetchStageData = ({ state: { requestPath, selectedStage, startDate }, commit }) => {
   commit(types.REQUEST_STAGE_DATA);
 
+  // TODO: move to api
   return axios
-    .get(`${requestPath}/events/${selectedStage.name}.json`, {
+    .get(`${requestPath}/events/${selectedStage.id}`, {
       params: { 'cycle_analytics[start_date]': startDate },
     })
     .then(({ data }) => {
@@ -91,9 +91,12 @@ export const fetchStageData = ({ state: { requestPath, selectedStage, startDate 
     .catch(() => commit(types.RECEIVE_STAGE_DATA_ERROR));
 };
 
-export const setSelectedStage = ({ commit, state: { stages } }, selectedStage = null) => {
+export const setSelectedStage = ({ dispatch, commit, state: { stages } }, selectedStage = null) => {
+  console.log('setSelectedStage::stages', stages);
+  console.log('setSelectedStage::selectedStage', selectedStage);
   const stage = selectedStage || stages[0];
   commit(types.SET_SELECTED_STAGE, stage);
+  return dispatch('fetchStageData');
 };
 
 export const setDateRange = ({ commit }, { startDate = DEFAULT_DAYS_TO_DISPLAY }) =>
