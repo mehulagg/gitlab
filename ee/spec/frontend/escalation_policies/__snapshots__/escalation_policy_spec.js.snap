@@ -1,117 +1,114 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`EscalationPolicy renders policy with rules 1`] = `
-<div>
-  <gl-card-stub
-    bodyclass=""
-    class="gl-mt-5"
-    footerclass=""
-    headerclass="gl-py-3"
+<gl-card-stub
+  bodyclass="[object Object]"
+  class="gl-mt-5"
+  footerclass=""
+  headerclass="[object Object]"
+>
+   
+  <gl-collapse-stub
+    visible="true"
   >
-     
-    <gl-collapse-stub
-      visible="true"
+    <p
+      class="gl-text-gray-500 gl-mb-5"
     >
-      <p
-        class="gl-text-gray-500 gl-mb-5"
-        data-testid="policy-description"
-      >
-        
-        Description 1 lives here
       
-      </p>
-       
+      Description 1 lives here
+    
+    </p>
+     
+    <div
+      class="gl-border-solid gl-border-1 gl-border-gray-100 gl-rounded-base gl-p-5"
+    >
       <div
-        class="gl-border-solid gl-border-1 gl-border-gray-100 gl-rounded-small gl-p-5"
+        class="gl-mb-5"
       >
-        <div
-          class="gl-text-gray-900 gl-mb-5"
+        <gl-icon-stub
+          class="gl-mr-3"
+          name="clock"
+          size="16"
+        />
+         IF alert is not 
+            acknowledged
+           in 
+        <span
+          class="gl-font-weight-bold"
         >
-          <gl-icon-stub
-            class="gl-mr-3"
-            name="clock"
-            size="16"
-          />
-           IF alert is not 
-              acknowledged
-             in 
-          <span
-            class="gl-font-weight-bold"
-          >
+          
+              10 mins
             
-                10 mins
-              
-          </span>
-           
-          <div
-            class="right-arrow"
-          >
-            <i
-              class="right-arrow-head"
-            />
-          </div>
-           
-          <gl-icon-stub
-            class="gl-mr-3"
-            name="notifications"
-            size="16"
-          />
-           THEN 
-              email on-call user in schedule
-             
-          <span
-            class="gl-font-weight-bold"
-          >
-            
-                Schedule to fill in
-              
-          </span>
-        </div>
-        <div
-          class="gl-text-gray-900"
+        </span>
+         
+        <span
+          class="right-arrow"
         >
-          <gl-icon-stub
-            class="gl-mr-3"
-            name="clock"
-            size="16"
+          <i
+            class="right-arrow-head"
           />
-           IF alert is not 
-              resolved
-             in 
-          <span
-            class="gl-font-weight-bold"
-          >
-            
-                20 mins
-              
-          </span>
+        </span>
+         
+        <gl-icon-stub
+          class="gl-mr-3"
+          name="notifications"
+          size="16"
+        />
+         THEN 
+            email on-call user in schedule
            
-          <div
-            class="right-arrow"
-          >
-            <i
-              class="right-arrow-head"
-            />
-          </div>
-           
-          <gl-icon-stub
-            class="gl-mr-3"
-            name="notifications"
-            size="16"
-          />
-           THEN 
-              email on-call user in schedule
-             
-          <span
-            class="gl-font-weight-bold"
-          >
+        <span
+          class="gl-font-weight-bold"
+        >
+          
+              Schedule to fill in
             
-                Monitor schedule
-              
-          </span>
-        </div>
+        </span>
       </div>
-    </gl-collapse-stub>
-  </gl-card-stub>
-</div>
+      <div
+        class=""
+      >
+        <gl-icon-stub
+          class="gl-mr-3"
+          name="clock"
+          size="16"
+        />
+         IF alert is not 
+            resolved
+           in 
+        <span
+          class="gl-font-weight-bold"
+        >
+          
+              20 mins
+            
+        </span>
+         
+        <span
+          class="right-arrow"
+        >
+          <i
+            class="right-arrow-head"
+          />
+        </span>
+         
+        <gl-icon-stub
+          class="gl-mr-3"
+          name="notifications"
+          size="16"
+        />
+         THEN 
+            email on-call user in schedule
+           
+        <span
+          class="gl-font-weight-bold"
+        >
+          
+              Monitor schedule
+            
+        </span>
+      </div>
+    </div>
+  </gl-collapse-stub>
+</gl-card-stub>
 `;

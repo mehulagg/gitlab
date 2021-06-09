@@ -9,7 +9,7 @@ import {
   GlIcon,
   GlCollapse,
 } from '@gitlab/ui';
-import { s__ } from '~/locale';
+import { s__, __ } from '~/locale';
 import { ACTIONS, ALERT_STATUSES, DEFAULT_ACTION } from '../constants';
 
 export const i18n = {
@@ -57,90 +57,89 @@ export default {
     policyVisibleAngleIcon() {
       return this.isPolicyVisible ? 'angle-down' : 'angle-right';
     },
+    policyVisibleAngleIconLabel() {
+      return this.isPolicyVisible ? __('Collapse') : __('Expand');
+    },
   },
 };
 </script>
 
 <template>
-  <div>
-    <gl-card class="gl-mt-5" header-class="gl-py-3">
-      <template #header>
+  <gl-card
+    class="gl-mt-5"
+    :class="{ 'gl-border-bottom-0': !isPolicyVisible }"
+    :body-class="{ 'gl-p-0': !isPolicyVisible }"
+    :header-class="{ 'gl-py-3': true, 'gl-rounded-base': !isPolicyVisible }"
+  >
+    <template #header>
+      <div class="gl-display-flex gl-align-items-center">
+        <gl-button
+          v-gl-tooltip
+          class="gl-mr-2 gl-p-0!"
+          :title="policyVisibleAngleIconLabel"
+          :aria-label="policyVisibleAngleIconLabel"
+          category="tertiary"
+          @click="isPolicyVisible = !isPolicyVisible"
+        >
+          <gl-icon :size="12" :name="policyVisibleAngleIcon" />
+        </gl-button>
+
+        <h3 class="gl-font-weight-bold gl-font-lg gl-m-0">{{ policy.name }}</h3>
+        <gl-button-group class="gl-ml-auto">
+          <gl-button
+            v-gl-tooltip
+            :title="$options.i18n.editPolicy"
+            icon="pencil"
+            :aria-label="$options.i18n.editPolicy"
+            disabled
+          />
+          <gl-button
+            v-gl-tooltip
+            :title="$options.i18n.deletePolicy"
+            icon="remove"
+            :aria-label="$options.i18n.deletePolicy"
+            disabled
+          />
+        </gl-button-group>
+      </div>
+    </template>
+    <gl-collapse :visible="isPolicyVisible">
+      <p v-if="policy.description" class="gl-text-gray-500 gl-mb-5">
+        {{ policy.description }}
+      </p>
+      <div class="gl-border-solid gl-border-1 gl-border-gray-100 gl-rounded-base gl-p-5">
         <div
-          class="gl-display-flex gl-justify-content-space-between gl-align-items-center gl-m-0"
-          data-testid="policy-header"
+          v-for="(rule, ruleIndex) in policy.rules"
+          :key="rule.id"
+          :class="{ 'gl-mb-5': ruleIndex !== policy.rules.length - 1 }"
         >
-          <div class="gl-font-weight-bold gl-font-lg">
-            <gl-icon
-              v-gl-tooltip
-              class="gl-hover-cursor-pointer gl-mr-2"
-              :aria-label="policyVisibleAngleIcon"
-              :size="12"
-              :name="policyVisibleAngleIcon"
-              @click="isPolicyVisible = !isPolicyVisible"
-            />
-            <span> {{ policy.name }}</span>
-          </div>
-          <gl-button-group>
-            <gl-button
-              v-gl-tooltip
-              :title="$options.i18n.editPolicy"
-              icon="pencil"
-              :aria-label="$options.i18n.editPolicy"
-              disabled
-            />
-            <gl-button
-              v-gl-tooltip
-              :title="$options.i18n.deletePolicy"
-              icon="remove"
-              :aria-label="$options.i18n.deletePolicy"
-              disabled
-            />
-          </gl-button-group>
+          <gl-icon name="clock" class="gl-mr-3" />
+          <gl-sprintf :message="$options.i18n.escalationRule">
+            <template #alertStatus>
+              {{ $options.ALERT_STATUSES[rule.status].toLowerCase() }}
+            </template>
+            <template #minutes>
+              <span class="gl-font-weight-bold">
+                {{ rule.elapsedTimeSeconds }} {{ $options.i18n.minutes }}
+              </span>
+            </template>
+            <template #then>
+              <span class="right-arrow">
+                <i class="right-arrow-head"></i>
+              </span>
+              <gl-icon name="notifications" class="gl-mr-3" />
+            </template>
+            <template #doAction>
+              {{ $options.ACTIONS[$options.DEFAULT_ACTION].toLowerCase() }}
+            </template>
+            <template #schedule>
+              <span class="gl-font-weight-bold">
+                {{ rule.oncallSchedule.name }}
+              </span>
+            </template>
+          </gl-sprintf>
         </div>
-      </template>
-      <gl-collapse :visible="isPolicyVisible">
-        <p
-          v-if="policy.description"
-          class="gl-text-gray-500 gl-mb-5"
-          data-testid="policy-description"
-        >
-          {{ policy.description }}
-        </p>
-        <div class="gl-border-solid gl-border-1 gl-border-gray-100 gl-rounded-small gl-p-5">
-          <div
-            v-for="(rule, ruleIndex) in policy.rules"
-            :key="rule.id"
-            class="gl-text-gray-900"
-            :class="{ 'gl-mb-5': ruleIndex !== policy.rules.length - 1 }"
-          >
-            <gl-icon name="clock" class="gl-mr-3" />
-            <gl-sprintf :message="$options.i18n.escalationRule">
-              <template #alertStatus>
-                {{ $options.ALERT_STATUSES[rule.status].toLowerCase() }}
-              </template>
-              <template #minutes>
-                <span class="gl-font-weight-bold">
-                  {{ rule.elapsedTimeSeconds }} {{ $options.i18n.minutes }}
-                </span>
-              </template>
-              <template #then>
-                <div class="right-arrow">
-                  <i class="right-arrow-head"></i>
-                </div>
-                <gl-icon name="notifications" class="gl-mr-3" />
-              </template>
-              <template #doAction>
-                {{ $options.ACTIONS[$options.DEFAULT_ACTION].toLowerCase() }}
-              </template>
-              <template #schedule>
-                <span class="gl-font-weight-bold">
-                  {{ rule.oncallSchedule.name }}
-                </span>
-              </template>
-            </gl-sprintf>
-          </div>
-        </div>
-      </gl-collapse>
-    </gl-card>
-  </div>
+      </div>
+    </gl-collapse>
+  </gl-card>
 </template>

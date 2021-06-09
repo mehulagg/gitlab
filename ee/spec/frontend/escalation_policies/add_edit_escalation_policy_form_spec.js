@@ -1,11 +1,11 @@
 import { GlLink } from '@gitlab/ui';
-import { shallowMount } from '@vue/test-utils';
 import AddEscalationPolicyForm, {
   i18n,
 } from 'ee/escalation_policies/components/add_edit_escalation_policy_form.vue';
 import EscalationRule from 'ee/escalation_policies/components/escalation_rule.vue';
 import { DEFAULT_ESCALATION_RULE } from 'ee/escalation_policies/constants';
-import { extendedWrapper } from 'helpers/vue_test_utils_helper';
+import { shallowMountExtended } from 'helpers/vue_test_utils_helper';
+
 import mockPolicy from './mocks/mockPolicy.json';
 
 describe('AddEscalationPolicyForm', () => {
@@ -13,29 +13,27 @@ describe('AddEscalationPolicyForm', () => {
   const projectPath = 'group/project';
 
   const createComponent = ({ props = {} } = {}) => {
-    wrapper = extendedWrapper(
-      shallowMount(AddEscalationPolicyForm, {
-        propsData: {
-          form: {
-            name: mockPolicy.name,
-            description: mockPolicy.description,
-          },
-          validationState: {
-            name: true,
-            rules: [],
-          },
-          ...props,
+    wrapper = shallowMountExtended(AddEscalationPolicyForm, {
+      propsData: {
+        form: {
+          name: mockPolicy.name,
+          description: mockPolicy.description,
         },
-        provide: {
-          projectPath,
+        validationState: {
+          name: true,
+          rules: [],
         },
-        mocks: {
-          $apollo: {
-            queries: { schedules: { loading: false } },
-          },
+        ...props,
+      },
+      provide: {
+        projectPath,
+      },
+      mocks: {
+        $apollo: {
+          queries: { schedules: { loading: false } },
         },
-      }),
-    );
+      },
+    });
   };
 
   beforeEach(() => {

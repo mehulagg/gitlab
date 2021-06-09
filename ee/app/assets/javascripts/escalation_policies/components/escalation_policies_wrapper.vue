@@ -46,10 +46,8 @@ export default {
           projectPath: this.projectPath,
         };
       },
-      update(data) {
-        const nodes = data.project?.incidentManagementEscalationPolicies?.nodes ?? [];
-
-        return nodes;
+      update({ project }) {
+        return project?.incidentManagementEscalationPolicies?.nodes ?? [];
       },
       error(error) {
         Sentry.captureException(error);
@@ -80,7 +78,6 @@ export default {
           category="secondary"
           variant="confirm"
           class="gl-mt-5"
-          data-testid="add-additional-policy-button"
         >
           {{ $options.i18n.addPolicy }}
         </gl-button>
