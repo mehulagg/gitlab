@@ -169,9 +169,9 @@ module EE
 
       report_diff = compare_license_scanning_reports(nil)
 
-      return false unless report_diff[:data] && report_diff[:data]['new_licenses']
+      return false unless report_diff.dig(:data, 'new_licenses')
 
-      report_diff[:data]['new_licenses'].any? { |l| l.dig('classification', 'approval_status') == 'denied' }
+      report_diff.dig(:data, 'new_licenses').any? { |l| l.dig('classification', 'approval_status') == 'denied' }
     end
 
     def enabled_reports
