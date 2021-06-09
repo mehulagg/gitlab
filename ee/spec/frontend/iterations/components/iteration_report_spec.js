@@ -8,7 +8,6 @@ import query from 'ee/iterations/queries/iteration.query.graphql';
 import createMockApollo from 'helpers/mock_apollo_helper';
 import waitForPromises from 'helpers/wait_for_promises';
 import { getIdFromGraphQLId } from '~/graphql_shared/utils';
-import { formatDate } from '~/lib/utils/datetime_utility';
 import { mockIterationNode, mockGroupIterations, mockProjectIterations } from '../mock_data';
 
 const localVue = createLocalVue();
@@ -166,8 +165,8 @@ describe('Iterations report', () => {
       });
 
       it('shows status and date in header', () => {
-        const startDate = formatDate(mockIterationNode.startDate, 'mmm d, yyyy', true);
-        const dueDate = formatDate(mockIterationNode.startDate, 'mmm d, yyyy', true);
+        const startDate = IterationReport.methods.formatDate(mockIterationNode.startDate);
+        const dueDate = IterationReport.methods.formatDate(mockIterationNode.startDate);
         expect(findTopbar().text().toLowerCase()).toContain(mockIterationNode.state);
         expect(findTopbar().text()).toContain(startDate);
         expect(findTopbar().text()).toContain(dueDate);
@@ -178,8 +177,11 @@ describe('Iterations report', () => {
         expect(findEmptyState().exists()).toBe(false);
       });
 
-      it('shows title and description', () => {
+      it('shows title', () => {
         expect(findTitle().text()).toContain(mockIterationNode.title);
+      });
+
+      it('shows description', () => {
         expect(findDescription().text()).toContain(mockIterationNode.description);
       });
 
