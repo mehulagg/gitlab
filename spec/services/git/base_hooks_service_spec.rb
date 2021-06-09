@@ -37,6 +37,31 @@ RSpec.describe Git::BaseHooksService do
     }
   end
 
+  let(:pipeline_params) do
+    {
+      after: newrev,
+      before: oldrev,
+      checkout_sha: checkout_sha,
+      push_options: push_options, # defined in each context
+      ref: ref,
+      variables_attributes: variables_attributes # defined in each context
+    }
+  end
+
+  let(:push_options)         { {} }
+  let(:variables_attributes) { [] }
+
+  shared_examples 'creates pipeline with params and expected variables' do
+    it 'calls the create pipeline service' do
+      expect(Ci::CreatePipelineService)
+        .to receive(:new)
+        .with(project, user, pipeline_params)
+        .and_return(double(execute!: true))
+
+      subject.execute
+    end
+  end
+
   describe 'push event' do
     it 'creates push event' do
       expect_next_instance_of(EventCreateService) do |service|
@@ -133,33 +158,54 @@ RSpec.describe Git::BaseHooksService do
     end
   end
 
-  describe 'Generating CI variables from push options' do
-    let(:pipeline_params) do
-      {
-        after: newrev,
-        before: oldrev,
-        checkout_sha: checkout_sha,
-        push_options: push_options, # defined in each context
-        ref: ref,
-        variables_attributes: variables_attributes # defined in each context
-      }
-    end
+  context 'creating pipelines' do
+    let(:merge_request) { create(:merge_request, :opened, source_project: project, target_project: project) }
+    let(:closed_merge_request) { create(:merge_request, :closed, source_project: project, target_project: project) }
 
-    shared_examples 'creates pipeline with params and expected variables' do
-      it 'calls the create pipeline service' do
+    context 'with the ref of the source branch on an open merge request' do
+      let(:checkout_sha) { merge_request.source_branch_sha }
+      let(:newrev)       { merge_request.source_branch_sha }
+      let(:ref)          { merge_request.source_branch_ref }
+
+      it 'does not call the pipeline create service' do
         expect(Ci::CreatePipelineService)
-          .to receive(:new)
-          .with(project, user, pipeline_params)
-          .and_return(double(execute!: true))
+          .not_to receive(:new)
+      end
 
-        subject.execute
+      context 'with better_pipeline_processing disabled' do
+        before do
+          stub_feature_flags(better_pipeline_processing: false)
+        end
+
+        it_behaves_like 'creates pipeline with params and expected variables'
       end
     end
 
-    context 'with empty push options' do
-      let(:push_options) { {} }
-      let(:variables_attributes) { [] }
+    context 'with the ref of the source branch of a closed merge request' do
+      let(:checkout_sha) { closed_merge_request.source_branch_sha }
+      let(:newrev)       { closed_merge_request.source_branch_sha }
+      let(:ref)          { closed_merge_request.source_branch_ref }
 
+      it 'does not call the pipeline create service' do
+        expect(Ci::CreatePipelineService)
+          .not_to receive(:new)
+      end
+    end
+
+    context 'with the ref of a branch uninvolved in merge requests' do
+      let(:checkout_sha) { '0ed8c6c' }
+      let(:newrev)       { '0ed8c6c' }
+      let(:ref)          { 'refs/heads/markdown' }
+
+      it 'does not call the pipeline create service' do
+        expect(Ci::CreatePipelineService)
+          .not_to receive(:new)
+      end
+    end
+  end
+
+  describe 'Generating CI variables from push options' do
+    context 'with empty push options' do
       it_behaves_like 'creates pipeline with params and expected variables'
     end
 
@@ -171,8 +217,6 @@ RSpec.describe Git::BaseHooksService do
           }
         }
       end
-
-      let(:variables_attributes) { [] }
 
       before do
         params[:push_options] = push_options

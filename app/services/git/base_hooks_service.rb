@@ -56,11 +56,24 @@ module Git
     def create_pipelines
       return unless params.fetch(:create_pipelines, true)
 
+      if Gitlab::Ci::Features.better_pipeline_processing_enabled?
+        branch_name = Gitlab::Git.branch_name(event_push_data[:ref])
+
+        return if open_mrs_for?(branch_name)
+      end
+
       Ci::CreatePipelineService
         .new(project, current_user, pipeline_params)
         .execute!(:push, pipeline_options)
     rescue Ci::CreatePipelineService::CreateError => ex
       log_pipeline_errors(ex)
+    end
+
+    def open_mrs_for?(source_branch)
+      @project.source_of_merge_requests
+        .opened
+        .from_source_branches(source_branch)
+        .exists?
     end
 
     def execute_project_hooks
