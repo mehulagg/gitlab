@@ -18,8 +18,7 @@ RSpec.describe Gitlab::UsageDataMetrics do
 
     context 'whith instrumentation_class' do
       it 'includes top level keys' do
-        expect(subject).to include(:uuid)
-        expect(subject).to include(:hostname)
+        expect(subject).to include(:instance_auto_devops_enabled)
       end
 
       it 'includes counts keys' do

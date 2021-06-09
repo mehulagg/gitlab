@@ -54,7 +54,7 @@ RSpec.describe SubmitUsagePingService do
   shared_examples 'does not run' do
     it do
       expect(Gitlab::HTTP).not_to receive(:post)
-      expect(Gitlab::UsageData).not_to receive(:data)
+      expect(Gitlab::UsageDataInstrumentation).not_to receive(:data)
 
       subject.execute
     end
@@ -115,7 +115,7 @@ RSpec.describe SubmitUsagePingService do
     it 'forces a refresh of usage data statistics before submitting' do
       stub_response(body: with_dev_ops_score_params)
 
-      expect(Gitlab::UsageData).to receive(:data).with(force_refresh: true).and_call_original
+      expect(Gitlab::UsageDataInstrumentation).to receive(:data).and_call_original
 
       subject.execute
     end
@@ -131,7 +131,7 @@ RSpec.describe SubmitUsagePingService do
         recorded_at = Time.current
         usage_data = { uuid: 'uuid', recorded_at: recorded_at }
 
-        expect(Gitlab::UsageData).to receive(:data).with(force_refresh: true).and_return(usage_data)
+        expect(Gitlab::UsageDataInstrumentation).to receive(:data).and_return(usage_data)
 
         subject.execute
 
@@ -176,7 +176,7 @@ RSpec.describe SubmitUsagePingService do
         recorded_at = Time.current
         usage_data = { uuid: 'uuid', recorded_at: recorded_at }
 
-        expect(Gitlab::UsageData).to receive(:data).with(force_refresh: true).and_return(usage_data)
+        expect(Gitlab::Usage::UsageDataInstrumentation).to receive(:data).and_return(usage_data)
 
         subject.execute
 
@@ -201,7 +201,7 @@ RSpec.describe SubmitUsagePingService do
 
     context 'and usage data is empty string' do
       before do
-        allow(Gitlab::UsageData).to receive(:data).and_return({})
+        allow(Gitlab::Usage::UsageDataInstrumentation).to receive(:data).and_return({})
       end
 
       it_behaves_like 'does not send a blank usage ping payload'
@@ -209,7 +209,7 @@ RSpec.describe SubmitUsagePingService do
 
     context 'and usage data is nil' do
       before do
-        allow(Gitlab::UsageData).to receive(:data).and_return(nil)
+        allow(Gitlab::Usage::UsageDataInstrumentation).to receive(:data).and_return(nil)
       end
 
       it_behaves_like 'does not send a blank usage ping payload'
