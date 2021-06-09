@@ -1,5 +1,5 @@
 mutation createIteration($input: CreateIterationInput!) {
-  iterationCreate(input: $input) {
+  createIteration(input: $input) {
     iteration {
       title
       description
