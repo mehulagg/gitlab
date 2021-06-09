@@ -100,7 +100,8 @@ If your Auto DevOps project has an active environment that was deployed with the
      MIGRATE_HELM_2TO3: "true"
 
    .auto-deploy:
-     image: registry.gitlab.com/gitlab-org/cluster-integration/auto-deploy-image:v2.0.0-beta.1
+     # Optional: If you are on GitLab 13.12 or older, pin the auto-deploy-image
+     # image: registry.gitlab.com/gitlab-org/cluster-integration/auto-deploy-image:v2.6.0
      variables:
        AUTO_DEVOPS_FORCE_DEPLOY_V2: 1
    ```
