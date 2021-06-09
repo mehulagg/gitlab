@@ -182,10 +182,9 @@
             .gl-card-header.gl-bg-blue-500.gl-text-white
               = _('This user is banned')
             .gl-card-body
-              %p= _('A banned user cannot:')
               %ul
-                %li= _('Log in')
-                %li= _('Access Git repositories')
+                %li= _('A banned user cannot log in or access git repositories.')
+                %li= _('Issues authored by this user are hidden from other users.')
               - link_start = '<a href="%{url}" target="_blank">'.html_safe % { url: help_page_path("user/admin_area/moderate_users", anchor: "ban-a-user") }
               = s_('AdminUsers|Learn more about %{link_start}banned users.%{link_end}').html_safe % { link_start: link_start, link_end: '</a>'.html_safe }
               %p

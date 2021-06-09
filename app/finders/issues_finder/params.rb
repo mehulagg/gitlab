@@ -42,6 +42,12 @@ class IssuesFinder
 
       current_user.blank?
     end
+
+    def user_can_see_all_issues?
+      strong_memoize(:user_can_see_all_issues) do
+        Ability.allowed?(current_user, :read_all_resources)
+      end
+    end
   end
 end
 

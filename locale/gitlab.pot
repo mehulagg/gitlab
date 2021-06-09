@@ -1372,7 +1372,7 @@ msgstr ""
 msgid "A Let's Encrypt account will be configured for this GitLab installation using your email address. You will receive emails to warn of expiring certificates."
 msgstr ""
 
-msgid "A banned user cannot:"
+msgid "A banned user cannot log in or access git repositories."
 msgstr ""
 
 msgid "A basic page and serverless function that uses AWS Lambda, AWS API Gateway, and GitLab Pages"
@@ -2588,6 +2588,9 @@ msgid "AdminUsers|Important information about usage on your GitLab instance"
 msgstr ""
 
 msgid "AdminUsers|Is using seat"
+msgstr ""
+
+msgid "AdminUsers|Issues created by this user will be hidden from other users"
 msgstr ""
 
 msgid "AdminUsers|It's you!"
@@ -18430,6 +18433,9 @@ msgstr ""
 msgid "Issues and merge requests"
 msgstr ""
 
+msgid "Issues authored by this user are hidden from other users."
+msgstr ""
+
 msgid "Issues can be bugs, tasks or ideas to be discussed. Also, issues are searchable and filterable."
 msgstr ""
 
@@ -33439,6 +33445,9 @@ msgid "This is your current session"
 msgstr ""
 
 msgid "This issue is currently blocked by the following issues:"
+msgstr ""
+
+msgid "This issue is hidden because its author has been banned"
 msgstr ""
 
 msgid "This issue is in a child epic of the filtered epic"

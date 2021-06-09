@@ -233,13 +233,15 @@ RSpec.describe IssuesFinder do
     end
   end
 
-  describe '#with_confidentiality_access_check' do
+  describe '#with_visibility_access_check' do
     let_it_be(:guest) { create(:user) }
 
     let_it_be(:authorized_user) { create(:user) }
+    let_it_be(:banned_user) { create(:user, :banned) }
     let_it_be(:project) { create(:project, namespace: authorized_user.namespace) }
     let_it_be(:public_issue) { create(:issue, project: project) }
     let_it_be(:confidential_issue) { create(:issue, project: project, confidential: true) }
+    let_it_be(:hidden_issue) { create(:issue, project: project, author: banned_user) }
 
     context 'when no project filter is given' do
       let(:params) { {} }
@@ -247,10 +249,10 @@ RSpec.describe IssuesFinder do
       context 'for an auditor' do
         let(:auditor_user) { create(:user, :auditor) }
 
-        subject { described_class.new(auditor_user, params).with_confidentiality_access_check }
+        subject { described_class.new(auditor_user, params).with_visibility_check }
 
         it 'returns all issues' do
-          expect(subject).to include(public_issue, confidential_issue)
+          expect(subject).to include(public_issue, confidential_issue, hidden_issue)
         end
       end
     end
@@ -261,10 +263,10 @@ RSpec.describe IssuesFinder do
       context 'for an auditor' do
         let(:auditor_user) { create(:user, :auditor) }
 
-        subject { described_class.new(auditor_user, params).with_confidentiality_access_check }
+        subject { described_class.new(auditor_user, params).with_visibility_check }
 
         it 'returns all issues' do
-          expect(subject).to include(public_issue, confidential_issue)
+          expect(subject).to include(public_issue, confidential_issue, hidden_issue)
         end
       end
     end

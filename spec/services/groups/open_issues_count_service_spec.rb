@@ -6,8 +6,10 @@ RSpec.describe Groups::OpenIssuesCountService, :use_clean_rails_memory_store_cac
   let_it_be(:group) { create(:group, :public)}
   let_it_be(:project) { create(:project, :public, namespace: group) }
   let_it_be(:user) { create(:user) }
+  let_it_be(:admin) { create(:user, :admin) }
   let_it_be(:issue) { create(:issue, :opened, project: project) }
   let_it_be(:confidential) { create(:issue, :opened, confidential: true, project: project) }
+  let_it_be(:confidential) { create(:issue, :opened, hidden: true, project: project) }
   let_it_be(:closed) { create(:issue, :closed, project: project) }
 
   subject { described_class.new(group, user) }
@@ -28,7 +30,7 @@ RSpec.describe Groups::OpenIssuesCountService, :use_clean_rails_memory_store_cac
 
   describe '#count' do
     context 'when user is nil' do
-      it 'does not include confidential issues in the issue count' do
+      it 'does not include confidential or hidden issues in the issue count' do
         expect(described_class.new(group).count).to eq(1)
       end
     end
@@ -39,7 +41,7 @@ RSpec.describe Groups::OpenIssuesCountService, :use_clean_rails_memory_store_cac
           group.add_reporter(user)
         end
 
-        it 'returns the right count with confidential issues' do
+        it 'includes confidential issues and does not include hidden issues in count' do
           expect(subject.count).to eq(2)
         end
       end
@@ -49,8 +51,14 @@ RSpec.describe Groups::OpenIssuesCountService, :use_clean_rails_memory_store_cac
           group.add_guest(user)
         end
 
-        it 'does not include confidential issues' do
+        it 'does not include confidential or hidden issues in count' do
           expect(subject.count).to eq(1)
+        end
+      end
+
+      context 'when user is an admin', :enable_admin_mode do
+        it 'includes confidential and hidden issues in count' do
+          expect(described_class.new(group, admin).count).to eq(3)
         end
       end
 
@@ -61,9 +69,11 @@ RSpec.describe Groups::OpenIssuesCountService, :use_clean_rails_memory_store_cac
   describe '#clear_all_cache_keys' do
     it 'calls `Rails.cache.delete` with the correct keys' do
       expect(Rails.cache).to receive(:delete)
-        .with(['groups', 'open_issues_count_service', 1, group.id, described_class::PUBLIC_COUNT_KEY])
+        .with(['groups', 'open_issues_count_service', 1, group.id, described_class::PUBLIC_COUNT_WITHOUT_HIDDEN_KEY])
       expect(Rails.cache).to receive(:delete)
         .with(['groups', 'open_issues_count_service', 1, group.id, described_class::TOTAL_COUNT_KEY])
+      expect(Rails.cache).to receive(:delete)
+        .with(['groups', 'open_issues_count_service', 1, group.id, described_class::TOTAL_COUNT_WITHOUT_HIDDEN_KEY])
 
       subject.clear_all_cache_keys
     end

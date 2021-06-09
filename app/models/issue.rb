@@ -130,8 +130,9 @@ class Issue < ApplicationRecord
   }
   scope :with_issue_type, ->(types) { where(issue_type: types) }
 
-  scope :public_only, -> { where(confidential: false) }
+  scope :public_only, -> { where(confidential: false).and(hidden: false) }
   scope :confidential_only, -> { where(confidential: true) }
+  scope :hidden_only, -> { where(hidden: true) }
 
   scope :counts_by_state, -> { reorder(nil).group(:state_id).count }
 
@@ -510,6 +511,8 @@ class Issue < ApplicationRecord
       true
     elsif confidential? && !assignee_or_author?(user)
       project.team.member?(user, Gitlab::Access::REPORTER)
+    elsif hidden?
+      false
     else
       project.public? ||
         project.internal? && !user.external? ||

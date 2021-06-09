@@ -12,12 +12,22 @@ class IssuePolicy < IssuablePolicy
     @user && IssueCollection.new([@subject]).visible_to(@user).any?
   end
 
+  desc "Current user is an admin"
+  condition(:admin) { @user.can_admin_all_resources? }
+
   desc "Issue is confidential"
   condition(:confidential, scope: :subject) { @subject.confidential? }
+
+  desc "Issue is hidden"
+  condition(:hidden, scope: :subject) { @subject.hidden? }
 
   rule { confidential & ~can_read_confidential }.policy do
     prevent(*create_read_update_admin_destroy(:issue))
     prevent :read_issue_iid
+  end
+
+  rule { hidden & ~admin }.policy do
+    prevent :read_issue
   end
 
   rule { ~can?(:read_issue) }.prevent :create_note

@@ -193,6 +193,7 @@ module UsersHelper
 
     list = tag.ul do
       concat tag.li s_('AdminUsers|User will be blocked')
+      concat tag.li s_('AdminUsers|Issues created by this user will be hidden from other users')
     end
 
     link_start = '<a href="%{url}" target="_blank">'.html_safe % { url: help_page_path("user/admin_area/moderate_users", anchor: "ban-a-user") }
