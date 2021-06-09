@@ -3,6 +3,7 @@ import {
   GlLink,
   GlDropdown,
   GlDropdownItem,
+  GlDropdownSectionHeader,
   GlDropdownText,
   GlSearchBoxByType,
   GlDropdownDivider,
@@ -38,6 +39,7 @@ export default {
     GlLink,
     GlDropdown,
     GlDropdownItem,
+    GlDropdownSectionHeader,
     GlDropdownText,
     GlDropdownDivider,
     GlSearchBoxByType,
@@ -147,6 +149,29 @@ export default {
     };
   },
   computed: {
+    isIteration() {
+      return this.issuableAttribute === 'iteration';
+    },
+    currentAttributeCadenceTitle() {
+      return this.currentAttribute?.iterationCadence?.title;
+    },
+    iterationCadences() {
+      const cadences = [];
+      this.attributesList.forEach((iteration) => {
+        if (!iteration.iterationCadence) {
+          return;
+        }
+        const { title } = iteration.iterationCadence;
+        const cadenceIteration = { id: iteration.id, title: iteration.title };
+        const cadence = cadences.find((cad) => cad.title === title);
+        if (cadence) {
+          cadence.iterations.push(cadenceIteration);
+        } else {
+          cadences.push({ title, iterations: [cadenceIteration] });
+        }
+      });
+      return cadences;
+    },
     issuableAttributeQuery() {
       return this.$options.issuableAttributesQueries[this.issuableAttribute];
     },
@@ -293,6 +318,13 @@ export default {
         <span v-else-if="!currentAttribute" class="gl-text-gray-500">
           {{ $options.i18n.none }}
         </span>
+        <template v-else-if="isIteration">
+          <p class="gl-font-weight-bold gl-m-0">{{ currentAttributeCadenceTitle }}</p>
+          <gl-link :href="attributeUrl">
+            <gl-icon name="iteration" class="gl-mr-1" />
+            {{ attributeTitle }}
+          </gl-link>
+        </template>
         <gl-link v-else class="gl-text-gray-900! gl-font-weight-bold" :href="attributeUrl">
           {{ attributeTitle }}
         </gl-link>
@@ -327,16 +359,34 @@ export default {
           <gl-dropdown-text v-if="emptyPropsList">
             {{ i18n.noAttributesFound }}
           </gl-dropdown-text>
-          <gl-dropdown-item
-            v-for="attrItem in attributesList"
-            :key="attrItem.id"
-            :is-check-item="true"
-            :is-checked="isAttributeChecked(attrItem.id)"
-            :data-testid="`${issuableAttribute}-items`"
-            @click="updateAttribute(attrItem.id)"
-          >
-            {{ attrItem.title }}
-          </gl-dropdown-item>
+          <template v-if="!isIteration">
+            <gl-dropdown-item
+              v-for="attrItem in attributesList"
+              :key="attrItem.id"
+              :is-check-item="true"
+              :is-checked="isAttributeChecked(attrItem.id)"
+              :data-testid="`${issuableAttribute}-items`"
+              @click="updateAttribute(attrItem.id)"
+            >
+              {{ attrItem.title }}
+            </gl-dropdown-item>
+          </template>
+          <template v-for="(cadence, index) in iterationCadences">
+            <gl-dropdown-divider v-if="index !== 0" :key="index" />
+            <gl-dropdown-section-header :key="cadence.title">
+              {{ cadence.title }}
+            </gl-dropdown-section-header>
+            <gl-dropdown-item
+              v-for="attrItem in cadence.iterations"
+              :key="attrItem.id"
+              :is-check-item="true"
+              :is-checked="isAttributeChecked(attrItem.id)"
+              :data-testid="`${issuableAttribute}-items`"
+              @click="updateAttribute(attrItem.id)"
+            >
+              {{ attrItem.title }}
+            </gl-dropdown-item>
+          </template>
         </template>
       </gl-dropdown>
     </template>

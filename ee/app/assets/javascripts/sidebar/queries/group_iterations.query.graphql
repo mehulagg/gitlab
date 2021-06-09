@@ -7,6 +7,10 @@ query issueIterations($fullPath: ID!, $title: String, $state: IterationState) {
       nodes {
         ...IterationFragment
         state
+        iterationCadence {
+          id
+          title
+        }
       }
     }
   }

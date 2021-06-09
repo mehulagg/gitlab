@@ -8,6 +8,10 @@ query projectIssueIteration($fullPath: ID!, $iid: String!) {
       id
       attribute: iteration {
         ...IterationFragment
+        iterationCadence {
+          id
+          title
+        }
       }
     }
   }
