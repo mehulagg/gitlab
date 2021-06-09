@@ -78,8 +78,7 @@ can assign, categorize, and track progress on a merge request:
 
 ## Close a merge request
 
-When a merge request is merged, it closes, but you can still view it, and the
-pipelines associated with it. If you decide to permanently stop work on a merge request,
+If you decide to permanently stop work on a merge request,
 GitLab recommends you close the merge request, rather than
 [delete it](#delete-a-merge-request). To close a merge request:
 
