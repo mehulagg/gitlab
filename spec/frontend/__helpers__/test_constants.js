@@ -1,5 +1,5 @@
 const FIXTURES_PATH = `/fixtures`;
-const TEST_HOST = 'http://test.host';
+const TEST_HOST = 'http://gitlab.test';
 
 const DUMMY_IMAGE_URL = `${FIXTURES_PATH}/static/images/one_white_pixel.png`;
 
