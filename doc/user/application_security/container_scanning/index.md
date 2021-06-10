@@ -11,10 +11,11 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 
 WARNING:
 Versions of GitLab prior to 14.0 used Clair as the default container scanning engine. GitLab 14.0
-removes Clair from the product and replaces it with two new [scanners](#scanner-selection). If you run container scanning with the
-default settings, GitLab switches you seamlessly and automatically to Trivy in GitLab 14.0. However,
-if you customized the variables in your container scanning job, you should review the
-[migration guide](#migrating-from-clair-to-trivy) and make any necessary updates.
+removes Clair from the product and replaces it with two new [scanners](#scanner-selection). If you
+run container scanning with the default settings, GitLab switches you seamlessly and automatically
+to Trivy in GitLab 14.0. However, if you customized the variables in your container scanning job,
+you should review the [migration guide](#migrating-from-clair-to-trivy)
+and make any necessary updates.
 
 Your application's Docker image may itself be based on Docker images that contain known
 vulnerabilities. By including an extra job in your pipeline that scans for those vulnerabilities and
@@ -81,7 +82,9 @@ Other changes:
   [Trivy](https://github.com/aquasecurity/trivy) by upgrading `CS_MAJOR_VERSION` from `3` to `4`.
 - GitLab 14.0 [introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/61850)
   an integration with [Trivy](https://github.com/aquasecurity/trivy)
-  as the default for container scanning, and also [introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/326279) an integration with [Grype](https://github.com/anchore/grype) as an alternative scanner.
+  as the default for container scanning, and also [introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/326279)
+  an integration with [Grype](https://github.com/anchore/grype)
+  as an alternative scanner.
 
 To include the `Container-Scanning.gitlab-ci.yml` template (GitLab 11.9 and later), add the
 following to your `.gitlab-ci.yml` file:
@@ -145,16 +148,16 @@ variables:
 
 #### Scanner selection
 
-The container-scanning analyzer can use different scanners, depending on the value of the `CS_ANALYZER_IMAGE`
-configuration variable.
+The container-scanning analyzer can use different scanners, depending on the value of the
+`CS_ANALYZER_IMAGE` configuration variable.
 
 The following options are available:
 
 | Scanner name | `CS_ANALYZER_IMAGE` |
 | ------------ | ------------------- |
-| Default scanner ([Trivy](https://github.com/aquasecurity/trivy)) | `registry.gitlab.com/security-products/container-scanning:4` |
-| [Grype](https://github.com/anchore/grype)                        | `registry.gitlab.com/security-products/container-scanning/grype:4` |
-| [Trivy](https://github.com/aquasecurity/trivy)                   | `registry.gitlab.com/security-products/container-scanning/trivy:4` |
+| Default ([Trivy](https://github.com/aquasecurity/trivy)) | `registry.gitlab.com/security-products/container-scanning:4` |
+| [Grype](https://github.com/anchore/grype)                | `registry.gitlab.com/security-products/container-scanning/grype:4` |
+| Trivy                                                    | `registry.gitlab.com/security-products/container-scanning/trivy:4` |
 
 #### Available CI/CD variables
 
@@ -243,8 +246,8 @@ The [instructions above](#migrating-from-clair-to-trivy) work for all supported 
 **Troubleshooting**
 
 Prior to the GitLab 14.0 release, any variable defined under the scope `container_scanning` is not
-considered for scanners other than Clair. From 14.0, all variables can be defined either as a global variable, 
-or under `container_scanning`.
+considered for scanners other than Clair. In GitLab 14.0 and later, all variables can be defined
+either as a global variable or under `container_scanning`.
 
 ### Using a custom SSL CA certificate authority
 
