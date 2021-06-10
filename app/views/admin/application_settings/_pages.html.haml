@@ -8,6 +8,11 @@
       .form-text.text-muted
         = _("0 for unlimited")
     .form-group
+      = f.label :pages_entries_count_limit, _('Maximum number of file entries per pages deployment'), class: 'label-bold'
+      = f.number_field :pages_entries_count_limit, class: 'form-control gl-form-input'
+      .form-text.text-muted
+        = _("0 for unlimited")
+    .form-group
       .form-check
         = f.check_box :pages_domain_verification_enabled, class: 'form-check-input'
         = f.label :pages_domain_verification_enabled, class: 'form-check-label' do

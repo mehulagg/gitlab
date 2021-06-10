@@ -276,6 +276,7 @@ module ApplicationSettingsHelper
       :kroki_enabled,
       :kroki_url,
       :kroki_formats,
+      :pages_entries_count_limit,
       :plantuml_enabled,
       :plantuml_url,
       :polling_interval_multiplier,
