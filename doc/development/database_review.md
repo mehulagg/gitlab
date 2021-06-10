@@ -117,7 +117,7 @@ test its execution using `CREATE INDEX CONCURRENTLY` in the `#database-lab` Slac
   - If the execution from `#database-lab` is longer than `1h`, the index should be moved to a [post-migration](post_deployment_migrations.md).
     Keep in mind that in this case you may need to split the migration and the application changes in separate releases to ensure the index
     will be in place when the code that needs it will be deployed.
-- When checking the performance of queries in a migration, check the results of the gitlabcom-database testing pipeline powered by the [migration testing](https://gitlab.com/gitlab-org/database-team/gitlab-com-database-testing) project, for each query. Make sure the "max time" reported for each query is compliant with our [query performance guidelines](#timing-guidelines-for-queries).
+- When checking the performance of queries in a migration, check the results of the gitlabcom-database testing pipeline powered by the [migration testing](https://gitlab.com/gitlab-org/database-team/gitlab-com-database-testing) project, for each query. Make sure the "max time" reported for each query is compliant with our [query performance guidelines](query_performance.md#timing-guidelines-for-queries).
 
 #### Preparation when adding or modifying queries
 
