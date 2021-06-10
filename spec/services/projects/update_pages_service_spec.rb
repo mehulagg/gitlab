@@ -157,6 +157,13 @@ RSpec.describe Projects::UpdatePagesService do
         expect(execute).not_to eq(:success)
       end
 
+      it 'limits pages file count' do
+        stub_application_setting(pages_entries_count_limit: 2)
+        expect(execute).not_to eq(:success)
+
+        expect(GenericCommitStatus.last.description).to eq("pages site contains 3 file entries, while limit is set to 2")
+      end
+
       it 'removes pages after destroy' do
         expect(PagesWorker).to receive(:perform_in)
         expect(project.pages_deployed?).to be_falsey
