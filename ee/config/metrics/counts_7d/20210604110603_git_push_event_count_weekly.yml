@@ -1,6 +1,6 @@
 ---
 key_path: usage_activity_by_stage.enablement.counts.geo_node_usage.git_push_event_count_weekly
-description: Number of git push events from Prometheus on the Geo secondary
+description: Number of Git push events from Prometheus on the Geo secondary
 product_section: enablement
 product_stage: enablement
 product_group: group::geo

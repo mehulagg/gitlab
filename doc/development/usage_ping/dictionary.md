@@ -2454,7 +2454,7 @@ Whether or not ModSecurity is set to blocking mode
 
 Group: `group::container security`
 
-Status: `deprecated`
+Status: `removed`
 
 Tiers: `free`, `premium`, `ultimate`
 
@@ -2466,7 +2466,7 @@ Whether or not ModSecurity is disabled within Ingress
 
 Group: `group::container security`
 
-Status: `deprecated`
+Status: `removed`
 
 Tiers: `free`, `premium`, `ultimate`
 
@@ -2478,7 +2478,7 @@ Whether or not ModSecurity is set to logging mode
 
 Group: `group::container security`
 
-Status: `deprecated`
+Status: `removed`
 
 Tiers: `free`, `premium`, `ultimate`
 
@@ -2490,7 +2490,7 @@ Whether or not ModSecurity has not been installed into the cluster
 
 Group: `group::container security`
 
-Status: `deprecated`
+Status: `removed`
 
 Tiers: `free`, `premium`, `ultimate`
 
@@ -2502,7 +2502,7 @@ Cumulative count of packets identified as anomalous by ModSecurity since Usage P
 
 Group: `group::container security`
 
-Status: `deprecated`
+Status: `removed`
 
 Tiers: `free`, `premium`, `ultimate`
 
@@ -2514,7 +2514,7 @@ Cumulative count of packets processed by ModSecurity since Usage Ping was last r
 
 Group: `group::container security`
 
-Status: `deprecated`
+Status: `removed`
 
 Tiers: `free`, `premium`, `ultimate`
 
@@ -2526,7 +2526,7 @@ Whether or not ModSecurity statistics are unavailable
 
 Group: `group::container security`
 
-Status: `deprecated`
+Status: `removed`
 
 Tiers: `ultimate`
 
@@ -6396,7 +6396,7 @@ Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.user_preferences_group_overview_details`
 
-Count of users who set personal preference to see Details on Group overview page
+Count of users who set personal preference to see Details on Group information page
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_all/20210216182203_user_preferences_group_overview_details.yml)
 
@@ -6408,7 +6408,7 @@ Tiers: `ultimate`
 
 ### `counts.user_preferences_group_overview_security_dashboard`
 
-Count of users who set personal preference to see Security Dashboard on Group overview page
+Count of users who set personal preference to see Security Dashboard on Group information page
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_all/20210216182205_user_preferences_group_overview_security_dashboard.yml)
 
@@ -17416,7 +17416,7 @@ Tiers: `ultimate`
 
 ### `usage_activity_by_stage.secure.user_preferences_group_overview_security_dashboard`
 
-Users who set personal preference to see Details on Group overview page
+Users who set personal preference to see Details on Group information page
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_all/20210216182207_user_preferences_group_overview_security_dashboard.yml)
 
@@ -19456,7 +19456,7 @@ Tiers: `ultimate`
 
 ### `usage_activity_by_stage_monthly.secure.user_preferences_group_overview_security_dashboard`
 
-Users who set personal preference to see Security Dashboard on Group overview page
+Users who set personal preference to see Security Dashboard on Group information page
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210216182209_user_preferences_group_overview_security_dashboard.yml)
 
