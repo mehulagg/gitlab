@@ -774,7 +774,8 @@ Parameters:
 | `extra_shared_runners_minutes_limit` | integer | no       | **(PREMIUM SELF)** Extra pipeline minutes quota for this group (purchased in addition to the minutes included in the plan). |
 
 NOTE:
-Currently it is not possible to create group without a parent group on GitLab.com using this API endpoint. Please use UI interface to do that. 
+On GitLab SaaS, you must use the GitLab UI to create group without a parent group. You cannot
+use the API to do this.
 
 ### Options for `default_branch_protection`
 
