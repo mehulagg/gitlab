@@ -2,7 +2,7 @@
 
 module AppSec
   module Fuzzing
-    module Api
+    module API
       class CiConfiguration
         PROFILES_DEFINITION_FILE = 'https://gitlab.com/gitlab-org/security-products/analyzers' \
           '/api-fuzzing/-/raw/master/gitlab-api-fuzzing-config.yml'

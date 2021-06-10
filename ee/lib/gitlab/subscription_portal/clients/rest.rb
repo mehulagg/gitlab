@@ -3,7 +3,7 @@
 module Gitlab
   module SubscriptionPortal
     module Clients
-      module REST
+      module Rest
         extend ActiveSupport::Concern
 
         class_methods do

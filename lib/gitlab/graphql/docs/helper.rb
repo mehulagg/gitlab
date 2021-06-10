@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-return if Rails.env.production?
+require 'gitlab/utils/strong_memoize'
 
 module Gitlab
   module Graphql

@@ -28,7 +28,7 @@ module API
 
         desc 'Update existing merge request approval setting' do
           detail 'This feature is gated by the :group_merge_request_approval_settings_feature_flag'
-          success EE::API::Entities::GroupMergeRequestApprovalSetting
+          success ::API::Entities::GroupMergeRequestApprovalSetting
         end
         params do
           optional :allow_author_approval, type: Boolean, desc: 'Allow authors to self-approve merge requests'

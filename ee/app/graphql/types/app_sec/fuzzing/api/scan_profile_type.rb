@@ -3,7 +3,7 @@
 module Types
   module AppSec
     module Fuzzing
-      module Api
+      module API
         # rubocop: disable Graphql/AuthorizeTypes
         class ScanProfileType < BaseObject
           graphql_name 'ApiFuzzingScanProfile'

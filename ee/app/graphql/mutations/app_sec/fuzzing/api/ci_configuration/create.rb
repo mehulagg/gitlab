@@ -3,7 +3,7 @@
 module Mutations
   module AppSec
     module Fuzzing
-      module Api
+      module API
         module CiConfiguration
           class Create < BaseMutation
             include FindsProject
@@ -27,7 +27,7 @@ module Mutations
               required: false,
               description: 'CI variable containing the username for authenticating with the target API.'
 
-            argument :scan_mode, ::Types::AppSec::Fuzzing::Api::ScanModeEnum,
+            argument :scan_mode, ::Types::AppSec::Fuzzing::API::ScanModeEnum,
               required: true,
               description: 'The mode for API fuzzing scans.'
 
@@ -53,7 +53,7 @@ module Mutations
             def resolve(args)
               project = authorized_find!(args[:project_path])
 
-              create_service = ::AppSec::Fuzzing::Api::CiConfigurationCreateService.new(
+              create_service = ::AppSec::Fuzzing::API::CiConfigurationCreateService.new(
                 container: project, current_user: current_user, params: args
               )
 

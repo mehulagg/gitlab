@@ -2,7 +2,7 @@
 
 module AppSec
   module Fuzzing
-    module Api
+    module API
       class CiConfigurationCreateService < ::BaseContainerService
         API_SPECIFICATION_CI_VARIABLES = {
           har: 'FUZZAPI_HAR',

@@ -2,6 +2,7 @@
 
 module Gitlab
   module Graphql
-    StandardGraphqlError = Class.new(StandardError)
+    class StandardGraphqlError < StandardError
+    end
   end
 end
