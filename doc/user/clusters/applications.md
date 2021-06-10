@@ -55,7 +55,6 @@ Supported applications:
 - [JupyterHub](#install-jupyterhub-using-gitlab-cicd)
 - [Elastic Stack](#install-elastic-stack-using-gitlab-cicd)
 - [Crossplane](#install-crossplane-using-gitlab-cicd)
-- [Fluentd](#install-fluentd-using-gitlab-cicd)
 - [Knative](#install-knative-using-gitlab-cicd)
 - [PostHog](#install-posthog-using-gitlab-cicd)
 - [Prometheus](#install-prometheus-using-gitlab-cicd)
