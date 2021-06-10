@@ -4,6 +4,7 @@ import Clipboard from 'clipboard';
 import { getBaseURL, setUrlParams, redirectTo } from '~/lib/utils/url_utility';
 import { sprintf, s__, __ } from '~/locale';
 import { CODE_SNIPPET_SOURCE_URL_PARAM } from '~/pipeline_editor/components/code_snippet_alert/constants';
+import EditorLite from '~/vue_shared/components/editor_lite.vue';
 import { CONFIGURATION_SNIPPET_MODAL_ID } from './constants';
 
 export default {
@@ -12,6 +13,7 @@ export default {
     GlModal,
     GlSprintf,
     GlLink,
+    EditorLite,
   },
   i18n: {
     helpText: s__(
@@ -109,6 +111,11 @@ export default {
       </gl-sprintf>
     </p>
 
-    <pre><code data-testid="configuration-modal-yaml-snippet" v-text="yaml"></code></pre>
+    <editor-lite
+      data-testid="configuration-modal-yaml-snippet"
+      :value="yaml"
+      file-name="*.yml"
+      :editor-options="{ readOnly: true }"
+    />
   </gl-modal>
 </template>
