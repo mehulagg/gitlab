@@ -2,7 +2,7 @@
 import { GlButton } from '@gitlab/ui';
 import $ from 'jquery';
 import { mapActions } from 'vuex';
-import { deprecatedCreateFlash as Flash } from '~/flash';
+import createFlash from '~/flash';
 import { __, sprintf } from '../../../locale';
 import eventHub from '../../event_hub';
 
@@ -49,10 +49,13 @@ export default {
         fullPath: this.fullPath,
       })
         .catch(() => {
-          const flashMessage = __(
-            'Something went wrong trying to change the locked state of this %{issuableDisplayName}',
+          const message = sprintf(
+            __(
+              'Something went wrong trying to change the locked state of this %{issuableDisplayName}',
+            ),
+            { issuableDisplayName: this.issuableDisplayName },
           );
-          Flash(sprintf(flashMessage, { issuableDisplayName: this.issuableDisplayName }));
+          createFlash({ message });
         })
         .finally(() => {
           this.closeForm();

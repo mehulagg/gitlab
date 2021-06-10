@@ -1,8 +1,7 @@
 <script>
 import { GlButton, GlLoadingIcon } from '@gitlab/ui';
-
 import eventHub from '~/blob/components/eventhub';
-import { deprecatedCreateFlash as Flash } from '~/flash';
+import createFlash from '~/flash';
 import { redirectTo, joinPaths } from '~/lib/utils/url_utility';
 import { __, sprintf } from '~/locale';
 import {
@@ -135,7 +134,8 @@ export default {
       const defaultErrorMsg = this.newSnippet
         ? SNIPPET_CREATE_MUTATION_ERROR
         : SNIPPET_UPDATE_MUTATION_ERROR;
-      Flash(sprintf(defaultErrorMsg, { err }));
+      const message = sprintf(defaultErrorMsg, { err });
+      createFlash({ message });
       this.isUpdating = false;
     },
     getAttachedFiles() {

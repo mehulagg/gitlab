@@ -1,5 +1,6 @@
 import $ from 'jquery';
 import '~/behaviors/markdown/render_gfm';
+import createFlash from '~/flash';
 import { __ } from '~/locale';
 import {
   REPO_BLOB_LOAD_VIEWER_START,
@@ -8,7 +9,6 @@ import {
 } from '~/performance/constants';
 import { performanceMarkAndMeasure } from '~/performance/utils';
 import { fixTitle } from '~/tooltips';
-import { deprecatedCreateFlash as Flash } from '../../flash';
 import axios from '../../lib/utils/axios_utils';
 import { handleLocationHash } from '../../lib/utils/common_utils';
 import eventHub from '../../notes/event_hub';
@@ -38,7 +38,9 @@ export const handleBlobRichViewer = (viewer, type) => {
   loadRichBlobViewer(type)
     .then((module) => module?.default(viewer))
     .catch((error) => {
-      Flash(__('Error loading file viewer.'));
+      createFlash({
+        message: __('Error loading file viewer.'),
+      });
       throw error;
     });
 };
@@ -182,7 +184,11 @@ export default class BlobViewer {
           ],
         });
       })
-      .catch(() => new Flash(__('Error loading viewer')));
+      .catch(() =>
+        createFlash({
+          message: __('Error loading viewer'),
+        }),
+      );
   }
 
   static loadViewer(viewerParam) {
