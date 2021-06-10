@@ -10,10 +10,10 @@ GitLab supports infrastructure management tasks for generic infrastructure using
 
 ## Generic infrastructure management
 
-As Terraform is the __de facto__ standard for provisioning infrastructure, GitLab created various integration points to support Terraform-based workflows. Using GitLab for Terraform integrations you can:
+Using GitLab for Terraform integrations you can:
 
-- collaborate easily around infrastructure changes using the Terraform merge request widget
-- ignore the state file management aspects of Terraform using the GitLab Managed Terraform states
+- Coordinate infrastructure changes using the [Terraform merge request widget](../../infrastructure/mr_integration.md).
+- Ignore the state file management aspects of Terraform using the GitLab Managed Terraform states.
 
 ## Kubernetes integrations
 
@@ -73,7 +73,7 @@ NOTE:
 
 ### Adding and removing clusters
 
-The recommended way to connect a Kubernetes cluster with GitLab is using the GitLab Kubernetes Agent. You can read more on [how to set up a GitLab to Kubernetes connection using the GitLab Kubernetes Agent](../../clusters/agent/).
+The recommended way to connect a Kubernetes cluster with GitLab is using the [GitLab Kubernetes Agent](../../clusters/agent/).
 
 For connecting to a cluster with certificates, see [Adding and removing Kubernetes clusters](add_remove_clusters.md) on how
 to:

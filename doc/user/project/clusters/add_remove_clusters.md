@@ -345,7 +345,7 @@ kubectl create clusterrolebinding permissive-binding \
   --group=system:serviceaccounts
 ```
 
-## Configuring your Kubernetes cluster
+## Configure your Kubernetes cluster
 
 After [adding a Kubernetes cluster](add_remove_clusters.md) to GitLab, read this section that covers
 important considerations for configuring Kubernetes clusters with GitLab.
