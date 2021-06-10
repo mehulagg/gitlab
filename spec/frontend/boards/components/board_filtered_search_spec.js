@@ -95,7 +95,7 @@ describe('BoardFilteredSearch', () => {
         expect(urlUtility.updateHistory).toHaveBeenCalledWith({
           replace: true,
           title: '',
-          url: 'http://test.host/',
+          url: 'http://gitlab.test/',
         });
       });
     });
@@ -122,7 +122,7 @@ describe('BoardFilteredSearch', () => {
       expect(urlUtility.updateHistory).toHaveBeenCalledWith({
         title: '',
         replace: true,
-        url: 'http://test.host/?author_username=root&label_name[]=label&label_name[]=label2',
+        url: 'http://gitlab.test/?author_username=root&label_name[]=label&label_name[]=label2',
       });
     });
   });

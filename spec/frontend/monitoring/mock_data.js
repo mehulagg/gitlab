@@ -59,13 +59,13 @@ export const deploymentData = [
     iid: 3,
     sha: 'f5bcd1d9dac6fa4137e2510b9ccd134ef2e84187',
     commitUrl:
-      'http://test.host/frontend-fixtures/environments-project/-/commit/f5bcd1d9dac6fa4137e2510b9ccd134ef2e84187',
+      'http://gitlab.test/frontend-fixtures/environments-project/-/commit/f5bcd1d9dac6fa4137e2510b9ccd134ef2e84187',
     ref: {
       name: 'main',
     },
     created_at: '2019-07-16T10:14:25.589Z',
     tag: false,
-    tagUrl: 'http://test.host/frontend-fixtures/environments-project/tags/false',
+    tagUrl: 'http://gitlab.test/frontend-fixtures/environments-project/tags/false',
     'last?': true,
   },
   {
@@ -73,13 +73,13 @@ export const deploymentData = [
     iid: 2,
     sha: 'f5bcd1d9dac6fa4137e2510b9ccd134ef2e84187',
     commitUrl:
-      'http://test.host/frontend-fixtures/environments-project/-/commit/f5bcd1d9dac6fa4137e2510b9ccd134ef2e84187',
+      'http://gitlab.test/frontend-fixtures/environments-project/-/commit/f5bcd1d9dac6fa4137e2510b9ccd134ef2e84187',
     ref: {
       name: 'main',
     },
     created_at: '2019-07-16T11:14:25.589Z',
     tag: false,
-    tagUrl: 'http://test.host/frontend-fixtures/environments-project/tags/false',
+    tagUrl: 'http://gitlab.test/frontend-fixtures/environments-project/tags/false',
     'last?': false,
   },
   {
@@ -87,13 +87,13 @@ export const deploymentData = [
     iid: 1,
     sha: '6511e58faafaa7ad2228990ec57f19d66f7db7c2',
     commitUrl:
-      'http://test.host/frontend-fixtures/environments-project/-/commit/6511e58faafaa7ad2228990ec57f19d66f7db7c2',
+      'http://gitlab.test/frontend-fixtures/environments-project/-/commit/6511e58faafaa7ad2228990ec57f19d66f7db7c2',
     ref: {
       name: 'update2-readme',
     },
     created_at: '2019-07-16T12:14:25.589Z',
     tag: false,
-    tagUrl: 'http://test.host/frontend-fixtures/environments-project/tags/false',
+    tagUrl: 'http://gitlab.test/frontend-fixtures/environments-project/tags/false',
     'last?': false,
   },
 ];

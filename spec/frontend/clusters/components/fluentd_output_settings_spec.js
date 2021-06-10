@@ -70,7 +70,7 @@ describe('FluentdOutputSettings', () => {
     describe.each`
       desc                                     | changeFn                                                                      | key                   | value
       ${'when protocol dropdown is triggered'} | ${() => changeProtocol(1)}                                                    | ${'protocol'}         | ${'udp'}
-      ${'when host is changed'}                | ${() => changeHost('test-host')}                                              | ${'host'}             | ${'test-host'}
+      ${'when host is changed'}                | ${() => changeHost('gitlab.test')}                                            | ${'host'}             | ${'gitlab.test'}
       ${'when port is changed'}                | ${() => changePort(123)}                                                      | ${'port'}             | ${123}
       ${'when ciliumLogEnabled changes'}       | ${() => changeCheckbox(findCheckbox('Send Container Network Policies Logs'))} | ${'ciliumLogEnabled'} | ${!defaultSettings.ciliumLogEnabled}
     `('$desc', ({ changeFn, key, value }) => {

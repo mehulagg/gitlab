@@ -7,7 +7,7 @@ import { metrics1 as metrics } from './mock_data';
 describe('PrometheusMetrics', () => {
   const FIXTURE = 'services/prometheus/prometheus_service.html';
   const customMetricsEndpoint =
-    'http://test.host/frontend-fixtures/services-project/prometheus/metrics';
+    'http://gitlab.test/frontend-fixtures/services-project/prometheus/metrics';
   let mock;
 
   beforeEach(() => {

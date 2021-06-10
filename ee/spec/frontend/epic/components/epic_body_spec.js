@@ -28,7 +28,7 @@ describe('EpicBodyComponent', () => {
 
     expect(findIssuableBody().exists()).toBe(true);
     expect(findIssuableBody().props()).toMatchObject({
-      endpoint: 'http://test.host',
+      endpoint: 'http://gitlab.test',
       updateEndpoint: '/groups/frontend-fixtures-group/-/epics/1.json',
       canUpdate: true,
       canDestroy: true,

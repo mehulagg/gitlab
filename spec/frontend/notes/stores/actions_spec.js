@@ -519,7 +519,7 @@ describe('Actions Notes Store', () => {
             type: 'removeNote',
             payload: {
               id: 1,
-              path: 'http://test.host/note',
+              path: 'http://gitlab.test/note',
             },
           },
         ],

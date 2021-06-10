@@ -132,22 +132,22 @@ describe('search_params.js', () => {
   describe('fromSearchToUrl', () => {
     examples.forEach(({ name, urlQuery, search }) => {
       it(`Converts ${name} to a url`, () => {
-        expect(fromSearchToUrl(search)).toEqual(`http://test.host/${urlQuery}`);
+        expect(fromSearchToUrl(search)).toEqual(`http://gitlab.test/${urlQuery}`);
       });
     });
 
     it('When a filtered search parameter is already present, it gets removed', () => {
-      const initialUrl = `http://test.host/?status[]=ACTIVE`;
+      const initialUrl = `http://gitlab.test/?status[]=ACTIVE`;
       const search = { filters: [], sort: 'CREATED_DESC' };
-      const expectedUrl = `http://test.host/`;
+      const expectedUrl = `http://gitlab.test/`;
 
       expect(fromSearchToUrl(search, initialUrl)).toEqual(expectedUrl);
     });
 
     it('When unrelated search parameter is present, it does not get removed', () => {
-      const initialUrl = `http://test.host/?unrelated=UNRELATED&status[]=ACTIVE`;
+      const initialUrl = `http://gitlab.test/?unrelated=UNRELATED&status[]=ACTIVE`;
       const search = { filters: [], sort: 'CREATED_DESC' };
-      const expectedUrl = `http://test.host/?unrelated=UNRELATED`;
+      const expectedUrl = `http://gitlab.test/?unrelated=UNRELATED`;
 
       expect(fromSearchToUrl(search, initialUrl)).toEqual(expectedUrl);
     });

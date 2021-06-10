@@ -15,7 +15,7 @@ describe('Deploy keys key', () => {
     wrapper = mount(key, {
       propsData: {
         store,
-        endpoint: 'https://test.host/dummy/endpoint',
+        endpoint: 'https://gitlab.test/dummy/endpoint',
         ...propsData,
       },
     });

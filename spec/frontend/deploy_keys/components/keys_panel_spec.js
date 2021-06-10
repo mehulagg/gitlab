@@ -17,7 +17,7 @@ describe('Deploy keys panel', () => {
         keys: data.enabled_keys,
         showHelpBox: true,
         store,
-        endpoint: 'https://test.host/dummy/endpoint',
+        endpoint: 'https://gitlab.test/dummy/endpoint',
         ...props,
       },
     });

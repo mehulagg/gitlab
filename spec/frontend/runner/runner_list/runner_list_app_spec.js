@@ -157,7 +157,7 @@ describe('RunnerListApp', () => {
     it('updates the browser url', () => {
       expect(updateHistory).toHaveBeenLastCalledWith({
         title: expect.any(String),
-        url: 'http://test.host/admin/runners/?status[]=ACTIVE&sort=CREATED_ASC',
+        url: 'http://gitlab.test/admin/runners/?status[]=ACTIVE&sort=CREATED_ASC',
       });
     });
 
