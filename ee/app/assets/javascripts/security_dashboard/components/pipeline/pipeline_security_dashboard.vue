@@ -66,7 +66,7 @@ export default {
       };
     },
     scansWithErrors() {
-      const getScans = (reportSummary) => reportSummary?.scans || [];
+      const getScans = (reportSummary) => reportSummary?.scans?.nodes || [];
       const hasErrors = (scan) => Boolean(scan.errors?.length);
 
       return this.securityReportSummary
