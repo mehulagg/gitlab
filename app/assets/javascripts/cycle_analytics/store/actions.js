@@ -21,10 +21,7 @@ export const fetchValueStreamStages = ({ commit, state }) => {
   return getProjectValueStreamStages(fullPath, selectedValueStream.id)
     .then(({ data }) => commit(types.RECEIVE_VALUE_STREAM_STAGES_SUCCESS, data))
     .catch((error) => {
-      const {
-        response: { status },
-      } = error;
-      commit(types.RECEIVE_VALUE_STREAM_STAGES_ERROR, status);
+      commit(types.RECEIVE_VALUE_STREAM_STAGES_ERROR);
       throw error;
     });
 };
@@ -46,10 +43,8 @@ export const fetchValueStreams = ({ commit, dispatch, state }) => {
     .then(({ data }) => dispatch('receiveValueStreamsSuccess', data))
     .then(() => dispatch('setSelectedStage'))
     .catch((error) => {
-      const {
-        response: { status },
-      } = error;
-      commit(types.RECEIVE_VALUE_STREAMS_ERROR, status);
+      // TODO: should create flash?
+      commit(types.RECEIVE_VALUE_STREAMS_ERROR);
       throw error;
     });
 };
@@ -96,7 +91,8 @@ const refetchData = (dispatch, commit) => {
   commit(types.SET_LOADING, true);
   return dispatch('fetchValueStreams')
     .then(() => dispatch('fetchCycleAnalyticsData'))
-    .then(() => commit(types.SET_LOADING, false));
+    .then(() => commit(types.SET_LOADING, false))
+    .catch((error) => commit(types.SET_ERROR, error));
 };
 
 export const setDateRange = ({ dispatch, commit }, { startDate = DEFAULT_DAYS_TO_DISPLAY }) => {

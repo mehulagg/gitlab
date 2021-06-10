@@ -19,6 +19,12 @@ export default {
   [types.SET_DATE_RANGE](state, { startDate }) {
     state.startDate = startDate;
   },
+  [types.SET_ERROR](state) {
+    state.hasError = true;
+    state.isLoading = false;
+    state.isLoadingStage = false;
+    state.errorMessage = 'There was a problem preparing the data, please refresh the page.';
+  },
   [types.REQUEST_VALUE_STREAMS](state) {
     state.valueStreams = [];
   },
@@ -76,6 +82,6 @@ export default {
     state.isEmptyStage = true;
     state.selectedStageEvents = [];
     state.hasError = true;
-    state.selectedStageError = error;
+    state.errorMessage = error;
   },
 };

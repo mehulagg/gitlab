@@ -54,11 +54,12 @@ export default {
       'isEmptyStage',
       'selectedStage',
       'selectedStageEvents',
-      'selectedStageError',
+      'errorMessage',
       'stages',
       'summary',
       'startDate',
       'permissions',
+      'hasError',
     ]),
     ...mapGetters(['pathNavigationData']),
     displayStageEvents() {
@@ -66,7 +67,7 @@ export default {
       return selectedStageEvents.length && !isLoadingStage && !isEmptyStage;
     },
     displayNotEnoughData() {
-      return this.selectedStageReady && this.isEmptyStage;
+      return (this.selectedStageReady && this.isEmptyStage) || this.hasError;
     },
     displayNoAccess() {
       return this.selectedStageReady && !this.isUserAllowed(this.selectedStage.id);
@@ -74,13 +75,16 @@ export default {
     selectedStageReady() {
       return !this.isLoadingStage && this.selectedStage;
     },
+    metricsReady() {
+      return !this.hasError && this.summary.length;
+    },
     emptyStageTitle() {
-      return this.selectedStageError
-        ? this.selectedStageError
+      return this.errorMessage
+        ? this.errorMessage
         : __("We don't have enough data to show this stage.");
     },
     emptyStageText() {
-      return !this.selectedStageError ? this.selectedStage.emptyStageText : '';
+      return !this.errorMessage ? this.selectedStage.emptyStageText : '';
     },
   },
   methods: {
@@ -117,6 +121,7 @@ export default {
 <template>
   <div class="cycle-analytics">
     <path-navigation
+      v-if="!hasError"
       class="js-path-navigation gl-w-full gl-pb-2"
       :loading="isLoading"
       :stages="pathNavigationData"
@@ -131,7 +136,7 @@ export default {
         For now we can use the `withStageCounts` flag to ensure we don't display empty stage counts
         Related issue: https://gitlab.com/gitlab-org/gitlab/-/issues/326705
       -->
-      <div class="card" data-testid="vsa-stage-overview-metrics">
+      <div v-if="metricsReady" class="card" data-testid="vsa-stage-overview-metrics">
         <div class="card-header">{{ __('Recent Project Activity') }}</div>
         <div class="d-flex justify-content-between">
           <div v-for="item in summary" :key="item.title" class="gl-flex-grow-1 gl-text-center">
