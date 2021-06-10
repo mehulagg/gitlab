@@ -20,13 +20,13 @@ migrations automatically reschedule themselves for a later point in time.
 Background migrations should be used when migrating _data_ in tables that have 
 so many rows this process would exceed [the limits in our guidelines](database_review.md#timing-guidelines-for-migrations) when performed in a regular Rails migration.
 
-Background migrations _may_ also be used when executing numerous single-row queries
+- Background migrations should be used when migrating data in [high-traffic tables](migration_style_guide.md#high-traffic-tables)
+- Background migrations may also be used when executing numerous single-row queries
 for every item on a large dataset. Typically, for single-record patterns, runtime is
 largely dependent on the size of the dataset, hence it should be split accordingly
 and put into background migrations.
+- Background migrations should not be used perform schema migrations
 
-Background migrations _may not_ be used to perform schema migrations, they
-should only be used for data migrations.
 
 Some examples where background migrations can be useful:
 
