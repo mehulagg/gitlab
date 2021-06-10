@@ -39,6 +39,7 @@ module QA
           verify_repository_import
           verify_labels_import
           verify_issues_import
+          verify_milestones_import
           verify_merge_requests_import
         end
       end
@@ -80,6 +81,13 @@ module QA
           labels: ['custom new label', 'good first issue', 'help wanted'],
           user_notes_count: 1
         )
+      end
+
+      def verify_milestones_import
+        milestones = imported_project.milestones
+
+        expect(milestones.length).to eq(1)
+        expect(milestones.first).to include(title: 'v1.0', description: nil, state: 'active')
       end
 
       def verify_merge_requests_import
