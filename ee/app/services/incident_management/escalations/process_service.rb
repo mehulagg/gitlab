@@ -15,11 +15,10 @@ module IncidentManagement
         return unless ::Gitlab::IncidentManagement.escalation_policies_available?(project)
 
         current_elapsed_time = process_time - escalation.created_at
-        notified_elapsed_time = escalation.last_notified_at - escalation.created_at
 
         escalation_rules
           .for_status_above(alert.status)
-          .for_elapsed_time_between(notified_elapsed_time, current_elapsed_time)
+          .for_elapsed_time_between(escalation.time_since_last_notify, current_elapsed_time)
           .each { |rule| escalate_rule(rule) }
 
         mark_escalation_as_updated!

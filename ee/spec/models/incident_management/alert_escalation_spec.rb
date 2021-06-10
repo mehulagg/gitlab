@@ -14,13 +14,19 @@ RSpec.describe IncidentManagement::AlertEscalation do
 
   it { is_expected.to delegate_method(:project).to(:policy) }
 
-  describe '#last_notified_at' do
-    subject { described_class.new.last_notified_at }
+  describe '#time_since_last_notify' do
+    let(:escalation) { build(:incident_management_alert_escalation) }
 
-    around do |example|
-      freeze_time { example.run }
+    subject { escalation.time_since_last_notify }
+
+    it { is_expected.to eq(0) }
+
+    context 'when last_notified_at is set' do
+      let(:created_at) { 1.hour.ago }
+      let(:last_notified_at) { Time.current }
+      let(:escalation) { create(:incident_management_alert_escalation, created_at: created_at, last_notified_at: last_notified_at) }
+
+      it { is_expected.to eql(last_notified_at - created_at) }
     end
-
-    it { is_expected.to be_like_time(Time.current) }
   end
 end
