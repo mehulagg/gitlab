@@ -59,7 +59,7 @@ describe('~/nav/components/responsive_app.vue', () => {
       ${'<div class="menu-expanded"></div>'}                            | ${false}
       ${'<div></div><div class="header-content menu-expanded"></div>}'} | ${true}
     `(
-      'with responsive toggle event and html iis $bodyHtml, responsive open = $expectation',
+      'with responsive toggle event and html set to $bodyHtml, responsive open = $expectation',
       ({ bodyHtml, expectation }) => {
         document.body.innerHTML = bodyHtml;
 
