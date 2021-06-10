@@ -229,7 +229,10 @@ export default {
       return !this.renderFileTree && !this.isParallelView && !this.isFluidLayout;
     },
     isDiffHead() {
-      return parseBoolean(getParameterByName('diff_head'));
+      return (
+        window.gon?.features?.defaultMergeRefForDiffs ||
+        parseBoolean(getParameterByName('diff_head'))
+      );
     },
     showFileByFileNavigation() {
       return this.diffFiles.length > 1 && this.viewDiffsFileByFile;
