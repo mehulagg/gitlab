@@ -386,11 +386,13 @@ Support for custom certificate authorities was introduced in the following versi
 
 #### Make GitLab container scanning analyzer images available inside your Docker registry
 
-For container scanning, import the following default images from `registry.gitlab.com` into your
+For container scanning, import the following images from `registry.gitlab.com` into your
 [local Docker container registry](../../packages/container_registry/index.md):
 
 ```plaintext
-registry.gitlab.com/security-products/container-scanning
+registry.gitlab.com/security-products/container-scanning:4
+registry.gitlab.com/security-products/container-scanning/grype:4
+registry.gitlab.com/security-products/container-scanning/trivy:4
 ```
 
 The process for importing Docker images into a local offline Docker registry depends on
@@ -431,13 +433,13 @@ following `.gitlab-yml.ci` example as a template.
 ```yaml
 variables:
   SOURCE_IMAGE: registry.gitlab.com/security-products/container-scanning:4
-  TARGET_IMAGE: $CI_REGISTRY/$CI_PROJECT_PATH/gitlab-container-scanning
+  TARGET_IMAGE: $CI_REGISTRY/namespace/gitlab-container-scanning
 
 image: docker:stable
 
 update-scanner-image:
   services:
-    - docker:19-dind
+    - docker:dind
   script:
     - docker pull $SOURCE_IMAGE
     - docker tag $SOURCE_IMAGE $TARGET_IMAGE
