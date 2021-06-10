@@ -155,7 +155,12 @@ module Projects
         branch_name: @project.default_branch_or_main,
         commit_message: 'Initial commit',
         file_path: 'README.md',
-        file_content: template('readme_basic.md')
+        file_content: experiment(:new_project_readme_content, namespace: @project.namespace) do |e|
+          e.control { template('readme_basic.md') }
+          e.try(:advanced) { template('readme_advanced.md') }
+          e.record!
+          e.run
+        end
       }
 
       Files::CreateService.new(@project, current_user, commit_attrs).execute
