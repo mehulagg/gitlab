@@ -48,7 +48,6 @@ export default {
     return {
       jiraLogo,
       issues: [],
-      issuesListLoading: false,
       issuesListLoadFailed: false,
       totalIssues: 0,
       currentState: this.initialState,
@@ -63,6 +62,9 @@ export default {
     };
   },
   computed: {
+    issuesListLoading() {
+      return this.$apollo.queries.jiraIssues.loading;
+    },
     showPaginationControls() {
       return Boolean(
         !this.issuesListLoading &&
@@ -76,54 +78,48 @@ export default {
     },
     urlParams() {
       return {
-        state: this.currentState,
-        page: this.currentPage,
-        sort: this.sortedBy,
         'labels[]': this.filterParams.labels,
+        page: this.currentPage,
         search: this.filterParams.search,
+        sort: this.sortedBy,
+        state: this.currentState,
+      };
+    },
+    jiraIssuesQueryVars() {
+      return {
+        issuesFetchPath: this.issuesFetchPath,
+        labels: this.filterParams.labels,
+        page: this.currentPage,
+        search: this.filterParams.search,
+        sort: this.sortedBy,
+        state: this.currentState,
       };
     },
   },
-  mounted() {
-    this.fetchIssues();
-  },
-  methods: {
-    async fetchIssues() {
-      this.issuesListLoading = true;
-      this.issuesListLoadFailed = false;
-
-      try {
-        const { data } = await this.$apollo.query({
-          query: getJiraIssuesQuery,
-          variables: {
-            issuesFetchPath: this.issuesFetchPath,
-            search: this.filterParams.search,
-            state: this.currentState,
-            sort: this.sortedBy,
-            labels: this.filterParams.labels,
-            page: this.currentPage,
-          },
-        });
-
+  apollo: {
+    jiraIssues: {
+      query: getJiraIssuesQuery,
+      variables() {
+        return this.jiraIssuesQueryVars;
+      },
+      result({ data }) {
         const { pageInfo, nodes, errors } = data?.jiraIssues ?? {};
-        if (errors?.length > 0) throw new Error(errors[0]);
+        if (errors?.length > 0) {
+          this.onJiraIssuesQueryError(errors[0]);
+        }
 
+        this.issues = nodes;
         this.currentPage = pageInfo.page;
         this.totalIssues = pageInfo.total;
-        this.issues = nodes;
-        this.issuesCount[this.currentState] = this.issues.length;
-      } catch (error) {
-        this.issuesListLoadFailed = true;
-
-        createFlash({
-          message: error.message,
-          captureError: true,
-          error,
-        });
-      }
-
-      this.issuesListLoading = false;
+        this.issuesCount[this.currentState] = nodes.length;
+        this.issuesListLoadFailed = false;
+      },
+      error(error) {
+        this.onJiraIssuesQueryError(error);
+      },
     },
+  },
+  methods: {
     getFilteredSearchValue() {
       return [
         {
@@ -136,7 +132,6 @@ export default {
     },
     fetchIssuesBy(propsName, propValue) {
       this[propsName] = propValue;
-      this.fetchIssues();
     },
     handleFilterIssues(filters = []) {
       const filterParams = {};
@@ -153,7 +148,15 @@ export default {
       }
 
       this.filterParams = filterParams;
-      this.fetchIssues();
+    },
+    onJiraIssuesQueryError(error) {
+      this.issuesListLoadFailed = true;
+
+      createFlash({
+        message: error.message,
+        captureError: true,
+        error,
+      });
     },
   },
 };
@@ -180,9 +183,9 @@ export default {
     :url-params="urlParams"
     label-filter-param="labels"
     recent-searches-storage-key="jira_issues"
-    @click-tab="fetchIssuesBy('currentState', $event)"
-    @page-change="fetchIssuesBy('currentPage', $event)"
-    @sort="fetchIssuesBy('sortedBy', $event)"
+    @click-tab="currentState = $event"
+    @page-change="currentPage = $event"
+    @sort="sortedBy = $event"
     @filter="handleFilterIssues"
   >
     <template #nav-actions>

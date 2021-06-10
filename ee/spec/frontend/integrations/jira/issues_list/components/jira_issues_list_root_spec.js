@@ -27,7 +27,7 @@ jest.mock('~/issuable_list/constants', () => ({
 const resolvedValue = {
   headers: {
     'x-page': 1,
-    'x-total': 3,
+    'x-total': mockJiraIssues.length,
   },
   data: mockJiraIssues,
 };
@@ -164,6 +164,7 @@ describe('JiraIssuesListRoot', () => {
   });
 
   it('renders issuable-list component with correct props', async () => {
+    jest.spyOn(axios, 'get').mockResolvedValue(resolvedValue);
     createComponent({ initialFilterParams: { search: 'foo' } });
 
     await waitForPromises();
@@ -175,12 +176,13 @@ describe('JiraIssuesListRoot', () => {
 
   describe('issuable-list events', () => {
     beforeEach(async () => {
-      jest.spyOn(axios, 'get');
       createComponent();
       await waitForPromises();
     });
 
     it('"click-tab" event executes GET request correctly', async () => {
+      jest.spyOn(axios, 'get');
+
       const issuableList = findIssuableList();
 
       issuableList.vm.$emit('click-tab', 'closed');
@@ -203,6 +205,7 @@ describe('JiraIssuesListRoot', () => {
     it('"page-change" event executes GET request correctly', async () => {
       const mockPage = 2;
       const issuableList = findIssuableList();
+      jest.spyOn(axios, 'get').mockResolvedValue(resolvedValue);
 
       issuableList.vm.$emit('page-change', mockPage);
       await waitForPromises();
@@ -218,6 +221,8 @@ describe('JiraIssuesListRoot', () => {
           with_labels_details: true,
         },
       });
+
+      await wrapper.vm.$nextTick();
       expect(issuableList.props()).toMatchObject({
         currentPage: mockPage,
         previousPage: mockPage - 1,

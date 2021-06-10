@@ -11,7 +11,7 @@ const resolvers = {
   },
 };
 
-const defaultClient = createDefaultClient(resolvers);
+const defaultClient = createDefaultClient(resolvers, { assumeImmutableResults: true });
 
 export default new VueApollo({
   defaultClient,
