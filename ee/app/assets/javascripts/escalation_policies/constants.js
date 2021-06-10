@@ -20,3 +20,4 @@ export const DEFAULT_ESCALATION_RULE = {
 
 export const addEscalationPolicyModalId = 'addEscalationPolicyModal';
 export const editEscalationPolicyModalId = 'editEscalationPolicyModal';
+export const deleteEscalationPolicyModalId = 'deleteEscalationPolicyModal';

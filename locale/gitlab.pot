@@ -13066,6 +13066,9 @@ msgstr ""
 msgid "EscalationPolicies|Add policy"
 msgstr ""
 
+msgid "EscalationPolicies|Are you sure you want to delete the \"%{deleteEscalationPolicy}\"? This action cannot be undone."
+msgstr ""
+
 msgid "EscalationPolicies|Create an escalation policy in GitLab"
 msgstr ""
 
@@ -13106,6 +13109,9 @@ msgid "EscalationPolicies|Set up escalation policies to define who is paged, and
 msgstr ""
 
 msgid "EscalationPolicies|THEN %{doAction} %{schedule}"
+msgstr ""
+
+msgid "EscalationPolicies|The escalation policy could not be deleted. Please try again."
 msgstr ""
 
 msgid "EscalationPolicies|mins"
