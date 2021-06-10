@@ -5,8 +5,15 @@ require 'spec_helper'
 RSpec.describe 'CiCdSettingsUpdate' do
   include GraphqlHelpers
 
-  let_it_be(:project) { create(:project, keep_latest_artifact: true) }
-  let(:variables) { { full_path: project.full_path, keep_latest_artifact: false } }
+  let_it_be(:project) { create(:project, keep_latest_artifact: true, ci_job_token_scope_enabled: true) }
+  let(:variables) do
+    {
+      full_path: project.full_path,
+      keep_latest_artifact: false,
+      job_token_scope_enabled: false
+    }
+  end
+
   let(:mutation) { graphql_mutation(:ci_cd_settings_update, variables) }
 
   context 'when unauthorized' do
@@ -43,6 +50,13 @@ RSpec.describe 'CiCdSettingsUpdate' do
 
       expect(response).to have_gitlab_http_status(:success)
       expect(project.keep_latest_artifact).to eq(false)
+    end
+
+    it 'updates job_token_scope_enabled' do
+      expect do
+        post_graphql_mutation(mutation, current_user: user)
+        expect(response).to have_gitlab_http_status(:success)
+      end.to change { project.ci_job_token_scope_enabled }.from(true).to(false)
     end
 
     context 'when bad arguments are provided' do

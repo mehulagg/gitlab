@@ -17,6 +17,10 @@ module Mutations
         required: false,
         description: 'Indicates if the latest artifact should be kept for this project.'
 
+      argument :job_token_scope_enabled, GraphQL::BOOLEAN_TYPE,
+        required: false,
+        description: 'Indicates if a job token generated in this project should have a limited scope of action.'
+
       field :ci_cd_settings,
         Types::Ci::CiCdSettingType,
         null: false,

@@ -16,6 +16,9 @@ module Types
       field :keep_latest_artifact, GraphQL::BOOLEAN_TYPE, null: true,
         description: 'Whether to keep the latest builds artifacts.',
         method: :keep_latest_artifacts_available?
+      field :job_token_scope_enabled, GraphQL::BOOLEAN_TYPE, null: true,
+        description: 'Whether the CI job token generated in this project has a restricted scope of action.',
+        method: :job_token_scope_enabled?
       field :project, Types::ProjectType, null: true,
         description: 'Project the CI/CD settings belong to.'
     end
