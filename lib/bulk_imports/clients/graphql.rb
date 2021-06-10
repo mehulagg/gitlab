@@ -32,6 +32,17 @@ module BulkImports
           @url,
           options(http: HTTP)
         )
+
+        validate_instance_version!
+      end
+
+      def validate_instance_version!
+        response = get(:version).parsed_response
+        version = Gitlab::VersionInfo.parse(response['version'])
+
+        if version.major < MINIMUM_COMPATIBLE_MAJOR_VERSION
+          raise(ConnectionError, "Unsupported Gitlab version #{version}")
+        end
       end
 
       def options(extra = {})

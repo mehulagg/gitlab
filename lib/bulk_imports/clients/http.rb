@@ -6,6 +6,7 @@ module BulkImports
       API_VERSION = 'v4'
       DEFAULT_PAGE = 1
       DEFAULT_PER_PAGE = 30
+      MINIMUM_COMPATIBLE_MAJOR_VERSION = 14
 
       ConnectionError = Class.new(StandardError)
 
@@ -15,6 +16,17 @@ module BulkImports
         @page = page
         @per_page = per_page
         @api_version = api_version
+
+        validate_instance_version!
+      end
+
+      def validate_instance_version!
+        response = get(:version).parsed_response
+        version = Gitlab::VersionInfo.parse(response['version'])
+
+        if version.major < MINIMUM_COMPATIBLE_MAJOR_VERSION
+          raise(ConnectionError, "Unsupported Gitlab version #{version}")
+        end
       end
 
       def get(resource, query = {})
