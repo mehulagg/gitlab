@@ -6,6 +6,10 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 
 # Infrastructure management
 
+> - Kubernetes clusters were [introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/issues/35954) in GitLab 10.1 for projects.
+> - Kubernetes clusters for [groups](../../group/clusters/index.md) were [introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/issues/34758) in GitLab 11.6.
+> - Kubernetes clusters for [instances](../../instance/clusters/index.md) were [introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/issues/39840) in GitLab 11.11.
+
 GitLab supports infrastructure management tasks for generic infrastructure using its Terraform integrations, and for Kubernetes using its extensive integration options.
 
 ## Generic infrastructure management (FREE)
