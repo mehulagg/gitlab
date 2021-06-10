@@ -414,20 +414,26 @@ export function getWebSocketUrl(path) {
  *
  * @param {String} query from "document.location.search"
  * @param {Object} options
- * @param {Boolean} options.gatherArrays - gather array values into an Array
+ * @param {Boolean?} options.gatherArrays - gather array values into an Array
+ * @param {Boolean?} options.replaceSpaces - replaces plus symbols with spaces, set to true where possible
  * @returns {Object}
  *
  * ex: "?one=1&two=2" into {one: 1, two: 2}
  */
 export function queryToObject(query, options = {}) {
-  const { gatherArrays = false } = options;
+  const { gatherArrays = false, replacePlusWithSpaces = false } = options;
   const removeQuestionMarkFromQuery = String(query).startsWith('?') ? query.slice(1) : query;
   return removeQuestionMarkFromQuery.split('&').reduce((accumulator, curr) => {
     const [key, value] = curr.split('=');
     if (value === undefined) {
       return accumulator;
     }
-    const decodedValue = decodeURIComponent(value);
+
+    let decodedValue = value;
+    if (replacePlusWithSpaces) {
+      decodedValue = value.replace(/\+/g, ' ');
+    }
+    decodedValue = decodeURIComponent(decodedValue);
 
     if (gatherArrays && key.endsWith('[]')) {
       const decodedKey = decodeURIComponent(key.slice(0, -2));
