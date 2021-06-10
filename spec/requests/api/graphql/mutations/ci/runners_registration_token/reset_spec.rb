@@ -6,10 +6,7 @@ RSpec.describe 'RunnersRegistrationTokenReset' do
   include GraphqlHelpers
 
   let(:mutation) { graphql_mutation(:runners_registration_token_reset, input) }
-
-  def mutation_response
-    graphql_mutation_response(:runners_registration_token_reset)
-  end
+  let(:mutation_response) { graphql_mutation_response(:runners_registration_token_reset) }
 
   subject { post_graphql_mutation(mutation, current_user: user) }
 
@@ -19,6 +16,7 @@ RSpec.describe 'RunnersRegistrationTokenReset' do
 
       expect(graphql_errors).not_to be_empty
       expect(graphql_errors).to include(a_hash_including('message' => "The resource that you are attempting to access does not exist or you don't have permission to perform this action"))
+      expect(mutation_response).to be_nil
     end
   end
 

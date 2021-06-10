@@ -6,7 +6,7 @@ module Mutations
       class Reset < BaseMutation
         graphql_name 'RunnersRegistrationTokenReset'
 
-        authorize :reset_runners_registration_token
+        authorize :update_runners_registration_token
 
         argument :full_path, GraphQL::ID_TYPE,
           required: false,
@@ -18,22 +18,8 @@ module Mutations
           description: 'The runner token after mutation.'
 
         def resolve(**args)
-          full_path = args[:full_path]
-          scope = full_path.blank? ? :global : authorized_find!(full_path: full_path)
-
-          if scope == :global
-            authorize!(scope)
-
-            ApplicationSetting.current.reset_runners_registration_token!
-
-            token = ApplicationSetting.current.runners_registration_token
-          else
-            scope.reset_runners_token!
-            token = scope.runners_token
-          end
-
           {
-            token: token,
+            token: reset_token(args[:full_path]),
             errors: []
           }
         end
@@ -44,6 +30,19 @@ module Mutations
           return unless full_path
 
           GitlabSchema.object_from_id(full_path, expected_type: [::Project, ::Group])
+        end
+
+        def reset_token(full_path)
+          if full_path.blank?
+            authorize!(:global)
+
+            ApplicationSetting.current.reset_runners_registration_token!
+            ApplicationSetting.current_without_cache.runners_registration_token
+          else
+            project_or_group = authorized_find!(full_path: full_path)
+            project_or_group.reset_runners_token!
+            project_or_group.runners_token
+          end
         end
       end
     end
