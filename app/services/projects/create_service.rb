@@ -11,6 +11,7 @@ module Projects
       @initialize_with_readme = Gitlab::Utils.to_boolean(@params.delete(:initialize_with_readme))
       @import_data = @params.delete(:import_data)
       @relations_block = @params.delete(:relations_block)
+      @default_branch = @params.delete(:default_branch)
 
       build_topics
     end
@@ -151,7 +152,7 @@ module Projects
 
     def create_readme
       commit_attrs = {
-        branch_name: @project.default_branch_or_main,
+        branch_name: @default_branch.presence || @project.default_branch_or_main,
         commit_message: 'Initial commit',
         file_path: 'README.md',
         file_content: "# #{@project.name}\n\n#{@project.description}"

@@ -1186,6 +1186,29 @@ RSpec.describe API::Projects do
       expect(response).to have_gitlab_http_status(:created)
     end
 
+    context 'Default branch name' do
+      let(:request) { post api('/projects', user), params: { path: 'foo_project', initialize_with_readme: true, default_branch: default_branch } }
+      let(:default_branch) { 'main' }
+
+      it 'creates project with provided default branch name' do
+        expect { request }.to change { Project.count }.by(1)
+        expect(response).to have_gitlab_http_status(:created)
+
+        expect(Project.last.default_branch).to eq(default_branch)
+      end
+
+      context 'when branch name is empty' do
+        let(:default_branch) { '' }
+
+        it 'creates project with a default project branch name' do
+          expect { request }.to change { Project.count }.by(1)
+          expect(response).to have_gitlab_http_status(:created)
+
+          expect(Project.last.default_branch).to eq('master')
+        end
+      end
+    end
+
     context 'when a visibility level is restricted' do
       let(:project_param) { attributes_for(:project, visibility: 'public') }
 
