@@ -612,8 +612,8 @@ Now navigate to your project's **Packages & Registries** page and view the publi
 ### Publishing a package with the same name or version
 
 When you publish a package with the same name and version as an existing package,
-the existing package is overwritten. However, you can still access and view the 
-files associated with the older version using the UI or API.
+the new package files are added to the existing package. You can still access and view the 
+older files associated with the existing package using the UI or API.
 
 To delete these older package versions, consider using the Packages API or the UI.
 
