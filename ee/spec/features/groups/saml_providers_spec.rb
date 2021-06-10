@@ -64,7 +64,7 @@ RSpec.describe 'SAML provider settings' do
         expect(find_field('Enforce SSO-only authentication for web activity for this group')).to be_checked
       end
 
-      it 'displays warning if unchecked', :js do
+      it 'displays warning if unchecked' do
         visit group_saml_providers_path(group)
 
         uncheck 'Enforce SSO-only authentication for web activity for this group'
@@ -93,7 +93,7 @@ RSpec.describe 'SAML provider settings' do
     context 'with existing SAML provider' do
       let!(:saml_provider) { create(:saml_provider, group: group, prohibited_outer_forks: false, enforced_sso: true) }
 
-      it 'allows provider to be disabled', :js do
+      it 'allows provider to be disabled' do
         visit group_saml_providers_path(group)
 
         uncheck 'Enable SAML authentication for this group'
@@ -110,7 +110,7 @@ RSpec.describe 'SAML provider settings' do
         expect(login_url).to end_with "?token=#{group.reload.saml_discovery_token}"
       end
 
-      it 'updates the enforced sso setting', :js do
+      it 'updates the enforced sso setting' do
         visit group_saml_providers_path(group)
 
         uncheck 'Enforce SSO-only authentication for web activity for this group'
@@ -119,7 +119,7 @@ RSpec.describe 'SAML provider settings' do
         expect(page).to have_content 'Warning - Enabling SSO enforcement can reduce security risks.'
       end
 
-      context 'enforced_group_managed_accounts enabled', :js do
+      context 'enforced_group_managed_accounts enabled' do
         before do
           create(:group_saml_identity, saml_provider: saml_provider, user: user)
           stub_feature_flags(group_managed_accounts: true)
