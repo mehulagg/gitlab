@@ -22828,6 +22828,8 @@ CREATE UNIQUE INDEX index_ci_pending_builds_on_build_id ON ci_pending_builds USI
 
 CREATE INDEX index_ci_pending_builds_on_project_id ON ci_pending_builds USING btree (project_id);
 
+CREATE INDEX index_ci_pending_builds_on_protected ON ci_pending_builds USING btree (protected);
+
 CREATE INDEX index_ci_pipeline_artifacts_failed_verification ON ci_pipeline_artifacts USING btree (verification_retry_at NULLS FIRST) WHERE (verification_state = 3);
 
 CREATE INDEX index_ci_pipeline_artifacts_needs_verification ON ci_pipeline_artifacts USING btree (verification_state) WHERE ((verification_state = 0) OR (verification_state = 3));
