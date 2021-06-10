@@ -6,7 +6,6 @@ mutation createIteration($input: iterationCreateInput!) {
       descriptionHtml
       startDate
       dueDate
-      webUrl
     }
     errors
   }

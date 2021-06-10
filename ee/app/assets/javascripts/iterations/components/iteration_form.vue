@@ -2,7 +2,7 @@
 import { GlButton, GlForm, GlFormInput } from '@gitlab/ui';
 import initDatePicker from '~/behaviors/date_picker';
 import createFlash from '~/flash';
-import { convertToGraphQLId } from '~/graphql_shared/utils';
+import { convertToGraphQLId, getIdFromGraphQLId } from '~/graphql_shared/utils';
 import { __ } from '~/locale';
 import MarkdownField from '~/vue_shared/components/markdown/field.vue';
 import readIteration from '../queries/iteration.query.graphql';
@@ -31,7 +31,10 @@ export default {
         };
       },
       /* eslint-enable @gitlab/require-i18n-strings */
-      result({ data }) {
+      result({ data, error }) {
+        if (error) {
+          throw new Error(error);
+        }
         const iteration = data.group.iterations?.nodes[0] || {};
 
         this.title = iteration.title;
@@ -64,7 +67,7 @@ export default {
       return this.$router.currentRoute.params.iterationId;
     },
     isEditing() {
-      return this.iterationId;
+      return Boolean(this.iterationId);
     },
     cadencesList() {
       return {
@@ -100,7 +103,8 @@ export default {
           },
         })
         .then(({ data }) => {
-          const { errors } = data.iterationCreate;
+          const { iteration, errors } = data.iterationCreate;
+
           if (errors.length > 0) {
             this.loading = false;
             createFlash({
@@ -113,7 +117,7 @@ export default {
             name: 'iteration',
             params: {
               cadenceId: this.cadenceId,
-              iterationId: this.iterationId,
+              iterationId: getIdFromGraphQLId(iteration.id),
             },
           });
         })
