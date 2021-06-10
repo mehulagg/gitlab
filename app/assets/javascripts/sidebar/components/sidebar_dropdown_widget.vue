@@ -73,7 +73,7 @@ export default {
       type: String,
       required: true,
       validator(value) {
-        return value === IssuableType.Issue;
+        return [IssuableType.Issue, IssuableType.MergeRequest].includes(value);
       },
     },
   },
@@ -170,6 +170,11 @@ export default {
     attributeTypeTitle() {
       return this.$options.i18n[this.issuableAttribute];
     },
+    attributeTypeIcon() {
+      return this.issuableAttribute === IssuableAttributeType.Milestone
+        ? 'clock'
+        : this.issuableAttribute;
+    },
     i18n() {
       return {
         noAttribute: sprintf(s__('DropdownWidget|No %{issuableAttribute}'), {
@@ -222,7 +227,8 @@ export default {
           variables: {
             fullPath: this.workspacePath,
             attributeId:
-              this.issuableAttribute === IssuableAttributeType.Milestone
+              this.issuableAttribute === IssuableAttributeType.Milestone &&
+              this.issuableType === IssuableType.Issue
                 ? getIdFromGraphQLId(attributeId)
                 : attributeId,
             iid: this.iid,
@@ -282,7 +288,7 @@ export default {
   >
     <template #collapsed>
       <div v-if="isClassicSidebar" v-gl-tooltip class="sidebar-collapsed-icon">
-        <gl-icon :size="16" :aria-label="attributeTypeTitle" :name="issuableAttribute" />
+        <gl-icon :size="16" :aria-label="attributeTypeTitle" :name="attributeTypeIcon" />
         <span class="collapse-truncated-title">{{ attributeTitle }}</span>
       </div>
       <div

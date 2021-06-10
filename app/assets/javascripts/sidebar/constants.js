@@ -9,6 +9,7 @@ import issueConfidentialQuery from '~/sidebar/queries/issue_confidential.query.g
 import issueDueDateQuery from '~/sidebar/queries/issue_due_date.query.graphql';
 import issueReferenceQuery from '~/sidebar/queries/issue_reference.query.graphql';
 import issueSubscribedQuery from '~/sidebar/queries/issue_subscribed.query.graphql';
+import mergeRequestMilestone from '~/sidebar/queries/merge_request_milestone.query.graphql';
 import mergeRequestReferenceQuery from '~/sidebar/queries/merge_request_reference.query.graphql';
 import mergeRequestSubscribed from '~/sidebar/queries/merge_request_subscribed.query.graphql';
 import updateEpicConfidentialMutation from '~/sidebar/queries/update_epic_confidential.mutation.graphql';
@@ -18,6 +19,7 @@ import updateEpicSubscriptionMutation from '~/sidebar/queries/update_epic_subscr
 import updateIssueConfidentialMutation from '~/sidebar/queries/update_issue_confidential.mutation.graphql';
 import updateIssueDueDateMutation from '~/sidebar/queries/update_issue_due_date.mutation.graphql';
 import updateIssueSubscriptionMutation from '~/sidebar/queries/update_issue_subscription.mutation.graphql';
+import mergeRequestMilestoneMutation from '~/sidebar/queries/update_merge_request_milestone.mutation.graphql';
 import updateMergeRequestSubscriptionMutation from '~/sidebar/queries/update_merge_request_subscription.mutation.graphql';
 import updateAlertAssigneesMutation from '~/vue_shared/alert_details/graphql/mutations/alert_set_assignees.mutation.graphql';
 import getAlertAssignees from '~/vue_shared/components/sidebar/queries/get_alert_assignees.query.graphql';
@@ -154,10 +156,17 @@ export const issuableMilestoneQueries = {
     query: projectIssueMilestoneQuery,
     mutation: projectIssueMilestoneMutation,
   },
+  [IssuableType.MergeRequest]: {
+    query: mergeRequestMilestone,
+    mutation: mergeRequestMilestoneMutation,
+  },
 };
 
 export const milestonesQueries = {
   [IssuableType.Issue]: {
+    query: projectMilestonesQuery,
+  },
+  [IssuableType.MergeRequest]: {
     query: projectMilestonesQuery,
   },
 };
