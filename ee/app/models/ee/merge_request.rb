@@ -167,9 +167,9 @@ module EE
 
       return false if has_approved_license_check?
 
-      report_diff = compare_license_scanning_reports(nil)
+      report_diff = compare_license_scanning_reports
 
-      return false unless report_diff.dig(:data, 'new_licenses')
+      return false unless licenses = report_diff.dig(:data, 'new_licenses')
 
       report_diff.dig(:data, 'new_licenses').any? { |l| l.dig('classification', 'approval_status') == 'denied' }
     end
