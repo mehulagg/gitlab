@@ -197,12 +197,11 @@ RSpec.describe MergeRequest do
   end
 
   describe '#has_denied_policies?' do
-    let(:report_diff) { { status: :parsed, data: { "new_licenses" => new_licenses } } }
-    let(:new_licenses) { [] }
-    let(:license1) { { 'name' => 'License 1', 'classification' => { 'approval_status' => 'unclassified' } } }
-    let(:license2) { { 'name' => 'License 2', 'classification' => { 'approval_status' => 'allowed' } } }
-    let(:license3) { { 'name' => 'License 2', 'classification' => { 'approval_status' => 'denied' } } }
-    let(:feature_available) { false }
+    let(:report_diff) { { data: { "new_licenses" => licenses } } }
+    let(:licenses) { [] }
+    let(:unclassified_license) { { 'name' => 'License 1', 'classification' => { 'approval_status' => 'unclassified' } } }
+    let(:allowed_license) { { 'name' => 'License 2', 'classification' => { 'approval_status' => 'allowed' } } }
+    let(:denied_license) { { 'name' => 'License 2', 'classification' => { 'approval_status' => 'denied' } } }
     let(:has_license_scanning_reports) { false }
     let(:has_approved_license_check) { true }
 
@@ -212,66 +211,62 @@ RSpec.describe MergeRequest do
       allow(project).to receive(:feature_available?).and_return(feature_available)
       allow(merge_request).to receive(:has_license_scanning_reports?).and_return(has_license_scanning_reports)
       allow(merge_request).to receive(:has_approved_license_check?).and_return(has_approved_license_check)
-      allow(merge_request).to receive(:compare_license_scanning_reports).with(nil).and_return(report_diff)
+      allow(merge_request).to receive(:compare_reports).and_return(report_diff)
     end
 
-    context 'when license_scanning feature is' do
-      context 'not available' do
+    context 'when license_scanning feature is not available' do
+      let(:feature_available) { false }
+
+      it { is_expected.to eq false }
+    end
+
+    context 'when license_scanning feature is available' do
+      let(:feature_available) { true }
+
+      context 'without license scanning reports' do
         it { is_expected.to eq false }
       end
 
-      context 'available' do
-        let!(:feature_available) { true }
+      context 'with license scanning reports' do
+        let(:has_license_scanning_reports) { true }
 
-        context 'and merge_request' do
-          context 'has license scanning reports' do
+        context 'and an approved license check' do
+          it { is_expected.to eq false }
+        end
+
+        context 'and no approved license check' do
+          let(:has_approved_license_check) { false }
+
+          context 'and malformed diff data' do
+            context 'with no data key' do
+              let(:report_diff) { { data: { "foo" => licenses } } }
+
+              it { is_expected.to eq false }
+            end
+
+            context 'with no new_licenses key' do
+              let(:report_diff) { { data: { "existing_licenses" => licenses } } }
+
+              it { is_expected.to eq false }
+            end
+          end
+
+          context 'and no new licenses' do
+            let(:licenses) { [] }
+
             it { is_expected.to eq false }
           end
 
-          context 'does not have license scanning reports' do
-            let(:has_license_scanning_reports) { true }
+          context 'and no blacklisted licenses' do
+            let(:licenses) { [unclassified_license, allowed_license] }
 
-            context 'and merge request' do
-              context 'has approved license check' do
-                it { is_expected.to eq false }
-              end
+            it { is_expected.to eq false }
+          end
 
-              context 'does not have approved license check' do
-                let(:has_approved_license_check) { false }
+          context 'and blacklisted licenses' do
+            let(:licenses) { [unclassified_license, allowed_license, denied_license] }
 
-                context 'and malformed report diff data' do
-                  context 'with no data key' do
-                    let(:report_diff) { { data: { "foo" => new_licenses } } }
-
-                    it { is_expected.to eq false }
-                  end
-
-                  context 'with no new_licenses key' do
-                    let(:report_diff) { { data: { "old_licenses" => new_licenses } } }
-
-                    it { is_expected.to eq false }
-                  end
-                end
-
-                context 'and no new licenses' do
-                  let(:new_licenses) { [] }
-
-                  it { is_expected.to eq false }
-                end
-
-                context 'and no blacklisted licenses' do
-                  let(:new_licenses) { [license1, license2] }
-
-                  it { is_expected.to eq false }
-                end
-
-                context 'and blacklisted licenses' do
-                  let(:new_licenses) { [license1, license2, license3] }
-
-                  it { is_expected.to eq true }
-                end
-              end
-            end
+            it { is_expected.to eq true }
           end
         end
       end
