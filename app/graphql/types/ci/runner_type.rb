@@ -38,9 +38,9 @@ module Types
       field :tag_list, [GraphQL::STRING_TYPE], null: true,
             description: 'Tags associated with the runner.'
       field :public_projects_minutes_cost_factor, GraphQL::FLOAT_TYPE, null: true,
-            description: 'Public projects Minutes cost factor associated with the runner.'
+            description: 'Public projects\' "minutes cost factor" associated with the runner.'
       field :private_projects_minutes_cost_factor, GraphQL::FLOAT_TYPE, null: true,
-            description: 'Private projects Minutes cost factor associated with the runner.'
+            description: 'Private projects\' "minutes cost factor" associated with the runner.'
     end
   end
 end
