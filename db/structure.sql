@@ -24181,8 +24181,6 @@ CREATE INDEX index_project_export_jobs_on_status ON project_export_jobs USING bt
 
 CREATE INDEX index_project_feature_usages_on_project_id ON project_feature_usages USING btree (project_id);
 
-CREATE UNIQUE INDEX index_project_features_on_project_id ON project_features USING btree (project_id);
-
 CREATE INDEX index_project_features_on_project_id_bal_20 ON project_features USING btree (project_id) WHERE (builds_access_level = 20);
 
 CREATE INDEX index_project_features_on_project_id_ral_20 ON project_features USING btree (project_id) WHERE (repository_access_level = 20);
