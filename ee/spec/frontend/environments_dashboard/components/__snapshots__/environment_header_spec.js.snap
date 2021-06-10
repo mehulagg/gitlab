@@ -106,6 +106,7 @@ exports[`Environment Header renders name and link to app matches the snapshot 1`
         aria-hidden="true"
         class="fgray gl-icon s16"
         data-testid="external-link-icon"
+        role="img"
       >
         <use
           href="#external-link"

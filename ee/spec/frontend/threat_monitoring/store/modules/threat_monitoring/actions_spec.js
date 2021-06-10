@@ -13,7 +13,6 @@ import { mockEnvironmentsResponse } from '../../../mocks/mock_data';
 jest.mock('~/flash');
 
 const environmentsEndpoint = 'environmentsEndpoint';
-const wafStatisticsEndpoint = 'wafStatisticsEndpoint';
 const networkPolicyStatisticsEndpoint = 'networkPolicyStatisticsEndpoint';
 
 describe('Threat Monitoring actions', () => {
@@ -33,7 +32,6 @@ describe('Threat Monitoring actions', () => {
         actions.setEndpoints,
         {
           environmentsEndpoint,
-          wafStatisticsEndpoint,
           networkPolicyStatisticsEndpoint,
         },
         state,
@@ -41,10 +39,6 @@ describe('Threat Monitoring actions', () => {
           {
             type: types.SET_ENDPOINT,
             payload: environmentsEndpoint,
-          },
-          {
-            type: `threatMonitoringWaf/${types.SET_ENDPOINT}`,
-            payload: wafStatisticsEndpoint,
           },
           {
             type: `threatMonitoringNetworkPolicy/${types.SET_ENDPOINT}`,

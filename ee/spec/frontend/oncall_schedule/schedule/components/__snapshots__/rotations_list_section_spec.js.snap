@@ -35,6 +35,7 @@ exports[`RotationsListSectionComponent when the timeframe includes today renders
               aria-hidden="true"
               class="gl-button-icon gl-icon s16"
               data-testid="pencil-icon"
+              role="img"
             >
               <use
                 href="#pencil"
@@ -56,6 +57,7 @@ exports[`RotationsListSectionComponent when the timeframe includes today renders
               aria-hidden="true"
               class="gl-button-icon gl-icon s16"
               data-testid="remove-icon"
+              role="img"
             >
               <use
                 href="#remove"

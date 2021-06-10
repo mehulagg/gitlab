@@ -8,7 +8,9 @@ module EE
       dockerfiles: ::Gitlab::Template::CustomDockerfileTemplate,
       gitignores: ::Gitlab::Template::CustomGitignoreTemplate,
       gitlab_ci_ymls: ::Gitlab::Template::CustomGitlabCiYmlTemplate,
-      metrics_dashboard_ymls: ::Gitlab::Template::CustomMetricsDashboardYmlTemplate
+      metrics_dashboard_ymls: ::Gitlab::Template::CustomMetricsDashboardYmlTemplate,
+      issues: ::Gitlab::Template::IssueTemplate,
+      merge_requests: ::Gitlab::Template::MergeRequestTemplate
     ).freeze
 
     attr_reader :custom_templates
@@ -17,8 +19,8 @@ module EE
     def initialize(type, project, *args, &blk)
       super
 
-      if custom_templates_mapping.key?(type)
-        finder = custom_templates_mapping.fetch(type)
+      if CUSTOM_TEMPLATES.key?(type)
+        finder = CUSTOM_TEMPLATES.fetch(type)
         @custom_templates = ::Gitlab::CustomFileTemplates.new(finder, project)
       end
     end
@@ -41,19 +43,6 @@ module EE
       # on custom templates we do want to fetch all template names as this will iterate through inherited templates
       # from ancestor group levels
       custom_templates.all_template_names.merge(super)
-    end
-
-    # This method is going to be removed once we remove the `inherited_issuable_templates` FF and
-    # issues and merge_requests entries will go into CUSTOM_TEMPLATES
-    def custom_templates_mapping
-      if project&.inherited_issuable_templates_enabled?
-        CUSTOM_TEMPLATES.merge(
-          issues: ::Gitlab::Template::IssueTemplate,
-          merge_requests: ::Gitlab::Template::MergeRequestTemplate
-        )
-      else
-        CUSTOM_TEMPLATES
-      end
     end
   end
 end

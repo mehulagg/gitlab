@@ -18,12 +18,20 @@ const isSupportedType = ({ type }) => Object.values(REPORT_TYPES).includes(type)
 const isOfType = (typeToCheck) => ({ type }) => type === typeToCheck;
 
 /**
- * Check if the given report is of type list
+ * Check if the given report is of type 'list'
  *
  * @param {{ type: string } } reportItem
  * @returns boolean
  */
 export const isOfTypeList = isOfType(REPORT_TYPES.list);
+
+/**
+ * Check if the given report is of type 'table'
+ *
+ * @param {{ type: string } } reportItem
+ * @returns boolean
+ */
+const isOfTypeTable = isOfType(REPORT_TYPES.table);
 
 /**
  * Check if the given report is of type named-list
@@ -123,6 +131,40 @@ const transformItemsIntoArray = (items) => {
 };
 
 /**
+ * Takes a report item's entry and transforms each item of type `table` in the following ways:
+ *
+ * 1. Adds a index-based key to each header-item (eg.: ` { key: column_0, ...headerData }`)
+ * 2. Transforms each item within the `rows` array into an object where each item's key corresponds
+ *    to it's header's key
+ *    (e.g: `rows: [
+ *      [{ column_0: {...cellData }}]
+ *    ]`)
+ *
+ *  This prepares the data to be rendered into a table.
+ *
+ * @param [String, {*}] report entry
+ * @returns [String, {*}]
+ */
+const transformTableItems = ([label, item]) => {
+  const newItem = isOfTypeTable(item)
+    ? {
+        ...item,
+        header: item.header.map((headerItem, index) => ({
+          ...headerItem,
+          key: `column_${index}`,
+        })),
+        rows: item.rows.map((row) => {
+          const getCellEntry = (cell, index) => [`column_${index}`, cell];
+          // transforms the array into an object with `column_N` as keys
+          return Object.fromEntries(row.map(getCellEntry));
+        }),
+      }
+    : item;
+
+  return [label, newItem];
+};
+
+/**
  * Takes a vulnerabilities details object - containing generic report data
  * Returns a copy of the report data with the following items being filtered:
  *
@@ -143,6 +185,7 @@ export const filterTypesAndLimitListDepth = (data, { maxDepth = 5 } = {}) => {
       flow([
         filterNestedListsItems(filterCriteria),
         overEveryNamedListItem(flow([filterTypesAndLimitListDepth, transformItemsIntoArray])),
+        transformTableItems,
       ]),
     );
 

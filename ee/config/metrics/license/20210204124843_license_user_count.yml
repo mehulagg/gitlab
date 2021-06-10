@@ -1,17 +1,17 @@
 ---
 key_path: license_user_count
-description: The number of users included in the license
-product_section: growth
-product_stage: growth
-product_group: group::product intelligence
-product_category: collection
-value_type: string
+description: The number of seats included in the license
+product_section: fulfillment
+product_stage: fulfillment
+product_group: group::license
+product_category: license
+value_type: number
 status: data_available
 time_frame: none
-data_source: system
+data_source: license
 distribution:
 - ee
 tier:
 - premium
 - ultimate
-skip_validation: true
+introduced_by_url: https://gitlab.com/gitlab-org/gitlab/-/merge_requests/557

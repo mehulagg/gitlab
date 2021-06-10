@@ -3,6 +3,8 @@
 require 'spec_helper'
 
 RSpec.describe 'Operations dropdown navbar EE' do
+  include Spec::Support::Helpers::Features::TopNavSpecHelpers
+
   let(:user) { create(:user) }
   let(:project) { create(:project) }
 
@@ -17,19 +19,19 @@ RSpec.describe 'Operations dropdown navbar EE' do
     end
 
     it 'has an `Operations` link' do
-      pending_on_combined_menu_flag
+      open_top_nav
 
       expect(page).to have_link('Operations', href: operations_path)
     end
 
     it 'has an `Environments` link' do
-      pending_on_combined_menu_flag
+      open_top_nav
 
       expect(page).to have_link('Environments', href: operations_environments_path)
     end
   end
 
-  context 'with combined_menu: feature flag on' do
+  context 'with combined_menu feature flag on', :js do
     let(:needs_rewrite_for_combined_menu_flag_on) { true }
 
     before do
@@ -47,9 +49,5 @@ RSpec.describe 'Operations dropdown navbar EE' do
     end
 
     it_behaves_like 'combined_menu: feature flag examples'
-  end
-
-  def pending_on_combined_menu_flag
-    pending 'https://gitlab.com/gitlab-org/gitlab/-/merge_requests/56587' if needs_rewrite_for_combined_menu_flag_on
   end
 end

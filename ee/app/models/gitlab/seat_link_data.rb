@@ -4,7 +4,7 @@ module Gitlab
   class SeatLinkData
     include Gitlab::Utils::StrongMemoize
 
-    attr_reader :timestamp, :key, :max_users, :active_users
+    attr_reader :timestamp, :key, :max_users, :billable_users_count
 
     delegate :to_json, to: :data
 
@@ -12,12 +12,12 @@ module Gitlab
     # are preferable, like for SyncSeatLinkWorker, to determine seat link data, and in others,
     # like for SyncSeatLinkRequestWorker, the params are passed because the values from when
     # the job was enqueued are necessary.
-    def initialize(timestamp: nil, key: default_key, max_users: nil, active_users: nil)
+    def initialize(timestamp: nil, key: default_key, max_users: nil, billable_users_count: nil)
       @current_time = Time.current
       @timestamp = timestamp || historical_data&.recorded_at || current_time
       @key = key
       @max_users = max_users || default_max_count
-      @active_users = active_users || default_active_count
+      @billable_users_count = billable_users_count || default_billable_users_count
     end
 
     def sync
@@ -54,7 +54,7 @@ module Gitlab
         date: timestamp.to_date.to_s,
         license_key: key,
         max_historical_user_count: max_users,
-        active_users: active_users
+        billable_users_count: billable_users_count
       }
     end
 
@@ -78,7 +78,7 @@ module Gitlab
       end
     end
 
-    def default_active_count
+    def default_billable_users_count
       historical_data&.active_user_count
     end
   end

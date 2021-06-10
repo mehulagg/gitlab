@@ -22,7 +22,7 @@ module QA
               end
 
               attribute :label do
-                QA::EE::Resource::GroupLabel.fabricate_via_api! do |group_label|
+                QA::Resource::GroupLabel.fabricate_via_api! do |group_label|
                   group_label.group = board.group
                   group_label.title = label_title
                 end

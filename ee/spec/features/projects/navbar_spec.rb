@@ -16,6 +16,10 @@ RSpec.describe 'Project navbar' do
   end
 
   context 'when sidebar refactor feature flag is disabled' do
+    let(:project_context_nav_item) do
+      nil
+    end
+
     before do
       stub_feature_flags(sidebar_refactor: false)
       insert_package_nav(_('Operations'))
@@ -61,8 +65,8 @@ RSpec.describe 'Project navbar' do
             _('Security Dashboard'),
             _('Vulnerability Report'),
             s_('OnDemandScans|On-demand Scans'),
-            _('Configuration'),
-            _('Audit Events')
+            _('Audit Events'),
+            _('Configuration')
           ]
         }
       end

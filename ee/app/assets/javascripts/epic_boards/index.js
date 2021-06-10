@@ -7,6 +7,7 @@ import Vue from 'vue';
 import VueApollo from 'vue-apollo';
 import { mapActions, mapState } from 'vuex';
 
+import initFilteredSearch from 'ee/boards/epic_filtered_search';
 import { fullEpicBoardId, transformBoardConfig } from 'ee_component/boards/boards_util';
 import BoardSidebar from 'ee_component/boards/components/board_sidebar';
 import toggleLabels from 'ee_component/boards/toggle_labels';
@@ -55,13 +56,7 @@ export default () => {
     }
   });
 
-  if (gon?.features?.boardsFilteredSearch) {
-    import('ee/boards/epic_filtered_search')
-      .then(({ default: initFilteredSearch }) => {
-        initFilteredSearch(apolloProvider);
-      })
-      .catch(() => {});
-  }
+  initFilteredSearch(apolloProvider);
 
   // eslint-disable-next-line no-new
   new Vue({

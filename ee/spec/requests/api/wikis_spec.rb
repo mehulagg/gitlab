@@ -17,6 +17,7 @@ RSpec.describe API::Wikis do
   include WorkhorseHelpers
 
   let_it_be(:user) { create(:user) }
+
   let(:group) { create(:group, :internal, :wiki_repo) }
   let(:wiki) { create(:group_wiki, container: group, user: user) }
   let(:payload) { { content: 'content', format: 'rdoc', title: 'title' } }
@@ -474,8 +475,8 @@ RSpec.describe API::Wikis do
     end
 
     context 'when user is owner of parent group' do
-      let(:namespace) { create(:group).tap { |g| g.add_owner(user) } }
-      let(:group) { create(:group, :wiki_repo, parent: namespace) }
+      let_it_be(:namespace) { create(:group).tap { |g| g.add_owner(user) } }
+      let_it_be(:group) { create(:group, :wiki_repo, parent: namespace) }
 
       include_examples 'wikis API updates wiki page'
     end
@@ -589,8 +590,8 @@ RSpec.describe API::Wikis do
     end
 
     context 'when user is owner of parent group' do
-      let(:namespace) { create(:group).tap { |g| g.add_owner(user) } }
-      let(:group) { create(:group, :wiki_repo, parent: namespace) }
+      let_it_be(:namespace) { create(:group).tap { |g| g.add_owner(user) } }
+      let_it_be(:group) { create(:group, :wiki_repo, parent: namespace) }
 
       before do
         delete(api(url, user))

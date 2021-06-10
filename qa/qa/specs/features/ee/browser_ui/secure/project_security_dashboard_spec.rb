@@ -54,7 +54,7 @@ module QA
         end
         Flow::Pipeline.wait_for_latest_pipeline(pipeline_condition: 'succeeded')
 
-        @label = Resource::Label.fabricate_via_api! do |new_label|
+        @label = Resource::ProjectLabel.fabricate_via_api! do |new_label|
           new_label.project = @project
           new_label.title = "test severity 3"
         end
@@ -88,7 +88,10 @@ module QA
         end
       end
 
-      it 'creates an issue from vulnerability details', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/1228' do
+      it(
+        'creates an issue from vulnerability details',
+        testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/1228'
+      ) do
         Page::Project::Menu.perform(&:click_on_vulnerability_report)
 
         EE::Page::Project::Secure::SecurityDashboard.perform do |security_dashboard|

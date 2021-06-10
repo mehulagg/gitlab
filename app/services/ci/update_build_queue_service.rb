@@ -19,7 +19,7 @@ module Ci
       raise InvalidQueueTransition unless transition.to == 'pending'
 
       transition.within_transaction do
-        result = ::Ci::PendingBuild.upsert_from_build!(build)
+        result = build.create_queuing_entry!
 
         unless result.empty?
           metrics.increment_queue_operation(:build_queue_push)
@@ -52,7 +52,7 @@ module Ci
     # Unblock runner associated with given project / build
     #
     def tick(build)
-      tick_for(build, build.project.all_runners)
+      tick_for(build, build.project.all_available_runners)
     end
 
     private

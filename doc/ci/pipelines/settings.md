@@ -1,6 +1,6 @@
 ---
 stage: Verify
-group: Continuous Integration
+group: Pipeline Execution
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 disqus_identifier: 'https://docs.gitlab.com/ee/user/project/pipelines/settings.html'
 type: reference, howto
@@ -35,7 +35,7 @@ There are two options. Using:
   back to clone if it doesn't exist).
   This is recommended, especially for [large repositories](../large_repositories/index.md#git-strategy).
 
-The configured Git strategy can be overridden by the [`GIT_STRATEGY` variable](../runners/README.md#git-strategy)
+The configured Git strategy can be overridden by the [`GIT_STRATEGY` variable](../runners/configure_runners.md#git-strategy)
 in `.gitlab-ci.yml`.
 
 ## Git shallow clone
@@ -66,7 +66,7 @@ if the job surpasses the threshold, it is marked as failed.
 > [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/17221) in GitLab 10.7.
 
 Project defined timeout (either specific timeout set by user or the default
-60 minutes timeout) may be [overridden for runners](../runners/README.md#set-maximum-job-timeout-for-a-runner).
+60 minutes timeout) may be [overridden for runners](../runners/configure_runners.md#set-maximum-job-timeout-for-a-runner).
 
 ## Maximum artifacts size **(FREE SELF)**
 
@@ -318,7 +318,7 @@ Markdown code embeds the test coverage report badge of the `coverage` job
 into your `README.md`:
 
 ```markdown
-![coverage](https://gitlab.com/gitlab-org/gitlab/badges/master/coverage.svg?job=coverage)
+![coverage](https://gitlab.com/gitlab-org/gitlab/badges/main/coverage.svg?job=coverage)
 ```
 
 ### Badge styles
@@ -331,7 +331,7 @@ Pipeline badges can be rendered in different styles by adding the `style=style_n
   https://gitlab.example.com/<namespace>/<project>/badges/<branch>/coverage.svg?style=flat
   ```
 
-  ![Badge flat style](https://gitlab.com/gitlab-org/gitlab/badges/master/coverage.svg?job=coverage&style=flat)
+  ![Badge flat style](https://gitlab.com/gitlab-org/gitlab/badges/main/coverage.svg?job=coverage&style=flat)
 
 - Flat square ([Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/issues/30120) in GitLab 11.8):
 
@@ -339,7 +339,7 @@ Pipeline badges can be rendered in different styles by adding the `style=style_n
   https://gitlab.example.com/<namespace>/<project>/badges/<branch>/coverage.svg?style=flat-square
   ```
 
-  ![Badge flat square style](https://gitlab.com/gitlab-org/gitlab/badges/master/coverage.svg?job=coverage&style=flat-square)
+  ![Badge flat square style](https://gitlab.com/gitlab-org/gitlab/badges/main/coverage.svg?job=coverage&style=flat-square)
 
 ### Custom badge text
 
@@ -348,10 +348,10 @@ Pipeline badges can be rendered in different styles by adding the `style=style_n
 The text for a badge can be customized to differentiate between multiple coverage jobs that run in the same pipeline. Customize the badge text and width by adding the `key_text=custom_text` and `key_width=custom_key_width` parameters to the URL:
 
 ```plaintext
-https://gitlab.com/gitlab-org/gitlab/badges/master/coverage.svg?job=karma&key_text=Frontend+Coverage&key_width=130
+https://gitlab.com/gitlab-org/gitlab/badges/main/coverage.svg?job=karma&key_text=Frontend+Coverage&key_width=130
 ```
 
-![Badge with custom text and width](https://gitlab.com/gitlab-org/gitlab/badges/master/coverage.svg?job=karma&key_text=Frontend+Coverage&key_width=130)
+![Badge with custom text and width](https://gitlab.com/gitlab-org/gitlab/badges/main/coverage.svg?job=karma&key_text=Frontend+Coverage&key_width=130)
 
 <!-- ## Troubleshooting
 

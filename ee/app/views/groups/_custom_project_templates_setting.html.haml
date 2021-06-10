@@ -19,6 +19,6 @@
         .form-group
           = f.label :custom_project_templates_group_id, class: 'label-bold' do
             = _('Custom project templates')
-          = groups_select_tag('group[custom_project_templates_group_id]', data: { parent_id: @group.id }, selected: @group.custom_project_templates_group_id, class: 'input-clamp allowClear qa-custom-project-template-select', multiple: false)
+          = groups_select_tag('group[custom_project_templates_group_id]', data: { groups_filter: 'subgroups', parent_id: @group.id }, selected: @group.custom_project_templates_group_id, class: 'input-clamp allowClear qa-custom-project-template-select', multiple: false)
 
       = f.submit _('Save changes'), class: 'btn gl-button btn-success qa-save-changes-button'

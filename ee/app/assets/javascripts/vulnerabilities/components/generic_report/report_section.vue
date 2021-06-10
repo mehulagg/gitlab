@@ -48,9 +48,12 @@ export default {
 </script>
 <template>
   <section v-if="hasDetails">
-    <header class="gl-display-flex gl-align-items-center">
+    <header
+      class="gl-display-inline-flex gl-align-items-center gl-font-size-h3 gl-cursor-pointer"
+      @click="toggleShowSection"
+    >
       <gl-icon name="angle-right" class="gl-mr-2" :class="{ 'gl-rotate-90': showSection }" />
-      <h3 class="gl-display-inline gl-my-0! gl-cursor-pointer" @click="toggleShowSection">
+      <h3 class="gl-my-0! gl-font-lg">
         {{ $options.i18n.heading }}
       </h3>
     </header>
@@ -58,7 +61,7 @@ export default {
       <div class="generic-report-container" data-testid="reports">
         <template v-for="[label, item] in detailsEntries">
           <div :key="label" class="generic-report-row" :data-testid="`report-row-${label}`">
-            <strong class="generic-report-column">{{ item.name }}</strong>
+            <strong class="generic-report-column">{{ item.name || label }}</strong>
             <div class="generic-report-column" data-testid="reportContent">
               <report-item :item="item" :data-testid="`report-item-${label}`" />
             </div>

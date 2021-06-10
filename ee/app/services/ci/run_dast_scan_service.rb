@@ -2,12 +2,12 @@
 
 module Ci
   class RunDastScanService < BaseService
-    def execute(branch:, dast_profile: nil, dast_site_profile: nil, **args)
+    def execute(branch:, ci_configuration:, dast_profile: nil, dast_site_profile: nil, dast_scanner_profile: nil)
       return ServiceResponse.error(message: 'Insufficient permissions') unless allowed?
 
       service = Ci::CreatePipelineService.new(project, current_user, ref: branch)
 
-      pipeline = service.execute(:ondemand_dast_scan, content: ci_yaml(args)) do |pipeline|
+      pipeline = service.execute(:ondemand_dast_scan, content: ci_configuration) do |pipeline|
         if dast_profile
           pipeline.dast_profile = dast_profile
         else
@@ -27,10 +27,6 @@ module Ci
 
     def allowed?
       Ability.allowed?(current_user, :create_on_demand_dast_scan, project)
-    end
-
-    def ci_yaml(args)
-      Ci::DastScanCiConfigurationService.execute(args)
     end
   end
 end

@@ -3,6 +3,8 @@
 require 'spec_helper'
 
 RSpec.describe Iteration do
+  include ActiveSupport::Testing::TimeHelpers
+
   let(:set_cadence) { nil }
 
   let_it_be(:group) { create(:group) }
@@ -452,7 +454,100 @@ RSpec.describe Iteration do
     end
   end
 
+  context 'sets correct state based on iteration dates' do
+    around do |example|
+      travel_to(Time.utc(2019, 12, 30)) { example.run }
+    end
+
+    let_it_be(:iterations_cadence) { create(:iterations_cadence, group: group, start_date: 10.days.ago.utc.to_date) }
+
+    let(:iteration) { build(:iteration, group: iterations_cadence.group, iterations_cadence: iterations_cadence, start_date: start_date, due_date: 2.weeks.after(start_date).to_date) }
+
+    context 'start_date is in the future' do
+      let(:start_date) { 1.day.from_now.utc.to_date }
+
+      it 'sets state to started' do
+        iteration.save!
+
+        expect(iteration.state).to eq('upcoming')
+      end
+    end
+
+    context 'start_date is today' do
+      let(:start_date) { Time.now.utc.to_date }
+
+      it 'sets state to started' do
+        iteration.save!
+
+        expect(iteration.state).to eq('started')
+      end
+    end
+
+    context 'start_date is in the past and due date is still in the future' do
+      let(:start_date) { 1.week.ago.utc.to_date }
+
+      it 'sets state to started' do
+        iteration.save!
+
+        expect(iteration.state).to eq('started')
+      end
+    end
+
+    context 'start_date is in the past and due date is also in the past' do
+      let(:start_date) { 3.weeks.ago.utc.to_date }
+
+      it 'sets state to started' do
+        iteration.save!
+
+        expect(iteration.state).to eq('closed')
+      end
+    end
+
+    context 'when dates for an existing iteration change' do
+      context 'when iteration dates go from future to past' do
+        let(:iteration) { create(:iteration, group: iterations_cadence.group, iterations_cadence: iterations_cadence, start_date: 2.weeks.from_now.utc.to_date, due_date: 3.weeks.from_now.utc.to_date)}
+
+        it 'sets state to closed' do
+          expect(iteration.state).to eq('upcoming')
+
+          iteration.start_date -= 4.weeks
+          iteration.due_date -= 4.weeks
+          iteration.save!
+
+          expect(iteration.state).to eq('closed')
+        end
+      end
+
+      context 'when iteration dates go from past to future' do
+        let(:iteration) { create(:iteration, group: iterations_cadence.group, iterations_cadence: iterations_cadence, start_date: 2.weeks.ago.utc.to_date, due_date: 1.week.ago.utc.to_date)}
+
+        it 'sets state to upcoming' do
+          expect(iteration.state).to eq('closed')
+
+          iteration.start_date += 3.weeks
+          iteration.due_date += 3.weeks
+          iteration.save!
+
+          expect(iteration.state).to eq('upcoming')
+        end
+
+        context 'and today is between iteration start and due dates' do
+          it 'sets state to started' do
+            expect(iteration.state).to eq('closed')
+
+            iteration.start_date += 2.weeks
+            iteration.due_date += 2.weeks
+            iteration.save!
+
+            expect(iteration.state).to eq('started')
+          end
+        end
+      end
+    end
+  end
+
   it_behaves_like 'a timebox', :iteration do
+    let(:cadence) { create(:iterations_cadence, group: group) }
     let(:timebox_args) { [:skip_project_validation] }
     let(:timebox_table_name) { described_class.table_name.to_sym }
 
@@ -460,5 +555,29 @@ RSpec.describe Iteration do
     let(:mid_point) { 1.year.from_now.to_date }
     let(:open_on_left) { min_date - 100.days }
     let(:open_on_right) { max_date + 100.days }
+
+    describe "#uniqueness_of_title" do
+      context "per group" do
+        let(:timebox) { create(:iteration, *timebox_args, iterations_cadence: cadence, group: group) }
+
+        before do
+          project.update!(group: group)
+        end
+
+        it "accepts the same title in the same group with different cadence" do
+          new_cadence = create(:iterations_cadence, group: group)
+          new_timebox = create(:iteration, iterations_cadence: new_cadence, group: group, title: timebox.title)
+
+          expect(new_timebox.iterations_cadence).not_to eq(timebox.iterations_cadence)
+          expect(new_timebox).to be_valid
+        end
+
+        it "does not accept the same title when in same cadence" do
+          new_timebox = described_class.new(group: group, iterations_cadence: cadence, title: timebox.title)
+
+          expect(new_timebox).not_to be_valid
+        end
+      end
+    end
   end
 end

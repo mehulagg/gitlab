@@ -1,6 +1,6 @@
 ---
 stage: Verify
-group: Continuous Integration
+group: Pipeline Execution
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 type: reference
 ---
@@ -15,7 +15,7 @@ This document lists the configuration options for your GitLab `.gitlab-ci.yml` f
 
 - For a quick introduction to GitLab CI/CD, follow the [quick start guide](../quick_start/index.md).
 - For a collection of examples, see [GitLab CI/CD Examples](../examples/README.md).
-- To view a large `.gitlab-ci.yml` file used in an enterprise, see the [`.gitlab-ci.yml` file for `gitlab`](https://gitlab.com/gitlab-org/gitlab/blob/master/.gitlab-ci.yml).
+- To view a large `.gitlab-ci.yml` file used in an enterprise, see the [`.gitlab-ci.yml` file for `gitlab`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/.gitlab-ci.yml).
 
 When you are editing your `.gitlab-ci.yml` file, you can validate it with the
 [CI Lint](../lint.md) tool.
@@ -253,7 +253,7 @@ variables:
 
 workflow:
   rules:
-    - if: $CI_COMMIT_REF_NAME =~ /master/
+    - if: $CI_COMMIT_REF_NAME == $CI_DEFAULT_BRANCH
       variables:
         DEPLOY_VARIABLE: "deploy-production"  # Override globally-defined DEPLOY_VARIABLE
     - if: $CI_COMMIT_REF_NAME =~ /feature/
@@ -265,7 +265,7 @@ job1:
   variables:
     DEPLOY_VARIABLE: "job1-default-deploy"
   rules:
-    - if: $CI_COMMIT_REF_NAME =~ /master/
+    - if: $CI_COMMIT_REF_NAME == $CI_DEFAULT_BRANCH
       variables:                                   # Override DEPLOY_VARIABLE defined
         DEPLOY_VARIABLE: "job1-deploy-production"  # at the job level.
     - when: on_success                             # Run the job in other cases
@@ -279,7 +279,7 @@ job2:
     - echo "Run another script if $IS_A_FEATURE exists"
 ```
 
-When the branch is `master`:
+When the branch is the default branch:
 
 - job1's `DEPLOY_VARIABLE` is `job1-deploy-production`.
 - job2's `DEPLOY_VARIABLE` is `deploy-production`.
@@ -559,7 +559,7 @@ You can also specify a `ref`. If you do not specify a value, the ref defaults to
 ```yaml
 include:
   - project: 'my-group/my-project'
-    ref: master
+    ref: main
     file: '/templates/.gitlab-ci-template.yml'
 
   - project: 'my-group/my-project'
@@ -584,7 +584,7 @@ You can include multiple files from the same project:
 ```yaml
 include:
   - project: 'my-group/my-project'
-    ref: master
+    ref: main
     file:
       - '/templates/.builds.yml'
       - '/templates/.tests.yml'
@@ -598,7 +598,7 @@ authentication in the remote URL is not supported. For example:
 
 ```yaml
 include:
-  - remote: 'https://gitlab.com/example-project/-/raw/master/.gitlab-ci.yml'
+  - remote: 'https://gitlab.com/example-project/-/raw/main/.gitlab-ci.yml'
 ```
 
 All [nested includes](#nested-includes) execute without context as a public user,
@@ -609,7 +609,7 @@ so you can only `include` public projects or templates.
 > [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/issues/53445) in GitLab 11.7.
 
 Use `include:template` to include `.gitlab-ci.yml` templates that are
-[shipped with GitLab](https://gitlab.com/gitlab-org/gitlab/tree/master/lib/gitlab/ci/templates).
+[shipped with GitLab](https://gitlab.com/gitlab-org/gitlab/-/tree/master/lib/gitlab/ci/templates).
 
 For example:
 
@@ -1029,7 +1029,7 @@ levels. For example:
     URL: "http://my-url.internal"
     IMPORTANT_VAR: "the details"
   only:
-    - master
+    - main
     - stable
   tags:
     - production
@@ -1062,7 +1062,7 @@ rspec:
     IMPORTANT_VAR: "the details"
     GITLAB: "is-awesome"
   only:
-    - master
+    - main
     - stable
   tags:
     - docker
@@ -1137,7 +1137,7 @@ For example:
 docker build:
   script: docker build -t my-image:$CI_COMMIT_REF_SLUG .
   rules:
-    - if: '$CI_COMMIT_BRANCH == "master"'
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
       when: delayed
       start_in: '3 hours'
       allow_failure: true
@@ -1251,8 +1251,11 @@ causes duplicated pipelines.
 
 To avoid duplicate pipelines, you can:
 
-- Use [`workflow`](#workflow) to specify which types of pipelines
-  can run.
+- Use the `CI_OPEN_MERGE_REQUESTS` CI/CD variable in [`workflow:rules`](#workflow) to
+  [switch between branch and merge request pipelines](#switch-between-branch-pipelines-and-merge-request-pipelines)
+  without duplication. You can also use this variable in individual job rules.
+- Use [`workflow`](#workflow) to specify that only branch pipelines or only merge request
+  pipelines should run.
 - Rewrite the rules to run the job only in very specific cases,
   and avoid a final `when:` rule:
 
@@ -1335,7 +1338,7 @@ For example:
 job:
   script: echo "Hello, Rules!"
   rules:
-    - if: '$CI_MERGE_REQUEST_SOURCE_BRANCH_NAME =~ /^feature/ && $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "master"'
+    - if: '$CI_MERGE_REQUEST_SOURCE_BRANCH_NAME =~ /^feature/ && $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == $CI_DEFAULT_BRANCH'
       when: always
     - if: '$CI_MERGE_REQUEST_SOURCE_BRANCH_NAME =~ /^feature/'
       when: manual
@@ -1533,7 +1536,7 @@ the particular rule triggers the job.
 job:
   script: echo "Hello, Rules!"
   rules:
-    - if: '$CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "master"'
+    - if: '$CI_MERGE_REQUEST_TARGET_BRANCH_NAME == $CI_DEFAULT_BRANCH'
       when: manual
       allow_failure: true
 ```
@@ -1554,7 +1557,7 @@ job:
   variables:
     DEPLOY_VARIABLE: "default-deploy"
   rules:
-    - if: $CI_COMMIT_REF_NAME =~ /master/
+    - if: $CI_COMMIT_REF_NAME == $CI_DEFAULT_BRANCH
       variables:                              # Override DEPLOY_VARIABLE defined
         DEPLOY_VARIABLE: "deploy-production"  # at the job level.
     - if: $CI_COMMIT_REF_NAME =~ /feature/
@@ -1602,7 +1605,7 @@ job1:
   script:
     - echo This rule uses parentheses.
   rules:
-    if: ($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH == "develop") && $MY_VARIABLE
+    if: ($CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH || $CI_COMMIT_BRANCH == "develop") && $MY_VARIABLE
 ```
 
 WARNING:
@@ -1968,12 +1971,12 @@ build_job:
   needs:
     - project: namespace/group/project-name
       job: build-1
-      ref: master
+      ref: main
       artifacts: true
 ```
 
 `build_job` downloads the artifacts from the latest successful `build-1` job
-on the `master` branch in the `group/project-name` project. If the project is in the
+on the `main` branch in the `group/project-name` project. If the project is in the
 same group or namespace, you can omit them from the `project:` keyword. For example,
 `project: group/project-name` or `project: project-name`.
 
@@ -2069,14 +2072,7 @@ To download artifacts from a job in the current pipeline, use the basic form of 
 #### Optional `needs`
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/30680) in GitLab 13.10.
-> - [Deployed behind a feature flag](../../user/feature_flags.md), disabled by default.
-> - [Enabled by default](https://gitlab.com/gitlab-org/gitlab/-/issues/323891) in GitLab 13.11.
-> - Enabled on GitLab.com.
-> - Recommended for production use.
-> - For GitLab self-managed instances, GitLab administrators can opt to [disable it](#enable-or-disable-optional-needs). **(FREE SELF)**
-
-WARNING:
-This feature might not be available to you. Check the **version history** note above for details.
+> - [Feature flag removed](https://gitlab.com/gitlab-org/gitlab/-/issues/323891) in GitLab 14.0.
 
 To need a job that sometimes does not exist in the pipeline, add `optional: true`
 to the `needs` configuration. If not defined, `optional: false` is the default.
@@ -2091,9 +2087,9 @@ error similar to:
 
 In this example:
 
-- When the branch is `master`, the `build` job exists in the pipeline, and the `rspec`
+- When the branch is the default branch, the `build` job exists in the pipeline, and the `rspec`
   job waits for it to complete before starting.
-- When the branch is not `master`, the `build` job does not exist in the pipeline.
+- When the branch is not the default branch, the `build` job does not exist in the pipeline.
   The `rspec` job runs immediately (similar to `needs: []`) because its `needs`
   relationship to the `build` job is optional.
 
@@ -2101,32 +2097,13 @@ In this example:
 build:
   stage: build
   rules:
-    - if: $CI_COMMIT_REF_NAME == "master"
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
 
 rspec:
   stage: test
   needs:
     - job: build
       optional: true
-```
-
-#### Enable or disable optional needs **(FREE SELF)**
-
-Optional needs is under development but ready for production use.
-It is deployed behind a feature flag that is **enabled by default**.
-[GitLab administrators with access to the GitLab Rails console](../../administration/feature_flags.md)
-can opt to disable it.
-
-To enable it:
-
-```ruby
-Feature.enable(:ci_needs_optional)
-```
-
-To disable it:
-
-```ruby
-Feature.disable(:ci_needs_optional)
 ```
 
 ### `tags`
@@ -2356,7 +2333,7 @@ To protect a manual job:
        url: https://example.com
      when: manual
      only:
-       - master
+       - main
    ```
 
 1. In the [protected environments settings](../environments/protected_environments.md#protecting-environments),
@@ -2416,7 +2393,7 @@ For example:
 ```yaml
 deploy to production:
   stage: deploy
-  script: git push production HEAD:master
+  script: git push production HEAD:main
   environment: production
 ```
 
@@ -2438,7 +2415,7 @@ Set a name for an [environment](../environments/index.md). For example:
 ```yaml
 deploy to production:
   stage: deploy
-  script: git push production HEAD:master
+  script: git push production HEAD:main
   environment:
     name: production
 ```
@@ -2473,7 +2450,7 @@ Set a URL for an [environment](../environments/index.md). For example:
 ```yaml
 deploy to production:
   stage: deploy
-  script: git push production HEAD:master
+  script: git push production HEAD:main
   environment:
     name: production
     url: https://prod.example.com
@@ -3329,7 +3306,7 @@ job:
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/49775) in GitLab 13.8
 > - It's [deployed behind a feature flag](../../user/feature_flags.md), disabled by default.
-> - It's enabled on GitLab.com.
+> - It's disabled on GitLab.com.
 > - It's recommended for production use.
 
 Use `artifacts:public` to determine whether the job artifacts should be
@@ -3547,12 +3524,13 @@ as artifacts.
 
 The collected Metrics report uploads to GitLab as an artifact and displays in merge requests.
 
-##### `artifacts:reports:performance` **(PREMIUM)**
+##### `artifacts:reports:browser_performance` **(PREMIUM)**
 
 > - Introduced in GitLab 11.5.
 > - Requires GitLab Runner 11.5 and above.
+> - [Name changed](https://gitlab.com/gitlab-org/gitlab/-/issues/225914) from `artifacts:reports:performance` in GitLab 14.0.
 
-The `performance` report collects [Browser Performance Testing metrics](../../user/project/merge_requests/browser_performance_testing.md)
+The `browser_performance` report collects [Browser Performance Testing metrics](../../user/project/merge_requests/browser_performance_testing.md)
 as artifacts.
 
 The collected Browser Performance report uploads to GitLab as an artifact and displays in merge requests.
@@ -3762,7 +3740,7 @@ Possible values for `when` are:
 - `scheduler_failure`: Retry if the scheduler failed to assign the job to a runner.
 - `data_integrity_failure`: Retry if there is a structural integrity problem detected.
 
-You can specify the number of [retry attempts for certain stages of job execution](../runners/README.md#job-stages-attempts) using variables.
+You can specify the number of [retry attempts for certain stages of job execution](../runners/configure_runners.md#job-stages-attempts) using variables.
 
 ### `timeout`
 
@@ -4065,7 +4043,7 @@ child-pipeline:
   trigger:
     include:
       - project: 'my-group/my-pipeline-library'
-        ref: 'master'
+        ref: 'main'
         file: '/path/to/child-pipeline.yml'
 ```
 
@@ -4240,7 +4218,7 @@ finishes.
 
 ### `release`
 
-> [Introduced](https://gitlab.com/gitlab-org/gitlab/merge_requests/19298) in GitLab 13.2.
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/19298) in GitLab 13.2.
 
 Use `release` to create a [release](../../user/project/releases/index.md).
 Requires the [`release-cli`](https://gitlab.com/gitlab-org/release-cli/-/tree/master/docs)
@@ -4664,7 +4642,7 @@ pages:
     paths:
       - public
   only:
-    - master
+    - main
 ```
 
 View the [GitLab Pages user documentation](../../user/project/pages/index.md).
@@ -4807,7 +4785,7 @@ You can use [YAML anchors for variables](#yaml-anchors-for-variables).
 
 > [Introduced in](https://gitlab.com/gitlab-org/gitlab/-/issues/30101) GitLab 13.7.
 
-Use the `value` and `description` keywords to define [variables that are prefilled](../pipelines/index.md#prefill-variables-in-manual-pipelines)
+Use the `value` and `description` keywords to define [pipeline-level (global) variables that are prefilled](../pipelines/index.md#prefill-variables-in-manual-pipelines)
 when [running a pipeline manually](../pipelines/index.md#run-a-pipeline-manually):
 
 ```yaml
@@ -4817,23 +4795,25 @@ variables:
     description: "The deployment target. Change this variable to 'canary' or 'production' if needed."
 ```
 
+You cannot set job-level variables to be pre-filled when you run a pipeline manually.
+
 ### Configure runner behavior with variables
 
 You can use [CI/CD variables](../variables/README.md) to configure how the runner processes Git requests:
 
-- [`GIT_STRATEGY`](../runners/README.md#git-strategy)
-- [`GIT_SUBMODULE_STRATEGY`](../runners/README.md#git-submodule-strategy)
-- [`GIT_CHECKOUT`](../runners/README.md#git-checkout)
-- [`GIT_CLEAN_FLAGS`](../runners/README.md#git-clean-flags)
-- [`GIT_FETCH_EXTRA_FLAGS`](../runners/README.md#git-fetch-extra-flags)
-- [`GIT_DEPTH`](../runners/README.md#shallow-cloning) (shallow cloning)
-- [`GIT_CLONE_PATH`](../runners/README.md#custom-build-directories) (custom build directories)
-- [`TRANSFER_METER_FREQUENCY`](../runners/README.md#artifact-and-cache-settings) (artifact/cache meter update frequency)
-- [`ARTIFACT_COMPRESSION_LEVEL`](../runners/README.md#artifact-and-cache-settings) (artifact archiver compression level)
-- [`CACHE_COMPRESSION_LEVEL`](../runners/README.md#artifact-and-cache-settings) (cache archiver compression level)
+- [`GIT_STRATEGY`](../runners/configure_runners.md#git-strategy)
+- [`GIT_SUBMODULE_STRATEGY`](../runners/configure_runners.md#git-submodule-strategy)
+- [`GIT_CHECKOUT`](../runners/configure_runners.md#git-checkout)
+- [`GIT_CLEAN_FLAGS`](../runners/configure_runners.md#git-clean-flags)
+- [`GIT_FETCH_EXTRA_FLAGS`](../runners/configure_runners.md#git-fetch-extra-flags)
+- [`GIT_DEPTH`](../runners/configure_runners.md#shallow-cloning) (shallow cloning)
+- [`GIT_CLONE_PATH`](../runners/configure_runners.md#custom-build-directories) (custom build directories)
+- [`TRANSFER_METER_FREQUENCY`](../runners/configure_runners.md#artifact-and-cache-settings) (artifact/cache meter update frequency)
+- [`ARTIFACT_COMPRESSION_LEVEL`](../runners/configure_runners.md#artifact-and-cache-settings) (artifact archiver compression level)
+- [`CACHE_COMPRESSION_LEVEL`](../runners/configure_runners.md#artifact-and-cache-settings) (cache archiver compression level)
 
 You can also use variables to configure how many times a runner
-[attempts certain stages of job execution](../runners/README.md#job-stages-attempts).
+[attempts certain stages of job execution](../runners/configure_runners.md#job-stages-attempts).
 
 ## YAML-specific features
 

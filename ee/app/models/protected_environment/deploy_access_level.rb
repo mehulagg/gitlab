@@ -14,11 +14,9 @@ class ProtectedEnvironment::DeployAccessLevel < ApplicationRecord
 
   belongs_to :user
   belongs_to :group
-  belongs_to :protected_environment
+  belongs_to :protected_environment, inverse_of: :deploy_access_levels
 
   validates :access_level, presence: true, inclusion: { in: ALLOWED_ACCESS_LEVELS }
-
-  delegate :project, to: :protected_environment
 
   def check_access(user)
     return false unless user
@@ -26,7 +24,7 @@ class ProtectedEnvironment::DeployAccessLevel < ApplicationRecord
     return user.id == user_id if user_type?
     return group.users.exists?(user.id) if group_type?
 
-    project.team.max_member_access(user.id) >= access_level
+    protected_environment.container_access_level(user) >= access_level
   end
 
   def user_type?

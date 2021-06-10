@@ -99,16 +99,17 @@ RSpec.describe MergeRequest, factory_default: :keep do
     let_it_be(:merge_request1) { create(:merge_request, :unique_branches, reviewers: [user1])}
     let_it_be(:merge_request2) { create(:merge_request, :unique_branches, reviewers: [user2])}
     let_it_be(:merge_request3) { create(:merge_request, :unique_branches, reviewers: [])}
+    let_it_be(:merge_request4) { create(:merge_request, :draft_merge_request)}
 
     describe '.review_requested' do
-      it 'returns MRs that has any review requests' do
+      it 'returns MRs that have any review requests' do
         expect(described_class.review_requested).to eq([merge_request1, merge_request2])
       end
     end
 
     describe '.no_review_requested' do
-      it 'returns MRs that has no review requests' do
-        expect(described_class.no_review_requested).to eq([merge_request3])
+      it 'returns MRs that have no review requests' do
+        expect(described_class.no_review_requested).to eq([merge_request3, merge_request4])
       end
     end
 
@@ -119,8 +120,15 @@ RSpec.describe MergeRequest, factory_default: :keep do
     end
 
     describe '.no_review_requested_to' do
-      it 'returns MRs that the user has been requested to review' do
-        expect(described_class.no_review_requested_to(user1)).to eq([merge_request2, merge_request3])
+      it 'returns MRs that the user has not been requested to review' do
+        expect(described_class.no_review_requested_to(user1))
+          .to eq([merge_request2, merge_request3, merge_request4])
+      end
+    end
+
+    describe '.drafts' do
+      it 'returns MRs where draft == true' do
+        expect(described_class.drafts).to eq([merge_request4])
       end
     end
   end
@@ -315,6 +323,38 @@ RSpec.describe MergeRequest, factory_default: :keep do
 
         expect(merge_request.target_project_id).to eq(project.id)
         expect(merge_request.target_project_id).to eq(merge_request.metrics.target_project_id)
+      end
+    end
+
+    describe '#set_draft_status' do
+      let(:merge_request) { create(:merge_request) }
+
+      context 'MR is a draft' do
+        before do
+          expect(merge_request.draft).to be_falsy
+
+          merge_request.title = "Draft: #{merge_request.title}"
+        end
+
+        it 'sets draft to true' do
+          merge_request.save!
+
+          expect(merge_request.draft).to be_truthy
+        end
+      end
+
+      context 'MR is not a draft' do
+        before do
+          expect(merge_request.draft).to be_falsey
+
+          merge_request.title = "This is not a draft"
+        end
+
+        it 'sets draft to true' do
+          merge_request.save!
+
+          expect(merge_request.draft).to be_falsey
+        end
       end
     end
   end
@@ -3880,14 +3920,6 @@ RSpec.describe MergeRequest, factory_default: :keep do
       let(:service_class) { 'Ci::CompareMetricsReportsService' }
 
       it { is_expected.to be_truthy }
-
-      context 'with the metrics report flag disabled' do
-        before do
-          stub_feature_flags(merge_base_pipeline_for_metrics_comparison: false)
-        end
-
-        it { is_expected.to be_falsey }
-      end
     end
 
     context 'when service class is Ci::CompareCodequalityReportsService' do

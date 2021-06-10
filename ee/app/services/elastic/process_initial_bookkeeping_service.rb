@@ -28,7 +28,7 @@ module Elastic
           maintain_indexed_associations(project, INDEXED_PROJECT_ASSOCIATIONS)
 
           ElasticCommitIndexerWorker.perform_async(project.id)
-          ElasticCommitIndexerWorker.perform_async(project.id, nil, nil, true)
+          ElasticCommitIndexerWorker.perform_async(project.id, true)
         end
       end
     end

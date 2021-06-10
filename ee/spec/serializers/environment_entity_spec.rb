@@ -51,9 +51,10 @@ RSpec.describe EnvironmentEntity do
     end
 
     context 'when environment has a review app' do
-      let(:project) { create(:project, :repository) }
+      let_it_be(:group) { create(:group) }
+      let_it_be(:project) { create(:project, :repository, group: group) }
+
       let(:environment) { create(:environment, :with_review_app, ref: 'development', project: project) }
-      let(:protected_environment) { create(:protected_environment, name: environment.name, project: project) }
 
       before do
         project.repository.add_branch(user, 'development', project.commit.id)

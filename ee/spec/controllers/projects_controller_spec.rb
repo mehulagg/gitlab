@@ -496,7 +496,7 @@ RSpec.describe ProjectsController do
 
             project.reload
 
-            expect(project[setting]).to eq(final_value)
+            expect(project[setting]).to eq(final_value.nil? ? setting_default_value : final_value)
           end
         end
       end
@@ -505,6 +505,7 @@ RSpec.describe ProjectsController do
         it_behaves_like 'merge request approvers rules' do
           let(:rule_name) { :modify_approvers_rules }
           let(:setting) { :disable_overriding_approvers_per_merge_request }
+          let(:setting_default_value) { nil }
         end
       end
 
@@ -512,6 +513,7 @@ RSpec.describe ProjectsController do
         it_behaves_like 'merge request approvers rules' do
           let(:rule_name) { :modify_merge_request_author_setting }
           let(:setting) { :merge_requests_author_approval }
+          let(:setting_default_value) { false }
         end
       end
 
@@ -519,6 +521,7 @@ RSpec.describe ProjectsController do
         it_behaves_like 'merge request approvers rules' do
           let(:rule_name) { :modify_merge_request_committer_setting }
           let(:setting) { :merge_requests_disable_committers_approval }
+          let(:setting_default_value) { nil }
         end
       end
     end

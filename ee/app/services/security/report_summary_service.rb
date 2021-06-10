@@ -22,7 +22,7 @@ module Security
     private
 
     def summary_counts_for_report_type(report_type, summary_types)
-      return unless report_exists?(report_type)
+      return if @pipeline.security_findings.by_report_types(report_type).empty?
 
       summary_types.each_with_object({}) do |summary_type, response|
         case summary_type
@@ -72,10 +72,6 @@ module Security
 
     def grouped_scans
       @grouped_scans ||= @pipeline.security_scans.by_scan_types(@selection_information.keys).group_by(&:scan_type)
-    end
-
-    def report_exists?(report_type)
-      @pipeline&.security_reports&.reports&.key?(report_type.to_s)
     end
   end
 end

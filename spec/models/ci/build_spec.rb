@@ -320,6 +320,20 @@ RSpec.describe Ci::Build do
     end
   end
 
+  describe '#stick_build_if_status_changed' do
+    it 'sticks the build if the status changed' do
+      job = create(:ci_build, :pending)
+
+      allow(Gitlab::Database::LoadBalancing).to receive(:enable?)
+        .and_return(true)
+
+      expect(Gitlab::Database::LoadBalancing::Sticking).to receive(:stick)
+        .with(:build, job.id)
+
+      job.update!(status: :running)
+    end
+  end
+
   describe '#enqueue' do
     let(:build) { create(:ci_build, :created) }
 
@@ -340,7 +354,7 @@ RSpec.describe Ci::Build do
       it 'does not push build to the queue' do
         build.enqueue
 
-        expect(::Ci::PendingBuild.all.count).to be_zero
+        expect(build.queuing_entry).not_to be_present
       end
     end
 
@@ -1880,6 +1894,26 @@ RSpec.describe Ci::Build do
 
           it { is_expected.not_to be_retryable }
         end
+
+        context 'when a canceled build has been retried already' do
+          before do
+            project.add_developer(user)
+            build.cancel!
+            described_class.retry(build, user)
+          end
+
+          context 'when prevent_retry_of_retried_jobs feature flag is enabled' do
+            it { is_expected.not_to be_retryable }
+          end
+
+          context 'when prevent_retry_of_retried_jobs feature flag is disabled' do
+            before do
+              stub_feature_flags(prevent_retry_of_retried_jobs: false)
+            end
+
+            it { is_expected.to be_retryable }
+          end
+        end
       end
     end
 
@@ -2606,6 +2640,17 @@ RSpec.describe Ci::Build do
       it { is_expected.to be_instance_of(Gitlab::Ci::Variables::Collection) }
       it { expect(subject.to_runner_variables).to eq(predefined_variables) }
 
+      it 'excludes variables that require an environment or user' do
+        environment_based_variables_collection = subject.filter do |variable|
+          %w[
+            YAML_VARIABLE CI_ENVIRONMENT_NAME CI_ENVIRONMENT_SLUG
+            CI_ENVIRONMENT_ACTION CI_ENVIRONMENT_URL
+          ].include?(variable[:key])
+        end
+
+        expect(environment_based_variables_collection).to be_empty
+      end
+
       context 'when ci_job_jwt feature flag is disabled' do
         before do
           stub_feature_flags(ci_job_jwt: false)
@@ -2675,7 +2720,7 @@ RSpec.describe Ci::Build do
           let(:expected_variables) do
             predefined_variables.map { |variable| variable.fetch(:key) } +
               %w[YAML_VARIABLE CI_ENVIRONMENT_NAME CI_ENVIRONMENT_SLUG
-                 CI_ENVIRONMENT_URL]
+                 CI_ENVIRONMENT_TIER CI_ENVIRONMENT_ACTION CI_ENVIRONMENT_URL]
           end
 
           before do
@@ -2692,6 +2737,50 @@ RSpec.describe Ci::Build do
             received_variables = subject.map { |variable| variable[:key] }
 
             expect(received_variables).to eq expected_variables
+          end
+
+          describe 'CI_ENVIRONMENT_ACTION' do
+            let(:enviroment_action_variable) { subject.find { |variable| variable[:key] == 'CI_ENVIRONMENT_ACTION' } }
+
+            shared_examples 'defaults value' do
+              it 'value matches start' do
+                expect(enviroment_action_variable[:value]).to eq('start')
+              end
+            end
+
+            it_behaves_like 'defaults value'
+
+            context 'when options is set' do
+              before do
+                build.update!(options: options)
+              end
+
+              context 'when options is empty' do
+                let(:options) { {} }
+
+                it_behaves_like 'defaults value'
+              end
+
+              context 'when options is nil' do
+                let(:options) { nil }
+
+                it_behaves_like 'defaults value'
+              end
+
+              context 'when options environment is specified' do
+                let(:options) { { environment: {} } }
+
+                it_behaves_like 'defaults value'
+              end
+
+              context 'when options environment action specified' do
+                let(:options) { { environment: { action: 'stop' } } }
+
+                it 'matches the specified action' do
+                  expect(enviroment_action_variable[:value]).to eq('stop')
+                end
+              end
+            end
           end
         end
       end
@@ -2731,7 +2820,8 @@ RSpec.describe Ci::Build do
       let(:environment_variables) do
         [
           { key: 'CI_ENVIRONMENT_NAME', value: 'production', public: true, masked: false },
-          { key: 'CI_ENVIRONMENT_SLUG', value: 'prod-slug',  public: true, masked: false }
+          { key: 'CI_ENVIRONMENT_SLUG', value: 'prod-slug',  public: true, masked: false },
+          { key: 'CI_ENVIRONMENT_TIER', value: 'production', public: true, masked: false }
         ]
       end
 
@@ -2740,6 +2830,7 @@ RSpec.describe Ci::Build do
                project: build.project,
                name: 'production',
                slug: 'prod-slug',
+               tier: 'production',
                external_url: '')
       end
 
@@ -4733,7 +4824,7 @@ RSpec.describe Ci::Build do
 
     context 'with project services' do
       before do
-        create(:service, active: true, job_events: true, project: project)
+        create(:integration, active: true, job_events: true, project: project)
       end
 
       it 'executes services' do
@@ -4747,7 +4838,7 @@ RSpec.describe Ci::Build do
 
     context 'without relevant project services' do
       before do
-        create(:service, active: true, job_events: false, project: project)
+        create(:integration, active: true, job_events: false, project: project)
       end
 
       it 'does not execute services' do

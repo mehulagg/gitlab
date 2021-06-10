@@ -1,4 +1,3 @@
-import trackShowInviteMemberLink from 'ee/projects/track_invite_members';
 import initSidebarBundle from 'ee/sidebar/sidebar_bundle';
 import { initReviewBar } from '~/batch_comments';
 import initMrNotes from '~/mr_notes';
@@ -11,7 +10,3 @@ initSidebarBundle();
 initMrNotes();
 initReviewBar();
 initIssuableHeaderWarning(store);
-
-const assigneeDropdown = document.querySelector('.js-sidebar-assignee-dropdown');
-
-if (assigneeDropdown) trackShowInviteMemberLink(assigneeDropdown);

@@ -3,9 +3,9 @@
 require 'spec_helper'
 
 RSpec.describe AuditEvents::BuildService do
-  let(:author) { build(:author, current_sign_in_ip: '127.0.0.1') }
-  let(:scope) { build(:group) }
-  let(:target) { build(:project) }
+  let(:author) { build_stubbed(:author, current_sign_in_ip: '127.0.0.1') }
+  let(:scope) { build_stubbed(:group) }
+  let(:target) { build_stubbed(:project) }
   let(:ip_address) { '192.168.8.8' }
   let(:message) { 'Added an interesting field from project Gotham' }
 
@@ -58,6 +58,29 @@ RSpec.describe AuditEvents::BuildService do
           expect(event.ip_address).to eq(author.current_sign_in_ip)
         end
       end
+
+      context 'when author is impersonated' do
+        let(:impersonator) { build_stubbed(:user, name: 'Agent Donald', current_sign_in_ip: '8.8.8.8') }
+        let(:author) { build_stubbed(:author, impersonator: impersonator) }
+
+        it 'sets author to impersonated user', :aggregate_failures do
+          expect(event.author_id).to eq(author.id)
+          expect(event.author_name).to eq(author.name)
+        end
+
+        it 'includes impersonator name in message' do
+          expect(event.details[:custom_message])
+            .to eq('Added an interesting field from project Gotham (by Agent Donald)')
+        end
+
+        context 'when IP address is not provided' do
+          let(:ip_address) { nil }
+
+          it 'uses impersonator current_sign_in_ip' do
+            expect(event.ip_address).to eq(impersonator.current_sign_in_ip)
+          end
+        end
+      end
     end
 
     context 'when not licensed' do
@@ -86,31 +109,41 @@ RSpec.describe AuditEvents::BuildService do
           expect(event.created_at).to eq(DateTime.current)
         end
       end
+
+      context 'when author is impersonated' do
+        let(:impersonator) { build_stubbed(:user, name: 'Agent Donald', current_sign_in_ip: '8.8.8.8') }
+        let(:author) { build_stubbed(:author, impersonator: impersonator) }
+
+        it 'does not includes impersonator name in message' do
+          expect(event.details[:custom_message])
+            .to eq('Added an interesting field from project Gotham')
+        end
+      end
     end
 
     context 'when attributes are missing' do
       context 'when author is missing' do
         let(:author) { nil }
 
-        it { expect { event }.to raise_error(described_class::MissingAttributeError) }
+        it { expect { service }.to raise_error(described_class::MissingAttributeError) }
       end
 
       context 'when scope is missing' do
         let(:scope) { nil }
 
-        it { expect { event }.to raise_error(described_class::MissingAttributeError) }
+        it { expect { service }.to raise_error(described_class::MissingAttributeError) }
       end
 
       context 'when target is missing' do
         let(:target) { nil }
 
-        it { expect { event }.to raise_error(described_class::MissingAttributeError) }
+        it { expect { service }.to raise_error(described_class::MissingAttributeError) }
       end
 
       context 'when message is missing' do
         let(:message) { nil }
 
-        it { expect { event }.to raise_error(described_class::MissingAttributeError) }
+        it { expect { service }.to raise_error(described_class::MissingAttributeError) }
       end
     end
   end

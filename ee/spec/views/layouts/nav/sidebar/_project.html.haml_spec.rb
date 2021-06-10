@@ -181,7 +181,7 @@ RSpec.describe 'layouts/nav/sidebar/_project' do
   end
 
   describe 'Security and Compliance' do
-    describe 'when user does not have permissions' do
+    context 'when user does not have permissions' do
       before do
         allow(view).to receive(:current_user).and_return(nil)
       end
@@ -190,16 +190,6 @@ RSpec.describe 'layouts/nav/sidebar/_project' do
         render
 
         expect(rendered).not_to have_link('Security & Compliance', href: project_security_dashboard_index_path(project))
-      end
-
-      context 'when user can see discover project security' do
-        it 'top level navigation link is visible and pointing to that page' do
-          allow(view).to receive(:show_discover_project_security?).and_return(true)
-
-          render
-
-          expect(rendered).to have_link('Security & Compliance', href: project_security_discover_path(project))
-        end
       end
     end
 
@@ -285,7 +275,7 @@ RSpec.describe 'layouts/nav/sidebar/_project' do
       end
     end
 
-    describe 'Escalation policies' do
+    describe 'Escalation Policies' do
       before do
         allow(view).to receive(:current_user).and_return(user)
         stub_licensed_features(oncall_schedules: true, escalation_policies: true)
@@ -294,7 +284,7 @@ RSpec.describe 'layouts/nav/sidebar/_project' do
       it 'has a link to the escalation policies page' do
         render
 
-        expect(rendered).to have_link('Escalation policies', href: project_incident_management_escalation_policies_path(project))
+        expect(rendered).to have_link('Escalation Policies', href: project_incident_management_escalation_policies_path(project))
       end
 
       describe 'when the user does not have access' do
@@ -303,7 +293,7 @@ RSpec.describe 'layouts/nav/sidebar/_project' do
         it 'does not have a link to the escalation policies page' do
           render
 
-          expect(rendered).not_to have_link('Escalation policies')
+          expect(rendered).not_to have_link('Escalation Policies')
         end
       end
     end

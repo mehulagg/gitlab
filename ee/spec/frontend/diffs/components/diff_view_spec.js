@@ -8,7 +8,7 @@ import createDiffsStore from '~/diffs/store/modules';
 
 const getReadableFile = () => JSON.parse(JSON.stringify(diffFileMockDataReadable));
 
-function createComponent({ withCodequality = true }) {
+function createComponent({ withCodequality = true, provide = {} }) {
   const diffFile = getReadableFile();
   const localVue = createLocalVue();
 
@@ -44,6 +44,7 @@ function createComponent({ withCodequality = true }) {
       diffFile,
       diffLines: [],
     },
+    provide,
   });
 
   return {
@@ -60,13 +61,29 @@ describe('EE DiffView', () => {
     wrapper.destroy();
   });
 
-  describe('when there is diff data for the file', () => {
+  describe('when there is diff data for the file and the feature flag is enabled', () => {
     beforeEach(() => {
-      ({ wrapper } = createComponent({ withCodequality: true }));
+      ({ wrapper } = createComponent({
+        withCodequality: true,
+        provide: { glFeatures: { codequalityMrDiffAnnotations: true } },
+      }));
     });
 
     it('has the with-codequality class', () => {
       expect(wrapper.classes('with-codequality')).toBe(true);
+    });
+  });
+
+  describe('when there is diff data for the file and the feature flag is disabled', () => {
+    beforeEach(() => {
+      ({ wrapper } = createComponent({
+        withCodequality: true,
+        provide: { glFeatures: { codequalityMrDiffAnnotations: false } },
+      }));
+    });
+
+    it('does not have the with-codequality class', () => {
+      expect(wrapper.classes('with-codequality')).toBe(false);
     });
   });
 

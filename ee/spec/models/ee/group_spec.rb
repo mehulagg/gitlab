@@ -63,6 +63,16 @@ RSpec.describe Group do
       end
     end
 
+    describe '.with_saml_provider' do
+      subject(:relation) { described_class.with_saml_provider }
+
+      it 'preloads saml_providers' do
+        create(:saml_provider, group: group)
+
+        expect(relation.first.association(:saml_provider)).to be_loaded
+      end
+    end
+
     describe '.aimed_for_deletion' do
       let!(:date) { 10.days.ago }
 

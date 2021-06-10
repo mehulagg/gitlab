@@ -28,7 +28,7 @@ class DependencyEntity < Grape::Entity
   private
 
   def can_read_vulnerabilities?
-    can?(request.user, :read_vulnerability, request.project)
+    can?(request.user, :read_security_resource, request.project)
   end
 
   def can_read_licenses?

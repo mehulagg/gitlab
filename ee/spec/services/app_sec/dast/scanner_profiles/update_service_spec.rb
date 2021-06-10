@@ -76,25 +76,22 @@ RSpec.describe AppSec::Dast::ScannerProfiles::UpdateService do
       let(:base_audit_details) do
         [
           {
-            change: "DAST scanner profile name",
-            from: dast_profile.name,
-            to: new_profile_name,
+            author_name: user.name,
+            custom_message: "Changed DAST scanner profile name from #{dast_profile.name} to #{new_profile_name}",
             target_id: dast_profile.id,
             target_type: 'DastScannerProfile',
             target_details: new_profile_name
           },
           {
-            change: "DAST scanner profile target_timeout",
-            from: dast_profile.target_timeout,
-            to: new_target_timeout,
+            author_name: user.name,
+            custom_message: "Changed DAST scanner profile target_timeout from #{dast_profile.target_timeout} to #{new_target_timeout}",
             target_id: dast_profile.id,
             target_type: 'DastScannerProfile',
             target_details: new_profile_name
           },
           {
-            change: "DAST scanner profile spider_timeout",
-            from: dast_profile.spider_timeout,
-            to: new_spider_timeout,
+            author_name: user.name,
+            custom_message: "Changed DAST scanner profile spider_timeout from #{dast_profile.spider_timeout} to #{new_spider_timeout}",
             target_id: dast_profile.id,
             target_type: 'DastScannerProfile',
             target_details: new_profile_name
@@ -169,25 +166,22 @@ RSpec.describe AppSec::Dast::ScannerProfiles::UpdateService do
 
           expect(audit_events_details).to match_array(base_audit_details + [
             {
-              change: "DAST scanner profile scan_type",
-              from: dast_profile.scan_type,
-              to: new_scan_type,
+              author_name: user.name,
+              custom_message: "Changed DAST scanner profile scan_type from #{dast_profile.scan_type} to #{new_scan_type}",
               target_id: profile.id,
               target_type: 'DastScannerProfile',
               target_details: new_profile_name
             },
             {
-              change: "DAST scanner profile use_ajax_spider",
-              from: dast_profile.use_ajax_spider,
-              to: new_use_ajax_spider,
+              author_name: user.name,
+              custom_message: "Changed DAST scanner profile use_ajax_spider from #{dast_profile.use_ajax_spider} to #{new_use_ajax_spider}",
               target_id: profile.id,
               target_type: 'DastScannerProfile',
               target_details: new_profile_name
             },
             {
-              change: "DAST scanner profile show_debug_messages",
-              from: dast_profile.show_debug_messages,
-              to: new_show_debug_messages,
+              author_name: user.name,
+              custom_message: "Changed DAST scanner profile show_debug_messages from #{dast_profile.show_debug_messages} to #{new_show_debug_messages}",
               target_id: profile.id,
               target_type: 'DastScannerProfile',
               target_details: new_profile_name

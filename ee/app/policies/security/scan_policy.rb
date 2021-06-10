@@ -4,7 +4,7 @@ module Security
   class ScanPolicy < BasePolicy
     delegate { @subject.project }
 
-    rule { can?(:read_vulnerability) }.policy do
+    rule { can?(:read_security_resource) }.policy do
       enable :read_scan
     end
   end

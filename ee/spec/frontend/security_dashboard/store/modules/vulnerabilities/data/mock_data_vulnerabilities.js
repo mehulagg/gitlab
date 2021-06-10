@@ -527,8 +527,8 @@ export default [
     confidence: 'unknown',
     url: '/testgroup/testproject/-/security/vulnerabilities/8',
     scanner: {
-      external_id: 'clair',
-      name: 'Clair',
+      external_id: 'trivy',
+      name: 'Trivy',
       vendor: 'GitLab',
     },
     identifiers: [
@@ -585,8 +585,8 @@ export default [
     confidence: 'unknown',
     url: '/testgroup/testproject/-/security/vulnerabilities/9',
     scanner: {
-      external_id: 'clair',
-      name: 'Clair',
+      external_id: 'trivy',
+      name: 'Trivy',
       vendor: 'GitLab',
     },
     identifiers: [

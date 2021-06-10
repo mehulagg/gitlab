@@ -75,6 +75,22 @@ RSpec.describe Ci::Runner do
         expect { create(:group, runners: [project_runner]) }
           .to raise_error(ActiveRecord::RecordInvalid)
       end
+
+      context 'when runner has config' do
+        it 'is valid' do
+          runner = build(:ci_runner, config: { gpus: "all" })
+
+          expect(runner).to be_valid
+        end
+      end
+
+      context 'when runner has an invalid config' do
+        it 'is invalid' do
+          runner = build(:ci_runner, config: { test: 1 })
+
+          expect(runner).not_to be_valid
+        end
+      end
     end
 
     context 'cost factors validations' do
@@ -257,6 +273,20 @@ RSpec.describe Ci::Runner do
     end
   end
 
+  describe '.recent' do
+    subject { described_class.recent }
+
+    before do
+      @runner1 = create(:ci_runner, :instance, contacted_at: nil, created_at: 2.months.ago)
+      @runner2 = create(:ci_runner, :instance, contacted_at: nil, created_at: 3.months.ago)
+      @runner3 = create(:ci_runner, :instance, contacted_at: 1.month.ago, created_at: 2.months.ago)
+      @runner4 = create(:ci_runner, :instance, contacted_at: 1.month.ago, created_at: 3.months.ago)
+      @runner5 = create(:ci_runner, :instance, contacted_at: 3.months.ago, created_at: 5.months.ago)
+    end
+
+    it { is_expected.to eq([@runner1, @runner3, @runner4])}
+  end
+
   describe '.online' do
     subject { described_class.online }
 
@@ -347,6 +377,22 @@ RSpec.describe Ci::Runner do
     end
 
     it { is_expected.to eq([@runner1])}
+  end
+
+  describe '#tick_runner_queue' do
+    it 'sticks the runner to the primary and calls the original method' do
+      runner = create(:ci_runner)
+
+      allow(Gitlab::Database::LoadBalancing).to receive(:enable?)
+        .and_return(true)
+
+      expect(Gitlab::Database::LoadBalancing::Sticking).to receive(:stick)
+        .with(:runner, runner.id)
+
+      expect(Gitlab::Workhorse).to receive(:set_key_and_notify)
+
+      runner.tick_runner_queue
+    end
   end
 
   describe '#can_pick?' do
@@ -653,7 +699,7 @@ RSpec.describe Ci::Runner do
   describe '#heartbeat' do
     let(:runner) { create(:ci_runner, :project) }
 
-    subject { runner.heartbeat(architecture: '18-bit') }
+    subject { runner.heartbeat(architecture: '18-bit', config: { gpus: "all" }) }
 
     context 'when database was updated recently' do
       before do
@@ -701,6 +747,7 @@ RSpec.describe Ci::Runner do
     def does_db_update
       expect { subject }.to change { runner.reload.read_attribute(:contacted_at) }
         .and change { runner.reload.read_attribute(:architecture) }
+        .and change { runner.reload.read_attribute(:config) }
     end
   end
 
@@ -826,12 +873,12 @@ RSpec.describe Ci::Runner do
       expect(described_class.search(runner.token)).to eq([runner])
     end
 
-    it 'returns runners with a partially matching token' do
-      expect(described_class.search(runner.token[0..2])).to eq([runner])
+    it 'does not return runners with a partially matching token' do
+      expect(described_class.search(runner.token[0..2])).to be_empty
     end
 
-    it 'returns runners with a matching token regardless of the casing' do
-      expect(described_class.search(runner.token.upcase)).to eq([runner])
+    it 'does not return runners with a matching token with different casing' do
+      expect(described_class.search(runner.token.upcase)).to be_empty
     end
 
     it 'returns runners with a matching description' do
@@ -919,25 +966,9 @@ RSpec.describe Ci::Runner do
       end
     end
 
-    context 'build picking improvement enabled' do
-      before do
-        stub_feature_flags(ci_reduce_queries_when_ticking_runner_queue: true)
-      end
-
+    context 'build picking improvement' do
       it 'does not check if the build is assignable to a runner' do
         expect(runner).not_to receive(:can_pick?)
-
-        runner.pick_build!(build)
-      end
-    end
-
-    context 'build picking improvement disabled' do
-      before do
-        stub_feature_flags(ci_reduce_queries_when_ticking_runner_queue: false)
-      end
-
-      it 'checks if the build is assignable to a runner' do
-        expect(runner).to receive(:can_pick?).and_call_original
 
         runner.pick_build!(build)
       end

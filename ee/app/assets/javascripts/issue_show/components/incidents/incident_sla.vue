@@ -3,27 +3,27 @@ import { GlIcon } from '@gitlab/ui';
 import { isValidSlaDueAt } from 'ee/vue_shared/components/incidents/utils';
 import ServiceLevelAgreement from 'ee_component/vue_shared/components/incidents/service_level_agreement.vue';
 import createFlash from '~/flash';
-import { formatTime, calculateRemainingMilliseconds } from '~/lib/utils/datetime_utility';
 import { s__ } from '~/locale';
-import getSlaDueAt from './graphql/queries/get_sla_due_at.graphql';
+import getSlaIncidentDataQuery from './graphql/queries/get_sla_due_at.query.graphql';
 
 export default {
   components: { GlIcon, ServiceLevelAgreement },
   inject: ['fullPath', 'iid', 'slaFeatureAvailable'],
   apollo: {
     slaDueAt: {
-      query: getSlaDueAt,
+      query: getSlaIncidentDataQuery,
       variables() {
         return {
           fullPath: this.fullPath,
           iid: this.iid,
         };
       },
-      update(data) {
-        return data?.project?.issue?.slaDueAt;
+      update({ project }) {
+        return project?.issue?.slaDueAt || null;
       },
       result({ data }) {
-        const isValidSla = isValidSlaDueAt(data?.project?.issue?.slaDueAt);
+        const issue = data?.project?.issue;
+        const isValidSla = isValidSlaDueAt(issue?.slaDueAt);
 
         // Render component
         this.hasData = isValidSla;
@@ -40,17 +40,9 @@ export default {
   },
   data() {
     return {
-      slaDueAt: null,
       hasData: false,
+      slaDueAt: null,
     };
-  },
-  computed: {
-    displayValue() {
-      const time = formatTime(calculateRemainingMilliseconds(this.slaDueAt));
-
-      // remove the seconds portion of the string
-      return time.substring(0, time.length - 3);
-    },
   },
 };
 </script>
@@ -60,7 +52,7 @@ export default {
     <span class="gl-font-weight-bold">{{ s__('HighlightBar|Time to SLA:') }}</span>
     <span class="gl-white-space-nowrap">
       <gl-icon name="timer" />
-      <service-level-agreement :sla-due-at="slaDueAt" />
+      <service-level-agreement :sla-due-at="slaDueAt" :issue-iid="iid" :project-path="fullPath" />
     </span>
   </div>
 </template>

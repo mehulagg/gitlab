@@ -18,7 +18,7 @@ describe('ThreatMonitoringSection component', () => {
 
   const factory = ({ propsData, state } = {}) => {
     store = createStore();
-    Object.assign(store.state.threatMonitoringWaf, {
+    Object.assign(store.state.threatMonitoringNetworkPolicy, {
       isLoadingStatistics: false,
       statistics: {
         total: 100,
@@ -36,7 +36,7 @@ describe('ThreatMonitoringSection component', () => {
 
     wrapper = shallowMount(ThreatMonitoringSection, {
       propsData: {
-        storeNamespace: 'threatMonitoringWaf',
+        storeNamespace: 'threatMonitoringNetworkPolicy',
         title: 'Web Application Firewall',
         subtitle: 'Requests',
         nominalTitle: 'Total Requests',
@@ -113,21 +113,21 @@ describe('ThreatMonitoringSection component', () => {
   });
 
   it('fetches statistics', () => {
-    expect(store.dispatch).toHaveBeenCalledWith('threatMonitoringWaf/fetchStatistics');
+    expect(store.dispatch).toHaveBeenCalledWith('threatMonitoringNetworkPolicy/fetchStatistics');
   });
 
   it('fetches statistics on environment change', async () => {
     store.dispatch.mockReset();
     await store.commit('threatMonitoring/SET_CURRENT_ENVIRONMENT_ID', 2);
 
-    expect(store.dispatch).toHaveBeenCalledWith('threatMonitoringWaf/fetchStatistics');
+    expect(store.dispatch).toHaveBeenCalledWith('threatMonitoringNetworkPolicy/fetchStatistics');
   });
 
   it('fetches statistics on time window change', async () => {
     store.dispatch.mockReset();
     await store.commit('threatMonitoring/SET_CURRENT_TIME_WINDOW', 'hour');
 
-    expect(store.dispatch).toHaveBeenCalledWith('threatMonitoringWaf/fetchStatistics');
+    expect(store.dispatch).toHaveBeenCalledWith('threatMonitoringNetworkPolicy/fetchStatistics');
   });
 
   describe('given the statistics are loading', () => {

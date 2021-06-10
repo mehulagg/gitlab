@@ -1,6 +1,6 @@
 ---
 stage: Verify
-group: Continuous Integration
+group: Pipeline Execution
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
@@ -82,8 +82,11 @@ job1:
     - echo This rule uses parentheses.
   only:
     variables:
-      - ($CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH == "develop") && $MY_VARIABLE
+      - ($CI_COMMIT_BRANCH == "main" || $CI_COMMIT_BRANCH == "develop") && $MY_VARIABLE
 ```
+
+When multiple entries are specified in `only:variables`, the job runs when at least one of them evaluates to `true`.
+You can use `&&` in a single entry when multiple conditions must be satisfied at the same time.
 
 ### `only:changes` / `except:changes` examples
 

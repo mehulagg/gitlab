@@ -51,15 +51,15 @@ module Resolvers
     private
 
     def iterations_finder_params(args)
-      IterationsFinder.params_for_parent(parent, include_ancestors: args[:include_ancestors]).merge!(
+      {
+        parent: parent,
+        include_ancestors: args[:include_ancestors],
         id: args[:id],
         iid: args[:iid],
         iteration_cadence_ids: args[:iteration_cadence_ids],
         state: args[:state] || 'all',
-        start_date: args.dig(:timeframe, :start) || args[:start_date],
-        end_date: args.dig(:timeframe, :end) || args[:end_date],
         search_title: args[:title]
-      )
+      }.merge(transform_timeframe_parameters(args))
     end
 
     def parent

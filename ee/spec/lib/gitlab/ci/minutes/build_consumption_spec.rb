@@ -9,7 +9,7 @@ RSpec.describe Gitlab::Ci::Minutes::BuildConsumption do
   let(:build) { build_stubbed(:ci_build, runner: runner, project: project) }
 
   let_it_be(:project) { create(:project) }
-  let_it_be(:runner) { create(:ci_runner, :instance) }
+  let_it_be_with_refind(:runner) { create(:ci_runner, :instance) }
 
   describe '#amount' do
     subject { consumption.amount }

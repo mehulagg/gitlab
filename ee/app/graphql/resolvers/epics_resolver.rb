@@ -54,6 +54,10 @@ module Resolvers
              required: false,
              description: 'Filter by reaction emoji applied by the current user.'
 
+    argument :not, ::Types::Epics::NegatedEpicFilterInputType,
+             required: false,
+             description: 'Negated epic arguments.'
+
     type Types::EpicType, null: true
 
     def ready?(**args)
@@ -98,10 +102,15 @@ module Resolvers
     def transform_args(args)
       transformed               = args.dup
       transformed[:group_id]    = group
-      transformed[:parent_id]   = parent.id if parent
       transformed[:iids]      ||= [args[:iid]].compact
 
-      transformed
+      transformed.merge(transform_timeframe_parameters(args)).merge(relative_param)
+    end
+
+    def relative_param
+      return {} unless parent
+
+      { parent_id: parent.id }
     end
 
     # `resolver_object` refers to the object we're currently querying on, and is usually a `Group`

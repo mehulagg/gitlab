@@ -1,75 +1,65 @@
 import { createLocalVue, mount } from '@vue/test-utils';
+import { nextTick } from 'vue';
 import Vuex from 'vuex';
 import BoardScope from 'ee/boards/components/board_scope.vue';
+import { useMockIntersectionObserver } from 'helpers/mock_dom_observer';
 import { TEST_HOST } from 'helpers/test_constants';
+import LabelsSelect from '~/vue_shared/components/sidebar/labels_select_vue/labels_select_root.vue';
 
 const localVue = createLocalVue();
 localVue.use(Vuex);
 
 describe('BoardScope', () => {
   let wrapper;
-  let vm;
+  let store;
+  useMockIntersectionObserver();
 
-  beforeEach(() => {
-    const propsData = {
-      collapseScope: false,
-      canAdminBoard: false,
-      board: {
-        labels: [],
-        assignee: {},
+  const createStore = () => {
+    return new Vuex.Store({
+      getters: {
+        isIssueBoard: () => true,
+        isEpicBoard: () => false,
       },
-      labelsPath: `${TEST_HOST}/labels`,
-      labelsWebUrl: `${TEST_HOST}/-/labels`,
-    };
+    });
+  };
 
-    const createStore = () => {
-      return new Vuex.Store({
-        getters: {
-          isIssueBoard: () => true,
-          isEpicBoard: () => false,
-        },
-      });
-    };
-
-    const store = createStore();
-
+  function mountComponent() {
     wrapper = mount(BoardScope, {
       localVue,
-      propsData,
       store,
+      propsData: {
+        collapseScope: false,
+        canAdminBoard: false,
+        board: {
+          labels: [],
+          assignee: {},
+        },
+        labelsPath: `${TEST_HOST}/labels`,
+        labelsWebUrl: `${TEST_HOST}/-/labels`,
+      },
     });
+  }
 
-    ({ vm } = wrapper);
+  beforeEach(() => {
+    store = createStore();
+    mountComponent();
   });
 
   afterEach(() => {
     wrapper.destroy();
   });
 
-  describe('methods', () => {
-    describe('handleLabelClick', () => {
-      const label = {
-        id: 1,
-        title: 'Foo',
-        color: ['#BADA55'],
-        text_color: '#FFFFFF',
-      };
+  const findLabelSelect = () => wrapper.findComponent(LabelsSelect);
 
-      it('initializes `board.labels` as empty array when `label.isAny` is `true`', () => {
-        const labelIsAny = { isAny: true };
-        vm.handleLabelClick(labelIsAny);
-
-        expect(Array.isArray(vm.board.labels)).toBe(true);
-        expect(vm.board.labels).toHaveLength(0);
-      });
-
-      it('adds provided `label` to board.labels', () => {
-        vm.handleLabelClick(label);
-
-        expect(vm.board.labels).toHaveLength(1);
-        expect(vm.board.labels[0].id).toBe(label.id);
-        vm.handleLabelClick(label);
-      });
+  describe('ee/app/assets/javascripts/boards/components/board_scope.vue', () => {
+    it('emits selected labels to be added and removed from the board', async () => {
+      const labels = [{ id: '1', set: true, color: '#BADA55', text_color: '#FFFFFF' }];
+      expect(findLabelSelect().exists()).toBe(true);
+      expect(findLabelSelect().text()).toContain('Any label');
+      expect(findLabelSelect().props('selectedLabels')).toHaveLength(0);
+      findLabelSelect().vm.$emit('updateSelectedLabels', labels);
+      await nextTick();
+      expect(wrapper.emitted('set-board-labels')).toEqual([[labels]]);
     });
   });
 });

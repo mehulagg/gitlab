@@ -13,8 +13,8 @@ RSpec.describe Admin::DevOpsReportController do
         stub_licensed_features(devops_adoption: true)
       end
 
-      it 'is true if there are any segments' do
-        create(:devops_adoption_segment)
+      it 'is true if there are any enabled_namespaces' do
+        create(:devops_adoption_enabled_namespace)
 
         expect(controller.show_adoption?).to be true
       end

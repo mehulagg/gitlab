@@ -208,6 +208,7 @@ formatters
 Fugit
 fuzzer
 Gantt
+Gemfile
 Gemnasium
 Gemojione
 Getter
@@ -294,7 +295,6 @@ keytab
 keytabs
 Kibana
 Kinesis
-Klar
 Knative
 Kramdown
 Kroki
@@ -441,6 +441,7 @@ Pritaly
 Priyanka
 profiler
 Prometheus
+ProseMirror
 protobuf
 protobufs
 proxied
@@ -642,6 +643,7 @@ timeboxed
 timeboxes
 timeboxing
 timecop
+tiptap
 todos
 tokenizer
 Tokenizers

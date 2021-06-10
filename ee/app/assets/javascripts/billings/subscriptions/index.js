@@ -1,5 +1,6 @@
 import Vue from 'vue';
 import Vuex from 'vuex';
+import { parseBoolean } from '~/lib/utils/common_utils';
 import SubscriptionApp from './components/app.vue';
 import initialStore from './store';
 
@@ -21,6 +22,7 @@ export default (containerId = 'js-billing-plans') => {
     customerPortalUrl,
     billableSeatsHref,
     planName,
+    freePersonalNamespace,
   } = containerEl.dataset;
 
   return new Vue({
@@ -35,6 +37,7 @@ export default (containerId = 'js-billing-plans') => {
       customerPortalUrl,
       billableSeatsHref,
       planName,
+      freePersonalNamespace: parseBoolean(freePersonalNamespace),
     },
     render(createElement) {
       return createElement(SubscriptionApp);

@@ -161,6 +161,9 @@ node, using `psql` which is installed by Omnibus GitLab.
 
 The database used by Praefect is now configured.
 
+If you see Praefect database errors after configuring PostgreSQL, see
+[troubleshooting steps](index.md#relation-does-not-exist-errors).
+
 #### PgBouncer
 
 To reduce PostgreSQL resource consumption, we recommend setting up and configuring
@@ -878,7 +881,7 @@ Particular attention should be shown to:
 
 When adding Gitaly Cluster to an existing Gitaly instance, the existing Gitaly storage
 must use a TCP address. If `gitaly_address` is not specified, then a Unix socket is used,
-which will prevent the communication with the cluster.
+which prevents the communication with the cluster.
 
 For example:
 
@@ -1467,8 +1470,10 @@ After creating and configuring Gitaly Cluster:
 1. [Schedule repository storage moves for all projects on a storage shard](../../api/project_repository_storage_moves.md#schedule-repository-storage-moves-for-all-projects-on-a-storage-shard) using the API. For example:
 
    ```shell
-   curl --request POST --header "Private-Token: <your_access_token>" --header "Content-Type: application/json" \
-   --data '{"source_storage_name":"<original_storage_name>","destination_storage_name":"<cluster_storage_name>"}' "https://gitlab.example.com/api/v4/project_repository_storage_moves"
+   curl --request POST --header "Private-Token: <your_access_token>" \
+        --header "Content-Type: application/json" \
+        --data '{"source_storage_name":"<original_storage_name>","destination_storage_name":"<cluster_storage_name>"}' \
+        "https://gitlab.example.com/api/v4/project_repository_storage_moves"
    ```
 
 1. [Query the most recent repository moves](../../api/project_repository_storage_moves.md#retrieve-all-project-repository-storage-moves)
@@ -1500,8 +1505,10 @@ After creating and configuring Gitaly Cluster:
 1. [Schedule repository storage moves for all snippets on a storage shard](../../api/snippet_repository_storage_moves.md#schedule-repository-storage-moves-for-all-snippets-on-a-storage-shard) using the API. For example:
 
    ```shell
-   curl --request POST --header "PRIVATE-TOKEN: <your_access_token>" --header "Content-Type: application/json" \
-   --data '{"source_storage_name":"<original_storage_name>","destination_storage_name":"<cluster_storage_name>"}' "https://gitlab.example.com/api/v4/snippet_repository_storage_moves"
+   curl --request POST --header "PRIVATE-TOKEN: <your_access_token>" \
+        --header "Content-Type: application/json" \
+        --data '{"source_storage_name":"<original_storage_name>","destination_storage_name":"<cluster_storage_name>"}' \
+        "https://gitlab.example.com/api/v4/snippet_repository_storage_moves"
    ```
 
 1. [Query the most recent repository moves](../../api/snippet_repository_storage_moves.md#retrieve-all-snippet-repository-storage-moves)
@@ -1525,8 +1532,10 @@ After creating and configuring Gitaly Cluster:
 1. [Schedule repository storage moves for all groups on a storage shard](../../api/group_repository_storage_moves.md#schedule-repository-storage-moves-for-all-groups-on-a-storage-shard) using the API.
 
     ```shell
-    curl --request POST --header "PRIVATE-TOKEN: <your_access_token>" --header "Content-Type: application/json" \
-    --data '{"source_storage_name":"<original_storage_name>","destination_storage_name":"<cluster_storage_name>"}' "https://gitlab.example.com/api/v4/group_repository_storage_moves"
+    curl --request POST --header "PRIVATE-TOKEN: <your_access_token>" \
+         --header "Content-Type: application/json" \
+         --data '{"source_storage_name":"<original_storage_name>","destination_storage_name":"<cluster_storage_name>"}' \
+         "https://gitlab.example.com/api/v4/group_repository_storage_moves"
     ```
 
 1. [Query the most recent repository moves](../../api/group_repository_storage_moves.md#retrieve-all-group-repository-storage-moves)
@@ -1544,35 +1553,3 @@ After creating and configuring Gitaly Cluster:
    ```
 
 1. Repeat for each storage as required.
-
-## Debugging Praefect
-
-If you receive an error, check `/var/log/gitlab/gitlab-rails/production.log`.
-
-Here are common errors and potential causes:
-
-- 500 response code
-  - **ActionView::Template::Error (7:permission denied)**
-    - `praefect['auth_token']` and `gitlab_rails['gitaly_token']` do not match on the GitLab server.
-  - **Unable to save project. Error: 7:permission denied**
-    - Secret token in `praefect['storage_nodes']` on GitLab server does not match the
-      value in `gitaly['auth_token']` on one or more Gitaly servers.
-- 503 response code
-  - **GRPC::Unavailable (14:failed to connect to all addresses)**
-    - GitLab was unable to reach Praefect.
-  - **GRPC::Unavailable (14:all SubCons are in TransientFailure...)**
-    - Praefect cannot reach one or more of its child Gitaly nodes. Try running
-      the Praefect connection checker to diagnose.
-
-### Determine primary Gitaly node
-
-To determine the current primary Gitaly node for a specific Praefect node:
-
-- Use the `Shard Primary Election` [Grafana chart](#grafana) on the [`Gitlab Omnibus - Praefect` dashboard](https://gitlab.com/gitlab-org/grafana-dashboards/-/blob/master/omnibus/praefect.json).
-  This is recommended.
-- If you do not have Grafana set up, use the following command on each host of each
-  Praefect node:
-
-  ```shell
-  curl localhost:9652/metrics | grep gitaly_praefect_primaries`
-  ```

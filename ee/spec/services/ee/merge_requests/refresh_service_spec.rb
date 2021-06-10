@@ -128,6 +128,12 @@ RSpec.describe MergeRequests::RefreshService do
 
             it_behaves_like 'does not refresh the code owner rules'
           end
+
+          context 'when the branch is created' do
+            let(:oldrev) { Gitlab::Git::BLANK_SHA }
+
+            it_behaves_like 'does not refresh the code owner rules'
+          end
         end
 
         context 'when the branch is not protected' do

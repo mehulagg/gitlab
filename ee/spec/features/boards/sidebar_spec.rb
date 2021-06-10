@@ -40,7 +40,7 @@ RSpec.describe 'Issue Boards', :js do
     visit_project_board
   end
 
-  context 'assignee' do
+  context 'assignee', quarantine: 'https://gitlab.com/gitlab-org/gitlab/-/issues/332078' do
     let(:assignees_widget) { '[data-testid="issue-boards-sidebar"] [data-testid="assignees-widget"]' }
 
     it 'updates the issues assignee' do
@@ -200,7 +200,8 @@ RSpec.describe 'Issue Boards', :js do
       it 'displays name of epic and links to it' do
         click_card(card2)
 
-        expect(epic_widget).to have_link(epic1.title, href: epic_path(epic1))
+        expect(epic_widget).to have_link(epic1.title)
+        expect(find_link(epic1.title)[:href]).to end_with(epic_path(epic1))
       end
 
       it 'updates the epic associated with the issue' do

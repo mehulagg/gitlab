@@ -131,7 +131,7 @@ module EE
           end
 
           def find_iterations(project, params = {})
-            parent_params = ::IterationsFinder.params_for_parent(project, include_ancestors: true)
+            parent_params = { parent: project, include_ancestors: true }
 
             ::IterationsFinder.new(current_user, params.merge(parent_params)).execute
           end

@@ -132,7 +132,7 @@ export default {
       :key="option.id"
       :is-checked="isSelected(option)"
       :text="option.name"
-      data-testid="filterOption"
+      :data-testid="`${filter.id}:${option.id}`"
       @click="toggleOption(option)"
     />
   </filter-body>

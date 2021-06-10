@@ -92,12 +92,10 @@ describe('Value Stream Analytics actions', () => {
 
   describe('setSelectedStage', () => {
     const data = { id: 'someStageId' };
-    const payload = { hasNextPage: null, page: 1 };
 
     it(`dispatches the ${types.SET_SELECTED_STAGE} and ${types.SET_PAGINATION} actions`, () => {
       return testAction(actions.setSelectedStage, data, { ...state, selectedValueStream: {} }, [
         { type: types.SET_SELECTED_STAGE, payload: data },
-        { type: types.SET_PAGINATION, payload },
       ]);
     });
   });
@@ -529,10 +527,7 @@ describe('Value Stream Analytics actions', () => {
         ...state,
         stages,
         currentGroup,
-        featureFlags: {
-          ...state.featureFlags,
-          hasPathNavigation: true,
-        },
+        featureFlags: state.featureFlags,
       };
       mock = new MockAdapter(axios);
       mock.onGet(endpoints.stageCount).reply(httpStatusCodes.OK, { events: [] });
@@ -622,6 +617,16 @@ describe('Value Stream Analytics actions', () => {
           });
           expect(mockDispatch).toHaveBeenCalledWith('setSelectedStage', stage);
           expect(mockDispatch).toHaveBeenCalledWith('fetchStageData', stage.id);
+        });
+      });
+
+      describe('with pagination parameters', () => {
+        it('dispatches "setSelectedStage" and "fetchStageData"', async () => {
+          const stage = { id: 2, title: 'plan' };
+          const pagination = { sort: 'end_event', direction: 'desc', page: 1337 };
+          const payload = { ...initialData, stage, pagination };
+          await actions.initializeCycleAnalytics(store, payload);
+          expect(mockCommit).toHaveBeenCalledWith('INITIALIZE_VSA', payload);
         });
       });
 

@@ -6,7 +6,7 @@ RSpec.describe Gitlab::SubscriptionPortal::Clients::REST do
   let(:client) { Gitlab::SubscriptionPortal::Client }
   let(:http_response) { nil }
   let(:http_method) { :post }
-  let(:error_message) { 'We encountered an error and our team has been notified. Please try again.' }
+  let(:error_message) { 'Our team has been notified. Please try again.' }
   let(:gitlab_http_response) do
     double(code: http_response.code, response: http_response, body: {}, parsed_response: {})
   end
@@ -24,9 +24,7 @@ RSpec.describe Gitlab::SubscriptionPortal::Clients::REST do
   shared_examples 'when http call raises an exception' do
     it 'overrides the error message' do
       exception = Gitlab::HTTP::HTTP_ERRORS.first.new
-      tracked_exception = Gitlab::SubscriptionPortal::Clients::REST::SubscriptionPortalRESTException.new(exception.message)
       allow(Gitlab::HTTP).to receive(http_method).and_raise(exception)
-      expect(Gitlab::ErrorTracking).to receive(:track_exception).with(tracked_exception)
 
       result = subject
 
@@ -40,10 +38,8 @@ RSpec.describe Gitlab::SubscriptionPortal::Clients::REST do
 
     it 'has a unprocessable entity status' do
       allow(Gitlab::HTTP).to receive(http_method).and_return(gitlab_http_response)
-      expect(Gitlab::ErrorTracking).to receive(:track_exception)
 
       expect(subject[:success]).to eq(false)
-      expect(subject[:data][:errors]).to eq(error_message)
     end
   end
 
@@ -52,10 +48,8 @@ RSpec.describe Gitlab::SubscriptionPortal::Clients::REST do
 
     it 'has a server error status' do
       allow(Gitlab::HTTP).to receive(http_method).and_return(gitlab_http_response)
-      expect(Gitlab::ErrorTracking).to receive(:track_exception)
 
       expect(subject[:success]).to eq(false)
-      expect(subject[:data][:errors]).to eq(error_message)
     end
   end
 

@@ -28,7 +28,7 @@ module Groups
     end
 
     def log_audit_event
-      EE::AuditEvents::CustomAuditEventService.new(
+      AuditEvents::CustomAuditEventService.new(
         current_user,
         group,
         nil,

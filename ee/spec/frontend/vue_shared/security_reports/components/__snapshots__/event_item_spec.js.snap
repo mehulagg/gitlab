@@ -11,6 +11,7 @@ exports[`Event Item with action buttons renders the action buttons 1`] = `
       aria-hidden="true"
       class="gl-icon s16"
       data-testid="plus-icon"
+      role="img"
     >
       <use
         href="#plus"
@@ -92,6 +93,7 @@ exports[`Event Item with action buttons renders the action buttons 1`] = `
         aria-hidden="true"
         class="gl-button-icon gl-icon s16"
         data-testid="pencil-icon"
+        role="img"
       >
         <use
           href="#pencil"
@@ -112,6 +114,7 @@ exports[`Event Item with action buttons renders the action buttons 1`] = `
         aria-hidden="true"
         class="gl-button-icon gl-icon s16"
         data-testid="remove-icon"
+        role="img"
       >
         <use
           href="#remove"

@@ -170,39 +170,18 @@ describe('Test coverage table component', () => {
   });
 
   describe('with usage metrics', () => {
-    describe('with :usageDataITestingGroupCodeCoverageProjectClickTotal enabled', () => {
-      it('tracks i_testing_group_code_coverage_project_click_total metric', async () => {
-        const { id } = projects[0];
-        createComponent({
-          glFeatures: { usageDataITestingGroupCodeCoverageProjectClickTotal: true },
-          mountFn: mount,
-        });
+    it('tracks i_testing_group_code_coverage_project_click_total metric', async () => {
+      const { id } = projects[0];
+      createComponent({ mountFn: mount });
 
-        await clickSelectAllProjects();
+      await clickSelectAllProjects();
 
-        findProjectNameById(id).trigger('click');
+      findProjectNameById(id).trigger('click');
 
-        expect(Api.trackRedisHllUserEvent).toHaveBeenCalledTimes(1);
-        expect(Api.trackRedisHllUserEvent).toHaveBeenCalledWith(
-          wrapper.vm.$options.usagePingProjectEvent,
-        );
-      });
-    });
-
-    describe('with :usageDataITestingGroupCodeCoverageProjectClickTotal disabled', () => {
-      it('does not track i_testing_group_code_coverage_project_click_total metric', async () => {
-        const { id } = projects[0];
-        createComponent({
-          glFeatures: { usageDataITestingGroupCodeCoverageProjectClickTotal: false },
-          mountFn: mount,
-        });
-
-        await clickSelectAllProjects();
-
-        findProjectNameById(id).trigger('click');
-
-        expect(Api.trackRedisHllUserEvent).not.toHaveBeenCalled();
-      });
+      expect(Api.trackRedisHllUserEvent).toHaveBeenCalledTimes(1);
+      expect(Api.trackRedisHllUserEvent).toHaveBeenCalledWith(
+        wrapper.vm.$options.usagePingProjectEvent,
+      );
     });
   });
 });

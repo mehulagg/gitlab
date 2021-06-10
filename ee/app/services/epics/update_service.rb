@@ -105,19 +105,48 @@ module Epics
 
     def reposition_on_board(epic)
       return unless params[:move_between_ids]
-      return unless params[positioning_scope_key]
+      return unless epic_board_id
 
-      epic_board_position = issuable_for_positioning(epic.id, params[positioning_scope_key])
+      fill_missing_positions_before
 
+      epic_board_position = issuable_for_positioning(epic.id, epic_board_id, create_missing: true)
       handle_move_between_ids(epic_board_position)
 
-      epic_board_position.save
+      epic_board_position.save!
     end
 
-    def issuable_for_positioning(id, board_id)
+    # we want to create missing only for the epic being moved
+    # other records are handled by PositionCreateService
+    def issuable_for_positioning(id, board_id, create_missing: false)
       return unless id
 
-      Boards::EpicBoardPosition.find_by_epic_id_and_epic_board_id(id, board_id)
+      position = Boards::EpicBoardPosition.find_by_epic_id_and_epic_board_id(id, board_id)
+
+      return position if position
+
+      Boards::EpicBoardPosition.create!(epic_id: id, epic_board_id: board_id) if create_missing
+    end
+
+    def fill_missing_positions_before
+      before_id = params[:move_between_ids].compact.max
+      list_id = params.delete(:list_id)
+      board_group = params.delete(:board_group)
+
+      return unless before_id
+      # if position for the epic above exists we don't need to create positioning records
+      return if issuable_for_positioning(before_id, epic_board_id)
+
+      service_params = {
+        board_id: epic_board_id,
+        list_id: list_id, # we need to have positions only for the current list
+        from_id: before_id # we need to have positions only for the epics above
+      }
+
+      Boards::Epics::PositionCreateService.new(board_group, current_user, service_params).execute
+    end
+
+    def epic_board_id
+      params[positioning_scope_key]
     end
 
     def positioning_scope_key

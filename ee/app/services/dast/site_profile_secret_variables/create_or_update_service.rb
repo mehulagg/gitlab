@@ -20,8 +20,7 @@ module Dast
       private
 
       def allowed?
-        Feature.enabled?(:security_dast_site_profiles_additional_fields, container, default_enabled: :yaml) &&
-          Ability.allowed?(current_user, :create_on_demand_dast_scan, container)
+        Ability.allowed?(current_user, :create_on_demand_dast_scan, container)
       end
 
       def site_profile

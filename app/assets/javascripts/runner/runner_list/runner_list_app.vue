@@ -1,15 +1,26 @@
 <script>
 import * as Sentry from '@sentry/browser';
+import { fetchPolicies } from '~/lib/graphql';
+import { updateHistory } from '~/lib/utils/url_utility';
+import RunnerFilteredSearchBar from '../components/runner_filtered_search_bar.vue';
 import RunnerList from '../components/runner_list.vue';
 import RunnerManualSetupHelp from '../components/runner_manual_setup_help.vue';
+import RunnerPagination from '../components/runner_pagination.vue';
 import RunnerTypeHelp from '../components/runner_type_help.vue';
 import getRunnersQuery from '../graphql/get_runners.query.graphql';
+import {
+  fromUrlQueryToSearch,
+  fromSearchToUrl,
+  fromSearchToVariables,
+} from './filtered_search_utils';
 
 export default {
   components: {
+    RunnerFilteredSearchBar,
     RunnerList,
     RunnerManualSetupHelp,
     RunnerTypeHelp,
+    RunnerPagination,
   },
   props: {
     activeRunnersCount: {
@@ -23,14 +34,29 @@ export default {
   },
   data() {
     return {
-      runners: [],
+      search: fromUrlQueryToSearch(),
+      runners: {
+        items: [],
+        pageInfo: {},
+      },
     };
   },
   apollo: {
     runners: {
       query: getRunnersQuery,
-      update({ runners }) {
-        return runners?.nodes || [];
+      // Runners can be updated by users directly in this list.
+      // A "cache and network" policy prevents outdated filtered
+      // results.
+      fetchPolicy: fetchPolicies.CACHE_AND_NETWORK,
+      variables() {
+        return this.variables;
+      },
+      update(data) {
+        const { runners } = data;
+        return {
+          items: runners?.nodes || [],
+          pageInfo: runners?.pageInfo || {},
+        };
       },
       error(err) {
         this.captureException(err);
@@ -38,11 +64,26 @@ export default {
     },
   },
   computed: {
+    variables() {
+      return fromSearchToVariables(this.search);
+    },
     runnersLoading() {
       return this.$apollo.queries.runners.loading;
     },
     noRunnersFound() {
-      return !this.runnersLoading && !this.runners.length;
+      return !this.runnersLoading && !this.runners.items.length;
+    },
+  },
+  watch: {
+    search: {
+      deep: true,
+      handler() {
+        // TODO Implement back button reponse using onpopstate
+        updateHistory({
+          url: fromSearchToUrl(this.search),
+          title: document.title,
+        });
+      },
     },
   },
   errorCaptured(err) {
@@ -69,14 +110,18 @@ export default {
       </div>
     </div>
 
+    <runner-filtered-search-bar v-model="search" namespace="admin_runners" />
+
     <div v-if="noRunnersFound" class="gl-text-center gl-p-5">
       {{ __('No runners found') }}
     </div>
-    <runner-list
-      v-else
-      :runners="runners"
-      :loading="runnersLoading"
-      :active-runners-count="activeRunnersCount"
-    />
+    <template v-else>
+      <runner-list
+        :runners="runners.items"
+        :loading="runnersLoading"
+        :active-runners-count="activeRunnersCount"
+      />
+      <runner-pagination v-model="search.pagination" :page-info="runners.pageInfo" />
+    </template>
   </div>
 </template>

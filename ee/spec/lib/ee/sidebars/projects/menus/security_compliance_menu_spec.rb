@@ -10,44 +10,20 @@ RSpec.describe Sidebars::Projects::Menus::SecurityComplianceMenu do
   let(:show_discover_project_security) { true }
   let(:context) { Sidebars::Projects::Context.new(current_user: user, container: project, show_promotions: show_promotions, show_discover_project_security: show_discover_project_security) }
 
-  subject { described_class.new(context) }
-
-  describe 'render?' do
-    context 'when user can access security and compliance' do
-      it 'returns true' do
-        expect(subject.render?).to eq true
-      end
-    end
-
-    context 'when user cannot access security and compliance' do
-      let(:user) { nil }
-
-      context 'when show discover project security is enabled' do
-        it 'returns true' do
-          expect(subject.render?).to eq true
-        end
-      end
-
-      context 'when show discover project security is disabled' do
-        let(:show_discover_project_security) { false }
-
-        it 'returns false' do
-          expect(subject.render?).to eq false
-        end
-      end
-    end
-  end
-
   describe '#link' do
+    subject { described_class.new(context) }
+
     let(:show_promotions) { false }
+    let(:show_discover_project_security) { false }
 
     using RSpec::Parameterized::TableSyntax
 
-    where(:security_dashboard_feature, :audit_events_feature, :dependency_scanning_feature, :expected_link) do
-      true  | true  | true  | "/-/security/dashboard"
-      false | true  | true  | "/-/audit_events"
-      false | false | true  | "/-/dependencies"
-      false | false | false | "/-/security/configuration"
+    where(:show_discover_project_security, :security_dashboard_feature, :dependency_scanning_feature, :audit_events_feature, :expected_link) do
+      true  | true  | true  | true  | '/-/security/discover'
+      false | true  | true  | true  | '/-/security/dashboard'
+      false | false | true  | true  | '/-/dependencies'
+      false | false | false | true  | '/-/audit_events'
+      false | false | false | false | '/-/security/configuration'
     end
 
     with_them do
@@ -61,9 +37,9 @@ RSpec.describe Sidebars::Projects::Menus::SecurityComplianceMenu do
     context 'when no security menu item and show promotions' do
       let(:user) { nil }
 
-      it 'returns the link to the discover security path', :aggregate_failures do
+      it 'returns nil', :aggregate_failures do
         expect(subject.renderable_items).to be_empty
-        expect(subject.link).to eq("/#{project.full_path}/-/security/discover")
+        expect(subject.link).to be_nil
       end
     end
   end
@@ -80,6 +56,7 @@ RSpec.describe Sidebars::Projects::Menus::SecurityComplianceMenu do
             projects/security/configuration#show
             projects/security/sast_configuration#show
             projects/security/api_fuzzing_configuration#show
+            projects/security/dast_configuration#show
             projects/security/dast_profiles#show
             projects/security/dast_site_profiles#new
             projects/security/dast_site_profiles#edit
@@ -91,6 +68,20 @@ RSpec.describe Sidebars::Projects::Menus::SecurityComplianceMenu do
         it 'includes all the security configuration paths' do
           expect(subject.active_routes[:path]).to eq expected_security_configuration_paths
         end
+      end
+    end
+
+    describe 'Discover Security & Compliance' do
+      let(:item_id) { :discover_project_security }
+
+      context 'when show_discover_project_security is true' do
+        it { is_expected.not_to be_nil }
+      end
+
+      context 'when show_discover_project_security is not true' do
+        let(:show_discover_project_security) { false }
+
+        it { is_expected.to be_nil }
       end
     end
 

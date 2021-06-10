@@ -1,7 +1,7 @@
 import Vue from 'vue';
-import PipelineSecurityDashboard from './components/pipeline_security_dashboard.vue';
+import { parseBoolean } from '~/lib/utils/common_utils';
+import PipelineSecurityDashboard from './components/pipeline/pipeline_security_dashboard.vue';
 import apolloProvider from './graphql/provider';
-import createRouter from './router';
 import createDashboardStore from './store';
 import { DASHBOARD_TYPES } from './store/constants';
 import { LOADING_VULNERABILITIES_ERROR_CODES } from './store/modules/vulnerabilities/constants';
@@ -25,6 +25,8 @@ export default () => {
     emptyStateForbiddenSvgPath,
     projectFullPath,
     pipelineJobsPath,
+    canAdminVulnerability,
+    securityReportHelpPageLink,
   } = el.dataset;
 
   const loadingErrorIllustrations = {
@@ -32,35 +34,31 @@ export default () => {
     [LOADING_VULNERABILITIES_ERROR_CODES.FORBIDDEN]: emptyStateForbiddenSvgPath,
   };
 
-  const router = createRouter();
-
   return new Vue({
     el,
-    router,
     apolloProvider,
     store: createDashboardStore({
       dashboardType: DASHBOARD_TYPES.PIPELINE,
     }),
     provide: {
       dashboardType: DASHBOARD_TYPES.PIPELINE,
+      projectId: parseInt(projectId, 10),
       projectFullPath,
       dashboardDocumentation,
       emptyStateSvgPath,
+      canAdminVulnerability: parseBoolean(canAdminVulnerability),
       pipeline: {
         id: parseInt(pipelineId, 10),
         iid: parseInt(pipelineIid, 10),
         jobsPath: pipelineJobsPath,
         sourceBranch,
       },
+      securityReportHelpPageLink,
+      vulnerabilitiesEndpoint,
+      loadingErrorIllustrations,
     },
     render(createElement) {
-      return createElement(PipelineSecurityDashboard, {
-        props: {
-          projectId: parseInt(projectId, 10),
-          vulnerabilitiesEndpoint,
-          loadingErrorIllustrations,
-        },
-      });
+      return createElement(PipelineSecurityDashboard);
     },
   });
 };

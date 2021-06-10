@@ -4,7 +4,7 @@ group: Distribution
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
-# Debugging Tips
+# Debugging tips **(FREE SELF)**
 
 Sometimes things don't work the way they should. Here are some tips on debugging issues out
 in production.
@@ -26,7 +26,7 @@ You can enable output of Active Record debug logging in the Rails console
 session by running:
 
 ```ruby
-ActiveRecord::Base.logger = Logger.new(STDOUT)
+ActiveRecord::Base.logger = Logger.new($stdout)
 ```
 
 This will show information about database queries triggered by any Ruby code
@@ -155,7 +155,7 @@ and more. However, this is not enabled by default. To enable it, define the
 gitlab_rails['env'] = {"ENABLE_RBTRACE" => "1"}
 ```
 
-Then reconfigure the system and restart Unicorn and Sidekiq. To run this
+Then reconfigure the system and restart Puma and Sidekiq. To run this
 in Omnibus, run as root:
 
 ```ruby

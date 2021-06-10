@@ -13,7 +13,7 @@ module Tooling
         'meta'
       ].freeze
       NO_CHANGELOG_CATEGORIES = %i[docs none].freeze
-      CHANGELOG_TRAILER_REGEX = /^Changelog:\s*(?<category>.+)$/.freeze
+      CHANGELOG_TRAILER_REGEX = /^(?<name>Changelog):\s*(?<category>.+)$/i.freeze
       CHANGELOG_EE_TRAILER_REGEX = /^EE: true$/.freeze
       CHANGELOG_MODIFIED_URL_TEXT = "**CHANGELOG.md was edited.** Please remove the additions and follow the [changelog guidelines](https://docs.gitlab.com/ee/development/changelog.html).\n\n"
       CHANGELOG_MISSING_URL_TEXT = "**[CHANGELOG missing](https://docs.gitlab.com/ee/development/changelog.html)**:\n\n"
@@ -23,7 +23,7 @@ module Tooling
         ci: <<~MSG
         If you want to create a changelog entry for GitLab FOSS, add the `Changelog` trailer to the commit message you want to add to the changelog.
 
-        If you want to create a changelog entry for GitLab EE, also add the trailer `EE: true` to your commit message.
+        If you want to create a changelog entry for GitLab EE, also [add the `EE: true` trailer](https://docs.gitlab.com/ee/development/changelog.html#gitlab-enterprise-changes) to your commit message.
 
         If this merge request [doesn't need a CHANGELOG entry](https://docs.gitlab.com/ee/development/changelog.html#what-warrants-a-changelog-entry), feel free to ignore this message.
         MSG
@@ -124,7 +124,12 @@ module Tooling
 
       def check_changelog_trailer(commit)
         trailer = commit.message.match(CHANGELOG_TRAILER_REGEX)
+        name = trailer[:name]
         category = trailer[:category]
+
+        unless name == 'Changelog'
+          return ChangelogCheckResult.error("The changelog trailer for commit #{commit.sha} must be `Changelog` (starting with a capital C), not `#{name}`")
+        end
 
         return ChangelogCheckResult.empty if CATEGORIES.include?(category)
 
@@ -138,15 +143,15 @@ module Tooling
         ee_changes = project_helper.all_ee_changes.dup
 
         if ee_changes.any? && !ee_changelog? && !required?
-          check_result.warning("This MR changes code in `ee/`, but is missing a Changelog commit. Consider adding the Changelog trailer to at least one commit.")
+          check_result.warning("This MR changes code in `ee/`, but its Changelog commit is missing the [`EE: true` trailer](https://docs.gitlab.com/ee/development/changelog.html#gitlab-enterprise-changes). Consider adding it to your Changelog commits.")
         end
 
         if ee_changes.empty? && ee_changelog?
-          check_result.warning("This MR has a Changelog commit for EE, but no code changes in `ee/`. Consider removing the use of the `EE: true` trailer from your commits.")
+          check_result.warning("This MR has a Changelog commit for EE, but no code changes in `ee/`. Consider removing the `EE: true` trailer from your commits.")
         end
 
         if ee_changes.any? && ee_changelog? && required_reasons.include?(:db_changes)
-          check_result.warning("This MR has a Changelog commit with the `EE: true` trailer, but there are database changes which [requires](https://docs.gitlab.com/ee/development/changelog.html#what-warrants-a-changelog-entry) the Changelog commiot to not have the `EE: true` trailer. Consider removing the `EE: true` trailer.")
+          check_result.warning("This MR has a Changelog commit with the `EE: true` trailer, but there are database changes which [requires](https://docs.gitlab.com/ee/development/changelog.html#what-warrants-a-changelog-entry) the Changelog commit to not have the `EE: true` trailer. Consider removing the `EE: true` trailer from your commits.")
         end
 
         check_result

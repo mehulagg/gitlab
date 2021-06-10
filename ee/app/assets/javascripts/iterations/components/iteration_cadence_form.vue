@@ -8,9 +8,13 @@ import {
   GlFormGroup,
   GlFormInput,
   GlFormSelect,
+  GlFormTextarea,
 } from '@gitlab/ui';
+import { convertToGraphQLId } from '~/graphql_shared/utils';
 import { s__, __ } from '~/locale';
-import createCadence from '../queries/create_cadence.mutation.graphql';
+import createCadence from '../queries/cadence_create.mutation.graphql';
+import updateCadence from '../queries/cadence_update.mutation.graphql';
+import readCadence from '../queries/iteration_cadence.query.graphql';
 
 const i18n = Object.freeze({
   title: {
@@ -31,21 +35,34 @@ const i18n = Object.freeze({
     description: s__('Iterations|The duration for each iteration (in weeks)'),
     placeholder: s__('Iterations|Select duration'),
   },
+  rollOver: {
+    label: s__('Iterations|Roll over issues'),
+    description: s__('Iterations|Move incomplete issues to the next iteration'),
+  },
   futureIterations: {
     label: s__('Iterations|Future iterations'),
     description: s__('Iterations|Number of future iterations you would like to have scheduled'),
     placeholder: s__('Iterations|Select number'),
   },
-  pageTitle: s__('Iterations|New iteration cadence'),
-  create: s__('Iterations|Create cadence'),
+  description: {
+    label: __('Description'),
+  },
+  edit: {
+    title: s__('Iterations|Edit iteration cadence'),
+    save: s__('Iterations|Save cadence'),
+  },
+  new: {
+    title: s__('Iterations|New iteration cadence'),
+    save: s__('Iterations|Create cadence'),
+  },
   cancel: __('Cancel'),
   requiredField: __('This field is required.'),
 });
 
 export default {
-  availableDurations: [{ value: null, text: i18n.duration.placeholder }, 1, 2, 3, 4, 5, 6],
+  availableDurations: [{ value: 0, text: i18n.duration.placeholder }, 1, 2, 3, 4, 5, 6],
   availableFutureIterations: [
-    { value: null, text: i18n.futureIterations.placeholder },
+    { value: 0, text: i18n.futureIterations.placeholder },
     2,
     4,
     6,
@@ -63,19 +80,26 @@ export default {
     GlFormGroup,
     GlFormInput,
     GlFormSelect,
+    GlFormTextarea,
   },
   inject: ['groupPath', 'cadencesListPath'],
   data() {
     return {
-      cadences: [],
+      group: {
+        loading: false,
+        iterationCadences: {
+          nodes: [],
+        },
+      },
       loading: false,
       errorMessage: '',
       title: '',
       automatic: true,
+      rollOver: false,
       startDate: null,
-      durationInWeeks: null,
-      rollOverIssues: false,
-      iterationsInAdvance: null,
+      durationInWeeks: 0,
+      iterationsInAdvance: 0,
+      description: '',
       validationState: {
         title: null,
         startDate: null,
@@ -86,27 +110,83 @@ export default {
     };
   },
   computed: {
+    loadingCadence() {
+      return this.$apollo.queries.group.loading;
+    },
+    cadenceId() {
+      return this.$router.currentRoute.params.cadenceId;
+    },
+    isEdit() {
+      return Boolean(this.cadenceId);
+    },
+    page() {
+      return this.isEdit ? 'edit' : 'new';
+    },
+    mutation() {
+      return this.isEdit ? updateCadence : createCadence;
+    },
     valid() {
       return !Object.values(this.validationState).includes(false);
     },
     variables() {
+      const id = this.isEdit
+        ? convertToGraphQLId('Iterations::Cadence', this.cadenceId)
+        : undefined;
+      const groupPath = this.isEdit ? undefined : this.groupPath;
+
       const vars = {
         input: {
-          groupPath: this.groupPath,
+          groupPath,
+          id,
           title: this.title,
           automatic: this.automatic,
           startDate: this.startDate,
           durationInWeeks: this.durationInWeeks,
           active: true,
+          iterationsInAdvance: this.iterationsInAdvance,
+          description: this.description,
         },
       };
-      if (this.automatic) {
-        vars.input = {
-          ...vars.input,
-          iterationsInAdvance: this.iterationsInAdvance,
-        };
-      }
+
       return vars;
+    },
+  },
+  apollo: {
+    group: {
+      skip() {
+        return !this.isEdit;
+      },
+      query: readCadence,
+      variables() {
+        return {
+          fullPath: this.groupPath,
+          id: this.cadenceId,
+        };
+      },
+      result({ data: { group, errors } }) {
+        if (errors?.length) {
+          [this.errorMessage] = errors;
+          return;
+        }
+
+        const cadence = group?.iterationCadences?.nodes?.[0];
+
+        if (!cadence) {
+          this.errorMessage = s__("Iterations|Couldn't find iteration cadence");
+          return;
+        }
+
+        this.title = cadence.title;
+        this.automatic = cadence.automatic;
+        this.startDate = cadence.startDate;
+        this.durationInWeeks = cadence.durationInWeeks;
+        this.rollOver = cadence.rollOver;
+        this.iterationsInAdvance = cadence.iterationsInAdvance;
+        this.description = cadence.description;
+      },
+      error(error) {
+        this.errorMessage = error;
+      },
     },
   },
   methods: {
@@ -131,6 +211,12 @@ export default {
       this.validationState.durationInWeeks = null;
       this.validationState.iterationsInAdvance = null;
     },
+    updateAutomatic(value) {
+      this.clearValidation();
+      if (!value) {
+        this.iterationsInAdvance = 0;
+      }
+    },
     save() {
       this.validateAllFields();
 
@@ -147,18 +233,18 @@ export default {
     createCadence() {
       return this.$apollo
         .mutate({
-          mutation: createCadence,
+          mutation: this.mutation,
           variables: this.variables,
         })
-        .then(({ data, errors: topLevelErrors = [] }) => {
+        .then(({ data, errors: topLevelErrors = [] } = {}) => {
           if (topLevelErrors.length > 0) {
             this.errorMessage = topLevelErrors[0].message;
             return;
           }
 
-          const { errors } = data.iterationCadenceCreate;
+          const { errors } = data?.result || {};
 
-          if (errors.length > 0) {
+          if (errors?.length > 0) {
             [this.errorMessage] = errors;
             return;
           }
@@ -181,7 +267,7 @@ export default {
   <article>
     <div class="gl-display-flex">
       <h3 ref="pageTitle" class="page-title">
-        {{ i18n.pageTitle }}
+        {{ i18n[page].title }}
       </h3>
     </div>
     <gl-form>
@@ -205,6 +291,7 @@ export default {
           :placeholder="i18n.title.placeholder"
           size="xl"
           :state="validationState.title"
+          :disabled="loadingCadence"
           @blur="validate('title')"
         />
       </gl-form-group>
@@ -218,7 +305,8 @@ export default {
         <gl-form-checkbox
           id="cadence-automated-scheduling"
           v-model="automatic"
-          @change="clearValidation"
+          :disabled="loadingCadence"
+          @change="updateAutomatic"
         >
           <span class="gl-font-weight-bold">{{ i18n.automatedScheduling.label }}</span>
         </gl-form-checkbox>
@@ -243,6 +331,7 @@ export default {
             inputmode="none"
             required
             :state="validationState.startDate"
+            :disabled="loadingCadence"
             data-qa-selector="cadence_start_date"
             @blur="validate('startDate')"
           />
@@ -265,8 +354,20 @@ export default {
           class="gl-form-input-md"
           required
           data-qa-selector="iteration_cadence_name_field"
+          :disabled="loadingCadence"
           @change="validate('durationInWeeks')"
         />
+      </gl-form-group>
+
+      <gl-form-group
+        :label-cols-md="2"
+        label-class="gl-font-weight-bold text-right-md gl-pt-3!"
+        label-for="cadence-rollover-issues"
+        :description="i18n.rollOver.description"
+      >
+        <gl-form-checkbox id="cadence-rollover-issues" v-model="rollOver" @change="clearValidation">
+          <span class="gl-font-weight-bold">{{ i18n.rollOver.label }}</span>
+        </gl-form-checkbox>
       </gl-form-group>
 
       <gl-form-group
@@ -282,13 +383,23 @@ export default {
         <gl-form-select
           id="cadence-schedule-future-iterations"
           v-model.number="iterationsInAdvance"
-          :disabled="!automatic"
+          :disabled="!automatic || loadingCadence"
           :options="$options.availableFutureIterations"
           :required="automatic"
           class="gl-form-input-md"
           data-qa-selector="iteration_cadence_name_field"
           @change="validate('iterationsInAdvance')"
         />
+      </gl-form-group>
+
+      <gl-form-group
+        :label="i18n.description.label"
+        :label-cols-md="2"
+        :content-cols-md="2"
+        label-class="text-right-md gl-pt-3!"
+        label-for="cadence-description"
+      >
+        <gl-form-textarea id="cadence-description" v-model="description" class="w-100" />
       </gl-form-group>
 
       <div class="form-actions gl-display-flex">
@@ -299,9 +410,9 @@ export default {
           data-qa-selector="save_cadence_button"
           @click="save"
         >
-          {{ i18n.create }}
+          {{ i18n[page].save }}
         </gl-button>
-        <gl-button class="ml-auto" data-testid="cancel-create-cadence" @click="cancel">
+        <gl-button class="gl-ml-3" data-testid="cancel-create-cadence" @click="cancel">
           {{ i18n.cancel }}
         </gl-button>
       </div>

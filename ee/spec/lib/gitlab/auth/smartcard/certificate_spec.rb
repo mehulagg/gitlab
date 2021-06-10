@@ -119,12 +119,12 @@ RSpec.describe Gitlab::Auth::Smartcard::Certificate do
                         certificate_subject:  subject_dn,
                         certificate_issuer: issuer_dn,
                         skip_confirmation: true }
-        expect(Users::BuildService).to(
+        expect(Users::AuthorizedBuildService).to(
           receive(:new)
             .with(nil, hash_including(user_params))
             .and_return(user_build_service))
         expect(user_build_service).to(
-          receive(:execute).with(skip_authorization: true).and_return(user))
+          receive(:execute).and_return(user))
 
         subject
       end

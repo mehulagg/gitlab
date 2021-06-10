@@ -29,7 +29,9 @@ RSpec.describe Groups::Analytics::RepositoryAnalyticsController do
         category: 'Groups::Analytics::RepositoryAnalyticsController',
         action: 'show',
         label: 'group_id',
-        value: group.id
+        value: group.id,
+        namespace: group,
+        user: current_user
       )
     end
 

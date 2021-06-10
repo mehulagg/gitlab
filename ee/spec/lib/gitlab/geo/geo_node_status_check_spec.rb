@@ -17,17 +17,12 @@ RSpec.describe Gitlab::Geo::GeoNodeStatusCheck do
     end
 
     context 'with legacy replication' do
-      before do
-        stub_feature_flags(geo_lfs_object_replication: false)
-      end
-
       it 'prints messages for all legacy replication and verification checks' do
         checks = [
           /Repositories: /,
           /Verified Repositories: /,
           /Wikis: /,
           /Verified Wikis: /,
-          /LFS Objects: /,
           /Attachments: /,
           /CI job artifacts: /,
           /Container repositories: /,

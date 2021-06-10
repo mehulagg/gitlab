@@ -25,6 +25,19 @@ const TEST_DATA = {
     name: 'some-numeric-field',
     value: 15,
   },
+  [REPORT_TYPES.moduleName]: {
+    moduleName: 'foo.c',
+    offset: 15,
+  },
+  [REPORT_TYPES.fileLocation]: {
+    fileName: 'index.js',
+    lineStart: '1',
+    lineEnd: '2',
+  },
+  [REPORT_TYPES.markdown]: {
+    name: 'Markdown:',
+    value: 'Checkout [GitLab](http://gitlab.com)',
+  },
 };
 
 describe('ee/vulnerabilities/components/generic_report/report_item.vue', () => {

@@ -10,7 +10,7 @@ module QA
       let!(:target) do
         Resource::Repository::Commit.fabricate_via_api! do |commit|
           commit.project = project
-          commit.branch = 'master'
+          commit.branch = project.default_branch
           commit.add_files([
             { file_path: '.gitlab/CODEOWNERS', content: '* @root' }
           ])
@@ -21,7 +21,7 @@ module QA
         Resource::Repository::Commit.fabricate_via_api! do |commit|
           commit.project = project
           commit.branch = 'codeowners_test'
-          commit.start_branch = 'master'
+          commit.start_branch = project.default_branch
           commit.add_files([
             { file_path: 'test1.txt', content: '1' }
           ])
@@ -50,13 +50,13 @@ module QA
         # so we unprotect it first and then protect it again with the desired parameters
         Resource::ProtectedBranch.unprotect_via_api! do |branch|
           branch.project = project
-          branch.branch_name = 'master'
+          branch.branch_name = project.default_branch
         end
 
         Resource::ProtectedBranch.fabricate_via_api! do |branch|
           branch.project = project
           branch.new_branch = false
-          branch.branch_name = 'master'
+          branch.branch_name = project.default_branch
           branch.allowed_to_push = { roles: Resource::ProtectedBranch::Roles::NO_ONE }
           branch.allowed_to_merge = { roles: Resource::ProtectedBranch::Roles::MAINTAINERS }
           branch.require_code_owner_approval = true

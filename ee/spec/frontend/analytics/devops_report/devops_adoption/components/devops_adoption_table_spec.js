@@ -10,7 +10,7 @@ import {
 } from 'ee/analytics/devops_report/devops_adoption/constants';
 import { createMockDirective, getBinding } from 'helpers/vue_mock_directive';
 import LocalStorageSync from '~/vue_shared/components/local_storage_sync.vue';
-import { devopsAdoptionSegmentsData, devopsAdoptionTableHeaders } from '../mock_data';
+import { devopsAdoptionNamespaceData, devopsAdoptionTableHeaders } from '../mock_data';
 
 describe('DevopsAdoptionTable', () => {
   let wrapper;
@@ -21,7 +21,7 @@ describe('DevopsAdoptionTable', () => {
     wrapper = mount(DevopsAdoptionTable, {
       propsData: {
         cols: DEVOPS_ADOPTION_TABLE_CONFIGURATION[0].cols,
-        segments: devopsAdoptionSegmentsData.nodes,
+        segments: devopsAdoptionNamespaceData.nodes,
       },
       provide,
       directives: {
@@ -112,7 +112,7 @@ describe('DevopsAdoptionTable', () => {
       });
 
       describe('"This group" badge', () => {
-        const thisGroupGid = devopsAdoptionSegmentsData.nodes[0].namespace.id;
+        const thisGroupGid = devopsAdoptionNamespaceData.nodes[0].namespace.id;
 
         it.each`
           scenario                            | expected | provide
@@ -165,9 +165,9 @@ describe('DevopsAdoptionTable', () => {
     });
 
     describe.each`
-      scenario              | tooltipText                                            | provide                                                           | disabled
-      ${'not active group'} | ${'Remove Group from the table.'}                      | ${{}}                                                             | ${false}
-      ${'active group'}     | ${'You cannot remove the group you are currently in.'} | ${{ groupGid: devopsAdoptionSegmentsData.nodes[0].namespace.id }} | ${true}
+      scenario              | tooltipText                                            | provide                                                            | disabled
+      ${'not active group'} | ${'Remove Group from the table.'}                      | ${{}}                                                              | ${false}
+      ${'active group'}     | ${'You cannot remove the group you are currently in.'} | ${{ groupGid: devopsAdoptionNamespaceData.nodes[0].namespace.id }} | ${true}
     `('actions column when $scenario', ({ tooltipText, provide, disabled }) => {
       beforeEach(() => {
         createComponent({ provide });
@@ -197,7 +197,9 @@ describe('DevopsAdoptionTable', () => {
     beforeEach(() => {
       createComponent();
 
-      wrapper.setData({ selectedSegment: devopsAdoptionSegmentsData.nodes[0] });
+      wrapper.setData({
+        selectedSegment: devopsAdoptionNamespaceData.nodes[0],
+      });
     });
 
     it('re emits trackModalOpenState with the given value', async () => {

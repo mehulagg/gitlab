@@ -8,7 +8,7 @@ import createFlash from '~/flash';
 import axios from '~/lib/utils/axios_utils';
 import httpStatus from '~/lib/utils/http_status';
 
-import { mockWafStatisticsResponse } from '../../../mocks/mock_data';
+import { mockNetworkPolicyStatisticsResponse } from '../../../mocks/mock_data';
 
 jest.mock('~/flash');
 
@@ -51,12 +51,12 @@ describe('threatMonitoringStatistics actions', () => {
     it('commits the RECEIVE_STATISTICS_SUCCESS mutation', () =>
       testAction(
         actions.receiveStatisticsSuccess,
-        mockWafStatisticsResponse,
+        mockNetworkPolicyStatisticsResponse,
         state,
         [
           {
             type: types.RECEIVE_STATISTICS_SUCCESS,
-            payload: mockWafStatisticsResponse,
+            payload: mockNetworkPolicyStatisticsResponse,
           },
         ],
         [],
@@ -105,7 +105,7 @@ describe('threatMonitoringStatistics actions', () => {
               ...timeRange,
             },
           })
-          .replyOnce(httpStatus.OK, mockWafStatisticsResponse);
+          .replyOnce(httpStatus.OK, mockNetworkPolicyStatisticsResponse);
       });
 
       it('should dispatch the request and success actions', () =>
@@ -121,7 +121,7 @@ describe('threatMonitoringStatistics actions', () => {
             },
             {
               type: 'receiveStatisticsSuccess',
-              payload: mockWafStatisticsResponse,
+              payload: mockNetworkPolicyStatisticsResponse,
             },
           ],
         ));

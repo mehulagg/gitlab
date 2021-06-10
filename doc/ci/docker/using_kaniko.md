@@ -1,6 +1,6 @@
 ---
 stage: Verify
-group: Continuous Integration
+group: Pipeline Execution
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 type: howto
 ---
@@ -133,7 +133,7 @@ The [Least Privilege Container Builds with Kaniko on GitLab](https://www.youtube
 video is a walkthrough of the [Kaniko Docker Build](https://gitlab.com/guided-explorations/containers/kaniko-docker-build)
 Guided Exploration project pipeline. It was tested on:
 
-- [GitLab.com shared runners](../../user/gitlab_com/index.md#shared-runners)
+- [GitLab.com shared runners](../runners/README.md)
 - [The Kubernetes runner executor](https://docs.gitlab.com/runner/executors/kubernetes.html)
 
 The example can be copied to your own group or instance for testing. More details

@@ -105,7 +105,7 @@ export default {
 <template>
   <gl-collapse
     :visible="visible"
-    class="selection-summary gl-z-index-2!"
+    class="selection-summary gl-z-index-3!"
     data-testid="selection-summary-collapse"
   >
     <div class="card" :class="{ 'with-error': Boolean(updateErrorText) }">

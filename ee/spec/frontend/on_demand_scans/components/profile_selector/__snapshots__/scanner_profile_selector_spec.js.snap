@@ -29,6 +29,7 @@ exports[`OnDemandScansScannerProfileSelector renders properly with profiles 1`] 
   >
      
     <fieldset
+      aria-describedby=""
       class="form-group gl-form-group"
     >
       <legend
@@ -42,7 +43,7 @@ exports[`OnDemandScansScannerProfileSelector renders properly with profiles 1`] 
         role="group"
         tabindex="-1"
       >
-         
+          
         <div
           class="dropdown b-dropdown gl-new-dropdown mw-460 btn-group"
           data-testid="profiles-dropdown"
@@ -68,6 +69,7 @@ exports[`OnDemandScansScannerProfileSelector renders properly with profiles 1`] 
               aria-hidden="true"
               class="gl-button-icon dropdown-chevron gl-icon s16"
               data-testid="chevron-down-icon"
+              role="img"
             >
               <use
                 href="#chevron-down"
@@ -94,6 +96,7 @@ exports[`OnDemandScansScannerProfileSelector renders properly with profiles 1`] 
                     aria-hidden="true"
                     class="gl-search-box-by-type-search-icon gl-icon s16"
                     data-testid="search-icon"
+                    role="img"
                   >
                     <use
                       href="#search"
@@ -134,6 +137,7 @@ exports[`OnDemandScansScannerProfileSelector renders properly with profiles 1`] 
                       aria-hidden="true"
                       class="gl-icon s16 gl-new-dropdown-item-check-icon gl-mt-3 gl-align-self-start"
                       data-testid="dropdown-item-checkbox"
+                      role="img"
                     >
                       <use
                         href="#mobile-issue-close"
@@ -174,6 +178,7 @@ exports[`OnDemandScansScannerProfileSelector renders properly with profiles 1`] 
                       aria-hidden="true"
                       class="gl-icon s16 gl-new-dropdown-item-check-icon gl-visibility-hidden gl-mt-3 gl-align-self-start"
                       data-testid="dropdown-item-checkbox"
+                      role="img"
                     >
                       <use
                         href="#mobile-issue-close"
@@ -302,6 +307,7 @@ exports[`OnDemandScansScannerProfileSelector renders properly with profiles 1`] 
               aria-hidden="true"
               class="gl-button-icon gl-icon s16"
               data-testid="pencil-icon"
+              role="img"
             >
               <use
                 href="#pencil"

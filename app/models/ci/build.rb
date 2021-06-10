@@ -214,6 +214,8 @@ module Ci
     before_save :ensure_token
     before_destroy { unscoped_project }
 
+    after_save :stick_build_if_status_changed
+
     after_create unless: :importing? do |build|
       run_after_commit { BuildHooksWorker.perform_async(build.id) }
     end
@@ -469,7 +471,13 @@ module Ci
     end
 
     def retryable?
-      !archived? && (success? || failed? || canceled?)
+      if Feature.enabled?(:prevent_retry_of_retried_jobs, project, default_enabled: :yaml)
+        return false if retried? || archived?
+
+        success? || failed? || canceled?
+      else
+        !archived? && (success? || failed? || canceled?)
+      end
     end
 
     def retries_count
@@ -586,6 +594,8 @@ module Ci
         break variables unless persisted? && persisted_environment.present?
 
         variables.concat(persisted_environment.predefined_variables)
+
+        variables.append(key: 'CI_ENVIRONMENT_ACTION', value: environment_action)
 
         # Here we're passing unexpanded environment_url for runner to expand,
         # and we need to make sure that CI_ENVIRONMENT_NAME and
@@ -1066,6 +1076,10 @@ module Ci
       ::Ci::PendingBuild.where(build_id: self.id)
     end
 
+    def create_queuing_entry!
+      ::Ci::PendingBuild.upsert_from_build!(self)
+    end
+
     protected
 
     def run_status_commit_hooks!
@@ -1075,6 +1089,13 @@ module Ci
     end
 
     private
+
+    def stick_build_if_status_changed
+      return unless saved_change_to_status?
+      return unless running?
+
+      ::Gitlab::Database::LoadBalancing::Sticking.stick(:build, id)
+    end
 
     def status_commit_hooks
       @status_commit_hooks ||= []

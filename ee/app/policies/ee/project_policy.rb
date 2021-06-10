@@ -196,7 +196,7 @@ module EE
       end
 
       rule { security_dashboard_enabled & can?(:developer_access) }.policy do
-        enable :read_vulnerability
+        enable :read_security_resource
         enable :read_vulnerability_scanner
       end
 
@@ -211,7 +211,7 @@ module EE
 
       rule { can?(:read_merge_request) & can?(:read_pipeline) }.enable :read_merge_train
 
-      rule { can?(:read_vulnerability) }.policy do
+      rule { can?(:read_security_resource) }.policy do
         enable :read_project_security_dashboard
         enable :create_vulnerability
         enable :create_vulnerability_export
@@ -266,8 +266,12 @@ module EE
         enable :read_pages
       end
 
+      rule { ~security_and_compliance_disabled & auditor }.policy do
+        enable :access_security_and_compliance
+      end
+
       rule { auditor & security_dashboard_enabled }.policy do
-        enable :read_vulnerability
+        enable :read_security_resource
         enable :read_vulnerability_scanner
       end
 

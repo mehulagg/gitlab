@@ -537,13 +537,7 @@ describe('OnDemandScansForm', () => {
     const [{ id }] = scannerProfiles;
 
     beforeEach(() => {
-      createComponent({
-        provide: {
-          glFeatures: {
-            securityDastSiteProfilesAdditionalFields: true,
-          },
-        },
-      });
+      createComponent();
     });
 
     it('renders profile summary when a valid profile is selected', async () => {
@@ -563,14 +557,7 @@ describe('OnDemandScansForm', () => {
     const [{ id }] = siteProfiles;
 
     beforeEach(() => {
-      createComponent({
-        provide: {
-          glFeatures: {
-            securityDastSiteProfilesAdditionalFields: true,
-            securityDastSiteProfilesApiOption: true,
-          },
-        },
-      });
+      createComponent();
     });
 
     it('renders profile summary when a valid profile is selected', async () => {

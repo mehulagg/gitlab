@@ -5,13 +5,13 @@ import Vue from 'vue';
 import VueApollo from 'vue-apollo';
 import DevopsAdoptionDeleteModal from 'ee/analytics/devops_report/devops_adoption/components/devops_adoption_delete_modal.vue';
 import { DEVOPS_ADOPTION_SEGMENT_DELETE_MODAL_ID } from 'ee/analytics/devops_report/devops_adoption/constants';
-import deleteDevopsAdoptionSegmentMutation from 'ee/analytics/devops_report/devops_adoption/graphql/mutations/delete_devops_adoption_segment.mutation.graphql';
+import disableDevopsAdoptionNamespaceMutation from 'ee/analytics/devops_report/devops_adoption/graphql/mutations/disable_devops_adoption_namespace.mutation.graphql';
 import createMockApollo from 'helpers/mock_apollo_helper';
 import waitForPromises from 'helpers/wait_for_promises';
 import {
   genericDeleteErrorMessage,
   dataErrorMessage,
-  devopsAdoptionSegmentsData,
+  devopsAdoptionNamespaceData,
 } from '../mock_data';
 
 const localVue = createLocalVue();
@@ -20,14 +20,14 @@ Vue.use(VueApollo);
 const mockEvent = { preventDefault: jest.fn() };
 const mutate = jest.fn().mockResolvedValue({
   data: {
-    deleteDevopsAdoptionSegment: {
+    disableDevopsAdoptionNamespace: {
       errors: [],
     },
   },
 });
 const mutateWithDataErrors = jest.fn().mockResolvedValue({
   data: {
-    deleteDevopsAdoptionSegment: {
+    disableDevopsAdoptionNamespace: {
       errors: [dataErrorMessage],
     },
   },
@@ -39,13 +39,15 @@ describe('DevopsAdoptionDeleteModal', () => {
   let wrapper;
 
   const createComponent = ({ deleteSegmentsSpy = mutate, props = {} } = {}) => {
-    const mockApollo = createMockApollo([[deleteDevopsAdoptionSegmentMutation, deleteSegmentsSpy]]);
+    const mockApollo = createMockApollo([
+      [disableDevopsAdoptionNamespaceMutation, deleteSegmentsSpy],
+    ]);
 
     wrapper = shallowMount(DevopsAdoptionDeleteModal, {
       localVue,
       apolloProvider: mockApollo,
       propsData: {
-        segment: devopsAdoptionSegmentsData.nodes[0],
+        segment: devopsAdoptionNamespaceData.nodes[0],
         ...props,
       },
       stubs: {
@@ -75,7 +77,7 @@ describe('DevopsAdoptionDeleteModal', () => {
     });
 
     it('displays the confirmation message', () => {
-      const text = `Are you sure that you would like to remove ${devopsAdoptionSegmentsData.nodes[0].namespace.fullName} from the table?`;
+      const text = `Are you sure that you would like to remove ${devopsAdoptionNamespaceData.nodes[0].namespace.fullName} from the table?`;
 
       expect(findModal().text()).toBe(text);
     });
@@ -136,14 +138,14 @@ describe('DevopsAdoptionDeleteModal', () => {
 
       it('submits the correct request variables', () => {
         expect(mutate).toHaveBeenCalledWith({
-          id: [devopsAdoptionSegmentsData.nodes[0].id],
+          id: [devopsAdoptionNamespaceData.nodes[0].id],
         });
       });
 
       it('emits segmentsRemoved with the correct variables', () => {
         const [params] = wrapper.emitted().segmentsRemoved[0];
 
-        expect(params).toStrictEqual([devopsAdoptionSegmentsData.nodes[0].id]);
+        expect(params).toStrictEqual([devopsAdoptionNamespaceData.nodes[0].id]);
       });
 
       it('closes the modal after a successful mutation', () => {

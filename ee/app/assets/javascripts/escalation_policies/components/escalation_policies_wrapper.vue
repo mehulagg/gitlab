@@ -1,8 +1,15 @@
 <script>
-import { GlEmptyState, GlButton } from '@gitlab/ui';
+import { GlEmptyState, GlButton, GlModalDirective, GlLoadingIcon } from '@gitlab/ui';
+import * as Sentry from '@sentry/browser';
 import { s__ } from '~/locale';
+import { addEscalationPolicyModalId } from '../constants';
+import getEscalationPoliciesQuery from '../graphql/queries/get_escalation_policies.query.graphql';
+import AddEscalationPolicyModal from './add_edit_escalation_policy_modal.vue';
+import EscalationPolicy from './escalation_policy.vue';
 
 export const i18n = {
+  title: s__('EscalationPolicies|Escalation policies'),
+  addPolicy: s__('EscalationPolicies|Add policy'),
   emptyState: {
     title: s__('EscalationPolicies|Create an escalation policy in GitLab'),
     description: s__(
@@ -14,29 +21,87 @@ export const i18n = {
 
 export default {
   i18n,
+  addEscalationPolicyModalId,
   components: {
     GlEmptyState,
     GlButton,
+    GlLoadingIcon,
+    AddEscalationPolicyModal,
+    EscalationPolicy,
   },
-  inject: ['emptyEscalationPoliciesSvgPath'],
-  methods: {
-    addEscalationPolicy() {
-      // TODO: Add method as part of https://gitlab.com/gitlab-org/gitlab/-/issues/268356
+  directives: {
+    GlModal: GlModalDirective,
+  },
+  inject: ['projectPath', 'emptyEscalationPoliciesSvgPath'],
+  data() {
+    return {
+      escalationPolicies: [],
+    };
+  },
+  apollo: {
+    escalationPolicies: {
+      query: getEscalationPoliciesQuery,
+      variables() {
+        return {
+          projectPath: this.projectPath,
+        };
+      },
+      update({ project }) {
+        return project?.incidentManagementEscalationPolicies?.nodes ?? [];
+      },
+      error(error) {
+        Sentry.captureException(error);
+      },
+    },
+  },
+  computed: {
+    isLoading() {
+      return this.$apollo.queries.escalationPolicies.loading;
+    },
+    hasPolicies() {
+      return this.escalationPolicies.length;
     },
   },
 };
 </script>
 
 <template>
-  <gl-empty-state
-    :title="$options.i18n.emptyState.title"
-    :description="$options.i18n.emptyState.description"
-    :svg-path="emptyEscalationPoliciesSvgPath"
-  >
-    <template #actions>
-      <gl-button variant="info" @click="addEscalationPolicy">{{
-        $options.i18n.emptyState.button
-      }}</gl-button>
+  <div>
+    <gl-loading-icon v-if="isLoading" size="lg" class="gl-mt-3" />
+
+    <template v-else-if="hasPolicies">
+      <div class="gl-display-flex gl-justify-content-space-between gl-align-items-center">
+        <h2>{{ $options.i18n.title }}</h2>
+        <gl-button
+          v-gl-modal="$options.addEscalationPolicyModalId"
+          :title="$options.i18n.addPolicy"
+          category="secondary"
+          variant="confirm"
+          class="gl-mt-5"
+        >
+          {{ $options.i18n.addPolicy }}
+        </gl-button>
+      </div>
+      <escalation-policy
+        v-for="(policy, index) in escalationPolicies"
+        :key="policy.id"
+        :policy="policy"
+        :index="index"
+      />
     </template>
-  </gl-empty-state>
+
+    <gl-empty-state
+      v-else
+      :title="$options.i18n.emptyState.title"
+      :description="$options.i18n.emptyState.description"
+      :svg-path="emptyEscalationPoliciesSvgPath"
+    >
+      <template #actions>
+        <gl-button v-gl-modal="$options.addEscalationPolicyModalId" variant="confirm">
+          {{ $options.i18n.emptyState.button }}
+        </gl-button>
+      </template>
+    </gl-empty-state>
+    <add-escalation-policy-modal :modal-id="$options.addEscalationPolicyModalId" />
+  </div>
 </template>

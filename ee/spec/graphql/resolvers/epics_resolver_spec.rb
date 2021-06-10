@@ -72,6 +72,14 @@ RSpec.describe Resolvers::EpicsResolver do
             expect(epics).to match_array([epic1, epic2])
           end
         end
+
+        context 'when timeframe start and end are present' do
+          it 'returns epics within timeframe' do
+            epics = resolve_epics(timeframe: { start: '2019-08-13', end: '2019-08-21' })
+
+            expect(epics).to match_array([epic1, epic2])
+          end
+        end
       end
 
       context 'with state' do
@@ -261,6 +269,36 @@ RSpec.describe Resolvers::EpicsResolver do
 
           expect(epics).to contain_exactly(epic5)
         end
+      end
+    end
+
+    context 'with negated filters' do
+      let_it_be(:group) { create(:group) }
+      let_it_be(:author) { create(:user) }
+      let_it_be(:label) { create(:label) }
+      let_it_be(:epic_1) { create(:labeled_epic, group: group, labels: [label]) }
+      let_it_be(:epic_2) { create(:epic, group: group, author: author) }
+      let_it_be(:epic_3) { create(:epic, group: group) }
+      let_it_be(:awarded_emoji) { create(:award_emoji, name: 'thumbsup', awardable: epic_3, user: current_user) }
+
+      subject(:results) { resolve_epics(args) }
+
+      context 'for label' do
+        let(:args) { { not: { label_name: [label.title] } } }
+
+        it { is_expected.to contain_exactly(epic_2, epic_3) }
+      end
+
+      context 'for author' do
+        let(:args) { { not: { author_username: author.username } } }
+
+        it { is_expected.to contain_exactly(epic_1, epic_3) }
+      end
+
+      context 'for emoji' do
+        let(:args) { { not: { my_reaction_emoji: awarded_emoji.name } } }
+
+        it { is_expected.to contain_exactly(epic_1, epic_2) }
       end
     end
   end

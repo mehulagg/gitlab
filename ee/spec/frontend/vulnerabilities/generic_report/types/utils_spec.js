@@ -49,6 +49,19 @@ const TEST_DATA = {
       unsupported: { type: MOCK_REPORT_TYPE_UNSUPPORTED },
     },
   },
+  table: {
+    type: REPORT_TYPES.table,
+    header: [
+      { type: REPORT_TYPES.text, value: 'foo ' },
+      { type: REPORT_TYPES.text, value: 'bar ' },
+    ],
+    rows: [
+      [
+        { type: REPORT_TYPES.text, value: 'foo' },
+        { type: REPORT_TYPES.text, value: 'bar' },
+      ],
+    ],
+  },
 };
 
 describe('ee/vulnerabilities/components/generic_report/types/utils', () => {
@@ -92,6 +105,21 @@ describe('ee/vulnerabilities/components/generic_report/types/utils', () => {
           { label: 'url1', type: REPORT_TYPES.url, name: 'foo' },
           { label: 'url2', type: REPORT_TYPES.url, name: 'bar' },
         ]);
+      });
+    });
+
+    describe('with tables', () => {
+      const filteredData = filterTypesAndLimitListDepth(TEST_DATA);
+
+      it('adds a key to each header item', () => {
+        expect(filteredData.table.header).toMatchObject([{ key: 'column_0' }, { key: 'column_1' }]);
+      });
+
+      it(`transforms the "rows" array into an object with it's keys corresponding to the header keys`, () => {
+        expect(filteredData.table.rows[0]).toMatchObject({
+          column_0: TEST_DATA.table.rows[0][0],
+          column_1: TEST_DATA.table.rows[0][1],
+        });
       });
     });
   });

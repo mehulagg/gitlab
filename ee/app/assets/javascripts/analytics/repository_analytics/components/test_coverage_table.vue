@@ -6,7 +6,6 @@ import { SUPPORTED_FORMATS, getFormatter } from '~/lib/utils/unit_format';
 import { joinPaths } from '~/lib/utils/url_utility';
 import { __, s__ } from '~/locale';
 import TimeAgoTooltip from '~/vue_shared/components/time_ago_tooltip.vue';
-import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import getProjectsTestCoverage from '../graphql/queries/get_projects_test_coverage.query.graphql';
 import SelectProjectsDropdown from './select_projects_dropdown.vue';
 
@@ -21,7 +20,6 @@ export default {
     SelectProjectsDropdown,
     TimeAgoTooltip,
   },
-  mixins: [glFeatureFlagsMixin()],
   inject: {
     groupFullPath: {
       default: '',
@@ -124,9 +122,7 @@ export default {
       this.hasError = true;
     },
     onProjectClick() {
-      if (this.glFeatures.usageDataITestingGroupCodeCoverageProjectClickTotal) {
-        api.trackRedisHllUserEvent(this.$options.usagePingProjectEvent);
-      }
+      api.trackRedisHllUserEvent(this.$options.usagePingProjectEvent);
     },
     selectAllProjects() {
       this.allProjectsSelected = true;

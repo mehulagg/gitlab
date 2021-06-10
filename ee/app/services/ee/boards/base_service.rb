@@ -53,7 +53,7 @@ module EE
       end
 
       def iterations_finder_params
-        IterationsFinder.params_for_parent(parent, include_ancestors: true).merge(state: 'all')
+        { parent: parent, include_ancestors: true, state: 'all' }
       end
     end
   end

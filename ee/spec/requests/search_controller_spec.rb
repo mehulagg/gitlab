@@ -31,7 +31,7 @@ RSpec.describe SearchController, type: :request do
   end
 
   describe 'GET /search' do
-    context 'when elasticsearch is enabled', :elastic, :sidekiq_inline do
+    context 'when elasticsearch is enabled', :elastic, :clean_gitlab_redis_shared_state, :sidekiq_inline do
       before do
         stub_ee_application_setting(elasticsearch_search: true, elasticsearch_indexing: true)
       end

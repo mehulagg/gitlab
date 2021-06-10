@@ -50,17 +50,11 @@ module Geo
     end
 
     def update_root_ref
-      if Feature.enabled?(:find_remote_root_refs_inmemory, default_enabled: :yaml)
-        authorization = ::Gitlab::Geo::RepoSyncRequest.new(
-          scope: repository.full_path
-        ).authorization
+      authorization = ::Gitlab::Geo::RepoSyncRequest.new(
+        scope: repository.full_path
+      ).authorization
 
-        project.update_root_ref(GEO_REMOTE_NAME, remote_url, authorization)
-      else
-        repository.with_config(jwt_authentication_header) do
-          project.update_root_ref(GEO_REMOTE_NAME, remote_url, nil)
-        end
-      end
+      project.update_root_ref(GEO_REMOTE_NAME, remote_url, authorization)
     end
 
     def execute_housekeeping

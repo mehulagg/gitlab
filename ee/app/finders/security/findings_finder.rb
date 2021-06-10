@@ -96,10 +96,10 @@ module Security
     def report_findings
       @report_findings ||= begin
         builds.each_with_object({}) do |build, memo|
-          report = build.job_artifacts.map(&:security_report).compact.first
-          next unless report
+          reports = build.job_artifacts.map(&:security_report).compact
+          next unless reports.present?
 
-          memo[build.id] = report.findings.group_by(&:uuid).transform_values(&:first)
+          memo[build.id] = reports.flat_map(&:findings).index_by(&:uuid)
         end
       end
     end

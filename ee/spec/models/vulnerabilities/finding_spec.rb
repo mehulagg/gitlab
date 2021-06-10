@@ -1055,6 +1055,11 @@ RSpec.describe Vulnerabilities::Finding do
         expect(finding1.eql?(finding2)).to be(vulnerability_finding_signatures_enabled)
       end
 
+      it 'wont match other record types' do
+        historical_stat = build(:vulnerability_historical_statistic, project: project)
+        expect(finding1.eql?(historical_stat)).to be(false)
+      end
+
       context 'short circuits on the highest priority signature match' do
         using RSpec::Parameterized::TableSyntax
 

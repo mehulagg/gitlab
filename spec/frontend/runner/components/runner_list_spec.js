@@ -1,5 +1,5 @@
-import { GlLink, GlSkeletonLoader } from '@gitlab/ui';
-import { mount } from '@vue/test-utils';
+import { GlLink, GlTable, GlSkeletonLoader } from '@gitlab/ui';
+import { mount, shallowMount } from '@vue/test-utils';
 import { extendedWrapper } from 'helpers/vue_test_utils_helper';
 import { getIdFromGraphQLId } from '~/graphql_shared/utils';
 import RunnerList from '~/runner/components/runner_list.vue';
@@ -13,14 +13,15 @@ describe('RunnerList', () => {
 
   const findActiveRunnersMessage = () => wrapper.findByTestId('active-runners-message');
   const findSkeletonLoader = () => wrapper.findComponent(GlSkeletonLoader);
+  const findTable = () => wrapper.findComponent(GlTable);
   const findHeaders = () => wrapper.findAll('th');
   const findRows = () => wrapper.findAll('[data-testid^="runner-row-"]');
   const findCell = ({ row = 0, fieldKey }) =>
-    findRows().at(row).find(`[data-testid="td-${fieldKey}"]`);
+    extendedWrapper(findRows().at(row).find(`[data-testid="td-${fieldKey}"]`));
 
-  const createComponent = ({ props = {} } = {}) => {
+  const createComponent = ({ props = {} } = {}, mountFn = shallowMount) => {
     wrapper = extendedWrapper(
-      mount(RunnerList, {
+      mountFn(RunnerList, {
         propsData: {
           runners: mockRunners,
           activeRunnersCount: mockActiveRunnersCount,
@@ -31,7 +32,7 @@ describe('RunnerList', () => {
   };
 
   beforeEach(() => {
-    createComponent();
+    createComponent({}, mount);
   });
 
   afterEach(() => {
@@ -67,7 +68,7 @@ describe('RunnerList', () => {
   });
 
   it('Displays a list of runners', () => {
-    expect(findRows()).toHaveLength(2);
+    expect(findRows()).toHaveLength(3);
 
     expect(findSkeletonLoader().exists()).toBe(false);
   });
@@ -76,7 +77,7 @@ describe('RunnerList', () => {
     const { id, description, version, ipAddress, shortSha } = mockRunners[0];
 
     // Badges
-    expect(findCell({ fieldKey: 'type' }).text()).toMatchInterpolatedText('shared locked');
+    expect(findCell({ fieldKey: 'type' }).text()).toMatchInterpolatedText('specific paused');
 
     // Runner identifier
     expect(findCell({ fieldKey: 'name' }).text()).toContain(
@@ -92,7 +93,12 @@ describe('RunnerList', () => {
     expect(findCell({ fieldKey: 'jobCount' }).text()).toBe('');
     expect(findCell({ fieldKey: 'tagList' }).text()).toBe('');
     expect(findCell({ fieldKey: 'contactedAt' }).text()).toEqual(expect.any(String));
-    expect(findCell({ fieldKey: 'actions' }).text()).toBe('');
+
+    // Actions
+    const actions = findCell({ fieldKey: 'actions' });
+
+    expect(actions.findByTestId('edit-runner').exists()).toBe(true);
+    expect(actions.findByTestId('toggle-active-runner').exists()).toBe(true);
   });
 
   it('Links to the runner page', () => {
@@ -104,12 +110,21 @@ describe('RunnerList', () => {
   });
 
   describe('When data is loading', () => {
-    beforeEach(() => {
-      createComponent({ props: { loading: true } });
+    it('shows a busy state', () => {
+      createComponent({ props: { runners: [], loading: true } });
+      expect(findTable().attributes('busy')).toBeTruthy();
     });
 
-    it('shows an skeleton loader', () => {
+    it('when there are no runners, shows an skeleton loader', () => {
+      createComponent({ props: { runners: [], loading: true } }, mount);
+
       expect(findSkeletonLoader().exists()).toBe(true);
+    });
+
+    it('when there are runners, shows a busy indicator skeleton loader', () => {
+      createComponent({ props: { loading: true } }, mount);
+
+      expect(findSkeletonLoader().exists()).toBe(false);
     });
   });
 });

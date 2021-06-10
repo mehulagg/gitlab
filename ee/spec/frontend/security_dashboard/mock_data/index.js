@@ -264,6 +264,7 @@ export const mockPipelineFindingsResponse = ({ hasNextPage } = {}) => ({
               ],
               scanner: null,
               severity: 'HIGH',
+              state: 'DETECTED',
               location: {
                 __typename: 'VulnerabilityLocationDependencyScanning',
                 blobPath: null,
@@ -280,6 +281,7 @@ export const mockPipelineFindingsResponse = ({ hasNextPage } = {}) => ({
                 'A prototype pollution vulnerability in handlebars may lead to remote code execution if an attacker can control the template in handlebars',
               description: null,
               confidence: 'unknown',
+              state: 'RESOLVED',
               identifiers: [
                 {
                   externalType: 'retire.js',

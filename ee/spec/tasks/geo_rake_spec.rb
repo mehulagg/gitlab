@@ -2,7 +2,7 @@
 
 require 'rake_helper'
 
-RSpec.describe 'geo rake tasks', :geo do
+RSpec.describe 'geo rake tasks', :geo, :silence_stdout do
   include ::EE::GeoHelpers
 
   before do
@@ -366,18 +366,6 @@ RSpec.describe 'geo rake tasks', :geo do
           expect { run_rake_task('geo:status') }.not_to output(/Health Status Summary/).to_stdout
         end
 
-        context 'with legacy LFS replication enabled' do
-          before do
-            stub_feature_flags(geo_lfs_object_replication: false)
-          end
-
-          it 'prints messages for all the checks' do
-            (checks << /LFS Objects: /).each do |text|
-              expect { run_rake_task('geo:status') }.to output(text).to_stdout
-            end
-          end
-        end
-
         context 'with SSF LFS replication eneabled' do
           it 'prints messages for all the checks' do
             checks.each do |text|
@@ -428,8 +416,7 @@ RSpec.describe 'geo rake tasks', :geo do
     end
 
     it 'removes orphaned registries taking into account TO_PROJECT_ID' do
-      allow(ENV).to receive(:[]).with('FROM_PROJECT_ID').and_return(nil)
-      allow(ENV).to receive(:[]).with('TO_PROJECT_ID').and_return(@orphaned.project_id)
+      stub_env('FROM_PROJECT_ID' => nil, 'TO_PROJECT_ID' => @orphaned.project_id)
 
       run_rake_task('geo:run_orphaned_project_registry_cleaner')
 
@@ -439,8 +426,7 @@ RSpec.describe 'geo rake tasks', :geo do
     end
 
     it 'removes orphaned registries taking into account FROM_PROJECT_ID' do
-      allow(ENV).to receive(:[]).with('FROM_PROJECT_ID').and_return(@orphaned1.project_id)
-      allow(ENV).to receive(:[]).with('TO_PROJECT_ID').and_return(nil)
+      stub_env('FROM_PROJECT_ID' => @orphaned1.project_id, 'TO_PROJECT_ID' => nil)
 
       run_rake_task('geo:run_orphaned_project_registry_cleaner')
 

@@ -142,6 +142,7 @@ exports[`MergeRequestTable component template matches the snapshot 1`] = `
                     aria-hidden="true"
                     class="mr-2 gl-icon s16"
                     data-testid="clock-icon"
+                    role="img"
                   >
                     <use
                       href="#clock"

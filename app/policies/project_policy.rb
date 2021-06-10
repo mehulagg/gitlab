@@ -238,6 +238,7 @@ class ProjectPolicy < BasePolicy
     enable :admin_issue_board
     enable :download_code
     enable :read_statistics
+    enable :daily_statistics
     enable :download_wiki_code
     enable :create_snippet
     enable :update_issue
@@ -263,7 +264,6 @@ class ProjectPolicy < BasePolicy
     enable :read_confidential_issues
     enable :read_package
     enable :read_product_analytics
-    enable :read_group_timelogs
   end
 
   # We define `:public_user_access` separately because there are cases in gitlab-ee
@@ -347,7 +347,6 @@ class ProjectPolicy < BasePolicy
     enable :update_deployment
     enable :create_release
     enable :update_release
-    enable :daily_statistics
     enable :create_metrics_dashboard_annotation
     enable :delete_metrics_dashboard_annotation
     enable :update_metrics_dashboard_annotation

@@ -62,11 +62,6 @@ export default {
       type: Object,
       required: true,
     },
-    schedule: {
-      type: Object,
-      required: false,
-      default: () => ({}),
-    },
   },
   data() {
     return {
@@ -112,7 +107,7 @@ export default {
       label-size="sm"
       label-for="schedule-name"
       :state="validationState.name"
-      requried
+      required
     >
       <gl-form-input
         id="schedule-name"
@@ -140,7 +135,7 @@ export default {
       :description="$options.i18n.fields.timezone.description"
       :state="validationState.timezone"
       :invalid-feedback="$options.i18n.fields.timezone.validation.empty"
-      requried
+      required
     >
       <gl-dropdown
         id="schedule-timezone"

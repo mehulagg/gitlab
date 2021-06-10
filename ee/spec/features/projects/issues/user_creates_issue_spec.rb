@@ -53,7 +53,7 @@ RSpec.describe "User creates issue", :js do
 
       wait_for_all_requests
 
-      page.within(".js-epic-block .js-epic-label") do
+      page.within('[data-testid="select-epic"]') do
         expect(page).to have_content('None')
       end
 
@@ -67,7 +67,7 @@ RSpec.describe "User creates issue", :js do
 
       wait_for_all_requests
 
-      page.within(".js-epic-block .js-epic-label") do
+      page.within('[data-testid="select-epic"]') do
         expect(page).to have_content(epic.title)
       end
 

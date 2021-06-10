@@ -1,4 +1,4 @@
-import { sortBy } from 'lodash';
+import { FiltersInfo as FiltersInfoCE } from '~/boards/boards_util';
 import { getIdFromGraphQLId } from '~/graphql_shared/utils';
 import { urlParamsToObject } from '~/lib/utils/common_utils';
 import { objectToQuery } from '~/lib/utils/url_utility';
@@ -10,6 +10,7 @@ import {
   MilestoneIDs,
   WeightFilterType,
   WeightIDs,
+  EpicFilterType,
 } from './constants';
 
 export function getMilestone({ milestone }) {
@@ -42,10 +43,9 @@ export function formatListEpics(listEpics) {
 
   const listData = listEpics.nodes.reduce((map, list) => {
     listItemsCount = list.epicsCount;
-    let sortedEpics = list.epics.edges.map((epicNode) => ({
+    const sortedEpics = list.epics.edges.map((epicNode) => ({
       ...epicNode.node,
     }));
-    sortedEpics = sortBy(sortedEpics, 'relativePosition');
 
     return {
       ...map,
@@ -133,6 +133,40 @@ export function transformBoardConfig(boardConfig) {
   updatedFilterPath = filterPath.join('&');
   return updatedFilterPath;
 }
+
+export const FiltersInfo = {
+  ...FiltersInfoCE,
+  epicId: {
+    negatedSupport: true,
+    transform: (epicId) => fullEpicId(epicId),
+    // epic_id should be renamed to epicWildcardId when ANY or NONE is the value
+    remap: (k, v) => (v === EpicFilterType.any || v === EpicFilterType.none ? 'epicWildcardId' : k),
+  },
+  epicWildcardId: {
+    negatedSupport: false,
+    transform: (val) => val.toUpperCase(),
+  },
+  iterationId: {
+    negatedSupport: true,
+    remap: (k, v) =>
+      // iteration_id should be renamed to iterationWildcardId when CURRENT is the value
+      v === IterationFilterType.any ||
+      v === IterationFilterType.none ||
+      v === IterationFilterType.current
+        ? 'iterationWildcardId'
+        : k,
+  },
+  iterationTitle: {
+    negatedSupport: true,
+  },
+  iterationWildcardId: {
+    negatedSupport: true,
+    transform: (val) => val.toUpperCase(),
+  },
+  weight: {
+    negatedSupport: true,
+  },
+};
 
 export default {
   getMilestone,

@@ -162,7 +162,7 @@ To set up GitLab and its components to accommodate up to 50,000 users:
    provides access to the Git repositories.
 1. [Configure Sidekiq](#configure-sidekiq).
 1. [Configure the main GitLab Rails application](#configure-gitlab-rails)
-   to run Puma/Unicorn, Workhorse, GitLab Shell, and to serve all frontend
+   to run Puma, Workhorse, GitLab Shell, and to serve all frontend
    requests (which include UI, API, and Git over HTTP/SSH).
 1. [Configure Prometheus](#configure-prometheus) to monitor your GitLab
    environment.
@@ -425,11 +425,6 @@ The following IPs will be used as an example:
 - `10.6.0.12`: Consul 2
 - `10.6.0.13`: Consul 3
 
-NOTE:
-The configuration processes for the other servers in your reference architecture will
-use the `/etc/gitlab/gitlab-secrets.json` file from your Consul server to connect
-with the other servers.
-
 To configure Consul:
 
 1. SSH in to the server that will host Consul.
@@ -460,7 +455,11 @@ To configure Consul:
    gitlab_rails['auto_migrate'] = false
    ```
 
+1. Copy the `/etc/gitlab/gitlab-secrets.json` file from the first Omnibus node you configured and add or replace
+   the file of the same name on this server. If this is the first Omnibus node you are configuring then you can skip this step.
+
 1. [Reconfigure Omnibus GitLab](../restart_gitlab.md#omnibus-gitlab-reconfigure) for the changes to take effect.
+
 1. Go through the steps again for all the other Consul nodes, and
    make sure you set up the correct IPs.
 
@@ -617,9 +616,8 @@ PostgreSQL, with Patroni managing its failover, will default to use `pg_rewind` 
 Like most failover handling methods, this has a small chance of leading to data loss.
 Learn more about the various [Patroni replication methods](../postgresql/replication_and_failover.md#selecting-the-appropriate-patroni-replication-method).
 
-1. Copy the `/etc/gitlab/gitlab-secrets.json` file from your Consul server, and replace
-   the file of the same name on this server. If that file is not on this server,
-   add the file from your Consul server to this server.
+1. Copy the `/etc/gitlab/gitlab-secrets.json` file from the first Omnibus node you configured and add or replace
+   the file of the same name on this server. If this is the first Omnibus node you are configuring then you can skip this step.
 
 1. [Reconfigure GitLab](../restart_gitlab.md#omnibus-gitlab-reconfigure) for the changes to take effect.
 
@@ -719,9 +717,8 @@ The following IPs will be used as an example:
    node_exporter['listen_address'] = '0.0.0.0:9100'
    ```
 
-1. Copy the `/etc/gitlab/gitlab-secrets.json` file from your Consul server, and replace
-   the file of the same name on this server. If that file is not on this server,
-   add the file from your Consul server to this server.
+1. Copy the `/etc/gitlab/gitlab-secrets.json` file from the first Omnibus node you configured and add or replace
+   the file of the same name on this server. If this is the first Omnibus node you are configuring then you can skip this step.
 
 1. [Reconfigure Omnibus GitLab](../restart_gitlab.md#omnibus-gitlab-reconfigure) for the changes to take effect.
 
@@ -880,9 +877,8 @@ a node and change its status from primary to replica (and vice versa).
    gitlab_rails['auto_migrate'] = false
    ```
 
-1. Copy the `/etc/gitlab/gitlab-secrets.json` file from your Consul server, and replace
-   the file of the same name on this server. If that file is not on this server,
-   add the file from your Consul server to this server.
+1. Copy the `/etc/gitlab/gitlab-secrets.json` file from the first Omnibus node you configured and add or replace
+   the file of the same name on this server. If this is the first Omnibus node you are configuring then you can skip this step.
 
 1. [Reconfigure Omnibus GitLab](../restart_gitlab.md#omnibus-gitlab-reconfigure) for the changes to take effect.
 
@@ -947,11 +943,11 @@ You can specify multiple roles, like sentinel and Redis, as:
    gitlab_rails['auto_migrate'] = false
    ```
 
-1. Copy the `/etc/gitlab/gitlab-secrets.json` file from your Consul server, and replace
-   the file of the same name on this server. If that file is not on this server,
-   add the file from your Consul server to this server.
+1. Copy the `/etc/gitlab/gitlab-secrets.json` file from the first Omnibus node you configured and add or replace
+   the file of the same name on this server. If this is the first Omnibus node you are configuring then you can skip this step.
 
 1. [Reconfigure Omnibus GitLab](../restart_gitlab.md#omnibus-gitlab-reconfigure) for the changes to take effect.
+
 1. Go through the steps again for all the other replica nodes, and
    make sure to set up the IPs correctly.
 
@@ -1079,11 +1075,11 @@ To configure the Sentinel Cache server:
    gitlab_rails['auto_migrate'] = false
    ```
 
-1. Copy the `/etc/gitlab/gitlab-secrets.json` file from your Consul server, and replace
-   the file of the same name on this server. If that file is not on this server,
-   add the file from your Consul server to this server.
+1. Copy the `/etc/gitlab/gitlab-secrets.json` file from the first Omnibus node you configured and add or replace
+   the file of the same name on this server. If this is the first Omnibus node you are configuring then you can skip this step.
 
 1. [Reconfigure Omnibus GitLab](../restart_gitlab.md#omnibus-gitlab-reconfigure) for the changes to take effect.
+
 1. Go through the steps again for all the other Consul/Sentinel nodes, and
    make sure you set up the correct IPs.
 
@@ -1145,9 +1141,8 @@ a node and change its status from primary to replica (and vice versa).
    gitlab_rails['auto_migrate'] = false
    ```
 
-1. Copy the `/etc/gitlab/gitlab-secrets.json` file from your Consul server, and replace
-   the file of the same name on this server. If that file is not on this server,
-   add the file from your Consul server to this server.
+1. Copy the `/etc/gitlab/gitlab-secrets.json` file from the first Omnibus node you configured and add or replace
+   the file of the same name on this server. If this is the first Omnibus node you are configuring then you can skip this step.
 
 1. [Reconfigure Omnibus GitLab](../restart_gitlab.md#omnibus-gitlab-reconfigure) for the changes to take effect.
 
@@ -1206,11 +1201,11 @@ You can specify multiple roles, like sentinel and Redis, as:
    gitlab_rails['auto_migrate'] = false
    ```
 
-1. Copy the `/etc/gitlab/gitlab-secrets.json` file from your Consul server, and replace
-   the file of the same name on this server. If that file is not on this server,
-   add the file from your Consul server to this server.
+1. Copy the `/etc/gitlab/gitlab-secrets.json` file from the first Omnibus node you configured and add or replace
+   the file of the same name on this server. If this is the first Omnibus node you are configuring then you can skip this step.
 
 1. [Reconfigure Omnibus GitLab](../restart_gitlab.md#omnibus-gitlab-reconfigure) for the changes to take effect.
+
 1. Go through the steps again for all the other replica nodes, and
    make sure to set up the IPs correctly.
 
@@ -1338,7 +1333,7 @@ To configure the Sentinel Queues server:
    gitlab_rails['auto_migrate'] = false
    ```
 
-1. To prevent database migrations from running on upgrade, run:
+1. To ensure database migrations are only run during reconfigure and not automatically on upgrade, run:
 
    ```shell
    sudo touch /etc/gitlab/skip-auto-reconfigure
@@ -1346,11 +1341,11 @@ To configure the Sentinel Queues server:
 
    Only the primary GitLab application server should handle migrations.
 
-1. Copy the `/etc/gitlab/gitlab-secrets.json` file from your Consul server, and replace
-   the file of the same name on this server. If that file is not on this server,
-   add the file from your Consul server to this server.
+1. Copy the `/etc/gitlab/gitlab-secrets.json` file from the first Omnibus node you configured and add or replace
+   the file of the same name on this server. If this is the first Omnibus node you are configuring then you can skip this step.
 
 1. [Reconfigure Omnibus GitLab](../restart_gitlab.md#omnibus-gitlab-reconfigure) for the changes to take effect.
+
 1. Go through the steps again for all the other Sentinel nodes, and
    make sure you set up the correct IPs.
 
@@ -1449,7 +1444,11 @@ in the second step, do not supply the `EXTERNAL_URL` value.
    # END user configuration
    ```
 
+1. Copy the `/etc/gitlab/gitlab-secrets.json` file from the first Omnibus node you configured and add or replace
+   the file of the same name on this server. If this is the first Omnibus node you are configuring then you can skip this step.
+
 1. [Reconfigure GitLab](../restart_gitlab.md#omnibus-gitlab-reconfigure) for the changes to take effect.
+
 1. Follow the [post configuration](#praefect-postgresql-post-configuration).
 
 <div align="right">
@@ -1547,19 +1546,18 @@ To configure the Praefect nodes, on each one:
 1. Edit the `/etc/gitlab/gitlab.rb` file to configure Praefect:
 
    ```ruby
-   # Avoid running unnecessary services on the Gitaly server
+   # Avoid running unnecessary services on the Praefect server
+   gitaly['enable'] = false
    postgresql['enable'] = false
    redis['enable'] = false
-   nginx['enable'] = false
    puma['enable'] = false
-   unicorn['enable'] = false
    sidekiq['enable'] = false
    gitlab_workhorse['enable'] = false
-   grafana['enable'] = false
-
-   # If you run a separate monitoring node you can disable these services
-   alertmanager['enable'] = false
    prometheus['enable'] = false
+   alertmanager['enable'] = false
+   grafana['enable'] = false
+   gitlab_exporter['enable'] = false
+   nginx['enable'] = false
 
    # Praefect Configuration
    praefect['enable'] = true
@@ -1597,19 +1595,20 @@ To configure the Praefect nodes, on each one:
    # server ('praefect') and in git_data_dirs on Gitaly nodes ('gitaly-1')
    praefect['virtual_storages'] = {
      'default' => {
-       'gitaly-1' => {
-         'address' => 'tcp://10.6.0.91:8075',
-         'token'   => '<praefect_internal_token>',
-         'primary' => true
-       },
-       'gitaly-2' => {
-         'address' => 'tcp://10.6.0.92:8075',
-         'token'   => '<praefect_internal_token>'
-       },
-       'gitaly-3' => {
-         'address' => 'tcp://10.6.0.93:8075',
-         'token'   => '<praefect_internal_token>'
-       },
+       'nodes' => {
+         'gitaly-1' => {
+           'address' => 'tcp://10.6.0.91:8075',
+           'token'   => '<praefect_internal_token>'
+         },
+         'gitaly-2' => {
+           'address' => 'tcp://10.6.0.92:8075',
+           'token'   => '<praefect_internal_token>'
+         },
+         'gitaly-3' => {
+           'address' => 'tcp://10.6.0.93:8075',
+           'token'   => '<praefect_internal_token>'
+         },
+       }
      }
    }
 
@@ -1626,11 +1625,25 @@ To configure the Praefect nodes, on each one:
    # END user configuration
    ```
 
-   1. Copy the `/etc/gitlab/gitlab-secrets.json` file from your Consul server, and
-      then replace the file of the same name on this server. If that file isn't on
-      this server, add the file from your Consul server to this server.
+1. Copy the `/etc/gitlab/gitlab-secrets.json` file from the first Omnibus node you configured and add or replace
+the file of the same name on this server. If this is the first Omnibus node you are configuring then you can skip this step.
 
-   1. Save the file, and then [reconfigure GitLab](../restart_gitlab.md#omnibus-gitlab-reconfigure).
+1. Praefect requires to run some database migrations, much like the main GitLab application. For this
+   you should select **one Praefect node only to run the migrations**, AKA the _Deploy Node_. This node
+   must be configured first before the others as follows:
+   
+   1. In the `/etc/gitlab/gitlab.rb` file, change the `praefect['auto_migrate']` setting value from `false` to `true`
+
+   1. To ensure database migrations are only run during reconfigure and not automatically on upgrade, run:
+
+   ```shell
+   sudo touch /etc/gitlab/skip-auto-reconfigure
+   ```
+   
+   1. [Reconfigure GitLab](../restart_gitlab.md#omnibus-gitlab-reconfigure) for the changes to take effect and
+      to run the Praefect database migrations.
+
+1. On all other Praefect nodes, [Reconfigure GitLab](../restart_gitlab.md#omnibus-gitlab-reconfigure) for the changes to take effect.
 
 ### Configure Gitaly
 
@@ -1674,21 +1687,17 @@ On each node:
    storage paths, enable the network listener, and to configure the token:
 
    ```ruby
-   # /etc/gitlab/gitlab.rb
-
    # Avoid running unnecessary services on the Gitaly server
    postgresql['enable'] = false
    redis['enable'] = false
-   nginx['enable'] = false
    puma['enable'] = false
-   unicorn['enable'] = false
    sidekiq['enable'] = false
    gitlab_workhorse['enable'] = false
-   grafana['enable'] = false
-
-   # If you run a separate monitoring node you can disable these services
-   alertmanager['enable'] = false
    prometheus['enable'] = false
+   alertmanager['enable'] = false
+   grafana['enable'] = false
+   gitlab_exporter['enable'] = false
+   nginx['enable'] = false
 
    # Prevent database migrations from running on upgrade automatically
    gitlab_rails['auto_migrate'] = false
@@ -1696,8 +1705,10 @@ On each node:
    # Configure the gitlab-shell API callback URL. Without this, `git push` will
    # fail. This can be your 'front door' GitLab URL or an internal load
    # balancer.
-   # Don't forget to copy `/etc/gitlab/gitlab-secrets.json` from web server to Gitaly server.
    gitlab_rails['internal_api_url'] = 'https://gitlab.example.com'
+
+   # Gitaly 
+   gitaly['enable'] = true
 
    # Make Gitaly accept connections on all network interfaces. You must use
    # firewalls to restrict access to this address/port.
@@ -1740,9 +1751,8 @@ On each node:
      })
      ```
 
-1. Copy the `/etc/gitlab/gitlab-secrets.json` file from your Consul server, and
-   then replace the file of the same name on this server. If that file isn't on
-   this server, add the file from your Consul server to this server.
+1. Copy the `/etc/gitlab/gitlab-secrets.json` file from the first Omnibus node you configured and add or replace
+   the file of the same name on this server. If this is the first Omnibus node you are configuring then you can skip this step.
 
 1. Save the file, and then [reconfigure GitLab](../restart_gitlab.md#omnibus-gitlab-reconfigure).
 
@@ -1849,28 +1859,19 @@ To configure the Sidekiq nodes, on each one:
 1. Open `/etc/gitlab/gitlab.rb` with your editor:
 
    ```ruby
-   ########################################
-   #####        Services Disabled       ###
-   ########################################
-
-   nginx['enable'] = false
-   grafana['enable'] = false
-   prometheus['enable'] = false
-   alertmanager['enable'] = false
+   # Avoid running unnecessary services on the Sidekiq server
    gitaly['enable'] = false
-   gitlab_workhorse['enable'] = false
-   nginx['enable'] = false
-   puma['enable'] = false
-   postgres_exporter['enable'] = false
    postgresql['enable'] = false
    redis['enable'] = false
-   redis_exporter['enable'] = false
+   puma['enable'] = false
+   gitlab_workhorse['enable'] = false
+   prometheus['enable'] = false
+   alertmanager['enable'] = false
+   grafana['enable'] = false
    gitlab_exporter['enable'] = false
+   nginx['enable'] = false
 
-   ########################################
-   ####              Redis              ###
-   ########################################
-
+   # Redis
    ## Redis connection details
    ## First cluster that will host the cache
    gitlab_rails['redis_cache_instance'] = 'redis://:<REDIS_PRIMARY_PASSWORD_OF_FIRST_CLUSTER>@gitlab-redis-cache'
@@ -1902,10 +1903,7 @@ To configure the Sidekiq nodes, on each one:
      {host: '10.6.0.83', port: 26379},
    ]
 
-   #######################################
-   ###              Gitaly             ###
-   #######################################
-
+   # Gitaly
    # git_data_dirs get configured for the Praefect virtual storage
    # Address is Internal Load Balancer for Praefect
    # Token is praefect_external_token
@@ -1916,31 +1914,26 @@ To configure the Sidekiq nodes, on each one:
      }
    })
 
-   #######################################
-   ###            Postgres             ###
-   #######################################
+   # PostgreSQL
    gitlab_rails['db_host'] = '10.6.0.20' # internal load balancer IP
    gitlab_rails['db_port'] = 6432
    gitlab_rails['db_password'] = '<postgresql_user_password>'
    gitlab_rails['db_adapter'] = 'postgresql'
    gitlab_rails['db_encoding'] = 'unicode'
-   # Prevent database migrations from running on upgrade automatically
+   ## Prevent database migrations from running on upgrade automatically
    gitlab_rails['auto_migrate'] = false
 
-   #######################################
-   ###      Sidekiq configuration      ###
-   #######################################
+   # Sidekiq
+   sidekiq['enable'] = true
    sidekiq['listen_address'] = "0.0.0.0"
 
-   # Set number of Sidekiq queue processes to the same number as available CPUs
+   ## Set number of Sidekiq queue processes to the same number as available CPUs
    sidekiq['queue_groups'] = ['*'] * 4
 
-   # Set number of Sidekiq threads per queue process to the recommend number of 10
+   ## Set number of Sidekiq threads per queue process to the recommend number of 10
    sidekiq['max_concurrency'] = 10
 
-   #######################################
-   ###     Monitoring configuration    ###
-   #######################################
+   # Monitoring 
    consul['enable'] = true
    consul['monitoring_service_discovery'] =  true
 
@@ -1951,15 +1944,12 @@ To configure the Sidekiq nodes, on each one:
    # Set the network addresses that the exporters will listen on
    node_exporter['listen_address'] = '0.0.0.0:9100'
 
-   # Rails Status for prometheus
+   ## Add the monitoring node's IP address to the monitoring whitelist
    gitlab_rails['monitoring_whitelist'] = ['10.6.0.151/32', '127.0.0.0/8']
 
-   #############################
-   ###     Object storage    ###
-   #############################
-
-   # This is an example for configuring Object Storage on GCP
-   # Replace this config with your chosen Object Storage provider as desired
+   # Object storage
+   ## This is an example for configuring Object Storage on GCP
+   ## Replace this config with your chosen Object Storage provider as desired
    gitlab_rails['object_store']['connection'] = {
      'provider' => 'Google',
      'google_project' => '<gcp-project-name>',
@@ -1972,11 +1962,26 @@ To configure the Sidekiq nodes, on each one:
    gitlab_rails['object_store']['objects']['packages']['bucket'] = "<gcp-packages-bucket-name>"
    gitlab_rails['object_store']['objects']['dependency_proxy']['bucket'] = "<gcp-dependency-proxy-bucket-name>"
    gitlab_rails['object_store']['objects']['terraform_state']['bucket'] = "<gcp-terraform-state-bucket-name>"
+
+   gitlab_rails['backup_upload_connection'] = {
+     'provider' => 'Google',
+     'google_project' => '<gcp-project-name>',
+     'google_json_key_location' => '<path-to-gcp-service-account-key>'
+   }
+   gitlab_rails['backup_upload_remote_directory'] = "<gcp-backups-state-bucket-name>"
    ```
 
-1. Copy the `/etc/gitlab/gitlab-secrets.json` file from your Consul server, and replace
-   the file of the same name on this server. If that file is not on this server,
-   add the file from your Consul server to this server.
+1. Copy the `/etc/gitlab/gitlab-secrets.json` file from the first Omnibus node you configured and add or replace
+   the file of the same name on this server. If this is the first Omnibus node you are configuring then you can skip this step.
+
+1. To ensure database migrations are only run during reconfigure and not automatically on upgrade, run:
+
+   ```shell
+   sudo touch /etc/gitlab/skip-auto-reconfigure
+   ```
+
+   Only a single designated node should handle migrations as detailed in the
+   [GitLab Rails post-configuration](#gitlab-rails-post-configuration) section.
 
 1. [Reconfigure GitLab](../restart_gitlab.md#omnibus-gitlab-reconfigure) for the changes to take effect.
 
@@ -2016,9 +2021,6 @@ On each node perform the following:
 1. [Download and install](https://about.gitlab.com/install/) the Omnibus GitLab
    package of your choice. Be sure to follow _only_ installation steps 1 and 2
    on the page.
-1. Copy the `/etc/gitlab/gitlab-secrets.json` file from your Consul server, and replace
-   the file of the same name on this server. If that file is not on this server,
-   add the file from your Consul server to this server.
 
 1. Edit `/etc/gitlab/gitlab.rb` and use the following configuration.
    To maintain uniformity of links across nodes, the `external_url`
@@ -2113,9 +2115,15 @@ On each node perform the following:
    gitlab_rails['object_store']['objects']['packages']['bucket'] = "<gcp-packages-bucket-name>"
    gitlab_rails['object_store']['objects']['dependency_proxy']['bucket'] = "<gcp-dependency-proxy-bucket-name>"
    gitlab_rails['object_store']['objects']['terraform_state']['bucket'] = "<gcp-terraform-state-bucket-name>"
+
+   gitlab_rails['backup_upload_connection'] = {
+     'provider' => 'Google',
+     'google_project' => '<gcp-project-name>',
+     'google_json_key_location' => '<path-to-gcp-service-account-key>'
+   }
+   gitlab_rails['backup_upload_remote_directory'] = "<gcp-backups-state-bucket-name>"
    ```
 
-1. Save the file and [reconfigure GitLab](../restart_gitlab.md#omnibus-gitlab-reconfigure).
 1. If you're using [Gitaly with TLS support](#gitaly-cluster-tls-support), make sure the
    `git_data_dirs` entry is configured with `tls` instead of `tcp`:
 
@@ -2133,6 +2141,20 @@ On each node perform the following:
       ```shell
       sudo cp cert.pem /etc/gitlab/trusted-certs/
       ```
+
+1. Copy the `/etc/gitlab/gitlab-secrets.json` file from the first Omnibus node you configured and add or replace
+   the file of the same name on this server. If this is the first Omnibus node you are configuring then you can skip this step.
+
+1. To ensure database migrations are only run during reconfigure and not automatically on upgrade, run:
+
+   ```shell
+   sudo touch /etc/gitlab/skip-auto-reconfigure
+   ```
+
+   Only a single designated node should handle migrations as detailed in the
+   [GitLab Rails post-configuration](#gitlab-rails-post-configuration) section.
+
+1. [Reconfigure GitLab](../restart_gitlab.md#omnibus-gitlab-reconfigure) for the changes to take effect.
 
 1. If you're [using NFS](#configure-nfs-optional):
    1. If necessary, install the NFS client utility packages using the following
@@ -2173,7 +2195,7 @@ On each node perform the following:
       registry['gid'] = 9002
       ```
 
-1. Save the file and [reconfigure GitLab](../restart_gitlab.md#omnibus-gitlab-reconfigure).
+   1. Save the file and [reconfigure GitLab](../restart_gitlab.md#omnibus-gitlab-reconfigure).
 1. Confirm the node can connect to Gitaly:
 
    ```shell
@@ -2237,29 +2259,20 @@ To configure the Monitoring node:
 1. [Download and install](https://about.gitlab.com/install/) the Omnibus GitLab
    package of your choice. Be sure to follow _only_ installation steps 1 and 2
    on the page.
-1. Copy the `/etc/gitlab/gitlab-secrets.json` file from your Consul server, and replace
-   the file of the same name on this server. If that file is not on this server,
-   add the file from your Consul server to this server.
 
 1. Edit `/etc/gitlab/gitlab.rb` and add the contents:
 
    ```ruby
    external_url 'http://gitlab.example.com'
 
-   # Disable all other services
-   alertmanager['enable'] = false
+   # Avoid running unnecessary services on the Prometheus server
    gitaly['enable'] = false
-   gitlab_exporter['enable'] = false
-   gitlab_workhorse['enable'] = false
-   nginx['enable'] = true
-   postgres_exporter['enable'] = false
    postgresql['enable'] = false
    redis['enable'] = false
-   redis_exporter['enable'] = false
-   sidekiq['enable'] = false
    puma['enable'] = false
-   unicorn['enable'] = false
-   node_exporter['enable'] = false
+   sidekiq['enable'] = false
+   gitlab_workhorse['enable'] = false
+   alertmanager['enable'] = false
    gitlab_exporter['enable'] = false
 
    # Enable Prometheus

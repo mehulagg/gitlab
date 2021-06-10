@@ -1,17 +1,15 @@
 import { GlAlert, GlFormGroup, GlFormInput } from '@gitlab/ui';
 import * as Sentry from '@sentry/browser';
-import { nextTick } from 'vue';
-import BranchesSelect from 'ee/status_checks/components/branches_select.vue';
 import Form from 'ee/status_checks/components/form.vue';
 import { NAME_TAKEN_SERVER_ERROR, URL_TAKEN_SERVER_ERROR } from 'ee/status_checks/constants';
+import ProtectedBranchesSelector from 'ee/vue_shared/components/branches_selector/protected_branches_selector.vue';
 import { stubComponent } from 'helpers/stub_component';
 import { shallowMountExtended } from 'helpers/vue_test_utils_helper';
-import { TEST_PROTECTED_BRANCHES } from '../mock_data';
+import { TEST_PROTECTED_BRANCHES } from '../../vue_shared/components/branches_selector/mock_data';
 
 const projectId = '1';
 const statusCheck = {
   protectedBranches: TEST_PROTECTED_BRANCHES,
-  branches: TEST_PROTECTED_BRANCHES,
   name: 'Foo',
   externalUrl: 'https://foo.com',
 };
@@ -22,7 +20,10 @@ describe('Status checks form', () => {
 
   const createWrapper = (props = {}) => {
     wrapper = shallowMountExtended(Form, {
-      propsData: { projectId, ...props },
+      propsData: {
+        projectId,
+        ...props,
+      },
       stubs: {
         GlFormGroup: stubComponent(GlFormGroup, {
           props: ['state', 'invalidFeedback'],
@@ -31,13 +32,15 @@ describe('Status checks form', () => {
           props: ['state', 'disabled', 'value'],
           template: `<input />`,
         }),
+        BranchesSelect: stubComponent(ProtectedBranchesSelector),
       },
     });
   };
 
+  const findForm = () => wrapper.find('form');
   const findNameInput = () => wrapper.findByTestId('name');
   const findNameValidation = () => wrapper.findByTestId('name-group');
-  const findBranchesSelect = () => wrapper.findComponent(BranchesSelect);
+  const findProtectedBranchesSelector = () => wrapper.findComponent(ProtectedBranchesSelector);
   const findUrlInput = () => wrapper.findByTestId('url');
   const findUrlValidation = () => wrapper.findByTestId('url-group');
   const findBranchesValidation = () => wrapper.findByTestId('branches-group');
@@ -60,8 +63,8 @@ describe('Status checks form', () => {
 
       expect(inputsAreValid()).toBe(true);
       expect(findNameInput().props('value')).toBe('');
-      expect(findBranchesSelect().props('selectedBranches')).toStrictEqual([]);
-      expect(findUrlInput().props('value')).toBe(undefined);
+      expect(findProtectedBranchesSelector().props('selectedBranches')).toStrictEqual([]);
+      expect(findUrlInput().props('value')).toBe('');
     });
 
     it('shows filled inputs when initial data is given', () => {
@@ -69,15 +72,20 @@ describe('Status checks form', () => {
 
       expect(inputsAreValid()).toBe(true);
       expect(findNameInput().props('value')).toBe(statusCheck.name);
-      expect(findBranchesSelect().props('selectedBranches')).toStrictEqual(statusCheck.branches);
+      expect(findProtectedBranchesSelector().props('selectedBranches')).toStrictEqual(
+        statusCheck.protectedBranches,
+      );
       expect(findUrlInput().props('value')).toBe(statusCheck.externalUrl);
     });
   });
 
   describe('Validation', () => {
-    it('shows the validation messages if showValidation is passed', () => {
-      createWrapper({ showValidation: true, branches: ['abc'] });
+    it('shows the validation messages if invalid on submission', async () => {
+      createWrapper({ branches: ['abc'] });
 
+      await findForm().trigger('submit');
+
+      expect(wrapper.emitted('submit')).toBe(undefined);
       expect(inputsAreValid()).toBe(false);
       expect(findNameValidation().props('invalidFeedback')).toBe('Please provide a name.');
       expect(findBranchesValidation().props('invalidFeedback')).toBe(
@@ -86,21 +94,33 @@ describe('Status checks form', () => {
       expect(findUrlValidation().props('invalidFeedback')).toBe('Please provide a valid URL.');
     });
 
-    it('shows the invalid URL error if the URL is unsafe', () => {
+    it('shows the invalid URL error if the URL is unsafe', async () => {
       createWrapper({
-        showValidation: true,
         statusCheck: { ...statusCheck, externalUrl: 'ftp://foo.com' },
       });
 
+      await findForm().trigger('submit');
+
+      expect(wrapper.emitted('submit')).toBe(undefined);
       expect(inputsAreValid()).toBe(false);
       expect(findUrlValidation().props('invalidFeedback')).toBe('Please provide a valid URL.');
     });
 
-    it('shows the serverValidationErrors if given', () => {
+    it('shows the serverValidationErrors if given', async () => {
       createWrapper({
-        showValidation: true,
         serverValidationErrors: [NAME_TAKEN_SERVER_ERROR, URL_TAKEN_SERVER_ERROR],
+        statusCheck,
       });
+
+      await findForm().trigger('submit');
+
+      expect(wrapper.emitted('submit')).toContainEqual([
+        {
+          branches: statusCheck.protectedBranches,
+          name: statusCheck.name,
+          url: statusCheck.externalUrl,
+        },
+      ]);
 
       expect(inputsAreValid()).toBe(false);
       expect(findNameValidation().props('invalidFeedback')).toBe('Name is already taken.');
@@ -109,9 +129,18 @@ describe('Status checks form', () => {
       );
     });
 
-    it('does not show any errors if the values are valid', () => {
-      createWrapper({ showValidation: true, statusCheck });
+    it('does not show any errors if the values are valid', async () => {
+      createWrapper({ statusCheck });
 
+      await findForm().trigger('submit');
+
+      expect(wrapper.emitted('submit')).toContainEqual([
+        {
+          branches: statusCheck.protectedBranches,
+          name: statusCheck.name,
+          url: statusCheck.externalUrl,
+        },
+      ]);
       expect(inputsAreValid()).toBe(true);
     });
   });
@@ -123,7 +152,7 @@ describe('Status checks form', () => {
     });
 
     it('sends the error to sentry', () => {
-      findBranchesSelect().vm.$emit('apiError', true, sentryError);
+      findProtectedBranchesSelector().vm.$emit('apiError', true, sentryError);
 
       expect(Sentry.captureException.mock.calls[0][0]).toStrictEqual(sentryError);
     });
@@ -131,25 +160,22 @@ describe('Status checks form', () => {
     it('shows the alert', async () => {
       expect(findBranchesErrorAlert().exists()).toBe(false);
 
-      findBranchesSelect().vm.$emit('apiError', true, sentryError);
-      await nextTick();
+      await findProtectedBranchesSelector().vm.$emit('apiError', true, sentryError);
 
       expect(findBranchesErrorAlert().exists()).toBe(true);
     });
 
     it('hides the alert if the apiError is reset', async () => {
-      findBranchesSelect().vm.$emit('apiError', true, sentryError);
-      await nextTick();
+      await findProtectedBranchesSelector().vm.$emit('apiError', true, sentryError);
       expect(findBranchesErrorAlert().exists()).toBe(true);
 
-      findBranchesSelect().vm.$emit('apiError', false);
-      await nextTick();
+      await findProtectedBranchesSelector().vm.$emit('apiError', false);
       expect(findBranchesErrorAlert().exists()).toBe(false);
     });
 
     it('only calls sentry once while the branches api is failing', () => {
-      findBranchesSelect().vm.$emit('apiError', true, sentryError);
-      findBranchesSelect().vm.$emit('apiError', true, sentryError);
+      findProtectedBranchesSelector().vm.$emit('apiError', true, sentryError);
+      findProtectedBranchesSelector().vm.$emit('apiError', true, sentryError);
 
       expect(Sentry.captureException.mock.calls).toEqual([[sentryError]]);
     });

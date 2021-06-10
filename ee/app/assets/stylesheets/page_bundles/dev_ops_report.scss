@@ -13,8 +13,10 @@
   }
 }
 
-.actions-cell {
-  width: $gl-spacing-scale-6;
+@include media-breakpoint-up(sm) {
+  .actions-cell {
+    width: $gl-spacing-scale-6;
+  }
 }
 
 @include media-breakpoint-down(sm) {
@@ -23,5 +25,9 @@
       width: 100% !important;
       text-align: center !important;
     }
+  }
+
+  .actions-cell::before {
+    @include gl-display-none;
   }
 }

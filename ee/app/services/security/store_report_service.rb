@@ -35,12 +35,6 @@ module Security
       pipeline.vulnerability_findings.report_type(@report.type).any?
     end
 
-    def optimize_sql_query_for_security_report_enabled?
-      strong_memoize(:optimize_sql_query_for_security_report_enabled) do
-        Feature.enabled?(:optimize_sql_query_for_security_report, project)
-      end
-    end
-
     def create_all_vulnerabilities!
       # Look for existing Findings using UUID
       finding_uuids = @report.findings.map(&:uuid)
@@ -48,18 +42,16 @@ module Security
         .where(uuid: finding_uuids) # rubocop: disable CodeReuse/ActiveRecord
         .to_h { |vf| [vf.uuid, vf] }
 
-      update_vulnerability_scanners!(@report.findings) if optimize_sql_query_for_security_report_enabled?
+      update_vulnerability_scanners!(@report.findings)
 
       vulnerability_ids = @report.findings.map do |finding|
         create_vulnerability_finding(vulnerability_findings_by_uuid, finding)&.id
       end.compact.uniq
 
-      if optimize_sql_query_for_security_report_enabled?
-        update_vulnerability_links_info
-        create_vulnerability_pipeline_objects
-        update_vulnerabilities_identifiers
-        update_vulnerabilities_finding_identifiers
-      end
+      update_vulnerability_links_info
+      create_vulnerability_pipeline_objects
+      update_vulnerabilities_identifiers
+      update_vulnerabilities_finding_identifiers
 
       vulnerability_ids
     end
@@ -85,25 +77,12 @@ module Security
 
       vulnerability_finding_to_finding_map[vulnerability_finding] = finding
 
-      update_vulnerability_scanner(finding) unless optimize_sql_query_for_security_report_enabled?
-
       update_vulnerability_finding(vulnerability_finding, vulnerability_params)
       reset_remediations_for(vulnerability_finding, finding)
 
       if ::Feature.enabled?(:vulnerability_finding_tracking_signatures, project) && project.licensed_feature_available?(:vulnerability_finding_signatures)
         update_feedbacks(vulnerability_finding, vulnerability_params[:uuid])
         update_finding_signatures(finding, vulnerability_finding)
-      end
-
-      unless optimize_sql_query_for_security_report_enabled?
-        # The maximum number of identifiers is not used in validation
-        # we just want to ignore the rest if a finding has more than that.
-        finding.identifiers.take(Vulnerabilities::Finding::MAX_NUMBER_OF_IDENTIFIERS).map do |identifier| # rubocop: disable CodeReuse/ActiveRecord
-          create_or_update_vulnerability_identifier_object(vulnerability_finding, identifier)
-        end
-
-        create_or_update_vulnerability_links(finding, vulnerability_finding)
-        create_vulnerability_pipeline_object(vulnerability_finding, pipeline)
       end
 
       create_vulnerability(vulnerability_finding, pipeline)
@@ -139,11 +118,11 @@ module Security
         # This might happen if we're processing another report in parallel and it finds the same Finding
         # faster. In that case we need to perform the lookup again
 
-        by_uuid = project.vulnerability_findings.reset.find_by(uuid: finding.uuid)
-        return by_uuid if by_uuid
+        vulnerability_finding = project.vulnerability_findings.reset.find_by(uuid: finding.uuid)
+        return vulnerability_finding if vulnerability_finding
 
-        by_find_params = project.vulnerability_findings.reset.find_by(find_params)
-        return by_find_params if by_find_params
+        vulnerability_finding = project.vulnerability_findings.reset.find_by(find_params)
+        return vulnerability_finding if vulnerability_finding
 
         Gitlab::ErrorTracking.track_and_raise_exception(e, find_params: find_params, uuid: finding.uuid)
       rescue ActiveRecord::ActiveRecordError => e
@@ -175,30 +154,44 @@ module Security
       begin
         vulnerability_finding = matched_findings.first
         if vulnerability_finding.nil?
-          find_params[:uuid] = finding.uuid
           vulnerability_finding = project
             .vulnerability_findings
-            .create_with(create_params)
-            .find_or_initialize_by(find_params)
+            .create_with(create_params.merge(find_params))
+            .new
         end
 
-        vulnerability_finding.uuid = finding.uuid
-
-        vulnerability_finding.location_fingerprint = if finding.signatures.empty?
-                                                       finding.location.fingerprint
-                                                     else
-                                                       finding.signatures.max_by(&:priority).signature_hex
-                                                     end
-
-        vulnerability_finding.location = create_params.dig(:location)
+        sync_vulnerability_finding(vulnerability_finding, finding, create_params.dig(:location))
         vulnerability_finding.save!
 
         vulnerability_finding
-      rescue ActiveRecord::RecordNotUnique
-        get_matched_findings(finding, normalized_signatures, find_params).first
+      rescue ActiveRecord::RecordNotUnique => e
+        # the uuid is the only unique constraint on the vulnerability_occurrences
+        # table - no need to use get_matched_findings(...).first here. Fetching
+        # the finding with the same uuid will be enough
+        vulnerability_finding = project.vulnerability_findings.reset.find_by(uuid: finding.uuid)
+        if vulnerability_finding
+          sync_vulnerability_finding(vulnerability_finding, finding, create_params.dig(:location))
+          vulnerability_finding.save!
+          return vulnerability_finding
+        end
+
+        Gitlab::ErrorTracking.track_and_raise_exception(e, find_params: find_params, uuid: finding.uuid)
       rescue ActiveRecord::RecordInvalid => e
         Gitlab::ErrorTracking.track_and_raise_exception(e, create_params: create_params&.dig(:raw_metadata))
       end
+    end
+
+    def sync_vulnerability_finding(vulnerability_finding, finding, location_data)
+      vulnerability_finding.uuid = finding.uuid
+      vulnerability_finding.location_fingerprint = fingerprint_for(finding)
+
+      vulnerability_finding.location = location_data
+    end
+
+    def fingerprint_for(finding)
+      return finding.location.fingerprint if finding.signatures.empty?
+
+      finding.signatures.max_by(&:priority).signature_hex
     end
 
     def update_vulnerability_scanner(finding)

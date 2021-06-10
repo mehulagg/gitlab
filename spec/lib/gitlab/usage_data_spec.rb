@@ -91,7 +91,7 @@ RSpec.describe Gitlab::UsageData, :aggregate_failures do
       expect(described_class.usage_activity_by_stage_package({})).to eq(
         projects_with_packages: 2
       )
-      expect(described_class.usage_activity_by_stage_package(described_class.last_28_days_time_period)).to eq(
+      expect(described_class.usage_activity_by_stage_package(described_class.monthly_time_range_db_params)).to eq(
         projects_with_packages: 1
       )
     end
@@ -135,7 +135,7 @@ RSpec.describe Gitlab::UsageData, :aggregate_failures do
         project_clusters_disabled: 2,
         project_clusters_enabled: 10
       )
-      expect(described_class.usage_activity_by_stage_configure(described_class.last_28_days_time_period)).to include(
+      expect(described_class.usage_activity_by_stage_configure(described_class.monthly_time_range_db_params)).to include(
         clusters_applications_cert_managers: 1,
         clusters_applications_helm: 1,
         clusters_applications_ingress: 1,
@@ -185,7 +185,7 @@ RSpec.describe Gitlab::UsageData, :aggregate_failures do
         snippets: 2,
         suggestions: 2
       )
-      expect(described_class.usage_activity_by_stage_create(described_class.last_28_days_time_period)).to include(
+      expect(described_class.usage_activity_by_stage_create(described_class.monthly_time_range_db_params)).to include(
         deploy_keys: 1,
         keys: 1,
         merge_requests: 1,
@@ -225,7 +225,7 @@ RSpec.describe Gitlab::UsageData, :aggregate_failures do
         omniauth_providers: ['google_oauth2'],
         user_auth_by_provider: { 'group_saml' => 2, 'ldap' => 4, 'standard' => 0, 'two-factor' => 0, 'two-factor-via-u2f-device' => 0, "two-factor-via-webauthn-device" => 0 }
       )
-      expect(described_class.usage_activity_by_stage_manage(described_class.last_28_days_time_period)).to include(
+      expect(described_class.usage_activity_by_stage_manage(described_class.monthly_time_range_db_params)).to include(
         events: 1,
         groups: 1,
         users_created: 3,
@@ -252,7 +252,7 @@ RSpec.describe Gitlab::UsageData, :aggregate_failures do
         unique_users_all_imports: 10
       )
 
-      expect(described_class.usage_activity_by_stage_manage(described_class.last_28_days_time_period)).to include(
+      expect(described_class.usage_activity_by_stage_manage(described_class.monthly_time_range_db_params)).to include(
         unique_users_all_imports: 5
       )
     end
@@ -327,7 +327,7 @@ RSpec.describe Gitlab::UsageData, :aggregate_failures do
           groups_imported: Gitlab::UsageData::DEPRECATED_VALUE
         }
       )
-      expect(described_class.usage_activity_by_stage_manage(described_class.last_28_days_time_period)).to include(
+      expect(described_class.usage_activity_by_stage_manage(described_class.monthly_time_range_db_params)).to include(
         {
           bulk_imports: {
             gitlab_v1: 1,
@@ -411,7 +411,7 @@ RSpec.describe Gitlab::UsageData, :aggregate_failures do
         projects_with_enabled_alert_integrations_histogram: { '1' => 2 }
       )
 
-      data_28_days = described_class.usage_activity_by_stage_monitor(described_class.last_28_days_time_period)
+      data_28_days = described_class.usage_activity_by_stage_monitor(described_class.monthly_time_range_db_params)
       expect(data_28_days).to include(
         clusters: 1,
         clusters_applications_prometheus: 1,
@@ -450,7 +450,7 @@ RSpec.describe Gitlab::UsageData, :aggregate_failures do
         projects_jira_dvcs_cloud_active: 2,
         projects_jira_dvcs_server_active: 2
       )
-      expect(described_class.usage_activity_by_stage_plan(described_class.last_28_days_time_period)).to include(
+      expect(described_class.usage_activity_by_stage_plan(described_class.monthly_time_range_db_params)).to include(
         issues: 2,
         notes: 1,
         projects: 1,
@@ -479,7 +479,7 @@ RSpec.describe Gitlab::UsageData, :aggregate_failures do
         releases: 2,
         successful_deployments: 2
       )
-      expect(described_class.usage_activity_by_stage_release(described_class.last_28_days_time_period)).to include(
+      expect(described_class.usage_activity_by_stage_release(described_class.monthly_time_range_db_params)).to include(
         deployments: 1,
         failed_deployments: 1,
         releases: 1,
@@ -513,7 +513,7 @@ RSpec.describe Gitlab::UsageData, :aggregate_failures do
         ci_triggers: 2,
         clusters_applications_runner: 2
       )
-      expect(described_class.usage_activity_by_stage_verify(described_class.last_28_days_time_period)).to include(
+      expect(described_class.usage_activity_by_stage_verify(described_class.monthly_time_range_db_params)).to include(
         ci_builds: 1,
         ci_external_pipelines: 1,
         ci_internal_pipelines: 1,
@@ -576,7 +576,6 @@ RSpec.describe Gitlab::UsageData, :aggregate_failures do
       expect(count_data[:projects_with_error_tracking_enabled]).to eq(1)
       expect(count_data[:projects_with_tracing_enabled]).to eq(1)
       expect(count_data[:projects_with_enabled_alert_integrations]).to eq(1)
-      expect(count_data[:projects_with_prometheus_alerts]).to eq(2)
       expect(count_data[:projects_with_terraform_reports]).to eq(2)
       expect(count_data[:projects_with_terraform_states]).to eq(2)
       expect(count_data[:projects_with_alerts_created]).to eq(1)
@@ -964,138 +963,6 @@ RSpec.describe Gitlab::UsageData, :aggregate_failures do
             uploads: 'uploads_object_store_config',
             packages: 'packages_object_store_config'
           })
-      end
-    end
-
-    describe '.ingress_modsecurity_usage' do
-      subject { described_class.ingress_modsecurity_usage }
-
-      let(:environment) { create(:environment) }
-      let(:project) { environment.project }
-      let(:environment_scope) { '*' }
-      let(:deployment) { create(:deployment, :success, environment: environment, project: project, cluster: cluster) }
-      let(:cluster) { create(:cluster, environment_scope: environment_scope, projects: [project]) }
-      let(:ingress_mode) { :modsecurity_blocking }
-      let!(:ingress) { create(:clusters_applications_ingress, ingress_mode, cluster: cluster) }
-
-      context 'when cluster is disabled' do
-        let(:cluster) { create(:cluster, :disabled, projects: [project]) }
-
-        it 'gathers ingress data' do
-          expect(subject[:ingress_modsecurity_logging]).to eq(0)
-          expect(subject[:ingress_modsecurity_blocking]).to eq(0)
-          expect(subject[:ingress_modsecurity_disabled]).to eq(0)
-          expect(subject[:ingress_modsecurity_not_installed]).to eq(0)
-        end
-      end
-
-      context 'when deployment is unsuccessful' do
-        let!(:deployment) { create(:deployment, :failed, environment: environment, project: project, cluster: cluster) }
-
-        it 'gathers ingress data' do
-          expect(subject[:ingress_modsecurity_logging]).to eq(0)
-          expect(subject[:ingress_modsecurity_blocking]).to eq(0)
-          expect(subject[:ingress_modsecurity_disabled]).to eq(0)
-          expect(subject[:ingress_modsecurity_not_installed]).to eq(0)
-        end
-      end
-
-      context 'when deployment is successful' do
-        let!(:deployment) { create(:deployment, :success, environment: environment, project: project, cluster: cluster) }
-
-        context 'when modsecurity is in blocking mode' do
-          it 'gathers ingress data' do
-            expect(subject[:ingress_modsecurity_logging]).to eq(0)
-            expect(subject[:ingress_modsecurity_blocking]).to eq(1)
-            expect(subject[:ingress_modsecurity_disabled]).to eq(0)
-            expect(subject[:ingress_modsecurity_not_installed]).to eq(0)
-          end
-        end
-
-        context 'when modsecurity is in logging mode' do
-          let(:ingress_mode) { :modsecurity_logging }
-
-          it 'gathers ingress data' do
-            expect(subject[:ingress_modsecurity_logging]).to eq(1)
-            expect(subject[:ingress_modsecurity_blocking]).to eq(0)
-            expect(subject[:ingress_modsecurity_disabled]).to eq(0)
-            expect(subject[:ingress_modsecurity_not_installed]).to eq(0)
-          end
-        end
-
-        context 'when modsecurity is disabled' do
-          let(:ingress_mode) { :modsecurity_disabled }
-
-          it 'gathers ingress data' do
-            expect(subject[:ingress_modsecurity_logging]).to eq(0)
-            expect(subject[:ingress_modsecurity_blocking]).to eq(0)
-            expect(subject[:ingress_modsecurity_disabled]).to eq(1)
-            expect(subject[:ingress_modsecurity_not_installed]).to eq(0)
-          end
-        end
-
-        context 'when modsecurity is not installed' do
-          let(:ingress_mode) { :modsecurity_not_installed }
-
-          it 'gathers ingress data' do
-            expect(subject[:ingress_modsecurity_logging]).to eq(0)
-            expect(subject[:ingress_modsecurity_blocking]).to eq(0)
-            expect(subject[:ingress_modsecurity_disabled]).to eq(0)
-            expect(subject[:ingress_modsecurity_not_installed]).to eq(1)
-          end
-        end
-
-        context 'with multiple projects' do
-          let(:environment_2) { create(:environment) }
-          let(:project_2) { environment_2.project }
-          let(:cluster_2) { create(:cluster, environment_scope: environment_scope, projects: [project_2]) }
-          let!(:ingress_2) { create(:clusters_applications_ingress, :modsecurity_logging, cluster: cluster_2) }
-          let!(:deployment_2) { create(:deployment, :success, environment: environment_2, project: project_2, cluster: cluster_2) }
-
-          it 'gathers non-duplicated ingress data' do
-            expect(subject[:ingress_modsecurity_logging]).to eq(1)
-            expect(subject[:ingress_modsecurity_blocking]).to eq(1)
-            expect(subject[:ingress_modsecurity_disabled]).to eq(0)
-            expect(subject[:ingress_modsecurity_not_installed]).to eq(0)
-          end
-        end
-
-        context 'with multiple deployments' do
-          let!(:deployment_2) { create(:deployment, :success, environment: environment, project: project, cluster: cluster) }
-
-          it 'gathers non-duplicated ingress data' do
-            expect(subject[:ingress_modsecurity_logging]).to eq(0)
-            expect(subject[:ingress_modsecurity_blocking]).to eq(1)
-            expect(subject[:ingress_modsecurity_disabled]).to eq(0)
-            expect(subject[:ingress_modsecurity_not_installed]).to eq(0)
-          end
-        end
-
-        context 'with multiple projects' do
-          let(:environment_2) { create(:environment) }
-          let(:project_2) { environment_2.project }
-          let!(:deployment_2) { create(:deployment, :success, environment: environment_2, project: project_2, cluster: cluster) }
-          let(:cluster) { create(:cluster, environment_scope: environment_scope, projects: [project, project_2]) }
-
-          it 'gathers ingress data' do
-            expect(subject[:ingress_modsecurity_logging]).to eq(0)
-            expect(subject[:ingress_modsecurity_blocking]).to eq(2)
-            expect(subject[:ingress_modsecurity_disabled]).to eq(0)
-            expect(subject[:ingress_modsecurity_not_installed]).to eq(0)
-          end
-        end
-
-        context 'with multiple environments' do
-          let!(:environment_2) { create(:environment, project: project) }
-          let!(:deployment_2) { create(:deployment, :success, environment: environment_2, project: project, cluster: cluster) }
-
-          it 'gathers ingress data' do
-            expect(subject[:ingress_modsecurity_logging]).to eq(0)
-            expect(subject[:ingress_modsecurity_blocking]).to eq(2)
-            expect(subject[:ingress_modsecurity_disabled]).to eq(0)
-            expect(subject[:ingress_modsecurity_not_installed]).to eq(0)
-          end
-        end
       end
     end
 

@@ -70,8 +70,20 @@ export default {
       return groups;
     },
     filterObject() {
-      const ids = this.selectedOptions.flatMap((x) => x.scannerIds);
-      return { scannerId: ids.map((x) => `${SCANNER_ID_PREFIX}${x}`) };
+      if (this.isNoOptionsSelected) {
+        return { scannerId: [] };
+      }
+
+      const ids = this.selectedOptions.flatMap(({ scannerIds, reportType }) => {
+        return scannerIds.length
+          ? scannerIds.map((id) => `${SCANNER_ID_PREFIX}${id}`)
+          : [`${SCANNER_ID_PREFIX}${reportType}:null`];
+      });
+
+      return { scannerId: ids };
+    },
+    hasCustomVendor() {
+      return Object.keys(this.groups).length > 1;
     },
   },
   methods: {
@@ -103,9 +115,10 @@ export default {
     />
 
     <template v-for="[groupName, groupOptions] in Object.entries(groups)">
-      <gl-dropdown-divider :key="`${groupName}:divider`" />
+      <gl-dropdown-divider v-if="hasCustomVendor" :key="`${groupName}:divider`" />
 
       <gl-dropdown-item
+        v-if="hasCustomVendor"
         :key="`${groupName}:header`"
         :data-testid="`${groupName}Header`"
         @click.native.capture.stop="toggleGroup(groupName)"

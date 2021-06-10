@@ -36,6 +36,9 @@ module Types
           field :expires_at, ::Types::DateType, null: true,
                 description: 'Date when the license expires.'
 
+          field :block_changes_at, ::Types::DateType, null: true,
+                description: 'Date, including grace period, when licensed features will be blocked.'
+
           field :activated_at, ::Types::DateType, null: true,
                 description: 'Date when the license was activated.'
 

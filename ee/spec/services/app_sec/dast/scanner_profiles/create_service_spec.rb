@@ -100,7 +100,8 @@ RSpec.describe AppSec::Dast::ScannerProfiles::CreateService do
           expect(audit_event.target_type).to eq('DastScannerProfile')
           expect(audit_event.target_details).to eq(profile.name)
           expect(audit_event.details).to eq({
-            add: 'DAST scanner profile',
+            author_name: user.name,
+            custom_message: 'Added DAST scanner profile',
             target_id: profile.id,
             target_type: 'DastScannerProfile',
             target_details: profile.name

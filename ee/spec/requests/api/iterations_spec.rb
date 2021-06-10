@@ -8,7 +8,7 @@ RSpec.describe API::Iterations do
   let_it_be(:group) { create(:group, :private, parent: parent_group) }
 
   let_it_be(:iteration) { create(:iteration, group: group, title: 'search_title') }
-  let_it_be(:closed_iteration) { create(:iteration, :closed, group: group) }
+  let_it_be(:closed_iteration) { create(:iteration, :closed, group: group, start_date: 2.weeks.ago, due_date: 1.week.ago) }
   let_it_be(:ancestor_iteration) { create(:iteration, group: parent_group) }
 
   before_all do
@@ -78,11 +78,11 @@ RSpec.describe API::Iterations do
 
     it_behaves_like 'iterations list'
 
-    it 'excludes ancestor iterations when include_ancestors is set to false' do
+    it 'return direct parent group iterations when include_ancestors is set to false' do
       get api(api_path, user), params: { include_ancestors: false }
 
       expect(response).to have_gitlab_http_status(:ok)
-      expect(json_response.size).to eq(0)
+      expect(json_response.map { |i| i['id'] }).to contain_exactly(iteration.id, closed_iteration.id)
     end
   end
 end

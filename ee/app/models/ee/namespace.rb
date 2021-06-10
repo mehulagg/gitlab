@@ -27,8 +27,11 @@ module EE
       has_one :namespace_limit, inverse_of: :namespace
       has_one :gitlab_subscription
       has_one :elasticsearch_indexed_namespace
+      has_one :upcoming_reconciliation, inverse_of: :namespace, class_name: "GitlabSubscriptions::UpcomingReconciliation"
 
       has_many :compliance_management_frameworks, class_name: "ComplianceManagement::Framework"
+
+      has_many :ci_minutes_additional_packs, class_name: "Ci::Minutes::AdditionalPack"
 
       accepts_nested_attributes_for :gitlab_subscription, update_only: true
       accepts_nested_attributes_for :namespace_limit
@@ -368,6 +371,10 @@ module EE
 
     def plan_eligible_for_trial?
       ::Plan::PLANS_ELIGIBLE_FOR_TRIAL.include?(actual_plan_name)
+    end
+
+    def free_personal?
+      user? && !paid?
     end
 
     def use_elasticsearch?

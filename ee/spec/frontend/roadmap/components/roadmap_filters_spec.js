@@ -175,6 +175,7 @@ describe('RoadmapFilters', () => {
           symbol: '@',
           token: AuthorToken,
           operators,
+          recentTokenValuesStorageKey: 'gitlab-org-epics-recent-tokens-author_username',
           fetchAuthors: expect.any(Function),
         },
         {
@@ -218,7 +219,6 @@ describe('RoadmapFilters', () => {
           symbol: '&',
           token: EpicToken,
           operators,
-          idProperty: 'iid',
           defaultEpics: [],
           fetchEpics: expect.any(Function),
         },

@@ -3,22 +3,6 @@
 require 'spec_helper'
 
 RSpec.describe EE::Ci::Runner do
-  describe '#tick_runner_queue' do
-    it 'sticks the runner to the primary and calls the original method' do
-      runner = create(:ci_runner)
-
-      allow(Gitlab::Database::LoadBalancing).to receive(:enable?)
-        .and_return(true)
-
-      expect(Gitlab::Database::LoadBalancing::Sticking).to receive(:stick)
-        .with(:runner, runner.id)
-
-      expect(Gitlab::Workhorse).to receive(:set_key_and_notify)
-
-      runner.tick_runner_queue
-    end
-  end
-
   describe '#minutes_cost_factor' do
     subject { runner.minutes_cost_factor(visibility_level) }
 
@@ -82,7 +66,7 @@ RSpec.describe EE::Ci::Runner do
     end
   end
 
-  describe `#visibility_levels_without_minutes_quota` do
+  describe '#visibility_levels_without_minutes_quota' do
     subject { runner.visibility_levels_without_minutes_quota }
 
     context 'with group type runner' do

@@ -45,7 +45,8 @@ module BillingPlansHelper
       plan_renew_href: plan_renew_url(namespace),
       customer_portal_url: "#{EE::SUBSCRIPTIONS_URL}/subscriptions",
       billable_seats_href: billable_seats_href(namespace),
-      plan_name: plan&.name
+      plan_name: plan&.name,
+      free_personal_namespace: namespace.free_personal?.to_s
     }
   end
 
@@ -84,6 +85,8 @@ module BillingPlansHelper
   end
 
   def show_plans?(namespace)
+    return false if namespace.free_personal?
+
     namespace.trial_active? || !(namespace.gold_plan? || namespace.ultimate_plan?)
   end
 
@@ -124,6 +127,10 @@ module BillingPlansHelper
         plan_data.deprecated?
       end
     end
+  end
+
+  def show_start_free_trial_messages?(namespace)
+    !namespace.free_personal? && namespace.eligible_for_trial?
   end
 
   private

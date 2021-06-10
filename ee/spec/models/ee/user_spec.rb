@@ -635,9 +635,9 @@ RSpec.describe User do
           SELECT "users".* FROM "users"
           WHERE ("users"."state" IN ('active'))
           AND
-          ("users"."user_type" IS NULL OR "users"."user_type" IN (NULL, 6, 4))
+          ("users"."user_type" IS NULL OR "users"."user_type" IN (6, 4))
           AND
-          ("users"."user_type" IS NULL OR "users"."user_type" NOT IN (2, 6, 1, 3, 7, 8))
+          ("users"."user_type" IS NULL OR "users"."user_type" NOT IN (2, 6, 1, 3, 7, 8, 9))
         SQL
 
         expect(users.to_sql.squish).to eq expected_sql.squish
@@ -663,9 +663,9 @@ RSpec.describe User do
           SELECT "users".* FROM "users"
           WHERE ("users"."state" IN ('active'))
           AND
-          ("users"."user_type" IS NULL OR "users"."user_type" IN (NULL, 6, 4))
+          ("users"."user_type" IS NULL OR "users"."user_type" IN (6, 4))
           AND
-          ("users"."user_type" IS NULL OR "users"."user_type" NOT IN (2, 6, 1, 3, 7, 8))
+          ("users"."user_type" IS NULL OR "users"."user_type" NOT IN (2, 6, 1, 3, 7, 8, 9))
           AND
           (EXISTS (SELECT 1 FROM "members"
             WHERE "members"."user_id" = "users"."id"

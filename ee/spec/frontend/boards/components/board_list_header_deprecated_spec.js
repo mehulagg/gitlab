@@ -41,6 +41,7 @@ describe('Board List Header Component', () => {
     listType = ListType.backlog,
     collapsed = false,
     withLocalStorage = true,
+    currentUserId = 1,
   } = {}) => {
     const boardId = '1';
 
@@ -73,6 +74,7 @@ describe('Board List Header Component', () => {
         list,
       },
       provide: {
+        currentUserId,
         boardId,
       },
     });

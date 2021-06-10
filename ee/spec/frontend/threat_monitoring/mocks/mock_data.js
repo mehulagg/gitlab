@@ -7,7 +7,7 @@ export const mockEnvironmentsResponse = {
     },
     {
       id: 1156094,
-      name: 'review/enable-blocking-waf',
+      name: 'review/enable-network-policies',
       state: 'available',
     },
   ],
@@ -41,6 +41,17 @@ spec:
   },
 ];
 
+export const mockCiliumPolicy = {
+  name: 'policy',
+  creationTimestamp: new Date('2021-06-07T00:00:00.000Z'),
+  manifest: `apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: policy
+spec:
+  endpointSelector: {}`,
+};
+
 export const mockNominalHistory = [
   ['2019-12-04T00:00:00.000Z', 56],
   ['2019-12-05T00:00:00.000Z', 2647],
@@ -50,15 +61,6 @@ export const mockAnomalousHistory = [
   ['2019-12-04T00:00:00.000Z', 1],
   ['2019-12-05T00:00:00.000Z', 83],
 ];
-
-export const mockWafStatisticsResponse = {
-  total_traffic: 2703,
-  anomalous_traffic: 0.03,
-  history: {
-    nominal: mockNominalHistory,
-    anomalous: mockAnomalousHistory,
-  },
-};
 
 export const mockNetworkPolicyStatisticsResponse = {
   ops_total: {
@@ -97,6 +99,7 @@ export const mockAlerts = [
     assignees: {
       nodes: [
         {
+          id: 'Alert:1',
           name: 'Administrator',
           username: 'root',
           avatarUrl: '/test-avatar-url',

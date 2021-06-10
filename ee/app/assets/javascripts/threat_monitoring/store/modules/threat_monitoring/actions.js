@@ -5,9 +5,6 @@ import * as types from './mutation_types';
 
 export const setEndpoints = ({ commit }, endpoints) => {
   commit(types.SET_ENDPOINT, endpoints.environmentsEndpoint);
-  commit(`threatMonitoringWaf/${types.SET_ENDPOINT}`, endpoints.wafStatisticsEndpoint, {
-    root: true,
-  });
   commit(
     `threatMonitoringNetworkPolicy/${types.SET_ENDPOINT}`,
     endpoints.networkPolicyStatisticsEndpoint,

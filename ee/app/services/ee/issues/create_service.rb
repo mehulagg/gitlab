@@ -7,7 +7,7 @@ module EE
 
       override :filter_params
       def filter_params(issue)
-        handle_epic(issue)
+        filter_epic(issue)
 
         super
       end
