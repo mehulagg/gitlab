@@ -37,6 +37,7 @@ module QA
 
         aggregate_failures do
           verify_repository_import
+          verify_commits_import
           verify_labels_import
           verify_issues_import
           verify_milestones_import
@@ -52,13 +53,17 @@ module QA
         )
       end
 
+      def verify_commits_import
+        expect(imported_project.commits.length).to eq(20)
+      end
+
       def verify_labels_import
         labels = imported_project.labels.map { |label| label.slice(:name, :color) }
 
         expect(labels).to eq(
           [
             { name: 'bug', color: '#d73a4a' },
-            { name: 'custom new label', color: '#fc8f9' },
+            { name: 'custom new label', color: '#fc8f91' },
             { name: 'documentation', color: '#0075ca' },
             { name: 'duplicate', color: '#cfd3d7' },
             { name: 'enhancement', color: '#a2eeef' },
