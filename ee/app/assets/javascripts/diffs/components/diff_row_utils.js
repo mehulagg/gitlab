@@ -1,7 +1,4 @@
-import {
-  mapParallel as CEMapParallel,
-  mapInline as CEMapInline,
-} from '~/diffs/components/diff_row_utils';
+import { mapParallel as CEMapParallel } from '~/diffs/components/diff_row_utils';
 
 export const mapParallel = (content) => (line) => {
   let { left, right } = line;
@@ -27,5 +24,3 @@ export const mapParallel = (content) => (line) => {
     }),
   };
 };
-
-export const mapInline = CEMapInline;
