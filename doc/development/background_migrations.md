@@ -27,7 +27,6 @@ largely dependent on the size of the dataset, hence it should be split according
 and put into background migrations.
 - Background migrations should not be used perform schema migrations
 
-
 Some examples where background migrations can be useful:
 
 - Migrating events from one table to multiple separate tables.
