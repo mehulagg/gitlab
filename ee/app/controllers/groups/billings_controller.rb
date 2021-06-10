@@ -9,6 +9,7 @@ class Groups::BillingsController < Groups::ApplicationController
   feature_category :purchase
 
   def index
+    @hide_search_settings = true
     @top_most_group = @group.root_ancestor if @group.has_parent?
     relevant_group = (@top_most_group || @group)
     current_plan = relevant_group.plan_name_for_upgrading

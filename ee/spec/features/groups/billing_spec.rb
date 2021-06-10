@@ -29,6 +29,14 @@ RSpec.describe 'Groups > Billing', :js do
     sign_in(user)
   end
 
+  shared_examples 'hides search settings' do
+    it 'does not have search settings' do
+      visit group_billings_path(group)
+
+      expect(page).not_to have_field(placeholder: SearchHelpers::INPUT_PLACEHOLDER)
+    end
+  end
+
   context 'when CustomersDot is available' do
     before do
       stub_eoa_eligibility_request(group.id)
@@ -43,6 +51,8 @@ RSpec.describe 'Groups > Billing', :js do
       let!(:subscription) do
         create(:gitlab_subscription, namespace: group, hosted_plan: nil, seats: 15)
       end
+
+      it_behaves_like 'hides search settings'
 
       it 'shows the proper title and subscription data' do
         visit group_billings_path(group)
@@ -62,6 +72,8 @@ RSpec.describe 'Groups > Billing', :js do
       let_it_be(:subscription) do
         create(:gitlab_subscription, namespace: group, hosted_plan: bronze_plan, seats: 15)
       end
+
+      it_behaves_like 'hides search settings'
 
       it 'shows the proper title and subscription data' do
         extra_seats_url = "#{EE::SUBSCRIPTIONS_URL}/gitlab/namespaces/#{group.id}/extra_seats"

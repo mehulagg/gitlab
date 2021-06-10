@@ -6,6 +6,7 @@ class Profiles::BillingsController < Profiles::ApplicationController
   feature_category :purchase
 
   def index
+    @hide_search_settings = true
     @plans_data = GitlabSubscriptions::FetchSubscriptionPlansService
       .new(plan: current_user.namespace.plan_name_for_upgrading, namespace_id: current_user.namespace_id)
       .execute
