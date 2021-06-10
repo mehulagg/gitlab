@@ -130,7 +130,7 @@ class Issue < ApplicationRecord
   }
   scope :with_issue_type, ->(types) { where(issue_type: types) }
 
-  scope :public_only, -> { where(confidential: false).and(hidden: false) }
+  scope :public_only, -> { where(confidential: false).where(hidden: false) }
   scope :confidential_only, -> { where(confidential: true) }
   scope :hidden_only, -> { where(hidden: true) }
 

@@ -37,7 +37,7 @@ module Projects
     end
 
     def relation_for_count
-      self.class.query(@project, public_only: public_only?)
+      self.class.query(@project, include_hidden: true)
     end
 
     def user_is_at_least_reporter?
@@ -46,12 +46,16 @@ module Projects
       end
     end
 
-    def public_count_cache_key
-      cache_key(PUBLIC_COUNT_KEY)
+    def total_count_without_hidden_cache_key
+      cache_key(TOTAL_COUNT_WITHOUT_HIDDEN_KEY)
     end
 
     def total_count_cache_key
       cache_key(TOTAL_COUNT_KEY)
+    end
+
+    def public_count_without_hidden_cache_key
+      cache_key(PUBLIC_COUNT_WITHOUT_HIDDEN_KEY)
     end
 
     # rubocop: disable CodeReuse/ActiveRecord
@@ -88,13 +92,13 @@ module Projects
     # This will still show a discrepancy on issues number but should be less than before.
     # Check https://gitlab.com/gitlab-org/gitlab-foss/issues/38418 description.
     # rubocop: disable CodeReuse/ActiveRecord
-    def self.query(projects, include_hidden: true)
+    def self.query(projects, include_hidden: false)
       issues_filtered_by_type = Issue.opened.with_issue_type(Issue::TYPES_FOR_LIST)
 
       if include_hidden
         issues_filtered_by_type.where(project: projects)
       else
-        issues_filtered_by_type.where(project: projects).joins(:author).where("users.state != 'banned'")
+        issues_filtered_by_type.where(project: projects).joins(:author).where("issues.hidden IS FALSE")
       end
     end
     # rubocop: enable CodeReuse/ActiveRecord
