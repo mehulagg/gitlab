@@ -39,6 +39,7 @@ module QA
           verify_repository_import
           verify_labels_import
           verify_issues_import
+          verify_milestones_import
           verify_merge_requests_import
         end
       end
@@ -56,16 +57,16 @@ module QA
 
         expect(labels).to eq(
           [
-            { name: "bug", color: "#d73a4a" },
-            { name: "custom new label", color: "#fc8f91" },
-            { name: "documentation", color: "#0075ca" },
-            { name: "duplicate", color: "#cfd3d7" },
-            { name: "enhancement", color: "#a2eeef" },
-            { name: "good first issue", color: "#7057ff" },
-            { name: "help wanted", color: "#008672" },
-            { name: "invalid", color: "#e4e669" },
-            { name: "question", color: "#d876e3" },
-            { name: "wontfix", color: "#ffffff" }
+            { name: 'bug', color: '#d73a4a' },
+            { name: 'custom new label', color: '#fc8f9' },
+            { name: 'documentation', color: '#0075ca' },
+            { name: 'duplicate', color: '#cfd3d7' },
+            { name: 'enhancement', color: '#a2eeef' },
+            { name: 'good first issue', color: '#7057ff' },
+            { name: 'help wanted', color: '#008672' },
+            { name: 'invalid', color: '#e4e669' },
+            { name: 'question', color: '#d876e3' },
+            { name: 'wontfix', color: '#ffffff' }
           ]
         )
       end
@@ -80,6 +81,13 @@ module QA
           labels: ['custom new label', 'good first issue', 'help wanted'],
           user_notes_count: 1
         )
+      end
+
+      def verify_milestones_import
+        milestones = imported_project.milestones
+
+        expect(milestones.length).to eq(1)
+        expect(milestones.first).to include(title: 'v1.0', description: nil, state: 'active')
       end
 
       def verify_merge_requests_import
