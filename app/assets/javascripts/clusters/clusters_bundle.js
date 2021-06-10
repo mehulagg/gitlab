@@ -4,7 +4,7 @@ import Vue from 'vue';
 import AccessorUtilities from '~/lib/utils/accessor';
 import initProjectSelectDropdown from '~/project_select';
 import initServerlessSurveyBanner from '~/serverless/survey_banner';
-import { deprecatedCreateFlash as Flash } from '../flash';
+import createFlash from '../flash';
 import Poll from '../lib/utils/poll';
 import { s__, sprintf } from '../locale';
 import PersistentUserCallout from '../persistent_user_callout';
@@ -303,7 +303,9 @@ export default class Clusters {
   }
 
   static handleError() {
-    Flash(s__('ClusterIntegration|Something went wrong on our end.'));
+    createFlash({
+      message: s__('ClusterIntegration|Something went wrong on our end.'),
+    });
   }
 
   handleClusterStatusSuccess(data) {
@@ -345,7 +347,11 @@ export default class Clusters {
           appList: appTitles.join(', '),
         },
       );
-      Flash(text, 'notice', this.successApplicationContainer);
+      createFlash({
+        message: text,
+        type: 'notice',
+        parent: this.successApplicationContainer,
+      });
     }
   }
 
