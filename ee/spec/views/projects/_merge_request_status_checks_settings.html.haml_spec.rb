@@ -9,6 +9,7 @@ RSpec.describe 'projects/_merge_request_status_checks_settings' do
     assign(:project, project)
 
     allow(view).to receive(:status_checks_app_data).and_return({ data: { status_checks_path: 'status-checks/path' } })
+    allow(view).to receive(:help_page_path).and_return('https://help.page')
 
     render partial: 'projects/merge_request_status_checks_settings'
   end
@@ -19,7 +20,7 @@ RSpec.describe 'projects/_merge_request_status_checks_settings' do
 
   it 'renders the settings description', :aggregate_failures do
     expect(rendered).to have_content 'Check for a status response in Merge Requests. Failures do not block merges.'
-    expect(rendered).to have_link 'Learn more', href: ''
+    expect(rendered).to have_link 'Learn more', href: 'https://help.page'
   end
 
   it 'renders the settings app element', :aggregate_failures do
