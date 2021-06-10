@@ -165,14 +165,17 @@ To edit the custom email display name:
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/2201) in GitLab Premium 13.0.
 > - [Feature flag removed](https://gitlab.com/gitlab-org/gitlab/-/issues/284656) in GitLab 13.8.
 
-If the `service_desk_email` is configured, then you can create Service Desk
-issues by sending emails to the Service Desk email address. The default
-address has the following format:
-`project_contact+%{key}@example.com`.
+Using the `service_desk_email` configuration, you can customize the mailbox
+used by Service Desk. This allows you to have a separate email address for 
+Service Desk and enables further customization in the project settings.
 
-The `%{key}` part is used to find the project where the issue should be created. The
-`%{key}` part combines the path to the project and configurable project name suffix:
+The `address` must include the `+%{key}` placeholder within the 'user' 
+portion of the address, before the `@`. This is used to identify the project 
+where the issue should be created and includes the configurable suffix:
 `<project_full_path>-<project_name_suffix>`.
+
+The default address on GitLab.com has the following format:
+`project_contact+%{key}@example.com`.
 
 You can set the project name suffix in your project's Service Desk settings.
 It can contain only lowercase letters (`a-z`), numbers (`0-9`), or underscores (`_`).
@@ -183,7 +186,7 @@ always use separate mailboxes. This is important, because emails picked from
 `service_desk_email` mailbox are processed by a different worker and it would
 not recognize `incoming_email` emails.
 
-To configure a custom email address for Service Desk with IMAP, add the following snippets to your configuration file:
+To configure a custom email address for Service Desk with IMAP, add the following snippets to your configuration file in full:
 
 - Example for installations from source:
 
