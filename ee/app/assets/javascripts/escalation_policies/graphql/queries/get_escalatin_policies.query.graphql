@@ -1,10 +1,19 @@
-#import "../fragments/escalation_policy_fragment.graphql"
-
 query getEscalationPolicies($projectPath: ID!) {
   project(fullPath: $projectPath) {
     incidentManagementEscalationPolicies {
       nodes {
-        ...EscalationPolicy
+        id
+        name
+        description
+        rules {
+          id
+          status
+          elapsedTimeSeconds
+          oncallSchedule {
+            iid
+            name
+          }
+        }
       }
     }
   }
