@@ -382,7 +382,7 @@ Support for custom certificate authorities was introduced in the following versi
 | Scanner | Version |
 | -------- | ------- |
 | `Trivy` | [4.0.0](https://gitlab.com/gitlab-org/security-products/analyzers/container-scanning/-/releases/4.0.0) |
-| `Grype` | [4.2.0](https://gitlab.com/gitlab-org/security-products/analyzers/container-scanning/-/releases/4.2.0) |
+| `Grype` | [4.3.0](https://gitlab.com/gitlab-org/security-products/analyzers/container-scanning/-/releases/4.3.0) |
 
 #### Make GitLab container scanning analyzer images available inside your Docker registry
 
