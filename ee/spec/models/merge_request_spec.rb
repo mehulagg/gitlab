@@ -197,11 +197,11 @@ RSpec.describe MergeRequest do
   end
 
   describe '#has_denied_policies?' do
-    let(:report_diff) { {:status=>:parsed, :data=>{"new_licenses"=> new_licenses } } }
+    let(:report_diff) { { status: :parsed, data: { "new_licenses" => new_licenses } } }
     let(:new_licenses) { [] }
-    let(:license1) { {'name' => 'License 1', 'classification' => { 'approval_status' => 'unclassified' } } }
-    let(:license2) { {'name' => 'License 2', 'classification' => { 'approval_status' => 'allowed' } } }
-    let(:license3) { {'name' => 'License 2', 'classification' => { 'approval_status' => 'denied' } } }
+    let(:license1) { { 'name' => 'License 1', 'classification' => { 'approval_status' => 'unclassified' } } }
+    let(:license2) { { 'name' => 'License 2', 'classification' => { 'approval_status' => 'allowed' } } }
+    let(:license3) { { 'name' => 'License 2', 'classification' => { 'approval_status' => 'denied' } } }
     let(:feature_available) { false }
     let(:has_license_scanning_reports) { false }
     let(:has_approved_license_check) { true }
@@ -241,28 +241,33 @@ RSpec.describe MergeRequest do
 
                 context 'and malformed report diff data' do
                   context 'with no data key' do
-                    let(:report_diff) { { :data=>{"foo"=> new_licenses } } }
+                    let(:report_diff) { { data: { "foo" => new_licenses } } }
+
                     it { is_expected.to eq false }
                   end
 
                   context 'with no new_licenses key' do
-                    let(:report_diff) { {:status=>:parsed, :data=>{"old_licenses"=> new_licenses } } }
+                    let(:report_diff) { { data: { "old_licenses" => new_licenses } } }
+
                     it { is_expected.to eq false }
                   end
                 end
 
                 context 'and no new licenses' do
                   let(:new_licenses) { [] }
+
                   it { is_expected.to eq false }
                 end
 
                 context 'and no blacklisted licenses' do
                   let(:new_licenses) { [license1, license2] }
+
                   it { is_expected.to eq false }
                 end
 
                 context 'and blacklisted licenses' do
                   let(:new_licenses) { [license1, license2, license3] }
+
                   it { is_expected.to eq true }
                 end
               end
