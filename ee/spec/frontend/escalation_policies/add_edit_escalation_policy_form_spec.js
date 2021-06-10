@@ -6,7 +6,7 @@ import EscalationRule from 'ee/escalation_policies/components/escalation_rule.vu
 import { DEFAULT_ESCALATION_RULE } from 'ee/escalation_policies/constants';
 import { shallowMountExtended } from 'helpers/vue_test_utils_helper';
 
-import mockPolicy from './mocks/mockPolicy.json';
+import mockPolicies from './mocks/mockPolicies.json';
 
 describe('AddEscalationPolicyForm', () => {
   let wrapper;
@@ -16,8 +16,8 @@ describe('AddEscalationPolicyForm', () => {
     wrapper = shallowMountExtended(AddEscalationPolicyForm, {
       propsData: {
         form: {
-          name: mockPolicy.name,
-          description: mockPolicy.description,
+          name: mockPolicies[1].name,
+          description: mockPolicies[1].description,
         },
         validationState: {
           name: true,

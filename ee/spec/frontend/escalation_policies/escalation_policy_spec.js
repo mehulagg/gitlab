@@ -3,14 +3,14 @@ import { shallowMount } from '@vue/test-utils';
 import { cloneDeep } from 'lodash';
 import EscalationPolicy from 'ee/escalation_policies/components/escalation_policy.vue';
 
-import mockPolicy from './mocks/mockPolicy.json';
+import mockPolicies from './mocks/mockPolicies.json';
 
 describe('EscalationPolicy', () => {
   let wrapper;
   const createComponent = () => {
     wrapper = shallowMount(EscalationPolicy, {
       propsData: {
-        policy: cloneDeep(mockPolicy),
+        policy: cloneDeep(mockPolicies[0]),
         index: 0,
       },
       stubs: {

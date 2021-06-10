@@ -1,17 +1,19 @@
 import { GlModal, GlAlert } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
+import { cloneDeep } from 'lodash';
 import AddEscalationPolicyForm from 'ee/escalation_policies/components/add_edit_escalation_policy_form.vue';
 import AddEscalationPolicyModal, {
   i18n,
 } from 'ee/escalation_policies/components/add_edit_escalation_policy_modal.vue';
 import waitForPromises from 'helpers/wait_for_promises';
-import mockPolicy from './mocks/mockPolicy.json';
+import mockPolicies from './mocks/mockPolicies.json';
 
 describe('AddEscalationPolicyModal', () => {
   let wrapper;
   const projectPath = 'group/project';
   const mockHideModal = jest.fn();
   const mutate = jest.fn();
+  const mockPolicy = cloneDeep(mockPolicies[0]);
 
   const createComponent = ({ escalationPolicy, data } = {}) => {
     wrapper = shallowMount(AddEscalationPolicyModal, {

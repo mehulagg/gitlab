@@ -2,12 +2,12 @@ import { GlEmptyState, GlLoadingIcon } from '@gitlab/ui';
 import EscalationPoliciesWrapper from 'ee/escalation_policies/components/escalation_policies_wrapper.vue';
 import EscalationPolicy from 'ee/escalation_policies/components/escalation_policy.vue';
 import { shallowMountExtended } from 'helpers/vue_test_utils_helper';
+import mockEscalationPolicies from './mocks/mockPolicies.json';
 
 describe('Escalation Policies Wrapper', () => {
   let wrapper;
   const emptyEscalationPoliciesSvgPath = 'illustration/path.svg';
   const projectPath = 'group/project';
-  const mockEscalationPolicies = [{ name: 'policy1' }, { name: 'policy2' }];
 
   function mountComponent({ loading = false, escalationPolicies = [] } = {}) {
     const $apollo = {
