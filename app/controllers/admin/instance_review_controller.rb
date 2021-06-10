@@ -16,7 +16,7 @@ class Admin::InstanceReviewController < Admin::ApplicationController
     }
 
     if Gitlab::CurrentSettings.usage_ping_enabled?
-      data = ::Gitlab::UsageData.data
+      data = ::Gitlab::Usage::UsageDataInstrumentation.data.with_indifferent_access
       counts = data[:counts]
 
       result[:instance_review].merge!(

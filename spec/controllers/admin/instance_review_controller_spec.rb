@@ -22,7 +22,7 @@ RSpec.describe Admin::InstanceReviewController do
       before do
         stub_application_setting(usage_ping_enabled: true)
         stub_usage_data_connections
-        ::Gitlab::UsageData.data(force_refresh: true)
+        ::Gitlab::Usage::UsageDataInstrumentation.data(force_refresh: true)
         subject
       end
 
