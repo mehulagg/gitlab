@@ -17464,7 +17464,8 @@ CREATE TABLE requirements_management_test_reports (
     author_id bigint,
     state smallint NOT NULL,
     build_id bigint,
-    issue_id bigint
+    issue_id bigint,
+    CONSTRAINT requirements_test_reports_requirement_id_xor_issue_id CHECK ((num_nonnulls(requirement_id, issue_id) = 1))
 );
 
 CREATE SEQUENCE requirements_management_test_reports_id_seq
@@ -24426,6 +24427,8 @@ CREATE INDEX index_requirements_management_test_reports_on_author_id ON requirem
 
 CREATE INDEX index_requirements_management_test_reports_on_build_id ON requirements_management_test_reports USING btree (build_id);
 
+CREATE INDEX index_requirements_management_test_reports_on_issue_id ON requirements_management_test_reports USING btree (issue_id);
+
 CREATE INDEX index_requirements_management_test_reports_on_requirement_id ON requirements_management_test_reports USING btree (requirement_id);
 
 CREATE INDEX index_requirements_on_author_id ON requirements USING btree (author_id);
@@ -24717,8 +24720,6 @@ CREATE UNIQUE INDEX index_terraform_states_on_project_id_and_name ON terraform_s
 CREATE UNIQUE INDEX index_terraform_states_on_uuid ON terraform_states USING btree (uuid);
 
 CREATE UNIQUE INDEX index_test_case_failures_unique_columns ON ci_test_case_failures USING btree (test_case_id, failed_at DESC, build_id);
-
-CREATE INDEX index_test_reports_on_issue_id ON requirements_management_test_reports USING btree (issue_id);
 
 CREATE INDEX index_timelogs_on_issue_id ON timelogs USING btree (issue_id);
 

@@ -5,7 +5,7 @@ class AddIssueIndexToTestReport < ActiveRecord::Migration[6.1]
 
   disable_ddl_transaction!
 
-  INDEX_NAME = 'index_test_reports_on_issue_id'
+  INDEX_NAME = 'index_requirements_management_test_reports_on_issue_id'
 
   def up
     add_concurrent_index :requirements_management_test_reports, :issue_id, name: INDEX_NAME
