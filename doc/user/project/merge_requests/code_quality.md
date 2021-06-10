@@ -54,20 +54,25 @@ See also the Code Climate list of [Supported Languages for Maintainability](http
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/267612) in [GitLab Ultimate](https://about.gitlab.com/pricing/) 13.11.
 > - [Deployed behind a feature flag](../../../user/feature_flags.md), disabled by default.
 > - [Enabled by default](https://gitlab.com/gitlab-org/gitlab/-/issues/284140) in GitLab 13.12.
+> - [Feature enhanced](https://gitlab.com/gitlab-org/gitlab/-/issues/2526) behind [a feature flag](../../../user/feature_flags.md) in GitLab 14.0.
 
 Changes to files in merge requests can cause Code Quality to fall if merged. In these cases,
 an indicator is displayed (**{information-o}** **Code Quality**) on the file in the merge request's diff view. For example:
 
 ![Code Quality MR diff report](img/code_quality_mr_diff_report_v13_11.png)
 
-To disable this feature, a GitLab administrator can run the following in a
+Or, when the enhanced version of the feature is enabled, an indicator is displayed next to the line where the new issue was detected:
+
+![Code Quality MR diff report](img/code_quality_mr_diff_report_v14.png)
+
+To switch to the enhanced version of this feature, a GitLab administrator can run the following in a
 [Rails console](../../../administration/operations/rails_console.md):
 
 ```ruby
 # For the instance
-Feature.disable(:codequality_mr_diff)
+Feature.enable(:codequality_mr_diff_annotations)
 # For a single project
-Feature.disable(:codequality_mr_diff, Project.find(<project id>))
+Feature.enable(:codequality_mr_diff_annotations, Project.find(<project id>))
 ```
 
 ## Use cases
