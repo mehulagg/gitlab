@@ -3,7 +3,7 @@ import { GlEmptyState, GlButton, GlModalDirective, GlLoadingIcon } from '@gitlab
 import * as Sentry from '@sentry/browser';
 import { s__ } from '~/locale';
 import { addEscalationPolicyModalId } from '../constants';
-import getEscalationPoliciesQuery from '../graphql/queries/get_escalatin_policies.query.graphql';
+import getEscalationPoliciesQuery from '../graphql/queries/get_escalation_policies.query.graphql';
 import AddEscalationPolicyModal from './add_edit_escalation_policy_modal.vue';
 import EscalationPolicy from './escalation_policy.vue';
 

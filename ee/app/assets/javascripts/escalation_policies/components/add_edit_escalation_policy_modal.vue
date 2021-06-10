@@ -5,7 +5,7 @@ import { s__, __ } from '~/locale';
 import { addEscalationPolicyModalId } from '../constants';
 import { updateStoreOnEscalationPolicyCreate } from '../graphql/cache_updates';
 import createEscalationPolicyMutation from '../graphql/mutations/create_escalation_policy.mutation.graphql';
-import getEscalationPoliciesQuery from '../graphql/queries/get_escalatin_policies.query.graphql';
+import getEscalationPoliciesQuery from '../graphql/queries/get_escalation_policies.query.graphql';
 import { isNameFieldValid, getRulesValidationState } from '../utils';
 import AddEditEscalationPolicyForm from './add_edit_escalation_policy_form.vue';
 
