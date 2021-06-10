@@ -54,6 +54,14 @@ export default {
           operators: OPERATOR_IS_ONLY,
           recentTokenValuesStorageKey: `${this.groupFullPath}-epics-recent-tokens-author_username`,
           fetchAuthors: Api.users.bind(Api),
+          preloadedAuthors: [
+            {
+              id: gon.current_user_id,
+              name: gon.current_user_fullname,
+              username: gon.current_username,
+              avatar_url: gon.current_user_avatar_url,
+            },
+          ],
         },
         {
           type: 'label_name',
