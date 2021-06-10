@@ -10,7 +10,7 @@ import {
 } from '@gitlab/ui';
 import { throttle } from 'lodash';
 import { mapGetters, mapState } from 'vuex';
-
+import Tracking from '~/tracking';
 import BoardForm from 'ee_else_ce/boards/components/board_form.vue';
 
 import { getIdFromGraphQLId } from '~/graphql_shared/utils';
@@ -94,6 +94,7 @@ export default {
       default: false,
     },
   },
+  mixins: [Tracking.mixin()],
   data() {
     return {
       hasScrollFade: false,

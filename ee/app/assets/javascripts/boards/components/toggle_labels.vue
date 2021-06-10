@@ -3,6 +3,7 @@ import { GlToggle } from '@gitlab/ui';
 import { mapState, mapActions } from 'vuex';
 import { parseBoolean } from '~/lib/utils/common_utils';
 import LocalStorageSync from '~/vue_shared/components/local_storage_sync.vue';
+import Tracking from '~/tracking';
 
 export default {
   components: {
@@ -15,9 +16,11 @@ export default {
       return this.isShowingLabels ? 'on' : 'off';
     },
   },
+  mixins: [Tracking.mixin()],
   methods: {
     ...mapActions(['setShowLabels']),
     onToggle(val) {
+      this.track('show_labels', { label: 'toggle', property: val ? 'on' : 'off' });
       this.setShowLabels(val);
     },
     onStorageUpdate(val) {

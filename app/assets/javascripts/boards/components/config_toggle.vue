@@ -2,6 +2,7 @@
 import { GlButton, GlModalDirective, GlTooltipDirective } from '@gitlab/ui';
 import { formType } from '~/boards/constants';
 import eventHub from '~/boards/eventhub';
+import Tracking from '~/tracking';
 import { s__, __ } from '~/locale';
 
 export default {
@@ -27,6 +28,7 @@ export default {
       required: true,
     },
   },
+  mixins:[Tracking.mixin()],
   computed: {
     buttonText() {
       return this.canAdminList ? s__('Boards|Edit board') : s__('Boards|View scope');
@@ -37,6 +39,7 @@ export default {
   },
   methods: {
     showPage() {
+      this.track('click_button', { label: 'edit_board' });
       eventHub.$emit('showBoardModal', formType.edit);
       if (this.boardsStore) {
         this.boardsStore.showPage(formType.edit);

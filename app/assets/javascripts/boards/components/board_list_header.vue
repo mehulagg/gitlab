@@ -13,6 +13,7 @@ import { isListDraggable } from '~/boards/boards_util';
 import { isScopedLabel, parseBoolean } from '~/lib/utils/common_utils';
 import { BV_HIDE_TOOLTIP } from '~/lib/utils/constants';
 import { n__, s__, __ } from '~/locale';
+import Tracking from '~/tracking';
 import sidebarEventHub from '~/sidebar/event_hub';
 import AccessorUtilities from '../../lib/utils/accessor';
 import { inactiveId, LIST, ListType } from '../constants';
@@ -52,6 +53,7 @@ export default {
       default: null,
     },
   },
+  mixins: [Tracking.mixin()],
   props: {
     list: {
       type: Object,
@@ -149,6 +151,8 @@ export default {
       }
 
       this.setActiveId({ id: this.list.id, sidebarType: LIST });
+
+      this.track('click_button', { label: 'list_settings' });
     },
     showScopedLabels(label) {
       return this.scopedLabelsAvailable && isScopedLabel(label);
@@ -170,6 +174,8 @@ export default {
       // When expanding/collapsing, the tooltip on the caret button sometimes stays open.
       // Close all tooltips manually to prevent dangling tooltips.
       this.$root.$emit(BV_HIDE_TOOLTIP);
+
+      this.track('click_toggle_button', { label: 'toggle_list', property: collapsed ? 'closed' : 'open' });
     },
     addToLocalStorage() {
       if (AccessorUtilities.isLocalStorageAccessSafe()) {
@@ -203,7 +209,11 @@ export default {
         'gl-py-2': list.collapsed && isSwimlanesHeader,
         'gl-flex-direction-column': list.collapsed,
       }"
-      class="board-title gl-m-0 gl-display-flex gl-align-items-center gl-font-base gl-px-3 js-board-handle"
+      class="
+        board-title
+        gl-m-0 gl-display-flex gl-align-items-center gl-font-base gl-px-3
+        js-board-handle
+      "
     >
       <gl-button
         v-gl-tooltip.hover

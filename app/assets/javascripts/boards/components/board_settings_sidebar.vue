@@ -5,6 +5,7 @@ import { LIST, ListType, ListTypeTitles } from '~/boards/constants';
 import boardsStore from '~/boards/stores/boards_store';
 import { isScopedLabel } from '~/lib/utils/common_utils';
 import { __ } from '~/locale';
+import Tracking from '~/tracking';
 import eventHub from '~/sidebar/event_hub';
 import glFeatureFlagMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 
@@ -21,7 +22,7 @@ export default {
     BoardSettingsListTypes: () =>
       import('ee_component/boards/components/board_settings_list_types.vue'),
   },
-  mixins: [glFeatureFlagMixin()],
+  mixins: [glFeatureFlagMixin(), Tracking.mixin()],
   inject: ['canAdminList'],
   data() {
     return {
@@ -72,6 +73,7 @@ export default {
       // eslint-disable-next-line no-alert
       if (window.confirm(__('Are you sure you want to remove this list?'))) {
         if (this.shouldUseGraphQL || this.isEpicBoard) {
+          this.track('click_button', { label: 'remove_list' });
           this.removeList(this.activeId);
         } else {
           this.activeList.destroy();

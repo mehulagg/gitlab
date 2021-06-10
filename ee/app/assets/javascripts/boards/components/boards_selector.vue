@@ -6,6 +6,7 @@ import { mapGetters } from 'vuex';
 import BoardsSelectorFoss from '~/boards/components/boards_selector.vue';
 import { getIdFromGraphQLId } from '~/graphql_shared/utils';
 import epicBoardsQuery from '../graphql/epic_boards.query.graphql';
+import Tracking from '~/tracking';
 
 export default {
   extends: BoardsSelectorFoss,
@@ -18,6 +19,8 @@ export default {
       return this.boards.length > 1;
     },
   },
+  mixins: [Tracking.mixin()],
+
   methods: {
     epicBoardUpdate(data) {
       if (!data?.group) {
@@ -32,6 +35,10 @@ export default {
       return epicBoardsQuery;
     },
     loadBoards(toggleDropdown = true) {
+      if (this.isEpicBoard) {
+        this.track('click_dropdown', { label: 'board_switcher' });
+      }
+
       if (toggleDropdown && this.boards.length > 0) {
         return;
       }

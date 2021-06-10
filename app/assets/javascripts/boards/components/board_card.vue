@@ -1,6 +1,7 @@
 <script>
 import { mapActions, mapState } from 'vuex';
 import BoardCardInner from './board_card_inner.vue';
+import Tracking from '~/tracking';
 
 export default {
   name: 'BoardCard',
@@ -29,6 +30,7 @@ export default {
       required: false,
     },
   },
+  mixins: [Tracking.mixin()],
   computed: {
     ...mapState(['selectedBoardItems', 'activeId']),
     isActive() {
@@ -58,6 +60,7 @@ export default {
         this.toggleBoardItemMultiSelection(this.item);
       } else {
         this.toggleBoardItem({ boardItem: this.item });
+        this.track('click_card', { label: 'right_sidebar' });
       }
     },
   },
