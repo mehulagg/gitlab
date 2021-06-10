@@ -265,7 +265,7 @@ Sg0KU1hNMGExaE9SVGR2V2pKQlBUMWNiaUo5DQo=',
 You can view the exact JSON payload in the administration panel. To view the payload:
 
 1. On the top bar, select **Menu >** **{admin}** **Admin**.
-1. Go to **Settings > Metrics and profiling** and expand **Seat Link**.
+1. On the left sidebar, select **Settings > Metrics and profiling** and expand **Seat Link**.
 1. Select **Preview payload**.
 
 #### Disable Seat Link
@@ -277,7 +277,7 @@ Seat Link is enabled by default.
 To disable this feature:
 
 1. On the top bar, select **Menu >** **{admin}** **Admin**.
-1. Select **Settings > Metrics and profiling** and expand **Seat Link**.
+1. On the left sidebar, select **Settings > Metrics and profiling** and expand **Seat Link**.
 1. Clear the **Enable Seat Link** checkbox.
 1. Select **Save changes**.
 
