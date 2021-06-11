@@ -75,10 +75,6 @@ export default {
         @click="toggleDropdownContents"
       />
     </div>
-    <component
-      :is="dropdownContentsView"
-      :labels-create-title="labelsCreateTitle"
-      @hideCreateView="toggleDropdownContentsCreateView"
-    />
+    <component :is="dropdownContentsView" @hideCreateView="toggleDropdownContentsCreateView" />
   </div>
 </template>

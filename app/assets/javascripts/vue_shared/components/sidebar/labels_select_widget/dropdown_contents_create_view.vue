@@ -19,12 +19,6 @@ export default {
       default: '',
     },
   },
-  props: {
-    labelsCreateTitle: {
-      type: String,
-      required: true,
-    },
-  },
   data() {
     return {
       labelTitle: '',
