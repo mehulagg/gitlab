@@ -297,7 +297,7 @@ class CoolWidgetState < ApplicationRecord
   belongs_to :cool_widget, inverse_of: :cool_widget_state
 end
 ```
-  - [ ] Add the following lines to the `cool_widget` model to accompish some important tasks:
+  - [ ] Add the following lines to the `cool_widget` model to accomplish some important tasks:
     - include the `::Gitlab::Geo::VerificationState` concern,
     - delegate verification related methods to the `cool_widget_state` model,
     - override some scopes to use the `cool_widget_state` table instead of the model table, for verification
