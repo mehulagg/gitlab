@@ -33,10 +33,7 @@ jest.mock('~/flash', () => {
     };
   });
 
-  return {
-    createFlash: flash,
-    deprecatedCreateFlash: flash,
-  };
+  return flash;
 });
 
 describe('Actions Notes Store', () => {
