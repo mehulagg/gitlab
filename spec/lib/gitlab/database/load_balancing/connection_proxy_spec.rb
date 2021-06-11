@@ -13,6 +13,14 @@ RSpec.describe Gitlab::Database::LoadBalancing::ConnectionProxy do
     end
   end
 
+  describe '#select_rows' do
+    it 'performs a read' do
+      expect(proxy).to receive(:read_using_load_balancer).with(:select_rows, ['foo'])
+
+      proxy.select_rows('foo')
+    end
+  end
+
   describe '#select_all' do
     let(:override_proxy) { ActiveRecord::Base.connection.class }
 
