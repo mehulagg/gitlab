@@ -8587,6 +8587,9 @@ msgstr ""
 msgid "ContainerRegistry|Cleanup pending"
 msgstr ""
 
+msgid "ContainerRegistry|Cleanup policies are now available for this project. %{linkStart}Click here to get started.%{linkEnd}"
+msgstr ""
+
 msgid "ContainerRegistry|Cleanup policy for tags is disabled"
 msgstr ""
 
@@ -28592,6 +28595,9 @@ msgid "Save pipeline schedule"
 msgstr ""
 
 msgid "Save space and find images in the Container Registry. Remove unneeded tags and keep only the ones you want."
+msgstr ""
+
+msgid "Save space and find images in the container Registry. remove unneeded tags and keep only the ones you want. %{linkStart}How does cleanup work?%{linkEnd}"
 msgstr ""
 
 msgid "Saved scan settings and target site settings which are reusable."
