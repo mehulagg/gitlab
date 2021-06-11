@@ -184,20 +184,10 @@ export default {
       </template>
     </div>
     <div
-      class="
-        board-card-footer
-        gl-display-flex gl-justify-content-space-between gl-align-items-flex-end
-      "
+      class="board-card-footer gl-display-flex gl-justify-content-space-between gl-align-items-flex-end"
     >
       <div
-        class="
-          gl-display-flex
-          align-items-start
-          flex-wrap-reverse
-          board-card-number-container
-          gl-overflow-hidden
-          js-board-card-number-container
-        "
+        class="gl-display-flex align-items-start flex-wrap-reverse board-card-number-container gl-overflow-hidden js-board-card-number-container"
       >
         <span
           v-if="issue.referencePath"
