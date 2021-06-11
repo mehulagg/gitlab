@@ -2454,7 +2454,7 @@ Whether or not ModSecurity is set to blocking mode
 
 Group: `group::container security`
 
-Status: `deprecated`
+Status: `removed`
 
 Tiers: `free`, `premium`, `ultimate`
 
@@ -2466,7 +2466,7 @@ Whether or not ModSecurity is disabled within Ingress
 
 Group: `group::container security`
 
-Status: `deprecated`
+Status: `removed`
 
 Tiers: `free`, `premium`, `ultimate`
 
@@ -2478,7 +2478,7 @@ Whether or not ModSecurity is set to logging mode
 
 Group: `group::container security`
 
-Status: `deprecated`
+Status: `removed`
 
 Tiers: `free`, `premium`, `ultimate`
 
@@ -2490,7 +2490,7 @@ Whether or not ModSecurity has not been installed into the cluster
 
 Group: `group::container security`
 
-Status: `deprecated`
+Status: `removed`
 
 Tiers: `free`, `premium`, `ultimate`
 
@@ -2502,7 +2502,7 @@ Cumulative count of packets identified as anomalous by ModSecurity since Usage P
 
 Group: `group::container security`
 
-Status: `deprecated`
+Status: `removed`
 
 Tiers: `free`, `premium`, `ultimate`
 
@@ -2514,7 +2514,7 @@ Cumulative count of packets processed by ModSecurity since Usage Ping was last r
 
 Group: `group::container security`
 
-Status: `deprecated`
+Status: `removed`
 
 Tiers: `free`, `premium`, `ultimate`
 
@@ -2526,7 +2526,7 @@ Whether or not ModSecurity statistics are unavailable
 
 Group: `group::container security`
 
-Status: `deprecated`
+Status: `removed`
 
 Tiers: `ultimate`
 
@@ -16262,7 +16262,7 @@ Tiers: `premium`, `ultimate`
 
 ### `usage_activity_by_stage.enablement.counts.geo_node_usage.git_push_event_count_weekly`
 
-Number of Git push events from Prometheus on the Geo secondary
+Number of git push events from Prometheus on the Geo secondary
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_7d/20210604110603_git_push_event_count_weekly.yml)
 
@@ -17296,7 +17296,7 @@ Tiers:
 
 ### `usage_activity_by_stage.secure.dependency_scanning_scans`
 
-Total count of Dependency Scanning Scans distinct per user
+Total number of users running Dependency Scanning Scans
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_all/20210216175220_dependency_scanning_scans.yml)
 
@@ -17392,7 +17392,7 @@ Tiers: `free`
 
 ### `usage_activity_by_stage.secure.user_dependency_scanning_jobs`
 
-Total count of Dependency Scanning jobs run distinct per user
+Total number of users running Dependency Scanning jobs
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_all/20210216175216_user_dependency_scanning_jobs.yml)
 
@@ -17404,7 +17404,7 @@ Tiers: `ultimate`
 
 ### `usage_activity_by_stage.secure.user_license_management_jobs`
 
-Total count of License Scanning jobs run distinct per user
+Total number of users running License Scanning jobs
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_all/20210216175218_user_license_management_jobs.yml)
 
@@ -19312,7 +19312,7 @@ Tiers: `ultimate`
 
 ### `usage_activity_by_stage_monthly.secure.dependency_scanning_scans`
 
-Monthly count of Dependency Scanning Scans distinct per user
+Monthly number of users running Dependency Scanning Scans
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210216183828_dependency_scanning_scans.yml)
 
@@ -19432,7 +19432,7 @@ Tiers: `free`
 
 ### `usage_activity_by_stage_monthly.secure.user_dependency_scanning_jobs`
 
-Montly count of Dependency Scanning jobs run distinct per user
+Monthly number of users creating Dependency Scanning jobs
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210216175222_user_dependency_scanning_jobs.yml)
 
@@ -19444,7 +19444,7 @@ Tiers: `ultimate`
 
 ### `usage_activity_by_stage_monthly.secure.user_license_management_jobs`
 
-Monthly count of License Scanning jobs run distinct per user
+Monthly number of users running License Scanning jobs
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210216175224_user_license_management_jobs.yml)
 
