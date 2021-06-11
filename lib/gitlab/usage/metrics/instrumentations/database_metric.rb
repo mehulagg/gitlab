@@ -42,15 +42,7 @@ module Gitlab
           end
 
           def value
-            key_name = "metric_instrumentation/#{relation.table_name}"
-
-            start = Rails.cache.fetch("#{key_name}_minimum_id", expires_in: 1.day) do
-              self.class.start
-            end
-
-            finish = Rails.cache.fetch("#{key_name}_maximum_id", expires_in: 1.day) do
-              self.class.finish
-            end
+            start, finish = get_or_cache_batch_ids if batch_query?
 
             method(self.class.metric_operation)
               .call(relation,
@@ -73,6 +65,10 @@ module Gitlab
 
           private
 
+          def batch_query?
+            self.class.metric_start.present? && self.class.metric_finish.present?
+          end
+
           def relation
             self.class.metric_relation.call.where(time_constraints)
           end
@@ -88,6 +84,20 @@ module Gitlab
             else
               raise "Unknown time frame: #{time_frame} for DatabaseMetric"
             end
+          end
+
+          def get_or_cache_batch_ids
+            key_name = "metric_instrumentation/#{relation.table_name}"
+
+            start = Rails.cache.fetch("#{key_name}_minimum_id", expires_in: 1.day) do
+              self.class.start
+            end
+
+            finish = Rails.cache.fetch("#{key_name}_maximum_id", expires_in: 1.day) do
+              self.class.finish
+            end
+
+            [start, finish]
           end
         end
       end
