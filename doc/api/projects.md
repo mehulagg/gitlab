@@ -2381,7 +2381,7 @@ POST /projects/:id/housekeeping
 
 | Attribute | Type           | Required               | Description |
 |-----------|----------------|------------------------|-------------|
-| `id`      | integer/string | **{check-circle}** Yes | The ID of the project or NAMESPACE/PROJECT_NAME. |
+| `id`      | integer/string | **{check-circle}** Yes | The ID or [URL-encoded path of the project](README.md#namespaced-path-encoding). |
 
 ## Push Rules **(PREMIUM)**
 
@@ -2396,7 +2396,7 @@ GET /projects/:id/push_rule
 
 | Attribute | Type           | Required               | Description |
 |-----------|----------------|------------------------|-------------|
-| `id`      | integer/string | **{check-circle}** Yes | The ID of the project or NAMESPACE/PROJECT_NAME. |
+| `id`      | integer/string | **{check-circle}** Yes | The ID or [URL-encoded path of the project](README.md#namespaced-path-encoding) |
 
 ```json
 {
@@ -2448,7 +2448,7 @@ POST /projects/:id/push_rule
 | `commit_message_regex`                  | string         | **{dotted-circle}** No | All commit messages must match this, for example `Fixed \d+\..*`. |
 | `deny_delete_tag`                       | boolean        | **{dotted-circle}** No | Deny deleting a tag. |
 | `file_name_regex`                       | string         | **{dotted-circle}** No | All committed filenames must **not** match this, for example `(jar|exe)$`. |
-| `id`                                    | integer/string | **{check-circle}** Yes | The ID of the project or NAMESPACE/PROJECT_NAME. |
+| `id`                                    | integer/string | **{check-circle}** Yes | The ID or [URL-encoded path of the project](README.md#namespaced-path-encoding), |
 | `max_file_size`                         | integer        | **{dotted-circle}** No | Maximum file size (MB). |
 | `member_check`                          | boolean        | **{dotted-circle}** No | Restrict commits by author (email) to existing GitLab users. |
 | `prevent_secrets`                       | boolean        | **{dotted-circle}** No | GitLab rejects any files that are likely to contain secrets. |
@@ -2471,7 +2471,7 @@ PUT /projects/:id/push_rule
 | `commit_message_regex`                  | string         | **{dotted-circle}** No | All commit messages must match this, for example `Fixed \d+\..*`. |
 | `deny_delete_tag`                       | boolean        | **{dotted-circle}** No | Deny deleting a tag. |
 | `file_name_regex`                       | string         | **{dotted-circle}** No | All committed filenames must **not** match this, for example `(jar|exe)$`. |
-| `id`                                    | integer/string | **{check-circle}** Yes | The ID of the project or NAMESPACE/PROJECT_NAME. |
+| `id`                                    | integer/string | **{check-circle}** Yes | The ID or [URL-encoded path of the project](README.md#namespaced-path-encoding). |
 | `max_file_size`                         | integer        | **{dotted-circle}** No | Maximum file size (MB). |
 | `member_check`                          | boolean        | **{dotted-circle}** No | Restrict commits by author (email) to existing GitLab users. |
 | `prevent_secrets`                       | boolean        | **{dotted-circle}** No | GitLab rejects any files that are likely to contain secrets. |
