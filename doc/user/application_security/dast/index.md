@@ -576,9 +576,9 @@ dast:
     DAST_SUBMIT_FIELD: "css:button[type='submit']" # the selector of the element that when clicked will submit the login form or the password form of a multi-page login process
     DAST_EXCLUDE_URLS: "http://example.com/sign-out"  # optional, URLs to skip during the authenticated scan; comma-separated, no spaces in between
     DAST_AUTH_VERIFICATION_URL: "http://example.com/loggedin_page"  # optional, used to verify authentication is successful by expecting this URL once the login form has been submitted
-    DAST_BROWSER_AUTH_VERIFICATION_SELECTOR: "css:.user-profile" # optional, used to verify authentication is successful by expecting a selector to be present on the page once the login form has been submitted
-    DAST_BROWSER_AUTH_VERIFICATION_LOGIN_FORM: "true" # optional, used to verify authentication is successful by ensuring there are no login forms on the page once the login form has been submitted
-    DAST_BROWSER_AUTH_REPORT: "true" # optionally output an authentication debug report
+    DAST_AUTH_VERIFICATION_SELECTOR: "css:.user-profile" # optional, used to verify authentication is successful by expecting a selector to be present on the page once the login form has been submitted
+    DAST_AUTH_VERIFICATION_LOGIN_FORM: "true" # optional, used to verify authentication is successful by ensuring there are no login forms on the page once the login form has been submitted
+    DAST_AUTH_REPORT: "true" # optionally output an authentication debug report
 ```
 
 WARNING:
@@ -648,7 +648,7 @@ dast:
 
 #### Verify based on presence of an element
 
-When `DAST_BROWSER_AUTH_VERIFICATION_SELECTOR` is configured, the page displayed in the browser tab is searched for an element described by the selector in the CI/CD variable.
+When `DAST_AUTH_VERIFICATION_SELECTOR` is configured, the page displayed in the browser tab is searched for an element described by the selector in the CI/CD variable.
 If no element is found, authentication is deemed to be unsuccessful.
 
 For example:
@@ -661,12 +661,12 @@ dast:
   variables:
     DAST_WEBSITE: "https://example.com"
     ...
-    DAST_BROWSER_AUTH_VERIFICATION_SELECTOR: "css:.welcome-user"
+    DAST_AUTH_VERIFICATION_SELECTOR: "css:.welcome-user"
 ```  
 
 #### Verify based on presence of a login form
 
-When `DAST_BROWSER_AUTH_VERIFICATION_LOGIN_FORM` is configured, the page displayed in the browser tab is searched for a form that is detected to be a login form.
+When `DAST_AUTH_VERIFICATION_LOGIN_FORM` is configured, the page displayed in the browser tab is searched for a form that is detected to be a login form.
 If any such form is found, authentication is deemed to be unsuccessful.
 
 For example:
@@ -679,7 +679,7 @@ dast:
   variables:
     DAST_WEBSITE: "https://example.com"
     ...
-    DAST_BROWSER_AUTH_VERIFICATION_LOGIN_FORM: "true"
+    DAST_AUTH_VERIFICATION_LOGIN_FORM: "true"
 ```  
 
 ### Configure the authentication debug output
@@ -697,7 +697,7 @@ dast:
   variables:
     DAST_WEBSITE: "https://example.com"
     ...
-    DAST_BROWSER_AUTH_REPORT: "true"
+    DAST_AUTH_REPORT: "true"
   artifacts:
     paths: [gl-dast-debug-auth-report.html]
 ```
@@ -744,9 +744,9 @@ DAST can be [configured](#customizing-the-dast-settings) using CI/CD variables.
 | `DAST_ZAP_LOG_CONFIGURATION`                | string        | Set to a semicolon-separated list of additional log4j properties for the ZAP Server. For example, `log4j.logger.org.parosproxy.paros.network.HttpSender=DEBUG;log4j.logger.com.crawljax=DEBUG` |
 | `DAST_AGGREGATE_VULNERABILITIES`            | boolean       | Vulnerability aggregation is set to `true` by default. To disable this feature and see each vulnerability individually set to `false`. [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/254043) in GitLab 14.0. |
 | `DAST_MAX_URLS_PER_VULNERABILITY`           | number        | The maximum number of URLs reported for a single vulnerability. `DAST_MAX_URLS_PER_VULNERABILITY` is set to `50` by default. To list all the URLs set to `0`. [Introduced](https://gitlab.com/gitlab-org/security-products/dast/-/merge_requests/433) in GitLab 13.12. |
-| `DAST_BROWSER_AUTH_REPORT`                  | boolean       | Used in combination with exporting the `gl-dast-debug-auth-report.html` artifact to aid in debugging authentication issues. |
-| `DAST_BROWSER_AUTH_VERIFICATION_SELECTOR`   | selector      | Verifies successful authentication by checking for presence of a selector once the login form has been submitted. Example: `css:.user-photo` |
-| `DAST_BROWSER_AUTH_VERIFICATION_LOGIN_FORM` | boolean       | Verifies successful authentication by checking for the lack of a login form once the login form has been submitted. |
+| `DAST_AUTH_REPORT`                  | boolean       | Used in combination with exporting the `gl-dast-debug-auth-report.html` artifact to aid in debugging authentication issues. |
+| `DAST_AUTH_VERIFICATION_SELECTOR`   | selector      | Verifies successful authentication by checking for presence of a selector once the login form has been submitted. Example: `css:.user-photo` |
+| `DAST_AUTH_VERIFICATION_LOGIN_FORM` | boolean       | Verifies successful authentication by checking for the lack of a login form once the login form has been submitted. |
 
 1. DAST CI/CD variable available to an on-demand scan.
 
