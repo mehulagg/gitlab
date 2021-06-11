@@ -26,4 +26,7 @@ export default {
   [types.SET_QUERY](state, { key, value }) {
     state.query[key] = value;
   },
+  [types.RECEIVE_FREQUENT_ITEMS_LS](state, { lsKey, data }) {
+    state.frequentItems[lsKey] = data || [];
+  },
 };

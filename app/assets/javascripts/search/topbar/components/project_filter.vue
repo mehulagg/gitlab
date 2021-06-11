@@ -1,6 +1,7 @@
 <script>
 import { mapState, mapActions } from 'vuex';
 import { visitUrl, setUrlParams } from '~/lib/utils/url_utility';
+import { PROJECTS_LOCAL_STORAGE_KEY } from '~/search/store/constants';
 import { ANY_OPTION, GROUP_DATA, PROJECT_DATA } from '../constants';
 import SearchableDropdown from './searchable_dropdown.vue';
 
@@ -22,9 +23,16 @@ export default {
       return this.initialData ? this.initialData : ANY_OPTION;
     },
   },
+  created() {
+    this.getFrequentItemLS(PROJECTS_LOCAL_STORAGE_KEY);
+  },
   methods: {
-    ...mapActions(['fetchProjects']),
-    handleProjectChange(project) {
+    ...mapActions(['fetchProjects', 'getFrequentItemLS', 'setFrequentItemLS']),
+    async handleProjectChange(project) {
+      if (project.id) {
+        await this.setFrequentItemLS({ item: project, lsKey: PROJECTS_LOCAL_STORAGE_KEY });
+      }
+
       // This determines if we need to update the group filter or not
       const queryParams = {
         ...(project.namespace?.id && { [GROUP_DATA.queryParam]: project.namespace.id }),

@@ -1,7 +1,9 @@
 import Api from '~/api';
 import createFlash from '~/flash';
+import AccessorUtilities from '~/lib/utils/accessor';
 import { visitUrl, setUrlParams } from '~/lib/utils/url_utility';
 import { __ } from '~/locale';
+import { MAX_FREQUENT_ITEMS } from './constants';
 import * as types from './mutation_types';
 
 export const fetchGroups = ({ commit }, search) => {
@@ -37,6 +39,42 @@ export const fetchProjects = ({ commit, state }, search) => {
       callback();
     });
   }
+};
+
+export const getFrequentItemLS = ({ commit }, lsKey) => {
+  if (!AccessorUtilities.isLocalStorageAccessSafe()) {
+    return;
+  }
+
+  commit(types.RECEIVE_FREQUENT_ITEMS_LS, { lsKey, data: JSON.parse(localStorage.getItem(lsKey)) });
+};
+
+export const setFrequentItemLS = ({ state }, { item, lsKey }) => {
+  if (!AccessorUtilities.isLocalStorageAccessSafe()) {
+    return;
+  }
+
+  const frequentItems = state.frequentItems[lsKey];
+  const existingItemIndex = frequentItems.findIndex((i) => i.id === item.id);
+
+  if (existingItemIndex >= 0) {
+    // Up the frequency (Max 5)
+    const currentFrequency = frequentItems[existingItemIndex].frequency;
+    frequentItems[existingItemIndex].frequency =
+      currentFrequency < MAX_FREQUENT_ITEMS ? currentFrequency + 1 : MAX_FREQUENT_ITEMS;
+  } else {
+    // Only store a max of 5 items
+    if (frequentItems.length >= MAX_FREQUENT_ITEMS) {
+      frequentItems.pop();
+    }
+
+    frequentItems.push({ id: item.id, frequency: 1 });
+  }
+
+  // Sort by frequency
+  frequentItems.sort((a, b) => b.frequency - a.frequency);
+
+  localStorage.setItem(lsKey, JSON.stringify(frequentItems));
 };
 
 export const setQuery = ({ commit }, { key, value }) => {
