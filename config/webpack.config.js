@@ -221,6 +221,9 @@ module.exports = {
             VUE_VERSION,
             VUE_LOADER_VERSION,
           ].join('|'),
+          compilerOptions: {
+            preserveWhitespace: false,
+          },
         },
       },
       {
