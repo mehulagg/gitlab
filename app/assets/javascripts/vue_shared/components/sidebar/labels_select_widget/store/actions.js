@@ -28,12 +28,6 @@ export const fetchLabels = ({ state, dispatch }) => {
     .catch(() => dispatch('receiveLabelsFailure'));
 };
 
-export const requestCreateLabel = ({ commit }) => commit(types.REQUEST_CREATE_LABEL);
-export const receiveCreateLabelSuccess = ({ commit }) => commit(types.RECEIVE_CREATE_LABEL_SUCCESS);
-export const receiveCreateLabelFailure = ({ commit }) => {
-  commit(types.RECEIVE_CREATE_LABEL_FAILURE);
-  flash(__('Error creating label.'));
-};
 export const createLabel = ({ state, dispatch }, label) => {
   dispatch('requestCreateLabel');
   axios

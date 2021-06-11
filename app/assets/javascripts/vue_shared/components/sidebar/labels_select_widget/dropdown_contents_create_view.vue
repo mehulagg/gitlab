@@ -1,6 +1,8 @@
 <script>
 import { GlTooltipDirective, GlButton, GlFormInput, GlLink, GlLoadingIcon } from '@gitlab/ui';
-import { mapState, mapActions } from 'vuex';
+import { mapActions } from 'vuex';
+import createFlash from '~/flash';
+import { __ } from '~/locale';
 import createLabelMutation from './graphql/create_label.mutation.graphql';
 
 export default {
@@ -28,10 +30,10 @@ export default {
     return {
       labelTitle: '',
       selectedColor: '',
+      labelCreateInProgress: false,
     };
   },
   computed: {
-    ...mapState(['labelCreateInProgress']),
     disableCreate() {
       return !this.labelTitle.length || !this.selectedColor.length || this.labelCreateInProgress;
     },
@@ -51,15 +53,27 @@ export default {
     handleColorClick(color) {
       this.selectedColor = this.getColorCode(color);
     },
-    createLabel() {
-      this.$apollo.mutate({
-        mutation: createLabelMutation,
-        variables: {
-          title: this.labelTitle,
-          color: this.selectedColor,
-          projectPath: this.projectPath,
-        },
-      });
+    async createLabel() {
+      this.labelCreateInProgress = true;
+      try {
+        const {
+          data: { labelCreate },
+        } = await this.$apollo.mutate({
+          mutation: createLabelMutation,
+          variables: {
+            title: this.labelTitle,
+            color: this.selectedColor,
+            projectPath: this.projectPath,
+          },
+        });
+        if (labelCreate.errors.length) {
+          createFlash({ message: __('Error creating label.') });
+        }
+      } catch {
+        createFlash({ message: __('Error creating label.') });
+      }
+      this.labelCreateInProgress = true;
+      this.toggleDropdownContentsCreateView();
     },
     handleCreateClick() {
       this.createLabel();
