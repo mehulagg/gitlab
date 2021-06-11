@@ -9792,7 +9792,7 @@ msgstr ""
 msgid "Customizable by owners."
 msgstr ""
 
-msgid "Customize CI/CD settings, including Auto DevOps, shared runners and job artifacts."
+msgid "Customize CI/CD settings, including Auto DevOps, shared runners, and job artifacts."
 msgstr ""
 
 msgid "Customize colors"
@@ -10500,7 +10500,7 @@ msgstr ""
 msgid "Default"
 msgstr ""
 
-msgid "Default CI configuration path"
+msgid "Default CI/CD configuration file"
 msgstr ""
 
 msgid "Default Timeout Period"
@@ -32491,7 +32491,7 @@ msgstr ""
 msgid "The data source is connected, but there is no data to display. %{documentationLink}"
 msgstr ""
 
-msgid "The default CI configuration path for new projects."
+msgid "The default CI/CD configuration file and path for new projects."
 msgstr ""
 
 msgid "The dependency list details information about the components used within your project."
