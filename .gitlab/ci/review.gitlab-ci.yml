@@ -237,7 +237,7 @@ parallel-spec-reports:
 allure-report-qa-smoke:
   extends:
     - .allure-report-base
-    - .review:rules:review-qa-smoke-report
+    - .review:rules:review-qa-smoke
   needs: ["review-qa-smoke"]
   variables:
     ALLURE_REPORT_PATH_PREFIX: gitlab-review-smoke
@@ -246,7 +246,7 @@ allure-report-qa-smoke:
 allure-report-qa-all:
   extends:
     - .allure-report-base
-    - .review:rules:review-qa-all-report
+    - .review:rules:review-qa-all
   needs: ["review-qa-all"]
   variables:
     ALLURE_REPORT_PATH_PREFIX: gitlab-review-all
