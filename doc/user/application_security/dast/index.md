@@ -591,7 +591,7 @@ DAST can be [configured](#customizing-the-dast-settings) using CI/CD variables.
 | `DAST_WEBSITE` (**1**)                      | URL           | The URL of the website to scan. `DAST_API_OPENAPI` must be specified if this is omitted. |
 | `DAST_API_OPENAPI`                          | URL or string | The API specification to import. The specification can be hosted at a URL, or the name of a file present in the `/zap/wrk` directory. `DAST_WEBSITE` must be specified if this is omitted. |
 | `DAST_API_SPECIFICATION` (**1**)            | URL or string | [Deprecated](https://gitlab.com/gitlab-org/gitlab/-/issues/290241) in GitLab 13.12 and replaced by `DAST_API_OPENAPI`. To be removed in GitLab 15.0. The API specification to import. The specification can be hosted at a URL, or the name of a file present in the `/zap/wrk` directory. `DAST_WEBSITE` must be specified if this is omitted. |
-| `DAST_SPIDER_START_AT_HOST`                 | boolean       | Set to `false` to prevent DAST from resetting the target to its host before scanning. When `true`, non-host targets `http://test.site/some_path` is reset to `http://test.site` before scan. Default: `true`. [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/258805) in GitLab 13.6. |
+| `DAST_SPIDER_START_AT_HOST`                 | boolean       | Set to `false` to prevent DAST from resetting the target to its host before scanning. When `true`, non-host targets `http://test.site/some_path` is reset to `http://test.site` before scan. Default: `false`. [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/258805) in GitLab 13.6. |
 | `DAST_AUTH_URL` (**1**)                     | URL           | The URL of the page containing the sign-in HTML form on the target website. `DAST_USERNAME` and `DAST_PASSWORD` are submitted with the login form to create an authenticated scan. Not supported for API scans. |
 | `DAST_AUTH_VERIFICATION_URL` (**1**)        | URL           | A URL only accessible to logged in users that DAST can use to confirm successful authentication. If provided, DAST exits if it cannot access the URL. [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/207335) in GitLab 13.8. |
 | `DAST_USERNAME` (**1**)                     | string        | The username to authenticate to in the website. |
@@ -623,7 +623,6 @@ DAST can be [configured](#customizing-the-dast-settings) using CI/CD variables.
 | `DAST_ZAP_LOG_CONFIGURATION`                | string        | Set to a semicolon-separated list of additional log4j properties for the ZAP Server. For example, `log4j.logger.org.parosproxy.paros.network.HttpSender=DEBUG;log4j.logger.com.crawljax=DEBUG` |
 | `DAST_AGGREGATE_VULNERABILITIES`            | boolean       | Vulnerability aggregation is set to `true` by default. To disable this feature and see each vulnerability individually set to `false`. [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/254043) in GitLab 14.0. |
 | `DAST_MAX_URLS_PER_VULNERABILITY`           | number        | The maximum number of URLs reported for a single vulnerability. `DAST_MAX_URLS_PER_VULNERABILITY` is set to `50` by default. To list all the URLs set to `0`. [Introduced](https://gitlab.com/gitlab-org/security-products/dast/-/merge_requests/433) in GitLab 13.12. |
-| `DAST_AUTH_EXCLUDE_URLS`                    | URLs          | [Deprecated](https://gitlab.com/gitlab-org/gitlab/-/issues/289959) in GitLab 13.8, to be removed in 14.0, and replaced by `DAST_EXCLUDE_URLS`. The URLs to skip during the authenticated scan; comma-separated. Regular expression syntax can be used to match multiple URLs. For example, `.*` matches an arbitrary character sequence. Not supported for API scans. |
 
 1. DAST CI/CD variable available to an on-demand scan.
 
@@ -1126,9 +1125,6 @@ sample reports can be found in the
 [DAST repository](https://gitlab.com/gitlab-org/security-products/dast/-/tree/master/test/end-to-end/expect).
 
 There are two formats of data in the JSON report that are used side by side:
-
-- The proprietary ZAP format, which is planned to be deprecated.
-- A common format that is planned to the default in the future.
 
 ### Other formats
 
