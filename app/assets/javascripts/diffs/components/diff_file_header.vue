@@ -383,6 +383,7 @@ export default {
         <gl-dropdown
           v-gl-tooltip.hover.focus="$options.i18n.optionsDropdownTitle"
           right
+          lazy
           toggle-class="btn-icon js-diff-more-actions"
           class="gl-pt-0!"
           data-qa-selector="dropdown_button"
