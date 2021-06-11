@@ -35,7 +35,6 @@ jest.mock('~/flash', () => {
 
   return {
     createFlash: flash,
-    deprecatedCreateFlash: flash,
   };
 });
 
