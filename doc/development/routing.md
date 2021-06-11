@@ -80,7 +80,7 @@ We don't want users don't hit 404 for no reason. The table below should help.
 |---|---|---|
 | Can be used in scipts and automation  | `snippet#raw`  |  You need to support both an old and a new URL for one major release. Then you need to support a redirect from an old URL to a new URL for another major release. |
 | Likely to be saved or shared | `issue#show`  | You need to add a redirect from an old URL to a new URL until a next major release.  |
-| Limited use, unlikely to be shared | `admin#labels` | No necessary steps needed | 
+| Limited use, unlikely to be shared | `admin#labels` | No extra steps required | 
 
 
 ## Migrating unscoped routes
