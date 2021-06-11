@@ -319,7 +319,10 @@
       when: never
     - <<: *if-dot-com-gitlab-org-and-security-merge-request
       changes: *ci-build-images-patterns
-    - changes: *code-qa-patterns
+    - <<: *if-dot-com-gitlab-org-and-security-merge-request
+      changes: *code-qa-patterns
+    - <<: *if-dot-com-gitlab-org-default-branch
+      changes: *code-qa-patterns
     - <<: *if-dot-com-gitlab-org-schedule
 
 .build-images:rules:build-assets-image:
