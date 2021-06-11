@@ -2,7 +2,7 @@
 
 module GroupSaml
   module SamlProvider
-    module BaseService
+    class BaseService
       extend FastGettext::Translation
 
       attr_reader :saml_provider, :params, :current_user
