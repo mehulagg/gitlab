@@ -678,7 +678,7 @@ RSpec.describe GroupsController, factory_default: :keep do
 
     context 'when not a group owner' do
       before do
-        group.add_developer(user)
+        group.add_maintainer(user)
         sign_in(user)
       end
 
