@@ -48,4 +48,17 @@ RSpec.describe RuboCop::Cop::RSpec::HaveEnqueuedSidekiqJob do
   include_examples 'cop',
     bad: 'expect(any_variable_or_method).to receive(:perform_async).with(1)',
     good: 'expect(any_variable_or_method).to have_enqueued_sidekiq_job(1)'
+
+  context 'when worker is assigned to a variable' do
+    it 'registers an offense', :aggregate_failures do
+      expect_offense(<<~CODE, node: 'a_variable = Worker; expect(a_variable).to receive(:perform_async).with(1)')
+        expect(a_variable).to receive(:perform_async).with(1)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ #{described_class::MESSAGE}
+      CODE
+    end
+
+    it 'does not register an offense' do
+      expect_no_offenses('a_variable = Worker; expect(a_variable).to have_enqueued_sidekiq_job(1)')
+    end
+  end
 end

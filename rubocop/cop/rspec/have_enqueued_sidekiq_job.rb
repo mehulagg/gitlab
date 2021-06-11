@@ -33,19 +33,7 @@ module RuboCop
           (send
             (send nil? :expect ...)
             {:to :not_to :to_not}
-            {
-              (send nil? :receive (sym :perform_async))
-
-              (send
-                (send nil? :receive (sym :perform_async)) ...
-              )
-
-              (send
-                (send
-                  (send nil? :receive (sym :perform_async)) ...
-                ) ...
-              )
-            }
+            `(send nil? :receive (sym :perform_async))
           )
         PATTERN
 
