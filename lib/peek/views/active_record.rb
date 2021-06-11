@@ -66,7 +66,8 @@ module Peek
           backtrace: Gitlab::BacktraceCleaner.clean_backtrace(caller),
           cached: data[:cached] ? 'Cached' : '',
           transaction: data[:connection].transaction_open? ? 'In a transaction' : '',
-          db_role: db_role(data)
+          db_role: db_role(data),
+          database: "Database: #{::Gitlab::Database.dbname(data[:connection])}"
         }
       end
 
