@@ -41,6 +41,11 @@ module Resolvers
              required: false,
              description: 'Filter epics by IID for autocomplete.'
 
+    argument :include_ancestor_groups, GraphQL::BOOLEAN_TYPE,
+             required: false,
+             description: 'Include epics from ancestor groups.',
+             default_value: false
+
     argument :include_descendant_groups, GraphQL::BOOLEAN_TYPE,
              required: false,
              description: 'Include epics from descendant groups.',

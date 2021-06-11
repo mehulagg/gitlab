@@ -82,9 +82,9 @@ RSpec.describe Gitlab::Geo::LogCursor::Events::RepositoryCreatedEvent, :clean_gi
       it_behaves_like 'RepositoryCreatedEvent'
 
       it 'does not schedule a Geo::ProjectSyncWorker job' do
-        expect(Geo::ProjectSyncWorker).not_to receive(:perform_async).with(project.id, anything)
-
         subject.process
+
+        expect(Geo::ProjectSyncWorker).not_to have_enqueued_sidekiq_job
       end
     end
   end

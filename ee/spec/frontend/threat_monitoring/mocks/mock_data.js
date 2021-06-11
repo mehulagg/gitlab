@@ -52,6 +52,24 @@ spec:
   endpointSelector: {}`,
 };
 
+export const mockScanExecutionPolicy = {
+  name: 'Scheduled DAST scan',
+  creationTimestamp: new Date('2021-06-07T00:00:00.000Z'),
+  manifest: `---
+name: Enforce DAST in every pipeline
+description: This policy enforces pipeline configuration to have a job with DAST scan
+enabled: true
+rules:
+- type: pipeline
+  branches:
+  - master
+actions:
+- scan: dast
+  scanner_profile: Scanner Profile
+  site_profile: Site Profile
+`,
+};
+
 export const mockNominalHistory = [
   ['2019-12-04T00:00:00.000Z', 56],
   ['2019-12-05T00:00:00.000Z', 2647],

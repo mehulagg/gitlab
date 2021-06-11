@@ -5,6 +5,7 @@ import { mapActions, mapGetters, mapState } from 'vuex';
 import { sortableStart, sortableEnd } from '~/boards/mixins/sortable_default_options';
 import { sprintf, __ } from '~/locale';
 import defaultSortableConfig from '~/sortable/sortable_config';
+import Tracking from '~/tracking';
 import eventHub from '../eventhub';
 import BoardCard from './board_card.vue';
 import BoardNewIssue from './board_new_issue.vue';
@@ -23,6 +24,12 @@ export default {
     GlLoadingIcon,
     GlIntersectionObserver,
   },
+  mixins: [Tracking.mixin()],
+  inject: {
+    canAdminList: {
+      default: false,
+    },
+  },
   props: {
     disabled: {
       type: Boolean,
@@ -35,11 +42,6 @@ export default {
     boardItems: {
       type: Array,
       required: true,
-    },
-    canAdminList: {
-      type: Boolean,
-      required: false,
-      default: false,
     },
   },
   data() {
@@ -155,6 +157,7 @@ export default {
     },
     handleDragOnStart() {
       sortableStart();
+      this.track('drag_card', { label: 'board' });
     },
     handleDragOnEnd(params) {
       sortableEnd();

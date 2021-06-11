@@ -3,6 +3,7 @@
 module Geo
   module VerifiableRegistry
     extend ActiveSupport::Concern
+    extend ::Gitlab::Utils::Override
     include ::Gitlab::Geo::VerificationState
 
     class_methods do
@@ -38,6 +39,7 @@ module Geo
       extend ::Gitlab::Utils::Override
 
       sha_attribute :verification_checksum_mismatched
+
       scope :available_verifiables, -> { all }
 
       override :clear_verification_failure_fields!
@@ -78,6 +80,11 @@ module Geo
 
         verification_succeeded_with_checksum!(checksum, calculation_started_at)
       end
+    end
+
+    override :after_synced
+    def after_synced
+      self.verification_pending!
     end
   end
 end

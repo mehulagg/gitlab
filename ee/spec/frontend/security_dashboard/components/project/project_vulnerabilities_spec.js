@@ -4,7 +4,7 @@ import { Portal } from 'portal-vue';
 import VueApollo from 'vue-apollo';
 import ProjectVulnerabilities from 'ee/security_dashboard/components/project/project_vulnerabilities.vue';
 import SecurityScannerAlert from 'ee/security_dashboard/components/project/security_scanner_alert.vue';
-import VulnerabilityList from 'ee/security_dashboard/components/vulnerability_list.vue';
+import VulnerabilityList from 'ee/security_dashboard/components/shared/vulnerability_list.vue';
 import securityScannersQuery from 'ee/security_dashboard/graphql/queries/project_security_scanners.query.graphql';
 import vulnerabilitiesQuery from 'ee/security_dashboard/graphql/queries/project_vulnerabilities.query.graphql';
 import { useLocalStorageSpy } from 'helpers/local_storage_helper';

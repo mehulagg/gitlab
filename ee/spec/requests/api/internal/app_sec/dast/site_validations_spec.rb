@@ -3,6 +3,8 @@
 require 'spec_helper'
 
 RSpec.describe API::Internal::AppSec::Dast::SiteValidations do
+  include AfterNextHelpers
+
   let_it_be(:project) { create(:project) }
   let_it_be(:developer) { create(:user, developer_projects: [project]) }
   let_it_be(:site_validation) { create(:dast_site_validation, dast_site_token: create(:dast_site_token, project: project)) }
@@ -66,11 +68,23 @@ RSpec.describe API::Internal::AppSec::Dast::SiteValidations do
       context 'when site validation and job are associated with different projects' do
         let_it_be(:job) { create(:ci_build, :running, user: developer) }
 
-        it 'returns 400 and a contextual error message', :aggregate_failures do
+        it 'returns 403', :aggregate_failures do
           subject
 
-          expect(response).to have_gitlab_http_status(:bad_request)
-          expect(json_response).to eq('message' => '400 Bad request - Project mismatch')
+          expect(response).to have_gitlab_http_status(:forbidden)
+        end
+
+        context 'when the job project belongs to the same job token scope' do
+          before do
+            allow_next(Ci::JobToken::Scope).to receive(:includes?).with(project).and_return(true)
+          end
+
+          it 'returns 400 and a contextual error message', :aggregate_failures do
+            subject
+
+            expect(response).to have_gitlab_http_status(:bad_request)
+            expect(json_response).to eq('message' => '400 Bad request - Project mismatch')
+          end
         end
       end
 

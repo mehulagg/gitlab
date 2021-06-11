@@ -12,7 +12,7 @@ import {
   relatedIssuesRemoveErrorMap,
 } from '~/related_issues/constants';
 
-import { ChildType, ChildState, idProp, relativePositions } from '../constants';
+import { ChildType, ChildState, idProp, relativePositions, trackingAddedIssue } from '../constants';
 
 import epicChildReorder from '../queries/epicChildReorder.mutation.graphql';
 import { processQueryResponse, formatChildItem, gqClient } from '../utils/epic_utils';
@@ -335,6 +335,7 @@ export const addItem = ({ state, dispatch, getters }) => {
       issuable_references: state.pendingReferences,
     })
     .then(({ data }) => {
+      Api.trackRedisHllUserEvent(trackingAddedIssue);
       dispatch('receiveAddItemSuccess', {
         // Newly added item is always first in the list
         rawItems: data.issuables.slice(0, state.pendingReferences.length),
@@ -568,6 +569,7 @@ export const createNewIssue = ({ state, dispatch }, { issuesEndpoint, title }) =
   return axios
     .post(issuesEndpoint, { epic_id: epicId, title })
     .then(({ data }) => {
+      Api.trackRedisHllUserEvent(trackingAddedIssue);
       dispatch('receiveCreateIssueSuccess', data);
       dispatch('fetchItems', {
         parentItem,

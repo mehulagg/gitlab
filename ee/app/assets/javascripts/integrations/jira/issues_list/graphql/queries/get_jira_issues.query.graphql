@@ -1,0 +1,48 @@
+#import "../fragments/jira_label.fragment.graphql"
+#import "../fragments/jira_user.fragment.graphql"
+
+query jiraIssues(
+  $issuesFetchPath: String
+  $search: String
+  $labels: String
+  $sort: String
+  $state: String
+  $page: Integer
+) {
+  jiraIssues(
+    issuesFetchPath: $issuesFetchPath
+    search: $search
+    labels: $labels
+    sort: $sort
+    state: $state
+    page: $page
+  ) @client {
+    errors
+    pageInfo {
+      total
+      page
+    }
+    nodes {
+      id
+      projectId
+      createdAt
+      updatedAt
+      closedAt
+      title
+      webUrl
+      gitlabWebUrl
+      status
+      references
+      externalTracker
+      labels {
+        ...JiraLabel
+      }
+      assignees {
+        ...JiraUser
+      }
+      author {
+        ...JiraUser
+      }
+    }
+  }
+}

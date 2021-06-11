@@ -270,11 +270,11 @@ RSpec.describe ApplicationSetting do
     end
 
     it 'resumes indexing' do
-      expect(ElasticIndexingControlWorker).to receive(:perform_async)
-
       setting.save!
       setting.elasticsearch_pause_indexing = false
       setting.save!
+
+      expect(ElasticIndexingControlWorker).to have_enqueued_sidekiq_job
     end
   end
 

@@ -1,8 +1,8 @@
 import { GlLoadingIcon } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
-import DashboardNotConfigured from 'ee/security_dashboard/components/empty_states/group_dashboard_not_configured.vue';
-import VulnerabilitySeverities from 'ee/security_dashboard/components/first_class_vulnerability_severities.vue';
 import GroupSecurityDashboard from 'ee/security_dashboard/components/group/group_security_dashboard.vue';
+import DashboardNotConfigured from 'ee/security_dashboard/components/shared/empty_states/group_dashboard_not_configured.vue';
+import VulnerabilitySeverities from 'ee/security_dashboard/components/shared/project_security_status_chart.vue';
 import SecurityDashboardLayout from 'ee/security_dashboard/components/shared/security_dashboard_layout.vue';
 import VulnerabilitiesOverTimeChart from 'ee/security_dashboard/components/shared/vulnerabilities_over_time_chart.vue';
 import vulnerabilityGradesQuery from 'ee/security_dashboard/graphql/queries/group_vulnerability_grades.query.graphql';

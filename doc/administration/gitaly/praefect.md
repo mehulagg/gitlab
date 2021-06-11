@@ -9,12 +9,20 @@ type: reference
 
 Configure Gitaly Cluster using either:
 
-- The Gitaly Cluster configuration instructions available as part of
-  [reference architectures](../reference_architectures/index.md) for installations for more than
-  2000 users.
-- The advanced configuration instructions that follow on this page.
+- Gitaly Cluster configuration instructions available as part of
+  [reference architectures](../reference_architectures/index.md) for installations of up to:
+  - [3000 users](../reference_architectures/3k_users.md#configure-gitaly-cluster).
+  - [5000 users](../reference_architectures/5k_users.md#configure-gitaly-cluster).
+  - [10,000 users](../reference_architectures/10k_users.md#configure-gitaly-cluster).
+  - [25,000 users](../reference_architectures/25k_users.md#configure-gitaly-cluster).
+  - [50,000 users](../reference_architectures/50k_users.md#configure-gitaly-cluster).
+- The custom configuration instructions that follow on this page.
 
 Smaller GitLab installations may need only [Gitaly itself](index.md).
+
+NOTE:
+Upgrade instructions for Omnibus GitLab installations
+[are available](https://docs.gitlab.com/omnibus/update/#gitaly-cluster).
 
 ## Requirements for configuring a Gitaly Cluster
 
@@ -226,8 +234,10 @@ PostgreSQL instances. Otherwise you should change the configuration parameter
 
 > [Introduced](https://gitlab.com/gitlab-org/gitaly/-/issues/2634) in GitLab 13.4, Praefect nodes can no longer be designated as `primary`.
 
-NOTE:
-If there are multiple Praefect nodes, complete these steps for **each** node.
+If there are multiple Praefect nodes:
+
+- Complete the following steps for **each** node.
+- Designate one node as the "deploy node", and configure it first.
 
 To complete this section you need a [configured PostgreSQL server](#postgresql), including:
 
@@ -262,8 +272,8 @@ application server, or a Gitaly node.
    praefect['enable'] = true
 
    # Prevent database connections during 'gitlab-ctl reconfigure'
-   gitlab_rails['rake_cache_clear'] = false
    gitlab_rails['auto_migrate'] = false
+   praefect['auto_migrate'] = false
    ```
 
 1. Configure **Praefect** to listen on network interfaces by editing
@@ -376,6 +386,30 @@ application server, or a Gitaly node.
    Gitaly nodes were configured directly under the virtual storage, and not under the `nodes` key.
 
 1. [Introduced](https://gitlab.com/groups/gitlab-org/-/epics/2013) in GitLab 13.1 and later, enable [distribution of reads](#distributed-reads).
+
+1. Save the changes to `/etc/gitlab/gitlab.rb` and [reconfigure
+   Praefect](../restart_gitlab.md#omnibus-gitlab-reconfigure):
+
+   ```shell
+   gitlab-ctl reconfigure
+   ```
+
+1. For:
+
+   - The "deploy node":
+     1. Enable Praefect auto-migration again by setting `praefect['auto_migrate'] = true` in
+        `/etc/gitlab/gitlab.rb`.
+     1. To ensure database migrations are only run during reconfigure and not automatically on
+        upgrade, run:
+
+        ```shell
+        sudo touch /etc/gitlab/skip-auto-reconfigure
+        ```
+
+   - The other nodes, you can leave the settings as they are. Though
+     `/etc/gitlab/skip-auto-reconfigure` isn't required, you may want to set it to prevent GitLab
+     running reconfigure automatically when running commands such as `apt-get update`. This way any
+     additional configuration changes can be done and then reconfigure can be run manually.
 
 1. Save the changes to `/etc/gitlab/gitlab.rb` and [reconfigure
    Praefect](../restart_gitlab.md#omnibus-gitlab-reconfigure):
@@ -602,7 +636,6 @@ documentation](configure_gitaly.md#configure-gitaly-servers).
    prometheus['enable'] = true
 
    # Prevent database connections during 'gitlab-ctl reconfigure'
-   gitlab_rails['rake_cache_clear'] = false
    gitlab_rails['auto_migrate'] = false
    ```
 
@@ -699,7 +732,7 @@ documentation](configure_gitaly.md#configure-gitaly-servers).
 
 **The steps above must be completed for each Gitaly node!**
 
-After all Gitaly nodes are configured, you can run the Praefect connection
+After all Gitaly nodes are configured, run the Praefect connection
 checker to verify Praefect can connect to all Gitaly servers in the Praefect
 configuration.
 
@@ -1163,15 +1196,36 @@ To migrate existing clusters:
    a Praefect node to reattempt it. The migration only runs with `sql` election strategy configured.
 
 1. Running two different election strategies side by side can cause a split brain, where different
-   Praefect nodes consider repositories to have different primaries. To avoid this, shut down
-   all Praefect nodes before changing the election strategy.
+   Praefect nodes consider repositories to have different primaries. This can be avoided either:
 
-   Do this by running `gitlab-ctl stop praefect` on the Praefect nodes.
+   - If a short downtime is acceptable:
 
-1. On the Praefect nodes, configure the election strategy in `/etc/gitlab/gitlab.rb` with
-   `praefect['failover_election_strategy'] = 'per_repository'`.
+      1. Shut down all Praefect nodes before changing the election strategy. Do this by running `gitlab-ctl stop praefect` on the Praefect nodes.
 
-1. Finally, run `gitlab-ctl reconfigure` to reconfigure and restart the Praefect nodes.
+      1. On the Praefect nodes, configure the election strategy in `/etc/gitlab/gitlab.rb` with `praefect['failover_election_strategy'] = 'per_repository'`.
+
+      1. Run `gitlab-ctl reconfigure && gitlab-ctl start` to reconfigure and start the Praefects.
+
+   - If downtime is unacceptable:
+
+      1. Determine which Gitaly node is [the current primary](index.md#determine-primary-gitaly-node).
+
+      1. Comment out the secondary Gitaly nodes from the virtual storage's configuration in `/etc/gitlab/gitlab.rb`
+      on all Praefect nodes. This ensures there's only one Gitaly node configured, causing both of the election
+      strategies to elect the same Gitaly node as the primary.
+
+      1. Run `gitlab-ctl reconfigure` on all Praefect nodes. Wait until all Praefect processes have restarted and
+      the old processes have exited. This can take up to one minute.
+
+      1. On all Praefect nodes, configure the election strategy in `/etc/gitlab/gitlab.rb` with
+      `praefect['failover_election_strategy'] = 'per_repository'`.
+
+      1. Run `gitlab-ctl reconfigure` on all Praefect nodes. Wait until all of the Praefect processes have restarted and
+      the old processes have exited. This can take up to one minute.
+
+      1. Uncomment the secondary Gitaly node configuration commented out in the earlier step on all Praefect nodes.
+
+      1. Run `gitlab-ctl reconfigure` on all Praefect nodes to reconfigure and restart the Praefect processes.
 
 ### Deprecated election strategies
 

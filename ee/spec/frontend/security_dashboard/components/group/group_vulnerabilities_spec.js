@@ -2,7 +2,7 @@ import { GlAlert, GlIntersectionObserver, GlLoadingIcon } from '@gitlab/ui';
 import { shallowMount, createLocalVue } from '@vue/test-utils';
 import VueApollo from 'vue-apollo';
 import GroupVulnerabilities from 'ee/security_dashboard/components/group/group_vulnerabilities.vue';
-import VulnerabilityList from 'ee/security_dashboard/components/vulnerability_list.vue';
+import VulnerabilityList from 'ee/security_dashboard/components/shared/vulnerability_list.vue';
 import vulnerabilitiesQuery from 'ee/security_dashboard/graphql/queries/group_vulnerabilities.query.graphql';
 import createMockApollo from 'helpers/mock_apollo_helper';
 import { generateVulnerabilities } from '../mock_data';

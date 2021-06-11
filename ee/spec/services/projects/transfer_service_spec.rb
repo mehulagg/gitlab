@@ -65,7 +65,7 @@ RSpec.describe Projects::TransferService do
     end
   end
 
-  describe 'elasticsearch indexing', :elastic, :aggregate_failures do
+  describe 'elasticsearch indexing', :elastic, :clean_gitlab_redis_shared_state, :aggregate_failures do
     before do
       stub_ee_application_setting(elasticsearch_indexing: true)
     end

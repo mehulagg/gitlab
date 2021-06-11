@@ -53,7 +53,7 @@ RSpec.describe API::Projects do
   let_it_be(:user2) { create(:user) }
   let_it_be(:user3) { create(:user) }
   let_it_be(:admin) { create(:admin) }
-  let_it_be(:project, reload: true) { create(:project, :repository, namespace: user.namespace) }
+  let_it_be(:project, reload: true) { create(:project, :repository, create_branch: 'something_else', namespace: user.namespace) }
   let_it_be(:project2, reload: true) { create(:project, namespace: user.namespace) }
   let_it_be(:project_member) { create(:project_member, :developer, user: user3, project: project) }
   let_it_be(:user4) { create(:user, username: 'user.with.dot') }
@@ -105,6 +105,43 @@ RSpec.describe API::Projects do
         lang_shares.each do |lang, share|
           create(:repository_language, project: proj, programming_language: lang, share: share)
         end
+      end
+    end
+  end
+
+  shared_examples_for 'create project with default branch parameter' do
+    let(:params) { { name: 'Foo Project', initialize_with_readme: true, default_branch: default_branch } }
+    let(:default_branch) { 'main' }
+
+    it 'creates project with provided default branch name' do
+      expect { request }.to change { Project.count }.by(1)
+      expect(response).to have_gitlab_http_status(:created)
+
+      project = Project.find(json_response['id'])
+      expect(project.default_branch).to eq(default_branch)
+    end
+
+    context 'when branch name is empty' do
+      let(:default_branch) { '' }
+
+      it 'creates project with a default project branch name' do
+        expect { request }.to change { Project.count }.by(1)
+        expect(response).to have_gitlab_http_status(:created)
+
+        project = Project.find(json_response['id'])
+        expect(project.default_branch).to eq('master')
+      end
+    end
+
+    context 'when initialize with readme is not set' do
+      let(:params) { super().merge(initialize_with_readme: nil) }
+
+      it 'creates project with a default project branch name' do
+        expect { request }.to change { Project.count }.by(1)
+        expect(response).to have_gitlab_http_status(:created)
+
+        project = Project.find(json_response['id'])
+        expect(project.default_branch).to be_nil
       end
     end
   end
@@ -182,6 +219,32 @@ RSpec.describe API::Projects do
           let(:current_user) { user }
           let(:additional_project) { create(:project, :public, group: create(:group)) }
         end
+      end
+
+      it 'includes correct value of container_registry_enabled', :aggregate_failures do
+        project.update_column(:container_registry_enabled, true)
+        project.project_feature.update!(container_registry_access_level: ProjectFeature::DISABLED)
+
+        get api('/projects', user)
+        project_response = json_response.find { |p| p['id'] == project.id }
+
+        expect(response).to have_gitlab_http_status(:ok)
+        expect(json_response).to be_an Array
+        expect(project_response['container_registry_enabled']).to eq(false)
+      end
+
+      it 'reads projects.container_registry_enabled when read_container_registry_access_level is disabled' do
+        stub_feature_flags(read_container_registry_access_level: false)
+
+        project.project_feature.update!(container_registry_access_level: ProjectFeature::DISABLED)
+        project.update_column(:container_registry_enabled, true)
+
+        get api('/projects', user)
+        project_response = json_response.find { |p| p['id'] == project.id }
+
+        expect(response).to have_gitlab_http_status(:ok)
+        expect(json_response).to be_an Array
+        expect(project_response['container_registry_enabled']).to eq(true)
       end
 
       it 'includes project topics' do
@@ -921,6 +984,10 @@ RSpec.describe API::Projects do
       expect(project.path).to eq('path-project-Foo')
     end
 
+    it_behaves_like 'create project with default branch parameter' do
+      let(:request) { post api('/projects', user), params: params }
+    end
+
     it 'creates last project before reaching project limit' do
       allow_any_instance_of(User).to receive(:projects_limit_left).and_return(1)
       post api('/projects', user2), params: { name: 'foo' }
@@ -1399,6 +1466,10 @@ RSpec.describe API::Projects do
 
       expect(project.name).to eq('Foo Project')
       expect(project.path).to eq('path-project-Foo')
+    end
+
+    it_behaves_like 'create project with default branch parameter' do
+      let(:request) { post api("/projects/user/#{user.id}", admin), params: params }
     end
 
     it 'responds with 400 on failure and not project' do
@@ -2887,6 +2958,18 @@ RSpec.describe API::Projects do
         project_param = { path: project4.path, name: project4.name }
 
         put api("/projects/#{project3.id}", user), params: project_param
+
+        expect(response).to have_gitlab_http_status(:ok)
+
+        project_param.each_pair do |k, v|
+          expect(json_response[k.to_s]).to eq(v)
+        end
+      end
+
+      it 'updates default_branch' do
+        project_param = { default_branch: 'something_else' }
+
+        put api("/projects/#{project.id}", user), params: project_param
 
         expect(response).to have_gitlab_http_status(:ok)
 

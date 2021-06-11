@@ -5,7 +5,7 @@ import pipelineSecurityReportSummaryQuery from 'ee/security_dashboard/graphql/qu
 import { fetchPolicies } from '~/lib/graphql';
 import { s__ } from '~/locale';
 import glFeatureFlagMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
-import VulnerabilityReport from '../vulnerability_report.vue';
+import VulnerabilityReport from '../shared/vulnerability_report.vue';
 import ScanErrorsAlert from './scan_errors_alert.vue';
 import SecurityDashboard from './security_dashboard_vuex.vue';
 import SecurityReportsSummary from './security_reports_summary.vue';
@@ -20,21 +20,15 @@ export default {
     VulnerabilityReport,
   },
   mixins: [glFeatureFlagMixin()],
-  inject: ['projectFullPath', 'pipeline', 'dashboardDocumentation', 'emptyStateSvgPath'],
-  props: {
-    projectId: {
-      type: Number,
-      required: true,
-    },
-    vulnerabilitiesEndpoint: {
-      type: String,
-      required: true,
-    },
-    loadingErrorIllustrations: {
-      type: Object,
-      required: true,
-    },
-  },
+  inject: [
+    'dashboardDocumentation',
+    'emptyStateSvgPath',
+    'loadingErrorIllustrations',
+    'pipeline',
+    'projectFullPath',
+    'projectId',
+    'vulnerabilitiesEndpoint',
+  ],
   data() {
     return {
       securityReportSummary: {},
@@ -72,7 +66,7 @@ export default {
       };
     },
     scansWithErrors() {
-      const getScans = (reportSummary) => reportSummary?.scans || [];
+      const getScans = (reportSummary) => reportSummary?.scans?.nodes || [];
       const hasErrors = (scan) => Boolean(scan.errors?.length);
 
       return this.securityReportSummary

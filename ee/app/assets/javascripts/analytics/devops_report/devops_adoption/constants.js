@@ -19,7 +19,7 @@ export const DEVOPS_ADOPTION_ERROR_KEYS = {
 };
 
 export const TABLE_HEADER_TEXT = s__(
-  'DevopsAdoption|Feature adoption is based on usage in the current calendar month. Last updated: %{timestamp}.',
+  'DevopsAdoption|Feature adoption is based on usage in the previous calendar month. Last updated: %{timestamp}.',
 );
 
 export const DEVOPS_ADOPTION_GROUP_LEVEL_LABEL = s__('DevopsAdoption|Add/remove sub-groups');

@@ -586,7 +586,7 @@ end
 
 Gitlab.ee do
   Settings.cron_jobs['analytics_devops_adoption_create_all_snapshots_worker'] ||= Settingslogic.new({})
-  Settings.cron_jobs['analytics_devops_adoption_create_all_snapshots_worker']['cron'] ||= '0 4 * * 0'
+  Settings.cron_jobs['analytics_devops_adoption_create_all_snapshots_worker']['cron'] ||= '0 0 1 * *'
   Settings.cron_jobs['analytics_devops_adoption_create_all_snapshots_worker']['job_class'] = 'Analytics::DevopsAdoption::CreateAllSnapshotsWorker'
   Settings.cron_jobs['active_user_count_threshold_worker'] ||= Settingslogic.new({})
   Settings.cron_jobs['active_user_count_threshold_worker']['cron'] ||= '0 12 * * *'
@@ -687,6 +687,9 @@ Gitlab.ee do
   Settings.cron_jobs['iterations_update_status_worker'] ||= Settingslogic.new({})
   Settings.cron_jobs['iterations_update_status_worker']['cron'] ||= '5 0 * * *'
   Settings.cron_jobs['iterations_update_status_worker']['job_class'] = 'IterationsUpdateStatusWorker'
+  Settings.cron_jobs['iterations_generator_worker'] ||= Settingslogic.new({})
+  Settings.cron_jobs['iterations_generator_worker']['cron'] ||= '5 0 * * *'
+  Settings.cron_jobs['iterations_generator_worker']['job_class'] = 'Iterations::Cadences::ScheduleCreateIterationsWorker'
   Settings.cron_jobs['vulnerability_statistics_schedule_worker'] ||= Settingslogic.new({})
   Settings.cron_jobs['vulnerability_statistics_schedule_worker']['cron'] ||= '15 1 * * *'
   Settings.cron_jobs['vulnerability_statistics_schedule_worker']['job_class'] = 'Vulnerabilities::Statistics::ScheduleWorker'

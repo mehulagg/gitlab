@@ -42,7 +42,7 @@ module Boards
       end
 
       def available?
-        group.licensed_feature_available?(:epics) && Feature.enabled?(:epic_boards, parent)
+        group.licensed_feature_available?(:epics) && Feature.enabled?(:epic_boards, parent, default_enabled: :yaml)
       end
 
       def allowed?

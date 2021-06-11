@@ -1158,7 +1158,7 @@ POST /projects
 | `path`                                                      | string  | **{check-circle}** Yes (if name isn't provided) | Repository name for new project. Generated based on name if not provided (generated as lowercase with dashes). |
 | `allow_merge_on_skipped_pipeline`                           | boolean | **{dotted-circle}** No | Set whether or not merge requests can be merged with skipped jobs. |
 | `analytics_access_level`                                    | string  | **{dotted-circle}** No | One of `disabled`, `private` or `enabled` |
-| `approvals_before_merge` **(PREMIUM)**                      | integer | **{dotted-circle}** No | How many approvers should approve merge requests by default. |
+| `approvals_before_merge` **(PREMIUM)**                      | integer | **{dotted-circle}** No | How many approvers should approve merge requests by default. To configure approval rules, see [Merge request approvals API](merge_request_approvals.md). |
 | `auto_cancel_pending_pipelines`                             | string  | **{dotted-circle}** No | Auto-cancel pending pipelines. This isn't a boolean, but enabled/disabled. |
 | `auto_devops_deploy_strategy`                               | string  | **{dotted-circle}** No | Auto Deploy strategy (`continuous`, `manual` or `timed_incremental`). |
 | `auto_devops_enabled`                                       | boolean | **{dotted-circle}** No | Enable Auto DevOps for this project. |
@@ -1171,7 +1171,7 @@ POST /projects
 | `ci_config_path`                                            | string  | **{dotted-circle}** No | The path to CI configuration file. |
 | `container_expiration_policy_attributes`                    | hash    | **{dotted-circle}** No | Update the image cleanup policy for this project. Accepts: `cadence` (string), `keep_n` (integer), `older_than` (string), `name_regex` (string), `name_regex_delete` (string), `name_regex_keep` (string), `enabled` (boolean). Valid values for `cadence` are: `1d` (every day), `7d` (every week), `14d` (every two weeks), `1month` (every month), or `3month` (every quarter). |
 | `container_registry_enabled`                                | boolean | **{dotted-circle}** No | Enable container registry for this project. |
-| `default_branch`                                            | string  | **{dotted-circle}** No | The [default branch](../user/project/repository/branches/default.md) name. |
+| `default_branch`                                            | string  | **{dotted-circle}** No | The [default branch](../user/project/repository/branches/default.md) name. Requires `initialize_with_readme` to be `true`. |
 | `description`                                               | string  | **{dotted-circle}** No | Short project description. |
 | `emails_disabled`                                           | boolean | **{dotted-circle}** No | Disable email notifications. |
 | `external_authorization_classification_label` **(PREMIUM)** | string  | **{dotted-circle}** No | The classification label for the project. |
@@ -1233,7 +1233,7 @@ POST /projects/user/:user_id
 | `name`                                                      | string  | **{check-circle}** Yes | The name of the new project. |
 | `allow_merge_on_skipped_pipeline`                           | boolean | **{dotted-circle}** No | Set whether or not merge requests can be merged with skipped jobs. |
 | `analytics_access_level`                                    | string  | **{dotted-circle}** No | One of `disabled`, `private` or `enabled` |
-| `approvals_before_merge` **(PREMIUM)**                      | integer | **{dotted-circle}** No | How many approvers should approve merge requests by default. |
+| `approvals_before_merge` **(PREMIUM)**                      | integer | **{dotted-circle}** No | How many approvers should approve merge requests by default. To configure approval rules, see [Merge request approvals API](merge_request_approvals.md). |
 | `auto_cancel_pending_pipelines`                             | string  | **{dotted-circle}** No | Auto-cancel pending pipelines. This isn't a boolean, but enabled/disabled. |
 | `auto_devops_deploy_strategy`                               | string  | **{dotted-circle}** No | Auto Deploy strategy (`continuous`, `manual` or `timed_incremental`). |
 | `auto_devops_enabled`                                       | boolean | **{dotted-circle}** No | Enable Auto DevOps for this project. |
@@ -1246,6 +1246,7 @@ POST /projects/user/:user_id
 | `ci_config_path`                                            | string  | **{dotted-circle}** No | The path to CI configuration file. |
 | `container_registry_enabled`                                | boolean | **{dotted-circle}** No | Enable container registry for this project. |
 | `description`                                               | string  | **{dotted-circle}** No | Short project description. |
+| `default_branch`                                            | string  | **{dotted-circle}** No | The [default branch](../user/project/repository/branches/default.md) name. Requires `initialize_with_readme` to be `true`. |
 | `emails_disabled`                                           | boolean | **{dotted-circle}** No | Disable email notifications. |
 | `external_authorization_classification_label` **(PREMIUM)** | string  | **{dotted-circle}** No | The classification label for the project. |
 | `forking_access_level`                                      | string  | **{dotted-circle}** No | One of `disabled`, `private`, or `enabled`. |
@@ -1305,7 +1306,7 @@ PUT /projects/:id
 |-------------------------------------------------------------|----------------|------------------------|-------------|
 | `allow_merge_on_skipped_pipeline`                           | boolean        | **{dotted-circle}** No | Set whether or not merge requests can be merged with skipped jobs. |
 | `analytics_access_level`                                    | string         | **{dotted-circle}** No | One of `disabled`, `private` or `enabled` |
-| `approvals_before_merge` **(PREMIUM)**                      | integer        | **{dotted-circle}** No | How many approvers should approve merge request by default. |
+| `approvals_before_merge` **(PREMIUM)**                      | integer        | **{dotted-circle}** No | How many approvers should approve merge request by default. To configure approval rules, see [Merge request approvals API](merge_request_approvals.md). |
 | `auto_cancel_pending_pipelines`                             | string         | **{dotted-circle}** No | Auto-cancel pending pipelines. This isn't a boolean, but enabled/disabled. |
 | `auto_devops_deploy_strategy`                               | string         | **{dotted-circle}** No | Auto Deploy strategy (`continuous`, `manual`, or `timed_incremental`). |
 | `auto_devops_enabled`                                       | boolean        | **{dotted-circle}** No | Enable Auto DevOps for this project. |

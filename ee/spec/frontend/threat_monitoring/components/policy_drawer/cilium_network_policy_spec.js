@@ -1,3 +1,4 @@
+import BasePolicy from 'ee/threat_monitoring/components/policy_drawer/base_policy.vue';
 import CiliumNetworkPolicy from 'ee/threat_monitoring/components/policy_drawer/cilium_network_policy.vue';
 import { toYaml } from 'ee/threat_monitoring/components/policy_editor/network_policy/lib';
 import PolicyPreview from 'ee/threat_monitoring/components/policy_editor/policy_preview.vue';
@@ -21,6 +22,9 @@ describe('CiliumNetworkPolicy component', () => {
       propsData: {
         ...propsData,
       },
+      stubs: {
+        BasePolicy,
+      },
     });
   };
 
@@ -39,7 +43,7 @@ describe('CiliumNetworkPolicy component', () => {
 
     it('does render the policy description', () => {
       expect(findDescription().exists()).toBe(true);
-      expect(findDescription().text()).toBe('test description');
+      expect(findDescription().text()).toContain('test description');
     });
 
     it('does render the policy preview', () => {
