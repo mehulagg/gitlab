@@ -5,10 +5,12 @@ module Gitlab
     class Cache < ::Gitlab::Redis::Wrapper
       CACHE_NAMESPACE = 'cache:gitlab'
 
-      class << self
-        def default_url
-          'redis://localhost:6380'
-        end
+      private
+
+      def raw_config_hash
+        config = super
+        config[:url] = 'redis://localhost:6380' if config[:url].blank?
+        config
       end
     end
   end

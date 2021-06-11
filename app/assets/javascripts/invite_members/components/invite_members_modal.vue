@@ -68,6 +68,7 @@ export default {
       newUsersToInvite: [],
       selectedDate: undefined,
       groupToBeSharedWith: {},
+      source: 'unknown',
     };
   },
   computed: {
@@ -195,6 +196,7 @@ export default {
         ...this.basePostData,
         email: usersToInviteByEmail,
         access_level: this.selectedAccessLevel,
+        invite_source: this.source,
       };
     },
     addByUserIdPostData(usersToAddById) {
@@ -202,6 +204,7 @@ export default {
         ...this.basePostData,
         user_id: usersToAddById,
         access_level: this.selectedAccessLevel,
+        invite_source: this.source,
       };
     },
     shareWithGroupPostData(groupToBeSharedWith) {
@@ -251,11 +254,11 @@ export default {
         ),
       },
     },
-    accessLevel: s__('InviteMembersModal|Choose a role permission'),
+    accessLevel: s__('InviteMembersModal|Select a role'),
     accessExpireDate: s__('InviteMembersModal|Access expiration date (optional)'),
     toastMessageSuccessful: s__('InviteMembersModal|Members were successfully added'),
     toastMessageUnsuccessful: s__('InviteMembersModal|Some of the members could not be added'),
-    readMoreText: s__(`InviteMembersModal|%{linkStart}Read more%{linkEnd} about role permissions`),
+    readMoreText: s__(`InviteMembersModal|%{linkStart}Learn more%{linkEnd} about roles.`),
     inviteButtonText: s__('InviteMembersModal|Invite'),
     cancelButtonText: s__('InviteMembersModal|Cancel'),
     headerCloseLabel: s__('InviteMembersModal|Close invite team members'),

@@ -13,20 +13,19 @@ RSpec.describe Gitlab::Geo::LogCursor::Events::HashedStorageAttachmentsEvent, :c
 
   subject { described_class.new(hashed_storage_attachments_event, Time.now, logger) }
 
-  around do |example|
-    Sidekiq::Testing.fake! { example.run }
-  end
-
   describe '#process' do
     it 'does not create a new project registry' do
       expect { subject.process }.not_to change(Geo::ProjectRegistry, :count)
     end
 
     it 'schedules a Geo::HashedStorageAttachmentsMigrationWorker' do
-      expect(::Geo::HashedStorageAttachmentsMigrationWorker).to receive(:perform_async)
-        .with(project.id, old_attachments_path, new_attachments_path)
-
       subject.process
+
+      expect(::Geo::HashedStorageAttachmentsMigrationWorker).to have_enqueued_sidekiq_job(
+        project.id,
+        old_attachments_path,
+        new_attachments_path
+      )
     end
 
     it_behaves_like 'logs event source info'

@@ -39,10 +39,10 @@ RSpec.describe Gitlab::BackgroundMigration::PopulateNamespaceStatistics do
 
     expect(namespace_statistics.count).to eq 1
 
-    expect(Namespaces::ScheduleAggregationWorker).to receive(:perform_async).with(group1.id)
-    expect(Namespaces::ScheduleAggregationWorker).to receive(:perform_async).with(group2.id)
-
     subject
+
+    expect(Namespaces::ScheduleAggregationWorker).to have_enqueued_sidekiq_job(group1.id)
+    expect(Namespaces::ScheduleAggregationWorker).to have_enqueued_sidekiq_job(group2.id)
 
     expect(namespace_statistics.count).to eq 2
 

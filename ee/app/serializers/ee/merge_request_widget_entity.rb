@@ -62,7 +62,7 @@ module EE
       end
 
       expose :can_read_vulnerabilities do |merge_request|
-        can?(current_user, :read_vulnerability, merge_request.project)
+        can?(current_user, :read_security_resource, merge_request.project)
       end
 
       expose :can_read_vulnerability_feedback do |merge_request|

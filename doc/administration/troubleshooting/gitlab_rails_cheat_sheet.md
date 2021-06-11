@@ -100,7 +100,7 @@ Rails.cache.instance_variable_get(:@data).keys
 
 ```ruby
 # Before 11.6.0
-logger = Logger.new(STDOUT)
+logger = Logger.new($stdout)
 admin_token = User.find_by_username('ADMIN_USERNAME').personal_access_tokens.first.token
 app.get("URL/?private_token=#{admin_token}")
 
@@ -113,7 +113,7 @@ Gitlab::Profiler.with_user(admin) { app.get(url) }
 ## Using the GitLab profiler inside console (used as of 10.5)
 
 ```ruby
-logger = Logger.new(STDOUT)
+logger = Logger.new($stdout)
 admin = User.find_by_username('ADMIN_USERNAME')
 Gitlab::Profiler.profile('URL', logger: logger, user: admin)
 ```
@@ -317,7 +317,18 @@ the displayed size may still show old sizes or commit numbers. To force an updat
 p = Project.find_by_full_path('<namespace>/<project>')
 pp p.statistics
 p.statistics.refresh!
-pp p.statistics  # compare with earlier values
+pp p.statistics
+# compare with earlier values
+
+# check the total artifact storage space separately
+builds_with_artifacts = p.builds.with_downloadable_artifacts.all
+
+artifact_storage = 0
+builds_with_artifacts.find_each do |build|
+  artifact_storage += build.artifacts_size
+end
+
+puts "#{artifact_storage} bytes"
 ```
 
 ### Identify deploy keys associated with blocked and non-member users 
@@ -549,7 +560,8 @@ User.billable.count
 Using cURL and jq (up to a max 100, see the [pagination docs](../../api/README.md#pagination)):
 
 ```shell
-curl --silent --header "Private-Token: ********************" "https://gitlab.example.com/api/v4/users?per_page=100&active" | jq --compact-output '.[] | [.id,.name,.username]'
+curl --silent --header "Private-Token: ********************" \
+     "https://gitlab.example.com/api/v4/users?per_page=100&active" | jq --compact-output '.[] | [.id,.name,.username]'
 ```
 
 ### Block or Delete Users that have no projects or groups
@@ -874,7 +886,7 @@ License.current.trial?
 
 ### Check if a project feature is available on the instance
 
-Features listed in <https://gitlab.com/gitlab-org/gitlab/blob/master/ee/app/models/license.rb>.
+Features listed in <https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/app/models/license.rb>.
 
 ```ruby
 License.current.feature_available?(:jira_dev_panel_integration)
@@ -882,7 +894,7 @@ License.current.feature_available?(:jira_dev_panel_integration)
 
 ### Check if a project feature is available in a project
 
-Features listed in [`license.rb`](https://gitlab.com/gitlab-org/gitlab/blob/master/ee/app/models/license.rb).
+Features listed in [`license.rb`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/app/models/license.rb).
 
 ```ruby
 p = Project.find_by_full_path('<group>/<project>')
@@ -1175,6 +1187,28 @@ Prints the metrics saved in `conversational_development_index_metrics`.
 rake gitlab:usage_data:generate_and_send
 ```
 
+## Kubernetes integration
+
+Find cluster:
+
+```ruby
+cluster = Clusters::Cluster.find(1)
+cluster = Clusters::Cluster.find_by(name: 'cluster_name')
+```
+
+Delete cluster without associated resources:
+
+```ruby
+# Find an admin user
+user = User.find_by(username: 'admin_user')
+
+# Find the cluster with the ID
+cluster = Clusters::Cluster.find(1)
+
+# Delete the cluster
+Clusters::DestroyService.new(user).execute(cluster)
+```
+
 ## Elasticsearch
 
 ### Configuration attributes
@@ -1192,11 +1226,11 @@ Among other attributes, in the output you will notice that all the settings avai
 You can then set anyone of Elasticsearch integration settings by issuing a command similar to:
 
 ```ruby
-ApplicationSetting.last.update_attributes(elasticsearch_url: '<your ES URL and port>')
+ApplicationSetting.last.update(elasticsearch_url: '<your ES URL and port>')
 
 #or
 
-ApplicationSetting.last.update_attributes(elasticsearch_indexing: false)
+ApplicationSetting.last.update(elasticsearch_indexing: false)
 ```
 
 #### Getting attributes

@@ -20,12 +20,6 @@ RSpec.describe Geo::FileUploadService do
       end
     end
 
-    it "returns a LfsRetriever given object_type is lfs" do
-      subject = described_class.new({ type: 'lfs', id: 1 }, 'request-data')
-
-      expect(subject.retriever).to be_a(Gitlab::Geo::Replication::LfsRetriever)
-    end
-
     it "returns a JobArtifactRetriever given object_type is job_artifact" do
       subject = described_class.new({ type: 'job_artifact', id: 1 }, 'request-data')
 
@@ -180,23 +174,6 @@ RSpec.describe Geo::FileUploadService do
       include_examples 'no decoded params'
     end
 
-    context 'LFS Object' do
-      let(:lfs_object) { create(:lfs_object, :with_file) }
-      let(:params) { { id: lfs_object.id, type: 'lfs' } }
-      let(:request_data) { Gitlab::Geo::Replication::LfsTransfer.new(lfs_object).request_data }
-
-      it 'sends LFS file' do
-        service = described_class.new(params, request_data)
-
-        response = service.execute
-
-        expect(response[:code]).to eq(:ok)
-        expect(response[:file].path).to eq(lfs_object.file.path)
-      end
-
-      include_examples 'no decoded params'
-    end
-
     context 'job artifact' do
       let(:job_artifact) { create(:ci_job_artifact, :with_file) }
       let(:params) { { id: job_artifact.id, type: 'job_artifact' } }
@@ -238,7 +215,7 @@ RSpec.describe Geo::FileUploadService do
     context 'bulk imports export file' do
       let_it_be(:type) { :'bulk_imports/export' }
       let_it_be(:export) { create(:bulk_import_export) }
-      let_it_be(:file) { fixture_file_upload('spec/fixtures/bulk_imports/labels.ndjson.gz') }
+      let_it_be(:file) { fixture_file_upload('spec/fixtures/bulk_imports/gz/labels.ndjson.gz') }
 
       let(:upload) { Upload.find_by(model: export, uploader: 'BulkImports::ExportUploader') }
       let(:request_data) { Gitlab::Geo::Replication::FileTransfer.new(type, upload).request_data }

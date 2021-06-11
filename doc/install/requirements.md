@@ -17,7 +17,7 @@ as the hardware requirements that are needed to install and use GitLab.
 - Ubuntu (16.04/18.04/20.04)
 - Debian (9/10)
 - CentOS (7/8)
-- openSUSE Leap (15.1/15.2)
+- openSUSE Leap (15.2)
 - SUSE Linux Enterprise Server (12 SP2/12 SP5)
 - Red Hat Enterprise Linux (please use the CentOS packages and instructions)
 - Scientific Linux (please use the CentOS packages and instructions)
@@ -200,22 +200,6 @@ of [legacy Rugged code](../administration/gitaly/index.md#direct-access-to-git-i
 - In all other cases, the recommended number of threads is `4`. We don't recommend setting this
 higher, due to how [Ruby MRI multi-threading](https://en.wikipedia.org/wiki/Global_interpreter_lock)
 works.
-
-## Unicorn Workers
-
-For most instances we recommend using: (CPU cores * 1.5) + 1 = Unicorn workers.
-For example a node with 4 cores would have 7 Unicorn workers.
-
-For all machines that have 2GB and up we recommend a minimum of three Unicorn workers.
-If you have a 1GB machine we recommend to configure only two Unicorn workers to prevent excessive
-swapping.
-
-As long as you have enough available CPU and memory capacity, it's okay to increase the number of
-Unicorn workers and this usually helps to reduce the response time of the applications and
-increase the ability to handle parallel requests.
-
-To change the Unicorn workers when you have the Omnibus package (which defaults to the
-recommendation above) please see [the Unicorn settings in the Omnibus GitLab documentation](https://docs.gitlab.com/omnibus/settings/unicorn.html).
 
 ## Redis and Sidekiq
 

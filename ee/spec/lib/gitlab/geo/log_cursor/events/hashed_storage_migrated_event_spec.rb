@@ -14,10 +14,6 @@ RSpec.describe Gitlab::Geo::LogCursor::Events::HashedStorageMigratedEvent, :clea
 
   subject { described_class.new(hashed_storage_migrated_event, Time.now, logger) }
 
-  around do |example|
-    Sidekiq::Testing.fake! { example.run }
-  end
-
   describe '#process' do
     context 'when a tracking entry does not exist' do
       it 'does not create a tracking entry' do
@@ -25,20 +21,23 @@ RSpec.describe Gitlab::Geo::LogCursor::Events::HashedStorageMigratedEvent, :clea
       end
 
       it 'does not schedule a Geo::HashedStorageMigrationWorker' do
-        expect(::Geo::HashedStorageMigrationWorker).not_to receive(:perform_async)
-          .with(project.id, old_disk_path, new_disk_path, old_storage_version)
-
         subject.process
+
+        expect(::Geo::HashedStorageMigrationWorker).not_to have_enqueued_sidekiq_job
       end
     end
 
     it 'schedules a Geo::HashedStorageMigrationWorker' do
       create(:geo_project_registry, project: project)
 
-      expect(::Geo::HashedStorageMigrationWorker).to receive(:perform_async)
-        .with(project.id, old_disk_path, new_disk_path, old_storage_version)
-
       subject.process
+
+      expect(::Geo::HashedStorageMigrationWorker).to have_enqueued_sidekiq_job(
+        project.id,
+        old_disk_path,
+        new_disk_path,
+        old_storage_version
+      )
     end
 
     it_behaves_like 'logs event source info'

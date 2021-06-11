@@ -17,7 +17,7 @@ localVue.use(VueApollo);
 describe('Order Summary', () => {
   const resolvers = { ...purchaseFlowResolvers, ...subscriptionsResolvers };
   const initialStateData = {
-    subscription: { planId: 'silver' },
+    selectedPlanId: 'silver',
   };
   let wrapper;
 
@@ -105,7 +105,8 @@ describe('Order Summary', () => {
     describe('the default plan', () => {
       beforeEach(() => {
         createComponent({
-          subscription: { planId: 'bronze', quantity: 1 },
+          subscription: { quantity: 1 },
+          selectedPlanId: 'bronze',
         });
       });
 
@@ -126,7 +127,8 @@ describe('Order Summary', () => {
   describe('Changing the number of users', () => {
     beforeEach(() => {
       createComponent({
-        subscription: { planId: 'silver', quantity: 1 },
+        subscription: { quantity: 1 },
+        selectedPlanId: 'silver',
       });
     });
 
@@ -151,7 +153,8 @@ describe('Order Summary', () => {
     describe('3 selected users', () => {
       beforeEach(() => {
         createComponent({
-          subscription: { planId: 'silver', quantity: 3 },
+          subscription: { quantity: 3 },
+          selectedPlanId: 'silver',
         });
       });
 
@@ -175,7 +178,8 @@ describe('Order Summary', () => {
     describe('no selected users', () => {
       beforeEach(() => {
         createComponent({
-          subscription: { planId: 'silver', quantity: 0 },
+          subscription: { quantity: 0 },
+          selectedPlanId: 'silver',
         });
       });
 

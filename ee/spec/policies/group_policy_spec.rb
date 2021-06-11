@@ -848,7 +848,7 @@ RSpec.describe GroupPolicy do
 
   describe 'read_group_security_dashboard & create_vulnerability_export' do
     let(:abilities) do
-      %i[read_group_security_dashboard create_vulnerability_export read_vulnerability]
+      %i[read_group_security_dashboard create_vulnerability_export read_security_resource]
     end
 
     before do
@@ -1613,9 +1613,9 @@ RSpec.describe GroupPolicy do
     end
   end
 
-  describe 'manage_devops_adoption_segments' do
+  describe 'manage_devops_adoption_namespaces' do
     let(:current_user) { owner }
-    let(:policy) { :manage_devops_adoption_segments }
+    let(:policy) { :manage_devops_adoption_namespaces }
 
     context 'when feature is disabled' do
       before do

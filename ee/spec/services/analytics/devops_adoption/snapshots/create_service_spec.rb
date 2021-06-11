@@ -17,11 +17,11 @@ RSpec.describe Analytics::DevopsAdoption::Snapshots::CreateService do
 
     params[:recorded_at] = Time.zone.now
     params[:end_time] = 1.month.ago.end_of_month
-    params[:namespace] = segment.namespace
+    params[:namespace] = enabled_namespace.namespace
     params
   end
 
-  let(:segment) { create(:devops_adoption_segment) }
+  let(:enabled_namespace) { create(:devops_adoption_enabled_namespace) }
 
   it 'persists the snapshot' do
     expect(subject).to be_success

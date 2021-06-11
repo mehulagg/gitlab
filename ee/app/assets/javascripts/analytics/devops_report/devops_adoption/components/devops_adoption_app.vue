@@ -9,7 +9,6 @@ import {
   DEVOPS_ADOPTION_STRINGS,
   DEVOPS_ADOPTION_ERROR_KEYS,
   MAX_REQUEST_COUNT,
-  MAX_SEGMENTS,
   DATE_TIME_FORMAT,
   DEFAULT_POLLING_INTERVAL,
   DEVOPS_ADOPTION_GROUP_LEVEL_LABEL,
@@ -17,8 +16,8 @@ import {
   TRACK_ADOPTION_TAB_CLICK_EVENT,
   TRACK_DEVOPS_SCORE_TAB_CLICK_EVENT,
 } from '../constants';
-import bulkFindOrCreateDevopsAdoptionSegmentsMutation from '../graphql/mutations/bulk_find_or_create_devops_adoption_segments.mutation.graphql';
-import devopsAdoptionSegmentsQuery from '../graphql/queries/devops_adoption_segments.query.graphql';
+import bulkEnableDevopsAdoptionNamespacesMutation from '../graphql/mutations/bulk_enable_devops_adoption_namespaces.mutation.graphql';
+import devopsAdoptionEnabledNamespacesQuery from '../graphql/queries/devops_adoption_enabled_namespaces.query.graphql';
 import getGroupsQuery from '../graphql/queries/get_groups.query.graphql';
 import { addSegmentsToCache, deleteSegmentsFromCache } from '../utils/cache_updates';
 import { shouldPollTableData } from '../utils/helpers';
@@ -58,7 +57,6 @@ export default {
   },
   trackDevopsTabClickEvent: TRACK_ADOPTION_TAB_CLICK_EVENT,
   trackDevopsScoreTabClickEvent: TRACK_DEVOPS_SCORE_TAB_CLICK_EVENT,
-  maxSegments: MAX_SEGMENTS,
   devopsAdoptionTableConfiguration: DEVOPS_ADOPTION_TABLE_CONFIGURATION,
   data() {
     return {
@@ -85,14 +83,17 @@ export default {
     };
   },
   apollo: {
-    devopsAdoptionSegments: {
-      query: devopsAdoptionSegmentsQuery,
+    devopsAdoptionEnabledNamespaces: {
+      query: devopsAdoptionEnabledNamespacesQuery,
+      context: {
+        isSingleRequest: true,
+      },
       variables() {
         return this.segmentsQueryVariables;
       },
       result({ data }) {
         if (this.isGroup) {
-          const groupEnabled = data.devopsAdoptionSegments.nodes.some(
+          const groupEnabled = data.devopsAdoptionEnabledNamespaces.nodes.some(
             ({ namespace: { id } }) => id === this.groupGid,
           );
 
@@ -114,14 +115,14 @@ export default {
       return Boolean(this.groups?.nodes?.length);
     },
     hasSegmentsData() {
-      return Boolean(this.devopsAdoptionSegments?.nodes?.length);
+      return Boolean(this.devopsAdoptionEnabledNamespaces?.nodes?.length);
     },
     hasLoadingError() {
       return Object.values(this.errors).some((error) => error === true);
     },
     timestamp() {
       return dateformat(
-        this.devopsAdoptionSegments?.nodes[0]?.latestSnapshot?.recordedAt,
+        this.devopsAdoptionEnabledNamespaces?.nodes[0]?.latestSnapshot?.recordedAt,
         DATE_TIME_FORMAT,
       );
     },
@@ -129,24 +130,29 @@ export default {
       return (
         this.isLoadingGroups ||
         this.isLoadingEnableGroup ||
-        this.$apollo.queries.devopsAdoptionSegments.loading
+        this.$apollo.queries.devopsAdoptionEnabledNamespaces.loading
       );
     },
-    segmentLimitReached() {
-      return this.devopsAdoptionSegments?.nodes?.length > this.$options.maxSegments;
+    isLoadingAdoptionData() {
+      return (
+        this.isLoadingEnableGroup || this.$apollo.queries.devopsAdoptionEnabledNamespaces.loading
+      );
     },
     editGroupsButtonLabel() {
       return this.isGroup
         ? this.$options.i18n.groupLevelLabel
         : this.$options.i18n.tableHeader.button;
     },
-    canRenderModal() {
-      return this.hasGroupData && !this.isLoading;
-    },
     tabIndexValues() {
       const tabs = this.$options.devopsAdoptionTableConfiguration.map((item) => item.tab);
 
       return this.isGroup ? tabs : [...tabs, 'devops-score'];
+    },
+    availableGroups() {
+      return this.groups?.nodes || [];
+    },
+    enabledGroups() {
+      return this.devopsAdoptionEnabledNamespaces?.nodes || [];
     },
   },
   created() {
@@ -165,19 +171,19 @@ export default {
 
       this.$apollo
         .mutate({
-          mutation: bulkFindOrCreateDevopsAdoptionSegmentsMutation,
+          mutation: bulkEnableDevopsAdoptionNamespacesMutation,
           variables: {
             namespaceIds: [this.groupGid],
           },
           update: (store, { data }) => {
             const {
-              bulkFindOrCreateDevopsAdoptionSegments: { segments, errors },
+              bulkEnableDevopsAdoptionNamespaces: { enabledNamespaces, errors },
             } = data;
 
             if (errors.length) {
               this.handleError(DEVOPS_ADOPTION_ERROR_KEYS.addSegment, errors);
             } else {
-              this.addSegmentsToCache(segments);
+              this.addSegmentsToCache(enabledNamespaces);
             }
           },
         })
@@ -190,13 +196,13 @@ export default {
     },
     pollTableData() {
       const shouldPoll = shouldPollTableData({
-        segments: this.devopsAdoptionSegments.nodes,
-        timestamp: this.devopsAdoptionSegments?.nodes[0]?.latestSnapshot?.recordedAt,
+        segments: this.devopsAdoptionEnabledNamespaces.nodes,
+        timestamp: this.devopsAdoptionEnabledNamespaces?.nodes[0]?.latestSnapshot?.recordedAt,
         openModal: this.openModal,
       });
 
       if (shouldPoll) {
-        this.$apollo.queries.devopsAdoptionSegments.refetch();
+        this.$apollo.queries.devopsAdoptionEnabledNamespaces.refetch();
       }
     },
     trackModalOpenState(state) {
@@ -214,6 +220,9 @@ export default {
       this.$apollo
         .query({
           query: getGroupsQuery,
+          context: {
+            isSingleRequest: true,
+          },
           variables: {
             nextPage,
           },
@@ -304,14 +313,13 @@ export default {
 
         <devops-adoption-section
           v-else
-          :is-loading="isLoading"
+          :is-loading="isLoadingAdoptionData"
           :has-segments-data="hasSegmentsData"
           :timestamp="timestamp"
           :has-group-data="hasGroupData"
-          :segment-limit-reached="segmentLimitReached"
           :edit-groups-button-label="editGroupsButtonLabel"
           :cols="tab.cols"
-          :segments="devopsAdoptionSegments"
+          :segments="devopsAdoptionEnabledNamespaces"
           @segmentsRemoved="deleteSegmentsFromCache"
           @openAddRemoveModal="openAddRemoveModal"
         />
@@ -324,10 +332,11 @@ export default {
     </gl-tabs>
 
     <devops-adoption-segment-modal
-      v-if="canRenderModal"
+      v-if="!hasLoadingError"
       ref="addRemoveModal"
-      :groups="groups.nodes"
-      :enabled-groups="devopsAdoptionSegments.nodes"
+      :groups="availableGroups"
+      :enabled-groups="enabledGroups"
+      :is-loading="isLoading"
       @segmentsAdded="addSegmentsToCache"
       @segmentsRemoved="deleteSegmentsFromCache"
       @trackModalOpenState="trackModalOpenState"

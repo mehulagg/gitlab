@@ -29,9 +29,6 @@ module EE
       {
         primary_version: version.to_s,
         primary_revision: revision.to_s,
-        node_actions_allowed: ::Gitlab::Database.db_read_write?.to_s,
-        node_edit_allowed: ::Gitlab::Geo.license_allows?.to_s,
-        geo_troubleshooting_help_path: help_page_path('administration/geo/replication/troubleshooting.md'),
         replicable_types: replicable_types.to_json,
         new_node_url: new_admin_geo_node_path,
         geo_nodes_empty_state_svg: image_path("illustrations/empty-state/geo-empty.svg")
@@ -145,11 +142,39 @@ module EE
     end
 
     def resync_all_button
-      button_to(s_("Geo|Resync all"), { controller: controller_name, action: :resync_all }, class: "btn btn-default btn-md mr-2")
+      # This is deprecated and Hard Coded for Projects.
+      # All new replicable types should be using geo_replicable/app.vue
+
+      resync_all_projects_modal_data = {
+        path: resync_all_admin_geo_projects_url,
+        method: 'post',
+        modal_attributes: {
+          title: s_('Geo|Resync all projects'),
+          message: s_('Geo|This will resync all projects. It may take some time to complete. Are you sure you want to continue?'),
+          okTitle: s_('Geo|Resync all'),
+          size: 'sm'
+        }
+      }
+
+      button_tag(s_("Geo|Resync all"), type: "button", class: 'gl-button btn btn-default gl-mr-3 js-confirm-modal-button', data: resync_all_projects_modal_data)
     end
 
     def reverify_all_button
-      button_to(s_("Geo|Reverify all"), { controller: controller_name, action: :reverify_all }, class: "btn btn-default btn-md")
+      # This is deprecated and Hard Coded for Projects.
+      # All new replicable types should be using geo_replicable/app.vue
+
+      reverify_all_projects_modal_data = {
+        path: reverify_all_admin_geo_projects_url,
+        method: 'post',
+        modal_attributes: {
+          title: s_('Geo|Reverify all projects'),
+          message: s_('Geo|This will reverify all projects. It may take some time to complete. Are you sure you want to continue?'),
+          okTitle: s_('Geo|Reverify all'),
+          size: 'sm'
+        }
+      }
+
+      button_tag(s_("Geo|Reverify all"), type: "button", class: 'gl-button btn btn-default gl-mr-3 js-confirm-modal-button', data: reverify_all_projects_modal_data)
     end
 
     def replicable_types
@@ -207,17 +232,6 @@ module EE
           secondary_view: true
         }
       ]
-
-      if ::Feature.disabled?(:geo_lfs_object_replication, default_enabled: :yaml)
-        replicable_types.insert(2, {
-          data_type: 'blob',
-          data_type_title: _('File'),
-          title: _('LFS object'),
-          title_plural: _('LFS objects'),
-          name: 'lfs_object',
-          name_plural: 'lfs_objects'
-        })
-      end
 
       # Adds all the SSF Data Types automatically
       enabled_replicator_classes.each do |replicator_class|

@@ -75,7 +75,6 @@ module Geo
     def job_finders
       [
         Geo::FileDownloadDispatchWorker::AttachmentJobFinder.new(scheduled_file_ids(Gitlab::Geo::Replication::USER_UPLOADS_OBJECT_TYPES)),
-        Geo::FileDownloadDispatchWorker::LfsObjectJobFinder.new(scheduled_file_ids(:lfs)),
         Geo::FileDownloadDispatchWorker::JobArtifactJobFinder.new(scheduled_file_ids(:job_artifact))
       ]
     end

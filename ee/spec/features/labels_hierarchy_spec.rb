@@ -32,18 +32,18 @@ RSpec.describe 'Labels Hierarchy', :js do
 
       labels.each do |label|
         page.within('.filter-dropdown-container') do
-          find('button', text: "Edit board").click
+          click_button 'Edit board'
         end
 
-        page.within('.js-labels-block') do
-          find('.edit-link').click
+        page.within('.block.labels') do
+          click_button 'Edit'
+
+          wait_for_requests
+
+          click_link label.title
         end
 
-        wait_for_requests
-
-        find('a.label-item', text: label.title).click
-
-        find('button', text: "Save changes").click
+        click_button 'Save changes'
 
         wait_for_requests
 

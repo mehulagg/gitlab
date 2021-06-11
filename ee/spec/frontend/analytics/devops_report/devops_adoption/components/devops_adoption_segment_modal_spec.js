@@ -1,13 +1,14 @@
-import { GlModal, GlFormInput, GlSprintf, GlAlert, GlIcon } from '@gitlab/ui';
+import { GlModal, GlFormInput, GlSprintf, GlAlert, GlIcon, GlLoadingIcon } from '@gitlab/ui';
 import * as Sentry from '@sentry/browser';
-import { createLocalVue, shallowMount } from '@vue/test-utils';
+import { createLocalVue } from '@vue/test-utils';
 import Vue, { nextTick } from 'vue';
 import VueApollo from 'vue-apollo';
 import DevopsAdoptionSegmentModal from 'ee/analytics/devops_report/devops_adoption/components/devops_adoption_segment_modal.vue';
 import { DEVOPS_ADOPTION_SEGMENT_MODAL_ID } from 'ee/analytics/devops_report/devops_adoption/constants';
-import bulkFindOrCreateDevopsAdoptionSegmentsMutation from 'ee/analytics/devops_report/devops_adoption/graphql/mutations/bulk_find_or_create_devops_adoption_segments.mutation.graphql';
-import deleteDevopsAdoptionSegmentMutation from 'ee/analytics/devops_report/devops_adoption/graphql/mutations/delete_devops_adoption_segment.mutation.graphql';
+import bulkEnableDevopsAdoptionNamespacesMutation from 'ee/analytics/devops_report/devops_adoption/graphql/mutations/bulk_enable_devops_adoption_namespaces.mutation.graphql';
+import disableDevopsAdoptionNamespaceMutation from 'ee/analytics/devops_report/devops_adoption/graphql/mutations/disable_devops_adoption_namespace.mutation.graphql';
 import createMockApollo from 'helpers/mock_apollo_helper';
+import { shallowMountExtended } from 'helpers/vue_test_utils_helper';
 import waitForPromises from 'helpers/wait_for_promises';
 import {
   groupNodes,
@@ -16,7 +17,7 @@ import {
   genericErrorMessage,
   dataErrorMessage,
   groupNodeLabelValues,
-  devopsAdoptionSegmentsData,
+  devopsAdoptionNamespaceData,
 } from '../mock_data';
 
 const localVue = createLocalVue();
@@ -25,25 +26,25 @@ Vue.use(VueApollo);
 const mockEvent = { preventDefault: jest.fn() };
 const mutate = jest.fn().mockResolvedValue({
   data: {
-    bulkFindOrCreateDevopsAdoptionSegments: {
-      segments: [devopsAdoptionSegmentsData.nodes[0]],
+    bulkEnableDevopsAdoptionNamespaces: {
+      enabledNamespaces: [devopsAdoptionNamespaceData.nodes[0]],
       errors: [],
     },
-    deleteDevopsAdoptionSegment: {
-      segments: [devopsAdoptionSegmentsData.nodes[0]],
+    disableDevopsAdoptionNamespace: {
+      enabledNamespaces: [devopsAdoptionNamespaceData.nodes[0]],
       errors: [],
     },
   },
 });
 const mutateWithDataErrors = jest.fn().mockResolvedValue({
   data: {
-    bulkFindOrCreateDevopsAdoptionSegments: {
+    bulkEnableDevopsAdoptionNamespaces: {
       errors: [dataErrorMessage],
-      segments: [],
+      enabledNamespaces: [],
     },
-    deleteDevopsAdoptionSegment: {
+    disableDevopsAdoptionNamespace: {
       errors: [dataErrorMessage],
-      segments: [],
+      enabledNamespaces: [],
     },
   },
 });
@@ -60,11 +61,11 @@ describe('DevopsAdoptionSegmentModal', () => {
     provide = {},
   } = {}) => {
     const mockApollo = createMockApollo([
-      [deleteDevopsAdoptionSegmentMutation, deleteSegmentsSpy],
-      [bulkFindOrCreateDevopsAdoptionSegmentsMutation, addSegmentsSpy],
+      [disableDevopsAdoptionNamespaceMutation, deleteSegmentsSpy],
+      [bulkEnableDevopsAdoptionNamespacesMutation, addSegmentsSpy],
     ]);
 
-    wrapper = shallowMount(DevopsAdoptionSegmentModal, {
+    wrapper = shallowMountExtended(DevopsAdoptionSegmentModal, {
       localVue,
       apolloProvider: mockApollo,
       propsData: {
@@ -81,7 +82,6 @@ describe('DevopsAdoptionSegmentModal', () => {
   };
 
   const findModal = () => wrapper.find(GlModal);
-  const findByTestId = (testId) => findModal().find(`[data-testid="${testId}"]`);
   const actionButtonDisabledState = () => findModal().props('actionPrimary').attributes[0].disabled;
   const cancelButtonDisabledState = () => findModal().props('actionCancel').attributes[0].disabled;
   const actionButtonLoadingState = () => findModal().props('actionPrimary').attributes[0].loading;
@@ -98,6 +98,26 @@ describe('DevopsAdoptionSegmentModal', () => {
 
     expect(modal.exists()).toBe(true);
     expect(modal.props('modalId')).toBe(DEVOPS_ADOPTION_SEGMENT_MODAL_ID);
+  });
+
+  describe('while loading', () => {
+    beforeEach(() => {
+      createComponent({ props: { isLoading: true } });
+    });
+
+    it('displays the loading icon', () => {
+      expect(wrapper.findComponent(GlLoadingIcon).exists()).toBe(true);
+    });
+
+    it('does not display the form', () => {
+      expect(wrapper.findByTestId('groups').exists()).toBe(false);
+    });
+  });
+
+  it('does not display the loading icon', () => {
+    createComponent();
+
+    expect(wrapper.findComponent(GlLoadingIcon).exists()).toBe(false);
   });
 
   describe('modal title', () => {
@@ -144,7 +164,7 @@ describe('DevopsAdoptionSegmentModal', () => {
     };
 
     it('contains the checkbox tree component', () => {
-      const checkboxes = findByTestId('groups');
+      const checkboxes = wrapper.findByTestId('groups');
 
       expect(checkboxes.exists()).toBe(true);
 
@@ -157,14 +177,14 @@ describe('DevopsAdoptionSegmentModal', () => {
     describe('filtering', () => {
       describe('filter input field', () => {
         it('contains the filter input', () => {
-          const filter = findByTestId('filter');
+          const filter = wrapper.findByTestId('filter');
 
           expect(filter.exists()).toBe(true);
           expect(filter.find(GlFormInput).exists()).toBe(true);
         });
 
         it('contains the filter icon', () => {
-          const icon = findByTestId('filter').find(GlIcon);
+          const icon = wrapper.findByTestId('filter').find(GlIcon);
 
           expect(icon.exists()).toBe(true);
           expect(icon.props('name')).toBe('search');
@@ -183,7 +203,7 @@ describe('DevopsAdoptionSegmentModal', () => {
 
           await nextTick();
 
-          const checkboxes = findByTestId('groups');
+          const checkboxes = wrapper.findByTestId('groups');
 
           expect(checkboxes.props('options')).toStrictEqual(results);
         },
@@ -197,7 +217,7 @@ describe('DevopsAdoptionSegmentModal', () => {
         });
 
         it('displays a warning message when there are no results', async () => {
-          const warning = findByTestId('filter-warning');
+          const warning = wrapper.findByTestId('filter-warning');
 
           expect(warning.exists()).toBe(true);
           expect(warning.text()).toBe('No filter results.');
@@ -205,7 +225,7 @@ describe('DevopsAdoptionSegmentModal', () => {
         });
 
         it('hides the checkboxes', () => {
-          const checkboxes = findByTestId('groups');
+          const checkboxes = wrapper.findByTestId('groups');
 
           expect(checkboxes.exists()).toBe(false);
         });
@@ -236,7 +256,7 @@ describe('DevopsAdoptionSegmentModal', () => {
     const enableFirstGroup = { checkboxValues: [groupIds[0]] };
     const enableSecondGroup = { checkboxValues: [groupIds[1]] };
     const noEnabledGroups = { checkboxValues: [] };
-    const firstGroupEnabledData = [devopsAdoptionSegmentsData.nodes[0]];
+    const firstGroupEnabledData = [devopsAdoptionNamespaceData.nodes[0]];
     const firstGroupId = [groupIds[0]];
     const firstGroupGid = [groupGids[0]];
     const secondGroupGid = [groupGids[1]];
@@ -250,7 +270,7 @@ describe('DevopsAdoptionSegmentModal', () => {
         });
 
         it('disables the form inputs', async () => {
-          const checkboxes = findByTestId('groups');
+          const checkboxes = wrapper.findByTestId('groups');
 
           expect(checkboxes.attributes('disabled')).not.toBeDefined();
 
@@ -311,7 +331,7 @@ describe('DevopsAdoptionSegmentModal', () => {
             it('emits segmentsAdded with the correct variables', () => {
               const [params] = wrapper.emitted().segmentsAdded[0];
 
-              expect(params).toStrictEqual([devopsAdoptionSegmentsData.nodes[0]]);
+              expect(params).toStrictEqual([devopsAdoptionNamespaceData.nodes[0]]);
             });
           }
 

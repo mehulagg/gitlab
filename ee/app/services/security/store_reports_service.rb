@@ -12,6 +12,7 @@ module Security
     def execute
       store_reports
       mark_project_as_vulnerable!
+      set_latest_pipeline!
 
       errors.any? ? error(full_errors) : success
     end
@@ -31,6 +32,10 @@ module Security
 
     def mark_project_as_vulnerable!
       project.project_setting.update!(has_vulnerabilities: true)
+    end
+
+    def set_latest_pipeline!
+      Vulnerabilities::Statistic.set_latest_pipeline_with(pipeline)
     end
 
     def full_errors

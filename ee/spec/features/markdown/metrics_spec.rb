@@ -78,7 +78,7 @@ RSpec.describe 'Metrics rendering', :js, :kubeclient, :use_clean_rails_memory_st
 
   context 'for GitLab embedded cluster health metrics' do
     before do
-      create(:clusters_applications_prometheus, :installed, cluster: cluster)
+      create(:clusters_integrations_prometheus, cluster: cluster)
       stub_kubeclient_discover(cluster.platform.api_url)
       stub_prometheus_request(/prometheus-prometheus-server/, body: prometheus_values_body)
       stub_prometheus_request(/prometheus\/api\/v1/, body: prometheus_values_body)

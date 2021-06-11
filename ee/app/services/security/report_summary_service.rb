@@ -15,29 +15,33 @@ module Security
 
     def execute
       @selection_information.each_with_object({}) do |(report_type, summary_types), response|
-        response[report_type] = summary_counts_for_report_type(report_type, summary_types)
+        response[report_type] = summary_counts_for_report_type(report_type.to_s, summary_types)
       end
     end
 
     private
 
     def summary_counts_for_report_type(report_type, summary_types)
-      return if @pipeline.security_findings.by_report_types(report_type).empty?
+      return unless has_report?(report_type)
 
       summary_types.each_with_object({}) do |summary_type, response|
         case summary_type
         when :vulnerabilities_count
-          response[:vulnerabilities_count] = vulnerability_counts[report_type.to_s]
+          response[:vulnerabilities_count] = vulnerability_counts[report_type]
         when :scanned_resources_count
-          response[:scanned_resources_count] = scanned_resources_counts[report_type.to_s]
+          response[:scanned_resources_count] = scanned_resources_counts[report_type]
         when :scanned_resources
-          response[:scanned_resources] = scanned_resources[report_type.to_s]
+          response[:scanned_resources] = scanned_resources[report_type]
         when :scanned_resources_csv_path
           response[:scanned_resources_csv_path] = csv_path
         when :scans
-          response[:scans] = grouped_scans[report_type.to_s]
+          response[:scans] = grouped_scans[report_type]
         end
       end
+    end
+
+    def has_report?(report_type)
+      grouped_scans[report_type].present?
     end
 
     def csv_path

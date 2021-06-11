@@ -2,22 +2,22 @@ import {
   deleteSegmentsFromCache,
   addSegmentsToCache,
 } from 'ee/analytics/devops_report/devops_adoption/utils/cache_updates';
-import { devopsAdoptionSegmentsData } from '../mock_data';
+import { devopsAdoptionNamespaceData } from '../mock_data';
 
 describe('addSegmentsToCache', () => {
   const store = {
-    readQuery: jest.fn(() => ({ devopsAdoptionSegments: { nodes: [] } })),
+    readQuery: jest.fn(() => ({ devopsAdoptionEnabledNamespaces: { nodes: [] } })),
     writeQuery: jest.fn(),
   };
 
   it('calls writeQuery with the correct response', () => {
-    addSegmentsToCache(store, devopsAdoptionSegmentsData.nodes);
+    addSegmentsToCache(store, devopsAdoptionNamespaceData.nodes);
 
     expect(store.writeQuery).toHaveBeenCalledWith(
       expect.objectContaining({
         data: {
-          devopsAdoptionSegments: {
-            nodes: devopsAdoptionSegmentsData.nodes,
+          devopsAdoptionEnabledNamespaces: {
+            nodes: devopsAdoptionNamespaceData.nodes,
           },
         },
       }),
@@ -27,20 +27,20 @@ describe('addSegmentsToCache', () => {
 
 describe('deleteSegmentsFromCache', () => {
   const store = {
-    readQuery: jest.fn(() => ({ devopsAdoptionSegments: devopsAdoptionSegmentsData })),
+    readQuery: jest.fn(() => ({ devopsAdoptionEnabledNamespaces: devopsAdoptionNamespaceData })),
     writeQuery: jest.fn(),
   };
 
   it('calls writeQuery with the correct response', () => {
     // Remove the item at the first index
-    deleteSegmentsFromCache(store, [devopsAdoptionSegmentsData.nodes[0].id]);
+    deleteSegmentsFromCache(store, [devopsAdoptionNamespaceData.nodes[0].id]);
 
     expect(store.writeQuery).toHaveBeenCalledWith(
       expect.not.objectContaining({
         data: {
-          devopsAdoptionSegments: {
-            __typename: 'devopsAdoptionSegments',
-            nodes: devopsAdoptionSegmentsData.nodes,
+          devopsAdoptionEnabledNamespaces: {
+            __typename: 'devopsAdoptionEnabledNamespaces',
+            nodes: devopsAdoptionNamespaceData.nodes,
           },
         },
       }),
@@ -48,10 +48,10 @@ describe('deleteSegmentsFromCache', () => {
     expect(store.writeQuery).toHaveBeenCalledWith(
       expect.objectContaining({
         data: {
-          devopsAdoptionSegments: {
-            __typename: 'devopsAdoptionSegments',
+          devopsAdoptionEnabledNamespaces: {
+            __typename: 'devopsAdoptionEnabledNamespaces',
             // Remove the item at the first index
-            nodes: devopsAdoptionSegmentsData.nodes.slice(1),
+            nodes: devopsAdoptionNamespaceData.nodes.slice(1),
           },
         },
       }),

@@ -11,8 +11,8 @@ import {
   DEFAULT_POLLING_INTERVAL,
   DEVOPS_ADOPTION_TABLE_CONFIGURATION,
 } from 'ee/analytics/devops_report/devops_adoption/constants';
-import bulkFindOrCreateDevopsAdoptionSegmentsMutation from 'ee/analytics/devops_report/devops_adoption/graphql/mutations/bulk_find_or_create_devops_adoption_segments.mutation.graphql';
-import devopsAdoptionSegments from 'ee/analytics/devops_report/devops_adoption/graphql/queries/devops_adoption_segments.query.graphql';
+import bulkEnableDevopsAdoptionNamespacesMutation from 'ee/analytics/devops_report/devops_adoption/graphql/mutations/bulk_enable_devops_adoption_namespaces.mutation.graphql';
+import devopsAdoptionEnabledNamespaces from 'ee/analytics/devops_report/devops_adoption/graphql/queries/devops_adoption_enabled_namespaces.query.graphql';
 import getGroupsQuery from 'ee/analytics/devops_report/devops_adoption/graphql/queries/get_groups.query.graphql';
 import { addSegmentsToCache } from 'ee/analytics/devops_report/devops_adoption/utils/cache_updates';
 import createMockApollo from 'helpers/mock_apollo_helper';
@@ -24,8 +24,8 @@ import {
   groupNodes,
   nextGroupNode,
   groupPageInfo,
-  devopsAdoptionSegmentsData,
-  devopsAdoptionSegmentsDataEmpty,
+  devopsAdoptionNamespaceData,
+  devopsAdoptionNamespaceDataEmpty,
 } from '../mock_data';
 
 jest.mock('ee/analytics/devops_report/devops_adoption/utils/cache_updates', () => ({
@@ -45,13 +45,13 @@ describe('DevopsAdoptionApp', () => {
   let wrapper;
 
   const groupsEmpty = jest.fn().mockResolvedValue({ __typename: 'Groups', nodes: [] });
-  const segmentsEmpty = jest
-    .fn()
-    .mockResolvedValue({ data: { devopsAdoptionSegments: devopsAdoptionSegmentsDataEmpty } });
+  const segmentsEmpty = jest.fn().mockResolvedValue({
+    data: { devopsAdoptionEnabledNamespaces: devopsAdoptionNamespaceDataEmpty },
+  });
   const addSegmentMutationSpy = jest.fn().mockResolvedValue({
     data: {
-      bulkFindOrCreateDevopsAdoptionSegments: {
-        segments: [devopsAdoptionSegmentsData.nodes[0]],
+      bulkEnableDevopsAdoptionNamespaces: {
+        enabledNamespaces: [devopsAdoptionNamespaceData.nodes[0]],
         errors: [],
       },
     },
@@ -66,8 +66,8 @@ describe('DevopsAdoptionApp', () => {
 
     const mockApollo = createMockApollo(
       [
-        [bulkFindOrCreateDevopsAdoptionSegmentsMutation, addSegmentsSpy],
-        [devopsAdoptionSegments, segmentsSpy],
+        [bulkEnableDevopsAdoptionNamespacesMutation, addSegmentsSpy],
+        [devopsAdoptionEnabledNamespaces, segmentsSpy],
       ],
       {
         Query: {
@@ -102,18 +102,6 @@ describe('DevopsAdoptionApp', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
-  });
-
-  describe('when loading', () => {
-    beforeEach(() => {
-      const mockApollo = createMockApolloProvider();
-      wrapper = createComponent({ mockApollo });
-    });
-
-    it('does not render the modal', () => {
-      expect(wrapper.find(DevopsAdoptionSegmentModal).exists()).toBe(false);
-    });
   });
 
   describe('initial request', () => {
@@ -121,19 +109,6 @@ describe('DevopsAdoptionApp', () => {
 
     afterEach(() => {
       groupsSpy = null;
-    });
-
-    describe('when no group data is present', () => {
-      beforeEach(async () => {
-        groupsSpy = jest.fn().mockResolvedValueOnce({ __typename: 'Groups', nodes: [] });
-        const mockApollo = createMockApolloProvider({ groupsSpy });
-        wrapper = createComponent({ mockApollo });
-        await waitForPromises();
-      });
-
-      it('does not render the segment modal', () => {
-        expect(wrapper.find(DevopsAdoptionSegmentModal).exists()).toBe(false);
-      });
     });
 
     describe('when group data is present', () => {
@@ -162,10 +137,6 @@ describe('DevopsAdoptionApp', () => {
         const mockApollo = createMockApolloProvider({ groupsSpy });
         wrapper = createComponent({ mockApollo });
         await waitForPromises();
-      });
-
-      it('does not render the segment modal', () => {
-        expect(wrapper.find(DevopsAdoptionSegmentModal).exists()).toBe(false);
       });
 
       it('should fetch data once', () => {
@@ -251,10 +222,6 @@ describe('DevopsAdoptionApp', () => {
         await waitForPromises();
       });
 
-      it('does not render the segment modal', () => {
-        expect(wrapper.find(DevopsAdoptionSegmentModal).exists()).toBe(false);
-      });
-
       it('should fetch data twice', () => {
         expect(groupsSpy).toHaveBeenCalledTimes(2);
       });
@@ -291,12 +258,12 @@ describe('DevopsAdoptionApp', () => {
     });
 
     describe('when there is an active group', () => {
-      const groupGid = devopsAdoptionSegmentsData.nodes[0].namespace.id;
+      const groupGid = devopsAdoptionNamespaceData.nodes[0].namespace.id;
 
       describe('which is enabled', () => {
         beforeEach(async () => {
           const segmentsWithData = jest.fn().mockResolvedValue({
-            data: { devopsAdoptionSegments: devopsAdoptionSegmentsData },
+            data: { devopsAdoptionEnabledNamespaces: devopsAdoptionNamespaceData },
           });
           const mockApollo = createMockApolloProvider({
             segmentsSpy: segmentsWithData,
@@ -341,7 +308,7 @@ describe('DevopsAdoptionApp', () => {
             expect(addSegmentsToCache).toHaveBeenCalledTimes(1);
             expect(addSegmentsToCache).toHaveBeenCalledWith(
               expect.anything(),
-              [devopsAdoptionSegmentsData.nodes[0]],
+              [devopsAdoptionNamespaceData.nodes[0]],
               {
                 displayNamespaceId: groupGid,
               },
@@ -523,7 +490,7 @@ describe('DevopsAdoptionApp', () => {
           mockApollo,
           provide: {
             isGroup: true,
-            groupGid: devopsAdoptionSegmentsData.nodes[0].namespace.id,
+            groupGid: devopsAdoptionNamespaceData.nodes[0].namespace.id,
           },
         });
       });

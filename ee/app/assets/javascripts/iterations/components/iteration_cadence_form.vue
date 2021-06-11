@@ -8,6 +8,7 @@ import {
   GlFormGroup,
   GlFormInput,
   GlFormSelect,
+  GlFormTextarea,
 } from '@gitlab/ui';
 import { convertToGraphQLId } from '~/graphql_shared/utils';
 import { s__, __ } from '~/locale';
@@ -34,10 +35,17 @@ const i18n = Object.freeze({
     description: s__('Iterations|The duration for each iteration (in weeks)'),
     placeholder: s__('Iterations|Select duration'),
   },
+  rollOver: {
+    label: s__('Iterations|Roll over issues'),
+    description: s__('Iterations|Move incomplete issues to the next iteration'),
+  },
   futureIterations: {
     label: s__('Iterations|Future iterations'),
     description: s__('Iterations|Number of future iterations you would like to have scheduled'),
     placeholder: s__('Iterations|Select number'),
+  },
+  description: {
+    label: __('Description'),
   },
   edit: {
     title: s__('Iterations|Edit iteration cadence'),
@@ -72,6 +80,7 @@ export default {
     GlFormGroup,
     GlFormInput,
     GlFormSelect,
+    GlFormTextarea,
   },
   inject: ['groupPath', 'cadencesListPath'],
   data() {
@@ -86,9 +95,11 @@ export default {
       errorMessage: '',
       title: '',
       automatic: true,
+      rollOver: false,
       startDate: null,
       durationInWeeks: 0,
       iterationsInAdvance: 0,
+      description: '',
       validationState: {
         title: null,
         startDate: null,
@@ -133,6 +144,7 @@ export default {
           durationInWeeks: this.durationInWeeks,
           active: true,
           iterationsInAdvance: this.iterationsInAdvance,
+          description: this.description,
         },
       };
 
@@ -168,7 +180,9 @@ export default {
         this.automatic = cadence.automatic;
         this.startDate = cadence.startDate;
         this.durationInWeeks = cadence.durationInWeeks;
+        this.rollOver = cadence.rollOver;
         this.iterationsInAdvance = cadence.iterationsInAdvance;
+        this.description = cadence.description;
       },
       error(error) {
         this.errorMessage = error;
@@ -346,6 +360,17 @@ export default {
       </gl-form-group>
 
       <gl-form-group
+        :label-cols-md="2"
+        label-class="gl-font-weight-bold text-right-md gl-pt-3!"
+        label-for="cadence-rollover-issues"
+        :description="i18n.rollOver.description"
+      >
+        <gl-form-checkbox id="cadence-rollover-issues" v-model="rollOver" @change="clearValidation">
+          <span class="gl-font-weight-bold">{{ i18n.rollOver.label }}</span>
+        </gl-form-checkbox>
+      </gl-form-group>
+
+      <gl-form-group
         :label="i18n.futureIterations.label"
         :label-cols-md="2"
         :content-cols-md="2"
@@ -367,6 +392,16 @@ export default {
         />
       </gl-form-group>
 
+      <gl-form-group
+        :label="i18n.description.label"
+        :label-cols-md="2"
+        :content-cols-md="2"
+        label-class="text-right-md gl-pt-3!"
+        label-for="cadence-description"
+      >
+        <gl-form-textarea id="cadence-description" v-model="description" class="w-100" />
+      </gl-form-group>
+
       <div class="form-actions gl-display-flex">
         <gl-button
           :loading="loading"
@@ -377,7 +412,7 @@ export default {
         >
           {{ i18n[page].save }}
         </gl-button>
-        <gl-button class="ml-auto" data-testid="cancel-create-cadence" @click="cancel">
+        <gl-button class="gl-ml-3" data-testid="cancel-create-cadence" @click="cancel">
           {{ i18n.cancel }}
         </gl-button>
       </div>

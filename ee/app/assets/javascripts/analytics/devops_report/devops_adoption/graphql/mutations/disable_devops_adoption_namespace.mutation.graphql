@@ -1,0 +1,5 @@
+mutation($id: [AnalyticsDevopsAdoptionEnabledNamespaceID!]!) {
+  disableDevopsAdoptionNamespace(input: { id: $id }) {
+    errors
+  }
+}

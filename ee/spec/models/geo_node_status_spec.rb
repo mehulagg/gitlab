@@ -173,7 +173,7 @@ RSpec.describe GeoNodeStatus, :geo do
   describe '#attachments_failed_count' do
     it 'counts failed avatars, attachment, personal snippets and files' do
       # These two should be ignored
-      create(:geo_lfs_object_legacy_registry, :with_lfs_object, :failed)
+      create(:geo_lfs_object_registry, :failed)
       create(:geo_upload_registry, :with_file)
 
       create(:geo_upload_registry, :with_file, :failed, file_type: :personal_file)
@@ -216,57 +216,6 @@ RSpec.describe GeoNodeStatus, :geo do
       stub_current_geo_node(primary)
 
       expect(subject.db_replication_lag_seconds).to eq(nil)
-    end
-  end
-
-  context 'LFS replication with SSF is disabled' do
-    before do
-      stub_feature_flags(geo_lfs_object_replication: false)
-    end
-
-    describe '#lfs_objects_synced_count' do
-      it 'counts synced LFS objects' do
-        # These four should be ignored
-        create(:geo_upload_registry, :failed)
-        create(:geo_upload_registry, :avatar)
-        create(:geo_upload_registry, file_type: :attachment)
-        create(:geo_lfs_object_legacy_registry, :failed)
-
-        create(:geo_lfs_object_legacy_registry)
-
-        create(:geo_lfs_object_legacy_registry, missing_on_primary: true)
-
-        expect(subject.lfs_objects_synced_missing_on_primary_count).to eq(1)
-      end
-    end
-
-    describe '#lfs_objects_failed_count' do
-      it 'counts failed LFS objects' do
-        # These four should be ignored
-        create(:geo_upload_registry, :failed)
-        create(:geo_upload_registry, :avatar, :failed)
-        create(:geo_upload_registry, :failed, file_type: :attachment)
-        create(:geo_lfs_object_legacy_registry)
-
-        create(:geo_lfs_object_legacy_registry, :failed)
-
-        expect(subject.lfs_objects_failed_count).to eq(1)
-      end
-    end
-
-    describe '#lfs_objects_synced_in_percentage' do
-      it 'returns 0 when there are no registries' do
-        expect(subject.lfs_objects_synced_in_percentage).to eq(0)
-      end
-
-      it 'returns the right percentage' do
-        create(:geo_lfs_object_legacy_registry)
-        create(:geo_lfs_object_legacy_registry, :failed)
-        create(:geo_lfs_object_legacy_registry, :never_synced)
-        create(:geo_lfs_object_legacy_registry, :never_synced)
-
-        expect(subject.lfs_objects_synced_in_percentage).to be_within(0.0001).of(25)
-      end
     end
   end
 
@@ -1394,12 +1343,6 @@ RSpec.describe GeoNodeStatus, :geo do
         stub_current_geo_node(primary)
       end
 
-      it 'does not call LfsObjectRegistryFinder#registry_count' do
-        expect_any_instance_of(Geo::LfsObjectLegacyRegistryFinder).not_to receive(:registry_count)
-
-        subject
-      end
-
       it 'does not call AttachmentRegistryFinder#registry_count' do
         expect_any_instance_of(Geo::AttachmentRegistryFinder).not_to receive(:registry_count)
 
@@ -1414,13 +1357,6 @@ RSpec.describe GeoNodeStatus, :geo do
     end
 
     context 'on the secondary' do
-      it 'calls LfsObjectRegistryFinder#registry_count' do
-        stub_feature_flags(geo_lfs_object_replication: false)
-        expect_any_instance_of(Geo::LfsObjectLegacyRegistryFinder).to receive(:registry_count).twice
-
-        subject
-      end
-
       it 'calls AttachmentRegistryFinder#registry_count' do
         expect_any_instance_of(Geo::AttachmentRegistryFinder).to receive(:registry_count).twice
 

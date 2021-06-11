@@ -233,10 +233,9 @@ RSpec.describe Gitlab::Auth::Ldap::Access do
           group_link_2 = create(:ldap_group_link, cn: 'Group2', provider: provider)
           group_ids = [group_link_1, group_link_2].map(&:group_id)
 
-          expect(LdapGroupSyncWorker).to receive(:perform_async)
-            .with(a_collection_containing_exactly(*group_ids), provider)
-
           access.update_user
+
+          expect(LdapGroupSyncWorker).to have_enqueued_sidekiq_job(a_collection_containing_exactly(*group_ids), provider)
         end
 
         it "doesn't trigger a sync when in a read-only GitLab instance" do
@@ -244,9 +243,9 @@ RSpec.describe Gitlab::Auth::Ldap::Access do
           create(:ldap_group_link, cn: 'Group1', provider: provider)
           create(:ldap_group_link, cn: 'Group2', provider: provider)
 
-          expect(LdapGroupSyncWorker).not_to receive(:perform_async)
-
           access.update_user
+
+          expect(LdapGroupSyncWorker).not_to have_enqueued_sidekiq_job
         end
 
         it "doesn't trigger a sync when there are no links for the provider" do
@@ -254,9 +253,9 @@ RSpec.describe Gitlab::Auth::Ldap::Access do
                                      cn: 'Group1',
                                      provider: 'not-this-ldap')
 
-          expect(LdapGroupSyncWorker).not_to receive(:perform_async)
-
           access.update_user
+
+          expect(LdapGroupSyncWorker).not_to have_enqueued_sidekiq_job
         end
 
         it 'does not performs the membership update for existing users' do
@@ -265,9 +264,10 @@ RSpec.describe Gitlab::Auth::Ldap::Access do
           user.save
 
           expect(LdapGroupLink).not_to receive(:where)
-          expect(LdapGroupSyncWorker).not_to receive(:perform_async)
 
           access.update_user
+
+          expect(LdapGroupSyncWorker).not_to have_enqueued_sidekiq_job
         end
       end
 
@@ -275,9 +275,10 @@ RSpec.describe Gitlab::Auth::Ldap::Access do
         stub_ldap_person_find_by_dn(entry, provider)
 
         expect(LdapGroupLink).not_to receive(:where)
-        expect(LdapGroupSyncWorker).not_to receive(:perform_async)
 
         access.update_user
+
+        expect(LdapGroupSyncWorker).not_to have_enqueued_sidekiq_job
       end
     end
 

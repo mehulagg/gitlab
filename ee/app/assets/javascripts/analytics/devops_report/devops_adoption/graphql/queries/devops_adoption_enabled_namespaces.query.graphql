@@ -1,0 +1,22 @@
+query devopsAdoptionEnabledNamespaces($displayNamespaceId: NamespaceID) {
+  devopsAdoptionEnabledNamespaces(displayNamespaceId: $displayNamespaceId) {
+    nodes {
+      id
+      latestSnapshot {
+        issueOpened
+        mergeRequestOpened
+        mergeRequestApproved
+        runnerConfigured
+        pipelineSucceeded
+        deploySucceeded
+        securityScanSucceeded
+        recordedAt
+        codeOwnersUsedCount
+      }
+      namespace {
+        fullName
+        id
+      }
+    }
+  }
+}

@@ -8,5 +8,9 @@ FactoryBot.define do
     description { 'The General Data Protection Regulation (GDPR) is a regulation in EU law on data protection and privacy in the European Union (EU) and the European Economic Area (EEA).' }
     color { '#004494' }
     regulated { true }
+
+    trait :sox do
+      name { 'SOX' }
+    end
   end
 end

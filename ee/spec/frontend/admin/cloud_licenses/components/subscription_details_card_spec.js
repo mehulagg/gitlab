@@ -18,16 +18,13 @@ describe('Subscription Details Card', () => {
   const findCardFooter = () => findCard().find('.gl-card-footer');
   const findSubscriptionDetailsTable = () => wrapper.findComponent(SubscriptionDetailsTable);
 
-  const createComponent = (
-    { detailsFields = subscriptionDetailsFields, headerText, subscription = license.ULTIMATE } = {},
-    slots,
-  ) => {
+  const createComponent = (props = {}, slots) => {
     wrapper = extendedWrapper(
       shallowMount(SubscriptionDetailsCard, {
         propsData: {
-          detailsFields,
-          headerText,
-          subscription,
+          detailsFields: subscriptionDetailsFields,
+          subscription: license.ULTIMATE,
+          ...props,
         },
         stubs: {
           GlCard,
@@ -59,31 +56,40 @@ describe('Subscription Details Card', () => {
     it('passes the details to the table component', () => {
       expect(findSubscriptionDetailsTable().props('details')).toEqual([
         {
-          canCopy: true,
-          label: 'ID',
+          detail: 'id',
           value: 13,
         },
         {
-          canCopy: false,
-          label: 'Plan',
+          detail: 'plan',
           value: 'Ultimate',
         },
         {
-          canCopy: false,
-          label: 'Renews',
+          detail: 'expiresAt',
           value: 'in 1 year',
         },
         {
-          canCopy: false,
-          label: 'Last Sync',
+          detail: 'lastSync',
           value: 'just now',
         },
         {
-          canCopy: false,
-          label: 'Started',
+          detail: 'startsAt',
           value: '11 March 2021',
         },
       ]);
+    });
+  });
+
+  describe('subscription sync state', () => {
+    it('passes true when sync succeeded', () => {
+      createComponent({ syncDidFail: false });
+
+      expect(findSubscriptionDetailsTable().props('syncDidFail')).toBe(false);
+    });
+
+    it('passes true when sync failed', () => {
+      createComponent({ syncDidFail: true });
+
+      expect(findSubscriptionDetailsTable().props('syncDidFail')).toBe(true);
     });
   });
 

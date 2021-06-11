@@ -355,7 +355,7 @@ RSpec.describe API::Search, factory_default: :keep do
         it_behaves_like 'elasticsearch disabled'
       end
 
-      context 'when elasticsearch is enabled', :elastic do
+      context 'when elasticsearch is enabled', :elastic, :clean_gitlab_redis_shared_state do
         before do
           stub_ee_application_setting(elasticsearch_search: true, elasticsearch_indexing: true)
         end
@@ -393,7 +393,7 @@ RSpec.describe API::Search, factory_default: :keep do
         it_behaves_like 'elasticsearch disabled'
       end
 
-      context 'when elasticsearch is enabled', :elastic do
+      context 'when elasticsearch is enabled', :elastic, :clean_gitlab_redis_shared_state do
         before do
           stub_ee_application_setting(elasticsearch_search: true, elasticsearch_indexing: true)
         end
@@ -496,7 +496,7 @@ RSpec.describe API::Search, factory_default: :keep do
         it_behaves_like 'search enabled'
       end
 
-      context 'when elasticsearch is enabled', :elastic do
+      context 'when elasticsearch is enabled', :elastic, :clean_gitlab_redis_shared_state do
         before do
           stub_ee_application_setting(elasticsearch_search: true, elasticsearch_indexing: true)
         end

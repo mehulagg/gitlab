@@ -1,4 +1,3 @@
-import { sortBy } from 'lodash';
 import { FiltersInfo as FiltersInfoCE } from '~/boards/boards_util';
 import { getIdFromGraphQLId } from '~/graphql_shared/utils';
 import { urlParamsToObject } from '~/lib/utils/common_utils';
@@ -44,10 +43,9 @@ export function formatListEpics(listEpics) {
 
   const listData = listEpics.nodes.reduce((map, list) => {
     listItemsCount = list.epicsCount;
-    let sortedEpics = list.epics.edges.map((epicNode) => ({
+    const sortedEpics = list.epics.edges.map((epicNode) => ({
       ...epicNode.node,
     }));
-    sortedEpics = sortBy(sortedEpics, 'relativePosition');
 
     return {
       ...map,

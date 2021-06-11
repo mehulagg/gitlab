@@ -335,15 +335,6 @@ RSpec.describe Ci::BuildDependencies do
       it 'returns both dependencies' do
         is_expected.to contain_exactly(cross_project_dependency, upstream_pipeline_dependency)
       end
-
-      context 'when feature flag `ci_cross_pipeline_artifacts_download` is disabled' do
-        before do
-          stub_feature_flags(ci_cross_pipeline_artifacts_download: false)
-        end
-
-        it { is_expected.to contain_exactly(cross_project_dependency) }
-        it { expect(build_dependencies).to be_valid }
-      end
     end
   end
 end

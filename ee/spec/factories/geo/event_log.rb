@@ -26,10 +26,6 @@ FactoryBot.define do
       hashed_storage_attachments_event factory: :geo_hashed_storage_attachments_event
     end
 
-    trait :lfs_object_deleted_event do
-      lfs_object_deleted_event factory: :geo_lfs_object_deleted_event
-    end
-
     trait :job_artifact_deleted_event do
       job_artifact_deleted_event factory: :geo_job_artifact_deleted_event
     end
@@ -124,18 +120,6 @@ FactoryBot.define do
 
     old_attachments_path { Storage::LegacyProject.new(project).disk_path }
     new_attachments_path { Storage::Hashed.new(project).disk_path }
-  end
-
-  factory :geo_lfs_object_deleted_event, class: 'Geo::LfsObjectDeletedEvent' do
-    lfs_object { association(:lfs_object, :with_file) }
-
-    after(:build, :stub) do |event, _|
-      local_store_path = Pathname.new(LfsObjectUploader.root)
-      relative_path = Pathname.new(event.lfs_object.file.path).relative_path_from(local_store_path)
-
-      event.oid = event.lfs_object.oid
-      event.file_path = relative_path
-    end
   end
 
   factory :geo_job_artifact_deleted_event, class: 'Geo::JobArtifactDeletedEvent' do

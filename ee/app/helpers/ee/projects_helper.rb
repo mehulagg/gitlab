@@ -191,7 +191,8 @@ module EE
           security_dashboard_help_path: help_page_path('user/application_security/security_dashboard/index'),
           auto_fix_documentation: help_page_path('user/application_security/index', anchor: 'auto-fix-merge-requests'),
           auto_fix_mrs_path: project_merge_requests_path(@project, label_name: 'GitLab-auto-fix'),
-          scanners: VulnerabilityScanners::ListService.new(project).execute.to_json
+          scanners: VulnerabilityScanners::ListService.new(project).execute.to_json,
+          can_admin_vulnerability: can?(current_user, :admin_vulnerability, project).to_s
         }.merge!(security_dashboard_pipeline_data(project))
       end
     end

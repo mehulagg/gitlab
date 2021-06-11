@@ -54,7 +54,8 @@ import {
 } from '~/diffs/store/actions';
 import * as types from '~/diffs/store/mutation_types';
 import * as utils from '~/diffs/store/utils';
-import { deprecatedCreateFlash as createFlash } from '~/flash';
+import * as workerUtils from '~/diffs/utils/workers';
+import createFlash from '~/flash';
 import axios from '~/lib/utils/axios_utils';
 import * as commonUtils from '~/lib/utils/common_utils';
 import { mergeUrlParams } from '~/lib/utils/url_utility';
@@ -252,7 +253,10 @@ describe('DiffsStoreActions', () => {
           { type: types.SET_MERGE_REQUEST_DIFFS, payload: diffMetadata.merge_request_diffs },
           { type: types.SET_DIFF_METADATA, payload: noFilesData },
           // Workers are synchronous in Jest environment (see https://gitlab.com/gitlab-org/gitlab/-/merge_requests/58805)
-          { type: types.SET_TREE_DATA, payload: utils.generateTreeList(diffMetadata.diff_files) },
+          {
+            type: types.SET_TREE_DATA,
+            payload: workerUtils.generateTreeList(diffMetadata.diff_files),
+          },
         ],
         [],
         () => {
@@ -293,7 +297,9 @@ describe('DiffsStoreActions', () => {
 
       testAction(fetchCoverageFiles, {}, { endpointCoverage }, [], [], () => {
         expect(createFlash).toHaveBeenCalledTimes(1);
-        expect(createFlash).toHaveBeenCalledWith(expect.stringMatching('Something went wrong'));
+        expect(createFlash).toHaveBeenCalledWith({
+          message: expect.stringMatching('Something went wrong'),
+        });
         done();
       });
     });

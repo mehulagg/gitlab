@@ -146,10 +146,9 @@ RSpec.describe RegistrationsController do
       end
 
       it 'redirects without deleting the account' do
-        expect(DeleteUserWorker).not_to receive(:perform_async)
-
         post :destroy, params: { username: user.username }
 
+        expect(DeleteUserWorker).not_to have_enqueued_sidekiq_job
         expect(flash[:alert]).to eq 'Account could not be deleted. GitLab was unable to verify your identity.'
         expect(response).to have_gitlab_http_status(:see_other)
         expect(response).to redirect_to profile_account_path

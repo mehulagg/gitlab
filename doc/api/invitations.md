@@ -4,7 +4,7 @@ group: Expansion
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
-# Invitations API
+# Invitations API **(FREE)**
 
 Use the Invitations API to send email to users you want to join a group or project, and to list pending
 invitations.
@@ -44,8 +44,10 @@ POST /projects/:id/invitations
 | `invite_source` | string | no | The source of the invitation that starts the member creation process. See [this issue](https://gitlab.com/gitlab-org/gitlab/-/issues/327120). |
 
 ```shell
-curl --request POST --header "PRIVATE-TOKEN: <your_access_token>" --data "email=test@example.com&access_level=30" "https://gitlab.example.com/api/v4/groups/:id/invitations"
-curl --request POST --header "PRIVATE-TOKEN: <your_access_token>" --data "email=test@example.com&access_level=30" "https://gitlab.example.com/api/v4/projects/:id/invitations"
+curl --request POST --header "PRIVATE-TOKEN: <your_access_token>" \
+     --data "email=test@example.com&access_level=30" "https://gitlab.example.com/api/v4/groups/:id/invitations"
+curl --request POST --header "PRIVATE-TOKEN: <your_access_token>" \
+     --data "email=test@example.com&access_level=30" "https://gitlab.example.com/api/v4/projects/:id/invitations"
 ```
 
 Example responses:

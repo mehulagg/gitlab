@@ -43,9 +43,9 @@ RSpec.describe Project, factory_default: :keep do
     it { is_expected.to have_one(:webex_teams_service) }
     it { is_expected.to have_one(:packagist_service) }
     it { is_expected.to have_one(:pushover_service) }
-    it { is_expected.to have_one(:asana_service) }
+    it { is_expected.to have_one(:asana_integration) }
     it { is_expected.to have_many(:boards) }
-    it { is_expected.to have_one(:campfire_service) }
+    it { is_expected.to have_one(:campfire_integration) }
     it { is_expected.to have_one(:datadog_service) }
     it { is_expected.to have_one(:discord_service) }
     it { is_expected.to have_one(:drone_ci_service) }
@@ -54,20 +54,20 @@ RSpec.describe Project, factory_default: :keep do
     it { is_expected.to have_one(:irker_service) }
     it { is_expected.to have_one(:pivotaltracker_service) }
     it { is_expected.to have_one(:flowdock_service) }
-    it { is_expected.to have_one(:assembla_service) }
+    it { is_expected.to have_one(:assembla_integration) }
     it { is_expected.to have_one(:slack_slash_commands_service) }
     it { is_expected.to have_one(:mattermost_slash_commands_service) }
-    it { is_expected.to have_one(:buildkite_service) }
-    it { is_expected.to have_one(:bamboo_service) }
+    it { is_expected.to have_one(:buildkite_integration) }
+    it { is_expected.to have_one(:bamboo_integration) }
     it { is_expected.to have_one(:teamcity_service) }
     it { is_expected.to have_one(:jira_service) }
     it { is_expected.to have_one(:redmine_service) }
     it { is_expected.to have_one(:youtrack_service) }
-    it { is_expected.to have_one(:custom_issue_tracker_service) }
-    it { is_expected.to have_one(:bugzilla_service) }
+    it { is_expected.to have_one(:custom_issue_tracker_integration) }
+    it { is_expected.to have_one(:bugzilla_integration) }
     it { is_expected.to have_one(:ewm_service) }
     it { is_expected.to have_one(:external_wiki_service) }
-    it { is_expected.to have_one(:confluence_service) }
+    it { is_expected.to have_one(:confluence_integration) }
     it { is_expected.to have_one(:project_feature) }
     it { is_expected.to have_one(:project_repository) }
     it { is_expected.to have_one(:container_expiration_policy) }
@@ -2854,6 +2854,16 @@ RSpec.describe Project, factory_default: :keep do
     end
   end
 
+  describe '#mark_primary_write_location' do
+    let(:project) { create(:project) }
+
+    it 'marks the location with project ID' do
+      expect(Gitlab::Database::LoadBalancing::Sticking).to receive(:mark_primary_write_location).with(:project, project.id)
+
+      project.mark_primary_write_location
+    end
+  end
+
   describe '#mark_stuck_remote_mirrors_as_failed!' do
     it 'fails stuck remote mirrors' do
       project = create(:project, :repository, :remote_mirror)
@@ -5301,7 +5311,7 @@ RSpec.describe Project, factory_default: :keep do
     it { expect(project.has_active_services?).to be_falsey }
 
     it 'returns true when a matching service exists' do
-      create(:custom_issue_tracker_service, push_events: true, merge_requests_events: false, project: project)
+      create(:custom_issue_tracker_integration, push_events: true, merge_requests_events: false, project: project)
 
       expect(project.has_active_services?(:merge_request_hooks)).to be_falsey
       expect(project.has_active_services?).to be_truthy
@@ -6919,11 +6929,6 @@ RSpec.describe Project, factory_default: :keep do
     context 'aliases' do
       it 'tag_list returns correct string array' do
         expect(project.tag_list).to match_array(%w[topic1 topic2 topic3])
-      end
-
-      it 'tags returns correct tag records' do
-        expect(project.tags.first.class.name).to eq('ActsAsTaggableOn::Tag')
-        expect(project.tags.map(&:name)).to match_array(%w[topic1 topic2 topic3])
       end
     end
   end

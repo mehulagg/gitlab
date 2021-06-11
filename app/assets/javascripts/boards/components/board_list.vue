@@ -5,6 +5,7 @@ import { mapActions, mapGetters, mapState } from 'vuex';
 import { sortableStart, sortableEnd } from '~/boards/mixins/sortable_default_options';
 import { sprintf, __ } from '~/locale';
 import defaultSortableConfig from '~/sortable/sortable_config';
+import Tracking from '~/tracking';
 import eventHub from '../eventhub';
 import BoardCard from './board_card.vue';
 import BoardNewIssue from './board_new_issue.vue';
@@ -23,6 +24,12 @@ export default {
     GlLoadingIcon,
     GlIntersectionObserver,
   },
+  mixins: [Tracking.mixin()],
+  inject: {
+    canAdminList: {
+      default: false,
+    },
+  },
   props: {
     disabled: {
       type: Boolean,
@@ -35,11 +42,6 @@ export default {
     boardItems: {
       type: Array,
       required: true,
-    },
-    canAdminList: {
-      type: Boolean,
-      required: false,
-      default: false,
     },
   },
   data() {
@@ -111,10 +113,17 @@ export default {
         this.showCount = this.scrollHeight() > Math.ceil(this.listHeight());
       });
     },
-  },
-  created() {
-    eventHub.$on(`toggle-issue-form-${this.list.id}`, this.toggleForm);
-    eventHub.$on(`scroll-board-list-${this.list.id}`, this.scrollToTop);
+    'list.id': {
+      handler(id, oldVal) {
+        if (id) {
+          eventHub.$on(`toggle-issue-form-${this.list.id}`, this.toggleForm);
+          eventHub.$on(`scroll-board-list-${this.list.id}`, this.scrollToTop);
+          eventHub.$off(`toggle-issue-form-${oldVal}`, this.toggleForm);
+          eventHub.$off(`scroll-board-list-${oldVal}`, this.scrollToTop);
+        }
+      },
+      immediate: true,
+    },
   },
   beforeDestroy() {
     eventHub.$off(`toggle-issue-form-${this.list.id}`, this.toggleForm);
@@ -142,19 +151,28 @@ export default {
     },
     onReachingListBottom() {
       if (!this.loadingMore && this.hasNextPage) {
+        this.showCount = true;
         this.loadNextPage();
       }
     },
     handleDragOnStart() {
       sortableStart();
+      this.track('drag_card', { label: 'board' });
     },
     handleDragOnEnd(params) {
       sortableEnd();
-      const { newIndex, oldIndex, from, to, item } = params;
+      const { oldIndex, from, to, item } = params;
+      let { newIndex } = params;
       const { itemId, itemIid, itemPath } = item.dataset;
-      const { children } = to;
+      let { children } = to;
       let moveBeforeId;
       let moveAfterId;
+
+      children = Array.from(children).filter((card) => card.classList.contains('board-card'));
+
+      if (newIndex > children.length) {
+        newIndex = children.length;
+      }
 
       const getItemId = (el) => Number(el.dataset.itemId);
 
@@ -218,6 +236,7 @@ export default {
       :data-board="list.id"
       :data-board-type="list.listType"
       :class="{ 'bg-danger-100': boardItemsSizeExceedsMax }"
+      draggable=".board-card"
       class="board-list gl-w-full gl-h-full gl-list-style-none gl-mb-0 gl-p-2 js-board-list"
       data-testid="tree-root-wrapper"
       @start="handleDragOnStart"
@@ -232,17 +251,17 @@ export default {
         :item="item"
         :disabled="disabled"
       />
-      <li v-if="showCount" class="board-list-count gl-text-center" data-issue-id="-1">
-        <gl-loading-icon
-          v-if="loadingMore"
-          :label="$options.i18n.loadingMoreboardItems"
-          data-testid="count-loading-icon"
-        />
-        <span v-if="showingAllItems">{{ showingAllItemsText }}</span>
-        <gl-intersection-observer v-else @appear="onReachingListBottom">
-          <span>{{ paginatedIssueText }}</span>
-        </gl-intersection-observer>
-      </li>
+      <gl-intersection-observer @appear="onReachingListBottom">
+        <li v-if="showCount" class="board-list-count gl-text-center" data-issue-id="-1">
+          <gl-loading-icon
+            v-if="loadingMore"
+            :label="$options.i18n.loadingMoreboardItems"
+            data-testid="count-loading-icon"
+          />
+          <span v-if="showingAllItems">{{ showingAllItemsText }}</span>
+          <span v-else>{{ paginatedIssueText }}</span>
+        </li>
+      </gl-intersection-observer>
     </component>
   </div>
 </template>

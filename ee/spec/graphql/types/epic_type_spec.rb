@@ -13,7 +13,7 @@ RSpec.describe GitlabSchema.types['Epic'] do
       notes discussions relative_position subscribed participants
       descendant_counts descendant_weight_sum upvotes downvotes
       user_notes_count user_discussions_count health_status current_user_todos
-      award_emoji events
+      award_emoji events ancestors
     ]
   end
 

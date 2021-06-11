@@ -28,6 +28,7 @@ GET /projects/:id/repository/commits
 | `with_stats` | boolean | no | Stats about each commit are added to the response |
 | `first_parent` | boolean | no | Follow only the first parent commit upon seeing a merge commit |
 | `order` | string | no | List commits in order. Possible values: `default`, [`topo`](https://git-scm.com/docs/git-log#Documentation/git-log.txt---topo-order). Defaults to `default`, the commits are shown in reverse chronological order. |
+| `trailers` | boolean | no | Parse and include [Git trailers](https://git-scm.com/docs/git-interpret-trailers) for every commit |
 
 ```shell
 curl --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/projects/5/repository/commits"
@@ -141,7 +142,8 @@ PAYLOAD=$(cat << 'JSON'
 }
 JSON
 )
-curl --request POST --header "PRIVATE-TOKEN: <your_access_token>" --header "Content-Type: application/json" --data "$PAYLOAD" "https://gitlab.example.com/api/v4/projects/1/repository/commits"
+curl --request POST --header "PRIVATE-TOKEN: <your_access_token>" --header "Content-Type: application/json" \
+     --data "$PAYLOAD" "https://gitlab.example.com/api/v4/projects/1/repository/commits"
 ```
 
 Example response:
@@ -308,7 +310,8 @@ Parameters:
 | `message` | string | no | A custom commit message to use for the new commit. [Introduced in GitLab 14.0](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/62481)
 
 ```shell
-curl --request POST --header "PRIVATE-TOKEN: <your_access_token>" --form "branch=master" "https://gitlab.example.com/api/v4/projects/5/repository/commits/master/cherry_pick"
+curl --request POST --header "PRIVATE-TOKEN: <your_access_token>" \
+     --form "branch=master" "https://gitlab.example.com/api/v4/projects/5/repository/commits/master/cherry_pick"
 ```
 
 Example response:
@@ -381,7 +384,8 @@ Parameters:
 | `dry_run` | boolean        | no       | Does not commit any changes. Default is false. [Introduced in GitLab 13.3](https://gitlab.com/gitlab-org/gitlab/-/issues/231032) |
 
 ```shell
-curl --request POST --header "PRIVATE-TOKEN: <your_access_token>" --form "branch=master" "https://gitlab.example.com/api/v4/projects/5/repository/commits/a738f717824ff53aebad8b090c1b79a14f2bd9e8/revert"
+curl --request POST --header "PRIVATE-TOKEN: <your_access_token>" --form "branch=master" \
+     "https://gitlab.example.com/api/v4/projects/5/repository/commits/a738f717824ff53aebad8b090c1b79a14f2bd9e8/revert"
 ```
 
 Example response:
@@ -535,7 +539,9 @@ POST /projects/:id/repository/commits/:sha/comments
 | `line_type` | string  | no  | The line type. Takes `new` or `old` as arguments |
 
 ```shell
-curl --request POST --header "PRIVATE-TOKEN: <your_access_token>" --form "note=Nice picture man\!" --form "path=dudeism.md" --form "line=11" --form "line_type=new" "https://gitlab.example.com/api/v4/projects/17/repository/commits/18f3e63d05582537db6d183d9d557be09e1f90c8/comments"
+curl --request POST --header "PRIVATE-TOKEN: <your_access_token>" \
+     --form "note=Nice picture man\!" --form "path=dudeism.md" --form "line=11" --form "line_type=new" \
+     "https://gitlab.example.com/api/v4/projects/17/repository/commits/18f3e63d05582537db6d183d9d557be09e1f90c8/comments"
 ```
 
 Example response:
@@ -792,6 +798,7 @@ Example response:
       "source_project_id":35,
       "target_project_id":35,
       "labels":[ ],
+      "draft":false,
       "work_in_progress":false,
       "milestone":null,
       "merge_when_pipeline_succeeds":false,

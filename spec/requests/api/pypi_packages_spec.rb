@@ -13,7 +13,7 @@ RSpec.describe API::PypiPackages do
   let_it_be(:personal_access_token) { create(:personal_access_token, user: user) }
   let_it_be(:deploy_token) { create(:deploy_token, read_package_registry: true, write_package_registry: true) }
   let_it_be(:project_deploy_token) { create(:project_deploy_token, deploy_token: deploy_token, project: project) }
-  let_it_be(:job) { create(:ci_build, :running, user: user) }
+  let_it_be(:job) { create(:ci_build, :running, user: user, project: project) }
   let(:headers) { {} }
 
   context 'simple API endpoint' do
@@ -23,6 +23,7 @@ RSpec.describe API::PypiPackages do
 
     describe 'GET /api/v4/groups/:id/-/packages/pypi/simple/:package_name' do
       let(:url) { "/groups/#{group.id}/-/packages/pypi/simple/#{package.name}" }
+      let(:snowplow_gitlab_standard_context) { {} }
 
       it_behaves_like 'pypi simple API endpoint'
       it_behaves_like 'rejects PyPI access with unknown group id'
@@ -53,6 +54,7 @@ RSpec.describe API::PypiPackages do
 
     describe 'GET /api/v4/projects/:id/packages/pypi/simple/:package_name' do
       let(:url) { "/projects/#{project.id}/packages/pypi/simple/#{package.name}" }
+      let(:snowplow_gitlab_standard_context) { { project: project, namespace: project.namespace } }
 
       it_behaves_like 'pypi simple API endpoint'
       it_behaves_like 'rejects PyPI access with unknown project id'
@@ -121,6 +123,7 @@ RSpec.describe API::PypiPackages do
     let(:base_params) { { requires_python: requires_python, version: '1.0.0', name: 'sample-project', sha256_digest: '123' } }
     let(:params) { base_params.merge(content: temp_file(file_name)) }
     let(:send_rewritten_field) { true }
+    let(:snowplow_gitlab_standard_context) { { project: project, namespace: project.namespace, user: user } }
 
     subject do
       workhorse_finalize(
@@ -221,6 +224,7 @@ RSpec.describe API::PypiPackages do
 
     describe 'GET /api/v4/groups/:id/-/packages/pypi/files/:sha256/*file_identifier' do
       let(:url) { "/groups/#{group.id}/-/packages/pypi/files/#{package.package_files.first.file_sha256}/#{package_name}-1.0.0.tar.gz" }
+      let(:snowplow_gitlab_standard_context) { {} }
 
       it_behaves_like 'pypi file download endpoint'
       it_behaves_like 'rejects PyPI access with unknown group id'
@@ -229,6 +233,7 @@ RSpec.describe API::PypiPackages do
 
     describe 'GET /api/v4/projects/:id/packages/pypi/files/:sha256/*file_identifier' do
       let(:url) { "/projects/#{project.id}/packages/pypi/files/#{package.package_files.first.file_sha256}/#{package_name}-1.0.0.tar.gz" }
+      let(:snowplow_gitlab_standard_context) { { project: project, namespace: project.namespace } }
 
       it_behaves_like 'pypi file download endpoint'
       it_behaves_like 'rejects PyPI access with unknown project id'

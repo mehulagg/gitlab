@@ -16,6 +16,7 @@ RSpec.shared_examples "redis_shared_examples" do
   let(:sentinel_port) { 26379 }
   let(:config_with_environment_variable_inside) { "spec/fixtures/config/redis_config_with_env.yml"}
   let(:config_env_variable_url) {"TEST_GITLAB_REDIS_URL"}
+  let(:rails_root) { Dir.mktmpdir('redis_shared_examples') }
 
   before do
     allow(described_class).to receive(:config_file_name).and_return(Rails.root.join(config_file_name).to_s)
@@ -28,8 +29,6 @@ RSpec.shared_examples "redis_shared_examples" do
 
   describe '.config_file_name' do
     subject { described_class.config_file_name }
-
-    let(:rails_root) { Dir.mktmpdir('redis_shared_examples') }
 
     before do
       # Undo top-level stub of config_file_name because we are testing that method now.
@@ -92,6 +91,7 @@ RSpec.shared_examples "redis_shared_examples" do
     subject { described_class.new(rails_env).params }
 
     let(:rails_env) { 'development' }
+    let(:config_file_name) { config_old_format_socket }
 
     it 'withstands mutation' do
       params1 = described_class.params
@@ -153,6 +153,8 @@ RSpec.shared_examples "redis_shared_examples" do
   end
 
   describe '.url' do
+    let(:config_file_name) { config_old_format_socket }
+
     it 'withstands mutation' do
       url1 = described_class.url
       url2 = described_class.url
@@ -201,6 +203,8 @@ RSpec.shared_examples "redis_shared_examples" do
   end
 
   describe '.with' do
+    let(:config_file_name) { config_old_format_socket }
+
     before do
       clear_pool
     end
@@ -230,6 +234,23 @@ RSpec.shared_examples "redis_shared_examples" do
         expect(ConnectionPool).to receive(:new).with(size: 18 + 5).and_call_original
 
         described_class.with { |_redis_shared_example| true }
+      end
+    end
+
+    context 'when there is no config at all' do
+      before do
+        # Undo top-level stub of config_file_name because we are testing that method now.
+        allow(described_class).to receive(:config_file_name).and_call_original
+
+        allow(described_class).to receive(:rails_root).and_return(rails_root)
+      end
+
+      after do
+        FileUtils.rm_rf(rails_root)
+      end
+
+      it 'can run an empty block' do
+        expect { described_class.with { nil } }.not_to raise_error
       end
     end
   end
@@ -288,12 +309,6 @@ RSpec.shared_examples "redis_shared_examples" do
   end
 
   describe '#raw_config_hash' do
-    it 'returns default redis url when no config file is present' do
-      expect(subject).to receive(:fetch_config) { false }
-
-      expect(subject.send(:raw_config_hash)).to eq(url: class_redis_url )
-    end
-
     it 'returns old-style single url config in a hash' do
       expect(subject).to receive(:fetch_config) { test_redis_url }
       expect(subject.send(:raw_config_hash)).to eq(url: test_redis_url)

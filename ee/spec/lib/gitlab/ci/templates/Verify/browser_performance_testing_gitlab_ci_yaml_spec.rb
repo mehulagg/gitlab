@@ -30,6 +30,7 @@ RSpec.describe 'Verify/Browser-Performance.gitlab-ci.yml' do
 
     before do
       stub_ci_pipeline_yaml_file(template)
+      stub_feature_flags(redirect_to_latest_template_verify_browser_performance: false)
       allow_next_instance_of(Ci::BuildScheduleWorker) do |worker|
         allow(worker).to receive(:perform).and_return(true)
       end
@@ -42,7 +43,7 @@ RSpec.describe 'Verify/Browser-Performance.gitlab-ci.yml' do
 
     shared_examples_for 'browser_performance job on tag or branch' do
       it 'by default' do
-        expect(build_names).to include('performance')
+        expect(build_names).to include('browser_performance')
       end
     end
 

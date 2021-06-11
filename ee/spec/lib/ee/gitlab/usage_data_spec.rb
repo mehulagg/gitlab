@@ -79,6 +79,7 @@ RSpec.describe Gitlab::UsageData do
         elasticsearch_enabled
         geo_enabled
         license_trial_ends_on
+        license_billable_users
       ))
     end
 
@@ -107,11 +108,9 @@ RSpec.describe Gitlab::UsageData do
         licenses_list_views
         operations_dashboard_default_dashboard
         operations_dashboard_users_with_projects_added
-        pod_logs_usages_total
         projects_jira_issuelist_active
         projects_mirrored_with_pipelines_enabled
         projects_reporting_ci_cd_back_to_github
-        projects_with_prometheus_alerts
         sast_jobs
         secret_detection_jobs
         status_page_incident_publishes
@@ -125,7 +124,6 @@ RSpec.describe Gitlab::UsageData do
         network_policy_drops
       ))
 
-      expect(count_data[:projects_with_prometheus_alerts]).to eq(Gitlab::UsageData::DEPRECATED_VALUE)
       expect(count_data[:feature_flags]).to eq(1)
       expect(count_data[:status_page_projects]).to eq(1)
       expect(count_data[:status_page_issues]).to eq(1)
@@ -183,6 +181,7 @@ RSpec.describe Gitlab::UsageData do
       expect(subject[:license_add_ons]).to eq(license.add_ons)
       expect(subject[:license_trial]).to eq(license.trial?)
       expect(subject[:license_subscription_id]).to eq(license.subscription_id)
+      expect(subject[:license_billable_users]).to eq(license.daily_billable_users_count)
     end
   end
 
@@ -267,13 +266,11 @@ RSpec.describe Gitlab::UsageData do
 
       expect(described_class.usage_activity_by_stage_configure({})).to include(
         projects_slack_notifications_active: 2,
-        projects_slack_slash_active: 2,
-        projects_with_prometheus_alerts: Gitlab::UsageData::DEPRECATED_VALUE
+        projects_slack_slash_active: 2
       )
       expect(described_class.usage_activity_by_stage_configure(described_class.monthly_time_range_db_params)).to include(
         projects_slack_notifications_active: 1,
-        projects_slack_slash_active: 1,
-        projects_with_prometheus_alerts: Gitlab::UsageData::DEPRECATED_VALUE
+        projects_slack_slash_active: 1
       )
     end
   end
@@ -584,7 +581,7 @@ RSpec.describe Gitlab::UsageData do
         ds_bundler_audit_build = create(:ci_build, :failed, user: user, name: 'retirejs')
         ds_bundler_build = create(:ci_build, name: 'bundler-audit', user: user, commit_id: ds_build.pipeline.id, status: 'success')
         secret_detection_build = create(:ci_build, name: 'secret', user: user, commit_id: ds_build.pipeline.id, status: 'success')
-        cs_build = create(:ci_build, name: 'klar', user: user, status: 'success')
+        cs_build = create(:ci_build, name: 'container-scanning', user: user, status: 'success')
         sast_build = create(:ci_build, name: 'sast', user: user, status: 'success', retried: true)
         create(:security_scan, build: ds_build, scan_type: 'dependency_scanning' )
         create(:security_scan, build: ds_bundler_build, scan_type: 'dependency_scanning')
@@ -774,232 +771,6 @@ RSpec.describe Gitlab::UsageData do
         user_sast_scans: be_within(error_rate).percent_of(2),
         user_secret_detection_scans: be_within(error_rate).percent_of(1)
       )
-    end
-
-    context 'with feature flag: postgres_hll_batch_counting is disabled' do
-      before do
-        stub_feature_flags(postgres_hll_batch_counting: false)
-      end
-
-      it 'does not count users who have run scans' do
-        for_defined_days_back do
-          create(:ee_ci_build, :api_fuzzing, :success, user: user3)
-          create(:ee_ci_build, :dast, :success, user: user2)
-          create(:ee_ci_build, :container_scanning, :success, user: user3)
-          create(:ee_ci_build, :coverage_fuzzing, :success, user: user)
-          create(:ee_ci_build, :dependency_scanning, :success, user: user)
-          create(:ee_ci_build, :sast, :success, user: user2)
-          create(:ee_ci_build, :secret_detection, :success, user: user)
-          create(:ee_ci_build, :secret_detection, :running, user: user2)
-          create(:ee_ci_build, :secret_detection, :failed, user: user3)
-        end
-
-        expect(described_class.usage_activity_by_stage_secure(described_class.monthly_time_range_db_params)).not_to include(
-          :user_api_fuzzing_scans,
-          :user_container_scanning_scans,
-          :user_coverage_fuzzing_scans,
-          :user_dast_scans,
-          :user_dependency_scanning_scans,
-          :user_sast_scans,
-          :user_secret_detection_scans
-        )
-      end
-
-      it 'includes accurate usage_activity_by_stage data' do
-        expect(described_class.usage_activity_by_stage_secure(described_class.monthly_time_range_db_params)).to include(
-          user_preferences_group_overview_security_dashboard: 3,
-          user_container_scanning_jobs: 1,
-          user_api_fuzzing_jobs: 1,
-          user_api_fuzzing_dnd_jobs: 1,
-          user_coverage_fuzzing_jobs: 1,
-          user_dast_jobs: 1,
-          user_dependency_scanning_jobs: 1,
-          user_license_management_jobs: 1,
-          user_sast_jobs: 1,
-          user_secret_detection_jobs: 1,
-          sast_pipeline: 0,
-          sast_scans: 0,
-          dependency_scanning_pipeline: 0,
-          dependency_scanning_scans: 0,
-          container_scanning_pipeline: 0,
-          container_scanning_scans: 0,
-          dast_pipeline: 0,
-          dast_scans: 0,
-          secret_detection_pipeline: 0,
-          secret_detection_scans: 0,
-          coverage_fuzzing_pipeline: 0,
-          coverage_fuzzing_scans: 0,
-          api_fuzzing_pipeline: 0,
-          api_fuzzing_scans: 0,
-          user_unique_users_all_secure_scanners: 1
-        )
-      end
-
-      it 'counts pipelines that have security jobs' do
-        for_defined_days_back do
-          ds_build = create(:ci_build, name: 'retirejs', user: user, status: 'success')
-          ds_bundler_audit_build = create(:ci_build, :failed, user: user, name: 'retirejs')
-          ds_bundler_build = create(:ci_build, name: 'bundler-audit', user: user, commit_id: ds_build.pipeline.id, status: 'success')
-          secret_detection_build = create(:ci_build, name: 'secret', user: user, commit_id: ds_build.pipeline.id, status: 'success')
-          cs_build = create(:ci_build, name: 'klar', user: user, status: 'success')
-          sast_build = create(:ci_build, name: 'sast', user: user, status: 'success', retried: true)
-          create(:security_scan, build: ds_build, scan_type: 'dependency_scanning' )
-          create(:security_scan, build: ds_bundler_build, scan_type: 'dependency_scanning')
-          create(:security_scan, build: secret_detection_build, scan_type: 'secret_detection')
-          create(:security_scan, build: cs_build, scan_type: 'container_scanning')
-          create(:security_scan, build: sast_build, scan_type: 'sast')
-          create(:security_scan, build: ds_bundler_audit_build, scan_type: 'dependency_scanning')
-        end
-
-        expect(described_class.usage_activity_by_stage_secure({})).to include(
-          user_preferences_group_overview_security_dashboard: 3,
-          user_container_scanning_jobs: 1,
-          user_dast_jobs: 1,
-          user_dependency_scanning_jobs: 1,
-          user_license_management_jobs: 1,
-          user_sast_jobs: 1,
-          user_secret_detection_jobs: 1,
-          user_unique_users_all_secure_scanners: 1,
-          sast_scans: 0,
-          dependency_scanning_scans: 4,
-          container_scanning_scans: 2,
-          dast_scans: 0,
-          secret_detection_scans: 2,
-          coverage_fuzzing_scans: 0
-        )
-
-        expect(described_class.usage_activity_by_stage_secure(described_class.monthly_time_range_db_params)).to include(
-          user_preferences_group_overview_security_dashboard: 3,
-          user_api_fuzzing_jobs: 1,
-          user_api_fuzzing_dnd_jobs: 1,
-          user_container_scanning_jobs: 1,
-          user_coverage_fuzzing_jobs: 1,
-          user_dast_jobs: 1,
-          user_dependency_scanning_jobs: 1,
-          user_license_management_jobs: 1,
-          user_sast_jobs: 1,
-          user_secret_detection_jobs: 1,
-          sast_pipeline: 0,
-          dependency_scanning_pipeline: 1,
-          container_scanning_pipeline: 1,
-          dast_pipeline: 0,
-          secret_detection_pipeline: 1,
-          coverage_fuzzing_pipeline: 0,
-          api_fuzzing_pipeline: 0,
-          user_unique_users_all_secure_scanners: 1,
-          sast_scans: 0,
-          dependency_scanning_scans: 2,
-          container_scanning_scans: 1,
-          dast_scans: 0,
-          secret_detection_scans: 1,
-          coverage_fuzzing_scans: 0,
-          api_fuzzing_scans: 0
-        )
-      end
-
-      it 'counts unique users correctly across multiple scanners' do
-        for_defined_days_back do
-          create(:ci_build, name: 'sast', user: user2)
-          create(:ci_build, name: 'dast', user: user2)
-          create(:ci_build, name: 'dast', user: user3)
-        end
-
-        expect(described_class.usage_activity_by_stage_secure(described_class.monthly_time_range_db_params)).to include(
-          user_preferences_group_overview_security_dashboard: 3,
-          user_api_fuzzing_jobs: 1,
-          user_api_fuzzing_dnd_jobs: 1,
-          user_container_scanning_jobs: 1,
-          user_coverage_fuzzing_jobs: 1,
-          user_dast_jobs: 3,
-          user_dependency_scanning_jobs: 1,
-          user_license_management_jobs: 1,
-          user_sast_jobs: 2,
-          user_secret_detection_jobs: 1,
-          sast_pipeline: 0,
-          sast_scans: 0,
-          dependency_scanning_pipeline: 0,
-          dependency_scanning_scans: 0,
-          container_scanning_pipeline: 0,
-          container_scanning_scans: 0,
-          dast_pipeline: 0,
-          dast_scans: 0,
-          secret_detection_pipeline: 0,
-          secret_detection_scans: 0,
-          coverage_fuzzing_pipeline: 0,
-          coverage_fuzzing_scans: 0,
-          api_fuzzing_pipeline: 0,
-          api_fuzzing_scans: 0,
-          user_unique_users_all_secure_scanners: 3
-        )
-      end
-
-      it 'combines license_scanning into license_management' do
-        for_defined_days_back do
-          create(:ci_build, name: 'license_scanning', user: user)
-        end
-
-        expect(described_class.usage_activity_by_stage_secure(described_class.monthly_time_range_db_params)).to include(
-          user_preferences_group_overview_security_dashboard: 3,
-          user_api_fuzzing_jobs: 1,
-          user_api_fuzzing_dnd_jobs: 1,
-          user_container_scanning_jobs: 1,
-          user_coverage_fuzzing_jobs: 1,
-          user_dast_jobs: 1,
-          user_dependency_scanning_jobs: 1,
-          user_license_management_jobs: 2,
-          user_sast_jobs: 1,
-          user_secret_detection_jobs: 1,
-          sast_pipeline: 0,
-          sast_scans: 0,
-          dependency_scanning_pipeline: 0,
-          dependency_scanning_scans: 0,
-          container_scanning_pipeline: 0,
-          container_scanning_scans: 0,
-          dast_pipeline: 0,
-          dast_scans: 0,
-          secret_detection_pipeline: 0,
-          secret_detection_scans: 0,
-          coverage_fuzzing_pipeline: 0,
-          coverage_fuzzing_scans: 0,
-          api_fuzzing_pipeline: 0,
-          api_fuzzing_scans: 0,
-          user_unique_users_all_secure_scanners: 1
-        )
-      end
-
-      it 'has to resort to 0 for counting license scan' do
-        allow(Gitlab::Database::BatchCount).to receive(:batch_distinct_count).and_raise(ActiveRecord::StatementInvalid)
-        allow(Gitlab::Database::BatchCount).to receive(:batch_count).and_raise(ActiveRecord::StatementInvalid)
-        allow(::Ci::Build).to receive(:distinct_count_by).and_raise(ActiveRecord::StatementInvalid)
-
-        expect(described_class.usage_activity_by_stage_secure(described_class.monthly_time_range_db_params)).to eq(
-          user_preferences_group_overview_security_dashboard: -1,
-          user_api_fuzzing_jobs: -1,
-          user_api_fuzzing_dnd_jobs: -1,
-          user_container_scanning_jobs: -1,
-          user_coverage_fuzzing_jobs: -1,
-          user_dast_jobs: -1,
-          user_dependency_scanning_jobs: -1,
-          user_license_management_jobs: -1,
-          user_sast_jobs: -1,
-          user_secret_detection_jobs: -1,
-          sast_pipeline: -1,
-          sast_scans: -1,
-          dependency_scanning_pipeline: -1,
-          dependency_scanning_scans: -1,
-          container_scanning_pipeline: -1,
-          container_scanning_scans: -1,
-          dast_pipeline: -1,
-          dast_scans: -1,
-          secret_detection_pipeline: -1,
-          secret_detection_scans: -1,
-          coverage_fuzzing_pipeline: -1,
-          coverage_fuzzing_scans: -1,
-          api_fuzzing_pipeline: -1,
-          api_fuzzing_scans: -1,
-          user_unique_users_all_secure_scanners: -1
-        )
-      end
     end
   end
 

@@ -26,10 +26,10 @@ const PRIVATE_VISIBILITY = 'private';
 const INTERNAL_VISIBILITY = 'internal';
 const PUBLIC_VISIBILITY = 'public';
 
-const ALLOWED_VISIBILITY = {
-  private: [PRIVATE_VISIBILITY],
-  internal: [INTERNAL_VISIBILITY, PRIVATE_VISIBILITY],
-  public: [INTERNAL_VISIBILITY, PRIVATE_VISIBILITY, PUBLIC_VISIBILITY],
+const VISIBILITY_LEVEL = {
+  [PRIVATE_VISIBILITY]: 0,
+  [INTERNAL_VISIBILITY]: 10,
+  [PUBLIC_VISIBILITY]: 20,
 };
 
 const initFormField = ({ value, required = true, skipValidation = false }) => ({
@@ -111,9 +111,7 @@ export default {
           required: false,
           skipValidation: true,
         }),
-        visibility: initFormField({
-          value: this.projectVisibility,
-        }),
+        visibility: initFormField({ value: this.projectVisibility }),
       },
     };
     return {
@@ -126,14 +124,23 @@ export default {
     projectUrl() {
       return `${gon.gitlab_url}/`;
     },
-    projectAllowedVisibility() {
-      return ALLOWED_VISIBILITY[this.projectVisibility];
+    projectVisibilityLevel() {
+      return VISIBILITY_LEVEL[this.projectVisibility];
     },
-    namespaceAllowedVisibility() {
-      return (
-        ALLOWED_VISIBILITY[this.form.fields.namespace.value?.visibility] ||
-        ALLOWED_VISIBILITY[PUBLIC_VISIBILITY]
-      );
+    namespaceVisibilityLevel() {
+      const visibility = this.form.fields.namespace.value?.visibility || PUBLIC_VISIBILITY;
+      return VISIBILITY_LEVEL[visibility];
+    },
+    visibilityLevelCap() {
+      return Math.min(this.projectVisibilityLevel, this.namespaceVisibilityLevel);
+    },
+    allowedVisibilityLevels() {
+      return Object.entries(VISIBILITY_LEVEL).reduce((levels, [levelName, levelValue]) => {
+        if (levelValue <= this.visibilityLevelCap) {
+          levels.push(levelName);
+        }
+        return levels;
+      }, []);
     },
     visibilityLevels() {
       return [
@@ -165,12 +172,8 @@ export default {
   },
   watch: {
     // eslint-disable-next-line func-names
-    'form.fields.namespace.value': function (newVal) {
-      const { visibility } = newVal;
-
-      if (this.projectAllowedVisibility.includes(visibility)) {
-        this.form.fields.visibility.value = visibility;
-      }
+    'form.fields.namespace.value': function () {
+      this.form.fields.visibility.value = PRIVATE_VISIBILITY;
     },
     // eslint-disable-next-line func-names
     'form.fields.name.value': function (newVal) {
@@ -185,11 +188,8 @@ export default {
       const { data } = await axios.get(this.endpoint);
       this.namespaces = data.namespaces;
     },
-    isVisibilityLevelDisabled(visibilityLevel) {
-      return !(
-        this.projectAllowedVisibility.includes(visibilityLevel) &&
-        this.namespaceAllowedVisibility.includes(visibilityLevel)
-      );
+    isVisibilityLevelDisabled(visibility) {
+      return !this.allowedVisibilityLevels.includes(visibility);
     },
     async onSubmit() {
       this.form.showValidation = true;

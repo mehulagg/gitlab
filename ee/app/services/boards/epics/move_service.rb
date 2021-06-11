@@ -20,6 +20,11 @@ module Boards
         ::Label.ids_on_epic_board(board.id)
       end
 
+      override :reposition_params
+      def reposition_params(reposition_ids)
+        super.merge(list_id: params[:to_list_id], board_group: parent)
+      end
+
       def reposition_parent
         { board_id: board.id }
       end

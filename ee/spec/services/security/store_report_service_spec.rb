@@ -15,17 +15,13 @@ RSpec.describe Security::StoreReportService, '#execute' do
 
   subject { described_class.new(pipeline, report).execute }
 
-  where(:vulnerability_finding_signatures_enabled, :optimize_sql_query_for_security_report_ff) do
-    true  | true
-    true  | false
-    false | true
-    false | false
+  where(:vulnerability_finding_signatures_enabled) do
+    [true, false]
   end
 
   with_them do
     before do
       stub_feature_flags(vulnerability_finding_tracking_signatures: vulnerability_finding_signatures_enabled)
-      stub_feature_flags(optimize_sql_query_for_security_report: optimize_sql_query_for_security_report_ff)
       stub_licensed_features(
         sast: true,
         dependency_scanning: true,
@@ -675,7 +671,6 @@ RSpec.describe Security::StoreReportService, '#execute' do
       stub_feature_flags(
         vulnerability_finding_tracking_signatures: false
       )
-      stub_feature_flags(optimize_sql_query_for_security_report: true)
 
       expect do
         expect do

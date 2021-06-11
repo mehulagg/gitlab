@@ -1,15 +1,16 @@
 ---
 key_path: usage_activity_by_stage_monthly.manage.ldap_admin_sync_enabled
-description:
+description: Whether LDAP admin sync is enabled
 product_section: dev
-product_stage:
-product_group: group::manage
-product_category:
+product_stage: manage
+product_group: group::access
+product_category: authentication_and_authorization
 value_type: boolean
 status: data_available
 time_frame: none
 data_source: system
 distribution:
 - ee
-tier: []
-skip_validation: true
+tier: 
+- premium
+- ultimate

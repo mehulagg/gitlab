@@ -63,7 +63,9 @@ describe('EE DiffsStoreActions', () => {
 
       testAction(fetchCodequality, {}, { endpoint }, [], [], () => {
         expect(createFlash).toHaveBeenCalledTimes(1);
-        expect(createFlash).toHaveBeenCalledWith(expect.stringMatching('Something went wrong'));
+        expect(createFlash).toHaveBeenCalledWith({
+          message: 'Something went wrong on our end while loading the code quality diff.',
+        });
         done();
       });
     });

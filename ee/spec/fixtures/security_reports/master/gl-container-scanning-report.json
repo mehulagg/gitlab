@@ -10,8 +10,8 @@
       "confidence": "Unknown",
       "solution": "Upgrade glibc from 2.24-11+deb9u3 to 2.24-11+deb9u4",
       "scanner": {
-        "id": "klar",
-        "name": "klar"
+        "id": "trivy",
+        "name": "trivy"
       },
       "location": {
         "dependency": {
@@ -46,8 +46,8 @@
       "confidence": "Unknown",
       "solution": "Upgrade glibc from 2.24-11+deb9u3 to 2.24-11+deb9u4",
       "scanner": {
-        "id": "klar",
-        "name": "klar"
+        "id": "trivy",
+        "name": "trivy"
       },
       "location": {
         "dependency": {
@@ -81,8 +81,8 @@
       "severity": "High",
       "confidence": "Unknown",
       "scanner": {
-        "id": "klar",
-        "name": "klar"
+        "id": "trivy",
+        "name": "trivy"
       },
       "location": {
         "dependency": {
@@ -116,8 +116,8 @@
       "severity": "Medium",
       "confidence": "Unknown",
       "scanner": {
-        "id": "klar",
-        "name": "klar"
+        "id": "trivy",
+        "name": "trivy"
       },
       "location": {
         "dependency": {
@@ -151,8 +151,8 @@
       "severity": "Low",
       "confidence": "Unknown",
       "scanner": {
-        "id": "klar",
-        "name": "klar"
+        "id": "trivy",
+        "name": "trivy"
       },
       "location": {
         "dependency": {
@@ -186,8 +186,8 @@
       "severity": "Low",
       "confidence": "Unknown",
       "scanner": {
-        "id": "klar",
-        "name": "klar"
+        "id": "trivy",
+        "name": "trivy"
       },
       "location": {
         "dependency": {
@@ -221,8 +221,8 @@
       "severity": "Unknown",
       "confidence": "Unknown",
       "scanner": {
-        "id": "klar",
-        "name": "klar"
+        "id": "trivy",
+        "name": "trivy"
       },
       "location": {
         "dependency": {
@@ -257,8 +257,8 @@
       "confidence": "Unknown",
       "solution": "Upgrade perl from 5.24.1-3+deb9u3 to 5.24.1-3+deb9u5",
       "scanner": {
-        "id": "klar",
-        "name": "klar"
+        "id": "trivy",
+        "name": "trivy"
       },
       "location": {
         "dependency": {
@@ -288,9 +288,9 @@
   "remediations": [],
   "scan": {
     "scanner": {
-      "id": "clair",
-      "name": "Clair",
-      "url": "https://github.com/coreos/clair",
+      "id": "trivy",
+      "name": "Trivy",
+      "url": "https://github.com/aquasecurity/trivy",
       "vendor": {
         "name": "GitLab"
       },

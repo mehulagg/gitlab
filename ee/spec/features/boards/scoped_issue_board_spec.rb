@@ -116,7 +116,7 @@ RSpec.describe 'Scoped issue boards', :js do
 
           page.within('.labels') do
             click_button 'Edit'
-            page.within('.dropdown') do
+            page.within('.labels-select-contents-list') do
               expect(page).to have_content(group_label.title)
               expect(page).not_to have_content(project_label.title)
             end
@@ -358,7 +358,7 @@ RSpec.describe 'Scoped issue boards', :js do
 
             page.within('.labels') do
               click_button 'Edit'
-              page.within('.dropdown') do
+              page.within('.labels-select-contents-list') do
                 expect(page).to have_content(group_label.title)
                 expect(page).not_to have_content(project_label.title)
               end

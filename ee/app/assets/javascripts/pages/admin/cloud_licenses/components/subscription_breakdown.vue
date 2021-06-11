@@ -5,11 +5,11 @@ import {
   enterActivationCode,
   licensedToHeaderText,
   manageSubscriptionButtonText,
-  notificationType,
+  subscriptionSyncStatus,
   removeLicense,
   removeLicenseConfirm,
   subscriptionDetailsHeaderText,
-  subscriptionType,
+  subscriptionTypes,
   syncSubscriptionButtonText,
   uploadLicense,
 } from '../constants';
@@ -63,7 +63,8 @@ export default {
     return {
       hasAsyncActivity: false,
       licensedToFields,
-      notification: null,
+      shouldShowNotifications: false,
+      subscriptionSyncStatus: null,
       subscriptionDetailsFields,
     };
   },
@@ -75,10 +76,10 @@ export default {
       return this.subscriptionSyncPath && this.isCloudType;
     },
     canUploadLicense() {
-      return this.licenseUploadPath && this.isLegacyType;
+      return this.licenseUploadPath && this.isLicenseFileType;
     },
     canRemoveLicense() {
-      return this.licenseRemovePath && this.isLegacyType;
+      return this.licenseRemovePath && this.isLicenseFileType;
     },
     hasSubscription() {
       return Boolean(Object.keys(this.subscription).length);
@@ -87,10 +88,10 @@ export default {
       return Boolean(this.subscriptionList.length);
     },
     isCloudType() {
-      return this.subscription.type === subscriptionType.CLOUD;
+      return this.subscription.type === subscriptionTypes.CLOUD;
     },
-    isLegacyType() {
-      return this.subscription.type === subscriptionType.LEGACY;
+    isLicenseFileType() {
+      return this.subscription.type === subscriptionTypes.LICENSE_FILE;
     },
     shouldShowFooter() {
       return (
@@ -103,23 +104,27 @@ export default {
     subscriptionHistory() {
       return this.hasSubscriptionHistory ? this.subscriptionList : [this.subscription];
     },
+    syncDidFail() {
+      return this.subscriptionSyncStatus === subscriptionSyncStatus.SYNC_FAILURE;
+    },
   },
   methods: {
     didDismissSuccessAlert() {
-      this.notification = null;
+      this.shouldShowNotifications = false;
     },
     syncSubscription() {
       this.hasAsyncActivity = true;
-      this.notification = null;
+      this.shouldShowNotifications = false;
       axios
         .post(this.subscriptionSyncPath)
         .then(() => {
-          this.notification = notificationType.SYNC_SUCCESS;
+          this.subscriptionSyncStatus = subscriptionSyncStatus.SYNC_SUCCESS;
         })
         .catch(() => {
-          this.notification = notificationType.SYNC_FAILURE;
+          this.subscriptionSyncStatus = subscriptionSyncStatus.SYNC_FAILURE;
         })
         .finally(() => {
+          this.shouldShowNotifications = true;
           this.hasAsyncActivity = false;
         });
     },
@@ -131,9 +136,9 @@ export default {
   <div>
     <subscription-activation-modal v-if="hasSubscription" :modal-id="$options.modal.id" />
     <subscription-sync-notifications
-      v-if="notification"
+      v-if="shouldShowNotifications"
       class="mb-4"
-      :notification="notification"
+      :sync-status="subscriptionSyncStatus"
       @success-alert-dismissed="didDismissSuccessAlert"
     />
     <section class="row gl-mb-5">
@@ -142,6 +147,7 @@ export default {
           :details-fields="subscriptionDetailsFields"
           :header-text="$options.i18n.subscriptionDetailsHeaderText"
           :subscription="subscription"
+          :sync-did-fail="syncDidFail"
         >
           <template v-if="shouldShowFooter" #footer>
             <gl-button

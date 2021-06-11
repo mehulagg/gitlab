@@ -40,10 +40,6 @@ module Geo
       object_type == :job_artifact
     end
 
-    def lfs?
-      object_type == :lfs
-    end
-
     # This is called by LogHelpers to build json log with context info
     #
     # @see ::Gitlab::Geo::LogHelpers

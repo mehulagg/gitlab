@@ -2,6 +2,7 @@ import { GlEmptyState, GlLoadingIcon, GlTable } from '@gitlab/ui';
 import { shallowMount, mount } from '@vue/test-utils';
 import StageTable from 'ee/analytics/cycle_analytics/components/stage_table.vue';
 import { PAGINATION_SORT_FIELD_DURATION } from 'ee/analytics/cycle_analytics/constants';
+import { mockTracking, unmockTracking } from 'helpers/tracking_helper';
 import { extendedWrapper } from 'helpers/vue_test_utils_helper';
 import {
   stagingEvents,
@@ -15,6 +16,7 @@ import {
 } from '../mock_data';
 
 let wrapper = null;
+let trackingSpy = null;
 
 const noDataSvgPath = 'path/to/no/data';
 const emptyStateMessage = 'Too much data';
@@ -281,6 +283,12 @@ describe('StageTable', () => {
   describe('Pagination', () => {
     beforeEach(() => {
       wrapper = createComponent();
+      trackingSpy = mockTracking(undefined, wrapper.element, jest.spyOn);
+    });
+
+    afterEach(() => {
+      unmockTracking();
+      wrapper.destroy();
     });
 
     it('will display the pagination component', () => {
@@ -292,6 +300,12 @@ describe('StageTable', () => {
       await wrapper.vm.$nextTick();
 
       expect(wrapper.emitted('handleUpdatePagination')[0]).toEqual([{ page: 2 }]);
+    });
+
+    it('clicking prev or next will send tracking information', () => {
+      findPagination().vm.$emit('input', 2);
+
+      expect(trackingSpy).toHaveBeenCalledWith(undefined, 'click_button', { label: 'pagination' });
     });
 
     describe('with `hasNextPage=false', () => {
@@ -306,15 +320,32 @@ describe('StageTable', () => {
   });
 
   describe('Sorting', () => {
+    const triggerTableSort = (sortDesc = true) =>
+      findTable().vm.$emit('sort-changed', {
+        sortBy: PAGINATION_SORT_FIELD_DURATION,
+        sortDesc,
+      });
+
     beforeEach(() => {
       wrapper = createComponent();
+      trackingSpy = mockTracking(undefined, wrapper.element, jest.spyOn);
+    });
+
+    afterEach(() => {
+      unmockTracking();
+      wrapper.destroy();
+    });
+
+    it('clicking a table column will send tracking information', () => {
+      triggerTableSort();
+
+      expect(trackingSpy).toHaveBeenCalledWith(undefined, 'click_button', {
+        label: 'sort_duration_desc',
+      });
     });
 
     it('clicking a table column will update the sort field', () => {
-      findTable().vm.$emit('sort-changed', {
-        sortBy: PAGINATION_SORT_FIELD_DURATION,
-        sortDesc: true,
-      });
+      triggerTableSort();
 
       expect(wrapper.emitted('handleUpdatePagination')[0]).toEqual([
         {
@@ -325,10 +356,7 @@ describe('StageTable', () => {
     });
 
     it('with sortDesc=false will toggle the direction field', async () => {
-      findTable().vm.$emit('sort-changed', {
-        sortBy: PAGINATION_SORT_FIELD_DURATION,
-        sortDesc: false,
-      });
+      triggerTableSort(false);
 
       expect(wrapper.emitted('handleUpdatePagination')[0]).toEqual([
         {

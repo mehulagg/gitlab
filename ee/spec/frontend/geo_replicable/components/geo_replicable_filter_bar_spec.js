@@ -1,13 +1,14 @@
-import { GlDropdown, GlDropdownItem, GlSearchBoxByType, GlButton } from '@gitlab/ui';
-import { createLocalVue, shallowMount } from '@vue/test-utils';
+import { GlDropdown, GlDropdownItem, GlSearchBoxByType, GlButton, GlModal } from '@gitlab/ui';
+import { shallowMount } from '@vue/test-utils';
+import Vue from 'vue';
 import Vuex from 'vuex';
 import GeoReplicableFilterBar from 'ee/geo_replicable/components/geo_replicable_filter_bar.vue';
-import { DEFAULT_SEARCH_DELAY } from 'ee/geo_replicable/constants';
+import { DEFAULT_SEARCH_DELAY, RESYNC_MODAL_ID } from 'ee/geo_replicable/constants';
 import { getStoreConfig } from 'ee/geo_replicable/store';
+import { createMockDirective, getBinding } from 'helpers/vue_mock_directive';
 import { MOCK_REPLICABLE_TYPE } from '../mock_data';
 
-const localVue = createLocalVue();
-localVue.use(Vuex);
+Vue.use(Vuex);
 
 describe('GeoReplicableFilterBar', () => {
   let wrapper;
@@ -25,8 +26,10 @@ describe('GeoReplicableFilterBar', () => {
       actions: actionSpies,
     });
     wrapper = shallowMount(GeoReplicableFilterBar, {
-      localVue,
       store: fakeStore,
+      directives: {
+        GlModalDirective: createMockDirective(),
+      },
     });
   };
 
@@ -35,11 +38,12 @@ describe('GeoReplicableFilterBar', () => {
   });
 
   const findNavContainer = () => wrapper.find('nav');
-  const findGlDropdown = () => findNavContainer().find(GlDropdown);
-  const findGlDropdownItems = () => findNavContainer().findAll(GlDropdownItem);
+  const findGlDropdown = () => findNavContainer().findComponent(GlDropdown);
+  const findGlDropdownItems = () => findNavContainer().findAllComponents(GlDropdownItem);
   const findDropdownItemsText = () => findGlDropdownItems().wrappers.map((w) => w.text());
-  const findGlSearchBox = () => findNavContainer().find(GlSearchBoxByType);
-  const findGlButton = () => findNavContainer().find(GlButton);
+  const findGlSearchBox = () => findNavContainer().findComponent(GlSearchBoxByType);
+  const findGlButton = () => findNavContainer().findComponent(GlButton);
+  const findGlModal = () => findNavContainer().findComponent(GlModal);
 
   describe('template', () => {
     beforeEach(() => {
@@ -47,11 +51,11 @@ describe('GeoReplicableFilterBar', () => {
     });
 
     it('renders nav container always', () => {
-      expect(findNavContainer().exists()).toBeTruthy();
+      expect(findNavContainer().exists()).toBe(true);
     });
 
     it('renders dropdown always', () => {
-      expect(findGlDropdown().exists()).toBeTruthy();
+      expect(findGlDropdown().exists()).toBe(true);
     });
 
     describe('Filter options', () => {
@@ -100,11 +104,23 @@ describe('GeoReplicableFilterBar', () => {
 
     describe('Re-sync all button', () => {
       it('renders always', () => {
-        expect(findGlButton().exists()).toBeTruthy();
+        expect(findGlButton().exists()).toBe(true);
       });
 
-      it('calls initiateAllReplicableSyncs when clicked', () => {
-        findGlButton().vm.$emit('click');
+      it('triggers GlModal', () => {
+        const binding = getBinding(findGlButton().element, 'gl-modal-directive');
+
+        expect(binding.value).toBe(RESYNC_MODAL_ID);
+      });
+    });
+
+    describe('GlModal', () => {
+      it('renders always', () => {
+        expect(findGlModal().exists()).toBe(true);
+      });
+
+      it('calls initiateAllReplicableSyncs when primary action is emitted', () => {
+        findGlModal().vm.$emit('primary');
         expect(actionSpies.initiateAllReplicableSyncs).toHaveBeenCalled();
       });
     });

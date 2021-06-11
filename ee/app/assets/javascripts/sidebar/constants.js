@@ -1,5 +1,10 @@
 import { IssuableType } from '~/issue_show/constants';
 import { s__, __ } from '~/locale';
+import {
+  IssuableAttributeType as IssuableAttributeTypeFoss,
+  IssuableAttributeState as IssuableAttributeStateFoss,
+  issuableAttributesQueries as issuableAttributesQueriesFoss,
+} from '~/sidebar/constants';
 import groupEpicsQuery from './queries/group_epics.query.graphql';
 import groupIterationsQuery from './queries/group_iterations.query.graphql';
 import projectIssueEpicMutation from './queries/project_issue_epic.mutation.graphql';
@@ -95,16 +100,19 @@ const epicsQueries = {
 };
 
 export const IssuableAttributeType = {
+  ...IssuableAttributeTypeFoss,
   Iteration: 'iteration',
   Epic: 'epic',
 };
 
 export const IssuableAttributeState = {
+  ...IssuableAttributeStateFoss,
   [IssuableAttributeType.Iteration]: 'opened',
   [IssuableAttributeType.Epic]: 'opened',
 };
 
 export const issuableAttributesQueries = {
+  ...issuableAttributesQueriesFoss,
   [IssuableAttributeType.Iteration]: {
     current: issuableIterationQueries,
     list: iterationsQueries,
