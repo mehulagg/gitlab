@@ -95,6 +95,9 @@ export default {
       }
       return __('Blocked issue');
     },
+    assignees() {
+      return this.issue.assignees.filter((_, index) => this.shouldRenderAssignee(index));
+    },
   },
   methods: {
     isIndexLessThanlimit(index) {
@@ -181,10 +184,20 @@ export default {
       </template>
     </div>
     <div
-      class="board-card-footer gl-display-flex gl-justify-content-space-between gl-align-items-flex-end"
+      class="
+        board-card-footer
+        gl-display-flex gl-justify-content-space-between gl-align-items-flex-end
+      "
     >
       <div
-        class="gl-display-flex align-items-start flex-wrap-reverse board-card-number-container gl-overflow-hidden js-board-card-number-container"
+        class="
+          gl-display-flex
+          align-items-start
+          flex-wrap-reverse
+          board-card-number-container
+          gl-overflow-hidden
+          js-board-card-number-container
+        "
       >
         <span
           v-if="issue.referencePath"
@@ -215,8 +228,7 @@ export default {
       </div>
       <div class="board-card-assignee gl-display-flex">
         <user-avatar-link
-          v-for="(assignee, index) in issue.assignees"
-          v-if="shouldRenderAssignee(index)"
+          v-for="assignee in assignees"
           :key="assignee.id"
           :link-href="assigneeUrl(assignee)"
           :img-alt="avatarUrlTitle(assignee)"

@@ -70,6 +70,9 @@ export default {
         ? this.getNotePositionStyle(this.movingNoteNewPosition)
         : this.getNotePositionStyle(this.currentCommentForm);
     },
+    visibleNotes() {
+      return this.notes.filter((note) => note.resolvedDiscussionsExpanded || !note.resolved);
+    },
   },
   methods: {
     setNewNoteCoordinates({ x, y }) {
@@ -266,14 +269,17 @@ export default {
       type="button"
       role="button"
       :aria-label="$options.i18n.newCommentButtonLabel"
-      class="gl-absolute gl-w-full gl-h-full gl-p-0 gl-top-0 gl-left-0 gl-outline-0! btn-transparent gl-hover-cursor-crosshair"
+      class="
+        gl-absolute gl-w-full gl-h-full gl-p-0 gl-top-0 gl-left-0 gl-outline-0!
+        btn-transparent
+        gl-hover-cursor-crosshair
+      "
       data-qa-selector="design_image_button"
       @mouseup="onAddCommentMouseup"
     ></button>
 
     <design-note-pin
-      v-for="note in notes"
-      v-if="resolvedDiscussionsExpanded || !note.resolved"
+      v-for="note in visibleNotes"
       :key="note.id"
       :label="note.index"
       :position="
