@@ -938,6 +938,12 @@
     - <<: *if-merge-request
       changes: [".gitlab/ci/rails.gitlab-ci.yml"]
 
+.rails:rules:rspec-feature-flags:
+  rules:
+    - <<: *if-not-ee
+      when: never
+    - changes: *code-backstage-qa-patterns
+
 .rails:rules:default-branch-schedule-nightly--code-backstage-ee-only:
   rules:
     - <<: *if-not-ee

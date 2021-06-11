@@ -464,7 +464,7 @@ rspec:coverage:
 rspec:feature-flags:
   extends:
     - .coverage-base
-    - .static-analysis:rules:ee-and-foss
+    - .rails:rules:rspec-feature-flags
   stage: post-test
   needs: ["static-analysis"]
   script:
