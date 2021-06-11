@@ -25,6 +25,30 @@ switching logs from JSON to plain text logging, and more.
 
 The logs for a given service may be managed and rotated by `logrotate`, `svlogd` (`runit`'s service logging daemon), both `logrotate` and `svlogd` or not at all. The table below includes information about what is responsible for managing and rotating logs for the included services. Logs [managed by `svlogd`](../../omnibus/settings/logs.md#runit-logs) are written to a file called `current`. The **logrotate** service built into GitLab [manages all logs](../../omnibus/settings/logs.md#logrotate) except those captured by runit. 
 
+
+| Type of Log                    | Managed by logrotate | Managed by svlogd/runit |
+| ------------------------------ | -------------------- | ----------------------- |
+| [Alertmanager Logs](#alertmanager-logs)       | N                    | Y                       |
+| [Crond Logs](#crond-logs)                     | N                    | Y                       |
+| [Gitaly](#gitaly-logs)         | Y                    | Y                       |
+| [GitLab Exporter For Omnibus](#gitlab-exporter)    | N                    | Y                       |
+| [GitLab Pages Logs](#pages-logs)       | Y                    | Y                       |
+| GitLab Rails                   | Y                    | N                       |
+| [GitLab Shell Logs](#gitlab-shelllog)  | Y                    | N                       |
+| [Grafana Logs](#grafana-logs)                   | N                    | Y                       |
+| [LogRotate Logs](#logrotate-logs)      | N                    | Y                       |
+| [Mailroom](#mail_room_jsonlog-default) | Y                    | Y                       |
+| [Nginx](#nginx-logs)           | Y                    | Y                       |
+| [PostgreSQL Logs](#postgresql-logs)    | N                    | Y                       |
+| [Prometheus Logs](#prometheus-logs)    | N                    | Y                       |
+| [Puma](#puma-logs)             | Y                    | Y                       |
+| [Redis Logs](#redis-logs)      | N                    | Y                       |
+| [Registry Logs](#registry-logs)        | N                    | Y                       |
+| [Workhorse Logs](#workhorse-logs)      | Y                    | Y                       |
+
+
+
+
 ## `production_json.log`
 
 This file lives in `/var/log/gitlab/gitlab-rails/production_json.log` for
