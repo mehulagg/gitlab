@@ -247,7 +247,7 @@ GET /projects/:id/snippets/:snippet_id/user_agent_detail
 
 | Attribute     | Type    | Required | Description                          |
 |---------------|---------|----------|--------------------------------------|
-| `id`          | Integer | yes      | The ID of a project                  |
+| `id`          | Integer | yes      | The ID or [URL-encoded path of a project](README.md#namespaced-path-encoding). |
 | `snippet_id`  | Integer | yes      | The ID of a snippet                  |
 
 Example request:
