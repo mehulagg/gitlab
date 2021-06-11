@@ -167,7 +167,7 @@ NOTE:
 Shared runners provided by GitLab are **not** configurable. Consider [installing your own runner](https://docs.gitlab.com/runner/install/) if you have specific configuration needs.
 
 The shared runners provided by GitLab are limited by [shared runner pipeline minutes quotas](../admin_area/settings/continuous_integration.md#shared-runners-pipeline-minutes-quota)
-for each GitLab [subscription plan](../../../subscriptions/gitlab_com/index.md#ci-pipeline-minutes).
+for each GitLab [subscription plan](../../subscriptions/gitlab_com/index.md#ci-pipeline-minutes).
 
 ### Linux shared runners
 
