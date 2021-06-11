@@ -14,7 +14,6 @@
 Graphql/Descriptions:
   Exclude:
     - 'ee/app/graphql/ee/types/list_limit_metric_enum.rb'
-    - 'ee/app/graphql/types/epic_state_enum.rb'
     - 'ee/app/graphql/types/health_status_enum.rb'
     - 'ee/app/graphql/types/iteration_state_enum.rb'
     - 'ee/app/graphql/types/requirements_management/requirement_state_enum.rb'
