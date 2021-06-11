@@ -60,7 +60,7 @@ on Geo secondaries. This issue is fixed in GitLab 13.6.1 and later.
 
 ## Updating to GitLab 13.3
 
-In GitLab 13.3, Geo removed the PostgreSQL [Foreign Data Wrapper](https://www.postgresql.org/docs/11/postgres-fdw.html)
+In GitLab 13.3, Geo removed the PostgreSQL [Foreign Data Wrapper](https://www.postgresql.org/docs/12/postgres-fdw.html)
 dependency for the tracking database.
 
 The FDW server, user, and the extension will be removed during the upgrade
