@@ -198,13 +198,26 @@ Here we can see that our filter has to remove 65,677 rows, and that we use
 208,846 buffers. Each buffer in PostgreSQL is 8 KB (8192 bytes), meaning our
 above node uses *1.6 GB of buffers*. That's a lot!
 
+Some statistics, like `time` and `rows`, are per-loop averages, while others, like `buffers`, are not. For example:
+
+```sql
+ ->  Index Scan using users_pkey on public.users  (cost=0.43..3.44 rows=1 width=1318) (actual time=0.025..0.025 rows=1 loops=888)
+       Index Cond: (users.id = issues.author_id)
+       Buffers: shared hit=3543 read=9
+       I/O Timings: read=17.760 write=0.000
+```
+
+Here we can see that this node used 3552 buffers (3543 + 9), returned 888 rows (`888 * 1`), and the actual duration was 22.2 milliseconds (`888 * 0.025`).
+17.76 milliseconds of the total duration was spent in reading from disk, to retrieve data that was not in the cache.
+
 ## Node types
 
 There are quite a few different types of nodes, so we only cover some of the
 more common ones here.
 
 A full list of all the available nodes and their descriptions can be found in
-the [PostgreSQL source file `plannodes.h`](https://gitlab.com/postgres/postgres/blob/master/src/include/nodes/plannodes.h)
+the [PostgreSQL source file `plannodes.h`](https://gitlab.com/postgres/postgres/blob/master/src/include/nodes/plannodes.h).
+pgMustard's [EXPLAIN docs](https://www.pgmustard.com/docs/explain) also offer detailed look into nodes and their fields.
 
 ### Seq Scan
 
@@ -617,7 +630,7 @@ If we look at the plan we also see our costs are very low:
 Index Scan using projects_pkey on projects  (cost=0.43..3.45 rows=1 width=4) (actual time=0.049..0.050 rows=1 loops=145)
 ```
 
-Here our cost is only 3.45, and it only takes us 0.050 milliseconds to do so.
+Here our cost is only 3.45, and it takes us 7.25 milliseconds to do so (0.05 * 145).
 The next index scan is a bit more expensive:
 
 ```sql
@@ -681,6 +694,69 @@ There are a few ways to get the output of a query plan. Of course you
 can directly run the `EXPLAIN` query in the `psql` console, or you can
 follow one of the other options below.
 
+### Database Lab Engine
+
+GitLab employees can use [Database Lab Engine](https://gitlab.com/postgres-ai/database-lab), and the companion
+SQL optimization tool - [Jow Bot](https://gitlab.com/postgres-ai/joe).
+
+Database Lab Engine provides developers with their own clone of the production database, while Joe Bot helps with exploring execution plans.
+
+Joe Bot is available in the [`#database-lab`](https://gitlab.slack.com/archives/CLJMDRD8C) channel on Slack,
+and through its [web interface](https://console.postgres.ai/gitlab/joe-instances).
+
+With Joe Bot you can execute DDL statements (like creating indexes, tables, and columns) and get query plans for `SELECT`, `UPDATE`, and `DELETE` statements.
+
+For example, in order to test new index on a column that is not existiing on production yet, you can do the following:
+
+Create the column:
+
+```sql
+exec ALTER TABLE projects ADD COLUMN last_at timestamp without time zone
+```
+
+Create the index:
+
+```sql
+exec CREATE INDEX index_projects_last_activity ON projects (last_activity_at) WHERE last_activity_at IS NOT NULL
+```
+
+Analyze the table to update its statistics:
+
+```sql
+exec ANALYZE projects
+```
+
+Get the query plan:
+
+```sql
+explain SELECT * FROM projects WHERE last_activity_at < CURRENT_DATE
+```
+
+Once done you can rollback your changes:
+
+```sql
+reset
+```
+
+For more information about the available options, run:
+
+```sql
+help
+```
+
+The web interface comes with the following execution plan visualizers included:
+* [Depesz](https://explain.depesz.com/)
+* [PEV2](https://github.com/dalibo/pev2)
+* [FlameGraph](https://github.com/mgartner/pg_flame)
+
+#### Tips & Tricks
+
+The database connection is now maintained during your whole session, so you can use `exec set ...` for any session variables (such as `enable_seqscan` or `work_mem`). These settings will be applied to all subsequent commands until you reset them. For example you can disable parallel queries with
+
+```sql
+exec SET max_parallel_workers_per_gather = 0
+```
+
 ### Rails console
 
 Using the [`activerecord-explain-analyze`](https://github.com/6/activerecord-explain-analyze)
@@ -724,63 +800,6 @@ For more information about the available options, run:
 
 ```sql
 /chatops run explain --help
-```
-
-### `#database-lab`
-
-Another tool GitLab employees can use is a chatbot powered by [Joe](https://gitlab.com/postgres-ai/joe)
-which uses [Database Lab](https://gitlab.com/postgres-ai/database-lab) to instantly provide developers
-with their own clone of the production database.
-
-Joe is available in the
-[`#database-lab`](https://gitlab.slack.com/archives/CLJMDRD8C) channel on Slack.
-
-Unlike ChatOps, it gives you a way to execute DDL statements (like creating indexes and tables) and get query plan not only for `SELECT` but also `UPDATE` and `DELETE`.
-
-For example, in order to test new index you can do the following:
-
-Create the index:
-
-```sql
-exec CREATE INDEX index_projects_last_activity ON projects (last_activity_at) WHERE last_activity_at IS NOT NULL
-```
-
-Analyze the table to update its statistics:
-
-```sql
-exec ANALYZE projects
-```
-
-Get the query plan:
-
-```sql
-explain SELECT * FROM projects WHERE last_activity_at < CURRENT_DATE
-```
-
-Once done you can rollback your changes:
-
-```sql
-reset
-```
-
-For more information about the available options, run:
-
-```sql
-help
-```
-
-#### Tips & Tricks
-
-The database connection is now maintained during your whole session, so you can use `exec set ...` for any session variables (such as `enable_seqscan` or `work_mem`). These settings will be applied to all subsequent commands until you reset them.
-
-It is also possible to use transactions. This may be useful when you are working on statements that modify the data, for example INSERT, UPDATE, and DELETE. The `explain` command will perform `EXPLAIN ANALYZE`, which executes the statement. In order to run each `explain` starting from a clean state you can wrap it in a transaction, for example:
-
-```sql
-exec BEGIN
-
-explain UPDATE some_table SET some_column = TRUE
-
-exec ROLLBACK
 ```
 
 ## Further reading
