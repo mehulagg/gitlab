@@ -840,19 +840,19 @@ in the second step, do not supply the `EXTERNAL_URL` value.
 1. On every database node, edit `/etc/gitlab/gitlab.rb` replacing values noted in the `# START user configuration` section:
 
    ```ruby
-   # Disable all components except PostgreSQL, Patroni, and Consul
-   roles ['postgres_role']
+   # Disable all components except Patroni, and Consul
+   roles ['patroni_role']
 
    # PostgreSQL configuration
    postgresql['listen_address'] = '0.0.0.0'
 
-   # Enable Patroni
-   patroni['enable'] = true
-   # Set `max_wal_senders` to one more than the number of database nodes in the cluster.
+   # Set `max_wal_senders` to one more than the number of replication slots in the cluster.
    # This is used to prevent replication from using up all of the
    # available database connections.
-   patroni['postgresql']['max_wal_senders'] = 4
-   patroni['postgresql']['max_replication_slots'] = 4
+   patroni['postgresql']['max_wal_senders'] = 7
+   # Sets `max_replication_slots` to double the number of database nodes.
+   # Patroni will use one extra slot when initiating replication
+   patroni['postgresql']['max_replication_slots'] = 6
    # Incoming recommended value for max connections is 500. See https://gitlab.com/gitlab-org/omnibus-gitlab/-/issues/5691.
    patroni['postgresql']['max_connections'] = 500
 
@@ -1115,7 +1115,6 @@ in the second step, do not supply the `EXTERNAL_URL` value.
    ```ruby
    # Disable all components except PostgreSQL and Consul
    roles ['postgres_role']
-   repmgr['enable'] = false
    patroni['enable'] = false
 
    # PostgreSQL configuration
