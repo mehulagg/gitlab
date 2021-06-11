@@ -78,6 +78,18 @@ class Groups::GroupMembersController < Groups::ApplicationController
   def membershipable_members
     group.members
   end
+
+  def source_type
+    _("group")
+  end
+
+  def members_page_url
+    polymorphic_url([group, :members])
+  end
+
+  def root_params_key
+    :group_member
+  end
 end
 
 Groups::GroupMembersController.prepend_mod_with('Groups::GroupMembersController')
