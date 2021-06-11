@@ -71,7 +71,6 @@ module QA
       it 'can switch branches', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/tbd' do
 
         Page::Project::PipelineEditor::Show.perform do |show|
-          require 'pry'; binding.pry
           # show.click_branch_selector_button # this doesn't work for reasons I don't yet understand
           click_button('master') # using capybara code here as a hack until I can fix the above method
           click_on('production')
