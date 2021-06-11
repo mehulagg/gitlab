@@ -9,8 +9,8 @@ info: "See the Technical Writers assigned to Development Guidelines: https://abo
 
 Background migrations should be used to perform data migrations whenever a 
 migration exceeds [the limits in our guidelines](database_review.md#timing-guidelines-for-migrations). For example, you can use background 
-migrations to migrate data so that instead of storing data in a single JSON column 
-the data is stored in a separate table.
+migrations to migrate data that's stored in a single JSON column 
+to a separate table instead.
 
 If the database cluster is considered to be in an unhealthy state, background
 migrations automatically reschedule themselves for a later point in time.
