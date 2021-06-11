@@ -15,6 +15,8 @@ These more detailed opinions may even include build manifests of platform specif
 
 Implementation Patterns allow architects and implementers at GitLab, GitLab Customers and GitLab Partners to build out deployments with less experimentation and a higher degree of confidence that the results will perform as expected.
 
+### Implementation patterns compared to reference architectures
+
 GitLab implementation patterns relate to [GitLab Reference Architectures](../reference_architectures/index.md) in the following ways:
 
 - Implementation patterns maintain Reference Architecture compliance and to provide [GitLab Performance Tool](https://gitlab.com/gitlab-org/quality/performance) (gpt) reports.
@@ -31,10 +33,10 @@ GitLab implementation patterns relate to [GitLab Reference Architectures](../ref
   - GitLab Runner implementation patterns.
   - Small, self-contained GitLab Instances for per-person admin training.
 
-The following is an example list of implementation patterns:
+### Example Pattern Types
 
 - Amazon Web Service (AWS)
-  - [GitLab Cloud Native Hybrid on AWS EKS](./AWS/index.md)
+  - [GitLab Cloud Native Hybrid on AWS EKS](./AWS/index.md) - MVC of this type of documentation.
 - Google Cloud (GCP) (Coming Soon)
   - GitLab Omnibus on GCP Instances (Coming Soon)
 - Microsoft Azure (Azure) (Coming Soon)
