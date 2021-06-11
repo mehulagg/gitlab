@@ -47,7 +47,12 @@ exports[`ee/BoardContentSidebar matches the snapshot 1`] = `
     class="swimlanes-sidebar-time-tracker"
   />
    
-  <boardsidebarduedate-stub />
+  <sidebardatewidget-stub
+    datetype="dueDate"
+    fullpath="gitlab-org/gitlab-test"
+    iid="27"
+    issuabletype="issue"
+  />
    
   <boardsidebarlabelsselect-stub
     class="labels"
