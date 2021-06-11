@@ -398,7 +398,7 @@ group :development, :test do
 
   gem 'rblineprof', '~> 0.3.6', platform: :mri, require: false
 
-  gem 'test_file_finder', '~> 0.1.3'
+  gem 'test_file_finder', git: 'git@gitlab.com:gitlab-org/ci-cd/test_file_finder.git', branch: 'bump-0-1-4'
 end
 
 group :development, :test, :danger do

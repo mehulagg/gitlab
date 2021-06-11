@@ -1,3 +1,11 @@
+GIT
+  remote: git@gitlab.com:gitlab-org/ci-cd/test_file_finder.git
+  revision: 2f895da3ca71fa38521d8225db903cc78d14d9ed
+  branch: bump-0-1-4
+  specs:
+    test_file_finder (0.1.4)
+      faraday (~> 1.0)
+
 PATH
   remote: vendor/gems/mail-smtp_pool
   specs:
@@ -1258,8 +1266,6 @@ GEM
     terser (1.0.2)
       execjs (>= 0.3.0, < 3)
     test-prof (0.12.0)
-    test_file_finder (0.1.3)
-      faraday (~> 1.0.1)
     text (1.3.1)
     thin (1.8.0)
       daemons (~> 1.0, >= 1.0.9)
@@ -1640,7 +1646,7 @@ DEPENDENCIES
   sys-filesystem (~> 1.1.6)
   terser (= 1.0.2)
   test-prof (~> 0.12.0)
-  test_file_finder (~> 0.1.3)
+  test_file_finder!
   thin (~> 1.8.0)
   thrift (>= 0.14.0)
   timecop (~> 0.9.1)
