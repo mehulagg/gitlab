@@ -105,6 +105,12 @@ export const TOGGLE_PERFORMANCE_BAR = {
   defaultKeys: ['p b'], // eslint-disable-line @gitlab/require-i18n-strings
 };
 
+export const HIDE_TOOLTIP = {
+  id: 'globalShortcuts.hideTooltip',
+  description: __('Hide visible tooltip'),
+  defaultKeys: ['esc'], // eslint-disable-line @gitlab/require-i18n-strings
+};
+
 export const TOGGLE_CANARY = {
   id: 'globalShortcuts.toggleCanary',
   description: __('Toggle GitLab Next'),
@@ -492,6 +498,7 @@ export const GLOBAL_SHORTCUTS_GROUP = {
     GO_TO_YOUR_MERGE_REQUESTS,
     GO_TO_YOUR_TODO_LIST,
     TOGGLE_PERFORMANCE_BAR,
+    HIDE_TOOLTIP,
   ],
 };
 

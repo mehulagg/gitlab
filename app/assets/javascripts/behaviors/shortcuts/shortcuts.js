@@ -12,6 +12,7 @@ import {
   START_SEARCH,
   FOCUS_FILTER_BAR,
   TOGGLE_PERFORMANCE_BAR,
+  HIDE_TOOLTIP,
   TOGGLE_CANARY,
   TOGGLE_MARKDOWN_PREVIEW,
   GO_TO_YOUR_TODO_LIST,
@@ -78,6 +79,7 @@ export default class Shortcuts {
     Mousetrap.bind(keysFor(START_SEARCH), Shortcuts.focusSearch);
     Mousetrap.bind(keysFor(FOCUS_FILTER_BAR), this.focusFilter.bind(this));
     Mousetrap.bind(keysFor(TOGGLE_PERFORMANCE_BAR), Shortcuts.onTogglePerfBar);
+    Mousetrap.bind(keysFor(HIDE_TOOLTIP), Shortcuts.hideTooltip);
     Mousetrap.bind(keysFor(TOGGLE_CANARY), Shortcuts.onToggleCanary);
 
     const findFileURL = document.body.dataset.findFile;
@@ -201,6 +203,15 @@ export default class Shortcuts {
       e.preventDefault();
     }
   }
+
+  static hideTooltip(e) {
+    $('.tooltip').hide();
+
+    if (e.preventDefault) {
+      e.preventDefault();
+    }
+  }
+
 
   /**
    * Initializes markdown editor shortcuts on the provided `<textarea>` element
