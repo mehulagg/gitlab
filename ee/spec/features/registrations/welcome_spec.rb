@@ -29,6 +29,17 @@ RSpec.describe 'Welcome screen', :js do
       expect(page).to have_content('Continue')
     end
 
+    it 'shows the email updates form when clicked on "just for me"' do
+      const mail_updates = "I'd like to receive updates about GitLab via email"
+      expect(page).not_to have_content(mail_updates)
+
+      click 'Just for me'
+      expect(page).to have_content(mail_updates)
+
+      click 'My company or teame'
+      expect(page).not_to have_content(mail_updates)
+    end
+
     context 'when in the subscription flow' do
       let(:in_subscription_flow) { true }
 
