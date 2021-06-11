@@ -650,3 +650,51 @@ Example response:
 ### Known consumers
 
 - CustomersDot
+
+## CI Minute Provisioning
+
+The CI Minute endpoint is used by [CustomersDot](https://gitlab.com/gitlab-org/customers-gitlab-com) (`customers.gitlab.com`)
+in order to apply additional packs of CI minutes, for personal namespaces or top-level groups within GitLab.com.
+
+### Creating an additional pack
+
+Use a POST to create an additional pack.
+
+```plaintext
+POST /namespaces/:id/minutes
+```
+
+| Attribute   | Type    | Required | Description |
+|:------------|:--------|:---------|:------------|
+| `expires_at` | date   | yes      | Expiry date of the purchased pack|
+| `number_of_minutes`  | integer    | yes       | Number of additional minutes |
+| `purchase_xid` | string  | yes       | The unique ID of the purchase |
+
+Example request:
+
+```shell
+curl --request POST --header "TOKEN: <admin_access_token>" "https://gitlab.com/api/v4/namespaces/1234/minutes?expires_at="2022-01-01"&="silver"&seats=10"
+curl --request POST \
+  --url http://127.0.0.1:3000/api/v4/namespaces/123/minutes \
+  --header 'Content-Type: application/json' \
+  --header 'PRIVATE-TOKEN: <admin access token>' \
+  --data '{
+    "number_of_minutes": 10000,
+    "expires_at": "2022-01-01",
+    "purchase_xid": "123abc" }'
+```
+
+Example response:
+
+```json
+{
+  "namespace_id": 123,
+  "expires_at": "2022-01-01",
+  "number_of_minutes": 10000,
+  "purchase_xid": "123abc"
+}
+```
+
+### Known consumers
+
+- CustomersDot
