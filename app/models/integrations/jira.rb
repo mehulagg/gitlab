@@ -12,6 +12,9 @@ module Integrations
     PROJECTS_PER_PAGE = 50
     JIRA_CLOUD_HOST = '.atlassian.net'
 
+    ATLASSIAN_REFERRER_GITLAB_COM = { atlOrigin: 'eyJpIjoiY2QyZTJiZDRkNGZhNGZlMWI3NzRkNTBmZmVlNzNiZTkiLCJwIjoianN3LWdpdGxhYi1pbnQifQ' }.freeze
+    ATLASSIAN_REFERRER_SELF_MANAGED = { atlOrigin: 'eyJpIjoiYjM0MTA4MzUyYTYxNDVkY2IwMzVjOGQ3ZWQ3NzMwM2QiLCJwIjoianN3LWdpdGxhYlNNLWludCJ9' }.freeze
+
     validates :url, public_url: true, presence: true, if: :activated?
     validates :api_url, public_url: true, allow_blank: true
     validates :username, presence: true, if: :activated?
@@ -153,12 +156,30 @@ module Integrations
       ]
     end
 
+    def build_url(path = nil, **params)
+      return unless url.present?
+
+      if Gitlab.com?
+        params.merge!(ATLASSIAN_REFERRER_GITLAB_COM) unless Gitlab.staging?
+      elsif !Gitlab.dev_or_test_env?
+        params.merge!(ATLASSIAN_REFERRER_SELF_MANAGED)
+      end
+
+      url = Addressable::URI.parse(self.url)
+      url.path = url.path.delete_suffix('/')
+      url.path << "/#{path.delete_prefix('/').delete_suffix('/')}" if path.present?
+      url.query_values = (url.query_values || {}).merge(params)
+      url.query_values = nil if url.query_values.empty?
+
+      url.to_s
+    end
+
     def issues_url
-      "#{url}/browse/:id"
+      build_url('browse/:id')
     end
 
     def new_issue_url
-      "#{url}/secure/CreateIssue!default.jspa"
+      build_url('secure/CreateIssue!default.jspa')
     end
 
     alias_method :original_url, :url

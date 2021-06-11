@@ -990,17 +990,51 @@ RSpec.describe Integrations::Jira do
   end
 
   context 'generating external URLs' do
-    let(:service) { described_class.new(url: 'http://jira.test.com/path/') }
+    let(:integration) { described_class.new(url: 'http://jira.test.com/path/') }
+
+    describe '#build_url' do
+      it 'handles paths, slashes, and query string' do
+        expect(integration.build_url).to eq(integration.url)
+        expect(integration.build_url('subpath/')).to eq('http://jira.test.com/path/subpath')
+        expect(integration.build_url('/subpath/')).to eq('http://jira.test.com/path/subpath')
+        expect(integration.build_url('subpath', foo: :bar)).to eq('http://jira.test.com/path/subpath?foo=bar')
+      end
+
+      it 'preserves existing query string' do
+        integration.url = 'http://jira.test.com/path/?nosso&foo=bar'
+
+        expect(integration.build_url).to eq("http://jira.test.com/path?foo=bar&nosso")
+        expect(integration.build_url('subpath/')).to eq('http://jira.test.com/path/subpath?foo=bar&nosso')
+        expect(integration.build_url('/subpath/')).to eq('http://jira.test.com/path/subpath?foo=bar&nosso')
+        expect(integration.build_url('subpath', bar: :baz)).to eq('http://jira.test.com/path/subpath?bar=baz&foo=bar&nosso')
+      end
+
+      it 'includes Atlassian referrer for gitlab.com' do
+        allow(Gitlab).to receive(:com?).and_return(true)
+
+        expect(integration.build_url).to eq("http://jira.test.com/path?#{described_class::ATLASSIAN_REFERRER_GITLAB_COM.to_query}")
+
+        allow(Gitlab).to receive(:staging?).and_return(true)
+
+        expect(integration.build_url).to eq(integration.url)
+      end
+
+      it 'includes Atlassian referrer for self-managed' do
+        allow(Gitlab).to receive(:dev_or_test_env?).and_return(false)
+
+        expect(integration.build_url).to eq("http://jira.test.com/path?#{described_class::ATLASSIAN_REFERRER_SELF_MANAGED.to_query}")
+      end
+    end
 
     describe '#issues_url' do
-      it 'handles trailing slashes' do
-        expect(service.issues_url).to eq('http://jira.test.com/path/browse/:id')
+      it 'returns the correct URL' do
+        expect(integration.issues_url).to eq('http://jira.test.com/path/browse/:id')
       end
     end
 
     describe '#new_issue_url' do
-      it 'handles trailing slashes' do
-        expect(service.new_issue_url).to eq('http://jira.test.com/path/secure/CreateIssue!default.jspa')
+      it 'returns the correct URL' do
+        expect(integration.new_issue_url).to eq('http://jira.test.com/path/secure/CreateIssue!default.jspa')
       end
     end
   end

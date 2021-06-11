@@ -78,8 +78,17 @@ RSpec.describe Integrations::JiraSerializers::IssueEntity do
 
   context 'with Jira Server configuration' do
     it 'returns the Jira Server profile URL' do
-      expect(subject[:author]).to include(web_url: 'http://jira.com/secure/ViewProfile.jspa?name=reporter@reporter.com')
-      expect(subject[:assignees].first).to include(web_url: 'http://jira.com/secure/ViewProfile.jspa?name=assignee@assignee.com')
+      expect(subject[:author]).to include(web_url: 'http://jira.com/secure/ViewProfile.jspa?name=reporter%40reporter.com')
+      expect(subject[:assignees].first).to include(web_url: 'http://jira.com/secure/ViewProfile.jspa?name=assignee%40assignee.com')
+    end
+
+    it 'includes the Atlassian referrer on gitlab.com' do
+      allow(Gitlab).to receive(:com?).and_return(true)
+      referrer = Integrations::Jira::ATLASSIAN_REFERRER_GITLAB_COM.to_query
+
+      expect(subject[:web_url]).to eq("http://jira.com/browse/GL-5?#{referrer}")
+      expect(subject[:author]).to include(web_url: "http://jira.com/secure/ViewProfile.jspa?#{referrer}&name=reporter%40reporter.com")
+      expect(subject[:assignees].first).to include(web_url: "http://jira.com/secure/ViewProfile.jspa?#{referrer}&name=assignee%40assignee.com")
     end
 
     context 'with only url' do
@@ -89,7 +98,7 @@ RSpec.describe Integrations::JiraSerializers::IssueEntity do
       end
 
       it 'returns URLs with the web url' do
-        expect(subject[:author]).to include(web_url: 'http://jira.com/secure/ViewProfile.jspa?name=reporter@reporter.com')
+        expect(subject[:author]).to include(web_url: 'http://jira.com/secure/ViewProfile.jspa?name=reporter%40reporter.com')
         expect(subject[:web_url]).to eq('http://jira.com/browse/GL-5')
       end
     end
@@ -104,6 +113,15 @@ RSpec.describe Integrations::JiraSerializers::IssueEntity do
     it 'returns the Jira Cloud profile URL' do
       expect(subject[:author]).to include(web_url: 'http://jira.com/people/12345')
       expect(subject[:assignees].first).to include(web_url: 'http://jira.com/people/67890')
+    end
+
+    it 'includes the Atlassian referrer on gitlab.com' do
+      allow(Gitlab).to receive(:com?).and_return(true)
+      referrer = Integrations::Jira::ATLASSIAN_REFERRER_GITLAB_COM.to_query
+
+      expect(subject[:web_url]).to eq("http://jira.com/browse/GL-5?#{referrer}")
+      expect(subject[:author]).to include(web_url: "http://jira.com/people/12345?#{referrer}")
+      expect(subject[:assignees].first).to include(web_url: "http://jira.com/people/67890?#{referrer}")
     end
   end
 
