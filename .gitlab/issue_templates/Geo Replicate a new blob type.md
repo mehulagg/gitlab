@@ -492,10 +492,10 @@ end
 ```
 
 - [ ] Add the following lines to the `cool_widget` model to accomplish some important tasks:
-  - include the `::Gitlab::Geo::VerificationState` concern,
-  - delegate verification related methods to the `cool_widget_state` model,
-  - override some scopes to use the `cool_widget_state` table instead of the model table, for verification
-  - override some methods to use the `cool_widget_state` table in verification related queries.
+  - include the `::Gitlab::Geo::VerificationState` concern
+  - delegate verification related methods to the `cool_widget_state` model
+  - override some scopes to use the `cool_widget_states` table instead of the model table, for verification
+  - override some methods to use the `cool_widget_states` table in verification related queries
 
 ```ruby
 class CoolWidget < ApplicationRecord
