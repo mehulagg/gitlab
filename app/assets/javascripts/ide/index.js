@@ -38,7 +38,7 @@ export function initIde(el, options = {}) {
 
   const { rootComponent = ide, extendStore = identity } = options;
   const store = createStore();
-  const router = createRouter(store);
+  const router = createRouter(store, el.dataset.defaultBranch);
 
   return new Vue({
     el,

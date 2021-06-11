@@ -274,7 +274,7 @@ describe('WebIDE utils', () => {
    *  hello.md -> hello-1.md
    *  hello_2.md -> hello_3.md
    *  hello_ -> hello_1
-   *  master-patch-22432 -> master-patch-22433
+   *  main-patch-22432 -> main-patch-22433
    *  patch_332 -> patch_333
    */
 
@@ -286,7 +286,7 @@ describe('WebIDE utils', () => {
       ${'hello.md'}           | ${'hello-1.md'}
       ${'hello_2.md'}         | ${'hello_3.md'}
       ${'hello_'}             | ${'hello_1'}
-      ${'master-patch-22432'} | ${'master-patch-22433'}
+      ${'main-patch-22432'}   | ${'main-patch-22433'}
       ${'patch_332'}          | ${'patch_333'}
     `('adds a numeric suffix to a given filename/branch name: $input', ({ input, output }) => {
       expect(addNumericSuffix(input)).toBe(output);
@@ -299,7 +299,7 @@ describe('WebIDE utils', () => {
       ${'hello.md'}           | ${'hello-39135.md'}
       ${'hello_2.md'}         | ${'hello_39135.md'}
       ${'hello_'}             | ${'hello_39135'}
-      ${'master-patch-22432'} | ${'master-patch-39135'}
+      ${'main-patch-22432'}   | ${'main-patch-39135'}
       ${'patch_332'}          | ${'patch_39135'}
     `('adds a random suffix if randomize=true is passed for name: $input', ({ input, output }) => {
       jest.spyOn(Math, 'random').mockReturnValue(0.391352525);

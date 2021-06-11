@@ -7,7 +7,7 @@ import { IDE_DATASET } from './mock_data';
 
 export default (container, { isRepoEmpty = false, path = '', mrId = '' } = {}) => {
   const projectName = isRepoEmpty ? 'lorem-ipsum-empty' : 'lorem-ipsum';
-  const pathSuffix = mrId ? `merge_requests/${mrId}` : `tree/master/-/${path}`;
+  const pathSuffix = mrId ? `merge_requests/${mrId}` : `tree/main/-/${path}`;
 
   global.jsdom.reconfigure({
     url: `${TEST_HOST}/-/ide/project/gitlab-test/${projectName}/${pathSuffix}`,
