@@ -8,7 +8,7 @@ info: "See the Technical Writers assigned to Development Guidelines: https://abo
 # Background migrations
 
 Background migrations should be used to perform data migrations whenever a 
-migration exceeds [the limits in our guidelines](database_review.md#timing-guidelines-for-migrations). For example, you can use background 
+migration exceeds [the time limits in our guidelines](database_review.md#timing-guidelines-for-migrations). For example, you can use background 
 migrations to migrate data that's stored in a single JSON column 
 to a separate table instead.
 
@@ -25,7 +25,7 @@ so many rows that the process would exceed [the time limits in our guidelines](d
 for every item on a large dataset. Typically, for single-record patterns, runtime is
 largely dependent on the size of the dataset, hence it should be split accordingly
 and put into background migrations.
-- Background migrations should not be used perform schema migrations
+- Background migrations should not be used to perform schema migrations.
 
 Some examples where background migrations can be useful:
 
