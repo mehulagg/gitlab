@@ -21,6 +21,10 @@ including adjusting log retention, log forwarding,
 switching logs from JSON to plain text logging, and more.
 - [How to parse and analyze JSON logs](troubleshooting/log_parsing.md).
 
+## Log Rotation
+
+The logs for a given service may be managed and rotated by `logrotate`, `svlogd` (`runit`'s service logging daemon), both `logrotate` and `svlogd` or not at all. The table below includes information about what is responsible for managing and rotating logs for the included services. Logs [managed by `svlogd`](../../omnibus/settings/logs.md#runit-logs) are written to a file called `current`. The **logrotate** service built into GitLab [manages all logs](../../omnibus/settings/logs.md#logrotate) except those captured by runit. 
+
 ## `production_json.log`
 
 This file lives in `/var/log/gitlab/gitlab-rails/production_json.log` for
