@@ -1,6 +1,5 @@
 <script>
 import { GlTooltipDirective, GlButton, GlFormInput, GlLink, GlLoadingIcon } from '@gitlab/ui';
-import { mapActions } from 'vuex';
 import createFlash from '~/flash';
 import { __ } from '~/locale';
 import createLabelMutation from './graphql/create_label.mutation.graphql';
@@ -43,7 +42,6 @@ export default {
     },
   },
   methods: {
-    ...mapActions(['toggleDropdownContents', 'toggleDropdownContentsCreateView']),
     getColorCode(color) {
       return Object.keys(color).pop();
     },
@@ -84,25 +82,6 @@ export default {
 
 <template>
   <div class="labels-select-contents-create js-labels-create">
-    <div class="dropdown-title d-flex align-items-center pt-0 pb-2">
-      <gl-button
-        :aria-label="__('Go back')"
-        variant="link"
-        size="small"
-        class="js-btn-back dropdown-header-button p-0"
-        icon="arrow-left"
-        @click="toggleDropdownContentsCreateView"
-      />
-      <span class="flex-grow-1">{{ labelsCreateTitle }}</span>
-      <gl-button
-        :aria-label="__('Close')"
-        variant="link"
-        size="small"
-        class="dropdown-header-button p-0"
-        icon="close"
-        @click="toggleDropdownContents"
-      />
-    </div>
     <div class="dropdown-input">
       <gl-form-input
         v-model.trim="labelTitle"
