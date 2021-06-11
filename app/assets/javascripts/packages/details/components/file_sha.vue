@@ -28,8 +28,8 @@ export default {
 <template>
   <details-row dashed>
     <div class="gl-px-4">
-      <span>{{ title }}:</span>
-      <span>{{ sha }}</span>
+      {{ title }}:
+      {{ sha }}
       <clipboard-button
         :text="sha"
         :title="$options.i18n.copyButtonTitle"

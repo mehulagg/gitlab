@@ -97,6 +97,7 @@ export default {
       <template #cell(name)="{ item, toggleDetails, detailsShowing }">
         <gl-button
           :icon="detailsShowing ? 'angle-up' : 'angle-down'"
+          :aria-label="detailsShowing ? __('Collapse') : __('Expand')"
           category="tertiary"
           size="small"
           @click="toggleDetails"
