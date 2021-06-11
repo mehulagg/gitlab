@@ -21,12 +21,10 @@ import invalidUrl from '~/lib/utils/invalid_url';
 import { relativePathToAbsolute, getBaseURL, visitUrl, isSafeURL } from '~/lib/utils/url_utility';
 import { __, n__ } from '~/locale';
 import TrackEventDirective from '~/vue_shared/directives/track_event';
-import glFeatureFlagMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import { panelTypes } from '../constants';
 
 import { graphDataToCsv } from '../csv_export';
 import { timeRangeToUrl, downloadCSVOptions, generateLinkToChartOptions } from '../utils';
-import AlertWidget from './alert_widget.vue';
 import MonitorAnomalyChart from './charts/anomaly.vue';
 import MonitorBarChart from './charts/bar.vue';
 import MonitorColumnChart from './charts/column.vue';
@@ -45,7 +43,6 @@ const events = {
 export default {
   components: {
     MonitorEmptyChart,
-    AlertWidget,
     GlIcon,
     GlLink,
     GlLoadingIcon,
@@ -62,7 +59,6 @@ export default {
     GlTooltip: GlTooltipDirective,
     TrackEvent: TrackEventDirective,
   },
-  mixins: [glFeatureFlagMixin()],
   props: {
     clipboardText: {
       type: String,
@@ -378,15 +374,6 @@ export default {
       <gl-tooltip :target="() => $refs.graphTitle" :disabled="!showTitleTooltip">
         {{ title }}
       </gl-tooltip>
-      <alert-widget
-        v-if="isContextualMenuShown && alertWidgetAvailable"
-        class="mx-1"
-        :modal-id="alertModalId"
-        :alerts-endpoint="alertsEndpoint"
-        :relevant-queries="graphData.metrics"
-        :alerts-to-manage="getGraphAlerts(graphData.metrics)"
-        @setAlerts="setAlerts"
-      />
       <div class="flex-grow-1"></div>
       <div v-if="graphDataIsLoading" class="mx-1 mt-1">
         <gl-loading-icon />
@@ -454,13 +441,6 @@ export default {
               @click="showToast(clipboardText)"
             >
               {{ __('Copy link to chart') }}
-            </gl-dropdown-item>
-            <gl-dropdown-item
-              v-if="alertWidgetAvailable"
-              v-gl-modal="alertModalId"
-              data-qa-selector="alert_widget_menu_item"
-            >
-              {{ __('Alerts') }}
             </gl-dropdown-item>
             <gl-dropdown-item
               v-for="runbook in getAlertRunbooks(graphData.metrics)"
