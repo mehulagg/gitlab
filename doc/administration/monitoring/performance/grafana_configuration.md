@@ -77,13 +77,22 @@ GitLab displays your link in the **Admin Area > Monitoring > Metrics Dashboard**
 
 > [Introduced](https://gitlab.com/gitlab-org/omnibus-gitlab/-/issues/5822) in GitLab 13.10.
 
-When setting Grafana up through the process above, no scope will show in the **Admin Area > Applications > GitLab Grafana** screen, however the application is provided the `read_user` scope automatically. Despite no scope showing up in the configuration screen, the `read_user` scope is required. Setting any scope other than `read_user` without also including `read_user` will lead to the below error when you try to log in using GitLab as the OAuth provider:
+When setting up Grafana through the process above, no scope shows in the
+**Admin Area > Applications > GitLab Grafana** screen. However, the `read_user` scope is required
+and it's provided to the application automatically. Note that setting any scope other than
+`read_user` without also including `read_user` leads to this error when you try to log in using
+GitLab as the OAuth provider:
 
-```
+```plaintext
 The requested scope is invalid, unknown, or malformed.
 ```
 
-Prior to GitLab version 13.10, the API scope would be set and was required to access Grafana through the GitLab OAuth provider. If you see the above error, make sure that either no scopes appear in the GitLab Grafana configuration screen or that the `read_user` scope is included.
+Prior to GitLab version 13.10, the API scope is set and is required to access Grafana through the
+GitLab OAuth provider. If you see the above error, make sure that one of the following is true in
+the GitLab Grafana configuration screen:
+
+- No scopes appear.
+- The `read_user` scope is included.
 
 ## Security Update
 
