@@ -20,7 +20,7 @@ module Ci
       def append_data(model, new_data, offset)
         if offset > 0
           truncated_data = data(model).to_s.byteslice(0, offset)
-          new_data = truncated_data + new_data
+          new_data = append_strings(truncated_data, new_data)
         end
 
         set_data(model, new_data)
@@ -48,6 +48,16 @@ module Ci
       end
 
       private
+
+      def append_strings(old_data, new_data)
+        if Feature.enabled?(:ci_job_trace_force_encode, default_enabled: :yaml)
+          new_data = new_data.dup.force_encoding('ASCII-8BIT')
+        end
+
+        old_data + new_data
+      rescue Encoding::CompatibilityError => e
+        Gitlab::ErrorTracking.track_and_raise_exception(e, old_data_encoding: old_data.encoding, new_data: new_data, new_data_encoding: new_data.encoding)
+      end
 
       def key(model)
         key_raw(model.build_id, model.chunk_index)
