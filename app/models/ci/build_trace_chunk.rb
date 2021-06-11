@@ -14,8 +14,8 @@ module Ci
 
     belongs_to :build, class_name: "Ci::Build", foreign_key: :build_id
 
-    default_value_for :data_store do
-      if Feature.enabled?(:dedicated_redis_trace_chunks, type: :ops)
+    default_value_for :data_store do |chunk|
+      if Feature.enabled?(:dedicated_redis_trace_chunks, chunk.build.project, type: :ops)
         :redis_trace_chunks
       else
         :redis
