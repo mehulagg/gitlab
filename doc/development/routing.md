@@ -82,7 +82,6 @@ We don't want users don't hit 404 for no reason. The table below should help.
 | Likely to be saved or shared | `issue#show`  | You need to add a redirect from an old URL to a new URL until a next major release.  |
 | Limited use, unlikely to be shared | `admin#labels` | No extra steps required | 
 
-
 ## Migrating unscoped routes
 
 Currently, the majority of routes are placed under the `/-/` scope. However,
