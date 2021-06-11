@@ -16,6 +16,14 @@ RSpec.describe Resolvers::Ci::JobTokenScopeResolver do
   end
 
   describe '#resolve' do
+    it 'returns nil when scope is not enabled' do
+      allow(project).to receive(:job_token_scope_enabled?).and_return(false)
+
+      result = resolve_ci_job_token_allow_list_projects(project, {})
+
+      expect(result).to eq(nil)
+    end
+
     it 'returns the same project in the allow list of projects for the Ci Job Token' do
       result = resolve_ci_job_token_allow_list_projects(project, {})
 
