@@ -69,10 +69,11 @@ describe('PaidFeatureCalloutBadge component', () => {
     });
 
     it('tracks that the badge has been displayed when mounted', () => {
-      expect(trackingSpy).toHaveBeenCalledWith(undefined, 'display_badge', {
-        label: 'feature_highlight_badge',
-        property: 'experiment:highlight_paid_features_during_active_trial',
-      });
+      expect(trackingSpy).toHaveBeenCalledWith(
+        undefined,
+        'display_badge',
+        expect.objectContaining({ label: 'feature_highlight_badge' }),
+      );
     });
   });
 

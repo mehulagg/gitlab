@@ -11,11 +11,6 @@ module Mutations
             null: true,
             description: 'ID of the scanner profile.'
 
-      field :global_id, ::Types::GlobalIDType[::DastScannerProfile],
-            null: true,
-            description: 'ID of the scanner profile.',
-            deprecated: { reason: 'Use `id`', milestone: '13.6' }
-
       argument :full_path, GraphQL::ID_TYPE,
                required: true,
                description: 'The project the scanner profile belongs to.'

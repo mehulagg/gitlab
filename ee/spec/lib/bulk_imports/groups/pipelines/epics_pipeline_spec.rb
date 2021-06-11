@@ -6,7 +6,7 @@ RSpec.describe BulkImports::Groups::Pipelines::EpicsPipeline do
   let_it_be(:user) { create(:user) }
   let_it_be(:group) { create(:group) }
   let_it_be(:bulk_import) { create(:bulk_import, user: user) }
-  let_it_be(:filepath) { 'spec/fixtures/bulk_imports/epics.ndjson.gz' }
+  let_it_be(:filepath) { 'ee/spec/fixtures/bulk_imports/gz/epics.ndjson.gz' }
   let_it_be(:entity) do
     create(
       :bulk_import_entity,
@@ -32,25 +32,43 @@ RSpec.describe BulkImports::Groups::Pipelines::EpicsPipeline do
   subject { described_class.new(context) }
 
   describe '#run' do
-    it 'imports group epics into destination group' do
+    before do
       allow(Dir).to receive(:mktmpdir).and_return(tmpdir)
       allow_next_instance_of(BulkImports::FileDownloadService) do |service|
         allow(service).to receive(:execute)
       end
 
-      expect { subject.run }.to change(::Epic, :count).by(5)
+      subject.run
+    end
 
+    it 'imports group epics into destination group' do
+      expect(group.epics.count).to eq(6)
+    end
+
+    it 'imports epic award emoji' do
       expect(group.epics.first.award_emoji.first.name).to eq('thumbsup')
+    end
+
+    it 'imports epic notes' do
       expect(group.epics.first.state).to eq('opened')
       expect(group.epics.first.notes.count).to eq(4)
       expect(group.epics.first.notes.first.award_emoji.first.name).to eq('drum')
+    end
 
+    it 'imports epic labels' do
       label = group.epics.first.labels.first
 
       expect(group.epics.first.labels.count).to eq(1)
       expect(label.title).to eq('title')
       expect(label.description).to eq('description')
       expect(label.color).to eq('#cd2c5c')
+    end
+
+    it 'imports epic system note metadata' do
+      note = group.epics.find_by_title('system notes').notes.first
+
+      expect(note.system).to eq(true)
+      expect(note.system_note_metadata.action).to eq('relate_epic')
     end
   end
 

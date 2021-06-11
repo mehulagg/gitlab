@@ -1,9 +1,8 @@
 import { GlDropdownItem, GlFormGroup, GlSprintf } from '@gitlab/ui';
-import { shallowMount } from '@vue/test-utils';
 import { cloneDeep } from 'lodash';
 import EscalationRule, { i18n } from 'ee/escalation_policies/components/escalation_rule.vue';
-import { defaultEscalationRule, ACTIONS, ALERT_STATUSES } from 'ee/escalation_policies/constants';
-import { extendedWrapper } from 'helpers/vue_test_utils_helper';
+import { DEFAULT_ESCALATION_RULE, ACTIONS, ALERT_STATUSES } from 'ee/escalation_policies/constants';
+import { shallowMountExtended } from 'helpers/vue_test_utils_helper';
 
 const mockSchedules = [
   { id: 1, name: 'schedule1' },
@@ -17,22 +16,20 @@ const invalidTimeMsg = i18n.fields.rules.invalidTimeValidationMsg;
 describe('EscalationRule', () => {
   let wrapper;
   const createComponent = ({ props = {} } = {}) => {
-    wrapper = extendedWrapper(
-      shallowMount(EscalationRule, {
-        propsData: {
-          rule: cloneDeep(defaultEscalationRule),
-          schedules: mockSchedules,
-          schedulesLoading: false,
-          index: 0,
-          isValid: false,
-          ...props,
-        },
-        stubs: {
-          GlFormGroup,
-          GlSprintf,
-        },
-      }),
-    );
+    wrapper = shallowMountExtended(EscalationRule, {
+      propsData: {
+        rule: cloneDeep(DEFAULT_ESCALATION_RULE),
+        schedules: mockSchedules,
+        schedulesLoading: false,
+        index: 0,
+        isValid: false,
+        ...props,
+      },
+      stubs: {
+        GlFormGroup,
+        GlSprintf,
+      },
+    });
   };
 
   beforeEach(() => {

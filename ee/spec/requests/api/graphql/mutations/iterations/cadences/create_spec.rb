@@ -90,7 +90,7 @@ RSpec.describe 'Creating an iteration cadence' do
         let(:attributes) { { title: '', duration_in_weeks: 1, active: false, automatic: false } }
 
         it_behaves_like 'a mutation that returns errors in the response',
-                        errors: ["Iterations in advance can't be blank", "Start date can't be blank", "Title can't be blank"]
+                        errors: ["Start date can't be blank", "Title can't be blank"]
 
         it 'does not create the iteration cadence' do
           expect { post_graphql_mutation(mutation, current_user: current_user) }.not_to change(Iterations::Cadence, :count)

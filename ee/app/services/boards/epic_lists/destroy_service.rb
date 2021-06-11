@@ -11,7 +11,7 @@ module Boards
           return ServiceResponse.error(message: 'Epics feature is not available.')
         end
 
-        unless Feature.enabled?(:epic_boards, list.board.group)
+        unless Feature.enabled?(:epic_boards, list.board.group, default_enabled: :yaml)
           return ServiceResponse.error(message: 'Epic boards feature is not enabled.')
         end
 

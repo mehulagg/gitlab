@@ -13,8 +13,8 @@ code are saved in projects, and most features are in the scope of projects.
 
 You can explore other popular projects available on GitLab. To explore projects:
 
-1. Click **Projects** in the navigation bar.
-1. Click **Explore Projects**.
+1. On the top bar, select **Menu > Project**.
+1. Select **Explore Projects**.
 
 GitLab displays a list of projects, sorted by last updated date. To view
 projects with the most [stars](#star-a-project), click **Most stars**. To view
@@ -197,8 +197,8 @@ To star a project:
 
 To view your starred projects:
 
-1. Click **Projects** in the navigation bar.
-1. Click **Starred Projects**.
+1. On the top bar, select **Menu > Project**.
+1. Select **Starred Projects**.
 1. GitLab displays information about your starred projects, including:
 
    - Project description, including name, description, and icon
@@ -228,10 +228,16 @@ Read through the documentation on [project settings](settings/index.md).
 
 ## Project activity
 
-To view the activity of a project, navigate to **Project overview > Activity**.
-From there, you can click on the tabs to see **All** the activity, or see it
-filtered by **Push events**, **Merge events**, **Issue events**, **Comments**,
-**Team**, and **Wiki**.
+To view the activity of a project:
+
+1. On the left sidebar, select **Project information > Activity**.
+1. Select a tab to view **All** the activity, or to filter it by any of these criteria:
+   - **Push events**
+   - **Merge events**
+   - **Issue events**
+   - **Comments**
+   - **Team**
+   - **Wiki**
 
 ### Leave a project
 

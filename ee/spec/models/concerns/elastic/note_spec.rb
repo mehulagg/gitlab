@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe Note, :elastic do
+RSpec.describe Note, :elastic, :clean_gitlab_redis_shared_state do
   before do
     stub_ee_application_setting(elasticsearch_search: true, elasticsearch_indexing: true)
   end
@@ -156,18 +156,6 @@ RSpec.describe Note, :elastic do
 
       before do
         project.project_feature.update_attribute(access_level.to_sym, project_feature_permission) if access_level.present?
-      end
-
-      it 'does not contain permissions if remove_permissions_data_from_notes_documents is not finished' do
-        allow(Elastic::DataMigrationService).to receive(:migration_has_finished?)
-                                                  .with(:remove_permissions_data_from_notes_documents)
-                                                  .and_return(false)
-        allow(Elastic::DataMigrationService).to receive(:migration_has_finished?)
-                                                  .with(:migrate_notes_to_separate_index)
-                                                  .and_return(false)
-
-        expect(note_json).not_to have_key(access_level) if access_level.present?
-        expect(note_json).not_to have_key('visibility_level')
       end
 
       it 'contains the correct permissions', :aggregate_failures do

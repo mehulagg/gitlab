@@ -551,8 +551,10 @@ describe('Roadmap Vuex Actions', () => {
       expectedVariables = {
         fullPath: 'gitlab-org',
         state: mockState.milestonessState,
-        startDate: '2017-11-1',
-        dueDate: '2018-6-30',
+        timeframe: {
+          start: '2017-11-01',
+          end: '2018-06-30',
+        },
         includeDescendants: true,
       };
     });

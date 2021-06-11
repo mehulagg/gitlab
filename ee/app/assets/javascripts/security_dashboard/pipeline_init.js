@@ -1,6 +1,6 @@
 import Vue from 'vue';
 import { parseBoolean } from '~/lib/utils/common_utils';
-import PipelineSecurityDashboard from './components/pipeline_security_dashboard.vue';
+import PipelineSecurityDashboard from './components/pipeline/pipeline_security_dashboard.vue';
 import apolloProvider from './graphql/provider';
 import createDashboardStore from './store';
 import { DASHBOARD_TYPES } from './store/constants';
@@ -26,6 +26,7 @@ export default () => {
     projectFullPath,
     pipelineJobsPath,
     canAdminVulnerability,
+    securityReportHelpPageLink,
   } = el.dataset;
 
   const loadingErrorIllustrations = {
@@ -41,6 +42,7 @@ export default () => {
     }),
     provide: {
       dashboardType: DASHBOARD_TYPES.PIPELINE,
+      projectId: parseInt(projectId, 10),
       projectFullPath,
       dashboardDocumentation,
       emptyStateSvgPath,
@@ -51,15 +53,12 @@ export default () => {
         jobsPath: pipelineJobsPath,
         sourceBranch,
       },
+      securityReportHelpPageLink,
+      vulnerabilitiesEndpoint,
+      loadingErrorIllustrations,
     },
     render(createElement) {
-      return createElement(PipelineSecurityDashboard, {
-        props: {
-          projectId: parseInt(projectId, 10),
-          vulnerabilitiesEndpoint,
-          loadingErrorIllustrations,
-        },
-      });
+      return createElement(PipelineSecurityDashboard);
     },
   });
 };

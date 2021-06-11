@@ -493,6 +493,34 @@ RSpec.describe Ci::Build do
         expect(build.queuing_entry).to be_present
       end
     end
+
+    context 'when build has been picked by a shared runner' do
+      let(:build) { create(:ci_build, :pending) }
+
+      it 'creates runtime metadata entry' do
+        build.runner = create(:ci_runner, :instance_type)
+
+        build.run!
+
+        expect(build.reload.runtime_metadata).to be_present
+      end
+    end
+  end
+
+  describe '#drop' do
+    context 'when has a runtime tracking entry' do
+      let(:build) { create(:ci_build, :pending) }
+
+      it 'removes runtime tracking entry' do
+        build.runner = create(:ci_runner, :instance_type)
+
+        build.run!
+        expect(build.reload.runtime_metadata).to be_present
+
+        build.drop!
+        expect(build.reload.runtime_metadata).not_to be_present
+      end
+    end
   end
 
   describe '#schedulable?' do
@@ -1842,7 +1870,7 @@ RSpec.describe Ci::Build do
     end
 
     describe '#retryable?' do
-      subject { build }
+      subject { build.retryable? }
 
       context 'when build is retryable' do
         context 'when build is successful' do
@@ -1850,7 +1878,7 @@ RSpec.describe Ci::Build do
             build.success!
           end
 
-          it { is_expected.to be_retryable }
+          it { is_expected.to be_truthy }
         end
 
         context 'when build is failed' do
@@ -1858,7 +1886,7 @@ RSpec.describe Ci::Build do
             build.drop!
           end
 
-          it { is_expected.to be_retryable }
+          it { is_expected.to be_truthy }
         end
 
         context 'when build is canceled' do
@@ -1866,7 +1894,7 @@ RSpec.describe Ci::Build do
             build.cancel!
           end
 
-          it { is_expected.to be_retryable }
+          it { is_expected.to be_truthy }
         end
       end
 
@@ -1876,7 +1904,7 @@ RSpec.describe Ci::Build do
             build.run!
           end
 
-          it { is_expected.not_to be_retryable }
+          it { is_expected.to be_falsey }
         end
 
         context 'when build is skipped' do
@@ -1884,7 +1912,7 @@ RSpec.describe Ci::Build do
             build.skip!
           end
 
-          it { is_expected.not_to be_retryable }
+          it { is_expected.to be_falsey }
         end
 
         context 'when build is degenerated' do
@@ -1892,7 +1920,7 @@ RSpec.describe Ci::Build do
             build.degenerate!
           end
 
-          it { is_expected.not_to be_retryable }
+          it { is_expected.to be_falsey }
         end
 
         context 'when a canceled build has been retried already' do
@@ -1903,7 +1931,7 @@ RSpec.describe Ci::Build do
           end
 
           context 'when prevent_retry_of_retried_jobs feature flag is enabled' do
-            it { is_expected.not_to be_retryable }
+            it { is_expected.to be_falsey }
           end
 
           context 'when prevent_retry_of_retried_jobs feature flag is disabled' do
@@ -1911,7 +1939,7 @@ RSpec.describe Ci::Build do
               stub_feature_flags(prevent_retry_of_retried_jobs: false)
             end
 
-            it { is_expected.to be_retryable }
+            it { is_expected.to be_truthy }
           end
         end
       end
@@ -2720,7 +2748,7 @@ RSpec.describe Ci::Build do
           let(:expected_variables) do
             predefined_variables.map { |variable| variable.fetch(:key) } +
               %w[YAML_VARIABLE CI_ENVIRONMENT_NAME CI_ENVIRONMENT_SLUG
-                 CI_ENVIRONMENT_ACTION CI_ENVIRONMENT_URL]
+                 CI_ENVIRONMENT_TIER CI_ENVIRONMENT_ACTION CI_ENVIRONMENT_URL]
           end
 
           before do
@@ -2820,7 +2848,8 @@ RSpec.describe Ci::Build do
       let(:environment_variables) do
         [
           { key: 'CI_ENVIRONMENT_NAME', value: 'production', public: true, masked: false },
-          { key: 'CI_ENVIRONMENT_SLUG', value: 'prod-slug',  public: true, masked: false }
+          { key: 'CI_ENVIRONMENT_SLUG', value: 'prod-slug',  public: true, masked: false },
+          { key: 'CI_ENVIRONMENT_TIER', value: 'production', public: true, masked: false }
         ]
       end
 
@@ -2829,6 +2858,7 @@ RSpec.describe Ci::Build do
                project: build.project,
                name: 'production',
                slug: 'prod-slug',
+               tier: 'production',
                external_url: '')
       end
 
@@ -4822,7 +4852,7 @@ RSpec.describe Ci::Build do
 
     context 'with project services' do
       before do
-        create(:service, active: true, job_events: true, project: project)
+        create(:integration, active: true, job_events: true, project: project)
       end
 
       it 'executes services' do
@@ -4836,7 +4866,7 @@ RSpec.describe Ci::Build do
 
     context 'without relevant project services' do
       before do
-        create(:service, active: true, job_events: false, project: project)
+        create(:integration, active: true, job_events: false, project: project)
       end
 
       it 'does not execute services' do
@@ -5178,5 +5208,35 @@ RSpec.describe Ci::Build do
     it { expect(matcher.protected?).to eq(build.protected?) }
 
     it { expect(matcher.project).to eq(build.project) }
+  end
+
+  describe '#shared_runner_build?' do
+    context 'when build does not have a runner assigned' do
+      it 'is not a shared runner build' do
+        expect(build.runner).to be_nil
+
+        expect(build).not_to be_shared_runner_build
+      end
+    end
+
+    context 'when build has a project runner assigned' do
+      before do
+        build.runner = create(:ci_runner, :project)
+      end
+
+      it 'is not a shared runner build' do
+        expect(build).not_to be_shared_runner_build
+      end
+    end
+
+    context 'when build has an instance runner assigned' do
+      before do
+        build.runner = create(:ci_runner, :instance_type)
+      end
+
+      it 'is a shared runner build' do
+        expect(build).to be_shared_runner_build
+      end
+    end
   end
 end

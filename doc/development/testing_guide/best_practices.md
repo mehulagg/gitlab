@@ -259,9 +259,9 @@ it 'sets the frobulance' do
 end
 
 it 'schedules a background job' do
-  expect(BackgroundJob).to receive(:perform_async)
-
   subject.execute
+
+  expect(BackgroundJob).to have_enqueued_sidekiq_job
 end
 ```
 
@@ -271,11 +271,11 @@ combining the examples:
 
 ```ruby
 it 'performs the expected side-effects' do
-  expect(BackgroundJob).to receive(:perform_async)
-
   expect { subject.execute }
     .to change(Event, :count).by(1)
     .and change { arg_0.frobulance }.to('wibble')
+
+  expect(BackgroundJob).to have_enqueued_sidekiq_job
 end
 ```
 
@@ -738,6 +738,28 @@ The usage of `perform_enqueued_jobs` is useful only for testing delayed mail
 deliveries, because our Sidekiq workers aren't inheriting from `ApplicationJob`
 / `ActiveJob::Base`.
 
+GitLab uses the [RSpec-Sidekiq](https://github.com/philostler/rspec-sidekiq) gem for expectations.
+We prefer you check that a job has been enqueued, rather than checking the worker has
+`received` the `perform_async` method:
+
+```ruby
+# bad
+expect(Worker).to receive(:perform_async).with(1, 'string')
+# Good
+expect(Worker).to have_enqueued_sidekiq_job(1, 'string')
+```
+
+The only exception to this rule: if the spec actually needs to make sure the job is
+enqueued only once, or a specific number of times:
+
+```ruby
+# good
+expect(Worker).to receive(:perform_async).with(1, 'string').once
+```
+
+If you need test that the job is only enqueued a specific number of times, you will have to disable the cop
+that enforces usage of `have_enqueued_sidekiq_job` (`RSpec/HaveEnqueuedSidekiqJob`) in that test.
+
 #### DNS
 
 DNS requests are stubbed universally in the test suite
@@ -864,10 +886,10 @@ Most tests for Elasticsearch logic relate to:
 - Searching for that data.
 - Ensuring that the test gives the expected result.
 
-There are some exceptions, such as checking for structural changes rather than individual records in an index. 
+There are some exceptions, such as checking for structural changes rather than individual records in an index.
 
 The `:elastic_with_delete_by_query` trait was added to reduce run time for pipelines by creating and deleting indices
-at the start and end of each context only. The [Elasticsearch DeleteByQuery API](https://www.elastic.co/guide/en/elasticsearch/reference/current/docs-delete-by-query.html) 
+at the start and end of each context only. The [Elasticsearch DeleteByQuery API](https://www.elastic.co/guide/en/elasticsearch/reference/current/docs-delete-by-query.html)
 is used to delete data in all indices in between examples to ensure a clean index.
 
 Note that Elasticsearch indexing uses [`Gitlab::Redis::SharedState`](../../../ee/development/redis.md#gitlabrediscachesharedstatequeues).
@@ -994,6 +1016,7 @@ Only use simple values as input in the `where` block. Using
 objects, FactoryBot-created objects, and similar items can lead to
 [unexpected results](https://github.com/tomykaira/rspec-parameterized/issues/8).
 <!-- vale gitlab.Spelling = YES -->
+
 ### Prometheus tests
 
 Prometheus metrics may be preserved from one test run to another. To ensure that metrics are
@@ -1072,6 +1095,16 @@ a non-empty result. To combine it with the schema matching above, use
 expect(json_string).to be_valid_json
 
 expect(json_string).to be_valid_json.and match_schema(schema)
+```
+
+#### `be_one_of(collection)`
+
+The inverse of `include`, tests that the `collection` includes the expected
+value:
+
+```ruby
+expect(:a).to be_one_of(%i[a b c])
+expect(:z).not_to be_one_of(%i[a b c])
 ```
 
 ### Testing query performance

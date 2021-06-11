@@ -33,6 +33,7 @@ describe('Board List Header Component', () => {
     withLocalStorage = true,
     isSwimlanesHeader = false,
     weightFeatureAvailable = false,
+    currentUserId = 1,
   } = {}) => {
     const boardId = '1';
 
@@ -65,6 +66,7 @@ describe('Board List Header Component', () => {
       provide: {
         boardId,
         weightFeatureAvailable,
+        currentUserId,
       },
     });
   };

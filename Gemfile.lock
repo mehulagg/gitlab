@@ -457,7 +457,7 @@ GEM
       activesupport (>= 3.0)
       request_store (>= 1.0)
       scientist (~> 1.6, >= 1.6.0)
-    gitlab-fog-azure-rm (1.0.1)
+    gitlab-fog-azure-rm (1.1.1)
       azure-storage-blob (~> 2.0)
       azure-storage-common (~> 2.0)
       fog-core (= 2.1.0)
@@ -1090,6 +1090,9 @@ GEM
       rspec-support (~> 3.10)
     rspec-retry (0.6.1)
       rspec-core (> 3.3)
+    rspec-sidekiq (3.1.0)
+      rspec-core (~> 3.0, >= 3.0.0)
+      sidekiq (>= 2.4.0)
     rspec-support (3.10.2)
     rspec_junit_formatter (0.4.1)
       rspec-core (>= 2, < 4, != 2.12.0)
@@ -1474,7 +1477,7 @@ DEPENDENCIES
   gitlab-chronic (~> 0.10.5)
   gitlab-dangerfiles (~> 2.0.0)
   gitlab-experiment (~> 0.5.4)
-  gitlab-fog-azure-rm (~> 1.0.1)
+  gitlab-fog-azure-rm (~> 1.1.1)
   gitlab-fog-google (~> 1.13)
   gitlab-labkit (~> 0.18.0)
   gitlab-license (~> 1.5)
@@ -1605,6 +1608,7 @@ DEPENDENCIES
   rspec-parameterized
   rspec-rails (~> 5.0.1)
   rspec-retry (~> 0.6.1)
+  rspec-sidekiq
   rspec_junit_formatter
   rspec_profiling (~> 0.0.6)
   ruby-fogbugz (~> 0.2.1)

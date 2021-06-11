@@ -581,7 +581,7 @@ RSpec.describe Gitlab::UsageData do
         ds_bundler_audit_build = create(:ci_build, :failed, user: user, name: 'retirejs')
         ds_bundler_build = create(:ci_build, name: 'bundler-audit', user: user, commit_id: ds_build.pipeline.id, status: 'success')
         secret_detection_build = create(:ci_build, name: 'secret', user: user, commit_id: ds_build.pipeline.id, status: 'success')
-        cs_build = create(:ci_build, name: 'klar', user: user, status: 'success')
+        cs_build = create(:ci_build, name: 'container-scanning', user: user, status: 'success')
         sast_build = create(:ci_build, name: 'sast', user: user, status: 'success', retried: true)
         create(:security_scan, build: ds_build, scan_type: 'dependency_scanning' )
         create(:security_scan, build: ds_bundler_build, scan_type: 'dependency_scanning')

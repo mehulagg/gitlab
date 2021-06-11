@@ -25,12 +25,14 @@ RSpec.describe EE::Ci::PipelineEditorHelper do
 
       it 'returns ee specific values' do
         expect(pipeline_editor_data.keys).to include('api-fuzzing-configuration-path')
+        expect(pipeline_editor_data.keys).to include('dast-configuration-path')
       end
     end
 
     context 'without licensed feature' do
       it 'does not return the API fuzzing path' do
         expect(pipeline_editor_data.keys).not_to include('api-fuzzing-configuration-path')
+        expect(pipeline_editor_data.keys).not_to include('dast-configuration-path')
       end
     end
   end

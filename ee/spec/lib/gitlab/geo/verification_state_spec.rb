@@ -23,6 +23,33 @@ RSpec.describe Gitlab::Geo::VerificationState do
 
   subject { DummyModel.new }
 
+  context 'state machine' do
+    context 'when failed' do
+      before do
+        subject.verification_started
+        subject.verification_failed_with_message!('foo')
+      end
+
+      context 'and transitioning to pending' do
+        it 'marks verification as pending' do
+          subject.verification_pending!
+
+          expect(subject.reload.verification_pending?).to be_truthy
+        end
+
+        it 'does not clear retry attributes' do
+          subject.verification_pending!
+
+          expect(subject.reload).to have_attributes(
+            verification_state: DummyModel.verification_state_value(:verification_pending),
+            verification_retry_count: 1,
+            verification_retry_at: be_present
+          )
+        end
+      end
+    end
+  end
+
   describe '.verification_pending_batch' do
     # Insert 2 records for a total of 3 with subject
     let!(:other_pending_records) do

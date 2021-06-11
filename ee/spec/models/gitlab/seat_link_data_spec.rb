@@ -8,14 +8,14 @@ RSpec.describe Gitlab::SeatLinkData do
       timestamp: timestamp,
       key: key,
       max_users: max_users,
-      active_users: active_users
+      billable_users_count: billable_users_count
     )
   end
 
   let_it_be(:timestamp) { Time.iso8601('2020-03-22T06:09:18Z') }
   let_it_be(:key) { 'key' }
   let_it_be(:max_users) { 11 }
-  let_it_be(:active_users) { 5 }
+  let_it_be(:billable_users_count) { 5 }
 
   describe '#initialize' do
     let_it_be(:utc_time) { Time.utc(2020, 3, 12, 12, 00) }
@@ -23,14 +23,14 @@ RSpec.describe Gitlab::SeatLinkData do
     let_it_be(:current_license) { create_current_license(starts_at: license_start_date)}
 
     let_it_be(:max_before_today) { 15 }
-    let_it_be(:yesterday_active_count) { 12 }
-    let_it_be(:today_active_count) { 20 }
+    let_it_be(:yesterday_billable_users_count) { 12 }
+    let_it_be(:today_billable_users_count) { 20 }
 
     before_all do
       create(:historical_data, recorded_at: license_start_date, active_user_count: 10)
       create(:historical_data, recorded_at: license_start_date + 1.day, active_user_count: max_before_today)
-      create(:historical_data, recorded_at: utc_time - 1.day, active_user_count: yesterday_active_count)
-      create(:historical_data, recorded_at: utc_time, active_user_count: today_active_count)
+      create(:historical_data, recorded_at: utc_time - 1.day, active_user_count: yesterday_billable_users_count)
+      create(:historical_data, recorded_at: utc_time, active_user_count: today_billable_users_count)
     end
 
     around do |example|
@@ -44,8 +44,8 @@ RSpec.describe Gitlab::SeatLinkData do
         expect(subject).to have_attributes(
           timestamp: eq(utc_time),
           key: eq(current_license.data),
-          max_users: eq(today_active_count),
-          active_users: eq(today_active_count)
+          max_users: eq(today_billable_users_count),
+          billable_users_count: eq(today_billable_users_count)
         )
       end
     end
@@ -56,7 +56,7 @@ RSpec.describe Gitlab::SeatLinkData do
           timestamp: eq(timestamp),
           key: eq(key),
           max_users: eq(max_users),
-          active_users: eq(active_users)
+          billable_users_count: eq(billable_users_count)
         )
       end
 
@@ -68,7 +68,7 @@ RSpec.describe Gitlab::SeatLinkData do
             timestamp: eq(utc_time - 1.day),
             key: eq(current_license.data),
             max_users: eq(max_before_today),
-            active_users: eq(yesterday_active_count)
+            billable_users_count: eq(yesterday_billable_users_count)
           )
         end
       end
@@ -86,7 +86,7 @@ RSpec.describe Gitlab::SeatLinkData do
           date: timestamp.to_date.iso8601,
           license_key: key,
           max_historical_user_count: max_users,
-          active_users: active_users
+          billable_users_count: billable_users_count
         }.to_json
       )
     end

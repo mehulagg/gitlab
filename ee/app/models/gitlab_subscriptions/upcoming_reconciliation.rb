@@ -6,8 +6,14 @@ module GitlabSubscriptions
 
     validates :namespace, uniqueness: true, presence: { if: proc { ::Gitlab.com? } }
 
-    def self.for_self_managed
-      self.find_by(namespace_id: nil)
+    def self.next(namespace_id = nil)
+      if ::Gitlab.com?
+        return unless namespace_id
+
+        self.find_by(namespace_id: namespace_id)
+      else
+        self.find_by(namespace_id: nil)
+      end
     end
 
     def display_alert?

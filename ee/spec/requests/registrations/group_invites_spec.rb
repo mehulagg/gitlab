@@ -71,12 +71,19 @@ RSpec.describe 'view group invites' do
           let(:valid_emails) { %w[a@a.a b@b.b] }
           let(:group_params) { { group_id: group.id, emails: valid_emails + ['', '', 'x', 'y'] } }
 
-          it 'adds users with developer access and ignores blank and invalid emails', :aggregate_failures do
+          it 'adds users with developer access and ignores blank and invalid emails', :aggregate_failures, :snowplow do
             post_request
 
             invited_members = group.members.invite
             expect(invited_members.pluck(:invite_email)).to match_array(valid_emails)
             expect(invited_members.pluck(:access_level).uniq).to match([Gitlab::Access::DEVELOPER])
+            expect_snowplow_event(
+              category: 'Members::CreateService',
+              action: 'create_member',
+              label: 'registrations-group-invite',
+              property: 'net_new_user',
+              user: user
+            )
           end
 
           it 'tracks experiment as expected', :experiment do

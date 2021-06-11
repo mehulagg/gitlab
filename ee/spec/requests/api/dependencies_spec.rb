@@ -10,6 +10,7 @@ RSpec.describe API::Dependencies do
     subject(:request) { get api("/projects/#{project.id}/dependencies", user), params: params }
 
     let(:params) { {} }
+    let(:snowplow_standard_context_params) { { user: user, project: project, namespace: project.namespace } }
 
     before do
       stub_licensed_features(dependency_scanning: true, security_dashboard: true)

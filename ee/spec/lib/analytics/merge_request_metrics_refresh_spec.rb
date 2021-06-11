@@ -55,11 +55,10 @@ RSpec.describe Analytics::MergeRequestMetricsRefresh do
 
   describe '#execute_async' do
     it 'schedules CodeReviewMetricsWorker with params' do
-      expect(Analytics::CodeReviewMetricsWorker)
-        .to receive(:perform_async)
-              .with('MyTestClass', merge_request.id, force: true)
-
       subject.execute_async(force: true)
+
+      expect(Analytics::CodeReviewMetricsWorker)
+        .to have_enqueued_sidekiq_job('MyTestClass', merge_request.id, force: true)
     end
   end
 end

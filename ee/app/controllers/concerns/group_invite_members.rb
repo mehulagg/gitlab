@@ -3,11 +3,12 @@
 module GroupInviteMembers
   private
 
-  def invite_members(group)
+  def invite_members(group, invite_source:)
     invite_params = {
       source: group,
       user_ids: emails_param[:emails]&.reject(&:blank?)&.join(','),
-      access_level: Gitlab::Access::DEVELOPER
+      access_level: Gitlab::Access::DEVELOPER,
+      invite_source: invite_source
     }
 
     result = Members::CreateService.new(current_user, invite_params).execute

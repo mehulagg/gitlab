@@ -129,8 +129,7 @@ module EE
       end
 
       scope :order_relative_position_on_board, ->(board_id) do
-        join_board_position(board_id)
-          .reorder(::Gitlab::Database.nulls_last_order('boards_epic_board_positions.relative_position', 'ASC'), 'epics.id DESC')
+        reorder(::Gitlab::Database.nulls_last_order('boards_epic_board_positions.relative_position', 'ASC'), 'epics.id DESC')
       end
 
       scope :without_board_position, ->(board_id) do

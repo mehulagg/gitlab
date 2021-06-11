@@ -21,7 +21,8 @@
     empty_state_unauthorized_svg_path: image_path('illustrations/user-not-logged-in.svg'),
     empty_state_forbidden_svg_path: image_path('illustrations/lock_promotion.svg'),
     project_full_path: project.path_with_namespace,
-    can_admin_vulnerability: can?(current_user, :admin_vulnerability, project).to_s } }
+    can_admin_vulnerability: can?(current_user, :admin_vulnerability, project).to_s,
+    security_report_help_page_link: help_page_path('user/application_security/index', anchor: 'security-report-validation') } }
 
 - if pipeline.expose_license_scanning_data?
   #js-tab-licenses.tab-pane

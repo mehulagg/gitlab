@@ -47,7 +47,7 @@ const countries = [
   ['Uruguay', 'UY'],
 ];
 
-const states = [{ id: 1, name: 'state' }];
+const states = { California: 'CA' };
 
 describe('~/subscriptions/buy_minutes/graphql/resolvers', () => {
   describe('Query', () => {
@@ -62,8 +62,8 @@ describe('~/subscriptions/buy_minutes/graphql/resolvers', () => {
 
           expect(createFlash).not.toHaveBeenCalled();
           expect(result).toStrictEqual([
-            { name: 'United States of America', alpha2: 'US', __typename: 'Country' },
-            { name: 'Uruguay', alpha2: 'UY', __typename: 'Country' },
+            { name: 'United States of America', id: 'US', __typename: 'Country' },
+            { name: 'Uruguay', id: 'UY', __typename: 'Country' },
           ]);
         });
       });
@@ -88,10 +88,10 @@ describe('~/subscriptions/buy_minutes/graphql/resolvers', () => {
         });
 
         it('returns an array of states with typename', async () => {
-          const result = await resolvers.Query.states(1);
+          const result = await resolvers.Query.states(null, { countryId: 1 });
 
           expect(createFlash).not.toHaveBeenCalled();
-          expect(result).toStrictEqual([{ id: 1, name: 'state', __typename: 'State' }]);
+          expect(result).toStrictEqual([{ id: 'CA', name: 'California', __typename: 'State' }]);
         });
       });
 
@@ -101,7 +101,7 @@ describe('~/subscriptions/buy_minutes/graphql/resolvers', () => {
         });
 
         it('shows a flash message', async () => {
-          await resolvers.Query.states();
+          await resolvers.Query.states(null, { countryId: 1 });
 
           expect(createFlash).toHaveBeenCalledWith({ message: ERROR_FETCHING_STATES });
         });

@@ -33,7 +33,7 @@ RSpec.shared_examples 'a mentionable with EE-specific mentions' do
     expect(refs).to include(mentioned_epic)
   end
 
-  it 'creates cross-reference notes' do
+  it 'creates cross-reference notes', :clean_gitlab_redis_cache do
     mentioned_objects = [mentioned_epic]
 
     mentioned_objects.each do |referenced|

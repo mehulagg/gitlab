@@ -1192,7 +1192,7 @@ Total count of groups as of usage ping snapshot
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216180750_groups.yml)
 
-Group: `group::manage`
+Group: `group::access`
 
 Status: `data_available`
 
@@ -1296,15 +1296,15 @@ Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.groups_datadog_active`
 
-Missing description
+Count of groups with active integrations for Datadog
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216182549_groups_datadog_active.yml)
 
-Group: ``
+Group: `group::ecosystem`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.groups_discord_active`
 
@@ -1344,15 +1344,15 @@ Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.groups_ewm_active`
 
-Missing description
+Count of groups with active integrations for EWM
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216182616_groups_ewm_active.yml)
 
-Group: ``
+Group: `group::ecosystem`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.groups_external_wiki_active`
 
@@ -1512,15 +1512,15 @@ Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.groups_inheriting_datadog_active`
 
-Missing description
+Count of active groups inheriting integrations for Datadog
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216182557_groups_inheriting_datadog_active.yml)
 
-Group: ``
+Group: `group::ecosystem`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.groups_inheriting_discord_active`
 
@@ -1560,15 +1560,15 @@ Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.groups_inheriting_ewm_active`
 
-Missing description
+Count of active groups inheriting integrations for EWM
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216182623_groups_inheriting_ewm_active.yml)
 
-Group: ``
+Group: `group::ecosystem`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.groups_inheriting_external_wiki_active`
 
@@ -1704,27 +1704,27 @@ Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.groups_inheriting_mock_ci_active`
 
-Missing description
+Count of active groups inheriting integrations for Mock CI
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216182732_groups_inheriting_mock_ci_active.yml)
 
-Group: ``
+Group: `group::ecosystem`
 
-Status: `data_available`
+Status: `removed`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.groups_inheriting_mock_monitoring_active`
 
-Missing description
+Count of active groups inheriting integrations for Mock Monitoring
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216182743_groups_inheriting_mock_monitoring_active.yml)
 
-Group: ``
+Group: `group::ecosystem`
 
-Status: `data_available`
+Status: `removed`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.groups_inheriting_packagist_active`
 
@@ -1944,27 +1944,27 @@ Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.groups_mock_ci_active`
 
-Missing description
+Count of groups with active integrations for Mock CI
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216182724_groups_mock_ci_active.yml)
 
-Group: ``
+Group: `group::ecosystem`
 
-Status: `data_available`
+Status: `removed`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.groups_mock_monitoring_active`
 
-Missing description
+Count of groups with active integrations for Mock Monitoring
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216182736_groups_mock_monitoring_active.yml)
 
-Group: ``
+Group: `group::ecosystem`
 
-Status: `data_available`
+Status: `removed`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.groups_packagist_active`
 
@@ -2454,7 +2454,7 @@ Whether or not ModSecurity is set to blocking mode
 
 Group: `group::container security`
 
-Status: `deprecated`
+Status: `removed`
 
 Tiers: `free`, `premium`, `ultimate`
 
@@ -2466,7 +2466,7 @@ Whether or not ModSecurity is disabled within Ingress
 
 Group: `group::container security`
 
-Status: `deprecated`
+Status: `removed`
 
 Tiers: `free`, `premium`, `ultimate`
 
@@ -2478,7 +2478,7 @@ Whether or not ModSecurity is set to logging mode
 
 Group: `group::container security`
 
-Status: `deprecated`
+Status: `removed`
 
 Tiers: `free`, `premium`, `ultimate`
 
@@ -2490,7 +2490,7 @@ Whether or not ModSecurity has not been installed into the cluster
 
 Group: `group::container security`
 
-Status: `deprecated`
+Status: `removed`
 
 Tiers: `free`, `premium`, `ultimate`
 
@@ -2502,7 +2502,7 @@ Cumulative count of packets identified as anomalous by ModSecurity since Usage P
 
 Group: `group::container security`
 
-Status: `deprecated`
+Status: `removed`
 
 Tiers: `free`, `premium`, `ultimate`
 
@@ -2514,7 +2514,7 @@ Cumulative count of packets processed by ModSecurity since Usage Ping was last r
 
 Group: `group::container security`
 
-Status: `deprecated`
+Status: `removed`
 
 Tiers: `free`, `premium`, `ultimate`
 
@@ -2526,7 +2526,7 @@ Whether or not ModSecurity statistics are unavailable
 
 Group: `group::container security`
 
-Status: `deprecated`
+Status: `removed`
 
 Tiers: `ultimate`
 
@@ -2652,15 +2652,15 @@ Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.instances_datadog_active`
 
-Missing description
+Count of active instance-level integrations for Datadog
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216182553_instances_datadog_active.yml)
 
-Group: ``
+Group: `group::ecosystem`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.instances_discord_active`
 
@@ -2700,15 +2700,15 @@ Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.instances_ewm_active`
 
-Missing description
+Count of active instance-level integrations for EWM
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216182620_instances_ewm_active.yml)
 
-Group: ``
+Group: `group::ecosystem`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.instances_external_wiki_active`
 
@@ -2844,27 +2844,27 @@ Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.instances_mock_ci_active`
 
-Missing description
+Count of active instance-level integrations for  Mock CI
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216182728_instances_mock_ci_active.yml)
 
-Group: ``
+Group: `group::ecosystem`
 
-Status: `data_available`
+Status: `removed`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.instances_mock_monitoring_active`
 
-Missing description
+Count of active instance-level integrations for  Mock Monitoring
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216182739_instances_mock_monitoring_active.yml)
 
-Group: ``
+Group: `group::ecosystem`
 
-Status: `data_available`
+Status: `removed`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.instances_packagist_active`
 
@@ -3156,15 +3156,15 @@ Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.keys`
 
-Missing description
+Number of keys.
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216180752_keys.yml)
 
-Group: `group::manage`
+Group: `group::access`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.kubernetes_agent_gitops_sync`
 
@@ -3266,13 +3266,13 @@ Tiers: `premium`, `ultimate`
 
 Number of users that are linked to LDAP
 
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216174826_ldap_users.yml)
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_all/20210216174826_ldap_users.yml)
 
 Group: `group::access`
 
 Status: `data_available`
 
-Tiers: `free`, `premium`, `ultimate`
+Tiers: `premium`, `ultimate`
 
 ### `counts.lfs_objects`
 
@@ -4308,15 +4308,15 @@ Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.projects_datadog_active`
 
-Missing description
+Count of projects with active integrations for Datadog
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216182547_projects_datadog_active.yml)
 
-Group: ``
+Group: `group::ecosystem`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.projects_discord_active`
 
@@ -4356,15 +4356,15 @@ Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.projects_ewm_active`
 
-Missing description
+Count of projects with active integrations for EWM
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216182614_projects_ewm_active.yml)
 
-Group: ``
+Group: `group::ecosystem`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.projects_external_wiki_active`
 
@@ -4536,15 +4536,15 @@ Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.projects_inheriting_datadog_active`
 
-Missing description
+Count of active projects inheriting integrations for Datadog
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216182555_projects_inheriting_datadog_active.yml)
 
-Group: ``
+Group: `group::ecosystem`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.projects_inheriting_discord_active`
 
@@ -4584,15 +4584,15 @@ Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.projects_inheriting_ewm_active`
 
-Missing description
+Count of active projects inheriting integrations for EWM
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216182622_projects_inheriting_ewm_active.yml)
 
-Group: ``
+Group: `group::ecosystem`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.projects_inheriting_external_wiki_active`
 
@@ -4728,27 +4728,27 @@ Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.projects_inheriting_mock_ci_active`
 
-Missing description
+Count of active projects inheriting integrations for Mock CI
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216182730_projects_inheriting_mock_ci_active.yml)
 
-Group: ``
+Group: `group::ecosystem`
 
-Status: `data_available`
+Status: `removed`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.projects_inheriting_mock_monitoring_active`
 
-Missing description
+Count of active projects inheriting integrations for Mock Monitoring
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216182741_projects_inheriting_mock_monitoring_active.yml)
 
-Group: ``
+Group: `group::ecosystem`
 
-Status: `data_available`
+Status: `removed`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.projects_inheriting_packagist_active`
 
@@ -5040,27 +5040,27 @@ Tiers: `premium`, `ultimate`
 
 ### `counts.projects_mock_ci_active`
 
-Missing description
+Count of projects with active integrations for Mock CI
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216182722_projects_mock_ci_active.yml)
 
-Group: ``
+Group: `group::ecosystem`
 
-Status: `data_available`
+Status: `removed`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.projects_mock_monitoring_active`
 
-Missing description
+Count of projects with active integrations for Mock Monitoring
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216182734_projects_mock_monitoring_active.yml)
 
-Group: ``
+Group: `group::ecosystem`
 
-Status: `data_available`
+Status: `removed`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.projects_packagist_active`
 
@@ -5988,15 +5988,15 @@ Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.templates_datadog_active`
 
-Missing description
+Count of active service templates for Datadog
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216182551_templates_datadog_active.yml)
 
-Group: ``
+Group: `group::ecosystem`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.templates_discord_active`
 
@@ -6036,15 +6036,15 @@ Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.templates_ewm_active`
 
-Missing description
+Count of active service templates for EWM
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216182618_templates_ewm_active.yml)
 
-Group: ``
+Group: `group::ecosystem`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.templates_external_wiki_active`
 
@@ -6180,27 +6180,27 @@ Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.templates_mock_ci_active`
 
-Missing description
+Count of active service templates for Mock CI
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216182726_templates_mock_ci_active.yml)
 
-Group: ``
+Group: `group::ecosystem`
 
-Status: `data_available`
+Status: `removed`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.templates_mock_monitoring_active`
 
-Missing description
+Count of active service templates for Mock Monitoring
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216182738_templates_mock_monitoring_active.yml)
 
-Group: ``
+Group: `group::ecosystem`
 
-Status: `data_available`
+Status: `removed`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.templates_packagist_active`
 
@@ -7134,7 +7134,7 @@ Whether or not ModSecurity is enabled within Ingress
 
 Group: `group::container security`
 
-Status: `deprecated`
+Status: `removed`
 
 Tiers: `free`, `premium`, `ultimate`
 
@@ -7262,9 +7262,9 @@ Tiers: `premium`, `ultimate`
 
 Whether this is a trial license or not
 
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/settings/20210204124851_license_trial.yml)
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/license/20210204124851_license_trial.yml)
 
-Group: `group::product intelligence`
+Group: `group::license`
 
 Status: `data_available`
 
@@ -7348,11 +7348,11 @@ Whether Mattermost is enabled
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/settings/20210204124908_mattermost_enabled.yml)
 
-Group: `group::product intelligence`
+Group: `group::ecosystem`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `object_store.artifacts.enabled`
 
@@ -10440,123 +10440,123 @@ Tiers: `free`, `premium`, `ultimate`
 
 ### `redis_hll_counters.ecosystem.ecosystem_total_unique_counts_monthly`
 
-Missing description
+Number of users performing actions on Jira issues by month
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216184957_ecosystem_total_unique_counts_monthly.yml)
 
-Group: ``
+Group: `group::ecosystem`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `redis_hll_counters.ecosystem.ecosystem_total_unique_counts_weekly`
 
-Missing description
+Number of users performing actions on Jira issues by week
 
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_7d/20210216184955_ecosystem_total_unique_counts_weekly.yml)
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_7d/20210216184955_ecosystem_total_unique_counts_weekly.yml)
 
-Group: ``
+Group: `group::ecosystem`
 
 Status: `data_available`
 
-Tiers:
+Tiers: `free`, `premium`, `ultimate`
 
 ### `redis_hll_counters.ecosystem.i_ecosystem_jira_service_close_issue_monthly`
 
-Missing description
+Number of users closing Jira issues by month
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216184941_i_ecosystem_jira_service_close_issue_monthly.yml)
 
-Group: ``
+Group: `group::ecosystem`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `redis_hll_counters.ecosystem.i_ecosystem_jira_service_close_issue_weekly`
 
-Missing description
+Number of users closing Jira issues by week
 
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_7d/20210216184939_i_ecosystem_jira_service_close_issue_weekly.yml)
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_7d/20210216184939_i_ecosystem_jira_service_close_issue_weekly.yml)
 
-Group: ``
+Group: `group::ecosystem`
 
 Status: `data_available`
 
-Tiers:
+Tiers: `free`, `premium`, `ultimate`
 
 ### `redis_hll_counters.ecosystem.i_ecosystem_jira_service_create_issue_monthly`
 
-Missing description
+Number of users creating Jira issues by month
 
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216184953_i_ecosystem_jira_service_create_issue_monthly.yml)
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210216184953_i_ecosystem_jira_service_create_issue_monthly.yml)
 
-Group: ``
+Group: `group::ecosystem`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `premium`, `ultimate`
 
 ### `redis_hll_counters.ecosystem.i_ecosystem_jira_service_create_issue_weekly`
 
-Missing description
+Number of users creating Jira issues by week
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_7d/20210216184951_i_ecosystem_jira_service_create_issue_weekly.yml)
 
-Group: ``
+Group: `group::ecosystem`
 
 Status: `data_available`
 
-Tiers:
+Tiers: `premium`, `ultimate`
 
 ### `redis_hll_counters.ecosystem.i_ecosystem_jira_service_cross_reference_monthly`
 
-Missing description
+Number of users that cross-referenced Jira issues by month
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216184945_i_ecosystem_jira_service_cross_reference_monthly.yml)
 
-Group: ``
+Group: `group::ecosystem`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `redis_hll_counters.ecosystem.i_ecosystem_jira_service_cross_reference_weekly`
 
-Missing description
+Number of users that cross-referenced Jira issues by week
 
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_7d/20210216184943_i_ecosystem_jira_service_cross_reference_weekly.yml)
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_7d/20210216184943_i_ecosystem_jira_service_cross_reference_weekly.yml)
 
-Group: ``
+Group: `group::ecosystem`
 
 Status: `data_available`
 
-Tiers:
+Tiers: `free`, `premium`, `ultimate`
 
 ### `redis_hll_counters.ecosystem.i_ecosystem_jira_service_list_issues_monthly`
 
-Missing description
+Count of Jira Issue List visits by month
 
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216184949_i_ecosystem_jira_service_list_issues_monthly.yml)
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210216184949_i_ecosystem_jira_service_list_issues_monthly.yml)
 
-Group: ``
+Group: `group::ecosystem`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `premium`, `ultimate`
 
 ### `redis_hll_counters.ecosystem.i_ecosystem_jira_service_list_issues_weekly`
 
-Missing description
+Count of Jira Issue List visits by week
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_7d/20210216184947_i_ecosystem_jira_service_list_issues_weekly.yml)
 
-Group: ``
+Group: `group::ecosystem`
 
 Status: `data_available`
 
-Tiers:
+Tiers: `premium`, `ultimate`
 
 ### `redis_hll_counters.ecosystem.i_ecosystem_slack_service_confidential_issue_notification_monthly`
 
@@ -11205,6 +11205,30 @@ Group: `group::product planning`
 Status: `data_available`
 
 Tiers: `premium`, `ultimate`
+
+### `redis_hll_counters.epics_usage.g_project_management_users_epic_issue_added_from_epic_monthly`
+
+Number of users creating an issue from an epic
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210608191652_g_project_management_users_epic_issue_added_from_epic_monthly.yml)
+
+Group: `group::product planning`
+
+Status: `implemented`
+
+Tiers: `premium`
+
+### `redis_hll_counters.epics_usage.g_project_management_users_epic_issue_added_from_epic_weekly`
+
+Number of users creating an issue from an epic
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_7d/20210608191647_g_project_management_users_epic_issue_added_from_epic_weekly.yml)
+
+Group: `group::product planning`
+
+Status: `implemented`
+
+Tiers: `premium`
 
 ### `redis_hll_counters.epics_usage.g_project_management_users_removing_epic_emoji_monthly`
 
@@ -15580,11 +15604,11 @@ Whether incoming email is setup
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/settings/20210204124916_reply_by_email_enabled.yml)
 
-Group: `group::product intelligence`
+Group: `group::certify`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `search_unique_visits.i_search_advanced`
 
@@ -16260,6 +16284,18 @@ Status: `data_available`
 
 Tiers: `premium`, `ultimate`
 
+### `usage_activity_by_stage.enablement.counts.geo_node_usage.git_push_event_count_weekly`
+
+Number of Git push events from Prometheus on the Geo secondary
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_7d/20210604110603_git_push_event_count_weekly.yml)
+
+Group: `group::geo`
+
+Status: `data_available`
+
+Tiers: `premium`, `ultimate`
+
 ### `usage_activity_by_stage.enablement.geo_secondary_web_oauth_users`
 
 Missing description
@@ -16358,15 +16394,15 @@ Tiers: `premium`
 
 ### `usage_activity_by_stage.manage.groups`
 
-Missing description
+Number of users who are group members.
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216180756_groups.yml)
 
-Group: `group::manage`
+Group: `group::access`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `usage_activity_by_stage.manage.groups_imported`
 
@@ -16478,75 +16514,75 @@ Tiers: `free`
 
 ### `usage_activity_by_stage.manage.ldap_admin_sync_enabled`
 
-Has the instance configured LDAP Admin Sync `https://docs.gitlab.com/ee/administration/auth/ldap/#administrator-sync`?
+Has the instance configured [LDAP Admin Sync](https://docs.gitlab.com/ee/administration/auth/ldap/#administrator-sync)
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/settings/20210216180811_ldap_admin_sync_enabled.yml)
 
-Group: `group::manage`
+Group: `group::access`
 
 Status: `data_available`
 
-Tiers:
+Tiers: `premium`, `ultimate`
 
 ### `usage_activity_by_stage.manage.ldap_group_sync_enabled`
 
-Has the instance configured LDAP Group Sync `https://docs.gitlab.com/ee/administration/auth/ldap/#group-sync`?
+Has the instance configured [LDAP Group Sync](https://docs.gitlab.com/ee/administration/auth/ldap/#group-sync)
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/settings/20210216180809_ldap_group_sync_enabled.yml)
 
-Group: `group::manage`
+Group: `group::access`
 
 Status: `data_available`
 
-Tiers:
+Tiers: `premium`, `ultimate`
 
 ### `usage_activity_by_stage.manage.ldap_keys`
 
-Missing description
+Number of users creating keys synced as part of LDAP
 
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216180800_ldap_keys.yml)
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_all/20210216180800_ldap_keys.yml)
 
-Group: `group::manage`
+Group: `group::access`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `premium`, `ultimate`
 
 ### `usage_activity_by_stage.manage.ldap_servers`
 
-Number of LDAP servers configured for the instance `https://docs.gitlab.com/ee/administration/auth/ldap/#multiple-ldap-servers`
+Number of [LDAP servers configured for the instance](https://docs.gitlab.com/ee/administration/auth/ldap/#multiple-ldap-servers)
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_all/20210216180807_ldap_servers.yml)
 
-Group: `group::manage`
+Group: `group::access`
 
 Status: `data_available`
 
-Tiers:
+Tiers: `premium`, `ultimate`
 
 ### `usage_activity_by_stage.manage.ldap_users`
 
-Missing description
+Number of users that are linked to LDAP
 
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216180801_ldap_users.yml)
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_all/20210216180801_ldap_users.yml)
 
-Group: `group::manage`
+Group: `group::access`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `premium`, `ultimate`
 
 ### `usage_activity_by_stage.manage.omniauth_providers`
 
-Missing description
+Number of unique user logins using an OmniAuth provider
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216183400_omniauth_providers.yml)
 
-Group: ``
+Group: `group::access`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `usage_activity_by_stage.manage.project_imports.bitbucket`
 
@@ -16802,75 +16838,75 @@ Tiers: `free`
 
 ### `usage_activity_by_stage.manage.user_auth_by_provider.google_oauth2`
 
-Missing description
+Number of unique user logins using Google OAuth authentication
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216183410_google_oauth2.yml)
 
-Group: ``
+Group: `group::access`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `usage_activity_by_stage.manage.user_auth_by_provider.standard`
 
-Missing description
+Number of unique user logins using password authentication
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216183408_standard.yml)
 
-Group: ``
+Group: `group::access`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `usage_activity_by_stage.manage.user_auth_by_provider.two-factor`
 
-Missing description
+Number of unique user logins using two factor authentication
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216183402_two-factor.yml)
 
-Group: ``
+Group: `group::access`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `usage_activity_by_stage.manage.user_auth_by_provider.two-factor-via-u2f-device`
 
-Missing description
+Number of unique user logins using two factor via a U2F device
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216183404_two-factor-via-u2f-device.yml)
 
-Group: ``
+Group: `group::access`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `usage_activity_by_stage.manage.user_auth_by_provider.two-factor-via-webauthn-device`
 
-Missing description
+Number of unique user logins using two factor via a WebAuthn device
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216183406_two-factor-via-webauthn-device.yml)
 
-Group: ``
+Group: `group::access`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `usage_activity_by_stage.manage.users_created`
 
-Missing description
+Number of users
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216180758_users_created.yml)
 
-Group: `group::manage`
+Group: `group::access`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `usage_activity_by_stage.manage.value_stream_management_customized_group_stages`
 
@@ -18316,27 +18352,27 @@ Tiers: `free`, `premium`, `ultimate`
 
 ### `usage_activity_by_stage_monthly.manage.group_saml_enabled`
 
-Missing description
+Whether group SAML is enabled
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/settings/20210216180833_group_saml_enabled.yml)
 
-Group: `group::manage`
+Group: `group:access`
 
 Status: `data_available`
 
-Tiers:
+Tiers: `premium`, `ultimate`
 
 ### `usage_activity_by_stage_monthly.manage.groups`
 
-Missing description
+Number of users who are group members for last 28 days
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216180816_groups.yml)
 
-Group: `group::manage`
+Group: `group::access`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `usage_activity_by_stage_monthly.manage.groups_imported`
 
@@ -18448,43 +18484,43 @@ Tiers: `free`
 
 ### `usage_activity_by_stage_monthly.manage.ldap_admin_sync_enabled`
 
-Missing description
+Whether LDAP admin sync is enabled
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/settings/20210216180831_ldap_admin_sync_enabled.yml)
 
-Group: `group::manage`
+Group: `group::access`
 
 Status: `data_available`
 
-Tiers:
+Tiers: `premium`, `ultimate`
 
 ### `usage_activity_by_stage_monthly.manage.ldap_group_sync_enabled`
 
-Missing description
+Has the instance configured [LDAP Group Sync](https://docs.gitlab.com/ee/administration/auth/ldap/#group-sync)
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/settings/20210216180829_ldap_group_sync_enabled.yml)
 
-Group: `group::manage`
+Group: `group::acess`
 
 Status: `data_available`
 
-Tiers:
+Tiers: `premium`, `ultimate`
 
 ### `usage_activity_by_stage_monthly.manage.ldap_keys`
 
-Missing description
+Number of users creating keys synced as part of LDAP for last 28 days.
 
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216180820_ldap_keys.yml)
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210216180820_ldap_keys.yml)
 
-Group: `group::manage`
+Group: `group::acess`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `premium`, `ultimate`
 
 ### `usage_activity_by_stage_monthly.manage.ldap_servers`
 
-Missing description
+Number of LDAP servers configured
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210216180827_ldap_servers.yml)
 
@@ -18492,31 +18528,31 @@ Group: `group::manage`
 
 Status: `data_available`
 
-Tiers:
+Tiers: `premium`, `ultimate`
 
 ### `usage_activity_by_stage_monthly.manage.ldap_users`
 
-Missing description
+Number of users that are linked to LDAP
 
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216180822_ldap_users.yml)
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210216180822_ldap_users.yml)
 
-Group: `group::manage`
+Group: `group::access`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `premium`, `ultimate`
 
 ### `usage_activity_by_stage_monthly.manage.omniauth_providers`
 
-Missing description
+Number of unique user logins using an OmniAuth provider
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216183627_omniauth_providers.yml)
 
-Group: ``
+Group: `group::access`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `usage_activity_by_stage_monthly.manage.project_imports.bitbucket`
 
@@ -18772,63 +18808,63 @@ Tiers: `free`, `premium`, `ultimate`
 
 ### `usage_activity_by_stage_monthly.manage.user_auth_by_provider.google_oauth2`
 
-Missing description
+Number of unique user logins using Google OAuth authentication
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216183636_google_oauth2.yml)
 
-Group: ``
+Group: `group::access`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `usage_activity_by_stage_monthly.manage.user_auth_by_provider.standard`
 
-Missing description
+Number of unique user logins using password authentication
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216183634_standard.yml)
 
-Group: ``
+Group: `group::access`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `usage_activity_by_stage_monthly.manage.user_auth_by_provider.two-factor`
 
-Missing description
+Number of unique user logins using two factor authentication
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216183629_two-factor.yml)
 
-Group: ``
+Group: `group::access`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `usage_activity_by_stage_monthly.manage.user_auth_by_provider.two-factor-via-u2f-device`
 
-Missing description
+Number of unique user logins using two factor via a U2F device
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216183631_two-factor-via-u2f-device.yml)
 
-Group: ``
+Group: `group::access`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `usage_activity_by_stage_monthly.manage.user_auth_by_provider.two-factor-via-webauthn-device`
 
-Missing description
+Number of unique user logins using two factor via a WebAuthn device
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216183633_two-factor-via-webauthn-device.yml)
 
-Group: ``
+Group: `group::access`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `usage_activity_by_stage_monthly.manage.users_created`
 
@@ -18836,11 +18872,11 @@ Number of users created in the month
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216180818_users_created.yml)
 
-Group: `group::manage`
+Group: `group::access`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `usage_activity_by_stage_monthly.manage.value_stream_management_customized_group_stages`
 

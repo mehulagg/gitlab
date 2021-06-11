@@ -725,6 +725,28 @@ Example response:
 }
 ```
 
+### Download a Group avatar
+
+Get a group avatar. This endpoint can be accessed without authentication if the
+group is publicly accessible.
+
+```plaintext
+GET /groups/:id/avatar
+```
+
+| Attribute | Type           | Required | Description           |
+| --------- | -------------- | -------- | --------------------- |
+| `id`      | integer/string | yes      | ID of the group       |
+
+Example:
+
+```shell
+curl --header "PRIVATE-TOKEN: $GITLAB_LOCAL_TOKEN" \
+  --remote-header-name \
+  --remote-name \
+  "https://gitlab.example.com/api/v4/groups/4/avatar"
+```
+
 ### Disable the results limit **(FREE SELF)**
 
 The 100 results limit can break integrations developed using GitLab 12.4 and earlier.
@@ -772,6 +794,10 @@ Parameters:
 | `default_branch_protection`          | integer | no       | See [Options for `default_branch_protection`](#options-for-default_branch_protection). Default to the global level default branch protection setting.      |
 | `shared_runners_minutes_limit`       | integer | no       | **(PREMIUM SELF)** Pipeline minutes quota for this group (included in plan). Can be `nil` (default; inherit system default), `0` (unlimited) or `> 0` |
 | `extra_shared_runners_minutes_limit` | integer | no       | **(PREMIUM SELF)** Extra pipeline minutes quota for this group (purchased in addition to the minutes included in the plan). |
+
+NOTE:
+On GitLab SaaS, you must use the GitLab UI to create groups without a parent group. You cannot
+use the API to do this.
 
 ### Options for `default_branch_protection`
 
