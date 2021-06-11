@@ -54,7 +54,7 @@ RSpec.describe Projects::GroupLinks::CreateService, '#execute' do
           .with(project.id, group.id, group_access)
           .and_call_original
       )
-      expect(AuthorizedProjectUpdate::UserRefreshWithLowUrgencyWorker).to(
+      expect(AuthorizedProjectUpdate::UserRefreshFromReplicaWorker).to(
         receive(:bulk_perform_in)
           .with(1.hour,
                 array_including([user.id], [other_user.id]),
@@ -77,7 +77,7 @@ RSpec.describe Projects::GroupLinks::CreateService, '#execute' do
         expect(AuthorizedProjectUpdate::ProjectCreateWorker).not_to(
           receive(:perform_async)
         )
-        expect(AuthorizedProjectUpdate::UserRefreshWithLowUrgencyWorker).not_to(
+        expect(AuthorizedProjectUpdate::UserRefreshFromReplicaWorker).not_to(
           receive(:bulk_perform_in)
         )
 
