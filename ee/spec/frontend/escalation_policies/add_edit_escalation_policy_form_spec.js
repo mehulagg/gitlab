@@ -1,41 +1,39 @@
 import { GlLink } from '@gitlab/ui';
-import { shallowMount } from '@vue/test-utils';
 import AddEscalationPolicyForm, {
   i18n,
 } from 'ee/escalation_policies/components/add_edit_escalation_policy_form.vue';
 import EscalationRule from 'ee/escalation_policies/components/escalation_rule.vue';
-import { defaultEscalationRule } from 'ee/escalation_policies/constants';
-import { extendedWrapper } from 'helpers/vue_test_utils_helper';
-import mockPolicy from './mocks/mockPolicy.json';
+import { DEFAULT_ESCALATION_RULE } from 'ee/escalation_policies/constants';
+import { shallowMountExtended } from 'helpers/vue_test_utils_helper';
+
+import mockPolicies from './mocks/mockPolicies.json';
 
 describe('AddEscalationPolicyForm', () => {
   let wrapper;
   const projectPath = 'group/project';
 
   const createComponent = ({ props = {} } = {}) => {
-    wrapper = extendedWrapper(
-      shallowMount(AddEscalationPolicyForm, {
-        propsData: {
-          form: {
-            name: mockPolicy.name,
-            description: mockPolicy.description,
-          },
-          validationState: {
-            name: true,
-            rules: [],
-          },
-          ...props,
+    wrapper = shallowMountExtended(AddEscalationPolicyForm, {
+      propsData: {
+        form: {
+          name: mockPolicies[1].name,
+          description: mockPolicies[1].description,
         },
-        provide: {
-          projectPath,
+        validationState: {
+          name: true,
+          rules: [],
         },
-        mocks: {
-          $apollo: {
-            queries: { schedules: { loading: false } },
-          },
+        ...props,
+      },
+      provide: {
+        projectPath,
+      },
+      mocks: {
+        $apollo: {
+          queries: { schedules: { loading: false } },
         },
-      }),
-    );
+      },
+    });
   };
 
   beforeEach(() => {
@@ -46,22 +44,8 @@ describe('AddEscalationPolicyForm', () => {
     wrapper.destroy();
   });
 
-  const findPolicyName = () => wrapper.findByTestId('escalation-policy-name');
   const findRules = () => wrapper.findAllComponents(EscalationRule);
   const findAddRuleLink = () => wrapper.findComponent(GlLink);
-
-  describe('Escalation policy form validation', () => {
-    it('should set correct validation state for validated controls', async () => {
-      createComponent({
-        props: {
-          validationState: { name: false, rules: [false] },
-        },
-      });
-      await wrapper.vm.$nextTick();
-      expect(findPolicyName().attributes('state')).toBeUndefined();
-      expect(findRules().at(0).attributes('is-valid')).toBeUndefined();
-    });
-  });
 
   describe('Escalation rules', () => {
     it('should render one default rule', () => {
@@ -79,7 +63,7 @@ describe('AddEscalationPolicyForm', () => {
       await wrapper.vm.$nextTick();
       const rules = findRules();
       expect(rules.length).toBe(2);
-      expect(rules.at(1).props('rule')).toMatchObject(defaultEscalationRule);
+      expect(rules.at(1).props('rule')).toMatchObject(DEFAULT_ESCALATION_RULE);
     });
 
     it('should NOT emit updates when rule is added', async () => {
@@ -96,7 +80,7 @@ describe('AddEscalationPolicyForm', () => {
       };
       findRules().at(0).vm.$emit('update-escalation-rule', 0, updatedRule);
       expect(wrapper.emitted('update-escalation-policy-form')[0]).toEqual([
-        { field: 'rules', value: [updatedRule] },
+        { field: 'rules', value: [expect.objectContaining(updatedRule)] },
       ]);
     });
 

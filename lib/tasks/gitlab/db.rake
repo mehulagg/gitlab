@@ -209,7 +209,7 @@ namespace :gitlab do
         raise "Index not found or not supported: #{args[:index_name]}" if indexes.empty?
       end
 
-      ActiveRecord::Base.logger = Logger.new(STDOUT) if Gitlab::Utils.to_boolean(ENV['LOG_QUERIES_TO_CONSOLE'], default: false)
+      ActiveRecord::Base.logger = Logger.new($stdout) if Gitlab::Utils.to_boolean(ENV['LOG_QUERIES_TO_CONSOLE'], default: false)
 
       Gitlab::Database::Reindexing.perform(indexes)
     rescue StandardError => e
@@ -240,9 +240,7 @@ namespace :gitlab do
     desc 'Run migrations with instrumentation'
     task migration_testing: :environment do
       result_dir = Gitlab::Database::Migrations::Instrumentation::RESULT_DIR
-      raise "Directory exists already, won't overwrite: #{result_dir}" if File.exist?(result_dir)
-
-      Dir.mkdir(result_dir)
+      FileUtils.mkdir_p(result_dir)
 
       verbose_was = ActiveRecord::Migration.verbose
       ActiveRecord::Migration.verbose = true

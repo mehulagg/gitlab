@@ -739,7 +739,7 @@ When enabled, access logs are generated in
 packages or in `/home/git/gitlab/log/sidekiq_exporter.log` for
 installations from source.
 
-If Prometheus metrics and the Web Exporter are both enabled, Puma/Unicorn
+If Prometheus metrics and the Web Exporter are both enabled, Puma
 starts a Web server and listen to the defined port (default: `8083`), and access logs
 are generated:
 
@@ -789,7 +789,7 @@ Line breaks have been added to the following example line for clarity:
 
 This file logs the information about exceptions being tracked by
 `Gitlab::ErrorTracking`, which provides a standard and consistent way of
-[processing rescued exceptions](https://gitlab.com/gitlab-org/gitlab/blob/master/doc/development/logging.md#exception-handling). This file is stored in:
+[processing rescued exceptions](https://gitlab.com/gitlab-org/gitlab/-/blob/master/doc/development/logging.md#exception-handling). This file is stored in:
 
 - `/var/log/gitlab/gitlab-rails/exceptions_json.log` for Omnibus GitLab packages.
 - `/home/git/gitlab/log/exceptions_json.log` for installations from source.

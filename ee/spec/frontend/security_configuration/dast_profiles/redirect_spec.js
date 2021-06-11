@@ -5,11 +5,12 @@ import * as urlUtility from '~/lib/utils/url_utility';
 const fullPath = 'group/project';
 const profilesLibraryPath = `${TEST_HOST}/${fullPath}/-/security/configuration/dast_scans`;
 const onDemandScansPath = `${TEST_HOST}/${fullPath}/-/on_demand_scans`;
+const dastConfigPath = `${TEST_HOST}/${fullPath}/-/security/configuration/dast`;
 const urlParamKey = 'site_profile_id';
 const originalReferrer = document.referrer;
 
 const params = {
-  onDemandScansPath,
+  allowedPaths: [onDemandScansPath, dastConfigPath],
   profilesLibraryPath,
   urlParamKey,
 };
@@ -38,9 +39,12 @@ describe('DAST Profiles redirector', () => {
       expect(urlUtility.redirectTo).toHaveBeenCalledWith(profilesLibraryPath);
     });
 
-    describe('when a referrer is set', () => {
+    describe.each([
+      ['On-demand scans', onDemandScansPath],
+      ['DAST Configuration', dastConfigPath],
+    ])('when previous page is %s', (_pathName, path) => {
       beforeEach(() => {
-        setReferrer();
+        setReferrer(path);
       });
 
       afterEach(() => {
@@ -49,14 +53,12 @@ describe('DAST Profiles redirector', () => {
 
       it('redirects to previous page', () => {
         factory();
-        expect(urlUtility.redirectTo).toHaveBeenCalledWith(onDemandScansPath);
+        expect(urlUtility.redirectTo).toHaveBeenCalledWith(path);
       });
 
       it('redirects to previous page with id', () => {
         factory({ id: 2 });
-        expect(urlUtility.redirectTo).toHaveBeenCalledWith(
-          `${onDemandScansPath}?site_profile_id=2`,
-        );
+        expect(urlUtility.redirectTo).toHaveBeenCalledWith(`${path}?site_profile_id=2`);
       });
     });
   });

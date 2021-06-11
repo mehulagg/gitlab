@@ -8,10 +8,12 @@ module Gitlab
       USER_SESSIONS_LOOKUP_NAMESPACE = 'session:lookup:user:gitlab'
       IP_SESSIONS_LOOKUP_NAMESPACE = 'session:lookup:ip:gitlab2'
 
-      class << self
-        def default_url
-          'redis://localhost:6382'
-        end
+      private
+
+      def raw_config_hash
+        config = super
+        config[:url] = 'redis://localhost:6382' if config[:url].blank?
+        config
       end
     end
   end

@@ -41,6 +41,38 @@ RSpec.describe Iterations::Cadences::CreateService do
           expect(iteration_cadence.active).to eq(true)
           expect(iteration_cadence.automatic).to eq(true)
         end
+
+        context 'create manual cadence' do
+          context 'when duration_in_weeks: nil and iterations_in_advance: nil' do
+            before do
+              params.merge!(automatic: false, duration_in_weeks: nil, iterations_in_advance: nil)
+            end
+
+            it 'creates an iteration cadence' do
+              expect(response.success?).to be_truthy
+              expect(iteration_cadence).to be_persisted
+              expect(iteration_cadence.title).to eq('My iteration cadence')
+              expect(iteration_cadence.duration_in_weeks).to be_nil
+              expect(iteration_cadence.iterations_in_advance).to be_nil
+              expect(iteration_cadence.active).to eq(true)
+              expect(iteration_cadence.automatic).to eq(false)
+            end
+          end
+
+          context 'with out list of values for duration_in_weeks, iterations_in_advance' do
+            before do
+              params.merge!(automatic: false, duration_in_weeks: 15, iterations_in_advance: 15)
+            end
+
+            it 'does not create an iteration cadence but returns errors' do
+              expect(response.error?).to be_truthy
+              expect(errors).to match([
+                "Duration in weeks is not included in the list",
+                "Iterations in advance is not included in the list"
+              ])
+            end
+          end
+        end
       end
 
       context 'invalid params' do
@@ -50,13 +82,30 @@ RSpec.describe Iterations::Cadences::CreateService do
           }
         end
 
-        it 'does not create an iteration cadence but returns errors' do
-          expect(response.error?).to be_truthy
-          expect(errors).to match([
-            "Start date can't be blank",
-            "Duration in weeks can't be blank",
-            "Iterations in advance can't be blank"
-          ])
+        context 'when duration_in_weeks: nil and iterations_in_advance: nil' do
+          it 'does not create an iteration cadence but returns errors' do
+            expect(response.error?).to be_truthy
+            expect(errors).to match([
+              "Start date can't be blank",
+              "Duration in weeks can't be blank",
+              "Iterations in advance can't be blank"
+            ])
+          end
+        end
+
+        context 'with out of list values for duration_in_weeks and iterations_in_advance' do
+          before do
+            params.merge!(duration_in_weeks: 15, iterations_in_advance: 15)
+          end
+
+          it 'does not create an iteration cadence but returns errors' do
+            expect(response.error?).to be_truthy
+            expect(errors).to match([
+              "Start date can't be blank",
+              "Duration in weeks is not included in the list",
+              "Iterations in advance is not included in the list"
+            ])
+          end
         end
       end
 
@@ -92,6 +141,26 @@ RSpec.describe Iterations::Cadences::CreateService do
 
         it 'creates new iteration cadence' do
           expect { response }.to change { Iterations::Cadence.count }.by(1)
+        end
+      end
+
+      context 'when create cadence can be automated' do
+        it 'invokes worker to create iterations in advance' do
+          params[:automatic] = true
+
+          expect(::Iterations::Cadences::CreateIterationsWorker).to receive(:perform_async)
+
+          response
+        end
+      end
+
+      context 'when create cadence is not automated' do
+        it 'invokes worker to create iterations in advance' do
+          params[:automatic] = false
+
+          expect(::Iterations::Cadences::CreateIterationsWorker).not_to receive(:perform_async)
+
+          response
         end
       end
     end

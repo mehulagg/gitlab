@@ -62,6 +62,9 @@ The [default ruleset provided by Gitleaks](https://gitlab.com/gitlab-org/securit
 - Password in URL
 - U.S. Social Security Number
 
+WARNING:
+Gitleaks does not support scanning binary files.
+
 ## Requirements
 
 To run Secret Detection jobs, by default, you need GitLab Runner with the
@@ -97,7 +100,8 @@ as shown in the following table:
 
 ## Configuration
 
-> GitLab 13.1 splits Secret Detection from the [SAST configuration](../sast#configuration) into its own CI/CD template. If you're using GitLab 13.0 or earlier and SAST is enabled, then Secret Detection is already enabled.
+> - In GitLab 13.1, Secret Detection was split from the [SAST configuration](../sast#configuration) into its own CI/CD template. If you're using GitLab 13.0 or earlier and SAST is enabled, then Secret Detection is already enabled.
+> - [In GitLab 14.0](https://gitlab.com/gitlab-org/gitlab/-/issues/297269), Secret Detection jobs `secret_detection_default_branch` and `secret_detection` were consolidated into one job, `secret_detection`.
 
 Secret Detection is performed by a [specific analyzer](https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/Security/Secret-Detection.gitlab-ci.yml)
 during the `secret-detection` job. It runs regardless of your app's programming language.
@@ -174,7 +178,7 @@ is no longer supported. When overriding the template, you must use [`rules`](../
 
 #### GIT_DEPTH
 
-The [`GIT_DEPTH` CI/CD variable](../../../ci/runners/README.md#shallow-cloning) affects Secret Detection.
+The [`GIT_DEPTH` CI/CD variable](../../../ci/runners/configure_runners.md#shallow-cloning) affects Secret Detection.
 The Secret Detection analyzer relies on generating patches between commits to scan content for
 secrets. If you override the default, ensure the value is greater than 1. If the number of commits
 in an MR is greater than the GIT_DEPTH value, Secret Detection will [fail to detect secrets](#error-couldnt-run-the-gitleaks-command-exit-status-2).
@@ -396,7 +400,7 @@ ERRO[2020-11-18T18:05:52Z] object not found
 [ERRO] [secrets] [2020-11-18T18:05:52Z] ▶ Gitleaks analysis failed: exit status 2
 ```
 
-To resolve the issue, set the [`GIT_DEPTH` CI/CD variable](../../../ci/runners/README.md#shallow-cloning)
+To resolve the issue, set the [`GIT_DEPTH` CI/CD variable](../../../ci/runners/configure_runners.md#shallow-cloning)
 to a higher value. To apply this only to the Secret Detection job, the following can be added to
 your `.gitlab-ci.yml` file:
 

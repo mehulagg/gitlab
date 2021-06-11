@@ -46,6 +46,7 @@ export default {
         ? ErrorMessages.fetchEpicsError
         : ErrorMessages.fetchIssueError;
     Vue.set(state.listsFlags, listId, { isLoading: false, isLoadingMore: false });
+    Vue.set(state.boardItemsByListId, listId, state.backupItemsList);
   },
 
   [mutationTypes.TOGGLE_EPICS_SWIMLANES]: (state) => {
@@ -90,16 +91,6 @@ export default {
     if (canAdminEpic !== undefined) {
       state.canAdminEpic = canAdminEpic;
     }
-  },
-
-  [mutationTypes.UPDATE_CACHED_EPICS]: (state, epics) => {
-    epics.forEach((e) => {
-      Vue.set(state.epicsCacheById, e.id, e);
-    });
-  },
-
-  [mutationTypes.SET_EPIC_FETCH_IN_PROGRESS]: (state, val) => {
-    state.epicFetchInProgress = val;
   },
 
   [mutationTypes.RESET_EPICS]: (state) => {

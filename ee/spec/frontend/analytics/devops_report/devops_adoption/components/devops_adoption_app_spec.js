@@ -102,18 +102,6 @@ describe('DevopsAdoptionApp', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
-  });
-
-  describe('when loading', () => {
-    beforeEach(() => {
-      const mockApollo = createMockApolloProvider();
-      wrapper = createComponent({ mockApollo });
-    });
-
-    it('does not render the modal', () => {
-      expect(wrapper.find(DevopsAdoptionSegmentModal).exists()).toBe(false);
-    });
   });
 
   describe('initial request', () => {
@@ -121,19 +109,6 @@ describe('DevopsAdoptionApp', () => {
 
     afterEach(() => {
       groupsSpy = null;
-    });
-
-    describe('when no group data is present', () => {
-      beforeEach(async () => {
-        groupsSpy = jest.fn().mockResolvedValueOnce({ __typename: 'Groups', nodes: [] });
-        const mockApollo = createMockApolloProvider({ groupsSpy });
-        wrapper = createComponent({ mockApollo });
-        await waitForPromises();
-      });
-
-      it('does not render the segment modal', () => {
-        expect(wrapper.find(DevopsAdoptionSegmentModal).exists()).toBe(false);
-      });
     });
 
     describe('when group data is present', () => {
@@ -162,10 +137,6 @@ describe('DevopsAdoptionApp', () => {
         const mockApollo = createMockApolloProvider({ groupsSpy });
         wrapper = createComponent({ mockApollo });
         await waitForPromises();
-      });
-
-      it('does not render the segment modal', () => {
-        expect(wrapper.find(DevopsAdoptionSegmentModal).exists()).toBe(false);
       });
 
       it('should fetch data once', () => {
@@ -249,10 +220,6 @@ describe('DevopsAdoptionApp', () => {
         const mockApollo = createMockApolloProvider({ groupsSpy });
         wrapper = createComponent({ mockApollo });
         await waitForPromises();
-      });
-
-      it('does not render the segment modal', () => {
-        expect(wrapper.find(DevopsAdoptionSegmentModal).exists()).toBe(false);
       });
 
       it('should fetch data twice', () => {

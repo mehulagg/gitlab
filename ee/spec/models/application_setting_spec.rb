@@ -166,24 +166,6 @@ RSpec.describe ApplicationSetting do
       end
     end
 
-    context 'when validating compliance_frameworks' do
-      where(:compliance_frameworks, :is_valid) do
-        [1, 2, 3, 4, 5] | true
-        nil             | true
-        1               | true
-        [2, 3, 4, 6]    | false
-        6               | false
-      end
-
-      with_them do
-        specify do
-          setting.compliance_frameworks = compliance_frameworks
-
-          expect(setting.valid?).to eq(is_valid)
-        end
-      end
-    end
-
     context 'when license presented' do
       let_it_be(:max_active_user_count) { 20 }
 

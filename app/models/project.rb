@@ -127,14 +127,10 @@ class Project < ApplicationRecord
   after_create :check_repository_absence!
 
   acts_as_ordered_taggable_on :topics
-  # The 'tag_list' alias and the 'tags' association are required during the 'tags -> topics' migration
-  # TODO: eliminate 'tag_list' and 'tags' in the further process of the migration
+  # The 'tag_list' alias is required during the 'tags -> topics' migration
+  # TODO: eliminate 'tag_list' in the further process of the migration
   # https://gitlab.com/gitlab-org/gitlab/-/issues/328226
   alias_attribute :tag_list, :topic_list
-  has_many :tags, -> { order("#{ActsAsTaggableOn::Tagging.table_name}.id") },
-                     class_name: 'ActsAsTaggableOn::Tag',
-                     through: :topic_taggings,
-                     source: :tag
 
   attr_accessor :old_path_with_namespace
   attr_accessor :template_name
@@ -155,14 +151,14 @@ class Project < ApplicationRecord
   has_many :boards
 
   # Project integrations
-  has_one :asana_service, class_name: 'Integrations::Asana'
-  has_one :assembla_service, class_name: 'Integrations::Assembla'
-  has_one :bamboo_service, class_name: 'Integrations::Bamboo'
-  has_one :bugzilla_service, class_name: 'Integrations::Bugzilla'
-  has_one :buildkite_service, class_name: 'Integrations::Buildkite'
-  has_one :campfire_service, class_name: 'Integrations::Campfire'
-  has_one :confluence_service, class_name: 'Integrations::Confluence'
-  has_one :custom_issue_tracker_service, class_name: 'Integrations::CustomIssueTracker'
+  has_one :asana_integration, class_name: 'Integrations::Asana'
+  has_one :assembla_integration, class_name: 'Integrations::Assembla'
+  has_one :bamboo_integration, class_name: 'Integrations::Bamboo'
+  has_one :bugzilla_integration, class_name: 'Integrations::Bugzilla'
+  has_one :buildkite_integration, class_name: 'Integrations::Buildkite'
+  has_one :campfire_integration, class_name: 'Integrations::Campfire'
+  has_one :confluence_integration, class_name: 'Integrations::Confluence'
+  has_one :custom_issue_tracker_integration, class_name: 'Integrations::CustomIssueTracker'
   has_one :datadog_service, class_name: 'Integrations::Datadog'
   has_one :discord_service, class_name: 'Integrations::Discord'
   has_one :drone_ci_service, class_name: 'Integrations::DroneCi'
@@ -175,6 +171,7 @@ class Project < ApplicationRecord
   has_one :jenkins_service, class_name: 'Integrations::Jenkins'
   has_one :jira_service, class_name: 'Integrations::Jira'
   has_one :mattermost_service, class_name: 'Integrations::Mattermost'
+  has_one :mattermost_slash_commands_service, class_name: 'Integrations::MattermostSlashCommands'
   has_one :microsoft_teams_service, class_name: 'Integrations::MicrosoftTeams'
   has_one :mock_ci_service, class_name: 'Integrations::MockCi'
   has_one :packagist_service, class_name: 'Integrations::Packagist'
@@ -183,12 +180,11 @@ class Project < ApplicationRecord
   has_one :pushover_service, class_name: 'Integrations::Pushover'
   has_one :redmine_service, class_name: 'Integrations::Redmine'
   has_one :slack_service, class_name: 'Integrations::Slack'
+  has_one :slack_slash_commands_service, class_name: 'Integrations::SlackSlashCommands'
   has_one :teamcity_service, class_name: 'Integrations::Teamcity'
   has_one :unify_circuit_service, class_name: 'Integrations::UnifyCircuit'
   has_one :webex_teams_service, class_name: 'Integrations::WebexTeams'
   has_one :youtrack_service, class_name: 'Integrations::Youtrack'
-  has_one :mattermost_slash_commands_service
-  has_one :slack_slash_commands_service
   has_one :prometheus_service, inverse_of: :project
   has_one :mock_monitoring_service
 
@@ -637,7 +633,7 @@ class Project < ApplicationRecord
   mount_uploader :bfg_object_map, AttachmentUploader
 
   def self.with_api_entity_associations
-    preload(:project_feature, :route, :tags, :group, :timelogs, namespace: [:route, :owner])
+    preload(:project_feature, :route, :topics, :group, :timelogs, namespace: [:route, :owner])
   end
 
   def self.with_web_entity_associations
@@ -2364,7 +2360,7 @@ class Project < ApplicationRecord
   end
 
   def mark_primary_write_location
-    # Overriden in EE
+    ::Gitlab::Database::LoadBalancing::Sticking.mark_primary_write_location(:project, self.id)
   end
 
   def toggle_ci_cd_settings!(settings_attribute)
@@ -2616,6 +2612,15 @@ class Project < ApplicationRecord
     !!read_attribute(:merge_requests_author_approval)
   end
 
+  def container_registry_enabled
+    if Feature.enabled?(:read_container_registry_access_level, self.namespace, default_enabled: :yaml)
+      project_feature.container_registry_enabled?
+    else
+      read_attribute(:container_registry_enabled)
+    end
+  end
+  alias_method :container_registry_enabled?, :container_registry_enabled
+
   private
 
   def set_container_registry_access_level
@@ -2645,7 +2650,7 @@ class Project < ApplicationRecord
   end
 
   def build_service(name)
-    Integration.service_name_to_model(name).new(project_id: id)
+    Integration.integration_name_to_model(name).new(project_id: id)
   end
 
   def services_templates

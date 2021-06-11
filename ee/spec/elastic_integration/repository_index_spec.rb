@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe 'Repository index', :elastic do
+RSpec.describe 'Repository index', :elastic, :clean_gitlab_redis_shared_state do
   context 'when fresh master branch is first pushed, followed by another update, then indexed' do
     let(:project) { create(:project_empty_repo) }
     let(:user) { project.owner }

@@ -409,11 +409,6 @@ module EE
         feature_available?(:github_project_service_integration)
     end
 
-    override :mark_primary_write_location
-    def mark_primary_write_location
-      ::Gitlab::Database::LoadBalancing::Sticking.mark_primary_write_location(:project, self.id)
-    end
-
     override :add_import_job
     def add_import_job
       return if gitlab_custom_project_template_import?

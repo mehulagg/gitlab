@@ -13,7 +13,7 @@ RSpec.describe InstanceSecurityDashboardPolicy do
   subject { described_class.new(current_user, [user]) }
 
   describe 'read_instance_security_dashboard' do
-    let(:abilities) { %i[read_instance_security_dashboard read_vulnerability] }
+    let(:abilities) { %i[read_instance_security_dashboard read_security_resource] }
 
     context 'when the user is not logged in' do
       let(:current_user) { nil }

@@ -19,7 +19,9 @@ class Groups::Analytics::RepositoryAnalyticsController < Groups::Analytics::Appl
   def pageview_tracker_params
     {
       label: 'group_id',
-      value: @group.id
+      value: @group.id,
+      user: current_user,
+      namespace: @group
     }
   end
 end

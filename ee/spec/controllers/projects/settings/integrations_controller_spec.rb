@@ -31,21 +31,21 @@ RSpec.describe Projects::Settings::IntegrationsController do
     let(:active_services) { assigns(:integrations).map(&:model_name) }
     let(:disabled_services) { %w[Integrations::Github] }
 
-    it 'enables SlackSlashCommandsService and disables GitlabSlackApplication' do
+    it 'enables SlackSlashCommands and disables GitlabSlackApplication' do
       get :show, params: { namespace_id: project.namespace, project_id: project }
 
-      expect(active_services).to include('SlackSlashCommandsService')
+      expect(active_services).to include('Integrations::SlackSlashCommands')
       expect(active_services).not_to include('Integrations::GitlabSlackApplication')
     end
 
-    it 'enables GitlabSlackApplication and disables SlackSlashCommandsService' do
+    it 'enables GitlabSlackApplication and disables SlackSlashCommands' do
       stub_application_setting(slack_app_enabled: true)
       allow(::Gitlab).to receive(:com?).and_return(true)
 
       get :show, params: { namespace_id: project.namespace, project_id: project }
 
       expect(active_services).to include('Integrations::GitlabSlackApplication')
-      expect(active_services).not_to include('SlackSlashCommandsService')
+      expect(active_services).not_to include('Integrations::SlackSlashCommands')
     end
 
     context 'without a license key' do

@@ -2,6 +2,7 @@ import { GlDrawer } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
 import Vuex from 'vuex';
 import EpicBoardContentSidebar from 'ee_component/boards/components/epic_board_content_sidebar.vue';
+import SidebarAncestorsWidget from 'ee_component/sidebar/components/ancestors_tree/sidebar_ancestors_widget.vue';
 import { stubComponent } from 'helpers/stub_component';
 import BoardSidebarLabelsSelect from '~/boards/components/sidebar/board_sidebar_labels_select.vue';
 import BoardSidebarTitle from '~/boards/components/sidebar/board_sidebar_title.vue';
@@ -98,6 +99,9 @@ describe('EpicBoardContentSidebar', () => {
 
   it('renders SidebarSubscriptionsWidget', () => {
     expect(wrapper.findComponent(SidebarSubscriptionsWidget).exists()).toBe(true);
+  });
+  it('renders SidebarAncestorsWidget', () => {
+    expect(wrapper.findComponent(SidebarAncestorsWidget).exists()).toBe(true);
   });
 
   describe('when we emit close', () => {

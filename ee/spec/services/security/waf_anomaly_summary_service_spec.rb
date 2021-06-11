@@ -112,7 +112,7 @@ RSpec.describe Security::WafAnomalySummaryService do
     context 'with environment missing external_url' do
       before do
         allow(environment.deployment_platform.cluster).to receive_message_chain(
-          :application_elastic_stack, :elasticsearch_client
+          :integration_elastic_stack, :elasticsearch_client
         ) { es_client }
 
         allow(environment).to receive(:external_url) { nil }
@@ -130,10 +130,10 @@ RSpec.describe Security::WafAnomalySummaryService do
         end
 
         allow(environment.deployment_platform.cluster).to receive_message_chain(
-          :application_elastic_stack, :elasticsearch_client
+          :integration_elastic_stack, :elasticsearch_client
         ) { es_client }
         allow(environment.deployment_platform.cluster).to receive_message_chain(
-          :application_elastic_stack, :chart_above_v3?
+          :integration_elastic_stack, :chart_above_v3?
         ) { chart_above_v3 }
       end
 

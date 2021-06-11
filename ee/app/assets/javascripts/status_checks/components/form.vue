@@ -2,6 +2,7 @@
 import { GlAlert, GlFormGroup, GlFormInput } from '@gitlab/ui';
 import * as Sentry from '@sentry/browser';
 import { isEqual, isNumber } from 'lodash';
+import ProtectedBranchesSelector from 'ee/vue_shared/components/branches_selector/protected_branches_selector.vue';
 import { isSafeURL } from '~/lib/utils/url_utility';
 import { __, s__ } from '~/locale';
 import {
@@ -10,11 +11,10 @@ import {
   NAME_TAKEN_SERVER_ERROR,
   URL_TAKEN_SERVER_ERROR,
 } from '../constants';
-import BranchesSelect from './branches_select.vue';
 
 export default {
   components: {
-    BranchesSelect,
+    ProtectedBranchesSelector,
     GlAlert,
     GlFormGroup,
     GlFormInput,
@@ -49,23 +49,30 @@ export default {
   },
   computed: {
     isValid() {
-      return this.nameState && this.urlState && this.branchesState;
+      return this.isValidName && this.isValidUrl && this.isValidBranches;
+    },
+    isValidBranches() {
+      return this.branches.every((branch) => isEqual(branch, ANY_BRANCH) || isNumber(branch?.id));
+    },
+    isValidName() {
+      return Boolean(this.name);
+    },
+    isValidUrl() {
+      return Boolean(this.url) && isSafeURL(this.url);
     },
     branchesState() {
-      return !this.showValidation || this.checkBranchesValidity(this.branches);
+      return !this.showValidation || this.isValidBranches;
     },
     nameState() {
       return (
         !this.showValidation ||
-        (this.checkNameValidity(this.name) &&
-          !this.serverValidationErrors.includes(NAME_TAKEN_SERVER_ERROR))
+        (this.isValidName && !this.serverValidationErrors.includes(NAME_TAKEN_SERVER_ERROR))
       );
     },
     urlState() {
       return (
         !this.showValidation ||
-        (this.checkUrlValidity(this.url) &&
-          !this.serverValidationErrors.includes(URL_TAKEN_SERVER_ERROR))
+        (this.isValidUrl && !this.serverValidationErrors.includes(URL_TAKEN_SERVER_ERROR))
       );
     },
     invalidNameMessage() {
@@ -104,15 +111,6 @@ export default {
       }
 
       this.branchesApiFailed = hasErrored;
-    },
-    checkBranchesValidity(branches) {
-      return branches.every((branch) => isEqual(branch, ANY_BRANCH) || isNumber(branch?.id));
-    },
-    checkNameValidity(name) {
-      return Boolean(name);
-    },
-    checkUrlValidity(url) {
-      return Boolean(url) && isSafeURL(url);
     },
   },
   i18n: {
@@ -184,7 +182,7 @@ export default {
         :invalid-feedback="$options.i18n.validations.branchesRequired"
         data-testid="branches-group"
       >
-        <branches-select
+        <protected-branches-selector
           v-model="branchesToAdd"
           :project-id="projectId"
           :is-invalid="!branchesState"

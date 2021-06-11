@@ -19,7 +19,7 @@ module Ci
       raise InvalidQueueTransition unless transition.to == 'pending'
 
       transition.within_transaction do
-        result = ::Ci::PendingBuild.upsert_from_build!(build)
+        result = build.create_queuing_entry!
 
         unless result.empty?
           metrics.increment_queue_operation(:build_queue_push)
@@ -42,6 +42,47 @@ module Ci
 
         if removed > 0
           metrics.increment_queue_operation(:build_queue_pop)
+
+          build.id
+        end
+      end
+    end
+
+    ##
+    # Add shared runner build tracking entry (used for queuing).
+    #
+    def track(build, transition)
+      return unless Feature.enabled?(:ci_track_shared_runner_builds, build.project, default_enabled: :yaml)
+      return unless build.shared_runner_build?
+
+      raise InvalidQueueTransition unless transition.to == 'running'
+
+      transition.within_transaction do
+        result = ::Ci::RunningBuild.upsert_shared_runner_build!(build)
+
+        unless result.empty?
+          metrics.increment_queue_operation(:shared_runner_build_new)
+
+          result.rows.dig(0, 0)
+        end
+      end
+    end
+
+    ##
+    # Remove a runtime build tracking entry for a shared runner build (used for
+    # queuing).
+    #
+    def untrack(build, transition)
+      return unless Feature.enabled?(:ci_untrack_shared_runner_builds, build.project, default_enabled: :yaml)
+      return unless build.shared_runner_build?
+
+      raise InvalidQueueTransition unless transition.from == 'running'
+
+      transition.within_transaction do
+        removed = build.all_runtime_metadata.delete_all
+
+        if removed > 0
+          metrics.increment_queue_operation(:shared_runner_build_done)
 
           build.id
         end

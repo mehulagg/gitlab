@@ -28,7 +28,7 @@ module Projects
         def vulnerability
           @vulnerability ||= @project.vulnerabilities.find(params[:vulnerability_id])
 
-          return render_404 unless can?(current_user, :read_vulnerability, @vulnerability)
+          return render_404 unless can?(current_user, :read_security_resource, @vulnerability)
 
           @vulnerability
         end

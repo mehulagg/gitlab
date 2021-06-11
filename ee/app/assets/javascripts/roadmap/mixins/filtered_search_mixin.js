@@ -52,6 +52,7 @@ export default {
           symbol: '@',
           token: AuthorToken,
           operators: OPERATOR_IS_ONLY,
+          recentTokenValuesStorageKey: `${this.groupFullPath}-epics-recent-tokens-author_username`,
           fetchAuthors: Api.users.bind(Api),
         },
         {

@@ -22,6 +22,7 @@ module Gitlab
         verification_succeeded: 2,
         verification_failed: 3
       }.freeze
+
       VERIFICATION_TIMEOUT = 8.hours
 
       included do
@@ -54,9 +55,14 @@ module Gitlab
             instance.verification_started_at = Time.current
           end
 
-          before_transition any => :verification_pending do |instance, _|
-            instance.verification_retry_count = 0
-            instance.verification_retry_at = nil
+          before_transition [:verification_pending, :verification_started, :verification_succeeded] => :verification_pending do |instance, _|
+            instance.clear_verification_failure_fields!
+          end
+
+          before_transition verification_failed: :verification_pending do |instance, _|
+            # If transitioning from verification_failed, then don't clear
+            # verification_retry_count and verification_retry_at to ensure
+            # progressive backoff of syncs-due-to-verification-failures
             instance.verification_failure = nil
           end
 
@@ -270,7 +276,7 @@ module Gitlab
         end
       end
 
-      # Overridden by ReplicableRegistry
+      # Overridden by Geo::VerifiableRegistry
       def clear_verification_failure_fields!
         self.verification_retry_count = 0
         self.verification_retry_at = nil

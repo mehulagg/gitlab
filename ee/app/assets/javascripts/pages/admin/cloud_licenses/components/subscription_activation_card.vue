@@ -1,7 +1,7 @@
 <script>
 import { GlCard, GlLink, GlSprintf } from '@gitlab/ui';
 import { helpPagePath } from '~/helpers/help_page_helper';
-import { activateSubscription, howToActivateSubscription, uploadLegacyLicense } from '../constants';
+import { activateSubscription, howToActivateSubscription, uploadLicenseFile } from '../constants';
 import SubscriptionActivationErrors from './subscription_activation_errors.vue';
 import SubscriptionActivationForm from './subscription_activation_form.vue';
 
@@ -14,7 +14,7 @@ export default {
   i18n: {
     activateSubscription,
     howToActivateSubscription,
-    uploadLegacyLicense,
+    uploadLicenseFile,
   },
   components: {
     GlCard,
@@ -68,7 +68,7 @@ export default {
     />
     <template #footer>
       <gl-link v-if="licenseUploadPath" data-testid="upload-license-link" :href="licenseUploadPath"
-        >{{ $options.i18n.uploadLegacyLicense }}
+        >{{ $options.i18n.uploadLicenseFile }}
       </gl-link>
     </template>
   </gl-card>

@@ -12,6 +12,7 @@ import {
   updateListQueries,
   issuableTypes,
   FilterFields,
+  ListTypeTitles,
 } from 'ee_else_ce/boards/constants';
 import createBoardListMutation from 'ee_else_ce/boards/graphql/board_list_create.mutation.graphql';
 import issueMoveListMutation from 'ee_else_ce/boards/graphql/issue_move_list.mutation.graphql';
@@ -34,9 +35,7 @@ import {
 import boardLabelsQuery from '../graphql/board_labels.query.graphql';
 import groupProjectsQuery from '../graphql/group_projects.query.graphql';
 import issueCreateMutation from '../graphql/issue_create.mutation.graphql';
-import issueSetDueDateMutation from '../graphql/issue_set_due_date.mutation.graphql';
 import issueSetLabelsMutation from '../graphql/issue_set_labels.mutation.graphql';
-import issueSetMilestoneMutation from '../graphql/issue_set_milestone.mutation.graphql';
 import listsIssuesQuery from '../graphql/lists_issues.query.graphql';
 import * as types from './mutation_types';
 
@@ -169,8 +168,11 @@ export default {
       });
   },
 
-  addList: ({ commit }, list) => {
+  addList: ({ commit, dispatch, getters }, list) => {
     commit(types.RECEIVE_ADD_LIST_SUCCESS, updateListPosition(list));
+    dispatch('fetchItemsForList', {
+      listId: getters.getListByTitle(ListTypeTitles.backlog).id,
+    });
   },
 
   fetchLabels: ({ state, commit, getters }, searchTerm) => {
@@ -261,7 +263,7 @@ export default {
     commit(types.TOGGLE_LIST_COLLAPSED, { listId, collapsed });
   },
 
-  removeList: ({ state: { issuableType, boardLists }, commit }, listId) => {
+  removeList: ({ state: { issuableType, boardLists }, commit, dispatch, getters }, listId) => {
     const listsBackup = { ...boardLists };
 
     commit(types.REMOVE_LIST, listId);
@@ -281,6 +283,10 @@ export default {
         }) => {
           if (errors.length > 0) {
             commit(types.REMOVE_LIST_FAILURE, listsBackup);
+          } else {
+            dispatch('fetchItemsForList', {
+              listId: getters.getListByTitle(ListTypeTitles.backlog).id,
+            });
           }
         },
       )
@@ -290,6 +296,9 @@ export default {
   },
 
   fetchItemsForList: ({ state, commit }, { listId, fetchNext = false }) => {
+    if (!fetchNext) {
+      commit(types.RESET_ITEMS_FOR_LIST, listId);
+    }
     commit(types.REQUEST_ITEMS_FOR_LIST, { listId, fetchNext });
 
     const { fullPath, fullBoardId, boardType, filterParams } = state;
@@ -468,30 +477,6 @@ export default {
     });
   },
 
-  setActiveIssueMilestone: async ({ commit, getters }, input) => {
-    const { activeBoardItem } = getters;
-    const { data } = await gqlClient.mutate({
-      mutation: issueSetMilestoneMutation,
-      variables: {
-        input: {
-          iid: String(activeBoardItem.iid),
-          milestoneId: getIdFromGraphQLId(input.milestoneId),
-          projectPath: input.projectPath,
-        },
-      },
-    });
-
-    if (data.updateIssue.errors?.length > 0) {
-      throw new Error(data.updateIssue.errors);
-    }
-
-    commit(types.UPDATE_BOARD_ITEM_BY_ID, {
-      itemId: activeBoardItem.id,
-      prop: 'milestone',
-      value: data.updateIssue.issue.milestone,
-    });
-  },
-
   addListItem: ({ commit }, { list, item, position, inProgress = false }) => {
     commit(types.ADD_BOARD_ITEM_TO_LIST, {
       listId: list.id,
@@ -570,30 +555,6 @@ export default {
       itemId: activeBoardItem.id,
       prop: 'labels',
       value: data.updateIssue.issue.labels.nodes,
-    });
-  },
-
-  setActiveIssueDueDate: async ({ commit, getters }, input) => {
-    const { activeBoardItem } = getters;
-    const { data } = await gqlClient.mutate({
-      mutation: issueSetDueDateMutation,
-      variables: {
-        input: {
-          iid: String(activeBoardItem.iid),
-          projectPath: input.projectPath,
-          dueDate: input.dueDate,
-        },
-      },
-    });
-
-    if (data.updateIssue?.errors?.length > 0) {
-      throw new Error(data.updateIssue.errors);
-    }
-
-    commit(types.UPDATE_BOARD_ITEM_BY_ID, {
-      itemId: activeBoardItem.id,
-      prop: 'dueDate',
-      value: data.updateIssue.issue.dueDate,
     });
   },
 

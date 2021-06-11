@@ -4,8 +4,7 @@ import Vue, { nextTick } from 'vue';
 import VueApollo from 'vue-apollo';
 import IterationCadenceForm from 'ee/iterations/components/iteration_cadence_form.vue';
 import createCadence from 'ee/iterations/queries/cadence_create.mutation.graphql';
-import readCadence from 'ee/iterations/queries/iteration_cadence.query.graphql';
-
+import getCadence from 'ee/iterations/queries/iteration_cadence.query.graphql';
 import createMockApollo from 'helpers/mock_apollo_helper';
 import { TEST_HOST } from 'helpers/test_constants';
 import { extendedWrapper } from 'helpers/vue_test_utils_helper';
@@ -33,8 +32,11 @@ describe('Iteration cadence form', () => {
     id: `gid://gitlab/Iterations::Cadence/${id}`,
     title: 'An iteration',
     automatic: true,
-    startDate: '2020-06-28',
+    rollOver: false,
     durationInWeeks: '3',
+    description: 'The words',
+    duration: '3',
+    startDate: '2020-06-28',
     iterationsInAdvance: '2',
   };
 
@@ -80,7 +82,7 @@ describe('Iteration cadence form', () => {
   const findAutomatedSchedulingGroup = () => wrapper.findAllComponents(GlFormGroup).at(1);
   const findStartDateGroup = () => wrapper.findAllComponents(GlFormGroup).at(2);
   const findDurationGroup = () => wrapper.findAllComponents(GlFormGroup).at(3);
-  const findFutureIterationsGroup = () => wrapper.findAllComponents(GlFormGroup).at(4);
+  const findFutureIterationsGroup = () => wrapper.findAllComponents(GlFormGroup).at(5);
 
   const findError = () => wrapper.findComponent(GlAlert);
 
@@ -88,6 +90,7 @@ describe('Iteration cadence form', () => {
   const findStartDate = () => wrapper.find('#cadence-start-date');
   const findFutureIterations = () => wrapper.find('#cadence-schedule-future-iterations');
   const findDuration = () => wrapper.find('#cadence-duration');
+  const findDescription = () => wrapper.find('#cadence-description');
 
   const setTitle = (value) => findTitle().vm.$emit('input', value);
   const setStartDate = (value) => findStartDate().vm.$emit('input', value);
@@ -149,6 +152,7 @@ describe('Iteration cadence form', () => {
             durationInWeeks,
             iterationsInAdvance,
             active: true,
+            description: '',
           },
         });
       });
@@ -222,6 +226,7 @@ describe('Iteration cadence form', () => {
             startDate,
             durationInWeeks,
             iterationsInAdvance: 0,
+            description: '',
             active: true,
           },
         });
@@ -230,11 +235,13 @@ describe('Iteration cadence form', () => {
   });
 
   describe('Edit cadence', () => {
-    const query = readCadence;
+    const query = getCadence;
     const resolverMock = jest.fn().mockResolvedValue(getCadenceSuccess);
 
     beforeEach(() => {
       $router.currentRoute.params.cadenceId = id;
+
+      createComponent({ query, resolverMock });
     });
 
     afterEach(() => {
@@ -242,8 +249,6 @@ describe('Iteration cadence form', () => {
     });
 
     it('shows correct title and button text', () => {
-      createComponent({ query, resolverMock });
-
       expect(wrapper.text()).toContain(wrapper.vm.i18n.edit.title);
       expect(wrapper.text()).toContain(wrapper.vm.i18n.edit.save);
     });
@@ -273,6 +278,7 @@ describe('Iteration cadence form', () => {
       expect(findStartDate().element.value).toBe(iterationCadence.startDate);
       expect(findFutureIterations().element.value).toBe(iterationCadence.iterationsInAdvance);
       expect(findDuration().element.value).toBe(iterationCadence.durationInWeeks);
+      expect(findDescription().element.value).toBe(iterationCadence.description);
     });
   });
 });

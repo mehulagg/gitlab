@@ -1,4 +1,4 @@
-import { GlTab, GlTabs } from '@gitlab/ui';
+import { GlTab } from '@gitlab/ui';
 import { mount } from '@vue/test-utils';
 import { extendedWrapper } from 'helpers/vue_test_utils_helper';
 import {
@@ -7,14 +7,20 @@ import {
   SAST_DESCRIPTION,
   SAST_HELP_PATH,
   SAST_CONFIG_HELP_PATH,
+  LICENSE_COMPLIANCE_NAME,
+  LICENSE_COMPLIANCE_DESCRIPTION,
+  LICENSE_COMPLIANCE_HELP_PATH,
 } from '~/security_configuration/components/constants';
 import FeatureCard from '~/security_configuration/components/feature_card.vue';
 import RedesignedSecurityConfigurationApp, {
   i18n,
 } from '~/security_configuration/components/redesigned_app.vue';
-import { REPORT_TYPE_SAST } from '~/vue_shared/security_reports/constants';
+import {
+  REPORT_TYPE_LICENSE_COMPLIANCE,
+  REPORT_TYPE_SAST,
+} from '~/vue_shared/security_reports/constants';
 
-describe('NewApp component', () => {
+describe('redesigned App component', () => {
   let wrapper;
 
   const createComponent = (propsData) => {
@@ -26,11 +32,12 @@ describe('NewApp component', () => {
   };
 
   const findMainHeading = () => wrapper.find('h1');
-  const findSubHeading = () => wrapper.find('h2');
   const findTab = () => wrapper.findComponent(GlTab);
-  const findTabs = () => wrapper.findAllComponents(GlTabs);
+  const findTabs = () => wrapper.findAllComponents(GlTab);
   const findByTestId = (id) => wrapper.findByTestId(id);
   const findFeatureCards = () => wrapper.findAllComponents(FeatureCard);
+  const findComplianceViewHistoryLink = () => findByTestId('compliance-view-history-link');
+  const findSecurityViewHistoryLink = () => findByTestId('security-view-history-link');
 
   const securityFeaturesMock = [
     {
@@ -44,6 +51,16 @@ describe('NewApp component', () => {
     },
   ];
 
+  const complianceFeaturesMock = [
+    {
+      name: LICENSE_COMPLIANCE_NAME,
+      description: LICENSE_COMPLIANCE_DESCRIPTION,
+      helpPath: LICENSE_COMPLIANCE_HELP_PATH,
+      type: REPORT_TYPE_LICENSE_COMPLIANCE,
+      configurationHelpPath: LICENSE_COMPLIANCE_HELP_PATH,
+    },
+  ];
+
   afterEach(() => {
     wrapper.destroy();
   });
@@ -52,6 +69,7 @@ describe('NewApp component', () => {
     beforeEach(() => {
       createComponent({
         augmentedSecurityFeatures: securityFeaturesMock,
+        augmentedComplianceFeatures: complianceFeaturesMock,
       });
     });
 
@@ -66,27 +84,31 @@ describe('NewApp component', () => {
     });
 
     it('renders right amount of tabs with correct title ', () => {
-      expect(findTabs().length).toEqual(1);
+      expect(findTabs()).toHaveLength(2);
     });
 
     it('renders security-testing tab', () => {
-      expect(findByTestId('security-testing-tab')).toExist();
+      expect(findByTestId('security-testing-tab').exists()).toBe(true);
     });
 
-    it('renders sub-heading with correct text', () => {
-      const subHeading = findSubHeading();
-      expect(subHeading).toExist();
-      expect(subHeading.text()).toContain(i18n.securityTesting);
+    it('renders compliance-testing tab', () => {
+      expect(findByTestId('compliance-testing-tab').exists()).toBe(true);
     });
 
     it('renders right amount of feature cards for given props with correct props', () => {
       const cards = findFeatureCards();
-      expect(cards.length).toEqual(1);
+      expect(cards).toHaveLength(2);
       expect(cards.at(0).props()).toEqual({ feature: securityFeaturesMock[0] });
+      expect(cards.at(1).props()).toEqual({ feature: complianceFeaturesMock[0] });
     });
 
     it('should not show latest pipeline link when latestPipelinePath is not defined', () => {
       expect(findByTestId('latest-pipeline-info').exists()).toBe(false);
+    });
+
+    it('should not show configuration History Link when gitlabCiPresent & gitlabCiHistoryPath are not defined', () => {
+      expect(findComplianceViewHistoryLink().exists()).toBe(false);
+      expect(findSecurityViewHistoryLink().exists()).toBe(false);
     });
   });
 
@@ -94,16 +116,48 @@ describe('NewApp component', () => {
     beforeEach(() => {
       createComponent({
         augmentedSecurityFeatures: securityFeaturesMock,
+        augmentedComplianceFeatures: complianceFeaturesMock,
         latestPipelinePath: 'test/path',
       });
     });
 
-    it('should show latest pipeline info with correct link when latestPipelinePath is defined', () => {
-      expect(findByTestId('latest-pipeline-info').exists()).toBe(true);
-      expect(findByTestId('latest-pipeline-info').text()).toMatchInterpolatedText(
+    it('should show latest pipeline info on the security tab  with correct link when latestPipelinePath is defined', () => {
+      const latestPipelineInfoSecurity = findByTestId('latest-pipeline-info-security');
+
+      expect(latestPipelineInfoSecurity.exists()).toBe(true);
+      expect(latestPipelineInfoSecurity.text()).toMatchInterpolatedText(
         i18n.securityTestingDescription,
       );
-      expect(findByTestId('latest-pipeline-info').find('a').attributes('href')).toBe('test/path');
+      expect(latestPipelineInfoSecurity.find('a').attributes('href')).toBe('test/path');
+    });
+
+    it('should show latest pipeline info on the compliance tab  with correct link when latestPipelinePath is defined', () => {
+      const latestPipelineInfoCompliance = findByTestId('latest-pipeline-info-compliance');
+
+      expect(latestPipelineInfoCompliance.exists()).toBe(true);
+      expect(latestPipelineInfoCompliance.text()).toMatchInterpolatedText(
+        i18n.securityTestingDescription,
+      );
+      expect(latestPipelineInfoCompliance.find('a').attributes('href')).toBe('test/path');
+    });
+  });
+
+  describe('given gitlabCiPresent & gitlabCiHistoryPath props', () => {
+    beforeEach(() => {
+      createComponent({
+        augmentedSecurityFeatures: securityFeaturesMock,
+        augmentedComplianceFeatures: complianceFeaturesMock,
+        gitlabCiPresent: true,
+        gitlabCiHistoryPath: 'test/historyPath',
+      });
+    });
+
+    it('should show configuration History Link', () => {
+      expect(findComplianceViewHistoryLink().exists()).toBe(true);
+      expect(findSecurityViewHistoryLink().exists()).toBe(true);
+
+      expect(findComplianceViewHistoryLink().attributes('href')).toBe('test/historyPath');
+      expect(findSecurityViewHistoryLink().attributes('href')).toBe('test/historyPath');
     });
   });
 });

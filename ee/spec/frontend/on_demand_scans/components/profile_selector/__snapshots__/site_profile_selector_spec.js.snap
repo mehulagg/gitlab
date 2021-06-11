@@ -29,6 +29,7 @@ exports[`OnDemandScansSiteProfileSelector renders properly with profiles 1`] = `
   >
      
     <fieldset
+      aria-describedby=""
       class="form-group gl-form-group"
     >
       <legend

@@ -3,7 +3,9 @@ import { GlModal, GlAlert } from '@gitlab/ui';
 import { set } from 'lodash';
 import { s__, __ } from '~/locale';
 import { addEscalationPolicyModalId } from '../constants';
+import { updateStoreOnEscalationPolicyCreate } from '../graphql/cache_updates';
 import createEscalationPolicyMutation from '../graphql/mutations/create_escalation_policy.mutation.graphql';
+import getEscalationPoliciesQuery from '../graphql/queries/get_escalation_policies.query.graphql';
 import { isNameFieldValid, getRulesValidationState } from '../utils';
 import AddEditEscalationPolicyForm from './add_edit_escalation_policy_form.vue';
 
@@ -61,15 +63,12 @@ export default {
       };
     },
     isFormValid() {
-      return this.validationState.name && this.validationState.rules.every(Boolean);
-    },
-    serializedData() {
-      const rules = this.form.rules.map(({ status, elapsedTimeSeconds, oncallScheduleIid }) => ({
-        status,
-        elapsedTimeSeconds,
-        oncallScheduleIid,
-      }));
-      return { ...this.form, rules };
+      return (
+        this.validationState.name &&
+        this.validationState.rules.every(
+          ({ isTimeValid, isScheduleValid }) => isTimeValid && isScheduleValid,
+        )
+      );
     },
   },
   methods: {
@@ -86,8 +85,13 @@ export default {
           variables: {
             input: {
               projectPath,
-              ...this.serializedData,
+              ...this.getRequestParams(),
             },
+          },
+          update(store, { data }) {
+            updateStoreOnEscalationPolicyCreate(store, getEscalationPoliciesQuery, data, {
+              projectPath,
+            });
           },
         })
         .then(
@@ -112,6 +116,15 @@ export default {
         .finally(() => {
           this.loading = false;
         });
+    },
+    getRequestParams() {
+      const rules = this.form.rules.map(({ status, elapsedTimeSeconds, oncallScheduleIid }) => ({
+        status,
+        elapsedTimeSeconds,
+        oncallScheduleIid,
+      }));
+
+      return { ...this.form, rules };
     },
     validateForm(field) {
       if (field === 'name') {

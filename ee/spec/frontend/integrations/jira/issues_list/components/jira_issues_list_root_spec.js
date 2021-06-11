@@ -1,8 +1,13 @@
-import { shallowMount } from '@vue/test-utils';
+import { shallowMount, createLocalVue } from '@vue/test-utils';
 import MockAdapter from 'axios-mock-adapter';
+import VueApollo from 'vue-apollo';
 
 import JiraIssuesListRoot from 'ee/integrations/jira/issues_list/components/jira_issues_list_root.vue';
+import jiraIssues from 'ee/integrations/jira/issues_list/graphql/resolvers/jira_issues';
+
+import createMockApollo from 'helpers/mock_apollo_helper';
 import waitForPromises from 'helpers/wait_for_promises';
+
 import createFlash from '~/flash';
 import IssuableList from '~/issuable_list/components/issuable_list_root.vue';
 import axios from '~/lib/utils/axios_utils';
@@ -27,6 +32,19 @@ const resolvedValue = {
   data: mockJiraIssues,
 };
 
+const localVue = createLocalVue();
+
+const resolvers = {
+  Query: {
+    jiraIssues,
+  },
+};
+
+function createMockApolloProvider() {
+  localVue.use(VueApollo);
+  return createMockApollo([], resolvers);
+}
+
 describe('JiraIssuesListRoot', () => {
   let wrapper;
   let mock;
@@ -39,6 +57,8 @@ describe('JiraIssuesListRoot', () => {
         initialFilterParams,
       },
       provide,
+      localVue,
+      apolloProvider: createMockApolloProvider(),
     });
   };
 
@@ -64,9 +84,11 @@ describe('JiraIssuesListRoot', () => {
         expect(issuableList.props('issuablesLoading')).toBe(true);
       });
 
-      it('calls `axios.get` with `issuesFetchPath` and query params', () => {
+      it('calls `axios.get` with `issuesFetchPath` and query params', async () => {
         jest.spyOn(axios, 'get');
         createComponent();
+
+        await waitForPromises();
 
         expect(axios.get).toHaveBeenCalledWith(
           mockProvide.issuesFetchPath,
@@ -102,17 +124,10 @@ describe('JiraIssuesListRoot', () => {
           nextPage: resolvedValue.headers['x-page'] + 1,
           totalItems: resolvedValue.headers['x-total'],
         });
-        expect(issuablesProp).toHaveLength(mockJiraIssues.length);
 
-        const firstIssue = convertObjectPropsToCamelCase(mockJiraIssues[0], { deep: true });
-        expect(issuablesProp[0]).toEqual({
-          ...firstIssue,
-          id: 31596,
-          author: {
-            ...firstIssue.author,
-            id: 0,
-          },
-        });
+        expect(issuablesProp).toMatchObject(
+          convertObjectPropsToCamelCase(mockJiraIssues, { deep: true }),
+        );
       });
 
       it('sets issuesListLoading to `false`', () => {
@@ -123,16 +138,16 @@ describe('JiraIssuesListRoot', () => {
 
     describe('when request fails', () => {
       it.each`
-        APIErrorMessage | expectedRenderedErrorMessage
-        ${'API error'}  | ${'API error'}
-        ${undefined}    | ${'An error occurred while loading issues'}
+        APIErrors        | expectedRenderedErrorMessage
+        ${['API error']} | ${'API error'}
+        ${undefined}     | ${'An error occurred while loading issues'}
       `(
-        'calls `createFlash` with "$expectedRenderedErrorMessage" when API responds with "$APIErrorMessage"',
-        async ({ APIErrorMessage, expectedRenderedErrorMessage }) => {
+        'calls `createFlash` with "$expectedRenderedErrorMessage" when API responds with "$APIErrors"',
+        async ({ APIErrors, expectedRenderedErrorMessage }) => {
           jest.spyOn(axios, 'get');
           mock
             .onGet(mockProvide.issuesFetchPath)
-            .replyOnce(httpStatus.INTERNAL_SERVER_ERROR, { errors: [APIErrorMessage] });
+            .replyOnce(httpStatus.INTERNAL_SERVER_ERROR, { errors: APIErrors });
 
           createComponent();
 

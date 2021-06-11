@@ -147,29 +147,21 @@ class Packages::Package < ApplicationRecord
   scope :order_by_package_file, -> { joins(:package_files).order('packages_package_files.created_at ASC') }
 
   scope :order_project_path, -> do
-    if Feature.enabled?(:arel_package_scopes)
-      keyset_order = keyset_pagination_order(join_class: Project, column_name: :path, direction: :asc)
+    keyset_order = keyset_pagination_order(join_class: Project, column_name: :path, direction: :asc)
 
-      joins(:project).reorder(keyset_order)
-    else
-      joins(:project).reorder('projects.path ASC, id ASC')
-    end
+    joins(:project).reorder(keyset_order)
   end
 
   scope :order_project_path_desc, -> do
-    if Feature.enabled?(:arel_package_scopes)
-      keyset_order = keyset_pagination_order(join_class: Project, column_name: :path, direction: :desc)
+    keyset_order = keyset_pagination_order(join_class: Project, column_name: :path, direction: :desc)
 
-      joins(:project).reorder(keyset_order)
-    else
-      joins(:project).reorder('projects.path DESC, id DESC')
-    end
+    joins(:project).reorder(keyset_order)
   end
 
   after_commit :update_composer_cache, on: :destroy, if: -> { composer? }
 
   def self.only_maven_packages_with_path(path, use_cte: false)
-    if use_cte && Feature.enabled?(:maven_metadata_by_path_with_optimization_fence, default_enabled: :yaml)
+    if use_cte
       # This is an optimization fence which assumes that looking up the Metadatum record by path (globally)
       # and then filter down the packages (by project or by group and subgroups) will be cheaper than
       # looking up all packages within a project or group and filter them by path.

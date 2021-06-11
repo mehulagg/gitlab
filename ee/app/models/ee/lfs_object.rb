@@ -15,8 +15,6 @@ module EE
 
       with_replicator Geo::LfsObjectReplicator
 
-      after_destroy :log_geo_deleted_event
-
       scope :project_id_in, ->(ids) { joins(:projects).merge(::Project.id_in(ids)) }
     end
 
@@ -39,7 +37,8 @@ module EE
     end
 
     def log_geo_deleted_event
-      ::Geo::LfsObjectDeletedEventStore.new(self).create! if ::Feature.disabled?(:geo_lfs_object_replication, default_enabled: :yaml)
+      # Keep empty for now. Should be addressed in future
+      # by https://gitlab.com/gitlab-org/gitlab/-/issues/232917
     end
   end
 end

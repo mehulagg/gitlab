@@ -354,7 +354,7 @@ RSpec.describe Ci::Build do
       it 'does not push build to the queue' do
         build.enqueue
 
-        expect(::Ci::PendingBuild.all.count).to be_zero
+        expect(build.queuing_entry).not_to be_present
       end
     end
 
@@ -491,6 +491,34 @@ RSpec.describe Ci::Build do
           .to raise_error(ActiveRecord::StaleObjectError)
 
         expect(build.queuing_entry).to be_present
+      end
+    end
+
+    context 'when build has been picked by a shared runner' do
+      let(:build) { create(:ci_build, :pending) }
+
+      it 'creates runtime metadata entry' do
+        build.runner = create(:ci_runner, :instance_type)
+
+        build.run!
+
+        expect(build.reload.runtime_metadata).to be_present
+      end
+    end
+  end
+
+  describe '#drop' do
+    context 'when has a runtime tracking entry' do
+      let(:build) { create(:ci_build, :pending) }
+
+      it 'removes runtime tracking entry' do
+        build.runner = create(:ci_runner, :instance_type)
+
+        build.run!
+        expect(build.reload.runtime_metadata).to be_present
+
+        build.drop!
+        expect(build.reload.runtime_metadata).not_to be_present
       end
     end
   end
@@ -2640,6 +2668,17 @@ RSpec.describe Ci::Build do
       it { is_expected.to be_instance_of(Gitlab::Ci::Variables::Collection) }
       it { expect(subject.to_runner_variables).to eq(predefined_variables) }
 
+      it 'excludes variables that require an environment or user' do
+        environment_based_variables_collection = subject.filter do |variable|
+          %w[
+            YAML_VARIABLE CI_ENVIRONMENT_NAME CI_ENVIRONMENT_SLUG
+            CI_ENVIRONMENT_ACTION CI_ENVIRONMENT_URL
+          ].include?(variable[:key])
+        end
+
+        expect(environment_based_variables_collection).to be_empty
+      end
+
       context 'when ci_job_jwt feature flag is disabled' do
         before do
           stub_feature_flags(ci_job_jwt: false)
@@ -2709,7 +2748,7 @@ RSpec.describe Ci::Build do
           let(:expected_variables) do
             predefined_variables.map { |variable| variable.fetch(:key) } +
               %w[YAML_VARIABLE CI_ENVIRONMENT_NAME CI_ENVIRONMENT_SLUG
-                 CI_ENVIRONMENT_URL]
+                 CI_ENVIRONMENT_TIER CI_ENVIRONMENT_ACTION CI_ENVIRONMENT_URL]
           end
 
           before do
@@ -2726,6 +2765,50 @@ RSpec.describe Ci::Build do
             received_variables = subject.map { |variable| variable[:key] }
 
             expect(received_variables).to eq expected_variables
+          end
+
+          describe 'CI_ENVIRONMENT_ACTION' do
+            let(:enviroment_action_variable) { subject.find { |variable| variable[:key] == 'CI_ENVIRONMENT_ACTION' } }
+
+            shared_examples 'defaults value' do
+              it 'value matches start' do
+                expect(enviroment_action_variable[:value]).to eq('start')
+              end
+            end
+
+            it_behaves_like 'defaults value'
+
+            context 'when options is set' do
+              before do
+                build.update!(options: options)
+              end
+
+              context 'when options is empty' do
+                let(:options) { {} }
+
+                it_behaves_like 'defaults value'
+              end
+
+              context 'when options is nil' do
+                let(:options) { nil }
+
+                it_behaves_like 'defaults value'
+              end
+
+              context 'when options environment is specified' do
+                let(:options) { { environment: {} } }
+
+                it_behaves_like 'defaults value'
+              end
+
+              context 'when options environment action specified' do
+                let(:options) { { environment: { action: 'stop' } } }
+
+                it 'matches the specified action' do
+                  expect(enviroment_action_variable[:value]).to eq('stop')
+                end
+              end
+            end
           end
         end
       end
@@ -2765,7 +2848,8 @@ RSpec.describe Ci::Build do
       let(:environment_variables) do
         [
           { key: 'CI_ENVIRONMENT_NAME', value: 'production', public: true, masked: false },
-          { key: 'CI_ENVIRONMENT_SLUG', value: 'prod-slug',  public: true, masked: false }
+          { key: 'CI_ENVIRONMENT_SLUG', value: 'prod-slug',  public: true, masked: false },
+          { key: 'CI_ENVIRONMENT_TIER', value: 'production', public: true, masked: false }
         ]
       end
 
@@ -2774,6 +2858,7 @@ RSpec.describe Ci::Build do
                project: build.project,
                name: 'production',
                slug: 'prod-slug',
+               tier: 'production',
                external_url: '')
       end
 
@@ -4767,7 +4852,7 @@ RSpec.describe Ci::Build do
 
     context 'with project services' do
       before do
-        create(:service, active: true, job_events: true, project: project)
+        create(:integration, active: true, job_events: true, project: project)
       end
 
       it 'executes services' do
@@ -4781,7 +4866,7 @@ RSpec.describe Ci::Build do
 
     context 'without relevant project services' do
       before do
-        create(:service, active: true, job_events: false, project: project)
+        create(:integration, active: true, job_events: false, project: project)
       end
 
       it 'does not execute services' do
@@ -5123,5 +5208,51 @@ RSpec.describe Ci::Build do
     it { expect(matcher.protected?).to eq(build.protected?) }
 
     it { expect(matcher.project).to eq(build.project) }
+  end
+
+  describe '#shared_runner_build?' do
+    context 'when build does not have a runner assigned' do
+      it 'is not a shared runner build' do
+        expect(build.runner).to be_nil
+
+        expect(build).not_to be_shared_runner_build
+      end
+    end
+
+    context 'when build has a project runner assigned' do
+      before do
+        build.runner = create(:ci_runner, :project)
+      end
+
+      it 'is not a shared runner build' do
+        expect(build).not_to be_shared_runner_build
+      end
+    end
+
+    context 'when build has an instance runner assigned' do
+      before do
+        build.runner = create(:ci_runner, :instance_type)
+      end
+
+      it 'is a shared runner build' do
+        expect(build).to be_shared_runner_build
+      end
+    end
+  end
+
+  describe '.without_coverage' do
+    let!(:build_with_coverage) { create(:ci_build, pipeline: pipeline, coverage: 100.0) }
+
+    it 'returns builds without coverage values' do
+      expect(described_class.without_coverage).to eq([build])
+    end
+  end
+
+  describe '.with_coverage_regex' do
+    let!(:build_with_coverage_regex) { create(:ci_build, pipeline: pipeline, coverage_regex: '\d') }
+
+    it 'returns builds with coverage regex values' do
+      expect(described_class.with_coverage_regex).to eq([build_with_coverage_regex])
+    end
   end
 end

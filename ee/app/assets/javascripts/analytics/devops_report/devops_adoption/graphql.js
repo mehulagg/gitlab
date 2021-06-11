@@ -3,6 +3,7 @@ import VueApollo from 'vue-apollo';
 import Api from 'ee/api';
 import createDefaultClient from '~/lib/graphql';
 import axios from '~/lib/utils/axios_utils';
+import { PER_PAGE } from './constants';
 
 Vue.use(VueApollo);
 
@@ -13,7 +14,7 @@ export const createResolvers = (groupId) => ({
         ? Api.buildUrl(Api.subgroupsPath).replace(':id', groupId)
         : Api.buildUrl(Api.groupsPath);
       const params = {
-        per_page: Api.DEFAULT_PER_PAGE,
+        per_page: PER_PAGE,
         search,
       };
       if (nextPage) {

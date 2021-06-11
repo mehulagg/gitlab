@@ -6,7 +6,7 @@ FactoryBot.define do
     type { 'Integration' }
   end
 
-  factory :custom_issue_tracker_service, class: 'Integrations::CustomIssueTracker' do
+  factory :custom_issue_tracker_integration, class: 'Integrations::CustomIssueTracker' do
     project
     active { true }
     issue_tracker
@@ -79,13 +79,13 @@ FactoryBot.define do
     end
   end
 
-  factory :confluence_service, class: 'Integrations::Confluence' do
+  factory :confluence_integration, class: 'Integrations::Confluence' do
     project
     active { true }
     confluence_url { 'https://example.atlassian.net/wiki' }
   end
 
-  factory :bugzilla_service, class: 'Integrations::Bugzilla' do
+  factory :bugzilla_integration, class: 'Integrations::Bugzilla' do
     project
     active { true }
     issue_tracker
@@ -167,6 +167,12 @@ FactoryBot.define do
     type { 'SlackService' }
   end
 
+  factory :slack_slash_commands_service, class: 'Integrations::SlackSlashCommands' do
+    project
+    active { true }
+    type { 'SlackSlashCommandsService' }
+  end
+
   factory :pipelines_email_service, class: 'Integrations::PipelinesEmail' do
     project
     active { true }
@@ -182,13 +188,13 @@ FactoryBot.define do
     create_data { false }
 
     after(:build) do
-      Integrations::IssueTracker.skip_callback(:validation, :before, :handle_properties)
+      Integrations::BaseIssueTracker.skip_callback(:validation, :before, :handle_properties)
     end
 
     to_create { |instance| instance.save!(validate: false) }
 
     after(:create) do
-      Integrations::IssueTracker.set_callback(:validation, :before, :handle_properties)
+      Integrations::BaseIssueTracker.set_callback(:validation, :before, :handle_properties)
     end
   end
 

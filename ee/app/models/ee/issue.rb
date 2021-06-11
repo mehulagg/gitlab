@@ -83,7 +83,7 @@ module EE
 
       # override
       def use_separate_indices?
-        Elastic::DataMigrationService.migration_has_finished?(:migrate_issues_to_separate_index)
+        true
       end
     end
 

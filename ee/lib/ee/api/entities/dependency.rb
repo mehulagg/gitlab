@@ -13,7 +13,7 @@ module EE
         private
 
         def can_read_vulnerabilities?(user, project)
-          Ability.allowed?(user, :read_vulnerability, project)
+          Ability.allowed?(user, :read_security_resource, project)
         end
       end
     end

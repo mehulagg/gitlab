@@ -2,6 +2,7 @@ import { GlDropdown } from '@gitlab/ui';
 import { shallowMount, createLocalVue } from '@vue/test-utils';
 import Vuex from 'vuex';
 import ValueStreamSelect from 'ee/analytics/cycle_analytics/components/value_stream_select.vue';
+import { mockTracking, unmockTracking } from 'helpers/tracking_helper';
 import { extendedWrapper } from 'helpers/vue_test_utils_helper';
 import { findDropdownItemText } from '../helpers';
 import { valueStreams, defaultStageConfig } from '../mock_data';
@@ -11,6 +12,7 @@ localVue.use(Vuex);
 
 describe('ValueStreamSelect', () => {
   let wrapper = null;
+  let trackingSpy = null;
 
   const deleteValueStreamMock = jest.fn(() => Promise.resolve());
   const mockEvent = { preventDefault: jest.fn() };
@@ -68,9 +70,11 @@ describe('ValueStreamSelect', () => {
         valueStreams,
       },
     });
+    trackingSpy = mockTracking(undefined, wrapper.element, jest.spyOn);
   });
 
   afterEach(() => {
+    unmockTracking();
     wrapper.destroy();
   });
 
@@ -202,6 +206,12 @@ describe('ValueStreamSelect', () => {
             position: 'top-center',
           },
         );
+      });
+
+      it('sends tracking information', () => {
+        expect(trackingSpy).toHaveBeenCalledWith(undefined, 'delete_value_stream', {
+          extra: { name: selectedValueStream.name },
+        });
       });
     });
 

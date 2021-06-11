@@ -4,7 +4,9 @@ module Elastic
   class MigrationRecord
     attr_reader :version, :name, :filename
 
-    delegate :migrate, :skip_migration?, :completed?, :batched?, :throttle_delay, :pause_indexing?, :space_requirements?, :space_required_bytes, to: :migration
+    delegate :migrate, :skip_migration?, :completed?, :batched?, :throttle_delay, :pause_indexing?,
+      :space_requirements?, :space_required_bytes, :obsolete?,
+      to: :migration
 
     ELASTICSEARCH_SIZE = 25
 

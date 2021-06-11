@@ -5,28 +5,13 @@ require 'spec_helper'
 RSpec.describe BaseCountService do
   include ::EE::GeoHelpers
 
-  describe '#cache_options' do
-    subject { described_class.new.cache_options }
+  describe '#update_cache_for_key' do
+    let(:key) { %w{a cache key} }
 
-    it 'returns the default' do
-      stub_current_geo_node(nil)
+    it 'calls Gitlab::Cache.delete_on_geo_secondaries' do
+      expect(::Gitlab::Cache).to receive(:delete_on_geo_secondaries).with(key)
 
-      is_expected.to include(:raw)
-      is_expected.not_to include(:expires_in)
-    end
-
-    it 'returns default on a Geo primary' do
-      stub_current_geo_node(create(:geo_node, :primary))
-
-      is_expected.to include(:raw)
-      is_expected.not_to include(:expires_in)
-    end
-
-    it 'returns cache of 20 mins on a Geo secondary' do
-      stub_current_geo_node(create(:geo_node))
-
-      is_expected.to include(:raw)
-      is_expected.to include(expires_in: 20.minutes)
+      described_class.new.update_cache_for_key(key) { 123 }
     end
   end
 end

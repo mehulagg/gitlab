@@ -7,12 +7,6 @@ FactoryBot.define do
     type { 'GitlabSlackApplicationService' }
   end
 
-  factory :slack_slash_commands_service do
-    project
-    active { true }
-    type { 'SlackSlashCommandsService' }
-  end
-
   factory :github_service, class: 'Integrations::Github' do
     project
     type { 'GithubService' }

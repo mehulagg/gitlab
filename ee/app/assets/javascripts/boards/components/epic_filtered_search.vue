@@ -60,7 +60,9 @@ export default {
             search: authorsSearchTerm,
           },
         })
-        .then(({ data }) => data.group?.groupMembers.nodes.map((item) => item.user));
+        .then(({ data }) =>
+          data.group?.groupMembers.nodes.filter((x) => x?.user).map(({ user }) => user),
+        );
     },
     fetchLabels(labelSearchTerm) {
       return this.$apollo

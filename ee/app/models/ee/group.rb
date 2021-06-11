@@ -513,34 +513,34 @@ module EE
 
     def billed_user_ids_excluding_guests
       strong_memoize(:billed_user_ids_excluding_guests) do
-        group_member_ids = billed_group_members.non_guests.distinct.pluck(:user_id)
-        project_member_ids = billed_project_members.non_guests.distinct.pluck(:user_id)
-        shared_group_ids = billed_shared_non_guests_group_members.non_guests.distinct.pluck(:user_id)
-        shared_project_ids = billed_invited_non_guests_group_to_project_members.non_guests.distinct.pluck(:user_id)
+        group_member_user_ids = billed_group_members.non_guests.distinct.pluck(:user_id)
+        project_member_user_ids = billed_project_users(non_guests: true).distinct.pluck(:id)
+        shared_group_user_ids = billed_shared_non_guests_group_members.non_guests.distinct.pluck(:user_id)
+        shared_project_user_ids = billed_invited_non_guests_group_to_project_members.non_guests.distinct.pluck(:user_id)
 
         {
-          user_ids: (group_member_ids + project_member_ids + shared_group_ids + shared_project_ids).to_set,
-          group_member_user_ids: group_member_ids.to_set,
-          project_member_user_ids: project_member_ids.to_set,
-          shared_group_user_ids: shared_group_ids.to_set,
-          shared_project_user_ids: shared_project_ids.to_set
+          user_ids: (group_member_user_ids + project_member_user_ids + shared_group_user_ids + shared_project_user_ids).to_set,
+          group_member_user_ids: group_member_user_ids.to_set,
+          project_member_user_ids: project_member_user_ids.to_set,
+          shared_group_user_ids: shared_group_user_ids.to_set,
+          shared_project_user_ids: shared_project_user_ids.to_set
         }
       end
     end
 
     def billed_user_ids_including_guests
       strong_memoize(:billed_user_ids_including_guests) do
-        group_member_ids = billed_group_members.distinct.pluck(:user_id)
-        project_member_ids = billed_project_members.distinct.pluck(:user_id)
-        shared_group_ids = billed_shared_group_members.distinct.pluck(:user_id)
-        shared_project_ids = billed_invited_group_to_project_members.distinct.pluck(:user_id)
+        group_member_user_ids = billed_group_members.distinct.pluck(:user_id)
+        project_member_user_ids = billed_project_users.distinct.pluck(:id)
+        shared_group_user_ids = billed_shared_group_members.distinct.pluck(:user_id)
+        shared_project_user_ids = billed_invited_group_to_project_members.distinct.pluck(:user_id)
 
         {
-          user_ids: (group_member_ids + project_member_ids + shared_group_ids + shared_project_ids).to_set,
-          group_member_user_ids: group_member_ids.to_set,
-          project_member_user_ids: project_member_ids.to_set,
-          shared_group_user_ids: shared_group_ids.to_set,
-          shared_project_user_ids: shared_project_ids.to_set
+          user_ids: (group_member_user_ids + project_member_user_ids + shared_group_user_ids + shared_project_user_ids).to_set,
+          group_member_user_ids: group_member_user_ids.to_set,
+          project_member_user_ids: project_member_user_ids.to_set,
+          shared_group_user_ids: shared_group_user_ids.to_set,
+          shared_project_user_ids: shared_project_user_ids.to_set
         }
       end
     end
@@ -553,10 +553,18 @@ module EE
     end
 
     # Members belonging directly to Projects within Group or Projects within subgroups
-    def billed_project_members
-      ::ProjectMember.active_without_invites_and_requests.without_project_bots.where(
+    def billed_project_users(non_guests: false)
+      members = ::ProjectMember.without_invites_and_requests
+
+      members = members.non_guests if non_guests
+
+      user_ids = members.where(
         source_id: ::Project.joins(:group).where(namespace: self_and_descendants)
       )
+      .distinct
+      .select(:user_id)
+
+      ::User.with_state(:active).without_project_bot.where(id: user_ids)
     end
 
     # Members belonging to Groups invited to collaborate with Projects

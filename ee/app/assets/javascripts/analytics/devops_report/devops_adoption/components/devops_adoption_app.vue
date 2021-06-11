@@ -9,7 +9,6 @@ import {
   DEVOPS_ADOPTION_STRINGS,
   DEVOPS_ADOPTION_ERROR_KEYS,
   MAX_REQUEST_COUNT,
-  MAX_SEGMENTS,
   DATE_TIME_FORMAT,
   DEFAULT_POLLING_INTERVAL,
   DEVOPS_ADOPTION_GROUP_LEVEL_LABEL,
@@ -58,7 +57,6 @@ export default {
   },
   trackDevopsTabClickEvent: TRACK_ADOPTION_TAB_CLICK_EVENT,
   trackDevopsScoreTabClickEvent: TRACK_DEVOPS_SCORE_TAB_CLICK_EVENT,
-  maxSegments: MAX_SEGMENTS,
   devopsAdoptionTableConfiguration: DEVOPS_ADOPTION_TABLE_CONFIGURATION,
   data() {
     return {
@@ -87,6 +85,9 @@ export default {
   apollo: {
     devopsAdoptionEnabledNamespaces: {
       query: devopsAdoptionEnabledNamespacesQuery,
+      context: {
+        isSingleRequest: true,
+      },
       variables() {
         return this.segmentsQueryVariables;
       },
@@ -132,21 +133,26 @@ export default {
         this.$apollo.queries.devopsAdoptionEnabledNamespaces.loading
       );
     },
-    segmentLimitReached() {
-      return this.devopsAdoptionEnabledNamespaces?.nodes?.length > this.$options.maxSegments;
+    isLoadingAdoptionData() {
+      return (
+        this.isLoadingEnableGroup || this.$apollo.queries.devopsAdoptionEnabledNamespaces.loading
+      );
     },
     editGroupsButtonLabel() {
       return this.isGroup
         ? this.$options.i18n.groupLevelLabel
         : this.$options.i18n.tableHeader.button;
     },
-    canRenderModal() {
-      return this.hasGroupData && !this.isLoading;
-    },
     tabIndexValues() {
       const tabs = this.$options.devopsAdoptionTableConfiguration.map((item) => item.tab);
 
       return this.isGroup ? tabs : [...tabs, 'devops-score'];
+    },
+    availableGroups() {
+      return this.groups?.nodes || [];
+    },
+    enabledGroups() {
+      return this.devopsAdoptionEnabledNamespaces?.nodes || [];
     },
   },
   created() {
@@ -214,6 +220,9 @@ export default {
       this.$apollo
         .query({
           query: getGroupsQuery,
+          context: {
+            isSingleRequest: true,
+          },
           variables: {
             nextPage,
           },
@@ -304,11 +313,10 @@ export default {
 
         <devops-adoption-section
           v-else
-          :is-loading="isLoading"
+          :is-loading="isLoadingAdoptionData"
           :has-segments-data="hasSegmentsData"
           :timestamp="timestamp"
           :has-group-data="hasGroupData"
-          :segment-limit-reached="segmentLimitReached"
           :edit-groups-button-label="editGroupsButtonLabel"
           :cols="tab.cols"
           :segments="devopsAdoptionEnabledNamespaces"
@@ -324,10 +332,11 @@ export default {
     </gl-tabs>
 
     <devops-adoption-segment-modal
-      v-if="canRenderModal"
+      v-if="!hasLoadingError"
       ref="addRemoveModal"
-      :groups="groups.nodes"
-      :enabled-groups="devopsAdoptionEnabledNamespaces.nodes"
+      :groups="availableGroups"
+      :enabled-groups="enabledGroups"
+      :is-loading="isLoading"
       @segmentsAdded="addSegmentsToCache"
       @segmentsRemoved="deleteSegmentsFromCache"
       @trackModalOpenState="trackModalOpenState"

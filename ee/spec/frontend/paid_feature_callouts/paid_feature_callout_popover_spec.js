@@ -3,14 +3,12 @@ import { GlBreakpointInstance } from '@gitlab/ui/dist/utils';
 import { shallowMount } from '@vue/test-utils';
 
 import PaidFeatureCalloutPopover from 'ee/paid_feature_callouts/components/paid_feature_callout_popover.vue';
-import { mockTracking } from 'helpers/tracking_helper';
+import { mockTracking, unmockTracking } from 'helpers/tracking_helper';
 import { extendedWrapper } from 'helpers/vue_test_utils_helper';
 
 describe('PaidFeatureCalloutPopover', () => {
   let trackingSpy;
   let wrapper;
-
-  const trackingExperimentKey = 'experiment:highlight_paid_features_during_active_trial';
 
   const findGlPopover = () => wrapper.findComponent(GlPopover);
 
@@ -36,10 +34,12 @@ describe('PaidFeatureCalloutPopover', () => {
   };
 
   beforeEach(() => {
+    trackingSpy = mockTracking(undefined, undefined, jest.spyOn);
     wrapper = createComponent();
   });
 
   afterEach(() => {
+    unmockTracking();
     wrapper.destroy();
   });
 
@@ -135,50 +135,68 @@ describe('PaidFeatureCalloutPopover', () => {
       variant: 'confirm',
       size: 'small',
       block: '',
-      'data-track-action': 'click_button',
-      'data-track-property': trackingExperimentKey,
     };
 
-    const findUpgradeBtn = () => wrapper.findByTestId('upgradeBtn');
-    const findCompareBtn = () => wrapper.findByTestId('compareBtn');
+    describe('upgrade plan button', () => {
+      const findUpgradeBtn = () => wrapper.findByTestId('upgradeBtn');
 
-    it('correctly renders an Upgrade button', () => {
-      const upgradeBtn = findUpgradeBtn();
+      it('correctly renders an Upgrade button', () => {
+        const upgradeBtn = findUpgradeBtn();
 
-      expect(upgradeBtn.text()).toEqual('Upgrade to GitLab Amazing');
-      expect(upgradeBtn.attributes()).toMatchObject({
-        ...sharedAttrs,
-        href: '/-/subscriptions/new?namespace_id=123&plan_id=abc456',
-        category: 'primary',
-        'data-track-label': 'upgrade_to_ultimate',
+        expect(upgradeBtn.text()).toEqual('Upgrade to GitLab Amazing');
+        expect(upgradeBtn.attributes()).toMatchObject({
+          ...sharedAttrs,
+          href: '/-/subscriptions/new?namespace_id=123&plan_id=abc456',
+          category: 'primary',
+        });
+      });
+
+      it('tracks on click', () => {
+        findUpgradeBtn().vm.$emit('click');
+
+        expect(trackingSpy).toHaveBeenCalledWith(
+          undefined,
+          'click_button',
+          expect.objectContaining({ label: 'upgrade_to_premium' }),
+        );
       });
     });
 
-    it('correctly renders a Compare button', () => {
-      const compareBtn = findCompareBtn();
+    describe('compare plans button', () => {
+      const findCompareBtn = () => wrapper.findByTestId('compareBtn');
 
-      expect(compareBtn.text()).toEqual('Compare all plans');
-      expect(compareBtn.attributes()).toMatchObject({
-        ...sharedAttrs,
-        href: '/group/test-group/-/billings',
-        category: 'secondary',
-        'data-track-label': 'compare_all_plans',
+      it('correctly renders a Compare button', () => {
+        const compareBtn = findCompareBtn();
+
+        expect(compareBtn.text()).toEqual('Compare all plans');
+        expect(compareBtn.attributes()).toMatchObject({
+          ...sharedAttrs,
+          href: '/group/test-group/-/billings',
+          category: 'secondary',
+        });
+      });
+
+      it('tracks on click', () => {
+        findCompareBtn().vm.$emit('click');
+
+        expect(trackingSpy).toHaveBeenCalledWith(
+          undefined,
+          'click_button',
+          expect.objectContaining({ label: 'compare_all_plans' }),
+        );
       });
     });
   });
 
   describe('onShown', () => {
-    beforeEach(() => {
-      trackingSpy = mockTracking(undefined, undefined, jest.spyOn);
-      wrapper = createComponent();
-      findGlPopover().vm.$emit('shown');
-    });
-
     it('tracks that the popover has been shown', () => {
-      expect(trackingSpy).toHaveBeenCalledWith(undefined, 'popover_shown', {
-        label: 'feature_highlight_popover:some feature',
-        property: trackingExperimentKey,
-      });
+      findGlPopover().vm.$emit('shown');
+
+      expect(trackingSpy).toHaveBeenCalledWith(
+        undefined,
+        'popover_shown',
+        expect.objectContaining({ label: 'feature_highlight_popover' }),
+      );
     });
   });
 

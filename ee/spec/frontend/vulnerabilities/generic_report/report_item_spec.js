@@ -34,6 +34,10 @@ const TEST_DATA = {
     lineStart: '1',
     lineEnd: '2',
   },
+  [REPORT_TYPES.markdown]: {
+    name: 'Markdown:',
+    value: 'Checkout [GitLab](http://gitlab.com)',
+  },
 };
 
 describe('ee/vulnerabilities/components/generic_report/report_item.vue', () => {

@@ -87,7 +87,11 @@ export default {
     </header>
 
     <gl-tabs content-class="gl-pt-0">
-      <gl-tab :title="s__('ThreatMonitoring|Alerts')" data-testid="threat-monitoring-alerts-tab">
+      <gl-tab
+        :title="s__('ThreatMonitoring|Alerts')"
+        data-testid="threat-monitoring-alerts-tab"
+        data-qa-selector="alerts_tab"
+      >
         <alerts />
       </gl-tab>
       <gl-tab ref="networkPolicyTab" :title="s__('ThreatMonitoring|Policies')">

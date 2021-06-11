@@ -6,6 +6,7 @@ module Resolvers
       class EnabledNamespacesResolver < BaseResolver
         include Gitlab::Graphql::Authorize::AuthorizeResource
         include Gitlab::Allowable
+        include LooksAhead
 
         type Types::Analytics::DevopsAdoption::EnabledNamespaceType, null: true
 
@@ -13,18 +14,24 @@ module Resolvers
                  required: false,
                  description: 'Filter by display namespace.'
 
-        def resolve(display_namespace_id: nil, **)
+        def resolve_with_lookahead(display_namespace_id: nil, **)
           display_namespace_id = GlobalID.parse(display_namespace_id)
           display_namespace = Gitlab::Graphql::Lazy.force(GitlabSchema.find_by_gid(display_namespace_id))
 
           authorize!(display_namespace)
 
-          ::Analytics::DevopsAdoption::EnabledNamespacesFinder.new(current_user, params: {
-            display_namespace: display_namespace
-          }).execute
+          apply_lookahead(finder_class.new(current_user, params: { display_namespace: display_namespace }).execute)
+        end
+
+        def unconditional_includes
+          [:display_namespace]
         end
 
         private
+
+        def finder_class
+          ::Analytics::DevopsAdoption::EnabledNamespacesFinder
+        end
 
         def authorize!(display_namespace)
           display_namespace ? authorize_with_namespace!(display_namespace) : authorize_global!

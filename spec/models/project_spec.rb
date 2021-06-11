@@ -43,9 +43,9 @@ RSpec.describe Project, factory_default: :keep do
     it { is_expected.to have_one(:webex_teams_service) }
     it { is_expected.to have_one(:packagist_service) }
     it { is_expected.to have_one(:pushover_service) }
-    it { is_expected.to have_one(:asana_service) }
+    it { is_expected.to have_one(:asana_integration) }
     it { is_expected.to have_many(:boards) }
-    it { is_expected.to have_one(:campfire_service) }
+    it { is_expected.to have_one(:campfire_integration) }
     it { is_expected.to have_one(:datadog_service) }
     it { is_expected.to have_one(:discord_service) }
     it { is_expected.to have_one(:drone_ci_service) }
@@ -54,20 +54,20 @@ RSpec.describe Project, factory_default: :keep do
     it { is_expected.to have_one(:irker_service) }
     it { is_expected.to have_one(:pivotaltracker_service) }
     it { is_expected.to have_one(:flowdock_service) }
-    it { is_expected.to have_one(:assembla_service) }
+    it { is_expected.to have_one(:assembla_integration) }
     it { is_expected.to have_one(:slack_slash_commands_service) }
     it { is_expected.to have_one(:mattermost_slash_commands_service) }
-    it { is_expected.to have_one(:buildkite_service) }
-    it { is_expected.to have_one(:bamboo_service) }
+    it { is_expected.to have_one(:buildkite_integration) }
+    it { is_expected.to have_one(:bamboo_integration) }
     it { is_expected.to have_one(:teamcity_service) }
     it { is_expected.to have_one(:jira_service) }
     it { is_expected.to have_one(:redmine_service) }
     it { is_expected.to have_one(:youtrack_service) }
-    it { is_expected.to have_one(:custom_issue_tracker_service) }
-    it { is_expected.to have_one(:bugzilla_service) }
+    it { is_expected.to have_one(:custom_issue_tracker_integration) }
+    it { is_expected.to have_one(:bugzilla_integration) }
     it { is_expected.to have_one(:ewm_service) }
     it { is_expected.to have_one(:external_wiki_service) }
-    it { is_expected.to have_one(:confluence_service) }
+    it { is_expected.to have_one(:confluence_integration) }
     it { is_expected.to have_one(:project_feature) }
     it { is_expected.to have_one(:project_repository) }
     it { is_expected.to have_one(:container_expiration_policy) }
@@ -653,6 +653,16 @@ RSpec.describe Project, factory_default: :keep do
     it { is_expected.to delegate_method(:root_ancestor).to(:namespace).with_arguments(allow_nil: true) }
     it { is_expected.to delegate_method(:last_pipeline).to(:commit).with_arguments(allow_nil: true) }
     it { is_expected.to delegate_method(:allow_editing_commit_messages?).to(:project_setting) }
+    it { is_expected.to delegate_method(:container_registry_enabled?).to(:project_feature) }
+    it { is_expected.to delegate_method(:container_registry_access_level).to(:project_feature) }
+
+    context 'when read_container_registry_access_level is disabled' do
+      before do
+        stub_feature_flags(read_container_registry_access_level: false)
+      end
+
+      it { is_expected.not_to delegate_method(:container_registry_enabled?).to(:project_feature) }
+    end
   end
 
   describe 'reference methods' do
@@ -2285,35 +2295,55 @@ RSpec.describe Project, factory_default: :keep do
     it 'updates project_feature', :aggregate_failures do
       # Simulate an existing project that has container_registry enabled
       project.update_column(:container_registry_enabled, true)
-      project.project_feature.update_column(:container_registry_access_level, ProjectFeature::DISABLED)
-
-      expect(project.container_registry_enabled).to eq(true)
-      expect(project.project_feature.container_registry_access_level).to eq(ProjectFeature::DISABLED)
+      project.project_feature.update_column(:container_registry_access_level, ProjectFeature::ENABLED)
 
       project.update!(container_registry_enabled: false)
 
-      expect(project.container_registry_enabled).to eq(false)
+      expect(project.read_attribute(:container_registry_enabled)).to eq(false)
       expect(project.project_feature.container_registry_access_level).to eq(ProjectFeature::DISABLED)
 
       project.update!(container_registry_enabled: true)
 
-      expect(project.container_registry_enabled).to eq(true)
+      expect(project.read_attribute(:container_registry_enabled)).to eq(true)
       expect(project.project_feature.container_registry_access_level).to eq(ProjectFeature::ENABLED)
     end
 
     it 'rollsback both projects and project_features row in case of error', :aggregate_failures do
       project.update_column(:container_registry_enabled, true)
-      project.project_feature.update_column(:container_registry_access_level, ProjectFeature::DISABLED)
-
-      expect(project.container_registry_enabled).to eq(true)
-      expect(project.project_feature.container_registry_access_level).to eq(ProjectFeature::DISABLED)
+      project.project_feature.update_column(:container_registry_access_level, ProjectFeature::ENABLED)
 
       allow(project).to receive(:valid?).and_return(false)
 
       expect { project.update!(container_registry_enabled: false) }.to raise_error(ActiveRecord::RecordInvalid)
 
-      expect(project.reload.container_registry_enabled).to eq(true)
-      expect(project.project_feature.reload.container_registry_access_level).to eq(ProjectFeature::DISABLED)
+      expect(project.reload.read_attribute(:container_registry_enabled)).to eq(true)
+      expect(project.project_feature.reload.container_registry_access_level).to eq(ProjectFeature::ENABLED)
+    end
+  end
+
+  describe '#container_registry_enabled' do
+    let_it_be_with_reload(:project) { create(:project) }
+
+    it 'delegates to project_feature', :aggregate_failures do
+      project.update_column(:container_registry_enabled, true)
+      project.project_feature.update_column(:container_registry_access_level, ProjectFeature::DISABLED)
+
+      expect(project.container_registry_enabled).to eq(false)
+      expect(project.container_registry_enabled?).to eq(false)
+    end
+
+    context 'with read_container_registry_access_level disabled' do
+      before do
+        stub_feature_flags(read_container_registry_access_level: false)
+      end
+
+      it 'reads project.container_registry_enabled' do
+        project.update_column(:container_registry_enabled, true)
+        project.project_feature.update_column(:container_registry_access_level, ProjectFeature::DISABLED)
+
+        expect(project.container_registry_enabled).to eq(true)
+        expect(project.container_registry_enabled?).to eq(true)
+      end
     end
   end
 
@@ -2851,6 +2881,16 @@ RSpec.describe Project, factory_default: :keep do
       it 'returns false when not overridden' do
         expect(project.remote_mirror_available?).to be(false)
       end
+    end
+  end
+
+  describe '#mark_primary_write_location' do
+    let(:project) { create(:project) }
+
+    it 'marks the location with project ID' do
+      expect(Gitlab::Database::LoadBalancing::Sticking).to receive(:mark_primary_write_location).with(:project, project.id)
+
+      project.mark_primary_write_location
     end
   end
 
@@ -5301,7 +5341,7 @@ RSpec.describe Project, factory_default: :keep do
     it { expect(project.has_active_services?).to be_falsey }
 
     it 'returns true when a matching service exists' do
-      create(:custom_issue_tracker_service, push_events: true, merge_requests_events: false, project: project)
+      create(:custom_issue_tracker_integration, push_events: true, merge_requests_events: false, project: project)
 
       expect(project.has_active_services?(:merge_request_hooks)).to be_falsey
       expect(project.has_active_services?).to be_truthy
@@ -6919,11 +6959,6 @@ RSpec.describe Project, factory_default: :keep do
     context 'aliases' do
       it 'tag_list returns correct string array' do
         expect(project.tag_list).to match_array(%w[topic1 topic2 topic3])
-      end
-
-      it 'tags returns correct tag records' do
-        expect(project.tags.first.class.name).to eq('ActsAsTaggableOn::Tag')
-        expect(project.tags.map(&:name)).to match_array(%w[topic1 topic2 topic3])
       end
     end
   end

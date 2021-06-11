@@ -19,13 +19,16 @@ export const i18n = {
       condition: s__('EscalationPolicies|IF alert is not %{alertStatus} in %{minutes} minutes'),
       action: s__('EscalationPolicies|THEN %{doAction} %{schedule}'),
       selectSchedule: s__('EscalationPolicies|Select schedule'),
-      validationMsg: s__(
-        'EscalationPolicies|A schedule is required for adding an escalation policy.',
-      ),
       noSchedules: s__(
         'EscalationPolicies|A schedule is required for adding an escalation policy. Please create an on-call schedule first.',
       ),
       removeRuleLabel: s__('EscalationPolicies|Remove escalation rule'),
+      emptyScheduleValidationMsg: s__(
+        'EscalationPolicies|A schedule is required for adding an escalation policy.',
+      ),
+      invalidTimeValidationMsg: s__(
+        'EscalationPolicies|Elapsed time must be greater than or equal to zero.',
+      ),
     },
   },
 };
@@ -66,10 +69,10 @@ export default {
       type: Number,
       required: true,
     },
-    isValid: {
-      type: Boolean,
+    validationState: {
+      type: Object,
       required: false,
-      default: true,
+      default: () => {},
     },
   },
   data() {
@@ -89,6 +92,15 @@ export default {
     },
     noSchedules() {
       return !this.schedulesLoading && !this.schedules.length;
+    },
+    isValid() {
+      return this.isTimeValid && this.isScheduleValid;
+    },
+    isTimeValid() {
+      return this.validationState?.isTimeValid;
+    },
+    isScheduleValid() {
+      return this.validationState?.isScheduleValid;
     },
   },
   methods: {
@@ -123,11 +135,16 @@ export default {
       class="gl-absolute rule-close-icon"
       @click="$emit('remove-escalation-rule', index)"
     />
-    <gl-form-group
-      :invalid-feedback="$options.i18n.fields.rules.validationMsg"
-      :state="isValid"
-      class="gl-mb-0"
-    >
+    <gl-form-group :state="isValid" class="gl-mb-0">
+      <template #invalid-feedback>
+        <div v-if="!isScheduleValid">
+          {{ $options.i18n.fields.rules.emptyScheduleValidationMsg }}
+        </div>
+        <div v-if="!isTimeValid" class="gl-display-inline-block gl-mt-2">
+          {{ $options.i18n.fields.rules.invalidTimeValidationMsg }}
+        </div>
+      </template>
+
       <div class="gl-display-flex gl-align-items-center">
         <gl-sprintf :message="$options.i18n.fields.rules.condition">
           <template #alertStatus>
@@ -150,10 +167,10 @@ export default {
           <template #minutes>
             <gl-form-input
               v-model="elapsedTimeSeconds"
-              class="gl-mx-3 gl-inset-border-1-gray-200! rule-elapsed-minutes"
+              class="gl-mx-3 gl-inset-border-1-gray-200! gl-w-12"
               type="number"
               min="0"
-              @change="emitUpdate"
+              @input="emitUpdate"
             />
           </template>
         </gl-sprintf>

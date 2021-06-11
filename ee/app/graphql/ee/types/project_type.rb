@@ -172,7 +172,7 @@ module EE
       end
 
       def api_fuzzing_ci_configuration
-        return unless Ability.allowed?(current_user, :read_vulnerability, object)
+        return unless Ability.allowed?(current_user, :read_security_resource, object)
 
         configuration = ::AppSec::Fuzzing::Api::CiConfiguration.new(project: object)
 

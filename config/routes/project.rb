@@ -385,7 +385,7 @@ constraints(::Constraints::ProjectUrlConstrainer.new) do
 
         # The wiki and repository routing contains wildcard characters so
         # its preferable to keep it below all other project routes
-        draw :repository_scoped
+        draw :repository
         draw :wiki
 
         namespace :import do
@@ -565,7 +565,7 @@ constraints(::Constraints::ProjectUrlConstrainer.new) do
       # Deprecated unscoped routing.
       scope as: 'deprecated' do
         # Issue https://gitlab.com/gitlab-org/gitlab/issues/118849
-        draw :repository
+        draw :repository_deprecated
 
         # Issue https://gitlab.com/gitlab-org/gitlab/-/issues/223719
         # rubocop: disable Cop/PutProjectRoutesUnderScope

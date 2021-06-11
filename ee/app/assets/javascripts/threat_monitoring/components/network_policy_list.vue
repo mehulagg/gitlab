@@ -1,39 +1,21 @@
 <script>
-import {
-  GlTable,
-  GlEmptyState,
-  GlDrawer,
-  GlButton,
-  GlAlert,
-  GlSprintf,
-  GlLink,
-  GlToggle,
-} from '@gitlab/ui';
+import { GlTable, GlEmptyState, GlButton, GlAlert, GlSprintf, GlLink } from '@gitlab/ui';
 import { mapState, mapActions, mapGetters } from 'vuex';
 import { getTimeago } from '~/lib/utils/datetime_utility';
 import { setUrlFragment, mergeUrlParams } from '~/lib/utils/url_utility';
 import { s__ } from '~/locale';
-import { getContentWrapperHeight } from '../utils';
 import EnvironmentPicker from './environment_picker.vue';
-import { CiliumNetworkPolicyKind } from './policy_editor/constants';
-import PolicyDrawer from './policy_editor/policy_drawer.vue';
+import PolicyDrawer from './policy_drawer/policy_drawer.vue';
 
 export default {
-  i18n: {
-    enforcementStatus: s__('NetworkPolicies|Enforcement status'),
-  },
   components: {
     GlTable,
     GlEmptyState,
-    GlDrawer,
     GlButton,
     GlAlert,
     GlSprintf,
     GlLink,
-    GlToggle,
     EnvironmentPicker,
-    NetworkPolicyEditor: () =>
-      import(/* webpackChunkName: 'network_policy_editor' */ './network_policy_editor.vue'),
     PolicyDrawer,
   },
   props: {
@@ -50,7 +32,7 @@ export default {
     return { selectedPolicyName: null, initialManifest: null, initialEnforcementStatus: null };
   },
   computed: {
-    ...mapState('networkPolicies', ['policies', 'isLoadingPolicies', 'isUpdatingPolicy']),
+    ...mapState('networkPolicies', ['policies', 'isLoadingPolicies']),
     ...mapState('threatMonitoring', ['currentEnvironmentId', 'allEnvironments']),
     ...mapGetters('networkPolicies', ['policiesWithDefaults']),
     documentationFullPath() {
@@ -64,27 +46,8 @@ export default {
 
       return this.policiesWithDefaults.find((policy) => policy.name === this.selectedPolicyName);
     },
-    hasPolicyChanges() {
-      if (!this.hasSelectedPolicy) return false;
-
-      return (
-        this.selectedPolicy.manifest !== this.initialManifest ||
-        this.selectedPolicy.isEnabled !== this.initialEnforcementStatus
-      );
-    },
     hasAutoDevopsPolicy() {
       return this.policiesWithDefaults.some((policy) => policy.isAutodevops);
-    },
-    hasCiliumSelectedPolicy() {
-      return this.hasSelectedPolicy
-        ? this.selectedPolicy.manifest.includes(CiliumNetworkPolicyKind)
-        : false;
-    },
-    shouldShowCiliumDrawer() {
-      return this.hasCiliumSelectedPolicy;
-    },
-    shouldShowEditButton() {
-      return this.hasCiliumSelectedPolicy && Boolean(this.selectedPolicy.creationTimestamp);
     },
     editPolicyPath() {
       return this.hasSelectedPolicy
@@ -133,9 +96,6 @@ export default {
   },
   methods: {
     ...mapActions('networkPolicies', ['fetchPolicies', 'createPolicy', 'updatePolicy']),
-    getDrawerHeaderHeight() {
-      return getContentWrapperHeight('.js-threat-monitoring-container-wrapper');
-    },
     getTimeAgoString(creationTimestamp) {
       if (!creationTimestamp) return '';
       return getTimeago().format(creationTimestamp);
@@ -153,21 +113,6 @@ export default {
 
       const bTable = this.$refs.policiesTable.$children[0];
       bTable.clearSelected();
-    },
-    savePolicy() {
-      const promise = this.selectedPolicy.creationTimestamp ? this.updatePolicy : this.createPolicy;
-      return promise({
-        environmentId: this.currentEnvironmentId,
-        policy: this.selectedPolicy,
-      })
-        .then(() => {
-          this.initialManifest = this.selectedPolicy.manifest;
-          this.initialEnforcementStatus = this.selectedPolicy.isEnabled;
-        })
-        .catch(() => {
-          this.selectedPolicy.manifest = this.initialManifest;
-          this.selectedPolicy.isEnabled = this.initialEnforcementStatus;
-        });
     },
   },
   emptyStateDescription: s__(
@@ -250,63 +195,12 @@ export default {
       </template>
     </gl-table>
 
-    <gl-drawer
-      ref="editorDrawer"
-      :z-index="252"
+    <policy-drawer
       :open="hasSelectedPolicy"
-      :header-height="getDrawerHeaderHeight()"
+      :policy="selectedPolicy"
+      :edit-policy-path="editPolicyPath"
+      data-testid="policyDrawer"
       @close="deselectPolicy"
-    >
-      <template #header>
-        <div>
-          <h3 class="gl-mb-3">{{ selectedPolicy.name }}</h3>
-          <div>
-            <gl-button ref="cancelButton" @click="deselectPolicy">{{ __('Cancel') }}</gl-button>
-            <gl-button
-              v-if="shouldShowEditButton"
-              data-testid="edit-button"
-              category="primary"
-              variant="info"
-              :href="editPolicyPath"
-              >{{ s__('NetworkPolicies|Edit policy') }}</gl-button
-            >
-            <gl-button
-              ref="applyButton"
-              category="primary"
-              variant="success"
-              :loading="isUpdatingPolicy"
-              :disabled="!hasPolicyChanges"
-              @click="savePolicy"
-              >{{ __('Apply changes') }}</gl-button
-            >
-          </div>
-        </div>
-      </template>
-      <div v-if="hasSelectedPolicy">
-        <policy-drawer v-if="shouldShowCiliumDrawer" v-model="selectedPolicy.manifest" />
-
-        <div v-else>
-          <h5>{{ s__('NetworkPolicies|Policy definition') }}</h5>
-          <p>
-            {{ s__("NetworkPolicies|Define this policy's location, conditions and actions.") }}
-          </p>
-          <div class="gl-p-3 gl-bg-gray-50">
-            <network-policy-editor
-              ref="policyEditor"
-              v-model="selectedPolicy.manifest"
-              class="network-policy-editor"
-            />
-          </div>
-        </div>
-
-        <h5 class="gl-mt-6">{{ $options.i18n.enforcementStatus }}</h5>
-        <p>{{ s__('NetworkPolicies|Choose whether to enforce this policy.') }}</p>
-        <gl-toggle
-          v-model="selectedPolicy.isEnabled"
-          :label="$options.i18n.enforcementStatus"
-          label-position="hidden"
-        />
-      </div>
-    </gl-drawer>
+    />
   </div>
 </template>

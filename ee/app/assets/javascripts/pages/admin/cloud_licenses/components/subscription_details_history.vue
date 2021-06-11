@@ -2,8 +2,13 @@
 import { GlBadge, GlTable } from '@gitlab/ui';
 import { kebabCase } from 'lodash';
 import { capitalizeFirstCharacter } from '~/lib/utils/text_utility';
-import sprintf from '~/locale/sprintf';
-import { detailsLabels, subscriptionTable, subscriptionTypeText } from '../constants';
+import {
+  cloudLicenseText,
+  detailsLabels,
+  licenseFileText,
+  subscriptionTable,
+  subscriptionTypes,
+} from '../constants';
 
 const DEFAULT_BORDER_CLASSES = 'gl-border-b-1! gl-border-b-gray-100! gl-border-b-solid!';
 const DEFAULT_TH_CLASSES = 'gl-bg-white! gl-border-t-0! gl-pb-5! gl-px-5! gl-text-gray-700!';
@@ -96,7 +101,7 @@ export default {
         {
           key: 'type',
           formatter: (v, k, item) =>
-            sprintf(subscriptionTypeText, { type: capitalizeFirstCharacter(item.type) }),
+            item.type === subscriptionTypes.LICENSE_FILE ? licenseFileText : cloudLicenseText,
           label: subscriptionTable.type,
           tdAttr,
           tdClass: this.cellClass,

@@ -17,7 +17,7 @@ module Elastic
           end
 
         options[:features] = 'issues'
-        options[:no_join_project] = Elastic::DataMigrationService.migration_has_finished?(:add_new_data_to_issues_documents)
+        options[:no_join_project] = true
         context.name(:issue) do
           query_hash = context.name(:authorized) { project_ids_filter(query_hash, options) }
           query_hash = context.name(:confidentiality) { confidentiality_filter(query_hash, options) }

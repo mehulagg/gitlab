@@ -37,7 +37,7 @@ module Mutations
 
       def add_project(project)
         Dashboard::Projects::CreateService
-          .new(current_user, current_user.security_dashboard_projects, ability: :read_vulnerability)
+          .new(current_user, current_user.security_dashboard_projects, ability: :read_security_resource)
           .execute([project.id])
       end
 

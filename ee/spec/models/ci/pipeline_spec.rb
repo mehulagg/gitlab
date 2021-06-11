@@ -353,6 +353,22 @@ RSpec.describe Ci::Pipeline do
   end
 
   describe 'state machine transitions' do
+    context 'on pipeline complete' do
+      let(:pipeline) { create(:ci_empty_pipeline, status: from_status) }
+
+      Ci::HasStatus::ACTIVE_STATUSES.each do |status|
+        context "from #{status}" do
+          let(:from_status) { status }
+
+          it 'schedules Ci::SyncReportsToReportApprovalRulesWorker' do
+            expect(Ci::SyncReportsToReportApprovalRulesWorker).to receive(:perform_async).with(pipeline.id)
+
+            pipeline.succeed
+          end
+        end
+      end
+    end
+
     context 'when pipeline has downstream bridges' do
       before do
         pipeline.downstream_bridges << create(:ci_bridge)

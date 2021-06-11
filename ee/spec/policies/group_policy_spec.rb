@@ -848,7 +848,7 @@ RSpec.describe GroupPolicy do
 
   describe 'read_group_security_dashboard & create_vulnerability_export' do
     let(:abilities) do
-      %i[read_group_security_dashboard create_vulnerability_export read_vulnerability]
+      %i[read_group_security_dashboard create_vulnerability_export read_security_resource]
     end
 
     before do

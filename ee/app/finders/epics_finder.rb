@@ -10,6 +10,7 @@
 #   state: 'open' or 'closed' or 'all'
 #   group_id: integer
 #   parent_id: integer
+#   child_id: integer
 #   author_id: integer
 #   author_username: string
 #   label_name: string
@@ -127,6 +128,7 @@ class EpicsFinder < IssuableFinder
     items = by_state(items)
     items = by_label(items)
     items = by_parent(items)
+    items = by_child(items)
     items = by_iids(items)
     items = by_my_reaction_emoji(items)
     items = by_confidential(items)
@@ -194,11 +196,24 @@ class EpicsFinder < IssuableFinder
     params[:parent_id].present?
   end
 
+  def child_id?
+    params[:child_id].present?
+  end
+
   # rubocop: disable CodeReuse/ActiveRecord
   def by_parent(items)
     return items unless parent_id?
 
     items.where(parent_id: params[:parent_id])
+  end
+  # rubocop: enable CodeReuse/ActiveRecord
+
+  # rubocop: disable CodeReuse/ActiveRecord
+  def by_child(items)
+    return items unless child_id?
+
+    ancestor_ids = Epic.find(params[:child_id]).ancestors.select(:id)
+    items.where(id: ancestor_ids)
   end
   # rubocop: enable CodeReuse/ActiveRecord
 

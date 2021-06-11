@@ -263,23 +263,12 @@ describe('Subscription Details', () => {
     describe('when setting up for a company', () => {
       it('should be valid', () => {
         wrapper = createComponent({
-          subscription: { planId: 'firstPlanId', namespaceId: 483, quantity: 14 },
+          subscription: { namespaceId: 483, quantity: 14 },
+          selectedPlanId: 'firstPlanId',
           customer: { company: 'Organization name' },
         });
 
         expect(isStepValid()).toBe(true);
-      });
-
-      it('should be invalid when no plan is selected', async () => {
-        wrapper = createComponent({
-          isSetupForCompany: true,
-          subscription: { planId: null, namespaceId: 483, quantity: 14 },
-          customer: { company: 'Organization name' },
-        });
-
-        await nextTick();
-
-        expect(isStepValid()).toBe(false);
       });
 
       it('should be invalid when no organization name is given, and no group is selected', async () => {
@@ -321,7 +310,8 @@ describe('Subscription Details', () => {
       beforeEach(() => {
         wrapper = createComponent({
           isSetupForCompany: false,
-          subscription: { planId: 'firstPlanId', namespaceId: 483, quantity: 1 },
+          subscription: { namespaceId: 483, quantity: 1 },
+          selectedPlanId: 'firstPlanId',
           customer: { company: 'Organization name' },
         });
       });
@@ -330,22 +320,11 @@ describe('Subscription Details', () => {
         expect(isStepValid()).toBe(true);
       });
 
-      it('should be invalid when no plan is selected', async () => {
-        wrapper = createComponent({
-          isSetupForCompany: false,
-          subscription: { planId: null, namespaceId: 483, quantity: 1 },
-          customer: { company: 'Organization name' },
-        });
-
-        await nextTick();
-
-        expect(isStepValid()).toBe(false);
-      });
-
       it('should be invalid when no number of users is 0', async () => {
         wrapper = createComponent({
           isSetupForCompany: false,
-          subscription: { planId: 'firstPlanId', namespaceId: 483, quantity: 0 },
+          subscription: { namespaceId: 483, quantity: 0 },
+          selectedPlanId: 'firstPlanId',
           customer: { company: 'Organization name' },
         });
 
@@ -357,7 +336,8 @@ describe('Subscription Details', () => {
       it('should be invalid when no number of users is greater than 1', async () => {
         wrapper = createComponent({
           isSetupForCompany: false,
-          subscription: { planId: 'firstPlanId', namespaceId: 483, quantity: 2 },
+          subscription: { namespaceId: 483, quantity: 2 },
+          selectedPlanId: 'firstPlanId',
           customer: { company: 'Organization name' },
         });
 

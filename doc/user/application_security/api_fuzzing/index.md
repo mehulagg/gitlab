@@ -135,7 +135,7 @@ To configure API fuzzing in GitLab with an OpenAPI Specification:
 1. Add the `fuzz` stage to your `.gitlab-ci.yml` file.
 
 1. [Include](../../../ci/yaml/README.md#includetemplate)
-   the [`API-Fuzzing.gitlab-ci.yml` template](https://gitlab.com/gitlab-org/gitlab/blob/master/lib/gitlab/ci/templates/Security/API-Fuzzing.gitlab-ci.yml)
+   the [`API-Fuzzing.gitlab-ci.yml` template](https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/Security/API-Fuzzing.gitlab-ci.yml)
    in your `.gitlab-ci.yml` file.
 
 1. Provide the profile by adding the `FUZZAPI_PROFILE` CI/CD variable to your `.gitlab-ci.yml` file.
@@ -156,7 +156,7 @@ To configure API fuzzing in GitLab with an OpenAPI Specification:
    dynamic environments. To run API fuzzing against an application dynamically created during a
    GitLab CI/CD pipeline, have the application persist its URL in an `environment_url.txt` file.
    API fuzzing automatically parses that file to find its scan target. You can see an
-   example of this in the [Auto DevOps CI YAML](https://gitlab.com/gitlab-org/gitlab/blob/master/lib/gitlab/ci/templates/Jobs/Deploy.gitlab-ci.yml).
+   example of this in the [Auto DevOps CI YAML](https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/Jobs/Deploy.gitlab-ci.yml).
 
 Example `.gitlab-ci.yml` file using an OpenAPI Specification:
 
@@ -201,7 +201,7 @@ To configure API fuzzing to use a HAR file:
 1. Add the `fuzz` stage to your `.gitlab-ci.yml` file.
 
 1. [Include](../../../ci/yaml/README.md#includetemplate)
-   the [`API-Fuzzing.gitlab-ci.yml` template](https://gitlab.com/gitlab-org/gitlab/blob/master/lib/gitlab/ci/templates/Security/API-Fuzzing.gitlab-ci.yml)
+   the [`API-Fuzzing.gitlab-ci.yml` template](https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/Security/API-Fuzzing.gitlab-ci.yml)
    in your `.gitlab-ci.yml` file.
 
 1. Provide the profile by adding the `FUZZAPI_PROFILE` CI/CD variable to your `.gitlab-ci.yml` file.
@@ -223,7 +223,7 @@ To configure API fuzzing to use a HAR file:
    dynamic environments. To run API fuzzing against an app dynamically created during a GitLab CI/CD
    pipeline, have the app persist its domain in an `environment_url.txt` file. API fuzzing
    automatically parses that file to find its scan target. You can see an
-   [example of this in our Auto DevOps CI YAML](https://gitlab.com/gitlab-org/gitlab/blob/master/lib/gitlab/ci/templates/Jobs/Deploy.gitlab-ci.yml).
+   [example of this in our Auto DevOps CI YAML](https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/Jobs/Deploy.gitlab-ci.yml).
 
 Example `.gitlab-ci.yml` file using a HAR file:
 
@@ -272,7 +272,7 @@ To configure API fuzzing to use a Postman Collection file:
 1. Add the `fuzz` stage to your `.gitlab-ci.yml` file.
 
 1. [Include](../../../ci/yaml/README.md#includetemplate)
-   the [`API-Fuzzing.gitlab-ci.yml` template](https://gitlab.com/gitlab-org/gitlab/blob/master/lib/gitlab/ci/templates/Security/API-Fuzzing.gitlab-ci.yml)
+   the [`API-Fuzzing.gitlab-ci.yml` template](https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/Security/API-Fuzzing.gitlab-ci.yml)
    in your `.gitlab-ci.yml` file.
 
 1. Provide the profile by adding the `FUZZAPI_PROFILE` CI/CD variable to your `.gitlab-ci.yml` file.
@@ -295,7 +295,7 @@ To configure API fuzzing to use a Postman Collection file:
    dynamic environments. To run API fuzzing against an app dynamically created during a GitLab CI/CD
    pipeline, have the app persist its domain in an `environment_url.txt` file. API fuzzing
    automatically parses that file to find its scan target. You can see an
-   [example of this in our Auto DevOps CI YAML](https://gitlab.com/gitlab-org/gitlab/blob/master/lib/gitlab/ci/templates/Jobs/Deploy.gitlab-ci.yml).
+   [example of this in our Auto DevOps CI YAML](https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/Jobs/Deploy.gitlab-ci.yml).
 
 Example `.gitlab-ci.yml` file using a Postman Collection file:
 
@@ -568,6 +568,7 @@ profile increases as the number of tests increases.
 | `FUZZAPI_TARGET_URL`                                        | Base URL of API testing target. |
 | `FUZZAPI_CONFIG`                                            | [Deprecated](https://gitlab.com/gitlab-org/gitlab/-/issues/276395) in GitLab 13.12, replaced with default `.gitlab/gitlab-api-fuzzing-config.yml`. API Fuzzing configuration file. |
 |[`FUZZAPI_PROFILE`](#api-fuzzing-profiles)                   | Configuration profile to use during testing. Defaults to `Quick-10`. |
+|[`FUZZAPI_EXCLUDE_PATHS`](#exclude-paths)                    | Exclude API URL paths from testing. |
 |[`FUZZAPI_OPENAPI`](#openapi-specification)                  | OpenAPI Specification file or URL. |
 |[`FUZZAPI_HAR`](#http-archive-har)                           | HTTP Archive (HAR) file. |
 |[`FUZZAPI_POSTMAN_COLLECTION`](#postman-collection)          | Postman Collection file. |
@@ -823,6 +824,47 @@ variables:
   FUZZAPI_OVERRIDES_FILE: output/api-fuzzing-overrides.json
   FUZZAPI_OVERRIDES_CMD: renew_token.py
   FUZZAPI_OVERRIDES_INTERVAL: 300
+```
+
+### Exclude Paths
+
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/211892) in GitLab 14.0.
+
+When testing an API it can be useful to exclude certain paths. For example, you might exclude testing of an authentication service or an older version of the API. To exclude paths, use the `FUZZAPI_EXCLUDE_PATHS` CI/CD variable . This variable is specified in your `.gitlab-ci.yml` file. To exclude multiple paths, separate entries using the `;` character. In the provided paths you can use a single character wildcard `?` and `*` for a multiple character wildcard.
+
+To verify the paths are excluded, review the `Tested Operations` and `Excluded Operations` portion of the job output. You should not see any excluded paths listed under `Tested Operations`.
+
+```plaintext
+2021-05-27 21:51:08 [INF] API Security: --[ Tested Operations ]-------------------------
+2021-05-27 21:51:08 [INF] API Security: 201 POST http://target:7777/api/users CREATED
+2021-05-27 21:51:08 [INF] API Security: ------------------------------------------------
+2021-05-27 21:51:08 [INF] API Security: --[ Excluded Operations ]-----------------------
+2021-05-27 21:51:08 [INF] API Security: GET http://target:7777/api/messages
+2021-05-27 21:51:08 [INF] API Security: POST http://target:7777/api/messages
+2021-05-27 21:51:08 [INF] API Security: ------------------------------------------------
+```
+
+#### Examples of excluding paths
+
+This example excludes the `/auth` resource. This does not exclude child resources (`/auth/child`).
+
+```yaml
+variables:
+  FUZZAPI_EXCLUDE_PATHS=/auth
+```
+
+To exclude `/auth`, and child resources (`/auth/child`), we use a wildcard.
+
+```yaml
+variables:
+  FUZZAPI_EXCLUDE_PATHS=/auth*
+```
+
+To exclude multiple paths we can use the `;` character. In this example we exclude `/auth*` and `/v1/*`.
+
+```yaml
+variables:
+  FUZZAPI_EXCLUDE_PATHS=/auth*;/v1/*
 ```
 
 ### Header Fuzzing
@@ -1160,7 +1202,7 @@ The API Fuzzing engine outputs an error message when it cannot establish a conne
 **Solution**
 
 - Remove the `FUZZAPI_API` variable from the `.gitlab-ci.yml` file. The value will be inherited from the API Fuzzing CI/CD template. We recommend this method instead of manually setting a value.
-- If removing the variable is not possible, check to see if this value has changed in the latest version of the [API Fuzzing CI/CD template](https://gitlab.com/gitlab-org/gitlab/blob/master/lib/gitlab/ci/templates/Security/API-Fuzzing.gitlab-ci.yml). If so, update the value in the `.gitlab-ci.yml` file.
+- If removing the variable is not possible, check to see if this value has changed in the latest version of the [API Fuzzing CI/CD template](https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/Security/API-Fuzzing.gitlab-ci.yml). If so, update the value in the `.gitlab-ci.yml` file.
 
 ### Application cannot determine the base URL for the target API
 

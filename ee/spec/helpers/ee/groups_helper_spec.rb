@@ -16,73 +16,31 @@ RSpec.describe GroupsHelper do
     group.add_owner(owner)
   end
 
-  describe '#group_epics_count' do
-    before do
-      stub_licensed_features(epics: true)
-    end
-
-    describe 'filtering by state' do
-      before do
-        create_list(:epic, 3, :opened, group: group)
-        create_list(:epic, 2, :closed, group: group)
-      end
-
-      it 'returns open epics count' do
-        expect(helper.group_epics_count(state: 'opened')).to eq(3)
-      end
-
-      it 'returns closed epics count' do
-        expect(helper.group_epics_count(state: 'closed')).to eq(2)
-      end
-    end
-
-    it 'counts also epics from subgroups not visible to user' do
-      parent_group = create(:group, :public)
-      subgroup = create(:group, :private, parent: parent_group)
-      create(:epic, :opened, group: parent_group)
-      create(:epic, :opened, group: subgroup)
-      helper.instance_variable_set(:@group, parent_group)
-
-      expect(Ability.allowed?(owner, :read_epic, parent_group)).to be_truthy
-      expect(Ability.allowed?(owner, :read_epic, subgroup)).to be_falsey
-      expect(helper.group_epics_count(state: 'opened')).to eq(2)
-    end
-  end
-
-  describe '#open_epics_count' do
-    let_it_be(:count_service) { ::Groups::EpicsCountService }
-
-    before do
-      allow(helper).to receive(:current_user) { current_user }
-    end
-
-    it 'returns count value from cache' do
-      allow_next_instance_of(count_service) do |service|
-        allow(service).to receive(:count).and_return(2500)
-      end
-
-      expect(helper.open_epics_count(group)).to eq('2.5k')
-    end
-
-    context 'when cached_sidebar_open_epics_count feature flag is disabled' do
-      before do
-        stub_feature_flags(cached_sidebar_open_epics_count: false)
-      end
-
-      it 'returns not cached epics count' do
-        allow(helper).to receive(:group_epics_count).and_return(2500)
-
-        expect(helper.open_epics_count(group)).to eq('2,500')
-      end
-    end
-  end
-
   describe '#cached_issuables_count' do
     context 'with epics type' do
       let(:type) { :epics }
       let(:count_service) { ::Groups::EpicsCountService }
 
       it_behaves_like 'cached issuables count'
+
+      context 'with subgroup epics' do
+        before do
+          stub_licensed_features(epics: true)
+          allow(helper).to receive(:current_user) { owner }
+          allow(count_service).to receive(:new).and_call_original
+        end
+
+        it 'counts also epics from subgroups not visible to user' do
+          parent_group = create(:group, :public)
+          subgroup = create(:group, :private, parent: parent_group)
+          create(:epic, :opened, group: parent_group)
+          create(:epic, :opened, group: subgroup)
+
+          expect(Ability.allowed?(owner, :read_epic, parent_group)).to be_truthy
+          expect(Ability.allowed?(owner, :read_epic, subgroup)).to be_falsey
+          expect(helper.cached_issuables_count(parent_group, type: type)).to eq('2')
+        end
+      end
     end
   end
 

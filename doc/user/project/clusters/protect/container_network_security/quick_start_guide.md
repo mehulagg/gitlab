@@ -4,7 +4,7 @@ group: Container Security
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
 ---
 
-# Getting started with Container Network Security
+# Getting started with Container Network Security **(FREE)**
 
 The following steps are recommended for installing Container Network Security.
 
@@ -20,7 +20,6 @@ The following steps are recommended to install and use Container Network Securit
 1. Install and configure an Ingress node:
 
    - [Install the Ingress node via CI/CD (Cluster Management Project)](../../../../clusters/applications.md#install-ingress-using-gitlab-cicd).
-   - [Determine the external endpoint via the manual method](../../../../clusters/applications.md#determining-the-external-endpoint-manually).
    - Navigate to the Kubernetes page and enter the [DNS address for the external endpoint](../../index.md#base-domain)
      into the **Base domain** field on the **Details** tab. Save the changes to the Kubernetes
      cluster.
@@ -58,7 +57,7 @@ use both methods simultaneously, when the application project pipeline runs the 
 NetworkPolicy in the `auto-deploy-values.yaml` file may override policies configured in the UI
 editor.
 
-## Monitoring throughput `**(ULTIMATE)**`
+## Monitoring throughput **(ULTIMATE)**
 
 To view statistics for Container Network Security, you must follow the installation steps above and
 configure GitLab integration with Prometheus. Also, if you use custom Helm values for Cilium, you
