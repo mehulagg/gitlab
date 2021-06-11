@@ -193,7 +193,7 @@ module QA
         def within_projects_menu(&block)
           within_top_menu { click_element :projects_dropdown }
 
-          page.within('.qa-projects-dropdown-sidebar', &block)
+          within_element(:projects_dropdown_sidebar, &block)
         end
 
         def click_admin_area
