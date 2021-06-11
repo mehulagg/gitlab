@@ -1,6 +1,7 @@
 <script>
 import { GlTooltipDirective, GlButton, GlFormInput, GlLink, GlLoadingIcon } from '@gitlab/ui';
 import { mapState, mapActions } from 'vuex';
+import createLabelMutation from './graphql/create_label.mutation.graphql';
 
 export default {
   components: {
@@ -11,6 +12,11 @@ export default {
   },
   directives: {
     GlTooltip: GlTooltipDirective,
+  },
+  inject: {
+    projectPath: {
+      default: '',
+    },
   },
   props: {
     labelsCreateTitle: {
@@ -35,7 +41,7 @@ export default {
     },
   },
   methods: {
-    ...mapActions(['toggleDropdownContents', 'toggleDropdownContentsCreateView', 'createLabel']),
+    ...mapActions(['toggleDropdownContents', 'toggleDropdownContentsCreateView']),
     getColorCode(color) {
       return Object.keys(color).pop();
     },
@@ -45,11 +51,18 @@ export default {
     handleColorClick(color) {
       this.selectedColor = this.getColorCode(color);
     },
-    handleCreateClick() {
-      this.createLabel({
-        title: this.labelTitle,
-        color: this.selectedColor,
+    createLabel() {
+      this.$apollo.mutate({
+        mutation: createLabelMutation,
+        variables: {
+          title: this.labelTitle,
+          color: this.selectedColor,
+          projectPath: this.projectPath,
+        },
       });
+    },
+    handleCreateClick() {
+      this.createLabel();
     },
   },
 };
