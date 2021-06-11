@@ -150,6 +150,8 @@ export default {
       @success="onSuccess"
     />
     <delete-value-stream-modal
+      v-if="selectedValueStream"
+      :selected-value-stream="selectedValueStream"
       :is-visible="showDeleteModal"
       @hidden="showDeleteModal = false"
       @success="onSuccess"

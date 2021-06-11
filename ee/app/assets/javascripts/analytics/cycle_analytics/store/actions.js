@@ -324,12 +324,14 @@ export const deleteValueStream = ({ commit, dispatch, getters }, valueStreamId) 
   const { currentGroupPath } = getters;
   commit(types.REQUEST_DELETE_VALUE_STREAM);
 
-  return Api.cycleAnalyticsDeleteValueStream(currentGroupPath, valueStreamId)
+  return Api.cycleAnalyticsDeleteValueStream('currentGroupPath', valueStreamId)
     .then(() => commit(types.RECEIVE_DELETE_VALUE_STREAM_SUCCESS))
     .then(() => dispatch('fetchCycleAnalyticsData'))
-    .catch(({ response } = {}) => {
+    .catch((error = {}) => {
+      const { response } = error;
       const { data: { message } = null } = response;
       commit(types.RECEIVE_DELETE_VALUE_STREAM_ERROR, message);
+      throw error;
     });
 };
 

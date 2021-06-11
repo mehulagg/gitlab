@@ -2,6 +2,7 @@
 import { GlAlert, GlModal, GlSprintf } from '@gitlab/ui';
 import { mapState, mapActions } from 'vuex';
 import { sprintf } from '~/locale';
+import Tracking from '~/tracking';
 import { I18N } from '../constants';
 
 export default {
@@ -11,7 +12,12 @@ export default {
     GlModal,
     GlSprintf,
   },
+  mixins: [Tracking.mixin()],
   props: {
+    selectedValueStream: {
+      type: Object,
+      required: true,
+    },
     isVisible: {
       type: Boolean,
       required: true,
@@ -21,7 +27,6 @@ export default {
     ...mapState({
       isDeleting: 'isDeletingValueStream',
       error: 'deleteValueStreamError',
-      selectedValueStream: 'selectedValueStream',
     }),
     deleteConfirmationText() {
       return sprintf(this.$options.I18N.DELETE_CONFIRMATION, {
@@ -61,7 +66,7 @@ export default {
     }"
     :action-cancel="{ text: $options.I18N.CANCEL }"
     :visible="isVisible"
-    @primary.prevent="onDelete"
+    @primary="onDelete"
     @hidden="$emit('hidden')"
   >
     <gl-alert v-if="error" variant="danger">{{ error }}</gl-alert>
