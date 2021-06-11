@@ -1295,8 +1295,6 @@ The DAST tool always emits a JSON report file called `gl-dast-report.json` and
 sample reports can be found in the
 [DAST repository](https://gitlab.com/gitlab-org/security-products/dast/-/tree/master/test/end-to-end/expect).
 
-There are two formats of data in the JSON report that are used side by side:
-
 ### Other formats
 
 Reports can also be generated in Markdown, HTML, and XML. These can be published as artifacts using the following configuration:

@@ -1,7 +1,7 @@
 # To use this template, add the following to your .gitlab-ci.yml file:
 #
 # include:
-#   template: DAST.latest.gitlab-ci.yml
+#   template: DAST.gitlab-ci.yml
 #
 # You also need to add a `dast` stage to your `stages:` configuration. A sample configuration for DAST:
 #
