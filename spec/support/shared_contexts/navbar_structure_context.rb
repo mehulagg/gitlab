@@ -227,7 +227,7 @@ RSpec.shared_context 'group navbar structure' do
         nav_item: _('Merge requests'),
         nav_sub_items: []
       },
-      security_and_compliance_nav_item,
+      (security_and_compliance_nav_item if Gitlab.ee?),
       (push_rules_nav_item if Gitlab.ee?),
       {
         nav_item: _('Kubernetes'),

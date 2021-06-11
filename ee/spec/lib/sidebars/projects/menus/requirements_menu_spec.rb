@@ -23,32 +23,12 @@ RSpec.describe Sidebars::Projects::Menus::RequirementsMenu do
     end
 
     context 'when user can read requirements' do
-      context 'when feature flag :sidebar_refactor is enabled' do
-        before do
-          stub_feature_flags(sidebar_refactor: true)
-        end
-
-        it 'returns true' do
-          expect(subject.render?).to eq true
-        end
-
-        it 'does not contain any menu item' do
-          expect(subject.renderable_items).to be_empty
-        end
+      it 'returns true' do
+        expect(subject.render?).to eq true
       end
 
-      context 'when feature flag :sidebar_refactor is disabled' do
-        before do
-          stub_feature_flags(sidebar_refactor: false)
-        end
-
-        it 'returns true' do
-          expect(subject.render?).to eq true
-        end
-
-        it 'contains list menu item' do
-          expect(subject.renderable_items[0].item_id).to eq :requirements_list
-        end
+      it 'does not contain any menu item' do
+        expect(subject.renderable_items).to be_empty
       end
     end
   end
