@@ -237,20 +237,6 @@ describe('AlertManagementTable', () => {
       expect(visitUrl).toHaveBeenCalledWith('/1527542/details', true);
     });
 
-    // describe('deprecation notice', () => {
-    //   it('shows the deprecation notice when available', () => {
-    //     mountComponent({ provide: { hasManagedPrometheus: true } });
-
-    //     expect(findDeprecationNotice().exists()).toBe(true);
-    //   });
-
-    //   it('hides the deprecation notice when not available', () => {
-    //     mountComponent();
-
-    //     expect(findDeprecationNotice().exists()).toBe(false);
-    //   });
-    // });
-
     it.each`
       managedAlertsDeprecation | hasManagedPrometheus | isVisible
       ${false}                 | ${false}             | ${false}
