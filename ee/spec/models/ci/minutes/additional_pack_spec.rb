@@ -19,6 +19,7 @@ RSpec.describe Ci::Minutes::AdditionalPack do
 
       it { is_expected.to validate_presence_of(:expires_at) }
       it { is_expected.to validate_presence_of(:purchase_xid) }
+      it { is_expected.to validate_uniqueness_of(:purchase_xid) }
     end
 
     context 'when self-managed' do
@@ -28,6 +29,7 @@ RSpec.describe Ci::Minutes::AdditionalPack do
 
       it { is_expected.not_to validate_presence_of(:purchase_xid) }
       it { is_expected.not_to validate_presence_of(:expires_at) }
+      it { is_expected.not_to validate_uniqueness_of(:purchase_xid) }
     end
   end
 end

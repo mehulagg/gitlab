@@ -22284,6 +22284,8 @@ CREATE INDEX finding_links_on_vulnerability_occurrence_id ON vulnerability_findi
 
 CREATE UNIQUE INDEX i_ci_job_token_project_scope_links_on_source_and_target_project ON ci_job_token_project_scope_links USING btree (source_project_id, target_project_id);
 
+CREATE UNIQUE INDEX i_ci_minutes_additional_packs_on_namespace_id_purchase_xid_uniq ON ci_minutes_additional_packs USING btree (namespace_id, purchase_xid);
+
 CREATE INDEX idx_analytics_devops_adoption_segments_on_namespace_id ON analytics_devops_adoption_segments USING btree (namespace_id);
 
 CREATE INDEX idx_audit_events_part_on_entity_id_desc_author_id_created_at ON ONLY audit_events USING btree (entity_id, entity_type, id DESC, author_id, created_at);
@@ -22771,8 +22773,6 @@ CREATE INDEX index_ci_job_token_project_scope_links_on_target_project_id ON ci_j
 CREATE INDEX index_ci_job_variables_on_job_id ON ci_job_variables USING btree (job_id);
 
 CREATE UNIQUE INDEX index_ci_job_variables_on_key_and_job_id ON ci_job_variables USING btree (key, job_id);
-
-CREATE INDEX index_ci_minutes_additional_packs_on_namespace_id_purchase_xid ON ci_minutes_additional_packs USING btree (namespace_id, purchase_xid);
 
 CREATE UNIQUE INDEX index_ci_namespace_monthly_usages_on_namespace_id_and_date ON ci_namespace_monthly_usages USING btree (namespace_id, date);
 
