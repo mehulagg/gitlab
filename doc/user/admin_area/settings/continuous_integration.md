@@ -28,6 +28,25 @@ From now on, every existing project and newly created ones that don't have a
 If you want to disable it for a specific project, you can do so in
 [its settings](../../../topics/autodevops/index.md#enable-or-disable-auto-devops).
 
+## Shared runner details
+
+To display details about the instance's shared runners in all projects'
+runner settings:
+
+1. On the top bar, select **Menu >** **{admin}** **Admin**.
+1. On the left sidebar, select **Settings > CI/CD**.
+1. Expand **Continuous Integration and Deployment**.
+1. Enter your shared runner details in the **Shared runner details** field.
+
+You can use [Markdown](../../markdown.md) for improved formatting. To see the rendered
+details:
+
+1. On the top bar, select **Menu > Project** and select any group or project.
+1. On the left sidebar, select **Settings > CI/CD**.
+1. Expand **Runners**.
+
+![Shared runner details example](img/continuous_integration_shared_runner_details_v14_0.png)
+
 ## Maximum artifacts size **(FREE SELF)**
 
 The maximum size of the [job artifacts](../../../administration/job_artifacts.md)
@@ -169,6 +188,15 @@ retried. Make it empty to never expire jobs. It has to be no less than 1 day,
 for example: <code>15 days</code>, <code>1 month</code>, <code>2 years</code>.
 
 As of June 22, 2020 the [value is set](../../gitlab_com/index.md#gitlab-cicd) to 3 months on GitLab.com. Jobs created before that date were archived after September 22, 2020.
+
+## Protect CI/CD variables by default
+
+To set all new [CI/CD variables](../../../ci/variables/README.md) as
+[protected](../../../ci/variables/README.md#protect-a-cicd-variable) by default:
+
+1. On the top bar, select **Menu >** **{admin}** **Admin**.
+1. On the left sidebar, select **Settings > CI/CD**.
+1. Select **Protect CI/CD variables by default**.
 
 ## Default CI/CD configuration file
 
