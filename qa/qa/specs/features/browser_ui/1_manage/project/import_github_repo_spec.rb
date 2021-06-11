@@ -4,7 +4,7 @@ module QA
   RSpec.describe 'Manage', :github, :requires_admin do
     describe 'Project import' do
       let!(:api_client) { Runtime::API::Client.as_admin }
-      let!(:group) { Resource::Group.fabricate_via_api! { |res| res.api_client = api_client } }
+      let!(:group) { Resource::Group.fabricate_via_api! { |resource| resource.api_client = api_client } }
       let!(:user) do
         Resource::User.fabricate_via_api! do |resource|
           resource.api_client = api_client
