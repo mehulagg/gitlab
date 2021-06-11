@@ -166,6 +166,18 @@ RSpec.describe Analytics::DevopsAdoption::SnapshotCalculator do
     end
   end
 
+  describe 'sast_enabled_count' do
+    subject { data[:sast_enabled_count] }
+
+    it { is_expected.to be_nil  }
+  end
+
+  describe 'dast_enabled_count' do
+    subject { data[:dast_enabled_count] }
+
+    it { is_expected.to be_nil  }
+  end
+
   context 'when snapshot already exists' do
     subject(:data) { described_class.new(enabled_namespace: enabled_namespace, range_end: range_end, snapshot: snapshot).calculate }
 

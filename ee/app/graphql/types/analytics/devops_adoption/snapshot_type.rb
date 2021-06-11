@@ -24,6 +24,10 @@ module Types
               description: 'At least one security scan succeeded.'
         field :code_owners_used_count, GraphQL::INT_TYPE, null: true,
               description: 'Total number of projects with existing CODEOWNERS file.'
+        field :sast_enabled_count, GraphQL::INT_TYPE, null: true,
+              description: 'Total number of projects with enabled SAST.'
+        field :dast_enabled_count, GraphQL::INT_TYPE, null: true,
+              description: 'Total number of projects with enabled DAST.'
         field :total_projects_count, GraphQL::INT_TYPE, null: true,
               description: 'Total number of projects.'
         field :recorded_at, Types::TimeType, null: false,

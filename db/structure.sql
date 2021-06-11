@@ -9114,6 +9114,8 @@ CREATE TABLE analytics_devops_adoption_snapshots (
     total_projects_count integer,
     code_owners_used_count integer,
     namespace_id integer,
+    sast_enabled_count integer,
+    dast_enabled_count integer,
     CONSTRAINT check_3f472de131 CHECK ((namespace_id IS NOT NULL))
 );
 

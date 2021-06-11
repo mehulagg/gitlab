@@ -9,7 +9,7 @@ module Analytics
           :namespace_id,
           :end_time,
           :recorded_at
-        ] + SnapshotCalculator::ADOPTION_METRICS).freeze
+        ] + Snapshot::ADOPTION_METRICS).freeze
 
         def initialize(snapshot:, params: {})
           @snapshot = snapshot

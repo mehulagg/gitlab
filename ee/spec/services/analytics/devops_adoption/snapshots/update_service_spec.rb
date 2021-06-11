@@ -9,10 +9,10 @@ RSpec.describe Analytics::DevopsAdoption::Snapshots::UpdateService do
 
   let(:params) do
     params = {}
-    Analytics::DevopsAdoption::SnapshotCalculator::BOOLEAN_METRICS.each.with_index do |attribute, i|
+    Analytics::DevopsAdoption::Snapshot::BOOLEAN_METRICS.each.with_index do |attribute, i|
       params[attribute] = i.odd?
     end
-    Analytics::DevopsAdoption::SnapshotCalculator::NUMERIC_METRICS.each.with_index do |attribute, i|
+    Analytics::DevopsAdoption::Snapshot::NUMERIC_METRICS.each.with_index do |attribute, i|
       params[attribute] = i
     end
     params[:recorded_at] = Time.zone.now
