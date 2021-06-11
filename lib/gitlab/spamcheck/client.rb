@@ -35,6 +35,7 @@ module Gitlab
           end
 
         @stub = ::Spamcheck::SpamcheckService::Stub.new(@endpoint_url, creds,
+                                                        interceptors: interceptors,
                                                         timeout: DEFAULT_TIMEOUT_SECS)
       end
 
@@ -99,6 +100,10 @@ module Gitlab
       def convert_to_pb_timestamp(ar_timestamp)
         Google::Protobuf::Timestamp.new(seconds: ar_timestamp.to_time.to_i,
                                         nanos: ar_timestamp.to_time.nsec)
+      end
+
+      def interceptors
+        [Labkit::Correlation::GRPC::ClientInterceptor.instance]
       end
     end
   end
