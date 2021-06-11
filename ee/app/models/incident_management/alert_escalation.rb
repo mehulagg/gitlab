@@ -7,6 +7,8 @@ module IncidentManagement
     belongs_to :policy, class_name: 'EscalationPolicy', foreign_key: 'policy_id'
     belongs_to :alert, class_name: 'AlertManagement::Alert', foreign_key: 'alert_id'
 
+    scope :for_alert, -> (alert) { where(alert: alert) }
+
     delegate :project, to: :policy
 
     def time_since_last_notify

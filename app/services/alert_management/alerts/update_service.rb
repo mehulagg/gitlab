@@ -24,9 +24,10 @@ module AlertManagement
 
         # Save old assignees for system notes
         old_assignees = alert.assignees.to_a
+        old_status = alert.status
 
         if alert.update(params)
-          handle_changes(old_assignees: old_assignees)
+          handle_changes(old_assignees: old_assignees, old_status: old_status)
 
           success
         else
@@ -36,8 +37,8 @@ module AlertManagement
 
       private
 
-      attr_reader :alert, :current_user, :params, :param_errors, :status
-      delegate :resolved?, to: :alert
+      attr_reader :alert, :current_user, :params, :param_errors, :status, :old_status
+      delegate :resolved?, :open?, to: :alert
 
       def allowed?
         current_user&.can?(:update_alert_management_alert, alert)
@@ -81,9 +82,9 @@ module AlertManagement
         filter_duplicate
       end
 
-      def handle_changes(old_assignees:)
+      def handle_changes(old_assignees:, old_status:)
         handle_assignement(old_assignees) if params[:assignees]
-        handle_status_change if params[:status_event]
+        handle_status_change(old_status) if params[:status_event]
       end
 
       # ----- Assignee-related behavior ------
@@ -127,7 +128,7 @@ module AlertManagement
         params[:status_event] = status_event
       end
 
-      def handle_status_change
+      def handle_status_change(old_status)
         add_status_change_system_note
         resolve_todos if resolved?
       end

@@ -34,14 +34,7 @@ module EE
       end
 
       def create_escalation
-        return unless ::Gitlab::IncidentManagement.escalation_policies_available?(project) && !resolving_alert?
-
-        policy = project.incident_management_escalation_policies.first
-
-        return unless policy
-
-        escalation = ::IncidentManagement::AlertEscalation.create!(alert: alert, policy: policy)
-        ::IncidentManagement::Escalations::ProcessService.new(escalation).execute
+        ::IncidentManagement::Escalations::CreateService.new(project, alert).execute
       end
     end
   end
