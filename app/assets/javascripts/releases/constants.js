@@ -13,8 +13,6 @@ export const ASSET_LINK_TYPE = Object.freeze({
 
 export const DEFAULT_ASSET_LINK_TYPE = ASSET_LINK_TYPE.OTHER;
 
-export const PAGE_SIZE = 10;
-
 export const ASCENDING_ORDER = 'asc';
 export const DESCENDING_ORDER = 'desc';
 export const RELEASED_AT = 'released_at';
@@ -48,4 +46,7 @@ export const SORT_MAP = {
   },
 };
 
+// These needs to be kept in sync with the constants in
+// app/helpers/releases_helper.rb
+export const PAGE_SIZE = 10;
 export const DEFAULT_SORT = RELEASED_AT_DESC;

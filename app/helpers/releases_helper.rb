@@ -4,6 +4,11 @@ module ReleasesHelper
   IMAGE_PATH = 'illustrations/releases.svg'
   DOCUMENTATION_PATH = 'user/project/releases/index'
 
+  # These needs to be kept in sync with the constants in
+  # app/assets/javascripts/releases/constants.js
+  PAGE_SIZE = 10
+  DEFAULT_SORT = 'RELEASED_AT_DESC'
+
   def illustration
     image_path(IMAGE_PATH)
   end
@@ -27,6 +32,21 @@ module ReleasesHelper
                                   end
       end
     end
+  end
+
+  def variables_for_full_releases_page_startup_query
+    {
+      fullPath: @project.full_path,
+      first: PAGE_SIZE,
+      sort: DEFAULT_SORT
+    }
+  end
+
+  def variables_for_single_releases_page_startup_query
+    {
+      **variables_for_full_releases_page_startup_query,
+      first: 1
+    }
   end
 
   def data_for_show_page
