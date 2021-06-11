@@ -14,10 +14,10 @@ GitLab supports infrastructure management tasks for generic infrastructure using
 
 ## Generic infrastructure management (FREE)
 
-Using GitLab for Terraform integrations you can:
+Using [GitLab for Terraform integrations](../../infrastructure) you can:
 
 - Coordinate infrastructure changes using the [Terraform merge request widget](../../infrastructure/mr_integration.md).
-- Ignore the state file management aspects of Terraform using the GitLab Managed Terraform states.
+- Ignore the state file management aspects of Terraform using the [GitLab Managed Terraform states](../../infrastructure/terraform_state.md).
 
 ## Kubernetes integrations
 
