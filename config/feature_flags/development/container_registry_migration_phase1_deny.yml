@@ -1,0 +1,8 @@
+---
+name: container_registry_migration_phase1_deny
+introduced_by_url:
+rollout_issue_url:
+milestone: '14.0'
+type: development
+group: group::package
+default_enabled: false

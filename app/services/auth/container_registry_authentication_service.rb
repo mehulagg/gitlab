@@ -115,7 +115,17 @@ module Auth
       #
       ensure_container_repository!(path, authorized_actions)
 
-      { type: type, name: path.to_s, actions: authorized_actions }
+      access = { type: type, name: path.to_s, actions: authorized_actions }
+      add_migration_flags(requested_project, access)
+    end
+
+    def add_migration_flags(project, access)
+      return access unless access[:actions].include?('push') && Feature.enabled?(:container_registry_migration_phase1)
+
+      access[:migration_eligible] = Feature.enabled?(:container_registry_migration_phase1_tier, project.group.actual_plan) \
+        && Feature.disabled?(:container_registry_migration_phase1_deny, project.group) \
+        && Feature.enabled?(:container_registry_migration_phase1_allow, project)
+      access
     end
 
     ##
