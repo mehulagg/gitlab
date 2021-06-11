@@ -16502,9 +16502,6 @@ msgstr ""
 msgid "How do I set up this service?"
 msgstr ""
 
-msgid "How does cleanup work?"
-msgstr ""
-
 msgid "How it works"
 msgstr ""
 
@@ -28592,9 +28589,6 @@ msgid "Save password"
 msgstr ""
 
 msgid "Save pipeline schedule"
-msgstr ""
-
-msgid "Save space and find images in the Container Registry. Remove unneeded tags and keep only the ones you want."
 msgstr ""
 
 msgid "Save space and find images in the container Registry. remove unneeded tags and keep only the ones you want. %{linkStart}How does cleanup work?%{linkEnd}"
