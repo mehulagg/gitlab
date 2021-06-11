@@ -15,6 +15,10 @@ export default {
       required: false,
       default: false,
     },
+    labelsCreateTitle: {
+      type: String,
+      required: true,
+    },
   },
   computed: {
     ...mapState(['showDropdownContentsCreateView']),
@@ -39,6 +43,6 @@ export default {
     data-qa-selector="labels_dropdown_content"
     :style="directionStyle"
   >
-    <component :is="dropdownContentsView" />
+    <component :is="dropdownContentsView" :labels-create-title="labelsCreateTitle" />
   </div>
 </template>

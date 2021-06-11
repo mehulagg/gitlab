@@ -163,7 +163,6 @@ export default {
       labelsFilterBasePath: this.labelsFilterBasePath,
       labelsFilterParam: this.labelsFilterParam,
       labelsListTitle: this.labelsListTitle,
-      labelsCreateTitle: this.labelsCreateTitle,
       footerCreateLabelTitle: this.footerCreateLabelTitle,
       footerManageLabelTitle: this.footerManageLabelTitle,
     });
@@ -313,6 +312,7 @@ export default {
         v-show="dropdownButtonVisible && showDropdownContents"
         ref="dropdownContents"
         :render-on-top="!contentIsOnViewport"
+        :labels-create-title="labelsCreateTitle"
       />
     </template>
     <template v-if="isDropdownVariantStandalone || isDropdownVariantEmbedded">

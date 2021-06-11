@@ -12,6 +12,12 @@ export default {
   directives: {
     GlTooltip: GlTooltipDirective,
   },
+  props: {
+    labelsCreateTitle: {
+      type: String,
+      required: true,
+    },
+  },
   data() {
     return {
       labelTitle: '',
@@ -19,7 +25,7 @@ export default {
     };
   },
   computed: {
-    ...mapState(['labelsCreateTitle', 'labelCreateInProgress']),
+    ...mapState(['labelCreateInProgress']),
     disableCreate() {
       return !this.labelTitle.length || !this.selectedColor.length || this.labelCreateInProgress;
     },
