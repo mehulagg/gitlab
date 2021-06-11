@@ -186,6 +186,8 @@ class GroupPolicy < BasePolicy
 
   rule { owner & (~share_with_group_locked | ~has_parent | ~parent_share_with_group_locked | can_change_parent_share_with_group_lock) }.enable :change_share_with_group_lock
 
+  rule { owner }.enable :change_prevent_sharing_groups_outside_hierarchy
+
   rule { developer & developer_maintainer_access }.enable :create_projects
   rule { create_projects_disabled }.prevent :create_projects
 
