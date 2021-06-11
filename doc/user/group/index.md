@@ -420,6 +420,19 @@ To restore a group that is marked for deletion:
 1. Expand the **Path, transfer, remove** section.
 1. In the Restore group section, select **Restore group**.
 
+## Prevent group sharing outside the group hierarchy
+
+This setting is only available on top-level groups. It affects all subgroups.
+
+When checked, any group within the top-level group hierarchy can be shared only with other groups within the hierarchy.
+
+For instance, given groups **Animals > Dogs**, **Animals > Cats**, and **Plants > Trees**, with this setting checked in the Animals group. Then Dogs group could be shared with Cats group, because they share the same top-level group, Animals. However, Dogs could not be shared with Trees, because Trees lies outside the Animals group hierarchy.
+
+1. Go to the group's **Settings > General** page.
+1. Expand the **Permissions, LFS, 2FA** section.
+1. Select **Restrict sharing of subgroups to other subgroups within `<group_name>`**.
+1. Select **Save changes**.
+
 ## Prevent a project from being shared with groups
 
 Prevent projects in a group from [sharing
