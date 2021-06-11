@@ -241,7 +241,7 @@ your CI file:
 #### Migrating to other scanners
 
 The [instructions above](#migrating-from-clair-to-trivy) work for all supported scanners. Please refer to the 
-[scanner selection](#scanner-selection) instructions.
+[scanner selection](#scanner-selection) instructions to choose your scanner and then the section above to validate the configuration.
 
 **Troubleshooting**
 
