@@ -1,6 +1,7 @@
 <script>
 import { GlLink, GlSprintf, GlTooltipDirective } from '@gitlab/ui';
 import { __ } from '~/locale';
+import RunnerRegistrationTokenReset from '~/runner/components/runner_registration_token_reset.vue';
 import ClipboardButton from '~/vue_shared/components/clipboard_button.vue';
 import RunnerInstructions from '~/vue_shared/components/runner_instructions/runner_instructions.vue';
 
@@ -10,6 +11,7 @@ export default {
     GlSprintf,
     ClipboardButton,
     RunnerInstructions,
+    RunnerRegistrationTokenReset,
   },
   directives: {
     GlTooltip: GlTooltipDirective,
@@ -30,9 +32,19 @@ export default {
       default: __('shared'),
     },
   },
+  data() {
+    return {
+      currentRegistrationToken: this.registrationToken,
+    };
+  },
   computed: {
     rootUrl() {
       return gon.gitlab_url || '';
+    },
+  },
+  methods: {
+    onTokenReset(token) {
+      this.currentRegistrationToken = token;
     },
   },
 };
@@ -65,12 +77,13 @@ export default {
         {{ __('And this registration token:') }}
         <br />
 
-        <code data-testid="registration-token">{{ registrationToken }}</code>
-        <clipboard-button :title="__('Copy token')" :text="registrationToken" />
+        <code data-testid="registration-token">{{ currentRegistrationToken }}</code>
+        <clipboard-button :title="__('Copy token')" :text="currentRegistrationToken" />
       </li>
     </ol>
 
-    <!-- TODO Implement reset token functionality -->
+    <runner-registration-token-reset @tokenReset="onTokenReset" />
+
     <runner-instructions />
   </div>
 </template>

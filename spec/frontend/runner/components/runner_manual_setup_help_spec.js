@@ -1,8 +1,10 @@
 import { GlSprintf } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
+import { nextTick } from 'vue';
 import { TEST_HOST } from 'helpers/test_constants';
 import { extendedWrapper } from 'helpers/vue_test_utils_helper';
 import RunnerManualSetupHelp from '~/runner/components/runner_manual_setup_help.vue';
+import RunnerRegistrationTokenReset from '~/runner/components/runner_registration_token_reset.vue';
 import ClipboardButton from '~/vue_shared/components/clipboard_button.vue';
 import RunnerInstructions from '~/vue_shared/components/runner_instructions/runner_instructions.vue';
 
@@ -14,6 +16,8 @@ describe('RunnerManualSetupHelp', () => {
   let originalGon;
 
   const findRunnerInstructions = () => wrapper.findComponent(RunnerInstructions);
+  const findRunnerRegistrationTokenReset = () =>
+    wrapper.findComponent(RunnerRegistrationTokenReset);
   const findClipboardButtons = () => wrapper.findAllComponents(ClipboardButton);
   const findRunnerHelpTitle = () => wrapper.findByTestId('runner-help-title');
   const findCoordinatorUrl = () => wrapper.findByTestId('coordinator-url');
@@ -73,12 +77,27 @@ describe('RunnerManualSetupHelp', () => {
     expect(findClipboardButtons().at(0).props('text')).toBe(TEST_HOST);
   });
 
+  it('Displays the runner instructions', () => {
+    expect(findRunnerInstructions().exists()).toBe(true);
+  });
+
   it('Displays the registration token', () => {
     expect(findRegistrationToken().text()).toBe(mockRegistrationToken);
     expect(findClipboardButtons().at(1).props('text')).toBe(mockRegistrationToken);
   });
 
-  it('Displays the runner instructions', () => {
-    expect(findRunnerInstructions().exists()).toBe(true);
+  it('Displays the runner registration token reset button', () => {
+    expect(findRunnerRegistrationTokenReset().exists()).toBe(true);
+  });
+
+  it('Replaces the runner reset button', async () => {
+    const mockNewRegistrationToken = 'NEW_MOCK_REGISTRATION_TOKEN';
+
+    findRunnerRegistrationTokenReset().vm.$emit('tokenReset', mockNewRegistrationToken);
+
+    await nextTick();
+
+    expect(findRegistrationToken().text()).toBe(mockNewRegistrationToken);
+    expect(findClipboardButtons().at(1).props('text')).toBe(mockNewRegistrationToken);
   });
 });
