@@ -389,9 +389,9 @@ RSpec.describe GitlabSchema.types['Project'] do
   end
 
   describe 'ci_job_token_allow_list field' do
-    subject { described_class.fields['ciJobTokenAllowList'] }
+    subject { described_class.fields['ciJobTokenScope'] }
 
     it { is_expected.to have_graphql_type(Types::ProjectType.connection_type) }
-    it { is_expected.to have_graphql_resolver(Resolvers::Ci::CiJobTokenProjectsResolver) }
+    it { is_expected.to have_graphql_resolver(Resolvers::Ci::JobTokenScopeResolver) }
   end
 end

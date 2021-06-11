@@ -11040,7 +11040,7 @@ Represents vulnerability finding of a security report on the pipeline.
 | <a id="projectautoclosereferencedissues"></a>`autocloseReferencedIssues` | [`Boolean`](#boolean) | Indicates if issues referenced by merge requests and commits within the default branch are closed automatically. |
 | <a id="projectavatarurl"></a>`avatarUrl` | [`String`](#string) | URL to avatar image file of the project. |
 | <a id="projectcicdsettings"></a>`ciCdSettings` | [`ProjectCiCdSetting`](#projectcicdsetting) | CI/CD settings for the project. |
-| <a id="projectcijobtokenallowlist"></a>`ciJobTokenAllowList` | [`ProjectConnection`](#projectconnection) | Allow list of projects with the CI Job token for this project. (see [Connections](#connections)) |
+| <a id="projectcijobtokenscope"></a>`ciJobTokenScope` | [`ProjectConnection`](#projectconnection) | Allow list of projects that can be accessed by CI Job tokens created by this project. (see [Connections](#connections)) |
 | <a id="projectclusteragents"></a>`clusterAgents` | [`ClusterAgentConnection`](#clusteragentconnection) | Cluster agents associated with the project. (see [Connections](#connections)) |
 | <a id="projectcodecoveragesummary"></a>`codeCoverageSummary` | [`CodeCoverageSummary`](#codecoveragesummary) | Code coverage summary associated with the project. |
 | <a id="projectcomplianceframeworks"></a>`complianceFrameworks` | [`ComplianceFrameworkConnection`](#complianceframeworkconnection) | Compliance frameworks associated with the project. (see [Connections](#connections)) |

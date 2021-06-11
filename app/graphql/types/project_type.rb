@@ -346,9 +346,9 @@ module Types
           description: 'Find a single CI/CD template by name.',
           resolver: Resolvers::Ci::TemplateResolver
 
-    field :ci_job_token_allow_list, Types::ProjectType.connection_type, null: true,
-          description: 'Allow list of projects with the CI Job token for this project.',
-          resolver: Resolvers::Ci::CiJobTokenProjectsResolver
+    field :ci_job_token_scope, Types::ProjectType.connection_type, null: true,
+          description: 'Allow list of projects that can be accessed by CI Job tokens created by this project.',
+          resolver: Resolvers::Ci::JobTokenScopeResolver
 
     def label(title:)
       BatchLoader::GraphQL.for(title).batch(key: project) do |titles, loader, args|
