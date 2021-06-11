@@ -12,32 +12,6 @@ RSpec.describe Gitlab::Metrics::Transaction do
     }
   end
 
-  describe '#duration' do
-    it 'returns the duration of a transaction in seconds' do
-      transaction.run { }
-
-      expect(transaction.duration).to be > 0
-    end
-  end
-
-  describe '#run' do
-    it 'yields the supplied block' do
-      expect { |b| transaction.run(&b) }.to yield_control
-    end
-
-    it 'stores the transaction in the current thread' do
-      transaction.run do
-        expect(described_class.current).to eq(transaction)
-      end
-    end
-
-    it 'removes the transaction from the current thread upon completion' do
-      transaction.run { }
-
-      expect(described_class.current).to be_nil
-    end
-  end
-
   describe '#method_call_for' do
     it 'returns a MethodCall' do
       method = transaction.method_call_for('Foo#bar', :Foo, '#bar')

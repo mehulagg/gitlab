@@ -75,7 +75,7 @@ module Gitlab
 
           elapsed = Time.now.to_f - started
 
-          unless health_endpoint
+          if !health_endpoint && Gitlab::Metrics.record_duration_for_status?(status)
             RequestsRackMiddleware.http_request_duration_seconds.observe({ method: method }, elapsed)
           end
 
