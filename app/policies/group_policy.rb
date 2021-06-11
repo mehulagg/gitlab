@@ -154,6 +154,7 @@ class GroupPolicy < BasePolicy
 
     enable :set_note_created_at
     enable :set_emails_disabled
+    enable :change_prevent_sharing_groups_outside_hierarchy
     enable :update_default_branch_protection
     enable :create_deploy_token
     enable :destroy_deploy_token
@@ -185,8 +186,6 @@ class GroupPolicy < BasePolicy
   rule { has_access }.prevent              :request_access
 
   rule { owner & (~share_with_group_locked | ~has_parent | ~parent_share_with_group_locked | can_change_parent_share_with_group_lock) }.enable :change_share_with_group_lock
-
-  rule { owner }.enable :change_prevent_sharing_groups_outside_hierarchy
 
   rule { developer & developer_maintainer_access }.enable :create_projects
   rule { create_projects_disabled }.prevent :create_projects
