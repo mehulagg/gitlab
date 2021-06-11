@@ -12,7 +12,7 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 
 GitLab supports infrastructure management tasks for generic infrastructure using its Terraform integrations, and for Kubernetes using its extensive integration options.
 
-## Generic infrastructure management (FREE)
+## Generic infrastructure management **(FREE)**
 
 Using [GitLab for Terraform integrations](../../infrastructure) you can:
 
@@ -27,7 +27,7 @@ As we roll out support for more features under the GitLab Kubernetes Agent, ther
 
 The following table summarizes the supported GitLab features with the integration methods.
 
-Feature | GitLab Kubernetes Agent (PREMIUM) | Certificate-based connection (FREE)
+Feature | GitLab Kubernetes Agent **(PREMIUM)** | Certificate-based connection **(FREE)**
 --------|-------------------------|------------------------------
 Auto DevOps | Partial [support planned](https://gitlab.com/groups/gitlab-org/-/epics/5528) | [Supported](#auto-devops)
 Pull based deployments | [Supported](../../clusters/agent/) | Not supported

@@ -426,7 +426,7 @@ To determine the external Ingress IP address, or external Ingress hostname:
   1. Click the **Google Kubernetes Engine** link in the **Advanced settings**,
      or go directly to the [Google Kubernetes Engine dashboard](https://console.cloud.google.com/kubernetes/).
   1. Select the proper project and cluster.
-  1. Click **Connect**
+  1. Click **Connect**.
   1. Execute the `gcloud` command in a local terminal or using the **Cloud Shell**.
 
 - *If the cluster is not on GKE*: Follow the specific instructions for your
