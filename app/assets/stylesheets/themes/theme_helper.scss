@@ -153,11 +153,9 @@
       color: rgba($search-and-nav-links, 0.8);
     }
 
-    .search-input-wrap {
-      .search-icon,
-      .clear-icon {
-        fill: rgba($search-and-nav-links, 0.8);
-      }
+    .search-icon,
+    .clear-icon {
+      fill: rgba($search-and-nav-links, 0.8);
     }
 
     &.search-active {
@@ -165,10 +163,8 @@
         background-color: $white;
       }
 
-      .search-input-wrap {
-        .search-icon {
-          fill: rgba($search-and-nav-links, 0.8);
-        }
+      .search-icon {
+        fill: rgba($search-and-nav-links, 0.8);
       }
     }
   }

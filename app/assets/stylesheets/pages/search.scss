@@ -68,7 +68,7 @@ input[type='checkbox']:hover {
   .search-input {
     border: 0;
     font-size: 14px;
-    padding: 0 20px 0 0;
+    padding: 0;
     margin-left: 5px;
     line-height: 25px;
     width: 98%;
@@ -86,55 +86,43 @@ input[type='checkbox']:hover {
     position: relative;
   }
 
-  .search-input-wrap {
-    width: 100%;
+  .search-icon {
+    transition: color $default-transition-duration;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+  }
 
-    .search-icon,
-    .clear-icon {
-      position: absolute;
-      right: 5px;
-      top: 4px;
+  .clear-icon {
+    display: none;
+  }
+
+  // Rewrite position. Dropdown menu should be relative to .search-input-container
+  .dropdown {
+    position: static;
+  }
+
+  .dropdown-header {
+    // Necessary because deprecatedJQueryDropdown doesn't support a second style of headers
+    font-weight: $gl-font-weight-bold;
+    color: $gl-text-color;
+    font-size: $gl-font-size;
+    line-height: 16px;
+  }
+
+  // Custom dropdown positioning
+  .dropdown-menu {
+    max-height: $search-dropdown-max-height;
+    overflow: auto;
+
+    @include media-breakpoint-up(xl) {
+      width: $search-input-xl-width;
     }
+  }
 
-    .search-icon {
-      transition: color $default-transition-duration;
-      -webkit-user-select: none;
-      -moz-user-select: none;
-      -ms-user-select: none;
-      user-select: none;
-    }
-
-    .clear-icon {
-      display: none;
-    }
-
-    // Rewrite position. Dropdown menu should be relative to .search-input-container
-    .dropdown {
-      position: static;
-    }
-
-    .dropdown-header {
-      // Necessary because deprecatedJQueryDropdown doesn't support a second style of headers
-      font-weight: $gl-font-weight-bold;
-      color: $gl-text-color;
-      font-size: $gl-font-size;
-      line-height: 16px;
-    }
-
-    // Custom dropdown positioning
-    .dropdown-menu {
-      left: -5px;
-      max-height: $search-dropdown-max-height;
-      overflow: auto;
-
-      @include media-breakpoint-up(xl) {
-        width: $search-input-xl-width;
-      }
-    }
-
-    .dropdown-content {
-      max-height: $search-dropdown-max-height - 18px;
-    }
+  .dropdown-content {
+    max-height: $search-dropdown-max-height - 18px;
   }
 
   &.search-active {
@@ -142,12 +130,10 @@ input[type='checkbox']:hover {
       border-color: $blue-300;
       box-shadow: none;
 
-      .search-input-wrap {
-        .search-icon,
-        .clear-icon {
-          color: $gl-text-color-tertiary;
-          transition: color ease-in-out $default-transition-duration;
-        }
+      .search-icon,
+      .clear-icon {
+        color: $gl-text-color-tertiary;
+        transition: color ease-in-out $default-transition-duration;
       }
 
       .search-input {

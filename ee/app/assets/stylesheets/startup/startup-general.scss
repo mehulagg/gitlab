@@ -1891,32 +1891,22 @@ svg.s16 {
   display: flex;
   position: relative;
 }
-.search .search-input-wrap {
-  width: 100%;
-}
-.search .search-input-wrap .search-icon,
-.search .search-input-wrap .clear-icon {
-  position: absolute;
-  right: 5px;
-  top: 4px;
-}
-.search .search-input-wrap .search-icon {
+.search .search-icon {
   -moz-user-select: none;
   user-select: none;
 }
-.search .search-input-wrap .clear-icon {
+.search .clear-icon {
   display: none;
 }
-.search .search-input-wrap .dropdown {
+.search .dropdown {
   position: static;
 }
-.search .search-input-wrap .dropdown-menu {
-  left: -5px;
+.search .dropdown-menu {
   max-height: 400px;
   overflow: auto;
 }
 @media (min-width: 1200px) {
-  .search .search-input-wrap .dropdown-menu {
+  .search .dropdown-menu {
     width: 320px;
   }
 }

@@ -56,14 +56,12 @@ body {
         }
       }
 
-      .search-input-wrap {
-        .search-icon {
-          fill: $gray-100;
-        }
+      .search-icon {
+        fill: $gray-100;
+      }
 
-        .search-input {
-          color: $gl-text-color;
-        }
+      .search-input {
+        color: $gl-text-color;
       }
     }
 
