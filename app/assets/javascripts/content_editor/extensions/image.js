@@ -1,7 +1,13 @@
+import { nodeInputRule } from '@tiptap/core';
 import { Image } from '@tiptap/extension-image';
 import { defaultMarkdownSerializer } from 'prosemirror-markdown/src/to_markdown';
 
+export const imageSyntaxInputRuleRegExp = /(?:^|\s)!\[(?<alt>[\w|\s|-]+)\]\((?<src>.+?)\)$/gm;
+
 const ExtendedImage = Image.extend({
+  addInputRules() {
+    return [nodeInputRule(imageSyntaxInputRuleRegExp, this.type, ({ groups }) => groups)];
+  },
   addAttributes() {
     return {
       ...this.parent?.(),
