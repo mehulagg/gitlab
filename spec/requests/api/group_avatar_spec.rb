@@ -4,7 +4,7 @@ require 'spec_helper'
 
 RSpec.describe API::GroupAvatar do
   def avatar_path(group)
-    "/groups/#{group.id}/avatar"
+    "/groups/#{group.full_path}/avatar"
   end
 
   describe 'GET /groups/:id/avatar' do
@@ -24,6 +24,20 @@ RSpec.describe API::GroupAvatar do
           get api(avatar_path(group))
 
           expect(response).to have_gitlab_http_status(:not_found)
+        end
+      end
+
+      context 'when the group is a subgroup' do
+        it 'returns :ok' do
+          group = create(:group, :nested, :public, :with_avatar)
+
+          require 'pp'
+          pp path: avatar_path(group),
+            avatar: group.avatar.file.file
+
+          get api(avatar_path(group))
+
+          expect(response).to have_gitlab_http_status(:ok)
         end
       end
     end
