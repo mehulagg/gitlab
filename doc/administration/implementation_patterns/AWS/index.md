@@ -165,3 +165,13 @@ Note: AWS Scaling speed from Idling to Full Scale took x minutes under gpt 10k l
 | web_user                                                 | 20/s  | 19.97/s (>9.60/s)    | 53.08ms    | 71.89ms (<4005ms)     | 100.00% (>99%) | Passed  |
 
 ² Failure may not be clear from summary alone. Refer to the individual test's full output for further debugging.
+
+## Scaled Runners on AWS
+
+Check out: [GitLab HA Scaling Runner Vending Machine for AWS](https://gitlab.com/guided-explorations/aws/gitlab-runner-autoscaling-aws-asg/) 
+
+## Single Instance GitLab Omnibus on AWS
+
+GitLab publishes an offiicial Enterprise Edition AMI every month after the official software release.  This is the primary way to implement high performance GitLab on AWS for 1000 or less users (when a tested backup and restore can meet your RTO and RPO requirements).
+
+[Find official GitLab-created AMI IDs on AWS](https://docs.gitlab.com/ee/install/aws/#find-official-gitlab-created-ami-ids-on-aws)
