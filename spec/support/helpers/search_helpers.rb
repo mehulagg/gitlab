@@ -11,7 +11,7 @@ module SearchHelpers
   end
 
   def submit_search(query)
-    page.within('.search-form, .search-page-form') do
+    page.within('.search, .search-page-form') do
       field = find_field('search')
       field.fill_in(with: query)
 
