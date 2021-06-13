@@ -19,6 +19,10 @@ import * as Link from '../extensions/link';
 import * as ListItem from '../extensions/list_item';
 import * as OrderedList from '../extensions/ordered_list';
 import * as Paragraph from '../extensions/paragraph';
+import * as Table from '../extensions/table';
+import * as TableCell from '../extensions/table_cell';
+import * as TableHeader from '../extensions/table_header';
+import * as TableRow from '../extensions/table_row';
 import * as Text from '../extensions/text';
 import buildSerializerConfig from './build_serializer_config';
 import { ContentEditor } from './content_editor';
@@ -44,6 +48,10 @@ const builtInContentEditorExtensions = [
   ListItem,
   OrderedList,
   Paragraph,
+  TableCell,
+  TableHeader,
+  TableRow,
+  Table,
   Text,
 ];
 
