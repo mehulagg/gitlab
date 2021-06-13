@@ -81,7 +81,7 @@ export default {
           <gl-icon :name="getIcon(ancestor)" />
         </div>
         <div class="vertical-timeline-content">
-          <gl-link :href="ancestor.url">{{ ancestor.title }}</gl-link>
+          <gl-link :href="ancestor.url" class="gl-text-gray-900">{{ ancestor.title }}</gl-link>
         </div>
       </li>
     </ul>

@@ -146,9 +146,9 @@ module QA
           autoload :PipelineSubscriptions, 'qa/ee/page/project/settings/pipeline_subscriptions'
         end
 
-        module Operations
+        module Monitor
           module Metrics
-            autoload :Show, 'qa/ee/page/project/operations/metrics/show'
+            autoload :Show, 'qa/ee/page/project/monitor/metrics/show'
           end
         end
 

@@ -55,14 +55,10 @@ RSpec.describe Mutations::RequirementsManagement::ExportRequirements do
         end
 
         it 'exports requirements' do
-          subject
+          expect(IssuableExportCsvWorker).to receive(:perform_async)
+            .with(:requirement, user.id, project.id, args.except(:project_path))
 
-          expect(IssuableExportCsvWorker).to have_enqueued_sidekiq_job(
-            :requirement,
-            user.id,
-            project.id,
-            args.except(:project_path)
-          )
+          subject
         end
       end
 
