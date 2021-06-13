@@ -17495,6 +17495,9 @@ msgstr ""
 msgid "Insert inline code"
 msgstr ""
 
+msgid "Insert link"
+msgstr ""
+
 msgid "Insert suggestion"
 msgstr ""
 
