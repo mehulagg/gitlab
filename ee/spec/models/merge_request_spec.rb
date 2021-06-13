@@ -197,76 +197,99 @@ RSpec.describe MergeRequest do
   end
 
   describe '#has_denied_policies?' do
-    let(:report_diff) { { data: { "new_licenses" => licenses } } }
-    let(:licenses) { [] }
-    let(:unclassified_license) { { 'name' => 'License 1', 'classification' => { 'approval_status' => 'unclassified' } } }
-    let(:allowed_license) { { 'name' => 'License 2', 'classification' => { 'approval_status' => 'allowed' } } }
-    let(:denied_license) { { 'name' => 'License 2', 'classification' => { 'approval_status' => 'denied' } } }
-    let(:has_license_scanning_reports) { false }
-    let(:has_approved_license_check) { true }
+    let(:project) { create(:project, :repository) }
+    let(:merge_request) { create(:ee_merge_request, :with_license_scanning_reports, source_project: project) }
+    let(:apache) { build(:software_license, :apache_2_0) }
+
+    let!(:head_pipeline) do
+      create(:ee_ci_pipeline,
+             :with_license_scanning_feature_branch,
+             project: project,
+             ref: merge_request.source_branch,
+             sha: merge_request.diff_head_sha)
+    end
+
+    let!(:base_pipeline) do
+      create(:ee_ci_pipeline,
+             project: project,
+             ref: merge_request.target_branch,
+             sha: merge_request.diff_base_sha)
+    end
+
+    before do
+      allow_any_instance_of(Ci::CompareSecurityReportsService)
+        .to receive(:execute).with(base_pipeline, head_pipeline).and_call_original
+    end
 
     subject { merge_request.has_denied_policies? }
 
-    before do
-      allow(project).to receive(:feature_available?).and_return(feature_available)
-      allow(merge_request).to receive(:has_license_scanning_reports?).and_return(has_license_scanning_reports)
-      allow(merge_request).to receive(:has_approved_license_check?).and_return(has_approved_license_check)
-      allow(merge_request).to receive(:compare_reports).and_return(report_diff)
+    context 'without existing pipeline' do
+      it { is_expected.to be_falsey }
     end
 
-    context 'when license_scanning feature is not available' do
-      let(:feature_available) { false }
-
-      it { is_expected.to eq false }
-    end
-
-    context 'when license_scanning feature is available' do
-      let(:feature_available) { true }
-
-      context 'without license scanning reports' do
-        it { is_expected.to eq false }
+    context 'with existing pipeline' do
+      before do
+        stub_licensed_features(license_scanning: true)
       end
 
-      context 'with license scanning reports' do
-        let(:has_license_scanning_reports) { true }
+      context 'without license_scanning report' do
+        let(:merge_request) { create(:ee_merge_request, :with_dependency_scanning_reports, source_project: project) }
 
-        context 'and an approved license check' do
-          it { is_expected.to eq false }
+        it { is_expected.to be_falsey }
+      end
+
+      context 'with license_scanning report' do
+        context 'without denied policy' do
+          it { is_expected.to be_falsey }
         end
 
-        context 'and no approved license check' do
-          let(:has_approved_license_check) { false }
+        context 'with allowed policy' do
+          let(:allowed_policy) { build(:software_license_policy, :allowed, software_license: apache) }
 
-          context 'and malformed diff data' do
-            context 'with no data key' do
-              let(:report_diff) { { data: { "foo" => licenses } } }
+          before do
+            project.software_license_policies << allowed_policy
+            synchronous_reactive_cache(merge_request)
+          end
 
-              it { is_expected.to eq false }
+          it { is_expected.to be_falsey }
+        end
+
+        context 'with denied policy' do
+          let(:denied_policy) { build(:software_license_policy, :denied, software_license: apache) }
+
+          before do
+            project.software_license_policies << denied_policy
+            synchronous_reactive_cache(merge_request)
+          end
+
+          it { is_expected.to be_truthy }
+
+          context 'with disabled licensed feature' do
+            before do
+              stub_licensed_features(license_scanning: false)
             end
 
-            context 'with no new_licenses key' do
-              let(:report_diff) { { data: { "existing_licenses" => licenses } } }
+            it { is_expected.to be_falsey }
+          end
 
-              it { is_expected.to eq false }
+          context 'with License-Check enabled' do
+            let!(:license_check) { create(:report_approver_rule, :license_scanning, merge_request: merge_request) }
+
+            context 'when rule is not approved' do
+              before do
+                allow_any_instance_of(ApprovalWrappedRule).to receive(:approved?).and_return(false)
+              end
+
+              it { is_expected.to be_truthy }
             end
-          end
 
-          context 'and no new licenses' do
-            let(:licenses) { [] }
+            context 'when rule is approved' do
+              before do
+                allow_any_instance_of(ApprovalWrappedRule).to receive(:approved?).and_return(true)
+              end
 
-            it { is_expected.to eq false }
-          end
-
-          context 'and no blacklisted licenses' do
-            let(:licenses) { [unclassified_license, allowed_license] }
-
-            it { is_expected.to eq false }
-          end
-
-          context 'and blacklisted licenses' do
-            let(:licenses) { [unclassified_license, allowed_license, denied_license] }
-
-            it { is_expected.to eq true }
+              it { is_expected.to be_falsey }
+            end
           end
         end
       end

@@ -171,7 +171,10 @@ module EE
 
       return false unless licenses = report_diff.dig(:data, 'new_licenses')
 
-      licenses.any? { |l| l.dig('classification', 'approval_status') == 'denied' }
+      licenses.any? do |l|
+        status = l.dig('classification', 'approval_status')
+        status == 'blacklisted' || status == 'denied'
+      end
     end
 
     def enabled_reports
