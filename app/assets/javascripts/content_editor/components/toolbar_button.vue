@@ -63,3 +63,8 @@ export default {
     @click="execute"
   />
 </template>
+<style>
+.ProseMirror hr.ProseMirror-selectednode {
+  outline: 4px solid rgba(31, 117, 203, 0.48);
+}
+</style>
