@@ -814,12 +814,13 @@ module EE
 
     def load_licensed_feature_available(feature)
       globally_available = License.feature_available?(feature)
+      usage_ping_enabled_feature = License.features_for_usage_ping.include?(feature)
 
       if ::Gitlab::CurrentSettings.should_check_namespace_plan? && namespace
         globally_available &&
           (public? && namespace.public? || namespace.feature_available_in_plan?(feature))
       else
-        globally_available
+        globally_available || usage_ping_enabled_feature
       end
     end
 

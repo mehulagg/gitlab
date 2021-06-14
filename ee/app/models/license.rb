@@ -232,6 +232,13 @@ class License < ApplicationRecord
     usage_quotas
   ].freeze
 
+  USAGE_PING_FEATURES = %i[
+    blocked_issues
+    milestone_charts
+    description_diffs
+    issue_weights
+  ]
+
   ACTIVE_USER_COUNT_THRESHOLD_LEVELS = [
     { range: (2..15), percentage: false, value: 1 },
     { range: (16..25), percentage: false, value: 2 },
@@ -263,6 +270,11 @@ class License < ApplicationRecord
   class << self
     def features_for_plan(plan)
       FEATURES_BY_PLAN.fetch(plan, [])
+    end
+
+    def features_for_usage_ping
+      return USAGE_PING_FEATURES if Gitlab::CurrentSettings.usage_ping_enabled?
+      []
     end
 
     def plans_with_feature(feature)
