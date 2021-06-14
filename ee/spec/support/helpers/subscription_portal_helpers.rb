@@ -22,15 +22,15 @@ module SubscriptionPortalHelpers
   end
 
   def billing_plans_data
-    Gitlab::Json.parse(plans_fixture).map do |data|
+    Gitlab::Json.parse(plans_fixture.read).map do |data|
       data.deep_symbolize_keys
     end
   end
 
-  def stub_billing_plans(namespace_id, plan = 'free')
+  def stub_billing_plans(namespace_id, plan = 'free', plans_data = nil)
     stub_full_request("#{EE::SUBSCRIPTIONS_URL}/gitlab_plans?namespace_id=#{namespace_id}&plan=#{plan}")
       .with(headers: { 'Accept' => 'application/json' })
-      .to_return(status: 200, body: plans_fixture)
+      .to_return(status: 200, body: plans_data || plans_fixture)
   end
 
   private
