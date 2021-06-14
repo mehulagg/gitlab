@@ -18,7 +18,7 @@ export default {
     cleanupPoliciesSettingsPath: {
       type: String,
       required: false,
-      default: null,
+      default: '',
     },
   },
   data() {
