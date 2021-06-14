@@ -34,7 +34,7 @@ module EE
       end
 
       def create_escalation
-        ::IncidentManagement::Escalations::CreateService.new(project, alert).execute
+        ::IncidentManagement::Escalations::CreateService.new(alert).execute
       end
     end
   end

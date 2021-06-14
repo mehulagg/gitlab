@@ -3,9 +3,9 @@
 module IncidentManagement
   module Escalations
     class CreateService < BaseService
-      def initialize(alert, project)
+      def initialize(alert)
         @alert = alert
-        @project = project
+        @project = alert.project
       end
 
       def execute
@@ -20,6 +20,8 @@ module IncidentManagement
       end
 
       private
+
+      attr_reader :alert, :project, :escalation
 
       def create_escalation(policy)
         @escalation = ::IncidentManagement::AlertEscalation.create!(alert: alert, policy: policy)

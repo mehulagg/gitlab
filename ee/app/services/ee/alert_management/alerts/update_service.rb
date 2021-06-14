@@ -3,7 +3,8 @@
 module EE
   module AlertManagement
     module Alerts
-      class UpdateService
+      module UpdateService
+        extend ::Gitlab::Utils::Override
 
         override :handle_status_change
         def handle_status_change(old_status)
@@ -11,7 +12,7 @@ module EE
 
           destroy_open_escalations if resolved?
 
-          if !AlertManagement::Alert.open_status?(old_status) && open?
+          if !::AlertManagement::Alert.open_status?(old_status) && open?
             create_escalation
           end
         end
@@ -19,11 +20,11 @@ module EE
         private
 
         def destroy_open_escalations
-          IncidentManagement::AlertEscalation.for_alert(alert).destroy_all
+          IncidentManagement::AlertEscalation.for_alert(alert).delete_all
         end
 
-        def create_escalation # MOVE TO EE
-          ::IncidentManagement::Escalations::CreateService.new(project, alert).execute
+        def create_escalation
+          ::IncidentManagement::Escalations::CreateService.new(alert).execute
         end
       end
     end

@@ -178,3 +178,5 @@ module AlertManagement
     end
   end
 end
+
+AlertManagement::Alerts::UpdateService.prepend_mod
