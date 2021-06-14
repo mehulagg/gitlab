@@ -1,5 +1,7 @@
 import { GlIcon } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
+import { extendedWrapper } from 'helpers/vue_test_utils_helper';
+
 import DiffStats from '~/diffs/components/diff_stats.vue';
 import mockDiffFile from '../mock_data/diff_file';
 
@@ -12,13 +14,15 @@ describe('diff_stats', () => {
   let wrapper;
 
   const createComponent = (props = {}) => {
-    wrapper = shallowMount(DiffStats, {
-      propsData: {
-        addedLines: TEST_ADDED_LINES,
-        removedLines: TEST_REMOVED_LINES,
-        ...props,
-      },
-    });
+    wrapper = extendedWrapper(
+      shallowMount(DiffStats, {
+        propsData: {
+          addedLines: TEST_ADDED_LINES,
+          removedLines: TEST_REMOVED_LINES,
+          ...props,
+        },
+      }),
+    );
   };
 
   describe('diff stats group', () => {
@@ -64,18 +68,18 @@ describe('diff_stats', () => {
   });
 
   describe('line changes', () => {
-    const findFileLine = (name) => wrapper.find(name);
+    const findFileLine = (name) => wrapper.findByTestId(name);
 
     beforeEach(() => {
       createComponent();
     });
 
     it('shows the amount of lines added', () => {
-      expect(findFileLine('.js-file-addition-line').text()).toBe(TEST_ADDED_LINES.toString());
+      expect(findFileLine('js-file-addition-line').text()).toBe(TEST_ADDED_LINES.toString());
     });
 
     it('shows the amount of lines removed', () => {
-      expect(findFileLine('.js-file-deletion-line').text()).toBe(TEST_REMOVED_LINES.toString());
+      expect(findFileLine('js-file-deletion-line').text()).toBe(TEST_REMOVED_LINES.toString());
     });
   });
 
