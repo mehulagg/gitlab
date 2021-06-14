@@ -31,10 +31,19 @@ Testing-backed architectural qualification is a fundamental concept behind imple
 - Implementation patterns can provided qualified testing for platform limitations, for example, ensuring Gitaly Cluster can work correctly on specific Cloud Platform availability zone latency and throughput characteristics or qualifying what levels of available platform partner local disk performance is workable for Gitaly server to operate with integrity.
 #### Platform Partner Specificity
 
+Implementation patterns enable platform specific terminology, best practice architecture and platform specific build manifests.
+
 - Implementation patterns are more vendor specific. For instance, advising specific compute instances / vms / nodes instead of vcpus or other generalized measures.
-- Implementation patterns are oriented to implementing good architecture for the vendor in view.  For instance, where reference architectures do not have a specific recommendation on what technology is leveraged for GitLab outbound email services or what the sizing should be - a Reference Implementation may advise using a cloud providers Email as a Service (PaaS) and possibly even with specific settings.
+- Implementation patterns are oriented to implementing good architecture for the vendor in view.  
 - Implementation patterns are written to an audience who is familiar with building on the infrastructure that the implementation pattern targets.  For example, if the implementation pattern is for GCP, the specific terminology of GCP is used - including using the specific names for PaaS services.
 - Implementation patterns can test and qualify if the versions of PaaS available are compatible with GitLab (e.g. PostgreSQL, Redis, etc)
+
+#### Platform as a Service
+
+Platform as a Service options are a huge portion of the value provided by Cloud Platforms and implementation patterns can be prequalified against the partner PaaS options.
+
+- Implementation patterns help implementers understand what PaaS options are known to work and how to choose between PaaS solutions when a single platform has more than one PaaS option for the same GitLab role (e.g. AWS RDS versus AWS Aurora RDS)
+- For instance, where reference architectures do not have a specific recommendation on what technology is leveraged for GitLab outbound email services or what the sizing should be - a Reference Implementation may advise using a cloud providers Email as a Service (PaaS) and possibly even with specific settings.
 
 #### Cost Optimizing Engineering
 
@@ -52,9 +61,12 @@ Implementation patterns are one step closer to specifics that can be used as a s
 - Implementation patterns enable builders to generate a list of vendor specific resources required to implement GitLab for a given Reference Architecture.
 - Implementation patterns enable builders to use manual instructions or to create automation to build out the reference implementation.
 #### Complimentary Implementation Patterns
-- Implementation patterns may also provide specialized implementations beyond the scope of reference architecture compliance, especially where the cost of enablement can be more appropriately managed, for example:
-  - GitLab Runner implementation patterns.
-  - Small, self-contained GitLab Instances for per-person admin training.
+Implementation patterns may also provide specialized implementations beyond the scope of reference architecture compliance, especially where the cost of enablement can be more appropriately managed.
+
+For example:
+
+- Small, self-contained GitLab Instances for per-person admin training - perhaps on kubernetes so a deployment cluster is self-contained as well.
+- GitLab Runner implementation patterns - including using platform specific PaaS.
 
 ### Example Platform Implementation Pattern Subsections
 
