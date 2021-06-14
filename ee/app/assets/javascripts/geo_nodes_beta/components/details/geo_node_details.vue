@@ -33,20 +33,20 @@ export default {
       class="gl-display-flex gl-sm-flex-direction-column gl-align-items-flex-start gl-h-full gl-w-full"
     >
       <geo-node-verification-info
-        class="gl-flex-fill-1 gl-mb-5 gl-md-mb-0 gl-md-mr-5 gl-h-full gl-w-full"
+        class="gl-flex-grow-1 gl-mb-5 gl-md-mb-0 gl-md-mr-5 gl-h-full gl-w-full"
         :node="node"
       />
-      <geo-node-primary-other-info class="gl-flex-fill-1 gl-h-full gl-w-full" :node="node" />
+      <geo-node-primary-other-info class="gl-flex-grow-1 gl-h-full gl-w-full" :node="node" />
     </div>
     <div v-else class="gl-display-flex gl-flex-direction-column gl-h-full gl-w-full">
       <div
         class="gl-display-flex gl-sm-flex-direction-column gl-align-items-flex-start gl-h-full gl-w-full gl-mb-5"
       >
         <geo-node-replication-summary
-          class="gl-flex-fill-1 gl-mb-5 gl-md-mb-0 gl-md-mr-5 gl-h-full gl-w-full"
+          class="gl-flex-grow-1 gl-mb-5 gl-md-mb-0 gl-md-mr-5 gl-h-full gl-w-full"
           :node="node"
         />
-        <geo-node-secondary-other-info class="gl-flex-fill-1 gl-h-full gl-w-full" :node="node" />
+        <geo-node-secondary-other-info class="gl-flex-grow-1 gl-h-full gl-w-full" :node="node" />
       </div>
       <geo-node-replication-details :node="node" />
     </div>

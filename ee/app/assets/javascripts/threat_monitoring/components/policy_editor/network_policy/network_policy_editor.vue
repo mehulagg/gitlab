@@ -221,7 +221,7 @@ export default {
         />
       </gl-form-group>
       <div class="gl-display-flex gl-sm-flex-direction-column">
-        <section class="gl-w-full gl-p-5 gl-flex-fill-4 policy-table-left">
+        <section class="gl-w-full gl-p-5 gl-flex-grow-4 policy-table-left">
           <div v-if="shouldShowRuleEditor" data-testid="rule-editor">
             <gl-alert v-if="hasParsingError" data-testid="parsing-alert" :dismissible="false">
               {{ $options.i18n.PARSING_ERROR_MESSAGE }}
@@ -312,7 +312,7 @@ export default {
 
         <section
           v-if="shouldShowRuleEditor"
-          class="gl-w-30p gl-p-5 gl-border-l-gray-100 gl-border-l-1 gl-border-l-solid gl-flex-fill-2"
+          class="gl-w-30p gl-p-5 gl-border-l-gray-100 gl-border-l-1 gl-border-l-solid gl-flex-grow-2"
         >
           <dim-disable-container data-testid="policy-preview-container" :disabled="hasParsingError">
             <template #title>
