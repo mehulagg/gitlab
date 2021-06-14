@@ -42,6 +42,7 @@ describe('Grouped security reports app', () => {
 
   const findReportSection = () => wrapper.find(ReportSection);
   const findCollapseButton = () => wrapper.find('.js-collapse-btn');
+  const findSpinner = () => wrapper.find('.gl-spinner');
 
   const props = {
     headBlobPath: 'path',
@@ -161,7 +162,7 @@ describe('Grouped security reports app', () => {
       });
 
       it('renders error state', () => {
-        expect(wrapper.find('.gl-spinner').exists()).toBe(false);
+        expect(findSpinner().exists()).toBe(false);
         expect(wrapper.find('[data-testid="report-section-code-text"]').text()).toEqual(
           'Security scanning failed loading any results',
         );
@@ -196,7 +197,7 @@ describe('Grouped security reports app', () => {
       });
 
       it('renders loading summary text + spinner', () => {
-        expect(wrapper.find('.gl-spinner').exists()).toBe(true);
+        expect(findSpinner().exists()).toBe(true);
         expect(wrapper.find('[data-testid="report-section-code-text"]').text()).toEqual(
           'Security scanning is loading',
         );
@@ -242,7 +243,7 @@ describe('Grouped security reports app', () => {
 
       it('renders reports', () => {
         // It's not loading
-        expect(wrapper.find('.gl-spinner').exists()).toBe(false);
+        expect(findSpinner().exists()).toBe(false);
 
         // Renders the summary text
         expect(wrapper.find('[data-testid="report-section-code-text"]').text()).toEqual(
@@ -299,7 +300,7 @@ describe('Grouped security reports app', () => {
 
       it('renders reports', () => {
         // It's not loading
-        expect(wrapper.find('.gl-spinner').exists()).toBe(false);
+        expect(findSpinner().exists()).toBe(false);
 
         // Renders the summary text
         expect(trimText(wrapper.find('[data-testid="report-section-code-text"]').text())).toEqual(
