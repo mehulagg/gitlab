@@ -138,6 +138,7 @@
 
 .frontend-build-patterns: &frontend-build-patterns
   - "{package.json,yarn.lock}"
+  - ".browserslistrc"
   - "babel.config.js"
   - "config/webpack.config.js"
   - "config/**/*.js"
@@ -146,6 +147,7 @@
 
 .frontend-patterns: &frontend-patterns
   - "{package.json,yarn.lock}"
+  - ".browserslistrc"
   - "babel.config.js"
   - "jest.config.{base,integration,unit}.js"
   - ".csscomb.json"
