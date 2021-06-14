@@ -32,6 +32,7 @@ module WaitableWorker
       failed = []
 
       args_list.each do |args|
+        Gitlab::AppJsonLogger.info(message: 'WaitableWorker executes a job inline', class: self.name)
         new.perform(*args)
       rescue StandardError
         failed << args

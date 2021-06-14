@@ -4,9 +4,9 @@ require 'spec_helper'
 
 RSpec.describe WaitableWorker do
   let(:worker) do
-    Class.new do
-      def self.name
-        'Gitlab::Foo::Bar::DummyWorker'
+     Class.new do
+       def self.name
+         'Gitlab::Foo::Bar::DummyWorker'
       end
 
       cattr_accessor(:counter) { 0 }
@@ -38,6 +38,9 @@ RSpec.describe WaitableWorker do
     it 'inlines workloads <= 3 jobs' do
       args_list = [[1], [2], [3]]
       expect(worker).to receive(:bulk_perform_inline).with(args_list).and_call_original
+      expect(Gitlab::AppJsonLogger).to(
+        receive(:info).with(message: 'WaitableWorker executes a job inline', class: 'Gitlab::Foo::Bar::DummyWorker')
+                      .exactly(3).times)
 
       worker.bulk_perform_and_wait(args_list)
 
