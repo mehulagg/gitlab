@@ -14396,6 +14396,13 @@ CREATE TABLE lfs_objects (
     updated_at timestamp without time zone,
     file character varying,
     file_store integer DEFAULT 1,
+    verification_retry_at timestamp with time zone,
+    verification_started_at timestamp with time zone,
+    verified_at timestamp with time zone,
+    verification_state smallint DEFAULT 0 NOT NULL,
+    verification_retry_count smallint,
+    verification_checksum bytea,
+    verification_failure character varying(255),
     CONSTRAINT check_eecfc5717d CHECK ((file_store IS NOT NULL))
 );
 
@@ -23648,9 +23655,17 @@ CREATE UNIQUE INDEX index_lfs_file_locks_on_project_id_and_path ON lfs_file_lock
 
 CREATE INDEX index_lfs_file_locks_on_user_id ON lfs_file_locks USING btree (user_id);
 
+CREATE INDEX index_lfs_objects_failed_verification ON lfs_objects USING btree (verification_retry_at NULLS FIRST) WHERE (verification_state = 3);
+
+CREATE INDEX index_lfs_objects_needs_verification ON lfs_objects USING btree (verification_state) WHERE ((verification_state = 0) OR (verification_state = 3));
+
 CREATE INDEX index_lfs_objects_on_file_store ON lfs_objects USING btree (file_store);
 
 CREATE UNIQUE INDEX index_lfs_objects_on_oid ON lfs_objects USING btree (oid);
+
+CREATE INDEX index_lfs_objects_on_verification_state ON lfs_objects USING btree (verification_state);
+
+CREATE INDEX index_lfs_objects_pending_verification ON lfs_objects USING btree (verified_at NULLS FIRST) WHERE (verification_state = 0);
 
 CREATE INDEX index_lfs_objects_projects_on_lfs_object_id ON lfs_objects_projects USING btree (lfs_object_id);
 

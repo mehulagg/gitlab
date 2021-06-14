@@ -20,4 +20,16 @@ FactoryBot.define do
   trait :object_storage do
     file_store { LfsObjectUploader::Store::REMOTE }
   end
+
+  trait(:verification_succeeded) do
+    with_file
+    verification_checksum { 'abc' }
+    verification_state { ::LfsObject.verification_state_value(:verification_succeeded) }
+  end
+
+  trait(:verification_failed) do
+    with_file
+    verification_failure { 'Could not calculate the checksum' }
+    verification_state { ::LfsObject.verification_state_value(:verification_failed) }
+  end
 end

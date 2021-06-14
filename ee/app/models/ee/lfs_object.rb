@@ -12,6 +12,7 @@ module EE
 
     prepended do
       include ::Gitlab::Geo::ReplicableModel
+      include ::Gitlab::Geo::VerificationState
 
       with_replicator Geo::LfsObjectReplicator
 

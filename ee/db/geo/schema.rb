@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2021_05_05_170208) do
+ActiveRecord::Schema.define(version: 2021_06_14_100650) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -104,10 +104,22 @@ ActiveRecord::Schema.define(version: 2021_05_05_170208) do
     t.integer "state", limit: 2, default: 0, null: false
     t.datetime_with_timezone "last_synced_at"
     t.text "last_sync_failure"
+    t.datetime_with_timezone "verification_started_at"
+    t.datetime_with_timezone "verified_at"
+    t.datetime_with_timezone "verification_retry_at"
+    t.integer "verification_retry_count", default: 0
+    t.integer "verification_state", limit: 2, default: 0, null: false
+    t.boolean "checksum_mismatch", default: false, null: false
+    t.binary "verification_checksum"
+    t.binary "verification_checksum_mismatched"
+    t.string "verification_failure", limit: 255
     t.index ["lfs_object_id"], name: "index_lfs_object_registry_on_lfs_object_id", unique: true
     t.index ["retry_at"], name: "index_lfs_object_registry_on_retry_at"
     t.index ["state"], name: "index_state_in_lfs_objects"
     t.index ["success"], name: "index_lfs_object_registry_on_success"
+    t.index ["verification_retry_at"], name: "lfs_object_registry_failed_verification", order: "NULLS FIRST", where: "((state = 2) AND (verification_state = 3))"
+    t.index ["verification_state"], name: "lfs_object_registry_needs_verification", where: "((state = 2) AND (verification_state = ANY (ARRAY[0, 3])))"
+    t.index ["verified_at"], name: "lfs_object_registry_pending_verification", order: "NULLS FIRST", where: "((state = 2) AND (verification_state = 0))"
   end
 
   create_table "merge_request_diff_registry", force: :cascade do |t|
