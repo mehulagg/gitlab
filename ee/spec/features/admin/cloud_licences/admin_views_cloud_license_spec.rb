@@ -16,7 +16,7 @@ RSpec.describe 'Admin views Cloud License', :js do
 
     context 'with a cloud license only' do
       before do
-        visit(admin_cloud_license_path)
+        visit(admin_subscription_path)
       end
 
       it 'displays the subscription details' do
@@ -51,7 +51,7 @@ RSpec.describe 'Admin views Cloud License', :js do
     let!(:license) { create_current_license(cloud_licensing_enabled: false, plan: License::ULTIMATE_PLAN) }
 
     before do
-      visit(admin_cloud_license_path)
+      visit(admin_subscription_path)
     end
 
     context 'when removing the a legacy license' do
@@ -108,7 +108,7 @@ RSpec.describe 'Admin views Cloud License', :js do
     before do
       allow(License).to receive(:current).and_return(license)
 
-      visit(admin_cloud_license_path)
+      visit(admin_subscription_path)
     end
 
     it 'displays a message signaling there is not active subscription' do
