@@ -77,7 +77,7 @@ module QA
               reload: true,
               skip_finished_loading_check_on_refresh: true
             ) do
-              page.has_no_content?('Importing 1 repository', wait: 3.0)
+              page.has_no_content?('Importing 1 repository')
             end
           end
 

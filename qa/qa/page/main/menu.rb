@@ -55,16 +55,14 @@ module QA
         end
 
         def go_to_projects
-          go_to_menu_dropdown_option(:projects_dropdown)
-
-          within_element(:menu_subview_container) do
+          within_projects_menu do
             click_element(:menu_item_link, title: 'Your projects')
           end
         end
 
-        def go_to_import_project
+        def go_to_create_project
           within_projects_menu do
-            click_element :import_project_link
+            click_element(:menu_item_link, title: 'Create new project')
           end
         end
 
@@ -191,9 +189,9 @@ module QA
         end
 
         def within_projects_menu(&block)
-          within_top_menu { click_element :projects_dropdown }
+          go_to_menu_dropdown_option(:projects_dropdown)
 
-          within_element(:projects_dropdown_sidebar, &block)
+          within_element(:menu_subview_container, &block)
         end
 
         def click_admin_area
