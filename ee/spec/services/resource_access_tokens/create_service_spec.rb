@@ -5,10 +5,14 @@ require 'spec_helper'
 RSpec.describe ResourceAccessTokens::CreateService do
   subject { described_class.new(user, resource).execute }
 
-  let_it_be(:user) { create(:user) }
+  let_it_be(:user) { create(:user, current_sign_in_ip: '8.8.8.8') }
+
+  before do
+    allow(::Gitlab::Audit::Auditor).to receive(:audit)
+  end
 
   shared_examples 'token creation succeeds' do
-    let(:resource) { create(:project, group: group)}
+    let(:resource) { create(:project, group: group) }
 
     before do
       resource.add_maintainer(user)
@@ -26,21 +30,6 @@ RSpec.describe ResourceAccessTokens::CreateService do
 
     it 'creates a project bot user' do
       expect { subject }.to change { User.bots.count }.by(1)
-    end
-  end
-
-  shared_examples 'audit event details' do
-    it 'creates an audit event' do
-      expect { subject }.to change { AuditEvent.count }.from(0).to(1)
-    end
-
-    it 'logs author and resource info', :aggregate_failures do
-      subject
-
-      audit_event = AuditEvent.where(author_id: user.id).last
-
-      expect(audit_event.entity_id).to eq(resource.id)
-      expect(audit_event.ip_address).to eq(user.current_sign_in_ip)
     end
   end
 
@@ -78,15 +67,20 @@ RSpec.describe ResourceAccessTokens::CreateService do
           resource.add_maintainer(user)
         end
 
-        it_behaves_like 'audit event details'
-
-        it 'logs project access token details', :aggregate_failures do
+        it 'logs project access token details' do
           response = subject
+          token = response.payload[:access_token]
 
-          audit_event = AuditEvent.where(author_id: user.id).last
+          message = "Created project access token with token_id: #{token.id} with scopes: #{token.scopes}"
 
-          expect(audit_event.details[:custom_message]).to eq("Created project access token with token_id: #{response.payload[:access_token].id} with scopes: #{response.payload[:access_token].scopes}")
-          expect(audit_event.details[:target_details]).to match(response.payload[:access_token].user.name)
+          expect(::Gitlab::Audit::Auditor).to have_received(:audit).with(
+            name: 'resource_acess_token_created',
+            author: user,
+            scope: resource,
+            target: token,
+            ip_address: '8.8.8.8',
+            message: message
+          )
         end
       end
 
@@ -96,17 +90,24 @@ RSpec.describe ResourceAccessTokens::CreateService do
             resource.add_developer(user)
           end
 
-          it_behaves_like 'audit event details'
-
           it 'logs the permission error message' do
             subject
 
-            expect(AuditEvent.where(author_id: user.id).last.details[:custom_message]).to eq('Attempted to create project access token but failed with message: User does not have permission to create project access token')
+            message = 'Attempted to create project access token but failed with message: ' \
+                      'User does not have permission to create project access token'
+
+            expect(::Gitlab::Audit::Auditor).to have_received(:audit).with(
+              name: 'resource_acess_token_failed',
+              author: user,
+              scope: resource,
+              target: user,
+              ip_address: '8.8.8.8',
+              message: message
+            )
           end
         end
 
         context "when access provisioning fails" do
-          let_it_be(:user) { create(:user) }
           let(:unpersisted_member) { build(:project_member, source: resource, user: user) }
 
           before do
@@ -118,12 +119,20 @@ RSpec.describe ResourceAccessTokens::CreateService do
             resource.add_maintainer(user)
           end
 
-          it_behaves_like 'audit event details'
-
           it 'logs the provisioning error message' do
             subject
 
-            expect(AuditEvent.where(author_id: user.id).last.details[:custom_message]).to eq('Attempted to create project access token but failed with message: Could not provision maintainer access to project access token')
+            message = 'Attempted to create project access token but failed with message: ' \
+                      'Could not provision maintainer access to project access token'
+
+            expect(::Gitlab::Audit::Auditor).to have_received(:audit).with(
+              name: 'resource_acess_token_failed',
+              author: user,
+              scope: resource,
+              target: user,
+              ip_address: '8.8.8.8',
+              message: message
+            )
           end
         end
       end
