@@ -24,10 +24,28 @@ RSpec.describe Projects::UpdateRemoteMirrorService do
         .and_return(double(divergent_refs: []))
     end
 
-    it 'ensures the remote exists' do
-      expect(remote_mirror).to receive(:ensure_remote!)
+    context 'with in-memory remote disabled' do
+      before do
+        stub_feature_flags(update_remote_mirror_inmemory: false)
+      end
 
-      execute!
+      it 'ensures the remote exists' do
+        expect(remote_mirror).to receive(:ensure_remote!)
+
+        execute!
+      end
+    end
+
+    context 'with in-memory remote enabled' do
+      before do
+        stub_feature_flags(update_remote_mirror_inmemory: true)
+      end
+
+      it 'does not ensure the remote exists' do
+        expect(remote_mirror).not_to receive(:ensure_remote!)
+
+        execute!
+      end
     end
 
     it 'does not fetch the remote repository' do

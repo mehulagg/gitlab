@@ -104,6 +104,7 @@ class RemoteMirror < ApplicationRecord
     Gitlab::Git::RemoteMirror.new(
       project.repository.raw,
       remote_name,
+      remote_url,
       **options_for_update
     ).update
   end
