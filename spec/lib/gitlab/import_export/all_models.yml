@@ -374,7 +374,7 @@ project:
 - packagist_service
 - pivotaltracker_service
 - prometheus_service
-- flowdock_service
+- flowdock_integration
 - assembla_integration
 - asana_integration
 - slack_service
