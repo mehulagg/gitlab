@@ -13,20 +13,19 @@ further restrictions on certain branches, they can be protected.
 
 The default branch for your repository is protected by default.
 
-## Who can access a protected branch
+## Default restrictions
 
-When a branch is protected, the default behavior enforces
-these restrictions on the branch.
+When a branch is protected, the default behavior enforces these restrictions on the branch.
 
-| Action                   | Who can do it |
-|--------------------------|---------------|
-| Protect a branch         | Maintainers only. |
-| Push to the branch       | GitLab administrators and anyone with **Allowed** permission. (*) |
-| Force push to the branch | No one. |
-| Delete the branch        | No one. |
+| Action                   | Who can do it                                                     |
+|:-------------------------|:------------------------------------------------------------------|
+| Protect a branch         | Maintainers only.                                                 |
+| Push to the branch       | GitLab administrators and anyone with **Allowed** permission. (1) |
+| Force push to the branch | No one.                                                           |
+| Delete the branch        | No one.                                                           |
 
-(*) Users with developer permissions can create a project in a group,
-but might not be allowed to initially push to the [default branch](repository/branches/default.md).
+1. Users with the Developer role can create a project in a group, but might not be allowed to
+   initially push to the [default branch](repository/branches/default.md).
 
 ### Set the branch protection default level
 
@@ -56,6 +55,7 @@ or prohibit Maintainers and/or Developers to push to a protected branch.
 
 Using the **Allowed to push** and **Allowed to merge** settings, you can control
 the actions that different roles can perform with the protected branch.
+
 For example, you could set **Allowed to push** to "No one", and **Allowed to merge**
 to "Developers + Maintainers", to require everyone to submit a merge request for
 changes going into the protected branch. This is compatible with workflows like
@@ -122,7 +122,7 @@ You can specify a wildcard protected branch, which protects all branches
 matching the wildcard. For example:
 
 | Wildcard Protected Branch | Matching Branches                                      |
-|---------------------------|--------------------------------------------------------|
+|:--------------------------|:-------------------------------------------------------|
 | `*-stable`                | `production-stable`, `staging-stable`                  |
 | `production/*`            | `production/app-server`, `production/load-balancer`    |
 | `*gitlab*`                | `gitlab`, `gitlab/staging`, `master/gitlab/production` |

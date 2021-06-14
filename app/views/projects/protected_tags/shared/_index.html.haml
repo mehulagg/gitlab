@@ -10,11 +10,7 @@
       Limit access to creating and updating tags. #{link_to "What are protected tags?", help_page_path("user/project/protected_tags")}
   .settings-content
     %p
-      By default, protected tags protect your code and:
-      %ul
-        %li Allow only users with Maintainer #{link_to "permissions", help_page_path("user/permissions")} to create tags.
-        %li Prevent <strong>anyone</strong> from updating tags.
-        %li Prevent <strong>anyone</strong> from deleting tags.
+      By default, protected tags protect your code and have #{link_to "certain restrictions", help_page_path("user/project/protected_tags", anchor: "default-restrictions")}.
 
     - if can? current_user, :admin_project, @project
       = yield :create_protected_tag

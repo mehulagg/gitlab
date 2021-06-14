@@ -10,12 +10,7 @@
       Keep stable branches secure, and force developers to use merge requests. #{link_to "What are protected branches?", help_page_path("user/project/protected_branches")}
   .settings-content
     %p
-      By default, protected branches protect your code and:
-      %ul
-        %li Allow only users with Maintainer #{link_to "permissions", help_page_path("user/permissions")} to create new protected branches.
-        %li Allow only users with Maintainer permissions to push code.
-        %li Prevent <strong>anyone</strong> from #{link_to "force-pushing", help_page_path('topics/git/git_rebase', anchor: 'force-push')} to the branch.
-        %li Prevent <strong>anyone</strong> from deleting the branch.
+      By default, protected branches protect your code and have #{link_to "certain restrictions", help_page_path("user/project/protected_branches", anchor: "default-restrictions")}.
 
     - if can? current_user, :admin_project, @project
       = content_for :create_protected_branch
