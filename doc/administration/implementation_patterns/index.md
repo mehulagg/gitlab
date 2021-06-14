@@ -7,7 +7,7 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 
 # Implementation patterns **(FREE SELF)**
 
-Like all Reference Architectures, GitLab Reference Architectures give qualified guidance on the recommended ways GitLab can be configured to meet the performance requirements of various workloads. Reference Architectures are purpose designed to be as non-implementation specific as possible so that they are applicable to the most different types of implementations possible. Among other tings this generally means they have a highly granular "machine" to "server role" specification and they focus on system elements that impact performance. Reference Architectures can be adapted to the broadest number of supported implementations.
+Like all Reference Architectures, GitLab Reference Architectures give qualified guidance on the recommended ways GitLab can be configured to meet the performance requirements of various workloads. Reference Architectures are purpose designed to be as non-implementation specific as possible so that they are applicable to the most different types of implementations possible. Among other things this generally means they have a highly granular "machine" to "server role" specification and they focus on system elements that impact performance. In general, liberal resourcing will be done whenever needed to guarantee performance. Reference Architectures can be adapted to the broadest number of supported implementations.
 
 For GitLab Platform Partners it is helpful to customers and partners for GitLab to express platform specific recommendations, which we are calling "Implementation Patterns".
 
@@ -40,7 +40,7 @@ Implementation patterns enable platform specific terminology, best practice arch
 
 #### Platform as a Service
 
-Platform as a Service options are a huge portion of the value provided by Cloud Platforms and implementation patterns can be prequalified against the partner PaaS options.
+Platform as a Service options are a huge portion of the value provided by Cloud Platforms as they simplify operational complexity and reduce the SRE and security skilling required to operate advanced, highly available technology services.  Implementation patterns can be prequalified against the partner PaaS options.
 
 - Implementation patterns help implementers understand what PaaS options are known to work and how to choose between PaaS solutions when a single platform has more than one PaaS option for the same GitLab role (e.g. AWS RDS versus AWS Aurora RDS)
 - For instance, where reference architectures do not have a specific recommendation on what technology is leveraged for GitLab outbound email services or what the sizing should be - a Reference Implementation may advise using a cloud providers Email as a Service (PaaS) and possibly even with specific settings.
