@@ -63,7 +63,7 @@ RSpec.describe API::Helpers::Caching, :use_clean_rails_redis_caching do
       end
 
       it "fetches from the cache" do
-        expect(instance.cache).to receive(:fetch).with("#{presentable.cache_key}:#{user.cache_key}", expires_in: described_class::DEFAULT_EXPIRY).once
+        expect(instance.cache).to receive(:fetch).with("#{presenter.class.name}:#{presentable.cache_key}:#{user.cache_key}", expires_in: described_class::DEFAULT_EXPIRY).once
 
         subject
       end
@@ -74,7 +74,7 @@ RSpec.describe API::Helpers::Caching, :use_clean_rails_redis_caching do
         end
 
         it "uses the context to augment the cache key" do
-          expect(instance.cache).to receive(:fetch).with("#{presentable.cache_key}:#{project.cache_key}", expires_in: described_class::DEFAULT_EXPIRY).once
+          expect(instance.cache).to receive(:fetch).with("#{presenter.class.name}:#{presentable.cache_key}:#{project.cache_key}", expires_in: described_class::DEFAULT_EXPIRY).once
 
           subject
         end
@@ -84,7 +84,7 @@ RSpec.describe API::Helpers::Caching, :use_clean_rails_redis_caching do
         it "sets the expiry when accessing the cache" do
           kwargs[:expires_in] = 7.days
 
-          expect(instance.cache).to receive(:fetch).with("#{presentable.cache_key}:#{user.cache_key}", expires_in: 7.days).once
+          expect(instance.cache).to receive(:fetch).with("#{presenter.class.name}:#{presentable.cache_key}:#{user.cache_key}", expires_in: 7.days).once
 
           subject
         end
@@ -115,7 +115,7 @@ RSpec.describe API::Helpers::Caching, :use_clean_rails_redis_caching do
       end
 
       it "fetches from the cache" do
-        keys = presentable.map { |todo| "#{todo.cache_key}:#{user.cache_key}" }
+        keys = presentable.map { |todo| "#{presenter.class.name}:#{todo.cache_key}:#{user.cache_key}" }
 
         expect(instance.cache).to receive(:fetch_multi).with(*keys, expires_in: described_class::DEFAULT_EXPIRY).once.and_call_original
 
@@ -128,7 +128,7 @@ RSpec.describe API::Helpers::Caching, :use_clean_rails_redis_caching do
         end
 
         it "uses the context to augment the cache key" do
-          keys = presentable.map { |todo| "#{todo.cache_key}:#{project.cache_key}" }
+          keys = presentable.map { |todo| "#{presenter.class.name}:#{todo.cache_key}:#{project.cache_key}" }
 
           expect(instance.cache).to receive(:fetch_multi).with(*keys, expires_in: described_class::DEFAULT_EXPIRY).once.and_call_original
 
@@ -138,7 +138,7 @@ RSpec.describe API::Helpers::Caching, :use_clean_rails_redis_caching do
 
       context "expires_in is supplied" do
         it "sets the expiry when accessing the cache" do
-          keys = presentable.map { |todo| "#{todo.cache_key}:#{user.cache_key}" }
+          keys = presentable.map { |todo| "#{presenter.class.name}:#{todo.cache_key}:#{user.cache_key}" }
           kwargs[:expires_in] = 7.days
 
           expect(instance.cache).to receive(:fetch_multi).with(*keys, expires_in: 7.days).once.and_call_original
