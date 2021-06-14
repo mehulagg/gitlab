@@ -29,7 +29,7 @@ GET /projects/:id/approvals
 
 | Attribute | Type    | Required | Description         |
 | --------- | ------- | -------- | ------------------- |
-| `id`      | integer | yes      | The ID or [URL-encoded path of a project](README.md#namespaced-path-encoding) |
+| `id`      | integer or string | yes      | The ID or [URL-encoded path of a project](README.md#namespaced-path-encoding) |
 
 ```json
 {
@@ -58,7 +58,7 @@ POST /projects/:id/approvals
 
 | Attribute                                        | Type    | Required | Description                                                                                         |
 | ------------------------------------------------ | ------- | -------- | --------------------------------------------------------------------------------------------------- |
-| `id`                                             | integer | yes      | The ID or [URL-encoded path of a project](README.md#namespaced-path-encoding)  |
+| `id`                                             | integer or string | yes      | The ID or [URL-encoded path of a project](README.md#namespaced-path-encoding)  |
 | `approvals_before_merge`                         | integer | no       | How many approvals are required before an MR can be merged. Deprecated in 12.0 in favor of Approval Rules API. |
 | `reset_approvals_on_push`                        | boolean | no       | Reset approvals on a new push                                                                       |
 | `disable_overriding_approvers_per_merge_request` | boolean | no       | Allow/Disallow overriding approvers per MR                                                          |
@@ -93,7 +93,7 @@ GET /projects/:id/approval_rules
 
 | Attribute            | Type    | Required | Description                                               |
 |----------------------|---------|----------|-----------------------------------------------------------|
-| `id`                 | integer | yes      | The ID or [URL-encoded path of a project](README.md#namespaced-path-encoding) |
+| `id`                 | integer or string | yes      | The ID or [URL-encoded path of a project](README.md#namespaced-path-encoding) |
 
 ```json
 [
@@ -192,7 +192,7 @@ GET /projects/:id/approval_rules/:approval_rule_id
 
 | Attribute            | Type    | Required | Description                                               |
 |----------------------|---------|----------|-----------------------------------------------------------|
-| `id`                 | integer | yes      | The ID or [URL-encoded path of a project](README.md#namespaced-path-encoding) |
+| `id`                 | integer or string | yes      | The ID or [URL-encoded path of a project](README.md#namespaced-path-encoding) |
 | `approval_rule_id`   | integer | yes      | The ID of a approval rule                                 |
 
 ```json
@@ -291,7 +291,7 @@ POST /projects/:id/approval_rules
 
 | Attribute              | Type    | Required | Description                                                      |
 |------------------------|---------|----------|------------------------------------------------------------------|
-| `id`                   | integer | yes      | The ID or [URL-encoded path of a project](README.md#namespaced-path-encoding) |
+| `id`                   | integer or string | yes      | The ID or [URL-encoded path of a project](README.md#namespaced-path-encoding) |
 | `name`                 | string  | yes      | The name of the approval rule                                    |
 | `approvals_required`   | integer | yes      | The number of required approvals for this rule                   |
 | `user_ids`             | Array   | no       | The ids of users as approvers                                    |
@@ -396,7 +396,7 @@ PUT /projects/:id/approval_rules/:approval_rule_id
 
 | Attribute              | Type    | Required | Description                                                      |
 |------------------------|---------|----------|------------------------------------------------------------------|
-| `id`                   | integer | yes      | The ID or [URL-encoded path of a project](README.md#namespaced-path-encoding) |
+| `id`                   | integer or string | yes      | The ID or [URL-encoded path of a project](README.md#namespaced-path-encoding) |
 | `approval_rule_id`     | integer | yes      | The ID of a approval rule                                        |
 | `name`                 | string  | yes      | The name of the approval rule                                    |
 | `approvals_required`   | integer | yes      | The number of required approvals for this rule                   |
@@ -500,7 +500,7 @@ DELETE /projects/:id/approval_rules/:approval_rule_id
 
 | Attribute            | Type    | Required | Description                                               |
 |----------------------|---------|----------|-----------------------------------------------------------|
-| `id`                 | integer | yes      | The ID or [URL-encoded path of a project](README.md#namespaced-path-encoding) |
+| `id`                 | integer or string | yes      | The ID or [URL-encoded path of a project](README.md#namespaced-path-encoding) |
 | `approval_rule_id`   | integer | yes      | The ID of a approval rule
 
 ## External Project-level MR approvals **(ULTIMATE)**
@@ -525,7 +525,7 @@ GET /projects/:id/external_approval_rules
 
 | Attribute           | Type    | Required | Description         |
 |---------------------|---------|----------|---------------------|
-| `id`                | integer | yes      | The ID or [URL-encoded path of a project](README.md#namespaced-path-encoding) |
+| `id`                | integer or string | yes      | The ID or [URL-encoded path of a project](README.md#namespaced-path-encoding) |
 
 ```json
 [
@@ -558,7 +558,7 @@ POST /projects/:id/external_approval_rules
 
 | Attribute              | Type           | Required | Description                                        |
 |------------------------|----------------|----------|----------------------------------------------------|
-| `id`                   | integer        | yes      | The ID or [URL-encoded path of a project](README.md#namespaced-path-encoding)  |
+| `id`                   | integer or string | yes      | The ID or [URL-encoded path of a project](README.md#namespaced-path-encoding)  |
 | `name`                 | string         | yes      | Display name of approval rule                      |
 | `external_url`         | string         | yes      | URL of external approval resource                  |
 | `protected_branch_ids` | `array<Integer>` | no       | The ids of protected branches to scope the rule by |
@@ -574,7 +574,7 @@ DELETE /projects/:id/external_approval_rules/:rule_id
 | Attribute              | Type           | Required | Description                                        |
 |------------------------|----------------|----------|----------------------------------------------------|
 | `rule_id`              | integer        | yes      | The ID of an approval rule                         |
-| `id`                   | integer        | yes      | The ID or [URL-encoded path of a project](README.md#namespaced-path-encoding) |
+| `id`                   | integer or string | yes      | The ID or [URL-encoded path of a project](README.md#namespaced-path-encoding) |
 
 ### Update external approval rule **(ULTIMATE)**
 
@@ -587,7 +587,7 @@ PUT /projects/:id/external_approval_rules/:rule_id
 | Attribute              | Type           | Required | Description                                        |
 |------------------------|----------------|----------|----------------------------------------------------|
 | `id`                   | integer        | yes      | The ID or [URL-encoded path of a project](README.md#namespaced-path-encoding) |
-| `rule_id`              | integer        | yes      | The ID of an external approval rule                |
+| `rule_id`              | integer or string | yes      | The ID of an external approval rule                |
 | `name`                 | string         | no       | Display name of approval rule                      |
 | `external_url`         | string         | no       | URL of external approval resource                  |
 | `protected_branch_ids` | `array<Integer>` | no       | The ids of protected branches to scope the rule by |
@@ -637,7 +637,7 @@ GET /projects/:id/merge_requests/:merge_request_iid/approvals
 
 | Attribute           | Type    | Required | Description         |
 |---------------------|---------|----------|---------------------|
-| `id`                | integer | yes      | The ID or [URL-encoded path of a project](README.md#namespaced-path-encoding) |
+| `id`                | integer or string | yes      | The ID or [URL-encoded path of a project](README.md#namespaced-path-encoding) |
 | `merge_request_iid` | integer | yes      | The IID of MR       |
 
 ```json
@@ -684,7 +684,7 @@ POST /projects/:id/merge_requests/:merge_request_iid/approvals
 
 | Attribute            | Type    | Required | Description                                |
 |----------------------|---------|----------|--------------------------------------------|
-| `id`                 | integer | yes      | The ID or [URL-encoded path of a project](README.md#namespaced-path-encoding) |
+| `id`                 | integer or string | yes      | The ID or [URL-encoded path of a project](README.md#namespaced-path-encoding) |
 | `merge_request_iid`  | integer | yes      | The IID of MR                              |
 | `approvals_required` | integer | yes      | Approvals required before MR can be merged. Deprecated in 12.0 in favor of Approval Rules API. |
 
@@ -726,7 +726,7 @@ This includes additional information about the users who have already approved
 
 | Attribute            | Type    | Required | Description         |
 |----------------------|---------|----------|---------------------|
-| `id`                 | integer | yes      | The ID or [URL-encoded path of a project](README.md#namespaced-path-encoding) |
+| `id`                 | integer or string | yes      | The ID or [URL-encoded path of a project](README.md#namespaced-path-encoding) |
 | `merge_request_iid`  | integer | yes      | The IID of MR       |
 
 ```json
@@ -793,7 +793,7 @@ GET /projects/:id/merge_requests/:merge_request_iid/approval_rules
 
 | Attribute           | Type    | Required | Description         |
 |---------------------|---------|----------|---------------------|
-| `id`                | integer | yes      | The ID or [URL-encoded path of a project](README.md#namespaced-path-encoding) |
+| `id`                | integer or string | yes      | The ID or [URL-encoded path of a project](README.md#namespaced-path-encoding) |
 | `merge_request_iid` | integer | yes      | The IID of MR       |
 
 ```json
@@ -871,7 +871,7 @@ POST /projects/:id/merge_requests/:merge_request_iid/approval_rules
 
 | Attribute                  | Type    | Required | Description                                    |
 |----------------------------|---------|----------|------------------------------------------------|
-| `id`                       | integer | yes      | The ID or [URL-encoded path of a project](README.md#namespaced-path-encoding) |
+| `id`                       | integer or string | yes      | The ID or [URL-encoded path of a project](README.md#namespaced-path-encoding) |
 | `merge_request_iid`        | integer | yes      | The IID of MR                                  |
 | `name`                     | string  | yes      | The name of the approval rule                  |
 | `approvals_required`       | integer | yes      | The number of required approvals for this rule |
@@ -961,7 +961,7 @@ These are system generated rules.
 
 | Attribute            | Type    | Required | Description                                    |
 |----------------------|---------|----------|------------------------------------------------|
-| `id`                 | integer | yes      | The ID or [URL-encoded path of a project](README.md#namespaced-path-encoding) |
+| `id`                 | integer or string | yes      | The ID or [URL-encoded path of a project](README.md#namespaced-path-encoding) |
 | `merge_request_iid`  | integer | yes      | The ID of MR                                   |
 | `approval_rule_id`   | integer | yes      | The ID of a approval rule                      |
 | `name`               | string  | yes      | The name of the approval rule                  |
@@ -1045,8 +1045,8 @@ These are system generated rules.
 
 | Attribute           | Type    | Required | Description               |
 |---------------------|---------|----------|---------------------------|
-| `id`                | integer | yes      | The ID or [URL-encoded path of a project](README.md#namespaced-path-encoding) |
-| `merge_request_iid` | integer | yes      | The ID of the merge request |
+| `id`                | integer or string | yes      | The ID or [URL-encoded path of a project](README.md#namespaced-path-encoding) |
+| `merge_request_iid` | integer | yes      | The IID of the merge request |
 | `approval_rule_id`  | integer | yes      | The ID of an approval rule |
 
 ## Approve Merge Request
@@ -1065,8 +1065,8 @@ POST /projects/:id/merge_requests/:merge_request_iid/approve
 
 | Attribute           | Type    | Required | Description             |
 |---------------------|---------|----------|-------------------------|
-| `id`                | integer | yes      | The ID or [URL-encoded path of a project](README.md#namespaced-path-encoding) |
-| `merge_request_iid` | integer | yes      | The IID of a merge request |
+| `id`                | integer or string | yes      | The ID or [URL-encoded path of a project](README.md#namespaced-path-encoding) |
+| `merge_request_iid` | integer | yes      | The IID of the merge request |
 | `sha`               | string  | no       | The `HEAD` of the merge request |
 | `approval_password` **(PREMIUM)** | string  | no      | Current user's password. Required if [**Require user password to approve**](../user/project/merge_requests/approvals/settings.md#require-authentication-for-approvals) is enabled in the project settings. |
 
@@ -1129,5 +1129,5 @@ POST /projects/:id/merge_requests/:merge_request_iid/unapprove
 
 | Attribute           | Type    | Required | Description         |
 |---------------------|---------|----------|---------------------|
-| `id`                | integer | yes      | The ID or [URL-encoded path of a project](README.md#namespaced-path-encoding) |
+| `id`                | integer or string | yes      | The ID or [URL-encoded path of a project](README.md#namespaced-path-encoding) |
 | `merge_request_iid` | integer | yes      | The IID of a merge request |
