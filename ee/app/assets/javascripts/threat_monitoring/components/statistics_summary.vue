@@ -1,11 +1,10 @@
 <script>
-import { GlSingleStat } from '@gitlab/ui/dist/charts';
 import { engineeringNotation } from '@gitlab/ui/src/utils/number_utils';
 
 export default {
   name: 'StatisticsSummary',
   components: {
-    GlSingleStat,
+    GlSingleStat: () => import(/* webpackChunkName: 'gl_single_stat' */ '@gitlab/ui/dist/charts'),
   },
   props: {
     data: {

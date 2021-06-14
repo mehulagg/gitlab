@@ -1,6 +1,5 @@
 <script>
 import { GlResizeObserverDirective } from '@gitlab/ui';
-import { GlAreaChart } from '@gitlab/ui/dist/charts';
 import dateFormat from 'dateformat';
 import { isFunction } from 'lodash';
 
@@ -9,7 +8,7 @@ import { COLORS, DATE_FORMATS, TIME } from './constants';
 export default {
   name: 'StatisticsHistoryChart',
   components: {
-    GlAreaChart,
+    GlAreaChart: () => import(/* webpackChunkName: 'gl_area_chart' */ '@gitlab/ui/dist/charts'),
   },
   directives: {
     GlResizeObserverDirective,
