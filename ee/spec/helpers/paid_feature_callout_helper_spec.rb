@@ -3,6 +3,7 @@
 require 'spec_helper'
 
 RSpec.describe PaidFeatureCalloutHelper do
+  # TODO: Update these specs to reflect that we're also recording the ExperimentSubject
   describe '#run_highlight_paid_features_during_active_trial_experiment', :experiment do
     let_it_be(:group) { create(:group) }
     let_it_be(:user) { create(:user) }
