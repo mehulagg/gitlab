@@ -125,9 +125,8 @@ Deploy keys are not available in the **Allowed to merge** dropdown.
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/issues/53361) in GitLab 11.9.
 
-When a protected branch has **Allowed to push** set to "No one," 
-Developers and users with higher [roles](../permissions.md) can create a protected branch. They must be
-[**Allowed to merge**](#using-the-allowed-to-merge-and-allowed-to-push-settings).
+When a protected branch has **Allowed to push** set to "No one" and **Allowed to merge** set to
+"Developers," then users with higher [roles](../permissions.md) can create a protected branch.
 
 You can create a protected branch by using the UI or through the API only.
 This prevents you from accidentally creating a branch
