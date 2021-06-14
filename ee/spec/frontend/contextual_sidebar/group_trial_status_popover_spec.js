@@ -1,16 +1,25 @@
 import { GlPopover } from '@gitlab/ui';
 import { GlBreakpointInstance } from '@gitlab/ui/dist/utils';
 import { shallowMount } from '@vue/test-utils';
-
+import { POPOVER, TRACKING_PROPERTY } from 'ee/contextual_sidebar/components/constants';
 import TrialStatusPopover from 'ee/contextual_sidebar/components/trial_status_popover.vue';
-import { mockTracking } from 'helpers/tracking_helper';
+import { mockTracking, unmockTracking } from 'helpers/tracking_helper';
 
 describe('TrialStatusPopover component', () => {
   let wrapper;
   let trackingSpy;
 
+  const { trackingEvents } = POPOVER;
+
   const findByTestId = (testId) => wrapper.find(`[data-testid="${testId}"]`);
   const findGlPopover = () => wrapper.findComponent(GlPopover);
+
+  const expectTracking = ({ action, ...options } = {}) => {
+    return expect(trackingSpy).toHaveBeenCalledWith(undefined, action, {
+      ...options,
+      property: TRACKING_PROPERTY,
+    });
+  };
 
   const createComponent = () => {
     return shallowMount(TrialStatusPopover, {
@@ -33,24 +42,23 @@ describe('TrialStatusPopover component', () => {
   afterEach(() => {
     wrapper.destroy();
     wrapper = null;
+    unmockTracking();
   });
 
   it('matches the snapshot', () => {
     expect(wrapper.element).toMatchSnapshot();
   });
 
-  it('renders the upgrade button with correct tracking data attrs', () => {
-    const attrs = findByTestId('upgradeBtn').attributes();
-    expect(attrs['data-track-event']).toBe('click_button');
-    expect(attrs['data-track-label']).toBe('upgrade_to_ultimate');
-    expect(attrs['data-track-property']).toBe('experiment:show_trial_status_in_sidebar');
+  it('tracks when the upgrade button is clicked', () => {
+    findByTestId('upgradeBtn').vm.$emit('click');
+
+    expectTracking(trackingEvents.upgradeBtnClick);
   });
 
-  it('renders the compare plans button with correct tracking data attrs', () => {
-    const attrs = findByTestId('compareBtn').attributes();
-    expect(attrs['data-track-event']).toBe('click_button');
-    expect(attrs['data-track-label']).toBe('compare_all_plans');
-    expect(attrs['data-track-property']).toBe('experiment:show_trial_status_in_sidebar');
+  it('tracks when the compare button is clicked', () => {
+    findByTestId('compareBtn').vm.$emit('click');
+
+    expectTracking(trackingEvents.compareBtnClick);
   });
 
   describe('methods', () => {
@@ -76,15 +84,10 @@ describe('TrialStatusPopover component', () => {
     });
 
     describe('onShown', () => {
-      beforeEach(() => {
-        findGlPopover().vm.$emit('shown');
-      });
-
       it('dispatches tracking event', () => {
-        expect(trackingSpy).toHaveBeenCalledWith(undefined, 'popover_shown', {
-          label: 'trial_status_popover',
-          property: 'experiment:show_trial_status_in_sidebar',
-        });
+        findGlPopover().vm.$emit('shown');
+
+        expectTracking(trackingEvents.popoverShown);
       });
     });
   });
