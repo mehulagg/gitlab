@@ -41,6 +41,7 @@ describe('Grouped security reports app', () => {
   let mock;
 
   const findReportSection = () => wrapper.find(ReportSection);
+  const findReportSummary = () => wrapper.find('[data-testid="report-section-code-text"]');
   const findCollapseButton = () => wrapper.find('.js-collapse-btn');
   const findSpinner = () => wrapper.find('.gl-spinner');
 
@@ -163,9 +164,7 @@ describe('Grouped security reports app', () => {
 
       it('renders error state', () => {
         expect(findSpinner().exists()).toBe(false);
-        expect(wrapper.find('[data-testid="report-section-code-text"]').text()).toEqual(
-          'Security scanning failed loading any results',
-        );
+        expect(findReportSummary().text()).toEqual('Security scanning failed loading any results');
 
         expect(findCollapseButton().text()).toEqual('Expand');
 
@@ -198,9 +197,7 @@ describe('Grouped security reports app', () => {
 
       it('renders loading summary text + spinner', () => {
         expect(findSpinner().exists()).toBe(true);
-        expect(wrapper.find('[data-testid="report-section-code-text"]').text()).toEqual(
-          'Security scanning is loading',
-        );
+        expect(findReportSummary().text()).toEqual('Security scanning is loading');
 
         expect(findCollapseButton().text()).toEqual('Expand');
 
@@ -246,7 +243,7 @@ describe('Grouped security reports app', () => {
         expect(findSpinner().exists()).toBe(false);
 
         // Renders the summary text
-        expect(wrapper.find('[data-testid="report-section-code-text"]').text()).toEqual(
+        expect(findReportSummary().text()).toEqual(
           'Security scanning detected no vulnerabilities.',
         );
 
@@ -303,7 +300,7 @@ describe('Grouped security reports app', () => {
         expect(findSpinner().exists()).toBe(false);
 
         // Renders the summary text
-        expect(trimText(wrapper.find('[data-testid="report-section-code-text"]').text())).toEqual(
+        expect(trimText(findReportSummary().text())).toEqual(
           'Security scanning detected 12 potential vulnerabilities 7 Critical 5 High and 0 Others',
         );
 
