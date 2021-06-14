@@ -216,6 +216,7 @@ In these cases, use the following workflow:
   environments.
 - [Performance guidelines](performance.md) for writing code, benchmarks, and
   certain patterns to avoid.
+- [Caching guidelines](caching.md) for using caching in Rails under a GitLab environment.
 - [Merge request performance guidelines](merge_request_performance_guidelines.md)
   for ensuring merge requests do not negatively impact GitLab performance
 - [Profiling](profiling.md) a URL, measuring performance using Sherlock, or
