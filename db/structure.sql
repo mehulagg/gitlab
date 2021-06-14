@@ -19234,8 +19234,10 @@ CREATE TABLE vulnerability_occurrences (
     solution text,
     cve text,
     location jsonb,
+    detection_method text,
     CONSTRAINT check_4a3a60f2ba CHECK ((char_length(solution) <= 7000)),
     CONSTRAINT check_ade261da6b CHECK ((char_length(description) <= 15000)),
+    CONSTRAINT check_c5a305e45e CHECK ((char_length(detection_method) <= 255)),
     CONSTRAINT check_df6dd20219 CHECK ((char_length(message) <= 3000)),
     CONSTRAINT check_f602da68dd CHECK ((char_length(cve) <= 48400))
 );
