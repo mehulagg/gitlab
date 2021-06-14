@@ -37,7 +37,6 @@ are written to a file called `current`. The `logrotate` service built into GitLa
 [manages all logs](https://docs.gitlab.com/omnibus/settings/logs.html#logrotate)
 except those captured by `runit`.
 
-
 | Log Type                                        | Managed by logrotate | Managed by svlogd/runit |
 | ----------------------------------------------- | -------------------- | ----------------------- |
 | [Alertmanager Logs](#alertmanager-logs)         | N                    | Y                       |
@@ -50,7 +49,7 @@ except those captured by `runit`.
 | [Grafana Logs](#grafana-logs)                   | N                    | Y                       |
 | [LogRotate Logs](#logrotate-logs)               | N                    | Y                       |
 | [Mailroom](#mail_room_jsonlog-default)          | Y                    | Y                       |
-| [Nginx](#nginx-logs)                            | Y                    | Y                       |
+| [NGINX](#nginx-logs)                            | Y                    | Y                       |
 | [PostgreSQL Logs](#postgresql-logs)             | N                    | Y                       |
 | [Prometheus Logs](#prometheus-logs)             | N                    | Y                       |
 | [Puma](#puma-logs)                              | Y                    | Y                       |
