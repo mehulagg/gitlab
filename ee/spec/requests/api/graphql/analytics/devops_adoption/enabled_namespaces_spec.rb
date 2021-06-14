@@ -26,6 +26,12 @@ RSpec.describe 'devopsAdoptionEnabledNamespaces' do
         displayNamespace {
           name
         }
+        snapshots {
+          nodes {
+            issueOpened
+            mergeRequestOpened
+          }
+        }
         latestSnapshot {
           issueOpened
           mergeRequestOpened
@@ -46,6 +52,10 @@ RSpec.describe 'devopsAdoptionEnabledNamespaces' do
         'id' => enabled_namespace.to_gid.to_s,
         'namespace' => { 'name' => group.name },
         'displayNamespace' => { 'name' => group.name },
+        'snapshots' => { 'nodes' => [{
+          'mergeRequestOpened' => false,
+          'issueOpened' => true
+        }] },
         'latestSnapshot' => {
           'mergeRequestOpened' => false,
           'issueOpened' => true

@@ -21,7 +21,7 @@ RSpec.describe Search::SnippetService do
       stub_ee_application_setting(elasticsearch_search: true, elasticsearch_indexing: true)
     end
 
-    context 'visibility', :elastic_delete_by_query, :sidekiq_inline do
+    context 'visibility', :elastic_delete_by_query, :clean_gitlab_redis_shared_state, :sidekiq_inline do
       include_context 'ProjectPolicyTable context'
       include ProjectHelpers
 

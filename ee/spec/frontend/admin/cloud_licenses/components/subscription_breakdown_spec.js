@@ -18,7 +18,7 @@ import {
   licensedToHeaderText,
   subscriptionSyncStatus,
   subscriptionDetailsHeaderText,
-  subscriptionType,
+  subscriptionTypes,
 } from 'ee/pages/admin/cloud_licenses/constants';
 import { extendedWrapper } from 'helpers/vue_test_utils_helper';
 import waitForPromises from 'helpers/wait_for_promises';
@@ -30,7 +30,7 @@ describe('Subscription Breakdown', () => {
   let wrapper;
   let glModalDirective;
 
-  const [, legacyLicense] = subscriptionHistory;
+  const [, licenseFile] = subscriptionHistory;
   const connectivityHelpURL = 'connectivity/help/url';
   const customersPortalUrl = 'customers.dot';
   const licenseRemovePath = '/license/remove/';
@@ -153,13 +153,13 @@ describe('Subscription Breakdown', () => {
 
     describe('footer buttons', () => {
       it.each`
-        url                     | type                       | shouldShow
-        ${subscriptionSyncPath} | ${subscriptionType.CLOUD}  | ${true}
-        ${subscriptionSyncPath} | ${subscriptionType.LEGACY} | ${false}
-        ${''}                   | ${subscriptionType.CLOUD}  | ${false}
-        ${''}                   | ${subscriptionType.LEGACY} | ${false}
-        ${undefined}            | ${subscriptionType.CLOUD}  | ${false}
-        ${undefined}            | ${subscriptionType.LEGACY} | ${false}
+        url                     | type                              | shouldShow
+        ${subscriptionSyncPath} | ${subscriptionTypes.CLOUD}        | ${true}
+        ${subscriptionSyncPath} | ${subscriptionTypes.LICENSE_FILE} | ${false}
+        ${''}                   | ${subscriptionTypes.CLOUD}        | ${false}
+        ${''}                   | ${subscriptionTypes.LICENSE_FILE} | ${false}
+        ${undefined}            | ${subscriptionTypes.CLOUD}        | ${false}
+        ${undefined}            | ${subscriptionTypes.LICENSE_FILE} | ${false}
       `(
         'with url is $url and type is $type the sync button is shown: $shouldShow',
         ({ url, type, shouldShow }) => {
@@ -179,13 +179,13 @@ describe('Subscription Breakdown', () => {
       );
 
       it.each`
-        url                  | type                       | shouldShow
-        ${licenseUploadPath} | ${subscriptionType.LEGACY} | ${true}
-        ${licenseUploadPath} | ${subscriptionType.CLOUD}  | ${false}
-        ${''}                | ${subscriptionType.LEGACY} | ${false}
-        ${''}                | ${subscriptionType.CLOUD}  | ${false}
-        ${undefined}         | ${subscriptionType.LEGACY} | ${false}
-        ${undefined}         | ${subscriptionType.CLOUD}  | ${false}
+        url                  | type                              | shouldShow
+        ${licenseUploadPath} | ${subscriptionTypes.LICENSE_FILE} | ${true}
+        ${licenseUploadPath} | ${subscriptionTypes.CLOUD}        | ${false}
+        ${''}                | ${subscriptionTypes.LICENSE_FILE} | ${false}
+        ${''}                | ${subscriptionTypes.CLOUD}        | ${false}
+        ${undefined}         | ${subscriptionTypes.LICENSE_FILE} | ${false}
+        ${undefined}         | ${subscriptionTypes.CLOUD}        | ${false}
       `(
         'with url is $url and type is $type the upload button is shown: $shouldShow',
         ({ url, type, shouldShow }) => {
@@ -224,13 +224,13 @@ describe('Subscription Breakdown', () => {
       });
 
       it.each`
-        url                  | type                       | shouldShow
-        ${licenseRemovePath} | ${subscriptionType.LEGACY} | ${true}
-        ${licenseRemovePath} | ${subscriptionType.CLOUD}  | ${false}
-        ${''}                | ${subscriptionType.LEGACY} | ${false}
-        ${''}                | ${subscriptionType.CLOUD}  | ${false}
-        ${undefined}         | ${subscriptionType.LEGACY} | ${false}
-        ${undefined}         | ${subscriptionType.CLOUD}  | ${false}
+        url                  | type                              | shouldShow
+        ${licenseRemovePath} | ${subscriptionTypes.LICENSE_FILE} | ${true}
+        ${licenseRemovePath} | ${subscriptionTypes.CLOUD}        | ${false}
+        ${''}                | ${subscriptionTypes.LICENSE_FILE} | ${false}
+        ${''}                | ${subscriptionTypes.CLOUD}        | ${false}
+        ${undefined}         | ${subscriptionTypes.LICENSE_FILE} | ${false}
+        ${undefined}         | ${subscriptionTypes.CLOUD}        | ${false}
       `(
         'with url is $url and type is $type the remove button is shown: $shouldShow',
         ({ url, type, shouldShow }) => {
@@ -250,10 +250,10 @@ describe('Subscription Breakdown', () => {
       );
     });
 
-    describe('with a legacy license', () => {
+    describe('with a license file', () => {
       beforeEach(() => {
         createComponent({
-          props: { subscription: legacyLicense },
+          props: { subscription: licenseFile },
           stubs: { GlCard, SubscriptionDetailsCard },
         });
       });

@@ -1,4 +1,4 @@
-import { GlModal } from '@gitlab/ui';
+import { GlModal, GlSprintf } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
 import Clipboard from 'clipboard';
 import { merge } from 'lodash';
@@ -31,6 +31,7 @@ describe('EE - SecurityConfigurationSnippetModal', () => {
 
   const findModal = () => wrapper.find(GlModal);
   const findYamlSnippet = () => wrapper.findByTestId('configuration-modal-yaml-snippet');
+  const helpText = () => wrapper.findByTestId('configuration-modal-help-text');
 
   const createWrapper = (options) => {
     wrapper = extendedWrapper(
@@ -47,6 +48,9 @@ describe('EE - SecurityConfigurationSnippetModal', () => {
             attrs: {
               static: true,
               visible: true,
+            },
+            stubs: {
+              GlSprintf,
             },
           },
           options,
@@ -65,6 +69,12 @@ describe('EE - SecurityConfigurationSnippetModal', () => {
 
   it('renders the YAML snippet', () => {
     expect(findYamlSnippet().text()).toBe(configurationYaml);
+  });
+
+  it('renders help text correctly', () => {
+    expect(helpText().exists()).toBe(true);
+    expect(helpText().text()).not.toBe('');
+    expect(helpText().html()).toContain(gitlabCiYamlEditPath);
   });
 
   it('on primary event, text is copied to the clipbard and user is redirected to CI editor', async () => {

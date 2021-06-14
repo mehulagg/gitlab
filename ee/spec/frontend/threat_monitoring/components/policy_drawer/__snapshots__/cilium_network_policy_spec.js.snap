@@ -8,32 +8,25 @@ exports[`CiliumNetworkPolicy component supported YAML renders policy preview tab
     Type
   </h5>
    
-  <p>
+  <p
+    data-testid="policy-type"
+  >
     Network policy
   </p>
    
   <div>
-    <h5
-      class="gl-mt-6"
-    >
-      Description
-    </h5>
-     
-    <p
+    <policy-info-row-stub
       data-testid="description"
+      label="Description"
     >
       test description
-    </p>
+    </policy-info-row-stub>
      
-    <h5
-      class="gl-mt-6"
+    <policy-info-row-stub
+      label="Enforcement status"
     >
-      Enforcement status
-    </h5>
-     
-    <p>
       Disabled
-    </p>
+    </policy-info-row-stub>
   </div>
    
   <policy-preview-stub
@@ -62,7 +55,9 @@ exports[`CiliumNetworkPolicy component unsupported YAML renders policy preview t
     Type
   </h5>
    
-  <p>
+  <p
+    data-testid="policy-type"
+  >
     Network policy
   </p>
    

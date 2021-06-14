@@ -44,11 +44,14 @@ module EE
       validate :future_date, if: :start_or_due_dates_changed?, unless: :skip_future_date_validation
       validate :no_project, unless: :skip_project_validation
       validate :validate_group
+      validate :uniqueness_of_title, if: :title_changed?
 
       before_validation :set_iterations_cadence, unless: -> { project_id.present? }
       before_save :set_iteration_state
       before_destroy :check_if_can_be_destroyed
 
+      scope :due_date_order_asc, -> { order(:due_date) }
+      scope :due_date_order_desc, -> { order(due_date: :desc) }
       scope :upcoming, -> { with_state(:upcoming) }
       scope :started, -> { with_state(:started) }
       scope :closed, -> { with_state(:closed) }
@@ -138,6 +141,15 @@ module EE
 
     def supports_timebox_charts?
       resource_parent&.feature_available?(:iterations) && weight_available?
+    end
+
+    # because iteration start and due date are dates and not datetime and
+    # we do not allow for dates of 2 iterations to overlap a week ends-up being 6 days.
+    # i.e. instead of having something like: 2020-01-01 00:00:00 - 2020-01-08 00:00:00
+    # we would convene to have 2020-01-01 00:00:00 - 2020-01-07 23:59:59 and because iteration dates have no time
+    # we end up having 2020-01-01(beginning of day) - 2020-01-07(end of day)
+    def duration_in_days
+      (due_date - start_date + 1).to_i
     end
 
     private
@@ -250,6 +262,13 @@ module EE
       return unless iterations_cadence
 
       errors.add(:group, s_('is not valid. The iteration group has to match the iteration cadence group.'))
+    end
+
+    def uniqueness_of_title
+      relation = self.class.where(iterations_cadence_id: self.iterations_cadence)
+      title_exists = relation.find_by_title(title)
+
+      errors.add(:title, _('already being used for another iteration within this cadence.')) if title_exists
     end
   end
 end

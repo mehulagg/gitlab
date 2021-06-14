@@ -37,7 +37,7 @@ describe('ThreatMonitoringSection component', () => {
     wrapper = shallowMount(ThreatMonitoringSection, {
       propsData: {
         storeNamespace: 'threatMonitoringNetworkPolicy',
-        title: 'Web Application Firewall',
+        title: 'Container Network Policy',
         subtitle: 'Requests',
         nominalTitle: 'Total Requests',
         anomalousTitle: 'Anomalous Requests',

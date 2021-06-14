@@ -1,4 +1,4 @@
-import { CONNECTIVITY_ERROR, subscriptionType } from 'ee/pages/admin/cloud_licenses/constants';
+import { CONNECTIVITY_ERROR, subscriptionTypes } from 'ee/pages/admin/cloud_licenses/constants';
 
 export const license = {
   ULTIMATE: {
@@ -13,7 +13,7 @@ export const license = {
     name: 'Jane Doe',
     plan: 'ultimate',
     startsAt: '2021-03-11',
-    type: subscriptionType.CLOUD,
+    type: subscriptionTypes.CLOUD,
     usersInLicenseCount: '10',
     usersOverLicenseCount: '0',
   },
@@ -29,7 +29,7 @@ export const subscriptionHistory = [
     name: 'Jane Doe',
     plan: 'ultimate',
     startsAt: '2021-03-11',
-    type: subscriptionType.CLOUD,
+    type: subscriptionTypes.CLOUD,
     usersInLicenseCount: '10',
   },
   {
@@ -41,7 +41,7 @@ export const subscriptionHistory = [
     name: 'Jane Doe',
     plan: 'premium',
     startsAt: '2020-03-16',
-    type: subscriptionType.LEGACY,
+    type: subscriptionTypes.LICENSE_FILE,
     usersInLicenseCount: '5',
   },
 ];

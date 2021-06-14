@@ -115,7 +115,7 @@ module EE
     def successful_creation_hooks
       super
 
-      invite_members(group)
+      invite_members(group, invite_source: 'group-creation-page')
     end
   end
 end

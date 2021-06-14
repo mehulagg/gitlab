@@ -10,11 +10,6 @@ module Types
     field :id, ::Types::GlobalIDType[::DastScannerProfile], null: false,
           description: 'ID of the DAST scanner profile.'
 
-    field :global_id, ::Types::GlobalIDType[::DastScannerProfile], null: false,
-          description: 'ID of the DAST scanner profile.',
-          deprecated: { reason: 'Use `id`', milestone: '13.6' },
-          method: :id
-
     field :profile_name, GraphQL::STRING_TYPE, null: true,
           description: 'Name of the DAST scanner profile.',
           method: :name

@@ -111,10 +111,6 @@ RSpec.describe Ci::Build do
   describe '.with_downloadable_artifacts' do
     subject { described_class.with_downloadable_artifacts }
 
-    before do
-      stub_feature_flags(drop_license_management_artifact: false)
-    end
-
     context 'when job does not have a downloadable artifact' do
       let!(:job) { create(:ci_build) }
 
@@ -491,6 +487,34 @@ RSpec.describe Ci::Build do
           .to raise_error(ActiveRecord::StaleObjectError)
 
         expect(build.queuing_entry).to be_present
+      end
+    end
+
+    context 'when build has been picked by a shared runner' do
+      let(:build) { create(:ci_build, :pending) }
+
+      it 'creates runtime metadata entry' do
+        build.runner = create(:ci_runner, :instance_type)
+
+        build.run!
+
+        expect(build.reload.runtime_metadata).to be_present
+      end
+    end
+  end
+
+  describe '#drop' do
+    context 'when has a runtime tracking entry' do
+      let(:build) { create(:ci_build, :pending) }
+
+      it 'removes runtime tracking entry' do
+        build.runner = create(:ci_runner, :instance_type)
+
+        build.run!
+        expect(build.reload.runtime_metadata).to be_present
+
+        build.drop!
+        expect(build.reload.runtime_metadata).not_to be_present
       end
     end
   end
@@ -1704,8 +1728,6 @@ RSpec.describe Ci::Build do
     subject { build.erase_erasable_artifacts! }
 
     before do
-      stub_feature_flags(drop_license_management_artifact: false)
-
       Ci::JobArtifact.file_types.keys.each do |file_type|
         create(:ci_job_artifact, job: build, file_type: file_type, file_format: Ci::JobArtifact::TYPE_AND_FORMAT_PAIRS[file_type.to_sym])
       end
@@ -2720,7 +2742,7 @@ RSpec.describe Ci::Build do
           let(:expected_variables) do
             predefined_variables.map { |variable| variable.fetch(:key) } +
               %w[YAML_VARIABLE CI_ENVIRONMENT_NAME CI_ENVIRONMENT_SLUG
-                 CI_ENVIRONMENT_ACTION CI_ENVIRONMENT_URL]
+                 CI_ENVIRONMENT_TIER CI_ENVIRONMENT_ACTION CI_ENVIRONMENT_URL]
           end
 
           before do
@@ -2820,7 +2842,8 @@ RSpec.describe Ci::Build do
       let(:environment_variables) do
         [
           { key: 'CI_ENVIRONMENT_NAME', value: 'production', public: true, masked: false },
-          { key: 'CI_ENVIRONMENT_SLUG', value: 'prod-slug',  public: true, masked: false }
+          { key: 'CI_ENVIRONMENT_SLUG', value: 'prod-slug',  public: true, masked: false },
+          { key: 'CI_ENVIRONMENT_TIER', value: 'production', public: true, masked: false }
         ]
       end
 
@@ -2829,6 +2852,7 @@ RSpec.describe Ci::Build do
                project: build.project,
                name: 'production',
                slug: 'prod-slug',
+               tier: 'production',
                external_url: '')
       end
 
@@ -4822,7 +4846,7 @@ RSpec.describe Ci::Build do
 
     context 'with project services' do
       before do
-        create(:service, active: true, job_events: true, project: project)
+        create(:integration, active: true, job_events: true, project: project)
       end
 
       it 'executes services' do
@@ -4836,7 +4860,7 @@ RSpec.describe Ci::Build do
 
     context 'without relevant project services' do
       before do
-        create(:service, active: true, job_events: false, project: project)
+        create(:integration, active: true, job_events: false, project: project)
       end
 
       it 'does not execute services' do
@@ -5178,5 +5202,51 @@ RSpec.describe Ci::Build do
     it { expect(matcher.protected?).to eq(build.protected?) }
 
     it { expect(matcher.project).to eq(build.project) }
+  end
+
+  describe '#shared_runner_build?' do
+    context 'when build does not have a runner assigned' do
+      it 'is not a shared runner build' do
+        expect(build.runner).to be_nil
+
+        expect(build).not_to be_shared_runner_build
+      end
+    end
+
+    context 'when build has a project runner assigned' do
+      before do
+        build.runner = create(:ci_runner, :project)
+      end
+
+      it 'is not a shared runner build' do
+        expect(build).not_to be_shared_runner_build
+      end
+    end
+
+    context 'when build has an instance runner assigned' do
+      before do
+        build.runner = create(:ci_runner, :instance_type)
+      end
+
+      it 'is a shared runner build' do
+        expect(build).to be_shared_runner_build
+      end
+    end
+  end
+
+  describe '.without_coverage' do
+    let!(:build_with_coverage) { create(:ci_build, pipeline: pipeline, coverage: 100.0) }
+
+    it 'returns builds without coverage values' do
+      expect(described_class.without_coverage).to eq([build])
+    end
+  end
+
+  describe '.with_coverage_regex' do
+    let!(:build_with_coverage_regex) { create(:ci_build, pipeline: pipeline, coverage_regex: '\d') }
+
+    it 'returns builds with coverage regex values' do
+      expect(described_class.with_coverage_regex).to eq([build_with_coverage_regex])
+    end
   end
 end

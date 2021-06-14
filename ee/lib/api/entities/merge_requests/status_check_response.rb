@@ -6,7 +6,7 @@ module API
       class StatusCheckResponse < Grape::Entity
         expose :id
         expose :merge_request, using: Entities::MergeRequest
-        expose :external_approval_rule, using: Entities::ExternalApprovalRule
+        expose :external_status_check, using: Entities::ExternalStatusCheck
       end
     end
   end

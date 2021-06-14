@@ -50,7 +50,6 @@ module EE
           performance: %i[merge_request_performance_metrics],
           browser_performance: %i[merge_request_performance_metrics],
           load_performance: %i[merge_request_performance_metrics],
-          license_management: %i[license_scanning],
           license_scanning: %i[license_scanning],
           metrics: %i[metrics_reports],
           requirements: %i[requirements],
@@ -65,7 +64,12 @@ module EE
             pipeline.run_after_commit do
               StoreSecurityReportsWorker.perform_async(pipeline.id) if pipeline.default_branch?
               ::Security::StoreScansWorker.perform_async(pipeline.id)
-              SyncSecurityReportsToReportApprovalRulesWorker.perform_async(pipeline.id)
+            end
+          end
+
+          after_transition any => ::Ci::Pipeline.completed_statuses do |pipeline|
+            pipeline.run_after_commit do
+              ::Ci::SyncReportsToReportApprovalRulesWorker.perform_async(pipeline.id)
             end
           end
 
@@ -107,9 +111,9 @@ module EE
       end
 
       def license_scanning_report
-        ::Gitlab::Ci::Reports::LicenseScanning::Report.new.tap do |license_management_report|
+        ::Gitlab::Ci::Reports::LicenseScanning::Report.new.tap do |license_scanning_report|
           latest_report_builds(::Ci::JobArtifact.license_scanning_reports).each do |build|
-            build.collect_license_scanning_reports!(license_management_report)
+            build.collect_license_scanning_reports!(license_scanning_report)
           end
         end
       end

@@ -56,7 +56,7 @@ module QA
       end
 
       before(:all) do
-        Runtime::Feature.enable(:bulk_import)
+        Runtime::Feature.enable(:bulk_import) unless staging?
         Runtime::Feature.enable(:top_level_group_creation_enabled) if staging?
       end
 
@@ -64,8 +64,11 @@ module QA
         sandbox.add_member(user, Resource::Members::AccessLevel::MAINTAINER)
 
         Flow::Login.sign_in(as: user)
-        Page::Main::Menu.new.go_to_import_group
-        Page::Group::New.new.connect_gitlab_instance(Runtime::Scenario.gitlab_address, personal_access_token)
+        Page::Main::Menu.perform(&:go_to_create_group)
+        Page::Group::New.perform do |group|
+          group.switch_to_import_tab
+          group.connect_gitlab_instance(Runtime::Scenario.gitlab_address, personal_access_token)
+        end
       end
 
       # Non blocking issues:
@@ -110,7 +113,7 @@ module QA
       end
 
       after(:all) do
-        Runtime::Feature.disable(:bulk_import)
+        Runtime::Feature.disable(:bulk_import) unless staging?
         Runtime::Feature.disable(:top_level_group_creation_enabled) if staging?
       end
     end

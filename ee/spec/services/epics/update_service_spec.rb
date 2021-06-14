@@ -99,9 +99,9 @@ RSpec.describe Epics::UpdateService do
     context 'when repositioning an epic on a board' do
       let_it_be(:group) { create(:group) }
       let_it_be(:epic) { create(:epic, group: group) }
-      let_it_be(:epic1) { create(:epic, group: group) }
-      let_it_be(:epic2) { create(:epic, group: group) }
-      let_it_be(:epic3) { create(:epic, group: group) }
+      let_it_be_with_reload(:epic1) { create(:epic, group: group) }
+      let_it_be_with_reload(:epic2) { create(:epic, group: group) }
+      let_it_be_with_reload(:epic3) { create(:epic, group: group) }
 
       let_it_be(:board) { create(:epic_board, group: group) }
       let_it_be(:list) { create(:epic_list, epic_board: board, list_type: :backlog) }
@@ -179,6 +179,18 @@ RSpec.describe Epics::UpdateService do
       context 'when board position records are missing' do
         context 'when the position does not exist for any record' do
           it_behaves_like 'board repositioning'
+
+          context 'when the list is closed' do
+            let_it_be(:list) { create(:epic_list, epic_board: board, list_type: :closed) }
+
+            before do
+              epic1.update!(state: :closed)
+              epic2.update!(state: :closed)
+              epic3.update!(state: :closed)
+            end
+
+            it_behaves_like 'board repositioning'
+          end
         end
 
         context 'when the epic is in a subgroup' do

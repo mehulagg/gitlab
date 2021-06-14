@@ -65,15 +65,39 @@ RSpec.describe GitlabSubscriptions::UpcomingReconciliation do
     end
   end
 
-  describe '.for_self_managed' do
-    it 'returns row where namespace_id is nil' do
-      upcoming_reconciliation = create(:upcoming_reconciliation, :self_managed)
+  describe '.next' do
+    context 'when self managed' do
+      it 'returns row where namespace_id is nil' do
+        upcoming_reconciliation = create(:upcoming_reconciliation, :self_managed)
 
-      expect(described_class.for_self_managed).to eq(upcoming_reconciliation)
+        expect(described_class.next).to eq(upcoming_reconciliation)
+      end
+
+      it 'returns nil when there is no row with namespace_id nil' do
+        expect(described_class.next).to eq(nil)
+      end
     end
 
-    it 'returns nil when there is no row with namespace_id nil' do
-      expect(described_class.for_self_managed).to eq(nil)
+    context 'when SaaS' do
+      let_it_be(:upcoming_reconciliation) { create(:upcoming_reconciliation, :saas) }
+
+      let(:namespace_id) { upcoming_reconciliation.namespace_id }
+
+      before do
+        allow(::Gitlab).to receive(:com?).and_return(true)
+      end
+
+      it 'returns row for given namespace' do
+        expect(described_class.next(namespace_id)).to eq(upcoming_reconciliation)
+      end
+
+      it 'returns nil when there is no row with given namespace_id' do
+        expect(described_class.next(non_existing_record_id)).to eq(nil)
+      end
+
+      it 'returns nil if namespace_id is nil' do
+        expect(described_class.next).to eq(nil)
+      end
     end
   end
 end

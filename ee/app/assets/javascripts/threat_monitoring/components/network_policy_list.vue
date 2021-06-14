@@ -5,7 +5,7 @@ import { getTimeago } from '~/lib/utils/datetime_utility';
 import { setUrlFragment, mergeUrlParams } from '~/lib/utils/url_utility';
 import { s__ } from '~/locale';
 import EnvironmentPicker from './environment_picker.vue';
-import NetworkPolicyDrawer from './policy_drawer/network_policy_drawer.vue';
+import PolicyDrawer from './policy_drawer/policy_drawer.vue';
 
 export default {
   components: {
@@ -16,7 +16,7 @@ export default {
     GlSprintf,
     GlLink,
     EnvironmentPicker,
-    NetworkPolicyDrawer,
+    PolicyDrawer,
   },
   props: {
     documentationPath: {
@@ -195,7 +195,7 @@ export default {
       </template>
     </gl-table>
 
-    <network-policy-drawer
+    <policy-drawer
       :open="hasSelectedPolicy"
       :policy="selectedPolicy"
       :edit-policy-path="editPolicyPath"

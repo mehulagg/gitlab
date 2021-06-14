@@ -4,6 +4,7 @@ import { CONTENT_EDITOR_TRACKING_LABEL, TOOLBAR_CONTROL_TRACKING_ACTION } from '
 import { ContentEditor } from '../services/content_editor';
 import Divider from './divider.vue';
 import ToolbarButton from './toolbar_button.vue';
+import ToolbarLinkButton from './toolbar_link_button.vue';
 import ToolbarTextStyleDropdown from './toolbar_text_style_dropdown.vue';
 
 const trackingMixin = Tracking.mixin({
@@ -14,6 +15,7 @@ export default {
   components: {
     ToolbarButton,
     ToolbarTextStyleDropdown,
+    ToolbarLinkButton,
     Divider,
   },
   mixins: [trackingMixin],
@@ -67,6 +69,11 @@ export default {
       icon-name="code"
       editor-command="toggleCode"
       :label="__('Code')"
+      :tiptap-editor="contentEditor.tiptapEditor"
+      @execute="trackToolbarControlExecution"
+    />
+    <toolbar-link-button
+      data-testid="link"
       :tiptap-editor="contentEditor.tiptapEditor"
       @execute="trackToolbarControlExecution"
     />

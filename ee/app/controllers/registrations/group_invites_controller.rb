@@ -39,7 +39,8 @@ module Registrations
       {
         source: group,
         user_ids: emails_param[:emails]&.reject(&:blank?)&.join(','),
-        access_level: Gitlab::Access::DEVELOPER
+        access_level: Gitlab::Access::DEVELOPER,
+        invite_source: 'registrations-group-invite'
       }
     end
 

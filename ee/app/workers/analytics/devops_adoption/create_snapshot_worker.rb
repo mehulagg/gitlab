@@ -3,7 +3,6 @@
 module Analytics
   module DevopsAdoption
     # Updates all pending snapshots for given enabled_namespace (from previous month)
-    # and creates or update snapshot for current month
     class CreateSnapshotWorker
       include ApplicationWorker
 
@@ -27,10 +26,9 @@ module Analytics
       def pending_ranges(enabled_namespace)
         end_times = enabled_namespace.snapshots.not_finalized.pluck(:end_time)
 
-        now = Time.zone.now
-
-        if !now.end_of_month.to_date.in?(end_times.map(&:to_date)) && now.day > 1
-          end_times << now.end_of_month
+        prev_month = Time.current.last_month.end_of_month
+        unless prev_month.to_date.in?(end_times.map(&:to_date)) || enabled_namespace.snapshots.for_month(prev_month).exists?
+          end_times << prev_month
         end
 
         end_times

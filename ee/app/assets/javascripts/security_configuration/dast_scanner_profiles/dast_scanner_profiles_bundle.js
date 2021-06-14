@@ -10,7 +10,12 @@ export default () => {
     return false;
   }
 
-  const { projectFullPath, profilesLibraryPath, onDemandScansPath } = el.dataset;
+  const {
+    projectFullPath,
+    profilesLibraryPath,
+    onDemandScansPath,
+    dastConfigurationPath,
+  } = el.dataset;
 
   const props = {
     projectFullPath,
@@ -22,7 +27,7 @@ export default () => {
 
   const returnToPreviousPage = ({ id } = {}) => {
     returnToPreviousPageFactory({
-      onDemandScansPath,
+      allowedPaths: [onDemandScansPath, dastConfigurationPath],
       profilesLibraryPath,
       urlParamKey: 'scanner_profile_id',
     })(id);

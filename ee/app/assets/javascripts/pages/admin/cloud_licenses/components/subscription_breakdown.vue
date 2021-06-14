@@ -9,7 +9,7 @@ import {
   removeLicense,
   removeLicenseConfirm,
   subscriptionDetailsHeaderText,
-  subscriptionType,
+  subscriptionTypes,
   syncSubscriptionButtonText,
   uploadLicense,
 } from '../constants';
@@ -76,10 +76,10 @@ export default {
       return this.subscriptionSyncPath && this.isCloudType;
     },
     canUploadLicense() {
-      return this.licenseUploadPath && this.isLegacyType;
+      return this.licenseUploadPath && this.isLicenseFileType;
     },
     canRemoveLicense() {
-      return this.licenseRemovePath && this.isLegacyType;
+      return this.licenseRemovePath && this.isLicenseFileType;
     },
     hasSubscription() {
       return Boolean(Object.keys(this.subscription).length);
@@ -88,10 +88,10 @@ export default {
       return Boolean(this.subscriptionList.length);
     },
     isCloudType() {
-      return this.subscription.type === subscriptionType.CLOUD;
+      return this.subscription.type === subscriptionTypes.CLOUD;
     },
-    isLegacyType() {
-      return this.subscription.type === subscriptionType.LEGACY;
+    isLicenseFileType() {
+      return this.subscription.type === subscriptionTypes.LICENSE_FILE;
     },
     shouldShowFooter() {
       return (

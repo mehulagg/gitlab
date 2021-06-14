@@ -8,6 +8,7 @@ import { mergeUrlParams, updateHistory, getParameterValues } from '~/lib/utils/u
 import {
   DEVOPS_ADOPTION_STRINGS,
   DEVOPS_ADOPTION_ERROR_KEYS,
+  MAX_REQUEST_COUNT,
   DATE_TIME_FORMAT,
   DEFAULT_POLLING_INTERVAL,
   DEVOPS_ADOPTION_GROUP_LEVEL_LABEL,
@@ -61,6 +62,7 @@ export default {
     return {
       isLoadingGroups: false,
       isLoadingEnableGroup: false,
+      requestCount: 0,
       openModal: false,
       errors: {
         [DEVOPS_ADOPTION_ERROR_KEYS.groups]: false,
@@ -234,7 +236,8 @@ export default {
             nodes: [...this.groups.nodes, ...nodes],
           };
 
-          if (pageInfo?.nextPage) {
+          this.requestCount += 1;
+          if (this.requestCount < MAX_REQUEST_COUNT && pageInfo?.nextPage) {
             this.fetchGroups(pageInfo.nextPage);
           } else {
             this.isLoadingGroups = false;

@@ -146,9 +146,9 @@ module QA
           autoload :PipelineSubscriptions, 'qa/ee/page/project/settings/pipeline_subscriptions'
         end
 
-        module Operations
+        module Monitor
           module Metrics
-            autoload :Show, 'qa/ee/page/project/operations/metrics/show'
+            autoload :Show, 'qa/ee/page/project/monitor/metrics/show'
           end
         end
 
@@ -180,6 +180,10 @@ module QA
 
         module Job
           autoload :Show, 'qa/ee/page/project/job/show'
+        end
+
+        module ThreatMonitoring
+          autoload :AlertsList, 'qa/ee/page/project/threat_monitoring/alerts_list'
         end
       end
 

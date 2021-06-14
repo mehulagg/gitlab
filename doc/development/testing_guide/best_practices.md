@@ -864,10 +864,10 @@ Most tests for Elasticsearch logic relate to:
 - Searching for that data.
 - Ensuring that the test gives the expected result.
 
-There are some exceptions, such as checking for structural changes rather than individual records in an index. 
+There are some exceptions, such as checking for structural changes rather than individual records in an index.
 
 The `:elastic_with_delete_by_query` trait was added to reduce run time for pipelines by creating and deleting indices
-at the start and end of each context only. The [Elasticsearch DeleteByQuery API](https://www.elastic.co/guide/en/elasticsearch/reference/current/docs-delete-by-query.html) 
+at the start and end of each context only. The [Elasticsearch DeleteByQuery API](https://www.elastic.co/guide/en/elasticsearch/reference/current/docs-delete-by-query.html)
 is used to delete data in all indices in between examples to ensure a clean index.
 
 Note that Elasticsearch indexing uses [`Gitlab::Redis::SharedState`](../../../ee/development/redis.md#gitlabrediscachesharedstatequeues).
@@ -994,6 +994,7 @@ Only use simple values as input in the `where` block. Using
 objects, FactoryBot-created objects, and similar items can lead to
 [unexpected results](https://github.com/tomykaira/rspec-parameterized/issues/8).
 <!-- vale gitlab.Spelling = YES -->
+
 ### Prometheus tests
 
 Prometheus metrics may be preserved from one test run to another. To ensure that metrics are
@@ -1072,6 +1073,16 @@ a non-empty result. To combine it with the schema matching above, use
 expect(json_string).to be_valid_json
 
 expect(json_string).to be_valid_json.and match_schema(schema)
+```
+
+#### `be_one_of(collection)`
+
+The inverse of `include`, tests that the `collection` includes the expected
+value:
+
+```ruby
+expect(:a).to be_one_of(%i[a b c])
+expect(:z).not_to be_one_of(%i[a b c])
 ```
 
 ### Testing query performance

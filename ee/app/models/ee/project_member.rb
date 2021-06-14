@@ -33,5 +33,9 @@ module EE
         errors.add(:user, _('is not in the group enforcing Group Managed Account'))
       end
     end
+
+    def provisioned_by_this_group?
+      false
+    end
   end
 end

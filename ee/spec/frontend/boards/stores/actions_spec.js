@@ -288,7 +288,7 @@ describe('fetchEpicsSwimlanes', () => {
 describe('fetchItemsForList', () => {
   const listId = mockLists[0].id;
 
-  const state = {
+  let state = {
     fullPath: 'gitlab-org',
     boardId: '1',
     filterParams: {},
@@ -329,6 +329,10 @@ describe('fetchItemsForList', () => {
   };
 
   it('add epicWildcardId with ANY as value when forSwimlanes is true', () => {
+    state = {
+      ...state,
+      isShowingEpicsSwimlanes: true,
+    };
     jest.spyOn(gqlClient, 'query').mockResolvedValue(queryResponse);
 
     testAction(

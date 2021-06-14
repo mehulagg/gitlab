@@ -5,6 +5,7 @@ import {
   IssuableAttributeState as IssuableAttributeStateFoss,
   issuableAttributesQueries as issuableAttributesQueriesFoss,
 } from '~/sidebar/constants';
+import epicAncestorsQuery from './queries/epic_ancestors.query.graphql';
 import groupEpicsQuery from './queries/group_epics.query.graphql';
 import groupIterationsQuery from './queries/group_iterations.query.graphql';
 import projectIssueEpicMutation from './queries/project_issue_epic.mutation.graphql';
@@ -30,7 +31,6 @@ export const healthStatusTextMap = {
 export const iterationSelectTextMap = {
   iteration: __('Iteration'),
   noIteration: __('No iteration'),
-  noIterationItem: [{ title: __('No iteration'), id: null }],
   assignIteration: __('Assign Iteration'),
   iterationSelectFail: __('Failed to set iteration on this issue. Please try again.'),
   currentIterationFetchError: __('Failed to fetch the iteration for this issue. Please try again.'),
@@ -120,5 +120,11 @@ export const issuableAttributesQueries = {
   [IssuableAttributeType.Epic]: {
     current: issuableEpicQueries,
     list: epicsQueries,
+  },
+};
+
+export const ancestorsQueries = {
+  [IssuableType.Epic]: {
+    query: epicAncestorsQuery,
   },
 };

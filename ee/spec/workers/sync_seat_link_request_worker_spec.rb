@@ -23,7 +23,7 @@ RSpec.describe SyncSeatLinkRequestWorker, type: :worker do
           date: '2019-12-31',
           license_key: '123',
           max_historical_user_count: 5,
-          active_users: 4
+          billable_users_count: 4
         }.to_json
       )
     end
@@ -117,9 +117,43 @@ RSpec.describe SyncSeatLinkRequestWorker, type: :worker do
             date: '2020-01-01',
             license_key: '123',
             max_historical_user_count: 5,
-            active_users: 4
+            billable_users_count: 4
           }.to_json
         )
+      end
+    end
+
+    context 'when response contains reconciliation dates' do
+      let(:body) { { success: true, next_reconciliation_date: today.to_s, display_alert_from: (today - 7.days).to_s }.to_json }
+      let(:today) { Date.current }
+
+      before do
+        stub_request(:post, seat_link_url).to_return(
+          status: 200,
+          body: body,
+          headers: { content_type: 'application/json' }
+        )
+      end
+
+      it 'saves the reconciliation dates' do
+        sync_seat_link
+        upcoming_reconciliation = GitlabSubscriptions::UpcomingReconciliation.next
+
+        expect(upcoming_reconciliation.next_reconciliation_date).to eq(today)
+        expect(upcoming_reconciliation.display_alert_from).to eq(today - 7.days)
+      end
+
+      context 'when an upcoming_reconciliation already exists' do
+        it 'updates the upcoming_reconciliation' do
+          create(:upcoming_reconciliation, :self_managed, next_reconciliation_date: today + 2.days, display_alert_from: today + 1.day)
+
+          sync_seat_link
+
+          upcoming_reconciliation = GitlabSubscriptions::UpcomingReconciliation.next
+
+          expect(upcoming_reconciliation.next_reconciliation_date).to eq(today)
+          expect(upcoming_reconciliation.display_alert_from).to eq(today - 7.days)
+        end
       end
     end
 

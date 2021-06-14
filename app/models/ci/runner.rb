@@ -134,6 +134,8 @@ module Ci
     end
 
     scope :order_contacted_at_asc, -> { order(contacted_at: :asc) }
+    scope :order_contacted_at_desc, -> { order(contacted_at: :desc) }
+    scope :order_created_at_asc, -> { order(created_at: :asc) }
     scope :order_created_at_desc, -> { order(created_at: :desc) }
     scope :with_tags, -> { preload(:tags) }
 
@@ -168,18 +170,13 @@ module Ci
 
     # Searches for runners matching the given query.
     #
-    # This method uses ILIKE on PostgreSQL.
-    #
-    # This method performs a *partial* match on tokens, thus a query for "a"
-    # will match any runner where the token contains the letter "a". As a result
-    # you should *not* use this method for non-admin purposes as otherwise users
-    # might be able to query a list of all runners.
+    # This method uses ILIKE on PostgreSQL for the description field and performs a full match on tokens.
     #
     # query - The search query as a String.
     #
     # Returns an ActiveRecord::Relation.
     def self.search(query)
-      fuzzy_search(query, [:token, :description])
+      where(token: query).or(fuzzy_search(query, [:description]))
     end
 
     def self.online_contact_time_deadline
@@ -195,8 +192,13 @@ module Ci
     end
 
     def self.order_by(order)
-      if order == 'contacted_asc'
+      case order
+      when 'contacted_asc'
         order_contacted_at_asc
+      when 'contacted_desc'
+        order_contacted_at_desc
+      when 'created_at_asc'
+        order_created_at_asc
       else
         order_created_at_desc
       end

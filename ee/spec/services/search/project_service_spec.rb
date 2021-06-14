@@ -34,7 +34,7 @@ RSpec.describe Search::ProjectService do
     end
   end
 
-  context 'visibility', :elastic_delete_by_query, :sidekiq_inline do
+  context 'visibility', :elastic_delete_by_query, :clean_gitlab_redis_shared_state, :sidekiq_inline do
     include_context 'ProjectPolicyTable context'
 
     shared_examples 'search respects visibility' do
@@ -224,7 +224,7 @@ RSpec.describe Search::ProjectService do
     end
   end
 
-  context 'sorting', :elastic, :sidekiq_inline do
+  context 'sorting', :elastic, :clean_gitlab_redis_shared_state, :sidekiq_inline do
     context 'issues' do
       let(:scope) { 'issues' }
       let_it_be(:project) { create(:project, :public) }

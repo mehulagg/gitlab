@@ -6,18 +6,15 @@ import { __, n__, s__, sprintf } from '~/locale';
 import Tracking from '~/tracking';
 
 const RESIZE_EVENT_DEBOUNCE_MS = 150;
+const CLICK_BUTTON = 'click_button';
+const trackingMixin = Tracking.mixin({ experiment: 'highlight_paid_features_during_active_trial' });
 
 export default {
-  tracking: {
-    action: 'click_button',
-    labels: { upgrade: 'upgrade_to_ultimate', compare: 'compare_all_plans' },
-    property: 'experiment:highlight_paid_features_during_active_trial',
-  },
   components: {
     GlButton,
     GlPopover,
   },
-  mixins: [Tracking.mixin()],
+  mixins: [trackingMixin],
   props: {
     containerId: {
       type: String,
@@ -71,6 +68,11 @@ export default {
   i18n: {
     compareAllButtonTitle: s__('BillingPlans|Compare all plans'),
   },
+  trackingEvents: {
+    popoverShown: { action: 'popover_shown', label: 'feature_highlight_popover' },
+    upgradeBtnClick: { action: CLICK_BUTTON, label: 'upgrade_to_premium' },
+    compareBtnClick: { action: CLICK_BUTTON, label: 'compare_all_plans' },
+  },
   computed: {
     popoverTitle() {
       const i18nPopoverTitle = n__(
@@ -116,14 +118,20 @@ export default {
     onResize() {
       this.updateDisabledState();
     },
-    onShown() {
-      this.track('popover_shown', {
-        label: `feature_highlight_popover:${this.featureName}`,
-        property: this.$options.tracking.property,
-      });
-    },
     updateDisabledState() {
       this.disabled = bp.getBreakpointSize() === 'xs';
+    },
+    onShown() {
+      const { action, ...options } = this.$options.trackingEvents.popoverShown;
+      this.track(action, options);
+    },
+    onUpgradeBtnClick() {
+      const { action, ...options } = this.$options.trackingEvents.upgradeBtnClick;
+      this.track(action, options);
+    },
+    onCompareBtnClick() {
+      const { action, ...options } = this.$options.trackingEvents.compareBtnClick;
+      this.track(action, options);
     },
   },
 };
@@ -163,9 +171,7 @@ export default {
         class="gl-mb-0"
         block
         data-testid="upgradeBtn"
-        :data-track-action="$options.tracking.action"
-        :data-track-label="$options.tracking.labels.upgrade"
-        :data-track-property="$options.tracking.property"
+        @click="onUpgradeBtnClick"
       >
         <span class="gl-font-sm">{{ upgradeButtonTitle }}</span>
       </gl-button>
@@ -178,9 +184,7 @@ export default {
         class="gl-mb-0"
         block
         data-testid="compareBtn"
-        :data-track-action="$options.tracking.action"
-        :data-track-label="$options.tracking.labels.compare"
-        :data-track-property="$options.tracking.property"
+        @click="onCompareBtnClick"
       >
         <span class="gl-font-sm">{{ $options.i18n.compareAllButtonTitle }}</span>
       </gl-button>

@@ -127,13 +127,12 @@ function disable_sign_ups() {
   fi
 
   # Create the root token
-  local ruby_cmd="token = User.find_by_username('root').personal_access_tokens.create(scopes: [:api], name: 'Token to disable sign-ups'); token.set_token('${REVIEW_APPS_ROOT_TOKEN}'); begin; token.save!; rescue(ActiveRecord::RecordNotUnique); end"
-  retry "run_task \"${ruby_cmd}\""
+  local set_token_rb="token = User.find_by_username('root').personal_access_tokens.create(scopes: [:api], name: 'Token to disable sign-ups'); token.set_token('${REVIEW_APPS_ROOT_TOKEN}'); begin; token.save!; rescue(ActiveRecord::RecordNotUnique); end"
+  retry "run_task \"${set_token_rb}\""
 
   # Disable sign-ups
-  local signup_enabled=$(retry 'curl --silent --show-error --request PUT --header "PRIVATE-TOKEN: ${REVIEW_APPS_ROOT_TOKEN}" "${CI_ENVIRONMENT_URL}/api/v4/application/settings?signup_enabled=false" | jq ".signup_enabled"')
-
-  if [[ "${signup_enabled}" == "false" ]]; then
+  local disable_signup_rb="Gitlab::CurrentSettings.current_application_settings.update!(signup_enabled: false)"
+  if (retry "run_task \"${disable_signup_rb}\""); then
     echoinfo "Sign-ups have been disabled successfully."
   else
     echoerr "Sign-ups are still enabled!"
@@ -160,6 +159,15 @@ function ensure_namespace() {
   echoinfo "Ensuring the ${namespace} namespace exists..." true
 
   kubectl describe namespace "${namespace}" || kubectl create namespace "${namespace}"
+}
+
+function label_namespace() {
+  local namespace="${1}"
+  local label="${2}"
+
+  echoinfo "Labeling the ${namespace} namespace with ${label}" true
+
+  kubectl label namespace "${namespace}" "${label}"
 }
 
 function install_external_dns() {
@@ -303,6 +311,7 @@ function deploy() {
   gitlab_workhorse_image_repository="${IMAGE_REPOSITORY}/gitlab-workhorse-ee"
 
   ensure_namespace "${namespace}"
+  label_namespace "${namespace}" "tls=review-apps-tls" # label namespace for kubed to sync tls
 
   create_application_secret
 
@@ -320,9 +329,6 @@ HELM_CMD=$(cat << EOF
     --set releaseOverride="${release}" \
     --set global.hosts.hostSuffix="${HOST_SUFFIX}" \
     --set global.hosts.domain="${REVIEW_APPS_DOMAIN}" \
-    --set gitlab.webservice.ingress.tls.secretName="${release}-gitlab-tls" \
-    --set registry.ingress.tls.secretName="${release}-registry-tls" \
-    --set minio.ingress.tls.secretName="${release}-minio-tls" \
     --set gitlab.migrations.image.repository="${gitlab_migrations_image_repository}" \
     --set gitlab.migrations.image.tag="${CI_COMMIT_REF_SLUG}" \
     --set gitlab.gitaly.image.repository="${gitlab_gitaly_image_repository}" \
@@ -363,6 +369,18 @@ EOF
   echoinfo "${HELM_CMD}"
 
   eval "${HELM_CMD}"
+}
+
+function verify_deploy() {
+  echoinfo "Verifying deployment at ${CI_ENVIRONMENT_URL}"
+
+  if retry "test_url \"${CI_ENVIRONMENT_URL}\" curl_output.txt"; then
+    echoinfo "Review app is deployed to ${CI_ENVIRONMENT_URL}"
+    return 0
+  else
+    echoerr "Review app is not available at ${CI_ENVIRONMENT_URL}. See curl_output.txt artifact for detail."
+    return 1
+  fi
 }
 
 function display_deployment_debug() {

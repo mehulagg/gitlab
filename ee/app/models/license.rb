@@ -71,6 +71,7 @@ class License < ApplicationRecord
     custom_file_templates_for_namespace
     custom_project_templates
     cycle_analytics_for_groups
+    cycle_analytics_for_projects
     db_load_balancing
     default_branch_protection_restriction_in_groups
     default_project_deletion_protection
