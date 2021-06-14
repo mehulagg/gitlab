@@ -19,16 +19,25 @@ Implementation Patterns allow architects and implementers at GitLab, GitLab Cust
 
 GitLab implementation patterns relate to [GitLab Reference Architectures](../reference_architectures/index.md) in the following ways:
 
+#### Reference Architecture and Cloud Well Architected Compliance
 - Implementation patterns maintain Reference Architecture compliance and to provide [GitLab Performance Tool](https://gitlab.com/gitlab-org/quality/performance) (gpt) reports.
+- Implementation patterns may be qualified by and/or contributed to by the technology vendor - for instance, an implementation pattern for AWS may be officially reviewed by AWS.
+- Implementation patterns may specify and test Cloud Platform PaaS services for suitability for GitLab - this testing can be coordinated and help qualify these technologies for Reference Architectures.
+#### Cost Engineering
+- Implementation patterns may define GPT tested autoscaling for various aspects of GitLab infrastructure - including minimum idling configurations and scaling speeds.
+- Implementation patterns may provide gpt testing for advised configurations that go beyond the scope of reference architectures - for instance gpt tested elastic scaling configurations for Cloud Native Hybrid that enable lower resourcing during periods of lower usage (e.g. on the weekend)
+- Implementation patterns may engineer specifically for the savings models available on a platform provider - an AWS example would be maximizing the occurance of a specific instance type for taking advantage of reserved instances.
+- Implementation patterns may leverage emphemeral compute where appropriate and with appropriate customer guidelines.  For instance a Kubernetes node group dedicated to runners on emphemeral compute - with appropriate GitLab runner tagging to indicate the compute type.
+- Implementation patterns may include vendor specific cost calculators.
+#### Actionability and Automatability Orientation
+- Implementation patterns enable builders to generate a list of vendor specific resources required to implement GitLab for a given Reference Architecture.
+- Implementation patterns enable builders to use manual instructions or to create automation to build out the reference implementation.
+#### Platform Partner Specificity
 - Implementation patterns are more vendor specific. For instance, advising specific compute instances / vms / nodes instead of vcpus or other generalized measures.
 - Implementation patterns are oriented to implementing good architecture for the vendor in view.  For instance, where reference architectures do not have a specific recommendation on what technology is leveraged for GitLab outbound email services or what the sizing should be - a Reference Implementation may advise using a cloud providers Email as a Service (PaaS) and possibly even with specific settings.
 - Implementation patterns are written to an audience who is familiar with building on the infrastructure that the implementation pattern targets.  For example, if the implementation pattern is for GCP, the specific terminology of GCP is used - including using the specific names for PaaS services.
-- Implementation patterns may implement autoscaling of the GitLab instance with native services where supported by the reference architecture.
-- Implementation patterns may be qualified by and/or contributed to by the technology vendor - for instance, an implementation pattern for AWS may be officially reviewed by AWS.
-- Implementation patterns enable builders to generate a list of vendor specific resources required to implement GitLab for a given Reference Architecture.
-- Implementation patterns may include vendor specific cost calculators.
-- Implementation patterns enable builders to use manual instructions or to create automation to build out the reference implementation.
-- Implementation patterns may define GPT tested autoscaling for various aspects of GitLab infrastructure - including minimum idling configurations and scaling speeds.
+
+#### Additional Implementation Patterns
 - Implementation patterns may also provide specialized implementations beyond the scope of reference architecture compliance, for example:
   - GitLab Runner implementation patterns.
   - Small, self-contained GitLab Instances for per-person admin training.
