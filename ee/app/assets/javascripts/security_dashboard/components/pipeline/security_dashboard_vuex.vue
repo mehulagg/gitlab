@@ -38,6 +38,11 @@ export default {
       required: false,
       default: null,
     },
+    securityReportSummary: {
+      type: Object,
+      required: false,
+      default: () => ({}),
+    },
     loadingErrorIllustrations: {
       type: Object,
       required: false,
@@ -57,7 +62,7 @@ export default {
     ...mapState('filters', ['filters']),
     ...mapGetters('vulnerabilities', ['loadingVulnerabilitiesFailedWithRecognizedErrorCode']),
     shouldShowDownloadGuidance() {
-      return this.projectFullPath && this.pipelineIid;
+      return this.projectFullPath && this.pipelineIid && this.securityReportSummary.coverageFuzzing;
     },
     canCreateIssue() {
       const path = this.vulnerability.create_vulnerability_feedback_issue_path;
