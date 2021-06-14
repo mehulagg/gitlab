@@ -155,7 +155,7 @@ class Project < ApplicationRecord
   has_one :campfire_integration, class_name: 'Integrations::Campfire'
   has_one :confluence_integration, class_name: 'Integrations::Confluence'
   has_one :custom_issue_tracker_integration, class_name: 'Integrations::CustomIssueTracker'
-  has_one :datadog_service, class_name: 'Integrations::Datadog'
+  has_one :datadog_integration, class_name: 'Integrations::Datadog'
   has_one :discord_service, class_name: 'Integrations::Discord'
   has_one :drone_ci_service, class_name: 'Integrations::DroneCi'
   has_one :emails_on_push_service, class_name: 'Integrations::EmailsOnPush'

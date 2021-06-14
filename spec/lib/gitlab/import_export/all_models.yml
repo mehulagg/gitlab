@@ -363,7 +363,7 @@ project:
 - integrations
 - campfire_integration
 - confluence_integration
-- datadog_service
+- datadog_integration
 - discord_service
 - drone_ci_service
 - emails_on_push_service

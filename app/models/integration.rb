@@ -43,6 +43,7 @@ class Integration < ApplicationRecord
     asana assembla
     bamboo bugzilla buildkite
     campfire confluence custom_issue_tracker
+    datadog
   ].to_set.freeze
 
   serialize :properties, JSON # rubocop:disable Cop/ActiveRecordSerialize
