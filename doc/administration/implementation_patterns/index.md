@@ -36,6 +36,7 @@ GitLab implementation patterns relate to [GitLab Reference Architectures](../ref
 - Implementation patterns are more vendor specific. For instance, advising specific compute instances / vms / nodes instead of vcpus or other generalized measures.
 - Implementation patterns are oriented to implementing good architecture for the vendor in view.  For instance, where reference architectures do not have a specific recommendation on what technology is leveraged for GitLab outbound email services or what the sizing should be - a Reference Implementation may advise using a cloud providers Email as a Service (PaaS) and possibly even with specific settings.
 - Implementation patterns are written to an audience who is familiar with building on the infrastructure that the implementation pattern targets.  For example, if the implementation pattern is for GCP, the specific terminology of GCP is used - including using the specific names for PaaS services.
+- Implementation patterns can test and qualify if the versions of PaaS available are compatible with GitLab (e.g. PostgreSQL, Redis, etc)
 
 #### Additional Implementation Patterns
 - Implementation patterns may also provide specialized implementations beyond the scope of reference architecture compliance, for example:
