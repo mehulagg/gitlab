@@ -43,7 +43,7 @@ class Integration < ApplicationRecord
     asana assembla
     bamboo bugzilla buildkite
     campfire confluence custom_issue_tracker
-    emails_on_push
+    emails_on_push ewm emails_on_push
   ].to_set.freeze
 
   serialize :properties, JSON # rubocop:disable Cop/ActiveRecordSerialize
