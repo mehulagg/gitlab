@@ -3,7 +3,10 @@
 require 'spec_helper'
 
 RSpec.describe GitlabSchema.types['CurrentLicense'], :enable_admin_mode do
+  include GraphqlHelpers
+
   let_it_be(:admin) { create(:admin) }
+  let_it_be(:last_synced_at) { DateTime.current - 1.day }
   let_it_be(:licensee) do
     {
       'Name' => 'User Example',
@@ -12,7 +15,14 @@ RSpec.describe GitlabSchema.types['CurrentLicense'], :enable_admin_mode do
     }
   end
 
-  let_it_be(:license) { create_current_license(licensee: licensee, cloud_licensing_enabled: true) }
+  let_it_be(:license) do
+    create_current_license(
+      licensee: licensee,
+      cloud_licensing_enabled: true,
+      last_synced_at: last_synced_at,
+      next_sync_at: last_synced_at + 1.day
+    )
+  end
 
   let(:fields) do
     %w[last_sync billable_users_count maximum_user_count users_over_license_count]
@@ -59,6 +69,36 @@ RSpec.describe GitlabSchema.types['CurrentLicense'], :enable_admin_mode do
       result_as_json = query_field('usersOverLicenseCount')
 
       expect(result_as_json['data']['currentLicense']['usersOverLicenseCount']).to eq(5)
+    end
+  end
+
+  describe 'field values' do
+    subject { resolve_field(field_name, license) }
+
+    describe 'last_sync' do
+      let(:field_name) { :last_sync }
+
+      it { is_expected.to eq(last_synced_at.change(usec: 0)) }
+    end
+
+    describe 'billable_users_count' do
+      let(:field_name) { :billable_users_count }
+
+      before do
+        allow(license).to receive(:daily_billable_users_count).and_return(10)
+      end
+
+      it { is_expected.to eq(10) }
+    end
+
+    describe 'maximum_user_count' do
+      let(:field_name) { :maximum_user_count }
+
+      before do
+        allow(license).to receive(:maximum_user_count).and_return(20)
+      end
+
+      it { is_expected.to eq(20) }
     end
   end
 end

@@ -170,6 +170,9 @@ production: &base
     ## Application settings cache expiry in seconds (default: 60)
     # application_settings_cache_seconds: 60
 
+    ## Print initial root password to stdout during initialization (default: true)
+    # display_initial_root_password: true
+
   ## Reply by email
   # Allow users to comment on issues and merge requests by replying to notification emails.
   # For documentation on how to set this up, see http://doc.gitlab.com/ce/administration/reply_by_email.html
@@ -502,7 +505,7 @@ production: &base
   ee_cron_jobs:
     # Schedule snapshots for all devops adoption segments
     analytics_devops_adoption_create_all_snapshots_worker:
-      cron: 0 4 * * 0
+      cron: 0 0 1 * *
 
     # Snapshot active users statistics
     historical_data_worker:

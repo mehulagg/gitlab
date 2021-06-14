@@ -44,8 +44,8 @@ RSpec.describe Gitlab::Ci::Reports::Security::Locations::ContainerScanning do
     end
 
     specify do
-      params[:image] = 'registry.gitlab.com/gitlab-org/security-products/analyzers/klar/tmp:af864bd61230d3d694eb01d6205b268b4ad63ac0'
-      expect(subject.fingerprint).to eq(sha1_of.call('registry.gitlab.com/gitlab-org/security-products/analyzers/klar/tmp:glibc'))
+      params[:image] = 'registry.gitlab.com/gitlab-org/security-products/analyzers/container-scanning/tmp:af864bd61230d3d694eb01d6205b268b4ad63ac0'
+      expect(subject.fingerprint).to eq(sha1_of.call('registry.gitlab.com/gitlab-org/security-products/analyzers/container-scanning/tmp:glibc'))
     end
 
     specify do

@@ -5,6 +5,7 @@ import { PRESET_OPTIONS_BLANK } from 'ee/analytics/cycle_analytics/components/cr
 import CustomStageFields from 'ee/analytics/cycle_analytics/components/create_value_stream_form/custom_stage_fields.vue';
 import DefaultStageFields from 'ee/analytics/cycle_analytics/components/create_value_stream_form/default_stage_fields.vue';
 import ValueStreamForm from 'ee/analytics/cycle_analytics/components/value_stream_form.vue';
+import { mockTracking, unmockTracking } from 'helpers/tracking_helper';
 import { extendedWrapper } from 'helpers/vue_test_utils_helper';
 import {
   convertObjectPropsToCamelCase,
@@ -20,6 +21,7 @@ localVue.use(Vuex);
 
 describe('ValueStreamForm', () => {
   let wrapper = null;
+  let trackingSpy = null;
 
   const createValueStreamMock = jest.fn(() => Promise.resolve());
   const updateValueStreamMock = jest.fn(() => Promise.resolve());
@@ -239,6 +241,7 @@ describe('ValueStreamForm', () => {
 
       describe('with valid fields', () => {
         beforeEach(() => {
+          trackingSpy = mockTracking(undefined, wrapper.element, jest.spyOn);
           wrapper = createComponent({
             props: {
               initialPreset,
@@ -246,6 +249,11 @@ describe('ValueStreamForm', () => {
               isEditing: true,
             },
           });
+        });
+
+        afterEach(() => {
+          unmockTracking();
+          wrapper.destroy();
         });
 
         describe('form submitted successfully', () => {
@@ -265,6 +273,12 @@ describe('ValueStreamForm', () => {
           it('displays a toast message', () => {
             expect(mockToastShow).toHaveBeenCalledWith(`'${initialData.name}' Value Stream saved`, {
               position: 'top-center',
+            });
+          });
+
+          it('sends tracking information', () => {
+            expect(trackingSpy).toHaveBeenCalledWith(undefined, 'submit_form', {
+              label: 'edit_value_stream',
             });
           });
         });
@@ -315,6 +329,12 @@ describe('ValueStreamForm', () => {
   describe('with valid fields', () => {
     beforeEach(() => {
       wrapper = createComponent({ data: { name: streamName } });
+      trackingSpy = mockTracking(undefined, wrapper.element, jest.spyOn);
+    });
+
+    afterEach(() => {
+      unmockTracking();
+      wrapper.destroy();
     });
 
     describe('form submitted successfully', () => {
@@ -349,6 +369,12 @@ describe('ValueStreamForm', () => {
       it('displays a toast message', () => {
         expect(mockToastShow).toHaveBeenCalledWith(`'${streamName}' Value Stream created`, {
           position: 'top-center',
+        });
+      });
+
+      it('sends tracking information', () => {
+        expect(trackingSpy).toHaveBeenCalledWith(undefined, 'submit_form', {
+          label: 'create_value_stream',
         });
       });
     });

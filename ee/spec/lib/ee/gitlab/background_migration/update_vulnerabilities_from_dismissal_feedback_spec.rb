@@ -25,7 +25,7 @@ RSpec.describe Gitlab::BackgroundMigration::UpdateVulnerabilitiesFromDismissalFe
   end
 
   let(:scanner) do
-    scanners.create!(project_id: project.id, external_id: 'clair', name: 'Security Scanner')
+    scanners.create!(project_id: project.id, external_id: 'trivy', name: 'Security Scanner')
   end
 
   let(:identifier) do

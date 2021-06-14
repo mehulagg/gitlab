@@ -3,6 +3,7 @@ import { shallowMount } from '@vue/test-utils';
 import CiCdAnalyticsApp from 'ee/analytics/group_ci_cd_analytics/components/app.vue';
 import ReleaseStatsCard from 'ee/analytics/group_ci_cd_analytics/components/release_stats_card.vue';
 import DeploymentFrequencyCharts from 'ee/dora/components/deployment_frequency_charts.vue';
+import LeadTimeCharts from 'ee/dora/components/lead_time_charts.vue';
 import setWindowLocation from 'helpers/set_window_location_helper';
 import { TEST_HOST } from 'helpers/test_constants';
 import { getParameterValues } from '~/lib/utils/url_utility';
@@ -52,8 +53,18 @@ describe('ee/analytics/group_ci_cd_analytics/components/app.vue', () => {
       createComponent();
     });
 
-    it('renders the deployment frequency component inside the first tab', () => {
+    it('renders the deployment frequency component inside the second tab', () => {
       expect(findGlTabAtIndex(1).findComponent(DeploymentFrequencyCharts).exists()).toBe(true);
+    });
+  });
+
+  describe('lead time', () => {
+    beforeEach(() => {
+      createComponent();
+    });
+
+    it('renders the lead time component inside the third tab', () => {
+      expect(findGlTabAtIndex(2).findComponent(LeadTimeCharts).exists()).toBe(true);
     });
   });
 
@@ -62,6 +73,7 @@ describe('ee/analytics/group_ci_cd_analytics/components/app.vue', () => {
       tab                       | index
       ${'release-statistics'}   | ${'0'}
       ${'deployment-frequency'} | ${'1'}
+      ${'lead-time'}            | ${'2'}
       ${'fake'}                 | ${'0'}
       ${''}                     | ${'0'}
     `('shows the correct tab for URL parameter "$tab"', ({ tab, index }) => {

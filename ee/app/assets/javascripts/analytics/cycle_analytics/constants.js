@@ -1,3 +1,4 @@
+import { OVERVIEW_STAGE_ID } from '~/cycle_analytics/constants';
 import { __, s__ } from '~/locale';
 
 export const PROJECTS_PER_PAGE = 50;
@@ -52,7 +53,6 @@ export const OVERVIEW_METRICS = {
 
 export const FETCH_VALUE_STREAM_DATA = 'fetchValueStreamData';
 
-export const OVERVIEW_STAGE_ID = 'overview';
 export const OVERVIEW_STAGE_CONFIG = {
   id: OVERVIEW_STAGE_ID,
   slug: OVERVIEW_STAGE_ID,

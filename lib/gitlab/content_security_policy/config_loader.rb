@@ -9,7 +9,7 @@ module Gitlab
 
       def self.default_settings_hash
         settings_hash = {
-          'enabled' => true,
+          'enabled' => Rails.env.development? || Rails.env.test?,
           'report_only' => false,
           'directives' => {
             'default_src' => "'self'",
@@ -18,13 +18,13 @@ module Gitlab
             'font_src' => "'self'",
             'form_action' => "'self' https: http:",
             'frame_ancestors' => "'self'",
-            'frame_src' => "'self' https://www.recaptcha.net/ https://content.googleapis.com https://content-compute.googleapis.com https://content-cloudbilling.googleapis.com https://content-cloudresourcemanager.googleapis.com",
+            'frame_src' => "'self' https://www.google.com/recaptcha/ https://www.recaptcha.net/ https://content.googleapis.com https://content-compute.googleapis.com https://content-cloudbilling.googleapis.com https://content-cloudresourcemanager.googleapis.com",
             'img_src' => "'self' data: blob: http: https:",
             'manifest_src' => "'self'",
             'media_src' => "'self'",
-            'script_src' => "'strict-dynamic' 'self' 'unsafe-inline' 'unsafe-eval' https://www.recaptcha.net https://apis.google.com",
+            'script_src' => "'strict-dynamic' 'self' 'unsafe-inline' 'unsafe-eval' https://www.google.com/recaptcha/ https://www.recaptcha.net https://apis.google.com",
             'style_src' => "'self' 'unsafe-inline'",
-            'worker_src' => "'self'",
+            'worker_src' => "'self' blob: data:",
             'object_src' => "'none'",
             'report_uri' => nil
           }
@@ -79,6 +79,7 @@ module Gitlab
 
         append_to_directive(settings_hash, 'script_src', cdn_host)
         append_to_directive(settings_hash, 'style_src', cdn_host)
+        append_to_directive(settings_hash, 'font_src', cdn_host)
       end
 
       def self.append_to_directive(settings_hash, directive, text)

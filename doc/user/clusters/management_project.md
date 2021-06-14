@@ -6,10 +6,6 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 
 # Cluster management project **(FREE)**
 
-WARNING:
-This is an _alpha_ feature, and it is subject to change at any time without
-prior notice.
-
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/32810) in GitLab 12.5
 
 A project can be designated as the management project for a cluster.
@@ -20,7 +16,7 @@ privileges.
 
 This can be useful for:
 
-- Creating pipelines to install cluster-wide applications into your cluster, see [Install using GitLab CI/CD (beta)](applications.md#install-using-gitlab-cicd-deprecated) for details.
+- Creating pipelines to install cluster-wide applications into your cluster, see [management project template](management_project_template.md) for details.
 - Any jobs that require `cluster-admin` privileges.
 
 ## Permissions

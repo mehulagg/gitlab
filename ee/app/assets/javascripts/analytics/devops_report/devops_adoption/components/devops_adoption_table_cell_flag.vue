@@ -17,10 +17,10 @@ export default {
       required: true,
     },
   },
-  data() {
-    return {
-      tooltipText: this.enabled ? trueText : falseText,
-    };
+  computed: {
+    tooltipText() {
+      return this.enabled ? trueText : falseText;
+    },
   },
 };
 </script>

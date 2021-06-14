@@ -1,4 +1,4 @@
-import { GlButton, GlCard, GlCollapse } from '@gitlab/ui';
+import { GlButton, GlCard, GlIcon, GlCollapse } from '@gitlab/ui';
 import { shallowMount, createLocalVue } from '@vue/test-utils';
 import { nextTick } from 'vue';
 import VueApollo from 'vue-apollo';
@@ -104,6 +104,7 @@ describe('On-call schedule', () => {
   const findLoadPreviousTimeframeBtn = () => wrapper.findByTestId('previous-timeframe-btn');
   const findLoadNextTimeframeBtn = () => wrapper.findByTestId('next-timeframe-btn');
   const findCollapsible = () => wrapper.findComponent(GlCollapse);
+  const findCollapsibleIcon = () => wrapper.findComponent(GlIcon);
 
   it('shows schedule title', () => {
     expect(findScheduleHeader().text()).toBe(mockSchedule.name);
@@ -160,11 +161,13 @@ describe('On-call schedule', () => {
 
   it('renders a open card for the first in the list by default', () => {
     expect(findCollapsible().attributes('visible')).toBe('true');
+    expect(findCollapsibleIcon().props('name')).toBe('angle-down');
   });
 
   it('renders a collapsed card if not the first in the list by default', () => {
     createComponent({ scheduleIndex: 1 });
     expect(findCollapsible().attributes('visible')).toBeUndefined();
+    expect(findCollapsibleIcon().props('name')).toBe('angle-right');
   });
 
   describe('Timeframe shift preset type', () => {

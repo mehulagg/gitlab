@@ -1019,6 +1019,26 @@ RSpec.describe Issue do
     end
   end
 
+  describe '#supports_time_tracking?' do
+    let_it_be(:project) { create(:project) }
+    let_it_be_with_refind(:issue) { create(:incident, project: project) }
+
+    where(:issue_type, :supports_time_tracking) do
+      :requirement | false
+      :test_case | false
+    end
+
+    with_them do
+      before do
+        issue.update!(issue_type: issue_type)
+      end
+
+      it do
+        expect(issue.supports_time_tracking?).to eq(supports_time_tracking)
+      end
+    end
+  end
+
   describe '.with_issue_type' do
     let_it_be(:project) { create(:project) }
     let_it_be(:issue) { create(:issue, project: project) }

@@ -1,5 +1,13 @@
 <script>
-import { GlFormGroup, GlFormInput, GlFormCheckboxTree, GlModal, GlAlert, GlIcon } from '@gitlab/ui';
+import {
+  GlFormGroup,
+  GlFormInput,
+  GlFormCheckboxTree,
+  GlModal,
+  GlAlert,
+  GlIcon,
+  GlLoadingIcon,
+} from '@gitlab/ui';
 import * as Sentry from '@sentry/browser';
 import _ from 'lodash';
 import { convertToGraphQLId, getIdFromGraphQLId, TYPE_GROUP } from '~/graphql_shared/utils';
@@ -8,8 +16,8 @@ import {
   DEVOPS_ADOPTION_SEGMENT_MODAL_ID,
   DEVOPS_ADOPTION_GROUP_LEVEL_LABEL,
 } from '../constants';
-import bulkFindOrCreateDevopsAdoptionSegmentsMutation from '../graphql/mutations/bulk_find_or_create_devops_adoption_segments.mutation.graphql';
-import deleteDevopsAdoptionSegmentMutation from '../graphql/mutations/delete_devops_adoption_segment.mutation.graphql';
+import bulkEnableDevopsAdoptionNamespacesMutation from '../graphql/mutations/bulk_enable_devops_adoption_namespaces.mutation.graphql';
+import disableDevopsAdoptionNamespaceMutation from '../graphql/mutations/disable_devops_adoption_namespace.mutation.graphql';
 
 export default {
   name: 'DevopsAdoptionSegmentModal',
@@ -20,6 +28,7 @@ export default {
     GlFormCheckboxTree,
     GlAlert,
     GlIcon,
+    GlLoadingIcon,
   },
   inject: {
     isGroup: {
@@ -38,6 +47,11 @@ export default {
       type: Array,
       required: false,
       default: () => [],
+    },
+    isLoading: {
+      type: Boolean,
+      required: false,
+      default: false,
     },
   },
   i18n: DEVOPS_ADOPTION_STRINGS.modal,
@@ -139,20 +153,20 @@ export default {
           this.loadingAdd = true;
           const {
             data: {
-              bulkFindOrCreateDevopsAdoptionSegments: { errors },
+              bulkEnableDevopsAdoptionNamespaces: { errors },
             },
           } = await this.$apollo.mutate({
-            mutation: bulkFindOrCreateDevopsAdoptionSegmentsMutation,
+            mutation: bulkEnableDevopsAdoptionNamespacesMutation,
             variables: {
               namespaceIds,
               displayNamespaceId: this.groupGid,
             },
             update: (store, { data }) => {
               const {
-                bulkFindOrCreateDevopsAdoptionSegments: { segments, errors: requestErrors },
+                bulkEnableDevopsAdoptionNamespaces: { enabledNamespaces, errors: requestErrors },
               } = data;
 
-              if (!requestErrors.length) this.$emit('segmentsAdded', segments);
+              if (!requestErrors.length) this.$emit('segmentsAdded', enabledNamespaces);
             },
           });
 
@@ -182,16 +196,16 @@ export default {
 
           const {
             data: {
-              deleteDevopsAdoptionSegment: { errors },
+              disableDevopsAdoptionNamespace: { errors },
             },
           } = await this.$apollo.mutate({
-            mutation: deleteDevopsAdoptionSegmentMutation,
+            mutation: disableDevopsAdoptionNamespaceMutation,
             variables: {
               id: removedGroupGids,
             },
             update: (store, { data }) => {
               const {
-                deleteDevopsAdoptionSegment: { errors: requestErrors },
+                disableDevopsAdoptionNamespace: { errors: requestErrors },
               } = data;
 
               if (!requestErrors.length) this.$emit('segmentsRemoved', removedGroupGids);
@@ -239,37 +253,40 @@ export default {
     @hidden="resetForm"
     @show="$emit('trackModalOpenState', true)"
   >
-    <gl-alert v-if="errors.length" variant="danger" class="gl-mb-3" @dismiss="clearErrors">
-      {{ displayError }}
-    </gl-alert>
-    <gl-form-group class="gl-mb-3" data-testid="filter">
-      <gl-icon
-        name="search"
-        :size="18"
-        use-deprecated-sizes
-        class="gl-text-gray-300 gl-absolute gl-mt-3 gl-ml-3"
-      />
-      <gl-form-input
-        v-model="filter"
-        class="gl-pl-7!"
-        type="text"
-        :placeholder="$options.i18n.filterPlaceholder"
-        :disabled="loading"
-      />
-    </gl-form-group>
-    <gl-form-group class="gl-mb-0">
-      <gl-form-checkbox-tree
-        v-if="filteredOptions.length"
-        v-model="checkboxValues"
-        data-testid="groups"
-        :options="filteredOptions"
-        :hide-toggle-all="true"
-        :disabled="loading"
-        class="gl-p-3 gl-pb-0 gl-mb-2 gl-border-1 gl-border-solid gl-border-gray-100 gl-rounded-base"
-      />
-      <gl-alert v-else variant="info" :dismissible="false" data-testid="filter-warning">
-        {{ $options.i18n.noResults }}
+    <gl-loading-icon v-if="isLoading" size="md" class="gl-mt-4" />
+    <div v-else>
+      <gl-alert v-if="errors.length" variant="danger" class="gl-mb-3" @dismiss="clearErrors">
+        {{ displayError }}
       </gl-alert>
-    </gl-form-group>
+      <gl-form-group class="gl-mb-3" data-testid="filter">
+        <gl-icon
+          name="search"
+          :size="18"
+          use-deprecated-sizes
+          class="gl-text-gray-300 gl-absolute gl-mt-3 gl-ml-3"
+        />
+        <gl-form-input
+          v-model="filter"
+          class="gl-pl-7!"
+          type="text"
+          :placeholder="$options.i18n.filterPlaceholder"
+          :disabled="loading"
+        />
+      </gl-form-group>
+      <gl-form-group class="gl-mb-0">
+        <gl-form-checkbox-tree
+          v-if="filteredOptions.length"
+          v-model="checkboxValues"
+          data-testid="groups"
+          :options="filteredOptions"
+          :hide-toggle-all="true"
+          :disabled="loading"
+          class="gl-p-3 gl-pb-0 gl-mb-2 gl-border-1 gl-border-solid gl-border-gray-100 gl-rounded-base"
+        />
+        <gl-alert v-else variant="info" :dismissible="false" data-testid="filter-warning">
+          {{ $options.i18n.noResults }}
+        </gl-alert>
+      </gl-form-group>
+    </div>
   </gl-modal>
 </template>

@@ -722,7 +722,6 @@ RSpec/EmptyLineAfterFinalLetItBe:
     - spec/services/wiki_pages/event_create_service_spec.rb
     - spec/support/shared_examples/graphql/design_fields_shared_examples.rb
     - spec/support/shared_examples/graphql/mutations/set_assignees_shared_examples.rb
-    - spec/support/shared_examples/models/slack_mattermost_notifications_shared_examples.rb
     - spec/support/shared_examples/quick_actions/issuable/issuable_quick_actions_shared_examples.rb
     - spec/support/shared_examples/services/container_registry_auth_service_shared_examples.rb
     - spec/support/shared_examples/services/packages_shared_examples.rb
@@ -1150,6 +1149,7 @@ RSpec/AnyInstanceOf:
     - 'spec/models/hooks/system_hook_spec.rb'
     - 'spec/models/hooks/web_hook_spec.rb'
     - 'spec/models/integrations/jira_spec.rb'
+    - 'spec/models/integrations/mattermost_slash_commands_spec.rb'
     - 'spec/models/issue_spec.rb'
     - 'spec/models/key_spec.rb'
     - 'spec/models/member_spec.rb'
@@ -1157,7 +1157,6 @@ RSpec/AnyInstanceOf:
     - 'spec/models/merge_request_spec.rb'
     - 'spec/models/note_spec.rb'
     - 'spec/models/project_import_state_spec.rb'
-    - 'spec/models/project_services/mattermost_slash_commands_service_spec.rb'
     - 'spec/models/project_spec.rb'
     - 'spec/models/repository_spec.rb'
     - 'spec/models/user_spec.rb'
@@ -1290,8 +1289,8 @@ RSpec/AnyInstanceOf:
     - 'spec/support/shared_examples/features/snippets_shared_examples.rb'
     - 'spec/support/shared_examples/lib/gitlab/ci/ci_trace_shared_examples.rb'
     - 'spec/support/shared_examples/models/atomic_internal_id_shared_examples.rb'
-    - 'spec/support/shared_examples/models/chat_slash_commands_shared_examples.rb'
     - 'spec/support/shared_examples/models/diff_note_after_commit_shared_examples.rb'
+    - 'spec/support/shared_examples/models/integrations/base_slash_commands_shared_examples.rb'
     - 'spec/support/shared_examples/models/mentionable_shared_examples.rb'
     - 'spec/support/shared_examples/models/with_uploads_shared_examples.rb'
     - 'spec/support/shared_examples/path_extraction_shared_examples.rb'
@@ -1645,16 +1644,9 @@ Gitlab/NamespacedClass:
     - 'app/models/project_pages_metadatum.rb'
     - 'app/models/project_repository.rb'
     - 'app/models/project_repository_storage_move.rb'
-    - 'app/models/project_services/alerts_service.rb'
-    - 'app/models/project_services/alerts_service_data.rb'
-    - 'app/models/project_services/chat_notification_service.rb'
-    - 'app/models/project_services/mattermost_slash_commands_service.rb'
     - 'app/models/project_services/mock_monitoring_service.rb'
     - 'app/models/project_services/monitoring_service.rb'
     - 'app/models/project_services/prometheus_service.rb'
-    - 'app/models/project_services/pushover_service.rb'
-    - 'app/models/project_services/slack_slash_commands_service.rb'
-    - 'app/models/project_services/slash_commands_service.rb'
     - 'app/models/project_setting.rb'
     - 'app/models/project_snippet.rb'
     - 'app/models/project_statistics.rb'
@@ -2359,11 +2351,6 @@ Gitlab/NamespacedClass:
     - 'ee/app/models/project_alias.rb'
     - 'ee/app/models/project_repository_state.rb'
     - 'ee/app/models/project_security_setting.rb'
-    - 'ee/app/models/project_services/github_service.rb'
-    - 'ee/app/models/project_services/github_service/remote_project.rb'
-    - 'ee/app/models/project_services/github_service/status_message.rb'
-    - 'ee/app/models/project_services/github_service/status_notifier.rb'
-    - 'ee/app/models/project_services/gitlab_slack_application_service.rb'
     - 'ee/app/models/protected_environment.rb'
     - 'ee/app/models/push_rule.rb'
     - 'ee/app/models/resource_iteration_event.rb'
@@ -2917,5 +2904,4 @@ Style/RegexpLiteralMixedPreserve:
     - 'spec/support/helpers/grafana_api_helpers.rb'
     - 'spec/support/helpers/query_recorder.rb'
     - 'spec/support/helpers/require_migration.rb'
-    - 'spec/support/shared_examples/models/slack_mattermost_notifications_shared_examples.rb'
     - 'spec/views/layouts/_head.html.haml_spec.rb'

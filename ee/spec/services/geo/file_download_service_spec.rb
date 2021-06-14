@@ -22,12 +22,6 @@ RSpec.describe Geo::FileDownloadService do
       end
     end
 
-    it "returns a LfsDownloader given object_type is lfs" do
-      subject = described_class.new('lfs', 1)
-
-      expect(subject.downloader).to be_a(Gitlab::Geo::Replication::LfsDownloader)
-    end
-
     it "returns a JobArtifactDownloader given object_type is job_artifact" do
       subject = described_class.new('job_artifact', 1)
 
@@ -103,8 +97,6 @@ RSpec.describe Geo::FileDownloadService do
       case file_type
       when 'job_artifact'
         Geo::JobArtifactRegistry
-      when 'lfs'
-        Geo::LfsObjectRegistry
       else
         Geo::UploadRegistry
       end
@@ -240,8 +232,6 @@ RSpec.describe Geo::FileDownloadService do
         case file_type
         when 'job_artifact'
           create(:geo_job_artifact_registry, success: false, artifact_id: file.id, retry_count: 3, retry_at: 1.hour.ago)
-        when 'lfs'
-          create(:geo_lfs_object_registry, success: false, lfs_object_id: file.id, retry_count: 3, retry_at: 1.hour.ago)
         else
           create(:geo_upload_registry, file_type.to_sym, success: false, file_id: file.id, retry_count: 3, retry_at: 1.hour.ago)
         end
@@ -438,16 +428,6 @@ RSpec.describe Geo::FileDownloadService do
 
       it_behaves_like 'a service that downloads the file and registers the sync result', 'issuable_metric_image'
       it_behaves_like 'a service that handles orphaned uploads', 'issuable_metric_image'
-    end
-
-    context 'LFS object' do
-      before do
-        stub_feature_flags(geo_lfs_object_replication: false)
-      end
-
-      it_behaves_like "a service that downloads the file and registers the sync result", 'lfs' do
-        let(:file) { create(:lfs_object) }
-      end
     end
 
     context 'job artifacts' do

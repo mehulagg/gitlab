@@ -35,9 +35,7 @@ RSpec.shared_examples 'protected environments access' do |developer_access: true
   context 'when Protected Environments feature is available in the project' do
     let(:feature_available) { true }
 
-    context 'when environment is protected' do
-      let(:protected_environment) { create(:protected_environment, name: environment.name, project: project) }
-
+    shared_examples_for 'authorize correctly per access type' do
       context 'when user does not have access to the environment' do
         where(:access_level, :result) do
           :guest      | false
@@ -77,17 +75,29 @@ RSpec.shared_examples 'protected environments access' do |developer_access: true
       end
 
       context 'when the user has access via a group' do
-        let(:group) { create(:group) }
+        let(:operator_group) { create(:group) }
 
         before do
           project.add_reporter(user)
-          group.add_reporter(user)
+          operator_group.add_reporter(user)
 
-          protected_environment.deploy_access_levels.create!(group: group, access_level: Gitlab::Access::REPORTER)
+          protected_environment.deploy_access_levels.create!(group: operator_group, access_level: Gitlab::Access::REPORTER)
         end
 
         it { is_expected.to eq(direct_access) }
       end
+    end
+
+    context 'when environment is protected with project-level protection' do
+      let(:protected_environment) { create(:protected_environment, :project_level, name: environment.name, project: project) }
+
+      it_behaves_like 'authorize correctly per access type'
+    end
+
+    context 'when environment is protected with group-level protection' do
+      let(:protected_environment) { create(:protected_environment, :group_level, name: environment.tier, group: group) }
+
+      it_behaves_like 'authorize correctly per access type'
     end
 
     context 'when environment is not protected' do

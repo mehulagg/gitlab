@@ -10,14 +10,11 @@ Users have different abilities depending on the role they have in a
 particular group or project. If a user is both in a project's group and the
 project itself, the highest role is used.
 
-On public and internal projects, the Guest role is not enforced. All users can:
+On [public and internal projects](../api/projects.md#project-visibility-level), the Guest role
+(not to be confused with [Guest user](#free-guest-users)) is not enforced.
 
-- Create issues.
-- Leave comments.
-- Clone or download the project code.
-
-When a member leaves a team's project, all the assigned [Issues](project/issues/index.md) and [Merge Requests](project/merge_requests/index.md)
-are unassigned automatically.
+When a member leaves a team's project, all the assigned [issues](project/issues/index.md) and
+[merge requests](project/merge_requests/index.md) are automatically unassigned.
 
 GitLab [administrators](../administration/index.md) receive all permissions.
 
@@ -71,7 +68,7 @@ The following table lists project permissions available for each role:
 | View requirements **(ULTIMATE)**                  | ✓       | ✓          | ✓           | ✓        | ✓      |
 | View Insights **(ULTIMATE)**                      | ✓       | ✓          | ✓           | ✓        | ✓      |
 | View Issue analytics **(PREMIUM)**                | ✓       | ✓          | ✓           | ✓        | ✓      |
-| View Merge Request analytics **(STARTER)**        | ✓       | ✓          | ✓           | ✓        | ✓      |
+| View Merge Request analytics **(PREMIUM)**        | ✓       | ✓          | ✓           | ✓        | ✓      |
 | View Value Stream analytics                       | ✓       | ✓          | ✓           | ✓        | ✓      |
 | Manage user-starred metrics dashboards (*7*)      | ✓       | ✓          | ✓           | ✓        | ✓      |
 | View confidential issues                          | (*2*)   | ✓          | ✓           | ✓        | ✓      |
@@ -80,6 +77,7 @@ The following table lists project permissions available for each role:
 | Label issues                                      |         | ✓          | ✓           | ✓        | ✓      |
 | Set issue weight                                  |         | ✓          | ✓           | ✓        | ✓      |
 | [Set issue estimate and record time spent](project/time_tracking.md) | | ✓ | ✓         | ✓        | ✓      |
+| View a time tracking report                       | ✓ (*1*) | ✓          | ✓           | ✓        | ✓      |
 | Lock issue threads                                |         | ✓          | ✓           | ✓        | ✓      |
 | Manage issue tracker                              |         | ✓          | ✓           | ✓        | ✓      |
 | Manage linked issues                              |         | ✓          | ✓           | ✓        | ✓      |
@@ -91,7 +89,7 @@ The following table lists project permissions available for each role:
 | See [DORA metrics](analytics/ci_cd_analytics.md)  |         | ✓          | ✓           | ✓        | ✓      |
 | See a list of merge requests                      |         | ✓          | ✓           | ✓        | ✓      |
 | View CI/CD analytics                              |         | ✓          | ✓           | ✓        | ✓      |
-| View Code Review analytics **(STARTER)**          |         | ✓          | ✓           | ✓        | ✓      |
+| View Code Review analytics **(PREMIUM)**          |         | ✓          | ✓           | ✓        | ✓      |
 | View Repository analytics                         |         | ✓          | ✓           | ✓        | ✓      |
 | View Error Tracking list                          |         | ✓          | ✓           | ✓        | ✓      |
 | View metrics dashboard annotations                |         | ✓          | ✓           | ✓        | ✓      |
@@ -103,6 +101,7 @@ The following table lists project permissions available for each role:
 | Move [test case](../ci/test_cases/index.md)       |         | ✓          | ✓           | ✓        | ✓      |
 | Reopen [test case](../ci/test_cases/index.md)     |         | ✓          | ✓           | ✓        | ✓      |
 | Pull [packages](packages/index.md)                |         | ✓          | ✓           | ✓        | ✓      |
+| View project statistics                           |         | ✓          | ✓           | ✓        | ✓      |
 | Publish [packages](packages/index.md)             |         |            | ✓           | ✓        | ✓      |
 | Create/edit/delete a Cleanup policy               |         |            | ✓           | ✓        | ✓      |
 | Upload [Design Management](project/issues/design_management.md) files |  |  | ✓        | ✓        | ✓      |
@@ -119,7 +118,6 @@ The following table lists project permissions available for each role:
 | Lock merge request threads                        |         |            | ✓           | ✓        | ✓      |
 | Approve merge requests (*9*)                      |         |            | ✓           | ✓        | ✓      |
 | Manage/Accept merge requests                      |         |            | ✓           | ✓        | ✓      |
-| View project statistics                           |         |            | ✓           | ✓        | ✓      |
 | Create new environments                           |         |            | ✓           | ✓        | ✓      |
 | Stop environments                                 |         |            | ✓           | ✓        | ✓      |
 | Enable Review Apps                                |         |            | ✓           | ✓        | ✓      |
@@ -456,33 +454,32 @@ NOTE:
 In GitLab 11.0, the Master role was renamed to Maintainer.
 
 GitLab CI/CD permissions rely on the role the user has in GitLab. There are four
-permission levels in total:
+roles:
 
-- admin
-- maintainer
-- developer
-- guest/reporter
+- Administrator
+- Maintainer
+- Developer
+- Guest/Reporter
 
-The admin user can perform any action on GitLab CI/CD in scope of the GitLab
-instance and project. In addition, all admins can use the admin interface under
-`/admin/runners`.
+The Administrator role can perform any action on GitLab CI/CD in scope of the GitLab
+instance and project.
 
-| Action                                | Guest, Reporter | Developer   |Maintainer| Admin  |
-|---------------------------------------|-----------------|-------------|----------|--------|
-| See commits and jobs                  | ✓               | ✓           | ✓        | ✓      |
-| Retry or cancel job                   |                 | ✓           | ✓        | ✓      |
-| Erase job artifacts and job logs      |                 | ✓ (*1*)     | ✓        | ✓      |
-| Delete project                        |                 |             | ✓        | ✓      |
-| Create project                        |                 |             | ✓        | ✓      |
-| Change project configuration          |                 |             | ✓        | ✓      |
-| Add specific runners                  |                 |             | ✓        | ✓      |
-| Add shared runners                    |                 |             |          | ✓      |
-| See events in the system              |                 |             |          | ✓      |
-| Admin interface                       |                 |             |          | ✓      |
+| Action                                | Guest, Reporter | Developer   |Maintainer| Administrator |
+|---------------------------------------|-----------------|-------------|----------|---------------|
+| See commits and jobs                  | ✓               | ✓           | ✓        | ✓             |
+| Retry or cancel job                   |                 | ✓           | ✓        | ✓             |
+| Erase job artifacts and job logs      |                 | ✓ (*1*)     | ✓        | ✓             |
+| Delete project                        |                 |             | ✓        | ✓             |
+| Create project                        |                 |             | ✓        | ✓             |
+| Change project configuration           |                 |             | ✓        | ✓             |
+| Add specific runners                   |                 |             | ✓        | ✓             |
+| Add shared runners                    |                 |             |          | ✓             |
+| See events in the system              |                 |             |          | ✓             |
+| Admin Area                            |                 |             |          | ✓             |
 
 1. Only if the job was:
    - Triggered by the user
-   - [In GitLab 13.0](https://gitlab.com/gitlab-org/gitlab/-/issues/35069) and later, not run for a protected branch
+   - [In GitLab 13.0](https://gitlab.com/gitlab-org/gitlab/-/issues/35069) and later, run for a non-protected branch.
 
 ### Job permissions
 

@@ -127,6 +127,7 @@ RSpec.describe ProjectsHelper do
       group.add_owner(user)
       stub_licensed_features(jira_vulnerabilities_integration: true)
       allow(helper).to receive(:current_user).and_return(user)
+      allow(helper).to receive(:can?).and_return(true)
     end
 
     context 'project without vulnerabilities' do
@@ -163,7 +164,8 @@ RSpec.describe ProjectsHelper do
           no_pipeline_run_scanners_help_path: "/#{project.full_path}/-/pipelines/new",
           auto_fix_documentation: help_page_path('user/application_security/index', anchor: 'auto-fix-merge-requests'),
           auto_fix_mrs_path: end_with('/merge_requests?label_name=GitLab-auto-fix'),
-          scanners: '[{"id":123,"vendor":"Security Vendor","report_type":"SAST"}]'
+          scanners: '[{"id":123,"vendor":"Security Vendor","report_type":"SAST"}]',
+          can_admin_vulnerability: 'true'
         }
       end
 

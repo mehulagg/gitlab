@@ -1,6 +1,7 @@
 <script>
 import { GlDrawer } from '@gitlab/ui';
 import { mapState, mapActions, mapGetters } from 'vuex';
+import SidebarAncestorsWidget from 'ee_component/sidebar/components/ancestors_tree/sidebar_ancestors_widget.vue';
 import BoardSidebarLabelsSelect from '~/boards/components/sidebar/board_sidebar_labels_select.vue';
 import BoardSidebarTitle from '~/boards/components/sidebar/board_sidebar_title.vue';
 import { ISSUABLE } from '~/boards/constants';
@@ -20,6 +21,7 @@ export default {
     SidebarDateWidget,
     SidebarParticipantsWidget,
     SidebarSubscriptionsWidget,
+    SidebarAncestorsWidget,
   },
   computed: {
     ...mapGetters(['isSidebarOpen', 'activeBoardItem']),
@@ -65,16 +67,21 @@ export default {
         :can-inherit="true"
       />
       <board-sidebar-labels-select class="labels" />
-      <sidebar-participants-widget
-        :iid="activeBoardItem.iid"
-        :full-path="fullPath"
-        issuable-type="epic"
-      />
       <sidebar-confidentiality-widget
         :iid="activeBoardItem.iid"
         :full-path="fullPath"
         :issuable-type="issuableType"
         @confidentialityUpdated="setActiveItemConfidential($event)"
+      />
+      <sidebar-ancestors-widget
+        :iid="activeBoardItem.iid"
+        :full-path="fullPath"
+        issuable-type="epic"
+      />
+      <sidebar-participants-widget
+        :iid="activeBoardItem.iid"
+        :full-path="fullPath"
+        issuable-type="epic"
       />
       <sidebar-subscriptions-widget
         :iid="activeBoardItem.iid"

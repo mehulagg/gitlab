@@ -106,7 +106,7 @@ export function formatDateAsMonth(datetime, options = {}) {
 
 /**
  * @example
- * dateFormat('2017-12-05','mmm d, yyyy h:MMtt Z' ) -> "Dec 5, 2017 12:00am GMT+0000"
+ * dateFormat('2017-12-05','mmm d, yyyy h:MMtt Z' ) -> "Dec 5, 2017 12:00am UTC"
  * @param {date} datetime
  * @param {String} format
  * @param {Boolean} UTC convert local time to UTC
@@ -881,21 +881,6 @@ export const approximateDuration = (seconds = 0) => {
     return n__('about 1 hour', 'about %d hours', seconds < ONE_HOUR_LIMIT ? 1 : hours);
   }
   return n__('1 day', '%d days', seconds < ONE_DAY_LIMIT ? 1 : days);
-};
-
-/**
- * A utility function which helps creating a date object
- * for a specific date. Accepts the year, month and day
- * returning a date object for the given params.
- *
- * @param {Int} year the full year as a number i.e. 2020
- * @param {Int} month the month index i.e. January => 0
- * @param {Int} day the day as a number i.e. 23
- *
- * @return {Date} the date object from the params
- */
-export const dateFromParams = (year, month, day) => {
-  return new Date(year, month, day);
 };
 
 /**

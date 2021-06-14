@@ -288,7 +288,7 @@ RSpec.describe 'layouts/nav/sidebar/_project' do
       let(:external_issue_tracker_url) { 'http://test.com' }
 
       let!(:external_issue_tracker) do
-        create(:custom_issue_tracker_service, active: external_issue_tracker_active, project: project, project_url: external_issue_tracker_url)
+        create(:custom_issue_tracker_integration, active: external_issue_tracker_active, project: project, project_url: external_issue_tracker_url)
       end
 
       context 'when external issue tracker is configured and active' do
@@ -1005,7 +1005,7 @@ RSpec.describe 'layouts/nav/sidebar/_project' do
   end
 
   describe 'Confluence' do
-    let!(:service) { create(:confluence_service, project: project, active: active) }
+    let!(:service) { create(:confluence_integration, project: project, active: active) }
 
     before do
       render
@@ -1338,4 +1338,22 @@ RSpec.describe 'layouts/nav/sidebar/_project' do
   end
 
   it_behaves_like 'sidebar includes snowplow attributes', 'render', 'projects_side_navigation', 'projects_side_navigation'
+
+  describe 'Collapsed menu items' do
+    it 'does not render the collapsed top menu as a link' do
+      render
+
+      expect(rendered).not_to have_selector('.sidebar-sub-level-items > li.fly-out-top-item > a')
+    end
+
+    context 'when feature flag :sidebar_refactor is disabled' do
+      it 'renders the collapsed top menu as a link' do
+        stub_feature_flags(sidebar_refactor: false)
+
+        render
+
+        expect(rendered).to have_selector('.sidebar-sub-level-items > li.fly-out-top-item > a')
+      end
+    end
+  end
 end

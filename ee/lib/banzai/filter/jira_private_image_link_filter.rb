@@ -7,8 +7,11 @@ module Banzai
       PRIVATE_IMAGE_PATH = '/secure/attachment/'
       CSS_WITH_ATTACHMENT_ICON = 'with-attachment-icon'
 
+      CSS   = 'img'
+      XPATH = Gitlab::Utils::Nokogiri.css_to_xpath(CSS).freeze
+
       def call
-        doc.xpath('descendant-or-self::img').each do |img|
+        doc.xpath(XPATH).each do |img|
           next unless img['src'].start_with?(PRIVATE_IMAGE_PATH)
 
           img_link = "#{project.jira_service.url}#{img['src']}"

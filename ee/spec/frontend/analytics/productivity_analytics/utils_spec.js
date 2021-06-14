@@ -93,6 +93,26 @@ describe('Productivity Analytics utils', () => {
       ];
       expect(result).toEqual(expected);
     });
+
+    describe('when a data item is out of the start/end date range', () => {
+      it('ensures that the sanity check is performed', () => {
+        const startDate = new Date('2021-04-30');
+        const endDate = new Date('2021-05-02');
+
+        const data = {
+          1: { merged_at: '2021-04-29T16:28:57.078Z', metric: 10 }, // this item is before the startDate
+          2: { merged_at: '2021-04-30T09:44:22.012Z', metric: 20 },
+          3: { merged_at: '2021-05-02T23:09:31.715Z', metric: 40 },
+        };
+        const result = transformScatterData(data, startDate, endDate);
+        const expected = [
+          [{ merged_at: '2021-04-30T09:44:22.012Z', metric: 20 }],
+          [],
+          [{ merged_at: '2021-05-02T23:09:31.715Z', metric: 40 }],
+        ];
+        expect(result).toEqual(expected);
+      });
+    });
   });
 
   describe('getScatterPlotData', () => {

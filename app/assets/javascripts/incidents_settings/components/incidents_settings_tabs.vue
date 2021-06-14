@@ -1,7 +1,6 @@
 <script>
 import { GlButton, GlTabs, GlTab } from '@gitlab/ui';
 import { INTEGRATION_TABS_CONFIG, I18N_INTEGRATION_TABS } from '../constants';
-import AlertsSettingsForm from './alerts_form.vue';
 import PagerDutySettingsForm from './pagerduty_form.vue';
 
 export default {
@@ -9,10 +8,14 @@ export default {
     GlButton,
     GlTabs,
     GlTab,
-    AlertsSettingsForm,
     PagerDutySettingsForm,
     ServiceLevelAgreementForm: () =>
       import('ee_component/incidents_settings/components/service_level_agreement_form.vue'),
+  },
+  computed: {
+    activeTabs() {
+      return this.$options.tabs.filter((tab) => tab.active);
+    },
   },
   tabs: INTEGRATION_TABS_CONFIG,
   i18n: I18N_INTEGRATION_TABS,
@@ -23,7 +26,7 @@ export default {
   <section
     id="incident-management-settings"
     data-qa-selector="incidents_settings_content"
-    class="settings no-animate qa-incident-management-settings"
+    class="settings no-animate"
   >
     <div class="settings-header">
       <h4
@@ -44,8 +47,7 @@ export default {
       <gl-tabs>
         <service-level-agreement-form />
         <gl-tab
-          v-for="(tab, index) in $options.tabs"
-          v-if="tab.active"
+          v-for="(tab, index) in activeTabs"
           :key="`${tab.title}_${index}`"
           :title="tab.title"
         >

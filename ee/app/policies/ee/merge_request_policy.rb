@@ -16,7 +16,6 @@ module EE
         project = @subject.target_project
         protected_branch = project
           .protected_branches
-          .requiring_code_owner_approval
           .find { |pb| pb.matches?(@subject.target_branch) }
 
         protected_branch.present? && group_access?(protected_branch)

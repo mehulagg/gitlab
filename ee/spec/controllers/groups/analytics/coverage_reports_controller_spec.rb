@@ -66,7 +66,9 @@ RSpec.describe Groups::Analytics::CoverageReportsController do
           category: described_class.name,
           action: 'download_code_coverage_csv',
           label: 'group_id',
-          value: group.id
+          value: group.id,
+          user: user,
+          namespace: group
         )
 
         expect(response).to have_gitlab_http_status(:ok)

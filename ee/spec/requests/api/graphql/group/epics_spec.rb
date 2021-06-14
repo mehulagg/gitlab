@@ -7,13 +7,20 @@ require 'spec_helper'
 RSpec.describe 'Epics through GroupQuery' do
   include GraphqlHelpers
 
-  let(:user)        { create(:user) }
+  let(:epics_data) { graphql_data['group']['epics']['edges'] }
+  let(:epic_data) { graphql_data['group']['epic'] }
+
+  let_it_be(:user) { create(:user) }
   let_it_be(:group) { create(:group) }
-  let(:project)     { create(:project, :public, group: group) }
-  let(:label)       { create(:label) }
-  let(:epic)        { create(:labeled_epic, group: group, labels: [label]) }
-  let(:epics_data)  { graphql_data['group']['epics']['edges'] }
-  let(:epic_data)   { graphql_data['group']['epic'] }
+  let_it_be(:project) { create(:project, :public, group: group) }
+  let_it_be(:label) { create(:label) }
+  let_it_be_with_reload(:epic) do
+    create(:labeled_epic, group: group,
+      state: :closed, created_at: 3.days.ago,
+      updated_at: 2.days.ago, start_date: 2.days.ago,
+      end_date: 4.days.ago, labels: [label]
+    )
+  end
 
   # similar to GET /groups/:id/epics
   describe 'Get list of epics from a group' do
@@ -44,8 +51,6 @@ RSpec.describe 'Epics through GroupQuery' do
     context 'when the request is correct' do
       before do
         stub_licensed_features(epics: true)
-        epic && group.reload
-
         post_graphql(query, current_user: user)
       end
 
@@ -61,7 +66,6 @@ RSpec.describe 'Epics through GroupQuery' do
 
     context 'with multiple epics' do
       let_it_be(:user2) { create(:user) }
-      let_it_be(:epic)  { create(:epic, group: group, state: :closed, created_at: 3.days.ago, updated_at: 2.days.ago, start_date: 2.days.ago, end_date: 4.days.ago) }
       let_it_be(:epic2) { create(:epic, author: user2, group: group, title: 'foo', description: 'bar', created_at: 2.days.ago, updated_at: 3.days.ago, start_date: 3.days.ago, end_date: 3.days.ago ) }
 
       before do
@@ -164,7 +168,7 @@ RSpec.describe 'Epics through GroupQuery' do
       end
 
       context 'query performance' do
-        let!(:child_epic) { create(:epic, group: group, parent: epic2) }
+        let_it_be(:child_epic) { create(:epic, group: group, parent: create(:epic, group: group)) }
         let(:epic_node) do
           <<~NODE
             edges {
@@ -177,16 +181,12 @@ RSpec.describe 'Epics through GroupQuery' do
           NODE
         end
 
-        before do
-          group.reload
-        end
-
         it 'avoids n+1 queries when loading parent field' do
           # warm up
-          post_graphql(query({ iids: [epic.iid] }), current_user: user)
+          post_graphql(query({ iids: [child_epic.iid] }), current_user: user)
 
           control_count = ActiveRecord::QueryRecorder.new(skip_cached: false) do
-            post_graphql(query({ iids: [epic.iid] }), current_user: user)
+            post_graphql(query({ iids: [child_epic.iid] }), current_user: user)
           end.count
 
           epics_with_parent = create_list(:epic, 3, group: group) do |epic|
@@ -194,10 +194,10 @@ RSpec.describe 'Epics through GroupQuery' do
           end
           group.reload
 
-          # Added +5 to control_count due to an existing N+1 with licenses
+          # Threshold of 3 due to an existing N+1 with licenses
           expect do
             post_graphql(query({ iids: epics_with_parent.pluck(:iid) }), current_user: user)
-          end.not_to exceed_all_query_limit(control_count + 5)
+          end.not_to exceed_query_limit(control_count).with_threshold(3)
         end
       end
 

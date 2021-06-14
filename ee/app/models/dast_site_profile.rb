@@ -52,8 +52,12 @@ class DastSiteProfile < ApplicationRecord
     collection.compact
   end
 
-  def secret_ci_variables
-    ::Gitlab::Ci::Variables::Collection.new(secret_variables)
+  def secret_ci_variables(user)
+    collection = ::Gitlab::Ci::Variables::Collection.new
+
+    return collection unless Ability.allowed?(user, :read_on_demand_scans, self)
+
+    collection.concat(secret_variables)
   end
 
   def status

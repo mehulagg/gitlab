@@ -47,6 +47,7 @@ module EE
         mount_mutation ::Mutations::Boards::EpicLists::Create
         mount_mutation ::Mutations::Boards::EpicLists::Destroy
         mount_mutation ::Mutations::Boards::EpicLists::Update
+        mount_mutation ::Mutations::Boards::Epics::Create
         mount_mutation ::Mutations::Boards::Lists::UpdateLimitMetrics
         mount_mutation ::Mutations::InstanceSecurityDashboard::AddProject
         mount_mutation ::Mutations::InstanceSecurityDashboard::RemoveProject
@@ -66,9 +67,9 @@ module EE
         mount_mutation ::Mutations::DastSiteTokens::Create
         mount_mutation ::Mutations::Namespaces::IncreaseStorageTemporarily
         mount_mutation ::Mutations::QualityManagement::TestCases::Create
-        mount_mutation ::Mutations::Analytics::DevopsAdoption::Segments::Create
-        mount_mutation ::Mutations::Analytics::DevopsAdoption::Segments::BulkFindOrCreate
-        mount_mutation ::Mutations::Analytics::DevopsAdoption::Segments::Delete
+        mount_mutation ::Mutations::Analytics::DevopsAdoption::EnabledNamespaces::Enable
+        mount_mutation ::Mutations::Analytics::DevopsAdoption::EnabledNamespaces::BulkEnable
+        mount_mutation ::Mutations::Analytics::DevopsAdoption::EnabledNamespaces::Disable
         mount_mutation ::Mutations::IncidentManagement::OncallSchedule::Create
         mount_mutation ::Mutations::IncidentManagement::OncallSchedule::Update
         mount_mutation ::Mutations::IncidentManagement::OncallSchedule::Destroy

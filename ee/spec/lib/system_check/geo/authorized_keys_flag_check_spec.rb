@@ -1,13 +1,8 @@
 # frozen_string_literal: true
 
 require 'spec_helper'
-require 'rake_helper'
 
-RSpec.describe SystemCheck::Geo::AuthorizedKeysFlagCheck do
-  before do
-    silence_output
-  end
-
+RSpec.describe SystemCheck::Geo::AuthorizedKeysFlagCheck, :silence_stdout do
   describe '#check?' do
     it 'fails when write to authorized_keys still enabled' do
       stub_application_setting(authorized_keys_enabled: true)

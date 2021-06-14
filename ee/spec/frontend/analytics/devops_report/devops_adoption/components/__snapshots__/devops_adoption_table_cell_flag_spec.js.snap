@@ -1,0 +1,25 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`DevopsAdoptionTableCellFlag disabled matches the snapshot 1`] = `
+<span
+  class="circle"
+/>
+`;
+
+exports[`DevopsAdoptionTableCellFlag disabled when the enabled flag is changed to true matches the snapshot 1`] = `
+<span
+  class="circle circle-enabled"
+/>
+`;
+
+exports[`DevopsAdoptionTableCellFlag enabled matches the snapshot 1`] = `
+<span
+  class="circle circle-enabled"
+/>
+`;
+
+exports[`DevopsAdoptionTableCellFlag enabled when the enabled flag is changed to false matches the snapshot 1`] = `
+<span
+  class="circle"
+/>
+`;

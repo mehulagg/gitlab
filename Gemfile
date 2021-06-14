@@ -2,7 +2,7 @@
 
 source 'https://rubygems.org'
 
-gem 'rails', '~> 6.0.3.7'
+gem 'rails', '~> 6.1.3.2'
 
 gem 'bootsnap', '~> 1.4.6'
 
@@ -129,7 +129,7 @@ gem 'fog-local', '~> 0.6'
 gem 'fog-openstack', '~> 1.0'
 gem 'fog-rackspace', '~> 0.1.1'
 gem 'fog-aliyun', '~> 0.3'
-gem 'gitlab-fog-azure-rm', '~> 1.0.1', require: false
+gem 'gitlab-fog-azure-rm', '~> 1.1.1', require: false
 
 # for Google storage
 gem 'google-api-client', '~> 0.33'
@@ -182,10 +182,6 @@ gem 'diff_match_patch', '~> 0.1.0'
 gem 'rack', '~> 2.2.3'
 # https://github.com/sharpstone/rack-timeout/blob/master/README.md#rails-apps-manually
 gem 'rack-timeout', '~> 0.5.1', require: 'rack/timeout/base'
-
-group :unicorn do
-  gem 'unicorn', '~> 5.5'
-end
 
 group :puma do
   gem 'puma', '~> 5.3.1', require: false
@@ -493,9 +489,9 @@ gem 'google-protobuf', '~> 3.17.1'
 gem 'toml-rb', '~> 1.0.0'
 
 # Feature toggles
-gem 'flipper', '~> 0.17.1'
-gem 'flipper-active_record', '~> 0.17.1'
-gem 'flipper-active_support_cache_store', '~> 0.17.1'
+gem 'flipper', '~> 0.21.0'
+gem 'flipper-active_record', '~> 0.21.0'
+gem 'flipper-active_support_cache_store', '~> 0.21.0'
 gem 'unleash', '~> 0.1.5'
 gem 'gitlab-experiment', '~> 0.5.4'
 

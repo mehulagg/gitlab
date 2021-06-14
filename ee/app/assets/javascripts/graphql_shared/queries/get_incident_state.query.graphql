@@ -1,0 +1,8 @@
+query getIncidentState($iid: String!, $fullPath: ID!) {
+  project(fullPath: $fullPath) {
+    issue(iid: $iid) {
+      id
+      state
+    }
+  }
+}

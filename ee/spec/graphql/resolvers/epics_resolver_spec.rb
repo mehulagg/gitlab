@@ -72,6 +72,14 @@ RSpec.describe Resolvers::EpicsResolver do
             expect(epics).to match_array([epic1, epic2])
           end
         end
+
+        context 'when timeframe start and end are present' do
+          it 'returns epics within timeframe' do
+            epics = resolve_epics(timeframe: { start: '2019-08-13', end: '2019-08-21' })
+
+            expect(epics).to match_array([epic1, epic2])
+          end
+        end
       end
 
       context 'with state' do
@@ -228,6 +236,16 @@ RSpec.describe Resolvers::EpicsResolver do
 
           expect(resolve_epics(milestone_title: milestone.title)).to contain_exactly(epic1, epic3)
         end
+
+        context 'when the resolved group is a subgroup' do
+          it 'returns only the epics belonging to the subgroup by default' do
+            expect(resolve_epics({}, sub_group)).to contain_exactly(epic3, epic4)
+          end
+
+          it 'returns the epics belonging to the ancestor groups when include_ancestor_groups is true' do
+            expect(resolve_epics({ include_ancestor_groups: true }, sub_group)).to contain_exactly(epic1, epic2, epic3, epic4)
+          end
+        end
       end
 
       context 'with partial iids' do
@@ -307,7 +325,7 @@ RSpec.describe Resolvers::EpicsResolver do
     end
   end
 
-  def resolve_epics(args = {}, context = { current_user: current_user })
-    resolve(described_class, obj: group, args: args, ctx: context)
+  def resolve_epics(args = {}, obj = group, context = { current_user: current_user })
+    resolve(described_class, obj: obj, args: args, ctx: context)
   end
 end

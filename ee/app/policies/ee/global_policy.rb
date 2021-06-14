@@ -36,7 +36,7 @@ module EE
       rule { ~anonymous & operations_dashboard_available }.enable :read_operations_dashboard
 
       rule { admin & instance_devops_adoption_available }.policy do
-        enable :manage_devops_adoption_segments
+        enable :manage_devops_adoption_namespaces
         enable :view_instance_devops_adoption
       end
 

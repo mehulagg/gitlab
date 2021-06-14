@@ -308,8 +308,10 @@ X-Gitlab-Event: Issue Hook
     "duplicated_to_id": null,
     "time_estimate": 0,
     "total_time_spent": 0,
+    "time_change": 0,
     "human_total_time_spent": null,
     "human_time_estimate": null,
+    "human_time_change": null,
     "weight": null,
     "iid": 23,
     "url": "http://example.com/diaspora/issues/23",
@@ -1161,6 +1163,7 @@ X-Gitlab-Event: Pipeline Hook
             "id": 380987,
             "description": "shared-runners-manager-6.gitlab.com",
             "active": true,
+            "runner_type": "instance_type",
             "is_shared": true,
             "tags": [
               "linux",
@@ -1196,7 +1199,8 @@ X-Gitlab-Event: Pipeline Hook
             "id":380987,
             "description":"shared-runners-manager-6.gitlab.com",
             "active":true,
-            "is_shared":true,
+            "runner_type": "instance_type",
+            "is_shared": true,
             "tags": [
               "linux",
               "docker"
@@ -1230,6 +1234,7 @@ X-Gitlab-Event: Pipeline Hook
             "id": 380987,
             "description": "shared-runners-manager-6.gitlab.com",
             "active": true,
+            "runner_type": "instance_type",
             "is_shared": true,
             "tags": [
               "linux",
@@ -1333,6 +1338,7 @@ X-Gitlab-Event: Job Hook
   },
   "runner": {
     "active": true,
+    "runner_type": "project_type", 
     "is_shared": false,
     "id": 380987,
     "description": "shared-runners-manager-6.gitlab.com",

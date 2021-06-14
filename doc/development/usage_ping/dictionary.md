@@ -36,7 +36,7 @@ was released.
 
 ### `active_user_count`
 
-This is named the instance_user_count in the Versions application.
+The number of active users existing in the instance. This is named the instance_user_count in the Versions application.
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/license/20210204124829_active_user_count.yml)
 
@@ -372,15 +372,15 @@ Tiers: `free`
 
 ### `container_registry_enabled`
 
-Whether container registry is enabled
+A count of projects where the container registry is enabled
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/settings/20210204124858_container_registry_enabled.yml)
 
-Group: `group::product intelligence`
+Group: `group::package`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `container_registry_server.vendor`
 
@@ -392,7 +392,7 @@ Group: `group::package`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `container_registry_server.version`
 
@@ -404,7 +404,7 @@ Group: `group::package`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.alert_bot_incident_issues`
 
@@ -1192,7 +1192,7 @@ Total count of groups as of usage ping snapshot
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216180750_groups.yml)
 
-Group: `group::manage`
+Group: `group::access`
 
 Status: `data_available`
 
@@ -1296,15 +1296,15 @@ Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.groups_datadog_active`
 
-Missing description
+Count of groups with active integrations for Datadog
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216182549_groups_datadog_active.yml)
 
-Group: ``
+Group: `group::ecosystem`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.groups_discord_active`
 
@@ -1344,15 +1344,15 @@ Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.groups_ewm_active`
 
-Missing description
+Count of groups with active integrations for EWM
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216182616_groups_ewm_active.yml)
 
-Group: ``
+Group: `group::ecosystem`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.groups_external_wiki_active`
 
@@ -1382,13 +1382,13 @@ Tiers: `free`, `premium`, `ultimate`
 
 Count of groups with active integrations for GitHub
 
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216175850_groups_github_active.yml)
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_all/20210216175850_groups_github_active.yml)
 
 Group: `group::ecosystem`
 
 Status: `data_available`
 
-Tiers: `free`, `premium`, `ultimate`
+Tiers: `premium`, `ultimate`
 
 ### `counts.groups_hangouts_chat_active`
 
@@ -1512,15 +1512,15 @@ Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.groups_inheriting_datadog_active`
 
-Missing description
+Count of active groups inheriting integrations for Datadog
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216182557_groups_inheriting_datadog_active.yml)
 
-Group: ``
+Group: `group::ecosystem`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.groups_inheriting_discord_active`
 
@@ -1560,15 +1560,15 @@ Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.groups_inheriting_ewm_active`
 
-Missing description
+Count of active groups inheriting integrations for EWM
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216182623_groups_inheriting_ewm_active.yml)
 
-Group: ``
+Group: `group::ecosystem`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.groups_inheriting_external_wiki_active`
 
@@ -1598,13 +1598,13 @@ Tiers: `free`, `premium`, `ultimate`
 
 Count of active groups inheriting integrations for GitHub
 
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216175857_groups_inheriting_github_active.yml)
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_all/20210216175857_groups_inheriting_github_active.yml)
 
 Group: `group::ecosystem`
 
 Status: `data_available`
 
-Tiers: `free`, `premium`, `ultimate`
+Tiers: `premium`, `ultimate`
 
 ### `counts.groups_inheriting_hangouts_chat_active`
 
@@ -1704,27 +1704,27 @@ Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.groups_inheriting_mock_ci_active`
 
-Missing description
+Count of active groups inheriting integrations for Mock CI
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216182732_groups_inheriting_mock_ci_active.yml)
 
-Group: ``
+Group: `group::ecosystem`
 
-Status: `data_available`
+Status: `removed`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.groups_inheriting_mock_monitoring_active`
 
-Missing description
+Count of active groups inheriting integrations for Mock Monitoring
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216182743_groups_inheriting_mock_monitoring_active.yml)
 
-Group: ``
+Group: `group::ecosystem`
 
-Status: `data_available`
+Status: `removed`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.groups_inheriting_packagist_active`
 
@@ -1944,27 +1944,27 @@ Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.groups_mock_ci_active`
 
-Missing description
+Count of groups with active integrations for Mock CI
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216182724_groups_mock_ci_active.yml)
 
-Group: ``
+Group: `group::ecosystem`
 
-Status: `data_available`
+Status: `removed`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.groups_mock_monitoring_active`
 
-Missing description
+Count of groups with active integrations for Mock Monitoring
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216182736_groups_mock_monitoring_active.yml)
 
-Group: ``
+Group: `group::ecosystem`
 
-Status: `data_available`
+Status: `removed`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.groups_packagist_active`
 
@@ -2454,7 +2454,7 @@ Whether or not ModSecurity is set to blocking mode
 
 Group: `group::container security`
 
-Status: `deprecated`
+Status: `removed`
 
 Tiers: `free`, `premium`, `ultimate`
 
@@ -2466,7 +2466,7 @@ Whether or not ModSecurity is disabled within Ingress
 
 Group: `group::container security`
 
-Status: `deprecated`
+Status: `removed`
 
 Tiers: `free`, `premium`, `ultimate`
 
@@ -2478,7 +2478,7 @@ Whether or not ModSecurity is set to logging mode
 
 Group: `group::container security`
 
-Status: `deprecated`
+Status: `removed`
 
 Tiers: `free`, `premium`, `ultimate`
 
@@ -2490,7 +2490,7 @@ Whether or not ModSecurity has not been installed into the cluster
 
 Group: `group::container security`
 
-Status: `deprecated`
+Status: `removed`
 
 Tiers: `free`, `premium`, `ultimate`
 
@@ -2502,7 +2502,7 @@ Cumulative count of packets identified as anomalous by ModSecurity since Usage P
 
 Group: `group::container security`
 
-Status: `deprecated`
+Status: `removed`
 
 Tiers: `free`, `premium`, `ultimate`
 
@@ -2514,7 +2514,7 @@ Cumulative count of packets processed by ModSecurity since Usage Ping was last r
 
 Group: `group::container security`
 
-Status: `deprecated`
+Status: `removed`
 
 Tiers: `free`, `premium`, `ultimate`
 
@@ -2526,7 +2526,7 @@ Whether or not ModSecurity statistics are unavailable
 
 Group: `group::container security`
 
-Status: `deprecated`
+Status: `removed`
 
 Tiers: `ultimate`
 
@@ -2652,15 +2652,15 @@ Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.instances_datadog_active`
 
-Missing description
+Count of active instance-level integrations for Datadog
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216182553_instances_datadog_active.yml)
 
-Group: ``
+Group: `group::ecosystem`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.instances_discord_active`
 
@@ -2700,15 +2700,15 @@ Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.instances_ewm_active`
 
-Missing description
+Count of active instance-level integrations for EWM
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216182620_instances_ewm_active.yml)
 
-Group: ``
+Group: `group::ecosystem`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.instances_external_wiki_active`
 
@@ -2738,13 +2738,13 @@ Tiers: `free`, `premium`, `ultimate`
 
 Count of active instance-level integrations for GitHub
 
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216175853_instances_github_active.yml)
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_all/20210216175853_instances_github_active.yml)
 
 Group: `group::ecosystem`
 
 Status: `data_available`
 
-Tiers: `free`, `premium`, `ultimate`
+Tiers: `premium`, `ultimate`
 
 ### `counts.instances_hangouts_chat_active`
 
@@ -2844,27 +2844,27 @@ Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.instances_mock_ci_active`
 
-Missing description
+Count of active instance-level integrations for  Mock CI
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216182728_instances_mock_ci_active.yml)
 
-Group: ``
+Group: `group::ecosystem`
 
-Status: `data_available`
+Status: `removed`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.instances_mock_monitoring_active`
 
-Missing description
+Count of active instance-level integrations for  Mock Monitoring
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216182739_instances_mock_monitoring_active.yml)
 
-Group: ``
+Group: `group::ecosystem`
 
-Status: `data_available`
+Status: `removed`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.instances_packagist_active`
 
@@ -3156,15 +3156,15 @@ Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.keys`
 
-Missing description
+Number of keys.
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216180752_keys.yml)
 
-Group: `group::manage`
+Group: `group::access`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.kubernetes_agent_gitops_sync`
 
@@ -3266,13 +3266,13 @@ Tiers: `premium`, `ultimate`
 
 Number of users that are linked to LDAP
 
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216174826_ldap_users.yml)
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_all/20210216174826_ldap_users.yml)
 
 Group: `group::access`
 
 Status: `data_available`
 
-Tiers: `free`, `premium`, `ultimate`
+Tiers: `premium`, `ultimate`
 
 ### `counts.lfs_objects`
 
@@ -3280,7 +3280,7 @@ Missing description
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216181009_lfs_objects.yml)
 
-Group: `group::package`
+Group: `group::create`
 
 Status: `data_available`
 
@@ -3456,267 +3456,267 @@ Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.package_events_i_package_composer_delete_package`
 
-Missing description
+A count of Composer packages that have been deleted
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216182855_package_events_i_package_composer_delete_package.yml)
 
-Group: ``
+Group: `group::package`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.package_events_i_package_composer_pull_package`
 
-Missing description
+A count of Composer packages that have been downloaded
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216182857_package_events_i_package_composer_pull_package.yml)
 
-Group: ``
+Group: `group::package`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.package_events_i_package_composer_push_package`
 
-Missing description
+A count of Composer packages that have been published
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216182859_package_events_i_package_composer_push_package.yml)
 
-Group: ``
+Group: `group::package`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.package_events_i_package_conan_delete_package`
 
-Missing description
+A count of Conan packages that have been deleted
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216182901_package_events_i_package_conan_delete_package.yml)
 
-Group: ``
+Group: `group::package`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.package_events_i_package_conan_pull_package`
 
-Missing description
+A count of Conan packages that have been downloaded
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216182903_package_events_i_package_conan_pull_package.yml)
 
-Group: ``
+Group: `group::package`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.package_events_i_package_conan_push_package`
 
-Missing description
+A count of Conan packages that have been published
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216182905_package_events_i_package_conan_push_package.yml)
 
-Group: ``
+Group: `group::package`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.package_events_i_package_container_delete_package`
 
-Missing description
+A count of container images that have been deleted
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216182907_package_events_i_package_container_delete_package.yml)
 
-Group: ``
+Group: `group::package`
 
-Status: `data_available`
+Status: `deprecated`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.package_events_i_package_container_pull_package`
 
-Missing description
+A count of container images that have been downloaded
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216182909_package_events_i_package_container_pull_package.yml)
 
-Group: ``
+Group: `group::package`
 
-Status: `data_available`
+Status: `deprecated`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.package_events_i_package_container_push_package`
 
-Missing description
+A count of container images that have been published
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216182911_package_events_i_package_container_push_package.yml)
 
-Group: ``
+Group: `group::package`
 
-Status: `data_available`
+Status: `deprecated`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.package_events_i_package_debian_delete_package`
 
-Missing description
+A count of Debian packages that have been deleted
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216182913_package_events_i_package_debian_delete_package.yml)
 
-Group: ``
+Group: `group::package`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.package_events_i_package_debian_pull_package`
 
-Missing description
+A count of Debian packages that have been downloaded
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216182915_package_events_i_package_debian_pull_package.yml)
 
-Group: ``
+Group: `group::package`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.package_events_i_package_debian_push_package`
 
-Missing description
+A count of Debian packages that have been published
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216182917_package_events_i_package_debian_push_package.yml)
 
-Group: ``
+Group: `group::package`
 
-Status: `data_available`
+Status: `deprecated`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.package_events_i_package_delete_package`
 
-Missing description
+A count of packages that have been deleted
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216182919_package_events_i_package_delete_package.yml)
 
-Group: ``
+Group: `group::package`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.package_events_i_package_delete_package_by_deploy_token`
 
-Missing description
+A count of packages that have been deleted using a Deploy Token
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216182921_package_events_i_package_delete_package_by_deploy_token.yml)
 
-Group: ``
+Group: `group::package`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.package_events_i_package_delete_package_by_guest`
 
-Missing description
+A count of packages that have been deleted using a Guest
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216182923_package_events_i_package_delete_package_by_guest.yml)
 
-Group: ``
+Group: `group::package`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.package_events_i_package_delete_package_by_user`
 
-Missing description
+A count of packages that have been deleted using a logged in user
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216182925_package_events_i_package_delete_package_by_user.yml)
 
-Group: ``
+Group: `group::package`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.package_events_i_package_generic_delete_package`
 
-Missing description
+A count of generic packages that have been deleted
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216182927_package_events_i_package_generic_delete_package.yml)
 
-Group: ``
+Group: `group::package`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.package_events_i_package_generic_pull_package`
 
-Missing description
+A count of generic packages that have been downloaded
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216182929_package_events_i_package_generic_pull_package.yml)
 
-Group: ``
+Group: `group::package`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.package_events_i_package_generic_push_package`
 
-Missing description
+A count of generic packages that have been published
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216182931_package_events_i_package_generic_push_package.yml)
 
-Group: ``
+Group: `group::package`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.package_events_i_package_golang_delete_package`
 
-Missing description
+A count of Go modules that have been deleted
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216182933_package_events_i_package_golang_delete_package.yml)
 
-Group: ``
+Group: `group::package`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.package_events_i_package_golang_pull_package`
 
-Missing description
+A count of Go modules that have been downloaded
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216182934_package_events_i_package_golang_pull_package.yml)
 
-Group: ``
+Group: `group::package`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.package_events_i_package_golang_push_package`
 
-Missing description
+A count of Go modules that have been published
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216182936_package_events_i_package_golang_push_package.yml)
 
-Group: ``
+Group: `group::package`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.package_events_i_package_helm_pull_package`
 
@@ -3732,243 +3732,243 @@ Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.package_events_i_package_maven_delete_package`
 
-Missing description
+A count of Maven packages that have been deleted
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216182938_package_events_i_package_maven_delete_package.yml)
 
-Group: ``
+Group: `group::package`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.package_events_i_package_maven_pull_package`
 
-Missing description
+A count of Maven packages that have been downloaded
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216182940_package_events_i_package_maven_pull_package.yml)
 
-Group: ``
+Group: `group::package`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.package_events_i_package_maven_push_package`
 
-Missing description
+A count of Maven packages that have been published
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216182942_package_events_i_package_maven_push_package.yml)
 
-Group: ``
+Group: `group::package`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.package_events_i_package_npm_delete_package`
 
-Missing description
+A count of npm packages that have been deleted
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216182944_package_events_i_package_npm_delete_package.yml)
 
-Group: ``
+Group: `group::package`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.package_events_i_package_npm_pull_package`
 
-Missing description
+A count of npm packages that have been downloaded
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216182946_package_events_i_package_npm_pull_package.yml)
 
-Group: ``
+Group: `group::package`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.package_events_i_package_npm_push_package`
 
-Missing description
+A count of npm packages that have been published
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216182948_package_events_i_package_npm_push_package.yml)
 
-Group: ``
+Group: `group::package`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.package_events_i_package_nuget_delete_package`
 
-Missing description
+A count of NuGet packages that have been deleted
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216182950_package_events_i_package_nuget_delete_package.yml)
 
-Group: ``
+Group: `group::package`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.package_events_i_package_nuget_pull_package`
 
-Missing description
+A count of NuGet packages that have been downloaded
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216182952_package_events_i_package_nuget_pull_package.yml)
 
-Group: ``
+Group: `group::package`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.package_events_i_package_nuget_push_package`
 
-Missing description
+A count of NuGet packages that have been published
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216182954_package_events_i_package_nuget_push_package.yml)
 
-Group: ``
+Group: `group::package`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.package_events_i_package_pull_package`
 
-Missing description
+A count of packages that have been downloaded from the package registry
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216182956_package_events_i_package_pull_package.yml)
 
-Group: ``
+Group: `group::package`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.package_events_i_package_pull_package_by_deploy_token`
 
-Missing description
+A count of packages that have been downloaded from the package registry using a Deploy Token
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216182958_package_events_i_package_pull_package_by_deploy_token.yml)
 
-Group: ``
+Group: `group::package`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.package_events_i_package_pull_package_by_guest`
 
-Missing description
+A count of packages that have been downloaded from the package registry by a guest
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216183000_package_events_i_package_pull_package_by_guest.yml)
 
-Group: ``
+Group: `group::package`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.package_events_i_package_pull_package_by_user`
 
-Missing description
+A count of packages that have been downloaded from the package registry by a user
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216183002_package_events_i_package_pull_package_by_user.yml)
 
-Group: ``
+Group: `group::package`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.package_events_i_package_push_package`
 
-Missing description
+A count of packages that have been published to the package registry
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216183004_package_events_i_package_push_package.yml)
 
-Group: ``
+Group: `group::package`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.package_events_i_package_push_package_by_deploy_token`
 
-Missing description
+A count of packages that have been published to the package registry using a deploy token
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216183005_package_events_i_package_push_package_by_deploy_token.yml)
 
-Group: ``
+Group: `group::package`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.package_events_i_package_push_package_by_guest`
 
-Missing description
+A count of packages that have been published to the package registry by a Guest
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216183007_package_events_i_package_push_package_by_guest.yml)
 
-Group: ``
+Group: `group::package`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.package_events_i_package_push_package_by_user`
 
-Missing description
+A count of packages that have been published to the package registry by a user
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216183009_package_events_i_package_push_package_by_user.yml)
 
-Group: ``
+Group: `group::package`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.package_events_i_package_pypi_delete_package`
 
-Missing description
+A count of Python packages that have been deleted from the package registry
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216183011_package_events_i_package_pypi_delete_package.yml)
 
-Group: ``
+Group: `group::package`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.package_events_i_package_pypi_pull_package`
 
-Missing description
+A count of Python packages that have been downloaded from the package registry
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216183013_package_events_i_package_pypi_pull_package.yml)
 
-Group: ``
+Group: `group::package`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.package_events_i_package_pypi_push_package`
 
-Missing description
+A count of Python packages that have been published to the package registry
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216183015_package_events_i_package_pypi_push_package.yml)
 
-Group: ``
+Group: `group::package`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.package_events_i_package_rubygems_delete_package`
 
@@ -4008,39 +4008,39 @@ Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.package_events_i_package_tag_delete_package`
 
-Missing description
+A count of package tags that have been deleted from the package registry
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216183017_package_events_i_package_tag_delete_package.yml)
 
-Group: ``
+Group: `group::package`
 
-Status: `data_available`
+Status: `deprecated`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.package_events_i_package_tag_pull_package`
 
-Missing description
+A count of package tags that have been downloaded from the package registry
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216183019_package_events_i_package_tag_pull_package.yml)
 
-Group: ``
+Group: `group::package`
 
-Status: `data_available`
+Status: `deprecated`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.package_events_i_package_tag_push_package`
 
-Missing description
+A count of package tags that have been published to the package registry
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216183021_package_events_i_package_tag_push_package.yml)
 
-Group: ``
+Group: `group::package`
 
-Status: `data_available`
+Status: `deprecated`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.package_events_i_package_terraform_module_delete_package`
 
@@ -4080,7 +4080,7 @@ Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.packages`
 
-Number of packages
+The total number of packages published to the registry
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216181012_packages.yml)
 
@@ -4088,7 +4088,7 @@ Group: `group::package`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.pages_domains`
 
@@ -4104,7 +4104,7 @@ Tiers: `free`
 
 ### `counts.personal_snippets`
 
-Count of Personal Snippets
+Count of personal Snippets
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216180239_personal_snippets.yml)
 
@@ -4122,7 +4122,7 @@ Count the total number of log views
 
 Group: `group::monitor`
 
-Status: `deprecated`
+Status: `removed`
 
 Tiers: `free`
 
@@ -4176,7 +4176,7 @@ Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.project_snippets`
 
-Count of Project Snippetss
+Count of project Snippets
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216180241_project_snippets.yml)
 
@@ -4308,15 +4308,15 @@ Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.projects_datadog_active`
 
-Missing description
+Count of projects with active integrations for Datadog
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216182547_projects_datadog_active.yml)
 
-Group: ``
+Group: `group::ecosystem`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.projects_discord_active`
 
@@ -4356,15 +4356,15 @@ Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.projects_ewm_active`
 
-Missing description
+Count of projects with active integrations for EWM
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216182614_projects_ewm_active.yml)
 
-Group: ``
+Group: `group::ecosystem`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.projects_external_wiki_active`
 
@@ -4394,13 +4394,13 @@ Tiers: `free`, `premium`, `ultimate`
 
 Count of projects with active integrations for GitHub
 
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216175848_projects_github_active.yml)
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_all/20210216175848_projects_github_active.yml)
 
 Group: `group::ecosystem`
 
 Status: `data_available`
 
-Tiers: `free`, `premium`, `ultimate`
+Tiers: `premium`, `ultimate`
 
 ### `counts.projects_hangouts_chat_active`
 
@@ -4536,15 +4536,15 @@ Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.projects_inheriting_datadog_active`
 
-Missing description
+Count of active projects inheriting integrations for Datadog
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216182555_projects_inheriting_datadog_active.yml)
 
-Group: ``
+Group: `group::ecosystem`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.projects_inheriting_discord_active`
 
@@ -4584,15 +4584,15 @@ Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.projects_inheriting_ewm_active`
 
-Missing description
+Count of active projects inheriting integrations for EWM
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216182622_projects_inheriting_ewm_active.yml)
 
-Group: ``
+Group: `group::ecosystem`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.projects_inheriting_external_wiki_active`
 
@@ -4622,13 +4622,13 @@ Tiers: `free`, `premium`, `ultimate`
 
 Count of active projects inheriting integrations for GitHub
 
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216175855_projects_inheriting_github_active.yml)
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_all/20210216175855_projects_inheriting_github_active.yml)
 
 Group: `group::ecosystem`
 
 Status: `data_available`
 
-Tiers: `free`, `premium`, `ultimate`
+Tiers: `premium`, `ultimate`
 
 ### `counts.projects_inheriting_hangouts_chat_active`
 
@@ -4728,27 +4728,27 @@ Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.projects_inheriting_mock_ci_active`
 
-Missing description
+Count of active projects inheriting integrations for Mock CI
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216182730_projects_inheriting_mock_ci_active.yml)
 
-Group: ``
+Group: `group::ecosystem`
 
-Status: `data_available`
+Status: `removed`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.projects_inheriting_mock_monitoring_active`
 
-Missing description
+Count of active projects inheriting integrations for Mock Monitoring
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216182741_projects_inheriting_mock_monitoring_active.yml)
 
-Group: ``
+Group: `group::ecosystem`
 
-Status: `data_available`
+Status: `removed`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.projects_inheriting_packagist_active`
 
@@ -5040,27 +5040,27 @@ Tiers: `premium`, `ultimate`
 
 ### `counts.projects_mock_ci_active`
 
-Missing description
+Count of projects with active integrations for Mock CI
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216182722_projects_mock_ci_active.yml)
 
-Group: ``
+Group: `group::ecosystem`
 
-Status: `data_available`
+Status: `removed`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.projects_mock_monitoring_active`
 
-Missing description
+Count of projects with active integrations for Mock Monitoring
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216182734_projects_mock_monitoring_active.yml)
 
-Group: ``
+Group: `group::ecosystem`
 
-Status: `data_available`
+Status: `removed`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.projects_packagist_active`
 
@@ -5256,7 +5256,7 @@ Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.projects_with_expiration_policy_disabled`
 
-Missing description
+The number of projects with cleanup policy for tags turned off
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216181014_projects_with_expiration_policy_disabled.yml)
 
@@ -5264,11 +5264,11 @@ Group: `group::package`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.projects_with_expiration_policy_enabled`
 
-Missing description
+A count of projects with the cleanup policy for tags turned on
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216181016_projects_with_expiration_policy_enabled.yml)
 
@@ -5276,11 +5276,11 @@ Group: `group::package`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.projects_with_expiration_policy_enabled_with_cadence_set_to_14d`
 
-Missing description
+A count of projects with the cleanup policy set to run every 14 days
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216181033_projects_with_expiration_policy_enabled_with_cadence_set_to_14d.yml)
 
@@ -5288,11 +5288,11 @@ Group: `group::package`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.projects_with_expiration_policy_enabled_with_cadence_set_to_1d`
 
-Missing description
+A count of projects with the cleanup policy set to run every day
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216181029_projects_with_expiration_policy_enabled_with_cadence_set_to_1d.yml)
 
@@ -5300,11 +5300,11 @@ Group: `group::package`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.projects_with_expiration_policy_enabled_with_cadence_set_to_1month`
 
-Missing description
+A count of projects with the cleanup policy set to run monthly
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216181035_projects_with_expiration_policy_enabled_with_cadence_set_to_1month.yml)
 
@@ -5312,11 +5312,11 @@ Group: `group::package`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.projects_with_expiration_policy_enabled_with_cadence_set_to_3month`
 
-Missing description
+A count of projects with the cleanup policy set to run every 3 months
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216181037_projects_with_expiration_policy_enabled_with_cadence_set_to_3month.yml)
 
@@ -5324,11 +5324,11 @@ Group: `group::package`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.projects_with_expiration_policy_enabled_with_cadence_set_to_7d`
 
-Missing description
+A count of projects with the cleanup policy set to run every 7 days
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216181031_projects_with_expiration_policy_enabled_with_cadence_set_to_7d.yml)
 
@@ -5336,95 +5336,95 @@ Group: `group::package`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.projects_with_expiration_policy_enabled_with_keep_n_set_to_1`
 
-Missing description
+A count of projects with the cleanup policy set to keep 1 tag
 
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_all/20210216181018_projects_with_expiration_policy_enabled_with_keep_n_set_to_1.yml)
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216181018_projects_with_expiration_policy_enabled_with_keep_n_set_to_1.yml)
 
 Group: `group::package`
 
 Status: `data_available`
 
-Tiers:
+Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.projects_with_expiration_policy_enabled_with_keep_n_set_to_10`
 
-Missing description
+A count of projects with the cleanup policy set to keep 10 tags
 
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_all/20210216181022_projects_with_expiration_policy_enabled_with_keep_n_set_to_10.yml)
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216181022_projects_with_expiration_policy_enabled_with_keep_n_set_to_10.yml)
 
 Group: `group::package`
 
 Status: `data_available`
 
-Tiers:
+Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.projects_with_expiration_policy_enabled_with_keep_n_set_to_100`
 
-Missing description
+A count of projects with the cleanup policy set to keep 100 tags
 
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_all/20210216181027_projects_with_expiration_policy_enabled_with_keep_n_set_to_100.yml)
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216181027_projects_with_expiration_policy_enabled_with_keep_n_set_to_100.yml)
 
 Group: `group::package`
 
 Status: `data_available`
 
-Tiers:
+Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.projects_with_expiration_policy_enabled_with_keep_n_set_to_25`
 
-Missing description
+A count of projects with the cleanup policy set to keep 25 tags
 
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_all/20210216181024_projects_with_expiration_policy_enabled_with_keep_n_set_to_25.yml)
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216181024_projects_with_expiration_policy_enabled_with_keep_n_set_to_25.yml)
 
 Group: `group::package`
 
 Status: `data_available`
 
-Tiers:
+Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.projects_with_expiration_policy_enabled_with_keep_n_set_to_5`
 
-Missing description
+A count of projects with the cleanup policy set to keep 5 tags
 
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_all/20210216181020_projects_with_expiration_policy_enabled_with_keep_n_set_to_5.yml)
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216181020_projects_with_expiration_policy_enabled_with_keep_n_set_to_5.yml)
 
 Group: `group::package`
 
 Status: `data_available`
 
-Tiers:
+Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.projects_with_expiration_policy_enabled_with_keep_n_set_to_50`
 
-Missing description
+A count of projects with the cleanup policy set to keep 50 tags
 
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_all/20210216181025_projects_with_expiration_policy_enabled_with_keep_n_set_to_50.yml)
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216181025_projects_with_expiration_policy_enabled_with_keep_n_set_to_50.yml)
 
 Group: `group::package`
 
 Status: `data_available`
 
-Tiers:
+Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.projects_with_expiration_policy_enabled_with_keep_n_unset`
 
-Missing description
+A count of projects with the cleanup policy with the number of tags to keep unset
 
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_all/20210216181046_projects_with_expiration_policy_enabled_with_keep_n_unset.yml)
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216181046_projects_with_expiration_policy_enabled_with_keep_n_unset.yml)
 
 Group: `group::package`
 
 Status: `data_available`
 
-Tiers:
+Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.projects_with_expiration_policy_enabled_with_older_than_set_to_14d`
 
-Missing description
+A count of projects with the cleanup policy set delete tags older than 14 days
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216181040_projects_with_expiration_policy_enabled_with_older_than_set_to_14d.yml)
 
@@ -5432,11 +5432,11 @@ Group: `group::package`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.projects_with_expiration_policy_enabled_with_older_than_set_to_30d`
 
-Missing description
+A count of projects with the cleanup policy set delete tags older than 30 days
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216181042_projects_with_expiration_policy_enabled_with_older_than_set_to_30d.yml)
 
@@ -5444,11 +5444,11 @@ Group: `group::package`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.projects_with_expiration_policy_enabled_with_older_than_set_to_7d`
 
-Missing description
+A count of projects with the cleanup policy set delete tags older than 7 days
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216181038_projects_with_expiration_policy_enabled_with_older_than_set_to_7d.yml)
 
@@ -5456,11 +5456,11 @@ Group: `group::package`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.projects_with_expiration_policy_enabled_with_older_than_set_to_90d`
 
-Missing description
+A count of projects with the cleanup policy set delete tags older than 90 days
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216181044_projects_with_expiration_policy_enabled_with_older_than_set_to_90d.yml)
 
@@ -5468,11 +5468,11 @@ Group: `group::package`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.projects_with_expiration_policy_enabled_with_older_than_unset`
 
-Missing description
+A count of projects with the cleanup policy with the number of tags to delete unset
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216181048_projects_with_expiration_policy_enabled_with_older_than_unset.yml)
 
@@ -5480,11 +5480,11 @@ Group: `group::package`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.projects_with_packages`
 
-Projects with package registry configured
+Projects with package registry enabled
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216181011_projects_with_packages.yml)
 
@@ -5492,7 +5492,7 @@ Group: `group::package`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.projects_with_prometheus_alerts`
 
@@ -5502,7 +5502,7 @@ Projects with Prometheus alerting enabled
 
 Group: `group::monitor`
 
-Status: `deprecated`
+Status: `removed`
 
 Tiers: `free`
 
@@ -5772,7 +5772,7 @@ Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.static_site_editor_commits`
 
-Count of commits created via Static Site Editor
+Count of commits created from the Static Site Editor
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216180301_static_site_editor_commits.yml)
 
@@ -5780,7 +5780,7 @@ Group: `group::editor`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.static_site_editor_merge_requests`
 
@@ -5792,11 +5792,11 @@ Group: `group::editor`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.static_site_editor_views`
 
-Missing description
+Count of Static Site Editor views
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216180259_static_site_editor_views.yml)
 
@@ -5988,15 +5988,15 @@ Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.templates_datadog_active`
 
-Missing description
+Count of active service templates for Datadog
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216182551_templates_datadog_active.yml)
 
-Group: ``
+Group: `group::ecosystem`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.templates_discord_active`
 
@@ -6036,15 +6036,15 @@ Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.templates_ewm_active`
 
-Missing description
+Count of active service templates for EWM
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216182618_templates_ewm_active.yml)
 
-Group: ``
+Group: `group::ecosystem`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.templates_external_wiki_active`
 
@@ -6074,13 +6074,13 @@ Tiers: `free`, `premium`, `ultimate`
 
 Count of active service templates for GitHub
 
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216175851_templates_github_active.yml)
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_all/20210216175851_templates_github_active.yml)
 
 Group: `group::ecosystem`
 
 Status: `data_available`
 
-Tiers: `free`, `premium`, `ultimate`
+Tiers: `premium`, `ultimate`
 
 ### `counts.templates_hangouts_chat_active`
 
@@ -6180,27 +6180,27 @@ Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.templates_mock_ci_active`
 
-Missing description
+Count of active service templates for Mock CI
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216182726_templates_mock_ci_active.yml)
 
-Group: ``
+Group: `group::ecosystem`
 
-Status: `data_available`
+Status: `removed`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.templates_mock_monitoring_active`
 
-Missing description
+Count of active service templates for Mock Monitoring
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216182738_templates_mock_monitoring_active.yml)
 
-Group: ``
+Group: `group::ecosystem`
 
-Status: `data_available`
+Status: `removed`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.templates_packagist_active`
 
@@ -6420,7 +6420,7 @@ Tiers: `ultimate`
 
 ### `counts.user_preferences_user_gitpod_enabled`
 
-Count all users with their GitPod setting enabled
+Count of users with the GitPod integration enabled
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216180304_user_preferences_user_gitpod_enabled.yml)
 
@@ -6444,7 +6444,7 @@ Tiers: `free`
 
 ### `counts.web_ide_commits`
 
-Count of Commits made from Web IDE
+Count of commits made from the Web IDE
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216180242_web_ide_commits.yml)
 
@@ -6456,7 +6456,7 @@ Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.web_ide_merge_requests`
 
-Count of merge requests created from Web IDE
+Count of merge requests created from the Web IDE
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216180246_web_ide_merge_requests.yml)
 
@@ -6468,7 +6468,7 @@ Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.web_ide_pipelines`
 
-Count of Pipeline tab views in Web IDE
+Count of Pipeline tab views in the Web IDE
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216180252_web_ide_pipelines.yml)
 
@@ -6480,7 +6480,7 @@ Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.web_ide_previews`
 
-Count of Live Preview tab views in Web IDE
+Count of Live Preview tab views in the Web IDE
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216180248_web_ide_previews.yml)
 
@@ -6492,7 +6492,7 @@ Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.web_ide_terminals`
 
-Count of Web Terminal Tab views in Web IDE
+Count of Web Terminal tab views in the Web IDE
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216180250_web_ide_terminals.yml)
 
@@ -6504,7 +6504,7 @@ Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.web_ide_views`
 
-Count of Views of the Web IDE
+Count of views of the Web IDE
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216180244_web_ide_views.yml)
 
@@ -6516,39 +6516,39 @@ Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.wiki_pages_create`
 
-Missing description
+Count of all Wiki pages created
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216180734_wiki_pages_create.yml)
 
-Group: `group::knowledge`
+Group: `group::editor`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.wiki_pages_delete`
 
-Missing description
+Count of all Wiki pages deleted
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216180738_wiki_pages_delete.yml)
 
-Group: `group::knowledge`
+Group: `group::editor`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.wiki_pages_update`
 
-Missing description
+Count of all Wiki page updates
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216180736_wiki_pages_update.yml)
 
-Group: `group::knowledge`
+Group: `group::editor`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.wiki_pages_view`
 
@@ -6696,7 +6696,7 @@ Tiers: `free`
 
 ### `counts_monthly.packages`
 
-Monthly count of Packages
+A monthly count of packages published to the registry
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216181050_packages.yml)
 
@@ -6704,11 +6704,11 @@ Group: `group::package`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `counts_monthly.personal_snippets`
 
-Monthly count of Personal Snippets
+Monthly count of personal Snippets
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216180308_personal_snippets.yml)
 
@@ -6720,7 +6720,7 @@ Tiers: `free`, `premium`, `ultimate`
 
 ### `counts_monthly.project_snippets`
 
-Monthly count of Project Snippets
+Monthly count of project Snippets
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216180310_project_snippets.yml)
 
@@ -6924,15 +6924,15 @@ Tiers: `free`, `premium`, `ultimate`
 
 ### `dependency_proxy_enabled`
 
-Whether dependency proxy is enabled
+A count of projects where the dependency proxy is enabled
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/settings/20210204124900_dependency_proxy_enabled.yml)
 
-Group: `group::product intelligence`
+Group: `group::package`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `edition`
 
@@ -7068,7 +7068,7 @@ Tiers: `free`, `premium`, `ultimate`
 
 ### `gitpod_enabled`
 
-Whether gitpod is enabled in the instance
+Whether Gitpod is enabled in the instance
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/settings/20210216180314_gitpod_enabled.yml)
 
@@ -7104,11 +7104,11 @@ Tiers: `free`, `premium`, `ultimate`
 
 ### `historical_max_users`
 
-The maximum active user count. Active is defined in UsersStatistics model.
+The peak active user count. Active is defined in UsersStatistics model.
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/license/20210204124835_historical_max_users.yml)
 
-Group: `group::product intelligence`
+Group: `group::license`
 
 Status: `data_available`
 
@@ -7134,7 +7134,7 @@ Whether or not ModSecurity is enabled within Ingress
 
 Group: `group::container security`
 
-Status: `deprecated`
+Status: `removed`
 
 Tiers: `free`, `premium`, `ultimate`
 
@@ -7174,13 +7174,25 @@ Status: `data_available`
 
 Tiers: `free`
 
+### `license_billable_users`
+
+Number of all billable users (active users excluding bots and guests).
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/license/20210531204603_license_billable_users.yml)
+
+Group: `group::product intelligence`
+
+Status: `implemented`
+
+Tiers: `premium`, `ultimate`
+
 ### `license_expires_at`
 
 The date the license ends
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/license/20210204124847_license_expires_at.yml)
 
-Group: `group::product intelligence`
+Group: `group::license`
 
 Status: `data_available`
 
@@ -7192,7 +7204,7 @@ The ID of the license
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/license/20210204124833_license_id.yml)
 
-Group: `group::product intelligence`
+Group: `group::license`
 
 Status: `data_available`
 
@@ -7200,15 +7212,15 @@ Tiers: `premium`, `ultimate`
 
 ### `license_md5`
 
-The license key of the GitLab instance
+The MD5 hash of license key of the GitLab instance
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/license/20210204124831_license_md5.yml)
 
-Group: `group::product intelligence`
+Group: `group::license`
 
 Status: `data_available`
 
-Tiers: `free`, `premium`, `ultimate`
+Tiers: `premium`, `ultimate`
 
 ### `license_plan`
 
@@ -7216,7 +7228,7 @@ The plan of the GitLab license
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/license/20210204124849_license_plan.yml)
 
-Group: `group::product intelligence`
+Group: `group::license`
 
 Status: `data_available`
 
@@ -7228,7 +7240,7 @@ The date the license starts
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/license/20210204124845_license_starts_at.yml)
 
-Group: `group::product intelligence`
+Group: `group::license`
 
 Status: `data_available`
 
@@ -7240,7 +7252,7 @@ Licese zuora_subscription_id
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/license/20210204124852_license_subscription_id.yml)
 
-Group: `group::product intelligence`
+Group: `group::license`
 
 Status: `data_available`
 
@@ -7250,9 +7262,9 @@ Tiers: `premium`, `ultimate`
 
 Whether this is a trial license or not
 
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/settings/20210204124851_license_trial.yml)
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/license/20210204124851_license_trial.yml)
 
-Group: `group::product intelligence`
+Group: `group::license`
 
 Status: `data_available`
 
@@ -7260,23 +7272,23 @@ Tiers: `premium`, `ultimate`
 
 ### `license_trial_ends_on`
 
-Date the license ends on
+Date the trial license ends on
 
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/license/20210204124926_license_trial_ends_on.yml)
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/license/20210204124926_license_trial_ends_on.yml)
 
-Group: `group::product intelligence`
+Group: `group::license`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `license_user_count`
 
-The number of users included in the license
+The number of seats included in the license
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/license/20210204124843_license_user_count.yml)
 
-Group: `group::product intelligence`
+Group: `group::license`
 
 Status: `data_available`
 
@@ -7288,7 +7300,7 @@ Company on the GitLab license
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/license/20210204124841_company.yml)
 
-Group: `group::product intelligence`
+Group: `group::license`
 
 Status: `data_available`
 
@@ -7300,7 +7312,7 @@ Email on the GitLab license
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/license/20210204124839_email.yml)
 
-Group: `group::product intelligence`
+Group: `group::license`
 
 Status: `data_available`
 
@@ -7312,7 +7324,7 @@ Name on the GitLab license
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/license/20210204124837_name.yml)
 
-Group: `group::product intelligence`
+Group: `group::license`
 
 Status: `data_available`
 
@@ -7336,11 +7348,11 @@ Whether Mattermost is enabled
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/settings/20210204124908_mattermost_enabled.yml)
 
-Group: `group::product intelligence`
+Group: `group::ecosystem`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `object_store.artifacts.enabled`
 
@@ -7712,7 +7724,7 @@ Group: `group::product intelligence`
 
 Status: `data_available`
 
-Tiers:
+Tiers: `premium`, `ultimate`
 
 ### `redis_hll_counters.analytics.analytics_total_unique_counts_monthly`
 
@@ -8196,27 +8208,27 @@ Tiers:
 
 ### `redis_hll_counters.ci_templates.ci_templates_total_unique_counts_monthly`
 
-Missing description
+Total count of pipelines runs
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216184559_ci_templates_total_unique_counts_monthly.yml)
 
-Group: ``
+Group: `group::configure`
 
-Status: `data_available`
+Status: `broken`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `redis_hll_counters.ci_templates.ci_templates_total_unique_counts_weekly`
 
-Missing description
+Total count of pipelines runs
 
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_7d/20210216184557_ci_templates_total_unique_counts_weekly.yml)
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_7d/20210216184557_ci_templates_total_unique_counts_weekly.yml)
 
-Group: ``
+Group: `group::configure`
 
-Status: `data_available`
+Status: `broken`
 
-Tiers:
+Tiers: `free`, `premium`, `ultimate`
 
 ### `redis_hll_counters.ci_templates.p_ci_templates_5_min_production_app_monthly`
 
@@ -8599,6 +8611,30 @@ Count of unique users per week who interact with a merge request
 Group: `group::code review`
 
 Status: `data_available`
+
+Tiers: `free`, `premium`, `ultimate`
+
+### `redis_hll_counters.code_review.i_code_review_click_diff_view_setting_monthly`
+
+Count of users clicking diff view setting
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210607113556_i_code_review_click_diff_view_setting_monthly.yml)
+
+Group: `group::code review`
+
+Status: `implemented`
+
+Tiers: `free`, `premium`, `ultimate`
+
+### `redis_hll_counters.code_review.i_code_review_click_diff_view_setting_weekly`
+
+Count of users clicking diff view setting
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_7d/20210607113552_i_code_review_click_diff_view_setting_weekly.yml)
+
+Group: `group::code review`
+
+Status: `implemented`
 
 Tiers: `free`, `premium`, `ultimate`
 
@@ -10044,171 +10080,171 @@ Tiers:
 
 ### `redis_hll_counters.deploy_token_packages.deploy_token_packages_total_unique_counts_monthly`
 
-Missing description
+A monthly count of packages published to the registry using a deploy token
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216184850_deploy_token_packages_total_unique_counts_monthly.yml)
 
-Group: ``
+Group: `group::package`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `redis_hll_counters.deploy_token_packages.deploy_token_packages_total_unique_counts_weekly`
 
-Missing description
+A weekly count of packages published to the registry using a deploy token
 
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_7d/20210216184848_deploy_token_packages_total_unique_counts_weekly.yml)
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_7d/20210216184848_deploy_token_packages_total_unique_counts_weekly.yml)
 
-Group: ``
+Group: `group::package`
 
 Status: `data_available`
 
-Tiers:
+Tiers: `free`, `premium`, `ultimate`
 
 ### `redis_hll_counters.deploy_token_packages.i_package_composer_deploy_token_monthly`
 
-Missing description
+A monthly count of Composer packages published to the registry using a deploy token
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216184806_i_package_composer_deploy_token_monthly.yml)
 
-Group: ``
+Group: `group::package`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `redis_hll_counters.deploy_token_packages.i_package_composer_deploy_token_weekly`
 
-Missing description
+A weekly count of Composer packages published to the registry using a deploy token
 
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_7d/20210216184805_i_package_composer_deploy_token_weekly.yml)
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_7d/20210216184805_i_package_composer_deploy_token_weekly.yml)
 
-Group: ``
+Group: `group::package`
 
-Status: `data_available`
+Status: `deprecated`
 
-Tiers:
+Tiers: `free`, `premium`, `ultimate`
 
 ### `redis_hll_counters.deploy_token_packages.i_package_conan_deploy_token_monthly`
 
-Missing description
+A monthly count of Conan packages published to the registry using a deploy token
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216184810_i_package_conan_deploy_token_monthly.yml)
 
-Group: ``
+Group: `group::package`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `redis_hll_counters.deploy_token_packages.i_package_conan_deploy_token_weekly`
 
-Missing description
+A weekly count of Conan packages published to the registry using a deploy token
 
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_7d/20210216184808_i_package_conan_deploy_token_weekly.yml)
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_7d/20210216184808_i_package_conan_deploy_token_weekly.yml)
 
-Group: ``
+Group: `group::package`
 
 Status: `data_available`
 
-Tiers:
+Tiers: `free`, `premium`, `ultimate`
 
 ### `redis_hll_counters.deploy_token_packages.i_package_container_deploy_token_monthly`
 
-Missing description
+A monthly count of container images published to the registry using a deploy token
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216184814_i_package_container_deploy_token_monthly.yml)
 
-Group: ``
+Group: `group::package`
 
-Status: `data_available`
+Status: `deprecated`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `redis_hll_counters.deploy_token_packages.i_package_container_deploy_token_weekly`
 
-Missing description
+A weekly count of container images published to the registry using a deploy token
 
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_7d/20210216184812_i_package_container_deploy_token_weekly.yml)
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_7d/20210216184812_i_package_container_deploy_token_weekly.yml)
 
-Group: ``
+Group: `group::package`
 
-Status: `data_available`
+Status: `deprecated`
 
-Tiers:
+Tiers: `free`, `premium`, `ultimate`
 
 ### `redis_hll_counters.deploy_token_packages.i_package_debian_deploy_token_monthly`
 
-Missing description
+A monthly count of Debian packages published to the registry using a deploy token
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216184818_i_package_debian_deploy_token_monthly.yml)
 
-Group: ``
+Group: `group::package`
 
-Status: `data_available`
+Status: `deprecated`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `redis_hll_counters.deploy_token_packages.i_package_debian_deploy_token_weekly`
 
-Missing description
+A weekly count of Debian packages published to the registry using a deploy token
 
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_7d/20210216184816_i_package_debian_deploy_token_weekly.yml)
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_7d/20210216184816_i_package_debian_deploy_token_weekly.yml)
 
-Group: ``
+Group: `group::package`
 
-Status: `data_available`
+Status: `deprecated`
 
-Tiers:
+Tiers: `free`, `premium`, `ultimate`
 
 ### `redis_hll_counters.deploy_token_packages.i_package_generic_deploy_token_monthly`
 
-Missing description
+A monthly count of generic packages published to the registry using a deploy token
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216184822_i_package_generic_deploy_token_monthly.yml)
 
-Group: ``
+Group: `group::package`
 
-Status: `data_available`
+Status: `broken`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `redis_hll_counters.deploy_token_packages.i_package_generic_deploy_token_weekly`
 
-Missing description
+A weekly count of generic packages published to the registry using a deploy token
 
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_7d/20210216184820_i_package_generic_deploy_token_weekly.yml)
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_7d/20210216184820_i_package_generic_deploy_token_weekly.yml)
 
-Group: ``
+Group: `group::package`
 
 Status: `data_available`
 
-Tiers:
+Tiers: `free`, `premium`, `ultimate`
 
 ### `redis_hll_counters.deploy_token_packages.i_package_golang_deploy_token_monthly`
 
-Missing description
+A monthly count of Go modules published to the registry using a deploy token
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216184826_i_package_golang_deploy_token_monthly.yml)
 
-Group: ``
+Group: `group::package`
 
-Status: `data_available`
+Status: `deprecated`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `redis_hll_counters.deploy_token_packages.i_package_golang_deploy_token_weekly`
 
-Missing description
+A weekly count of Go modules published to the registry using a deploy token
 
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_7d/20210216184824_i_package_golang_deploy_token_weekly.yml)
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_7d/20210216184824_i_package_golang_deploy_token_weekly.yml)
 
-Group: ``
+Group: `group::package`
 
-Status: `data_available`
+Status: `deprecated`
 
-Tiers:
+Tiers: `free`, `premium`, `ultimate`
 
 ### `redis_hll_counters.deploy_token_packages.i_package_helm_deploy_token_monthly`
 
@@ -10236,103 +10272,103 @@ Tiers: `free`, `premium`, `ultimate`
 
 ### `redis_hll_counters.deploy_token_packages.i_package_maven_deploy_token_monthly`
 
-Missing description
+A monthly count of Maven packages published to the registry using a deploy token
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216184830_i_package_maven_deploy_token_monthly.yml)
 
-Group: ``
+Group: `group::package`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `redis_hll_counters.deploy_token_packages.i_package_maven_deploy_token_weekly`
 
-Missing description
+A weekly count of Maven packages published to the registry using a deploy token
 
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_7d/20210216184828_i_package_maven_deploy_token_weekly.yml)
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_7d/20210216184828_i_package_maven_deploy_token_weekly.yml)
 
-Group: ``
+Group: `group::package`
 
 Status: `data_available`
 
-Tiers:
+Tiers: `free`, `premium`, `ultimate`
 
 ### `redis_hll_counters.deploy_token_packages.i_package_npm_deploy_token_monthly`
 
-Missing description
+A monthly count of npm packages published to the registry using a deploy token
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216184834_i_package_npm_deploy_token_monthly.yml)
 
-Group: ``
+Group: `group::package`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `redis_hll_counters.deploy_token_packages.i_package_npm_deploy_token_weekly`
 
-Missing description
+A weekly count of npm packages published to the registry using a deploy token
 
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_7d/20210216184832_i_package_npm_deploy_token_weekly.yml)
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_7d/20210216184832_i_package_npm_deploy_token_weekly.yml)
 
-Group: ``
+Group: `group::package`
 
 Status: `data_available`
 
-Tiers:
+Tiers: `free`, `premium`, `ultimate`
 
 ### `redis_hll_counters.deploy_token_packages.i_package_nuget_deploy_token_monthly`
 
-Missing description
+A monthly count of NuGet packages published to the registry using a deploy token
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216184838_i_package_nuget_deploy_token_monthly.yml)
 
-Group: ``
+Group: `group::package`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `redis_hll_counters.deploy_token_packages.i_package_nuget_deploy_token_weekly`
 
-Missing description
+A weekly count of NuGet packages published to the registry using a deploy token
 
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_7d/20210216184836_i_package_nuget_deploy_token_weekly.yml)
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_7d/20210216184836_i_package_nuget_deploy_token_weekly.yml)
 
-Group: ``
+Group: `group::package`
 
 Status: `data_available`
 
-Tiers:
+Tiers: `free`, `premium`, `ultimate`
 
 ### `redis_hll_counters.deploy_token_packages.i_package_pypi_deploy_token_monthly`
 
-Missing description
+A monthly count of PyPI packages published to the registry using a deploy token
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216184842_i_package_pypi_deploy_token_monthly.yml)
 
-Group: ``
+Group: `group::package`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `redis_hll_counters.deploy_token_packages.i_package_pypi_deploy_token_weekly`
 
-Missing description
+A weekly count of Python packages published to the registry using a deploy token
 
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_7d/20210216184840_i_package_pypi_deploy_token_weekly.yml)
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_7d/20210216184840_i_package_pypi_deploy_token_weekly.yml)
 
-Group: ``
+Group: `group::package`
 
 Status: `data_available`
 
-Tiers:
+Tiers: `free`, `premium`, `ultimate`
 
 ### `redis_hll_counters.deploy_token_packages.i_package_rubygems_deploy_token_monthly`
 
-Distinct user count events for RubyGems packages in recent 28 days
+Distinct count events for RubyGems packages published using a Deploy token in recent 28 days
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210303154626_i_package_rubygems_deploy_token_monthly.yml)
 
@@ -10344,7 +10380,7 @@ Tiers: `free`, `premium`, `ultimate`
 
 ### `redis_hll_counters.deploy_token_packages.i_package_rubygems_deploy_token_weekly`
 
-Distinct RubyGems pakages deployed in recent 7 days
+A weekly count of distinct RubyGems packages published using a deploy token
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_7d/20210303154624_i_package_rubygems_deploy_token_weekly.yml)
 
@@ -10356,27 +10392,27 @@ Tiers: `free`, `premium`, `ultimate`
 
 ### `redis_hll_counters.deploy_token_packages.i_package_tag_deploy_token_monthly`
 
-Missing description
+A monthly count of package tags published to the registry using a deploy token
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216184846_i_package_tag_deploy_token_monthly.yml)
 
-Group: ``
+Group: `group::package`
 
-Status: `data_available`
+Status: `deprecated`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `redis_hll_counters.deploy_token_packages.i_package_tag_deploy_token_weekly`
 
-Missing description
+A weekly count of users that have published a package tag to the registry using a deploy token
 
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_7d/20210216184844_i_package_tag_deploy_token_weekly.yml)
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_7d/20210216184844_i_package_tag_deploy_token_weekly.yml)
 
-Group: ``
+Group: `group::package`
 
-Status: `data_available`
+Status: `deprecated`
 
-Tiers:
+Tiers: `free`, `premium`, `ultimate`
 
 ### `redis_hll_counters.deploy_token_packages.i_package_terraform_module_deploy_token_monthly`
 
@@ -10404,123 +10440,123 @@ Tiers: `free`, `premium`, `ultimate`
 
 ### `redis_hll_counters.ecosystem.ecosystem_total_unique_counts_monthly`
 
-Missing description
+Number of users performing actions on Jira issues by month
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216184957_ecosystem_total_unique_counts_monthly.yml)
 
-Group: ``
+Group: `group::ecosystem`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `redis_hll_counters.ecosystem.ecosystem_total_unique_counts_weekly`
 
-Missing description
+Number of users performing actions on Jira issues by week
 
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_7d/20210216184955_ecosystem_total_unique_counts_weekly.yml)
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_7d/20210216184955_ecosystem_total_unique_counts_weekly.yml)
 
-Group: ``
+Group: `group::ecosystem`
 
 Status: `data_available`
 
-Tiers:
+Tiers: `free`, `premium`, `ultimate`
 
 ### `redis_hll_counters.ecosystem.i_ecosystem_jira_service_close_issue_monthly`
 
-Missing description
+Number of users closing Jira issues by month
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216184941_i_ecosystem_jira_service_close_issue_monthly.yml)
 
-Group: ``
+Group: `group::ecosystem`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `redis_hll_counters.ecosystem.i_ecosystem_jira_service_close_issue_weekly`
 
-Missing description
+Number of users closing Jira issues by week
 
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_7d/20210216184939_i_ecosystem_jira_service_close_issue_weekly.yml)
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_7d/20210216184939_i_ecosystem_jira_service_close_issue_weekly.yml)
 
-Group: ``
+Group: `group::ecosystem`
 
 Status: `data_available`
 
-Tiers:
+Tiers: `free`, `premium`, `ultimate`
 
 ### `redis_hll_counters.ecosystem.i_ecosystem_jira_service_create_issue_monthly`
 
-Missing description
+Number of users creating Jira issues by month
 
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216184953_i_ecosystem_jira_service_create_issue_monthly.yml)
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210216184953_i_ecosystem_jira_service_create_issue_monthly.yml)
 
-Group: ``
+Group: `group::ecosystem`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `premium`, `ultimate`
 
 ### `redis_hll_counters.ecosystem.i_ecosystem_jira_service_create_issue_weekly`
 
-Missing description
+Number of users creating Jira issues by week
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_7d/20210216184951_i_ecosystem_jira_service_create_issue_weekly.yml)
 
-Group: ``
+Group: `group::ecosystem`
 
 Status: `data_available`
 
-Tiers:
+Tiers: `premium`, `ultimate`
 
 ### `redis_hll_counters.ecosystem.i_ecosystem_jira_service_cross_reference_monthly`
 
-Missing description
+Number of users that cross-referenced Jira issues by month
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216184945_i_ecosystem_jira_service_cross_reference_monthly.yml)
 
-Group: ``
+Group: `group::ecosystem`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `redis_hll_counters.ecosystem.i_ecosystem_jira_service_cross_reference_weekly`
 
-Missing description
+Number of users that cross-referenced Jira issues by week
 
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_7d/20210216184943_i_ecosystem_jira_service_cross_reference_weekly.yml)
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_7d/20210216184943_i_ecosystem_jira_service_cross_reference_weekly.yml)
 
-Group: ``
+Group: `group::ecosystem`
 
 Status: `data_available`
 
-Tiers:
+Tiers: `free`, `premium`, `ultimate`
 
 ### `redis_hll_counters.ecosystem.i_ecosystem_jira_service_list_issues_monthly`
 
-Missing description
+Count of Jira Issue List visits by month
 
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216184949_i_ecosystem_jira_service_list_issues_monthly.yml)
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210216184949_i_ecosystem_jira_service_list_issues_monthly.yml)
 
-Group: ``
+Group: `group::ecosystem`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `premium`, `ultimate`
 
 ### `redis_hll_counters.ecosystem.i_ecosystem_jira_service_list_issues_weekly`
 
-Missing description
+Count of Jira Issue List visits by week
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_7d/20210216184947_i_ecosystem_jira_service_list_issues_weekly.yml)
 
-Group: ``
+Group: `group::ecosystem`
 
 Status: `data_available`
 
-Tiers:
+Tiers: `premium`, `ultimate`
 
 ### `redis_hll_counters.ecosystem.i_ecosystem_slack_service_confidential_issue_notification_monthly`
 
@@ -11170,6 +11206,30 @@ Status: `data_available`
 
 Tiers: `premium`, `ultimate`
 
+### `redis_hll_counters.epics_usage.g_project_management_users_epic_issue_added_from_epic_monthly`
+
+Number of users creating an issue from an epic
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210608191652_g_project_management_users_epic_issue_added_from_epic_monthly.yml)
+
+Group: `group::product planning`
+
+Status: `implemented`
+
+Tiers: `premium`
+
+### `redis_hll_counters.epics_usage.g_project_management_users_epic_issue_added_from_epic_weekly`
+
+Number of users creating an issue from an epic
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_7d/20210608191647_g_project_management_users_epic_issue_added_from_epic_weekly.yml)
+
+Group: `group::product planning`
+
+Status: `implemented`
+
+Tiers: `premium`
+
 ### `redis_hll_counters.epics_usage.g_project_management_users_removing_epic_emoji_monthly`
 
 Counts of MAU removing emoji on epic
@@ -11532,7 +11592,7 @@ Tiers: `premium`, `ultimate`
 
 ### `redis_hll_counters.ide_edit.g_edit_by_sfe_monthly`
 
-Missing description
+Number of users editing a file from the single file editor
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216180334_g_edit_by_sfe_monthly.yml)
 
@@ -11540,23 +11600,23 @@ Group: `group::editor`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `redis_hll_counters.ide_edit.g_edit_by_sfe_weekly`
 
-Missing description
+Weekly number of users editing from the single file editor
 
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_7d/20210216180332_g_edit_by_sfe_weekly.yml)
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_7d/20210216180332_g_edit_by_sfe_weekly.yml)
 
 Group: `group::editor`
 
 Status: `data_available`
 
-Tiers:
+Tiers: `free`, `premium`, `ultimate`
 
 ### `redis_hll_counters.ide_edit.g_edit_by_snippet_ide_monthly`
 
-Missing description
+Count of monthly edits to a snippet
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216180338_g_edit_by_snippet_ide_monthly.yml)
 
@@ -11564,47 +11624,47 @@ Group: `group::editor`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `redis_hll_counters.ide_edit.g_edit_by_snippet_ide_weekly`
 
-Missing description
+Weekly number of users editing Snippets
 
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_7d/20210216180336_g_edit_by_snippet_ide_weekly.yml)
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_7d/20210216180336_g_edit_by_snippet_ide_weekly.yml)
 
 Group: `group::editor`
 
 Status: `data_available`
 
-Tiers:
+Tiers: `free`, `premium`, `ultimate`
 
 ### `redis_hll_counters.ide_edit.g_edit_by_sse_monthly`
 
-Missing description
+Number of user editing files using the Static Site Editor
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216184024_g_edit_by_sse_monthly.yml)
 
-Group: ``
+Group: `group::editor`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `redis_hll_counters.ide_edit.g_edit_by_sse_weekly`
 
-Missing description
+Weekly number of users editing using the Static Site Editor
 
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_7d/20210216184022_g_edit_by_sse_weekly.yml)
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_7d/20210216184022_g_edit_by_sse_weekly.yml)
 
-Group: ``
+Group: `group::editor`
 
 Status: `data_available`
 
-Tiers:
+Tiers: `free`, `premium`, `ultimate`
 
 ### `redis_hll_counters.ide_edit.g_edit_by_web_ide_monthly`
 
-Missing description
+Number of users editing a file from the Web IDE
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216180330_g_edit_by_web_ide_monthly.yml)
 
@@ -11612,23 +11672,23 @@ Group: `group::editor`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `redis_hll_counters.ide_edit.g_edit_by_web_ide_weekly`
 
-Missing description
+Weekly number of users editing using the Web IDE
 
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_7d/20210216180328_g_edit_by_web_ide_weekly.yml)
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_7d/20210216180328_g_edit_by_web_ide_weekly.yml)
 
 Group: `group::editor`
 
 Status: `data_available`
 
-Tiers:
+Tiers: `free`, `premium`, `ultimate`
 
 ### `redis_hll_counters.ide_edit.ide_edit_total_unique_counts_monthly`
 
-Missing description
+Count of unique users per month who edited a file from the Web IDE
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216180341_ide_edit_total_unique_counts_monthly.yml)
 
@@ -11636,19 +11696,19 @@ Group: `group::editor`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `redis_hll_counters.ide_edit.ide_edit_total_unique_counts_weekly`
 
-Missing description
+Weekly number of users editing a file using the Web IDE
 
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_7d/20210216180339_ide_edit_total_unique_counts_weekly.yml)
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_7d/20210216180339_ide_edit_total_unique_counts_weekly.yml)
 
 Group: `group::editor`
 
 Status: `data_available`
 
-Tiers:
+Tiers: `free`, `premium`, `ultimate`
 
 ### `redis_hll_counters.incident_management.incident_management_alert_assigned_monthly`
 
@@ -14700,27 +14760,27 @@ Tiers: `free`, `premium`, `ultimate`
 
 ### `redis_hll_counters.snippets.i_snippets_show_monthly`
 
-Missing description
+Monthly number of users viewing snippets
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216184255_i_snippets_show_monthly.yml)
 
-Group: ``
+Group: `group::editor`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `redis_hll_counters.snippets.i_snippets_show_weekly`
 
-Missing description
+Weekly number of users viewing snippets
 
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_7d/20210216184253_i_snippets_show_weekly.yml)
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_7d/20210216184253_i_snippets_show_weekly.yml)
 
-Group: ``
+Group: `group::editor`
 
 Status: `data_available`
 
-Tiers:
+Tiers: `free`, `premium`, `ultimate`
 
 ### `redis_hll_counters.source_code.design_action_monthly`
 
@@ -15180,147 +15240,147 @@ Tiers: `free`, `premium`, `ultimate`
 
 ### `redis_hll_counters.user_packages.i_package_composer_user_monthly`
 
-Missing description
+A monthly count of users that have published a Composer package to the registry
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216184854_i_package_composer_user_monthly.yml)
 
-Group: ``
+Group: `group::package`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `redis_hll_counters.user_packages.i_package_composer_user_weekly`
 
-Missing description
+A weekly count of users that have published a Composer package to the registry
 
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_7d/20210216184852_i_package_composer_user_weekly.yml)
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_7d/20210216184852_i_package_composer_user_weekly.yml)
 
-Group: ``
+Group: `group::package`
 
 Status: `data_available`
 
-Tiers:
+Tiers: `free`, `premium`, `ultimate`
 
 ### `redis_hll_counters.user_packages.i_package_conan_user_monthly`
 
-Missing description
+A monthly count of users that have published a Conan package to the registry
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216184858_i_package_conan_user_monthly.yml)
 
-Group: ``
+Group: `group::package`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `redis_hll_counters.user_packages.i_package_conan_user_weekly`
 
-Missing description
+A weekly count of users that have published a Conan package to the registry
 
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_7d/20210216184856_i_package_conan_user_weekly.yml)
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_7d/20210216184856_i_package_conan_user_weekly.yml)
 
-Group: ``
+Group: `group::package`
 
 Status: `data_available`
 
-Tiers:
+Tiers: `free`, `premium`, `ultimate`
 
 ### `redis_hll_counters.user_packages.i_package_container_user_monthly`
 
-Missing description
+A monthly count of users that have published a container image to the registry
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216184902_i_package_container_user_monthly.yml)
 
-Group: ``
+Group: `group::package`
 
-Status: `data_available`
+Status: `deprecated`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `redis_hll_counters.user_packages.i_package_container_user_weekly`
 
-Missing description
+A weekly count of users that have published a container image to the registry
 
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_7d/20210216184900_i_package_container_user_weekly.yml)
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_7d/20210216184900_i_package_container_user_weekly.yml)
 
-Group: ``
+Group: `group::package`
 
-Status: `data_available`
+Status: `deprecated`
 
-Tiers:
+Tiers: `free`, `premium`, `ultimate`
 
 ### `redis_hll_counters.user_packages.i_package_debian_user_monthly`
 
-Missing description
+A monthly count of users that have published a Debian package to the registry
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216184906_i_package_debian_user_monthly.yml)
 
-Group: ``
+Group: `group::package`
 
-Status: `data_available`
+Status: `deprecated`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `redis_hll_counters.user_packages.i_package_debian_user_weekly`
 
-Missing description
+A weekly count of users that have published a Debian package to the registry
 
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_7d/20210216184904_i_package_debian_user_weekly.yml)
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_7d/20210216184904_i_package_debian_user_weekly.yml)
 
-Group: ``
+Group: `group::package`
 
-Status: `data_available`
+Status: `deprecated`
 
-Tiers:
+Tiers: `free`, `premium`, `ultimate`
 
 ### `redis_hll_counters.user_packages.i_package_generic_user_monthly`
 
-Missing description
+A monthly count of users that have published a generic package to the registry
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216184910_i_package_generic_user_monthly.yml)
 
-Group: ``
+Group: `group::package`
 
-Status: `data_available`
+Status: `broken`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `redis_hll_counters.user_packages.i_package_generic_user_weekly`
 
-Missing description
+A weekly count of users that have published a generic package to the registry
 
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_7d/20210216184908_i_package_generic_user_weekly.yml)
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_7d/20210216184908_i_package_generic_user_weekly.yml)
 
-Group: ``
+Group: `group::package`
 
-Status: `data_available`
+Status: `broken`
 
-Tiers:
+Tiers: `free`, `premium`, `ultimate`
 
 ### `redis_hll_counters.user_packages.i_package_golang_user_monthly`
 
-Missing description
+A monthly count of users that have published a Go moduleto the registry
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216184913_i_package_golang_user_monthly.yml)
 
-Group: ``
+Group: `group::package`
 
-Status: `data_available`
+Status: `deprecated`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `redis_hll_counters.user_packages.i_package_golang_user_weekly`
 
-Missing description
+A weekly count of users that have published a Go module to the registry
 
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_7d/20210216184911_i_package_golang_user_weekly.yml)
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_7d/20210216184911_i_package_golang_user_weekly.yml)
 
-Group: ``
+Group: `group::package`
 
-Status: `data_available`
+Status: `deprecated`
 
-Tiers:
+Tiers: `free`, `premium`, `ultimate`
 
 ### `redis_hll_counters.user_packages.i_package_helm_user_monthly`
 
@@ -15348,103 +15408,103 @@ Tiers: `free`, `premium`, `ultimate`
 
 ### `redis_hll_counters.user_packages.i_package_maven_user_monthly`
 
-Missing description
+A monthly count of users that have published a Maven package to the registry
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216184917_i_package_maven_user_monthly.yml)
 
-Group: ``
+Group: `group::package`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `redis_hll_counters.user_packages.i_package_maven_user_weekly`
 
-Missing description
+A weekly count of users that have published a Maven package to the registry
 
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_7d/20210216184916_i_package_maven_user_weekly.yml)
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_7d/20210216184916_i_package_maven_user_weekly.yml)
 
-Group: ``
+Group: `group::package`
 
 Status: `data_available`
 
-Tiers:
+Tiers: `free`, `premium`, `ultimate`
 
 ### `redis_hll_counters.user_packages.i_package_npm_user_monthly`
 
-Missing description
+A monthly count of users that have published an npm package to the registry
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216184921_i_package_npm_user_monthly.yml)
 
-Group: ``
+Group: `group::package`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `redis_hll_counters.user_packages.i_package_npm_user_weekly`
 
-Missing description
+A weekly count of users that have published an npm package to the registry
 
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_7d/20210216184919_i_package_npm_user_weekly.yml)
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_7d/20210216184919_i_package_npm_user_weekly.yml)
 
-Group: ``
+Group: `group::package`
 
 Status: `data_available`
 
-Tiers:
+Tiers: `free`, `premium`, `ultimate`
 
 ### `redis_hll_counters.user_packages.i_package_nuget_user_monthly`
 
-Missing description
+A monthly count of users that have published a NuGet package to the registry
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216184925_i_package_nuget_user_monthly.yml)
 
-Group: ``
+Group: `group::package`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `redis_hll_counters.user_packages.i_package_nuget_user_weekly`
 
-Missing description
+A weekly count of users that have published a NuGet package to the registry
 
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_7d/20210216184923_i_package_nuget_user_weekly.yml)
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_7d/20210216184923_i_package_nuget_user_weekly.yml)
 
-Group: ``
+Group: `group::package`
 
 Status: `data_available`
 
-Tiers:
+Tiers: `free`, `premium`, `ultimate`
 
 ### `redis_hll_counters.user_packages.i_package_pypi_user_monthly`
 
-Missing description
+A monthly count of users that have published a PyPI package to the registry
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216184929_i_package_pypi_user_monthly.yml)
 
-Group: ``
+Group: `group::package`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `redis_hll_counters.user_packages.i_package_pypi_user_weekly`
 
-Missing description
+A weekly count of users that have published a Python package to the registry
 
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_7d/20210216184927_i_package_pypi_user_weekly.yml)
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_7d/20210216184927_i_package_pypi_user_weekly.yml)
 
-Group: ``
+Group: `group::package`
 
 Status: `data_available`
 
-Tiers:
+Tiers: `free`, `premium`, `ultimate`
 
 ### `redis_hll_counters.user_packages.i_package_rubygems_user_monthly`
 
-Distinct user count events for RubyGems packages in recent 28 days
+Distinct user count of RubyGems packages published in recent 28 days
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210303154654_i_package_rubygems_user_monthly.yml)
 
@@ -15456,7 +15516,7 @@ Tiers: `free`, `premium`, `ultimate`
 
 ### `redis_hll_counters.user_packages.i_package_rubygems_user_weekly`
 
-Distinct user count events for RubyGems packages in recent 7 days
+A weekly count of distinct RubyGems packages published by a user
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_7d/20210303154652_i_package_rubygems_user_weekly.yml)
 
@@ -15468,27 +15528,27 @@ Tiers: `free`, `premium`, `ultimate`
 
 ### `redis_hll_counters.user_packages.i_package_tag_user_monthly`
 
-Missing description
+A monthly count of users that have published a package tag to the registry
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216184933_i_package_tag_user_monthly.yml)
 
-Group: ``
+Group: `group::package`
 
-Status: `data_available`
+Status: `deprecated`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `redis_hll_counters.user_packages.i_package_tag_user_weekly`
 
-Missing description
+A weekly count of users that have published a package with a tag to the registry
 
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_7d/20210216184931_i_package_tag_user_weekly.yml)
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_7d/20210216184931_i_package_tag_user_weekly.yml)
 
-Group: ``
+Group: `group::package`
 
-Status: `data_available`
+Status: `deprecated`
 
-Tiers:
+Tiers: `free`, `premium`, `ultimate`
 
 ### `redis_hll_counters.user_packages.i_package_terraform_module_user_monthly`
 
@@ -15516,27 +15576,27 @@ Tiers: `free`, `premium`, `ultimate`
 
 ### `redis_hll_counters.user_packages.user_packages_total_unique_counts_monthly`
 
-Missing description
+A monthly count of users that have published a package to the registry
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216184937_user_packages_total_unique_counts_monthly.yml)
 
-Group: ``
+Group: `group::package`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `redis_hll_counters.user_packages.user_packages_total_unique_counts_weekly`
 
-Missing description
+A weekly count of users that have published a package to the registry
 
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_7d/20210216184935_user_packages_total_unique_counts_weekly.yml)
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_7d/20210216184935_user_packages_total_unique_counts_weekly.yml)
 
-Group: ``
+Group: `group::package`
 
 Status: `data_available`
 
-Tiers:
+Tiers: `free`, `premium`, `ultimate`
 
 ### `reply_by_email_enabled`
 
@@ -15544,11 +15604,11 @@ Whether incoming email is setup
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/settings/20210204124916_reply_by_email_enabled.yml)
 
-Group: `group::product intelligence`
+Group: `group::certify`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `search_unique_visits.i_search_advanced`
 
@@ -15896,7 +15956,7 @@ Projects with Prometheus alerting enabled
 
 Group: `group::configure`
 
-Status: `deprecated`
+Status: `removed`
 
 Tiers: `free`, `premium`, `ultimate`
 
@@ -16142,7 +16202,7 @@ Tiers: `free`, `premium`, `ultimate`
 
 ### `usage_activity_by_stage.create.snippets`
 
-Snippets
+Count of distinct author_id from snippets
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216180316_snippets.yml)
 
@@ -16217,6 +16277,18 @@ Tiers: `premium`, `ultimate`
 Number of Git fetch events from Prometheus on the Geo secondary
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_7d/20210309194425_git_fetch_event_count_weekly.yml)
+
+Group: `group::geo`
+
+Status: `data_available`
+
+Tiers: `premium`, `ultimate`
+
+### `usage_activity_by_stage.enablement.counts.geo_node_usage.git_push_event_count_weekly`
+
+Number of Git push events from Prometheus on the Geo secondary
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_7d/20210604110603_git_push_event_count_weekly.yml)
 
 Group: `group::geo`
 
@@ -16322,15 +16394,15 @@ Tiers: `premium`
 
 ### `usage_activity_by_stage.manage.groups`
 
-Missing description
+Number of users who are group members.
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216180756_groups.yml)
 
-Group: `group::manage`
+Group: `group::access`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `usage_activity_by_stage.manage.groups_imported`
 
@@ -16442,75 +16514,75 @@ Tiers: `free`
 
 ### `usage_activity_by_stage.manage.ldap_admin_sync_enabled`
 
-Has the instance configured LDAP Admin Sync `https://docs.gitlab.com/ee/administration/auth/ldap/#administrator-sync`?
+Has the instance configured [LDAP Admin Sync](https://docs.gitlab.com/ee/administration/auth/ldap/#administrator-sync)
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/settings/20210216180811_ldap_admin_sync_enabled.yml)
 
-Group: `group::manage`
+Group: `group::access`
 
 Status: `data_available`
 
-Tiers:
+Tiers: `premium`, `ultimate`
 
 ### `usage_activity_by_stage.manage.ldap_group_sync_enabled`
 
-Has the instance configured LDAP Group Sync `https://docs.gitlab.com/ee/administration/auth/ldap/#group-sync`?
+Has the instance configured [LDAP Group Sync](https://docs.gitlab.com/ee/administration/auth/ldap/#group-sync)
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/settings/20210216180809_ldap_group_sync_enabled.yml)
 
-Group: `group::manage`
+Group: `group::access`
 
 Status: `data_available`
 
-Tiers:
+Tiers: `premium`, `ultimate`
 
 ### `usage_activity_by_stage.manage.ldap_keys`
 
-Missing description
+Number of users creating keys synced as part of LDAP
 
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216180800_ldap_keys.yml)
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_all/20210216180800_ldap_keys.yml)
 
-Group: `group::manage`
+Group: `group::access`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `premium`, `ultimate`
 
 ### `usage_activity_by_stage.manage.ldap_servers`
 
-Number of LDAP servers configured for the instance `https://docs.gitlab.com/ee/administration/auth/ldap/#multiple-ldap-servers`
+Number of [LDAP servers configured for the instance](https://docs.gitlab.com/ee/administration/auth/ldap/#multiple-ldap-servers)
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_all/20210216180807_ldap_servers.yml)
 
-Group: `group::manage`
+Group: `group::access`
 
 Status: `data_available`
 
-Tiers:
+Tiers: `premium`, `ultimate`
 
 ### `usage_activity_by_stage.manage.ldap_users`
 
-Missing description
+Number of users that are linked to LDAP
 
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216180801_ldap_users.yml)
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_all/20210216180801_ldap_users.yml)
 
-Group: `group::manage`
+Group: `group::access`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `premium`, `ultimate`
 
 ### `usage_activity_by_stage.manage.omniauth_providers`
 
-Missing description
+Number of unique user logins using an OmniAuth provider
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216183400_omniauth_providers.yml)
 
-Group: ``
+Group: `group::access`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `usage_activity_by_stage.manage.project_imports.bitbucket`
 
@@ -16766,75 +16838,75 @@ Tiers: `free`
 
 ### `usage_activity_by_stage.manage.user_auth_by_provider.google_oauth2`
 
-Missing description
+Number of unique user logins using Google OAuth authentication
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216183410_google_oauth2.yml)
 
-Group: ``
+Group: `group::access`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `usage_activity_by_stage.manage.user_auth_by_provider.standard`
 
-Missing description
+Number of unique user logins using password authentication
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216183408_standard.yml)
 
-Group: ``
+Group: `group::access`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `usage_activity_by_stage.manage.user_auth_by_provider.two-factor`
 
-Missing description
+Number of unique user logins using two factor authentication
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216183402_two-factor.yml)
 
-Group: ``
+Group: `group::access`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `usage_activity_by_stage.manage.user_auth_by_provider.two-factor-via-u2f-device`
 
-Missing description
+Number of unique user logins using two factor via a U2F device
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216183404_two-factor-via-u2f-device.yml)
 
-Group: ``
+Group: `group::access`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `usage_activity_by_stage.manage.user_auth_by_provider.two-factor-via-webauthn-device`
 
-Missing description
+Number of unique user logins using two factor via a WebAuthn device
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216183406_two-factor-via-webauthn-device.yml)
 
-Group: ``
+Group: `group::access`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `usage_activity_by_stage.manage.users_created`
 
-Missing description
+Number of users
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216180758_users_created.yml)
 
-Group: `group::manage`
+Group: `group::access`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `usage_activity_by_stage.manage.value_stream_management_customized_group_stages`
 
@@ -16972,7 +17044,7 @@ Tiers: `free`, `premium`, `ultimate`
 
 ### `usage_activity_by_stage.package.projects_with_packages`
 
-Projects with package registry configured
+Projects with package registry enabled
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216181055_projects_with_packages.yml)
 
@@ -16980,7 +17052,7 @@ Group: `group::package`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `usage_activity_by_stage.plan.assignee_lists`
 
@@ -17758,7 +17830,7 @@ Projects with Prometheus alerting enabled
 
 Group: `group::monitor`
 
-Status: `deprecated`
+Status: `removed`
 
 Tiers: `free`, `premium`, `ultimate`
 
@@ -17788,7 +17860,7 @@ Tiers: `free`, `premium`, `ultimate`
 
 ### `usage_activity_by_stage_monthly.create.action_monthly_active_users_ide_edit`
 
-Count unique edit actions when users used an IDE, no matter which one
+Number of unique users per month who edited a file from any web editor
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216180327_action_monthly_active_users_ide_edit.yml)
 
@@ -17796,7 +17868,7 @@ Group: `group::editor`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `usage_activity_by_stage_monthly.create.action_monthly_active_users_project_repo`
 
@@ -17812,7 +17884,7 @@ Tiers: `free`, `premium`, `ultimate`
 
 ### `usage_activity_by_stage_monthly.create.action_monthly_active_users_sfe_edit`
 
-Count unique edit actions using the single file editor
+Number of users using single file editor
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216180321_action_monthly_active_users_sfe_edit.yml)
 
@@ -17820,11 +17892,11 @@ Group: `group::editor`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `usage_activity_by_stage_monthly.create.action_monthly_active_users_snippet_editor_edit`
 
-Count unique edit actions using the snippet editor
+Number of users using the snippet editor
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216180323_action_monthly_active_users_snippet_editor_edit.yml)
 
@@ -17832,11 +17904,11 @@ Group: `group::editor`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `usage_activity_by_stage_monthly.create.action_monthly_active_users_sse_edit`
 
-Count unique edit actions using the static site editor
+Number of users using the static site editor
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216180325_action_monthly_active_users_sse_edit.yml)
 
@@ -17844,11 +17916,11 @@ Group: `group::editor`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `usage_activity_by_stage_monthly.create.action_monthly_active_users_web_ide_edit`
 
-Count unique edit actions using the web IDE
+Number of users editing using web IDE
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216180319_action_monthly_active_users_web_ide_edit.yml)
 
@@ -17856,19 +17928,19 @@ Group: `group::editor`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `usage_activity_by_stage_monthly.create.action_monthly_active_users_wiki_repo`
 
-Missing description
+Unique monthly active users of the Wiki
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216180747_action_monthly_active_users_wiki_repo.yml)
 
-Group: `group::knowledge`
+Group: `group::editor`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `usage_activity_by_stage_monthly.create.approval_project_rules`
 
@@ -18124,7 +18196,7 @@ Tiers: `free`, `premium`, `ultimate`
 
 ### `usage_activity_by_stage_monthly.create.snippets`
 
-Monthly Snippets
+Count of distinct author_id from snippets for last 28 days
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216180317_snippets.yml)
 
@@ -18280,27 +18352,27 @@ Tiers: `free`, `premium`, `ultimate`
 
 ### `usage_activity_by_stage_monthly.manage.group_saml_enabled`
 
-Missing description
+Whether group SAML is enabled
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/settings/20210216180833_group_saml_enabled.yml)
 
-Group: `group::manage`
+Group: `group:access`
 
 Status: `data_available`
 
-Tiers:
+Tiers: `premium`, `ultimate`
 
 ### `usage_activity_by_stage_monthly.manage.groups`
 
-Missing description
+Number of users who are group members for last 28 days
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216180816_groups.yml)
 
-Group: `group::manage`
+Group: `group::access`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `usage_activity_by_stage_monthly.manage.groups_imported`
 
@@ -18412,43 +18484,43 @@ Tiers: `free`
 
 ### `usage_activity_by_stage_monthly.manage.ldap_admin_sync_enabled`
 
-Missing description
+Whether LDAP admin sync is enabled
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/settings/20210216180831_ldap_admin_sync_enabled.yml)
 
-Group: `group::manage`
+Group: `group::access`
 
 Status: `data_available`
 
-Tiers:
+Tiers: `premium`, `ultimate`
 
 ### `usage_activity_by_stage_monthly.manage.ldap_group_sync_enabled`
 
-Missing description
+Has the instance configured [LDAP Group Sync](https://docs.gitlab.com/ee/administration/auth/ldap/#group-sync)
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/settings/20210216180829_ldap_group_sync_enabled.yml)
 
-Group: `group::manage`
+Group: `group::acess`
 
 Status: `data_available`
 
-Tiers:
+Tiers: `premium`, `ultimate`
 
 ### `usage_activity_by_stage_monthly.manage.ldap_keys`
 
-Missing description
+Number of users creating keys synced as part of LDAP for last 28 days.
 
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216180820_ldap_keys.yml)
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210216180820_ldap_keys.yml)
 
-Group: `group::manage`
+Group: `group::acess`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `premium`, `ultimate`
 
 ### `usage_activity_by_stage_monthly.manage.ldap_servers`
 
-Missing description
+Number of LDAP servers configured
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210216180827_ldap_servers.yml)
 
@@ -18456,31 +18528,31 @@ Group: `group::manage`
 
 Status: `data_available`
 
-Tiers:
+Tiers: `premium`, `ultimate`
 
 ### `usage_activity_by_stage_monthly.manage.ldap_users`
 
-Missing description
+Number of users that are linked to LDAP
 
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216180822_ldap_users.yml)
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210216180822_ldap_users.yml)
 
-Group: `group::manage`
+Group: `group::access`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `premium`, `ultimate`
 
 ### `usage_activity_by_stage_monthly.manage.omniauth_providers`
 
-Missing description
+Number of unique user logins using an OmniAuth provider
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216183627_omniauth_providers.yml)
 
-Group: ``
+Group: `group::access`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `usage_activity_by_stage_monthly.manage.project_imports.bitbucket`
 
@@ -18736,63 +18808,63 @@ Tiers: `free`, `premium`, `ultimate`
 
 ### `usage_activity_by_stage_monthly.manage.user_auth_by_provider.google_oauth2`
 
-Missing description
+Number of unique user logins using Google OAuth authentication
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216183636_google_oauth2.yml)
 
-Group: ``
+Group: `group::access`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `usage_activity_by_stage_monthly.manage.user_auth_by_provider.standard`
 
-Missing description
+Number of unique user logins using password authentication
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216183634_standard.yml)
 
-Group: ``
+Group: `group::access`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `usage_activity_by_stage_monthly.manage.user_auth_by_provider.two-factor`
 
-Missing description
+Number of unique user logins using two factor authentication
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216183629_two-factor.yml)
 
-Group: ``
+Group: `group::access`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `usage_activity_by_stage_monthly.manage.user_auth_by_provider.two-factor-via-u2f-device`
 
-Missing description
+Number of unique user logins using two factor via a U2F device
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216183631_two-factor-via-u2f-device.yml)
 
-Group: ``
+Group: `group::access`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `usage_activity_by_stage_monthly.manage.user_auth_by_provider.two-factor-via-webauthn-device`
 
-Missing description
+Number of unique user logins using two factor via a WebAuthn device
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216183633_two-factor-via-webauthn-device.yml)
 
-Group: ``
+Group: `group::access`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `usage_activity_by_stage_monthly.manage.users_created`
 
@@ -18800,11 +18872,11 @@ Number of users created in the month
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216180818_users_created.yml)
 
-Group: `group::manage`
+Group: `group::access`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `usage_activity_by_stage_monthly.manage.value_stream_management_customized_group_stages`
 
@@ -18928,7 +19000,7 @@ Tiers: `free`, `premium`, `ultimate`
 
 ### `usage_activity_by_stage_monthly.package.projects_with_packages`
 
-Incident confidential status changed event
+The total number of projects in a given month with at least one package
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216181057_projects_with_packages.yml)
 
@@ -18936,7 +19008,7 @@ Group: `group::package`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `usage_activity_by_stage_monthly.plan.assignee_lists`
 
@@ -19600,12 +19672,12 @@ Tiers: `free`, `premium`, `ultimate`
 
 ### `web_ide_clientside_preview_enabled`
 
-Whether web ide clientside preview is enabled
+Whether Web IDE clientside preview is enabled
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/settings/20210204124920_web_ide_clientside_preview_enabled.yml)
 
-Group: `group::product intelligence`
+Group: `group::editor`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`

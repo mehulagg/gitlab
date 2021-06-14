@@ -59,11 +59,9 @@ describe('ee/BoardContentSidebar', () => {
         BoardSidebarLabelsSelect: true,
         SidebarAssigneesWidget: true,
         SidebarConfidentialityWidget: true,
-        BoardSidebarDueDate: true,
+        SidebarDateWidget: true,
         SidebarSubscriptionsWidget: true,
-        BoardSidebarMilestoneSelect: true,
         BoardSidebarWeightInput: true,
-        SidebarIterationWidget: true,
         SidebarDropdownWidget: true,
       },
     });

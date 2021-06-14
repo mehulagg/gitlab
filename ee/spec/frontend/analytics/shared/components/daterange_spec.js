@@ -2,6 +2,7 @@ import { GlDaterangePicker } from '@gitlab/ui';
 import { mount } from '@vue/test-utils';
 import Daterange from 'ee/analytics/shared/components/daterange.vue';
 import { useFakeDate } from 'helpers/fake_date';
+import { createMockDirective, getBinding } from 'helpers/vue_mock_directive';
 
 const defaultProps = {
   startDate: new Date(2019, 8, 1),
@@ -19,6 +20,7 @@ describe('Daterange component', () => {
         ...defaultProps,
         ...props,
       },
+      directives: { GlTooltip: createMockDirective() },
     });
   };
 
@@ -75,6 +77,16 @@ describe('Daterange component', () => {
 
       it('displays the correct number of selected days in the indicator', () => {
         expect(findDateRangeIndicator().find('span').text()).toBe('10 days');
+      });
+
+      it('displays a tooltip', () => {
+        const icon = wrapper.find('[data-testid="helper-icon"]');
+        const tooltip = getBinding(icon.element, 'gl-tooltip');
+
+        expect(tooltip).toBeDefined();
+        expect(icon.attributes('title')).toBe(
+          'Showing data for workflow items created in this date range. Date range cannot exceed 30 days.',
+        );
       });
     });
   });

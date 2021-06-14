@@ -19,20 +19,10 @@ module EE
             add_item(license_compliance_menu_item)
             add_item(threat_monitoring_menu_item)
             add_item(scan_policies_menu_item)
-            add_item(configuration_menu_item)
             add_item(audit_events_menu_item)
+            add_item(configuration_menu_item)
 
             true
-          end
-
-          override :link
-          def link
-            return discover_project_security_menu_item.link if discover_project_security_menu_item.render?
-            return security_dashboard_menu_item.link if security_dashboard_menu_item.render?
-            return audit_events_menu_item.link if audit_events_menu_item.render?
-            return dependencies_menu_item.link if dependencies_menu_item.render?
-
-            renderable_items.first&.link
           end
 
           private
@@ -58,143 +48,125 @@ module EE
           end
 
           def discover_project_security_menu_item
-            strong_memoize(:discover_project_security_menu_item) do
-              unless context.show_discover_project_security
-                next ::Sidebars::NilMenuItem.new(item_id: :discover_project_security)
-              end
-
-              ::Sidebars::MenuItem.new(
-                title: _('Discover'),
-                link: project_security_discover_path(context.project),
-                active_routes: { path: 'projects/security/discover#show' },
-                item_id: :discover_project_security
-              )
+            unless context.show_discover_project_security
+              return ::Sidebars::NilMenuItem.new(item_id: :discover_project_security)
             end
+
+            ::Sidebars::MenuItem.new(
+              title: _('Discover'),
+              link: project_security_discover_path(context.project),
+              active_routes: { path: 'projects/security/discover#show' },
+              item_id: :discover_project_security
+            )
           end
 
           def security_dashboard_menu_item
-            strong_memoize(:security_dashboard_menu_item) do
-              unless can?(context.current_user, :read_project_security_dashboard, context.project)
-                next ::Sidebars::NilMenuItem.new(item_id: :dashboard)
-              end
-
-              ::Sidebars::MenuItem.new(
-                title: _('Security Dashboard'),
-                link: project_security_dashboard_index_path(context.project),
-                active_routes: { path: 'projects/security/dashboard#index' },
-                item_id: :dashboard
-              )
+            unless can?(context.current_user, :read_project_security_dashboard, context.project)
+              return ::Sidebars::NilMenuItem.new(item_id: :dashboard)
             end
+
+            ::Sidebars::MenuItem.new(
+              title: _('Security Dashboard'),
+              link: project_security_dashboard_index_path(context.project),
+              active_routes: { path: 'projects/security/dashboard#index' },
+              item_id: :dashboard
+            )
           end
 
           def vulnerability_report_menu_item
-            strong_memoize(:vulnerability_report_menu_item) do
-              unless can?(context.current_user, :read_project_security_dashboard, context.project)
-                next ::Sidebars::NilMenuItem.new(item_id: :vulnerability_report)
-              end
-
-              ::Sidebars::MenuItem.new(
-                title: _('Vulnerability Report'),
-                link: project_security_vulnerability_report_index_path(context.project),
-                active_routes: { path: %w[projects/security/vulnerability_report#index projects/security/vulnerabilities#show] },
-                item_id: :vulnerability_report
-              )
+            unless can?(context.current_user, :read_project_security_dashboard, context.project)
+              return ::Sidebars::NilMenuItem.new(item_id: :vulnerability_report)
             end
+
+            ::Sidebars::MenuItem.new(
+              title: _('Vulnerability Report'),
+              link: project_security_vulnerability_report_index_path(context.project),
+              active_routes: { path: %w[projects/security/vulnerability_report#index projects/security/vulnerabilities#show] },
+              item_id: :vulnerability_report
+            )
           end
 
           def on_demand_scans_menu_item
-            strong_memoize(:on_demand_scans_menu_item) do
-              unless can?(context.current_user, :read_on_demand_scans, context.project)
-                next ::Sidebars::NilMenuItem.new(item_id: :on_demand_scans)
-              end
-
-              ::Sidebars::MenuItem.new(
-                title: s_('OnDemandScans|On-demand Scans'),
-                link: new_project_on_demand_scan_path(context.project),
-                item_id: :on_demand_scans,
-                active_routes: { path: %w[
-                  projects/on_demand_scans#index
-                  projects/on_demand_scans#new
-                  projects/on_demand_scans#edit
-                ] }
-              )
+            unless can?(context.current_user, :read_on_demand_scans, context.project)
+              return ::Sidebars::NilMenuItem.new(item_id: :on_demand_scans)
             end
+
+            ::Sidebars::MenuItem.new(
+              title: s_('OnDemandScans|On-demand Scans'),
+              link: new_project_on_demand_scan_path(context.project),
+              item_id: :on_demand_scans,
+              active_routes: { path: %w[
+                projects/on_demand_scans#index
+                projects/on_demand_scans#new
+                projects/on_demand_scans#edit
+              ] }
+            )
           end
 
           def dependencies_menu_item
-            strong_memoize(:dependencies_menu_item) do
-              unless can?(context.current_user, :read_dependencies, context.project)
-                next ::Sidebars::NilMenuItem.new(item_id: :dependency_list)
-              end
-
-              ::Sidebars::MenuItem.new(
-                title: _('Dependency List'),
-                link: project_dependencies_path(context.project),
-                active_routes: { path: 'projects/dependencies#index' },
-                item_id: :dependency_list
-              )
+            unless can?(context.current_user, :read_dependencies, context.project)
+              return ::Sidebars::NilMenuItem.new(item_id: :dependency_list)
             end
+
+            ::Sidebars::MenuItem.new(
+              title: _('Dependency List'),
+              link: project_dependencies_path(context.project),
+              active_routes: { path: 'projects/dependencies#index' },
+              item_id: :dependency_list
+            )
           end
 
           def license_compliance_menu_item
-            strong_memoize(:license_compliance_menu_item) do
-              unless can?(context.current_user, :read_licenses, context.project)
-                next ::Sidebars::NilMenuItem.new(item_id: :license_compliance)
-              end
-
-              ::Sidebars::MenuItem.new(
-                title: _('License Compliance'),
-                link: project_licenses_path(context.project),
-                active_routes: { path: 'projects/licenses#index' },
-                item_id: :license_compliance
-              )
+            unless can?(context.current_user, :read_licenses, context.project)
+              return ::Sidebars::NilMenuItem.new(item_id: :license_compliance)
             end
+
+            ::Sidebars::MenuItem.new(
+              title: _('License Compliance'),
+              link: project_licenses_path(context.project),
+              active_routes: { path: 'projects/licenses#index' },
+              item_id: :license_compliance
+            )
           end
 
           def threat_monitoring_menu_item
-            strong_memoize(:threat_monitoring_menu_item) do
-              unless can?(context.current_user, :read_threat_monitoring, context.project)
-                next ::Sidebars::NilMenuItem.new(item_id: :threat_monitoring)
-              end
-
-              ::Sidebars::MenuItem.new(
-                title: _('Threat Monitoring'),
-                link: project_threat_monitoring_path(context.project),
-                active_routes: { controller: ['projects/threat_monitoring'] },
-                item_id: :threat_monitoring
-              )
+            unless can?(context.current_user, :read_threat_monitoring, context.project)
+              return ::Sidebars::NilMenuItem.new(item_id: :threat_monitoring)
             end
+
+            ::Sidebars::MenuItem.new(
+              title: _('Threat Monitoring'),
+              link: project_threat_monitoring_path(context.project),
+              active_routes: { controller: ['projects/threat_monitoring'] },
+              item_id: :threat_monitoring
+            )
           end
 
           def scan_policies_menu_item
-            strong_memoize(:scan_policies_menu_item) do
-              if ::Feature.disabled?(:security_orchestration_policies_configuration, context.project) ||
-                !can?(context.current_user, :security_orchestration_policies, context.project)
-                next ::Sidebars::NilMenuItem.new(item_id: :scan_policies)
-              end
-
-              ::Sidebars::MenuItem.new(
-                title: _('Scan Policies'),
-                link: project_security_policy_path(context.project),
-                active_routes: { controller: ['projects/security/policies'] },
-                item_id: :scan_policies
-              )
+            if ::Feature.disabled?(:security_orchestration_policies_configuration, context.project) ||
+              !can?(context.current_user, :security_orchestration_policies, context.project)
+              return ::Sidebars::NilMenuItem.new(item_id: :scan_policies)
             end
+
+            ::Sidebars::MenuItem.new(
+              title: _('Scan Policies'),
+              link: project_security_policy_path(context.project),
+              active_routes: { controller: ['projects/security/policies'] },
+              item_id: :scan_policies
+            )
           end
 
           def audit_events_menu_item
-            strong_memoize(:audit_events_menu_item) do
-              unless show_audit_events?
-                next ::Sidebars::NilMenuItem.new(item_id: :audit_events)
-              end
-
-              ::Sidebars::MenuItem.new(
-                title: _('Audit Events'),
-                link: project_audit_events_path(context.project),
-                active_routes: { controller: :audit_events },
-                item_id: :audit_events
-              )
+            unless show_audit_events?
+              return ::Sidebars::NilMenuItem.new(item_id: :audit_events)
             end
+
+            ::Sidebars::MenuItem.new(
+              title: _('Audit Events'),
+              link: project_audit_events_path(context.project),
+              active_routes: { controller: :audit_events },
+              item_id: :audit_events
+            )
           end
 
           def show_audit_events?

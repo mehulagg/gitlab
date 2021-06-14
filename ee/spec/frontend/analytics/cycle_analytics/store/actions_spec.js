@@ -527,10 +527,7 @@ describe('Value Stream Analytics actions', () => {
         ...state,
         stages,
         currentGroup,
-        featureFlags: {
-          ...state.featureFlags,
-          hasPathNavigation: true,
-        },
+        featureFlags: state.featureFlags,
       };
       mock = new MockAdapter(axios);
       mock.onGet(endpoints.stageCount).reply(httpStatusCodes.OK, { events: [] });

@@ -38,7 +38,7 @@ module EE
           override :service_classes
           def service_classes
             [
-              ::GithubService,
+              ::Integrations::Github,
               *super
             ]
           end

@@ -5,39 +5,11 @@ require 'spec_helper'
 RSpec.describe Ci::RegisterJobService do
   let_it_be_with_refind(:shared_runner) { create(:ci_runner, :instance) }
 
-  let!(:project) { create :project, shared_runners_enabled: true }
-  let!(:pipeline) { create :ci_empty_pipeline, project: project }
-  let!(:pending_build) { create :ci_build, pipeline: pipeline }
+  let!(:project) { create(:project, shared_runners_enabled: true) }
+  let!(:pipeline) { create(:ci_empty_pipeline, project: project) }
+  let!(:pending_build) { create(:ci_build, :pending, :queued, pipeline: pipeline) }
 
   describe '#execute' do
-    context 'checks database loadbalancing stickiness' do
-      subject { described_class.new(shared_runner).execute }
-
-      before do
-        project.update!(shared_runners_enabled: false)
-      end
-
-      it 'result is valid if replica did caught-up' do
-        allow(Gitlab::Database::LoadBalancing).to receive(:enable?)
-          .and_return(true)
-
-        expect(Gitlab::Database::LoadBalancing::Sticking).to receive(:all_caught_up?)
-          .with(:runner, shared_runner.id) { true }
-
-        expect(subject).to be_valid
-      end
-
-      it 'result is invalid if replica did not caught-up' do
-        allow(Gitlab::Database::LoadBalancing).to receive(:enable?)
-          .and_return(true)
-
-        expect(Gitlab::Database::LoadBalancing::Sticking).to receive(:all_caught_up?)
-          .with(:runner, shared_runner.id) { false }
-
-        expect(subject).not_to be_valid
-      end
-    end
-
     context 'shared runners minutes limit' do
       subject { described_class.new(shared_runner).execute.build }
 

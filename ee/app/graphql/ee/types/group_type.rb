@@ -65,13 +65,6 @@ module EE
               description: 'Number of vulnerabilities per day for the projects in the group and its subgroups.',
               resolver: ::Resolvers::VulnerabilitiesCountPerDayResolver
 
-        field :vulnerabilities_count_by_day_and_severity,
-              ::Types::VulnerabilitiesCountByDayAndSeverityType.connection_type,
-              null: true,
-              description: 'Number of vulnerabilities per severity level, per day, for the projects in the group and its subgroups.',
-              resolver: ::Resolvers::VulnerabilitiesHistoryResolver,
-              deprecated: { reason: 'Use `vulnerabilitiesCountByDay`', milestone: '13.3' }
-
         field :vulnerability_grades,
               [::Types::VulnerableProjectsByGradeType],
               null: false,

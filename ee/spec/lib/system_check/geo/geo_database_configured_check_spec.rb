@@ -1,13 +1,8 @@
 # frozen_string_literal: true
 
 require 'spec_helper'
-require 'rake_helper'
 
-RSpec.describe SystemCheck::Geo::GeoDatabaseConfiguredCheck do
-  before do
-    silence_output
-  end
-
+RSpec.describe SystemCheck::Geo::GeoDatabaseConfiguredCheck, :silence_stdout do
   subject { described_class.new }
 
   describe '#multi_check' do

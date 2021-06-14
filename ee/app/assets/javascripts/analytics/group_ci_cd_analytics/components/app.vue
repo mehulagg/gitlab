@@ -1,6 +1,7 @@
 <script>
 import { GlTabs, GlTab } from '@gitlab/ui';
 import DeploymentFrequencyCharts from 'ee/dora/components/deployment_frequency_charts.vue';
+import LeadTimeCharts from 'ee/dora/components/lead_time_charts.vue';
 import { mergeUrlParams, updateHistory, getParameterValues } from '~/lib/utils/url_utility';
 import { TABS } from '../constants';
 import ReleaseStatsCard from './release_stats_card.vue';
@@ -12,6 +13,7 @@ export default {
     GlTabs,
     GlTab,
     DeploymentFrequencyCharts,
+    LeadTimeCharts,
   },
   data() {
     return {
@@ -46,6 +48,9 @@ export default {
       </gl-tab>
       <gl-tab :title="s__('CICDAnalytics|Deployment frequency')">
         <deployment-frequency-charts />
+      </gl-tab>
+      <gl-tab :title="s__('CICDAnalytics|Lead time')">
+        <lead-time-charts />
       </gl-tab>
     </gl-tabs>
   </div>

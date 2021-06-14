@@ -24,7 +24,7 @@ RSpec.describe CiCd::GithubSetupService do
       subject.execute
     end
 
-    it 'sets up GithubService project integration' do
+    it 'sets up Github project integration' do
       allow(subject).to receive(:create_webhook)
 
       subject.execute

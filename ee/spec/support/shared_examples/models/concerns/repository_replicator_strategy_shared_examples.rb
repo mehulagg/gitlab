@@ -81,7 +81,7 @@ RSpec.shared_examples 'a repository replicator' do
     end
 
     context 'in replicables_for_current_secondary list' do
-      it 'runs SnippetRepositorySyncService service' do
+      it 'runs Geo::FrameworkRepositorySyncService service' do
         allow(replicator).to receive(:in_replicables_for_current_secondary?).and_return(true)
         sync_service = double
 
@@ -95,7 +95,7 @@ RSpec.shared_examples 'a repository replicator' do
     end
 
     context 'not in replicables_for_current_secondary list' do
-      it 'runs SnippetRepositorySyncService service' do
+      it 'does not run Geo::FrameworkRepositorySyncService service' do
         allow(replicator).to receive(:in_replicables_for_current_secondary?).and_return(false)
 
         expect(::Geo::FrameworkRepositorySyncService)

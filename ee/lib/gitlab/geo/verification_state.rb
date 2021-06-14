@@ -22,6 +22,7 @@ module Gitlab
         verification_succeeded: 2,
         verification_failed: 3
       }.freeze
+
       VERIFICATION_TIMEOUT = 8.hours
 
       included do
@@ -35,7 +36,7 @@ module Gitlab
         scope :checksummed, -> { where.not(verification_checksum: nil) }
         scope :not_checksummed, -> { where(verification_checksum: nil) }
         scope :verification_timed_out, -> { verification_started.where("verification_started_at < ?", VERIFICATION_TIMEOUT.ago) }
-        scope :retry_due, -> { where(arel_table[:verification_retry_at].eq(nil).or(arel_table[:verification_retry_at].lt(Time.current))) }
+        scope :retry_due, -> { where(verification_arel_table[:verification_retry_at].eq(nil).or(verification_arel_table[:verification_retry_at].lt(Time.current))) }
         scope :needs_verification, -> { available_verifiables.merge(with_verification_state(:verification_pending).or(with_verification_state(:verification_failed).retry_due)) }
         scope :needs_reverification, -> { verification_succeeded.where("verified_at < ?", ::Gitlab::Geo.current_node.minimum_reverification_interval.days.ago) }
         # rubocop:enable CodeReuse/ActiveRecord
@@ -54,9 +55,14 @@ module Gitlab
             instance.verification_started_at = Time.current
           end
 
-          before_transition any => :verification_pending do |instance, _|
-            instance.verification_retry_count = 0
-            instance.verification_retry_at = nil
+          before_transition [:verification_pending, :verification_started, :verification_succeeded] => :verification_pending do |instance, _|
+            instance.clear_verification_failure_fields!
+          end
+
+          before_transition verification_failed: :verification_pending do |instance, _|
+            # If transitioning from verification_failed, then don't clear
+            # verification_retry_count and verification_retry_at to ensure
+            # progressive backoff of syncs-due-to-verification-failures
             instance.verification_failure = nil
           end
 
@@ -177,7 +183,7 @@ module Gitlab
           started_enum_value = VERIFICATION_STATE_VALUES[:verification_started]
 
           <<~SQL.squish
-            UPDATE #{table_name}
+            UPDATE #{verification_state_table_name}
             SET "verification_state" = #{started_enum_value},
               "verification_started_at" = NOW()
             WHERE #{self.verification_state_model_key} IN (#{start_verification_batch_subselect(relation).to_sql})
@@ -200,8 +206,26 @@ module Gitlab
         end
 
         # Overridden in ReplicableRegistry
+        # This method can also be overriden in the replicable model class that
+        # includes this concern to specify the primary key of the database
+        # table that stores verification state
+        # See module EE::MergeRequestDiff for example
         def verification_state_model_key
           self.primary_key
+        end
+
+        # Override this method in the class that includes this concern to specify
+        # a different database table to store verification state
+        # See module EE::MergeRequestDiff for example
+        def verification_state_table_name
+          table_name
+        end
+
+        # Override this method in the class that includes this concern to specify
+        # a different arel table to store verification state
+        # See module EE::MergeRequestDiff for example
+        def verification_arel_table
+          arel_table
         end
 
         # Fail verification for records which started verification a long time ago
@@ -263,14 +287,14 @@ module Gitlab
           pending_enum_value = VERIFICATION_STATE_VALUES[:verification_pending]
 
           <<~SQL.squish
-            UPDATE #{table_name}
+            UPDATE #{verification_state_table_name}
             SET "verification_state" = #{pending_enum_value}
             WHERE #{self.verification_state_model_key} IN (#{relation.select(self.verification_state_model_key).to_sql})
           SQL
         end
       end
 
-      # Overridden by ReplicableRegistry
+      # Overridden by Geo::VerifiableRegistry
       def clear_verification_failure_fields!
         self.verification_retry_count = 0
         self.verification_retry_at = nil

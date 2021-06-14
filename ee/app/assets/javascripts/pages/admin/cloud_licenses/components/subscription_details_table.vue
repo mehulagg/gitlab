@@ -2,7 +2,7 @@
 import { GlSkeletonLoader, GlTable } from '@gitlab/ui';
 import { slugifyWithUnderscore } from '~/lib/utils/text_utility';
 import ClipboardButton from '~/vue_shared/components/clipboard_button.vue';
-import { copySubscriptionIdButtonText } from '../constants';
+import { copySubscriptionIdButtonText, detailsLabels } from '../constants';
 
 const placeholderHeightFactor = 32;
 const placeholderWidth = 180;
@@ -10,6 +10,7 @@ const DEFAULT_TH_CLASSES = 'gl-display-none';
 const DEFAULT_TD_CLASSES = 'gl-border-none! gl-h-7 gl-line-height-normal! gl-p-0!';
 
 export default {
+  detailsLabels,
   i18n: {
     copySubscriptionIdButtonText,
   },
@@ -39,6 +40,11 @@ export default {
       type: Array,
       required: true,
     },
+    syncDidFail: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
   },
   computed: {
     hasContent() {
@@ -61,30 +67,48 @@ export default {
     placeHolderPosition(index) {
       return (index - 1) * placeholderHeightFactor;
     },
-    qaSelectorValue(label) {
-      return slugifyWithUnderscore(label.toLowerCase());
+    qaSelectorValue({ detail }) {
+      return slugifyWithUnderscore(detail);
+    },
+    rowAttr({ detail }, type) {
+      return {
+        'data-testid': `${type}-${slugifyWithUnderscore(detail)}`,
+      };
+    },
+    rowClass(item) {
+      return item.detail === 'lastSync' && this.syncDidFail
+        ? `gl-text-red-500`
+        : 'gl-text-gray-800';
+    },
+    rowLabel({ detail }) {
+      return this.$options.detailsLabels[detail];
     },
   },
 };
 </script>
 
 <template>
-  <gl-table v-if="hasContent" :fields="$options.fields" :items="details" class="gl-m-0!">
+  <gl-table
+    v-if="hasContent"
+    :fields="$options.fields"
+    :items="details"
+    class="gl-m-0!"
+    :tbody-tr-attr="rowAttr"
+    :tbody-tr-class="rowClass"
+  >
     <template #cell(label)="{ item }">
-      <p class="gl-font-weight-bold gl-text-gray-800" data-testid="details-label">
-        {{ item.label }}:
-      </p>
+      <p class="gl-font-weight-bold" data-testid="details-label">{{ rowLabel(item) }}:</p>
     </template>
 
     <template #cell(value)="{ item, value }">
       <p
         class="gl-relative"
         data-testid="details-content"
-        :data-qa-selector="qaSelectorValue(item.label)"
+        :data-qa-selector="qaSelectorValue(item)"
       >
         {{ value || '-' }}
         <clipboard-button
-          v-if="item.canCopy"
+          v-if="item.detail === 'id'"
           :text="value"
           :title="$options.i18n.copySubscriptionIdButtonText"
           category="tertiary"

@@ -12,7 +12,7 @@ module EE
         override :data
         def data
           strong_memoize(:data) do
-            next pipeline_events_data if integration.is_a?(::GithubService)
+            next pipeline_events_data if integration.is_a?(::Integrations::Github)
 
             super
           end

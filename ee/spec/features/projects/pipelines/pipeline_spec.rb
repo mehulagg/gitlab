@@ -171,7 +171,8 @@ RSpec.describe 'Pipeline', :js do
               ref: 'master',
               status: 'failed',
               failure_reason: 'user_not_verified',
-              sha: project.commit.id
+              sha: project.commit.id,
+              user: user
             )
           end
 

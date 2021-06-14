@@ -17,7 +17,6 @@ module QA
         [
           %w(SECURE_ANALYZERS_PREFIX registry.example.com),
           %w(SAST_EXCLUDED_PATHS foo,\ bar),
-          %w(SAST_ANALYZER_IMAGE_TAG latest),
           %w(SAST_BANDIT_EXCLUDED_PATHS exclude_path_a,\ exclude_path_b)
         ]
       end

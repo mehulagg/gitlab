@@ -69,6 +69,7 @@ itself: # project
     - shared_with_groups
     - ssh_url_to_repo
     - tag_list
+    - topics
     - web_url
 
 build_auto_devops: # auto_devops
@@ -139,7 +140,6 @@ project_setting:
     - project_id
     - push_rule_id
     - show_default_award_emojis
-    - squash_option
     - updated_at
     - cve_id_request_enabled
     - mr_default_target_self

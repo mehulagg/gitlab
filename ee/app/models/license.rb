@@ -675,7 +675,7 @@ class License < ApplicationRecord
     else
       message = ["You have applied a True-up for #{trueup_qty} #{"user".pluralize(trueup_qty)}"]
       message << "but you need one for #{expected_trueup_qty} #{"user".pluralize(expected_trueup_qty)}."
-      message << "Please contact sales at renewals@gitlab.com"
+      message << "Please contact sales at https://about.gitlab.com/sales/"
 
       self.errors.add(:base, message.join(' '))
     end
@@ -689,7 +689,7 @@ class License < ApplicationRecord
     message << "exceeding this license's limit of #{number_with_delimiter(restricted_user_count)} by"
     message << "#{number_with_delimiter(overage_count)} #{"user".pluralize(overage_count)}."
     message << "Please upload a license for at least"
-    message << "#{number_with_delimiter(user_count)} #{"user".pluralize(user_count)} or contact sales at renewals@gitlab.com"
+    message << "#{number_with_delimiter(user_count)} #{"user".pluralize(user_count)} or contact sales at https://about.gitlab.com/sales/"
 
     self.errors.add(:base, message.join(' '))
   end

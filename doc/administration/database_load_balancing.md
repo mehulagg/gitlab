@@ -4,9 +4,10 @@ group: Database
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
-# Database Load Balancing **(PREMIUM SELF)**
+# Database Load Balancing **(FREE SELF)**
 
-> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/1283) in [GitLab Premium](https://about.gitlab.com/pricing/) 9.0.
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/1283) in [GitLab Premium](https://about.gitlab.com/pricing/) 9.0.
+> - [Moved](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/60894) from GitLab Premium to GitLab Free in 14.0.
 
 Distribute read-only queries among multiple database servers.
 
@@ -194,28 +195,6 @@ upper limit on the time it takes to terminate all old database connections.
 Some nameservers (like [Consul](https://www.consul.io/docs/discovery/dns#udp-based-dns-queries)) can return a truncated list of hosts when
 queried over UDP. To overcome this issue, you can use TCP for querying by setting
 `use_tcp` to `true`.
-
-### Forking
-
-NOTE:
-Starting with GitLab 13.0, Puma is the default web server used in GitLab
-all-in-one package based installations as well as GitLab Helm chart deployments.
-
-If you use an application server that forks, such as Unicorn, you _have to_
-update your Unicorn configuration to start service discovery _after_ a fork.
-Failure to do so leads to service discovery only running in the parent
-process. If you are using Unicorn, then you can add the following to your
-Unicorn configuration file:
-
-```ruby
-after_fork do |server, worker|
-  defined?(Gitlab::Database::LoadBalancing) &&
-    Gitlab::Database::LoadBalancing.start_service_discovery
-end
-```
-
-This ensures that service discovery is started in both the parent and all
-child processes.
 
 ## Balancing queries
 

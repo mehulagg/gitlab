@@ -5,7 +5,7 @@ class Analytics::DevopsAdoption::Snapshot < ApplicationRecord
 
   belongs_to :namespace
 
-  has_many :segments, foreign_key: :namespace_id, primary_key: :namespace_id
+  has_many :enabled_namespaces, foreign_key: :namespace_id, primary_key: :namespace_id
 
   validates :namespace, presence: true
   validates :recorded_at, presence: true
@@ -25,6 +25,7 @@ class Analytics::DevopsAdoption::Snapshot < ApplicationRecord
   scope :latest_snapshot_for_namespace_ids, -> (ids) do
     inner_select = model
       .default_scoped
+      .finalized
       .distinct
       .select("FIRST_VALUE(id) OVER (PARTITION BY namespace_id ORDER BY end_time DESC) as id")
       .where(namespace_id: ids)
@@ -33,8 +34,12 @@ class Analytics::DevopsAdoption::Snapshot < ApplicationRecord
   end
 
   scope :for_month, -> (month_date) { where(end_time: month_date.end_of_month) }
-  scope :not_finalized, -> { where(arel_table[:recorded_at].lteq(arel_table[:end_time])) }
+  scope :not_finalized, -> { where(arel_table[:recorded_at].lt(arel_table[:end_time])) }
+  scope :finalized, -> { where(arel_table[:recorded_at].gteq(arel_table[:end_time])) }
   scope :by_end_time, -> { order(end_time: :desc) }
+
+  scope :for_timespan, -> (from: nil, to: nil) { where(end_time: from..to) }
+  scope :for_namespaces, -> (ids) { where(namespace: ids) }
 
   def start_time
     end_time.beginning_of_month

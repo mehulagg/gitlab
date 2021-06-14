@@ -7,28 +7,25 @@ info: "See the Technical Writers assigned to Development Guidelines: https://abo
 
 # Background migrations
 
-Background migrations can be used to perform data migrations that would
-otherwise take a very long time (hours, days, years, etc) to complete. For
-example, you can use background migrations to migrate data so that instead of
-storing data in a single JSON column the data is stored in a separate table.
+Background migrations should be used to perform data migrations whenever a 
+migration exceeds [the time limits in our guidelines](database_review.md#timing-guidelines-for-migrations). For example, you can use background 
+migrations to migrate data that's stored in a single JSON column 
+to a separate table instead.
 
 If the database cluster is considered to be in an unhealthy state, background
 migrations automatically reschedule themselves for a later point in time.
 
 ## When To Use Background Migrations
 
-In the vast majority of cases you will want to use a regular Rails migration
-instead. Background migrations should be used when migrating _data_ in
-tables that have so many rows this process would take hours when performed in a
-regular Rails migration.
+You should use a background migration when you migrate _data_ in tables that have 
+so many rows that the process would exceed [the time limits in our guidelines](database_review.md#timing-guidelines-for-migrations) if performed using a regular Rails migration.
 
-Background migrations _may_ also be used when executing numerous single-row queries
+- Background migrations should be used when migrating data in [high-traffic tables](migration_style_guide.md#high-traffic-tables).
+- Background migrations may also be used when executing numerous single-row queries
 for every item on a large dataset. Typically, for single-record patterns, runtime is
 largely dependent on the size of the dataset, hence it should be split accordingly
 and put into background migrations.
-
-Background migrations _may not_ be used to perform schema migrations, they
-should only be used for data migrations.
+- Background migrations should not be used to perform schema migrations.
 
 Some examples where background migrations can be useful:
 
@@ -255,12 +252,8 @@ batches instead of doing this one by one:
 class ScheduleExtractServicesUrl < ActiveRecord::Migration[4.2]
   disable_ddl_transaction!
 
-  class Service < ActiveRecord::Base
-    self.table_name = 'services'
-  end
-
   def up
-    Service.select(:id).in_batches do |relation|
+    define_batchable_model('services').select(:id).in_batches do |relation|
       jobs = relation.pluck(:id).map do |id|
         ['ExtractServicesUrl', [id]]
       end
@@ -286,18 +279,12 @@ this:
 class ConsumeRemainingExtractServicesUrlJobs < ActiveRecord::Migration[4.2]
   disable_ddl_transaction!
 
-  class Service < ActiveRecord::Base
-    include ::EachBatch
-
-    self.table_name = 'services'
-  end
-
   def up
     # This must be included
     Gitlab::BackgroundMigration.steal('ExtractServicesUrl')
 
     # This should be included, but can be skipped - see below
-    Service.where(url: nil).each_batch(of: 50) do |batch|
+    define_batchable_model('services').where(url: nil).each_batch(of: 50) do |batch|
       range = batch.pluck('MIN(id)', 'MAX(id)').first
 
       Gitlab::BackgroundMigration::ExtractServicesUrl.new.perform(*range)

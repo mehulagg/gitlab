@@ -32,10 +32,12 @@ export default {
   data() {
     return {
       group: {
-        iterationCadences: [],
-        pageInfo: {
-          hasNextPage: true,
-          hasPreviousPage: false,
+        iterationCadences: {
+          nodes: [],
+          pageInfo: {
+            hasNextPage: true,
+            hasPreviousPage: false,
+          },
         },
       },
       pagination: {},
@@ -104,11 +106,13 @@ export default {
       <template #title>
         {{ tab }}
       </template>
-      <gl-loading-icon v-if="loading" class="gl-my-5" size="lg" />
 
-      <gl-alert v-else-if="error" variant="danger" @dismiss="error = ''">
+      <gl-alert v-if="error" variant="danger" @dismiss="error = ''">
         {{ error }}
       </gl-alert>
+
+      <gl-loading-icon v-if="loading" class="gl-my-5" size="lg" />
+
       <template v-else>
         <ul v-if="cadences.length" class="content-list">
           <iteration-cadence-list-item

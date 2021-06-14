@@ -31,11 +31,11 @@ module DastOnDemandScans
     end
 
     def create_pipeline
-      params_result = DastOnDemandScans::ParamsCreateService.new(container: container, current_user: current_user, params: params).execute
+      config_result = AppSec::Dast::ScanConfigs::BuildService.new(container: container, current_user: current_user, params: params).execute
 
-      return params_result unless params_result.success?
+      return config_result unless config_result.success?
 
-      result = ::Ci::RunDastScanService.new(container, current_user).execute(**params_result.payload)
+      result = ::Ci::RunDastScanService.new(container, current_user).execute(**config_result.payload)
 
       return success_response(result.payload) if result.success?
 

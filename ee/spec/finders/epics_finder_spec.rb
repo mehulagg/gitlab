@@ -9,8 +9,8 @@ RSpec.describe EpicsFinder do
   let_it_be(:another_group) { create(:group) }
   let_it_be(:reference_time) { Time.parse('2020-09-15 01:00') } # Arbitrary time used for time/date range filters
   let_it_be(:epic1) { create(:epic, :opened, group: group, title: 'This is awesome epic', created_at: 1.week.before(reference_time), end_date: 10.days.before(reference_time)) }
-  let_it_be(:epic2) { create(:epic, :opened, group: group, created_at: 4.days.before(reference_time), author: user, start_date: 2.days.before(reference_time), end_date: 3.days.since(reference_time)) }
-  let_it_be(:epic3) { create(:epic, :closed, group: group, description: 'not so awesome', start_date: 5.days.before(reference_time), end_date: 3.days.before(reference_time)) }
+  let_it_be(:epic2) { create(:epic, :opened, group: group, created_at: 4.days.before(reference_time), author: user, start_date: 2.days.before(reference_time), end_date: 3.days.since(reference_time), parent: epic1) }
+  let_it_be(:epic3) { create(:epic, :closed, group: group, description: 'not so awesome', start_date: 5.days.before(reference_time), end_date: 3.days.before(reference_time), parent: epic2) }
   let_it_be(:epic4) { create(:epic, :closed, group: another_group) }
 
   describe '#execute' do
@@ -140,9 +140,14 @@ RSpec.describe EpicsFinder do
 
         context 'when subgroups are supported' do
           let_it_be(:subgroup) { create(:group, :private, parent: group) }
+          let_it_be(:subgroup_guest) { create(:user) }
           let_it_be(:subgroup2) { create(:group, :private, parent: subgroup) }
           let_it_be(:subgroup_epic) { create(:epic, group: subgroup) }
           let_it_be(:subgroup2_epic) { create(:epic, group: subgroup2) }
+
+          before do
+            subgroup.add_guest(subgroup_guest)
+          end
 
           it 'returns all epics that belong to the given group and its subgroups' do
             expect(epics).to contain_exactly(epic1, epic2, epic3, subgroup_epic, subgroup2_epic)
@@ -168,20 +173,36 @@ RSpec.describe EpicsFinder do
                 let(:finder_params) { { include_descendant_groups: false, include_ancestor_groups: true } }
 
                 it { is_expected.to contain_exactly(subgroup_epic, epic1, epic2, epic3) }
+
+                context "when user does not have permission to view ancestor groups" do
+                  let(:finder_params) { { group_id: subgroup.id, include_descendant_groups: false, include_ancestor_groups: true } }
+
+                  subject { described_class.new(subgroup_guest, finder_params).execute }
+
+                  it { is_expected.to contain_exactly(subgroup_epic) }
+                end
               end
             end
 
-            context 'when include_descendant_groups is true' do
+            context 'when include_descendant_groups is true (by default)' do
               context 'and include_ancestor_groups is false' do
-                let(:finder_params) { { include_descendant_groups: true, include_ancestor_groups: false } }
+                let(:finder_params) { { include_ancestor_groups: false } }
 
                 it { is_expected.to contain_exactly(subgroup_epic, subgroup2_epic) }
               end
 
               context 'and include_ancestor_groups is true' do
-                let(:finder_params) { { include_descendant_groups: true, include_ancestor_groups: true } }
+                let(:finder_params) { { include_ancestor_groups: true } }
 
                 it { is_expected.to contain_exactly(subgroup_epic, subgroup2_epic, epic1, epic2, epic3) }
+
+                context "when user does not have permission to view ancestor groups" do
+                  let(:finder_params) { { group_id: subgroup.id, include_ancestor_groups: true } }
+
+                  subject { described_class.new(subgroup_guest, finder_params).execute }
+
+                  it { is_expected.to contain_exactly(subgroup_epic, subgroup2_epic) }
+                end
               end
             end
 
@@ -258,17 +279,18 @@ RSpec.describe EpicsFinder do
         end
 
         context 'by parent' do
-          before do
-            epic2.update!(parent: epic1)
-            epic3.update!(parent: epic2)
-          end
-
           it 'returns direct children of the parent' do
-            params = {
-              parent_id: epic1.id
-            }
+            params = { parent_id: epic1.id }
 
             expect(epics(params)).to contain_exactly(epic2)
+          end
+        end
+
+        context 'by child' do
+          it 'returns ancestors of the child epic' do
+            params = { child_id: epic3.id }
+
+            expect(epics(params)).to contain_exactly(epic1, epic2)
           end
         end
 

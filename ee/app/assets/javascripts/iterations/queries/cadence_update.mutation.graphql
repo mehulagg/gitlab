@@ -1,0 +1,10 @@
+#import "./iteration_cadence.fragment.graphql"
+
+mutation updateIterationCadence($input: IterationCadenceUpdateInput!) {
+  result: iterationCadenceUpdate(input: $input) {
+    iterationCadence {
+      ...IterationCadence
+    }
+    errors
+  }
+}

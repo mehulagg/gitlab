@@ -44,6 +44,11 @@ module Geo::ReplicableRegistry
     end
   end
 
+  # Overridden by Geo::VerifiableRegistry
+  def after_synced
+    # No-op
+  end
+
   def replicator_class
     Gitlab::Geo::Replicator.for_class_name(self)
   end
@@ -84,6 +89,10 @@ module Geo::ReplicableRegistry
         registry.retry_count = 0
         registry.last_sync_failure = nil
         registry.retry_at = nil
+      end
+
+      after_transition any => :synced do |registry, _|
+        registry.after_synced
       end
 
       event :start do

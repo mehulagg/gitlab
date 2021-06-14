@@ -26,14 +26,12 @@ module Dast
       where(project_id: project_id)
     end
 
+    delegate :secret_ci_variables, to: :dast_site_profile
+
     def branch
       return unless project.repository.exists?
 
       Dast::Branch.new(self)
-    end
-
-    def secret_ci_variables
-      ::Gitlab::Ci::Variables::Collection.new(secret_variables)
     end
 
     private

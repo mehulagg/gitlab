@@ -51,6 +51,14 @@ RSpec.describe 'Query.project(fullPath).pipeline(iid).codeQualityReports' do
           expect(degradation['line']).not_to be_nil
         end
       end
+
+      it 'returns all the queried fields ordered by severity', :aggregate_failures do
+        post_graphql(query, current_user: current_user)
+
+        codequality_severities = codequality_degradations.map { |degradation| degradation['severity'] }
+
+        expect(codequality_severities).to eq(%w[MAJOR MAJOR MINOR])
+      end
     end
 
     context 'when user is not a member of the project' do

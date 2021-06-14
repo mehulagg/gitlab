@@ -25,12 +25,6 @@ RSpec.describe 'Creating a DAST Scanner Profile' do
       expect(mutation_response['id']).to eq(dast_scanner_profile.to_global_id.to_s)
     end
 
-    it 'returns the dast_scanner_profile global_id' do
-      post_graphql_mutation(mutation, current_user: current_user)
-
-      expect(mutation_response['globalId']).to eq(dast_scanner_profile.to_global_id.to_s)
-    end
-
     it 'sets default values of omitted properties' do
       post_graphql_mutation(mutation, current_user: current_user)
 

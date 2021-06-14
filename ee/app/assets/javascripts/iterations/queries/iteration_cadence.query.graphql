@@ -1,0 +1,12 @@
+#import "./iteration_cadence.fragment.graphql"
+
+# todo: should this use IterationsCadenceID! ?
+query IterationCadence($fullPath: ID!, $id: ID!) {
+  group(fullPath: $fullPath) {
+    iterationCadences(id: $id) {
+      nodes {
+        ...IterationCadence
+      }
+    }
+  }
+}

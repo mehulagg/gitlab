@@ -50,7 +50,7 @@ constraints(::Constraints::ProjectUrlConstrainer.new) do
           end
         end
 
-        resources :infrastructure_registry, only: [:index], module: :packages
+        resources :infrastructure_registry, only: [:index, :show], module: :packages
 
         resources :jobs, only: [:index, :show], constraints: { id: /\d+/ } do
           collection do
@@ -385,7 +385,7 @@ constraints(::Constraints::ProjectUrlConstrainer.new) do
 
         # The wiki and repository routing contains wildcard characters so
         # its preferable to keep it below all other project routes
-        draw :repository_scoped
+        draw :repository
         draw :wiki
 
         namespace :import do
@@ -565,15 +565,15 @@ constraints(::Constraints::ProjectUrlConstrainer.new) do
       # Deprecated unscoped routing.
       scope as: 'deprecated' do
         # Issue https://gitlab.com/gitlab-org/gitlab/issues/118849
-        draw :repository
+        draw :repository_deprecated
 
-        # Issue https://gitlab.com/gitlab-org/gitlab/-/issues/29572
-        resources :snippets, concerns: :awardable, constraints: { id: /\d+/ } do # rubocop: disable Cop/PutProjectRoutesUnderScope
-          member do
-            get :raw # rubocop:todo Cop/PutProjectRoutesUnderScope
-            post :mark_as_spam # rubocop:todo Cop/PutProjectRoutesUnderScope
-          end
-        end
+        # Issue https://gitlab.com/gitlab-org/gitlab/-/issues/223719
+        # rubocop: disable Cop/PutProjectRoutesUnderScope
+        get '/snippets/:id/raw',
+          to: 'snippets#raw',
+          format: false,
+          constraints: { id: /\d+/ }
+        # rubocop: enable Cop/PutProjectRoutesUnderScope
       end
 
       # All new routes should go under /-/ scope.
@@ -589,7 +589,7 @@ constraints(::Constraints::ProjectUrlConstrainer.new) do
                                             :tracing,
                                             :serverless, :clusters, :audit_events, :wikis, :merge_requests,
                                             :vulnerability_feedback, :security, :dependencies, :issues,
-                                            :pipelines, :pipeline_schedules)
+                                            :pipelines, :pipeline_schedules, :snippets)
     end
 
     # rubocop: disable Cop/PutProjectRoutesUnderScope

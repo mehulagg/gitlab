@@ -3,6 +3,8 @@ import {
   GlAlert,
   GlButton,
   GlCollapse,
+  GlDropdown,
+  GlDropdownItem,
   GlIcon,
   GlInfiniteScroll,
   GlSkeletonLoader,
@@ -24,6 +26,8 @@ export default {
     GlAlert,
     GlButton,
     GlCollapse,
+    GlDropdown,
+    GlDropdownItem,
     GlIcon,
     GlInfiniteScroll,
     GlSkeletonLoader,
@@ -42,7 +46,7 @@ export default {
       },
     },
   },
-  inject: ['groupPath'],
+  inject: ['groupPath', 'canEditCadence'],
   props: {
     title: {
       type: String,
@@ -159,7 +163,7 @@ export default {
     <div class="gl-display-flex gl-align-items-center">
       <gl-button
         variant="link"
-        class="gl-font-weight-bold gl-text-body! gl-py-5! gl-px-3! gl-mr-auto"
+        class="gl-font-weight-bold gl-text-body! gl-py-5! gl-px-3! gl-mr-auto gl-min-w-0"
         :aria-expanded="expanded"
         @click="expanded = !expanded"
       >
@@ -171,10 +175,23 @@ export default {
         {{ title }}
       </gl-button>
 
-      <span v-if="durationInWeeks" class="gl-mr-5">
+      <span v-if="durationInWeeks" class="gl-mr-5 gl-display-none gl-sm-display-inline-block">
         <gl-icon name="clock" class="gl-mr-3" />
         {{ n__('Every week', 'Every %d weeks', durationInWeeks) }}</span
       >
+      <gl-dropdown
+        v-if="canEditCadence"
+        icon="ellipsis_v"
+        category="tertiary"
+        right
+        lazy
+        text-sr-only
+        no-caret
+      >
+        <gl-dropdown-item :to="editCadence">
+          {{ s__('Iterations|Edit cadence') }}
+        </gl-dropdown-item>
+      </gl-dropdown>
     </div>
 
     <gl-alert v-if="error" variant="danger" :dismissible="true" @dismiss="error = ''">

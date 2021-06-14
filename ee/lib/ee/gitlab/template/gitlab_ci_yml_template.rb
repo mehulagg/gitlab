@@ -6,6 +6,10 @@ module EE
       module GitlabCiYmlTemplate
         extend ActiveSupport::Concern
 
+        EE_TEMPLATES_WITH_LATEST_VERSION = {
+          'Verify/Browser-Performance' => true
+        }.freeze
+
         class_methods do
           extend ::Gitlab::Utils::Override
 
@@ -25,6 +29,12 @@ module EE
             {
               'Security' => 'Security'
             }
+          end
+
+          override :templates_with_latest_version
+          def templates_with_latest_version
+            @templates_with_latest_version ||=
+              super.merge(EE_TEMPLATES_WITH_LATEST_VERSION)
           end
         end
       end

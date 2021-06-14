@@ -16,10 +16,7 @@ class Group < Namespace
   include Gitlab::Utils::StrongMemoize
   include GroupAPICompatibility
   include EachBatch
-  include HasTimelogsReport
   include BulkMemberAccessLoad
-
-  ACCESS_REQUEST_APPROVERS_TO_BE_NOTIFIED_LIMIT = 10
 
   has_many :all_group_members, -> { where(requested_at: nil) }, dependent: :destroy, as: :source, class_name: 'GroupMember' # rubocop:disable Cop/ActiveRecordDependent
   has_many :group_members, -> { where(requested_at: nil).where.not(members: { access_level: Gitlab::Access::MINIMAL_ACCESS }) }, dependent: :destroy, as: :source # rubocop:disable Cop/ActiveRecordDependent
@@ -445,6 +442,12 @@ class Group < Namespace
     end
   end
 
+  def self_and_descendants_ids
+    strong_memoize(:self_and_descendants_ids) do
+      self_and_descendants.pluck(:id)
+    end
+  end
+
   def direct_members
     GroupMember.active_without_invites_and_requests
                .non_minimal_access
@@ -634,7 +637,7 @@ class Group < Namespace
   end
 
   def access_request_approvers_to_be_notified
-    members.owners.connected_to_user.order_recent_sign_in.limit(ACCESS_REQUEST_APPROVERS_TO_BE_NOTIFIED_LIMIT)
+    members.owners.connected_to_user.order_recent_sign_in.limit(Member::ACCESS_REQUEST_APPROVERS_TO_BE_NOTIFIED_LIMIT)
   end
 
   def supports_events?

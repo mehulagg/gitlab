@@ -6,6 +6,7 @@ class Geo::SecondaryUsageData < Geo::TrackingBase
   include Gitlab::Utils::UsageData
 
   GIT_FETCH_EVENT_COUNT_WEEKLY_QUERY = 'round(sum(increase(grpc_server_handled_total{grpc_method=~"SSHUploadPack|PostUploadPack"}[7d])))'
+  GIT_PUSH_EVENT_COUNT_WEEKLY_QUERY = 'round(sum(increase(grpc_server_handled_total{grpc_method=~"SSHReceivePack|PostReceivePack"}[7d])))'
 
   # Eventually, we'll find a way to auto-load this
   # from the metric yaml files that include something
@@ -13,6 +14,7 @@ class Geo::SecondaryUsageData < Geo::TrackingBase
   # just enumerate them.
   PAYLOAD_COUNT_FIELDS = %w(
     git_fetch_event_count_weekly
+    git_push_event_count_weekly
   ).freeze
 
   store_accessor :payload, *PAYLOAD_COUNT_FIELDS
@@ -35,8 +37,9 @@ class Geo::SecondaryUsageData < Geo::TrackingBase
   end
 
   def collect_prometheus_metrics
-    self.git_fetch_event_count_weekly = with_prometheus_client(fallback: nil, verify: false) do |client|
-      client.query(GIT_FETCH_EVENT_COUNT_WEEKLY_QUERY).dig(0, "value", 1)&.to_i
+    with_prometheus_client(fallback: nil, verify: false) do |client|
+      self.git_fetch_event_count_weekly = client.query(GIT_FETCH_EVENT_COUNT_WEEKLY_QUERY).dig(0, "value", 1)&.to_i
+      self.git_push_event_count_weekly = client.query(GIT_PUSH_EVENT_COUNT_WEEKLY_QUERY).dig(0, "value", 1)&.to_i
     end
   end
 end

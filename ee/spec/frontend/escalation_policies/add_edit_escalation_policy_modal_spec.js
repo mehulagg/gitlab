@@ -1,17 +1,19 @@
 import { GlModal, GlAlert } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
+import { cloneDeep } from 'lodash';
 import AddEscalationPolicyForm from 'ee/escalation_policies/components/add_edit_escalation_policy_form.vue';
 import AddEscalationPolicyModal, {
   i18n,
 } from 'ee/escalation_policies/components/add_edit_escalation_policy_modal.vue';
 import waitForPromises from 'helpers/wait_for_promises';
-import mockPolicy from './mocks/mockPolicy.json';
+import mockPolicies from './mocks/mockPolicies.json';
 
 describe('AddEscalationPolicyModal', () => {
   let wrapper;
   const projectPath = 'group/project';
   const mockHideModal = jest.fn();
   const mutate = jest.fn();
+  const mockPolicy = cloneDeep(mockPolicies[0]);
 
   const createComponent = ({ escalationPolicy, data } = {}) => {
     wrapper = shallowMount(AddEscalationPolicyModal, {
@@ -60,14 +62,23 @@ describe('AddEscalationPolicyModal', () => {
     it('makes a request with form data to create an escalation policy', () => {
       mutate.mockResolvedValueOnce({});
       findModal().vm.$emit('primary', { preventDefault: jest.fn() });
+      const rules = mockPolicy.rules.map(
+        ({ status, elapsedTimeSeconds, oncallSchedule: { id } }) => ({
+          status,
+          elapsedTimeSeconds,
+          oncallScheduleIid: id,
+        }),
+      );
       expect(mutate).toHaveBeenCalledWith(
         expect.objectContaining({
           variables: {
             input: {
               projectPath,
               ...mockPolicy,
+              rules,
             },
           },
+          update: expect.any(Function),
         }),
       );
     });
@@ -90,14 +101,30 @@ describe('AddEscalationPolicyModal', () => {
       expect(alert.text()).toContain(error);
     });
 
-    it('clears the form on modal close', () => {
+    it('clears the form on modal cancel', () => {
       expect(wrapper.vm.form).toEqual(mockPolicy);
-      findModal().vm.$emit('cancel', { preventDefault: jest.fn() });
+      findModal().vm.$emit('canceled', { preventDefault: jest.fn() });
       expect(wrapper.vm.form).toEqual({
         name: '',
         description: '',
         rules: [],
       });
+
+      expect(wrapper.vm.validationState).toEqual({
+        name: null,
+        rules: [],
+      });
+    });
+
+    it('clears the validation state on modal cancel', () => {
+      expect(wrapper.vm.validationState.name).toBe(null);
+      findEscalationPolicyForm().vm.$emit('update-escalation-policy-form', {
+        field: 'name',
+        value: '',
+      });
+      expect(wrapper.vm.validationState.name).toBe(false);
+      findModal().vm.$emit('canceled', { preventDefault: jest.fn() });
+      expect(wrapper.vm.validationState.name).toBe(null);
     });
   });
 

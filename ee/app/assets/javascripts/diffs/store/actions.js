@@ -42,7 +42,9 @@ export const fetchCodequality = ({ commit, state, dispatch }) => {
       }
     },
     errorCallback: () =>
-      createFlash(__('Something went wrong on our end while loading the code quality diff.')),
+      createFlash({
+        message: __('Something went wrong on our end while loading the code quality diff.'),
+      }),
   });
 
   if (!Visibility.hidden()) {

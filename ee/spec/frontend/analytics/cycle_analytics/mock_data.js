@@ -12,11 +12,12 @@ import mutations from 'ee/analytics/cycle_analytics/store/mutations';
 import {
   getTasksByTypeData,
   transformRawTasksByTypeData,
-  transformStagesForPathNavigation,
 } from 'ee/analytics/cycle_analytics/utils';
 import { toYmd } from 'ee/analytics/shared/utils';
 import { getJSONFixture } from 'helpers/fixtures';
 import { TEST_HOST } from 'helpers/test_constants';
+import { getStageByTitle, defaultStages, rawStageMedians } from 'jest/cycle_analytics/mock_data';
+import { transformStagesForPathNavigation } from '~/cycle_analytics/utils';
 import { convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
 import { getDateInPast, getDatesInRange } from '~/lib/utils/datetime_utility';
 
@@ -62,9 +63,6 @@ export const group = {
 };
 
 export const currentGroup = convertObjectPropsToCamelCase(group, { deep: true });
-
-const getStageByTitle = (stages, title) =>
-  stages.find((stage) => stage.title && stage.title.toLowerCase().trim() === title) || {};
 
 export const recentActivityData = getJSONFixture(fixtureEndpoints.recentActivityData);
 export const timeMetricsData = getJSONFixture(fixtureEndpoints.timeMetricsData);
@@ -113,8 +111,6 @@ export const allowedStages = [issueStage, planStage, codeStage];
 
 const deepCamelCase = (obj) => convertObjectPropsToCamelCase(obj, { deep: true });
 
-export const defaultStages = ['issue', 'plan', 'review', 'code', 'test', 'staging'];
-
 const stageFixtures = defaultStages.reduce((acc, stage) => {
   const events = getJSONFixture(fixtureEndpoints.stageEvents(stage));
   return {
@@ -122,11 +118,6 @@ const stageFixtures = defaultStages.reduce((acc, stage) => {
     [stage]: events,
   };
 }, {});
-
-export const rawStageMedians = defaultStages.map((id) => ({
-  id,
-  ...getJSONFixture(fixtureEndpoints.stageMedian(id)),
-}));
 
 export const stageMedians = rawStageMedians.reduce(
   (acc, { id, value }) => ({

@@ -1,9 +1,10 @@
-import { GlFormCheckbox, GlFormGroup } from '@gitlab/ui';
+import { GlAlert, GlFormCheckbox, GlFormGroup } from '@gitlab/ui';
 import { mount } from '@vue/test-utils';
-import Vue from 'vue';
+import Vue, { nextTick } from 'vue';
 import VueApollo from 'vue-apollo';
 import IterationCadenceForm from 'ee/iterations/components/iteration_cadence_form.vue';
-import createCadence from 'ee/iterations/queries/create_cadence.mutation.graphql';
+import createCadence from 'ee/iterations/queries/cadence_create.mutation.graphql';
+import getCadence from 'ee/iterations/queries/iteration_cadence.query.graphql';
 import createMockApollo from 'helpers/mock_apollo_helper';
 import { TEST_HOST } from 'helpers/test_constants';
 import { extendedWrapper } from 'helpers/vue_test_utils_helper';
@@ -11,6 +12,9 @@ import waitForPromises from 'helpers/wait_for_promises';
 
 const push = jest.fn();
 const $router = {
+  currentRoute: {
+    params: {},
+  },
   push,
 };
 
@@ -25,24 +29,37 @@ describe('Iteration cadence form', () => {
   const groupPath = 'gitlab-org';
   const id = 72;
   const iterationCadence = {
-    id: `gid://gitlab/Iteration/${id}`,
+    id: `gid://gitlab/Iterations::Cadence/${id}`,
     title: 'An iteration',
+    automatic: true,
+    rollOver: false,
+    durationInWeeks: '3',
     description: 'The words',
+    duration: '3',
     startDate: '2020-06-28',
-    dueDate: '2020-07-05',
+    iterationsInAdvance: '2',
   };
 
   const createMutationSuccess = {
-    data: { iterationCadenceCreate: { iterationCadence, errors: [] } },
+    data: { result: { iterationCadence, errors: [] } },
   };
   const createMutationFailure = {
     data: {
-      iterationCadenceCreate: { iterationCadence, errors: ['alas, your data is unchanged'] },
+      result: { iterationCadence, errors: ['alas, your data is unchanged'] },
+    },
+  };
+  const getCadenceSuccess = {
+    data: {
+      group: {
+        iterationCadences: {
+          nodes: [iterationCadence],
+        },
+      },
     },
   };
 
-  function createComponent({ resolverMock } = {}) {
-    const apolloProvider = createMockApolloProvider([[createCadence, resolverMock]]);
+  function createComponent({ query = createCadence, resolverMock } = {}) {
+    const apolloProvider = createMockApolloProvider([[query, resolverMock]]);
     wrapper = extendedWrapper(
       mount(IterationCadenceForm, {
         apolloProvider,
@@ -65,12 +82,32 @@ describe('Iteration cadence form', () => {
   const findAutomatedSchedulingGroup = () => wrapper.findAllComponents(GlFormGroup).at(1);
   const findStartDateGroup = () => wrapper.findAllComponents(GlFormGroup).at(2);
   const findDurationGroup = () => wrapper.findAllComponents(GlFormGroup).at(3);
-  const findFutureIterationsGroup = () => wrapper.findAllComponents(GlFormGroup).at(4);
+  const findFutureIterationsGroup = () => wrapper.findAllComponents(GlFormGroup).at(5);
+
+  const findError = () => wrapper.findComponent(GlAlert);
 
   const findTitle = () => wrapper.find('#cadence-title');
   const findStartDate = () => wrapper.find('#cadence-start-date');
   const findFutureIterations = () => wrapper.find('#cadence-schedule-future-iterations');
   const findDuration = () => wrapper.find('#cadence-duration');
+  const findDescription = () => wrapper.find('#cadence-description');
+
+  const setTitle = (value) => findTitle().vm.$emit('input', value);
+  const setStartDate = (value) => findStartDate().vm.$emit('input', value);
+  const setFutureIterations = (value) => findFutureIterations().vm.$emit('input', value);
+  const setDuration = (value) => findDuration().vm.$emit('input', value);
+  const setAutomaticValue = (value) => {
+    const checkbox = findAutomatedSchedulingGroup().find(GlFormCheckbox).vm;
+    checkbox.$emit('input', value);
+    checkbox.$emit('change', value);
+  };
+
+  const findAllFields = () => [
+    findTitle(),
+    findStartDate(),
+    findFutureIterations(),
+    findDuration(),
+  ];
 
   const findSaveButton = () => wrapper.findByTestId('save-cadence');
   const findCancelButton = () => wrapper.findByTestId('cancel-create-cadence');
@@ -92,19 +129,20 @@ describe('Iteration cadence form', () => {
     });
 
     describe('save', () => {
-      it('triggers mutation with form data', () => {
-        const title = 'Iteration 5';
-        const startDate = '2020-05-05';
-        const durationInWeeks = 2;
-        const iterationsInAdvance = 6;
+      const title = 'Iteration 5';
+      const startDate = '2020-05-05';
+      const durationInWeeks = 2;
+      const iterationsInAdvance = 6;
 
-        findTitle().vm.$emit('input', title);
-        findStartDate().vm.$emit('input', startDate);
-        findDuration().vm.$emit('input', durationInWeeks);
-        findFutureIterations().vm.$emit('input', iterationsInAdvance);
+      it('triggers mutation with form data', () => {
+        setTitle(title);
+        setStartDate(startDate);
+        setDuration(durationInWeeks);
+        setFutureIterations(iterationsInAdvance);
 
         clickSave();
 
+        expect(findError().exists()).toBe(false);
         expect(resolverMock).toHaveBeenCalledWith({
           input: {
             groupPath,
@@ -114,20 +152,16 @@ describe('Iteration cadence form', () => {
             durationInWeeks,
             iterationsInAdvance,
             active: true,
+            description: '',
           },
         });
       });
 
       it('redirects to Iteration page on success', async () => {
-        const title = 'Iteration 5';
-        const startDate = '2020-05-05';
-        const durationInWeeks = 2;
-        const iterationsInAdvance = 6;
-
-        findTitle().vm.$emit('input', title);
-        findStartDate().vm.$emit('input', startDate);
-        findDuration().vm.$emit('input', durationInWeeks);
-        findFutureIterations().vm.$emit('input', iterationsInAdvance);
+        setTitle(title);
+        setStartDate(startDate);
+        setDuration(durationInWeeks);
+        setFutureIterations(iterationsInAdvance);
 
         clickSave();
 
@@ -159,22 +193,28 @@ describe('Iteration cadence form', () => {
     });
 
     describe('automated scheduling disabled', () => {
-      beforeEach(() => {
-        findAutomatedSchedulingGroup().find(GlFormCheckbox).vm.$emit('input', false);
-      });
+      it('disables future iterations', async () => {
+        setAutomaticValue(false);
 
-      it('disables future iterations', () => {
+        await nextTick();
+
         expect(findFutureIterations().attributes('disabled')).toBe('disabled');
       });
 
-      it('does not require future iterations ', () => {
+      it('sets future iterations to 0', async () => {
         const title = 'Iteration 5';
         const startDate = '2020-05-05';
         const durationInWeeks = 2;
 
-        findTitle().vm.$emit('input', title);
-        findStartDate().vm.$emit('input', startDate);
-        findDuration().vm.$emit('input', durationInWeeks);
+        setFutureIterations(10);
+
+        setAutomaticValue(false);
+
+        await nextTick();
+
+        setTitle(title);
+        setStartDate(startDate);
+        setDuration(durationInWeeks);
 
         clickSave();
 
@@ -185,10 +225,60 @@ describe('Iteration cadence form', () => {
             automatic: false,
             startDate,
             durationInWeeks,
+            iterationsInAdvance: 0,
+            description: '',
             active: true,
           },
         });
       });
+    });
+  });
+
+  describe('Edit cadence', () => {
+    const query = getCadence;
+    const resolverMock = jest.fn().mockResolvedValue(getCadenceSuccess);
+
+    beforeEach(() => {
+      $router.currentRoute.params.cadenceId = id;
+
+      createComponent({ query, resolverMock });
+    });
+
+    afterEach(() => {
+      delete $router.currentRoute.params.cadenceId;
+    });
+
+    it('shows correct title and button text', () => {
+      expect(wrapper.text()).toContain(wrapper.vm.i18n.edit.title);
+      expect(wrapper.text()).toContain(wrapper.vm.i18n.edit.save);
+    });
+
+    it('disables fields while loading', async () => {
+      createComponent({ query, resolverMock });
+
+      findAllFields().forEach(({ element }) => {
+        expect(element).toBeDisabled();
+      });
+
+      await waitForPromises();
+
+      findAllFields().forEach(({ element }) => {
+        expect(element).not.toBeDisabled();
+      });
+    });
+
+    it('fills fields with existing cadence info after loading', async () => {
+      createComponent({ query, resolverMock });
+
+      await waitForPromises();
+
+      await nextTick();
+
+      expect(findTitle().element.value).toBe(iterationCadence.title);
+      expect(findStartDate().element.value).toBe(iterationCadence.startDate);
+      expect(findFutureIterations().element.value).toBe(iterationCadence.iterationsInAdvance);
+      expect(findDuration().element.value).toBe(iterationCadence.durationInWeeks);
+      expect(findDescription().element.value).toBe(iterationCadence.description);
     });
   });
 });

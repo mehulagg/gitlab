@@ -80,11 +80,17 @@ RSpec.describe 'get list of epic boards' do
       end
 
       it 'returns the correct values for count' do
-        create_list(:epic, 2, group: group) # epics in backlog, the list which is returned first
+        label = create(:group_label, group: group)
+        # Epics in backlog, the list which is returned first. The first epic
+        # should be ignored because it doesn't have the label by which we are
+        # filtering.
+        create(:labeled_epic, group: group)
+        create(:labeled_epic, group: group, labels: [label])
 
-        post_graphql(pagination_query, current_user: current_user)
+        params = { epicFilters: { labelName: label.title } }
+        post_graphql(pagination_query(params), current_user: current_user)
 
-        assert_field_value('epicsCount', [2, 0, 0])
+        assert_field_value('epicsCount', [1, 0, 0])
       end
     end
   end

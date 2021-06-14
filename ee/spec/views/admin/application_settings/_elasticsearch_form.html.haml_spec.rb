@@ -228,11 +228,27 @@ RSpec.describe 'admin/application_settings/_elasticsearch_form' do
         allow(Elastic::DataMigrationService).to receive(:halted_migration).and_return(migration)
       end
 
-      it 'shows the retry migration card' do
-        render
+      context 'when there is no reindexing' do
+        it 'shows the retry migration card' do
+          render
 
-        expect(rendered).to include('There is a halted Elasticsearch migration')
-        expect(rendered).to include('Retry migration')
+          expect(rendered).to include('There is a halted Elasticsearch migration')
+          expect(rendered).to have_css('a', text: 'Retry migration')
+          expect(rendered).not_to have_css('a[disabled="disabled"]', text: 'Retry migration')
+        end
+      end
+
+      context 'when there is a reindexing task in progress' do
+        before do
+          assign(:last_elasticsearch_reindexing_task, build(:elastic_reindexing_task))
+        end
+
+        it 'shows the retry migration card with retry button disabled' do
+          render
+
+          expect(rendered).to include('There is a halted Elasticsearch migration')
+          expect(rendered).to have_css('a[disabled="disabled"]', text: 'Retry migration')
+        end
       end
     end
 

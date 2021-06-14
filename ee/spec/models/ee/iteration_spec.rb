@@ -547,6 +547,7 @@ RSpec.describe Iteration do
   end
 
   it_behaves_like 'a timebox', :iteration do
+    let(:cadence) { create(:iterations_cadence, group: group) }
     let(:timebox_args) { [:skip_project_validation] }
     let(:timebox_table_name) { described_class.table_name.to_sym }
 
@@ -554,5 +555,29 @@ RSpec.describe Iteration do
     let(:mid_point) { 1.year.from_now.to_date }
     let(:open_on_left) { min_date - 100.days }
     let(:open_on_right) { max_date + 100.days }
+
+    describe "#uniqueness_of_title" do
+      context "per group" do
+        let(:timebox) { create(:iteration, *timebox_args, iterations_cadence: cadence, group: group) }
+
+        before do
+          project.update!(group: group)
+        end
+
+        it "accepts the same title in the same group with different cadence" do
+          new_cadence = create(:iterations_cadence, group: group)
+          new_timebox = create(:iteration, iterations_cadence: new_cadence, group: group, title: timebox.title)
+
+          expect(new_timebox.iterations_cadence).not_to eq(timebox.iterations_cadence)
+          expect(new_timebox).to be_valid
+        end
+
+        it "does not accept the same title when in same cadence" do
+          new_timebox = described_class.new(group: group, iterations_cadence: cadence, title: timebox.title)
+
+          expect(new_timebox).not_to be_valid
+        end
+      end
+    end
   end
 end

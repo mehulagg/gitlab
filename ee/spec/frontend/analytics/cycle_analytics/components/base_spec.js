@@ -7,16 +7,16 @@ import Component from 'ee/analytics/cycle_analytics/components/base.vue';
 import DurationChart from 'ee/analytics/cycle_analytics/components/duration_chart.vue';
 import FilterBar from 'ee/analytics/cycle_analytics/components/filter_bar.vue';
 import Metrics from 'ee/analytics/cycle_analytics/components/metrics.vue';
-import PathNavigation from 'ee/analytics/cycle_analytics/components/path_navigation.vue';
-import StageTableNew from 'ee/analytics/cycle_analytics/components/stage_table_new.vue';
+import StageTable from 'ee/analytics/cycle_analytics/components/stage_table.vue';
 import TypeOfWorkCharts from 'ee/analytics/cycle_analytics/components/type_of_work_charts.vue';
 import ValueStreamSelect from 'ee/analytics/cycle_analytics/components/value_stream_select.vue';
-import { OVERVIEW_STAGE_ID } from 'ee/analytics/cycle_analytics/constants';
 import createStore from 'ee/analytics/cycle_analytics/store';
 import Daterange from 'ee/analytics/shared/components/daterange.vue';
 import ProjectsDropdownFilter from 'ee/analytics/shared/components/projects_dropdown_filter.vue';
 import { toYmd } from 'ee/analytics/shared/utils';
 import waitForPromises from 'helpers/wait_for_promises';
+import PathNavigation from '~/cycle_analytics/components/path_navigation.vue';
+import { OVERVIEW_STAGE_ID } from '~/cycle_analytics/constants';
 import { getIdFromGraphQLId } from '~/graphql_shared/utils';
 import * as commonUtils from '~/lib/utils/common_utils';
 import { convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
@@ -98,7 +98,7 @@ async function shouldMergeUrlParams(wrapper, result) {
   expect(commonUtils.historyPushState).toHaveBeenCalled();
 }
 
-describe('Value Stream Analytics component', () => {
+describe('EE Value Stream Analytics component', () => {
   let wrapper;
   let mock;
   let store;
@@ -167,7 +167,7 @@ describe('Value Stream Analytics component', () => {
   };
 
   const displaysStageTable = (flag) => {
-    expect(wrapper.findComponent(StageTableNew).exists()).toBe(flag);
+    expect(wrapper.findComponent(StageTable).exists()).toBe(flag);
   };
 
   const displaysDurationChart = (flag) => {

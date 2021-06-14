@@ -1,5 +1,5 @@
 /* eslint-disable import/export */
-import { issuableTypes } from '~/boards/constants';
+import { issuableTypes, FilterFields as FilterFieldsCE } from '~/boards/constants';
 import destroyBoardListMutation from '~/boards/graphql/board_list_destroy.mutation.graphql';
 import updateBoardListMutation from '~/boards/graphql/board_list_update.mutation.graphql';
 
@@ -22,7 +22,18 @@ export const EpicFilterType = {
   none: 'None',
 };
 
-export const SupportedFiltersEE = ['epicId', 'iterationTitle', 'weight'];
+export const FilterFields = {
+  [issuableTypes.issue]: [
+    ...FilterFieldsCE[issuableTypes.issue],
+    'epicId',
+    'epicWildcardId',
+    'weight',
+    'iterationId',
+    'iterationTitle',
+    'iterationWildcardId',
+  ],
+  [issuableTypes.epic]: ['authorUsername', 'labelName', 'search', 'myReactionEmoji'],
+};
 
 export const IterationFilterType = {
   any: 'Any',

@@ -5,12 +5,15 @@ require 'spec_helper'
 RSpec.describe API::ProtectedEnvironments do
   include AccessMatchersForRequest
 
+  let_it_be(:group) { create(:group) }
+  let_it_be(:project) { create(:project, :repository, group: group) }
+
   let(:user) { create(:user) }
-  let(:project) { create(:project, :repository) }
   let(:protected_environment_name) { 'production' }
 
   before do
-    create(:protected_environment, :maintainers_can_deploy, project: project, name: protected_environment_name)
+    create(:protected_environment, :maintainers_can_deploy, :project_level, project: project, name: protected_environment_name)
+    create(:protected_environment, :maintainers_can_deploy, :group_level, group: group, name: protected_environment_name)
   end
 
   shared_examples 'requests for non-maintainers' do
@@ -155,6 +158,149 @@ RSpec.describe API::ProtectedEnvironments do
         expect do
           request
         end.to change { project.protected_environments.count }.by(-1)
+
+        expect(response).to have_gitlab_http_status(:no_content)
+      end
+    end
+
+    it_behaves_like 'requests for non-maintainers'
+  end
+
+  describe "GET /groups/:id/protected_environments" do
+    let(:route) { "/groups/#{group.id}/protected_environments" }
+    let(:request) { get api(route, user), params: { per_page: 100 } }
+
+    context 'when authenticated as a maintainer' do
+      before do
+        group.add_maintainer(user)
+      end
+
+      it 'returns the protected environments' do
+        request
+
+        expect(response).to have_gitlab_http_status(:ok)
+        expect(response).to include_pagination_headers
+        expect(json_response).to be_an Array
+
+        protected_environment_names = json_response.map { |x| x['name'] }
+        expect(protected_environment_names).to match_array([protected_environment_name])
+      end
+    end
+
+    it_behaves_like 'requests for non-maintainers'
+  end
+
+  describe "GET /groups/:id/protected_environments/:environment" do
+    let(:requested_environment_name) { protected_environment_name }
+    let(:route) { "/groups/#{group.id}/protected_environments/#{requested_environment_name}" }
+    let(:request) { get api(route, user) }
+
+    context 'when authenticated as a maintainer' do
+      before do
+        group.add_maintainer(user)
+      end
+
+      it 'returns the protected environment' do
+        request
+
+        expect(response).to have_gitlab_http_status(:ok)
+        expect(response).to match_response_schema('public_api/v4/protected_environment', dir: 'ee')
+        expect(json_response['name']).to eq(protected_environment_name)
+        expect(json_response['deploy_access_levels'][0]['access_level']).to eq(::Gitlab::Access::MAINTAINER)
+      end
+
+      context 'when protected environment does not exist' do
+        let(:requested_environment_name) { 'unknown' }
+
+        it_behaves_like '404 response' do
+          let(:message) { '404 Not found' }
+        end
+      end
+    end
+
+    it_behaves_like 'requests for non-maintainers'
+  end
+
+  describe 'POST /groups/:id/protected_environments/' do
+    let(:api_url) { api("/groups/#{group.id}/protected_environments/", user) }
+
+    context 'when authenticated as a maintainer' do
+      before do
+        group.add_maintainer(user)
+      end
+
+      it 'protects the environment with user allowed to deploy' do
+        deployer = create(:user)
+        group.add_maintainer(deployer)
+
+        post api_url, params: { name: 'staging', deploy_access_levels: [{ user_id: deployer.id }] }
+
+        expect(response).to have_gitlab_http_status(:created)
+        expect(response).to match_response_schema('public_api/v4/protected_environment', dir: 'ee')
+        expect(json_response['name']).to eq('staging')
+        expect(json_response['deploy_access_levels'].first['user_id']).to eq(deployer.id)
+      end
+
+      it 'protects the environment with group allowed to deploy' do
+        subgroup = create(:group, parent: group)
+
+        post api_url, params: { name: 'staging', deploy_access_levels: [{ group_id: subgroup.id }] }
+
+        expect(response).to have_gitlab_http_status(:created)
+        expect(response).to match_response_schema('public_api/v4/protected_environment', dir: 'ee')
+        expect(json_response['name']).to eq('staging')
+        expect(json_response['deploy_access_levels'].first['group_id']).to eq(subgroup.id)
+      end
+
+      it 'protects the environment with maintainers allowed to deploy' do
+        post api_url, params: { name: 'staging', deploy_access_levels: [{ access_level: Gitlab::Access::MAINTAINER }] }
+
+        expect(response).to have_gitlab_http_status(:created)
+        expect(response).to match_response_schema('public_api/v4/protected_environment', dir: 'ee')
+        expect(json_response['name']).to eq('staging')
+        expect(json_response['deploy_access_levels'].first['access_level']).to eq(Gitlab::Access::MAINTAINER)
+      end
+
+      it 'returns 409 error if environment is already protected' do
+        deployer = create(:user)
+        group.add_developer(deployer)
+
+        post api_url, params: { name: 'production', deploy_access_levels: [{ user_id: deployer.id }] }
+
+        expect(response).to have_gitlab_http_status(:conflict)
+      end
+
+      context 'without deploy_access_levels' do
+        it_behaves_like '400 response' do
+          let(:request) { post api_url, params: { name: 'staging' } }
+        end
+      end
+
+      it 'returns error with invalid deploy access level' do
+        post api_url, params: { name: 'staging', deploy_access_levels: [{ access_level: nil }] }
+
+        expect(response).to have_gitlab_http_status(:unprocessable_entity)
+      end
+    end
+
+    it_behaves_like 'requests for non-maintainers' do
+      let(:request) { post api_url, params: { name: 'staging' } }
+    end
+  end
+
+  describe 'DELETE /groups/:id/protected_environments/:environment' do
+    let(:route) { "/groups/#{group.id}/protected_environments/production" }
+    let(:request) { delete api(route, user) }
+
+    context 'when authenticated as a maintainer' do
+      before do
+        group.add_maintainer(user)
+      end
+
+      it 'unprotects the environment' do
+        expect do
+          request
+        end.to change { group.protected_environments.count }.by(-1)
 
         expect(response).to have_gitlab_http_status(:no_content)
       end

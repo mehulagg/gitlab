@@ -4,7 +4,6 @@ import { identity } from 'lodash';
 import { getIdFromGraphQLId } from '~/graphql_shared/utils';
 import { formatDate, getTimeago } from '~/lib/utils/datetime_utility';
 import { capitalizeFirstCharacter } from '~/lib/utils/text_utility';
-import { detailsLabels } from '../constants';
 import SubscriptionDetailsTable from './subscription_details_table.vue';
 
 const humanReadableDate = (value) => (value ? formatDate(value, 'd mmmm yyyy') : '');
@@ -20,8 +19,8 @@ const subscriptionDetailsFormatRules = {
 export default {
   name: 'SubscriptionDetailsCard',
   components: {
-    SubscriptionDetailsTable,
     GlCard,
+    SubscriptionDetailsTable,
   },
   props: {
     detailsFields: {
@@ -37,15 +36,19 @@ export default {
       type: Object,
       required: true,
     },
+    syncDidFail: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
   },
   computed: {
     details() {
       return this.detailsFields.map((detail) => {
-        const label = detailsLabels[detail];
         const formatter = subscriptionDetailsFormatRules[detail] || identity;
         const valueToFormat = this.subscription[detail];
         const value = valueToFormat ? formatter(valueToFormat) : '';
-        return { canCopy: detail === 'id', label, value };
+        return { detail, value };
       });
     },
   },
@@ -57,9 +60,7 @@ export default {
     <template v-if="headerText" #header>
       <h6 class="gl-m-0">{{ headerText }}</h6>
     </template>
-
-    <subscription-details-table :details="details" />
-
+    <subscription-details-table :details="details" :sync-did-fail="syncDidFail" />
     <template #footer>
       <slot name="footer"></slot>
     </template>

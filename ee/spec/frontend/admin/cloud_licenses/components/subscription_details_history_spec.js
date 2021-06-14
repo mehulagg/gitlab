@@ -1,6 +1,7 @@
 import { GlBadge } from '@gitlab/ui';
 import { mount } from '@vue/test-utils';
 import SubscriptionDetailsHistory from 'ee/pages/admin/cloud_licenses/components/subscription_details_history.vue';
+import { cloudLicenseText } from 'ee/pages/admin/cloud_licenses/constants';
 import { extendedWrapper } from 'helpers/vue_test_utils_helper';
 import { license, subscriptionHistory } from '../mock_data';
 
@@ -42,8 +43,8 @@ describe('Subscription Details History', () => {
     });
 
     it('has the correct license type', () => {
-      expect(findCurrentRow().text()).toContain('Cloud License');
-      expect(findTableRows().at(0).text()).toContain('Legacy License');
+      expect(findCurrentRow().text()).toContain(cloudLicenseText);
+      expect(findTableRows().at(0).text()).toContain('License file');
     });
 
     it('has a badge for the license type', () => {
@@ -82,7 +83,7 @@ describe('Subscription Details History', () => {
 
       it('displays the correct value for the type cell', () => {
         const cellTestId = `subscription-cell-type`;
-        expect(findCellByTestid(cellTestId).text()).toBe('Cloud License');
+        expect(findCellByTestid(cellTestId).text()).toBe(cloudLicenseText);
       });
 
       it('displays the correct value for the plan cell', () => {

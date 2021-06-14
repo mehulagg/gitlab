@@ -794,18 +794,18 @@ module API
           ::Integrations::Jenkins,
           ::Integrations::Jira,
           ::Integrations::Mattermost,
+          ::Integrations::MattermostSlashCommands,
           ::Integrations::MicrosoftTeams,
           ::Integrations::Packagist,
           ::Integrations::PipelinesEmail,
           ::Integrations::Pivotaltracker,
+          ::Integrations::Pushover,
           ::Integrations::Redmine,
           ::Integrations::Slack,
+          ::Integrations::SlackSlashCommands,
           ::Integrations::Teamcity,
           ::Integrations::Youtrack,
-          ::MattermostSlashCommandsService,
-          ::SlackSlashCommandsService,
-          ::PrometheusService,
-          ::PushoverService
+          ::PrometheusService
         ]
       end
 

@@ -102,6 +102,7 @@
   - ".gitlab/ci/build-images.gitlab-ci.yml"
   - ".gitlab/ci/review.gitlab-ci.yml"
   - "scripts/review_apps/base-config.yaml"
+  - "scripts/review_apps/review-apps.sh"
   - "scripts/trigger-build"
 
 .ci-qa-patterns: &ci-qa-patterns
@@ -109,6 +110,9 @@
   - ".gitlab/ci/frontend.gitlab-ci.yml"
   - ".gitlab/ci/build-images.gitlab-ci.yml"
   - ".gitlab/ci/qa.gitlab-ci.yml"
+
+.gitaly-patterns: &gitaly-patterns
+  - "GITALY_SERVER_VERSION"
 
 .workhorse-patterns: &workhorse-patterns
   - "GITLAB_WORKHORSE_VERSION"
@@ -149,6 +153,9 @@
   - "config/**/*.js"
   - "vendor/assets/**/*"
   - "{,ee/,jh/}{app/assets,app/helpers,app/presenters,app/views,locale,public,symbol}/**/*"
+
+.startup-css-patterns: &startup-css-patterns
+  - "{,ee/,jh/}app/assets/stylesheets/startup/**/*"
 
 .backend-patterns: &backend-patterns
   - "Gemfile{,.lock}"
@@ -306,6 +313,11 @@
     - <<: *if-security-schedule
     - <<: *if-merge-request-title-update-caches
 
+.shared:rules:update-gitaly-binaries-cache:
+  rules:
+    - <<: *if-merge-request-title-update-caches
+    - changes: *gitaly-patterns
+
 ######################
 # Build images rules #
 ######################
@@ -316,6 +328,8 @@
     - <<: *if-dot-com-gitlab-org-and-security-merge-request
       changes: *ci-build-images-patterns
     - <<: *if-dot-com-gitlab-org-and-security-merge-request
+      changes: *code-qa-patterns
+    - <<: *if-dot-com-gitlab-org-default-branch
       changes: *code-qa-patterns
     - <<: *if-dot-com-gitlab-org-schedule
 
@@ -439,6 +453,8 @@
       changes: *code-backstage-patterns
     - <<: *if-merge-request-title-as-if-foss
     - <<: *if-merge-request-title-run-all-rspec
+    - <<: *if-merge-request
+      changes: *startup-css-patterns
     - <<: *if-merge-request
       changes: *ci-patterns
 
@@ -1130,6 +1146,20 @@
       changes: *code-qa-patterns
       allow_failure: true
 
+.review:rules:review-qa-smoke-report:
+  rules:
+    - <<: *if-not-ee
+      when: never
+    - <<: *if-dot-com-gitlab-org-merge-request
+      changes: *ci-review-patterns
+      when: always
+    - <<: *if-dot-com-gitlab-org-merge-request
+      changes: *frontend-patterns
+      when: always
+    - <<: *if-dot-com-gitlab-org-merge-request
+      changes: *code-qa-patterns
+      when: always
+
 .review:rules:review-qa-all:
   rules:
     - <<: *if-not-ee
@@ -1141,6 +1171,19 @@
     - <<: *if-dot-com-gitlab-org-merge-request
       changes: *qa-patterns
       allow_failure: true
+
+.review:rules:review-qa-all-report:
+  rules:
+    - <<: *if-not-ee
+      when: never
+    - <<: *if-dot-com-gitlab-org-merge-request
+      changes: *code-patterns
+      when: manual
+      allow_failure: true
+    - <<: *if-dot-com-gitlab-org-merge-request
+      changes: *qa-patterns
+      allow_failure: true
+      when: always
 
 .review:rules:review-cleanup:
   rules:

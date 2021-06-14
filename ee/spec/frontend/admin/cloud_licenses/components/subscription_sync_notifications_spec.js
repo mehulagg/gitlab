@@ -6,7 +6,7 @@ import SubscriptionSyncNotifications, {
 import {
   connectivityIssue,
   manualSyncSuccessfulTitle,
-  notificationType,
+  subscriptionSyncStatus,
 } from 'ee/pages/admin/cloud_licenses/constants';
 import { extendedWrapper } from 'helpers/vue_test_utils_helper';
 
@@ -23,7 +23,10 @@ describe('Subscription Sync Notifications', () => {
   const createComponent = ({ props, stubs } = {}) => {
     wrapper = extendedWrapper(
       shallowMount(SubscriptionSyncNotifications, {
-        propsData: props,
+        propsData: {
+          syncStatus: '',
+          ...props,
+        },
         provide: { connectivityHelpURL },
         stubs,
       }),
@@ -45,7 +48,7 @@ describe('Subscription Sync Notifications', () => {
   describe('sync success notification', () => {
     beforeEach(() => {
       createComponent({
-        props: { notification: notificationType.SYNC_SUCCESS },
+        props: { syncStatus: subscriptionSyncStatus.SYNC_SUCCESS },
       });
     });
 
@@ -63,7 +66,7 @@ describe('Subscription Sync Notifications', () => {
   describe('sync failure notification', () => {
     beforeEach(() => {
       createComponent({
-        props: { notification: notificationType.SYNC_FAILURE },
+        props: { syncStatus: subscriptionSyncStatus.SYNC_FAILURE },
         stubs: { GlSprintf },
       });
     });

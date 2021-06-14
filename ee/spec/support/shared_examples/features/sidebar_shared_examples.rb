@@ -72,13 +72,13 @@ RSpec.shared_examples 'issue boards sidebar EE' do
 
           select_iteration(iteration.title)
 
-          expect(page.find('[data-testid="iteration-edit-link"]')).to have_content('Iteration 1')
+          expect(page.find('[data-testid="iteration-edit"]')).to have_content('Iteration 1')
 
           find_and_click_edit_iteration
 
           select_iteration('No iteration')
 
-          expect(page.find('[data-testid="iteration-edit-link"]')).to have_content('None')
+          expect(page.find('[data-testid="iteration-edit"]')).to have_content('None')
         end
 
         context 'when iteration feature is not available' do
@@ -90,15 +90,15 @@ RSpec.shared_examples 'issue boards sidebar EE' do
             wait_for_all_requests
           end
 
-          it 'cannot find the iteration-edit-link' do
-            expect(page).not_to have_selector('[data-testid="iteration-edit-link"]')
+          it 'cannot find the iteration-edit' do
+            expect(page).not_to have_selector('[data-testid="iteration-edit"]')
           end
         end
       end
     end
 
     def find_and_click_edit_iteration
-      page.find('[data-testid="iteration-edit-link"] [data-testid="edit-button"]').click
+      page.find('[data-testid="iteration-edit"] [data-testid="edit-button"]').click
 
       wait_for_all_requests
     end

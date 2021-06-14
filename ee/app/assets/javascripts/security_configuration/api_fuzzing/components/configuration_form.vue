@@ -11,16 +11,17 @@ import {
   GlSprintf,
 } from '@gitlab/ui';
 import * as Sentry from '@sentry/browser';
+import ConfigurationSnippetModal from 'ee/security_configuration/components/configuration_snippet_modal.vue';
+import { CONFIGURATION_SNIPPET_MODAL_ID } from 'ee/security_configuration/components/constants';
 import { isEmptyValue } from '~/lib/utils/forms';
 import { __, s__ } from '~/locale';
 import { CODE_SNIPPET_SOURCE_API_FUZZING } from '~/pipeline_editor/components/code_snippet_alert/constants';
 import DropdownInput from '../../components/dropdown_input.vue';
 import DynamicFields from '../../components/dynamic_fields.vue';
 import FormInput from '../../components/form_input.vue';
-import { SCAN_MODES, CONFIGURATION_SNIPPET_MODAL_ID } from '../constants';
+import { SCAN_MODES } from '../constants';
 import apiFuzzingCiConfigurationCreate from '../graphql/api_fuzzing_ci_configuration_create.mutation.graphql';
 import { insertTips } from '../utils';
-import ConfigurationSnippetModal from './configuration_snippet_modal.vue';
 
 export default {
   CONFIGURATION_SNIPPET_MODAL_ID,
@@ -336,6 +337,7 @@ export default {
       :ci-yaml-edit-url="ciYamlEditPath"
       :yaml="configurationYamlWithTips"
       :redirect-param="$options.CODE_SNIPPET_SOURCE_API_FUZZING"
+      scan-type="API Fuzzing"
     />
   </form>
 </template>

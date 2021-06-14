@@ -24,7 +24,7 @@ they changed the location of directories or run services as the wrong user.
 
 If you find a bug/error in this guide, **submit a merge request**
 following the
-[contributing guide](https://gitlab.com/gitlab-org/gitlab/blob/master/CONTRIBUTING.md).
+[contributing guide](https://gitlab.com/gitlab-org/gitlab/-/blob/master/CONTRIBUTING.md).
 
 ## Consider the Omnibus package installation
 
@@ -40,7 +40,7 @@ can't be terminated and its memory usage grows over time.
 
 ## Select a version to install
 
-Make sure you view [this installation guide](https://gitlab.com/gitlab-org/gitlab/blob/master/doc/install/installation.md) from the branch (version) of GitLab you would like to install (e.g., `11-7-stable`).
+Make sure you view [this installation guide](https://gitlab.com/gitlab-org/gitlab/-/blob/master/doc/install/installation.md) from the branch (version) of GitLab you would like to install (e.g., `11-7-stable`).
 You can select the branch in the version dropdown in the top left corner of GitLab (below the menu bar).
 
 If the highest number stable branch is unclear, check the [GitLab blog](https://about.gitlab.com/blog/) for installation guide links by version.
@@ -545,7 +545,6 @@ sudo -u git -H editor config/resque.yml
 ```
 
 Make sure to edit both `gitlab.yml` and `puma.rb` to match your setup.
-If you want to use the Unicorn web server, see [Using Unicorn](#using-unicorn) for the additional steps.
 
 If you want to use HTTPS, see [Using HTTPS](#using-https) for the additional steps.
 
@@ -649,7 +648,7 @@ You then need to update `gitlab.yml`'s `production -> elasticsearch -> indexer_p
 
 ### Install GitLab Pages
 
-GitLab Pages uses [GNU Make](https://www.gnu.org/software/make/). This step is optional and only needed if you wish to host static sites from within GitLab. The following commands install GitLab Pages in `/home/git/gitlab-pages`. For additional setup steps, consult the [administration guide](https://gitlab.com/gitlab-org/gitlab/blob/master/doc/administration/pages/source.md) for your version of GitLab as the GitLab Pages daemon can be run several different ways.
+GitLab Pages uses [GNU Make](https://www.gnu.org/software/make/). This step is optional and only needed if you wish to host static sites from within GitLab. The following commands install GitLab Pages in `/home/git/gitlab-pages`. For additional setup steps, consult the [administration guide](https://gitlab.com/gitlab-org/gitlab/-/blob/master/doc/administration/pages/source.md) for your version of GitLab as the GitLab Pages daemon can be run several different ways.
 
 ```shell
 cd /home/git
@@ -995,24 +994,6 @@ You also need to change the corresponding options (e.g. `ssh_user`, `ssh_host`, 
 ### Additional Markup Styles
 
 Apart from the always supported Markdown style, there are other rich text files that GitLab can display. But you might have to install a dependency to do so. See the [`github-markup` gem README](https://github.com/gitlabhq/markup#markups) for more information.
-
-### Using Unicorn
-
-As of GitLab 12.9, [Puma](https://github.com/puma/puma) has replaced Unicorn as the default web server for installations from source.
-If you want to switch back to Unicorn, follow these steps:
-
-1. Finish the GitLab setup so you have it up and running.
-1. Copy the supplied example Unicorn configuration file into place:
-
-   ```shell
-   cd /home/git/gitlab
-
-   # Copy config file for the web server
-   sudo -u git -H cp config/unicorn.rb.example config/unicorn.rb
-   ```
-
-1. Edit the system `init.d` script and set `USE_WEB_SERVER="unicorn"`. If you have `/etc/default/gitlab`, then you should edit it instead.
-1. Restart GitLab.
 
 ### Using Sidekiq instead of Sidekiq Cluster
 

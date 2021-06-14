@@ -37,16 +37,6 @@ module EE
                 Number of vulnerabilities per day for the projects on the current user's instance security dashboard.
               DESC
 
-        field :vulnerabilities_count_by_day_and_severity,
-              ::Types::VulnerabilitiesCountByDayAndSeverityType.connection_type,
-              null: true,
-              resolver: ::Resolvers::VulnerabilitiesHistoryResolver,
-              deprecated: { reason: :discouraged, replacement: 'Query.vulnerabilitiesCountByDay', milestone: '13.3' },
-              description: <<~DESC
-                Number of vulnerabilities per severity level, per day, for the projects on the
-                current user's instance security dashboard.
-              DESC
-
         field :geo_node, ::Types::Geo::GeoNodeType,
               null: true,
               resolver: ::Resolvers::Geo::GeoNodeResolver,
@@ -57,10 +47,10 @@ module EE
               resolver: ::Resolvers::InstanceSecurityDashboardResolver,
               description: 'Fields related to Instance Security Dashboard.'
 
-        field :devops_adoption_segments, ::Types::Admin::Analytics::DevopsAdoption::SegmentType.connection_type,
+        field :devops_adoption_enabled_namespaces, ::Types::Analytics::DevopsAdoption::EnabledNamespaceType.connection_type,
               null: true,
-              description: 'Get configured DevOps adoption segments on the instance. **BETA** This endpoint is subject to change without notice.',
-              resolver: ::Resolvers::Admin::Analytics::DevopsAdoption::SegmentsResolver
+              description: 'Get configured DevOps adoption namespaces. **BETA** This endpoint is subject to change without notice.',
+              resolver: ::Resolvers::Analytics::DevopsAdoption::EnabledNamespacesResolver
 
         field :current_license, ::Types::Admin::CloudLicenses::CurrentLicenseType,
               null: true,

@@ -2,7 +2,7 @@
 
 module Integrations
   class Slack < BaseChatNotification
-    include SlackMattermost::Notifier
+    include SlackMattermostNotifier
     extend ::Gitlab::Utils::Override
 
     SUPPORTED_EVENTS_FOR_USAGE_LOG = %w[
@@ -25,7 +25,7 @@ module Integrations
     end
 
     def default_channel_placeholder
-      _('general, development')
+      _('#general, #development')
     end
 
     def webhook_placeholder

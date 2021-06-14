@@ -52,7 +52,6 @@ module EE
         def usage_data_counters
           super + [
             ::Gitlab::UsageDataCounters::LicensesList,
-            ::Gitlab::UsageDataCounters::IngressModsecurityCounter,
             ::Gitlab::StatusPage::UsageDataCounters::IncidentCounter,
             ::Gitlab::UsageDataCounters::NetworkPolicyCounter
           ]
@@ -97,6 +96,7 @@ module EE
             # rubocop: enable UsageData/LargeTable
             usage_data[:licensee] = license.licensee
             usage_data[:license_user_count] = license.restricted_user_count
+            usage_data[:license_billable_users] = alt_usage_data { license.daily_billable_users_count }
             usage_data[:license_starts_at] = license.starts_at
             usage_data[:license_expires_at] = license.expires_at
             usage_data[:license_plan] = license.plan
@@ -201,12 +201,11 @@ module EE
                 issues_with_health_status: count(::Issue.with_health_status, start: minimum_id(::Issue), finish: maximum_id(::Issue)),
                 ldap_keys: count(::LDAPKey),
                 ldap_users: count(::User.ldap, 'users.id'),
-                pod_logs_usages_total: ::Gitlab::UsageData::DEPRECATED_VALUE,
                 merged_merge_requests_using_approval_rules: count(::MergeRequest.merged.joins(:approval_rules), # rubocop: disable CodeReuse/ActiveRecord
                                                                   start: minimum_id(::MergeRequest),
                                                                   finish: maximum_id(::MergeRequest)),
                 projects_mirrored_with_pipelines_enabled: count(::Project.mirrored_with_enabled_pipelines),
-                projects_reporting_ci_cd_back_to_github: count(::GithubService.active),
+                projects_reporting_ci_cd_back_to_github: count(::Integrations::Github.active),
                 status_page_projects: count(::StatusPage::ProjectSetting.enabled),
                 status_page_issues: count(::Issue.on_status_page, start: minimum_id(::Issue), finish: maximum_id(::Issue)),
                 template_repositories: add(count(::Project.with_repos_templates), count(::Project.with_groups_level_repos_templates))
@@ -233,8 +232,7 @@ module EE
         def usage_activity_by_stage_configure(time_period)
           super.merge({
             projects_slack_notifications_active: distinct_count(::Project.with_slack_service.where(time_period), :creator_id),
-            projects_slack_slash_active: distinct_count(::Project.with_slack_slash_commands_service.where(time_period), :creator_id),
-            projects_with_prometheus_alerts: ::Gitlab::UsageData::DEPRECATED_VALUE
+            projects_slack_slash_active: distinct_count(::Project.with_slack_slash_commands_service.where(time_period), :creator_id)
           })
         end
 
@@ -393,7 +391,6 @@ module EE
         # rubocop:disable CodeReuse/ActiveRecord
         def count_secure_user_scans(time_period)
           return {} if time_period.blank?
-          return {} unless ::Feature.enabled?(:postgres_hll_batch_counting)
 
           user_scans = {}
           start_id, finish_id = min_max_security_scan_id(time_period)
@@ -435,53 +432,33 @@ module EE
 
           pipelines_with_secure_jobs = {}
 
-          # HLL batch counting always iterate over pkey of
-          # given relation, while ordinary batch count
-          # iterated over counted attribute, one-to-many joins
-          # can break batch size limitation, and lead to
-          # time outing batch queries, to avoid that
-          # different join strategy is used for HLL counter
-          if ::Feature.enabled?(:postgres_hll_batch_counting)
-            start_id, finish_id = min_max_security_scan_id(time_period)
+          start_id, finish_id = min_max_security_scan_id(time_period)
 
-            ::Security::Scan.scan_types.each do |name, scan_type|
-              relation = ::Security::Scan
-                           .latest_successful_by_build
-                           .by_scan_types(scan_type)
-                           .where(security_scans: time_period)
+          ::Security::Scan.scan_types.each do |name, scan_type|
+            relation = ::Security::Scan
+                         .latest_successful_by_build
+                         .by_scan_types(scan_type)
+                         .where(security_scans: time_period)
 
-              metric_name = "#{name}_pipeline"
-              aggregated_metrics_params = {
-                metric_name: metric_name,
-                recorded_at_timestamp: recorded_at,
-                time_period: time_period
-              }
+            metric_name = "#{name}_pipeline"
+            aggregated_metrics_params = {
+              metric_name: metric_name,
+              recorded_at_timestamp: recorded_at,
+              time_period: time_period
+            }
 
-              pipelines_with_secure_jobs[metric_name.to_sym] =
-                if start_id && finish_id
-                  estimate_batch_distinct_count(relation, :commit_id, batch_size: 1000, start: start_id, finish: finish_id) do |result|
-                    ::Gitlab::Usage::Metrics::Aggregates::Sources::PostgresHll
-                      .save_aggregated_metrics(**aggregated_metrics_params.merge({ data: result }))
-                  end
-                else
+            pipelines_with_secure_jobs[metric_name.to_sym] =
+              if start_id && finish_id
+                estimate_batch_distinct_count(relation, :commit_id, batch_size: 1000, start: start_id, finish: finish_id) do |result|
                   ::Gitlab::Usage::Metrics::Aggregates::Sources::PostgresHll
-                    .save_aggregated_metrics(**aggregated_metrics_params.merge({ data: ::Gitlab::Database::PostgresHll::Buckets.new }))
-                  0
+                    .save_aggregated_metrics(**aggregated_metrics_params.merge({ data: result }))
                 end
-            end
-          else
-            start = minimum_id(::Ci::Pipeline)
-            finish = maximum_id(::Ci::Pipeline)
-
-            ::Security::Scan.scan_types.each do |name, scan_type|
-              relation = ::Ci::Build.joins(:security_scans)
-                           .where(status: 'success', retried: [nil, false])
-                           .where(security_scans: { scan_type: scan_type })
-                           .where(time_period)
-              pipelines_with_secure_jobs["#{name}_pipeline".to_sym] = distinct_count(relation, :commit_id, start: start, finish: finish, batch: false)
-            end
+              else
+                ::Gitlab::Usage::Metrics::Aggregates::Sources::PostgresHll
+                  .save_aggregated_metrics(**aggregated_metrics_params.merge({ data: ::Gitlab::Database::PostgresHll::Buckets.new }))
+                0
+              end
           end
-
           pipelines_with_secure_jobs
         end
 

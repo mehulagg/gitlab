@@ -147,6 +147,7 @@ module EE
       rule { maintainer }.policy do
         enable :maintainer_access
         enable :admin_wiki
+        enable :admin_protected_environment
       end
 
       rule { owner | admin }.policy do
@@ -185,12 +186,12 @@ module EE
       end
 
       rule { reporter & group_devops_adoption_enabled & group_devops_adoption_available }.policy do
-        enable :manage_devops_adoption_segments
+        enable :manage_devops_adoption_namespaces
         enable :view_group_devops_adoption
       end
 
       rule { admin & group_devops_adoption_enabled }.policy do
-        enable :manage_devops_adoption_segments
+        enable :manage_devops_adoption_namespaces
       end
 
       rule { owner & ~has_parent & prevent_group_forking_available }.policy do
@@ -281,7 +282,7 @@ module EE
 
       rule { can?(:read_group_security_dashboard) }.policy do
         enable :create_vulnerability_export
-        enable :read_vulnerability
+        enable :read_security_resource
       end
 
       rule { admin | owner }.policy do

@@ -67,9 +67,7 @@ RSpec.describe IterationsFinder do
       end
 
       it 'orders iterations by due date' do
-        iteration = create(:iteration, :skip_future_date_validation, group: group, start_date: 5.days.ago, due_date: 3.days.ago)
-
-        expect(subject.to_a).to eq([iteration, closed_iteration, root_closed_iteration, started_group_iteration, root_group_iteration, upcoming_group_iteration])
+        expect(subject.to_a).to eq([closed_iteration, root_closed_iteration, started_group_iteration, root_group_iteration, upcoming_group_iteration])
       end
     end
 
@@ -136,17 +134,15 @@ RSpec.describe IterationsFinder do
         end
 
         it 'returns iterations which start before the timeframe' do
-          iteration = create(:iteration, :skip_project_validation, :skip_future_date_validation, group: group, start_date: 5.days.ago, due_date: 3.days.ago)
           params.merge!(start_date: 3.days.ago, end_date: 2.days.ago)
 
-          expect(subject).to match_array([iteration, closed_iteration, root_closed_iteration])
+          expect(subject).to match_array([closed_iteration, root_closed_iteration])
         end
 
         it 'returns iterations which end after the timeframe' do
-          iteration = create(:iteration, :skip_project_validation, group: group, start_date: 9.days.from_now, due_date: 2.weeks.from_now)
-          params.merge!(start_date: 9.days.from_now, end_date: 10.days.from_now)
+          params.merge!(start_date: 3.days.from_now, end_date: 5.days.from_now)
 
-          expect(subject).to match_array([iteration])
+          expect(subject).to match_array([upcoming_group_iteration])
         end
 
         describe 'when one of the timeframe params are missing' do

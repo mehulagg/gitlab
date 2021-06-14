@@ -43,7 +43,6 @@ module API
       expose :visibility
       expose :owner, using: Entities::UserBasic, unless: ->(project, options) { project.group }
       expose :resolve_outdated_diff_discussions
-      expose :container_registry_enabled
       expose :container_expiration_policy, using: Entities::ContainerExpirationPolicy,
         if: -> (project, _) { project.container_expiration_policy }
 
@@ -54,6 +53,13 @@ module API
       expose(:wiki_enabled) { |project, options| project.feature_available?(:wiki, options[:current_user]) }
       expose(:jobs_enabled) { |project, options| project.feature_available?(:builds, options[:current_user]) }
       expose(:snippets_enabled) { |project, options| project.feature_available?(:snippets, options[:current_user]) }
+      expose(:container_registry_enabled) do |project, options|
+        if ::Feature.enabled?(:read_container_registry_access_level, project.namespace, default_enabled: :yaml)
+          project.feature_available?(:container_registry, options[:current_user])
+        else
+          project.read_attribute(:container_registry_enabled)
+        end
+      end
       expose :service_desk_enabled
       expose :service_desk_address
 
@@ -108,6 +114,7 @@ module API
       expose :remove_source_branch_after_merge
       expose :printing_merge_request_link_enabled
       expose :merge_method
+      expose :squash_option
       expose :suggestion_commit_message
       expose :statistics, using: 'API::Entities::ProjectStatistics', if: -> (project, options) {
         options[:statistics] && Ability.allowed?(options[:current_user], :read_statistics, project)
@@ -123,9 +130,9 @@ module API
 
       # rubocop: disable CodeReuse/ActiveRecord
       def self.preload_relation(projects_relation, options = {})
-        # Preloading tags, should be done with using only `:tags`,
-        # as `:tags` are defined as: `has_many :tags, through: :taggings`
-        # N+1 is solved then by using `subject.tags.map(&:name)`
+        # Preloading topics, should be done with using only `:topics`,
+        # as `:topics` are defined as: `has_many :topics, through: :taggings`
+        # N+1 is solved then by using `subject.topics.map(&:name)`
         # MR describing the solution: https://gitlab.com/gitlab-org/gitlab-foss/merge_requests/20555
         super(projects_relation).preload(group: :namespace_settings)
                                 .preload(:ci_cd_settings)
@@ -136,7 +143,7 @@ module API
                                 .preload(project_group_links: { group: :route },
                                          fork_network: :root_project,
                                          fork_network_member: :forked_from_project,
-                                         forked_from_project: [:route, :tags, :group, :project_feature, namespace: [:route, :owner]])
+                                         forked_from_project: [:route, :topics, :group, :project_feature, namespace: [:route, :owner]])
       end
       # rubocop: enable CodeReuse/ActiveRecord
 

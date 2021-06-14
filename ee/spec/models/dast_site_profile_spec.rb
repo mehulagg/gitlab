@@ -249,17 +249,47 @@ RSpec.describe DastSiteProfile, type: :model do
     end
 
     describe '#secret_ci_variables' do
-      context 'when there are no secret_variables' do
-        it 'returns an empty collection' do
-          expect(subject.secret_ci_variables.size).to be_zero
+      let_it_be(:user) { create(:user, developer_projects: [project]) }
+
+      context 'when user can read secrets' do
+        before do
+          stub_licensed_features(security_on_demand_scans: true)
+        end
+
+        it 'works with policy' do
+          expect(Ability.allowed?(user, :read_on_demand_scans, subject)).to be_truthy
+        end
+
+        it 'checks the policy' do
+          expect(Ability).to receive(:allowed?).with(user, :read_on_demand_scans, subject).and_call_original
+
+          subject.secret_ci_variables(user)
+        end
+
+        context 'when there are no secret_variables' do
+          it 'returns an empty collection' do
+            expect(subject.secret_ci_variables(user).size).to be_zero
+          end
+        end
+
+        context 'when there are secret_variables' do
+          it 'returns a collection containing that variable' do
+            variable = create(:dast_site_profile_secret_variable, dast_site_profile: subject)
+
+            expect(subject.secret_ci_variables(user).to_runner_variables).to include(key: variable.key, value: variable.value, public: false, masked: true)
+          end
         end
       end
 
-      context 'when there are secret_variables' do
-        it 'returns a collection containing that variable' do
-          variable = create(:dast_site_profile_secret_variable, dast_site_profile: subject)
+      context 'when user cannot read secrets' do
+        before do
+          stub_licensed_features(security_on_demand_scans: false)
+        end
 
-          expect(subject.secret_ci_variables.to_runner_variables).to include(key: variable.key, value: variable.value, public: false, masked: true)
+        it 'returns an empty collection' do
+          create(:dast_site_profile_secret_variable, dast_site_profile: subject)
+
+          expect(subject.secret_ci_variables(user).size).to be_zero
         end
       end
     end

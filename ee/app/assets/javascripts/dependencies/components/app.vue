@@ -146,9 +146,10 @@ export default {
 
     <header class="d-md-flex align-items-end my-3">
       <div class="mr-auto">
-        <h2 class="h4 mb-1 mt-0">
+        <h2 class="h4 mb-1 mt-0 gl-display-flex gl-align-items-center">
           {{ __('Dependencies') }}
           <gl-link
+            class="gl-ml-3"
             target="_blank"
             :href="documentationPath"
             :aria-label="__('Dependencies help page link')"

@@ -29,9 +29,7 @@ FactoryBot.define do
     trait :with_file do
       after(:build, :stub) do |registry, _|
         file =
-          if registry.file_type.to_sym == :lfs
-            raise NotImplementedError, 'Use create(:geo_lfs_object_registry, :with_lfs_object) instead'
-          elsif registry.file_type.to_sym == :job_artifact
+          if registry.file_type.to_sym == :job_artifact
             raise NotImplementedError, 'Use create(:geo_job_artifact_registry, :with_artifact) instead'
           else
             create(:upload)

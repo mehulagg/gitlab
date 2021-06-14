@@ -644,6 +644,10 @@ module Ci
       end
     end
 
+    def update_builds_coverage
+      builds.with_coverage_regex.without_coverage.each(&:update_coverage)
+    end
+
     def batch_lookup_report_artifact_for_file_type(file_type)
       latest_report_artifacts
         .values_at(*::Ci::JobArtifact.associated_file_types_for(file_type.to_s))
@@ -994,7 +998,7 @@ module Ci
     end
 
     def latest_test_report_builds
-      latest_report_builds(Ci::JobArtifact.test_reports).preload(:project, :job_variables, :metadata)
+      latest_report_builds(Ci::JobArtifact.test_reports).preload(:project)
     end
 
     def builds_with_coverage

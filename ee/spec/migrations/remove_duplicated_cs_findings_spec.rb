@@ -18,7 +18,7 @@ RSpec.describe RemoveDuplicatedCsFindings, :migration do
   let(:identifiers) { table(:vulnerability_identifiers) }
   let!(:project) { projects.create!(id: 12058473, namespace_id: group.id, name: 'gitlab', path: 'gitlab') }
   let!(:scanner) do
-    scanners.create!(id: 6, project_id: project.id, external_id: 'clair', name: 'Security Scanner')
+    scanners.create!(id: 6, project_id: project.id, external_id: 'trivy', name: 'Security Scanner')
   end
 
   before do

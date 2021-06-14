@@ -15,7 +15,7 @@ This document lists the configuration options for your GitLab `.gitlab-ci.yml` f
 
 - For a quick introduction to GitLab CI/CD, follow the [quick start guide](../quick_start/index.md).
 - For a collection of examples, see [GitLab CI/CD Examples](../examples/README.md).
-- To view a large `.gitlab-ci.yml` file used in an enterprise, see the [`.gitlab-ci.yml` file for `gitlab`](https://gitlab.com/gitlab-org/gitlab/blob/master/.gitlab-ci.yml).
+- To view a large `.gitlab-ci.yml` file used in an enterprise, see the [`.gitlab-ci.yml` file for `gitlab`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/.gitlab-ci.yml).
 
 When you are editing your `.gitlab-ci.yml` file, you can validate it with the
 [CI Lint](../lint.md) tool.
@@ -609,7 +609,7 @@ so you can only `include` public projects or templates.
 > [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/issues/53445) in GitLab 11.7.
 
 Use `include:template` to include `.gitlab-ci.yml` templates that are
-[shipped with GitLab](https://gitlab.com/gitlab-org/gitlab/tree/master/lib/gitlab/ci/templates).
+[shipped with GitLab](https://gitlab.com/gitlab-org/gitlab/-/tree/master/lib/gitlab/ci/templates).
 
 For example:
 
@@ -1518,7 +1518,8 @@ job:
 Glob patterns are interpreted with Ruby [`File.fnmatch`](https://docs.ruby-lang.org/en/2.7.0/File.html#method-c-fnmatch)
 with the flags `File::FNM_PATHNAME | File::FNM_DOTMATCH | File::FNM_EXTGLOB`.
 
-For performance reasons, GitLab matches a maximum of 10,000 `exists` patterns. After the 10,000th check, rules with patterned globs always match.
+For performance reasons, GitLab matches a maximum of 10,000 `exists` patterns or file paths. After the 10,000th check, rules with patterned globs always match.
+In other words, the `exists` rule always assumes a match in projects with more than 10,000 files.
 
 #### `rules:allow_failure`
 
@@ -3306,7 +3307,7 @@ job:
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/49775) in GitLab 13.8
 > - It's [deployed behind a feature flag](../../user/feature_flags.md), disabled by default.
-> - It's enabled on GitLab.com.
+> - It's disabled on GitLab.com.
 > - It's recommended for production use.
 
 Use `artifacts:public` to determine whether the job artifacts should be
@@ -3524,12 +3525,13 @@ as artifacts.
 
 The collected Metrics report uploads to GitLab as an artifact and displays in merge requests.
 
-##### `artifacts:reports:performance` **(PREMIUM)**
+##### `artifacts:reports:browser_performance` **(PREMIUM)**
 
 > - Introduced in GitLab 11.5.
 > - Requires GitLab Runner 11.5 and above.
+> - [Name changed](https://gitlab.com/gitlab-org/gitlab/-/issues/225914) from `artifacts:reports:performance` in GitLab 14.0.
 
-The `performance` report collects [Browser Performance Testing metrics](../../user/project/merge_requests/browser_performance_testing.md)
+The `browser_performance` report collects [Browser Performance Testing metrics](../../user/project/merge_requests/browser_performance_testing.md)
 as artifacts.
 
 The collected Browser Performance report uploads to GitLab as an artifact and displays in merge requests.
@@ -3739,7 +3741,7 @@ Possible values for `when` are:
 - `scheduler_failure`: Retry if the scheduler failed to assign the job to a runner.
 - `data_integrity_failure`: Retry if there is a structural integrity problem detected.
 
-You can specify the number of [retry attempts for certain stages of job execution](../runners/README.md#job-stages-attempts) using variables.
+You can specify the number of [retry attempts for certain stages of job execution](../runners/configure_runners.md#job-stages-attempts) using variables.
 
 ### `timeout`
 
@@ -4217,7 +4219,7 @@ finishes.
 
 ### `release`
 
-> [Introduced](https://gitlab.com/gitlab-org/gitlab/merge_requests/19298) in GitLab 13.2.
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/19298) in GitLab 13.2.
 
 Use `release` to create a [release](../../user/project/releases/index.md).
 Requires the [`release-cli`](https://gitlab.com/gitlab-org/release-cli/-/tree/master/docs)
@@ -4800,19 +4802,19 @@ You cannot set job-level variables to be pre-filled when you run a pipeline manu
 
 You can use [CI/CD variables](../variables/README.md) to configure how the runner processes Git requests:
 
-- [`GIT_STRATEGY`](../runners/README.md#git-strategy)
-- [`GIT_SUBMODULE_STRATEGY`](../runners/README.md#git-submodule-strategy)
-- [`GIT_CHECKOUT`](../runners/README.md#git-checkout)
-- [`GIT_CLEAN_FLAGS`](../runners/README.md#git-clean-flags)
-- [`GIT_FETCH_EXTRA_FLAGS`](../runners/README.md#git-fetch-extra-flags)
-- [`GIT_DEPTH`](../runners/README.md#shallow-cloning) (shallow cloning)
-- [`GIT_CLONE_PATH`](../runners/README.md#custom-build-directories) (custom build directories)
-- [`TRANSFER_METER_FREQUENCY`](../runners/README.md#artifact-and-cache-settings) (artifact/cache meter update frequency)
-- [`ARTIFACT_COMPRESSION_LEVEL`](../runners/README.md#artifact-and-cache-settings) (artifact archiver compression level)
-- [`CACHE_COMPRESSION_LEVEL`](../runners/README.md#artifact-and-cache-settings) (cache archiver compression level)
+- [`GIT_STRATEGY`](../runners/configure_runners.md#git-strategy)
+- [`GIT_SUBMODULE_STRATEGY`](../runners/configure_runners.md#git-submodule-strategy)
+- [`GIT_CHECKOUT`](../runners/configure_runners.md#git-checkout)
+- [`GIT_CLEAN_FLAGS`](../runners/configure_runners.md#git-clean-flags)
+- [`GIT_FETCH_EXTRA_FLAGS`](../runners/configure_runners.md#git-fetch-extra-flags)
+- [`GIT_DEPTH`](../runners/configure_runners.md#shallow-cloning) (shallow cloning)
+- [`GIT_CLONE_PATH`](../runners/configure_runners.md#custom-build-directories) (custom build directories)
+- [`TRANSFER_METER_FREQUENCY`](../runners/configure_runners.md#artifact-and-cache-settings) (artifact/cache meter update frequency)
+- [`ARTIFACT_COMPRESSION_LEVEL`](../runners/configure_runners.md#artifact-and-cache-settings) (artifact archiver compression level)
+- [`CACHE_COMPRESSION_LEVEL`](../runners/configure_runners.md#artifact-and-cache-settings) (cache archiver compression level)
 
 You can also use variables to configure how many times a runner
-[attempts certain stages of job execution](../runners/README.md#job-stages-attempts).
+[attempts certain stages of job execution](../runners/configure_runners.md#job-stages-attempts).
 
 ## YAML-specific features
 

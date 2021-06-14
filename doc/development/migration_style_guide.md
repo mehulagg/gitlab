@@ -844,7 +844,7 @@ You have to use a serializer to provide a translation layer:
 
 ```ruby
 class BuildMetadata
-  serialize :config_options, Serializers::JSON # rubocop:disable Cop/ActiveRecordSerialize
+  serialize :config_options, Serializers::Json # rubocop:disable Cop/ActiveRecordSerialize
 end
 ```
 
@@ -975,6 +975,9 @@ the model needs to be declared in the migration.
 If using a model in the migrations, you should first
 [clear the column cache](https://api.rubyonrails.org/classes/ActiveRecord/ModelSchema/ClassMethods.html#method-i-reset_column_information)
 using `reset_column_information`.
+
+If using a model that leverages single table inheritance (STI), there are [special
+considerations](single_table_inheritance.md#in-migrations).
 
 This avoids problems where a column that you are using was altered and cached
 in a previous migration.

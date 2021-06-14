@@ -4,7 +4,7 @@ stage: Manage
 group: Import
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
-# Group Import/Export
+# Group import/export **(FREE)**
 
 > - [Introduced](https://gitlab.com/groups/gitlab-org/-/epics/2888) in GitLab 13.0 as an experimental feature. May change in future releases.
 
@@ -58,7 +58,7 @@ The following items are **not** exported:
 
 NOTE:
 For more details on the specific data persisted in a group export, see the
-[`import_export.yml`](https://gitlab.com/gitlab-org/gitlab/blob/master/lib/gitlab/import_export/group/import_export.yml) file.
+[`import_export.yml`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/import_export/group/import_export.yml) file.
 
 ## Exporting a Group
 

@@ -11,9 +11,11 @@ RSpec.shared_examples 'a dast on-demand scan policy' do
     stub_licensed_features(security_on_demand_scans: true)
   end
 
-  describe 'create_on_demand_dast_scan' do
+  describe 'dast on-demand policies' do
+    let(:policies) { [:create_on_demand_dast_scan, :read_on_demand_scans] }
+
     context 'when a user does not have access to the project' do
-      it { is_expected.to be_disallowed(:create_on_demand_dast_scan) }
+      it { is_expected.to be_disallowed(*policies) }
     end
 
     context 'when the user is a guest' do
@@ -21,7 +23,7 @@ RSpec.shared_examples 'a dast on-demand scan policy' do
         project.add_guest(user)
       end
 
-      it { is_expected.to be_disallowed(:create_on_demand_dast_scan) }
+      it { is_expected.to be_disallowed(*policies) }
     end
 
     context 'when the user is a reporter' do
@@ -29,7 +31,7 @@ RSpec.shared_examples 'a dast on-demand scan policy' do
         project.add_reporter(user)
       end
 
-      it { is_expected.to be_disallowed(:create_on_demand_dast_scan) }
+      it { is_expected.to be_disallowed(*policies) }
     end
 
     context 'when the user is a developer' do
@@ -37,7 +39,7 @@ RSpec.shared_examples 'a dast on-demand scan policy' do
         project.add_developer(user)
       end
 
-      it { is_expected.to be_allowed(:create_on_demand_dast_scan) }
+      it { is_expected.to be_allowed(*policies) }
     end
 
     context 'when the user is a maintainer' do
@@ -45,7 +47,7 @@ RSpec.shared_examples 'a dast on-demand scan policy' do
         project.add_maintainer(user)
       end
 
-      it { is_expected.to be_allowed(:create_on_demand_dast_scan) }
+      it { is_expected.to be_allowed(*policies) }
     end
 
     context 'when the user is an owner' do
@@ -53,7 +55,7 @@ RSpec.shared_examples 'a dast on-demand scan policy' do
         group.add_owner(user)
       end
 
-      it { is_expected.to be_allowed(:create_on_demand_dast_scan) }
+      it { is_expected.to be_allowed(*policies) }
     end
 
     context 'when the user is allowed' do
@@ -68,7 +70,7 @@ RSpec.shared_examples 'a dast on-demand scan policy' do
           stub_licensed_features(security_on_demand_scans: false)
         end
 
-        it { is_expected.to be_disallowed(:create_on_demand_dast_scan) }
+        it { is_expected.to be_disallowed(*policies) }
       end
     end
   end

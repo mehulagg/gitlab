@@ -4,7 +4,9 @@ require 'spec_helper'
 RSpec.describe EnvironmentPolicy do
   using RSpec::Parameterized::TableSyntax
 
-  let(:project) { create(:project, :repository) }
+  let_it_be(:group) { create(:group) }
+  let_it_be(:project) { create(:project, :repository, group: group) }
+
   let(:user) { create(:user) }
   let(:environment) { create(:environment, :with_review_app, ref: 'development', project: project) }
 

@@ -39,7 +39,7 @@ export const groupPageInfo = {
   nextPage: 2,
 };
 
-export const devopsAdoptionSegmentsData = {
+export const devopsAdoptionNamespaceData = {
   nodes: [
     {
       id: 1,
@@ -59,7 +59,7 @@ export const devopsAdoptionSegmentsData = {
         recordedAt: '2020-10-31T23:59:59Z',
         __typename: 'latestSnapshot',
       },
-      __typename: 'devopsSegment',
+      __typename: 'devopsAdoptionEnabledNamespace',
     },
     {
       id: 2,
@@ -68,13 +68,13 @@ export const devopsAdoptionSegmentsData = {
         id: 'gid://gitlab/Group/2',
       },
       latestSnapshot: null,
-      __typename: 'devopsSegment',
+      __typename: 'devopsAdoptionEnabledNamespace',
     },
   ],
-  __typename: 'devopsAdoptionSegments',
+  __typename: 'devopsAdoptionEnabledNamespaces',
 };
 
-export const devopsAdoptionSegmentsDataEmpty = {
+export const devopsAdoptionNamespaceDataEmpty = {
   nodes: [],
   __typename: 'devopsAdoptionSegments',
 };

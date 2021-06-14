@@ -35,8 +35,22 @@ FactoryBot.define do
       end
     end
 
+    trait :production do
+      name { 'production' }
+    end
+
     trait :staging do
       name { 'staging' }
+    end
+
+    trait :project_level do
+      project
+      group { nil }
+    end
+
+    trait :group_level do
+      project { nil }
+      group
     end
   end
 end

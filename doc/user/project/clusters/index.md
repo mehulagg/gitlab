@@ -88,11 +88,9 @@ to:
 
 ### Installing applications
 
-GitLab can install and manage some applications like Helm, GitLab Runner, Ingress,
-Prometheus, and so on, in your project-level cluster. For more information on
-installing, upgrading, uninstalling, and troubleshooting applications for
-your project cluster, see
-[GitLab Managed Apps](../../clusters/applications.md).
+Attach a [Cluster management project](../../clusters/management_project.md)
+to your cluster to manage shared resources requiring `cluster-admin` privileges for
+installation, such as an Ingress controller.
 
 ### Auto DevOps
 
@@ -254,6 +252,6 @@ Automatically detect and monitor Kubernetes metrics. Automatic monitoring of
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/4701) in [GitLab Ultimate](https://about.gitlab.com/pricing/) 10.6.
 > - [Moved](https://gitlab.com/gitlab-org/gitlab/-/issues/208224) to GitLab Free in 13.2.
 
-When [Prometheus is deployed](#installing-applications), GitLab monitors the cluster's health. At the top of the cluster settings page, CPU and Memory utilization is displayed, along with the total amount available. Keeping an eye on cluster resources can be important, if the cluster runs out of memory pods may be shutdown or fail to start.
+When [the Prometheus cluster integration is enabled](../../clusters/integrations.md#prometheus-cluster-integration), GitLab monitors the cluster's health. At the top of the cluster settings page, CPU and Memory utilization is displayed, along with the total amount available. Keeping an eye on cluster resources can be important, if the cluster runs out of memory pods may be shutdown or fail to start.
 
 ![Cluster Monitoring](img/k8s_cluster_monitoring.png)

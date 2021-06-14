@@ -33,7 +33,7 @@ RSpec.describe UpdateOccurrenceSeverityColumn do
                         external_id: 'SECURITY_0',
                         name: 'SECURITY_IDENTIFIER 0')
 
-    scanners.create!(id: 6, project_id: 123, external_id: 'clair', name: 'Security Scanner')
+    scanners.create!(id: 6, project_id: 123, external_id: 'trivy', name: 'Security Scanner')
 
     vulnerabilities.create!(severity: 0,
                             confidence: 5,
@@ -80,7 +80,7 @@ RSpec.describe UpdateOccurrenceSeverityColumn do
                         external_id: 'SECURITY_0',
                         name: 'SECURITY_IDENTIFIER 0')
 
-    scanners.create!(id: 6, project_id: 123, external_id: 'clair', name: 'Security Scanner')
+    scanners.create!(id: 6, project_id: 123, external_id: 'trivy', name: 'Security Scanner')
 
     vulnerabilities.create!(severity: 0,
                             confidence: 5,

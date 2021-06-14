@@ -40,6 +40,7 @@ exports[`Alert integration settings form should match the default snapshot 1`] =
       invalid-feedback=""
       label="Time limit"
       label-for="sla-duration"
+      labeldescription=""
       state="true"
     >
       <div

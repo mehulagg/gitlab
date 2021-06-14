@@ -273,6 +273,20 @@ RSpec.describe Ci::Runner do
     end
   end
 
+  describe '.recent' do
+    subject { described_class.recent }
+
+    before do
+      @runner1 = create(:ci_runner, :instance, contacted_at: nil, created_at: 2.months.ago)
+      @runner2 = create(:ci_runner, :instance, contacted_at: nil, created_at: 3.months.ago)
+      @runner3 = create(:ci_runner, :instance, contacted_at: 1.month.ago, created_at: 2.months.ago)
+      @runner4 = create(:ci_runner, :instance, contacted_at: 1.month.ago, created_at: 3.months.ago)
+      @runner5 = create(:ci_runner, :instance, contacted_at: 3.months.ago, created_at: 5.months.ago)
+    end
+
+    it { is_expected.to eq([@runner1, @runner3, @runner4])}
+  end
+
   describe '.online' do
     subject { described_class.online }
 
@@ -363,6 +377,22 @@ RSpec.describe Ci::Runner do
     end
 
     it { is_expected.to eq([@runner1])}
+  end
+
+  describe '#tick_runner_queue' do
+    it 'sticks the runner to the primary and calls the original method' do
+      runner = create(:ci_runner)
+
+      allow(Gitlab::Database::LoadBalancing).to receive(:enable?)
+        .and_return(true)
+
+      expect(Gitlab::Database::LoadBalancing::Sticking).to receive(:stick)
+        .with(:runner, runner.id)
+
+      expect(Gitlab::Workhorse).to receive(:set_key_and_notify)
+
+      runner.tick_runner_queue
+    end
   end
 
   describe '#can_pick?' do
@@ -843,12 +873,12 @@ RSpec.describe Ci::Runner do
       expect(described_class.search(runner.token)).to eq([runner])
     end
 
-    it 'returns runners with a partially matching token' do
-      expect(described_class.search(runner.token[0..2])).to eq([runner])
+    it 'does not return runners with a partially matching token' do
+      expect(described_class.search(runner.token[0..2])).to be_empty
     end
 
-    it 'returns runners with a matching token regardless of the casing' do
-      expect(described_class.search(runner.token.upcase)).to eq([runner])
+    it 'does not return runners with a matching token with different casing' do
+      expect(described_class.search(runner.token.upcase)).to be_empty
     end
 
     it 'returns runners with a matching description' do

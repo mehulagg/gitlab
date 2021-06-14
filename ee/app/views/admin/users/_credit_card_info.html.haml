@@ -1,0 +1,10 @@
+- return unless Gitlab.com?
+%li#credit-card-status
+  - if user.credit_card_validated_at
+    %span.light= _('Credit card validated at:')
+    %strong
+      = user.credit_card_validated_at.to_s(:medium)
+  - else
+    %span.light= _('Credit card validated:')
+    %strong
+      = _('No')

@@ -1,9 +1,8 @@
 import { GlDropdownItem, GlFormGroup, GlSprintf } from '@gitlab/ui';
-import { shallowMount } from '@vue/test-utils';
 import { cloneDeep } from 'lodash';
-import EscalationRule from 'ee/escalation_policies/components/escalation_rule.vue';
-import { defaultEscalationRule, ACTIONS, ALERT_STATUSES } from 'ee/escalation_policies/constants';
-import { extendedWrapper } from 'helpers/vue_test_utils_helper';
+import EscalationRule, { i18n } from 'ee/escalation_policies/components/escalation_rule.vue';
+import { DEFAULT_ESCALATION_RULE, ACTIONS, ALERT_STATUSES } from 'ee/escalation_policies/constants';
+import { shallowMountExtended } from 'helpers/vue_test_utils_helper';
 
 const mockSchedules = [
   { id: 1, name: 'schedule1' },
@@ -11,23 +10,26 @@ const mockSchedules = [
   { id: 3, name: 'schedule3' },
 ];
 
+const emptyScheduleMsg = i18n.fields.rules.emptyScheduleValidationMsg;
+const invalidTimeMsg = i18n.fields.rules.invalidTimeValidationMsg;
+
 describe('EscalationRule', () => {
   let wrapper;
   const createComponent = ({ props = {} } = {}) => {
-    wrapper = extendedWrapper(
-      shallowMount(EscalationRule, {
-        propsData: {
-          rule: cloneDeep(defaultEscalationRule),
-          schedules: mockSchedules,
-          index: 0,
-          isValid: false,
-          ...props,
-        },
-        stubs: {
-          GlSprintf,
-        },
-      }),
-    );
+    wrapper = shallowMountExtended(EscalationRule, {
+      propsData: {
+        rule: cloneDeep(DEFAULT_ESCALATION_RULE),
+        schedules: mockSchedules,
+        schedulesLoading: false,
+        index: 0,
+        isValid: false,
+        ...props,
+      },
+      stubs: {
+        GlFormGroup,
+        GlSprintf,
+      },
+    });
   };
 
   beforeEach(() => {
@@ -48,6 +50,8 @@ describe('EscalationRule', () => {
   const findSchedulesDropdownOptions = () => findSchedulesDropdown().findAll(GlDropdownItem);
 
   const findFormGroup = () => wrapper.findComponent(GlFormGroup);
+
+  const findNoSchedulesInfoIcon = () => wrapper.findByTestId('no-schedules-info-icon');
 
   describe('Status dropdown', () => {
     it('should have correct alert status options', () => {
@@ -79,20 +83,59 @@ describe('EscalationRule', () => {
         mockSchedules.map(({ name }) => name),
       );
     });
+
+    it('should NOT disable the dropdown OR show the info icon when schedules are loaded and provided', () => {
+      expect(findSchedulesDropdown().attributes('disabled')).toBeUndefined();
+      expect(findNoSchedulesInfoIcon().exists()).toBe(false);
+    });
+
+    it('should disable the dropdown and show the info icon when no schedules provided', () => {
+      createComponent({ props: { schedules: [], schedulesLoading: false } });
+      expect(findSchedulesDropdown().attributes('disabled')).toBe('true');
+      expect(findNoSchedulesInfoIcon().exists()).toBe(true);
+    });
   });
 
   describe('Validation', () => {
-    it.each`
-      isValid  | state
-      ${true}  | ${'true'}
-      ${false} | ${undefined}
-    `('when $isValid sets from group state to $state', ({ isValid, state }) => {
-      createComponent({
-        props: {
-          isValid,
-        },
+    describe.each`
+      validationState                                   | formState
+      ${{ isTimeValid: true, isScheduleValid: true }}   | ${'true'}
+      ${{ isTimeValid: false, isScheduleValid: true }}  | ${undefined}
+      ${{ isTimeValid: true, isScheduleValid: false }}  | ${undefined}
+      ${{ isTimeValid: false, isScheduleValid: false }} | ${undefined}
+    `(`when`, ({ validationState, formState }) => {
+      describe(`elapsed minutes control is ${
+        validationState.isTimeValid ? 'valid' : 'invalid'
+      } and schedule control is ${validationState.isScheduleValid ? 'valid' : 'invalid'}`, () => {
+        beforeEach(() => {
+          createComponent({
+            props: {
+              validationState,
+            },
+          });
+        });
+
+        it(`sets form group validation state to ${formState}`, () => {
+          expect(findFormGroup().attributes('state')).toBe(formState);
+        });
+
+        it(`does ${
+          validationState.isTimeValid ? 'not show' : 'show'
+        } invalid time error message && does ${
+          validationState.isScheduleValid ? 'not show' : 'show'
+        } invalid schedule error message `, () => {
+          if (validationState.isTimeValid) {
+            expect(findFormGroup().text()).not.toContain(invalidTimeMsg);
+          } else {
+            expect(findFormGroup().text()).toContain(invalidTimeMsg);
+          }
+          if (validationState.isScheduleValid) {
+            expect(findFormGroup().text()).not.toContain(emptyScheduleMsg);
+          } else {
+            expect(findFormGroup().text()).toContain(emptyScheduleMsg);
+          }
+        });
       });
-      expect(findFormGroup().attributes('state')).toBe(state);
     });
   });
 });
