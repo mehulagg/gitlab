@@ -706,6 +706,9 @@ git for-each-ref --format="%(refname)" 'refs/replace/*' | xargs -n 100 git push 
 
 We can use this example to push the refs in batches of 100.
 
+We are working to improve Gitaly. You can follow our work towards this goal in the
+[related epic](https://gitlab.com/groups/gitlab-org/-/epics/5717).
+
 ### Troubleshoot Praefect (Gitaly Cluster)
 
 The following sections provide possible solutions to Gitaly Cluster errors.
