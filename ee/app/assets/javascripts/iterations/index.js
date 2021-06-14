@@ -139,3 +139,4 @@ export function initCadenceApp({ namespaceType }) {
 }
 
 export const initGroupCadenceApp = () => initCadenceApp({ namespaceType: Namespace.Group });
+export const initProjectCadenceApp = () => initCadenceApp({ namespaceType: Namespace.Project });
