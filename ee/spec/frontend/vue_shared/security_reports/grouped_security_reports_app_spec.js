@@ -44,6 +44,7 @@ describe('Grouped security reports app', () => {
   const findReportSummary = () => wrapper.find('[data-testid="report-section-code-text"]');
   const findCollapseButton = () => wrapper.find('.js-collapse-btn');
   const findSpinner = () => wrapper.find('.gl-spinner');
+  const findSecretScanReport = () => wrapper.find('[data-testid="secret-scan-report"]');
 
   const props = {
     headBlobPath: 'path',
@@ -634,7 +635,7 @@ describe('Grouped security reports app', () => {
       });
 
       it('should render the component', () => {
-        expect(wrapper.find('[data-testid="secret-scan-report"]').exists()).toBe(true);
+        expect(findSecretScanReport().exists()).toBe(true);
       });
 
       it('should set diffEndpoint', () => {
@@ -656,7 +657,7 @@ describe('Grouped security reports app', () => {
       });
 
       it('should not render the component', () => {
-        expect(wrapper.find('[data-testid="secret-scan-report"]').exists()).toBe(false);
+        expect(findSecretScanReport().exists()).toBe(false);
       });
     });
   });
