@@ -391,7 +391,7 @@ project:
 - youtrack_service
 - custom_issue_tracker_integration
 - bugzilla_integration
-- ewm_service
+- ewm_integration
 - external_wiki_service
 - mock_ci_service
 - mock_monitoring_service

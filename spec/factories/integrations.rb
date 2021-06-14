@@ -103,7 +103,7 @@ FactoryBot.define do
     issue_tracker
   end
 
-  factory :ewm_service, class: 'Integrations::Ewm' do
+  factory :ewm_integration, class: 'Integrations::Ewm' do
     project
     active { true }
     issue_tracker
