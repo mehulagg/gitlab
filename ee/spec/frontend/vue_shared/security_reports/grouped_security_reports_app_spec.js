@@ -41,6 +41,7 @@ describe('Grouped security reports app', () => {
   let mock;
 
   const findReportSection = () => wrapper.find(ReportSection);
+  const findCollapseButton = () => wrapper.find('.js-collapse-btn');
 
   const props = {
     headBlobPath: 'path',
@@ -165,7 +166,7 @@ describe('Grouped security reports app', () => {
           'Security scanning failed loading any results',
         );
 
-        expect(wrapper.find('.js-collapse-btn').text()).toEqual('Expand');
+        expect(findCollapseButton().text()).toEqual('Expand');
 
         const wrapperText = wrapper.text();
         expect(wrapperText).toContain('SAST: Loading resulted in an error');
@@ -200,7 +201,7 @@ describe('Grouped security reports app', () => {
           'Security scanning is loading',
         );
 
-        expect(wrapper.find('.js-collapse-btn').text()).toEqual('Expand');
+        expect(findCollapseButton().text()).toEqual('Expand');
 
         const wrapperText = wrapper.text();
         expect(wrapperText).toContain('SAST is loading');
@@ -306,7 +307,7 @@ describe('Grouped security reports app', () => {
         );
 
         // Renders the expand button
-        expect(wrapper.find('.js-collapse-btn').text()).toEqual('Expand');
+        expect(findCollapseButton().text()).toEqual('Expand');
 
         const normalizedWrapperText = trimText(wrapper.text());
 
