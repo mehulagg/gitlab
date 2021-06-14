@@ -41,6 +41,7 @@ module QA
           verify_labels_import
           verify_issues_import
           verify_milestones_import
+          verify_wikis_import
           verify_merge_requests_import
         end
       end
@@ -93,6 +94,13 @@ module QA
 
         expect(milestones.length).to eq(1)
         expect(milestones.first).to include(title: 'v1.0', description: nil, state: 'active')
+      end
+
+      def verify_wikis_import
+        wikis = imported_project.wikis
+
+        expect(wikis.length).to eq(1)
+        expect(wikis.first).to include(title: 'Home', format: 'markdown')
       end
 
       def verify_merge_requests_import

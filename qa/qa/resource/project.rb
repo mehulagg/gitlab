@@ -203,6 +203,10 @@ module QA
         "#{api_get_path}/milestones"
       end
 
+      def api_wikis_path
+        "#{api_get_path}/wikis"
+      end
+
       def api_post_body
         post_body = {
           name: name,
@@ -330,6 +334,11 @@ module QA
 
       def milestones
         response = get(request_url(api_milestones_path))
+        parse_body(response)
+      end
+
+      def wikis
+        response = get(request_url(api_wikis_path))
         parse_body(response)
       end
 
