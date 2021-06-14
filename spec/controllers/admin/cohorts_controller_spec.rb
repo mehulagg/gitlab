@@ -12,6 +12,6 @@ RSpec.describe Admin::CohortsController do
   it 'redirects to Overview->Users' do
     get :index
 
-    expect(response).to redirect_to(cohorts_admin_users_path)
+    expect(response).to redirect_to(admin_cohorts_path)
   end
 end
