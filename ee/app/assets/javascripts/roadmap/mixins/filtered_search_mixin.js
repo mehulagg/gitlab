@@ -43,6 +43,19 @@ export default {
   },
   methods: {
     getFilteredSearchTokens({ supportsEpic = true } = {}) {
+      let preloadedAuthors = [];
+
+      if (gon.current_user_id) {
+        preloadedAuthors = [
+          {
+            id: gon.current_user_id,
+            name: gon.current_user_fullname,
+            username: gon.current_username,
+            avatar_url: gon.current_user_avatar_url,
+          },
+        ];
+      }
+
       const tokens = [
         {
           type: 'author_username',
@@ -54,6 +67,7 @@ export default {
           operators: OPERATOR_IS_ONLY,
           recentTokenValuesStorageKey: `${this.groupFullPath}-epics-recent-tokens-author_username`,
           fetchAuthors: Api.users.bind(Api),
+          preloadedAuthors,
         },
         {
           type: 'label_name',

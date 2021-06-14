@@ -1,17 +1,15 @@
 ---
 key_path: usage_activity_by_stage.secure.user_license_management_jobs
-description: no idea, Count of License Scanning jobs run, it implies user but AFAIK
-  we don't track per user
+description: Total number of users running License Scanning jobs
 product_section: sec
 product_stage: secure
 product_group: group::composition analysis
 product_category: license_compliance
-value_type: string
+value_type: number
 status: data_available
-time_frame: none
-data_source:
+time_frame: all
+data_source: database
 distribution:
 - ee
 tier:
 - ultimate
-skip_validation: true

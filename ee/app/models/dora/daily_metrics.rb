@@ -57,8 +57,6 @@ module Dora
       def aggregate_for!(metric, interval)
         data_query = data_query_for!(metric)
 
-        # NOTE: We would remove the `{ date => value }` entry in 14.0 in favor of the explicit `date` and `value` keys.
-        # See more https://gitlab.com/gitlab-org/gitlab/-/issues/325931
         case interval
         when INTERVAL_ALL
           select(data_query).take.data
@@ -66,12 +64,12 @@ module Dora
           select("DATE_TRUNC('month', date)::date AS month, #{data_query}")
             .group("DATE_TRUNC('month', date)")
             .order('month ASC')
-            .map { |row| { row.month.to_s => row.data, 'date' => row.month.to_s, 'value' => row.data } }
+            .map { |row| { 'date' => row.month.to_s, 'value' => row.data } }
         when INTERVAL_DAILY
           select("date, #{data_query}")
             .group('date')
             .order('date ASC')
-            .map { |row| { row.date.to_s => row.data, 'date' => row.date.to_s, 'value' => row.data } }
+            .map { |row| { 'date' => row.date.to_s, 'value' => row.data } }
         else
           raise ArgumentError, 'Unknown interval'
         end

@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe Gitlab::SubscriptionPortal::Clients::REST do
+RSpec.describe Gitlab::SubscriptionPortal::Clients::Rest do
   let(:client) { Gitlab::SubscriptionPortal::Client }
   let(:http_response) { nil }
   let(:http_method) { :post }

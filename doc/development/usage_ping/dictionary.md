@@ -508,7 +508,7 @@ Unique builds in project
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216175510_ci_builds.yml)
 
-Group: `group::continuous integration`
+Group: `group::pipeline execution`
 
 Status: `data_available`
 
@@ -520,7 +520,7 @@ Total pipelines in external repositories
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216175514_ci_external_pipelines.yml)
 
-Group: `group::continuous integration`
+Group: `group::pipeline execution`
 
 Status: `data_available`
 
@@ -532,7 +532,7 @@ Total pipelines in GitLab repositories
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216175512_ci_internal_pipelines.yml)
 
-Group: `group::continuous integration`
+Group: `group::pipeline execution`
 
 Status: `data_available`
 
@@ -556,7 +556,7 @@ Total Pipelines from templates in repository
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216175518_ci_pipeline_config_repository.yml)
 
-Group: `group::continuous integration`
+Group: `group::pipeline execution`
 
 Status: `data_available`
 
@@ -568,7 +568,7 @@ Pipeline schedules in GitLab
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216175523_ci_pipeline_schedules.yml)
 
-Group: `group::continuous integration`
+Group: `group::pipeline execution`
 
 Status: `data_available`
 
@@ -580,7 +580,7 @@ Total configured Runners in project
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216175520_ci_runners.yml)
 
-Group: `group::continuous integration`
+Group: `group::pipeline execution`
 
 Status: `data_available`
 
@@ -592,7 +592,7 @@ Total active instance Runners
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210502050341_ci_runners_group_type_active.yml)
 
-Group: `group::continuous integration`
+Group: `group::pipeline execution`
 
 Status: `implemented`
 
@@ -604,7 +604,7 @@ Total active and online group Runners
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210502051922_ci_runners_group_type_active_online.yml)
 
-Group: `group::continuous integration`
+Group: `group::pipeline execution`
 
 Status: `implemented`
 
@@ -616,7 +616,7 @@ Total active group Runners
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210502045402_ci_runners_instance_type_active.yml)
 
-Group: `group::continuous integration`
+Group: `group::pipeline execution`
 
 Status: `implemented`
 
@@ -628,7 +628,7 @@ Total active and online instance Runners
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210502051651_ci_runners_instance_type_active_online.yml)
 
-Group: `group::continuous integration`
+Group: `group::pipeline execution`
 
 Status: `implemented`
 
@@ -640,7 +640,7 @@ Total online Runners
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210502050942_ci_runners_online.yml)
 
-Group: `group::continuous integration`
+Group: `group::pipeline execution`
 
 Status: `implemented`
 
@@ -652,7 +652,7 @@ Total active project Runners
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210502050834_ci_runners_project_type_active.yml)
 
-Group: `group::continuous integration`
+Group: `group::pipeline execution`
 
 Status: `implemented`
 
@@ -664,7 +664,7 @@ Total active and online project Runners
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210502052036_ci_runners_project_type_active_online.yml)
 
-Group: `group::continuous integration`
+Group: `group::pipeline execution`
 
 Status: `implemented`
 
@@ -676,7 +676,7 @@ Total configured Triggers in project
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216175521_ci_triggers.yml)
 
-Group: `group::continuous integration`
+Group: `group::pipeline execution`
 
 Status: `data_available`
 
@@ -3288,15 +3288,15 @@ Tiers: `free`
 
 ### `counts.license_management_jobs`
 
-Name on the GitLab license
+Count of License Scanning jobs run
 
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/license/20210204124854_license_management_jobs.yml)
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_all/20210204124854_license_management_jobs.yml)
 
-Group: `group::product intelligence`
+Group: `group::composition analysis`
 
 Status: `data_available`
 
-Tiers: `premium`, `ultimate`
+Tiers: `ultimate`
 
 ### `counts.licenses_list_views`
 
@@ -5032,7 +5032,7 @@ Projects with repository mirroring enabled
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_all/20210216181920_projects_mirrored_with_pipelines_enabled.yml)
 
-Group: `group::continuous integration`
+Group: `group::pipeline execution`
 
 Status: `data_available`
 
@@ -17240,7 +17240,7 @@ Count creator_id from projects with repository mirroring enabled.
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_all/20210216181934_projects_mirrored_with_pipelines_enabled.yml)
 
-Group: `group::continuous integration`
+Group: `group::pipeline execution`
 
 Status: `data_available`
 
@@ -17320,7 +17320,7 @@ Tiers:
 
 ### `usage_activity_by_stage.secure.dependency_scanning_scans`
 
-Counts dependency scanning jobs
+Total number of users running Dependency Scanning Scans
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_all/20210216175220_dependency_scanning_scans.yml)
 
@@ -17416,7 +17416,7 @@ Tiers: `free`
 
 ### `usage_activity_by_stage.secure.user_dependency_scanning_jobs`
 
-no idea, Count of Dependency Scanning jobs run, it implies user but AFAIK we don't track per user
+Total number of users running Dependency Scanning jobs
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_all/20210216175216_user_dependency_scanning_jobs.yml)
 
@@ -17428,9 +17428,9 @@ Tiers: `ultimate`
 
 ### `usage_activity_by_stage.secure.user_license_management_jobs`
 
-no idea, Count of License Scanning jobs run, it implies user but AFAIK we don't track per user
+Total number of users running License Scanning jobs
 
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/license/20210216175218_user_license_management_jobs.yml)
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_all/20210216175218_user_license_management_jobs.yml)
 
 Group: `group::composition analysis`
 
@@ -17492,7 +17492,7 @@ Unique count of builds in project
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216175525_ci_builds.yml)
 
-Group: `group::continuous integration`
+Group: `group::pipeline execution`
 
 Status: `data_available`
 
@@ -17504,7 +17504,7 @@ Total pipelines in external repositories
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216175527_ci_external_pipelines.yml)
 
-Group: `group::continuous integration`
+Group: `group::pipeline execution`
 
 Status: `data_available`
 
@@ -17516,7 +17516,7 @@ Total pipelines in GitLab repositories
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216175529_ci_internal_pipelines.yml)
 
-Group: `group::continuous integration`
+Group: `group::pipeline execution`
 
 Status: `data_available`
 
@@ -17540,7 +17540,7 @@ Total Pipelines from templates in repository
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216175533_ci_pipeline_config_repository.yml)
 
-Group: `group::continuous integration`
+Group: `group::pipeline execution`
 
 Status: `data_available`
 
@@ -17552,7 +17552,7 @@ Pipeline schedules in GitLab
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216175535_ci_pipeline_schedules.yml)
 
-Group: `group::continuous integration`
+Group: `group::pipeline execution`
 
 Status: `data_available`
 
@@ -17564,7 +17564,7 @@ Distinct Users triggering Total pipelines
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216175537_ci_pipelines.yml)
 
-Group: `group::continuous integration`
+Group: `group::pipeline execution`
 
 Status: `data_available`
 
@@ -17576,7 +17576,7 @@ Total configured Triggers in project
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216175539_ci_triggers.yml)
 
-Group: `group::continuous integration`
+Group: `group::pipeline execution`
 
 Status: `data_available`
 
@@ -17600,7 +17600,7 @@ Projects with a GitHub service pipeline enabled
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_all/20210216175540_projects_reporting_ci_cd_back_to_github.yml)
 
-Group: `group::continuous integration`
+Group: `group::pipeline execution`
 
 Status: `data_available`
 
@@ -19196,7 +19196,7 @@ Count creator_id from projects with repository mirroring enabled.
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210216181943_projects_mirrored_with_pipelines_enabled.yml)
 
-Group: `group::continuous integration`
+Group: `group::pipeline execution`
 
 Status: `data_available`
 
@@ -19324,7 +19324,7 @@ Tiers: `free`
 
 ### `usage_activity_by_stage_monthly.secure.dependency_scanning_pipeline`
 
-no idea, what is this when did it get added? guess pipelines containing a DS job
+Count of pipelines with successful Dependency Scanning jobs
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210216175226_dependency_scanning_pipeline.yml)
 
@@ -19336,15 +19336,15 @@ Tiers: `ultimate`
 
 ### `usage_activity_by_stage_monthly.secure.dependency_scanning_scans`
 
-Missing description
+Monthly number of users running Dependency Scanning Scans
 
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216183828_dependency_scanning_scans.yml)
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210216183828_dependency_scanning_scans.yml)
 
-Group: ``
+Group: `group::composition analysis`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `ultimate`
 
 ### `usage_activity_by_stage_monthly.secure.sast_pipeline`
 
@@ -19456,7 +19456,7 @@ Tiers: `free`
 
 ### `usage_activity_by_stage_monthly.secure.user_dependency_scanning_jobs`
 
-no idea, Count of Dependency Scanning jobs run, it implies user and monthly, but AFAIK we don't track per user
+Monthly number of users creating Dependency Scanning jobs
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210216175222_user_dependency_scanning_jobs.yml)
 
@@ -19468,9 +19468,9 @@ Tiers: `ultimate`
 
 ### `usage_activity_by_stage_monthly.secure.user_license_management_jobs`
 
-no idea, Count of License Scanning jobs run, it implies user and monthly, but AFAIK we don't track per user
+Monthly number of users running License Scanning jobs
 
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/license/20210216175224_user_license_management_jobs.yml)
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210216175224_user_license_management_jobs.yml)
 
 Group: `group::composition analysis`
 
@@ -19532,7 +19532,7 @@ Unique monthly builds in project
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216175542_ci_builds.yml)
 
-Group: `group::continuous integration`
+Group: `group::pipeline execution`
 
 Status: `data_available`
 
@@ -19544,7 +19544,7 @@ Total pipelines in external repositories in a month
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216175544_ci_external_pipelines.yml)
 
-Group: `group::continuous integration`
+Group: `group::pipeline execution`
 
 Status: `data_available`
 
@@ -19556,7 +19556,7 @@ Total pipelines in GitLab repositories in a month
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216175546_ci_internal_pipelines.yml)
 
-Group: `group::continuous integration`
+Group: `group::pipeline execution`
 
 Status: `data_available`
 
@@ -19580,7 +19580,7 @@ Total Monthly Pipelines from templates in repository
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216175550_ci_pipeline_config_repository.yml)
 
-Group: `group::continuous integration`
+Group: `group::pipeline execution`
 
 Status: `data_available`
 
@@ -19592,7 +19592,7 @@ Total monthly Pipeline schedules in GitLab
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216175552_ci_pipeline_schedules.yml)
 
-Group: `group::continuous integration`
+Group: `group::pipeline execution`
 
 Status: `data_available`
 
@@ -19604,7 +19604,7 @@ Distinct users triggering pipelines in a month
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216175554_ci_pipelines.yml)
 
-Group: `group::continuous integration`
+Group: `group::pipeline execution`
 
 Status: `data_available`
 
@@ -19616,7 +19616,7 @@ Total configured Triggers in project
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216175556_ci_triggers.yml)
 
-Group: `group::continuous integration`
+Group: `group::pipeline execution`
 
 Status: `data_available`
 
@@ -19640,7 +19640,7 @@ Projects with a GitHub repository mirror pipeline enabled
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210216175558_projects_reporting_ci_cd_back_to_github.yml)
 
-Group: `group::continuous integration`
+Group: `group::pipeline execution`
 
 Status: `data_available`
 

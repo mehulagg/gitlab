@@ -7966,6 +7966,9 @@ msgstr ""
 msgid "Collapse approvers"
 msgstr ""
 
+msgid "Collapse diffs larger than this size, and show a 'too large' message instead."
+msgstr ""
+
 msgid "Collapse issues"
 msgstr ""
 
@@ -8561,6 +8564,9 @@ msgid "ContainerRegistry|Cleanup is disabled for this project"
 msgstr ""
 
 msgid "ContainerRegistry|Cleanup pending"
+msgstr ""
+
+msgid "ContainerRegistry|Cleanup policies are now available for this project. %{linkStart}Click here to get started.%{linkEnd}"
 msgstr ""
 
 msgid "ContainerRegistry|Cleanup policy for tags is disabled"
@@ -11400,9 +11406,6 @@ msgid "Didn't receive confirmation instructions?"
 msgstr ""
 
 msgid "Didn't receive unlock instructions?"
-msgstr ""
-
-msgid "Diff content limits"
 msgstr ""
 
 msgid "Diff limits"
@@ -16361,9 +16364,6 @@ msgstr ""
 msgid "How do I set up this service?"
 msgstr ""
 
-msgid "How does cleanup work?"
-msgstr ""
-
 msgid "How it works"
 msgstr ""
 
@@ -17493,6 +17493,9 @@ msgid "Insert image"
 msgstr ""
 
 msgid "Insert inline code"
+msgstr ""
+
+msgid "Insert link"
 msgstr ""
 
 msgid "Insert suggestion"
@@ -20214,6 +20217,9 @@ msgid "Maximum concurrency of Elasticsearch bulk requests per indexing operation
 msgstr ""
 
 msgid "Maximum delay (Minutes)"
+msgstr ""
+
+msgid "Maximum diff patch size in bytes"
 msgstr ""
 
 msgid "Maximum duration of a session."
@@ -23337,6 +23343,9 @@ msgid "PackageRegistry|Copy NuGet Setup Command"
 msgstr ""
 
 msgid "PackageRegistry|Copy Pip command"
+msgstr ""
+
+msgid "PackageRegistry|Copy SHA"
 msgstr ""
 
 msgid "PackageRegistry|Copy add Gradle Groovy DSL repository command"
@@ -28342,6 +28351,12 @@ msgstr ""
 msgid "SSH keys allow you to establish a secure connection between your computer and GitLab."
 msgstr ""
 
+msgid "SSH keys with the following fingerprints are scheduled to expire soon. Expired SSH keys can not be used:"
+msgstr ""
+
+msgid "SSH keys with the following fingerprints have expired and can no longer be used:"
+msgstr ""
+
 msgid "SSH public key"
 msgstr ""
 
@@ -28393,7 +28408,7 @@ msgstr ""
 msgid "Save pipeline schedule"
 msgstr ""
 
-msgid "Save space and find images in the Container Registry. Remove unneeded tags and keep only the ones you want."
+msgid "Save space and find images in the container Registry. remove unneeded tags and keep only the ones you want. %{linkStart}How does cleanup work?%{linkEnd}"
 msgstr ""
 
 msgid "Saved scan settings and target site settings which are reusable."
@@ -29637,6 +29652,9 @@ msgid "Set projects and maximum size limits, session duration, user options, and
 msgstr ""
 
 msgid "Set requirements for a user to sign-in. Enable mandatory two-factor authentication."
+msgstr ""
+
+msgid "Set size limits for displaying diffs in the browser."
 msgstr ""
 
 msgid "Set target branch"
@@ -37638,12 +37656,6 @@ msgstr ""
 msgid "Your SSH keys (%{count})"
 msgstr ""
 
-msgid "Your SSH keys with the following fingerprints are scheduled to expire soon. Expired SSH keys will not be usable in future versions of GitLab:"
-msgstr ""
-
-msgid "Your SSH keys with the following fingerprints have expired. Expired SSH keys will not be usable in future versions of GitLab:"
-msgstr ""
-
 msgid "Your To-Do List"
 msgstr ""
 
@@ -39509,6 +39521,9 @@ msgid "view the blob"
 msgstr ""
 
 msgid "view the source"
+msgstr ""
+
+msgid "visibility"
 msgstr ""
 
 msgid "vulnerability"

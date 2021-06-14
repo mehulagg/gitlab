@@ -1610,7 +1610,7 @@
   :urgency: :high
   :resource_boundary: :unknown
   :weight: 5
-  :idempotent:
+  :idempotent: true
   :tags: []
 - :name: pipeline_processing:stage_update
   :worker_name: StageUpdateWorker

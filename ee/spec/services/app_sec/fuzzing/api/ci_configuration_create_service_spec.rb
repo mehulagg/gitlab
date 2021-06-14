@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe ::AppSec::Fuzzing::Api::CiConfigurationCreateService do
+RSpec.describe ::AppSec::Fuzzing::API::CiConfigurationCreateService do
   let(:service) { described_class.new(container: double(Project), current_user: double(User), params: params) }
 
   describe '#create' do
