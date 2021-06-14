@@ -908,10 +908,9 @@
   resolved "https://registry.yarnpkg.com/@gitlab/tributejs/-/tributejs-1.0.0.tgz#672befa222aeffc83e7d799b0500a7a4418e59b8"
   integrity sha512-nmKw1+hB6MHvlmPz63yPwVs1qQkycHwsKgxpEbzmky16Y6mL4EJMk3w1b8QlOAF/AIAzjCERPhe/R4MJiohbZw==
 
-"@gitlab/ui@29.34.0":
+"@gitlab/ui@https://gitlab.com/gitlab-org/gitlab-ui/-/jobs/1345897454/artifacts/raw/gitlab-ui.1455-flex-rename.tgz":
   version "29.34.0"
-  resolved "https://registry.yarnpkg.com/@gitlab/ui/-/ui-29.34.0.tgz#c8e9d7411f98537d3153d99b6c614583d4d1285d"
-  integrity sha512-ukEHnvd+4f9M+K4b5EArVygUDbS+kUcsP94f6I7Rvd95TR/LlJXwf6vtFdgdBNbk8W98AzW9GwdlT4hmgWfRdw==
+  resolved "https://gitlab.com/gitlab-org/gitlab-ui/-/jobs/1345897454/artifacts/raw/gitlab-ui.1455-flex-rename.tgz#56c5d38bf6678d98f0315cac7249021c0356c750"
   dependencies:
     "@babel/standalone" "^7.0.0"
     "@gitlab/vue-toasted" "^1.3.0"
