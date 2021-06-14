@@ -2,7 +2,8 @@ import { GlFilteredSearch, GlDropdown, GlDropdownItem } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
 import { extendedWrapper } from 'helpers/vue_test_utils_helper';
 import RunnerFilteredSearchBar from '~/runner/components/runner_filtered_search_bar.vue';
-import { PARAM_KEY_STATUS, PARAM_KEY_RUNNER_TYPE } from '~/runner/constants';
+import TagsToken from '~/runner/components/search_tokens/tags_token.vue';
+import { PARAM_KEY_STATUS, PARAM_KEY_RUNNER_TYPE, PARAM_KEY_TAGS } from '~/runner/constants';
 import FilteredSearch from '~/vue_shared/components/filtered_search_bar/filtered_search_bar_root.vue';
 
 describe('RunnerList', () => {
@@ -70,6 +71,10 @@ describe('RunnerList', () => {
       expect.objectContaining({
         type: PARAM_KEY_RUNNER_TYPE,
         options: expect.any(Array),
+      }),
+      expect.objectContaining({
+        type: PARAM_KEY_TAGS,
+        token: TagsToken,
       }),
     ]);
   });

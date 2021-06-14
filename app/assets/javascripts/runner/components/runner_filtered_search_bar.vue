@@ -1,9 +1,9 @@
 <script>
-import { GlFilteredSearchToken } from '@gitlab/ui';
 import { cloneDeep } from 'lodash';
 import { __, s__ } from '~/locale';
 import { OPERATOR_IS_ONLY } from '~/vue_shared/components/filtered_search_bar/constants';
 import FilteredSearch from '~/vue_shared/components/filtered_search_bar/filtered_search_bar_root.vue';
+import BaseToken from '~/vue_shared/components/filtered_search_bar/tokens/base_token.vue';
 import {
   STATUS_ACTIVE,
   STATUS_PAUSED,
@@ -19,14 +19,16 @@ import {
   CONTACTED_ASC,
   PARAM_KEY_STATUS,
   PARAM_KEY_RUNNER_TYPE,
+  PARAM_KEY_TAGS,
 } from '../constants';
+import TagsToken from './search_tokens/tags_token.vue';
 
 const searchTokens = [
   {
     icon: 'status',
     title: __('Status'),
     type: PARAM_KEY_STATUS,
-    token: GlFilteredSearchToken,
+    token: BaseToken,
     // TODO Get more than one value when GraphQL API supports OR for "status"
     unique: true,
     options: [
@@ -48,7 +50,7 @@ const searchTokens = [
     icon: 'file-tree',
     title: __('Type'),
     type: PARAM_KEY_RUNNER_TYPE,
-    token: GlFilteredSearchToken,
+    token: BaseToken,
     // TODO Get more than one value when GraphQL API supports OR for "status"
     unique: true,
     options: [
@@ -61,7 +63,15 @@ const searchTokens = [
     operators: OPERATOR_IS_ONLY,
   },
 
-  // TODO Support tags
+  {
+    icon: 'tag',
+    title: s__('Runners|Tags'),
+    type: PARAM_KEY_TAGS,
+    token: TagsToken,
+    // TODO Should this be dynamic?
+    recentTokenValuesStorageKey: 'admin-runner-search-recent-tags',
+    operators: OPERATOR_IS_ONLY,
+  },
 ];
 
 const sortOptions = [
