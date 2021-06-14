@@ -392,7 +392,7 @@ project:
 - custom_issue_tracker_integration
 - bugzilla_integration
 - ewm_integration
-- external_wiki_service
+- external_wiki_integration
 - mock_ci_service
 - mock_monitoring_service
 - forked_to_members

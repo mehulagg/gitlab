@@ -127,7 +127,7 @@ FactoryBot.define do
     end
   end
 
-  factory :external_wiki_service, class: 'Integrations::ExternalWiki' do
+  factory :external_wiki_integration, class: 'Integrations::ExternalWiki' do
     project
     type { 'ExternalWikiService' }
     active { true }
