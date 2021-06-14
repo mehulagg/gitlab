@@ -7,55 +7,106 @@ require 'active_support/core_ext/array/extract_options'
 module QA
   module Resource
     class Base
-      extend SingleForwardable
       include ApiFabricator
+      extend SingleForwardable
       extend Capybara::DSL
 
       NoValueError = Class.new(RuntimeError)
 
-      def_delegators :evaluator, :attribute
+      # Reload all attributes after fetching data via api
+      #
+      api_reload = instance_method(:reload!)
+      define_method(:reload!) do
+        api_reload.bind(self).call
 
-      def self.fabricate!(*args, &prepare_block)
-        fabricate_via_api!(*args, &prepare_block)
-      rescue NotImplementedError
-        fabricate_via_browser_ui!(*args, &prepare_block)
-      end
+        custom_attributes.each do |attribute_name|
+          api_value = api_resource&.dig(name)
 
-      def self.fabricate_via_browser_ui!(*args, &prepare_block)
-        options = args.extract_options!
-        resource = options.fetch(:resource) { new }
-        parents = options.fetch(:parents) { [] }
-
-        do_fabricate!(resource: resource, prepare_block: prepare_block, parents: parents) do
-          log_fabrication(:browser_ui, resource, parents, args) { resource.fabricate!(*args) }
-
-          current_url
+          instance_variable_set("@#{attribute_name}") unless api_value
         end
+
+        self
       end
 
-      def self.fabricate_via_api!(*args, &prepare_block)
-        options = args.extract_options!
-        resource = options.fetch(:resource) { new }
-        parents = options.fetch(:parents) { [] }
+      def_delegator :evaluator, :attribute
 
-        raise NotImplementedError unless resource.api_support?
+      attribute :web_url
 
-        resource.eager_load_api_client!
-
-        do_fabricate!(resource: resource, prepare_block: prepare_block, parents: parents) do
-          log_fabrication(:api, resource, parents, args) { resource.fabricate_via_api! }
+      class << self
+        def fabricate!(*args, &prepare_block)
+          fabricate_via_api!(*args, &prepare_block)
+        rescue NotImplementedError
+          fabricate_via_browser_ui!(*args, &prepare_block)
         end
-      end
 
-      def self.remove_via_api!(*args, &prepare_block)
-        options = args.extract_options!
-        resource = options.fetch(:resource) { new }
-        parents = options.fetch(:parents) { [] }
+        def fabricate_via_browser_ui!(*args, &prepare_block)
+          options = args.extract_options!
+          resource = options.fetch(:resource) { new }
+          parents = options.fetch(:parents) { [] }
 
-        resource.eager_load_api_client!
+          do_fabricate!(resource: resource, prepare_block: prepare_block, parents: parents) do
+            log_fabrication(:browser_ui, resource, parents, args) { resource.fabricate!(*args) }
 
-        do_fabricate!(resource: resource, prepare_block: prepare_block, parents: parents) do
-          log_fabrication(:api, resource, parents, args) { resource.remove_via_api! }
+            current_url
+          end
+        end
+
+        def fabricate_via_api!(*args, &prepare_block)
+          options = args.extract_options!
+          resource = options.fetch(:resource) { new }
+          parents = options.fetch(:parents) { [] }
+
+          raise NotImplementedError unless resource.api_support?
+
+          resource.eager_load_api_client!
+
+          do_fabricate!(resource: resource, prepare_block: prepare_block, parents: parents) do
+            log_fabrication(:api, resource, parents, args) { resource.fabricate_via_api! }
+          end
+        end
+
+        def remove_via_api!(*args, &prepare_block)
+          options = args.extract_options!
+          resource = options.fetch(:resource) { new }
+          parents = options.fetch(:parents) { [] }
+
+          resource.eager_load_api_client!
+
+          do_fabricate!(resource: resource, prepare_block: prepare_block, parents: parents) do
+            log_fabrication(:api, resource, parents, args) { resource.remove_via_api! }
+          end
+        end
+
+        private
+
+        def do_fabricate!(resource:, prepare_block:, parents: [])
+          prepare_block.call(resource) if prepare_block
+
+          resource_web_url = yield
+          resource.web_url = resource_web_url
+
+          resource
+        end
+
+        def log_fabrication(method, resource, parents, args)
+          return yield unless Runtime::Env.debug?
+
+          start = Time.now
+          prefix = "==#{'=' * parents.size}>"
+          msg = [prefix]
+          msg << "Built a #{name}"
+          msg << "as a dependency of #{parents.last}" if parents.any?
+          msg << "via #{method}"
+
+          yield.tap do
+            msg << "in #{Time.now - start} seconds"
+            puts msg.join(' ')
+            puts if parents.empty?
+          end
+        end
+
+        def evaluator
+          @evaluator ||= Base::DSL.new(self)
         end
       end
 
@@ -64,7 +115,7 @@ module QA
       end
 
       def visit!
-        Runtime::Logger.debug(%Q[Visiting #{self.class.name} at "#{web_url}"])
+        Runtime::Logger.debug(%(Visiting #{self.class.name} at "#{web_url}"))
 
         # Just in case an async action is not yet complete
         Support::WaitForRequests.wait_for_requests
@@ -79,16 +130,18 @@ module QA
       end
 
       def populate(*attributes)
-        attributes.each(&method(:public_send))
+        attributes.each { |attribute| public_send(attribute) }
       end
 
-      def wait_until(max_duration: 60, sleep_interval: 0.1)
-        QA::Support::Waiter.wait_until(max_duration: max_duration, sleep_interval: sleep_interval) do
-          yield
-        end
+      def wait_until(max_duration: 60, sleep_interval: 0.1, &block)
+        QA::Support::Waiter.wait_until(max_duration: max_duration, sleep_interval: sleep_interval, &block)
       end
 
       private
+
+      def custom_attributes
+        @custom_attributes ||= []
+      end
 
       def populate_attribute(name, block)
         value = attribute_value(name, block)
@@ -101,70 +154,35 @@ module QA
       def attribute_value(name, block)
         api_value = api_resource&.dig(name)
 
-        if api_value && block
-          log_having_both_api_result_and_block(name, api_value)
-        end
+        log_having_both_api_result_and_block(name, api_value) if api_value && block
 
         api_value || (block && instance_exec(&block))
       end
 
       def log_having_both_api_result_and_block(name, api_value)
-        QA::Runtime::Logger.info "<#{self.class}> Attribute #{name.inspect} has both API response `#{api_value}` and a block. API response will be picked. Block will be ignored."
+        QA::Runtime::Logger.info(<<~MSG.strip)
+          <#{self.class}> Attribute #{name.inspect} has both API response `#{api_value}` and a block. API response will be picked. Block will be ignored.
+        MSG
       end
-
-      def self.do_fabricate!(resource:, prepare_block:, parents: [])
-        prepare_block.call(resource) if prepare_block
-
-        resource_web_url = yield
-        resource.web_url = resource_web_url
-
-        resource
-      end
-      private_class_method :do_fabricate!
-
-      def self.log_fabrication(method, resource, parents, args)
-        return yield unless Runtime::Env.debug?
-
-        start = Time.now
-        prefix = "==#{'=' * parents.size}>"
-        msg = [prefix]
-        msg << "Built a #{name}"
-        msg << "as a dependency of #{parents.last}" if parents.any?
-        msg << "via #{method}"
-
-        yield.tap do
-          msg << "in #{Time.now - start} seconds"
-          puts msg.join(' ')
-          puts if parents.empty?
-        end
-      end
-      private_class_method :log_fabrication
-
-      def self.evaluator
-        @evaluator ||= Base::DSL.new(self)
-      end
-      private_class_method :evaluator
 
       class DSL
         def initialize(base)
           @base = base
         end
 
-        def attribute(name, &block)
-          @base.module_eval do
-            attr_writer(name)
+        def attribute(*names, &block)
+          names.each do |name|
+            @base.module_eval do
+              custom_attributes.push(name)
+              attr_writer(name)
 
-            define_method(name) do
-              instance_variable_get("@#{name}") ||
-                instance_variable_set(
-                  "@#{name}",
-                  populate_attribute(name, block))
+              define_method(name) do
+                instance_variable_get("@#{name}") || instance_variable_set("@#{name}", populate_attribute(name, block))
+              end
             end
           end
         end
       end
-
-      attribute :web_url
     end
   end
 end
