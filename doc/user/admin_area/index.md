@@ -156,7 +156,9 @@ You can impersonate a user in the following ways:
 
 - Through the UI:
   1. On the top bar, select **Menu >** **{admin}** **Admin**.
-  1. In the left sidebar, select **Overview > Users > Select a user > Impersonate**.
+  1. In the left sidebar, select **Overview > Users**.
+  1. From the list of users, select a user.
+  1. Select **Impersonate**.
 - With the API, using [impersonation tokens](../../api/README.md#impersonation-tokens).
 
 All impersonation activities are [captured with audit events](../../administration/audit_events.md#impersonation-data).

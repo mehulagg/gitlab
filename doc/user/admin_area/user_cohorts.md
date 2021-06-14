@@ -12,6 +12,7 @@ To view user cohorts:
 
 1. On the top bar, select **Menu >** **{admin}** **Admin**.
 1. In the left sidebar, select **Overview > Users**.
+1. Select the **Cohorts** tab.
 
 ## Overview
 

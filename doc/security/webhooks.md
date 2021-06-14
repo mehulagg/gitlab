@@ -47,7 +47,8 @@ to `127.0.0.1`, `::1` and `0.0.0.0`, as well as IPv4 `10.0.0.0/8`, `172.16.0.0/1
 This behavior can be overridden:
 
 1. On the top bar, select **Menu >** **{admin}** **Admin**.
-1. In the left sidebar, select **Settings** (`/admin/application_settings/network`):
+1. In the left sidebar, select **Settings > Network**.
+1. Expand the **Outbound requests** section:
    ![Outbound requests admin settings](img/outbound_requests_section_v12_2.png)
 1. Select **Allow requests to the local network from web hooks and services**.
 
