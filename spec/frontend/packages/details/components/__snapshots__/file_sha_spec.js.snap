@@ -10,14 +10,10 @@ exports[`FileSha renders 1`] = `
     <div
       class="gl-px-4"
     >
-      <span>
-        bar:
-      </span>
-       
-      <span>
-        foo
-      </span>
-       
+      
+    bar:
+    foo
+    
       <gl-button-stub
         aria-label="Copy this value"
         buttontextclasses=""
