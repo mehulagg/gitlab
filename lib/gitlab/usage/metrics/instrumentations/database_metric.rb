@@ -38,7 +38,11 @@ module Gitlab
               @column = column
             end
 
-            attr_reader :metric_operation, :metric_relation, :metric_start, :metric_finish, :column
+            def cache_start_and_finish_as(cache_key)
+              @cache_key = cache_key
+            end
+
+            attr_reader :metric_operation, :metric_relation, :metric_start, :metric_finish, :column, :cache_key
           end
 
           def value
@@ -87,7 +91,11 @@ module Gitlab
           end
 
           def get_or_cache_batch_ids
-            key_name = "metric_instrumentation/#{relation.table_name}"
+            key_name = if self.class.cache_key.present?
+                         "metric_instrumentation/#{self.class.cache_key}"
+                       else
+                         "metric_instrumentation/#{relation.table_name}"
+                       end
 
             start = Rails.cache.fetch("#{key_name}_minimum_id", expires_in: 1.day) do
               self.class.start
