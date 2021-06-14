@@ -8,7 +8,7 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 
 > [Introduced](https://gitlab.com/groups/gitlab-org/-/epics/4638) in [GitLab Premium](https://about.gitlab.com/pricing/) 14.0.
 
-Escalation Policies contain time-boxed steps that will automatically page a responder in the next escalation step if the responder in the previous step has not responded. To protect your company from missed critical alerts, create an escalation policy in the GitLab project where you manage [On-call schedules](./oncall_schedules.md).
+Escalation Policies contain time-boxed steps that will automatically page a responder in the next escalation step if the responder in the previous step has not responded. To protect your company from missed critical alerts, create an escalation policy in the GitLab project where you manage [On-call schedules](oncall_schedules.md).
 
 ## Add an escalation policy
 
@@ -35,4 +35,4 @@ Follow these steps to delete a policy:
 
 1. Go to **Operations > Escalation Policies**  and select the **Trash Can** icon on the top right of the
    policy card.
-1. In the **Delete policy** window, click the **Delete** button.
+1. In the **Delete escalation policy** window, click the **Delete escalation policy** button.
