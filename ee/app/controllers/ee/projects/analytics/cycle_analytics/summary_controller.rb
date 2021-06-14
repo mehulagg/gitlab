@@ -3,6 +3,10 @@
 module EE::Projects::Analytics::CycleAnalytics::SummaryController
   extend ::Gitlab::Utils::Override
 
+  def time_summary
+    render json: project_level.time_summary
+  end
+
   private
 
   override :allowed_params

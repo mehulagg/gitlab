@@ -16,6 +16,16 @@ module Analytics
                                                                 current_user: options[:current_user]).data
       end
 
+      def time_summary
+        @time_summary ||= begin
+          stage = ::Analytics::CycleAnalytics::ProjectStage.new(project: project)
+
+          Gitlab::Analytics::CycleAnalytics::Summary::StageTimeSummary
+            .new(stage, options: options)
+            .data
+        end
+      end
+
       def permissions(user:)
         Gitlab::CycleAnalytics::Permissions.get(user: user, project: project)
       end
