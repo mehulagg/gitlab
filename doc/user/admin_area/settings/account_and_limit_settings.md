@@ -12,10 +12,10 @@ type: reference
 You can change the default maximum number of projects that users can create in their personal namespace:
 
 1. On the top bar, select **Menu >** **{admin}** **Admin**.
-1. In the left sidebar, select **Settings > General**, then expand **Account and Limit**.
-1. Increase or decrease that `Default projects limit` value.
+1. In the left sidebar, select **Settings > General**, then expand **Account and limit**.
+1. Increase or decrease that **Default projects limit** value.
 
-If you set `Default projects limit` to 0, users are not allowed to create projects
+If you set **Default projects limit** to 0, users are not allowed to create projects
 in their users personal namespace. However, projects can still be created in a group.
 
 ## Max attachment size
@@ -23,8 +23,8 @@ in their users personal namespace. However, projects can still be created in a g
 You can change the maximum file size for attachments in comments and replies in GitLab:
 
 1. On the top bar, select **Menu >** **{admin}** **Admin**.
-1. In the left sidebar, select **Settings > General**, then expand **Account and Limit**.
-1. Increase or decrease by changing the value in `Maximum attachment size (MB)`.
+1. In the left sidebar, select **Settings > General**, then expand **Account and limit**.
+1. Increase or decrease by changing the value in **Maximum attachment size (MB)**.
 
 NOTE:
 If you choose a size larger than the configured value for the web server,
@@ -36,8 +36,8 @@ details.
 You can change the maximum push size for your repository:
 
 1. On the top bar, select **Menu >** **{admin}** **Admin**.
-1. In the left sidebar, select **Settings > General**, then expand **Account and Limit**.
-1. Increase or decrease by changing the value in `Maximum push size (MB)`.
+1. In the left sidebar, select **Settings > General**, then expand **Account and limit**.
+1. Increase or decrease by changing the value in **Maximum push size (MB)**.
 
 NOTE:
 When you [add files to a repository](../../project/repository/web_editor.md#create-a-file)
@@ -51,8 +51,8 @@ Use [Git LFS](../../../topics/git/lfs/index.md) to add large files to a reposito
 You can change the maximum file size for imports in GitLab:
 
 1. On the top bar, select **Menu >** **{admin}** **Admin**.
-1. In the left sidebar, select **Settings > General**, then expand **Account and Limit**.
-1. Increase or decrease by changing the value in `Maximum import size (MB)`.
+1. In the left sidebar, select **Settings > General**, then expand **Account and limit**.
+1. Increase or decrease by changing the value in **Maximum import size (MB)**.
 
 NOTE:
 If you choose a size larger than the configured value for the web server,
@@ -243,7 +243,7 @@ To maintain integrity of user details in [Audit Events](../../../administration/
 To do this:
 
 1. On the top bar, select **Menu >** **{admin}** **Admin**.
-1. In the left sidebar, select **Settings > General**, then expand **Account and Limit**.
+1. In the left sidebar, select **Settings > General**, then expand **Account and limit**.
 1. Select the **Prevent users from changing their profile name** checkbox.
 
 NOTE:

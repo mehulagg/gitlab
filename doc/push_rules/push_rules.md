@@ -94,7 +94,7 @@ To override global push rules in a project's settings:
 
 1. Navigate to your project's **Settings > Repository** and expand **Push rules**.
 1. Set the rule you want.
-1. Click **Save Push Rules** for the changes to take effect.
+1. Select **Save Push Rules** for the changes to take effect.
 
 The following options are available:
 
