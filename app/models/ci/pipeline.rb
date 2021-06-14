@@ -928,26 +928,31 @@ module Ci
       Environment.where(id: environment_ids)
     end
 
-    # Without using `unscoped`, caller scope is also included into the query.
-    # Using `unscoped` here will be redundant after Rails 6.1
+    def self_and_upstreams
+      object_hierarchy(same_project: false)
+        .base_and_ancestors
+    end
+
+    def self_and_ancestors
+      object_hierarchy(same_project: true)
+        .base_and_ancestors
+    end
+
     def self_and_descendants
-      ::Gitlab::Ci::PipelineObjectHierarchy
-        .new(self.class.unscoped.where(id: id), options: { same_project: true })
+      object_hierarchy(same_project: true)
         .base_and_descendants
     end
 
     def root_ancestor
       return self unless child?
 
-      Gitlab::Ci::PipelineObjectHierarchy
-        .new(self.class.unscoped.where(id: id), options: { same_project: true })
+      object_hierarchy(same_project: true)
         .base_and_ancestors(hierarchy_order: :desc)
         .first
     end
 
-    def self_with_ancestors_and_descendants(same_project: false)
-      ::Gitlab::Ci::PipelineObjectHierarchy
-        .new(self.class.unscoped.where(id: id), options: { same_project: same_project })
+    def self_with_upstreams_and_downstreams
+      object_hierarchy(same_project: false)
         .all_objects
     end
 
@@ -1210,14 +1215,6 @@ module Ci
       self.ci_ref = Ci::Ref.ensure_for(self)
     end
 
-    def base_and_ancestors(same_project: false)
-      # Without using `unscoped`, caller scope is also included into the query.
-      # Using `unscoped` here will be redundant after Rails 6.1
-      ::Gitlab::Ci::PipelineObjectHierarchy
-        .new(self.class.unscoped.where(id: id), options: { same_project: same_project })
-        .base_and_ancestors
-    end
-
     # We need `base_and_ancestors` in a specific order to "break" when needed.
     # If we use `find_each`, then the order is broken.
     # rubocop:disable Rails/FindEach
@@ -1228,7 +1225,7 @@ module Ci
         source_bridge.pending!
         Ci::AfterRequeueJobService.new(project, current_user).execute(source_bridge) # rubocop:disable CodeReuse/ServiceClass
       else
-        base_and_ancestors.includes(:source_bridge).each do |pipeline|
+        self_and_ancestors.includes(:source_bridge).each do |pipeline|
           break unless pipeline.bridge_waiting?
 
           pipeline.source_bridge.pending!
@@ -1310,6 +1307,13 @@ module Ci
       return unless project
 
       project.repository.keep_around(self.sha, self.before_sha)
+    end
+
+    # Without using `unscoped`, caller scope is also included into the query.
+    # Using `unscoped` here will be redundant after Rails 6.1
+    def object_hierarchy(options = {})
+      ::Gitlab::Ci::PipelineObjectHierarchy
+        .new(self.class.unscoped.where(id: id), options: options)
     end
   end
 end
