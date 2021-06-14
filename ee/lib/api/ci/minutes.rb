@@ -29,6 +29,26 @@ module API
             bad_request!(result[:message])
           end
         end
+
+        desc 'Transfer purchased CI Minutes packs to another namespace'
+        params do
+          requires :id, type: String, desc: 'The ID of the namespace to transfer from'
+          requires :target_id, type: Integer, desc: 'The namespace ID for the pack to transfer to'
+        end
+        patch ':id/minutes/move/:target_id' do
+          namespace = find_namespace(params[:id])
+          target_namespace = find_namespace(params[:target_id])
+
+          break not_found!('Namespace') unless namespace && target_namespace
+
+          result = ::Ci::Minutes::AdditionalPacks::ChangeNamespaceService.new(current_user, namespace, target_namespace).execute
+
+          if result[:status] == :success
+            accepted!
+          else
+            bad_request!(result[:message])
+          end
+        end
       end
     end
   end
