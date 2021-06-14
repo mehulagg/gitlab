@@ -45,6 +45,7 @@ class Integration < ApplicationRecord
     campfire confluence custom_issue_tracker
     flowdock
     hangouts_chat
+    irker
   ].to_set.freeze
 
   serialize :properties, JSON # rubocop:disable Cop/ActiveRecordSerialize
