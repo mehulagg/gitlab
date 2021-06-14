@@ -121,7 +121,7 @@ class Namespace < ApplicationRecord
       { column: arel_table["path"], multiplier: 1 },
       { column: arel_table["name"], multiplier: 0.7 }
     ])
-    reorder(order_expression.desc).order(Gitlab::Database.nulls_last_order('parent_id', :desc))
+    reorder(order_expression.desc, Namespace.arel_table['parent_id'].desc.nulls_last)
   end
 
   # Make sure that the name is same as strong_memoize name in root_ancestor

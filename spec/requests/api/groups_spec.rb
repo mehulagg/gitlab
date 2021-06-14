@@ -184,7 +184,7 @@ RSpec.describe API::Groups do
 
             group_names = json_response.map { |group| group['name'] }
 
-            expect(group_names).to eq(['Group', 'Test', 'Test Group', 'Test Group 2', group1.name])
+            expect(group_names).to eq(groups_visible_to_user(user1).order(:name).pluck(:name))
           end
         end
       end
@@ -374,10 +374,6 @@ RSpec.describe API::Groups do
         expect(json_response).to be_an Array
         expect(response_groups_ids).to eq(Group.select { |group| group['name'] == 'same-name' }.map { |group| group['id'] }.sort)
       end
-
-      def groups_visible_to_user(user)
-        Group.where(id: user.authorized_groups.select(:id).reorder(nil))
-      end
     end
 
     context 'when using owned in the request' do
@@ -411,6 +407,12 @@ RSpec.describe API::Groups do
         expect(json_response).to be_an Array
         expect(response_groups).to contain_exactly(group2.id, group3.id)
       end
+    end
+
+    private
+
+    def groups_visible_to_user(user)
+      Group.where(id: user.authorized_groups.select(:id).reorder(nil))
     end
   end
 
