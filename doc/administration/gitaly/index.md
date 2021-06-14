@@ -683,6 +683,29 @@ it's likely that the Gitaly servers are experiencing
 Ensure the Gitaly clients and servers are synchronized, and use an NTP time
 server to keep them synchronized.
 
+#### Gitaly times out when pushing lots of refs
+
+You might have time-outs when pushing a repository with a lot of refs.
+The logs would have the following:
+
+```shell
+{
+  ...
+  "error": "GitLab: Push operation timed out\n\nTiming information for debugging purposes:\nRunning checks for ref:..."
+  ...
+}
+```
+
+The error may be very long in the log and is truncated in this example.
+
+To workaround this problem we can push the refs in batches. For example, [from an answer on Stack Overflow](https://stackoverflow.com/questions/34154171/how-to-split-refs-into-chunks-that-are-pushed-accross-several-commands):
+
+```
+git for-each-ref --format="%(refname)" 'refs/replace/*' | xargs -n 100 git push origin
+```
+
+We can use this example to push the refs in batches of 100.
+
 ### Troubleshoot Praefect (Gitaly Cluster)
 
 The following sections provide possible solutions to Gitaly Cluster errors.
