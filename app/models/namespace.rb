@@ -122,33 +122,7 @@ class Namespace < ApplicationRecord
       { column: arel_table["name"], multiplier: 0.7 }
     ])
 
-    order = Gitlab::Pagination::Keyset::Order.build([
-                                                      Gitlab::Pagination::Keyset::ColumnOrderDefinition.new(
-                                                        attribute_name: 'similarity',
-                                                        column_expression: order_expression,
-                                                        order_expression: order_expression.desc,
-                                                        order_direction: :desc,
-                                                        distinct: false,
-                                                        add_to_projections: true
-                                                      ),
-                                                      Gitlab::Pagination::Keyset::ColumnOrderDefinition.new(
-                                                        attribute_name: 'parent_id',
-                                                        column_expression: Namespace.arel_table[:parent_id],
-                                                        order_expression: Gitlab::Database.nulls_last_order('namespaces.parent_id', :desc),
-                                                        reversed_order_expression: Gitlab::Database.nulls_first_order('namespaces.parent_id', :asc),
-                                                        order_direction: :desc,
-                                                        nullable: :nulls_first,
-                                                        distinct: false,
-                                                        add_to_projections: true
-                                                      ),
-                                                      Gitlab::Pagination::Keyset::ColumnOrderDefinition.new(
-                                                        attribute_name: 'id',
-                                                        order_expression: Namespace.arel_table[:id].desc,
-                                                        add_to_projections: true
-                                                      )
-                                                    ])
-
-    order.apply_cursor_conditions(reorder(order))
+    reorder(order_expression.desc)
   end
 
   # Make sure that the name is same as strong_memoize name in root_ancestor

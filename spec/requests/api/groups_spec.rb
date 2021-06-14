@@ -17,7 +17,7 @@ RSpec.describe API::Groups do
   let_it_be(:project3) { create(:project, namespace: group1, path: 'test', visibility_level: Gitlab::VisibilityLevel::PRIVATE) }
   let_it_be(:archived_project) { create(:project, namespace: group1, archived: true) }
 
-  before do
+  before_all do
     group1.add_owner(user1)
     group2.add_owner(user2)
   end
@@ -368,22 +368,17 @@ RSpec.describe API::Groups do
       end
     end
 
-    context 'search with similarity ordering' do
-      let!(:group3) { create(:group, name: 'Group', path: 'group') }
-      let!(:group4) { create(:group, name: 'Test Group', path: 'test-group') }
-      let!(:group5) { create(:group, name: 'Test', path: 'test') }
-      let!(:group6) { create(:group, name: 'Test Group 2', parent: group4) }
+    context 'search with similarity ordering', :aggregate_failures do
+      let_it_be(:group3) { create(:group, name: 'Group', path: 'group') }
+      let_it_be(:group4) { create(:group, name: 'Test Group', path: 'test-group') }
+      let_it_be(:group5) { create(:group, name: 'Test', path: 'test') }
+      let_it_be(:group6) { create(:group, name: 'Test Group 2', parent: group4) }
+
       let(:params) { { order_by: 'similarity', search: 'test' } }
 
-      before do
-        group3.add_owner(user1)
-        group4.add_owner(user1)
-        group5.add_owner(user1)
-      end
+      subject { get api('/groups', admin), params: params }
 
-      subject { get api('/groups', user1), params: params }
-
-      it 'returns top level groups before subgroups' do
+      it 'returns top level groups before subgroups with exact matches first' do
         subject
 
         expect(response).to have_gitlab_http_status(:ok)
@@ -413,11 +408,11 @@ RSpec.describe API::Groups do
 
           expect(response).to have_gitlab_http_status(:ok)
           expect(response).to include_pagination_headers
-          expect(json_response.length).to eq(5)
+          expect(json_response.length).to eq(6)
 
           group_names = json_response.map { |group| group['name'] }
 
-          expect(group_names).to eq(['Group', 'Test', 'Test Group', 'Test Group 2', 'group1'])
+          expect(group_names).to eq(['Group', 'Test', 'Test Group', 'Test Group 2', 'group1', 'group2'])
         end
       end
     end
