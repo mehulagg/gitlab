@@ -23,6 +23,7 @@ import ItemCount from './item_count.vue';
 export default {
   i18n: {
     newIssue: __('New issue'),
+    newEpic: __('New epic'),
     listSettings: __('List settings'),
     expand: s__('Boards|Expand'),
     collapse: s__('Boards|Collapse'),
@@ -102,7 +103,7 @@ export default {
     },
     showListHeaderActions() {
       if (this.isLoggedIn) {
-        return this.isNewIssueShown || this.isSettingsShown;
+        return this.isNewIssueShown || this.isNewEpicShown || this.isSettingsShown;
       }
       return false;
     },
@@ -123,6 +124,9 @@ export default {
     },
     isNewIssueShown() {
       return (this.listType === ListType.backlog || this.showListHeaderButton) && !this.isEpicBoard;
+    },
+    isNewEpicShown() {
+      return this.isEpicBoard && this.listType !== ListType.closed;
     },
     isSettingsShown() {
       return (
@@ -166,6 +170,9 @@ export default {
 
     showNewIssueForm() {
       eventHub.$emit(`toggle-issue-form-${this.list.id}`);
+    },
+    showNewEpicForm() {
+      eventHub.$emit(`toggle-epic-form-${this.list.id}`);
     },
     toggleExpanded() {
       const collapsed = !this.list.collapsed;
@@ -377,6 +384,18 @@ export default {
           class="issue-count-badge-add-button no-drag"
           icon="plus"
           @click="showNewIssueForm"
+        />
+
+        <gl-button
+          v-if="isNewEpicShown"
+          v-show="!list.collapsed"
+          ref="newEpicBtn"
+          v-gl-tooltip.hover
+          :aria-label="$options.i18n.newEpic"
+          :title="$options.i18n.newEpic"
+          class="epic-count-badge-add-button no-drag"
+          icon="plus"
+          @click="showNewEpicForm"
         />
 
         <gl-button

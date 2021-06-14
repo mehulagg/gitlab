@@ -37,6 +37,16 @@ export function calculateSwimlanesBufferSize(listTopCoordinate) {
   return Math.ceil((window.innerHeight - listTopCoordinate) / EPIC_LANE_BASE_HEIGHT);
 }
 
+export function formatEpic(epic) {
+  return {
+    ...epic,
+    labels: epic.labels?.nodes || [],
+    // Epics don't support assignees
+    // but `<board-card-inner>` expects it.
+    assignees: [],
+  };
+}
+
 export function formatListEpics(listEpics) {
   const boardItems = {};
   let listItemsCount;

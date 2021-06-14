@@ -21,6 +21,7 @@ export default {
   components: {
     BoardCard,
     BoardNewIssue,
+    BoardNewEpic: () => import('ee_component/boards/components/board_new_epic.vue'),
     GlLoadingIcon,
     GlIntersectionObserver,
   },
@@ -49,6 +50,7 @@ export default {
       scrollOffset: 250,
       showCount: false,
       showIssueForm: false,
+      showEpicForm: false,
     };
   },
   computed: {
@@ -117,6 +119,7 @@ export default {
       handler(id, oldVal) {
         if (id) {
           eventHub.$on(`toggle-issue-form-${this.list.id}`, this.toggleForm);
+          eventHub.$on(`toggle-epic-form-${this.list.id}`, this.toggleForm);
           eventHub.$on(`scroll-board-list-${this.list.id}`, this.scrollToTop);
           eventHub.$off(`toggle-issue-form-${oldVal}`, this.toggleForm);
           eventHub.$off(`scroll-board-list-${oldVal}`, this.scrollToTop);
@@ -127,6 +130,7 @@ export default {
   },
   beforeDestroy() {
     eventHub.$off(`toggle-issue-form-${this.list.id}`, this.toggleForm);
+    eventHub.$off(`toggle-epic-form-${this.list.id}`, this.toggleForm);
     eventHub.$off(`scroll-board-list-${this.list.id}`, this.scrollToTop);
   },
   methods: {
@@ -147,7 +151,11 @@ export default {
       this.fetchItemsForList({ listId: this.list.id, fetchNext: true });
     },
     toggleForm() {
-      this.showIssueForm = !this.showIssueForm;
+      if (this.isEpicBoard) {
+        this.showEpicForm = !this.showEpicForm;
+      } else {
+        this.showIssueForm = !this.showIssueForm;
+      }
     },
     onReachingListBottom() {
       if (!this.loadingMore && this.hasNextPage) {
@@ -228,6 +236,7 @@ export default {
       <gl-loading-icon />
     </div>
     <board-new-issue v-if="list.listType !== 'closed' && showIssueForm" :list="list" />
+    <board-new-epic v-if="isEpicBoard && showEpicForm && list.listType !== 'closed'" :list="list" />
     <component
       :is="treeRootWrapper"
       v-show="!loading"

@@ -94,7 +94,7 @@ export default {
     },
     showListHeaderActions() {
       if (this.isLoggedIn) {
-        return this.isNewIssueShown || this.isSettingsShown;
+        return this.isNewIssueShown || this.isNewEpicShown || this.isSettingsShown;
       }
       return false;
     },
@@ -112,6 +112,9 @@ export default {
     },
     isNewIssueShown() {
       return this.listType === ListType.backlog || this.showListHeaderButton;
+    },
+    isNewEpicShown() {
+      return this.isEpicBoard && this.listType !== ListType.closed;
     },
     isSettingsShown() {
       return (
