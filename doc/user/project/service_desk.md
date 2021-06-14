@@ -160,25 +160,21 @@ To edit the custom email display name:
 1. Enter a new name in **Email display name**.
 1. Select **Save Changes**.
 
-### Using custom email address **(FREE SELF)**
+### Using a custom mailbox **(FREE SELF)**
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/2201) in GitLab Premium 13.0.
 > - [Feature flag removed](https://gitlab.com/gitlab-org/gitlab/-/issues/284656) in GitLab 13.8.
 
 Using the `service_desk_email` configuration, you can customize the mailbox
 used by Service Desk. This allows you to have a separate email address for 
-Service Desk and enables the addition of a custom suffix in the project settings.
+Service Desk and enables the configuration of a [custom suffix](#using-a-custom-suffix).
 
 The `address` must include the `+%{key}` placeholder within the 'user' 
 portion of the address, before the `@`. This is used to identify the project 
-where the issue should be created and includes the configurable suffix:
-`<project_full_path>-<project_name_suffix>`.
+where the issue should be created.
 
 The default address on GitLab.com has the following format:
-`project_contact+%{key}@example.com`.
-
-You can set the project name suffix in your project's Service Desk settings.
-It can contain only lowercase letters (`a-z`), numbers (`0-9`), or underscores (`_`).
+`incoming-%{key}-issue-@incoming.gitlab.com`.
 
 NOTE:
 The `service_desk_email` and `incoming_email` configurations should
@@ -186,7 +182,7 @@ always use separate mailboxes. This is important, because emails picked from
 `service_desk_email` mailbox are processed by a different worker and it would
 not recognize `incoming_email` emails.
 
-To configure a custom email address for Service Desk with IMAP, add the following snippets to your configuration file in full:
+To configure a custom email inbox for Service Desk with IMAP, add the following snippets to your configuration file in full:
 
 - Example for installations from source:
 
@@ -232,12 +228,23 @@ To configure a custom email address for Service Desk with IMAP, add the followin
   gitlab_rails['service_desk_email_start_tls'] = false
   ```
 
+The configuration options are the same as for configuring
+[incoming email](../../administration/incoming_email.md#set-it-up).
+
+### Using custom email address suffix **(FREE SELF)**
+
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/2201) in GitLab Premium 13.0.
+> - [Feature flag removed](https://gitlab.com/gitlab-org/gitlab/-/issues/284656) in GitLab 13.8.
+
+NOTE:
+In order to use this feature, a [custom mailbox](#using-a-custom-mailbox) must be fully configured first.
+
+You can set a custom suffix in your project's Service Desk settings.
+It can contain only lowercase letters (`a-z`), numbers (`0-9`), or underscores (`_`).
+
 In this case, suppose the `mygroup/myproject` project Service Desk settings has the project name
 suffix set to `support`, and a user sends an email to `project_contact+mygroup-myproject-support@example.com`.
 As a result, a new Service Desk issue is created from this email in the `mygroup/myproject` project.
-
-The configuration options are the same as for configuring
-[incoming email](../../administration/incoming_email.md#set-it-up).
 
 #### Microsoft Graph
 
