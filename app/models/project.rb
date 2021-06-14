@@ -158,7 +158,7 @@ class Project < ApplicationRecord
   has_one :datadog_service, class_name: 'Integrations::Datadog'
   has_one :discord_service, class_name: 'Integrations::Discord'
   has_one :drone_ci_service, class_name: 'Integrations::DroneCi'
-  has_one :emails_on_push_service, class_name: 'Integrations::EmailsOnPush'
+  has_one :emails_on_push_integration, class_name: 'Integrations::EmailsOnPush'
   has_one :ewm_service, class_name: 'Integrations::Ewm'
   has_one :external_wiki_service, class_name: 'Integrations::ExternalWiki'
   has_one :flowdock_service, class_name: 'Integrations::Flowdock'
