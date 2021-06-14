@@ -148,7 +148,7 @@ RSpec.describe Security::DependencyListService do
               }
             end
 
-            expect(dependencies).to match([{ name: "saml2-js", vulnerabilities: match_array(%w(unknown medium critical)) },
+            expect(dependencies).to match([{ name: "saml2-js", vulnerabilities: match(%w(unknown medium critical)) },
                                            { name: "nokogiri", vulnerabilities: ["high"] }])
           end
 
@@ -156,7 +156,7 @@ RSpec.describe Security::DependencyListService do
             saml2js_dependency = subject.find { |dep| dep[:name] == 'saml2-js' }
             saml2js_severities = saml2js_dependency[:vulnerabilities].map {|v| v[:severity] }
 
-            expect(saml2js_severities).to match_array(%w(unknown medium critical))
+            expect(saml2js_severities).to match(%w(unknown medium critical))
           end
         end
       end
