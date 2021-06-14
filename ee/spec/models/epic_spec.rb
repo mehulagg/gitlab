@@ -62,7 +62,7 @@ RSpec.describe Epic do
 
       describe '.order_relative_position_on_board' do
         it 'returns epics ordered by position on the board, null last' do
-          epics = described_class.order_relative_position_on_board(board.id)
+          epics = described_class.join_board_position(board.id).order_relative_position_on_board(board.id)
 
           expect(epics).to eq([epic2, epic3, epic1, public_epic, confidential_epic])
         end

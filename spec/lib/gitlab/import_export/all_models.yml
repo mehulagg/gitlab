@@ -342,10 +342,9 @@ container_repositories:
 - project
 - name
 project:
-- external_approval_rules
+- external_status_checks
 - taggings
 - base_tags
-- tags
 - topic_taggings
 - topics
 - chat_services

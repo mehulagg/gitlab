@@ -1,7 +1,6 @@
 ---
 key_path: usage_activity_by_stage_monthly.secure.user_dependency_scanning_jobs
-description: no idea, Count of Dependency Scanning jobs run, it implies user and monthly,
-  but AFAIK we don't track per user
+description: Monthly number of users creating Dependency Scanning jobs
 product_section: sec
 product_stage: secure
 product_group: group::composition analysis
@@ -9,9 +8,8 @@ product_category: dependency_scanning
 value_type: number
 status: data_available
 time_frame: 28d
-data_source:
+data_source: database
 distribution:
 - ee
 tier:
 - ultimate
-skip_validation: true

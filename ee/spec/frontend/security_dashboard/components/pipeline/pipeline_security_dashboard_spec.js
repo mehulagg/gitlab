@@ -5,7 +5,7 @@ import PipelineSecurityDashboard from 'ee/security_dashboard/components/pipeline
 import ScanErrorsAlert from 'ee/security_dashboard/components/pipeline/scan_errors_alert.vue';
 import SecurityDashboard from 'ee/security_dashboard/components/pipeline/security_dashboard_vuex.vue';
 import SecurityReportsSummary from 'ee/security_dashboard/components/pipeline/security_reports_summary.vue';
-import VulnerabilityReport from 'ee/security_dashboard/components/vulnerability_report.vue';
+import VulnerabilityReport from 'ee/security_dashboard/components/shared/vulnerability_report.vue';
 
 const localVue = createLocalVue();
 localVue.use(Vuex);
@@ -55,6 +55,7 @@ describe('Pipeline Security Dashboard component', () => {
       localVue,
       store,
       provide: {
+        projectId,
         projectFullPath: 'my-path',
         emptyStateSvgPath,
         dashboardDocumentation,
@@ -64,12 +65,9 @@ describe('Pipeline Security Dashboard component', () => {
           jobsPath,
           sourceBranch,
         },
-        ...provide,
-      },
-      propsData: {
-        projectId,
         vulnerabilitiesEndpoint,
         loadingErrorIllustrations,
+        ...provide,
       },
       stubs,
       data() {
@@ -155,23 +153,29 @@ describe('Pipeline Security Dashboard component', () => {
       const securityReportSummary = {
         scanner_1: {
           // this scan contains errors
-          scans: [
-            { errors: ['scanner 1 - error 1', 'scanner 1 - error 2'], name: 'foo' },
-            { errors: ['scanner 1 - error 3', 'scanner 1 - error 4'], name: 'bar' },
-          ],
+          scans: {
+            nodes: [
+              { errors: ['scanner 1 - error 1', 'scanner 1 - error 2'], name: 'foo' },
+              { errors: ['scanner 1 - error 3', 'scanner 1 - error 4'], name: 'bar' },
+            ],
+          },
         },
         scanner_2: null,
         scanner_3: {
           // this scan contains errors
-          scans: [{ errors: ['scanner 3 - error 1', 'scanner 3 - error 2'], name: 'baz' }],
+          scans: {
+            nodes: [{ errors: ['scanner 3 - error 1', 'scanner 3 - error 2'], name: 'baz' }],
+          },
         },
         scanner_4: {
-          scans: [{ errors: [], name: 'quz' }],
+          scans: {
+            nodes: [{ errors: [], name: 'quz' }],
+          },
         },
       };
       const scansWithErrors = [
-        ...securityReportSummary.scanner_1.scans,
-        ...securityReportSummary.scanner_3.scans,
+        ...securityReportSummary.scanner_1.scans.nodes,
+        ...securityReportSummary.scanner_3.scans.nodes,
       ];
 
       beforeEach(() => {

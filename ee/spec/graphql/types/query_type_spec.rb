@@ -10,7 +10,7 @@ RSpec.describe GitlabSchema.types['Query'] do
       :vulnerabilities,
       :vulnerability,
       :instance_security_dashboard,
-      :vulnerabilities_count_by_day_and_severity,
+      :vulnerabilities_count_by_day,
       :current_license,
       :license_history_entries
     ).at_least

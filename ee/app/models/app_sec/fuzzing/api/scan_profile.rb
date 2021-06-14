@@ -2,7 +2,7 @@
 
 module AppSec
   module Fuzzing
-    module Api
+    module API
       class ScanProfile
         NAMES = %w(Quick-10 Medium-20 Medium-50 Long-100).freeze
 

@@ -19,6 +19,7 @@ export default (el) => {
       reportType: vulnerability.reportType,
       newIssueUrl: vulnerability.newIssueUrl,
       projectFingerprint: vulnerability.projectFingerprint,
+      projectFullPath: vulnerability.project?.fullPath,
       vulnerabilityId: vulnerability.id,
       issueTrackingHelpPath: vulnerability.issueTrackingHelpPath,
       permissionsHelpPath: vulnerability.permissionsHelpPath,

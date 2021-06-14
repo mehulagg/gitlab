@@ -627,7 +627,7 @@ describe('Grouped security reports app', () => {
       return waitForMutation(wrapper.vm.$store, types.RECEIVE_DAST_DIFF_SUCCESS).then(() => {
         const findDownloadLink = wrapper.find('[data-testid="download-link"]');
 
-        expect(wrapper.text()).toContain('Download scanned resources');
+        expect(findDownloadLink.vm.$el.querySelector('[data-testid="download-icon"]')).toExist();
         expect(findDownloadLink.exists()).toBe(true);
         expect(findDownloadLink.attributes('href')).toBe('http://test');
       });

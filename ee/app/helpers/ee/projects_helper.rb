@@ -81,7 +81,7 @@ module EE
       'license_check_help_page_path': help_page_path('user/application_security/index', anchor: 'enabling-license-approvals-within-a-project') }
 
       if ::Feature.enabled?(:ff_compliance_approval_gates, project, default_enabled: :yaml)
-        data[:external_approval_rules_path] = expose_path(api_v4_projects_external_approval_rules_path(id: project.id))
+        data[:external_approval_rules_path] = expose_path(api_v4_projects_external_status_checks_path(id: project.id))
       end
 
       { data: data }
@@ -91,7 +91,7 @@ module EE
       {
         data: {
           project_id: project.id,
-          status_checks_path: expose_path(api_v4_projects_external_approval_rules_path(id: project.id))
+          status_checks_path: expose_path(api_v4_projects_external_status_checks_path(id: project.id))
         }
       }
     end

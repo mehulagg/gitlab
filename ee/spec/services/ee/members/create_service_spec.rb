@@ -10,7 +10,13 @@ RSpec.describe Members::CreateService do
   let_it_be(:subgroup_project) { create(:project, group: subgroup) }
   let_it_be(:project_users) { create_list(:user, 2) }
 
-  let(:params) { { user_ids: project_users.map(&:id).join(','), access_level: Gitlab::Access::GUEST } }
+  let(:params) do
+    {
+      user_ids: project_users.map(&:id).join(','),
+      access_level: Gitlab::Access::GUEST,
+      invite_source: '_invite_source_'
+    }
+  end
 
   subject { described_class.new(user, params.merge({ source: project })).execute }
 

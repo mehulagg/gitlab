@@ -7,6 +7,7 @@ RSpec.describe Nav::TopNavHelper do
 
   let_it_be(:user) { build_stubbed(:user) }
   let_it_be(:admin) { build_stubbed(:user, :admin) }
+  let_it_be(:external_user) { build_stubbed(:user, :external, can_create_group: false) }
 
   let(:current_user) { nil }
 
@@ -297,12 +298,20 @@ RSpec.describe Nav::TopNavHelper do
           it 'has expected :linksSecondary' do
             expected_links_secondary = [
               ::Gitlab::Nav::TopNavMenuItem.build(
-                href: '/groups/new#create-group-pane',
+                href: '/groups/new',
                 id: 'create',
                 title: 'Create group'
               )
             ]
             expect(groups_view[:linksSecondary]).to eq(expected_links_secondary)
+          end
+
+          context 'with external user' do
+            let(:current_user) { external_user }
+
+            it 'does not have create group link' do
+              expect(groups_view[:linksSecondary]).to eq([])
+            end
           end
 
           context 'with current nav as group' do

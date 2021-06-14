@@ -99,14 +99,10 @@ RSpec.describe Ci::Pipeline do
 
     before do
       stub_licensed_features(license_scanning: true)
-      stub_feature_flags(drop_license_management_artifact: false)
+      create(:ee_ci_build, :license_scanning, pipeline: pipeline)
     end
 
-    [:license_scanning, :license_management].each do |artifact_type|
-      let!(:build) { create(:ee_ci_build, artifact_type, pipeline: pipeline) }
-
-      it { is_expected.to be_truthy }
-    end
+    it { is_expected.to be_truthy }
   end
 
   describe '#security_reports' do
@@ -353,6 +349,22 @@ RSpec.describe Ci::Pipeline do
   end
 
   describe 'state machine transitions' do
+    context 'on pipeline complete' do
+      let(:pipeline) { create(:ci_empty_pipeline, status: from_status) }
+
+      Ci::HasStatus::ACTIVE_STATUSES.each do |status|
+        context "from #{status}" do
+          let(:from_status) { status }
+
+          it 'schedules Ci::SyncReportsToReportApprovalRulesWorker' do
+            expect(Ci::SyncReportsToReportApprovalRulesWorker).to receive(:perform_async).with(pipeline.id)
+
+            pipeline.succeed
+          end
+        end
+      end
+    end
+
     context 'when pipeline has downstream bridges' do
       before do
         pipeline.downstream_bridges << create(:ci_bridge)

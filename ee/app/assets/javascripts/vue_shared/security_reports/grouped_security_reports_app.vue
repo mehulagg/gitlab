@@ -1,5 +1,11 @@
 <script>
-import { GlButton, GlSprintf, GlLink, GlModalDirective } from '@gitlab/ui';
+import {
+  GlButton,
+  GlSprintf,
+  GlLink,
+  GlModalDirective,
+  GlTooltipDirective as GlTooltip,
+} from '@gitlab/ui';
 import { once } from 'lodash';
 import { mapActions, mapState, mapGetters } from 'vuex';
 import { componentNames } from 'ee/reports/components/issue_body';
@@ -46,6 +52,7 @@ export default {
   },
   directives: {
     'gl-modal': GlModalDirective,
+    GlTooltip,
   },
   mixins: [securityReportsMixin, vulnerabilityModalMixin()],
   apollo: {
@@ -607,14 +614,16 @@ export default {
               />
             </template>
             <template v-else-if="dastDownloadLink">
-              <gl-link
+              <gl-button
+                v-gl-tooltip
+                :title="s__('SecurityReports|Download scanned resources')"
                 download
+                size="small"
+                icon="download"
                 :href="dastDownloadLink"
                 class="gl-ml-1"
                 data-testid="download-link"
-              >
-                ({{ s__('SecurityReports|Download scanned resources') }})
-              </gl-link>
+              />
             </template>
           </summary-row>
           <grouped-issues-list

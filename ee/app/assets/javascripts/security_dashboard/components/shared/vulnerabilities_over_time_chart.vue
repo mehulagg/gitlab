@@ -11,7 +11,7 @@ import {
 } from '~/lib/utils/datetime_utility';
 import { formattedChangeInPercent } from '~/lib/utils/number_utils';
 import { s__, sprintf } from '~/locale';
-import ChartButtons from '../vulnerability_chart_buttons.vue';
+import ChartButtons from './vulnerabilities_over_time_chart_buttons.vue';
 
 const ISO_DATE = 'isoDate';
 const TH_CLASS = 'gl-bg-white!';

@@ -127,14 +127,6 @@ class Project < ApplicationRecord
   after_create :check_repository_absence!
 
   acts_as_ordered_taggable_on :topics
-  # The 'tag_list' alias and the 'tags' association are required during the 'tags -> topics' migration
-  # TODO: eliminate 'tag_list' and 'tags' in the further process of the migration
-  # https://gitlab.com/gitlab-org/gitlab/-/issues/328226
-  alias_attribute :tag_list, :topic_list
-  has_many :tags, -> { order("#{ActsAsTaggableOn::Tagging.table_name}.id") },
-                     class_name: 'ActsAsTaggableOn::Tag',
-                     through: :topic_taggings,
-                     source: :tag
 
   attr_accessor :old_path_with_namespace
   attr_accessor :template_name
@@ -418,6 +410,7 @@ class Project < ApplicationRecord
   delegate :scheduled?, :started?, :in_progress?, :failed?, :finished?,
     prefix: :import, to: :import_state, allow_nil: true
   delegate :squash_always?, :squash_never?, :squash_enabled_by_default?, :squash_readonly?, to: :project_setting
+  delegate :squash_option, to: :project_setting
   delegate :no_import?, to: :import_state, allow_nil: true
   delegate :name, to: :owner, allow_nil: true, prefix: true
   delegate :members, to: :team, prefix: true
@@ -428,11 +421,12 @@ class Project < ApplicationRecord
   delegate :last_pipeline, to: :commit, allow_nil: true
   delegate :external_dashboard_url, to: :metrics_setting, allow_nil: true, prefix: true
   delegate :dashboard_timezone, to: :metrics_setting, allow_nil: true, prefix: true
-  delegate :default_git_depth, :default_git_depth=, to: :ci_cd_settings, prefix: :ci
-  delegate :forward_deployment_enabled, :forward_deployment_enabled=, :forward_deployment_enabled?, to: :ci_cd_settings, prefix: :ci
-  delegate :keep_latest_artifact, :keep_latest_artifact=, :keep_latest_artifact?, :keep_latest_artifacts_available?, to: :ci_cd_settings
+  delegate :default_git_depth, :default_git_depth=, to: :ci_cd_settings, prefix: :ci, allow_nil: true
+  delegate :forward_deployment_enabled, :forward_deployment_enabled=, :forward_deployment_enabled?, to: :ci_cd_settings, prefix: :ci, allow_nil: true
+  delegate :job_token_scope_enabled, :job_token_scope_enabled=, :job_token_scope_enabled?, to: :ci_cd_settings, prefix: :ci
+  delegate :keep_latest_artifact, :keep_latest_artifact=, :keep_latest_artifact?, :keep_latest_artifacts_available?, to: :ci_cd_settings, allow_nil: true
   delegate :restrict_user_defined_variables, :restrict_user_defined_variables=, :restrict_user_defined_variables?,
-    to: :ci_cd_settings
+    to: :ci_cd_settings, allow_nil: true
   delegate :actual_limits, :actual_plan_name, to: :namespace, allow_nil: true
   delegate :allow_merge_on_skipped_pipeline, :allow_merge_on_skipped_pipeline?,
     :allow_merge_on_skipped_pipeline=, :has_confluence?, :allow_editing_commit_messages?,
@@ -637,7 +631,7 @@ class Project < ApplicationRecord
   mount_uploader :bfg_object_map, AttachmentUploader
 
   def self.with_api_entity_associations
-    preload(:project_feature, :route, :tags, :group, :timelogs, namespace: [:route, :owner])
+    preload(:project_feature, :route, :topics, :group, :timelogs, namespace: [:route, :owner])
   end
 
   def self.with_web_entity_associations
@@ -2615,6 +2609,15 @@ class Project < ApplicationRecord
   def merge_requests_author_approval
     !!read_attribute(:merge_requests_author_approval)
   end
+
+  def container_registry_enabled
+    if Feature.enabled?(:read_container_registry_access_level, self.namespace, default_enabled: :yaml)
+      project_feature.container_registry_enabled?
+    else
+      read_attribute(:container_registry_enabled)
+    end
+  end
+  alias_method :container_registry_enabled?, :container_registry_enabled
 
   private
 

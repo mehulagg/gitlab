@@ -30,7 +30,7 @@ describe('NetworkPolicyList component', () => {
       data,
       store,
       provide,
-      stubs: { NetworkPolicyDrawer: GlDrawer },
+      stubs: { PolicyDrawer: GlDrawer },
     });
   };
 

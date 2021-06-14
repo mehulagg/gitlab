@@ -153,7 +153,9 @@ export default {
     </div>
 
     <div class="hide-collapsed">
-      <p class="title gl-display-flex justify-content-between">
+      <div
+        class="gl-display-flex gl-justify-content-space-between gl-align-items-center gl-line-height-20 gl-mb-2 gl-text-gray-900"
+      >
         <span data-testid="statusTitle">{{ s__('Sidebar|Health status') }}</span>
         <span
           v-if="isEditable"
@@ -172,7 +174,7 @@ export default {
             {{ __('Edit') }}
           </gl-button>
         </span>
-      </p>
+      </div>
 
       <div
         data-testid="dropdownWrapper"

@@ -278,13 +278,15 @@ RSpec.describe Banzai::Filter::References::EpicReferenceFilter do
         reference_filter(markdown, context)
       end.count
 
+      expect(control_count).to eq 1
+
       markdown = "#{epic.to_reference} #{epic.group.full_path}&9999991 #{epic.group.full_path}&9999992 &9999993 #{epic2.to_reference(group)} #{epic2.group.full_path}&9999991 something/cool&12"
 
       # Since we're not batching queries across groups,
       # we have to account for that.
       # 1 for both groups, 1 for epics in each group == 3
       # TODO: https://gitlab.com/gitlab-org/gitlab/-/issues/330359
-      max_count = control_count + 1
+      max_count = control_count + 2
 
       expect do
         reference_filter(markdown, context)

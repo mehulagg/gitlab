@@ -174,6 +174,7 @@ When the user is authenticated and `simple` is not set this returns something li
     "remove_source_branch_after_merge": false,
     "request_access_enabled": false,
     "merge_method": "merge",
+    "squash_option": "default_on",
     "autoclose_referenced_issues": true,
     "suggestion_commit_message": null,
     "marked_for_deletion_at": "2020-04-03", // Deprecated and will be removed in API v5 in favor of marked_for_deletion_on
@@ -273,6 +274,7 @@ When the user is authenticated and `simple` is not set this returns something li
     "remove_source_branch_after_merge": false,
     "request_access_enabled": false,
     "merge_method": "merge",
+    "squash_option": "default_on",
     "auto_devops_enabled": true,
     "auto_devops_deploy_strategy": "continuous",
     "repository_storage": "default",
@@ -448,6 +450,7 @@ GET /users/:user_id/projects
     "remove_source_branch_after_merge": false,
     "request_access_enabled": false,
     "merge_method": "merge",
+    "squash_option": "default_on",
     "autoclose_referenced_issues": true,
     "suggestion_commit_message": null,
     "marked_for_deletion_at": "2020-04-03", // Deprecated and will be removed in API v5 in favor of marked_for_deletion_on
@@ -547,6 +550,7 @@ GET /users/:user_id/projects
     "remove_source_branch_after_merge": false,
     "request_access_enabled": false,
     "merge_method": "merge",
+    "squash_option": "default_on",
     "auto_devops_enabled": true,
     "auto_devops_deploy_strategy": "continuous",
     "repository_storage": "default",
@@ -682,6 +686,7 @@ Example response:
     "remove_source_branch_after_merge": false,
     "request_access_enabled": false,
     "merge_method": "merge",
+    "squash_option": "default_on",
     "autoclose_referenced_issues": true,
     "suggestion_commit_message": null,
     "statistics": {
@@ -774,6 +779,7 @@ Example response:
     "remove_source_branch_after_merge": false,
     "request_access_enabled": false,
     "merge_method": "merge",
+    "squash_option": "default_on",
     "auto_devops_enabled": true,
     "auto_devops_deploy_strategy": "continuous",
     "repository_storage": "default",
@@ -936,6 +942,7 @@ GET /projects/:id
   "printing_merge_requests_link_enabled": true,
   "request_access_enabled": false,
   "merge_method": "merge",
+  "squash_option": "default_on",
   "auto_devops_enabled": true,
   "auto_devops_deploy_strategy": "continuous",
   "approvals_before_merge": 0,
@@ -1158,7 +1165,7 @@ POST /projects
 | `path`                                                      | string  | **{check-circle}** Yes (if name isn't provided) | Repository name for new project. Generated based on name if not provided (generated as lowercase with dashes). |
 | `allow_merge_on_skipped_pipeline`                           | boolean | **{dotted-circle}** No | Set whether or not merge requests can be merged with skipped jobs. |
 | `analytics_access_level`                                    | string  | **{dotted-circle}** No | One of `disabled`, `private` or `enabled` |
-| `approvals_before_merge` **(PREMIUM)**                      | integer | **{dotted-circle}** No | How many approvers should approve merge requests by default. |
+| `approvals_before_merge` **(PREMIUM)**                      | integer | **{dotted-circle}** No | How many approvers should approve merge requests by default. To configure approval rules, see [Merge request approvals API](merge_request_approvals.md). |
 | `auto_cancel_pending_pipelines`                             | string  | **{dotted-circle}** No | Auto-cancel pending pipelines. This isn't a boolean, but enabled/disabled. |
 | `auto_devops_deploy_strategy`                               | string  | **{dotted-circle}** No | Auto Deploy strategy (`continuous`, `manual` or `timed_incremental`). |
 | `auto_devops_enabled`                                       | boolean | **{dotted-circle}** No | Enable Auto DevOps for this project. |
@@ -1171,7 +1178,7 @@ POST /projects
 | `ci_config_path`                                            | string  | **{dotted-circle}** No | The path to CI configuration file. |
 | `container_expiration_policy_attributes`                    | hash    | **{dotted-circle}** No | Update the image cleanup policy for this project. Accepts: `cadence` (string), `keep_n` (integer), `older_than` (string), `name_regex` (string), `name_regex_delete` (string), `name_regex_keep` (string), `enabled` (boolean). Valid values for `cadence` are: `1d` (every day), `7d` (every week), `14d` (every two weeks), `1month` (every month), or `3month` (every quarter). |
 | `container_registry_enabled`                                | boolean | **{dotted-circle}** No | Enable container registry for this project. |
-| `default_branch`                                            | string  | **{dotted-circle}** No | The [default branch](../user/project/repository/branches/default.md) name. |
+| `default_branch`                                            | string  | **{dotted-circle}** No | The [default branch](../user/project/repository/branches/default.md) name. Requires `initialize_with_readme` to be `true`. |
 | `description`                                               | string  | **{dotted-circle}** No | Short project description. |
 | `emails_disabled`                                           | boolean | **{dotted-circle}** No | Disable email notifications. |
 | `external_authorization_classification_label` **(PREMIUM)** | string  | **{dotted-circle}** No | The classification label for the project. |
@@ -1206,6 +1213,7 @@ POST /projects
 | `show_default_award_emojis`                                 | boolean | **{dotted-circle}** No | Show default award emojis. |
 | `snippets_access_level`                                     | string  | **{dotted-circle}** No | One of `disabled`, `private`, or `enabled`. |
 | `snippets_enabled`                                          | boolean | **{dotted-circle}** No | _(Deprecated)_ Enable snippets for this project. Use `snippets_access_level` instead. |
+| `squash_option`                                             | string  | **{dotted-circle}** No | One of `never`, `always`, `default_on`, or `default_off`. |
 | `tag_list`                                                  | array   | **{dotted-circle}** No | _([Deprecated](https://gitlab.com/gitlab-org/gitlab/-/issues/328226) in GitLab 14.0)_ The list of tags for a project; put array of tags, that should be finally assigned to a project. Use `topics` instead. |
 | `template_name`                                             | string  | **{dotted-circle}** No | When used without `use_custom_template`, name of a [built-in project template](../user/project/working_with_projects.md#built-in-templates). When used with `use_custom_template`, name of a custom project template. |
 | `template_project_id` **(PREMIUM)**                         | integer | **{dotted-circle}** No | When used with `use_custom_template`, project ID of a custom project template. This is preferable to using `template_name` since `template_name` may be ambiguous. |
@@ -1233,7 +1241,7 @@ POST /projects/user/:user_id
 | `name`                                                      | string  | **{check-circle}** Yes | The name of the new project. |
 | `allow_merge_on_skipped_pipeline`                           | boolean | **{dotted-circle}** No | Set whether or not merge requests can be merged with skipped jobs. |
 | `analytics_access_level`                                    | string  | **{dotted-circle}** No | One of `disabled`, `private` or `enabled` |
-| `approvals_before_merge` **(PREMIUM)**                      | integer | **{dotted-circle}** No | How many approvers should approve merge requests by default. |
+| `approvals_before_merge` **(PREMIUM)**                      | integer | **{dotted-circle}** No | How many approvers should approve merge requests by default. To configure approval rules, see [Merge request approvals API](merge_request_approvals.md). |
 | `auto_cancel_pending_pipelines`                             | string  | **{dotted-circle}** No | Auto-cancel pending pipelines. This isn't a boolean, but enabled/disabled. |
 | `auto_devops_deploy_strategy`                               | string  | **{dotted-circle}** No | Auto Deploy strategy (`continuous`, `manual` or `timed_incremental`). |
 | `auto_devops_enabled`                                       | boolean | **{dotted-circle}** No | Enable Auto DevOps for this project. |
@@ -1246,6 +1254,7 @@ POST /projects/user/:user_id
 | `ci_config_path`                                            | string  | **{dotted-circle}** No | The path to CI configuration file. |
 | `container_registry_enabled`                                | boolean | **{dotted-circle}** No | Enable container registry for this project. |
 | `description`                                               | string  | **{dotted-circle}** No | Short project description. |
+| `default_branch`                                            | string  | **{dotted-circle}** No | The [default branch](../user/project/repository/branches/default.md) name. Requires `initialize_with_readme` to be `true`. |
 | `emails_disabled`                                           | boolean | **{dotted-circle}** No | Disable email notifications. |
 | `external_authorization_classification_label` **(PREMIUM)** | string  | **{dotted-circle}** No | The classification label for the project. |
 | `forking_access_level`                                      | string  | **{dotted-circle}** No | One of `disabled`, `private`, or `enabled`. |
@@ -1280,6 +1289,7 @@ POST /projects/user/:user_id
 | `show_default_award_emojis`                                 | boolean | **{dotted-circle}** No | Show default award emojis. |
 | `snippets_access_level`                                     | string  | **{dotted-circle}** No | One of `disabled`, `private`, or `enabled`. |
 | `snippets_enabled`                                          | boolean | **{dotted-circle}** No | _(Deprecated)_ Enable snippets for this project. Use `snippets_access_level` instead. |
+| `squash_option`                                             | string  | **{dotted-circle}** No | One of `never`, `always`, `default_on`, or `default_off`. |
 | `suggestion_commit_message`                                 | string  | **{dotted-circle}** No | The commit message used to apply merge request [suggestions](../user/project/merge_requests/reviews/suggestions.md). |
 | `tag_list`                                                  | array   | **{dotted-circle}** No | _([Deprecated](https://gitlab.com/gitlab-org/gitlab/-/issues/328226) in GitLab 14.0)_ The list of tags for a project; put array of tags, that should be finally assigned to a project. Use `topics` instead. |
 | `template_name`                                             | string  | **{dotted-circle}** No | When used without `use_custom_template`, name of a [built-in project template](../user/project/working_with_projects.md#built-in-templates). When used with `use_custom_template`, name of a custom project template. |
@@ -1305,7 +1315,7 @@ PUT /projects/:id
 |-------------------------------------------------------------|----------------|------------------------|-------------|
 | `allow_merge_on_skipped_pipeline`                           | boolean        | **{dotted-circle}** No | Set whether or not merge requests can be merged with skipped jobs. |
 | `analytics_access_level`                                    | string         | **{dotted-circle}** No | One of `disabled`, `private` or `enabled` |
-| `approvals_before_merge` **(PREMIUM)**                      | integer        | **{dotted-circle}** No | How many approvers should approve merge request by default. |
+| `approvals_before_merge` **(PREMIUM)**                      | integer        | **{dotted-circle}** No | How many approvers should approve merge request by default. To configure approval rules, see [Merge request approvals API](merge_request_approvals.md). |
 | `auto_cancel_pending_pipelines`                             | string         | **{dotted-circle}** No | Auto-cancel pending pipelines. This isn't a boolean, but enabled/disabled. |
 | `auto_devops_deploy_strategy`                               | string         | **{dotted-circle}** No | Auto Deploy strategy (`continuous`, `manual`, or `timed_incremental`). |
 | `auto_devops_enabled`                                       | boolean        | **{dotted-circle}** No | Enable Auto DevOps for this project. |
@@ -1359,6 +1369,7 @@ PUT /projects/:id
 | `show_default_award_emojis`                                 | boolean        | **{dotted-circle}** No | Show default award emojis. |
 | `snippets_access_level`                                     | string         | **{dotted-circle}** No | One of `disabled`, `private`, or `enabled`. |
 | `snippets_enabled`                                          | boolean        | **{dotted-circle}** No | _(Deprecated)_ Enable snippets for this project. Use `snippets_access_level` instead. |
+| `squash_option`                                             | string         | **{dotted-circle}** No | One of `never`, `always`, `default_on`, or `default_off`. |
 | `suggestion_commit_message`                                 | string         | **{dotted-circle}** No | The commit message used to apply merge request suggestions. |
 | `tag_list`                                                  | array          | **{dotted-circle}** No | _([Deprecated](https://gitlab.com/gitlab-org/gitlab/-/issues/328226) in GitLab 14.0)_ The list of tags for a project; put array of tags, that should be finally assigned to a project. Use `topics` instead. |
 | `topics`                                                    | array          | **{dotted-circle}** No | The list of topics for the project. This replaces any existing topics that are already added to the project. _([Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/328226) in GitLab 14.0.)_ |
@@ -1483,6 +1494,7 @@ Example responses:
     "remove_source_branch_after_merge": false,
     "request_access_enabled": false,
     "merge_method": "merge",
+    "squash_option": "default_on",
     "autoclose_referenced_issues": true,
     "suggestion_commit_message": null,
     "container_registry_image_prefix": "registry.example.com/diaspora/diaspora-project-site",
@@ -1582,6 +1594,7 @@ Example response:
   "remove_source_branch_after_merge": false,
   "request_access_enabled": false,
   "merge_method": "merge",
+  "squash_option": "default_on",
   "autoclose_referenced_issues": true,
   "suggestion_commit_message": null,
   "container_registry_image_prefix": "registry.example.com/diaspora/diaspora-project-site",
@@ -1679,6 +1692,7 @@ Example response:
   "remove_source_branch_after_merge": false,
   "request_access_enabled": false,
   "merge_method": "merge",
+  "squash_option": "default_on",
   "autoclose_referenced_issues": true,
   "suggestion_commit_message": null,
   "container_registry_image_prefix": "registry.example.com/diaspora/diaspora-project-site",
@@ -1870,6 +1884,7 @@ Example response:
   "remove_source_branch_after_merge": false,
   "request_access_enabled": false,
   "merge_method": "merge",
+  "squash_option": "default_on",
   "autoclose_referenced_issues": true,
   "suggestion_commit_message": null,
   "container_registry_image_prefix": "registry.example.com/diaspora/diaspora-project-site",
@@ -1988,6 +2003,7 @@ Example response:
   "remove_source_branch_after_merge": false,
   "request_access_enabled": false,
   "merge_method": "merge",
+  "squash_option": "default_on",
   "autoclose_referenced_issues": true,
   "suggestion_commit_message": null,
   "container_registry_image_prefix": "registry.example.com/diaspora/diaspora-project-site",
@@ -2590,6 +2606,7 @@ Example response:
   "remove_source_branch_after_merge": true,
   "printing_merge_request_link_enabled": true,
   "merge_method": "merge",
+  "squash_option": "default_on",
   "suggestion_commit_message": null,
   "auto_devops_enabled": true,
   "auto_devops_deploy_strategy": "continuous",

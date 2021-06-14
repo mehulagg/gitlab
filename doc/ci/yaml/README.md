@@ -1323,8 +1323,8 @@ Use `rules:if` clauses to specify when to add a job to a pipeline:
 
 `rules:if` differs slightly from `only:variables` by accepting only a single
 expression string per rule, rather than an array of them. Any set of expressions to be
-evaluated can be [conjoined into a single expression](../variables/README.md#conjunction--disjunction)
-by using `&&` or `||`, and the [variable matching operators (`==`, `!=`, `=~` and `!~`)](../variables/README.md#syntax-of-cicd-variable-expressions).
+evaluated can be [conjoined into a single expression](../jobs/job_control.md#join-variable-expressions-together-with--or-)
+by using `&&` or `||`, and the [variable matching operators (`==`, `!=`, `=~` and `!~`)](../jobs/job_control.md#cicd-variable-expressions).
 
 Unlike variables in [`script`](../variables/README.md#use-cicd-variables-in-job-scripts)
 sections, variables in rules expressions are always formatted as `$VARIABLE`.
@@ -1518,7 +1518,8 @@ job:
 Glob patterns are interpreted with Ruby [`File.fnmatch`](https://docs.ruby-lang.org/en/2.7.0/File.html#method-c-fnmatch)
 with the flags `File::FNM_PATHNAME | File::FNM_DOTMATCH | File::FNM_EXTGLOB`.
 
-For performance reasons, GitLab matches a maximum of 10,000 `exists` patterns. After the 10,000th check, rules with patterned globs always match.
+For performance reasons, GitLab matches a maximum of 10,000 `exists` patterns or file paths. After the 10,000th check, rules with patterned globs always match.
+In other words, the `exists` rule always assumes a match in projects with more than 10,000 files.
 
 #### `rules:allow_failure`
 
@@ -1597,7 +1598,7 @@ considered for their usage and behavior in this context. Future keyword improvem
 are being discussed in our [epic for improving `rules`](https://gitlab.com/groups/gitlab-org/-/epics/2783),
 where anyone can add suggestions or requests.
 
-You can use [parentheses](../variables/README.md#parentheses) with `&&` and `||` to build more complicated variable expressions.
+You can use [parentheses](../jobs/job_control.md#group-variable-expressions-together-with-parentheses) with `&&` and `||` to build more complicated variable expressions.
 [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/230938) in GitLab 13.3:
 
 ```yaml
@@ -1725,7 +1726,7 @@ to a pipeline, based on the status of [CI/CD variables](../variables/README.md).
 
 **Keyword type**: Job keyword. You can use it only as part of a job.
 
-**Possible inputs**: An array of [CI/CD variable expressions](../variables/README.md#cicd-variable-expressions).
+**Possible inputs**: An array of [CI/CD variable expressions](../jobs/job_control.md#cicd-variable-expressions).
 
 **Example of `only:variables`**:
 
@@ -3477,22 +3478,6 @@ concatenate them into a single file. Use a filename pattern (`junit: rspec-*.xml
 an array of filenames (`junit: [rspec-1.xml, rspec-2.xml, rspec-3.xml]`), or a
 combination thereof (`junit: [rspec.xml, test-results/TEST-*.xml]`).
 
-##### `artifacts:reports:license_management` **(ULTIMATE)**
-
-> - Introduced in GitLab 11.5.
-> - Requires GitLab Runner 11.5 and above.
-
-WARNING:
-This artifact is still valid but is **deprecated** in favor of the
-[artifacts:reports:license_scanning](#artifactsreportslicense_scanning)
-introduced in GitLab 12.8.
-
-The `license_management` report collects [Licenses](../../user/compliance/license_compliance/index.md)
-as artifacts.
-
-The collected License Compliance report uploads to GitLab as an artifact and is summarized in merge requests and the pipeline view. It's also used to provide data for security
-dashboards.
-
 ##### `artifacts:reports:license_scanning` **(ULTIMATE)**
 
 > - Introduced in GitLab 12.8.
@@ -3740,7 +3725,7 @@ Possible values for `when` are:
 - `scheduler_failure`: Retry if the scheduler failed to assign the job to a runner.
 - `data_integrity_failure`: Retry if there is a structural integrity problem detected.
 
-You can specify the number of [retry attempts for certain stages of job execution](../runners/README.md#job-stages-attempts) using variables.
+You can specify the number of [retry attempts for certain stages of job execution](../runners/configure_runners.md#job-stages-attempts) using variables.
 
 ### `timeout`
 
@@ -4801,19 +4786,19 @@ You cannot set job-level variables to be pre-filled when you run a pipeline manu
 
 You can use [CI/CD variables](../variables/README.md) to configure how the runner processes Git requests:
 
-- [`GIT_STRATEGY`](../runners/README.md#git-strategy)
-- [`GIT_SUBMODULE_STRATEGY`](../runners/README.md#git-submodule-strategy)
-- [`GIT_CHECKOUT`](../runners/README.md#git-checkout)
-- [`GIT_CLEAN_FLAGS`](../runners/README.md#git-clean-flags)
-- [`GIT_FETCH_EXTRA_FLAGS`](../runners/README.md#git-fetch-extra-flags)
-- [`GIT_DEPTH`](../runners/README.md#shallow-cloning) (shallow cloning)
-- [`GIT_CLONE_PATH`](../runners/README.md#custom-build-directories) (custom build directories)
-- [`TRANSFER_METER_FREQUENCY`](../runners/README.md#artifact-and-cache-settings) (artifact/cache meter update frequency)
-- [`ARTIFACT_COMPRESSION_LEVEL`](../runners/README.md#artifact-and-cache-settings) (artifact archiver compression level)
-- [`CACHE_COMPRESSION_LEVEL`](../runners/README.md#artifact-and-cache-settings) (cache archiver compression level)
+- [`GIT_STRATEGY`](../runners/configure_runners.md#git-strategy)
+- [`GIT_SUBMODULE_STRATEGY`](../runners/configure_runners.md#git-submodule-strategy)
+- [`GIT_CHECKOUT`](../runners/configure_runners.md#git-checkout)
+- [`GIT_CLEAN_FLAGS`](../runners/configure_runners.md#git-clean-flags)
+- [`GIT_FETCH_EXTRA_FLAGS`](../runners/configure_runners.md#git-fetch-extra-flags)
+- [`GIT_DEPTH`](../runners/configure_runners.md#shallow-cloning) (shallow cloning)
+- [`GIT_CLONE_PATH`](../runners/configure_runners.md#custom-build-directories) (custom build directories)
+- [`TRANSFER_METER_FREQUENCY`](../runners/configure_runners.md#artifact-and-cache-settings) (artifact/cache meter update frequency)
+- [`ARTIFACT_COMPRESSION_LEVEL`](../runners/configure_runners.md#artifact-and-cache-settings) (artifact archiver compression level)
+- [`CACHE_COMPRESSION_LEVEL`](../runners/configure_runners.md#artifact-and-cache-settings) (cache archiver compression level)
 
 You can also use variables to configure how many times a runner
-[attempts certain stages of job execution](../runners/README.md#job-stages-attempts).
+[attempts certain stages of job execution](../runners/configure_runners.md#job-stages-attempts).
 
 ## YAML-specific features
 
