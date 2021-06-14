@@ -171,19 +171,15 @@ describe('Grouped security reports app', () => {
           'Expand',
         );
 
-        expect(trimText(wrapper.vm.$el.textContent)).toContain(
-          'SAST: Loading resulted in an error',
-        );
+        expect(trimText(wrapper.text())).toContain('SAST: Loading resulted in an error');
 
-        expect(trimText(wrapper.vm.$el.textContent)).toContain(
+        expect(trimText(wrapper.text())).toContain(
           'Dependency scanning: Loading resulted in an error',
         );
 
-        expect(wrapper.vm.$el.textContent).toContain(
-          'Container scanning: Loading resulted in an error',
-        );
+        expect(wrapper.text()).toContain('Container scanning: Loading resulted in an error');
 
-        expect(wrapper.vm.$el.textContent).toContain('DAST: Loading resulted in an error');
+        expect(wrapper.text()).toContain('DAST: Loading resulted in an error');
 
         expect(wrapper.text()).toContain('Secret scanning: Loading resulted in an error');
       });
@@ -215,12 +211,12 @@ describe('Grouped security reports app', () => {
           'Expand',
         );
 
-        expect(wrapper.vm.$el.textContent).toContain('SAST is loading');
-        expect(wrapper.vm.$el.textContent).toContain('Dependency scanning is loading');
-        expect(wrapper.vm.$el.textContent).toContain('Container scanning is loading');
-        expect(wrapper.vm.$el.textContent).toContain('DAST is loading');
-        expect(wrapper.vm.$el.textContent).toContain('Coverage fuzzing is loading');
-        expect(wrapper.vm.$el.textContent).toContain('API fuzzing is loading');
+        expect(wrapper.text()).toContain('SAST is loading');
+        expect(wrapper.text()).toContain('Dependency scanning is loading');
+        expect(wrapper.text()).toContain('Container scanning is loading');
+        expect(wrapper.text()).toContain('DAST is loading');
+        expect(wrapper.text()).toContain('Coverage fuzzing is loading');
+        expect(wrapper.text()).toContain('API fuzzing is loading');
       });
     });
 
@@ -263,28 +259,24 @@ describe('Grouped security reports app', () => {
         ).toEqual('Security scanning detected no vulnerabilities.');
 
         // Renders Sast result
-        expect(trimText(wrapper.vm.$el.textContent)).toContain('SAST detected no vulnerabilities.');
+        expect(trimText(wrapper.text())).toContain('SAST detected no vulnerabilities.');
 
         // Renders DSS result
-        expect(trimText(wrapper.vm.$el.textContent)).toContain(
+        expect(trimText(wrapper.text())).toContain(
           'Dependency scanning detected no vulnerabilities.',
         );
 
         // Renders container scanning result
-        expect(wrapper.vm.$el.textContent).toContain(
-          'Container scanning detected no vulnerabilities.',
-        );
+        expect(wrapper.text()).toContain('Container scanning detected no vulnerabilities.');
 
         // Renders DAST result
-        expect(wrapper.vm.$el.textContent).toContain('DAST detected no vulnerabilities.');
+        expect(wrapper.text()).toContain('DAST detected no vulnerabilities.');
 
         // Renders Coverage Fuzzing result
-        expect(wrapper.vm.$el.textContent).toContain(
-          'Coverage fuzzing detected no vulnerabilities.',
-        );
+        expect(wrapper.text()).toContain('Coverage fuzzing detected no vulnerabilities.');
 
         // Renders API Fuzzing result
-        expect(wrapper.vm.$el.textContent).toContain('API fuzzing detected no vulnerabilities.');
+        expect(wrapper.text()).toContain('API fuzzing detected no vulnerabilities.');
       });
     });
 
@@ -333,32 +325,32 @@ describe('Grouped security reports app', () => {
         );
 
         // Renders Sast result
-        expect(trimText(wrapper.vm.$el.textContent)).toContain(
+        expect(trimText(wrapper.text())).toContain(
           'SAST detected 1 potential vulnerability 1 Critical 0 High and 0 Others',
         );
 
         // Renders DSS result
-        expect(trimText(wrapper.vm.$el.textContent)).toContain(
+        expect(trimText(wrapper.text())).toContain(
           'Dependency scanning detected 2 potential vulnerabilities 1 Critical 1 High and 0 Others',
         );
 
         // Renders container scanning result
-        expect(trimText(wrapper.vm.$el.textContent)).toContain(
+        expect(trimText(wrapper.text())).toContain(
           'Container scanning detected 2 potential vulnerabilities 1 Critical 1 High and 0 Others',
         );
 
         // Renders DAST result
-        expect(trimText(wrapper.vm.$el.textContent)).toContain(
+        expect(trimText(wrapper.text())).toContain(
           'DAST detected 1 potential vulnerability 1 Critical 0 High and 0 Others',
         );
 
         // Renders coverage fuzzing scanning result
-        expect(trimText(wrapper.vm.$el.textContent)).toContain(
+        expect(trimText(wrapper.text())).toContain(
           'Coverage fuzzing detected 2 potential vulnerabilities 1 Critical 1 High and 0 Others',
         );
 
         // Renders api fuzzing scanning result
-        expect(trimText(wrapper.vm.$el.textContent)).toContain(
+        expect(trimText(wrapper.text())).toContain(
           'API fuzzing detected 2 potential vulnerabilities 1 Critical 1 High and 0 Others',
         );
       });
@@ -522,7 +514,7 @@ describe('Grouped security reports app', () => {
     });
 
     it('should display the correct numbers of vulnerabilities', () => {
-      expect(trimText(wrapper.vm.$el.textContent)).toContain(
+      expect(trimText(wrapper.text())).toContain(
         'Dependency scanning detected 2 potential vulnerabilities 1 Critical 1 High and 0 Others',
       );
     });
@@ -550,7 +542,7 @@ describe('Grouped security reports app', () => {
     });
 
     it('should display the correct numbers of vulnerabilities', () => {
-      expect(trimText(wrapper.vm.$el.textContent)).toContain(
+      expect(trimText(wrapper.text())).toContain(
         'DAST detected 1 potential vulnerability 1 Critical 0 High and 0 Others',
       );
     });
@@ -703,7 +695,7 @@ describe('Grouped security reports app', () => {
     });
 
     it('should display the correct numbers of vulnerabilities', () => {
-      expect(trimText(wrapper.vm.$el.textContent)).toContain(
+      expect(trimText(wrapper.text())).toContain(
         'SAST detected 1 potential vulnerability 1 Critical 0 High and 0 Others',
       );
     });
@@ -735,7 +727,7 @@ describe('Grouped security reports app', () => {
       });
 
       it('should display out of date message', () => {
-        expect(wrapper.vm.$el.textContent).toContain(
+        expect(wrapper.text()).toContain(
           'Security report is out of date. Run a new pipeline for the target branch (main)',
         );
       });
@@ -747,7 +739,7 @@ describe('Grouped security reports app', () => {
       });
 
       it('should display out of date message', () => {
-        expect(wrapper.vm.$el.textContent).toContain(
+        expect(wrapper.text()).toContain(
           'Security report is out of date. Please update your branch with the latest changes from the target branch (main)',
         );
       });
@@ -759,7 +751,7 @@ describe('Grouped security reports app', () => {
       });
 
       it('should not display out of date message', () => {
-        expect(wrapper.vm.$el.textContent).not.toContain('Security report is out of date.');
+        expect(wrapper.text()).not.toContain('Security report is out of date.');
       });
     });
 
@@ -769,7 +761,7 @@ describe('Grouped security reports app', () => {
       });
 
       it('should not display out of date message', () => {
-        expect(wrapper.vm.$el.textContent).not.toContain('Security report is out of date.');
+        expect(wrapper.text()).not.toContain('Security report is out of date.');
       });
     });
   });
