@@ -1,6 +1,6 @@
 import { mount } from '@vue/test-utils';
 import MockAdapter from 'axios-mock-adapter';
-import Vue from 'vue';
+import { nextTick } from 'vue';
 import GroupedSecurityReportsApp from 'ee/vue_shared/security_reports/grouped_security_reports_app.vue';
 import appStore from 'ee/vue_shared/security_reports/store';
 import { trackMrSecurityReportDetails } from 'ee/vue_shared/security_reports/store/constants';
@@ -341,18 +341,18 @@ describe('Grouped security reports app', () => {
         );
       });
 
-      it('opens modal with more information', () => {
+      it('opens modal with more information', async () => {
         wrapper.find('[aria-label="Vulnerability Name"]').trigger('click');
 
-        return Vue.nextTick().then(() => {
-          expect(document.querySelector('.modal-title').textContent.trim()).toEqual(
-            mockFindings[0].name,
-          );
+        await nextTick();
 
-          expect(document.querySelector('.modal-body').textContent).toContain(
-            mockFindings[0].solution,
-          );
-        });
+        expect(document.querySelector('.modal-title').textContent.trim()).toEqual(
+          mockFindings[0].name,
+        );
+
+        expect(document.querySelector('.modal-body').textContent).toContain(
+          mockFindings[0].solution,
+        );
       });
 
       it.each`
@@ -541,7 +541,8 @@ describe('Grouped security reports app', () => {
       expect(jobLink.text()).toBe('View details');
 
       jobLink.vm.$emit('click');
-      await wrapper.vm.$nextTick();
+
+      await nextTick();
 
       expect(glModalDirective).toHaveBeenCalled();
     });
@@ -765,30 +766,30 @@ describe('Grouped security reports app', () => {
       unmockTracking();
     });
 
-    it('tracks an event when toggled', () => {
+    it('tracks an event when toggled', async () => {
       expect(trackingSpy).not.toHaveBeenCalled();
       findReportSection().vm.$emit('toggleEvent');
-      return wrapper.vm.$nextTick().then(() => {
-        expect(trackingSpy).toHaveBeenCalledWith(category, action);
-      });
+
+      await nextTick();
+
+      expect(trackingSpy).toHaveBeenCalledWith(category, action);
     });
 
-    it('tracks an event only the first time it is toggled', () => {
+    it('tracks an event only the first time it is toggled', async () => {
       const report = findReportSection();
 
       expect(trackingSpy).not.toHaveBeenCalled();
       report.vm.$emit('toggleEvent');
-      return wrapper.vm
-        .$nextTick()
-        .then(() => {
-          expect(trackingSpy).toHaveBeenCalledWith(category, action);
-          expect(trackingSpy).toHaveBeenCalledTimes(1);
-          report.vm.$emit('toggleEvent');
-        })
-        .then(wrapper.vm.$nextTick())
-        .then(() => {
-          expect(trackingSpy).toHaveBeenCalledTimes(1);
-        });
+
+      await nextTick();
+
+      expect(trackingSpy).toHaveBeenCalledWith(category, action);
+      expect(trackingSpy).toHaveBeenCalledTimes(1);
+      report.vm.$emit('toggleEvent');
+
+      await nextTick();
+
+      expect(trackingSpy).toHaveBeenCalledTimes(1);
     });
   });
 });
