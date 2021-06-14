@@ -121,7 +121,7 @@ class Namespace < ApplicationRecord
       { column: arel_table["path"], multiplier: 1 },
       { column: arel_table["name"], multiplier: 0.7 }
     ])
-    reorder(order_expression.desc, Namespace.arel_table['parent_id'].desc.nulls_last)
+    reorder(order_expression.desc, Namespace.arel_table['parent_id'].desc.nulls_last, Namespace.arel_table['id'].desc)
   end
 
   # Make sure that the name is same as strong_memoize name in root_ancestor
