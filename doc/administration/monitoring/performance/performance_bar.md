@@ -80,8 +80,7 @@ The GitLab Performance Bar is disabled by default for non-administrators. To ena
 for a given group:
 
 1. Sign in as a user with Administrator [permissions](../../../user/permissions.md).
-1. In the menu bar, click **Admin Area**.
-1. Go to **Settings > Metrics and profiling**
+1. In the top bar, select **Menu > Admin > Settings > Metrics and profiling**
    (`admin/application_settings/metrics_and_profiling`), and expand the section
    **Profiling - Performance bar**.
 1. Click **Enable access to the Performance Bar**.
