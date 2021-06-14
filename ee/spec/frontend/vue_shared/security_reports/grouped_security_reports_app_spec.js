@@ -160,28 +160,23 @@ describe('Grouped security reports app', () => {
       });
 
       it('renders error state', () => {
-        expect(wrapper.vm.$el.querySelector('.gl-spinner')).toBeNull();
-        expect(
-          wrapper.vm.$el
-            .querySelector('[data-testid="report-section-code-text"]')
-            .textContent.trim(),
-        ).toEqual('Security scanning failed loading any results');
-
-        expect(wrapper.vm.$el.querySelector('.js-collapse-btn').textContent.trim()).toEqual(
-          'Expand',
+        expect(wrapper.find('.gl-spinner').exists()).toBe(false);
+        expect(wrapper.find('[data-testid="report-section-code-text"]').text()).toEqual(
+          'Security scanning failed loading any results',
         );
 
-        expect(trimText(wrapper.text())).toContain('SAST: Loading resulted in an error');
+        expect(wrapper.find('.js-collapse-btn').text()).toEqual('Expand');
 
-        expect(trimText(wrapper.text())).toContain(
-          'Dependency scanning: Loading resulted in an error',
-        );
+        const wrapperText = wrapper.text();
+        expect(wrapperText).toContain('SAST: Loading resulted in an error');
 
-        expect(wrapper.text()).toContain('Container scanning: Loading resulted in an error');
+        expect(wrapperText).toContain('Dependency scanning: Loading resulted in an error');
 
-        expect(wrapper.text()).toContain('DAST: Loading resulted in an error');
+        expect(wrapperText).toContain('Container scanning: Loading resulted in an error');
 
-        expect(wrapper.text()).toContain('Secret scanning: Loading resulted in an error');
+        expect(wrapperText).toContain('DAST: Loading resulted in an error');
+
+        expect(wrapperText).toContain('Secret scanning: Loading resulted in an error');
       });
     });
 
@@ -200,23 +195,20 @@ describe('Grouped security reports app', () => {
       });
 
       it('renders loading summary text + spinner', () => {
-        expect(wrapper.vm.$el.querySelector('.gl-spinner')).not.toBeNull();
-        expect(
-          wrapper.vm.$el
-            .querySelector('[data-testid="report-section-code-text"]')
-            .textContent.trim(),
-        ).toEqual('Security scanning is loading');
-
-        expect(wrapper.vm.$el.querySelector('.js-collapse-btn').textContent.trim()).toEqual(
-          'Expand',
+        expect(wrapper.find('.gl-spinner').exists()).toBe(true);
+        expect(wrapper.find('[data-testid="report-section-code-text"]').text()).toEqual(
+          'Security scanning is loading',
         );
 
-        expect(wrapper.text()).toContain('SAST is loading');
-        expect(wrapper.text()).toContain('Dependency scanning is loading');
-        expect(wrapper.text()).toContain('Container scanning is loading');
-        expect(wrapper.text()).toContain('DAST is loading');
-        expect(wrapper.text()).toContain('Coverage fuzzing is loading');
-        expect(wrapper.text()).toContain('API fuzzing is loading');
+        expect(wrapper.find('.js-collapse-btn').text()).toEqual('Expand');
+
+        const wrapperText = wrapper.text();
+        expect(wrapperText).toContain('SAST is loading');
+        expect(wrapperText).toContain('Dependency scanning is loading');
+        expect(wrapperText).toContain('Container scanning is loading');
+        expect(wrapperText).toContain('DAST is loading');
+        expect(wrapperText).toContain('Coverage fuzzing is loading');
+        expect(wrapperText).toContain('API fuzzing is loading');
       });
     });
 
@@ -249,34 +241,32 @@ describe('Grouped security reports app', () => {
 
       it('renders reports', () => {
         // It's not loading
-        expect(wrapper.vm.$el.querySelector('.gl-spinner')).toBeNull();
+        expect(wrapper.find('.gl-spinner').exists()).toBe(false);
 
         // Renders the summary text
-        expect(
-          wrapper.vm.$el
-            .querySelector('[data-testid="report-section-code-text"]')
-            .textContent.trim(),
-        ).toEqual('Security scanning detected no vulnerabilities.');
-
-        // Renders Sast result
-        expect(trimText(wrapper.text())).toContain('SAST detected no vulnerabilities.');
-
-        // Renders DSS result
-        expect(trimText(wrapper.text())).toContain(
-          'Dependency scanning detected no vulnerabilities.',
+        expect(wrapper.find('[data-testid="report-section-code-text"]').text()).toEqual(
+          'Security scanning detected no vulnerabilities.',
         );
 
+        const wrapperText = wrapper.text();
+
+        // Renders Sast result
+        expect(wrapperText).toContain('SAST detected no vulnerabilities.');
+
+        // Renders DSS result
+        expect(wrapper.text()).toContain('Dependency scanning detected no vulnerabilities.');
+
         // Renders container scanning result
-        expect(wrapper.text()).toContain('Container scanning detected no vulnerabilities.');
+        expect(wrapperText).toContain('Container scanning detected no vulnerabilities.');
 
         // Renders DAST result
-        expect(wrapper.text()).toContain('DAST detected no vulnerabilities.');
+        expect(wrapperText).toContain('DAST detected no vulnerabilities.');
 
         // Renders Coverage Fuzzing result
-        expect(wrapper.text()).toContain('Coverage fuzzing detected no vulnerabilities.');
+        expect(wrapperText).toContain('Coverage fuzzing detected no vulnerabilities.');
 
         // Renders API Fuzzing result
-        expect(wrapper.text()).toContain('API fuzzing detected no vulnerabilities.');
+        expect(wrapperText).toContain('API fuzzing detected no vulnerabilities.');
       });
     });
 
@@ -308,55 +298,51 @@ describe('Grouped security reports app', () => {
 
       it('renders reports', () => {
         // It's not loading
-        expect(wrapper.vm.$el.querySelector('.gl-spinner')).toBeNull();
+        expect(wrapper.find('.gl-spinner').exists()).toBe(false);
 
         // Renders the summary text
-        expect(
-          trimText(
-            wrapper.vm.$el.querySelector('[data-testid="report-section-code-text"]').textContent,
-          ),
-        ).toEqual(
+        expect(trimText(wrapper.find('[data-testid="report-section-code-text"]').text())).toEqual(
           'Security scanning detected 12 potential vulnerabilities 7 Critical 5 High and 0 Others',
         );
 
         // Renders the expand button
-        expect(wrapper.vm.$el.querySelector('.js-collapse-btn').textContent.trim()).toEqual(
-          'Expand',
-        );
+        expect(wrapper.find('.js-collapse-btn').text()).toEqual('Expand');
+
+        const normalizedWrapperText = trimText(wrapper.text());
 
         // Renders Sast result
-        expect(trimText(wrapper.text())).toContain(
+        expect(normalizedWrapperText).toContain(
           'SAST detected 1 potential vulnerability 1 Critical 0 High and 0 Others',
         );
 
         // Renders DSS result
-        expect(trimText(wrapper.text())).toContain(
+        expect(normalizedWrapperText).toContain(
           'Dependency scanning detected 2 potential vulnerabilities 1 Critical 1 High and 0 Others',
         );
 
         // Renders container scanning result
-        expect(trimText(wrapper.text())).toContain(
+        expect(normalizedWrapperText).toContain(
           'Container scanning detected 2 potential vulnerabilities 1 Critical 1 High and 0 Others',
         );
 
         // Renders DAST result
-        expect(trimText(wrapper.text())).toContain(
+        expect(normalizedWrapperText).toContain(
           'DAST detected 1 potential vulnerability 1 Critical 0 High and 0 Others',
         );
 
         // Renders coverage fuzzing scanning result
-        expect(trimText(wrapper.text())).toContain(
+        expect(normalizedWrapperText).toContain(
           'Coverage fuzzing detected 2 potential vulnerabilities 1 Critical 1 High and 0 Others',
         );
 
         // Renders api fuzzing scanning result
-        expect(trimText(wrapper.text())).toContain(
+        expect(normalizedWrapperText).toContain(
           'API fuzzing detected 2 potential vulnerabilities 1 Critical 1 High and 0 Others',
         );
       });
 
       it('opens modal with more information', () => {
-        wrapper.vm.$el.querySelector('[aria-label="Vulnerability Name"]').click();
+        wrapper.find('[aria-label="Vulnerability Name"]').trigger('click');
 
         return Vue.nextTick().then(() => {
           expect(document.querySelector('.modal-title').textContent.trim()).toEqual(
@@ -619,7 +605,7 @@ describe('Grouped security reports app', () => {
       return waitForMutation(wrapper.vm.$store, types.RECEIVE_DAST_DIFF_SUCCESS).then(() => {
         const findDownloadLink = wrapper.find('[data-testid="download-link"]');
 
-        expect(findDownloadLink.vm.$el.querySelector('[data-testid="download-icon"]')).toExist();
+        expect(findDownloadLink.find('[data-testid="download-icon"]').exists()).toBe(true);
         expect(findDownloadLink.exists()).toBe(true);
         expect(findDownloadLink.attributes('href')).toBe('http://test');
       });
@@ -772,7 +758,7 @@ describe('Grouped security reports app', () => {
 
     beforeEach(() => {
       createWrapper(props);
-      trackingSpy = mockTracking(category, wrapper.vm.$el, jest.spyOn);
+      trackingSpy = mockTracking(category, wrapper.element, jest.spyOn);
     });
 
     afterEach(() => {
