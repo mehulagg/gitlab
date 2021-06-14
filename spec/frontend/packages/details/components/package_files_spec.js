@@ -193,6 +193,16 @@ describe('Package Files', () => {
         expect(findFirstToggleDetailsButton().exists()).toBe(true);
       });
 
+      it('is hidden when no details is present', () => {
+        const [{ ...noShaFile }] = npmFiles;
+        noShaFile.file_sha256 = null;
+        noShaFile.file_md5 = null;
+        noShaFile.file_sha1 = null;
+        createComponent({ packageFiles: [noShaFile] });
+
+        expect(findFirstToggleDetailsButton().exists()).toBe(false);
+      });
+
       it('toggles the details row', async () => {
         createComponent();
 
@@ -235,11 +245,14 @@ describe('Package Files', () => {
       });
 
       it('does not display a row when the data is missing', async () => {
-        createComponent({ packageFiles: mavenFiles });
+        const [{ ...missingMd5 }] = npmFiles;
+        missingMd5.file_md5 = null;
+
+        createComponent({ packageFiles: [missingMd5] });
 
         await showShaFiles();
 
-        expect(findFirstRowShaComponent('sha-256').exists()).toBe(false);
+        expect(findFirstRowShaComponent('md5').exists()).toBe(false);
       });
     });
   });

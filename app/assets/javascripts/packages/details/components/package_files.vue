@@ -79,6 +79,9 @@ export default {
     formatSize(size) {
       return numberToHumanSize(size);
     },
+    hasDetails(item) {
+      return item.file_sha256 || item.file_md5 || item.file_sha1;
+    },
   },
   i18n: {
     deleteFile: __('Delete file'),
@@ -96,6 +99,7 @@ export default {
     >
       <template #cell(name)="{ item, toggleDetails, detailsShowing }">
         <gl-button
+          v-if="hasDetails(item)"
           :icon="detailsShowing ? 'angle-up' : 'angle-down'"
           :aria-label="detailsShowing ? __('Collapse') : __('Expand')"
           category="tertiary"
