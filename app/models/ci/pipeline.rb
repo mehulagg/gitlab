@@ -1064,6 +1064,7 @@ module Ci
     def codequality_reports
       Gitlab::Ci::Reports::CodequalityReports.new.tap do |codequality_reports|
         latest_report_builds(Ci::JobArtifact.codequality_reports).each do |build|
+          # just going to comment here
           build.collect_codequality_reports!(codequality_reports)
         end
       end
