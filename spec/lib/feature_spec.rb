@@ -289,6 +289,27 @@ RSpec.describe Feature, stub_feature_flags: false do
           it 'reads the default from the YAML definition' do
             expect(described_class.enabled?(:my_feature_flag, default_enabled: :yaml)).to eq(true)
           end
+
+          context 'when a gate is defined for one user' do
+            let(:actor) { stub_feature_flag_gate('SomeActor:1') }
+            let(:other_actor) { stub_feature_flag_gate('SomeActor:2') }
+
+            before do
+              described_class.enable(:my_feature_flag, actor)
+            end
+
+            it 'returns true for the actor' do
+              expect(described_class.enabled?(:my_feature_flag, actor, default_enabled: :yaml)).to eq(true)
+            end
+
+            it 'returns true for the other actor' do
+              expect(described_class.enabled?(:my_feature_flag, other_actor, default_enabled: :yaml)).to eq(true)
+            end
+
+            it 'reads the default from the YAML definition' do
+              expect(described_class.enabled?(:my_feature_flag, default_enabled: :yaml)).to eq(true)
+            end
+          end
         end
 
         context 'when YAML definition does not exist for an optional type' do
