@@ -946,6 +946,12 @@
     - <<: *if-merge-request
       changes: [".gitlab/ci/rails.gitlab-ci.yml"]
 
+.rails:rules:rspec-feature-flags:
+  rules:
+    - <<: *if-not-ee
+      when: never
+    - changes: *code-backstage-patterns
+
 #########################
 # Static analysis rules #
 #########################
