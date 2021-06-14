@@ -44,6 +44,7 @@ class Integration < ApplicationRecord
     bamboo bugzilla buildkite
     campfire confluence custom_issue_tracker
     flowdock
+    hangouts_chat
   ].to_set.freeze
 
   serialize :properties, JSON # rubocop:disable Cop/ActiveRecordSerialize

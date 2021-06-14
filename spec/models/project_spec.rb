@@ -38,7 +38,7 @@ RSpec.describe Project, factory_default: :keep do
     it { is_expected.to have_one(:slack_service) }
     it { is_expected.to have_one(:microsoft_teams_service) }
     it { is_expected.to have_one(:mattermost_service) }
-    it { is_expected.to have_one(:hangouts_chat_service) }
+    it { is_expected.to have_one(:hangouts_chat_integration) }
     it { is_expected.to have_one(:unify_circuit_service) }
     it { is_expected.to have_one(:webex_teams_service) }
     it { is_expected.to have_one(:packagist_service) }

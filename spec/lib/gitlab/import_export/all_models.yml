@@ -380,7 +380,7 @@ project:
 - slack_service
 - microsoft_teams_service
 - mattermost_service
-- hangouts_chat_service
+- hangouts_chat_integration
 - unify_circuit_service
 - buildkite_integration
 - bamboo_integration
