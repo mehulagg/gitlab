@@ -7,6 +7,7 @@ import {
 } from '~/boards/boards_util';
 import { BoardType } from '~/boards/constants';
 import eventHub from '~/boards/eventhub';
+import groupBoardAssigneesQuery from '~/boards/graphql/group_board_assignees.query.graphql';
 import listsIssuesQuery from '~/boards/graphql/lists_issues.query.graphql';
 import projectBoardAssigneesQuery from '~/boards/graphql/project_board_assignees.query.graphql';
 import actionsCE, { gqlClient } from '~/boards/stores/actions';
@@ -31,7 +32,6 @@ import { EpicFilterType, GroupByParamType, FilterFields } from '../constants';
 import createEpicBoardListMutation from '../graphql/epic_board_list_create.mutation.graphql';
 import epicMoveListMutation from '../graphql/epic_move_list.mutation.graphql';
 import epicsSwimlanesQuery from '../graphql/epics_swimlanes.query.graphql';
-import groupBoardAssigneesQuery from '../graphql/group_board_assignees.query.graphql';
 import groupBoardIterationsQuery from '../graphql/group_board_iterations.query.graphql';
 import groupBoardMilestonesQuery from '../graphql/group_board_milestones.query.graphql';
 import issueSetWeightMutation from '../graphql/issue_set_weight.mutation.graphql';
