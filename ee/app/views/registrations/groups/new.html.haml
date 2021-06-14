@@ -43,11 +43,7 @@
             = render partial: 'shared/groups/visibility_level', locals: { f: f }
         - if !in_trial_onboarding_flow? && show_trial_during_signup?
           = render partial: 'shared/groups/trial_form'
-        - else
-          - experiment(:registrations_group_invite, actor: current_user) do |experiment_instance|
-            - experiment_instance.use do
-              = render partial: 'shared/groups/invite_members'
-            - experiment_instance.try(:invite_page) {}
+
         .row
           .form-group.col-sm-12.gl-mb-0
             = button_tag class: %w[btn gl-button btn-success gl-w-full!] do
