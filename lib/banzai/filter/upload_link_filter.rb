@@ -45,6 +45,9 @@ module Banzai
           return
         end
 
+        # Preserve original source url as metadata
+        html_attr.parent.set_attribute('data-original-url', html_attr.value)
+
         html_attr.value =
           if context[:only_path]
             path

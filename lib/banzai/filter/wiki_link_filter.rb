@@ -36,8 +36,16 @@ module Banzai
       protected
 
       def process_link(link_attr, node)
+        # Preserve original source url as metadata
+        preserve_original_url(link_attr, node)
         process_link_attr(link_attr)
         remove_unsafe_links({ node: node }, remove_invalid_links: false)
+      end
+
+      def preserve_original_url(html_attr, node)
+        return if html_attr.blank?
+
+        node.set_attribute('data-original-url', html_attr.value)
       end
 
       def wiki?

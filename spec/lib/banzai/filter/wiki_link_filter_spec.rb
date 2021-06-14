@@ -22,6 +22,16 @@ RSpec.describe Banzai::Filter::WikiLinkFilter do
     expect(filtered_link.attribute('href').value).to eq('/uploads/a.test')
   end
 
+  describe 'when links are rewritable' do
+    it "stores original url in the data-original-url attribute" do
+      original_path = "#{repository_upload_folder}/a.jpg"
+      filtered_elements = filter("<a href='#{original_path}'><img src='#{original_path}'>example</img></a>", wiki: wiki)
+
+      expect(filtered_elements.search('img').first.attribute('data-original-url').value).to eq(original_path)
+      expect(filtered_elements.search('a').first.attribute('data-original-url').value).to eq(original_path)
+    end
+  end
+
   describe 'when links point to the relative wiki path' do
     it 'does not rewrite links' do
       path = "#{wiki.wiki_base_path}/#{repository_upload_folder}/a.jpg"
