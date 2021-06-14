@@ -144,11 +144,7 @@ module EE
       end
 
       if ::Feature.enabled?(:group_iterations, @group, default_enabled: true) && @group.licensed_feature_available?(:iterations) && can?(current_user, :read_iteration, @group)
-        if ::Feature.enabled?(:iteration_cadences)
-          links << :iteration_cadences
-        else
-          links << :iterations
-        end
+        links << ::Feature.enabled?(:iteration_cadences, @group, default_enabled: :yaml) ? :iteration_cadences : :iterations
       end
 
       if ::Feature.enabled?(:group_ci_cd_analytics_page, @group, default_enabled: true) && @group.licensed_feature_available?(:group_ci_cd_analytics) && can?(current_user, :view_group_ci_cd_analytics, @group)
