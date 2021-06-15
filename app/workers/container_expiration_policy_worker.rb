@@ -22,9 +22,10 @@ class ContainerExpirationPolicyWorker # rubocop:disable Scalability/IdempotentWo
   private
 
   def disable_policies_without_container_repositories
-    ContainerExpirationPolicy.active
-                             .without_container_repositories
-                             .update_all(enabled: false)
+    ContainerExpirationPolicy.active.each_batch(of: BATCH_SIZE) do |policies|
+      policies.without_container_repositories
+              .update_all(enabled: false)
+    end
   end
 
   def process_stale_ongoing_cleanups
