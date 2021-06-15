@@ -483,7 +483,7 @@ export default {
     </template>
 
     <template v-if="isMRActive" #sub-heading>
-      <div class="text-secondary-700 text-1">
+      <div class="gl-text-gray gl-font-sm">
         <gl-sprintf
           v-if="hasDivergedFromTargetBranch"
           :message="
@@ -493,7 +493,7 @@ export default {
           "
         >
           <template #targetBranchName>
-            <gl-link class="text-1" :href="targetBranchTreePath">{{ targetBranch }}</gl-link>
+            <gl-link class="gl-font-sm" :href="targetBranchTreePath">{{ targetBranch }}</gl-link>
           </template>
         </gl-sprintf>
 
@@ -506,12 +506,12 @@ export default {
           "
         >
           <template #newPipelineLink="{ content }">
-            <gl-link class="text-1" :href="`${newPipelinePath}?ref=${targetBranch}`">{{
+            <gl-link class="gl-font-sm" :href="`${newPipelinePath}?ref=${targetBranch}`">{{
               content
             }}</gl-link>
           </template>
           <template #targetBranchName>
-            <gl-link class="text-1" :href="targetBranchTreePath">{{ targetBranch }}</gl-link>
+            <gl-link class="gl-font-sm" :href="targetBranchTreePath">{{ targetBranch }}</gl-link>
           </template>
         </gl-sprintf>
       </div>
