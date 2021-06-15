@@ -231,21 +231,6 @@ To configure a custom email inbox for Service Desk with IMAP, add the following 
 The configuration options are the same as for configuring
 [incoming email](../../administration/incoming_email.md#set-it-up).
 
-### Using a custom email address suffix **(FREE SELF)**
-
-> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/2201) in GitLab Premium 13.0.
-> - [Feature flag removed](https://gitlab.com/gitlab-org/gitlab/-/issues/284656) in GitLab 13.8.
-
-NOTE:
-In order to use this feature, a [custom mailbox](#using-a-custom-mailbox) must be fully configured first.
-
-You can set a custom suffix in your project's Service Desk settings.
-It can contain only lowercase letters (`a-z`), numbers (`0-9`), or underscores (`_`).
-
-In this case, suppose the `mygroup/myproject` project Service Desk settings has the project name
-suffix set to `support`, and a user sends an email to `project_contact+mygroup-myproject-support@example.com`.
-As a result, a new Service Desk issue is created from this email in the `mygroup/myproject` project.
-
 #### Microsoft Graph
 
 > Introduced in [GitLab 13.11](https://gitlab.com/gitlab-org/gitlab/-/issues/214900)
@@ -277,6 +262,21 @@ Graph API instead of IMAP. Follow the [documentation in the incoming e-mail sect
   ```
 
 The Microsoft Graph API is not yet supported in source installations. See [this issue](https://gitlab.com/gitlab-org/gitlab/-/issues/326169) for more details.
+
+### Using a custom email address suffix **(FREE SELF)**
+
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/2201) in GitLab Premium 13.0.
+> - [Feature flag removed](https://gitlab.com/gitlab-org/gitlab/-/issues/284656) in GitLab 13.8.
+
+NOTE:
+In order to use this feature, a [custom mailbox](#using-a-custom-mailbox) must be fully configured first.
+
+You can set a custom suffix in your project's Service Desk settings.
+It can contain only lowercase letters (`a-z`), numbers (`0-9`), or underscores (`_`).
+
+In this case, suppose the `mygroup/myproject` project Service Desk settings has the project name
+suffix set to `support`, and a user sends an email to `project_contact+mygroup-myproject-support@example.com`.
+As a result, a new Service Desk issue is created from this email in the `mygroup/myproject` project.
 
 ## Using Service Desk
 
