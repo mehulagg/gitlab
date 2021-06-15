@@ -31,7 +31,7 @@ documentation](../report_abuse.md).
 
 ## Resolving abuse reports
 
-To access abuse reports,
+To access abuse reports:
 
 1. On the top bar, select **Menu >** **{admin}** **Admin**.
 1. On the left sidebar, select **Abuse Reports**.
