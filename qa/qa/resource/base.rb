@@ -40,7 +40,6 @@ module QA
         # Initialize new instance of class without fabrication
         #
         # @param [Proc] prepare_block
-        # @return [QA::Resource::Base]
         def init(&prepare_block)
           new.tap(&prepare_block)
         end
