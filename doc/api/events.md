@@ -12,18 +12,19 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 
 Available action types for the `action` parameter are:
 
-- `approved`
-- `created`
-- `updated`
-- `closed`
-- `reopened`
-- `pushed`
-- `commented`
-- `merged`
-- `joined`
-- `left`
-- `destroyed`
-- `expired`
+- `approved`: Approved a merge request.
+- `archived`: Archived a design or a project, without deleting it.
+- `closed`: Closed an issue or merge request.
+- `commented`: Commented on an issue or merge request.
+- `created`: Created a design, project, group, or a wiki page.
+- `destroyed`: Deleted a design, issue, or merge request.
+- `expired`: Removed as a member of a group or project due to expiration.
+- `joined`: Added as a member of a group or project.
+- `left`: Removed as a member of a group or project.
+- `merged`: Merged a merge request.
+- `pushed`: Pushed commits to (or deleted commits from) a repository.
+- `reopened`: Re-opened a closed issue or merge request.
+- `updated`: Updated a design, or wiki page.
 
 Note that these options are in lower case.
 
