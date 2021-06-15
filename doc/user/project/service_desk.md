@@ -166,7 +166,7 @@ To edit the custom email display name:
 > - [Feature flag removed](https://gitlab.com/gitlab-org/gitlab/-/issues/284656) in GitLab 13.8.
 
 It is possible to customize the email address used by Service Desk. In order to do this,
-both a custom mailbox and a custom suffix must be configured.
+both a [custom mailbox](#configuring-a-custom-mailbox) and a [custom suffix](#configuring-a-custom-suffix) must be configured.
 
 #### Configuring a custom mailbox
 
@@ -271,15 +271,21 @@ The Microsoft Graph API is not yet supported in source installations. See [this 
 
 #### Configuring a custom email address suffix
 
-NOTE:
-In order to use this feature, a [custom mailbox](#using-a-custom-mailbox) must be fully configured first.
-
-You can set a custom suffix in your project's Service Desk settings.
+You can set a custom suffix in your project's Service Desk settings once you have configured a [custom mailbox](#configuring-a-custom-mailbox).
 It can contain only lowercase letters (`a-z`), numbers (`0-9`), or underscores (`_`).
 
-In this case, suppose the `mygroup/myproject` project Service Desk settings has the project name
-suffix set to `support`, and a user sends an email to `project_contact+mygroup-myproject-support@example.com`.
-As a result, a new Service Desk issue is created from this email in the `mygroup/myproject` project.
+When configured, the custom suffix will create a new Service Desk email address, comprised of the `service_desk_email_address` setting and a
+key of the format:
+`<project_full_path>-<custom_suffix>` 
+
+For example, suppose the `mygroup/myproject` project Service Desk settings has the project name suffix set to `support`, and the Service Desk
+email address is configured to be `contact+%{key}@example.com`. The Service Desk email address for this project will be:
+`contact+mygroup-myproject-support@example.com`.
+
+The former, default email address will continue to work.
+
+On GitLab.com the Service Desk email address is already configured to `contact-project+%{key}@incoming.gitlab.com` so you only have to configure 
+the custom suffix.
 
 ## Using Service Desk
 
