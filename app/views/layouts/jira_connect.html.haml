@@ -6,7 +6,7 @@
     = yield :page_specific_styles
 
     = javascript_include_tag 'https://connect-cdn.atl-paas.net/all.js'
-    = Gon::Base.render_data(nonce: content_security_policy_nonce)
+    = render_gon_and_global_window_variables
     = yield :head
   %body
     = yield

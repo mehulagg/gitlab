@@ -175,6 +175,14 @@ module PageLayoutHelper
     })
   end
 
+  def render_gon_and_global_window_variables
+    tags = Gon::Base.render_data(nonce: content_security_policy_nonce)
+
+    tags << render_webpack_public_path
+
+    tags.html_safe
+  end
+
   private
 
   def generic_canonical_url
@@ -199,5 +207,19 @@ module PageLayoutHelper
     # `fullpath` would return the path without the slash.
     # Therefore, we need to process `original_fullpath`
     request.original_fullpath.sub(request.path, '')[0] == '/'
+  end
+
+  # This sets webpack's runtime path. It is used to manually configure
+  # config.output.publicPath to account for relative_url_root or CDN settings
+  # which cannot be baked-in to our webpack bundles.
+  def render_webpack_public_path
+    return '' unless Gon.webpack_public_path
+
+    options = {}
+    options[:nonce] = content_security_policy_nonce if content_security_policy_nonce
+
+    script = Gon::Escaper.escape_unicode("window.__webpack_public_path__ = '#{Gon.webpack_public_path}'")
+
+    content_tag(:script, script.html_safe, options)
   end
 end

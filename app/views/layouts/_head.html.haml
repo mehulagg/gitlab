@@ -54,7 +54,7 @@
 
   = stylesheet_link_tag 'performance_bar' if performance_bar_enabled?
 
-  = Gon::Base.render_data(nonce: content_security_policy_nonce)
+  = render_gon_and_global_window_variables
 
   = javascript_include_tag locale_path unless I18n.locale == :en
   = webpack_bundle_tag "sentry" if Gitlab.config.sentry.enabled
