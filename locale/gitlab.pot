@@ -18601,6 +18601,9 @@ msgstr ""
 msgid "Iterations|Title"
 msgstr ""
 
+msgid "Iterations|Unable to find iteration."
+msgstr ""
+
 msgid "Iteration|Dates cannot overlap with other existing Iterations within this group"
 msgstr ""
 

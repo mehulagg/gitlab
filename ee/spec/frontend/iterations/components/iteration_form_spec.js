@@ -95,7 +95,7 @@ describe('Iteration Form', () => {
     });
 
     it('cancel button links to list page', () => {
-      expect(findCancelButton().attributes('href')).toEqual(baseUrl);
+      expect(findCancelButton().attributes('href')).toBe(baseUrl);
     });
 
     describe('save', () => {

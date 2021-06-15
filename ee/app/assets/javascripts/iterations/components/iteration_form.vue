@@ -1,16 +1,20 @@
 <script>
-import { GlButton, GlForm, GlFormInput } from '@gitlab/ui';
+import { GlAlert, GlButton, GlForm, GlFormInput } from '@gitlab/ui';
 import initDatePicker from '~/behaviors/date_picker';
 import createFlash from '~/flash';
 import { convertToGraphQLId, getIdFromGraphQLId } from '~/graphql_shared/utils';
-import { __ } from '~/locale';
+import { __, s__ } from '~/locale';
 import MarkdownField from '~/vue_shared/components/markdown/field.vue';
 import readIteration from '../queries/iteration.query.graphql';
 import createIteration from '../queries/iteration_create.mutation.graphql';
 import updateIteration from '../queries/update_iteration.mutation.graphql';
 
 export default {
+  cadencesList: {
+    name: 'index',
+  },
   components: {
+    GlAlert,
     GlButton,
     GlForm,
     GlFormInput,
@@ -31,13 +35,13 @@ export default {
         };
       },
       /* eslint-enable @gitlab/require-i18n-strings */
-      result({ data, errors }) {
-        if (errors?.length) {
-          [this.error] = errors;
+      result({ data }) {
+        const iteration = data.group.iterations?.nodes[0];
+
+        if (!iteration) {
+          this.error = s__('Iterations|Unable to find iteration.');
           return;
         }
-
-        const iteration = data.group.iterations?.nodes[0] || {};
 
         this.title = iteration.title;
         this.description = iteration.description;
@@ -70,11 +74,6 @@ export default {
     },
     isEditing() {
       return Boolean(this.iterationId);
-    },
-    cadencesList() {
-      return {
-        name: 'index',
-      };
     },
     variables() {
       return {
@@ -185,6 +184,10 @@ export default {
       </h3>
     </div>
     <hr class="gl-mt-0" />
+
+    <gl-alert v-if="error" class="gl-mb-5" variant="danger" @dismiss="error = ''">{{
+      error
+    }}</gl-alert>
     <gl-form class="row common-note-form">
       <div class="col-md-6">
         <div class="form-group row">
@@ -285,7 +288,7 @@ export default {
       >
         {{ isEditing ? __('Update iteration') : __('Create iteration') }}
       </gl-button>
-      <gl-button class="gl-ml-3" data-testid="cancel-iteration" :to="cadencesList">
+      <gl-button class="gl-ml-3" data-testid="cancel-iteration" :to="$options.cadencesList">
         {{ __('Cancel') }}
       </gl-button>
     </div>
