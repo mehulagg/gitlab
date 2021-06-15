@@ -85,11 +85,10 @@ The **Alert details** tab has two sections. The top section provides a short lis
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/217768) in GitLab 13.2.
 
-The **Metrics** tab displays a metrics chart for alerts coming from Prometheus. If the alert originated from any other tool, the **Metrics** tab is empty. To set up alerts for GitLab-managed Prometheus instances, see [Managed Prometheus instances](../metrics/alerts.md#managed-prometheus-instances). For externally-managed Prometheus instances, you must configure your alerting
-rules to display a chart in the alert. For information about how to configure
+The **Metrics** tab displays a metrics chart for alerts coming from Prometheus. If the alert originated from any other tool, the **Metrics** tab is empty.
+For externally-managed Prometheus instances, you must configure your alerting rules to display a chart in the alert. For information about how to configure
 your alerting rules, see [Embedding metrics based on alerts in incident issues](../metrics/embed.md#embedding-metrics-based-on-alerts-in-incident-issues). See
-[External Prometheus instances](../metrics/alerts.md#external-prometheus-instances)
-for information about setting up alerts for your self-managed Prometheus
+[External Prometheus instances](../metrics/alerts.md#external-prometheus-instances) for information about setting up alerts for your self-managed Prometheus
 instance.
 
 To view the metrics for an alert:
@@ -205,8 +204,7 @@ Select the **To-Do List** **{todo-done}** in the navigation bar to view your cur
 
 > Runbook URLs [introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/39315) in GitLab 13.3.
 
-When creating alerts from the metrics dashboard for
-[managed Prometheus instances](../metrics/alerts.md#managed-prometheus-instances),
+When creating alerts from the metrics dashboard for managed Prometheus instances,
 you can link a runbook. When the alert triggers, you can access the runbook through
 the [chart context menu](../metrics/dashboards/index.md#chart-context-menu) in the
 upper-right corner of the metrics chart, making it easy for you to locate and access
