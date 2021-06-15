@@ -2,6 +2,8 @@
 
 module Integrations
   class BaseIssueTracker < Integration
+    self.abstract_class = true
+
     validate :one_issue_tracker, if: :activated?, on: :manual_change
 
     # TODO: we can probably just delegate as part of

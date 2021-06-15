@@ -4,6 +4,8 @@
 # This class is not meant to be used directly, but only to inherrit from.
 module Integrations
   class BaseSlashCommands < Integration
+    self.abstract_class = true
+
     default_value_for :category, 'chat'
 
     prop_accessor :token

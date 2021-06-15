@@ -5,6 +5,8 @@
 # working with GitLab merge requests
 module Integrations
   class BaseCi < Integration
+    self.abstract_class = true
+
     default_value_for :category, 'ci'
 
     def valid_token?(token)

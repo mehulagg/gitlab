@@ -8,6 +8,8 @@ module Integrations
     include ChatMessage
     include NotificationBranchSelection
 
+    self.abstract_class = true
+
     SUPPORTED_EVENTS = %w[
       push issue confidential_issue merge_request note confidential_note
       tag_push pipeline wiki_page deployment

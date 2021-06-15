@@ -3,6 +3,16 @@
 require 'spec_helper'
 
 RSpec.describe Integrations::BaseChatNotification do
+  # `Integrations::BaseChatNotification` is an `abstract_class`, so cannot be instantiated directly.
+  # rubocop: disable Gitlab/NamespacedClass
+  # rubocop: disable RSpec/LeakyConstantDeclaration
+  let(:described_class) do
+    class InstantiableBaseChatNotification < Integrations::BaseChatNotification; end
+    InstantiableBaseChatNotification
+  end
+  # rubocop: enable RSpec/LeakyConstantDeclaration
+  # rubocop: enable Gitlab/NamespacedClass
+
   describe 'Associations' do
     before do
       allow(subject).to receive(:activated?).and_return(true)
