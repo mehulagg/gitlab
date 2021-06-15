@@ -691,7 +691,7 @@ describe('Grouped security reports app', () => {
   });
 
   describe('Out of date report', () => {
-    const createComponent = (extraProp, done) => {
+    const createComponent = (extraProp) => {
       mock
         .onGet(SAST_DIFF_ENDPOINT)
         .reply(200, { ...sastDiffSuccessMock, base_report_out_of_date: true });
@@ -705,14 +705,12 @@ describe('Grouped security reports app', () => {
         },
       });
 
-      waitForMutation(wrapper.vm.$store, `sast/${sastTypes.RECEIVE_DIFF_SUCCESS}`)
-        .then(done)
-        .catch(done.fail);
+      return waitForMutation(wrapper.vm.$store, `sast/${sastTypes.RECEIVE_DIFF_SUCCESS}`);
     };
 
     describe('with active MR', () => {
-      beforeEach((done) => {
-        createComponent({ mrState: mrStates.open }, done);
+      beforeEach(() => {
+        return createComponent({ mrState: mrStates.open });
       });
 
       it('should display out of date message', () => {
@@ -723,8 +721,8 @@ describe('Grouped security reports app', () => {
     });
 
     describe('with active MR and diverged commit', () => {
-      beforeEach((done) => {
-        createComponent({ mrState: mrStates.open, divergedCommitsCount: 1 }, done);
+      beforeEach(() => {
+        return createComponent({ mrState: mrStates.open, divergedCommitsCount: 1 });
       });
 
       it('should display out of date message', () => {
@@ -735,8 +733,8 @@ describe('Grouped security reports app', () => {
     });
 
     describe('with closed MR', () => {
-      beforeEach((done) => {
-        createComponent({ mrState: mrStates.closed }, done);
+      beforeEach(() => {
+        return createComponent({ mrState: mrStates.closed });
       });
 
       it('should not display out of date message', () => {
@@ -745,8 +743,8 @@ describe('Grouped security reports app', () => {
     });
 
     describe('with merged MR', () => {
-      beforeEach((done) => {
-        createComponent({ mrState: mrStates.merged }, done);
+      beforeEach(() => {
+        return createComponent({ mrState: mrStates.merged });
       });
 
       it('should not display out of date message', () => {
