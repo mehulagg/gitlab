@@ -8,7 +8,6 @@ module QA
     class MergeRequest < Base
       attr_accessor :approval_rules,
                     :source_branch,
-                    :target_branch,
                     :target_new_branch,
                     :assignee,
                     :milestone,
@@ -32,11 +31,15 @@ module QA
         end
       end
 
+      attribute :target_branch do
+        project.default_branch
+      end
+
       attribute :target do
         Repository::ProjectPush.fabricate! do |resource|
           resource.project = project
           resource.branch_name = target_branch
-          resource.new_branch = @target_new_branch
+          resource.new_branch = target_new_branch
           resource.remote_branch = target_branch
         end
       end
@@ -62,7 +65,6 @@ module QA
         @labels = []
         @file_name = "added_file-#{SecureRandom.hex(8)}.txt"
         @file_content = "File Added"
-        @target_branch = project.default_branch
         @target_new_branch = true
         @no_preparation = false
         @wait_for_merge = true
@@ -110,10 +112,10 @@ module QA
 
       def api_post_body
         {
-          description: @description,
-          source_branch: @source_branch,
-          target_branch: @target_branch,
-          title: @title
+          description: description,
+          source_branch: source_branch,
+          target_branch: target_branch,
+          title: title
         }
       end
 
@@ -160,8 +162,6 @@ module QA
       end
 
       def populate_target_and_source_if_required
-        @target_branch ||= project.default_branch
-
         populate(:target, :source) unless @no_preparation
       end
     end
