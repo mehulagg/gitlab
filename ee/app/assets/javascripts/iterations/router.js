@@ -38,6 +38,10 @@ const routes = [
     path: '/:cadenceId/iterations/:iterationId/edit',
     component: IterationForm,
   },
+  {
+    path: '*',
+    redirect: '/',
+  },
 ];
 
 export default function createRouter(base) {

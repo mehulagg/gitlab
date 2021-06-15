@@ -40,17 +40,11 @@ describe('Iteration Form', () => {
   const readMutationSuccess = {
     data: { group: { iterations: { nodes: [iteration] }, errors: [] } },
   };
-  const readMutationFailure = {
-    data: { group: { iteration, errors: ['alas, your data is unchanged'] } },
-  };
   const createMutationSuccess = { data: { iterationCreate: { iteration, errors: [] } } };
   const createMutationFailure = {
     data: { iterationCreate: { iteration, errors: ['alas, your data is unchanged'] } },
   };
   const updateMutationSuccess = { data: { updateIteration: { iteration, errors: [] } } };
-  const updateMutationFailure = {
-    data: { updateIteration: { iteration: {}, errors: ['alas, your data is unchanged'] } },
-  };
 
   function createComponent({
     mutationQuery = createIteration,
@@ -84,10 +78,9 @@ describe('Iteration Form', () => {
   const findDescription = () => wrapper.find('#iteration-description');
   const findStartDate = () => wrapper.find('#iteration-start-date');
   const findDueDate = () => wrapper.find('#iteration-due-date');
-  const findSaveButton = () => wrapper.find('[data-testid="save-iteration"]');
-  const findCancelButton = () => wrapper.find('[data-testid="cancel-iteration"]');
-  const clickSave = () => findSaveButton().vm.$emit('click');
-  const clickCancel = () => findCancelButton().vm.$emit('click');
+  const findSaveButton = () => wrapper.findByTestId('save-iteration');
+  const findCancelButton = () => wrapper.findByTestId('cancel-iteration');
+  const clickSave = () => findSaveButton().trigger('click');
 
   describe('New iteration', () => {
     const resolverMock = jest.fn().mockResolvedValue(createMutationSuccess);
@@ -106,7 +99,7 @@ describe('Iteration Form', () => {
     });
 
     describe('save', () => {
-      it('triggers mutation with form data', () => {
+      it('triggers mutation with form data', async () => {
         const title = 'Iteration 5';
         const description = 'The fifth iteration';
         const startDate = '2020-05-05';
@@ -117,7 +110,7 @@ describe('Iteration Form', () => {
         findStartDate().vm.$emit('input', startDate);
         findDueDate().vm.$emit('input', dueDate);
 
-        clickSave();
+        await clickSave();
 
         expect(resolverMock).toHaveBeenCalledWith({
           groupPath,
@@ -132,9 +125,7 @@ describe('Iteration Form', () => {
       it('redirects to Iteration page on success', async () => {
         createComponent();
 
-        clickSave();
-
-        await nextTick();
+        await clickSave();
 
         expect(findSaveButton().props('loading')).toBe(true);
 

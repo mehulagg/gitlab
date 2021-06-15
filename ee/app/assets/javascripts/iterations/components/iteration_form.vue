@@ -31,10 +31,12 @@ export default {
         };
       },
       /* eslint-enable @gitlab/require-i18n-strings */
-      result({ data, error }) {
-        if (error) {
-          throw new Error(error);
+      result({ data, errors }) {
+        if (errors?.length) {
+          [this.error] = errors;
+          return;
         }
+
         const iteration = data.group.iterations?.nodes[0] || {};
 
         this.title = iteration.title;
