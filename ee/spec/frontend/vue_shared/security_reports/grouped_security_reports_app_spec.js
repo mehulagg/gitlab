@@ -45,6 +45,7 @@ describe('Grouped security reports app', () => {
   const findCollapseButton = () => wrapper.find('.js-collapse-btn');
   const findSpinner = () => wrapper.find('.gl-spinner');
   const findSecretScanReport = () => wrapper.find('[data-testid="secret-scan-report"]');
+  const findViewFullReportButton = () => wrapper.find('.report-btn');
 
   const props = {
     headBlobPath: 'path',
@@ -395,14 +396,14 @@ describe('Grouped security reports app', () => {
     });
 
     it('should calculate the security tab path', () => {
-      const button = wrapper.find('.report-btn');
-      expect(button.attributes('target')).toBe('_blank');
-      expect(button.attributes('href')).toBe(`${pipelinePath}/security`);
+      expect(findViewFullReportButton().attributes()).toMatchObject({
+        target: '_blank',
+        href: `${pipelinePath}/security`,
+      });
     });
 
     it('should render view full report button', () => {
-      const button = wrapper.find('.report-btn');
-      expect(button.exists()).toBe(true);
+      expect(findViewFullReportButton().exists()).toBe(true);
     });
   });
 
