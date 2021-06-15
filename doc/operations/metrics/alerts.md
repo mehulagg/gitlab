@@ -25,7 +25,7 @@ and scheduled for [removal in GitLab 14.0](https://gitlab.com/groups/gitlab-org/
 However, you can still add runbooks to your alert payload. They show up in the alert UI when the
 alert is triggered.
 
-When creating alerts from the metrics dashboard for [managed Prometheus instances](#managed-prometheus-instances),
+When creating alerts from the metrics dashboard for managed Prometheus instances,
 you can also link a runbook. When the alert triggers, the
 [chart context menu](dashboards/index.md#chart-context-menu) on the metrics chart
 links to the runbook, making it easy for you to locate and access the correct runbook
