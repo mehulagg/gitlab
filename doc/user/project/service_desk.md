@@ -160,13 +160,13 @@ To edit the custom email display name:
 1. Enter a new name in **Email display name**.
 1. Select **Save Changes**.
 
-### Using a custom email address**(FREE SELF)**
+### Using a custom email address **(FREE SELF)**
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/2201) in GitLab Premium 13.0.
 > - [Feature flag removed](https://gitlab.com/gitlab-org/gitlab/-/issues/284656) in GitLab 13.8.
 
 It is possible to customize the email address used by Service Desk. In order to do this,
-both a [custom mailbox](#configuring-a-custom-mailbox) and a [custom suffix](#configuring-a-custom-suffix) must be configured.
+both a [custom mailbox](#configuring-a-custom-mailbox) and a [custom suffix](#configuring-a-custom-email-address-suffix) must be configured.
 
 #### Configuring a custom mailbox
 
