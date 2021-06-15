@@ -6,7 +6,7 @@ module Resolvers
       include Gitlab::Graphql::Authorize::AuthorizeResource
 
       authorize :admin_project
-      description 'Allowed projects that can use a project CI Job Token.'
+      description 'Projects that can be accessed by a CI job token from the current project. Null if job token scope setting is disabled.'
       type ::Types::ProjectType.connection_type, null: true
 
       def resolve
