@@ -44,8 +44,8 @@ be configured to automatically roll over incomplete issues to the next iteration
 ## View the iterations list
 
 To view the iterations list, go to **{issues}** **Issues > Iterations**.
-Click an iteration cadence to view all the iterations in that cadence, ordered by descending date.
-From there you can create a new iteration or click an iteration to get a more detailed view.
+Select an iteration cadence to view all the iterations in that cadence, ordered by descending date.
+From there you can create a new iteration or select an iteration to get a more detailed view.
 
 ## Create an iteration cadence
 
@@ -55,8 +55,8 @@ You need Developer [permissions](../../permissions.md) or higher to create an it
 To create an iteration:
 
 1. In a group, go to **{issues}** **Issues > Iterations**.
-1. Click **New iteration cadence**.
-1. Fill out required fields, and click **Create iteration cadence**. The cadence list page opens.
+1. Select **New iteration cadence**.
+1. Fill out required fields, and select **Create iteration cadence**. The cadence list page opens.
 
 ## Create an iteration
 
@@ -68,9 +68,9 @@ For manually scheduled iteration cadences, you create and add iterations yoursel
 To create an iteration:
 
 1. In a group, go to **{issues}** **Issues > Iterations**.
-1. Click the three-dot menu (**{ellipsis_v}**) > **Add iteration** for the cadence you want to add to.
+1. Select the three-dot menu (**{ellipsis_v}**) > **Add iteration** for the cadence you want to add to.
 1. Enter the title, a description (optional), a start date, and a due date.
-1. Click **Create iteration**. The iteration details page opens.
+1. Select **Create iteration**. The iteration details page opens.
 
 ## Edit an iteration
 
@@ -79,7 +79,7 @@ To create an iteration:
 NOTE:
 You need Developer [permissions](../../permissions.md) or higher to edit an iteration.
 
-To edit an iteration, click the three-dot menu (**{ellipsis_v}**) > **Edit iteration**.
+To edit an iteration, select the three-dot menu (**{ellipsis_v}**) > **Edit iteration**.
 
 ## Add an issue to an iteration
 
@@ -99,7 +99,7 @@ The report also shows a breakdown of total issues in an iteration.
 Open iteration reports show a summary of completed, unstarted, and in-progress issues.
 Closed iteration reports show the total number of issues completed by the due date.
 
-To view an iteration report, go to the iterations list page and click an iteration's title.
+To view an iteration report, go to the iterations list page and select an iteration's title.
 
 ### Iteration burndown and burnup charts
 
@@ -126,7 +126,7 @@ To group issues by label:
 1. Select the **Filter by label** dropdown.
 1. Select the labels you want to group by in the labels dropdown.
    You can also search for labels by typing in the search input.
-1. Click or tap outside of the label dropdown. The page is now grouped by the selected labels.
+1. Select or tap outside of the label dropdown. The page is now grouped by the selected labels.
 
 ## Disable iterations **(PREMIUM SELF)**
 
