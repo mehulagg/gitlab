@@ -88,7 +88,7 @@ export const subscriptionSyncStatus = {
 };
 export const subscriptionTypes = {
   CLOUD: 'cloud',
-  LICENSE_FILE: 'legacy',
+  LICENSE_FILE: 'license_file',
 };
 
 export const subscriptionQueries = {
