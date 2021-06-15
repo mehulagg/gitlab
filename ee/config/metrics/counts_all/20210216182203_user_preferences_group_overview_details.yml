@@ -1,6 +1,6 @@
 ---
 key_path: counts.user_preferences_group_overview_details
-description: Count of users who set personal preference to see Details on Group overview
+description: Count of users who set personal preference to see Details on Group information
   page
 product_section: sec
 product_stage: secure

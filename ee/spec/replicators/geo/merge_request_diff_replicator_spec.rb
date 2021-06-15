@@ -6,4 +6,5 @@ RSpec.describe Geo::MergeRequestDiffReplicator do
   let(:model_record) { build(:merge_request_diff, :external) }
 
   include_examples 'a blob replicator'
+  include_examples 'a verifiable replicator'
 end

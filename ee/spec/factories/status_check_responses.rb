@@ -3,6 +3,6 @@
 FactoryBot.define do
   factory :status_check_response, class: 'MergeRequests::StatusCheckResponse' do
     merge_request
-    external_approval_rule
+    external_status_check
   end
 end

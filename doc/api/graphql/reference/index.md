@@ -766,6 +766,7 @@ Input type: `CiCdSettingsUpdateInput`
 | ---- | ---- | ----------- |
 | <a id="mutationcicdsettingsupdateclientmutationid"></a>`clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 | <a id="mutationcicdsettingsupdatefullpath"></a>`fullPath` | [`ID!`](#id) | Full Path of the project the settings belong to. |
+| <a id="mutationcicdsettingsupdatejobtokenscopeenabled"></a>`jobTokenScopeEnabled` | [`Boolean`](#boolean) | Indicates CI job tokens generated in this project have restricted access to resources. |
 | <a id="mutationcicdsettingsupdatekeeplatestartifact"></a>`keepLatestArtifact` | [`Boolean`](#boolean) | Indicates if the latest artifact should be kept for this project. |
 | <a id="mutationcicdsettingsupdatemergepipelinesenabled"></a>`mergePipelinesEnabled` | [`Boolean`](#boolean) | Indicates if merge pipelines are enabled for the project. |
 | <a id="mutationcicdsettingsupdatemergetrainsenabled"></a>`mergeTrainsEnabled` | [`Boolean`](#boolean) | Indicates if merge trains are enabled for the project. |
@@ -3527,6 +3528,28 @@ Input type: `RunnerUpdateInput`
 | <a id="mutationrunnerupdateerrors"></a>`errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 | <a id="mutationrunnerupdaterunner"></a>`runner` | [`CiRunner`](#cirunner) | The runner after mutation. |
 
+### `Mutation.runnersRegistrationTokenReset`
+
+Available only when feature flag `runner_graphql_query` is enabled.
+
+Input type: `RunnersRegistrationTokenResetInput`
+
+#### Arguments
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| <a id="mutationrunnersregistrationtokenresetclientmutationid"></a>`clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
+| <a id="mutationrunnersregistrationtokenresetid"></a>`id` | [`ID`](#id) | ID of the project or group to reset the token for. Omit if resetting instance runner token. |
+| <a id="mutationrunnersregistrationtokenresettype"></a>`type` | [`CiRunnerType!`](#cirunnertype) | Scope of the object to reset the token for. |
+
+#### Fields
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| <a id="mutationrunnersregistrationtokenresetclientmutationid"></a>`clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
+| <a id="mutationrunnersregistrationtokenreseterrors"></a>`errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
+| <a id="mutationrunnersregistrationtokenresettoken"></a>`token` | [`String`](#string) | The runner token after mutation. |
+
 ### `Mutation.terraformStateDelete`
 
 Input type: `TerraformStateDeleteInput`
@@ -4223,6 +4246,29 @@ The precise type of `Edge` and `Item` depends on the kind of connection. A
 Some of the types in the schema exist solely to model connections. Each connection
 has a distinct, named type, with a distinct named edge type. These are listed separately
 below.
+
+#### `AgentConfigurationConnection`
+
+The connection type for [`AgentConfiguration`](#agentconfiguration).
+
+##### Fields
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| <a id="agentconfigurationconnectionedges"></a>`edges` | [`[AgentConfigurationEdge]`](#agentconfigurationedge) | A list of edges. |
+| <a id="agentconfigurationconnectionnodes"></a>`nodes` | [`[AgentConfiguration]`](#agentconfiguration) | A list of nodes. |
+| <a id="agentconfigurationconnectionpageinfo"></a>`pageInfo` | [`PageInfo!`](#pageinfo) | Information to aid in pagination. |
+
+#### `AgentConfigurationEdge`
+
+The edge type for [`AgentConfiguration`](#agentconfiguration).
+
+##### Fields
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| <a id="agentconfigurationedgecursor"></a>`cursor` | [`String!`](#string) | A cursor for use in pagination. |
+| <a id="agentconfigurationedgenode"></a>`node` | [`AgentConfiguration`](#agentconfiguration) | The item at the end of the edge. |
 
 #### `AlertManagementAlertConnection`
 
@@ -5730,6 +5776,29 @@ The edge type for [`Namespace`](#namespace).
 | <a id="namespaceedgecursor"></a>`cursor` | [`String!`](#string) | A cursor for use in pagination. |
 | <a id="namespaceedgenode"></a>`node` | [`Namespace`](#namespace) | The item at the end of the edge. |
 
+#### `NetworkPolicyConnection`
+
+The connection type for [`NetworkPolicy`](#networkpolicy).
+
+##### Fields
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| <a id="networkpolicyconnectionedges"></a>`edges` | [`[NetworkPolicyEdge]`](#networkpolicyedge) | A list of edges. |
+| <a id="networkpolicyconnectionnodes"></a>`nodes` | [`[NetworkPolicy]`](#networkpolicy) | A list of nodes. |
+| <a id="networkpolicyconnectionpageinfo"></a>`pageInfo` | [`PageInfo!`](#pageinfo) | Information to aid in pagination. |
+
+#### `NetworkPolicyEdge`
+
+The edge type for [`NetworkPolicy`](#networkpolicy).
+
+##### Fields
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| <a id="networkpolicyedgecursor"></a>`cursor` | [`String!`](#string) | A cursor for use in pagination. |
+| <a id="networkpolicyedgenode"></a>`node` | [`NetworkPolicy`](#networkpolicy) | The item at the end of the edge. |
+
 #### `NoteConnection`
 
 The connection type for [`Note`](#note).
@@ -6863,6 +6932,16 @@ Represents the access level of a relationship between a User and object that it 
 | <a id="accesslevelintegervalue"></a>`integerValue` | [`Int`](#int) | Integer representation of access level. |
 | <a id="accesslevelstringvalue"></a>`stringValue` | [`AccessLevelEnum`](#accesslevelenum) | String representation of access level. |
 
+### `AgentConfiguration`
+
+Configuration details for an Agent.
+
+#### Fields
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| <a id="agentconfigurationagentname"></a>`agentName` | [`String`](#string) | Name of the agent. |
+
 ### `AlertManagementAlert`
 
 Describes an alert from the project's Alert Management.
@@ -7521,6 +7600,8 @@ Represents the total number of issues and their weights for a particular day.
 | <a id="cirunneripaddress"></a>`ipAddress` | [`String!`](#string) | IP address of the runner. |
 | <a id="cirunnerlocked"></a>`locked` | [`Boolean`](#boolean) | Indicates the runner is locked. |
 | <a id="cirunnermaximumtimeout"></a>`maximumTimeout` | [`Int`](#int) | Maximum timeout (in seconds) for jobs processed by the runner. |
+| <a id="cirunnerprivateprojectsminutescostfactor"></a>`privateProjectsMinutesCostFactor` | [`Float`](#float) | Private projects' "minutes cost factor" associated with the runner (GitLab.com only). |
+| <a id="cirunnerpublicprojectsminutescostfactor"></a>`publicProjectsMinutesCostFactor` | [`Float`](#float) | Public projects' "minutes cost factor" associated with the runner (GitLab.com only). |
 | <a id="cirunnerrevision"></a>`revision` | [`String!`](#string) | Revision of the runner. |
 | <a id="cirunnerrununtagged"></a>`runUntagged` | [`Boolean!`](#boolean) | Indicates the runner is able to run untagged jobs. |
 | <a id="cirunnerrunnertype"></a>`runnerType` | [`CiRunnerType!`](#cirunnertype) | Type of the runner. |
@@ -10617,6 +10698,21 @@ four standard [pagination arguments](#connection-pagination-arguments):
 | <a id="namespaceprojectssearch"></a>`search` | [`String`](#string) | Search project with most similar names or paths. |
 | <a id="namespaceprojectssort"></a>`sort` | [`NamespaceProjectSort`](#namespaceprojectsort) | Sort projects by this criteria. |
 
+### `NetworkPolicy`
+
+Represents the network policy.
+
+#### Fields
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| <a id="networkpolicyenabled"></a>`enabled` | [`Boolean!`](#boolean) | Indicates whether this policy is enabled. |
+| <a id="networkpolicyfromautodevops"></a>`fromAutoDevops` | [`Boolean!`](#boolean) | Indicates whether this policy is created from AutoDevops. |
+| <a id="networkpolicyname"></a>`name` | [`String!`](#string) | Name of the policy. |
+| <a id="networkpolicynamespace"></a>`namespace` | [`String!`](#string) | Namespace of the policy. |
+| <a id="networkpolicyupdatedat"></a>`updatedAt` | [`Time!`](#time) | Timestamp of when the policy YAML was last updated. |
+| <a id="networkpolicyyaml"></a>`yaml` | [`String!`](#string) | YAML definition of the policy. |
+
 ### `Note`
 
 #### Fields
@@ -11011,6 +11107,7 @@ Represents vulnerability finding of a security report on the pipeline.
 | Name | Type | Description |
 | ---- | ---- | ----------- |
 | <a id="projectactualrepositorysizelimit"></a>`actualRepositorySizeLimit` | [`Float`](#float) | Size limit for the repository in bytes. |
+| <a id="projectagentconfigurations"></a>`agentConfigurations` | [`AgentConfigurationConnection`](#agentconfigurationconnection) | Agent configurations defined by the project. (see [Connections](#connections)) |
 | <a id="projectallowmergeonskippedpipeline"></a>`allowMergeOnSkippedPipeline` | [`Boolean`](#boolean) | If `only_allow_merge_if_pipeline_succeeds` is true, indicates if merge requests of the project can also be merged with skipped jobs. |
 | <a id="projectapifuzzingciconfiguration"></a>`apiFuzzingCiConfiguration` | [`ApiFuzzingCiConfiguration`](#apifuzzingciconfiguration) | API fuzzing configuration for the project. |
 | <a id="projectarchived"></a>`archived` | [`Boolean`](#boolean) | Indicates the archived status of the project. |
@@ -11593,6 +11690,22 @@ four standard [pagination arguments](#connection-pagination-arguments):
 | <a id="projectmilestonestimeframe"></a>`timeframe` | [`Timeframe`](#timeframe) | List items overlapping the given timeframe. |
 | <a id="projectmilestonestitle"></a>`title` | [`String`](#string) | The title of the milestone. |
 
+##### `Project.networkPolicies`
+
+Network Policies of the project.
+
+Returns [`NetworkPolicyConnection`](#networkpolicyconnection).
+
+This field returns a [connection](#connections). It accepts the
+four standard [pagination arguments](#connection-pagination-arguments):
+`before: String`, `after: String`, `first: Int`, `last: Int`.
+
+###### Arguments
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| <a id="projectnetworkpoliciesenvironmentid"></a>`environmentId` | [`EnvironmentID`](#environmentid) | The global ID of the environment to filter policies. |
+
 ##### `Project.packages`
 
 Packages of the project.
@@ -11853,6 +11966,7 @@ Returns [`VulnerabilitySeveritiesCount`](#vulnerabilityseveritiescount).
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
+| <a id="projectcicdsettingjobtokenscopeenabled"></a>`jobTokenScopeEnabled` | [`Boolean`](#boolean) | Indicates CI job tokens generated in this project have restricted access to resources. |
 | <a id="projectcicdsettingkeeplatestartifact"></a>`keepLatestArtifact` | [`Boolean`](#boolean) | Whether to keep the latest builds artifacts. |
 | <a id="projectcicdsettingmergepipelinesenabled"></a>`mergePipelinesEnabled` | [`Boolean`](#boolean) | Whether merge pipelines are enabled. |
 | <a id="projectcicdsettingmergetrainsenabled"></a>`mergeTrainsEnabled` | [`Boolean`](#boolean) | Whether merge trains are enabled. |
@@ -13841,7 +13955,9 @@ Values for sorting runners.
 | Value | Description |
 | ----- | ----------- |
 | <a id="cirunnersortcontacted_asc"></a>`CONTACTED_ASC` | Ordered by contacted_at in ascending order. |
-| <a id="cirunnersortcreated_desc"></a>`CREATED_DESC` | Ordered by created_date in descending order. |
+| <a id="cirunnersortcontacted_desc"></a>`CONTACTED_DESC` | Ordered by contacted_at in descending order. |
+| <a id="cirunnersortcreated_asc"></a>`CREATED_ASC` | Ordered by created_at in ascending order. |
+| <a id="cirunnersortcreated_desc"></a>`CREATED_DESC` | Ordered by created_at in descending order. |
 
 ### `CiRunnerStatus`
 
@@ -14284,7 +14400,6 @@ Iteration ID wildcard values.
 | <a id="jobartifactfiletypedependency_scanning"></a>`DEPENDENCY_SCANNING` | DEPENDENCY SCANNING job artifact file type. |
 | <a id="jobartifactfiletypedotenv"></a>`DOTENV` | DOTENV job artifact file type. |
 | <a id="jobartifactfiletypejunit"></a>`JUNIT` | JUNIT job artifact file type. |
-| <a id="jobartifactfiletypelicense_management"></a>`LICENSE_MANAGEMENT` | LICENSE MANAGEMENT job artifact file type. |
 | <a id="jobartifactfiletypelicense_scanning"></a>`LICENSE_SCANNING` | LICENSE SCANNING job artifact file type. |
 | <a id="jobartifactfiletypeload_performance"></a>`LOAD_PERFORMANCE` | LOAD PERFORMANCE job artifact file type. |
 | <a id="jobartifactfiletypelsif"></a>`LSIF` | LSIF job artifact file type. |
@@ -14799,6 +14914,7 @@ Name of the feature that the callout is for.
 | <a id="usercalloutfeaturenameenumpipeline_needs_banner"></a>`PIPELINE_NEEDS_BANNER` | Callout feature name for pipeline_needs_banner. |
 | <a id="usercalloutfeaturenameenumpipeline_needs_hover_tip"></a>`PIPELINE_NEEDS_HOVER_TIP` | Callout feature name for pipeline_needs_hover_tip. |
 | <a id="usercalloutfeaturenameenumregistration_enabled_callout"></a>`REGISTRATION_ENABLED_CALLOUT` | Callout feature name for registration_enabled_callout. |
+| <a id="usercalloutfeaturenameenumsecurity_configuration_upgrade_banner"></a>`SECURITY_CONFIGURATION_UPGRADE_BANNER` | Callout feature name for security_configuration_upgrade_banner. |
 | <a id="usercalloutfeaturenameenumservice_templates_deprecated_callout"></a>`SERVICE_TEMPLATES_DEPRECATED_CALLOUT` | Callout feature name for service_templates_deprecated_callout. |
 | <a id="usercalloutfeaturenameenumsuggest_pipeline"></a>`SUGGEST_PIPELINE` | Callout feature name for suggest_pipeline. |
 | <a id="usercalloutfeaturenameenumsuggest_popover_dismissed"></a>`SUGGEST_POPOVER_DISMISSED` | Callout feature name for suggest_popover_dismissed. |

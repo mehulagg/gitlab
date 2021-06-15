@@ -1897,6 +1897,9 @@ msgstr ""
 msgid "Add a comment to this line or drag for multiple lines"
 msgstr ""
 
+msgid "Add a custom message with details about the instance's shared runners. The message is visible in group and project CI/CD settings, in the Runners section. Markdown is supported."
+msgstr ""
+
 msgid "Add a general comment to this %{noteableDisplayName}."
 msgstr ""
 
@@ -2332,9 +2335,6 @@ msgstr ""
 msgid "AdminSettings|Enable shared runners for new projects"
 msgstr ""
 
-msgid "AdminSettings|Environment variables are protected by default"
-msgstr ""
-
 msgid "AdminSettings|Feed token"
 msgstr ""
 
@@ -2347,7 +2347,13 @@ msgstr ""
 msgid "AdminSettings|Moved to integrations"
 msgstr ""
 
+msgid "AdminSettings|New CI/CD variables in projects and groups default to protected."
+msgstr ""
+
 msgid "AdminSettings|No required pipeline"
+msgstr ""
+
+msgid "AdminSettings|Protect CI/CD variables by default"
 msgstr ""
 
 msgid "AdminSettings|Required pipeline configuration"
@@ -2378,9 +2384,6 @@ msgid "AdminSettings|The latest artifacts for all jobs in the most recent succes
 msgstr ""
 
 msgid "AdminSettings|The template for the required pipeline configuration can be one of the GitLab-provided templates, or a custom template added to an instance template repository. %{link_start}How do I create an instance template repository?%{link_end}"
-msgstr ""
-
-msgid "AdminSettings|When creating a new environment variable it will be protected by default."
 msgstr ""
 
 msgid "AdminSettings|You can't add new templates. To migrate or remove a Service template, create a new integration at %{settings_link_start}Settings &gt; Integrations%{link_end}. Learn more about %{doc_link_start}Project integration management%{link_end}."
@@ -2791,7 +2794,16 @@ msgstr ""
 msgid "Admin|Admin notes"
 msgstr ""
 
+msgid "Admin|Learn more about quarterly reconcilliation"
+msgstr ""
+
 msgid "Admin|Note"
+msgstr ""
+
+msgid "Admin|Quarterly reconcilliation will occur on %{qrtlyDate}"
+msgstr ""
+
+msgid "Admin|The number of maximum users for your instance is currently exceeding the number of users in license. On %{qrtlyDate}, GitLab will process a quarterly reconciliation and automatically bill you a prorated amount for the overage. There is no action needed from you. If you have a credit card on file, it will be charged. Otherwise, you will receive an invoice."
 msgstr ""
 
 msgid "Admin|View pending user approvals"
@@ -3499,6 +3511,9 @@ msgid "An error occurred while drawing job relationship links."
 msgstr ""
 
 msgid "An error occurred while enabling Service Desk."
+msgstr ""
+
+msgid "An error occurred while fetching ancestors"
 msgstr ""
 
 msgid "An error occurred while fetching branches.  Retry the search."
@@ -4697,9 +4712,6 @@ msgstr ""
 msgid "Auto DevOps enabled"
 msgstr ""
 
-msgid "Auto DevOps, runners and job artifacts"
-msgstr ""
-
 msgid "Auto stop successfully canceled."
 msgstr ""
 
@@ -5758,10 +5770,10 @@ msgstr ""
 msgid "CICD|Jobs"
 msgstr ""
 
-msgid "CICD|The Auto DevOps pipeline runs if no alternative CI configuration file is found."
+msgid "CICD|The Auto DevOps pipeline runs by default in all projects with no CI/CD configuration file."
 msgstr ""
 
-msgid "CICD|The Auto DevOps pipeline will run if no alternative CI configuration file is found."
+msgid "CICD|The Auto DevOps pipeline runs if no alternative CI configuration file is found."
 msgstr ""
 
 msgid "CICD|group enabled"
@@ -6452,6 +6464,9 @@ msgid "Choose labels"
 msgstr ""
 
 msgid "Choose specific groups or storage shards"
+msgstr ""
+
+msgid "Choose the preferred Runner and populate the AWS CFT."
 msgstr ""
 
 msgid "Choose the top-level group for your repository imports."
@@ -8551,6 +8566,9 @@ msgstr ""
 msgid "ContainerRegistry|Cleanup pending"
 msgstr ""
 
+msgid "ContainerRegistry|Cleanup policies are now available for this project. %{linkStart}Click here to get started.%{linkEnd}"
+msgstr ""
+
 msgid "ContainerRegistry|Cleanup policy for tags is disabled"
 msgstr ""
 
@@ -8943,6 +8961,9 @@ msgstr ""
 msgid "Copy ID"
 msgstr ""
 
+msgid "Copy IP Address"
+msgstr ""
+
 msgid "Copy KRB5 clone URL"
 msgstr ""
 
@@ -9007,6 +9028,9 @@ msgid "Copy source branch name"
 msgstr ""
 
 msgid "Copy the code below to implement tracking in your application:"
+msgstr ""
+
+msgid "Copy this registration token."
 msgstr ""
 
 msgid "Copy this value"
@@ -9718,6 +9742,9 @@ msgid "Customizable by an administrator."
 msgstr ""
 
 msgid "Customizable by owners."
+msgstr ""
+
+msgid "Customize CI/CD settings, including Auto DevOps, shared runners, and job artifacts."
 msgstr ""
 
 msgid "Customize colors"
@@ -10434,7 +10461,7 @@ msgstr ""
 msgid "Default"
 msgstr ""
 
-msgid "Default CI configuration path"
+msgid "Default CI/CD configuration file"
 msgstr ""
 
 msgid "Default Timeout Period"
@@ -11387,7 +11414,7 @@ msgstr ""
 msgid "Didn't receive unlock instructions?"
 msgstr ""
 
-msgid "Diff content limits"
+msgid "Diff files surpassing this limit will be presented as 'too large' and won't be expandable."
 msgstr ""
 
 msgid "Diff limits"
@@ -12362,6 +12389,9 @@ msgid "Enter weights for storages for new repositories."
 msgstr ""
 
 msgid "Enter your password to approve"
+msgstr ""
+
+msgid "Enterprise"
 msgstr ""
 
 msgid "Environment"
@@ -13973,9 +14003,6 @@ msgid "File browser"
 msgstr ""
 
 msgid "File deleted"
-msgstr ""
-
-msgid "File format is no longer supported"
 msgstr ""
 
 msgid "File hooks are similar to system hooks but are executed as files instead of sending data to a URL."
@@ -15880,6 +15907,9 @@ msgstr ""
 msgid "GroupSettings|Prevent forking setting was not saved"
 msgstr ""
 
+msgid "GroupSettings|Prevent members from sending invitations to groups outside of %{group} and its subgroups."
+msgstr ""
+
 msgid "GroupSettings|Prevent sharing a project within %{group} with other groups"
 msgstr ""
 
@@ -15914,6 +15944,9 @@ msgid "GroupSettings|This setting is applied on %{ancestor_group}. To share proj
 msgstr ""
 
 msgid "GroupSettings|This setting is applied on %{ancestor_group}. You can override the setting or %{remove_ancestor_share_with_group_lock}."
+msgstr ""
+
+msgid "GroupSettings|This setting is only available on the top-level group and it applies to all subgroups. Groups that have already been shared with a group outside %{group} will still be shared, and this access will have to be revoked manually."
 msgstr ""
 
 msgid "GroupSettings|This setting will be applied to all subgroups unless overridden by a group owner. Groups that already have access to the project will continue to have access unless removed manually."
@@ -16263,6 +16296,9 @@ msgstr ""
 msgid "Hide shared projects"
 msgstr ""
 
+msgid "Hide tooltips or popovers"
+msgstr ""
+
 msgid "Hide value"
 msgid_plural "Hide values"
 msgstr[0] ""
@@ -16344,9 +16380,6 @@ msgid "How do I set up a Google Chat webhook?"
 msgstr ""
 
 msgid "How do I set up this service?"
-msgstr ""
-
-msgid "How does cleanup work?"
 msgstr ""
 
 msgid "How it works"
@@ -17429,6 +17462,18 @@ msgstr ""
 msgid "Infrastructure Registry"
 msgstr ""
 
+msgid "InfrastructureRegistry|Copy Terraform Command"
+msgstr ""
+
+msgid "InfrastructureRegistry|Copy Terraform Setup Command"
+msgstr ""
+
+msgid "InfrastructureRegistry|Copy and paste into your Terraform configuration, insert the variables, and run Terraform init:"
+msgstr ""
+
+msgid "InfrastructureRegistry|For more information on the Terraform registry, %{linkStart}see our documentation%{linkEnd}."
+msgstr ""
+
 msgid "InfrastructureRegistry|Infrastructure Registry"
 msgstr ""
 
@@ -17439,6 +17484,9 @@ msgid "InfrastructureRegistry|Terraform"
 msgstr ""
 
 msgid "InfrastructureRegistry|Terraform modules are the main way to package and reuse resource configurations with Terraform. Learn more about how to %{noPackagesLinkStart}create Terraform modules%{noPackagesLinkEnd} in GitLab."
+msgstr ""
+
+msgid "InfrastructureRegistry|To authorize access to the Terraform registry:"
 msgstr ""
 
 msgid "InfrastructureRegistry|You have no Terraform modules in your project"
@@ -17478,6 +17526,9 @@ msgid "Insert image"
 msgstr ""
 
 msgid "Insert inline code"
+msgstr ""
+
+msgid "Insert link"
 msgstr ""
 
 msgid "Insert suggestion"
@@ -20201,6 +20252,9 @@ msgstr ""
 msgid "Maximum delay (Minutes)"
 msgstr ""
 
+msgid "Maximum diff patch size (Bytes)"
+msgstr ""
+
 msgid "Maximum duration of a session."
 msgstr ""
 
@@ -20222,6 +20276,9 @@ msgstr ""
 msgid "Maximum file size is 2MB. Please select a smaller file."
 msgstr ""
 
+msgid "Maximum files in a diff"
+msgstr ""
+
 msgid "Maximum import size (MB)"
 msgstr ""
 
@@ -20232,6 +20289,9 @@ msgid "Maximum job timeout has a value which could not be accepted"
 msgstr ""
 
 msgid "Maximum lifetime allowable for Personal Access Tokens is active, your expire date must be set before %{maximum_allowable_date}."
+msgstr ""
+
+msgid "Maximum lines in a diff"
 msgstr ""
 
 msgid "Maximum npm package file size in bytes"
@@ -21750,6 +21810,9 @@ msgid "NetworkPolicies|Rules"
 msgstr ""
 
 msgid "NetworkPolicies|Save changes"
+msgstr ""
+
+msgid "NetworkPolicies|Scan Execution"
 msgstr ""
 
 msgid "NetworkPolicies|Something went wrong, failed to update policy"
@@ -23324,6 +23387,9 @@ msgstr ""
 msgid "PackageRegistry|Copy Pip command"
 msgstr ""
 
+msgid "PackageRegistry|Copy SHA"
+msgstr ""
+
 msgid "PackageRegistry|Copy add Gradle Groovy DSL repository command"
 msgstr ""
 
@@ -24116,10 +24182,16 @@ msgstr ""
 msgid "Pipelines|Improve code quality with GitLab CI/CD"
 msgstr ""
 
+msgid "Pipelines|Install GitLab Runners"
+msgstr ""
+
 msgid "Pipelines|It is recommended the code is reviewed thoroughly before running this pipeline with the parent project's CI resource."
 msgstr ""
 
 msgid "Pipelines|Last Used"
+msgstr ""
+
+msgid "Pipelines|Learn about Runners"
 msgstr ""
 
 msgid "Pipelines|Lint"
@@ -24437,10 +24509,10 @@ msgstr ""
 msgid "Please check the configuration file to ensure that it is available and the YAML is valid"
 msgstr ""
 
-msgid "Please check your email (%{email}) to verify that you own this address and unlock the power of CI/CD. Didn't receive it? %{resend_link}. Wrong email address? %{update_link}."
+msgid "Please check your email %{email} to confirm your account"
 msgstr ""
 
-msgid "Please check your email to confirm your account"
+msgid "Please check your email (%{email}) to verify that you own this address and unlock the power of CI/CD. Didn't receive it? %{resend_link}. Wrong email address? %{update_link}."
 msgstr ""
 
 msgid "Please choose a file"
@@ -26573,6 +26645,9 @@ msgstr ""
 msgid "Provider"
 msgstr ""
 
+msgid "Provision instructions"
+msgstr ""
+
 msgid "Provisioned by:"
 msgstr ""
 
@@ -28045,6 +28120,9 @@ msgstr ""
 msgid "RightSidebar|deleting the"
 msgstr ""
 
+msgid "Rnners|Don't see what you are looking for? See the full list of options, including a fully customizable option, %{linkStart}here%{linkEnd}."
+msgstr ""
+
 msgid "Roadmap"
 msgstr ""
 
@@ -28123,6 +28201,12 @@ msgstr ""
 msgid "Runners|Active"
 msgstr ""
 
+msgid "Runners|Amazon Linux 2 Docker HA with manual scaling and optional scheduling. %{percentage} spot."
+msgstr ""
+
+msgid "Runners|Amazon Linux 2 Docker HA with manual scaling and optional scheduling. Non-spot. Default choice for Linux Docker executor."
+msgstr ""
+
 msgid "Runners|An error has occurred fetching instructions"
 msgstr ""
 
@@ -28141,6 +28225,9 @@ msgstr ""
 msgid "Runners|Copy instructions"
 msgstr ""
 
+msgid "Runners|Deploy GitLab Runner in AWS"
+msgstr ""
+
 msgid "Runners|Description"
 msgstr ""
 
@@ -28150,7 +28237,16 @@ msgstr ""
 msgid "Runners|Download latest binary"
 msgstr ""
 
+msgid "Runners|Enter the number of seconds. This timeout takes precedence over lower timeouts set for the project."
+msgstr ""
+
+msgid "Runners|For each solution, you will choose a capacity. 1 enables warm HA through Auto Scaling group re-spawn. 2 enables hot HA because the service is available even when a node is lost. 3 or more enables hot HA and manual scaling of runner fleet."
+msgstr ""
+
 msgid "Runners|IP Address"
+msgstr ""
+
+msgid "Runners|If you do not select an AWS VPC, the runner will deploy to the Default VPC in the AWS Region you select. Please consult with your AWS administrator to understand if there are any security risks to deploying into the Default VPC in any given region in your AWS account."
 msgstr ""
 
 msgid "Runners|Install a runner"
@@ -28246,6 +28342,12 @@ msgstr ""
 msgid "Runners|View installation instructions"
 msgstr ""
 
+msgid "Runners|Windows 2019 Shell with manual scaling and optional scheduling. %{percentage} spot."
+msgstr ""
+
+msgid "Runners|Windows 2019 Shell with manual scaling and optional scheduling. Non-spot. Default choice for Windows Shell executor."
+msgstr ""
+
 msgid "Runners|You can set up a specific runner to be used by multiple projects but you cannot make this a shared runner."
 msgstr ""
 
@@ -28324,6 +28426,12 @@ msgstr ""
 msgid "SSH keys allow you to establish a secure connection between your computer and GitLab."
 msgstr ""
 
+msgid "SSH keys with the following fingerprints are scheduled to expire soon. Expired SSH keys can not be used:"
+msgstr ""
+
+msgid "SSH keys with the following fingerprints have expired and can no longer be used:"
+msgstr ""
+
 msgid "SSH public key"
 msgstr ""
 
@@ -28375,7 +28483,7 @@ msgstr ""
 msgid "Save pipeline schedule"
 msgstr ""
 
-msgid "Save space and find images in the Container Registry. Remove unneeded tags and keep only the ones you want."
+msgid "Save space and find images in the container Registry. remove unneeded tags and keep only the ones you want. %{linkStart}How does cleanup work?%{linkEnd}"
 msgstr ""
 
 msgid "Saved scan settings and target site settings which are reusable."
@@ -28409,6 +28517,9 @@ msgid "Scheduled Deletion At - %{permanent_deletion_time}"
 msgstr ""
 
 msgid "Scheduled a rebase of branch %{branch}."
+msgstr ""
+
+msgid "Scheduled pipelines cannot run more frequently than once per %{limit} minutes. A pipeline configured to run more frequently only starts after %{limit} minutes have elapsed since the last time it ran."
 msgstr ""
 
 msgid "Scheduled to merge this merge request (%{strategy})."
@@ -28814,6 +28925,12 @@ msgstr ""
 msgid "SecurityConfiguration|Feature documentation for %{featureName}"
 msgstr ""
 
+msgid "SecurityConfiguration|GitLab Ultimate checks your application for security vulnerabilities that may lead to unauthorized access, data leaks, and denial of service attacks. Its features include:"
+msgstr ""
+
+msgid "SecurityConfiguration|High-level vulnerability statistics across projects and groups."
+msgstr ""
+
 msgid "SecurityConfiguration|Manage"
 msgstr ""
 
@@ -28826,10 +28943,16 @@ msgstr ""
 msgid "SecurityConfiguration|Not enabled"
 msgstr ""
 
+msgid "SecurityConfiguration|Runtime security metrics for application environments."
+msgstr ""
+
 msgid "SecurityConfiguration|SAST Analyzers"
 msgstr ""
 
 msgid "SecurityConfiguration|SAST Configuration"
+msgstr ""
+
+msgid "SecurityConfiguration|Secure your project with Ultimate"
 msgstr ""
 
 msgid "SecurityConfiguration|Security Control"
@@ -28847,10 +28970,19 @@ msgstr ""
 msgid "SecurityConfiguration|The status of the tools only applies to the default branch and is based on the %{linkStart}latest pipeline%{linkEnd}. Once you've enabled a scan for the default branch, any subsequent feature branch you create will include the scan."
 msgstr ""
 
+msgid "SecurityConfiguration|Upgrade or start a free trial"
+msgstr ""
+
 msgid "SecurityConfiguration|Using custom settings. You won't receive automatic updates on this variable. %{anchorStart}Restore to default%{anchorEnd}"
 msgstr ""
 
 msgid "SecurityConfiguration|View history"
+msgstr ""
+
+msgid "SecurityConfiguration|Vulnerability details and statistics in the merge request."
+msgstr ""
+
+msgid "SecurityConfiguration|With the information provided, you can immediately begin risk analysis and remediation within GitLab."
 msgstr ""
 
 msgid "SecurityConfiguration|You can quickly enable all security scanning tools by enabling %{linkStart}Auto DevOps%{linkEnd}."
@@ -29621,6 +29753,9 @@ msgstr ""
 msgid "Set requirements for a user to sign-in. Enable mandatory two-factor authentication."
 msgstr ""
 
+msgid "Set size limits for displaying diffs in the browser."
+msgstr ""
+
 msgid "Set target branch"
 msgstr ""
 
@@ -29823,6 +29958,9 @@ msgid "Shared runners are disabled for the parent group"
 msgstr ""
 
 msgid "Shared runners are disabled on group level"
+msgstr ""
+
+msgid "Shared runners details"
 msgstr ""
 
 msgid "Shared runners help link"
@@ -32263,7 +32401,7 @@ msgstr ""
 msgid "The data source is connected, but there is no data to display. %{documentationLink}"
 msgstr ""
 
-msgid "The default CI configuration path for new projects."
+msgid "The default CI/CD configuration file and path for new projects."
 msgstr ""
 
 msgid "The dependency list details information about the components used within your project."
@@ -32291,6 +32429,9 @@ msgid "The environment tier must be one of %{environment_tiers}."
 msgstr ""
 
 msgid "The errors we encountered were:"
+msgstr ""
+
+msgid "The file containing the export is not available yet; it may still be transferring. Please try again later."
 msgstr ""
 
 msgid "The file has been successfully created."
@@ -32965,6 +33106,9 @@ msgid "There was an error while fetching value stream analytics data."
 msgstr ""
 
 msgid "There was an error while fetching value stream analytics duration data."
+msgstr ""
+
+msgid "There was an error while fetching value stream summary data."
 msgstr ""
 
 msgid "There was an error with the reCAPTCHA. Please solve the reCAPTCHA again."
@@ -35268,7 +35412,13 @@ msgstr ""
 msgid "Use .gitlab-ci.yml"
 msgstr ""
 
+msgid "Use GitLab Runner in AWS"
+msgstr ""
+
 msgid "Use a one-time password authenticator on your mobile device or computer to enable two-factor authentication (2FA)."
+msgstr ""
+
+msgid "Use an AWS CloudFormation Template (CFT) to install and configure GitLab Runner in AWS."
 msgstr ""
 
 msgid "Use cURL"
@@ -36583,6 +36733,9 @@ msgstr ""
 msgid "What does this command do?"
 msgstr ""
 
+msgid "What is Auto DevOps?"
+msgstr ""
+
 msgid "What is repository mirroring?"
 msgstr ""
 
@@ -37617,12 +37770,6 @@ msgstr ""
 msgid "Your SSH keys (%{count})"
 msgstr ""
 
-msgid "Your SSH keys with the following fingerprints are scheduled to expire soon. Expired SSH keys will not be usable in future versions of GitLab:"
-msgstr ""
-
-msgid "Your SSH keys with the following fingerprints have expired. Expired SSH keys will not be usable in future versions of GitLab:"
-msgstr ""
-
 msgid "Your To-Do List"
 msgstr ""
 
@@ -37956,6 +38103,9 @@ msgid "can contain only letters of the Base64 alphabet (RFC4648) with the additi
 msgstr ""
 
 msgid "can only be changed by a group admin."
+msgstr ""
+
+msgid "can only have one escalation policy"
 msgstr ""
 
 msgid "can't be enabled because signed commits are required for this project"
@@ -39385,6 +39535,9 @@ msgstr ""
 msgid "the correct format."
 msgstr ""
 
+msgid "the file"
+msgstr ""
+
 msgid "the following issue(s)"
 msgstr ""
 
@@ -39485,6 +39638,9 @@ msgid "view the blob"
 msgstr ""
 
 msgid "view the source"
+msgstr ""
+
+msgid "visibility"
 msgstr ""
 
 msgid "vulnerability"

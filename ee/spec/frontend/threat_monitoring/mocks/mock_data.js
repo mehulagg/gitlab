@@ -181,3 +181,40 @@ export const mockAlertDetails = {
   title: 'dropingress',
   monitorTool: 'Cilium',
 };
+
+export const mockL7Manifest = `apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: limit-inbound-ip
+spec:
+  endpointSelector: {}
+  ingress:
+  - toPorts:
+    - ports:
+      - port: '80'
+        protocol: TCP
+      - port: '443'
+        protocol: TCP
+      rules:
+        http:
+        - headers:
+          - 'X-Forwarded-For: 192.168.1.1'
+    fromEntities:
+    - cluster`;
+
+export const mockL3Manifest = `apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+description: test description
+metadata:
+  name: test-policy
+  labels:
+    app.gitlab.com/proj: '21'
+spec:
+  endpointSelector:
+    matchLabels:
+      network-policy.gitlab.com/disabled_by: gitlab
+      foo: bar
+  ingress:
+  - fromEndpoints:
+    - matchLabels:
+        foo: bar`;

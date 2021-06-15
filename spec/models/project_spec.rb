@@ -4376,6 +4376,18 @@ RSpec.describe Project, factory_default: :keep do
     end
   end
 
+  context 'with export' do
+    let(:project) { create(:project, :with_export) }
+
+    it '#export_file_exists? returns true' do
+      expect(project.export_file_exists?).to be true
+    end
+
+    it '#export_archive_exists? returns false' do
+      expect(project.export_archive_exists?).to be true
+    end
+  end
+
   describe '#forks_count' do
     it 'returns the number of forks' do
       project = build(:project)
@@ -6638,7 +6650,7 @@ RSpec.describe Project, factory_default: :keep do
     context 'when project export is completed' do
       before do
         finish_job(project_export_job)
-        allow(project).to receive(:export_file).and_return(double(ImportExportUploader, file: 'exists.zip'))
+        allow(project).to receive(:export_file_exists?).and_return(true)
       end
 
       it { expect(project.export_status).to eq :finished }
@@ -6649,7 +6661,7 @@ RSpec.describe Project, factory_default: :keep do
 
       before do
         finish_job(project_export_job)
-        allow(project).to receive(:export_file).and_return(double(ImportExportUploader, file: 'exists.zip'))
+        allow(project).to receive(:export_file_exists?).and_return(true)
       end
 
       it { expect(project.export_status).to eq :regeneration_in_progress }
@@ -6945,7 +6957,7 @@ RSpec.describe Project, factory_default: :keep do
   end
 
   describe 'topics' do
-    let_it_be(:project) { create(:project, tag_list: 'topic1, topic2, topic3') }
+    let_it_be(:project) { create(:project, topic_list: 'topic1, topic2, topic3') }
 
     it 'topic_list returns correct string array' do
       expect(project.topic_list).to match_array(%w[topic1 topic2 topic3])
@@ -6954,12 +6966,6 @@ RSpec.describe Project, factory_default: :keep do
     it 'topics returns correct tag records' do
       expect(project.topics.first.class.name).to eq('ActsAsTaggableOn::Tag')
       expect(project.topics.map(&:name)).to match_array(%w[topic1 topic2 topic3])
-    end
-
-    context 'aliases' do
-      it 'tag_list returns correct string array' do
-        expect(project.tag_list).to match_array(%w[topic1 topic2 topic3])
-      end
     end
   end
 

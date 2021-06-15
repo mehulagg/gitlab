@@ -161,11 +161,22 @@ module EE
     end
 
     def has_denied_policies?
+      return false unless project.feature_available?(:license_scanning)
+
       return false unless has_license_scanning_reports?
 
       return false if has_approved_license_check?
 
-      actual_head_pipeline.license_scanning_report.violates?(project.software_license_policies)
+      report_diff = compare_reports(::Ci::CompareLicenseScanningReportsService)
+
+      licenses = report_diff.dig(:data, 'new_licenses')
+
+      return false if licenses.nil? || licenses.empty?
+
+      licenses.any? do |l|
+        status = l.dig('classification', 'approval_status')
+        %w(blacklisted denied).include?(status)
+      end
     end
 
     def enabled_reports

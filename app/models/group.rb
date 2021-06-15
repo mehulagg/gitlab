@@ -80,6 +80,8 @@ class Group < Namespace
   # debian_distributions and associated component_files must be destroyed by ruby code in order to properly remove carrierwave uploads
   has_many :debian_distributions, class_name: 'Packages::Debian::GroupDistribution', dependent: :destroy # rubocop:disable Cop/ActiveRecordDependent
 
+  delegate :prevent_sharing_groups_outside_hierarchy, to: :namespace_settings
+
   accepts_nested_attributes_for :variables, allow_destroy: true
 
   validate :visibility_level_allowed_by_projects
@@ -645,11 +647,15 @@ class Group < Namespace
   end
 
   def export_file_exists?
-    export_file&.file
+    import_export_upload&.export_file_exists?
   end
 
   def export_file
     import_export_upload&.export_file
+  end
+
+  def export_archive_exists?
+    import_export_upload&.export_archive_exists?
   end
 
   def adjourned_deletion?

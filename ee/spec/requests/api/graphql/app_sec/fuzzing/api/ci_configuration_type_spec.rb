@@ -38,7 +38,7 @@ RSpec.describe 'Query.project(fullPath).apiFuzzingCiConfiguration' do
     project.add_developer(user)
 
     stub_full_request(
-      ::AppSec::Fuzzing::Api::CiConfiguration::PROFILES_DEFINITION_FILE
+      ::AppSec::Fuzzing::API::CiConfiguration::PROFILES_DEFINITION_FILE
     ).to_return(body: profiles_yaml)
   end
 

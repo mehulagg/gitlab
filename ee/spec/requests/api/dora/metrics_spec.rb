@@ -35,8 +35,8 @@ RSpec.describe API::Dora::Metrics do
       subject
 
       expect(response).to have_gitlab_http_status(:ok)
-      expect(json_response).to eq([{ '2021-01-01' => 1, 'date' => '2021-01-01', 'value' => 1 },
-                                   { '2021-01-02' => 2, 'date' => '2021-01-02', 'value' => 2 }])
+      expect(json_response).to eq([{ 'date' => '2021-01-01', 'value' => 1 },
+                                   { 'date' => '2021-01-02', 'value' => 2 }])
     end
 
     context 'when user is guest' do
@@ -84,8 +84,8 @@ RSpec.describe API::Dora::Metrics do
       subject
 
       expect(response).to have_gitlab_http_status(:ok)
-      expect(json_response).to eq([{ 1.day.ago.to_date.to_s => 1, 'date' => 1.day.ago.to_date.to_s, 'value' => 1 },
-                                   { Time.current.to_date.to_s => 2, 'date' => Time.current.to_date.to_s, 'value' => 2 }])
+      expect(json_response).to eq([{ 'date' => 1.day.ago.to_date.to_s, 'value' => 1 },
+                                   { 'date' => Time.current.to_date.to_s, 'value' => 2 }])
     end
 
     context 'when user is guest' do

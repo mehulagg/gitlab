@@ -81,6 +81,10 @@ module EE
       end
     end
 
+    def provisioned_by_this_group?
+      user&.user_detail&.provisioned_by_group_id == source_id
+    end
+
     private
 
     override :access_level_inclusion
@@ -151,10 +155,6 @@ module EE
     override :send_welcome_email?
     def send_welcome_email?
       !provisioned_by_this_group?
-    end
-
-    def provisioned_by_this_group?
-      user.user_detail.provisioned_by_group_id == source_id
     end
   end
 end

@@ -111,10 +111,6 @@ RSpec.describe Ci::Build do
   describe '.with_downloadable_artifacts' do
     subject { described_class.with_downloadable_artifacts }
 
-    before do
-      stub_feature_flags(drop_license_management_artifact: false)
-    end
-
     context 'when job does not have a downloadable artifact' do
       let!(:job) { create(:ci_build) }
 
@@ -1732,8 +1728,6 @@ RSpec.describe Ci::Build do
     subject { build.erase_erasable_artifacts! }
 
     before do
-      stub_feature_flags(drop_license_management_artifact: false)
-
       Ci::JobArtifact.file_types.keys.each do |file_type|
         create(:ci_job_artifact, job: build, file_type: file_type, file_format: Ci::JobArtifact::TYPE_AND_FORMAT_PAIRS[file_type.to_sym])
       end
@@ -1870,7 +1864,7 @@ RSpec.describe Ci::Build do
     end
 
     describe '#retryable?' do
-      subject { build.retryable? }
+      subject { build }
 
       context 'when build is retryable' do
         context 'when build is successful' do
@@ -1878,7 +1872,7 @@ RSpec.describe Ci::Build do
             build.success!
           end
 
-          it { is_expected.to be_truthy }
+          it { is_expected.to be_retryable }
         end
 
         context 'when build is failed' do
@@ -1886,7 +1880,7 @@ RSpec.describe Ci::Build do
             build.drop!
           end
 
-          it { is_expected.to be_truthy }
+          it { is_expected.to be_retryable }
         end
 
         context 'when build is canceled' do
@@ -1894,7 +1888,7 @@ RSpec.describe Ci::Build do
             build.cancel!
           end
 
-          it { is_expected.to be_truthy }
+          it { is_expected.to be_retryable }
         end
       end
 
@@ -1904,7 +1898,7 @@ RSpec.describe Ci::Build do
             build.run!
           end
 
-          it { is_expected.to be_falsey }
+          it { is_expected.not_to be_retryable }
         end
 
         context 'when build is skipped' do
@@ -1912,7 +1906,7 @@ RSpec.describe Ci::Build do
             build.skip!
           end
 
-          it { is_expected.to be_falsey }
+          it { is_expected.not_to be_retryable }
         end
 
         context 'when build is degenerated' do
@@ -1920,7 +1914,7 @@ RSpec.describe Ci::Build do
             build.degenerate!
           end
 
-          it { is_expected.to be_falsey }
+          it { is_expected.not_to be_retryable }
         end
 
         context 'when a canceled build has been retried already' do
@@ -1931,7 +1925,7 @@ RSpec.describe Ci::Build do
           end
 
           context 'when prevent_retry_of_retried_jobs feature flag is enabled' do
-            it { is_expected.to be_falsey }
+            it { is_expected.not_to be_retryable }
           end
 
           context 'when prevent_retry_of_retried_jobs feature flag is disabled' do
@@ -1939,7 +1933,7 @@ RSpec.describe Ci::Build do
               stub_feature_flags(prevent_retry_of_retried_jobs: false)
             end
 
-            it { is_expected.to be_truthy }
+            it { is_expected.to be_retryable }
           end
         end
       end
@@ -5237,6 +5231,22 @@ RSpec.describe Ci::Build do
       it 'is a shared runner build' do
         expect(build).to be_shared_runner_build
       end
+    end
+  end
+
+  describe '.without_coverage' do
+    let!(:build_with_coverage) { create(:ci_build, pipeline: pipeline, coverage: 100.0) }
+
+    it 'returns builds without coverage values' do
+      expect(described_class.without_coverage).to eq([build])
+    end
+  end
+
+  describe '.with_coverage_regex' do
+    let!(:build_with_coverage_regex) { create(:ci_build, pipeline: pipeline, coverage_regex: '\d') }
+
+    it 'returns builds with coverage regex values' do
+      expect(described_class.with_coverage_regex).to eq([build_with_coverage_regex])
     end
   end
 end

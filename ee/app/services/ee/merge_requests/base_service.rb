@@ -9,11 +9,9 @@ module EE
 
       attr_accessor :blocking_merge_requests_params
 
-      override :execute_hooks
-      def execute_hooks(merge_request, action = 'open', old_rev: nil, old_associations: {})
-        super do
-          merge_request.project.execute_external_compliance_hooks(merge_data)
-        end
+      override :execute_external_hooks
+      def execute_external_hooks(merge_request, merge_data)
+        merge_request.project.execute_external_compliance_hooks(merge_data)
       end
 
       override :filter_params

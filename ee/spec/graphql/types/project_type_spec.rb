@@ -21,7 +21,7 @@ RSpec.describe GitlabSchema.types['Project'] do
       vulnerability_severities_count packages compliance_frameworks vulnerabilities_count_by_day
       security_dashboard_path iterations iteration_cadences cluster_agents repository_size_excess actual_repository_size_limit
       code_coverage_summary api_fuzzing_ci_configuration path_locks incident_management_escalation_policies
-      incident_management_escalation_policy scan_execution_policies
+      incident_management_escalation_policy scan_execution_policies network_policies
     ]
 
     expect(described_class).to include_graphql_fields(*expected_fields)
@@ -98,6 +98,41 @@ RSpec.describe GitlabSchema.types['Project'] do
       expect(vulnerabilities.first['title']).to eq('A terrible one!')
       expect(vulnerabilities.first['state']).to eq('DETECTED')
       expect(vulnerabilities.first['severity']).to eq('CRITICAL')
+    end
+  end
+
+  describe 'agent_configurations' do
+    let_it_be(:query) do
+      %(
+        query {
+          project(fullPath: "#{project.full_path}") {
+            agentConfigurations {
+              nodes {
+                agentName
+              }
+            }
+          }
+        }
+      )
+    end
+
+    let(:agent_name) { 'example-agent-name' }
+    let(:kas_client) { instance_double(Gitlab::Kas::Client, list_agent_config_files: [double(agent_name: agent_name)]) }
+
+    subject { GitlabSchema.execute(query, context: { current_user: user }).as_json }
+
+    before do
+      stub_licensed_features(cluster_agents: true)
+
+      project.add_maintainer(user)
+      allow(Gitlab::Kas::Client).to receive(:new).and_return(kas_client)
+    end
+
+    it 'returns configured agents' do
+      agents = subject.dig('data', 'project', 'agentConfigurations', 'nodes')
+
+      expect(agents.count).to eq(1)
+      expect(agents.first['agentName']).to eq(agent_name)
     end
   end
 

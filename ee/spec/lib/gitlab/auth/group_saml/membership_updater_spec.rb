@@ -54,9 +54,9 @@ RSpec.describe Gitlab::Auth::GroupSaml::MembershipUpdater do
   end
 
   it 'does not enqueue group sync' do
-    update_membership
+    expect(GroupSamlGroupSyncWorker).not_to receive(:perform_async)
 
-    expect(GroupSamlGroupSyncWorker).not_to have_enqueued_sidekiq_job
+    update_membership
   end
 
   context 'when SAML group links exist' do
@@ -73,34 +73,30 @@ RSpec.describe Gitlab::Auth::GroupSaml::MembershipUpdater do
       end
 
       it 'does not enqueue group sync' do
-        expect(GroupSamlGroupSyncWorker).not_to have_enqueued_sidekiq_job
+        expect(GroupSamlGroupSyncWorker).not_to receive(:perform_async)
       end
     end
 
     context 'when group sync is available' do
       before do
         stub_saml_group_sync_available(true)
-        group_link
-        subgroup_link
       end
 
       it 'enqueues group sync' do
-        update_membership
+        expect(GroupSamlGroupSyncWorker).to receive(:perform_async).with(user.id, group.id, match_array([group_link.id, subgroup_link.id]))
 
-        expect(GroupSamlGroupSyncWorker).to have_enqueued_sidekiq_job(user.id, group.id, match_array([group_link.id, subgroup_link.id]))
+        update_membership
       end
 
       context 'with a group link outside the top-level group' do
         before do
           create(:saml_group_link, saml_group_name: 'Developers', group: create(:group))
-          group_link
-          subgroup_link
         end
 
         it 'enqueues group sync without the outside group' do
-          update_membership
+          expect(GroupSamlGroupSyncWorker).to receive(:perform_async).with(user.id, group.id, match_array([group_link.id, subgroup_link.id]))
 
-          expect(GroupSamlGroupSyncWorker).to have_enqueued_sidekiq_job(user.id, group.id, match_array([group_link.id, subgroup_link.id]))
+          update_membership
         end
       end
     end

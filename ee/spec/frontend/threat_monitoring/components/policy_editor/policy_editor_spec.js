@@ -14,7 +14,7 @@ describe('PolicyEditor component', () => {
   const findFormSelect = () => wrapper.findComponent(GlFormSelect);
   const findNeworkPolicyEditor = () => wrapper.findComponent(NetworkPolicyEditor);
 
-  const factory = ({ propsData } = {}) => {
+  const factory = ({ propsData = {}, provide = {} } = {}) => {
     store = createStore();
 
     jest.spyOn(store, 'dispatch').mockImplementation(() => Promise.resolve());
@@ -25,18 +25,19 @@ describe('PolicyEditor component', () => {
         projectId: '21',
         ...propsData,
       },
+      provide,
       store,
       stubs: { GlFormSelect },
     });
   };
-
-  beforeEach(factory);
 
   afterEach(() => {
     wrapper.destroy();
   });
 
   describe('default', () => {
+    beforeEach(factory);
+
     it('renders the environment picker', () => {
       expect(findEnvironmentPicker().exists()).toBe(true);
     });
@@ -45,10 +46,23 @@ describe('PolicyEditor component', () => {
       const formSelect = findFormSelect();
       expect(formSelect.exists()).toBe(true);
       expect(formSelect.attributes('value')).toBe(POLICY_TYPES.networkPolicy.value);
+      expect(formSelect.attributes('disabled')).toBe('true');
     });
 
     it('renders the "NetworkPolicyEditor" component', () => {
       expect(findNeworkPolicyEditor().exists()).toBe(true);
+    });
+  });
+
+  describe('with "scanExecutionPolicyUi" feature flag enabled', () => {
+    beforeEach(() => {
+      factory({ provide: { glFeatures: { scanExecutionPolicyUi: true } } });
+    });
+
+    it('renders the form select', () => {
+      const formSelect = findFormSelect();
+      expect(formSelect.exists()).toBe(true);
+      expect(formSelect.attributes('disabled')).toBe(undefined);
     });
   });
 });

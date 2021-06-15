@@ -47,10 +47,9 @@ module Boards
         # before the epic being positioned. Epics w/o position are ordered
         # by ID in descending order so we need to set position for epics with
         # id >= from_id
-        list_params = { board_id: board_id, id: list_id, from_id: params[:from_id] }
+        list_params = { board_id: board_id, id: list_id, from_id: params[:from_id], exclude_positioned: true }
 
         Boards::Epics::ListService.new(parent, current_user, list_params).execute
-          .without_board_position(board_id)
           .select(:id)
           .limit(LIMIT)
       end

@@ -13,13 +13,13 @@ RSpec.describe Gitlab::Geo::LogCursor::Events::Event, :clean_gitlab_redis_shared
 
   describe "#process" do
     it "enqueues Geo::EventWorker" do
-      subject.process
-
-      expect(::Geo::EventWorker).to have_enqueued_sidekiq_job(
+      expect(::Geo::EventWorker).to receive(:perform_async).with(
         "package_file",
         "created",
         { "model_record_id" => replicable.id }
       )
+
+      subject.process
     end
 
     it "eventually calls Replicator#consume", :sidekiq_inline do

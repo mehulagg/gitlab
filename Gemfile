@@ -432,7 +432,6 @@ group :test do
   gem 'concurrent-ruby', '~> 1.1'
   gem 'test-prof', '~> 0.12.0'
   gem 'rspec_junit_formatter'
-  gem 'rspec-sidekiq'
   gem 'guard-rspec'
 
   # Moved in `test` because https://gitlab.com/gitlab-org/gitlab/-/issues/217527
@@ -482,6 +481,9 @@ gem 'spamcheck', '~> 0.1.0'
 
 # Gitaly GRPC protocol definitions
 gem 'gitaly', '~> 13.12.0.pre.rc1'
+
+# KAS GRPC protocol definitions
+gem 'kas-grpc', '~> 0.0.2'
 
 gem 'grpc', '~> 1.30.2'
 

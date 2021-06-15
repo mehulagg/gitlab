@@ -173,9 +173,9 @@ RSpec.describe Gitlab::Geo::LogCursor::Daemon, :clean_gitlab_redis_shared_state 
       it 'does not replay events for projects that do not belong to selected namespaces to replicate' do
         secondary.update!(selective_sync_type: 'namespaces', namespaces: [group_2])
 
-        daemon.find_and_handle_events!
+        expect(Geo::ProjectSyncWorker).not_to receive(:perform_async).with(project.id, anything)
 
-        expect(Geo::ProjectSyncWorker).not_to have_enqueued_sidekiq_job(project.id, anything)
+        daemon.find_and_handle_events!
       end
 
       it 'detects when an event was skipped' do
@@ -240,9 +240,9 @@ RSpec.describe Gitlab::Geo::LogCursor::Daemon, :clean_gitlab_redis_shared_state 
       it 'does not replay events for projects that do not belong to selected shards to replicate' do
         secondary.update!(selective_sync_type: 'shards', selective_sync_shards: ['broken'])
 
-        daemon.find_and_handle_events!
+        expect(Geo::ProjectSyncWorker).not_to receive(:perform_async).with(project.id, anything)
 
-        expect(Geo::ProjectSyncWorker).not_to have_enqueued_sidekiq_job(project.id, anything)
+        daemon.find_and_handle_events!
       end
     end
   end
