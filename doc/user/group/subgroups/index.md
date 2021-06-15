@@ -95,7 +95,7 @@ The setting can be changed for any group by:
 For:
 
 - More information, check the [permissions table](../../permissions.md#group-members-permissions).
-- A list of words that are not allowed to be used as group names see the
+- A list of words that are not allowed to be used as group names, see the
   [reserved names](../../reserved_names.md).
 
 Users can always create subgroups if they are explicitly added as an Owner (or
