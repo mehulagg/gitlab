@@ -179,9 +179,6 @@ The `address` must include the `+%{key}` placeholder within the 'user'
 portion of the address, before the `@`. This is used to identify the project 
 where the issue should be created.
 
-The default address on GitLab.com has the following format:
-`incoming-%{key}-issue-@incoming.gitlab.com`.
-
 NOTE:
 The `service_desk_email` and `incoming_email` configurations should
 always use separate mailboxes. This is important, because emails picked from
