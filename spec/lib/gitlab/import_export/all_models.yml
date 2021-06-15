@@ -485,7 +485,7 @@ project:
 - protected_environments
 - mirror_user
 - push_rule
-- jenkins_service
+- jenkins_integration
 - index_status
 - feature_usage
 - approval_rules
