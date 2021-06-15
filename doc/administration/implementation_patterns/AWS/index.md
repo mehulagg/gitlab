@@ -56,35 +56,40 @@ Note: Picking more of a smaller size instance allows scaling costs to be more gr
 
 Note: AWS Scaling speed from Idling to Full Scale took x minutes under gpt 10k loading.
 
-| Service                                                    | Advised <br />Nodes | Configuration                  | Total                        | Example Cost<br />US East       |
-| ---------------------------------------------------------- | ------------------- | ------------------------------ | ---------------------------- | ------------------------------- |
-|                                                            |                     |                                |                              |                                 |
-| **AWS Aurora RDS PostgreSQL (GitLab Data)** which handles: |                     |                                |                              |                                 |
-| - PostgreSQL(1)                                            | 3                   | 8 vCPU, 30 GB memory           | 24vCPU, 90 GB                | m5.2xlarge $0.38 x 3 = $1.14/hr |
-| - PgBouncer(1)                                             | 3                   | 2 vCPU, 1.8 GB memory          | 6vCPU, 5.4 GB                | M5.xlarge: $0.19 x 3 = $0.57/hr |
-| - Consul(1)                                                | 3                   | 2 vCPU, 1.8 GB memory          | 6vCPU, 5.4 GB                | Combined with PgBouncer         |
-| - Ref Arch Total                                           | 9                   |                                | 36vCPU, 100 GB               | $1.73/hr (non-managed)          |
-| Aurora RDS Nodes Configuration (GPT tested)                | 3                   | db.r5.2xlarge (8vCPU, 64 GB)   | 24vCPU, 192 GB               | $1.16 x 3 = $3.48/hr            |
-|                                                            |                     |                                |                              |                                 |
-| **AWS Elasticache Redis** which handles:                   |                     |                                |                              |                                 |
-| - Redis - Cache(2)                                         | 3                   | 4 vCPU, 15 GB memory           | 12vCPU, 45GB                 | M5.xlarge: $0.19 x 3 = $0.57/hr |
-| - Redis - Queues / Shared State(2)                         | 3                   | 4 vCPU, 15 GB memory           | 12vCPU, 45GB                 | M5.xlarge: $0.19 x 3 = $0.57/hr |
-| - Redis Sentinel - Cache(2)                                | 3                   | 1 vCPU, 3.75 GB memory         | 3vCPU, 12GB                  | M5.xlarge: $0.19 x 3 = $0.57/hr |
-| - Redis Sentinel - Queues / Shared State(2)                | 3                   | 1 vCPU, 3.75 GB memory         | 3vCPU, 12GB                  | Combined with Sentinel - Cache  |
-| - Ref Arch Total                                           | 12                  |                                | 30vCPU, 114GB                | $1.71/hr (non-managed)          |
-| Redis Elasticache Configuration (GPT Tested)               | 3                   | cache.m5.xlarge (4vCPU, 13 GB) | 12vCPU, 40GB                 | $0.31 x 3 = $0.93/hr            |
-|                                                            |                     |                                |                              |                                 |
-| **Gitaly Cluster (Git file system) on Instance Compute**   |                     |                                |                              |                                 |
-| Gitaly (Instance in an ASG)                                | 3                   | 16 vCPU, 60 GB memory          | m5.4xlarge                   | $0.77 x 3 = $2.31/hr            |
-| - EBS Volume size per Gitaly Node (Git file system)        |                     | See below.                     |                              |                                 |
-| Praefect (Instances in ASG with load balancer)             | 3                   | 2 vCPU, 1.8 GB memory          | c5.large                     | $0.09 x 3 = $0.21/hr            |
-| Praefect PostgreSQL(1) [AWS RDS]                           | 3                   | 2 vCPU, 1.8 GB memory          | c5.large                     | $0.09 x 3 = $0.21/hr            |
-| Internal load balancing node(3) [ELB]                      | 1                   | 2 vCPU, 1.8 GB memory          | c5.large <br />(ELB for AWS) | $0.09 x 3 = $0.21/hr            |
-| - Ref Arch total                                           | 10                  |                                |                              | $2.94/hr                        |
-| AWS total                                                  | 9                   |                                |                              | $2.73/hr + $15/mon              |
-|                                                            |                     |                                |                              |                                 |
-| All Non-Git Storage Subsystems (but does include LFS)      |                     |                                |                              |                                 |
-| - AWS S3                                                   | n/a                 | n/a                            | n/a                          |                                 |
+| Service                                                      | Advised <br />Nodes | Configuration                  | Total                        | Example Cost<br />US East       |
+| ------------------------------------------------------------ | ------------------- | ------------------------------ | ---------------------------- | ------------------------------- |
+|                                                              |                     |                                |                              |                                 |
+| **PostgreSQL (GitLab Data)**                                 |                     |                                |                              |                                 |
+| **Total:** Aurora RDS Nodes Configuration (GPT tested)       | 3                   | db.r5.2xlarge (8vCPU, 64 GB)   | 24vCPU, 192 GB               | $1.16 x 3 = $3.48/hr            |
+| **Total:** Reference Architecture VM Specification on AWS, consisting of (add up below rows): | 9                   |                                | 36vCPU, 100 GB               | $1.73/hr (non-managed)          |
+| - PostgreSQL(1)                                              | 3                   | 8 vCPU, 30 GB memory           | 24vCPU, 90 GB                | m5.2xlarge $0.38 x 3 = $1.14/hr |
+| - PgBouncer(1)                                               | 3                   | 2 vCPU, 1.8 GB memory          | 6vCPU, 5.4 GB                | M5.xlarge: $0.19 x 3 = $0.57/hr |
+| - Consul(1)                                                  | 3                   | 2 vCPU, 1.8 GB memory          | 6vCPU, 5.4 GB                | Combined with PgBouncer         |
+|                                                              |                     |                                |                              |                                 |
+| **Redis**                                                    |                     |                                |                              |                                 |
+| **Total:** Redis Elasticache Configuration (GPT Tested)      | 3                   | cache.m5.xlarge (4vCPU, 13 GB) | 12vCPU, 40GB                 | $0.31 x 3 = $0.93/hr            |
+| **Total:** Reference Architecture VM Specification on AWS, consisting of (add up below rows): | 12                  |                                | 30vCPU, 114GB                | $1.71/hr (non-managed)          |
+| - Redis - Cache(2)                                           | 3                   | 4 vCPU, 15 GB memory           | 12vCPU, 45GB                 | M5.xlarge: $0.19 x 3 = $0.57/hr |
+| - Redis - Queues / Shared State(2)                           | 3                   | 4 vCPU, 15 GB memory           | 12vCPU, 45GB                 | M5.xlarge: $0.19 x 3 = $0.57/hr |
+| - Redis Sentinel - Cache(2)                                  | 3                   | 1 vCPU, 3.75 GB memory         | 3vCPU, 12GB                  | M5.xlarge: $0.19 x 3 = $0.57/hr |
+| - Redis Sentinel - Queues / Shared State(2)                  | 3                   | 1 vCPU, 3.75 GB memory         | 3vCPU, 12GB                  | Combined with Sentinel - Cache  |
+|                                                              |                     |                                |                              |                                 |
+| **Gitaly Cluster (Git file system) on Instance Compute**     |                     |                                |                              |                                 |
+| AWS total                                                    | 9                   |                                |                              | $2.73/hr + $15/mon              |
+| Ref Arch total, consisting of:                               | 10                  |                                |                              | $2.94/hr                        |
+| Gitaly (Instance in an ASG)                                  | 3                   | 16 vCPU, 60 GB memory          | m5.4xlarge                   | $0.77 x 3 = $2.31/hr            |
+| Praefect (Instances in ASG with load balancer)               | 3                   | 2 vCPU, 1.8 GB memory          | c5.large                     | $0.09 x 3 = $0.21/hr            |
+| Praefect PostgreSQL(1) [AWS RDS]                             | 3                   | 2 vCPU, 1.8 GB memory          | c5.large                     | $0.09 x 3 = $0.21/hr            |
+| Internal load balancing node(3) [ELB]                        | 1                   | 2 vCPU, 1.8 GB memory          | c5.large <br />(ELB for AWS) | $0.09 x 3 = $0.21/hr            |
+|                                                              |                     |                                |                              |                                 |
+| All Non-Git Storage Subsystems (but does include LFS)        |                     |                                |                              |                                 |
+| - AWS S3                                                     | n/a                 | n/a                            | n/a                          |                                 |
+|                                                              |                     |                                |                              |                                 |
+| **Components Not Covered in Reference Architectures**        |                     |                                |                              |                                 |
+| **Outbound Email Services** => AWS Simple Email Service (SES) (tested) |                     |                                |                              |                                 |
+| **Certificate Authority and Management** => AWS Certificate Manager (ACM) (tested) |                     |                                |                              |                                 |
+| **DNS Services** => AWS Route53 (managed DNS) (tested)       |                     |                                |                              |                                 |
+|                                                              |                     |                                |                              |                                 |
 
 ### 10K Cloud Native Hybrid on EKS Test Results 
 

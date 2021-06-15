@@ -76,8 +76,7 @@ For example:
 
 - [Amazon Web Service (AWS)](./AWS/index.md) - MVC of this type of documentation.
 - Google Cloud (GCP) (Coming Soon)
-- Microsoft Azure (Azure) (Coming Soon)
-- IBM
+- IBM (Coming Soon)
 
 ### Audiences and Contributors
 
