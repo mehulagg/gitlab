@@ -46,6 +46,7 @@ describe('Grouped security reports app', () => {
   const findSpinner = () => wrapper.find('.gl-spinner');
   const findSecretScanReport = () => wrapper.find('[data-testid="secret-scan-report"]');
   const findViewFullReportButton = () => wrapper.find('.report-btn');
+  const findDastJobLink = () => wrapper.find('[data-testid="dast-ci-job-link"]');
 
   const props = {
     headBlobPath: 'path',
@@ -535,7 +536,7 @@ describe('Grouped security reports app', () => {
     });
 
     it('shows the scanned URLs count and opens a modal', async () => {
-      const jobLink = wrapper.find('[data-testid="dast-ci-job-link"]');
+      const jobLink = findDastJobLink();
 
       expect(wrapper.text()).toContain('211 URLs scanned');
       expect(jobLink.exists()).toBe(true);
@@ -576,7 +577,7 @@ describe('Grouped security reports app', () => {
 
       return waitForMutation(wrapper.vm.$store, types.RECEIVE_DAST_DIFF_SUCCESS).then(() => {
         expect(wrapper.text()).not.toContain('0 URLs scanned');
-        expect(wrapper.find('[data-testid="dast-ci-job-link"]').exists()).toBe(false);
+        expect(findDastJobLink().exists()).toBe(false);
       });
     });
 
