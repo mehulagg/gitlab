@@ -63,7 +63,7 @@ To create an iteration:
 ## View the iterations list
 
 To view the iterations list, go to **{issues}** **Issues > Iterations**.
-Select an iteration cadence to view all the iterations in that cadence, ordered by descending date.
+To view all the iterations in a cadence, ordered by descending date, select that iteration cadence.
 From there you can create a new iteration or select an iteration to get a more detailed view.
 
 ## Create an iteration
