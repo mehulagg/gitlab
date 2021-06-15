@@ -11,9 +11,9 @@ module ApprovalRules
     tags :exclude_from_kubernetes
 
     def perform(rule_id, data)
-      rule = ApprovalRules::ExternalApprovalRule.find(rule_id)
+      rule = MergeRequests::ExternalStatusCheck.find(rule_id)
 
-      ExternalApprovalRules::DispatchService.new(rule, data).execute
+      ExternalStatusChecks::DispatchService.new(rule, data).execute
     end
   end
 end

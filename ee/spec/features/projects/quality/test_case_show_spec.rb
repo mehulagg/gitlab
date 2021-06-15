@@ -33,7 +33,7 @@ RSpec.describe 'Test Cases', :js do
       end
 
       it 'shows action buttons' do
-        page.within('.test-case-container .detail-page-header-actions') do
+        page.within('.test-case-container .detail-page-header') do
           expect(page).to have_selector('.dropdown', visible: false)
           expect(page).to have_button('Archive test case')
           expect(page).to have_link('New test case', href: new_project_quality_test_case_path(project))

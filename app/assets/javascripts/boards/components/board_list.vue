@@ -5,6 +5,7 @@ import { mapActions, mapGetters, mapState } from 'vuex';
 import { sortableStart, sortableEnd } from '~/boards/mixins/sortable_default_options';
 import { sprintf, __ } from '~/locale';
 import defaultSortableConfig from '~/sortable/sortable_config';
+import Tracking from '~/tracking';
 import eventHub from '../eventhub';
 import BoardCard from './board_card.vue';
 import BoardNewIssue from './board_new_issue.vue';
@@ -23,6 +24,12 @@ export default {
     GlLoadingIcon,
     GlIntersectionObserver,
   },
+  mixins: [Tracking.mixin()],
+  inject: {
+    canAdminList: {
+      default: false,
+    },
+  },
   props: {
     disabled: {
       type: Boolean,
@@ -35,11 +42,6 @@ export default {
     boardItems: {
       type: Array,
       required: true,
-    },
-    canAdminList: {
-      type: Boolean,
-      required: false,
-      default: false,
     },
   },
   data() {
@@ -111,10 +113,17 @@ export default {
         this.showCount = this.scrollHeight() > Math.ceil(this.listHeight());
       });
     },
-  },
-  created() {
-    eventHub.$on(`toggle-issue-form-${this.list.id}`, this.toggleForm);
-    eventHub.$on(`scroll-board-list-${this.list.id}`, this.scrollToTop);
+    'list.id': {
+      handler(id, oldVal) {
+        if (id) {
+          eventHub.$on(`toggle-issue-form-${this.list.id}`, this.toggleForm);
+          eventHub.$on(`scroll-board-list-${this.list.id}`, this.scrollToTop);
+          eventHub.$off(`toggle-issue-form-${oldVal}`, this.toggleForm);
+          eventHub.$off(`scroll-board-list-${oldVal}`, this.scrollToTop);
+        }
+      },
+      immediate: true,
+    },
   },
   beforeDestroy() {
     eventHub.$off(`toggle-issue-form-${this.list.id}`, this.toggleForm);
@@ -148,6 +157,7 @@ export default {
     },
     handleDragOnStart() {
       sortableStart();
+      this.track('drag_card', { label: 'board' });
     },
     handleDragOnEnd(params) {
       sortableEnd();

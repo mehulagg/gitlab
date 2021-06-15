@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe Gitlab::Elastic::ProjectSearchResults, :elastic do
+RSpec.describe Gitlab::Elastic::ProjectSearchResults, :elastic, :clean_gitlab_redis_shared_state do
   let_it_be(:user) { create(:user) }
   let_it_be(:project) { create(:project, :public, :repository) }
 

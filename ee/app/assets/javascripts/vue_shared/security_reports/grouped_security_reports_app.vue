@@ -1,5 +1,11 @@
 <script>
-import { GlButton, GlSprintf, GlLink, GlModalDirective } from '@gitlab/ui';
+import {
+  GlButton,
+  GlSprintf,
+  GlLink,
+  GlModalDirective,
+  GlTooltipDirective as GlTooltip,
+} from '@gitlab/ui';
 import { once } from 'lodash';
 import { mapActions, mapState, mapGetters } from 'vuex';
 import { componentNames } from 'ee/reports/components/issue_body';
@@ -10,8 +16,8 @@ import ReportSection from '~/reports/components/report_section.vue';
 import SummaryRow from '~/reports/components/summary_row.vue';
 import { LOADING } from '~/reports/constants';
 import Tracking from '~/tracking';
+import MergeRequestArtifactDownload from '~/vue_shared/security_reports/components/artifact_downloads/merge_request_artifact_download.vue';
 import SecuritySummary from '~/vue_shared/security_reports/components/security_summary.vue';
-import MrArtifactDownload from './components/artifact_downloads/merge_request_artifact_download.vue';
 import DastModal from './components/dast_modal.vue';
 import IssueModal from './components/modal.vue';
 import { securityReportTypeEnumToReportType } from './constants';
@@ -33,7 +39,7 @@ import {
 export default {
   store: createStore(),
   components: {
-    MrArtifactDownload,
+    MergeRequestArtifactDownload,
     GroupedIssuesList,
     ReportSection,
     SummaryRow,
@@ -46,6 +52,7 @@ export default {
   },
   directives: {
     'gl-modal': GlModalDirective,
+    GlTooltip,
   },
   mixins: [securityReportsMixin, vulnerabilityModalMixin()],
   apollo: {
@@ -607,14 +614,16 @@ export default {
               />
             </template>
             <template v-else-if="dastDownloadLink">
-              <gl-link
+              <gl-button
+                v-gl-tooltip
+                :title="s__('SecurityReports|Download scanned resources')"
                 download
+                size="small"
+                icon="download"
                 :href="dastDownloadLink"
                 class="gl-ml-1"
                 data-testid="download-link"
-              >
-                ({{ s__('SecurityReports|Download scanned resources') }})
-              </gl-link>
+              />
             </template>
           </summary-row>
           <grouped-issues-list
@@ -661,7 +670,7 @@ export default {
             <template #summary>
               <security-summary :message="groupedCoverageFuzzingText" />
             </template>
-            <mr-artifact-download
+            <merge-request-artifact-download
               v-if="shouldShowDownloadGuidance"
               :report-types="$options.reportTypes.COVERAGE_FUZZING"
               :target-project-full-path="targetProjectFullPath"
@@ -691,7 +700,7 @@ export default {
               <security-summary :message="groupedApiFuzzingText" />
             </template>
 
-            <mr-artifact-download
+            <merge-request-artifact-download
               v-if="shouldShowDownloadGuidance"
               :report-types="$options.reportTypes.API_FUZZING"
               :target-project-full-path="targetProjectFullPath"

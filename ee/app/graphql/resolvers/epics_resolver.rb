@@ -41,6 +41,11 @@ module Resolvers
              required: false,
              description: 'Filter epics by IID for autocomplete.'
 
+    argument :include_ancestor_groups, GraphQL::BOOLEAN_TYPE,
+             required: false,
+             description: 'Include epics from ancestor groups.',
+             default_value: false
+
     argument :include_descendant_groups, GraphQL::BOOLEAN_TYPE,
              required: false,
              description: 'Include epics from descendant groups.',
@@ -102,10 +107,15 @@ module Resolvers
     def transform_args(args)
       transformed               = args.dup
       transformed[:group_id]    = group
-      transformed[:parent_id]   = parent.id if parent
       transformed[:iids]      ||= [args[:iid]].compact
 
-      transformed
+      transformed.merge(transform_timeframe_parameters(args)).merge(relative_param)
+    end
+
+    def relative_param
+      return {} unless parent
+
+      { parent_id: parent.id }
     end
 
     # `resolver_object` refers to the object we're currently querying on, and is usually a `Group`

@@ -37,7 +37,7 @@ const TEST_RULE_RESPONSE = {
 };
 const TEST_SETTINGS_PATH = 'projects/9/approval_settings';
 const TEST_RULES_PATH = 'projects/9/approval_settings/rules';
-const TEST_EXTERNAL_RULES_PATH = 'projects/9/external_approval_rules';
+const TEST_EXTERNAL_RULES_PATH = 'projects/9/external_status_checks';
 
 describe('EE approvals project settings module actions', () => {
   let state;

@@ -3,7 +3,9 @@ import { GlModal, GlAlert } from '@gitlab/ui';
 import { set } from 'lodash';
 import { s__, __ } from '~/locale';
 import { addEscalationPolicyModalId } from '../constants';
+import { updateStoreOnEscalationPolicyCreate } from '../graphql/cache_updates';
 import createEscalationPolicyMutation from '../graphql/mutations/create_escalation_policy.mutation.graphql';
+import getEscalationPoliciesQuery from '../graphql/queries/get_escalation_policies.query.graphql';
 import { isNameFieldValid, getRulesValidationState } from '../utils';
 import AddEditEscalationPolicyForm from './add_edit_escalation_policy_form.vue';
 
@@ -85,6 +87,11 @@ export default {
               projectPath,
               ...this.getRequestParams(),
             },
+          },
+          update(store, { data }) {
+            updateStoreOnEscalationPolicyCreate(store, getEscalationPoliciesQuery, data, {
+              projectPath,
+            });
           },
         })
         .then(

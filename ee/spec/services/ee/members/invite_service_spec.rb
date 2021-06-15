@@ -9,7 +9,7 @@ RSpec.describe Members::InviteService, :aggregate_failures do
   let_it_be(:subgroup) { create(:group, parent: root_ancestor) }
   let_it_be(:subgroup_project) { create(:project, group: subgroup) }
 
-  let(:base_params) { { access_level: Gitlab::Access::GUEST, source: project } }
+  let(:base_params) { { access_level: Gitlab::Access::GUEST, source: project, invite_source: '_invite_source_' } }
   let(:params) { { email: %w[email@example.org email2@example.org] } }
 
   subject(:result) { described_class.new(user, base_params.merge(params)).execute }

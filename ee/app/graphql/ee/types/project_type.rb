@@ -146,7 +146,7 @@ module EE
               resolver: ::Resolvers::IncidentManagement::EscalationPoliciesResolver.single
 
         field :api_fuzzing_ci_configuration,
-              ::Types::AppSec::Fuzzing::Api::CiConfigurationType,
+              ::Types::AppSec::Fuzzing::API::CiConfigurationType,
               null: true,
               description: 'API fuzzing configuration for the project. '
 
@@ -174,10 +174,10 @@ module EE
       def api_fuzzing_ci_configuration
         return unless Ability.allowed?(current_user, :read_security_resource, object)
 
-        configuration = ::AppSec::Fuzzing::Api::CiConfiguration.new(project: object)
+        configuration = ::AppSec::Fuzzing::API::CiConfiguration.new(project: object)
 
         {
-          scan_modes: ::AppSec::Fuzzing::Api::CiConfiguration::SCAN_MODES,
+          scan_modes: ::AppSec::Fuzzing::API::CiConfiguration::SCAN_MODES,
           scan_profiles: configuration.scan_profiles
         }
       end

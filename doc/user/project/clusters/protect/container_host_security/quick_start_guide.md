@@ -4,7 +4,7 @@ group: Container Security
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
 ---
 
-# Getting started with Container Host Security
+# Getting started with Container Host Security **(FREE)**
 
 The following steps are recommended for installing Container Host Security.
 
@@ -20,7 +20,6 @@ The following steps are recommended to install and use Container Host Security t
 1. Install and configure an Ingress node:
 
    - [Install the Ingress node via CI/CD (Cluster Management Project)](../../../../clusters/applications.md#install-ingress-using-gitlab-cicd).
-   - [Determine the external endpoint via the manual method](../../../../clusters/applications.md#determining-the-external-endpoint-manually).
    - Navigate to the Kubernetes page and enter the [DNS address for the external endpoint](../../index.md#base-domain)
      into the **Base domain** field on the **Details** tab. Save the changes to the Kubernetes
      cluster.

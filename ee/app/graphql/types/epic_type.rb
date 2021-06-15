@@ -149,6 +149,12 @@ module Types
           null: true,
           description: 'A list of award emojis associated with the epic.'
 
+    field :ancestors, Types::EpicType.connection_type,
+          null: true,
+          complexity: 5,
+          resolver: ::Resolvers::EpicAncestorsResolver,
+          description: 'Ancestors (parents) of the epic.'
+
     def has_children?
       Gitlab::Graphql::Aggregations::Epics::LazyEpicAggregate.new(context, object.id, COUNT) do |node, _aggregate_object|
         node.children.any?

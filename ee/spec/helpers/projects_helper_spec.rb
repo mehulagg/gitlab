@@ -374,7 +374,7 @@ RSpec.describe ProjectsHelper do
           stub_feature_flags(ff_compliance_approval_gates: feature_flag_enabled)
         end
 
-        it 'includes external_approval_rules_path only when enabled' do
+        it 'includes external_status_checks_path only when enabled' do
           expect(subject[:data].key?(:external_approval_rules_path)).to eq(feature_flag_enabled)
         end
       end
@@ -387,7 +387,7 @@ RSpec.describe ProjectsHelper do
     it 'returns the correct data' do
       expect(subject[:data]).to eq({
         project_id: project.id,
-        status_checks_path: expose_path(api_v4_projects_external_approval_rules_path(id: project.id))
+        status_checks_path: expose_path(api_v4_projects_external_status_checks_path(id: project.id))
       })
     end
   end

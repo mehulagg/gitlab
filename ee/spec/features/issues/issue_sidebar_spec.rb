@@ -135,39 +135,93 @@ RSpec.describe 'Issue Sidebar' do
 
   context 'Iterations', :js do
     context 'when iterations feature available' do
-      let_it_be(:iteration) { create(:iteration, group: group, start_date: 1.day.from_now, due_date: 2.days.from_now, title: 'Iteration 1') }
-      let_it_be(:iteration2) { create(:iteration, group: group, start_date: 2.days.ago, due_date: 1.day.ago, title: 'Iteration 2', state: 'closed', skip_future_date_validation: true) }
+      let_it_be(:iteration_cadence) { create(:iterations_cadence, group: group, active: true) }
+      let_it_be(:iteration) { create(:iteration, iterations_cadence: iteration_cadence, group: group, start_date: 1.day.from_now, due_date: 2.days.from_now) }
+      let_it_be(:iteration2) { create(:iteration, iterations_cadence: iteration_cadence, group: group, start_date: 2.days.ago, due_date: 1.day.ago, state: 'closed', skip_future_date_validation: true) }
 
       before do
-        iteration
         stub_licensed_features(iterations: true)
 
         project.add_developer(user)
-
-        visit_issue(project, issue)
-
-        wait_for_all_requests
       end
 
-      it 'selects and updates the right iteration' do
-        find_and_click_edit_iteration
+      context 'when `iteration_cadences` feature flag is off' do
+        before do
+          stub_feature_flags(iteration_cadences: false)
 
-        select_iteration(iteration.title)
+          visit_issue(project, issue)
 
-        expect(page.find('[data-testid="select-iteration"]')).to have_content('Iteration 1')
+          wait_for_all_requests
+        end
 
-        find_and_click_edit_iteration
+        it 'selects and updates the right iteration', :aggregate_failures do
+          find_and_click_edit_iteration
 
-        select_iteration('No iteration')
+          within '[data-testid="iteration-edit"]' do
+            expect(page).not_to have_text(iteration_cadence.title)
+            expect(page).to have_text(iteration.title)
+          end
 
-        expect(page.find('[data-testid="select-iteration"]')).to have_content('None')
+          select_iteration(iteration.title)
+
+          within '[data-testid="select-iteration"]' do
+            expect(page).not_to have_text(iteration_cadence.title)
+            expect(page).to have_text(iteration.title)
+          end
+
+          find_and_click_edit_iteration
+
+          select_iteration('No iteration')
+
+          expect(page.find('[data-testid="select-iteration"]')).to have_content('None')
+        end
+
+        it 'does not show closed iterations' do
+          find_and_click_edit_iteration
+
+          page.within '[data-testid="iteration-edit"]' do
+            expect(page).not_to have_content iteration2.title
+          end
+        end
       end
 
-      it 'does not show closed iterations' do
-        find_and_click_edit_iteration
+      context 'when `iteration_cadences` feature flag is on' do
+        before do
+          stub_feature_flags(iteration_cadences: true)
 
-        page.within '.milestone' do
-          expect(page).not_to have_content iteration2.title
+          visit_issue(project, issue)
+
+          wait_for_all_requests
+        end
+
+        it 'selects and updates the right iteration', :aggregate_failures do
+          find_and_click_edit_iteration
+
+          within '[data-testid="iteration-edit"]' do
+            expect(page).to have_text(iteration_cadence.title)
+            expect(page).to have_text(iteration.title)
+          end
+
+          select_iteration(iteration.title)
+
+          within '[data-testid="select-iteration"]' do
+            expect(page).to have_text(iteration_cadence.title)
+            expect(page).to have_text(iteration.title)
+          end
+
+          find_and_click_edit_iteration
+
+          select_iteration('No iteration')
+
+          expect(page.find('[data-testid="select-iteration"]')).to have_content('None')
+        end
+
+        it 'does not show closed iterations' do
+          find_and_click_edit_iteration
+
+          page.within '[data-testid="iteration-edit"]' do
+            expect(page).not_to have_content iteration2.title
+          end
         end
       end
     end

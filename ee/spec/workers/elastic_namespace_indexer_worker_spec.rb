@@ -18,7 +18,7 @@ RSpec.describe ElasticNamespaceIndexerWorker do
     end
   end
 
-  context 'when ES is enabled', :elastic do
+  context 'when ES is enabled', :elastic, :clean_gitlab_redis_shared_state do
     before do
       stub_ee_application_setting(elasticsearch_indexing: true)
       stub_ee_application_setting(elasticsearch_limit_indexing: true)

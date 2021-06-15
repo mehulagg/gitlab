@@ -50,6 +50,8 @@ RSpec.describe Geo::SecondaryUsageData, :geo, type: :model do
       allow_next_instance_of(described_class) do |instance|
         allow(instance).to receive(:with_prometheus_client).and_yield(prometheus_client)
       end
+
+      allow(prometheus_client).to receive(:query).and_return([])
     end
 
     context 'metric git_fetch_event_count_weekly' do
@@ -66,7 +68,7 @@ RSpec.describe Geo::SecondaryUsageData, :geo, type: :model do
       end
 
       it 'returns nil if metric is unavailable' do
-        expect(prometheus_client).to receive(:query).with(Geo::SecondaryUsageData::GIT_FETCH_EVENT_COUNT_WEEKLY_QUERY).and_return([])
+        allow(prometheus_client).to receive(:query).with(Geo::SecondaryUsageData::GIT_FETCH_EVENT_COUNT_WEEKLY_QUERY).and_return([])
 
         expect do
           described_class.update_metrics!
@@ -87,6 +89,44 @@ RSpec.describe Geo::SecondaryUsageData, :geo, type: :model do
 
         expect(described_class.last).to be_valid
         expect(described_class.last.git_fetch_event_count_weekly).to be_nil
+      end
+    end
+
+    context 'metric git_push_event_count_weekly' do
+      it 'gets metrics from prometheus' do
+        expected_result = 48
+        allow(prometheus_client).to receive(:query).with(Geo::SecondaryUsageData::GIT_PUSH_EVENT_COUNT_WEEKLY_QUERY).and_return([{ "value" => [1614029769.82, expected_result.to_s] }])
+
+        expect do
+          described_class.update_metrics!
+        end.to change { described_class.count }.by(1)
+
+        expect(described_class.last).to be_valid
+        expect(described_class.last.git_push_event_count_weekly).to eq(expected_result)
+      end
+
+      it 'returns nil if metric is unavailable' do
+        allow(prometheus_client).to receive(:query).with(Geo::SecondaryUsageData::GIT_PUSH_EVENT_COUNT_WEEKLY_QUERY).and_return([])
+
+        expect do
+          described_class.update_metrics!
+        end.to change { described_class.count }.by(1)
+
+        expect(described_class.last).to be_valid
+        expect(described_class.last.git_push_event_count_weekly).to be_nil
+      end
+
+      it 'returns nil if it cannot reach prometheus' do
+        expect_next_instance_of(described_class) do |instance|
+          expect(instance).to receive(:with_prometheus_client).and_return(nil)
+        end
+
+        expect do
+          described_class.update_metrics!
+        end.to change { described_class.count }.by(1)
+
+        expect(described_class.last).to be_valid
+        expect(described_class.last.git_push_event_count_weekly).to be_nil
       end
     end
   end

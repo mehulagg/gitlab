@@ -4,21 +4,16 @@ require 'spec_helper'
 
 RSpec.describe 'Show trial banner', :js do
   include StubRequests
+  include SubscriptionPortalHelpers
 
   let!(:user) { create(:user) }
   let!(:group) { create(:group) }
   let!(:ultimate_plan) { create(:ultimate_plan) }
-  let(:plans_data) do
-    Gitlab::Json.parse(File.read(Rails.root.join('ee/spec/fixtures/gitlab_com_plans.json'))).map do |data|
-      data.deep_symbolize_keys
-    end
-  end
 
   before do
     stub_application_setting(check_namespace_plan: true)
     allow(Gitlab).to receive(:com?).and_return(true).at_least(:once)
-    stub_full_request("#{EE::SUBSCRIPTIONS_URL}/gitlab_plans?plan=free&namespace_id=#{namespace_id}")
-      .to_return(status: 200, body: plans_data.to_json)
+    stub_billing_plans(namespace_id)
 
     group.add_owner(user)
     create(:gitlab_subscription, namespace: user.namespace, hosted_plan: ultimate_plan, trial: true, trial_ends_on: Date.current + 1.month)

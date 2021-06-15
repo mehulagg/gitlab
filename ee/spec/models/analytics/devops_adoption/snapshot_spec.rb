@@ -10,14 +10,14 @@ RSpec.describe Analytics::DevopsAdoption::Snapshot, type: :model do
   it { is_expected.to validate_presence_of(:end_time) }
 
   describe '.latest_snapshot_for_namespace_ids' do
-    it 'returns the latest snapshot for the given namespace ids based on snapshot end_time' do
+    it 'returns the latest finalized snapshot for the given namespace ids based on snapshot end_time' do
       group1 = create(:group)
-      group1_latest_snapshot = create(:devops_adoption_snapshot, namespace: group1, end_time: 1.week.ago)
-      create(:devops_adoption_snapshot, namespace: group1, end_time: 2.weeks.ago)
+      group1_latest_snapshot = create(:devops_adoption_snapshot, namespace: group1, end_time: 1.week.ago, recorded_at: 1.day.ago)
+      create(:devops_adoption_snapshot, namespace: group1, end_time: 2.weeks.ago, recorded_at: 1.day.ago)
 
       group2 = create(:group)
-      group2_latest_snapshot = create(:devops_adoption_snapshot, namespace: group2, end_time: 1.year.ago)
-      create(:devops_adoption_snapshot, namespace: group2, end_time: 2.years.ago)
+      group2_latest_snapshot = create(:devops_adoption_snapshot, namespace: group2, end_time: 1.year.ago, recorded_at: 1.day.ago)
+      create(:devops_adoption_snapshot, namespace: group2, end_time: 2.years.ago, recorded_at: 1.day.ago)
 
       latest_snapshots = described_class.latest_snapshot_for_namespace_ids([group1.id, group2.id])
 
@@ -43,6 +43,38 @@ RSpec.describe Analytics::DevopsAdoption::Snapshot, type: :model do
       create(:devops_adoption_snapshot, recorded_at: 1.day.ago, end_time: 2.days.ago)
 
       expect(described_class.not_finalized).to match_array([snapshot1])
+    end
+  end
+
+  describe '.finalized' do
+    it 'returns all snapshots which were recorded later than snapshot end_time' do
+      create(:devops_adoption_snapshot, recorded_at: 1.day.ago, end_time: Time.zone.now)
+      snapshot1 = create(:devops_adoption_snapshot, recorded_at: 1.day.ago, end_time: 2.days.ago)
+
+      expect(described_class.finalized).to match_array([snapshot1])
+    end
+  end
+
+  describe '.for_timespan' do
+    let_it_be(:first_date) { DateTime.parse('2021-05-10').end_of_month }
+    let_it_be(:snapshot1) { create(:devops_adoption_snapshot, recorded_at: 1.day.ago, end_time: first_date)}
+    let_it_be(:snapshot2) { create(:devops_adoption_snapshot, recorded_at: 1.day.ago, end_time: first_date + 1.month)}
+    let_it_be(:snapshot3) { create(:devops_adoption_snapshot, recorded_at: 1.day.ago, end_time: first_date + 2.months)}
+
+    it 'returns snapshots for given timespan', :aggregate_failures do
+      expect(described_class.for_timespan(to: first_date + 1.week)).to match_array([snapshot1])
+      expect(described_class.for_timespan(from: first_date + 1.week)).to match_array([snapshot2, snapshot3])
+      expect(described_class.for_timespan(from: first_date + 1.week, to: first_date + 40.days)).to match_array([snapshot2])
+    end
+  end
+
+  describe '.for_namespaces' do
+    it 'returns all snapshots with given namespaces' do
+      snapshot1 = create(:devops_adoption_snapshot)
+      snapshot2 = create(:devops_adoption_snapshot)
+      create(:devops_adoption_snapshot)
+
+      expect(described_class.for_namespaces([snapshot1.namespace, snapshot2.namespace])).to match_array([snapshot1, snapshot2])
     end
   end
 

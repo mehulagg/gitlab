@@ -1,6 +1,6 @@
 export const mockIterationNode = {
   description: 'some description',
-  descriptionHtml: '<p></p>',
+  descriptionHtml: '<p>some description</p>',
   dueDate: '2021-02-17',
   id: 'gid://gitlab/Iteration/4',
   iid: '1',

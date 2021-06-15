@@ -2,7 +2,12 @@
 
 query issueEpics($fullPath: ID!, $title: String, $state: EpicState) {
   workspace: group(fullPath: $fullPath) {
-    attributes: epics(search: $title, state: $state) {
+    attributes: epics(
+      search: $title
+      state: $state
+      includeAncestorGroups: true
+      includeDescendantGroups: false
+    ) {
       nodes {
         ...EpicFragment
         state

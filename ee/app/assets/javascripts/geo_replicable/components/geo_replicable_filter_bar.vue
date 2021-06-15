@@ -1,16 +1,38 @@
 <script>
-import { GlSearchBoxByType, GlDropdown, GlDropdownItem, GlButton } from '@gitlab/ui';
+import {
+  GlSearchBoxByType,
+  GlDropdown,
+  GlDropdownItem,
+  GlButton,
+  GlModal,
+  GlSprintf,
+  GlModalDirective,
+} from '@gitlab/ui';
 import { mapActions, mapState, mapGetters } from 'vuex';
-import { __, sprintf } from '~/locale';
-import { DEFAULT_SEARCH_DELAY, ACTION_TYPES, FILTER_STATES } from '../constants';
+import { s__, __, sprintf } from '~/locale';
+import { DEFAULT_SEARCH_DELAY, ACTION_TYPES, FILTER_STATES, RESYNC_MODAL_ID } from '../constants';
 
 export default {
   name: 'GeoReplicableFilterBar',
+  i18n: {
+    resyncAll: s__('Geo|Resync all'),
+    resyncAllReplicables: s__('Geo|Resync all %{replicableType}'),
+    dropdownTitle: s__('Geo|Filter by status'),
+    searchPlaceholder: s__('Geo|Filter by name'),
+    modalBody: s__(
+      'Geo|This will resync all %{replicableType}. It may take some time to complete. Are you sure you want to continue?',
+    ),
+  },
   components: {
     GlSearchBoxByType,
     GlDropdown,
     GlDropdownItem,
     GlButton,
+    GlModal,
+    GlSprintf,
+  },
+  directives: {
+    GlModalDirective,
   },
   computed: {
     ...mapState(['currentFilterIndex', 'filterOptions', 'searchFilter']),
@@ -25,7 +47,7 @@ export default {
       },
     },
     resyncText() {
-      return sprintf(__('Resync all %{replicableType}'), {
+      return sprintf(this.$options.i18n.resyncAllReplicables, {
         replicableType: this.replicableTypeName,
       });
     },
@@ -40,6 +62,13 @@ export default {
   actionTypes: ACTION_TYPES,
   filterStates: FILTER_STATES,
   debounce: DEFAULT_SEARCH_DELAY,
+  MODAL_PRIMARY_ACTION: {
+    text: s__('Geo|Resync all'),
+  },
+  MODAL_CANCEL_ACTION: {
+    text: __('Cancel'),
+  },
+  RESYNC_MODAL_ID,
 };
 </script>
 
@@ -48,7 +77,7 @@ export default {
     <div class="row d-flex flex-column flex-sm-row">
       <div class="col">
         <div class="d-sm-flex mx-n1">
-          <gl-dropdown :text="__('Filter by status')" class="px-1 my-1 my-sm-0 w-100">
+          <gl-dropdown :text="$options.i18n.dropdownTitle" class="px-1 my-1 my-sm-0 w-100">
             <gl-dropdown-item
               v-for="(filter, index) in filterOptions"
               :key="index"
@@ -66,15 +95,27 @@ export default {
             :debounce="$options.debounce"
             class="px-1 my-1 my-sm-0 bg-white w-100"
             type="text"
-            :placeholder="__('Filter by name')"
+            :placeholder="$options.i18n.searchPlaceholder"
           />
         </div>
       </div>
       <div class="col col-sm-5 d-flex justify-content-end my-1 my-sm-0 w-100">
-        <gl-button @click="initiateAllReplicableSyncs($options.actionTypes.RESYNC)">{{
-          __('Resync all')
+        <gl-button v-gl-modal-directive="$options.RESYNC_MODAL_ID">{{
+          $options.i18n.resyncAll
         }}</gl-button>
       </div>
     </div>
+    <gl-modal
+      :modal-id="$options.RESYNC_MODAL_ID"
+      :title="resyncText"
+      :action-primary="$options.MODAL_PRIMARY_ACTION"
+      :action-cancel="$options.MODAL_CANCEL_ACTION"
+      size="sm"
+      @primary="initiateAllReplicableSyncs($options.actionTypes.RESYNC)"
+    >
+      <gl-sprintf :message="$options.i18n.modalBody">
+        <template #replicableType>{{ replicableTypeName }}</template>
+      </gl-sprintf>
+    </gl-modal>
   </nav>
 </template>

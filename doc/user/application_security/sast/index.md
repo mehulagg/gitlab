@@ -239,6 +239,24 @@ spotbugs-sast:
     FAIL_NEVER: 1
 ```
 
+#### Pinning to minor image version
+
+While our templates use `MAJOR` version pinning to always ensure the latest analyzer
+versions are pulled, there are certain cases where it can be beneficial to pin
+an analyzer to a specific release. To do so, override the `SAST_ANALYZER_IMAGE_TAG` CI/CD variable
+in the job template directly.
+
+In the example below, we are pinning to a specific patch version of the `spotbugs` analyzer:
+
+```yaml
+include:
+  - template: Security/SAST.gitlab-ci.yml
+
+spotbugs-sast:
+  variables:
+    SAST_ANALYZER_IMAGE_TAG: "2.28.1"
+```
+
 ### Customize rulesets **(ULTIMATE)**
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/235382) in GitLab 13.5.
@@ -490,7 +508,7 @@ Some analyzers can be customized with CI/CD variables.
 | `MAVEN_REPO_PATH`           | SpotBugs   | Path to the Maven local repository (shortcut for the `maven.repo.local` property).                                                                                                                                                 |
 | `SBT_PATH`                  | SpotBugs   | Path to the `sbt` executable.                                                                                                                                                                                                      |
 | `FAIL_NEVER`                | SpotBugs   | Set to `1` to ignore compilation failure.                                                                                                                                                                                          |
-| `SAST_GOSEC_CONFIG`         | Gosec      | Path to configuration for Gosec (optional).                                                                                                                                                                                        |
+| `SAST_GOSEC_CONFIG`         | Gosec      | **{warning}** **[Removed](https://gitlab.com/gitlab-org/gitlab/-/issues/328301)** in GitLab 14.0 - use custom rulesets instead. Path to configuration for Gosec (optional).                                                                                                                                                                                        |
 | `PHPCS_SECURITY_AUDIT_PHP_EXTENSIONS` | phpcs-security-audit | Comma separated list of additional PHP Extensions.                                                                                                                                                             |
 | `SAST_DISABLE_BABEL`        | NodeJsScan | Disable Babel processing for the NodeJsScan scanner. Set to `true` to disable Babel processing. [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/33065) in GitLab 13.2.                                                  
 | `SAST_SEMGREP_METRICS` | Semgrep | Set to `"false"` to disable sending anonymized scan metrics to [r2c](https://r2c.dev/). Default: `true`. [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/330565) in GitLab 14.0.      |

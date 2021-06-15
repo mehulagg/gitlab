@@ -21,7 +21,23 @@ module SubscriptionPortalHelpers
       )
   end
 
+  def billing_plans_data
+    Gitlab::Json.parse(plans_fixture).map do |data|
+      data.deep_symbolize_keys
+    end
+  end
+
+  def stub_billing_plans(namespace_id, plan = 'free')
+    stub_full_request("#{EE::SUBSCRIPTIONS_URL}/gitlab_plans?namespace_id=#{namespace_id}&plan=#{plan}")
+      .with(headers: { 'Accept' => 'application/json' })
+      .to_return(status: 200, body: plans_fixture)
+  end
+
   private
+
+  def plans_fixture
+    File.new(Rails.root.join('ee/spec/fixtures/gitlab_com_plans.json'))
+  end
 
   def stubbed_eoa_eligibility_response_body(eligible, free_upgrade_plan_id, assisted_upgrade_plan_id)
     {

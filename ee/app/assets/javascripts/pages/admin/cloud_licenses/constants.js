@@ -23,7 +23,8 @@ export const licensedToHeaderText = s__('SuperSonics|Licensed to');
 export const manageSubscriptionButtonText = s__('SuperSonics|Manage');
 export const syncSubscriptionButtonText = s__('SuperSonics|Sync subscription details');
 export const copySubscriptionIdButtonText = __('Copy');
-export const subscriptionTypeText = __('%{type} License');
+export const licenseFileText = __('License file');
+export const cloudLicenseText = __('SuperSonics|Cloud license');
 export const usersInSubscriptionUnlimited = __('Unlimited');
 export const detailsLabels = {
   address: __('Address'),
@@ -40,7 +41,7 @@ export const detailsLabels = {
 export const removeLicense = __('Remove license');
 export const removeLicenseConfirm = __('Are you sure you want to remove the license?');
 export const uploadLicense = __('Upload license');
-export const uploadLegacyLicense = s__('SuperSonics|Upload a legacy license');
+export const uploadLicenseFile = s__('SuperSonics|Upload a license file');
 export const billableUsersTitle = s__('SuperSonics|Billable users');
 export const maximumUsersTitle = s__('SuperSonics|Maximum users');
 export const usersInSubscriptionTitle = s__('SuperSonics|Users in subscription');
@@ -85,9 +86,9 @@ export const subscriptionSyncStatus = {
   SYNC_FAILURE: 'SYNC_FAILURE',
   SYNC_SUCCESS: 'SYNC_SUCCESS',
 };
-export const subscriptionType = {
+export const subscriptionTypes = {
   CLOUD: 'cloud',
-  LEGACY: 'legacy',
+  LICENSE_FILE: 'legacy',
 };
 
 export const subscriptionQueries = {

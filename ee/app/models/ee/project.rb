@@ -62,7 +62,7 @@ module EE
           includes(:protected_branches).reject { |rule| rule.applies_to_branch?(branch) }
         end
       end
-      has_many :external_approval_rules, class_name: 'ApprovalRules::ExternalApprovalRule'
+      has_many :external_status_checks, class_name: 'MergeRequests::ExternalStatusCheck'
       has_many :approval_merge_request_rules, through: :merge_requests, source: :approval_rules
       has_many :audit_events, as: :entity
       has_many :path_locks
@@ -440,7 +440,7 @@ module EE
     end
 
     def execute_external_compliance_hooks(data)
-      external_approval_rules.each do |approval_rule|
+      external_status_checks.each do |approval_rule|
         approval_rule.async_execute(data)
       end
     end

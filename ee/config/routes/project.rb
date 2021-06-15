@@ -53,10 +53,6 @@ constraints(::Constraints::ProjectUrlConstrainer.new) do
         resources :audit_events, only: [:index]
 
         namespace :security do
-          resources :waf_anomalies, only: [] do
-            get :summary, on: :collection
-          end
-
           resources :network_policies, only: [:index, :create, :update, :destroy] do
             get :summary, on: :collection
           end

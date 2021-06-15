@@ -1,17 +1,9 @@
+#import "../fragments/escalation_policy.fragment.graphql"
+
 mutation escalationPolicyCreate($input: EscalationPolicyCreateInput!) {
   escalationPolicyCreate(input: $input) {
     escalationPolicy {
-      id
-      name
-      description
-      rules {
-        status
-        elapsedTimeSeconds
-        oncallSchedule {
-          iid
-          name
-        }
-      }
+      ...EscalationPolicy
     }
     errors
   }
