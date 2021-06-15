@@ -1,9 +1,9 @@
 #import "~/graphql_shared/fragments/user.fragment.graphql"
 
-query ProjectBoardAssignees($fullPath: ID!, $search: String) {
-  workspace: project(fullPath: $fullPath) {
+query GroupBoardMembers($fullPath: ID!, $search: String) {
+  workspace: group(fullPath: $fullPath) {
     __typename
-    assignees: projectMembers(search: $search) {
+    assignees: groupMembers(search: $search) {
       __typename
       nodes {
         id

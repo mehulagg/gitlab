@@ -7,9 +7,9 @@ import {
 } from '~/boards/boards_util';
 import { BoardType } from '~/boards/constants';
 import eventHub from '~/boards/eventhub';
-import groupBoardAssigneesQuery from '~/boards/graphql/group_board_assignees.query.graphql';
+import groupBoardMembersQuery from '~/boards/graphql/group_board_members.query.graphql';
 import listsIssuesQuery from '~/boards/graphql/lists_issues.query.graphql';
-import projectBoardAssigneesQuery from '~/boards/graphql/project_board_assignees.query.graphql';
+import projectBoardMembersQuery from '~/boards/graphql/project_board_members.query.graphql';
 import actionsCE, { gqlClient } from '~/boards/stores/actions';
 import boardsStore from '~/boards/stores/boards_store';
 import * as typesCE from '~/boards/stores/mutation_types';
@@ -522,10 +522,10 @@ export default {
 
     let query;
     if (boardType === BoardType.project) {
-      query = projectBoardAssigneesQuery;
+      query = projectBoardMembersQuery;
     }
     if (boardType === BoardType.group) {
-      query = groupBoardAssigneesQuery;
+      query = groupBoardMembersQuery;
     }
 
     if (!query) {
