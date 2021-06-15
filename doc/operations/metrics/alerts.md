@@ -13,7 +13,7 @@ alerting for Prometheus metrics, and
 [trigger actions from alerts](#trigger-actions-from-alerts) to notify
 your team when environment performance falls outside of the boundaries you set.
 
-### Link runbooks to alerts
+## Link runbooks to alerts
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/39315) in GitLab 13.3.
 > - [Deprecated](https://gitlab.com/groups/gitlab-org/-/epics/5877) in GitLab 13.11.
