@@ -56,8 +56,8 @@ describe('CustomStageFields', () => {
 
   let wrapper = null;
 
-  const getDropdown = (dropdownEl) => dropdownEl.find(GlDropdown);
-  const getLabelSelect = (dropdownEl) => dropdownEl.find(LabelsSelector);
+  const getDropdown = (dropdownEl) => dropdownEl.findComponent(GlDropdown);
+  const getLabelSelect = (dropdownEl) => dropdownEl.findComponent(LabelsSelector);
 
   const findName = (index = 0) => wrapper.findByTestId(`custom-stage-name-${index}`);
   const findStartEvent = (index = 0) => wrapper.findByTestId(`custom-stage-start-event-${index}`);
@@ -66,12 +66,12 @@ describe('CustomStageFields', () => {
     wrapper.findByTestId(`custom-stage-start-event-label-${index}`);
   const findEndEventLabel = (index = 0) =>
     wrapper.findByTestId(`custom-stage-end-event-label-${index}`);
-  const findNameField = () => findName().find(GlFormInput);
+  const findNameField = () => findName().findComponent(GlFormInput);
   const findStartEventField = () => getDropdown(findStartEvent());
   const findEndEventField = () => getDropdown(findEndEvent());
   const findStartEventLabelField = () => getLabelSelect(findStartEventLabel());
   const findEndEventLabelField = () => getLabelSelect(findEndEventLabel());
-  const findStageFieldActions = () => wrapper.find(StageFieldActions);
+  const findStageFieldActions = () => wrapper.findComponent(StageFieldActions);
 
   beforeEach(() => {
     wrapper = createComponent();

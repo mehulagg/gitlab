@@ -37,13 +37,13 @@ describe('DefaultStageFields', () => {
   }
 
   const findStageFieldName = () => wrapper.find('[name="create-value-stream-stage-0"]');
-  const findStageFieldNameInput = () => findStageFieldName().find(GlFormInput);
+  const findStageFieldNameInput = () => findStageFieldName().findComponent(GlFormInput);
   const findStartEvent = () => wrapper.find('[data-testid="stage-start-event-0"]');
-  const findStartEventInput = () => findStartEvent().find(GlFormText);
+  const findStartEventInput = () => findStartEvent().findComponent(GlFormText);
   const findEndEvent = () => wrapper.find('[data-testid="stage-end-event-0"]');
-  const findEndEventInput = () => findEndEvent().find(GlFormText);
-  const findFormGroup = () => wrapper.find(GlFormGroup);
-  const findFieldActions = () => wrapper.find(StageFieldActions);
+  const findEndEventInput = () => findEndEvent().findComponent(GlFormText);
+  const findFormGroup = () => wrapper.findComponent(GlFormGroup);
+  const findFieldActions = () => wrapper.findComponent(StageFieldActions);
 
   beforeEach(() => {
     wrapper = createComponent();

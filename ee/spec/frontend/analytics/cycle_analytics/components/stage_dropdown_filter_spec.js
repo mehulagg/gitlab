@@ -37,9 +37,9 @@ describe('StageDropdownFilter component', () => {
     createComponent();
   });
 
-  const findDropdown = () => wrapper.find(GlDropdown);
+  const findDropdown = () => wrapper.findComponent(GlDropdown);
   const selectDropdownItemAtIndex = (index) =>
-    findDropdown().findAll(GlDropdownItem).at(index).vm.$emit('click');
+    findDropdown().findAllComponents(GlDropdownItem).at(index).vm.$emit('click');
 
   describe('on stage click', () => {
     describe('clicking a selected stage', () => {
