@@ -14827,7 +14827,7 @@ State of a Sentry error.
 | <a id="servicetypehangouts_chat_service"></a>`HANGOUTS_CHAT_SERVICE` | HangoutsChatService type. |
 | <a id="servicetypeirker_service"></a>`IRKER_SERVICE` | IrkerService type. |
 | <a id="servicetypejenkins_service"></a>`JENKINS_SERVICE` | JenkinsService type. |
-| <a id="servicetypejira_service"></a>`JIRA_SERVICE` | JiraService type. |
+| <a id="[servicetypejira_service](servicetypejira_service)"></a>`JIRA_SERVICE` | JiraService type. |
 | <a id="servicetypemattermost_service"></a>`MATTERMOST_SERVICE` | MattermostService type. |
 | <a id="servicetypemattermost_slash_commands_service"></a>`MATTERMOST_SLASH_COMMANDS_SERVICE` | MattermostSlashCommandsService type. |
 | <a id="servicetypemicrosoft_teams_service"></a>`MICROSOFT_TEAMS_SERVICE` | MicrosoftTeamsService type. |

@@ -246,11 +246,11 @@ module EE
       end
 
       def jira_vulnerabilities_integration_enabled?
-        !!jira_service&.jira_vulnerabilities_integration_enabled?
+        !!jira_integration&.jira_vulnerabilities_integration_enabled?
       end
 
       def configured_to_create_issues_from_vulnerabilities?
-        !!jira_service&.configured_to_create_issues_from_vulnerabilities?
+        !!jira_integration&.configured_to_create_issues_from_vulnerabilities?
       end
     end
 

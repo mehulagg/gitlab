@@ -37,7 +37,7 @@ RSpec.describe Gitlab::UsageData do
       create(:prometheus_alert, project: projects[0])
       create(:prometheus_alert, project: projects[1])
 
-      create(:jira_service, project: projects[0], issues_enabled: true, project_key: 'GL')
+      create(:jira_integration, project: projects[0], issues_enabled: true, project_key: 'GL')
 
       create(:operations_feature_flag, project: projects[0])
 

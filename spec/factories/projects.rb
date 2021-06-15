@@ -408,7 +408,7 @@ FactoryBot.define do
   factory :jira_project, parent: :project do
     has_external_issue_tracker { true }
 
-    jira_service
+    jira_integration
   end
 
   factory :prometheus_project, parent: :project do

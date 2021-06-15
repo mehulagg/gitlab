@@ -60,7 +60,7 @@ RSpec.describe Project, factory_default: :keep do
     it { is_expected.to have_one(:buildkite_integration) }
     it { is_expected.to have_one(:bamboo_integration) }
     it { is_expected.to have_one(:teamcity_service) }
-    it { is_expected.to have_one(:jira_service) }
+    it { is_expected.to have_one(:jira_integration) }
     it { is_expected.to have_one(:redmine_service) }
     it { is_expected.to have_one(:youtrack_service) }
     it { is_expected.to have_one(:custom_issue_tracker_integration) }
@@ -1444,13 +1444,13 @@ RSpec.describe Project, factory_default: :keep do
     end
   end
 
-  describe '.with_active_jira_services' do
-    it 'returns the correct project' do
-      active_jira_service = create(:jira_service)
+  describe '.with_active_jira_integrations' do
+    it 'returns the correct integrations' do
+      active_jira_integration = create(:jira_integration)
       active_service = create(:service, active: true)
 
-      expect(described_class.with_active_jira_services).to include(active_jira_service.project)
-      expect(described_class.with_active_jira_services).not_to include(active_service.project)
+      expect(described_class.with_active_jira_integrations).to include(active_jira_integration.project)
+      expect(described_class.with_active_jira_integrations).not_to include(active_service.project)
     end
   end
 

@@ -119,7 +119,7 @@ RSpec.describe ProjectsHelper do
     let_it_be(:user) { create(:user) }
     let_it_be(:group) { create(:group) }
     let_it_be(:project) { create(:project, :repository, group: group) }
-    let_it_be(:jira_service) { create(:jira_service, project: project, vulnerabilities_enabled: true, project_key: 'GV', vulnerabilities_issuetype: '10000') }
+    let_it_be(:jira_integration) { create(:jira_integration, project: project, vulnerabilities_enabled: true, project_key: 'GV', vulnerabilities_issuetype: '10000') }
 
     subject { helper.project_security_dashboard_config(project) }
 

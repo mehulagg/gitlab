@@ -21,7 +21,7 @@ RSpec.describe Sidebars::Projects::Menus::JiraMenu do
     end
 
     context 'when issue tracker is Jira' do
-      let!(:jira) { create(:jira_service, project: project, project_key: 'GL') }
+      let!(:jira) { create(:jira_integration, project: project, project_key: 'GL') }
 
       context 'when issues integration is disabled' do
         it 'returns false' do

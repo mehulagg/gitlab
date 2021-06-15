@@ -386,7 +386,7 @@ project:
 - bamboo_integration
 - teamcity_service
 - pushover_service
-- jira_service
+- jira_integration
 - redmine_service
 - youtrack_service
 - custom_issue_tracker_integration

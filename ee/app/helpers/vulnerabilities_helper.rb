@@ -49,7 +49,7 @@ module VulnerabilitiesHelper
     description = ApplicationController.render(template: 'vulnerabilities/jira_issue_description.md.erb',
                                                locals: { vulnerability: decorated_vulnerability })
 
-    vulnerability.project.jira_service.new_issue_url_with_predefined_fields(summary, description)
+    vulnerability.project.jira_integration.new_issue_url_with_predefined_fields(summary, description)
   end
 
   def vulnerability_pipeline_data(pipeline)

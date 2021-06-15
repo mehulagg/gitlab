@@ -165,7 +165,7 @@ class Project < ApplicationRecord
   has_one :hangouts_chat_service, class_name: 'Integrations::HangoutsChat'
   has_one :irker_service, class_name: 'Integrations::Irker'
   has_one :jenkins_integration, class_name: 'Integrations::Jenkins'
-  has_one :jira_service, class_name: 'Integrations::Jira'
+  has_one :jira_integration, class_name: 'Integrations::Jira'
   has_one :mattermost_service, class_name: 'Integrations::Mattermost'
   has_one :mattermost_slash_commands_service, class_name: 'Integrations::MattermostSlashCommands'
   has_one :microsoft_teams_service, class_name: 'Integrations::MicrosoftTeams'
@@ -534,7 +534,7 @@ class Project < ApplicationRecord
   scope :for_milestones, ->(ids) { joins(:milestones).where('milestones.id' => ids).distinct }
   scope :with_push, -> { joins(:events).merge(Event.pushed_action) }
   scope :with_project_feature, -> { joins('LEFT JOIN project_features ON projects.id = project_features.project_id') }
-  scope :with_active_jira_services, -> { joins(:integrations).merge(::Integrations::Jira.active) } # rubocop:disable CodeReuse/ServiceClass
+  scope :with_active_jira_integrations, -> { joins(:integrations).merge(::Integrations::Jira.active) } # rubocop:disable CodeReuse/ServiceClass
   scope :with_jira_dvcs_cloud, -> { joins(:feature_usage).merge(ProjectFeatureUsage.with_jira_dvcs_integration_enabled(cloud: true)) }
   scope :with_jira_dvcs_server, -> { joins(:feature_usage).merge(ProjectFeatureUsage.with_jira_dvcs_integration_enabled(cloud: false)) }
   scope :inc_routes, -> { includes(:route, namespace: :route) }

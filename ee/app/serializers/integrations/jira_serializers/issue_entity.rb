@@ -94,7 +94,7 @@ module Integrations
       end
 
       def base_web_url
-        @base_web_url ||= project.jira_service.url
+        @base_web_url ||= project.jira_integration.url
       end
 
       def project

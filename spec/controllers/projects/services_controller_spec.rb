@@ -8,7 +8,7 @@ RSpec.describe Projects::ServicesController do
 
   let(:project) { create(:project, :repository) }
   let(:user)    { create(:user) }
-  let(:service) { create(:jira_service, project: project) }
+  let(:service) { create(:jira_integration, project: project) }
   let(:service_params) { { username: 'username', password: 'password', url: 'http://example.com' } }
 
   before do
@@ -56,7 +56,7 @@ RSpec.describe Projects::ServicesController do
         end
 
         it 'returns success' do
-          stub_jira_service_test
+          stub_jira_integration_test
 
           expect(Gitlab::HTTP).to receive(:get).with('/rest/api/2/serverInfo', any_args).and_call_original
 
@@ -67,7 +67,7 @@ RSpec.describe Projects::ServicesController do
       end
 
       it 'returns success' do
-        stub_jira_service_test
+        stub_jira_integration_test
 
         expect(Gitlab::HTTP).to receive(:get).with('/rest/api/2/serverInfo', any_args).and_call_original
 
@@ -210,7 +210,7 @@ RSpec.describe Projects::ServicesController do
         it_behaves_like 'service update'
       end
 
-      context 'wehn param `inherit_from_id` is set to empty string' do
+      context 'when param `inherit_from_id` is set to empty string' do
         let(:service_params) { { inherit_from_id: '' } }
 
         it 'sets inherit_from_id to nil' do
@@ -218,8 +218,8 @@ RSpec.describe Projects::ServicesController do
         end
       end
 
-      context 'wehn param `inherit_from_id` is set to some value' do
-        let(:instance_service) { create(:jira_service, :instance) }
+      context 'when param `inherit_from_id` is set to some value' do
+        let(:instance_service) { create(:jira_integration, :instance) }
         let(:service_params) { { inherit_from_id: instance_service.id } }
 
         it 'sets inherit_from_id to value' do
@@ -230,7 +230,7 @@ RSpec.describe Projects::ServicesController do
 
     describe 'as JSON' do
       before do
-        stub_jira_service_test
+        stub_jira_integration_test
         put :update, params: project_params(service: service_params, format: :json)
       end
 

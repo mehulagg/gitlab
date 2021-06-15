@@ -61,7 +61,7 @@ module Projects
 
         def issue_json
           ::Integrations::JiraSerializers::IssueDetailSerializer.new
-            .represent(project.jira_service.find_issue(params[:id], rendered_fields: true), project: project)
+            .represent(project.jira_integration.find_issue(params[:id], rendered_fields: true), project: project)
         end
 
         def finder
@@ -92,7 +92,7 @@ module Projects
         protected
 
         def check_feature_enabled!
-          return render_404 unless project.jira_issues_integration_available? && project.jira_service.issues_enabled
+          return render_404 unless project.jira_issues_integration_available? && project.jira_integration.issues_enabled
         end
 
         # Return the informational message to the user

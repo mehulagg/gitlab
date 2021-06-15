@@ -183,7 +183,7 @@ RSpec.describe Banzai::Filter::References::ExternalIssueReferenceFilter do
   end
 
   context "jira project" do
-    let_it_be(:service) { create(:jira_service, project: project) }
+    let_it_be(:service) { create(:jira_integration, project: project) }
 
     let(:reference) { issue.to_reference }
 

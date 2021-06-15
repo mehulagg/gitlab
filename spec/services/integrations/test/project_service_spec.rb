@@ -32,7 +32,7 @@ RSpec.describe Integrations::Test::ProjectService do
 
     context 'with event specified' do
       context 'event not supported by integration' do
-        let(:integration) { create(:jira_service, project: project) }
+        let(:integration) { create(:jira_integration, project: project) }
         let(:event) { 'push' }
 
         it 'returns error message' do

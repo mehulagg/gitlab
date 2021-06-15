@@ -50,7 +50,7 @@ RSpec.describe EE::ServicesHelper do
     end
 
     context 'Jira service' do
-      let_it_be_with_refind(:integration) { create(:jira_service, project: project, issues_enabled: true, project_key: 'FE', vulnerabilities_enabled: true, vulnerabilities_issuetype: '10001') }
+      let_it_be_with_refind(:integration) { create(:jira_integration, project: project, issues_enabled: true, project_key: 'FE', vulnerabilities_enabled: true, vulnerabilities_issuetype: '10001') }
 
       context 'when there is no license for jira_vulnerabilities_integration' do
         before do

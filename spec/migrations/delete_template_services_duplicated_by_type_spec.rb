@@ -15,10 +15,10 @@ RSpec.describe DeleteTemplateServicesDuplicatedByType do
 
   it 'deletes service templates duplicated by type except the one with the lowest ID' do
     jenkins_service_id = services.where(type: 'JenkinsService').order(:id).pluck(:id).first
-    jira_service_id = services.where(type: 'JiraService').pluck(:id).first
+    jira_integration_id = services.where(type: 'JiraService').pluck(:id).first
 
     migrate!
 
-    expect(services.pluck(:id)).to contain_exactly(jenkins_service_id, jira_service_id)
+    expect(services.pluck(:id)).to contain_exactly(jenkins_service_id, jira_integration_id)
   end
 end

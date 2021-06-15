@@ -63,19 +63,19 @@ RSpec.describe Project do
     it { is_expected.to have_many(:incident_management_escalation_policies).class_name('IncidentManagement::EscalationPolicy') }
 
     describe '#jira_vulnerabilities_integration_enabled?' do
-      context 'when project lacks a jira_service relation' do
+      context 'when project lacks a jira_integration relation' do
         it 'returns false' do
           expect(project.jira_vulnerabilities_integration_enabled?).to be false
         end
       end
 
-      context 'when project has a jira_service relation' do
+      context 'when project has a jira_integration relation' do
         before do
-          create(:jira_service, project: project)
+          create(:jira_integration, project: project)
         end
 
-        it 'accesses the value from the jira_service' do
-          expect(project.jira_service)
+        it 'accesses the value from the jira_integration' do
+          expect(project.jira_integration)
             .to receive(:jira_vulnerabilities_integration_enabled?)
 
           project.jira_vulnerabilities_integration_enabled?
@@ -84,19 +84,19 @@ RSpec.describe Project do
     end
 
     describe '#configured_to_create_issues_from_vulnerabilities?' do
-      context 'when project lacks a jira_service relation' do
+      context 'when project lacks a jira_integration relation' do
         it 'returns false' do
           expect(project.configured_to_create_issues_from_vulnerabilities?).to be false
         end
       end
 
-      context 'when project has a jira_service relation' do
+      context 'when project has a jira_integration relation' do
         before do
-          create(:jira_service, project: project)
+          create(:jira_integration, project: project)
         end
 
-        it 'accesses the value from the jira_service' do
-          expect(project.jira_service)
+        it 'accesses the value from the jira_integration' do
+          expect(project.jira_integration)
             .to receive(:configured_to_create_issues_from_vulnerabilities?)
 
           project.configured_to_create_issues_from_vulnerabilities?
