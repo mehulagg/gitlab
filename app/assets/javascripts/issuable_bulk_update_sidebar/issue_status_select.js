@@ -1,6 +1,6 @@
 import $ from 'jquery';
 import initDeprecatedJQueryDropdown from '~/deprecated_jquery_dropdown';
-import { __ } from './locale';
+import { __ } from '~/locale';
 
 export default function issueStatusSelect() {
   $('.js-issue-status').each((i, el) => {

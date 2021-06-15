@@ -3,7 +3,8 @@
 import $ from 'jquery';
 import { property } from 'lodash';
 import IssuableBulkUpdateActions from './issuable_bulk_update_actions';
-import issueStatusSelect from '~/issue_status_select';
+import issueStatusSelect from './issue_status_select';
+import initIssueStatusSelectVue from './issue_status_select_vue';
 import issueableEventHub from '~/issues_list/eventhub';
 import LabelsSelect from '~/labels_select';
 import MilestoneSelect from '~/milestone_select';
@@ -56,7 +57,8 @@ export default class IssuableBulkUpdateSidebar {
   initDropdowns() {
     new LabelsSelect();
     new MilestoneSelect();
-    issueStatusSelect();
+    // issueStatusSelect()
+    initIssueStatusSelect();
     subscriptionSelect();
 
     if (IS_EE) {

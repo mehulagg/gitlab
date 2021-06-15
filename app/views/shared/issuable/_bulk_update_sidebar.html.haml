@@ -12,15 +12,7 @@
         .block
           .title
             = _('Status')
-          .filter-item
-            = dropdown_tag(_("Select status"), options: { toggle_class: "js-issue-status", title: _("Change status"), dropdown_class: "dropdown-menu-status dropdown-menu-selectable", data: { field_name: "update[state_event]", default_label: _("Status") } } ) do
-              %ul
-                %li
-                  %a{ href: "#", data: { id: "reopen" } }
-                    = _('Open')
-                %li
-                  %a{ href: "#", data: { id: "close" } }
-                    = _('Closed')
+          .js-issue-status
       .block
         .title
           = _('Assignee')

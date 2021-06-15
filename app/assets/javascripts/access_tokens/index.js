@@ -6,7 +6,7 @@ import { __ } from '~/locale';
 import ExpiresAtField from './components/expires_at_field.vue';
 
 export const initExpiresAtField = () => {
-  const el = document.querySelector('.js-access-tokens-expires-at');
+  const el = document.querySelector('.js-status-select');
 
   if (!el) {
     return null;
