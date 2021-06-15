@@ -6,6 +6,8 @@ module Types
       graphql_name 'CiRunner'
       authorize :read_runner
 
+      present_using ::Ci::RunnerPresenter
+
       field :id, ::Types::GlobalIDType[::Ci::Runner], null: false,
             description: 'ID of the runner.'
       field :description, GraphQL::STRING_TYPE, null: true,
@@ -37,6 +39,10 @@ module Types
             description: 'Type of the runner.'
       field :tag_list, [GraphQL::STRING_TYPE], null: true,
             description: 'Tags associated with the runner.'
+      field :project_count, GraphQL::INT_TYPE, null: false,
+            description: 'Number of projects attached to the runner.'
+      field :job_count, GraphQL::INT_TYPE, null: false,
+            description: 'Number of jobs processed by the runner.'
     end
   end
 end
