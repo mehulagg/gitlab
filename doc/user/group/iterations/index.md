@@ -11,9 +11,9 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 > - Deployed behind a feature flag, disabled by default.
 > - [Enabled by default](https://gitlab.com/gitlab-org/gitlab/-/issues/221047) in GitLab 13.2.
 > - Enabled on GitLab.com.
-> - Able to be enabled or disabled per-group.
+> - Can be enabled or disabled per-group.
 > - Recommended for production use.
-> - For GitLab self-managed instances, GitLab administrators can opt to [disable it](#disable-iterations). **(PREMIUM ONLY)**
+> - For GitLab self-managed instances, GitLab administrators can opt to [disable it](#enable-or-disable-iterations). **(PREMIUM ONLY)**
 > - Moved to GitLab Premium in 13.9.
 
 Iterations are a way to track issues over a period of time. This allows teams
@@ -35,22 +35,24 @@ In GitLab, iterations are similar to milestones, with a few differences:
 ## Iteration cadences
 
 > - [Introduced](https://gitlab.com/groups/gitlab-org/-/epics/5077) in GitLab 14.0.
-> - Deployed behind a feature flag, disabled by default.
+> - Deployed behind a [feature flag](../../feature_flags.md), disabled by default.
+> - Disabled on GitLab.com.
+> - Not recommended for production use.
+> - To use in GitLab self-managed instances, ask a GitLab administrator to [enable it](#enable-or-disable-iteration-cadences). **(PREMIUM SELF)**
+
+This in-development feature might not be available for your use. There can be
+[risks when enabling features still in development](../../feature_flags.md#risks-when-enabling-features-still-in-development).
+Refer to this feature's version history for more details.
 
 Iteration cadences automate some common iteration tasks. They can be used to
 automatically create iterations every 1, 2, 3, 4, or 6 weeks. They can also
 be configured to automatically roll over incomplete issues to the next iteration.
 
-## View the iterations list
+### Create an iteration cadence
 
-To view the iterations list, go to **{issues}** **Issues > Iterations**.
-Select an iteration cadence to view all the iterations in that cadence, ordered by descending date.
-From there you can create a new iteration or select an iteration to get a more detailed view.
+Prerequisites:
 
-## Create an iteration cadence
-
-NOTE:
-You need Developer [permissions](../../permissions.md) or higher to create an iteration cadence.
+- You must have at least the [Developer role](../../permissions.md) for a group.
 
 To create an iteration:
 
@@ -58,10 +60,17 @@ To create an iteration:
 1. Select **New iteration cadence**.
 1. Fill out required fields, and select **Create iteration cadence**. The cadence list page opens.
 
+## View the iterations list
+
+To view the iterations list, go to **{issues}** **Issues > Iterations**.
+Select an iteration cadence to view all the iterations in that cadence, ordered by descending date.
+From there you can create a new iteration or select an iteration to get a more detailed view.
+
 ## Create an iteration
 
-NOTE:
-You need Developer [permissions](../../permissions.md) or higher to create an iteration.
+Prerequisites:
+
+- You must have at least the [Developer role](../../permissions.md) for a group.
 
 For manually scheduled iteration cadences, you create and add iterations yourself.
 
@@ -76,8 +85,9 @@ To create an iteration:
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/218277) in GitLab 13.2.
 
-NOTE:
-You need Developer [permissions](../../permissions.md) or higher to edit an iteration.
+Prerequisites:
+
+- You must have at least the [Developer role](../../permissions.md) for a group.
 
 To edit an iteration, select the three-dot menu (**{ellipsis_v}**) > **Edit iteration**.
 
@@ -128,7 +138,7 @@ To group issues by label:
    You can also search for labels by typing in the search input.
 1. Select or tap outside of the label dropdown. The page is now grouped by the selected labels.
 
-## Disable iterations **(PREMIUM SELF)**
+## Enable or disable iterations **(PREMIUM SELF)**
 
 GitLab Iterations feature is deployed with a feature flag that is **enabled by default**.
 [GitLab administrators with access to the GitLab Rails console](../../../administration/feature_flags.md)
@@ -150,6 +160,25 @@ To disable it:
 Feature.disable(:group_iterations)
 # or by group
 Feature.disable(:group_iterations, Group.find(<group ID>))
+```
+
+### Enable or disable iteration cadences **(PREMIUM SELF)**
+
+Iteration Cadences feature is under development and not ready for production use. It is
+deployed behind a feature flag that is **disabled by default**.
+[GitLab administrators with access to the GitLab Rails console](../../../administration/feature_flags.md)
+can enable it.
+
+To enable it:
+
+```ruby
+Feature.enable(:iterations_cadences)
+```
+
+To disable it:
+
+```ruby
+Feature.disable(:iterations_cadences)
 ```
 
 <!-- ## Troubleshooting
