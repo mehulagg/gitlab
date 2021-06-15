@@ -691,10 +691,10 @@ describe('Grouped security reports app', () => {
   });
 
   describe('Out of date report', () => {
-    const createComponent = (extraProp) => {
+    const createComponent = ({ baseReportOutOfDate = false, ...extraProp }) => {
       mock
         .onGet(SAST_DIFF_ENDPOINT)
-        .reply(200, { ...sastDiffSuccessMock, base_report_out_of_date: true });
+        .reply(200, { ...sastDiffSuccessMock, base_report_out_of_date: baseReportOutOfDate });
 
       createWrapper({
         ...props,
@@ -708,9 +708,9 @@ describe('Grouped security reports app', () => {
       return waitForMutation(wrapper.vm.$store, `sast/${sastTypes.RECEIVE_DIFF_SUCCESS}`);
     };
 
-    describe('with active MR', () => {
+    describe('with active MR and base report is out of date', () => {
       beforeEach(() => {
-        return createComponent({ mrState: mrStates.open });
+        return createComponent({ mrState: mrStates.open, baseReportOutOfDate: true });
       });
 
       it('should display out of date message', () => {
@@ -732,9 +732,39 @@ describe('Grouped security reports app', () => {
       });
     });
 
+    describe('with active MR, base report out of date and diverged commit', () => {
+      beforeEach(() => {
+        return createComponent({
+          mrState: mrStates.open,
+          divergedCommitsCount: 1,
+          baseReportOutOfDate: true,
+        });
+      });
+
+      it('should display out of date message', () => {
+        expect(wrapper.text()).toContain(
+          'Security report is out of date. Please update your branch with the latest changes from the target branch (main)',
+        );
+      });
+    });
+
+    describe('with active MR', () => {
+      beforeEach(() => {
+        return createComponent({ mrState: mrStates.open });
+      });
+
+      it('should not display out of date message', () => {
+        expect(wrapper.text()).not.toContain('Security report is out of date.');
+      });
+    });
+
     describe('with closed MR', () => {
       beforeEach(() => {
-        return createComponent({ mrState: mrStates.closed });
+        return createComponent({
+          mrState: mrStates.closed,
+          divergedCommitsCount: 1,
+          baseReportOutOfDate: true,
+        });
       });
 
       it('should not display out of date message', () => {
@@ -744,7 +774,11 @@ describe('Grouped security reports app', () => {
 
     describe('with merged MR', () => {
       beforeEach(() => {
-        return createComponent({ mrState: mrStates.merged });
+        return createComponent({
+          mrState: mrStates.merged,
+          divergedCommitsCount: 1,
+          baseReportOutOfDate: true,
+        });
       });
 
       it('should not display out of date message', () => {

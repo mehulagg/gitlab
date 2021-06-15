@@ -309,7 +309,7 @@ export default {
     isMRActive() {
       return this.mrState !== mrStates.merged && this.mrState !== mrStates.closed;
     },
-    isMRBranchOutdated() {
+    hasDivergedFromTargetBranch() {
       return this.divergedCommitsCount > 0;
     },
     hasDastScannedResources() {
@@ -482,10 +482,10 @@ export default {
       </gl-button>
     </template>
 
-    <template v-if="isMRActive && isBaseSecurityReportOutOfDate" #sub-heading>
+    <template v-if="isMRActive" #sub-heading>
       <div class="text-secondary-700 text-1">
         <gl-sprintf
-          v-if="isMRBranchOutdated"
+          v-if="hasDivergedFromTargetBranch"
           :message="
             __(
               'Security report is out of date. Please update your branch with the latest changes from the target branch (%{targetBranchName})',
@@ -498,7 +498,7 @@ export default {
         </gl-sprintf>
 
         <gl-sprintf
-          v-else
+          v-else-if="isBaseSecurityReportOutOfDate"
           :message="
             __(
               'Security report is out of date. Run %{newPipelineLinkStart}a new pipeline%{newPipelineLinkEnd} for the target branch (%{targetBranchName})',
