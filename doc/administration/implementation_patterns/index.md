@@ -7,15 +7,19 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 
 # Implementation patterns **(FREE SELF)**
 
-Like all Reference Architectures, GitLab Reference Architectures give qualified guidance on the recommended ways GitLab can be configured to meet the performance requirements of various workloads. Reference Architectures are purpose designed to be as non-implementation specific as possible so that they are applicable to the most different types of implementations possible. Among other things this generally means they have a highly granular "machine" to "server role" specification and they focus on system elements that impact performance. In general, liberal resourcing will be done whenever needed to guarantee performance. Reference Architectures can be adapted to the broadest number of supported implementations.
+GitLab Reference Architectures give qualified guidance on the recommended ways GitLab can be configured to meet the performance requirements of various workloads. Reference Architectures are purpose-designed to be as non-implementation specific as possible to apply to the most different types of implementations possible. This generally means they have a highly granular "machine" to "server role" specification and focus on system elements that impact performance. Reference Architectures can be adapted to the broadest number of supported implementations.
 
 For GitLab Platform Partners it is helpful to customers and partners for GitLab to express platform specific recommendations, which we are calling "Implementation Patterns".
 
-Implementation Patterns are built on the foundational information and testing done for Reference Architectures and allow architects and implementers at GitLab, GitLab Customers and GitLab Partners to build out deployments with less experimentation and a higher degree of confidence that the results will perform as expected.
+Implementation Patterns are built on the foundational information and testing done for Reference Architectures and allow architects and implementers at GitLab, GitLab Customers, and GitLab Partners to build out deployments with less experimentation and a higher degree of confidence that the results will perform as expected.
 
-This separation also enables GitLab to apply platform specific subject matter expertise, testing and architectual qualification to the platform in view. This may be in the form of specialized GitLab internal technical resources, partner technical resources or advanced customer collaboration.
+This separation also enables GitLab to apply platform-specific subject matter expertise, testing and architectural qualification to the platform in view. This may be in the form of specialized GitLab internal technical resources, partner technical resources or advanced customer collaboration.
 
 Implementation patterns may include platform specific build manifests, version qualification and platform vendor architectural reviews. Implementation patterns can also include opinions on parts of GitLab implementation that are not commented on by Reference Architectures - for instance, using PaaS for SMTP, Certificate Authority, etc.
+
+Implementation patterns represent the best knowledge on deploying GitLab to a given platform.  They are not intended, nor maintained as a resource for comparing implementations across platforms.  
+
+Each platform partner introduces a huge number of small and large innovations each quarter - Implementation Patterns are not intended to qualify and test all possible innovations or improvements made by specific Platform Partners and will generally qualify top level cloud services for use with GitLab. 
 
 ### Implementation patterns value add
 
