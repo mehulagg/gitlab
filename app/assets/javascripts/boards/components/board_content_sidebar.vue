@@ -78,7 +78,6 @@ export default {
       v-if="showSidebar"
       class="gl-absolute"
       :open="isSidebarOpen"
-      :header-height="heightFromTop"
       @close="handleClose"
     >
       <template #header>{{ __('Issue details') }}</template>

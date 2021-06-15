@@ -1,9 +1,9 @@
 import { GlDrawer } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
+import { MountingPortal } from 'portal-vue';
 import Vuex from 'vuex';
 import { stubComponent } from 'helpers/stub_component';
 import BoardContentSidebar from '~/boards/components/board_content_sidebar.vue';
-import SetFromTop from '~/boards/components/set_from_top.vue';
 import BoardSidebarDueDate from '~/boards/components/sidebar/board_sidebar_due_date.vue';
 import BoardSidebarLabelsSelect from '~/boards/components/sidebar/board_sidebar_labels_select.vue';
 import BoardSidebarMilestoneSelect from '~/boards/components/sidebar/board_sidebar_milestone_select.vue';
@@ -89,8 +89,8 @@ describe('BoardContentSidebar', () => {
     expect(wrapper.find(GlDrawer).exists()).toBe(true);
   });
 
-  it('confirms we render SetFromTop', () => {
-    expect(wrapper.find(SetFromTop).exists()).toBe(true);
+  it('confirms we render MountingPortal', () => {
+    expect(wrapper.find(MountingPortal).exists()).toBe(true);
   });
 
   it('does not render GlDrawer when isSidebarOpen is false', () => {

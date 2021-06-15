@@ -1,9 +1,9 @@
 import { GlDrawer } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
+import { MountingPortal } from 'portal-vue';
 import Vuex from 'vuex';
 import EpicBoardContentSidebar from 'ee_component/boards/components/epic_board_content_sidebar.vue';
 import { stubComponent } from 'helpers/stub_component';
-import SetFromTop from '~/boards/components/set_from_top.vue';
 import BoardSidebarLabelsSelect from '~/boards/components/sidebar/board_sidebar_labels_select.vue';
 import BoardSidebarTitle from '~/boards/components/sidebar/board_sidebar_title.vue';
 import { ISSUABLE } from '~/boards/constants';
@@ -66,8 +66,8 @@ describe('EpicBoardContentSidebar', () => {
     expect(wrapper.findComponent(GlDrawer).exists()).toBe(true);
   });
 
-  it('confirms we render SetFromTop', () => {
-    expect(wrapper.findComponent(SetFromTop).exists()).toBe(true);
+  it('confirms we render MountingPortal', () => {
+    expect(wrapper.findComponent(MountingPortal).exists()).toBe(true);
   });
 
   it('does not render GlDrawer when isSidebarOpen is false', () => {

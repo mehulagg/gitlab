@@ -1,8 +1,20 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`ee/BoardContentSidebar matches the snapshot 1`] = `
-<set-from-top-stub>
-  <div>
+<mounting-portal-stub
+  append="true"
+  mountto="#js-right-sidebar-portal"
+  name="right-sidebar"
+  order="0"
+  slotprops="[object Object]"
+  tag="DIV"
+  targetslotprops="[object Object]"
+  targettag="div"
+  to="9246829"
+>
+  <div
+    class="gl-absolute"
+  >
     Issue details
     <board-sidebar-title-stub />
      
@@ -86,5 +98,5 @@ exports[`ee/BoardContentSidebar matches the snapshot 1`] = `
       issuabletype="issue"
     />
   </div>
-</set-from-top-stub>
+</mounting-portal-stub>
 `;

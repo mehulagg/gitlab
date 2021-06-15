@@ -89,7 +89,6 @@ export default {
       v-if="showSidebar"
       class="js-board-settings-sidebar gl-absolute"
       :open="isSidebarOpen"
-      :header-height="heightFromTop"
       @close="unsetActiveId"
     >
       <template #header>{{ $options.listSettingsText }}</template>
