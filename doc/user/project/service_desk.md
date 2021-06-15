@@ -147,7 +147,7 @@ To use a custom issue template with Service Desk, in your project:
 1. Go to **Settings > General > Service Desk**.
 1. From the dropdown **Template to append to all Service Desk issues**, select your template.
 
-### Using custom email display name
+### Using a custom email display name
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/7529) in GitLab 12.8.
 
@@ -160,14 +160,20 @@ To edit the custom email display name:
 1. Enter a new name in **Email display name**.
 1. Select **Save Changes**.
 
-### Using a custom mailbox **(FREE SELF)**
+### Using a custom email address**(FREE SELF)**
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/2201) in GitLab Premium 13.0.
 > - [Feature flag removed](https://gitlab.com/gitlab-org/gitlab/-/issues/284656) in GitLab 13.8.
 
+It is possible to customize the email address used by Service Desk. In order to do this,
+both a custom mailbox and a custom suffix must be configured.
+
+#### Configuring a custom mailbox
+
 Using the `service_desk_email` configuration, you can customize the mailbox
 used by Service Desk. This allows you to have a separate email address for 
-Service Desk and enables the configuration of a [custom suffix](#using-a-custom-email-address-suffix).
+Service Desk and set a [custom suffix](#configuring-a-custom-email-address-suffix)
+in project settings.
 
 The `address` must include the `+%{key}` placeholder within the 'user' 
 portion of the address, before the `@`. This is used to identify the project 
@@ -231,7 +237,7 @@ To configure a custom email inbox for Service Desk with IMAP, add the following 
 The configuration options are the same as for configuring
 [incoming email](../../administration/incoming_email.md#set-it-up).
 
-#### Microsoft Graph
+##### Microsoft Graph
 
 > Introduced in [GitLab 13.11](https://gitlab.com/gitlab-org/gitlab/-/issues/214900)
 
@@ -263,10 +269,7 @@ Graph API instead of IMAP. Follow the [documentation in the incoming e-mail sect
 
 The Microsoft Graph API is not yet supported in source installations. See [this issue](https://gitlab.com/gitlab-org/gitlab/-/issues/326169) for more details.
 
-### Using a custom email address suffix **(FREE SELF)**
-
-> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/2201) in GitLab Premium 13.0.
-> - [Feature flag removed](https://gitlab.com/gitlab-org/gitlab/-/issues/284656) in GitLab 13.8.
+#### Configuring a custom email address suffix
 
 NOTE:
 In order to use this feature, a [custom mailbox](#using-a-custom-mailbox) must be fully configured first.
