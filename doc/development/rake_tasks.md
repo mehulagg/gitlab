@@ -256,7 +256,6 @@ between square brackets. Take the `cluster_management` template as an example:
 bundle exec rake gitlab:update_project_templates\[cluster_management\]
 ```
 
-
 ## Generate route lists
 
 To see the full list of API routes, you can run:
