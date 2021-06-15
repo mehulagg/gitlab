@@ -4,8 +4,8 @@ import { STEPS, SUBSCRIPTON_FLOW_STEPS } from 'ee/registrations/constants';
 import stateQuery from 'ee/subscriptions/graphql/queries/state.query.graphql';
 import { s__ } from '~/locale';
 import BillingAddress from './checkout/billing_address.vue';
-import SubscriptionDetails from './checkout/subscription_details.vue';
 import PaymentMethod from './checkout/payment_method.vue';
+import SubscriptionDetails from './checkout/subscription_details.vue';
 
 export default {
   components: { ProgressBar, SubscriptionDetails, BillingAddress, PaymentMethod },
