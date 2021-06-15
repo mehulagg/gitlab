@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 require 'securerandom'
-require 'active_support/core_ext/object/blank'
 
 module QA
   module Resource
