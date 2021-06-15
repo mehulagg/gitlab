@@ -1,6 +1,7 @@
 import { shallowMount } from '@vue/test-utils';
 import BoardFilteredSearch from '~/boards/components/board_filtered_search.vue';
 import IssueBoardFilteredSpec from '~/boards/components/issue_board_filtered_search.vue';
+import { BoardType } from '~/boards/constants';
 import issueBoardFilters from '~/boards/issue_board_filters';
 import { __ } from '~/locale';
 import AuthorToken from '~/vue_shared/components/filtered_search_bar/tokens/author_token.vue';
@@ -29,7 +30,7 @@ describe('IssueBoardFilter', () => {
       expect(wrapper.find(BoardFilteredSearch).exists()).toBe(true);
     });
 
-    it.each([['group'], ['project']])(
+    it.each([[BoardType.group], [BoardType.project]])(
       'when boradType is %s we pass the correct tokens to BoardFilteredSearch',
       (boardType) => {
         const { fetchAuthors, fetchLabels } = issueBoardFilters({}, '', boardType);
