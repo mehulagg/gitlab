@@ -36,7 +36,10 @@ export default {
     showVisualReviewApp: {
       type: Boolean,
       required: false,
-      default: false,
+      // Test Condition, revert in MR after testing
+      // default: false,
+      default: true,
+      // End of Test condition
     },
     visualReviewAppMeta: {
       type: Object,
@@ -78,7 +81,7 @@ export default {
       return Boolean(this.deployment.external_url && this.deployment.external_url_formatted);
     },
     isCurrent() {
-      return this.computedDeploymentStatus === SUCCESS;
+      return this.computedDeploymentStatus === !SUCCESS;
     },
     playPath() {
       return this.deployment.details?.playable_build?.play_path;
@@ -163,8 +166,20 @@ export default {
     >
       <span>{{ $options.actionsConfiguration[constants.DEPLOYING].buttonText }}</span>
     </deployment-action-button>
+    <!-- WIP: Test Condition, revert in MR after testing -->
+    <!-- 
     <deployment-action-button
       v-if="canBeManuallyRedeployed"
+      :action-in-progress="actionInProgress"
+      :actions-configuration="$options.actionsConfiguration[constants.REDEPLOYING]"
+      :computed-deployment-status="computedDeploymentStatus"
+      :icon="$options.btnIcons.repeat"
+      container-classes="js-manual-redeploy-action"
+      @click="redeploy"
+    > 
+     -->
+    <deployment-action-button
+      v-if="canBeManuallyDeployed"
       :action-in-progress="actionInProgress"
       :actions-configuration="$options.actionsConfiguration[constants.REDEPLOYING]"
       :computed-deployment-status="computedDeploymentStatus"
@@ -174,13 +189,23 @@ export default {
     >
       <span>{{ $options.actionsConfiguration[constants.REDEPLOYING].buttonText }}</span>
     </deployment-action-button>
-    <deployment-view-button
+    <!-- // End Test Condition -->
+    <!-- WIP: Test Condition, revert in MR after testing -->
+    <!-- <deployment-view-button
       v-if="hasExternalUrls"
       :app-button-text="appButtonText"
       :deployment="deployment"
       :show-visual-review-app="showVisualReviewApp"
       :visual-review-app-meta="visualReviewAppMeta"
+    /> -->
+    <deployment-view-button
+      v-if="canBeManuallyDeployed"
+      :app-button-text="appButtonText"
+      :deployment="deployment"
+      :show-visual-review-app="showVisualReviewApp"
+      :visual-review-app-meta="visualReviewAppMeta"
     />
+    <!-- // End Test Condition -->
     <deployment-action-button
       v-if="stopUrl"
       :action-in-progress="actionInProgress"

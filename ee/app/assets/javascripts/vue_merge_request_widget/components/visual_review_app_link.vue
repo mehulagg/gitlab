@@ -157,7 +157,7 @@ export default {
     <gl-button
       v-gl-modal="modalId"
       category="secondary"
-      class="gl-ml-3 js-review-button"
+      class="gl-ml-2 js-review-button"
       size="small"
       :class="cssClass"
       type="button"

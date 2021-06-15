@@ -62,7 +62,7 @@ export default {
 </script>
 
 <template>
-  <span v-gl-tooltip :title="actionInProgressTooltip" class="gl-display-inline-block" tabindex="0">
+  <span v-gl-tooltip :title="actionInProgressTooltip" class="gl-display-inline-block">
     <gl-button
       v-gl-tooltip
       category="primary"

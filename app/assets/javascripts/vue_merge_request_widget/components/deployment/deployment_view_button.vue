@@ -71,13 +71,14 @@ export default {
 };
 </script>
 <template>
-  <span>
-    <gl-button-group v-if="shouldRenderDropdown" size="small">
+  <span class="gl-display-inline-block wawawa">
+    <!-- <gl-button-group v-if="shouldRenderDropdown" size="small"> -->
+    <gl-button-group size="small">
       <review-app-link
         :display="appButtonText"
         :link="deploymentExternalUrl"
         size="small"
-        css-class="deploy-link js-deploy-url inline"
+        css-class="deploy-link js-deploy-url inline gl-ml-2"
       />
       <gl-dropdown toggle-class="gl-px-2!" size="small" class="js-mr-wigdet-deployment-dropdown">
         <template #button-content>
@@ -107,19 +108,35 @@ export default {
         </gl-dropdown-item>
       </gl-dropdown>
     </gl-button-group>
-    <review-app-link
+    <!-- WIP: Test Condition, revert in MR after testing -->
+    <!-- <review-app-link
       v-else
       :display="appButtonText"
       :link="deploymentExternalUrl"
       size="small"
-      css-class="js-deploy-url deploy-link btn btn-default btn-sm inline"
+      css-class="js-deploy-url deploy-link btn btn-default btn-sm inline gl-ml-2"
+    /> -->
+    <review-app-link
+      :display="appButtonText"
+      :link="deploymentExternalUrl"
+      size="small"
+      css-class="js-deploy-url deploy-link btn btn-default btn-sm inline gl-ml-2"
     />
-    <visual-review-app-link
+    <!-- // End Test Condition -->
+    <!-- WIP: Test Condition, revert in MR after testing -->
+    <!-- <visual-review-app-link
       v-if="showVisualReviewApp"
       :view-app-display="appButtonText"
       :link="deploymentExternalUrl"
       :app-metadata="visualReviewAppMeta"
       :changes="deployment.changes"
+    /> -->
+    <visual-review-app-link
+      :view-app-display="appButtonText"
+      :link="deploymentExternalUrl"
+      :app-metadata="visualReviewAppMeta"
+      :changes="deployment.changes"
     />
+    <!-- // End Test Condition -->
   </span>
 </template>
