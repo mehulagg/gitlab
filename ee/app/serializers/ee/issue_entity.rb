@@ -4,6 +4,7 @@ module EE
     extend ActiveSupport::Concern
 
     prepended do
+      expose :iteration, if: ->(issue, _) { issue.project.licensed_feature_available?(:iterations) }
       expose :weight, if: ->(issue, _) { issue.weight_available? }
 
       with_options if: -> (_, options) { options[:with_blocking_issues] } do

@@ -19,9 +19,18 @@ module EE
 
     private
 
+    # rubocop:disable Gitlab/ModuleWithInstanceVariables
+    def iterations_available?
+      return false if @project.blank?
+
+      @project.licensed_feature_available?(:iterations)
+    end
+    # rubocop:enable Gitlab/ModuleWithInstanceVariables
+
     def issue_preloads
       [].tap do |issue_params|
         issue_params << :epic_issue if params[:include_subepics].present?
+        issue_params << :iteration if iterations_available?
       end
     end
   end
