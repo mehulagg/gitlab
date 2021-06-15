@@ -685,7 +685,7 @@ server to keep them synchronized.
 
 #### Gitaly times out when pushing lots of refs
 
-You might have time-outs when pushing a repository with a lot of refs.
+You might have time-outs when pushing a lot of refs to a repository.
 The logs would have the following:
 
 ```shell
@@ -696,15 +696,13 @@ The logs would have the following:
 }
 ```
 
-The error may be very long in the log and is truncated in this example.
+The actual error may be much longer, but is truncated in this example.
 
-To workaround this problem we can push the refs in batches. For example, [from an answer on Stack Overflow](https://stackoverflow.com/questions/34154171/how-to-split-refs-into-chunks-that-are-pushed-accross-several-commands):
+To work around this problem we can push the refs in batches. For example, [from an answer on Stack Overflow](https://stackoverflow.com/questions/34154171/how-to-split-refs-into-chunks-that-are-pushed-accross-several-commands), to push the refs in batches of 100:
 
-```
+```shell
 git for-each-ref --format="%(refname)" 'refs/replace/*' | xargs -n 100 git push origin
 ```
-
-We can use this example to push the refs in batches of 100.
 
 We are working to improve Gitaly. You can follow our work towards this goal in the
 [related epic](https://gitlab.com/groups/gitlab-org/-/epics/5717).
