@@ -78,3 +78,19 @@ For example:
 - Google Cloud (GCP) (Coming Soon)
 - Microsoft Azure (Azure) (Coming Soon)
 - IBM
+
+### Audiences and Contributors
+
+The "Implementation Eco System".
+
+* GitLab Internal
+  * Quality / Distribution / Self-Managed
+  * Alliances
+  * Support
+  * GitLab Professional Services
+  * GitLab Private
+  * Public Sector
+* External: 
+  * Customers
+  * GitLab Channel Partners (Integrators)
+  * Platform Partners
