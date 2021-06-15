@@ -200,18 +200,6 @@ add a to-do item:
 
 Select the **To-Do List** **{todo-done}** in the navigation bar to view your current to-do list.
 
-## Link runbooks to alerts
-
-> Runbook URLs [introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/39315) in GitLab 13.3.
-
-When creating alerts from the metrics dashboard for managed Prometheus instances,
-you can link a runbook. When the alert triggers, you can access the runbook through
-the [chart context menu](../metrics/dashboards/index.md#chart-context-menu) in the
-upper-right corner of the metrics chart, making it easy for you to locate and access
-the correct runbook:
-
-![Linked Runbook in charts](img/link_runbooks_to_alerts_v13_5.png)
-
 ## View the environment that generated the alert
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/232492) in GitLab 13.5 behind a feature flag, disabled by default.
