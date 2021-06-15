@@ -61,7 +61,7 @@ module QA
       def verify_labels_import
         labels = imported_project.labels.map { |label| label.slice(:name, :color) }
 
-        expect(labels).to eq(
+        expect(labels).to include(
           [
             { name: 'bug', color: '#d73a4a' },
             { name: 'custom new label', color: '#fc8f91' },
