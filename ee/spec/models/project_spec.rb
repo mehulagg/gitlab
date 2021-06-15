@@ -105,17 +105,32 @@ RSpec.describe Project do
     end
 
     describe '#jira_issue_association_required_to_merge_enabled?' do
-      using RSpec::Parameterized::TableSyntax
-
-      where(:licensed, :feature_flag, :result) do
-        true  | true  | true
-        true  | false | false
-        false | false | false
-        false | true  | false
+      where(:jira_integration_licensed, :jira_integration_active, :jira_enforcement_licensed, :feature_flag, :result) do
+        true  | true  | true  | true  | true
+        true  | true  | true  | false | false
+        true  | true  | false | true  | false
+        true  | true  | false | false | false
+        true  | false | true  | true  | false
+        true  | false | true  | false | false
+        true  | false | false | true  | false
+        true  | false | false | false | false
+        false | true  | true  | true  | false
+        false | true  | true  | false | false
+        false | true  | false | true  | false
+        false | true  | false | false | false
+        false | false | true  | true  | false
+        false | false | true  | false | false
+        false | false | false | true  | false
+        false | false | false | false | false
       end
 
       before do
-        stub_licensed_features(jira_issue_association_enforcement: licensed)
+        stub_licensed_features(
+          jira_issues_integration: jira_integration_licensed,
+          jira_issue_association_enforcement: jira_enforcement_licensed
+        )
+
+        project.build_jira_service(active: jira_integration_active)
         stub_feature_flags(jira_issue_association_on_merge_request: feature_flag)
       end
 
@@ -2729,8 +2744,6 @@ RSpec.describe Project do
   end
 
   describe '#prevent_merge_without_jira_issue?' do
-    using RSpec::Parameterized::TableSyntax
-
     subject { project.prevent_merge_without_jira_issue? }
 
     where(:feature_available, :prevent_merge, :result) do
@@ -2865,8 +2878,6 @@ RSpec.describe Project do
   end
 
   describe '#shared_runners_enabled_but_unavailable?' do
-    using RSpec::Parameterized::TableSyntax
-
     let(:project) do
       build_stubbed(:project, shared_runners_enabled: shared_runners_enabled)
     end
