@@ -231,7 +231,7 @@ To configure a custom email inbox for Service Desk with IMAP, add the following 
 The configuration options are the same as for configuring
 [incoming email](../../administration/incoming_email.md#set-it-up).
 
-### Using custom email address suffix **(FREE SELF)**
+### Using a custom email address suffix **(FREE SELF)**
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/2201) in GitLab Premium 13.0.
 > - [Feature flag removed](https://gitlab.com/gitlab-org/gitlab/-/issues/284656) in GitLab 13.8.
