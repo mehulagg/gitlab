@@ -16,7 +16,6 @@ RSpec.describe Resolvers::IncidentManagement::EscalationPoliciesResolver do
 
   before do
     stub_licensed_features(oncall_schedules: true, escalation_policies: true)
-    stub_feature_flags(escalation_policies_mvc: project)
     project.add_reporter(current_user)
   end
 

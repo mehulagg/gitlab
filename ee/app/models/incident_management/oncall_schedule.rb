@@ -47,7 +47,6 @@ module IncidentManagement
     # configure a policy directly in order to direct alerts
     # to a schedule.
     def backfill_escalation_policy
-      return if ::Feature.enabled?(:escalation_policies_mvc, project, default_enabled: :yaml)
       return if ::Feature.disabled?(:escalation_policies_backfill, project, default_enabled: :yaml)
 
       if policy = project.incident_management_escalation_policies.first

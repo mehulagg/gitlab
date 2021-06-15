@@ -75,7 +75,7 @@ RSpec.describe IncidentManagement::OncallSchedule do
         let_it_be(:policy) { create(:incident_management_escalation_policy, project: project) }
         let_it_be(:rule) { policy.rules.first }
 
-        it 'creates an new escalation rule on the existing policy' do
+        it 'creates a new escalation rule on the existing policy' do
           expect { schedule }
             .to change(::IncidentManagement::EscalationPolicy, :count).by(0)
             .and change(::IncidentManagement::EscalationRule, :count).by(1)
@@ -113,7 +113,7 @@ RSpec.describe IncidentManagement::OncallSchedule do
         context 'with a previously created schedule which has not yet been backfilled' do
           let_it_be(:existing_schedule) { create(:incident_management_oncall_schedule, project: project) }
 
-          it 'creates an new escalation rule on the existing policy' do
+          it 'creates a new escalation rule on the existing policy' do
             expect { schedule }
               .to change(::IncidentManagement::EscalationPolicy, :count).by(1)
               .and change(::IncidentManagement::EscalationRule, :count).by(2)
