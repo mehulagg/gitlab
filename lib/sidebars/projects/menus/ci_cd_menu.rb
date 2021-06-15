@@ -47,6 +47,7 @@ module Sidebars
         private
 
         def pipelines_menu_item
+          # active_routes: { controller: :pipelines },
           ::Sidebars::MenuItem.new(
             title: _('Pipelines'),
             link: project_pipelines_path(context.project),
