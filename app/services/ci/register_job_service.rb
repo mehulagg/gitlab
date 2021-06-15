@@ -126,7 +126,7 @@ module Ci
       end
 
       if Feature.enabled?(:ci_register_job_service_one_by_one, runner, default_enabled: true)
-        build_ids = retrieve_queue(-> { builds.pluck(:id) })
+        build_ids = retrieve_queue(-> { builds.map(&:id) })
 
         @metrics.observe_queue_size(-> { build_ids.size }, @runner.runner_type)
 
@@ -269,9 +269,10 @@ module Ci
 
     # rubocop: disable CodeReuse/ActiveRecord
     def builds_for_shared_runner
-      relation = new_builds.
+      relation = new_builds
         # don't run projects which have not enabled shared runners and builds
-        joins(:project).where(projects: { shared_runners_enabled: true, pending_delete: false })
+        .joins('INNER JOIN projects ON ci_builds.project_id = projects.id')
+        .where(projects: { shared_runners_enabled: true, pending_delete: false })
         .joins('LEFT JOIN project_features ON ci_builds.project_id = project_features.project_id')
         .where('project_features.builds_access_level IS NULL or project_features.builds_access_level > 0')
 
@@ -288,8 +289,12 @@ module Ci
       end
     end
 
+    def in_projects(scope)
+      new_builds.where("project_id IN (#{scope.select(:id).to_sql})").order('id ASC')
+    end
+
     def builds_for_project_runner
-      new_builds.where(project: runner.projects.without_deleted.with_builds_enabled).order('id ASC')
+      in_projects(runner.projects.without_deleted.with_builds_enabled)
     end
 
     def builds_for_group_runner
@@ -301,27 +306,40 @@ module Ci
         .with_group_runners_enabled
         .with_builds_enabled
         .without_deleted
-      new_builds.where(project: projects).order('id ASC')
+
+      in_projects(projects)
     end
 
-    def running_builds_for_shared_runners
-      Ci::Build.running.where(runner: Ci::Runner.instance_type)
-        .group(:project_id).select(:project_id, 'count(*) AS running_builds')
+    def all_running_builds
+      if Feature.enabled?(:ci_pending_builds_queue_source, runner, default_enabled: :yaml)
+        Ci::RunningBuild.all
+      else
+        Ci::Build.running
+      end
     end
 
     def all_builds
-      if Feature.enabled?(:ci_pending_builds_queue_join, runner, default_enabled: :yaml)
-        Ci::Build.joins(:queuing_entry)
+      if Feature.enabled?(:ci_pending_builds_queue_source, runner, default_enabled: :yaml)
+        Ci::PendingBuild.select('build_id AS id').from('ci_pending_builds AS ci_builds')
       else
-        Ci::Build.all
+        Ci::Build.select('id').pending.unstarted
       end
     end
     # rubocop: enable CodeReuse/ActiveRecord
 
+    def running_builds_for_shared_runners
+      all_running_builds
+        .where(runner: Ci::Runner.instance_type)
+        .group(:project_id)
+        .select(:project_id, 'count(*) AS running_builds')
+    end
+
     def new_builds
-      builds = all_builds.pending.unstarted
-      builds = builds.ref_protected if runner.ref_protected?
-      builds
+      if runner.ref_protected?
+        all_builds.ref_protected
+      else
+        all_builds
+      end
     end
 
     def pre_assign_runner_checks

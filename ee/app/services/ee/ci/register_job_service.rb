@@ -21,10 +21,18 @@ module EE
 
       # rubocop: disable CodeReuse/ActiveRecord
       def enforce_minutes_based_on_cost_factors(relation)
-        visibility_relation = ::Ci::Build.where(
+        # TODO find a way to merge with ::Ci::Builds without appying `type = "Ci::Builds"` filter!
+        #
+        model = if ::Feature.enabled?(:ci_pending_builds_queue_source, runner, default_enabled: :yaml)
+                  ::Ci::PendingBuild
+                else
+                  ::Ci::Build
+                end
+
+        visibility_relation = model.where(
           projects: { visibility_level: runner.visibility_levels_without_minutes_quota })
 
-        enforce_limits_relation = ::Ci::Build.where('EXISTS (?)', builds_check_limit)
+        enforce_limits_relation = model.where('EXISTS (?)', builds_check_limit)
 
         relation.merge(visibility_relation.or(enforce_limits_relation))
       end

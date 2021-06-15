@@ -178,7 +178,7 @@ module Ci
       joins(:metadata).where("ci_builds_metadata.config_options -> 'artifacts' -> 'reports' ?| array[:job_types]", job_types: job_types)
     end
 
-    scope :matches_tag_ids, -> (tag_ids) do
+    scope :matches_tag_ids, ->(tag_ids) do
       matcher = ::ActsAsTaggableOn::Tagging
         .where(taggable_type: CommitStatus.name)
         .where(context: 'tags')

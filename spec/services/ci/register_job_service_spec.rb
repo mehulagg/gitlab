@@ -733,17 +733,17 @@ module Ci
         include_examples 'handles runner assignment'
       end
 
-      context 'when joining with pending builds table' do
+      context 'when using pending builds table' do
         before do
-          stub_feature_flags(ci_pending_builds_queue_join: true)
+          stub_feature_flags(ci_pending_builds_queue_source: true)
         end
 
         include_examples 'handles runner assignment'
       end
 
-      context 'when not joining with pending builds table' do
+      context 'when not using pending builds table' do
         before do
-          stub_feature_flags(ci_pending_builds_queue_join: false)
+          stub_feature_flags(ci_pending_builds_queue_source: false)
         end
 
         include_examples 'handles runner assignment'
