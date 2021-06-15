@@ -20,7 +20,7 @@ describe('Qrtly Reconciliation Alert', () => {
     });
   };
 
-  const findAlert = () => wrapper.find(GlAlert);
+  const findAlert = () => wrapper.findComponent(GlAlert);
 
   beforeEach(() => {
     wrapper = createComponent();
