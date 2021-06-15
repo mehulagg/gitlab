@@ -4370,7 +4370,7 @@ job:
     description: 'Release description'
 ```
 
-It is also possible to create any unique tag, in which case [`rules`](#rules) to
+It is also possible to create a new unique tag, in which case [`rules`](#rules) to
 configure the job to only run for tags are not mandatory.
 
 A semantic versioning example:

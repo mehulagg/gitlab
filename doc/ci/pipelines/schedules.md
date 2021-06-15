@@ -61,7 +61,7 @@ GitLab CI/CD so that they can be used in your [`.gitlab-ci.yml` file](../../ci/y
 To configure a job to be executed only when the pipeline has been
 scheduled, use the [`rules`](../yaml/README.md#rules) keyword.
 
-In the example below `make world` runs in scheduled pipelines, and `make build`
+In this example, `make world` runs in scheduled pipelines, and `make build`
 runs in branch and tag pipelines:
 
 ```yaml
