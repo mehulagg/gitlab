@@ -17,7 +17,13 @@ query State {
     zipCode
     company
   }
-  paymentMethod @client
+  paymentMethod @client {
+    id
+    creditCardExpirationMonth
+    creditCardExpirationYear
+    creditCardType
+    creditCardMaskNumber
+  }
   subscription @client {
     quantity
     namespaceId

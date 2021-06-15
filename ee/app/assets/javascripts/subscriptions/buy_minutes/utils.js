@@ -37,7 +37,6 @@ export function writeInitialDataToApolloCache(apolloProvider, dataset) {
         creditCardExpirationYear: null,
         creditCardType: null,
         creditCardMaskNumber: null,
-        // eslint-disable-next-line @gitlab/require-i18n-strings
         __typename: 'PaymentMethod',
       },
       customer: {
