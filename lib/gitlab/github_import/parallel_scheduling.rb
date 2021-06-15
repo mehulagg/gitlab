@@ -104,10 +104,6 @@ module Gitlab
             next if already_imported?(object)
 
             yield object
-
-            # We mark the object as imported immediately so we don't end up
-            # scheduling it multiple times.
-            mark_as_imported(object)
           end
         end
       end

@@ -37,6 +37,9 @@ module Gitlab
         importer_class.new(object, project, client).execute
 
         counter.increment
+
+        mark_as_imported(object)
+
         info(project.id, message: 'importer finished')
       rescue StandardError => e
         error(project.id, e, hash)
@@ -67,9 +70,20 @@ module Gitlab
         raise NotImplementedError
       end
 
+      # Returns the class that was used to schedule this worker
+      # The scheduler is used to cache the information that the object
+      # was already imported
+      def scheduler_class
+        raise NotImplementedError
+      end
+
       private
 
       attr_accessor :github_id
+
+      def mark_as_imported(object)
+        scheduler_class.new(project, nil).mark_as_imported(object)
+      end
 
       def info(project_id, extra = {})
         logger.info(log_attributes(project_id, extra))

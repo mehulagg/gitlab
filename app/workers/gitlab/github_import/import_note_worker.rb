@@ -13,6 +13,10 @@ module Gitlab
         Importer::NoteImporter
       end
 
+      def scheduler_class
+        Importer::NotesImporter
+      end
+
       def counter_name
         :github_importer_imported_notes
       end
