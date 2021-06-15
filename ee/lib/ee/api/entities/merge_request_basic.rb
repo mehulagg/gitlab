@@ -7,6 +7,8 @@ module EE
         extend ActiveSupport::Concern
 
         prepended do
+          expose :approved_by_users, using: ::API::Entities::UserBasic
+
           expose :approvals_before_merge
         end
       end
