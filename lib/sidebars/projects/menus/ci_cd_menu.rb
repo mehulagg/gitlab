@@ -47,22 +47,13 @@ module Sidebars
         private
 
         def pipelines_menu_item
-          # active_routes: { controller: :pipelines },
           ::Sidebars::MenuItem.new(
             title: _('Pipelines'),
             link: project_pipelines_path(context.project),
             container_html_options: { class: 'shortcuts-pipelines' },
-            active_routes: { path: pipelines_routes },
+            active_routes: { controller: :pipelines },
             item_id: :pipelines
           )
-        end
-
-        def pipelines_routes
-          %w[
-            pipelines#index
-            pipelines#show
-            pipelines#new
-          ]
         end
 
         def pipelines_editor_menu_item
