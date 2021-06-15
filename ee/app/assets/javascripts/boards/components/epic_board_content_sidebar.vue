@@ -1,7 +1,7 @@
 <script>
 import { GlDrawer } from '@gitlab/ui';
+import { MountingPortal } from 'portal-vue';
 import { mapState, mapActions, mapGetters } from 'vuex';
-import SetFromTop from '~/boards/components/set_from_top.vue';
 import BoardSidebarLabelsSelect from '~/boards/components/sidebar/board_sidebar_labels_select.vue';
 import BoardSidebarTitle from '~/boards/components/sidebar/board_sidebar_title.vue';
 import { ISSUABLE } from '~/boards/constants';
@@ -13,7 +13,7 @@ import SidebarSubscriptionsWidget from '~/sidebar/components/subscriptions/sideb
 export default {
   components: {
     GlDrawer,
-    SetFromTop,
+    MountingPortal,
     BoardSidebarLabelsSelect,
     BoardSidebarTitle,
     SidebarConfidentialityWidget,
@@ -41,9 +41,10 @@ export default {
 </script>
 
 <template>
-  <set-from-top #default="{ heightFromTop }">
+  <mounting-portal mount-to="#js-right-sidebar-portal" name="right-sidebar" append>
     <gl-drawer
       v-if="showSidebar"
+      class="gl-absolute"
       :open="isSidebarOpen"
       :header-height="heightFromTop"
       @close="handleClose"
@@ -84,5 +85,5 @@ export default {
         />
       </template>
     </gl-drawer>
-  </set-from-top>
+  </mounting-portal>
 </template>

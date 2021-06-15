@@ -1,5 +1,6 @@
 <script>
 import { GlButton, GlDrawer, GlLabel } from '@gitlab/ui';
+import { MountingPortal } from 'portal-vue';
 import { mapActions, mapState, mapGetters } from 'vuex';
 import { LIST, ListType, ListTypeTitles } from '~/boards/constants';
 import boardsStore from '~/boards/stores/boards_store';
@@ -7,12 +8,11 @@ import { isScopedLabel } from '~/lib/utils/common_utils';
 import { __ } from '~/locale';
 import eventHub from '~/sidebar/event_hub';
 import glFeatureFlagMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
-import SetFromTop from './set_from_top.vue';
 
 export default {
   listSettingsText: __('List settings'),
   components: {
-    SetFromTop,
+    MountingPortal,
     GlButton,
     GlDrawer,
     GlLabel,
@@ -84,10 +84,10 @@ export default {
 </script>
 
 <template>
-  <set-from-top #default="{ heightFromTop }">
+  <mounting-portal mount-to="#js-right-sidebar-portal" name="right-sidebar" append>
     <gl-drawer
       v-if="showSidebar"
-      class="js-board-settings-sidebar"
+      class="js-board-settings-sidebar gl-absolute"
       :open="isSidebarOpen"
       :header-height="heightFromTop"
       @close="unsetActiveId"
@@ -124,5 +124,5 @@ export default {
         </div>
       </template>
     </gl-drawer>
-  </set-from-top>
+  </mounting-portal>
 </template>

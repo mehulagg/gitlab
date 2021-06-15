@@ -1,5 +1,6 @@
 <script>
 import { GlDrawer } from '@gitlab/ui';
+import { MountingPortal } from 'portal-vue';
 import { mapState, mapActions, mapGetters } from 'vuex';
 import BoardSidebarDueDate from '~/boards/components/sidebar/board_sidebar_due_date.vue';
 import BoardSidebarLabelsSelect from '~/boards/components/sidebar/board_sidebar_labels_select.vue';
@@ -10,7 +11,6 @@ import { ISSUABLE } from '~/boards/constants';
 import SidebarAssigneesWidget from '~/sidebar/components/assignees/sidebar_assignees_widget.vue';
 import SidebarConfidentialityWidget from '~/sidebar/components/confidential/sidebar_confidentiality_widget.vue';
 import SidebarSubscriptionsWidget from '~/sidebar/components/subscriptions/sidebar_subscriptions_widget.vue';
-import SetFromTop from './set_from_top.vue';
 
 export default {
   components: {
@@ -23,7 +23,7 @@ export default {
     BoardSidebarDueDate,
     SidebarSubscriptionsWidget,
     BoardSidebarMilestoneSelect,
-    SetFromTop,
+    MountingPortal,
     BoardSidebarEpicSelect: () =>
       import('ee_component/boards/components/sidebar/board_sidebar_epic_select.vue'),
     BoardSidebarWeightInput: () =>
@@ -73,9 +73,10 @@ export default {
 </script>
 
 <template>
-  <set-from-top #default="{ heightFromTop }">
+  <mounting-portal mount-to="#js-right-sidebar-portal" name="right-sidebar" append>
     <gl-drawer
       v-if="showSidebar"
+      class="gl-absolute"
       :open="isSidebarOpen"
       :header-height="heightFromTop"
       @close="handleClose"
@@ -120,5 +121,5 @@ export default {
         />
       </template>
     </gl-drawer>
-  </set-from-top>
+  </mounting-portal>
 </template>
