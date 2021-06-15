@@ -76,7 +76,7 @@ To add a new application for a group:
 To create an application for your GitLab instance:
 
 1. On the top bar, select **Menu >** **{admin}** **Admin**.
-1. On the left sidebar, select **Applications**
+1. On the left sidebar, select **Applications**.
 1. Select **New application**.
 
 When creating application in the **Admin Area** , you can mark it as _trusted_.

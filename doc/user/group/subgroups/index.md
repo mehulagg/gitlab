@@ -85,7 +85,7 @@ The setting can be changed for any group by:
 
 - A group owner:
   1. Select the group.
-  1. On the left sidebar, select **Settings > General**
+  1. On the left sidebar, select **Settings > General**.
   1. Expand the **Permissions, LFS, 2FA** section.
 - An administrator:
   1. On the top bar, select **Menu >** **{admin}** **Admin**.
