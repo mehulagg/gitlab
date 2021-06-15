@@ -17,8 +17,8 @@ query State {
     zipCode
     company
   }
+  paymentMethod @client
   subscription @client {
-    paymentMethodId
     quantity
     namespaceId
   }
