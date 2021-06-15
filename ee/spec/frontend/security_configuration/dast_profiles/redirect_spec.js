@@ -3,9 +3,9 @@ import { TEST_HOST } from 'helpers/test_constants';
 import * as urlUtility from '~/lib/utils/url_utility';
 
 const fullPath = 'group/project';
-const profilesLibraryPath = `${TEST_HOST}/${fullPath}/-/security/configuration/dast_scans`;
-const onDemandScansPath = `${TEST_HOST}/${fullPath}/-/on_demand_scans`;
-const dastConfigPath = `${TEST_HOST}/${fullPath}/-/security/configuration/dast`;
+const profilesLibraryPath = `/${fullPath}/-/security/configuration/dast_scans`;
+const onDemandScansPath = `/${fullPath}/-/on_demand_scans`;
+const dastConfigPath = `/${fullPath}/-/security/configuration/dast`;
 const urlParamKey = 'site_profile_id';
 const originalReferrer = document.referrer;
 
@@ -15,11 +15,15 @@ const params = {
   urlParamKey,
 };
 
+const getUrl = (path) => {
+  return new URL(path, TEST_HOST).href;
+};
+
 const factory = (id) => returnToPreviousPageFactory(params)(id);
 
-const setReferrer = (value = onDemandScansPath) => {
+const setReferrer = (value) => {
   Object.defineProperty(document, 'referrer', {
-    value,
+    value: getUrl(value),
     configurable: true,
   });
 };
@@ -34,11 +38,21 @@ describe('DAST Profiles redirector', () => {
       jest.spyOn(urlUtility, 'redirectTo').mockImplementation();
     });
 
-    it('default - redirects to profile library page', () => {
-      factory();
-      expect(urlUtility.redirectTo).toHaveBeenCalledWith(profilesLibraryPath);
-    });
+    describe('redirects to profile library page', () => {
+      it('default - with no referrer', () => {
+        factory();
+        expect(urlUtility.redirectTo).toHaveBeenCalledWith(profilesLibraryPath);
+      });
 
+      it('when user comes from profile library page', () => {
+        setReferrer(profilesLibraryPath);
+
+        factory();
+        expect(urlUtility.redirectTo).toHaveBeenCalledWith(profilesLibraryPath);
+
+        resetReferrer();
+      });
+    });
     describe.each([
       ['On-demand scans', onDemandScansPath],
       ['DAST Configuration', dastConfigPath],
@@ -58,7 +72,7 @@ describe('DAST Profiles redirector', () => {
 
       it('redirects to previous page with id', () => {
         factory({ id: 2 });
-        expect(urlUtility.redirectTo).toHaveBeenCalledWith(`${path}?site_profile_id=2`);
+        expect(urlUtility.redirectTo).toHaveBeenCalledWith(`${TEST_HOST}${path}?site_profile_id=2`);
       });
     });
   });
