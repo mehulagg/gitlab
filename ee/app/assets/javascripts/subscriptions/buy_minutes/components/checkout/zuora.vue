@@ -1,7 +1,6 @@
 <script>
 import { GlLoadingIcon } from '@gitlab/ui';
 import { pick } from 'lodash';
-import { convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
 import Api from 'ee/api';
 import {
   ERROR_LOADING_PAYMENT_FORM,
@@ -9,10 +8,11 @@ import {
   ZUORA_IFRAME_OVERRIDE_PARAMS,
   PAYMENT_FORM_ID,
 } from 'ee/subscriptions/constants';
-import createFlash from '~/flash';
+import updateStateMutation from 'ee/subscriptions/graphql/mutations/update_state.mutation.graphql';
 import { GENERAL_ERROR_MESSAGE } from 'ee/vue_shared/purchase_flow/constants';
 import activateNextStepMutation from 'ee/vue_shared/purchase_flow/graphql/mutations/activate_next_step.mutation.graphql';
-import updateStateMutation from 'ee/subscriptions/graphql/mutations/update_state.mutation.graphql';
+import createFlash from '~/flash';
+import { convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
 
 export default {
   components: {
@@ -45,9 +45,6 @@ export default {
   },
   mounted() {
     this.loadZuoraScript();
-  },
-  beforeDestroy() {
-    document.head.removeChild(this.zuoraScriptEl);
   },
   methods: {
     zuoraIframeRendered() {
