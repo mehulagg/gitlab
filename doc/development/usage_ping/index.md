@@ -85,6 +85,8 @@ production: &base
     usage_ping_enabled: false
 ```
 
+*note: the method to disable usage ping via `gitlab.rb` does not work from GitLab version 9.3 to version 13.12.4. Please use the Gitlab Administrator settings in the UI. See more information in this [issue](https://gitlab.com/gitlab-org/gitlab/-/issues/333269)*
+
 ## Usage Ping request flow
 
 The following example shows a basic request/response flow between a GitLab instance, the Versions Application, the License Application, Salesforce, the GitLab S3 Bucket, the GitLab Snowflake Data Warehouse, and Sisense:
