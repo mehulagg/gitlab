@@ -1,40 +1,15 @@
 # frozen_string_literal: true
 
-require 'forwardable'
 require 'capybara/dsl'
 require 'active_support/core_ext/array/extract_options'
 
 module QA
   module Resource
     class Base
-      extend SingleForwardable
       include ApiFabricator
       extend Capybara::DSL
 
       NoValueError = Class.new(RuntimeError)
-
-      # Custom attribute definition helper class
-      #
-      class DSL
-        def initialize(base)
-          @base = base
-        end
-
-        def attributes(*names)
-          names.each { |name| attribute(name) }
-        end
-
-        def attribute(name, &block)
-          @base.class_eval do
-            attr_writer(name)
-
-            # Add unused attribute so we can easily filter out all custom attribute methods
-            define_method(name) do |_attribute_mark = nil|
-              instance_variable_get("@#{name}") || instance_variable_set("@#{name}", populate_attribute(name, block))
-            end
-          end
-        end
-      end
 
       class << self
         # Initialize new instance of class without fabrication
@@ -116,8 +91,26 @@ module QA
           end
         end
 
-        def evaluator
-          @evaluator ||= Base::DSL.new(self)
+        # Define custom attribute
+        #
+        # @param [SYmbol] name
+        # @param [Proc] &block
+        # @return [void]
+        def attribute(name, &block)
+          attr_writer(name)
+
+          # Add unused attribute so we can easily filter out all custom attribute methods
+          define_method(name) do |_attribute_mark = nil|
+            instance_variable_get("@#{name}") || instance_variable_set("@#{name}", populate_attribute(name, block))
+          end
+        end
+
+        # Define multiple custom attributes
+        #
+        # @param [Array] *names
+        # @return [void]
+        def attributes(*names)
+          names.each { |name| attribute(name) }
         end
       end
 
@@ -136,8 +129,6 @@ module QA
 
         self
       end
-
-      def_delegators :evaluator, :attribute, :attributes
 
       attribute :web_url
 
