@@ -842,6 +842,34 @@ Keep in mind, this means your app will not batch queries.
 
 Once subscriptions are mature, this process can be replaced by using them and we can remove the separate link library and return to batching queries.
 
+#### Subscriptions
+
+We use [subscriptions](https://www.apollographql.com/docs/react/data/subscriptions/) to receive real-time updates from GraphQL API via websockets. Currently, the number of existing subscriptions is limited, you can check a list of available ones in [GraphqiQL explorer](https://gitlab.com/-/graphql-explorer)
+
+NOTE:
+We cannot test subscriptions using GraphiQL, because they require an Action Cable client, which GraphiQL does not support at the moment.
+
+Subscriptions don't require any additional configuration of Apollo Client instance, you can use them in the application right away. To distinguish subscriptions from queries and mutations, we recommend naming them with `.subscription.graphql` extention:
+
+```javascript
+// app/assets/javascripts/sidebar/queries/issuable_assignees.subscription.graphql
+
+subscription issuableAssigneesUpdated($issuableId: IssuableID!) {
+  issuableAssigneesUpdated(issuableId: $issuableId) {
+    ... on Issue {
+      assignees {
+        nodes {
+          ...User
+          status {
+            availability
+          }
+        }
+      }
+    }
+  }
+}
+```
+
 ### Testing
 
 #### Generating the GraphQL schema
