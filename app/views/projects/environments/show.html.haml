@@ -5,58 +5,26 @@
 - add_page_specific_style 'page_bundles/environments'
 - add_page_specific_style 'page_bundles/ci_status'
 
-#environments-detail-view{ data: { name: @environment.name, id: @environment.id, delete_path: environment_delete_path(@environment)} }
-  - if @environment.available? && can?(current_user, :stop_environment, @environment)
-    #stop-environment-modal.modal.fade{ tabindex: -1 }
-      .modal-dialog
-        .modal-content
-          .modal-header
-            %h4.modal-title.d-flex.mw-100
-              = s_("Environments|Stopping")
-              %span.has-tooltip.text-truncate.ml-1.mr-1.flex-fill{ title: @environment.name, data: { container: '#stop-environment-modal' } }
-                #{@environment.name}?
-          .modal-body
-            %p= s_('Environments|Are you sure you want to stop this environment?')
-            - unless @environment.stop_action_available?
-              .warning_message
-                %p= s_('Environments|Note that this action will stop the environment, but it will %{emphasis_start}not%{emphasis_end} have an effect on any existing deployment due to no “stop environment action” being defined in the %{ci_config_link_start}.gitlab-ci.yml%{ci_config_link_end} file.').html_safe % { emphasis_start: '<strong>'.html_safe,
-                  emphasis_end: '</strong>'.html_safe,
-                  ci_config_link_start: '<a href="https://docs.gitlab.com/ee/ci/yaml/" target="_blank" rel="noopener noreferrer">'.html_safe,
-                  ci_config_link_end: '</a>'.html_safe }
-                %a{ href: 'https://docs.gitlab.com/ee/ci/environments/index.html#stopping-an-environment',
-                  target: '_blank',
-                  rel: 'noopener noreferrer' }
-                  = s_('Environments|Learn more about stopping environments')
-          .modal-footer
-            = button_tag _('Cancel'), type: 'button', class: 'gl-button btn btn-cancel', data: { dismiss: 'modal' }
-            = button_to stop_project_environment_path(@project, @environment), class: 'gl-button btn btn-danger has-tooltip', method: :post do
-              = s_('Environments|Stop environment')
-
-  - if can_destroy_environment?(@environment)
-    #delete-environment-modal
-
-  .top-area.justify-content-between
-    .d-flex
-      %h3.page-title= @environment.name
-      - if @environment.auto_stop_at?
-        %p.align-self-end.gl-ml-3
-          = s_('Environments|Auto stops %{auto_stop_time}').html_safe % {auto_stop_time: time_ago_with_tooltip(@environment.auto_stop_at)}
-    .nav-controls.my-2
-      = render 'projects/environments/pin_button', environment: @environment
-      = render 'projects/environments/terminal_button', environment: @environment
-      = render 'projects/environments/external_url', environment: @environment
-      = render 'projects/environments/metrics_button', environment: @environment
-      - if can?(current_user, :update_environment, @environment)
-        = link_to _('Edit'), edit_project_environment_path(@project, @environment), class: 'btn'
-      - if @environment.available? && can?(current_user, :stop_environment, @environment)
-        = button_tag class: 'gl-button btn btn-danger', type: 'button', data: { toggle: 'modal',
-          target: '#stop-environment-modal' } do
-          = sprite_icon('stop')
-          = s_('Environments|Stop')
-      - if can_destroy_environment?(@environment)
-        = button_tag class: 'gl-button btn btn-danger', type: 'button', data: { toggle: 'modal',
-          target: '#delete-environment-modal' } do
-          = s_('Environments|Delete')
+#environments-detail-view{ data: { 
+  name: @environment.name,
+  id: @environment.id,
+  external_url: @environment.external_url,
+  can_update_environment: can?(current_user, :update_environment, @environment).to_s,
+  can_destroy_environment: can_destroy_environment?(@environment).to_s,
+  can_read_environment: can?(current_user, :read_environment, @environment).to_s, 
+  can_stop_environment: can?(current_user, :stop_environment, @environment).to_s,
+  can_admin_environment: can?(current_user, :admin_environment, @project).to_s,
+  environment_metrics_path: environment_metrics_path(@environment),
+  environments_fetch_path: project_environments_path(@project, format: :json),
+  environment_edit_path: edit_project_environment_path(@project, @environment),
+  environment_stop_path: stop_project_environment_path(@project, @environment),
+  environment_delete_path: environment_delete_path(@environment),
+  environment_cancel_auto_stop_path: cancel_auto_stop_project_environment_path(@project, @environment),
+  environment_terminal_path: terminal_project_environment_path(@project, @environment),
+  has_terminals: @environment.has_terminals?.to_s,
+  is_environment_available: @environment.available?.to_s,
+  auto_stop_at: @environment.auto_stop_at } }
+  #environments-detail-view-header
 
   .environments-container
     - if @deployments.blank?

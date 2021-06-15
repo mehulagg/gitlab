@@ -106,7 +106,13 @@ export default {
 
         this.service
           .postAction(endpoint)
-          .then(() => this.fetchEnvironments())
+          .then(() => {
+            if (!this.isDetailView) {
+              this.fetchEnvironments();
+            } else {
+              window.location.reload();
+            }
+          })
           .catch((err) => {
             this.isLoading = false;
             Flash(isFunction(errorMessage) ? errorMessage(err.response.data) : errorMessage);
