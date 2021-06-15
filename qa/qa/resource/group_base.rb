@@ -9,10 +9,10 @@ module QA
 
       attr_accessor :path
 
-      attribute :id
-      attribute :runners_token
-      attribute :name
-      attribute :full_path
+      attributes :id,
+                 :runners_token,
+                 :name,
+                 :full_path
 
       # Get group labels
       #
