@@ -611,11 +611,6 @@ module ProjectsHelper
     project.unlink_forks_upon_visibility_decrease_enabled? && project.visibility_level > Gitlab::VisibilityLevel::PRIVATE && project.forks_count > 0
   end
 
-  def settings_container_registry_expiration_policy_available?(project)
-    Feature.disabled?(:sidebar_refactor, current_user, default_enabled: :yaml) &&
-      can_destroy_container_registry_image?(current_user, project)
-  end
-
   def settings_packages_and_registries_enabled?(project)
     Feature.enabled?(:sidebar_refactor, current_user, default_enabled: :yaml) &&
       can_destroy_container_registry_image?(current_user, project)
