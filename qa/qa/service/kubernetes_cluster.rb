@@ -51,6 +51,26 @@ module QA
         shell('kubectl apply -f -', stdin_data: manifest)
       end
 
+      def add_sample_policy(project, policy_name: 'sample-policy')
+        namespace = "#{project.name}-#{project.id}-production"
+        network_policy = <<~EOF
+          apiVersion: "cilium.io/v2"
+          kind: CiliumNetworkPolicy
+          metadata:
+            name: #{policy_name}
+            namespace: #{namespace}
+          spec:
+            endpointSelector:
+              matchLabels:
+                role: backend
+            ingress:
+            - fromEndpoints:
+              - matchLabels:
+                  role: frontend
+        EOF
+        shell('kubectl apply -f -', stdin_data: network_policy)
+      end
+
       private
 
       def fetch_api_url

@@ -183,6 +183,7 @@ module QA
         end
 
         module ThreatMonitoring
+          autoload :Index, 'qa/ee/page/project/threat_monitoring/index'
           autoload :AlertsList, 'qa/ee/page/project/threat_monitoring/alerts_list'
         end
       end
