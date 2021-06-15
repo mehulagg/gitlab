@@ -10,8 +10,10 @@ import {
   formatStageDataForSubmission,
   generateInitialStageData,
 } from 'ee/analytics/cycle_analytics/components/create_value_stream_form/utils';
-
+import { defaultStageConfig } from '../../mock_data';
 import { emptyErrorsState, emptyState, formInitialData } from './mock_data';
+
+const defaultStageNames = defaultStageConfig.map(({ name }) => name);
 
 describe('initializeFormData', () => {
   const checkInitializedData = (
@@ -102,7 +104,7 @@ describe('validateStage', () => {
     ${'name'}               | ${'Issue'}                         | ${ERRORS.STAGE_NAME_EXISTS}    | ${'is a capitalized default name'}
     ${'endEventIdentifier'} | ${''}                              | ${ERRORS.START_EVENT_REQUIRED} | ${'has no corresponding start event'}
   `('returns "$error" if $field $msg', ({ field, value, error }) => {
-    const result = validateStage({ ...defaultFields, [field]: value });
+    const result = validateStage({ ...defaultFields, [field]: value }, defaultStageNames);
     expectFieldError({ result, error, field });
   });
 
