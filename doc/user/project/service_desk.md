@@ -167,7 +167,7 @@ To edit the custom email display name:
 
 Using the `service_desk_email` configuration, you can customize the mailbox
 used by Service Desk. This allows you to have a separate email address for 
-Service Desk and enables the configuration of a [custom suffix](#using-a-custom-suffix).
+Service Desk and enables the configuration of a [custom suffix](#using-a-custom-email-address-suffix).
 
 The `address` must include the `+%{key}` placeholder within the 'user' 
 portion of the address, before the `@`. This is used to identify the project 
