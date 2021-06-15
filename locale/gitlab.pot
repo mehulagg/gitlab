@@ -6343,6 +6343,9 @@ msgstr ""
 msgid "Checkout|Failed to load states. Please try again."
 msgstr ""
 
+msgid "Checkout|Failed to load the payment form. Please try again."
+msgstr ""
+
 msgid "Checkout|Failed to register credit card. Please try again."
 msgstr ""
 
