@@ -76,6 +76,7 @@ export default {
   <mounting-portal mount-to="#js-right-sidebar-portal" name="right-sidebar" append>
     <gl-drawer
       v-if="showSidebar"
+      v-bind="$attrs"
       class="gl-absolute"
       :open="isSidebarOpen"
       @close="handleClose"
