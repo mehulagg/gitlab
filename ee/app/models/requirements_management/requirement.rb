@@ -20,6 +20,7 @@ module RequirementsManagement
 
     belongs_to :author, inverse_of: :requirements, class_name: 'User'
     belongs_to :project, inverse_of: :requirements
+    belongs_to :issue, inverse_of: :requirement
 
     has_many :test_reports, inverse_of: :requirement
 
