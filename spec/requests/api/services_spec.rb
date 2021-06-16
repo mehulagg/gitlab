@@ -179,10 +179,10 @@ RSpec.describe API::Services do
   end
 
   describe 'POST /projects/:id/services/:slug/trigger' do
-    describe 'Mattermost Service' do
-      let(:service_name) { 'mattermost_slash_commands' }
+    describe 'Mattermost integration' do
+      let(:integration_name) { 'mattermost_slash_commands' }
 
-      context 'no service is available' do
+      context 'when no integration is available' do
         it 'returns a not found message' do
           post api("/projects/#{project.id}/services/idonotexist/trigger")
 
@@ -191,34 +191,34 @@ RSpec.describe API::Services do
         end
       end
 
-      context 'the service exists' do
+      context 'when the integration exists' do
         let(:params) { { token: 'token' } }
 
-        context 'the service is not active' do
+        context 'when the integration is not active' do
           before do
-            project.create_mattermost_slash_commands_service(
+            project.create_mattermost_slash_commands_integration(
               active: false,
               properties: params
             )
           end
 
-          it 'when the service is inactive' do
-            post api("/projects/#{project.id}/services/#{service_name}/trigger"), params: params
+          it 'when the integration is inactive' do
+            post api("/projects/#{project.id}/services/#{integration_name}/trigger"), params: params
 
             expect(response).to have_gitlab_http_status(:not_found)
           end
         end
 
-        context 'the service is active' do
+        context 'when the integration is active' do
           before do
-            project.create_mattermost_slash_commands_service(
+            project.create_mattermost_slash_commands_integration(
               active: true,
               properties: params
             )
           end
 
           it 'returns status 200' do
-            post api("/projects/#{project.id}/services/#{service_name}/trigger"), params: params
+            post api("/projects/#{project.id}/services/#{integration_name}/trigger"), params: params
 
             expect(response).to have_gitlab_http_status(:ok)
           end
@@ -226,7 +226,7 @@ RSpec.describe API::Services do
 
         context 'when the project can not be found' do
           it 'returns a generic 404' do
-            post api("/projects/404/services/#{service_name}/trigger"), params: params
+            post api("/projects/404/services/#{integration_name}/trigger"), params: params
 
             expect(response).to have_gitlab_http_status(:not_found)
             expect(json_response["message"]).to eq("404 Service Not Found")

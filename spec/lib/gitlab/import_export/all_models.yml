@@ -368,7 +368,7 @@ project:
 - drone_ci_integration
 - emails_on_push_service
 - pipelines_email_service
-- mattermost_slash_commands_service
+- mattermost_slash_commands_integration
 - slack_slash_commands_service
 - irker_service
 - packagist_service
