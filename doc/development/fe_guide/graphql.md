@@ -852,7 +852,7 @@ We cannot test subscriptions using GraphiQL, because they require an Action Cabl
 Subscriptions don't require any additional configuration of Apollo Client instance, you can use them in the application right away. To distinguish subscriptions from queries and mutations, we recommend naming them with `.subscription.graphql` extention:
 
 ```javascript
-// app/assets/javascripts/sidebar/queries/issuable_assignees.subscription.graphql
+// ~/sidebar/queries/issuable_assignees.subscription.graphql
 
 subscription issuableAssigneesUpdated($issuableId: IssuableID!) {
   issuableAssigneesUpdated(issuableId: $issuableId) {
@@ -868,6 +868,45 @@ subscription issuableAssigneesUpdated($issuableId: IssuableID!) {
     }
   }
 }
+```
+
+When using GraphQL subscriptions in Vue application, we recommend updating existing Apollo query results with [subscribeToMore](https://apollo.vuejs.org/guide/apollo/subscriptions.html#subscribe-to-more) option:
+
+```javascript
+import issuableAssigneesSubscription from '~/sidebar/queries/issuable_assignees.subscription.graphql'
+
+apollo: {
+  issuable: {
+    query() {
+      return assigneesQueries[this.issuableType].query;
+    },
+    subscribeToMore: {
+      // Specify the subscription that will update the query
+      document() {
+        return issuableAssigneesSubscription;
+      },
+      variables() {
+        return {
+          issuableId: convertToGraphQLId(this.issuableClass, this.issuableId),
+        };
+      },
+      // Describe how subscription should update the query
+      updateQuery(prev, { subscriptionData }) {
+        if (prev && subscriptionData?.data?.issuableAssigneesUpdated) {
+          const data = produce(prev, (draftData) => {
+            draftData.workspace.issuable.assignees.nodes =
+              subscriptionData.data.issuableAssigneesUpdated.assignees.nodes;
+          });
+          if (this.mediator) {
+            this.handleFetchResult(data);
+          }
+          return data;
+        }
+        return prev;
+      },
+    },
+  },
+},
 ```
 
 ### Testing
