@@ -347,9 +347,6 @@ h1 {
   .d-sm-none {
     display: none !important;
   }
-  .d-sm-inline-block {
-    display: inline-block !important;
-  }
 }
 @media (min-width: 768px) {
   .d-md-block {
@@ -505,9 +502,6 @@ body {
   background-color: rgba(255, 255, 255, 0.07);
   color: #dbdbdb;
   vertical-align: baseline;
-}
-.gl-font-sm {
-  font-size: 12px;
 }
 .dropdown {
   position: relative;
@@ -2103,7 +2097,9 @@ body.gl-dark .navbar-gitlab .navbar-collapse {
 }
 body.gl-dark .navbar-gitlab .container-fluid .navbar-toggler {
   border-left: 1px solid #b3b3b3;
-  color: #fafafa;
+}
+body.gl-dark .navbar-gitlab .container-fluid .navbar-toggler svg {
+  fill: #fafafa;
 }
 body.gl-dark .navbar-gitlab .navbar-sub-nav > li.active > a,
 body.gl-dark .navbar-gitlab .navbar-sub-nav > li.active > button,
@@ -2290,26 +2286,8 @@ body.gl-dark {
   white-space: nowrap;
   width: 1px;
 }
-.gl-border-none\! {
-  border-style: none !important;
-}
-.gl-display-none {
-  display: none;
-}
-@media (min-width: 36rem) {
-  .gl-sm-display-block {
-    display: block;
-  }
-}
 .gl-absolute {
   position: absolute;
-}
-.gl-px-3 {
-  padding-left: 0.5rem;
-  padding-right: 0.5rem;
-}
-.gl-pr-2 {
-  padding-right: 0.25rem;
 }
 .gl-ml-3 {
   margin-left: 0.5rem;
@@ -2317,12 +2295,6 @@ body.gl-dark {
 .gl-mx-0\! {
   margin-left: 0 !important;
   margin-right: 0 !important;
-}
-.gl-font-sm {
-  font-size: 0.75rem;
-}
-.gl-font-weight-bold {
-  font-weight: 600;
 }
 
 @import "startup/cloaking";
