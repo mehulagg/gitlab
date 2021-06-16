@@ -60,7 +60,6 @@ module EE
         :max_personal_access_token_lifetime,
         :pseudonymizer_enabled,
         :repository_size_limit,
-        :seat_link_enabled,
         :secret_detection_token_revocation_enabled,
         :secret_detection_token_revocation_url,
         :secret_detection_token_revocation_token,

@@ -140,16 +140,6 @@ RSpec.describe SyncSeatLinkWorker, type: :worker do
       end
     end
 
-    context 'when seat link has been disabled' do
-      before do
-        create(:historical_data)
-
-        allow(Gitlab::CurrentSettings).to receive(:seat_link_enabled?).and_return(false)
-      end
-
-      include_examples 'no seat link sync'
-    end
-
     context 'when no historical data exists' do
       include_examples 'no seat link sync'
     end

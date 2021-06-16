@@ -195,37 +195,5 @@ RSpec.describe Gitlab::SeatLinkData do
         it { is_expected.to eq(true) }
       end
     end
-
-    context 'legacy license' do
-      let(:license) { build(:license) }
-
-      context 'when seat link is disabled' do
-        before do
-          allow(Settings.gitlab).to receive(:seat_link_enabled).and_return(false)
-        end
-
-        it { is_expected.to be_falsey }
-      end
-
-      context 'when license is trial' do
-        let(:license) { build(:license, trial: true) }
-
-        it { is_expected.to be_falsey }
-      end
-
-      context 'when timestamp is out of the range' do
-        let(:timestamp) { license.starts_at - 1.day }
-
-        it { is_expected.to be_falsey }
-      end
-
-      context 'when historical data not found' do
-        before do
-          historical_data.destroy!
-        end
-
-        it { is_expected.to eq(false) }
-      end
-    end
   end
 end
