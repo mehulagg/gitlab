@@ -126,6 +126,14 @@ RSpec.describe BlobPresenter do
 
     subject { described_class.new(blob).plain_data }
 
+    context 'when blob is text' do
+      let(:file) { 'files/ruby/popen.rb' }
+
+      it 'returns false' do
+        expect(subject.include?('</span>')).to be_falsey
+      end
+    end
+
     context 'when blob is binary' do
       let(:file) { 'files/images/logo-black.png' }
 

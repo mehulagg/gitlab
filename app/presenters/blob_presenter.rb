@@ -23,7 +23,7 @@ class BlobPresenter < Gitlab::View::Presenter::Delegated
   def plain_data
     return if blob.binary?
 
-    highlight(plain: false)
+    highlight(plain: true)
   end
 
   def web_url
