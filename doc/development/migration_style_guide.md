@@ -943,6 +943,41 @@ derived from the class name or namespace.
 
 Be aware of the limitations [when using models in migrations](#using-models-in-migrations-discouraged).
 
+### Modifying existing data
+
+In most circumstances, prefer migrating data in **batches** when modifying data in the database.
+
+We introduced a new helper [each_batch_range](https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/database/dynamic_model_helpers.rb#L28-31) which faciliates the process of iterating over a collection in a performant way. The default size of the batch is set to `1000`.
+
+#### Examples
+
+**Purging data in batch:**
+
+```ruby
+include ::Gitlab::Database::DynamicModelHelpers
+
+disable_ddl_transaction!
+
+def up
+  each_batch_range(table_name: 'ci_pending_builds', scope: ->(table) { table.all }, of: BATCH_SIZE) do |min, max|
+    execute <<~SQL
+      DELETE FROM ci_pending_builds
+        USING ci_builds
+        WHERE ci_builds.id = ci_pending_builds.build_id
+          AND ci_builds.status != 'pending'
+          AND ci_builds.type = 'Ci::Build'
+          AND ci_pending_builds.id BETWEEN #{min} AND #{max}
+    SQL
+  end
+end
+```
+
+- `table_name` is the table being modified
+- `scope` calls a lambda which fetches the relevant dataset selected (default is set to `.all`)
+- `of` is the batch size (default is set to `1000`)
+
+Here an [example MR](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/62195) illustrating how to use our new helper.
+
 ### Renaming reserved paths
 
 When a new route for projects is introduced, it could conflict with any
