@@ -144,6 +144,10 @@ Parameters:
 | `id` | integer/string | yes | The ID or [URL-encoded path of the group](README.md#namespaced-path-encoding) owned by the authenticated user |
 | `milestone_id` | integer | yes | The ID of a group milestone |
 
+NOTE: 
+Currently, this API endpoint doesn't return issues from any subgroups.
+If you are interested in obtaining all the milestones' issues feel free to utilize the [List Issues API](https://docs.gitlab.com/ee/api/issues.html#list-issues) instead, while filtering for a particular milestone explicitly (e.g `GET /issues?milestone=1.0.0&state=opened`) .
+
 ## Get all merge requests assigned to a single milestone
 
 Gets all merge requests assigned to a single group milestone.
