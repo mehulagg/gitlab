@@ -1,0 +1,35 @@
+# Use this template to enable running container scanning in your project.
+# You should add this template to an existing `.gitlab-ci.yml` file by using the `include:`
+# keyword.
+# The template should work without modifications but you can customize the template settings if
+# needed: https://docs.gitlab.com/ee/user/application_security/running_container_scanning/#customizing-the-running-container-scanning-settings
+#
+# Requirements:
+# - A `test` stage to be present in the pipeline.
+# - You must define the kubeconfig of the cluster to be scanned in the RCS_KUBECONFIG variable. If RCS_KUBECONFIG is the
+#   same as $KUBECONFIG, you can skip this.
+#
+# Configure running container scanning with CI/CD variables (https://docs.gitlab.com/ee/ci/variables/README.html).
+# List of available variables: https://docs.gitlab.com/ee/user/application_security/running_container_scanning/#available-variables
+
+variables:
+  RCS_ANALYZER_IMAGE: registry.gitlab.com/mparuszewski/running-container-scanning:1
+
+running_container_scanning:
+  image: "$RCS_ANALYZER_IMAGE"
+  stage: test
+  variables:
+    GIT_STRATEGY: none
+  allow_failure: true
+  artifacts:
+    reports:
+      running_container_scanning: gl-running-container-scanning-report.json
+    paths: [gl-running-container-scanning-report.json]
+  dependencies: []
+  script:
+    - /scanner -A
+  rules:
+    - if: $RUNNING_CONTAINER_SCANNING_DISABLED
+      when: never
+    - if: $CI_COMMIT_BRANCH &&
+          $GITLAB_FEATURES =~ /\brunning_container_scanning\b/
