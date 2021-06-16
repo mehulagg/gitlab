@@ -22,15 +22,15 @@ RSpec.describe GitlabSubscriptions::UpcomingReconciliation do
       )
     end
 
-    context 'when gitlab.com' do
+    context 'when instance has paid namespaces (ex: gitlab.com)' do
       before do
-        allow(Gitlab).to receive(:com?).and_return(true)
+        stub_application_setting(check_namespace_plan: true)
       end
 
       it { is_expected.to validate_presence_of(:namespace) }
     end
 
-    context 'when not gitlab.com' do
+    context 'when namespaces are not paid (ex: self managed instance)' do
       it { is_expected.not_to validate_presence_of(:namespace) }
     end
   end
@@ -78,13 +78,13 @@ RSpec.describe GitlabSubscriptions::UpcomingReconciliation do
       end
     end
 
-    context 'when SaaS' do
+    context 'when instance has paid namespaces (ex: gitlab.com)' do
       let_it_be(:upcoming_reconciliation) { create(:upcoming_reconciliation, :saas) }
 
       let(:namespace_id) { upcoming_reconciliation.namespace_id }
 
       before do
-        allow(::Gitlab).to receive(:com?).and_return(true)
+        stub_application_setting(check_namespace_plan: true)
       end
 
       it 'returns row for given namespace' do
