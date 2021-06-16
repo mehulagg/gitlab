@@ -169,6 +169,7 @@ export default {
           :is-checked="currentBranch === branch"
           :is-check-item="true"
           @click="selectBranch(branch)"
+          data-qa-selector="menu_branch_button"
         >
           {{ branch }}
         </gl-dropdown-item>

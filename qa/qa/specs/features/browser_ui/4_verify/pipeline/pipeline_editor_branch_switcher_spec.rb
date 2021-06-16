@@ -25,6 +25,15 @@ module QA
         end
       end
 
+      let!(:production_push) do
+        Resource::Repository::Push.fabricate! do |push|
+          push.repository_http_uri = project.repository_http_location.uri
+          push.branch_name = 'production'
+          push.file_name = '.gitlab-ci.yml'
+          push.file_content = production_file_content
+        end
+      end
+
       let(:default_file_content) do
         <<~YAML
           stages:
@@ -52,13 +61,6 @@ module QA
       before do
         Flow::Login.sign_in
 
-        Resource::Repository::Push.fabricate! do |push|
-          push.repository_http_uri = project.repository_http_location.uri
-          push.branch_name = 'production'
-          push.file_name = '.gitlab-ci.yml'
-          push.file_content = production_file_content
-        end
-
         project.visit!
 
         Page::Project::Menu.perform(&:go_to_pipeline_editor)
@@ -68,16 +70,14 @@ module QA
         project.remove_via_api!
       end
 
-      it 'can switch branches', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/tbd' do
-
+      it 'can switch branches and target branch field updates accordingly', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/1856' do
         Page::Project::PipelineEditor::Show.perform do |show|
-          # show.click_branch_selector_button # this doesn't work for reasons I don't yet understand
-          click_button('master') # using capybara code here as a hack until I can fix the above method
-          click_on('production')
-          # expect target branch to be production
-          click_button('production')
-          click_on('master')
-          # expect target branch to be master
+          show.click_branch_selector_button
+          show.select_branch_from_dropdown(production_push.branch_name)
+          expect(show.target_branch_name).to eq(production_push.branch_name)
+          show.click_branch_selector_button
+          show.select_branch_from_dropdown(project.default_branch)
+          expect(show.target_branch_name).to eq(project.default_branch)
         end
       end
     end

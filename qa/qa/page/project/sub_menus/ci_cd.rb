@@ -20,7 +20,7 @@ module QA
               click_element(:sidebar_menu_link, menu_item: 'CI/CD')
             end
           end
-          
+
           def click_pipelines_editor
             within_sidebar do
               click_element(:sidebar_menu_item_link, menu_item: 'Editor')
