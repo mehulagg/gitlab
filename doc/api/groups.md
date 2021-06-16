@@ -497,6 +497,9 @@ NOTE:
 The `projects` and `shared_projects` attributes in the response are deprecated and [scheduled for removal in API v5](https://gitlab.com/gitlab-org/gitlab/-/issues/213797).
 To get the details of all projects within a group, use either the [list a group's projects](#list-a-groups-projects) or the [list a group's shared projects](#list-a-groups-shared-projects) endpoint.
 
+NOTE:
+The `prevent_sharing_groups_outside_hierarchy` attribute is present only on top-level groups.
+
 ```shell
 curl --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/groups/4"
 ```
@@ -535,6 +538,7 @@ Example response:
       "expires_at": null
     }
   ],
+  "prevent_sharing_groups_outside_hierarchy": false,
   "projects": [ // Deprecated and will be removed in API v5
     {
       "id": 7,
