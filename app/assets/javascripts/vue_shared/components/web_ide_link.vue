@@ -93,9 +93,9 @@ export default {
         tooltip: '',
         attrs: {
           'data-qa-selector': 'edit_button',
-          'data-track-event': 'click_edit',
+          'data-track-event': 'click_consolidated_edit',
           // eslint-disable-next-line @gitlab/require-i18n-strings
-          'data-track-label': 'Edit',
+          'data-track-label': 'edit',
         },
         ...handleOptions,
       };
@@ -127,9 +127,9 @@ export default {
         tooltip: '',
         attrs: {
           'data-qa-selector': 'web_ide_button',
-          'data-track-event': 'click_edit_ide',
+          'data-track-event': 'click_consolidated_edit_ide',
           // eslint-disable-next-line @gitlab/require-i18n-strings
-          'data-track-label': 'Web IDE',
+          'data-track-label': 'web_ide',
         },
         ...handleOptions,
       };
