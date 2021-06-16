@@ -379,7 +379,7 @@ project:
 - asana_integration
 - slack_service
 - microsoft_teams_service
-- mattermost_service
+- mattermost_integration
 - hangouts_chat_service
 - unify_circuit_service
 - buildkite_integration

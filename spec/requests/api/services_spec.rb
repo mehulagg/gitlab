@@ -254,21 +254,21 @@ RSpec.describe API::Services do
     end
   end
 
-  describe 'Mattermost service' do
-    let(:service_name) { 'mattermost' }
+  describe 'Mattermost integration' do
+    let(:integration_name) { 'mattermost' }
     let(:params) do
       { webhook: 'https://hook.example.com', username: 'username' }
     end
 
     before do
-      project.create_mattermost_service(
+      project.create_mattermost_integration(
         active: true,
         properties: params
       )
     end
 
     it 'accepts a username for update' do
-      put api("/projects/#{project.id}/services/#{service_name}", user), params: params.merge(username: 'new_username')
+      put api("/projects/#{project.id}/services/#{integration_name}", user), params: params.merge(username: 'new_username')
 
       expect(response).to have_gitlab_http_status(:ok)
       expect(json_response['properties']['username']).to eq('new_username')
