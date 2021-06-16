@@ -1,7 +1,6 @@
 import fs from 'fs';
 import path from 'path';
 import jsYaml from 'js-yaml';
-import { toArray } from 'lodash';
 import { getJSONFixture } from 'helpers/fixtures';
 
 export const loadMarkdownApiResult = (testName) => {
@@ -13,7 +12,6 @@ export const loadMarkdownApiResult = (testName) => {
 export const loadMarkdownApiExamples = () => {
   const apiMarkdownYamlPath = path.join(__dirname, '..', 'fixtures', 'api_markdown.yml');
   const apiMarkdownYamlText = fs.readFileSync(apiMarkdownYamlPath);
-  const apiMarkdownExampleObjects = jsYaml.safeLoad(apiMarkdownYamlText);
 
-  return apiMarkdownExampleObjects.map((example) => toArray(example));
+  return jsYaml.safeLoad(apiMarkdownYamlText);
 };

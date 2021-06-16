@@ -50,7 +50,15 @@ export default {
   },
   methods: {
     updateLink() {
-      this.tiptapEditor.chain().focus().unsetLink().setLink({ href: this.linkHref }).run();
+      this.tiptapEditor
+        .chain()
+        .focus()
+        .unsetLink()
+        .setLink({
+          href: this.linkHref,
+          'data-original-url': this.linkHref,
+        })
+        .run();
 
       this.$emit('execute', { contentType: linkContentType });
     },
