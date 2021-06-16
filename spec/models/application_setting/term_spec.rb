@@ -15,6 +15,36 @@ RSpec.describe ApplicationSetting::Term do
     end
   end
 
+  describe '.disable!' do
+    subject { ApplicationSetting::Term.disable! }
+
+    shared_examples 'it disables terms and conditions' do
+      it 'sets enforcement to false and creates a new, blank terms' do
+        subject
+
+        expect(Gitlab::CurrentSettings.current_application_settings.enforce_terms).to be false
+        expect(ApplicationSetting::Term.last.terms).to eq('')
+      end
+    end
+
+    context 'when enforcement is enabled' do
+      before_all do
+        create(:term)
+        Gitlab::CurrentSettings.update!(enforce_terms: true)
+      end
+
+      it_behaves_like 'it disables terms and conditions'
+    end
+
+    context 'when enforcement is disabled' do
+      before do
+        Gitlab::CurrentSettings.update!(enforce_terms: false)
+      end
+
+      it_behaves_like 'it disables terms and conditions'
+    end
+  end
+
   describe '#accepted_by_user?' do
     let(:user) { create(:user) }
     let(:project_bot) { create(:user, :project_bot) }

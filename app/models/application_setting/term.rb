@@ -5,12 +5,15 @@ class ApplicationSetting
     include CacheMarkdownField
     has_many :term_agreements
 
-    validates :terms, presence: true
-
     cache_markdown_field :terms
 
     def self.latest
       order(:id).last
+    end
+
+    def self.disable!
+      Gitlab::CurrentSettings.update!(enforce_terms: false)
+      create!(terms: '')
     end
 
     def accepted_by_user?(user)
@@ -21,3 +24,5 @@ class ApplicationSetting
     end
   end
 end
+
+
