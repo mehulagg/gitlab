@@ -33,6 +33,7 @@ RSpec.describe Gitlab::GithubImport::Stage::FinishImportWorker do
             message: 'GitHub project import finished',
             import_stage: 'Gitlab::GithubImport::Stage::FinishImportWorker',
             import_source: :github,
+            objects_imported: {},
             project_id: project.id,
             duration_s: a_kind_of(Numeric)
           )

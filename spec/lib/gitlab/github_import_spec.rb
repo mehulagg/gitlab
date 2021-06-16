@@ -4,7 +4,7 @@ require 'spec_helper'
 
 RSpec.describe Gitlab::GithubImport do
   context 'github.com' do
-    let(:project) { double(:project, import_url: 'http://t0ken@github.com/user/repo.git') }
+    let(:project) { double(:project, import_url: 'http://t0ken@github.com/user/repo.git', id: 1) }
 
     it 'returns a new Client with a custom token' do
       expect(described_class::Client)
@@ -86,6 +86,18 @@ RSpec.describe Gitlab::GithubImport do
 
     it 'formats the import url' do
       expect(described_class.formatted_import_url(project)).to eq('http://github.another-domain.com/api/v3')
+    end
+  end
+
+  describe '#objects_imported', :clean_gitlab_redis_shared_state do
+    let(:project) { double(:project, id: 1) }
+
+    it 'lists the objects imported counters' do
+      described_class.increment_object_count(project, 'github/counter_1')
+
+      expect(described_class.objects_imported(project)).to eq({
+        'counter_1' => 1
+      })
     end
   end
 end
