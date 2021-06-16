@@ -287,7 +287,7 @@ RSpec.describe 'Every Sidekiq worker' do
         'Gitlab::PhabricatorImport::ImportTasksWorker' => 5,
         'GitlabPerformanceBarStatsWorker' => 3,
         'GitlabShellWorker' => 3,
-        'GitlabUsagePingWorker' => 3,
+        'GitlabServicePingWorker' => 3,
         'GroupDestroyWorker' => 3,
         'GroupExportWorker' => false,
         'GroupImportWorker' => false,

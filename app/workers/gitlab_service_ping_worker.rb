@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
-class GitlabUsagePingWorker # rubocop:disable Scalability/IdempotentWorker
-  LEASE_KEY = 'gitlab_usage_ping_worker:ping'
+class GitlabServicePingWorker # rubocop:disable Scalability/IdempotentWorker
+  LEASE_KEY = 'gitlab_service_ping_worker:ping'
   LEASE_TIMEOUT = 86400
 
   include ApplicationWorker
@@ -13,7 +13,7 @@ class GitlabUsagePingWorker # rubocop:disable Scalability/IdempotentWorker
   sidekiq_retry_in { |count| (count + 1) * 8.hours.to_i }
 
   def perform
-    # Disable usage ping for GitLab.com
+    # Disable service ping for GitLab.com
     # See https://gitlab.com/gitlab-org/gitlab/-/issues/292929 for details
     return if Gitlab.com?
 

@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe GitlabUsagePingWorker, :clean_gitlab_redis_shared_state do
+RSpec.describe GitlabServicePingWorker, :clean_gitlab_redis_shared_state do
   before do
     allow_next_instance_of(SubmitUsagePingService) { |service| allow(service).to receive(:execute) }
     allow(subject).to receive(:sleep)
