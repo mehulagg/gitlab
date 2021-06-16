@@ -101,7 +101,6 @@ FactoryBot.define do
       application_jupyter factory: %i(clusters_applications_jupyter installed)
       application_knative factory: %i(clusters_applications_knative installed)
       application_elastic_stack factory: %i(clusters_applications_elastic_stack installed)
-      application_fluentd factory: %i(clusters_applications_fluentd installed)
       application_cilium factory: %i(clusters_applications_cilium installed)
     end
 
@@ -137,10 +136,6 @@ FactoryBot.define do
 
     trait :cleanup_not_started do
       cleanup_status { 1 }
-    end
-
-    trait :cleanup_uninstalling_applications do
-      cleanup_status { 2 }
     end
 
     trait :cleanup_removing_project_namespaces do

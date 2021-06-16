@@ -197,6 +197,30 @@ RSpec.describe MergeRequest do
   end
 
   describe '#has_denied_policies?' do
+    let(:project) { create(:project, :repository) }
+    let(:merge_request) { create(:ee_merge_request, :with_license_scanning_reports, source_project: project) }
+    let(:apache) { build(:software_license, :apache_2_0) }
+
+    let!(:head_pipeline) do
+      create(:ee_ci_pipeline,
+             :with_license_scanning_feature_branch,
+             project: project,
+             ref: merge_request.source_branch,
+             sha: merge_request.diff_head_sha)
+    end
+
+    let!(:base_pipeline) do
+      create(:ee_ci_pipeline,
+             project: project,
+             ref: merge_request.target_branch,
+             sha: merge_request.diff_base_sha)
+    end
+
+    before do
+      allow_any_instance_of(Ci::CompareSecurityReportsService)
+        .to receive(:execute).with(base_pipeline, head_pipeline).and_call_original
+    end
+
     subject { merge_request.has_denied_policies? }
 
     context 'without existing pipeline' do
@@ -215,28 +239,27 @@ RSpec.describe MergeRequest do
       end
 
       context 'with license_scanning report' do
-        let(:merge_request) { create(:ee_merge_request, :with_license_scanning_reports, source_project: project) }
-        let(:mit_license) { build(:software_license, :mit, spdx_identifier: nil) }
-
         context 'without denied policy' do
           it { is_expected.to be_falsey }
         end
 
         context 'with allowed policy' do
-          let(:allowed_policy) { build(:software_license_policy, :allowed, software_license: mit_license) }
+          let(:allowed_policy) { build(:software_license_policy, :allowed, software_license: apache) }
 
           before do
             project.software_license_policies << allowed_policy
+            synchronous_reactive_cache(merge_request)
           end
 
           it { is_expected.to be_falsey }
         end
 
         context 'with denied policy' do
-          let(:denied_policy) { build(:software_license_policy, :denied, software_license: mit_license) }
+          let(:denied_policy) { build(:software_license_policy, :denied, software_license: apache) }
 
           before do
             project.software_license_policies << denied_policy
+            synchronous_reactive_cache(merge_request)
           end
 
           it { is_expected.to be_truthy }

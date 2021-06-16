@@ -121,7 +121,7 @@ export default {
             ><b>{{ selectedVulnerabilitiesCount }}</b> {{ $options.i18n.selected }}</span
           >
         </div>
-        <div class="gl-flex-fill-1 gl-ml-6 gl-mr-4">
+        <div class="gl-flex-grow-1 gl-ml-6 gl-mr-4">
           <status-dropdown @change="handleStatusDropdownChange" />
         </div>
         <template v-if="shouldShowActionButtons">

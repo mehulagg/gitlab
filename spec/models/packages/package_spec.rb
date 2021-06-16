@@ -404,7 +404,8 @@ RSpec.describe Packages::Package, type: :model do
         it { is_expected.not_to allow_value(nil).for(:version) }
         it { is_expected.not_to allow_value('').for(:version) }
         it { is_expected.to allow_value('v1.2.3').for(:version) }
-        it { is_expected.not_to allow_value('1.2.3').for(:version) }
+        it { is_expected.to allow_value('1.2.3').for(:version) }
+        it { is_expected.not_to allow_value('v1.2').for(:version) }
       end
 
       it_behaves_like 'validating version to be SemVer compliant for', :npm_package
@@ -897,6 +898,26 @@ RSpec.describe Packages::Package, type: :model do
     end
   end
 
+  describe '#infrastructure_package?' do
+    let(:package) { create(:package) }
+
+    subject { package.infrastructure_package? }
+
+    it { is_expected.to eq(false) }
+
+    context 'with generic package' do
+      let(:package) { create(:generic_package) }
+
+      it { is_expected.to eq(false) }
+    end
+
+    context 'with terraform module package' do
+      let(:package) { create(:terraform_module_package) }
+
+      it { is_expected.to eq(true) }
+    end
+  end
+
   describe 'plan_limits' do
     Packages::Package.package_types.keys.without('composer').each do |pt|
       plan_limit_name = if pt == 'generic'
@@ -998,10 +1019,24 @@ RSpec.describe Packages::Package, type: :model do
       package.composer_metadatum.reload
     end
 
-    it 'schedule the update job' do
-      expect(::Packages::Composer::CacheUpdateWorker).to receive(:perform_async).with(project.id, package_name, package.composer_metadatum.version_cache_sha)
+    context 'with feature flag disabled' do
+      before do
+        stub_feature_flags(disable_composer_callback: false)
+      end
 
-      package.destroy!
+      it 'schedule the update job' do
+        expect(::Packages::Composer::CacheUpdateWorker).to receive(:perform_async).with(project.id, package_name, package.composer_metadatum.version_cache_sha)
+
+        package.destroy!
+      end
+    end
+
+    context 'with feature flag enabled' do
+      it 'does nothing' do
+        expect(::Packages::Composer::CacheUpdateWorker).not_to receive(:perform_async)
+
+        package.destroy!
+      end
     end
   end
 end

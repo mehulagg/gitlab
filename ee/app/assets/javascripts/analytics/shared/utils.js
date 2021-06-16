@@ -1,5 +1,6 @@
 import dateFormat from 'dateformat';
 import { convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
+import { capitalizeFirstCharacter } from '~/lib/utils/text_utility';
 import { dateFormats } from './constants';
 
 export const toYmd = (date) => dateFormat(date, dateFormats.isoDate);
@@ -127,7 +128,10 @@ export const buildCycleAnalyticsInitialData = ({
   labelsPath,
   milestonesPath,
   defaultStageConfig: defaultStages
-    ? buildDefaultStagesFromJSON(defaultStages).map(convertObjectPropsToCamelCase)
+    ? buildDefaultStagesFromJSON(defaultStages).map(({ name, ...rest }) => ({
+        ...convertObjectPropsToCamelCase(rest),
+        name: capitalizeFirstCharacter(name),
+      }))
     : [],
   stage: JSON.parse(stage),
 });

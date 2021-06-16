@@ -22,6 +22,8 @@ module EE
     prepended do
       include AtomicInternalId
       include Timebox
+      include EachBatch
+      include AfterCommitQueue
 
       attr_accessor :skip_future_date_validation
       attr_accessor :skip_project_validation
@@ -64,6 +66,7 @@ module EE
 
       scope :start_date_passed, -> { where('start_date <= ?', Date.current).where('due_date >= ?', Date.current) }
       scope :due_date_passed, -> { where('due_date < ?', Date.current) }
+      scope :with_cadence, -> { preload([iterations_cadence: :group]) }
 
       state_machine :state_enum, initial: :upcoming do
         event :start do
@@ -72,6 +75,12 @@ module EE
 
         event :close do
           transition [:upcoming, :started] => :closed
+        end
+
+        after_transition any => [:closed] do |iteration|
+          iteration.run_after_commit do
+            Iterations::RollOverIssuesWorker.perform_async([iteration.id]) if iteration.iterations_cadence&.can_roll_over?
+          end
         end
 
         state :upcoming, value: Iteration::STATE_ENUM_MAP[:upcoming]

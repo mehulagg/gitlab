@@ -95,7 +95,7 @@ RSpec.describe 'Setting the epic of an issue' do
         new_epic_group.add_developer(current_user)
       end
 
-      it 'promotes the issue to epic' do
+      it 'promotes the issue to epic', quarantine: 'https://gitlab.com/gitlab-org/gitlab/-/issues/333845' do
         post_graphql_mutation(mutation, current_user: current_user)
 
         expect(response).to have_gitlab_http_status(:success)

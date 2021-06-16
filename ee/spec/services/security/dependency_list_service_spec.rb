@@ -148,15 +148,15 @@ RSpec.describe Security::DependencyListService do
               }
             end
 
-            expect(dependencies).to eq([{ name: "saml2-js", vulnerabilities: %w(unknown medium critical) },
-                                        { name: "nokogiri", vulnerabilities: ["high"] }])
+            expect(dependencies).to match([{ name: "saml2-js", vulnerabilities: match_array(%w(unknown medium critical)) },
+                                           { name: "nokogiri", vulnerabilities: ["high"] }])
           end
 
           it 'returns array of data with package vulnerabilities sorted in ascending order' do
             saml2js_dependency = subject.find { |dep| dep[:name] == 'saml2-js' }
             saml2js_severities = saml2js_dependency[:vulnerabilities].map {|v| v[:severity] }
 
-            expect(saml2js_severities).to eq(%w(unknown medium critical))
+            expect(saml2js_severities).to match_array(%w(unknown medium critical))
           end
         end
       end

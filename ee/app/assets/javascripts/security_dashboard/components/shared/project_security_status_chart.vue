@@ -159,7 +159,7 @@ export default {
     <gl-loading-icon v-if="isLoadingGrades" size="lg" class="gl-my-12" />
     <accordion
       v-else
-      class="security-dashboard-accordion gl-px-5 gl-display-flex gl-flex-fill-1 gl-border-t-1 gl-border-t-solid gl-border-t-gray-100"
+      class="security-dashboard-accordion gl-px-5 gl-display-flex gl-flex-grow-1 gl-border-t-1 gl-border-t-solid gl-border-t-gray-100"
     >
       <template #default="{ accordionId }">
         <accordion-item

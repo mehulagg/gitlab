@@ -2863,30 +2863,4 @@ RSpec.describe Project do
       end
     end
   end
-
-  describe '#shared_runners_enabled_but_unavailable?' do
-    using RSpec::Parameterized::TableSyntax
-
-    let(:project) do
-      build_stubbed(:project, shared_runners_enabled: shared_runners_enabled)
-    end
-
-    before do
-      allow(project).to receive(:ci_minutes_quota)
-        .and_return(double('quota', minutes_used_up?: minutes_used_up))
-    end
-
-    where(:shared_runners_enabled, :minutes_used_up, :result) do
-      true  | true  | true
-      true  | false | false
-      false | false | false
-      false | true  | false
-    end
-
-    with_them do
-      it 'returns the correct value' do
-        expect(project.shared_runners_enabled_but_unavailable?).to eq(result)
-      end
-    end
-  end
 end

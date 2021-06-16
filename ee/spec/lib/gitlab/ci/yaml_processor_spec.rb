@@ -259,9 +259,19 @@ RSpec.describe Gitlab::Ci::YamlProcessor do
         ])
       end
     end
+
+    describe 'dast configuration' do
+      let(:config) do
+        { build: { stage: 'build', dast_configuration: { site_profile: 'Site profile', scanner_profile: 'Scanner profile' }, script: 'test' } }
+      end
+
+      it 'creates a job with a valid specification' do
+        expect(subject.builds[0]).to include(dast_configuration: { site_profile: 'Site profile', scanner_profile: 'Scanner profile' })
+      end
+    end
   end
 
-  describe 'Secrets' do
+  describe 'secrets' do
     let(:secrets) do
       {
         DATABASE_PASSWORD: {

@@ -38,7 +38,7 @@ RSpec.describe Project, factory_default: :keep do
     it { is_expected.to have_one(:slack_service) }
     it { is_expected.to have_one(:microsoft_teams_service) }
     it { is_expected.to have_one(:mattermost_service) }
-    it { is_expected.to have_one(:hangouts_chat_service) }
+    it { is_expected.to have_one(:hangouts_chat_integration) }
     it { is_expected.to have_one(:unify_circuit_service) }
     it { is_expected.to have_one(:webex_teams_service) }
     it { is_expected.to have_one(:packagist_service) }
@@ -46,14 +46,14 @@ RSpec.describe Project, factory_default: :keep do
     it { is_expected.to have_one(:asana_integration) }
     it { is_expected.to have_many(:boards) }
     it { is_expected.to have_one(:campfire_integration) }
-    it { is_expected.to have_one(:datadog_service) }
-    it { is_expected.to have_one(:discord_service) }
-    it { is_expected.to have_one(:drone_ci_service) }
-    it { is_expected.to have_one(:emails_on_push_service) }
+    it { is_expected.to have_one(:datadog_integration) }
+    it { is_expected.to have_one(:discord_integration) }
+    it { is_expected.to have_one(:drone_ci_integration) }
+    it { is_expected.to have_one(:emails_on_push_integration) }
     it { is_expected.to have_one(:pipelines_email_service) }
-    it { is_expected.to have_one(:irker_service) }
+    it { is_expected.to have_one(:irker_integration) }
     it { is_expected.to have_one(:pivotaltracker_service) }
-    it { is_expected.to have_one(:flowdock_service) }
+    it { is_expected.to have_one(:flowdock_integration) }
     it { is_expected.to have_one(:assembla_integration) }
     it { is_expected.to have_one(:slack_slash_commands_service) }
     it { is_expected.to have_one(:mattermost_slash_commands_service) }
@@ -65,8 +65,8 @@ RSpec.describe Project, factory_default: :keep do
     it { is_expected.to have_one(:youtrack_service) }
     it { is_expected.to have_one(:custom_issue_tracker_integration) }
     it { is_expected.to have_one(:bugzilla_integration) }
-    it { is_expected.to have_one(:ewm_service) }
-    it { is_expected.to have_one(:external_wiki_service) }
+    it { is_expected.to have_one(:ewm_integration) }
+    it { is_expected.to have_one(:external_wiki_integration) }
     it { is_expected.to have_one(:confluence_integration) }
     it { is_expected.to have_one(:project_feature) }
     it { is_expected.to have_one(:project_repository) }
@@ -991,6 +991,39 @@ RSpec.describe Project, factory_default: :keep do
           expect(issue.project).to eq(project)
         end
       end
+    end
+  end
+
+  describe '#open_issues_count', :aggregate_failures do
+    let(:project) { build(:project) }
+
+    it 'provides the issue count' do
+      expect(project.open_issues_count).to eq 0
+    end
+
+    it 'invokes the count service with current_user' do
+      user = build(:user)
+      count_service = instance_double(Projects::OpenIssuesCountService)
+      expect(Projects::OpenIssuesCountService).to receive(:new).with(project, user).and_return(count_service)
+      expect(count_service).to receive(:count)
+
+      project.open_issues_count(user)
+    end
+
+    it 'invokes the count service with no current_user' do
+      count_service = instance_double(Projects::OpenIssuesCountService)
+      expect(Projects::OpenIssuesCountService).to receive(:new).with(project, nil).and_return(count_service)
+      expect(count_service).to receive(:count)
+
+      project.open_issues_count
+    end
+  end
+
+  describe '#open_merge_requests_count' do
+    it 'provides the merge request count' do
+      project = build(:project)
+
+      expect(project.open_merge_requests_count).to eq 0
     end
   end
 
@@ -4376,6 +4409,18 @@ RSpec.describe Project, factory_default: :keep do
     end
   end
 
+  context 'with export' do
+    let(:project) { create(:project, :with_export) }
+
+    it '#export_file_exists? returns true' do
+      expect(project.export_file_exists?).to be true
+    end
+
+    it '#export_archive_exists? returns false' do
+      expect(project.export_archive_exists?).to be true
+    end
+  end
+
   describe '#forks_count' do
     it 'returns the number of forks' do
       project = build(:project)
@@ -4654,7 +4699,6 @@ RSpec.describe Project, factory_default: :keep do
     specify do
       expect(subject).to include
       [
-        { key: 'CI_PROJECT_CONFIG_PATH', value: Ci::Pipeline::DEFAULT_CONFIG_PATH, public: true, masked: false },
         { key: 'CI_CONFIG_PATH', value: Ci::Pipeline::DEFAULT_CONFIG_PATH, public: true, masked: false }
       ]
     end
@@ -4667,7 +4711,6 @@ RSpec.describe Project, factory_default: :keep do
       it do
         expect(subject).to include
         [
-          { key: 'CI_PROJECT_CONFIG_PATH', value: 'random.yml', public: true, masked: false },
           { key: 'CI_CONFIG_PATH', value: 'random.yml', public: true, masked: false }
         ]
       end
@@ -6638,7 +6681,7 @@ RSpec.describe Project, factory_default: :keep do
     context 'when project export is completed' do
       before do
         finish_job(project_export_job)
-        allow(project).to receive(:export_file).and_return(double(ImportExportUploader, file: 'exists.zip'))
+        allow(project).to receive(:export_file_exists?).and_return(true)
       end
 
       it { expect(project.export_status).to eq :finished }
@@ -6649,7 +6692,7 @@ RSpec.describe Project, factory_default: :keep do
 
       before do
         finish_job(project_export_job)
-        allow(project).to receive(:export_file).and_return(double(ImportExportUploader, file: 'exists.zip'))
+        allow(project).to receive(:export_file_exists?).and_return(true)
       end
 
       it { expect(project.export_status).to eq :regeneration_in_progress }

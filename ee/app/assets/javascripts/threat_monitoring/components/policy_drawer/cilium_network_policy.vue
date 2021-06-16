@@ -1,9 +1,6 @@
 <script>
-import {
-  fromYaml,
-  humanizeNetworkPolicy,
-  removeUnnecessaryDashes,
-} from '../policy_editor/network_policy/lib';
+import { removeUnnecessaryDashes } from '../../utils';
+import { fromYaml, humanizeNetworkPolicy } from '../policy_editor/network_policy/lib';
 import PolicyPreview from '../policy_editor/policy_preview.vue';
 import BasePolicy from './base_policy.vue';
 import PolicyInfoRow from './policy_info_row.vue';

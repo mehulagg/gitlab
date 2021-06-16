@@ -12,23 +12,18 @@ module IncidentManagement
       end
 
       def execute
-        return error_no_license unless available?
         return error_no_permissions unless allowed?
 
         if escalation_policy.destroy
           success(escalation_policy)
         else
-          error(escalation_policy.errors.full_messages.to_sentence)
+          error_in_save(escalation_policy)
         end
       end
 
       private
 
       attr_reader :escalation_policy, :user, :project
-
-      def error_no_permissions
-        error(_('You have insufficient permissions to remove an escalation policy from this project'))
-      end
     end
   end
 end

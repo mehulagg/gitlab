@@ -12,18 +12,13 @@ RSpec.describe 'Billing plan pages', :feature, :js do
   let(:premium_plan) { create(:premium_plan) }
   let(:ultimate_plan) { create(:ultimate_plan) }
 
-  let(:plans_data) do
-    Gitlab::Json.parse(File.read(Rails.root.join('ee/spec/fixtures/gitlab_com_plans.json'))).map do |data|
-      data.deep_symbolize_keys
-    end
-  end
+  let(:plans_data) { billing_plans_data }
 
   before do
     stub_feature_flags(show_billing_eoa_banner: true)
     stub_feature_flags(hide_deprecated_billing_plans: false)
     stub_experiment_for_subject(contact_sales_btn_in_app: true)
-    stub_full_request("#{EE::SUBSCRIPTIONS_URL}/gitlab_plans?plan=#{plan.name}&namespace_id=#{namespace.id}")
-      .to_return(status: 200, body: plans_data.to_json)
+    stub_billing_plans(namespace.id, plan.name, plans_data.to_json)
     stub_eoa_eligibility_request(namespace.id)
     stub_application_setting(check_namespace_plan: true)
     allow(Gitlab).to receive(:com?) { true }
@@ -416,17 +411,14 @@ RSpec.describe 'Billing plan pages', :feature, :js do
       end
 
       context 'on trial' do
-        let(:plan) { premium_plan }
+        let(:plan) { free_plan }
 
         let!(:subscription) do
-          create(:gitlab_subscription, namespace: namespace, hosted_plan: plan,
+          create(:gitlab_subscription, namespace: namespace, hosted_plan: premium_plan,
                  trial: true, trial_ends_on: Date.current.tomorrow, seats: 15)
         end
 
         before do
-          stub_full_request("#{EE::SUBSCRIPTIONS_URL}/gitlab_plans?plan=free&namespace_id=#{namespace.id}")
-            .to_return(status: 200, body: plans_data.to_json)
-
           visit page_path
         end
 

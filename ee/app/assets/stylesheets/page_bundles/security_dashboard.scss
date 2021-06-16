@@ -44,7 +44,7 @@ $selection-summary-with-error-height: 118px;
 
 .security-dashboard-accordion > ul {
   @include gl-display-flex;
-  @include gl-flex-fill-1;
+  @include gl-flex-grow-1;
 }
 
 .security-charts > section {

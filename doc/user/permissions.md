@@ -263,8 +263,9 @@ The following table lists group permissions available for each role:
 | Browse group                                           | ✓     | ✓        | ✓         | ✓          | ✓     |
 | View group wiki pages **(PREMIUM)**                    | ✓ (6) | ✓        | ✓         | ✓          | ✓     |
 | View Insights charts **(ULTIMATE)**                    | ✓     | ✓        | ✓         | ✓          | ✓     |
-| View group epic **(PREMIUM)**                         | ✓     | ✓        | ✓         | ✓          | ✓     |
-| Create/edit group epic **(PREMIUM)**                  |       | ✓        | ✓         | ✓          | ✓     |
+| View group epic **(PREMIUM)**                          | ✓     | ✓        | ✓         | ✓          | ✓     |
+| Create/edit group epic **(PREMIUM)**                   |       | ✓        | ✓         | ✓          | ✓     |
+| Create/edit/delete epic boards **(PREMIUM)**           |       | ✓        | ✓         | ✓          | ✓     |
 | Manage group labels                                    |       | ✓        | ✓         | ✓          | ✓     |
 | See a container registry                               |       | ✓        | ✓         | ✓          | ✓     |
 | Pull [packages](packages/index.md)                     |       | ✓        | ✓         | ✓          | ✓     |
@@ -288,8 +289,8 @@ The following table lists group permissions available for each role:
 | Create/Delete group deploy tokens                      |       |          |           |            | ✓     |
 | Manage group members                                   |       |          |           |            | ✓     |
 | Delete group                                           |       |          |           |            | ✓     |
-| Delete group epic **(PREMIUM)**                       |       |          |           |            | ✓     |
-| Edit SAML SSO Billing **(PREMIUM SAAS)**                | ✓     | ✓        | ✓         | ✓          | ✓ (4) |
+| Delete group epic **(PREMIUM)**                        |       |          |           |            | ✓     |
+| Edit SAML SSO Billing **(PREMIUM SAAS)**               | ✓     | ✓        | ✓         | ✓          | ✓ (4) |
 | View group Audit Events                                |       |          | ✓ (7)     | ✓ (7)      | ✓     |
 | Disable notification emails                            |       |          |           |            | ✓     |
 | View Contribution analytics                            | ✓     | ✓        | ✓         | ✓          | ✓     |
@@ -358,10 +359,11 @@ External users still count towards a license seat.
 
 An administrator can flag a user as external by either of the following methods:
 
-- Either [through the API](../api/users.md#user-modification).
-- Or by navigating to the **Admin Area > Overview > Users** to create a new user
-  or edit an existing one. There, you can find the option to flag the user as
-  external.
+- [Through the API](../api/users.md#user-modification).
+- Using the GitLab UI:
+  1. On the top bar, select **Menu >** **{admin}** **Admin**.
+  1. On the left sidebar, select **Overview > Users** to create a new user or edit an existing one.
+     There, you can find the option to flag the user as external.
 
 Additionally users can be set as external users using [SAML groups](../integration/saml.md#external-groups)
 and [LDAP groups](../administration/auth/ldap/index.md#external-groups).
@@ -369,7 +371,11 @@ and [LDAP groups](../administration/auth/ldap/index.md#external-groups).
 ### Setting new users to external
 
 By default, new users are not set as external users. This behavior can be changed
-by an administrator on the **Admin Area > Settings > General** page, under **Account and limit**.
+by an administrator:
+
+1. On the top bar, select **Menu >** **{admin}** **Admin**.
+1. On the left sidebar, select **Settings > General**.
+1. Expand the **Account and limit** section.
 
 If you change the default behavior of creating new users as external, you
 have the option to narrow it down by defining a set of internal users.

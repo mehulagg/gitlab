@@ -1,4 +1,4 @@
-import { getContentWrapperHeight } from 'ee/threat_monitoring/utils';
+import { getContentWrapperHeight, removeUnnecessaryDashes } from 'ee/threat_monitoring/utils';
 import { setHTMLFixture } from 'helpers/fixtures';
 
 describe('Threat Monitoring Utils', () => {
@@ -21,6 +21,18 @@ describe('Threat Monitoring Utils', () => {
 
     it('returns an empty string for a class that does not exist', () => {
       expect(getContentWrapperHeight('.does-not-exist')).toBe('');
+    });
+  });
+
+  describe('removeUnnecessaryDashes', () => {
+    it.each`
+      input          | output
+      ${'---\none'}  | ${'one'}
+      ${'two'}       | ${'two'}
+      ${'--\nthree'} | ${'--\nthree'}
+      ${'four---\n'} | ${'four'}
+    `('returns $output when used on $input', ({ input, output }) => {
+      expect(removeUnnecessaryDashes(input)).toBe(output);
     });
   });
 });

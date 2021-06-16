@@ -38,7 +38,11 @@ module EE
       def new_issue_url_with_predefined_fields(summary, description)
         escaped_summary = CGI.escape(summary)
         escaped_description = CGI.escape(description)
-        "#{url}/secure/CreateIssueDetails!init.jspa?pid=#{jira_project_id}&issuetype=#{vulnerabilities_issuetype}&summary=#{escaped_summary}&description=#{escaped_description}"[0..MAX_URL_LENGTH]
+
+        # Put summary and description at the end of the URL in case we need to trim it
+        web_url('secure/CreateIssueDetails!init.jspa', pid: jira_project_id, issuetype: vulnerabilities_issuetype)
+          .concat("&summary=#{escaped_summary}&description=#{escaped_description}")
+          .slice(0..MAX_URL_LENGTH)
       end
 
       def create_issue(summary, description, current_user)

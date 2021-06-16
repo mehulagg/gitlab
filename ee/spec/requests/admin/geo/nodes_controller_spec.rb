@@ -13,17 +13,17 @@ RSpec.describe Admin::Geo::NodesController, :geo do
     login_as(admin)
   end
 
-  describe 'GET /geo/nodes_beta' do
+  describe 'GET /geo/nodes' do
     context 'with a valid license' do
       before do
         stub_licensed_features(geo: true)
       end
 
-      it 'renders the Geo Nodes Beta View', :aggregate_failures do
+      it 'renders the Geo Nodes View', :aggregate_failures do
         get admin_geo_nodes_path
 
         expect(response).to render_template(:index)
-        expect(response.body).to include('js-geo-nodes-beta')
+        expect(response.body).to include('js-geo-nodes')
       end
     end
 

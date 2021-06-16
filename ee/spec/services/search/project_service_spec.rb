@@ -11,10 +11,21 @@ RSpec.describe Search::ProjectService do
     stub_ee_application_setting(elasticsearch_search: true, elasticsearch_indexing: true)
   end
 
-  it_behaves_like 'EE search service shared examples', ::Gitlab::ProjectSearchResults, ::Gitlab::Elastic::ProjectSearchResults do
-    let(:user) { scope.owner }
-    let(:scope) { create(:project) }
-    let(:service) { described_class.new(scope, user, params) }
+  context 'when a single project provided' do
+    it_behaves_like 'EE search service shared examples', ::Gitlab::ProjectSearchResults, ::Gitlab::Elastic::ProjectSearchResults do
+      let(:user) { scope.owner }
+      let(:scope) { create(:project) }
+      let(:service) { described_class.new(scope, user, params) }
+    end
+  end
+
+  context 'when a multiple projects provided' do
+    it_behaves_like 'EE search service shared examples', ::Gitlab::ProjectSearchResults, ::Gitlab::Elastic::SearchResults do
+      let(:user) { group.owner }
+      let(:group) { create(:group) }
+      let(:scope) { create_list(:project, 3, namespace: group) }
+      let(:service) { described_class.new( scope, user, params) }
+    end
   end
 
   context 'code search' do

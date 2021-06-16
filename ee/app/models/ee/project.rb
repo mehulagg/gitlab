@@ -361,10 +361,6 @@ module EE
       super && !ci_minutes_quota.minutes_used_up?
     end
 
-    def shared_runners_enabled_but_unavailable?
-      shared_runners_enabled? && !shared_runners_available?
-    end
-
     def link_pool_repository
       super
       repository.log_geo_updated_event

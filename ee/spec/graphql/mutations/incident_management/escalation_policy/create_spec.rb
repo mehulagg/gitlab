@@ -36,7 +36,10 @@ RSpec.describe Mutations::IncidentManagement::EscalationPolicy::Create do
 
     shared_examples 'raises a resource not available error' do |error|
       specify do
-        expect { resolve }.to raise_error(Gitlab::Graphql::Errors::ResourceNotAvailable, error)
+        expect { resolve }.to raise_error(
+          Gitlab::Graphql::Errors::ResourceNotAvailable,
+          error || Gitlab::Graphql::Authorize::AuthorizeResource::RESOURCE_ACCESS_ERROR
+        )
       end
     end
 
@@ -79,7 +82,7 @@ RSpec.describe Mutations::IncidentManagement::EscalationPolicy::Create do
             args[:rules] = []
           end
 
-          it_behaves_like 'returns a GraphQL error', "A rule must be provided to create an escalation policy"
+          it_behaves_like 'returns a GraphQL error', 'Escalation policies must have at least one rule'
         end
 
         context 'schedule that does not belong to the project' do
@@ -89,14 +92,14 @@ RSpec.describe Mutations::IncidentManagement::EscalationPolicy::Create do
             args[:rules][0][:oncall_schedule_iid] = other_schedule.iid
           end
 
-          it_behaves_like 'raises a resource not available error', 'The oncall schedule for iid 2 could not be found'
+          it_behaves_like 'returns a GraphQL error', 'All escalations rules must have a schedule in the same project as the policy'
 
           context 'user does not have permission for project' do
             before do
               project.add_reporter(current_user)
             end
 
-            it_behaves_like 'raises a resource not available error', "The resource that you are attempting to access does not exist or you don't have permission to perform this action"
+            it_behaves_like 'raises a resource not available error'
           end
         end
       end
@@ -106,7 +109,7 @@ RSpec.describe Mutations::IncidentManagement::EscalationPolicy::Create do
           project.add_reporter(current_user)
         end
 
-        it_behaves_like 'raises a resource not available error', "The resource that you are attempting to access does not exist or you don't have permission to perform this action"
+        it_behaves_like 'raises a resource not available error'
       end
     end
 
@@ -115,7 +118,7 @@ RSpec.describe Mutations::IncidentManagement::EscalationPolicy::Create do
         args[:project_path] = 'something/incorrect'
       end
 
-      it_behaves_like 'raises a resource not available error', 'The project could not be found'
+      it_behaves_like 'raises a resource not available error'
     end
   end
 

@@ -14,7 +14,7 @@ module Banzai
         doc.xpath(XPATH).each do |img|
           next unless img['src'].start_with?(PRIVATE_IMAGE_PATH)
 
-          img_link = "#{project.jira_service.url}#{img['src']}"
+          img_link = project.jira_service.web_url(img['src'])
           link = "<a class=\"#{CSS_WITH_ATTACHMENT_ICON}\" href=\"#{img_link}\">#{img_link}</a>"
 
           img.replace(link)

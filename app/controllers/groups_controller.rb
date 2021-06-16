@@ -183,7 +183,12 @@ class GroupsController < Groups::ApplicationController
 
   def download_export
     if @group.export_file_exists?
-      send_upload(@group.export_file, attachment: @group.export_file.filename)
+      if @group.export_archive_exists?
+        send_upload(@group.export_file, attachment: @group.export_file.filename)
+      else
+        redirect_to edit_group_path(@group),
+                    alert: _('The file containing the export is not available yet; it may still be transferring. Please try again later.')
+      end
     else
       redirect_to edit_group_path(@group),
         alert: _('Group export link has expired. Please generate a new export from your group settings.')
@@ -265,7 +270,8 @@ class GroupsController < Groups::ApplicationController
       :default_branch_protection,
       :default_branch_name,
       :allow_mfa_for_subgroups,
-      :resource_access_token_creation_allowed
+      :resource_access_token_creation_allowed,
+      :prevent_sharing_groups_outside_hierarchy
     ]
   end
 

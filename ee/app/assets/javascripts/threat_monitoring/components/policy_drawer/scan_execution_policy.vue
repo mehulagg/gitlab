@@ -1,6 +1,6 @@
 <script>
 import { GlLink } from '@gitlab/ui';
-import { safeLoad } from 'js-yaml';
+import { fromYaml } from '../policy_editor/scan_execution_policy/lib';
 import BasePolicy from './base_policy.vue';
 import PolicyInfoRow from './policy_info_row.vue';
 
@@ -18,7 +18,7 @@ export default {
   },
   computed: {
     policy() {
-      return safeLoad(this.value, { json: true });
+      return fromYaml(this.value);
     },
   },
 };

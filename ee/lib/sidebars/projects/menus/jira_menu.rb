@@ -59,7 +59,7 @@ module Sidebars
           ::Sidebars::MenuItem.new(
             title: s_('JiraService|Issue List'),
             link: project_integrations_jira_issues_path(context.project),
-            active_routes: { path: 'projects/integrations/jira/issues#index' },
+            active_routes: { controller: 'projects/integrations/jira/issues' },
             item_id: :issue_list
           )
         end
@@ -71,7 +71,6 @@ module Sidebars
             active_routes: {},
             item_id: :open_jira,
             sprite_icon: 'external-link',
-            sprite_icon_html_options: { css_class: 'gl-vertical-align-text-bottom' },
             container_html_options: {
               target: '_blank',
               rel: 'noopener noreferrer'

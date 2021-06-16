@@ -89,6 +89,12 @@ module EE
               resolver: ::Resolvers::DastSiteValidationResolver,
               description: 'DAST Site Validations associated with the project.'
 
+        field :agent_configurations,
+              ::Types::Kas::AgentConfigurationType.connection_type,
+              null: true,
+              description: 'Agent configurations defined by the project',
+              resolver: ::Resolvers::Kas::AgentConfigurationsResolver
+
         field :cluster_agent,
               ::Types::Clusters::AgentType,
               null: true,
@@ -169,6 +175,12 @@ module EE
               null: true,
               description: 'Scan Execution Policies of the project',
               resolver: ::Resolvers::ScanExecutionPolicyResolver
+
+        field :network_policies,
+              ::Types::NetworkPolicyType.connection_type,
+              null: true,
+              description: 'Network Policies of the project',
+              resolver: ::Resolvers::NetworkPolicyResolver
       end
 
       def api_fuzzing_ci_configuration

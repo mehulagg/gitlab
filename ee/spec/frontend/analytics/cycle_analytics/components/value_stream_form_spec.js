@@ -84,11 +84,15 @@ describe('ValueStreamForm', () => {
     );
 
   const findModal = () => wrapper.findComponent(GlModal);
-  const clickSubmit = () => findModal().vm.$emit('primary', mockEvent);
-  const clickAddStage = () => findModal().vm.$emit('secondary', mockEvent);
   const findExtendedFormFields = () => wrapper.findByTestId('extended-form-fields');
   const findPresetSelector = () => wrapper.findByTestId('vsa-preset-selector');
+  const findRestoreButton = (index) => wrapper.findByTestId(`stage-action-restore-${index}`);
+  const findHiddenStages = () => wrapper.findAllByTestId('vsa-hidden-stage').wrappers;
   const findBtn = (btn) => findModal().props(btn);
+
+  const clickSubmit = () => findModal().vm.$emit('primary', mockEvent);
+  const clickAddStage = () => findModal().vm.$emit('secondary', mockEvent);
+  const clickRestoreStageAtIndex = (index) => findRestoreButton(index).vm.$emit('click');
   const expectFieldError = (testId, error = '') =>
     expect(wrapper.findByTestId(testId).attributes('invalid-feedback')).toBe(error);
 
@@ -114,6 +118,10 @@ describe('ValueStreamForm', () => {
       it('has the preset button', () => {
         expect(findPresetSelector().exists()).toBe(true);
       });
+    });
+
+    it('does not display any hidden stages', () => {
+      expect(findHiddenStages().length).toBe(0);
     });
 
     describe('Add stage button', () => {
@@ -201,6 +209,39 @@ describe('ValueStreamForm', () => {
 
       it('sets the submit action text to "Save Value Stream"', () => {
         expect(findBtn('actionPrimary').text).toBe('Save Value Stream');
+      });
+
+      it('does not display any hidden stages', () => {
+        expect(findHiddenStages().length).toBe(0);
+      });
+
+      describe('with hidden stages', () => {
+        const hiddenStages = defaultStageConfig.map((s) => ({ ...s, hidden: true }));
+
+        beforeEach(() => {
+          wrapper = createComponent({
+            props: {
+              initialPreset,
+              initialData: { ...initialData, stages: [...initialData.stages, ...hiddenStages] },
+              isEditing: true,
+            },
+          });
+        });
+
+        it('displays hidden each stage', () => {
+          expect(findHiddenStages().length).toBe(hiddenStages.length);
+
+          findHiddenStages().forEach((s) => {
+            expect(s.text()).toContain('Restore stage');
+          });
+        });
+
+        it('when `Restore stage` is clicked, the stage is restored', async () => {
+          await clickRestoreStageAtIndex(1);
+
+          expect(findHiddenStages().length).toBe(hiddenStages.length - 1);
+          expect(wrapper.vm.stages.length).toBe(stageCount + 1);
+        });
       });
 
       describe('Add stage button', () => {
