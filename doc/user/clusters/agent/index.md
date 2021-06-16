@@ -16,8 +16,7 @@ tasks in a secure and cloud-native way. It enables:
 
 - Integrating GitLab with a Kubernetes cluster behind a firewall or NAT
   (network address translation).
-- Pull-based GitOps deployments by leveraging the
-  [GitOps Engine](https://github.com/argoproj/gitops-engine).
+- Pull-based GitOps deployments.
 - Real-time access to API endpoints in a cluster.
 - Alert generation based on [Container network policy](../../application_security/threat_monitoring/index.md#container-network-policy).
 
@@ -37,7 +36,9 @@ sequenceDiagram
   participant M as Manifest repository
   participant K as Kubernetes Agent
   participant C as Agent configuration repository
-  K->C: Grab the configuration
+  loop Regularly
+    K-->>C: Grab the configuration
+  end
   D->>+A: Pushing code changes
   A->>M: Updating manifest
   loop Regularly
@@ -425,6 +426,79 @@ spec:
         ports:
         - containerPort: 80
 ```
+
+### Inventory object
+
+An inventory object is a `ConfigMap` object which keeps track of the set of objects applied to the cluster together.
+When you remove objects from a manifest repository, GitLab Kubernetes Agent uses a corresponding inventory object to
+prune (delete) objects from the cluster.
+
+GitLab Kubernetes Agent creates an inventory object for each manifest project specified in the
+`gitops.manifest_projects` configuration section. Inventory object have to be stored somewhere in the cluster,
+the default behavior is:
+
+- Namespace from `gitops.manifest_projects[].default_namespace` is used. If you don't specify this parameter
+  explicitly, the inventory object will be stored in the `default` namespace.
+- Name is generated from the numeric project id of the manifest project and the numeric agent id.
+  That way GitLab Kubernetes Agent can deterministically construct the name and later locate the created
+  inventory object in the cluster.
+
+GitLab Kubernetes Agent will not be able to locate the existing inventory object if you:
+
+- Change `gitops.manifest_projects[].default_namespace` parameter because the namespace will change.
+- Move manifests into another project because the generated name will change as the new project has
+  a different project id.
+
+When GitLab Kubernetes Agent cannot locate the inventory object, it cannot tell if the
+object never existed in the first place, or if the configuration has changed. It creates a new one to track
+the objects that it's applying to the cluster. Usually it's not a problem, and the only downside is that the previous
+inventory object is left behind. However, if there are objects that should be pruned when
+the configuration changes, GitLab Kubernetes Agent has no way of knowing about them because they are tracked in the
+previous inventory object, which it cannot locate. The consequence is that they are not pruned and not tracked
+in the new object, and you will need to delete them manually along with the old inventory object.
+
+### Inventory object template
+
+Inventory object template is a `ConfigMap` object that allows you to configure namespace and name of the inventory
+object. Inventory object template should be stored together with manifest files that are a single logical group.
+
+Inventory object template looks like this:
+
+```yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: my-inventory-object
+  namespace: my-project-namespace
+  labels:
+    cli-utils.sigs.k8s.io/inventory-id: my-inventory-object
+```
+
+`namespace` and `name` fields allow you to configure where the real inventory object will be created.
+`cli-utils.sigs.k8s.io/inventory-id` label with the provided value will be set on the inventory object, created
+from this template. Objects, tracked by this inventory object, will have the `config.k8s.io/owning-inventory` annotation
+set to the same value. Label's value doesn't have to match the `name` but it's convenient to
+have them set to the same value. Make sure `name` is set to something unique so that it doesn't collide with another
+inventory object in the same namespace in the future.
+
+### Using GitOps with pre-existing Kubernetes objects
+
+GitLab Kubernetes Agent treats manifest files in the manifest repository as the source of truth. When it applies
+objects from the files to the cluster, it tracks them in an inventory object. If an object already exists,
+GitLab Kubernetes Agent behaves differently based on the `gitops.manifest_projects[].inventory_policy` setting:
+
+- `must_match`. This is the default policy. It means that for changes to be applied to a live object, it must
+  have the `config.k8s.io/owning-inventory` annotation set to the same value as the
+  `cli-utils.sigs.k8s.io/inventory-id` label on the corresponding inventory object. If the values don't match or the object
+  doesn't have the annotation, manifests are not applied and an error is reported.
+- `adopt_if_no_inventory`. This mode allows to "adopt" an object if it doesn't have the
+  `config.k8s.io/owning-inventory` annotation. Use this mode if you want to start managing an existing object using
+  the GitOps feature. Once all objects have been "adopted", we recommend you to put the setting back into the default
+  `must_match` mode to avoid any unexpected adoptions.
+- `adopt_all`. This mode allows to "adopt" an object even if it has the `config.k8s.io/owning-inventory` annotation
+  set to a different value. This mode can be useful if you want to migrate a set of objects from one agent to another
+  one or from some other tool to the GitLab Kubernetes Agent. Once all objects have been "adopted", we recommend
+  you to put the setting back into the default `must_match` mode to avoid any unexpected adoptions.
 
 ## Example projects
 
