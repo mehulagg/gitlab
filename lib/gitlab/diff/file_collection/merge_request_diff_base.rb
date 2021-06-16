@@ -11,7 +11,7 @@ module Gitlab
 
           super(merge_request_diff,
             project: merge_request_diff.project,
-            diff_options: merged_diff_options(diff_options),
+            diff_options: diff_options,
             diff_refs: merge_request_diff.diff_refs,
             fallback_diff_refs: merge_request_diff.fallback_diff_refs)
         end
@@ -69,13 +69,6 @@ module Gitlab
 
             diff_stats_cache.read || super
           end
-        end
-
-        def merged_diff_options(diff_options)
-          project = @merge_request_diff.project
-          max_diff_options = ::Commit.max_diff_options(project: project).merge(project: project)
-
-          diff_options.present? ? diff_options.merge(max_diff_options) : max_diff_options
         end
       end
     end
