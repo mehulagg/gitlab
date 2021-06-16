@@ -7,6 +7,8 @@ module Gitlab
     module ObjectImporter
       extend ActiveSupport::Concern
 
+      PROJECT_IMPORT_COUNTER_KEY = 'github_importer/project/%{project}/counter/%{counter_name}'
+
       included do
         include ApplicationWorker
 
@@ -36,10 +38,37 @@ module Gitlab
 
         importer_class.new(object, project, client).execute
 
-        counter.increment
-        info(project.id, message: 'importer finished')
+        increment_counters(project)
+
+        info(
+          project.id,
+          message: 'importer finished',
+          count: project_counter_current(project)
+        )
       rescue StandardError => e
         error(project.id, e, hash)
+      end
+
+      # Counters incremented:
+      # - global (prometheus): for metrics in Grafana
+      # - project (redis): used in FinishImportWorker to report number of objects imported
+      def increment_counters(project)
+        counter.increment
+        increment_project_counter(project)
+      end
+
+      def project_counter_current(project)
+        ::Gitlab::Cache::Import::Caching.read_integer(project_counter_key(project))
+      end
+
+      def increment_project_counter(project)
+        key = project_counter_key(project)
+        ::Gitlab::GithubImport.save_counter_name(project, key)
+        ::Gitlab::Cache::Import::Caching.increment(key)
+      end
+
+      def project_counter_key(project)
+        PROJECT_IMPORT_COUNTER_KEY % { project: project.id, counter_name: counter_name }
       end
 
       def counter

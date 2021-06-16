@@ -2,6 +2,8 @@
 
 module Gitlab
   module GithubImport
+    COUNTER_LIST_KEY = 'github-importer/counter-list/%{project}'
+
     def self.refmap
       [:heads, :tags, '+refs/pull/*/head:refs/merge-requests/*/head']
     end
@@ -32,6 +34,25 @@ module Gitlab
         url.path = "/api/v3"
         url.to_s
       end
+    end
+
+    def self.save_counter_name(project, name)
+      ::Gitlab::Cache::Import::Caching.set_add(counter_list_key(project), name)
+    end
+
+    def self.objects_imported(project)
+      caching = ::Gitlab::Cache::Import::Caching
+
+      caching
+        .values_from_set(counter_list_key(project))
+        .each_with_object({}) do |counter, result|
+          humanized_name = counter.split('/').last
+          result[humanized_name] = caching.read_integer(counter)
+        end
+    end
+
+    def self.counter_list_key(project)
+      COUNTER_LIST_KEY % { project: project.id }
     end
   end
 end
