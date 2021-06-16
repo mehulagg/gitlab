@@ -39246,6 +39246,9 @@ msgstr ""
 msgid "on track"
 msgstr ""
 
+msgid "only available on top-level groups."
+msgstr ""
+
 msgid "open issue"
 msgstr ""
 
