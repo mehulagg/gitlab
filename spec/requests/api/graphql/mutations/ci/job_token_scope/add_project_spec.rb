@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe 'JobTokenScopeAddProject' do
+RSpec.describe 'CiJobTokenScopeAddProject' do
   include GraphqlHelpers
 
   let_it_be(:project) { create(:project) }
@@ -15,8 +15,8 @@ RSpec.describe 'JobTokenScopeAddProject' do
     }
   end
 
-  let(:mutation) { graphql_mutation(:job_token_scope_add_project, variables) }
-  let(:mutation_response) { graphql_mutation_response(:job_token_scope_add_project) }
+  let(:mutation) { graphql_mutation(:ci_job_token_scope_add_project, variables) }
+  let(:mutation_response) { graphql_mutation_response(:ci_job_token_scope_add_project) }
 
   context 'when unauthorized' do
     let(:current_user) { create(:user) }

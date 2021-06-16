@@ -18,6 +18,14 @@ RSpec.describe Ci::JobTokenScope::AddProjectService do
       end
     end
 
+    context 'when job token scope is disabled for the given project' do
+      before do
+        allow(project).to receive(:ci_job_token_scope_enabled?).and_return(false)
+      end
+
+      it_behaves_like 'returns error', 'Edit not allowed since job token scope is disabled for this project'
+    end
+
     context 'when user does not have permissions to edit the job token scope' do
       it_behaves_like 'returns error', 'Insufficient permissions to modify the job token scope'
     end
@@ -47,6 +55,16 @@ RSpec.describe Ci::JobTokenScope::AddProjectService do
             expect do
               expect(result).to be_success
             end.to change { Ci::JobToken::ProjectScopeLink.count }.by(1)
+          end
+
+          context 'when target project is already in scope' do
+            before do
+              create(:ci_job_token_project_scope_link,
+                source_project: project,
+                target_project: target_project)
+            end
+
+            it_behaves_like 'returns error', "Target project is already in the job token scope"
           end
         end
 

@@ -7,17 +7,17 @@ module Mutations
         include FindsProject
         include ResolvesProject
 
-        graphql_name 'JobTokenScopeAddProject'
+        graphql_name 'CiJobTokenScopeAddProject'
 
         authorize :admin_project
 
         argument :project_path, GraphQL::ID_TYPE,
                  required: true,
-                 description: 'The project the job token scope is being updated.'
+                 description: 'The project that defines the CI job token scope.'
 
         argument :target_project_path, GraphQL::ID_TYPE,
                  required: true,
-                 description: 'The project to be added to the job token scope.'
+                 description: 'The project to be added to the CI job token scope.'
 
         field :target_project,
           Types::ProjectType,

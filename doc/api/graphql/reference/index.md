@@ -779,6 +779,26 @@ Input type: `CiCdSettingsUpdateInput`
 | <a id="mutationcicdsettingsupdateclientmutationid"></a>`clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 | <a id="mutationcicdsettingsupdateerrors"></a>`errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 
+### `Mutation.ciJobTokenScopeAddProject`
+
+Input type: `CiJobTokenScopeAddProjectInput`
+
+#### Arguments
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| <a id="mutationcijobtokenscopeaddprojectclientmutationid"></a>`clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
+| <a id="mutationcijobtokenscopeaddprojectprojectpath"></a>`projectPath` | [`ID!`](#id) | The project that defines the CI job token scope. |
+| <a id="mutationcijobtokenscopeaddprojecttargetprojectpath"></a>`targetProjectPath` | [`ID!`](#id) | The project to be added to the CI job token scope. |
+
+#### Fields
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| <a id="mutationcijobtokenscopeaddprojectclientmutationid"></a>`clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
+| <a id="mutationcijobtokenscopeaddprojecterrors"></a>`errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
+| <a id="mutationcijobtokenscopeaddprojecttargetproject"></a>`targetProject` | [`Project`](#project) | The project added to the job token scope. |
+
 ### `Mutation.clusterAgentDelete`
 
 Input type: `ClusterAgentDeleteInput`
@@ -2713,26 +2733,6 @@ Input type: `JobRetryInput`
 | <a id="mutationjobretryclientmutationid"></a>`clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 | <a id="mutationjobretryerrors"></a>`errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 | <a id="mutationjobretryjob"></a>`job` | [`CiJob`](#cijob) | The job after the mutation. |
-
-### `Mutation.jobTokenScopeAddProject`
-
-Input type: `JobTokenScopeAddProjectInput`
-
-#### Arguments
-
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| <a id="mutationjobtokenscopeaddprojectclientmutationid"></a>`clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
-| <a id="mutationjobtokenscopeaddprojectprojectpath"></a>`projectPath` | [`ID!`](#id) | The project the job token scope is being updated. |
-| <a id="mutationjobtokenscopeaddprojecttargetprojectpath"></a>`targetProjectPath` | [`ID!`](#id) | The project to be added to the job token scope. |
-
-#### Fields
-
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| <a id="mutationjobtokenscopeaddprojectclientmutationid"></a>`clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
-| <a id="mutationjobtokenscopeaddprojecterrors"></a>`errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
-| <a id="mutationjobtokenscopeaddprojecttargetproject"></a>`targetProject` | [`Project`](#project) | The project added to the job token scope. |
 
 ### `Mutation.labelCreate`
 
