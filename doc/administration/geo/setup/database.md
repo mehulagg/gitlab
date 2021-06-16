@@ -737,6 +737,16 @@ For each Patroni instance on the secondary site:
    gitlab-ctl reconfigure
    ```
 
+   NOTE: If you are configuring a Patroni standby cluster on a site that previous had a working Patroni cluster, follow these steps instead:
+
+   ```shell
+   gitlab-ctl stop patroni 
+   rm -rf /var/opt/gitlab/postgresql/data
+   /opt/gitlab/embedded/bin/patronictl -c /var/opt/gitlab/patroni/patroni.yaml remove postgresql-ha
+   gitlab-ctl reconfigure
+   gitlab-ctl start patroni
+   ```
+
 ### Migrating from repmgr to Patroni
 
 1. Before migrating, it is recommended that there is no replication lag between the primary and secondary sites and that replication is paused. In GitLab 13.2 and later, you can pause and resume replication with `gitlab-ctl geo-replication-pause` and `gitlab-ctl geo-replication-resume` on a Geo secondary database node.
