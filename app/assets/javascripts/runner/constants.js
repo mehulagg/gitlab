@@ -1,6 +1,7 @@
 import { s__ } from '~/locale';
 
 export const RUNNER_PAGE_SIZE = 20;
+export const RUNNER_JOB_COUNT_LIMIT = 1000;
 
 export const I18N_DETAILS_TITLE = s__('Runners|Runner #%{runner_id}');
 
