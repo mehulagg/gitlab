@@ -44,13 +44,20 @@ The IP address for `mg.gitlab.com` is subject to change at any time.
 
 [See our backup strategy](https://about.gitlab.com/handbook/engineering/infrastructure/production/#backups).
 
-There are several ways to perform backups of your content on GitLab.com.
+To back up an entire project on GitLab.com, you can export it either:
 
-Projects can be backed up in their entirety by exporting them either [through the UI](../project/settings/import_export.md) or [API](../../api/project_import_export.md#schedule-an-export), the latter of which can be used to programmatically upload exports to a storage platform such as AWS S3.
+- [Through the UI](../project/settings/import_export.md).
+- [Through the API](../../api/project_import_export.md#schedule-an-export). You can also use
+  the API to programmatically upload exports to a storage platform, such as Amazon S3.
 
-With exports, be sure to take note of [what is and is not](../project/settings/import_export.md#exported-contents), included in a project export.
+With exports, be aware of [what is and is not](../project/settings/import_export.md#exported-contents)
+included in a project export.
 
-Since GitLab is built on Git, you can back up **just** the repository of a project by [cloning](../../gitlab-basics/start-using-git.md#clone-a-repository) it to another machine. Similarly, if you need to back up just the wiki of a repository it can also be cloned and all files uploaded to that wiki are included [if they were uploaded after 2020-08-22](../project/wiki/index.md#create-a-new-wiki-page).
+GitLab is built on Git, so you can back up just the repository of a project by
+[cloning](../../gitlab-basics/start-using-git.md#clone-a-repository) it to another machine.
+Similarly, you can clone a project's wiki to back it up. All files
+[uploaded after August 22, 2020](../project/wiki/index.md#create-a-new-wiki-page)
+are included when cloning.
 
 ## Alternative SSH port
 
@@ -116,7 +123,7 @@ or over the repository size limit, you can [reduce your repository size with Git
 | -----------                   | ----------- | ------------- |
 | [Repository size including LFS](../admin_area/settings/account_and_limit_settings.md#repository-size-limit) | 10 GB       | Unlimited     |
 | Maximum import size           | 5 GB        | Unlimited ([Modified](https://gitlab.com/gitlab-org/gitlab/-/issues/251106) from 50MB to unlimited in GitLab 13.8.    |
-| Maximum attachment size       | 10 MB      |     10 MB   | 
+| Maximum attachment size       | 10 MB      |     10 MB   |
 
 NOTE:
 `git push` and GitLab project imports are limited to 5 GB per request through Cloudflare. Git LFS and imports other than a file upload are not affected by this limit.
@@ -129,17 +136,16 @@ from those IPs and allow them.
 
 GitLab.com is fronted by Cloudflare. For incoming connections to GitLab.com you might need to allow CIDR blocks of Cloudflare ([IPv4](https://www.cloudflare.com/ips-v4) and [IPv6](https://www.cloudflare.com/ips-v6)).
 
-For outgoing connections from CI/CD runners we are not providing static IP addresses.
-All our runners are deployed into Google Cloud Platform (GCP) - any IP based
+For outgoing connections from CI/CD runners, we are not providing static IP addresses.
+All GitLab runners are deployed into Google Cloud Platform (GCP). Any IP-based
 firewall can be configured by looking up all
 [IP address ranges or CIDR blocks for GCP](https://cloud.google.com/compute/docs/faq#find_ip_range).
 
 ## Hostname list
 
-To configure allow-lists in local HTTP(S) proxies, or other
-web-blocking software that govern end-user machines,
-pages on GitLab.com will attempt to load content from
-the following hostnames:
+Add these hostnames when you configure allow-lists in local HTTP(S) proxies,
+or other web-blocking software that governs end-user machines. Pages on GitLab.com
+load content from these hostnames:
 
 - `gitlab.com`
 - `*.gitlab.com`
@@ -148,7 +154,7 @@ the following hostnames:
 - `*.gitlab.net`
 
 Documentation and Company pages served over `docs.gitlab.com`
-and `about.gitlab.com` will attempt to also load certain page
+and `about.gitlab.com` also load certain page
 content directly from common public CDN hostnames.
 
 ## Webhooks
@@ -157,9 +163,9 @@ The following limits apply for [Webhooks](../project/integrations/webhooks.md):
 
 | Setting | GitLab.com | Default |
 | ------- | ---------- | ------- |
-| [Webhook rate limit](../../administration/instance_limits.md#webhook-rate-limit) | `120` calls per minute for Free tier, unlimited for all paid tiers | Unlimited
-| [Number of webhooks](../../administration/instance_limits.md#number-of-webhooks) | `100` per-project, `50` per-group | `100` per-project, `50` per-group
-| Maximum payload size | `25 MB` | `25 MB`
+| [Webhook rate limit](../../administration/instance_limits.md#webhook-rate-limit) | `120` calls per minute for GitLab Free, unlimited for GitLab Premium and GitLab Ultimate | Unlimited |
+| [Number of webhooks](../../administration/instance_limits.md#number-of-webhooks) | `100` per project, `50` per group | `100` per project, `50` per group |
+| Maximum payload size | `25 MB` | `25 MB` |
 
 ## Shared runners
 
@@ -228,11 +234,8 @@ The list of GitLab.com specific settings (and their defaults) is as follows:
 | `idle_in_transaction_session_timeout` | 60s                                                                 | 60s                                   |
 
 Some of these settings are in the process being adjusted. For example, the value
-for `shared_buffers` is quite high and as such we are looking into adjusting it.
-More information on this particular change can be found at
-<https://gitlab.com/gitlab-com/infrastructure/-/issues/1555>. An up to date list
-of proposed changes can be found at
-<https://gitlab.com/gitlab-com/infrastructure/-/issues?scope=all&state=opened&label_name[]=database&label_name[]=change>.
+for `shared_buffers` is quite high, and we are
+[considering adjusting it](https://gitlab.com/gitlab-com/gl-infra/infrastructure/-/issues/4985).
 
 ## Puma
 
@@ -289,7 +292,7 @@ See [Protected Paths](../admin_area/settings/protected_paths.md) for more detail
 ### IP blocks
 
 IP blocks can occur when GitLab.com receives unusual traffic from a single
-IP address that the system views as potentially malicious, based on rate limit
+IP address that the system views as potentially malicious. This can be based on rate limit
 settings. After the unusual traffic ceases, the IP address is automatically
 released depending on the type of block, as described in a following section.
 
@@ -326,9 +329,12 @@ doesn't return the following headers:
 
 ### Visibility settings
 
-On GitLab.com, projects, groups, and snippets created
-As of GitLab 12.2 (July 2019), projects, groups, and snippets have the
-[**Internal** visibility](../../public_access/public_access.md#internal-projects) setting [disabled on GitLab.com](https://gitlab.com/gitlab-org/gitlab/-/issues/12388).
+If created before GitLab 12.2 (July 2019), these items have the
+[Internal visibility](../../public_access/public_access.md#internal-projects) setting [disabled on GitLab.com](https://gitlab.com/gitlab-org/gitlab/-/issues/12388):
+
+- Projects.
+- Groups.
+- Snippets.
 
 ### SSH maximum number of connections
 
