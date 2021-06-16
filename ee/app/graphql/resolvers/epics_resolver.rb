@@ -21,6 +21,10 @@ module Resolvers
              required: false,
              description: 'Search query for epic title or description.'
 
+    argument :in, GraphQL::STRING_TYPE,
+             required: false,
+             description: 'Fields to search in. e.i.: `title`, `description`, or a string joining them with comma.'
+
     argument :sort, Types::EpicSortEnum,
              required: false,
              description: 'List epics by sort order.'
@@ -68,6 +72,7 @@ module Resolvers
     def ready?(**args)
       validate_timeframe_params!(args)
       validate_starts_with_iid!(args)
+      validate_search_in_params!(args)
 
       super(**args)
     end
@@ -156,6 +161,14 @@ module Resolvers
       unless EpicsFinder.valid_iid_query?(args[:iid_starts_with])
         raise Gitlab::Graphql::Errors::ArgumentError, 'Invalid `iidStartsWith` query'
       end
+    end
+
+    def validate_search_in_params!(args)
+      return unless args[:in].present?
+      return if args[:search].present?
+
+      raise Gitlab::Graphql::Errors::ArgumentError,
+        '`search` should be present when including the `in` argument'
     end
   end
 end
