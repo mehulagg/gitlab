@@ -17,7 +17,6 @@
 - auto_devops
 - backup_restore
 - boards
-- build_artifacts
 - chatops
 - cloud_native_installation
 - cluster_cost_management
@@ -90,7 +89,6 @@
 - package_registry
 - pages
 - performance_testing
-- pipeline_abuse_prevention
 - pipeline_authoring
 - planning_analytics
 - privacy_control_center
@@ -129,6 +127,7 @@
 - value_stream_management
 - vulnerability_database
 - vulnerability_management
+- web_firewall
 - web_ide
 - wiki
 - workflow_automation
