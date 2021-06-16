@@ -93,8 +93,7 @@ module QA
 
         # Define custom attribute
         #
-        # @param [SYmbol] name
-        # @param [Proc] &block
+        # @param [Symbol] name
         # @return [void]
         def attribute(name, &block)
           attr_writer(name)
@@ -107,7 +106,7 @@ module QA
 
         # Define multiple custom attributes
         #
-        # @param [Array] *names
+        # @param [Array] names
         # @return [void]
         def attributes(*names)
           names.each { |name| attribute(name) }
