@@ -5630,6 +5630,9 @@ msgstr ""
 msgid "BulkImport|must be a group"
 msgstr ""
 
+msgid "Burndown Charts - Track progress duing a sprint or while working on a new version of your software. <a href=\"%{url}\" target=\"_blank\" rel=\"noopener noreferrer\">Learn more</a>."
+msgstr ""
+
 msgid "Burndown chart"
 msgstr ""
 
@@ -5637,6 +5640,9 @@ msgid "BurndownChartLabel|Open issue weight"
 msgstr ""
 
 msgid "BurndownChartLabel|Open issues"
+msgstr ""
+
+msgid "Burnup Charts - Milstone and Iteration Burnup Charts. <a href=\"%{url}\" target=\"_blank\" rel=\"noopener noreferrer\">Learn more</a>."
 msgstr ""
 
 msgid "Burnup chart"
@@ -12145,6 +12151,9 @@ msgstr ""
 msgid "Enable Spam Check via external API endpoint"
 msgstr ""
 
+msgid "Enable Team Performance Features"
+msgstr ""
+
 msgid "Enable What's new: All tiers"
 msgstr ""
 
@@ -18176,6 +18185,9 @@ msgid "Issue Analytics"
 msgstr ""
 
 msgid "Issue Boards"
+msgstr ""
+
+msgid "Issue Dependencies - Mark issues as blocked and blocking and track their status. <a href=\"%{url}\" target=\"_blank\" rel=\"noopener noreferrer\">Learn more</a>."
 msgstr ""
 
 msgid "Issue Type"
@@ -34348,6 +34360,9 @@ msgstr ""
 msgid "Tracing"
 msgstr ""
 
+msgid "Track Description Changes - View the full history of description updates in issues, merge requests, and epics. <a href=\"%{url}\" target=\"_blank\" rel=\"noopener noreferrer\">Learn more</a>."
+msgstr ""
+
 msgid "Track groups of issues that share a theme, across projects and milestones"
 msgstr ""
 
@@ -37264,6 +37279,9 @@ msgid "You can create new ones at your Personal Access Tokens settings %{pat_lin
 msgstr ""
 
 msgid "You can easily contribute to them by requesting to join these groups."
+msgstr ""
+
+msgid "You can enable Team Performance Features because you have checked Enable usage ping. Team Performance Features include:"
 msgstr ""
 
 msgid "You can enable project access token creation in %{link_start}group settings%{link_end}."

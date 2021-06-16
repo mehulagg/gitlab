@@ -43,15 +43,19 @@
           = _('Enable Team Performance Features')
         .form-text
           - if can_be_configured
+            - issue_dependencies_path = help_page_path('user/project/issues/related_issues.md', anchor: 'add-a-linked-issue')
+            - burnup_charts_path = help_page_path('user/project/milestones/burndown_and_burnup_charts.md', anchor: 'burnup-charts')
+            - burndown_charts_path = help_page_path('user/project/milestones/burndown_and_burnup_charts.md')
+            - track_description_changes_path = help_page_path('user/project/issues/issue_data_and_actions.md', anchor: 'description')
             %p.mb-2.text-muted= _('You can enable Team Performance Features because you have checked Enable usage ping. Team Performance Features include:')
             %ul
               %li
-                = html_escape(_('Issue Dependencies - Mark issues as blocked and blocking and track their status. Learn more'))
+                = _('Issue Dependencies - Mark issues as blocked and blocking and track their status. <a href="%{url}" target="_blank" rel="noopener noreferrer">Learn more</a>.').html_safe % { url: issue_dependencies_path }
               %li
-                = html_escape(_('Burnup Charts - Milstone and Iteration Burnup Charts. Learn more'))
+                = _('Burnup Charts - Milstone and Iteration Burnup Charts. <a href="%{url}" target="_blank" rel="noopener noreferrer">Learn more</a>.').html_safe % { url: burnup_charts_path }
               %li
-                = html_escape(_('Burndown Charts - Track progress duing a sprint or while working on a new version of your software. Learn more'))
+                = _('Burndown Charts - Track progress duing a sprint or while working on a new version of your software. <a href="%{url}" target="_blank" rel="noopener noreferrer">Learn more</a>.').html_safe % { url: burndown_charts_path }
               %li
-                = html_escape(_('Issue Dependencies - View the full history of description updates in issues, merge requests, and epics. Learn more'))
+                = _('Track Description Changes - View the full history of description updates in issues, merge requests, and epics. <a href="%{url}" target="_blank" rel="noopener noreferrer">Learn more</a>.').html_safe % { url: track_description_changes_path }
 
   = f.submit _('Save changes'), class: "gl-button btn btn-confirm"
