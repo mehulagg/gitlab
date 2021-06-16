@@ -184,6 +184,9 @@ RSpec.describe Tooling::Danger::ProjectHelper do
       'spec/lib/generators/usage_metric_definition_generator_spec.rb' | [:backend, :product_intelligence]
       'config/metrics/schema.json' | [:product_intelligence]
       'app/assets/javascripts/tracking/index.js' | [:frontend, :product_intelligence]
+      'app/assets/javascripts/tracking/constants.js' | [:frontend, :product_intelligence]
+      'app/assets/javascripts/tracking/get_standard_context.js' | [:frontend, :product_intelligence]
+      'spec/frontend/tracking/get_standard_context_spec.js' | [:frontend, :product_intelligence]
       'spec/frontend/tracking_spec.js' | [:frontend, :product_intelligence]
       'lib/gitlab/usage_database/foo.rb' | [:backend]
     end
