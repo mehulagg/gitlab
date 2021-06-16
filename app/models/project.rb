@@ -179,7 +179,7 @@ class Project < ApplicationRecord
   has_one :microsoft_teams_service, class_name: 'Integrations::MicrosoftTeams'
   has_one :mock_ci_service, class_name: 'Integrations::MockCi'
   has_one :packagist_integration, class_name: 'Integrations::Packagist'
-  has_one :pipelines_email_service, class_name: 'Integrations::PipelinesEmail'
+  has_one :pipelines_email_integration, class_name: 'Integrations::PipelinesEmail'
   has_one :pivotaltracker_service, class_name: 'Integrations::Pivotaltracker'
   has_one :pushover_service, class_name: 'Integrations::Pushover'
   has_one :redmine_service, class_name: 'Integrations::Redmine'

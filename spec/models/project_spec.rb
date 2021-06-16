@@ -50,7 +50,7 @@ RSpec.describe Project, factory_default: :keep do
     it { is_expected.to have_one(:discord_integration) }
     it { is_expected.to have_one(:drone_ci_integration) }
     it { is_expected.to have_one(:emails_on_push_service) }
-    it { is_expected.to have_one(:pipelines_email_service) }
+    it { is_expected.to have_one(:pipelines_email_integration) }
     it { is_expected.to have_one(:irker_service) }
     it { is_expected.to have_one(:pivotaltracker_service) }
     it { is_expected.to have_one(:flowdock_service) }
