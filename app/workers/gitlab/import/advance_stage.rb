@@ -20,6 +20,8 @@ module Gitlab
         new_waiters = wait_for_jobs(waiters)
 
         if new_waiters.empty?
+          info(project_id, next_stage)
+
           # We refresh the import JID here so workers importing individual
           # resources (e.g. notes) don't have to do this all the time, reducing
           # the pressure on Redis. We _only_ do this once all jobs are done so
@@ -55,6 +57,23 @@ module Gitlab
 
       def next_stage_worker(next_stage)
         raise NotImplementedError
+      end
+
+      def import_source
+        raise NotImplementedError
+      end
+
+      def info(project_id, next_stage)
+        logger.info(
+          message: 'advance stage',
+          project_id: project_id,
+          next_stage: next_stage,
+          import_source: import_source
+        )
+      end
+
+      def logger
+        @logger ||= Gitlab::Import::Logger.build
       end
     end
   end

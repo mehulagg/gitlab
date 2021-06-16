@@ -27,6 +27,10 @@ module Gitlab
       def next_stage_worker(next_stage)
         STAGES.fetch(next_stage.to_sym)
       end
+
+      def import_source
+        :jira
+      end
     end
   end
 end
