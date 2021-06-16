@@ -163,6 +163,7 @@ export default {
   i18n: {
     API_FUZZING: __('API Fuzzing'),
     CONTAINER_SCANNING: __('Container Scanning'),
+    RUNNING_CONTAINER_SCANNING: __('Running Container Scanning'),
     COVERAGE_FUZZING: __('Coverage Fuzzing'),
     SECRET_DETECTION: __('Secret Detection'),
     DEPENDENCY_SCANNING: __('Dependency Scanning'),
