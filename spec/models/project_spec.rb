@@ -42,7 +42,7 @@ RSpec.describe Project, factory_default: :keep do
     it { is_expected.to have_one(:unify_circuit_service) }
     it { is_expected.to have_one(:webex_teams_service) }
     it { is_expected.to have_one(:packagist_integration) }
-    it { is_expected.to have_one(:pushover_service) }
+    it { is_expected.to have_one(:pushover_integration) }
     it { is_expected.to have_one(:asana_integration) }
     it { is_expected.to have_many(:boards) }
     it { is_expected.to have_one(:campfire_integration) }

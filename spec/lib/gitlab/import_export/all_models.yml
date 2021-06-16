@@ -385,7 +385,7 @@ project:
 - buildkite_integration
 - bamboo_integration
 - teamcity_service
-- pushover_service
+- pushover_integration
 - jira_service
 - redmine_service
 - youtrack_service
