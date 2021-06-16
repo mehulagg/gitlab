@@ -96,7 +96,7 @@ per [multiple Kubernetes clusters](#multiple-kubernetes-clusters) When specifyin
 this is automatically set as an environment variable (`KUBE_INGRESS_BASE_DOMAIN`) during
 the [Auto DevOps](../../../topics/autodevops/index.md) stages.
 
-The domain should have a wildcard DNS configured to the Ingress IP address. [More details](../../project/clusters/index.md#base-domain).
+The domain should have a wildcard DNS configured to the Ingress IP address. [More details](../../project/clusters/add_remove_clusters.md#base-domain).
 
 ## Environment scopes **(PREMIUM)**
 
