@@ -66,7 +66,7 @@ describe('PolicyDrawer component', () => {
     it('renders network policy editor with manifest', () => {
       const policyEditor = findPolicyEditor();
       expect(policyEditor.exists()).toBe(true);
-      expect(policyEditor.attributes('value')).toBe(mockGenericPolicy.manifest);
+      expect(policyEditor.attributes('value')).toBe(mockGenericPolicy.yaml);
     });
 
     itRendersEditButton();

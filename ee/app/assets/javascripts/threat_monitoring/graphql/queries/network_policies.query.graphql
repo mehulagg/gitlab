@@ -1,0 +1,13 @@
+query networkPolicies($fullPath: ID!, $environmentId: EnvironmentID) {
+  project(fullPath: $fullPath) {
+    networkPolicies(environmentId: $environmentId) {
+      nodes {
+        name
+        yaml
+        enabled
+        fromAutoDevops
+        updatedAt
+      }
+    }
+  }
+}
