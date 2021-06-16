@@ -24,7 +24,7 @@ export const manageSubscriptionButtonText = s__('SuperSonics|Manage');
 export const syncSubscriptionButtonText = s__('SuperSonics|Sync subscription details');
 export const copySubscriptionIdButtonText = __('Copy');
 export const licenseFileText = __('License file');
-export const cloudLicenseText = __('SuperSonics|Cloud license');
+export const cloudLicenseText = s__('SuperSonics|Cloud license');
 export const usersInSubscriptionUnlimited = __('Unlimited');
 export const detailsLabels = {
   address: __('Address'),
