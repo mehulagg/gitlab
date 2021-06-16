@@ -115,6 +115,7 @@ the status check and it **will not** be recoverable.
 
 ## Status checks widget
 
+![Status checks widget](img/status_checks_widget_passed_v14_0.png)
 
 This widget will, on a per merge request basis, allow you to see
 the status of the external check for the merge request you are currently looking at.
@@ -126,6 +127,16 @@ This feature will not enforce that policy.
 
 We cannot guarantee that the external status checks will be processed
 by the external service doing the check.
+
+### Pending state
+
+![Status checks widget pending](img/status_checks_widget_pending_v14_0.png)
+
+There is no guarantee that the external status check will be completed
+by the time you view any given merge request. In this instance a pending
+state is shown. Once we
+[receive a response](../../../api/status_checks.md#set-approval-status-of-an-external-status-check)
+from the external status check it's state will be updated accordingly.
 
 ## Troubleshooting
 
@@ -161,6 +172,16 @@ Unable to fetch branches list, please close the form and try again
 
 An unexpected response was received from the branches retrieval API.
 As suggested, you should close the form and reopen again or refresh the page. This error should be temporary, although
+if it persists please check the [GitLab status page](https://status.gitlab.com/) to see if there is a wider outage.
+
+### Failed to load status checks
+
+```plaintext
+Failed to load status checks
+```
+
+An unexpected response was received from the external status checks API.
+You should refresh the page. This error should be temporary, although
 if it persists please check the [GitLab status page](https://status.gitlab.com/) to see if there is a wider outage.
 
 ## Enable or disable status checks **(ULTIMATE SELF)**
