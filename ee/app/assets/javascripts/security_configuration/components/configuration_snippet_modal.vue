@@ -52,6 +52,9 @@ export default {
     show() {
       this.$refs.modal.show();
     },
+    resetEditor() {
+      this.$refs.editor.getEditor().layout();
+    },
     onHide() {
       this.clipboard?.destroy();
     },
@@ -95,6 +98,7 @@ export default {
     :modal-id="$options.CONFIGURATION_SNIPPET_MODAL_ID"
     :title="modalTitle"
     @hide="onHide"
+    @shown="resetEditor"
     @primary="copySnippet"
     @secondary="copySnippet(false)"
   >
@@ -111,11 +115,14 @@ export default {
       </gl-sprintf>
     </p>
 
-    <editor-lite
-      data-testid="configuration-modal-yaml-snippet"
-      :value="yaml"
-      file-name="*.yml"
-      :editor-options="{ readOnly: true }"
-    />
+    <div class="gl-w-full gl-h-full" data-testid="configuration-modal-yaml-snippet">
+      <editor-lite
+          ref="editor"
+          :value="yaml"
+          file-name="*.yml"
+          :editor-options="{ readOnly: true }"
+      />
+    </div>
+
   </gl-modal>
 </template>
