@@ -373,6 +373,10 @@ module ApplicationSettingImplementation
     Settings.gitlab.usage_ping_enabled
   end
 
+  def team_features_enabled?
+    team_features_enabled
+  end
+
   def usage_ping_enabled
     usage_ping_can_be_configured? && super
   end
