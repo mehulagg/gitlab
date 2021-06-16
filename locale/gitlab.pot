@@ -28585,6 +28585,9 @@ msgstr ""
 msgid "Search"
 msgstr ""
 
+msgid "Search GitLab"
+msgstr ""
+
 msgid "Search Jira issues"
 msgstr ""
 
@@ -28667,9 +28670,6 @@ msgid "Search or filter results..."
 msgstr ""
 
 msgid "Search or filter results…"
-msgstr ""
-
-msgid "Search or jump to…"
 msgstr ""
 
 msgid "Search project"
