@@ -908,10 +908,9 @@
   resolved "https://registry.yarnpkg.com/@gitlab/tributejs/-/tributejs-1.0.0.tgz#672befa222aeffc83e7d799b0500a7a4418e59b8"
   integrity sha512-nmKw1+hB6MHvlmPz63yPwVs1qQkycHwsKgxpEbzmky16Y6mL4EJMk3w1b8QlOAF/AIAzjCERPhe/R4MJiohbZw==
 
-"@gitlab/ui@29.35.0":
-  version "29.35.0"
-  resolved "https://registry.yarnpkg.com/@gitlab/ui/-/ui-29.35.0.tgz#bb04d1e4f8796134bc406adaa869c1b5b1fdcaf2"
-  integrity sha512-Fso++QXqxZSfIgSmPGlfQC3mdFI6oh/AOL/9cGn4t/3kfxwHd1GCMjUNAFeHsgyIwKIr1hwksipapwuuOIFSCw==
+"@gitlab/ui@https://gitlab.com/gitlab-org/gitlab-ui/-/jobs/1353167047/artifacts/raw/gitlab-ui.1444-update-identicon-fallback.tgz":
+  version "29.36.0"
+  resolved "https://gitlab.com/gitlab-org/gitlab-ui/-/jobs/1353167047/artifacts/raw/gitlab-ui.1444-update-identicon-fallback.tgz#f127ed8a047584df9a473c7506f7628cf3312a19"
   dependencies:
     "@babel/standalone" "^7.0.0"
     "@gitlab/vue-toasted" "^1.3.0"
