@@ -120,9 +120,7 @@ review-stop:
   stage: qa
   needs: ["review-deploy"]
   variables:
-    QA_ARTIFACTS_DIR: "${CI_PROJECT_DIR}/qa"
     QA_CAN_TEST_GIT_PROTOCOL_V2: "false"
-    QA_DEBUG: "true"
     QA_GENERATE_ALLURE_REPORT: "true"
     GITLAB_USERNAME: "root"
     GITLAB_PASSWORD: "${REVIEW_APPS_ROOT_PASSWORD}"
@@ -131,16 +129,26 @@ review-stop:
     GITHUB_ACCESS_TOKEN: "${REVIEW_APPS_QA_GITHUB_ACCESS_TOKEN}"
     EE_LICENSE: "${REVIEW_APPS_EE_LICENSE}"
     SIGNUP_DISABLED: "true"
+    BUNDLE_PATH: vendor/bundle
+    BUNDLE_FROZEN: "true"
+    BUNDLE_SUPPRESS_INSTALL_USING_MESSAGES: "true"
   before_script:
-    - export QA_IMAGE="${CI_REGISTRY}/${CI_PROJECT_PATH}/gitlab-ee-qa:${CI_COMMIT_REF_SLUG}"
     - export CI_ENVIRONMENT_URL="$(cat environment_url.txt)"
     - echo "${CI_ENVIRONMENT_URL}"
-    - echo "${QA_IMAGE}"
     - *base-before_script
-    - gem install gitlab-qa --no-document ${GITLAB_QA_VERSION:+ --version ${GITLAB_QA_VERSION}}
+    - cd qa
+    - bundle install
+  after_script:
+    - ls -la
+  cache:
+    key:
+      files:
+        - qa/Gemfile.lock
+    paths:
+      - qa/vendor/bundle
   artifacts:
     paths:
-      - ./qa/gitlab-qa-run-*
+      - qa/tmp
     expire_in: 7 days
     when: always
 
@@ -157,7 +165,7 @@ review-stop:
   script:
     - |
       allure-report-publisher upload gcs \
-        --results-glob="qa/gitlab-qa-run-*/**/allure-results/*" \
+        --results-glob="qa/tmp/allure-results/*" \
         --bucket="gitlab-qa-allure-reports" \
         --prefix="$ALLURE_REPORT_PATH_PREFIX/$CI_COMMIT_REF_SLUG" \
         --update-pr="comment" \
@@ -171,7 +179,7 @@ review-qa-smoke:
     - .review:rules:review-qa-smoke
   retry: 1  # This is confusing but this means "2 runs at max".
   script:
-    - gitlab-qa Test::Instance::Smoke "${QA_IMAGE}" "${CI_ENVIRONMENT_URL}"
+    - bundle exec bin/qa Test::Instance::Smoke "${CI_ENVIRONMENT_URL}"
 
 review-qa-all:
   extends:
@@ -181,7 +189,7 @@ review-qa-all:
   script:
     - export KNAPSACK_REPORT_PATH=knapsack/master_report.json
     - export KNAPSACK_TEST_FILE_PATTERN=qa/specs/features/**/*_spec.rb
-    - gitlab-qa Test::Instance::Any "${QA_IMAGE}" "${CI_ENVIRONMENT_URL}" -- --format RspecJunitFormatter --out tmp/rspec-${CI_JOB_ID}.xml --format html --out tmp/rspec.htm --color --format documentation
+    - bundle exec bin/qa Test::Instance::Any "${CI_ENVIRONMENT_URL}" -- --format RspecJunitFormatter --out tmp/rspec-${CI_JOB_ID}.xml --format html --out tmp/rspec.htm --color --format documentation
 
 review-performance:
   extends:
