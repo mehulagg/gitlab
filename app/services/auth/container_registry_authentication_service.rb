@@ -122,8 +122,8 @@ module Auth
     def add_migration_flags(project, access)
       return access unless access[:actions].include?('push') && Feature.enabled?(:container_registry_migration_phase1)
 
-      access[:migration_eligible] = Feature.enabled?(:container_registry_migration_phase1_tier, project.group.actual_plan) \
-        && Feature.disabled?(:container_registry_migration_phase1_deny, project.group) \
+      access[:migration_eligible] = Feature.enabled?(:container_registry_migration_phase1_tier, project.root_ancestor.actual_plan) \
+        && Feature.disabled?(:container_registry_migration_phase1_deny, project.root_ancestor) \
         && Feature.enabled?(:container_registry_migration_phase1_allow, project)
       access
     end
