@@ -11,6 +11,7 @@ export const makeMockUserCalloutDismisser = ({
     return this.$scopedSlots.default({
       dismiss,
       shouldShowCallout,
+      isDismissed: !shouldShowCallout,
     });
   },
 });

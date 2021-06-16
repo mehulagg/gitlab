@@ -29,6 +29,7 @@ export default {
       toggle-class="top-nav-toggle js-top-nav-dropdown-toggle gl-px-3!"
       no-flip
       no-caret
+      v-on="$listeners"
     >
       <gl-dropdown-form>
         <top-nav-dropdown-menu
@@ -38,5 +39,6 @@ export default {
         />
       </gl-dropdown-form>
     </gl-nav-item-dropdown>
+    <slot></slot>
   </gl-nav>
 </template>

@@ -31,7 +31,8 @@ class UserCallout < ApplicationRecord
     pipeline_needs_banner: 29,
     pipeline_needs_hover_tip: 30,
     web_ide_ci_environments_guidance: 31,
-    security_configuration_upgrade_banner: 32
+    security_configuration_upgrade_banner: 32,
+    combined_menu_top_nav: 33
   }
 
   validates :user, presence: true
