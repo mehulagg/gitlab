@@ -204,6 +204,21 @@ RSpec.describe Epics::IssuePromoteService, :aggregate_failures do
               expect(epic.parent).to eq(parent_epic)
             end
           end
+
+          context 'when issue and epic are confidential' do
+            before do
+              issue.update_attribute(:confidential, true)
+              parent_epic.update_attribute(:confidential, true)
+            end
+
+            it 'promotes issue to epic' do
+              epic = subject.execute(issue, group)
+
+              expect(issue.reload.promoted_to_epic_id).to eq(epic.id)
+              expect(epic.confidential).to eq(true)
+              expect(epic.parent).to eq(parent_epic)
+            end
+          end
         end
 
         context 'when issue was already promoted' do

@@ -75,11 +75,7 @@ module EE
           command :promote do
             @updates[:promote_to_epic] = true
 
-            @execution_message[:promote] = if quick_action_target.confidential?
-                                             _('Promoted confidential issue to a non-confidential epic. Information in this issue is no longer confidential as epics are public to group members.')
-                                           else
-                                             _('Promoted issue to an epic.')
-                                           end
+            @execution_message[:promote] = _('Promoted issue to an epic.')
           end
 
           desc _('Set iteration')

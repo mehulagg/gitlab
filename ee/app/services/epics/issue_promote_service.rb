@@ -55,7 +55,8 @@ module Epics
     def params
       {
         title: original_entity.title,
-        parent: issue_epic
+        parent: issue_epic,
+        confidential: issue.confidential
       }
     end
 
