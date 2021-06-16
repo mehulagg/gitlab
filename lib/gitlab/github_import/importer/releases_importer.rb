@@ -26,7 +26,7 @@ module Gitlab
           build_database_rows(each_release)
         end
 
-        def already_imported?(release)
+        def already_fetched?(release)
           existing_tags.include?(release.tag_name)
         end
 

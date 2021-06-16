@@ -98,11 +98,11 @@ RSpec.describe Gitlab::GithubImport::Importer::DiffNotesImporter do
     end
   end
 
-  describe '#id_for_already_imported_cache' do
+  describe '#id_for_already_fetched_cache' do
     it 'returns the ID of the given note' do
       importer = described_class.new(project, client)
 
-      expect(importer.id_for_already_imported_cache(github_comment))
+      expect(importer.id_for_already_fetched_cache(github_comment))
         .to eq(1)
     end
   end

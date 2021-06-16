@@ -22,7 +22,7 @@ module Gitlab
           :issues
         end
 
-        def id_for_already_imported_cache(issue)
+        def id_for_already_fetched_cache(issue)
           issue.number
         end
 

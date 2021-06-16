@@ -17,7 +17,7 @@ RSpec.describe Gitlab::GithubImport::BulkImporting do
         .and_return({ title: 'Foo' })
 
       expect(importer)
-        .to receive(:already_imported?)
+        .to receive(:already_fetched?)
         .with(object)
         .and_return(false)
 
@@ -26,14 +26,14 @@ RSpec.describe Gitlab::GithubImport::BulkImporting do
       expect(importer.build_database_rows(enum)).to eq([{ title: 'Foo' }])
     end
 
-    it 'does not import objects that have already been imported' do
+    it 'does not import objects that have already been fetched' do
       object = double(:object, title: 'Foo')
 
       expect(importer)
         .not_to receive(:build)
 
       expect(importer)
-        .to receive(:already_imported?)
+        .to receive(:already_fetched?)
         .with(object)
         .and_return(true)
 

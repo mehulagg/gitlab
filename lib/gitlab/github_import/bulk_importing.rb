@@ -10,7 +10,7 @@ module Gitlab
       #        rows.
       def build_database_rows(enum)
         enum.each_with_object([]) do |(object, _), rows|
-          rows << build(object) unless already_imported?(object)
+          rows << build(object) unless already_fetched?(object)
         end
       end
 

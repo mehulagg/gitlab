@@ -9,8 +9,8 @@ module Gitlab
         def initialize(...)
           super
 
-          @merge_requests_already_imported_cache_key =
-            "github-importer/merge_request/already-imported/#{project.id}"
+          @merge_requests_already_fetched_cache_key =
+            "github-importer/merge_request/already-fetched/#{project.id}"
         end
 
         def importer_class
@@ -29,33 +29,33 @@ module Gitlab
           :pull_request_reviews
         end
 
-        def id_for_already_imported_cache(review)
+        def id_for_already_fetched_cache(review)
           review.id
         end
 
         def each_object_to_import(&block)
-          if use_github_review_importer_query_only_unimported_merge_requests?
+          if use_github_review_importer_query_only_unfetched_merge_requests?
             each_merge_request_to_import(&block)
           else
-            each_merge_request_skipping_imported(&block)
+            each_merge_request_skipping_fetched(&block)
           end
         end
 
         private
 
-        attr_reader :merge_requests_already_imported_cache_key
+        attr_reader :merge_requests_already_fetched_cache_key
 
         # https://gitlab.com/gitlab-org/gitlab/-/merge_requests/62036#note_587181108
-        def use_github_review_importer_query_only_unimported_merge_requests?
+        def use_github_review_importer_query_only_unfetched_merge_requests?
           Feature.enabled?(
-            :github_review_importer_query_only_unimported_merge_requests,
+            :github_review_importer_query_only_unfetched_merge_requests,
             default_enabled: :yaml
           )
         end
 
-        def each_merge_request_skipping_imported
+        def each_merge_request_skipping_fetched
           project.merge_requests.find_each do |merge_request|
-            next if already_imported?(merge_request)
+            next if already_fetched?(merge_request)
 
             client
               .pull_request_reviews(project.import_source, merge_request.iid)
@@ -64,27 +64,27 @@ module Gitlab
                 yield(review)
               end
 
-            mark_as_imported(merge_request)
+            mark_as_fetched(merge_request)
           end
         end
 
         # The worker can be interrupted, by rate limit for instance,
-        # in different situations. To avoid requesting already imported data,
+        # in different situations. To avoid requesting already fetched data,
         # if the worker is interrupted:
         # - before importing all reviews of a merge request
         #   The reviews page is cached with the `PageCounter`, by merge request.
         # - before importing all merge requests reviews
-        #   Merge requests that had all the reviews imported are cached with
-        #   `mark_merge_request_reviews_imported`
+        #   Merge requests that had all the reviews fetched are cached with
+        #   `mark_merge_request_reviews_fetched`
         def each_merge_request_to_import
           each_review_page do |page, merge_request|
             page.objects.each do |review|
-              next if already_imported?(review)
+              next if already_fetched?(review)
 
               review.merge_request_id = merge_request.id
               yield(review)
 
-              mark_as_imported(review)
+              mark_as_fetched(review)
             end
           end
         end
@@ -92,7 +92,7 @@ module Gitlab
         def each_review_page
           merge_requests_to_import.find_each do |merge_request|
             # The page counter needs to be scoped by merge request to avoid skipping
-            # pages of reviews from already imported merge requests.
+            # pages of reviews from already fetched merge requests.
             page_counter = PageCounter.new(project, page_counter_id(merge_request))
             repo = project.import_source
             options = collection_options.merge(page: page_counter.current)
@@ -105,26 +105,26 @@ module Gitlab
 
             # Avoid unnecessary Redis cache keys after the work is done.
             page_counter.expire!
-            mark_merge_request_reviews_imported(merge_request)
+            mark_merge_request_reviews_fetched(merge_request)
           end
         end
 
-        # Returns only the merge requests that still have reviews to be imported.
+        # Returns only the merge requests that still have reviews to be fetched.
         def merge_requests_to_import
-          project.merge_requests.where.not(id: already_imported_merge_requests) # rubocop: disable CodeReuse/ActiveRecord
+          project.merge_requests.where.not(id: already_fetched_merge_requests) # rubocop: disable CodeReuse/ActiveRecord
         end
 
-        def already_imported_merge_requests
-          Gitlab::Cache::Import::Caching.values_from_set(merge_requests_already_imported_cache_key)
+        def already_fetched_merge_requests
+          Gitlab::Cache::Import::Caching.values_from_set(merge_requests_already_fetched_cache_key)
         end
 
         def page_counter_id(merge_request)
           "merge_request/#{merge_request.id}/#{collection_method}"
         end
 
-        def mark_merge_request_reviews_imported(merge_request)
+        def mark_merge_request_reviews_fetched(merge_request)
           Gitlab::Cache::Import::Caching.set_add(
-            merge_requests_already_imported_cache_key,
+            merge_requests_already_fetched_cache_key,
             merge_request.id
           )
         end

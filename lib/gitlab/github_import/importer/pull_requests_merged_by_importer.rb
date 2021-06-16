@@ -22,18 +22,18 @@ module Gitlab
           :pull_requests_merged_by
         end
 
-        def id_for_already_imported_cache(merge_request)
+        def id_for_already_fetched_cache(merge_request)
           merge_request.id
         end
 
         def each_object_to_import
           project.merge_requests.with_state(:merged).find_each do |merge_request|
-            next if already_imported?(merge_request)
+            next if already_fetched?(merge_request)
 
             pull_request = client.pull_request(project.import_source, merge_request.iid)
             yield(pull_request)
 
-            mark_as_imported(merge_request)
+            mark_as_fetched(merge_request)
           end
         end
       end

@@ -56,14 +56,14 @@ RSpec.describe Gitlab::GithubImport::ParallelScheduling do
         .to eq([])
     end
 
-    it 'expires the cache used for tracking already imported objects' do
+    it 'expires the cache used for tracking already fetched objects' do
       importer = importer_class.new(project, client)
 
       expect(importer).to receive(:parallel_import)
 
       expect(Gitlab::Cache::Import::Caching)
         .to receive(:expire)
-        .with(importer.already_imported_cache_key, a_kind_of(Numeric))
+        .with(importer.already_fetched_cache_key, a_kind_of(Numeric))
 
       importer.execute
     end
@@ -242,12 +242,12 @@ RSpec.describe Gitlab::GithubImport::ParallelScheduling do
         .and_return(true)
 
       expect(importer)
-        .to receive(:already_imported?)
+        .to receive(:already_fetched?)
         .with(object)
         .and_return(false)
 
       expect(importer)
-        .to receive(:mark_as_imported)
+        .to receive(:mark_as_fetched)
         .with(object)
 
       expect { |b| importer.each_object_to_import(&b) }
@@ -272,12 +272,12 @@ RSpec.describe Gitlab::GithubImport::ParallelScheduling do
         .and_return(true)
 
       expect(importer)
-        .to receive(:already_imported?)
+        .to receive(:already_fetched?)
         .with(object)
         .and_return(false)
 
       expect(importer)
-        .to receive(:mark_as_imported)
+        .to receive(:mark_as_fetched)
         .with(object)
 
       expect { |b| importer.each_object_to_import(&b) }
@@ -301,7 +301,7 @@ RSpec.describe Gitlab::GithubImport::ParallelScheduling do
         .not_to yield_control
     end
 
-    it 'does not yield the object if it was already imported' do
+    it 'does not yield the object if it was already fetched' do
       page = double(:page, objects: [object], number: 1)
 
       expect(client)
@@ -315,64 +315,64 @@ RSpec.describe Gitlab::GithubImport::ParallelScheduling do
         .and_return(true)
 
       expect(importer)
-        .to receive(:already_imported?)
+        .to receive(:already_fetched?)
         .with(object)
         .and_return(true)
 
       expect(importer)
-        .not_to receive(:mark_as_imported)
+        .not_to receive(:mark_as_fetched)
 
       expect { |b| importer.each_object_to_import(&b) }
         .not_to yield_control
     end
   end
 
-  describe '#already_imported?', :clean_gitlab_redis_cache do
+  describe '#already_fetched?', :clean_gitlab_redis_cache do
     let(:importer) { importer_class.new(project, client) }
 
-    it 'returns false when an object has not yet been imported' do
+    it 'returns false when an object has not yet been fetched' do
       object = double(:object, id: 10)
 
       expect(importer)
-        .to receive(:id_for_already_imported_cache)
+        .to receive(:id_for_already_fetched_cache)
         .with(object)
         .and_return(object.id)
 
-      expect(importer.already_imported?(object))
+      expect(importer.already_fetched?(object))
         .to eq(false)
     end
 
-    it 'returns true when an object has already been imported' do
+    it 'returns true when an object has already been fetched' do
       object = double(:object, id: 10)
 
       allow(importer)
-        .to receive(:id_for_already_imported_cache)
+        .to receive(:id_for_already_fetched_cache)
         .with(object)
         .and_return(object.id)
 
-      importer.mark_as_imported(object)
+      importer.mark_as_fetched(object)
 
-      expect(importer.already_imported?(object))
+      expect(importer.already_fetched?(object))
         .to eq(true)
     end
   end
 
-  describe '#mark_as_imported', :clean_gitlab_redis_cache do
-    it 'marks an object as already imported' do
+  describe '#mark_as_fetched', :clean_gitlab_redis_cache do
+    it 'marks an object as already fetched' do
       object = double(:object, id: 10)
       importer = importer_class.new(project, client)
 
       expect(importer)
-        .to receive(:id_for_already_imported_cache)
+        .to receive(:id_for_already_fetched_cache)
         .with(object)
         .and_return(object.id)
 
       expect(Gitlab::Cache::Import::Caching)
         .to receive(:set_add)
-        .with(importer.already_imported_cache_key, object.id)
+        .with(importer.already_fetched_cache_key, object.id)
         .and_call_original
 
-      importer.mark_as_imported(object)
+      importer.mark_as_fetched(object)
     end
   end
 end

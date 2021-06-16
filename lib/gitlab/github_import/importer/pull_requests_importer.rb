@@ -18,7 +18,7 @@ module Gitlab
           ImportPullRequestWorker
         end
 
-        def id_for_already_imported_cache(pr)
+        def id_for_already_fetched_cache(pr)
           pr.number
         end
 

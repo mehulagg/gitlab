@@ -3,11 +3,11 @@
 module Gitlab
   module GithubImport
     module ParallelScheduling
-      attr_reader :project, :client, :page_counter, :already_imported_cache_key
+      attr_reader :project, :client, :page_counter, :already_fetched_cache_key
 
-      # The base cache key to use for tracking already imported objects.
-      ALREADY_IMPORTED_CACHE_KEY =
-        'github-importer/already-imported/%{project}/%{collection}'
+      # The base cache key to use for tracking already fetched objects.
+      ALREADY_FETCHED_CACHE_KEY =
+        'github-importer/already-fetched/%{project}/%{collection}'
 
       # project - An instance of `Project`.
       # client - An instance of `Gitlab::GithubImport::Client`.
@@ -17,7 +17,7 @@ module Gitlab
         @client = client
         @parallel = parallel
         @page_counter = PageCounter.new(project, collection_method)
-        @already_imported_cache_key = ALREADY_IMPORTED_CACHE_KEY %
+        @already_fetched_cache_key = ALREADY_FETCHED_CACHE_KEY %
           { project: project.id, collection: collection_method }
       end
 
@@ -44,7 +44,7 @@ module Gitlab
         # still scheduling duplicates while. Since all work has already been
         # completed those jobs will just cycle through any remaining pages while
         # not scheduling anything.
-        Gitlab::Cache::Import::Caching.expire(already_imported_cache_key, 15.minutes.to_i)
+        Gitlab::Cache::Import::Caching.expire(already_fetched_cache_key, 15.minutes.to_i)
         info(project.id, message: "importer finished")
 
         retval
@@ -101,39 +101,39 @@ module Gitlab
           next unless page_counter.set(page.number)
 
           page.objects.each do |object|
-            next if already_imported?(object)
+            next if already_fetched?(object)
 
             yield object
 
-            # We mark the object as imported immediately so we don't end up
+            # We mark the object as fetched immediately so we don't end up
             # scheduling it multiple times.
-            mark_as_imported(object)
+            mark_as_fetched(object)
           end
         end
       end
 
-      # Returns true if the given object has already been imported, false
+      # Returns true if the given object has already been fetched, false
       # otherwise.
       #
       # object - The object to check.
-      def already_imported?(object)
-        id = id_for_already_imported_cache(object)
+      def already_fetched?(object)
+        id = id_for_already_fetched_cache(object)
 
-        Gitlab::Cache::Import::Caching.set_includes?(already_imported_cache_key, id)
+        Gitlab::Cache::Import::Caching.set_includes?(already_fetched_cache_key, id)
       end
 
-      # Marks the given object as "already imported".
-      def mark_as_imported(object)
-        id = id_for_already_imported_cache(object)
+      # Marks the given object as "already fetched".
+      def mark_as_fetched(object)
+        id = id_for_already_fetched_cache(object)
 
-        Gitlab::Cache::Import::Caching.set_add(already_imported_cache_key, id)
+        Gitlab::Cache::Import::Caching.set_add(already_fetched_cache_key, id)
       end
 
       # Returns the ID to use for the cache used for checking if an object has
-      # already been imported or not.
+      # already been fetched or not.
       #
       # object - The object we may want to import.
-      def id_for_already_imported_cache(object)
+      def id_for_already_fetched_cache(object)
         raise NotImplementedError
       end
 

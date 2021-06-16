@@ -22,7 +22,7 @@ module Gitlab
           :pull_requests_comments
         end
 
-        def id_for_already_imported_cache(note)
+        def id_for_already_fetched_cache(note)
           note.id
         end
       end

@@ -22,8 +22,8 @@ RSpec.describe Gitlab::GithubImport::Importer::PullRequestsMergedByImporter do
     it { expect(subject.collection_method).to eq(:pull_requests_merged_by) }
   end
 
-  describe '#id_for_already_imported_cache' do
-    it { expect(subject.id_for_already_imported_cache(double(id: 1))).to eq(1) }
+  describe '#id_for_already_fetched_cache' do
+    it { expect(subject.id_for_already_fetched_cache(double(id: 1))).to eq(1) }
   end
 
   describe '#each_object_to_import', :clean_gitlab_redis_cache do

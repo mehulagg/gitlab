@@ -32,7 +32,7 @@ module QA
           end
 
           def import!(full_path, name)
-            return if already_imported(full_path)
+            return if already_fetched(full_path)
 
             choose_test_namespace(full_path)
             set_path(full_path, name)
@@ -88,7 +88,7 @@ module QA
             end
           end
 
-          def already_imported(full_path)
+          def already_fetched(full_path)
             within_repo_path(full_path) do
               has_element?(:project_path_content) && has_element?(:go_to_project_button)
             end

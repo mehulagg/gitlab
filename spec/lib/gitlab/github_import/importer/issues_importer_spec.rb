@@ -102,11 +102,11 @@ RSpec.describe Gitlab::GithubImport::Importer::IssuesImporter do
     end
   end
 
-  describe '#id_for_already_imported_cache' do
+  describe '#id_for_already_fetched_cache' do
     it 'returns the issue number of the given issue' do
       importer = described_class.new(project, client)
 
-      expect(importer.id_for_already_imported_cache(github_issue))
+      expect(importer.id_for_already_fetched_cache(github_issue))
         .to eq(42)
     end
   end

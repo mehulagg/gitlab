@@ -22,14 +22,14 @@ RSpec.describe Gitlab::GithubImport::Importer::PullRequestsReviewsImporter do
     it { expect(subject.collection_method).to eq(:pull_request_reviews) }
   end
 
-  describe '#id_for_already_imported_cache' do
-    it { expect(subject.id_for_already_imported_cache(double(id: 1))).to eq(1) }
+  describe '#id_for_already_fetched_cache' do
+    it { expect(subject.id_for_already_fetched_cache(double(id: 1))).to eq(1) }
   end
 
   describe '#each_object_to_import', :clean_gitlab_redis_cache do
-    context 'when github_review_importer_query_only_unimported_merge_requests is enabled' do
+    context 'when github_review_importer_query_only_unfetched_merge_requests is enabled' do
       before do
-        stub_feature_flags(github_review_importer_query_only_unimported_merge_requests: true)
+        stub_feature_flags(github_review_importer_query_only_unfetched_merge_requests: true)
       end
 
       let(:merge_request) do
@@ -79,7 +79,7 @@ RSpec.describe Gitlab::GithubImport::Importer::PullRequestsReviewsImporter do
 
       it 'skips cached merge requests' do
         Gitlab::Cache::Import::Caching.set_add(
-          "github-importer/merge_request/already-imported/#{project.id}",
+          "github-importer/merge_request/already-fetched/#{project.id}",
           merge_request.id
         )
 
@@ -91,9 +91,9 @@ RSpec.describe Gitlab::GithubImport::Importer::PullRequestsReviewsImporter do
       end
     end
 
-    context 'when github_review_importer_query_only_unimported_merge_requests is disabled' do
+    context 'when github_review_importer_query_only_unfetched_merge_requests is disabled' do
       before do
-        stub_feature_flags(github_review_importer_query_only_unimported_merge_requests: false)
+        stub_feature_flags(github_review_importer_query_only_unfetched_merge_requests: false)
       end
 
       it 'fetchs the merged pull requests data' do

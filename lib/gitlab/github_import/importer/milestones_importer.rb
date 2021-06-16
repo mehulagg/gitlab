@@ -27,7 +27,7 @@ module Gitlab
           build_database_rows(each_milestone)
         end
 
-        def already_imported?(milestone)
+        def already_fetched?(milestone)
           existing_milestones.include?(milestone.number)
         end
 

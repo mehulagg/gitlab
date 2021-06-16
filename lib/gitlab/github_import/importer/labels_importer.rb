@@ -27,7 +27,7 @@ module Gitlab
           build_database_rows(each_label)
         end
 
-        def already_imported?(label)
+        def already_fetched?(label)
           existing_labels.include?(label.name)
         end
 
