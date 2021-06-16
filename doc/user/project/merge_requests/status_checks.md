@@ -113,6 +113,20 @@ To complete the deletion of the status check you must select the
 **Remove status check** button. This **permanently** deletes
 the status check and it **will not** be recoverable.
 
+## Status checks widget
+
+
+This widget will, on a per merge request basis, allow you to see
+the status of the external check for the merge request you are currently looking at.
+
+These checks **do not affect** the mergeability of the merge request and are for
+informational purposes only. However, you could decide to have an internal policy
+to not merge a merge request until the status checks pass if you wish.
+This feature will not enforce that policy.
+
+We cannot guarantee that the external status checks will be processed
+by the external service doing the check.
+
 ## Troubleshooting
 
 ### Duplicate value errors
