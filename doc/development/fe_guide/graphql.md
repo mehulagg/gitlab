@@ -849,7 +849,7 @@ We use [subscriptions](https://www.apollographql.com/docs/react/data/subscriptio
 **NOTE:**
 We cannot test subscriptions using GraphiQL, because they require an ActionCable client, which GraphiQL does not support at the moment.
 
-Subscriptions don't require any additional configuration of Apollo Client instance, you can use them in the application right away. To distinguish subscriptions from queries and mutations, we recommend naming them with `.subscription.graphql` extention:
+Subscriptions don't require any additional configuration of Apollo Client instance, you can use them in the application right away. To distinguish subscriptions from queries and mutations, we recommend naming them with `.subscription.graphql` extension:
 
 ```javascript
 // ~/sidebar/queries/issuable_assignees.subscription.graphql
