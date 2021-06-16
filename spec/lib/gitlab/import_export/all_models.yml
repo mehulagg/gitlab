@@ -393,7 +393,7 @@ project:
 - bugzilla_integration
 - ewm_service
 - external_wiki_service
-- mock_ci_service
+- mock_ci_integration
 - mock_monitoring_service
 - forked_to_members
 - forked_from_project
