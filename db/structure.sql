@@ -13779,6 +13779,25 @@ CREATE SEQUENCE in_product_marketing_emails_id_seq
 
 ALTER SEQUENCE in_product_marketing_emails_id_seq OWNED BY in_product_marketing_emails.id;
 
+CREATE TABLE incident_management_alert_escalations (
+    id bigint NOT NULL,
+    policy_id bigint NOT NULL,
+    alert_id bigint NOT NULL,
+    last_notified_at timestamp with time zone,
+    created_at timestamp with time zone NOT NULL,
+    updated_at timestamp with time zone NOT NULL
+)
+PARTITION BY RANGE (created_at);
+
+CREATE SEQUENCE incident_management_alert_escalations_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE incident_management_alert_escalations_id_seq OWNED BY incident_management_alert_escalations.id;
+
 CREATE TABLE incident_management_escalation_policies (
     id bigint NOT NULL,
     project_id bigint NOT NULL,
@@ -19986,6 +20005,8 @@ ALTER TABLE ONLY import_failures ALTER COLUMN id SET DEFAULT nextval('import_fai
 
 ALTER TABLE ONLY in_product_marketing_emails ALTER COLUMN id SET DEFAULT nextval('in_product_marketing_emails_id_seq'::regclass);
 
+ALTER TABLE ONLY incident_management_alert_escalations ALTER COLUMN id SET DEFAULT nextval('incident_management_alert_escalations_id_seq'::regclass);
+
 ALTER TABLE ONLY incident_management_escalation_policies ALTER COLUMN id SET DEFAULT nextval('incident_management_escalation_policies_id_seq'::regclass);
 
 ALTER TABLE ONLY incident_management_escalation_rules ALTER COLUMN id SET DEFAULT nextval('incident_management_escalation_rules_id_seq'::regclass);
@@ -21354,6 +21375,9 @@ ALTER TABLE ONLY in_product_marketing_emails
 
 ALTER TABLE ONLY incident_management_oncall_shifts
     ADD CONSTRAINT inc_mgmnt_no_overlapping_oncall_shifts EXCLUDE USING gist (rotation_id WITH =, tstzrange(starts_at, ends_at, '[)'::text) WITH &&);
+
+ALTER TABLE ONLY incident_management_alert_escalations
+    ADD CONSTRAINT incident_management_alert_escalations_pkey PRIMARY KEY (id, created_at);
 
 ALTER TABLE ONLY incident_management_escalation_policies
     ADD CONSTRAINT incident_management_escalation_policies_pkey PRIMARY KEY (id);
@@ -23570,6 +23594,10 @@ CREATE INDEX index_inc_mgmnt_oncall_pcpnt_on_oncall_rotation_id_is_removed ON in
 CREATE UNIQUE INDEX index_inc_mgmnt_oncall_rotations_on_oncall_schedule_id_and_id ON incident_management_oncall_rotations USING btree (oncall_schedule_id, id);
 
 CREATE UNIQUE INDEX index_inc_mgmnt_oncall_rotations_on_oncall_schedule_id_and_name ON incident_management_oncall_rotations USING btree (oncall_schedule_id, name);
+
+CREATE INDEX index_incident_management_alert_escalations_on_alert_id ON ONLY incident_management_alert_escalations USING btree (alert_id);
+
+CREATE INDEX index_incident_management_alert_escalations_on_policy_id ON ONLY incident_management_alert_escalations USING btree (policy_id);
 
 CREATE INDEX index_incident_management_oncall_schedules_on_project_id ON incident_management_oncall_schedules USING btree (project_id);
 
@@ -27110,6 +27138,9 @@ ALTER TABLE ONLY vulnerability_feedback
 ALTER TABLE ONLY ci_pipeline_messages
     ADD CONSTRAINT fk_rails_8d3b04e3e1 FOREIGN KEY (pipeline_id) REFERENCES ci_pipelines(id) ON DELETE CASCADE;
 
+ALTER TABLE incident_management_alert_escalations
+    ADD CONSTRAINT fk_rails_8d8de95da9 FOREIGN KEY (alert_id) REFERENCES alert_management_alerts(id) ON DELETE CASCADE;
+
 ALTER TABLE ONLY approval_merge_request_rules_approved_approvers
     ADD CONSTRAINT fk_rails_8dc94cff4d FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE;
 
@@ -27376,6 +27407,9 @@ ALTER TABLE ONLY security_findings
 
 ALTER TABLE ONLY packages_debian_project_component_files
     ADD CONSTRAINT fk_rails_bbe9ebfbd9 FOREIGN KEY (component_id) REFERENCES packages_debian_project_components(id) ON DELETE RESTRICT;
+
+ALTER TABLE incident_management_alert_escalations
+    ADD CONSTRAINT fk_rails_bc0826ee7d FOREIGN KEY (policy_id) REFERENCES incident_management_escalation_policies(id) ON DELETE CASCADE;
 
 ALTER TABLE ONLY approval_merge_request_rules_users
     ADD CONSTRAINT fk_rails_bc8972fa55 FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE;
