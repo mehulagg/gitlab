@@ -1,5 +1,5 @@
 import { shallowMount } from '@vue/test-utils';
-import ExperimentTracking from '~/experimentation/experiment_tracking';
+import Tracking from '~/tracking';
 import PipelinesCiTemplate from '~/pipelines/components/pipelines_list/pipelines_ci_templates.vue';
 
 const addCiYmlPath = "/-/new/main?commit_message='Add%20.gitlab-ci.yml'";
@@ -9,7 +9,7 @@ const suggestedCiTemplates = [
   { name: 'C++', logo: '/assets/illustrations/logos/c_plus_plus.svg' },
 ];
 
-jest.mock('~/experimentation/experiment_tracking');
+jest.mock('~/tracking');
 
 describe('Pipelines CI Templates', () => {
   let wrapper;
@@ -88,24 +88,25 @@ describe('Pipelines CI Templates', () => {
   describe('tracking', () => {
     beforeEach(() => {
       wrapper = createWrapper();
+      document.body.dataset.page = 'projects:pipelines:index';
     });
 
     it('sends an event when template is clicked', () => {
       findTemplateLinks().at(0).vm.$emit('click');
 
-      expect(ExperimentTracking).toHaveBeenCalledWith('pipeline_empty_state_templates', {
+      expect(Tracking.event).toHaveBeenCalledTimes(1);
+      expect(Tracking.event).toHaveBeenCalledWith('projects:pipelines:index', 'template_clicked', {
         label: 'Android',
       });
-      expect(ExperimentTracking.prototype.event).toHaveBeenCalledWith('template_clicked');
     });
 
     it('sends an event when Hello-World template is clicked', () => {
       findTestTemplateLinks().at(0).vm.$emit('click');
 
-      expect(ExperimentTracking).toHaveBeenCalledWith('pipeline_empty_state_templates', {
+      expect(Tracking.event).toHaveBeenCalledTimes(1);
+      expect(Tracking.event).toHaveBeenCalledWith('projects:pipelines:index', 'template_clicked', {
         label: 'Hello-World',
       });
-      expect(ExperimentTracking.prototype.event).toHaveBeenCalledWith('template_clicked');
     });
   });
 });

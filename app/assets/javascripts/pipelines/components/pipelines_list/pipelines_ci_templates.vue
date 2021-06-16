@@ -1,6 +1,6 @@
 <script>
 import { GlButton, GlCard, GlSprintf } from '@gitlab/ui';
-import ExperimentTracking from '~/experimentation/experiment_tracking';
+import Tracking from '~/tracking';
 import { mergeUrlParams } from '~/lib/utils/url_utility';
 import { s__, sprintf } from '~/locale';
 import { HELLO_WORLD_TEMPLATE_KEY } from '../../constants';
@@ -55,10 +55,9 @@ export default {
   },
   methods: {
     trackEvent(template) {
-      const tracking = new ExperimentTracking('pipeline_empty_state_templates', {
+      Tracking.event(document.body.dataset.page, 'template_clicked', {
         label: template,
       });
-      tracking.event('template_clicked');
     },
   },
 };
