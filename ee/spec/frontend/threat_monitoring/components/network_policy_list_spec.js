@@ -1,27 +1,48 @@
 import { GlTable, GlDrawer } from '@gitlab/ui';
+import { createLocalVue } from '@vue/test-utils';
+import VueApollo from 'vue-apollo';
 import NetworkPolicyList from 'ee/threat_monitoring/components/network_policy_list.vue';
+import networkPoliciesQuery from 'ee/threat_monitoring/graphql/queries/network_policies.query.graphql';
 import createStore from 'ee/threat_monitoring/store';
-import { mountExtended } from 'helpers/vue_test_utils_helper';
-import { convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
+import createMockApolloProvider from 'helpers/mock_apollo_helper';
+import { mountExtended, shallowMountExtended } from 'helpers/vue_test_utils_helper';
+import { networkPolicies } from '../mocks/mock_apollo';
 import { mockPoliciesResponse, mockCiliumPolicy } from '../mocks/mock_data';
 
-const mockData = mockPoliciesResponse.map((policy) => convertObjectPropsToCamelCase(policy));
+const localVue = createLocalVue();
+localVue.use(VueApollo);
+
+const fullPath = 'project/path';
+const environments = [
+  {
+    id: 2,
+    global_id: 'gid://gitlab/Environment/2',
+  },
+];
+const defaultRequestHandlers = {
+  networkPolicies: networkPolicies(mockPoliciesResponse),
+};
+const pendingHandler = jest.fn(() => new Promise(() => {}));
 
 describe('NetworkPolicyList component', () => {
   let store;
   let wrapper;
+  let requestHandlers;
 
-  const factory = ({ propsData, state, data, provide } = {}) => {
+  const factory = ({ mountFn = mountExtended, propsData, state, data, handlers } = {}) => {
     store = createStore();
     Object.assign(store.state.networkPolicies, {
-      isLoadingPolicies: false,
-      policies: mockData,
       ...state,
     });
+    store.state.threatMonitoring.environments = environments;
+    requestHandlers = {
+      ...defaultRequestHandlers,
+      ...handlers,
+    };
 
     jest.spyOn(store, 'dispatch').mockImplementation(() => Promise.resolve());
 
-    wrapper = mountExtended(NetworkPolicyList, {
+    wrapper = mountFn(NetworkPolicyList, {
       propsData: {
         documentationPath: 'documentation_path',
         newPolicyPath: '/policies/new',
@@ -29,8 +50,14 @@ describe('NetworkPolicyList component', () => {
       },
       data,
       store,
-      provide,
+      provide: {
+        projectPath: fullPath,
+      },
+      apolloProvider: createMockApolloProvider([
+        [networkPoliciesQuery, requestHandlers.networkPolicies],
+      ]),
       stubs: { PolicyDrawer: GlDrawer },
+      localVue,
     });
   };
 
@@ -58,25 +85,40 @@ describe('NetworkPolicyList component', () => {
     expect(button.exists()).toBe(true);
   });
 
-  it('fetches policies', () => {
-    expect(store.dispatch).toHaveBeenCalledWith('networkPolicies/fetchPolicies', -1);
+  describe('initial state', () => {
+    beforeEach(() => {
+      factory({
+        mountFn: shallowMountExtended,
+        handlers: {
+          networkPolicies: pendingHandler,
+        },
+      });
+    });
+
+    it('fetches policies', () => {
+      expect(requestHandlers.networkPolicies).toHaveBeenCalledWith({
+        fullPath,
+      });
+    });
+
+    it("sets table's loading state", () => {
+      expect(findPoliciesTable().attributes('busy')).toBe('true');
+    });
   });
 
   it('fetches policies on environment change', async () => {
     store.dispatch.mockReset();
     await store.commit('threatMonitoring/SET_CURRENT_ENVIRONMENT_ID', 2);
-
-    expect(store.dispatch).toHaveBeenCalledWith('networkPolicies/fetchPolicies', 2);
+    expect(requestHandlers.networkPolicies).toHaveBeenCalledTimes(2);
+    expect(requestHandlers.networkPolicies.mock.calls[1][0]).toEqual({
+      fullPath: 'project/path',
+      environmentId: environments[0].global_id,
+    });
   });
 
   describe('given selected policy is a cilium policy', () => {
     beforeEach(() => {
-      factory({
-        data: () => ({ selectedPolicyName: 'policy' }),
-        state: {
-          policies: [mockCiliumPolicy],
-        },
-      });
+      findPoliciesTable().vm.$emit('row-selected', [mockCiliumPolicy]);
     });
 
     it('renders the new policy drawer', () => {
@@ -121,13 +163,7 @@ describe('NetworkPolicyList component', () => {
 
   describe('given there is a selected policy', () => {
     beforeEach(() => {
-      factory({
-        data: () => ({
-          selectedPolicyName: 'policy',
-          initialManifest: mockData[0].manifest,
-          initialEnforcementStatus: mockData[0].isEnabled,
-        }),
-      });
+      findPoliciesTable().vm.$emit('row-selected', [mockPoliciesResponse[0]]);
     });
 
     it('renders opened editor drawer', () => {
@@ -153,11 +189,15 @@ describe('NetworkPolicyList component', () => {
 
   describe('given autodevops selected policy', () => {
     beforeEach(() => {
-      const policies = mockPoliciesResponse;
-      policies[0].isAutodevops = true;
+      const autoDevOpsPolicy = {
+        ...mockPoliciesResponse[0],
+        name: 'auto-devops',
+        fromAutoDevops: true,
+      };
       factory({
-        state: { policies },
-        data: () => ({ selectedPolicyName: 'policy' }),
+        handlers: {
+          networkPolicies: networkPolicies([autoDevOpsPolicy]),
+        },
       });
     });
 
