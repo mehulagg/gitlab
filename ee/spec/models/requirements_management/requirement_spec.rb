@@ -11,6 +11,8 @@ RSpec.describe RequirementsManagement::Requirement do
 
     it { is_expected.to belong_to(:author).class_name('User') }
     it { is_expected.to belong_to(:project) }
+
+    it_behaves_like 'a model with a requirement issue association'
   end
 
   describe 'validations' do

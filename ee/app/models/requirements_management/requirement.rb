@@ -20,6 +20,7 @@ module RequirementsManagement
 
     belongs_to :author, inverse_of: :requirements, class_name: 'User'
     belongs_to :project, inverse_of: :requirements
+    belongs_to :requirement_issue, class_name: 'Issue', foreign_key: :issue_id
 
     has_many :test_reports, inverse_of: :requirement
 
@@ -29,6 +30,8 @@ module RequirementsManagement
 
     validates :title, length: { maximum: Issuable::TITLE_LENGTH_MAX }
     validates :title_html, length: { maximum: Issuable::TITLE_HTML_LENGTH_MAX }, allow_blank: true
+
+    validate :only_requirement_type_issue
 
     enum state: { opened: 1, archived: 2 }
 
@@ -90,6 +93,10 @@ module RequirementsManagement
 
     def last_test_report_manually_created?
       latest_report&.build.nil?
+    end
+
+    def only_requirement_type_issue
+      errors.add(:requirement_issue, 'must be an issue of type `Requirement`') if requirement_issue && !requirement_issue.requirement?
     end
   end
 end
