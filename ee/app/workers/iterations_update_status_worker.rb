@@ -12,20 +12,20 @@ class IterationsUpdateStatusWorker
   feature_category :issue_tracking
 
   def perform
-    set_started_iterations
+    set_current_iterations
     set_closed_iterations
   end
 
   private
 
-  def set_started_iterations
+  def set_current_iterations
     Iteration.upcoming.start_date_passed.each_batch(of: BATCH_SIZE) do |iterations|
-      iterations.update_all(state_enum: ::Iteration::STATE_ENUM_MAP[:started], updated_at: Time.current)
+      iterations.update_all(state_enum: ::Iteration::STATE_ENUM_MAP[:current], updated_at: Time.current)
     end
   end
 
   def set_closed_iterations
-    Iteration.upcoming.or(Iteration.started).due_date_passed.each_batch(of: BATCH_SIZE) do |iterations|
+    Iteration.opened.due_date_passed.each_batch(of: BATCH_SIZE) do |iterations|
       closed_iteration_ids = iterations.pluck_primary_key
       iterations.update_all(state_enum: ::Iteration::STATE_ENUM_MAP[:closed], updated_at: Time.current)
 

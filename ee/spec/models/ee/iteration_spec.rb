@@ -93,7 +93,7 @@ RSpec.describe Iteration do
 
   describe '.filter_by_state' do
     let_it_be(:closed_iteration) { create(:iteration, :closed, :skip_future_date_validation, group: group, start_date: 8.days.ago, due_date: 2.days.ago) }
-    let_it_be(:started_iteration) { create(:iteration, :started, :skip_future_date_validation, group: group, start_date: 1.day.ago, due_date: 6.days.from_now) }
+    let_it_be(:current_iteration) { create(:iteration, :current, :skip_future_date_validation, group: group, start_date: 1.day.ago, due_date: 6.days.from_now) }
     let_it_be(:upcoming_iteration) { create(:iteration, :upcoming, group: group, start_date: 1.week.from_now, due_date: 2.weeks.from_now) }
 
     shared_examples_for 'filter_by_state' do
@@ -111,15 +111,15 @@ RSpec.describe Iteration do
 
     context 'filtering by started iterations' do
       it_behaves_like 'filter_by_state' do
-        let(:state) { 'started' }
-        let(:expected_iterations) { [started_iteration] }
+        let(:state) { 'current' }
+        let(:expected_iterations) { [current_iteration] }
       end
     end
 
     context 'filtering by opened iterations' do
       it_behaves_like 'filter_by_state' do
         let(:state) { 'opened' }
-        let(:expected_iterations) { [started_iteration, upcoming_iteration] }
+        let(:expected_iterations) { [current_iteration, upcoming_iteration] }
       end
     end
 
@@ -133,7 +133,7 @@ RSpec.describe Iteration do
     context 'filtering by "all"' do
       it_behaves_like 'filter_by_state' do
         let(:state) { 'all' }
-        let(:expected_iterations) { [closed_iteration, started_iteration, upcoming_iteration] }
+        let(:expected_iterations) { [closed_iteration, current_iteration, upcoming_iteration] }
       end
     end
 
@@ -438,7 +438,7 @@ RSpec.describe Iteration do
     let_it_be(:iterations_cadence1) { create(:iterations_cadence, group: group, start_date: 10.days.ago) }
     let_it_be(:iterations_cadence2) { create(:iterations_cadence, group: group, start_date: 10.days.ago) }
     let_it_be(:closed_iteration) { create(:iteration, :closed, :skip_future_date_validation, iterations_cadence: iterations_cadence1, group: group, start_date: 8.days.ago, due_date: 2.days.ago) }
-    let_it_be(:started_iteration) { create(:iteration, :started, :skip_future_date_validation, iterations_cadence: iterations_cadence2, group: group, start_date: 1.day.ago, due_date: 6.days.from_now) }
+    let_it_be(:current_iteration) { create(:iteration, :current, :skip_future_date_validation, iterations_cadence: iterations_cadence2, group: group, start_date: 1.day.ago, due_date: 6.days.from_now) }
     let_it_be(:upcoming_iteration) { create(:iteration, :upcoming, iterations_cadence: iterations_cadence2, group: group, start_date: 1.week.from_now, due_date: 2.weeks.from_now) }
 
     it 'returns iterations by cadence' do
@@ -450,7 +450,7 @@ RSpec.describe Iteration do
     it 'returns iterations by multiple cadences' do
       iterations = described_class.by_iteration_cadence_ids([iterations_cadence1, iterations_cadence2])
 
-      expect(iterations).to match_array([closed_iteration, started_iteration, upcoming_iteration])
+      expect(iterations).to match_array([closed_iteration, current_iteration, upcoming_iteration])
     end
   end
 
@@ -479,7 +479,7 @@ RSpec.describe Iteration do
       it 'sets state to started' do
         iteration.save!
 
-        expect(iteration.state).to eq('started')
+        expect(iteration.state).to eq('current')
       end
     end
 
@@ -489,7 +489,7 @@ RSpec.describe Iteration do
       it 'sets state to started' do
         iteration.save!
 
-        expect(iteration.state).to eq('started')
+        expect(iteration.state).to eq('current')
       end
     end
 
@@ -539,7 +539,7 @@ RSpec.describe Iteration do
             iteration.due_date += 2.weeks
             iteration.save!
 
-            expect(iteration.state).to eq('started')
+            expect(iteration.state).to eq('current')
           end
         end
       end

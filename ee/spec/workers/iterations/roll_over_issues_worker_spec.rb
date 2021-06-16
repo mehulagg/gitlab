@@ -7,10 +7,10 @@ RSpec.describe Iterations::RollOverIssuesWorker do
   let_it_be(:group2) { create(:group) }
   let_it_be(:cadence1, reload: true) { create(:iterations_cadence, group: group1, roll_over: true, automatic: true) }
   let_it_be(:cadence2) { create(:iterations_cadence, group: group2, roll_over: true, automatic: true) }
-  let_it_be(:closed_iteration1) { create(:closed_iteration, iterations_cadence: cadence1, group: group1, start_date: 2.weeks.ago, due_date: 1.week.ago) }
-  let_it_be(:closed_iteration2) { create(:closed_iteration, iterations_cadence: cadence2, group: group2, start_date: 2.weeks.ago, due_date: 1.week.ago) }
-  let_it_be(:started_iteration1) { create(:started_iteration, iterations_cadence: cadence1, group: group1, start_date: 2.days.ago, due_date: 5.days.from_now) }
-  let_it_be(:started_iteration2) { create(:upcoming_iteration, iterations_cadence: cadence2, group: group2, start_date: 2.days.ago, due_date: 5.days.from_now) }
+  let_it_be(:closed_iteration1) { create(:iteration, iterations_cadence: cadence1, group: group1, start_date: 2.weeks.ago, due_date: 1.week.ago) }
+  let_it_be(:closed_iteration2) { create(:iteration, iterations_cadence: cadence2, group: group2, start_date: 2.weeks.ago, due_date: 1.week.ago) }
+  let_it_be(:current_iteration1) { create(:iteration, iterations_cadence: cadence1, group: group1, start_date: 2.days.ago, due_date: 5.days.from_now) }
+  let_it_be(:current_iteration2) { create(:iteration, iterations_cadence: cadence2, group: group2, start_date: 2.days.ago, due_date: 5.days.from_now) }
 
   let(:mock_success_service) { double('mock service', execute: ::ServiceResponse.success) }
   let(:mock_failure_service) { double('mock service', execute: ::ServiceResponse.error(message: 'some error')) }

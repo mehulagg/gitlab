@@ -67,6 +67,10 @@ class IterationsFinder
   def by_state(items)
     return items unless params[:state].present?
 
+    # we've deprecated `started` status name for iteration, so we are translating it here to current
+    # this is to be removed when deprecation is removed in 14.6: https://gitlab.com/gitlab-org/gitlab/-/issues/334018
+    params[:state] = 'current' if params[:state] == 'started'
+
     Iteration.filter_by_state(items, params[:state])
   end
 
