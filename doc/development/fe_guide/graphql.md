@@ -897,9 +897,6 @@ apollo: {
             draftData.workspace.issuable.assignees.nodes =
               subscriptionData.data.issuableAssigneesUpdated.assignees.nodes;
           });
-          if (this.mediator) {
-            this.handleFetchResult(data);
-          }
           return data;
         }
         return prev;
