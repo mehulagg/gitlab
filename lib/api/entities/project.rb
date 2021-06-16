@@ -95,6 +95,7 @@ module API
       expose :runners_token, if: lambda { |_project, options| options[:user_can_admin_project] }
       expose :ci_default_git_depth
       expose :ci_forward_deployment_enabled
+      expose :ci_job_token_scope_enabled
       expose :public_builds, as: :public_jobs
       expose :build_git_strategy, if: lambda { |project, options| options[:user_can_admin_project] } do |project, options|
         project.build_allow_git_fetch ? 'fetch' : 'clone'
@@ -127,6 +128,7 @@ module API
       expose :repository_storage, if: ->(project, options) {
         Ability.allowed?(options[:current_user], :change_repository_storage, project)
       }
+      expose :keep_latest_artifacts_available?, as: :keep_latest_artifact
 
       # rubocop: disable CodeReuse/ActiveRecord
       def self.preload_relation(projects_relation, options = {})

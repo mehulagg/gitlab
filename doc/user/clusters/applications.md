@@ -454,7 +454,7 @@ for the available configuration options.
 You can check Cilium's installation status on the cluster management page:
 
 - [Project-level cluster](../project/clusters/index.md): Navigate to your project's
-  **Operations > Kubernetes** page.
+  **Infrastructure > Kubernetes clusters** page.
 - [Group-level cluster](../group/clusters/index.md): Navigate to your group's
   **Kubernetes** page.
 
@@ -463,7 +463,10 @@ Installation and removal of the Cilium requires a **manual**
 [restart](https://docs.cilium.io/en/stable/gettingstarted/k8s-install-gke/#restart-unmanaged-pods)
 of all affected pods in all namespaces to ensure that they are
 [managed](https://docs.cilium.io/en/v1.8/operations/troubleshooting/#ensure-managed-pod)
-by the correct networking plugin.
+by the correct networking plugin. Whenever Hubble is enabled, its related pod might require a
+restart depending on whether it started prior to Cilium. For more information, see
+[Failed Deployment](https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#failed-deployment)
+in the Kubernetes docs.
 
 NOTE:
 Major upgrades might require additional setup steps. For more information, see
@@ -1029,7 +1032,13 @@ at least 2 people from the
 The one-click installation method was deprecated in GitLab 13.9 and removed in [GitLab 14.0](https://gitlab.com/groups/gitlab-org/-/epics/4280).
 The removal does not break nor uninstall any apps you have installed, it only
 removes the "Applications" tab from the cluster page.
-Follow the process to [take ownership of your GitLab Managed Apps](#take-ownership-of-your-gitlab-managed-apps).
+The new recommended way to manage cluster applications is to use the [cluster management project template](management_project_template.md).
+
+- If you want to migrate your GitLab managed apps management to this template, read
+  [migrating from GitLab managed apps to project template](migrating_from_gma_to_project_template.md).
+- If you don't want to use the template, you can also manually manage your applications.
+  For that, follow the process to
+  [take ownership of your GitLab Managed Apps](#take-ownership-of-your-gitlab-managed-apps).
 
 If you are not yet on GitLab 14.0 or later, you can refer to [an older version of this document](https://docs.gitlab.com/13.12/ee/user/clusters/applications.html#install-with-one-click-deprecated).
 
@@ -1388,8 +1397,8 @@ Logs produced by pods running **GitLab Managed Apps** can be browsed using
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/327803) in GitLab 13.12.
 
 With the removal of the One-click install method in GitLab 14.0,
-the **Applications** tab (under your project's  **Operations > Kubernetes**)
-will no longer be displayed:
+the **Applications** tab (under your project's **Infrastructure > Kubernetes clusters**)
+is no longer displayed:
 
 ![GitLab Managed Apps - Applications tab](img/applications_tab_v13_12.png)
 

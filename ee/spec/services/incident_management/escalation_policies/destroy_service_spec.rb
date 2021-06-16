@@ -34,13 +34,13 @@ RSpec.describe IncidentManagement::EscalationPolicies::DestroyService do
     context 'when the current_user is anonymous' do
       let(:current_user) { nil }
 
-      it_behaves_like 'error response', 'You have insufficient permissions to remove an escalation policy from this project'
+      it_behaves_like 'error response', 'You have insufficient permissions to configure escalation policies for this project'
     end
 
     context 'when the current_user does not have permissions to remove escalation policies' do
       let(:current_user) { user_without_permissions }
 
-      it_behaves_like 'error response', 'You have insufficient permissions to remove an escalation policy from this project'
+      it_behaves_like 'error response', 'You have insufficient permissions to configure escalation policies for this project'
     end
 
     context 'when license is not enabled' do
@@ -48,7 +48,7 @@ RSpec.describe IncidentManagement::EscalationPolicies::DestroyService do
         stub_licensed_features(oncall_schedules: true, escalation_policies: false)
       end
 
-      it_behaves_like 'error response', 'Escalation policies are not supported for this project'
+      it_behaves_like 'error response', 'You have insufficient permissions to configure escalation policies for this project'
     end
 
     context 'when feature is not available' do
@@ -56,7 +56,7 @@ RSpec.describe IncidentManagement::EscalationPolicies::DestroyService do
         stub_feature_flags(escalation_policies_mvc: false)
       end
 
-      it_behaves_like 'error response', 'Escalation policies are not supported for this project'
+      it_behaves_like 'error response', 'You have insufficient permissions to configure escalation policies for this project'
     end
 
     context 'when an error occurs during removal' do

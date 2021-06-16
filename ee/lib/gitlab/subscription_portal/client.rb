@@ -3,7 +3,7 @@
 module Gitlab
   module SubscriptionPortal
     class Client
-      include SubscriptionPortal::Clients::REST
+      include SubscriptionPortal::Clients::Rest
       include SubscriptionPortal::Clients::Graphql
 
       ResponseError = Class.new(StandardError)

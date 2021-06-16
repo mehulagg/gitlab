@@ -77,8 +77,9 @@ module EE
         mount_mutation ::Mutations::IncidentManagement::OncallRotation::Update
         mount_mutation ::Mutations::IncidentManagement::OncallRotation::Destroy
         mount_mutation ::Mutations::IncidentManagement::EscalationPolicy::Create
+        mount_mutation ::Mutations::IncidentManagement::EscalationPolicy::Update
         mount_mutation ::Mutations::IncidentManagement::EscalationPolicy::Destroy
-        mount_mutation ::Mutations::AppSec::Fuzzing::Api::CiConfiguration::Create
+        mount_mutation ::Mutations::AppSec::Fuzzing::API::CiConfiguration::Create
 
         prepend(Types::DeprecatedMutations)
       end

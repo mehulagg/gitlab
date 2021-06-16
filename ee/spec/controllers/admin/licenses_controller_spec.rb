@@ -103,7 +103,7 @@ RSpec.describe Admin::LicensesController do
 
         get :show
 
-        expect(response).to redirect_to(admin_cloud_license_path)
+        expect(response).to redirect_to(admin_subscription_path)
       end
     end
 

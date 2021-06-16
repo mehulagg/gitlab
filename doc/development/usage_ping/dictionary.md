@@ -162,7 +162,7 @@ Missing description
 
 Group: ``
 
-Status: `implemented`
+Status: `data_available`
 
 Tiers:
 
@@ -282,7 +282,7 @@ Missing description
 
 Group: ``
 
-Status: `implemented`
+Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
 
@@ -508,7 +508,7 @@ Unique builds in project
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216175510_ci_builds.yml)
 
-Group: `group::continuous integration`
+Group: `group::pipeline execution`
 
 Status: `data_available`
 
@@ -520,7 +520,7 @@ Total pipelines in external repositories
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216175514_ci_external_pipelines.yml)
 
-Group: `group::continuous integration`
+Group: `group::pipeline execution`
 
 Status: `data_available`
 
@@ -532,7 +532,7 @@ Total pipelines in GitLab repositories
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216175512_ci_internal_pipelines.yml)
 
-Group: `group::continuous integration`
+Group: `group::pipeline execution`
 
 Status: `data_available`
 
@@ -556,7 +556,7 @@ Total Pipelines from templates in repository
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216175518_ci_pipeline_config_repository.yml)
 
-Group: `group::continuous integration`
+Group: `group::pipeline execution`
 
 Status: `data_available`
 
@@ -568,7 +568,7 @@ Pipeline schedules in GitLab
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216175523_ci_pipeline_schedules.yml)
 
-Group: `group::continuous integration`
+Group: `group::pipeline execution`
 
 Status: `data_available`
 
@@ -580,7 +580,7 @@ Total configured Runners in project
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216175520_ci_runners.yml)
 
-Group: `group::continuous integration`
+Group: `group::pipeline execution`
 
 Status: `data_available`
 
@@ -592,9 +592,9 @@ Total active instance Runners
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210502050341_ci_runners_group_type_active.yml)
 
-Group: `group::continuous integration`
+Group: `group::pipeline execution`
 
-Status: `implemented`
+Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
 
@@ -604,9 +604,9 @@ Total active and online group Runners
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210502051922_ci_runners_group_type_active_online.yml)
 
-Group: `group::continuous integration`
+Group: `group::pipeline execution`
 
-Status: `implemented`
+Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
 
@@ -616,9 +616,9 @@ Total active group Runners
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210502045402_ci_runners_instance_type_active.yml)
 
-Group: `group::continuous integration`
+Group: `group::pipeline execution`
 
-Status: `implemented`
+Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
 
@@ -628,9 +628,9 @@ Total active and online instance Runners
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210502051651_ci_runners_instance_type_active_online.yml)
 
-Group: `group::continuous integration`
+Group: `group::pipeline execution`
 
-Status: `implemented`
+Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
 
@@ -640,9 +640,9 @@ Total online Runners
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210502050942_ci_runners_online.yml)
 
-Group: `group::continuous integration`
+Group: `group::pipeline execution`
 
-Status: `implemented`
+Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
 
@@ -652,9 +652,9 @@ Total active project Runners
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210502050834_ci_runners_project_type_active.yml)
 
-Group: `group::continuous integration`
+Group: `group::pipeline execution`
 
-Status: `implemented`
+Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
 
@@ -664,9 +664,9 @@ Total active and online project Runners
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210502052036_ci_runners_project_type_active_online.yml)
 
-Group: `group::continuous integration`
+Group: `group::pipeline execution`
 
-Status: `implemented`
+Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
 
@@ -676,7 +676,7 @@ Total configured Triggers in project
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216175521_ci_triggers.yml)
 
-Group: `group::continuous integration`
+Group: `group::pipeline execution`
 
 Status: `data_available`
 
@@ -2118,7 +2118,7 @@ Total clicks on the create track's first email
 
 Group: `group::activation`
 
-Status: `implemented`
+Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
 
@@ -2130,7 +2130,7 @@ Total sent emails of the create track's first email
 
 Group: `group::activation`
 
-Status: `implemented`
+Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
 
@@ -2142,7 +2142,7 @@ Total clicks on the create track's second email
 
 Group: `group::activation`
 
-Status: `implemented`
+Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
 
@@ -2154,7 +2154,7 @@ Total sent emails of the create track's second email
 
 Group: `group::activation`
 
-Status: `implemented`
+Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
 
@@ -2166,7 +2166,7 @@ Total clicks on the create track's third email
 
 Group: `group::activation`
 
-Status: `implemented`
+Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
 
@@ -2178,7 +2178,7 @@ Total sent emails of the create track's third email
 
 Group: `group::activation`
 
-Status: `implemented`
+Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
 
@@ -2190,7 +2190,7 @@ Total sent emails of the experience track's first email
 
 Group: `group::activation`
 
-Status: `implemented`
+Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
 
@@ -2202,7 +2202,7 @@ Total clicks on the team track's first email
 
 Group: `group::activation`
 
-Status: `implemented`
+Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
 
@@ -2214,7 +2214,7 @@ Total sent emails of the team track's first email
 
 Group: `group::activation`
 
-Status: `implemented`
+Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
 
@@ -2226,7 +2226,7 @@ Total clicks on the team track's second email
 
 Group: `group::activation`
 
-Status: `implemented`
+Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
 
@@ -2238,7 +2238,7 @@ Total sent emails of the team track's second email
 
 Group: `group::activation`
 
-Status: `implemented`
+Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
 
@@ -2250,7 +2250,7 @@ Total clicks on the team track's third email
 
 Group: `group::activation`
 
-Status: `implemented`
+Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
 
@@ -2262,7 +2262,7 @@ Total sent emails of the team track's third email
 
 Group: `group::activation`
 
-Status: `implemented`
+Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
 
@@ -2274,7 +2274,7 @@ Total clicks on the verify trial's first email
 
 Group: `group::activation`
 
-Status: `implemented`
+Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
 
@@ -2286,7 +2286,7 @@ Total sent emails of the trial track's first email
 
 Group: `group::activation`
 
-Status: `implemented`
+Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
 
@@ -2298,7 +2298,7 @@ Total clicks on the trial track's second email
 
 Group: `group::activation`
 
-Status: `implemented`
+Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
 
@@ -2310,7 +2310,7 @@ Total sent emails of the trial track's second email
 
 Group: `group::activation`
 
-Status: `implemented`
+Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
 
@@ -2322,7 +2322,7 @@ Total clicks on the trial track's third email
 
 Group: `group::activation`
 
-Status: `implemented`
+Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
 
@@ -2334,7 +2334,7 @@ Total sent emails of the trial track's third email
 
 Group: `group::activation`
 
-Status: `implemented`
+Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
 
@@ -2346,7 +2346,7 @@ Total clicks on the verify track's first email
 
 Group: `group::activation`
 
-Status: `implemented`
+Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
 
@@ -2358,7 +2358,7 @@ Total sent emails of the verify track's first email
 
 Group: `group::activation`
 
-Status: `implemented`
+Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
 
@@ -2370,7 +2370,7 @@ Total clicks on the verify track's second email
 
 Group: `group::activation`
 
-Status: `implemented`
+Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
 
@@ -2382,7 +2382,7 @@ Total sent emails of the verify track's second email
 
 Group: `group::activation`
 
-Status: `implemented`
+Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
 
@@ -2394,7 +2394,7 @@ Total clicks on the verify track's third email
 
 Group: `group::activation`
 
-Status: `implemented`
+Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
 
@@ -2406,7 +2406,7 @@ Total sent emails of the verify track's third email
 
 Group: `group::activation`
 
-Status: `implemented`
+Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
 
@@ -3186,7 +3186,7 @@ Count of Kubernetes API proxy requests
 
 Group: `group::configure`
 
-Status: `implemented`
+Status: `data_available`
 
 Tiers: `premium`, `ultimate`
 
@@ -3288,15 +3288,15 @@ Tiers: `free`
 
 ### `counts.license_management_jobs`
 
-Name on the GitLab license
+Count of License Scanning jobs run
 
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/license/20210204124854_license_management_jobs.yml)
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_all/20210204124854_license_management_jobs.yml)
 
-Group: `group::product intelligence`
+Group: `group::composition analysis`
 
 Status: `data_available`
 
-Tiers: `premium`, `ultimate`
+Tiers: `ultimate`
 
 ### `counts.licenses_list_views`
 
@@ -5032,7 +5032,7 @@ Projects with repository mirroring enabled
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_all/20210216181920_projects_mirrored_with_pipelines_enabled.yml)
 
-Group: `group::continuous integration`
+Group: `group::pipeline execution`
 
 Status: `data_available`
 
@@ -6396,7 +6396,7 @@ Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.user_preferences_group_overview_details`
 
-Count of users who set personal preference to see Details on Group overview page
+Count of users who set personal preference to see Details on Group information page
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_all/20210216182203_user_preferences_group_overview_details.yml)
 
@@ -6408,7 +6408,7 @@ Tiers: `ultimate`
 
 ### `counts.user_preferences_group_overview_security_dashboard`
 
-Count of users who set personal preference to see Security Dashboard on Group overview page
+Count of users who set personal preference to see Security Dashboard on Group information page
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_all/20210216182205_user_preferences_group_overview_security_dashboard.yml)
 
@@ -6570,7 +6570,7 @@ Missing description
 
 Group: ``
 
-Status: `implemented`
+Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
 
@@ -6582,7 +6582,7 @@ Missing description
 
 Group: ``
 
-Status: `implemented`
+Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
 
@@ -6594,7 +6594,7 @@ Missing description
 
 Group: ``
 
-Status: `implemented`
+Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
 
@@ -6786,7 +6786,7 @@ Missing description
 
 Group: ``
 
-Status: `implemented`
+Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
 
@@ -6798,7 +6798,7 @@ Missing description
 
 Group: ``
 
-Status: `implemented`
+Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
 
@@ -6810,7 +6810,7 @@ Missing description
 
 Group: ``
 
-Status: `implemented`
+Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
 
@@ -8166,7 +8166,7 @@ Counts visits to DevOps Adoption page per month
 
 Group: `group::optimize`
 
-Status: `implemented`
+Status: `data_available`
 
 Tiers: `premium`, `ultimate`
 
@@ -8178,7 +8178,7 @@ Counts visits to DevOps Adoption page per week
 
 Group: `group::optimize`
 
-Status: `implemented`
+Status: `data_available`
 
 Tiers: `premium`, `ultimate`
 
@@ -8622,7 +8622,7 @@ Count of users clicking diff view setting
 
 Group: `group::code review`
 
-Status: `implemented`
+Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
 
@@ -8634,7 +8634,7 @@ Count of users clicking diff view setting
 
 Group: `group::code review`
 
-Status: `implemented`
+Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
 
@@ -8646,7 +8646,7 @@ Count of users clicking merge request file browser setting
 
 Group: `group::code review`
 
-Status: `implemented`
+Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
 
@@ -8658,7 +8658,7 @@ Count of users with merge request file list setting
 
 Group: `group::code review`
 
-Status: `implemented`
+Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
 
@@ -8670,7 +8670,7 @@ Count of users clicking single file mode setting
 
 Group: `group::code review`
 
-Status: `implemented`
+Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
 
@@ -8682,7 +8682,7 @@ Count of users clicking single file mode setting
 
 Group: `group::code review`
 
-Status: `implemented`
+Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
 
@@ -8694,7 +8694,7 @@ Count of users clicking merge request whitespae setting
 
 Group: `group::code review`
 
-Status: `implemented`
+Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
 
@@ -8706,7 +8706,7 @@ Count of users clicking merge request whitespae setting
 
 Group: `group::code review`
 
-Status: `implemented`
+Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
 
@@ -8718,7 +8718,7 @@ Count of users with show whitespace disabled
 
 Group: `group::code review`
 
-Status: `implemented`
+Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
 
@@ -8730,7 +8730,7 @@ Count of users with show whitespace disabled
 
 Group: `group::code review`
 
-Status: `implemented`
+Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
 
@@ -8742,7 +8742,7 @@ Count of users with single mode disabled
 
 Group: `group::code review`
 
-Status: `implemented`
+Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
 
@@ -8754,7 +8754,7 @@ Count of users with single mode disabled
 
 Group: `group::code review`
 
-Status: `implemented`
+Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
 
@@ -8766,7 +8766,7 @@ Count of users with show whitespace enabled
 
 Group: `group::code review`
 
-Status: `implemented`
+Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
 
@@ -8778,7 +8778,7 @@ Count of users with show whitespace enabled
 
 Group: `group::code review`
 
-Status: `implemented`
+Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
 
@@ -8790,7 +8790,7 @@ Count of users with single file mode enabled
 
 Group: `group::code review`
 
-Status: `implemented`
+Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
 
@@ -8802,7 +8802,7 @@ Count of users with single file mode enabled
 
 Group: `group::code review`
 
-Status: `implemented`
+Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
 
@@ -8814,7 +8814,7 @@ Count of users with merge request view type as inline
 
 Group: `group::code review`
 
-Status: `implemented`
+Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
 
@@ -8826,7 +8826,7 @@ Count of users with merge request view type as inline
 
 Group: `group::code review`
 
-Status: `implemented`
+Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
 
@@ -8838,7 +8838,7 @@ Count of users with merge request view type as parallel
 
 Group: `group::code review`
 
-Status: `implemented`
+Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
 
@@ -8850,7 +8850,7 @@ Count of users with merge request view type as parallel
 
 Group: `group::code review`
 
-Status: `implemented`
+Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
 
@@ -8910,7 +8910,7 @@ Count of users with merge request file list setting
 
 Group: `group::code review`
 
-Status: `implemented`
+Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
 
@@ -8922,7 +8922,7 @@ Count of users with merge request file list setting
 
 Group: `group::code review`
 
-Status: `implemented`
+Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
 
@@ -8934,7 +8934,7 @@ Count of users with merge request file tree setting
 
 Group: `group::code review`
 
-Status: `implemented`
+Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
 
@@ -8946,7 +8946,7 @@ Count of users with merge request file tree setting
 
 Group: `group::code review`
 
-Status: `implemented`
+Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
 
@@ -9414,7 +9414,7 @@ Count of unique users per week who load the conflict resolution page
 
 Group: `group::code review`
 
-Status: `implemented`
+Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
 
@@ -9426,7 +9426,7 @@ Count of unique users per week who load the conflict resolution page
 
 Group: `group::code review`
 
-Status: `implemented`
+Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
 
@@ -9654,7 +9654,7 @@ Count of unique users per week who attempt to resolve a conflict through the ui
 
 Group: `group::code review`
 
-Status: `implemented`
+Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
 
@@ -9666,7 +9666,7 @@ Count of unique users per week who attempt to resolve a conflict through the ui
 
 Group: `group::code review`
 
-Status: `implemented`
+Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
 
@@ -10782,7 +10782,7 @@ Missing description
 
 Group: ``
 
-Status: `implemented`
+Status: `data_available`
 
 Tiers: `ultimate`
 
@@ -10794,7 +10794,7 @@ Missing description
 
 Group: ``
 
-Status: `implemented`
+Status: `data_available`
 
 Tiers: `ultimate`
 
@@ -10806,7 +10806,7 @@ Count of MAU creating epic boards
 
 Group: `group::product planning`
 
-Status: `implemented`
+Status: `data_available`
 
 Tiers: `premium`, `ultimate`
 
@@ -10818,7 +10818,7 @@ Count of WAU creating epic boards
 
 Group: `group::product planning`
 
-Status: `implemented`
+Status: `data_available`
 
 Tiers: `premium`, `ultimate`
 
@@ -10830,7 +10830,7 @@ Count of MAU updating epic board names
 
 Group: `group::product planning`
 
-Status: `implemented`
+Status: `data_available`
 
 Tiers: `premium`, `ultimate`
 
@@ -10842,7 +10842,7 @@ Count of WAU updating epic board names
 
 Group: `group::product planning`
 
-Status: `implemented`
+Status: `data_available`
 
 Tiers: `premium`, `ultimate`
 
@@ -10854,7 +10854,7 @@ Count of MAU viewing epic boards
 
 Group: `group::product planning`
 
-Status: `implemented`
+Status: `data_available`
 
 Tiers: `premium`, `ultimate`
 
@@ -10866,7 +10866,7 @@ Count of WAU viewing epic boards
 
 Group: `group::product planning`
 
-Status: `implemented`
+Status: `data_available`
 
 Tiers: `premium`, `ultimate`
 
@@ -10950,7 +10950,7 @@ Count of MAU cross referencing epics
 
 Group: `group::product planning`
 
-Status: `implemented`
+Status: `data_available`
 
 Tiers: `premium`, `ultimate`
 
@@ -10962,7 +10962,7 @@ Counts of WAU cross referencing epics
 
 Group: `group::product planning`
 
-Status: `implemented`
+Status: `data_available`
 
 Tiers: `premium`, `ultimate`
 
@@ -11142,7 +11142,7 @@ Counts of MAU awarding emoji on epic
 
 Group: `group::product planning`
 
-Status: `implemented`
+Status: `data_available`
 
 Tiers: `premium`, `ultimate`
 
@@ -11154,7 +11154,7 @@ Counts of WAU awarding emoji on epic
 
 Group: `group::product planning`
 
-Status: `implemented`
+Status: `data_available`
 
 Tiers: `premium`, `ultimate`
 
@@ -11214,7 +11214,7 @@ Number of users creating an issue from an epic
 
 Group: `group::product planning`
 
-Status: `implemented`
+Status: `data_available`
 
 Tiers: `premium`
 
@@ -11226,7 +11226,7 @@ Number of users creating an issue from an epic
 
 Group: `group::product planning`
 
-Status: `implemented`
+Status: `data_available`
 
 Tiers: `premium`
 
@@ -11238,7 +11238,7 @@ Counts of MAU removing emoji on epic
 
 Group: `group::product planning`
 
-Status: `implemented`
+Status: `data_available`
 
 Tiers: `premium`, `ultimate`
 
@@ -11250,7 +11250,7 @@ Counts of WAU removing emoji on epic
 
 Group: `group::product planning`
 
-Status: `implemented`
+Status: `data_available`
 
 Tiers: `premium`, `ultimate`
 
@@ -11454,7 +11454,7 @@ Counts of MAU updating parent on epic
 
 Group: `group::product planning`
 
-Status: `implemented`
+Status: `data_available`
 
 Tiers: `premium`, `ultimate`
 
@@ -11466,7 +11466,7 @@ Counts of WAU updating parent on epic
 
 Group: `group::product planning`
 
-Status: `implemented`
+Status: `data_available`
 
 Tiers: `premium`, `ultimate`
 
@@ -11550,7 +11550,7 @@ Counts of MAU checking epic task
 
 Group: `group::product planning`
 
-Status: `implemented`
+Status: `data_available`
 
 Tiers: `premium`, `ultimate`
 
@@ -11562,7 +11562,7 @@ Counts of WAU checking epic task
 
 Group: `group::product planning`
 
-Status: `implemented`
+Status: `data_available`
 
 Tiers: `premium`, `ultimate`
 
@@ -11574,7 +11574,7 @@ Counts of MAU unchecking epic task
 
 Group: `group::product planning`
 
-Status: `implemented`
+Status: `data_available`
 
 Tiers: `premium`, `ultimate`
 
@@ -11586,7 +11586,7 @@ Counts of WAU unchecking epic task
 
 Group: `group::product planning`
 
-Status: `implemented`
+Status: `data_available`
 
 Tiers: `premium`, `ultimate`
 
@@ -12990,7 +12990,7 @@ Missing description
 
 Group: ``
 
-Status: `implemented`
+Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
 
@@ -13002,7 +13002,7 @@ Missing description
 
 Group: ``
 
-Status: `implemented`
+Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
 
@@ -16304,7 +16304,7 @@ Missing description
 
 Group: ``
 
-Status: `implemented`
+Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
 
@@ -16340,7 +16340,7 @@ Total count of all custom compliance framework labels
 
 Group: `compliance`
 
-Status: `implemented`
+Status: `data_available`
 
 Tiers: `premium`, `ultimate`
 
@@ -17240,7 +17240,7 @@ Count creator_id from projects with repository mirroring enabled.
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_all/20210216181934_projects_mirrored_with_pipelines_enabled.yml)
 
-Group: `group::continuous integration`
+Group: `group::pipeline execution`
 
 Status: `data_available`
 
@@ -17320,7 +17320,7 @@ Tiers:
 
 ### `usage_activity_by_stage.secure.dependency_scanning_scans`
 
-Counts dependency scanning jobs
+Total number of users running Dependency Scanning Scans
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_all/20210216175220_dependency_scanning_scans.yml)
 
@@ -17416,7 +17416,7 @@ Tiers: `free`
 
 ### `usage_activity_by_stage.secure.user_dependency_scanning_jobs`
 
-no idea, Count of Dependency Scanning jobs run, it implies user but AFAIK we don't track per user
+Total number of users running Dependency Scanning jobs
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_all/20210216175216_user_dependency_scanning_jobs.yml)
 
@@ -17428,9 +17428,9 @@ Tiers: `ultimate`
 
 ### `usage_activity_by_stage.secure.user_license_management_jobs`
 
-no idea, Count of License Scanning jobs run, it implies user but AFAIK we don't track per user
+Total number of users running License Scanning jobs
 
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/license/20210216175218_user_license_management_jobs.yml)
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_all/20210216175218_user_license_management_jobs.yml)
 
 Group: `group::composition analysis`
 
@@ -17440,7 +17440,7 @@ Tiers: `ultimate`
 
 ### `usage_activity_by_stage.secure.user_preferences_group_overview_security_dashboard`
 
-Users who set personal preference to see Details on Group overview page
+Users who set personal preference to see Details on Group information page
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_all/20210216182207_user_preferences_group_overview_security_dashboard.yml)
 
@@ -17492,7 +17492,7 @@ Unique count of builds in project
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216175525_ci_builds.yml)
 
-Group: `group::continuous integration`
+Group: `group::pipeline execution`
 
 Status: `data_available`
 
@@ -17504,7 +17504,7 @@ Total pipelines in external repositories
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216175527_ci_external_pipelines.yml)
 
-Group: `group::continuous integration`
+Group: `group::pipeline execution`
 
 Status: `data_available`
 
@@ -17516,7 +17516,7 @@ Total pipelines in GitLab repositories
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216175529_ci_internal_pipelines.yml)
 
-Group: `group::continuous integration`
+Group: `group::pipeline execution`
 
 Status: `data_available`
 
@@ -17540,7 +17540,7 @@ Total Pipelines from templates in repository
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216175533_ci_pipeline_config_repository.yml)
 
-Group: `group::continuous integration`
+Group: `group::pipeline execution`
 
 Status: `data_available`
 
@@ -17552,7 +17552,7 @@ Pipeline schedules in GitLab
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216175535_ci_pipeline_schedules.yml)
 
-Group: `group::continuous integration`
+Group: `group::pipeline execution`
 
 Status: `data_available`
 
@@ -17564,7 +17564,7 @@ Distinct Users triggering Total pipelines
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216175537_ci_pipelines.yml)
 
-Group: `group::continuous integration`
+Group: `group::pipeline execution`
 
 Status: `data_available`
 
@@ -17576,7 +17576,7 @@ Total configured Triggers in project
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216175539_ci_triggers.yml)
 
-Group: `group::continuous integration`
+Group: `group::pipeline execution`
 
 Status: `data_available`
 
@@ -17600,7 +17600,7 @@ Projects with a GitHub service pipeline enabled
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_all/20210216175540_projects_reporting_ci_cd_back_to_github.yml)
 
-Group: `group::continuous integration`
+Group: `group::pipeline execution`
 
 Status: `data_available`
 
@@ -18274,7 +18274,7 @@ Missing description
 
 Group: ``
 
-Status: `implemented`
+Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
 
@@ -18310,7 +18310,7 @@ Monthly count of all custom compliance framework labels
 
 Group: `compliance`
 
-Status: `implemented`
+Status: `data_available`
 
 Tiers: `premium`, `ultimate`
 
@@ -19196,7 +19196,7 @@ Count creator_id from projects with repository mirroring enabled.
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210216181943_projects_mirrored_with_pipelines_enabled.yml)
 
-Group: `group::continuous integration`
+Group: `group::pipeline execution`
 
 Status: `data_available`
 
@@ -19324,7 +19324,7 @@ Tiers: `free`
 
 ### `usage_activity_by_stage_monthly.secure.dependency_scanning_pipeline`
 
-no idea, what is this when did it get added? guess pipelines containing a DS job
+Count of pipelines with successful Dependency Scanning jobs
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210216175226_dependency_scanning_pipeline.yml)
 
@@ -19336,15 +19336,15 @@ Tiers: `ultimate`
 
 ### `usage_activity_by_stage_monthly.secure.dependency_scanning_scans`
 
-Missing description
+Monthly number of users running Dependency Scanning Scans
 
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216183828_dependency_scanning_scans.yml)
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210216183828_dependency_scanning_scans.yml)
 
-Group: ``
+Group: `group::composition analysis`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `ultimate`
 
 ### `usage_activity_by_stage_monthly.secure.sast_pipeline`
 
@@ -19456,7 +19456,7 @@ Tiers: `free`
 
 ### `usage_activity_by_stage_monthly.secure.user_dependency_scanning_jobs`
 
-no idea, Count of Dependency Scanning jobs run, it implies user and monthly, but AFAIK we don't track per user
+Monthly number of users creating Dependency Scanning jobs
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210216175222_user_dependency_scanning_jobs.yml)
 
@@ -19468,9 +19468,9 @@ Tiers: `ultimate`
 
 ### `usage_activity_by_stage_monthly.secure.user_license_management_jobs`
 
-no idea, Count of License Scanning jobs run, it implies user and monthly, but AFAIK we don't track per user
+Monthly number of users running License Scanning jobs
 
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/license/20210216175224_user_license_management_jobs.yml)
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210216175224_user_license_management_jobs.yml)
 
 Group: `group::composition analysis`
 
@@ -19480,7 +19480,7 @@ Tiers: `ultimate`
 
 ### `usage_activity_by_stage_monthly.secure.user_preferences_group_overview_security_dashboard`
 
-Users who set personal preference to see Security Dashboard on Group overview page
+Users who set personal preference to see Security Dashboard on Group information page
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210216182209_user_preferences_group_overview_security_dashboard.yml)
 
@@ -19532,7 +19532,7 @@ Unique monthly builds in project
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216175542_ci_builds.yml)
 
-Group: `group::continuous integration`
+Group: `group::pipeline execution`
 
 Status: `data_available`
 
@@ -19544,7 +19544,7 @@ Total pipelines in external repositories in a month
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216175544_ci_external_pipelines.yml)
 
-Group: `group::continuous integration`
+Group: `group::pipeline execution`
 
 Status: `data_available`
 
@@ -19556,7 +19556,7 @@ Total pipelines in GitLab repositories in a month
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216175546_ci_internal_pipelines.yml)
 
-Group: `group::continuous integration`
+Group: `group::pipeline execution`
 
 Status: `data_available`
 
@@ -19580,7 +19580,7 @@ Total Monthly Pipelines from templates in repository
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216175550_ci_pipeline_config_repository.yml)
 
-Group: `group::continuous integration`
+Group: `group::pipeline execution`
 
 Status: `data_available`
 
@@ -19592,7 +19592,7 @@ Total monthly Pipeline schedules in GitLab
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216175552_ci_pipeline_schedules.yml)
 
-Group: `group::continuous integration`
+Group: `group::pipeline execution`
 
 Status: `data_available`
 
@@ -19604,7 +19604,7 @@ Distinct users triggering pipelines in a month
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216175554_ci_pipelines.yml)
 
-Group: `group::continuous integration`
+Group: `group::pipeline execution`
 
 Status: `data_available`
 
@@ -19616,7 +19616,7 @@ Total configured Triggers in project
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216175556_ci_triggers.yml)
 
-Group: `group::continuous integration`
+Group: `group::pipeline execution`
 
 Status: `data_available`
 
@@ -19640,7 +19640,7 @@ Projects with a GitHub repository mirror pipeline enabled
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210216175558_projects_reporting_ci_cd_back_to_github.yml)
 
-Group: `group::continuous integration`
+Group: `group::pipeline execution`
 
 Status: `data_available`
 

@@ -111,10 +111,6 @@ RSpec.describe Ci::Build do
   describe '.with_downloadable_artifacts' do
     subject { described_class.with_downloadable_artifacts }
 
-    before do
-      stub_feature_flags(drop_license_management_artifact: false)
-    end
-
     context 'when job does not have a downloadable artifact' do
       let!(:job) { create(:ci_build) }
 
@@ -1732,8 +1728,6 @@ RSpec.describe Ci::Build do
     subject { build.erase_erasable_artifacts! }
 
     before do
-      stub_feature_flags(drop_license_management_artifact: false)
-
       Ci::JobArtifact.file_types.keys.each do |file_type|
         create(:ci_job_artifact, job: build, file_type: file_type, file_format: Ci::JobArtifact::TYPE_AND_FORMAT_PAIRS[file_type.to_sym])
       end
@@ -2627,7 +2621,6 @@ RSpec.describe Ci::Build do
           { key: 'CI_PROJECT_VISIBILITY', value: 'private', public: true, masked: false },
           { key: 'CI_PROJECT_REPOSITORY_LANGUAGES', value: project.repository_languages.map(&:name).join(',').downcase, public: true, masked: false },
           { key: 'CI_DEFAULT_BRANCH', value: project.default_branch, public: true, masked: false },
-          { key: 'CI_PROJECT_CONFIG_PATH', value: project.ci_config_path_or_default, public: true, masked: false },
           { key: 'CI_CONFIG_PATH', value: project.ci_config_path_or_default, public: true, masked: false },
           { key: 'CI_PAGES_DOMAIN', value: Gitlab.config.pages.host, public: true, masked: false },
           { key: 'CI_PAGES_URL', value: project.pages_url, public: true, masked: false },

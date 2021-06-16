@@ -6,5 +6,5 @@ RSpec.describe Gitlab::SubscriptionPortal::Client do
   subject { described_class }
 
   it { is_expected.to include_module Gitlab::SubscriptionPortal::Clients::Graphql }
-  it { is_expected.to include_module Gitlab::SubscriptionPortal::Clients::REST }
+  it { is_expected.to include_module Gitlab::SubscriptionPortal::Clients::Rest }
 end

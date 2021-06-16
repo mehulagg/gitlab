@@ -146,6 +146,14 @@ class Project < ApplicationRecord
   has_one :last_event, -> {order 'events.created_at DESC'}, class_name: 'Event'
   has_many :boards
 
+  def self.integration_association_name(name)
+    if ::Integration.renamed?(name)
+      "#{name}_integration"
+    else
+      "#{name}_service"
+    end
+  end
+
   # Project integrations
   has_one :asana_integration, class_name: 'Integrations::Asana'
   has_one :assembla_integration, class_name: 'Integrations::Assembla'
@@ -155,9 +163,9 @@ class Project < ApplicationRecord
   has_one :campfire_integration, class_name: 'Integrations::Campfire'
   has_one :confluence_integration, class_name: 'Integrations::Confluence'
   has_one :custom_issue_tracker_integration, class_name: 'Integrations::CustomIssueTracker'
-  has_one :datadog_service, class_name: 'Integrations::Datadog'
-  has_one :discord_service, class_name: 'Integrations::Discord'
-  has_one :drone_ci_service, class_name: 'Integrations::DroneCi'
+  has_one :datadog_integration, class_name: 'Integrations::Datadog'
+  has_one :discord_integration, class_name: 'Integrations::Discord'
+  has_one :drone_ci_integration, class_name: 'Integrations::DroneCi'
   has_one :emails_on_push_service, class_name: 'Integrations::EmailsOnPush'
   has_one :ewm_service, class_name: 'Integrations::Ewm'
   has_one :external_wiki_service, class_name: 'Integrations::ExternalWiki'
@@ -421,11 +429,12 @@ class Project < ApplicationRecord
   delegate :last_pipeline, to: :commit, allow_nil: true
   delegate :external_dashboard_url, to: :metrics_setting, allow_nil: true, prefix: true
   delegate :dashboard_timezone, to: :metrics_setting, allow_nil: true, prefix: true
-  delegate :default_git_depth, :default_git_depth=, to: :ci_cd_settings, prefix: :ci
-  delegate :forward_deployment_enabled, :forward_deployment_enabled=, :forward_deployment_enabled?, to: :ci_cd_settings, prefix: :ci
-  delegate :keep_latest_artifact, :keep_latest_artifact=, :keep_latest_artifact?, :keep_latest_artifacts_available?, to: :ci_cd_settings
+  delegate :default_git_depth, :default_git_depth=, to: :ci_cd_settings, prefix: :ci, allow_nil: true
+  delegate :forward_deployment_enabled, :forward_deployment_enabled=, :forward_deployment_enabled?, to: :ci_cd_settings, prefix: :ci, allow_nil: true
+  delegate :job_token_scope_enabled, :job_token_scope_enabled=, :job_token_scope_enabled?, to: :ci_cd_settings, prefix: :ci
+  delegate :keep_latest_artifact, :keep_latest_artifact=, :keep_latest_artifact?, :keep_latest_artifacts_available?, to: :ci_cd_settings, allow_nil: true
   delegate :restrict_user_defined_variables, :restrict_user_defined_variables=, :restrict_user_defined_variables?,
-    to: :ci_cd_settings
+    to: :ci_cd_settings, allow_nil: true
   delegate :actual_limits, :actual_plan_name, to: :namespace, allow_nil: true
   delegate :allow_merge_on_skipped_pipeline, :allow_merge_on_skipped_pipeline?,
     :allow_merge_on_skipped_pipeline=, :has_confluence?, :allow_editing_commit_messages?,
@@ -533,7 +542,7 @@ class Project < ApplicationRecord
   scope :for_milestones, ->(ids) { joins(:milestones).where('milestones.id' => ids).distinct }
   scope :with_push, -> { joins(:events).merge(Event.pushed_action) }
   scope :with_project_feature, -> { joins('LEFT JOIN project_features ON projects.id = project_features.project_id') }
-  scope :with_active_jira_services, -> { joins(:integrations).merge(::Integrations::Jira.active) } # rubocop:disable CodeReuse/ServiceClass
+  scope :with_active_jira_services, -> { joins(:integrations).merge(::Integrations::Jira.active) }
   scope :with_jira_dvcs_cloud, -> { joins(:feature_usage).merge(ProjectFeatureUsage.with_jira_dvcs_integration_enabled(cloud: true)) }
   scope :with_jira_dvcs_server, -> { joins(:feature_usage).merge(ProjectFeatureUsage.with_jira_dvcs_integration_enabled(cloud: false)) }
   scope :inc_routes, -> { includes(:route, namespace: :route) }
@@ -1752,7 +1761,7 @@ class Project < ApplicationRecord
   # rubocop: enable CodeReuse/ServiceClass
 
   # rubocop: disable CodeReuse/ServiceClass
-  def open_merge_requests_count
+  def open_merge_requests_count(_current_user = nil)
     Projects::OpenMergeRequestsCountService.new(self).count
   end
   # rubocop: enable CodeReuse/ServiceClass
@@ -1986,7 +1995,11 @@ class Project < ApplicationRecord
   end
 
   def export_file_exists?
-    export_file&.file
+    import_export_upload&.export_file_exists?
+  end
+
+  def export_archive_exists?
+    import_export_upload&.export_archive_exists?
   end
 
   def export_file
@@ -2026,7 +2039,6 @@ class Project < ApplicationRecord
       .append(key: 'CI_PROJECT_VISIBILITY', value: Gitlab::VisibilityLevel.string_level(visibility_level))
       .append(key: 'CI_PROJECT_REPOSITORY_LANGUAGES', value: repository_languages.map(&:name).join(',').downcase)
       .append(key: 'CI_DEFAULT_BRANCH', value: default_branch)
-      .append(key: 'CI_PROJECT_CONFIG_PATH', value: ci_config_path_or_default)
       .append(key: 'CI_CONFIG_PATH', value: ci_config_path_or_default)
   end
 

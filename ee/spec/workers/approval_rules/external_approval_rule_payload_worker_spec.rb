@@ -3,7 +3,7 @@
 require 'spec_helper'
 
 RSpec.describe ApprovalRules::ExternalApprovalRulePayloadWorker do
-  let_it_be(:rule) { create(:external_approval_rule, external_url: 'https://example.com/callback') }
+  let_it_be(:rule) { create(:external_status_check, external_url: 'https://example.com/callback') }
 
   subject { described_class.new.perform(rule.id, {}) }
 

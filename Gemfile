@@ -345,7 +345,7 @@ end
 
 group :development do
   gem 'lefthook', '~> 0.7.0', require: false
-  gem 'solargraph', '~> 0.40.4', require: false
+  gem 'solargraph', '~> 0.42', require: false
 
   gem 'letter_opener_web', '~> 1.4.0'
 
@@ -402,7 +402,7 @@ group :development, :test do
 end
 
 group :development, :test, :danger do
-  gem 'gitlab-dangerfiles', '~> 2.0.0', require: false
+  gem 'gitlab-dangerfiles', '~> 2.1.2', require: false
 end
 
 group :development, :test, :coverage do
@@ -481,6 +481,9 @@ gem 'spamcheck', '~> 0.1.0'
 
 # Gitaly GRPC protocol definitions
 gem 'gitaly', '~> 13.12.0.pre.rc1'
+
+# KAS GRPC protocol definitions
+gem 'kas-grpc', '~> 0.0.2'
 
 gem 'grpc', '~> 1.30.2'
 

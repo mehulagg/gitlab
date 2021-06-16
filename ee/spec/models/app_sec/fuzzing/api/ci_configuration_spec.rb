@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe AppSec::Fuzzing::Api::CiConfiguration do
+RSpec.describe AppSec::Fuzzing::API::CiConfiguration do
   include StubRequests
 
   describe '#scan_profiles' do

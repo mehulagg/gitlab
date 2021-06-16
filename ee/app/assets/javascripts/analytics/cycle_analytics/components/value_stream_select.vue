@@ -112,9 +112,13 @@ export default {
     onEdit() {
       this.showCreateModal = true;
       this.isEditing = true;
+      const stages = generateInitialStageData(
+        this.defaultStageConfig,
+        this.selectedValueStreamStages,
+      );
       this.initialData = {
         ...this.selectedValueStream,
-        stages: generateInitialStageData(this.defaultStageConfig, this.selectedValueStreamStages),
+        stages,
       };
     },
     slugify(valueStreamTitle) {

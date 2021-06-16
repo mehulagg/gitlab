@@ -901,9 +901,13 @@ Particular attention should be shown to:
    gitlab-rake gitlab:gitaly:check
    ```
 
-1. Check in **Admin Area > Settings > Repository > Repository storage** that the Praefect storage
-   is configured to store new repositories. Following this guide, the `default` storage should have
-   weight 100 to store all new repositories.
+1. Check that the Praefect storage is configured to store new repositories:
+
+   1. On the top bar, select **Menu >** **{admin}** **Admin**.
+   1. On the left sidebar, select **Settings > Repository**.
+   1. Expand the **Repository storage** section.
+
+   Following this guide, the `default` storage should have weight 100 to store all new repositories.
 
 1. Verify everything is working by creating a new project. Check the
    "Initialize repository with a README" box so that there is content in the
@@ -1485,15 +1489,8 @@ or to move from single Gitaly nodes, the basic process involves:
 1. Create and configure Gitaly Cluster.
 1. [Move the repositories](#move-repositories).
 
-The size of the required storage can vary between instances and depends on the set
-[replication factor](#replication-factor). The migration to Gitaly Cluster might include
-implementing repository storage redundancy.
-
-For a replication factor:
-
-- Of `1`: NFS, Gitaly, and Gitaly Cluster have roughly the same storage requirements.
-- More than `1`: The amount of required storage is `used space * replication factor`. `used space`
-  should include any planned future growth.
+When creating the storage, see some
+[repository storage recommendations](faq.md#what-are-some-repository-storage-recommendations).
 
 ### Move Repositories
 

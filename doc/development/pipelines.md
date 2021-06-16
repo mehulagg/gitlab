@@ -24,7 +24,7 @@ feature of the GitLab CI/CD.
 
 Pipelines are always created for the following scenarios:
 
-- `master` branch, including on schedules, pushes, merges, and so on.
+- `main` branch, including on schedules, pushes, merges, and so on.
 - Merge requests.
 - Tags.
 - Stable, `auto-deploy`, and security branches.
@@ -428,7 +428,7 @@ We are using a custom mapping between source file to test files, maintained in t
 
 As part of the objective to improve overall pipeline duration, we are experimenting with a minimal set of RSpec tests.
 The purpose of this experiment is to verify if we are able to run a minimal set of RSpec tests in a Merge Request pipeline,
-without resulting in increased number of broken master.
+without resulting in increased number of broken main branch.
 
 To identify the minimal set of tests needed, we use [Crystalball gem](https://github.com/toptal/crystalball) to create a test mapping.
 The test mapping contains a map of each source files to a list of test files which is dependent of the source file.
@@ -480,14 +480,18 @@ because of 2 reasons:
 ### PostgreSQL versions testing
 
 Our test suite runs against PG12 as GitLab.com runs on PG12 and
-[Omnibus defaults to PG12 for new installs and upgrades](https://docs.gitlab.com/omnibus/package-information/postgresql_versions.html).
+[Omnibus defaults to PG12 for new installs and upgrades](https://docs.gitlab.com/omnibus/package-information/postgresql_versions.html),
+Our test suite is currently running against PG11, since GitLab.com still runs on PG11.
+
+We do run our test suite against PG11 on nightly scheduled pipelines as well as upon specific
+database library changes in MRs and `main` pipelines (with the `rspec db-library-code pg11` job).
 
 #### Current versions testing
 
 | Where? | PostgreSQL version |
 | ------ | ------------------ |
 | MRs    | 12, 11 for DB library changes |
-| `master` (non-scheduled pipelines) | 12, 11 for DB library changes |
+| `main` (non-scheduled pipelines) | 12, 11 for DB library changes |
 | 2-hourly scheduled pipelines | 12, 11 for DB library changes |
 | `nightly` scheduled pipelines | 12, 11 |
 
@@ -498,6 +502,7 @@ We follow the [PostgreSQL versions shipped with Omnibus GitLab](https://docs.git
 | PostgreSQL version | 13.11 (April 2021)     | 13.12 (May 2021)       | 14.0 (June 2021?)      |
 | -------------------| ---------------------- | ---------------------- | ---------------------- |
 | PG12               | `nightly`              | MRs/`2-hour`/`nightly` | MRs/`2-hour`/`nightly` |
+| PG11               | MRs/`2-hour`/`nightly` | `nightly`              | `nightly`              |
 
 ### Test jobs
 
@@ -533,7 +538,7 @@ the `gitlab-org/gitlab-foss` project.
 ### Interruptible pipelines
 
 By default, all jobs are [interruptible](../ci/yaml/README.md#interruptible), except the
-`dont-interrupt-me` job which runs automatically on `master`, and is `manual`
+`dont-interrupt-me` job which runs automatically on `main`, and is `manual`
 otherwise.
 
 If you want a running pipeline to finish even if you push new commits to a merge
@@ -726,6 +731,8 @@ that are scoped to a single [configuration keyword](../ci/yaml/README.md#job-key
 | `.qa-cache` | Allows a job to use a default `cache` definition suitable for QA tasks. |
 | `.yarn-cache` | Allows a job to use a default `cache` definition suitable for frontend jobs that do a `yarn install`. |
 | `.assets-compile-cache` | Allows a job to use a default `cache` definition suitable for frontend jobs that compile assets. |
+| `.use-pg11` | Allows a job to run the `postgres` 11 and `redis` services (see [`.gitlab/ci/global.gitlab-ci.yml`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/.gitlab/ci/global.gitlab-ci.yml) for the specific versions of the services). |
+| `.use-pg11-ee` | Same as `.use-pg11` but also use an `elasticsearch` service (see [`.gitlab/ci/global.gitlab-ci.yml`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/.gitlab/ci/global.gitlab-ci.yml) for the specific version of the service). |
 | `.use-pg12` | Allows a job to use the `postgres` 12 and `redis` services (see [`.gitlab/ci/global.gitlab-ci.yml`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/.gitlab/ci/global.gitlab-ci.yml) for the specific versions of the services). |
 | `.use-pg12-ee` | Same as `.use-pg12` but also use an `elasticsearch` service (see [`.gitlab/ci/global.gitlab-ci.yml`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/.gitlab/ci/global.gitlab-ci.yml) for the specific version of the service). |
 | `.use-kaniko` | Allows a job to use the `kaniko` tool to build Docker images. |

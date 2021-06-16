@@ -54,7 +54,10 @@ module Gitlab
         date: timestamp.to_date.to_s,
         license_key: key,
         max_historical_user_count: max_users,
-        billable_users_count: billable_users_count
+        billable_users_count: billable_users_count,
+        hostname: Gitlab.config.gitlab.host,
+        instance_id: Gitlab::CurrentSettings.uuid,
+        license_md5: license&.md5
       }
     end
 

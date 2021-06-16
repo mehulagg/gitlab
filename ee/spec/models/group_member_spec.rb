@@ -400,6 +400,32 @@ RSpec.describe GroupMember do
     end
   end
 
+  describe '#provisioned_by_this_group?' do
+    let_it_be(:group) { create(:group) }
+
+    let(:user) { build(:user) }
+    let(:member) { build(:group_member, group: group, user: user) }
+    let(:invited) { build(:group_member, :invited, group: group, user: user) }
+
+    subject { member.provisioned_by_this_group? }
+
+    context 'when user is provisioned by the group' do
+      let!(:user_detail) { build(:user_detail, user: user, provisioned_by_group_id: group.id) }
+
+      it { is_expected.to eq(true) }
+    end
+
+    context 'when user is not provisioned by the group' do
+      it { is_expected.to eq(false) }
+    end
+
+    context 'when member does not have a related user (invited member)' do
+      let(:member) { invited }
+
+      it { is_expected.to eq(false) }
+    end
+  end
+
   def webhook_data(group_member, event)
     {
       headers: { 'Content-Type' => 'application/json', 'User-Agent' => "GitLab/#{Gitlab::VERSION}", 'X-Gitlab-Event' => 'Member Hook' },

@@ -50,6 +50,10 @@ module Iterations
       active? && automatic? && duration_in_weeks.to_i > 0 && iterations_in_advance.to_i > 0
     end
 
+    def can_roll_over?
+      active? && automatic? && roll_over?
+    end
+
     def duration_in_days
       duration_in_weeks * 7
     end

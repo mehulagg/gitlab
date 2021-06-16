@@ -1,5 +1,5 @@
-import { GlModal, GlToggle } from '@gitlab/ui';
-import { EditorModeYAML } from 'ee/threat_monitoring/components/policy_editor/constants';
+import { GlToggle } from '@gitlab/ui';
+import { EDITOR_MODE_YAML } from 'ee/threat_monitoring/components/policy_editor/constants';
 import {
   RuleDirectionInbound,
   PortMatchModeAny,
@@ -12,35 +12,18 @@ import {
 import NetworkPolicyEditor from 'ee/threat_monitoring/components/policy_editor/network_policy/network_policy_editor.vue';
 import PolicyRuleBuilder from 'ee/threat_monitoring/components/policy_editor/network_policy/policy_rule_builder.vue';
 import PolicyAlertPicker from 'ee/threat_monitoring/components/policy_editor/policy_alert_picker.vue';
+import PolicyEditorLayout from 'ee/threat_monitoring/components/policy_editor/policy_editor_layout.vue';
 import PolicyPreview from 'ee/threat_monitoring/components/policy_editor/policy_preview.vue';
 import createStore from 'ee/threat_monitoring/store';
 import { shallowMountExtended } from 'helpers/vue_test_utils_helper';
 import { redirectTo } from '~/lib/utils/url_utility';
+import { mockL3Manifest, mockL7Manifest } from '../../../mocks/mock_data';
 
 jest.mock('~/lib/utils/url_utility');
 
 describe('NetworkPolicyEditor component', () => {
   let store;
   let wrapper;
-  const l7manifest = `apiVersion: cilium.io/v2
-  kind: CiliumNetworkPolicy
-metadata:
-  name: limit-inbound-ip
-spec:
-  endpointSelector: {}
-  ingress:
-  - toPorts:
-    - ports:
-      - port: '80'
-        protocol: TCP
-      - port: '443'
-        protocol: TCP
-      rules:
-        http:
-        - headers:
-          - 'X-Forwarded-For: 192.168.1.1'
-    fromEntities:
-    - cluster`;
 
   const factory = ({ propsData, provide = {}, state, data } = {}) => {
     store = createStore();
@@ -55,11 +38,11 @@ spec:
 
     wrapper = shallowMountExtended(NetworkPolicyEditor, {
       propsData: {
-        threatMonitoringPath: '/threat-monitoring',
-        projectId: '21',
         ...propsData,
       },
       provide: {
+        threatMonitoringPath: '/threat-monitoring',
+        projectId: '21',
         ...provide,
       },
       store,
@@ -68,27 +51,21 @@ spec:
     });
   };
 
-  const findRuleEditor = () => wrapper.findByTestId('rule-editor');
   const findPreview = () => wrapper.findComponent(PolicyPreview);
   const findAddRuleButton = () => wrapper.findByTestId('add-rule');
   const findYAMLParsingAlert = () => wrapper.findByTestId('parsing-alert');
-  const findPolicyYamlEditor = () => wrapper.findByTestId('policy-yaml-editor');
   const findPolicyAlertPicker = () => wrapper.findComponent(PolicyAlertPicker);
   const findPolicyDescription = () => wrapper.find("[id='policyDescription']");
   const findPolicyEnableContainer = () => wrapper.findByTestId('policy-enable');
   const findPolicyName = () => wrapper.find("[id='policyName']");
   const findPolicyRuleBuilder = () => wrapper.findComponent(PolicyRuleBuilder);
-  const findSavePolicy = () => wrapper.findByTestId('save-policy');
-  const findDeletePolicy = () => wrapper.findByTestId('delete-policy');
-  const findEditorModeToggle = () => wrapper.findByTestId('editor-mode');
+  const findPolicyEditorLayout = () => wrapper.findComponent(PolicyEditorLayout);
 
   const modifyPolicyAlert = async ({ isAlertEnabled }) => {
     const policyAlertPicker = findPolicyAlertPicker();
-    policyAlertPicker.vm.$emit('update-alert', isAlertEnabled);
-    await wrapper.vm.$nextTick();
+    await policyAlertPicker.vm.$emit('update-alert', isAlertEnabled);
     expect(policyAlertPicker.props('policyAlert')).toBe(isAlertEnabled);
-    findSavePolicy().vm.$emit('click');
-    await wrapper.vm.$nextTick();
+    await findPolicyEditorLayout().vm.$emit('save-policy');
   };
 
   beforeEach(() => {
@@ -117,14 +94,10 @@ spec:
   it.each`
     component                | status                | findComponent            | state
     ${'policy alert picker'} | ${'does display'}     | ${findPolicyAlertPicker} | ${true}
-    ${'editor mode toggle'}  | ${'does display'}     | ${findEditorModeToggle}  | ${true}
     ${'policy name input'}   | ${'does display'}     | ${findPolicyName}        | ${true}
-    ${'rule editor'}         | ${'does display'}     | ${findRuleEditor}        | ${true}
     ${'add rule button'}     | ${'does display'}     | ${findAddRuleButton}     | ${true}
     ${'policy preview'}      | ${'does display'}     | ${findPreview}           | ${true}
-    ${'yaml editor'}         | ${'does not display'} | ${findPolicyYamlEditor}  | ${false}
     ${'parsing error alert'} | ${'does not display'} | ${findYAMLParsingAlert}  | ${false}
-    ${'delete button'}       | ${'does not display'} | ${findDeletePolicy}      | ${false}
   `('$status the $component', async ({ findComponent, state }) => {
     expect(findComponent().exists()).toBe(state);
   });
@@ -133,38 +106,13 @@ spec:
     beforeEach(() => {
       factory({
         data: () => ({
-          editorMode: EditorModeYAML,
+          editorMode: EDITOR_MODE_YAML,
         }),
       });
     });
 
-    it.each`
-      component               | status                | findComponent           | state
-      ${'editor mode toggle'} | ${'does display'}     | ${findEditorModeToggle} | ${true}
-      ${'rule editor'}        | ${'does not display'} | ${findRuleEditor}       | ${false}
-      ${'yaml editor'}        | ${'does display'}     | ${findPolicyYamlEditor} | ${true}
-    `('$status the $component', ({ findComponent, state }) => {
-      expect(findComponent().exists()).toBe(state);
-    });
-
     it('updates policy on yaml editor value change', async () => {
-      const manifest = `apiVersion: cilium.io/v2
-kind: CiliumNetworkPolicy
-description: test description
-metadata:
-  name: test-policy
-  labels:
-    app.gitlab.com/proj: '21'
-spec:
-  endpointSelector:
-    matchLabels:
-      network-policy.gitlab.com/disabled_by: gitlab
-      foo: bar
-  ingress:
-  - fromEndpoints:
-    - matchLabels:
-        foo: bar`;
-      findPolicyYamlEditor().vm.$emit('input', manifest);
+      findPolicyEditorLayout().vm.$emit('update-yaml', mockL3Manifest);
 
       expect(wrapper.vm.policy).toMatchObject({
         name: 'test-policy',
@@ -185,16 +133,15 @@ spec:
     it('saves L7 policies', async () => {
       factory({
         data: () => ({
-          editorMode: EditorModeYAML,
-          yamlEditorValue: l7manifest,
+          editorMode: EDITOR_MODE_YAML,
+          yamlEditorValue: mockL7Manifest,
         }),
       });
-      findSavePolicy().vm.$emit('click');
 
-      await wrapper.vm.$nextTick();
+      await findPolicyEditorLayout().vm.$emit('save-policy', EDITOR_MODE_YAML);
       expect(store.dispatch).toHaveBeenCalledWith('networkPolicies/createPolicy', {
         environmentId: -1,
-        policy: { manifest: l7manifest },
+        policy: { manifest: mockL7Manifest },
       });
       expect(redirectTo).toHaveBeenCalledWith('/threat-monitoring');
     });
@@ -202,24 +149,21 @@ spec:
 
   it('given there is a name change, updates policy yaml preview', async () => {
     const initialValue = findPreview().props('policyYaml');
-    findPolicyName().vm.$emit('input', 'new');
-    await wrapper.vm.$nextTick();
+    await findPolicyName().vm.$emit('input', 'new');
     expect(findPreview().props('policyYaml')).not.toEqual(initialValue);
   });
 
   it('given there is a rule change, updates policy description preview', async () => {
     const initialValue = findPreview().props('policyDescription');
-    findAddRuleButton().vm.$emit('click');
-    await wrapper.vm.$nextTick();
+    await findAddRuleButton().vm.$emit('click');
     expect(findPreview().props('policyDescription')).not.toEqual(initialValue);
   });
 
   it('adds a new rule', async () => {
     expect(wrapper.findAllComponents(PolicyRuleBuilder)).toHaveLength(1);
     const button = findAddRuleButton();
-    button.vm.$emit('click');
-    button.vm.$emit('click');
-    await wrapper.vm.$nextTick();
+    await button.vm.$emit('click');
+    await button.vm.$emit('click');
     const elements = wrapper.findAllComponents(PolicyRuleBuilder);
     expect(elements).toHaveLength(3);
 
@@ -236,23 +180,18 @@ spec:
   });
 
   it('removes a new rule', async () => {
-    findAddRuleButton().vm.$emit('click');
-    await wrapper.vm.$nextTick();
+    await findAddRuleButton().vm.$emit('click');
     expect(wrapper.findAllComponents(PolicyRuleBuilder)).toHaveLength(2);
 
-    findPolicyRuleBuilder().vm.$emit('remove');
-    await wrapper.vm.$nextTick();
+    await findPolicyRuleBuilder().vm.$emit('remove');
     expect(wrapper.findAllComponents(PolicyRuleBuilder)).toHaveLength(1);
   });
 
   it('updates yaml editor value on switch to yaml editor', async () => {
+    const policyEditorLayout = findPolicyEditorLayout();
     findPolicyName().vm.$emit('input', 'test-policy');
-    findEditorModeToggle().vm.$emit('input', EditorModeYAML);
-    await wrapper.vm.$nextTick();
-
-    const editor = findPolicyYamlEditor();
-    expect(editor.exists()).toBe(true);
-    expect(fromYaml(editor.attributes('value'))).toMatchObject({
+    await policyEditorLayout.vm.$emit('update-editor-mode', EDITOR_MODE_YAML);
+    expect(fromYaml(policyEditorLayout.attributes('yamleditorvalue'))).toMatchObject({
       name: 'test-policy',
     });
   });
@@ -296,19 +235,14 @@ spec:
 
     it('does not update yaml editor value on switch to yaml editor', async () => {
       findPolicyName().vm.$emit('input', 'test-policy');
-      findEditorModeToggle().vm.$emit('input', EditorModeYAML);
-      await wrapper.vm.$nextTick();
-
-      const editor = findPolicyYamlEditor();
-      expect(editor.exists()).toBe(true);
-      expect(editor.attributes('value')).toEqual('');
+      const policyEditorLayout = findPolicyEditorLayout();
+      await policyEditorLayout.vm.$emit('update-editor-mode', EDITOR_MODE_YAML);
+      expect(policyEditorLayout.attributes('yamleditorvalue')).toEqual('');
     });
   });
 
   it('creates policy and redirects to a threat monitoring path', async () => {
-    findSavePolicy().vm.$emit('click');
-
-    await wrapper.vm.$nextTick();
+    await findPolicyEditorLayout().vm.$emit('save-policy');
     expect(store.dispatch).toHaveBeenCalledWith('networkPolicies/createPolicy', {
       environmentId: -1,
       policy: { manifest: toYaml(wrapper.vm.policy) },
@@ -326,9 +260,7 @@ spec:
     });
 
     it('it does not redirect', async () => {
-      findSavePolicy().vm.$emit('click');
-
-      await wrapper.vm.$nextTick();
+      await findPolicyEditorLayout().vm.$emit('save-policy');
       expect(redirectTo).not.toHaveBeenCalledWith('/threat-monitoring');
     });
   });
@@ -354,11 +286,7 @@ spec:
     });
 
     it('updates existing policy and redirects to a threat monitoring path', async () => {
-      const saveButton = findSavePolicy();
-      expect(saveButton.text()).toEqual('Save changes');
-      saveButton.vm.$emit('click');
-
-      await wrapper.vm.$nextTick();
+      await findPolicyEditorLayout().vm.$emit('save-policy');
       expect(store.dispatch).toHaveBeenCalledWith('networkPolicies/updatePolicy', {
         environmentId: -1,
         policy: { name: 'policy', manifest: toYaml(wrapper.vm.policy) },
@@ -379,27 +307,14 @@ spec:
       });
 
       it('it does not redirect', async () => {
-        findSavePolicy().vm.$emit('click');
-
+        findPolicyEditorLayout().vm.$emit('save-policy');
         await wrapper.vm.$nextTick();
         expect(redirectTo).not.toHaveBeenCalledWith('/threat-monitoring');
       });
     });
 
-    it('renders delete button', () => {
-      expect(findDeletePolicy().exists()).toBe(true);
-    });
-
-    it('it does not trigger deletePolicy on delete button click', async () => {
-      findDeletePolicy().vm.$emit('click');
-      await wrapper.vm.$nextTick();
-
-      expect(store.dispatch).not.toHaveBeenCalledWith('networkPolicies/deletePolicy');
-    });
-
     it('removes policy and redirects to a threat monitoring path on secondary modal button click', async () => {
-      wrapper.findComponent(GlModal).vm.$emit('secondary');
-      await wrapper.vm.$nextTick();
+      await findPolicyEditorLayout().vm.$emit('remove-policy');
 
       expect(store.dispatch).toHaveBeenCalledWith('networkPolicies/deletePolicy', {
         environmentId: -1,

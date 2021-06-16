@@ -1,7 +1,7 @@
 ---
 key_path: counts.user_preferences_group_overview_security_dashboard
 description: Count of users who set personal preference to see Security Dashboard
-  on Group overview page
+  on Group information page
 product_section: sec
 product_stage: secure
 product_group: group::threat insights

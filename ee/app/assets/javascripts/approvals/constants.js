@@ -15,9 +15,7 @@ export const RULE_TYPE_REGULAR = 'regular';
 export const RULE_TYPE_REPORT_APPROVER = 'report_approver';
 export const RULE_TYPE_CODE_OWNER = 'code_owner';
 export const RULE_TYPE_ANY_APPROVER = 'any_approver';
-export const RULE_TYPE_EXTERNAL_APPROVAL = 'external_approval';
 export const RULE_NAME_ANY_APPROVER = 'All Members';
-export const RULE_TYPE_USER_OR_GROUP_APPROVER = 'user_or_group';
 
 export const VULNERABILITY_CHECK_NAME = 'Vulnerability-Check';
 export const LICENSE_CHECK_NAME = 'License-Check';

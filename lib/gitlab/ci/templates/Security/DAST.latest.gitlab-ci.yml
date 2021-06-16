@@ -17,7 +17,7 @@
 # List of available variables: https://docs.gitlab.com/ee/user/application_security/dast/#available-variables
 
 variables:
-  DAST_VERSION: 1
+  DAST_VERSION: 2
   # Setting this variable will affect all Security templates
   # (SAST, Dependency Scanning, ...)
   SECURE_ANALYZERS_PREFIX: "registry.gitlab.com/gitlab-org/security-products/analyzers"
@@ -46,13 +46,10 @@ dast:
           $REVIEW_DISABLED && $DAST_WEBSITE == null &&
           $DAST_API_SPECIFICATION == null
       when: never
-    - if: $CI_MERGE_REQUEST_IID &&
-          $CI_KUBERNETES_ACTIVE &&
-          $GITLAB_FEATURES =~ /\bdast\b/
-    - if: $CI_MERGE_REQUEST_IID && ($DAST_WEBSITE || $DAST_API_SPECIFICATION)
-    - if: $CI_OPEN_MERGE_REQUESTS
-      when: never
     - if: $CI_COMMIT_BRANCH &&
           $CI_KUBERNETES_ACTIVE &&
           $GITLAB_FEATURES =~ /\bdast\b/
-    - if: $CI_COMMIT_BRANCH && ($DAST_WEBSITE || $DAST_API_SPECIFICATION)
+    - if: $CI_COMMIT_BRANCH &&
+          $DAST_WEBSITE
+    - if: $CI_COMMIT_BRANCH &&
+          $DAST_API_SPECIFICATION
