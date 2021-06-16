@@ -44,7 +44,7 @@ class Integration < ApplicationRecord
     bamboo bugzilla buildkite
     campfire confluence custom_issue_tracker
     datadog discord drone_ci
-    mattermost
+    mattermost mattermost_slash_commands microsoft_teams
   ].to_set.freeze
 
   def self.renamed?(name)

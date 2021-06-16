@@ -176,7 +176,7 @@ class Project < ApplicationRecord
   has_one :jira_service, class_name: 'Integrations::Jira'
   has_one :mattermost_integration, class_name: 'Integrations::Mattermost'
   has_one :mattermost_slash_commands_integration, class_name: 'Integrations::MattermostSlashCommands'
-  has_one :microsoft_teams_service, class_name: 'Integrations::MicrosoftTeams'
+  has_one :microsoft_teams_integration, class_name: 'Integrations::MicrosoftTeams'
   has_one :mock_ci_service, class_name: 'Integrations::MockCi'
   has_one :packagist_service, class_name: 'Integrations::Packagist'
   has_one :pipelines_email_service, class_name: 'Integrations::PipelinesEmail'

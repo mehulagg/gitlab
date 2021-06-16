@@ -275,8 +275,8 @@ RSpec.describe API::Services do
     end
   end
 
-  describe 'Microsoft Teams service' do
-    let(:service_name) { 'microsoft-teams' }
+  describe 'Microsoft Teams integration' do
+    let(:integration_name) { 'microsoft-teams' }
     let(:params) do
       {
         webhook: 'https://hook.example.com',
@@ -286,21 +286,23 @@ RSpec.describe API::Services do
     end
 
     before do
-      project.create_microsoft_teams_service(
+      project.create_microsoft_teams_integration(
         active: true,
         properties: params
       )
     end
 
     it 'accepts branches_to_be_notified for update' do
-      put api("/projects/#{project.id}/services/#{service_name}", user), params: params.merge(branches_to_be_notified: 'all')
+      put api("/projects/#{project.id}/services/#{integration_name}", user),
+          params: params.merge(branches_to_be_notified: 'all')
 
       expect(response).to have_gitlab_http_status(:ok)
       expect(json_response['properties']['branches_to_be_notified']).to eq('all')
     end
 
     it 'accepts notify_only_broken_pipelines for update' do
-      put api("/projects/#{project.id}/services/#{service_name}", user), params: params.merge(notify_only_broken_pipelines: true)
+      put api("/projects/#{project.id}/services/#{integration_name}", user),
+          params: params.merge(notify_only_broken_pipelines: true)
 
       expect(response).to have_gitlab_http_status(:ok)
       expect(json_response['properties']['notify_only_broken_pipelines']).to eq(true)
