@@ -851,7 +851,7 @@ We cannot test subscriptions using GraphiQL, because they require an ActionCable
 
 Subscriptions don't require any additional configuration of Apollo Client instance, you can use them in the application right away. To distinguish subscriptions from queries and mutations, we recommend naming them with `.subscription.graphql` extension:
 
-```javascript
+```graphql
 // ~/sidebar/queries/issuable_assignees.subscription.graphql
 
 subscription issuableAssigneesUpdated($issuableId: IssuableID!) {
