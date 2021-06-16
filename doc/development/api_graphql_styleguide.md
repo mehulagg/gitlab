@@ -96,7 +96,7 @@ discussed in [Nullable fields](#nullable-fields).
 Fields that use the [`feature_flag` property](#feature_flag-property) and the flag is disabled by default are exempt
 from the deprecation process, and can be removed at any time without notice.
 
-See the [deprecating fields and enum values](#deprecating-fields-arguments-and-enum-values) section for how to deprecate items.
+See the [deprecating fields, arguments, and enum values](#deprecating-fields-arguments-and-enum-values) section for how to deprecate items.
 
 ## Global IDs
 
@@ -110,6 +110,7 @@ See also:
 
 - [Exposing Global IDs](#exposing-global-ids).
 - [Mutation arguments](#object-identifier-arguments).
+- [Deprecating Global IDs](#deprecating-global-ids).
 
 We have a custom scalar type (`Types::GlobalIDType`) which should be used as the
 type of input and output arguments when the value is a `GlobalID`. The benefits
@@ -594,6 +595,78 @@ end
 
 If the field, argument, or enum value being deprecated is not being replaced,
 a descriptive deprecation `reason` should be given.
+
+### Deprecating Global IDs
+
+We use the [rails/globalid](https://github.com/rails/globalid) gem to generate and parse
+Global IDs, so as such they are coupled to model names. This means that when we rename a
+model it will change its Global ID.
+
+If the Global ID is used as an _argument_ type anywhere in the schema then the Global ID
+change would normally constitute a breaking change.
+
+In order to continue to support clients using the old Global ID argument, we add a deprecation
+to `Gitlab::GlobalId::Deprecations`.
+
+NOTE:
+If the Global ID is _only_ [exposed as a field](#exposing-global-ids) then we do not need to
+deprecate it. We consider the change to the way a Global ID is expressed in a field to be
+backwards-compatible.
+
+**Example scenario:**
+
+This example scenario is based on this [merge request](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/62645).
+
+A model named `PrometheusService` is to be renamed `Integrations::Prometheus`. The old model
+name is used to create a Global ID type that is used as an argument for a mutation:
+
+```ruby
+# Mutations::UpdatePrometheus:
+
+argument :id, Types::GlobalIDType[::PrometheusService],
+              required: true,
+              description: "The ID of the integration to mutate."
+```
+
+And, currently clients call the mutation by passing a Global ID string that looks like
+`"gid://gitlab/PrometheusService/1"`, named as `PrometheusServiceID`, as the `input.id` argument:
+
+```graphql
+mutation updatePrometheus($id: PrometheusServiceID!, $active: Boolean!) {
+  prometheusIntegrationUpdate(input: { id: $id, active: $active }) {
+    errors
+    integration {
+      active
+    }
+  }
+}
+```
+
+We rename the model to `Integrations::Prometheus`, and then update the codebase with the new name.
+When we come to update the mutation, we pass the renamed model to `Types::GlobalIDType[]`:
+
+```ruby
+# Mutations::UpdatePrometheus:
+
+argument :id, Types::GlobalIDType[::Integrations::Prometheus],
+              required: true,
+              description: "The ID of the integration to mutate."
+```
+
+This would cause a breaking change to the GraphQL API, as the API would now reject clients who
+passed the Global ID as `"gid://gitlab/PrometheusService/1"`, or named it as `PrometheusServiceID`
+in their queries.
+
+We can continue to support the old argument by editing the `DEPRECATIONS` constant in
+`Gitlab::GlobalId::Deprecations` and adding a new `Deprecation` to the array:
+
+```ruby
+DEPRECATIONS = [
+  Deprecation.new(old_model_name: 'PrometheusService', new_model_name: 'Integrations::Prometheus', milestone: '14.0')
+].freeze
+```
+
+We then follow our [Deprecation and Removal process](../api/graphql/index.md#deprecation-and-removal-process).
 
 See also [Aliasing and deprecating mutations](#aliasing-and-deprecating-mutations).
 
@@ -1315,6 +1388,8 @@ primary key IDs.
 Where an object has an `iid`, prefer to use the `full_path` or `group_path`
 of its parent in combination with its `iid` as arguments to identify an
 object rather than its `id`.
+
+See also [Deprecating Global IDs](#deprecating-global-ids).
 
 ### Fields
 
