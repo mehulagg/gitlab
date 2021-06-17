@@ -55,7 +55,7 @@ module Integrations
       end
 
       expose :web_url do |jira_issue|
-        "#{base_web_url}/browse/#{jira_issue.key}"
+        project.jira_service.issue_url(jira_issue.key)
       end
 
       expose :gitlab_web_url do |jira_issue|
@@ -87,14 +87,10 @@ module Integrations
         # accountId is only available on Jira Cloud.
         # https://community.atlassian.com/t5/Jira-Questions/How-to-find-account-id-on-jira-on-premise/qaq-p/1168652
         if user['accountId'].present?
-          "#{base_web_url}/people/#{user['accountId']}"
+          project.jira_service.web_url("people/#{user['accountId']}")
         else
-          "#{base_web_url}/secure/ViewProfile.jspa?name=#{user['name']}"
+          project.jira_service.web_url('secure/ViewProfile.jspa', name: user['name'])
         end
-      end
-
-      def base_web_url
-        @base_web_url ||= project.jira_service.url
       end
 
       def project

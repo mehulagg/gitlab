@@ -1,16 +1,13 @@
 <script>
 import { GlButton, GlDrawer } from '@gitlab/ui';
-import { getContentWrapperHeight } from '../../utils';
-import {
-  CiliumNetworkPolicyKind,
-  ScanExecutionPolicyKind,
-} from '../policy_editor/network_policy/lib';
+import { getContentWrapperHeight, getPolicyKind } from '../../utils';
+import { POLICY_KINDS } from '../constants';
 import CiliumNetworkPolicy from './cilium_network_policy.vue';
 import ScanExecutionPolicy from './scan_execution_policy.vue';
 
 const policyComponent = {
-  [CiliumNetworkPolicyKind]: CiliumNetworkPolicy,
-  [ScanExecutionPolicyKind]: ScanExecutionPolicy,
+  [POLICY_KINDS.ciliumNetwork]: CiliumNetworkPolicy,
+  [POLICY_KINDS.scanExecution]: ScanExecutionPolicy,
 };
 
 export default {
@@ -36,13 +33,7 @@ export default {
   },
   computed: {
     policyKind() {
-      if (this.policy?.manifest?.includes(CiliumNetworkPolicyKind)) {
-        return CiliumNetworkPolicyKind;
-      }
-      if (this.policy?.manifest?.includes(ScanExecutionPolicyKind)) {
-        return ScanExecutionPolicyKind;
-      }
-      return null;
+      return getPolicyKind(this.policy);
     },
     policyComponent() {
       return policyComponent[this.policyKind] || null;

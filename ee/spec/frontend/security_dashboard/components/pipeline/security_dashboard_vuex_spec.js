@@ -1,4 +1,4 @@
-import { shallowMount } from '@vue/test-utils';
+import { mount } from '@vue/test-utils';
 import MockAdapter from 'axios-mock-adapter';
 import { merge } from 'lodash';
 import { nextTick } from 'vue';
@@ -7,8 +7,8 @@ import Filters from 'ee/security_dashboard/components/pipeline/filters.vue';
 import LoadingError from 'ee/security_dashboard/components/pipeline/loading_error.vue';
 import SecurityDashboardTable from 'ee/security_dashboard/components/pipeline/security_dashboard_table.vue';
 import SecurityDashboard from 'ee/security_dashboard/components/pipeline/security_dashboard_vuex.vue';
-import VulnerabilityReportLayout from 'ee/security_dashboard/components/shared/vulnerability_report_layout.vue';
 import { getStoreConfig } from 'ee/security_dashboard/store';
+import PipelineArtifactDownload from 'ee/vue_shared/security_reports/components/artifact_downloads/pipeline_artifact_download.vue';
 import { VULNERABILITY_MODAL_ID } from 'ee/vue_shared/security_reports/components/constants';
 import IssueModal from 'ee/vue_shared/security_reports/components/modal.vue';
 import { TEST_HOST } from 'helpers/test_constants';
@@ -16,6 +16,7 @@ import axios from '~/lib/utils/axios_utils';
 import { BV_HIDE_MODAL } from '~/lib/utils/constants';
 
 const pipelineId = 123;
+const pipelineIid = 12;
 const vulnerabilitiesEndpoint = `${TEST_HOST}/vulnerabilities`;
 
 jest.mock('~/lib/utils/url_utility', () => ({
@@ -45,16 +46,17 @@ describe('Security Dashboard component', () => {
       }),
     );
 
-    wrapper = shallowMount(SecurityDashboard, {
+    wrapper = mount(SecurityDashboard, {
       store,
       stubs: {
-        VulnerabilityReportLayout,
+        PipelineArtifactDownload: true,
       },
       propsData: {
         dashboardDocumentation: '',
         projectFullPath: '/path',
         vulnerabilitiesEndpoint,
         pipelineId,
+        pipelineIid,
         ...props,
       },
     });
@@ -95,6 +97,10 @@ describe('Security Dashboard component', () => {
       expect(wrapper.find(IssueModal).exists()).toBe(true);
     });
 
+    it('does not render coverage fuzzing artifact download', () => {
+      expect(wrapper.find(PipelineArtifactDownload).exists()).toBe(false);
+    });
+
     it.each`
       emittedModalEvent                      | eventPayload | expectedDispatchedAction                        | expectedActionPayload
       ${'addDismissalComment'}               | ${'foo'}     | ${'vulnerabilities/addDismissalComment'}        | ${{ comment: 'foo', vulnerability: 'bar' }}
@@ -128,6 +134,18 @@ describe('Security Dashboard component', () => {
       const rootEmit = jest.spyOn(wrapper.vm.$root, '$emit');
       wrapper.vm.hideModal();
       expect(rootEmit).toHaveBeenCalledWith(BV_HIDE_MODAL, VULNERABILITY_MODAL_ID);
+    });
+  });
+
+  describe('with coverage fuzzing', () => {
+    beforeEach(() => {
+      createComponent({
+        props: { securityReportSummary: { coverageFuzzing: { scannedResourcesCount: 1 } } },
+      });
+    });
+
+    it('renders coverage fuzzing artifact download', () => {
+      expect(wrapper.find(PipelineArtifactDownload).exists()).toBe(true);
     });
   });
 

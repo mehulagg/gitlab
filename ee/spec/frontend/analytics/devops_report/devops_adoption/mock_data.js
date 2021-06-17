@@ -3,10 +3,6 @@ export const groupData = [
   { id: '2', full_name: 'Bar' },
 ];
 
-export const pageData = {
-  'x-next-page': 2,
-};
-
 export const groupNodes = [
   {
     __typename: 'Group',
@@ -28,12 +24,6 @@ export const groupNodeLabelValues = [
 export const groupIds = [1, 2];
 
 export const groupGids = ['gid://gitlab/Group/1', 'gid://gitlab/Group/2'];
-
-export const nextGroupNode = {
-  __typename: 'Group',
-  full_name: 'Baz',
-  id: '3',
-};
 
 export const groupPageInfo = {
   nextPage: 2,

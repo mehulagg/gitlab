@@ -60,15 +60,15 @@ export default {
         @click="$emit('collapse')"
       />
       <div
-        class="gl-display-flex gl-flex-direction-column gl-md-flex-direction-row gl-md-align-items-center gl-flex-fill-1"
+        class="gl-display-flex gl-flex-direction-column gl-md-flex-direction-row gl-md-align-items-center gl-flex-grow-1"
       >
-        <div class="gl-display-flex gl-align-items-center gl-flex-fill-1">
+        <div class="gl-display-flex gl-align-items-center gl-flex-grow-1">
           <gl-badge v-if="node.current" variant="info" class="gl-mr-2">{{
             $options.i18n.currentNodeLabel
           }}</gl-badge>
           <h4 class="gl-font-lg">{{ node.name }}</h4>
         </div>
-        <div class="gl-display-flex gl-align-items-center gl-flex-fill-2">
+        <div class="gl-display-flex gl-align-items-center gl-flex-grow-2">
           <geo-node-health-status :status="node.healthStatus" />
           <geo-node-last-updated
             v-if="statusCheckTimestamp"

@@ -7,9 +7,10 @@ RSpec.describe 'CI YML Templates' do
 
   let(:all_templates) { Gitlab::Template::GitlabCiYmlTemplate.all.map(&:full_name) }
   let(:excluded_templates) do
-    all_templates.select do |name|
+    excluded = all_templates.select do |name|
       Gitlab::Template::GitlabCiYmlTemplate.excluded_patterns.any? { |pattern| pattern.match?(name) }
     end
+    excluded + ["Terraform.gitlab-ci.yml"]
   end
 
   before do
@@ -26,16 +27,17 @@ RSpec.describe 'CI YML Templates' do
   end
 
   context 'that support autodevops' do
-    non_autodevops_templates = [
-      'Security/DAST-API.gitlab-ci.yml',
-      'Security/API-Fuzzing.gitlab-ci.yml'
+    exceptions = [
+      'Security/DAST.gitlab-ci.yml',        # DAST stage is defined inside AutoDevops yml
+      'Security/DAST-API.gitlab-ci.yml',    # no auto-devops
+      'Security/API-Fuzzing.gitlab-ci.yml'  # no auto-devops
     ]
 
     context 'when including available templates in a CI YAML configuration' do
       using RSpec::Parameterized::TableSyntax
 
       where(:template_name) do
-        all_templates - excluded_templates - non_autodevops_templates
+        all_templates - excluded_templates - exceptions
       end
 
       with_them do

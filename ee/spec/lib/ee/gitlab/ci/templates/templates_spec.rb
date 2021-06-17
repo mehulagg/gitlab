@@ -23,13 +23,15 @@ RSpec.describe "CI YML Templates" do
   end
 
   context 'that support autodevops' do
-    non_autodevops_templates = [
-      'Security/DAST-API.gitlab-ci.yml',
-      'Security/API-Fuzzing.gitlab-ci.yml'
+    exceptions = [
+      'Security/DAST.gitlab-ci.yml',        # DAST stage is defined inside AutoDevops yml
+      'Security/DAST-API.gitlab-ci.yml',    # no auto-devops
+      'Security/API-Fuzzing.gitlab-ci.yml', # no auto-devops
+      'Terraform.gitlab-ci.yml'
     ]
 
     where(:template_name) do
-      all_templates - non_autodevops_templates
+      all_templates - exceptions
     end
 
     with_them do

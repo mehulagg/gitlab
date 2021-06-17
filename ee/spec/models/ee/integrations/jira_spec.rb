@@ -366,7 +366,7 @@ RSpec.describe Integrations::Jira do
       allow(jira_service).to receive(:vulnerabilities_issuetype).and_return('10001')
     end
 
-    let(:expected_new_issue_url) { "#{jira_service.url}/secure/CreateIssueDetails!init.jspa?pid=11223&issuetype=10001&summary=Special+Summary%21%3F&description=%2AID%2A%3A+2%0A_Issue_%3A+%21" }
+    let(:expected_new_issue_url) { "#{jira_service.url}/secure/CreateIssueDetails!init.jspa?issuetype=10001&pid=11223&summary=Special+Summary%21%3F&description=%2AID%2A%3A+2%0A_Issue_%3A+%21" }
 
     subject(:new_issue_url) { jira_service.new_issue_url_with_predefined_fields("Special Summary!?", "*ID*: 2\n_Issue_: !") }
 

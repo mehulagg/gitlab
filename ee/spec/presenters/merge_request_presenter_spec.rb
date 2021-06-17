@@ -180,4 +180,31 @@ RSpec.describe MergeRequestPresenter do
       it { is_expected.to be_empty }
     end
   end
+
+  describe '#api_status_checks_path' do
+    subject { presenter.api_status_checks_path }
+
+    where(:feature_flag_enabled?, :authenticated?, :has_status_checks?, :exposes_path?) do
+      false | false | false | false
+      false | false | true  | false
+      false | true  | true  | false
+      false | true  | false | false
+      true  | false | false | false
+      true  | true  | false | false
+      true  | false | true  | false
+      true  | true  | true  | true
+    end
+
+    with_them do
+      let(:presenter) { described_class.new(merge_request, current_user: authenticated? ? user : nil) }
+      let(:path) { exposes_path? ? expose_path("/api/v4/projects/#{merge_request.project.id}/merge_requests/#{merge_request.iid}/status_checks") : nil }
+
+      before do
+        stub_feature_flags(ff_compliance_approval_gates: feature_flag_enabled?)
+        allow(project.external_status_checks).to receive(:any?).and_return(has_status_checks?)
+      end
+
+      it { is_expected.to eq(path) }
+    end
+  end
 end

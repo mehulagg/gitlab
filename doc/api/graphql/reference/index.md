@@ -9686,11 +9686,26 @@ A block of time for which a participant is on-call.
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
-| <a id="instancesecuritydashboardprojects"></a>`projects` | [`ProjectConnection!`](#projectconnection) | Projects selected in Instance Security Dashboard. (see [Connections](#connections)) |
 | <a id="instancesecuritydashboardvulnerabilitygrades"></a>`vulnerabilityGrades` | [`[VulnerableProjectsByGrade!]!`](#vulnerableprojectsbygrade) | Represents vulnerable project counts for each grade. |
 | <a id="instancesecuritydashboardvulnerabilityscanners"></a>`vulnerabilityScanners` | [`VulnerabilityScannerConnection`](#vulnerabilityscannerconnection) | Vulnerability scanners reported on the vulnerabilities from projects selected in Instance Security Dashboard. (see [Connections](#connections)) |
 
 #### Fields with arguments
+
+##### `InstanceSecurityDashboard.projects`
+
+Projects selected in Instance Security Dashboard.
+
+Returns [`ProjectConnection!`](#projectconnection).
+
+This field returns a [connection](#connections). It accepts the
+four standard [pagination arguments](#connection-pagination-arguments):
+`before: String`, `after: String`, `first: Int`, `last: Int`.
+
+###### Arguments
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| <a id="instancesecuritydashboardprojectssearch"></a>`search` | [`String`](#string) | Search query for project name, path, or description. |
 
 ##### `InstanceSecurityDashboard.vulnerabilitySeveritiesCount`
 
@@ -10063,6 +10078,8 @@ Maven metadata.
 | <a id="mergerequesthasci"></a>`hasCi` | [`Boolean!`](#boolean) | Indicates if the merge request has CI. |
 | <a id="mergerequesthassecurityreports"></a>`hasSecurityReports` | [`Boolean!`](#boolean) | Indicates if the source branch has any security reports. |
 | <a id="mergerequestheadpipeline"></a>`headPipeline` | [`Pipeline`](#pipeline) | The pipeline running on the branch HEAD of the merge request. |
+| <a id="mergerequesthumantimeestimate"></a>`humanTimeEstimate` | [`String`](#string) | Human-readable time estimate of the merge request. |
+| <a id="mergerequesthumantotaltimespent"></a>`humanTotalTimeSpent` | [`String`](#string) | Human-readable total time reported as spent on the merge request. |
 | <a id="mergerequestid"></a>`id` | [`ID!`](#id) | ID of the merge request. |
 | <a id="mergerequestiid"></a>`iid` | [`String!`](#string) | Internal ID of the merge request. |
 | <a id="mergerequestinprogressmergecommitsha"></a>`inProgressMergeCommitSha` | [`String`](#string) | Commit SHA of the merge request if merge is in progress. |
@@ -14442,9 +14459,9 @@ List limit metric setting.
 
 | Value | Description |
 | ----- | ----------- |
-| <a id="listlimitmetricall_metrics"></a>`all_metrics` |  |
-| <a id="listlimitmetricissue_count"></a>`issue_count` |  |
-| <a id="listlimitmetricissue_weights"></a>`issue_weights` |  |
+| <a id="listlimitmetricall_metrics"></a>`all_metrics` | Limit list by number and total weight of issues. |
+| <a id="listlimitmetricissue_count"></a>`issue_count` | Limit list by number of issues. |
+| <a id="listlimitmetricissue_weights"></a>`issue_weights` | Limit list by total weight of issues. |
 
 ### `MeasurementIdentifier`
 
@@ -15361,6 +15378,7 @@ An example `IssueID` is: `"gid://gitlab/Issue/1"`.
 A `IterationID` is a global ID. It is encoded as a string.
 
 An example `IterationID` is: `"gid://gitlab/Iteration/1"`.
+The older format `"gid://gitlab/EEIteration/1"` was deprecated in 13.3.
 
 ### `IterationsCadenceID`
 

@@ -38,7 +38,7 @@ RSpec.describe Project, factory_default: :keep do
     it { is_expected.to have_one(:slack_service) }
     it { is_expected.to have_one(:microsoft_teams_service) }
     it { is_expected.to have_one(:mattermost_service) }
-    it { is_expected.to have_one(:hangouts_chat_service) }
+    it { is_expected.to have_one(:hangouts_chat_integration) }
     it { is_expected.to have_one(:unify_circuit_service) }
     it { is_expected.to have_one(:webex_teams_service) }
     it { is_expected.to have_one(:packagist_service) }
@@ -46,14 +46,14 @@ RSpec.describe Project, factory_default: :keep do
     it { is_expected.to have_one(:asana_integration) }
     it { is_expected.to have_many(:boards) }
     it { is_expected.to have_one(:campfire_integration) }
-    it { is_expected.to have_one(:datadog_service) }
-    it { is_expected.to have_one(:discord_service) }
-    it { is_expected.to have_one(:drone_ci_service) }
-    it { is_expected.to have_one(:emails_on_push_service) }
+    it { is_expected.to have_one(:datadog_integration) }
+    it { is_expected.to have_one(:discord_integration) }
+    it { is_expected.to have_one(:drone_ci_integration) }
+    it { is_expected.to have_one(:emails_on_push_integration) }
     it { is_expected.to have_one(:pipelines_email_service) }
-    it { is_expected.to have_one(:irker_service) }
+    it { is_expected.to have_one(:irker_integration) }
     it { is_expected.to have_one(:pivotaltracker_service) }
-    it { is_expected.to have_one(:flowdock_service) }
+    it { is_expected.to have_one(:flowdock_integration) }
     it { is_expected.to have_one(:assembla_integration) }
     it { is_expected.to have_one(:slack_slash_commands_service) }
     it { is_expected.to have_one(:mattermost_slash_commands_service) }
@@ -65,8 +65,8 @@ RSpec.describe Project, factory_default: :keep do
     it { is_expected.to have_one(:youtrack_service) }
     it { is_expected.to have_one(:custom_issue_tracker_integration) }
     it { is_expected.to have_one(:bugzilla_integration) }
-    it { is_expected.to have_one(:ewm_service) }
-    it { is_expected.to have_one(:external_wiki_service) }
+    it { is_expected.to have_one(:ewm_integration) }
+    it { is_expected.to have_one(:external_wiki_integration) }
     it { is_expected.to have_one(:confluence_integration) }
     it { is_expected.to have_one(:project_feature) }
     it { is_expected.to have_one(:project_repository) }
@@ -994,6 +994,39 @@ RSpec.describe Project, factory_default: :keep do
     end
   end
 
+  describe '#open_issues_count', :aggregate_failures do
+    let(:project) { build(:project) }
+
+    it 'provides the issue count' do
+      expect(project.open_issues_count).to eq 0
+    end
+
+    it 'invokes the count service with current_user' do
+      user = build(:user)
+      count_service = instance_double(Projects::OpenIssuesCountService)
+      expect(Projects::OpenIssuesCountService).to receive(:new).with(project, user).and_return(count_service)
+      expect(count_service).to receive(:count)
+
+      project.open_issues_count(user)
+    end
+
+    it 'invokes the count service with no current_user' do
+      count_service = instance_double(Projects::OpenIssuesCountService)
+      expect(Projects::OpenIssuesCountService).to receive(:new).with(project, nil).and_return(count_service)
+      expect(count_service).to receive(:count)
+
+      project.open_issues_count
+    end
+  end
+
+  describe '#open_merge_requests_count' do
+    it 'provides the merge request count' do
+      project = build(:project)
+
+      expect(project.open_merge_requests_count).to eq 0
+    end
+  end
+
   describe '#issue_exists?' do
     let_it_be(:project) { create(:project) }
 
@@ -1625,6 +1658,45 @@ RSpec.describe Project, factory_default: :keep do
 
     it 'returns empty if there is no project with the key' do
       expect(Project.with_service_desk_key('key1')).to be_empty
+    end
+  end
+
+  describe '.find_by_url' do
+    subject { described_class.find_by_url(url) }
+
+    let_it_be(:project) { create(:project) }
+
+    before do
+      stub_config_setting(host: 'gitlab.com')
+    end
+
+    context 'url is internal' do
+      let(:url) { "https://#{Gitlab.config.gitlab.host}/#{path}" }
+
+      context 'path is recognised as a project path' do
+        let(:path) { project.full_path }
+
+        it { is_expected.to eq(project) }
+
+        it 'returns nil if the path detection throws an error' do
+          expect(Rails.application.routes).to receive(:recognize_path).with(url) { raise ActionController::RoutingError, 'test' }
+
+          expect { subject }.not_to raise_error(ActionController::RoutingError)
+          expect(subject).to be_nil
+        end
+      end
+
+      context 'path is not a project path' do
+        let(:path) { 'probably/missing.git' }
+
+        it { is_expected.to be_nil }
+      end
+    end
+
+    context 'url is external' do
+      let(:url) { "https://foo.com/bar/baz.git" }
+
+      it { is_expected.to be_nil }
     end
   end
 
@@ -4666,7 +4738,6 @@ RSpec.describe Project, factory_default: :keep do
     specify do
       expect(subject).to include
       [
-        { key: 'CI_PROJECT_CONFIG_PATH', value: Ci::Pipeline::DEFAULT_CONFIG_PATH, public: true, masked: false },
         { key: 'CI_CONFIG_PATH', value: Ci::Pipeline::DEFAULT_CONFIG_PATH, public: true, masked: false }
       ]
     end
@@ -4679,7 +4750,6 @@ RSpec.describe Project, factory_default: :keep do
       it do
         expect(subject).to include
         [
-          { key: 'CI_PROJECT_CONFIG_PATH', value: 'random.yml', public: true, masked: false },
           { key: 'CI_CONFIG_PATH', value: 'random.yml', public: true, masked: false }
         ]
       end

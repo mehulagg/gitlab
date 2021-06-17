@@ -4,7 +4,7 @@ module EE
   module Gitlab
     module Checks
       module PushRules
-        class FileSizeCheck < ::Gitlab::Checks::BaseChecker
+        class FileSizeCheck < ::Gitlab::Checks::BaseSingleChecker
           LOG_MESSAGE = "Checking if any files are larger than the allowed size..."
 
           def validate!

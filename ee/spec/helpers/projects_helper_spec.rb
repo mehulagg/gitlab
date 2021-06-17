@@ -367,17 +367,20 @@ RSpec.describe ProjectsHelper do
       allow(helper).to receive(:can?).and_return(true)
     end
 
-    context 'with the status check feature flag' do
-      where(feature_flag_enabled: [true, false])
-      with_them do
-        before do
-          stub_feature_flags(ff_compliance_approval_gates: feature_flag_enabled)
-        end
-
-        it 'includes external_status_checks_path only when enabled' do
-          expect(subject[:data].key?(:external_approval_rules_path)).to eq(feature_flag_enabled)
-        end
-      end
+    it 'returns the correct data' do
+      expect(subject[:data]).to eq({
+        project_id: project.id,
+        can_edit: 'true',
+        project_path: expose_path(api_v4_projects_path(id: project.id)),
+        settings_path: expose_path(api_v4_projects_approval_settings_path(id: project.id)),
+        rules_path: expose_path(api_v4_projects_approval_settings_rules_path(id: project.id)),
+        allow_multi_rule: project.multiple_approval_rules_available?.to_s,
+        eligible_approvers_docs_path: help_page_path('user/project/merge_requests/merge_request_approvals', anchor: 'eligible-approvers'),
+        security_approvals_help_page_path: help_page_path('user/application_security/index', anchor: 'security-approvals-in-merge-requests'),
+        security_configuration_path: project_security_configuration_path(project),
+        vulnerability_check_help_page_path: help_page_path('user/application_security/index', anchor: 'enabling-security-approvals-within-a-project'),
+        license_check_help_page_path: help_page_path('user/application_security/index', anchor: 'enabling-license-approvals-within-a-project')
+      })
     end
   end
 

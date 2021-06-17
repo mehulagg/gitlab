@@ -3,7 +3,8 @@ import { debounce } from 'lodash';
 import {
   stateFilter,
   severityFilter,
-  scannerFilter,
+  vendorScannerFilter,
+  standardScannerFilter,
   activityFilter,
   getProjectFilter,
 } from 'ee/security_dashboard/helpers';
@@ -25,6 +26,9 @@ export default {
     };
   },
   computed: {
+    isProjectDashboard() {
+      return this.dashboardType === DASHBOARD_TYPES.PROJECT;
+    },
     isPipeline() {
       return this.dashboardType === DASHBOARD_TYPES.PIPELINE;
     },
@@ -46,7 +50,8 @@ export default {
       this.$emit('filterChange', this.filterQuery);
     }),
   },
-  scannerFilter,
+  vendorScannerFilter,
+  standardScannerFilter,
   activityFilter,
 };
 </script>
@@ -62,7 +67,19 @@ export default {
       :data-testid="filter.id"
       @filter-changed="updateFilterQuery"
     />
-    <scanner-filter :filter="$options.scannerFilter" @filter-changed="updateFilterQuery" />
+
+    <scanner-filter
+      v-if="isProjectDashboard"
+      :filter="$options.vendorScannerFilter"
+      @filter-changed="updateFilterQuery"
+    />
+    <standard-filter
+      v-else
+      :filter="$options.standardScannerFilter"
+      :data-testid="$options.standardScannerFilter.id"
+      @filter-changed="updateFilterQuery"
+    />
+
     <activity-filter
       v-if="!isPipeline"
       :filter="$options.activityFilter"

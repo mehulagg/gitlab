@@ -112,7 +112,7 @@ describe('Alert Drawer', () => {
   it('displays the issue link if an alert already has an issue associated with it', () => {
     createWrapper();
     expect(findIssueLink().exists()).toBe(true);
-    expect(findIssueLink().attributes('href')).toBe('/#/-/issues/02');
+    expect(findIssueLink().attributes('href')).toBe('http://test.com/05');
   });
 
   it('displays the loading icon when retrieving the alert details', () => {

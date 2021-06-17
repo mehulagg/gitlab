@@ -7,7 +7,9 @@ import {
 } from '~/boards/boards_util';
 import { BoardType } from '~/boards/constants';
 import eventHub from '~/boards/eventhub';
+import groupBoardMembersQuery from '~/boards/graphql/group_board_members.query.graphql';
 import listsIssuesQuery from '~/boards/graphql/lists_issues.query.graphql';
+import projectBoardMembersQuery from '~/boards/graphql/project_board_members.query.graphql';
 import actionsCE, { gqlClient } from '~/boards/stores/actions';
 import boardsStore from '~/boards/stores/boards_store';
 import * as typesCE from '~/boards/stores/mutation_types';
@@ -30,13 +32,11 @@ import { EpicFilterType, GroupByParamType, FilterFields } from '../constants';
 import createEpicBoardListMutation from '../graphql/epic_board_list_create.mutation.graphql';
 import epicMoveListMutation from '../graphql/epic_move_list.mutation.graphql';
 import epicsSwimlanesQuery from '../graphql/epics_swimlanes.query.graphql';
-import groupBoardAssigneesQuery from '../graphql/group_board_assignees.query.graphql';
 import groupBoardIterationsQuery from '../graphql/group_board_iterations.query.graphql';
 import groupBoardMilestonesQuery from '../graphql/group_board_milestones.query.graphql';
 import issueSetWeightMutation from '../graphql/issue_set_weight.mutation.graphql';
 import listUpdateLimitMetricsMutation from '../graphql/list_update_limit_metrics.mutation.graphql';
 import listsEpicsQuery from '../graphql/lists_epics.query.graphql';
-import projectBoardAssigneesQuery from '../graphql/project_board_assignees.query.graphql';
 import projectBoardIterationsQuery from '../graphql/project_board_iterations.query.graphql';
 import projectBoardMilestonesQuery from '../graphql/project_board_milestones.query.graphql';
 import updateBoardEpicUserPreferencesMutation from '../graphql/update_board_epic_user_preferences.mutation.graphql';
@@ -522,10 +522,10 @@ export default {
 
     let query;
     if (boardType === BoardType.project) {
-      query = projectBoardAssigneesQuery;
+      query = projectBoardMembersQuery;
     }
     if (boardType === BoardType.group) {
-      query = groupBoardAssigneesQuery;
+      query = groupBoardMembersQuery;
     }
 
     if (!query) {

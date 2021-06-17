@@ -47,6 +47,7 @@ module Vulnerabilities
     enum confidence: ::Enums::Vulnerability.confidence_levels, _prefix: :confidence
     enum report_type: ::Enums::Vulnerability.report_types
     enum severity: ::Enums::Vulnerability.severity_levels, _prefix: :severity
+    enum detection_method: ::Enums::Vulnerability.detection_methods
 
     validates :scanner, presence: true
     validates :project, presence: true
@@ -62,6 +63,7 @@ module Vulnerabilities
     validates :report_type, presence: true
     validates :severity, presence: true
     validates :confidence, presence: true
+    validates :detection_method, presence: true
 
     validates :metadata_version, presence: true
     validates :raw_metadata, presence: true

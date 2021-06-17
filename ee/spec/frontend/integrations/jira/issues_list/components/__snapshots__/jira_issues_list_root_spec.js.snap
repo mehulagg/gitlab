@@ -6,6 +6,8 @@ Object {
   "currentTab": "opened",
   "defaultPageSize": 2,
   "enableLabelPermalinks": true,
+  "hasNextPage": false,
+  "hasPreviousPage": false,
   "initialFilterValue": Array [
     Object {
       "type": "filtered-search-term",
@@ -75,5 +77,6 @@ Object {
     "sort": "created_desc",
     "state": "opened",
   },
+  "useKeysetPagination": false,
 }
 `;

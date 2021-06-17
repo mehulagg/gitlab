@@ -63,7 +63,8 @@ to deploy this project to.
 ## Create a Kubernetes cluster from within GitLab
 
 1. On your project's landing page, click **Add Kubernetes cluster**
-   (note that this option is also available when you navigate to **Operations > Kubernetes**).
+   (note that this option is also available when you navigate to
+   **Infrastructure > Kubernetes clusters**).
 
    ![Project landing page](img/guide_project_landing_page_v12_10.png)
 
@@ -154,7 +155,7 @@ these steps to enable Auto DevOps if it's disabled:
 1. Navigate to **Settings > CI/CD > Auto DevOps**, and click **Expand**.
 1. Select **Default to Auto DevOps pipeline** to display more options.
 1. In **Deployment strategy**, select your desired [continuous deployment strategy](index.md#deployment-strategy)
-   to deploy the application to production after the pipeline successfully runs on the `master` branch.
+   to deploy the application to production after the pipeline successfully runs on the default branch.
 1. Click **Save changes**.
 
    ![Auto DevOps settings](img/guide_enable_autodevops_v12_3.png)
@@ -198,7 +199,7 @@ The jobs are separated into stages:
     licenses and is allowed to fail
     ([Auto License Compliance](stages.md#auto-license-compliance)) **(ULTIMATE)**
 
-- **Review** - Pipelines on `master` include this stage with a `dast_environment_deploy` job.
+- **Review** - Pipelines on the default branch include this stage with a `dast_environment_deploy` job.
   To learn more, see [Dynamic Application Security Testing (DAST)](../../user/application_security/dast/index.md).
 
 - **Production** - After the tests and checks finish, the application deploys in
@@ -207,7 +208,7 @@ The jobs are separated into stages:
 - **Performance** - Performance tests are run on the deployed application
   ([Auto Browser Performance Testing](stages.md#auto-browser-performance-testing)). **(PREMIUM)**
 
-- **Cleanup** - Pipelines on `master` include this stage with a `stop_dast_environment` job.
+- **Cleanup** - Pipelines on the default branch include this stage with a `stop_dast_environment` job.
 
 After running a pipeline, you should view your deployed website and learn how
 to monitor it.
@@ -216,7 +217,7 @@ to monitor it.
 
 After successfully deploying your application, you can view its website and check
 on its health on the **Environments** page by navigating to
-**Operations > Environments**. This page displays details about
+**Deployments > Environments**. This page displays details about
 the deployed applications, and the right-hand column displays icons that link
 you to common environment tasks:
 
@@ -266,7 +267,7 @@ you should next create a feature branch to add content to your application:
 
 After submitting the merge request, GitLab runs your pipeline, and all the jobs
 in it, as [described previously](#deploy-the-application), in addition to
-a few more that run only on branches other than `master`.
+a few more that run only on branches other than the default branch.
 
 ![Merge request](img/guide_merge_request_v12_3.png)
 
@@ -302,7 +303,7 @@ the **View app** **{external-link}** button to see your changes deployed.
 
 ![Review app](img/guide_merge_request_review_app_v12_3.png)
 
-After merging the merge request, GitLab runs the pipeline on the `master` branch,
+After merging the merge request, GitLab runs the pipeline on the default branch,
 and then deploys the application to production.
 
 ## Conclusion

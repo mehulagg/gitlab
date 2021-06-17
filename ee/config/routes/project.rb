@@ -95,6 +95,10 @@ constraints(::Constraints::ProjectUrlConstrainer.new) do
           resources :code_reviews, only: [:index]
           resource :issues_analytics, only: [:show]
           resource :merge_request_analytics, only: :show
+
+          scope module: :cycle_analytics, as: 'cycle_analytics', path: 'value_stream_analytics' do
+            get '/time_summary' => 'summary#time_summary'
+          end
         end
 
         resources :approvers, only: :destroy

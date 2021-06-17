@@ -293,6 +293,8 @@ module EE
         elasticsearch_indexes_namespace?(scope)
       when Project
         elasticsearch_indexes_project?(scope)
+      when Array
+        scope.any? { |project| elasticsearch_indexes_project?(project) }
       else
         ::Feature.enabled?(:advanced_global_search_for_limited_indexing)
       end

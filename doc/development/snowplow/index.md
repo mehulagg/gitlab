@@ -53,7 +53,7 @@ Snowplow tracking is enabled on GitLab.com, and we use it for most of our tracki
 
 To enable Snowplow tracking on a self-managed instance:
 
-1. Go to the Admin Area (**{admin}**) and select **Settings > General**.
+1. On the top bar, select **Menu >** **{admin}** **Admin**, then select **Settings > General**.
    Alternatively, go to `admin/application_settings/general` in your browser.
 
 1. Expand **Snowplow**.
@@ -395,6 +395,46 @@ describe('MyTracking', () => {
         templateVariant: 'primary',
         valid: true,
       },
+    });
+  });
+});
+```
+
+### Form tracking
+
+You can enable Snowplow automatic [form tracking](https://docs.snowplowanalytics.com/docs/collecting-data/collecting-from-own-applications/javascript-trackers/javascript-tracker/javascript-tracker-v2/tracking-specific-events/#form-tracking) by calling `Tracking.enableFormTracking` (after the DOM is ready) and providing a `config` object that includes at least one of the following elements:
+
+- `forms`: determines which forms are tracked, and are identified by the CSS class name.
+- `fields`: determines which fields inside the tracked forms are tracked, and are identified by the field `name`.
+
+An optional list of contexts can be provided as the second argument.
+Note that our [`gitlab_standard`](#gitlab_standard) schema is excluded from these events.
+
+```javascript
+Tracking.enableFormTracking({
+  forms: { allow: ['sign-in-form', 'password-recovery-form'] },
+  fields: { allow: ['terms_and_conditions', 'newsletter_agreement'] },
+});
+```
+
+#### Testing example
+
+```javascript
+import Tracking from '~/tracking';
+
+describe('MyFormTracking', () => {
+  let formTrackingSpy;
+
+  beforeEach(() => {
+    formTrackingSpy = jest
+      .spyOn(Tracking, 'enableFormTracking')
+      .mockImplementation(() => null);
+  });
+
+  it('initialized with the correct configuration', () => {
+    expect(formTrackingSpy).toHaveBeenCalledWith({
+      forms: { allow: ['sign-in-form', 'password-recovery-form'] },
+      fields: { allow: ['terms_and_conditions', 'newsletter_agreement'] },
     });
   });
 });
