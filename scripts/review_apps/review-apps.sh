@@ -166,6 +166,7 @@ function label_namespace() {
   local label="${2}"
 
   echoinfo "Labeling the ${namespace} namespace with ${label}" true
+  echoinfo "We should pass the --overwrite option!"
 
   kubectl label namespace "${namespace}" "${label}"
 }
