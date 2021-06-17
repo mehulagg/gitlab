@@ -245,13 +245,13 @@ describe('UploadBlobModal', () => {
 
     describe('replace blob file', () => {
       const modalTitle = 'Replace foo.js';
-      const replacePath = 'replace-path';
+      const endpoint = 'replace-path';
       const primaryBtnText = 'Replace file';
 
       beforeEach(() => {
         createComponent({
           modalTitle,
-          replacePath,
+          endpoint,
           primaryBtnText,
         });
       });
@@ -276,7 +276,7 @@ describe('UploadBlobModal', () => {
 
         expect(mock.history.put).toHaveLength(1);
         expect(mock.history.post).toHaveLength(0);
-        expect(mock.history.put[0].url).toBe(replacePath);
+        expect(mock.history.put[0].url).toBe(endpoint);
       });
     });
   });

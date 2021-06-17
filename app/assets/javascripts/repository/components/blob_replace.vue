@@ -68,7 +68,7 @@ export default {
       :original-branch="originalBranch || ref"
       :can-push-code="canPushCode"
       :path="path"
-      :replace-path="replacePath"
+      :endpoint="replacePath"
       :primary-btn-text="$options.i18n.replacePrimaryBtnText"
     />
   </div>

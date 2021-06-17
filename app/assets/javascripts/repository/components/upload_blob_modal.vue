@@ -10,13 +10,12 @@ import {
   GlAlert,
 } from '@gitlab/ui';
 import createFlash from '~/flash';
-import axios from '~/lib/utils/axios_utils';
-import { ContentTypeMultipartFormData } from '~/lib/utils/headers';
 import { numberToHumanSize } from '~/lib/utils/number_utils';
 import { visitUrl, joinPaths } from '~/lib/utils/url_utility';
 import { __ } from '~/locale';
 import { trackFileUploadEvent } from '~/projects/upload_file_experiment_tracking';
 import UploadDropzone from '~/vue_shared/components/upload_dropzone/upload_dropzone.vue';
+import BlobService from '../services/blob_service';
 
 const PRIMARY_OPTIONS_TEXT = __('Upload file');
 const SECONDARY_OPTIONS_TEXT = __('Cancel');
@@ -84,7 +83,7 @@ export default {
       type: String,
       required: true,
     },
-    replacePath: {
+    endpoint: {
       type: String,
       default: null,
       required: false,
@@ -134,7 +133,20 @@ export default {
       return this.file && this.commit && this.target;
     },
   },
+  mounted() {
+    const endpoint = this.endpoint || getUploadEndpoint();
+    this.service = new BlobService(endpoint);
+  },
   methods: {
+    getUploadEndpoint() {
+      const {
+        $route: {
+          params: { path },
+        },
+      } = this;
+
+      return joinPaths(this.path, path);
+    },
     setFile(file) {
       this.file = file;
 
@@ -153,15 +165,8 @@ export default {
     submitForm() {
       return this.replacePath ? this.replaceFile() : this.uploadFile();
     },
-    submitRequest(method, url) {
-      return axios({
-        method,
-        url,
-        data: this.formData(),
-        headers: {
-          ...ContentTypeMultipartFormData,
-        },
-      })
+    submitRequest(service) {
+      return service(this.formData())
         .then((response) => {
           if (!this.replacePath) {
             trackFileUploadEvent('click_upload_modal_form_submit');
@@ -184,22 +189,11 @@ export default {
     },
     replaceFile() {
       this.loading = true;
-
-      // The PUT path can be geneated from $route (similar to "uploadFile") once router is connected
-      // Follow-up issue: https://gitlab.com/gitlab-org/gitlab/-/issues/332736
-      return this.submitRequest('put', this.replacePath);
+      return submitRequest(this.service.replaceBlob);
     },
     uploadFile() {
       this.loading = true;
-
-      const {
-        $route: {
-          params: { path },
-        },
-      } = this;
-      const uploadPath = joinPaths(this.path, path);
-
-      return this.submitRequest('post', uploadPath);
+      return submitRequest(this.service.uploadBlob);
     },
   },
   validFileMimetypes: [],
