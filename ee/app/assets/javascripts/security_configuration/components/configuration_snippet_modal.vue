@@ -47,6 +47,19 @@ export default {
         scanType: this.scanType,
       });
     },
+    editorOptions() {
+      return {
+        readOnly: true,
+        lineNumbers: 'off',
+        folding: false,
+        renderIndentGuides: false,
+        renderLineHighlight: 'none',
+        lineDecorationsWidth: 0,
+        occurrencesHighlight: false,
+        hideCursorInOverviewRuler: true,
+        overviewRulerBorder: false,
+      };
+    },
   },
   methods: {
     show() {
@@ -116,13 +129,7 @@ export default {
     </p>
 
     <div class="gl-w-full gl-h-full" data-testid="configuration-modal-yaml-snippet">
-      <editor-lite
-          ref="editor"
-          :value="yaml"
-          file-name="*.yml"
-          :editor-options="{ readOnly: true }"
-      />
+      <editor-lite ref="editor" :value="yaml" file-name="*.yml" :editor-options="editorOptions" />
     </div>
-
   </gl-modal>
 </template>
