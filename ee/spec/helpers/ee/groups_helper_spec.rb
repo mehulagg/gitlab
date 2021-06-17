@@ -102,6 +102,27 @@ RSpec.describe GroupsHelper do
         expect(helper.group_sidebar_links).not_to include(:group_ci_cd_analytics)
       end
     end
+
+    context 'when iterations is available' do
+      before do
+        stub_licensed_features(iterations: true)
+        stub_feature_flags(iteration_cadences: false)
+      end
+
+      it 'shows iterations link' do
+        expect(helper.group_sidebar_links).to include(:iterations)
+      end
+
+      context 'when iteration_cadences is available' do
+        before do
+          stub_feature_flags(iteration_cadences: true)
+        end
+
+        it 'shows iterations link' do
+          expect(helper.group_sidebar_links).to include(:iteration_cadences)
+        end
+      end
+    end
   end
 
   describe '#render_setting_to_allow_project_access_token_creation?' do
