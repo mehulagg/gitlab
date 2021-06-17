@@ -51,7 +51,7 @@ Click on the service links to see further configuration instructions and details
 | [Microsoft Teams notifications](microsoft_teams.md)       | Receive event notifications.                                                                 | **{dotted-circle}** No |
 | Packagist                                                 | Update your projects.                                                                        | **{check-circle}** Yes |
 | Pipelines emails                                          | Send the pipeline status to a list of recipients by email.                                   | **{dotted-circle}** No |
-| PivotalTracker                                            | Use PivotalTracker as the issue tracker.                                                     | **{dotted-circle}** No |
+| [PivotalTracker](pivotal_tracker.md)                      | Add commit messages as comments to PivotalTracker stories.                                                    | **{dotted-circle}** No |
 | [Prometheus](prometheus.md)                               | Monitor application metrics.                                                                 | **{dotted-circle}** No |
 | Pushover                                                  | Get real-time notifications on your device.                                                  | **{dotted-circle}** No |
 | [Redmine](redmine.md)                                     | Use Redmine as the issue tracker.                                                            | **{dotted-circle}** No |
