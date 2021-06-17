@@ -1,3 +1,4 @@
+import { GlTabs } from '@gitlab/ui';
 import { mount, shallowMount } from '@vue/test-utils';
 import MockAdapter from 'axios-mock-adapter';
 import { extendedWrapper } from 'helpers/vue_test_utils_helper';
@@ -6,6 +7,7 @@ import DeployBoard from '~/environments/components/deploy_board.vue';
 import EmptyState from '~/environments/components/empty_state.vue';
 import EnableReviewAppModal from '~/environments/components/enable_review_app_modal.vue';
 import EnvironmentsApp from '~/environments/components/environments_app.vue';
+import * as utils from '~/lib/utils/common_utils';
 import axios from '~/lib/utils/axios_utils';
 import { environment, folder } from './mock_data';
 
@@ -94,7 +96,7 @@ describe('Environment', () => {
         });
 
         it('should make an API request when page is clicked', () => {
-          jest.spyOn(wrapper.vm, 'updateContent').mockImplementation(() => {});
+          jest.spyOn(wrapper.vm, 'updateContent').mockImplementation(() => { });
 
           wrapper.find('.gl-pagination li:nth-child(3) .page-link').trigger('click');
           expect(wrapper.vm.updateContent).toHaveBeenCalledWith({
@@ -105,7 +107,7 @@ describe('Environment', () => {
         });
 
         it('should make an API request when using tabs', () => {
-          jest.spyOn(wrapper.vm, 'updateContent').mockImplementation(() => {});
+          jest.spyOn(wrapper.vm, 'updateContent').mockImplementation(() => { });
           findEnvironmentsTabStopped().trigger('click');
           expect(wrapper.vm.updateContent).toHaveBeenCalledWith({
             scope: 'stopped',
@@ -116,7 +118,7 @@ describe('Environment', () => {
 
         it('should not make the same API request when clicking on the current scope tab', () => {
           // component starts at available
-          jest.spyOn(wrapper.vm, 'updateContent').mockImplementation(() => {});
+          jest.spyOn(wrapper.vm, 'updateContent').mockImplementation(() => { });
           findEnvironmentsTabAvailable().trigger('click');
           expect(wrapper.vm.updateContent).toHaveBeenCalledTimes(0);
         });
@@ -262,6 +264,18 @@ describe('Environment', () => {
         expect(modal).toHaveLength(1);
         expect(modal.at(0).exists()).toBe(true);
       });
+    });
+  });
+
+  describe('tabs', () => {
+    beforeEach(() => {
+      mockRequest(200, { environments: [] });
+      jest.spyOn(utils, 'getParameterByName').mockImplementation((param) => param === 'scope' ? 'stopped' : null)
+      return createWrapper(true);
+    });
+
+    it('selects the tab for the parameter', () => {
+      expect(wrapper.find(GlTabs).attributes('value')).toBe('1');
     });
   });
 });
