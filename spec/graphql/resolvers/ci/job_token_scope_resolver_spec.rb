@@ -9,7 +9,7 @@ RSpec.describe Resolvers::Ci::JobTokenScopeResolver do
   let_it_be(:project) { create(:project) }
 
   specify do
-    expect(described_class).to have_nullable_graphql_type(::Types::ProjectType.connection_type)
+    expect(described_class).to have_nullable_graphql_type(::Types::Ci::JobTokenScopeType)
   end
 
   subject(:resolve_scope) { resolve(described_class, ctx: { current_user: current_user }, obj: project) }
@@ -27,30 +27,14 @@ RSpec.describe Resolvers::Ci::JobTokenScopeResolver do
       end
 
       it 'returns the same project in the allow list of projects for the Ci Job Token' do
-        expect(resolve_scope).to contain_exactly(project)
+        expect(resolve_scope.all_projects).to contain_exactly(project)
       end
 
-      context 'when linked projects are readable' do
-        context 'when another projects gets added to the allow list' do
-          let!(:link) { create(:ci_job_token_project_scope_link, source_project: project) }
+      context 'when another projects gets added to the allow list' do
+        let!(:link) { create(:ci_job_token_project_scope_link, source_project: project) }
 
-          before do
-            link.target_project.add_user(current_user, :developer)
-          end
-
-          it 'returns the same project and another project that is on the allow list' do
-            expect(resolve_scope).to contain_exactly(project, link.target_project)
-          end
-        end
-      end
-
-      context 'when linked projects are not readable' do
-        context 'when another projects gets added to the allow list' do
-          let!(:link) { create(:ci_job_token_project_scope_link, source_project: project) }
-
-          it 'returns the same project and another project that is on the allow list' do
-            expect(resolve_scope).to contain_exactly(project)
-          end
+        it 'returns both projects' do
+          expect(resolve_scope.all_projects).to contain_exactly(project, link.target_project)
         end
       end
     end
