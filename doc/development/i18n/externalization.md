@@ -363,6 +363,50 @@ use `%{created_at}` in Ruby but `%{createdAt}` in JavaScript. Make sure to
   // => When x == 2: 'Last 2 days'
   ```
 
+- In Vue:
+
+  One of [the recommended ways to organize translated strings for Vue files](#vue-files) is to extract them into a `constants.js` file.
+  That can be difficult to do when there are pluralized strings since the `count` variable won't be known inside the constants file.
+  The recommended approach for doing so is to create a function which takes a `count` argument:
+
+  ```javascript
+  // .../feature/constants.js
+  import { n__ } from '~/locale';
+
+  export const I18N = {
+    daysRemaining(count) { return n__('%{count} day remaining', '%{count} days remaining', count); },
+  };
+  ```
+
+  Then within a Vue file the function can be used to retrieve the correct pluralization form of the string:
+
+  ```javascript
+  // .../feature/components/days_remaining.vue
+  import { sprintf } from '~/locale';
+  import { I18N } from '../constants';
+
+  <script>
+    export default {
+      props: {
+        days: {
+          type: Number,
+          required: true,
+        },
+      },
+      i18n: I18N,
+      computed: {
+        i18nDaysRemaining() {
+          return sprintf(this.$options.i18n.daysRemaining(this.days), { count: this.days });
+        },
+      },
+    };
+  </script>
+
+  <template>
+    <span>{{ i18nDaysRemaining }}</span>
+  </template>
+  ```
+
 The `n_` method should only be used to fetch pluralized translations of the same
 string, not to control the logic of showing different strings for different
 quantities. Some languages have different quantities of target plural forms.
