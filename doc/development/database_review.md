@@ -118,7 +118,8 @@ test its execution using `CREATE INDEX CONCURRENTLY` in the `#database-lab` Slac
     Keep in mind that in this case you may need to split the migration and the application changes in separate releases to ensure the index
     will be in place when the code that needs it will be deployed.
 - Trigger the [database testing](../architecture/blueprints/database_testing/index.md) job (`db:gitlabcom-database-testing`) in the `test` stage.
-  - Review migration runtimes and any warnings.
+    - This job runs your migrations in a production-like environment (similar to `#database_lab`) and comments on the MR with its findings (queries, runtime, size change).
+    - Review migration runtimes and any warnings.
 
 #### Preparation when adding or modifying queries
 
