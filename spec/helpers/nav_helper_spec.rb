@@ -144,4 +144,22 @@ RSpec.describe NavHelper do
       it { is_expected.to eq(true) }
     end
   end
+
+  describe '#iterations_sub_menu_controllers' do
+    context 'when :iteration_cadences is turned on' do
+      it 'includes iteration_cadences#index path in the list' do
+        expect(helper.iterations_sub_menu_controllers).to include('iteration_cadences#index')
+      end
+    end
+
+    context 'when :iteration_cadences is NOT turned on' do
+      before do
+        stub_feature_flags(iteration_cadences: false)
+      end
+
+      it 'includes iteration_cadences#index path in the list' do
+        expect(helper.iterations_sub_menu_controllers).to_not include('iteration_cadences#index')
+      end
+    end
+  end
 end
