@@ -68,6 +68,10 @@ class BulkImports::Entity < ApplicationRecord
     end
   end
 
+  def self.all_human_statuses
+    state_machine.states.map(&:human_name)
+  end
+
   def encoded_source_full_path
     ERB::Util.url_encode(source_full_path)
   end

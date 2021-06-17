@@ -13,6 +13,8 @@ class BulkImport < ApplicationRecord
 
   enum source_type: { gitlab: 0 }
 
+  scope :with_status, ->(status) { where(status: status) }
+
   state_machine :status, initial: :created do
     state :created, value: 0
     state :started, value: 1
@@ -30,5 +32,13 @@ class BulkImport < ApplicationRecord
     event :fail_op do
       transition any => :failed
     end
+  end
+
+  def self.all_human_statuses
+    state_machine.states.map(&:human_name)
+  end
+
+  def self.machine_status(human_status)
+    state_machine.states.find { |st| st.human_name == human_status }&.value
   end
 end
