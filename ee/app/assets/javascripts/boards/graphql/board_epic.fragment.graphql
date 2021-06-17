@@ -11,4 +11,8 @@ fragment BoardEpicNode on BoardEpic {
   userPermissions {
     adminEpic
   }
+  descendantCounts {
+    openedIssues
+    closedIssues
+  }
 }

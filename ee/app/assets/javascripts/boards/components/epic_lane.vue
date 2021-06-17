@@ -1,5 +1,5 @@
 <script>
-import { GlButton, GlIcon, GlLink, GlPopover, GlTooltipDirective } from '@gitlab/ui';
+import { GlButton, GlIcon, GlLink, GlLoadingIcon, GlPopover, GlTooltipDirective } from '@gitlab/ui';
 import { mapActions, mapGetters, mapState } from 'vuex';
 import { formatDate } from '~/lib/utils/datetime_utility';
 import { __, n__, sprintf } from '~/locale';
@@ -12,6 +12,7 @@ export default {
     GlButton,
     GlIcon,
     GlLink,
+    GlLoadingIcon,
     GlPopover,
     IssuesLaneList,
   },
@@ -48,7 +49,7 @@ export default {
     };
   },
   computed: {
-    ...mapState(['filterParams']),
+    ...mapState(['epicsFlags', 'filterParams']),
     ...mapGetters(['getIssuesByEpic']),
     isOpen() {
       return this.epic.state === statusType.open;
@@ -60,10 +61,8 @@ export default {
       return this.isCollapsed ? 'chevron-right' : 'chevron-down';
     },
     issuesCount() {
-      return this.lists.reduce(
-        (total, list) => total + this.getIssuesByEpic(list.id, this.epic.id).length,
-        0,
-      );
+      const { openedIssues, closedIssues } = this.epic.descendantCounts;
+      return openedIssues + closedIssues;
     },
     issuesCountTooltipText() {
       return n__(`%d issue in this group`, `%d issues in this group`, this.issuesCount);
@@ -80,13 +79,41 @@ export default {
     epicDateString() {
       return formatDate(this.epic.createdAt);
     },
+    isLoading() {
+      return Boolean(this.epicsFlags[this.epic.id]?.isLoading);
+    },
     shouldDisplay() {
-      return this.issuesCount > 0;
+      return this.issuesCount > 0 || this.isLoading;
+    },
+    fetchedIssuesCount() {
+      return this.lists.reduce(
+        (total, list) => total + this.getIssuesByEpic(list.id, this.epic.id).length,
+        0,
+      );
     },
   },
+  watch: {
+    filterParams: {
+      handler() {
+        if (!this.filterParams.epicId || this.filterParams.epicId === this.epic.id) {
+          this.fetchIssuesForEpic(this.epic.id);
+        }
+      },
+      deep: true,
+    },
+  },
+  mounted() {
+    if (this.fetchedIssuesCount === 0 && !this.isCollapsed) {
+      this.fetchIssuesForEpic(this.epic.id);
+    }
+  },
   methods: {
-    ...mapActions(['updateBoardEpicUserPreferences', 'setError']),
+    ...mapActions(['updateBoardEpicUserPreferences', 'setError', 'fetchIssuesForEpic']),
     toggleCollapsed() {
+      if (this.isCollapsed && this.fetchedIssuesCount === 0) {
+        this.fetchIssuesForEpic(this.epic.id);
+      }
+
       this.isCollapsed = !this.isCollapsed;
 
       this.updateBoardEpicUserPreferences({
@@ -141,9 +168,14 @@ export default {
           <gl-icon class="gl-mr-2 gl-flex-shrink-0" name="issues" />
           <span aria-hidden="true">{{ issuesCount }}</span>
         </span>
+        <gl-loading-icon v-if="isLoading" class="gl-p-2" />
       </div>
     </div>
-    <div v-if="!isCollapsed" class="gl-display-flex gl-pb-5" data-testid="board-epic-lane-issues">
+    <div
+      v-if="!isCollapsed && fetchedIssuesCount > 0"
+      class="gl-display-flex gl-pb-5"
+      data-testid="board-epic-lane-issues"
+    >
       <issues-lane-list
         v-for="list in lists"
         :key="`${list.id}-issues`"

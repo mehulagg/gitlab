@@ -67,8 +67,10 @@ export default {
 
       return this.canAdminList ? options : {};
     },
-    isLoadingMore() {
-      return this.listsFlags[this.list.id]?.isLoadingMore;
+    isLoading() {
+      return (
+        this.listsFlags[this.list.id]?.isLoading || this.listsFlags[this.list.id]?.isLoadingMore
+      );
     },
     highlighted() {
       return this.highlightedLists.includes(this.list.id);
@@ -190,7 +192,7 @@ export default {
           :item="issue"
           :disabled="disabled || !canAdminEpic"
         />
-        <gl-loading-icon v-if="isLoadingMore && isUnassignedIssuesLane" size="sm" class="gl-py-3" />
+        <gl-loading-icon v-if="isLoading && isUnassignedIssuesLane" size="sm" class="gl-py-3" />
       </component>
     </div>
   </div>
