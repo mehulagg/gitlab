@@ -30,7 +30,7 @@ module Gitlab
             project.id,
             message: "GitHub project import finished",
             duration_s: duration.round(2),
-            objects_imported: ::Gitlab::GithubImport.objects_imported(project)
+            objects_imported: ::Gitlab::GithubImport::ObjectCounter.summary(project)
           )
         end
 

@@ -88,16 +88,4 @@ RSpec.describe Gitlab::GithubImport do
       expect(described_class.formatted_import_url(project)).to eq('http://github.another-domain.com/api/v3')
     end
   end
-
-  describe '#objects_imported', :clean_gitlab_redis_shared_state do
-    let(:project) { double(:project, id: 1) }
-
-    it 'lists the objects imported counters' do
-      described_class.increment_object_count(project, 'github/counter_1')
-
-      expect(described_class.objects_imported(project)).to eq({
-        'counter_1' => 1
-      })
-    end
-  end
 end

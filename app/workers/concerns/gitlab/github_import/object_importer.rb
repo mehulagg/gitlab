@@ -7,8 +7,6 @@ module Gitlab
     module ObjectImporter
       extend ActiveSupport::Concern
 
-      PROJECT_IMPORT_COUNTER_KEY = 'github-importer/project/%{project}/counter/%{counter_name}'
-
       included do
         include ApplicationWorker
 
@@ -50,15 +48,15 @@ module Gitlab
       # - project (redis): used in FinishImportWorker to report number of objects imported
       def increment_counters(project)
         counter.increment
-        Gitlab::GithubImport.increment_object_count(project, project_counter_key(project))
-      end
-
-      def project_counter_key(project)
-        PROJECT_IMPORT_COUNTER_KEY % { project: project.id, counter_name: counter_name }
+        Gitlab::GithubImport::ObjectCounter.increment(project, object_type, :imported)
       end
 
       def counter
         @counter ||= Gitlab::Metrics.counter(counter_name, counter_description)
+      end
+
+      def object_type
+        raise NotImplementedError
       end
 
       # Returns the representation class to use for the object. This class must
