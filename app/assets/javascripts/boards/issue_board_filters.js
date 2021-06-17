@@ -3,7 +3,7 @@ import projectBoardAssignees from '~/boards/graphql/project_board_assignees.quer
 import { BoardType } from './constants';
 import boardLabels from './graphql/board_labels.query.graphql';
 
-export default function issueBoardFilters (apollo, fullPath, boardType) {
+export default function issueBoardFilters(apollo, fullPath, boardType) {
   const transformLabels = ({ data }) => {
     return boardType === BoardType.group
       ? data.group?.labels.nodes || []
@@ -23,16 +23,16 @@ export default function issueBoardFilters (apollo, fullPath, boardType) {
           search: authorsSearchTerm,
         },
       })
-      .then(({ data }) => (
-          /*
-            * we need to filter this is only for graphql when bc we
-            * are putting the current_user on top of the list to avoid duplicates
-          */
+      .then(({ data }) =>
+        /*
+         * we need to filter this is only for graphql when bc we
+         * are putting the current_user on top of the list to avoid duplicates
+         */
 
-          data.workspace?.assignees.nodes
-            .map(({ user }) => user)
-            .filter(({ username }) => username !== gon.current_username)
-      ));
+        data.workspace?.assignees.nodes
+          .map(({ user }) => user)
+          .filter(({ username }) => username !== gon.current_username),
+      );
   };
 
   const fetchLabels = (labelSearchTerm) => {
@@ -53,4 +53,4 @@ export default function issueBoardFilters (apollo, fullPath, boardType) {
     fetchLabels,
     fetchAuthors,
   };
-};
+}
