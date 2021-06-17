@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require 'knapsack'
+require 'json'
 
 # A custom parallel rspec runner based on Knapsack runner
 # which takes in additional option for a file containing
@@ -34,6 +35,9 @@ module Tooling
       Knapsack.logger.info 'Filter specs:'
       Knapsack.logger.info filter_tests
       Knapsack.logger.info
+      Knapsack.logger.info 'Flaky specs automatically excluded:'
+      Knapsack.logger.info flaky_tests
+      Knapsack.logger.info
       Knapsack.logger.info 'Running specs:'
       Knapsack.logger.info tests_to_run
       Knapsack.logger.info
@@ -54,6 +58,7 @@ module Tooling
       %w[bundle exec rspec].tap do |cmd|
         cmd.push(*rspec_args)
         cmd.push('--default-path', allocator.test_dir)
+        flaky_tests.each { |flaky_test| cmd.push('--exclude-pattern', %|"#{flaky_test}"|) }
         cmd.push('--')
         cmd.push(*tests_to_run)
       end
@@ -75,6 +80,14 @@ module Tooling
     def filter_tests
       @filter_tests ||=
         filter_tests_file ? tests_from_file(filter_tests_file) : []
+    end
+
+    def flaky_tests
+      return [] if ENV['SUITE_FLAKY_RSPEC_REPORT_PATH'].to_s.empty?
+      return [] unless File.exist?(ENV['SUITE_FLAKY_RSPEC_REPORT_PATH'])
+
+      flaky_tests_data = JSON.parse(File.read(ENV['SUITE_FLAKY_RSPEC_REPORT_PATH'])) # rubocop:disable Gitlab/Json
+      flaky_tests_data.map { |_, flaky_test_data| flaky_test_data["example_id"] }
     end
 
     def tests_from_file(filter_tests_file)
