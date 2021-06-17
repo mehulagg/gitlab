@@ -3,13 +3,20 @@
 require 'spec_helper'
 
 RSpec.describe RequirementsManagement::UpdateRequirementService do
+  let_it_be(:title) { 'title' }
+  let_it_be(:description) { 'description' }
+
+  let(:new_title) { 'new title' }
+  let(:new_description) { 'new description' }
+
   let_it_be(:project) { create(:project)}
   let_it_be(:user) { create(:user) }
-  let_it_be(:requirement) { create(:requirement, project: project) }
+  let_it_be_with_reload(:requirement) { create(:requirement, project: project, title: title, description: description) }
 
   let(:params) do
     {
-      title: 'foo',
+      title: new_title,
+      description: new_description,
       state: 'archived',
       created_at: 2.days.ago,
       author_id: create(:user).id
@@ -38,6 +45,69 @@ RSpec.describe RequirementsManagement::UpdateRequirementService do
           created_at: params[:created_at],
           author_id: params[:author_id]
         )
+      end
+
+      context 'when updating title or description' do
+        context 'if there is an associated requirement_issue' do
+          let_it_be_with_reload(:requirement_issue) { create(:requirement_issue, requirement: requirement, title: title, description: description) }
+
+          let(:params) do
+            { title: new_title, description: new_description }
+          end
+
+          it 'updates the synced requirement_issue with title or description' do
+            expect { subject }.to change { requirement.requirement_issue.description }.from(description).to(new_description)
+          end
+
+          context 'when updating only title' do
+            let(:params) do
+              { title: new_title }
+            end
+
+            it "updates requirement's title" do
+              expect { subject }.to change { requirement.requirement_issue.reload.title }.from(title).to(new_title)
+            end
+          end
+
+          context "updates requirement's description" do
+            let(:params) do
+              { description: new_description }
+            end
+
+            it 'updates description' do
+              expect { subject }.to change { requirement.requirement_issue.reload.description }.from(description).to(new_description)
+            end
+          end
+
+          context 'if update fails' do
+            let(:params) do
+              { title: nil }
+            end
+
+            it 'does not update' do
+              expect { subject }.not_to change { requirement.reload.title }
+              expect { subject }.not_to change { requirement.requirement_issue.reload.title }
+            end
+          end
+
+          context 'when updating some unrelated field' do
+            let(:params) do
+              { state: :archived }
+            end
+
+            it 'does not update' do
+              expect { subject }.not_to change { requirement.requirement_issue.state }
+            end
+          end
+        end
+
+        context 'if there is no requirement_issue' do
+          it 'does not call the Issues::UpdateService' do
+            expect(Issues::CreateService).not_to receive(:new)
+
+            subject
+          end
+        end
       end
 
       context 'when updating last test report state' do

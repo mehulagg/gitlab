@@ -509,5 +509,55 @@ RSpec.describe Issues::UpdateService do
         include_examples 'no trigger status page publish'
       end
     end
+
+    context 'sync with requirement even if Requirements feature is not available' do
+      let_it_be(:title) { 'title' }
+      let_it_be(:description) { 'description' }
+
+      let_it_be_with_reload(:issue) { create(:issue, issue_type: :requirement, project: project, title: title, description: description) }
+
+      context 'when updating title or description' do
+        let(:new_title) { 'new title' }
+        let(:new_description) { 'new description' }
+
+        context 'if there is an associated requirement' do
+          let_it_be_with_reload(:requirement) { create(:requirement, title: title, description: description, requirement_issue: issue, project: project) }
+
+          it 'updates the synced requirement with title and/or description' do
+            update_issue( { title: new_title, description: new_description } )
+
+            expect(requirement.reload.title).to eq(new_title)
+            expect(requirement.reload.description).to eq(new_description)
+          end
+
+          it ' updates title' do
+            expect { update_issue( { title: new_title } ) }.to change { requirement.reload.title }.from(title).to(new_title)
+          end
+
+          it 'updates description' do
+            expect { update_issue( { description: new_description } ) }.to change { requirement.reload.description }.from(description).to(new_description)
+          end
+
+          it 'does not update some unrelated field' do
+            expect { update_issue( { state: :closed } ) }.not_to change { requirement.reload.state }
+          end
+
+          context 'if update fails' do
+            it 'does not update' do
+              expect { update_issue( { title: nil } ) }.not_to change { issue.reload.title }
+              expect { update_issue( { title: nil } ) }.not_to change { requirement.reload.title }
+            end
+          end
+        end
+
+        context 'if there is no associated requirement' do
+          it 'does not call the RequirementsManagement::UpdateRequirementService' do
+            expect(Issues::CreateService).not_to receive(:new)
+
+            update_issue( { title: new_title, description: new_description } )
+          end
+        end
+      end
+    end
   end
 end

@@ -26,6 +26,8 @@ module EE
           Epics::UpdateDatesService.new([issue.epic]).execute
         end
 
+        sync_issue_and_requirement(issue) if issue.requirement
+
         ::Gitlab::StatusPage.trigger_publish(project, current_user, issue) if issue.valid?
 
         result
@@ -65,6 +67,23 @@ module EE
         return unless params.delete(:promote_to_epic)
 
         Epics::IssuePromoteService.new(project: issue.project, current_user: current_user).execute(issue)
+      end
+
+      def sync_issue_and_requirement(issue)
+        # we want to limit to issues that have an associated Requirement.
+        # That way they always stay in sync
+        # See gitlab-org/gitlab#323779 for details
+
+        if issue.previous_changes.slice(*allowlisted_sync_params).any?
+          # Sync directly rather than via auth-check service, so stays in sync even if the Requirements feature is no longer available via license.
+          sync_params = params.slice(*allowlisted_sync_params)
+
+          issue.requirement.update!(sync_params)
+        end
+      end
+
+      def allowlisted_sync_params
+        [:title, :description, :state]
       end
     end
   end
