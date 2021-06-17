@@ -1,10 +1,12 @@
 <script>
 import { GlAvatar, GlAvatarLink } from '@gitlab/ui';
+import ComplianceFrameworkBadge from 'ee/vue_shared/components/compliance_framework_badge/compliance_framework_badge.vue';
 
 import { s__ } from '~/locale';
 
 export default {
   components: {
+    ComplianceFrameworkBadge,
     GlAvatar,
     GlAvatarLink,
   },
@@ -49,5 +51,13 @@ export default {
         <span>{{ mergeRequest.author.name }}</span>
       </gl-avatar-link>
     </span>
+    <div>
+      <compliance-framework-badge
+        v-if="mergeRequest.compliance_management_framework"
+        :name="mergeRequest.compliance_management_framework.name"
+        :color="mergeRequest.compliance_management_framework.color"
+        :description="mergeRequest.compliance_management_framework.description"
+      />
+    </div>
   </div>
 </template>

@@ -1,0 +1,18 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`ComplianceFrameworkBadge component matches the snapshot 1`] = `
+<b-badge-stub
+  class="gl-text-white! gl-badge sm"
+  pill="true"
+  style="background-color: rgb(0, 153, 102);"
+  tag="span"
+  target="_self"
+  title="General Data Protection Regulation"
+  variant="neutral"
+>
+  <!---->
+   
+  GDPR
+
+</b-badge-stub>
+`;
