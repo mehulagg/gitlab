@@ -37,7 +37,7 @@ RSpec.describe Gitlab::Graphql::Aggregations::Epics::LazyEpicAggregate do
     it 'adds the epic_id to lazy state' do
       described_class.new(query_ctx, epic_id, COUNT)
 
-      expect(query_ctx[:lazy_epic_aggregate][:pending_ids]).to match [epic_id]
+      expect(query_ctx[:lazy_epic_aggregate][:pending_ids]).to match [epic_id] # a comment
     end
   end
 
