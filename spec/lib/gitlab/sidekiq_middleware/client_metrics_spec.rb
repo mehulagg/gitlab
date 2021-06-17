@@ -27,6 +27,15 @@ RSpec.describe Gitlab::SidekiqMiddleware::ClientMetrics do
 
           subject.call(worker_class, job, :test, double) { nil }
         end
+
+        context 'when `at` field is present in job' do
+          it 'yields once and does not increment enqueued jobs counter to prevent double counting of scheduled jobs' do
+            job['at'] = 1.second.from_now
+            expect(enqueued_jobs_metric).not_to receive(:increment)
+
+            expect { |b| subject.call(worker_class, job, :test, double, &b) }.to yield_control.once
+          end
+        end
       end
     end
   end
