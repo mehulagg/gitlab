@@ -14,7 +14,7 @@ module Resolvers
 
       argument :iids, [GraphQL::ID_TYPE],
                required: false,
-               description: 'List of IIDs of requirements, e.g., [1, 2].'
+               description: 'List of IIDs of requirements, e.g., `[1, 2]`.'
 
       argument :last_test_report_state, ::Types::RequirementsManagement::RequirementStatusFilterEnum,
                required: false,
