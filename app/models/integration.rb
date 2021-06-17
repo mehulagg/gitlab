@@ -49,6 +49,7 @@ class Integration < ApplicationRecord
     hangouts_chat
     irker
     redmine
+    slack
   ].to_set.freeze
 
   def self.renamed?(name)

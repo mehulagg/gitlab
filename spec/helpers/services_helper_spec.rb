@@ -36,8 +36,8 @@ RSpec.describe ServicesHelper do
 
     subject { helper.integration_form_data(integration) }
 
-    context 'Slack service' do
-      let(:integration) { build(:slack_service) }
+    context 'with Slack integration' do
+      let(:integration) { build(:slack_integration) }
 
       it { is_expected.to include(*fields) }
       it { is_expected.not_to include(*jira_fields) }

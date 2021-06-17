@@ -7,7 +7,8 @@ RSpec.describe Integrations::Test::ProjectService do
 
   describe '#execute' do
     let_it_be(:project) { create(:project) }
-    let(:integration) { create(:slack_service, project: project) }
+
+    let(:integration) { create(:slack_integration, project: project) }
     let(:user) { project.owner }
     let(:event) { nil }
     let(:sample_data) { { data: 'sample' } }

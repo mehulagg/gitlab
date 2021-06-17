@@ -231,7 +231,7 @@ module EE
         override :usage_activity_by_stage_configure
         def usage_activity_by_stage_configure(time_period)
           super.merge({
-            projects_slack_notifications_active: distinct_count(::Project.with_slack_service.where(time_period), :creator_id),
+            projects_slack_notifications_active: distinct_count(::Project.with_slack_integration.where(time_period), :creator_id),
             projects_slack_slash_active: distinct_count(::Project.with_slack_slash_commands_service.where(time_period), :creator_id)
           })
         end

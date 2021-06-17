@@ -35,7 +35,7 @@ RSpec.describe Project, factory_default: :keep do
     it { is_expected.to have_many(:hooks) }
     it { is_expected.to have_many(:protected_branches) }
     it { is_expected.to have_many(:exported_protected_branches) }
-    it { is_expected.to have_one(:slack_service) }
+    it { is_expected.to have_one(:slack_integration) }
     it { is_expected.to have_one(:microsoft_teams_service) }
     it { is_expected.to have_one(:mattermost_service) }
     it { is_expected.to have_one(:hangouts_chat_integration) }
@@ -5367,26 +5367,26 @@ RSpec.describe Project, factory_default: :keep do
   end
 
   describe '#execute_services' do
-    let(:service) { create(:slack_service, push_events: true, merge_requests_events: false, active: true) }
+    let(:integration) { create(:slack_integration, push_events: true, merge_requests_events: false, active: true) }
 
-    it 'executes services with the specified scope' do
+    it 'executes integrations with the specified scope' do
       data = 'any data'
 
       expect_next_found_instance_of(Integrations::Slack) do |instance|
         expect(instance).to receive(:async_execute).with(data).once
       end
 
-      service.project.execute_services(data, :push_hooks)
+      integration.project.execute_services(data, :push_hooks)
     end
 
-    it 'does not execute services that don\'t match the specified scope' do
+    it 'does not execute integration that don\'t match the specified scope' do
       expect(Integrations::Slack).not_to receive(:allocate).and_wrap_original do |method|
         method.call.tap do |instance|
           expect(instance).not_to receive(:async_execute)
         end
       end
 
-      service.project.execute_services(anything, :merge_request_hooks)
+      integration.project.execute_services(anything, :merge_request_hooks)
     end
   end
 

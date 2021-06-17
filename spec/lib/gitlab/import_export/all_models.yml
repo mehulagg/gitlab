@@ -377,7 +377,7 @@ project:
 - flowdock_integration
 - assembla_integration
 - asana_integration
-- slack_service
+- slack_integration
 - microsoft_teams_service
 - mattermost_service
 - hangouts_chat_integration
