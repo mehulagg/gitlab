@@ -91,7 +91,7 @@ FactoryBot.define do
     issue_tracker
   end
 
-  factory :redmine_service, class: 'Integrations::Redmine' do
+  factory :redmine_integration, class: 'Integrations::Redmine' do
     project
     active { true }
     issue_tracker

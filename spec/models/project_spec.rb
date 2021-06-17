@@ -61,7 +61,7 @@ RSpec.describe Project, factory_default: :keep do
     it { is_expected.to have_one(:bamboo_integration) }
     it { is_expected.to have_one(:teamcity_service) }
     it { is_expected.to have_one(:jira_service) }
-    it { is_expected.to have_one(:redmine_service) }
+    it { is_expected.to have_one(:redmine_integration) }
     it { is_expected.to have_one(:youtrack_service) }
     it { is_expected.to have_one(:custom_issue_tracker_integration) }
     it { is_expected.to have_one(:bugzilla_integration) }

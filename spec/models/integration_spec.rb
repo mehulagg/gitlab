@@ -70,7 +70,7 @@ RSpec.describe Integration do
     describe '.by_type' do
       let!(:service1) { create(:jira_service) }
       let!(:service2) { create(:jira_service) }
-      let!(:service3) { create(:redmine_service) }
+      let!(:service3) { create(:redmine_integration) }
 
       subject { described_class.by_type(type) }
 

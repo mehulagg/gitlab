@@ -48,6 +48,7 @@ class Integration < ApplicationRecord
     flowdock
     hangouts_chat
     irker
+    redmine
   ].to_set.freeze
 
   def self.renamed?(name)

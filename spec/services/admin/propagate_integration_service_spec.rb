@@ -20,7 +20,7 @@ RSpec.describe Admin::PropagateIntegrationService do
     end
 
     let_it_be(:different_type_inherited_integration) do
-      create(:redmine_service, project: project, inherit_from_id: instance_integration.id)
+      create(:redmine_integration, project: project, inherit_from_id: instance_integration.id)
     end
 
     context 'with inherited integration' do

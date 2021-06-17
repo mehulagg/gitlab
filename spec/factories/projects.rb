@@ -396,7 +396,7 @@ FactoryBot.define do
   factory :redmine_project, parent: :project do
     has_external_issue_tracker { true }
 
-    redmine_service
+    redmine_integration
   end
 
   factory :youtrack_project, parent: :project do
