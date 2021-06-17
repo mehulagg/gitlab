@@ -343,7 +343,7 @@ module EE
 
     def gitlab_employee?
       strong_memoize(:gitlab_employee) do
-        ::Gitlab.com? && ::Feature.enabled?(:gitlab_employee_badge) && gitlab_team_member?
+        ::Gitlab.com? && gitlab_team_member?
       end
     end
 
