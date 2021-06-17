@@ -38,6 +38,11 @@ export default {
       type: Array,
       required: true,
     },
+    defaultGroupLabels: {
+      type: Array,
+      required: false,
+      default: () => [],
+    },
   },
   data() {
     return {
@@ -150,6 +155,7 @@ export default {
             :invalid-feedback="fieldErrorMessage('startEventLabelId')"
           >
             <labels-selector
+              :initial-data="defaultGroupLabels"
               :selected-label-id="[stage.startEventLabelId]"
               :name="`custom-stage-start-label-${index}`"
               @select-label="$emit('input', { field: 'startEventLabelId', value: $event })"
@@ -193,6 +199,7 @@ export default {
             :invalid-feedback="fieldErrorMessage('endEventLabelId')"
           >
             <labels-selector
+              :initial-data="defaultGroupLabels"
               :selected-label-id="[stage.endEventLabelId]"
               :name="`custom-stage-end-label-${index}`"
               @select-label="$emit('input', { field: 'endEventLabelId', value: $event })"

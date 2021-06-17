@@ -84,6 +84,7 @@ export default {
     state,
     {
       group = null,
+      groupLabels = [],
       createdAfter: startDate = null,
       createdBefore: endDate = null,
       selectedProjects = [],
@@ -99,6 +100,7 @@ export default {
     state.startDate = startDate;
     state.endDate = endDate;
     state.defaultStageConfig = defaultStageConfig;
+    state.defaultGroupLabels = groupLabels;
 
     Vue.set(state, 'pagination', {
       page: pagination.page ?? state.pagination.page,

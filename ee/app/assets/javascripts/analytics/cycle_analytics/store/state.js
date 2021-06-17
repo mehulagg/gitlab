@@ -3,6 +3,7 @@ import { PAGINATION_SORT_FIELD_END_EVENT, PAGINATION_SORT_DIRECTION_DESC } from 
 export default () => ({
   featureFlags: {},
   defaultStageConfig: [],
+  defaultGroupLabels: [],
 
   startDate: null,
   endDate: null,

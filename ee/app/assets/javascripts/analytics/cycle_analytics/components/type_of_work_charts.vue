@@ -12,6 +12,7 @@ export default {
   name: 'TypeOfWorkCharts',
   components: { ChartSkeletonLoader, GlAlert, TasksByTypeChart, TasksByTypeFilters },
   computed: {
+    ...mapState(['defaultGroupLabels']),
     ...mapState('typeOfWork', [
       'isLoadingTasksByTypeChart',
       'isLoadingTasksByTypeChartTopLabels',
@@ -78,6 +79,7 @@ export default {
       <h3>{{ s__('CycleAnalytics|Type of work') }}</h3>
       <p>{{ summaryDescription }}</p>
       <tasks-by-type-filters
+        :default-group-labels="defaultGroupLabels"
         :has-data="hasData"
         :selected-label-ids="selectedLabelIdsFilter"
         :subject-filter="selectedSubjectFilter"

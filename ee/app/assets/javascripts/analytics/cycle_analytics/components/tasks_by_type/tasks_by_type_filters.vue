@@ -38,6 +38,11 @@ export default {
       type: Boolean,
       required: true,
     },
+    defaultGroupLabels: {
+      type: Array,
+      required: false,
+      default: () => [],
+    },
   },
   computed: {
     subjectFilterOptions() {
@@ -108,6 +113,7 @@ export default {
     <div class="flex-column">
       <labels-selector
         data-testid="type-of-work-filters-label"
+        :initial-data="defaultGroupLabels"
         :default-selected-labels-ids="selectedLabelIds"
         :max-labels="maxLabels"
         :aria-label="__('CycleAnalytics|Display chart filters')"

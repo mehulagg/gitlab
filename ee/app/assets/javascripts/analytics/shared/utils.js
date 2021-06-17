@@ -88,6 +88,17 @@ const buildProjectsFromJSON = (projects = '') => {
 };
 
 /**
+ * Creates an array of group label objects from a json string. Returns null if no projects are present.
+ *
+ * @param {String} data - JSON encoded array of group labels
+ * @returns {Array} - An array of group labels objects
+ */
+const buildGroupLabelsFromJSON = (groupLabels = '') => {
+  if (!groupLabels.length) return [];
+  return JSON.parse(groupLabels);
+};
+
+/**
  * Builds the initial data object for Value Stream Analytics with data loaded from the backend
  *
  * @param {Object} dataset - dataset object paseed to the frontend via data-* properties
@@ -103,6 +114,7 @@ export const buildCycleAnalyticsInitialData = ({
   groupFullPath = null,
   groupParentId = null,
   groupAvatarUrl = null,
+  groupLabels = null,
   labelsPath = '',
   milestonesPath = '',
   defaultStages = null,
@@ -124,6 +136,9 @@ export const buildCycleAnalyticsInitialData = ({
   createdAfter: createdAfter ? new Date(createdAfter) : null,
   selectedProjects: projects
     ? buildProjectsFromJSON(projects).map(convertObjectPropsToCamelCase)
+    : [],
+  groupLabels: groupLabels
+    ? buildGroupLabelsFromJSON(groupLabels).map(convertObjectPropsToCamelCase)
     : [],
   labelsPath,
   milestonesPath,
