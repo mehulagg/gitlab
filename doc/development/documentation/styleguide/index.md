@@ -1109,7 +1109,7 @@ An Admin Area example:
 1. On the top bar, select **Menu >** **{admin}** **Admin**.
 ```
 
-This is the rendered output:
+This text renders this output:
 
 1. On the top bar, select **Menu >** **{admin}** **Admin**.
 
