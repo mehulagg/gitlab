@@ -12,7 +12,7 @@ module LatestPipelineInformation
       builds = latest_security_builds
       builds = builds.select { |build| build.status == 'success' } if only_successful_builds
       builds.map do |build|
-        if Feature.enabled?(:ci_build_metadata_config)
+        if Feature.enabled?(:ci_build_metadata_config, self, default_enabled: :yaml)
           build.metadata.config_options[:artifacts][:reports].keys.map(&:to_sym)
         else
           build.options[:artifacts][:reports].keys
