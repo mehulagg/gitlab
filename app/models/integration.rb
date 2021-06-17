@@ -50,6 +50,7 @@ class Integration < ApplicationRecord
     irker
     redmine
     slack slack_slash_commands
+    teamcity
   ].to_set.freeze
 
   def self.renamed?(name)

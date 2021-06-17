@@ -59,7 +59,7 @@ RSpec.describe Project, factory_default: :keep do
     it { is_expected.to have_one(:mattermost_slash_commands_service) }
     it { is_expected.to have_one(:buildkite_integration) }
     it { is_expected.to have_one(:bamboo_integration) }
-    it { is_expected.to have_one(:teamcity_service) }
+    it { is_expected.to have_one(:teamcity_integration) }
     it { is_expected.to have_one(:jira_service) }
     it { is_expected.to have_one(:redmine_integration) }
     it { is_expected.to have_one(:youtrack_service) }

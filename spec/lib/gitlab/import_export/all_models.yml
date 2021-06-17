@@ -384,7 +384,7 @@ project:
 - unify_circuit_service
 - buildkite_integration
 - bamboo_integration
-- teamcity_service
+- teamcity_integration
 - pushover_service
 - jira_service
 - redmine_integration
