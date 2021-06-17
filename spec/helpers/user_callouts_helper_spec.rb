@@ -98,6 +98,30 @@ RSpec.describe UserCalloutsHelper do
       end
 
       it { is_expected.to be true }
+
+      context 'when user is logged in' do
+        context 'when user is on the default dashboard' do
+          before do
+            user.dashboard = User.dashboards.each_key.first
+          end
+
+          it { is_expected.to be true }
+        end
+
+        context 'when user is not on the default dashboard' do
+          before do
+            user.dashboard = 'stars'
+          end
+
+          it { is_expected.to be false }
+        end
+      end
+
+      context 'when user is not logged in' do
+        let(:user) { nil }
+
+        it { is_expected.to be true }
+      end
     end
 
     context 'when user dismissed' do

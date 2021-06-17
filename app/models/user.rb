@@ -808,6 +808,10 @@ class User < ApplicationRecord
   # Instance methods
   #
 
+  def default_dashboard?
+    dashboard == self.class.dashboards.each_key.first
+  end
+
   def full_path
     username
   end
