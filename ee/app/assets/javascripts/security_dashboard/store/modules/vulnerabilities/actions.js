@@ -1,7 +1,11 @@
 import _ from 'lodash';
 import createFlash from '~/flash';
 import axios from '~/lib/utils/axios_utils';
-import { parseIntPagination, normalizeHeaders } from '~/lib/utils/common_utils';
+import {
+  parseIntPagination,
+  normalizeHeaders,
+  convertObjectPropsToCamelCase,
+} from '~/lib/utils/common_utils';
 import download from '~/lib/utils/downloader';
 import { s__, n__, sprintf } from '~/locale';
 import toast from '~/vue_shared/plugins/global_toast';
@@ -76,6 +80,8 @@ export const receiveVulnerabilitiesSuccess = ({ commit }, { headers, data }) => 
   // We need to add dummy IDs here to avoid rendering issues.
   const vulnerabilities = data.map((vulnerability) => ({
     ...vulnerability,
+    // @TODO: Test this
+    details: convertObjectPropsToCamelCase(vulnerability.details, { deep: true }),
     id: vulnerability.id || _.uniqueId('client_'),
   }));
 
