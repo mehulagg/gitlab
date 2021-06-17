@@ -78,6 +78,9 @@ export default {
         actions: {
           spacing: 'section-20',
         },
+        folder: {
+          spacing: 'section-100',
+        },        
       };
     },
   },

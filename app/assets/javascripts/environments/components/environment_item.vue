@@ -112,6 +112,16 @@ export default {
     },
 
     /**
+     * Checkes whether the gridcell width should match that of a folder.
+     *
+     * @returns {Object|String} that will be used as a class name to define the width of the gridcell.
+     */
+
+    hasFolderSpacing() {
+      return isFolder ? tableData.name.spacing : tableData.name.spacing
+    },
+
+    /**
      * Checkes whether the environment is protected.
      * (`is_protected` currently only set in EE)
      *
@@ -588,7 +598,7 @@ export default {
   >
     <div
       class="table-section section-wrap text-truncate"
-      :class="[isFolder ? 'section-100' : tableData.name.spacing]"
+      :class="hasFolderSpacing()"
       role="gridcell"
     >
       <div v-if="!isFolder" class="table-mobile-header" role="rowheader">
