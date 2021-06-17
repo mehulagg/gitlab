@@ -43,8 +43,7 @@ describe('Subscription Breakdown', () => {
   const findDetailsUserInfo = () => wrapper.findComponent(SubscriptionDetailsUserInfo);
   const findLicenseUploadAction = () => wrapper.findByTestId('license-upload-action');
   const findLicenseRemoveAction = () => wrapper.findByTestId('license-remove-action');
-  const findSubscriptionActivationAction = () =>
-    wrapper.findByTestId('subscription-activation-action');
+  const findEnterCodeAction = () => wrapper.findByTestId('subscription-enter-code-action');
   const findSubscriptionMangeAction = () => wrapper.findByTestId('subscription-manage-action');
   const findSubscriptionSyncAction = () => wrapper.findByTestId('subscription-sync-action');
   const findSubscriptionActivationModal = () => wrapper.findComponent(SubscriptionActivationModal);
@@ -140,7 +139,7 @@ describe('Subscription Breakdown', () => {
     it('shows a button to activate a new subscription', () => {
       createComponent({ stubs: { GlCard, SubscriptionDetailsCard } });
 
-      expect(findSubscriptionActivationAction().exists()).toBe(true);
+      expect(findEnterCodeAction().exists()).toBe(true);
     });
 
     it('presents a subscription activation modal', () => {
@@ -372,7 +371,7 @@ describe('Subscription Breakdown', () => {
   describe('activating a new subscription', () => {
     it('shows a modal', () => {
       createComponent({ stubs: { GlCard, SubscriptionDetailsCard } });
-      findSubscriptionActivationAction().vm.$emit('click');
+      findEnterCodeAction().vm.$emit('click');
 
       expect(glModalDirective).toHaveBeenCalledWith(modalId);
     });
