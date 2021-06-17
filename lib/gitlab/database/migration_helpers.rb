@@ -13,6 +13,10 @@ module Gitlab
       PERMITTED_TIMESTAMP_COLUMNS = %i[created_at updated_at deleted_at].to_set.freeze
       DEFAULT_TIMESTAMP_COLUMNS = %i[created_at updated_at].freeze
 
+      def ci_database?
+        ::Gitlab::Database.ci_database?(connection.pool.db_config.name)
+      end
+
       # Adds `created_at` and `updated_at` columns with timezone information.
       #
       # This method is an improved version of Rails' built-in method `add_timestamps`.
