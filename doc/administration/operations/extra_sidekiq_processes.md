@@ -180,32 +180,21 @@ for Sidekiq are respected.
 By default, logs for `sidekiq-cluster` go to `/var/log/gitlab/sidekiq`
 like regular Sidekiq logs.
 
-## Ignore all GitHub import queues
+## Ignore all import queues
 
-When [importing from GitHub](../../user/project/import/github.md), Sidekiq might
-use all of its resources to perform those operations. To set up a separate
-`sidekiq-cluster` process to ignore all GitHub import-related queues:
+When [importing from GitHub](../../user/project/import/github.md) or
+other sources, Sidekiq might use all of its resources to perform those
+operations. To set up two separate `sidekiq-cluster` processes, where
+one only processes imports and the other processes all other queues:
 
 1. Edit `/etc/gitlab/gitlab.rb` and add:
 
    ```ruby
    sidekiq['enable'] = true
-   sidekiq['negate'] = true
+   sidekiq['queue_selector'] = true
    sidekiq['queue_groups'] = [
-     "github_import_advance_stage",
-     "github_importer:github_import_import_diff_note",
-     "github_importer:github_import_import_issue",
-     "github_importer:github_import_import_note",
-     "github_importer:github_import_import_lfs_object",
-     "github_importer:github_import_import_pull_request",
-     "github_importer:github_import_refresh_import_jid",
-     "github_importer:github_import_stage_finish_import",
-     "github_importer:github_import_stage_import_base_data",
-     "github_importer:github_import_stage_import_issues_and_diff_notes",
-     "github_importer:github_import_stage_import_notes",
-     "github_importer:github_import_stage_import_lfs_objects",
-     "github_importer:github_import_stage_import_pull_requests",
-     "github_importer:github_import_stage_import_repository"
+     "feature_category=importers",
+     "feature_category!=importers"
    ]
    ```
 
