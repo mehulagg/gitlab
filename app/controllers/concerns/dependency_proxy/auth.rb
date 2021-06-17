@@ -15,7 +15,8 @@ module DependencyProxy
 
       authenticate_with_http_token do |token, _|
         user = user_from_token(token)
-        sign_in(user) if user
+        sign_in(user) if user.is_a?(User)
+        @current_user = user if user.is_a?(DeployToken)
       end
 
       request_bearer_token! unless current_user
@@ -35,7 +36,10 @@ module DependencyProxy
 
     def user_from_token(token)
       token_payload = DependencyProxy::AuthTokenService.decoded_token_payload(token)
-      User.find(token_payload['user_id'])
+      return User.find(token_payload['user_id']) if token_payload['user_id']
+      return DeployToken.active.find_by_token(token_payload['deploy_token']) if token_payload['deploy_token']
+
+      nil
     rescue JWT::DecodeError, JWT::ExpiredSignature, JWT::ImmatureSignature
       nil
     end

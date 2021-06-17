@@ -7,8 +7,8 @@ RSpec.describe Groups::DependencyProxyForContainersController do
   include DependencyProxyHelpers
 
   let_it_be(:user) { create(:user) }
+  let_it_be_with_reload(:group) { create(:group) }
 
-  let(:group) { create(:group) }
   let(:token_response) { { status: :success, token: 'abcd1234' } }
   let(:jwt) { build_jwt(user) }
   let(:token_header) { "Bearer #{jwt.encoded}" }
@@ -67,6 +67,28 @@ RSpec.describe Groups::DependencyProxyForContainersController do
       it { is_expected.to have_gitlab_http_status(:not_found) }
     end
 
+    context 'deploy tokens' do
+      context 'with valid deploy token that does not have access' do
+        let(:user) { create(:deploy_token) }
+
+        it { is_expected.to have_gitlab_http_status(:not_found) }
+      end
+
+      context 'with revoked deploy token' do
+        let_it_be(:user) { create(:deploy_token, :revoked) }
+        let_it_be(:group_deploy_token) { create(:group_deploy_token, deploy_token: user, group: group) }
+
+        it { is_expected.to have_gitlab_http_status(:not_found) }
+      end
+
+      context 'with expired deploy token' do
+        let_it_be(:user) { create(:deploy_token, :expired) }
+        let_it_be(:group_deploy_token) { create(:group_deploy_token, deploy_token: user, group: group) }
+
+        it { is_expected.to have_gitlab_http_status(:not_found) }
+      end
+    end
+
     context 'when user is not found' do
       before do
         allow(User).to receive(:find).and_return(nil)
@@ -114,6 +136,25 @@ RSpec.describe Groups::DependencyProxyForContainersController do
 
     subject { get_manifest }
 
+    shared_examples 'a successful manifest pull' do
+      it 'sends a file' do
+        expect(controller).to receive(:send_file).with(manifest.file.path, type: manifest.content_type)
+
+        subject
+      end
+
+      it 'returns Content-Disposition: attachment' do
+        subject
+
+        expect(response).to have_gitlab_http_status(:ok)
+        expect(response.headers['Docker-Content-Digest']).to eq(manifest.digest)
+        expect(response.headers['Content-Length']).to eq(manifest.size)
+        expect(response.headers['Docker-Distribution-Api-Version']).to eq(DependencyProxy::DISTRIBUTION_API_VERSION)
+        expect(response.headers['Etag']).to eq("\"#{manifest.digest}\"")
+        expect(response.headers['Content-Disposition']).to match(/^attachment/)
+      end
+    end
+
     context 'feature enabled' do
       before do
         enable_dependency_proxy
@@ -157,21 +198,13 @@ RSpec.describe Groups::DependencyProxyForContainersController do
         end
       end
 
-      it 'sends a file' do
-        expect(controller).to receive(:send_file).with(manifest.file.path, type: manifest.content_type)
+      it_behaves_like 'a successful manifest pull'
 
-        subject
-      end
+      context 'a valid deploy token' do
+        let_it_be(:user) { create(:deploy_token, :revoked) }
+        let_it_be(:group_deploy_token) { create(:group_deploy_token, deploy_token: user, group: group) }
 
-      it 'returns Content-Disposition: attachment' do
-        subject
-
-        expect(response).to have_gitlab_http_status(:ok)
-        expect(response.headers['Docker-Content-Digest']).to eq(manifest.digest)
-        expect(response.headers['Content-Length']).to eq(manifest.size)
-        expect(response.headers['Docker-Distribution-Api-Version']).to eq(DependencyProxy::DISTRIBUTION_API_VERSION)
-        expect(response.headers['Etag']).to eq("\"#{manifest.digest}\"")
-        expect(response.headers['Content-Disposition']).to match(/^attachment/)
+        it_behaves_like 'a successful manifest pull'
       end
     end
 
@@ -191,6 +224,21 @@ RSpec.describe Groups::DependencyProxyForContainersController do
     before do
       allow_next_instance_of(DependencyProxy::FindOrCreateBlobService) do |instance|
         allow(instance).to receive(:execute).and_return(blob_response)
+      end
+    end
+
+    shared_examples 'a successful blob pull' do
+      it 'sends a file' do
+        expect(controller).to receive(:send_file).with(blob.file.path, {})
+
+        subject
+      end
+
+      it 'returns Content-Disposition: attachment', :aggregate_failures do
+        subject
+
+        expect(response).to have_gitlab_http_status(:ok)
+        expect(response.headers['Content-Disposition']).to match(/^attachment/)
       end
     end
 
@@ -222,17 +270,13 @@ RSpec.describe Groups::DependencyProxyForContainersController do
         end
       end
 
-      it 'sends a file' do
-        expect(controller).to receive(:send_file).with(blob.file.path, {})
+      it_behaves_like 'a successful blob pull'
 
-        subject
-      end
+      context 'a valid deploy token' do
+        let_it_be(:user) { create(:deploy_token, :revoked) }
+        let_it_be(:group_deploy_token) { create(:group_deploy_token, deploy_token: user, group: group) }
 
-      it 'returns Content-Disposition: attachment', :aggregate_failures do
-        subject
-
-        expect(response).to have_gitlab_http_status(:ok)
-        expect(response.headers['Content-Disposition']).to match(/^attachment/)
+        it_behaves_like 'a successful blob pull'
       end
     end
 

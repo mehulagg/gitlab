@@ -30,16 +30,31 @@ RSpec.describe Groups::DependencyProxyAuthController do
     end
 
     context 'with valid JWT' do
-      let_it_be(:user) { create(:user) }
+      context 'user' do
+        let_it_be(:user) { create(:user) }
 
-      let(:jwt) { build_jwt(user) }
-      let(:token_header) { "Bearer #{jwt.encoded}" }
+        let(:jwt) { build_jwt(user) }
+        let(:token_header) { "Bearer #{jwt.encoded}" }
 
-      before do
-        request.headers['HTTP_AUTHORIZATION'] = token_header
+        before do
+          request.headers['HTTP_AUTHORIZATION'] = token_header
+        end
+
+        it { is_expected.to have_gitlab_http_status(:success) }
       end
 
-      it { is_expected.to have_gitlab_http_status(:success) }
+      context 'deploy token' do
+        let_it_be(:user) { create(:deploy_token) }
+
+        let(:jwt) { build_jwt(user) }
+        let(:token_header) { "Bearer #{jwt.encoded}" }
+
+        before do
+          request.headers['HTTP_AUTHORIZATION'] = token_header
+        end
+
+        it { is_expected.to have_gitlab_http_status(:success) }
+      end
     end
 
     context 'with invalid JWT' do
