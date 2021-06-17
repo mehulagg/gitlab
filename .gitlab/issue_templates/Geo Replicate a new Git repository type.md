@@ -509,72 +509,72 @@ That's all of the required database changes.
   end
   ```
 
-##### If you added verification state fields to a separate table (Option 2 above), then you need to make additional model changes
+##### If you added verification state fields to a separate table (option 2 above), then you need to make additional model changes
 
 If you did not add verification state fields to a separate table, `cool_widget_states`, then skip to [Step 2. Implement metrics gathering](#step-2-implement-metrics-gathering).
 
-You can follow [the example of Merge Request Diffs](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/63309).
+Otherwise, you can follow [the example of Merge Request Diffs](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/63309).
 
 - [ ] Add the following lines to the `cool_widget_state.rb` model:
 
-``` ruby
-class CoolWidgetState < ApplicationRecord
-  self.primary_key = :cool_widget_id
+  ``` ruby
+  class CoolWidgetState < ApplicationRecord
+    self.primary_key = :cool_widget_id
 
-  belongs_to :cool_widget, inverse_of: :cool_widget_state
-end
-```
+    belongs_to :cool_widget, inverse_of: :cool_widget_state
+  end
+  ```
 
 - [ ] Add the following lines to the `cool_widget` model to accomplish some important tasks:
-  - include the `::Gitlab::Geo::VerificationState` concern
-  - delegate verification related methods to the `cool_widget_state` model
-  - override some scopes to use the `cool_widget_states` table instead of the model table, for verification
-  - override some methods to use the `cool_widget_states` table in verification related queries
+  - Include the `::Gitlab::Geo::VerificationState` concern.
+  - Delegate verification related methods to the `cool_widget_state` model.
+  - Override some scopes to use the `cool_widget_states` table instead of the model table, for verification.
+  - Override some methods to use the `cool_widget_states` table in verification related queries.
 
-```ruby
-class CoolWidget < ApplicationRecord
-  ...
-  include ::Gitlab::Geo::VerificationState
-
-  has_one :cool_widget_state, autosave: true, inverse_of: :cool_widget
-
-  delegate :verification_retry_at, :verification_retry_at=,
-          :verified_at, :verified_at=,
-          :verification_checksum, :verification_checksum=,
-          :verification_failure, :verification_failure=,
-          :verification_retry_count, :verification_retry_count=,
-          :verification_state=, :verification_state,
-          :verification_started_at=, :verification_started_at,
-          to: :cool_widget_state
-  ...
-
-  scope :with_verification_state, ->(state) { joins(:cool_widget_state).where(cool_widget_states: { verification_state: verification_state_value(state) }) }
-  scope :checksummed, -> { joins(:cool_widget_state).where.not(cool_widget_states: { verification_checksum: nil } ) }
-  scope :not_checksummed, -> { joins(:cool_widget_state).where(cool_widget_states: { verification_checksum: nil } ) }
-
-  ...
-
-  class_methods do
-    extend ::Gitlab::Utils::Override
+  ```ruby
+  class CoolWidget < ApplicationRecord
     ...
-    override :verification_state_table_name
-    def verification_state_table_name
-      'cool_widget_states'
-    end
+    include ::Gitlab::Geo::VerificationState
 
-    override :verification_state_model_key
-    def verification_state_model_key
-      'cool_widget_id'
-    end
+    has_one :cool_widget_state, autosave: true, inverse_of: :cool_widget
 
-    override :verification_arel_table
-    def verification_arel_table
-      CoolWidgetState.arel_table
+    delegate :verification_retry_at, :verification_retry_at=,
+             :verified_at, :verified_at=,
+             :verification_checksum, :verification_checksum=,
+             :verification_failure, :verification_failure=,
+             :verification_retry_count, :verification_retry_count=,
+             :verification_state=, :verification_state,
+             :verification_started_at=, :verification_started_at,
+             to: :cool_widget_state
+    ...
+
+    scope :with_verification_state, ->(state) { joins(:cool_widget_state).where(cool_widget_states: { verification_state: verification_state_value(state) }) }
+    scope :checksummed, -> { joins(:cool_widget_state).where.not(cool_widget_states: { verification_checksum: nil } ) }
+    scope :not_checksummed, -> { joins(:cool_widget_state).where(cool_widget_states: { verification_checksum: nil } ) }
+
+    ...
+
+    class_methods do
+      extend ::Gitlab::Utils::Override
+      ...
+      override :verification_state_table_name
+      def verification_state_table_name
+        'cool_widget_states'
+      end
+
+      override :verification_state_model_key
+      def verification_state_model_key
+        'cool_widget_id'
+      end
+
+      override :verification_arel_table
+      def verification_arel_table
+        CoolWidgetState.arel_table
+      end
     end
+    ...
   end
-  ...
-end
-```
+  ```
 
 #### Step 2. Implement metrics gathering
 
