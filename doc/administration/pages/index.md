@@ -693,22 +693,13 @@ database encryption. Proceed with caution.
    gitlab_pages['access_control'] = true
    ```
 
+1. Configure [the object storage and migrate pages data to it](#using-object-storage).
+
 1. [Reconfigure the **GitLab server**](../restart_gitlab.md#omnibus-gitlab-reconfigure) for the
    changes to take effect. The `gitlab-secrets.json` file is now updated with the
    new configuration.
 
 1. Set up a new server. This becomes the **Pages server**.
-
-1. Create an [NFS share](../nfs.md)
-   on the **Pages server** and configure this share to
-   allow access from your main **GitLab server**.
-   Note that the example there is more general and
-   shares several sub-directories from `/home` to several `/nfs/home` mount points.
-   For our Pages-specific example here, we instead share only the
-   default GitLab Pages folder `/var/opt/gitlab/gitlab-rails/shared/pages`
-   from the **Pages server** and we mount it to `/mnt/pages`
-   on the **GitLab server**.
-   Therefore, omit "Step 4" there.
 
 1. On the **Pages server**, install Omnibus GitLab and modify `/etc/gitlab/gitlab.rb`
    to include:
