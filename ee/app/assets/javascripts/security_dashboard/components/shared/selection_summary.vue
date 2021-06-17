@@ -27,6 +27,7 @@ export default {
   },
   data() {
     return {
+      isSubmitting: false,
       updateErrorText: null,
       selectedStatus: null,
       selectedStatusPayload: undefined,
@@ -51,6 +52,7 @@ export default {
     },
 
     handleSubmit() {
+      this.isSubmitting = true;
       this.updateErrorText = null;
       let fulfilledCount = 0;
       const rejected = [];
@@ -73,6 +75,9 @@ export default {
           })
           .catch(() => {
             rejected.push(vulnerability.id.split('/').pop());
+          })
+          .finally(() => {
+            this.isSubmitting = false;
           });
       });
 
@@ -128,7 +133,7 @@ export default {
           <gl-button type="button" class="gl-mr-4" @click="resetSelected">
             {{ $options.i18n.cancel }}
           </gl-button>
-          <gl-button type="submit" category="primary" variant="confirm">
+          <gl-button type="submit" category="primary" variant="confirm" :disabled="isSubmitting">
             {{ $options.i18n.changeStatus }}
           </gl-button>
         </template>

@@ -113,10 +113,13 @@ describe('Selection Summary component', () => {
       { id: 'gid://gitlab/Vulnerability/58' },
     ];
 
-    const submitForm = async () => {
+    const submitFormSync = () => {
       wrapper.find(StatusDropdown).vm.$emit('change', { action, payload });
       findForm().trigger('submit');
+    };
 
+    const submitForm = async () => {
+      submitFormSync();
       await waitForPromises();
     };
 
@@ -184,6 +187,16 @@ describe('Selection Summary component', () => {
       it(`calls the toaster - ${action}`, async () => {
         await submitForm();
         expect(toast).toHaveBeenLastCalledWith('3 vulnerabilities updated');
+      });
+
+      it(`the submit button is unclickable during form submission - ${action}`, async () => {
+        const button = findSubmitButton();
+        expect(button.props('disabled')).toBe(false);
+        submitFormSync();
+        await wrapper.vm.$nextTick();
+        expect(button.props('disabled')).toBe(true);
+        await waitForPromises();
+        expect(button.props('disabled')).toBe(false);
       });
 
       it(`emits an event for the event hub - ${action}`, async () => {
