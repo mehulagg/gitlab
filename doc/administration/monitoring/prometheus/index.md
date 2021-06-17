@@ -60,14 +60,14 @@ on, as this might affect or conflict with other services running on the GitLab
 server. Proceed at your own risk.
 
 To access Prometheus from outside the GitLab server, set an FQDN or IP in
-`prometheus['listen_address']`. To change the address/port that Prometheus
+`prometheus['server_address']`. To change the address/port that Prometheus
 listens on:
 
 1. Edit `/etc/gitlab/gitlab.rb`
 1. Add or find and uncomment the following line:
 
    ```ruby
-   prometheus['listen_address'] = 'localhost:9090'
+   prometheus['server_address'] = 'localhost:9090'
    ```
 
    Replace `localhost:9090` with the address or port you want Prometheus to
@@ -75,9 +75,9 @@ listens on:
    than `localhost`, leave out the host, or use `0.0.0.0` to allow public access:
 
    ```ruby
-   prometheus['listen_address'] = ':9090'
+   prometheus['server_address'] = ':9090'
    # or
-   prometheus['listen_address'] = '0.0.0.0:9090'
+   prometheus['server_address'] = '0.0.0.0:9090'
    ```
 
 1. Save the file and [reconfigure GitLab](../../restart_gitlab.md#omnibus-gitlab-reconfigure) for the changes to
@@ -127,7 +127,7 @@ The steps below are the minimum necessary to configure a Monitoring node running
    external_url 'http://gitlab.example.com'
 
    # Prometheus
-   prometheus['listen_address'] = '0.0.0.0:9090'
+   prometheus['server_address'] = '0.0.0.0:9090'
    prometheus['monitor_kubernetes'] = false
 
    # Grafana
