@@ -7,6 +7,16 @@ import IterationReport from './components/iteration_report.vue';
 
 Vue.use(VueRouter);
 
+function checkPermission(permission) {
+  return (to, from, next) => {
+    if (permission) {
+      next();
+    } else {
+      next({ path: '/' });
+    }
+  };
+}
+
 export default function createRouter({ base, permissions = {} }) {
   const routes = [
     {
@@ -18,30 +28,19 @@ export default function createRouter({ base, permissions = {} }) {
       name: 'new',
       path: '/new',
       component: IterationCadenceForm,
-      beforeEnter: (to, from, next) => {
-        if (!permissions.canCreateCadence) {
-          next({ path: '/' });
-        } else {
-          next();
-        }
-      },
+      beforeEnter: checkPermission(permissions.canCreateCadence),
     },
     {
       name: 'edit',
       path: '/:cadenceId/edit',
       component: IterationCadenceForm,
-      beforeEnter: (to, from, next) => {
-        if (!permissions.canEditCadence) {
-          next({ path: '/' });
-        } else {
-          next();
-        }
-      },
+      beforeEnter: checkPermission(permissions.canEditCadence),
     },
     {
       name: 'newIteration',
       path: '/:cadenceId/iterations/new',
       component: IterationForm,
+      beforeEnter: checkPermission(permissions.canCreateIteration),
     },
     {
       name: 'iteration',
@@ -52,6 +51,7 @@ export default function createRouter({ base, permissions = {} }) {
       name: 'editIteration',
       path: '/:cadenceId/iterations/:iterationId/edit',
       component: IterationForm,
+      beforeEnter: checkPermission(permissions.canEditIteration),
     },
     {
       path: '*',

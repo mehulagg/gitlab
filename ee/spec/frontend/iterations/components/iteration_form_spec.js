@@ -12,7 +12,6 @@ import waitForPromises from 'helpers/wait_for_promises';
 import { convertToGraphQLId } from '~/graphql_shared/utils';
 
 const baseUrl = '/cadences/';
-const router = createRouter({ base: baseUrl });
 
 function createMockApolloProvider(requestHandlers) {
   Vue.use(VueApollo);
@@ -22,6 +21,7 @@ function createMockApolloProvider(requestHandlers) {
 
 describe('Iteration Form', () => {
   let wrapper;
+  let router;
   const groupPath = 'gitlab-org';
   const iterationId = 72;
   const cadenceId = 2;
@@ -68,6 +68,13 @@ describe('Iteration Form', () => {
       }),
     );
   }
+
+  beforeEach(() => {
+    router = createRouter({
+      base: baseUrl,
+      permissions: { canCreateIteration: true, canEditIteration: true },
+    });
+  });
 
   afterEach(() => {
     wrapper.destroy();
@@ -152,7 +159,7 @@ describe('Iteration Form', () => {
 
   describe('Edit iteration', () => {
     beforeEach(() => {
-      router.replace({ name: 'newIteration', params: { cadenceId, iterationId } });
+      router.replace({ name: 'editIteration', params: { cadenceId, iterationId } });
     });
 
     afterEach(() => {

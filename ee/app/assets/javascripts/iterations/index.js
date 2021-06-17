@@ -107,6 +107,7 @@ export function initCadenceApp({ namespaceType }) {
     cadencesListPath,
     canCreateCadence,
     canEditCadence,
+    canCreateIteration,
     canEditIteration,
     hasScopedLabelsFeature,
     labelsFetchPath,
@@ -118,6 +119,7 @@ export function initCadenceApp({ namespaceType }) {
     permissions: {
       canCreateCadence: parseBoolean(canCreateCadence),
       canEditCadence: parseBoolean(canEditCadence),
+      canCreateIteration: parseBoolean(canCreateIteration),
       canEditIteration: parseBoolean(canEditIteration),
     },
   });
@@ -133,6 +135,7 @@ export function initCadenceApp({ namespaceType }) {
       canCreateCadence: parseBoolean(canCreateCadence),
       canEditCadence: parseBoolean(canEditCadence),
       namespaceType,
+      canCreateIteration: parseBoolean(canCreateIteration),
       canEditIteration: parseBoolean(canEditIteration),
       hasScopedLabelsFeature: parseBoolean(hasScopedLabelsFeature),
       labelsFetchPath,
