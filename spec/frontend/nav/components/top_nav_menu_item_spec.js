@@ -6,7 +6,6 @@ const TEST_MENU_ITEM = {
   title: 'Cheeseburger',
   icon: 'search',
   href: '/pretty/good/burger',
-  view: 'burger-view',
   data: { qa_selector: 'not-a-real-selector', method: 'post', testFoo: 'test' },
 };
 
@@ -68,24 +67,11 @@ describe('~/nav/components/top_nav_menu_item.vue', () => {
 
       expect(listener).toHaveBeenCalledWith('TEST');
     });
-
-    it('renders expected icons', () => {
-      expect(findButtonIcons()).toEqual([
-        {
-          name: TEST_MENU_ITEM.icon,
-          classes: ['gl-mr-2!'],
-        },
-        {
-          name: 'chevron-right',
-          classes: ['gl-ml-auto'],
-        },
-      ]);
-    });
   });
 
   describe('with icon-only', () => {
     beforeEach(() => {
-      createComponent({ iconOnly: true });
+      createComponent({ iconOnly: true, menuItem: { ...TEST_MENU_ITEM, view: 'test-view' } });
     });
 
     it('does not render title or view icon', () => {
@@ -103,10 +89,10 @@ describe('~/nav/components/top_nav_menu_item.vue', () => {
   });
 
   describe.each`
-    desc                      | menuItem                                         | expectedIcons
-    ${'with no icon'}         | ${{ ...TEST_MENU_ITEM, icon: null }}             | ${['chevron-right']}
-    ${'with no view'}         | ${{ ...TEST_MENU_ITEM, view: null }}             | ${[TEST_MENU_ITEM.icon]}
-    ${'with no icon or view'} | ${{ ...TEST_MENU_ITEM, view: null, icon: null }} | ${[]}
+    desc              | menuItem                                    | expectedIcons
+    ${'default'}      | ${{ ...TEST_MENU_ITEM }}                    | ${[TEST_MENU_ITEM.icon]}
+    ${'with no icon'} | ${{ ...TEST_MENU_ITEM, icon: null }}        | ${[]}
+    ${'with view'}    | ${{ ...TEST_MENU_ITEM, view: 'test-view' }} | ${[TEST_MENU_ITEM.icon, 'chevron-right']}
   `('$desc', ({ menuItem, expectedIcons }) => {
     beforeEach(() => {
       createComponent({ menuItem });
@@ -118,17 +104,17 @@ describe('~/nav/components/top_nav_menu_item.vue', () => {
   });
 
   describe.each`
-    desc                         | active   | cssClass                        | expectedClasses
-    ${'default'}                 | ${false} | ${''}                           | ${[]}
-    ${'with css class'}          | ${false} | ${'test-css-class testing-123'} | ${['test-css-class', 'testing-123']}
-    ${'with css class & active'} | ${true}  | ${'test-css-class'}             | ${['test-css-class', ...TopNavMenuItem.ACTIVE_CLASS.split(' ')]}
-  `('$desc', ({ active, cssClass, expectedClasses }) => {
+    desc                         | menuItem                                              | expectedClasses
+    ${'default'}                 | ${{}}                                                 | ${[]}
+    ${'with css class'}          | ${{ css_class: 'test-css-class testing-123' }}        | ${['test-css-class', 'testing-123']}
+    ${'with css class & active'} | ${{ css_class: 'test-css-class', active: true }}      | ${['test-css-class', ...TopNavMenuItem.ACTIVE_CLASS.split(' ')]}
+    ${'with css class & view'}   | ${{ css_class: 'test-css-class', view: 'test-view' }} | ${['test-css-class', 'gl-pr-3!']}
+  `('$desc', ({ menuItem, expectedClasses }) => {
     beforeEach(() => {
       createComponent({
         menuItem: {
           ...TEST_MENU_ITEM,
-          active,
-          css_class: cssClass,
+          ...menuItem,
         },
       });
     });

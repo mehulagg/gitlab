@@ -26,6 +26,15 @@ export default {
     dataAttrs() {
       return mapKeys(this.menuItem.data || {}, (value, key) => getDataKey(key));
     },
+    cssClasses() {
+      return [
+        this.menuItem.css_class,
+        {
+          [ACTIVE_CLASS]: this.menuItem.active,
+          'gl-pr-3!': this.menuItem.view,
+        },
+      ];
+    },
   },
   ACTIVE_CLASS,
 };
@@ -36,7 +45,7 @@ export default {
     category="tertiary"
     :href="menuItem.href"
     class="top-nav-menu-item gl-display-block"
-    :class="[menuItem.css_class, { [$options.ACTIVE_CLASS]: menuItem.active }]"
+    :class="cssClasses"
     :aria-label="menuItem.title"
     v-bind="dataAttrs"
     v-on="$listeners"
