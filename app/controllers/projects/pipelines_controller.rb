@@ -30,6 +30,7 @@ class Projects::PipelinesController < Projects::ApplicationController
   wrap_parameters Ci::Pipeline
 
   POLLING_INTERVAL = 10_000
+  PER_PAGE = 15
 
   feature_category :continuous_integration, [
                      :charts, :show, :config_variables, :stage, :cancel, :retry,
@@ -43,7 +44,7 @@ class Projects::PipelinesController < Projects::ApplicationController
       .new(project, current_user, index_params)
       .execute
       .page(params[:page])
-      .per(20)
+      .per(PER_PAGE)
 
     @pipelines_count = limited_pipelines_count(project)
 
