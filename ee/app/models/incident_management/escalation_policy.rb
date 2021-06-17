@@ -13,5 +13,7 @@ module IncidentManagement
     validates :rules, presence: true
 
     accepts_nested_attributes_for :rules
+
+    scope :with_rules, -> { includes(:rules) }
   end
 end
