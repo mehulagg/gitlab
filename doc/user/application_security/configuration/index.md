@@ -11,6 +11,11 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 > - SAST configuration was [enabled](https://gitlab.com/groups/gitlab-org/-/epics/3659) in 13.3 and [improved](https://gitlab.com/gitlab-org/gitlab/-/issues/232862) in 13.4. **(ULTIMATE)**
 > - DAST Profiles feature was [introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/40474) in 13.4. **(ULTIMATE)**
 > - A simplified version was made [available in all tiers](https://gitlab.com/gitlab-org/gitlab/-/issues/294076) in GitLab 13.10.
+> - The UI was [redesigned in 14.0](https://gitlab.com/groups/gitlab-org/-/epics/6147) for all tiers except Ultimate, behind a feature flag, disabled by default. **(FREE ONLY)** **(PREMIUM ONLY)**
+> - The UI redesign feature flag is enabled on GitLab.com.
+> - It can be enabled or disabled for a single project.
+> - It is recommended for production use.
+> - To use in GitLab self-managed instances, ask a GitLab administrator to [enable it](#enable-or-disable-ui-redesign). **(FREE SELF)**
 
 WARNING:
 This feature might not be available to you. Check the **version history** note above for details.
@@ -52,3 +57,28 @@ You can configure the following security controls:
 - Secret Detection
   - Select **Configure via Merge Request** to create a merge request with the changes required to
     enable Secret Detection. For more details, see [Enable Secret Detection via an automatic merge request](../secret_detection/index.md#enable-secret-detection-via-an-automatic-merge-request).
+
+## Enable or disable UI redesign **(FREE SELF)**
+
+The Security Configuration redesign is under development, but is ready for
+production use. It is deployed behind a feature flag that is **disabled by
+default**.
+[GitLab administrators with access to the GitLab Rails console](../../../administration/feature_flags.md) can enable it.
+
+To enable it:
+
+```ruby
+# For the instance
+Feature.enable(:security_configuration_redesign)
+# For a single project
+Feature.enable(:security_configuration_redesign, Project.find(<project id>))
+```
+
+To disable it:
+
+```ruby
+# For the instance
+Feature.disable(:security_configuration_redesign)
+# For a single project
+Feature.disable(:security_configuration_redesign, Project.find(<project id>))
+```
