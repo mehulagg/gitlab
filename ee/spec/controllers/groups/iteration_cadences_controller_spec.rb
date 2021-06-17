@@ -15,28 +15,13 @@ RSpec.describe Groups::IterationCadencesController do
     sign_in(user)
   end
 
-  describe 'new' do
-    subject { get :new, params: { group_id: group } }
+  describe 'index' do
+    subject { get :index, params: { group_id: group } }
 
     where(:feature_flag_available, :role, :status) do
       false | :developer | :not_found
       true  | :none      | :not_found
-      true  | :guest     | :not_found
-      true  | :developer | :success
-    end
-
-    with_them do
-      it_behaves_like 'returning response status', params[:status]
-    end
-  end
-
-  describe 'edit' do
-    subject { get :edit, params: { group_id: group, id: cadence } }
-
-    where(:feature_flag_available, :role, :status) do
-      false | :developer | :not_found
-      true  | :none      | :not_found
-      true  | :guest     | :not_found
+      true  | :guest     | :success
       true  | :developer | :success
     end
 

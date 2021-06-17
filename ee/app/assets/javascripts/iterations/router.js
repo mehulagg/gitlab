@@ -7,44 +7,58 @@ import IterationReport from './components/iteration_report.vue';
 
 Vue.use(VueRouter);
 
-const routes = [
-  {
-    name: 'new',
-    path: '/new',
-    component: IterationCadenceForm,
-  },
-  {
-    name: 'edit',
-    path: '/:cadenceId/edit',
-    component: IterationCadenceForm,
-  },
-  {
-    name: 'index',
-    path: '/',
-    component: IterationCadenceList,
-  },
-  {
-    name: 'newIteration',
-    path: '/:cadenceId/iterations/new',
-    component: IterationForm,
-  },
-  {
-    name: 'iteration',
-    path: '/:cadenceId/iterations/:iterationId',
-    component: IterationReport,
-  },
-  {
-    name: 'editIteration',
-    path: '/:cadenceId/iterations/:iterationId/edit',
-    component: IterationForm,
-  },
-  {
-    path: '*',
-    redirect: '/',
-  },
-];
+export default function createRouter({ base, permissions = {} }) {
+  const routes = [
+    {
+      name: 'index',
+      path: '/',
+      component: IterationCadenceList,
+    },
+    {
+      name: 'new',
+      path: '/new',
+      component: IterationCadenceForm,
+      beforeEnter: (to, from, next) => {
+        if (!permissions.canCreateCadence) {
+          next({ path: '/' });
+        } else {
+          next();
+        }
+      },
+    },
+    {
+      name: 'edit',
+      path: '/:cadenceId/edit',
+      component: IterationCadenceForm,
+      beforeEnter: (to, from, next) => {
+        if (!permissions.canEditCadence) {
+          next({ path: '/' });
+        } else {
+          next();
+        }
+      },
+    },
+    {
+      name: 'newIteration',
+      path: '/:cadenceId/iterations/new',
+      component: IterationForm,
+    },
+    {
+      name: 'iteration',
+      path: '/:cadenceId/iterations/:iterationId',
+      component: IterationReport,
+    },
+    {
+      name: 'editIteration',
+      path: '/:cadenceId/iterations/:iterationId/edit',
+      component: IterationForm,
+    },
+    {
+      path: '*',
+      redirect: '/',
+    },
+  ];
 
-export default function createRouter(base) {
   const router = new VueRouter({
     base,
     mode: 'history',

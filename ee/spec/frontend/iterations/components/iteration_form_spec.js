@@ -12,7 +12,7 @@ import waitForPromises from 'helpers/wait_for_promises';
 import { convertToGraphQLId } from '~/graphql_shared/utils';
 
 const baseUrl = '/cadences/';
-const router = createRouter(baseUrl);
+const router = createRouter({ base: baseUrl });
 
 function createMockApolloProvider(requestHandlers) {
   Vue.use(VueApollo);

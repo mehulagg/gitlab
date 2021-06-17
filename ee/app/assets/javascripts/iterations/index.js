@@ -113,7 +113,14 @@ export function initCadenceApp({ namespaceType }) {
     previewMarkdownPath,
     noIssuesSvgPath,
   } = el.dataset;
-  const router = createRouter(cadencesListPath);
+  const router = createRouter({
+    base: cadencesListPath,
+    permissions: {
+      canCreateCadence: parseBoolean(canCreateCadence),
+      canEditCadence: parseBoolean(canEditCadence),
+      canEditIteration: parseBoolean(canEditIteration),
+    },
+  });
 
   return new Vue({
     el,
