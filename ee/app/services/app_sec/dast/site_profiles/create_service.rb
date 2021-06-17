@@ -28,6 +28,8 @@ module AppSec
             create_secret_variable!(::Dast::SiteProfileSecretVariable::PASSWORD, params[:auth_password])
             create_secret_variable!(::Dast::SiteProfileSecretVariable::REQUEST_HEADERS, params[:request_headers])
 
+            create_audit_event
+
             ServiceResponse.success(payload: dast_site_profile)
           end
         rescue Rollback => e
@@ -67,6 +69,16 @@ module AppSec
             project_id: project.id,
             url_base: url_base
           ).execute.first
+        end
+
+        def create_audit_event
+          ::Gitlab::Audit::Auditor.audit(
+            name: 'dast_site_profile_create',
+            author: current_user,
+            scope: project,
+            target: dast_site_profile,
+            message: 'Added DAST site profile'
+          )
         end
       end
     end

@@ -320,9 +320,9 @@ After the `gitlab-ci.yml` template has been added and the `serverless.yml` file
 has been created, pushing a commit to your project results in a CI pipeline
 being executed which deploys each function as a Knative service. After the
 deploy stage has finished, additional details for the function display
-under **Operations > Serverless**.
+under **Infrastructure > Serverless platform**.
 
-![serverless page](img/serverless-page.png)
+![serverless page](img/serverless-page_v14_0.png)
 
 This page contains all functions available for the project, the description for
 accessing the function, and, if available, the function's runtime information.
@@ -454,7 +454,7 @@ With all the pieces in place, the next time a CI pipeline runs the Knative appli
 
 ### Function details
 
-Go to the **Operations > Serverless** page to see the final URL of your functions.
+Go to the **Infrastructure > Serverless platform** page to see the final URL of your functions.
 
 ![function_details](img/function-list_v12_7.png)
 
@@ -463,7 +463,7 @@ Go to the **Operations > Serverless** page to see the final URL of your function
 On the same page as above, click on one of the function
 rows to bring up the function details page.
 
-![function_details](img/function-details-loaded.png)
+![function_details](img/function-details-loaded_v14_0.png)
 
 The pod count gives you the number of pods running the serverless function instances on a given cluster.
 
@@ -579,7 +579,7 @@ or with other versions of Python.
 
    Where `<namespace>` is the namespace created by GitLab for your serverless project (composed of `<project_name>-<project_id>-<environment>`) and
    `example.com` is the domain being used for your project. If you are unsure what the namespace of your project is, navigate
-   to the **Operations > Serverless** page of your project and inspect
+   to the **Infrastructure > Serverless platform** page of your project and inspect
    the endpoint provided for your function/app.
 
    ![function_endpoint](img/function-endpoint.png)

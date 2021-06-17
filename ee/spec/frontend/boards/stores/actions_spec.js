@@ -3,6 +3,7 @@ import MockAdapter from 'axios-mock-adapter';
 import Vue from 'vue';
 import Vuex from 'vuex';
 import { BoardType, GroupByParamType, listsQuery, issuableTypes } from 'ee/boards/constants';
+import epicCreateMutation from 'ee/boards/graphql/epic_create.mutation.graphql';
 import actions, { gqlClient } from 'ee/boards/stores/actions';
 import boardsStoreEE from 'ee/boards/stores/boards_store_ee';
 import * as types from 'ee/boards/stores/mutation_types';
@@ -13,6 +14,7 @@ import { mockMoveIssueParams, mockMoveData, mockMoveState } from 'jest/boards/mo
 import { formatListIssues } from '~/boards/boards_util';
 import listsIssuesQuery from '~/boards/graphql/lists_issues.query.graphql';
 import * as typesCE from '~/boards/stores/mutation_types';
+import { getIdFromGraphQLId } from '~/graphql_shared/utils';
 import * as commonUtils from '~/lib/utils/common_utils';
 import { mergeUrlParams, removeParams } from '~/lib/utils/url_utility';
 import {
@@ -873,6 +875,169 @@ describe('createEpicList', () => {
     expect(dispatch).toHaveBeenCalledWith('highlightList', existingList.id);
     expect(dispatch).toHaveBeenCalledTimes(1);
     expect(commit).not.toHaveBeenCalled();
+  });
+});
+
+describe('addListNewEpic', () => {
+  const state = {
+    boardType: 'group',
+    fullPath: 'gitlab-org/gitlab',
+    boardConfig: {
+      labelIds: [],
+      assigneeId: null,
+      milestoneId: -1,
+    },
+  };
+
+  const fakeList = { id: 'gid://gitlab/List/123' };
+
+  it('should add board scope to the epic being created', async () => {
+    jest.spyOn(gqlClient, 'mutate').mockResolvedValue({
+      data: {
+        boardEpicCreate: {
+          epic: mockEpic,
+          errors: [],
+        },
+      },
+    });
+
+    await actions.addListNewEpic(
+      { dispatch: jest.fn(), commit: jest.fn(), state },
+      { epicInput: mockEpic, list: fakeList },
+    );
+
+    expect(gqlClient.mutate).toHaveBeenCalledWith({
+      mutation: epicCreateMutation,
+      variables: {
+        input: {
+          ...mockEpic,
+          groupPath: state.fullPath,
+          id: 'gid://gitlab/Epic/41',
+          labels: [],
+        },
+      },
+    });
+  });
+
+  it('should add board scope by merging attributes to the epic being created', async () => {
+    const epic = {
+      ...mockEpic,
+      labelIds: ['gid://gitlab/GroupLabel/4'],
+    };
+
+    jest.spyOn(gqlClient, 'mutate').mockResolvedValue({
+      data: {
+        boardEpicCreate: {
+          epic,
+          errors: [],
+        },
+      },
+    });
+
+    const payload = {
+      ...epic,
+      labelIds: [...epic.labelIds, 'gid://gitlab/GroupLabel/5'],
+    };
+
+    await actions.addListNewEpic(
+      { dispatch: jest.fn(), commit: jest.fn(), state },
+      { epicInput: epic, list: fakeList },
+    );
+
+    expect(gqlClient.mutate).toHaveBeenCalledWith({
+      mutation: epicCreateMutation,
+      variables: {
+        input: {
+          ...epic,
+          groupPath: state.fullPath,
+        },
+      },
+    });
+    expect(payload.labelIds).toEqual(['gid://gitlab/GroupLabel/4', 'gid://gitlab/GroupLabel/5']);
+  });
+
+  describe('when issue creation mutation request succeeds', () => {
+    it('dispatches a correct set of mutations', () => {
+      jest.spyOn(gqlClient, 'mutate').mockResolvedValue({
+        data: {
+          boardEpicCreate: {
+            epic: mockEpic,
+            errors: [],
+          },
+        },
+      });
+
+      testAction({
+        action: actions.addListNewEpic,
+        payload: {
+          epicInput: mockEpic,
+          list: fakeList,
+          placeholderId: 'tmp',
+        },
+        state,
+        expectedActions: [
+          {
+            type: 'addListItem',
+            payload: {
+              list: fakeList,
+              item: { ...mockEpic, id: 'tmp', isLoading: true, labels: [], assignees: [] },
+              position: 0,
+              inProgress: true,
+            },
+          },
+          { type: 'removeListItem', payload: { listId: fakeList.id, itemId: 'tmp' } },
+          {
+            type: 'addListItem',
+            payload: {
+              list: fakeList,
+              item: { ...mockEpic, id: getIdFromGraphQLId(mockEpic.id), assignees: [] },
+              position: 0,
+            },
+          },
+        ],
+      });
+    });
+  });
+
+  describe('when issue creation mutation request fails', () => {
+    it('dispatches a correct set of mutations', () => {
+      jest.spyOn(gqlClient, 'mutate').mockResolvedValue({
+        data: {
+          boardEpicCreate: {
+            epic: mockEpic,
+            errors: [{ foo: 'bar' }],
+          },
+        },
+      });
+
+      testAction({
+        action: actions.addListNewEpic,
+        payload: {
+          epicInput: mockEpic,
+          list: fakeList,
+          placeholderId: 'tmp',
+        },
+        state,
+        expectedActions: [
+          {
+            type: 'addListItem',
+            payload: {
+              list: fakeList,
+              item: { ...mockEpic, id: 'tmp', isLoading: true, labels: [], assignees: [] },
+              position: 0,
+              inProgress: true,
+            },
+          },
+          { type: 'removeListItem', payload: { listId: fakeList.id, itemId: 'tmp' } },
+        ],
+        expectedMutations: [
+          {
+            type: types.SET_ERROR,
+            payload: 'An error occurred while creating the epic. Please try again.',
+          },
+        ],
+      });
+    });
   });
 });
 

@@ -1,4 +1,5 @@
 import {
+  formatEpic,
   formatListEpics,
   formatEpicListsPageInfo,
   transformBoardConfig,
@@ -6,6 +7,33 @@ import {
 import { mockLabel } from './mock_data';
 
 const listId = 'gid://gitlab/Boards::EpicList/3';
+
+describe('formatEpic', () => {
+  it('formats raw epic object for state', () => {
+    const labels = [
+      {
+        id: 1,
+        title: 'bug',
+      },
+    ];
+
+    const rawEpic = {
+      id: 1,
+      title: 'Foo',
+      labels: {
+        nodes: labels,
+      },
+    };
+
+    expect(formatEpic(rawEpic)).toEqual({
+      ...rawEpic,
+      labels,
+      // Until we add support for assignees within Epics,
+      // we need to pass it as an empty array.
+      assignees: [],
+    });
+  });
+});
 
 describe('formatListEpics', () => {
   it('formats raw response from list epics for state', () => {

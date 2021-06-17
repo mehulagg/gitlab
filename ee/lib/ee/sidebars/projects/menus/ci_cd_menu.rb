@@ -18,6 +18,15 @@ module EE
 
           private
 
+          override :pipelines_routes
+          def pipelines_routes
+            super + %w[
+              pipelines#security
+              pipelines#licenses
+              pipelines#codequality_report
+            ]
+          end
+
           def test_cases_menu_item
             if !context.project.licensed_feature_available?(:quality_management) ||
               !can?(context.current_user, :read_issue, context.project)

@@ -34,7 +34,6 @@ exports[`ee/BoardContentSidebar matches the snapshot 1`] = `
     <sidebardropdownwidget-stub
       attrworkspacepath="gitlab-org"
       class="gl-mt-5"
-      data-qa-selector="iteration_container"
       data-testid="iteration-edit"
       iid="27"
       issuableattribute="iteration"

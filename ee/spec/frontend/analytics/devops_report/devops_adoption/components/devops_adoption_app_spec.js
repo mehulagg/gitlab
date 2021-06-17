@@ -1,8 +1,9 @@
-import { GlAlert } from '@gitlab/ui';
+import { GlAlert, GlTabs } from '@gitlab/ui';
 import * as Sentry from '@sentry/browser';
 import { createLocalVue } from '@vue/test-utils';
 import Vue from 'vue';
 import VueApollo from 'vue-apollo';
+import DevopsAdoptionAddDropdown from 'ee/analytics/devops_report/devops_adoption/components/devops_adoption_add_dropdown.vue';
 import DevopsAdoptionApp from 'ee/analytics/devops_report/devops_adoption/components/devops_adoption_app.vue';
 import DevopsAdoptionSection from 'ee/analytics/devops_report/devops_adoption/components/devops_adoption_section.vue';
 import DevopsAdoptionSegmentModal from 'ee/analytics/devops_report/devops_adoption/components/devops_adoption_segment_modal.vue';
@@ -22,7 +23,6 @@ import DevopsScore from '~/analytics/devops_report/components/devops_score.vue';
 import API from '~/api';
 import {
   groupNodes,
-  nextGroupNode,
   groupPageInfo,
   devopsAdoptionNamespaceData,
   devopsAdoptionNamespaceDataEmpty,
@@ -95,6 +95,9 @@ describe('DevopsAdoptionApp', () => {
       data() {
         return data;
       },
+      stubs: {
+        GlTabs,
+      },
     });
   }
 
@@ -104,7 +107,7 @@ describe('DevopsAdoptionApp', () => {
     wrapper.destroy();
   });
 
-  describe('initial request', () => {
+  describe('group data request', () => {
     let groupsSpy;
 
     afterEach(() => {
@@ -119,16 +122,12 @@ describe('DevopsAdoptionApp', () => {
         await waitForPromises();
       });
 
-      it('renders the segment modal', () => {
-        expect(wrapper.find(DevopsAdoptionSegmentModal).exists()).toBe(true);
-      });
-
       it('should fetch data once', () => {
         expect(groupsSpy).toHaveBeenCalledTimes(1);
       });
     });
 
-    describe('when error is thrown in the initial request', () => {
+    describe('when error is thrown fetching group data', () => {
       const error = new Error('foo!');
 
       beforeEach(async () => {
@@ -141,98 +140,6 @@ describe('DevopsAdoptionApp', () => {
 
       it('should fetch data once', () => {
         expect(groupsSpy).toHaveBeenCalledTimes(1);
-      });
-
-      it('displays the error message and calls Sentry', () => {
-        const alert = wrapper.find(GlAlert);
-        expect(alert.exists()).toBe(true);
-        expect(alert.text()).toBe(DEVOPS_ADOPTION_STRINGS.app.groupsError);
-        expect(Sentry.captureException.mock.calls[0][0].networkError).toBe(error);
-      });
-    });
-  });
-
-  describe('fetchMore request', () => {
-    let groupsSpy;
-
-    afterEach(() => {
-      groupsSpy = null;
-    });
-
-    describe('when group data is present', () => {
-      beforeEach(async () => {
-        groupsSpy = jest
-          .fn()
-          .mockResolvedValueOnce(initialResponse)
-          // `fetchMore` response
-          .mockResolvedValueOnce({
-            __typename: 'Groups',
-            nodes: [nextGroupNode],
-            nextPage: null,
-          });
-        const mockApollo = createMockApolloProvider({ groupsSpy });
-        wrapper = createComponent({ mockApollo });
-        await waitForPromises();
-      });
-
-      it('renders the segment modal', () => {
-        expect(wrapper.find(DevopsAdoptionSegmentModal).exists()).toBe(true);
-      });
-
-      it('should fetch data twice', () => {
-        expect(groupsSpy).toHaveBeenCalledTimes(2);
-      });
-
-      it('should fetch more data', () => {
-        expect(groupsSpy.mock.calls[0][1]).toMatchObject({
-          nextPage: undefined,
-        });
-        expect(groupsSpy.mock.calls[1][1]).toMatchObject({
-          nextPage: 2,
-        });
-      });
-    });
-
-    describe('when fetching too many pages of data', () => {
-      beforeEach(async () => {
-        // Always send the same page
-        groupsSpy = jest.fn().mockResolvedValue(initialResponse);
-        const mockApollo = createMockApolloProvider({ groupsSpy });
-        wrapper = createComponent({ mockApollo, data: { requestCount: 2 } });
-        await waitForPromises();
-      });
-
-      it('should fetch data twice', () => {
-        expect(groupsSpy).toHaveBeenCalledTimes(2);
-      });
-    });
-
-    describe('when error is thrown in the fetchMore request', () => {
-      const error = 'Error: foo!';
-
-      beforeEach(async () => {
-        jest.spyOn(Sentry, 'captureException');
-        groupsSpy = jest
-          .fn()
-          .mockResolvedValueOnce(initialResponse)
-          // `fetchMore` response
-          .mockRejectedValue(error);
-        const mockApollo = createMockApolloProvider({ groupsSpy });
-        wrapper = createComponent({ mockApollo });
-        await waitForPromises();
-      });
-
-      it('should fetch data twice', () => {
-        expect(groupsSpy).toHaveBeenCalledTimes(2);
-      });
-
-      it('should fetch more data', () => {
-        expect(groupsSpy.mock.calls[0][1]).toMatchObject({
-          nextPage: undefined,
-        });
-        expect(groupsSpy.mock.calls[1][1]).toMatchObject({
-          nextPage: 2,
-        });
       });
 
       it('displays the error message and calls Sentry', () => {
@@ -456,6 +363,10 @@ describe('DevopsAdoptionApp', () => {
           expect(
             wrapper.findByTestId('devops-adoption-tab').find(DevopsAdoptionSection).exists(),
           ).toBe(true);
+        });
+
+        it('displays the DevopsAdoptionAddDropdown as the last tab', () => {
+          expect(wrapper.find(DevopsAdoptionAddDropdown).exists()).toBe(true);
         });
 
         eventTrackingBehaviour('devops-adoption-tab', 'i_analytics_dev_ops_adoption');

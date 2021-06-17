@@ -50,8 +50,8 @@ recover. See below for more details.
 
 The following guide assumes that:
 
-- You are using Omnibus and therefore you are using PostgreSQL 11 or later
-  which includes the [`pg_basebackup` tool](https://www.postgresql.org/docs/11/app-pgbasebackup.html).
+- You are using Omnibus and therefore you are using PostgreSQL 12 or later
+  which includes the [`pg_basebackup` tool](https://www.postgresql.org/docs/12/app-pgbasebackup.html).
 - You have a **primary** node already set up (the GitLab server you are
   replicating from), running Omnibus' PostgreSQL (or equivalent version), and
   you have a new **secondary** server set up with the same versions of the OS,
@@ -187,7 +187,7 @@ There is an [issue where support is being discussed](https://gitlab.com/gitlab-o
    `postgresql['md5_auth_cidr_addresses']` and `postgresql['listen_address']`.
 
    The `listen_address` option opens PostgreSQL up to network connections with the interface
-   corresponding to the given address. See [the PostgreSQL documentation](https://www.postgresql.org/docs/11/runtime-config-connection.html)
+   corresponding to the given address. See [the PostgreSQL documentation](https://www.postgresql.org/docs/12/runtime-config-connection.html)
    for more details.
 
    NOTE:
@@ -209,7 +209,7 @@ There is an [issue where support is being discussed](https://gitlab.com/gitlab-o
    ## Geo Primary role
    ## - configure dependent flags automatically to enable Geo
    ##
-   roles ['geo_primary_role']
+   roles(['geo_primary_role'])
 
    ##
    ## Primary address
@@ -245,7 +245,7 @@ There is an [issue where support is being discussed](https://gitlab.com/gitlab-o
    ```
 
    You may also want to edit the `wal_keep_segments` and `max_wal_senders` to match your
-   database replication requirements. Consult the [PostgreSQL - Replication documentation](https://www.postgresql.org/docs/11/runtime-config-replication.html)
+   database replication requirements. Consult the [PostgreSQL - Replication documentation](https://www.postgresql.org/docs/12/runtime-config-replication.html)
    for more information.
 
 1. Save the file and reconfigure GitLab for the database listen changes and
@@ -382,7 +382,7 @@ There is an [issue where support is being discussed](https://gitlab.com/gitlab-o
    ## Geo Secondary role
    ## - configure dependent flags automatically to enable Geo
    ##
-   roles ['geo_secondary_role']
+   roles(['geo_secondary_role'])
 
    ##
    ## Secondary address
@@ -401,7 +401,7 @@ There is an [issue where support is being discussed](https://gitlab.com/gitlab-o
    ```
 
    For external PostgreSQL instances, see [additional instructions](external_database.md).
-   If you bring a former **primary** node back online to serve as a **secondary** node, then you also need to remove `roles ['geo_primary_role']` or `geo_primary_role['enable'] = true`.
+   If you bring a former **primary** node back online to serve as a **secondary** node, then you also need to remove `roles(['geo_primary_role'])` or `geo_primary_role['enable'] = true`.
 
 1. Reconfigure GitLab for the changes to take effect:
 
@@ -468,7 +468,7 @@ data before running `pg_basebackup`.
      (e.g., you know the network path is secure, or you are using a site-to-site
      VPN). This is **not** safe over the public Internet!
    - You can read more details about each `sslmode` in the
-     [PostgreSQL documentation](https://www.postgresql.org/docs/11/libpq-ssl.html#LIBPQ-SSL-PROTECTION);
+     [PostgreSQL documentation](https://www.postgresql.org/docs/12/libpq-ssl.html#LIBPQ-SSL-PROTECTION);
      the instructions above are carefully written to ensure protection against
      both passive eavesdroppers and active "man-in-the-middle" attackers.
    - Change the `--slot-name` to the name of the replication slot
@@ -541,12 +541,12 @@ Leader instance**:
 1. Edit `/etc/gitlab/gitlab.rb` and add the following:
 
    ```ruby
-   consul['enable'] = true
+   roles(['patroni_role'])
+   
+   consul['services'] = %w(postgresql)
    consul['configuration'] = {
      retry_join: %w[CONSUL_PRIMARY1_IP CONSUL_PRIMARY2_IP CONSUL_PRIMARY3_IP]
    }
-
-   roles ['patroni_role']
    
    # You need one entry for each secondary, with a unique name following PostgreSQL slot_name constraints:
    #
@@ -644,7 +644,7 @@ Follow the minimal configuration for the PgBouncer node:
 
    ```ruby
    # Disable all components except Pgbouncer and Consul agent
-   roles ['pgbouncer_role']
+   roles(['pgbouncer_role'])
 
    # PgBouncer configuration
    pgbouncer['admin_users'] = %w(pgbouncer gitlab-consul)
@@ -703,7 +703,7 @@ For each Patroni instance on the secondary site:
 1. Edit `/etc/gitlab/gitlab.rb` and add the following:
 
    ```ruby
-   roles ['consul_role', 'patroni_role']
+   roles(['consul_role', 'patroni_role'])
 
    consul['enable'] = true
    consul['configuration'] = {
@@ -768,7 +768,7 @@ by following the same instructions above.
 
 Secondary sites use a separate PostgreSQL installation as a tracking database to
 keep track of replication status and automatically recover from potential replication issues.
-Omnibus automatically configures a tracking database when `roles ['geo_secondary_role']` is set.
+Omnibus automatically configures a tracking database when `roles(['geo_secondary_role'])` is set.
 If you want to run this database in a highly available configuration, follow the instructions below.
 
 A production-ready and secure setup requires at least three Consul nodes, three
@@ -793,7 +793,7 @@ Follow the minimal configuration for the PgBouncer node for the tracking databas
 
    ```ruby
    # Disable all components except Pgbouncer and Consul agent
-   roles ['pgbouncer_role']
+   roles(['pgbouncer_role'])
 
    # PgBouncer configuration
    pgbouncer['users'] = {
@@ -855,7 +855,7 @@ For each Patroni instance on the secondary site for the tracking database:
 
    ```ruby
    # Disable all components except PostgreSQL, Patroni, and Consul
-   roles ['patroni_role']
+   roles(['patroni_role'])
 
    # Consul configuration
    consul['services'] = %w(postgresql)

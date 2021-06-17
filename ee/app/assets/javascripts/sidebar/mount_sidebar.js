@@ -14,7 +14,7 @@ import { IssuableAttributeType } from './constants';
 
 Vue.use(VueApollo);
 
-const mountWeightComponent = (mediator) => {
+const mountWeightComponent = () => {
   const el = document.querySelector('.js-sidebar-weight-entry-point');
 
   if (!el) return false;
@@ -24,12 +24,7 @@ const mountWeightComponent = (mediator) => {
     components: {
       SidebarWeight,
     },
-    render: (createElement) =>
-      createElement('sidebar-weight', {
-        props: {
-          mediator,
-        },
-      }),
+    render: (createElement) => createElement('sidebar-weight'),
   });
 };
 
@@ -140,7 +135,7 @@ function mountIterationSelect() {
 
 export default function mountSidebar(mediator) {
   CEMountSidebar.mountSidebar(mediator);
-  mountWeightComponent(mediator);
+  mountWeightComponent();
   mountStatusComponent(mediator);
   mountEpicsSelect();
   mountIterationSelect();

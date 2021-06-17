@@ -11,7 +11,6 @@ import {
   RuleTypeFQDN,
   EntityTypes,
   fromYaml,
-  removeUnnecessaryDashes,
   buildRule,
   toYaml,
 } from 'ee/threat_monitoring/components/policy_editor/network_policy/lib';
@@ -330,17 +329,5 @@ spec:
         expect(fromYaml(manifest)).toStrictEqual({ error: true });
       },
     );
-  });
-});
-
-describe('removeUnnecessaryDashes', () => {
-  it.each`
-    input          | output
-    ${'---\none'}  | ${'one'}
-    ${'two'}       | ${'two'}
-    ${'--\nthree'} | ${'--\nthree'}
-    ${'four---\n'} | ${'four'}
-  `('returns $output when used on $input', ({ input, output }) => {
-    expect(removeUnnecessaryDashes(input)).toBe(output);
   });
 });

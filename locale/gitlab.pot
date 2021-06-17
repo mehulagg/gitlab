@@ -421,6 +421,21 @@ msgstr ""
 msgid "%{board_target} not found"
 msgstr ""
 
+msgid "%{bold_start}%{count}%{bold_end} issue"
+msgid_plural "%{bold_start}%{count}%{bold_end} issues"
+msgstr[0] ""
+msgstr[1] ""
+
+msgid "%{bold_start}%{count}%{bold_end} member"
+msgid_plural "%{bold_start}%{count}%{bold_end} members"
+msgstr[0] ""
+msgstr[1] ""
+
+msgid "%{bold_start}%{count}%{bold_end} opened merge request"
+msgid_plural "%{bold_start}%{count}%{bold_end} opened merge requests"
+msgstr[0] ""
+msgstr[1] ""
+
 msgid "%{code_open}Masked:%{code_close} Hidden in job logs. Must match masking requirements."
 msgstr ""
 
@@ -1474,9 +1489,6 @@ msgstr ""
 msgid "A rebase is already in progress."
 msgstr ""
 
-msgid "A rule must be provided to create an escalation policy"
-msgstr ""
-
 msgid "A secure token that identifies an external storage request."
 msgstr ""
 
@@ -1895,6 +1907,9 @@ msgid "Add a comment to this line"
 msgstr ""
 
 msgid "Add a comment to this line or drag for multiple lines"
+msgstr ""
+
+msgid "Add a custom message with details about the instance's shared runners. The message is visible in group and project CI/CD settings, in the Runners section. Markdown is supported."
 msgstr ""
 
 msgid "Add a general comment to this %{noteableDisplayName}."
@@ -2332,9 +2347,6 @@ msgstr ""
 msgid "AdminSettings|Enable shared runners for new projects"
 msgstr ""
 
-msgid "AdminSettings|Environment variables are protected by default"
-msgstr ""
-
 msgid "AdminSettings|Feed token"
 msgstr ""
 
@@ -2347,7 +2359,13 @@ msgstr ""
 msgid "AdminSettings|Moved to integrations"
 msgstr ""
 
+msgid "AdminSettings|New CI/CD variables in projects and groups default to protected."
+msgstr ""
+
 msgid "AdminSettings|No required pipeline"
+msgstr ""
+
+msgid "AdminSettings|Protect CI/CD variables by default"
 msgstr ""
 
 msgid "AdminSettings|Required pipeline configuration"
@@ -2378,9 +2396,6 @@ msgid "AdminSettings|The latest artifacts for all jobs in the most recent succes
 msgstr ""
 
 msgid "AdminSettings|The template for the required pipeline configuration can be one of the GitLab-provided templates, or a custom template added to an instance template repository. %{link_start}How do I create an instance template repository?%{link_end}"
-msgstr ""
-
-msgid "AdminSettings|When creating a new environment variable it will be protected by default."
 msgstr ""
 
 msgid "AdminSettings|You can't add new templates. To migrate or remove a Service template, create a new integration at %{settings_link_start}Settings &gt; Integrations%{link_end}. Learn more about %{doc_link_start}Project integration management%{link_end}."
@@ -3223,6 +3238,9 @@ msgid "All environments"
 msgstr ""
 
 msgid "All epics"
+msgstr ""
+
+msgid "All escalations rules must have a schedule in the same project as the policy"
 msgstr ""
 
 msgid "All groups and projects"
@@ -4124,13 +4142,7 @@ msgstr ""
 msgid "ApprovalRule|Rule name"
 msgstr ""
 
-msgid "ApprovalRule|Status check"
-msgstr ""
-
 msgid "ApprovalRule|Target branch"
-msgstr ""
-
-msgid "ApprovalRule|Users or groups"
 msgstr ""
 
 msgid "ApprovalStatusTooltip|Adheres to separation of duties"
@@ -4518,9 +4530,6 @@ msgstr ""
 msgid "At least one approval from a code owner is required to change files matching the respective CODEOWNER rules."
 msgstr ""
 
-msgid "At least one logging option is required to be enabled"
-msgstr ""
-
 msgid "At least one of group_id or project_id must be specified"
 msgstr ""
 
@@ -4707,9 +4716,6 @@ msgid "Auto DevOps"
 msgstr ""
 
 msgid "Auto DevOps enabled"
-msgstr ""
-
-msgid "Auto DevOps, runners and job artifacts"
 msgstr ""
 
 msgid "Auto stop successfully canceled."
@@ -5241,6 +5247,9 @@ msgid_plural "Boards|+ %{displayedIssuablesCount} more %{issuableType}s"
 msgstr[0] ""
 msgstr[1] ""
 
+msgid "Boards|An error occurred while creating the epic. Please try again."
+msgstr ""
+
 msgid "Boards|An error occurred while creating the issue. Please try again."
 msgstr ""
 
@@ -5300,6 +5309,9 @@ msgstr ""
 msgid "Boards|Failed to fetch blocking %{issuableType}s"
 msgstr ""
 
+msgid "Boards|New epic"
+msgstr ""
+
 msgid "Boards|Retrieving blocking %{issuableType}s"
 msgstr ""
 
@@ -5328,6 +5340,9 @@ msgid "Board|Edit board"
 msgstr ""
 
 msgid "Board|Enter board name"
+msgstr ""
+
+msgid "Board|Failed to create epic. Please try again."
 msgstr ""
 
 msgid "Board|Failed to delete board. Please try again."
@@ -5770,10 +5785,10 @@ msgstr ""
 msgid "CICD|Jobs"
 msgstr ""
 
-msgid "CICD|The Auto DevOps pipeline runs if no alternative CI configuration file is found."
+msgid "CICD|The Auto DevOps pipeline runs by default in all projects with no CI/CD configuration file."
 msgstr ""
 
-msgid "CICD|The Auto DevOps pipeline will run if no alternative CI configuration file is found."
+msgid "CICD|The Auto DevOps pipeline runs if no alternative CI configuration file is found."
 msgstr ""
 
 msgid "CICD|group enabled"
@@ -6466,6 +6481,9 @@ msgstr ""
 msgid "Choose specific groups or storage shards"
 msgstr ""
 
+msgid "Choose the preferred Runner and populate the AWS CFT."
+msgstr ""
+
 msgid "Choose the top-level group for your repository imports."
 msgstr ""
 
@@ -6964,9 +6982,6 @@ msgstr ""
 msgid "ClusterIntegration|All data will be deleted and cannot be restored."
 msgstr ""
 
-msgid "ClusterIntegration|All installed applications and related resources"
-msgstr ""
-
 msgid "ClusterIntegration|Allow GitLab to manage namespace and service accounts for this cluster. %{linkStart}More information%{linkEnd}"
 msgstr ""
 
@@ -7070,9 +7085,6 @@ msgid "ClusterIntegration|Cluster management project"
 msgstr ""
 
 msgid "ClusterIntegration|Cluster name is required."
-msgstr ""
-
-msgid "ClusterIntegration|Cluster_applications artifact too big. Maximum allowable size: %{human_size}"
 msgstr ""
 
 msgid "ClusterIntegration|Clusters are utilized by selecting the nearest ancestor with a matching environment scope. For example, project clusters will override group clusters. %{linkStart}More information%{linkEnd}"
@@ -7279,9 +7291,6 @@ msgstr ""
 msgid "ClusterIntegration|HTTP Error"
 msgstr ""
 
-msgid "ClusterIntegration|Helm release failed to install"
-msgstr ""
-
 msgid "ClusterIntegration|If you are setting up multiple clusters and are using Auto DevOps, %{help_link_start}read this first%{help_link_end}."
 msgstr ""
 
@@ -7439,12 +7448,6 @@ msgid "ClusterIntegration|No Key Pairs found"
 msgstr ""
 
 msgid "ClusterIntegration|No VPCs found"
-msgstr ""
-
-msgid "ClusterIntegration|No deployment cluster found for this job"
-msgstr ""
-
-msgid "ClusterIntegration|No deployment found for this job"
 msgstr ""
 
 msgid "ClusterIntegration|No instance type found"
@@ -7682,9 +7685,6 @@ msgid "ClusterIntegration|Specifying a domain will allow you to use Auto Review 
 msgstr ""
 
 msgid "ClusterIntegration|Subnets"
-msgstr ""
-
-msgid "ClusterIntegration|The %{gitlabNamespace} namespace"
 msgstr ""
 
 msgid "ClusterIntegration|The Amazon Resource Name (ARN) associated with your role. If you do not have a provision role, first create one on  %{startAwsLink}Amazon Web Services %{externalLinkIcon}%{endLink} using the above account and external IDs. %{startMoreInfoLink}More information%{endLink}"
@@ -7933,7 +7933,13 @@ msgstr ""
 msgid "CodeQuality|Code quality"
 msgstr ""
 
+msgid "CodeQuality|Code quality: %{severity} - %{description}"
+msgstr ""
+
 msgid "CodeQuality|New code quality degradations in this file"
+msgstr ""
+
+msgid "CodeQuality|New code quality degradations on this line"
 msgstr ""
 
 msgid "CodeQuality|Some changes in this file degrade the code quality."
@@ -7964,9 +7970,6 @@ msgid "Collapse all threads"
 msgstr ""
 
 msgid "Collapse approvers"
-msgstr ""
-
-msgid "Collapse diffs larger than this size, and show a 'too large' message instead."
 msgstr ""
 
 msgid "Collapse issues"
@@ -9030,6 +9033,9 @@ msgstr ""
 msgid "Copy the code below to implement tracking in your application:"
 msgstr ""
 
+msgid "Copy this registration token."
+msgstr ""
+
 msgid "Copy this value"
 msgstr ""
 
@@ -9739,6 +9745,9 @@ msgid "Customizable by an administrator."
 msgstr ""
 
 msgid "Customizable by owners."
+msgstr ""
+
+msgid "Customize CI/CD settings, including Auto DevOps, shared runners, and job artifacts."
 msgstr ""
 
 msgid "Customize colors"
@@ -10455,7 +10464,7 @@ msgstr ""
 msgid "Default"
 msgstr ""
 
-msgid "Default CI configuration path"
+msgid "Default CI/CD configuration file"
 msgstr ""
 
 msgid "Default Timeout Period"
@@ -11255,6 +11264,18 @@ msgstr ""
 msgid "DevopsAdoption|Add a group to get started"
 msgstr ""
 
+msgid "DevopsAdoption|Add group"
+msgstr ""
+
+msgid "DevopsAdoption|Add group to table"
+msgstr ""
+
+msgid "DevopsAdoption|Add sub-group"
+msgstr ""
+
+msgid "DevopsAdoption|Add sub-group to table"
+msgstr ""
+
 msgid "DevopsAdoption|Add/remove groups"
 msgstr ""
 
@@ -11330,6 +11351,9 @@ msgstr ""
 msgid "DevopsAdoption|No filter results."
 msgstr ""
 
+msgid "DevopsAdoption|No results…"
+msgstr ""
+
 msgid "DevopsAdoption|Not adopted"
 msgstr ""
 
@@ -11369,6 +11393,9 @@ msgstr ""
 msgid "DevopsAdoption|There was an error fetching Groups. Please refresh the page."
 msgstr ""
 
+msgid "DevopsAdoption|This group has no sub-groups"
+msgstr ""
+
 msgid "DevopsAdoption|You cannot remove the group you are currently in."
 msgstr ""
 
@@ -11406,6 +11433,9 @@ msgid "Didn't receive confirmation instructions?"
 msgstr ""
 
 msgid "Didn't receive unlock instructions?"
+msgstr ""
+
+msgid "Diff files surpassing this limit will be presented as 'too large' and won't be expandable."
 msgstr ""
 
 msgid "Diff limits"
@@ -13030,7 +13060,7 @@ msgstr ""
 msgid "Escalation policies"
 msgstr ""
 
-msgid "Escalation policies are not supported for this project"
+msgid "Escalation policies must have at least one rule"
 msgstr ""
 
 msgid "EscalationPolicies|+ Add an additional rule"
@@ -13049,6 +13079,9 @@ msgid "EscalationPolicies|Add escalation policy"
 msgstr ""
 
 msgid "EscalationPolicies|Add policy"
+msgstr ""
+
+msgid "EscalationPolicies|Are you sure you want to delete the \"%{escalationPolicy}\" escalation policy? This action cannot be undone."
 msgstr ""
 
 msgid "EscalationPolicies|Create an escalation policy in GitLab"
@@ -13091,6 +13124,12 @@ msgid "EscalationPolicies|Set up escalation policies to define who is paged, and
 msgstr ""
 
 msgid "EscalationPolicies|THEN %{doAction} %{schedule}"
+msgstr ""
+
+msgid "EscalationPolicies|The escalation policy could not be deleted. Please try again."
+msgstr ""
+
+msgid "EscalationPolicies|The escalation policy could not be updated. Please try again"
 msgstr ""
 
 msgid "EscalationPolicies|mins"
@@ -13299,9 +13338,6 @@ msgstr ""
 msgid "Expires"
 msgstr ""
 
-msgid "Expires at"
-msgstr ""
-
 msgid "Expires at (optional)"
 msgstr ""
 
@@ -13396,9 +13432,6 @@ msgid "External storage URL"
 msgstr ""
 
 msgid "External storage authentication token"
-msgstr ""
-
-msgid "External url has already been taken"
 msgstr ""
 
 msgid "ExternalAuthorizationService|Classification label"
@@ -13705,9 +13738,6 @@ msgid "Favicon will be removed. Are you sure?"
 msgstr ""
 
 msgid "Feature Flags"
-msgstr ""
-
-msgid "Feature flag is not enabled on the environment's project."
 msgstr ""
 
 msgid "Feature flag status"
@@ -14243,6 +14273,9 @@ msgid "For each job, clone the repository."
 msgstr ""
 
 msgid "For each job, re-use the project workspace. If the workspace doesn't exist, use %{code_open}git clone%{code_close}."
+msgstr ""
+
+msgid "For example, the application using the token or the purpose of the token."
 msgstr ""
 
 msgid "For general work"
@@ -15418,6 +15451,15 @@ msgstr ""
 msgid "Graph"
 msgstr ""
 
+msgid "GraphViewType|Job dependencies"
+msgstr ""
+
+msgid "GraphViewType|Show dependencies"
+msgstr ""
+
+msgid "GraphViewType|Stage"
+msgstr ""
+
 msgid "Gravatar"
 msgstr ""
 
@@ -15898,6 +15940,9 @@ msgstr ""
 msgid "GroupSettings|Prevent forking setting was not saved"
 msgstr ""
 
+msgid "GroupSettings|Prevent members from sending invitations to groups outside of %{group} and its subgroups."
+msgstr ""
+
 msgid "GroupSettings|Prevent sharing a project within %{group} with other groups"
 msgstr ""
 
@@ -15932,6 +15977,9 @@ msgid "GroupSettings|This setting is applied on %{ancestor_group}. To share proj
 msgstr ""
 
 msgid "GroupSettings|This setting is applied on %{ancestor_group}. You can override the setting or %{remove_ancestor_share_with_group_lock}."
+msgstr ""
+
+msgid "GroupSettings|This setting is only available on the top-level group and it applies to all subgroups. Groups that have already been shared with a group outside %{group} will still be shared, and this access will have to be revoked manually."
 msgstr ""
 
 msgid "GroupSettings|This setting will be applied to all subgroups unless overridden by a group owner. Groups that already have access to the project will continue to have access unless removed manually."
@@ -16279,6 +16327,9 @@ msgid "Hide payload"
 msgstr ""
 
 msgid "Hide shared projects"
+msgstr ""
+
+msgid "Hide tooltips or popovers"
 msgstr ""
 
 msgid "Hide value"
@@ -17650,13 +17701,22 @@ msgstr ""
 msgid "Integrations|Failed to unlink namespace. Please try again."
 msgstr ""
 
-msgid "Integrations|GitLab administrators can set up integrations that all projects inherit and use by default. These integrations apply to all projects that don't already use custom settings. You can override custom settings for a group or project if the settings are necessary at that level. Learn more about %{integrations_link_start}project integration management%{link_end}."
+msgid "Integrations|GitLab administrators can set up integrations that all groups and projects inherit and use by default. These integrations apply to all groups and projects that don't already use custom settings. You can override custom settings for a group or project if the settings are necessary at that level. Learn more about %{integrations_link_start}instance-level integration management%{link_end}."
+msgstr ""
+
+msgid "Integrations|GitLab administrators can set up integrations that all projects in a group inherit and use by default. These integrations apply to all projects that don't already use custom settings. You can override custom settings for a project if the settings are necessary at that level. Learn more about %{integrations_link_start}group-level integration management%{link_end}."
+msgstr ""
+
+msgid "Integrations|Group-level integration management"
 msgstr ""
 
 msgid "Integrations|Includes Standard, plus the entire commit message, commit hash, and issue IDs"
 msgstr ""
 
 msgid "Integrations|Includes commit title and branch."
+msgstr ""
+
+msgid "Integrations|Instance-level integration management"
 msgstr ""
 
 msgid "Integrations|Issues created in Jira are shown here once you have created the issues in project setup in Jira."
@@ -17681,9 +17741,6 @@ msgid "Integrations|No linked namespaces"
 msgstr ""
 
 msgid "Integrations|Note: this integration only works with accounts on GitLab.com (SaaS)."
-msgstr ""
-
-msgid "Integrations|Project integration management"
 msgstr ""
 
 msgid "Integrations|Projects using custom settings will not be affected."
@@ -17836,6 +17893,9 @@ msgstr ""
 msgid "Invalid login or password"
 msgstr ""
 
+msgid "Invalid period"
+msgstr ""
+
 msgid "Invalid pin code"
 msgstr ""
 
@@ -17911,25 +17971,7 @@ msgstr ""
 msgid "InviteEmail|%{inviter} invited you to join the %{strong_start}%{project_or_group_name}%{strong_end}%{br_tag}%{project_or_group} as a %{role}"
 msgstr ""
 
-msgid "InviteEmail|%{inviter} invited you to join the %{strong_start}%{project_or_group_name}%{strong_end}%{br_tag}%{project_or_group} with the %{role} permission level."
-msgstr ""
-
-msgid "InviteEmail|As a developer, you have full access to projects, so you can take an idea from concept to production."
-msgstr ""
-
-msgid "InviteEmail|As a guest, you can view projects, leave comments, and create issues."
-msgstr ""
-
-msgid "InviteEmail|As a maintainer, you have full access to projects. You can push commits to the default branch and deploy to production."
-msgstr ""
-
-msgid "InviteEmail|As a reporter, you can view projects and reports, and leave comments on issues."
-msgstr ""
-
-msgid "InviteEmail|As a user with minimal access, you can view the high-level group from the UI and API."
-msgstr ""
-
-msgid "InviteEmail|As an owner, you have full access to projects and can manage access to the group, including inviting new members."
+msgid "InviteEmail|%{project_or_group} details"
 msgstr ""
 
 msgid "InviteEmail|Groups assemble related projects together and grant members access to several projects at once."
@@ -17938,13 +17980,10 @@ msgstr ""
 msgid "InviteEmail|Join now"
 msgstr ""
 
-msgid "InviteEmail|Projects can be used to host your code, track issues, collaborate on code, and continuously build, test, and deploy your app with built-in GitLab CI/CD."
+msgid "InviteEmail|Projects are used to host and collaborate on code, track issues, and continuously build, test, and deploy your app with built-in GitLab CI/CD."
 msgstr ""
 
-msgid "InviteEmail|What can I do with the %{role} permission level?"
-msgstr ""
-
-msgid "InviteEmail|What is a GitLab %{project_or_group}?"
+msgid "InviteEmail|What's it about?"
 msgstr ""
 
 msgid "InviteEmail|You are invited to join the %{strong_start}%{project_or_group_name}%{strong_end}%{br_tag}%{project_or_group} as a %{role}"
@@ -18722,9 +18761,6 @@ msgid "Job artifact"
 msgstr ""
 
 msgid "Job artifacts"
-msgstr ""
-
-msgid "Job dependencies"
 msgstr ""
 
 msgid "Job has been erased"
@@ -20234,7 +20270,7 @@ msgstr ""
 msgid "Maximum delay (Minutes)"
 msgstr ""
 
-msgid "Maximum diff patch size in bytes"
+msgid "Maximum diff patch size (Bytes)"
 msgstr ""
 
 msgid "Maximum duration of a session."
@@ -20258,6 +20294,9 @@ msgstr ""
 msgid "Maximum file size is 2MB. Please select a smaller file."
 msgstr ""
 
+msgid "Maximum files in a diff"
+msgstr ""
+
 msgid "Maximum import size (MB)"
 msgstr ""
 
@@ -20268,6 +20307,9 @@ msgid "Maximum job timeout has a value which could not be accepted"
 msgstr ""
 
 msgid "Maximum lifetime allowable for Personal Access Tokens is active, your expire date must be set before %{maximum_allowable_date}."
+msgstr ""
+
+msgid "Maximum lines in a diff"
 msgstr ""
 
 msgid "Maximum npm package file size in bytes"
@@ -21728,10 +21770,7 @@ msgstr ""
 msgid "NetworkPolicies|Namespace"
 msgstr ""
 
-msgid "NetworkPolicies|Network Policy"
-msgstr ""
-
-msgid "NetworkPolicies|Network policy"
+msgid "NetworkPolicies|Network"
 msgstr ""
 
 msgid "NetworkPolicies|Network traffic"
@@ -21786,6 +21825,9 @@ msgid "NetworkPolicies|Rules"
 msgstr ""
 
 msgid "NetworkPolicies|Save changes"
+msgstr ""
+
+msgid "NetworkPolicies|Scan Execution"
 msgstr ""
 
 msgid "NetworkPolicies|Something went wrong, failed to update policy"
@@ -24155,10 +24197,16 @@ msgstr ""
 msgid "Pipelines|Improve code quality with GitLab CI/CD"
 msgstr ""
 
+msgid "Pipelines|Install GitLab Runners"
+msgstr ""
+
 msgid "Pipelines|It is recommended the code is reviewed thoroughly before running this pipeline with the parent project's CI resource."
 msgstr ""
 
 msgid "Pipelines|Last Used"
+msgstr ""
+
+msgid "Pipelines|Learn about Runners"
 msgstr ""
 
 msgid "Pipelines|Lint"
@@ -27411,7 +27459,13 @@ msgstr ""
 msgid "Replace"
 msgstr ""
 
+msgid "Replace %{name}"
+msgstr ""
+
 msgid "Replace all label(s)"
+msgstr ""
+
+msgid "Replace file"
 msgstr ""
 
 msgid "Replaced all labels with %{label_references} %{label_text}."
@@ -28087,6 +28141,9 @@ msgstr ""
 msgid "RightSidebar|deleting the"
 msgstr ""
 
+msgid "Rnners|Don't see what you are looking for? See the full list of options, including a fully customizable option, %{linkStart}here%{linkEnd}."
+msgstr ""
+
 msgid "Roadmap"
 msgstr ""
 
@@ -28165,6 +28222,12 @@ msgstr ""
 msgid "Runners|Active"
 msgstr ""
 
+msgid "Runners|Amazon Linux 2 Docker HA with manual scaling and optional scheduling. %{percentage} spot."
+msgstr ""
+
+msgid "Runners|Amazon Linux 2 Docker HA with manual scaling and optional scheduling. Non-spot. Default choice for Linux Docker executor."
+msgstr ""
+
 msgid "Runners|An error has occurred fetching instructions"
 msgstr ""
 
@@ -28183,6 +28246,9 @@ msgstr ""
 msgid "Runners|Copy instructions"
 msgstr ""
 
+msgid "Runners|Deploy GitLab Runner in AWS"
+msgstr ""
+
 msgid "Runners|Description"
 msgstr ""
 
@@ -28195,7 +28261,13 @@ msgstr ""
 msgid "Runners|Enter the number of seconds. This timeout takes precedence over lower timeouts set for the project."
 msgstr ""
 
+msgid "Runners|For each solution, you will choose a capacity. 1 enables warm HA through Auto Scaling group re-spawn. 2 enables hot HA because the service is available even when a node is lost. 3 or more enables hot HA and manual scaling of runner fleet."
+msgstr ""
+
 msgid "Runners|IP Address"
+msgstr ""
+
+msgid "Runners|If you do not select an AWS VPC, the runner will deploy to the Default VPC in the AWS Region you select. Please consult with your AWS administrator to understand if there are any security risks to deploying into the Default VPC in any given region in your AWS account."
 msgstr ""
 
 msgid "Runners|Install a runner"
@@ -28211,6 +28283,9 @@ msgid "Runners|Maximum job timeout"
 msgstr ""
 
 msgid "Runners|Name"
+msgstr ""
+
+msgid "Runners|New registration token generated!"
 msgstr ""
 
 msgid "Runners|New runner, has not connected yet"
@@ -28289,6 +28364,12 @@ msgid "Runners|Version"
 msgstr ""
 
 msgid "Runners|View installation instructions"
+msgstr ""
+
+msgid "Runners|Windows 2019 Shell with manual scaling and optional scheduling. %{percentage} spot."
+msgstr ""
+
+msgid "Runners|Windows 2019 Shell with manual scaling and optional scheduling. Non-spot. Default choice for Windows Shell executor."
 msgstr ""
 
 msgid "Runners|You can set up a specific runner to be used by multiple projects but you cannot make this a shared runner."
@@ -29903,6 +29984,9 @@ msgstr ""
 msgid "Shared runners are disabled on group level"
 msgstr ""
 
+msgid "Shared runners details"
+msgstr ""
+
 msgid "Shared runners help link"
 msgstr ""
 
@@ -29955,9 +30039,6 @@ msgid "Show commit description"
 msgstr ""
 
 msgid "Show complete raw log"
-msgstr ""
-
-msgid "Show dependencies"
 msgstr ""
 
 msgid "Show details"
@@ -31023,10 +31104,16 @@ msgstr ""
 msgid "Status: %{title}"
 msgstr ""
 
+msgid "StatusCheck|%{pending} pending"
+msgstr ""
+
 msgid "StatusCheck|API to check"
 msgstr ""
 
 msgid "StatusCheck|Add status check"
+msgstr ""
+
+msgid "StatusCheck|All passed"
 msgstr ""
 
 msgid "StatusCheck|An error occurred deleting the %{name} status check."
@@ -31047,7 +31134,7 @@ msgstr ""
 msgid "StatusCheck|External API is already in use by another status check."
 msgstr ""
 
-msgid "StatusCheck|Invoke an external API as part of the approvals"
+msgid "StatusCheck|Failed to load status checks."
 msgstr ""
 
 msgid "StatusCheck|Invoke an external API as part of the pipeline process."
@@ -31075,6 +31162,9 @@ msgid "StatusCheck|Target branch"
 msgstr ""
 
 msgid "StatusCheck|Update status check"
+msgstr ""
+
+msgid "StatusCheck|When this merge request is updated, a call is sent to the following APIs to confirm their status. %{linkStart}Learn more%{linkEnd}."
 msgstr ""
 
 msgid "StatusCheck|You are about to remove the %{name} status check."
@@ -31162,6 +31252,9 @@ msgid "Storage:"
 msgstr ""
 
 msgid "StorageSize|Unknown"
+msgstr ""
+
+msgid "Strikethrough"
 msgstr ""
 
 msgid "Subgroup information"
@@ -31899,6 +31992,9 @@ msgstr ""
 msgid "Telephone number"
 msgstr ""
 
+msgid "Tell us your experiences with the new Markdown editor %{linkStart}in this feedback issue%{linkEnd}."
+msgstr ""
+
 msgid "Template"
 msgstr ""
 
@@ -32305,9 +32401,6 @@ msgstr ""
 msgid "The character highlighter helps you keep the subject line to %{titleLength} characters and wrap the body at %{bodyLength} so they are readable in git."
 msgstr ""
 
-msgid "The coding stage shows the time from the first commit to creating the merge request. The data will automatically be added here once you create your first merge request."
-msgstr ""
-
 msgid "The collection of events added to the data gathered for that stage."
 msgstr ""
 
@@ -32341,7 +32434,7 @@ msgstr ""
 msgid "The data source is connected, but there is no data to display. %{documentationLink}"
 msgstr ""
 
-msgid "The default CI configuration path for new projects."
+msgid "The default CI/CD configuration file and path for new projects."
 msgstr ""
 
 msgid "The dependency list details information about the components used within your project."
@@ -32369,6 +32462,9 @@ msgid "The environment tier must be one of %{environment_tiers}."
 msgstr ""
 
 msgid "The errors we encountered were:"
+msgstr ""
+
+msgid "The file containing the export is not available yet; it may still be transferring. Please try again later."
 msgstr ""
 
 msgid "The file has been successfully created."
@@ -32464,9 +32560,6 @@ msgid "The invitation has already been accepted."
 msgstr ""
 
 msgid "The invitation was successfully resent."
-msgstr ""
-
-msgid "The issue stage shows the time it takes from creating an issue to assigning the issue to a milestone, or add the issue to a list on your Issue Board. Begin creating issues to see data for this stage."
 msgstr ""
 
 msgid "The issue was successfully promoted to an epic. Redirecting to epic..."
@@ -32568,9 +32661,6 @@ msgstr ""
 msgid "The pipelines schedule runs pipelines in the future, repeatedly, for specific branches or tags. Those scheduled pipelines will inherit limited project access based on their associated user."
 msgstr ""
 
-msgid "The planning stage shows the time from the previous step to pushing your first commit. This time will be added automatically once you push your first commit."
-msgstr ""
-
 msgid "The private key to use when a client certificate is provided. This value is encrypted at rest."
 msgstr ""
 
@@ -32634,9 +32724,6 @@ msgstr ""
 msgid "The repository must be accessible over %{code_open}http://%{code_close}, %{code_open}https://%{code_close}, %{code_open}ssh://%{code_close} or %{code_open}git://%{code_close}."
 msgstr ""
 
-msgid "The review stage shows the time from creating the merge request to merging it. The data will automatically be added after you merge your first merge request."
-msgstr ""
-
 msgid "The same shared runner executes code from multiple projects, unless you configure autoscaling with %{link} set to 1 (which it is on GitLab.com)."
 msgstr ""
 
@@ -32661,9 +32748,6 @@ msgstr ""
 msgid "The specified tab is invalid, please select another"
 msgstr ""
 
-msgid "The staging stage shows the time between merging the MR and deploying code to the production environment. The data will be automatically added once you deploy to production for the first time."
-msgstr ""
-
 msgid "The start date must be ealier than the end date."
 msgstr ""
 
@@ -32674,9 +32758,6 @@ msgid "The subject will be used as the title of the new issue, and the message w
 msgstr ""
 
 msgid "The tag name can't be changed for an existing release."
-msgstr ""
-
-msgid "The testing stage shows the time GitLab CI takes to run every pipeline for the related merge request. The data will automatically be added after your first pipeline finishes running."
 msgstr ""
 
 msgid "The time taken by each data entry gathered by that stage."
@@ -34234,7 +34315,16 @@ msgstr ""
 msgid "Token"
 msgstr ""
 
+msgid "Token name"
+msgstr ""
+
 msgid "Token valid until revoked"
+msgstr ""
+
+msgid "Tokens|Scopes set the permission levels granted to the token."
+msgstr ""
+
+msgid "Tokens|Select scopes"
 msgstr ""
 
 msgid "Tomorrow"
@@ -35349,7 +35439,13 @@ msgstr ""
 msgid "Use .gitlab-ci.yml"
 msgstr ""
 
+msgid "Use GitLab Runner in AWS"
+msgstr ""
+
 msgid "Use a one-time password authenticator on your mobile device or computer to enable two-factor authentication (2FA)."
+msgstr ""
+
+msgid "Use an AWS CloudFormation Template (CFT) to install and configure GitLab Runner in AWS."
 msgstr ""
 
 msgid "Use cURL"
@@ -36664,6 +36760,9 @@ msgstr ""
 msgid "What does this command do?"
 msgstr ""
 
+msgid "What is Auto DevOps?"
+msgstr ""
+
 msgid "What is repository mirroring?"
 msgstr ""
 
@@ -36864,7 +36963,7 @@ msgstr ""
 msgid "WikiPage|An error occured while trying to render the content editor. Please try again later."
 msgstr ""
 
-msgid "WikiPage|Are you sure you want to switch to the old editor?"
+msgid "WikiPage|Are you sure you want to switch back to the classic editor?"
 msgstr ""
 
 msgid "WikiPage|Cancel"
@@ -36885,6 +36984,9 @@ msgstr ""
 msgid "WikiPage|Format"
 msgstr ""
 
+msgid "WikiPage|Get a richer editing experience"
+msgstr ""
+
 msgid "WikiPage|Keep editing"
 msgstr ""
 
@@ -36900,16 +37002,16 @@ msgstr ""
 msgid "WikiPage|Save changes"
 msgstr ""
 
-msgid "WikiPage|Switch to old editor"
+msgid "WikiPage|Switch me back to the classic editor."
 msgstr ""
 
-msgid "WikiPage|Switching to the old editor will discard any changes you've made in the new editor."
+msgid "WikiPage|Switch to classic editor"
 msgstr ""
 
-msgid "WikiPage|Switching will discard any changes you've made in the new editor."
+msgid "WikiPage|Switching to the classic editor will discard any changes you've made in the new editor."
 msgstr ""
 
-msgid "WikiPage|This editor is in beta and may not display the page's contents properly."
+msgid "WikiPage|This editor is in beta and may not display the page's contents properly. Switching back to the classic editor will discard changes you've made in the new editor."
 msgstr ""
 
 msgid "WikiPage|Tip: You can move this page by adding the path to the beginning of the title."
@@ -36924,10 +37026,16 @@ msgstr ""
 msgid "WikiPage|To link to a (new) page, simply type %{linkExample}. More examples are in the %{linkStart}documentation%{linkEnd}."
 msgstr ""
 
+msgid "WikiPage|Try the new visual Markdown editor. Read the %{linkStart}documentation%{linkEnd} to learn what's currently supported."
+msgstr ""
+
+msgid "WikiPage|Try this later"
+msgstr ""
+
 msgid "WikiPage|Update %{pageTitle}"
 msgstr ""
 
-msgid "WikiPage|Use new editor"
+msgid "WikiPage|Use the new editor"
 msgstr ""
 
 msgid "WikiPage|Write your content or drag files here…"
@@ -37413,19 +37521,16 @@ msgstr ""
 msgid "You have imported from this project %{numberOfPreviousImports} times before. Each new import will create duplicate issues."
 msgstr ""
 
+msgid "You have insufficient permissions to configure escalation policies for this project"
+msgstr ""
+
 msgid "You have insufficient permissions to create a Todo for this alert"
 msgstr ""
 
 msgid "You have insufficient permissions to create an HTTP integration for this project"
 msgstr ""
 
-msgid "You have insufficient permissions to create an escalation policy for this project"
-msgstr ""
-
 msgid "You have insufficient permissions to create an on-call schedule for this project"
-msgstr ""
-
-msgid "You have insufficient permissions to remove an escalation policy from this project"
 msgstr ""
 
 msgid "You have insufficient permissions to remove an on-call rotation from this project"
@@ -38031,6 +38136,9 @@ msgid "can contain only letters of the Base64 alphabet (RFC4648) with the additi
 msgstr ""
 
 msgid "can only be changed by a group admin."
+msgstr ""
+
+msgid "can only have one escalation policy"
 msgstr ""
 
 msgid "can't be enabled because signed commits are required for this project"
@@ -39112,6 +39220,9 @@ msgid "must be after start"
 msgstr ""
 
 msgid "must be greater than start date"
+msgstr ""
+
+msgid "must be inside the fork network"
 msgstr ""
 
 msgid "must have a unique schedule, status, and elapsed time"

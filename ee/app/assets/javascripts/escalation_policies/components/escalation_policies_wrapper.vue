@@ -72,15 +72,6 @@ export default {
     <template v-else-if="hasPolicies">
       <div class="gl-display-flex gl-justify-content-space-between gl-align-items-center">
         <h2>{{ $options.i18n.title }}</h2>
-        <gl-button
-          v-gl-modal="$options.addEscalationPolicyModalId"
-          :title="$options.i18n.addPolicy"
-          category="secondary"
-          variant="confirm"
-          class="gl-mt-5"
-        >
-          {{ $options.i18n.addPolicy }}
-        </gl-button>
       </div>
       <escalation-policy
         v-for="(policy, index) in escalationPolicies"

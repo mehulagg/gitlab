@@ -43,7 +43,7 @@ module Ci
       dotenv: '.env',
       cobertura: 'cobertura-coverage.xml',
       terraform: 'tfplan.json',
-      cluster_applications: 'gl-cluster-applications.json',
+      cluster_applications: 'gl-cluster-applications.json', # DEPRECATED: https://gitlab.com/gitlab-org/gitlab/-/issues/333441
       requirements: 'requirements.json',
       coverage_fuzzing: 'gl-coverage-fuzzing.json',
       api_fuzzing: 'gl-api-fuzzing-report.json'
@@ -181,6 +181,8 @@ module Ci
     scope :with_destroy_preloads, -> { includes(project: [:route, :statistics]) }
 
     scope :scoped_project, -> { where('ci_job_artifacts.project_id = projects.id') }
+    scope :for_project, ->(project) { where(project_id: project) }
+    scope :created_in_time_range, ->(from: nil, to: nil) { where(created_at: from..to) }
 
     delegate :filename, :exists?, :open, to: :file
 

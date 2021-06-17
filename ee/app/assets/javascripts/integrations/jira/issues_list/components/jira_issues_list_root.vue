@@ -10,6 +10,7 @@ import {
   AvailableSortOptions,
   DEFAULT_PAGE_SIZE,
 } from '~/issuable_list/constants';
+import { ISSUES_LIST_FETCH_ERROR } from '../constants';
 import getJiraIssuesQuery from '../graphql/queries/get_jira_issues.query.graphql';
 import JiraIssuesListEmptyState from './jira_issues_list_empty_state.vue';
 
@@ -48,8 +49,6 @@ export default {
     return {
       jiraLogo,
       issues: [],
-      issuesListLoading: false,
-      issuesListLoadFailed: false,
       totalIssues: 0,
       currentState: this.initialState,
       filterParams: this.initialFilterParams,
@@ -63,67 +62,61 @@ export default {
     };
   },
   computed: {
+    issuesListLoading() {
+      return this.$apollo.queries.jiraIssues.loading;
+    },
     showPaginationControls() {
-      return Boolean(
-        !this.issuesListLoading &&
-          !this.issuesListLoadFailed &&
-          this.issues.length &&
-          this.totalIssues > 1,
-      );
+      return Boolean(!this.issuesListLoading && this.issues.length && this.totalIssues > 1);
     },
     hasFiltersApplied() {
       return Boolean(this.filterParams.search || this.filterParams.labels);
     },
     urlParams() {
       return {
-        state: this.currentState,
-        page: this.currentPage,
-        sort: this.sortedBy,
         'labels[]': this.filterParams.labels,
+        page: this.currentPage,
         search: this.filterParams.search,
+        sort: this.sortedBy,
+        state: this.currentState,
       };
     },
   },
-  mounted() {
-    this.fetchIssues();
-  },
-  methods: {
-    async fetchIssues() {
-      this.issuesListLoading = true;
-      this.issuesListLoadFailed = false;
-
-      try {
-        const { data } = await this.$apollo.query({
-          query: getJiraIssuesQuery,
-          variables: {
-            issuesFetchPath: this.issuesFetchPath,
-            search: this.filterParams.search,
-            state: this.currentState,
-            sort: this.sortedBy,
-            labels: this.filterParams.labels,
-            page: this.currentPage,
-          },
-        });
+  apollo: {
+    jiraIssues: {
+      query: getJiraIssuesQuery,
+      variables() {
+        return {
+          issuesFetchPath: this.issuesFetchPath,
+          labels: this.filterParams.labels,
+          page: this.currentPage,
+          search: this.filterParams.search,
+          sort: this.sortedBy,
+          state: this.currentState,
+        };
+      },
+      result({ data, error }) {
+        // let error() callback handle errors
+        if (error) {
+          return;
+        }
 
         const { pageInfo, nodes, errors } = data?.jiraIssues ?? {};
-        if (errors?.length > 0) throw new Error(errors[0]);
+        if (errors?.length > 0) {
+          this.onJiraIssuesQueryError(new Error(errors[0]));
+          return;
+        }
 
+        this.issues = nodes;
         this.currentPage = pageInfo.page;
         this.totalIssues = pageInfo.total;
-        this.issues = nodes;
-        this.issuesCount[this.currentState] = this.issues.length;
-      } catch (error) {
-        this.issuesListLoadFailed = true;
-
-        createFlash({
-          message: error.message,
-          captureError: true,
-          error,
-        });
-      }
-
-      this.issuesListLoading = false;
+        this.issuesCount[this.currentState] = nodes.length;
+      },
+      error() {
+        this.onJiraIssuesQueryError(new Error(ISSUES_LIST_FETCH_ERROR));
+      },
     },
+  },
+  methods: {
     getFilteredSearchValue() {
       return [
         {
@@ -134,11 +127,23 @@ export default {
         },
       ];
     },
-    fetchIssuesBy(propsName, propValue) {
-      this[propsName] = propValue;
-      this.fetchIssues();
+    onJiraIssuesQueryError(error) {
+      createFlash({
+        message: error.message,
+        captureError: true,
+        error,
+      });
     },
-    handleFilterIssues(filters = []) {
+    onIssuableListClickTab(selectedIssueState) {
+      this.currentState = selectedIssueState;
+    },
+    onIssuableListPageChange(selectedPage) {
+      this.currentPage = selectedPage;
+    },
+    onIssuableListSort(selectedSort) {
+      this.sortedBy = selectedSort;
+    },
+    onIssuableListFilter(filters = []) {
       const filterParams = {};
       const plainText = [];
 
@@ -153,7 +158,6 @@ export default {
       }
 
       this.filterParams = filterParams;
-      this.fetchIssues();
     },
   },
 };
@@ -180,10 +184,10 @@ export default {
     :url-params="urlParams"
     label-filter-param="labels"
     recent-searches-storage-key="jira_issues"
-    @click-tab="fetchIssuesBy('currentState', $event)"
-    @page-change="fetchIssuesBy('currentPage', $event)"
-    @sort="fetchIssuesBy('sortedBy', $event)"
-    @filter="handleFilterIssues"
+    @click-tab="onIssuableListClickTab"
+    @page-change="onIssuableListPageChange"
+    @sort="onIssuableListSort"
+    @filter="onIssuableListFilter"
   >
     <template #nav-actions>
       <gl-button :href="issueCreateUrl" target="_blank" class="gl-my-5">

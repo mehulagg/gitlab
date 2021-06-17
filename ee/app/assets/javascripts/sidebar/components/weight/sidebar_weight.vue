@@ -2,22 +2,21 @@
 import createFlash from '~/flash';
 import { __ } from '~/locale';
 import eventHub from '~/sidebar/event_hub';
+import Mediator from '../../sidebar_mediator';
 import weightComponent from './weight.vue';
 
 export default {
   components: {
     weight: weightComponent,
   },
-  props: {
-    mediator: {
-      required: true,
-      type: Object,
-      validator(mediatorObject) {
-        return mediatorObject.updateWeight && mediatorObject.store;
-      },
-    },
+  data() {
+    return {
+      // Defining `mediator` here as a data prop
+      // makes it reactive for any internal updates
+      // which wouldn't happen otherwise.
+      mediator: new Mediator(),
+    };
   },
-
   created() {
     eventHub.$on('updateWeight', this.onUpdateWeight);
   },

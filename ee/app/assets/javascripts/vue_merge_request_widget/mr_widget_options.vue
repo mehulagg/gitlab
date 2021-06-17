@@ -3,6 +3,7 @@ import { GlSafeHtmlDirective } from '@gitlab/ui';
 import GroupedBrowserPerformanceReportsApp from 'ee/reports/browser_performance_report/grouped_browser_performance_reports_app.vue';
 import { componentNames } from 'ee/reports/components/issue_body';
 import GroupedLoadPerformanceReportsApp from 'ee/reports/load_performance_report/grouped_load_performance_reports_app.vue';
+import StatusChecksReportsApp from 'ee/reports/status_checks_report/status_checks_reports_app.vue';
 import MrWidgetLicenses from 'ee/vue_shared/license_compliance/mr_widget_license_report.vue';
 import GroupedMetricsReportsApp from 'ee/vue_shared/metrics_reports/grouped_metrics_reports_app.vue';
 import reportsMixin from 'ee/vue_shared/security_reports/mixins/reports_mixin';
@@ -20,6 +21,7 @@ export default {
     MrWidgetGeoSecondaryNode,
     MrWidgetPolicyViolation,
     MrWidgetJiraAssociationMissing,
+    StatusChecksReportsApp,
     BlockingMergeRequestsReport,
     GroupedSecurityReportsApp: () =>
       import('ee/vue_shared/security_reports/grouped_security_reports_app.vue'),
@@ -100,6 +102,9 @@ export default {
         enabledReports &&
         this.$options.securityReportTypes.some((reportType) => enabledReports[reportType])
       );
+    },
+    shouldRenderStatusReport() {
+      return this.mr.apiStatusChecksPath && !this.mr.isNothingToMergeState;
     },
 
     browserPerformanceText() {
@@ -415,6 +420,11 @@ export default {
       <grouped-accessibility-reports-app
         v-if="shouldShowAccessibilityReport"
         :endpoint="mr.accessibilityReportPath"
+      />
+
+      <status-checks-reports-app
+        v-if="shouldRenderStatusReport"
+        :endpoint="mr.apiStatusChecksPath"
       />
 
       <div class="mr-widget-section">

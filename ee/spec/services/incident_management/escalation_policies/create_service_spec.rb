@@ -21,7 +21,7 @@ RSpec.describe IncidentManagement::EscalationPolicies::CreateService do
   let(:rule_params) do
     [
       {
-        oncall_schedule_id: oncall_schedule.id,
+        oncall_schedule: oncall_schedule,
         elapsed_time_seconds: 60,
         status: :resolved
       }
@@ -45,7 +45,7 @@ RSpec.describe IncidentManagement::EscalationPolicies::CreateService do
     context 'when user does not have access' do
       let(:user) { create(:user) }
 
-      it_behaves_like 'error response', 'You have insufficient permissions to create an escalation policy for this project'
+      it_behaves_like 'error response', 'You have insufficient permissions to configure escalation policies for this project'
     end
 
     context 'when license is not enabled' do
@@ -53,7 +53,7 @@ RSpec.describe IncidentManagement::EscalationPolicies::CreateService do
         stub_licensed_features(oncall_schedules: true, escalation_policies: false)
       end
 
-      it_behaves_like 'error response', 'Escalation policies are not supported for this project'
+      it_behaves_like 'error response', 'You have insufficient permissions to configure escalation policies for this project'
     end
 
     context 'validation errors' do
@@ -68,15 +68,31 @@ RSpec.describe IncidentManagement::EscalationPolicies::CreateService do
       context 'no rules are given' do
         let(:rule_params) { nil }
 
-        it_behaves_like 'error response', 'A rule must be provided to create an escalation policy'
+        it_behaves_like 'error response', 'Escalation policies must have at least one rule'
       end
 
       context 'oncall schedule is blank' do
         before do
-          rule_params[0][:oncall_schedule_id] = nil
+          rule_params[0][:oncall_schedule] = nil
         end
 
-        it_behaves_like 'error response', "Rules[0] oncall schedule can't be blank"
+        it_behaves_like 'error response', 'All escalations rules must have a schedule in the same project as the policy'
+      end
+
+      context 'oncall schedule is on the wrong project' do
+        before do
+          rule_params[0][:oncall_schedule] = create(:incident_management_oncall_schedule)
+        end
+
+        it_behaves_like 'error response', 'All escalations rules must have a schedule in the same project as the policy'
+      end
+
+      context 'project has an existing escalation policy' do
+        before do
+          create(:incident_management_escalation_policy, project: project)
+        end
+
+        it_behaves_like 'error response', "Project can only have one escalation policy"
       end
     end
 

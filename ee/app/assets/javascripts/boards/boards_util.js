@@ -37,6 +37,18 @@ export function calculateSwimlanesBufferSize(listTopCoordinate) {
   return Math.ceil((window.innerHeight - listTopCoordinate) / EPIC_LANE_BASE_HEIGHT);
 }
 
+export function formatEpic(epic) {
+  return {
+    ...epic,
+    labels: epic.labels?.nodes || [],
+    // Epics don't support assignees as of now
+    // but `<board-card-inner>` expects it.
+    // So until https://gitlab.com/gitlab-org/gitlab/-/issues/238444
+    // is addressed, we need to pass empty array.
+    assignees: [],
+  };
+}
+
 export function formatListEpics(listEpics) {
   const boardItems = {};
   let listItemsCount;

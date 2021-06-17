@@ -206,6 +206,18 @@ RSpec.describe Ci::CreatePipelineService, '#execute' do
             expect(pipeline.failure_reason).to eq('user_not_verified')
           end
 
+          context 'when config is blank' do
+            before do
+              stub_ci_pipeline_yaml_file(nil)
+            end
+
+            it 'does not create a pipeline', :aggregate_failures do
+              pipeline = create_pipeline!
+
+              expect(pipeline).not_to be_persisted
+            end
+          end
+
           context 'when feature flag is disabled' do
             before do
               stub_feature_flags(ci_require_credit_card_on_free_plan: false)

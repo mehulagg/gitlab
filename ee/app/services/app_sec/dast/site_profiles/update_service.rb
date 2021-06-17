@@ -22,6 +22,14 @@ module AppSec
           return ServiceResponse.error(message: _('Cannot modify %{profile_name} referenced in security policy') % { profile_name: dast_site_profile.name }) if referenced_in_security_policy?
 
           ActiveRecord::Base.transaction do
+            auditor = Audit::UpdateService.new(project, current_user, {
+              dast_site_profile: dast_site_profile,
+              new_params: params.dup,
+              old_params: dast_site_profile.attributes.symbolize_keys.merge(
+                target_url: dast_site_profile.dast_site.url
+              )
+            })
+
             if target_url = params.delete(:target_url)
               params[:dast_site] = DastSites::FindOrCreateService.new(project, current_user).execute!(url: target_url)
             end
@@ -30,8 +38,8 @@ module AppSec
             handle_secret_variable!(params, :auth_password, ::Dast::SiteProfileSecretVariable::PASSWORD)
 
             params.compact!
-
             dast_site_profile.update!(params)
+            auditor.execute
 
             ServiceResponse.success(payload: dast_site_profile)
           end

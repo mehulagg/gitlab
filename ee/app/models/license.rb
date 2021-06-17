@@ -8,7 +8,7 @@ class License < ApplicationRecord
   PREMIUM_PLAN = 'premium'
   ULTIMATE_PLAN = 'ultimate'
   CLOUD_LICENSE_TYPE = 'cloud'
-  LEGACY_LICENSE_TYPE = 'legacy'
+  LICENSE_FILE_TYPE = 'license_file'
   ALLOWED_PERCENTAGE_OF_USERS_OVERAGE = (10 / 100.0)
 
   EE_ALL_PLANS = [STARTER_PLAN, PREMIUM_PLAN, ULTIMATE_PLAN].freeze
@@ -561,7 +561,7 @@ class License < ApplicationRecord
   end
 
   def license_type
-    cloud_license? ? CLOUD_LICENSE_TYPE : LEGACY_LICENSE_TYPE
+    cloud_license? ? CLOUD_LICENSE_TYPE : LICENSE_FILE_TYPE
   end
 
   def auto_renew

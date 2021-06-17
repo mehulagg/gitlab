@@ -1,7 +1,7 @@
 import { DEFAULT_PAGE_SIZE } from '~/issuable_list/constants';
 import axios from '~/lib/utils/axios_utils';
 import { convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
-import { __ } from '~/locale';
+import { ISSUES_LIST_FETCH_ERROR } from '../../constants';
 
 const transformJiraIssueAssignees = (jiraIssue) => {
   return jiraIssue.assignees.map((assignee) => ({
@@ -78,7 +78,7 @@ export default function jiraIssuesResolver(
     .catch((error) => {
       return {
         __typename: 'JiraIssues',
-        errors: error?.response?.data?.errors || [__('An error occurred while loading issues')],
+        errors: error?.response?.data?.errors || [ISSUES_LIST_FETCH_ERROR],
         pageInfo: transformJiraIssuePageInfo(),
         nodes: [],
       };

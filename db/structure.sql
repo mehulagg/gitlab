@@ -9114,6 +9114,8 @@ CREATE TABLE analytics_devops_adoption_snapshots (
     total_projects_count integer,
     code_owners_used_count integer,
     namespace_id integer,
+    sast_enabled_count integer,
+    dast_enabled_count integer,
     CONSTRAINT check_3f472de131 CHECK ((namespace_id IS NOT NULL))
 );
 
@@ -9517,6 +9519,8 @@ CREATE TABLE application_settings (
     elasticsearch_username text,
     encrypted_elasticsearch_password bytea,
     encrypted_elasticsearch_password_iv bytea,
+    diff_max_lines integer DEFAULT 50000 NOT NULL,
+    diff_max_files integer DEFAULT 1000 NOT NULL,
     CONSTRAINT app_settings_container_reg_cleanup_tags_max_list_size_positive CHECK ((container_registry_cleanup_tags_service_max_list_size >= 0)),
     CONSTRAINT app_settings_ext_pipeline_validation_service_url_text_limit CHECK ((char_length(external_pipeline_validation_service_url) <= 255)),
     CONSTRAINT app_settings_registry_exp_policies_worker_capacity_positive CHECK ((container_registry_expiration_policies_worker_capacity >= 0)),
@@ -17496,10 +17500,12 @@ ALTER SEQUENCE requirements_id_seq OWNED BY requirements.id;
 CREATE TABLE requirements_management_test_reports (
     id bigint NOT NULL,
     created_at timestamp with time zone NOT NULL,
-    requirement_id bigint NOT NULL,
+    requirement_id bigint,
     author_id bigint,
     state smallint NOT NULL,
-    build_id bigint
+    build_id bigint,
+    issue_id bigint,
+    CONSTRAINT requirements_test_reports_requirement_id_xor_issue_id CHECK ((num_nonnulls(requirement_id, issue_id) = 1))
 );
 
 CREATE SEQUENCE requirements_management_test_reports_id_seq
@@ -19270,6 +19276,7 @@ CREATE TABLE vulnerability_occurrences (
     solution text,
     cve text,
     location jsonb,
+    detection_method smallint DEFAULT 0 NOT NULL,
     CONSTRAINT check_4a3a60f2ba CHECK ((char_length(solution) <= 7000)),
     CONSTRAINT check_ade261da6b CHECK ((char_length(description) <= 15000)),
     CONSTRAINT check_df6dd20219 CHECK ((char_length(message) <= 3000)),
@@ -22828,6 +22835,8 @@ CREATE UNIQUE INDEX index_ci_group_variables_on_group_id_and_key_and_environment
 
 CREATE UNIQUE INDEX index_ci_instance_variables_on_key ON ci_instance_variables USING btree (key);
 
+CREATE INDEX index_ci_job_artifacts_dast_for_devops_adoption ON ci_job_artifacts USING btree (project_id, created_at) WHERE (file_type = 8);
+
 CREATE INDEX index_ci_job_artifacts_for_terraform_reports ON ci_job_artifacts USING btree (project_id, id) WHERE (file_type = 18);
 
 CREATE INDEX index_ci_job_artifacts_id_for_terraform_reports ON ci_job_artifacts USING btree (id) WHERE (file_type = 18);
@@ -22841,6 +22850,8 @@ CREATE UNIQUE INDEX index_ci_job_artifacts_on_job_id_and_file_type ON ci_job_art
 CREATE INDEX index_ci_job_artifacts_on_project_id ON ci_job_artifacts USING btree (project_id);
 
 CREATE INDEX index_ci_job_artifacts_on_project_id_for_security_reports ON ci_job_artifacts USING btree (project_id) WHERE (file_type = ANY (ARRAY[5, 6, 7, 8]));
+
+CREATE INDEX index_ci_job_artifacts_sast_for_devops_adoption ON ci_job_artifacts USING btree (project_id, created_at) WHERE (file_type = 5);
 
 CREATE INDEX index_ci_job_token_project_scope_links_on_added_by_id ON ci_job_token_project_scope_links USING btree (added_by_id);
 
@@ -24112,6 +24123,8 @@ CREATE UNIQUE INDEX index_packages_on_project_id_name_version_unique_when_generi
 
 CREATE UNIQUE INDEX index_packages_on_project_id_name_version_unique_when_golang ON packages_packages USING btree (project_id, name, version) WHERE (package_type = 8);
 
+CREATE UNIQUE INDEX index_packages_on_project_id_name_version_unique_when_helm ON packages_packages USING btree (project_id, name, version) WHERE (package_type = 11);
+
 CREATE INDEX index_packages_package_file_build_infos_on_package_file_id ON packages_package_file_build_infos USING btree (package_file_id);
 
 CREATE INDEX index_packages_package_file_build_infos_on_pipeline_id ON packages_package_file_build_infos USING btree (pipeline_id);
@@ -24485,6 +24498,8 @@ CREATE INDEX index_required_code_owners_sections_on_protected_branch_id ON requi
 CREATE INDEX index_requirements_management_test_reports_on_author_id ON requirements_management_test_reports USING btree (author_id);
 
 CREATE INDEX index_requirements_management_test_reports_on_build_id ON requirements_management_test_reports USING btree (build_id);
+
+CREATE INDEX index_requirements_management_test_reports_on_issue_id ON requirements_management_test_reports USING btree (issue_id);
 
 CREATE INDEX index_requirements_management_test_reports_on_requirement_id ON requirements_management_test_reports USING btree (requirement_id);
 
@@ -25133,6 +25148,8 @@ CREATE UNIQUE INDEX term_agreements_unique_index ON term_agreements USING btree 
 CREATE INDEX tmp_idx_deduplicate_vulnerability_occurrences ON vulnerability_occurrences USING btree (project_id, report_type, location_fingerprint, primary_identifier_id, id);
 
 CREATE INDEX tmp_idx_on_namespaces_delayed_project_removal ON namespaces USING btree (id) WHERE (delayed_project_removal = true);
+
+CREATE INDEX tmp_index_merge_requests_draft_and_status ON merge_requests USING btree (id) WHERE ((draft = false) AND (state_id = 1) AND ((title)::text ~* '^\[draft\]|\(draft\)|draft:|draft|\[WIP\]|WIP:|WIP'::text));
 
 CREATE INDEX tmp_index_namespaces_empty_traversal_ids_with_child_namespaces ON namespaces USING btree (id) WHERE ((parent_id IS NOT NULL) AND (traversal_ids = '{}'::integer[]));
 
@@ -25822,6 +25839,9 @@ ALTER TABLE ONLY vulnerabilities
 
 ALTER TABLE ONLY bulk_import_entities
     ADD CONSTRAINT fk_88c725229f FOREIGN KEY (namespace_id) REFERENCES namespaces(id) ON DELETE CASCADE;
+
+ALTER TABLE ONLY requirements_management_test_reports
+    ADD CONSTRAINT fk_88f30752fc FOREIGN KEY (issue_id) REFERENCES issues(id) ON DELETE CASCADE;
 
 ALTER TABLE ONLY issues
     ADD CONSTRAINT fk_899c8f3231 FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE;

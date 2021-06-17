@@ -13,9 +13,6 @@ export const RuleTypeEntity = 'NetworkPolicyRuleEntity';
 export const RuleTypeCIDR = 'NetworkPolicyRuleCIDR';
 export const RuleTypeFQDN = 'NetworkPolicyRuleFQDN';
 
-export const CiliumNetworkPolicyKind = 'CiliumNetworkPolicy';
-export const ScanExecutionPolicyKind = 'scanner_profile';
-
 export const EntityTypes = {
   ALL: 'all',
   HOST: 'host',

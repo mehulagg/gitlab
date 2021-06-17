@@ -13,8 +13,6 @@
 # WIP See https://gitlab.com/gitlab-org/gitlab/-/issues/322903
 Graphql/Descriptions:
   Exclude:
-    - 'ee/app/graphql/ee/types/list_limit_metric_enum.rb'
-    - 'ee/app/graphql/types/epic_state_enum.rb'
     - 'ee/app/graphql/types/health_status_enum.rb'
     - 'ee/app/graphql/types/iteration_state_enum.rb'
     - 'ee/app/graphql/types/requirements_management/requirement_state_enum.rb'
@@ -29,8 +27,6 @@ Graphql/Descriptions:
 # WIP: See https://gitlab.com/gitlab-org/gitlab/-/issues/220040
 Rails/SaveBang:
   Exclude:
-    - 'ee/spec/controllers/projects/merge_requests_controller_spec.rb'
-    - 'ee/spec/controllers/subscriptions_controller_spec.rb'
     - 'ee/spec/initializers/fog_google_https_private_urls_spec.rb'
     - 'ee/spec/lib/analytics/merge_request_metrics_calculator_spec.rb'
     - 'ee/spec/lib/ee/gitlab/auth/ldap/sync/group_spec.rb'

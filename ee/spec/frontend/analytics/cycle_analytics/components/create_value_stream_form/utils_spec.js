@@ -10,8 +10,10 @@ import {
   formatStageDataForSubmission,
   generateInitialStageData,
 } from 'ee/analytics/cycle_analytics/components/create_value_stream_form/utils';
-
+import { defaultStageConfig } from '../../mock_data';
 import { emptyErrorsState, emptyState, formInitialData } from './mock_data';
+
+const defaultStageNames = defaultStageConfig.map(({ name }) => name);
 
 describe('initializeFormData', () => {
   const checkInitializedData = (
@@ -102,7 +104,7 @@ describe('validateStage', () => {
     ${'name'}               | ${'Issue'}                         | ${ERRORS.STAGE_NAME_EXISTS}    | ${'is a capitalized default name'}
     ${'endEventIdentifier'} | ${''}                              | ${ERRORS.START_EVENT_REQUIRED} | ${'has no corresponding start event'}
   `('returns "$error" if $field $msg', ({ field, value, error }) => {
-    const result = validateStage({ ...defaultFields, [field]: value });
+    const result = validateStage({ ...defaultFields, [field]: value }, defaultStageNames);
     expectFieldError({ result, error, field });
   });
 
@@ -286,6 +288,19 @@ describe('generateInitialStageData', () => {
     );
 
     expect(res).toEqual({});
+  });
+
+  it('will set missing default stages to `hidden`', () => {
+    const hiddenStage = {
+      id: 'fake-hidden',
+      name: 'fake-hidden',
+      custom: false,
+      startEventIdentifier: 'merge_request_created',
+      endEventIdentifier: 'merge_request_closed',
+    };
+    const res = generateInitialStageData([initialCustomStage, hiddenStage], [initialCustomStage]);
+
+    expect(res[1]).toEqual({ ...hiddenStage, hidden: true, isDefault: true });
   });
 
   describe('custom stages', () => {

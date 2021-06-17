@@ -30,6 +30,15 @@
   :weight: 1
   :idempotent: true
   :tags: []
+- :name: authorized_project_update:authorized_project_update_user_refresh_from_replica
+  :worker_name: AuthorizedProjectUpdate::UserRefreshFromReplicaWorker
+  :feature_category: :authentication_and_authorization
+  :has_external_dependencies:
+  :urgency: :low
+  :resource_boundary: :unknown
+  :weight: 1
+  :idempotent: true
+  :tags: []
 - :name: authorized_project_update:authorized_project_update_user_refresh_over_user_range
   :worker_name: AuthorizedProjectUpdate::UserRefreshOverUserRangeWorker
   :feature_category: :authentication_and_authorization
@@ -805,15 +814,6 @@
   :has_external_dependencies: true
   :urgency: :low
   :resource_boundary: :cpu
-  :weight: 1
-  :idempotent:
-  :tags: []
-- :name: gcp_cluster:clusters_cleanup_app
-  :worker_name: Clusters::Cleanup::AppWorker
-  :feature_category: :kubernetes_management
-  :has_external_dependencies: true
-  :urgency: :low
-  :resource_boundary: :unknown
   :weight: 1
   :idempotent:
   :tags: []

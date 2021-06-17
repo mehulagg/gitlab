@@ -12,7 +12,10 @@ The DevOps Report gives you an overview of your entire instance's adoption of
 [Concurrent DevOps](https://about.gitlab.com/topics/concurrent-devops/)
 from planning to monitoring.
 
-To see DevOps Report, go to **Admin Area > Analytics > DevOps Report**.
+To see DevOps Report:
+
+1. On the top bar, select **Menu >** **{admin}** **Admin**.
+1. In the left sidebar, select **Analytics > DevOps Report**.
 
 ## DevOps Score
 
@@ -55,7 +58,8 @@ The DevOps Adoption tab shows you which groups within your organization are usin
   - Pipelines
   - Deployments
 
-Buttons to manage your groups appear in the DevOps Adoption section of the page.
+When managing groups in the UI, you can add your groups with the **Add group to table**
+button, in the top right hand section the page.
 
 DevOps Adoption allows you to:
 

@@ -2154,6 +2154,28 @@ Input type: `EscalationPolicyDestroyInput`
 | <a id="mutationescalationpolicydestroyerrors"></a>`errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 | <a id="mutationescalationpolicydestroyescalationpolicy"></a>`escalationPolicy` | [`EscalationPolicyType`](#escalationpolicytype) | The escalation policy. |
 
+### `Mutation.escalationPolicyUpdate`
+
+Input type: `EscalationPolicyUpdateInput`
+
+#### Arguments
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| <a id="mutationescalationpolicyupdateclientmutationid"></a>`clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
+| <a id="mutationescalationpolicyupdatedescription"></a>`description` | [`String`](#string) | The description of the escalation policy. |
+| <a id="mutationescalationpolicyupdateid"></a>`id` | [`IncidentManagementEscalationPolicyID!`](#incidentmanagementescalationpolicyid) | The ID of the on-call schedule to create the on-call rotation in. |
+| <a id="mutationescalationpolicyupdatename"></a>`name` | [`String`](#string) | The name of the escalation policy. |
+| <a id="mutationescalationpolicyupdaterules"></a>`rules` | [`[EscalationRuleInput!]`](#escalationruleinput) | The steps of the escalation policy. |
+
+#### Fields
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| <a id="mutationescalationpolicyupdateclientmutationid"></a>`clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
+| <a id="mutationescalationpolicyupdateerrors"></a>`errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
+| <a id="mutationescalationpolicyupdateescalationpolicy"></a>`escalationPolicy` | [`EscalationPolicyType`](#escalationpolicytype) | The escalation policy. |
+
 ### `Mutation.exportRequirements`
 
 Input type: `ExportRequirementsInput`
@@ -4247,6 +4269,29 @@ Some of the types in the schema exist solely to model connections. Each connecti
 has a distinct, named type, with a distinct named edge type. These are listed separately
 below.
 
+#### `AgentConfigurationConnection`
+
+The connection type for [`AgentConfiguration`](#agentconfiguration).
+
+##### Fields
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| <a id="agentconfigurationconnectionedges"></a>`edges` | [`[AgentConfigurationEdge]`](#agentconfigurationedge) | A list of edges. |
+| <a id="agentconfigurationconnectionnodes"></a>`nodes` | [`[AgentConfiguration]`](#agentconfiguration) | A list of nodes. |
+| <a id="agentconfigurationconnectionpageinfo"></a>`pageInfo` | [`PageInfo!`](#pageinfo) | Information to aid in pagination. |
+
+#### `AgentConfigurationEdge`
+
+The edge type for [`AgentConfiguration`](#agentconfiguration).
+
+##### Fields
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| <a id="agentconfigurationedgecursor"></a>`cursor` | [`String!`](#string) | A cursor for use in pagination. |
+| <a id="agentconfigurationedgenode"></a>`node` | [`AgentConfiguration`](#agentconfiguration) | The item at the end of the edge. |
+
 #### `AlertManagementAlertConnection`
 
 The connection type for [`AlertManagementAlert`](#alertmanagementalert).
@@ -5753,6 +5798,29 @@ The edge type for [`Namespace`](#namespace).
 | <a id="namespaceedgecursor"></a>`cursor` | [`String!`](#string) | A cursor for use in pagination. |
 | <a id="namespaceedgenode"></a>`node` | [`Namespace`](#namespace) | The item at the end of the edge. |
 
+#### `NetworkPolicyConnection`
+
+The connection type for [`NetworkPolicy`](#networkpolicy).
+
+##### Fields
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| <a id="networkpolicyconnectionedges"></a>`edges` | [`[NetworkPolicyEdge]`](#networkpolicyedge) | A list of edges. |
+| <a id="networkpolicyconnectionnodes"></a>`nodes` | [`[NetworkPolicy]`](#networkpolicy) | A list of nodes. |
+| <a id="networkpolicyconnectionpageinfo"></a>`pageInfo` | [`PageInfo!`](#pageinfo) | Information to aid in pagination. |
+
+#### `NetworkPolicyEdge`
+
+The edge type for [`NetworkPolicy`](#networkpolicy).
+
+##### Fields
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| <a id="networkpolicyedgecursor"></a>`cursor` | [`String!`](#string) | A cursor for use in pagination. |
+| <a id="networkpolicyedgenode"></a>`node` | [`NetworkPolicy`](#networkpolicy) | The item at the end of the edge. |
+
 #### `NoteConnection`
 
 The connection type for [`Note`](#note).
@@ -6885,6 +6953,16 @@ Represents the access level of a relationship between a User and object that it 
 | ---- | ---- | ----------- |
 | <a id="accesslevelintegervalue"></a>`integerValue` | [`Int`](#int) | Integer representation of access level. |
 | <a id="accesslevelstringvalue"></a>`stringValue` | [`AccessLevelEnum`](#accesslevelenum) | String representation of access level. |
+
+### `AgentConfiguration`
+
+Configuration details for an Agent.
+
+#### Fields
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| <a id="agentconfigurationagentname"></a>`agentName` | [`String`](#string) | Name of the agent. |
 
 ### `AlertManagementAlert`
 
@@ -8270,6 +8348,7 @@ Snapshot.
 | Name | Type | Description |
 | ---- | ---- | ----------- |
 | <a id="devopsadoptionsnapshotcodeownersusedcount"></a>`codeOwnersUsedCount` | [`Int`](#int) | Total number of projects with existing CODEOWNERS file. |
+| <a id="devopsadoptionsnapshotdastenabledcount"></a>`dastEnabledCount` | [`Int`](#int) | Total number of projects with enabled DAST. |
 | <a id="devopsadoptionsnapshotdeploysucceeded"></a>`deploySucceeded` | [`Boolean!`](#boolean) | At least one deployment succeeded. |
 | <a id="devopsadoptionsnapshotendtime"></a>`endTime` | [`Time!`](#time) | The end time for the snapshot where the data points were collected. |
 | <a id="devopsadoptionsnapshotissueopened"></a>`issueOpened` | [`Boolean!`](#boolean) | At least one issue was opened. |
@@ -8278,6 +8357,7 @@ Snapshot.
 | <a id="devopsadoptionsnapshotpipelinesucceeded"></a>`pipelineSucceeded` | [`Boolean!`](#boolean) | At least one pipeline succeeded. |
 | <a id="devopsadoptionsnapshotrecordedat"></a>`recordedAt` | [`Time!`](#time) | The time the snapshot was recorded. |
 | <a id="devopsadoptionsnapshotrunnerconfigured"></a>`runnerConfigured` | [`Boolean!`](#boolean) | At least one runner was used. |
+| <a id="devopsadoptionsnapshotsastenabledcount"></a>`sastEnabledCount` | [`Int`](#int) | Total number of projects with enabled SAST. |
 | <a id="devopsadoptionsnapshotsecurityscansucceeded"></a>`securityScanSucceeded` | [`Boolean!`](#boolean) | At least one security scan succeeded. |
 | <a id="devopsadoptionsnapshotstarttime"></a>`startTime` | [`Time!`](#time) | The start time for the snapshot where the data points were collected. |
 | <a id="devopsadoptionsnapshottotalprojectscount"></a>`totalProjectsCount` | [`Int`](#int) | Total number of projects. |
@@ -9608,11 +9688,26 @@ A block of time for which a participant is on-call.
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
-| <a id="instancesecuritydashboardprojects"></a>`projects` | [`ProjectConnection!`](#projectconnection) | Projects selected in Instance Security Dashboard. (see [Connections](#connections)) |
 | <a id="instancesecuritydashboardvulnerabilitygrades"></a>`vulnerabilityGrades` | [`[VulnerableProjectsByGrade!]!`](#vulnerableprojectsbygrade) | Represents vulnerable project counts for each grade. |
 | <a id="instancesecuritydashboardvulnerabilityscanners"></a>`vulnerabilityScanners` | [`VulnerabilityScannerConnection`](#vulnerabilityscannerconnection) | Vulnerability scanners reported on the vulnerabilities from projects selected in Instance Security Dashboard. (see [Connections](#connections)) |
 
 #### Fields with arguments
+
+##### `InstanceSecurityDashboard.projects`
+
+Projects selected in Instance Security Dashboard.
+
+Returns [`ProjectConnection!`](#projectconnection).
+
+This field returns a [connection](#connections). It accepts the
+four standard [pagination arguments](#connection-pagination-arguments):
+`before: String`, `after: String`, `first: Int`, `last: Int`.
+
+###### Arguments
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| <a id="instancesecuritydashboardprojectssearch"></a>`search` | [`String`](#string) | Search query for project name, path, or description. |
 
 ##### `InstanceSecurityDashboard.vulnerabilitySeveritiesCount`
 
@@ -9985,6 +10080,8 @@ Maven metadata.
 | <a id="mergerequesthasci"></a>`hasCi` | [`Boolean!`](#boolean) | Indicates if the merge request has CI. |
 | <a id="mergerequesthassecurityreports"></a>`hasSecurityReports` | [`Boolean!`](#boolean) | Indicates if the source branch has any security reports. |
 | <a id="mergerequestheadpipeline"></a>`headPipeline` | [`Pipeline`](#pipeline) | The pipeline running on the branch HEAD of the merge request. |
+| <a id="mergerequesthumantimeestimate"></a>`humanTimeEstimate` | [`String`](#string) | Human-readable time estimate of the merge request. |
+| <a id="mergerequesthumantotaltimespent"></a>`humanTotalTimeSpent` | [`String`](#string) | Human-readable total time reported as spent on the merge request. |
 | <a id="mergerequestid"></a>`id` | [`ID!`](#id) | ID of the merge request. |
 | <a id="mergerequestiid"></a>`iid` | [`String!`](#string) | Internal ID of the merge request. |
 | <a id="mergerequestinprogressmergecommitsha"></a>`inProgressMergeCommitSha` | [`String`](#string) | Commit SHA of the merge request if merge is in progress. |
@@ -10642,6 +10739,21 @@ four standard [pagination arguments](#connection-pagination-arguments):
 | <a id="namespaceprojectssearch"></a>`search` | [`String`](#string) | Search project with most similar names or paths. |
 | <a id="namespaceprojectssort"></a>`sort` | [`NamespaceProjectSort`](#namespaceprojectsort) | Sort projects by this criteria. |
 
+### `NetworkPolicy`
+
+Represents the network policy.
+
+#### Fields
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| <a id="networkpolicyenabled"></a>`enabled` | [`Boolean!`](#boolean) | Indicates whether this policy is enabled. |
+| <a id="networkpolicyfromautodevops"></a>`fromAutoDevops` | [`Boolean!`](#boolean) | Indicates whether this policy is created from AutoDevops. |
+| <a id="networkpolicyname"></a>`name` | [`String!`](#string) | Name of the policy. |
+| <a id="networkpolicynamespace"></a>`namespace` | [`String!`](#string) | Namespace of the policy. |
+| <a id="networkpolicyupdatedat"></a>`updatedAt` | [`Time!`](#time) | Timestamp of when the policy YAML was last updated. |
+| <a id="networkpolicyyaml"></a>`yaml` | [`String!`](#string) | YAML definition of the policy. |
+
 ### `Note`
 
 #### Fields
@@ -11036,6 +11148,7 @@ Represents vulnerability finding of a security report on the pipeline.
 | Name | Type | Description |
 | ---- | ---- | ----------- |
 | <a id="projectactualrepositorysizelimit"></a>`actualRepositorySizeLimit` | [`Float`](#float) | Size limit for the repository in bytes. |
+| <a id="projectagentconfigurations"></a>`agentConfigurations` | [`AgentConfigurationConnection`](#agentconfigurationconnection) | Agent configurations defined by the project. (see [Connections](#connections)) |
 | <a id="projectallowmergeonskippedpipeline"></a>`allowMergeOnSkippedPipeline` | [`Boolean`](#boolean) | If `only_allow_merge_if_pipeline_succeeds` is true, indicates if merge requests of the project can also be merged with skipped jobs. |
 | <a id="projectapifuzzingciconfiguration"></a>`apiFuzzingCiConfiguration` | [`ApiFuzzingCiConfiguration`](#apifuzzingciconfiguration) | API fuzzing configuration for the project. |
 | <a id="projectarchived"></a>`archived` | [`Boolean`](#boolean) | Indicates the archived status of the project. |
@@ -11617,6 +11730,22 @@ four standard [pagination arguments](#connection-pagination-arguments):
 | <a id="projectmilestonesstate"></a>`state` | [`MilestoneStateEnum`](#milestonestateenum) | Filter milestones by state. |
 | <a id="projectmilestonestimeframe"></a>`timeframe` | [`Timeframe`](#timeframe) | List items overlapping the given timeframe. |
 | <a id="projectmilestonestitle"></a>`title` | [`String`](#string) | The title of the milestone. |
+
+##### `Project.networkPolicies`
+
+Network Policies of the project.
+
+Returns [`NetworkPolicyConnection`](#networkpolicyconnection).
+
+This field returns a [connection](#connections). It accepts the
+four standard [pagination arguments](#connection-pagination-arguments):
+`before: String`, `after: String`, `first: Int`, `last: Int`.
+
+###### Arguments
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| <a id="projectnetworkpoliciesenvironmentid"></a>`environmentId` | [`EnvironmentID`](#environmentid) | The global ID of the environment to filter policies. |
 
 ##### `Project.packages`
 
@@ -14116,9 +14245,9 @@ State of an epic.
 
 | Value | Description |
 | ----- | ----------- |
-| <a id="epicstateall"></a>`all` |  |
-| <a id="epicstateclosed"></a>`closed` |  |
-| <a id="epicstateopened"></a>`opened` |  |
+| <a id="epicstateall"></a>`all` | All epics. |
+| <a id="epicstateclosed"></a>`closed` | Closed epics. |
+| <a id="epicstateopened"></a>`opened` | Open epics. |
 
 ### `EpicStateEvent`
 
@@ -14332,9 +14461,9 @@ List limit metric setting.
 
 | Value | Description |
 | ----- | ----------- |
-| <a id="listlimitmetricall_metrics"></a>`all_metrics` |  |
-| <a id="listlimitmetricissue_count"></a>`issue_count` |  |
-| <a id="listlimitmetricissue_weights"></a>`issue_weights` |  |
+| <a id="listlimitmetricall_metrics"></a>`all_metrics` | Limit list by number and total weight of issues. |
+| <a id="listlimitmetricissue_count"></a>`issue_count` | Limit list by number of issues. |
+| <a id="listlimitmetricissue_weights"></a>`issue_weights` | Limit list by total weight of issues. |
 
 ### `MeasurementIdentifier`
 
@@ -15251,6 +15380,7 @@ An example `IssueID` is: `"gid://gitlab/Issue/1"`.
 A `IterationID` is a global ID. It is encoded as a string.
 
 An example `IterationID` is: `"gid://gitlab/Iteration/1"`.
+The older format `"gid://gitlab/EEIteration/1"` was deprecated in 13.3.
 
 ### `IterationsCadenceID`
 

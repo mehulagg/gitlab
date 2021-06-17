@@ -36,6 +36,7 @@ RSpec.describe 'Issue Sidebar' do
     before do
       project.add_maintainer(user)
       visit_issue(project, issue)
+      wait_for_all_requests
     end
 
     it 'updates weight in sidebar to 1' do

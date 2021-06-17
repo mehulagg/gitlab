@@ -580,4 +580,32 @@ RSpec.describe Iteration do
       end
     end
   end
+
+  context 'when closing iteration' do
+    let_it_be_with_reload(:iteration) { create(:iteration, group: group, start_date: 4.days.from_now, due_date: 1.week.from_now) }
+
+    context 'when cadence roll-over flag enabled' do
+      before do
+        iteration.iterations_cadence.update!(automatic: true, active: true, roll_over: true)
+      end
+
+      it 'triggers roll-over issues worker' do
+        expect(Iterations::RollOverIssuesWorker).to receive(:perform_async).with([iteration.id])
+
+        iteration.close!
+      end
+    end
+
+    context 'when cadence roll-over flag disabled' do
+      before do
+        iteration.iterations_cadence.update!(automatic: true, active: true, roll_over: false)
+      end
+
+      it 'triggers roll-over issues worker' do
+        expect(Iterations::RollOverIssuesWorker).not_to receive(:perform_async)
+
+        iteration.close!
+      end
+    end
+  end
 end
