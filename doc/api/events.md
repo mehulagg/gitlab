@@ -14,37 +14,41 @@ Available types for the `action` parameter, and the resources that might be affe
 
 - `approved`
   - Merge request
-- `archived`
-  - Design
-  - Project
 - `closed`
+  - Epic
   - Issue
   - Merge request
+  - Milestone
 - `commented`
   - Issue
   - Merge request
 - `created`
   - Design
+  - Epic
+  - Issue
+  - Merge request
+  - Milestone
   - Project
-  - Group
   - Wiki page
 - `destroyed`
   - Design
-  - Issue
-  - Merge request
+  - Milestone
+  - Wiki page
 - `expired`
-  - Membership (group or project)
+  - Project membership
 - `joined`
-  - Membership (group or project)
+  - Project membership
 - `left`
-  - Membership (group or project)
+  - Project membership
 - `merged`
   - Merge request
-- `pushed` commits to (or deleted commits from) a repository.
+- `pushed` commits to (or deleted commits from) a repository, individually or in bulk.
   - Project
 - `reopened`
+  - Epic
   - Issue
   - Merge request
+  - Milestone
 - `updated`
   - Design
   - Wiki page
