@@ -38,6 +38,8 @@ RSpec.describe FixBatchedMigrationsOldFormatJobArguments do
       legacy_push_event_payloads_migration = create_batched_migration('push_event_payloads', 'event_id', ['event_id', 'event_id_convert_to_bigint'])
       push_event_payloads_migration = create_batched_migration('push_event_payloads', 'event_id', [['event_id'], ['event_id_convert_to_bigint']])
 
+      migrate!
+
       expect(legacy_events_migration.reload.job_arguments).to eq(['id', 'id_convert_to_bigint'])
       expect(events_migration.reload.job_arguments).to eq([['id'], ['id_convert_to_bigint']])
       expect(legacy_push_event_payloads_migration.reload.job_arguments).to eq(['event_id', 'event_id_convert_to_bigint'])
