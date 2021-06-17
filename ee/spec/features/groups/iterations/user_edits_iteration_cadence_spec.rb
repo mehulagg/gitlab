@@ -27,8 +27,15 @@ RSpec.describe 'User edits iteration cadence', :js do
         expect(page).not_to have_selector(dropdown_selector)
       end
 
-      it 'redirects to list page when loading edit page directly' do
+      it 'redirects to list page when loading edit cadence page' do
         visit edit_group_iteration_cadence_path(cadence.group, id: cadence.id)
+
+        # vue-router has trailing slash but _path helper doesn't
+        expect(page).to have_current_path("#{group_iteration_cadences_path(cadence.group)}/")
+      end
+
+      it 'redirects to list page when loading new cadence page' do
+        visit new_group_iteration_cadence_path(cadence.group)
 
         # vue-router has trailing slash but _path helper doesn't
         expect(page).to have_current_path("#{group_iteration_cadences_path(cadence.group)}/")
