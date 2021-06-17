@@ -737,7 +737,7 @@ For each Patroni instance on the secondary site:
    gitlab-ctl reconfigure
    ```
 
-   NOTE: If you are configuring a Patroni standby cluster on a site that previous had a working Patroni cluster, follow these steps instead:
+   NOTE: If you are configuring a Patroni standby cluster on a site that previously had a working Patroni cluster, follow these steps instead:
 
    ```shell
    gitlab-ctl stop patroni 
