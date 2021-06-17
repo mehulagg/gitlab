@@ -93,8 +93,8 @@ module API
 
       params :sort_params do
         optional :order_by, type: String,
-                            values: %w[id name path created_at updated_at last_activity_at] + Helpers::ProjectsHelpers::STATISTICS_SORT_PARAMS,
-                            default: 'created_at', desc: "Return projects ordered by field. #{Helpers::ProjectsHelpers::STATISTICS_SORT_PARAMS.join(', ')} are only available to admins."
+                            values: %w[id name path created_at updated_at last_activity_at similarity] + Helpers::ProjectsHelpers::STATISTICS_SORT_PARAMS,
+                            default: 'created_at', desc: "Return projects ordered by field. #{Helpers::ProjectsHelpers::STATISTICS_SORT_PARAMS.join(', ')} are only available to admins. Similarity is only available when searching."
         optional :sort, type: String, values: %w[asc desc], default: 'desc',
                         desc: 'Return projects sorted in ascending and descending order'
       end
@@ -140,7 +140,7 @@ module API
       def present_projects(projects, options = {})
         verify_statistics_order_by_projects!
 
-        projects = reorder_projects(projects)
+        projects = reorder_projects_with_similarity_order_support(projects)
         projects = apply_filters(projects)
 
         records, options = paginate_with_strategies(projects, options[:request_scope]) do |projects|
@@ -158,6 +158,22 @@ module API
         end
 
         present records, options
+      end
+
+      def reorder_projects_with_similarity_order_support(projects)
+        return projects.sorted_by_similarity_desc(params[:search]) if order_by_similarity?
+
+        projects.reorder(project_without_similarity_options) # rubocop: disable CodeReuse/ActiveRecord
+      end
+
+      def order_by_similarity?
+        params[:search].present? && params[:order_by] == 'similarity'
+      end
+
+      def project_without_similarity_options
+        order_options = order_options_with_tie_breaker
+        order_options['name'] = order_options.delete('similarity') if order_options.has_key?('similarity')
+        order_options
       end
 
       def present_groups(groups)
