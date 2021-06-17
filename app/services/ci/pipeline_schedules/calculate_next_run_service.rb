@@ -16,10 +16,10 @@ module Ci
         schedule_next_run = schedule_cron.next_time_from(now)
         return schedule_next_run if worker_cron.match?(schedule_next_run) && plan_cron.match?(schedule_next_run)
 
-        plan_next_run = plan_cron.next_time_from(now)
+        plan_next_run = plan_cron.next_time_from(schedule_next_run)
         return plan_next_run if worker_cron.match?(plan_next_run)
 
-        worker_next_run = worker_cron.next_time_from(now)
+        worker_next_run = worker_cron.next_time_from(schedule_next_run)
         return worker_next_run if plan_cron.match?(worker_next_run)
 
         worker_cron.next_time_from(plan_next_run)
