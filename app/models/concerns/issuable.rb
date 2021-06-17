@@ -331,12 +331,20 @@ module Issuable
       # This prevents errors when ignored columns are present in the database.
       issuable_columns = with_cte ? issue_grouping_columns(use_cte: with_cte) : "#{table_name}.*"
 
-      extra_select_columns.unshift("(#{highest_priority}) AS highest_priority")
+      extra_select_columns.unshift("highest_priorities.label_priority as highest_priority")
+
+      columns = issue_grouping_columns(use_cte: with_cte)
+      group_columns = if columns.is_a?(Array)
+                        columns + "highest_priorities.label_priority"
+                      else
+                        [columns, "highest_priorities.label_priority"]
+                      end
 
       select(issuable_columns)
         .select(extra_select_columns)
-        .group(issue_grouping_columns(use_cte: with_cte))
-        .reorder(Gitlab::Database.nulls_last_order('highest_priority', direction))
+        .from("#{table_name}, LATERAL(#{highest_priority}) as highest_priorities")
+        .group(group_columns)
+        .reorder(Gitlab::Database.nulls_last_order('highest_priorities.label_priority', direction))
     end
 
     def with_label(title, sort = nil)

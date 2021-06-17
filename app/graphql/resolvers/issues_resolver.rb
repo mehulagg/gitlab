@@ -15,7 +15,6 @@ module Resolvers
     type Types::IssueType.connection_type, null: true
 
     NON_STABLE_CURSOR_SORTS = %i[priority_asc priority_desc
-                                 label_priority_asc label_priority_desc
                                  milestone_due_asc milestone_due_desc].freeze
 
     def continue_issue_resolve(parent, finder, **args)
