@@ -25,23 +25,23 @@ GitLab thrives as a language-agnostic, DevSecOps Platform.  That being said, the
 
 ### Commit
 
-* [Syntax Highlighting within Web IDE](/ee/user/project/web_ide/#syntax-highlighting)
+* [Syntax Highlighting within Web IDE](../user/project/web_ide/#syntax-highlighting)
 * [Project Templates](https://gitlab.com/gitlab-org/project-templates)
 * [CI Template Repository](https://gitlab.com/gitlab-org/gitlab-foss/tree/master/lib/gitlab/ci/templates)
-* [CI/CD Examples in Docs](https://docs.gitlab.com/ee/ci/examples/README.html)
+* [CI/CD Examples in Docs](../ci/examples/README.html)
 
 ### Verify
 
-* [Dependency Caching Examples](https://docs.gitlab.com/ee/ci/caching/#common-use-cases)
-* [Setting Up Unit Test Reports](https://docs.gitlab.com/ee/ci/unit_test_reports.html#how-to-set-it-up)
-* [Code Quality Engines](https://docs.gitlab.com/ee/user/project/merge_requests/code_quality.html)
+* [Dependency Caching Examples](../ci/caching/#common-use-cases)
+* [Setting Up Unit Test Reports](../ci/unit_test_reports.html#how-to-set-it-up)
+* [Code Quality Engines](../user/project/merge_requests/code_quality.html)
 
 ### Package
 
 * [Auto DevOps / Heroku Buildpack Support](https://devcenter.heroku.com/articles/buildpacks#officially-supported-buildpacks)
-* [Dependency Proxy Support](https://docs.gitlab.com/ee/user/packages/dependency_proxy/#supported-dependency-proxies)
-* [Package Registry Support](https://docs.gitlab.com/ee/user/packages/)
-* [Package Registry Administration](https://docs.gitlab.com/ee/administration/packages/
+* [Dependency Proxy Support](../user/packages/dependency_proxy/#supported-dependency-proxies)
+* [Package Registry Support](../user/packages/)
+* [Package Registry Administration](../administration/packages/
 
 
 ### Configure
@@ -54,7 +54,7 @@ GitLab thrives as a language-agnostic, DevSecOps Platform.  That being said, the
 
 ### Secure
 
-* [SAST Supported Languages](https://docs.gitlab.com/ee/user/application_security/sast/#supported-languages-and-frameworks)
-* [Dependency Scanning Supported Languages](https://docs.gitlab.com/ee/user/application_security/dependency_scanning/#supported-languages-and-package-managers)
-* [Coverage Fuzzing Supported Languages](https://docs.gitlab.com/ee/user/application_security/coverage_fuzzing/#supported-fuzzing-engines-and-languages)
-* [DAST Header Validation Examples](https://docs.gitlab.com/ee/user/application_security/dast/index.html#ruby-on-rails-example-for-on-demand-scan)
+* [SAST Supported Languages](../user/application_security/sast/#supported-languages-and-frameworks)
+* [Dependency Scanning Supported Languages](../user/application_security/dependency_scanning/#supported-languages-and-package-managers)
+* [Coverage Fuzzing Supported Languages](../user/application_security/coverage_fuzzing/#supported-fuzzing-engines-and-languages)
+* [DAST Header Validation Examples](../user/application_security/dast/index.html#ruby-on-rails-example-for-on-demand-scan)
