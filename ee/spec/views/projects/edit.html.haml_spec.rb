@@ -18,7 +18,7 @@ RSpec.describe 'projects/edit' do
   context 'status checks' do
     context 'feature enabled' do
       before do
-        stub_feature_flags(ff_compliance_approval_gates: true)
+        stub_feature_flags(ff_external_status_checks: true)
 
         render
       end
@@ -30,7 +30,7 @@ RSpec.describe 'projects/edit' do
 
     context 'feature disabled' do
       before do
-        stub_feature_flags(ff_compliance_approval_gates: false)
+        stub_feature_flags(ff_external_status_checks: false)
 
         render
       end

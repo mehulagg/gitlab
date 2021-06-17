@@ -1,5 +1,5 @@
 ---
-name: ff_compliance_approval_gates
+name: ff_external_status_checks
 introduced_by_url: https://gitlab.com/gitlab-org/gitlab/-/merge_requests/54002
 rollout_issue_url: https://gitlab.com/gitlab-org/gitlab/-/issues/320783
 milestone: '13.10'
