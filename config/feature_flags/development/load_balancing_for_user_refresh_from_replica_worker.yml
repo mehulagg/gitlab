@@ -1,0 +1,8 @@
+---
+name: load_balancing_for_user_refresh_from_replica_worker
+introduced_by_url: https://gitlab.com/gitlab-org/gitlab/-/merge_requests/64276
+rollout_issue_url: https://gitlab.com/gitlab-org/gitlab/-/issues/333903
+milestone: '14.0'
+type: development
+group: group::access
+default_enabled: false
