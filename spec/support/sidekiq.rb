@@ -20,4 +20,21 @@ RSpec.configure do |config|
   config.around(:example, :sidekiq_inline) do |example|
     gitlab_sidekiq_inline { example.run }
   end
+
+  # Some specs need to run mailers through Sidekiq explicitly, rather
+  # than the ActiveJob test adapter. There is a Rails bug that means we
+  # have to do some extra steps to make this happen:
+  # https://github.com/rails/rails/issues/37270#issuecomment-553927324
+  config.around(:example, :sidekiq_mailers) do |example|
+    original_queue_adapter = ActiveJob::Base.queue_adapter
+    descendants = ActiveJob::Base.descendants + [ActiveJob::Base]
+
+    ActiveJob::Base.queue_adapter = :sidekiq
+    descendants.each(&:disable_test_adapter)
+
+    example.run
+
+    descendants.each { |a| a.enable_test_adapter(ActiveJob::QueueAdapters::TestAdapter.new) }
+    ActiveJob::Base.queue_adapter = original_queue_adapter
+  end
 end
