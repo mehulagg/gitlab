@@ -7,6 +7,7 @@ module RequirementsManagement
 
       attrs = whitelisted_requirement_params
       requirement.update(attrs)
+      # also update requirement issue
 
       create_test_report_for(requirement) if manually_create_test_report?
 
