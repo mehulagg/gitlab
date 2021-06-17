@@ -106,6 +106,13 @@ Yes! We have specific instructions for [zero-downtime updates](../update/index.m
 
 ## I've identified a potential backwards compatibility problem, what can I do about it?
 
+### Co-ordinate
+
+For major or minor version updates of Rails, or Puma, you are encourage to:
+
+- Engage the Quality team to thoroughly test the MR.
+- Open a [Production Change issue](https://gitlab.com/gitlab-com/gl-infra/production/-/issues/new?issuable_template=change_management) prior to merging the MR.
+
 ### Feature flags
 
 One way to handle this is to use a feature flag that is disabled by
