@@ -587,8 +587,11 @@ export default {
     role="row"
   >
     <div
+      :class="{ 
+        'section-100': isFolder,
+        tableData.name.spacing: tableData.name.spacing              
+      }"
       class="table-section section-wrap text-truncate"
-      :class="tableData.name.spacing"
       role="gridcell"
     >
       <div v-if="!isFolder" class="table-mobile-header" role="rowheader">
