@@ -26,6 +26,11 @@ export default {
     GlSearchBoxByType,
   },
   props: {
+    initialData: {
+      type: Array,
+      required: false,
+      default: () => [],
+    },
     defaultSelectedLabelIds: {
       type: Array,
       required: false,
@@ -89,7 +94,11 @@ export default {
     },
   },
   mounted() {
-    this.fetchData();
+    if (!this.initialData.length) {
+      this.fetchData();
+    } else {
+      this.labels = this.initialData;
+    }
   },
   methods: {
     ...mapGetters(['currentGroupPath']),
