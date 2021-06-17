@@ -33,3 +33,11 @@ export const BRANCH_PAGINATION_LIMIT = 20;
 export const BRANCH_SEARCH_DEBOUNCE = '500';
 
 export const STARTER_TEMPLATE_NAME = 'Getting-Started';
+
+export const pipelineEditorTrackingOptions = {
+  /* eslint-disable-next-line @gitlab/require-i18n-strings */
+  category: 'pipeline_editor',
+  actions: {
+    browse_templates: 'browse_templates',
+  },
+};
