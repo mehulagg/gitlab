@@ -316,7 +316,7 @@ To add a Kubernetes cluster to your project, group, or instance:
         with limited permissions, the secret's namespace and project namespace may
         be the same.
 
-1. Finally, click the **Create Kubernetes cluster** button.
+1. Finally, click the **Add Kubernetes cluster** button.
 
 After a couple of minutes, your cluster is ready.
 
