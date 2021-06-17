@@ -569,7 +569,7 @@ RSpec.describe Group do
 
     before do
       create(:jira_service, group: group, project: nil)
-      create(:slack_integration, group: another_group, project: nil)
+      create(:integrations_slack, group: another_group, project: nil)
     end
 
     it 'returns groups without integration' do

@@ -10,7 +10,7 @@ RSpec.describe Integrations::Slack do
       stub_request(:post, "https://slack.service.url/")
     end
 
-    let_it_be(:slack_integration) { create(:slack_integration, branches_to_be_notified: 'all') }
+    let_it_be(:slack_integration) { create(:integrations_slack, branches_to_be_notified: 'all') }
 
     it 'uses only known events', :aggregate_failures do
       described_class::SUPPORTED_EVENTS_FOR_USAGE_LOG.each do |action|

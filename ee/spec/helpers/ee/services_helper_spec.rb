@@ -42,7 +42,7 @@ RSpec.describe EE::ServicesHelper do
     end
 
     context 'with Slack integration' do
-      let(:integration) { build(:slack_integration) }
+      let(:integration) { build(:integrations_slack) }
 
       it 'does not include Jira specific fields' do
         is_expected.not_to include(*jira_fields.keys)

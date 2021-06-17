@@ -5367,7 +5367,7 @@ RSpec.describe Project, factory_default: :keep do
   end
 
   describe '#execute_services' do
-    let(:integration) { create(:slack_integration, push_events: true, merge_requests_events: false, active: true) }
+    let(:integration) { create(:integrations_slack, push_events: true, merge_requests_events: false, active: true) }
 
     it 'executes integrations with the specified scope' do
       data = 'any data'

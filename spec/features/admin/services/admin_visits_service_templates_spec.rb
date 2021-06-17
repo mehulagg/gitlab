@@ -23,7 +23,7 @@ RSpec.describe 'Admin visits service templates' do
 
   context 'with an active service template' do
     before do
-      create(:slack_integration, :template, active: true)
+      create(:integrations_slack, :template, active: true)
       visit(admin_application_settings_services_path)
     end
 
@@ -40,7 +40,7 @@ RSpec.describe 'Admin visits service templates' do
 
     context 'with instance-level integration' do
       before do
-        create(:slack_integration, instance: true, project: nil)
+        create(:integrations_slack, instance: true, project: nil)
         visit(admin_application_settings_services_path)
       end
 

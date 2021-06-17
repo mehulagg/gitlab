@@ -259,7 +259,7 @@ RSpec.describe Gitlab::UsageData do
       for_defined_days_back do
         user = create(:user)
         project = create(:project, creator: user)
-        create(:slack_integration, project: project)
+        create(:integrations_slack, project: project)
         create(:slack_slash_commands_integration, project: project)
         create(:prometheus_service, project: project)
       end

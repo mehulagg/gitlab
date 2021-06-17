@@ -25,7 +25,7 @@ RSpec.describe ServiceEventEntity do
     end
 
     context 'integration with fields' do
-      let(:integration) { create(:slack_integration, note_events: false, note_channel: 'note-channel') }
+      let(:integration) { create(:integrations_slack, note_events: false, note_channel: 'note-channel') }
       let(:event) { 'note' }
 
       it 'exposes correct attributes' do

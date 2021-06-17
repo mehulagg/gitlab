@@ -160,7 +160,8 @@ FactoryBot.define do
     password { 'my-secret-password' }
   end
 
-  factory :slack_integration, class: 'Integrations::Slack' do
+  # avoids conflict with slack_integration factory
+  factory :integrations_slack, class: 'Integrations::Slack' do
     project
     active { true }
     webhook { 'https://slack.service.url' }

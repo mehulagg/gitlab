@@ -7,7 +7,7 @@ RSpec.describe Projects::TransferService do
 
   let_it_be(:user) { create(:user) }
   let_it_be(:group) { create(:group) }
-  let_it_be(:group_integration) { create(:slack_integration, group: group, project: nil, webhook: 'http://group.slack.com') }
+  let_it_be(:group_integration) { create(:integrations_slack, group: group, project: nil, webhook: 'http://group.slack.com') }
   let(:project) { create(:project, :repository, :legacy_storage, namespace: user.namespace) }
 
   subject(:execute_transfer) { described_class.new(project, user).execute(group).tap { project.reload } }
@@ -121,10 +121,10 @@ RSpec.describe Projects::TransferService do
 
     context 'with a project integration' do
       let_it_be_with_reload(:project) { create(:project, namespace: user.namespace) }
-      let_it_be(:instance_integration) { create(:slack_integration, :instance, webhook: 'http://project.slack.com') }
+      let_it_be(:instance_integration) { create(:integrations_slack, :instance, webhook: 'http://project.slack.com') }
 
       context 'with an inherited integration' do
-        let_it_be(:project_integration) { create(:slack_integration, project: project, webhook: 'http://project.slack.com', inherit_from_id: instance_integration.id) }
+        let_it_be(:project_integration) { create(:integrations_slack, project: project, webhook: 'http://project.slack.com', inherit_from_id: instance_integration.id) }
 
         it 'replaces inherited integrations', :aggregate_failures do
           execute_transfer
@@ -135,7 +135,7 @@ RSpec.describe Projects::TransferService do
       end
 
       context 'with a custom integration' do
-        let_it_be(:project_integration) { create(:slack_integration, project: project, webhook: 'http://project.slack.com') }
+        let_it_be(:project_integration) { create(:integrations_slack, project: project, webhook: 'http://project.slack.com') }
 
         it 'does not updates the integrations' do
           expect { execute_transfer }.not_to change { project.slack_integration.webhook }

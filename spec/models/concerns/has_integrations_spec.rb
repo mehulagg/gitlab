@@ -14,7 +14,7 @@ RSpec.describe HasIntegrations do
     create(:jira_service, project: project_2, inherit_from_id: nil)
     create(:jira_service, group: create(:group), project: nil, inherit_from_id: nil)
     create(:jira_service, project: project_3, inherit_from_id: nil)
-    create(:slack_integration, project: project_4, inherit_from_id: nil)
+    create(:integrations_slack, project: project_4, inherit_from_id: nil)
   end
 
   describe '.with_custom_integration_for' do
