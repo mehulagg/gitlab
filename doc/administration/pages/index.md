@@ -1315,6 +1315,24 @@ To enable disk access:
 
 1. [Reconfigure GitLab](../restart_gitlab.md#omnibus-gitlab-reconfigure).
 
+### httprange: new resource 403
+
+If you see the error similar to:
+
+```plaintext
+{"error":"httprange: new resource 403: \"403 Forbidden\"","host":"root.pages.example.com","level":"error","msg":"vfs.Root","path":"/pages1/","time":"2021-06-10T08:45:19Z"}
+```
+
+And you run pages on the separate server syncing files via NFS, it may mean that
+pages directory is mounted to different path on the main GitLab server and the
+GitLab Pages server.
+
+In that case we highly recommend you to configure
+[the object storage and migrate pages data to it](#using-object-storage).
+
+Alternatively you can mount GitLab Pages shared directory to the same path on
+both server.
+
 ### GitLab Pages doesn't work after upgrading to GitLab 14.0 or above
 
 GitLab 14.0 introduces a number of changes to GitLab Pages which may require manual intervention.
