@@ -14,9 +14,9 @@ export default {
   mixins: [Tracking.mixin()],
   methods: {
     trackTemplateBrowsing() {
-      const { category, actions } = pipelineEditorTrackingOptions;
+      const { label, actions } = pipelineEditorTrackingOptions;
 
-      this.track(actions.browse_templates, { label: category });
+      this.track(actions.browse_templates, { label });
     },
   },
 };

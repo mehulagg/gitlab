@@ -36,7 +36,7 @@ export const STARTER_TEMPLATE_NAME = 'Getting-Started';
 
 export const pipelineEditorTrackingOptions = {
   /* eslint-disable-next-line @gitlab/require-i18n-strings */
-  category: 'pipeline_editor',
+  label: 'pipeline_editor',
   actions: {
     browse_templates: 'browse_templates',
   },

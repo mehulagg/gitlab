@@ -40,12 +40,12 @@ describe('CI Editor Header', () => {
     });
 
     it('tracks the click on the browse button', async () => {
-      const { category, actions } = pipelineEditorTrackingOptions;
+      const { label, actions } = pipelineEditorTrackingOptions;
 
       await findLinkBtn().vm.$emit('click');
 
       expect(trackingSpy).toHaveBeenCalledWith(undefined, actions.browse_templates, {
-        label: category,
+        label,
       });
     });
   });
