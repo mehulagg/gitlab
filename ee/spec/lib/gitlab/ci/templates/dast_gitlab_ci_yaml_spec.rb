@@ -19,13 +19,12 @@ RSpec.describe 'DAST.gitlab-ci.yml' do
 
     context 'when ci yaml is just template' do
       before do
+        stub_application_setting(default_branch_name: default_branch)
         stub_ci_pipeline_yaml_file(template.content)
 
         allow_next_instance_of(Ci::BuildScheduleWorker) do |worker|
           allow(worker).to receive(:perform).and_return(true)
         end
-
-        allow(project).to receive(:default_branch).and_return(default_branch)
       end
 
       context 'when project has no license' do
@@ -37,13 +36,12 @@ RSpec.describe 'DAST.gitlab-ci.yml' do
 
     context 'when stages includes dast' do
       before do
+        stub_application_setting(default_branch_name: default_branch)
         stub_ci_pipeline_yaml_file(ci_pipeline_yaml + template.content)
 
         allow_next_instance_of(Ci::BuildScheduleWorker) do |worker|
           allow(worker).to receive(:perform).and_return(true)
         end
-
-        allow(project).to receive(:default_branch).and_return(default_branch)
       end
 
       context 'when project has no license' do
@@ -127,7 +125,7 @@ RSpec.describe 'DAST.gitlab-ci.yml' do
             let(:pipeline_branch) { 'patch-1' }
 
             before do
-              project.repository.create_branch(pipeline_branch)
+              project.repository.create_branch(pipeline_branch, default_branch)
             end
 
             it 'includes dast job' do
@@ -153,7 +151,7 @@ RSpec.describe 'DAST.gitlab-ci.yml' do
             let(:pipeline_branch) { 'patch-1' }
 
             before do
-              project.repository.create_branch(pipeline_branch)
+              project.repository.create_branch(pipeline_branch, default_branch)
             end
 
             it 'includes no jobs' do

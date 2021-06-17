@@ -36,11 +36,11 @@ RSpec.describe 'Jobs/DAST-Default-Branch-Deploy.gitlab-ci.yml' do
     let(:build_names) { pipeline.builds.pluck(:name) }
 
     before do
+      stub_application_setting(default_branch_name: default_branch)
       stub_ci_pipeline_yaml_file(template)
       allow_next_instance_of(Ci::BuildScheduleWorker) do |worker|
         allow(worker).to receive(:perform).and_return(true)
       end
-      allow(project).to receive(:default_branch).and_return(default_branch)
     end
 
     it 'has no errors' do

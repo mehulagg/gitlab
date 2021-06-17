@@ -40,11 +40,11 @@ RSpec.describe 'API-Fuzzing.gitlab-ci.yml' do
 
     context 'when no stages' do
       before do
+        stub_application_setting(default_branch_name: default_branch)
         stub_ci_pipeline_yaml_file(template.content)
         allow_next_instance_of(Ci::BuildScheduleWorker) do |worker|
           allow(worker).to receive(:perform).and_return(true)
         end
-        allow(project).to receive(:default_branch).and_return(default_branch)
       end
 
       context 'when project has no stages' do
@@ -58,13 +58,12 @@ RSpec.describe 'API-Fuzzing.gitlab-ci.yml' do
       let(:ci_pipeline_yaml) { "stages: [\"fuzz\"]\n" }
 
       before do
+        stub_application_setting(default_branch_name: default_branch)
         stub_ci_pipeline_yaml_file(ci_pipeline_yaml + template.content)
 
         allow_next_instance_of(Ci::BuildScheduleWorker) do |worker|
           allow(worker).to receive(:perform).and_return(true)
         end
-
-        allow(project).to receive(:default_branch).and_return(default_branch)
       end
 
       context 'when project has no license' do
