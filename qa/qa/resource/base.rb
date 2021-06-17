@@ -96,10 +96,11 @@ module QA
         # @param [Symbol] name
         # @return [void]
         def attribute(name, &block)
+          (@attribute_names ||= []).push(name) # save added attributes
+
           attr_writer(name)
 
-          # Add unused attribute so we can easily filter out all custom attribute methods
-          define_method(name) do |_attribute_mark = nil|
+          define_method(name) do
             instance_variable_get("@#{name}") || instance_variable_set("@#{name}", populate_attribute(name, block))
           end
         end
@@ -176,13 +177,15 @@ module QA
         api_value || (block && instance_exec(&block))
       end
 
-      # Get all defined attributes by filtering out via custom optional parameter
+      # Get all defined attributes across all parents
       #
       # @return [Array<Symbol>]
       def all_attributes
-        @all_attributes ||= methods.select do |name|
-          method(name).parameters.flatten.include?(:_attribute_mark)
-        end
+        @all_attributes ||= self.class.ancestors
+                                .select { |clazz| clazz <= QA::Resource::Base }
+                                .map { |clazz| clazz.instance_variable_get(:@attribute_names) }
+                                .flatten
+                                .compact
       end
 
       def log_having_both_api_result_and_block(name, api_value)
