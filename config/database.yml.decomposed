@@ -19,6 +19,7 @@ development:
     adapter: postgresql
     encoding: unicode
     database: gitlabhq_development_ci
+    migrations_paths: db/ci_migrate
     username: postgres
     password: "secure password"
     host: localhost
