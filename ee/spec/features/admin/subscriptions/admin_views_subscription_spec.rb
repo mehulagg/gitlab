@@ -70,7 +70,7 @@ RSpec.describe 'Admin views Subscription', :js do
 
     context 'activate another subscription' do
       before do
-        click_button('Enter activation code')
+        click_button('Activate cloud license')
       end
 
       it 'shows the activation modal' do

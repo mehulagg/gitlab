@@ -2,6 +2,7 @@
 import { GlButton, GlModalDirective } from '@gitlab/ui';
 import axios from '~/lib/utils/axios_utils';
 import {
+  activateCloudLicense,
   enterActivationCode,
   licensedToHeaderText,
   manageSubscriptionButtonText,
@@ -24,6 +25,7 @@ export const modalId = 'subscription-activation-modal';
 
 export default {
   i18n: {
+    activateCloudLicense,
     enterActivationCode,
     licensedToHeaderText,
     manageSubscriptionButtonText,
@@ -69,6 +71,12 @@ export default {
     };
   },
   computed: {
+    canActivateSubscription() {
+      return this.isLicenseFileType;
+    },
+    canEnterActivationCode() {
+      return this.isCloudType;
+    },
     canManageSubscription() {
       return this.customersPortalUrl && this.hasSubscription;
     },
@@ -95,6 +103,7 @@ export default {
     },
     shouldShowFooter() {
       return (
+        this.canActivateSubscription ||
         this.canRemoveLicense ||
         this.canManageSubscription ||
         this.canSyncSubscription ||
@@ -161,11 +170,20 @@ export default {
               {{ $options.i18n.syncSubscriptionButtonText }}
             </gl-button>
             <gl-button
-              v-if="hasSubscription"
+              v-if="canActivateSubscription"
               v-gl-modal="$options.modal.id"
               category="primary"
               variant="confirm"
-              data-testid="subscription-activation-action"
+              data-testid="subscription-activate-subscription-action"
+            >
+              {{ $options.i18n.activateCloudLicense }}
+            </gl-button>
+            <gl-button
+              v-if="canEnterActivationCode"
+              v-gl-modal="$options.modal.id"
+              category="primary"
+              variant="confirm"
+              data-testid="subscription-enter-code-action"
             >
               {{ $options.i18n.enterActivationCode }}
             </gl-button>

@@ -31623,6 +31623,9 @@ msgstr ""
 msgid "SuperSonics|Activate"
 msgstr ""
 
+msgid "SuperSonics|Activate cloud license"
+msgstr ""
+
 msgid "SuperSonics|Activate subscription"
 msgstr ""
 

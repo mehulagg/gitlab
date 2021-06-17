@@ -17,6 +17,7 @@ export const howToActivateSubscription = s__(
 export const activateLabel = s__('SuperSonics|Activate');
 export const activateSubscription = s__('SuperSonics|Activate subscription');
 export const enterActivationCode = s__('SuperSonics|Enter activation code');
+export const activateCloudLicense = s__('SuperSonics|Activate cloud license');
 export const noActiveSubscription = s__(`SuperSonics|You do not have an active subscription`);
 export const subscriptionDetailsHeaderText = s__('SuperSonics|Subscription details');
 export const licensedToHeaderText = s__('SuperSonics|Licensed to');
