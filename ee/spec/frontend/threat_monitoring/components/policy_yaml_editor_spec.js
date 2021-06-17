@@ -1,11 +1,11 @@
 import { shallowMount } from '@vue/test-utils';
 import PolicyYamlEditor from 'ee/threat_monitoring/components/policy_yaml_editor.vue';
-import EditorLite from '~/vue_shared/components/editor_lite.vue';
+import SourceEditor from '~/vue_shared/components/source_editor.vue';
 
 describe('PolicyYamlEditor component', () => {
   let wrapper;
 
-  const findEditor = () => wrapper.findComponent(EditorLite);
+  const findEditor = () => wrapper.findComponent(SourceEditor);
 
   const factory = ({ propsData } = {}) => {
     wrapper = shallowMount(PolicyYamlEditor, {
@@ -14,7 +14,7 @@ describe('PolicyYamlEditor component', () => {
         ...propsData,
       },
       stubs: {
-        EditorLite,
+        SourceEditor,
       },
     });
   };
