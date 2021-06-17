@@ -13779,27 +13779,6 @@ CREATE SEQUENCE in_product_marketing_emails_id_seq
 
 ALTER SEQUENCE in_product_marketing_emails_id_seq OWNED BY in_product_marketing_emails.id;
 
-CREATE TABLE incident_management_alert_escalations (
-    id bigint NOT NULL,
-    rule_id bigint NOT NULL,
-    alert_id bigint NOT NULL,
-    schedule_id bigint NOT NULL,
-    status smallint NOT NULL,
-    notify_at timestamp with time zone NOT NULL,
-    created_at timestamp with time zone NOT NULL,
-    updated_at timestamp with time zone NOT NULL
-)
-PARTITION BY RANGE (created_at);
-
-CREATE SEQUENCE incident_management_alert_escalations_id_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-ALTER SEQUENCE incident_management_alert_escalations_id_seq OWNED BY incident_management_alert_escalations.id;
-
 CREATE TABLE incident_management_escalation_policies (
     id bigint NOT NULL,
     project_id bigint NOT NULL,
@@ -13916,6 +13895,27 @@ CREATE SEQUENCE incident_management_oncall_shifts_id_seq
     CACHE 1;
 
 ALTER SEQUENCE incident_management_oncall_shifts_id_seq OWNED BY incident_management_oncall_shifts.id;
+
+CREATE TABLE incident_management_pending_alert_escalations (
+    id bigint NOT NULL,
+    rule_id bigint NOT NULL,
+    alert_id bigint NOT NULL,
+    schedule_id bigint NOT NULL,
+    status smallint NOT NULL,
+    process_at timestamp with time zone NOT NULL,
+    created_at timestamp with time zone NOT NULL,
+    updated_at timestamp with time zone NOT NULL
+)
+PARTITION BY RANGE (process_at);
+
+CREATE SEQUENCE incident_management_pending_alert_escalations_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE incident_management_pending_alert_escalations_id_seq OWNED BY incident_management_pending_alert_escalations.id;
 
 CREATE TABLE index_statuses (
     id integer NOT NULL,
@@ -20009,8 +20009,6 @@ ALTER TABLE ONLY import_failures ALTER COLUMN id SET DEFAULT nextval('import_fai
 
 ALTER TABLE ONLY in_product_marketing_emails ALTER COLUMN id SET DEFAULT nextval('in_product_marketing_emails_id_seq'::regclass);
 
-ALTER TABLE ONLY incident_management_alert_escalations ALTER COLUMN id SET DEFAULT nextval('incident_management_alert_escalations_id_seq'::regclass);
-
 ALTER TABLE ONLY incident_management_escalation_policies ALTER COLUMN id SET DEFAULT nextval('incident_management_escalation_policies_id_seq'::regclass);
 
 ALTER TABLE ONLY incident_management_escalation_rules ALTER COLUMN id SET DEFAULT nextval('incident_management_escalation_rules_id_seq'::regclass);
@@ -20022,6 +20020,8 @@ ALTER TABLE ONLY incident_management_oncall_rotations ALTER COLUMN id SET DEFAUL
 ALTER TABLE ONLY incident_management_oncall_schedules ALTER COLUMN id SET DEFAULT nextval('incident_management_oncall_schedules_id_seq'::regclass);
 
 ALTER TABLE ONLY incident_management_oncall_shifts ALTER COLUMN id SET DEFAULT nextval('incident_management_oncall_shifts_id_seq'::regclass);
+
+ALTER TABLE ONLY incident_management_pending_alert_escalations ALTER COLUMN id SET DEFAULT nextval('incident_management_pending_alert_escalations_id_seq'::regclass);
 
 ALTER TABLE ONLY index_statuses ALTER COLUMN id SET DEFAULT nextval('index_statuses_id_seq'::regclass);
 
@@ -21380,9 +21380,6 @@ ALTER TABLE ONLY in_product_marketing_emails
 ALTER TABLE ONLY incident_management_oncall_shifts
     ADD CONSTRAINT inc_mgmnt_no_overlapping_oncall_shifts EXCLUDE USING gist (rotation_id WITH =, tstzrange(starts_at, ends_at, '[)'::text) WITH &&);
 
-ALTER TABLE ONLY incident_management_alert_escalations
-    ADD CONSTRAINT incident_management_alert_escalations_pkey PRIMARY KEY (id, created_at);
-
 ALTER TABLE ONLY incident_management_escalation_policies
     ADD CONSTRAINT incident_management_escalation_policies_pkey PRIMARY KEY (id);
 
@@ -21400,6 +21397,9 @@ ALTER TABLE ONLY incident_management_oncall_schedules
 
 ALTER TABLE ONLY incident_management_oncall_shifts
     ADD CONSTRAINT incident_management_oncall_shifts_pkey PRIMARY KEY (id);
+
+ALTER TABLE ONLY incident_management_pending_alert_escalations
+    ADD CONSTRAINT incident_management_pending_alert_escalations_pkey PRIMARY KEY (id, process_at);
 
 ALTER TABLE ONLY index_statuses
     ADD CONSTRAINT index_statuses_pkey PRIMARY KEY (id);
@@ -23599,15 +23599,15 @@ CREATE UNIQUE INDEX index_inc_mgmnt_oncall_rotations_on_oncall_schedule_id_and_i
 
 CREATE UNIQUE INDEX index_inc_mgmnt_oncall_rotations_on_oncall_schedule_id_and_name ON incident_management_oncall_rotations USING btree (oncall_schedule_id, name);
 
-CREATE INDEX index_incident_management_alert_escalations_on_alert_id ON ONLY incident_management_alert_escalations USING btree (alert_id);
-
-CREATE INDEX index_incident_management_alert_escalations_on_notify_at ON ONLY incident_management_alert_escalations USING btree (notify_at);
-
-CREATE INDEX index_incident_management_alert_escalations_on_rule_id ON ONLY incident_management_alert_escalations USING btree (rule_id);
-
 CREATE INDEX index_incident_management_oncall_schedules_on_project_id ON incident_management_oncall_schedules USING btree (project_id);
 
 CREATE INDEX index_incident_management_oncall_shifts_on_participant_id ON incident_management_oncall_shifts USING btree (participant_id);
+
+CREATE INDEX index_incident_management_pending_alert_escalations_on_alert_id ON ONLY incident_management_pending_alert_escalations USING btree (alert_id);
+
+CREATE INDEX index_incident_management_pending_alert_escalations_on_process_ ON ONLY incident_management_pending_alert_escalations USING btree (process_at);
+
+CREATE INDEX index_incident_management_pending_alert_escalations_on_rule_id ON ONLY incident_management_pending_alert_escalations USING btree (rule_id);
 
 CREATE UNIQUE INDEX index_index_statuses_on_project_id ON index_statuses USING btree (project_id);
 
@@ -26308,7 +26308,7 @@ ALTER TABLE ONLY terraform_state_versions
 ALTER TABLE ONLY ci_build_report_results
     ADD CONSTRAINT fk_rails_056d298d48 FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE;
 
-ALTER TABLE incident_management_alert_escalations
+ALTER TABLE incident_management_pending_alert_escalations
     ADD CONSTRAINT fk_rails_057c1e3d87 FOREIGN KEY (rule_id) REFERENCES incident_management_escalation_rules(id) ON DELETE SET NULL;
 
 ALTER TABLE ONLY ci_daily_build_group_report_results
@@ -27154,7 +27154,7 @@ ALTER TABLE ONLY vulnerability_feedback
 ALTER TABLE ONLY ci_pipeline_messages
     ADD CONSTRAINT fk_rails_8d3b04e3e1 FOREIGN KEY (pipeline_id) REFERENCES ci_pipelines(id) ON DELETE CASCADE;
 
-ALTER TABLE incident_management_alert_escalations
+ALTER TABLE incident_management_pending_alert_escalations
     ADD CONSTRAINT fk_rails_8d8de95da9 FOREIGN KEY (alert_id) REFERENCES alert_management_alerts(id) ON DELETE CASCADE;
 
 ALTER TABLE ONLY approval_merge_request_rules_approved_approvers
@@ -27817,7 +27817,7 @@ ALTER TABLE ONLY ci_job_variables
 ALTER TABLE ONLY packages_nuget_metadata
     ADD CONSTRAINT fk_rails_fc0c19f5b4 FOREIGN KEY (package_id) REFERENCES packages_packages(id) ON DELETE CASCADE;
 
-ALTER TABLE incident_management_alert_escalations
+ALTER TABLE incident_management_pending_alert_escalations
     ADD CONSTRAINT fk_rails_fcbfd9338b FOREIGN KEY (schedule_id) REFERENCES incident_management_oncall_schedules(id) ON DELETE CASCADE;
 
 ALTER TABLE ONLY external_approval_rules
