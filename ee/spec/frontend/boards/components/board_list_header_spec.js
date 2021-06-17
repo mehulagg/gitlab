@@ -1,19 +1,25 @@
 import { shallowMount, createLocalVue } from '@vue/test-utils';
+import VueApollo from 'vue-apollo';
 import Vuex from 'vuex';
 
 import BoardListHeader from 'ee/boards/components/board_list_header.vue';
 import getters from 'ee/boards/stores/getters';
-import { mockLabelList } from 'jest/boards/mock_data';
+import createMockApollo from 'helpers/mock_apollo_helper';
+import waitForPromises from 'helpers/wait_for_promises';
+import { boardListQueryResponse, mockLabelList } from 'jest/boards/mock_data';
 import { ListType, inactiveId } from '~/boards/constants';
+import listQuery from '~/boards/graphql/board_lists_deferred.query.graphql';
 import sidebarEventHub from '~/sidebar/event_hub';
 
 const localVue = createLocalVue();
 
+localVue.use(VueApollo);
 localVue.use(Vuex);
 
 describe('Board List Header Component', () => {
   let store;
   let wrapper;
+  let fakeApollo;
 
   beforeEach(() => {
     store = new Vuex.Store({ state: { activeId: inactiveId }, getters });
@@ -23,6 +29,7 @@ describe('Board List Header Component', () => {
   afterEach(() => {
     wrapper.destroy();
     wrapper = null;
+    fakeApollo = null;
 
     localStorage.clear();
   });
@@ -33,6 +40,7 @@ describe('Board List Header Component', () => {
     withLocalStorage = true,
     isSwimlanesHeader = false,
     weightFeatureAvailable = false,
+    listQueryHandler = jest.fn().mockResolvedValue(boardListQueryResponse()),
   } = {}) => {
     const boardId = '1';
 
@@ -54,7 +62,10 @@ describe('Board List Header Component', () => {
       );
     }
 
+    fakeApollo = createMockApollo([[listQuery, listQueryHandler]]);
+
     wrapper = shallowMount(BoardListHeader, {
+      apolloProvider: fakeApollo,
       store,
       localVue,
       propsData: {
@@ -127,10 +138,15 @@ describe('Board List Header Component', () => {
   });
 
   describe('weightFeatureAvailable', () => {
-    it('weightFeatureAvailable is true', () => {
+    it('weightFeatureAvailable is true', async () => {
       createComponent({ weightFeatureAvailable: true });
 
-      expect(wrapper.find({ ref: 'weightTooltip' }).exists()).toBe(true);
+      await waitForPromises();
+
+      const weightTooltip = wrapper.find({ ref: 'weightTooltip' });
+
+      expect(weightTooltip.exists()).toBe(true);
+      expect(weightTooltip.text()).toContain(boardListQueryResponse().data.boardList.totalWeight);
     });
 
     it('weightFeatureAvailable is false', () => {

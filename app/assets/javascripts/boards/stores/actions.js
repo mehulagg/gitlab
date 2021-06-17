@@ -15,6 +15,7 @@ import {
 } from 'ee_else_ce/boards/constants';
 import createBoardListMutation from 'ee_else_ce/boards/graphql/board_list_create.mutation.graphql';
 import issueMoveListMutation from 'ee_else_ce/boards/graphql/issue_move_list.mutation.graphql';
+import totalCountAndWeightQuery from '~/boards/graphql/board_lists_deferred.query.graphql';
 import { getIdFromGraphQLId } from '~/graphql_shared/utils';
 import { convertObjectPropsToCamelCase, urlParamsToObject } from '~/lib/utils/common_utils';
 import { s__ } from '~/locale';
@@ -39,8 +40,6 @@ import issueSetLabelsMutation from '../graphql/issue_set_labels.mutation.graphql
 import issueSetMilestoneMutation from '../graphql/issue_set_milestone.mutation.graphql';
 import listsIssuesQuery from '../graphql/lists_issues.query.graphql';
 import * as types from './mutation_types';
-
-import totalCountAndWeightQuery from '~/boards/graphql/board_lists_deferred.query.graphql';
 
 export default {
   setInitialBoardData: ({ commit }, data) => {

@@ -526,3 +526,14 @@ export const mockMoveData = {
   originalIssue: { foo: 'bar' },
   ...mockMoveIssueParams,
 };
+
+export const boardListQueryResponse = () => ({
+  data: {
+    boardList: {
+      __typename: 'BoardList',
+      id: 'gid://gitlab/BoardList/5',
+      totalWeight: 5,
+      issuesCount: 8,
+    },
+  },
+});

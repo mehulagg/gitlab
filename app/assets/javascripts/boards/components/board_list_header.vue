@@ -103,7 +103,7 @@ export default {
       return 'issues';
     },
     itemsTooltipLabel() {
-      return n__(`%d issue`, `%d issues`, this.boardLists.issuesCount);
+      return n__(`%d issue`, `%d issues`, this.boardLists?.issuesCount);
     },
     chevronTooltip() {
       return this.list.collapsed ? this.$options.i18n.expand : this.$options.i18n.collapse;
@@ -131,6 +131,9 @@ export default {
     },
     userCanDrag() {
       return !this.disabled && isListDraggable(this.list);
+    },
+    isLoading() {
+      return this.$apollo.queries.boardList.loading;
     },
   },
   apollo: {
@@ -325,7 +328,7 @@ export default {
           </gl-sprintf>
         </div>
         <div v-else>• {{ itemsTooltipLabel }}</div>
-        <div v-if="weightFeatureAvailable && !$apollo.queries.boardList.loading">
+        <div v-if="weightFeatureAvailable && !isLoading">
           •
           <gl-sprintf :message="__('%{totalWeight} total weight')">
             <template #totalWeight>{{ boardList.totalWeight }}</template>
@@ -347,15 +350,13 @@ export default {
           <span ref="itemCount" class="issue-count-badge-count">
             <gl-icon class="gl-mr-2" :name="countIcon" />
             <item-count
-              v-if="!$apollo.queries.boardList.loading"
+              v-if="!isLoading"
               :items-size="boardList.issuesCount"
               :max-issue-count="list.maxIssueCount"
             />
           </span>
           <!-- EE start -->
-          <template
-            v-if="weightFeatureAvailable && !isEpicBoard && !$apollo.queries.boardList.loading"
-          >
+          <template v-if="weightFeatureAvailable && !isEpicBoard && !isLoading">
             <gl-tooltip :target="() => $refs.weightTooltip" :title="weightCountToolTip" />
             <span ref="weightTooltip" class="gl-display-inline-flex gl-ml-3">
               <gl-icon class="gl-mr-2" name="weight" />
