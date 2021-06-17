@@ -159,7 +159,7 @@ module EE
                                              project_features: { builds_access_level: ::ProjectFeature::ENABLED })
       end
       scope :with_slack_integration, -> { joins(:slack_integration) }
-      scope :with_slack_slash_commands_service, -> { joins(:slack_slash_commands_service) }
+      scope :with_slack_slash_commands_integration, -> { joins(:slack_slash_commands_integration) }
       scope :with_prometheus_service, -> { joins(:prometheus_service) }
       scope :aimed_for_deletion, -> (date) { where('marked_for_deletion_at <= ?', date).without_deleted }
       scope :not_aimed_for_deletion, -> { where(marked_for_deletion_at: nil) }

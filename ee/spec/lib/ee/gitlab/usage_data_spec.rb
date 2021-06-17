@@ -260,7 +260,7 @@ RSpec.describe Gitlab::UsageData do
         user = create(:user)
         project = create(:project, creator: user)
         create(:slack_integration, project: project)
-        create(:slack_slash_commands_service, project: project)
+        create(:slack_slash_commands_integration, project: project)
         create(:prometheus_service, project: project)
       end
 

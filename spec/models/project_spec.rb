@@ -55,7 +55,7 @@ RSpec.describe Project, factory_default: :keep do
     it { is_expected.to have_one(:pivotaltracker_service) }
     it { is_expected.to have_one(:flowdock_integration) }
     it { is_expected.to have_one(:assembla_integration) }
-    it { is_expected.to have_one(:slack_slash_commands_service) }
+    it { is_expected.to have_one(:slack_slash_commands_integration) }
     it { is_expected.to have_one(:mattermost_slash_commands_service) }
     it { is_expected.to have_one(:buildkite_integration) }
     it { is_expected.to have_one(:bamboo_integration) }

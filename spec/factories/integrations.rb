@@ -167,7 +167,7 @@ FactoryBot.define do
     type { 'SlackService' }
   end
 
-  factory :slack_slash_commands_service, class: 'Integrations::SlackSlashCommands' do
+  factory :slack_slash_commands_integration, class: 'Integrations::SlackSlashCommands' do
     project
     active { true }
     type { 'SlackSlashCommandsService' }

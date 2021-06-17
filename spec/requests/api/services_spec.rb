@@ -239,7 +239,7 @@ RSpec.describe API::Services do
       let(:service_name) { 'slack_slash_commands' }
 
       before do
-        project.create_slack_slash_commands_service(
+        project.create_slack_slash_commands_integration(
           active: true,
           properties: { token: 'token' }
         )
