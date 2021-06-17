@@ -372,6 +372,7 @@ That's all of the required database changes.
   module Geo
     class CoolWidgetReplicator < Gitlab::Geo::Replicator
       include ::Geo::BlobReplicatorStrategy
+      extend ::Gitlab::Utils::Override
 
       def self.model
         ::CoolWidget
@@ -702,7 +703,10 @@ Individual Cool Widget replication and verification data should now be available
   module Geo
     class CoolWidgetReplicator < Gitlab::Geo::Replicator
       ...
+      # REMOVE THIS LINE IF NOT USING OVERRIDE ANYWHERE APART FROM THE METHOD BELOW
+      extend ::Gitlab::Utils::Override
 
+      ...
       # REMOVE THIS METHOD
       def self.replication_enabled_by_default?
         false
