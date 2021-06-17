@@ -110,10 +110,13 @@ by the `CACHE_FALLBACK_KEY` variable:
 variables:
   CACHE_FALLBACK_KEY: fallback-key
 
-cache:
-  key: "$CI_COMMIT_REF_SLUG"
-  paths:
-    - binaries/
+job1:
+  script:
+    - echo
+  cache:
+    key: "$CI_COMMIT_REF_SLUG"
+    paths:
+      - binaries/
 ```
 
 ## Disable cache for specific jobs
