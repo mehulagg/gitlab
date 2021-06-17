@@ -9,71 +9,71 @@ $top-level-item-color: $purple-900;
 // Needed while we serve both *_base and *_variant stylesheets
 // TODO: These have to be removed during the ':sidebar_refactor' flag rollout
 //
-&.gl-dark .nav-sidebar li.active {
-  box-shadow: none;
-}
-
-&.gl-dark .nav-sidebar .sidebar-sub-level-items {
-  box-shadow: none;
-  border: 1px solid $border-color;
-}
-
-&.gl-dark .sidebar-top-level-items .context-header a .avatar-container.rect-avatar .avatar.s32 {
-  color: $white;
-}
-
-&.gl-dark .nav-sidebar li a,
-&.gl-dark .toggle-sidebar-button .collapse-text,
-&.gl-dark .toggle-sidebar-button .icon-chevron-double-lg-left,
-&.gl-dark .toggle-sidebar-button .icon-chevron-double-lg-right,
-&.gl-dark .sidebar-top-level-items .context-header a .sidebar-context-title,
-&.gl-dark .nav-sidebar-inner-scroll > div.context-header a .sidebar-context-title,
-&.gl-dark .nav-sidebar a.has-sub-items + .sidebar-sub-level-items .fly-out-top-item a,
-&.gl-dark .nav-sidebar a.has-sub-items + .sidebar-sub-level-items .fly-out-top-item a:hover,
-&.gl-dark .nav-sidebar a.has-sub-items + .sidebar-sub-level-items .fly-out-top-item.active a,
-&.gl-dark .nav-sidebar a.has-sub-items + .sidebar-sub-level-items .fly-out-top-item .fly-out-top-item-container {
-  color: $gray-darkest;
-}
-
-&.gl-dark .nav-sidebar a.has-sub-items + .sidebar-sub-level-items .fly-out-top-item a,
-&.gl-dark .nav-sidebar a.has-sub-items + .sidebar-sub-level-items .fly-out-top-item a:hover,
-&.gl-dark .nav-sidebar a.has-sub-items + .sidebar-sub-level-items .fly-out-top-item.active a,
-&.gl-dark .nav-sidebar a.has-sub-items + .sidebar-sub-level-items .fly-out-top-item .fly-out-top-item-container {
-  @include gl-mt-0;
-}
-
-&.gl-dark .nav-sidebar a:not(.has-sub-items) + .sidebar-sub-level-items .fly-out-top-item a,
-&.gl-dark .nav-sidebar a:not(.has-sub-items) + .sidebar-sub-level-items .fly-out-top-item a:hover,
-&.gl-dark .nav-sidebar a:not(.has-sub-items) + .sidebar-sub-level-items .fly-out-top-item.active a,
-&.gl-dark .nav-sidebar a:not(.has-sub-items) + .sidebar-sub-level-items .fly-out-top-item .fly-out-top-item-container {
-  background: $white;
-  color: $gray-darkest;
-
-  &::before {
-    border-right-color: $white;
-  }
-}
-
-&.gl-dark .nav-sidebar .sidebar-sub-level-items {
-  background-color: $white;
-}
-
-&.ui-indigo .nav-sidebar li.active:not(.fly-out-top-item) > a {
-  color: $top-level-item-color;
-}
-
-&.ui-indigo .nav-sidebar li.active .nav-icon-container svg {
-  fill: $top-level-item-color;
-}
-
-.nav-sidebar {
-  box-shadow: none;
-
-  li.active {
-    background-color: transparent;
-    box-shadow: none !important; // TODO: This should be updated in `theme_helper.scss` together with ':sidebar_refactor' rollout
-  }
-}
+//&.gl-dark .nav-sidebar li.active {
+//  box-shadow: none;
+//}
+//
+//&.gl-dark .nav-sidebar .sidebar-sub-level-items {
+//  box-shadow: none;
+//  border: 1px solid $border-color;
+//}
+//
+//&.gl-dark .sidebar-top-level-items .context-header a .avatar-container.rect-avatar .avatar.s32 {
+//  color: $white;
+//}
+//
+//&.gl-dark .nav-sidebar li a,
+//&.gl-dark .toggle-sidebar-button .collapse-text,
+//&.gl-dark .toggle-sidebar-button .icon-chevron-double-lg-left,
+//&.gl-dark .toggle-sidebar-button .icon-chevron-double-lg-right,
+//&.gl-dark .sidebar-top-level-items .context-header a .sidebar-context-title,
+//&.gl-dark .nav-sidebar-inner-scroll > div.context-header a .sidebar-context-title,
+//&.gl-dark .nav-sidebar a.has-sub-items + .sidebar-sub-level-items .fly-out-top-item a,
+//&.gl-dark .nav-sidebar a.has-sub-items + .sidebar-sub-level-items .fly-out-top-item a:hover,
+//&.gl-dark .nav-sidebar a.has-sub-items + .sidebar-sub-level-items .fly-out-top-item.active a,
+//&.gl-dark .nav-sidebar a.has-sub-items + .sidebar-sub-level-items .fly-out-top-item .fly-out-top-item-container {
+//  color: $gray-darkest;
+//}
+//
+//&.gl-dark .nav-sidebar a.has-sub-items + .sidebar-sub-level-items .fly-out-top-item a,
+//&.gl-dark .nav-sidebar a.has-sub-items + .sidebar-sub-level-items .fly-out-top-item a:hover,
+//&.gl-dark .nav-sidebar a.has-sub-items + .sidebar-sub-level-items .fly-out-top-item.active a,
+//&.gl-dark .nav-sidebar a.has-sub-items + .sidebar-sub-level-items .fly-out-top-item .fly-out-top-item-container {
+//  @include gl-mt-0;
+//}
+//
+//&.gl-dark .nav-sidebar a:not(.has-sub-items) + .sidebar-sub-level-items .fly-out-top-item a,
+//&.gl-dark .nav-sidebar a:not(.has-sub-items) + .sidebar-sub-level-items .fly-out-top-item a:hover,
+//&.gl-dark .nav-sidebar a:not(.has-sub-items) + .sidebar-sub-level-items .fly-out-top-item.active a,
+//&.gl-dark .nav-sidebar a:not(.has-sub-items) + .sidebar-sub-level-items .fly-out-top-item .fly-out-top-item-container {
+//  background: $white;
+//  color: $gray-darkest;
+//
+//  &::before {
+//    border-right-color: $white;
+//  }
+//}
+//
+//&.gl-dark .nav-sidebar .sidebar-sub-level-items {
+//  background-color: $white;
+//}
+//
+//&.ui-indigo .nav-sidebar li.active:not(.fly-out-top-item) > a {
+//  color: $top-level-item-color;
+//}
+//
+//&.ui-indigo .nav-sidebar li.active .nav-icon-container svg {
+//  fill: $top-level-item-color;
+//}
+//
+//.nav-sidebar {
+//  box-shadow: none;
+//
+//  li.active {
+//    background-color: transparent;
+//    box-shadow: none !important; // TODO: This should be updated in `theme_helper.scss` together with ':sidebar_refactor' rollout
+//  }
+//}
 
 //
 // MIXINS
@@ -259,7 +259,7 @@ $top-level-item-color: $purple-900;
     @include gl-pointer-events-none;
     @include gl-font-sm;
     background-color: $purple-900;
-    color: $white;
+    color: var(--gl-text-color, $gl-text-color);
 
     @if $has-sub-items {
       @include gl-mt-0;
@@ -269,7 +269,7 @@ $top-level-item-color: $purple-900;
       @include gl-my-n2;
       @include gl-mt-0;
       @include gl-relative;
-      background-color: $black;
+      background: var(--black, $black);
 
       strong {
         @include gl-font-weight-normal;
@@ -287,6 +287,7 @@ $top-level-item-color: $purple-900;
         border-top: $gl-spacing-scale-2 solid transparent;
         border-bottom: $gl-spacing-scale-2 solid transparent;
         border-right: $gl-spacing-scale-2 solid $black;
+        border-right-color: var(--black, $black);
       }
     }
   }
@@ -343,7 +344,8 @@ $top-level-item-color: $purple-900;
 
   a {
     @include gl-text-decoration-none;
-    color: $top-level-item-color;
+    //color: $top-level-item-color;
+    color: var(--gl-text-color, $top-level-item-color);
   }
 
   li {
