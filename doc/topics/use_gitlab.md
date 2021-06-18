@@ -57,4 +57,4 @@ GitLab thrives as a language-agnostic, DevSecOps Platform. That being said, ther
 * [SAST Supported Languages](../user/application_security/sast/#supported-languages-and-frameworks)
 * [Dependency Scanning Supported Languages](../user/application_security/dependency_scanning/#supported-languages-and-package-managers)
 * [Coverage Fuzzing Supported Languages](../user/application_security/coverage_fuzzing/#supported-fuzzing-engines-and-languages)
-* [DAST Header Validation Examples](../user/application_security/dast/index.html#ruby-on-rails-example-for-on-demand-scan)
+* [DAST Header Validation Examples](../user/application_security/dast/index.md#ruby-on-rails-example-for-on-demand-scan)
