@@ -24,7 +24,7 @@
 
           %ul.sidebar-sub-level-items{ data: { qa_selector: 'group_information_submenu'} }
             = nav_link(path: paths, html_options: { class: "fly-out-top-item" } ) do
-              = link_to information_link do
+              = link_to activity_group_path(@group) do
                 %strong.fly-out-top-item-name
                   = group_information_title(@group)
             %li.divider.fly-out-top-item
