@@ -45,5 +45,3 @@ Complete these steps in GitLab:
 1. (Optional) To restrict this setting to specific branches, list them in the **Restrict to branch**
    field, separated with commas.
 1. Select **Save changes** or optionally select **Test settings**.
-
-<!-- ## Troubleshooting -->
