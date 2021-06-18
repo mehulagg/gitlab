@@ -13,24 +13,25 @@ GitLab encourages communication through comments, threads, and
 There are three types of comments:
 
 - A standard comment.
-- A reply to a comment, which is called a thread.
+- A reply to a comment, which makes it a thread.
 - A comment in the form of a thread.
 
 In a comment, you can enter [Markdown](../markdown.md) and use [quick actions](../project/quick_actions.md).
 
-You can [suggest code changes](../project/merge_requests/reviews/suggestions.md) in your comment,
+You can [suggest code changes](../project/merge_requests/reviews/suggestions.md) in your commit diff comment,
 which the user can accept through the user interface.
 
 ## Where you can create comments
 
-You can create a comment in the following places:
+You can create comments in places like:
 
-- Issues
+- Commit diffs
+- Commits
+- Designs
 - Epics
+- Issues
 - Merge requests
 - Snippets
-- Commits
-- Commit diffs
 
 Each object can have as many as 5,000 comments.
 
