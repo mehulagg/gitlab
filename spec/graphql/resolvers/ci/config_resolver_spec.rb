@@ -15,10 +15,11 @@ RSpec.describe Resolvers::Ci::ConfigResolver do
 
     let_it_be(:user) { create(:user) }
     let_it_be(:project) { create(:project, :repository, creator: user, namespace: user.namespace) }
+    let_it_be(:sha) { nil }
 
     subject(:response) do
       resolve(described_class,
-              args: { project_path: project.full_path, content: content },
+              args: { project_path: project.full_path, content: content, sha: sha },
               ctx:  { current_user: user })
     end
 
@@ -36,10 +37,20 @@ RSpec.describe Resolvers::Ci::ConfigResolver do
         File.read(Rails.root.join('spec/support/gitlab_stubs/gitlab_ci_includes.yml'))
       end
 
-      it 'lints the ci config file and returns the merged yaml file' do
-        expect(response[:merged_yaml]).to eq(content)
-        expect(response[:status]).to eq(:valid)
-        expect(response[:errors]).to be_empty
+      context 'with a sha' do
+        let(:sha) { '1231231' }
+
+        it 'lints the ci config file and returns the merged yaml file' do
+          expect(response[:status]).to eq(:valid)
+          expect(::Gitlab::Ci::Lint).to have_received(:new).with(current_user: user, project: project, sha: sha)
+        end
+      end
+
+      context 'without a sha' do
+        it 'lints the ci config file and returns the merged yaml file' do
+          expect(response[:merged_yaml]).to eq(content)
+          expect(response[:errors]).to be_empty
+        end
       end
     end
 
