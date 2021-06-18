@@ -190,7 +190,7 @@ class Project < ApplicationRecord
   has_one :teamcity_service, class_name: 'Integrations::Teamcity'
   has_one :unify_circuit_integration, class_name: 'Integrations::UnifyCircuit'
   has_one :webex_teams_integration, class_name: 'Integrations::WebexTeams'
-  has_one :youtrack_service, class_name: 'Integrations::Youtrack'
+  has_one :youtrack_integration, class_name: 'Integrations::Youtrack'
 
   has_one :root_of_fork_network,
           foreign_key: 'root_project_id',

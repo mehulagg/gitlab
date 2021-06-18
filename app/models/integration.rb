@@ -53,6 +53,7 @@ class Integration < ApplicationRecord
     mattermost mattermost_slash_commands microsoft_teams mock_ci mock_monitoring
     unify_circuit
     webex_teams
+    youtrack
   ].to_set.freeze
 
   def self.renamed?(name)

@@ -388,7 +388,7 @@ project:
 - pushover_integration
 - jira_integration
 - redmine_service
-- youtrack_service
+- youtrack_integration
 - custom_issue_tracker_integration
 - bugzilla_integration
 - ewm_integration
