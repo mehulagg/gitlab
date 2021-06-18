@@ -23,7 +23,7 @@ export const SUBSCRIPTION_ACTIVATION_FAILURE_EVENT = 'subscription-activation-fa
 export const SUBSCRIPTION_ACTIVATION_SUCCESS_EVENT = 'subscription-activation-success';
 
 export default {
-  name: 'CloudLicenseSubscriptionActivationForm',
+  name: 'SubscriptionActivationForm',
   components: {
     GlButton,
     GlForm,
