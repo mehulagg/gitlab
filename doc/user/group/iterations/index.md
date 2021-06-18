@@ -54,11 +54,25 @@ Prerequisites:
 
 - You must have at least the [Developer role](../../permissions.md) for a group.
 
-To create an iteration:
+To create an iteration cadence:
 
 1. In a group, go to **{issues}** **Issues > Iterations**.
 1. Select **New iteration cadence**.
 1. Fill out required fields, and select **Create iteration cadence**. The cadence list page opens.
+
+## Delete an iteration cadence
+
+Prerequisites:
+
+- You must have at least the [Developer role](../../permissions.md) for a group.
+
+Deleting an iteration cadence also deletes all iterations within that cadence.
+
+To delete an iteration cadence:
+
+1. In a group, go to **{issues}** **Issues > Iterations**.
+1. Select the three-dot menu (**{ellipsis_v}**) > **Delete cadence** for the cadence you want to delete.
+1. Select **Delete cadence** in the confirmation modal.
 
 ## View the iterations list
 
