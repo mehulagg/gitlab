@@ -56,7 +56,8 @@ Prerequisites:
 
 To create an iteration cadence:
 
-1. In a group, go to **{issues}** **Issues > Iterations**.
+1. On the top bar, select **Menu > Groups** and find your group.
+1. On the left sidebar, select **Issues > Iterations**.
 1. Select **New iteration cadence**.
 1. Fill out required fields, and select **Create iteration cadence**. The cadence list page opens.
 
@@ -70,7 +71,8 @@ Deleting an iteration cadence also deletes all iterations within that cadence.
 
 To delete an iteration cadence:
 
-1. In a group, go to **{issues}** **Issues > Iterations**.
+1. On the top bar, select **Menu > Groups** and find your group.
+1. On the left sidebar, select **Issues > Iterations**.
 1. Select the three-dot menu (**{ellipsis_v}**) > **Delete cadence** for the cadence you want to delete.
 1. Select **Delete cadence** in the confirmation modal.
 
@@ -90,7 +92,8 @@ For manually scheduled iteration cadences, you create and add iterations yoursel
 
 To create an iteration:
 
-1. In a group, go to **{issues}** **Issues > Iterations**.
+1. On the top bar, select **Menu > Groups** and find your group.
+1. On the left sidebar, select **Issues > Iterations**.
 1. Select the three-dot menu (**{ellipsis_v}**) > **Add iteration** for the cadence you want to add to.
 1. Enter the title, a description (optional), a start date, and a due date.
 1. Select **Create iteration**. The iteration details page opens.
@@ -146,6 +149,8 @@ and get a more accurate understanding of scope attributable to each label.
 
 To group issues by label:
 
+1. On the top bar, select **Menu > Groups** and find your group.
+1. On the left sidebar, select **Issues > Iterations**.
 1. In the **Group by** dropdown, select **Label**.
 1. Select the **Filter by label** dropdown.
 1. Select the labels you want to group by in the labels dropdown.
