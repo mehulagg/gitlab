@@ -21,22 +21,22 @@ module WhatsNewHelper
   def whats_new_variants_label(variant)
     case variant
     when 'all_tiers'
-      _("Enable What's new: All tiers")
+      _("All tiers")
     when 'current_tier'
-      _("Enable What's new: Current tier only")
+      _("Current tier only")
     when 'disabled'
-      _("Disable What's new")
+      _("Inactive")
     end
   end
 
   def whats_new_variants_description(variant)
     case variant
     when 'all_tiers'
-      _("What's new presents new features from all tiers to help you keep track of all new features.")
+      _("New features from all tiers are included.")
     when 'current_tier'
-      _("What's new presents new features for your current subscription tier, while hiding new features not available to your subscription tier.")
+      _("Only new features in your current subscription tier are .")
     when 'disabled'
-      _("What's new is disabled and can no longer be viewed.")
+      _("What's new is inactive and cannot be viewed.")
     end
   end
 end
