@@ -23093,10 +23093,10 @@ msgstr ""
 msgid "Package type must be RubyGems"
 msgstr ""
 
-msgid "PackageRegistry|%{boldStart}Allow duplicates%{boldEnd} - Packages with the same name and version are accepted."
+msgid "PackageRegistry|%{boldStart}Allow duplicates%{boldEnd} - Accept packages with the same name and version."
 msgstr ""
 
-msgid "PackageRegistry|%{boldStart}Do not allow duplicates%{boldEnd} - Packages with the same name and version are rejected."
+msgid "PackageRegistry|%{boldStart}Do not allow duplicates%{boldEnd} - Reject packages with the same name and version."
 msgstr ""
 
 msgid "PackageRegistry|%{name} version %{version} was first created %{datetime}"
@@ -23234,9 +23234,6 @@ msgstr ""
 msgid "PackageRegistry|Generic"
 msgstr ""
 
-msgid "PackageRegistry|GitLab Packages allows organizations to utilize GitLab as a private repository for a variety of common package formats. %{linkStart}More Information%{linkEnd}"
-msgstr ""
-
 msgid "PackageRegistry|Gradle Groovy DSL"
 msgstr ""
 
@@ -23300,13 +23297,13 @@ msgstr ""
 msgid "PackageRegistry|Package updated by commit %{link} on branch %{branch}, built by pipeline %{pipeline}, and published to the registry %{datetime}"
 msgstr ""
 
-msgid "PackageRegistry|Packages can be published if their name or version matches this regex"
-msgstr ""
-
 msgid "PackageRegistry|Pip Command"
 msgstr ""
 
 msgid "PackageRegistry|Publish and share packages for a variety of common package managers. %{docLinkStart}More information%{docLinkEnd}"
+msgstr ""
+
+msgid "PackageRegistry|Publish packages if their name or version matches this regex."
 msgstr ""
 
 msgid "PackageRegistry|Published to the %{project} Package Registry %{datetime}"
@@ -23388,6 +23385,9 @@ msgid "PackageRegistry|Unable to fetch package version information."
 msgstr ""
 
 msgid "PackageRegistry|Unable to load package"
+msgstr ""
+
+msgid "PackageRegistry|Use GitLab as a private repository for common package formats. %{linkStart}More Information%{linkEnd}"
 msgstr ""
 
 msgid "PackageRegistry|You are about to delete %{filename}. This is a destructive action that may render your package unusable. Are you sure?"
