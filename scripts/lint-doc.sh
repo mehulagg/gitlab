@@ -68,7 +68,7 @@ then
 fi
 
 # Do not use 'README.md', instead use 'index.md'
-# Number of 'README.md's as of 2020-10-13
+# Number of 'README.md's as of 2021-10-13
 NUMBER_READMES=15
 FIND_READMES=$(find doc/ -name "README.md" | wc -l)
 echo '=> Checking for new README.md files...'
