@@ -959,7 +959,7 @@ GET /projects/:id/services/pipelines-email
 
 Add commit messages as comments to Pivotal Tracker stories.
 
-See also the [Pivotal Tracker service documentation](../user/project/integrations/pivotal_tracker.md),
+See also the [Pivotal Tracker service documentation](../user/project/integrations/pivotal_tracker.md).
 
 ### Create/Edit Pivotal Tracker service
 

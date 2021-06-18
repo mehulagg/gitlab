@@ -12,7 +12,7 @@ Once enabled, commit messages are checked for square brackets containing a hash 
 the story ID (for example, `[#555]`). Every story ID found gets the commit comment added to it.
 
 You can also close a story with a message containing: `fix [#555]`.
-You can use either of these words:
+You can use any of these words:
 
 - `fix`
 - `fixed`
@@ -27,11 +27,11 @@ You can use either of these words:
 
 Read more about the
 [Source Commits endpoint](https://www.pivotaltracker.com/help/api/rest/v5#Source_Commits) in
-Pivotal Tracker API documentation.
+the Pivotal Tracker API documentation.
 
 See also the [Pivotal Tracker service API documentation](../../../api/services.md#pivotal-tracker).
 
-## Setup
+## Set up Pivotal Tracker
 
 In Pivotal Tracker, [create an API token](https://www.pivotaltracker.com/help/articles/api_token/).
 
