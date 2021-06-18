@@ -55,6 +55,7 @@ export function formatListEpics(listEpics) {
         const listEpic = {
           ...i,
           id,
+          fullId: i.id,
           labels: i.labels?.nodes || [],
           assignees: i.assignees?.nodes || [],
         };

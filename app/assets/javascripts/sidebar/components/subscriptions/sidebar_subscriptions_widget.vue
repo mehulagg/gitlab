@@ -57,6 +57,7 @@ export default {
         };
       },
       update(data) {
+        console.log('UPDATE', data);
         return data.workspace?.issuable?.subscribed || false;
       },
       result({ data }) {

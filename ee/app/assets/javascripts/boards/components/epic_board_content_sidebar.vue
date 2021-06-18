@@ -10,11 +10,13 @@ import SidebarConfidentialityWidget from '~/sidebar/components/confidential/side
 import SidebarDateWidget from '~/sidebar/components/date/sidebar_date_widget.vue';
 import SidebarParticipantsWidget from '~/sidebar/components/participants/sidebar_participants_widget.vue';
 import SidebarSubscriptionsWidget from '~/sidebar/components/subscriptions/sidebar_subscriptions_widget.vue';
+import SidebarTodoWidget from '~/sidebar/components/todo_toggle/sidebar_todo_widget.vue';
 
 export default {
   headerHeight: `${contentTop()}px`,
   components: {
     GlDrawer,
+    SidebarTodoWidget,
     BoardSidebarLabelsSelect,
     BoardSidebarTitle,
     SidebarConfidentialityWidget,
@@ -49,7 +51,15 @@ export default {
     :header-height="$options.headerHeight"
     @close="handleClose"
   >
-    <template #header>{{ __('Epic details') }}</template>
+    <template #header>
+      {{ __('Epic details') }}
+      <sidebar-todo-widget
+        :id="activeBoardItem.fullId"
+        :iid="activeBoardItem.iid"
+        :full-path="fullPath"
+        :issuable-type="issuableType"
+      />
+    </template>
     <template #default>
       <board-sidebar-title data-testid="sidebar-title" />
       <sidebar-date-widget
