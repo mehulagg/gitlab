@@ -32,7 +32,7 @@ to trigger a pipeline in a different project.
 
 In GitLab 11.8 and earlier, you [used the API](#trigger-multi-project-pipelines-through-api).
 
-### Create a multi-project pipeline in your `.gitlab-ci.yml` file
+### Create multi-project pipelines in your `.gitlab-ci.yml` file
 
 > [Moved](https://gitlab.com/gitlab-org/gitlab/-/issues/199224) to GitLab Free in 12.8.
 
@@ -254,7 +254,7 @@ Some features are not implemented yet. For example, support for environments.
 - `extends`
 - `needs`
 
-### Create a multi-project pipelines by using the API
+### Create multi-project pipelines by using the API
 
 > [Moved](https://gitlab.com/gitlab-org/gitlab/-/issues/31573) to GitLab Free in 12.4.
 
