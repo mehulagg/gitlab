@@ -19,6 +19,10 @@ RSpec.describe Gitlab::GithubImport::ObjectImporter do
         'This is a counter'
       end
 
+      def object_type
+        :dummy
+      end
+
       def representation_class
         MockRepresantation
       end
@@ -91,8 +95,9 @@ RSpec.describe Gitlab::GithubImport::ObjectImporter do
 
       worker.import(project, client, { 'number' => 10, 'github_id' => 1 })
 
-      expect(Gitlab::GithubImport.objects_imported(project)).to eq({
-        'dummy_counter' => 1
+      expect(Gitlab::GithubImport::ObjectCounter.summary(project)).to eq({
+        'fetched' => {},
+        'imported' => { 'dummy' => 1 }
       })
     end
 
