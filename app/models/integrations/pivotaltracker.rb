@@ -37,8 +37,8 @@ module Integrations
           type: 'text',
           name: 'restrict_to_branch',
           title: 'Restrict to branch (optional)',
-          help: s_('PivotalTrackerService|Comma-separated list of branches to be ' \
-            'automatically inspected. Leave blank to include all branches.')
+          help: s_('PivotalTrackerService|Comma-separated list of branches to ' \
+            'automatically inspect. Leave blank to include all branches.')
         }
       ]
     end

@@ -24467,7 +24467,7 @@ msgstr ""
 msgid "PivotalTrackerService|Add commit messages as comments to Pivotal Tracker stories."
 msgstr ""
 
-msgid "PivotalTrackerService|Comma-separated list of branches to be automatically inspected. Leave blank to include all branches."
+msgid "PivotalTrackerService|Comma-separated list of branches to automatically inspect. Leave blank to include all branches."
 msgstr ""
 
 msgid "PivotalTrackerService|Pivotal Tracker API token. User must have access to the story. All comments are attributed to this user."
