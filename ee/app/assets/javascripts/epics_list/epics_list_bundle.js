@@ -3,11 +3,8 @@ import VueApollo from 'vue-apollo';
 
 import { IssuableStates } from '~/issuable_list/constants';
 import createDefaultClient from '~/lib/graphql';
-import {
-  urlParamsToObject,
-  parseBoolean,
-  convertObjectPropsToCamelCase,
-} from '~/lib/utils/common_utils';
+import { parseBoolean, convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
+import { urlParamsToObject } from '~/lib/utils/url_utility';
 
 import EpicsListApp from './components/epics_list_root.vue';
 

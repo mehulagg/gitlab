@@ -2,11 +2,8 @@ import Vue from 'vue';
 import VueApollo from 'vue-apollo';
 
 import createDefaultClient from '~/lib/graphql';
-import {
-  urlParamsToObject,
-  convertObjectPropsToCamelCase,
-  parseBoolean,
-} from '~/lib/utils/common_utils';
+import { convertObjectPropsToCamelCase, parseBoolean } from '~/lib/utils/common_utils';
+import { urlParamsToObject } from '~/lib/utils/url_utility';
 
 import TestCaseListApp from './components/test_case_list_root.vue';
 

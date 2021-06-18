@@ -1,12 +1,8 @@
 import Vue from 'vue';
 import { mapActions } from 'vuex';
 
-import {
-  parseBoolean,
-  urlParamsToObject,
-  convertObjectPropsToCamelCase,
-} from '~/lib/utils/common_utils';
-import { visitUrl, mergeUrlParams } from '~/lib/utils/url_utility';
+import { parseBoolean, convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
+import { visitUrl, mergeUrlParams, urlParamsToObject } from '~/lib/utils/url_utility';
 import Translate from '~/vue_shared/translate';
 
 import EpicItem from './components/epic_item.vue';

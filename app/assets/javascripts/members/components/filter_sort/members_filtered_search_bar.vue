@@ -1,8 +1,8 @@
 <script>
 import { GlFilteredSearchToken } from '@gitlab/ui';
 import { mapState } from 'vuex';
-import { getParameterByName, urlParamsToObject } from '~/lib/utils/common_utils';
-import { setUrlParams } from '~/lib/utils/url_utility';
+import { getParameterByName } from '~/lib/utils/common_utils';
+import { setUrlParams, urlParamsToObject } from '~/lib/utils/url_utility';
 import { s__ } from '~/locale';
 import { SEARCH_TOKEN_TYPE, SORT_PARAM } from '~/members/constants';
 import { OPERATOR_IS_ONLY } from '~/vue_shared/components/filtered_search_bar/constants';

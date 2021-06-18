@@ -18,7 +18,8 @@ import createBoardListMutation from 'ee_else_ce/boards/graphql/board_list_create
 import issueMoveListMutation from 'ee_else_ce/boards/graphql/issue_move_list.mutation.graphql';
 import { getIdFromGraphQLId } from '~/graphql_shared/utils';
 import createGqClient, { fetchPolicies } from '~/lib/graphql';
-import { convertObjectPropsToCamelCase, urlParamsToObject } from '~/lib/utils/common_utils';
+import { convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
+import { urlParamsToObject } from '~/lib/utils/url_utility';
 import { s__ } from '~/locale';
 import {
   formatBoardLists,

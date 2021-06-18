@@ -1,5 +1,5 @@
 import Vue from 'vue';
-import { urlParamsToObject } from '~/lib/utils/common_utils';
+import { urlParamsToObject } from '~/lib/utils/url_utility';
 import IssuesAnalytics from './components/issues_analytics.vue';
 import store from './stores';
 

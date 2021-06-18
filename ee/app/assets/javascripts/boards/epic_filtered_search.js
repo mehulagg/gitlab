@@ -1,7 +1,8 @@
 import Vue from 'vue';
 import EpicFilteredSearch from 'ee_component/boards/components/epic_filtered_search.vue';
 import store from '~/boards/stores';
-import { urlParamsToObject, convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
+import { convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
+import { urlParamsToObject } from '~/lib/utils/url_utility';
 
 export default (apolloProvider) => {
   const el = document.getElementById('js-board-filtered-search');

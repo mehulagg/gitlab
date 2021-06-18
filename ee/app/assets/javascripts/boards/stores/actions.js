@@ -15,12 +15,8 @@ import boardsStore from '~/boards/stores/boards_store';
 import * as typesCE from '~/boards/stores/mutation_types';
 import { getIdFromGraphQLId } from '~/graphql_shared/utils';
 import axios from '~/lib/utils/axios_utils';
-import {
-  historyPushState,
-  convertObjectPropsToCamelCase,
-  urlParamsToObject,
-} from '~/lib/utils/common_utils';
-import { mergeUrlParams, removeParams } from '~/lib/utils/url_utility';
+import { historyPushState, convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
+import { mergeUrlParams, removeParams, urlParamsToObject } from '~/lib/utils/url_utility';
 import { s__ } from '~/locale';
 import {
   fullEpicId,

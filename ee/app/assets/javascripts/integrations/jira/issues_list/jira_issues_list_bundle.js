@@ -1,7 +1,8 @@
 import Vue from 'vue';
 
 import { IssuableStates } from '~/issuable_list/constants';
-import { urlParamsToObject, convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
+import { convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
+import { urlParamsToObject } from '~/lib/utils/url_utility';
 
 import JiraIssuesListApp from './components/jira_issues_list_root.vue';
 import apolloProvider from './graphql';

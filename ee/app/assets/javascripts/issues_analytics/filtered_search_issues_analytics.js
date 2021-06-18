@@ -1,7 +1,8 @@
 import FilteredSearchManager from 'ee_else_ce/filtered_search/filtered_search_manager';
 import IssuableFilteredSearchTokenKeys from 'ee_else_ce/filtered_search/issuable_filtered_search_token_keys';
 import FilteredSearchTokenKeys from '~/filtered_search/filtered_search_token_keys';
-import { historyPushState, urlParamsToObject } from '~/lib/utils/common_utils';
+import { historyPushState } from '~/lib/utils/common_utils';
+import { urlParamsToObject } from '~/lib/utils/url_utility';
 import { __ } from '~/locale';
 import issueAnalyticsStore from './stores';
 

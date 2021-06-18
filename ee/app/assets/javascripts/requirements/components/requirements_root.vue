@@ -3,8 +3,7 @@ import { GlPagination, GlAlert } from '@gitlab/ui';
 import Api from '~/api';
 import createFlash, { FLASH_TYPES } from '~/flash';
 import axios from '~/lib/utils/axios_utils';
-import { urlParamsToObject } from '~/lib/utils/common_utils';
-import { updateHistory, setUrlParams } from '~/lib/utils/url_utility';
+import { updateHistory, setUrlParams, urlParamsToObject } from '~/lib/utils/url_utility';
 import { __, sprintf } from '~/locale';
 import Tracking from '~/tracking';
 
