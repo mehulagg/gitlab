@@ -63,15 +63,6 @@ RSpec.describe Projects::RunnersController do
           expect(json_response['error']).to eq('Shared runners enabled cannot be enabled until a valid credit credit is on file')
           expect(project.shared_runners_enabled).to eq(false)
         end
-
-        it 'allows disabling of shared runners', :aggregate_failures do
-          project.update!(shared_runners_enabled: true)
-
-          post :toggle_shared_runners, params: params
-
-          expect(response).to have_gitlab_http_status(:ok)
-          expect(project.reload.shared_runners_enabled).to eq(false)
-        end
       end
     end
   end

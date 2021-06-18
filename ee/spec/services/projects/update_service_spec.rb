@@ -9,6 +9,74 @@ RSpec.describe Projects::UpdateService, '#execute' do
   let(:admin) { create(:user, :admin) }
   let(:project) { create(:project, :repository, creator: user, namespace: user.namespace) }
 
+  context 'shared runners' do
+    let(:opts) { { shared_runners_enabled: enabled } }
+    let(:enabled) { true }
+
+    before do
+      create(:gitlab_subscription, namespace: user.namespace, hosted_plan: create(:free_plan))
+      allow(::Gitlab).to receive(:com?).and_return(true)
+    end
+
+    context 'when shared runners are on' do
+      let(:enabled) { false }
+
+      before do
+        project.update!(shared_runners_enabled: true)
+      end
+
+      it 'disables shared runners', :aggregate_failures do
+        result = update_project(project, user, opts)
+
+        expect(result).to eq(status: :success)
+        expect(project).to have_attributes(opts)
+      end
+
+      context 'when user has valid credit card' do
+        before do
+          create(:credit_card_validation, user: user)
+        end
+
+        it 'disables shared runners', :aggregate_failures do
+          result = update_project(project, user, opts)
+
+          expect(result).to eq(status: :success)
+          expect(project).to have_attributes(opts)
+        end
+      end
+    end
+
+    context 'when shared runners are off' do
+      before do
+        project.update!(shared_runners_enabled: false)
+      end
+
+      context 'when user has valid credit card' do
+        before do
+          create(:credit_card_validation, user: user)
+        end
+
+        it 'enables shared runners', :aggregate_failures do
+          result = update_project(project, user, opts)
+
+          expect(result).to eq(status: :success)
+          expect(project).to have_attributes(opts)
+        end
+      end
+
+      context 'when user does not have valid credit card' do
+        it 'does not enable shared runners', :aggregate_failures do
+          result = update_project(project, user, opts)
+
+          project.reload
+
+          expect(result).to eq(status: :error, message: 'Shared runners enabled cannot be enabled until a valid credit credit is on file')
+          expect(project.shared_runners_enabled).to eq(false)
+        end
+      end
+    end
+  end
+
   context 'repository mirror' do
     let(:opts) { { mirror: true, import_url: 'http://foo.com' } }
 

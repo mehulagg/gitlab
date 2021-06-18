@@ -63,9 +63,8 @@ module EE
         return unless params[:shared_runners_enabled]
         return if project.shared_runners_enabled
 
-        if !current_user.has_required_credit_card_to_enable_shared_runners?(project)
+        unless current_user.has_required_credit_card_to_enable_shared_runners?(project)
           project.errors.add(:shared_runners_enabled, _('cannot be enabled until a valid credit credit is on file'))
-          return
         end
       end
 
