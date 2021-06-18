@@ -5,6 +5,7 @@ require 'spec_helper'
 RSpec.describe 'Merge Requests > Filters generic behavior', :js do
   include FilteredSearchHelpers
 
+
   let(:project) { create(:project, :public, :repository) }
   let(:user)    { project.creator }
   let(:bug) { create(:label, project: project, title: 'bug') }
