@@ -11,7 +11,7 @@ Ruby applications. It's the default GitLab web server since GitLab 13.0
 and has replaced Unicorn. From GitLab 14.0, Unicorn is no longer supported.
 
 NOTE:
-Starting with GitLab 13.0, Puma is the default web server and Unicorn has been disabled by default.
+Starting with GitLab 13.0, Puma is the default web server and Unicorn has been disabled.
 In GitLab 14.0, Unicorn was removed from the Linux package and only Puma is available.
 
 ## Configure Puma
