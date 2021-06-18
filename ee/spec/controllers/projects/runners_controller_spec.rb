@@ -60,7 +60,7 @@ RSpec.describe Projects::RunnersController do
           project.reload
 
           expect(response).to have_gitlab_http_status(:unauthorized)
-          expect(json_response['error']).to eq('Cannot enable shared runners until you have a valid credit card on file')
+          expect(json_response['error']).to eq('Shared runners cannot be enabled until a valid credit credit is on file')
           expect(project.shared_runners_enabled).to eq(false)
         end
 
