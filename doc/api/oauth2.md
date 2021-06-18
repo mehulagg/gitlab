@@ -32,8 +32,7 @@ GitLab currently supports the following authorization flows:
   hosted, first-party services. GitLab recommends against use of this flow.
 
 The draft specification for [OAuth 2.1](https://oauth.net/2.1/) specifically omits both the
-Implicit grant and Resource Owner Password Credentials flows.
-  it will be deprecated in the next OAuth specification version.
+Implicit grant and Resource Owner Password Credentials flows. It will be deprecated in the next OAuth specification version and GitLab 14.0.
 
 Refer to the [OAuth RFC](https://tools.ietf.org/html/rfc6749) to find out
 how all those flows work and pick the right one for your use case.
