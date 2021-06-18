@@ -124,8 +124,8 @@ export default {
 
     <table v-if="isExpanded" :class="$options.userColorScheme" class="code js-syntax-highlight">
       <tbody>
-        <template v-for="(line, index) in lines">
-          <tr :key="`stacktrace-line-${index}`" class="line_holder">
+        <template v-for="(line, index) in lines" :key="`stacktrace-line-${index}`">
+          <tr class="line_holder">
             <td class="diff-line-num" :class="{ old: isHighlighted(lineNum(line)) }">
               {{ lineNum(line) }}
             </td>

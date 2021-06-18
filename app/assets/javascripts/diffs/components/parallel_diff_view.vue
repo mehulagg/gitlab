@@ -65,7 +65,7 @@ export default {
       <col />
     </colgroup>
     <tbody>
-      <template v-for="(line, index) in diffLines">
+      <template v-for="(line, index) in diffLines" :key="line.line_code">
         <tr
           v-if="line.isMatchLineLeft || line.isMatchLineRight"
           :key="`expand-${index}`"
@@ -82,7 +82,6 @@ export default {
           </td>
         </tr>
         <parallel-diff-table-row
-          :key="line.line_code"
           :file-hash="diffFile.file_hash"
           :file-path="diffFile.file_path"
           :line="line"

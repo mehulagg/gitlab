@@ -124,7 +124,7 @@ export default {
             :eligible-approvers-docs-path="settings.eligibleApproversDocsPath"
             :can-edit="canEdit(rule)"
           />
-          <tr v-else :key="index">
+          <tr v-else :key="`rule_${index}`">
             <td class="js-name">
               <rule-name :name="rule.name" />
             </td>

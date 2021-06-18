@@ -17,16 +17,16 @@ export default {
 };
 </script>
 
-<template functional>
+<template>
   <div class="gl-display-flex gl-flex-wrap gl-mb-2">
-    <template v-if="props.renderGroup">
+    <template v-if="renderGroup">
       <button
-        v-for="emoji in props.emojis"
+        v-for="emoji in emojis"
         :key="emoji"
         type="button"
         class="gl-border-0 gl-bg-transparent gl-px-0 gl-py-2 gl-text-center emoji-picker-emoji"
         data-testid="emoji-button"
-        @click="props.clickEmoji(emoji)"
+        @click="clickEmoji(emoji)"
       >
         <gl-emoji :data-name="emoji" />
       </button>

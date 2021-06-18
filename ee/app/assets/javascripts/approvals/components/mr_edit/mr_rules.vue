@@ -128,7 +128,7 @@ export default {
           :eligible-approvers-docs-path="settings.eligibleApproversDocsPath"
           :can-edit="canEdit"
         />
-        <tr v-else :key="index">
+        <tr v-else :key="`rule_${index}`">
           <td>
             <div class="js-name">{{ rule.name }}</div>
             <div ref="indicator" class="text-muted">{{ indicatorText(rule) }}</div>

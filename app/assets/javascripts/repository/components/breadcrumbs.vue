@@ -283,10 +283,9 @@ export default {
             <gl-icon name="plus" :size="16" class="float-left" />
             <gl-icon name="chevron-down" :size="16" class="float-left" />
           </template>
-          <template v-for="(item, i) in dropdownItems">
+          <template v-for="(item, i) in dropdownItems" :key="i">
             <component
               :is="getComponent(item.type)"
-              :key="i"
               v-bind="item.attrs"
               v-gl-modal="item.modalId || null"
             >

@@ -6,7 +6,7 @@ const SOURCEGRAPH_VERSION = require('@sourcegraph/code-host-integration/package.
 const CompressionPlugin = require('compression-webpack-plugin');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 const glob = require('glob');
-const VueLoaderPlugin = require('vue-loader/lib/plugin');
+const VueLoaderPlugin = require('vue-loader/dist/pluginWebpack4').default;
 const VUE_LOADER_VERSION = require('vue-loader/package.json').version;
 const VUE_VERSION = require('vue/package.json').version;
 const webpack = require('webpack');
@@ -129,7 +129,7 @@ const alias = {
   icons: path.join(ROOT_PATH, 'app/views/shared/icons'),
   images: path.join(ROOT_PATH, 'app/assets/images'),
   vendor: path.join(ROOT_PATH, 'vendor/assets/javascripts'),
-  vue$: 'vue/dist/vue.esm.js',
+  vue$: '@vue/compat',
   jquery$: 'jquery/dist/jquery.slim.js',
   spec: path.join(ROOT_PATH, 'spec/javascripts'),
   jest: path.join(ROOT_PATH, 'spec/frontend'),
@@ -278,7 +278,7 @@ module.exports = {
       {
         test: /.css$/,
         use: [
-          'vue-style-loader',
+          'style-loader',
           {
             loader: 'css-loader',
             options: {

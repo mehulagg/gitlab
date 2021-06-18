@@ -133,9 +133,9 @@ export default {
       >
     </template>
     <template v-else>
-      <template v-for="(cadence, index) in iterationCadences">
+      <template v-for="(cadence, index) in iterationCadences" :key="cadence.title">
         <gl-dropdown-divider v-if="index !== 0" :key="index" />
-        <gl-dropdown-section-header :key="cadence.title">
+        <gl-dropdown-section-header>
           {{ cadence.title }}
         </gl-dropdown-section-header>
         <gl-dropdown-item

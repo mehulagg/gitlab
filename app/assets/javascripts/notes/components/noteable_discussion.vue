@@ -12,7 +12,7 @@ import eventHub from '../event_hub';
 import noteable from '../mixins/noteable';
 import resolvable from '../mixins/resolvable';
 import diffDiscussionHeader from './diff_discussion_header.vue';
-import diffWithNote from './diff_with_note.vue';
+// import diffWithNote from './diff_with_note.vue';
 import DiscussionActions from './discussion_actions.vue';
 import DiscussionNotes from './discussion_notes.vue';
 import noteForm from './note_form.vue';
@@ -106,7 +106,7 @@ export default {
       return !this.shouldRenderDiffs;
     },
     wrapperComponent() {
-      return this.shouldRenderDiffs ? diffWithNote : 'div';
+      return this.shouldRenderDiffs ? 'div' : 'div';
     },
     wrapperComponentProps() {
       if (this.shouldRenderDiffs) {

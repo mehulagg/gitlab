@@ -174,12 +174,8 @@ export default {
           <th class="import-jobs-cta-col gl-p-4 gl-vertical-align-top gl-border-b-1"></th>
         </thead>
         <tbody>
-          <template v-for="repo in repositories">
-            <provider-repo-table-row
-              :key="repo.importSource.providerLink"
-              :repo="repo"
-              :available-namespaces="availableNamespaces"
-            />
+          <template v-for="repo in repositories" :key="repo.importSource.providerLink">
+            <provider-repo-table-row :repo="repo" :available-namespaces="availableNamespaces" />
           </template>
         </tbody>
       </table>

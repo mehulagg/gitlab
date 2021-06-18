@@ -50,12 +50,9 @@ export default {
     :text="$options.MSG_EMBED"
     menu-class="gl-px-1! gl-pb-5! gl-dropdown-menu-wide"
   >
-    <template v-for="{ name, value } in sections">
-      <gl-dropdown-section-header :key="`header_${name}`" data-testid="header">{{
-        name
-      }}</gl-dropdown-section-header>
+    <template v-for="{ name, value } in sections" :key="name">
+      <gl-dropdown-section-header data-testid="header">{{ name }}</gl-dropdown-section-header>
       <gl-dropdown-text
-        :key="`input_${name}`"
         tag="div"
         class="gl-dropdown-text-py-0 gl-dropdown-text-block"
         data-testid="input"

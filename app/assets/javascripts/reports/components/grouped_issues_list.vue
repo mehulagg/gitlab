@@ -84,9 +84,8 @@ export default {
     wtag="ul"
     wclass="report-block-list"
   >
-    <template v-for="(group, groupIndex) in groups">
+    <template v-for="(group, groupIndex) in groups" :key="group.name">
       <h2
-        :key="group.name"
         :data-testid="`${group.name}Heading`"
         :class="[groupIndex > 0 ? 'mt-2' : 'mt-0']"
         class="h5 mb-1"

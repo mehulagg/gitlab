@@ -84,9 +84,12 @@ export default {
       </gl-link>
     </template>
     <template #list="{ attributesList = [], isAttributeChecked, updateAttribute }">
-      <template v-for="(cadence, index) in getIterationCadences(attributesList)">
+      <template
+        v-for="(cadence, index) in getIterationCadences(attributesList)"
+        :key="cadence.title"
+      >
         <gl-dropdown-divider v-if="index !== 0" :key="index" />
-        <gl-dropdown-section-header :key="cadence.title">
+        <gl-dropdown-section-header>
           {{ cadence.title }}
         </gl-dropdown-section-header>
         <gl-dropdown-item

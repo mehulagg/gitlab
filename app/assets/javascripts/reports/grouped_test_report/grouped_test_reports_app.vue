@@ -160,12 +160,8 @@ export default {
     </template>
     <template #body>
       <div class="mr-widget-grouped-section report-block">
-        <template v-for="(report, i) in reports">
-          <summary-row
-            :key="`summary-row-${i}`"
-            :status-icon="getReportIcon(report)"
-            nested-summary
-          >
+        <template v-for="(report, i) in reports" :key="`summary-row-${i}`">
+          <summary-row :status-icon="getReportIcon(report)" nested-summary>
             <template #summary>
               <div class="gl-display-inline-flex gl-flex-direction-column">
                 <div>{{ reportText(report) }}</div>

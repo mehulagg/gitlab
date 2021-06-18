@@ -47,9 +47,8 @@ export default {
     <span v-if="!selectedLabels.length" class="text-secondary">
       <slot></slot>
     </span>
-    <template v-for="label in selectedLabels" v-else>
+    <template v-for="label in selectedLabels" v-else :key="label.id">
       <gl-label
-        :key="label.id"
         data-qa-selector="selected_label_content"
         :data-qa-label-name="label.title"
         :title="label.title"

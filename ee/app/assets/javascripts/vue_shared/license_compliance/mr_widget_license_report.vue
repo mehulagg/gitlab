@@ -142,13 +142,11 @@ export default {
           wtag="ul"
           wclass="report-block-list my-1"
         >
-          <template v-for="(licenseReportGroup, index) in licenseReportGroups">
-            <li
-              ref="reportHeading"
-              :key="licenseReportGroup.name"
-              :class="{ 'mt-3': index > 0 }"
-              class="mx-1 mb-1"
-            >
+          <template
+            v-for="(licenseReportGroup, index) in licenseReportGroups"
+            :key="licenseReportGroup.name"
+          >
+            <li ref="reportHeading" :class="{ 'mt-3': index > 0 }" class="mx-1 mb-1">
               <h2 class="h5 m-0">{{ licenseReportGroup.name }}</h2>
               <p class="m-0">{{ licenseReportGroup.description }}</p>
             </li>

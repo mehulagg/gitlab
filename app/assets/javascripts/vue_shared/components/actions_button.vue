@@ -73,9 +73,8 @@ export default {
         {{ selectedAction.text }}
       </span>
     </template>
-    <template v-for="(action, index) in actions">
+    <template v-for="(action, index) in actions" :key="action.key">
       <gl-dropdown-item
-        :key="action.key"
         :is-check-item="true"
         :is-checked="action.key === selectedAction.key"
         :secondary-text="action.secondaryText"

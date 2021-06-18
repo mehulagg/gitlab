@@ -25,10 +25,9 @@ export default {
 
 <template>
   <gl-dropdown :text="selectedVersionName" data-qa-selector="dropdown_content">
-    <template v-for="version in versions">
+    <template v-for="version in versions" :key="version.id">
       <gl-dropdown-divider v-if="version.addDivider" :key="version.id" />
       <gl-dropdown-item
-        :key="version.id"
         :class="{
           'is-active': version.selected,
         }"

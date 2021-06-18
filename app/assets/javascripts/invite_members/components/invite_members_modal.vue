@@ -319,9 +319,8 @@ export default {
           v-bind="$attrs"
           :text="selectedRoleName"
         >
-          <template v-for="(key, item) in accessLevels">
+          <template v-for="(key, item) in accessLevels" :key="key">
             <gl-dropdown-item
-              :key="key"
               active-class="is-active"
               is-check-item
               :is-checked="key === selectedAccessLevel"

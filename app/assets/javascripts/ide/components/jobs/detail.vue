@@ -103,8 +103,7 @@ export default {
         v-show="!detailJob.isLoading"
         class="bash"
         v-html="jobOutput"
-      >
-      </code>
+      ></code>
       <div
         v-show="detailJob.isLoading"
         class="build-loader-animation"

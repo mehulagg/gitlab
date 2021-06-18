@@ -40,13 +40,8 @@ export default {
       <gl-dropdown-section-header v-if="showHeaders" :key="`${index}_header`" data-testid="header">
         {{ title }}
       </gl-dropdown-section-header>
-      <template v-for="menuItem in menu_items">
-        <gl-dropdown-item
-          :key="`${index}_item_${menuItem.id}`"
-          link-class="top-nav-menu-item"
-          :href="menuItem.href"
-          data-testid="item"
-        >
+      <template v-for="menuItem in menu_items" :key="`${index}_item_${menuItem.id}`">
+        <gl-dropdown-item link-class="top-nav-menu-item" :href="menuItem.href" data-testid="item">
           {{ menuItem.title }}
         </gl-dropdown-item>
       </template>
