@@ -20,8 +20,9 @@ class IssueLink < ApplicationRecord
   # we don't store is_blocked_by in the db but need it for displaying the relation
   # from the target (used in IssueLink.inverse_link_type)
   TYPE_IS_BLOCKED_BY = 'is_blocked_by'
+  TYPE_PARENT = 'parent_of'
 
-  enum link_type: { TYPE_RELATES_TO => 0, TYPE_BLOCKS => 1 }
+  enum link_type: { TYPE_RELATES_TO => 0, TYPE_BLOCKS => 1, TYPE_PARENT => 2 }
 
   def self.inverse_link_type(type)
     type

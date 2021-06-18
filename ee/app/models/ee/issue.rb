@@ -228,6 +228,22 @@ module EE
       issue_type_supports?(:epics) && project.group.present?
     end
 
+    def hierarchy
+      @hierarchy ||= ::Gitlab::IssueObjectHierarchy.new(Issue.where(id: self))
+    end
+
+    def ancestors
+      hierarchy.ancestors
+    end
+
+    def children
+      hierarchy.descendants
+    end
+
+    def parent
+
+    end
+
     private
 
     def blocking_issues_ids
