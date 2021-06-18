@@ -20,7 +20,7 @@ RSpec.describe CiCd::GithubIntegrationSetupService do
   end
 
   describe 'sets up GitHub service integration' do
-    let(:integration) { project.github_service }
+    let(:integration) { project.github_integration }
 
     specify 'with API token' do
       expect(integration.token).to eq api_token

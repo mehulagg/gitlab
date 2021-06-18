@@ -54,7 +54,7 @@ RSpec.describe Project do
     it { is_expected.to have_many(:vulnerability_historical_statistics).class_name('Vulnerabilities::HistoricalStatistic') }
     it { is_expected.to have_many(:vulnerability_remediations).class_name('Vulnerabilities::Remediation') }
 
-    it { is_expected.to have_one(:github_service) }
+    it { is_expected.to have_one(:github_integration) }
     it { is_expected.to have_many(:project_aliases) }
     it { is_expected.to have_many(:approval_rules) }
 
@@ -295,13 +295,15 @@ RSpec.describe Project do
       end
     end
 
-    describe '.with_github_service_pipeline_events' do
+    describe '.with_github_integration_pipeline_events' do
       it 'returns the correct project' do
-        project_with_github_service_pipeline_events = create(:project, github_service: create(:github_service))
-        project_without_github_service_pipeline_events = create(:project)
+        project_with_github_integration_pipeline_events = create(:project, github_integration: create(:github_integration))
+        project_without_github_integration_pipeline_events = create(:project)
 
-        expect(described_class.with_github_service_pipeline_events).to include(project_with_github_service_pipeline_events)
-        expect(described_class.with_github_service_pipeline_events).not_to include(project_without_github_service_pipeline_events)
+        expect(described_class.with_github_integration_pipeline_events)
+          .to include(project_with_github_integration_pipeline_events)
+        expect(described_class.with_github_integration_pipeline_events)
+          .not_to include(project_without_github_integration_pipeline_events)
       end
     end
 
