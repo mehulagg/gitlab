@@ -16,6 +16,7 @@ import * as typesCE from '~/boards/stores/mutation_types';
 import { getIdFromGraphQLId } from '~/graphql_shared/utils';
 import axios from '~/lib/utils/axios_utils';
 import { historyPushState, convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
+// eslint-disable-next-line import/no-deprecated
 import { mergeUrlParams, removeParams, urlParamsToObject } from '~/lib/utils/url_utility';
 import { s__ } from '~/locale';
 import {
@@ -119,6 +120,7 @@ export default {
   performSearch({ dispatch, getters }) {
     dispatch(
       'setFilters',
+      // eslint-disable-next-line import/no-deprecated
       convertObjectPropsToCamelCase(urlParamsToObject(window.location.search)),
     );
 

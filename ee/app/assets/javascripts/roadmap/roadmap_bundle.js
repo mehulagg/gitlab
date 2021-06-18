@@ -2,6 +2,7 @@ import Vue from 'vue';
 import { mapActions } from 'vuex';
 
 import { parseBoolean, convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
+// eslint-disable-next-line import/no-deprecated
 import { visitUrl, mergeUrlParams, urlParamsToObject } from '~/lib/utils/url_utility';
 import Translate from '~/vue_shared/translate';
 
@@ -63,6 +64,7 @@ export default () => {
         supportedPresetTypes.indexOf(dataset.presetType) > -1
           ? dataset.presetType
           : PRESET_TYPES.MONTHS;
+      // eslint-disable-next-line import/no-deprecated
       const rawFilterParams = urlParamsToObject(window.location.search.substring(1));
       const filterParams = {
         ...convertObjectPropsToCamelCase(rawFilterParams, {

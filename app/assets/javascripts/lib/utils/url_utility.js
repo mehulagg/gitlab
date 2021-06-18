@@ -429,8 +429,9 @@ export const getUrlParamsArray = () => urlParamsToArray(window.location.search);
  *
  * @returns {object} Query params object containing key-value pairs
  *                   with both key and values decoded into plain string.
+ *
+ * @deprecated Please use `queryToObject(query, { gatherArrays: true });` instead. See https://gitlab.com/gitlab-org/gitlab/-/issues/328845
  */
-
 export const urlParamsToObject = (path = '') =>
   splitPath(path).reduce((dataParam, filterParam) => {
     if (filterParam === '') {

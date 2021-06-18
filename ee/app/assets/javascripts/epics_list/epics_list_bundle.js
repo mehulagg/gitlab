@@ -4,6 +4,7 @@ import VueApollo from 'vue-apollo';
 import { IssuableStates } from '~/issuable_list/constants';
 import createDefaultClient from '~/lib/graphql';
 import { parseBoolean, convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
+// eslint-disable-next-line import/no-deprecated
 import { urlParamsToObject } from '~/lib/utils/url_utility';
 
 import EpicsListApp from './components/epics_list_root.vue';
@@ -40,6 +41,7 @@ export default function initEpicsList({ mountPointSelector }) {
     emptyStatePath,
   } = mountPointEl.dataset;
 
+  // eslint-disable-next-line import/no-deprecated
   const rawFilterParams = urlParamsToObject(window.location.search);
   const initialFilterParams = {
     ...convertObjectPropsToCamelCase(rawFilterParams, {
