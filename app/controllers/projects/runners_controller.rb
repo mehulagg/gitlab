@@ -77,3 +77,5 @@ class Projects::RunnersController < Projects::ApplicationController
     params.require(:runner).permit(Ci::Runner::FORM_EDITABLE)
   end
 end
+
+Projects::RunnersController.prepend_mod_with('Projects::RunnersController')

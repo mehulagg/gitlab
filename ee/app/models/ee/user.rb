@@ -406,6 +406,10 @@ module EE
       has_valid_credit_card? || !requires_credit_card_to_run_pipelines?(project)
     end
 
+    def has_required_credit_card_to_enable_shared_runners?(project)
+      has_valid_credit_card? || !requires_credit_card_to_enable_shared_runners?(project)
+    end
+
     protected
 
     override :password_required?
@@ -428,8 +432,19 @@ module EE
 
     def requires_credit_card_to_run_pipelines?(project)
       return false unless ::Gitlab.com?
-      return false unless created_after_credit_card_release_day?(project)
       return false unless project.shared_runners_enabled
+
+      requires_credit_card?(project)
+    end
+
+    def requires_credit_card_to_enable_shared_runners?(project)
+      return false unless ::Gitlab.com?
+
+      requires_credit_card?(project)
+    end
+
+    def requires_credit_card?(project)
+      return false unless created_after_credit_card_release_day?(project)
 
       root_namespace = project.root_namespace
       if root_namespace.free_plan?
