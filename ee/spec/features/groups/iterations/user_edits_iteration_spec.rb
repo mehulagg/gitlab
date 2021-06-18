@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe 'User views iteration' do
+RSpec.describe 'User edits iteration' do
   let_it_be(:now) { Time.now }
   let_it_be(:group) { create(:group) }
   let_it_be(:user) { create(:group_member, :maintainer, user: create(:user), group: group ).user }
