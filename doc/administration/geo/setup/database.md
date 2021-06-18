@@ -515,13 +515,20 @@ For instructions about how to set up Patroni on the primary site, see the
 
 In a Geo secondary site, the main PostgreSQL database is a read-only replica of the primary site’s PostgreSQL database.
 
-If you are currently using `repmgr` on your Geo primary site, see [these instructions](#migrating-from-repmgr-to-patroni) for migrating from `repmgr` to Patroni.
+If you are currently using `repmgr` on your Geo primary site, see [these instructions](#migrating-from-repmgr-to-patroni) 
+for migrating from `repmgr` to Patroni.
 
-A production-ready and secure setup requires at least three Consul nodes, three
-Patroni nodes, one internal load-balancing node on the primary site, and a similar
-configuration for the secondary site. The internal load balancer provides a single
-endpoint for connecting to the Patroni cluster's leader whenever a new leader is
-elected. Be sure to use [password credentials](../../postgresql/replication_and_failover.md#database-authorization-for-patroni) and other database best practices.
+A production-ready and secure setup requires at least:
+- 3 Consul nodes _(primary and secondary sites)_
+- 2 Patroni nodes _(primary and secondary sites)_
+- 1 PgBouncer node _(primary and secondary sites)_
+- 1 internal load-balancer _(primary site only)_
+
+The internal load balancer provides a single endpoint for connecting to the Patroni cluster's leader whenever a new leader is
+elected, and it is required for enabling cascading replication from the secondary sites. 
+
+Be sure to use [password credentials](../../postgresql/replication_and_failover.md#database-authorization-for-patroni) 
+and other database best practices.
 
 ##### Step 1. Configure Patroni permanent replication slot on the primary site
 
