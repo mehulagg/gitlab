@@ -10805,7 +10805,8 @@ CREATE TABLE ci_pending_builds (
     project_id bigint NOT NULL,
     created_at timestamp with time zone DEFAULT now() NOT NULL,
     protected boolean DEFAULT false NOT NULL,
-    minutes_exceeded boolean DEFAULT false NOT NULL
+    minutes_exceeded boolean DEFAULT false NOT NULL,
+    namespace_id bigint
 );
 
 CREATE SEQUENCE ci_pending_builds_id_seq

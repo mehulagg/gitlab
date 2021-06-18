@@ -33,6 +33,8 @@ class Namespace < ApplicationRecord
 
   has_many :runner_namespaces, inverse_of: :namespace, class_name: 'Ci::RunnerNamespace'
   has_many :runners, through: :runner_namespaces, source: :runner, class_name: 'Ci::Runner'
+  has_many :pending_builds, inverse_of: :namespace, class_name: 'Ci::PendingBuild'
+  # TODO create foreign key here https://docs.gitlab.com/ee/development/foreign_keys.html
   has_one :onboarding_progress
 
   # This should _not_ be `inverse_of: :namespace`, because that would also set

@@ -6,25 +6,27 @@ module Ci
 
     belongs_to :project
     belongs_to :build, class_name: 'Ci::Build'
+    belongs_to :namespace, inverse_of: :ci_pending_builds, class_name: 'Namespace'
 
     def self.upsert_from_build!(build)
-      entry = self.new(attributes(build))
+      entry = self.new(args(build))
 
       entry.validate!
 
       self.upsert(entry.attributes.compact, returning: %w[build_id], unique_by: :build_id)
     end
 
-    def attributes(build)
+    def self.args(build)
       {
         build: build,
         project: build.project,
         protected: build.protected?,
-        minutes_exceeded: minutes_exceeded?(build.project)
+        minutes_exceeded: minutes_exceeded?(build.project),
+        namespace_id: build.project.namespace.id # might need to preload this
       }
     end
 
-    def minutes_exceeded?(project)
+    def self.minutes_exceeded?(project)
       !!project.ci_minutes_quota.minutes_used_up?
     end
   end
