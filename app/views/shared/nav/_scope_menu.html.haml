@@ -1,6 +1,7 @@
-.context-header
-  = link_to scope_menu.link, **scope_menu.container_html_options, data: { qa_selector: 'project_scope_link' } do
-    %span{ class: ['avatar-container', 'rect-avatar', 'project-avatar', 's32'] }
-      = source_icon(scope_menu.container, alt: scope_menu.title, class: ['avatar', 'avatar-tile', 's32'], width: 32, height: 32)
-    %span.sidebar-context-title
-      = scope_menu.title
+= nav_link(**scope_menu.active_routes, html_options: scope_menu.nav_link_html_options) do
+  .context-header
+    = link_to scope_menu.link, **scope_menu.container_html_options, data: { qa_selector: 'project_scope_link' } do
+      %span{ class: ['avatar-container', 'rect-avatar', 'project-avatar', 's32'] }
+        = source_icon(scope_menu.container, alt: scope_menu.title, class: ['avatar', 'avatar-tile', 's32'], width: 32, height: 32)
+      %span.sidebar-context-title
+        = scope_menu.title

@@ -5,6 +5,12 @@
 %aside.nav-sidebar{ class: ("sidebar-collapsed-desktop" if collapsed_sidebar?), **sidebar_tracking_attributes_by_object(@group), 'aria-label': aside_title }
   .nav-sidebar-inner-scroll
     %ul.sidebar-top-level-items.qa-group-sidebar
+      = nav_link(path: ['groups#show', 'groups#details'], html_options: { class: 'context-header' }) do
+        = link_to group_path(@group), title: @group.name, data: { qa_selector: 'group_scope_link' } do
+          %span{ class: ['avatar-container', 'rect-avatar', 'group-avatar' , 's32'] }
+            = group_icon(@group, class: ['avatar', 'avatar-tile', 's32'])
+          %span.sidebar-context-title
+            = @group.name
       = render_if_exists 'layouts/nav/sidebar/group_trial_status_widget', group: @group
 
       - if group_sidebar_link?(:overview)
