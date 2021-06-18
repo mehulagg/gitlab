@@ -52,6 +52,7 @@ class Integration < ApplicationRecord
     packagist pipelines_email pivotaltracker pushover
     mattermost mattermost_slash_commands microsoft_teams mock_ci mock_monitoring
     unify_circuit
+    webex_teams
   ].to_set.freeze
 
   def self.renamed?(name)

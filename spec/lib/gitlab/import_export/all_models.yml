@@ -557,7 +557,7 @@ project:
 - alert_management_alerts
 - repository_storage_moves
 - freeze_periods
-- webex_teams_service
+- webex_teams_integration
 - build_report_results
 - vulnerability_statistic
 - vulnerability_historical_statistics
