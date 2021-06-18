@@ -10,10 +10,6 @@ module Gitlab
         ::Feature.enabled?(:ci_artifacts_exclude, default_enabled: true)
       end
 
-      def self.pipeline_latest?
-        ::Feature.enabled?(:ci_pipeline_latest, default_enabled: true)
-      end
-
       def self.pipeline_status_omit_commit_sha_in_cache_key?(project)
         Feature.enabled?(:ci_pipeline_status_omit_commit_sha_in_cache_key, project, default_enabled: true)
       end
