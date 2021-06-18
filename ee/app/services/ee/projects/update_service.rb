@@ -63,17 +63,8 @@ module EE
         return unless params[:shared_runners_enabled]
         return if project.shared_runners_enabled
 
-        if project.group && project.group.shared_runners_setting == 'disabled_and_unoverridable'
-          # The actual attribute is `shared_runners_enabled`, but this makes the error message sound odd.
-          # For example: "Shared runners enabled cannot be activated"
-          project.errors.add(:shared_runners, _('cannot be enabled because parent group does not allow it'))
-          return
-        end
-
         if !current_user.has_required_credit_card_to_enable_shared_runners?(project)
-          # The actual attribute is `shared_runners_enabled`, but this makes the error message sound odd.
-          # For example: "Shared runners enabled cannot be activated"
-          project.errors.add(:shared_runners, _('cannot be enabled until a valid credit credit is on file'))
+          project.errors.add(:shared_runners_enabled, _('cannot be enabled until a valid credit credit is on file'))
           return
         end
       end
