@@ -36,7 +36,7 @@ module QA
         end
       end
 
-      let!(:runner) do
+      let(:runner) do
         Resource::Runner.fabricate! do |runner|
           runner.name = "qa-runner-#{Time.now.to_i}"
           runner.tags = ["runner-for-#{package_project.group.name}"]
@@ -127,8 +127,9 @@ module QA
         }
       end
 
-      before(:context) do
+      before do
         Flow::Login.sign_in_unless_signed_in
+        runner
       end
 
       after do
