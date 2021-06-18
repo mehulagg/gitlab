@@ -406,6 +406,8 @@ module EE
       has_valid_credit_card? || !requires_credit_card_to_run_pipelines?(project)
     end
 
+    # This is like has_required_credit_card_to_run_pipelines? except that
+    # former checks whether shared runners are enabled, and this method does not.
     def has_required_credit_card_to_enable_shared_runners?(project)
       has_valid_credit_card? || !requires_credit_card_to_enable_shared_runners?(project)
     end
