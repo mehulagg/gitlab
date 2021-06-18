@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 FactoryBot.define do
-  factory :gitlab_slack_application_service, class: 'Integrations::GitlabSlackApplication' do
+  factory :gitlab_slack_application_integration, class: 'Integrations::GitlabSlackApplication' do
     project
     active { true }
     type { 'GitlabSlackApplicationService' }

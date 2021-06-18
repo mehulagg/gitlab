@@ -1571,7 +1571,7 @@ RSpec.describe Project do
     it 'returns projects where Slack application is disabled' do
       project1 = create(:project)
       project2 = create(:project)
-      create(:gitlab_slack_application_service, project: project2)
+      create(:gitlab_slack_application_integration, project: project2)
 
       projects = described_class.with_slack_application_disabled
 

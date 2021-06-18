@@ -480,7 +480,7 @@ project:
 - kubernetes_namespaces
 - error_tracking_setting
 - metrics_setting
-- gitlab_slack_application_service
+- gitlab_slack_application_integration
 - github_integration
 - protected_environments
 - mirror_user
