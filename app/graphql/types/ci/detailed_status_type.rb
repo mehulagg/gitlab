@@ -6,6 +6,8 @@ module Types
     class DetailedStatusType < BaseObject
       graphql_name 'DetailedStatus'
 
+      field :id, GraphQL::ID_TYPE, null: false,
+            description: 'ID of the detailed status.'
       field :group, GraphQL::STRING_TYPE, null: true,
             description: 'Group of the status.'
       field :icon, GraphQL::STRING_TYPE, null: true,

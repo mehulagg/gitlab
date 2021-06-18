@@ -7556,6 +7556,7 @@ Represents the total number of issues and their weights for a particular day.
 | Name | Type | Description |
 | ---- | ---- | ----------- |
 | <a id="cigroupdetailedstatus"></a>`detailedStatus` | [`DetailedStatus`](#detailedstatus) | Detailed status of the group. |
+| <a id="cigroupid"></a>`id` | [`ID!`](#id) | ID of the group. |
 | <a id="cigroupjobs"></a>`jobs` | [`CiJobConnection`](#cijobconnection) | Jobs in group. (see [Connections](#connections)) |
 | <a id="cigroupname"></a>`name` | [`String`](#string) | Name of the job group. |
 | <a id="cigroupsize"></a>`size` | [`Int`](#int) | Size of the group. |
@@ -7640,6 +7641,7 @@ Represents the total number of issues and their weights for a particular day.
 | ---- | ---- | ----------- |
 | <a id="cistagedetailedstatus"></a>`detailedStatus` | [`DetailedStatus`](#detailedstatus) | Detailed status of the stage. |
 | <a id="cistagegroups"></a>`groups` | [`CiGroupConnection`](#cigroupconnection) | Group of jobs for the stage. (see [Connections](#connections)) |
+| <a id="cistageid"></a>`id` | [`ID!`](#id) | ID of the stage. |
 | <a id="cistagejobs"></a>`jobs` | [`CiJobConnection`](#cijobconnection) | Jobs for the stage. (see [Connections](#connections)) |
 | <a id="cistagename"></a>`name` | [`String`](#string) | Name of the stage. |
 
@@ -8303,6 +8305,7 @@ four standard [pagination arguments](#connection-pagination-arguments):
 | <a id="detailedstatusgroup"></a>`group` | [`String`](#string) | Group of the status. |
 | <a id="detailedstatushasdetails"></a>`hasDetails` | [`Boolean`](#boolean) | Indicates if the status has further details. |
 | <a id="detailedstatusicon"></a>`icon` | [`String`](#string) | Icon of the status. |
+| <a id="detailedstatusid"></a>`id` | [`ID!`](#id) | ID of the detailed status. |
 | <a id="detailedstatuslabel"></a>`label` | [`String`](#string) | Label of the status. |
 | <a id="detailedstatustext"></a>`text` | [`String`](#string) | Text of the status. |
 | <a id="detailedstatustooltip"></a>`tooltip` | [`String`](#string) | Tooltip associated with the status. |
