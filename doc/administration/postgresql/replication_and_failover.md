@@ -246,7 +246,7 @@ patroni['postgresql']['max_replication_slots'] = X
 patroni['postgresql']['max_wal_senders'] = X+1
 
 # Replace XXX.XXX.XXX.XXX/YY with Network Address
-postgresql['trust_auth_cidr_addresses'] = %w(XXX.XXX.XXX.XXX/YY)
+postgresql['trust_auth_cidr_addresses'] = %w(XXX.XXX.XXX.XXX/YY 127.0.0.1/32)
 
 # Replace placeholders:
 #
@@ -259,8 +259,8 @@ consul['configuration'] = {
 # END user configuration
 ```
 
-You do not need an additional or different configuration for replica nodes. As a matter of fact, you don't have to have
-a predetermined primary node. Therefore all database nodes use the same configuration.
+All database nodes use the same configuration. The leader node is not determined in configuration,
+and there is no additional or different configuration for either leader or replica nodes.
 
 Once the configuration of a node is done, you must [reconfigure Omnibus GitLab](../restart_gitlab.md#omnibus-gitlab-reconfigure)
 on each node for the changes to take effect.
@@ -558,7 +558,7 @@ postgresql['sql_user_password'] = '450409b85a0223a214b5fb1484f34d0f'
 patroni['postgresql']['max_replication_slots'] = 6
 patroni['postgresql']['max_wal_senders'] = 7
 
-postgresql['trust_auth_cidr_addresses'] = %w(10.6.0.0/16)
+postgresql['trust_auth_cidr_addresses'] = %w(10.6.0.0/16 127.0.0.1/32)
 
 # Configure the Consul agent
 consul['services'] = %w(postgresql)
@@ -647,7 +647,7 @@ patroni['postgresql']['max_replication_slots'] = 6
 # available database connections.
 patroni['postgresql']['max_wal_senders'] = 7
 
-postgresql['trust_auth_cidr_addresses'] = %w(10.6.0.0/16)
+postgresql['trust_auth_cidr_addresses'] = %w(10.6.0.0/16 127.0.0.1/32)
 
 consul['configuration'] = {
   server: true,
@@ -1016,6 +1016,57 @@ postgresql['trust_auth_cidr_addresses'] = %w(123.123.123.123/32 <other_cidrs>)
 ```
 
 [Reconfigure GitLab](../restart_gitlab.md#omnibus-gitlab-reconfigure) for the changes to take effect.
+
+### Errors in the Patroni log about a pg_hba.conf entry for 127.0.0.1
+
+The following log entry in the Patroni log indicate replication is not working
+and a configuration change is needed:
+
+```plaintext
+FATAL:  no pg_hba.conf entry for replication connection from host "127.0.0.1", user "gitlab_replicator"
+```
+
+To fix the problem, ensure the loopback is in `/etc/gitlab/gitlab.rb` on all the Patroni nodes:
+
+```ruby
+postgresql['trust_auth_cidr_addresses'] = %w(<other_cidrs> 127.0.0.1/32)
+```
+
+[Reconfigure GitLab](../restart_gitlab.md#omnibus-gitlab-reconfigure) for the changes to take effect.
+
+Then check that all the replicas are syncronized.
+
+### Errors in Patroni logs: the requested start point is ahead of the WAL flush position
+
+This error indicates that the database is not replicating.
+
+```plaintext
+FATAL:  could not receive data from WAL stream: ERROR:  requested starting point 0/5000000 is ahead of the WAL flush position of this server 0/4000388
+```
+
+This example error is from a replica that was initially misconfigured, and had never replicated.
+
+To reinitialize the replica:
+
+1. On any server in the cluster, determine the Cluster and Member names,
+and check the replication lag:
+
+```shell
+# gitlab-ctl patroni members
++ Cluster: postgresql-ha (6970678148837286213) ------+---------+---------+----+-----------+
+| Member                              | Host         | Role    | State   | TL | Lag in MB |
++-------------------------------------+--------------+---------+---------+----+-----------+
+| gitlab-database-1.example.com       | 172.18.0.111 | Replica | running |  5 |         0 |
+| gitlab-database-2.example.com       | 172.18.0.112 | Replica | running |  5 |       100 |
+| gitlab-database-3.example.com       | 172.18.0.113 | Leader  | running |  5 |           |
++-------------------------------------+--------------+---------+---------+----+-----------+
+```
+
+2. On the affected replica server:
+
+```shell
+# gitlab-ctl patroni reinitialize-replica postgresql-ha gitlab-database-2.example.com
+```
 
 ### Issues with other components
 
