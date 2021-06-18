@@ -108,14 +108,14 @@ module Resolvers
       transformed               = args.dup
       transformed[:group_id]    = group
       transformed[:iids]      ||= [args[:iid]].compact
+      return transformed unless related_epic.present?
 
-      transformed.merge(transform_timeframe_parameters(args)).merge(relative_param)
+      set_related_epic_param(transformed)
     end
 
-    def relative_param
-      return {} unless parent
-
-      { parent_id: parent.id }
+    # Override to filter by parent or child epic
+    def set_related_epic_param(args)
+      args
     end
 
     # `resolver_object` refers to the object we're currently querying on, and is usually a `Group`
@@ -123,14 +123,14 @@ module Resolvers
     # an Epic's `children` field, then `resolver_object` is an `EpicPresenter` (rather than an Epic).
     # But that's the epic we need in order to scope the find to only children of this epic,
     # using the `parent_id`
-    def parent
+    def related_epic
       resolver_object if resolver_object.is_a?(Epic)
     end
 
     def group
       return resolver_object if resolver_object.is_a?(Group)
 
-      parent.group
+      related_epic.group
     end
 
     # If we're querying for multiple iids and selecting issues, then ideally

@@ -85,7 +85,7 @@ module Types
     field :children, ::Types::EpicType.connection_type, null: true,
           description: 'Children (sub-epics) of the epic.',
           max_page_size: 2000,
-          resolver: ::Resolvers::EpicsResolver
+          resolver: ::Resolvers::EpicChildrenResolver
     field :labels, Types::LabelType.connection_type, null: true,
           description: 'Labels assigned to the epic.'
 
