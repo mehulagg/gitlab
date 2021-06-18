@@ -41,7 +41,7 @@ then
          Replace with standard spaces:' >&2
   # Find the spaces, then add color codes with sed to highlight each NBSP or NNBSP in the output.
   grep --extended-regexp --binary-file=without-match --recursive --color=auto '[  ]' doc \
-       | sed -e ''/ /s//`printf "\033[0;101m \033[0m"`/'' -e ''/ /s//`printf "\033[0;101m \033[0m"`/''
+       | sed -e ''/ /s//`printf "\033[0;101m \033[0m"`/'' -e ''/ /s//`printf "\033[0;101m \033[0m"`/''
   ((ERRORCODE++))
 fi
 
@@ -69,7 +69,7 @@ fi
 
 # Do not use 'README.md', instead use 'index.md'
 # Number of 'README.md's as of 2020-10-13
-NUMBER_READMES=28
+NUMBER_READMES=15
 FIND_READMES=$(find doc/ -name "README.md" | wc -l)
 echo '=> Checking for new README.md files...'
 echo
