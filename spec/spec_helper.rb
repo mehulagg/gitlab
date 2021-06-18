@@ -218,6 +218,9 @@ RSpec.configure do |config|
     # Enable all features by default for testing
     # Reset any changes in after hook.
     stub_all_feature_flags
+
+    # TODO: disable the feature flag for tests temporarily
+    stub_feature_flags(ci_pending_builds_queue_source: false)
   end
 
   config.after(:all) do
