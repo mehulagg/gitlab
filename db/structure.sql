@@ -14527,7 +14527,8 @@ CREATE TABLE lists (
     max_issue_count integer DEFAULT 0 NOT NULL,
     max_issue_weight integer DEFAULT 0 NOT NULL,
     limit_metric character varying(20),
-    iteration_id bigint
+    iteration_id bigint,
+    health_status_id smallint
 );
 
 CREATE SEQUENCE lists_id_seq
