@@ -1563,7 +1563,7 @@ RSpec.describe Project, factory_default: :keep do
     end
 
     it 'avoid n + 1' do
-      expect { described_class.with_service(:prometheus_service).map(&:prometheus_service) }.not_to exceed_query_limit(1)
+      expect { described_class.with_service(:prometheus_integration).map(&:prometheus_integration) }.not_to exceed_query_limit(1)
     end
   end
 
@@ -5911,7 +5911,7 @@ RSpec.describe Project, factory_default: :keep do
       subject { create(:project) }
 
       before do
-        create(:prometheus_service, project: subject, api_url: 'https://prometheus.project.com/')
+        create(:prometheus_integration, project: subject, api_url: 'https://prometheus.project.com/')
       end
 
       it 'retrieves the integration' do
@@ -5921,8 +5921,8 @@ RSpec.describe Project, factory_default: :keep do
 
     context 'with an instance-level and template integrations' do
       before do
-        create(:prometheus_service, :instance, api_url: 'https://prometheus.instance.com/')
-        create(:prometheus_service, :template, api_url: 'https://prometheus.template.com/')
+        create(:prometheus_integration, :instance, api_url: 'https://prometheus.instance.com/')
+        create(:prometheus_integration, :template, api_url: 'https://prometheus.template.com/')
       end
 
       it 'builds the service from the instance if exists' do
@@ -5932,7 +5932,7 @@ RSpec.describe Project, factory_default: :keep do
 
     context 'with an instance-level and template integrations' do
       before do
-        create(:prometheus_service, :template, api_url: 'https://prometheus.template.com/')
+        create(:prometheus_integration, :template, api_url: 'https://prometheus.template.com/')
       end
 
       it 'builds the service from the template if instance does not exists' do
@@ -6623,13 +6623,13 @@ RSpec.describe Project, factory_default: :keep do
     end
   end
 
-  describe '#prometheus_service_active?' do
+  describe '#prometheus_integration_active?' do
     let(:project) { create(:project) }
 
-    subject { project.prometheus_service_active? }
+    subject { project.prometheus_integration_active? }
 
     before do
-      create(:prometheus_service, project: project, manual_configuration: manual_configuration)
+      create(:prometheus_integration, project: project, manual_configuration: manual_configuration)
     end
 
     context 'when project has an activated prometheus service' do

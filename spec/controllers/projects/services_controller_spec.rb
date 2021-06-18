@@ -257,7 +257,7 @@ RSpec.describe Projects::ServicesController do
     end
 
     context 'Prometheus service' do
-      let!(:service) { create(:prometheus_service, project: project) }
+      let!(:service) { create(:prometheus_integration, project: project) }
       let(:service_params) { { manual_configuration: '1', api_url: 'http://example.com' } }
 
       context 'feature flag :settings_operations_prometheus_service is enabled' do
@@ -275,7 +275,7 @@ RSpec.describe Projects::ServicesController do
         end
 
         it 'does not modify service' do
-          expect { put :update, params: project_params.merge(service: service_params) }.not_to change { project.prometheus_service.reload.attributes }
+          expect { put :update, params: project_params.merge(service: service_params) }.not_to change { project.prometheus_integration.reload.attributes }
         end
       end
 
@@ -285,7 +285,7 @@ RSpec.describe Projects::ServicesController do
         end
 
         it 'modifies service' do
-          expect { put :update, params: project_params.merge(service: service_params) }.to change { project.prometheus_service.reload.attributes }
+          expect { put :update, params: project_params.merge(service: service_params) }.to change { project.prometheus_integration.reload.attributes }
         end
       end
     end

@@ -589,7 +589,7 @@ RSpec.describe Projects::CreateService, '#execute' do
     subject(:project) { create_project(user, opts) }
 
     context 'with an active service template' do
-      let!(:template_integration) { create(:prometheus_service, :template, api_url: 'https://prometheus.template.com/') }
+      let!(:template_integration) { create(:prometheus_integration, :template, api_url: 'https://prometheus.template.com/') }
 
       it 'creates a service from the template' do
         expect(project.integrations.count).to eq(1)
@@ -598,7 +598,7 @@ RSpec.describe Projects::CreateService, '#execute' do
       end
 
       context 'with an active instance-level integration' do
-        let!(:instance_integration) { create(:prometheus_service, :instance, api_url: 'https://prometheus.instance.com/') }
+        let!(:instance_integration) { create(:prometheus_integration, :instance, api_url: 'https://prometheus.instance.com/') }
 
         it 'creates a service from the instance-level integration' do
           expect(project.integrations.count).to eq(1)
@@ -607,7 +607,7 @@ RSpec.describe Projects::CreateService, '#execute' do
         end
 
         context 'with an active group-level integration' do
-          let!(:group_integration) { create(:prometheus_service, group: group, project: nil, api_url: 'https://prometheus.group.com/') }
+          let!(:group_integration) { create(:prometheus_integration, group: group, project: nil, api_url: 'https://prometheus.group.com/') }
           let!(:group) do
             create(:group).tap do |group|
               group.add_owner(user)
@@ -628,7 +628,7 @@ RSpec.describe Projects::CreateService, '#execute' do
           end
 
           context 'with an active subgroup' do
-            let!(:subgroup_integration) { create(:prometheus_service, group: subgroup, project: nil, api_url: 'https://prometheus.subgroup.com/') }
+            let!(:subgroup_integration) { create(:prometheus_integration, group: subgroup, project: nil, api_url: 'https://prometheus.subgroup.com/') }
             let!(:subgroup) do
               create(:group, parent: group).tap do |subgroup|
                 subgroup.add_owner(user)
@@ -705,7 +705,7 @@ RSpec.describe Projects::CreateService, '#execute' do
 
       it 'creates Integrations::Prometheus record', :aggregate_failures do
         project = create_project(user, opts.merge!(namespace_id: group.id))
-        service = project.prometheus_service
+        service = project.prometheus_integration
 
         expect(service.active).to be true
         expect(service.manual_configuration?).to be false
@@ -722,7 +722,7 @@ RSpec.describe Projects::CreateService, '#execute' do
 
       it 'creates Integrations::Prometheus record', :aggregate_failures do
         project = create_project(user, opts)
-        service = project.prometheus_service
+        service = project.prometheus_integration
 
         expect(service.active).to be true
         expect(service.manual_configuration?).to be false
@@ -730,13 +730,13 @@ RSpec.describe Projects::CreateService, '#execute' do
       end
 
       it 'cleans invalid record and logs warning', :aggregate_failures do
-        invalid_service_record = build(:prometheus_service, properties: { api_url: nil, manual_configuration: true }.to_json)
+        invalid_service_record = build(:prometheus_integration, properties: { api_url: nil, manual_configuration: true }.to_json)
         allow(::Integrations::Prometheus).to receive(:new).and_return(invalid_service_record)
 
         expect(Gitlab::ErrorTracking).to receive(:track_exception).with(an_instance_of(ActiveRecord::RecordInvalid), include(extra: { project_id: a_kind_of(Integer) }))
         project = create_project(user, opts)
 
-        expect(project.prometheus_service).to be_nil
+        expect(project.prometheus_integration).to be_nil
       end
     end
 
@@ -744,7 +744,7 @@ RSpec.describe Projects::CreateService, '#execute' do
       it 'does not persist Integrations::Prometheus record' do
         project = create_project(user, opts)
 
-        expect(project.prometheus_service).to be_nil
+        expect(project.prometheus_integration).to be_nil
       end
     end
   end

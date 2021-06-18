@@ -67,7 +67,7 @@ RSpec.describe Gitlab::DatabaseImporters::SelfMonitoring::Project::CreateService
         it do
           expect(result[:status]).to eq(:success)
 
-          prometheus = project.prometheus_service
+          prometheus = project.prometheus_integration
           expect(prometheus).not_to eq(nil)
           expect(prometheus.api_url).to eq(server_address)
           expect(prometheus.active).to eq(true)
@@ -233,7 +233,7 @@ RSpec.describe Gitlab::DatabaseImporters::SelfMonitoring::Project::CreateService
 
         it 'does not fail' do
           expect(result).to include(status: :success)
-          expect(project.prometheus_service).to be_nil
+          expect(project.prometheus_integration).to be_nil
         end
       end
 
@@ -244,7 +244,7 @@ RSpec.describe Gitlab::DatabaseImporters::SelfMonitoring::Project::CreateService
 
         it 'does not fail' do
           expect(result).to include(status: :success)
-          expect(project.prometheus_service).to be_nil
+          expect(project.prometheus_integration).to be_nil
         end
       end
 
@@ -258,7 +258,7 @@ RSpec.describe Gitlab::DatabaseImporters::SelfMonitoring::Project::CreateService
 
         it 'does not configure prometheus' do
           expect(result).to include(status: :success)
-          expect(project.prometheus_service).to be_nil
+          expect(project.prometheus_integration).to be_nil
         end
       end
 
@@ -267,7 +267,7 @@ RSpec.describe Gitlab::DatabaseImporters::SelfMonitoring::Project::CreateService
 
         it 'does not configure prometheus' do
           expect(result).to include(status: :success)
-          expect(project.prometheus_service).to be_nil
+          expect(project.prometheus_integration).to be_nil
         end
       end
 

@@ -39,7 +39,7 @@ RSpec.describe Projects::PostCreationWorker do
           it 'creates an Integrations::Prometheus record', :aggregate_failures do
             subject
 
-            service = project.prometheus_service
+            service = project.prometheus_integration
             expect(service.active).to be true
             expect(service.manual_configuration?).to be false
             expect(service.persisted?).to be true
@@ -56,20 +56,20 @@ RSpec.describe Projects::PostCreationWorker do
           it 'creates an Integrations::Prometheus record', :aggregate_failures do
             subject
 
-            service = project.prometheus_service
+            service = project.prometheus_integration
             expect(service.active).to be true
             expect(service.manual_configuration?).to be false
             expect(service.persisted?).to be true
           end
 
           it 'cleans invalid record and logs warning', :aggregate_failures do
-            invalid_service_record = build(:prometheus_service, properties: { api_url: nil, manual_configuration: true }.to_json)
+            invalid_service_record = build(:prometheus_integration, properties: { api_url: nil, manual_configuration: true }.to_json)
             allow(::Integrations::Prometheus).to receive(:new).and_return(invalid_service_record)
 
             expect(Gitlab::ErrorTracking).to receive(:track_exception).with(an_instance_of(ActiveRecord::RecordInvalid), include(extra: { project_id: a_kind_of(Integer) })).twice
             subject
 
-            expect(project.prometheus_service).to be_nil
+            expect(project.prometheus_integration).to be_nil
           end
         end
 
@@ -77,7 +77,7 @@ RSpec.describe Projects::PostCreationWorker do
           it 'does not persist an Integrations::Prometheus record' do
             subject
 
-            expect(project.prometheus_service).to be_nil
+            expect(project.prometheus_integration).to be_nil
           end
         end
       end

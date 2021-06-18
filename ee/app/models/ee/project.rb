@@ -152,7 +152,7 @@ module EE
       scope :with_security_reports_stored, -> { where('EXISTS (?)', ::Vulnerabilities::Finding.scoped_project.select(1)) }
       scope :with_security_reports, -> { where('EXISTS (?)', ::Ci::JobArtifact.security_reports.scoped_project.select(1)) }
       scope :with_github_service_pipeline_events, -> { joins(:github_service).merge(::Integrations::Github.pipeline_hooks) }
-      scope :with_active_prometheus_service, -> { joins(:prometheus_service).merge(::Integrations::Prometheus.active) }
+      scope :with_active_prometheus_integration, -> { joins(:prometheus_integration).merge(::Integrations::Prometheus.active) }
       scope :with_enabled_incident_sla, -> { joins(:incident_management_setting).where(project_incident_management_settings: { sla_timer: true }) }
       scope :mirrored_with_enabled_pipelines, -> do
         joins(:project_feature).mirror.where(mirror_trigger_builds: true,
@@ -160,7 +160,7 @@ module EE
       end
       scope :with_slack_service, -> { joins(:slack_service) }
       scope :with_slack_slash_commands_service, -> { joins(:slack_slash_commands_service) }
-      scope :with_prometheus_service, -> { joins(:prometheus_service) }
+      scope :with_prometheus_integration, -> { joins(:prometheus_integration) }
       scope :aimed_for_deletion, -> (date) { where('marked_for_deletion_at <= ?', date).without_deleted }
       scope :not_aimed_for_deletion, -> { where(marked_for_deletion_at: nil) }
       scope :with_repos_templates, -> { where(namespace_id: ::Gitlab::CurrentSettings.current_application_settings.custom_project_templates_group_id) }

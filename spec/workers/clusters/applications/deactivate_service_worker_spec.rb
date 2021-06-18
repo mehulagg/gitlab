@@ -9,7 +9,7 @@ RSpec.describe Clusters::Applications::DeactivateServiceWorker, '#perform' do
       let!(:integration) { create(:clusters_integrations_prometheus, cluster: cluster) }
 
       context 'prometheus service exists' do
-        let!(:prometheus_service) { create(:prometheus_service, project: project, manual_configuration: false, active: true) }
+        let!(:prometheus_integration) { create(:prometheus_integration, project: project, manual_configuration: false, active: true) }
 
         before do
           integration.delete # prometheus service before save synchronises active stated with integration existence.
@@ -22,7 +22,7 @@ RSpec.describe Clusters::Applications::DeactivateServiceWorker, '#perform' do
 
           it 'ensures Prometheus service is deactivated' do
             expect { described_class.new.perform(cluster.id, service_name) }
-              .to change { prometheus_service.reload.active }.from(true).to(false)
+              .to change { prometheus_integration.reload.active }.from(true).to(false)
           end
         end
 
@@ -32,7 +32,7 @@ RSpec.describe Clusters::Applications::DeactivateServiceWorker, '#perform' do
 
           it 'ensures Prometheus service is deactivated' do
             expect { described_class.new.perform(cluster.id, service_name) }
-              .to change { prometheus_service.reload.active }.from(true).to(false)
+              .to change { prometheus_integration.reload.active }.from(true).to(false)
           end
         end
 
@@ -42,7 +42,7 @@ RSpec.describe Clusters::Applications::DeactivateServiceWorker, '#perform' do
 
           it 'ensures Prometheus service is deactivated' do
             expect { described_class.new.perform(cluster.id, service_name) }
-              .to change { prometheus_service.reload.active }.from(true).to(false)
+              .to change { prometheus_integration.reload.active }.from(true).to(false)
           end
         end
       end

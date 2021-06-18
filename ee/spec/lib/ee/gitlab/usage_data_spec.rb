@@ -261,7 +261,7 @@ RSpec.describe Gitlab::UsageData do
         project = create(:project, creator: user)
         create(:slack_service, project: project)
         create(:slack_slash_commands_service, project: project)
-        create(:prometheus_service, project: project)
+        create(:prometheus_integration, project: project)
       end
 
       expect(described_class.usage_activity_by_stage_configure({})).to include(
@@ -465,7 +465,7 @@ RSpec.describe Gitlab::UsageData do
         user    = create(:user, dashboard: 'operations')
         project = create(:project, creator: user)
         create(:users_ops_dashboard_project, user: user)
-        create(:prometheus_service, project: project)
+        create(:prometheus_integration, project: project)
         create(:project_incident_management_setting, :sla_enabled, project: project)
       end
 

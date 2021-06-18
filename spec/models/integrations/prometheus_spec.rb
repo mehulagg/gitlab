@@ -10,7 +10,7 @@ RSpec.describe Integrations::Prometheus, :use_clean_rails_memory_store_caching, 
 
   let_it_be_with_reload(:project) { create(:prometheus_project) }
 
-  let(:service) { project.prometheus_service }
+  let(:service) { project.prometheus_integration }
 
   describe "Associations" do
     it { is_expected.to belong_to :project }
@@ -129,7 +129,7 @@ RSpec.describe Integrations::Prometheus, :use_clean_rails_memory_store_caching, 
   describe 'callbacks' do
     context 'after_create' do
       let(:project) { create(:project) }
-      let(:service) { build(:prometheus_service, project: project) }
+      let(:service) { build(:prometheus_integration, project: project) }
 
       subject(:create_service) { service.save! }
 
@@ -142,7 +142,7 @@ RSpec.describe Integrations::Prometheus, :use_clean_rails_memory_store_caching, 
       end
 
       context 'no project exists' do
-        let(:service) { build(:prometheus_service, :instance) }
+        let(:service) { build(:prometheus_integration, :instance) }
 
         it 'does not create default alerts' do
           expect(Prometheus::CreateDefaultAlertsWorker)

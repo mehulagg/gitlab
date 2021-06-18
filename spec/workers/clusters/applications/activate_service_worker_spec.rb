@@ -18,7 +18,7 @@ RSpec.describe Clusters::Applications::ActivateServiceWorker, '#perform' do
 
         it 'ensures Prometheus service is activated' do
           expect { described_class.new.perform(cluster.id, service_name) }
-            .to change { project.reload.prometheus_service&.active }.from(nil).to(true)
+            .to change { project.reload.prometheus_integration&.active }.from(nil).to(true)
         end
       end
 
@@ -28,7 +28,7 @@ RSpec.describe Clusters::Applications::ActivateServiceWorker, '#perform' do
 
         it 'ensures Prometheus service is activated' do
           expect { described_class.new.perform(cluster.id, service_name) }
-            .to change { project.reload.prometheus_service&.active }.from(nil).to(true)
+            .to change { project.reload.prometheus_integration&.active }.from(nil).to(true)
         end
       end
 
@@ -38,7 +38,7 @@ RSpec.describe Clusters::Applications::ActivateServiceWorker, '#perform' do
 
         it 'ensures Prometheus service is activated' do
           expect { described_class.new.perform(cluster.id, service_name) }
-            .to change { project.reload.prometheus_service&.active }.from(nil).to(true)
+            .to change { project.reload.prometheus_integration&.active }.from(nil).to(true)
         end
       end
     end

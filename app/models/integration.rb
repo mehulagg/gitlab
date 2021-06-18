@@ -48,7 +48,7 @@ class Integration < ApplicationRecord
     flowdock
     hangouts_chat
     irker
-    packagist pipelines_email pivotaltracker pushover
+    packagist pipelines_email pivotaltracker prometheus pushover
     mattermost mattermost_slash_commands microsoft_teams mock_ci mock_monitoring
   ].to_set.freeze
 

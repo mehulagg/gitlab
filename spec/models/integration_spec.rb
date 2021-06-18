@@ -340,7 +340,7 @@ RSpec.describe Integration do
     describe '.build_from_integration' do
       context 'when integration is invalid' do
         let(:integration) do
-          build(:prometheus_service, :template, active: true, properties: {})
+          build(:prometheus_integration, :template, active: true, properties: {})
             .tap { |integration| integration.save!(validate: false) }
         end
 
@@ -529,7 +529,7 @@ RSpec.describe Integration do
 
   describe '.create_from_active_default_integrations' do
     context 'with an active service template' do
-      let_it_be(:template_integration) { create(:prometheus_service, :template, api_url: 'https://prometheus.template.com/') }
+      let_it_be(:template_integration) { create(:prometheus_integration, :template, api_url: 'https://prometheus.template.com/') }
 
       it 'creates a service from the template' do
         described_class.create_from_active_default_integrations(project, :project_id, with_templates: true)
@@ -540,7 +540,7 @@ RSpec.describe Integration do
       end
 
       context 'with an active instance-level integration' do
-        let!(:instance_integration) { create(:prometheus_service, :instance, api_url: 'https://prometheus.instance.com/') }
+        let!(:instance_integration) { create(:prometheus_integration, :instance, api_url: 'https://prometheus.instance.com/') }
 
         it 'creates a service from the instance-level integration' do
           described_class.create_from_active_default_integrations(project, :project_id, with_templates: true)
@@ -561,7 +561,7 @@ RSpec.describe Integration do
         end
 
         context 'with an active group-level integration' do
-          let!(:group_integration) { create(:prometheus_service, group: group, project: nil, api_url: 'https://prometheus.group.com/') }
+          let!(:group_integration) { create(:prometheus_integration, group: group, project: nil, api_url: 'https://prometheus.group.com/') }
 
           it 'creates a service from the group-level integration' do
             described_class.create_from_active_default_integrations(project, :project_id, with_templates: true)
@@ -584,7 +584,7 @@ RSpec.describe Integration do
           end
 
           context 'with an active subgroup' do
-            let!(:subgroup_integration) { create(:prometheus_service, group: subgroup, project: nil, api_url: 'https://prometheus.subgroup.com/') }
+            let!(:subgroup_integration) { create(:prometheus_integration, group: subgroup, project: nil, api_url: 'https://prometheus.subgroup.com/') }
             let!(:subgroup) { create(:group, parent: group) }
             let(:project) { create(:project, group: subgroup) }
 
@@ -612,7 +612,7 @@ RSpec.describe Integration do
                   end
 
                   context 'having a service inheriting settings' do
-                    let!(:subgroup_integration) { create(:prometheus_service, group: subgroup, project: nil, inherit_from_id: group_integration.id, api_url: 'https://prometheus.subgroup.com/') }
+                    let!(:subgroup_integration) { create(:prometheus_integration, group: subgroup, project: nil, inherit_from_id: group_integration.id, api_url: 'https://prometheus.subgroup.com/') }
 
                     it 'creates a service from the group-level integration' do
                       described_class.create_from_active_default_integrations(sub_subgroup, :group_id)
@@ -656,11 +656,11 @@ RSpec.describe Integration do
     let_it_be(:subgroup2) { create(:group, parent: group) }
     let_it_be(:project1) { create(:project, group: subgroup1) }
     let_it_be(:project2) { create(:project, group: subgroup2) }
-    let_it_be(:group_integration) { create(:prometheus_service, group: group, project: nil) }
-    let_it_be(:subgroup_integration1) { create(:prometheus_service, group: subgroup1, project: nil, inherit_from_id: group_integration.id) }
-    let_it_be(:subgroup_integration2) { create(:prometheus_service, group: subgroup2, project: nil) }
-    let_it_be(:project_integration1) { create(:prometheus_service, group: nil, project: project1, inherit_from_id: group_integration.id) }
-    let_it_be(:project_integration2) { create(:prometheus_service, group: nil, project: project2, inherit_from_id: subgroup_integration2.id) }
+    let_it_be(:group_integration) { create(:prometheus_integration, group: group, project: nil) }
+    let_it_be(:subgroup_integration1) { create(:prometheus_integration, group: subgroup1, project: nil, inherit_from_id: group_integration.id) }
+    let_it_be(:subgroup_integration2) { create(:prometheus_integration, group: subgroup2, project: nil) }
+    let_it_be(:project_integration1) { create(:prometheus_integration, group: nil, project: project1, inherit_from_id: group_integration.id) }
+    let_it_be(:project_integration2) { create(:prometheus_integration, group: nil, project: project2, inherit_from_id: subgroup_integration2.id) }
 
     it 'returns the groups and projects inheriting from integration ancestors', :aggregate_failures do
       expect(described_class.inherited_descendants_from_self_or_ancestors_from(group_integration)).to eq([subgroup_integration1, project_integration1])
