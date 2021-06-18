@@ -21,25 +21,25 @@ organize your work, create and secure your application, and analyze its performa
 
 # Language-Specific Fast Paths
 
-GitLab thrives as a language-agnostic, DevSecOps Platform.  That being said, there are a few locations where we interact with programming languages in very specific ways and our support for languages may vary.  This aims to give you quick access to the locations where we have language-specific support.
+GitLab thrives as a language-agnostic, DevSecOps Platform. That being said, there are a few locations where we interact with programming languages in very specific ways and our support for languages may vary. This aims to give you quick access to the locations where we have language-specific support.
 
 ### Commit
 
 * [Syntax Highlighting within Web IDE](../user/project/web_ide/#syntax-highlighting)
 * [Project Templates](https://gitlab.com/gitlab-org/project-templates)
 * [CI Template Repository](https://gitlab.com/gitlab-org/gitlab-foss/tree/master/lib/gitlab/ci/templates)
-* [CI/CD Examples in Docs](../ci/examples/README.html)
+* [CI/CD Examples in Docs](../ci/examples/README.md)
 
 ### Verify
 
 * [Dependency Caching Examples](../ci/caching/#common-use-cases)
-* [Setting Up Unit Test Reports](../ci/unit_test_reports.html#how-to-set-it-up)
-* [Code Quality Engines](../user/project/merge_requests/code_quality.html)
+* [Setting Up Unit Test Reports](../ci/unit_test_reports.md#how-to-set-it-up)
+* [Code Quality Engines](../user/project/merge_requests/code_quality.md)
 
 ### Package
 
 * [Auto DevOps / Heroku Buildpack Support](https://devcenter.heroku.com/articles/buildpacks#officially-supported-buildpacks)
-* [Dependency Proxy Support](../user/packages/dependency_proxy/#supported-dependency-proxies)
+* [Dependency Proxy Support](../user/packages/dependency_proxy/)
 * [Package Registry Support](../user/packages/)
 * [Package Registry Administration](../administration/packages/
 
