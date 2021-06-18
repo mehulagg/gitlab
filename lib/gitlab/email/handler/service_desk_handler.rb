@@ -95,6 +95,7 @@ module Gitlab
 
         def send_thank_you_email
           Notify.service_desk_thank_you_email(@issue.id).deliver_later
+          Gitlab::Metrics::BackgroundTransaction.current&.add_event(:service_desk_thank_you_email)
         end
 
         def message_including_template
