@@ -694,6 +694,40 @@ Example response:
 }
 ```
 
+### Moving additional packs
+
+When a customer moves their subscription from one namespace to another, additional CI minute packs should also be moved.
+The move is triggered with a PATCH request to this endpoint.
+
+```plaintext
+PATCH /namespaces/:id/minutes/move/:target_id
+```
+
+| Attribute   | Type    | Required | Description |
+|:------------|:--------|:---------|:------------|
+| `id` | string   | yes      | The ID of the namespace to transfer packs from |
+| `target_id`  | string    | yes       | The ID of the target namespace to transfer the packs to |
+
+Example request:
+
+```shell
+curl --request PATCH \
+  --url http://localhost:3000/api/v4/namespaces/123/minutes/move/321 \
+  --header 'PRIVATE-TOKEN: <admin access token>'
+```
+
+Example response:
+
+```json
+{
+  "message": "202 Accepted"
+}
+```
+
+### Known consumers
+
+- CustomersDot
+
 ## Upcoming reconciliations
 
 The `upcoming_reconciliations` endpoint is used by [CustomersDot](https://gitlab.com/gitlab-org/customers-gitlab-com) (`customers.gitlab.com`)
