@@ -25,7 +25,7 @@ variables:
 dast:
   stage: dast
   image:
-    name: "$SECURE_ANALYZERS_PREFIX/dast:$DAST_VERSION"
+    name: "registry.gitlab.com/security-products/dast:$DAST_VERSION"
   variables:
     GIT_STRATEGY: none
   allow_failure: true
