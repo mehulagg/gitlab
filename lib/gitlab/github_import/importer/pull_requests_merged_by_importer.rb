@@ -31,15 +31,17 @@ module Gitlab
         end
 
         def each_object_to_import
-          project.merge_requests.with_state(:merged).find_each do |merge_request|
-            next if already_imported?(merge_request)
+          Gitlab::GithubImport::ObjectCounter.increment(project, object_type, :fetched) do |object_counter|
+            project.merge_requests.with_state(:merged).find_each do |merge_request|
+              next if already_imported?(merge_request)
 
-            Gitlab::GithubImport::ObjectCounter.increment(project, object_type, :fetched)
+              object_counter.increment
 
-            pull_request = client.pull_request(project.import_source, merge_request.iid)
-            yield(pull_request)
+              pull_request = client.pull_request(project.import_source, merge_request.iid)
+              yield(pull_request)
 
-            mark_as_imported(merge_request)
+              mark_as_imported(merge_request)
+            end
           end
         end
       end

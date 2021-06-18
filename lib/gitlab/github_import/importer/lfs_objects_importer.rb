@@ -29,10 +29,12 @@ module Gitlab
         def each_object_to_import
           lfs_objects = Projects::LfsPointers::LfsObjectDownloadListService.new(project).execute
 
-          lfs_objects.each do |object|
-            Gitlab::GithubImport::ObjectCounter.increment(project, object_type, :fetched)
+          Gitlab::GithubImport::ObjectCounter.increment(project, object_type, :fetched) do |object_counter|
+            lfs_objects.each do |object|
+              object_counter.increment
 
-            yield object
+              yield object
+            end
           end
         rescue StandardError => e
           error(project.id, e)

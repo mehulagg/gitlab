@@ -85,6 +85,21 @@ module Gitlab
           end
         end
 
+        # Yieds a pipelined redis.
+        #
+        # key - The cache key to increment.
+        # timeout - The time after which the cache key should expire.
+        def self.pipelined(raw_key, timeout: TIMEOUT)
+          key = cache_key_for(raw_key)
+
+          Redis::Cache.with do |redis|
+            redis.pipelined do |multi|
+              yield(key, multi)
+            end
+            redis.expire(key, timeout)
+          end
+        end
+
         # Adds a value to a set.
         #
         # raw_key - The key of the set to add the value to.

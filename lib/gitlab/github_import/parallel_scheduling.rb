@@ -100,16 +100,18 @@ module Gitlab
           # block.
           next unless page_counter.set(page.number)
 
-          page.objects.each do |object|
-            next if already_imported?(object)
+          Gitlab::GithubImport::ObjectCounter.increment(project, object_type, :fetched) do |object_counter|
+            page.objects.each do |object|
+              next if already_imported?(object)
 
-            Gitlab::GithubImport::ObjectCounter.increment(project, object_type, :fetched)
+              object_counter.increment
 
-            yield object
+              yield object
 
-            # We mark the object as imported immediately so we don't end up
-            # scheduling it multiple times.
-            mark_as_imported(object)
+              # We mark the object as imported immediately so we don't end up
+              # scheduling it multiple times.
+              mark_as_imported(object)
+            end
           end
         end
       end

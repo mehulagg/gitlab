@@ -61,16 +61,17 @@ module Gitlab
           project.merge_requests.find_each do |merge_request|
             next if already_imported?(merge_request)
 
-            Gitlab::GithubImport::ObjectCounter.increment(project, object_type, :fetched)
+            Gitlab::GithubImport::ObjectCounter.increment(project, object_type, :fetched) do |object_counter|
+              client
+                .pull_request_reviews(project.import_source, merge_request.iid)
+                .each do |review|
+                  object_counter.increment
+                  review.merge_request_id = merge_request.id
+                  yield(review)
+                end
 
-            client
-              .pull_request_reviews(project.import_source, merge_request.iid)
-              .each do |review|
-                review.merge_request_id = merge_request.id
-                yield(review)
-              end
-
-            mark_as_imported(merge_request)
+              mark_as_imported(merge_request)
+            end
           end
         end
 
@@ -84,15 +85,17 @@ module Gitlab
         #   `mark_merge_request_reviews_imported`
         def each_merge_request_to_import
           each_review_page do |page, merge_request|
-            page.objects.each do |review|
-              next if already_imported?(review)
+            Gitlab::GithubImport::ObjectCounter.increment(project, object_type, :fetched) do |object_counter|
+              page.objects.each do |review|
+                next if already_imported?(review)
 
-              Gitlab::GithubImport::ObjectCounter.increment(project, object_type, :fetched)
+                object_counter.increment
 
-              review.merge_request_id = merge_request.id
-              yield(review)
+                review.merge_request_id = merge_request.id
+                yield(review)
 
-              mark_as_imported(review)
+                mark_as_imported(review)
+              end
             end
           end
         end
