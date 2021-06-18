@@ -188,7 +188,7 @@ class Project < ApplicationRecord
   has_one :slack_service, class_name: 'Integrations::Slack'
   has_one :slack_slash_commands_service, class_name: 'Integrations::SlackSlashCommands'
   has_one :teamcity_service, class_name: 'Integrations::Teamcity'
-  has_one :unify_circuit_service, class_name: 'Integrations::UnifyCircuit'
+  has_one :unify_circuit_integration, class_name: 'Integrations::UnifyCircuit'
   has_one :webex_teams_service, class_name: 'Integrations::WebexTeams'
   has_one :youtrack_service, class_name: 'Integrations::Youtrack'
 

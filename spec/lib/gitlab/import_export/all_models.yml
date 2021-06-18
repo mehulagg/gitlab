@@ -381,7 +381,7 @@ project:
 - microsoft_teams_integration
 - mattermost_integration
 - hangouts_chat_integration
-- unify_circuit_service
+- unify_circuit_integration
 - buildkite_integration
 - bamboo_integration
 - teamcity_service

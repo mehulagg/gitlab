@@ -51,6 +51,7 @@ class Integration < ApplicationRecord
     jenkins jira
     packagist pipelines_email pivotaltracker pushover
     mattermost mattermost_slash_commands microsoft_teams mock_ci mock_monitoring
+    unify_circuit
   ].to_set.freeze
 
   def self.renamed?(name)
