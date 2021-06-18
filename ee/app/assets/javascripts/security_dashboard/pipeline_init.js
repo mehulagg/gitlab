@@ -26,6 +26,7 @@ export default () => {
     projectFullPath,
     pipelineJobsPath,
     canAdminVulnerability,
+    securityReportHelpPageLink,
   } = el.dataset;
 
   const loadingErrorIllustrations = {
@@ -41,6 +42,7 @@ export default () => {
     }),
     provide: {
       dashboardType: DASHBOARD_TYPES.PIPELINE,
+      projectId: parseInt(projectId, 10),
       projectFullPath,
       dashboardDocumentation,
       emptyStateSvgPath,
@@ -51,15 +53,12 @@ export default () => {
         jobsPath: pipelineJobsPath,
         sourceBranch,
       },
+      securityReportHelpPageLink,
+      vulnerabilitiesEndpoint,
+      loadingErrorIllustrations,
     },
     render(createElement) {
-      return createElement(PipelineSecurityDashboard, {
-        props: {
-          projectId: parseInt(projectId, 10),
-          vulnerabilitiesEndpoint,
-          loadingErrorIllustrations,
-        },
-      });
+      return createElement(PipelineSecurityDashboard);
     },
   });
 };

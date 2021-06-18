@@ -82,6 +82,7 @@ export default {
       :empty-text="$options.i18n.emptyTableText"
       show-empty
       stacked="md"
+      data-testid="status-checks-table"
     >
       <template #cell(protectedBranches)="{ item }">
         <branch :branches="item.protectedBranches" />

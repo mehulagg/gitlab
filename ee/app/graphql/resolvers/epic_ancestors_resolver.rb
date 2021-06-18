@@ -11,10 +11,10 @@ module Resolvers
 
     private
 
-    def set_relative_param(args)
-      args[:child_id] = parent.id if parent
+    def relative_param
+      return {} unless parent
 
-      args
+      { child_id: parent.id }
     end
   end
 end

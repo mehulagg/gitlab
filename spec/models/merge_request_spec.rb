@@ -4906,7 +4906,6 @@ RSpec.describe MergeRequest, factory_default: :keep do
       subject { merge_request.enabled_reports[report_type] }
 
       before do
-        stub_feature_flags(drop_license_management_artifact: false)
         stub_licensed_features({ feature => true })
       end
 
@@ -4950,6 +4949,17 @@ RSpec.describe MergeRequest, factory_default: :keep do
       let(:diff_stats) { [double(path: '.gitlab-ci.yml')] }
 
       it { is_expected.to eq(true) }
+    end
+  end
+
+  describe '.from_fork' do
+    let!(:project) { create(:project, :repository) }
+    let!(:forked_project) { fork_project(project) }
+    let!(:fork_mr) { create(:merge_request, source_project: forked_project, target_project: project) }
+    let!(:regular_mr) { create(:merge_request, source_project: project) }
+
+    it 'returns merge requests from forks only' do
+      expect(described_class.from_fork).to eq([fork_mr])
     end
   end
 end

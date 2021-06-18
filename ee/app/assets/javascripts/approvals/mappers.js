@@ -1,8 +1,4 @@
-import {
-  RULE_TYPE_REGULAR,
-  RULE_TYPE_ANY_APPROVER,
-  RULE_TYPE_EXTERNAL_APPROVAL,
-} from './constants';
+import { RULE_TYPE_REGULAR, RULE_TYPE_ANY_APPROVER } from './constants';
 
 const visibleTypes = new Set([RULE_TYPE_ANY_APPROVER, RULE_TYPE_REGULAR]);
 
@@ -24,16 +20,9 @@ function withDefaultEmptyRule(rules = []) {
       ruleType: RULE_TYPE_ANY_APPROVER,
       protectedBranches: [],
       overridden: false,
-      external_url: null,
     },
   ];
 }
-
-export const mapExternalApprovalRuleRequest = (req) => ({
-  name: req.name,
-  protected_branch_ids: req.protectedBranchIds,
-  external_url: req.externalUrl,
-});
 
 export const mapApprovalRuleRequest = (req) => ({
   name: req.name,
@@ -61,16 +50,6 @@ export const mapApprovalRuleResponse = (res) => ({
   ruleType: res.rule_type,
   protectedBranches: res.protected_branches,
   overridden: res.overridden,
-  externalUrl: res.external_url,
-});
-
-export const mapExternalApprovalRuleResponse = (res) => ({
-  ...mapApprovalRuleResponse(res),
-  ruleType: RULE_TYPE_EXTERNAL_APPROVAL,
-});
-
-export const mapExternalApprovalResponse = (res) => ({
-  rules: res.map(mapExternalApprovalRuleResponse),
 });
 
 export const mapApprovalSettingsResponse = (res) => ({

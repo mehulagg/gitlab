@@ -87,14 +87,29 @@ RSpec.describe 'epic boards', :js do
       expect(find('.board:nth-child(3) .board-card')).to have_content(epic3.title)
     end
 
-    it 'moves epic between lists' do
-      expect(find('.board:nth-child(1)')).to have_content(epic3.title)
+    it 'moves to the bottom of another list' do
+      expect(find_board_list(1)).to have_content(epic3.title)
 
-      drag(list_from_index: 0, list_to_index: 1)
+      drag(list_from_index: 0, list_to_index: 1, to_index: 1)
       wait_for_all_requests
 
       expect(find_board_list(1)).not_to have_content(epic3.title)
-      expect(find_board_list(2)).to have_content(epic3.title)
+      page.within(find_board_list(2)) do
+        expect(all('.board-card')[1]).to have_content(epic3.title)
+      end
+    end
+
+    it 'moves to the top of another list' do
+      expect(find_board_list(1)).to have_content(epic3.title)
+
+      drag(list_from_index: 0, list_to_index: 1, to_index: 0)
+      wait_for_all_requests
+
+      expect(find_board_list(1)).not_to have_content(epic3.title)
+
+      page.within(find_board_list(2)) do
+        expect(all('.board-card')[0]).to have_content(epic3.title)
+      end
     end
 
     context 'lists' do
@@ -234,6 +249,7 @@ RSpec.describe 'epic boards', :js do
 
       wait_for_requests
 
+      expect(list_header(label_list)).to have_content('0')
       expect(page).not_to have_content('Epic1')
       expect(page).to have_content('Epic2')
       expect(page).to have_content('Epic3')
@@ -250,6 +266,7 @@ RSpec.describe 'epic boards', :js do
 
       wait_for_requests
 
+      expect(list_header(label_list)).to have_content('1')
       expect(page).to have_content('Epic1')
       expect(page).not_to have_content('Epic2')
       expect(page).not_to have_content('Epic3')
@@ -266,6 +283,7 @@ RSpec.describe 'epic boards', :js do
 
       wait_for_requests
 
+      expect(list_header(label_list)).to have_content('1')
       expect(page).to have_content('Epic1')
       expect(page).not_to have_content('Epic2')
       expect(page).not_to have_content('Epic3')
@@ -282,6 +300,7 @@ RSpec.describe 'epic boards', :js do
 
       wait_for_requests
 
+      expect(list_header(label_list)).to have_content('0')
       expect(page).not_to have_content('Epic1')
       expect(page).to have_content('Epic2')
       expect(page).to have_content('Epic3')
@@ -296,6 +315,7 @@ RSpec.describe 'epic boards', :js do
 
       wait_for_requests
 
+      expect(list_header(label_list)).to have_content('1')
       expect(page).to have_content('Epic1')
       expect(page).not_to have_content('Epic2')
       expect(page).not_to have_content('Epic3')

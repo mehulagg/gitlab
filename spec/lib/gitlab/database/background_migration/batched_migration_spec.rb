@@ -19,6 +19,12 @@ RSpec.describe Gitlab::Database::BackgroundMigration::BatchedMigration, type: :m
     end
   end
 
+  describe 'validations' do
+    subject { build(:batched_background_migration) }
+
+    it { is_expected.to validate_uniqueness_of(:job_arguments).scoped_to(:job_class_name, :table_name, :column_name) }
+  end
+
   describe '.queue_order' do
     let!(:migration1) { create(:batched_background_migration) }
     let!(:migration2) { create(:batched_background_migration) }
@@ -379,6 +385,24 @@ RSpec.describe Gitlab::Database::BackgroundMigration::BatchedMigration, type: :m
       actual = described_class.for_configuration('MyJobClass', :projects, :id, [[:id], [:id_convert_to_bigint]])
 
       expect(actual).to contain_exactly(migration)
+    end
+  end
+
+  describe '.find_for_configuration' do
+    it 'returns nill if such migration does not exists' do
+      expect(described_class.find_for_configuration('MyJobClass', :projects, :id, [[:id], [:id_convert_to_bigint]])).to be_nil
+    end
+
+    it 'returns the migration when it exists' do
+      migration = create(
+        :batched_background_migration,
+        job_class_name: 'MyJobClass',
+        table_name: :projects,
+        column_name: :id,
+        job_arguments: [[:id], [:id_convert_to_bigint]]
+      )
+
+      expect(described_class.find_for_configuration('MyJobClass', :projects, :id, [[:id], [:id_convert_to_bigint]])).to eq(migration)
     end
   end
 end

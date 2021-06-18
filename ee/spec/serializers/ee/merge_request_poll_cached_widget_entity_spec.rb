@@ -25,8 +25,10 @@ RSpec.describe MergeRequestPollCachedWidgetEntity do
 
   context 'jira_associations' do
     context 'when feature is available' do
+      let_it_be(:jira_service) { create(:jira_service, project: project, active: true) }
+
       before do
-        stub_licensed_features(jira_issue_association_enforcement: true)
+        stub_licensed_features(jira_issues_integration: true, jira_issue_association_enforcement: true)
         stub_feature_flags(jira_issue_association_on_merge_request: true)
       end
 

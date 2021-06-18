@@ -105,17 +105,32 @@ RSpec.describe Project do
     end
 
     describe '#jira_issue_association_required_to_merge_enabled?' do
-      using RSpec::Parameterized::TableSyntax
-
-      where(:licensed, :feature_flag, :result) do
-        true  | true  | true
-        true  | false | false
-        false | false | false
-        false | true  | false
+      where(:jira_integration_licensed, :jira_integration_active, :jira_enforcement_licensed, :feature_flag, :result) do
+        true  | true  | true  | true  | true
+        true  | true  | true  | false | false
+        true  | true  | false | true  | false
+        true  | true  | false | false | false
+        true  | false | true  | true  | false
+        true  | false | true  | false | false
+        true  | false | false | true  | false
+        true  | false | false | false | false
+        false | true  | true  | true  | false
+        false | true  | true  | false | false
+        false | true  | false | true  | false
+        false | true  | false | false | false
+        false | false | true  | true  | false
+        false | false | true  | false | false
+        false | false | false | true  | false
+        false | false | false | false | false
       end
 
       before do
-        stub_licensed_features(jira_issue_association_enforcement: licensed)
+        stub_licensed_features(
+          jira_issues_integration: jira_integration_licensed,
+          jira_issue_association_enforcement: jira_enforcement_licensed
+        )
+
+        project.build_jira_service(active: jira_integration_active)
         stub_feature_flags(jira_issue_association_on_merge_request: feature_flag)
       end
 
@@ -878,7 +893,7 @@ RSpec.describe Project do
   end
 
   describe '#execute_external_compliance_hooks' do
-    let_it_be(:rule) { create(:external_approval_rule) }
+    let_it_be(:rule) { create(:external_status_check) }
 
     it 'enqueues the correct number of workers' do
       allow(rule).to receive(:async_execute).once
@@ -2412,6 +2427,61 @@ RSpec.describe Project do
         expect(project.reload.import_url).to eq('http://user:pass@test.com')
       end
     end
+
+    context 'project is inside a fork network' do
+      subject { project }
+
+      let(:project) { create(:project, fork_network: fork_network) }
+      let(:fork_network) { create(:fork_network) }
+
+      before do
+        stub_config_setting(host: 'gitlab.com')
+      end
+
+      context 'feature flag is disabled' do
+        before do
+          stub_feature_flags(block_external_fork_network_mirrors: false)
+          project.import_url = "https://customgitlab.com/foo/bar.git"
+        end
+
+        it { is_expected.to be_valid }
+      end
+
+      context 'the project is the root of the fork network' do
+        before do
+          project.import_url = "https://customgitlab.com/foo/bar.git"
+          expect(fork_network).to receive(:root_project).and_return(project)
+        end
+
+        it { is_expected.to be_valid }
+      end
+
+      context 'the URL is inside the fork network' do
+        before do
+          project.import_url = "https://#{Gitlab.config.gitlab.host}/#{project.fork_network.root_project.full_path}.git"
+        end
+
+        it { is_expected.to be_valid }
+      end
+
+      context 'the URL is external but the project exists' do
+        it 'raises an error' do
+          project.import_url = "https://customgitlab.com/#{project.fork_network.root_project.full_path}.git"
+          project.validate
+
+          expect(project.errors[:url]).to include('must be inside the fork network')
+        end
+      end
+
+      context 'the URL is not inside the fork network' do
+        it 'raises an error' do
+          project.import_url = "https://customgitlab.com/foo/bar.git"
+          project.validate
+
+          expect(project.errors[:url]).to include('must be inside the fork network')
+        end
+      end
+    end
   end
 
   describe '#add_import_job' do
@@ -2729,8 +2799,6 @@ RSpec.describe Project do
   end
 
   describe '#prevent_merge_without_jira_issue?' do
-    using RSpec::Parameterized::TableSyntax
-
     subject { project.prevent_merge_without_jira_issue? }
 
     where(:feature_available, :prevent_merge, :result) do
@@ -2860,32 +2928,6 @@ RSpec.describe Project do
 
       it 'returns a list with specific runners' do
         is_expected.to match_array([group_runner, project_runner])
-      end
-    end
-  end
-
-  describe '#shared_runners_enabled_but_unavailable?' do
-    using RSpec::Parameterized::TableSyntax
-
-    let(:project) do
-      build_stubbed(:project, shared_runners_enabled: shared_runners_enabled)
-    end
-
-    before do
-      allow(project).to receive(:ci_minutes_quota)
-        .and_return(double('quota', minutes_used_up?: minutes_used_up))
-    end
-
-    where(:shared_runners_enabled, :minutes_used_up, :result) do
-      true  | true  | true
-      true  | false | false
-      false | false | false
-      false | true  | false
-    end
-
-    with_them do
-      it 'returns the correct value' do
-        expect(project.shared_runners_enabled_but_unavailable?).to eq(result)
       end
     end
   end

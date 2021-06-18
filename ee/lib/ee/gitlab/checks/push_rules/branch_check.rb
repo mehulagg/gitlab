@@ -4,7 +4,7 @@ module EE
   module Gitlab
     module Checks
       module PushRules
-        class BranchCheck < ::Gitlab::Checks::BaseChecker
+        class BranchCheck < ::Gitlab::Checks::BaseSingleChecker
           ERROR_MESSAGE = "Branch name does not follow the pattern '%{branch_name_regex}'"
           LOG_MESSAGE = "Checking if branch follows the naming patterns defined by the project..."
 

@@ -6,6 +6,7 @@ RSpec.describe Vulnerabilities::Finding do
   it { is_expected.to define_enum_for(:confidence) }
   it { is_expected.to define_enum_for(:report_type) }
   it { is_expected.to define_enum_for(:severity) }
+  it { is_expected.to define_enum_for(:detection_method) }
 
   where(vulnerability_finding_signatures_enabled: [true, false])
   with_them do
@@ -44,6 +45,7 @@ RSpec.describe Vulnerabilities::Finding do
       it { is_expected.to validate_presence_of(:raw_metadata) }
       it { is_expected.to validate_presence_of(:severity) }
       it { is_expected.to validate_presence_of(:confidence) }
+      it { is_expected.to validate_presence_of(:detection_method) }
 
       it { is_expected.to validate_length_of(:description).is_at_most(15000) }
       it { is_expected.to validate_length_of(:message).is_at_most(3000) }
@@ -1053,6 +1055,11 @@ RSpec.describe Vulnerabilities::Finding do
 
         # now verify that the correct matching method was used for eql?
         expect(finding1.eql?(finding2)).to be(vulnerability_finding_signatures_enabled)
+      end
+
+      it 'wont match other record types' do
+        historical_stat = build(:vulnerability_historical_statistic, project: project)
+        expect(finding1.eql?(historical_stat)).to be(false)
       end
 
       context 'short circuits on the highest priority signature match' do

@@ -24,7 +24,7 @@ feature of the GitLab CI/CD.
 
 Pipelines are always created for the following scenarios:
 
-- `master` branch, including on schedules, pushes, merges, and so on.
+- `main` branch, including on schedules, pushes, merges, and so on.
 - Merge requests.
 - Tags.
 - Stable, `auto-deploy`, and security branches.
@@ -428,7 +428,7 @@ We are using a custom mapping between source file to test files, maintained in t
 
 As part of the objective to improve overall pipeline duration, we are experimenting with a minimal set of RSpec tests.
 The purpose of this experiment is to verify if we are able to run a minimal set of RSpec tests in a Merge Request pipeline,
-without resulting in increased number of broken master.
+without resulting in increased number of broken main branch.
 
 To identify the minimal set of tests needed, we use [Crystalball gem](https://github.com/toptal/crystalball) to create a test mapping.
 The test mapping contains a map of each source files to a list of test files which is dependent of the source file.
@@ -484,14 +484,14 @@ Our test suite runs against PG12 as GitLab.com runs on PG12 and
 Our test suite is currently running against PG11, since GitLab.com still runs on PG11.
 
 We do run our test suite against PG11 on nightly scheduled pipelines as well as upon specific
-database library changes in MRs and `master` pipelines (with the `rspec db-library-code pg11` job).
+database library changes in MRs and `main` pipelines (with the `rspec db-library-code pg11` job).
 
 #### Current versions testing
 
 | Where? | PostgreSQL version |
 | ------ | ------------------ |
 | MRs    | 12, 11 for DB library changes |
-| `master` (non-scheduled pipelines) | 12, 11 for DB library changes |
+| `main` (non-scheduled pipelines) | 12, 11 for DB library changes |
 | 2-hourly scheduled pipelines | 12, 11 for DB library changes |
 | `nightly` scheduled pipelines | 12, 11 |
 
@@ -538,7 +538,7 @@ the `gitlab-org/gitlab-foss` project.
 ### Interruptible pipelines
 
 By default, all jobs are [interruptible](../ci/yaml/README.md#interruptible), except the
-`dont-interrupt-me` job which runs automatically on `master`, and is `manual`
+`dont-interrupt-me` job which runs automatically on `main`, and is `manual`
 otherwise.
 
 If you want a running pipeline to finish even if you push new commits to a merge
@@ -559,9 +559,10 @@ request, be sure to start the `dont-interrupt-me` job before pushing.
    - `.qa-cache`
    - `.yarn-cache`
    - `.assets-compile-cache` (the key includes `${NODE_ENV}` so it's actually two different caches).
-1. These cache definitions are composed of [multiple atomic caches](../ci/yaml/README.md#multiple-caches).
+1. These cache definitions are composed of [multiple atomic caches](../ci/caching/index.md#use-multiple-caches).
 1. Only 6 specific jobs, running in 2-hourly scheduled pipelines, are pushing (i.e. updating) to the caches:
    - `update-setup-test-env-cache`, defined in [`.gitlab/ci/rails.gitlab-ci.yml`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/.gitlab/ci/rails.gitlab-ci.yml).
+   - `update-gitaly-binaries-cache`, defined in [`.gitlab/ci/rails.gitlab-ci.yml`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/.gitlab/ci/rails.gitlab-ci.yml).
    - `update-static-analysis-cache`, defined in [`.gitlab/ci/rails.gitlab-ci.yml`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/.gitlab/ci/rails.gitlab-ci.yml).
    - `update-qa-cache`, defined in [`.gitlab/ci/qa.gitlab-ci.yml`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/.gitlab/ci/qa.gitlab-ci.yml).
    - `update-assets-compile-production-cache`, defined in [`.gitlab/ci/frontend.gitlab-ci.yml`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/.gitlab/ci/frontend.gitlab-ci.yml).
@@ -583,7 +584,7 @@ several reasons:
 - It significantly reduces load on the file server, as smaller deltas mean less time spent in `git pack-objects`.
 
 The pre-clone step works by using the `CI_PRE_CLONE_SCRIPT` variable
-[defined by GitLab.com shared runners](../user/gitlab_com/index.md#pre-clone-script).
+[defined by GitLab.com shared runners](../ci/runners/README.md#pre-clone-script).
 
 The `CI_PRE_CLONE_SCRIPT` is currently defined as a project CI/CD variable:
 

@@ -39,7 +39,7 @@ module Vulnerabilities
 
     has_one :evidence, class_name: 'Vulnerabilities::Finding::Evidence', inverse_of: :finding, foreign_key: 'vulnerability_occurrence_id'
 
-    serialize :config_options, Serializers::JSON # rubocop:disable Cop/ActiveRecordSerialize
+    serialize :config_options, Serializers::Json # rubocop:disable Cop/ActiveRecordSerialize
 
     attr_writer :sha
     attr_accessor :scan
@@ -47,6 +47,7 @@ module Vulnerabilities
     enum confidence: ::Enums::Vulnerability.confidence_levels, _prefix: :confidence
     enum report_type: ::Enums::Vulnerability.report_types
     enum severity: ::Enums::Vulnerability.severity_levels, _prefix: :severity
+    enum detection_method: ::Enums::Vulnerability.detection_methods
 
     validates :scanner, presence: true
     validates :project, presence: true
@@ -62,6 +63,7 @@ module Vulnerabilities
     validates :report_type, presence: true
     validates :severity, presence: true
     validates :confidence, presence: true
+    validates :detection_method, presence: true
 
     validates :metadata_version, presence: true
     validates :raw_metadata, presence: true
@@ -336,6 +338,7 @@ module Vulnerabilities
     alias_method :==, :eql?
 
     def eql?(other)
+      return false unless other.is_a?(self.class)
       return false unless other.report_type == report_type && other.primary_identifier_fingerprint == primary_identifier_fingerprint
 
       if ::Feature.enabled?(:vulnerability_finding_tracking_signatures, project) && project.licensed_feature_available?(:vulnerability_finding_signatures)

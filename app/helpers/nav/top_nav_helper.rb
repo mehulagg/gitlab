@@ -4,20 +4,57 @@ module Nav
   module TopNavHelper
     PROJECTS_VIEW = :projects
     GROUPS_VIEW = :groups
+    NEW_VIEW = :new
+    SEARCH_VIEW = :search
 
     def top_nav_view_model(project:, group:)
       builder = ::Gitlab::Nav::TopNavViewModelBuilder.new
 
-      if current_user
-        build_view_model(builder: builder, project: project, group: group)
-      else
-        build_anonymous_view_model(builder: builder)
+      build_base_view_model(builder: builder, project: project, group: group)
+
+      builder.build
+    end
+
+    def top_nav_responsive_view_model(project:, group:)
+      builder = ::Gitlab::Nav::TopNavViewModelBuilder.new
+
+      build_base_view_model(builder: builder, project: project, group: group)
+
+      new_view_model = new_dropdown_view_model(project: project, group: group)
+
+      if new_view_model && new_view_model.fetch(:menu_sections)&.any?
+        builder.add_view(NEW_VIEW, new_view_model)
+      end
+
+      if top_nav_show_search
+        builder.add_view(SEARCH_VIEW, ::Gitlab::Nav::TopNavMenuItem.build(**top_nav_search_menu_item_attrs))
       end
 
       builder.build
     end
 
+    def top_nav_show_search
+      header_link?(:search)
+    end
+
+    def top_nav_search_menu_item_attrs
+      {
+        id: 'search',
+        title: _('Search'),
+        icon: 'search',
+        href: search_context.search_url
+      }
+    end
+
     private
+
+    def build_base_view_model(builder:, project:, group:)
+      if current_user
+        build_view_model(builder: builder, project: project, group: group)
+      else
+        build_anonymous_view_model(builder: builder)
+      end
+    end
 
     def build_anonymous_view_model(builder:)
       # These come from `app/views/layouts/nav/_explore.html.ham`
@@ -239,7 +276,11 @@ module Nav
       builder = ::Gitlab::Nav::TopNavMenuBuilder.new
       builder.add_primary_menu_item(id: 'your', title: _('Your groups'), href: dashboard_groups_path)
       builder.add_primary_menu_item(id: 'explore', title: _('Explore groups'), href: explore_groups_path)
-      builder.add_secondary_menu_item(id: 'create', title: _('Create group'), href: new_group_path(anchor: 'create-group-pane'))
+
+      if current_user.can_create_group?
+        builder.add_secondary_menu_item(id: 'create', title: _('Create group'), href: new_group_path)
+      end
+
       builder.build
     end
   end

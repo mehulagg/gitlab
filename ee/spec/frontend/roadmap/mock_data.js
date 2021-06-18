@@ -1,3 +1,4 @@
+import { GlFilteredSearchToken } from '@gitlab/ui';
 import {
   getTimeframeForWeeksView,
   getTimeframeForMonthsView,
@@ -5,6 +6,13 @@ import {
 } from 'ee/roadmap/utils/roadmap_utils';
 
 import { dateFromString } from 'helpers/datetime_helpers';
+import { OPERATOR_IS_ONLY } from '~/vue_shared/components/filtered_search_bar/constants';
+
+import AuthorToken from '~/vue_shared/components/filtered_search_bar/tokens/author_token.vue';
+import EmojiToken from '~/vue_shared/components/filtered_search_bar/tokens/emoji_token.vue';
+import EpicToken from '~/vue_shared/components/filtered_search_bar/tokens/epic_token.vue';
+import LabelToken from '~/vue_shared/components/filtered_search_bar/tokens/label_token.vue';
+import MilestoneToken from '~/vue_shared/components/filtered_search_bar/tokens/milestone_token.vue';
 
 export const mockScrollBarSize = 15;
 
@@ -758,3 +766,74 @@ export const mockEpicsWithParents = [
     },
   },
 ];
+
+export const mockAuthorTokenConfig = {
+  type: 'author_username',
+  icon: 'user',
+  title: 'Author',
+  unique: true,
+  symbol: '@',
+  token: AuthorToken,
+  operators: OPERATOR_IS_ONLY,
+  recentTokenValuesStorageKey: 'gitlab-org-epics-recent-tokens-author_username',
+  fetchAuthors: expect.any(Function),
+  preloadedAuthors: [],
+};
+
+export const mockLabelTokenConfig = {
+  type: 'label_name',
+  icon: 'labels',
+  title: 'Label',
+  unique: false,
+  symbol: '~',
+  token: LabelToken,
+  operators: OPERATOR_IS_ONLY,
+  recentTokenValuesStorageKey: 'gitlab-org-epics-recent-tokens-label_name',
+  fetchLabels: expect.any(Function),
+};
+
+export const mockMilestoneTokenConfig = {
+  type: 'milestone_title',
+  icon: 'clock',
+  title: 'Milestone',
+  unique: true,
+  symbol: '%',
+  token: MilestoneToken,
+  operators: OPERATOR_IS_ONLY,
+  fetchMilestones: expect.any(Function),
+};
+
+export const mockConfidentialTokenConfig = {
+  type: 'confidential',
+  icon: 'eye-slash',
+  title: 'Confidential',
+  unique: true,
+  token: GlFilteredSearchToken,
+  operators: OPERATOR_IS_ONLY,
+  options: [
+    { icon: 'eye-slash', value: true, title: 'Yes' },
+    { icon: 'eye', value: false, title: 'No' },
+  ],
+};
+
+export const mockEpicTokenConfig = {
+  type: 'epic_iid',
+  icon: 'epic',
+  title: 'Epic',
+  unique: true,
+  symbol: '&',
+  token: EpicToken,
+  operators: OPERATOR_IS_ONLY,
+  defaultEpics: [],
+  fetchEpics: expect.any(Function),
+};
+
+export const mockReactionEmojiTokenConfig = {
+  type: 'my_reaction_emoji',
+  icon: 'thumb-up',
+  title: 'My-Reaction',
+  unique: true,
+  token: EmojiToken,
+  operators: OPERATOR_IS_ONLY,
+  fetchEmojis: expect.any(Function),
+};

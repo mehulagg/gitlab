@@ -38,7 +38,7 @@ RSpec.describe Git::BranchPushService do
       end
     end
 
-    context 'ElasticSearch indexing', :elastic do
+    context 'ElasticSearch indexing', :elastic, :clean_gitlab_redis_shared_state do
       before do
         stub_ee_application_setting(elasticsearch_indexing?: true)
       end

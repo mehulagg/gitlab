@@ -2,7 +2,9 @@ import { s__, __ } from '~/locale';
 
 export const DEFAULT_POLLING_INTERVAL = 30000;
 
-export const PER_PAGE = 100;
+export const PER_PAGE = 20;
+
+export const DEBOUNCE_DELAY = 500;
 
 export const DEVOPS_ADOPTION_SEGMENT_MODAL_ID = 'devopsSegmentModal';
 
@@ -17,7 +19,7 @@ export const DEVOPS_ADOPTION_ERROR_KEYS = {
 };
 
 export const TABLE_HEADER_TEXT = s__(
-  'DevopsAdoption|Feature adoption is based on usage in the current calendar month. Last updated: %{timestamp}.',
+  'DevopsAdoption|Feature adoption is based on usage in the previous calendar month. Last updated: %{timestamp}.',
 );
 
 export const DEVOPS_ADOPTION_GROUP_LEVEL_LABEL = s__('DevopsAdoption|Add/remove sub-groups');
@@ -25,6 +27,15 @@ export const DEVOPS_ADOPTION_GROUP_LEVEL_LABEL = s__('DevopsAdoption|Add/remove 
 export const DEVOPS_ADOPTION_TABLE_REMOVE_BUTTON_DISABLED = s__(
   'DevopsAdoption|You cannot remove the group you are currently in.',
 );
+
+export const DEVOPS_ADOPTION_GROUP_DROPDOWN_TEXT = s__('DevopsAdoption|Add sub-group to table');
+export const DEVOPS_ADOPTION_GROUP_DROPDOWN_HEADER = s__('DevopsAdoption|Add sub-group');
+export const DEVOPS_ADOPTION_ADMIN_DROPDOWN_TEXT = s__('DevopsAdoption|Add group to table');
+export const DEVOPS_ADOPTION_ADMIN_DROPDOWN_HEADER = s__('DevopsAdoption|Add group');
+
+export const DEVOPS_ADOPTION_NO_RESULTS = s__('DevopsAdoption|No results…');
+
+export const DEVOPS_ADOPTION_NO_SUB_GROUPS = s__('DevopsAdoption|This group has no sub-groups');
 
 export const DEVOPS_ADOPTION_STRINGS = {
   app: {

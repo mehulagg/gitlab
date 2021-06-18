@@ -5,60 +5,35 @@ require 'spec_helper'
 RSpec.describe Namespaces::InProductMarketingEmailsWorker, '#perform' do
   using RSpec::Parameterized::TableSyntax
 
-  context 'not on gitlab.com' do
-    let(:is_gitlab_com) { false }
-    let(:license) { build(:license) }
+  let(:license) { build(:license) }
 
-    where(:in_product_marketing_emails_enabled, :experiment_active, :executes_service) do
-      true     | true     | 1
-      true     | false    | 1
-      false    | false    | 0
-      false    | true     | 0
-    end
-
-    with_them do
-      context 'with a license' do
-        before do
-          allow(license).to receive(:paid?).and_return(is_paid)
-          allow(License).to receive(:current).and_return(license)
-        end
-
-        context 'paid' do
-          let(:is_paid) { true }
-          let(:executes_service) { 0 }
-
-          it_behaves_like 'in-product marketing email'
-        end
-
-        context 'free' do
-          let(:is_paid) { false }
-
-          it_behaves_like 'in-product marketing email'
-        end
-      end
-
-      context 'without a license' do
-        before do
-          allow(License).to receive(:current).and_return(nil)
-        end
-
-        it_behaves_like 'in-product marketing email'
-      end
-    end
+  where(:in_product_marketing_emails_enabled, :on_gitlab_dot_com, :paid_license, :executes_service) do
+    true     | true     | true   | true
+    true     | true     | false  | true
+    true     | false    | true   | false
+    true     | false    | false  | true
+    false    | true     | true   | false
+    false    | true     | false  | false
+    false    | false    | true   | false
+    false    | false    | false  | false
   end
 
-  context 'on gitlab.com' do
-    let(:is_gitlab_com) { true }
-
-    where(:in_product_marketing_emails_enabled, :experiment_active, :executes_service) do
-      true     | true     | 1
-      true     | false    | 0
-      false    | false    | 0
-      false    | true     | 0
+  with_them do
+    before do
+      stub_application_setting(in_product_marketing_emails_enabled: in_product_marketing_emails_enabled)
+      allow(::Gitlab).to receive(:com?).and_return(on_gitlab_dot_com)
+      allow(License).to receive(:current).and_return(license)
+      allow(license).to receive(:paid?).and_return(paid_license)
     end
 
-    with_them do
-      it_behaves_like 'in-product marketing email'
+    it 'executes the email service' do
+      if executes_service
+        expect(Namespaces::InProductMarketingEmailsService).to receive(:send_for_all_tracks_and_intervals)
+      else
+        expect(Namespaces::InProductMarketingEmailsService).not_to receive(:send_for_all_tracks_and_intervals)
+      end
+
+      subject.perform
     end
   end
 end

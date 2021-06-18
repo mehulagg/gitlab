@@ -15,10 +15,18 @@ class ContainerExpirationPolicyWorker # rubocop:disable Scalability/IdempotentWo
 
   def perform
     process_stale_ongoing_cleanups
+    disable_policies_without_container_repositories
     throttling_enabled? ? perform_throttled : perform_unthrottled
   end
 
   private
+
+  def disable_policies_without_container_repositories
+    ContainerExpirationPolicy.active.each_batch(of: BATCH_SIZE) do |policies|
+      policies.without_container_repositories
+              .update_all(enabled: false)
+    end
+  end
 
   def process_stale_ongoing_cleanups
     threshold = delete_tags_service_timeout.seconds + 30.minutes
@@ -38,18 +46,6 @@ class ContainerExpirationPolicyWorker # rubocop:disable Scalability/IdempotentWo
 
   def perform_throttled
     try_obtain_lease do
-      unless loopless_enabled?
-        with_runnable_policy do |policy|
-          ContainerExpirationPolicy.transaction do
-            policy.schedule_next_run!
-            ContainerRepository.for_project_id(policy.id)
-                               .each_batch do |relation|
-                                 relation.update_all(expiration_policy_cleanup_status: :cleanup_scheduled)
-                               end
-          end
-        end
-      end
-
       ContainerExpirationPolicies::CleanupContainerRepositoryWorker.perform_with_capacity
     end
   end
@@ -84,10 +80,6 @@ class ContainerExpirationPolicyWorker # rubocop:disable Scalability/IdempotentWo
 
   def throttling_enabled?
     Feature.enabled?(:container_registry_expiration_policies_throttling)
-  end
-
-  def loopless_enabled?
-    Feature.enabled?(:container_registry_expiration_policies_loopless)
   end
 
   def lease_timeout

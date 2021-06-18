@@ -3,6 +3,7 @@
 exports[`PolicyPreview component with policy description renders policy preview tabs 1`] = `
 <gl-tabs-stub
   contentclass="gl-pt-0"
+  queryparamname="tab"
   theme="indigo"
   value="0"
 >

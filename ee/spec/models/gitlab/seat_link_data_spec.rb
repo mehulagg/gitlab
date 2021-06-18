@@ -76,6 +76,12 @@ RSpec.describe Gitlab::SeatLinkData do
   end
 
   describe '.to_json' do
+    let(:instance_id) { '123' }
+
+    before do
+      stub_application_setting(uuid: instance_id)
+    end
+
     it { is_expected.to delegate_method(:to_json).to(:data) }
 
     it 'returns payload data as a JSON string' do
@@ -86,9 +92,32 @@ RSpec.describe Gitlab::SeatLinkData do
           date: timestamp.to_date.iso8601,
           license_key: key,
           max_historical_user_count: max_users,
-          billable_users_count: billable_users_count
+          billable_users_count: billable_users_count,
+          hostname: Gitlab.config.gitlab.host,
+          instance_id: instance_id,
+          license_md5: ::License.current.md5
         }.to_json
       )
+    end
+
+    context 'when instance has no current license' do
+      it 'returns payload data as a JSON string' do
+        allow(License).to receive(:current).and_return(nil)
+
+        expect(subject.to_json).to eq(
+          {
+            gitlab_version: Gitlab::VERSION,
+            timestamp: timestamp.iso8601,
+            date: timestamp.to_date.iso8601,
+            license_key: key,
+            max_historical_user_count: max_users,
+            billable_users_count: billable_users_count,
+            hostname: Gitlab.config.gitlab.host,
+            instance_id: instance_id,
+            license_md5: nil
+          }.to_json
+        )
+      end
     end
   end
 

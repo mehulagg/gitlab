@@ -5,7 +5,8 @@ import pipelineSecurityReportSummaryQuery from 'ee/security_dashboard/graphql/qu
 import { fetchPolicies } from '~/lib/graphql';
 import { s__ } from '~/locale';
 import glFeatureFlagMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
-import VulnerabilityReport from '../vulnerability_report.vue';
+import VulnerabilityReport from '../shared/vulnerability_report.vue';
+import ScanErrorsAlert from './scan_errors_alert.vue';
 import SecurityDashboard from './security_dashboard_vuex.vue';
 import SecurityReportsSummary from './security_reports_summary.vue';
 
@@ -13,11 +14,26 @@ export default {
   name: 'PipelineSecurityDashboard',
   components: {
     GlEmptyState,
+    ScanErrorsAlert,
     SecurityReportsSummary,
     SecurityDashboard,
     VulnerabilityReport,
   },
   mixins: [glFeatureFlagMixin()],
+  inject: [
+    'dashboardDocumentation',
+    'emptyStateSvgPath',
+    'loadingErrorIllustrations',
+    'pipeline',
+    'projectFullPath',
+    'projectId',
+    'vulnerabilitiesEndpoint',
+  ],
+  data() {
+    return {
+      securityReportSummary: {},
+    };
+  },
   apollo: {
     securityReportSummary: {
       query: pipelineSecurityReportSummaryQuery,
@@ -32,21 +48,6 @@ export default {
         const summary = data?.project?.pipeline?.securityReportSummary;
         return summary && Object.keys(summary).length ? summary : null;
       },
-    },
-  },
-  inject: ['projectFullPath', 'pipeline', 'dashboardDocumentation', 'emptyStateSvgPath'],
-  props: {
-    projectId: {
-      type: Number,
-      required: true,
-    },
-    vulnerabilitiesEndpoint: {
-      type: String,
-      required: true,
-    },
-    loadingErrorIllustrations: {
-      type: Object,
-      required: true,
     },
   },
   computed: {
@@ -64,6 +65,20 @@ export default {
         primaryButtonText: s__('SecurityReports|Learn more about setting up your dashboard'),
       };
     },
+    scansWithErrors() {
+      const getScans = (reportSummary) => reportSummary?.scans?.nodes || [];
+      const hasErrors = (scan) => Boolean(scan.errors?.length);
+
+      return this.securityReportSummary
+        ? Object.values(this.securityReportSummary)
+            // generate flat array of all scans
+            .flatMap(getScans)
+            .filter(hasErrors)
+        : [];
+    },
+    hasScansWithErrors() {
+      return this.scansWithErrors.length > 0;
+    },
   },
   created() {
     this.setSourceBranch(this.pipeline.sourceBranch);
@@ -79,11 +94,10 @@ export default {
 
 <template>
   <div>
-    <security-reports-summary
-      v-if="securityReportSummary"
-      :summary="securityReportSummary"
-      class="gl-my-5"
-    />
+    <div v-if="securityReportSummary" class="gl-my-5">
+      <scan-errors-alert v-if="hasScansWithErrors" :scans="scansWithErrors" class="gl-mb-5" />
+      <security-reports-summary :summary="securityReportSummary" />
+    </div>
     <security-dashboard
       v-if="!shouldShowGraphqlVulnerabilityReport"
       :vulnerabilities-endpoint="vulnerabilitiesEndpoint"

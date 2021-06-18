@@ -111,6 +111,9 @@
   - ".gitlab/ci/build-images.gitlab-ci.yml"
   - ".gitlab/ci/qa.gitlab-ci.yml"
 
+.gitaly-patterns: &gitaly-patterns
+  - "GITALY_SERVER_VERSION"
+
 .workhorse-patterns: &workhorse-patterns
   - "GITLAB_WORKHORSE_VERSION"
   - "workhorse/**/*"
@@ -310,6 +313,11 @@
     - <<: *if-security-schedule
     - <<: *if-merge-request-title-update-caches
 
+.shared:rules:update-gitaly-binaries-cache:
+  rules:
+    - <<: *if-merge-request-title-update-caches
+    - changes: *gitaly-patterns
+
 ######################
 # Build images rules #
 ######################
@@ -320,6 +328,8 @@
     - <<: *if-dot-com-gitlab-org-and-security-merge-request
       changes: *ci-build-images-patterns
     - <<: *if-dot-com-gitlab-org-and-security-merge-request
+      changes: *code-qa-patterns
+    - <<: *if-dot-com-gitlab-org-default-branch
       changes: *code-qa-patterns
     - <<: *if-dot-com-gitlab-org-schedule
 
@@ -922,14 +932,6 @@
     - <<: *if-merge-request-title-run-all-rspec
       when: always
 
-.rails:rules:rspec-feature-flags:
-  rules:
-    - <<: *if-not-ee
-      when: never
-    - <<: *if-default-branch-schedule-2-hourly
-      allow_failure: true
-    - <<: *if-merge-request-title-run-all-rspec
-
 .rails:rules:default-branch-schedule-nightly--code-backstage:
   rules:
     - <<: *if-default-branch-schedule-nightly
@@ -943,6 +945,12 @@
     - <<: *if-default-branch-schedule-nightly
     - <<: *if-merge-request
       changes: [".gitlab/ci/rails.gitlab-ci.yml"]
+
+.rails:rules:rspec-feature-flags:
+  rules:
+    - <<: *if-not-ee
+      when: never
+    - changes: *code-backstage-patterns
 
 #########################
 # Static analysis rules #

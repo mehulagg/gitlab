@@ -30,8 +30,8 @@ To make full use of Auto DevOps with Kubernetes, you need:
      deployments, any Ingress controller should work, but as of GitLab 14.0,
      [canary deployments](../../user/project/canary_deployments.md) require
      NGINX Ingress. You can deploy the NGINX Ingress controller to your
-     Kubernetes cluster by installing the
-     [`ingress-nginx`](https://github.com/kubernetes/ingress-nginx/tree/master/charts/ingress-nginx)
+     Kubernetes cluster either through the GitLab [Cluster management project template](../../user/clusters/management_project_template.md)
+     or manually by using the [`ingress-nginx`](https://github.com/kubernetes/ingress-nginx/tree/master/charts/ingress-nginx)
      Helm chart.
 
      NOTE:
@@ -64,10 +64,9 @@ To make full use of Auto DevOps with Kubernetes, you need:
   You can configure Docker-based runners to autoscale as well, using
   [Docker Machine](https://docs.gitlab.com/runner/install/autoscaling.html).
 
-  Runners should be registered as [shared runners](../../ci/runners/README.md#shared-runners)
-  for the entire GitLab instance, or [specific runners](../../ci/runners/README.md#specific-runners)
-  that are assigned to specific projects (the default if you've installed the
-  GitLab Runner managed application).
+  Runners should be registered as [shared runners](../../ci/runners/runners_scope.md#shared-runners)
+  for the entire GitLab instance, or [specific runners](../../ci/runners/runners_scope.md#specific-runners)
+  that are assigned to specific projects.
 
 - **Prometheus** (for [Auto Monitoring](stages.md#auto-monitoring))
 

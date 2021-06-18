@@ -546,6 +546,24 @@ RSpec.describe ApplicationSetting do
 
         it { is_expected.to eq(only_when_enabled_globally) }
       end
+
+      context 'array of projects (all in scope)' do
+        let(:scope) { [included_project] }
+
+        it { is_expected.to eq(indexing && searching) }
+      end
+
+      context 'array of projects (all not in scope)' do
+        let(:scope) { [excluded_project] }
+
+        it { is_expected.to eq(only_when_enabled_globally) }
+      end
+
+      context 'array of projects (some in scope)' do
+        let(:scope) { [included_project, excluded_project] }
+
+        it { is_expected.to eq(indexing && searching) }
+      end
     end
   end
 

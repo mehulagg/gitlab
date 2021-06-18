@@ -4,3 +4,4 @@ export const planTags = {
 };
 /* eslint-enable @gitlab/require-i18n-strings */
 export const CUSTOMER_CLIENT = 'customerClient';
+export const GITLAB_CLIENT = 'gitlabClient';

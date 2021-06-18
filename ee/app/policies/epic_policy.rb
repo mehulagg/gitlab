@@ -35,4 +35,8 @@ class EpicPolicy < BasePolicy
   rule { ~anonymous & can?(:read_epic) }.policy do
     enable :create_todo
   end
+
+  rule { can?(:admin_epic) }.policy do
+    enable :set_epic_metadata
+  end
 end

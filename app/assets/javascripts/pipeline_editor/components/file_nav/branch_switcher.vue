@@ -6,6 +6,7 @@ import {
   GlInfiniteScroll,
   GlLoadingIcon,
   GlSearchBoxByType,
+  GlTooltipDirective,
 } from '@gitlab/ui';
 import { produce } from 'immer';
 import { fetchPolicies } from '~/lib/graphql';
@@ -17,12 +18,14 @@ import {
   BRANCH_SEARCH_DEBOUNCE,
   DEFAULT_FAILURE,
 } from '~/pipeline_editor/constants';
-import getAvailableBranches from '~/pipeline_editor/graphql/queries/available_branches.graphql';
-import getCurrentBranch from '~/pipeline_editor/graphql/queries/client/current_branch.graphql';
+import updateCurrentBranchMutation from '~/pipeline_editor/graphql/mutations/update_current_branch.mutation.graphql';
+import getAvailableBranchesQuery from '~/pipeline_editor/graphql/queries/available_branches.graphql';
+import getCurrentBranchQuery from '~/pipeline_editor/graphql/queries/client/current_branch.graphql';
+import getLastCommitBranchQuery from '~/pipeline_editor/graphql/queries/client/last_commit_branch.query.graphql';
 
 export default {
   i18n: {
-    dropdownHeader: s__('Switch Branch'),
+    dropdownHeader: s__('Switch branch'),
     title: s__('Branches'),
     fetchError: s__('Unable to fetch branch list for this project.'),
   },
@@ -34,6 +37,9 @@ export default {
     GlInfiniteScroll,
     GlLoadingIcon,
     GlSearchBoxByType,
+  },
+  directives: {
+    GlTooltip: GlTooltipDirective,
   },
   inject: ['projectFullPath', 'totalBranches'],
   props: {
@@ -51,11 +57,12 @@ export default {
       pageLimit: this.paginationLimit,
       pageCounter: 0,
       searchTerm: '',
+      lastCommitBranch: '',
     };
   },
   apollo: {
     availableBranches: {
-      query: getAvailableBranches,
+      query: getAvailableBranchesQuery,
       variables() {
         return {
           limit: this.paginationLimit,
@@ -75,7 +82,16 @@ export default {
       },
     },
     currentBranch: {
-      query: getCurrentBranch,
+      query: getCurrentBranchQuery,
+    },
+    lastCommitBranch: {
+      query: getLastCommitBranchQuery,
+      result({ data: { lastCommitBranch } }) {
+        if (lastCommitBranch === '' || this.availableBranches.includes(lastCommitBranch)) {
+          return;
+        }
+        this.availableBranches.unshift(lastCommitBranch);
+      },
     },
   },
   computed: {
@@ -90,13 +106,14 @@ export default {
     },
   },
   methods: {
-    availableBranchesQueryVars() {
+    availableBranchesQueryVars(varsOverride = {}) {
       if (this.searchTerm.length > 0) {
         return {
           limit: this.totalBranches,
           offset: 0,
           projectFullPath: this.projectFullPath,
           searchPattern: `*${this.searchTerm}*`,
+          ...varsOverride,
         };
       }
 
@@ -105,6 +122,7 @@ export default {
         offset: this.pageCounter * this.paginationLimit,
         projectFullPath: this.projectFullPath,
         searchPattern: '*',
+        ...varsOverride,
       };
     },
     // if there is no searchPattern, paginate by {paginationLimit} branches
@@ -112,7 +130,7 @@ export default {
       if (
         this.isBranchesLoading ||
         this.searchTerm.length > 0 ||
-        this.branches.length === this.totalBranches
+        this.branches.length >= this.totalBranches
       ) {
         return;
       }
@@ -136,11 +154,7 @@ export default {
         return;
       }
 
-      await this.$apollo.getClient().writeQuery({
-        query: getCurrentBranch,
-        data: { currentBranch: newBranch },
-      });
-
+      this.updateCurrentBranch(newBranch);
       const updatedPath = setUrlParams({ branch_name: newBranch });
       historyPushState(updatedPath);
 
@@ -158,7 +172,7 @@ export default {
       this.isSearchingBranches = true;
       const fetchResults = await this.$apollo
         .query({
-          query: getAvailableBranches,
+          query: getAvailableBranchesQuery,
           fetchPolicy: fetchPolicies.NETWORK_ONLY,
           variables: this.availableBranchesQueryVars(),
         })
@@ -173,6 +187,12 @@ export default {
         reasons: [this.$options.i18n.fetchError],
       });
     },
+    updateCurrentBranch(currentBranch) {
+      this.$apollo.mutate({
+        mutation: updateCurrentBranchMutation,
+        variables: { currentBranch },
+      });
+    },
   },
 };
 </script>
@@ -180,6 +200,8 @@ export default {
 <template>
   <gl-dropdown
     v-if="showBranchSwitcher"
+    v-gl-tooltip.hover
+    :title="$options.i18n.dropdownHeader"
     :header-text="$options.i18n.dropdownHeader"
     :text="currentBranch"
     icon="branch"
@@ -191,7 +213,6 @@ export default {
 
     <gl-infinite-scroll
       :fetched-items="branches.length"
-      :total-items="totalBranches"
       :max-list-height="250"
       @bottomReached="fetchNextBranches"
     >

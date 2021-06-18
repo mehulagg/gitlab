@@ -33,12 +33,6 @@ RSpec.describe Ci::Build do
 
     let(:artifact) { build.job_artifacts.first }
 
-    context 'with old license_management artifact' do
-      let!(:license_artifact) { create(:ee_ci_job_artifact, :license_management, job: job, project: job.project) }
-
-      it { expect(artifact.file_type).to eq 'license_management' }
-    end
-
     context 'with new license_scanning artifact' do
       let!(:license_artifact) { create(:ee_ci_job_artifact, :license_scanning, job: job, project: job.project) }
 
@@ -317,23 +311,9 @@ RSpec.describe Ci::Build do
         stub_licensed_features(license_scanning: true)
       end
 
-      context 'when there is a new type report' do
+      context 'when there is a report' do
         before do
           create(:ee_ci_job_artifact, :license_scanning, job: job, project: job.project)
-        end
-
-        it 'parses blobs and add the results to the report' do
-          expect { subject }.not_to raise_error
-
-          expect(license_scanning_report.licenses.count).to eq(4)
-          expect(license_scanning_report.licenses.map(&:name)).to contain_exactly("Apache 2.0", "MIT", "New BSD", "unknown")
-          expect(license_scanning_report.licenses.find { |x| x.name == 'MIT' }.dependencies.count).to eq(52)
-        end
-      end
-
-      context 'when there is an old type report' do
-        before do
-          create(:ee_ci_job_artifact, :license_management, job: job, project: job.project)
         end
 
         it 'parses blobs and add the results to the report' do

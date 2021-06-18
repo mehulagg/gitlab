@@ -47,7 +47,6 @@ module Gitlab
     config.eager_load_paths.push(*%W[#{config.root}/lib
                                      #{config.root}/app/models/badges
                                      #{config.root}/app/models/hooks
-                                     #{config.root}/app/models/integrations
                                      #{config.root}/app/models/members
                                      #{config.root}/app/models/project_services
                                      #{config.root}/app/graphql/resolvers/concerns
@@ -165,6 +164,10 @@ module Gitlab
     # This is necessary if your schema can't be completely dumped by the schema dumper,
     # like if you have constraints or database-specific column types
     config.active_record.schema_format = :sql
+
+    # Use new connection handling so that we can use Rails 6.1+ multiple
+    # database support.
+    config.active_record.legacy_connection_handling = false
 
     config.action_mailer.delivery_job = "ActionMailer::MailDeliveryJob"
 
@@ -312,11 +315,33 @@ module Gitlab
       end
 
       # Cross-origin requests must be enabled for the Authorization code with PKCE OAuth flow when used from a browser.
+      %w(/oauth/token /oauth/revoke).each do |oauth_path|
+        allow do
+          origins '*'
+          resource oauth_path,
+            headers: %w(Authorization),
+            credentials: false,
+            methods: %i(post)
+        end
+      end
+
+      # These are routes from doorkeeper-openid_connect:
+      # https://github.com/doorkeeper-gem/doorkeeper-openid_connect#routes
       allow do
         origins '*'
-        resource '/oauth/token',
+        resource '/oauth/userinfo',
+          headers: %w(Authorization),
           credentials: false,
-          methods: [:post]
+          methods: %i(get head post)
+      end
+
+      %w(/oauth/discovery/keys /.well-known/openid-configuration /.well-known/webfinger).each do |openid_path|
+        allow do
+          origins '*'
+          resource openid_path,
+          credentials: false,
+          methods: %i(get head)
+        end
       end
     end
 

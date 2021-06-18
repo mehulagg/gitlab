@@ -10,10 +10,8 @@ describe('Sidebar Weight', () => {
   let sidebarMediator;
   let wrapper;
 
-  const createComponent = (props = {}) => {
-    wrapper = shallowMount(SidebarWeight, {
-      propsData: { ...props },
-    });
+  const createComponent = () => {
+    wrapper = shallowMount(SidebarWeight);
   };
 
   beforeEach(() => {

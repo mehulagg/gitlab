@@ -19,29 +19,34 @@ export default {
     GlLoadingIcon,
   },
   props: {
-    tokenConfig: {
+    config: {
       type: Object,
       required: true,
     },
-    tokenValue: {
+    value: {
       type: Object,
       required: true,
     },
-    tokenActive: {
+    active: {
       type: Boolean,
       required: true,
     },
     tokensListLoading: {
       type: Boolean,
-      required: true,
+      required: false,
+      default: false,
     },
     tokenValues: {
       type: Array,
-      required: true,
+      required: false,
+      default: () => [],
     },
     fnActiveTokenValue: {
       type: Function,
-      required: true,
+      required: false,
+      default: (tokenValues, currentTokenValue) => {
+        return tokenValues.find(({ value }) => value === currentTokenValue);
+      },
     },
     defaultTokenValues: {
       type: Array,
@@ -83,13 +88,16 @@ export default {
       return Boolean(this.recentTokenValuesStorageKey);
     },
     recentTokenIds() {
-      return this.recentTokenValues.map((tokenValue) => tokenValue.id || tokenValue.name);
+      return this.recentTokenValues.map((tokenValue) => tokenValue[this.valueIdentifier]);
+    },
+    preloadedTokenIds() {
+      return this.preloadedTokenValues.map((tokenValue) => tokenValue[this.valueIdentifier]);
     },
     currentTokenValue() {
       if (this.fnCurrentTokenValue) {
-        return this.fnCurrentTokenValue(this.tokenValue.data);
+        return this.fnCurrentTokenValue(this.value.data);
       }
-      return this.tokenValue.data.toLowerCase();
+      return this.value.data.toLowerCase();
     },
     activeTokenValue() {
       return this.fnActiveTokenValue(this.tokenValues, this.currentTokenValue);
@@ -103,16 +111,18 @@ export default {
       return this.searchKey
         ? this.tokenValues
         : this.tokenValues.filter(
-            (tokenValue) => !this.recentTokenIds.includes(tokenValue[this.valueIdentifier]),
+            (tokenValue) =>
+              !this.recentTokenIds.includes(tokenValue[this.valueIdentifier]) &&
+              !this.preloadedTokenIds.includes(tokenValue[this.valueIdentifier]),
           );
     },
   },
   watch: {
-    tokenActive: {
+    active: {
       immediate: true,
       handler(newValue) {
         if (!newValue && !this.tokenValues.length) {
-          this.$emit('fetch-token-values', this.tokenValue.data);
+          this.$emit('fetch-token-values', this.value.data);
         }
       },
     },
@@ -125,7 +135,15 @@ export default {
       }, DEBOUNCE_DELAY);
     },
     handleTokenValueSelected(activeTokenValue) {
-      if (this.isRecentTokenValuesEnabled && activeTokenValue) {
+      // Make sure that;
+      // 1. Recently used values feature is enabled
+      // 2. User has actually selected a value
+      // 3. Selected value is not part of preloaded list.
+      if (
+        this.isRecentTokenValuesEnabled &&
+        activeTokenValue &&
+        !this.preloadedTokenIds.includes(activeTokenValue[this.valueIdentifier])
+      ) {
         setTokenValueToRecentlyUsed(this.recentTokenValuesStorageKey, activeTokenValue);
       }
     },
@@ -135,9 +153,11 @@ export default {
 
 <template>
   <gl-filtered-search-token
-    :config="tokenConfig"
-    v-bind="{ ...this.$parent.$props, ...this.$parent.$attrs }"
-    v-on="this.$parent.$listeners"
+    :config="config"
+    :value="value"
+    :active="active"
+    v-bind="$attrs"
+    v-on="$listeners"
     @input="handleInput"
     @select="handleTokenValueSelected(activeTokenValue)"
   >
@@ -164,7 +184,7 @@ export default {
         <gl-dropdown-divider />
       </template>
       <slot
-        v-if="preloadedTokenValues.length"
+        v-if="preloadedTokenValues.length && !searchKey"
         name="token-values-list"
         :token-values="preloadedTokenValues"
       ></slot>

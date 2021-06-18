@@ -62,7 +62,7 @@ module EE
           includes(:protected_branches).reject { |rule| rule.applies_to_branch?(branch) }
         end
       end
-      has_many :external_approval_rules, class_name: 'ApprovalRules::ExternalApprovalRule'
+      has_many :external_status_checks, class_name: 'MergeRequests::ExternalStatusCheck'
       has_many :approval_merge_request_rules, through: :merge_requests, source: :approval_rules
       has_many :audit_events, as: :entity
       has_many :path_locks
@@ -218,6 +218,7 @@ module EE
                         less_than: ::Gitlab::Pages::MAX_SIZE / 1.megabyte }
 
       validates :approvals_before_merge, numericality: true, allow_blank: true
+      validate :import_url_inside_fork_network, if: :import_url_changed?
 
       with_options if: :mirror? do
         validates :import_url, presence: true
@@ -241,8 +242,14 @@ module EE
       alias_attribute :fallback_approvals_required, :approvals_before_merge
 
       def jira_issue_association_required_to_merge_enabled?
-        ::Feature.enabled?(:jira_issue_association_on_merge_request, self) &&
-          feature_available?(:jira_issue_association_enforcement)
+        strong_memoize(:jira_issue_association_required_to_merge_enabled) do
+          next false unless jira_issues_integration_available?
+          next false unless jira_service&.active?
+          next false unless ::Feature.enabled?(:jira_issue_association_on_merge_request, self, default_enabled: :yaml)
+          next false unless feature_available?(:jira_issue_association_enforcement)
+
+          true
+        end
       end
 
       def jira_vulnerabilities_integration_enabled?
@@ -361,10 +368,6 @@ module EE
       super && !ci_minutes_quota.minutes_used_up?
     end
 
-    def shared_runners_enabled_but_unavailable?
-      shared_runners_enabled? && !shared_runners_available?
-    end
-
     def link_pool_repository
       super
       repository.log_geo_updated_event
@@ -440,7 +443,7 @@ module EE
     end
 
     def execute_external_compliance_hooks(data)
-      external_approval_rules.each do |approval_rule|
+      external_status_checks.each do |approval_rule|
         approval_rule.async_execute(data)
       end
     end
@@ -855,6 +858,20 @@ module EE
 
       pipeline_scope.with_reports(::Ci::JobArtifact.security_reports).first ||
         pipeline_scope.with_legacy_security_reports.first
+    end
+
+    # If the project is inside a fork network, the mirror URL must
+    # also belong to a member of that fork network
+    def import_url_inside_fork_network
+      return unless ::Feature.enabled?(:block_external_fork_network_mirrors, self, default_enabled: :yaml)
+
+      if forked?
+        mirror_project = ::Project.find_by_url(import_url)
+
+        unless mirror_project.present? && fork_network_projects.include?(mirror_project)
+          errors.add(:url, _("must be inside the fork network"))
+        end
+      end
     end
   end
 end

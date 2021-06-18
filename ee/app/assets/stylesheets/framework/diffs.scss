@@ -11,4 +11,8 @@
       grid-template-columns: 50px 50px 8px 20px 1fr;
     }
   }
+
+  .codequality-severity-icon {
+    filter: drop-shadow(0 1px 0.5px #fff) drop-shadow(1px 0 0.5px #fff) drop-shadow(0 -1px 0.5px #fff) drop-shadow(-1px 0 0.5px #fff);
+  }
 }

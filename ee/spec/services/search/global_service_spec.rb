@@ -24,7 +24,7 @@ RSpec.describe Search::GlobalService do
     it_behaves_like 'search query applies joins based on migrations shared examples', :add_new_data_to_merge_requests_documents
   end
 
-  context 'visibility', :elastic_delete_by_query, :sidekiq_inline do
+  context 'visibility', :elastic_delete_by_query, :clean_gitlab_redis_shared_state, :sidekiq_inline do
     include_context 'ProjectPolicyTable context'
 
     shared_examples 'search respects visibility' do
@@ -246,7 +246,7 @@ RSpec.describe Search::GlobalService do
     end
   end
 
-  context 'sorting', :elastic, :sidekiq_inline do
+  context 'sorting', :elastic, :clean_gitlab_redis_shared_state, :sidekiq_inline do
     context 'issue' do
       let(:scope) { 'issues' }
       let_it_be(:project) { create(:project, :public) }

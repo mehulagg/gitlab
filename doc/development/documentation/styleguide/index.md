@@ -216,15 +216,15 @@ to update.
 
 Put files for a specific product area into the related folder:
 
-| Directory             | What belongs here |
+| Directory             | Contents |
 |:----------------------|:------------------|
-| `doc/user/`           | User related documentation. Anything that can be done in the GitLab user interface goes here, including usage of the `/admin` interface. |
+| `doc/user/`           | Documentation for users. Anything that can be done in the GitLab user interface goes here, including usage of the `/admin` interface. |
 | `doc/administration/` | Documentation that requires the user to have access to the server where GitLab is installed. Administrator settings in the GitLab user interface are under `doc/user/admin_area/`. |
-| `doc/api/`            | API-related documentation. |
+| `doc/api/`            | Documentation for the API. |
 | `doc/development/`    | Documentation related to the development of GitLab, whether contributing code or documentation. Related process and style guides should go here. |
 | `doc/legal/`          | Legal documents about contributing to GitLab. |
-| `doc/install/`        | Contains instructions for installing GitLab. |
-| `doc/update/`         | Contains instructions for updating GitLab. |
+| `doc/install/`        | Instructions for installing GitLab. |
+| `doc/update/`         | Instructions for updating GitLab. |
 | `doc/topics/`         | Indexes per topic (`doc/topics/topic_name/index.md`): all resources for that topic. |
 
 ### Work with directories and files
@@ -300,11 +300,17 @@ Do not include the same information in multiple places.
 
 ## Language
 
-GitLab documentation should be clear and easy to understand.
+GitLab documentation should be clear and easy to understand. Avoid unnecessary words.
 
-- Be clear, concise, and stick to the goal of the documentation.
+- Be clear, concise, and stick to the goal of the topic.
 - Write in US English with US grammar. (Tested in [`British.yml`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/doc/.vale/gitlab/British.yml).)
 - Use [inclusive language](#inclusive-language).
+- Rewrite to avoid wordiness:
+  - there is
+  - there are
+  - enables you to
+  - in order to
+  - because of the fact that
 
 ### Capitalization
 
@@ -1069,35 +1075,43 @@ document to ensure it links to the most recent version of the file.
 
 ## Navigation
 
-When documenting navigation through the user interface:
-
-- Use the exact wording as shown in the UI, including any capital letters as-is.
-- Use bold text for navigation items.
+When documenting navigation through the user interface, use these terms and styles.
 
 ### What to call the menus
 
 Use these terms when referring to the main GitLab user interface
 elements:
 
-- **Top menu**: This is the top menu that spans the width of the user interface.
-  It includes the GitLab logo, search field, counters, and the user's avatar.
+- **Top bar**: This is the top bar that spans the width of the user interface.
+  It includes the menu, the GitLab logo, search field, counters, and the user's avatar.
 - **Left sidebar**: This is the navigation sidebar on the left of the user
   interface, specific to the project or group.
 - **Right sidebar**: This is the navigation sidebar on the right of the user
   interface, specific to the open issue, merge request, or epic.
 
-### How to document the left sidebar
+### How to document the menus
 
-To be consistent, use this format when you refer to the left sidebar.
+To be consistent, use this format when you write about UI navigation.
 
-- Go to your project and select **Settings > CI/CD**.
-- Go to your group and select **Settings > CI/CD**.
-- Go to the Admin Area (**{admin}**) and select **Overview > Projects**.
-
-For expandable menus, use this format:
-
-1. Go to your group and select **Settings > CI/CD**.
+1. On the top bar, select **Menu > Projects** and find your project.
+1. On the left sidebar, select **Settings > CI/CD**.
 1. Expand **General pipelines**.
+
+Another example:
+
+1. On the top bar, select **Menu > Groups** and find your group.
+1. On the left sidebar, select **Settings > CI/CD**.
+1. Expand **General pipelines**.
+
+An Admin Area example:
+
+```markdown
+1. On the top bar, select **Menu >** **{admin}** **Admin**.
+```
+
+This text renders this output:
+
+1. On the top bar, select **Menu >** **{admin}** **Admin**.
 
 ## Images
 
@@ -1270,7 +1284,7 @@ hidden on the documentation site, but is displayed by `/help`.
 ## Code blocks
 
 - Always wrap code added to a sentence in inline code blocks (`` ` ``).
-  For example, `.gitlab-ci.yml`, `git add .`, `CODEOWNERS`, or `only: [master]`.
+  For example, `.gitlab-ci.yml`, `git add .`, `CODEOWNERS`, or `only: [main]`.
   File names, commands, entries, and anything that refers to code should be
   added to code blocks. To make things easier for the user, always add a full
   code block for things that can be useful to copy and paste, as they can do it
@@ -1377,10 +1391,10 @@ readability of the text.
 For example, this Markdown adds little to the accompanying text:
 
 ```markdown
-1. Go to **{home}** **Project overview > Details**.
+1. Go to **{home}** **Project information > Details**.
 ```
 
-1. Go to **{home}** **Project overview > Details**.
+1. Go to **{home}** **Project information > Details**.
 
 However, these tables might help the reader connect the text to the user
 interface:
@@ -1543,15 +1557,6 @@ elements:
 | Recommended | Used for                        | Replaces              |
 |:------------|:--------------------------------|:----------------------|
 | _go to_     | making a browser go to location | "navigate to", "open" |
-
-### Permissions vs roles
-
-GitLab users are [assigned roles](../../../user/permissions.md) that confer specific permissions:
-
-- _Maintainer_ is an example of a role.
-- _Create new issue_ is an example of a permission.
-
-[Do not use](word_list.md) these terms interchangeably.
 
 ## GitLab versions
 
@@ -1754,7 +1759,7 @@ badges and tooltips (`<span class="badge-trigger free">`).
 | _Only_ GitLab Ultimate SaaS (no self-managed instances)                   | `**(ULTIMATE SAAS)**` |
 
 Topics that mention the `gitlab.rb` file are referring to
-self-managed instances of GitLab. To prevent confusion, include the relevant `TIER ONLY`
+self-managed instances of GitLab. To prevent confusion, include the relevant `TIER SELF`
 tier badge on the highest applicable heading level on
 the page.
 

@@ -23,7 +23,7 @@ module QA
         Flow::Login.sign_in
       end
 
-      it 'assigns a group iteration to an existing issue', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/1173', quarantine: { issue: 'https://gitlab.com/gitlab-org/gitlab/-/issues/332484', type: :stale } do
+      it 'assigns a group iteration to an existing issue', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/1173' do
         issue.visit!
 
         Page::Project::Issue::Show.perform do |issue|

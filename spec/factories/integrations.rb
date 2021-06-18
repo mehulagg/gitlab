@@ -6,13 +6,13 @@ FactoryBot.define do
     type { 'Integration' }
   end
 
-  factory :custom_issue_tracker_service, class: 'Integrations::CustomIssueTracker' do
+  factory :custom_issue_tracker_integration, class: 'Integrations::CustomIssueTracker' do
     project
     active { true }
     issue_tracker
   end
 
-  factory :emails_on_push_service, class: 'Integrations::EmailsOnPush' do
+  factory :emails_on_push_integration, class: 'Integrations::EmailsOnPush' do
     project
     type { 'EmailsOnPushService' }
     active { true }
@@ -38,7 +38,7 @@ FactoryBot.define do
     end
   end
 
-  factory :drone_ci_service, class: 'Integrations::DroneCi' do
+  factory :drone_ci_integration, class: 'Integrations::DroneCi' do
     project
     active { true }
     drone_url { 'https://bamboo.example.com' }
@@ -79,13 +79,13 @@ FactoryBot.define do
     end
   end
 
-  factory :confluence_service, class: 'Integrations::Confluence' do
+  factory :confluence_integration, class: 'Integrations::Confluence' do
     project
     active { true }
     confluence_url { 'https://example.atlassian.net/wiki' }
   end
 
-  factory :bugzilla_service, class: 'Integrations::Bugzilla' do
+  factory :bugzilla_integration, class: 'Integrations::Bugzilla' do
     project
     active { true }
     issue_tracker
@@ -103,7 +103,7 @@ FactoryBot.define do
     issue_tracker
   end
 
-  factory :ewm_service, class: 'Integrations::Ewm' do
+  factory :ewm_integration, class: 'Integrations::Ewm' do
     project
     active { true }
     issue_tracker
@@ -127,7 +127,7 @@ FactoryBot.define do
     end
   end
 
-  factory :external_wiki_service, class: 'Integrations::ExternalWiki' do
+  factory :external_wiki_integration, class: 'Integrations::ExternalWiki' do
     project
     type { 'ExternalWikiService' }
     active { true }
@@ -173,7 +173,7 @@ FactoryBot.define do
     type { 'SlackSlashCommandsService' }
   end
 
-  factory :pipelines_email_service, class: 'Integrations::PipelinesEmail' do
+  factory :pipelines_email_integration, class: 'Integrations::PipelinesEmail' do
     project
     active { true }
     type { 'PipelinesEmailService' }

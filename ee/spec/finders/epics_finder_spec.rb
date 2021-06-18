@@ -140,9 +140,14 @@ RSpec.describe EpicsFinder do
 
         context 'when subgroups are supported' do
           let_it_be(:subgroup) { create(:group, :private, parent: group) }
+          let_it_be(:subgroup_guest) { create(:user) }
           let_it_be(:subgroup2) { create(:group, :private, parent: subgroup) }
           let_it_be(:subgroup_epic) { create(:epic, group: subgroup) }
           let_it_be(:subgroup2_epic) { create(:epic, group: subgroup2) }
+
+          before do
+            subgroup.add_guest(subgroup_guest)
+          end
 
           it 'returns all epics that belong to the given group and its subgroups' do
             expect(epics).to contain_exactly(epic1, epic2, epic3, subgroup_epic, subgroup2_epic)
@@ -168,20 +173,36 @@ RSpec.describe EpicsFinder do
                 let(:finder_params) { { include_descendant_groups: false, include_ancestor_groups: true } }
 
                 it { is_expected.to contain_exactly(subgroup_epic, epic1, epic2, epic3) }
+
+                context "when user does not have permission to view ancestor groups" do
+                  let(:finder_params) { { group_id: subgroup.id, include_descendant_groups: false, include_ancestor_groups: true } }
+
+                  subject { described_class.new(subgroup_guest, finder_params).execute }
+
+                  it { is_expected.to contain_exactly(subgroup_epic) }
+                end
               end
             end
 
-            context 'when include_descendant_groups is true' do
+            context 'when include_descendant_groups is true (by default)' do
               context 'and include_ancestor_groups is false' do
-                let(:finder_params) { { include_descendant_groups: true, include_ancestor_groups: false } }
+                let(:finder_params) { { include_ancestor_groups: false } }
 
                 it { is_expected.to contain_exactly(subgroup_epic, subgroup2_epic) }
               end
 
               context 'and include_ancestor_groups is true' do
-                let(:finder_params) { { include_descendant_groups: true, include_ancestor_groups: true } }
+                let(:finder_params) { { include_ancestor_groups: true } }
 
                 it { is_expected.to contain_exactly(subgroup_epic, subgroup2_epic, epic1, epic2, epic3) }
+
+                context "when user does not have permission to view ancestor groups" do
+                  let(:finder_params) { { group_id: subgroup.id, include_ancestor_groups: true } }
+
+                  subject { described_class.new(subgroup_guest, finder_params).execute }
+
+                  it { is_expected.to contain_exactly(subgroup_epic, subgroup2_epic) }
+                end
               end
             end
 

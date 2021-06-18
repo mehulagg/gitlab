@@ -5,23 +5,6 @@ module Analytics
     class SnapshotCalculator
       attr_reader :enabled_namespace, :range_end, :range_start, :snapshot
 
-      BOOLEAN_METRICS = [
-        :issue_opened,
-        :merge_request_opened,
-        :merge_request_approved,
-        :runner_configured,
-        :pipeline_succeeded,
-        :deploy_succeeded,
-        :security_scan_succeeded
-      ].freeze
-
-      NUMERIC_METRICS = [
-        :code_owners_used_count,
-        :total_projects_count
-      ].freeze
-
-      ADOPTION_METRICS = BOOLEAN_METRICS + NUMERIC_METRICS
-
       def initialize(enabled_namespace:, range_end:, snapshot: nil)
         @enabled_namespace = enabled_namespace
         @range_end = range_end
@@ -32,11 +15,11 @@ module Analytics
       def calculate
         params = { recorded_at: Time.zone.now, end_time: range_end, namespace: enabled_namespace.namespace }
 
-        BOOLEAN_METRICS.each do |metric|
+        Snapshot::BOOLEAN_METRICS.each do |metric|
           params[metric] = snapshot&.public_send(metric) || send(metric) # rubocop:disable GitlabSecurity/PublicSend
         end
 
-        NUMERIC_METRICS.each do |metric|
+        Snapshot::NUMERIC_METRICS.each do |metric|
           params[metric] = send(metric) # rubocop:disable GitlabSecurity/PublicSend
         end
 
@@ -111,6 +94,28 @@ module Analytics
           !Gitlab::CodeOwners::Loader.new(project, project.default_branch || 'HEAD').empty_code_owners?
         end
       end
+
+      # rubocop: disable CodeReuse/ActiveRecord
+      def sast_enabled_count
+        return unless Feature.enabled?(:analytics_devops_adoption_sastdast, enabled_namespace.namespace, default_enabled: :yaml)
+
+        Ci::JobArtifact.sast_reports
+                       .for_project(snapshot_project_ids)
+                       .created_in_time_range(from: range_start, to: range_end)
+                       .select(:project_id).distinct.count
+      end
+      # rubocop: enable CodeReuse/ActiveRecord
+
+      # rubocop: disable CodeReuse/ActiveRecord
+      def dast_enabled_count
+        return unless Feature.enabled?(:analytics_devops_adoption_sastdast, enabled_namespace.namespace, default_enabled: :yaml)
+
+        Ci::JobArtifact.dast_reports
+          .for_project(snapshot_project_ids)
+          .created_in_time_range(from: range_start, to: range_end)
+          .select(:project_id).distinct.count
+      end
+      # rubocop: enable CodeReuse/ActiveRecord
     end
   end
 end

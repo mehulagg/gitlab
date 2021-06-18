@@ -124,11 +124,6 @@ module API
             yield
           end
         end
-
-        # Overridden in EE
-        def geo_proxy
-          {}
-        end
       end
 
       namespace 'internal' do
@@ -167,18 +162,15 @@ module API
         end
 
         #
-        # Get a ssh key using the fingerprint
+        # Check whether an SSH key is known to GitLab
         #
-        # rubocop: disable CodeReuse/ActiveRecord
         get '/authorized_keys', feature_category: :source_code_management do
-          fingerprint = params.fetch(:fingerprint) do
-            Gitlab::InsecureKeyFingerprint.new(params.fetch(:key)).fingerprint
-          end
-          key = Key.find_by(fingerprint: fingerprint)
+          fingerprint = Gitlab::InsecureKeyFingerprint.new(params.fetch(:key)).fingerprint
+
+          key = Key.find_by_fingerprint(fingerprint)
           not_found!('Key') if key.nil?
           present key, with: Entities::SSHKey
         end
-        # rubocop: enable CodeReuse/ActiveRecord
 
         #
         # Discover user by ssh key, user id or username
@@ -322,12 +314,6 @@ module API
           status 200
 
           two_factor_otp_check
-        end
-
-        # Workhorse calls this to determine if it is a Geo secondary site
-        # that should proxy requests. FOSS can quickly return empty data.
-        get '/geo_proxy', feature_category: :geo_replication do
-          geo_proxy
         end
       end
     end

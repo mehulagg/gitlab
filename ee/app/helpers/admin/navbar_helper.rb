@@ -3,7 +3,7 @@
 module Admin
   module NavbarHelper
     def navbar_controller_path
-      cloud_license_enabled? ? 'admin/cloud_licenses' : 'admin/licenses'
+      cloud_license_enabled? ? 'admin/subscriptions' : 'admin/licenses'
     end
 
     def navbar_item_name
@@ -11,7 +11,7 @@ module Admin
     end
 
     def navbar_item_path
-      cloud_license_enabled? ? admin_cloud_license_path : admin_license_path
+      cloud_license_enabled? ? admin_subscription_path : admin_license_path
     end
 
     private

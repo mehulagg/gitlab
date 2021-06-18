@@ -873,12 +873,12 @@ RSpec.describe Ci::Runner do
       expect(described_class.search(runner.token)).to eq([runner])
     end
 
-    it 'returns runners with a partially matching token' do
-      expect(described_class.search(runner.token[0..2])).to eq([runner])
+    it 'does not return runners with a partially matching token' do
+      expect(described_class.search(runner.token[0..2])).to be_empty
     end
 
-    it 'returns runners with a matching token regardless of the casing' do
-      expect(described_class.search(runner.token.upcase)).to eq([runner])
+    it 'does not return runners with a matching token with different casing' do
+      expect(described_class.search(runner.token.upcase)).to be_empty
     end
 
     it 'returns runners with a matching description' do
@@ -1086,6 +1086,18 @@ RSpec.describe Ci::Runner do
         expect(matchers.map(&:tag_list)).to match_array([%w[tag1 tag2], %w[tag3 tag4]])
       end
     end
+
+    context 'with runner_ids' do
+      before do
+        create_list(:ci_runner, 2)
+      end
+
+      it 'includes runner_ids' do
+        expect(matchers.size).to eq(1)
+
+        expect(matchers.first.runner_ids).to match_array(described_class.all.pluck(:id))
+      end
+    end
   end
 
   describe '#runner_matcher' do
@@ -1094,6 +1106,8 @@ RSpec.describe Ci::Runner do
     end
 
     subject(:matcher) { runner.runner_matcher }
+
+    it { expect(matcher.runner_ids).to eq([runner.id]) }
 
     it { expect(matcher.runner_type).to eq(runner.runner_type) }
 

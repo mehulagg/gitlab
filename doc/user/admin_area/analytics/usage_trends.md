@@ -4,7 +4,7 @@ group: Optimize
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
-# Usage Trends **(FREE)**
+# Usage Trends **(FREE SELF)**
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/235754) in GitLab 13.5 behind a feature flag, disabled by default.
 > - [Became enabled by default](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/46962) in GitLab 13.6.
@@ -17,7 +17,10 @@ This feature might not be available to you. Check the **version history** note a
 
 Usage Trends gives you an overview of how much data your instance contains, and how quickly this volume is changing over time.
 
-To see Usage Trends, go to **Admin Area > Analytics > Usage Trends**.
+To see Usage Trends:
+
+1. On the top bar, select **Menu >** **{admin}** **Admin**.
+1. On the left sidebar, select **Analytics > Usage Trends**.
 
 ## Total counts
 

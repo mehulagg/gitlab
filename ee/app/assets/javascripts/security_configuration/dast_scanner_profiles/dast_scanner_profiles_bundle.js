@@ -10,7 +10,12 @@ export default () => {
     return false;
   }
 
-  const { projectFullPath, profilesLibraryPath, onDemandScansPath } = el.dataset;
+  const {
+    projectFullPath,
+    profilesLibraryPath,
+    onDemandScansPath,
+    dastConfigurationPath,
+  } = el.dataset;
 
   const props = {
     projectFullPath,
@@ -20,12 +25,10 @@ export default () => {
     props.profile = convertObjectPropsToCamelCase(JSON.parse(el.dataset.scannerProfile));
   }
 
-  const returnToPreviousPage = ({ id } = {}) => {
-    returnToPreviousPageFactory({
-      onDemandScansPath,
-      profilesLibraryPath,
-      urlParamKey: 'scanner_profile_id',
-    })(id);
+  const factoryParams = {
+    allowedPaths: [onDemandScansPath, dastConfigurationPath],
+    profilesLibraryPath,
+    urlParamKey: 'scanner_profile_id',
   };
 
   return new Vue({
@@ -35,8 +38,8 @@ export default () => {
       return h(DastScannerProfileForm, {
         props,
         on: {
-          success: returnToPreviousPage,
-          cancel: returnToPreviousPage,
+          success: returnToPreviousPageFactory(factoryParams),
+          cancel: returnToPreviousPageFactory(factoryParams),
         },
       });
     },

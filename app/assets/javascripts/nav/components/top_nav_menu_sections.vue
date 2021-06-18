@@ -1,7 +1,7 @@
 <script>
 import TopNavMenuItem from './top_nav_menu_item.vue';
 
-const BORDER_CLASSES = 'gl-pt-3 gl-border-1 gl-border-t-solid gl-border-gray-100';
+const BORDER_CLASSES = 'gl-pt-3 gl-border-1 gl-border-t-solid gl-border-gray-50';
 
 export default {
   components: {
@@ -54,6 +54,7 @@ export default {
         :key="menuItem.id"
         :menu-item="menuItem"
         data-testid="menu-item"
+        class="gl-w-full"
         :class="{ 'gl-mt-1': menuItemIndex > 0 }"
         @click="onClick(menuItem)"
       />

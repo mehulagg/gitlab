@@ -89,6 +89,12 @@ module EE
               resolver: ::Resolvers::DastSiteValidationResolver,
               description: 'DAST Site Validations associated with the project.'
 
+        field :agent_configurations,
+              ::Types::Kas::AgentConfigurationType.connection_type,
+              null: true,
+              description: 'Agent configurations defined by the project',
+              resolver: ::Resolvers::Kas::AgentConfigurationsResolver
+
         field :cluster_agent,
               ::Types::Clusters::AgentType,
               null: true,
@@ -146,7 +152,7 @@ module EE
               resolver: ::Resolvers::IncidentManagement::EscalationPoliciesResolver.single
 
         field :api_fuzzing_ci_configuration,
-              ::Types::AppSec::Fuzzing::Api::CiConfigurationType,
+              ::Types::AppSec::Fuzzing::API::CiConfigurationType,
               null: true,
               description: 'API fuzzing configuration for the project. '
 
@@ -169,15 +175,21 @@ module EE
               null: true,
               description: 'Scan Execution Policies of the project',
               resolver: ::Resolvers::ScanExecutionPolicyResolver
+
+        field :network_policies,
+              ::Types::NetworkPolicyType.connection_type,
+              null: true,
+              description: 'Network Policies of the project',
+              resolver: ::Resolvers::NetworkPolicyResolver
       end
 
       def api_fuzzing_ci_configuration
         return unless Ability.allowed?(current_user, :read_security_resource, object)
 
-        configuration = ::AppSec::Fuzzing::Api::CiConfiguration.new(project: object)
+        configuration = ::AppSec::Fuzzing::API::CiConfiguration.new(project: object)
 
         {
-          scan_modes: ::AppSec::Fuzzing::Api::CiConfiguration::SCAN_MODES,
+          scan_modes: ::AppSec::Fuzzing::API::CiConfiguration::SCAN_MODES,
           scan_profiles: configuration.scan_profiles
         }
       end

@@ -42,8 +42,8 @@ module Gitlab
         ::Feature.enabled?(:gldropdown_tags, default_enabled: :yaml)
       end
 
-      def self.background_pipeline_retry_endpoint?(project)
-        ::Feature.enabled?(:background_pipeline_retry_endpoint, project)
+      def self.require_builds_token_encryption?
+        Feature.enabled?(:ci_builds_tokens_required_encryption, default_enabled: :yaml)
       end
     end
   end

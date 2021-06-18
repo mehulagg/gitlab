@@ -51,7 +51,11 @@ class ProjectPolicy < BasePolicy
 
   desc "Container registry is disabled"
   condition(:container_registry_disabled, scope: :subject) do
-    !project.container_registry_enabled
+    if ::Feature.enabled?(:read_container_registry_access_level, @subject&.namespace, default_enabled: :yaml)
+      !access_allowed_to?(:container_registry)
+    else
+      !project.container_registry_enabled
+    end
   end
 
   desc "Project has an external wiki"
@@ -73,6 +77,11 @@ class ProjectPolicy < BasePolicy
   desc "Deploy token with write_package_registry scope"
   condition(:write_package_registry_deploy_token) do
     user.is_a?(DeployToken) && user.has_access_to?(project) && user.write_package_registry
+  end
+
+  desc "If user is authenticated via CI job token then the target project should be in scope"
+  condition(:project_allowed_for_job_token) do
+    !@user&.from_ci_job_token? || @user.ci_job_token_scope.includes?(project)
   end
 
   with_scope :subject
@@ -410,6 +419,7 @@ class ProjectPolicy < BasePolicy
     enable :update_freeze_period
     enable :destroy_freeze_period
     enable :admin_feature_flags_client
+    enable :update_runners_registration_token
   end
 
   rule { public_project & metrics_dashboard_allowed }.policy do
@@ -507,6 +517,8 @@ class ProjectPolicy < BasePolicy
     enable :public_access
     enable :read_project_for_iids
   end
+
+  rule { ~project_allowed_for_job_token }.prevent_all
 
   rule { can?(:public_access) }.policy do
     enable :read_package

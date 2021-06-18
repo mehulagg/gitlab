@@ -227,7 +227,7 @@ export default {
     },
   },
   created() {
-    const params = queryToObject(window.location.search);
+    const params = queryToObject(window.location.search, { legacySpacesDecode: true });
 
     this.selectedSiteProfileId = params.site_profile_id
       ? convertToGraphQLId(TYPE_SITE_PROFILE, params.site_profile_id)

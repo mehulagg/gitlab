@@ -24,8 +24,8 @@ export function writeInitialDataToApolloCache(apolloProvider, dataset) {
       isSetupForCompany,
       namespaces,
       fullName,
+      selectedPlanId: planId,
       subscription: {
-        planId,
         paymentMethodId: null,
         quantity: 1,
         namespaceId: null,

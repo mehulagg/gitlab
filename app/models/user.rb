@@ -84,10 +84,11 @@ class User < ApplicationRecord
 
     update_tracked_fields(request)
 
-    lease = Gitlab::ExclusiveLease.new("user_update_tracked_fields:#{id}", timeout: 1.hour.to_i)
-    return unless lease.try_obtain
-
-    Users::UpdateService.new(self, user: self).execute(validate: false)
+    Gitlab::ExclusiveLease.throttle(id) do
+      ::Ability.forgetting(/admin/) do
+        Users::UpdateService.new(self, user: self).execute(validate: false)
+      end
+    end
   end
   # rubocop: enable CodeReuse/ServiceClass
 
@@ -779,6 +780,16 @@ class User < ApplicationRecord
         u.name = 'GitLab Support Bot'
         u.avatar = bot_avatar(image: 'support-bot.png')
         u.confirmed_at = Time.zone.now
+      end
+    end
+
+    def automation_bot
+      email_pattern = "automation%s@#{Settings.gitlab.host}"
+
+      unique_internal(where(user_type: :automation_bot), 'automation-bot', email_pattern) do |u|
+        u.bio = 'The GitLab automation bot used for automated workflows and tasks'
+        u.name = 'GitLab Automation Bot'
+        u.avatar = bot_avatar(image: 'support-bot.png') # todo: add an avatar for automation-bot
       end
     end
 
@@ -1858,6 +1869,12 @@ class User < ApplicationRecord
     !!(password_expires_at && password_expires_at < Time.current)
   end
 
+  def password_expired_if_applicable?
+    return false unless allow_password_authentication?
+
+    password_expired?
+  end
+
   def can_be_deactivated?
     active? && no_recent_activity? && !internal?
   end
@@ -1911,6 +1928,20 @@ class User < ApplicationRecord
 
   def can_trigger_notifications?
     confirmed? && !blocked? && !ghost?
+  end
+
+  # This attribute hosts a Ci::JobToken::Scope object which is set when
+  # the user is authenticated successfully via CI_JOB_TOKEN.
+  def ci_job_token_scope
+    Gitlab::SafeRequestStore[ci_job_token_scope_cache_key]
+  end
+
+  def set_ci_job_token_scope!(job)
+    Gitlab::SafeRequestStore[ci_job_token_scope_cache_key] = Ci::JobToken::Scope.new(job.project)
+  end
+
+  def from_ci_job_token?
+    ci_job_token_scope.present?
   end
 
   protected
@@ -2075,6 +2106,10 @@ class User < ApplicationRecord
 
   def update_highest_role_attribute
     id
+  end
+
+  def ci_job_token_scope_cache_key
+    "users:#{id}:ci:job_token_scope"
   end
 end
 

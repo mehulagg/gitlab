@@ -9,7 +9,8 @@ module Types
     field :projects,
           Types::ProjectType.connection_type,
           null: false,
-          description: 'Projects selected in Instance Security Dashboard.'
+          description: 'Projects selected in Instance Security Dashboard.',
+          resolver: ::Resolvers::InstanceSecurityDashboard::ProjectsResolver
 
     field :vulnerability_scanners,
           ::Types::VulnerabilityScannerType.connection_type,

@@ -166,7 +166,7 @@ export default {
     toggle-class="gl-shadow-none"
   >
     <template #button-content>
-      <div class="gl-display-flex gl-flex-fill-1">
+      <div class="gl-display-flex gl-flex-grow-1">
         <gl-avatar
           v-if="isOnlyOneProjectSelected"
           :src="selectedProjects[0].avatarUrl"

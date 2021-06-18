@@ -16,6 +16,14 @@ module QA
                   element :edit_link
                 end
 
+                view 'app/assets/javascripts/sidebar/components/sidebar_dropdown_widget.vue' do
+                  element :iteration_link, "`${issuableAttribute}_link`" # rubocop:disable QA/ElementWithPattern
+                end
+
+                view 'app/views/shared/issuable/_sidebar.html.haml' do
+                  element :iteration_container
+                end
+
                 view 'ee/app/assets/javascripts/sidebar/components/weight/weight.vue' do
                   element :edit_weight_link
                   element :remove_weight_link

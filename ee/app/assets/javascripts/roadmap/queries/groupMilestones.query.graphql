@@ -1,19 +1,13 @@
 query groupMilestones(
   $fullPath: ID!
   $state: MilestoneStateEnum
-  $startDate: Time
-  $dueDate: Time
+  $timeframe: Timeframe
   $includeDescendants: Boolean
 ) {
   group(fullPath: $fullPath) {
     id
     name
-    milestones(
-      state: $state
-      startDate: $startDate
-      endDate: $dueDate
-      includeDescendants: $includeDescendants
-    ) {
+    milestones(state: $state, includeDescendants: $includeDescendants, timeframe: $timeframe) {
       edges {
         node {
           id

@@ -230,6 +230,10 @@ RSpec.configure do |config|
     Gitlab::Database.set_open_transactions_baseline
   end
 
+  config.append_before do
+    Thread.current[:current_example_group] = ::RSpec.current_example.metadata[:example_group]
+  end
+
   config.append_after do
     Gitlab::Database.reset_open_transactions_baseline
   end
@@ -344,6 +348,15 @@ RSpec.configure do |config|
 
   config.around(:example, :request_store) do |example|
     Gitlab::WithRequestStore.with_request_store { example.run }
+  end
+
+  # previous test runs may have left some resources throttled
+  config.before do
+    ::Gitlab::ExclusiveLease.reset_all!("el:throttle:*")
+  end
+
+  config.before(:example, :assume_throttled) do |example|
+    allow(::Gitlab::ExclusiveLease).to receive(:throttle).and_return(nil)
   end
 
   config.before(:example, :request_store) do

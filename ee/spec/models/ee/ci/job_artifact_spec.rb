@@ -26,17 +26,9 @@ RSpec.describe Ci::JobArtifact do
   describe '.license_scanning_reports' do
     subject { Ci::JobArtifact.license_scanning_reports }
 
-    context 'when there is a license management report' do
-      let!(:artifact) { create(:ee_ci_job_artifact, :license_management) }
+    let_it_be(:artifact) { create(:ee_ci_job_artifact, :license_scanning) }
 
-      it { is_expected.to eq([artifact]) }
-    end
-
-    context 'when there is a license scanning report' do
-      let!(:artifact) { create(:ee_ci_job_artifact, :license_scanning) }
-
-      it { is_expected.to eq([artifact]) }
-    end
+    it { is_expected.to eq([artifact]) }
   end
 
   describe '.metrics_reports' do
@@ -139,7 +131,7 @@ RSpec.describe Ci::JobArtifact do
     subject { Ci::JobArtifact.associated_file_types_for(file_type) }
 
     where(:file_type, :result) do
-      'license_scanning'    | %w(license_management license_scanning)
+      'license_scanning'    | %w(license_scanning)
       'codequality'         | %w(codequality)
       'browser_performance' | %w(browser_performance performance)
       'load_performance'    | %w(load_performance)

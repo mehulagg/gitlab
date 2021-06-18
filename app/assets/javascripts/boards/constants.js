@@ -36,12 +36,18 @@ export const ListTypeTitles = {
   milestone: __('Milestone'),
   iteration: __('Iteration'),
   label: __('Label'),
+  backlog: __('Open'),
 };
 
 export const formType = {
   new: 'new',
   delete: 'delete',
   edit: 'edit',
+};
+
+export const toggleFormEventPrefix = {
+  epic: 'toggle-epic-form-',
+  issue: 'toggle-issue-form-',
 };
 
 export const inactiveId = 0;

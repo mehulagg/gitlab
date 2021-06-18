@@ -8,7 +8,7 @@ class License < ApplicationRecord
   PREMIUM_PLAN = 'premium'
   ULTIMATE_PLAN = 'ultimate'
   CLOUD_LICENSE_TYPE = 'cloud'
-  LEGACY_LICENSE_TYPE = 'legacy'
+  LICENSE_FILE_TYPE = 'license_file'
   ALLOWED_PERCENTAGE_OF_USERS_OVERAGE = (10 / 100.0)
 
   EE_ALL_PLANS = [STARTER_PLAN, PREMIUM_PLAN, ULTIMATE_PLAN].freeze
@@ -71,6 +71,7 @@ class License < ApplicationRecord
     custom_file_templates_for_namespace
     custom_project_templates
     cycle_analytics_for_groups
+    cycle_analytics_for_projects
     db_load_balancing
     default_branch_protection_restriction_in_groups
     default_project_deletion_protection
@@ -560,7 +561,7 @@ class License < ApplicationRecord
   end
 
   def license_type
-    cloud_license? ? CLOUD_LICENSE_TYPE : LEGACY_LICENSE_TYPE
+    cloud_license? ? CLOUD_LICENSE_TYPE : LICENSE_FILE_TYPE
   end
 
   def auto_renew
