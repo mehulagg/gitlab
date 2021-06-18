@@ -399,6 +399,23 @@ RSpec.describe License do
     end
   end
 
+  describe 'Scopes' do
+    describe 'cloud' do
+      it 'includes cloud licenses' do
+        non_cloud_license = create(:license)
+        cloud_license_1 = create(:license, cloud: true)
+        cloud_license_2 = create(:license, cloud: true)
+
+        result = described_class.cloud
+
+        aggregate_failures do
+          expect(result).to include(cloud_license_1, cloud_license_2)
+          expect(result).not_to include(non_cloud_license)
+        end
+      end
+    end
+  end
+
   describe "Class methods" do
     before do
       described_class.reset_current

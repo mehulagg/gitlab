@@ -38,6 +38,17 @@ RSpec.describe GitlabSubscriptions::ActivateService do
       expect(result).to eq({ success: true, license: created_license })
 
       expect(created_license.data).to eq(license_key)
+      expect(created_license.cloud).to eq(true)
+    end
+
+    it 'deletes any existing cloud licenses' do
+      previous_1 = create(:license, cloud: true)
+      previous_2 = create(:license, cloud: true)
+
+      expect { execute_service }.to change(License, :count)
+
+      expect(License.cloud.count).to eq(1)
+      expect(License.cloud).not_to include(previous_1, previous_2)
     end
 
     context 'when persisting fails' do

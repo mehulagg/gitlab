@@ -32,7 +32,7 @@ RSpec.describe SyncSeatLinkRequestWorker, type: :worker do
     end
 
     context 'when response contains a license' do
-      let(:license_key) { build(:gitlab_license).export }
+      let(:license_key) { build(:gitlab_license, :cloud).export }
       let(:body) { { success: true, license: license_key }.to_json }
 
       before do
@@ -84,7 +84,10 @@ RSpec.describe SyncSeatLinkRequestWorker, type: :worker do
           context 'when deleting fails' do
             it 'does not create a new license and logs error' do
               last_license = License.last
-              allow(current_license).to receive(:destroy!).and_raise
+
+              relation = instance_double(ActiveRecord::Relation)
+              allow(License).to receive(:cloud).and_return(relation)
+              allow(relation).to receive(:delete_all).and_raise
 
               expect(Gitlab::ErrorTracking).to receive(:track_and_raise_for_dev_exception).and_call_original
 
