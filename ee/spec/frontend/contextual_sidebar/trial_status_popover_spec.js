@@ -14,7 +14,7 @@ describe('TrialStatusPopover component', () => {
 
   const createComponent = () => {
     return shallowMount(TrialStatusPopover, {
-      propsData: {
+      provide: {
         groupName: 'Some Test Group',
         planName: 'Ultimate',
         plansHref: 'billing/path-for/group',

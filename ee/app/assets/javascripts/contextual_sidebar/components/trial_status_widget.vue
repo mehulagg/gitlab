@@ -12,7 +12,7 @@ export default {
     GlLink,
     GlProgressBar,
   },
-  props: {
+  inject: {
     containerId: {
       type: [String, null],
       required: false,

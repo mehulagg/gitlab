@@ -20,7 +20,7 @@ export default {
     GlSprintf,
   },
   mixins: [Tracking.mixin()],
-  props: {
+  inject: {
     containerId: {
       type: [String, null],
       required: false,
