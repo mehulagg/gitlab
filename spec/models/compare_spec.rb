@@ -13,7 +13,16 @@ RSpec.describe Compare do
 
   let(:raw_compare) { Gitlab::Git::Compare.new(project.repository.raw_repository, start_commit.id, head_commit.id) }
 
-  subject { described_class.new(raw_compare, project) }
+  subject(:compare) { described_class.new(raw_compare, project) }
+
+  describe '#cache_key' do
+    subject { compare.cache_key }
+
+    it { is_expected.to include(project) }
+    it { is_expected.to include(start_commit.id) }
+    it { is_expected.to include(head_commit.id) }
+    it { is_expected.to include(compare.base_commit_sha) }
+  end
 
   describe '#start_commit' do
     it 'returns raw compare base commit' do
