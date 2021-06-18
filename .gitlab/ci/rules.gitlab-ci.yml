@@ -1305,3 +1305,5 @@
   rules:
     - <<: *if-default-refs
       changes: *yaml-lint-patterns
+
+# TEST
