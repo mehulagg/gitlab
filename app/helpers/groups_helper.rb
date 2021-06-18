@@ -6,11 +6,7 @@ module GroupsHelper
       groups#activity
       groups#subgroups
     ].tap do |paths|
-      extra_routes = if sidebar_refactor_disabled?
-                       ['groups#show', 'groups#details']
-                     else
-                       ['labels#index', 'group_members#index']
-                     end
+      extra_routes = ['labels#index', 'group_members#index']
 
       paths.concat(extra_routes)
     end

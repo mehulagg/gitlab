@@ -1,12 +1,8 @@
-- avatar_size_class = sidebar_refactor_disabled? ? 's40' : 's32'
-- avatar_classes = ['avatar-container', 'rect-avatar', 'settings-avatar']
-- avatar_classes << avatar_size_class
-
 %aside.nav-sidebar{ class: ("sidebar-collapsed-desktop" if collapsed_sidebar?), 'aria-label': _('Security navigation') }
   .nav-sidebar-inner-scroll
     .context-header
       = link_to security_dashboard_path, title: _('Security Dashboard'), id: 'logo' do
-        %span{ class: avatar_classes }
+        %span{ class: ['avatar-container', 'rect-avatar', 'settings-avatar', 's32'] }
           = brand_header_logo
         %span.sidebar-context-title
           = _('Security')
@@ -19,14 +15,9 @@
             = _('Security Dashboard')
         %ul.sidebar-sub-level-items.is-fly-out-only
           = nav_link(path: %w[dashboard#show], html_options: { class: "fly-out-top-item" } ) do
-            - if sidebar_refactor_disabled?
-              = link_to security_dashboard_path do
-                %strong.fly-out-top-item-name
-                  = _('Security Dashboard')
-            - else
-              %span.fly-out-top-item-container
-                %strong.fly-out-top-item-name
-                  = _('Security Dashboard')
+            %span.fly-out-top-item-container
+              %strong.fly-out-top-item-name
+                = _('Security Dashboard')
 
       = nav_link(path: %w[vulnerabilities#index]) do
         = link_to security_vulnerabilities_path, class: 'shortcuts-project rspec-project-link' do
@@ -36,14 +27,9 @@
             = _('Vulnerability Report')
         %ul.sidebar-sub-level-items.is-fly-out-only
           = nav_link(path: %w[vulnerabilities#index], html_options: { class: "fly-out-top-item" } ) do
-            - if sidebar_refactor_disabled?
-              = link_to security_vulnerabilities_path do
-                %strong.fly-out-top-item-name
-                  = _('Vulnerability Report')
-            - else
-              %span.fly-out-top-item-container
-                %strong.fly-out-top-item-name
-                  = _('Vulnerability Report')
+            %span.fly-out-top-item-container
+              %strong.fly-out-top-item-name
+                = _('Vulnerability Report')
 
       = nav_link(path: %w[dashboard#settings]) do
         = link_to settings_security_dashboard_path, class: 'shortcuts-project rspec-project-link' do
@@ -53,13 +39,8 @@
             = _('Settings')
         %ul.sidebar-sub-level-items.is-fly-out-only
           = nav_link(path: %w[dashboard#settings], html_options: { class: "fly-out-top-item" } ) do
-            - if sidebar_refactor_disabled?
-              = link_to settings_security_dashboard_path do
-                %strong.fly-out-top-item-name
-                  = _('Settings')
-            - else
-              %span.fly-out-top-item-container
-                %strong.fly-out-top-item-name
-                  = _('Settings')
+            %span.fly-out-top-item-container
+              %strong.fly-out-top-item-name
+                = _('Settings')
 
     = render 'shared/sidebar_toggle_button'
