@@ -11,10 +11,9 @@ GitLab can be configured to use one or multiple repository storages. These stora
 
 - Accessed via [Gitaly](gitaly/index.md), optionally on
   [its own server](gitaly/configure_gitaly.md#run-gitaly-on-its-own-server).
-- Exposed as a local mount, with repositories accessible using group and project names as
-  directory names. This [legacy storage method](repository_storage_paths.md#configure-repository-storage-paths)
-  is deprecated and [scheduled to be removed](https://gitlab.com/groups/gitlab-org/-/epics/2320) in
-  GitLab 14.0.
+- Mounted to the local disk. This [method](repository_storage_paths.md#configure-repository-storage-paths)
+  is deprecated and [scheduled to be removed](https://gitlab.com/gitlab-org/gitaly/-/issues/1690) in
+  GitLab 14.3.
 - Exposed as an NFS shared volume. This method is deprecated and
   [scheduled to be removed](https://gitlab.com/groups/gitlab-org/-/epics/3371) in GitLab 14.0.
 
