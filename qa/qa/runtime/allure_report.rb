@@ -75,7 +75,7 @@ module QA
               quarantine_issue = example.metadata.dig(:quarantine, :issue)
               example.issue('Quarantine issue', quarantine_issue) if quarantine_issue
 
-              spec_file = example.file_path.split("/").last
+              spec_file = example.file_path.split('/').last
               example.issue(
                 'Failure issues',
                 "https://gitlab.com/gitlab-org/gitlab/-/issues?scope=all&state=opened&search=#{spec_file}"
