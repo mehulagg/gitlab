@@ -84,6 +84,10 @@ module QA
           end
 
           click_element :comment_button
+
+          unless has_element?(:noteable_note_container, text: text)
+            raise ElementNotFound, "Comment did not appear as expected"
+          end
         end
 
         def edit_comment(text)
