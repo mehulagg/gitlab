@@ -264,6 +264,36 @@ RSpec.describe 'Database schema' do
     end
   end
 
+  context 'CI database' do
+    it 'does not contain anything that is not in the main database' do
+      ci_connection = ::Ci::ApplicationRecord.connection
+      main_connection = ::ActiveRecord::Base.connection
+
+      ci_connection_tables = ci_connection.tables
+      main_connection_tables = main_connection.tables
+
+      expect(ci_connection_tables - main_connection_tables).to be_empty
+
+      ci_connection_tables.each do |table|
+        # Compare index names since the IndexDefinition object does not
+        # implement the equality check we want
+        expect(ci_connection.indexes(table).map(&:name)).to match_array(main_connection.indexes(table).map(&:name))
+
+        ci_constraints = ci_connection.check_constraints(table)
+        main_constraints = main_connection.check_constraints(table)
+        ci_constraint_names = ci_constraints.map { |c| c.options[:name] }
+        main_constraint_names = main_constraints.map { |c| c.options[:name] }
+
+        expect(ci_constraint_names).to match_array(main_constraint_names)
+
+        ci_constraint_expressions = ci_constraints.map(&:expression)
+        main_constraint_expressions = ci_constraints.map(&:expression)
+
+        expect(ci_constraint_expressions).to match_array(main_constraint_expressions)
+      end
+    end
+  end
+
   private
 
   def retrieve_columns_name_with_jsonb
