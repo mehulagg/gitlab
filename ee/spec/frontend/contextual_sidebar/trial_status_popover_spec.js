@@ -12,7 +12,7 @@ describe('TrialStatusPopover component', () => {
   const findByTestId = (testId) => wrapper.find(`[data-testid="${testId}"]`);
   const findGlPopover = () => wrapper.findComponent(GlPopover);
 
-  const createComponent = () => {
+  const createComponent = (props = {}) => {
     return shallowMount(TrialStatusPopover, {
       propsData: {
         groupName: 'Some Test Group',
@@ -21,6 +21,7 @@ describe('TrialStatusPopover component', () => {
         purchaseHref: 'transactions/new',
         targetId: 'target-element-identifier',
         trialEndDate: new Date('2021-02-28'),
+        ...props,
       },
     });
   };
@@ -53,7 +54,60 @@ describe('TrialStatusPopover component', () => {
     expect(attrs['data-track-property']).toBe('experiment:show_trial_status_in_sidebar');
   });
 
+  describe('startInitiallyShown', () => {
+    describe('when set to true', () => {
+      beforeEach(() => {
+        wrapper = createComponent({ startInitiallyShown: true });
+      });
+
+      it('causes the popover to be shown by default', () => {
+        expect(findGlPopover().attributes('show')).toBeTruthy();
+      });
+
+      it('removes the popover triggers', () => {
+        expect(findGlPopover().attributes('triggers')).toBe('');
+      });
+    });
+
+    describe('when set to false', () => {
+      beforeEach(() => {
+        wrapper = createComponent({ startInitiallyShown: false });
+      });
+
+      it('does not cause the popover to be shown by default', () => {
+        expect(findGlPopover().attributes('show')).toBeFalsy();
+      });
+
+      it('uses the standard triggers for the popover', () => {
+        expect(findGlPopover().attributes('triggers')).toBe('hover focus');
+      });
+    });
+  });
+
   describe('methods', () => {
+    // TODO: Try rewriting this section to be more of a Before & After matching of the UI
+    describe('onClose', () => {
+      beforeEach(() => {
+        jest.spyOn(findGlPopover().vm, '$emit');
+        wrapper.vm.onClose();
+      });
+
+      it('tells the popover component to close', () => {
+        expect(findGlPopover().vm.$emit).toHaveBeenCalledWith('close');
+      });
+
+      it('sets forciblyShowing to false', () => {
+        expect(wrapper.vm.forciblyShowing).toBeFalsy();
+      });
+
+      it('tracks an event', () => {
+        expect(trackingSpy).toHaveBeenCalledWith(undefined, 'click_button', {
+          label: 'close_popover',
+          property: 'experiment:show_trial_status_in_sidebar',
+        });
+      });
+    });
+
     describe('onResize', () => {
       it.each`
         bp      | isDisabled

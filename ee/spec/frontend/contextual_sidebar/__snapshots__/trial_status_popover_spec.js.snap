@@ -7,6 +7,7 @@ exports[`TrialStatusPopover component matches the snapshot 1`] = `
   delay="[object Object]"
   placement="rightbottom"
   target="target-element-identifier"
+  triggers="hover focus"
 >
    
   <gl-sprintf-stub
