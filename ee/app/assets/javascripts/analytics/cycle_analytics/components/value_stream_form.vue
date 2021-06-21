@@ -353,39 +353,37 @@ export default {
         @input="onSelectPreset"
       />
       <div data-testid="extended-form-fields">
-        <div
-          v-for="(stage, activeStageIndex) in stages"
-          ref="formStages"
-          :key="stageKey(activeStageIndex)"
-        >
-          <hr class="gl-my-3" />
-          <span
-            class="gl-display-flex gl-m-0 gl-vertical-align-middle gl-mr-2 gl-font-weight-bold gl-display-flex gl-pb-3"
-            >{{ stageGroupLabel(activeStageIndex) }}</span
-          >
-          <custom-stage-fields
-            v-if="stage.custom"
-            :stage="stage"
-            :stage-events="formEvents"
-            :index="activeStageIndex"
-            :total-stages="stages.length"
-            :errors="fieldErrors(activeStageIndex)"
-            @move="handleMove"
-            @remove="onRemove"
-            @input="onFieldInput(activeStageIndex, $event)"
-          />
-          <default-stage-fields
-            v-else
-            :stage="stage"
-            :stage-events="formEvents"
-            :index="activeStageIndex"
-            :total-stages="stages.length"
-            :errors="fieldErrors(activeStageIndex)"
-            @move="handleMove"
-            @hide="onHide"
-            @input="validateStageFields(activeStageIndex)"
-          />
-        </div>
+        <transition-group name="stage-list" tag="div">
+          <div v-for="(stage, activeStageIndex) in stages" ref="formStages" :key="stage.name">
+            <hr class="gl-my-3" />
+            <span
+              class="gl-display-flex gl-m-0 gl-vertical-align-middle gl-mr-2 gl-font-weight-bold gl-display-flex gl-pb-3"
+              >{{ stageGroupLabel(activeStageIndex) }}</span
+            >
+            <custom-stage-fields
+              v-if="stage.custom"
+              :stage="stage"
+              :stage-events="formEvents"
+              :index="activeStageIndex"
+              :total-stages="stages.length"
+              :errors="fieldErrors(activeStageIndex)"
+              @move="handleMove"
+              @remove="onRemove"
+              @input="onFieldInput(activeStageIndex, $event)"
+            />
+            <default-stage-fields
+              v-else
+              :stage="stage"
+              :stage-events="formEvents"
+              :index="activeStageIndex"
+              :total-stages="stages.length"
+              :errors="fieldErrors(activeStageIndex)"
+              @move="handleMove"
+              @hide="onHide"
+              @input="validateStageFields(activeStageIndex)"
+            />
+          </div>
+        </transition-group>
         <div v-if="hiddenStages.length">
           <hr />
           <gl-form-group
