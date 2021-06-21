@@ -100,9 +100,9 @@ module Analytics
         return unless Feature.enabled?(:analytics_devops_adoption_sastdast, enabled_namespace.namespace, default_enabled: :yaml)
 
         Ci::JobArtifact.sast_reports
-                       .for_project(snapshot_project_ids)
-                       .created_in_time_range(from: range_start, to: range_end)
-                       .select(:project_id).distinct.count
+          .for_project(snapshot_project_ids)
+          .created_in_time_range(from: range_start, to: range_end)
+          .select(:project_id).distinct.count
       end
       # rubocop: enable CodeReuse/ActiveRecord
 
@@ -111,6 +111,15 @@ module Analytics
         return unless Feature.enabled?(:analytics_devops_adoption_sastdast, enabled_namespace.namespace, default_enabled: :yaml)
 
         Ci::JobArtifact.dast_reports
+          .for_project(snapshot_project_ids)
+          .created_in_time_range(from: range_start, to: range_end)
+          .select(:project_id).distinct.count
+      end
+      # rubocop: enable CodeReuse/ActiveRecord
+
+      # rubocop: disable CodeReuse/ActiveRecord
+      def dependency_scanning_enabled_count
+        Ci::JobArtifact.dependency_list_reports
           .for_project(snapshot_project_ids)
           .created_in_time_range(from: range_start, to: range_end)
           .select(:project_id).distinct.count
