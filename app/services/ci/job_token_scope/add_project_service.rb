@@ -3,10 +3,10 @@
 module Ci
   module JobTokenScope
     class AddProjectService < ::BaseService
+      include EditScopeValidations
+
       def execute(target_project)
-        if error_response = validation_error(target_project)
-          return error_response
-        end
+        validate_edit!(project, target_project, current_user)
 
         link = ::Ci::JobToken::ProjectScopeLink.new(
           source_project: project,
@@ -20,28 +20,8 @@ module Ci
         end
       rescue ActiveRecord::RecordNotUnique
         ServiceResponse.error(message: "Target project is already in the job token scope")
-      end
-
-      private
-
-      def validation_error(target_project)
-        unless project.ci_job_token_scope_enabled?
-          return ServiceResponse.error(message: "Edit not allowed since job token scope is disabled for this project")
-        end
-
-        unless can?(current_user, :admin_project, project)
-          return ServiceResponse.error(message: "Insufficient permissions to modify the job token scope")
-        end
-
-        unless target_project
-          return ServiceResponse.error(message: "Target project must be provided")
-        end
-
-        unless can?(current_user, :read_project, target_project)
-          return ServiceResponse.error(message: "Insufficient permissions to add the target project")
-        end
-
-        nil
+      rescue EditScopeValidations::ValidationError => e
+        ServiceResponse.error(message: e.message)
       end
     end
   end
