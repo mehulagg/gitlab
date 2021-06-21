@@ -214,7 +214,7 @@ class Integration < ApplicationRecord
   private_class_method :create_nonexistent_templates
 
   def self.find_or_initialize_non_project_specific_integration(name, instance: false, group_id: nil)
-    return unless name.in?(available_services_names(include_project_specific: false))
+    return unless name.in?(available_integration_names(include_project_specific: false))
 
     integration_name_to_model(name).find_or_initialize_by(instance: instance, group_id: group_id)
   end
@@ -239,13 +239,13 @@ class Integration < ApplicationRecord
   end
   private_class_method :nonexistent_services_types_for
 
-  # Returns a list of available service names.
+  # Returns a list of available integration names.
   # Example: ["asana", ...]
   # @deprecated
-  def self.available_services_names(include_project_specific: true, include_dev: true)
-    service_names = services_names
+  def self.available_integration_names(include_project_specific: true, include_dev: true)
+    service_names = integration_names
     service_names += project_specific_services_names if include_project_specific
-    service_names += dev_services_names if include_dev
+    service_names += dev_integration_names if include_dev
 
     service_names.sort_by(&:downcase)
   end
@@ -258,20 +258,20 @@ class Integration < ApplicationRecord
     integration_names
   end
 
-  def self.dev_services_names
+  def self.dev_integration_names
     return [] unless Rails.env.development?
 
     DEV_INTEGRATION_NAMES
   end
 
-  def self.project_specific_services_names
+  def self.project_specific_integration_names
     PROJECT_SPECIFIC_INTEGRATION_NAMES
   end
 
   # Returns a list of available service types.
   # Example: ["AsanaService", ...]
   def self.available_services_types(include_project_specific: true, include_dev: true)
-    available_services_names(include_project_specific: include_project_specific, include_dev: include_dev).map do |service_name|
+    available_integration_names(include_project_specific: include_project_specific, include_dev: include_dev).map do |service_name|
       integration_name_to_type(service_name)
     end
   end

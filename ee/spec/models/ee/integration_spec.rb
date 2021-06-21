@@ -3,8 +3,8 @@
 require 'spec_helper'
 
 RSpec.describe Integration do
-  describe '.available_services_names' do
-    it { expect(described_class.available_services_names).to include('github') }
+  describe '.available_integration_names' do
+    it { expect(described_class.available_integration_names).to include('github') }
   end
 
   describe '.project_specific_services_names' do

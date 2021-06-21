@@ -42,7 +42,7 @@ RSpec.describe API::Services do
     end
   end
 
-  Integration.available_services_names.each do |service|
+  Integration.available_integration_names.each do |service|
     describe "PUT /projects/:id/services/#{service.dasherize}" do
       include_context service
 
@@ -99,7 +99,7 @@ RSpec.describe API::Services do
       include_context service
 
       before do
-        initialize_service(service)
+        initialize_integration(service)
       end
 
       it "deletes #{service}" do
@@ -114,7 +114,7 @@ RSpec.describe API::Services do
     describe "GET /projects/:id/services/#{service.dasherize}" do
       include_context service
 
-      let!(:initialized_service) { initialize_service(service, active: true) }
+      let!(:initialized_service) { initialize_integration(service, active: true) }
 
       let_it_be(:project2) do
         create(:project, creator_id: user.id, namespace: user.namespace)
