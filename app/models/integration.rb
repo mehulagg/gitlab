@@ -10,9 +10,6 @@ class Integration < ApplicationRecord
   include FromUnion
   include EachBatch
 
-  # TODO Rename the table: https://gitlab.com/gitlab-org/gitlab/-/issues/201856
-  self.table_name = 'services'
-
   INTEGRATION_NAMES = %w[
     asana assembla bamboo bugzilla buildkite campfire confluence custom_issue_tracker datadog discord
     drone_ci emails_on_push ewm external_wiki flowdock hangouts_chat irker jira
