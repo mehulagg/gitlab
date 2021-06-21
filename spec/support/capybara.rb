@@ -72,8 +72,6 @@ Capybara.register_driver :chrome do |app|
   # Chrome 75 defaults to W3C mode which doesn't allow console log access
   options.add_option(:w3c, false)
 
-  options.add_argument('--enable-features=NetworkService,NetworkServiceInProcess')
-
   Capybara::Selenium::Driver.new(
     app,
     browser: :chrome,
@@ -192,6 +190,7 @@ RSpec.configure do |config|
     # failed again.
     puts 'test'
     puts example.exception
+    puts page.driver.instance_variable_get(:@browser)
 
     if example.exception && !example.exception.is_a?(RSpec::Core::Pending::PendingExampleFixedError)
       begin
