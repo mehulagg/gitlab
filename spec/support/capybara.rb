@@ -72,6 +72,8 @@ Capybara.register_driver :chrome do |app|
   # Chrome 75 defaults to W3C mode which doesn't allow console log access
   options.add_option(:w3c, false)
 
+  options.add_argument('--enable-features=NetworkService,NetworkServiceInProcess')
+
   Capybara::Selenium::Driver.new(
     app,
     browser: :chrome,
