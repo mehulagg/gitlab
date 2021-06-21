@@ -27,10 +27,10 @@ at GitLab@learn, in the Continuous Integration section.
 
 ## Create multi-project pipelines
 
-In GitLab 11.8 and later, you can [use the CI/CD configuration syntax](#create-a-multi-project-pipeline-in-your-gitlab-ciyml-file)
+In GitLab 11.8 and later, you can [use the CI/CD configuration syntax](#create-multi-project-pipelines-in-your-gitlab-ciyml-file)
 to trigger a pipeline in a different project.
 
-In GitLab 11.8 and earlier, you [used the API](#trigger-multi-project-pipelines-through-api).
+In GitLab 11.8 and earlier, you can [use the API](#create-multi-project-pipelines-by-using-the-api).
 
 ### Create multi-project pipelines in your `.gitlab-ci.yml` file
 
