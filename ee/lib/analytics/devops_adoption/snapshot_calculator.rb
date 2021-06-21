@@ -95,25 +95,44 @@ module Analytics
         end
       end
 
-      # rubocop: disable CodeReuse/ActiveRecord
       def sast_enabled_count
         return unless Feature.enabled?(:analytics_devops_adoption_sastdast, enabled_namespace.namespace, default_enabled: :yaml)
+        return unless job_artifacts_index_exists?
 
-        Ci::JobArtifact.sast_reports
-                       .for_project(snapshot_project_ids)
-                       .created_in_time_range(from: range_start, to: range_end)
-                       .select(:project_id).distinct.count
+        projects_count_with_artifact(Ci::JobArtifact.sast_reports)
+      end
+
+      def dast_enabled_count
+        return unless Feature.enabled?(:analytics_devops_adoption_sastdast, enabled_namespace.namespace, default_enabled: :yaml)
+        return unless job_artifacts_index_exists?
+
+        projects_count_with_artifact(Ci::JobArtifact.dast_reports)
+      end
+
+      def dependency_scanning_enabled_count
+        return unless job_artifacts_index_exists?
+
+        projects_count_with_artifact(Ci::JobArtifact.dependency_list_reports)
+      end
+
+      # rubocop: disable CodeReuse/ActiveRecord
+      def projects_count_with_artifact(artifacts_scope)
+        subquery = artifacts_scope.created_in_time_range(from: range_start, to: range_end)
+          .where(Ci::JobArtifact.arel_table[:project_id].eq(Project.arel_table[:id])).arel.exists
+
+        snapshot_project_ids.each_slice(1000).sum do |project_ids|
+          Project.where(id: project_ids).where(subquery).count
+        end
       end
       # rubocop: enable CodeReuse/ActiveRecord
 
       # rubocop: disable CodeReuse/ActiveRecord
-      def dast_enabled_count
-        return unless Feature.enabled?(:analytics_devops_adoption_sastdast, enabled_namespace.namespace, default_enabled: :yaml)
-
-        Ci::JobArtifact.dast_reports
-          .for_project(snapshot_project_ids)
-          .created_in_time_range(from: range_start, to: range_end)
-          .select(:project_id).distinct.count
+      def job_artifacts_index_exists?
+        Ci::JobArtifact.connection.index_exists?(
+          :ci_job_artifacts,
+          [:file_type, :project_id, :created_at],
+          name: 'index_ci_job_artifacts_on_file_type_for_devops_adoption'
+        )
       end
       # rubocop: enable CodeReuse/ActiveRecord
     end

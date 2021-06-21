@@ -28,6 +28,8 @@ module Types
               description: 'Total number of projects with enabled SAST.'
         field :dast_enabled_count, GraphQL::INT_TYPE, null: true,
               description: 'Total number of projects with enabled DAST.'
+        field :dependency_scanning_enabled_count, GraphQL::INT_TYPE, null: true,
+              description: 'Total number of projects with enabled dependency scanning.'
         field :total_projects_count, GraphQL::INT_TYPE, null: true,
               description: 'Total number of projects.'
         field :recorded_at, Types::TimeType, null: false,
