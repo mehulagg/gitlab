@@ -30,7 +30,7 @@ module EE
 
       super.concat(controllers)
     end
-#
+
     def iterations_sub_menu_controllers
       paths = ['iterations#index', 'iterations#show']
 

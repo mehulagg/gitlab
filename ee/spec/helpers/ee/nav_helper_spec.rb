@@ -16,7 +16,7 @@ RSpec.describe NavHelper do
       end
 
       it 'includes iteration_cadences#index path in the list' do
-        expect(helper.iterations_sub_menu_controllers).to_not include('iteration_cadences#index')
+        expect(helper.iterations_sub_menu_controllers).not_to include('iteration_cadences#index')
       end
     end
   end
