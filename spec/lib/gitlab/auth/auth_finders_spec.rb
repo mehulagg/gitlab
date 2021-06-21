@@ -472,6 +472,10 @@ RSpec.describe Gitlab::Auth::AuthFinders do
       it 'returns nil if the request is not API' do
         expect(find_user_from_web_access_token(:api)).to be_nil
       end
+
+      it 'returns nil if the request is not ARCHIVE' do
+        expect(find_user_from_web_access_token(:archive)).to be_nil
+      end
     end
 
     it 'returns the user for RSS requests' do
@@ -484,6 +488,10 @@ RSpec.describe Gitlab::Auth::AuthFinders do
       set_header('SCRIPT_NAME', 'url.ics')
 
       expect(find_user_from_web_access_token(:ics)).to eq(user)
+    end
+
+    it 'returns the user for ARCHIVE requests' do
+      expect(find_user_from_web_access_token(:archive)).to eq(user)
     end
 
     context 'for API requests' do
