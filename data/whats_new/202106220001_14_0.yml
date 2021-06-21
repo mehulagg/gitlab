@@ -54,9 +54,9 @@
   release: 14.0
 - title: Inline code quality notices on MR diffs
   body: |
-    "If you're a developer authoring or reviewing a merge request, you want to know how any changes may impact the quality of a project. To do this within GitLab, you previously needed two windows open: one on the code diff of the merge request and one on the main merge request page to see the code quality changes. This back-and-forth is inefficient, and makes it easy to miss critical code quality issues.
+    If you're a developer authoring or reviewing a merge request, you want to know how any changes may impact the quality of a project. To do this within GitLab, you previously needed two windows open: one on the code diff of the merge request and one on the main merge request page to see the code quality changes. This back-and-forth is inefficient, and makes it easy to miss critical code quality issues.
 
-    The merge request **Changes** tab now shows you which line introduced a code quality violation, and its severity, so you can quickly identify the most critical issues to resolve. Hovering over the icon provides details about the violation."
+    The merge request **Changes** tab now shows you which line introduced a code quality violation, and its severity, so you can quickly identify the most critical issues to resolve. Hovering over the icon provides details about the violation.
   stage: Verify
   self-managed: true
   gitlab-com: true
@@ -94,11 +94,11 @@
   release: 14.0
 - title: Aggregate identical DAST vulnerabilities into a single vulnerability
   body: |
-    "In GitLab 13.12 and earlier, all DAST vulnerabilities found in a scan were listed individually for each URL the vulnerability was found on. This could create many vulnerabilities when the fix was a single file or configuration change. For example: an issue with a server header sent with every HTTP response would be reported on every page on the site, rather than reported as a single issue with multiple occurrences.
+    In GitLab 13.12 and earlier, all DAST vulnerabilities found in a scan were listed individually for each URL the vulnerability was found on. This could create many vulnerabilities when the fix was a single file or configuration change. For example: an issue with a server header sent with every HTTP response would be reported on every page on the site, rather than reported as a single issue with multiple occurrences.
 
     To reduce the overhead of managing vulnerabilities, GitLab combines identical vulnerabilities found on multiple pages into a single reported vulnerability in the DAST report. The vulnerability details include a list of all the URLs where the vulnerability was found, rather than individual vulnerabilities being created in the vulnerability list and dashboard for each page.
 
-    This new reporting functionality will not retroactively combine vulnerabilities found in previous scans. It only applies to scans performed in GitLab 14.0 and later."
+    This new reporting functionality will not retroactively combine vulnerabilities found in previous scans. It only applies to scans performed in GitLab 14.0 and later.
   stage: Secure
   self-managed: true
   gitlab-com: true
