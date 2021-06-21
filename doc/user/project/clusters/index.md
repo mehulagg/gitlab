@@ -99,7 +99,7 @@ applications running on the cluster.
 ## Multiple Kubernetes clusters
 
 See how to associate [multiple Kubernetes clusters](multiple_kubernetes_clusters.md)
-to your GitLab project.
+with your GitLab project.
 
 ## Cluster integrations
 

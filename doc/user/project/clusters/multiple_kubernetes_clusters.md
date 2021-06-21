@@ -4,7 +4,7 @@ group: Configure
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
-# Multiple Kubernetes cluster for a single project
+# Multiple Kubernetes clusters for a single project
 
 > - Introduced in [GitLab Premium](https://about.gitlab.com/pricing/) 10.3
 > - [Moved](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/35094) to GitLab Free in 13.2.
