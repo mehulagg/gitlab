@@ -269,6 +269,8 @@ module Gitlab
           ics_request?
         when :api
           api_request?
+        when :archive
+          archive_request?
         end
       end
 
