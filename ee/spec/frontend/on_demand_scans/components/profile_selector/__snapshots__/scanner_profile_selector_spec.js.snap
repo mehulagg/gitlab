@@ -62,7 +62,7 @@ exports[`OnDemandScansScannerProfileSelector renders properly with profiles 1`] 
             <span
               class="gl-new-dropdown-button-text"
             >
-              Scanner profile #1 (Passive)
+              Scanner profile #1
             </span>
              
             <svg

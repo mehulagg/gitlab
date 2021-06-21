@@ -62,7 +62,7 @@ exports[`OnDemandScansSiteProfileSelector renders properly with profiles 1`] = `
             <span
               class="gl-new-dropdown-button-text"
             >
-              Site profile #1: https://foo.com (Not Validated)
+              Site profile #1: https://foo.com
             </span>
              
             <svg

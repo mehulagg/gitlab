@@ -79,14 +79,14 @@ export default {
     </template>
     <div class="row">
       <profile-selector-summary-cell
-        v-if="hasExcludedUrls"
         :label="$options.i18n.excludedUrls"
-        :value="profile.excludedUrls.join($options.EXCLUDED_URLS_SEPARATOR)"
+        :value="
+          hasExcludedUrls ? profile.excludedUrls.join($options.EXCLUDED_URLS_SEPARATOR) : undefined
+        "
       />
       <profile-selector-summary-cell
-        v-if="profile.requestHeaders"
         :label="$options.i18n.requestHeaders"
-        :value="__('[Redacted]')"
+        :value="profile.requestHeaders ? __('[Redacted]') : undefined"
       />
     </div>
   </div>
