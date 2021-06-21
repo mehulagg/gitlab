@@ -74,30 +74,19 @@ RSpec.describe 'Admin Dashboard' do
   end
 
   describe 'qrtly reconciliation alert', :js do
-    shared_examples 'a visible alert' do
-      it 'displays an alert' do
-        expect(page).to have_selector('[data-testid="qrtly-reconciliation-alert"]')
-      end
-    end
-
-    shared_examples 'a hidden alert' do
-      it 'does not display an alert' do
-        expect(page).not_to have_selector('[data-testid="qrtly-reconciliation-alert"]')
-      end
-    end
-
     context 'on self-managed' do
       before do
-        allow(Gitlab).to receive(:ee?).and_return(true)
+        stub_ee_application_setting(should_check_namespace_plan: false)
       end
 
       context 'when qrtly reconciliation is available' do
+        let_it_be(:reconciliation) { create(:upcoming_reconciliation, :self_managed) }
+
         before do
-          create(:upcoming_reconciliation, :self_managed)
           visit(admin_root_path)
         end
 
-        it_behaves_like 'a visible alert'
+        it_behaves_like 'a visible dismissible qrtly reconciliation alert'
       end
 
       context 'when qrtly reconciliation is not available' do
@@ -105,7 +94,7 @@ RSpec.describe 'Admin Dashboard' do
           visit(admin_root_path)
         end
 
-        it_behaves_like 'a hidden alert'
+        it_behaves_like 'a hidden qrtly reconciliation alert'
       end
     end
   end

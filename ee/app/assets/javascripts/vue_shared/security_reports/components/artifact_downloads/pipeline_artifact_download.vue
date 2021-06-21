@@ -78,6 +78,7 @@ export default {
   <div>
     <slot name="label"></slot>
     <security-report-download-dropdown
+      :text="s__('SecurityReports|Download results')"
       :artifacts="reportArtifacts"
       :loading="isLoadingReportArtifacts"
     />

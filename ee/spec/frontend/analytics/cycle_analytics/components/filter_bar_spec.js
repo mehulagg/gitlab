@@ -100,7 +100,7 @@ describe('Filter bar', () => {
   const selectedMilestone = [filterMilestones[0]];
   const selectedLabelList = [filterLabels[0]];
 
-  const findFilteredSearch = () => wrapper.find(FilteredSearchBar);
+  const findFilteredSearch = () => wrapper.findComponent(FilteredSearchBar);
   const getSearchToken = (type) =>
     findFilteredSearch()
       .props('tokens')

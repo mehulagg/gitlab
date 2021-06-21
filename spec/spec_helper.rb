@@ -190,6 +190,7 @@ RSpec.configure do |config|
   config.include RailsHelpers
   config.include SidekiqMiddleware
   config.include StubActionCableConnection, type: :channel
+  config.include StubSpamServices
 
   include StubFeatureFlags
 
@@ -271,7 +272,6 @@ RSpec.configure do |config|
       # See https://gitlab.com/gitlab-org/gitlab/-/issues/33867
       stub_feature_flags(file_identifier_hash: false)
 
-      stub_feature_flags(unified_diff_components: false)
       stub_feature_flags(diffs_virtual_scrolling: false)
 
       # The following `vue_issues_list`/`vue_issuables_list` stubs can be removed

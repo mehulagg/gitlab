@@ -1,10 +1,10 @@
 import Api from 'ee/api';
+import { PAYMENT_FORM_ID } from 'ee/subscriptions/constants';
 import { GENERAL_ERROR_MESSAGE } from 'ee/vue_shared/purchase_flow/constants';
 import activateNextStepMutation from 'ee/vue_shared/purchase_flow/graphql/mutations/activate_next_step.mutation.graphql';
 import createFlash from '~/flash';
 import { redirectTo } from '~/lib/utils/url_utility';
 import { sprintf, s__ } from '~/locale';
-import { PAYMENT_FORM_ID } from '../constants';
 import defaultClient from '../graphql';
 import * as types from './mutation_types';
 

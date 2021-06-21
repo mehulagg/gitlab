@@ -11,7 +11,7 @@ module Resolvers
 
     argument :iids, [GraphQL::ID_TYPE],
              required: false,
-             description: 'List of IIDs of epics, e.g., [1, 2].'
+             description: 'List of IIDs of epics, e.g., `[1, 2]`.'
 
     argument :state, Types::EpicStateEnum,
              required: false,

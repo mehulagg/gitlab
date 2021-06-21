@@ -775,7 +775,7 @@ export const mockAuthorTokenConfig = {
   symbol: '@',
   token: AuthorToken,
   operators: OPERATOR_IS_ONLY,
-  recentTokenValuesStorageKey: 'gitlab-org-epics-recent-tokens-author_username',
+  recentSuggestionsStorageKey: 'gitlab-org-epics-recent-tokens-author_username',
   fetchAuthors: expect.any(Function),
   preloadedAuthors: [],
 };
@@ -788,7 +788,7 @@ export const mockLabelTokenConfig = {
   symbol: '~',
   token: LabelToken,
   operators: OPERATOR_IS_ONLY,
-  recentTokenValuesStorageKey: 'gitlab-org-epics-recent-tokens-label_name',
+  recentSuggestionsStorageKey: 'gitlab-org-epics-recent-tokens-label_name',
   fetchLabels: expect.any(Function),
 };
 

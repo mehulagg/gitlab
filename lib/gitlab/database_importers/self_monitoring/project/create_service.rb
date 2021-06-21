@@ -75,13 +75,13 @@ module Gitlab
 
             if response
               # In the add_prometheus_manual_configuration method, the Prometheus
-              # server_address config is saved as an api_url in the PrometheusService
-              # model. There are validates hooks in the PrometheusService model that
-              # check if the project associated with the PrometheusService is the
+              # server_address config is saved as an api_url in the Integrations::Prometheus
+              # model. There are validates hooks in the Integrations::Prometheus model that
+              # check if the project associated with the Integrations::Prometheus is the
               # self_monitoring project. It checks
               # Gitlab::CurrentSettings.self_monitoring_project_id, which is why the
               # Gitlab::CurrentSettings cache needs to be expired here, so that
-              # PrometheusService sees the latest self_monitoring_project_id.
+              # Integrations::Prometheus sees the latest self_monitoring_project_id.
               Gitlab::CurrentSettings.expire_current_application_settings
               success(result)
             else
@@ -109,7 +109,7 @@ module Gitlab
 
             service = result[:project].find_or_initialize_service('prometheus')
 
-            unless service.update(prometheus_service_attributes)
+            unless service.update(prometheus_integration_attributes)
               log_error('Could not save prometheus manual configuration for self-monitoring project. Errors: %{errors}' % { errors: service.errors.full_messages })
               return error(_('Could not save prometheus manual configuration'))
             end
@@ -156,7 +156,7 @@ module Gitlab
             ::Gitlab::Prometheus::Internal.uri
           end
 
-          def prometheus_service_attributes
+          def prometheus_integration_attributes
             {
               api_url: internal_prometheus_server_address_uri,
               manual_configuration: true,

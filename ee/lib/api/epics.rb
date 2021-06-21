@@ -22,8 +22,8 @@ module API
         success EE::API::Entities::Epic
       end
       params do
-        optional :order_by, type: String, values: %w[created_at updated_at], default: 'created_at',
-                            desc: 'Return epics ordered by `created_at` or `updated_at` fields.'
+        optional :order_by, type: String, values: %w[created_at updated_at title], default: 'created_at',
+                            desc: 'Return epics ordered by `created_at`, `updated_at` or `title` fields.'
         optional :sort, type: String, values: %w[asc desc], default: 'desc',
                         desc: 'Return epics sorted in `asc` or `desc` order.'
         optional :search, type: String, desc: 'Search epics for text present in the title or description'

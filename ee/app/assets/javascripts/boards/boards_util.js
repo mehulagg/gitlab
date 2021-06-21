@@ -1,7 +1,7 @@
 import { FiltersInfo as FiltersInfoCE } from '~/boards/boards_util';
 import { getIdFromGraphQLId } from '~/graphql_shared/utils';
-import { urlParamsToObject } from '~/lib/utils/common_utils';
-import { objectToQuery } from '~/lib/utils/url_utility';
+// eslint-disable-next-line import/no-deprecated
+import { objectToQuery, urlParamsToObject } from '~/lib/utils/url_utility';
 import {
   EPIC_LANE_BASE_HEIGHT,
   IterationFilterType,
@@ -93,6 +93,7 @@ export function formatEpicListsPageInfo(lists) {
 
 export function transformBoardConfig(boardConfig) {
   const updatedBoardConfig = {};
+  // eslint-disable-next-line import/no-deprecated
   const passedFilterParams = urlParamsToObject(window.location.search);
   const updateScopeObject = (key, value = '') => {
     if (value === null || value === '') return;

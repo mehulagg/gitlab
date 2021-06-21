@@ -29,7 +29,7 @@ module QA
               end
 
               view 'app/assets/javascripts/vue_shared/new_namespace/components/welcome.vue' do
-                element :cicd_for_external_repo_link, ':data-qa-selector="`${panel.name}_link`"' # rubocop:disable QA/ElementWithPattern
+                element :panel_link
               end
             end
           end
@@ -51,7 +51,7 @@ module QA
           end
 
           def click_cicd_for_external_repo
-            click_element :cicd_for_external_repo_link
+            click_element(:panel_link, panel_name: 'cicd_for_external_repo')
           end
         end
       end

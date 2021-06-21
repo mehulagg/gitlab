@@ -8,7 +8,12 @@ import bulkEnableDevopsAdoptionNamespacesMutation from 'ee/analytics/devops_repo
 import createMockApollo from 'helpers/mock_apollo_helper';
 import { createMockDirective, getBinding } from 'helpers/vue_mock_directive';
 import { shallowMountExtended } from 'helpers/vue_test_utils_helper';
-import { groupNodes, devopsAdoptionNamespaceData, genericDeleteErrorMessage } from '../mock_data';
+import {
+  groupNodes,
+  groupGids,
+  devopsAdoptionNamespaceData,
+  genericDeleteErrorMessage,
+} from '../mock_data';
 
 const localVue = createLocalVue();
 Vue.use(VueApollo);
@@ -123,16 +128,23 @@ describe('DevopsAdoptionAddDropdown', () => {
       });
 
       describe('on row click', () => {
-        describe('sucessful request', () => {
+        describe.each`
+          level      | groupGid
+          ${'group'} | ${groupGids[0]}
+          ${'admin'} | ${null}
+        `('$level level sucessful request', ({ groupGid }) => {
           beforeEach(() => {
-            createComponent({ props: { hasSubgroups: true, groups: groupNodes } });
+            createComponent({
+              props: { hasSubgroups: true, groups: groupNodes },
+              provide: { groupGid },
+            });
 
             clickFirstRow();
           });
 
           it('makes a request to enable the selected group', () => {
             expect(mutate).toHaveBeenCalledWith({
-              displayNamespaceId: undefined,
+              displayNamespaceId: groupGid,
               namespaceIds: ['gid://gitlab/Group/1'],
             });
           });

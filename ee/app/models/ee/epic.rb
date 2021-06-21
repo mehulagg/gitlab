@@ -112,6 +112,14 @@ module EE
         reorder(keyset_order)
       end
 
+      scope :order_title_asc, -> do
+        reorder(title: :asc)
+      end
+
+      scope :order_title_desc, -> do
+        reorder(title: :desc)
+      end
+
       scope :order_closed_date_desc, -> { reorder(closed_at: :desc) }
 
       scope :order_relative_position, -> do
@@ -179,6 +187,8 @@ module EE
         when 'start_date_desc' then order_start_date_desc
         when 'end_date_asc' then order_end_date_asc
         when 'end_date_desc' then order_end_date_desc
+        when 'title_asc' then order_title_asc
+        when 'title_desc' then order_title_desc
         else
           super
         end
@@ -256,6 +266,8 @@ module EE
         when 'end_date_asc' then order_end_date_asc
         when 'end_date_desc' then order_end_date_desc
         when 'relative_position' then order_relative_position
+        when 'title_asc' then order_title_asc
+        when 'title_desc' then order_title_desc
         else
           super
         end
@@ -268,7 +280,9 @@ module EE
             'start_date_asc' => -> { order_start_date_asc },
             'start_date_desc' => -> { order_start_date_desc },
             'end_date_asc' => -> { order_end_date_asc },
-            'end_date_desc' => -> { order_end_date_desc }
+            'end_date_desc' => -> { order_end_date_desc },
+            'title_asc' => -> { order_title_asc },
+            'title_desc' => -> { order_title_desc }
           }
         )
       end

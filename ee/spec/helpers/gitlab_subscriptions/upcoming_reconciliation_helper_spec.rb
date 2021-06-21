@@ -26,7 +26,8 @@ RSpec.describe GitlabSubscriptions::UpcomingReconciliationHelper do
       expect(helper.display_upcoming_reconciliation_alert?(namespace)).to eq(true)
       expect(helper.upcoming_reconciliation_hash(namespace)).to eq(
         reconciliation_date: upcoming_reconciliation.next_reconciliation_date.to_s,
-        cookie_key: cookie_key
+        cookie_key: cookie_key,
+        dot_com: true
       )
     end
 
@@ -46,7 +47,8 @@ RSpec.describe GitlabSubscriptions::UpcomingReconciliationHelper do
         expect(helper.display_upcoming_reconciliation_alert?(group)).to eq(true)
         expect(helper.upcoming_reconciliation_hash(group)).to eq(
           reconciliation_date: upcoming_reconciliation2.next_reconciliation_date.to_s,
-          cookie_key: cookie_key
+          cookie_key: cookie_key,
+          dot_com: true
         )
       end
     end
@@ -97,7 +99,8 @@ RSpec.describe GitlabSubscriptions::UpcomingReconciliationHelper do
       expect(helper.display_upcoming_reconciliation_alert?).to eq(true)
       expect(helper.upcoming_reconciliation_hash).to eq(
         reconciliation_date: upcoming_reconciliation.next_reconciliation_date.to_s,
-        cookie_key: cookie_key
+        cookie_key: cookie_key,
+        dot_com: false
       )
     end
 
@@ -117,9 +120,7 @@ RSpec.describe GitlabSubscriptions::UpcomingReconciliationHelper do
         expect(helper.display_upcoming_reconciliation_alert?).to eq(false)
         expect(helper.upcoming_reconciliation_hash).to eq({})
       end
-    end
 
-    context 'when instance has paid namespaces (ex: gitlab.com)' do
       it 'returns false and empty hash' do
         stub_application_setting(check_namespace_plan: true)
         enable_admin_mode!(user)

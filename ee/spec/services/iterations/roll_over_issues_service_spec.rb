@@ -7,13 +7,13 @@ RSpec.describe Iterations::RollOverIssuesService do
   let_it_be(:group) { create(:group) }
   let_it_be(:closed_iteration1) { create(:closed_iteration, group: group) }
   let_it_be(:closed_iteration2) { create(:closed_iteration, group: group) }
-  let_it_be(:started_iteration) { create(:started_iteration, group: group) }
+  let_it_be(:current_iteration) { create(:current_iteration, group: group) }
   let_it_be(:upcoming_iteration) { create(:upcoming_iteration, group: group) }
   let_it_be(:open_issues) { [create(:issue, :opened, iteration: closed_iteration1)] }
   let_it_be(:closed_issues) { [create(:issue, :closed, iteration: closed_iteration1)] }
 
   let(:from_iteration) { closed_iteration1 }
-  let(:to_iteration) { started_iteration }
+  let(:to_iteration) { current_iteration }
 
   subject { described_class.new(user, from_iteration, to_iteration).execute }
 
@@ -80,12 +80,12 @@ RSpec.describe Iterations::RollOverIssuesService do
         it { is_expected.not_to be_error }
 
         it 'rolls-over issues to next iteration' do
-          expect(started_iteration.issues).to be_empty
+          expect(current_iteration.issues).to be_empty
           expect(closed_iteration1.issues).to match_array(open_issues + closed_issues)
 
           expect { subject }.to change(ResourceIterationEvent, :count).by(2)
 
-          expect(started_iteration.reload.issues).to match_array(open_issues)
+          expect(current_iteration.reload.issues).to match_array(open_issues)
           expect(closed_iteration1.reload.issues).to match_array(closed_issues)
         end
       end

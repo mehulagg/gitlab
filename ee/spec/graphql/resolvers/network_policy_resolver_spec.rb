@@ -8,13 +8,13 @@ RSpec.describe Resolvers::NetworkPolicyResolver do
   let_it_be(:project) { create(:project) }
 
   let(:user) { project.owner }
-  let(:time_now) { Time.current }
+  let(:time_now) { Time.utc(2021, 6, 16) }
 
   let(:policy) do
     Gitlab::Kubernetes::NetworkPolicy.new(
       name: 'policy',
       namespace: 'another',
-      creation_timestamp: time_now,
+      creation_timestamp: time_now.iso8601,
       selector: { matchLabels: { role: 'db' } },
       ingress: [{ from: [{ namespaceSelector: { matchLabels: { project: 'myproject' } } }] }]
     )
@@ -24,7 +24,7 @@ RSpec.describe Resolvers::NetworkPolicyResolver do
     Gitlab::Kubernetes::CiliumNetworkPolicy.new(
       name: 'cilium_policy',
       namespace: 'another',
-      creation_timestamp: time_now,
+      creation_timestamp: time_now.iso8601,
       resource_version: '102',
       selector: { matchLabels: { role: 'db' } },
       ingress: [{ endpointFrom: [{ matchLabels: { project: 'myproject' } }] }]

@@ -21,10 +21,17 @@ export const stateData = {
   subscription: {
     quantity: 1,
     namespaceId: null,
-    paymentMethodId: null,
     __typename: 'Subscription',
   },
   selectedPlanId: null,
+  paymentMethod: {
+    id: null,
+    creditCardExpirationMonth: null,
+    creditCardExpirationYear: null,
+    creditCardType: null,
+    creditCardMaskNumber: null,
+    __typename: 'PaymentMethod',
+  },
   customer: {
     country: null,
     address1: null,

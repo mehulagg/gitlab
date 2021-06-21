@@ -152,15 +152,15 @@ module EE
       scope :with_security_reports_stored, -> { where('EXISTS (?)', ::Vulnerabilities::Finding.scoped_project.select(1)) }
       scope :with_security_reports, -> { where('EXISTS (?)', ::Ci::JobArtifact.security_reports.scoped_project.select(1)) }
       scope :with_github_service_pipeline_events, -> { joins(:github_service).merge(::Integrations::Github.pipeline_hooks) }
-      scope :with_active_prometheus_service, -> { joins(:prometheus_service).merge(PrometheusService.active) }
+      scope :with_active_prometheus_integration, -> { joins(:prometheus_integration).merge(::Integrations::Prometheus.active) }
       scope :with_enabled_incident_sla, -> { joins(:incident_management_setting).where(project_incident_management_settings: { sla_timer: true }) }
       scope :mirrored_with_enabled_pipelines, -> do
         joins(:project_feature).mirror.where(mirror_trigger_builds: true,
                                              project_features: { builds_access_level: ::ProjectFeature::ENABLED })
       end
-      scope :with_slack_service, -> { joins(:slack_service) }
-      scope :with_slack_slash_commands_service, -> { joins(:slack_slash_commands_service) }
-      scope :with_prometheus_service, -> { joins(:prometheus_service) }
+      scope :with_slack_integration, -> { joins(:slack_integration) }
+      scope :with_slack_slash_commands_integration, -> { joins(:slack_slash_commands_integration) }
+      scope :with_prometheus_integration, -> { joins(:prometheus_integration) }
       scope :aimed_for_deletion, -> (date) { where('marked_for_deletion_at <= ?', date).without_deleted }
       scope :not_aimed_for_deletion, -> { where(marked_for_deletion_at: nil) }
       scope :with_repos_templates, -> { where(namespace_id: ::Gitlab::CurrentSettings.current_application_settings.custom_project_templates_group_id) }
@@ -244,7 +244,7 @@ module EE
       def jira_issue_association_required_to_merge_enabled?
         strong_memoize(:jira_issue_association_required_to_merge_enabled) do
           next false unless jira_issues_integration_available?
-          next false unless jira_service&.active?
+          next false unless jira_integration&.active?
           next false unless ::Feature.enabled?(:jira_issue_association_on_merge_request, self, default_enabled: :yaml)
           next false unless feature_available?(:jira_issue_association_enforcement)
 
@@ -253,11 +253,11 @@ module EE
       end
 
       def jira_vulnerabilities_integration_enabled?
-        !!jira_service&.jira_vulnerabilities_integration_enabled?
+        !!jira_integration&.jira_vulnerabilities_integration_enabled?
       end
 
       def configured_to_create_issues_from_vulnerabilities?
-        !!jira_service&.configured_to_create_issues_from_vulnerabilities?
+        !!jira_integration&.configured_to_create_issues_from_vulnerabilities?
       end
     end
 

@@ -44,6 +44,7 @@ exports[`Security Dashboard error states has unavailable pages 1`] = `
         <img
           alt=""
           class="gl-max-w-full"
+          role="img"
           src="/test/empty_state.svg"
         />
       </div>

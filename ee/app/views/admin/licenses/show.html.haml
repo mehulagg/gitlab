@@ -1,7 +1,6 @@
 - page_title _('License')
 
-- if display_upcoming_reconciliation_alert?
-  #js-qrtly-reconciliation-alert{ data: upcoming_reconciliation_hash }
+= render_if_exists 'shared/qrtly_reconciliation_alert'
 
 %h3.page-title
   = _('Your License')
@@ -13,10 +12,12 @@
 %hr
 
 - if License.future_dated_only?
-  .gl-alert.gl-alert-info
-    = sprite_icon('information-o', css_class: 'gl-icon gl-alert-icon gl-alert-icon-no-title')
+  = render 'shared/global_alert',
+    title: _('You do not have an active license'),
+    variant: :info,
+    is_contained: true,
+    dismissible: false do
     .gl-alert-body
-      %h4.gl-alert-title= _('You do not have an active license')
       = _('You have a license that activates at a future date. Please see the License History table below.')
 
 - if @license.present?

@@ -9,6 +9,10 @@ module EE
       around_action :set_current_ip_address
     end
 
+    def check_if_gl_com_or_dev
+      render_404 unless ::Gitlab.dev_env_or_com?
+    end
+
     def verify_namespace_plan_check_enabled
       render_404 unless ::Gitlab::CurrentSettings.should_check_namespace_plan?
     end

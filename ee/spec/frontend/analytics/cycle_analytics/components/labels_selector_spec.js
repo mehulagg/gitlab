@@ -71,7 +71,7 @@ describe('Value Stream Analytics LabelsSelector', () => {
     });
 
     it('will render with the default option selected', () => {
-      const sectionHeader = wrapper.find(GlDropdownSectionHeader);
+      const sectionHeader = wrapper.findComponent(GlDropdownSectionHeader);
 
       expect(sectionHeader.exists()).toBe(true);
       expect(sectionHeader.text()).toEqual('Select a label');

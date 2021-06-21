@@ -42,11 +42,7 @@ describe('CloudLicenseApp', () => {
     template: `<input />`,
   });
 
-  const createFakeEvent = () => ({
-    preventDefault,
-    stopPropagation,
-  });
-
+  const createFakeEvent = () => ({ preventDefault, stopPropagation });
   const createComponentWithApollo = ({ props = {}, mutationMock } = {}) => {
     wrapper = extendedWrapper(
       shallowMount(SubscriptionActivationForm, {

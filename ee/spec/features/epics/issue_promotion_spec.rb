@@ -89,33 +89,6 @@ RSpec.describe 'Issue promotion', :js do
         end
       end
     end
-
-    context 'when issue is confidential' do
-      let(:confidential_issue) { create(:issue, :confidential, project: project) }
-
-      before do
-        group.add_developer(user)
-        visit project_issue_path(project, confidential_issue)
-      end
-
-      it 'displays warning' do
-        fill_in 'Comment', with: '/promote'
-
-        expect(find_autocomplete_menu).to have_text 'Promote confidential issue to a non-confidential epic'
-      end
-
-      it 'promotes the issue' do
-        add_note('/promote')
-
-        epic = Epic.last
-
-        expect(page).to have_content 'Promoted confidential issue to a non-confidential epic. Information in this issue is no longer confidential as epics are public to group members.'
-        expect(confidential_issue.reload).to be_closed
-        expect(epic.title).to eq(confidential_issue.title)
-        expect(epic.description).to eq(confidential_issue.description)
-        expect(epic.author).to eq(user)
-      end
-    end
   end
 
   private

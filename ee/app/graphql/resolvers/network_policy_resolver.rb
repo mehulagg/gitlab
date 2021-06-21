@@ -26,7 +26,7 @@ module Resolvers
         {
           name: policy_json[:name],
           namespace: policy_json[:namespace],
-          updated_at: policy_json[:creation_timestamp],
+          updated_at: Time.iso8601(policy_json[:creation_timestamp]),
           yaml: policy_json[:manifest],
           from_auto_devops: policy_json[:is_autodevops],
           enabled: policy_json[:is_enabled]

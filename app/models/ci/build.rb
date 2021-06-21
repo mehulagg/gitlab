@@ -136,6 +136,7 @@ module Ci
 
     scope :eager_load_job_artifacts, -> { includes(:job_artifacts) }
     scope :eager_load_job_artifacts_archive, -> { includes(:job_artifacts_archive) }
+    scope :eager_load_tags, -> { includes(:tags) }
 
     scope :eager_load_everything, -> do
       includes(
@@ -212,7 +213,8 @@ module Ci
 
     acts_as_taggable
 
-    add_authentication_token_field :token, encrypted: :optional
+    add_authentication_token_field :token,
+      encrypted: -> { Gitlab::Ci::Features.require_builds_token_encryption? ? :required : :optional }
 
     before_save :ensure_token
     before_destroy { unscoped_project }
@@ -756,6 +758,14 @@ module Ci
 
     def valid_token?(token)
       self.token && ActiveSupport::SecurityUtils.secure_compare(token, self.token)
+    end
+
+    def tag_list
+      if tags.loaded?
+        tags.map(&:name)
+      else
+        super
+      end
     end
 
     def has_tags?
