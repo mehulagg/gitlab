@@ -90,39 +90,11 @@ combined with *one* of the following:
 - An environment-scoped cluster per protected environment. The same cluster
   can be added multiple times with multiple restricted service accounts.
 
-## Integrations
-
-### Canary Deployments
-
-Leverage [Kubernetes' Canary deployments](https://kubernetes.io/docs/concepts/cluster-administration/manage-deployment/#canary-deployments)
-and visualize your canary deployments right inside the Deploy Board, without
-the need to leave GitLab.
-
-[Read more about Canary Deployments](../canary_deployments.md)
-
-### Deploy Boards
-
-GitLab Deploy Boards offer a consolidated view of the current health and
-status of each CI [environment](../../../ci/environments/index.md) running on Kubernetes.
-They display the status of the pods in the deployment. Developers and other
-teammates can view the progress and status of a rollout, pod by pod, in the
-workflow they already use without any need to access Kubernetes.
-
-[Read more about Deploy Boards](../deploy_boards.md)
-
-### Viewing pod logs
-
-GitLab enables you to view the logs of running pods in connected Kubernetes
-clusters. By displaying the logs directly in GitLab, developers can avoid having
-to manage console tools or jump to a different interface.
-
-[Read more about Kubernetes logs](kubernetes_pod_logs.md)
-
-### Web terminals
+## Web terminals for Kubernetes clusters
 
 > Introduced in GitLab 8.15.
 
-When enabled, the Kubernetes integration adds [web terminal](../../../ci/environments/index.md#web-terminals)
+The Kubernetes integration adds [web terminal](../../../ci/environments/index.md#web-terminals)
 support to your [environments](../../../ci/environments/index.md). This is based
 on the `exec` functionality found in Docker and Kubernetes, so you get a new
 shell session in your existing containers. To use this integration, you

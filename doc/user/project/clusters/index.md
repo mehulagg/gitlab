@@ -1,6 +1,6 @@
 ---
-stage: Monitor
-group: Monitor
+stage: Configure
+group: Configure
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
@@ -12,21 +12,28 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/issues/39840) in
 >   GitLab 11.11 for [instances](../../instance/clusters/index.md).
 
-You can use GitLab to manage your clusters and [benefit from the GitLab-Kubernetes integration](#benefit-from-the-gitlab-kubernetes-integration).
+We offer extensive integrations to help you connect and manage your Kubernetes clusters from GitLab.
 
-See the [supported cluster versions](#supported-cluster-versions) before
-you begin.
+Read through this document to get started.
+
+## Clusters infrastructure
+
+Use [Infrastructure as Code](../../infrastructure) to manage your clusters through GitLab with the Terraform integration to create new clusters from GitLab and manage your cluster's infrastructure changes.
 
 ## Benefit from the GitLab-Kubernetes integration
 
 Using the GitLab-Kubernetes integration, you can benefit of GitLab
 features such as:
 
-- Create GitLab CI/CD [Pipelines](../../../ci/pipelines/index.md) to build, test, and deploy to your cluster.
+- Create [CI/CD Pipelines](../../../ci/pipelines/index.md) to build, test, and deploy to your cluster.
 - Use [Auto DevOps](#auto-devops) to automate the CI/CD process.
 - Use [role-based or attribute-based access controls](cluster_access.md).
 - Run serverless workloads on [Kubernetes with Knative](serverless/index.md).
 - Connect GitLab to in-cluster applications using [cluster integrations](../../clusters/integrations.md).
+- Use [Deploy Boards](../deploy_boards.md) to see the health and status of each CI [environment](../../../ci/environments/index.md) running on your Kubernetes cluster.
+- Use [Canary deployments](../canary_deployments.md) to see them directly on your Deploy Board in GitLab.
+- View your [Kubernetes podlogs](kubernetes_pod_logs.md) directly in GitLab.
+- Connect to your cluster through GitLab [web terminals](deploy_to_cluster.md#web-terminals-for-kubernetes-clusters).
 
 ## Supported cluster versions
 
@@ -133,3 +140,4 @@ Automatically detect and monitor Kubernetes metrics. Automatic monitoring of
 When [the Prometheus cluster integration is enabled](../../clusters/integrations.md#prometheus-cluster-integration), GitLab monitors the cluster's health. At the top of the cluster settings page, CPU and Memory utilization is displayed, along with the total amount available. Keeping an eye on cluster resources can be important, if the cluster runs out of memory pods may be shutdown or fail to start.
 
 ![Cluster Monitoring](img/k8s_cluster_monitoring.png)
+
