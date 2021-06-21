@@ -10,11 +10,6 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 > - [Deployed behind a feature flag](../../../user/feature_flags.md), disabled by default.
 > - [Enabled by default](https://gitlab.com/gitlab-org/gitlab/-/issues/323159) in GitLab 13.12.
 > - Enabled on GitLab.com.
-> - For GitLab self-managed instances, GitLab administrators can opt to [disable it](#enable-or-disable-group-devops-adoption). **(ULTIMATE SELF)**
-
-This in-development feature might not be available for your use. There can be
-[risks when enabling features still in development](../../feature_flags.md#risks-when-enabling-features-still-in-development).
-Refer to this feature's version history for more details.
 
 Prerequisites:
 
@@ -64,12 +59,6 @@ Each group appears as a separate row in the table.
 For each row, a feature is considered "adopted" if it has been used in a project in the given group
 during the time period (including projects in any sub-groups of the given group).
 
-You should expect adoption to be lower at the beginning of the month,
-before you have had an opportunity to use all the features listed in the table.
-
-In the future [we plan to implement](https://gitlab.com/gitlab-org/gitlab/-/issues/329708)
-a rolling 30-day perspective instead.
-
 ## When is a feature considered adopted
 
 A feature is considered "adopted" if it has been used anywhere in the group in the specified time.
@@ -105,21 +94,3 @@ Please note that the sub-group data might not appear immediately,
 because GitLab requires a few moments to collect the data.
 Generally the data will be visible in less than one minute.
 
-## Enable or disable Group DevOps Adoption **(ULTIMATE SELF)**
-
-Group DevOps Adoption is under development and not ready for production use. It is
-deployed behind a feature flag that is **enabled by default**.
-[GitLab administrators with access to the GitLab Rails console](../../../administration/feature_flags.md)
-can disable it.
-
-To disable it:
-
-```ruby
-Feature.disable(:group_devops_adoption)
-```
-
-To re-enable it:
-
-```ruby
-Feature.enable(:group_devops_adoption)
-```
