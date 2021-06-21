@@ -86,6 +86,7 @@ class Wiki
 
   def create_wiki_repository
     repository.create_if_not_exists
+    change_head_to_default_branch
 
     raise CouldNotCreateWikiError unless repository_exists?
   rescue StandardError => err
@@ -97,6 +98,15 @@ class Wiki
     })
 
     raise CouldNotCreateWikiError
+  end
+
+  def change_head_to_default_branch
+    return unless repository.empty?
+
+    repository.before_change_head
+    repository.raw_repository.write_ref('HEAD', "refs/heads/#{default_branch}")
+    repository.copy_gitattributes(default_branch)
+    repository.after_change_head
   end
 
   def has_home_page?
@@ -246,7 +256,7 @@ class Wiki
 
   override :default_branch
   def default_branch
-    wiki.class.default_ref
+    super || Gitlab::DefaultBranch.value(object: container)
   end
 
   def wiki_base_path
