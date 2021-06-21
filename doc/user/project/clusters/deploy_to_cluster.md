@@ -48,7 +48,7 @@ GitLab CI/CD build environment to deployment jobs. Deployment jobs have
 | `KUBE_CA_PEM_FILE`         | Path to a file containing PEM data. Only present if a custom CA bundle was specified. |
 | `KUBE_CA_PEM`              | (**deprecated**) Raw PEM data. Only if a custom CA bundle was specified. |
 | `KUBECONFIG`               | Path to a file containing `kubeconfig` for this deployment. CA bundle would be embedded if specified. This configuration also embeds the same token defined in `KUBE_TOKEN` so you likely need only this variable. This variable name is also automatically picked up by `kubectl` so you don't need to reference it explicitly if using `kubectl`. |
-| `KUBE_INGRESS_BASE_DOMAIN` | From GitLab 11.8, this variable can be used to set a domain per cluster. See [cluster domains](#base-domain) for more information. |
+| `KUBE_INGRESS_BASE_DOMAIN` | From GitLab 11.8, this variable can be used to set a domain per cluster. See [cluster domains](gitlab_managed_clusters.md#base-domain) for more information. |
 
 ## Custom namespace
 
@@ -75,7 +75,7 @@ You can customize the deployment namespace in a few ways:
   in `.gitlab-ci.yml`.
 
 When you customize the namespace, existing environments remain linked to their current
-namespaces until you [clear the cluster cache](#clearing-the-cluster-cache).
+namespaces until you [clear the cluster cache](gitlab_managed_clusters.md#clearing-the-cluster-cache).
 
 ### Protecting credentials
 
@@ -118,7 +118,7 @@ the deployment job:
 - A namespace.
 - A service account.
 
-However, sometimes GitLab can not create them. In such instances, your job can fail with the message:
+However, sometimes GitLab cannot create them. In such instances, your job can fail with the message:
 
 ```plaintext
 This job failed because the necessary resources were not successfully created.
@@ -137,5 +137,5 @@ Reasons for failure include:
 NOTE:
 Project-level clusters upgraded from GitLab 12.0 or older may be configured
 in a way that causes this error. Ensure you deselect the
-[GitLab-managed cluster](#gitlab-managed-clusters) option if you want to manage
+[GitLab-managed cluster](gitlab_managed_clusters.md) option if you want to manage
 namespaces and service accounts yourself.

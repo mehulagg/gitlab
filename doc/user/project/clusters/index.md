@@ -18,7 +18,7 @@ Read through this document to get started.
 
 ## Clusters infrastructure
 
-Use [Infrastructure as Code](../../infrastructure) to manage your clusters through GitLab with the Terraform integration to create new clusters from GitLab and manage your cluster's infrastructure changes.
+Use [Infrastructure as Code](../../infrastructure) to create and manage your clusters with the GitLab integration with Terraform.
 
 ## Benefit from the GitLab-Kubernetes integration
 
@@ -31,7 +31,7 @@ features such as:
 - Run serverless workloads on [Kubernetes with Knative](serverless/index.md).
 - Connect GitLab to in-cluster applications using [cluster integrations](../../clusters/integrations.md).
 - Use [Deploy Boards](../deploy_boards.md) to see the health and status of each CI [environment](../../../ci/environments/index.md) running on your Kubernetes cluster.
-- Use [Canary deployments](../canary_deployments.md) to see them directly on your Deploy Board in GitLab.
+- Use [Canary deployments](../canary_deployments.md) to update only a portion of your fleet with the latest version of your application.
 - View your [Kubernetes podlogs](kubernetes_pod_logs.md) directly in GitLab.
 - Connect to your cluster through GitLab [web terminals](deploy_to_cluster.md#web-terminals-for-kubernetes-clusters).
 
@@ -98,7 +98,7 @@ applications running on the cluster.
 
 ## Multiple Kubernetes clusters
 
-See how to associate [multiple Kubernetes clusters](add_existing_cluster.md#multiple-kubernetes-clusters-for-a-single-project)
+See how to associate [multiple Kubernetes clusters](multiple_kubernetes_clusters.md)
 to your GitLab project.
 
 ## Cluster integrations
@@ -140,4 +140,3 @@ Automatically detect and monitor Kubernetes metrics. Automatic monitoring of
 When [the Prometheus cluster integration is enabled](../../clusters/integrations.md#prometheus-cluster-integration), GitLab monitors the cluster's health. At the top of the cluster settings page, CPU and Memory utilization is displayed, along with the total amount available. Keeping an eye on cluster resources can be important, if the cluster runs out of memory pods may be shutdown or fail to start.
 
 ![Cluster Monitoring](img/k8s_cluster_monitoring.png)
-

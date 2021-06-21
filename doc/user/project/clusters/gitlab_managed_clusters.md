@@ -16,7 +16,7 @@ details about the created resources.
 
 If you choose to manage your own cluster, project-specific resources aren't created
 automatically. If you are using [Auto DevOps](../../../topics/autodevops/index.md), you must
-explicitly provide the `KUBE_NAMESPACE` [deployment variable](#deployment-variables)
+explicitly provide the `KUBE_NAMESPACE` [deployment variable](deploy_to_cluster.md#deployment-variables)
 for your deployment jobs to use. Otherwise, a namespace is created for you.
 
 WARNING:
