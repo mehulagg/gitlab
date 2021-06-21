@@ -12,6 +12,7 @@ import waitForPromises from 'helpers/wait_for_promises';
 import BranchSwitcher from '~/pipeline_editor/components/file_nav/branch_switcher.vue';
 import { DEFAULT_FAILURE } from '~/pipeline_editor/constants';
 import getAvailableBranchesQuery from '~/pipeline_editor/graphql/queries/available_branches.graphql';
+import getLatestCommitShaQuery from '~/pipeline_editor/graphql/queries/latest_commit_sha.query.graphql';
 import {
   mockBranchPaginationLimit,
   mockDefaultBranch,
@@ -23,6 +24,7 @@ import {
   mockTotalBranchResults,
   mockTotalSearchResults,
   mockNewBranch,
+  mockNewCommitSha,
 } from '../../mock_data';
 
 const localVue = createLocalVue();
@@ -34,6 +36,7 @@ describe('Pipeline editor branch switcher', () => {
   let mockAvailableBranchQuery;
   let mockCurrentBranchQuery;
   let mockLastCommitBranchQuery;
+  let mockLatestCommitShaQuery;
 
   const createComponent = (
     { currentBranch, isQueryLoading, mountFn, options } = {
@@ -71,7 +74,7 @@ describe('Pipeline editor branch switcher', () => {
   };
 
   const createComponentWithApollo = (mountFn = shallowMount) => {
-    const handlers = [[getAvailableBranchesQuery, mockAvailableBranchQuery]];
+    const handlers = [[getAvailableBranchesQuery, mockAvailableBranchQuery], [getLatestCommitShaQuery, mockLatestCommitShaQuery]];
     const resolvers = {
       Query: {
         currentBranch() {
@@ -101,13 +104,17 @@ describe('Pipeline editor branch switcher', () => {
   const findInfiniteScroll = () => wrapper.findComponent(GlInfiniteScroll);
   const defaultBranchInDropdown = () => findDropdownItems().at(0);
 
-  const setMockResolvedValues = ({ availableBranches, currentBranch, lastCommitBranch }) => {
+  const setMockResolvedValues = ({ availableBranches, commitSha, currentBranch, lastCommitBranch }) => {
     if (availableBranches) {
       mockAvailableBranchQuery.mockResolvedValue(availableBranches);
     }
 
     if (currentBranch) {
       mockCurrentBranchQuery.mockResolvedValue(currentBranch);
+    }
+
+    if (commitSha) {
+      mockLatestCommitShaQuery.mockResolvedValue(commitSha);
     }
 
     mockLastCommitBranchQuery.mockResolvedValue(lastCommitBranch || '');
@@ -117,6 +124,7 @@ describe('Pipeline editor branch switcher', () => {
     mockAvailableBranchQuery = jest.fn();
     mockCurrentBranchQuery = jest.fn();
     mockLastCommitBranchQuery = jest.fn();
+    mockLatestCommitShaQuery = jest.fn();
   });
 
   afterEach(() => {
@@ -127,7 +135,7 @@ describe('Pipeline editor branch switcher', () => {
     expect(wrapper.emitted('showError')).toBeDefined();
     expect(wrapper.emitted('showError')[0]).toEqual([
       {
-        reasons: [wrapper.vm.$options.i18n.fetchError],
+        reasons: [wrapper.vm.$options.i18n.branchListFetchError],
         type: DEFAULT_FAILURE,
       },
     ]);
@@ -200,6 +208,7 @@ describe('Pipeline editor branch switcher', () => {
       setMockResolvedValues({
         availableBranches: mockProjectBranches,
         currentBranch: mockDefaultBranch,
+        commitSha: mockNewCommitSha,
       });
       createComponentWithApollo(mount);
       await waitForPromises();

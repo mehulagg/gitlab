@@ -18,16 +18,19 @@ import {
   BRANCH_SEARCH_DEBOUNCE,
   DEFAULT_FAILURE,
 } from '~/pipeline_editor/constants';
+import updateCommitSha from '~/pipeline_editor/graphql/mutations/update_commit_sha.mutation.graphql';
 import updateCurrentBranchMutation from '~/pipeline_editor/graphql/mutations/update_current_branch.mutation.graphql';
 import getAvailableBranchesQuery from '~/pipeline_editor/graphql/queries/available_branches.graphql';
 import getCurrentBranchQuery from '~/pipeline_editor/graphql/queries/client/current_branch.graphql';
 import getLastCommitBranchQuery from '~/pipeline_editor/graphql/queries/client/last_commit_branch.query.graphql';
+import getLatestCommitShaQuery from '~/pipeline_editor/graphql/queries/latest_commit_sha.query.graphql';
 
 export default {
   i18n: {
+    branchListFetchError: s__('Unable to fetch branch list for this project.'),
+    commitShaFetchError: s__('Unable to fetch latest commit sha for this branch.'),
     dropdownHeader: s__('Switch branch'),
     title: s__('Branches'),
-    fetchError: s__('Unable to fetch branch list for this project.'),
   },
   inputDebounce: BRANCH_SEARCH_DEBOUNCE,
   components: {
@@ -155,6 +158,8 @@ export default {
       }
 
       this.updateCurrentBranch(newBranch);
+      this.updateCommitSha(newBranch);
+
       const updatedPath = setUrlParams({ branch_name: newBranch });
       historyPushState(updatedPath);
 
@@ -184,7 +189,29 @@ export default {
     showFetchError() {
       this.$emit('showError', {
         type: DEFAULT_FAILURE,
-        reasons: [this.$options.i18n.fetchError],
+        reasons: [this.$options.i18n.branchListFetchError],
+      });
+    },
+    async updateCommitSha(newBranch) {
+      const fetchResults = await this.$apollo
+        .query({
+          query: getLatestCommitShaQuery,
+          variables: {
+            projectPath: this.projectFullPath,
+            ref: newBranch,
+          },
+        })
+        .catch(this.showFetchError);
+
+      const pipelineNodes = fetchResults.data?.project?.pipelines?.nodes;
+      if(pipelineNodes.length === 0) {
+        return;
+      }
+
+      const commitSha = pipelineNodes[0].sha;
+      this.$apollo.mutate({
+        mutation: updateCommitSha,
+        variables: { commitSha },
       });
     },
     updateCurrentBranch(currentBranch) {
