@@ -280,8 +280,6 @@ describe('Subscription Breakdown', () => {
       });
 
       it('shows a modal', () => {
-        const props = { subscription: { ...licenseFile } };
-        createComponent({ props, stubs: { GlCard, SubscriptionDetailsCard } });
         findActivateSubscriptionAction().vm.$emit('click');
 
         expect(glModalDirective).toHaveBeenCalledWith(modalId);

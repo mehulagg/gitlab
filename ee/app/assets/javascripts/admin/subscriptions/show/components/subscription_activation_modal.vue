@@ -46,6 +46,9 @@ export default {
     removeError() {
       this.error = null;
     },
+    show() {
+      this.$refs.modal.show();
+    },
   },
 };
 </script>

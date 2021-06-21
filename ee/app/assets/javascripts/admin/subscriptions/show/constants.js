@@ -137,3 +137,7 @@ export const connectivityErrorAlert = {
   ),
 };
 export const supportLink = 'https://about.gitlab.com/support/#contact-support';
+export const subscriptionBannerTitle = s__('SuperSonics|Cloud licensing');
+export const subscriptionBannerText = s__(`SuperSonics|By upgrading your instance to 14.0 or above, you can take
+advantage of the cloud licensing service, a hassle-free way to manage your subscription You can get your cloud
+license activation code from the %{linkStart}Customers Portal.%{linkEnd}`);

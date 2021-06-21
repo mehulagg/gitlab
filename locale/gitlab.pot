@@ -31437,7 +31437,13 @@ msgstr ""
 msgid "SuperSonics|Buy subscription"
 msgstr ""
 
+msgid "SuperSonics|By upgrading your instance to 14.0 or above, you can take advantage of the cloud licensing service, a hassle-free way to manage your subscription You can get your cloud license activation code from the %{linkStart}Customers Portal.%{linkEnd}"
+msgstr ""
+
 msgid "SuperSonics|Cloud license"
+msgstr ""
+
+msgid "SuperSonics|Cloud licensing"
 msgstr ""
 
 msgid "SuperSonics|Expires on"
