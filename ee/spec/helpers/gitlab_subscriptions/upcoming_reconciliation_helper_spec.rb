@@ -27,7 +27,7 @@ RSpec.describe GitlabSubscriptions::UpcomingReconciliationHelper do
       expect(helper.upcoming_reconciliation_hash(namespace)).to eq(
         reconciliation_date: upcoming_reconciliation.next_reconciliation_date.to_s,
         cookie_key: cookie_key,
-        dot_com: true
+        uses_namespace_plan: true
       )
     end
 
@@ -48,7 +48,7 @@ RSpec.describe GitlabSubscriptions::UpcomingReconciliationHelper do
         expect(helper.upcoming_reconciliation_hash(group)).to eq(
           reconciliation_date: upcoming_reconciliation2.next_reconciliation_date.to_s,
           cookie_key: cookie_key,
-          dot_com: true
+          uses_namespace_plan: true
         )
       end
     end
@@ -100,7 +100,7 @@ RSpec.describe GitlabSubscriptions::UpcomingReconciliationHelper do
       expect(helper.upcoming_reconciliation_hash).to eq(
         reconciliation_date: upcoming_reconciliation.next_reconciliation_date.to_s,
         cookie_key: cookie_key,
-        dot_com: false
+        uses_namespace_plan: false
       )
     end
 
