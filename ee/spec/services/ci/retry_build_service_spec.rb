@@ -2,6 +2,18 @@
 require 'spec_helper'
 
 RSpec.describe Ci::RetryBuildService do
+  let_it_be(:user) { create(:user) }
+
+  let(:build) { create(:ci_build, project: project) }
+
+  subject(:service) { described_class.new(project, user) }
+
+  before do
+    stub_not_protect_default_branch
+
+    project.add_developer(user)
+  end
+
   it_behaves_like 'restricts access to protected environments'
 
   describe '#reprocess' do
@@ -9,12 +21,8 @@ RSpec.describe Ci::RetryBuildService do
       let_it_be(:namespace) { create(:namespace) }
       let_it_be(:ultimate_plan) { create(:ultimate_plan) }
       let_it_be(:plan_limits) { create(:plan_limits, plan: ultimate_plan) }
-      let_it_be(:user) { create(:user) }
 
       let(:project) { create(:project, namespace: namespace, creator: user) }
-      let(:build) { create(:ci_build, project: project) }
-
-      subject(:service) { described_class.new(project, user) }
 
       let(:new_build) do
         travel_to(1.second.from_now) do
@@ -22,10 +30,18 @@ RSpec.describe Ci::RetryBuildService do
         end
       end
 
-      before do
-        stub_not_protect_default_branch
+      context 'dast' do
+        let(:dast_site_profile) { create(:dast_site_profile, project: project) }
+        let(:dast_scanner_profile) { create(:dast_scanner_profile, project: project) }
 
-        project.add_developer(user)
+        before do
+          build.update!(dast_site_profile: dast_site_profile, dast_scanner_profile: dast_scanner_profile)
+        end
+
+        it 'clones the profile associations', :aggregate_failures do
+          expect(new_build.dast_site_profile).to eq(dast_site_profile)
+          expect(new_build.dast_scanner_profile).to eq(dast_scanner_profile)
+        end
       end
 
       context 'when build has secrets' do
@@ -102,6 +118,48 @@ RSpec.describe Ci::RetryBuildService do
 
         context 'when credit card is not required' do
           it_behaves_like 'creates a retried build'
+        end
+      end
+    end
+  end
+
+  describe '#execute' do
+    let(:new_build) do
+      travel_to(1.second.from_now) do
+        service.execute(build)
+      end
+    end
+
+    context 'when the CI quota is exceeded' do
+      let_it_be(:namespace) { create(:namespace, :with_used_build_minutes_limit) }
+      let_it_be(:project) { create(:project, namespace: namespace, creator: user) }
+
+      context 'when there are no runners available' do
+        it { expect(new_build).not_to be_failed }
+      end
+
+      context 'when shared runners are available' do
+        let_it_be(:runner) { create(:ci_runner, :instance, :online) }
+
+        it 'fails the build' do
+          expect(new_build).to be_failed
+          expect(new_build.failure_reason).to eq('ci_quota_exceeded')
+        end
+
+        context 'with private runners' do
+          let_it_be(:private_runner) do
+            create(:ci_runner, :project, :online, projects: [project])
+          end
+
+          it { expect(new_build).not_to be_failed }
+        end
+
+        context 'when the feature is disabled' do
+          before do
+            stub_feature_flags(ci_quota_check_on_retries: false)
+          end
+
+          it { expect(new_build).not_to be_failed }
         end
       end
     end

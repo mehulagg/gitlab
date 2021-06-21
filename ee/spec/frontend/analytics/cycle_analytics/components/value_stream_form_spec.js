@@ -273,7 +273,10 @@ describe('ValueStreamForm', () => {
         it('validates existing fields when clicked', async () => {
           expect(wrapper.vm.nameError).toEqual([]);
 
-          wrapper.findByTestId('create-value-stream-name').find(GlFormInput).vm.$emit('input', '');
+          wrapper
+            .findByTestId('create-value-stream-name')
+            .findComponent(GlFormInput)
+            .vm.$emit('input', '');
           await clickAddStage();
 
           expect(wrapper.vm.nameError).toEqual(['Name is required']);

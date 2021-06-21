@@ -1,3 +1,3 @@
-import { initQrtlyReconciliationAlert } from 'ee/admin/qrtly_reconciliation_alert/init_qrtly_reconciliation_alert';
+import { initQrtlyReconciliationAlert } from 'ee/billings/qrtly_reconciliation/init_qrtly_reconciliation_alert';
 
 initQrtlyReconciliationAlert();

@@ -67,17 +67,17 @@ module QA
         end
 
         let!(:owner_api_client) do
-          Runtime::API::Client.new(:gitlab, user: owner_user)
+          Runtime::API::Client.new(:gitlab, user: owner_user, is_new_session: false)
         end
 
-        let!(:sandbox_group) do
+        let(:sandbox_group) do
           Resource::Sandbox.fabricate! do |sandbox_group|
             sandbox_group.path = "gitlab-qa-2fa-recovery-sandbox-group-#{SecureRandom.hex(4)}"
             sandbox_group.api_client = owner_api_client
           end
         end
 
-        let!(:two_fa_group) do
+        let(:two_fa_group) do
           QA::Resource::Group.fabricate_via_api! do |group|
             group.sandbox = sandbox_group
             group.api_client = owner_api_client

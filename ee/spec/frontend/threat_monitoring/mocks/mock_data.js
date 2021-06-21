@@ -188,6 +188,20 @@ export const mockAlertDetails = {
   notes: { nodes: [] },
 };
 
+export const mockDastScanExecutionManifest = `type: scan_execution_policy
+name: 'Test Dast'
+description: 'This is a good test'
+enabled: false
+rules:
+  - type: pipeline
+    branches:
+      - main
+actions:
+  - scan: dast
+    site_profile: 'required_site_profile'
+    scanner_profile: 'required_scanner_profile'
+`;
+
 export const mockL7Manifest = `apiVersion: cilium.io/v2
 kind: CiliumNetworkPolicy
 metadata:

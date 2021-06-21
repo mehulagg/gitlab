@@ -37,7 +37,7 @@ export default {
 
 <template>
   <base-policy :policy="policy">
-    <template #type>{{ s__('NetworkPolicies|Network policy') }}</template>
+    <template #type>{{ s__('NetworkPolicies|Network') }}</template>
 
     <template #default="{ enforcementStatusLabel }">
       <div v-if="policy">

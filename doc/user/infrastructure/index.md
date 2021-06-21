@@ -16,7 +16,7 @@ GitLab, and support Terraform best practices.
 ## Quick Start
 
 Use the following `.gitlab-ci.yml` to set up a basic Terraform project integration
-for GitLab versions 13.5 and later:
+for GitLab versions 14.0 and later:
 
 ```yaml
 include:
@@ -38,7 +38,7 @@ This template includes some opinionated decisions, which you can override:
 - Creating [four pipeline stages](https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/Terraform.gitlab-ci.yml):
   `init`, `validate`, `build`, and `deploy`. These stages
   [run the Terraform commands](https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/Terraform/Base.gitlab-ci.yml)
-  `init`, `validate`, `plan`, `plan-json`, and `apply`. The `apply` command only runs on `master`.
+  `init`, `validate`, `plan`, `plan-json`, and `apply`. The `apply` command only runs on the default branch.
 
 This video from January 2021 walks you through all the GitLab Terraform integration features:
 

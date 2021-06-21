@@ -80,7 +80,7 @@ To enable it:
    and choose the [deployment strategy](#deployment-strategy).
 1. Click **Save changes** for the changes to take effect.
 
-After enabling the feature, an Auto DevOps pipeline is triggered on the `master` branch.
+After enabling the feature, an Auto DevOps pipeline is triggered on the default branch.
 
 ### At the group level
 
@@ -103,7 +103,8 @@ To enable or disable Auto DevOps at the group level:
 Even when disabled at the instance level, group owners and project maintainers
 can still enable Auto DevOps at the group and project level, respectively.
 
-1. As an administrator, go to **Admin Area > Settings > CI/CD > Continuous Integration and Deployment**.
+1. As an administrator, on the top bar, select **Menu >** **{admin}** **Admin**.
+1. Go to **Settings > CI/CD > Continuous Integration and Deployment**.
 1. Select **Default to Auto DevOps pipeline for all projects** to enable it.
 1. (Optional) You can set up the Auto DevOps [base domain](#auto-devops-base-domain),
    for Auto Deploy and Auto Review Apps to use.
@@ -118,7 +119,7 @@ project's **Settings > CI/CD > Auto DevOps**. The following options
 are available:
 
 - **Continuous deployment to production**: Enables [Auto Deploy](stages.md#auto-deploy)
-  with `master` branch directly deployed to production.
+  with the default branch directly deployed to production.
 - **Continuous deployment to production using timed incremental rollout**: Sets the
   [`INCREMENTAL_ROLLOUT_MODE`](customize.md#timed-incremental-rollout-to-production) variable
   to `timed`. Production deployments execute with a 5 minute delay between
@@ -128,7 +129,7 @@ are available:
   [`INCREMENTAL_ROLLOUT_MODE`](customize.md#incremental-rollout-to-production) variables
   to `1` and `manual`. This means:
 
-  - `master` branch is directly deployed to staging.
+  - The default branch is directly deployed to staging.
   - Manual actions are provided for incremental rollout to production.
 
 NOTE:
@@ -222,13 +223,13 @@ The Auto DevOps base domain is required to use
 [Auto Monitoring](stages.md#auto-monitoring). You can define the base domain in
 any of the following places:
 
-- either under the cluster's settings, whether for an instance,
+- Either under the cluster's settings, whether for an instance,
   [projects](../../user/project/clusters/index.md#base-domain) or
   [groups](../../user/group/clusters/index.md#base-domain)
-- or at the project level as a variable: `KUBE_INGRESS_BASE_DOMAIN`
-- or at the group level as a variable: `KUBE_INGRESS_BASE_DOMAIN`
-- or as an instance-wide fallback in **Admin Area > Settings > CI/CD** under the
-  **Continuous Integration and Delivery** section
+- Or at the project level as a variable: `KUBE_INGRESS_BASE_DOMAIN`
+- Or at the group level as a variable: `KUBE_INGRESS_BASE_DOMAIN`
+- Or as an instance-wide fallback in **Menu >** **{admin}** **Admin >**
+  **Settings > CI/CD** under the **Continuous Integration and Delivery** section.
 
 The base domain variable `KUBE_INGRESS_BASE_DOMAIN` follows the same order of precedence
 as other environment [variables](../../ci/variables/README.md#cicd-variable-precedence).

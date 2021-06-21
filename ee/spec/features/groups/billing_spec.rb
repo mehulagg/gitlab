@@ -114,9 +114,7 @@ RSpec.describe 'Groups > Billing', :js do
 
   context 'when CustomersDot is unavailable' do
     before do
-      stub_full_request("#{EE::SUBSCRIPTIONS_URL}/gitlab_plans?plan=#{plan}&namespace_id=#{group.id}")
-        .with(headers: { 'Accept' => 'application/json' })
-        .to_raise("Connection refused")
+      stub_billing_plans(group.id, plan, raise_error: 'Connection refused')
     end
 
     let(:plan) { 'bronze' }

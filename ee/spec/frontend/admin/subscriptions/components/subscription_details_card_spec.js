@@ -73,7 +73,7 @@ describe('Subscription Details Card', () => {
         },
         {
           detail: 'startsAt',
-          value: '11 March 2021',
+          value: '2021-03-11',
         },
       ]);
     });

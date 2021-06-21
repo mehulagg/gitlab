@@ -11,9 +11,9 @@ RSpec.describe IterationsFinder do
   let_it_be(:iteration_cadence2) { create(:iterations_cadence, group: group, active: true, duration_in_weeks: 2, title: 'two week iterations') }
   let_it_be(:iteration_cadence3) { create(:iterations_cadence, group: root, active: true, duration_in_weeks: 3, title: 'three week iterations') }
   let_it_be(:closed_iteration) { create(:closed_iteration, :skip_future_date_validation, iterations_cadence: iteration_cadence2, group: iteration_cadence2.group, start_date: 7.days.ago, due_date: 2.days.ago) }
-  let_it_be(:started_group_iteration) { create(:started_iteration, :skip_future_date_validation, iterations_cadence: iteration_cadence2, group: iteration_cadence2.group, title: 'one test', start_date: 1.day.ago, due_date: Date.today) }
+  let_it_be(:started_group_iteration) { create(:current_iteration, :skip_future_date_validation, iterations_cadence: iteration_cadence2, group: iteration_cadence2.group, title: 'one test', start_date: 1.day.ago, due_date: Date.today) }
   let_it_be(:upcoming_group_iteration) { create(:iteration, iterations_cadence: iteration_cadence1, group: iteration_cadence1.group, start_date: 1.day.from_now, due_date: 3.days.from_now) }
-  let_it_be(:root_group_iteration) { create(:started_iteration, iterations_cadence: iteration_cadence3, group: iteration_cadence3.group, start_date: 1.day.ago, due_date: 2.days.from_now) }
+  let_it_be(:root_group_iteration) { create(:current_iteration, iterations_cadence: iteration_cadence3, group: iteration_cadence3.group, start_date: 1.day.ago, due_date: 2.days.from_now) }
   let_it_be(:root_closed_iteration) { create(:closed_iteration, iterations_cadence: iteration_cadence3, group: iteration_cadence3.group, start_date: 1.week.ago, due_date: 2.days.ago) }
 
   let(:parent) { project_1 }
@@ -79,7 +79,7 @@ RSpec.describe IterationsFinder do
       end
 
       it 'filters by started state' do
-        params[:state] = 'started'
+        params[:state] = 'current'
 
         expect(subject).to contain_exactly(root_group_iteration, started_group_iteration)
       end

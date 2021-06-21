@@ -20,3 +20,8 @@ export const COLORS = {
 // otherwise they could get out of sync.
 // See https://gitlab.com/gitlab-org/gitlab-ui/issues/554.
 export { dateFormats as DATE_FORMATS } from 'ee/analytics/shared/constants';
+
+export const POLICY_KINDS = {
+  ciliumNetwork: 'CiliumNetworkPolicy',
+  scanExecution: 'scanner_profile',
+};

@@ -4,7 +4,7 @@ require 'spec_helper'
 
 RSpec.describe Integrations::JiraSerializers::IssueSerializer do
   let_it_be(:project) { create(:project) }
-  let_it_be(:jira_service) { create(:jira_service, project: project) }
+  let_it_be(:jira_integration) { create(:jira_integration, project: project) }
 
   subject { described_class.new.represent(jira_issues, project: project) }
 

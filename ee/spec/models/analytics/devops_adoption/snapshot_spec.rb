@@ -9,19 +9,21 @@ RSpec.describe Analytics::DevopsAdoption::Snapshot, type: :model do
   it { is_expected.to validate_presence_of(:recorded_at) }
   it { is_expected.to validate_presence_of(:end_time) }
 
-  describe '.latest_snapshot_for_namespace_ids' do
-    it 'returns the latest finalized snapshot for the given namespace ids based on snapshot end_time' do
-      group1 = create(:group)
-      group1_latest_snapshot = create(:devops_adoption_snapshot, namespace: group1, end_time: 1.week.ago, recorded_at: 1.day.ago)
-      create(:devops_adoption_snapshot, namespace: group1, end_time: 2.weeks.ago, recorded_at: 1.day.ago)
+  describe '.latest_for_namespace_ids' do
+    it 'returns for previous month finalized snapshot for the given namespace ids based on snapshot end_time' do
+      freeze_time do
+        group1 = create(:group)
+        group1_latest_snapshot = create(:devops_adoption_snapshot, namespace: group1, end_time: 1.month.ago.end_of_month, recorded_at: 1.day.ago)
+        create(:devops_adoption_snapshot, namespace: group1, end_time: 2.months.ago.end_of_month, recorded_at: 1.day.ago)
 
-      group2 = create(:group)
-      group2_latest_snapshot = create(:devops_adoption_snapshot, namespace: group2, end_time: 1.year.ago, recorded_at: 1.day.ago)
-      create(:devops_adoption_snapshot, namespace: group2, end_time: 2.years.ago, recorded_at: 1.day.ago)
+        group2 = create(:group)
+        create(:devops_adoption_snapshot, namespace: group2, end_time: 1.year.ago.end_of_month, recorded_at: 1.day.ago)
+        create(:devops_adoption_snapshot, namespace: group2, end_time: 2.years.ago.end_of_month, recorded_at: 1.day.ago)
 
-      latest_snapshots = described_class.latest_snapshot_for_namespace_ids([group1.id, group2.id])
+        latest_snapshots = described_class.latest_for_namespace_ids([group1.id, group2.id])
 
-      expect(latest_snapshots).to match_array([group1_latest_snapshot, group2_latest_snapshot])
+        expect(latest_snapshots).to match_array([group1_latest_snapshot])
+      end
     end
   end
 

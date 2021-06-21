@@ -12,10 +12,10 @@ export const EDITOR_MODES = [
   { value: EDITOR_MODE_YAML, text: s__('NetworkPolicies|.yaml mode') },
 ];
 
-export const POLICY_TYPES = {
-  networkPolicy: {
-    value: 'networkPolicy',
-    text: s__('NetworkPolicies|Network Policy'),
+export const POLICY_KIND_OPTIONS = {
+  network: {
+    value: 'network',
+    text: s__('NetworkPolicies|Network'),
     component: 'network-policy-editor',
     shouldShowEnvironmentPicker: true,
   },
@@ -23,7 +23,6 @@ export const POLICY_TYPES = {
     value: 'scanExecution',
     text: s__('NetworkPolicies|Scan Execution'),
     component: 'scan-execution-policy-editor',
-    shouldShowMergeRequestButton: true,
   },
 };
 

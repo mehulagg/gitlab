@@ -26,9 +26,7 @@ module Types
 
         def latest_snapshot
           BatchLoader::GraphQL.for(object.namespace_id).batch(key: :devops_adoption_latest_snapshots) do |ids, loader, _args|
-            snapshots = ::Analytics::DevopsAdoption::Snapshot
-              .latest_snapshot_for_namespace_ids(ids)
-              .index_by(&:namespace_id)
+            snapshots = ::Analytics::DevopsAdoption::Snapshot.latest_for_namespace_ids(ids).index_by(&:namespace_id)
 
             ids.each do |id|
               loader.call(id, snapshots[id])

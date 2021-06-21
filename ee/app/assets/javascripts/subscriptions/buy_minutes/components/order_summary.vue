@@ -45,7 +45,7 @@ export default {
   },
   computed: {
     selectedPlan() {
-      return this.plans.find((plan) => plan.code === this.selectedPlanId);
+      return this.plans.find((plan) => plan.id === this.selectedPlanId);
     },
     selectedPlanPrice() {
       return this.selectedPlan.pricePerYear;
@@ -92,6 +92,13 @@ export default {
     titleWithName() {
       return sprintf(this.$options.i18n.title, { name: this.name });
     },
+    isVisible() {
+      return (
+        !this.$apollo.loading &&
+        (!this.isGroupSelected || this.isSelectedGroupPresent) &&
+        this.selectedPlan
+      );
+    },
   },
   methods: {
     toggleCollapse() {
@@ -106,7 +113,7 @@ export default {
 </script>
 <template>
   <div
-    v-if="!$apollo.loading && (!isGroupSelected || isSelectedGroupPresent) && selectedPlan"
+    v-if="isVisible"
     class="order-summary gl-display-flex gl-flex-direction-column gl-flex-grow-1 gl-mt-2 mt-lg-5"
   >
     <div class="d-lg-none">

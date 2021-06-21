@@ -3,7 +3,7 @@ import ActivityFilter from 'ee/security_dashboard/components/shared/filters/acti
 import Filters from 'ee/security_dashboard/components/shared/filters/filters_layout.vue';
 import ScannerFilter from 'ee/security_dashboard/components/shared/filters/scanner_filter.vue';
 import StandardFilter from 'ee/security_dashboard/components/shared/filters/standard_filter.vue';
-import { getProjectFilter } from 'ee/security_dashboard/helpers';
+import { getProjectFilter, standardScannerFilter } from 'ee/security_dashboard/helpers';
 import { DASHBOARD_TYPES } from 'ee/security_dashboard/store/constants';
 import { extendedWrapper } from 'helpers/vue_test_utils_helper';
 
@@ -16,7 +16,8 @@ describe('First class vulnerability filters component', () => {
   ];
 
   const findStandardFilters = () => wrapper.findAllComponents(StandardFilter);
-  const findScannerFilter = () => wrapper.findComponent(ScannerFilter);
+  const findStandardScannerFilter = () => wrapper.findByTestId(standardScannerFilter.id);
+  const findVendorScannerFilter = () => wrapper.findComponent(ScannerFilter);
   const findActivityFilter = () => wrapper.findComponent(ActivityFilter);
   const findProjectFilter = () => wrapper.findByTestId(getProjectFilter([]).id);
 
@@ -34,7 +35,6 @@ describe('First class vulnerability filters component', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   describe('on render without project filter', () => {
@@ -44,7 +44,6 @@ describe('First class vulnerability filters component', () => {
 
     it('should render the default filters', () => {
       expect(findStandardFilters()).toHaveLength(2);
-      expect(findScannerFilter().exists()).toBe(true);
       expect(findActivityFilter().exists()).toBe(true);
       expect(findProjectFilter().exists()).toBe(false);
     });
@@ -81,6 +80,21 @@ describe('First class vulnerability filters component', () => {
 
     it('does not display on the pipeline dashboard', () => {
       expect(findActivityFilter().exists()).toBe(false);
+    });
+  });
+
+  describe('scanner filter', () => {
+    it.each`
+      type          | dashboardType
+      ${'vendor'}   | ${DASHBOARD_TYPES.PROJECT}
+      ${'standard'} | ${DASHBOARD_TYPES.GROUP}
+      ${'standard'} | ${DASHBOARD_TYPES.INSTANCE}
+      ${'standard'} | ${DASHBOARD_TYPES.PIPELINE}
+    `('shows the $type scanner filter on the $dashboardType report', ({ type, dashboardType }) => {
+      wrapper = createComponent({ provide: { dashboardType } });
+
+      expect(findStandardScannerFilter().exists()).toBe(type === 'standard');
+      expect(findVendorScannerFilter().exists()).toBe(type === 'vendor');
     });
   });
 });

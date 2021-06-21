@@ -6,7 +6,7 @@ RSpec.describe Banzai::Filter::JiraPrivateImageLinkFilter do
   include FilterSpecHelper
 
   let_it_be(:project) { create(:project) }
-  let_it_be(:jira_service) { create(:jira_service, project: project) }
+  let_it_be(:jira_integration) { create(:jira_integration, project: project) }
   let_it_be(:context) { { project: project } }
 
   context 'with a Jira private image' do
@@ -14,7 +14,7 @@ RSpec.describe Banzai::Filter::JiraPrivateImageLinkFilter do
     let(:doc) { filter("<img src=\"#{img_link}\">", context) }
 
     it 'replaces the Jira private images with the link to the image' do
-      expect(doc.to_html).to eq("<a class=\"with-attachment-icon\" href=\"#{jira_service.url}#{img_link}\">#{jira_service.url}#{img_link}</a>")
+      expect(doc.to_html).to eq("<a class=\"with-attachment-icon\" href=\"#{jira_integration.url}#{img_link}\">#{jira_integration.url}#{img_link}</a>")
     end
 
     it 'includes the Atlassian referrer on gitlab.com' do

@@ -47,14 +47,14 @@ RSpec.describe 'Admin views Subscription', :js do
     end
   end
 
-  context 'with a legacy license' do
+  context 'with license file' do
     let!(:license) { create_current_license(cloud_licensing_enabled: false, plan: License::ULTIMATE_PLAN) }
 
     before do
       visit(admin_subscription_path)
     end
 
-    context 'when removing the a legacy license' do
+    context 'when removing a license file' do
       before do
         accept_alert do
           click_on 'Remove license'
@@ -68,9 +68,9 @@ RSpec.describe 'Admin views Subscription', :js do
       end
     end
 
-    context 'activate another subscription' do
+    context 'when activating another subscription' do
       before do
-        click_button('Enter activation code')
+        click_button('Activate cloud license')
       end
 
       it 'shows the activation modal' do
@@ -102,7 +102,7 @@ RSpec.describe 'Admin views Subscription', :js do
     end
   end
 
-  context 'when there is no license' do
+  context 'with no active subscription' do
     let_it_be(:license) { nil }
 
     before do
@@ -117,7 +117,40 @@ RSpec.describe 'Admin views Subscription', :js do
       end
     end
 
-    context 'Upload a legacy license' do
+    context 'when activating a new subscription' do
+      before do
+        license = create(:license, data: create(:gitlab_license, { cloud_licensing_enabled: true, plan: License::ULTIMATE_PLAN }).export)
+
+        stub_request(:post, EE::SUBSCRIPTIONS_GRAPHQL_URL)
+          .to_return(status: 200, body: {
+            "data": {
+              "cloudActivationActivate": {
+                "licenseKey": license.data
+              }
+            }
+          }.to_json, headers: { 'Content-Type' => 'application/json' })
+
+        page.within(find('#content-body', match: :first)) do
+          fill_activation_form
+        end
+      end
+
+      it 'shows a successful activation message' do
+        expect(page).to have_content('Your subscription was successfully activated.')
+      end
+
+      it 'shows the subscription details' do
+        expect(page).to have_content('Subscription details')
+      end
+
+      it 'shows the appropriate license type' do
+        page.within(find('[data-testid="subscription-cell-type"]', match: :first)) do
+          expect(page).to have_content('Cloud license')
+        end
+      end
+    end
+
+    context 'when uploading a license file' do
       it 'shows a link to upload a license file' do
         page.within(find('#content-body', match: :first)) do
           expect(page).to have_link('Upload a license file', href: new_admin_license_path)

@@ -134,6 +134,13 @@ RSpec.describe Security::DependencyListService do
         end
 
         context('when the sort_dependency_vulnerabilities feature flag is false') do
+          # overwrite the existing findings so we can re-create the original test
+          let_it_be(:pipeline) { create(:ee_ci_pipeline, :with_dependency_list_report) }
+          let_it_be(:nokogiri_finding) { create(:vulnerabilities_finding, :detected, :with_dependency_scanning_metadata, :with_pipeline) }
+          let_it_be(:nokogiri_pipeline) { create(:vulnerabilities_finding_pipeline, finding: nokogiri_finding, pipeline: pipeline) }
+          let_it_be(:other_finding) { create(:vulnerabilities_finding, :detected, :with_dependency_scanning_metadata, package: 'saml2-js', file: 'yarn/yarn.lock', version: '1.5.0', raw_severity: 'Unknown') }
+          let_it_be(:other_pipeline) { create(:vulnerabilities_finding_pipeline, finding: other_finding, pipeline: pipeline) }
+
           before do
             stub_feature_flags(sort_dependency_vulnerabilities: false)
           end
@@ -148,15 +155,8 @@ RSpec.describe Security::DependencyListService do
               }
             end
 
-            expect(dependencies).to match([{ name: "saml2-js", vulnerabilities: match_array(%w(unknown medium critical)) },
-                                           { name: "nokogiri", vulnerabilities: ["high"] }])
-          end
-
-          it 'returns array of data with package vulnerabilities sorted in ascending order' do
-            saml2js_dependency = subject.find { |dep| dep[:name] == 'saml2-js' }
-            saml2js_severities = saml2js_dependency[:vulnerabilities].map {|v| v[:severity] }
-
-            expect(saml2js_severities).to match_array(%w(unknown medium critical))
+            expect(dependencies).to eq([{ name: "saml2-js", vulnerabilities: ["unknown"] },
+                                        { name: "nokogiri", vulnerabilities: ["high"] }])
           end
         end
       end

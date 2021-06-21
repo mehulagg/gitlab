@@ -296,8 +296,7 @@ RSpec.describe 'Billing plan pages', :feature, :js do
       let!(:subscription) { create(:gitlab_subscription, namespace: namespace, hosted_plan: plan) }
 
       before do
-        stub_full_request("#{EE::SUBSCRIPTIONS_URL}/gitlab_plans?plan=#{plan.name}&namespace_id=#{namespace.id}")
-          .to_raise("Connection refused")
+        stub_billing_plans(namespace.id, plan.name, raise_error: 'Connection refused')
       end
 
       it 'renders an error page' do

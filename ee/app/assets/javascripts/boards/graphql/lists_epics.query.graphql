@@ -27,6 +27,17 @@ query ListEpics(
                     ...Label
                   }
                 }
+                hasIssues
+                descendantCounts {
+                  closedEpics
+                  closedIssues
+                  openedEpics
+                  openedIssues
+                }
+                descendantWeightSum {
+                  closedIssues
+                  openedIssues
+                }
               }
             }
             pageInfo {

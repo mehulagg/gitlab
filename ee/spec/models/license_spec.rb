@@ -1459,7 +1459,7 @@ RSpec.describe License do
     subject { license.license_type }
 
     context 'when the license is not a cloud license' do
-      it { is_expected.to eq(described_class::LEGACY_LICENSE_TYPE) }
+      it { is_expected.to eq(described_class::LICENSE_FILE_TYPE) }
     end
 
     context 'when the license is a cloud license' do

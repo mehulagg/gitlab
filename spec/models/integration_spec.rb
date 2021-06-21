@@ -68,9 +68,9 @@ RSpec.describe Integration do
 
   describe 'Scopes' do
     describe '.by_type' do
-      let!(:service1) { create(:jira_service) }
-      let!(:service2) { create(:jira_service) }
-      let!(:service3) { create(:redmine_service) }
+      let!(:service1) { create(:jira_integration) }
+      let!(:service2) { create(:jira_integration) }
+      let!(:service3) { create(:redmine_integration) }
 
       subject { described_class.by_type(type) }
 
@@ -88,8 +88,8 @@ RSpec.describe Integration do
     end
 
     describe '.for_group' do
-      let!(:service1) { create(:jira_service, project_id: nil, group_id: group.id) }
-      let!(:service2) { create(:jira_service) }
+      let!(:service1) { create(:jira_integration, project_id: nil, group_id: group.id) }
+      let!(:service2) { create(:jira_integration) }
 
       it 'returns the right group service' do
         expect(described_class.for_group(group)).to match_array([service1])
@@ -234,15 +234,17 @@ RSpec.describe Integration do
   end
 
   describe '.find_or_initialize_non_project_specific_integration' do
-    let!(:service1) { create(:jira_service, project_id: nil, group_id: group.id) }
-    let!(:service2) { create(:jira_service) }
+    let!(:integration_1) { create(:jira_integration, project_id: nil, group_id: group.id) }
+    let!(:integration_2) { create(:jira_integration) }
 
-    it 'returns the right service' do
-      expect(Integration.find_or_initialize_non_project_specific_integration('jira', group_id: group)).to eq(service1)
+    it 'returns the right integration' do
+      expect(Integration.find_or_initialize_non_project_specific_integration('jira', group_id: group))
+        .to eq(integration_1)
     end
 
-    it 'does not create a new service' do
-      expect { Integration.find_or_initialize_non_project_specific_integration('redmine', group_id: group) }.not_to change { Integration.count }
+    it 'does not create a new integration' do
+      expect { Integration.find_or_initialize_non_project_specific_integration('redmine', group_id: group) }
+        .not_to change(Integration, :count)
     end
   end
 
@@ -280,7 +282,7 @@ RSpec.describe Integration do
 
     context 'with a few existing instances' do
       before do
-        create(:jira_service, :instance)
+        create(:jira_integration, :instance)
       end
 
       it_behaves_like 'service instances'
@@ -326,7 +328,7 @@ RSpec.describe Integration do
 
       context 'with a few existing templates' do
         before do
-          create(:jira_service, :template)
+          create(:jira_integration, :template)
         end
 
         it 'creates the rest of the service templates' do
@@ -339,36 +341,36 @@ RSpec.describe Integration do
 
     describe '.build_from_integration' do
       context 'when integration is invalid' do
-        let(:integration) do
-          build(:prometheus_service, :template, active: true, properties: {})
+        let(:template_integration) do
+          build(:prometheus_integration, :template, active: true, properties: {})
             .tap { |integration| integration.save!(validate: false) }
         end
 
-        it 'sets service to inactive' do
-          service = described_class.build_from_integration(integration, project_id: project.id)
+        it 'sets integration to inactive' do
+          integration = described_class.build_from_integration(template_integration, project_id: project.id)
 
-          expect(service).to be_valid
-          expect(service.active).to be false
+          expect(integration).to be_valid
+          expect(integration.active).to be false
         end
       end
 
       context 'when integration is an instance-level integration' do
-        let(:integration) { create(:jira_service, :instance) }
+        let(:instance_integration) { create(:jira_integration, :instance) }
 
         it 'sets inherit_from_id from integration' do
-          service = described_class.build_from_integration(integration, project_id: project.id)
+          integration = described_class.build_from_integration(instance_integration, project_id: project.id)
 
-          expect(service.inherit_from_id).to eq(integration.id)
+          expect(integration.inherit_from_id).to eq(instance_integration.id)
         end
       end
 
       context 'when integration is a group-level integration' do
-        let(:integration) { create(:jira_service, group: group, project: nil) }
+        let(:group_integration) { create(:jira_integration, group: group, project: nil) }
 
         it 'sets inherit_from_id from integration' do
-          service = described_class.build_from_integration(integration, project_id: project.id)
+          integration = described_class.build_from_integration(group_integration, project_id: project.id)
 
-          expect(service.inherit_from_id).to eq(integration.id)
+          expect(integration.inherit_from_id).to eq(group_integration.id)
         end
       end
 
@@ -418,7 +420,7 @@ RSpec.describe Integration do
         context 'when data are stored in properties' do
           let(:properties) { data_params }
           let!(:integration) do
-            create(:jira_service, :without_properties_callback, template: true, properties: properties.merge(additional: 'something'))
+            create(:jira_integration, :without_properties_callback, template: true, properties: properties.merge(additional: 'something'))
           end
 
           it_behaves_like 'service creation from an integration'
@@ -426,7 +428,7 @@ RSpec.describe Integration do
 
         context 'when data are stored in separated fields' do
           let(:integration) do
-            create(:jira_service, :template, data_params.merge(properties: {}))
+            create(:jira_integration, :template, data_params.merge(properties: {}))
           end
 
           it_behaves_like 'service creation from an integration'
@@ -435,7 +437,7 @@ RSpec.describe Integration do
         context 'when data are stored in both properties and separated fields' do
           let(:properties) { data_params }
           let(:integration) do
-            create(:jira_service, :without_properties_callback, active: true, template: true, properties: properties).tap do |integration|
+            create(:jira_integration, :without_properties_callback, active: true, template: true, properties: properties).tap do |integration|
               create(:jira_tracker_data, data_params.merge(integration: integration))
             end
           end
@@ -472,26 +474,26 @@ RSpec.describe Integration do
   end
 
   describe '.default_integration' do
-    context 'with an instance-level service' do
-      let_it_be(:instance_service) { create(:jira_service, :instance) }
+    context 'with an instance-level integration' do
+      let_it_be(:instance_integration) { create(:jira_integration, :instance) }
 
-      it 'returns the instance service' do
-        expect(described_class.default_integration('JiraService', project)).to eq(instance_service)
+      it 'returns the instance integration' do
+        expect(described_class.default_integration('JiraService', project)).to eq(instance_integration)
       end
 
-      it 'returns nil for nonexistent service type' do
+      it 'returns nil for nonexistent integration type' do
         expect(described_class.default_integration('HipchatService', project)).to eq(nil)
       end
 
-      context 'with a group service' do
-        let_it_be(:group_service) { create(:jira_service, group_id: group.id, project_id: nil) }
+      context 'with a group integration' do
+        let_it_be(:group_integration) { create(:jira_integration, group_id: group.id, project_id: nil) }
 
-        it 'returns the group service for a project' do
-          expect(described_class.default_integration('JiraService', project)).to eq(group_service)
+        it 'returns the group integration for a project' do
+          expect(described_class.default_integration('JiraService', project)).to eq(group_integration)
         end
 
-        it 'returns the instance service for a group' do
-          expect(described_class.default_integration('JiraService', group)).to eq(instance_service)
+        it 'returns the instance integration for a group' do
+          expect(described_class.default_integration('JiraService', group)).to eq(instance_integration)
         end
 
         context 'with a subgroup' do
@@ -499,27 +501,27 @@ RSpec.describe Integration do
 
           let!(:project) { create(:project, group: subgroup) }
 
-          it 'returns the closest group service for a project' do
-            expect(described_class.default_integration('JiraService', project)).to eq(group_service)
+          it 'returns the closest group integration for a project' do
+            expect(described_class.default_integration('JiraService', project)).to eq(group_integration)
           end
 
-          it 'returns the closest group service for a subgroup' do
-            expect(described_class.default_integration('JiraService', subgroup)).to eq(group_service)
+          it 'returns the closest group integration for a subgroup' do
+            expect(described_class.default_integration('JiraService', subgroup)).to eq(group_integration)
           end
 
-          context 'having a service with custom settings' do
-            let!(:subgroup_service) { create(:jira_service, group_id: subgroup.id, project_id: nil) }
+          context 'having a integration with custom settings' do
+            let!(:subgroup_integration) { create(:jira_integration, group_id: subgroup.id, project_id: nil) }
 
-            it 'returns the closest group service for a project' do
-              expect(described_class.default_integration('JiraService', project)).to eq(subgroup_service)
+            it 'returns the closest group integration for a project' do
+              expect(described_class.default_integration('JiraService', project)).to eq(subgroup_integration)
             end
           end
 
-          context 'having a service inheriting settings' do
-            let!(:subgroup_service) { create(:jira_service, group_id: subgroup.id, project_id: nil, inherit_from_id: group_service.id) }
+          context 'having a integration inheriting settings' do
+            let!(:subgroup_integration) { create(:jira_integration, group_id: subgroup.id, project_id: nil, inherit_from_id: group_integration.id) }
 
-            it 'returns the closest group service which does not inherit from its parent for a project' do
-              expect(described_class.default_integration('JiraService', project)).to eq(group_service)
+            it 'returns the closest group integration which does not inherit from its parent for a project' do
+              expect(described_class.default_integration('JiraService', project)).to eq(group_integration)
             end
           end
         end
@@ -528,10 +530,10 @@ RSpec.describe Integration do
   end
 
   describe '.create_from_active_default_integrations' do
-    context 'with an active service template' do
-      let_it_be(:template_integration) { create(:prometheus_service, :template, api_url: 'https://prometheus.template.com/') }
+    context 'with an active integration template' do
+      let_it_be(:template_integration) { create(:prometheus_integration, :template, api_url: 'https://prometheus.template.com/') }
 
-      it 'creates a service from the template' do
+      it 'creates an integration from the template' do
         described_class.create_from_active_default_integrations(project, :project_id, with_templates: true)
 
         expect(project.reload.integrations.size).to eq(1)
@@ -540,9 +542,9 @@ RSpec.describe Integration do
       end
 
       context 'with an active instance-level integration' do
-        let!(:instance_integration) { create(:prometheus_service, :instance, api_url: 'https://prometheus.instance.com/') }
+        let!(:instance_integration) { create(:prometheus_integration, :instance, api_url: 'https://prometheus.instance.com/') }
 
-        it 'creates a service from the instance-level integration' do
+        it 'creates an integration from the instance-level integration' do
           described_class.create_from_active_default_integrations(project, :project_id, with_templates: true)
 
           expect(project.reload.integrations.size).to eq(1)
@@ -551,7 +553,7 @@ RSpec.describe Integration do
         end
 
         context 'passing a group' do
-          it 'creates a service from the instance-level integration' do
+          it 'creates an integration from the instance-level integration' do
             described_class.create_from_active_default_integrations(group, :group_id)
 
             expect(group.reload.integrations.size).to eq(1)
@@ -561,9 +563,9 @@ RSpec.describe Integration do
         end
 
         context 'with an active group-level integration' do
-          let!(:group_integration) { create(:prometheus_service, group: group, project: nil, api_url: 'https://prometheus.group.com/') }
+          let!(:group_integration) { create(:prometheus_integration, group: group, project: nil, api_url: 'https://prometheus.group.com/') }
 
-          it 'creates a service from the group-level integration' do
+          it 'creates an integration from the group-level integration' do
             described_class.create_from_active_default_integrations(project, :project_id, with_templates: true)
 
             expect(project.reload.integrations.size).to eq(1)
@@ -574,7 +576,7 @@ RSpec.describe Integration do
           context 'passing a group' do
             let!(:subgroup) { create(:group, parent: group) }
 
-            it 'creates a service from the group-level integration' do
+            it 'creates an integration from the group-level integration' do
               described_class.create_from_active_default_integrations(subgroup, :group_id)
 
               expect(subgroup.reload.integrations.size).to eq(1)
@@ -584,11 +586,11 @@ RSpec.describe Integration do
           end
 
           context 'with an active subgroup' do
-            let!(:subgroup_integration) { create(:prometheus_service, group: subgroup, project: nil, api_url: 'https://prometheus.subgroup.com/') }
+            let!(:subgroup_integration) { create(:prometheus_integration, group: subgroup, project: nil, api_url: 'https://prometheus.subgroup.com/') }
             let!(:subgroup) { create(:group, parent: group) }
             let(:project) { create(:project, group: subgroup) }
 
-            it 'creates a service from the subgroup-level integration' do
+            it 'creates an integration from the subgroup-level integration' do
               described_class.create_from_active_default_integrations(project, :project_id, with_templates: true)
 
               expect(project.reload.integrations.size).to eq(1)
@@ -601,7 +603,7 @@ RSpec.describe Integration do
 
               context 'traversal queries' do
                 shared_examples 'correct ancestor order' do
-                  it 'creates a service from the subgroup-level integration' do
+                  it 'creates an integration from the subgroup-level integration' do
                     described_class.create_from_active_default_integrations(sub_subgroup, :group_id)
 
                     sub_subgroup.reload
@@ -611,10 +613,10 @@ RSpec.describe Integration do
                     expect(sub_subgroup.integrations.first.inherit_from_id).to eq(subgroup_integration.id)
                   end
 
-                  context 'having a service inheriting settings' do
-                    let!(:subgroup_integration) { create(:prometheus_service, group: subgroup, project: nil, inherit_from_id: group_integration.id, api_url: 'https://prometheus.subgroup.com/') }
+                  context 'having an integration inheriting settings' do
+                    let!(:subgroup_integration) { create(:prometheus_integration, group: subgroup, project: nil, inherit_from_id: group_integration.id, api_url: 'https://prometheus.subgroup.com/') }
 
-                    it 'creates a service from the group-level integration' do
+                    it 'creates an integration from the group-level integration' do
                       described_class.create_from_active_default_integrations(sub_subgroup, :group_id)
 
                       sub_subgroup.reload
@@ -656,11 +658,11 @@ RSpec.describe Integration do
     let_it_be(:subgroup2) { create(:group, parent: group) }
     let_it_be(:project1) { create(:project, group: subgroup1) }
     let_it_be(:project2) { create(:project, group: subgroup2) }
-    let_it_be(:group_integration) { create(:prometheus_service, group: group, project: nil) }
-    let_it_be(:subgroup_integration1) { create(:prometheus_service, group: subgroup1, project: nil, inherit_from_id: group_integration.id) }
-    let_it_be(:subgroup_integration2) { create(:prometheus_service, group: subgroup2, project: nil) }
-    let_it_be(:project_integration1) { create(:prometheus_service, group: nil, project: project1, inherit_from_id: group_integration.id) }
-    let_it_be(:project_integration2) { create(:prometheus_service, group: nil, project: project2, inherit_from_id: subgroup_integration2.id) }
+    let_it_be(:group_integration) { create(:prometheus_integration, group: group, project: nil) }
+    let_it_be(:subgroup_integration1) { create(:prometheus_integration, group: subgroup1, project: nil, inherit_from_id: group_integration.id) }
+    let_it_be(:subgroup_integration2) { create(:prometheus_integration, group: subgroup2, project: nil) }
+    let_it_be(:project_integration1) { create(:prometheus_integration, group: nil, project: project1, inherit_from_id: group_integration.id) }
+    let_it_be(:project_integration2) { create(:prometheus_integration, group: nil, project: project2, inherit_from_id: subgroup_integration2.id) }
 
     it 'returns the groups and projects inheriting from integration ancestors', :aggregate_failures do
       expect(described_class.inherited_descendants_from_self_or_ancestors_from(group_integration)).to eq([subgroup_integration1, project_integration1])
@@ -669,11 +671,8 @@ RSpec.describe Integration do
   end
 
   describe '.integration_name_to_model' do
-    it 'returns the model for the given service name', :aggregate_failures do
+    it 'returns the model for the given service name' do
       expect(described_class.integration_name_to_model('asana')).to eq(Integrations::Asana)
-      # TODO We can remove this test when all models have been namespaced:
-      # https://gitlab.com/gitlab-org/gitlab/-/merge_requests/60968#note_570994955
-      expect(described_class.integration_name_to_model('prometheus')).to eq(PrometheusService)
     end
 
     it 'raises an error if service name is invalid' do

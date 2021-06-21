@@ -236,7 +236,7 @@ RSpec.describe SearchService do
         project_ids = [accessible_project.id, accessible_project_2.id].join(',')
         projects = described_class.new(user, group_id: group.id, project_ids: project_ids).projects
 
-        expect(projects).to match [accessible_project, accessible_project_2]
+        expect(projects).to match_array [accessible_project, accessible_project_2]
       end
 
       it 'returns the projects for guests' do
@@ -245,14 +245,14 @@ RSpec.describe SearchService do
         project_ids = [accessible_project.id, accessible_project_2.id, search_project.id].join(',')
         projects = described_class.new(user, group_id: group.id, project_ids: project_ids).projects
 
-        expect(projects).to match [accessible_project, accessible_project_2, search_project]
+        expect(projects).to match_array [accessible_project, accessible_project_2, search_project]
       end
 
       it 'handles spaces in the param' do
         project_ids = [accessible_project.id, accessible_project_2.id].join(',    ')
         projects = described_class.new(user, group_id: group.id, project_ids: project_ids).projects
 
-        expect(projects).to match [accessible_project, accessible_project_2]
+        expect(projects).to match_array [accessible_project, accessible_project_2]
       end
 
       it 'returns nil if projects param is not a String' do
@@ -268,7 +268,7 @@ RSpec.describe SearchService do
         project_ids = [accessible_project.id, inaccessible_project.id].join(',')
         projects = described_class.new(user, group_id: group.id, project_ids: project_ids).projects
 
-        expect(projects).to match [accessible_project]
+        expect(projects).to match_array [accessible_project]
       end
     end
 

@@ -3,9 +3,8 @@
 - return unless show_trial_status_widget?(root_group)
 
 -# For the current Growth::Conversion experiment
-- experiment_key = :show_trial_status_in_sidebar
-- record_experiment_group(experiment_key, root_group)
-- return unless experiment_enabled?(experiment_key, subject: root_group)
+- record_experiment_group(:show_trial_status_in_sidebar, root_group)
+- return unless experiment_enabled?(:show_trial_status_in_sidebar, subject: root_group)
 
 = nav_link do
   #js-trial-status-widget{ data: trial_status_widget_data_attrs(root_group) }

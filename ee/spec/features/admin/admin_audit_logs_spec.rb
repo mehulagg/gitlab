@@ -190,7 +190,7 @@ RSpec.describe 'Admin::AuditLogs', :js do
         click_link 'Impersonate'
 
         visit(new_project_path)
-        find('[data-qa-selector="blank_project_link"]').click
+        find('[data-qa-panel-name="blank_project"]').click
 
         fill_in(:project_name, with: 'Gotham City')
 

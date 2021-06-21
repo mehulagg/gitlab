@@ -8,6 +8,11 @@ module MergeRequests
     ignore_column :external_approval_rule_id, remove_with: '14.3', remove_after: '2021-09-22'
 
     scope :with_api_entity_associations, -> { preload(:protected_branches) }
+    scope :applicable_to_branch, ->(branch) do
+      includes(:protected_branches)
+        .references(:protected_branches)
+        .where('protected_branches.id IS NULL OR protected_branches.name = ?', branch)
+    end
 
     belongs_to :project
     has_and_belongs_to_many :protected_branches
@@ -16,6 +21,8 @@ module MergeRequests
     validates :name, uniqueness: { scope: :project_id }, presence: true
 
     def async_execute(data)
+      return unless protected_branches.none? || protected_branches.by_name(data[:object_attributes][:target_branch]).any?
+
       ApprovalRules::ExternalApprovalRulePayloadWorker.perform_async(self.id, payload_data(data))
     end
 

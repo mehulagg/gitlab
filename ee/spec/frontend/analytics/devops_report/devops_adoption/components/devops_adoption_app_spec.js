@@ -6,7 +6,6 @@ import VueApollo from 'vue-apollo';
 import DevopsAdoptionAddDropdown from 'ee/analytics/devops_report/devops_adoption/components/devops_adoption_add_dropdown.vue';
 import DevopsAdoptionApp from 'ee/analytics/devops_report/devops_adoption/components/devops_adoption_app.vue';
 import DevopsAdoptionSection from 'ee/analytics/devops_report/devops_adoption/components/devops_adoption_section.vue';
-import DevopsAdoptionSegmentModal from 'ee/analytics/devops_report/devops_adoption/components/devops_adoption_segment_modal.vue';
 import {
   DEVOPS_ADOPTION_STRINGS,
   DEFAULT_POLLING_INTERVAL,
@@ -238,10 +237,6 @@ describe('DevopsAdoptionApp', () => {
               await wrapper.vm.$nextTick();
             });
 
-            it('does not render the segment modal', () => {
-              expect(wrapper.find(DevopsAdoptionSegmentModal).exists()).toBe(false);
-            });
-
             it('does not render the devops section', () => {
               expect(wrapper.find(DevopsAdoptionSection).exists()).toBe(false);
             });
@@ -271,10 +266,6 @@ describe('DevopsAdoptionApp', () => {
         const mockApollo = createMockApolloProvider({ segmentsSpy: segmentsError });
         wrapper = createComponent({ mockApollo });
         await waitForPromises();
-      });
-
-      it('does not render the segment modal', () => {
-        expect(wrapper.find(DevopsAdoptionSegmentModal).exists()).toBe(false);
       });
 
       it('does not render the devops section', () => {

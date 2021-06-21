@@ -2,7 +2,7 @@ import { GlToggle } from '@gitlab/ui';
 import { shallowMount, mount, createLocalVue } from '@vue/test-utils';
 import Vuex from 'vuex';
 import Filters from 'ee/security_dashboard/components/pipeline/filters.vue';
-import { pipelineScannerFilter } from 'ee/security_dashboard/helpers';
+import { standardScannerFilter } from 'ee/security_dashboard/helpers';
 import createStore from 'ee/security_dashboard/store';
 import state from 'ee/security_dashboard/store/modules/filters/state';
 import { extendedWrapper } from 'helpers/vue_test_utils_helper';
@@ -75,8 +75,8 @@ describe('Filter component', () => {
       // scanner filter item.
       mock.mockClear();
 
-      const filterId = pipelineScannerFilter.id;
-      const optionId = pipelineScannerFilter.options[2].id;
+      const filterId = standardScannerFilter.id;
+      const optionId = standardScannerFilter.options[2].id;
       const option = wrapper.findByTestId(`${filterId}:${optionId}`);
       option.vm.$emit('click');
       await wrapper.vm.$nextTick();

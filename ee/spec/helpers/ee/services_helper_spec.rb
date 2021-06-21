@@ -41,8 +41,8 @@ RSpec.describe EE::ServicesHelper do
       assign(:project, project)
     end
 
-    context 'Slack service' do
-      let(:integration) { build(:slack_service) }
+    context 'with Slack integration' do
+      let(:integration) { build(:integrations_slack) }
 
       it 'does not include Jira specific fields' do
         is_expected.not_to include(*jira_fields.keys)
@@ -50,7 +50,7 @@ RSpec.describe EE::ServicesHelper do
     end
 
     context 'Jira service' do
-      let_it_be_with_refind(:integration) { create(:jira_service, project: project, issues_enabled: true, project_key: 'FE', vulnerabilities_enabled: true, vulnerabilities_issuetype: '10001') }
+      let_it_be_with_refind(:integration) { create(:jira_integration, project: project, issues_enabled: true, project_key: 'FE', vulnerabilities_enabled: true, vulnerabilities_issuetype: '10001') }
 
       context 'when there is no license for jira_vulnerabilities_integration' do
         before do

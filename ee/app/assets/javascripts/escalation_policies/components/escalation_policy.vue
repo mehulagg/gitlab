@@ -15,7 +15,9 @@ import {
   ALERT_STATUSES,
   DEFAULT_ACTION,
   deleteEscalationPolicyModalId,
+  editEscalationPolicyModalId,
 } from '../constants';
+import EditEscalationPolicyModal from './add_edit_escalation_policy_modal.vue';
 import DeleteEscalationPolicyModal from './delete_escalation_policy_modal.vue';
 
 export const i18n = {
@@ -45,6 +47,7 @@ export default {
     GlIcon,
     GlCollapse,
     DeleteEscalationPolicyModal,
+    EditEscalationPolicyModal,
   },
   directives: {
     GlModal: GlModalDirective,
@@ -74,6 +77,9 @@ export default {
     },
     policyVisibleAngleIconLabel() {
       return this.isPolicyVisible ? __('Collapse') : __('Expand');
+    },
+    editPolicyModalId() {
+      return `${editEscalationPolicyModalId}-${this.policy.id}`;
     },
     deletePolicyModalId() {
       return `${deleteEscalationPolicyModalId}-${this.policy.id}`;
@@ -106,11 +112,11 @@ export default {
           <h3 class="gl-font-weight-bold gl-font-lg gl-m-0">{{ policy.name }}</h3>
           <gl-button-group class="gl-ml-auto">
             <gl-button
+              v-gl-modal="editPolicyModalId"
               v-gl-tooltip
               :title="$options.i18n.editPolicy"
               icon="pencil"
               :aria-label="$options.i18n.editPolicy"
-              disabled
             />
             <gl-button
               v-gl-modal="deletePolicyModalId"
@@ -163,5 +169,10 @@ export default {
     </gl-card>
 
     <delete-escalation-policy-modal :escalation-policy="policy" :modal-id="deletePolicyModalId" />
+    <edit-escalation-policy-modal
+      :escalation-policy="policy"
+      :modal-id="editPolicyModalId"
+      is-edit-mode
+    />
   </div>
 </template>

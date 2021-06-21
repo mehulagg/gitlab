@@ -2,6 +2,7 @@ import { mount } from '@vue/test-utils';
 import MockAdapter from 'axios-mock-adapter';
 import Vue, { nextTick } from 'vue';
 import VueApollo from 'vue-apollo';
+import StatusChecksReportsApp from 'ee/reports/status_checks_report/status_checks_reports_app.vue';
 import PerformanceIssueBody from 'ee/vue_merge_request_widget/components/performance_issue_body.vue';
 import MrWidgetOptions from 'ee/vue_merge_request_widget/mr_widget_options.vue';
 // Force Jest to transpile and cache
@@ -98,6 +99,7 @@ describe('ee merge request widget options', () => {
   const findLoadPerformanceWidget = () => wrapper.find('.js-load-performance-widget');
   const findExtendedSecurityWidget = () => wrapper.find('.js-security-widget');
   const findBaseSecurityWidget = () => wrapper.find('[data-testid="security-mr-widget"]');
+  const findStatusChecksReport = () => wrapper.findComponent(StatusChecksReportsApp);
 
   const setBrowserPerformance = (data = {}) => {
     const browserPerformance = { ...DEFAULT_BROWSER_PERFORMANCE, ...data };
@@ -1261,6 +1263,32 @@ describe('ee merge request widget options', () => {
 
     it('does not render the EE security report', () => {
       expect(findExtendedSecurityWidget().exists()).toBe(false);
+    });
+  });
+
+  describe.each`
+    path             | mergeState          | shouldRender
+    ${'http://test'} | ${'readyToMerge'}   | ${true}
+    ${'http://test'} | ${'nothingToMerge'} | ${false}
+    ${undefined}     | ${'readyToMerge'}   | ${false}
+    ${undefined}     | ${'nothingToMerge'} | ${false}
+  `('status checks widget', ({ path, mergeState, shouldRender }) => {
+    beforeEach(() => {
+      createComponent({
+        propsData: {
+          mrData: {
+            ...mockData,
+            api_status_checks_path: path,
+          },
+        },
+      });
+      wrapper.vm.mr.state = mergeState;
+    });
+
+    it(`${
+      shouldRender ? 'renders' : 'does not render'
+    } when the path is '${path}' and the merge state is '${mergeState}'`, () => {
+      expect(findStatusChecksReport().exists()).toBe(shouldRender);
     });
   });
 });

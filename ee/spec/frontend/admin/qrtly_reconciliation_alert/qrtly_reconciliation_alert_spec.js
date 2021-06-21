@@ -1,7 +1,7 @@
 import { GlAlert } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
 import Cookie from 'js-cookie';
-import QrtlyReconciliationAlert from 'ee/admin/qrtly_reconciliation_alert/components/qrtly_reconciliation_alert.vue';
+import QrtlyReconciliationAlert from 'ee/billings/qrtly_reconciliation/components/qrtly_reconciliation_alert.vue';
 
 jest.mock('js-cookie', () => ({
   set: jest.fn(),
@@ -20,7 +20,7 @@ describe('Qrtly Reconciliation Alert', () => {
     });
   };
 
-  const findAlert = () => wrapper.find(GlAlert);
+  const findAlert = () => wrapper.findComponent(GlAlert);
 
   beforeEach(() => {
     wrapper = createComponent();

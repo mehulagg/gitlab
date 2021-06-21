@@ -27,10 +27,14 @@ module SubscriptionPortalHelpers
     end
   end
 
-  def stub_billing_plans(namespace_id, plan = 'free', plans_data = nil)
-    stub_full_request("#{EE::SUBSCRIPTIONS_URL}/gitlab_plans?namespace_id=#{namespace_id}&plan=#{plan}")
-      .with(headers: { 'Accept' => 'application/json' })
-      .to_return(status: 200, body: plans_data || plans_fixture)
+  def stub_billing_plans(namespace_id, plan = 'free', plans_data = nil, raise_error: nil)
+    stub = stub_full_request("#{EE::SUBSCRIPTIONS_URL}/gitlab_plans?namespace_id=#{namespace_id}&plan=#{plan}")
+             .with(headers: { 'Accept' => 'application/json' })
+    if raise_error
+      stub.to_raise(raise_error)
+    else
+      stub.to_return(status: 200, body: plans_data || plans_fixture)
+    end
   end
 
   private

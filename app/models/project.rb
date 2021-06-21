@@ -172,25 +172,25 @@ class Project < ApplicationRecord
   has_one :flowdock_integration, class_name: 'Integrations::Flowdock'
   has_one :hangouts_chat_integration, class_name: 'Integrations::HangoutsChat'
   has_one :irker_integration, class_name: 'Integrations::Irker'
-  has_one :jenkins_service, class_name: 'Integrations::Jenkins'
-  has_one :jira_service, class_name: 'Integrations::Jira'
-  has_one :mattermost_service, class_name: 'Integrations::Mattermost'
-  has_one :mattermost_slash_commands_service, class_name: 'Integrations::MattermostSlashCommands'
-  has_one :microsoft_teams_service, class_name: 'Integrations::MicrosoftTeams'
-  has_one :mock_ci_service, class_name: 'Integrations::MockCi'
-  has_one :packagist_service, class_name: 'Integrations::Packagist'
-  has_one :pipelines_email_service, class_name: 'Integrations::PipelinesEmail'
-  has_one :pivotaltracker_service, class_name: 'Integrations::Pivotaltracker'
-  has_one :pushover_service, class_name: 'Integrations::Pushover'
-  has_one :redmine_service, class_name: 'Integrations::Redmine'
-  has_one :slack_service, class_name: 'Integrations::Slack'
-  has_one :slack_slash_commands_service, class_name: 'Integrations::SlackSlashCommands'
-  has_one :teamcity_service, class_name: 'Integrations::Teamcity'
-  has_one :unify_circuit_service, class_name: 'Integrations::UnifyCircuit'
-  has_one :webex_teams_service, class_name: 'Integrations::WebexTeams'
-  has_one :youtrack_service, class_name: 'Integrations::Youtrack'
-  has_one :prometheus_service, inverse_of: :project
-  has_one :mock_monitoring_service
+  has_one :jenkins_integration, class_name: 'Integrations::Jenkins'
+  has_one :jira_integration, class_name: 'Integrations::Jira'
+  has_one :mattermost_integration, class_name: 'Integrations::Mattermost'
+  has_one :mattermost_slash_commands_integration, class_name: 'Integrations::MattermostSlashCommands'
+  has_one :microsoft_teams_integration, class_name: 'Integrations::MicrosoftTeams'
+  has_one :mock_ci_integration, class_name: 'Integrations::MockCi'
+  has_one :mock_monitoring_integration, class_name: 'Integrations::MockMonitoring'
+  has_one :packagist_integration, class_name: 'Integrations::Packagist'
+  has_one :pipelines_email_integration, class_name: 'Integrations::PipelinesEmail'
+  has_one :pivotaltracker_integration, class_name: 'Integrations::Pivotaltracker'
+  has_one :prometheus_integration, class_name: 'Integrations::Prometheus', inverse_of: :project
+  has_one :pushover_integration, class_name: 'Integrations::Pushover'
+  has_one :redmine_integration, class_name: 'Integrations::Redmine'
+  has_one :slack_integration, class_name: 'Integrations::Slack'
+  has_one :slack_slash_commands_integration, class_name: 'Integrations::SlackSlashCommands'
+  has_one :teamcity_integration, class_name: 'Integrations::Teamcity'
+  has_one :unify_circuit_integration, class_name: 'Integrations::UnifyCircuit'
+  has_one :webex_teams_integration, class_name: 'Integrations::WebexTeams'
+  has_one :youtrack_integration, class_name: 'Integrations::Youtrack'
 
   has_one :root_of_fork_network,
           foreign_key: 'root_project_id',
@@ -400,7 +400,7 @@ class Project < ApplicationRecord
   accepts_nested_attributes_for :error_tracking_setting, update_only: true
   accepts_nested_attributes_for :metrics_setting, update_only: true, allow_destroy: true
   accepts_nested_attributes_for :grafana_integration, update_only: true, allow_destroy: true
-  accepts_nested_attributes_for :prometheus_service, update_only: true
+  accepts_nested_attributes_for :prometheus_integration, update_only: true
   accepts_nested_attributes_for :alerting_setting, update_only: true
 
   delegate :feature_available?, :builds_enabled?, :wiki_enabled?,
@@ -439,7 +439,7 @@ class Project < ApplicationRecord
   delegate :allow_merge_on_skipped_pipeline, :allow_merge_on_skipped_pipeline?,
     :allow_merge_on_skipped_pipeline=, :has_confluence?, :allow_editing_commit_messages?,
     to: :project_setting
-  delegate :active?, to: :prometheus_service, allow_nil: true, prefix: true
+  delegate :active?, to: :prometheus_integration, allow_nil: true, prefix: true
 
   delegate :log_jira_dvcs_integration_usage, :jira_dvcs_server_last_sync_at, :jira_dvcs_cloud_last_sync_at, to: :feature_usage
 
@@ -542,7 +542,7 @@ class Project < ApplicationRecord
   scope :for_milestones, ->(ids) { joins(:milestones).where('milestones.id' => ids).distinct }
   scope :with_push, -> { joins(:events).merge(Event.pushed_action) }
   scope :with_project_feature, -> { joins('LEFT JOIN project_features ON projects.id = project_features.project_id') }
-  scope :with_active_jira_services, -> { joins(:integrations).merge(::Integrations::Jira.active) }
+  scope :with_active_jira_integrations, -> { joins(:integrations).merge(::Integrations::Jira.active) }
   scope :with_jira_dvcs_cloud, -> { joins(:feature_usage).merge(ProjectFeatureUsage.with_jira_dvcs_integration_enabled(cloud: true)) }
   scope :with_jira_dvcs_server, -> { joins(:feature_usage).merge(ProjectFeatureUsage.with_jira_dvcs_integration_enabled(cloud: false)) }
   scope :inc_routes, -> { includes(:route, namespace: :route) }
@@ -824,6 +824,21 @@ class Project < ApplicationRecord
       with_merge_requests_enabled = with_merge_requests_available_for_user(user).select(:id)
 
       from_union([with_issues_enabled, with_merge_requests_enabled]).select(:id)
+    end
+
+    def find_by_url(url)
+      uri = URI(url)
+
+      return unless uri.host == Gitlab.config.gitlab.host
+
+      match = Rails.application.routes.recognize_path(url)
+
+      return if match[:unmatched_route].present?
+      return if match[:namespace_id].blank? || match[:id].blank?
+
+      find_by_full_path(match.values_at(:namespace_id, :id).join("/"))
+    rescue ActionController::RoutingError, URI::InvalidURIError
+      nil
     end
   end
 
@@ -1392,8 +1407,6 @@ class Project < ApplicationRecord
   end
 
   def disabled_services
-    return %w[datadog] unless Feature.enabled?(:datadog_ci_integration, self)
-
     []
   end
 

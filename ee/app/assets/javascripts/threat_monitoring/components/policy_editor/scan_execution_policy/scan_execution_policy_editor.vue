@@ -23,16 +23,12 @@ export default {
     },
   },
   data() {
-    const policy = this.existingPolicy
-      ? fromYaml(this.existingPolicy.manifest)
-      : fromYaml(DEFAULT_SCAN_EXECUTION_POLICY);
-
     const yamlEditorValue = this.existingPolicy
       ? removeUnnecessaryDashes(this.existingPolicy.manifest)
       : DEFAULT_SCAN_EXECUTION_POLICY;
 
     return {
-      policy,
+      policy: fromYaml(yamlEditorValue),
       yamlEditorValue,
     };
   },

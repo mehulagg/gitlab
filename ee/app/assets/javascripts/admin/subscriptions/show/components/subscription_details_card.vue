@@ -2,18 +2,15 @@
 import { GlCard } from '@gitlab/ui';
 import { identity } from 'lodash';
 import { getIdFromGraphQLId } from '~/graphql_shared/utils';
-import { formatDate, getTimeago } from '~/lib/utils/datetime_utility';
+import { getTimeago } from '~/lib/utils/datetime_utility';
 import { capitalizeFirstCharacter } from '~/lib/utils/text_utility';
 import SubscriptionDetailsTable from './subscription_details_table.vue';
-
-const humanReadableDate = (value) => (value ? formatDate(value, 'd mmmm yyyy') : '');
 
 const subscriptionDetailsFormatRules = {
   id: getIdFromGraphQLId,
   expiresAt: getTimeago().format,
   lastSync: getTimeago().format,
   plan: capitalizeFirstCharacter,
-  startsAt: humanReadableDate,
 };
 
 export default {

@@ -22,7 +22,8 @@ module QualityManagement
             title: title,
             description: description,
             label_ids: label_ids
-          }
+          },
+          spam_params: nil
         ).execute
 
         return error(issue.errors.full_messages.to_sentence, issue) unless issue.valid?

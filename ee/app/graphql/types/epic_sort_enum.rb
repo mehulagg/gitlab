@@ -16,5 +16,7 @@ module Types
     value 'START_DATE_ASC', 'Sort by start date in ascending order.', value: :start_date_asc
     value 'END_DATE_DESC', 'Sort by end date in descending order.', value: :end_date_desc
     value 'END_DATE_ASC', 'Sort by end date in ascending order.', value: :end_date_asc
+    value 'TITLE_DESC', 'Sort by title in descending order.', value: :title_desc
+    value 'TITLE_ASC', 'Sort by title in ascending order.', value: :title_asc
   end
 end
