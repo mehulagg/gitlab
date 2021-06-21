@@ -3270,6 +3270,9 @@ msgstr ""
 msgid "All threads resolved"
 msgstr ""
 
+msgid "All tiers"
+msgstr ""
+
 msgid "All users must have a name."
 msgstr ""
 
@@ -9684,6 +9687,9 @@ msgstr ""
 msgid "Current sign-in at:"
 msgstr ""
 
+msgid "Current tier only"
+msgstr ""
+
 msgid "Current vulnerabilities count"
 msgstr ""
 
@@ -11477,9 +11483,6 @@ msgstr ""
 msgid "Disable Two-factor Authentication"
 msgstr ""
 
-msgid "Disable What's new"
-msgstr ""
-
 msgid "Disable for this project"
 msgstr ""
 
@@ -12152,12 +12155,6 @@ msgid "Enable Seat Link"
 msgstr ""
 
 msgid "Enable Spam Check via external API endpoint"
-msgstr ""
-
-msgid "Enable What's new: All tiers"
-msgstr ""
-
-msgid "Enable What's new: Current tier only"
 msgstr ""
 
 msgid "Enable a Prometheus metrics endpoint at %{metrics_path} to expose a variety of statistics on the health and performance of GitLab. Additional information on authenticating and connecting to the metrics endpoint is available %{link}."
@@ -17246,6 +17243,9 @@ msgstr ""
 msgid "InProductMarketing|you may %{unsubscribe_link} at any time."
 msgstr ""
 
+msgid "Inactive"
+msgstr ""
+
 msgid "Incident"
 msgstr ""
 
@@ -22006,6 +22006,9 @@ msgstr ""
 msgid "New epic title"
 msgstr ""
 
+msgid "New features from all tiers are included."
+msgstr ""
+
 msgid "New file"
 msgstr ""
 
@@ -23079,6 +23082,9 @@ msgid "Only active this projects shows up in the search and on the dashboard."
 msgstr ""
 
 msgid "Only admins can delete project"
+msgstr ""
+
+msgid "Only new features in your current subscription tier are ."
 msgstr ""
 
 msgid "Only policy:"
@@ -36775,13 +36781,7 @@ msgstr ""
 msgid "What's new"
 msgstr ""
 
-msgid "What's new is disabled and can no longer be viewed."
-msgstr ""
-
-msgid "What's new presents new features for your current subscription tier, while hiding new features not available to your subscription tier."
-msgstr ""
-
-msgid "What's new presents new features from all tiers to help you keep track of all new features."
+msgid "What's new is inactive and cannot be viewed."
 msgstr ""
 
 msgid "What’s your experience level?"
