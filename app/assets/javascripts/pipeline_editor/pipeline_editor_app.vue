@@ -76,10 +76,10 @@ export default {
         };
       },
       update(data) {
-        return data?.blobContent?.rawData;
+        return data?.project?.repository?.blobs?.nodes[0]?.rawBlob;
       },
       result({ data }) {
-        const fileContent = data?.blobContent?.rawData ?? '';
+        const fileContent = data?.project?.repository?.blobs?.nodes[0]?.rawBlob ?? '';
 
         this.lastCommittedContent = fileContent;
         this.currentCiFileContent = fileContent;
