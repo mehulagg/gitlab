@@ -97,8 +97,8 @@ export default {
     addRule() {
       this.rules.push({ ...cloneDeep(DEFAULT_ESCALATION_RULE), key: uniqueId() });
     },
-    updateEscalationRules(index, rule) {
-      this.rules[index] = { ...this.rules[index], ...rule };
+    updateEscalationRules(rule) {
+      this.rules[rule.index] = { ...this.rules[rule.index], ...rule };
       this.emitRulesUpdate();
     },
     removeEscalationRule(index) {

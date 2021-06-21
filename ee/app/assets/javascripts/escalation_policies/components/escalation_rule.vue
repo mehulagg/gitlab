@@ -113,7 +113,8 @@ export default {
       this.emitUpdate();
     },
     emitUpdate() {
-      this.$emit('update-escalation-rule', this.index, {
+      this.$emit('update-escalation-rule', {
+        index: this.index,
         oncallScheduleIid: parseInt(this.oncallScheduleIid, 10),
         action: this.action,
         status: this.status,
