@@ -148,6 +148,7 @@ export default {
     <section class="row gl-mb-5">
       <div class="col-md-6 gl-mb-5">
         <subscription-details-card
+          class="gl-h-full"
           :details-fields="subscriptionDetailsFields"
           :header-text="$options.i18n.subscriptionDetailsHeaderText"
           :subscription="subscription"
@@ -211,6 +212,7 @@ export default {
 
       <div class="col-md-6 gl-mb-5">
         <subscription-details-card
+          class="gl-h-full"
           :details-fields="licensedToFields"
           :header-text="$options.i18n.licensedToHeaderText"
           :subscription="subscription"
