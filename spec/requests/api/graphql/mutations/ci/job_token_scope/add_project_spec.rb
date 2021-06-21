@@ -15,7 +15,21 @@ RSpec.describe 'CiJobTokenScopeAddProject' do
     }
   end
 
-  let(:mutation) { graphql_mutation(:ci_job_token_scope_add_project, variables) }
+  let(:mutation) do
+    graphql_mutation(:ci_job_token_scope_add_project, variables) do
+      <<~QL
+        errors
+        ciJobTokenScope {
+          projects {
+            nodes {
+              path
+            }
+          }
+        }
+      QL
+    end
+  end
+
   let(:mutation_response) { graphql_mutation_response(:ci_job_token_scope_add_project) }
 
   context 'when unauthorized' do
@@ -42,11 +56,11 @@ RSpec.describe 'CiJobTokenScopeAddProject' do
     end
 
     it 'adds the target project to the job token scope' do
-      post_graphql_mutation(mutation, current_user: current_user)
-
-      expect(response).to have_gitlab_http_status(:success)
-      expect(mutation_response['targetProject']).to be_present
-      expect(Ci::JobToken::Scope.new(project).includes?(target_project)).to be_truthy
+      expect do
+        post_graphql_mutation(mutation, current_user: current_user)
+        expect(response).to have_gitlab_http_status(:success)
+        expect(mutation_response.dig('ciJobTokenScope', 'projects', 'nodes')).not_to be_empty
+      end.to change { Ci::JobToken::Scope.new(project).includes?(target_project) }.from(false).to(true)
     end
 
     context 'when invalid target project is provided' do
