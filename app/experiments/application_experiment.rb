@@ -12,18 +12,26 @@ class ApplicationExperiment < Gitlab::Experiment # rubocop:disable Gitlab/Namesp
   def publish(_result = nil)
     return unless should_track? # don't track events for excluded contexts
 
-    record_experiment if @record # record the subject in the database if the context contains a namespace, group, project, actor or user
-
     track(:assignment) # track that we've assigned a variant for this context
 
-    push_to_client
+    publish_to_database if @record # publish the experiment context to the database
+    publish_to_client # publish the experiment data to the client
   end
 
-  # push the experiment data to the client
-  def push_to_client
+  def publish_to_client
     Gon.push({ experiment: { name => signature } }, true)
   rescue NoMethodError
     # means we're not in the request cycle, and can't add to Gon. Log a warning maybe?
+  end
+
+  def publish_to_database
+    # if the context contains a namespace, group, project, actor or user
+    subject = %i[namespace group project user actor].first { |known_key| context.value[known_key] }
+    return unless ExperimentSubject.valid_subject?(subject)
+
+    variant = :experimental if @variant_name != :control
+
+    Experiment.add_subject(name, variant: variant || :control, subject: subject)
   end
 
   def track(action, **event_args)
@@ -41,10 +49,6 @@ class ApplicationExperiment < Gitlab::Experiment # rubocop:disable Gitlab/Namesp
     @record = true
   end
 
-  def exclude!
-    @excluded = true
-  end
-
   def control_behavior
     # define a default nil control behavior so we can omit it when not needed
   end
@@ -57,14 +61,5 @@ class ApplicationExperiment < Gitlab::Experiment # rubocop:disable Gitlab/Namesp
 
   def experiment_group?
     Feature.enabled?(feature_flag_name, self, type: :experiment, default_enabled: :yaml)
-  end
-
-  def record_experiment
-    subject = context.value[:namespace] || context.value[:group] || context.value[:project] || context.value[:user] || context.value[:actor]
-    return unless ExperimentSubject.valid_subject?(subject)
-
-    variant = :experimental if @variant_name != :control
-
-    Experiment.add_subject(name, variant: variant || :control, subject: subject)
   end
 end

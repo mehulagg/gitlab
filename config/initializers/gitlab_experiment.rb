@@ -2,6 +2,7 @@
 
 Gitlab::Experiment.configure do |config|
   config.base_class = 'ApplicationExperiment'
+  config.mount_at = Feature.enabled?(:gitlab_experiment_middleware) ? '/-/experiment/' : nil
   config.cache = Gitlab::Experiment::Cache::RedisHashStore.new(
     pool: ->(&block) { Gitlab::Redis::SharedState.with { |redis| block.call(redis) } }
   )
@@ -11,7 +12,6 @@ Gitlab::Experiment.configure do |config|
   #  enable migrating into the new SHA2 strategy.
   config.context_hash_strategy = lambda do |source, seed|
     source = source.keys + source.values if source.is_a?(Hash)
-    data = Array(source).map { |v| (v.respond_to?(:to_global_id) ? v.to_global_id : v).to_s }
-    Digest::MD5.hexdigest(data.unshift(seed).join('|'))
+    Digest::MD5.hexdigest(Array(source).map { |v| identify(v) }.unshift(seed).join('|'))
   end
 end

@@ -1,3 +1,13 @@
+GIT
+  remote: https://gitlab.com/gitlab-org/gitlab-experiment.git
+  revision: afad3ae609ba108ed568553389a71927b7f0a0aa
+  ref: release-0.6.1
+  specs:
+    gitlab-experiment (0.6.1)
+      activesupport (>= 3.0)
+      request_store (>= 1.0)
+      scientist (~> 1.6, >= 1.6.0)
+
 PATH
   remote: vendor/gems/mail-smtp_pool
   specs:
@@ -464,10 +474,6 @@ GEM
       numerizer (~> 0.2)
     gitlab-dangerfiles (2.1.2)
       danger-gitlab
-    gitlab-experiment (0.5.4)
-      activesupport (>= 3.0)
-      request_store (>= 1.0)
-      scientist (~> 1.6, >= 1.6.0)
     gitlab-fog-azure-rm (1.1.1)
       azure-storage-blob (~> 2.0)
       azure-storage-common (~> 2.0)
@@ -1487,7 +1493,7 @@ DEPENDENCIES
   github-markup (~> 1.7.0)
   gitlab-chronic (~> 0.10.5)
   gitlab-dangerfiles (~> 2.1.2)
-  gitlab-experiment (~> 0.5.4)
+  gitlab-experiment!
   gitlab-fog-azure-rm (~> 1.1.1)
   gitlab-fog-google (~> 1.13)
   gitlab-labkit (~> 0.18.0)
