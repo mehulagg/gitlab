@@ -1,0 +1,8 @@
+---
+name: git_access_batched_changes_size
+introduced_by_url:
+rollout_issue_url: https://gitlab.com/gitlab-org/gitlab/-/issues/334130
+milestone: '14.0'
+type: development
+group: group::gitaly
+default_enabled: false
