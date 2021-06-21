@@ -55,6 +55,9 @@ module QA
       end
 
       def fabricate!
+        @token = QA::Resource::PersonalAccessTokenRepository.get_token_for_username(user.username)
+        return if @token
+
         Flow::Login.sign_in_unless_signed_in(as: user)
 
         Page::Main::Menu.perform(&:click_edit_profile_link)
@@ -66,6 +69,8 @@ module QA
           # Expire in 2 days just in case the token is created just before midnight
           token_page.fill_expiry_date(Time.now.utc.to_date + 2)
           token_page.click_create_token_button
+
+          QA::Resource::PersonalAccessTokenRepository.set_token_for_username(user.username, token)
         end
       end
     end
