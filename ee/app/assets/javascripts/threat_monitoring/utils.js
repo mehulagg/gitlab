@@ -14,14 +14,14 @@ export const getContentWrapperHeight = (contentWrapperClass) => {
 
 /**
  * Get a policy's type
- * @param {String} manifest policy's YAML manifest
+ * @param {String} yaml policy's YAML manifest
  * @returns {String|null} policy type if available
  */
-export const getPolicyKind = (manifest = '') => {
-  if (manifest?.includes(POLICY_KINDS.ciliumNetwork)) {
+export const getPolicyKind = (yaml = '') => {
+  if (yaml?.includes(POLICY_KINDS.ciliumNetwork)) {
     return POLICY_KINDS.ciliumNetwork;
   }
-  if (manifest?.includes(POLICY_KINDS.scanExecution)) {
+  if (yaml?.includes(POLICY_KINDS.scanExecution)) {
     return POLICY_KINDS.scanExecution;
   }
   return null;
