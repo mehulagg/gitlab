@@ -207,8 +207,8 @@ In this example:
   or `storage-3`.
 - Each storage is serviced by a Gitaly node.
 - The three Gitaly nodes share data in three separate hashed storage locations.
-- The [replication factor](praefect.md#replication-factor) is `3`. There are three copies maintained
-  of each repository.
+- The [replication factor](praefect.md#replication-factor) is `1`. Each node stores different
+  repositories and no repositories are replicated across different nodes.
 
 Generally, virtual storage with Gitaly Cluster can replace direct Gitaly storage configurations, at
 the expense of additional storage needed to store each repository on multiple Gitaly nodes. The
