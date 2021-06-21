@@ -8,6 +8,8 @@ module Ci
     belongs_to :build, class_name: 'Ci::Build'
     belongs_to :namespace, inverse_of: :ci_pending_builds, class_name: 'Namespace'
 
+    scope :with_namespace, ->(namespace) { where(namespace: namespace) }
+
     def self.upsert_from_build!(build)
       entry = self.new(args(build))
 
