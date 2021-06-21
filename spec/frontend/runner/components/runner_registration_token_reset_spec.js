@@ -7,8 +7,10 @@ import createFlash, { FLASH_TYPES } from '~/flash';
 import RunnerRegistrationTokenReset from '~/runner/components/runner_registration_token_reset.vue';
 import { INSTANCE_TYPE } from '~/runner/constants';
 import runnersRegistrationTokenResetMutation from '~/runner/graphql/runners_registration_token_reset.mutation.graphql';
+import { reportToSentry } from '~/runner/sentry_utils';
 
 jest.mock('~/flash');
+jest.mock('~/runner/sentry_utils');
 
 const localVue = createLocalVue();
 localVue.use(VueApollo);
@@ -111,16 +113,20 @@ describe('RunnerRegistrationTokenReset', () => {
 
   describe('On error', () => {
     it('On network error, error message is shown', async () => {
-      runnersRegistrationTokenResetMutationHandler.mockRejectedValueOnce(
-        new Error('Something went wrong'),
-      );
+      const errorMsg = 'Something went wrong';
+
+      runnersRegistrationTokenResetMutationHandler.mockRejectedValueOnce(new Error(errorMsg));
 
       window.confirm.mockReturnValueOnce(true);
       await findButton().vm.$emit('click');
       await waitForPromises();
 
       expect(createFlash).toHaveBeenLastCalledWith({
-        message: 'Network error: Something went wrong',
+        message: `Network error: ${errorMsg}`,
+      });
+      expect(reportToSentry).toHaveBeenCalledWith({
+        error: new Error(`Network error: ${errorMsg}`),
+        component: 'runner_registration_token_reset',
       });
     });
 
@@ -140,6 +146,10 @@ describe('RunnerRegistrationTokenReset', () => {
 
       expect(createFlash).toHaveBeenLastCalledWith({
         message: 'Token reset failed',
+      });
+      expect(reportToSentry).toHaveBeenCalledWith({
+        error: new Error('Token reset failed'),
+        component: 'runner_registration_token_reset',
       });
     });
   });

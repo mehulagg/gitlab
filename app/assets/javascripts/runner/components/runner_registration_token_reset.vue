@@ -3,6 +3,7 @@ import { GlButton } from '@gitlab/ui';
 import createFlash, { FLASH_TYPES } from '~/flash';
 import { __, s__ } from '~/locale';
 import runnersRegistrationTokenResetMutation from '~/runner/graphql/runners_registration_token_reset.mutation.graphql';
+import { reportToSentry } from '~/runner/sentry_utils';
 import { INSTANCE_TYPE, GROUP_TYPE, PROJECT_TYPE } from '../constants';
 
 export default {
@@ -52,8 +53,7 @@ export default {
           },
         });
         if (errors && errors.length) {
-          this.onError(new Error(errors[0]));
-          return;
+          throw new Error(errors[0]);
         }
         this.onSuccess(token);
       } catch (e) {
@@ -65,6 +65,8 @@ export default {
     onError(error) {
       const { message } = error;
       createFlash({ message });
+
+      this.reportError(error);
     },
     onSuccess(token) {
       createFlash({
@@ -72,6 +74,9 @@ export default {
         type: FLASH_TYPES.SUCCESS,
       });
       this.$emit('tokenReset', token);
+    },
+    reportError(error) {
+      reportToSentry({ error, component: 'runner_registration_token_reset' });
     },
   },
 };

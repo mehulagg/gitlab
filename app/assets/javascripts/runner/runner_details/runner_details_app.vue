@@ -1,10 +1,13 @@
 <script>
+import createFlash from '~/flash';
 import { convertToGraphQLId } from '~/graphql_shared/utils';
+import { s__ } from '~/locale';
 import RunnerTypeAlert from '../components/runner_type_alert.vue';
 import RunnerTypeBadge from '../components/runner_type_badge.vue';
 import RunnerUpdateForm from '../components/runner_update_form.vue';
 import { I18N_DETAILS_TITLE, RUNNER_ENTITY_TYPE } from '../constants';
 import getRunnerQuery from '../graphql/get_runner.query.graphql';
+import { reportToSentry } from '../sentry_utils';
 
 export default {
   components: {
@@ -23,7 +26,7 @@ export default {
   },
   data() {
     return {
-      runner: null,
+      runner: undefined,
     };
   },
   apollo: {
@@ -34,6 +37,19 @@ export default {
           id: convertToGraphQLId(RUNNER_ENTITY_TYPE, this.runnerId),
         };
       },
+      error(error) {
+        createFlash({ message: s__('Runners|Something went wrong while fetching runner data.') });
+
+        this.reportError(error);
+      },
+    },
+  },
+  errorCaptured(error) {
+    this.reportError(error);
+  },
+  methods: {
+    reportError(error) {
+      reportToSentry({ error, component: 'runner_details_app' });
     },
   },
 };

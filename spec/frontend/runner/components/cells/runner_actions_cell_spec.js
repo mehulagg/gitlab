@@ -1,48 +1,71 @@
-import { shallowMount } from '@vue/test-utils';
+import { createLocalVue, shallowMount } from '@vue/test-utils';
+import VueApollo from 'vue-apollo';
+import createMockApollo from 'helpers/mock_apollo_helper';
 import { extendedWrapper } from 'helpers/vue_test_utils_helper';
-import waitForPromises from 'helpers/wait_for_promises';
+import createFlash from '~/flash';
 import RunnerActionCell from '~/runner/components/cells/runner_actions_cell.vue';
-import deleteRunnerMutation from '~/runner/graphql/delete_runner.mutation.graphql';
 import getRunnersQuery from '~/runner/graphql/get_runners.query.graphql';
+import runnerDeleteMutation from '~/runner/graphql/runner_delete.mutation.graphql';
 import runnerUpdateMutation from '~/runner/graphql/runner_update.mutation.graphql';
+import { reportToSentry } from '~/runner/sentry_utils';
+import { runnerData } from '../../mock_data';
 
-const mockId = '1';
+const mockRunner = runnerData.data.runner;
 
 const getRunnersQueryName = getRunnersQuery.definitions[0].name.value;
 
+const localVue = createLocalVue();
+localVue.use(VueApollo);
+
+jest.mock('~/flash');
+jest.mock('~/runner/sentry_utils');
+
 describe('RunnerTypeCell', () => {
   let wrapper;
-  let mutate;
+  let runnerDeleteMutationHandler;
+  let runnerUpdateMutationHandler;
 
   const findEditBtn = () => wrapper.findByTestId('edit-runner');
   const findToggleActiveBtn = () => wrapper.findByTestId('toggle-active-runner');
   const findDeleteBtn = () => wrapper.findByTestId('delete-runner');
 
   const createComponent = ({ active = true } = {}, options) => {
+    runnerDeleteMutationHandler = jest.fn().mockResolvedValue({
+      data: {
+        runnerDelete: {
+          errors: [],
+        },
+      },
+    });
+
+    runnerUpdateMutationHandler = jest.fn().mockResolvedValue({
+      data: {
+        runnerUpdate: {
+          runner: runnerData.data.runner,
+          errors: [],
+        },
+      },
+    });
+
     wrapper = extendedWrapper(
       shallowMount(RunnerActionCell, {
         propsData: {
           runner: {
-            id: `gid://gitlab/Ci::Runner/${mockId}`,
+            id: mockRunner.id,
             active,
           },
         },
-        mocks: {
-          $apollo: {
-            mutate,
-          },
-        },
+        localVue,
+        apolloProvider: createMockApollo([
+          [runnerDeleteMutation, runnerDeleteMutationHandler],
+          [runnerUpdateMutation, runnerUpdateMutationHandler],
+        ]),
         ...options,
       }),
     );
   };
 
-  beforeEach(() => {
-    mutate = jest.fn();
-  });
-
   afterEach(() => {
-    mutate.mockReset();
     wrapper.destroy();
   });
 
@@ -58,17 +81,6 @@ describe('RunnerTypeCell', () => {
     ${'paused'} | ${'Resume'} | ${'play'}  | ${false} | ${true}
   `('When the runner is $state', ({ label, icon, isActive, newActiveValue }) => {
     beforeEach(() => {
-      mutate.mockResolvedValue({
-        data: {
-          runnerUpdate: {
-            runner: {
-              id: `gid://gitlab/Ci::Runner/1`,
-              __typename: 'CiRunner',
-            },
-          },
-        },
-      });
-
       createComponent({ active: isActive });
     });
 
@@ -95,18 +107,14 @@ describe('RunnerTypeCell', () => {
     describe(`When clicking on the ${icon} button`, () => {
       beforeEach(async () => {
         await findToggleActiveBtn().vm.$emit('click');
-        await waitForPromises();
       });
 
       it(`The apollo mutation to set active to ${newActiveValue} is called`, () => {
-        expect(mutate).toHaveBeenCalledTimes(1);
-        expect(mutate).toHaveBeenCalledWith({
-          mutation: runnerUpdateMutation,
-          variables: {
-            input: {
-              id: `gid://gitlab/Ci::Runner/${mockId}`,
-              active: newActiveValue,
-            },
+        expect(runnerUpdateMutationHandler).toHaveBeenCalledTimes(1);
+        expect(runnerUpdateMutationHandler).toHaveBeenCalledWith({
+          input: {
+            id: mockRunner.id,
+            active: newActiveValue,
           },
         });
       });
@@ -115,22 +123,30 @@ describe('RunnerTypeCell', () => {
         expect(findToggleActiveBtn().props('loading')).toBe(false);
       });
     });
+
+    describe('When update fails', () => {
+      beforeEach(async () => {
+        runnerUpdateMutationHandler.mockRejectedValueOnce(new Error('Update error!'));
+
+        await findToggleActiveBtn().vm.$emit('click');
+      });
+
+      it('error is reported to sentry', () => {
+        expect(reportToSentry).toHaveBeenCalledWith({
+          error: new Error('Network error: Update error!'),
+          component: 'runner_actions_cell',
+        });
+      });
+
+      it('error is shown to the user', () => {
+        expect(createFlash).toHaveBeenCalledTimes(1);
+      });
+    });
   });
 
   describe('When the user clicks a runner', () => {
     beforeEach(() => {
       createComponent();
-
-      mutate.mockResolvedValue({
-        data: {
-          runnerDelete: {
-            runner: {
-              id: `gid://gitlab/Ci::Runner/1`,
-              __typename: 'CiRunner',
-            },
-          },
-        },
-      });
 
       jest.spyOn(window, 'confirm');
     });
@@ -141,18 +157,28 @@ describe('RunnerTypeCell', () => {
         await findDeleteBtn().vm.$emit('click');
       });
 
-      it('The user sees a confirmation alert', async () => {
+      it('The user sees a confirmation alert', () => {
         expect(window.confirm).toHaveBeenCalledTimes(1);
         expect(window.confirm).toHaveBeenCalledWith(expect.any(String));
       });
 
       it('The delete mutation is called correctly', () => {
-        expect(mutate).toHaveBeenCalledTimes(1);
-        expect(mutate).toHaveBeenCalledWith({
-          mutation: deleteRunnerMutation,
+        expect(runnerDeleteMutationHandler).toHaveBeenCalledTimes(1);
+        expect(runnerDeleteMutationHandler).toHaveBeenCalledWith({
+          input: { id: mockRunner.id },
+        });
+      });
+
+      it('When delete mutation is called, current runners are refetched', async () => {
+        jest.spyOn(wrapper.vm.$apollo, 'mutate');
+
+        await findDeleteBtn().vm.$emit('click');
+
+        expect(wrapper.vm.$apollo.mutate).toHaveBeenCalledWith({
+          mutation: runnerDeleteMutation,
           variables: {
             input: {
-              id: `gid://gitlab/Ci::Runner/${mockId}`,
+              id: mockRunner.id,
             },
           },
           awaitRefetchQueries: true,
@@ -176,6 +202,25 @@ describe('RunnerTypeCell', () => {
 
         expect(findDeleteBtn().attributes('title')).toBe('');
       });
+
+      describe('When delete fails', () => {
+        beforeEach(async () => {
+          runnerDeleteMutationHandler.mockRejectedValueOnce(new Error('Error!'));
+
+          await findDeleteBtn().vm.$emit('click');
+        });
+
+        it('error is reported to sentry', () => {
+          expect(reportToSentry).toHaveBeenCalledWith({
+            error: new Error('Network error: Error!'),
+            component: 'runner_actions_cell',
+          });
+        });
+
+        it('error is shown to the user', () => {
+          expect(createFlash).toHaveBeenCalledTimes(1);
+        });
+      });
     });
 
     describe('When the user does not confirm deletion', () => {
@@ -189,7 +234,7 @@ describe('RunnerTypeCell', () => {
       });
 
       it('The delete mutation is not called', () => {
-        expect(mutate).toHaveBeenCalledTimes(0);
+        expect(runnerDeleteMutationHandler).toHaveBeenCalledTimes(0);
       });
 
       it('The delete button does not have a loading state', () => {

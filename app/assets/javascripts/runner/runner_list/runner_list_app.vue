@@ -1,7 +1,8 @@
 <script>
-import * as Sentry from '@sentry/browser';
+import createFlash from '~/flash';
 import { fetchPolicies } from '~/lib/graphql';
 import { updateHistory } from '~/lib/utils/url_utility';
+import { s__ } from '~/locale';
 import RunnerFilteredSearchBar from '../components/runner_filtered_search_bar.vue';
 import RunnerList from '../components/runner_list.vue';
 import RunnerManualSetupHelp from '../components/runner_manual_setup_help.vue';
@@ -9,6 +10,7 @@ import RunnerPagination from '../components/runner_pagination.vue';
 import RunnerTypeHelp from '../components/runner_type_help.vue';
 import { INSTANCE_TYPE } from '../constants';
 import getRunnersQuery from '../graphql/get_runners.query.graphql';
+import { reportToSentry } from '../sentry_utils';
 import {
   fromUrlQueryToSearch,
   fromSearchToUrl,
@@ -59,8 +61,10 @@ export default {
           pageInfo: runners?.pageInfo || {},
         };
       },
-      error(err) {
-        this.captureException(err);
+      error(error) {
+        createFlash({ message: s__('Runners|Something went wrong while fetching runners data.') });
+
+        this.reportError(error);
       },
     },
   },
@@ -87,15 +91,12 @@ export default {
       },
     },
   },
-  errorCaptured(err) {
-    this.captureException(err);
+  errorCaptured(error) {
+    this.reportError(error);
   },
   methods: {
-    captureException(err) {
-      Sentry.withScope((scope) => {
-        scope.setTag('component', 'runner_list_app');
-        Sentry.captureException(err);
-      });
+    reportError(error) {
+      reportToSentry({ error, component: 'runner_list_app' });
     },
   },
   INSTANCE_TYPE,

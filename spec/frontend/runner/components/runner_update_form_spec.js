@@ -15,9 +15,11 @@ import {
   ACCESS_LEVEL_NOT_PROTECTED,
 } from '~/runner/constants';
 import runnerUpdateMutation from '~/runner/graphql/runner_update.mutation.graphql';
+import { reportToSentry } from '~/runner/sentry_utils';
 import { runnerData } from '../mock_data';
 
 jest.mock('~/flash');
+jest.mock('~/runner/sentry_utils');
 
 const mockRunner = runnerData.data.runner;
 
@@ -239,6 +241,10 @@ describe('RunnerUpdateForm', () => {
       expect(createFlash).toHaveBeenLastCalledWith({
         message: 'Network error: Something went wrong',
       });
+      expect(reportToSentry).toHaveBeenCalledWith({
+        component: 'runner_update_form',
+        error: new Error('Network error: Something went wrong'),
+      });
       expect(findSubmitDisabledAttr()).toBeUndefined();
     });
 
@@ -257,6 +263,7 @@ describe('RunnerUpdateForm', () => {
       expect(createFlash).toHaveBeenLastCalledWith({
         message: 'A value is invalid',
       });
+      expect(reportToSentry).not.toHaveBeenCalled();
       expect(findSubmitDisabledAttr()).toBeUndefined();
     });
   });
