@@ -657,6 +657,12 @@ RSpec.describe Project, factory_default: :keep do
     it { is_expected.to delegate_method(:allow_editing_commit_messages?).to(:project_setting) }
     it { is_expected.to delegate_method(:container_registry_enabled?).to(:project_feature) }
     it { is_expected.to delegate_method(:container_registry_access_level).to(:project_feature) }
+    it { is_expected.to delegate_method(:default_git_depth).to(:ci_cd_settings).with_prefix(:ci).allow_nil }
+    it { is_expected.to delegate_method(:forward_deployment_enabled).to(:ci_cd_settings).with_prefix(:ci).allow_nil }
+    it { is_expected.to delegate_method(:job_token_scope_enabled).to(:ci_cd_settings).with_prefix(:ci).allow_nil }
+    it { is_expected.to delegate_method(:group_runners_enabled).to(:ci_cd_settings).allow_nil }
+    it { is_expected.to delegate_method(:keep_latest_artifact).to(:ci_cd_settings).allow_nil }
+    it { is_expected.to delegate_method(:restrict_user_defined_variables).to(:ci_cd_settings).allow_nil }
 
     context 'when read_container_registry_access_level is disabled' do
       before do
