@@ -80,6 +80,7 @@ module EE
         mount_mutation ::Mutations::IncidentManagement::EscalationPolicy::Update
         mount_mutation ::Mutations::IncidentManagement::EscalationPolicy::Destroy
         mount_mutation ::Mutations::AppSec::Fuzzing::API::CiConfiguration::Create
+        mount_mutation ::Mutations::SecurityPolicy::CommitScanExecutionPolicy
 
         prepend(Types::DeprecatedMutations)
       end
