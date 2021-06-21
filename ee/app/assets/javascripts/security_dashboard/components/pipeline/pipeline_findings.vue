@@ -14,7 +14,7 @@ export default {
     GlLoadingIcon,
     VulnerabilityList,
   },
-  inject: ['pipeline', 'projectFullPath'],
+  inject: ['pipeline', 'projectPathWithNamespace'],
   props: {
     filters: {
       type: Object,
@@ -48,7 +48,7 @@ export default {
       variables() {
         return {
           pipelineId: this.pipeline.iid,
-          fullPath: this.projectFullPath,
+          fullPath: this.projectPathWithNamespace,
           first: VULNERABILITIES_PER_PAGE,
         };
       },
