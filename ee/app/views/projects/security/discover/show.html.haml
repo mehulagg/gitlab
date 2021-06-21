@@ -2,6 +2,6 @@
 - page_title _("Security Dashboard")
 - add_page_specific_style 'page_bundles/security_discover'
 - linkFeedback = 'https://gitlab.com/gitlab-org/growth/ui-ux/issues/25'
-- linkUpgrade = @project.personal? ? profile_billings_path(@project.group) : group_billings_path(@project.root_ancestor)
+- linkUpgrade = @project.personal? ? profile_billings_path(@project.group, source: 'security_discovery_project') : group_billings_path(@project.root_ancestor, source: 'security_discovery_project')
 
 #js-security-discover-app{ data: { project: { id: @project.id, name: @project.name }, link: { main: new_trial_registration_path(glm_source: 'gitlab.com', glm_content: 'discover-project-security'), secondary: linkUpgrade, feedback: linkFeedback } } }
