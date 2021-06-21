@@ -96,9 +96,6 @@ export default {
       },
     },
     searchUsers: {
-      // TODO Remove error policy
-      // https://gitlab.com/gitlab-org/gitlab/-/issues/329750
-      errorPolicy: 'all',
       query: searchUsers,
       variables() {
         return {
