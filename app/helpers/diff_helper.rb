@@ -190,10 +190,8 @@ module DiffHelper
   end
 
   def render_overflow_warning?(diffs_collection)
-    diff_files = diffs_collection.raw_diff_files
-
-    diff_files.overflow?.tap do |overflown|
-      log_overflow_limits(diff_files)
+    diffs_collection.overflow?.tap do |overflown|
+      log_overflow_limits(diffs_collection.raw_diff_files)
     end
   end
 
