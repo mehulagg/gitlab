@@ -7,7 +7,7 @@ RSpec.describe NewProjectReadmeContentExperiment, :experiment do
 
   let(:project) { create(:project, name: 'Experimental', description: 'An experiment project') }
 
-  it "renders the basic template" do
+  it "renders the basic README" do
     expect(subject.run_with(project)).to eq(<<~MARKDOWN.strip)
       # Experimental
 
@@ -15,13 +15,32 @@ RSpec.describe NewProjectReadmeContentExperiment, :experiment do
     MARKDOWN
   end
 
-  it "renders the advanced template" do
-    expect(subject.run_with(project, variant: :advanced)).to include(<<~MARKDOWN.strip)
-      # Experimental
+  describe "the advanced variant" do
+    let(:markdown) { subject.run_with(project, variant: :advanced) }
 
-      An experiment project
+    before do
+      allow(subject).to receive(:key_for).and_return('ABC123')
+    end
 
-      ## Getting started
-    MARKDOWN
+    it "renders the project details in the README" do
+      expect(markdown).to include(<<~MARKDOWN.strip)
+        # Experimental
+
+        An experiment project
+
+        ## Getting started
+      MARKDOWN
+    end
+
+    it "renders redirect urls" do
+      initial_url = 'https://docs.gitlab.com/ee/user/project/repository/web_editor.html#create-a-file'
+      mounted_at = Gitlab::Experiment::Configuration.mount_at
+
+      if mounted_at.nil?
+        expect(markdown).to include(initial_url)
+      else
+        expect(markdown).to include("#{mounted_at}/#{subject.to_param}?#{initial_url}")
+      end
+    end
   end
 end
