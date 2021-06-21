@@ -1,9 +1,11 @@
 import { GlPopover } from '@gitlab/ui';
 import { GlBreakpointInstance } from '@gitlab/ui/dist/utils';
-import { shallowMount } from '@vue/test-utils';
-
+import { mount, shallowMount } from '@vue/test-utils';
+import Vue from 'vue';
 import TrialStatusPopover from 'ee/contextual_sidebar/components/trial_status_popover.vue';
 import { mockTracking } from 'helpers/tracking_helper';
+
+Vue.config.ignoredElements = ['gl-emoji'];
 
 describe('TrialStatusPopover component', () => {
   let wrapper;
@@ -12,8 +14,8 @@ describe('TrialStatusPopover component', () => {
   const findByTestId = (testId) => wrapper.find(`[data-testid="${testId}"]`);
   const findGlPopover = () => wrapper.findComponent(GlPopover);
 
-  const createComponent = () => {
-    return shallowMount(TrialStatusPopover, {
+  const createComponent = (props = {}, mountFn = shallowMount) => {
+    return mountFn(TrialStatusPopover, {
       propsData: {
         groupName: 'Some Test Group',
         planName: 'Ultimate',
@@ -21,6 +23,7 @@ describe('TrialStatusPopover component', () => {
         purchaseHref: 'transactions/new',
         targetId: 'target-element-identifier',
         trialEndDate: new Date('2021-02-28'),
+        ...props,
       },
     });
   };
@@ -51,6 +54,62 @@ describe('TrialStatusPopover component', () => {
     expect(attrs['data-track-event']).toBe('click_button');
     expect(attrs['data-track-label']).toBe('compare_all_plans');
     expect(attrs['data-track-property']).toBe('experiment:show_trial_status_in_sidebar');
+  });
+
+  describe('startInitiallyShown', () => {
+    describe('when set to true', () => {
+      beforeEach(() => {
+        wrapper = createComponent({ startInitiallyShown: true });
+      });
+
+      it('causes the popover to be shown by default', () => {
+        expect(findGlPopover().attributes('show')).toBeTruthy();
+      });
+
+      it('removes the popover triggers', () => {
+        expect(findGlPopover().attributes('triggers')).toBe('');
+      });
+
+      it('tracks the popover_shown event', () => {
+        expect(trackingSpy).toHaveBeenCalledWith(undefined, 'popover_shown', {
+          label: 'trial_status_popover',
+          property: 'experiment:show_trial_status_in_sidebar',
+        });
+      });
+    });
+
+    describe('when set to false', () => {
+      beforeEach(() => {
+        wrapper = createComponent({ startInitiallyShown: false });
+      });
+
+      it('does not cause the popover to be shown by default', () => {
+        expect(findGlPopover().attributes('show')).toBeFalsy();
+      });
+
+      it('uses the standard triggers for the popover', () => {
+        expect(findGlPopover().attributes('triggers')).toBe('hover focus');
+      });
+    });
+  });
+
+  describe('close button', () => {
+    beforeEach(async () => {
+      wrapper = createComponent({ startInitiallyShown: true }, mount);
+      findByTestId('closeBtn').trigger('click');
+      await wrapper.vm.$nextTick();
+    });
+
+    it('closes the popover component', () => {
+      expect(findGlPopover().attributes('show')).toBeFalsy();
+    });
+
+    it('tracks an event', () => {
+      expect(trackingSpy).toHaveBeenCalledWith(undefined, 'click_button', {
+        label: 'close_popover',
+        property: 'experiment:show_trial_status_in_sidebar',
+      });
+    });
   });
 
   describe('methods', () => {

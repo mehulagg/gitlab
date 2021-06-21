@@ -3,7 +3,7 @@ import { GlButton, GlPopover, GlSprintf } from '@gitlab/ui';
 import { GlBreakpointInstance as bp } from '@gitlab/ui/dist/utils';
 import { debounce } from 'lodash';
 import { formatDate } from '~/lib/utils/datetime_utility';
-import { s__ } from '~/locale';
+import { __, s__ } from '~/locale';
 import Tracking from '~/tracking';
 
 const RESIZE_EVENT_DEBOUNCE_MS = 150;
@@ -42,6 +42,11 @@ export default {
       type: String,
       required: true,
     },
+    startInitiallyShown: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
     targetId: {
       type: String,
       required: true,
@@ -54,9 +59,11 @@ export default {
   data() {
     return {
       disabled: false,
+      forciblyShowing: false,
     };
   },
   i18n: {
+    close: __('Close'),
     compareAllButtonTitle: s__('Trials|Compare all plans'),
     popoverTitle: s__('Trials|Hey there'),
     popoverContent: s__(`Trials|Your trial ends on
@@ -66,6 +73,13 @@ export default {
       Premium if it meets your needs.)`),
     upgradeButtonTitle: s__('Trials|Upgrade %{groupName} to %{planName}'),
   },
+  trackingEvents: {
+    clickCloseBtn: {
+      action: 'click_button',
+      label: 'close_popover',
+      property: 'experiment:show_trial_status_in_sidebar',
+    },
+  },
   computed: {
     formattedTrialEndDate() {
       return formatDate(this.trialEndDate, 'mmmm d');
@@ -74,6 +88,11 @@ export default {
   created() {
     this.debouncedResize = debounce(() => this.onResize(), RESIZE_EVENT_DEBOUNCE_MS);
     window.addEventListener('resize', this.debouncedResize);
+
+    if (this.startInitiallyShown) {
+      this.forciblyShowing = true;
+      this.onShown();
+    }
   },
   mounted() {
     this.onResize();
@@ -82,6 +101,12 @@ export default {
     window.removeEventListener('resize', this.debouncedResize);
   },
   methods: {
+    onClose() {
+      this.forciblyShowing = false;
+
+      const { action, ...options } = this.$options.trackingEvents.clickCloseBtn;
+      this.track(action, options);
+    },
     onResize() {
       this.updateDisabledState();
     },
@@ -100,17 +125,35 @@ export default {
 
 <template>
   <gl-popover
+    ref="popover"
     :container="containerId"
     :target="targetId"
     :disabled="disabled"
     placement="rightbottom"
     boundary="viewport"
     :delay="{ hide: 400 }"
+    :show="forciblyShowing"
+    :triggers="forciblyShowing ? '' : 'hover focus'"
     @shown="onShown"
   >
-    <template #title>
-      {{ $options.i18n.popoverTitle }}
-      <gl-emoji class="gl-vertical-align-baseline font-size-inherit gl-ml-1" data-name="wave" />
+    <template
+      #title
+      class="gl-display-flex flex-direction-row-reverse justify-content-space-between"
+    >
+      <gl-button
+        v-if="forciblyShowing"
+        category="tertiary"
+        class="close"
+        data-testid="closeBtn"
+        :aria-label="$options.i18n.close"
+        @click.prevent="onClose"
+      >
+        <span class="d-inline-block" aria-hidden="true">&times;</span>
+      </gl-button>
+      <span>
+        {{ $options.i18n.popoverTitle }}
+        <gl-emoji class="gl-vertical-align-baseline font-size-inherit gl-ml-1" data-name="wave" />
+      </span>
     </template>
 
     <gl-sprintf :message="$options.i18n.popoverContent">
