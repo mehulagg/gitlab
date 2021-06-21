@@ -370,6 +370,16 @@ module Gitlab
         end
       end
 
+      def blobs(revisions, dynamic_timeout: nil)
+        revisions = revisions.reject { |rev| rev == ::Gitlab::Git::BLANK_SHA }
+
+        return [] if revisions.blank?
+
+        wrapped_gitaly_errors do
+          gitaly_blob_client.list_blobs(revisions, limit: REV_LIST_COMMIT_LIMIT, dynamic_timeout: dynamic_timeout)
+        end
+      end
+
       def count_commits(options)
         options = process_count_commits_options(options.dup)
 

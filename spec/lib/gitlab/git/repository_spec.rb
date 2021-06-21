@@ -869,6 +869,67 @@ RSpec.describe Gitlab::Git::Repository, :seed_helper do
     end
   end
 
+  describe '#blobs' do
+    shared_examples 'a blob enumeration' do
+      it 'enumerates blobs' do
+        blobs = repository.blobs(revisions).to_a
+
+        expect(blobs.size).to eq(expected_blobs)
+        blobs.each do |blob|
+          expect(blob.data).to be_empty
+          expect(blob.id.size).to be(40)
+        end
+      end
+    end
+
+    context 'single revision' do
+      let(:revisions) { ['master'] }
+      let(:expected_blobs) { 53 }
+
+      it_behaves_like 'a blob enumeration'
+    end
+
+    context 'multiple revisions' do
+      let(:revisions) { ['^master~', 'master'] }
+      let(:expected_blobs) { 1 }
+
+      it_behaves_like 'a blob enumeration'
+    end
+
+    context 'pseudo revisions' do
+      let(:revisions) { ['master', '--not', '--all'] }
+      let(:expected_blobs) { 0 }
+
+      it_behaves_like 'a blob enumeration'
+    end
+
+    context 'blank revisions' do
+      let(:revisions) { [::Gitlab::Git::BLANK_SHA] }
+      let(:expected_blobs) { 0 }
+
+      before do
+        expect_any_instance_of(Gitlab::GitalyClient::BlobService)
+          .not_to receive(:list_blobs)
+      end
+
+      it_behaves_like 'a blob enumeration'
+    end
+
+    context 'partially blank revisions' do
+      let(:revisions) { [::Gitlab::Git::BLANK_SHA, "master"] }
+      let(:expected_blobs) { 53 }
+
+      before do
+        expect_any_instance_of(Gitlab::GitalyClient::BlobService)
+          .to receive(:list_blobs)
+          .with(["master"], kind_of(Hash))
+          .and_call_original
+      end
+
+      it_behaves_like 'a blob enumeration'
+    end
+  end
+
   describe '#count_commits_between' do
     subject { repository.count_commits_between('feature', 'master') }
 
