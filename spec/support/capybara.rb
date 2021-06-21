@@ -190,6 +190,9 @@ RSpec.configure do |config|
     # but fail don't add the message if the failure is a pending test that got
     # fixed. If we raised the `JSException` the fixed test would be marked as
     # failed again.
+    puts 'test'
+    puts example.exception
+    puts example.exception.backtrace
     if example.exception && !example.exception.is_a?(RSpec::Core::Pending::PendingExampleFixedError)
       begin
         console = page.driver.browser.manage.logs.get(:browser)&.reject { |log| log.message =~ JS_CONSOLE_FILTER }
