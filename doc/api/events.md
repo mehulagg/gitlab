@@ -19,9 +19,13 @@ Available types for the `action` parameter, and the resources that might be affe
   - Issue
   - Merge request
   - Milestone
-- `commented`
+- `commented` on any `Noteable` record.
+  - Alert
+  - Commit
+  - Design
   - Issue
   - Merge request
+  - Snippet
 - `created`
   - Design
   - Epic
