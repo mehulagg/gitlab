@@ -111,7 +111,7 @@ Yes! We have specific instructions for [zero-downtime updates](../update/index.m
 For major, or minor version updates of Rails, or Puma, you are encouraged to:
 
 - Engage the Quality team to thoroughly test the MR.
-- Open a [Production Change issue](https://gitlab.com/gitlab-com/gl-infra/production/-/issues/new?issuable_template=change_management) prior to merging the MR.
+- Notify the `@gitlab-org/release/managers` on the MR prior to merging.
 
 ### Feature flags
 
