@@ -11051,6 +11051,9 @@ msgstr ""
 msgid "DevOps Report"
 msgstr ""
 
+msgid "DevopsAdoption|%{adoptedCount}/%{featuresCount} features adopted"
+msgstr ""
+
 msgid "DevopsAdoption|Add Group"
 msgstr ""
 

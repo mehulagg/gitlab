@@ -35,6 +35,10 @@ export const DEVOPS_ADOPTION_NO_RESULTS = s__('DevopsAdoption|No results…');
 
 export const DEVOPS_ADOPTION_NO_SUB_GROUPS = s__('DevopsAdoption|This group has no sub-groups');
 
+export const DEVOPS_ADOPTION_FEATURES_ADOPTED_TEXT = s__(
+  'DevopsAdoption|%{adoptedCount}/%{featuresCount} features adopted',
+);
+
 export const DEVOPS_ADOPTION_STRINGS = {
   app: {
     [DEVOPS_ADOPTION_ERROR_KEYS.groups]: s__(

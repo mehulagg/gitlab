@@ -6,6 +6,7 @@ import DevopsScore from '~/analytics/devops_report/components/devops_score.vue';
 import API from '~/api';
 import { getIdFromGraphQLId } from '~/graphql_shared/utils';
 import { mergeUrlParams, updateHistory, getParameterValues } from '~/lib/utils/url_utility';
+import { sprintf } from '~/locale';
 import {
   DEVOPS_ADOPTION_STRINGS,
   DEVOPS_ADOPTION_ERROR_KEYS,
@@ -15,6 +16,7 @@ import {
   DEVOPS_ADOPTION_TABLE_CONFIGURATION,
   TRACK_ADOPTION_TAB_CLICK_EVENT,
   TRACK_DEVOPS_SCORE_TAB_CLICK_EVENT,
+  TABLE_HEADER_TEXT,
 } from '../constants';
 import bulkEnableDevopsAdoptionNamespacesMutation from '../graphql/mutations/bulk_enable_devops_adoption_namespaces.mutation.graphql';
 import devopsAdoptionEnabledNamespacesQuery from '../graphql/queries/devops_adoption_enabled_namespaces.query.graphql';
@@ -22,6 +24,7 @@ import getGroupsQuery from '../graphql/queries/get_groups.query.graphql';
 import { addSegmentsToCache, deleteSegmentsFromCache } from '../utils/cache_updates';
 import { shouldPollTableData } from '../utils/helpers';
 import DevopsAdoptionAddDropdown from './devops_adoption_add_dropdown.vue';
+import DevopsAdoptionOverviewCard from './devops_adoption_overview_card.vue';
 import DevopsAdoptionSection from './devops_adoption_section.vue';
 
 export default {
@@ -30,6 +33,7 @@ export default {
     GlAlert,
     DevopsAdoptionAddDropdown,
     DevopsAdoptionSection,
+    DevopsAdoptionOverviewCard,
     DevopsScore,
     GlTabs,
     GlTab,
@@ -156,6 +160,9 @@ export default {
       );
 
       return this.availableGroups.filter((group) => !enabledNamespaceIds.includes(group.id));
+    },
+    tableHeaderText() {
+      return sprintf(TABLE_HEADER_TEXT, { timestamp: this.timestamp });
     },
   },
   created() {
@@ -293,6 +300,10 @@ export default {
 </script>
 <template>
   <div>
+    <p class="gl-text-gray-400">{{ tableHeaderText }}</p>
+
+    <devops-adoption-overview-card class="gl-mb-3" icon="tanuki" title="Overall adoption" />
+
     <gl-tabs :value="selectedTab" @input="onTabChange">
       <gl-tab
         v-for="tab in $options.devopsAdoptionTableConfiguration"
@@ -313,7 +324,6 @@ export default {
           v-else
           :is-loading="isLoadingAdoptionData"
           :has-segments-data="hasSegmentsData"
-          :timestamp="timestamp"
           :has-group-data="hasGroupData"
           :cols="tab.cols"
           :segments="devopsAdoptionEnabledNamespaces"
