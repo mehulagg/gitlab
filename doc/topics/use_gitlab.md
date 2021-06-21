@@ -18,43 +18,41 @@ organize your work, create and secure your application, and analyze its performa
 - [Monitor application performance](../operations/index.md)
 - [Analyze GitLab usage](../user/analytics/index.md)
 
-
-# Language-Specific Fast Paths
+## Language-Specific Fast Paths
 
 GitLab thrives as a language-agnostic, DevSecOps Platform. That being said, there are a few locations where we interact with programming languages in very specific ways and our support for languages may vary. This aims to give you quick access to the locations where we have language-specific support.
 
-## Commit
+### Commit
 
-* [Syntax Highlighting within Web IDE](../user/project/web_ide/#syntax-highlighting)
-* [Project Templates](https://gitlab.com/gitlab-org/project-templates)
-* [CI Template Repository](https://gitlab.com/gitlab-org/gitlab-foss/tree/master/lib/gitlab/ci/templates)
-* [CI/CD Examples in Docs](../ci/examples/README.md)
+- [Syntax Highlighting within Web IDE](../user/project/web_ide/#syntax-highlighting)
+- [Project Templates](https://gitlab.com/gitlab-org/project-templates)
+- [CI Template Repository](https://gitlab.com/gitlab-org/gitlab-foss/tree/master/lib/gitlab/ci/templates)
+- [CI/CD Examples in Docs](../ci/examples/README.md)
 
-## Verify
+### Verify
 
-* [Dependency Caching Examples](../ci/caching/#common-use-cases)
-* [Setting Up Unit Test Reports](../ci/unit_test_reports.md#how-to-set-it-up)
-* [Code Quality Engines](../user/project/merge_requests/code_quality.md)
+- [Dependency Caching Examples](../ci/caching/#common-use-cases)
+- [Setting Up Unit Test Reports](../ci/unit_test_reports.md#how-to-set-it-up)
+- [Code Quality Engines](../user/project/merge_requests/code_quality.md)
 
-## Package
+### Package
 
-* [Auto DevOps / Heroku Buildpack Support](https://devcenter.heroku.com/articles/buildpacks#officially-supported-buildpacks)
-* [Dependency Proxy Support](../user/packages/dependency_proxy/)
-* [Package Registry Support](../user/packages/)
-* [Package Registry Administration](../administration/packages/
+- [Auto DevOps / Heroku Buildpack Support](https://devcenter.heroku.com/articles/buildpacks#officially-supported-buildpacks)
+- [Dependency Proxy Support](../user/packages/dependency_proxy/)
+- [Package Registry Support](../user/packages/)
+- [Package Registry Administration](../administration/packages/
 
+### Configure
 
-## Configure
+- [Feature Flag Client SDKs](https://docs.getunleash.io/sdks/)
 
-* [Feature Flag Client SDKs](https://docs.getunleash.io/sdks/)
+### Monitor
 
-## Monitor
+- [Sentry Integration SDKs](https://sentry.io/platforms/)
 
-* [Sentry Integration SDKs](https://sentry.io/platforms/)
+### Secure
 
-## Secure
-
-* [SAST Supported Languages](../user/application_security/sast/#supported-languages-and-frameworks)
-* [Dependency Scanning Supported Languages](../user/application_security/dependency_scanning/#supported-languages-and-package-managers)
-* [Coverage Fuzzing Supported Languages](../user/application_security/coverage_fuzzing/#supported-fuzzing-engines-and-languages)
-* [DAST Header Validation Examples](../user/application_security/dast/index.md#ruby-on-rails-example-for-on-demand-scan)
+- [SAST Supported Languages](../user/application_security/sast/#supported-languages-and-frameworks)
+- [Dependency Scanning Supported Languages](../user/application_security/dependency_scanning/#supported-languages-and-package-managers)
+- [Coverage Fuzzing Supported Languages](../user/application_security/coverage_fuzzing/#supported-fuzzing-engines-and-languages)
+- [DAST Header Validation Examples](../user/application_security/dast/index.md#ruby-on-rails-example-for-on-demand-scan)
