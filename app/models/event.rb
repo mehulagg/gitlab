@@ -24,7 +24,7 @@ class Event < ApplicationRecord
     left:       9, # User left project
     destroyed:  10,
     expired:    11, # User left project due to expiry
-    approved:   12,
+    approved:   12
   ).freeze
 
   private_constant :ACTIONS
@@ -437,7 +437,7 @@ class Event < ApplicationRecord
     {
       created: _('uploaded'),
       updated: _('revised'),
-      destroyed: _('deleted'),
+      destroyed: _('deleted')
     }
   end
 
