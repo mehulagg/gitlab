@@ -2,12 +2,12 @@
 
 require 'spec_helper'
 
-RSpec.describe EE::ServicesHelper do
+RSpec.describe EE::Integrations::Helper do
   include Devise::Test::ControllerHelpers
 
   let(:controller_class) do
     Class.new(ActionController::Base) do
-      include EE::ServicesHelper
+      include EE::Integrations::Helpers
       include ActionView::Helpers::AssetUrlHelper
 
       def slack_auth_project_settings_slack_url(project)

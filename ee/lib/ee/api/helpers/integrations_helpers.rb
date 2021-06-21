@@ -3,7 +3,7 @@
 module EE
   module API
     module Helpers
-      module ServicesHelpers
+      module IntegrationsHelpers
         extend ActiveSupport::Concern
 
         class_methods do

@@ -6,7 +6,7 @@ module API
     #
     # The data structures inside this model are returned using class methods,
     # allowing EE to extend them where necessary.
-    module ServicesHelpers
+    module IntegrationsHelpers
       def self.chat_notification_settings
         [
           {

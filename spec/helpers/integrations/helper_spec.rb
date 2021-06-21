@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe ServicesHelper do
+RSpec.describe Integrations::Helper do
   describe '#integration_form_data' do
     let(:fields) do
       [

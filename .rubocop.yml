@@ -227,6 +227,8 @@ Gitlab/ModuleWithInstanceVariables:
     # We ignore Rails helpers right now because it's hard to workaround it
     - app/helpers/**/*_helper.rb
     - ee/app/helpers/**/*_helper.rb
+    - app/helpers/**/helper.rb
+    - ee/app/helpers/**/helper.rb
     # We ignore Rails mailers right now because it's hard to workaround it
     - app/mailers/emails/**/*.rb
     - ee/**/emails/**/*.rb

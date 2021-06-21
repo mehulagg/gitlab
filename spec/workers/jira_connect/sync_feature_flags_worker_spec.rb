@@ -4,7 +4,7 @@ require 'spec_helper'
 
 RSpec.describe ::JiraConnect::SyncFeatureFlagsWorker do
   include AfterNextHelpers
-  include ServicesHelper
+  include IntegrationsHelper
 
   describe '#perform' do
     let_it_be(:feature_flag) { create(:operations_feature_flag) }

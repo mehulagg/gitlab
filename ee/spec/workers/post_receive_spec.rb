@@ -4,7 +4,7 @@ require 'spec_helper'
 
 RSpec.describe PostReceive do
   include AfterNextHelpers
-  include ServicesHelper
+  include Integrations::Helper
 
   let(:changes) { "123456 789012 refs/heads/tést\n654321 210987 refs/tags/tag" }
   let(:changes_with_master) { "#{changes}\n423423 797823 refs/heads/master" }

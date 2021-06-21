@@ -178,7 +178,7 @@ class Integration < ApplicationRecord
   end
 
   def self.event_names
-    self.supported_events.map { |event| ServicesHelper.service_event_field_name(event) }
+    self.supported_events.map { |event| Integrations::Helper.integration_event_field_name(event) }
   end
 
   def self.supported_event_actions
@@ -194,7 +194,7 @@ class Integration < ApplicationRecord
   end
 
   def self.event_description(event)
-    ServicesHelper.service_event_description(event)
+    Integrations::Helper.integration_event_description(event)
   end
 
   def self.find_or_create_templates

@@ -2,7 +2,7 @@
 
 class Admin::IntegrationsController < Admin::ApplicationController
   include IntegrationsActions
-  include ServicesHelper
+  include Integrations::Helper
 
   before_action :not_found, unless: -> { instance_level_integrations? }
 

@@ -4,7 +4,7 @@ require 'spec_helper'
 
 RSpec.describe PostReceive do
   include AfterNextHelpers
-  include ServicesHelper
+  include IntegrationsHelper
 
   let(:changes) { "123456 789012 refs/heads/tést\n654321 210987 refs/tags/tag" }
   let(:wrongly_encoded_changes) { changes.encode("ISO-8859-1").force_encoding("UTF-8") }

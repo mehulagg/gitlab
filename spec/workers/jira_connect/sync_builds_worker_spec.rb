@@ -4,7 +4,7 @@ require 'spec_helper'
 
 RSpec.describe ::JiraConnect::SyncBuildsWorker do
   include AfterNextHelpers
-  include ServicesHelper
+  include IntegrationsHelper
 
   describe '#perform' do
     let_it_be(:pipeline) { create(:ci_pipeline) }

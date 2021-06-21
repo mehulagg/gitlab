@@ -3,8 +3,8 @@ module API
   class Services < ::API::Base
     feature_category :integrations
 
-    services = Helpers::ServicesHelpers.services
-    service_classes = Helpers::ServicesHelpers.service_classes
+    services = Helpers::IntegrationsHelpers.services
+    service_classes = Helpers::IntegrationsHelpers.service_classes
 
     if Rails.env.development?
       services['mock-ci'] = [
@@ -18,7 +18,7 @@ module API
       services['mock-deployment'] = []
       services['mock-monitoring'] = []
 
-      service_classes += Helpers::ServicesHelpers.development_service_classes
+      service_classes += Helpers::IntegrationsHelpers.development_service_classes
     end
 
     SERVICES = services.freeze

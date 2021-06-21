@@ -2,10 +2,10 @@
 
 require_relative './after_next_helpers'
 
-module ServicesHelper
+module IntegrationsHelper
   include AfterNextHelpers
 
-  def expect_execution_of(service_class, *args)
-    expect_next(service_class, *args).to receive(:execute)
+  def expect_execution_of(integration_class, *args)
+    expect_next(integration_class, *args).to receive(:execute)
   end
 end
