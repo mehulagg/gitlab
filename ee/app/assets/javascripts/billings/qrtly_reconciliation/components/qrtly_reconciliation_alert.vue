@@ -43,7 +43,6 @@ export default {
         ? this.$options.i18n.description.usesNamespacePlan
         : this.$options.i18n.description.ee;
     },
-    shouldDisplayAlert() {},
   },
   methods: {
     handleDismiss() {
