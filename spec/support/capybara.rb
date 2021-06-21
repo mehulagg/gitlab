@@ -189,10 +189,15 @@ RSpec.configure do |config|
     # fixed. If we raised the `JSException` the fixed test would be marked as
     # failed again.
     puts 'test'
-    puts example.exception
-    puts page.driver.instance_variable_get(:@browser)
+    
+    
 
     if example.exception && !example.exception.is_a?(RSpec::Core::Pending::PendingExampleFixedError)
+      puts 'in exception'
+      puts example.exception
+      puts example.exception.methods
+      puts page.driver.instance_variable_get(:@browser)
+
       begin
         console = page.driver.browser.manage.logs.get(:browser)&.reject { |log| log.message =~ JS_CONSOLE_FILTER }
 
