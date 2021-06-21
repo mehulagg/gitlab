@@ -18,6 +18,7 @@ import {
   mockCiConfigPath,
   mockCiConfigQueryResponse,
   mockCiYml,
+  mockCommitSha,
   mockDefaultBranch,
   mockProjectFullPath,
 } from './mock_data';
@@ -83,6 +84,9 @@ describe('Pipeline editor app component', () => {
             __typename: 'BlobContent',
             rawData: mockBlobContentData(),
           };
+        },
+        commitSha() {
+          return mockCommitSha;
         },
       },
     };
@@ -154,6 +158,7 @@ describe('Pipeline editor app component', () => {
         expect(mockCiConfigData).toHaveBeenCalledWith({
           content: mockCiYml,
           projectPath: mockProjectFullPath,
+          sha: mockCommitSha,
         });
       });
     });

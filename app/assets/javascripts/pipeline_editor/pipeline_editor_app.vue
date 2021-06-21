@@ -19,6 +19,7 @@ import {
 import getBlobContent from './graphql/queries/blob_content.graphql';
 import getCiConfigData from './graphql/queries/ci_config.graphql';
 import getAppStatus from './graphql/queries/client/app_status.graphql';
+import getCommitSha from './graphql/queries/client/commit_sha.graphql';
 import getCurrentBranch from './graphql/queries/client/current_branch.graphql';
 import getIsNewCiConfigFile from './graphql/queries/client/is_new_ci_config_file.graphql';
 import getTemplate from './graphql/queries/get_starter_template.query.graphql';
@@ -107,6 +108,7 @@ export default {
       variables() {
         return {
           projectPath: this.projectFullPath,
+          sha: this.commitSha,
           content: this.currentCiFileContent,
         };
       },
@@ -131,6 +133,9 @@ export default {
     },
     appStatus: {
       query: getAppStatus,
+    },
+    commitSha: {
+      query: getCommitSha,
     },
     currentBranch: {
       query: getCurrentBranch,
