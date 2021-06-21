@@ -1557,13 +1557,16 @@ RSpec.describe Project, factory_default: :keep do
     end
   end
 
-  describe '.with_service' do
+  describe '.with_integration' do
     before do
       create_list(:prometheus_project, 2)
     end
 
-    it 'avoid n + 1' do
-      expect { described_class.with_service(:prometheus_integration).map(&:prometheus_integration) }.not_to exceed_query_limit(1)
+    let(:integration) { :prometheus_integration }
+
+    it 'avoids n + 1' do
+      expect { described_class.with_service(integration).map(&integration) }
+        .not_to exceed_query_limit(1)
     end
   end
 
