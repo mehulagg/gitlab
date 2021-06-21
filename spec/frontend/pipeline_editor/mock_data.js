@@ -35,6 +35,11 @@ job_build:
     - echo "build"
   needs: ["job_test_2"]
 `;
+export const mockBlobContentQueryResponse = {
+  data: {
+    project: { repository: { blobs: { nodes: [{ rawBlob: mockCiYml }] } } },
+  },
+};
 
 const mockJobFields = {
   beforeScript: [],

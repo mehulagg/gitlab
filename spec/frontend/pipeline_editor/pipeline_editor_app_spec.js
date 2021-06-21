@@ -11,15 +11,17 @@ import PipelineEditorTabs from '~/pipeline_editor/components/pipeline_editor_tab
 import PipelineEditorEmptyState from '~/pipeline_editor/components/ui/pipeline_editor_empty_state.vue';
 import PipelineEditorMessages from '~/pipeline_editor/components/ui/pipeline_editor_messages.vue';
 import { COMMIT_SUCCESS, COMMIT_FAILURE } from '~/pipeline_editor/constants';
+import getBlobContent from '~/pipeline_editor/graphql/queries/blob_content.graphql';
 import getCiConfigData from '~/pipeline_editor/graphql/queries/ci_config.graphql';
 import PipelineEditorApp from '~/pipeline_editor/pipeline_editor_app.vue';
 import PipelineEditorHome from '~/pipeline_editor/pipeline_editor_home.vue';
 import {
   mockCiConfigPath,
   mockCiConfigQueryResponse,
-  mockCiYml,
+  mockBlobContentQueryResponse,
   mockDefaultBranch,
   mockProjectFullPath,
+  mockCiYml,
 } from './mock_data';
 
 const localVue = createLocalVue();
@@ -75,19 +77,12 @@ describe('Pipeline editor app component', () => {
   };
 
   const createComponentWithApollo = async ({ props = {}, provide = {} } = {}) => {
-    const handlers = [[getCiConfigData, mockCiConfigData]];
-    const resolvers = {
-      Query: {
-        blobContent() {
-          return {
-            __typename: 'BlobContent',
-            rawData: mockBlobContentData(),
-          };
-        },
-      },
-    };
+    const handlers = [
+      [getBlobContent, mockBlobContentData],
+      [getCiConfigData, mockCiConfigData],
+    ];
 
-    mockApollo = createMockApollo(handlers, resolvers);
+    mockApollo = createMockApollo(handlers);
 
     const options = {
       localVue,
@@ -133,7 +128,7 @@ describe('Pipeline editor app component', () => {
 
   describe('when queries are called', () => {
     beforeEach(() => {
-      mockBlobContentData.mockResolvedValue(mockCiYml);
+      mockBlobContentData.mockResolvedValue(mockBlobContentQueryResponse);
       mockCiConfigData.mockResolvedValue(mockCiConfigQueryResponse);
     });
 
@@ -325,7 +320,7 @@ describe('Pipeline editor app component', () => {
       expect(findEmptyState().exists()).toBe(true);
       expect(findEditorHome().exists()).toBe(false);
 
-      mockBlobContentData.mockResolvedValue(mockCiYml);
+      mockBlobContentData.mockResolvedValue(mockBlobContentQueryResponse);
       await wrapper.vm.$apollo.queries.initialCiFileContent.refetch();
 
       expect(findEmptyState().exists()).toBe(false);
