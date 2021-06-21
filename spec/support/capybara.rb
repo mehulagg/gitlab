@@ -192,7 +192,7 @@ RSpec.configure do |config|
     # failed again.
     puts 'test'
     puts example.exception
-    puts example.exception.backtrace
+
     if example.exception && !example.exception.is_a?(RSpec::Core::Pending::PendingExampleFixedError)
       begin
         console = page.driver.browser.manage.logs.get(:browser)&.reject { |log| log.message =~ JS_CONSOLE_FILTER }
