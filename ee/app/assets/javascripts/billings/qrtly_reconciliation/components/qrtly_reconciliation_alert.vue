@@ -20,11 +20,16 @@ export default {
       type: String,
       required: true,
     },
-    dotCom: {
+    usesNamespacePlan: {
       type: Boolean,
       required: false,
       default: false,
     },
+  },
+  data() {
+    return {
+      isAlertDismissed: false,
+    };
   },
   computed: {
     alertTitle() {
@@ -34,16 +39,18 @@ export default {
       return formatDate(this.date, 'isoDate');
     },
     description() {
-      return this.dotCom
-        ? this.$options.i18n.description.dotCom
+      return this.usesNamespacePlan
+        ? this.$options.i18n.description.usesNamespacePlan
         : this.$options.i18n.description.ee;
     },
+    shouldDisplayAlert() {},
   },
   methods: {
     handleDismiss() {
       Cookie.set(this.cookieKey, true, {
         expires: getDayDifference(new Date(), new Date(this.date)),
       });
+      this.isAlertDismissed = true;
     },
   },
   i18n,
@@ -52,6 +59,7 @@ export default {
 
 <template>
   <gl-alert
+    v-if="!isAlertDismissed"
     data-testid="qrtly-reconciliation-alert"
     variant="info"
     :title="alertTitle"
