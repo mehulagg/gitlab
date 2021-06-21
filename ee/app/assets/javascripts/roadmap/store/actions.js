@@ -32,9 +32,11 @@ const fetchGroupEpics = (
     }),
   };
 
+  const transformedFilterParams = roadmapItemUtils.transformFetchEpicFilterParams(filterParams);
+
   // When epicIid is present,
   // Roadmap is being accessed from within an Epic,
-  // and then we don't need to pass `filterParams`.
+  // and then we don't need to pass `transformedFilterParams`.
   if (epicIid) {
     query = epicChildEpics;
     variables.iid = epicIid;
@@ -42,12 +44,12 @@ const fetchGroupEpics = (
     query = groupEpics;
     variables = {
       ...variables,
-      ...filterParams,
+      ...transformedFilterParams,
       first: gon.roadmap_epics_limit + 1,
     };
 
-    if (filterParams?.epicIid) {
-      variables.iid = filterParams.epicIid.split('::&').pop();
+    if (transformedFilterParams?.epicIid) {
+      variables.iid = transformedFilterParams.epicIid.split('::&').pop();
     }
   }
 

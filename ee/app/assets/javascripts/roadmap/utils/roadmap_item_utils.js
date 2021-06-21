@@ -148,3 +148,29 @@ export const timeframeEndDate = (presetType, timeframe) => {
   endDate.setDate(endDate.getDate() + DAYS_IN_WEEK);
   return endDate;
 };
+
+/**
+ * Returns transformed `filterParams` by consolidating all `not` params into a
+ * single object like { not: { labelName: [], ... }, authorUsername: '' }
+ *
+ * @param {Object} filterParams
+ */
+export const transformFetchEpicFilterParams = (filterParams) => {
+  const newParams = {};
+
+  Object.keys(filterParams).forEach((param) => {
+    if (param.startsWith('not')) {
+      // Get the param name like `authorUsername` from `not[authorUsername]`
+      const key = param.match(/not\[(.+)\]/)[1];
+
+      if (key) {
+        newParams.not = newParams.not || {};
+        newParams.not[key] = filterParams[param];
+      }
+    } else {
+      newParams[param] = filterParams[param];
+    }
+  });
+
+  return newParams;
+};
