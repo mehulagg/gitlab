@@ -11,4 +11,24 @@ module GroupMembersHelper
       EOT
     )
   end
+
+  def ldap_sync_button_data
+    {
+      method: :put,
+      path: sync_group_ldap_path(@group),
+      modal_attributes: {
+        message: _("Warning: Synchronizing LDAP removes direct members' access."),
+        title: _('Synchronize LDAP'),
+        size: 'sm',
+        actionPrimary: {
+          text: _('Sync LDAP'),
+          attributes: [{ variant: 'danger', 'data-qa-selector': 'sync-ldap-confirm-button' }]
+        },
+        actionSecondary: {
+          text: _('Cancel'),
+          attributes: [{ variant: 'default' }],
+        }
+      }.to_json
+    }
+  end
 end

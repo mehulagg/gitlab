@@ -12,6 +12,7 @@ import { MEMBER_TYPES } from '~/members/constants';
 import { groupLinkRequestFormatter } from '~/members/utils';
 import UsersSelect from '~/users_select';
 import RemoveMemberModal from '~/vue_shared/components/remove_member_modal.vue';
+import initConfirmModal from '~/confirm_modal';
 
 function mountRemoveMemberModal() {
   const el = document.querySelector('.js-remove-member-modal');
@@ -81,3 +82,5 @@ initInviteGroupTrigger();
 initInviteMembersForm();
 
 new UsersSelect(); // eslint-disable-line no-new
+
+initConfirmModal();
