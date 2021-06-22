@@ -8,5 +8,5 @@ description: 'Database Scalability Patterns'
 
 # Database Scalability Patterns
 
-* [Read-mostly](read-mostly.md)
-* [Time-decay](time-decay.md)
+- [Read-mostly](read-mostly.md)
+- [Time-decay](time-decay.md)

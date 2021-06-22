@@ -6,12 +6,7 @@ comments: false
 description: 'Database Scalability Patterns: Time-decay'
 ---
 
-## On this page
-{:.no_toc}
-
-- TOC
-{:toc}
-## Time-Decay data
+# Time-Decay data
 
 This document describes the *time-decay pattern* introduced in the [Database Scalability Working Group](https://about.gitlab.com/company/team/structure/working-groups/database-scalability/#time-decay-data).
 We discuss the characteristics of time-decay data and propose best practices for GitLab development to consider in this context.
@@ -30,7 +25,7 @@ They represent a snapshot that is very quickly becoming less and less relevant t
 
 In the middle of the two extremes we can find datasets that have useful information that we want to keep around, but with old records seldomly being accessed after an initial (small) time period after they are created.
 
-## Characteristics of time-decay data
+# Characteristics of time-decay data
 
 We are interested in datasets that show the following characteristics:
 
@@ -39,7 +34,7 @@ We are interested in datasets that show the following characteristics:
 1. Immutability: The time-decay status does not change.
 1. Retention: whether we want to keep the old data or not and/or whether old data will be accessible by users through the application.
 
-### Size of the dataset
+## Size of the dataset
 
 There can be datasets of variable sizes that show strong time-decay effects, but in the context of this blueprint we are going to focus on entities with a **considerably large dataset**.
 
@@ -47,7 +42,7 @@ Smaller datasets do not contribute significantly to the database related resourc
 
 In contrast, large datasets over \~50 Million records and/or 100GB in size add a significant overhead to constantly accessing a really small subset of the data. In those cases we would want to use the time-decay effect in our advantage and reduce the actively accessed dataset.
 
-### Access methods
+## Access methods
 
 The second and most important characteristic of time-decay data is that most of the times we are able to implicitly or explicitly access the data using a date filter, **restricting our results based on a time related dimension**.
 
@@ -60,7 +55,7 @@ It's important to add that even if time-decay data are not accessed that way by 
 We are not restricting the definition to data that are always accessed using a time-decay related access method, as there may be some outlier operations, which may be necessary and we can accept them not scaling that well as long as the rest of the accesss methods can scale.
 An example could be an administrator accessing all past events of a specific type while all other operations only access a maximum of a month of events, restricted to 6 months in the past.
 
-### Immutability
+## Immutability
 
 The third characteristic of time-decay data is that their **time-decay status does not change**. Once they are considered "old", they can not switch back to "new" or relevant again.
 
@@ -68,11 +63,11 @@ This definition may sound trivial but we have to be able to make operations over
 
 Consider as a counter example to a time-decay data access pattern an application view that presents issues by when they were updated. We are also interested in the most recent data from an "update" perspective, but that definition is volatile and not actionable.
 
-### Retention
+## Retention
 
 Finally, a characteristic that further differentiates time-decay data in sub categories with slightly different approaches available is **whether we want to keep the old data or not** (e.g. retention policy) and/or **whether old data will be accessible by users through the application**.
 
-#### (optional) Extended definition of time-decay data
+### (optional) Extended definition of time-decay data
 
 As a side note, if we extend the aforementioned definitions to access patterns that restrict access to a well defined subset of the data based on a clustering attribute, we could use the time-decay scaling patterns for many other types of data.
 
@@ -82,9 +77,9 @@ As long as that subset is small compared to the overall size of the dataset, we 
 
 Similarly, we may define data as old based both on a time dimension and additional status attributes, like for example ci pipelines that have failed more than 6 months ago.
 
-## Time-Decay data strategies
+# Time-Decay data strategies
 
-### Partitioning
+## Partitioning
 
 This is the acceptable best practice for addressing time-decay data from a pure database perspective.
 You can find more information on table partitioning for PostgreSQL in the [documentation page for table partitioning](https://www.postgresql.org/docs/12/ddl-partitioning.html).
@@ -122,7 +117,7 @@ It is possible to specify a tablespace and storage parameters for each partition
 
 Finally, moving partitions outside of the database can be achieved through database archiving or manually exporting the partitions to a different storage engine (more details in the dedicated sub-section).
 
-### Pruning old data
+## Pruning old data
 
 If we don't want to keep old data around in any form, we can implement a pruning strategy and delete old data.
 
@@ -134,7 +129,7 @@ It also leads to the pruning worker not being able to catchup with new records b
 
 For the aforementioned reasons, our proposal is that **we should base any implementation of a data retention strategy on partitioning**, unless there are strong reasons not to.
 
-### Moving old data outside of the database
+## Moving old data outside of the database
 
 In most cases, we consider old data as valuable, so we do not want to prune them. If at the same time, they are not required for any database related operations (e.g. directly accessed or used in joins and other types of queries), we can move them outside of the database.
 
@@ -153,9 +148,9 @@ We might consider a number of strategies for moving data outside of the database
 
    This may be a not viable solution for large datasets; as long as bulk uploading using files is an option, it should outperform API calls.
 
-## Use cases
+# Use cases
 
-### Web hook logs
+## Web hook logs
 
 Related epic: [Partitioning: `web_hook_logs` table](https://gitlab.com/groups/gitlab-org/-/epics/5558)
 
@@ -223,7 +218,7 @@ The process required follows:
 
    In this case, the worker will make sure that only 4 partitions are always active (as the retention policy is 90 days) and drop any partitions older than four months. We have to keep 4 months of partitions while the current month is still active, as going 90 days back takes you to the fourth oldest partition.
 
-### Audit Events
+## Audit Events
 
 Related epic: [Partitioning: Design and implement partitioning strategy for Audit Events](https://gitlab.com/groups/gitlab-org/-/epics/3206)
 
@@ -242,6 +237,6 @@ The migrations and steps required for partitioning the `audit_events` are simila
 
 What's interesting on the case of `audit_events` is the discussion on the necessary steps that we had to follow to implement the [UI/UX Changes needed to encourage optimal querying of the partitioned](https://gitlab.com/gitlab-org/gitlab/-/issues/223260). It can be used as a starting point on the changes required on the application level to align all access patterns with a specific time-decay related access method.
 
-### CI tables
+## CI tables
 
 **WIP:** Requirements and analysis of the CI tables use case - Still a work in progress, so we'll have to add more details after the analysis moves forward.
