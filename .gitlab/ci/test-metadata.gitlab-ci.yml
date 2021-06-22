@@ -18,7 +18,7 @@ retrieve-tests-metadata:
   script:
     - install_gitlab_gem
     - source ./scripts/rspec_helpers.sh
-    - retrieve_tests_metadata
+    - run_timed_command retrieve_tests_metadata
 
 update-tests-metadata:
   extends:
