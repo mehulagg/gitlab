@@ -1,11 +1,13 @@
 import Vue from 'vue';
 import IssueBoardFilteredSearch from '~/boards/components/issue_board_filtered_search.vue';
 import store from '~/boards/stores';
-import { urlParamsToObject, convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
+import { convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
+import { queryToObject } from '~/lib/utils/url_utility';
 
 export default (apolloProvider) => {
   const el = document.getElementById('js-issue-board-filtered-search');
-  const rawFilterParams = urlParamsToObject(window.location.search);
+  const rawFilterParams = queryToObject(window.location.search, { gatherArrays: true });
+
   const initialFilterParams = {
     ...convertObjectPropsToCamelCase(rawFilterParams, {}),
   };
@@ -23,7 +25,7 @@ export default (apolloProvider) => {
     apolloProvider,
     render: (createElement) =>
       createElement(IssueBoardFilteredSearch, {
-        props: { fullPath: store.state?.fullPath || '', boardType: store.state?.boardType || '' },
+        props: { fullPath: store.state?.fullPath, boardType: store.state?.boardType },
       }),
   });
 };

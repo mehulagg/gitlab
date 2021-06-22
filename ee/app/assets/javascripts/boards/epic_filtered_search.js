@@ -12,6 +12,7 @@ export default (apolloProvider) => {
   const initialFilterParams = {
     ...convertObjectPropsToCamelCase(rawFilterParams, {}),
   };
+  console.log(store.state)
   if (!el) {
     return null;
   }
@@ -25,7 +26,7 @@ export default (apolloProvider) => {
     apolloProvider,
     render: (createElement) =>
       createElement(EpicFilteredSearch, {
-        props: { fullPath: store.state.fullPath, boardType: store.state.boardType },
+        props: { fullPath: store.state?.fullPath, boardType: store.state?.boardType },
       }),
   });
 };

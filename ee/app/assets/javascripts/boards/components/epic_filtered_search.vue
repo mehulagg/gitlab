@@ -18,10 +18,12 @@ export default {
     fullPath: {
       type: String,
       required: true,
+      default: () => '',
     },
     boardType: {
       type: String,
       required: true,
+      default: () => '',
     },
   },
   computed: {
