@@ -6,17 +6,16 @@ import IterationCadenceListItem from 'ee/iterations/components/iteration_cadence
 import IterationCadencesList from 'ee/iterations/components/iteration_cadences_list.vue';
 import destroyIterationCadence from 'ee/iterations/queries/destroy_cadence.mutation.graphql';
 import cadencesListQuery from 'ee/iterations/queries/iteration_cadences_list.query.graphql';
+import createRouter from 'ee/iterations/router';
 import createMockApollo from 'helpers/mock_apollo_helper';
 import { TEST_HOST } from 'helpers/test_constants';
 import { mountExtended as mount } from 'helpers/vue_test_utils_helper';
 import waitForPromises from 'helpers/wait_for_promises';
 
-const push = jest.fn();
-const $router = {
-  push,
-};
-
 const localVue = createLocalVue();
+
+const baseUrl = '/cadences/';
+const router = createRouter(baseUrl);
 
 function createMockApolloProvider(requestHandlers) {
   localVue.use(VueApollo);
@@ -98,9 +97,7 @@ describe('Iteration cadences list', () => {
     wrapper = mount(IterationCadencesList, {
       localVue,
       apolloProvider,
-      mocks: {
-        $router,
-      },
+      router,
       provide: {
         groupPath,
         cadencesListPath,
@@ -225,14 +222,10 @@ describe('Iteration cadences list', () => {
     });
 
     describe('deleting cadence', () => {
-      beforeEach(async () => {
+      it('removes item from list', async () => {
         await createComponent({
           canEditCadence: true,
         });
-      });
-
-      it('removes item from list', async () => {
-        await createComponent();
 
         await waitForPromises();
 
