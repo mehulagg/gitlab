@@ -13,6 +13,7 @@ import {
   syncSubscriptionButtonText,
   uploadLicense,
 } from '../constants';
+import SubscriptionActivationBanner from './subscription_activation_banner.vue';
 import SubscriptionActivationModal from './subscription_activation_modal.vue';
 import SubscriptionDetailsCard from './subscription_details_card.vue';
 import SubscriptionDetailsHistory from './subscription_details_history.vue';
@@ -41,6 +42,7 @@ export default {
     GlModal: GlModalDirective,
   },
   components: {
+    SubscriptionActivationBanner,
     GlButton,
     SubscriptionActivationModal,
     SubscriptionDetailsCard,
@@ -116,6 +118,9 @@ export default {
     didDismissSuccessAlert() {
       this.shouldShowNotifications = false;
     },
+    showActivationModal() {
+      this.$refs.modal.show();
+    },
     syncSubscription() {
       this.hasAsyncActivity = true;
       this.shouldShowNotifications = false;
@@ -138,7 +143,16 @@ export default {
 
 <template>
   <div>
-    <subscription-activation-modal v-if="hasSubscription" :modal-id="$options.modal.id" />
+    <subscription-activation-modal
+      v-if="hasSubscription"
+      ref="modal"
+      :modal-id="$options.modal.id"
+    />
+    <subscription-activation-banner
+      v-if="canActivateSubscription"
+      class="mb-4"
+      @activate-subscription-event="showActivationModal"
+    />
     <subscription-sync-notifications
       v-if="shouldShowNotifications"
       class="mb-4"
