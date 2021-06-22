@@ -211,6 +211,8 @@ RSpec.configure do |config|
       execute_script("localStorage.clear();")
     end
 
+    puts page.driver.browser.manage.logs.get(:driver)
+
     # capybara/rspec already calls Capybara.reset_sessions! in an `after` hook,
     # but `block_and_wait_for_requests_complete` is called before it so by
     # calling it explicitly here, we prevent any new requests from being fired
