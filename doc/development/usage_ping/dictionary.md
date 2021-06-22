@@ -7122,6 +7122,8 @@ Host name of GitLab instance
 
 Group: `group::product intelligence`
 
+Data Category: `Standard`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -7218,6 +7220,8 @@ The MD5 hash of license key of the GitLab instance
 
 Group: `group::license`
 
+Data Category: `Standard`
+
 Status: `data_available`
 
 Tiers: `premium`, `ultimate`
@@ -7253,6 +7257,8 @@ Licese zuora_subscription_id
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/license/20210204124852_license_subscription_id.yml)
 
 Group: `group::license`
+
+Data Category: `Standard`
 
 Status: `data_available`
 
@@ -19653,6 +19659,8 @@ GitLab instance unique identifier
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/license/20210201124933_uuid.yml)
 
 Group: `group::product intelligence`
+
+Data Category: `Standard`
 
 Status: `data_available`
 
