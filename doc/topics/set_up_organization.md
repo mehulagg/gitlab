@@ -215,7 +215,7 @@ The EC2 instance meets the requirements for an application data backup by taking
 
 In general, if you're running GitLab on a virtualized server, you can likely create VM snapshots of the entire GitLab server. Note that it is common for a VM snapshot to require you to power down the server.
 
-You can find more details and examples on our [Alternative backup strategies page](../raketasks/backup_restore).
+You can find more details and examples on our [Alternative backup strategies page](../raketasks/backup_restore.md).
 
 #### **Option 2 - GitLab Geo**
 
