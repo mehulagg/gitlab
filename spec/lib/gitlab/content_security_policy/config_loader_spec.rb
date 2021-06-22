@@ -61,6 +61,18 @@ RSpec.describe Gitlab::ContentSecurityPolicy::ConfigLoader do
         expect(directives['font_src']).to eq("'self' https://example.com")
       end
     end
+
+    context 'when CUSTOMER_PORTAL_URL is set' do
+      before do
+        stub_env('CUSTOMER_PORTAL_URL', 'https://customers.example.com')
+      end
+
+      it 'adds CUSTOMER_PORTAL_URL to CSP' do
+        directives = settings['directives']
+
+        expect(directives['frame_src']).to eq("'self' https://www.google.com/recaptcha/ https://www.recaptcha.net/ https://content.googleapis.com https://content-compute.googleapis.com https://content-cloudbilling.googleapis.com https://content-cloudresourcemanager.googleapis.com https://customers.example.com")
+      end
+    end
   end
 
   describe '#load' do
