@@ -5,5 +5,6 @@ FactoryBot.define do
     build factory: :ci_build
     project
     protected { build.protected }
+    shared_runner_enabled { true }
   end
 end
