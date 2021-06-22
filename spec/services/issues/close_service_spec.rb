@@ -81,7 +81,7 @@ RSpec.describe Issues::CloseService do
   describe '#close_issue' do
     context 'with external issue' do
       context 'with an active external issue tracker supporting close_issue' do
-        let!(:external_issue_tracker) { create(:jira_service, project: project) }
+        let!(:external_issue_tracker) { create(:jira_integration, project: project) }
 
         it 'closes the issue on the external issue tracker' do
           project.reload
@@ -92,7 +92,7 @@ RSpec.describe Issues::CloseService do
       end
 
       context 'with inactive external issue tracker supporting close_issue' do
-        let!(:external_issue_tracker) { create(:jira_service, project: project, active: false) }
+        let!(:external_issue_tracker) { create(:jira_integration, project: project, active: false) }
 
         it 'does not close the issue on the external issue tracker' do
           project.reload
@@ -103,7 +103,7 @@ RSpec.describe Issues::CloseService do
       end
 
       context 'with an active external issue tracker not supporting close_issue' do
-        let!(:external_issue_tracker) { create(:bugzilla_service, project: project) }
+        let!(:external_issue_tracker) { create(:bugzilla_integration, project: project) }
 
         it 'does not close the issue on the external issue tracker' do
           project.reload
@@ -222,7 +222,7 @@ RSpec.describe Issues::CloseService do
 
       it 'verifies the number of queries' do
         recorded = ActiveRecord::QueryRecorder.new { close_issue }
-        expected_queries = 23
+        expected_queries = 24
 
         expect(recorded.count).to be <= expected_queries
         expect(recorded.cached_count).to eq(0)

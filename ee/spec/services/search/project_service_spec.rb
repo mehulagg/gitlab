@@ -11,10 +11,21 @@ RSpec.describe Search::ProjectService do
     stub_ee_application_setting(elasticsearch_search: true, elasticsearch_indexing: true)
   end
 
-  it_behaves_like 'EE search service shared examples', ::Gitlab::ProjectSearchResults, ::Gitlab::Elastic::ProjectSearchResults do
-    let(:user) { scope.owner }
-    let(:scope) { create(:project) }
-    let(:service) { described_class.new(scope, user, params) }
+  context 'when a single project provided' do
+    it_behaves_like 'EE search service shared examples', ::Gitlab::ProjectSearchResults, ::Gitlab::Elastic::ProjectSearchResults do
+      let(:user) { scope.owner }
+      let(:scope) { create(:project) }
+      let(:service) { described_class.new(scope, user, params) }
+    end
+  end
+
+  context 'when a multiple projects provided' do
+    it_behaves_like 'EE search service shared examples', ::Gitlab::ProjectSearchResults, ::Gitlab::Elastic::SearchResults do
+      let(:user) { group.owner }
+      let(:group) { create(:group) }
+      let(:scope) { create_list(:project, 3, namespace: group) }
+      let(:service) { described_class.new( scope, user, params) }
+    end
   end
 
   context 'code search' do
@@ -34,15 +45,7 @@ RSpec.describe Search::ProjectService do
     end
   end
 
-  context 'notes search' do
-    let_it_be(:project) { create(:project) }
-
-    let(:results) { described_class.new(project, nil, search: 'test').execute.objects('notes') }
-
-    it_behaves_like 'search query applies joins based on migrations shared examples', :add_permissions_data_to_notes_documents
-  end
-
-  context 'visibility', :elastic_delete_by_query, :sidekiq_inline do
+  context 'visibility', :elastic_delete_by_query, :clean_gitlab_redis_shared_state, :sidekiq_inline do
     include_context 'ProjectPolicyTable context'
 
     shared_examples 'search respects visibility' do
@@ -121,17 +124,7 @@ RSpec.describe Search::ProjectService do
         end
 
         with_them do
-          context 'when add_permissions_data_to_notes_documents migration is finished' do
-            it_behaves_like 'search respects visibility'
-          end
-
-          context 'when add_permissions_data_to_notes_documents migration is not finished' do
-            before do
-              set_elasticsearch_migration_to :add_permissions_data_to_notes_documents, including: false
-            end
-
-            it_behaves_like 'search respects visibility'
-          end
+          it_behaves_like 'search respects visibility'
         end
       end
 
@@ -144,17 +137,7 @@ RSpec.describe Search::ProjectService do
         end
 
         with_them do
-          context 'when add_permissions_data_to_notes_documents migration is finished' do
-            it_behaves_like 'search respects visibility'
-          end
-
-          context 'when add_permissions_data_to_notes_documents migration is not finished' do
-            before do
-              set_elasticsearch_migration_to :add_permissions_data_to_notes_documents, including: false
-            end
-
-            it_behaves_like 'search respects visibility'
-          end
+          it_behaves_like 'search respects visibility'
         end
       end
 
@@ -174,17 +157,7 @@ RSpec.describe Search::ProjectService do
             project2.repository.index_commits_and_blobs
           end
 
-          context 'when add_permissions_data_to_notes_documents migration is finished' do
-            it_behaves_like 'search respects visibility'
-          end
-
-          context 'when add_permissions_data_to_notes_documents migration is not finished' do
-            before do
-              set_elasticsearch_migration_to :add_permissions_data_to_notes_documents, including: false
-            end
-
-            it_behaves_like 'search respects visibility'
-          end
+          it_behaves_like 'search respects visibility'
         end
       end
 
@@ -197,17 +170,7 @@ RSpec.describe Search::ProjectService do
         end
 
         with_them do
-          context 'when add_permissions_data_to_notes_documents migration is finished' do
-            it_behaves_like 'search respects visibility'
-          end
-
-          context 'when add_permissions_data_to_notes_documents migration is not finished' do
-            before do
-              set_elasticsearch_migration_to :add_permissions_data_to_notes_documents, including: false
-            end
-
-            it_behaves_like 'search respects visibility'
-          end
+          it_behaves_like 'search respects visibility'
         end
       end
     end
@@ -272,7 +235,7 @@ RSpec.describe Search::ProjectService do
     end
   end
 
-  context 'sorting', :elastic, :sidekiq_inline do
+  context 'sorting', :elastic, :clean_gitlab_redis_shared_state, :sidekiq_inline do
     context 'issues' do
       let(:scope) { 'issues' }
       let_it_be(:project) { create(:project, :public) }

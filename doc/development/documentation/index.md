@@ -27,7 +27,7 @@ The source of the documentation exists within the codebase of each GitLab applic
 
 | Project | Path |
 | --- | --- |
-| [GitLab](https://gitlab.com/gitlab-org/gitlab/) | [`/doc`](https://gitlab.com/gitlab-org/gitlab/tree/master/doc) |
+| [GitLab](https://gitlab.com/gitlab-org/gitlab/) | [`/doc`](https://gitlab.com/gitlab-org/gitlab/-/tree/master/doc) |
 | [GitLab Runner](https://gitlab.com/gitlab-org/gitlab-runner/) | [`/docs`](https://gitlab.com/gitlab-org/gitlab-runner/-/tree/main/docs) |
 | [Omnibus GitLab](https://gitlab.com/gitlab-org/omnibus-gitlab/) | [`/doc`](https://gitlab.com/gitlab-org/omnibus-gitlab/tree/master/doc) |
 | [Charts](https://gitlab.com/gitlab-org/charts/gitlab) | [`/doc`](https://gitlab.com/gitlab-org/charts/gitlab/tree/master/doc) |
@@ -296,7 +296,7 @@ Before getting started, make sure you read the introductory section
 "[contributing to docs](#contributing-to-docs)" above and the
 [documentation workflow](workflow.md).
 
-- Use the current [merge request description template](https://gitlab.com/gitlab-org/gitlab/blob/master/.gitlab/merge_request_templates/Documentation.md)
+- Use the current [merge request description template](https://gitlab.com/gitlab-org/gitlab/-/blob/master/.gitlab/merge_request_templates/Documentation.md)
 - Label the MR `Documentation` (can only be done by people with `developer` access, for example, GitLab team members)
 - Assign the correct milestone per note below (can only be done by people with `developer` access, for example, GitLab team members)
 
@@ -317,7 +317,8 @@ it increases the work of the release managers.
 Every GitLab instance includes the documentation, which is available at `/help`
 (`https://gitlab.example.com/help`). For example, <https://gitlab.com/help>.
 
-The documentation available online on <https://docs.gitlab.com> is deployed every four hours from the `master` branch of GitLab, Omnibus, and Runner. Therefore,
+The documentation available online on <https://docs.gitlab.com> is deployed every
+four hours from the `main` branch of GitLab, Omnibus, and Runner. Therefore,
 after a merge request gets merged, it is available online on the same day.
 However, it's shipped (and available on `/help`) within the milestone assigned
 to the MR.
@@ -393,7 +394,7 @@ This is preferred over static paths, as the helper also works on instances insta
 
 ### GitLab `/help` tests
 
-Several [RSpec tests](https://gitlab.com/gitlab-org/gitlab/blob/master/spec/features/help_pages_spec.rb)
+Several [RSpec tests](https://gitlab.com/gitlab-org/gitlab/-/blob/master/spec/features/help_pages_spec.rb)
 are run to ensure GitLab documentation renders and works correctly. In particular, that [main docs landing page](../../README.md) works correctly from `/help`.
 For example, [GitLab.com's `/help`](https://gitlab.com/help).
 
@@ -459,9 +460,9 @@ In case the review app URL returns 404, follow these steps to debug:
 If you want to know the in-depth details, here's what's really happening:
 
 1. You manually run the `review-docs-deploy` job in a merge request.
-1. The job runs the [`scripts/trigger-build`](https://gitlab.com/gitlab-org/gitlab/blob/master/scripts/trigger-build)
+1. The job runs the [`scripts/trigger-build`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/scripts/trigger-build)
    script with the `docs deploy` flag, which triggers the "Triggered from `gitlab-org/gitlab` 'review-docs-deploy' job"
-   pipeline trigger in the `gitlab-org/gitlab-docs` project for the `$DOCS_BRANCH` (defaults to `master`).
+   pipeline trigger in the `gitlab-org/gitlab-docs` project for the `$DOCS_BRANCH` (defaults to `main`).
 1. The preview URL is shown both at the job output and in the merge request
    widget. You also get the link to the remote pipeline.
 1. In the `gitlab-org/gitlab-docs` project, the pipeline is created and it
@@ -478,7 +479,7 @@ The following GitLab features are used among others:
 - [Multi project pipelines](../../ci/multi_project_pipelines.md)
 - [Review Apps](../../ci/review_apps/index.md)
 - [Artifacts](../../ci/yaml/README.md#artifacts)
-- [Specific runner](../../ci/runners/README.md#prevent-a-specific-runner-from-being-enabled-for-other-projects)
+- [Specific runner](../../ci/runners/runners_scope.md#prevent-a-specific-runner-from-being-enabled-for-other-projects)
 - [Pipelines for merge requests](../../ci/merge_request_pipelines/index.md)
 
 ## Testing
@@ -492,7 +493,7 @@ GitLab uses [Danger](https://github.com/danger/danger) for some elements in
 code review. For docs changes in merge requests, whenever a change to files under `/doc`
 is made, Danger Bot leaves a comment with further instructions about the documentation
 process. This is configured in the `Dangerfile` in the GitLab repository under
-[/danger/documentation/](https://gitlab.com/gitlab-org/gitlab/tree/master/danger/documentation).
+[/danger/documentation/](https://gitlab.com/gitlab-org/gitlab/-/tree/master/danger/documentation).
 
 ## Automatic screenshot generator
 
@@ -555,6 +556,3 @@ padding. The padding is added around the element, enlarging the screenshot area.
 #### Live example
 
 Please use `spec/docs_screenshots/container_registry_docs.rb` as a guide and as an example to create your own scripts.
-
-<!-- This redirect file can be deleted after February 1, 2021. -->
-<!-- Before deletion, see: https://docs.gitlab.com/ee/development/documentation/#move-or-rename-a-page -->

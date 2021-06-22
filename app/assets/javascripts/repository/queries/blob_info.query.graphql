@@ -1,6 +1,5 @@
 query getBlobInfo($projectPath: ID!, $filePath: String!) {
   project(fullPath: $projectPath) {
-    id
     repository {
       blobs(paths: [$filePath]) {
         nodes {
@@ -16,6 +15,7 @@ query getBlobInfo($projectPath: ID!, $filePath: String!) {
           storedExternally
           rawPath
           replacePath
+          canModifyBlob
           simpleViewer {
             fileType
             tooLarge

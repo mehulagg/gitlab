@@ -190,6 +190,7 @@ RSpec.configure do |config|
   config.include RailsHelpers
   config.include SidekiqMiddleware
   config.include StubActionCableConnection, type: :channel
+  config.include StubSpamServices
 
   include StubFeatureFlags
 
@@ -271,7 +272,6 @@ RSpec.configure do |config|
       # See https://gitlab.com/gitlab-org/gitlab/-/issues/33867
       stub_feature_flags(file_identifier_hash: false)
 
-      stub_feature_flags(unified_diff_components: false)
       stub_feature_flags(diffs_virtual_scrolling: false)
 
       # The following `vue_issues_list`/`vue_issuables_list` stubs can be removed
@@ -350,6 +350,15 @@ RSpec.configure do |config|
     Gitlab::WithRequestStore.with_request_store { example.run }
   end
 
+  # previous test runs may have left some resources throttled
+  config.before do
+    ::Gitlab::ExclusiveLease.reset_all!("el:throttle:*")
+  end
+
+  config.before(:example, :assume_throttled) do |example|
+    allow(::Gitlab::ExclusiveLease).to receive(:throttle).and_return(nil)
+  end
+
   config.before(:example, :request_store) do
     # Clear request store before actually starting the spec (the
     # `around` above will have the request store enabled for all
@@ -405,6 +414,15 @@ RSpec.configure do |config|
     allow(view).to receive(:can?) do |*args|
       Ability.allowed?(*args)
     end
+  end
+
+  # Allows stdout to be redirected to reduce noise
+  config.before(:each, :silence_stdout) do
+    $stdout = StringIO.new
+  end
+
+  config.after(:each, :silence_stdout) do
+    $stdout = STDOUT
   end
 
   config.disable_monkey_patching!

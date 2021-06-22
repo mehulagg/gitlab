@@ -15,7 +15,7 @@ RSpec.describe Resolvers::IssuesResolver do
       let_it_be(:epic2) { create :epic, group: group }
 
       let_it_be(:iteration1) { create(:iteration, group: group, start_date: 2.weeks.ago, due_date: 1.week.ago) }
-      let_it_be(:current_iteration) { create(:iteration, :started, group: group, start_date: Date.today, due_date: 1.day.from_now) }
+      let_it_be(:current_iteration) { create(:iteration, group: group, start_date: Date.yesterday, due_date: 1.day.from_now) }
 
       let_it_be(:issue1) { create :issue, project: project, epic: epic1, iteration: iteration1 }
       let_it_be(:issue2) { create :issue, project: project, epic: epic2, weight: 1 }

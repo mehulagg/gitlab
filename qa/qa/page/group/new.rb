@@ -21,6 +21,10 @@ module QA
           element :connect_instance_button
         end
 
+        view 'app/assets/javascripts/vue_shared/new_namespace/components/welcome.vue' do
+          element :panel_link
+        end
+
         def set_path(path)
           fill_element(:group_path_field, path)
           fill_element(:group_name_field, path)
@@ -59,6 +63,10 @@ module QA
           set_gitlab_token(gitlab_token)
 
           click_element(:connect_instance_button)
+        end
+
+        def switch_to_import_tab
+          click_element(:panel_link, panel_name: 'import-group-pane')
         end
       end
     end

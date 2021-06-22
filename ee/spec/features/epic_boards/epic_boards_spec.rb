@@ -87,14 +87,29 @@ RSpec.describe 'epic boards', :js do
       expect(find('.board:nth-child(3) .board-card')).to have_content(epic3.title)
     end
 
-    it 'moves epic between lists' do
-      expect(find('.board:nth-child(1)')).to have_content(epic3.title)
+    it 'moves to the bottom of another list' do
+      expect(find_board_list(1)).to have_content(epic3.title)
 
-      drag(list_from_index: 0, list_to_index: 1)
+      drag(list_from_index: 0, list_to_index: 1, to_index: 1)
       wait_for_all_requests
 
       expect(find_board_list(1)).not_to have_content(epic3.title)
-      expect(find_board_list(2)).to have_content(epic3.title)
+      page.within(find_board_list(2)) do
+        expect(all('.board-card')[1]).to have_content(epic3.title)
+      end
+    end
+
+    it 'moves to the top of another list' do
+      expect(find_board_list(1)).to have_content(epic3.title)
+
+      drag(list_from_index: 0, list_to_index: 1, to_index: 0)
+      wait_for_all_requests
+
+      expect(find_board_list(1)).not_to have_content(epic3.title)
+
+      page.within(find_board_list(2)) do
+        expect(all('.board-card')[0]).to have_content(epic3.title)
+      end
     end
 
     context 'lists' do
@@ -214,7 +229,6 @@ RSpec.describe 'epic boards', :js do
   context 'filtered search' do
     before do
       stub_licensed_features(epics: true)
-      stub_feature_flags(boards_filtered_search: true)
 
       group.add_guest(user)
       sign_in(user)
@@ -235,6 +249,7 @@ RSpec.describe 'epic boards', :js do
 
       wait_for_requests
 
+      expect(list_header(label_list)).to have_content('0')
       expect(page).not_to have_content('Epic1')
       expect(page).to have_content('Epic2')
       expect(page).to have_content('Epic3')
@@ -251,6 +266,7 @@ RSpec.describe 'epic boards', :js do
 
       wait_for_requests
 
+      expect(list_header(label_list)).to have_content('1')
       expect(page).to have_content('Epic1')
       expect(page).not_to have_content('Epic2')
       expect(page).not_to have_content('Epic3')
@@ -267,6 +283,7 @@ RSpec.describe 'epic boards', :js do
 
       wait_for_requests
 
+      expect(list_header(label_list)).to have_content('1')
       expect(page).to have_content('Epic1')
       expect(page).not_to have_content('Epic2')
       expect(page).not_to have_content('Epic3')
@@ -283,6 +300,7 @@ RSpec.describe 'epic boards', :js do
 
       wait_for_requests
 
+      expect(list_header(label_list)).to have_content('0')
       expect(page).not_to have_content('Epic1')
       expect(page).to have_content('Epic2')
       expect(page).to have_content('Epic3')
@@ -297,6 +315,7 @@ RSpec.describe 'epic boards', :js do
 
       wait_for_requests
 
+      expect(list_header(label_list)).to have_content('1')
       expect(page).to have_content('Epic1')
       expect(page).not_to have_content('Epic2')
       expect(page).not_to have_content('Epic3')
@@ -358,7 +377,7 @@ RSpec.describe 'epic boards', :js do
 
     click_value(filter, value)
 
-    click_on_board_modal
+    send_keys :escape
 
     click_button 'Create board'
 
@@ -372,7 +391,7 @@ RSpec.describe 'epic boards', :js do
 
     click_value(filter, value)
 
-    click_on_board_modal
+    send_keys :escape
 
     click_button 'Save changes'
 
@@ -383,12 +402,6 @@ RSpec.describe 'epic boards', :js do
 
   def update_board_label(label_title)
     update_board_scope('labels', label_title)
-  end
-
-  # Click on modal to make sure the dropdown is closed (e.g. label scenario)
-  #
-  def click_on_board_modal
-    find('.board-config-modal .modal-content').click
   end
 
   # This isnt the "best" matcher but because we have opts

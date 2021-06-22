@@ -1,6 +1,5 @@
 import { isEqual, pick } from 'lodash';
 import { convertObjectPropsToSnakeCase } from '~/lib/utils/common_utils';
-import { DEFAULT_STAGE_NAMES } from '../../constants';
 import { isStartEvent, getAllowedEndEvents, eventToOption, eventsByIdentifier } from '../../utils';
 import {
   i18n,
@@ -89,16 +88,17 @@ export const initializeFormData = ({ fields, errors }) => {
  * the name of the field.g
  *
  * @param {Object} fields key value pair of form field values
+ * @param {Object} defaultStageNames array of lower case default value stream names
  * @returns {Object} key value pair of form fields with an array of errors
  */
-export const validateStage = (fields) => {
+export const validateStage = (fields, defaultStageNames = []) => {
   const newErrors = {};
 
   if (fields?.name) {
     if (fields.name.length > NAME_MAX_LENGTH) {
       newErrors.name = [ERRORS.MAX_LENGTH];
     }
-    if (fields?.custom && DEFAULT_STAGE_NAMES.includes(fields.name.toLowerCase())) {
+    if (fields?.custom && defaultStageNames.includes(fields.name.toLowerCase())) {
       newErrors.name = [ERRORS.STAGE_NAME_EXISTS];
     }
   } else {
@@ -216,16 +216,29 @@ const prepareDefaultStage = (defaultStageConfig, { name, ...rest }) => {
   };
 };
 
+const generateHiddenDefaultStages = (defaultStageConfig, stageNames) => {
+  // We use the stage name to check for any default stages that might be hidden
+  // Currently the default stages can't be renamed
+  return defaultStageConfig
+    .filter(({ name }) => !stageNames.includes(name.toLowerCase()))
+    .map((data) => ({ ...data, hidden: true }));
+};
+
 /**
  * Returns a valid array of value stream stages for
  * use in the value stream form
  *
- * @param {Array} stage an array of raw value stream stages retrieved from the vuex store
- * @param {Array} stage an array of raw value stream stages retrieved from the vuex store
+ * @param {Array} defaultStageConfig an array of the default value stream stages retrieved from the backend
+ * @param {Array} selectedValueStreamStages an array of raw value stream stages retrieved from the vuex store
  * @returns {Object} the same stage with fields adjusted for the value stream form
  */
-export const generateInitialStageData = (defaultStageConfig, selectedValueStreamStages) =>
-  selectedValueStreamStages.map(
+export const generateInitialStageData = (defaultStageConfig, selectedValueStreamStages) => {
+  const hiddenDefaultStages = generateHiddenDefaultStages(
+    defaultStageConfig,
+    selectedValueStreamStages.map((s) => s.name.toLowerCase()),
+  );
+  const combinedStages = [...selectedValueStreamStages, ...hiddenDefaultStages];
+  return combinedStages.map(
     ({ startEventIdentifier = null, endEventIdentifier = null, custom = false, ...rest }) => {
       const stageData =
         custom && startEventIdentifier && endEventIdentifier
@@ -241,3 +254,4 @@ export const generateInitialStageData = (defaultStageConfig, selectedValueStream
       return {};
     },
   );
+};

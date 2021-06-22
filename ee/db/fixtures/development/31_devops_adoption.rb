@@ -36,6 +36,8 @@ Gitlab::Seeder.quiet do
           deploy_succeeded: booleans.sample,
           security_scan_succeeded: booleans.sample,
           code_owners_used_count: rand(10),
+          sast_enabled_count: rand(10),
+          dast_enabled_count: rand(10),
           total_projects_count: rand(10..19),
           recorded_at: [end_time + 1.day, Time.zone.now].min,
           end_time: end_time

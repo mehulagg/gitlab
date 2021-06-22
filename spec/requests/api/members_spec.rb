@@ -265,8 +265,9 @@ RSpec.describe API::Members do
             expect_snowplow_event(
               category: 'Members::CreateService',
               action: 'create_member',
-              label: 'api',
-              property: 'existing_user'
+              label: 'members-api',
+              property: 'existing_user',
+              user: maintainer
             )
           end
 
@@ -278,7 +279,8 @@ RSpec.describe API::Members do
               category: 'Members::CreateService',
               action: 'create_member',
               label: '_invite_source_',
-              property: 'existing_user'
+              property: 'existing_user',
+              user: maintainer
             )
           end
         end
@@ -320,8 +322,9 @@ RSpec.describe API::Members do
               expect_snowplow_event(
                 category: 'Members::CreateService',
                 action: 'create_member',
-                label: 'api',
-                property: 'existing_user'
+                label: 'members-api',
+                property: 'existing_user',
+                user: maintainer
               )
             end
 
@@ -333,7 +336,8 @@ RSpec.describe API::Members do
                 category: 'Members::CreateService',
                 action: 'create_member',
                 label: '_invite_source_',
-                property: 'existing_user'
+                property: 'existing_user',
+                user: maintainer
               )
             end
           end

@@ -62,7 +62,7 @@ module EE
           includes(:protected_branches).reject { |rule| rule.applies_to_branch?(branch) }
         end
       end
-      has_many :external_approval_rules, class_name: 'ApprovalRules::ExternalApprovalRule'
+      has_many :external_status_checks, class_name: 'MergeRequests::ExternalStatusCheck'
       has_many :approval_merge_request_rules, through: :merge_requests, source: :approval_rules
       has_many :audit_events, as: :entity
       has_many :path_locks
@@ -152,15 +152,15 @@ module EE
       scope :with_security_reports_stored, -> { where('EXISTS (?)', ::Vulnerabilities::Finding.scoped_project.select(1)) }
       scope :with_security_reports, -> { where('EXISTS (?)', ::Ci::JobArtifact.security_reports.scoped_project.select(1)) }
       scope :with_github_service_pipeline_events, -> { joins(:github_service).merge(::Integrations::Github.pipeline_hooks) }
-      scope :with_active_prometheus_service, -> { joins(:prometheus_service).merge(PrometheusService.active) }
+      scope :with_active_prometheus_integration, -> { joins(:prometheus_integration).merge(::Integrations::Prometheus.active) }
       scope :with_enabled_incident_sla, -> { joins(:incident_management_setting).where(project_incident_management_settings: { sla_timer: true }) }
       scope :mirrored_with_enabled_pipelines, -> do
         joins(:project_feature).mirror.where(mirror_trigger_builds: true,
                                              project_features: { builds_access_level: ::ProjectFeature::ENABLED })
       end
-      scope :with_slack_service, -> { joins(:slack_service) }
-      scope :with_slack_slash_commands_service, -> { joins(:slack_slash_commands_service) }
-      scope :with_prometheus_service, -> { joins(:prometheus_service) }
+      scope :with_slack_integration, -> { joins(:slack_integration) }
+      scope :with_slack_slash_commands_integration, -> { joins(:slack_slash_commands_integration) }
+      scope :with_prometheus_integration, -> { joins(:prometheus_integration) }
       scope :aimed_for_deletion, -> (date) { where('marked_for_deletion_at <= ?', date).without_deleted }
       scope :not_aimed_for_deletion, -> { where(marked_for_deletion_at: nil) }
       scope :with_repos_templates, -> { where(namespace_id: ::Gitlab::CurrentSettings.current_application_settings.custom_project_templates_group_id) }
@@ -218,6 +218,7 @@ module EE
                         less_than: ::Gitlab::Pages::MAX_SIZE / 1.megabyte }
 
       validates :approvals_before_merge, numericality: true, allow_blank: true
+      validate :import_url_inside_fork_network, if: :import_url_changed?
 
       with_options if: :mirror? do
         validates :import_url, presence: true
@@ -241,16 +242,22 @@ module EE
       alias_attribute :fallback_approvals_required, :approvals_before_merge
 
       def jira_issue_association_required_to_merge_enabled?
-        ::Feature.enabled?(:jira_issue_association_on_merge_request, self) &&
-          feature_available?(:jira_issue_association_enforcement)
+        strong_memoize(:jira_issue_association_required_to_merge_enabled) do
+          next false unless jira_issues_integration_available?
+          next false unless jira_integration&.active?
+          next false unless ::Feature.enabled?(:jira_issue_association_on_merge_request, self, default_enabled: :yaml)
+          next false unless feature_available?(:jira_issue_association_enforcement)
+
+          true
+        end
       end
 
       def jira_vulnerabilities_integration_enabled?
-        !!jira_service&.jira_vulnerabilities_integration_enabled?
+        !!jira_integration&.jira_vulnerabilities_integration_enabled?
       end
 
       def configured_to_create_issues_from_vulnerabilities?
-        !!jira_service&.configured_to_create_issues_from_vulnerabilities?
+        !!jira_integration&.configured_to_create_issues_from_vulnerabilities?
       end
     end
 
@@ -361,10 +368,6 @@ module EE
       super && !ci_minutes_quota.minutes_used_up?
     end
 
-    def shared_runners_enabled_but_unavailable?
-      shared_runners_enabled? && !shared_runners_available?
-    end
-
     def link_pool_repository
       super
       repository.log_geo_updated_event
@@ -440,7 +443,7 @@ module EE
     end
 
     def execute_external_compliance_hooks(data)
-      external_approval_rules.each do |approval_rule|
+      external_status_checks.each do |approval_rule|
         approval_rule.async_execute(data)
       end
     end
@@ -855,6 +858,20 @@ module EE
 
       pipeline_scope.with_reports(::Ci::JobArtifact.security_reports).first ||
         pipeline_scope.with_legacy_security_reports.first
+    end
+
+    # If the project is inside a fork network, the mirror URL must
+    # also belong to a member of that fork network
+    def import_url_inside_fork_network
+      return unless ::Feature.enabled?(:block_external_fork_network_mirrors, self, default_enabled: :yaml)
+
+      if forked?
+        mirror_project = ::Project.find_by_url(import_url)
+
+        unless mirror_project.present? && fork_network_projects.include?(mirror_project)
+          errors.add(:url, _("must be inside the fork network"))
+        end
+      end
     end
   end
 end

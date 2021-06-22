@@ -9,7 +9,7 @@ RSpec.describe Resolvers::ExternalIssueResolver do
 
   context 'when Jira issues are requested' do
     let_it_be(:project) { create(:project) }
-    let_it_be(:jira_service) { create(:jira_service, project: project) }
+    let_it_be(:jira_integration) { create(:jira_integration, project: project) }
     let_it_be(:vulnerability_external_issue_link) { create(:vulnerabilities_external_issue_link, project: project) }
 
     let(:jira_issue) do

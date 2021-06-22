@@ -5,11 +5,17 @@ require 'spec_helper'
 RSpec.describe Nav::TopNavHelper do
   include ActionView::Helpers::UrlHelper
 
-  describe '#top_nav_view_model' do
-    let_it_be(:user) { build_stubbed(:user) }
-    let_it_be(:admin) { build_stubbed(:user, :admin) }
+  let_it_be(:user) { build_stubbed(:user) }
+  let_it_be(:admin) { build_stubbed(:user, :admin) }
+  let_it_be(:external_user) { build_stubbed(:user, :external, can_create_group: false) }
 
-    let(:current_user) { nil }
+  let(:current_user) { nil }
+
+  before do
+    allow(helper).to receive(:current_user) { current_user }
+  end
+
+  describe '#top_nav_view_model' do
     let(:current_project) { nil }
     let(:current_group) { nil }
     let(:with_current_settings_admin_mode) { false }
@@ -26,7 +32,6 @@ RSpec.describe Nav::TopNavHelper do
     let(:active_title) { 'Menu' }
 
     before do
-      allow(helper).to receive(:current_user) { current_user }
       allow(Gitlab::CurrentSettings).to receive(:admin_mode) { with_current_settings_admin_mode }
       allow(helper).to receive(:header_link?).with(:admin_mode) { with_header_link_admin_mode }
       allow(Gitlab::Sherlock).to receive(:enabled?) { with_sherlock_enabled }
@@ -105,6 +110,16 @@ RSpec.describe Nav::TopNavHelper do
           )
         ]
         expect(subject[:secondary]).to eq(expected_secondary)
+      end
+
+      context 'with current nav as project' do
+        before do
+          helper.nav('project')
+        end
+
+        it 'has expected :active' do
+          expect(subject[:primary].detect { |entry| entry[:id] == 'project' }[:active]).to eq(true)
+        end
       end
     end
 
@@ -190,6 +205,16 @@ RSpec.describe Nav::TopNavHelper do
             expect(projects_view[:linksSecondary]).to eq(expected_links_secondary)
           end
 
+          context 'with current nav as project' do
+            before do
+              helper.nav('project')
+            end
+
+            it 'has expected :active' do
+              expect(subject[:primary].detect { |entry| entry[:id] == 'project' }[:active]).to eq(true)
+            end
+          end
+
           context 'with persisted project' do
             let_it_be(:project) { build_stubbed(:project) }
 
@@ -273,12 +298,30 @@ RSpec.describe Nav::TopNavHelper do
           it 'has expected :linksSecondary' do
             expected_links_secondary = [
               ::Gitlab::Nav::TopNavMenuItem.build(
-                href: '/groups/new#create-group-pane',
+                href: '/groups/new',
                 id: 'create',
                 title: 'Create group'
               )
             ]
             expect(groups_view[:linksSecondary]).to eq(expected_links_secondary)
+          end
+
+          context 'with external user' do
+            let(:current_user) { external_user }
+
+            it 'does not have create group link' do
+              expect(groups_view[:linksSecondary]).to eq([])
+            end
+          end
+
+          context 'with current nav as group' do
+            before do
+              helper.nav('group')
+            end
+
+            it 'has expected :active' do
+              expect(subject[:primary].detect { |entry| entry[:id] == 'groups' }[:active]).to eq(true)
+            end
           end
 
           context 'with persisted group' do
@@ -454,6 +497,60 @@ RSpec.describe Nav::TopNavHelper do
           )
           expect(subject[:secondary].last).to eq(expected_enter_admin_mode_item)
         end
+      end
+    end
+  end
+
+  describe '#top_nav_responsive_view_model' do
+    let_it_be(:project) { create(:project) }
+    let_it_be(:group) { create(:group) }
+
+    let(:with_search) { false }
+    let(:with_new_view_model) { nil }
+
+    let(:subject) { helper.top_nav_responsive_view_model(project: project, group: group) }
+
+    before do
+      allow(helper).to receive(:header_link?).with(:search) { with_search }
+      allow(helper).to receive(:new_dropdown_view_model).with(project: project, group: group) { with_new_view_model }
+    end
+
+    it 'has nil new subview' do
+      expect(subject[:views][:new]).to be_nil
+    end
+
+    it 'has nil search subview' do
+      expect(subject[:views][:search]).to be_nil
+    end
+
+    context 'with search' do
+      let(:with_search) { true }
+
+      it 'has search subview' do
+        expect(subject[:views][:search]).to eq(
+          ::Gitlab::Nav::TopNavMenuItem.build(
+            id: 'search',
+            title: 'Search',
+            icon: 'search',
+            href: search_path
+          )
+        )
+      end
+    end
+
+    context 'with new' do
+      let(:with_new_view_model) { { menu_sections: [{ id: 'test-new-view-model' }] } }
+
+      it 'has new subview' do
+        expect(subject[:views][:new]).to eq(with_new_view_model)
+      end
+    end
+
+    context 'with new and no menu_sections' do
+      let(:with_new_view_model) { { menu_sections: [] } }
+
+      it 'has new subview' do
+        expect(subject[:views][:new]).to be_nil
       end
     end
   end

@@ -1,7 +1,3 @@
-// The backend actually uses "hide_whitespace" while the frontend
-// uses "show whitspace" so these values are opposite what you might expect
-export const NO_SHOW_WHITESPACE = '1';
-export const SHOW_WHITESPACE = '0';
 export const INLINE_DIFF_VIEW_TYPE = 'inline';
 export const PARALLEL_DIFF_VIEW_TYPE = 'parallel';
 export const MATCH_LINE_TYPE = 'match';
@@ -63,7 +59,6 @@ export const MIN_RENDERING_MS = 2;
 export const START_RENDERING_INDEX = 200;
 export const INLINE_DIFF_LINES_KEY = 'highlighted_diff_lines';
 export const PARALLEL_DIFF_LINES_KEY = 'parallel_diff_lines';
-export const DIFFS_PER_PAGE = 20;
 
 export const DIFF_COMPARE_BASE_VERSION_INDEX = -1;
 export const DIFF_COMPARE_HEAD_VERSION_INDEX = -2;

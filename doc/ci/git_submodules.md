@@ -5,7 +5,7 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 type: reference
 ---
 
-# Using Git submodules with GitLab CI/CD
+# Using Git submodules with GitLab CI/CD **(FREE)**
 
 Use [Git submodules](https://git-scm.com/book/en/v2/Git-Tools-Submodules) to keep
 a Git repository as a subdirectory of another Git repository. You can clone another
@@ -53,7 +53,7 @@ To make submodules work correctly in CI/CD jobs:
 1. Make sure you use [relative URLs](#configure-the-gitmodules-file)
    for submodules located in the same GitLab server.
 1. You can set the `GIT_SUBMODULE_STRATEGY` variable to either `normal` or `recursive`
-   to tell the runner to [fetch your submodules before the job](runners/README.md#git-submodule-strategy):
+   to tell the runner to [fetch your submodules before the job](runners/configure_runners.md#git-submodule-strategy):
 
    ```yaml
    variables:

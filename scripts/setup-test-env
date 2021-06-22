@@ -11,6 +11,8 @@ require 'active_support/dependencies/autoload'
 require 'active_support/core_ext/numeric'
 require 'active_support/string_inquirer'
 
+ENV['SKIP_RAILS_ENV_IN_RAKE'] = 'true'
+
 module Rails
   extend self
 

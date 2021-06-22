@@ -14,7 +14,7 @@ module Gitlab
 
     # Minimum PostgreSQL version requirement per documentation:
     # https://docs.gitlab.com/ee/install/requirements.html#postgresql-requirements
-    MINIMUM_POSTGRES_VERSION = 11
+    MINIMUM_POSTGRES_VERSION = 12
 
     # https://www.postgresql.org/docs/9.2/static/datatype-numeric.html
     MAX_INT_VALUE = 2147483647
@@ -147,7 +147,7 @@ module Gitlab
           is required for this version of GitLab.
           <% if Rails.env.development? || Rails.env.test? %>
           If using gitlab-development-kit, please find the relevant steps here:
-            https://gitlab.com/gitlab-org/gitlab-development-kit/-/blob/master/doc/howto/postgresql.md#upgrade-postgresql
+            https://gitlab.com/gitlab-org/gitlab-development-kit/-/blob/main/doc/howto/postgresql.md#upgrade-postgresql
           <% end %>
           Please upgrade your environment to a supported PostgreSQL version, see
           https://docs.gitlab.com/ee/install/requirements.html#database for details.
@@ -293,7 +293,7 @@ module Gitlab
     # @param [ActiveRecord::Connection] ar_connection
     # @return [String]
     def self.get_write_location(ar_connection)
-      use_new_load_balancer_query = Gitlab::Utils.to_boolean(ENV['USE_NEW_LOAD_BALANCER_QUERY'], default: false)
+      use_new_load_balancer_query = Gitlab::Utils.to_boolean(ENV['USE_NEW_LOAD_BALANCER_QUERY'], default: true)
 
       sql = if use_new_load_balancer_query
               <<~NEWSQL
@@ -331,6 +331,16 @@ module Gitlab
           ActiveRecord::Migrator.migrations_paths << path
         end
       end
+    end
+
+    def self.dbname(ar_connection)
+      if ar_connection.respond_to?(:pool) &&
+          ar_connection.pool.respond_to?(:db_config) &&
+          ar_connection.pool.db_config.respond_to?(:database)
+        return ar_connection.pool.db_config.database
+      end
+
+      'unknown'
     end
 
     # inside_transaction? will return true if the caller is running within a transaction. Handles special cases

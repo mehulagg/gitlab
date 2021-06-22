@@ -21,15 +21,14 @@ export default {
   apollo: {
     state: {
       query: STATE_QUERY,
-      update(data) {
-        return data;
-      },
+      manual: true,
       result({ data }) {
         this.subscription = data.subscription;
         this.namespaces = data.namespaces;
         this.isSetupForCompany = data.isSetupForCompany;
         this.fullName = data.fullName;
         this.customer = data.customer;
+        this.selectedPlanId = data.selectedPlanId;
       },
     },
   },
@@ -41,11 +40,12 @@ export default {
       collapsed: true,
       fullName: null,
       customer: {},
+      selectedPlanId: null,
     };
   },
   computed: {
     selectedPlan() {
-      return this.plans.find((plan) => plan.code === this.subscription.planId);
+      return this.plans.find((plan) => plan.id === this.selectedPlanId);
     },
     selectedPlanPrice() {
       return this.selectedPlan.pricePerYear;
@@ -92,6 +92,13 @@ export default {
     titleWithName() {
       return sprintf(this.$options.i18n.title, { name: this.name });
     },
+    isVisible() {
+      return (
+        !this.$apollo.loading &&
+        (!this.isGroupSelected || this.isSelectedGroupPresent) &&
+        this.selectedPlan
+      );
+    },
   },
   methods: {
     toggleCollapse() {
@@ -106,7 +113,7 @@ export default {
 </script>
 <template>
   <div
-    v-if="!$apollo.loading && (!isGroupSelected || isSelectedGroupPresent)"
+    v-if="isVisible"
     class="order-summary gl-display-flex gl-flex-direction-column gl-flex-grow-1 gl-mt-2 mt-lg-5"
   >
     <div class="d-lg-none">

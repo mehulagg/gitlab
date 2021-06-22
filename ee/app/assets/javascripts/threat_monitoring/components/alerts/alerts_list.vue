@@ -200,6 +200,7 @@ export default {
 
     <gl-table
       class="alert-management-table"
+      data-qa-selector="alerts_list"
       :busy="isLoadingFirstAlerts"
       :items="alerts"
       :fields="$options.i18n.FIELDS"

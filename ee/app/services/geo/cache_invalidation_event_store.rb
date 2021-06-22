@@ -7,7 +7,8 @@ module Geo
     attr_reader :key
 
     def initialize(key)
-      @key = key
+      # Rails cache keys are often not `String`, see https://guides.rubyonrails.org/caching_with_rails.html#cache-keys
+      @key = ::ActiveSupport::Cache.expand_cache_key(key)
     end
 
     private

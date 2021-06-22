@@ -19,6 +19,12 @@ module EE
       end
     end
 
+    def api_status_checks_path
+      if expose_mr_status_checks?
+        expose_path(api_v4_projects_merge_requests_status_checks_path(id: project.id, merge_request_iid: merge_request.iid))
+      end
+    end
+
     def merge_train_when_pipeline_succeeds_docs_path
       help_page_path('ci/merge_request_pipelines/pipelines_for_merged_results/merge_trains/index.md', anchor: 'add-a-merge-request-to-a-merge-train')
     end
@@ -61,6 +67,12 @@ module EE
     end
 
     private
+
+    def expose_mr_status_checks?
+      ::Feature.enabled?(:ff_compliance_approval_gates, project, default_enabled: :yaml) &&
+        current_user.present? &&
+        project.external_status_checks.any?
+    end
 
     def expose_mr_approval_path?
       approval_feature_available? && merge_request.iid

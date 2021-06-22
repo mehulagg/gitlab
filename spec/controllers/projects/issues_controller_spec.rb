@@ -17,7 +17,7 @@ RSpec.describe Projects::IssuesController do
       before do
         sign_in(user)
         project.add_developer(user)
-        create(:jira_service, project: project)
+        create(:jira_integration, project: project)
       end
 
       context 'when GitLab issues disabled' do
@@ -310,7 +310,7 @@ RSpec.describe Projects::IssuesController do
 
     context 'external issue tracker' do
       let!(:service) do
-        create(:custom_issue_tracker_service, project: project, new_issue_url: 'http://test.com')
+        create(:custom_issue_tracker_integration, project: project, new_issue_url: 'http://test.com')
       end
 
       before do

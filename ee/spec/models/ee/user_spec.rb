@@ -637,7 +637,7 @@ RSpec.describe User do
           AND
           ("users"."user_type" IS NULL OR "users"."user_type" IN (6, 4))
           AND
-          ("users"."user_type" IS NULL OR "users"."user_type" NOT IN (2, 6, 1, 3, 7, 8))
+          ("users"."user_type" IS NULL OR "users"."user_type" NOT IN (2, 6, 1, 3, 7, 8, 9))
         SQL
 
         expect(users.to_sql.squish).to eq expected_sql.squish
@@ -665,7 +665,7 @@ RSpec.describe User do
           AND
           ("users"."user_type" IS NULL OR "users"."user_type" IN (6, 4))
           AND
-          ("users"."user_type" IS NULL OR "users"."user_type" NOT IN (2, 6, 1, 3, 7, 8))
+          ("users"."user_type" IS NULL OR "users"."user_type" NOT IN (2, 6, 1, 3, 7, 8, 9))
           AND
           (EXISTS (SELECT 1 FROM "members"
             WHERE "members"."user_id" = "users"."id"
@@ -1756,6 +1756,53 @@ RSpec.describe User do
         allow(project.namespace).to receive(:free_plan?).and_return(plan == :free)
         allow(project.namespace).to receive(:trial?).and_return(plan == :trial)
         project.update!(shared_runners_enabled: shared_runners_enabled)
+        stub_feature_flags(
+          ci_require_credit_card_on_free_plan: feature_flags.include?(:free),
+          ci_require_credit_card_on_trial_plan: feature_flags.include?(:trial),
+          ci_require_credit_card_for_old_users: feature_flags.include?(:old_users))
+      end
+
+      it description do
+        expect(subject).to eq(result)
+      end
+    end
+  end
+
+  describe '#has_required_credit_card_to_enable_shared_runners?' do
+    let_it_be(:project) { create(:project) }
+
+    subject { user.has_required_credit_card_to_enable_shared_runners?(project) }
+
+    using RSpec::Parameterized::TableSyntax
+
+    where(:saas, :cc_present, :plan, :feature_flags, :days_from_release, :result, :description) do
+      # self-hosted
+      nil   | false | :paid  | %i[free trial]           | 0  | true  | 'self-hosted paid plan'
+      nil   | false | :trial | %i[free trial]           | 0  | true  | 'self-hosted missing CC on trial plan'
+
+      # saas
+      :saas | false | :paid  | %i[free trial old_users] | 0  | true  | 'missing CC on paid plan'
+
+      :saas | false | :free  | %i[free trial]           | 0  | false | 'missing CC on free plan'
+      :saas | false | :free  | %i[free trial]           | -1 | true  | 'missing CC on free plan but old user'
+      :saas | false | :free  | %i[free trial old_users] | -1 | false | 'missing CC on free plan but old user and FF enabled'
+      :saas | true  | :free  | %i[free trial]           | 0  | true  | 'present CC on free plan'
+      :saas | false | :free  | %i[]                     | 0  | true  | 'missing CC on free plan - FF off'
+
+      :saas | false | :trial | %i[free trial]           | 0  | false | 'missing CC on trial plan'
+      :saas | false | :trial | %i[free trial]           | -1 | true  | 'missing CC on trial plan but old user'
+      :saas | false | :trial | %i[free trial old_users] | -1 | false | 'missing CC on trial plan but old user and FF enabled'
+      :saas | false | :trial | %i[]                     | 0  | true  | 'missing CC on trial plan - FF off'
+      :saas | true  | :trial | %i[free trial]           | 0  | true  | 'present CC on trial plan'
+    end
+
+    with_them do
+      before do
+        allow(::Gitlab).to receive(:com?).and_return(saas == :saas)
+        user.created_at = ::Users::CreditCardValidation::RELEASE_DAY + days_from_release.days
+        allow(user).to receive(:credit_card_validated_at).and_return(Time.current) if cc_present
+        allow(project.namespace).to receive(:free_plan?).and_return(plan == :free)
+        allow(project.namespace).to receive(:trial?).and_return(plan == :trial)
         stub_feature_flags(
           ci_require_credit_card_on_free_plan: feature_flags.include?(:free),
           ci_require_credit_card_on_trial_plan: feature_flags.include?(:trial),

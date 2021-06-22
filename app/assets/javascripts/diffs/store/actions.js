@@ -25,10 +25,6 @@ import {
   MIN_RENDERING_MS,
   START_RENDERING_INDEX,
   INLINE_DIFF_LINES_KEY,
-  DIFFS_PER_PAGE,
-  DIFF_WHITESPACE_COOKIE_NAME,
-  SHOW_WHITESPACE,
-  NO_SHOW_WHITESPACE,
   DIFF_FILE_MANUAL_COLLAPSE,
   DIFF_FILE_AUTOMATIC_COLLAPSE,
   EVT_PERF_MARK_FILE_TREE_START,
@@ -95,15 +91,9 @@ export const setBaseConfig = ({ commit }, options) => {
 };
 
 export const fetchDiffFilesBatch = ({ commit, state, dispatch }) => {
-  const diffsGradualLoad = window.gon?.features?.diffsGradualLoad;
-  let perPage = DIFFS_PER_PAGE;
+  let perPage = state.viewDiffsFileByFile ? 1 : 5;
   let increaseAmount = 1.4;
-
-  if (diffsGradualLoad) {
-    perPage = state.viewDiffsFileByFile ? 1 : 5;
-  }
-
-  const startPage = diffsGradualLoad ? 0 : 1;
+  const startPage = 0;
   const id = window?.location?.hash;
   const isNoteLink = id.indexOf('#note') === 0;
   const urlParams = {
@@ -133,11 +123,7 @@ export const fetchDiffFilesBatch = ({ commit, state, dispatch }) => {
           dispatch('setCurrentDiffFileIdFromNote', id.split('_').pop());
         }
 
-        if (
-          (diffsGradualLoad &&
-            (totalLoaded === pagination.total_pages || pagination.total_pages === null)) ||
-          (!diffsGradualLoad && !pagination.next_page)
-        ) {
+        if (totalLoaded === pagination.total_pages || pagination.total_pages === null) {
           commit(types.SET_RETRIEVING_BATCHES, false);
 
           // We need to check that the currentDiffFileId points to a file that exists
@@ -167,15 +153,11 @@ export const fetchDiffFilesBatch = ({ commit, state, dispatch }) => {
           return null;
         }
 
-        if (diffsGradualLoad) {
-          const nextPage = page + perPage;
-          perPage = Math.min(Math.ceil(perPage * increaseAmount), 30);
-          increaseAmount = Math.min(increaseAmount + 0.2, 2);
+        const nextPage = page + perPage;
+        perPage = Math.min(Math.ceil(perPage * increaseAmount), 30);
+        increaseAmount = Math.min(increaseAmount + 0.2, 2);
 
-          return nextPage;
-        }
-
-        return pagination.next_page;
+        return nextPage;
       })
       .then((nextPage) => {
         dispatch('startRenderDiffsQueue');
@@ -569,16 +551,15 @@ export const setRenderTreeList = ({ commit }, renderTreeList) => {
   }
 };
 
-export const setShowWhitespace = ({ commit }, { showWhitespace, pushState = false }) => {
-  commit(types.SET_SHOW_WHITESPACE, showWhitespace);
-  const w = showWhitespace ? SHOW_WHITESPACE : NO_SHOW_WHITESPACE;
-
-  Cookies.set(DIFF_WHITESPACE_COOKIE_NAME, w);
-
-  if (pushState) {
-    historyPushState(mergeUrlParams({ w }, window.location.href));
+export const setShowWhitespace = async (
+  { state, commit },
+  { url, showWhitespace, updateDatabase = true },
+) => {
+  if (updateDatabase) {
+    await axios.put(url || state.endpointUpdateUser, { show_whitespace_in_diffs: showWhitespace });
   }
 
+  commit(types.SET_SHOW_WHITESPACE, showWhitespace);
   notesEventHub.$emit('refetchDiffData');
 
   if (window.gon?.features?.diffSettingsUsageData) {

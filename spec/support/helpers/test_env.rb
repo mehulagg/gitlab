@@ -521,8 +521,14 @@ module TestEnv
       # Cleanup the component entirely to ensure we start fresh
       FileUtils.rm_rf(install_dir)
 
-      unless Rake::Task[task].invoke(*task_args)
-        raise ComponentFailedToInstallError
+      if ENV['SKIP_RAILS_ENV_IN_RAKE']
+        # When we run `scripts/setup-test-env`, we take care of loading the necessary dependencies
+        # so we can run the rake task programmatically.
+        Rake::Task[task].invoke(*task_args)
+      else
+        # In other cases, we run the task via `rake` so that the environment
+        # and dependencies are automatically loaded.
+        raise ComponentFailedToInstallError unless system('rake', "#{task}[#{task_args.join(',')}]")
       end
 
       yield if block_given?

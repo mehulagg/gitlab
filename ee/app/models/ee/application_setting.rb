@@ -104,8 +104,6 @@ module EE
                 allow_blank: true,
                 numericality: { only_integer: true, greater_than: 0, less_than_or_equal_to: 365 }
 
-      validate :allowed_frameworks, if: :compliance_frameworks_changed?
-
       validates :new_user_signups_cap,
                 allow_blank: true,
                 numericality: { only_integer: true, greater_than: 0 }
@@ -295,6 +293,8 @@ module EE
         elasticsearch_indexes_namespace?(scope)
       when Project
         elasticsearch_indexes_project?(scope)
+      when Array
+        scope.any? { |project| elasticsearch_indexes_project?(project) }
       else
         ::Feature.enabled?(:advanced_global_search_for_limited_indexing)
       end
@@ -462,12 +462,6 @@ module EE
       end
     rescue ::Gitlab::UrlBlocker::BlockedUrlError
       errors.add(:elasticsearch_url, "only supports valid HTTP(S) URLs.")
-    end
-
-    def allowed_frameworks
-      if Array.wrap(compliance_frameworks).any? { |value| !::ComplianceManagement::Framework::DEFAULT_FRAMEWORKS.map(&:id).include?(value) }
-        errors.add(:compliance_frameworks, _('must contain only valid frameworks'))
-      end
     end
   end
 end

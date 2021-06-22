@@ -15,6 +15,7 @@ module ApplicationSettingImplementation
   # forbidden.
   FORBIDDEN_KEY_VALUE = KeyRestrictionValidator::FORBIDDEN
   SUPPORTED_KEY_TYPES = %i[rsa dsa ecdsa ed25519].freeze
+  VALID_RUNNER_REGISTRAR_TYPES = %w(project group).freeze
 
   DEFAULT_PROTECTED_PATHS = [
     '/users/password',
@@ -60,6 +61,8 @@ module ApplicationSettingImplementation
         default_projects_limit: Settings.gitlab['default_projects_limit'],
         default_snippet_visibility: Settings.gitlab.default_projects_features['visibility_level'],
         diff_max_patch_bytes: Gitlab::Git::Diff::DEFAULT_MAX_PATCH_BYTES,
+        diff_max_files: Commit::DEFAULT_MAX_DIFF_FILES_SETTING,
+        diff_max_lines: Commit::DEFAULT_MAX_DIFF_LINES_SETTING,
         disable_feed_token: false,
         disabled_oauth_sign_in_sources: [],
         dns_rebinding_protection_enabled: true,
@@ -184,6 +187,7 @@ module ApplicationSettingImplementation
         user_default_external: false,
         user_default_internal_regex: nil,
         user_show_add_ssh_key_message: true,
+        valid_runner_registrars: VALID_RUNNER_REGISTRAR_TYPES,
         wiki_page_max_content_bytes: 50.megabytes,
         container_registry_delete_tags_service_timeout: 250,
         container_registry_expiration_policies_worker_capacity: 0,
@@ -374,6 +378,7 @@ module ApplicationSettingImplementation
   def usage_ping_enabled
     usage_ping_can_be_configured? && super
   end
+  alias_method :usage_ping_enabled?, :usage_ping_enabled
 
   def allowed_key_types
     SUPPORTED_KEY_TYPES.select do |type|
@@ -501,6 +506,17 @@ module ApplicationSettingImplementation
 
       errors.add(:repository_storages_weighted, _("value for '%{storage}' must be an integer") % { storage: key }) unless val.is_a?(Integer)
       errors.add(:repository_storages_weighted, _("value for '%{storage}' must be between 0 and 100") % { storage: key }) unless val.between?(0, 100)
+    end
+  end
+
+  def check_valid_runner_registrars
+    valid = valid_runner_registrar_combinations.include?(valid_runner_registrars)
+    errors.add(:valid_runner_registrars, _("%{value} is not included in the list") % { value: valid_runner_registrars }) unless valid
+  end
+
+  def valid_runner_registrar_combinations
+    0.upto(VALID_RUNNER_REGISTRAR_TYPES.size).flat_map do |n|
+      VALID_RUNNER_REGISTRAR_TYPES.permutation(n).to_a
     end
   end
 

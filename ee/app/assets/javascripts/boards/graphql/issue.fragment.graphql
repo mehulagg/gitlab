@@ -20,10 +20,6 @@ fragment IssueNode on Issue {
   epic {
     id
   }
-  milestone {
-    id
-    title
-  }
   assignees {
     nodes {
       ...User

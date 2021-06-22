@@ -4,12 +4,12 @@ module EE
   module BaseCountService
     extend ::Gitlab::Utils::Override
 
-    # geo secondary cache should expire quicker than primary, otherwise various counts
-    # could be incorrect for 2 weeks.
-    override :cache_options
-    def cache_options
-      super.tap do |options|
-        options[:expires_in] = 20.minutes if ::Gitlab::Geo.secondary?
+    # When updating a cached count on a Geo primary, also invalidate the key on
+    # Geo secondaries.
+    override :update_cache_for_key
+    def update_cache_for_key(key, &block)
+      super.tap do
+        ::Gitlab::Cache.delete_on_geo_secondaries(key)
       end
     end
   end

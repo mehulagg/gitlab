@@ -5,7 +5,6 @@ require 'parallel'
 module QA
   RSpec.describe 'Create' do
     context 'Gitaly' do
-      # Issue to track removal of feature flag: https://gitlab.com/gitlab-org/quality/team-tasks/-/issues/602
       describe 'Distributed reads', :orchestrated, :gitaly_cluster, :skip_live_env, :requires_admin do
         let(:number_of_reads_per_loop) { 9 }
         let(:praefect_manager) { Service::PraefectManager.new }
@@ -17,12 +16,7 @@ module QA
         end
 
         before do
-          Runtime::Feature.enable(:gitaly_distributed_reads)
           praefect_manager.wait_for_replication(project.id)
-        end
-
-        after do
-          Runtime::Feature.disable(:gitaly_distributed_reads)
         end
 
         it 'reads from each node', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/979' do

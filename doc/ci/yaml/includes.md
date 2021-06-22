@@ -5,7 +5,7 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 type: reference
 ---
 
-# GitLab CI/CD include examples
+# GitLab CI/CD include examples **(FREE)**
 
 In addition to the [`includes` examples](README.md#include) listed in the
 [GitLab CI YAML reference](README.md), this page lists more variations of `include`
@@ -111,8 +111,8 @@ production:
   environment:
     name: production
     url: https://$CI_PROJECT_PATH_SLUG.$KUBE_INGRESS_BASE_DOMAIN
-  only:
-    - main
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
 ```
 
 Content of `.gitlab-ci.yml`:

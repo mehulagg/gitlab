@@ -107,5 +107,117 @@ RSpec.describe Gitlab::SidekiqMiddleware::ServerMetrics do
     let(:job_status) { :done }
     let(:labels_with_job_status) { labels.merge(job_status: job_status.to_s) }
   end
+
+  context 'DB load balancing' do
+    subject { described_class.new }
+
+    let(:queue) { :test }
+    let(:worker_class) { worker.class }
+    let(:worker) { TestWorker.new }
+    let(:client_middleware) { Gitlab::Database::LoadBalancing::SidekiqClientMiddleware.new }
+    let(:load_balancer) { double.as_null_object }
+    let(:load_balancing_metric) { double('load balancing metric') }
+    let(:job) { { "retry" => 3, "job_id" => "a180b47c-3fd6-41b8-81e9-34da61c3400e" } }
+
+    def process_job
+      client_middleware.call(worker_class, job, queue, double) do
+        worker_class.process_job(job)
+      end
+    end
+
+    before do
+      stub_const('TestWorker', Class.new)
+      TestWorker.class_eval do
+        include Sidekiq::Worker
+        include WorkerAttributes
+
+        def perform(*args)
+        end
+      end
+
+      allow(::Gitlab::Database::LoadBalancing).to receive_message_chain(:proxy, :load_balancer).and_return(load_balancer)
+      allow(load_balancing_metric).to receive(:increment)
+      allow(Gitlab::Metrics).to receive(:counter).with(:sidekiq_load_balancing_count, anything).and_return(load_balancing_metric)
+    end
+
+    around do |example|
+      with_sidekiq_server_middleware do |chain|
+        chain.add Gitlab::Database::LoadBalancing::SidekiqServerMiddleware
+        chain.add described_class
+        Sidekiq::Testing.inline! { example.run }
+      end
+    end
+
+    include_context 'server metrics with mocked prometheus'
+    include_context 'server metrics call'
+    include_context 'clear DB Load Balancing configuration'
+
+    shared_context 'worker declaring data consistency' do
+      let(:worker_class) { LBTestWorker }
+
+      before do
+        stub_const('LBTestWorker', Class.new(TestWorker))
+        LBTestWorker.class_eval do
+          include ApplicationWorker
+
+          data_consistency :delayed
+        end
+      end
+    end
+
+    context 'when load_balancing is enabled' do
+      before do
+        allow(::Gitlab::Database::LoadBalancing).to receive(:enable?).and_return(true)
+      end
+
+      describe '#call' do
+        context 'when worker declares data consistency' do
+          include_context 'worker declaring data consistency'
+
+          it 'increments load balancing counter' do
+            process_job
+
+            expect(load_balancing_metric).to have_received(:increment).with(
+              a_hash_including(
+                data_consistency: :delayed,
+                load_balancing_strategy: 'replica'
+              ), 1)
+          end
+        end
+
+        context 'when worker does not declare data consistency' do
+          it 'does not increment load balancing counter' do
+            process_job
+
+            expect(load_balancing_metric).not_to have_received(:increment)
+          end
+        end
+      end
+    end
+
+    context 'when load_balancing is disabled' do
+      include_context 'worker declaring data consistency'
+
+      before do
+        allow(::Gitlab::Database::LoadBalancing).to receive(:enable?).and_return(false)
+      end
+
+      describe '#initialize' do
+        it 'does not set load_balancing metrics' do
+          expect(Gitlab::Metrics).not_to receive(:counter).with(:sidekiq_load_balancing_count, anything)
+
+          subject
+        end
+      end
+
+      describe '#call' do
+        it 'does not increment load balancing counter' do
+          process_job
+
+          expect(load_balancing_metric).not_to have_received(:increment)
+        end
+      end
+    end
+  end
 end
 # rubocop: enable RSpec/MultipleMemoizedHelpers

@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe Gitlab::Elastic::ProjectSearchResults, :elastic do
+RSpec.describe Gitlab::Elastic::ProjectSearchResults, :elastic, :clean_gitlab_redis_shared_state do
   let_it_be(:user) { create(:user) }
   let_it_be(:project) { create(:project, :public, :repository) }
 
@@ -37,13 +37,13 @@ RSpec.describe Gitlab::Elastic::ProjectSearchResults, :elastic do
     let_it_be(:private_project) { create(:project, :repository, :wiki_repo) }
 
     before do
-      [project, private_project].each do |project|
-        create(:note, note: 'bla-bla term', project: project)
-        project.wiki.create_page('index_page', 'term')
-        project.wiki.index_wiki_blobs
+      [project, private_project].each do |p|
+        create(:note, note: 'bla-bla term', project: p)
+        p.wiki.create_page('index_page', 'term')
+        p.wiki.index_wiki_blobs
+        p.repository.index_commits_and_blobs
       end
 
-      project.repository.index_commits_and_blobs
       ensure_elasticsearch_index!
     end
 
@@ -58,8 +58,6 @@ RSpec.describe Gitlab::Elastic::ProjectSearchResults, :elastic do
     end
 
     context 'visibility checks' do
-      let_it_be(:project) { create(:project, :public, :wiki_repo) }
-
       let(:query) { 'term' }
 
       before do

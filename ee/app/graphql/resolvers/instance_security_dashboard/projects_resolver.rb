@@ -5,10 +5,15 @@ module Resolvers
     class ProjectsResolver < BaseResolver
       type ::Types::ProjectType, null: true
 
+      argument :search, GraphQL::STRING_TYPE,
+               required: false,
+               description: 'Search query for project name, path, or description.'
+
       alias_method :dashboard, :object
 
       def resolve(**args)
-        dashboard&.projects
+        projects = dashboard&.projects
+        args[:search] ? projects&.search(args[:search]) : projects
       end
     end
   end

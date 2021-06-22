@@ -8,7 +8,7 @@ import {
 } from '@gitlab/ui';
 
 import { DEBOUNCE_DELAY } from '../constants';
-import { getRecentlyUsedTokenValues, setTokenValueToRecentlyUsed } from '../filtered_search_utils';
+import { getRecentlyUsedSuggestions, setTokenValueToRecentlyUsed } from '../filtered_search_utils';
 
 export default {
   components: {
@@ -19,41 +19,46 @@ export default {
     GlLoadingIcon,
   },
   props: {
-    tokenConfig: {
+    config: {
       type: Object,
       required: true,
     },
-    tokenValue: {
+    value: {
       type: Object,
       required: true,
     },
-    tokenActive: {
+    active: {
       type: Boolean,
       required: true,
     },
-    tokensListLoading: {
+    suggestionsLoading: {
       type: Boolean,
-      required: true,
+      required: false,
+      default: false,
     },
-    tokenValues: {
+    suggestions: {
       type: Array,
-      required: true,
+      required: false,
+      default: () => [],
     },
     fnActiveTokenValue: {
       type: Function,
-      required: true,
+      required: false,
+      default: (suggestions, currentTokenValue) => {
+        return suggestions.find(({ value }) => value === currentTokenValue);
+      },
     },
-    defaultTokenValues: {
+    defaultSuggestions: {
       type: Array,
       required: false,
       default: () => [],
     },
-    preloadedTokenValues: {
+    preloadedSuggestions: {
       type: Array,
       required: false,
       default: () => [],
     },
-    recentTokenValuesStorageKey: {
+    recentSuggestionsStorageKey: {
       type: String,
       required: false,
       default: '',
@@ -72,47 +77,52 @@ export default {
   data() {
     return {
       searchKey: '',
-      recentTokenValues: this.recentTokenValuesStorageKey
-        ? getRecentlyUsedTokenValues(this.recentTokenValuesStorageKey)
+      recentSuggestions: this.recentSuggestionsStorageKey
+        ? getRecentlyUsedSuggestions(this.recentSuggestionsStorageKey)
         : [],
       loading: false,
     };
   },
   computed: {
-    isRecentTokenValuesEnabled() {
-      return Boolean(this.recentTokenValuesStorageKey);
+    isRecentSuggestionsEnabled() {
+      return Boolean(this.recentSuggestionsStorageKey);
     },
     recentTokenIds() {
-      return this.recentTokenValues.map((tokenValue) => tokenValue.id || tokenValue.name);
+      return this.recentSuggestions.map((tokenValue) => tokenValue[this.valueIdentifier]);
+    },
+    preloadedTokenIds() {
+      return this.preloadedSuggestions.map((tokenValue) => tokenValue[this.valueIdentifier]);
     },
     currentTokenValue() {
       if (this.fnCurrentTokenValue) {
-        return this.fnCurrentTokenValue(this.tokenValue.data);
+        return this.fnCurrentTokenValue(this.value.data);
       }
-      return this.tokenValue.data.toLowerCase();
+      return this.value.data.toLowerCase();
     },
     activeTokenValue() {
-      return this.fnActiveTokenValue(this.tokenValues, this.currentTokenValue);
+      return this.fnActiveTokenValue(this.suggestions, this.currentTokenValue);
     },
     /**
-     * Return all the tokenValues when searchKey is present
-     * otherwise return only the tokenValues which aren't
+     * Return all the suggestions when searchKey is present
+     * otherwise return only the suggestions which aren't
      * present in "Recently used"
      */
-    availableTokenValues() {
+    availableSuggestions() {
       return this.searchKey
-        ? this.tokenValues
-        : this.tokenValues.filter(
-            (tokenValue) => !this.recentTokenIds.includes(tokenValue[this.valueIdentifier]),
+        ? this.suggestions
+        : this.suggestions.filter(
+            (tokenValue) =>
+              !this.recentTokenIds.includes(tokenValue[this.valueIdentifier]) &&
+              !this.preloadedTokenIds.includes(tokenValue[this.valueIdentifier]),
           );
     },
   },
   watch: {
-    tokenActive: {
+    active: {
       immediate: true,
       handler(newValue) {
-        if (!newValue && !this.tokenValues.length) {
-          this.$emit('fetch-token-values', this.tokenValue.data);
+        if (!newValue && !this.suggestions.length) {
+          this.$emit('fetch-suggestions', this.value.data);
         }
       },
     },
@@ -121,12 +131,20 @@ export default {
     handleInput({ data }) {
       this.searchKey = data;
       setTimeout(() => {
-        if (!this.tokensListLoading) this.$emit('fetch-token-values', data);
+        if (!this.suggestionsLoading) this.$emit('fetch-suggestions', data);
       }, DEBOUNCE_DELAY);
     },
     handleTokenValueSelected(activeTokenValue) {
-      if (this.isRecentTokenValuesEnabled && activeTokenValue) {
-        setTokenValueToRecentlyUsed(this.recentTokenValuesStorageKey, activeTokenValue);
+      // Make sure that;
+      // 1. Recently used values feature is enabled
+      // 2. User has actually selected a value
+      // 3. Selected value is not part of preloaded list.
+      if (
+        this.isRecentSuggestionsEnabled &&
+        activeTokenValue &&
+        !this.preloadedTokenIds.includes(activeTokenValue[this.valueIdentifier])
+      ) {
+        setTokenValueToRecentlyUsed(this.recentSuggestionsStorageKey, activeTokenValue);
       }
     },
   },
@@ -135,9 +153,11 @@ export default {
 
 <template>
   <gl-filtered-search-token
-    :config="tokenConfig"
-    v-bind="{ ...this.$parent.$props, ...this.$parent.$attrs }"
-    v-on="this.$parent.$listeners"
+    :config="config"
+    :value="value"
+    :active="active"
+    v-bind="$attrs"
+    v-on="$listeners"
     @input="handleInput"
     @select="handleTokenValueSelected(activeTokenValue)"
   >
@@ -148,9 +168,9 @@ export default {
       <slot name="view" :view-token-props="{ ...viewTokenProps, activeTokenValue }"></slot>
     </template>
     <template #suggestions>
-      <template v-if="defaultTokenValues.length">
+      <template v-if="defaultSuggestions.length">
         <gl-filtered-search-suggestion
-          v-for="token in defaultTokenValues"
+          v-for="token in defaultSuggestions"
           :key="token.value"
           :value="token.value"
         >
@@ -158,19 +178,19 @@ export default {
         </gl-filtered-search-suggestion>
         <gl-dropdown-divider />
       </template>
-      <template v-if="isRecentTokenValuesEnabled && recentTokenValues.length && !searchKey">
+      <template v-if="isRecentSuggestionsEnabled && recentSuggestions.length && !searchKey">
         <gl-dropdown-section-header>{{ __('Recently used') }}</gl-dropdown-section-header>
-        <slot name="token-values-list" :token-values="recentTokenValues"></slot>
+        <slot name="suggestions-list" :suggestions="recentSuggestions"></slot>
         <gl-dropdown-divider />
       </template>
       <slot
-        v-if="preloadedTokenValues.length"
-        name="token-values-list"
-        :token-values="preloadedTokenValues"
+        v-if="preloadedSuggestions.length && !searchKey"
+        name="suggestions-list"
+        :suggestions="preloadedSuggestions"
       ></slot>
-      <gl-loading-icon v-if="tokensListLoading" />
+      <gl-loading-icon v-if="suggestionsLoading" />
       <template v-else>
-        <slot name="token-values-list" :token-values="availableTokenValues"></slot>
+        <slot name="suggestions-list" :suggestions="availableSuggestions"></slot>
       </template>
     </template>
   </gl-filtered-search-token>

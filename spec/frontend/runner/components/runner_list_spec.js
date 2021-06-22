@@ -17,7 +17,7 @@ describe('RunnerList', () => {
   const findHeaders = () => wrapper.findAll('th');
   const findRows = () => wrapper.findAll('[data-testid^="runner-row-"]');
   const findCell = ({ row = 0, fieldKey }) =>
-    findRows().at(row).find(`[data-testid="td-${fieldKey}"]`);
+    extendedWrapper(findRows().at(row).find(`[data-testid="td-${fieldKey}"]`));
 
   const createComponent = ({ props = {} } = {}, mountFn = shallowMount) => {
     wrapper = extendedWrapper(
@@ -68,7 +68,7 @@ describe('RunnerList', () => {
   });
 
   it('Displays a list of runners', () => {
-    expect(findRows()).toHaveLength(2);
+    expect(findRows()).toHaveLength(3);
 
     expect(findSkeletonLoader().exists()).toBe(false);
   });
@@ -77,7 +77,7 @@ describe('RunnerList', () => {
     const { id, description, version, ipAddress, shortSha } = mockRunners[0];
 
     // Badges
-    expect(findCell({ fieldKey: 'type' }).text()).toMatchInterpolatedText('shared locked');
+    expect(findCell({ fieldKey: 'type' }).text()).toMatchInterpolatedText('specific paused');
 
     // Runner identifier
     expect(findCell({ fieldKey: 'name' }).text()).toContain(
@@ -93,7 +93,12 @@ describe('RunnerList', () => {
     expect(findCell({ fieldKey: 'jobCount' }).text()).toBe('');
     expect(findCell({ fieldKey: 'tagList' }).text()).toBe('');
     expect(findCell({ fieldKey: 'contactedAt' }).text()).toEqual(expect.any(String));
-    expect(findCell({ fieldKey: 'actions' }).text()).toBe('');
+
+    // Actions
+    const actions = findCell({ fieldKey: 'actions' });
+
+    expect(actions.findByTestId('edit-runner').exists()).toBe(true);
+    expect(actions.findByTestId('toggle-active-runner').exists()).toBe(true);
   });
 
   it('Links to the runner page', () => {

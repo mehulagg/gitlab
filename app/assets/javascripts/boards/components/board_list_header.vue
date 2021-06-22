@@ -14,14 +14,16 @@ import { isScopedLabel, parseBoolean } from '~/lib/utils/common_utils';
 import { BV_HIDE_TOOLTIP } from '~/lib/utils/constants';
 import { n__, s__, __ } from '~/locale';
 import sidebarEventHub from '~/sidebar/event_hub';
+import Tracking from '~/tracking';
 import AccessorUtilities from '../../lib/utils/accessor';
-import { inactiveId, LIST, ListType } from '../constants';
+import { inactiveId, LIST, ListType, toggleFormEventPrefix } from '../constants';
 import eventHub from '../eventhub';
 import ItemCount from './item_count.vue';
 
 export default {
   i18n: {
     newIssue: __('New issue'),
+    newEpic: s__('Boards|New epic'),
     listSettings: __('List settings'),
     expand: s__('Boards|Expand'),
     collapse: s__('Boards|Collapse'),
@@ -38,6 +40,7 @@ export default {
   directives: {
     GlTooltip: GlTooltipDirective,
   },
+  mixins: [Tracking.mixin()],
   inject: {
     boardId: {
       default: '',
@@ -98,6 +101,12 @@ export default {
     showListDetails() {
       return !this.list.collapsed || !this.isSwimlanesHeader;
     },
+    showListHeaderActions() {
+      if (this.isLoggedIn) {
+        return this.isNewIssueShown || this.isNewEpicShown || this.isSettingsShown;
+      }
+      return false;
+    },
     itemsCount() {
       return this.list.issuesCount;
     },
@@ -115,6 +124,9 @@ export default {
     },
     isNewIssueShown() {
       return (this.listType === ListType.backlog || this.showListHeaderButton) && !this.isEpicBoard;
+    },
+    isNewEpicShown() {
+      return this.isEpicBoard && this.listType !== ListType.closed;
     },
     isSettingsShown() {
       return (
@@ -149,13 +161,18 @@ export default {
       }
 
       this.setActiveId({ id: this.list.id, sidebarType: LIST });
+
+      this.track('click_button', { label: 'list_settings' });
     },
     showScopedLabels(label) {
       return this.scopedLabelsAvailable && isScopedLabel(label);
     },
 
     showNewIssueForm() {
-      eventHub.$emit(`toggle-issue-form-${this.list.id}`);
+      eventHub.$emit(`${toggleFormEventPrefix.issue}${this.list.id}`);
+    },
+    showNewEpicForm() {
+      eventHub.$emit(`${toggleFormEventPrefix.epic}${this.list.id}`);
     },
     toggleExpanded() {
       const collapsed = !this.list.collapsed;
@@ -170,6 +187,11 @@ export default {
       // When expanding/collapsing, the tooltip on the caret button sometimes stays open.
       // Close all tooltips manually to prevent dangling tooltips.
       this.$root.$emit(BV_HIDE_TOOLTIP);
+
+      this.track('click_toggle_button', {
+        label: 'toggle_list',
+        property: collapsed ? 'closed' : 'open',
+      });
     },
     addToLocalStorage() {
       if (AccessorUtilities.isLocalStorageAccessSafe()) {
@@ -351,10 +373,7 @@ export default {
           <!-- EE end -->
         </span>
       </div>
-      <gl-button-group
-        v-if="isNewIssueShown || isSettingsShown"
-        class="board-list-button-group pl-2"
-      >
+      <gl-button-group v-if="showListHeaderActions" class="board-list-button-group gl-pl-2">
         <gl-button
           v-if="isNewIssueShown"
           v-show="!list.collapsed"
@@ -365,6 +384,17 @@ export default {
           class="issue-count-badge-add-button no-drag"
           icon="plus"
           @click="showNewIssueForm"
+        />
+
+        <gl-button
+          v-if="isNewEpicShown"
+          v-show="!list.collapsed"
+          v-gl-tooltip.hover
+          :aria-label="$options.i18n.newEpic"
+          :title="$options.i18n.newEpic"
+          class="no-drag"
+          icon="plus"
+          @click="showNewEpicForm"
         />
 
         <gl-button

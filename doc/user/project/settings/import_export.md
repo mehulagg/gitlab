@@ -24,9 +24,9 @@ See also:
 
 To set up a project import/export:
 
-  1. Navigate to **Admin Area > Settings > Visibility and access controls**.
-  1. Scroll to **Import sources**
-  1. Enable desired **Import sources**
+  1. On the top bar, go to **Menu > Admin > Settings > General > Visibility and access controls**.
+  1. Scroll to **Import sources**.
+  1. Enable the desired **Import sources**.
 
 ## Important notes
 
@@ -139,7 +139,7 @@ The following items are **not** exported:
 
 NOTE:
 For more details on the specific data persisted in a project export, see the
-[`import_export.yml`](https://gitlab.com/gitlab-org/gitlab/blob/master/lib/gitlab/import_export/project/import_export.yml) file.
+[`import_export.yml`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/import_export/project/import_export.yml) file.
 
 ## Exporting a project and its data
 

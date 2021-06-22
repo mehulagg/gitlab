@@ -52,7 +52,6 @@ module EE
         def usage_data_counters
           super + [
             ::Gitlab::UsageDataCounters::LicensesList,
-            ::Gitlab::UsageDataCounters::IngressModsecurityCounter,
             ::Gitlab::StatusPage::UsageDataCounters::IncidentCounter,
             ::Gitlab::UsageDataCounters::NetworkPolicyCounter
           ]
@@ -97,6 +96,7 @@ module EE
             # rubocop: enable UsageData/LargeTable
             usage_data[:licensee] = license.licensee
             usage_data[:license_user_count] = license.restricted_user_count
+            usage_data[:license_billable_users] = alt_usage_data { license.daily_billable_users_count }
             usage_data[:license_starts_at] = license.starts_at
             usage_data[:license_expires_at] = license.expires_at
             usage_data[:license_plan] = license.plan
@@ -231,8 +231,8 @@ module EE
         override :usage_activity_by_stage_configure
         def usage_activity_by_stage_configure(time_period)
           super.merge({
-            projects_slack_notifications_active: distinct_count(::Project.with_slack_service.where(time_period), :creator_id),
-            projects_slack_slash_active: distinct_count(::Project.with_slack_slash_commands_service.where(time_period), :creator_id)
+            projects_slack_notifications_active: distinct_count(::Project.with_slack_integration.where(time_period), :creator_id),
+            projects_slack_slash_active: distinct_count(::Project.with_slack_slash_commands_integration.where(time_period), :creator_id)
           })
         end
 

@@ -10,12 +10,6 @@ namespace :admin do
       end
     end
 
-    collection do
-      scope '/-/' do
-        get :cohorts
-      end
-    end
-
     member do
       get :projects
       get :keys
@@ -124,15 +118,6 @@ namespace :admin do
     end
   end
 
-  resource :appearances, only: [:show, :create, :update], path: 'appearance' do
-    member do
-      get :preview_sign_in
-      delete :logo
-      delete :header_logos
-      delete :favicon
-    end
-  end
-
   resource :application_settings, only: :update do
     resources :services, only: [:index, :edit, :update]
     resources :integrations, only: [:edit, :update] do
@@ -153,6 +138,15 @@ namespace :admin do
     get :status_create_self_monitoring_project
     delete :delete_self_monitoring_project
     get :status_delete_self_monitoring_project
+
+    resource :appearances, only: [:show, :create, :update], path: 'appearance', module: 'application_settings' do
+      member do
+        get :preview_sign_in
+        delete :logo
+        delete :header_logos
+        delete :favicon
+      end
+    end
   end
 
   resources :plan_limits, only: :create

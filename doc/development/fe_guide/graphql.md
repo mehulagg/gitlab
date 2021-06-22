@@ -94,7 +94,7 @@ their execution by clicking **Execute query** button on the top left:
 ## Apollo Client
 
 To save duplicated clients getting created in different apps, we have a
-[default client](https://gitlab.com/gitlab-org/gitlab/blob/master/app/assets/javascripts/lib/graphql.js) that should be used. This sets up the
+[default client](https://gitlab.com/gitlab-org/gitlab/-/blob/master/app/assets/javascripts/lib/graphql.js) that should be used. This sets up the
 Apollo client with the correct URL and also sets the CSRF headers.
 
 Default client accepts two parameters: `resolvers` and `config`.
@@ -841,6 +841,70 @@ const apolloProvider = new VueApollo({
 Keep in mind, this means your app will not batch queries.
 
 Once subscriptions are mature, this process can be replaced by using them and we can remove the separate link library and return to batching queries.
+
+#### Subscriptions
+
+We use [subscriptions](https://www.apollographql.com/docs/react/data/subscriptions/) to receive real-time updates from GraphQL API via websockets. Currently, the number of existing subscriptions is limited, you can check a list of available ones in [GraphqiQL explorer](https://gitlab.com/-/graphql-explorer)
+
+**NOTE:**
+We cannot test subscriptions using GraphiQL, because they require an ActionCable client, which GraphiQL does not support at the moment.
+
+Subscriptions don't require any additional configuration of Apollo Client instance, you can use them in the application right away. To distinguish subscriptions from queries and mutations, we recommend naming them with `.subscription.graphql` extension:
+
+```graphql
+// ~/sidebar/queries/issuable_assignees.subscription.graphql
+
+subscription issuableAssigneesUpdated($issuableId: IssuableID!) {
+  issuableAssigneesUpdated(issuableId: $issuableId) {
+    ... on Issue {
+      assignees {
+        nodes {
+          ...User
+          status {
+            availability
+          }
+        }
+      }
+    }
+  }
+}
+```
+
+When using GraphQL subscriptions in Vue application, we recommend updating existing Apollo query results with [subscribeToMore](https://apollo.vuejs.org/guide/apollo/subscriptions.html#subscribe-to-more) option:
+
+```javascript
+import issuableAssigneesSubscription from '~/sidebar/queries/issuable_assignees.subscription.graphql'
+
+apollo: {
+  issuable: {
+    query() {
+      return assigneesQueries[this.issuableType].query;
+    },
+    subscribeToMore: {
+      // Specify the subscription that will update the query
+      document() {
+        return issuableAssigneesSubscription;
+      },
+      variables() {
+        return {
+          issuableId: convertToGraphQLId(this.issuableClass, this.issuableId),
+        };
+      },
+      // Describe how subscription should update the query
+      updateQuery(prev, { subscriptionData }) {
+        if (prev && subscriptionData?.data?.issuableAssigneesUpdated) {
+          const data = produce(prev, (draftData) => {
+            draftData.workspace.issuable.assignees.nodes =
+              subscriptionData.data.issuableAssigneesUpdated.assignees.nodes;
+          });
+          return data;
+        }
+        return prev;
+      },
+    },
+  },
+},
+```
 
 ### Testing
 

@@ -4,12 +4,11 @@ import * as Sentry from '@sentry/browser';
 import dateformat from 'dateformat';
 import DevopsScore from '~/analytics/devops_report/components/devops_score.vue';
 import API from '~/api';
+import { getIdFromGraphQLId } from '~/graphql_shared/utils';
 import { mergeUrlParams, updateHistory, getParameterValues } from '~/lib/utils/url_utility';
 import {
   DEVOPS_ADOPTION_STRINGS,
   DEVOPS_ADOPTION_ERROR_KEYS,
-  MAX_REQUEST_COUNT,
-  MAX_SEGMENTS,
   DATE_TIME_FORMAT,
   DEFAULT_POLLING_INTERVAL,
   DEVOPS_ADOPTION_GROUP_LEVEL_LABEL,
@@ -22,15 +21,15 @@ import devopsAdoptionEnabledNamespacesQuery from '../graphql/queries/devops_adop
 import getGroupsQuery from '../graphql/queries/get_groups.query.graphql';
 import { addSegmentsToCache, deleteSegmentsFromCache } from '../utils/cache_updates';
 import { shouldPollTableData } from '../utils/helpers';
+import DevopsAdoptionAddDropdown from './devops_adoption_add_dropdown.vue';
 import DevopsAdoptionSection from './devops_adoption_section.vue';
-import DevopsAdoptionSegmentModal from './devops_adoption_segment_modal.vue';
 
 export default {
   name: 'DevopsAdoptionApp',
   components: {
     GlAlert,
+    DevopsAdoptionAddDropdown,
     DevopsAdoptionSection,
-    DevopsAdoptionSegmentModal,
     DevopsScore,
     GlTabs,
     GlTab,
@@ -58,10 +57,10 @@ export default {
   },
   trackDevopsTabClickEvent: TRACK_ADOPTION_TAB_CLICK_EVENT,
   trackDevopsScoreTabClickEvent: TRACK_DEVOPS_SCORE_TAB_CLICK_EVENT,
-  maxSegments: MAX_SEGMENTS,
   devopsAdoptionTableConfiguration: DEVOPS_ADOPTION_TABLE_CONFIGURATION,
   data() {
     return {
+      hasSubgroups: undefined,
       isLoadingGroups: false,
       isLoadingEnableGroup: false,
       requestCount: 0,
@@ -140,14 +139,6 @@ export default {
         this.isLoadingEnableGroup || this.$apollo.queries.devopsAdoptionEnabledNamespaces.loading
       );
     },
-    segmentLimitReached() {
-      return this.devopsAdoptionEnabledNamespaces?.nodes?.length > this.$options.maxSegments;
-    },
-    editGroupsButtonLabel() {
-      return this.isGroup
-        ? this.$options.i18n.groupLevelLabel
-        : this.$options.i18n.tableHeader.button;
-    },
     tabIndexValues() {
       const tabs = this.$options.devopsAdoptionTableConfiguration.map((item) => item.tab);
 
@@ -156,13 +147,21 @@ export default {
     availableGroups() {
       return this.groups?.nodes || [];
     },
-    enabledGroups() {
+    enabledNamespaces() {
       return this.devopsAdoptionEnabledNamespaces?.nodes || [];
+    },
+    disabledGroupNodes() {
+      const enabledNamespaceIds = this.enabledNamespaces.map((group) =>
+        getIdFromGraphQLId(group.namespace.id),
+      );
+
+      return this.availableGroups.filter((group) => !enabledNamespaceIds.includes(group.id));
     },
   },
   created() {
     this.fetchGroups();
     this.selectTab();
+    this.startPollingTableData();
   },
   beforeDestroy() {
     clearInterval(this.pollingTableData);
@@ -220,8 +219,10 @@ export default {
       this.errors[key] = true;
       Sentry.captureException(error);
     },
-    fetchGroups(nextPage) {
+    fetchGroups(searchTerm = '') {
+      this.searchTerm = searchTerm;
       this.isLoadingGroups = true;
+
       this.$apollo
         .query({
           query: getGroupsQuery,
@@ -229,25 +230,17 @@ export default {
             isSingleRequest: true,
           },
           variables: {
-            nextPage,
+            search: searchTerm,
           },
         })
         .then(({ data }) => {
-          const { pageInfo, nodes } = data.groups;
+          this.groups = data.groups;
 
-          // Update data
-          this.groups = {
-            pageInfo,
-            nodes: [...this.groups.nodes, ...nodes],
-          };
-
-          this.requestCount += 1;
-          if (this.requestCount < MAX_REQUEST_COUNT && pageInfo?.nextPage) {
-            this.fetchGroups(pageInfo.nextPage);
-          } else {
-            this.isLoadingGroups = false;
-            this.startPollingTableData();
+          if (this.hasSubgroups === undefined) {
+            this.hasSubgroups = this.groups?.nodes?.length > 0;
           }
+
+          this.isLoadingGroups = false;
         })
         .catch((error) => this.handleError(DEVOPS_ADOPTION_ERROR_KEYS.groups, error));
     },
@@ -322,12 +315,16 @@ export default {
           :has-segments-data="hasSegmentsData"
           :timestamp="timestamp"
           :has-group-data="hasGroupData"
-          :segment-limit-reached="segmentLimitReached"
-          :edit-groups-button-label="editGroupsButtonLabel"
           :cols="tab.cols"
           :segments="devopsAdoptionEnabledNamespaces"
+          :search-term="searchTerm"
+          :disabled-group-nodes="disabledGroupNodes"
+          :is-loading-groups="isLoadingGroups"
+          :has-subgroups="hasSubgroups"
           @segmentsRemoved="deleteSegmentsFromCache"
-          @openAddRemoveModal="openAddRemoveModal"
+          @fetchGroups="fetchGroups"
+          @segmentsAdded="addSegmentsToCache"
+          @trackModalOpenState="trackModalOpenState"
         />
       </gl-tab>
 
@@ -335,17 +332,22 @@ export default {
         <template #title>{{ s__('DevopsReport|DevOps Score') }}</template>
         <devops-score />
       </gl-tab>
-    </gl-tabs>
 
-    <devops-adoption-segment-modal
-      v-if="!hasLoadingError"
-      ref="addRemoveModal"
-      :groups="availableGroups"
-      :enabled-groups="enabledGroups"
-      :is-loading="isLoading"
-      @segmentsAdded="addSegmentsToCache"
-      @segmentsRemoved="deleteSegmentsFromCache"
-      @trackModalOpenState="trackModalOpenState"
-    />
+      <template #tabs-end>
+        <span
+          class="nav-item gl-align-self-center gl-flex-grow-1 gl-display-none gl-md-display-block"
+          align="right"
+        >
+          <devops-adoption-add-dropdown
+            :search-term="searchTerm"
+            :groups="disabledGroupNodes"
+            :is-loading-groups="isLoadingGroups"
+            :has-subgroups="hasSubgroups"
+            @fetchGroups="fetchGroups"
+            @segmentsAdded="addSegmentsToCache"
+          />
+        </span>
+      </template>
+    </gl-tabs>
   </div>
 </template>

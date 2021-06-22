@@ -19,11 +19,18 @@ export const mockSetupForCompany = 'true';
 export const stateData = {
   namespaces: [],
   subscription: {
-    planId: 'secondPlanId',
     quantity: 1,
     namespaceId: null,
-    paymentMethodId: null,
     __typename: 'Subscription',
+  },
+  selectedPlanId: null,
+  paymentMethod: {
+    id: null,
+    creditCardExpirationMonth: null,
+    creditCardExpirationYear: null,
+    creditCardType: null,
+    creditCardMaskNumber: null,
+    __typename: 'PaymentMethod',
   },
   customer: {
     country: null,

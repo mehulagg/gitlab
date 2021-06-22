@@ -8,8 +8,8 @@ module API
 
     helpers do
       params :list_params do
-        optional :state, type: String, values: %w[opened upcoming started closed all], default: 'all',
-                 desc: 'Return "opened", "upcoming", "started", "closed", or "all" milestones'
+        optional :state, type: String, values: %w[opened upcoming started current closed all], default: 'all',
+                 desc: 'Return "opened", "upcoming", "current (previously started)", "closed", or "all" iterations. Filtering by `started` state is deprecated starting with 14.1, please use `current` instead.'
         optional :search, type: String, desc: 'The search criteria for the title of the iteration'
         optional :include_ancestors, type: Grape::API::Boolean, default: true,
                  desc: 'Include iterations from parent and its ancestors'

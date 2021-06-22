@@ -1,7 +1,7 @@
 import { GlLoadingIcon, GlTable } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
 import VulnerabilitiesOverTimeChart from 'ee/security_dashboard/components/shared/vulnerabilities_over_time_chart.vue';
-import ChartButtons from 'ee/security_dashboard/components/vulnerability_chart_buttons.vue';
+import ChartButtons from 'ee/security_dashboard/components/shared/vulnerabilities_over_time_chart_buttons.vue';
 import { extendedWrapper } from 'helpers/vue_test_utils_helper';
 
 describe('Vulnerabilities Over Time Chart Component', () => {

@@ -1,4 +1,4 @@
-query state {
+query State {
   namespaces @client {
     id
     name
@@ -7,6 +7,7 @@ query state {
   isNewUser @client
   fullName @client
   isSetupForCompany @client
+  selectedPlanId @client
   customer @client {
     country
     address1
@@ -16,9 +17,14 @@ query state {
     zipCode
     company
   }
+  paymentMethod @client {
+    id
+    creditCardExpirationMonth
+    creditCardExpirationYear
+    creditCardType
+    creditCardMaskNumber
+  }
   subscription @client {
-    planId
-    paymentMethodId
     quantity
     namespaceId
   }

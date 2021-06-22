@@ -346,6 +346,10 @@ module Types
           description: 'Find a single CI/CD template by name.',
           resolver: Resolvers::Ci::TemplateResolver
 
+    field :ci_job_token_scope, Types::Ci::JobTokenScopeType, null: true,
+          description: 'The CI Job Tokens scope of access.',
+          resolver: Resolvers::Ci::JobTokenScopeResolver
+
     def label(title:)
       BatchLoader::GraphQL.for(title).batch(key: project) do |titles, loader, args|
         LabelsFinder
@@ -385,6 +389,10 @@ module Types
       return unless Ability.allowed?(current_user, :download_code, object)
 
       ::Security::CiConfiguration::SastParserService.new(object).configuration
+    end
+
+    def tag_list
+      object.topic_list
     end
 
     private

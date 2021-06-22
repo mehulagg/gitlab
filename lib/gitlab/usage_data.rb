@@ -188,7 +188,6 @@ module Gitlab
             services_usage,
             usage_counters,
             user_preferences_usage,
-            ingress_modsecurity_usage,
             container_expiration_policies_usage,
             service_desk_counts,
             email_campaign_counts
@@ -295,7 +294,6 @@ module Gitlab
           reply_by_email_enabled: alt_usage_data(fallback: nil) { Gitlab::IncomingEmail.enabled? },
           signup_enabled: alt_usage_data(fallback: nil) { Gitlab::CurrentSettings.allow_signup? },
           web_ide_clientside_preview_enabled: alt_usage_data(fallback: nil) { Gitlab::CurrentSettings.web_ide_clientside_preview_enabled? },
-          ingress_modsecurity_enabled: Feature.enabled?(:ingress_modsecurity),
           grafana_link_enabled: alt_usage_data(fallback: nil) { Gitlab::CurrentSettings.grafana_enabled? },
           gitpod_enabled: alt_usage_data(fallback: nil) { Gitlab::CurrentSettings.gitpod_enabled? }
         }
@@ -377,29 +375,6 @@ module Gitlab
         Gitlab::UsageData::Topology.new.topology_usage_data
       end
 
-      # rubocop: disable UsageData/DistinctCountByLargeForeignKey
-      def ingress_modsecurity_usage
-        ##
-        # This method measures usage of the Modsecurity Web Application Firewall across the entire
-        # instance's deployed environments.
-        #
-        # NOTE: this service is an approximation as it does not yet take into account if environment
-        # is enabled and only measures applications installed using GitLab Managed Apps (disregards
-        # CI-based managed apps).
-        #
-        # More details: https://gitlab.com/gitlab-org/gitlab/-/merge_requests/28331#note_318621786
-        ##
-
-        column = ::Deployment.arel_table[:environment_id]
-        {
-          ingress_modsecurity_logging: distinct_count(successful_deployments_with_cluster(::Clusters::Applications::Ingress.modsecurity_enabled.logging), column),
-          ingress_modsecurity_blocking: distinct_count(successful_deployments_with_cluster(::Clusters::Applications::Ingress.modsecurity_enabled.blocking), column),
-          ingress_modsecurity_disabled: distinct_count(successful_deployments_with_cluster(::Clusters::Applications::Ingress.modsecurity_disabled), column),
-          ingress_modsecurity_not_installed: distinct_count(successful_deployments_with_cluster(::Clusters::Applications::Ingress.modsecurity_not_installed), column)
-        }
-      end
-      # rubocop: enable UsageData/DistinctCountByLargeForeignKey
-
       # rubocop: disable CodeReuse/ActiveRecord
       def container_expiration_policies_usage
         results = {}
@@ -428,15 +403,15 @@ module Gitlab
 
       def services_usage
         # rubocop: disable UsageData/LargeTable:
-        Integration.available_services_names(include_dev: false).each_with_object({}) do |service_name, response|
-          service_type = Integration.service_name_to_type(service_name)
+        Integration.available_services_names(include_dev: false).each_with_object({}) do |name, response|
+          type = Integration.integration_name_to_type(name)
 
-          response["projects_#{service_name}_active".to_sym] = count(Integration.active.where.not(project: nil).where(type: service_type))
-          response["groups_#{service_name}_active".to_sym] = count(Integration.active.where.not(group: nil).where(type: service_type))
-          response["templates_#{service_name}_active".to_sym] = count(Integration.active.where(template: true, type: service_type))
-          response["instances_#{service_name}_active".to_sym] = count(Integration.active.where(instance: true, type: service_type))
-          response["projects_inheriting_#{service_name}_active".to_sym] = count(Integration.active.where.not(project: nil).where.not(inherit_from_id: nil).where(type: service_type))
-          response["groups_inheriting_#{service_name}_active".to_sym] = count(Integration.active.where.not(group: nil).where.not(inherit_from_id: nil).where(type: service_type))
+          response[:"projects_#{name}_active"] = count(Integration.active.where.not(project: nil).where(type: type))
+          response[:"groups_#{name}_active"] = count(Integration.active.where.not(group: nil).where(type: type))
+          response[:"templates_#{name}_active"] = count(Integration.active.where(template: true, type: type))
+          response[:"instances_#{name}_active"] = count(Integration.active.where(instance: true, type: type))
+          response[:"projects_inheriting_#{name}_active"] = count(Integration.active.where.not(project: nil).where.not(inherit_from_id: nil).where(type: type))
+          response[:"groups_inheriting_#{name}_active"] = count(Integration.active.where.not(group: nil).where.not(inherit_from_id: nil).where(type: type))
         end.merge(jira_usage, jira_import_usage)
         # rubocop: enable UsageData/LargeTable:
       end
@@ -451,9 +426,9 @@ module Gitlab
           projects_jira_dvcs_server_active: count(ProjectFeatureUsage.with_jira_dvcs_integration_enabled(cloud: false))
         }
 
-        jira_service_data_hash = jira_service_data
-        results[:projects_jira_server_active] = jira_service_data_hash[:projects_jira_server_active]
-        results[:projects_jira_cloud_active] = jira_service_data_hash[:projects_jira_cloud_active]
+        jira_integration_data_hash = jira_integration_data
+        results[:projects_jira_server_active] = jira_integration_data_hash[:projects_jira_server_active]
+        results[:projects_jira_cloud_active] = jira_integration_data_hash[:projects_jira_cloud_active]
 
         results
       rescue ActiveRecord::StatementInvalid
@@ -675,9 +650,9 @@ module Gitlab
           todos: distinct_count(::Todo.where(time_period), :author_id),
           service_desk_enabled_projects: distinct_count_service_desk_enabled_projects(time_period),
           service_desk_issues: count(::Issue.service_desk.where(time_period)),
-          projects_jira_active: distinct_count(::Project.with_active_jira_services.where(time_period), :creator_id),
-          projects_jira_dvcs_cloud_active: distinct_count(::Project.with_active_jira_services.with_jira_dvcs_cloud.where(time_period), :creator_id),
-          projects_jira_dvcs_server_active: distinct_count(::Project.with_active_jira_services.with_jira_dvcs_server.where(time_period), :creator_id)
+          projects_jira_active: distinct_count(::Project.with_active_jira_integrations.where(time_period), :creator_id),
+          projects_jira_dvcs_cloud_active: distinct_count(::Project.with_active_jira_integrations.with_jira_dvcs_cloud.where(time_period), :creator_id),
+          projects_jira_dvcs_server_active: distinct_count(::Project.with_active_jira_integrations.with_jira_dvcs_server.where(time_period), :creator_id)
         }
       end
       # rubocop: enable CodeReuse/ActiveRecord

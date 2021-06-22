@@ -404,7 +404,8 @@ RSpec.describe Packages::Package, type: :model do
         it { is_expected.not_to allow_value(nil).for(:version) }
         it { is_expected.not_to allow_value('').for(:version) }
         it { is_expected.to allow_value('v1.2.3').for(:version) }
-        it { is_expected.not_to allow_value('1.2.3').for(:version) }
+        it { is_expected.to allow_value('1.2.3').for(:version) }
+        it { is_expected.not_to allow_value('v1.2').for(:version) }
       end
 
       it_behaves_like 'validating version to be SemVer compliant for', :npm_package
@@ -757,19 +758,8 @@ RSpec.describe Packages::Package, type: :model do
       end
     end
 
-    context 'with arel scope feature flag enabled' do
-      it_behaves_like 'order_project_path scope'
-      it_behaves_like 'order_project_path_desc scope'
-    end
-
-    context 'with feature flag disabled' do
-      before do
-        stub_feature_flags(arel_package_scopes: false)
-      end
-
-      it_behaves_like 'order_project_path scope'
-      it_behaves_like 'order_project_path_desc scope'
-    end
+    it_behaves_like 'order_project_path scope'
+    it_behaves_like 'order_project_path_desc scope'
   end
 
   describe '.order_by_package_file' do
@@ -908,6 +898,26 @@ RSpec.describe Packages::Package, type: :model do
     end
   end
 
+  describe '#infrastructure_package?' do
+    let(:package) { create(:package) }
+
+    subject { package.infrastructure_package? }
+
+    it { is_expected.to eq(false) }
+
+    context 'with generic package' do
+      let(:package) { create(:generic_package) }
+
+      it { is_expected.to eq(false) }
+    end
+
+    context 'with terraform module package' do
+      let(:package) { create(:terraform_module_package) }
+
+      it { is_expected.to eq(true) }
+    end
+  end
+
   describe 'plan_limits' do
     Packages::Package.package_types.keys.without('composer').each do |pt|
       plan_limit_name = if pt == 'generic'
@@ -994,25 +1004,6 @@ RSpec.describe Packages::Package, type: :model do
       let_it_be(:package) { create(:npm_package) }
 
       it_behaves_like 'not enqueuing a sync worker job'
-    end
-  end
-
-  context 'destroying a composer package' do
-    let_it_be(:package_name) { 'composer-package-name' }
-    let_it_be(:json) { { 'name' => package_name } }
-    let_it_be(:project) { create(:project, :custom_repo, files: { 'composer.json' => json.to_json } ) }
-
-    let!(:package) { create(:composer_package, :with_metadatum, project: project, name: package_name, version: '1.0.0', json: json) }
-
-    before do
-      Gitlab::Composer::Cache.new(project: project, name: package_name).execute
-      package.composer_metadatum.reload
-    end
-
-    it 'schedule the update job' do
-      expect(::Packages::Composer::CacheUpdateWorker).to receive(:perform_async).with(project.id, package_name, package.composer_metadatum.version_cache_sha)
-
-      package.destroy!
     end
   end
 end

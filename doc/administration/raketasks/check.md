@@ -34,10 +34,11 @@ exactly which repositories are causing the trouble.
 - Receiving an error when trying to push code - `remote: error: cannot lock ref`
 - A 500 error when viewing the GitLab dashboard or when accessing a specific project.
 
-### Check all GitLab repositories
+### Check project code repositories
 
-This task loops through all repositories on the GitLab server and runs the
-integrity check described previously.
+This task loops through the project code repositories and runs the integrity check
+described previously. If a project uses a pool repository, that will also be checked.
+Other types of Git repositories [are not checked](https://gitlab.com/gitlab-org/gitaly/-/issues/3643).
 
 **Omnibus Installation**
 
@@ -206,8 +207,7 @@ above.
 ### Dangling commits
 
 `gitlab:git:fsck` can find dangling commits. To fix them, try
-[manually triggering housekeeping](../housekeeping.md#manual-housekeeping)
-for the affected project(s).
+[enabling housekeeping](../housekeeping.md).
 
 If the issue persists, try triggering `gc` via the
 [Rails Console](../operations/rails_console.md#starting-a-rails-console-session):

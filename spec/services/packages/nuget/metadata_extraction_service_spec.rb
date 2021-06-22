@@ -21,25 +21,11 @@ RSpec.describe Packages::Nuget::MetadataExtractionService do
             version: '12.0.3'
           }
         ],
-        package_tags: []
+        package_tags: [],
+        package_types: []
       }
 
-      context 'with packages_nuget_archive_new_file_reader enabled' do
-        before do
-          expect(service).to receive(:with_new_file_reader).and_call_original
-        end
-
-        it { is_expected.to eq(expected_metadata) }
-      end
-
-      context 'with packages_nuget_archive_new_file_reader disabled' do
-        before do
-          stub_feature_flags(packages_nuget_archive_new_file_reader: false)
-          expect(service).to receive(:with_legacy_file_reader).and_call_original
-        end
-
-        it { is_expected.to eq(expected_metadata) }
-      end
+      it { is_expected.to eq(expected_metadata) }
     end
 
     context 'with nuspec file' do
@@ -59,6 +45,16 @@ RSpec.describe Packages::Nuget::MetadataExtractionService do
           expect(dependencies).to include(name: 'Castle.Core')
           expect(dependencies).to include(name: 'Test.Dependency', version: '2.3.7', target_framework: '.NETStandard2.0')
           expect(dependencies).to include(name: 'Newtonsoft.Json', version: '12.0.3', target_framework: '.NETStandard2.0')
+        end
+      end
+
+      context 'with package types' do
+        let(:nuspec_filepath) { 'packages/nuget/with_package_types.nuspec' }
+
+        it { is_expected.to have_key(:package_types) }
+
+        it 'extracts package types' do
+          expect(subject[:package_types]).to include('SymbolsPackage')
         end
       end
 

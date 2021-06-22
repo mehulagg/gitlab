@@ -20,6 +20,7 @@ tasks in a secure and cloud-native way. It enables:
   [GitOps Engine](https://github.com/argoproj/gitops-engine).
 - Real-time access to API endpoints in a cluster.
 - Alert generation based on [Container network policy](../../application_security/threat_monitoring/index.md#container-network-policy).
+- [CI/CD Tunnel](ci_cd_tunnel.md) that enables users to access Kubernetes clusters from GitLab CI/CD jobs even if there is no network connectivity between GitLab Runner and a cluster.
 
 Many more features are planned. Please review [our roadmap](https://gitlab.com/groups/gitlab-org/-/epics/3329)
 and [our development documentation](../../../development/agent/index.md).
@@ -462,7 +463,7 @@ The setup process follows the same steps as [GitOps](#get-started-with-gitops-an
 with the following differences:
 
 - When you define a configuration repository, you must do so with [Cilium settings](#define-a-configuration-repository-with-cilium-settings).
-- You do not need to create a `manifest.yaml`.
+- You do not need to specify the `gitops` configuration section.
 
 ### Define a configuration repository with Cilium settings
 
@@ -486,7 +487,7 @@ cilium:
 ## Management interfaces
 
 Users with at least the [Developer](../../permissions.md) can access the user interface
-for the GitLab Kubernetes agent at **Operations > Kubernetes** under the
+for the GitLab Kubernetes agent at **Infrastructure > Kubernetes clusters**, under the
 **GitLab Agent managed clusters** tab. This page lists all registered agents for
 the current project, and the configuration directory for each agent:
 

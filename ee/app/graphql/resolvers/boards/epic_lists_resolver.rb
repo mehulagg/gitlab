@@ -5,6 +5,7 @@ module Resolvers
     class EpicListsResolver < BaseResolver
       include Gitlab::Graphql::Authorize::AuthorizeResource
       include LooksAhead
+      include ::BoardItemFilterable
 
       type Types::Boards::EpicListType.connection_type, null: true
 
@@ -12,12 +13,17 @@ module Resolvers
                required: false,
                description: 'Find an epic board list by ID.'
 
+      argument :epic_filters, Types::Boards::BoardEpicInputType,
+               required: false,
+               description: 'Filters applied when getting epic metadata in the epic board list.'
+
       alias_method :epic_board, :object
 
-      def resolve_with_lookahead(id: nil)
+      def resolve_with_lookahead(id: nil, epic_filters: {})
         authorize!
 
         lists = board_lists(id)
+        context.scoped_set!(:epic_filters, item_filters(epic_filters))
 
         if load_preferences?(lookahead)
           ::Boards::EpicList.preload_preferences_for_user(lists, current_user)

@@ -5,6 +5,14 @@ require 'spec_helper'
 RSpec.describe Gitlab::Database::LoadBalancing::SidekiqServerMiddleware do
   let(:middleware) { described_class.new }
 
+  let(:load_balancer) { double.as_null_object }
+  let(:has_replication_lag) { false }
+
+  before do
+    allow(::Gitlab::Database::LoadBalancing).to receive_message_chain(:proxy, :load_balancer).and_return(load_balancer)
+    allow(load_balancer).to receive(:select_up_to_date_host).and_return(!has_replication_lag)
+  end
+
   after do
     Gitlab::Database::LoadBalancing::Session.clear_session
   end
@@ -31,14 +39,6 @@ RSpec.describe Gitlab::Database::LoadBalancing::SidekiqServerMiddleware do
       end
     end
 
-    shared_examples_for 'job marked with chosen database' do
-      it 'yields and sets database chosen', :aggregate_failures do
-        expect { |b| middleware.call(worker, job, double(:queue), &b) }.to yield_control
-
-        expect(job[:database_chosen]).to eq('primary')
-      end
-    end
-
     shared_examples_for 'stick to the primary' do
       it 'sticks to the primary' do
         middleware.call(worker, job, double(:queue)) do
@@ -48,14 +48,14 @@ RSpec.describe Gitlab::Database::LoadBalancing::SidekiqServerMiddleware do
     end
 
     shared_examples_for 'replica is up to date' do |location|
-      it 'do not stick to the primary', :aggregate_failures do
+      it 'does not stick to the primary', :aggregate_failures do
         expect(middleware).to receive(:replica_caught_up?).with(location).and_return(true)
 
         middleware.call(worker, job, double(:queue)) do
           expect(Gitlab::Database::LoadBalancing::Session.current.use_primary?).not_to be_truthy
         end
 
-        expect(job[:database_chosen]).to eq('replica')
+        expect(job['load_balancing_strategy']).to eq('replica')
       end
     end
 
@@ -93,7 +93,7 @@ RSpec.describe Gitlab::Database::LoadBalancing::SidekiqServerMiddleware do
       context 'when database location is not set' do
         let(:job) { { 'job_id' => 'a180b47c-3fd6-41b8-81e9-34da61c3400e' } }
 
-        it_behaves_like 'stick to the primary', nil
+        it_behaves_like 'stick to the primary'
       end
     end
 
@@ -126,10 +126,7 @@ RSpec.describe Gitlab::Database::LoadBalancing::SidekiqServerMiddleware do
       include_examples 'sticks based on data consistency', :delayed
 
       context 'when replica is not up to date' do
-        before do
-          allow(::Gitlab::Database::LoadBalancing).to receive_message_chain(:proxy, :load_balancer, :release_host)
-          allow(::Gitlab::Database::LoadBalancing).to receive_message_chain(:proxy, :load_balancer, :host, :caught_up?).and_return(false)
-        end
+        let(:has_replication_lag) { true }
 
         around do |example|
           with_sidekiq_server_middleware do |chain|
@@ -145,7 +142,7 @@ RSpec.describe Gitlab::Database::LoadBalancing::SidekiqServerMiddleware do
             end.to raise_error(Sidekiq::JobRetry::Skip)
 
             expect(job['error_class']).to eq('Gitlab::Database::LoadBalancing::SidekiqServerMiddleware::JobReplicaNotUpToDate')
-            expect(job[:database_chosen]).to eq('retry')
+            expect(job['load_balancing_strategy']).to eq('retry_replica')
           end
         end
 
@@ -156,7 +153,21 @@ RSpec.describe Gitlab::Database::LoadBalancing::SidekiqServerMiddleware do
             end.to raise_error(Sidekiq::JobRetry::Skip)
 
             process_job(job)
-            expect(job[:database_chosen]).to eq('primary')
+            expect(job['load_balancing_strategy']).to eq('retry_primary')
+          end
+        end
+
+        context 'replica selection mechanism feature flag rollout' do
+          before do
+            stub_feature_flags(sidekiq_load_balancing_rotate_up_to_date_replica: false)
+          end
+
+          it 'uses different implementation' do
+            expect(::Gitlab::Database::LoadBalancing).to receive_message_chain(:proxy, :load_balancer, :host, :caught_up?).and_return(false)
+
+            expect do
+              process_job(job)
+            end.to raise_error(Sidekiq::JobRetry::Skip)
           end
         end
       end
@@ -171,7 +182,12 @@ RSpec.describe Gitlab::Database::LoadBalancing::SidekiqServerMiddleware do
         end
 
         include_examples 'stick to the primary'
-        include_examples 'job marked with chosen database'
+
+        it 'updates job hash with primary database chosen', :aggregate_failures do
+          middleware.call(worker, job, double(:queue)) do
+            expect(job['load_balancing_strategy']).to eq('primary')
+          end
+        end
       end
     end
   end

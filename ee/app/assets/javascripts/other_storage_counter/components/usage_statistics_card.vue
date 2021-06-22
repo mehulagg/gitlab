@@ -35,7 +35,7 @@ export default {
 };
 </script>
 <template>
-  <div class="gl-p-5 gl-my-5 gl-bg-gray-10 gl-flex-fill-1 gl-white-space-nowrap" :class="cssClass">
+  <div class="gl-p-5 gl-my-5 gl-bg-gray-10 gl-flex-grow-1 gl-white-space-nowrap" :class="cssClass">
     <p class="mb-2">
       <gl-sprintf :message="__('%{size} %{unit}')">
         <template #size>

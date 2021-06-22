@@ -102,6 +102,7 @@ export function mockProjectData(
       created_at: '2019-02-01T15:40:27.522Z',
       default_branch: 'main',
       tag_list: [],
+      topics: [],
       avatar_url: null,
       web_url: 'https://mock-web_url/',
       namespace: {

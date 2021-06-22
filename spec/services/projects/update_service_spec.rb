@@ -468,58 +468,58 @@ RSpec.describe Projects::UpdateService do
       end
     end
 
-    context 'when updating nested attributes for prometheus service' do
-      context 'prometheus service exists' do
-        let(:prometheus_service_attributes) do
-          attributes_for(:prometheus_service,
+    context 'when updating nested attributes for prometheus integration' do
+      context 'prometheus integration exists' do
+        let(:prometheus_integration_attributes) do
+          attributes_for(:prometheus_integration,
                          project: project,
                          properties: { api_url: "http://new.prometheus.com", manual_configuration: "0" }
                         )
         end
 
-        let!(:prometheus_service) do
-          create(:prometheus_service,
+        let!(:prometheus_integration) do
+          create(:prometheus_integration,
                  project: project,
                  properties: { api_url: "http://old.prometheus.com", manual_configuration: "0" }
                 )
         end
 
         it 'updates existing record' do
-          expect { update_project(project, user, prometheus_service_attributes: prometheus_service_attributes) }
-            .to change { prometheus_service.reload.api_url }
+          expect { update_project(project, user, prometheus_integration_attributes: prometheus_integration_attributes) }
+            .to change { prometheus_integration.reload.api_url }
             .from("http://old.prometheus.com")
             .to("http://new.prometheus.com")
         end
       end
 
-      context 'prometheus service does not exist' do
+      context 'prometheus integration does not exist' do
         context 'valid parameters' do
-          let(:prometheus_service_attributes) do
-            attributes_for(:prometheus_service,
+          let(:prometheus_integration_attributes) do
+            attributes_for(:prometheus_integration,
                            project: project,
                            properties: { api_url: "http://example.prometheus.com", manual_configuration: "0" }
                           )
           end
 
           it 'creates new record' do
-            expect { update_project(project, user, prometheus_service_attributes: prometheus_service_attributes) }
-              .to change { ::PrometheusService.where(project: project).count }
+            expect { update_project(project, user, prometheus_integration_attributes: prometheus_integration_attributes) }
+              .to change { ::Integrations::Prometheus.where(project: project).count }
               .from(0)
               .to(1)
           end
         end
 
         context 'invalid parameters' do
-          let(:prometheus_service_attributes) do
-            attributes_for(:prometheus_service,
+          let(:prometheus_integration_attributes) do
+            attributes_for(:prometheus_integration,
                            project: project,
                            properties: { api_url: nil, manual_configuration: "1" }
                           )
           end
 
           it 'does not create new record' do
-            expect { update_project(project, user, prometheus_service_attributes: prometheus_service_attributes) }
-              .not_to change { ::PrometheusService.where(project: project).count }
+            expect { update_project(project, user, prometheus_integration_attributes: prometheus_integration_attributes) }
+              .not_to change { ::Integrations::Prometheus.where(project: project).count }
           end
         end
       end
@@ -585,6 +585,31 @@ RSpec.describe Projects::UpdateService do
         let(:user) { create(:user) }
 
         it_behaves_like 'the transfer was not scheduled'
+      end
+    end
+
+    describe 'when updating topics' do
+      let(:project) { create(:project, topic_list: 'topic1, topic2') }
+
+      it 'update using topics' do
+        result = update_project(project, user, { topics: 'topics' })
+
+        expect(result[:status]).to eq(:success)
+        expect(project.topic_list).to eq(%w[topics])
+      end
+
+      it 'update using topic_list' do
+        result = update_project(project, user, { topic_list: 'topic_list' })
+
+        expect(result[:status]).to eq(:success)
+        expect(project.topic_list).to eq(%w[topic_list])
+      end
+
+      it 'update using tag_list (deprecated)' do
+        result = update_project(project, user, { tag_list: 'tag_list' })
+
+        expect(result[:status]).to eq(:success)
+        expect(project.topic_list).to eq(%w[tag_list])
       end
     end
   end

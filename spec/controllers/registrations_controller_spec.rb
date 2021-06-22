@@ -187,38 +187,6 @@ RSpec.describe RegistrationsController do
               end
             end
 
-            context 'when it is part of our invite_signup_page_interaction experiment', :experiment do
-              let_it_be(:member) { create(:project_member, :invited, invite_email: user_params.dig(:user, :email)) }
-
-              let(:originating_member_id) { member.id }
-              let(:session_params) do
-                {
-                  invite_email: user_params.dig(:user, :email),
-                  originating_member_id: originating_member_id
-                }
-              end
-
-              context 'when member exists from the session key value' do
-                it 'tracks the experiment' do
-                  expect(experiment(:invite_signup_page_interaction)).to track(:form_submission)
-                                                                  .with_context(actor: member)
-                                                                  .on_next_instance
-
-                  subject
-                end
-              end
-
-              context 'when member does not exist from the session key value' do
-                let(:originating_member_id) { -1 }
-
-                it 'tracks the experiment' do
-                  expect(experiment(:invite_signup_page_interaction)).not_to track(:form_submission)
-
-                  subject
-                end
-              end
-            end
-
             context 'when invite email matches email used on registration' do
               let(:session_params) { { invite_email: user_params.dig(:user, :email) } }
 
@@ -434,6 +402,18 @@ RSpec.describe RegistrationsController do
       expect(User.last.last_name).to eq(base_user_params[:last_name])
       expect(User.last.name).to eq("#{base_user_params[:first_name]} #{base_user_params[:last_name]}")
     end
+
+    it 'sets the username and caller_id in the context' do
+      expect(controller).to receive(:create).and_wrap_original do |m, *args|
+        m.call(*args)
+
+        expect(Gitlab::ApplicationContext.current)
+          .to include('meta.user' => base_user_params[:username],
+                      'meta.caller_id' => 'RegistrationsController#create')
+      end
+
+      subject
+    end
   end
 
   describe '#destroy' do
@@ -524,6 +504,18 @@ RSpec.describe RegistrationsController do
           end
         end
       end
+    end
+
+    it 'sets the username and caller_id in the context' do
+      expect(controller).to receive(:destroy).and_wrap_original do |m, *args|
+        m.call(*args)
+
+        expect(Gitlab::ApplicationContext.current)
+          .to include('meta.user' => user.username,
+                      'meta.caller_id' => 'RegistrationsController#destroy')
+      end
+
+      post :destroy
     end
   end
 end

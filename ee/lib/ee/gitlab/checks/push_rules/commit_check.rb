@@ -4,7 +4,7 @@ module EE
   module Gitlab
     module Checks
       module PushRules
-        class CommitCheck < ::Gitlab::Checks::BaseChecker
+        class CommitCheck < ::Gitlab::Checks::BaseSingleChecker
           ERROR_MESSAGES = {
             committer_not_verified: "Committer email '%{committer_email}' is not verified.",
             committer_not_allowed: "You cannot push commits for '%{committer_email}'. You can only push commits that were committed with one of your own verified emails."

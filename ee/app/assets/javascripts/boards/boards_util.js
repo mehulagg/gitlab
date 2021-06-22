@@ -1,8 +1,7 @@
-import { sortBy } from 'lodash';
 import { FiltersInfo as FiltersInfoCE } from '~/boards/boards_util';
 import { getIdFromGraphQLId } from '~/graphql_shared/utils';
-import { urlParamsToObject } from '~/lib/utils/common_utils';
-import { objectToQuery } from '~/lib/utils/url_utility';
+// eslint-disable-next-line import/no-deprecated
+import { objectToQuery, urlParamsToObject } from '~/lib/utils/url_utility';
 import {
   EPIC_LANE_BASE_HEIGHT,
   IterationFilterType,
@@ -38,16 +37,27 @@ export function calculateSwimlanesBufferSize(listTopCoordinate) {
   return Math.ceil((window.innerHeight - listTopCoordinate) / EPIC_LANE_BASE_HEIGHT);
 }
 
+export function formatEpic(epic) {
+  return {
+    ...epic,
+    labels: epic.labels?.nodes || [],
+    // Epics don't support assignees as of now
+    // but `<board-card-inner>` expects it.
+    // So until https://gitlab.com/gitlab-org/gitlab/-/issues/238444
+    // is addressed, we need to pass empty array.
+    assignees: [],
+  };
+}
+
 export function formatListEpics(listEpics) {
   const boardItems = {};
   let listItemsCount;
 
   const listData = listEpics.nodes.reduce((map, list) => {
     listItemsCount = list.epicsCount;
-    let sortedEpics = list.epics.edges.map((epicNode) => ({
+    const sortedEpics = list.epics.edges.map((epicNode) => ({
       ...epicNode.node,
     }));
-    sortedEpics = sortBy(sortedEpics, 'relativePosition');
 
     return {
       ...map,
@@ -83,6 +93,7 @@ export function formatEpicListsPageInfo(lists) {
 
 export function transformBoardConfig(boardConfig) {
   const updatedBoardConfig = {};
+  // eslint-disable-next-line import/no-deprecated
   const passedFilterParams = urlParamsToObject(window.location.search);
   const updateScopeObject = (key, value = '') => {
     if (value === null || value === '') return;

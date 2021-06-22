@@ -206,6 +206,7 @@ function mountConfidentialComponent() {
     },
     provide: {
       canUpdate: initialData.is_editable,
+      isClassicSidebar: true,
     },
 
     render: (createElement) =>
@@ -390,7 +391,7 @@ function mountSubscriptionsComponent() {
 
 function mountTimeTrackingComponent() {
   const el = document.getElementById('issuable-time-tracker');
-  const { id, issuableType } = getSidebarOptions();
+  const { iid, fullPath, issuableType, timeTrackingLimitToHours } = getSidebarOptions();
 
   if (!el) return;
 
@@ -402,7 +403,9 @@ function mountTimeTrackingComponent() {
     render: (createElement) =>
       createElement(SidebarTimeTracking, {
         props: {
-          issuableId: id.toString(),
+          fullPath,
+          issuableIid: iid.toString(),
+          limitToHours: timeTrackingLimitToHours,
         },
       }),
   });

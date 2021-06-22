@@ -5,7 +5,7 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 type: index, reference
 ---
 
-# Changes tab in merge requests
+# Changes tab in merge requests **(FREE)**
 
 The **Changes** tab on a [merge request](index.md), below the main merge request details and next to the discussion tab,
 shows the changes to files between branches or commits. This view of changes to a
@@ -91,10 +91,6 @@ specific commit page.
 
 ![MR diff](img/merge_request_diff.png)
 
-NOTE:
-You can append `?w=1` while on the diffs page of a merge request to ignore any
-whitespace changes.
-
 ## Mark files as viewed
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/51513) in GitLab 13.9.
@@ -133,4 +129,43 @@ To disable it:
 
 ```ruby
 Feature.disable(:local_file_reviews)
+```
+
+## Show merge request conflicts in diff
+
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/232484) in GitLab 13.5.
+> - [Deployed behind a feature flag](../../feature_flags.md), disabled by default.
+> - Disabled on GitLab.com.
+> - Not recommended for production use.
+> - To use in GitLab self-managed instances, ask a GitLab administrator to [enable it](#enable-or-disable-merge-request-conflicts-in-diff). **(FREE SELF)**
+
+This in-development feature might not be available for your use. There can be
+[risks when enabling features still in development](../../feature_flags.md#risks-when-enabling-features-still-in-development).
+Refer to this feature's version history for more details.
+
+To avoid displaying the changes that are already on target branch in the diff,
+we compare the merge request's source branch with HEAD of the target branch.
+
+When there are conflicts between the source and target branch, we show the
+conflicts on the merge request diff as well:
+
+![Example of a conflict shown in a merge request diff](img/conflict_ui_v14_0.png)
+
+### Enable or disable merge request conflicts in diff **(FREE SELF)**
+
+Merge request conflicts in diff is under development and not ready for production use. It is
+deployed behind a feature flag that is **disabled by default**.
+[GitLab administrators with access to the GitLab Rails console](../../../administration/feature_flags.md)
+can enable it.
+
+To enable it:
+
+```ruby
+Feature.enable(:display_merge_conflicts_in_diff)
+```
+
+To disable it:
+
+```ruby
+Feature.disable(:display_merge_conflicts_in_diff)
 ```

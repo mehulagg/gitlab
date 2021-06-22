@@ -27,7 +27,7 @@ to clone and fetch large repositories, speeding up development.
 
 For a video introduction to Geo, see [Introduction to GitLab Geo - GitLab Features](https://www.youtube.com/watch?v=-HDLxSjEh6w).
 
-To make sure you're using the right version of the documentation, navigate to [the Geo page on GitLab.com](https://gitlab.com/gitlab-org/gitlab/blob/master/doc/administration/geo/index.md) and choose the appropriate release from the **Switch branch/tag** dropdown. For example, [`v13.7.6-ee`](https://gitlab.com/gitlab-org/gitlab/-/blob/v13.7.6-ee/doc/administration/geo/index.md).
+To make sure you're using the right version of the documentation, navigate to [the Geo page on GitLab.com](https://gitlab.com/gitlab-org/gitlab/-/blob/master/doc/administration/geo/index.md) and choose the appropriate release from the **Switch branch/tag** dropdown. For example, [`v13.7.6-ee`](https://gitlab.com/gitlab-org/gitlab/-/blob/v13.7.6-ee/doc/administration/geo/index.md).
 
 Geo uses a set of defined terms that is described in the [Geo Glossary](glossary.md), please familiarize yourself with those terms.
 
@@ -56,7 +56,8 @@ Geo provides:
 ### Gitaly Cluster
 
 Geo should not be confused with [Gitaly Cluster](../gitaly/praefect.md). For more information about
-the difference between Geo and Gitaly Cluster, see [Gitaly Cluster compared to Geo](../gitaly/index.md#gitaly-cluster-compared-to-geo).
+the difference between Geo and Gitaly Cluster, see
+[How does Gitaly Cluster compare to Geo?](../gitaly/faq.md#how-does-gitaly-cluster-compare-to-geo).
 
 ## How it works
 
@@ -121,7 +122,7 @@ The following are required to run Geo:
   The following operating systems are known to ship with a current version of OpenSSH:
   - [CentOS](https://www.centos.org) 7.4+
   - [Ubuntu](https://ubuntu.com) 16.04+
-- PostgreSQL 11+ with [Streaming Replication](https://wiki.postgresql.org/wiki/Streaming_Replication)
+- PostgreSQL 12+ with [Streaming Replication](https://wiki.postgresql.org/wiki/Streaming_Replication)
 - Git 2.9+
 - Git-lfs 2.4.2+ on the user side when using LFS
 - All sites must run the same GitLab version.

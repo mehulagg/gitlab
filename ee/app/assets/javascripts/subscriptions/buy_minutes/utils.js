@@ -24,13 +24,20 @@ export function writeInitialDataToApolloCache(apolloProvider, dataset) {
       isSetupForCompany,
       namespaces,
       fullName,
+      selectedPlanId: planId,
       subscription: {
-        planId,
-        paymentMethodId: null,
         quantity: 1,
         namespaceId: null,
         // eslint-disable-next-line @gitlab/require-i18n-strings
         __typename: 'Subscription',
+      },
+      paymentMethod: {
+        id: null,
+        creditCardExpirationMonth: null,
+        creditCardExpirationYear: null,
+        creditCardType: null,
+        creditCardMaskNumber: null,
+        __typename: 'PaymentMethod',
       },
       customer: {
         country: null,

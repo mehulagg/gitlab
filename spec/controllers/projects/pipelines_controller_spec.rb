@@ -278,26 +278,22 @@ RSpec.describe Projects::PipelinesController do
       stub_application_setting(auto_devops_enabled: false)
     end
 
-    context 'pipeline_empty_state_templates experiment' do
-      it 'tracks the assignment', :experiment do
-        expect(experiment(:pipeline_empty_state_templates))
-          .to track(:assignment)
-          .with_context(namespace: project.root_ancestor)
-          .on_next_instance
+    def action
+      get :index, params: { namespace_id: project.namespace, project_id: project }
+    end
 
-        get :index, params: { namespace_id: project.namespace, project_id: project }
-      end
+    subject { project.namespace }
+
+    context 'pipeline_empty_state_templates experiment' do
+      it_behaves_like 'tracks assignment and records the subject', :pipeline_empty_state_templates, :namespace
     end
 
     context 'code_quality_walkthrough experiment' do
-      it 'tracks the assignment', :experiment do
-        expect(experiment(:code_quality_walkthrough))
-          .to track(:assignment)
-          .with_context(namespace: project.root_ancestor)
-          .on_next_instance
+      it_behaves_like 'tracks assignment and records the subject', :code_quality_walkthrough, :namespace
+    end
 
-        get :index, params: { namespace_id: project.namespace, project_id: project }
-      end
+    context 'ci_runner_templates experiment' do
+      it_behaves_like 'tracks assignment and records the subject', :ci_runner_templates, :namespace
     end
   end
 
@@ -876,19 +872,6 @@ RSpec.describe Projects::PipelinesController do
 
       expect(response).to have_gitlab_http_status(:no_content)
       expect(::Ci::RetryPipelineWorker).to have_received(:perform_async).with(pipeline.id, user.id)
-    end
-
-    context 'when feature flag is disabled' do
-      before do
-        stub_feature_flags(background_pipeline_retry_endpoint: false)
-      end
-
-      it 'retries the pipeline without returning any content' do
-        post_retry
-
-        expect(response).to have_gitlab_http_status(:no_content)
-        expect(build.reload).to be_retried
-      end
     end
 
     context 'when builds are disabled' do

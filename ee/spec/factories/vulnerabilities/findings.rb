@@ -57,6 +57,7 @@ FactoryBot.define do
     end
     severity { :high }
     confidence { :medium }
+    detection_method { :gitlab_security_report }
     scanner factory: :vulnerabilities_scanner
     metadata_version { 'sast:1.0' }
 

@@ -5,7 +5,7 @@ module Mutations
     class Create < BaseMutation
       include Mutations::ResolvesResourceParent
 
-      graphql_name 'CreateIteration'
+      graphql_name 'iterationCreate'
 
       authorize :create_iteration
 
@@ -13,6 +13,12 @@ module Mutations
             Types::IterationType,
             null: true,
             description: 'The created iteration.'
+
+      argument :iterations_cadence_id,
+               ::Types::GlobalIDType[::Iterations::Cadence],
+               loads: ::Types::Iterations::CadenceType,
+               required: false,
+               description: 'Global ID of the iterations cadence to be assigned to newly created iteration.'
 
       argument :title,
                GraphQL::STRING_TYPE,
@@ -35,9 +41,9 @@ module Mutations
                description: 'The end date of the iteration.'
 
       def resolve(args)
-        validate_arguments!(args)
-
         parent = authorized_resource_parent_find!(args)
+
+        validate_arguments!(parent, args)
 
         response = ::Iterations::CreateService.new(parent, current_user, args).execute
 
@@ -52,10 +58,18 @@ module Mutations
 
       private
 
-      def validate_arguments!(args)
+      def validate_arguments!(parent, args)
         if args.except(:group_path, :project_path).empty?
-          raise Gitlab::Graphql::Errors::ArgumentError,
-                'The list of iteration attributes is empty'
+          raise Gitlab::Graphql::Errors::ArgumentError, 'The list of iteration attributes is empty'
+        end
+
+        # Currently there is a single iteration cadence per group, so if `iterations_cadence_id` argument is not provided
+        # we assign iteration to the only cadence in the group(see `Iteration#set_iterations_cadence`).
+        # Once we introduce cadence CRUD support we need to specify to which iteration cadence a given iteration
+        # belongs if there are more than once cadence in the group. Eventually `iterations_cadence_id` argument should
+        # become required and there should be no need for group_path argument for iteration.
+        if args[:iterations_cadence].blank? && parent.iterations_cadences.count > 1
+          raise Gitlab::Graphql::Errors::ArgumentError, 'Please provide iterations_cadence_id argument to assign iteration to respective cadence'
         end
       end
     end

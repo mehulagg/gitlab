@@ -8,7 +8,7 @@ import {
 } from 'ee/vue_shared/security_reports/constants';
 import createMockApollo from 'helpers/mock_apollo_helper';
 import {
-  expectedDownloadDropdownProps,
+  expectedDownloadDropdownPropsWithText,
   securityReportPipelineDownloadPathsQueryResponse,
 } from 'jest/vue_shared/security_reports/mock_data';
 import createFlash from '~/flash';
@@ -80,7 +80,7 @@ describe('Pipeline artifact Download', () => {
     });
 
     it('renders the download dropdown', () => {
-      expect(findDownloadDropdown().props()).toEqual(expectedDownloadDropdownProps);
+      expect(findDownloadDropdown().props()).toEqual(expectedDownloadDropdownPropsWithText);
     });
   });
 

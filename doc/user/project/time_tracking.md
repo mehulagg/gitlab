@@ -20,7 +20,7 @@ Time Tracking allows you to:
 - Record the time spent working on an issue or a merge request.
 - Add an estimate of the amount of time needed to complete an issue or a merge
   request.
-- View a breakdown of time spent working on an issue or a merge request. 
+- View a breakdown of time spent working on an issue or a merge request.
 
 You don't have to indicate an estimate to enter the time spent, and vice versa.
 
@@ -84,7 +84,7 @@ You can view a breakdown of time spent on an issue or merge request.
 
 Prerequisites:
 
-- A minimum of [Reporter](../permissions.md#project-members-permissions) access to a private project in GitLab.
+- You must have at least the [Reporter role](../permissions.md#project-members-permissions) for a project.
 
 To view a time tracking report, go to an issue or a merge request and select **Time tracking report**
 in the right sidebar.
@@ -109,8 +109,15 @@ Default conversion rates are 1mo = 4w, 1w = 5d and 1d = 8h.
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/29469/) in GitLab 12.1.
 
-In GitLab self-managed instances, the display of time units can be limited to
-hours through the option in **Admin Area > Settings > Preferences** under **Localization**.
+In GitLab self-managed instances, you can limit the display of time units to
+hours.
+To do so:
+
+1. On the top bar, select **Menu >** **{admin}** **Admin**.
+1. On the left sidebar, select **Settings > Preferences**.
+1. Expand **Localization**.
+1. Under **Time tracking**, select the **Limit display of time tracking units to hours** checkbox.
+1. Select **Save changes**.
 
 With this option enabled, `75h` is displayed instead of `1w 4d 3h`.
 

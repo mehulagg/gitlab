@@ -1,6 +1,6 @@
 import MockAdapter from 'axios-mock-adapter';
 import Api from 'ee/api';
-import * as constants from 'ee/subscriptions/new/constants';
+import * as constants from 'ee/subscriptions/constants';
 import defaultClient from 'ee/subscriptions/new/graphql';
 import * as actions from 'ee/subscriptions/new/store/actions';
 import { GENERAL_ERROR_MESSAGE } from 'ee/vue_shared/purchase_flow/constants';

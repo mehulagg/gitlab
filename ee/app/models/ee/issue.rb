@@ -83,7 +83,7 @@ module EE
 
       # override
       def use_separate_indices?
-        Elastic::DataMigrationService.migration_has_finished?(:migrate_issues_to_separate_index)
+        true
       end
     end
 
@@ -216,6 +216,20 @@ module EE
         FROM (#{blocking_issues_count_by_id}) AS grouped_counts
         WHERE issues.id = grouped_counts.blocking_issue_id
       SQL
+    end
+
+    def related_feature_flags(current_user, preload: nil)
+      feature_flags = ::Operations::FeatureFlag
+        .select('operations_feature_flags.*, operations_feature_flags_issues.id AS link_id')
+        .joins(:feature_flag_issues)
+        .where(operations_feature_flags_issues: { issue_id: id })
+        .order('operations_feature_flags_issues.id ASC')
+        .includes(preload)
+
+      cross_project_filter = -> (feature_flags) { feature_flags.where(project: project) }
+      Ability.feature_flags_readable_by_user(feature_flags,
+        current_user,
+        filters: { read_cross_project: cross_project_filter })
     end
 
     override :relocation_target

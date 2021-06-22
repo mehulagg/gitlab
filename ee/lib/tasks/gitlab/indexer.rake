@@ -3,7 +3,7 @@
 namespace :gitlab do
   namespace :indexer do
     desc "GitLab | Indexer | Install or upgrade gitlab-elasticsearch-indexer"
-    task :install, [:dir, :repo] => :with_gitlab_helpers do |t, args|
+    task :install, [:dir, :repo] => :gitlab_environment do |t, args|
       unless args.dir.present?
         abort %(Please specify the directory where you want to install the indexer
 Usage: rake "gitlab:indexer:install[/installation/dir,repo]")

@@ -74,6 +74,9 @@ RSpec.describe User do
     it { is_expected.to delegate_method(:job_title).to(:user_detail).allow_nil }
     it { is_expected.to delegate_method(:job_title=).to(:user_detail).with_arguments(:args).allow_nil }
 
+    it { is_expected.to delegate_method(:pronouns).to(:user_detail).allow_nil }
+    it { is_expected.to delegate_method(:pronouns=).to(:user_detail).with_arguments(:args).allow_nil }
+
     it { is_expected.to delegate_method(:bio).to(:user_detail).allow_nil }
     it { is_expected.to delegate_method(:bio=).to(:user_detail).with_arguments(:args).allow_nil }
     it { is_expected.to delegate_method(:bio_html).to(:user_detail).allow_nil }
@@ -92,7 +95,7 @@ RSpec.describe User do
     it { is_expected.to have_many(:group_members) }
     it { is_expected.to have_many(:groups) }
     it { is_expected.to have_many(:keys).dependent(:destroy) }
-    it { is_expected.to have_many(:expired_today_and_unnotified_keys) }
+    it { is_expected.to have_many(:expired_and_unnotified_keys) }
     it { is_expected.to have_many(:deploy_keys).dependent(:nullify) }
     it { is_expected.to have_many(:group_deploy_keys) }
     it { is_expected.to have_many(:events).dependent(:delete_all) }
@@ -134,6 +137,12 @@ RSpec.describe User do
         user = create(:user, bio: 'my bio')
 
         expect(user.bio).to eq(user.user_detail.bio)
+      end
+
+      it 'delegates `pronouns` to `user_detail`' do
+        user = create(:user, pronouns: 'they/them')
+
+        expect(user.pronouns).to eq(user.user_detail.pronouns)
       end
 
       it 'creates `user_detail` when `bio` is first updated' do
@@ -1026,12 +1035,6 @@ RSpec.describe User do
       let_it_be(:expired_today_already_notified) { create(:key, expires_at: Time.current, user: user2, expiry_notification_delivered_at: Time.current) }
       let_it_be(:expiring_soon_not_notified) { create(:key, expires_at: 2.days.from_now, user: user2) }
       let_it_be(:expiring_soon_notified) { create(:key, expires_at: 2.days.from_now, user: user1, before_expiry_notification_delivered_at: Time.current) }
-
-      describe '.with_ssh_key_expired_today' do
-        it 'returns users whose key has expired today' do
-          expect(described_class.with_ssh_key_expired_today).to contain_exactly(user1)
-        end
-      end
 
       describe '.with_ssh_key_expiring_soon' do
         it 'returns users whose keys will expire soon' do
@@ -5221,6 +5224,70 @@ RSpec.describe User do
     end
   end
 
+  describe '#password_expired_if_applicable?' do
+    let(:user) { build(:user, password_expires_at: password_expires_at) }
+
+    subject { user.password_expired_if_applicable? }
+
+    context 'when user is not ldap user' do
+      context 'when password_expires_at is not set' do
+        let(:password_expires_at) {}
+
+        it 'returns false' do
+          is_expected.to be_falsey
+        end
+      end
+
+      context 'when password_expires_at is in the past' do
+        let(:password_expires_at) { 1.minute.ago }
+
+        it 'returns true' do
+          is_expected.to be_truthy
+        end
+      end
+
+      context 'when password_expires_at is in the future' do
+        let(:password_expires_at) { 1.minute.from_now }
+
+        it 'returns false' do
+          is_expected.to be_falsey
+        end
+      end
+    end
+
+    context 'when user is ldap user' do
+      let(:user) { build(:user, password_expires_at: password_expires_at) }
+
+      before do
+        allow(user).to receive(:ldap_user?).and_return(true)
+      end
+
+      context 'when password_expires_at is not set' do
+        let(:password_expires_at) {}
+
+        it 'returns false' do
+          is_expected.to be_falsey
+        end
+      end
+
+      context 'when password_expires_at is in the past' do
+        let(:password_expires_at) { 1.minute.ago }
+
+        it 'returns false' do
+          is_expected.to be_falsey
+        end
+      end
+
+      context 'when password_expires_at is in the future' do
+        let(:password_expires_at) { 1.minute.from_now }
+
+        it 'returns false' do
+          is_expected.to be_falsey
+        end
+      end
+    end
+  end
+
   describe '#read_only_attribute?' do
     context 'when synced attributes metadata is present' do
       it 'delegates to synced_attributes_metadata' do
@@ -5245,9 +5312,10 @@ RSpec.describe User do
     let_it_be(:user3) { create(:user, :ghost) }
     let_it_be(:user4) { create(:user, user_type: :support_bot) }
     let_it_be(:user5) { create(:user, state: 'blocked', user_type: :support_bot) }
+    let_it_be(:user6) { create(:user, user_type: :automation_bot) }
 
     it 'returns all active users including active bots but ghost users' do
-      expect(described_class.active_without_ghosts).to match_array([user1, user4])
+      expect(described_class.active_without_ghosts).to match_array([user1, user4, user6])
     end
   end
 
@@ -5382,7 +5450,8 @@ RSpec.describe User do
             { user_type: :ghost },
             { user_type: :alert_bot },
             { user_type: :support_bot },
-            { user_type: :security_bot }
+            { user_type: :security_bot },
+            { user_type: :automation_bot }
           ]
         end
 
@@ -5438,6 +5507,7 @@ RSpec.describe User do
         'alert_bot'         | false
         'support_bot'       | false
         'security_bot'      | false
+        'automation_bot'    | false
       end
 
       with_them do
@@ -5585,10 +5655,12 @@ RSpec.describe User do
     it_behaves_like 'bot users', :migration_bot
     it_behaves_like 'bot users', :security_bot
     it_behaves_like 'bot users', :ghost
+    it_behaves_like 'bot users', :automation_bot
 
     it_behaves_like 'bot user avatars', :alert_bot, 'alert-bot.png'
     it_behaves_like 'bot user avatars', :support_bot, 'support-bot.png'
     it_behaves_like 'bot user avatars', :security_bot, 'security-bot.png'
+    it_behaves_like 'bot user avatars', :automation_bot, 'support-bot.png'
 
     context 'when bot is the support_bot' do
       subject { described_class.support_bot }

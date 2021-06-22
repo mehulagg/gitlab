@@ -119,7 +119,7 @@ RSpec.describe ProjectsHelper do
     let_it_be(:user) { create(:user) }
     let_it_be(:group) { create(:group) }
     let_it_be(:project) { create(:project, :repository, group: group) }
-    let_it_be(:jira_service) { create(:jira_service, project: project, vulnerabilities_enabled: true, project_key: 'GV', vulnerabilities_issuetype: '10000') }
+    let_it_be(:jira_integration) { create(:jira_integration, project: project, vulnerabilities_enabled: true, project_key: 'GV', vulnerabilities_issuetype: '10000') }
 
     subject { helper.project_security_dashboard_config(project) }
 
@@ -127,6 +127,7 @@ RSpec.describe ProjectsHelper do
       group.add_owner(user)
       stub_licensed_features(jira_vulnerabilities_integration: true)
       allow(helper).to receive(:current_user).and_return(user)
+      allow(helper).to receive(:can?).and_return(true)
     end
 
     context 'project without vulnerabilities' do
@@ -163,7 +164,8 @@ RSpec.describe ProjectsHelper do
           no_pipeline_run_scanners_help_path: "/#{project.full_path}/-/pipelines/new",
           auto_fix_documentation: help_page_path('user/application_security/index', anchor: 'auto-fix-merge-requests'),
           auto_fix_mrs_path: end_with('/merge_requests?label_name=GitLab-auto-fix'),
-          scanners: '[{"id":123,"vendor":"Security Vendor","report_type":"SAST"}]'
+          scanners: '[{"id":123,"vendor":"Security Vendor","report_type":"SAST"}]',
+          can_admin_vulnerability: 'true'
         }
       end
 
@@ -365,17 +367,20 @@ RSpec.describe ProjectsHelper do
       allow(helper).to receive(:can?).and_return(true)
     end
 
-    context 'with the status check feature flag' do
-      where(feature_flag_enabled: [true, false])
-      with_them do
-        before do
-          stub_feature_flags(ff_compliance_approval_gates: feature_flag_enabled)
-        end
-
-        it 'includes external_approval_rules_path only when enabled' do
-          expect(subject[:data].key?(:external_approval_rules_path)).to eq(feature_flag_enabled)
-        end
-      end
+    it 'returns the correct data' do
+      expect(subject[:data]).to eq({
+        project_id: project.id,
+        can_edit: 'true',
+        project_path: expose_path(api_v4_projects_path(id: project.id)),
+        settings_path: expose_path(api_v4_projects_approval_settings_path(id: project.id)),
+        rules_path: expose_path(api_v4_projects_approval_settings_rules_path(id: project.id)),
+        allow_multi_rule: project.multiple_approval_rules_available?.to_s,
+        eligible_approvers_docs_path: help_page_path('user/project/merge_requests/approvals/rules', anchor: 'eligible-approvers'),
+        security_approvals_help_page_path: help_page_path('user/application_security/index', anchor: 'security-approvals-in-merge-requests'),
+        security_configuration_path: project_security_configuration_path(project),
+        vulnerability_check_help_page_path: help_page_path('user/application_security/index', anchor: 'security-approvals-in-merge-requests'),
+        license_check_help_page_path: help_page_path('user/application_security/index', anchor: 'enabling-license-approvals-within-a-project')
+      })
     end
   end
 
@@ -385,7 +390,7 @@ RSpec.describe ProjectsHelper do
     it 'returns the correct data' do
       expect(subject[:data]).to eq({
         project_id: project.id,
-        status_checks_path: expose_path(api_v4_projects_external_approval_rules_path(id: project.id))
+        status_checks_path: expose_path(api_v4_projects_external_status_checks_path(id: project.id))
       })
     end
   end

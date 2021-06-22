@@ -106,10 +106,6 @@ class ApplicationController < ActionController::Base
     redirect_back(fallback_location: default, **options)
   end
 
-  def check_if_gl_com_or_dev
-    render_404 unless ::Gitlab.dev_env_or_com?
-  end
-
   def not_found
     render_404
   end
@@ -263,7 +259,6 @@ class ApplicationController < ActionController::Base
     headers['X-XSS-Protection'] = '1; mode=block'
     headers['X-UA-Compatible'] = 'IE=edge'
     headers['X-Content-Type-Options'] = 'nosniff'
-    headers[Gitlab::Metrics::RequestsRackMiddleware::FEATURE_CATEGORY_HEADER] = feature_category
   end
 
   def default_cache_headers
@@ -456,19 +451,17 @@ class ApplicationController < ActionController::Base
   end
 
   def set_current_context(&block)
-    Gitlab::ApplicationContext.with_context(
-      # Avoid loading the auth_user again after the request. Otherwise calling
-      # `auth_user` again would also trigger the Warden callbacks again
-      user: -> { auth_user if strong_memoized?(:auth_user) },
+    Gitlab::ApplicationContext.push(
+      user: -> { context_user },
       project: -> { @project if @project&.persisted? },
       namespace: -> { @group if @group&.persisted? },
       caller_id: caller_id,
       remote_ip: request.ip,
-      feature_category: feature_category) do
-      yield
-    ensure
-      @current_context = Gitlab::ApplicationContext.current
-    end
+      feature_category: feature_category
+    )
+    yield
+  ensure
+    @current_context = Gitlab::ApplicationContext.current
   end
 
   def set_locale(&block)
@@ -540,6 +533,12 @@ class ApplicationController < ActionController::Base
     ::Gitlab::GitalyClient.allow_ref_name_caching do
       yield
     end
+  end
+
+  # Avoid loading the auth_user again after the request. Otherwise calling
+  # `auth_user` again would also trigger the Warden callbacks again
+  def context_user
+    auth_user if strong_memoized?(:auth_user)
   end
 
   def caller_id

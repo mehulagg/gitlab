@@ -4,6 +4,7 @@ module Registrations
   class GroupInvitesController < Groups::ApplicationController
     layout 'checkout'
 
+    before_action :check_if_gl_com_or_dev
     before_action :authorize_invite_to_group!
 
     feature_category :navigation
@@ -12,12 +13,7 @@ module Registrations
     end
 
     def create
-      result = Members::CreateService.new(current_user, invite_params).execute
-
-      if result[:status] == :success
-        experiment(:registrations_group_invite, actor: current_user)
-          .track(:invites_sent, property: group.id.to_s, value: group.members.invite.size)
-      end
+      Members::CreateService.new(current_user, invite_params).execute
 
       redirect_to new_users_sign_up_project_path(namespace_id: group.id,
                                                  trial: helpers.in_trial_during_signup_flow?,
@@ -39,7 +35,8 @@ module Registrations
       {
         source: group,
         user_ids: emails_param[:emails]&.reject(&:blank?)&.join(','),
-        access_level: Gitlab::Access::DEVELOPER
+        access_level: Gitlab::Access::DEVELOPER,
+        invite_source: 'registrations-group-invite'
       }
     end
 

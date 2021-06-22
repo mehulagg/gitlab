@@ -98,7 +98,7 @@ RSpec.describe Vulnerabilities::FindingEntity do
       end
 
       context 'when jira service is configured' do
-        let_it_be(:jira_service) { create(:jira_service, project: project, issues_enabled: true, project_key: 'FE', vulnerabilities_enabled: true, vulnerabilities_issuetype: '10001') }
+        let_it_be(:jira_integration) { create(:jira_integration, project: project, issues_enabled: true, project_key: 'FE', vulnerabilities_enabled: true, vulnerabilities_issuetype: '10001') }
 
         before do
           stub_licensed_features(jira_vulnerabilities_integration: true)

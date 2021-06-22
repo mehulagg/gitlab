@@ -13,7 +13,7 @@ module Ci
     include Gitlab::Utils::StrongMemoize
     include TaggableQueries
 
-    add_authentication_token_field :token, encrypted: -> { Feature.enabled?(:ci_runners_tokens_optional_encryption, default_enabled: true) ? :optional : :required }
+    add_authentication_token_field :token, encrypted: :optional
 
     enum access_level: {
       not_protected: 0,
@@ -134,6 +134,8 @@ module Ci
     end
 
     scope :order_contacted_at_asc, -> { order(contacted_at: :asc) }
+    scope :order_contacted_at_desc, -> { order(contacted_at: :desc) }
+    scope :order_created_at_asc, -> { order(created_at: :asc) }
     scope :order_created_at_desc, -> { order(created_at: :desc) }
     scope :with_tags, -> { preload(:tags) }
 
@@ -168,18 +170,13 @@ module Ci
 
     # Searches for runners matching the given query.
     #
-    # This method uses ILIKE on PostgreSQL.
-    #
-    # This method performs a *partial* match on tokens, thus a query for "a"
-    # will match any runner where the token contains the letter "a". As a result
-    # you should *not* use this method for non-admin purposes as otherwise users
-    # might be able to query a list of all runners.
+    # This method uses ILIKE on PostgreSQL for the description field and performs a full match on tokens.
     #
     # query - The search query as a String.
     #
     # Returns an ActiveRecord::Relation.
     def self.search(query)
-      fuzzy_search(query, [:token, :description])
+      where(token: query).or(fuzzy_search(query, [:description]))
     end
 
     def self.online_contact_time_deadline
@@ -195,8 +192,13 @@ module Ci
     end
 
     def self.order_by(order)
-      if order == 'contacted_asc'
+      case order
+      when 'contacted_asc'
         order_contacted_at_asc
+      when 'contacted_desc'
+        order_contacted_at_desc
+      when 'created_at_asc'
+        order_created_at_asc
       else
         order_created_at_desc
       end
@@ -212,15 +214,15 @@ module Ci
         Arel.sql("(#{arel_tag_names_array.to_sql})")
       ]
 
-      # we use distinct to de-duplicate data
-      distinct.pluck(*unique_params).map do |values|
+      group(*unique_params).pluck('array_agg(ci_runners.id)', *unique_params).map do |values|
         Gitlab::Ci::Matching::RunnerMatcher.new({
-          runner_type: values[0],
-          public_projects_minutes_cost_factor: values[1],
-          private_projects_minutes_cost_factor: values[2],
-          run_untagged: values[3],
-          access_level: values[4],
-          tag_list: values[5]
+          runner_ids: values[0],
+          runner_type: values[1],
+          public_projects_minutes_cost_factor: values[2],
+          private_projects_minutes_cost_factor: values[3],
+          run_untagged: values[4],
+          access_level: values[5],
+          tag_list: values[6]
         })
       end
     end
@@ -228,6 +230,7 @@ module Ci
     def runner_matcher
       strong_memoize(:runner_matcher) do
         Gitlab::Ci::Matching::RunnerMatcher.new({
+          runner_ids: [id],
           runner_type: runner_type,
           public_projects_minutes_cost_factor: public_projects_minutes_cost_factor,
           private_projects_minutes_cost_factor: private_projects_minutes_cost_factor,

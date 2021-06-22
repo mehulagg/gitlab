@@ -108,10 +108,14 @@ class Member < ApplicationRecord
   scope :active_without_invites_and_requests, -> do
     left_join_users
       .where(users: { state: 'active' })
-      .non_request
+      .without_invites_and_requests
+      .reorder(nil)
+  end
+
+  scope :without_invites_and_requests, -> do
+    non_request
       .non_invite
       .non_minimal_access
-      .reorder(nil)
   end
 
   scope :invite, -> { where.not(invite_token: nil) }
@@ -152,7 +156,7 @@ class Member < ApplicationRecord
     distinct_members = select('DISTINCT ON (user_id, invite_email) *')
                        .order('user_id, invite_email, access_level DESC, expires_at DESC, created_at ASC')
 
-    from(distinct_members, :members)
+    unscoped.from(distinct_members, :members)
   end
 
   scope :order_name_asc, -> { left_join_users.reorder(Gitlab::Database.nulls_last_order('users.name', 'ASC')) }

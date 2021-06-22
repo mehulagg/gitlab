@@ -288,7 +288,7 @@ RSpec.describe 'layouts/nav/sidebar/_project' do
       let(:external_issue_tracker_url) { 'http://test.com' }
 
       let!(:external_issue_tracker) do
-        create(:custom_issue_tracker_service, active: external_issue_tracker_active, project: project, project_url: external_issue_tracker_url)
+        create(:custom_issue_tracker_integration, active: external_issue_tracker_active, project: project, project_url: external_issue_tracker_url)
       end
 
       context 'when external issue tracker is configured and active' do
@@ -313,7 +313,7 @@ RSpec.describe 'layouts/nav/sidebar/_project' do
     end
 
     context 'with Jira issue tracker' do
-      let_it_be(:jira) { create(:jira_service, project: project, issues_enabled: false) }
+      let_it_be(:jira) { create(:jira_integration, project: project, issues_enabled: false) }
 
       it 'has a link to the Jira issue tracker' do
         render
@@ -1005,7 +1005,7 @@ RSpec.describe 'layouts/nav/sidebar/_project' do
   end
 
   describe 'Confluence' do
-    let!(:service) { create(:confluence_service, project: project, active: active) }
+    let!(:service) { create(:confluence_integration, project: project, active: active) }
 
     before do
       render
@@ -1061,7 +1061,7 @@ RSpec.describe 'layouts/nav/sidebar/_project' do
     let(:service_status) { true }
 
     before do
-      project.create_external_wiki_service(active: service_status, properties: properties)
+      project.create_external_wiki_integration(active: service_status, properties: properties)
       project.reload
     end
 

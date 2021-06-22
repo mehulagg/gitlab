@@ -80,6 +80,8 @@ class Group < Namespace
   # debian_distributions and associated component_files must be destroyed by ruby code in order to properly remove carrierwave uploads
   has_many :debian_distributions, class_name: 'Packages::Debian::GroupDistribution', dependent: :destroy # rubocop:disable Cop/ActiveRecordDependent
 
+  delegate :prevent_sharing_groups_outside_hierarchy, to: :namespace_settings
+
   accepts_nested_attributes_for :variables, allow_destroy: true
 
   validate :visibility_level_allowed_by_projects
@@ -442,6 +444,12 @@ class Group < Namespace
     end
   end
 
+  def self_and_descendants_ids
+    strong_memoize(:self_and_descendants_ids) do
+      self_and_descendants.pluck(:id)
+    end
+  end
+
   def direct_members
     GroupMember.active_without_invites_and_requests
                .non_minimal_access
@@ -639,11 +647,15 @@ class Group < Namespace
   end
 
   def export_file_exists?
-    export_file&.file
+    import_export_upload&.export_file_exists?
   end
 
   def export_file
     import_export_upload&.export_file
+  end
+
+  def export_archive_exists?
+    import_export_upload&.export_archive_exists?
   end
 
   def adjourned_deletion?
@@ -709,6 +721,18 @@ class Group < Namespace
   def activity_path
     Gitlab::Routing.url_helpers.activity_group_path(self)
   end
+
+  # rubocop: disable CodeReuse/ServiceClass
+  def open_issues_count(current_user = nil)
+    Groups::OpenIssuesCountService.new(self, current_user).count
+  end
+  # rubocop: enable CodeReuse/ServiceClass
+
+  # rubocop: disable CodeReuse/ServiceClass
+  def open_merge_requests_count(current_user = nil)
+    Groups::MergeRequestsCountService.new(self, current_user).count
+  end
+  # rubocop: enable CodeReuse/ServiceClass
 
   private
 

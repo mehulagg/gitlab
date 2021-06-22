@@ -54,7 +54,7 @@ RSpec.describe 'DevOps Report page', :js do
       visit admin_dev_ops_report_path
 
       within tabs_selector do
-        expect(page.all(:css, tab_item_selector).length).to be(4)
+        expect(page.all(:css, tab_item_selector).length).to be(5)
         expect(page).to have_text 'Dev Sec Ops DevOps Score'
       end
     end

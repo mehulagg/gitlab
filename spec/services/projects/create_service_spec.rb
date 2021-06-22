@@ -82,6 +82,34 @@ RSpec.describe Projects::CreateService, '#execute' do
     end
   end
 
+  describe 'topics' do
+    subject(:project) { create_project(user, opts) }
+
+    context "with 'topics' parameter" do
+      let(:opts) { { topics: 'topics' } }
+
+      it 'keeps them as specified' do
+        expect(project.topic_list).to eq(%w[topics])
+      end
+    end
+
+    context "with 'topic_list' parameter" do
+      let(:opts) { { topic_list: 'topic_list' } }
+
+      it 'keeps them as specified' do
+        expect(project.topic_list).to eq(%w[topic_list])
+      end
+    end
+
+    context "with 'tag_list' parameter (deprecated)" do
+      let(:opts) { { tag_list: 'tag_list' } }
+
+      it 'keeps them as specified' do
+        expect(project.topic_list).to eq(%w[tag_list])
+      end
+    end
+  end
+
   context 'user namespace' do
     it do
       project = create_project(user, opts)
@@ -270,7 +298,7 @@ RSpec.describe Projects::CreateService, '#execute' do
 
   context 'error handling' do
     it 'handles invalid options' do
-      opts[:default_branch] = 'master'
+      opts[:invalid] = 'option'
       expect(create_project(user, opts)).to eq(nil)
     end
   end
@@ -554,32 +582,49 @@ RSpec.describe Projects::CreateService, '#execute' do
         expect(branches.size).to eq(1)
         expect(branches.collect(&:name)).to contain_exactly('example_branch')
       end
+
+      describe 'advanced readme content', experiment: :new_project_readme_content do
+        before do
+          stub_experiments(new_project_readme_content: :advanced)
+        end
+
+        it_behaves_like 'creates README.md'
+
+        it 'includes advanced content in the README.md' do
+          content = project.repository.readme.data
+          expect(content).to include <<~MARKDOWN
+            git remote add origin #{project.http_url_to_repo}
+            git branch -M example_branch
+            git push -uf origin example_branch
+          MARKDOWN
+        end
+      end
     end
   end
 
-  describe 'create service for the project' do
+  describe 'create integration for the project' do
     subject(:project) { create_project(user, opts) }
 
-    context 'with an active service template' do
-      let!(:template_integration) { create(:prometheus_service, :template, api_url: 'https://prometheus.template.com/') }
+    context 'with an active integration template' do
+      let!(:template_integration) { create(:prometheus_integration, :template, api_url: 'https://prometheus.template.com/') }
 
-      it 'creates a service from the template' do
+      it 'creates an integration from the template' do
         expect(project.integrations.count).to eq(1)
         expect(project.integrations.first.api_url).to eq(template_integration.api_url)
         expect(project.integrations.first.inherit_from_id).to be_nil
       end
 
       context 'with an active instance-level integration' do
-        let!(:instance_integration) { create(:prometheus_service, :instance, api_url: 'https://prometheus.instance.com/') }
+        let!(:instance_integration) { create(:prometheus_integration, :instance, api_url: 'https://prometheus.instance.com/') }
 
-        it 'creates a service from the instance-level integration' do
+        it 'creates an integration from the instance-level integration' do
           expect(project.integrations.count).to eq(1)
           expect(project.integrations.first.api_url).to eq(instance_integration.api_url)
           expect(project.integrations.first.inherit_from_id).to eq(instance_integration.id)
         end
 
         context 'with an active group-level integration' do
-          let!(:group_integration) { create(:prometheus_service, group: group, project: nil, api_url: 'https://prometheus.group.com/') }
+          let!(:group_integration) { create(:prometheus_integration, group: group, project: nil, api_url: 'https://prometheus.group.com/') }
           let!(:group) do
             create(:group).tap do |group|
               group.add_owner(user)
@@ -593,14 +638,14 @@ RSpec.describe Projects::CreateService, '#execute' do
             }
           end
 
-          it 'creates a service from the group-level integration' do
+          it 'creates an integration from the group-level integration' do
             expect(project.integrations.count).to eq(1)
             expect(project.integrations.first.api_url).to eq(group_integration.api_url)
             expect(project.integrations.first.inherit_from_id).to eq(group_integration.id)
           end
 
           context 'with an active subgroup' do
-            let!(:subgroup_integration) { create(:prometheus_service, group: subgroup, project: nil, api_url: 'https://prometheus.subgroup.com/') }
+            let!(:subgroup_integration) { create(:prometheus_integration, group: subgroup, project: nil, api_url: 'https://prometheus.subgroup.com/') }
             let!(:subgroup) do
               create(:group, parent: group).tap do |subgroup|
                 subgroup.add_owner(user)
@@ -614,7 +659,7 @@ RSpec.describe Projects::CreateService, '#execute' do
               }
             end
 
-            it 'creates a service from the subgroup-level integration' do
+            it 'creates an integration from the subgroup-level integration' do
               expect(project.integrations.count).to eq(1)
               expect(project.integrations.first.api_url).to eq(subgroup_integration.api_url)
               expect(project.integrations.first.inherit_from_id).to eq(subgroup_integration.id)
@@ -658,7 +703,7 @@ RSpec.describe Projects::CreateService, '#execute' do
     create_project(user, opts)
   end
 
-  context 'when project has access to shared service' do
+  context 'when project has access to shared integration' do
     before do
       stub_feature_flags(projects_post_creation_worker: false)
     end
@@ -675,13 +720,13 @@ RSpec.describe Projects::CreateService, '#execute' do
         create(:clusters_integrations_prometheus, cluster: cluster)
       end
 
-      it 'creates PrometheusService record', :aggregate_failures do
+      it 'creates Integrations::Prometheus record', :aggregate_failures do
         project = create_project(user, opts.merge!(namespace_id: group.id))
-        service = project.prometheus_service
+        integration = project.prometheus_integration
 
-        expect(service.active).to be true
-        expect(service.manual_configuration?).to be false
-        expect(service.persisted?).to be true
+        expect(integration.active).to be true
+        expect(integration.manual_configuration?).to be false
+        expect(integration.persisted?).to be true
       end
     end
 
@@ -692,31 +737,31 @@ RSpec.describe Projects::CreateService, '#execute' do
         create(:clusters_integrations_prometheus, cluster: cluster)
       end
 
-      it 'creates PrometheusService record', :aggregate_failures do
+      it 'creates Integrations::Prometheus record', :aggregate_failures do
         project = create_project(user, opts)
-        service = project.prometheus_service
+        integration = project.prometheus_integration
 
-        expect(service.active).to be true
-        expect(service.manual_configuration?).to be false
-        expect(service.persisted?).to be true
+        expect(integration.active).to be true
+        expect(integration.manual_configuration?).to be false
+        expect(integration.persisted?).to be true
       end
 
       it 'cleans invalid record and logs warning', :aggregate_failures do
-        invalid_service_record = build(:prometheus_service, properties: { api_url: nil, manual_configuration: true }.to_json)
-        allow(PrometheusService).to receive(:new).and_return(invalid_service_record)
+        invalid_integration_record = build(:prometheus_integration, properties: { api_url: nil, manual_configuration: true }.to_json)
+        allow(::Integrations::Prometheus).to receive(:new).and_return(invalid_integration_record)
 
         expect(Gitlab::ErrorTracking).to receive(:track_exception).with(an_instance_of(ActiveRecord::RecordInvalid), include(extra: { project_id: a_kind_of(Integer) }))
         project = create_project(user, opts)
 
-        expect(project.prometheus_service).to be_nil
+        expect(project.prometheus_integration).to be_nil
       end
     end
 
     context 'shared Prometheus integration is not available' do
-      it 'does not persist PrometheusService record', :aggregate_failures do
+      it 'does not persist Integrations::Prometheus record' do
         project = create_project(user, opts)
 
-        expect(project.prometheus_service).to be_nil
+        expect(project.prometheus_integration).to be_nil
       end
     end
   end
@@ -778,7 +823,7 @@ RSpec.describe Projects::CreateService, '#execute' do
     end
   end
 
-  context 'with specialized_project_authorization_workers' do
+  context 'with specialized project_authorization workers' do
     let_it_be(:other_user) { create(:user) }
     let_it_be(:group) { create(:group) }
 
@@ -809,7 +854,7 @@ RSpec.describe Projects::CreateService, '#execute' do
       expect(AuthorizedProjectUpdate::ProjectCreateWorker).to(
         receive(:perform_async).and_call_original
       )
-      expect(AuthorizedProjectUpdate::UserRefreshWithLowUrgencyWorker).to(
+      expect(AuthorizedProjectUpdate::UserRefreshFromReplicaWorker).to(
         receive(:bulk_perform_in)
           .with(1.hour,
                 array_including([user.id], [other_user.id]),
@@ -818,34 +863,6 @@ RSpec.describe Projects::CreateService, '#execute' do
       )
 
       create_project(user, opts)
-    end
-
-    context 'when feature is disabled' do
-      before do
-        stub_feature_flags(specialized_project_authorization_workers: false)
-      end
-
-      it 'updates authorization for current_user' do
-        project = create_project(user, opts)
-
-        expect(
-          Ability.allowed?(user, :read_project, project)
-        ).to be_truthy
-      end
-
-      it 'uses AuthorizedProjectsWorker' do
-        expect(AuthorizedProjectsWorker).to(
-          receive(:bulk_perform_async).with(array_including([user.id], [other_user.id])).and_call_original
-        )
-        expect(AuthorizedProjectUpdate::ProjectCreateWorker).not_to(
-          receive(:perform_async)
-        )
-        expect(AuthorizedProjectUpdate::UserRefreshWithLowUrgencyWorker).not_to(
-          receive(:bulk_perform_in)
-        )
-
-        create_project(user, opts)
-      end
     end
   end
 

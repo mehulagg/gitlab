@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe Mutations::AppSec::Fuzzing::Api::CiConfiguration::Create do
+RSpec.describe Mutations::AppSec::Fuzzing::API::CiConfiguration::Create do
   let_it_be(:project) { create(:project) }
   let_it_be(:user) { create(:user) }
 

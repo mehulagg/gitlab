@@ -17,17 +17,49 @@
             = sprite_icon('dashboard')
           %span.nav-item-name
             = _('Security Dashboard')
+        %ul.sidebar-sub-level-items.is-fly-out-only
+          = nav_link(path: %w[dashboard#show], html_options: { class: "fly-out-top-item" } ) do
+            - if sidebar_refactor_disabled?
+              = link_to security_dashboard_path do
+                %strong.fly-out-top-item-name
+                  = _('Security Dashboard')
+            - else
+              %span.fly-out-top-item-container
+                %strong.fly-out-top-item-name
+                  = _('Security Dashboard')
+
       = nav_link(path: %w[vulnerabilities#index]) do
         = link_to security_vulnerabilities_path, class: 'shortcuts-project rspec-project-link' do
           .nav-icon-container
             = sprite_icon('list-bulleted')
           %span.nav-item-name
             = _('Vulnerability Report')
+        %ul.sidebar-sub-level-items.is-fly-out-only
+          = nav_link(path: %w[vulnerabilities#index], html_options: { class: "fly-out-top-item" } ) do
+            - if sidebar_refactor_disabled?
+              = link_to security_vulnerabilities_path do
+                %strong.fly-out-top-item-name
+                  = _('Vulnerability Report')
+            - else
+              %span.fly-out-top-item-container
+                %strong.fly-out-top-item-name
+                  = _('Vulnerability Report')
+
       = nav_link(path: %w[dashboard#settings]) do
         = link_to settings_security_dashboard_path, class: 'shortcuts-project rspec-project-link' do
           .nav-icon-container
             = sprite_icon('settings')
           %span.nav-item-name
             = _('Settings')
+        %ul.sidebar-sub-level-items.is-fly-out-only
+          = nav_link(path: %w[dashboard#settings], html_options: { class: "fly-out-top-item" } ) do
+            - if sidebar_refactor_disabled?
+              = link_to settings_security_dashboard_path do
+                %strong.fly-out-top-item-name
+                  = _('Settings')
+            - else
+              %span.fly-out-top-item-container
+                %strong.fly-out-top-item-name
+                  = _('Settings')
 
     = render 'shared/sidebar_toggle_button'

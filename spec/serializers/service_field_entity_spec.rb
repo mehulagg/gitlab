@@ -5,18 +5,18 @@ require 'spec_helper'
 RSpec.describe ServiceFieldEntity do
   let(:request) { double('request') }
 
-  subject { described_class.new(field, request: request, service: service).as_json }
+  subject { described_class.new(field, request: request, service: integration).as_json }
 
   before do
-    allow(request).to receive(:service).and_return(service)
+    allow(request).to receive(:service).and_return(integration)
   end
 
   describe '#as_json' do
     context 'Jira Service' do
-      let(:service) { create(:jira_service) }
+      let(:integration) { create(:jira_integration) }
 
       context 'field with type text' do
-        let(:field) { service.global_fields.find { |field| field[:name] == 'username' } }
+        let(:field) { integration_field('username') }
 
         it 'exposes correct attributes' do
           expected_hash = {
@@ -35,7 +35,7 @@ RSpec.describe ServiceFieldEntity do
       end
 
       context 'field with type password' do
-        let(:field) { service.global_fields.find { |field| field[:name] == 'password' } }
+        let(:field) { integration_field('password') }
 
         it 'exposes correct attributes but hides password' do
           expected_hash = {
@@ -55,10 +55,10 @@ RSpec.describe ServiceFieldEntity do
     end
 
     context 'EmailsOnPush Service' do
-      let(:service) { create(:emails_on_push_service, send_from_committer_email: '1') }
+      let(:integration) { create(:emails_on_push_integration, send_from_committer_email: '1') }
 
       context 'field with type checkbox' do
-        let(:field) { service.global_fields.find { |field| field[:name] == 'send_from_committer_email' } }
+        let(:field) { integration_field('send_from_committer_email') }
 
         it 'exposes correct attributes and casts value to Boolean' do
           expected_hash = {
@@ -77,7 +77,7 @@ RSpec.describe ServiceFieldEntity do
       end
 
       context 'field with type select' do
-        let(:field) { service.global_fields.find { |field| field[:name] == 'branches_to_be_notified' } }
+        let(:field) { integration_field('branches_to_be_notified') }
 
         it 'exposes correct attributes' do
           expected_hash = {
@@ -95,5 +95,9 @@ RSpec.describe ServiceFieldEntity do
         end
       end
     end
+  end
+
+  def integration_field(name)
+    integration.global_fields.find { |f| f[:name] == name }
   end
 end

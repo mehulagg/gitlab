@@ -17,7 +17,7 @@ as the hardware requirements that are needed to install and use GitLab.
 - Ubuntu (16.04/18.04/20.04)
 - Debian (9/10)
 - CentOS (7/8)
-- openSUSE Leap (15.1/15.2)
+- openSUSE Leap (15.2)
 - SUSE Linux Enterprise Server (12 SP2/12 SP5)
 - Red Hat Enterprise Linux (please use the CentOS packages and instructions)
 - Scientific Linux (please use the CentOS packages and instructions)
@@ -116,6 +116,7 @@ the following table) as these were used for development and testing:
 |----------------|----------------------------|
 | 10.0           | 9.6                        |
 | 13.0           | 11                         |
+| 14.0           | 12                         |
 
 You must also ensure the following extensions are loaded into every
 GitLab database. [Read more about this requirement, and troubleshooting](postgresql_extensions.md).
@@ -169,11 +170,13 @@ of GitLab Support or other GitLab engineers.
 ## Puma settings
 
 The recommended settings for Puma are determined by the infrastructure on which it's running.
-Omnibus GitLab defaults to the recommended Puma settings. Regardless of installation method, you can
-tune the Puma settings.
+The GitLab Linux package defaults to the recommended Puma settings. Regardless of installation method, you can
+tune the Puma settings:
 
-If you're using Omnibus GitLab, see [Puma settings](https://docs.gitlab.com/omnibus/settings/puma.html)
-for instructions on changing the Puma settings. If you're using the GitLab Helm chart, see the [`webservice` chart](https://docs.gitlab.com/charts/charts/gitlab/webservice/index.html).
+- If you're using the GitLab Linux package, see [Puma settings](../administration/operations/puma.md)
+  for instructions on changing the Puma settings.
+- If you're using the GitLab Helm chart, see the
+  [`webservice` chart](https://docs.gitlab.com/charts/charts/gitlab/webservice/index.html).
 
 ### Puma workers
 

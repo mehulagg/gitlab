@@ -52,7 +52,7 @@
     top: $system-header-height + $header-height;
   }
 
-  .content-wrapper {
+  .content-wrapper-margin {
     margin-top: $system-header-height + $header-height;
   }
 
@@ -60,7 +60,8 @@
   // System Header
   &.with-performance-bar {
     // main navigation
-    header.navbar-gitlab {
+    header.navbar-gitlab,
+    .fixed-top {
       top: $performance-bar-height + $system-header-height;
     }
 
@@ -90,7 +91,7 @@
     bottom: $system-footer-height;
   }
 
-  .content-wrapper {
+  .content-wrapper-margin {
     margin-bottom: 16px;
   }
 

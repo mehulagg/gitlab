@@ -17,6 +17,7 @@ RSpec.describe AppSec::Dast::SiteProfiles::UpdateService do
   let_it_be(:new_request_headers) { "Authorization: Bearer #{SecureRandom.hex}" }
   let_it_be(:new_auth_url) { "#{new_target_url}/login" }
   let_it_be(:new_auth_password) { SecureRandom.hex }
+  let_it_be(:new_auth_username) { generate(:email) }
 
   let(:default_params) do
     {
@@ -29,7 +30,7 @@ RSpec.describe AppSec::Dast::SiteProfiles::UpdateService do
       auth_url: new_auth_url,
       auth_username_field: 'login[username]',
       auth_password_field: 'login[password]',
-      auth_username: generate(:email),
+      auth_username: new_auth_username,
       auth_password: new_auth_password
     }
   end
@@ -79,6 +80,37 @@ RSpec.describe AppSec::Dast::SiteProfiles::UpdateService do
 
       it 'returns a dast_site_profile payload' do
         expect(payload).to be_a(DastSiteProfile)
+      end
+
+      it 'audits the update' do
+        profile = payload.reload
+        audit_events = AuditEvent.where(author_id: user.id)
+
+        aggregate_failures do
+          expect(audit_events.count).to be(9)
+
+          audit_events.each do |event|
+            expect(event.author).to eq(user)
+            expect(event.entity).to eq(project)
+            expect(event.target_id).to eq(profile.id)
+            expect(event.target_type).to eq('DastSiteProfile')
+            expect(event.target_details).to eq(profile.name)
+          end
+
+          custom_messages = audit_events.map(&:details).pluck(:custom_message)
+          expected_custom_messages = [
+            "Changed DAST site profile name from #{dast_profile.name} to #{new_profile_name}",
+            "Changed DAST site profile target_url from #{dast_profile.dast_site.url} to #{new_target_url}",
+            'Changed DAST site profile excluded_urls (long value omitted)',
+            "Changed DAST site profile auth_url from #{dast_profile.auth_url} to #{new_auth_url}",
+            "Changed DAST site profile auth_username_field from #{dast_profile.auth_username_field} to login[username]",
+            "Changed DAST site profile auth_password_field from #{dast_profile.auth_password_field} to login[password]",
+            "Changed DAST site profile auth_username from #{dast_profile.auth_username} to #{new_auth_username}",
+            "Changed DAST site profile auth_password (secret value omitted)",
+            "Changed DAST site profile request_headers (secret value omitted)"
+          ]
+          expect(custom_messages).to match_array(expected_custom_messages)
+        end
       end
 
       context 'when the target url is localhost' do

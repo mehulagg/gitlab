@@ -72,7 +72,6 @@ RSpec.describe 'getting Incident Management escalation policies' do
 
     context 'with escalation policies' do
       let_it_be(:policy) { create(:incident_management_escalation_policy, project: project) }
-      let_it_be(:second_policy) { create(:incident_management_escalation_policy, project: project) }
 
       let(:last_policy) { escalation_policies.last }
 
@@ -83,7 +82,6 @@ RSpec.describe 'getting Incident Management escalation policies' do
       it_behaves_like 'a working graphql query'
 
       it 'returns the correct properties of the escalation policy' do
-        expect(escalation_policies.size).to eq(2)
         expect(last_policy).to include(
           'id' => policy.to_global_id.to_s,
           'name' => policy.name,

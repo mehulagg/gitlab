@@ -16,6 +16,14 @@ module QA
                   element :edit_link
                 end
 
+                view 'ee/app/assets/javascripts/sidebar/components/iteration_sidebar_dropdown_widget.vue' do
+                  element :iteration_link
+                end
+
+                view 'app/views/shared/issuable/_sidebar.html.haml' do
+                  element :iteration_container
+                end
+
                 view 'ee/app/assets/javascripts/sidebar/components/weight/weight.vue' do
                   element :edit_weight_link
                   element :remove_weight_link

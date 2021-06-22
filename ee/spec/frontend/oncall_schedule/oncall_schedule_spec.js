@@ -12,7 +12,7 @@ import * as commonUtils from 'ee/oncall_schedules/utils/common_utils';
 import createMockApollo from 'helpers/mock_apollo_helper';
 import { extendedWrapper } from 'helpers/vue_test_utils_helper';
 import waitForPromises from 'helpers/wait_for_promises';
-import * as dateTimeUtility from '~/lib/utils/datetime_utility';
+import * as dateTimeUtility from '~/lib/utils/datetime/date_calculation_utility';
 import { getOncallSchedulesQueryResponse } from './mocks/apollo_mock';
 import mockTimezones from './mocks/mock_timezones.json';
 

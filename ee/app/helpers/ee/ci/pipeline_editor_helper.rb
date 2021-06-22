@@ -10,7 +10,8 @@ module EE
         return super unless project.licensed_feature_available?(:api_fuzzing)
 
         super.merge(
-          "api-fuzzing-configuration-path" => project_security_configuration_api_fuzzing_path(project)
+          "api-fuzzing-configuration-path" => project_security_configuration_api_fuzzing_path(project),
+          "dast-configuration-path" => project_security_configuration_dast_path(project)
         )
       end
     end

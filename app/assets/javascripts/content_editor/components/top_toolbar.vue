@@ -4,6 +4,7 @@ import { CONTENT_EDITOR_TRACKING_LABEL, TOOLBAR_CONTROL_TRACKING_ACTION } from '
 import { ContentEditor } from '../services/content_editor';
 import Divider from './divider.vue';
 import ToolbarButton from './toolbar_button.vue';
+import ToolbarLinkButton from './toolbar_link_button.vue';
 import ToolbarTextStyleDropdown from './toolbar_text_style_dropdown.vue';
 
 const trackingMixin = Tracking.mixin({
@@ -14,6 +15,7 @@ export default {
   components: {
     ToolbarButton,
     ToolbarTextStyleDropdown,
+    ToolbarLinkButton,
     Divider,
   },
   mixins: [trackingMixin],
@@ -62,11 +64,25 @@ export default {
       @execute="trackToolbarControlExecution"
     />
     <toolbar-button
+      data-testid="strike"
+      content-type="strike"
+      icon-name="strikethrough"
+      editor-command="toggleStrike"
+      :label="__('Strikethrough')"
+      :tiptap-editor="contentEditor.tiptapEditor"
+      @execute="trackToolbarControlExecution"
+    />
+    <toolbar-button
       data-testid="code"
       content-type="code"
       icon-name="code"
       editor-command="toggleCode"
       :label="__('Code')"
+      :tiptap-editor="contentEditor.tiptapEditor"
+      @execute="trackToolbarControlExecution"
+    />
+    <toolbar-link-button
+      data-testid="link"
       :tiptap-editor="contentEditor.tiptapEditor"
       @execute="trackToolbarControlExecution"
     />
@@ -77,6 +93,15 @@ export default {
       icon-name="quote"
       editor-command="toggleBlockquote"
       :label="__('Insert a quote')"
+      :tiptap-editor="contentEditor.tiptapEditor"
+      @execute="trackToolbarControlExecution"
+    />
+    <toolbar-button
+      data-testid="code-block"
+      content-type="codeBlock"
+      icon-name="doc-code"
+      editor-command="toggleCodeBlock"
+      :label="__('Insert a code block')"
       :tiptap-editor="contentEditor.tiptapEditor"
       @execute="trackToolbarControlExecution"
     />

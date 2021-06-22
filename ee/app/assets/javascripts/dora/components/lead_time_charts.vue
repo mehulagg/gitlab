@@ -139,7 +139,7 @@ export default {
 };
 </script>
 <template>
-  <div>
+  <div data-testid="lead-time-charts">
     <dora-chart-header
       :header-text="$options.i18n.chartHeaderText"
       :chart-description-text="$options.chartDescriptionText"

@@ -127,14 +127,6 @@ class Project < ApplicationRecord
   after_create :check_repository_absence!
 
   acts_as_ordered_taggable_on :topics
-  # The 'tag_list' alias and the 'tags' association are required during the 'tags -> topics' migration
-  # TODO: eliminate 'tag_list' and 'tags' in the further process of the migration
-  # https://gitlab.com/gitlab-org/gitlab/-/issues/328226
-  alias_attribute :tag_list, :topic_list
-  has_many :tags, -> { order("#{ActsAsTaggableOn::Tagging.table_name}.id") },
-                     class_name: 'ActsAsTaggableOn::Tag',
-                     through: :topic_taggings,
-                     source: :tag
 
   attr_accessor :old_path_with_namespace
   attr_accessor :template_name
@@ -154,43 +146,51 @@ class Project < ApplicationRecord
   has_one :last_event, -> {order 'events.created_at DESC'}, class_name: 'Event'
   has_many :boards
 
+  def self.integration_association_name(name)
+    if ::Integration.renamed?(name)
+      "#{name}_integration"
+    else
+      "#{name}_service"
+    end
+  end
+
   # Project integrations
-  has_one :asana_service, class_name: 'Integrations::Asana'
-  has_one :assembla_service, class_name: 'Integrations::Assembla'
-  has_one :bamboo_service, class_name: 'Integrations::Bamboo'
-  has_one :bugzilla_service, class_name: 'Integrations::Bugzilla'
-  has_one :buildkite_service, class_name: 'Integrations::Buildkite'
-  has_one :campfire_service, class_name: 'Integrations::Campfire'
-  has_one :confluence_service, class_name: 'Integrations::Confluence'
-  has_one :custom_issue_tracker_service, class_name: 'Integrations::CustomIssueTracker'
-  has_one :datadog_service, class_name: 'Integrations::Datadog'
-  has_one :discord_service, class_name: 'Integrations::Discord'
-  has_one :drone_ci_service, class_name: 'Integrations::DroneCi'
-  has_one :emails_on_push_service, class_name: 'Integrations::EmailsOnPush'
-  has_one :ewm_service, class_name: 'Integrations::Ewm'
-  has_one :external_wiki_service, class_name: 'Integrations::ExternalWiki'
-  has_one :flowdock_service, class_name: 'Integrations::Flowdock'
-  has_one :hangouts_chat_service, class_name: 'Integrations::HangoutsChat'
-  has_one :irker_service, class_name: 'Integrations::Irker'
-  has_one :jenkins_service, class_name: 'Integrations::Jenkins'
-  has_one :jira_service, class_name: 'Integrations::Jira'
-  has_one :mattermost_service, class_name: 'Integrations::Mattermost'
-  has_one :mattermost_slash_commands_service, class_name: 'Integrations::MattermostSlashCommands'
-  has_one :microsoft_teams_service, class_name: 'Integrations::MicrosoftTeams'
-  has_one :mock_ci_service, class_name: 'Integrations::MockCi'
-  has_one :packagist_service, class_name: 'Integrations::Packagist'
-  has_one :pipelines_email_service, class_name: 'Integrations::PipelinesEmail'
-  has_one :pivotaltracker_service, class_name: 'Integrations::Pivotaltracker'
-  has_one :pushover_service, class_name: 'Integrations::Pushover'
-  has_one :redmine_service, class_name: 'Integrations::Redmine'
-  has_one :slack_service, class_name: 'Integrations::Slack'
-  has_one :slack_slash_commands_service, class_name: 'Integrations::SlackSlashCommands'
-  has_one :teamcity_service, class_name: 'Integrations::Teamcity'
-  has_one :unify_circuit_service, class_name: 'Integrations::UnifyCircuit'
-  has_one :webex_teams_service, class_name: 'Integrations::WebexTeams'
-  has_one :youtrack_service, class_name: 'Integrations::Youtrack'
-  has_one :prometheus_service, inverse_of: :project
-  has_one :mock_monitoring_service
+  has_one :asana_integration, class_name: 'Integrations::Asana'
+  has_one :assembla_integration, class_name: 'Integrations::Assembla'
+  has_one :bamboo_integration, class_name: 'Integrations::Bamboo'
+  has_one :bugzilla_integration, class_name: 'Integrations::Bugzilla'
+  has_one :buildkite_integration, class_name: 'Integrations::Buildkite'
+  has_one :campfire_integration, class_name: 'Integrations::Campfire'
+  has_one :confluence_integration, class_name: 'Integrations::Confluence'
+  has_one :custom_issue_tracker_integration, class_name: 'Integrations::CustomIssueTracker'
+  has_one :datadog_integration, class_name: 'Integrations::Datadog'
+  has_one :discord_integration, class_name: 'Integrations::Discord'
+  has_one :drone_ci_integration, class_name: 'Integrations::DroneCi'
+  has_one :emails_on_push_integration, class_name: 'Integrations::EmailsOnPush'
+  has_one :ewm_integration, class_name: 'Integrations::Ewm'
+  has_one :external_wiki_integration, class_name: 'Integrations::ExternalWiki'
+  has_one :flowdock_integration, class_name: 'Integrations::Flowdock'
+  has_one :hangouts_chat_integration, class_name: 'Integrations::HangoutsChat'
+  has_one :irker_integration, class_name: 'Integrations::Irker'
+  has_one :jenkins_integration, class_name: 'Integrations::Jenkins'
+  has_one :jira_integration, class_name: 'Integrations::Jira'
+  has_one :mattermost_integration, class_name: 'Integrations::Mattermost'
+  has_one :mattermost_slash_commands_integration, class_name: 'Integrations::MattermostSlashCommands'
+  has_one :microsoft_teams_integration, class_name: 'Integrations::MicrosoftTeams'
+  has_one :mock_ci_integration, class_name: 'Integrations::MockCi'
+  has_one :mock_monitoring_integration, class_name: 'Integrations::MockMonitoring'
+  has_one :packagist_integration, class_name: 'Integrations::Packagist'
+  has_one :pipelines_email_integration, class_name: 'Integrations::PipelinesEmail'
+  has_one :pivotaltracker_integration, class_name: 'Integrations::Pivotaltracker'
+  has_one :prometheus_integration, class_name: 'Integrations::Prometheus', inverse_of: :project
+  has_one :pushover_integration, class_name: 'Integrations::Pushover'
+  has_one :redmine_integration, class_name: 'Integrations::Redmine'
+  has_one :slack_integration, class_name: 'Integrations::Slack'
+  has_one :slack_slash_commands_integration, class_name: 'Integrations::SlackSlashCommands'
+  has_one :teamcity_integration, class_name: 'Integrations::Teamcity'
+  has_one :unify_circuit_integration, class_name: 'Integrations::UnifyCircuit'
+  has_one :webex_teams_integration, class_name: 'Integrations::WebexTeams'
+  has_one :youtrack_integration, class_name: 'Integrations::Youtrack'
 
   has_one :root_of_fork_network,
           foreign_key: 'root_project_id',
@@ -400,7 +400,7 @@ class Project < ApplicationRecord
   accepts_nested_attributes_for :error_tracking_setting, update_only: true
   accepts_nested_attributes_for :metrics_setting, update_only: true, allow_destroy: true
   accepts_nested_attributes_for :grafana_integration, update_only: true, allow_destroy: true
-  accepts_nested_attributes_for :prometheus_service, update_only: true
+  accepts_nested_attributes_for :prometheus_integration, update_only: true
   accepts_nested_attributes_for :alerting_setting, update_only: true
 
   delegate :feature_available?, :builds_enabled?, :wiki_enabled?,
@@ -418,6 +418,7 @@ class Project < ApplicationRecord
   delegate :scheduled?, :started?, :in_progress?, :failed?, :finished?,
     prefix: :import, to: :import_state, allow_nil: true
   delegate :squash_always?, :squash_never?, :squash_enabled_by_default?, :squash_readonly?, to: :project_setting
+  delegate :squash_option, to: :project_setting
   delegate :no_import?, to: :import_state, allow_nil: true
   delegate :name, to: :owner, allow_nil: true, prefix: true
   delegate :members, to: :team, prefix: true
@@ -428,16 +429,17 @@ class Project < ApplicationRecord
   delegate :last_pipeline, to: :commit, allow_nil: true
   delegate :external_dashboard_url, to: :metrics_setting, allow_nil: true, prefix: true
   delegate :dashboard_timezone, to: :metrics_setting, allow_nil: true, prefix: true
-  delegate :default_git_depth, :default_git_depth=, to: :ci_cd_settings, prefix: :ci
-  delegate :forward_deployment_enabled, :forward_deployment_enabled=, :forward_deployment_enabled?, to: :ci_cd_settings, prefix: :ci
-  delegate :keep_latest_artifact, :keep_latest_artifact=, :keep_latest_artifact?, :keep_latest_artifacts_available?, to: :ci_cd_settings
+  delegate :default_git_depth, :default_git_depth=, to: :ci_cd_settings, prefix: :ci, allow_nil: true
+  delegate :forward_deployment_enabled, :forward_deployment_enabled=, :forward_deployment_enabled?, to: :ci_cd_settings, prefix: :ci, allow_nil: true
+  delegate :job_token_scope_enabled, :job_token_scope_enabled=, :job_token_scope_enabled?, to: :ci_cd_settings, prefix: :ci
+  delegate :keep_latest_artifact, :keep_latest_artifact=, :keep_latest_artifact?, :keep_latest_artifacts_available?, to: :ci_cd_settings, allow_nil: true
   delegate :restrict_user_defined_variables, :restrict_user_defined_variables=, :restrict_user_defined_variables?,
-    to: :ci_cd_settings
+    to: :ci_cd_settings, allow_nil: true
   delegate :actual_limits, :actual_plan_name, to: :namespace, allow_nil: true
   delegate :allow_merge_on_skipped_pipeline, :allow_merge_on_skipped_pipeline?,
     :allow_merge_on_skipped_pipeline=, :has_confluence?, :allow_editing_commit_messages?,
     to: :project_setting
-  delegate :active?, to: :prometheus_service, allow_nil: true, prefix: true
+  delegate :active?, to: :prometheus_integration, allow_nil: true, prefix: true
 
   delegate :log_jira_dvcs_integration_usage, :jira_dvcs_server_last_sync_at, :jira_dvcs_cloud_last_sync_at, to: :feature_usage
 
@@ -540,7 +542,7 @@ class Project < ApplicationRecord
   scope :for_milestones, ->(ids) { joins(:milestones).where('milestones.id' => ids).distinct }
   scope :with_push, -> { joins(:events).merge(Event.pushed_action) }
   scope :with_project_feature, -> { joins('LEFT JOIN project_features ON projects.id = project_features.project_id') }
-  scope :with_active_jira_services, -> { joins(:integrations).merge(::Integrations::Jira.active) } # rubocop:disable CodeReuse/ServiceClass
+  scope :with_active_jira_integrations, -> { joins(:integrations).merge(::Integrations::Jira.active) }
   scope :with_jira_dvcs_cloud, -> { joins(:feature_usage).merge(ProjectFeatureUsage.with_jira_dvcs_integration_enabled(cloud: true)) }
   scope :with_jira_dvcs_server, -> { joins(:feature_usage).merge(ProjectFeatureUsage.with_jira_dvcs_integration_enabled(cloud: false)) }
   scope :inc_routes, -> { includes(:route, namespace: :route) }
@@ -637,7 +639,7 @@ class Project < ApplicationRecord
   mount_uploader :bfg_object_map, AttachmentUploader
 
   def self.with_api_entity_associations
-    preload(:project_feature, :route, :tags, :group, :timelogs, namespace: [:route, :owner])
+    preload(:project_feature, :route, :topics, :group, :timelogs, namespace: [:route, :owner])
   end
 
   def self.with_web_entity_associations
@@ -822,6 +824,21 @@ class Project < ApplicationRecord
       with_merge_requests_enabled = with_merge_requests_available_for_user(user).select(:id)
 
       from_union([with_issues_enabled, with_merge_requests_enabled]).select(:id)
+    end
+
+    def find_by_url(url)
+      uri = URI(url)
+
+      return unless uri.host == Gitlab.config.gitlab.host
+
+      match = Rails.application.routes.recognize_path(url)
+
+      return if match[:unmatched_route].present?
+      return if match[:namespace_id].blank? || match[:id].blank?
+
+      find_by_full_path(match.values_at(:namespace_id, :id).join("/"))
+    rescue ActionController::RoutingError, URI::InvalidURIError
+      nil
     end
   end
 
@@ -1390,8 +1407,6 @@ class Project < ApplicationRecord
   end
 
   def disabled_services
-    return %w[datadog] unless Feature.enabled?(:datadog_ci_integration, self)
-
     []
   end
 
@@ -1759,7 +1774,7 @@ class Project < ApplicationRecord
   # rubocop: enable CodeReuse/ServiceClass
 
   # rubocop: disable CodeReuse/ServiceClass
-  def open_merge_requests_count
+  def open_merge_requests_count(_current_user = nil)
     Projects::OpenMergeRequestsCountService.new(self).count
   end
   # rubocop: enable CodeReuse/ServiceClass
@@ -1993,7 +2008,11 @@ class Project < ApplicationRecord
   end
 
   def export_file_exists?
-    export_file&.file
+    import_export_upload&.export_file_exists?
+  end
+
+  def export_archive_exists?
+    import_export_upload&.export_archive_exists?
   end
 
   def export_file
@@ -2033,7 +2052,6 @@ class Project < ApplicationRecord
       .append(key: 'CI_PROJECT_VISIBILITY', value: Gitlab::VisibilityLevel.string_level(visibility_level))
       .append(key: 'CI_PROJECT_REPOSITORY_LANGUAGES', value: repository_languages.map(&:name).join(',').downcase)
       .append(key: 'CI_DEFAULT_BRANCH', value: default_branch)
-      .append(key: 'CI_PROJECT_CONFIG_PATH', value: ci_config_path_or_default)
       .append(key: 'CI_CONFIG_PATH', value: ci_config_path_or_default)
   end
 
@@ -2616,6 +2634,15 @@ class Project < ApplicationRecord
     !!read_attribute(:merge_requests_author_approval)
   end
 
+  def container_registry_enabled
+    if Feature.enabled?(:read_container_registry_access_level, self.namespace, default_enabled: :yaml)
+      project_feature.container_registry_enabled?
+    else
+      read_attribute(:container_registry_enabled)
+    end
+  end
+  alias_method :container_registry_enabled?, :container_registry_enabled
+
   private
 
   def set_container_registry_access_level
@@ -2645,7 +2672,7 @@ class Project < ApplicationRecord
   end
 
   def build_service(name)
-    Integration.service_name_to_model(name).new(project_id: id)
+    Integration.integration_name_to_model(name).new(project_id: id)
   end
 
   def services_templates

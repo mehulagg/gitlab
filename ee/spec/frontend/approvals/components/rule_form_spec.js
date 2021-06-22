@@ -2,23 +2,16 @@ import { GlFormGroup, GlFormInput } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
 import Vue, { nextTick } from 'vue';
 import Vuex from 'vuex';
-import ApproverTypeSelect from 'ee/approvals/components/approver_type_select.vue';
 import ApproversList from 'ee/approvals/components/approvers_list.vue';
 import ApproversSelect from 'ee/approvals/components/approvers_select.vue';
 import RuleForm from 'ee/approvals/components/rule_form.vue';
-import {
-  TYPE_USER,
-  TYPE_GROUP,
-  TYPE_HIDDEN_GROUPS,
-  RULE_TYPE_EXTERNAL_APPROVAL,
-} from 'ee/approvals/constants';
+import { TYPE_USER, TYPE_GROUP, TYPE_HIDDEN_GROUPS } from 'ee/approvals/constants';
 import { createStoreOptions } from 'ee/approvals/stores';
 import projectSettingsModule from 'ee/approvals/stores/modules/project_settings';
 import ProtectedBranchesSelector from 'ee/vue_shared/components/branches_selector/protected_branches_selector.vue';
 import { stubComponent } from 'helpers/stub_component';
 import { extendedWrapper } from 'helpers/vue_test_utils_helper';
 import waitForPromises from 'helpers/wait_for_promises';
-import { createExternalRule } from '../mocks';
 
 const TEST_PROJECT_ID = '7';
 const TEST_RULE = {
@@ -39,10 +32,6 @@ const TEST_FALLBACK_RULE = {
   approvalsRequired: 1,
   isFallback: true,
 };
-const TEST_EXTERNAL_APPROVAL_RULE = {
-  ...createExternalRule(),
-  protectedBranches: TEST_PROTECTED_BRANCHES,
-};
 const TEST_LOCKED_RULE_NAME = 'LOCKED_RULE';
 const nameTakenError = {
   response: {
@@ -50,13 +39,6 @@ const nameTakenError = {
       message: {
         name: ['has already been taken'],
       },
-    },
-  },
-};
-const urlTakenError = {
-  response: {
-    data: {
-      message: ['External url has already been taken'],
     },
   },
 };
@@ -70,19 +52,11 @@ describe('EE Approvals RuleForm', () => {
   let store;
   let actions;
 
-  const createComponent = (props = {}, features = {}) => {
+  const createComponent = (props = {}) => {
     wrapper = extendedWrapper(
       shallowMount(RuleForm, {
         propsData: props,
         store: new Vuex.Store(store),
-
-        provide: {
-          glFeatures: {
-            ffComplianceApprovalGates: true,
-            scopedApprovalRules: true,
-            ...features,
-          },
-        },
         stubs: {
           GlFormGroup: stubComponent(GlFormGroup, {
             props: ['state', 'invalidFeedback'],
@@ -106,9 +80,6 @@ describe('EE Approvals RuleForm', () => {
   const findApproversValidation = () => wrapper.findByTestId('approvers-group');
   const findApproversList = () => wrapper.findComponent(ApproversList);
   const findProtectedBranchesSelector = () => wrapper.findComponent(ProtectedBranchesSelector);
-  const findApproverTypeSelect = () => wrapper.findComponent(ApproverTypeSelect);
-  const findExternalUrlInput = () => wrapper.findByTestId('status-checks-url');
-  const findExternalUrlValidation = () => wrapper.findByTestId('status-checks-url-group');
   const findBranchesValidation = () => wrapper.findByTestId('branches-group');
 
   const inputsAreValid = (inputs) => inputs.every((x) => x.props('state'));
@@ -126,20 +97,12 @@ describe('EE Approvals RuleForm', () => {
     findBranchesValidation(),
   ];
 
-  const findValidationForExternal = () => [
-    findNameValidation(),
-    findExternalUrlValidation(),
-    findBranchesValidation(),
-  ];
-
   beforeEach(() => {
     store = createStoreOptions(projectSettingsModule(), { projectId: TEST_PROJECT_ID });
 
-    ['postRule', 'putRule', 'deleteRule', 'putFallbackRule', 'postExternalApprovalRule'].forEach(
-      (actionName) => {
-        jest.spyOn(store.modules.approvals.actions, actionName).mockImplementation(() => {});
-      },
-    );
+    ['postRule', 'putRule', 'deleteRule', 'putFallbackRule'].forEach((actionName) => {
+      jest.spyOn(store.modules.approvals.actions, actionName).mockImplementation(() => {});
+    });
 
     ({ actions } = store.modules.approvals);
   });
@@ -227,112 +190,6 @@ describe('EE Approvals RuleForm', () => {
           await findForm().trigger('submit');
 
           expect(actions.postRule).toHaveBeenCalledWith(expect.anything(), expected);
-        });
-      });
-    });
-
-    describe('when the rule is an external rule', () => {
-      describe('with initial rule', () => {
-        beforeEach(() => {
-          createComponent({
-            isMrEdit: false,
-            initRule: TEST_EXTERNAL_APPROVAL_RULE,
-          });
-        });
-
-        it('does not render the approver type select input', () => {
-          expect(findApproverTypeSelect().exists()).toBe(false);
-        });
-
-        it('on load, it populates the external URL', () => {
-          expect(findExternalUrlInput().props('value')).toBe(
-            TEST_EXTERNAL_APPROVAL_RULE.externalUrl,
-          );
-        });
-      });
-
-      describe('without an initial rule', () => {
-        beforeEach(() => {
-          createComponent({
-            isMrEdit: false,
-          });
-          findApproverTypeSelect().vm.$emit('input', RULE_TYPE_EXTERNAL_APPROVAL);
-        });
-
-        it('renders the approver type select input', () => {
-          expect(findApproverTypeSelect().exists()).toBe(true);
-        });
-
-        it('renders the inputs for external rules', () => {
-          expect(findNameInput().exists()).toBe(true);
-          expect(findExternalUrlInput().exists()).toBe(true);
-          expect(findProtectedBranchesSelector().exists()).toBe(true);
-        });
-
-        it('does not render the user and group input fields', () => {
-          expect(findApprovalsRequiredInput().exists()).toBe(false);
-          expect(findApproversList().exists()).toBe(false);
-          expect(findApproversSelect().exists()).toBe(false);
-        });
-
-        it('at first, shows no validation', () => {
-          expect(inputsAreValid(findValidationForExternal())).toBe(true);
-        });
-
-        it('on submit, does not dispatch action', async () => {
-          await findForm().trigger('submit');
-
-          expect(actions.postExternalApprovalRule).not.toHaveBeenCalled();
-        });
-
-        it('on submit, shows external URL validation', async () => {
-          findNameInput().setValue('');
-
-          await findForm().trigger('submit');
-          await nextTick();
-
-          const externalUrlGroup = findExternalUrlValidation();
-          expect(externalUrlGroup.props('state')).toBe(false);
-          expect(externalUrlGroup.props('invalidFeedback')).toBe('Please provide a valid URL');
-        });
-
-        describe('with valid data', () => {
-          const branches = [TEST_PROTECTED_BRANCHES[0]];
-          const expected = {
-            id: null,
-            name: 'Lorem',
-            externalUrl: 'https://gitlab.com/',
-            protectedBranchIds: branches.map((x) => x.id),
-          };
-
-          beforeEach(async () => {
-            await findNameInput().vm.$emit('input', expected.name);
-            await findExternalUrlInput().vm.$emit('input', expected.externalUrl);
-            await findProtectedBranchesSelector().vm.$emit('input', branches[0]);
-          });
-
-          it('on submit, posts external approval rule', async () => {
-            await findForm().trigger('submit');
-
-            expect(actions.postExternalApprovalRule).toHaveBeenCalledWith(
-              expect.anything(),
-              expected,
-            );
-          });
-
-          it('when submitted with a duplicate external URL, shows the "url already taken" validation', async () => {
-            store.state.settings.prefix = 'project-settings';
-            actions.postExternalApprovalRule.mockRejectedValueOnce(urlTakenError);
-
-            await findForm().trigger('submit');
-            await waitForPromises();
-
-            const externalUrlGroup = findExternalUrlValidation();
-            expect(externalUrlGroup.props('state')).toBe(false);
-            expect(externalUrlGroup.props('invalidFeedback')).toBe(
-              'External url has already been taken',
-            );
-          });
         });
       });
     });
@@ -655,13 +512,13 @@ describe('EE Approvals RuleForm', () => {
 
     describe('with approval suggestions', () => {
       describe.each`
-        defaultRuleName          | expectedDisabledAttribute | approverTypeSelect
-        ${'Vulnerability-Check'} | ${true}                   | ${false}
-        ${'License-Check'}       | ${true}                   | ${false}
-        ${'Foo Bar Baz'}         | ${false}                  | ${true}
+        defaultRuleName          | expectedDisabledAttribute
+        ${'Vulnerability-Check'} | ${true}
+        ${'License-Check'}       | ${true}
+        ${'Foo Bar Baz'}         | ${false}
       `(
         'with defaultRuleName set to $defaultRuleName',
-        ({ defaultRuleName, expectedDisabledAttribute, approverTypeSelect }) => {
+        ({ defaultRuleName, expectedDisabledAttribute }) => {
           beforeEach(() => {
             createComponent({
               initRule: null,
@@ -674,12 +531,6 @@ describe('EE Approvals RuleForm', () => {
             expectedDisabledAttribute ? 'disables' : 'does not disable'
           } the name text field`, () => {
             expect(findNameInput().props('disabled')).toBe(expectedDisabledAttribute);
-          });
-
-          it(`${
-            approverTypeSelect ? 'renders' : 'does not render'
-          } the approver type select`, () => {
-            expect(findApproverTypeSelect().exists()).toBe(approverTypeSelect);
           });
         },
       );
@@ -846,16 +697,6 @@ describe('EE Approvals RuleForm', () => {
           );
         });
       });
-    });
-  });
-
-  describe('when the status check feature is disabled', () => {
-    it('does not render the approver type select input', async () => {
-      createComponent({ isMrEdit: false }, { ffComplianceApprovalGates: false });
-
-      await nextTick();
-
-      expect(findApproverTypeSelect().exists()).toBe(false);
     });
   });
 });

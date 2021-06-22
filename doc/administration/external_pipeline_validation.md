@@ -5,7 +5,7 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 type: reference, howto
 ---
 
-# External pipeline validation
+# External pipeline validation **(FREE SELF)**
 
 You can use an external service to validate a pipeline before it's created.
 
@@ -119,6 +119,17 @@ required number of seconds.
       }
     },
     "namespace": {
+      "type": "object",
+      "required": [
+        "plan",
+        "trial"
+      ],
+      "properties": {
+        "plan": { "type": "string" },
+        "trial": { "type": "boolean" }
+      }
+    },
+    "provisioning_group": {
       "type": "object",
       "required": [
         "plan",

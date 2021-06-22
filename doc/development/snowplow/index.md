@@ -24,7 +24,7 @@ More useful links:
 
 Snowplow is an enterprise-grade marketing and Product Intelligence platform which helps track the way users engage with our website and application.
 
-[Snowplow](https://github.com/snowplow/snowplow) consists of the following loosely-coupled sub-systems:
+[Snowplow](https://snowplowanalytics.com) consists of the following loosely-coupled sub-systems:
 
 - **Trackers** fire Snowplow events. Snowplow has 12 trackers, covering web, mobile, desktop, server, and IoT.
 - **Collectors** receive Snowplow events from trackers. We have three different event collectors, synchronizing events either to Amazon S3, Apache Kafka, or Amazon Kinesis.
@@ -35,15 +35,11 @@ Snowplow is an enterprise-grade marketing and Product Intelligence platform whic
 
 ![snowplow_flow](../img/snowplow_flow.png)
 
-## Snowplow schema
+### Useful links
 
-We have many definitions of Snowplow's schema. We have an active issue to [standardize this schema](https://gitlab.com/gitlab-org/gitlab/-/issues/207930) including the following definitions:
-
-- Frontend and backend taxonomy as listed below
-- [Structured event taxonomy](#structured-event-taxonomy)
-- [Self describing events](https://github.com/snowplow/snowplow/wiki/Custom-events#self-describing-events)
-- [Iglu schema](https://gitlab.com/gitlab-org/iglu/)
-- [Snowplow authored events](https://github.com/snowplow/snowplow/wiki/Snowplow-authored-events)
+- [Understanding the structure of Snowplow data](https://docs.snowplowanalytics.com/docs/understanding-your-pipeline/canonical-event/)
+- [Our Iglu schema registry](https://gitlab.com/gitlab-org/iglu)
+- [List of events used in our codebase (Event Dictionary)](dictionary.md)
 
 ## Enable Snowplow tracking
 
@@ -57,7 +53,7 @@ Snowplow tracking is enabled on GitLab.com, and we use it for most of our tracki
 
 To enable Snowplow tracking on a self-managed instance:
 
-1. Go to the Admin Area (**{admin}**) and select **Settings > General**.  
+1. On the top bar, select **Menu >** **{admin}** **Admin**, then select **Settings > General**.
    Alternatively, go to `admin/application_settings/general` in your browser.
 
 1. Expand **Snowplow**.
@@ -162,7 +158,7 @@ Snowplow JS adds many [web-specific parameters](https://docs.snowplowanalytics.c
 
 ## Implementing Snowplow JS (Frontend) tracking
 
-GitLab provides `Tracking`, an interface that wraps the [Snowplow JavaScript Tracker](https://github.com/snowplow/snowplow/wiki/javascript-tracker) for tracking custom events. The simplest way to use it is to add `data-` attributes to clickable elements and dropdowns. There is also a Vue mixin (exposing a `track` method), and the static method `Tracking.event`. Each of these requires at minimum a `category` and an `action`. You can provide additional [Structured event taxonomy](#structured-event-taxonomy) properties along with an `extra` object that accepts key-value pairs.
+GitLab provides `Tracking`, an interface that wraps the [Snowplow JavaScript Tracker](https://docs.snowplowanalytics.com/docs/collecting-data/collecting-from-own-applications/javascript-trackers) for tracking custom events. The simplest way to use it is to add `data-` attributes to clickable elements and dropdowns. There is also a Vue mixin (exposing a `track` method), and the static method `Tracking.event`. Each of these requires at minimum a `category` and an `action`. You can provide additional [Structured event taxonomy](#structured-event-taxonomy) properties along with an `extra` object that accepts key-value pairs.
 
 | field      | type   | default value              | description                                                                                                                                                                                                    |
 |:-----------|:-------|:---------------------------|:---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
@@ -404,9 +400,49 @@ describe('MyTracking', () => {
 });
 ```
 
+### Form tracking
+
+You can enable Snowplow automatic [form tracking](https://docs.snowplowanalytics.com/docs/collecting-data/collecting-from-own-applications/javascript-trackers/javascript-tracker/javascript-tracker-v2/tracking-specific-events/#form-tracking) by calling `Tracking.enableFormTracking` (after the DOM is ready) and providing a `config` object that includes at least one of the following elements:
+
+- `forms`: determines which forms are tracked, and are identified by the CSS class name.
+- `fields`: determines which fields inside the tracked forms are tracked, and are identified by the field `name`.
+
+An optional list of contexts can be provided as the second argument.
+Note that our [`gitlab_standard`](#gitlab_standard) schema is excluded from these events.
+
+```javascript
+Tracking.enableFormTracking({
+  forms: { allow: ['sign-in-form', 'password-recovery-form'] },
+  fields: { allow: ['terms_and_conditions', 'newsletter_agreement'] },
+});
+```
+
+#### Testing example
+
+```javascript
+import Tracking from '~/tracking';
+
+describe('MyFormTracking', () => {
+  let formTrackingSpy;
+
+  beforeEach(() => {
+    formTrackingSpy = jest
+      .spyOn(Tracking, 'enableFormTracking')
+      .mockImplementation(() => null);
+  });
+
+  it('initialized with the correct configuration', () => {
+    expect(formTrackingSpy).toHaveBeenCalledWith({
+      forms: { allow: ['sign-in-form', 'password-recovery-form'] },
+      fields: { allow: ['terms_and_conditions', 'newsletter_agreement'] },
+    });
+  });
+});
+```
+
 ## Implementing Snowplow Ruby (Backend) tracking
 
-GitLab provides `Gitlab::Tracking`, an interface that wraps the [Snowplow Ruby Tracker](https://github.com/snowplow/snowplow/wiki/ruby-tracker) for tracking custom events.
+GitLab provides `Gitlab::Tracking`, an interface that wraps the [Snowplow Ruby Tracker](https://docs.snowplowanalytics.com/docs/collecting-data/collecting-from-own-applications/ruby-tracker) for tracking custom events.
 
 Custom event tracking and instrumentation can be added by directly calling the `GitLab::Tracking.event` class method, which accepts the following arguments:
 
@@ -513,13 +549,13 @@ Snowplow Micro is a Docker-based solution for testing frontend and backend event
    update application_settings set snowplow_collector_hostname='localhost:9090', snowplow_enabled=true, snowplow_cookie_domain='.gitlab.com';
    ```
 
-1. Update `DEFAULT_SNOWPLOW_OPTIONS` in `app/assets/javascripts/tracking.js` to remove `forceSecureTracker: true`:
+1. Update `DEFAULT_SNOWPLOW_OPTIONS` in `app/assets/javascripts/tracking/index.js` to remove `forceSecureTracker: true`:
 
    ```diff
-   diff --git a/app/assets/javascripts/tracking.js b/app/assets/javascripts/tracking.js
+   diff --git a/app/assets/javascripts/tracking/index.js b/app/assets/javascripts/tracking/index.js
    index 0a1211d0a76..3b98c8f28f2 100644
-   --- a/app/assets/javascripts/tracking.js
-   +++ b/app/assets/javascripts/tracking.js
+   --- a/app/assets/javascripts/tracking/index.js
+   +++ b/app/assets/javascripts/tracking/index.js
    @@ -7,7 +7,6 @@ const DEFAULT_SNOWPLOW_OPTIONS = {
       appId: '',
       userFingerprint: false,

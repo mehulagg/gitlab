@@ -1,16 +1,17 @@
 <script>
 import { GlDrawer } from '@gitlab/ui';
 import { mapState, mapActions, mapGetters } from 'vuex';
-import BoardSidebarDueDate from '~/boards/components/sidebar/board_sidebar_due_date.vue';
+import SidebarDropdownWidget from 'ee_else_ce/sidebar/components/sidebar_dropdown_widget.vue';
 import BoardSidebarLabelsSelect from '~/boards/components/sidebar/board_sidebar_labels_select.vue';
-import BoardSidebarMilestoneSelect from '~/boards/components/sidebar/board_sidebar_milestone_select.vue';
 import BoardSidebarTimeTracker from '~/boards/components/sidebar/board_sidebar_time_tracker.vue';
 import BoardSidebarTitle from '~/boards/components/sidebar/board_sidebar_title.vue';
 import { ISSUABLE } from '~/boards/constants';
 import { contentTop } from '~/lib/utils/common_utils';
 import SidebarAssigneesWidget from '~/sidebar/components/assignees/sidebar_assignees_widget.vue';
 import SidebarConfidentialityWidget from '~/sidebar/components/confidential/sidebar_confidentiality_widget.vue';
+import SidebarDateWidget from '~/sidebar/components/date/sidebar_date_widget.vue';
 import SidebarSubscriptionsWidget from '~/sidebar/components/subscriptions/sidebar_subscriptions_widget.vue';
+import glFeatureFlagMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 
 export default {
   headerHeight: `${contentTop()}px`,
@@ -18,17 +19,18 @@ export default {
     GlDrawer,
     BoardSidebarTitle,
     SidebarAssigneesWidget,
+    SidebarDateWidget,
     SidebarConfidentialityWidget,
     BoardSidebarTimeTracker,
     BoardSidebarLabelsSelect,
-    BoardSidebarDueDate,
     SidebarSubscriptionsWidget,
-    BoardSidebarMilestoneSelect,
+    SidebarDropdownWidget,
     BoardSidebarWeightInput: () =>
       import('ee_component/boards/components/sidebar/board_sidebar_weight_input.vue'),
-    SidebarDropdownWidget: () =>
-      import('ee_component/sidebar/components/sidebar_dropdown_widget.vue'),
+    IterationSidebarDropdownWidget: () =>
+      import('ee_component/sidebar/components/iteration_sidebar_dropdown_widget.vue'),
   },
+  mixins: [glFeatureFlagMixin()],
   inject: {
     multipleAssigneesFeatureAvailable: {
       default: false,
@@ -97,21 +99,45 @@ export default {
         data-testid="sidebar-epic"
       />
       <div>
-        <board-sidebar-milestone-select />
         <sidebar-dropdown-widget
-          v-if="iterationFeatureAvailable"
           :iid="activeBoardItem.iid"
-          issuable-attribute="iteration"
+          issuable-attribute="milestone"
           :workspace-path="projectPathForActiveIssue"
-          :attr-workspace-path="groupPathForActiveIssue"
+          :attr-workspace-path="projectPathForActiveIssue"
           :issuable-type="issuableType"
-          class="gl-mt-5"
-          data-testid="iteration-edit"
-          data-qa-selector="iteration_container"
+          data-testid="sidebar-milestones"
         />
+        <template v-if="!glFeatures.iterationCadences">
+          <sidebar-dropdown-widget
+            v-if="iterationFeatureAvailable"
+            :iid="activeBoardItem.iid"
+            issuable-attribute="iteration"
+            :workspace-path="projectPathForActiveIssue"
+            :attr-workspace-path="groupPathForActiveIssue"
+            :issuable-type="issuableType"
+            class="gl-mt-5"
+            data-testid="iteration-edit"
+          />
+        </template>
+        <template v-else>
+          <iteration-sidebar-dropdown-widget
+            v-if="iterationFeatureAvailable"
+            :iid="activeBoardItem.iid"
+            :workspace-path="projectPathForActiveIssue"
+            :attr-workspace-path="groupPathForActiveIssue"
+            :issuable-type="issuableType"
+            class="gl-mt-5"
+            data-testid="iteration-edit"
+          />
+        </template>
       </div>
       <board-sidebar-time-tracker class="swimlanes-sidebar-time-tracker" />
-      <board-sidebar-due-date />
+      <sidebar-date-widget
+        :iid="activeBoardItem.iid"
+        :full-path="fullPath"
+        :issuable-type="issuableType"
+        data-testid="sidebar-due-date"
+      />
       <board-sidebar-labels-select class="labels" />
       <board-sidebar-weight-input v-if="weightFeatureAvailable" class="weight" />
       <sidebar-confidentiality-widget

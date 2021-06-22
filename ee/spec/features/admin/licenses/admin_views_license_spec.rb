@@ -85,14 +85,13 @@ RSpec.describe "Admin views license" do
         license_history = page.find("#license_history")
         highlighted_license_row = license_history.find("[data-testid='license-current']")
 
-        expect(highlighted_license_row).to have_content(license.licensee[:name])
-        expect(highlighted_license_row).to have_content(license.licensee[:email])
-        expect(highlighted_license_row).to have_content(license.licensee[:company])
+        expect(highlighted_license_row).to have_content(license.licensee.fetch('Name'))
+        expect(highlighted_license_row).to have_content(license.licensee.fetch('Email'))
+        expect(highlighted_license_row).to have_content(license.licensee.fetch('Company'))
         expect(highlighted_license_row).to have_content(license.plan.capitalize)
         expect(highlighted_license_row).to have_content(I18n.l(license.created_at, format: :with_timezone))
         expect(highlighted_license_row).to have_content(I18n.l(license.starts_at))
         expect(highlighted_license_row).to have_content(I18n.l(license.expires_at))
-        expect(highlighted_license_row).to have_content(license.restrictions[:active_user_count])
       end
     end
   end
@@ -139,15 +138,44 @@ RSpec.describe "Admin views license" do
 
         expect(license_history).to have_css('tbody tr', count: 1)
 
-        expect(license_history_row).to have_content(license.licensee[:name])
-        expect(license_history_row).to have_content(license.licensee[:email])
-        expect(license_history_row).to have_content(license.licensee[:company])
+        expect(license_history_row).to have_content(license.licensee.fetch('Name'))
+        expect(license_history_row).to have_content(license.licensee.fetch('Email'))
+        expect(license_history_row).to have_content(license.licensee.fetch('Company'))
         expect(license_history_row).to have_content(license.plan.capitalize)
         expect(license_history_row).to have_content(I18n.l(license.created_at, format: :with_timezone))
         expect(license_history_row).to have_content(I18n.l(license.starts_at))
         expect(license_history_row).to have_content(I18n.l(license.expires_at))
-        expect(license_history_row).to have_content(license.restrictions[:active_user_count])
       end
+    end
+  end
+
+  describe 'qrtly reconciliation alert', :js do
+    context 'on self-managed' do
+      context 'when qrtly reconciliation is available' do
+        let_it_be(:reconciliation) { create(:upcoming_reconciliation, :self_managed) }
+
+        before do
+          visit(admin_license_path)
+        end
+
+        it_behaves_like 'a visible dismissible qrtly reconciliation alert'
+      end
+
+      context 'when qrtly reconciliation is not available' do
+        before do
+          visit(admin_license_path)
+        end
+
+        it_behaves_like 'a hidden qrtly reconciliation alert'
+      end
+    end
+
+    context 'on dotcom' do
+      before do
+        visit(admin_license_path)
+      end
+
+      it_behaves_like 'a hidden qrtly reconciliation alert'
     end
   end
 end

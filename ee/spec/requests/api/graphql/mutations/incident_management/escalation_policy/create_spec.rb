@@ -75,7 +75,7 @@ RSpec.describe 'creating escalation policy' do
       it 'raises an error' do
         resolve
 
-        expect(mutation_response['errors'][0]).to eq("A rule must be provided to create an escalation policy")
+        expect(mutation_response['errors'][0]).to eq('Escalation policies must have at least one rule')
       end
     end
 
@@ -87,7 +87,7 @@ RSpec.describe 'creating escalation policy' do
       it 'raises an error' do
         resolve
 
-        expect_graphql_errors_to_include("Escalation policies are not supported for this project")
+        expect_graphql_errors_to_include('Escalation policies are not supported for this project')
       end
     end
   end

@@ -40,7 +40,7 @@ When using Vuex at GitLab, separate these concerns into different files to impro
 
 The following example shows an application that lists and adds users to the
 state. (For a more complex example implementation, review the security
-applications stored in this [repository](https://gitlab.com/gitlab-org/gitlab/tree/master/ee/app/assets/javascripts/vue_shared/security_reports/store)).
+applications stored in this [repository](https://gitlab.com/gitlab-org/gitlab/-/tree/master/ee/app/assets/javascripts/vue_shared/security_reports/store)).
 
 ### `index.js`
 
@@ -106,7 +106,7 @@ In this file, we write the actions that call mutations for handling a list of us
       .then(({ data }) => commit(types.RECEIVE_USERS_SUCCESS, data))
       .catch((error) => {
         commit(types.RECEIVE_USERS_ERROR, error)
-        createFlash('There was an error')
+        createFlash({ message: 'There was an error' })
       });
   }
 

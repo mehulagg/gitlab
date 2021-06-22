@@ -728,14 +728,14 @@ RSpec.describe ::SystemNotes::IssuablesService do
       let(:noteable) { ExternalIssue.new('EXT-1234', project) }
 
       it 'is false with issue tracker supporting referencing' do
-        create(:jira_service, project: project)
+        create(:jira_integration, project: project)
         project.reload
 
         expect(service.cross_reference_disallowed?(noteable)).to be_falsey
       end
 
       it 'is true with issue tracker not supporting referencing' do
-        create(:bugzilla_service, project: project)
+        create(:bugzilla_integration, project: project)
         project.reload
 
         expect(service.cross_reference_disallowed?(noteable)).to be_truthy

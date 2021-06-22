@@ -117,14 +117,14 @@ export default {
         <td class="w-0 gl-pr-4!"><approved-icon class="gl-pl-2" :is-approved="rule.approved" /></td>
         <td :colspan="rule.rule_type === $options.ruleTypeAnyApprover ? 2 : 1" class="gl-pl-0!">
           <div
-            :class="glFeatures.approvalsCommentedBy ? 'd-md-block' : 'd-sm-block'"
-            class="d-none js-name"
+            :class="glFeatures.approvalsCommentedBy ? 'd-md-flex' : 'd-sm-flex'"
+            class="d-none js-name align-items-center"
           >
             <empty-rule-name
               v-if="rule.rule_type === $options.ruleTypeAnyApprover"
               :eligible-approvers-docs-path="eligibleApproversDocsPath"
             />
-            <span v-else>
+            <span v-else class="mt-n1">
               <span
                 v-if="rule.section && rule.section !== 'codeowners'"
                 :aria-label="sectionNameLabel(rule)"

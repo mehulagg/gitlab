@@ -779,7 +779,7 @@ RSpec.describe MergeRequest, factory_default: :keep do
 
     context 'when both internal and external issue trackers are enabled' do
       before do
-        create(:jira_service, project: subject.project)
+        create(:jira_integration, project: subject.project)
         subject.project.reload
       end
 
@@ -1310,7 +1310,7 @@ RSpec.describe MergeRequest, factory_default: :keep do
         subject.project.add_developer(subject.author)
         commit = double(:commit, safe_message: 'Fixes TEST-3')
 
-        create(:jira_service, project: subject.project)
+        create(:jira_integration, project: subject.project)
         subject.project.reload
 
         allow(subject).to receive(:commits).and_return([commit])
@@ -4906,7 +4906,6 @@ RSpec.describe MergeRequest, factory_default: :keep do
       subject { merge_request.enabled_reports[report_type] }
 
       before do
-        stub_feature_flags(drop_license_management_artifact: false)
         stub_licensed_features({ feature => true })
       end
 
@@ -4950,6 +4949,17 @@ RSpec.describe MergeRequest, factory_default: :keep do
       let(:diff_stats) { [double(path: '.gitlab-ci.yml')] }
 
       it { is_expected.to eq(true) }
+    end
+  end
+
+  describe '.from_fork' do
+    let!(:project) { create(:project, :repository) }
+    let!(:forked_project) { fork_project(project) }
+    let!(:fork_mr) { create(:merge_request, source_project: forked_project, target_project: project) }
+    let!(:regular_mr) { create(:merge_request, source_project: project) }
+
+    it 'returns merge requests from forks only' do
+      expect(described_class.from_fork).to eq([fork_mr])
     end
   end
 end

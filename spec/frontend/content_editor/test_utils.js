@@ -15,10 +15,28 @@ import { Editor } from '@tiptap/vue-2';
  * include in the editor
  * @returns An instance of a Tiptap’s Editor class
  */
-export const createTestEditor = ({ extensions = [] }) => {
+export const createTestEditor = ({ extensions = [] } = {}) => {
   return new Editor({
     extensions: [Document, Text, Paragraph, ...extensions],
   });
+};
+
+export const mockChainedCommands = (editor, commandNames = []) => {
+  const commandMocks = commandNames.reduce(
+    (accum, commandName) => ({
+      ...accum,
+      [commandName]: jest.fn(),
+    }),
+    {},
+  );
+
+  Object.keys(commandMocks).forEach((commandName) => {
+    commandMocks[commandName].mockReturnValue(commandMocks);
+  });
+
+  jest.spyOn(editor, 'chain').mockImplementation(() => commandMocks);
+
+  return commandMocks;
 };
 
 /**

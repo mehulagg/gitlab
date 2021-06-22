@@ -7,7 +7,7 @@ import {
 } from 'ee/oncall_schedules/constants';
 import CommonMixin from 'ee/oncall_schedules/mixins/common_mixin';
 import { useFakeDate } from 'helpers/fake_date';
-import * as dateTimeUtility from '~/lib/utils/datetime_utility';
+import * as dateTimeUtility from '~/lib/utils/datetime/date_calculation_utility';
 
 describe('Schedule Common Mixins', () => {
   // January 3rd, 2018

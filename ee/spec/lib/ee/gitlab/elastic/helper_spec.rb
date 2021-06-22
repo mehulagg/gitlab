@@ -18,7 +18,7 @@ RSpec.describe Gitlab::Elastic::Helper, :request_store do
   end
 
   after do
-    helper.delete_index(index_name: @index_name)
+    helper.delete_index(index_name: @index_name) if @index_name
   end
 
   describe '.new' do

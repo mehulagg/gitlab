@@ -125,10 +125,10 @@ RSpec.describe Gitlab::Database do
       expect(described_class.postgresql_minimum_supported_version?).to eq(false)
     end
 
-    it 'returns true when using PostgreSQL 11' do
+    it 'returns false when using PostgreSQL 11' do
       allow(described_class).to receive(:version).and_return('11')
 
-      expect(described_class.postgresql_minimum_supported_version?).to eq(true)
+      expect(described_class.postgresql_minimum_supported_version?).to eq(false)
     end
 
     it 'returns true when using PostgreSQL 12' do
@@ -411,6 +411,23 @@ RSpec.describe Gitlab::Database do
       connection = double(select_all: [])
 
       expect(described_class.get_write_location(connection)).to be_nil
+    end
+  end
+
+  describe '.dbname' do
+    it 'returns the dbname for the connection' do
+      connection = ActiveRecord::Base.connection
+
+      expect(described_class.dbname(connection)).to be_a(String)
+      expect(described_class.dbname(connection)).to eq(connection.pool.db_config.database)
+    end
+
+    context 'when the pool is a NullPool' do
+      it 'returns unknown' do
+        connection = double(:active_record_connection, pool: ActiveRecord::ConnectionAdapters::NullPool.new)
+
+        expect(described_class.dbname(connection)).to eq('unknown')
+      end
     end
   end
 

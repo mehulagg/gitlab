@@ -37,7 +37,7 @@ RSpec.describe Gitlab::UsageData do
       create(:prometheus_alert, project: projects[0])
       create(:prometheus_alert, project: projects[1])
 
-      create(:jira_service, project: projects[0], issues_enabled: true, project_key: 'GL')
+      create(:jira_integration, project: projects[0], issues_enabled: true, project_key: 'GL')
 
       create(:operations_feature_flag, project: projects[0])
 
@@ -79,6 +79,7 @@ RSpec.describe Gitlab::UsageData do
         elasticsearch_enabled
         geo_enabled
         license_trial_ends_on
+        license_billable_users
       ))
     end
 
@@ -180,6 +181,7 @@ RSpec.describe Gitlab::UsageData do
       expect(subject[:license_add_ons]).to eq(license.add_ons)
       expect(subject[:license_trial]).to eq(license.trial?)
       expect(subject[:license_subscription_id]).to eq(license.subscription_id)
+      expect(subject[:license_billable_users]).to eq(license.daily_billable_users_count)
     end
   end
 
@@ -257,9 +259,9 @@ RSpec.describe Gitlab::UsageData do
       for_defined_days_back do
         user = create(:user)
         project = create(:project, creator: user)
-        create(:slack_service, project: project)
-        create(:slack_slash_commands_service, project: project)
-        create(:prometheus_service, project: project)
+        create(:integrations_slack, project: project)
+        create(:slack_slash_commands_integration, project: project)
+        create(:prometheus_integration, project: project)
       end
 
       expect(described_class.usage_activity_by_stage_configure({})).to include(
@@ -463,7 +465,7 @@ RSpec.describe Gitlab::UsageData do
         user    = create(:user, dashboard: 'operations')
         project = create(:project, creator: user)
         create(:users_ops_dashboard_project, user: user)
-        create(:prometheus_service, project: project)
+        create(:prometheus_integration, project: project)
         create(:project_incident_management_setting, :sla_enabled, project: project)
       end
 
@@ -579,7 +581,7 @@ RSpec.describe Gitlab::UsageData do
         ds_bundler_audit_build = create(:ci_build, :failed, user: user, name: 'retirejs')
         ds_bundler_build = create(:ci_build, name: 'bundler-audit', user: user, commit_id: ds_build.pipeline.id, status: 'success')
         secret_detection_build = create(:ci_build, name: 'secret', user: user, commit_id: ds_build.pipeline.id, status: 'success')
-        cs_build = create(:ci_build, name: 'klar', user: user, status: 'success')
+        cs_build = create(:ci_build, name: 'container-scanning', user: user, status: 'success')
         sast_build = create(:ci_build, name: 'sast', user: user, status: 'success', retried: true)
         create(:security_scan, build: ds_build, scan_type: 'dependency_scanning' )
         create(:security_scan, build: ds_bundler_build, scan_type: 'dependency_scanning')

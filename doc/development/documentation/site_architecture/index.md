@@ -49,7 +49,7 @@ GitLab docs content isn't kept in the `gitlab-docs` repository.
 All documentation files are hosted in the respective repository of each
 product, and all together are pulled to generate the docs website:
 
-- [GitLab](https://gitlab.com/gitlab-org/gitlab/tree/master/doc)
+- [GitLab](https://gitlab.com/gitlab-org/gitlab/-/tree/master/doc)
 - [Omnibus GitLab](https://gitlab.com/gitlab-org/omnibus-gitlab/tree/master/doc)
 - [GitLab Runner](https://gitlab.com/gitlab-org/gitlab-runner/-/tree/main/docs)
 - [GitLab Chart](https://gitlab.com/charts/gitlab/tree/master/doc)
@@ -114,7 +114,7 @@ located in the [Dockerfiles directory](https://gitlab.com/gitlab-org/gitlab-docs
 If you need to rebuild the Docker images immediately (must have maintainer level permissions):
 
 WARNING:
-If you change the Dockerfile configuration and rebuild the images, you can break the master
+If you change the Dockerfile configuration and rebuild the images, you can break the main
 pipeline in the main `gitlab` repository as well as in `gitlab-docs`. Create an image with
 a different name first and test it to ensure you do not break the pipelines.
 
@@ -132,7 +132,7 @@ a different name first and test it to ensure you do not break the pipelines.
 ### Deploy the docs site
 
 Every four hours a scheduled pipeline builds and deploys the docs site. The pipeline
-fetches the current docs from the main project's master branch, builds it with Nanoc
+fetches the current docs from the main project's main branch, builds it with Nanoc
 and deploys it to <https://docs.gitlab.com>.
 
 If you need to build and deploy the site immediately (must have maintainer level permissions):

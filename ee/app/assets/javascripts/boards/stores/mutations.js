@@ -46,6 +46,7 @@ export default {
         ? ErrorMessages.fetchEpicsError
         : ErrorMessages.fetchIssueError;
     Vue.set(state.listsFlags, listId, { isLoading: false, isLoadingMore: false });
+    Vue.set(state.boardItemsByListId, listId, state.backupItemsList);
   },
 
   [mutationTypes.TOGGLE_EPICS_SWIMLANES]: (state) => {

@@ -283,45 +283,45 @@ RSpec.describe Gitlab::BackgroundMigration::MigrateIssueTrackersSensitiveData, s
   end
 
   context 'with Jira service with invalid properties, valid Jira service and valid bugzilla service' do
-    let!(:jira_service_invalid) do
+    let!(:jira_integration_invalid) do
       services.create!(id: 19, title: 'invalid - title', description: 'invalid - description', type: 'JiraService', properties: 'invalid data', category: 'issue_tracker')
     end
 
-    let!(:jira_service_valid) do
+    let!(:jira_integration_valid) do
       services.create!(id: 20, type: 'JiraService', properties: jira_properties.to_json, category: 'issue_tracker')
     end
 
-    let!(:bugzilla_service_valid) do
+    let!(:bugzilla_integration_valid) do
       services.create!(id: 11, type: 'BugzillaService', title: nil, properties: tracker_properties.to_json, category: 'issue_tracker')
     end
 
     it 'migrates data for the valid service' do
       subject
 
-      jira_service_invalid.reload
-      expect(JiraTrackerData.find_by(service_id: jira_service_invalid.id)).to be_nil
-      expect(jira_service_invalid.title).to eq('invalid - title')
-      expect(jira_service_invalid.description).to eq('invalid - description')
-      expect(jira_service_invalid.properties).to eq('invalid data')
+      jira_integration_invalid.reload
+      expect(JiraTrackerData.find_by(service_id: jira_integration_invalid.id)).to be_nil
+      expect(jira_integration_invalid.title).to eq('invalid - title')
+      expect(jira_integration_invalid.description).to eq('invalid - description')
+      expect(jira_integration_invalid.properties).to eq('invalid data')
 
-      jira_service_valid.reload
-      data = JiraTrackerData.find_by(service_id: jira_service_valid.id)
+      jira_integration_valid.reload
+      data = JiraTrackerData.find_by(service_id: jira_integration_valid.id)
 
       expect(data.url).to eq(url)
       expect(data.api_url).to eq(api_url)
       expect(data.username).to eq(username)
       expect(data.password).to eq(password)
-      expect(jira_service_valid.title).to eq(title)
-      expect(jira_service_valid.description).to eq(description)
+      expect(jira_integration_valid.title).to eq(title)
+      expect(jira_integration_valid.description).to eq(description)
 
-      bugzilla_service_valid.reload
-      data = IssueTrackerData.find_by(service_id: bugzilla_service_valid.id)
+      bugzilla_integration_valid.reload
+      data = IssueTrackerData.find_by(service_id: bugzilla_integration_valid.id)
 
       expect(data.project_url).to eq(url)
       expect(data.issues_url).to eq(issues_url)
       expect(data.new_issue_url).to eq(new_issue_url)
-      expect(bugzilla_service_valid.title).to eq(title)
-      expect(bugzilla_service_valid.description).to eq(description)
+      expect(bugzilla_integration_valid.title).to eq(title)
+      expect(bugzilla_integration_valid.description).to eq(description)
     end
   end
 end

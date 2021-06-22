@@ -7,7 +7,7 @@ RSpec.describe Projects::Integrations::Jira::IssuesController do
 
   let_it_be(:project) { create(:project) }
   let_it_be(:user) { create(:user, developer_projects: [project]) }
-  let_it_be(:jira) { create(:jira_service, project: project, issues_enabled: true, project_key: 'TEST') }
+  let_it_be(:jira) { create(:jira_integration, project: project, issues_enabled: true, project_key: 'TEST') }
 
   before do
     stub_licensed_features(jira_issues_integration: true)

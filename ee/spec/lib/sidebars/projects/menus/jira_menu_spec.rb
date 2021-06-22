@@ -14,14 +14,14 @@ RSpec.describe Sidebars::Projects::Menus::JiraMenu do
   describe 'render?' do
     context 'when issue tracker is not Jira' do
       it 'returns false' do
-        create(:custom_issue_tracker_service, active: true, project: project, project_url: 'http://test.com')
+        create(:custom_issue_tracker_integration, active: true, project: project, project_url: 'http://test.com')
 
         expect(subject.render?).to eq false
       end
     end
 
     context 'when issue tracker is Jira' do
-      let!(:jira) { create(:jira_service, project: project, project_key: 'GL') }
+      let!(:jira) { create(:jira_integration, project: project, project_key: 'GL') }
 
       context 'when issues integration is disabled' do
         it 'returns false' do

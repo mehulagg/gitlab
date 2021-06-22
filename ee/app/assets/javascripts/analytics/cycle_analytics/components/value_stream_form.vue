@@ -3,6 +3,7 @@ import { GlButton, GlForm, GlFormInput, GlFormGroup, GlFormRadioGroup, GlModal }
 import { cloneDeep } from 'lodash';
 import Vue from 'vue';
 import { mapState, mapActions } from 'vuex';
+import { filterStagesByHiddenStatus } from '~/cycle_analytics/utils';
 import { swapArrayItems } from '~/lib/utils/array_utility';
 import { sprintf } from '~/locale';
 import Tracking from '~/tracking';
@@ -72,20 +73,20 @@ export default {
   data() {
     const {
       defaultStageConfig = [],
-      initialData: { name: initialName, stages: initialStages },
+      initialData: { name: initialName, stages: initialStages = [] },
       initialFormErrors,
       initialPreset,
     } = this;
     const { name: nameError = [], stages: stageErrors = [{}] } = initialFormErrors;
     const additionalFields = {
       stages: this.isEditing
-        ? cloneDeep(initialStages)
+        ? filterStagesByHiddenStatus(cloneDeep(initialStages), false)
         : initializeStages(defaultStageConfig, initialPreset),
       stageErrors:
         cloneDeep(stageErrors) || initializeStageErrors(defaultStageConfig, initialPreset),
     };
     return {
-      hiddenStages: [],
+      hiddenStages: filterStagesByHiddenStatus(initialStages),
       selectedPreset: initialPreset,
       presetOptions: PRESET_OPTIONS,
       name: initialName,
@@ -138,6 +139,9 @@ export default {
     },
     canRestore() {
       return this.hiddenStages.length || this.isDirtyEditing;
+    },
+    defaultValueStreamNames() {
+      return this.defaultStageConfig.map(({ name }) => name);
     },
   },
   methods: {
@@ -192,7 +196,7 @@ export default {
       return current.trim().toLowerCase() !== original.trim().toLowerCase();
     },
     validateStages() {
-      return this.stages.map(validateStage);
+      return this.stages.map((stage) => validateStage(stage, this.defaultValueStreamNames));
     },
     validate() {
       const { name } = this;
@@ -290,6 +294,9 @@ export default {
         initializeStageErrors(this.defaultStageConfig, this.selectedPreset),
       );
     },
+    restoreActionTestId(index) {
+      return `stage-action-restore-${index}`;
+    },
   },
   i18n,
 };
@@ -381,13 +388,20 @@ export default {
         </div>
         <div v-if="hiddenStages.length">
           <hr />
-          <gl-form-group v-for="(stage, hiddenStageIndex) in hiddenStages" :key="stage.id">
+          <gl-form-group
+            v-for="(stage, hiddenStageIndex) in hiddenStages"
+            :key="stage.id"
+            data-testid="vsa-hidden-stage"
+          >
             <span class="gl-m-0 gl-vertical-align-middle gl-mr-3 gl-font-weight-bold">{{
               recoverStageTitle(stage.name)
             }}</span>
-            <gl-button variant="link" @click="onRestore(hiddenStageIndex)">{{
-              $options.i18n.RESTORE_HIDDEN_STAGE
-            }}</gl-button>
+            <gl-button
+              variant="link"
+              :data-testid="restoreActionTestId(hiddenStageIndex)"
+              @click="onRestore(hiddenStageIndex)"
+              >{{ $options.i18n.RESTORE_HIDDEN_STAGE }}</gl-button
+            >
           </gl-form-group>
         </div>
       </div>

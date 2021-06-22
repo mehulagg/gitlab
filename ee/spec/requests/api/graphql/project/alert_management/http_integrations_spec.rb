@@ -28,7 +28,7 @@ RSpec.describe 'getting Alert Management HTTP Integrations' do
   let_it_be(:maintainer) { create(:user) }
   let_it_be(:developer) { create(:user) }
   let_it_be(:guest) { create(:user) }
-  let_it_be(:prometheus_service) { create(:prometheus_service, project: project) }
+  let_it_be(:prometheus_integration) { create(:prometheus_integration, project: project) }
   let_it_be(:project_alerting_setting) { create(:project_alerting_setting, project: project) }
   let_it_be(:inactive_http_integration) { create(:alert_management_http_integration, :inactive, project: project) }
   let_it_be(:other_project_http_integration) { create(:alert_management_http_integration) }

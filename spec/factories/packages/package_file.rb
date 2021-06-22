@@ -208,6 +208,8 @@ FactoryBot.define do
 
       transient do
         without_loaded_metadatum { false }
+        package_name { package&.name || 'foo' }
+        sequence(:package_version) { |n| package&.version || "v#{n}" }
         channel { 'stable' }
       end
 
@@ -265,6 +267,14 @@ FactoryBot.define do
       package
       file_fixture { 'spec/fixtures/packages/nuget/package.nupkg' }
       file_name { 'package.nupkg' }
+      file_sha1 { '5fe852b2a6abd96c22c11fa1ff2fb19d9ce58b57' }
+      size { 300.kilobytes }
+    end
+
+    trait(:snupkg) do
+      package
+      file_fixture { 'spec/fixtures/packages/nuget/package.snupkg' }
+      file_name { 'package.snupkg' }
       file_sha1 { '5fe852b2a6abd96c22c11fa1ff2fb19d9ce58b57' }
       size { 300.kilobytes }
     end

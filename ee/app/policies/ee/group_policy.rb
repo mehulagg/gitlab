@@ -216,6 +216,10 @@ module EE
         enable :admin_iteration_cadence
       end
 
+      rule { (automation_bot | developer) & iterations_available }.policy do
+        enable :rollover_issues
+      end
+
       rule { reporter & epics_available }.policy do
         enable :create_epic
         enable :admin_epic

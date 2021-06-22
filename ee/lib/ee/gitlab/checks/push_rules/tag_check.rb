@@ -4,7 +4,7 @@ module EE
   module Gitlab
     module Checks
       module PushRules
-        class TagCheck < ::Gitlab::Checks::BaseChecker
+        class TagCheck < ::Gitlab::Checks::BaseSingleChecker
           def validate!
             return unless push_rule
 

@@ -1,8 +1,8 @@
 <script>
-import { GlModal } from '@gitlab/ui';
+import { GlModal, GlSprintf, GlLink } from '@gitlab/ui';
 import Clipboard from 'clipboard';
 import { getBaseURL, setUrlParams, redirectTo } from '~/lib/utils/url_utility';
-import { sprintf, s__ } from '~/locale';
+import { sprintf, s__, __ } from '~/locale';
 import { CODE_SNIPPET_SOURCE_URL_PARAM } from '~/pipeline_editor/components/code_snippet_alert/constants';
 import { CONFIGURATION_SNIPPET_MODAL_ID } from './constants';
 
@@ -10,6 +10,16 @@ export default {
   CONFIGURATION_SNIPPET_MODAL_ID,
   components: {
     GlModal,
+    GlSprintf,
+    GlLink,
+  },
+  i18n: {
+    helpText: s__(
+      'This code snippet contains everything reflected in the configuration form. Copy and paste it into %{linkStart}.gitlab-ci.yml%{linkEnd} file and save your changes. Future %{scanType} scans will use these settings.',
+    ),
+    primaryText: s__('SecurityConfiguration|Copy code and open .gitlab-ci.yml file'),
+    secondaryText: s__('SecurityConfiguration|Copy code only'),
+    cancelText: __('Cancel'),
   },
   props: {
     ciYamlEditUrl: {
@@ -70,15 +80,15 @@ export default {
   <gl-modal
     ref="modal"
     :action-primary="{
-      text: s__('SecurityConfiguration|Copy code and open .gitlab-ci.yml file'),
+      text: $options.i18n.primaryText,
       attributes: [{ variant: 'confirm' }, { id: 'copy-yaml-snippet-and-edit-button' }],
     }"
     :action-secondary="{
-      text: s__('SecurityConfiguration|Copy code only'),
+      text: $options.i18n.secondaryText,
       attributes: [{ variant: 'default' }, { id: 'copy-yaml-snippet-button' }],
     }"
     :action-cancel="{
-      text: __('Cancel'),
+      text: $options.i18n.cancelText,
     }"
     :modal-id="$options.CONFIGURATION_SNIPPET_MODAL_ID"
     :title="modalTitle"
@@ -86,6 +96,19 @@ export default {
     @primary="copySnippet"
     @secondary="copySnippet(false)"
   >
+    <p class="gl-text-gray-500" data-testid="configuration-modal-help-text">
+      <gl-sprintf :message="$options.i18n.helpText">
+        <template #link="{ content }">
+          <gl-link :href="ciYamlEditUrl" target="_blank">
+            {{ content }}
+          </gl-link>
+        </template>
+        <template #scanType>
+          {{ scanType }}
+        </template>
+      </gl-sprintf>
+    </p>
+
     <pre><code data-testid="configuration-modal-yaml-snippet" v-text="yaml"></code></pre>
   </gl-modal>
 </template>

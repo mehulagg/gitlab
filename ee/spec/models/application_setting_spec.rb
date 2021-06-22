@@ -166,24 +166,6 @@ RSpec.describe ApplicationSetting do
       end
     end
 
-    context 'when validating compliance_frameworks' do
-      where(:compliance_frameworks, :is_valid) do
-        [1, 2, 3, 4, 5] | true
-        nil             | true
-        1               | true
-        [2, 3, 4, 6]    | false
-        6               | false
-      end
-
-      with_them do
-        specify do
-          setting.compliance_frameworks = compliance_frameworks
-
-          expect(setting.valid?).to eq(is_valid)
-        end
-      end
-    end
-
     context 'when license presented' do
       let_it_be(:max_active_user_count) { 20 }
 
@@ -563,6 +545,24 @@ RSpec.describe ApplicationSetting do
         let(:scope) { excluded_project }
 
         it { is_expected.to eq(only_when_enabled_globally) }
+      end
+
+      context 'array of projects (all in scope)' do
+        let(:scope) { [included_project] }
+
+        it { is_expected.to eq(indexing && searching) }
+      end
+
+      context 'array of projects (all not in scope)' do
+        let(:scope) { [excluded_project] }
+
+        it { is_expected.to eq(only_when_enabled_globally) }
+      end
+
+      context 'array of projects (some in scope)' do
+        let(:scope) { [included_project, excluded_project] }
+
+        it { is_expected.to eq(indexing && searching) }
       end
     end
   end

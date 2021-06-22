@@ -1,17 +1,18 @@
 - return unless show_new_user_signups_cap_reached?
 
 - user_cap_help_url = help_page_path('user/admin_area/settings/sign_up_restrictions.md')
-- help_link_start = '<a href="%{url}" target="_blank" rel="noopener noreferrer">'.html_safe % { url: user_cap_help_url }
+- help_link_start = '<a class="gl-link" href="%{url}" target="_blank" rel="noopener noreferrer">'.html_safe % { url: user_cap_help_url }
 - help_link_end = '</a>'.html_safe
 
 %div{ class: [container_class, @content_class, 'gl-pt-5!'] }
-  .gl-alert.gl-alert-warning.js-new-user-signups-cap-reached{ role: 'alert', data: { feature_id: ::EE::UserCalloutsHelper::NEW_USER_SIGNUPS_CAP_REACHED, dismiss_endpoint: user_callouts_path, defer_links: "true" } }
-    = sprite_icon('warning', css_class: 'gl-icon gl-alert-icon gl-alert-icon-no-title')
-    %button.js-close.gl-alert-dismiss.gl-cursor-pointer{ type: 'button', 'aria-label' => _('Dismiss') }
-      = sprite_icon('close', css_class: 'gl-icon')
+  = render 'shared/global_alert',
+    variant: :warning,
+    title: s_('Admin|Your instance has reached its user cap'),
+    is_contained: true,
+    alert_class: 'js-new-user-signups-cap-reached',
+    alert_data: { feature_id: ::EE::UserCalloutsHelper::NEW_USER_SIGNUPS_CAP_REACHED, dismiss_endpoint: user_callouts_path, defer_links: "true" } do
     .gl-alert-body
-      %h4.gl-alert-title= s_('Admin|Your instance has reached its user cap')
       = s_('Admin|Additional users must be reviewed and approved by a system administrator. Learn more about %{help_link_start}usage caps%{help_link_end}.').html_safe % { help_link_start: help_link_start, help_link_end: help_link_end }
-    - if User.blocked_pending_approval.count > 0
-      .gl-alert-actions
-        = link_to s_('Admin|View pending user approvals'), admin_users_path({ filter: 'blocked_pending_approval' }), class: 'btn gl-alert-action btn-info gl-button'
+      - if User.blocked_pending_approval.count > 0
+        .gl-alert-actions
+          = link_to s_('Admin|View pending user approvals'), admin_users_path({ filter: 'blocked_pending_approval' }), class: 'btn gl-alert-action btn-confirm gl-button'

@@ -2,11 +2,11 @@
 import { GlTooltipDirective, GlIcon } from '@gitlab/ui';
 import { mapActions, mapGetters } from 'vuex';
 import DraftNote from '~/batch_comments/components/draft_note.vue';
+import createFlash from '~/flash';
 import { clearDraft, getDiscussionReplyKey } from '~/lib/utils/autosave';
 import { s__, __ } from '~/locale';
 import diffLineNoteFormMixin from '~/notes/mixins/diff_line_note_form';
 import TimelineEntryItem from '~/vue_shared/components/notes/timeline_entry_item.vue';
-import { deprecatedCreateFlash as Flash } from '../../flash';
 import userAvatarLink from '../../vue_shared/components/user_avatar/user_avatar_link.vue';
 import eventHub from '../event_hub';
 import noteable from '../mixins/noteable';
@@ -135,6 +135,13 @@ export default {
     resolveWithIssuePath() {
       return !this.discussionResolved ? this.discussion.resolve_with_issue_path : '';
     },
+    canShowReplyActions() {
+      if (this.shouldRenderDiffs && !this.discussion.diff_file.diff_refs) {
+        return false;
+      }
+
+      return true;
+    },
   },
   created() {
     eventHub.$on('startReplying', this.onStartReplying);
@@ -213,7 +220,11 @@ export default {
           const msg = __(
             'Your comment could not be submitted! Please check your network connection and try again.',
           );
-          Flash(msg, 'alert', this.$el);
+          createFlash({
+            message: msg,
+            type: 'alert',
+            parent: this.$el,
+          });
           this.$refs.noteForm.note = noteText;
           callback(err);
         });
@@ -263,7 +274,7 @@ export default {
                   :draft="draftForDiscussion(discussion.reply_id)"
                 />
                 <div
-                  v-else-if="showReplies"
+                  v-else-if="canShowReplyActions && showReplies"
                   :class="{ 'is-replying': isReplying }"
                   class="discussion-reply-holder gl-border-t-0! clearfix"
                 >

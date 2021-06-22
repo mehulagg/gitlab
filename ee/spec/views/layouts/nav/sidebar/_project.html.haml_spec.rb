@@ -51,7 +51,7 @@ RSpec.describe 'layouts/nav/sidebar/_project' do
     end
 
     context 'when Jira service integration is set' do
-      let!(:jira) { create(:jira_service, project: project, issues_enabled: true, project_key: 'GL') }
+      let!(:jira) { create(:jira_integration, project: project, issues_enabled: true, project_key: 'GL') }
 
       before do
         stub_licensed_features(jira_issues_integration: true)

@@ -39,13 +39,6 @@ RSpec.describe 'Gets registries' do
   }
 
   it_behaves_like 'gets registries for', {
-    field_name: 'lfsObjectRegistries',
-    registry_class_name: 'LfsObjectRegistry',
-    registry_factory: :geo_lfs_object_registry,
-    registry_foreign_key_field_name: 'lfsObjectId'
-  }
-
-  it_behaves_like 'gets registries for', {
     field_name: 'pipelineArtifactRegistries',
     registry_class_name: 'PipelineArtifactRegistry',
     registry_factory: :geo_pipeline_artifact_registry,

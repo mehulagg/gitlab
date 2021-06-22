@@ -237,7 +237,7 @@ export default {
       class="gl-mt-5"
       :class="{ 'gl-border-bottom-0': !scheduleVisible }"
       :body-class="{ 'gl-p-0': !scheduleVisible }"
-      header-class="gl-py-3"
+      :header-class="{ 'gl-py-3': true, 'gl-rounded-small': !scheduleVisible }"
     >
       <template #header>
         <div

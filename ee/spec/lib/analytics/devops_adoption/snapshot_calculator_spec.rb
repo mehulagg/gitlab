@@ -166,6 +166,29 @@ RSpec.describe Analytics::DevopsAdoption::SnapshotCalculator do
     end
   end
 
+  shared_examples 'calculates artifact type count' do |type|
+    it 'returns number of projects with at least 1 sast CI artifact created in given period' do
+      create(:ee_ci_job_artifact, type, project: project, created_at: 1.year.before(range_end))
+      create(:ee_ci_job_artifact, type, project: project, created_at: 1.day.before(range_end))
+      create(:ee_ci_job_artifact, type, project: subproject, created_at: 1.week.before(range_end))
+      create(:ee_ci_job_artifact, type, created_at: 1.week.before(range_end))
+
+      expect(subject).to eq 2
+    end
+  end
+
+  describe 'sast_enabled_count' do
+    subject { data[:sast_enabled_count] }
+
+    include_examples 'calculates artifact type count', :sast
+  end
+
+  describe 'dast_enabled_count' do
+    subject { data[:dast_enabled_count] }
+
+    include_examples 'calculates artifact type count', :dast
+  end
+
   context 'when snapshot already exists' do
     subject(:data) { described_class.new(enabled_namespace: enabled_namespace, range_end: range_end, snapshot: snapshot).calculate }
 

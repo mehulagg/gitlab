@@ -5,6 +5,7 @@ require 'spec_helper'
 RSpec.describe API::Geo do
   include TermsHelper
   include ApiHelpers
+  include WorkhorseHelpers
   include ::EE::GeoHelpers
 
   let_it_be(:admin) { create(:admin) }
@@ -274,59 +275,6 @@ RSpec.describe API::Geo do
         end
       end
     end
-
-    describe 'GET /geo/transfers/lfs/1' do
-      let(:resource) { create(:lfs_object, :with_file) }
-      let(:transfer) { Gitlab::Geo::Replication::LfsTransfer.new(resource) }
-      let(:req_header) { Gitlab::Geo::TransferRequest.new(transfer.request_data).headers }
-
-      context 'invalid requests' do
-        before do
-          allow_next_instance_of(Gitlab::Geo::TransferRequest) do |instance|
-            allow(instance).to receive(:requesting_node).and_return(secondary_node)
-          end
-        end
-
-        it 'responds with 401 when an invalid auth header is provided' do
-          get api("/geo/transfers/lfs/#{resource.id}"), headers: invalid_geo_auth_header
-
-          expect(response).to have_gitlab_http_status(:unauthorized)
-        end
-
-        it 'responds with 404 when resource does not exist' do
-          get api("/geo/transfers/lfs/100000"), headers: not_found_req_header
-
-          expect(response).to have_gitlab_http_status(:not_found)
-        end
-      end
-
-      context 'LFS object exists' do
-        context 'file exists' do
-          subject(:request) { get api("/geo/transfers/lfs/#{resource.id}"), headers: req_header }
-
-          it 'responds with 200 with X-Sendfile' do
-            request
-
-            expect(response).to have_gitlab_http_status(:ok)
-            expect(response.headers['Content-Type']).to eq('application/octet-stream')
-            expect(response.headers['X-Sendfile']).to eq(resource.file.path)
-          end
-
-          it_behaves_like 'with terms enforced'
-        end
-
-        context 'file does not exist' do
-          it 'responds with 404 and a specific geo code' do
-            File.unlink(resource.file.path)
-
-            get api("/geo/transfers/lfs/#{resource.id}"), headers: req_header
-
-            expect(response).to have_gitlab_http_status(:not_found)
-            expect(json_response['geo_code']).to eq(Gitlab::Geo::Replication::FILE_NOT_FOUND_GEO_CODE)
-          end
-        end
-      end
-    end
   end
 
   describe 'POST /geo/status' do
@@ -375,7 +323,6 @@ RSpec.describe API::Geo do
           container_repositories_replication_enabled: true,
           design_repositories_replication_enabled: false,
           job_artifacts_replication_enabled: true,
-          lfs_objects_replication_enabled: true,
           repositories_replication_enabled: true,
           repository_verification_enabled: true
         }
@@ -696,6 +643,83 @@ RSpec.describe API::Geo do
           end
         end
       end
+    end
+  end
+
+  describe 'GET /geo/proxy' do
+    subject { get api('/geo/proxy'), headers: workhorse_headers }
+
+    include_context 'workhorse headers'
+
+    context 'with valid auth' do
+      context 'when Geo is not being used' do
+        it 'returns empty data' do
+          allow(::Gitlab::Geo).to receive(:enabled?).and_return(false)
+
+          subject
+
+          expect(response).to have_gitlab_http_status(:ok)
+          expect(json_response).to be_empty
+        end
+      end
+
+      context 'when this is a primary site' do
+        it 'returns empty data' do
+          stub_current_geo_node(primary_node)
+
+          subject
+
+          expect(response).to have_gitlab_http_status(:ok)
+          expect(json_response).to be_empty
+        end
+      end
+
+      context 'when this is a secondary site' do
+        before do
+          stub_current_geo_node(secondary_node)
+        end
+
+        context 'when a primary exists' do
+          it 'returns the primary internal URL' do
+            subject
+
+            expect(response).to have_gitlab_http_status(:ok)
+            expect(json_response['geo_proxy_url']).to match(primary_node.internal_url)
+          end
+        end
+
+        context 'when a primary does not exist' do
+          it 'returns empty data' do
+            allow(::Gitlab::Geo).to receive(:primary_node_configured?).and_return(false)
+
+            subject
+
+            expect(response).to have_gitlab_http_status(:ok)
+            expect(json_response).to be_empty
+          end
+        end
+      end
+
+      context 'when geo_secondary_proxy feature flag is disabled' do
+        before do
+          stub_feature_flags(geo_secondary_proxy: false)
+        end
+
+        it 'returns empty data' do
+          subject
+
+          expect(response).to have_gitlab_http_status(:ok)
+          expect(json_response).to be_empty
+        end
+      end
+    end
+
+    it 'rejects requests that bypassed gitlab-workhorse' do
+      workhorse_headers.delete(Gitlab::Workhorse::INTERNAL_API_REQUEST_HEADER)
+
+      subject
+
+      expect(response).to have_gitlab_http_status(:forbidden)
     end
   end
 end

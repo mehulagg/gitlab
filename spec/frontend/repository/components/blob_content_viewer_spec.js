@@ -4,7 +4,8 @@ import { nextTick } from 'vue';
 import BlobContent from '~/blob/components/blob_content.vue';
 import BlobHeader from '~/blob/components/blob_header.vue';
 import BlobContentViewer from '~/repository/components/blob_content_viewer.vue';
-import BlobHeaderEdit from '~/repository/components/blob_header_edit.vue';
+import BlobEdit from '~/repository/components/blob_edit.vue';
+import BlobReplace from '~/repository/components/blob_replace.vue';
 
 let wrapper;
 const simpleMockData = {
@@ -75,10 +76,11 @@ const factory = createFactory(shallowMount);
 const fullFactory = createFactory(mount);
 
 describe('Blob content viewer component', () => {
-  const findLoadingIcon = () => wrapper.find(GlLoadingIcon);
-  const findBlobHeader = () => wrapper.find(BlobHeader);
-  const findBlobHeaderEdit = () => wrapper.find(BlobHeaderEdit);
-  const findBlobContent = () => wrapper.find(BlobContent);
+  const findLoadingIcon = () => wrapper.findComponent(GlLoadingIcon);
+  const findBlobHeader = () => wrapper.findComponent(BlobHeader);
+  const findBlobEdit = () => wrapper.findComponent(BlobEdit);
+  const findBlobContent = () => wrapper.findComponent(BlobContent);
+  const findBlobReplace = () => wrapper.findComponent(BlobReplace);
 
   afterEach(() => {
     wrapper.destroy();
@@ -169,12 +171,13 @@ describe('Blob content viewer component', () => {
         mockData: { blobInfo: simpleMockData },
         stubs: {
           BlobContent: true,
+          BlobReplace: true,
         },
       });
 
       await nextTick();
 
-      expect(findBlobHeaderEdit().props()).toMatchObject({
+      expect(findBlobEdit().props()).toMatchObject({
         editPath: editBlobPath,
         webIdePath: ideEditPath,
       });
@@ -185,14 +188,54 @@ describe('Blob content viewer component', () => {
         mockData: { blobInfo: richMockData },
         stubs: {
           BlobContent: true,
+          BlobReplace: true,
         },
       });
 
       await nextTick();
 
-      expect(findBlobHeaderEdit().props()).toMatchObject({
+      expect(findBlobEdit().props()).toMatchObject({
         editPath: editBlobPath,
         webIdePath: ideEditPath,
+      });
+    });
+
+    describe('BlobReplace', () => {
+      const { name, path } = simpleMockData;
+
+      it('renders component', async () => {
+        window.gon.current_user_id = 1;
+
+        fullFactory({
+          mockData: { blobInfo: simpleMockData },
+          stubs: {
+            BlobContent: true,
+            BlobReplace: true,
+          },
+        });
+
+        await nextTick();
+
+        expect(findBlobReplace().props()).toMatchObject({
+          name,
+          path,
+        });
+      });
+
+      it('does not render if not logged in', async () => {
+        window.gon.current_user_id = null;
+
+        fullFactory({
+          mockData: { blobInfo: simpleMockData },
+          stubs: {
+            BlobContent: true,
+            BlobReplace: true,
+          },
+        });
+
+        await nextTick();
+
+        expect(findBlobReplace().exists()).toBe(false);
       });
     });
   });

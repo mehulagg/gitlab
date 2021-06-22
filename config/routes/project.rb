@@ -273,6 +273,7 @@ constraints(::Constraints::ProjectUrlConstrainer.new) do
             resources :value_streams, only: [:index] do
               resources :stages, only: [:index]
             end
+            resource :summary, controller: :summary, only: :show
           end
         end
 
@@ -385,7 +386,7 @@ constraints(::Constraints::ProjectUrlConstrainer.new) do
 
         # The wiki and repository routing contains wildcard characters so
         # its preferable to keep it below all other project routes
-        draw :repository_scoped
+        draw :repository
         draw :wiki
 
         namespace :import do
@@ -546,7 +547,13 @@ constraints(::Constraints::ProjectUrlConstrainer.new) do
         end
       end
 
-      scope :usage_ping, controller: :usage_ping do
+      # TODO: Deprecated. This should be removed in 14.2.
+      scope :usage_ping, controller: :service_ping do
+        post :web_ide_clientside_preview # rubocop:todo Cop/PutProjectRoutesUnderScope
+        post :web_ide_pipelines_count # rubocop:todo Cop/PutProjectRoutesUnderScope
+      end
+
+      scope :service_ping, controller: :service_ping do
         post :web_ide_clientside_preview # rubocop:todo Cop/PutProjectRoutesUnderScope
         post :web_ide_pipelines_count # rubocop:todo Cop/PutProjectRoutesUnderScope
       end

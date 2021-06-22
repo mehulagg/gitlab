@@ -65,12 +65,35 @@ RSpec.describe Gitlab::Ci::Pipeline::Chain::Validate::External do
 
       it 'returns an Ultimate plan on trial' do
         expect(::Gitlab::HTTP).to receive(:post) do |_url, params|
+          expect(params[:body]).to match_schema('/external_validation', dir: 'ee')
+
           payload = Gitlab::Json.parse(params[:body])
           expect(payload.dig('namespace', 'plan')).to eq('ultimate')
           expect(payload.dig('namespace', 'trial')).to be true
+          expect(payload.dig('provisioning_group')).be_nil
         end
 
         step.perform!
+      end
+
+      context 'when user is provisioned by group' do
+        let(:user) { create(:user) }
+
+        before do
+          user.provisioned_by_group = group
+        end
+
+        it 'returns the provisioned group with an Ultimate plan' do
+          expect(::Gitlab::HTTP).to receive(:post) do |_url, params|
+            expect(params[:body]).to match_schema('/external_validation', dir: 'ee')
+
+            payload = Gitlab::Json.parse(params[:body])
+            expect(payload.dig('provisioning_group', 'plan')).to eq('ultimate')
+            expect(payload.dig('provisioning_group', 'trial')).to be true
+          end
+
+          step.perform!
+        end
       end
     end
   end

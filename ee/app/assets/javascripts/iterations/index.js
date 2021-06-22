@@ -3,9 +3,10 @@ import VueApollo from 'vue-apollo';
 import createDefaultClient from '~/lib/graphql';
 import { parseBoolean } from '~/lib/utils/common_utils';
 import App from './components/app.vue';
-import IterationForm from './components/iteration_form.vue';
-import IterationReport from './components/iteration_report.vue';
+import IterationForm from './components/iteration_form_without_vue_router.vue';
+import IterationReport from './components/iteration_report_without_vue_router.vue';
 import Iterations from './components/iterations.vue';
+import { Namespace } from './constants';
 import createRouter from './router';
 
 Vue.use(VueApollo);
@@ -94,7 +95,7 @@ export function initIterationReport({ namespaceType, initiallyEditing } = {}) {
   });
 }
 
-export function initCadenceApp() {
+export function initCadenceApp({ namespaceType }) {
   const el = document.querySelector('.js-iteration-cadence-app');
 
   if (!el) {
@@ -106,6 +107,11 @@ export function initCadenceApp() {
     cadencesListPath,
     canCreateCadence,
     canEditCadence,
+    canEditIteration,
+    hasScopedLabelsFeature,
+    labelsFetchPath,
+    previewMarkdownPath,
+    noIssuesSvgPath,
   } = el.dataset;
   const router = createRouter(cadencesListPath);
 
@@ -119,9 +125,17 @@ export function initCadenceApp() {
       cadencesListPath,
       canCreateCadence: parseBoolean(canCreateCadence),
       canEditCadence: parseBoolean(canEditCadence),
+      namespaceType,
+      canEditIteration: parseBoolean(canEditIteration),
+      hasScopedLabelsFeature: parseBoolean(hasScopedLabelsFeature),
+      labelsFetchPath,
+      previewMarkdownPath,
+      noIssuesSvgPath,
     },
     render(createElement) {
       return createElement(App);
     },
   });
 }
+
+export const initGroupCadenceApp = () => initCadenceApp({ namespaceType: Namespace.Group });

@@ -21,7 +21,6 @@ module Clusters
       Clusters::Applications::Jupyter.application_name => Clusters::Applications::Jupyter,
       Clusters::Applications::Knative.application_name => Clusters::Applications::Knative,
       Clusters::Applications::ElasticStack.application_name => Clusters::Applications::ElasticStack,
-      Clusters::Applications::Fluentd.application_name => Clusters::Applications::Fluentd,
       Clusters::Applications::Cilium.application_name => Clusters::Applications::Cilium
     }.freeze
     DEFAULT_ENVIRONMENT = '*'
@@ -68,7 +67,6 @@ module Clusters
     has_one_cluster_application :jupyter
     has_one_cluster_application :knative
     has_one_cluster_application :elastic_stack
-    has_one_cluster_application :fluentd
     has_one_cluster_application :cilium
 
     has_many :kubernetes_namespaces
@@ -138,7 +136,6 @@ module Clusters
     scope :gcp_installed, -> { gcp_provided.joins(:provider_gcp).merge(Clusters::Providers::Gcp.with_status(:created)) }
     scope :aws_installed, -> { aws_provided.joins(:provider_aws).merge(Clusters::Providers::Aws.with_status(:created)) }
 
-    scope :with_enabled_modsecurity, -> { joins(:application_ingress).merge(::Clusters::Applications::Ingress.modsecurity_enabled) }
     scope :with_available_elasticstack, -> { joins(:application_elastic_stack).merge(::Clusters::Applications::ElasticStack.available) }
     scope :with_available_cilium, -> { joins(:application_cilium).merge(::Clusters::Applications::Cilium.available) }
     scope :distinct_with_deployed_environments, -> { joins(:environments).merge(::Deployment.success).distinct }
@@ -171,18 +168,16 @@ module Clusters
 
     state_machine :cleanup_status, initial: :cleanup_not_started do
       state :cleanup_not_started, value: 1
-      state :cleanup_uninstalling_applications, value: 2
       state :cleanup_removing_project_namespaces, value: 3
       state :cleanup_removing_service_account, value: 4
       state :cleanup_errored, value: 5
 
       event :start_cleanup do |cluster|
-        transition [:cleanup_not_started, :cleanup_errored] => :cleanup_uninstalling_applications
+        transition [:cleanup_not_started, :cleanup_errored] => :cleanup_removing_project_namespaces
       end
 
       event :continue_cleanup do
         transition(
-          cleanup_uninstalling_applications: :cleanup_removing_project_namespaces,
           cleanup_removing_project_namespaces: :cleanup_removing_service_account)
       end
 
@@ -195,13 +190,7 @@ module Clusters
         cluster.cleanup_status_reason = status_reason if status_reason
       end
 
-      after_transition [:cleanup_not_started, :cleanup_errored] => :cleanup_uninstalling_applications do |cluster|
-        cluster.run_after_commit do
-          Clusters::Cleanup::AppWorker.perform_async(cluster.id)
-        end
-      end
-
-      after_transition cleanup_uninstalling_applications: :cleanup_removing_project_namespaces do |cluster|
+      after_transition [:cleanup_not_started, :cleanup_errored] => :cleanup_removing_project_namespaces do |cluster|
         cluster.run_after_commit do
           Clusters::Cleanup::ProjectNamespaceWorker.perform_async(cluster.id)
         end

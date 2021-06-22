@@ -37,15 +37,6 @@ RSpec.describe Security::CiConfiguration::SastParserService do
           expect(sast_brakeman_level['value']).to eql('2')
         end
 
-        context 'SAST_DEFAULT_ANALYZERS is set' do
-          it 'enables analyzers correctly' do
-            allow(project.repository).to receive(:blob_data_at).and_return(gitlab_ci_yml_default_analyzers_content)
-
-            expect(brakeman['enabled']).to be(false)
-            expect(bandit['enabled']).to be(true)
-          end
-        end
-
         context 'SAST_EXCLUDED_ANALYZERS is set' do
           it 'enables analyzers correctly' do
             allow(project.repository).to receive(:blob_data_at).and_return(gitlab_ci_yml_excluded_analyzers_content)
@@ -59,6 +50,23 @@ RSpec.describe Security::CiConfiguration::SastParserService do
       context 'when .gitlab-ci.yml is absent' do
         it 'populates the current values with the default values' do
           allow(project.repository).to receive(:blob_data_at).and_return(nil)
+          expect(secure_analyzers_prefix['value']).to eql('registry.gitlab.com/gitlab-org/security-products/analyzers')
+          expect(sast_excluded_paths['value']).to eql('spec, test, tests, tmp')
+          expect(sast_pipeline_stage['value']).to eql('test')
+          expect(sast_search_max_depth['value']).to eql('4')
+          expect(brakeman['enabled']).to be(true)
+          expect(sast_brakeman_level['value']).to eql('1')
+        end
+      end
+
+      context 'when .gitlab-ci.yml does not include the sast job' do
+        before do
+          allow(project.repository).to receive(:blob_data_at).and_return(
+            File.read(Rails.root.join('spec/support/gitlab_stubs/gitlab_ci.yml'))
+          )
+        end
+
+        it 'populates the current values with the default values' do
           expect(secure_analyzers_prefix['value']).to eql('registry.gitlab.com/gitlab-org/security-products/analyzers')
           expect(sast_excluded_paths['value']).to eql('spec, test, tests, tmp')
           expect(sast_pipeline_stage['value']).to eql('test')

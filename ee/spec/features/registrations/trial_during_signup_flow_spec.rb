@@ -8,7 +8,6 @@ RSpec.describe 'User sees new onboarding flow', :js do
 
   before do
     allow(Gitlab).to receive(:com?).and_return(true)
-    stub_feature_flags(registrations_group_invite: false)
     sign_in(user)
     visit users_sign_up_welcome_path
 
@@ -20,13 +19,13 @@ RSpec.describe 'User sees new onboarding flow', :js do
     expect(page).to have_content('GitLab Ultimate trial (optional)')
   end
 
-  it 'shows the expected behavior with no trial chosen' do
+  it 'shows the expected behavior with no trial chosen', :aggregate_failures do
     fill_in 'group_name', with: 'test'
 
     click_on 'Create group'
 
     expect(page).not_to have_content('Congratulations, your free trial is activated.')
-    expect(page).to have_content('Create/import your first project')
+    expect(page).to have_content('Invite your teammates')
   end
 
   it 'shows the expected behavior with trial chosen' do
@@ -73,6 +72,6 @@ RSpec.describe 'User sees new onboarding flow', :js do
     click_on 'Create group'
 
     expect(page).to have_content('Congratulations, your free trial is activated.')
-    expect(page).to have_content('Create/import your first project')
+    expect(page).to have_content('Invite your teammates')
   end
 end

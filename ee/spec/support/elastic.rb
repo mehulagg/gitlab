@@ -56,6 +56,10 @@ module Elastic
 end
 
 RSpec.configure do |config|
+  config.define_derived_metadata do |meta|
+    meta[:clean_gitlab_redis_cache] = true if meta[:elastic] || meta[:elastic_delete_by_query]
+  end
+
   config.around(:each, :elastic) do |example|
     helper = Elastic::TestHelpers.new
     helper.setup

@@ -84,10 +84,11 @@ class User < ApplicationRecord
 
     update_tracked_fields(request)
 
-    lease = Gitlab::ExclusiveLease.new("user_update_tracked_fields:#{id}", timeout: 1.hour.to_i)
-    return unless lease.try_obtain
-
-    Users::UpdateService.new(self, user: self).execute(validate: false)
+    Gitlab::ExclusiveLease.throttle(id) do
+      ::Ability.forgetting(/admin/) do
+        Users::UpdateService.new(self, user: self).execute(validate: false)
+      end
+    end
   end
   # rubocop: enable CodeReuse/ServiceClass
 
@@ -108,7 +109,7 @@ class User < ApplicationRecord
 
   # Profile
   has_many :keys, -> { regular_keys }, dependent: :destroy # rubocop:disable Cop/ActiveRecordDependent
-  has_many :expired_today_and_unnotified_keys, -> { expired_today_and_not_notified }, class_name: 'Key'
+  has_many :expired_and_unnotified_keys, -> { expired_and_not_notified }, class_name: 'Key'
   has_many :expiring_soon_and_unnotified_keys, -> { expiring_soon_and_not_notified }, class_name: 'Key'
   has_many :deploy_keys, -> { where(type: 'DeployKey') }, dependent: :nullify # rubocop:disable Cop/ActiveRecordDependent
   has_many :group_deploy_keys
@@ -312,6 +313,7 @@ class User < ApplicationRecord
   delegate :other_role, :other_role=, to: :user_detail, allow_nil: true
   delegate :bio, :bio=, :bio_html, to: :user_detail, allow_nil: true
   delegate :webauthn_xid, :webauthn_xid=, to: :user_detail, allow_nil: true
+  delegate :pronouns, :pronouns=, to: :user_detail, allow_nil: true
 
   accepts_nested_attributes_for :user_preference, update_only: true
   accepts_nested_attributes_for :user_detail, update_only: true
@@ -411,14 +413,7 @@ class User < ApplicationRecord
             .without_impersonation
             .expired_today_and_not_notified)
   end
-  scope :with_ssh_key_expired_today, -> do
-    includes(:expired_today_and_unnotified_keys)
-      .where('EXISTS (?)',
-        ::Key
-        .select(1)
-        .where('keys.user_id = users.id')
-        .expired_today_and_not_notified)
-  end
+
   scope :with_ssh_key_expiring_soon, -> do
     includes(:expiring_soon_and_unnotified_keys)
       .where('EXISTS (?)',
@@ -785,6 +780,16 @@ class User < ApplicationRecord
         u.name = 'GitLab Support Bot'
         u.avatar = bot_avatar(image: 'support-bot.png')
         u.confirmed_at = Time.zone.now
+      end
+    end
+
+    def automation_bot
+      email_pattern = "automation%s@#{Settings.gitlab.host}"
+
+      unique_internal(where(user_type: :automation_bot), 'automation-bot', email_pattern) do |u|
+        u.bio = 'The GitLab automation bot used for automated workflows and tasks'
+        u.name = 'GitLab Automation Bot'
+        u.avatar = bot_avatar(image: 'support-bot.png') # todo: add an avatar for automation-bot
       end
     end
 
@@ -1864,6 +1869,12 @@ class User < ApplicationRecord
     !!(password_expires_at && password_expires_at < Time.current)
   end
 
+  def password_expired_if_applicable?
+    return false unless allow_password_authentication?
+
+    password_expired?
+  end
+
   def can_be_deactivated?
     active? && no_recent_activity? && !internal?
   end
@@ -1917,6 +1928,20 @@ class User < ApplicationRecord
 
   def can_trigger_notifications?
     confirmed? && !blocked? && !ghost?
+  end
+
+  # This attribute hosts a Ci::JobToken::Scope object which is set when
+  # the user is authenticated successfully via CI_JOB_TOKEN.
+  def ci_job_token_scope
+    Gitlab::SafeRequestStore[ci_job_token_scope_cache_key]
+  end
+
+  def set_ci_job_token_scope!(job)
+    Gitlab::SafeRequestStore[ci_job_token_scope_cache_key] = Ci::JobToken::Scope.new(job.project)
+  end
+
+  def from_ci_job_token?
+    ci_job_token_scope.present?
   end
 
   protected
@@ -2081,6 +2106,10 @@ class User < ApplicationRecord
 
   def update_highest_role_attribute
     id
+  end
+
+  def ci_job_token_scope_cache_key
+    "users:#{id}:ci:job_token_scope"
   end
 end
 

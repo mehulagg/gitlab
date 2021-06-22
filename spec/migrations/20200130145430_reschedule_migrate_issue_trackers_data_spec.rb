@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 require 'spec_helper'
-require Rails.root.join('db', 'post_migrate', '20200130145430_reschedule_migrate_issue_trackers_data.rb')
+require_migration!('reschedule_migrate_issue_trackers_data')
 
 RSpec.describe RescheduleMigrateIssueTrackersData do
   let(:services) { table(:services) }
@@ -14,23 +14,23 @@ RSpec.describe RescheduleMigrateIssueTrackersData do
     }
   end
 
-  let!(:jira_service) do
+  let!(:jira_integration) do
     services.create!(id: 10, type: 'JiraService', properties: properties, category: 'issue_tracker')
   end
 
-  let!(:jira_service_nil) do
+  let!(:jira_integration_nil) do
     services.create!(id: 11, type: 'JiraService', properties: nil, category: 'issue_tracker')
   end
 
-  let!(:bugzilla_service) do
+  let!(:bugzilla_integration) do
     services.create!(id: 12, type: 'BugzillaService', properties: properties, category: 'issue_tracker')
   end
 
-  let!(:youtrack_service) do
+  let!(:youtrack_integration) do
     services.create!(id: 13, type: 'YoutrackService', properties: properties, category: 'issue_tracker')
   end
 
-  let!(:youtrack_service_empty) do
+  let!(:youtrack_integration_empty) do
     services.create!(id: 14, type: 'YoutrackService', properties: '', category: 'issue_tracker')
   end
 
@@ -56,8 +56,8 @@ RSpec.describe RescheduleMigrateIssueTrackersData do
         freeze_time do
           migrate!
 
-          expect(migration_name).to be_scheduled_delayed_migration(3.minutes, jira_service.id, bugzilla_service.id)
-          expect(migration_name).to be_scheduled_delayed_migration(6.minutes, youtrack_service.id, gitlab_service.id)
+          expect(migration_name).to be_scheduled_delayed_migration(3.minutes, jira_integration.id, bugzilla_integration.id)
+          expect(migration_name).to be_scheduled_delayed_migration(6.minutes, youtrack_integration.id, gitlab_service.id)
           expect(BackgroundMigrationWorker.jobs.size).to eq(2)
         end
       end
@@ -70,7 +70,7 @@ RSpec.describe RescheduleMigrateIssueTrackersData do
 
     let!(:valid_issue_tracker_data) do
       issue_tracker_data.create!(
-        service_id: bugzilla_service.id,
+        service_id: bugzilla_integration.id,
         encrypted_issues_url: 'http://url.com',
         encrypted_issues_url_iv: 'somevalue'
       )
@@ -78,7 +78,7 @@ RSpec.describe RescheduleMigrateIssueTrackersData do
 
     let!(:invalid_issue_tracker_data) do
       issue_tracker_data.create!(
-        service_id: bugzilla_service.id,
+        service_id: bugzilla_integration.id,
         encrypted_issues_url: 'http:url.com',
         encrypted_issues_url_iv: nil
       )
@@ -86,7 +86,7 @@ RSpec.describe RescheduleMigrateIssueTrackersData do
 
     let!(:valid_jira_tracker_data) do
       jira_tracker_data.create!(
-        service_id: bugzilla_service.id,
+        service_id: bugzilla_integration.id,
         encrypted_url: 'http://url.com',
         encrypted_url_iv: 'somevalue'
       )
@@ -94,7 +94,7 @@ RSpec.describe RescheduleMigrateIssueTrackersData do
 
     let!(:invalid_jira_tracker_data) do
       jira_tracker_data.create!(
-        service_id: bugzilla_service.id,
+        service_id: bugzilla_integration.id,
         encrypted_url: 'http://url.com',
         encrypted_url_iv: nil
       )

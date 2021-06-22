@@ -323,7 +323,7 @@ export function isAbsolute(url) {
  * @param {String} url
  */
 export function isRootRelative(url) {
-  return /^\//.test(url);
+  return /^\/(?!\/)/.test(url);
 }
 
 /**
@@ -409,34 +409,89 @@ export function getWebSocketUrl(path) {
   return `${getWebSocketProtocol()}//${joinPaths(window.location.host, path)}`;
 }
 
+const splitPath = (path = '') => path.replace(/^\?/, '').split('&');
+
+export const urlParamsToArray = (path = '') =>
+  splitPath(path)
+    .filter((param) => param.length > 0)
+    .map((param) => {
+      const split = param.split('=');
+      return [decodeURI(split[0]), split[1]].join('=');
+    });
+
+export const getUrlParamsArray = () => urlParamsToArray(window.location.search);
+
+/**
+ * Accepts encoding string which includes query params being
+ * sent to URL.
+ *
+ * @param {string} path Query param string
+ *
+ * @returns {object} Query params object containing key-value pairs
+ *                   with both key and values decoded into plain string.
+ *
+ * @deprecated Please use `queryToObject(query, { gatherArrays: true });` instead. See https://gitlab.com/gitlab-org/gitlab/-/issues/328845
+ */
+export const urlParamsToObject = (path = '') =>
+  splitPath(path).reduce((dataParam, filterParam) => {
+    if (filterParam === '') {
+      return dataParam;
+    }
+
+    const data = dataParam;
+    let [key, value] = filterParam.split('=');
+    key = /%\w+/g.test(key) ? decodeURIComponent(key) : key;
+    const isArray = key.includes('[]');
+    key = key.replace('[]', '');
+    value = decodeURIComponent(value.replace(/\+/g, ' '));
+
+    if (isArray) {
+      if (!data[key]) {
+        data[key] = [];
+      }
+
+      data[key].push(value);
+    } else {
+      data[key] = value;
+    }
+
+    return data;
+  }, {});
+
 /**
  * Convert search query into an object
  *
  * @param {String} query from "document.location.search"
  * @param {Object} options
- * @param {Boolean} options.gatherArrays - gather array values into an Array
+ * @param {Boolean?} options.gatherArrays - gather array values into an Array
+ * @param {Boolean?} options.legacySpacesDecode - (deprecated) plus symbols (+) are not replaced with spaces, false by default
  * @returns {Object}
  *
  * ex: "?one=1&two=2" into {one: 1, two: 2}
  */
-export function queryToObject(query, options = {}) {
-  const { gatherArrays = false } = options;
+export function queryToObject(query, { gatherArrays = false, legacySpacesDecode = false } = {}) {
   const removeQuestionMarkFromQuery = String(query).startsWith('?') ? query.slice(1) : query;
   return removeQuestionMarkFromQuery.split('&').reduce((accumulator, curr) => {
     const [key, value] = curr.split('=');
     if (value === undefined) {
       return accumulator;
     }
-    const decodedValue = decodeURIComponent(value);
+
+    const decodedValue = legacySpacesDecode ? decodeURIComponent(value) : decodeUrlParameter(value);
 
     if (gatherArrays && key.endsWith('[]')) {
-      const decodedKey = decodeURIComponent(key.slice(0, -2));
+      const decodedKey = legacySpacesDecode
+        ? decodeURIComponent(key.slice(0, -2))
+        : decodeUrlParameter(key.slice(0, -2));
+
       if (!Array.isArray(accumulator[decodedKey])) {
         accumulator[decodedKey] = [];
       }
       accumulator[decodedKey].push(decodedValue);
     } else {
-      accumulator[decodeURIComponent(key)] = decodedValue;
+      const decodedKey = legacySpacesDecode ? decodeURIComponent(key) : decodeUrlParameter(key);
+
+      accumulator[decodedKey] = decodedValue;
     }
 
     return accumulator;

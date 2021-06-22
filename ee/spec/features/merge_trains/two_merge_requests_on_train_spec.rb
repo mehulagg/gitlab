@@ -8,7 +8,6 @@ RSpec.describe 'Two merge requests on a merge train' do
   let(:project) { create(:project, :repository) }
   let_it_be(:maintainer_1) { create(:user) }
   let_it_be(:maintainer_2) { create(:user) }
-  let_it_be(:runner) { create(:ci_runner, :online) }
 
   let(:merge_request_1) do
     create(:merge_request,

@@ -70,7 +70,12 @@ export default {
   <div class="block weight">
     <div class="title gl-mb-3">
       {{ __('Weight') }}
-      <gl-button v-if="canEdit" variant="link" class="float-right" @click="showDropdown">
+      <gl-button
+        v-if="canEdit"
+        variant="link"
+        class="float-right gl-text-gray-800!"
+        @click="showDropdown"
+      >
         {{ __('Edit') }}
       </gl-button>
     </div>

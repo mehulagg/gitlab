@@ -49,23 +49,30 @@ export default {
   },
   computed: {
     isValid() {
-      return this.nameState && this.urlState && this.branchesState;
+      return this.isValidName && this.isValidUrl && this.isValidBranches;
+    },
+    isValidBranches() {
+      return this.branches.every((branch) => isEqual(branch, ANY_BRANCH) || isNumber(branch?.id));
+    },
+    isValidName() {
+      return Boolean(this.name);
+    },
+    isValidUrl() {
+      return Boolean(this.url) && isSafeURL(this.url);
     },
     branchesState() {
-      return !this.showValidation || this.checkBranchesValidity(this.branches);
+      return !this.showValidation || this.isValidBranches;
     },
     nameState() {
       return (
         !this.showValidation ||
-        (this.checkNameValidity(this.name) &&
-          !this.serverValidationErrors.includes(NAME_TAKEN_SERVER_ERROR))
+        (this.isValidName && !this.serverValidationErrors.includes(NAME_TAKEN_SERVER_ERROR))
       );
     },
     urlState() {
       return (
         !this.showValidation ||
-        (this.checkUrlValidity(this.url) &&
-          !this.serverValidationErrors.includes(URL_TAKEN_SERVER_ERROR))
+        (this.isValidUrl && !this.serverValidationErrors.includes(URL_TAKEN_SERVER_ERROR))
       );
     },
     invalidNameMessage() {
@@ -104,15 +111,6 @@ export default {
       }
 
       this.branchesApiFailed = hasErrored;
-    },
-    checkBranchesValidity(branches) {
-      return branches.every((branch) => isEqual(branch, ANY_BRANCH) || isNumber(branch?.id));
-    },
-    checkNameValidity(name) {
-      return Boolean(name);
-    },
-    checkUrlValidity(url) {
-      return Boolean(url) && isSafeURL(url);
     },
   },
   i18n: {
@@ -154,12 +152,7 @@ export default {
         :invalid-feedback="invalidNameMessage"
         data-testid="name-group"
       >
-        <gl-form-input
-          v-model="name"
-          :state="nameState"
-          data-qa-selector="rule_name_field"
-          data-testid="name"
-        />
+        <gl-form-input v-model="name" :state="nameState" data-testid="name" />
       </gl-form-group>
       <gl-form-group
         :label="$options.i18n.form.addStatusChecks"
@@ -173,7 +166,6 @@ export default {
           :state="urlState"
           type="url"
           :placeholder="`https://api.gitlab.com/`"
-          data-qa-selector="external_url_field"
           data-testid="url"
         />
       </gl-form-group>
