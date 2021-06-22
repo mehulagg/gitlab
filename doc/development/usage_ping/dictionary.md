@@ -5676,7 +5676,7 @@ Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.secret_detection_jobs`
 
-Count of 'secret-detection' CI jobs fro the month.
+Count of 'secret-detection' CI jobs for the month.
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216182114_secret_detection_jobs.yml)
 
@@ -17312,7 +17312,7 @@ Counts dast jobs
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_all/20210216182122_dast_scans.yml)
 
-Group: `group::static analysis`
+Group: `group::dynamic analysis`
 
 Status: `data_available`
 
@@ -17344,7 +17344,7 @@ Tiers:
 
 ### `usage_activity_by_stage.secure.secret_detection_scans`
 
-Counts secret detection jobs
+counts secret detection jobs
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_all/20210216182123_secret_detection_scans.yml)
 
@@ -17352,7 +17352,7 @@ Group: `group::static analysis`
 
 Status: `data_available`
 
-Tiers:
+Tiers: `ultimate`
 
 ### `usage_activity_by_stage.secure.user_api_fuzzing_dnd_jobs`
 
@@ -17452,7 +17452,7 @@ Tiers: `ultimate`
 
 ### `usage_activity_by_stage.secure.user_sast_jobs`
 
-Count of SAST jobs
+Count of SAST jobs per user per month
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216182116_user_sast_jobs.yml)
 
@@ -17464,7 +17464,7 @@ Tiers: `free`, `premium`, `ultimate`
 
 ### `usage_activity_by_stage.secure.user_secret_detection_jobs`
 
-Count of Secret Detection Jobs
+Count of Secret Detection Jobs per user per month
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216182118_user_secret_detection_jobs.yml)
 
