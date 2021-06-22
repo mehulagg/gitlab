@@ -34,8 +34,6 @@ Capybara.register_server :puma_via_workhorse do |app, port, host, **options|
   socket_path = file.path
   file.close! # We just want the filename
 
-  options[:queue_requests] = false
-
   TestEnv.with_workhorse(host, port, socket_path) do
     Capybara.servers[:puma].call(app, nil, socket_path, **options)
   end
@@ -192,11 +190,7 @@ RSpec.configure do |config|
     # but fail don't add the message if the failure is a pending test that got
     # fixed. If we raised the `JSException` the fixed test would be marked as
     # failed again.
-    puts 'in after hook'
     if example.exception && !example.exception.is_a?(RSpec::Core::Pending::PendingExampleFixedError)
-      puts 'in exception'
-
-      puts page.driver.browser.manage
 
       begin
         console = page.driver.browser.manage.logs.get(:browser)&.reject { |log| log.message =~ JS_CONSOLE_FILTER }
@@ -215,24 +209,17 @@ RSpec.configure do |config|
       end
     end
 
-    puts Capybara.current_session.driver.browser.manage
-    puts page.driver.browser.manage.logs.get(:driver)
-    puts 'Capybara.current_session.driver.browser.current_url'
     # prevent localStorage from introducing side effects based on test order
     unless ['', 'about:blank', 'data:,'].include? Capybara.current_session.driver.browser.current_url
       execute_script("localStorage.clear();")
     end
 
-    puts 'Capybara.reset_sessions!'
     # capybara/rspec already calls Capybara.reset_sessions! in an `after` hook,
     # but `block_and_wait_for_requests_complete` is called before it so by
     # calling it explicitly here, we prevent any new requests from being fired
     # See https://github.com/teamcapybara/capybara/blob/ffb41cfad620de1961bb49b1562a9fa9b28c0903/lib/capybara/rspec.rb#L20-L25
     # We don't reset the session when the example failed, because we need capybara-screenshot to have access to it.
     Capybara.reset_sessions! unless example.exception
-
-    puts Capybara.current_session.driver.browser.manage
-    puts 'block_and_wait_for_requests_complete'
     block_and_wait_for_requests_complete
   end
 end
