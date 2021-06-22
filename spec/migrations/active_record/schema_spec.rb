@@ -7,7 +7,7 @@ require 'spec_helper'
 
 RSpec.describe ActiveRecord::Schema, schema: :latest do
   let(:all_migrations) do
-    migrations_paths = %w[db/migrate db/post_migrate]
+    migrations_paths = %w[db/migrate db/post_migrate db/ci_migrate]
       .map { |path| Rails.root.join(*path, '*') }
 
     migrations = Dir[*migrations_paths]
