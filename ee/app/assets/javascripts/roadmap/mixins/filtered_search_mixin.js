@@ -235,14 +235,14 @@ export default {
       if (milestoneTitle) {
         filteredSearchValue.push({
           type: 'milestone_title',
-          value: { data: milestoneTitle, operator: OPERATOR_IS },
+          value: { data: milestoneTitle },
         });
       }
 
       if (confidential !== undefined) {
         filteredSearchValue.push({
           type: 'confidential',
-          value: { data: confidential, operator: OPERATOR_IS },
+          value: { data: confidential },
         });
       }
 
@@ -262,7 +262,7 @@ export default {
       if (epicIid) {
         filteredSearchValue.push({
           type: 'epic_iid',
-          value: { data: epicIid, operator: OPERATOR_IS },
+          value: { data: epicIid },
         });
       }
 

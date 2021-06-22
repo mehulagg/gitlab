@@ -10,7 +10,10 @@ import { mockSortedBy, mockTimeframeInitialDate } from 'ee_jest/roadmap/mock_dat
 
 import { TEST_HOST } from 'helpers/test_constants';
 import { visitUrl, mergeUrlParams, updateHistory } from '~/lib/utils/url_utility';
-import { OPERATOR_IS_ONLY } from '~/vue_shared/components/filtered_search_bar/constants';
+import {
+  OPERATOR_IS_ONLY,
+  OPERATOR_IS_AND_IS_NOT,
+} from '~/vue_shared/components/filtered_search_bar/constants';
 import FilteredSearchBar from '~/vue_shared/components/filtered_search_bar/filtered_search_bar_root.vue';
 import AuthorToken from '~/vue_shared/components/filtered_search_bar/tokens/author_token.vue';
 import EmojiToken from '~/vue_shared/components/filtered_search_bar/tokens/emoji_token.vue';
@@ -147,11 +150,19 @@ describe('RoadmapFilters', () => {
       const mockInitialFilterValue = [
         {
           type: 'author_username',
-          value: { data: 'root' },
+          value: { data: 'root', operator: '=' },
+        },
+        {
+          type: 'author_username',
+          value: { data: 'John', operator: '!=' },
         },
         {
           type: 'label_name',
-          value: { data: 'Bug' },
+          value: { data: 'Bug', operator: '=' },
+        },
+        {
+          type: 'label_name',
+          value: { data: 'Feature', operator: '!=' },
         },
         {
           type: 'milestone_title',
@@ -160,6 +171,10 @@ describe('RoadmapFilters', () => {
         {
           type: 'confidential',
           value: { data: true },
+        },
+        {
+          type: 'my_reaction_emoji',
+          value: { data: 'thumbs_up', operator: '!=' },
         },
       ];
       let filteredSearchBar;
@@ -174,7 +189,7 @@ describe('RoadmapFilters', () => {
           unique: true,
           symbol: '@',
           token: AuthorToken,
-          operators,
+          operators: OPERATOR_IS_AND_IS_NOT,
           recentTokenValuesStorageKey: 'gitlab-org-epics-recent-tokens-author_username',
           fetchAuthors: expect.any(Function),
         },
@@ -185,7 +200,7 @@ describe('RoadmapFilters', () => {
           unique: false,
           symbol: '~',
           token: LabelToken,
-          operators,
+          operators: OPERATOR_IS_AND_IS_NOT,
           recentTokenValuesStorageKey: 'gitlab-org-epics-recent-tokens-label_name',
           fetchLabels: expect.any(Function),
         },
@@ -265,6 +280,9 @@ describe('RoadmapFilters', () => {
           labelName: ['Bug'],
           milestoneTitle: '4.0',
           confidential: true,
+          'not[authorUsername]': 'John',
+          'not[labelName]': ['Feature'],
+          'not[myReactionEmoji]': 'thumbs_up',
         });
 
         await wrapper.vm.$nextTick();
@@ -287,6 +305,9 @@ describe('RoadmapFilters', () => {
           labelName: ['Bug'],
           milestoneTitle: '4.0',
           confidential: true,
+          'not[authorUsername]': 'John',
+          'not[labelName]': ['Feature'],
+          'not[myReactionEmoji]': 'thumbs_up',
         });
         expect(wrapper.vm.fetchEpics).toHaveBeenCalled();
       });
@@ -319,7 +340,7 @@ describe('RoadmapFilters', () => {
               title: 'My-Reaction',
               unique: true,
               token: EmojiToken,
-              operators,
+              operators: OPERATOR_IS_AND_IS_NOT,
               fetchEmojis: expect.any(Function),
             },
           ]);

@@ -150,12 +150,16 @@ export const timeframeEndDate = (presetType, timeframe) => {
 };
 
 /**
- * Returns transformed `filterParams` by consolidating all `not` params into a
+ * Returns transformed `filterParams` by congregating all `not` params into a
  * single object like { not: { labelName: [], ... }, authorUsername: '' }
  *
  * @param {Object} filterParams
  */
 export const transformFetchEpicFilterParams = (filterParams) => {
+  if (!filterParams) {
+    return filterParams;
+  }
+
   const newParams = {};
 
   Object.keys(filterParams).forEach((param) => {
