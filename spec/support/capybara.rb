@@ -57,6 +57,8 @@ Capybara.register_driver :chrome do |app|
   # Force the browser's scale factor to prevent inconsistencies on high-res devices
   options.add_argument('--force-device-scale-factor=1')
 
+  options.add_argument('--enable-features=NetworkService,NetworkServiceInProcess')
+
   options.add_argument("window-size=#{CAPYBARA_WINDOW_SIZE.join(',')}")
 
   # Chrome won't work properly in a Docker container in sandbox mode
