@@ -259,11 +259,13 @@ hub_docker_quota_check:
 
 If a service alias is not set the `docker:19.03.12` image is unable to find the
 `dind` service, and an error like the following is thrown:
+
 ```plaintext
 error during connect: Get http://docker:2376/v1.39/info: dial tcp: lookup docker on 192.168.0.1:53: no such host
 ```
 
 This can be resolved by setting a service alias for the Docker service:
+
 ```
 services:
     - name: ${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}/docker:18.09.7-dind
