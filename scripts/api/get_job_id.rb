@@ -34,10 +34,19 @@ class JobFinder
   end
 
   def execute
-    find_job_with_artifact || find_job_with_filtered_pipelines || find_job_in_pipeline
+    timed do
+      find_job_with_artifact || find_job_with_filtered_pipelines || find_job_in_pipeline
+    end
   end
 
   private
+
+  def timed
+    start = Time.now
+    result = yield
+    puts "#{__FILE__} completed in #{Time.now - start} seconds"
+    result
+  end
 
   attr_reader :project, :pipeline_query, :job_query, :pipeline_id, :job_name, :artifact_path
 

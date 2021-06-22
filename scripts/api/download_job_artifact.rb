@@ -24,17 +24,26 @@ class ArtifactFinder
   end
 
   def execute
-    url = "https://gitlab.com/api/v4/projects/#{CGI.escape(project)}/jobs/#{job_id}/artifacts"
+    timed do
+      url = "https://gitlab.com/api/v4/projects/#{CGI.escape(project)}/jobs/#{job_id}/artifacts"
 
-    if artifact_path
-      FileUtils.mkdir_p(File.dirname(artifact_path))
-      url += "/#{artifact_path}"
+      if artifact_path
+        FileUtils.mkdir_p(File.dirname(artifact_path))
+        url += "/#{artifact_path}"
+      end
+
+      fetch(url)
     end
-
-    fetch(url)
   end
 
   private
+
+  def timed
+    start = Time.now
+    result = yield
+    puts "#{__FILE__} completed in #{Time.now - start} seconds"
+    result
+  end
 
   attr_reader :project, :job_id, :api_token, :artifact_path
 
