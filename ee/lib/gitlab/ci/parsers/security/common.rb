@@ -25,6 +25,7 @@ module Gitlab
 
             create_scanner
             create_scan
+            create_analyzer
             collate_remediations.each { |vulnerability| create_vulnerability(vulnerability) }
 
             report_data
@@ -65,6 +66,10 @@ module Gitlab
 
           def scan_data
             @scan_data ||= report_data.dig('scan')
+          end
+
+          def analyzer_data
+            @analyzer_data ||= report_data.dig('scan', 'analyzer')
           end
 
           # map remediations to relevant vulnerabilities
@@ -164,6 +169,24 @@ module Gitlab
             return unless scan_data.is_a?(Hash)
 
             report.scan = ::Gitlab::Ci::Reports::Security::Scan.new(scan_data)
+          end
+
+          def create_analyzer
+            return unless analyzer_data.is_a?(Hash)
+
+            params = {
+              id: analyzer_data.dig('id'),
+              name: analyzer_data.dig('name'),
+              version: analyzer_data.dig('version'),
+              vendor: analyzer_data.dig('vendor', 'name'),
+            }
+
+            return unless params.values.all?
+
+            report.analyzer = ::Gitlab::Ci::Reports::Security::Analyzer.new(params[:id],
+                                                                            params[:name],
+                                                                            params[:version],
+                                                                            params[:vendor])
           end
 
           def create_scanner(scanner_data = top_level_scanner)

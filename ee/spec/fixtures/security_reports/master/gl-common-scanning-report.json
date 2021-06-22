@@ -133,6 +133,15 @@
     ],
     "dependency_files": [],
     "scan": {
+      "analyzer": {
+          "id": "common-analyzer",
+          "name": "Common Analyzer",
+          "url": "https://site.com/analyzer/common",
+          "version": "2.0.1",
+          "vendor": {
+            "name": "Common"
+          }
+        },
         "scanner": {
             "id": "gemnasium",
             "name": "Gemnasium",

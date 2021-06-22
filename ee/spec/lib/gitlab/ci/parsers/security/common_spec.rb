@@ -225,6 +225,22 @@ RSpec.describe Gitlab::Ci::Parsers::Security::Common do
         end
       end
 
+      describe 'parsing analyzer' do
+        it 'associates analyzer with report' do
+          expect(report.analyzer.id).to eq('common-analyzer')
+          expect(report.analyzer.name).to eq('Common Analyzer')
+          expect(report.analyzer.version).to eq('2.0.1')
+          expect(report.analyzer.vendor).to eq('Common')
+        end
+
+        it 'returns nil when analyzer data is not available' do
+          empty_report = Gitlab::Ci::Reports::Security::Report.new(artifact.file_type, pipeline, 2.weeks.ago)
+          described_class.parse!({}.to_json, empty_report)
+
+          expect(empty_report.analyzer).to be_nil
+        end
+      end
+
       describe 'parsing links' do
         it 'returns links object for each finding', :aggregate_failures do
           links = report.findings.flat_map(&:links)
