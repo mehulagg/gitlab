@@ -11,8 +11,7 @@ module Types
         description 'Represents the current license'
 
         field :last_sync, ::Types::TimeType, null: true,
-              description: 'Date when the license was last synced.',
-              method: :last_synced_at
+              description: 'Date when the license was last synced.'
 
         field :billable_users_count, GraphQL::INT_TYPE, null: true,
               description: 'Number of billable users on the system.',
@@ -29,6 +28,12 @@ module Types
           return 0 if object.trial?
 
           [object.overage_with_historical_max, 0].max
+        end
+
+        def last_sync
+          return unless object.cloud_license?
+
+          object.last_synced_at
         end
       end
     end

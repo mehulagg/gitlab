@@ -32,13 +32,18 @@ RSpec.describe GitlabSubscriptions::ActivateService do
     end
 
     it 'persists license' do
-      result = execute_service
-      created_license = License.last
+      freeze_time do
+        result = execute_service
+        created_license = License.last
 
-      expect(result).to eq({ success: true, license: created_license })
+        expect(result).to eq({ success: true, license: created_license })
 
-      expect(created_license.data).to eq(license_key)
-      expect(created_license.cloud).to eq(true)
+        expect(created_license).to have_attributes(
+          data: license_key,
+          cloud: true,
+          last_synced_at: Time.current
+        )
+      end
     end
 
     it 'deletes any existing cloud licenses' do

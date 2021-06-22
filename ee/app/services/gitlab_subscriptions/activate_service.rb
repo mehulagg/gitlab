@@ -17,7 +17,7 @@ module GitlabSubscriptions
 
       return response unless response[:success]
 
-      license = License.new(data: response[:license_key], cloud: true)
+      license = License.new(data: response[:license_key], cloud: true, last_synced_at: Time.current)
 
       if license.save
         License.cloud.id_not_in(license.id).delete_all
