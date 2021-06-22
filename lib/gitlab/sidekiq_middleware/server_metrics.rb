@@ -14,6 +14,16 @@ module Gitlab
 
         @metrics[:sidekiq_concurrency].set({}, Sidekiq.options[:concurrency].to_i)
 
+        ::Gitlab::SidekiqConfig.current_worker_queue_mappings.each do |worker, queue|
+          worker_class = worker.safe_constantize
+
+          next unless worker_class
+
+          ['done', 'fail'].each do |status|
+            @metrics[:sidekiq_jobs_completion_seconds].get(create_labels(worker_class, queue, {}).merge(job_status: status))
+          end
+        end
+
         if ::Gitlab::Database::LoadBalancing.enable?
           @metrics[:sidekiq_load_balancing_count] = ::Gitlab::Metrics.counter(:sidekiq_load_balancing_count, 'Sidekiq jobs with load balancing')
         end

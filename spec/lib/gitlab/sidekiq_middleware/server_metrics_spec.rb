@@ -14,6 +14,50 @@ RSpec.describe Gitlab::SidekiqMiddleware::ServerMetrics do
 
           subject
         end
+
+        it 'initializes sidekiq_jobs_completion_seconds for the workers in the current Sidekiq process' do
+          allow(Gitlab::SidekiqConfig)
+            .to receive(:current_worker_queue_mappings)
+                  .and_return('MergeWorker' => 'merge', 'BuildFinishedWorker' => 'default')
+
+          expect(completion_seconds_metric)
+            .to receive(:get).with(queue: 'merge',
+                                   worker: 'MergeWorker',
+                                   urgency: 'high',
+                                   external_dependencies: 'no',
+                                   feature_category: 'source_code_management',
+                                   boundary: '',
+                                   job_status: 'done')
+
+          expect(completion_seconds_metric)
+            .to receive(:get).with(queue: 'merge',
+                                   worker: 'MergeWorker',
+                                   urgency: 'high',
+                                   external_dependencies: 'no',
+                                   feature_category: 'source_code_management',
+                                   boundary: '',
+                                   job_status: 'fail')
+
+          expect(completion_seconds_metric)
+            .to receive(:get).with(queue: 'default',
+                                   worker: 'BuildFinishedWorker',
+                                   urgency: 'high',
+                                   external_dependencies: 'no',
+                                   feature_category: 'continuous_integration',
+                                   boundary: 'cpu',
+                                   job_status: 'done')
+
+          expect(completion_seconds_metric)
+            .to receive(:get).with(queue: 'default',
+                                   worker: 'BuildFinishedWorker',
+                                   urgency: 'high',
+                                   external_dependencies: 'no',
+                                   feature_category: 'continuous_integration',
+                                   boundary: 'cpu',
+                                   job_status: 'fail')
+
+          subject
+        end
       end
 
       describe '#call' do
