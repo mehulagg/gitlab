@@ -91,8 +91,8 @@ module UsersHelper
     end
   end
 
-  def impersonation_enabled?
-    Gitlab.config.gitlab.impersonation_enabled
+  def impersonation_enabled?(user)
+    Gitlab.config.gitlab.impersonation_enabled && user != current_user && user.can?(:log_in)
   end
 
   def user_badges_in_admin_section(user)
@@ -256,6 +256,13 @@ module UsersHelper
     user.name
   end
 
+  def admin_user_actions_data_attributes(user)
+    {
+      user: Admin::UserEntity.represent(user, { current_user: current_user }).to_json,
+      paths: admin_users_paths.to_json
+    }
+  end
+
   private
 
   def admin_users_paths
@@ -270,7 +277,8 @@ module UsersHelper
       unlock: unlock_admin_user_path(:id),
       delete: admin_user_path(:id),
       delete_with_contributions: admin_user_path(:id),
-      admin_user: admin_user_path(:id)
+      admin_user: admin_user_path(:id),
+      impersonate: impersonate_admin_user_path(:id)
     }
   end
 

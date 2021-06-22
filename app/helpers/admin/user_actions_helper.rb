@@ -16,6 +16,10 @@ module Admin
       unlock_actions
       delete_actions
 
+      if impersonation_enabled?(user)
+        @actions << 'impersonate'
+      end
+
       @actions
     end
 

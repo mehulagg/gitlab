@@ -5,8 +5,8 @@ export const USER_AVATAR_SIZE = 32;
 export const LENGTH_OF_USER_NOTE_TOOLTIP = 100;
 
 export const I18N_USER_ACTIONS = {
-  edit: __('Edit'),
-  settings: __('Settings'),
+  edit: __('Edit user'),
+  userAdministration: __('User administration'),
   unlock: __('Unlock'),
   block: s__('AdminUsers|Block'),
   unblock: s__('AdminUsers|Unblock'),
@@ -17,4 +17,5 @@ export const I18N_USER_ACTIONS = {
   ldapBlocked: s__('AdminUsers|Cannot unblock LDAP blocked users'),
   delete: s__('AdminUsers|Delete user'),
   deleteWithContributions: s__('AdminUsers|Delete user and contributions'),
+  impersonate: __('Impersonate'),
 };

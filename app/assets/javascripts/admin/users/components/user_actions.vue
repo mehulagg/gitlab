@@ -5,6 +5,7 @@ import {
   GlDropdownItem,
   GlDropdownSectionHeader,
   GlDropdownDivider,
+  GlTooltipDirective,
 } from '@gitlab/ui';
 import { convertArrayToCamelCase } from '~/lib/utils/common_utils';
 import { capitalizeFirstCharacter } from '~/lib/utils/text_utility';
@@ -21,6 +22,9 @@ export default {
     GlDropdownDivider,
     ...Actions,
   },
+  directives: {
+    GlTooltip: GlTooltipDirective,
+  },
   props: {
     user: {
       type: Object,
@@ -29,6 +33,16 @@ export default {
     paths: {
       type: Object,
       required: true,
+    },
+    showImpersonateButton: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
+    showButtonLabels: {
+      type: Boolean,
+      required: false,
+      default: false,
     },
   },
   computed: {
@@ -53,8 +67,23 @@ export default {
     hasEditAction() {
       return this.userActions.includes('edit');
     },
+    hasImpersonateAction() {
+      return this.userActions.includes('impersonate') && this.showImpersonateButton;
+    },
     userPaths() {
       return generateUserPaths(this.paths, this.user.username);
+    },
+    editButtonAttrs() {
+      return {
+        'data-testid': 'edit',
+        icon: 'pencil-square',
+        href: this.userPaths.edit,
+      };
+    },
+    userAdministrationLabelAttrs() {
+      return this.showButtonLabels
+        ? { text: this.$options.i18n.settings }
+        : { 'aria-label': this.$options.i18n.settings };
     },
   },
   methods: {
@@ -71,18 +100,31 @@ export default {
 
 <template>
   <div class="gl-display-flex gl-justify-content-end" :data-testid="`user-actions-${user.id}`">
-    <gl-button v-if="hasEditAction" data-testid="edit" :href="userPaths.edit">{{
-      $options.i18n.edit
-    }}</gl-button>
+    <template v-if="hasEditAction">
+      <gl-button v-if="showButtonLabels" v-bind="editButtonAttrs">{{
+        $options.i18n.edit
+      }}</gl-button>
+      <gl-button
+        v-else
+        v-gl-tooltip
+        v-bind="editButtonAttrs"
+        :title="$options.i18n.edit"
+        :aria-label="$options.i18n.edit"
+      />
+    </template>
 
     <gl-dropdown
       v-if="hasDropdownActions"
       data-testid="dropdown-toggle"
       right
       class="gl-ml-2"
+      :text="$options.i18n.userAdministration"
+      :text-sr-only="!showButtonLabels"
       icon="settings"
     >
-      <gl-dropdown-section-header>{{ $options.i18n.settings }}</gl-dropdown-section-header>
+      <gl-dropdown-section-header>{{
+        $options.i18n.userAdministration
+      }}</gl-dropdown-section-header>
 
       <template v-for="action in dropdownSafeActions">
         <component
@@ -116,5 +158,15 @@ export default {
         </component>
       </template>
     </gl-dropdown>
+
+    <gl-button
+      v-if="hasImpersonateAction"
+      class="gl-ml-2"
+      variant="confirm"
+      :href="userPaths.impersonate"
+      rel="nofollow"
+      data-method="post"
+      >{{ $options.i18n.impersonate }}</gl-button
+    >
   </div>
 </template>
