@@ -38,3 +38,14 @@ export const networkPolicies = (nodes) =>
       },
     },
   });
+
+export const scanExecutionPolicies = (nodes) =>
+  jest.fn().mockResolvedValue({
+    data: {
+      project: {
+        scanExecutionPolicies: {
+          nodes,
+        },
+      },
+    },
+  });

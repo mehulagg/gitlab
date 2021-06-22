@@ -1,0 +1,3 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`PolicyList component given there is a default environment with no data to display shows the table empty state 1`] = `undefined`;

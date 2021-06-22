@@ -30,9 +30,8 @@ export default () => {
   const {
     networkPolicyStatisticsEndpoint,
     environmentsEndpoint,
-    networkPoliciesEndpoint,
     emptyStateSvgPath,
-    networkPolicyNoDataSvgPath,
+    policyNoDataSvgPath,
     newPolicyPath,
     documentationPath,
     defaultEnvironmentId,
@@ -43,9 +42,6 @@ export default () => {
   store.dispatch('threatMonitoring/setEndpoints', {
     networkPolicyStatisticsEndpoint,
     environmentsEndpoint,
-  });
-  store.dispatch('networkPolicies/setEndpoints', {
-    networkPoliciesEndpoint,
   });
 
   return new Vue({
@@ -60,7 +56,7 @@ export default () => {
     render(createElement) {
       return createElement(ThreatMonitoringApp, {
         props: {
-          networkPolicyNoDataSvgPath,
+          policyNoDataSvgPath,
           defaultEnvironmentId: parseInt(defaultEnvironmentId, 10),
           newPolicyPath,
         },

@@ -3,8 +3,8 @@ import { GlIcon, GlLink, GlPopover, GlTabs, GlTab } from '@gitlab/ui';
 import { mapActions } from 'vuex';
 import { s__ } from '~/locale';
 import Alerts from './alerts/alerts.vue';
-import NetworkPolicyList from './network_policy_list.vue';
 import NoEnvironmentEmptyState from './no_environment_empty_state.vue';
+import PolicyList from './policy_list.vue';
 import ThreatMonitoringFilters from './threat_monitoring_filters.vue';
 import ThreatMonitoringSection from './threat_monitoring_section.vue';
 
@@ -19,7 +19,7 @@ export default {
     Alerts,
     ThreatMonitoringFilters,
     ThreatMonitoringSection,
-    NetworkPolicyList,
+    PolicyList,
     NoEnvironmentEmptyState,
   },
   inject: ['documentationPath'],
@@ -28,7 +28,7 @@ export default {
       type: Number,
       required: true,
     },
-    networkPolicyNoDataSvgPath: {
+    policyNoDataSvgPath: {
       type: String,
       required: true,
     },
@@ -58,7 +58,7 @@ export default {
       return Number.isInteger(id) && id >= 0;
     },
   },
-  networkPolicyChartEmptyStateDescription: s__(
+  policyChartEmptyStateDescription: s__(
     `ThreatMonitoring|Container Network Policies are not installed or have been disabled. To view
      this data, ensure your Network Policies are installed and enabled for your cluster.`,
   ),
@@ -94,9 +94,9 @@ export default {
       >
         <alerts />
       </gl-tab>
-      <gl-tab ref="networkPolicyTab" :title="s__('ThreatMonitoring|Policies')">
+      <gl-tab ref="policyTab" :title="s__('ThreatMonitoring|Policies')">
         <no-environment-empty-state v-if="!isSetUpMaybe" />
-        <network-policy-list
+        <policy-list
           v-else
           :documentation-path="documentationPath"
           :new-policy-path="newPolicyPath"
@@ -111,7 +111,7 @@ export default {
           <threat-monitoring-filters />
 
           <threat-monitoring-section
-            ref="networkPolicySection"
+            ref="policySection"
             store-namespace="threatMonitoringNetworkPolicy"
             :title="s__('ThreatMonitoring|Container Network Policy')"
             :subtitle="s__('ThreatMonitoring|Packet Activity')"
@@ -121,8 +121,8 @@ export default {
             :chart-empty-state-title="
               s__('ThreatMonitoring|Container NetworkPolicies not detected')
             "
-            :chart-empty-state-text="$options.networkPolicyChartEmptyStateDescription"
-            :chart-empty-state-svg-path="networkPolicyNoDataSvgPath"
+            :chart-empty-state-text="$options.policyChartEmptyStateDescription"
+            :chart-empty-state-svg-path="policyNoDataSvgPath"
             :documentation-path="documentationPath"
             documentation-anchor="container-network-policy"
           />
