@@ -364,7 +364,7 @@ Feature.enabled?(:feature_flag, group)
 Feature.enabled?(:feature_flag, user)
 ```
 
-Please see [Feature flag controls](./controls.html#process) for more details on working with feature flags.
+Please see [Feature flag controls](controls.html#process) for more details on working with feature flags.
 
 #### Selectively disable by actor
 
