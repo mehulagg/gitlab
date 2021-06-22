@@ -753,7 +753,6 @@ For example:
 | App B    | Description text. <sup>2</sup>   | 
 
 1. This is the footnote.
-
 1. This is the other footnote.
 ```
 
@@ -765,7 +764,6 @@ This text renders this output:
 | App B    | Description text. <sup>2</sup>   |
 
 1. This is the footnote.
-
 1. This is the other footnote.
 
 ## Quotes
