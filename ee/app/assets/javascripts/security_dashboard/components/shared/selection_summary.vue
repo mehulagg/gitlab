@@ -75,13 +75,12 @@ export default {
           })
           .catch(() => {
             rejected.push(vulnerability.id.split('/').pop());
-          })
-          .finally(() => {
-            this.isSubmitting = false;
           });
       });
 
       return Promise.all(promises).then(() => {
+        this.isSubmitting = false;
+
         if (fulfilledCount > 0) {
           toast(this.$options.i18n.vulnerabilitiesUpdated(fulfilledCount));
           eventHub.$emit('vulnerabilities-updated', this);

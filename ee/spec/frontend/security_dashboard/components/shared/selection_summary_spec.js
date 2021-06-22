@@ -29,6 +29,7 @@ describe('Selection Summary component', () => {
   const findGlAlert = () => wrapper.findComponent(GlAlert);
   const findCancelButton = () => wrapper.find('[type="button"]');
   const findSubmitButton = () => wrapper.find('[type="submit"]');
+  const isSubmitButtonDisabled = () => findSubmitButton().props('disabled');
 
   const createComponent = ({ props = {}, data = defaultData, apolloProvider } = {}) => {
     wrapper = shallowMount(SelectionSummary, {
@@ -47,7 +48,6 @@ describe('Selection Summary component', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   describe('with 1 vulnerability selected', () => {
@@ -113,13 +113,9 @@ describe('Selection Summary component', () => {
       { id: 'gid://gitlab/Vulnerability/58' },
     ];
 
-    const submitFormSync = () => {
+    const submitForm = async () => {
       wrapper.find(StatusDropdown).vm.$emit('change', { action, payload });
       findForm().trigger('submit');
-    };
-
-    const submitForm = async () => {
-      submitFormSync();
       await waitForPromises();
     };
 
@@ -174,7 +170,11 @@ describe('Selection Summary component', () => {
           }),
         ]);
 
-        createComponent({ apolloProvider, props: { selectedVulnerabilities } });
+        createComponent({
+          apolloProvider,
+          props: { selectedVulnerabilities },
+          data: { selectedStatus: null },
+        });
       });
 
       it(`emits an update for each vulnerability - ${action}`, async () => {
@@ -190,13 +190,12 @@ describe('Selection Summary component', () => {
       });
 
       it(`the submit button is unclickable during form submission - ${action}`, async () => {
-        const button = findSubmitButton();
-        expect(button.props('disabled')).toBe(false);
-        submitFormSync();
+        expect(findSubmitButton().exists()).toBe(false);
+        submitForm();
         await wrapper.vm.$nextTick();
-        expect(button.props('disabled')).toBe(true);
+        expect(isSubmitButtonDisabled()).toBe(true);
         await waitForPromises();
-        expect(button.props('disabled')).toBe(false);
+        expect(isSubmitButtonDisabled()).toBe(false);
       });
 
       it(`emits an event for the event hub - ${action}`, async () => {
