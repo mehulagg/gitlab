@@ -89,7 +89,6 @@ export const RUNNING_CONTAINER_SCANNING_CONFIG_HELP_PATH = helpPagePath(
   { anchor: 'configuration' },
 );
 
-
 export const COVERAGE_FUZZING_NAME = __('Coverage Fuzzing');
 export const COVERAGE_FUZZING_DESCRIPTION = __(
   'Find bugs in your code with coverage-guided fuzzing.',
