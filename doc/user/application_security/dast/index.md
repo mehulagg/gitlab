@@ -523,7 +523,7 @@ DAST scan with both configured exits with an error.
 
 By default, several rules are disabled because they either take a long time to
 run or frequently generate false positives. The complete list of disabled rules
-can be found in [exclude_rules.yml](https://gitlab.com/gitlab-org/security-products/dast/-/blob/master/src/config/exclude_rules.yml).
+can be found in [exclude_rules.yml](https://gitlab.com/gitlab-org/security-products/dast/-/blob/main/src/config/exclude_rules.yml).
 
 ### Hide sensitive information
 
