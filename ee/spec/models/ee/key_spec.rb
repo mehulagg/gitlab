@@ -40,7 +40,7 @@ RSpec.describe Key do
         stub_ee_application_setting(enforce_ssh_key_expiration: enforced)
       end
 
-      it 'checks if ssh key expiration is enforced' do
+      it 'checks if the key is only expired and enforcement is enabled' do
         key = create(:personal_key)
         key.update_attribute(:expires_at, 3.days.ago) if expired
 
