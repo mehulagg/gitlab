@@ -14,7 +14,7 @@ As you begin your onboarding journey with GitLab, we want you to have the tools 
 - [GitLab instances - security best practices](#gitlab-instance-security)
 - [Monitor GitLab](#monitor-gitlab)
 - Back up GitLab
-  - [Self-managed](#self-managed-backup)
+  - [Self-managed](#back-up-gitlab-self-managed)
   - [GitLab SaaS](#back-up-gitlab-saas)
 - [Alternative backup strategies](#alternative-backup-strategies)
 - Support information for:
@@ -105,8 +105,8 @@ You may need to import projects from external sources like GitHub, Bitbucket, or
 ### Import migration checklist
 
 - Review the [GitLab projects documentation](../user/project/index.md#project-integrations).
-- Consider [repository mirroring](../user/project/repository/repository_mirroring.md#repository-mirroring-free)—an [alternative to project migrations](../ci/ci_cd_for_external_repos/index.md#gitlab-ci/cd-for-external-repositories-premium).
-- Check out our [migration index](../user/project/import/index.md#migrate-projects-to-a-gitlab-instance-free) for documentation on common migration paths.
+- Consider [repository mirroring](../user/project/repository/repository_mirroring.md)—an [alternative to project migrations](../ci/ci_cd_for_external_repos/index.md).
+- Check out our [migration index](../user/project/import/index.md) for documentation on common migration paths.
 - Schedule your project exports with our [import/export API](../api/project_import_export.md#schedule-an-export).
 
 ## GitLab instance security
@@ -129,7 +129,7 @@ While this isn't an exhaustive list, following these steps give you a solid star
 - Set up [email notification for unknown sign-ins](../user/admin_area/settings/sign_in_restrictions.md#email-notification-for-unknown-sign-ins).
 - Configure [user and IP rate limits](https://about.gitlab.com/blog/2020/05/20/gitlab-instance-security-best-practices/#user-and-ip-rate-limits).
 - Limit [webhooks local access](https://about.gitlab.com/blog/2020/05/20/gitlab-instance-security-best-practices/#webhooks).
-- Set [rate limits for protected paths](../user/admin_area/settings/protected_paths.md#protected-paths-free-self).
+- Set [rate limits for protected paths](../user/admin_area/settings/protected_paths.md).
 
 ## Monitor GitLab
 
@@ -137,7 +137,7 @@ After you've established your basic setup, you're ready to review the GitLab mon
 
 ### Monitor with Prometheus
 
-- **Use case**: [Prometheus](../administration/monitoring/prometheus/index.md#monitoring-gitlab-with-prometheus-free-self) captures [these GitLab metrics](../administration/monitoring/prometheus/gitlab_metrics.md#metrics-available). See more about our [bundled software metrics](../administration/monitoring/prometheus/index.md#bundled-software-metrics).
+- **Use case**: [Prometheus](../administration/monitoring/prometheus/index.md) captures [these GitLab metrics](../administration/monitoring/prometheus/gitlab_metrics.md#metrics-available). See more about our [bundled software metrics](../administration/monitoring/prometheus/index.md#bundled-software-metrics).
 - **Benefit**: Unlike other monitoring solutions (for example, Zabbix, New Relic), Prometheus is tightly integrated with GitLab and has extensive community support.
 - **Get started**: Prometheus and its exporters are on by default; however, you need to [configure the service](../administration/monitoring/prometheus/index.md#configuring-prometheus). 
 
@@ -151,7 +151,7 @@ After you've established your basic setup, you're ready to review the GitLab mon
 
 - Learn more about [GitLab architecture](../development/architecture.md).
 - Find out why [application performance metrics](https://about.gitlab.com/blog/2020/05/07/working-with-performance-metrics/) matter. 
-- Create a [self-monitoring project](../administration/monitoring/gitlab_self_monitoring_project/index.md#gitlab-self-monitoring-project-free-self) to track the health of your instance.
+- Create a [self-monitoring project](../administration/monitoring/gitlab_self_monitoring_project/index.md) to track the health of your instance.
 - Integrate Grafana to [build visual dashboards](https://youtu.be/f4R7s0An1qE) based on performance metrics.
 
 ## Back up your GitLab data
@@ -215,7 +215,7 @@ The EC2 instance meets the requirements for an application data backup by taking
 
 In general, if you're running GitLab on a virtualized server, you can likely create VM snapshots of the entire GitLab server. Note that it is common for a VM snapshot to require you to power down the server.
 
-You can find more details and examples on our [Alternative backup strategies page](../raketasks/backup_restore#alternative-backup-strategies).
+You can find more details and examples on our [Alternative backup strategies page](../raketasks/backup_restore).
 
 #### **Option 2 - GitLab Geo**
 
@@ -238,7 +238,7 @@ Find more information about [replication limitations](../administration/geo/repl
 - Run a test backup and restore.
 - Set up a way to periodically verify the backups.
 
-## Support for GitLab self-managed:
+## Support for GitLab self-managed
 
 GitLab provides support for self-managed GitLab through different channels.
 
