@@ -12,29 +12,18 @@ class StuckCiJobsWorker # rubocop:disable Scalability/IdempotentWorker
   EXCLUSIVE_LEASE_KEY = 'stuck_ci_builds_worker_lease'
 
   BUILD_RUNNING_OUTDATED_TIMEOUT = 1.hour
-  BUILD_PENDING_OUTDATED_TIMEOUT = 1.day
   BUILD_SCHEDULED_OUTDATED_TIMEOUT = 1.hour
-  BUILD_PENDING_STUCK_TIMEOUT = 1.hour
-  BUILD_LOOKBACK = 5.days
 
   def perform
     return unless try_obtain_lease
 
     Gitlab::AppLogger.info "#{self.class}: Cleaning stuck builds"
 
+    ::Ci::StuckBuilds::DropPendingWorker.new.perform
+
     drop(running_timed_out_builds, failure_reason: :stuck_or_timeout_failure)
 
-    drop(
-      Ci::Build.pending.updated_before(lookback: BUILD_LOOKBACK.ago, timeout: BUILD_PENDING_OUTDATED_TIMEOUT.ago),
-      failure_reason: :stuck_or_timeout_failure
-    )
-
     drop(scheduled_timed_out_builds, failure_reason: :stale_schedule)
-
-    drop_stuck(
-      Ci::Build.pending.updated_before(lookback: BUILD_LOOKBACK.ago, timeout: BUILD_PENDING_STUCK_TIMEOUT.ago),
-      failure_reason: :stuck_or_timeout_failure
-    )
 
     remove_lease
   end

@@ -11,6 +11,7 @@ RSpec.describe StuckCiJobsWorker do
   let(:worker_lease_uuid) { SecureRandom.uuid }
   let(:created_at) { }
   let(:updated_at) { }
+  let(:status) { 'running' }
 
   subject(:worker) { described_class.new }
 
@@ -20,6 +21,10 @@ RSpec.describe StuckCiJobsWorker do
     job_attributes[:created_at] = created_at if created_at
     job_attributes[:updated_at] = updated_at if updated_at
     job.update!(job_attributes)
+
+    allow_next_instance_of(Ci::StuckBuilds::DropPendingWorker) do |worker|
+      allow(worker).to receive(:perform)
+    end
   end
 
   shared_examples 'job is dropped' do
@@ -49,6 +54,14 @@ RSpec.describe StuckCiJobsWorker do
     end
   end
 
+  it 'calls DropPendingWorker' do
+    expect_next_instance_of(Ci::StuckBuilds::DropPendingWorker) do |pending_worker|
+      expect(pending_worker).to receive(:perform)
+    end
+
+    worker.perform
+  end
+
   shared_examples 'job is unchanged' do
     before do
       worker.perform
@@ -57,132 +70,6 @@ RSpec.describe StuckCiJobsWorker do
 
     it "doesn't change status" do
       expect(job.status).to eq(status)
-    end
-  end
-
-  context 'when job is pending' do
-    let(:status) { 'pending' }
-
-    context 'when job is not stuck' do
-      before do
-        allow_any_instance_of(Ci::Build).to receive(:stuck?).and_return(false)
-      end
-
-      context 'when job was updated_at more than 1 day ago' do
-        let(:updated_at) { 1.5.days.ago }
-
-        context 'when created_at is the same as updated_at' do
-          let(:created_at) { 1.5.days.ago }
-
-          it_behaves_like 'job is dropped'
-        end
-
-        context 'when created_at is before updated_at' do
-          let(:created_at) { 3.days.ago }
-
-          it_behaves_like 'job is dropped'
-        end
-
-        context 'when created_at is outside lookback window' do
-          let(:created_at) { described_class::BUILD_LOOKBACK - 1.day }
-
-          it_behaves_like 'job is unchanged'
-        end
-      end
-
-      context 'when job was updated less than 1 day ago' do
-        let(:updated_at) { 6.hours.ago }
-
-        context 'when created_at is the same as updated_at' do
-          let(:created_at) { 1.5.days.ago }
-
-          it_behaves_like 'job is unchanged'
-        end
-
-        context 'when created_at is before updated_at' do
-          let(:created_at) { 3.days.ago }
-
-          it_behaves_like 'job is unchanged'
-        end
-
-        context 'when created_at is outside lookback window' do
-          let(:created_at) { described_class::BUILD_LOOKBACK - 1.day }
-
-          it_behaves_like 'job is unchanged'
-        end
-      end
-
-      context 'when job was updated more than 1 hour ago' do
-        let(:updated_at) { 2.hours.ago }
-
-        context 'when created_at is the same as updated_at' do
-          let(:created_at) { 2.hours.ago }
-
-          it_behaves_like 'job is unchanged'
-        end
-
-        context 'when created_at is before updated_at' do
-          let(:created_at) { 3.days.ago }
-
-          it_behaves_like 'job is unchanged'
-        end
-
-        context 'when created_at is outside lookback window' do
-          let(:created_at) { described_class::BUILD_LOOKBACK - 1.day }
-
-          it_behaves_like 'job is unchanged'
-        end
-      end
-    end
-
-    context 'when job is stuck' do
-      before do
-        allow_any_instance_of(Ci::Build).to receive(:stuck?).and_return(true)
-      end
-
-      context 'when job was updated_at more than 1 hour ago' do
-        let(:updated_at) { 1.5.hours.ago }
-
-        context 'when created_at is the same as updated_at' do
-          let(:created_at) { 1.5.hours.ago }
-
-          it_behaves_like 'job is dropped'
-        end
-
-        context 'when created_at is before updated_at' do
-          let(:created_at) { 3.days.ago }
-
-          it_behaves_like 'job is dropped'
-        end
-
-        context 'when created_at is outside lookback window' do
-          let(:created_at) { described_class::BUILD_LOOKBACK - 1.day }
-
-          it_behaves_like 'job is unchanged'
-        end
-      end
-
-      context 'when job was updated in less than 1 hour ago' do
-        let(:updated_at) { 30.minutes.ago }
-
-        context 'when created_at is the same as updated_at' do
-          let(:created_at) { 30.minutes.ago }
-
-          it_behaves_like 'job is unchanged'
-        end
-
-        context 'when created_at is before updated_at' do
-          let(:created_at) { 2.days.ago }
-
-          it_behaves_like 'job is unchanged'
-        end
-
-        context 'when created_at is outside lookback window' do
-          let(:created_at) { described_class::BUILD_LOOKBACK - 1.day }
-
-          it_behaves_like 'job is unchanged'
-        end
-      end
     end
   end
 
@@ -215,12 +102,6 @@ RSpec.describe StuckCiJobsWorker do
 
       context 'when created_at is before updated_at' do
         let(:created_at) { 3.days.ago }
-
-        it_behaves_like 'job is unchanged'
-      end
-
-      context 'when created_at is outside lookback window' do
-        let(:created_at) { described_class::BUILD_LOOKBACK - 1.day }
 
         it_behaves_like 'job is unchanged'
       end
@@ -288,8 +169,8 @@ RSpec.describe StuckCiJobsWorker do
     let(:worker2) { described_class.new }
 
     it 'is guard by exclusive lease when executed concurrently' do
-      expect(worker).to receive(:drop).at_least(:once).and_call_original
-      expect(worker2).not_to receive(:drop)
+      expect(worker).to receive(:remove_lease).at_least(:once).and_call_original
+      expect(worker2).not_to receive(:remove_lease)
 
       worker.perform
 
@@ -299,8 +180,8 @@ RSpec.describe StuckCiJobsWorker do
     end
 
     it 'can be executed in sequence' do
-      expect(worker).to receive(:drop).at_least(:once).and_call_original
-      expect(worker2).to receive(:drop).at_least(:once).and_call_original
+      expect(worker).to receive(:remove_lease).at_least(:once).and_call_original
+      expect(worker2).to receive(:remove_lease).at_least(:once).and_call_original
 
       worker.perform
       worker2.perform
