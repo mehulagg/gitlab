@@ -8,7 +8,8 @@ product_category: dynamic_application_security_testing
 value_type: number
 status: data_available
 time_frame: all
-data_source:
+data_source: database
+data_category: optional
 distribution:
 - ee
 tier: []
