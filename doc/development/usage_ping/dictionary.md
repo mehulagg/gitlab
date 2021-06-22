@@ -288,21 +288,21 @@ Tiers: `free`, `premium`, `ultimate`
 
 ### `compliance_unique_visits.a_compliance_audit_events_api`
 
-Missing description
+Unique users that have used the Audit Events API.
 
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216183912_a_compliance_audit_events_api.yml)
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_all/20210216183912_a_compliance_audit_events_api.yml)
 
 Group: `group::compliance`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `premium`, `ultimate`
 
 ### `compliance_unique_visits.compliance_unique_visits_for_any_target`
 
 Missing description
 
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216183914_compliance_unique_visits_for_any_target.yml)
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_all/20210216183914_compliance_unique_visits_for_any_target.yml)
 
 Group: `group::compliance`
 
@@ -314,61 +314,61 @@ Tiers: `free`
 
 Missing description
 
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216183916_compliance_unique_visits_for_any_target_monthly.yml)
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210216183916_compliance_unique_visits_for_any_target_monthly.yml)
 
 Group: `group::compliance`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `premium`, `ultimate`
 
 ### `compliance_unique_visits.g_compliance_audit_events`
 
-Missing description
+Unique users who have viewed audit events
 
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216183906_g_compliance_audit_events.yml)
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_all/20210216183906_g_compliance_audit_events.yml)
 
 Group: `group::compliance`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `premium`, `ultimate`
 
 ### `compliance_unique_visits.g_compliance_dashboard`
 
 Number of unique visitors to the compliance dashboard.
 
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216183904_g_compliance_dashboard.yml)
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_all/20210216183904_g_compliance_dashboard.yml)
 
 Group: `group::compliance`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `premium`, `ultimate`
 
 ### `compliance_unique_visits.i_compliance_audit_events`
 
-Missing description
+Unique users that have viewed the instance-level audit events screen
 
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216183908_i_compliance_audit_events.yml)
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_all/20210216183908_i_compliance_audit_events.yml)
 
 Group: `group::compliance`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `premium`, `ultimate`
 
 ### `compliance_unique_visits.i_compliance_credential_inventory`
 
-Missing description
+Unique users who have viewed the credential inventory
 
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216183910_i_compliance_credential_inventory.yml)
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_all/20210216183910_i_compliance_credential_inventory.yml)
 
 Group: `group::compliance`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `ultimate`
 
 ### `container_registry_enabled`
 
@@ -6590,7 +6590,7 @@ Tiers: `free`, `premium`, `ultimate`
 
 Unique users that have used audit event screen, audit event API, compliance dashboard, or credential inventory
 
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216183201_compliance_features_track_unique_visits_union.yml)
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210216183201_compliance_features_track_unique_visits_union.yml)
 
 Group: `group::compliance`
 
@@ -9888,19 +9888,19 @@ Tiers: `free`, `premium`, `ultimate`
 
 ### `redis_hll_counters.compliance.a_compliance_audit_events_api_monthly`
 
-Missing description
+Unique users that have used the Audit Events API in a given month.
 
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216183942_a_compliance_audit_events_api_monthly.yml)
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210216183942_a_compliance_audit_events_api_monthly.yml)
 
 Group: `group::compliance`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `premium`, `ultimate`
 
 ### `redis_hll_counters.compliance.a_compliance_audit_events_api_weekly`
 
-Number of unique audit events accessed over API.
+Unique users that have used the Audit Events API in a given week.
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_7d/20210216183940_a_compliance_audit_events_api_weekly.yml)
 
@@ -9914,13 +9914,13 @@ Tiers: `premium`, `ultimate`
 
 Missing description
 
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216183946_compliance_total_unique_counts_monthly.yml)
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210216183946_compliance_total_unique_counts_monthly.yml)
 
 Group: `group::compliance`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `premium`, `ultimate`
 
 ### `redis_hll_counters.compliance.compliance_total_unique_counts_weekly`
 
@@ -9932,19 +9932,19 @@ Group: `group::compliance`
 
 Status: `data_available`
 
-Tiers:
+Tiers: `premium`, `ultimate`
 
 ### `redis_hll_counters.compliance.g_compliance_audit_events_monthly`
 
-Missing description
+Unique users who have viewed the audit event screen in a given month.
 
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216183930_g_compliance_audit_events_monthly.yml)
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210216183930_g_compliance_audit_events_monthly.yml)
 
 Group: `group::compliance`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `premium`, `ultimate`
 
 ### `redis_hll_counters.compliance.g_compliance_audit_events_weekly`
 
@@ -9960,19 +9960,19 @@ Tiers:
 
 ### `redis_hll_counters.compliance.g_compliance_dashboard_monthly`
 
-Missing description
+Unique users who have viewed the compliance dashboard in a given month.
 
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216183926_g_compliance_dashboard_monthly.yml)
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210216183926_g_compliance_dashboard_monthly.yml)
 
 Group: `group::compliance`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `premium`, `ultimate`
 
 ### `redis_hll_counters.compliance.g_compliance_dashboard_weekly`
 
-Missing description
+Unique users who have looked at the compliance dashboard in a given week
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_7d/20210216183924_g_compliance_dashboard_weekly.yml)
 
@@ -9980,23 +9980,23 @@ Group: `group::compliance`
 
 Status: `data_available`
 
-Tiers:
+Tiers: `premium`, `ultimate`
 
 ### `redis_hll_counters.compliance.i_compliance_audit_events_monthly`
 
-Missing description
+Unique users that have viewed the instance-level audit events screen
 
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216183934_i_compliance_audit_events_monthly.yml)
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210216183934_i_compliance_audit_events_monthly.yml)
 
 Group: `group::compliance`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `premium`, `ultimate`
 
 ### `redis_hll_counters.compliance.i_compliance_audit_events_weekly`
 
-Missing description
+Unique users that have viewed the instance-level audit events screen
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_7d/20210216183932_i_compliance_audit_events_weekly.yml)
 
@@ -10004,19 +10004,19 @@ Group: `group::compliance`
 
 Status: `data_available`
 
-Tiers:
+Tiers: `premium`, `ultimate`
 
 ### `redis_hll_counters.compliance.i_compliance_credential_inventory_monthly`
 
-Missing description
+Unique users who have viewed the credential inventory in a given month.
 
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216183938_i_compliance_credential_inventory_monthly.yml)
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210216183938_i_compliance_credential_inventory_monthly.yml)
 
 Group: `group::compliance`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `ultimate`
 
 ### `redis_hll_counters.compliance.i_compliance_credential_inventory_weekly`
 
