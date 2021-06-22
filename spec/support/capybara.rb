@@ -196,6 +196,8 @@ RSpec.configure do |config|
     if example.exception && !example.exception.is_a?(RSpec::Core::Pending::PendingExampleFixedError)
       puts 'in exception'
 
+      puts page.driver.browser.manage
+
       begin
         console = page.driver.browser.manage.logs.get(:browser)&.reject { |log| log.message =~ JS_CONSOLE_FILTER }
 
@@ -213,6 +215,8 @@ RSpec.configure do |config|
       end
     end
 
+    puts Capybara.current_session.driver.browser.manage
+    puts page.driver.browser.manage.logs.get(:driver)
     puts 'Capybara.current_session.driver.browser.current_url'
     # prevent localStorage from introducing side effects based on test order
     unless ['', 'about:blank', 'data:,'].include? Capybara.current_session.driver.browser.current_url
@@ -227,6 +231,7 @@ RSpec.configure do |config|
     # We don't reset the session when the example failed, because we need capybara-screenshot to have access to it.
     Capybara.reset_sessions! unless example.exception
 
+    puts Capybara.current_session.driver.browser.manage
     puts 'block_and_wait_for_requests_complete'
     block_and_wait_for_requests_complete
   end
