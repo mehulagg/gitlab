@@ -225,6 +225,19 @@ RSpec.describe Gitlab::Ci::Parsers::Security::Common do
         end
       end
 
+      describe 'parsing schema version' do
+        it 'parses the version' do
+          expect(report.schema_version).to eq('14.0.2')
+        end
+
+        it 'returns nil when there is no version' do
+          empty_report = Gitlab::Ci::Reports::Security::Report.new(artifact.file_type, pipeline, 2.weeks.ago)
+          described_class.parse!({}.to_json, empty_report)
+
+          expect(empty_report.schema_version).to be_nil
+        end
+      end
+
       describe 'parsing analyzer' do
         it 'associates analyzer with report' do
           expect(report.analyzer.id).to eq('common-analyzer')

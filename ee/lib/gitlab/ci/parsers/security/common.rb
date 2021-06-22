@@ -26,6 +26,7 @@ module Gitlab
             create_scanner
             create_scan
             create_analyzer
+            create_schema_version
             collate_remediations.each { |vulnerability| create_vulnerability(vulnerability) }
 
             report_data
@@ -169,6 +170,10 @@ module Gitlab
             return unless scan_data.is_a?(Hash)
 
             report.scan = ::Gitlab::Ci::Reports::Security::Scan.new(scan_data)
+          end
+
+          def create_schema_version
+            report.schema_version = report_data.dig('version')
           end
 
           def create_analyzer

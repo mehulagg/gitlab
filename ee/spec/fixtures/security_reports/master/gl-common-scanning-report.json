@@ -155,5 +155,6 @@
         "start_time": "placeholder-value",
         "end_time": "placeholder-value",
         "status": "success"
-    }
+    },
+    "version": "14.0.2"
 }
