@@ -37,8 +37,12 @@ RSpec.describe EE::API::Helpers::MembersHelpers do
   end
 
   describe '.member_sort_options' do
-    it 'lists all keys available in group member view' do
-      expect(described_class.member_sort_options).to match_array(member_sort_options_hash.keys)
+    it 'lists all keys members can be sorted by' do
+      sort_options = %w[
+        access_level_asc access_level_desc last_joined name_asc name_desc oldest_joined oldest_sign_in recent_sign_in
+      ]
+
+      expect(described_class.member_sort_options).to match_array(sort_options)
     end
   end
 end
