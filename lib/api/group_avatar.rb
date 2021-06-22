@@ -14,6 +14,14 @@ module API
         detail 'This feature was introduced in GitLab 14.0'
       end
       get ':id/avatar' do
+        avatar = user_group.avatar
+
+        not_found!('Avatar') if avatar.blank?
+
+        filename = File.basename(avatar.file.file)
+
+        header 'Content-Disposition', "attachment; filename=#{filename}; filename*=UTF-8''#{CGI.escape(filename)}"
+
         present_carrierwave_file!(user_group.avatar)
       end
     end
