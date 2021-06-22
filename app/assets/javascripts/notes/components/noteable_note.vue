@@ -393,7 +393,9 @@ export default {
         :img-alt="author.name"
         :img-size="40"
       >
-        <slot slot="avatar-badge" name="avatar-badge"></slot>
+        <template #avatar-badge>
+          <slot name="avatar-badge"></slot>
+        </template>
       </user-avatar-link>
     </div>
     <div class="timeline-content">
@@ -404,7 +406,9 @@ export default {
           :note-id="note.id"
           :is-confidential="note.confidential"
         >
-          <slot slot="note-header-info" name="note-header-info"></slot>
+          <template #note-header-info>
+            <slot name="note-header-info"></slot>
+          </template>
           <span v-if="commit" v-safe-html="actionText"></span>
           <span v-else-if="note.created_at" class="d-none d-sm-inline">&middot;</span>
         </note-header>
