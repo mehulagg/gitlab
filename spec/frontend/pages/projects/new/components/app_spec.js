@@ -16,36 +16,6 @@ describe('Experimental new project creation app', () => {
     wrapper.destroy();
   });
 
-  describe('new_repo experiment', () => {
-    it('passes new_repo experiment', () => {
-      createComponent();
-
-      expect(findNewNamespacePage().props().experiment).toBe('new_repo');
-    });
-
-    describe('when in the candidate variant', () => {
-      assignGitlabExperiment('new_repo', 'candidate');
-
-      it('has "repository" in the panel title', () => {
-        createComponent();
-
-        expect(findNewNamespacePage().props().panels[0].title).toBe(
-          'Create blank project/repository',
-        );
-      });
-    });
-
-    describe('when in the control variant', () => {
-      assignGitlabExperiment('new_repo', 'control');
-
-      it('has "project" in the panel title', () => {
-        createComponent();
-
-        expect(findNewNamespacePage().props().panels[0].title).toBe('Create blank project');
-      });
-    });
-  });
-
   it('passes custom new project guideline text to underlying component', () => {
     const DEMO_GUIDELINES = 'Demo guidelines';
     const guidelineSelector = '#new-project-guideline';

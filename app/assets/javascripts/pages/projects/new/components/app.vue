@@ -9,7 +9,6 @@ import { s__ } from '~/locale';
 import NewNamespacePage from '~/vue_shared/new_namespace/new_namespace_page.vue';
 import NewProjectPushTipPopover from './new_project_push_tip_popover.vue';
 
-const NEW_REPO_EXPERIMENT = 'new_repo';
 const CI_CD_PANEL = 'cicd_for_external_repo';
 const PANELS = [
   {
@@ -79,28 +78,10 @@ export default {
   },
 
   computed: {
-    decoratedPanels() {
-      const PANEL_TITLES = experiment(NEW_REPO_EXPERIMENT, {
-        use: () => ({
-          blank: s__('ProjectsNew|Create blank project'),
-          import: s__('ProjectsNew|Import project'),
-        }),
-        try: () => ({
-          blank: s__('ProjectsNew|Create blank project/repository'),
-          import: s__('ProjectsNew|Import project/repository'),
-        }),
-      });
-
-      return PANELS.map(({ key, title, ...el }) => ({
-        ...el,
-        title: PANEL_TITLES[key] ?? title,
-      }));
-    },
-
     availablePanels() {
       return this.isCiCdAvailable
-        ? this.decoratedPanels
-        : this.decoratedPanels.filter((p) => p.name !== CI_CD_PANEL);
+        ? PANELS
+        : PANELS.filter((p) => p.name !== CI_CD_PANEL);
     },
   },
 
@@ -112,7 +93,6 @@ export default {
       }
     },
   },
-  EXPERIMENT: NEW_REPO_EXPERIMENT,
 };
 </script>
 
