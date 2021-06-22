@@ -4,16 +4,17 @@ module Gitlab
   module Database
     module Partitioning
       class MonthlyStrategy
-        attr_reader :model, :partitioning_key
+        attr_reader :model, :partitioning_key, :retain_for
 
         # We create this many partitions in the future
         HEADROOM = 6.months
 
         delegate :table_name, to: :model
 
-        def initialize(model, partitioning_key)
+        def initialize(model, partitioning_key, retain_for: nil)
           @model = model
           @partitioning_key = partitioning_key
+          @retain_for = retain_for
         end
 
         def current_partitions
@@ -25,6 +26,10 @@ module Gitlab
         # Check the currently existing partitions and determine which ones are missing
         def missing_partitions
           desired_partitions - current_partitions
+        end
+
+        def extra_partitions
+          current_partitions - desired_partitions
         end
 
         private
@@ -42,7 +47,7 @@ module Gitlab
 
               min_date = next_date
             end
-          end
+          end.reject { |part| pruning_old_partitions? && part.to <= oldest_active_date }
         end
 
         # This determines the relevant time range for which we expect to have data
@@ -52,11 +57,15 @@ module Gitlab
         #       to start from MINVALUE to a specific date `x`. The range returned
         #       does not include the range of the first, half-unbounded partition.
         def relevant_range
-          if first_partition = current_partitions.min
+          if (first_partition = current_partitions.min)
             # Case 1: First partition starts with MINVALUE, i.e. from is nil -> start with first real partition
             # Case 2: Rather unexpectedly, first partition does not start with MINVALUE, i.e. from is not nil
             #         In this case, use first partition beginning as a start
             min_date = first_partition.from || first_partition.to
+          end
+
+          if pruning_old_partitions?
+            min_date ||= oldest_active_date
           end
 
           # In case we don't have a partition yet
@@ -70,6 +79,14 @@ module Gitlab
 
         def partition_for(lower_bound: nil, upper_bound:)
           TimePartition.new(table_name, lower_bound, upper_bound)
+        end
+
+        def pruning_old_partitions?
+          retain_for.present?
+        end
+
+        def oldest_active_date
+          Date.today - retain_for
         end
 
         def connection

@@ -14,6 +14,16 @@ RSpec.describe PartitionedTable do
       end
     end
 
+    context 'with keyword arguments passed to the strategy' do
+      subject { my_class.partitioned_by(key, strategy: :monthly, retain_for: 3.months) }
+
+      it 'passes the keyword arguments to the strategy' do
+        expect(Gitlab::Database::Partitioning::MonthlyStrategy).to receive(:new).with(my_class, key, retain_for: 3.months).and_call_original
+
+        subject
+      end
+    end
+
     it 'assigns the MonthlyStrategy as the partitioning strategy' do
       subject
 
