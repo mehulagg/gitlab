@@ -1,4 +1,7 @@
 import { GlDropdownItem } from '@gitlab/ui';
+import createFlash from '~/flash';
+
+jest.mock('~/flash');
 
 export function renderTotalTime(selector, element, totalTime = {}) {
   const { days, hours, mins, seconds } = totalTime;
@@ -16,9 +19,6 @@ export function renderTotalTime(selector, element, totalTime = {}) {
   }
 }
 
-export const shouldFlashAMessage = (msg = '') =>
-  expect(document.querySelector('.flash-container .flash-text').innerText.trim()).toBe(msg);
-
 export const findDropdownItems = (wrapper) => wrapper.findAllComponents(GlDropdownItem);
 
 export const findDropdownItemText = (wrapper) =>
@@ -26,7 +26,6 @@ export const findDropdownItemText = (wrapper) =>
 
 export default {
   renderTotalTime,
-  shouldFlashAMessage,
   findDropdownItems,
   findDropdownItemText,
 };
