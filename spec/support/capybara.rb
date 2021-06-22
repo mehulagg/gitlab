@@ -211,7 +211,16 @@ RSpec.configure do |config|
       execute_script("localStorage.clear();")
     end
 
-    
+
+    Capybara.send(:session_pool).reverse_each do |mode, session|
+      puts "Mode: #{mode}"
+      puts "Session: #{session}"
+
+      if session.server
+        puts "Pending requests?: #{session.server.send(:middleware).pending_requests?}"
+        puts "Pending requests: #{session.server.send(:middleware).pending_requests}"
+      end
+    end
 
     # capybara/rspec already calls Capybara.reset_sessions! in an `after` hook,
     # but `block_and_wait_for_requests_complete` is called before it so by
@@ -219,9 +228,6 @@ RSpec.configure do |config|
     # See https://github.com/teamcapybara/capybara/blob/ffb41cfad620de1961bb49b1562a9fa9b28c0903/lib/capybara/rspec.rb#L20-L25
     # We don't reset the session when the example failed, because we need capybara-screenshot to have access to it.
     Capybara.reset_sessions! unless example.exception
-
-    puts page.driver.browser.manage.logs.get(:driver)
-    
     block_and_wait_for_requests_complete
   end
 end

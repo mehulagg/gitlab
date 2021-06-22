@@ -10,9 +10,11 @@ module WaitForRequests
 
   # Block all requests inside block with 503 response
   def block_requests
+    puts 'Blocking requests'
     Gitlab::Testing::RequestBlockerMiddleware.block_requests!
     yield
   ensure
+    puts 'UNBlocking requests'
     Gitlab::Testing::RequestBlockerMiddleware.allow_requests!
   end
 
