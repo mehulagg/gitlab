@@ -98,6 +98,19 @@ class Milestone < ApplicationRecord
     User.joins(assigned_issues: :milestone).where(milestones: { id: id }).distinct
   end
 
+  def self.with_expired_last(sort_by)
+    # NOTE: this is a custom ordering of milestones
+    # to prioritize displaying non-expired milestones and milestones without due dates
+    sorted = reorder(Arel.sql('(CASE WHEN due_date IS NULL THEN 1 WHEN due_date > now() THEN 0 ELSE 2 END) ASC'))
+    sorted = if sort_by == 'due_date_asc'
+               sorted.order(due_date: :asc)
+             else
+               sorted.order(due_date: :desc)
+             end
+
+    sorted.with_order_id_desc
+  end
+
   def self.sort_by_attribute(method)
     sorted =
       case method.to_s
