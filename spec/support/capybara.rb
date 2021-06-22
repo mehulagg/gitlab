@@ -206,8 +206,6 @@ RSpec.configure do |config|
       end
     end
 
-    puts page.driver.browser.manage.logs.get(:driver)
-
     # prevent localStorage from introducing side effects based on test order
     unless ['', 'about:blank', 'data:,'].include? Capybara.current_session.driver.browser.current_url
       execute_script("localStorage.clear();")
