@@ -68,6 +68,7 @@ actions:
   scanner_profile: Scanner Profile
   site_profile: Site Profile
 `,
+  enabled: true,
 };
 
 export const mockNominalHistory = [
