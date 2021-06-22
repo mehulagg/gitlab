@@ -15,11 +15,12 @@ module EE
       # See https://gitlab.com/gitlab-org/gitlab/-/issues/297472
       after_destroy :log_geo_deleted_event
 
-      SECURITY_REPORT_FILE_TYPES = %w[sast secret_detection dependency_scanning container_scanning dast coverage_fuzzing api_fuzzing].freeze
+      SECURITY_REPORT_FILE_TYPES = %w[sast secret_detection dependency_scanning container_scanning running_container_scanning dast coverage_fuzzing api_fuzzing].freeze
       LICENSE_SCANNING_REPORT_FILE_TYPES = %w[license_scanning].freeze
       DEPENDENCY_LIST_REPORT_FILE_TYPES = %w[dependency_scanning].freeze
       METRICS_REPORT_FILE_TYPES = %w[metrics].freeze
       CONTAINER_SCANNING_REPORT_TYPES = %w[container_scanning].freeze
+      RUNNING_CONTAINER_SCANNING_REPORT_TYPES = %w[running_container_scanning].freeze
       DAST_REPORT_TYPES = %w[dast].freeze
       REQUIREMENTS_REPORT_FILE_TYPES = %w[requirements].freeze
       COVERAGE_FUZZING_REPORT_TYPES = %w[coverage_fuzzing].freeze
@@ -42,6 +43,10 @@ module EE
 
       scope :container_scanning_reports, -> do
         with_file_types(CONTAINER_SCANNING_REPORT_TYPES)
+      end
+
+      scope :running_container_scanning_reports, -> do
+        with_file_types(RUNNING_CONTAINER_SCANNING_REPORT_TYPES)
       end
 
       scope :dast_reports, -> do

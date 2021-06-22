@@ -46,6 +46,7 @@ module EE
           secret_detection: %i[secret_detection],
           dependency_scanning: %i[dependency_scanning],
           container_scanning: %i[container_scanning],
+          running_container_scanning: %i[running_container_scanning],
           dast: %i[dast],
           performance: %i[merge_request_performance_metrics],
           browser_performance: %i[merge_request_performance_metrics],

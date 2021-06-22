@@ -172,6 +172,7 @@ class License < ApplicationRecord
     release_evidence_test_artifacts
     report_approver_rules
     requirements
+    running_container_scanning
     sast
     sast_custom_rulesets
     secret_detection

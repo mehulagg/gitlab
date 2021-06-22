@@ -3531,6 +3531,18 @@ The collected Requirements report uploads to GitLab as an artifact and
 existing [requirements](../../user/project/requirements/index.md) are
 marked as Satisfied.
 
+##### `artifacts:reports:running_container_scanning` **(ULTIMATE)**
+
+> - Introduced in GitLab 14.1.
+> - Requires GitLab Runner 14.1 and above.
+
+The `container_scanning` report collects [Running Container Scanning vulnerabilities](../../user/application_security/running_container_scanning/index.md)
+as artifacts.
+
+The collected Running Container Scanning report uploads to GitLab as an artifact and
+is summarized in the pipeline view. It's also used to provide data for security
+dashboards.
+
 ##### `artifacts:reports:sast`
 
 > - Introduced in GitLab 11.5.

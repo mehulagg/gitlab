@@ -508,6 +508,14 @@ FactoryBot.define do
       end
     end
 
+    trait :running_container_scanning do
+      options do
+        {
+            artifacts: { reports: { running_container_scanning: 'gl-running-container-scanning-report.json' } }
+        }
+      end
+    end
+
     trait :license_scanning do
       options do
         {

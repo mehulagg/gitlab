@@ -226,13 +226,14 @@ RSpec.describe Ci::JobArtifact do
 
     context 'for different types' do
       where(:file_type, :security_report?) do
-        :performance         | false
-        :sast                | true
-        :secret_detection    | true
-        :dependency_scanning | true
-        :container_scanning  | true
-        :dast                | true
-        :coverage_fuzzing    | true
+        :performance                | false
+        :sast                       | true
+        :secret_detection           | true
+        :dependency_scanning        | true
+        :container_scanning         | true
+        :running_container_scanning | true
+        :dast                       | true
+        :coverage_fuzzing           | true
       end
 
       with_them do

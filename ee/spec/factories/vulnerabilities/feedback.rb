@@ -52,6 +52,10 @@ FactoryBot.define do
       category { 'container_scanning' }
     end
 
+    trait :running_container_scanning do
+      category { 'running_container_scanning' }
+    end
+
     trait :dast do
       category { 'dast' }
     end

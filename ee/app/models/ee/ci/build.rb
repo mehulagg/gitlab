@@ -18,6 +18,7 @@ module EE
         container_scanning: :container_scanning,
         dast: :dast,
         coverage_fuzzing: :coverage_fuzzing,
+        running_container_scanning: :running_container_scanning,
         api_fuzzing: :api_fuzzing
       }.with_indifferent_access.freeze
 
