@@ -12,4 +12,3 @@ data_source:
 distribution:
 - ee
 tier: []
-skip_validation: true

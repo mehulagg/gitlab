@@ -13,4 +13,3 @@ data_source: database
 distribution:
 - ee
 tier: []
-skip_validation: true
