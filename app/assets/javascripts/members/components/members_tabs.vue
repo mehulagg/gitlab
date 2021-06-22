@@ -115,7 +115,7 @@ export default {
   <gl-tabs v-model="selectedTabIndex">
     <template v-for="(tab, index) in $options.tabs">
       <gl-tab v-if="showTab(tab, index)" :key="tab.namespace" :title-link-attributes="tab.attrs">
-        <template slot="title">
+        <template #title>
           <span>{{ tab.title }}</span>
           <gl-badge size="sm" class="gl-tab-counter-badge">{{ getTabCount(tab) }}</gl-badge>
         </template>
