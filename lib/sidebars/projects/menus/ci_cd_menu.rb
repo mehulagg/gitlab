@@ -13,6 +13,7 @@ module Sidebars
           add_item(jobs_menu_item)
           add_item(artifacts_menu_item)
           add_item(pipeline_schedules_menu_item)
+          add_item(runners_menu_item)
         end
 
         override :link
@@ -112,6 +113,20 @@ module Sidebars
             container_html_options: { class: 'shortcuts-builds' },
             active_routes: { controller: :pipeline_schedules },
             item_id: :pipeline_schedules
+          )
+        end
+
+        def runners_menu_item
+          unless Feature.enabled?(:runner_list_project_view_vue_ui, context.project, default_enabled: :yaml)
+            return ::Sidebars::NilMenuItem.new(item_id: :runners)
+          end
+
+          ::Sidebars::MenuItem.new(
+            title: s_('Runners|Runners'),
+            link: project_runners_path(context.project),
+            container_html_options: { class: 'shortcuts-builds' },
+            active_routes: { controller: :runners },
+            item_id: :runners
           )
         end
       end

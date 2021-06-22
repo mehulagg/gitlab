@@ -4,12 +4,14 @@ class Projects::RunnersController < Projects::ApplicationController
   before_action :authorize_admin_build!
   before_action :runner, only: [:edit, :update, :destroy, :pause, :resume, :show]
 
-  layout 'project_settings'
-
   feature_category :runner
 
   def index
-    redirect_to project_settings_ci_cd_path(@project, anchor: 'js-runners-settings')
+    unless Feature.enabled?(:runner_list_project_view_vue_ui, @project, default_enabled: :yaml)
+      redirect_to project_settings_ci_cd_path(@project, anchor: 'js-runners-settings')
+    end
+
+    render 'index'
   end
 
   def edit

@@ -422,6 +422,8 @@ constraints(::Constraints::ProjectUrlConstrainer.new) do
             end
           end
         end
+
+        resources :runners, only: [:index]
       end
       # End of the /-/ scope.
 
@@ -523,7 +525,7 @@ constraints(::Constraints::ProjectUrlConstrainer.new) do
         end
       end
 
-      resources :runners, only: [:index, :edit, :update, :destroy, :show] do # rubocop: disable Cop/PutProjectRoutesUnderScope
+      resources :runners, only: [:edit, :update, :destroy, :show] do # rubocop: disable Cop/PutProjectRoutesUnderScope
         member do
           post :resume # rubocop:todo Cop/PutProjectRoutesUnderScope
           post :pause # rubocop:todo Cop/PutProjectRoutesUnderScope
