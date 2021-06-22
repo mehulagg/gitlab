@@ -402,24 +402,20 @@ export default {
       @created="onChartCreated"
       @updated="onChartUpdated"
     >
-      <template v-if="tooltip.type === 'deployments'">
-        <template #tooltip-title>
+      <template #tooltip-title>
+        <template v-if="tooltip.type === 'deployments'">
           {{ __('Deployed') }}
         </template>
-        <template #tooltip-content>
-          <div class="d-flex align-items-center">
-            <gl-icon name="commit" class="mr-2" />
-            <gl-link :href="tooltip.commitUrl">{{ tooltip.sha }}</gl-link>
-          </div>
-        </template>
+        <div v-else class="text-nowrap">
+          {{ tooltip.title }}
+        </div>
       </template>
-      <template v-else>
-        <template #tooltip-title>
-          <div class="text-nowrap">
-            {{ tooltip.title }}
-          </div>
-        </template>
-        <template #tooltip-content :tooltip="tooltip">
+      <template #tooltip-content>
+        <div v-if="tooltip.type === 'deployments'" class="d-flex align-items-center">
+          <gl-icon name="commit" class="mr-2" />
+          <gl-link :href="tooltip.commitUrl">{{ tooltip.sha }}</gl-link>
+        </div>
+        <template v-else>
           <div
             v-for="(content, key) in tooltip.content"
             :key="key"
