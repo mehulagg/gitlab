@@ -7,7 +7,6 @@ import {
   GlLoadingIcon,
 } from '@gitlab/ui';
 
-import { DEBOUNCE_DELAY } from '../constants';
 import { getRecentlyUsedSuggestions, setTokenValueToRecentlyUsed } from '../filtered_search_utils';
 
 export default {
@@ -130,9 +129,9 @@ export default {
   methods: {
     handleInput({ data }) {
       this.searchKey = data;
-      setTimeout(() => {
-        if (!this.suggestionsLoading) this.$emit('fetch-suggestions', data);
-      }, DEBOUNCE_DELAY);
+      if (!this.suggestionsLoading) {
+        this.$emit('fetch-suggestions', data);
+      }
     },
     handleTokenValueSelected(activeTokenValue) {
       // Make sure that;

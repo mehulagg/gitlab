@@ -1,11 +1,12 @@
 <script>
 import { GlToken, GlFilteredSearchSuggestion } from '@gitlab/ui';
+import { debounce } from 'lodash';
 
 import createFlash from '~/flash';
 import { convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
 import { __ } from '~/locale';
 
-import { DEFAULT_LABELS } from '../constants';
+import { DEBOUNCE_DELAY, DEFAULT_LABELS } from '../constants';
 import { stripQuotes } from '../filtered_search_utils';
 
 import BaseToken from './base_token.vue';
@@ -87,6 +88,9 @@ export default {
           this.loading = false;
         });
     },
+    searchLabels: debounce(function debouncedSearch(data) {
+      this.fetchLabelBySearchTerm(data);
+    }, DEBOUNCE_DELAY),
   },
 };
 </script>
@@ -101,7 +105,7 @@ export default {
     :fn-active-token-value="getActiveLabel"
     :default-suggestions="defaultLabels"
     :recent-suggestions-storage-key="config.recentSuggestionsStorageKey"
-    @fetch-suggestions="fetchLabelBySearchTerm"
+    @fetch-suggestions="searchLabels"
     v-on="$listeners"
   >
     <template

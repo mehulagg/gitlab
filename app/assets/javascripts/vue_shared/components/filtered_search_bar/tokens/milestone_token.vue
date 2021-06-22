@@ -62,8 +62,8 @@ export default {
       this.loading = true;
       this.config
         .fetchMilestones(searchTerm)
-        .then(({ data }) => {
-          this.milestones = data;
+        .then((response) => {
+          this.milestones = Array.isArray(response) ? response : response.data;
         })
         .catch(() => createFlash({ message: __('There was a problem fetching milestones.') }))
         .finally(() => {

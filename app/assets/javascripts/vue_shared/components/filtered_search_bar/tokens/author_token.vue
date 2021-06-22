@@ -1,10 +1,11 @@
 <script>
 import { GlAvatar, GlFilteredSearchSuggestion } from '@gitlab/ui';
+import { debounce } from 'lodash';
 
 import createFlash from '~/flash';
 import { __ } from '~/locale';
 
-import { DEFAULT_LABEL_ANY } from '../constants';
+import { DEBOUNCE_DELAY, DEFAULT_LABEL_ANY } from '../constants';
 
 import BaseToken from './base_token.vue';
 
@@ -65,6 +66,9 @@ export default {
           this.loading = false;
         });
     },
+    searchAuthors: debounce(function debouncedSearch(data) {
+      this.fetchAuthorBySearchTerm(data);
+    }, DEBOUNCE_DELAY),
   },
 };
 </script>
@@ -80,7 +84,7 @@ export default {
     :default-suggestions="defaultAuthors"
     :preloaded-suggestions="preloadedAuthors"
     :recent-suggestions-storage-key="config.recentSuggestionsStorageKey"
-    @fetch-suggestions="fetchAuthorBySearchTerm"
+    @fetch-suggestions="searchAuthors"
     v-on="$listeners"
   >
     <template #view="{ viewTokenProps: { inputValue, activeTokenValue } }">

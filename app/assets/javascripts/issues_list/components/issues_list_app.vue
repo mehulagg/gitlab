@@ -9,6 +9,7 @@ import {
   GlTooltipDirective,
 } from '@gitlab/ui';
 import fuzzaldrinPlus from 'fuzzaldrin-plus';
+import { sortBy } from 'lodash';
 import getIssuesQuery from 'ee_else_ce/issues_list/queries/get_issues.query.graphql';
 import createFlash from '~/flash';
 import CsvImportExportButtons from '~/issuable/components/csv_import_export_buttons.vue';
@@ -70,6 +71,10 @@ import LabelToken from '~/vue_shared/components/filtered_search_bar/tokens/label
 import MilestoneToken from '~/vue_shared/components/filtered_search_bar/tokens/milestone_token.vue';
 import WeightToken from '~/vue_shared/components/filtered_search_bar/tokens/weight_token.vue';
 import eventHub from '../eventhub';
+import searchIterationsQuery from '../queries/search_iterations.query.graphql';
+import searchLabelsQuery from '../queries/search_labels.query.graphql';
+import searchMilestonesQuery from '../queries/search_milestones.query.graphql';
+import searchUsersQuery from '../queries/search_users.query.graphql';
 import IssueCardTimeInfo from './issue_card_time_info.vue';
 
 export default {
@@ -94,9 +99,6 @@ export default {
     autocompleteAwardEmojisPath: {
       default: '',
     },
-    autocompleteUsersPath: {
-      default: '',
-    },
     calendarPath: {
       default: '',
     },
@@ -118,6 +120,9 @@ export default {
     hasIssueWeightsFeature: {
       default: false,
     },
+    hasIterationsFeature: {
+      default: false,
+    },
     hasMultipleIssueAssigneesFeature: {
       default: false,
     },
@@ -137,15 +142,6 @@ export default {
       default: '',
     },
     newIssuePath: {
-      default: '',
-    },
-    projectIterationsPath: {
-      default: '',
-    },
-    projectLabelsPath: {
-      default: '',
-    },
-    projectMilestonesPath: {
       default: '',
     },
     projectPath: {
@@ -308,7 +304,7 @@ export default {
         });
       }
 
-      if (this.projectIterationsPath) {
+      if (this.hasIterationsFeature) {
         tokens.push({
           type: TOKEN_TYPE_ITERATION,
           title: TOKEN_TITLE_ITERATION,
@@ -407,19 +403,46 @@ export default {
         : epics.filter((epic) => epic.id === number);
     },
     fetchLabels(search) {
-      return this.fetchWithCache(this.projectLabelsPath, 'labels', 'title', search);
+      return this.$apollo
+        .query({
+          query: searchLabelsQuery,
+          variables: { projectPath: this.projectPath, search },
+        })
+        .then(({ data }) => data.project.labels.nodes);
     },
     fetchMilestones(search) {
-      return this.fetchWithCache(this.projectMilestonesPath, 'milestones', 'title', search, true);
+      return this.$apollo
+        .query({
+          query: searchMilestonesQuery,
+          variables: { projectPath: this.projectPath, search },
+        })
+        .then(({ data }) => data.project.milestones.nodes);
     },
     fetchIterations(search) {
       const id = Number(search);
-      return !search || Number.isNaN(id)
-        ? axios.get(this.projectIterationsPath, { params: { search } })
-        : axios.get(this.projectIterationsPath, { params: { id } });
+      const variables =
+        !search || Number.isNaN(id)
+          ? { projectPath: this.projectPath, search }
+          : { projectPath: this.projectPath, id };
+
+      return this.$apollo
+        .query({
+          query: searchIterationsQuery,
+          variables,
+        })
+        .then(({ data }) => data.project.iterations.nodes);
     },
     fetchUsers(search) {
-      return axios.get(this.autocompleteUsersPath, { params: { search } });
+      return this.$apollo
+        .query({
+          query: searchUsersQuery,
+          variables: { projectPath: this.projectPath, search },
+        })
+        .then(({ data }) => {
+          const users = data.project.projectMembers.nodes.map((member) => member.user);
+          const moveCurrentUserToTop = (user) => (user.username === gon.current_username ? -1 : 0);
+          return sortBy(users, moveCurrentUserToTop);
+        });
     },
     getExportCsvPathWithQuery() {
       return `${this.exportCsvPath}${window.location.search}`;

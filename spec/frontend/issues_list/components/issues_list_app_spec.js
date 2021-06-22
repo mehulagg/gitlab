@@ -54,19 +54,18 @@ describe('IssuesListApp component', () => {
   localVue.use(VueApollo);
 
   const defaultProvide = {
-    autocompleteUsersPath: 'autocomplete/users/path',
     calendarPath: 'calendar/path',
     canBulkUpdate: false,
     emptyStateSvgPath: 'empty-state.svg',
     exportCsvPath: 'export/csv/path',
     hasBlockedIssuesFeature: true,
     hasIssueWeightsFeature: true,
+    hasIterationsFeature: true,
     hasProjectIssues: true,
     isSignedIn: false,
     issuesPath: 'path/to/issues',
     jiraIntegrationPath: 'jira/integration/path',
     newIssuePath: 'new/issue/path',
-    projectLabelsPath: 'project/labels/path',
     projectPath: 'path/to/project',
     rssPath: 'rss/path',
     showNewIssueLink: true,
