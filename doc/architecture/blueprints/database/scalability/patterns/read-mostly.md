@@ -42,7 +42,7 @@ It can be difficult to recognize read-mostly data, even though there are clear c
 
 One approach to this is to look at the [read/write ratio and statistics from e.g. the primary](https://thanos.gitlab.net/graph?g0.range_input=1h&g0.max_source_resolution=0s&g0.expr=bottomk(20%2C%0Aavg%20by%20(relname%2C%20fqdn)%20(%0A%20%20(%0A%20%20%20%20%20%20rate(pg_stat_user_tables_seq_tup_read%7Benv%3D%22gprd%22%7D%5B1h%5D)%0A%20%20%20%20%20%20%2B%20%0A%20%20%20%20%20%20rate(pg_stat_user_tables_idx_tup_fetch%7Benv%3D%22gprd%22%7D%5B1h%5D)%0A%20%20)%20%2F%0A%20%20(%20%20%20%0A%20%20%20%20%20%20rate(pg_stat_user_tables_seq_tup_read%7Benv%3D%22gprd%22%7D%5B1h%5D)%0A%20%20%20%20%20%20%2B%20rate(pg_stat_user_tables_idx_tup_fetch%7Benv%3D%22gprd%22%7D%5B1h%5D)%0A%20%20%20%20%20%20%2B%20rate(pg_stat_user_tables_n_tup_ins%7Benv%3D%22gprd%22%7D%5B1h%5D)%0A%20%20%20%20%20%20%2B%20rate(pg_stat_user_tables_n_tup_upd%7Benv%3D%22gprd%22%7D%5B1h%5D)%0A%20%20%20%20%20%20%2B%20rate(pg_stat_user_tables_n_tup_del%7Benv%3D%22gprd%22%7D%5B1h%5D)%0A%20%20)%0A)%20and%20on%20(fqdn)%20(pg_replication_is_replica%20%3D%3D%200)%0A)%20&g0.tab=1&g1.range_input=1h&g1.max_source_resolution=0s&g1.expr=&g1.tab=1). Here, we look at the TOP20 tables by their read/write ratio over 60 minutes (taken in a peak traffic time):
 
-```
+```sh
 bottomk(20,
 avg by (relname, fqdn) (
   (
