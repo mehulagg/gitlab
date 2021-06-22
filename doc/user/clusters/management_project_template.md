@@ -70,7 +70,7 @@ The [built-in supported applications](https://gitlab.com/gitlab-org/project-temp
 
 - Apparmor
 - Cert-manager
-- Cilium
+- [Cilium](applications/cilium.md)
 - Elastic Stack
 - Falco
 - Fluentd
