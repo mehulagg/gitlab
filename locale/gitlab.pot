@@ -23210,6 +23210,9 @@ msgstr ""
 msgid "PackageRegistry|Created by commit %{link} on branch %{branch}"
 msgstr ""
 
+msgid "PackageRegistry|Debian"
+msgstr ""
+
 msgid "PackageRegistry|Delete Package File"
 msgstr ""
 
