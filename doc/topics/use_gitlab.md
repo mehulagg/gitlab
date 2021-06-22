@@ -40,7 +40,7 @@ GitLab thrives as a language-agnostic, DevSecOps Platform. That being said, ther
 - [Auto DevOps / Heroku Buildpack Support](https://devcenter.heroku.com/articles/buildpacks#officially-supported-buildpacks)
 - [Dependency Proxy Support](../user/packages/dependency_proxy/)
 - [Package Registry Support](../user/packages/)
-- [Package Registry Administration](../administration/packages/
+- [Package Registry Administration](../administration/packages/)
 
 ### Configure
 
