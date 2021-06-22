@@ -38,18 +38,17 @@ RSpec.describe ProductIntelligence::CollectServicePingService do
       stub_usage_data_connections
       stub_object_store_settings
 
-      metrics_definitions.each do |definition|
-        allow_next_instance_of(::Gitlab::Usage::Metric, definition[:key_path]) do |metric|
-          allow(metric).to receive(:definition).and_return(definition)
-        end
-      end
+      allow(Gitlab::Usage::MetricDefinition).to(
+        receive(:definitions)
+          .and_return(metrics_definitions.to_h { |definition| [definition['key_path'], double(attributes: definition)] })
+      )
     end
 
     shared_examples 'includes all appointed metrics' do
       specify do
         aggregate_failures do
           expected_metrics.each do |metric|
-            is_expected.to have_usage_metric metric[:key_path]
+            is_expected.to have_usage_metric metric['key_path']
           end
         end
       end
@@ -59,7 +58,7 @@ RSpec.describe ProductIntelligence::CollectServicePingService do
       specify do
         aggregate_failures do
           restricted_metrics.each do |metric|
-            is_expected.not_to have_usage_metric metric[:key_path]
+            is_expected.not_to have_usage_metric metric['key_path']
           end
         end
       end
@@ -168,9 +167,9 @@ RSpec.describe ProductIntelligence::CollectServicePingService do
 
   def metric_attributes(key_path, description, category)
     {
-      key_path: key_path,
-      description: description,
-      data_category: category
+      'key_path' => key_path,
+      'description' => description,
+      'data_category' => category
     }
   end
 end
