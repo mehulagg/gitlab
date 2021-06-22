@@ -26,6 +26,10 @@ module Types
     field :state, Types::MilestoneStateEnum, null: false,
           description: 'State of the milestone.'
 
+    field :expired, GraphQL::BOOLEAN_TYPE, null: false,
+          description: 'Expired state of the milestone (a milestone is expired when the due date is past the current date).',
+          method: :expired?
+
     field :web_path, GraphQL::STRING_TYPE, null: false, method: :milestone_path,
           description: 'Web path of the milestone.'
 
@@ -43,11 +47,11 @@ module Types
 
     field :project_milestone, GraphQL::BOOLEAN_TYPE, null: false,
           description: 'Indicates if milestone is at project level.',
-          method: :project_milestone?
+          method: :project_timebox?
 
     field :group_milestone, GraphQL::BOOLEAN_TYPE, null: false,
           description: 'Indicates if milestone is at group level.',
-          method: :group_milestone?
+          method: :group_timebox?
 
     field :subgroup_milestone, GraphQL::BOOLEAN_TYPE, null: false,
           description: 'Indicates if milestone is at subgroup level.',

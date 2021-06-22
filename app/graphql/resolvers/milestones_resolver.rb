@@ -25,9 +25,19 @@ module Resolvers
              required: false,
              description: 'A date that the milestone contains.'
 
+    argument :sort, Types::MilestoneSortEnum,
+             description: 'Sort milestones by this criteria.',
+             required: false,
+             default_value: :due_date_asc
+
+    argument :expired_last, GraphQL::BOOLEAN_TYPE,
+             description: 'Display non-expired milestones first when sorting milestones. In any sort the displayed order would be: non-expired milestones with due dates, non-expired milestones without due dates and expired milestones.',
+             required: false
+
     type Types::MilestoneType.connection_type, null: true
 
     def resolve(**args)
+      # TODO raise error if expired_last not used with due date sorts.
       validate_timeframe_params!(args)
 
       authorize!
@@ -43,6 +53,8 @@ module Resolvers
         state: args[:state] || 'all',
         title: args[:title],
         search_title: args[:search_title],
+        sort: args[:sort],
+        expired_last: args[:expired_last],
         containing_date: args[:containing_date]
       }.merge!(transform_timeframe_parameters(args)).merge!(parent_id_parameters(args))
     end
