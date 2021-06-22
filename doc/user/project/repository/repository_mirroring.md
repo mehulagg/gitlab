@@ -597,6 +597,4 @@ For example, we've seen this error when a Firewall was performing a `Deep SSH In
 
 ### 2:fetch remote: "fatal: could not read Username for 'https://bitbucket.org': terminal prompts disabled\n": exit status 128.
 
-If you receive an `"2:fetch remote: "fatal: could not read Username for 'https://bitbucket.org': terminal prompts disabled\n": exit status 128."` after creating a new project using [GitLab CI/CD for external repositories](../../../ci/ci_cd_for_external_repos/), please check if the repo owner is specified in the URL of your mirrored repository: **Project** > **Settings** > **Repository** > **Mirroring repositories**. If it is not specified, please delete and add the URL again in the following format: `https://**<repo_owner>**@bitbucket.org/<accountname>/<reponame>.git`. 
-
-
+If you receive an `"2:fetch remote: "fatal: could not read Username for 'https://bitbucket.org': terminal prompts disabled\n": exit status 128."` after creating a new project using [GitLab CI/CD for external repositories](../../../ci/ci_cd_for_external_repos/), please check if the repo owner is specified in the URL of your mirrored repository: **Project** > **Settings** > **Repository** > **Mirroring repositories**. If it is not specified, please delete and add the URL again in the following format: `https://**<repo_owner>**@bitbucket.org/<accountname>/<reponame>.git`. The repo owner is needed in order for BitBucket to connect to the repository for mirroring.
