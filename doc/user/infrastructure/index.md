@@ -101,3 +101,42 @@ owned by GitLab, where everyone can contribute.
 
 The [documentation of the provider](https://registry.terraform.io/providers/gitlabhq/gitlab/latest/docs)
 is available as part of the official Terraform provider documentations.
+
+## Adding Google Kubernetes Engine (GKE) clusters
+
+The GitLab terraform provider along with Kubernetes and the Google Terraform providers can
+work together to help you easily create GKE clusters and deploy them to GitLab. In this example
+we are going to set up a GKE cluster as a [GitLab Group level cluster](https://docs.gitlab.com/ee/user/group/clusters/).
+
+### Import the example project
+
+[Import the example project by URL](https://docs.gitlab.com/ee/user/project/import/repo_by_url.html)
+using the following URL: `https://gitlab.com/gitlab-org/configure/examples/gitlab-terraform-gke.git`
+
+### Prepare your secrets
+
+The following [CI environment variables](https://docs.gitlab.com/ee/ci/variables/) need to be set so that your CI
+job is able to provision the cluster on GCP and associate the newborn cluster to
+your GitLab group. It is advised that you create them through the UI and not inside the `.gitlab-ci.yml` to not expose
+them in your code.
+
+- `GITLAB_TOKEN`: [GitLab personal access token](https://docs.gitlab.com/ee/user/profile/personal_access_tokens.html)
+  with `api` access, created with a user with maintainer privileges, over the desired GitLab group.
+- `BASE64_GOOGLE_CREDENTIALS`:
+    - You must create [GCP service account](https://cloud.google.com/docs/authentication/getting-started) with the 
+      following roles: `Compute Network Viewer`, `Kubernetes Engine Admin`, `Service Account User`.
+    - As described in the above link, also create a json service account key.
+    - After downloading the json file for the key, encode it with: `base64 /path/to/sa-key.json | tr -d \\n`.
+      Copy this value and use it to create your CI environment variable.
+
+### Configure your deployment
+
+Override the project defaults to match your desired infrastructure.
+
+- In the `gke.tf` file.
+    - **(required)** Override the GCP `project` name.
+    - **(optional)** Choose also the `region` and `zone` that you would like to deploy your cluster to.
+- In the `group_cluster.tf` file.
+    - **(required)** Override the full_path to point to your GitLab desired group name.
+
+You can refer to the [GitLab Terraform provider](https://registry.terraform.io/providers/gitlabhq/gitlab/latest/docs) and the [Google Terraform provider](https://registry.terraform.io/providers/hashicorp/google/latest/docs/guides/provider_reference) for further resource options.
