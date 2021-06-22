@@ -41,10 +41,18 @@ export const fetchCodequality = ({ commit, state, dispatch }) => {
         dispatch('stopCodequalityPolling');
       }
     },
-    errorCallback: () =>
-      createFlash({
-        message: __('Something went wrong on our end while loading the code quality diff.'),
-      }),
+    errorCallback: ({ response }) => {
+      if (response.status === httpStatusCodes.BAD_REQUEST) {
+        // we want to ignore this error status and keep polling here because
+        // this is the status we get when waiting for new reports
+        // such as when the MR is rebased or new commits are pushed
+        // see https://gitlab.com/gitlab-org/gitlab/-/issues/334116
+      } else {
+        createFlash({
+          message: __('An unexpected error occurred while loading the code quality diff.'),
+        });
+      }
+    },
   });
 
   if (!Visibility.hidden()) {
