@@ -62,7 +62,6 @@ export default {
               name: this.entryName,
             }),
             type: 'alert',
-            parent: document,
             fadeTransition: false,
             addBodyClass: true,
           });

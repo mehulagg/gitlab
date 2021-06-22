@@ -253,7 +253,6 @@ export default {
           createFlash({
             message: __('Error setting up editor. Please try again.'),
             type: 'alert',
-            parent: document,
             fadeTransition: false,
             addBodyClass: true,
           });

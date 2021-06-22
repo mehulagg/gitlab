@@ -42,7 +42,6 @@ export const createTempEntry = (
       }),
 
       type: 'alert',
-      parent: document,
       fadeTransition: false,
       addBodyClass: true,
     });
@@ -287,7 +286,6 @@ export const getBranchData = ({ commit, state }, { projectId, branchId, force = 
             createFlash({
               message: __('Error loading branch data. Please try again.'),
               type: 'alert',
-              parent: document,
               fadeTransition: false,
               addBodyClass: true,
             });

@@ -146,7 +146,6 @@ export const commitChanges = ({ commit, state, getters, dispatch, rootState, roo
         createFlash({
           message: data.message,
           type: 'alert',
-          parent: document,
           fadeTransition: false,
           addBodyClass: true,
         });
