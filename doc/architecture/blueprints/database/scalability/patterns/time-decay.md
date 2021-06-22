@@ -1,8 +1,9 @@
 ---
-layout: markdown_page
-title: "Time-Decay Data"
-description: "Blueprint for time-decay data"
-canonical_path: "/company/team/structure/working-groups/database-scalability/time-decay.html"
+stage: none
+group: unassigned
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
+comments: false
+description: 'Database Scalability Patterns: Time-decay'
 ---
 
 ## On this page

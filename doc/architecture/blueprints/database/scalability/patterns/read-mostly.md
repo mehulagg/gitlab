@@ -1,8 +1,9 @@
 ---
-layout: markdown_page
-title: "Read-Mostly Data"
-description: "Blueprint for read-mostly data"
-canonical_path: "/company/team/structure/working-groups/database-scalability/read-mostly.html"
+stage: none
+group: unassigned
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
+comments: false
+description: 'Database Scalability Patterns: Read-Mostly'
 ---
 
 ## On this page
