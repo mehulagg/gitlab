@@ -72,6 +72,7 @@ query childItems(
           node {
             __typename
             ...EpicNode
+            confidential
           }
         }
         pageInfo {
