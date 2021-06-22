@@ -147,7 +147,6 @@ export const commitChanges = ({ commit, state, getters, dispatch, rootState, roo
           message: data.message,
           type: 'alert',
           parent: document,
-          actionConfig: null,
           fadeTransition: false,
           addBodyClass: true,
         });

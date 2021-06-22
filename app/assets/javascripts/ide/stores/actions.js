@@ -43,7 +43,6 @@ export const createTempEntry = (
 
       type: 'alert',
       parent: document,
-      actionConfig: null,
       fadeTransition: false,
       addBodyClass: true,
     });
@@ -289,7 +288,6 @@ export const getBranchData = ({ commit, state }, { projectId, branchId, force = 
               message: __('Error loading branch data. Please try again.'),
               type: 'alert',
               parent: document,
-              actionConfig: null,
               fadeTransition: false,
               addBodyClass: true,
             });

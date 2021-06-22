@@ -63,7 +63,6 @@ export default {
             }),
             type: 'alert',
             parent: document,
-            actionConfig: null,
             fadeTransition: false,
             addBodyClass: true,
           });

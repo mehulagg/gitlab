@@ -254,7 +254,6 @@ export default {
             message: __('Error setting up editor. Please try again.'),
             type: 'alert',
             parent: document,
-            actionConfig: null,
             fadeTransition: false,
             addBodyClass: true,
           });

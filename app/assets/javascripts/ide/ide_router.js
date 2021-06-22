@@ -115,7 +115,6 @@ export const createRouter = (store, defaultBranch) => {
             message: __('Error while loading the project data. Please try again.'),
             type: 'alert',
             parent: document,
-            actionConfig: null,
             fadeTransition: false,
             addBodyClass: true,
           });
