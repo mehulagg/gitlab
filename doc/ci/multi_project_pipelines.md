@@ -62,9 +62,9 @@ GitLab then creates a downstream pipeline in the
 You can view the status for the pipeline, or you can display
 [the downstream pipeline's status instead](#mirror-status-from-triggered-pipeline).
 
-The user that created the upstream pipeline must have access permission for the
-downstream project (`my/deployment`). If a downstream project is
-not found, or a user does not have permission to create a pipeline there,
+The user that creates the upstream pipeline must be able to create pipelines in the
+downstream project (`my/deployment`) too. If the downstream project is not found,
+or the user does not have [permission](../user/permissions.md) to create a pipeline there,
 the `staging` job is marked as _failed_.
 
 #### Specify a downstream pipeline branch
