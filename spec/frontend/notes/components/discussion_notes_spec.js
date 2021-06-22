@@ -33,7 +33,11 @@ describe('DiscussionNotes', () => {
         ...props,
       },
       scopedSlots: {
-        footer: '<p slot-scope="{ showReplies }">showReplies:{{showReplies}}</p>',
+        footer: `
+          <template #default="{ showReplies }">
+            <p>showReplies:{{ showReplies }}</p>,
+          </template>
+        `,
       },
       slots: {
         'avatar-badge': '<span class="avatar-badge-slot-content" />',
