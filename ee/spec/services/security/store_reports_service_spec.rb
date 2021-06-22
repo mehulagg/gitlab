@@ -23,12 +23,12 @@ RSpec.describe Security::StoreReportsService do
 
       it 'initializes and execute a StoreReportService for each report' do
         expect(Security::StoreReportService).to receive(:new)
-          .exactly(3).times.with(pipeline, instance_of(::Gitlab::Ci::Reports::Security::Report))
-          .and_wrap_original do |method, *original_args|
-            method.call(*original_args).tap do |store_service|
-              expect(store_service).to receive(:execute).once.and_call_original
-            end
+                                                  .exactly(3).times.with(pipeline, instance_of(::Gitlab::Ci::Reports::Security::Report))
+                                                  .and_wrap_original do |method, *original_args|
+          method.call(*original_args).tap do |store_service|
+            expect(store_service).to receive(:execute).once.and_call_original
           end
+        end
 
         execute_service_object
       end
@@ -70,13 +70,10 @@ RSpec.describe Security::StoreReportsService do
         let(:reports) { Gitlab::Ci::Reports::Security::Reports.new(pipeline) }
         let(:dast_artifact) { create(:ee_ci_job_artifact, :dast) }
         let(:success) { { status: :success } }
-        let(:scan) { nil }
-
-        let(:dast_report) do
-          report = reports.get_report('dast', dast_artifact)
-          report.scan = scan
-          report
-        end
+        let(:scan_params) { { type: 'dast', status: 'success', start_time: '2021-06-11T07:26:17', end_time: '2021-06-11T07:27:50' } }
+        let(:scan) { ::Gitlab::Ci::Reports::Security::Scan.new(scan_params.stringify_keys) }
+        let(:scanner) { ::Gitlab::Ci::Reports::Security::Scanner.new(external_id: 'zaproxy', name: 'Zed Attack Proxy', vendor: 'OWASP') }
+        let(:dast_report) { reports.get_report('dast', dast_artifact) }
 
         before do
           allow(pipeline).to receive(:security_reports).and_return(reports)
@@ -86,12 +83,10 @@ RSpec.describe Security::StoreReportsService do
           end
         end
 
-        context 'report has scan metadata' do
-          let(:scan) do
-            ::Gitlab::Ci::Reports::Security::Scan.new({ type: 'dast',
-                                                        status: 'success',
-                                                        start_time: '2021-06-11T07:26:17',
-                                                        end_time: '2021-06-11T07:27:50' }.stringify_keys)
+        context 'report has all metadata' do
+          before do
+            dast_report.scan = scan
+            dast_report.add_scanner(scanner)
           end
 
           it 'tracks the scan event', :snowplow do
@@ -103,14 +98,20 @@ RSpec.describe Security::StoreReportsService do
               end_time: '2021-06-11T07:27:50',
               project: project.id,
               scan_type: 'dast',
+              scanner: 'zaproxy',
+              scanner_vendor: 'OWASP',
               start_time: '2021-06-11T07:26:17',
               status: 'success',
-              triggered_by: user.id
+              triggered_by: user.id,
             )
           end
         end
 
         context 'report has no scan metadata' do
+          before do
+            dast_report.add_scanner(scanner)
+          end
+
           it 'tracks the scan event', :snowplow do
             execute_service_object
 
@@ -120,9 +121,34 @@ RSpec.describe Security::StoreReportsService do
               end_time: nil,
               project: project.id,
               scan_type: 'dast',
+              scanner: 'zaproxy',
+              scanner_vendor: 'OWASP',
               start_time: nil,
               status: nil,
-              triggered_by: user.id
+              triggered_by: user.id,
+            )
+          end
+        end
+
+        context 'report has no scanner' do
+          before do
+            dast_report.scan = scan
+          end
+
+          it 'tracks the scan event', :snowplow do
+            execute_service_object
+
+            expect_snowplow_event(
+              category: 'secure::scan',
+              action: 'scan',
+              end_time: '2021-06-11T07:27:50',
+              project: project.id,
+              scan_type: 'dast',
+              scanner: nil,
+              scanner_vendor: nil,
+              start_time: '2021-06-11T07:26:17',
+              status: 'success',
+              triggered_by: user.id,
             )
           end
         end

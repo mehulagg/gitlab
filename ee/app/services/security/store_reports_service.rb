@@ -54,6 +54,8 @@ module Security
         start_time: report&.scan&.start_time,
         status: report&.scan&.status,
         triggered_by: pipeline.user_id,
+        scanner: report&.primary_scanner&.external_id,
+        scanner_vendor: report&.primary_scanner&.vendor,
       )
     end
   end
