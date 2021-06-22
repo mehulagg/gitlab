@@ -18,10 +18,6 @@ RSpec.describe 'Import/Export - Connect to another instance', :js do
     click_link 'Import group'
   end
 
-  after do
-    visit '/'
-  end
-
   context 'when the user provides valid credentials' do
     it 'successfully connects to remote instance' do
       source_url = 'https://gitlab.com'
@@ -57,6 +53,8 @@ RSpec.describe 'Import/Export - Connect to another instance', :js do
 
       expect(page).to have_content 'Showing 1-1 of %{total} groups from %{url}' % { url: source_url, total: total }
       expect(page).to have_content stub_path
+
+      visit '/'
     end
   end
 
