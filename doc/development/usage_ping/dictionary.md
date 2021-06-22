@@ -898,6 +898,18 @@ Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
 
+### `counts.compliance_frameworks_with_pipeline`
+
+Count of compliance frameworks that have a pipeline configuration
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210622091519_compliance_frameworks_with_pipeline.yml)
+
+Group: `compliance`
+
+Status: `implemented`
+
+Tiers: `ultimate`
+
 ### `counts.confidential_epics`
 
 Count of confidential epics
