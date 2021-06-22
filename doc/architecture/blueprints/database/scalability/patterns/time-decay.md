@@ -13,7 +13,7 @@ description: 'Database Scalability Patterns: Time-decay'
 {:toc}
 ## Time-Decay data
 
-This document describes the *time-decay pattern* introduced in the [Database Scalability Working Group](index.html#time-decay-data).
+This document describes the *time-decay pattern* introduced in the [Database Scalability Working Group](https://about.gitlab.com/company/team/structure/working-groups/database-scalability/#time-decay-data).
 We discuss the characteristics of time-decay data and propose best practices for GitLab development to consider in this context.
 
 Some datasets are subject to strong time-decay effects, in which recent data is accessed far more frequently than older data.
@@ -141,7 +141,7 @@ In most cases, we consider old data as valuable, so we do not want to prune them
 That does not mean that they are not directly accessible by users through the application; we could move data outside the database and use other storage engines or access types for them, similarly to offloading metadata but only for the case of old data.
 
 In the simplest use case we can provide fast and direct access to recent data, while allowing users to download an archive with older data.
-This is an option evaluated in the `audit_events` use case; depending on the country and industry, audit events may have a very long retention period, while only the past month(s) of data are actively accessed through GitLab's interface.
+This is an option evaluated in the `audit_events` use case; depending on the country and industry, audit events may have a very long retention period, while only the past month(s) of data are actively accessed through GitLab interface.
 
 Additional use cases may include exporting data to a datawarehouse or other types of data stores as they may be better suited for processing that type of data. An example can be JSON logs that we sometimes store in tables: loading such data into a BigQuery or a columnar store like Redshift may be better for analyzing/querying the data.
 
@@ -161,7 +161,7 @@ Related epic: [Partitioning: `web_hook_logs` table](https://gitlab.com/groups/gi
 
 The important characteristics of `web_hook_logs` are the following:
 
-1. Size of the dataset: It is a really large table. At the moment we decided to partition it (`2021-03-01`), it had \~527M records and a  total size of \~1TB
+1. Size of the dataset: It is a really large table. At the moment we decided to partition it (`2021-03-01`), it had \~527M records and a total size of \~1TB
 
    | Table | Rows | Total size | Table size | Index(es) Size | TOAST Size |
    |-------|------|--------------|------------|----------------|------------|

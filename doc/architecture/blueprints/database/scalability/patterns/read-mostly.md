@@ -13,7 +13,7 @@ description: 'Database Scalability Patterns: Read-Mostly'
 {:toc}
 ## Read-Mostly Data
 
-This document describes the *read-mostly pattern* introduced in the [Database Scalability Working Group](index.html#read-mostly-data). We discuss the characteristics of read-mostly data and propose best practices for GitLab development to consider in this context.
+This document describes the *read-mostly pattern* introduced in the [Database Scalability Working Group](https://about.gitlab.com/company/team/structure/working-groups/database-scalability/#read-mostly-data). We discuss the characteristics of read-mostly data and propose best practices for GitLab development to consider in this context.
 
 ### Characteristics of read-mostly data
 
@@ -23,7 +23,7 @@ In addition, read-mostly data in this context is typically a small dataset. We e
 
 #### Example: License data
 
-Let's introduce a canonical example: License data in GitLab. A GitLab instance may have a license attached in order to use Gitlab's enterprise features. This license data is held instance-wide, i.e. there typically only exist a few relevant records. This information is kept in a table `licenses` which is very small.
+Let's introduce a canonical example: License data in GitLab. A GitLab instance may have a license attached in order to use Gitlab enterprise features. This license data is held instance-wide, i.e. there typically only exist a few relevant records. This information is kept in a table `licenses` which is very small.
 
 We consider this read-mostly data, because it follows above outlined characteristics:
 
@@ -102,7 +102,7 @@ A caveat here is that our Redis setup is currently not using Redis secondaries a
 
 With or without caching implemented, we also must make sure to read data from database replicas if we can. This supports our efforts to scale reads across many database replicas and removes unnecessary workload from the database primary.
 
-GitLab's [database load balancing for reads](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/lib/gitlab/database/load_balancing.rb) sticks to the primary after a first write or when opening an explicit transaction. In the context of read-mostly data, we strive to read this data outside of a transaction scope and before doing any writes. This is often possible given that this data is only seldomly updated (and thus we're often not concerned with reading slightly stale data, for example). However, it can be non-obvious that this query cannot be sent to a replica because of a previous write or or transaction. Hence, when we encounter read-mostly data, it is a good practice to check the wider context and make sure this data can be read from a replica.
+GitLab [database load balancing for reads](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/lib/gitlab/database/load_balancing.rb) sticks to the primary after a first write or when opening an explicit transaction. In the context of read-mostly data, we strive to read this data outside of a transaction scope and before doing any writes. This is often possible given that this data is only seldomly updated (and thus we're often not concerned with reading slightly stale data, for example). However, it can be non-obvious that this query cannot be sent to a replica because of a previous write or transaction. Hence, when we encounter read-mostly data, it is a good practice to check the wider context and make sure this data can be read from a replica.
 
 ### Summary & Follow-Ups
 
