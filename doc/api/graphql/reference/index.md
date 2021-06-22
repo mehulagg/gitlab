@@ -14762,6 +14762,7 @@ Size of UI component in SAST configuration page.
 | <a id="securityreporttypeenumcoverage_fuzzing"></a>`COVERAGE_FUZZING` | COVERAGE FUZZING scan report. |
 | <a id="securityreporttypeenumdast"></a>`DAST` | DAST scan report. |
 | <a id="securityreporttypeenumdependency_scanning"></a>`DEPENDENCY_SCANNING` | DEPENDENCY SCANNING scan report. |
+| <a id="securityreporttypeenumrunning_container_scanning"></a>`RUNNING_CONTAINER_SCANNING` | RUNNING CONTAINER SCANNING scan report. |
 | <a id="securityreporttypeenumsast"></a>`SAST` | SAST scan report. |
 | <a id="securityreporttypeenumsecret_detection"></a>`SECRET_DETECTION` | SECRET DETECTION scan report. |
 
@@ -14776,6 +14777,7 @@ The type of the security scanner.
 | <a id="securityscannertypecoverage_fuzzing"></a>`COVERAGE_FUZZING` |  |
 | <a id="securityscannertypedast"></a>`DAST` |  |
 | <a id="securityscannertypedependency_scanning"></a>`DEPENDENCY_SCANNING` |  |
+| <a id="securityscannertyperunning_container_scanning"></a>`RUNNING_CONTAINER_SCANNING` |  |
 | <a id="securityscannertypesast"></a>`SAST` |  |
 | <a id="securityscannertypesecret_detection"></a>`SECRET_DETECTION` |  |
 

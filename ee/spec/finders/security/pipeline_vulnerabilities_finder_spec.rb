@@ -16,17 +16,20 @@ RSpec.describe Security::PipelineVulnerabilitiesFinder do
     let(:params) { {} }
 
     let_it_be(:build_cs) { create(:ci_build, :success, name: 'cs_job', pipeline: pipeline, project: project) }
+    let_it_be(:build_rcs) { create(:ci_build, :success, name: 'rcs_job', pipeline: pipeline, project: project) }
     let_it_be(:build_dast) { create(:ci_build, :success, name: 'dast_job', pipeline: pipeline, project: project) }
     let_it_be(:build_ds) { create(:ci_build, :success, name: 'ds_job', pipeline: pipeline, project: project) }
     let_it_be(:build_sast) { create(:ci_build, :success, name: 'sast_job', pipeline: pipeline, project: project) }
 
     let_it_be(:artifact_cs) { create(:ee_ci_job_artifact, :container_scanning, job: build_cs, project: project) }
+    let_it_be(:artifact_rcs) { create(:ee_ci_job_artifact, :running_container_scanning, job: build_rcs, project: project) }
     let_it_be(:artifact_dast) { create(:ee_ci_job_artifact, :dast, job: build_dast, project: project) }
     let_it_be(:artifact_ds) { create(:ee_ci_job_artifact, :dependency_scanning, job: build_ds, project: project) }
 
     let!(:artifact_sast) { create(:ee_ci_job_artifact, :sast, job: build_sast, project: project) }
 
     let(:cs_count) { read_fixture(artifact_cs)['vulnerabilities'].count }
+    let(:rcs_count) { read_fixture(artifact_rcs)['vulnerabilities'].count }
     let(:ds_count) { read_fixture(artifact_ds)['vulnerabilities'].count }
     let(:sast_count) { read_fixture(artifact_sast)['vulnerabilities'].count }
     let(:dast_count) do
@@ -38,7 +41,7 @@ RSpec.describe Security::PipelineVulnerabilitiesFinder do
     end
 
     before do
-      stub_licensed_features(sast: true, dependency_scanning: true, container_scanning: true, dast: true)
+      stub_licensed_features(sast: true, dependency_scanning: true, container_scanning: true, running_container_scanning: true, dast: true)
       # Stub out deduplication, if not done the expectations will vary based on the fixtures (which may/may not have duplicates)
       disable_deduplication
     end
@@ -168,6 +171,16 @@ RSpec.describe Security::PipelineVulnerabilitiesFinder do
           expect(subject.findings.count).to eq(cs_count)
         end
       end
+
+      context 'when running_container_scanning' do
+        let(:params) { { report_type: %w[running_container_scanning] } }
+
+        it 'includes only running_container_scanning' do
+          fingerprints = pipeline.security_reports.reports['running_container_scanning'].findings.map(&:location).map(&:fingerprint)
+          expect(subject.findings.map(&:location_fingerprint)).to match_array(fingerprints)
+          expect(subject.findings.count).to eq(rcs_count)
+        end
+      end
     end
 
     context 'by scope' do
@@ -208,7 +221,7 @@ RSpec.describe Security::PipelineVulnerabilitiesFinder do
           subject { described_class.new(pipeline: pipeline).execute }
 
           it 'returns non-dismissed vulnerabilities' do
-            expect(subject.findings.count).to eq(cs_count + dast_count + ds_count + sast_count - feedback.count)
+            expect(subject.findings.count).to eq(rcs_count + cs_count + dast_count + ds_count + sast_count - feedback.count)
             expect(subject.findings.map(&:project_fingerprint)).not_to include(*feedback.map(&:project_fingerprint))
           end
         end
@@ -223,10 +236,10 @@ RSpec.describe Security::PipelineVulnerabilitiesFinder do
         end
 
         context 'when `all`' do
-          let(:params) { { report_type: %w[sast dast container_scanning dependency_scanning], scope: 'all' } }
+          let(:params) { { report_type: %w[sast dast running_container_scanning container_scanning dependency_scanning], scope: 'all' } }
 
           it 'returns all vulnerabilities' do
-            expect(subject.findings.count).to eq(cs_count + dast_count + ds_count + sast_count)
+            expect(subject.findings.count).to eq(rcs_count + cs_count + dast_count + ds_count + sast_count)
           end
         end
       end
@@ -255,7 +268,7 @@ RSpec.describe Security::PipelineVulnerabilitiesFinder do
           subject { described_class.new(pipeline: pipeline).execute }
 
           it 'returns non-dismissed vulnerabilities' do
-            expect(subject.findings.count).to eq(cs_count + dast_count + ds_count + sast_count - feedback.count)
+            expect(subject.findings.count).to eq(rcs_count + cs_count + dast_count + ds_count + sast_count - feedback.count)
             expect(subject.findings.map(&:project_fingerprint)).not_to include(*feedback.map(&:project_fingerprint))
           end
         end
@@ -270,10 +283,10 @@ RSpec.describe Security::PipelineVulnerabilitiesFinder do
         end
 
         context 'when `all`' do
-          let(:params) { { report_type: %w[sast dast container_scanning dependency_scanning], scope: 'all' } }
+          let(:params) { { report_type: %w[sast dast running_container_scanning container_scanning dependency_scanning], scope: 'all' } }
 
           it 'returns all vulnerabilities' do
-            expect(subject.findings.count).to eq(cs_count + dast_count + ds_count + sast_count)
+            expect(subject.findings.count).to eq(rcs_count + cs_count + dast_count + ds_count + sast_count)
           end
         end
       end
@@ -320,7 +333,7 @@ RSpec.describe Security::PipelineVulnerabilitiesFinder do
         subject { described_class.new(pipeline: pipeline).execute }
 
         it 'returns all vulnerabilities with all scanners available' do
-          expect(subject.findings.map(&:scanner).map(&:external_id).uniq).to match_array %w[bundler_audit find_sec_bugs gemnasium trivy zaproxy]
+          expect(subject.findings.map(&:scanner).map(&:external_id).uniq).to match_array %w[bundler_audit find_sec_bugs gemnasium trivy zaproxy starboard]
         end
       end
 
@@ -335,11 +348,11 @@ RSpec.describe Security::PipelineVulnerabilitiesFinder do
 
     context 'by all filters' do
       context 'with found entity' do
-        let(:params) { { report_type: %w[sast dast container_scanning dependency_scanning], scanner: %w[bundler_audit find_sec_bugs gemnasium trivy zaproxy], scope: 'all' } }
+        let(:params) { { report_type: %w[sast dast running_container_scanning container_scanning dependency_scanning], scanner: %w[bundler_audit find_sec_bugs gemnasium starboard trivy zaproxy], scope: 'all' } }
 
         it 'filters by all params' do
-          expect(subject.findings.count).to eq(cs_count + dast_count + ds_count + sast_count)
-          expect(subject.findings.map(&:scanner).map(&:external_id).uniq).to match_array %w[bundler_audit find_sec_bugs gemnasium trivy zaproxy]
+          expect(subject.findings.count).to eq(rcs_count + cs_count + dast_count + ds_count + sast_count)
+          expect(subject.findings.map(&:scanner).map(&:external_id).uniq).to match_array %w[bundler_audit find_sec_bugs gemnasium trivy zaproxy starboard]
           expect(subject.findings.map(&:confidence).uniq).to match_array(%w[unknown low medium high])
           expect(subject.findings.map(&:severity).uniq).to match_array(%w[unknown low medium high critical info])
         end
@@ -359,7 +372,7 @@ RSpec.describe Security::PipelineVulnerabilitiesFinder do
       subject { described_class.new(pipeline: pipeline).execute }
 
       it 'returns all report_types' do
-        expect(subject.findings.count).to eq(cs_count + dast_count + ds_count + sast_count)
+        expect(subject.findings.count).to eq(rcs_count + cs_count + dast_count + ds_count + sast_count)
       end
     end
 
