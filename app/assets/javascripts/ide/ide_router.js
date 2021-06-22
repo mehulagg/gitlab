@@ -113,7 +113,6 @@ export const createRouter = (store, defaultBranch) => {
         .catch((e) => {
           createFlash({
             message: __('Error while loading the project data. Please try again.'),
-            type: 'alert',
             fadeTransition: false,
             addBodyClass: true,
           });

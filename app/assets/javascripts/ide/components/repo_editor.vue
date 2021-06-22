@@ -252,7 +252,6 @@ export default {
         .catch((err) => {
           createFlash({
             message: __('Error setting up editor. Please try again.'),
-            type: 'alert',
             fadeTransition: false,
             addBodyClass: true,
           });

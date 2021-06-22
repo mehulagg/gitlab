@@ -21,7 +21,6 @@ export const getProjectData = ({ commit, state }, { namespace, projectId, force 
         .catch(() => {
           createFlash({
             message: __('Error loading project data. Please try again.'),
-            type: 'alert',
             fadeTransition: false,
             addBodyClass: true,
           });
@@ -45,7 +44,6 @@ export const refreshLastCommitData = ({ commit }, { projectId, branchId } = {}) 
     .catch((e) => {
       createFlash({
         message: __('Error loading last commit.'),
-        type: 'alert',
         fadeTransition: false,
         addBodyClass: true,
       });
