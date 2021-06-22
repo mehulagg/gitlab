@@ -9,6 +9,8 @@ module Users
     def execute(user)
       if user.ban
         log_event(user)
+        save_banned_user(user)
+
         success
       else
         messages = user.errors.full_messages
@@ -17,6 +19,10 @@ module Users
     end
 
     private
+
+    def save_banned_user(user)
+      BannedUser.new(user: user).save
+    end
 
     def log_event(user)
       Gitlab::AppLogger.info(message: "User banned", user: "#{user.username}", email: "#{user.email}", banned_by: "#{current_user.username}", ip_address: "#{current_user.current_sign_in_ip}")
