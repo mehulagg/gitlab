@@ -3,9 +3,10 @@
 
 - if feature_available
   %h3.page-title
-    = _('Project Audit Events')
+    = _('Audit Events')
   %p.light
-    = _('Events in %{project_path}') % { project_path: @project.full_path }
+    = _('Keep track of important events that happened in this project (%{project_path}).') % { project_path: @project.full_path }
+    = link_to _('What are audit events?'), help_page_path('administration/audit_events.md'), target: '_blank'
 
   #js-project-audit-events-app{ data: { form_path: project_audit_events_path(@project),
   events: @events.to_json,

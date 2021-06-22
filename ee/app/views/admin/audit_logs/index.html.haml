@@ -1,5 +1,10 @@
 - page_title _('Audit Events')
 
+%h3.page-title= _('Audit Events')
+%p.light
+  = _('Keep track of important events that happened in your GitLab instance.')
+  = link_to _('What are audit events?'), help_page_path('administration/audit_events.md'), target: '_blank'
+
 #js-audit-log-app{ data: { form_path: admin_audit_logs_path,
   events: @events.to_json,
   is_last_page: @is_last_page.to_json,

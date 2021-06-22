@@ -12976,9 +12976,6 @@ msgstr ""
 msgid "Events"
 msgstr ""
 
-msgid "Events in %{project_path}"
-msgstr ""
-
 msgid "Every %{action} attempt has failed: %{job_error_message}. Please try again."
 msgstr ""
 
@@ -15274,9 +15271,6 @@ msgstr ""
 msgid "Group %{group_name} was successfully created."
 msgstr ""
 
-msgid "Group Audit Events"
-msgstr ""
-
 msgid "Group Git LFS status:"
 msgstr ""
 
@@ -15416,9 +15410,6 @@ msgid "Group was exported"
 msgstr ""
 
 msgid "Group was successfully updated."
-msgstr ""
-
-msgid "Group-level events in %{group_name} (no project-level events)"
 msgstr ""
 
 msgid "Group: %{group_name}"
@@ -18731,6 +18722,15 @@ msgid "Keep divergent refs"
 msgstr ""
 
 msgid "Keep editing"
+msgstr ""
+
+msgid "Keep track of important events that happened in this group (%{group_name}). This doesn't include project-level events."
+msgstr ""
+
+msgid "Keep track of important events that happened in this project (%{project_path})."
+msgstr ""
+
+msgid "Keep track of important events that happened in your GitLab instance."
 msgstr ""
 
 msgid "Keeping all SAST analyzers enabled future-proofs the project in case new languages are added later on. Determining which analyzers apply is a process that consumes minimal resources and adds minimal time to the pipeline. Leaving all SAST analyzers enabled ensures maximum coverage."
@@ -25218,9 +25218,6 @@ msgid "Project '%{project_name}' will be deleted on %{date}"
 msgstr ""
 
 msgid "Project Access Tokens"
-msgstr ""
-
-msgid "Project Audit Events"
 msgstr ""
 
 msgid "Project Badges"
@@ -36548,6 +36545,9 @@ msgid "Welcome to the guided GitLab tour"
 msgstr ""
 
 msgid "Welcome, %{name}!"
+msgstr ""
+
+msgid "What are audit events?"
 msgstr ""
 
 msgid "What are you searching for?"

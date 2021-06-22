@@ -1,7 +1,9 @@
 - page_title _('Audit Events')
 
-%h3.page-title= _('Group Audit Events')
-%p.light= _('Group-level events in %{group_name} (no project-level events)') % { group_name: @group.name }
+%h3.page-title= _('Audit Events')
+%p.light
+  = _("Keep track of important events that happened in this group (%{group_name}). This doesn't include project-level events.") % { group_name: @group.name }
+  = link_to _('What are audit events?'), help_page_path('administration/audit_events.md'), target: '_blank'
 
 #js-group-audit-events-app{ data: { form_path: group_audit_events_path(@group),
   events: @events.to_json,
