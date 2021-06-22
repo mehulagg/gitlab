@@ -463,8 +463,14 @@ RSpec.describe API::Releases do
     end
 
     context 'when specified tag is not found in the project' do
-      it 'cannot find the release entry' do
+      it 'returns 404 for maintater' do
         get api("/projects/#{project.id}/releases/non_exist_tag", maintainer)
+
+        expect(response).to have_gitlab_http_status(:not_found)
+      end
+
+      it 'returns 403 for non_project_member' do
+        get api("/projects/#{project.id}/releases/non_exist_tag", non_project_member)
 
         expect(response).to have_gitlab_http_status(:forbidden)
       end

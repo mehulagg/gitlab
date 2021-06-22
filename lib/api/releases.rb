@@ -60,7 +60,7 @@ module API
                                desc: 'If `true`, a response includes HTML rendered markdown of the release description.'
       end
       get ':id/releases/:tag_name', requirements: RELEASE_ENDPOINT_REQUIREMENTS do
-        authorize_download_code!
+        # authorize_read_releases!
 
         present release, with: Entities::Release, current_user: current_user, include_html_description: params[:include_html_description]
       end
