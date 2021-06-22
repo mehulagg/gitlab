@@ -59,7 +59,8 @@ class ProjectPresenter < Gitlab::View::Presenter::Delegated
       changelog_anchor_data,
       contribution_guide_anchor_data,
       gitlab_ci_anchor_data,
-      integrations_anchor_data
+      integrations_anchor_data,
+      sast_anchor_data
     ].compact.reject { |item| item.is_link }
   end
 
@@ -397,6 +398,25 @@ class ProjectPresenter < Gitlab::View::Presenter::Delegated
                      statistic_icon('doc-text') + _('CI/CD configuration'),
                      project_ci_pipeline_editor_path(project),
                     'btn-default')
+    end
+  end
+
+  def sast_anchor_data
+    experiment(:sast_entry_points, namespace: project.root_ancestor) do |e|
+      e.exclude! unless can?(current_user, :admin_project, project)
+
+      e.use {} # nil control
+      e.try do
+        label = statistic_icon('doc-text') + _('Add Security Testing')
+        AnchorData.new(false, label, help_page_url('user/application_security/sast/index'), nil, nil, nil, {
+          'track-event': 'click',
+          'track-experiment': e.name
+        })
+      end
+
+      e.run
+
+      e.track(:view)
     end
   end
 
