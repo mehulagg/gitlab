@@ -6,7 +6,6 @@ RSpec.describe GitlabSchema.types['CurrentLicense'], :enable_admin_mode do
   include GraphqlHelpers
 
   let_it_be(:admin) { create(:admin) }
-  let_it_be(:last_synced_at) { DateTime.current - 1.day }
   let_it_be(:licensee) do
     {
       'Name' => 'User Example',
@@ -19,27 +18,13 @@ RSpec.describe GitlabSchema.types['CurrentLicense'], :enable_admin_mode do
     create_current_license(
       licensee: licensee,
       cloud_licensing_enabled: true,
-      last_synced_at: last_synced_at,
-      next_sync_at: last_synced_at + 1.day
+      last_synced_at: DateTime.current - 1.day,
+      next_sync_at: DateTime.current
     )
   end
 
   let(:fields) do
     %w[last_sync billable_users_count maximum_user_count users_over_license_count]
-  end
-
-  def query(field_name)
-    %(
-      {
-        currentLicense {
-          #{field_name}
-        }
-      }
-    )
-  end
-
-  def query_field(field_name)
-    GitlabSchema.execute(query(field_name), context: { current_user: admin }).as_json
   end
 
   before do
@@ -52,6 +37,20 @@ RSpec.describe GitlabSchema.types['CurrentLicense'], :enable_admin_mode do
   include_examples 'license type fields', %w[data currentLicense]
 
   describe "#users_over_license_count" do
+    def query(field_name)
+      %(
+        {
+          currentLicense {
+            #{field_name}
+          }
+        }
+      )
+    end
+
+    def query_field(field_name)
+      GitlabSchema.execute(query(field_name), context: { current_user: admin }).as_json
+    end
+
     context 'when license is for a trial' do
       it 'returns 0' do
         create_current_license(licensee: licensee, restrictions: { trial: true })
@@ -78,7 +77,15 @@ RSpec.describe GitlabSchema.types['CurrentLicense'], :enable_admin_mode do
     describe 'last_sync' do
       let(:field_name) { :last_sync }
 
-      it { is_expected.to eq(last_synced_at.change(usec: 0)) }
+      context 'when license is a cloud license' do
+        it { is_expected.to eq(license.updated_at) }
+      end
+
+      context 'when license is not a cloud license' do
+        let_it_be(:license, refind: true) { create_current_license(licensee: licensee) }
+
+        it { is_expected.to be_nil }
+      end
     end
 
     describe 'billable_users_count' do
