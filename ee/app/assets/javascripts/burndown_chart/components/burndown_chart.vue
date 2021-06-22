@@ -149,8 +149,8 @@ export default {
       :include-legend-avg-max="false"
       @created="setChart"
     >
-      <template slot="tooltip-title">{{ tooltip.title }}</template>
-      <template slot="tooltip-content">{{ tooltip.content }}</template>
+      <template #tooltip-title>{{ tooltip.title }}</template>
+      <template #tooltip-content>{{ tooltip.content }}</template>
     </gl-line-chart>
   </div>
 </template>
