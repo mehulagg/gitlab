@@ -43,6 +43,7 @@ export default {
     return {
       error: null,
       isLoading: true,
+      isAlertDismissed: true,
     };
   },
   computed: {
@@ -54,6 +55,9 @@ export default {
     iframeHeight() {
       return IFRAME_MINIMUM_HEIGHT * window.devicePixelRatio;
     },
+    shouldShowAlert() {
+      return this.error && !this.isAlertDismissed;
+    },
   },
   destroyed() {
     window.removeEventListener('message', this.handleFrameMessages, true);
@@ -64,6 +68,7 @@ export default {
 
       this.error = null;
       this.isLoading = true;
+      this.isAlertDismissed = true;
 
       this.$refs.zuora.contentWindow.postMessage('submit', this.allowedOrigin);
     },
@@ -87,10 +92,13 @@ export default {
       if (event.data.success) {
         this.$emit('success');
       } else if (parseInt(event.data.code, 10) > 6) {
-        // 0-6 error codes mean client-side validation error,
+        // 0-6 error codes mean client-side validation error after submit,
         // no needs to reload the iframe and emit the failure event
         this.error = event.data.msg;
-        this.$refs.zuora.src = this.iframeSrc;
+        this.isAlertDismissed = false;
+        this.nextTick(() => {
+          this.$refs.zuora.src = this.iframeSrc;
+        });
         this.$emit('failure', { msg: this.error });
       }
 
@@ -104,6 +112,9 @@ export default {
       } catch {
         return false;
       }
+    },
+    handleAlertDismiss() {
+      this.isAlertDismissed = true;
     },
   },
   i18n,
@@ -126,7 +137,9 @@ export default {
       </gl-sprintf>
     </p>
 
-    <gl-alert v-if="error" variant="danger">{{ error }}</gl-alert>
+    <gl-alert v-if="shouldShowAlert" variant="danger" @dismiss="handleAlertDismiss">{{
+      error
+    }}</gl-alert>
     <gl-loading-icon v-if="isLoading" size="lg" />
     <!-- eslint-disable @gitlab/vue-require-i18n-strings -->
     <iframe
