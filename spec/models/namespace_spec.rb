@@ -1010,7 +1010,7 @@ RSpec.describe Namespace do
     end
   end
 
-  describe '#all_projects' do
+  shared_examples '#all_projects' do
     context 'when namespace is a group' do
       let(:namespace) { create(:group) }
       let(:child) { create(:group, parent: namespace) }
@@ -1019,12 +1019,6 @@ RSpec.describe Namespace do
 
       it { expect(namespace.all_projects.to_a).to match_array([project2, project1]) }
       it { expect(child.all_projects.to_a).to match_array([project2]) }
-
-      it 'queries for the namespace and its descendants' do
-        expect(Project).to receive(:where).with(namespace: [namespace, child])
-
-        namespace.all_projects
-      end
     end
 
     context 'when namespace is a user namespace' do
@@ -1039,6 +1033,20 @@ RSpec.describe Namespace do
 
         user_namespace.all_projects
       end
+    end
+  end
+
+  describe '#all_projects' do
+    context 'when recursive approach is enabled' do
+      include_examples '#all_projects'
+    end
+
+    context 'when recursive approach is disabled' do
+      before do
+        stub_feature_flags(recursive_approach_for_all_projects: false)
+      end
+
+      include_examples '#all_projects'
     end
   end
 
