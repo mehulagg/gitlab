@@ -20,11 +20,13 @@ RSpec.describe Gitlab::Ci::Parsers::Security::Dast do
           :last_occurrence_method_name,
           :last_occurrence_path,
           :last_occurrence_severity,
-          :last_occurrence_confidence) do
-      :dast                             | 24 | 15 | 1 | 6 | 'http://goat:8080' | 'GET' | '/WebGoat/plugins/bootstrap/css/bootstrap.min.css' | 'info' | 'low'
-      :dast_multiple_sites              | 25 | 15 | 1 | 0 | 'http://goat:8080' | 'GET' | '/WebGoat/plugins/bootstrap/css/bootstrap.min.css' | 'info' | 'low'
-      :dast_deprecated_no_spider        | 2  | 3  | 1 | 0 | 'http://bikebilly-spring-auto-devops-review-feature-br-3y2gpb.35.192.176.43.xip.io' | 'GET' | '/' | 'low' | 'medium'
-      :dast_deprecated_no_common_fields | 24 | 15 | 1 | 0 | 'http://goat:8080' | 'GET' | '/WebGoat/plugins/bootstrap/css/bootstrap.min.css' | 'info' | 'low'
+          :last_occurrence_confidence,
+          :scanner_id) do
+      :dast                             | 24 | 15 | 1 | 6 | 'http://goat:8080' | 'GET' | '/WebGoat/plugins/bootstrap/css/bootstrap.min.css' | 'info' | 'low' | 'zaproxy'
+      :dast_multiple_sites              | 25 | 15 | 1 | 0 | 'http://goat:8080' | 'GET' | '/WebGoat/plugins/bootstrap/css/bootstrap.min.css' | 'info' | 'low' | 'zaproxy'
+      :dast_deprecated_no_spider        | 2  | 3  | 1 | 0 | 'http://bikebilly-spring-auto-devops-review-feature-br-3y2gpb.35.192.176.43.xip.io' | 'GET' | '/' | 'low' | 'medium' | 'zaproxy'
+      :dast_deprecated_no_common_fields | 24 | 15 | 1 | 0 | 'http://goat:8080' | 'GET' | '/WebGoat/plugins/bootstrap/css/bootstrap.min.css' | 'info' | 'low' | 'zaproxy'
+      :dast_14_0_2                      | 1  | 2  | 1 | 3 | 'http://pancakes'  | '' | '' | 'medium' | 'high' | 'zaproxy-browserker'
     end
 
     with_them do
@@ -34,11 +36,12 @@ RSpec.describe Gitlab::Ci::Parsers::Security::Dast do
         artifact.each_blob { |blob| described_class.parse!(blob, report) }
       end
 
-      it 'parses all identifiers, findings and scanned resources' do
+      it 'parses all identifiers, findings, scanner and scanned resources', focus: true do
         expect(report.findings.length).to eq(occurrence_count)
         expect(report.identifiers.length).to eq(identifier_count)
         expect(report.scanners.length).to eq(scanner_count)
         expect(report.scanned_resources.length).to eq(scanned_resources_count)
+        expect(report.primary_scanner.external_id).to eq(scanner_id)
       end
 
       it 'generates expected location' do
