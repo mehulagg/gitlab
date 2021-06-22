@@ -52,19 +52,6 @@
   image_url: https://about.gitlab.com/images/14_0/codeownersadoption.png
   published_at: 2021-06-22
   release: 14.0
-- title: Inline code quality notices on MR diffs
-  body: |
-    If you're a developer authoring or reviewing a merge request, you want to know how any changes may impact the quality of a project. To do this within GitLab, you previously needed two windows open: one on the code diff of the merge request and one on the main merge request page to see the code quality changes. This back-and-forth is inefficient, and makes it easy to miss critical code quality issues.
-
-    The merge request **Changes** tab now shows you which line introduced a code quality violation, and its severity, so you can quickly identify the most critical issues to resolve. Hovering over the icon provides details about the violation.
-  stage: Verify
-  self-managed: true
-  gitlab-com: true
-  packages: [Ultimate]
-  url: https://docs.gitlab.com/ee/user/project/merge_requests/code_quality.html#code-quality-in-diff-view
-  image_url: https://about.gitlab.com/images/14_0/code_quality_annotations.png
-  published_at: 2021-06-22
-  release: 14.0
 - title: Set pronouns on GitLab user profiles
   body: |
     Pronouns have been added to GitLab user profiles. The pronouns appear next to user names in the **Profile** tab. You can:
@@ -143,7 +130,7 @@
   gitlab-com: true
   packages: [Free, Premium, Ultimate]
   url: https://docs.gitlab.com/ee/user/project/issues/managing_issues.html#change-the-issue-type
-  image_url: https://about.gitlab.com
+  image_url: https://about.gitlab.com/images/14_0/change_type_on_issues.png
   published_at: 2021-06-22
   release: 14.0
 - title: Prepopulate the CI/CD pipeline editor with an initial template
