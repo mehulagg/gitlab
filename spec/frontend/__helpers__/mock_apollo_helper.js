@@ -4,7 +4,6 @@ import VueApollo from 'vue-apollo';
 
 const defaultCacheOptions = {
   fragmentMatcher: { match: () => true },
-  addTypename: false,
 };
 
 export function createMockClient(handlers = [], resolvers = {}, cacheOptions = {}) {
