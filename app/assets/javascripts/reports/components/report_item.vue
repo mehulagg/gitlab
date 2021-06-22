@@ -52,7 +52,7 @@ export default {
       v-if="showReportSectionStatusIcon"
       :status="status"
       :status-icon-size="statusIconSize"
-      class="gl-mr-3"
+      class="gl-mr-2"
     />
 
     <component :is="component" v-if="component" :issue="issue" :status="status" :is-new="isNew" />
