@@ -41,6 +41,10 @@ module Gitlab
       def endpoint_id
         Labkit::Context.current&.get_attribute(:caller_id)
       end
+
+      def feature_category
+        Labkit::Context.current&.get_attribute(:feature_category)
+      end
     end
   end
 end
