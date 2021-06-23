@@ -3580,7 +3580,7 @@ deploystacks: [vultr, data]
 Use `trigger` to define a downstream pipeline trigger. When GitLab starts a `trigger` job,
 a downstream pipeline is created.
 
-Jobs with `trigger` can only use a [limited set of keywords](../multi_project_pipelines.md#limitations).
+Jobs with `trigger` can only use a [limited set of keywords](../multi_project_pipelines.md#create-multi-project-pipelines-in-your-gitlab-ciyml-file).
 For example, you can't run commands with [`script`](#script), [`before_script`](#before_script),
 or [`after_script`](#after_script).
 
@@ -3661,7 +3661,7 @@ trigger_job:
     include: path/to/child-pipeline.yml
 ```
 
-Similar to [multi-project pipelines](../multi_project_pipelines.md#mirror-status-from-triggered-pipeline),
+Similar to [multi-project pipelines](../multi_project_pipelines.md#mirror-status-of-a-triggered-pipeline-in-the-trigger-job),
 it's possible to mirror the status from a triggered pipeline:
 
 ```yaml

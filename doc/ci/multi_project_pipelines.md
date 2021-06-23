@@ -65,7 +65,7 @@ GitLab then creates a downstream pipeline in the
 `staging` job succeeds. The full path to the project is `my/deployment`.
 
 You can view the status for the pipeline, or you can display
-[the downstream pipeline's status instead](#mirror-status-from-triggered-pipeline).
+[the downstream pipeline's status instead](#mirror-status-of-a-triggered-pipeline-in-the-trigger-job).
 
 The user that creates the upstream pipeline must be able to create pipelines in the
 downstream project (`my/deployment`) too. If the downstream project is not found,
