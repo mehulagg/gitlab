@@ -703,8 +703,7 @@ Only run an authenticated scan against a test server.
 
 ### Available CI/CD variables
 
-DAST can be [configured](#customizing-the-dast-settings) using CI/CD variables. Only variables
-marked <sup>1</sup> are available to an on-demand DAST scan.
+You can use CI/CD variables to customize DAST.
 
 | CI/CD variable                                  | Type          | Description                    |
 |:------------------------------------------------|:--------------|:-------------------------------|
@@ -745,6 +744,7 @@ marked <sup>1</sup> are available to an on-demand DAST scan.
 | `DAST_ZAP_LOG_CONFIGURATION`                    | string        | Set to a semicolon-separated list of additional log4j properties for the ZAP Server. For example, `log4j.logger.org.parosproxy.paros.network.HttpSender=DEBUG;log4j.logger.com.crawljax=DEBUG` |
 | `DAST_AUTH_EXCLUDE_URLS`                        | URLs          | [Deprecated](https://gitlab.com/gitlab-org/gitlab/-/issues/289959) in GitLab 13.8, to be removed in 14.0, and replaced by `DAST_EXCLUDE_URLS`. The URLs to skip during the authenticated scan; comma-separated. Regular expression syntax can be used to match multiple URLs. For example, `.*` matches an arbitrary character sequence. Not supported for API scans. |
 
+1. Available to an on-demand DAST scan.
 ### DAST command-line options
 
 Not all DAST configuration is available via CI/CD variables. To find out all
