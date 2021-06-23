@@ -266,6 +266,8 @@ The following metrics are available:
 |:--------------------------------- |:--------- |:------------------------------------------------------------- |:-------------------------------------- |:--------------------------------------------------------- |
 | `db_load_balancing_hosts`         | Gauge     | [12.3](https://gitlab.com/gitlab-org/gitlab/-/issues/13630)   | Current number of load balancing hosts | |
 | `sidekiq_load_balancing_count`    | Counter   | 13.11                                                         | Sidekiq jobs using load balancing with data consistency set to :sticky or :delayed | `queue`, `boundary`, `external_dependencies`, `feature_category`, `job_status`, `urgency`, `data_consistency`, `load_balancing_strategy` |
+| `gitlab_transaction_caught_up_replicas_search_found_total`    | Counter   | 13.11                             | Number of successful search attempts for caught up replica (each may result to using replica) | | 
+| `gitlab_transaction_caught_up_replicas_search_absent_total`   | Counter   | 13.11                             | Number of non-successful search attempts for caught up replica (each results in using primary) | | 
 
 ## Database partitioning metrics **(PREMIUM SELF)**
 
