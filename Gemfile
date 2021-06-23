@@ -116,7 +116,7 @@ gem 'kaminari', '~> 1.0'
 gem 'hamlit', '~> 2.15.0'
 
 # Files attachments
-gem 'carrierwave', '~> 1.3'
+gem 'carrierwave', github: 'carrierwaveuploader/carrierwave', ref: '6c1140' # rubocop: disable Cop/GemFetcher
 gem 'mini_magick', '~> 4.10.1'
 
 # for backups
