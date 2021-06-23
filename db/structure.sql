@@ -9873,6 +9873,23 @@ CREATE SEQUENCE badges_id_seq
 
 ALTER SEQUENCE badges_id_seq OWNED BY badges.id;
 
+CREATE TABLE banned_users (
+    id bigint NOT NULL,
+    user_id integer,
+    ban_state character varying,
+    created_at timestamp with time zone NOT NULL,
+    updated_at timestamp with time zone NOT NULL
+);
+
+CREATE SEQUENCE banned_users_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE banned_users_id_seq OWNED BY banned_users.id;
+
 CREATE TABLE batched_background_migration_jobs (
     id bigint NOT NULL,
     created_at timestamp with time zone NOT NULL,
@@ -19648,6 +19665,8 @@ ALTER TABLE ONLY background_migration_jobs ALTER COLUMN id SET DEFAULT nextval('
 
 ALTER TABLE ONLY badges ALTER COLUMN id SET DEFAULT nextval('badges_id_seq'::regclass);
 
+ALTER TABLE ONLY banned_users ALTER COLUMN id SET DEFAULT nextval('banned_users_id_seq'::regclass);
+
 ALTER TABLE ONLY batched_background_migration_jobs ALTER COLUMN id SET DEFAULT nextval('batched_background_migration_jobs_id_seq'::regclass);
 
 ALTER TABLE ONLY batched_background_migrations ALTER COLUMN id SET DEFAULT nextval('batched_background_migrations_id_seq'::regclass);
@@ -20783,6 +20802,9 @@ ALTER TABLE ONLY background_migration_jobs
 
 ALTER TABLE ONLY badges
     ADD CONSTRAINT badges_pkey PRIMARY KEY (id);
+
+ALTER TABLE ONLY banned_users
+    ADD CONSTRAINT banned_users_pkey PRIMARY KEY (id);
 
 ALTER TABLE ONLY batched_background_migration_jobs
     ADD CONSTRAINT batched_background_migration_jobs_pkey PRIMARY KEY (id);
