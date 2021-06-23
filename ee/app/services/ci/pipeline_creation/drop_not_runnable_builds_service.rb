@@ -13,7 +13,6 @@ module Ci
       # before the first pipeline processing call
       #
       def execute
-        return unless ::Feature.enabled?(:ci_drop_new_builds_when_ci_quota_exceeded, project, default_enabled: :yaml)
         return unless pipeline.created?
 
         validate_build_matchers
