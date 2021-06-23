@@ -54,6 +54,7 @@ const SentryConfig = {
 
     this.configure();
     this.bindSentryErrors();
+    this.setFeatureCategory();
     if (this.options.currentUserId) this.setUser();
   },
 
@@ -75,6 +76,14 @@ const SentryConfig = {
     Sentry.setUser({
       id: this.options.currentUserId,
     });
+  },
+
+  setFeatureCategory() {
+    if (gon?.feature_category) {
+      Sentry.configureScope((scope) => {
+        scope.setTag('feature_category', gon.feature_category);
+      });
+    }
   },
 
   bindSentryErrors() {
