@@ -1,0 +1,156 @@
+---
+comments: false
+description: 'Database Scalability / Limit table sizes'
+group: database
+---
+
+# Database Scalability: Limit on-disk table size to < 100 GB for GitLab.com
+
+This document is a proposal to work towards reducing and limiting table sizes on GitLab.com. We establish a **measurable target** by limiting table size to a certain threshold. This will be used as an indicator to drive database focus and decision making. With GitLab.com growing, we continuously re-evaluate which tables need to be worked on to prevent or otherwise fix violations.
+
+Note that this is not meant to be a hard rule but rather a strong indication that work needs to be done to break a table apart or otherwise reduce its size.
+
+This is meant to be read in context with https://gitlab.com/gitlab-org/gitlab/-/merge_requests/64115,
+which paints the bigger picture. This proposal here is thought to be part of the "debloating step" below, as we aim to reduce storage requirements and improve data modeling. Partitioning is part of the standard tool-belt: where possible, we can already use partitioning as a solution to cut physical table sizes significantly. Both will help to prepare efforts like decomposition (database usage is already optimized) and sharding (database is already partitioned along an identified data access dimension).
+
+```mermaid
+graph LR
+    Fe(Pick feature) --> D
+    D[(Database)] --> De
+    De[Debloating] --> Dc
+    Dc[Decomposition] --> P
+    P[Partitioning] --> S
+    S[Sharding] --> R
+    P --> M
+    M[Microservices] --> R
+    R{Repeat?} --> Fe
+    style De fill:#fca326
+    style P fill:#fc6d26
+```
+
+## Motivation: GitLab.com stability and performance
+
+Large tables on GitLab.com are a major problem - for both operations and development. They cause a variety of problems:
+
+1. **Query timings** and hence overall application performance suffers
+1. **Table maintenance** becomes much more costly. Vacuum activity has become a significant concern on GitLab.com - with large tables only seeing infrequent (e.g. once per day) and vacuum runs taking many hours to complete. This has various negative consequences and a very large table has potential to impact seemingly unrelated parts of the database and hence overall application performance suffers.
+1. **Data migrations** on large tables are significantly more complex to implement and incur development overhead. They have potential to cause stability problems on GitLab.com and take a long time to execute on large datasets.
+1. **Indexes size** is significant. This directly impacts performance as smaller parts of the index are kept in memory and also makes the indexes harder to maintain (think repacking).
+1. **Index creation times** go up significantly - in 2021, we see btree creation take up to 6 hours for a single btree index. This impacts our ability to deploy frequently and leads to vacuum-related problems (delayed cleanup).
+1. We tend to add **many indexes** to mitigate, but this eventually causes significant overhead, can confuse the query planner and a large number of indexes is a smell of a design problem.
+
+## Examples
+
+Most priminently, the `ci_builds` table is 1.5 TB in size as of June 2021 and has 31 indexes associated with it which sum up to 1 TB in size. The overall on-disk size for this table is 2.5 TB. Currently, this grows at 300 GB per month. By the end of the year, this is thought to be close to 5 TB if we don't take measures against.
+
+The following examples show that very large tables often constitute the root cause of incidents on GitLab.com.
+
+1. Infrequent and long running vacuum activity has led to [repeated degradation of query performance for CI queuing](https://gitlab.com/gitlab-com/gl-infra/production/-/issues?label_name%5B%5D=Service%3A%3ACI+Runners&label_name%5B%5D=incident&scope=all&search=shared_runner_queues&state=all)
+1. On large tables like `ci_builds`, index creation time varies between 1.5 to 6 hours during busy times. This process blocks deployments as migrations are being run synchronously - reducing our ability to deploy frequently.
+1. Creating a large index can lead to a burst of activity on the database primary:
+   1. on `merge_request_diff_commits` table: caused [high network saturation](https://gitlab.com/gitlab-com/gl-infra/production/-/issues/4823),
+   1. regular reindexing activity on the weekend: causes [growing WAL queue](https://gitlab.com/gitlab-com/gl-infra/production/-/issues/4767) (impacts recovery objectives),
+   1. `notes` table: Re-creating a GIN trigram index for maintenance reasons has become nearly unfeasible and had to be [aborted after 12 hours upon first try](https://gitlab.com/gitlab-com/gl-infra/production/-/issues/4633) as it was blocking other vacuum operation.
+
+## Problematic tables on GitLab.com
+
+This shows the TOP30 tables by their total size (includes index sizes). `table_size, index_size` is the on-disk size of the actual data and associated indexes, respectively. `percentage_of_total_database_size` displays the ratio of total table size to database size.
+
+```
+         tablename          | total_size | table_size | index_size | index_count | percentage_of_total_database_size
+----------------------------+------------+------------+------------+-------------+-----------------------------------
+ ci_builds                  | 2964 GB    | 1537 GB    | 947 GB     |          31 |                              22.8
+ merge_request_diff_commits | 1883 GB    | 1449 GB    | 412 GB     |           2 |                              14.5
+ ci_build_trace_sections    | 1116 GB    | 539 GB     | 577 GB     |           3 |                               8.6
+ notes                      | 743 GB     | 387 GB     | 330 GB     |          13 |                               5.7
+ merge_request_diff_files   | 571 GB     | 478 GB     | 88 GB      |           1 |                               4.4
+ events                     | 439 GB     | 95 GB      | 344 GB     |          12 |                               3.4
+ ci_job_artifacts           | 394 GB     | 186 GB     | 208 GB     |          10 |                               3.0
+ ci_pipelines               | 263 GB     | 66 GB      | 197 GB     |          23 |                               2.0
+ taggings                   | 237 GB     | 59 GB      | 178 GB     |           5 |                               1.8
+ ci_builds_metadata         | 235 GB     | 87 GB      | 148 GB     |           5 |                               1.8
+ issues                     | 218 GB     | 47 GB      | 150 GB     |          28 |                               1.7
+ web_hook_logs_202103       | 186 GB     | 122 GB     | 8416 MB    |           3 |                               1.4
+ ci_stages                  | 181 GB     | 58 GB      | 123 GB     |           6 |                               1.4
+ web_hook_logs_202105       | 180 GB     | 115 GB     | 7868 MB    |           3 |                               1.4
+ web_hook_logs_202104       | 176 GB     | 115 GB     | 7472 MB    |           3 |                               1.4
+ merge_requests             | 175 GB     | 44 GB      | 123 GB     |          36 |                               1.3
+ web_hook_logs_202101       | 169 GB     | 112 GB     | 7231 MB    |           3 |                               1.3
+ web_hook_logs_202102       | 167 GB     | 111 GB     | 7106 MB    |           3 |                               1.3
+ sent_notifications         | 166 GB     | 87 GB      | 78 GB      |           3 |                               1.3
+ web_hook_logs_202011       | 163 GB     | 113 GB     | 7125 MB    |           3 |                               1.3
+ push_event_payloads        | 162 GB     | 114 GB     | 47 GB      |           1 |                               1.2
+ web_hook_logs_202012       | 159 GB     | 106 GB     | 6771 MB    |           3 |                               1.2
+ deployments                | 153 GB     | 30 GB      | 123 GB     |          24 |                               1.2
+ web_hook_logs_202010       | 136 GB     | 98 GB      | 6116 MB    |           3 |                               1.0
+ web_hook_logs_202106       | 135 GB     | 88 GB      | 5913 MB    |           3 |                               1.0
+ web_hook_logs_202009       | 114 GB     | 82 GB      | 5168 MB    |           3 |                               0.9
+ security_findings          | 103 GB     | 20 GB      | 82 GB      |           8 |                               0.8
+ web_hook_logs_202008       | 92 GB      | 66 GB      | 3983 MB    |           3 |                               0.7
+ resource_label_events      | 65 GB      | 46 GB      | 19 GB      |           6 |                               0.5
+ merge_request_diffs        | 62 GB      | 38 GB      | 22 GB      |           5 |                               0.5
+```
+
+## Target: All physical tables on GitLab.com are < 100 GB including indexes
+
+In order to maintain and improve operational stability and lessen development burden, we target a **table size less than 100 GB for a physical table on GitLab.com** (including its indexes). This has numerous benefits:
+
+1. Improved query performance and more stable query plans
+1. Significantly reduce vacuum run times and increase frequency of vacuum runs to maintain a healthy state - reducing overhead on the database primary
+1. Index creation times are significantly faster (significantly less data to read per index)
+1. Indexes are smaller, can be maintained more efficiently and fit better into memory
+1. Data migrations are easier to reason about, take less time to implement and execute
+
+Note that this target is *pragmatic*: We understand table sizes depend on feature usage, code changes and other factors - which all change over time. We may not always find solutions where we can tightly limit the size of physical tables once and for all. That is acceptable though and we primarily aim to keep the situation on GitLab.com under control. We adapt our efforts to the situation present on GitLab.com and will re-evaluate frequently.
+
+In PostgreSQL context, a **physical table** is either a regular table or a partition of a partitioned table.
+
+## Solutions
+
+There is no standard solution to reduce table sizes - there are many!
+
+1. **Normalization**: Review relational modeling and apply normalization techniques to remove duplicate data
+1. **Optimise data types**: Review data type decisions and optimise data types where possible (example: use integer instead of text for a enum column)
+1. **Vertical table splits**: Review column usage and split table vertically.
+1. **Partitioning**: Apply a partitioning scheme if there is a common access dimension.
+1. **Retention**: Delete unnecessary data, for example expire old and unneeded records.
+1. **Externalize**: Move large data types out of the database entirely. For example, JSON documents, especially when not used for filtering, may be better stored outside the database, e.g. in object storage.
+1. **Remove STI**: We still use [single-table inheritance](https://docs.gitlab.com/ee/development/single_table_inheritance.html) in a few places. Redesigning this, we can split data into multiple tables.
+1. **Index optimization**: Drop unnecessary indexes and consolidate overlapping indexes if possible.
+
+### Example efforts
+
+A few examples can be found below, many more are organized under the epic [Database efficiency](https://gitlab.com/groups/gitlab-org/-/epics/5585).
+
+1. [Reduce number of indexes on `ci_builds`](https://gitlab.com/groups/gitlab-org/-/epics/6203)
+1. [Normalise and de-duplicate committer and author details in merge_request_diff_commits](https://gitlab.com/gitlab-org/gitlab/-/issues/331823)
+1. [Retention strategy for `ci_build_trace_sections`](https://gitlab.com/gitlab-org/gitlab/-/issues/32565#note_603138100)
+1. [Implement worker that hard-deletes old CI jobs metadata](https://gitlab.com/gitlab-org/gitlab/-/issues/215646)
+
+## Goal
+
+The [epic for ~group::database](https://gitlab.com/groups/gitlab-org/-/epics/6211) drives decision making to establish and communicate the target and to identify and propose necessary changes to reach it. Those changes should primarily be driven by the respective stage group owning the data (and the feature using it), with ~group::database to support.
+
+## Who
+
+<!-- vale gitlab.Spelling = NO -->
+
+Identifying solutions for offending tables is driven by the [GitLab Database Team](https://about.gitlab.com/handbook/engineering/development/enablement/database/) and stage groups.
+
+| Role                         | Who
+|------------------------------|-------------------------|
+| Author                       |    Andreas Brandl       |
+| Architecture Evolution Coach |                         |
+| Engineering Leader           |                         |
+| Domain Expert                |                         |
+| Domain Expert                |                         |
+
+DRIs:
+
+| Role                         | Who
+|------------------------------|------------------------|
+| Product                      |                        |
+| Leadership                   |                        |
+| Engineering                  |                        |
+
+<!-- vale gitlab.Spelling = YES -->
