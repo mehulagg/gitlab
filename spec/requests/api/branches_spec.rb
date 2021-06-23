@@ -74,6 +74,26 @@ RSpec.describe API::Branches do
 
             check_merge_status(json_response)
           end
+
+          it 'sets pagination headers' do
+            2.times do
+              get api(route, current_user), params: base_params.merge(per_page: 100)
+              expect(response.headers).to include('X-Page')
+            end
+          end
+
+          context 'when api_caching_rate_limit_branches is disabled' do
+            before do
+              stub_feature_flags(api_caching_rate_limit_branches: false)
+            end
+
+            it 'sets pagination headers' do
+              2.times do
+                get api(route, current_user), params: base_params.merge(per_page: 100)
+                expect(response.headers).to include('X-Page')
+              end
+            end
+          end
         end
 
         context 'with gitaly pagination params' do
