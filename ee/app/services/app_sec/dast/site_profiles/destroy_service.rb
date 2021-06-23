@@ -14,6 +14,8 @@ module AppSec
           return ServiceResponse.error(message: _('Cannot delete %{profile_name} referenced in security policy') % { profile_name: dast_site_profile.name }) if referenced_in_security_policy?(dast_site_profile)
 
           if dast_site_profile.destroy
+            create_audit_event(dast_site_profile)
+
             ServiceResponse.success(payload: dast_site_profile)
           else
             ServiceResponse.error(message: _('Site profile failed to delete'))
@@ -36,6 +38,16 @@ module AppSec
 
         def find_dast_site_profile(id)
           project.dast_site_profiles.id_in(id).first
+        end
+
+        def create_audit_event(profile)
+          ::Gitlab::Audit::Auditor.audit(
+            name: 'dast_site_profile_destroy',
+            author: current_user,
+            scope: project,
+            target: profile,
+            message: 'Removed DAST site profile'
+          )
         end
       end
     end

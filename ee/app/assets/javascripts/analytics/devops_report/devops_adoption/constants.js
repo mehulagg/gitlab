@@ -6,8 +6,6 @@ export const PER_PAGE = 20;
 
 export const DEBOUNCE_DELAY = 500;
 
-export const DEVOPS_ADOPTION_SEGMENT_MODAL_ID = 'devopsSegmentModal';
-
 export const DEVOPS_ADOPTION_SEGMENT_DELETE_MODAL_ID = 'devopsSegmentDeleteModal';
 
 export const DATE_TIME_FORMAT = 'yyyy-mm-dd HH:MM';

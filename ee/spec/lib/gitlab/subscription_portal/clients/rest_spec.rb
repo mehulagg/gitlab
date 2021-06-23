@@ -124,4 +124,17 @@ RSpec.describe Gitlab::SubscriptionPortal::Clients::Rest do
     it_behaves_like 'when response code is 500'
     it_behaves_like 'when http call raises an exception'
   end
+
+  describe '#customers_oauth_app_id' do
+    subject do
+      client.customers_oauth_app_id
+    end
+
+    let(:http_method) { :get }
+
+    it_behaves_like 'when response is successful'
+    it_behaves_like 'when response code is 422'
+    it_behaves_like 'when response code is 500'
+    it_behaves_like 'when http call raises an exception'
+  end
 end

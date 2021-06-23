@@ -63,7 +63,7 @@ export default {
 <template>
   <section class="row">
     <div class="col-md-6 gl-mb-5">
-      <gl-card data-testid="users-in-subscription">
+      <gl-card class="gl-h-full" data-testid="users-in-subscription">
         <header>
           <h2 data-qa-selector="users_in_subscription">{{ usersInSubscription }}</h2>
           <h5 class="gl-font-weight-normal text-uppercase">
@@ -77,7 +77,7 @@ export default {
     </div>
 
     <div class="col-md-6 gl-mb-5">
-      <gl-card data-testid="billable-users">
+      <gl-card class="gl-h-full" data-testid="billable-users">
         <header>
           <h2 data-qa-selector="billable_users">{{ billableUsers }}</h2>
           <h5 class="gl-font-weight-normal text-uppercase">
@@ -97,7 +97,7 @@ export default {
     </div>
 
     <div class="col-md-6 gl-mb-5">
-      <gl-card data-testid="maximum-users">
+      <gl-card class="gl-h-full" data-testid="maximum-users">
         <header>
           <h2 data-qa-selector="maximum_users">{{ maximumUsers }}</h2>
           <h5 class="gl-font-weight-normal text-uppercase">
@@ -111,7 +111,7 @@ export default {
     </div>
 
     <div class="col-md-6 gl-mb-5">
-      <gl-card data-testid="users-over-license">
+      <gl-card class="gl-h-full" data-testid="users-over-license">
         <header>
           <h2 data-qa-selector="users_over_subscription">{{ usersOverSubscription }}</h2>
           <h5 class="gl-font-weight-normal text-uppercase">

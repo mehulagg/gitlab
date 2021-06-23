@@ -6,7 +6,7 @@ RSpec.describe Integrations::JiraSerializers::IssueEntity do
   include JiraServiceHelper
 
   let_it_be(:project) { create(:project) }
-  let_it_be(:jira_service) { create(:jira_service, project: project, url: 'http://jira.com', api_url: 'http://api.jira.com') }
+  let_it_be(:jira_integration) { create(:jira_integration, project: project, url: 'http://jira.com', api_url: 'http://api.jira.com') }
 
   let(:reporter) do
     {
@@ -93,8 +93,8 @@ RSpec.describe Integrations::JiraSerializers::IssueEntity do
 
     context 'with only url' do
       before do
-        stub_jira_service_test
-        jira_service.update!(api_url: nil)
+        stub_jira_integration_test
+        jira_integration.update!(api_url: nil)
       end
 
       it 'returns URLs with the web url' do

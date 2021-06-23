@@ -33,7 +33,7 @@ module SystemCheck
       private
 
       def check_gitlab_geo_node(node)
-        response = Gitlab::HTTP.get(node.internal_uri, allow_local_requests: true)
+        response = Gitlab::HTTP.get(node.internal_uri, allow_local_requests: true, limit: 10)
 
         if response.code_type == Net::HTTPOK
           $stdout.puts 'yes'.color(:green)

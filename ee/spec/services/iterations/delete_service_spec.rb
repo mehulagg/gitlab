@@ -17,7 +17,7 @@ RSpec.describe Iterations::DeleteService do
   let_it_be(:past_issue, refind: true) { create(:issue, namespace: group, iteration: past_iteration) }
   let_it_be(:past_merge_request, refind: true) { create(:merge_request, source_project: project, iteration: past_iteration) }
 
-  let_it_be(:current_iteration, refind: true) { create(:started_iteration, iterations_cadence: iteration_cadence1, group: group, start_date: start_date + 14.days, due_date: start_date + 27.days) }
+  let_it_be(:current_iteration, refind: true) { create(:current_iteration, iterations_cadence: iteration_cadence1, group: group, start_date: start_date + 14.days, due_date: start_date + 27.days) }
 
   let_it_be(:future_iteration, refind: true) { create(:upcoming_iteration, iterations_cadence: iteration_cadence1, group: group, start_date: start_date + 28.days, due_date: start_date + 41.days) }
 
@@ -26,7 +26,7 @@ RSpec.describe Iterations::DeleteService do
   let_it_be(:last_future_issue, refind: true) { create(:issue, namespace: group, iteration: last_future_iteration) }
   let_it_be(:last_future_merge_request, refind: true) { create(:merge_request, source_branch: 'another-feature', source_project: project, iteration: last_future_iteration) }
 
-  let_it_be(:other_cadence_iteration, refind: true) { create(:started_iteration, iterations_cadence: iteration_cadence2, group: group, start_date: start_date + 14.days, due_date: start_date + 27.days) }
+  let_it_be(:other_cadence_iteration, refind: true) { create(:current_iteration, iterations_cadence: iteration_cadence2, group: group, start_date: start_date + 14.days, due_date: start_date + 27.days) }
   let_it_be(:other_cadence_board, refind: true) { create(:board, iteration: other_cadence_iteration, group: group) }
   let_it_be(:other_cadence_issue, refind: true) { create(:issue, namespace: group, iteration: other_cadence_iteration) }
   let_it_be(:other_cadence_merge_request, refind: true) { create(:merge_request, source_branch: 'another-feature2', source_project: project, iteration: other_cadence_iteration) }

@@ -10,7 +10,6 @@ RSpec.describe 'User is able to invite members to group during signup', :js, :ex
 
   before do
     allow(Gitlab).to receive(:dev_env_or_com?).and_return(true)
-    stub_experiments(registrations_group_invite: :invite_page)
     sign_in(user)
   end
 

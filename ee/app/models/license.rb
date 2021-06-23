@@ -141,7 +141,7 @@ class License < ApplicationRecord
     api_fuzzing
     auto_rollback
     cilium_alerts
-    compliance_approval_gates
+    external_status_checks
     container_scanning
     coverage_fuzzing
     credentials_inventory
@@ -256,6 +256,7 @@ class License < ApplicationRecord
   after_commit :reset_future_dated, on: [:create, :destroy]
   after_commit :reset_previous, on: [:create, :destroy]
 
+  scope :cloud, -> { where(cloud: true) }
   scope :recent, -> { reorder(id: :desc) }
   scope :last_hundred, -> { recent.limit(100) }
 

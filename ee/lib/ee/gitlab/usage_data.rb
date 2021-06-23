@@ -231,8 +231,8 @@ module EE
         override :usage_activity_by_stage_configure
         def usage_activity_by_stage_configure(time_period)
           super.merge({
-            projects_slack_notifications_active: distinct_count(::Project.with_slack_service.where(time_period), :creator_id),
-            projects_slack_slash_active: distinct_count(::Project.with_slack_slash_commands_service.where(time_period), :creator_id)
+            projects_slack_notifications_active: distinct_count(::Project.with_slack_integration.where(time_period), :creator_id),
+            projects_slack_slash_active: distinct_count(::Project.with_slack_slash_commands_integration.where(time_period), :creator_id)
           })
         end
 
@@ -348,7 +348,7 @@ module EE
         override :usage_activity_by_stage_verify
         def usage_activity_by_stage_verify(time_period)
           super.merge({
-            projects_reporting_ci_cd_back_to_github: distinct_count(::Project.with_github_service_pipeline_events.where(time_period), :creator_id)
+            projects_reporting_ci_cd_back_to_github: distinct_count(::Project.with_github_integration_pipeline_events.where(time_period), :creator_id)
           })
         end
 

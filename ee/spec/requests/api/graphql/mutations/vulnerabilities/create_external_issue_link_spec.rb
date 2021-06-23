@@ -63,7 +63,7 @@ RSpec.describe 'Creating an External Issue Link' do
       end
 
       context 'when jira is configured' do
-        let!(:jira_service) { create(:jira_service, project: vulnerability.project, vulnerabilities_enabled: true, project_key: 'GV', vulnerabilities_issuetype: '10000') }
+        let!(:jira_integration) { create(:jira_integration, project: vulnerability.project, vulnerabilities_enabled: true, project_key: 'GV', vulnerabilities_issuetype: '10000') }
 
         context 'when issue creation succeeds' do
           before do

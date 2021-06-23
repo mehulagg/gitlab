@@ -54,7 +54,7 @@ RSpec.describe Project do
     it { is_expected.to have_many(:vulnerability_historical_statistics).class_name('Vulnerabilities::HistoricalStatistic') }
     it { is_expected.to have_many(:vulnerability_remediations).class_name('Vulnerabilities::Remediation') }
 
-    it { is_expected.to have_one(:github_service) }
+    it { is_expected.to have_one(:github_integration) }
     it { is_expected.to have_many(:project_aliases) }
     it { is_expected.to have_many(:approval_rules) }
 
@@ -63,19 +63,19 @@ RSpec.describe Project do
     it { is_expected.to have_many(:incident_management_escalation_policies).class_name('IncidentManagement::EscalationPolicy') }
 
     describe '#jira_vulnerabilities_integration_enabled?' do
-      context 'when project lacks a jira_service relation' do
+      context 'when project lacks a jira_integration relation' do
         it 'returns false' do
           expect(project.jira_vulnerabilities_integration_enabled?).to be false
         end
       end
 
-      context 'when project has a jira_service relation' do
+      context 'when project has a jira_integration relation' do
         before do
-          create(:jira_service, project: project)
+          create(:jira_integration, project: project)
         end
 
-        it 'accesses the value from the jira_service' do
-          expect(project.jira_service)
+        it 'accesses the value from the jira_integration' do
+          expect(project.jira_integration)
             .to receive(:jira_vulnerabilities_integration_enabled?)
 
           project.jira_vulnerabilities_integration_enabled?
@@ -84,19 +84,19 @@ RSpec.describe Project do
     end
 
     describe '#configured_to_create_issues_from_vulnerabilities?' do
-      context 'when project lacks a jira_service relation' do
+      context 'when project lacks a jira_integration relation' do
         it 'returns false' do
           expect(project.configured_to_create_issues_from_vulnerabilities?).to be false
         end
       end
 
-      context 'when project has a jira_service relation' do
+      context 'when project has a jira_integration relation' do
         before do
-          create(:jira_service, project: project)
+          create(:jira_integration, project: project)
         end
 
-        it 'accesses the value from the jira_service' do
-          expect(project.jira_service)
+        it 'accesses the value from the jira_integration' do
+          expect(project.jira_integration)
             .to receive(:configured_to_create_issues_from_vulnerabilities?)
 
           project.configured_to_create_issues_from_vulnerabilities?
@@ -105,38 +105,28 @@ RSpec.describe Project do
     end
 
     describe '#jira_issue_association_required_to_merge_enabled?' do
-      where(:jira_integration_licensed, :jira_integration_active, :jira_enforcement_licensed, :feature_flag, :result) do
-        true  | true  | true  | true  | true
-        true  | true  | true  | false | false
-        true  | true  | false | true  | false
-        true  | true  | false | false | false
-        true  | false | true  | true  | false
-        true  | false | true  | false | false
-        true  | false | false | true  | false
-        true  | false | false | false | false
-        false | true  | true  | true  | false
-        false | true  | true  | false | false
-        false | true  | false | true  | false
-        false | true  | false | false | false
-        false | false | true  | true  | false
-        false | false | true  | false | false
-        false | false | false | true  | false
-        false | false | false | false | false
-      end
-
       before do
         stub_licensed_features(
           jira_issues_integration: jira_integration_licensed,
           jira_issue_association_enforcement: jira_enforcement_licensed
         )
 
-        project.build_jira_service(active: jira_integration_active)
+        project.build_jira_integration(active: jira_integration_active)
         stub_feature_flags(jira_issue_association_on_merge_request: feature_flag)
       end
 
+      where(
+        jira_integration_licensed: [true, false],
+        jira_integration_active: [true, false],
+        jira_enforcement_licensed: [true, false],
+        feature_flag: [true, false]
+      )
+
       with_them do
-        it 'returns the correct value' do
-          expect(project.jira_issue_association_required_to_merge_enabled?).to eq(result)
+        it 'is enabled if all values are true' do
+          expect(project.jira_issue_association_required_to_merge_enabled?).to be(
+            jira_integration_licensed && jira_integration_active && jira_enforcement_licensed && feature_flag
+          )
         end
       end
     end
@@ -305,23 +295,25 @@ RSpec.describe Project do
       end
     end
 
-    describe '.with_github_service_pipeline_events' do
+    describe '.with_github_integration_pipeline_events' do
       it 'returns the correct project' do
-        project_with_github_service_pipeline_events = create(:project, github_service: create(:github_service))
-        project_without_github_service_pipeline_events = create(:project)
+        project_with_github_integration_pipeline_events = create(:project, github_integration: create(:github_integration))
+        project_without_github_integration_pipeline_events = create(:project)
 
-        expect(described_class.with_github_service_pipeline_events).to include(project_with_github_service_pipeline_events)
-        expect(described_class.with_github_service_pipeline_events).not_to include(project_without_github_service_pipeline_events)
+        expect(described_class.with_github_integration_pipeline_events)
+          .to include(project_with_github_integration_pipeline_events)
+        expect(described_class.with_github_integration_pipeline_events)
+          .not_to include(project_without_github_integration_pipeline_events)
       end
     end
 
-    describe '.with_active_prometheus_service' do
+    describe '.with_active_prometheus_integration' do
       it 'returns the correct project' do
-        project_with_active_prometheus_service = create(:prometheus_project)
-        project_without_active_prometheus_service = create(:project)
+        project_with_active_prometheus_integration = create(:prometheus_project)
+        project_without_active_prometheus_integration = create(:project)
 
-        expect(described_class.with_active_prometheus_service).to include(project_with_active_prometheus_service)
-        expect(described_class.with_active_prometheus_service).not_to include(project_without_active_prometheus_service)
+        expect(described_class.with_active_prometheus_integration).to include(project_with_active_prometheus_integration)
+        expect(described_class.with_active_prometheus_integration).not_to include(project_without_active_prometheus_integration)
       end
     end
 
@@ -1579,7 +1571,7 @@ RSpec.describe Project do
     it 'returns projects where Slack application is disabled' do
       project1 = create(:project)
       project2 = create(:project)
-      create(:gitlab_slack_application_service, project: project2)
+      create(:gitlab_slack_application_integration, project: project2)
 
       projects = described_class.with_slack_application_disabled
 

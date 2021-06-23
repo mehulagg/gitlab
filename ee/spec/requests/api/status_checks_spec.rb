@@ -21,7 +21,7 @@ RSpec.describe API::StatusChecks do
 
   describe 'permissions' do
     before do
-      stub_licensed_features(compliance_approval_gates: true)
+      stub_licensed_features(external_status_checks: true)
     end
 
     it { expect { subject }.to be_allowed_for(:maintainer).of(project) }
@@ -34,7 +34,7 @@ RSpec.describe API::StatusChecks do
 
     context 'feature flag is disabled' do
       before do
-        stub_feature_flags(ff_compliance_approval_gates: false)
+        stub_feature_flags(ff_external_status_checks: false)
       end
 
       it 'returns a not found error' do
@@ -46,11 +46,13 @@ RSpec.describe API::StatusChecks do
 
     context 'when current_user has access' do
       before do
-        stub_licensed_features(compliance_approval_gates: true)
+        stub_licensed_features(external_status_checks: true)
         project.add_user(project_maintainer, :maintainer)
       end
 
       context 'when merge request has received status check responses' do
+        let!(:non_applicable_check) { create(:external_status_check, project: project, protected_branches: [create(:protected_branch, name: 'different-branch')]) }
+        let!(:branch_specific_check) { create(:external_status_check, project: project, protected_branches: [create(:protected_branch, name: merge_request.target_branch)]) }
         let!(:status_check_response) { create(:status_check_response, external_status_check: rule, merge_request: merge_request, sha: sha) }
 
         it 'returns a 200' do
@@ -62,7 +64,7 @@ RSpec.describe API::StatusChecks do
         it 'returns the total number of status checks for the MRs project' do
           subject
 
-          expect(json_response.size).to eq(2)
+          expect(json_response.size).to eq(3)
         end
 
         it 'has the correct status values' do
@@ -70,6 +72,7 @@ RSpec.describe API::StatusChecks do
 
           expect(json_response[0]["status"]).to eq('approved')
           expect(json_response[1]["status"]).to eq('pending')
+          expect(json_response[2]["status"]).to eq('pending')
         end
       end
     end
@@ -80,7 +83,7 @@ RSpec.describe API::StatusChecks do
 
     context 'feature flag is disabled' do
       before do
-        stub_feature_flags(ff_compliance_approval_gates: false)
+        stub_feature_flags(ff_external_status_checks: false)
       end
 
       it 'returns a not found error' do
@@ -92,7 +95,7 @@ RSpec.describe API::StatusChecks do
 
     context 'when user has access' do
       before do
-        stub_licensed_features(compliance_approval_gates: true)
+        stub_licensed_features(external_status_checks: true)
         project.add_user(project_maintainer, :maintainer)
       end
 
@@ -140,7 +143,7 @@ RSpec.describe API::StatusChecks do
 
   describe 'DELETE projects/:id/external_status_checks/:check_id' do
     before do
-      stub_licensed_features(compliance_approval_gates: true)
+      stub_licensed_features(external_status_checks: true)
     end
 
     it 'deletes the specified rule' do
@@ -163,8 +166,8 @@ RSpec.describe API::StatusChecks do
 
       with_them do
         before do
-          stub_feature_flags(ff_compliance_approval_gates: flag)
-          stub_licensed_features(compliance_approval_gates: licensed)
+          stub_feature_flags(ff_external_status_checks: flag)
+          stub_licensed_features(external_status_checks: licensed)
         end
 
         it 'returns the correct status code' do
@@ -179,8 +182,8 @@ RSpec.describe API::StatusChecks do
   describe 'POST projects/:id/external_status_checks' do
     context 'successfully creating new external approval rule' do
       before do
-        stub_feature_flags(ff_compliance_approval_gates: true)
-        stub_licensed_features(compliance_approval_gates: true)
+        stub_feature_flags(ff_external_status_checks: true)
+        stub_licensed_features(external_status_checks: true)
       end
 
       subject do
@@ -239,8 +242,8 @@ RSpec.describe API::StatusChecks do
 
       with_them do
         before do
-          stub_feature_flags(ff_compliance_approval_gates: flag)
-          stub_licensed_features(compliance_approval_gates: licensed)
+          stub_feature_flags(ff_external_status_checks: flag)
+          stub_licensed_features(external_status_checks: licensed)
         end
 
         it 'returns the correct status code' do
@@ -260,7 +263,7 @@ RSpec.describe API::StatusChecks do
     end
 
     before do
-      stub_licensed_features(compliance_approval_gates: true)
+      stub_licensed_features(external_status_checks: true)
     end
 
     it 'responds with expected JSON', :aggregate_failures do
@@ -290,8 +293,8 @@ RSpec.describe API::StatusChecks do
 
       with_them do
         before do
-          stub_feature_flags(ff_compliance_approval_gates: flag)
-          stub_licensed_features(compliance_approval_gates: licensed)
+          stub_feature_flags(ff_external_status_checks: flag)
+          stub_licensed_features(external_status_checks: licensed)
         end
 
         it 'returns the correct status code' do
@@ -308,8 +311,8 @@ RSpec.describe API::StatusChecks do
 
     context 'successfully updating external approval rule' do
       before do
-        stub_feature_flags(ff_compliance_approval_gates: true)
-        stub_licensed_features(compliance_approval_gates: true)
+        stub_feature_flags(ff_external_status_checks: true)
+        stub_licensed_features(external_status_checks: true)
       end
 
       subject do
@@ -372,8 +375,8 @@ RSpec.describe API::StatusChecks do
 
       with_them do
         before do
-          stub_feature_flags(ff_compliance_approval_gates: flag)
-          stub_licensed_features(compliance_approval_gates: licensed)
+          stub_feature_flags(ff_external_status_checks: flag)
+          stub_licensed_features(external_status_checks: licensed)
         end
 
         it 'returns the correct status code' do

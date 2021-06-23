@@ -29,7 +29,7 @@ const routes = [
   },
 ];
 
-export default function createRouter(base) {
+export default function createRouter({ base }) {
   const router = new VueRouter({
     base,
     mode: 'history',

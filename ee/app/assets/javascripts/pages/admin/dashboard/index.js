@@ -1,3 +1,3 @@
-import { initQrtlyReconciliationAlert } from 'ee/billings/qrtly_reconciliation/init_qrtly_reconciliation_alert';
+import { shouldQrtlyReconciliationMount } from 'ee/billings/qrtly_reconciliation';
 
-initQrtlyReconciliationAlert();
+shouldQrtlyReconciliationMount();

@@ -18,7 +18,6 @@ describe('EpicsSelect', () => {
     const storeStandalone = createDefaultStore();
 
     beforeEach(() => {
-      setFixtures('<div class="flash-container"></div>');
       const props = {
         canEdit: true,
         initialEpic: mockEpic1,

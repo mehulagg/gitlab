@@ -38,6 +38,9 @@ export default {
     isGroup: {
       default: false,
     },
+    groupGid: {
+      default: null,
+    },
   },
   props: {
     groups: {

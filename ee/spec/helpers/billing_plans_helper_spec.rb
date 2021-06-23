@@ -3,6 +3,8 @@
 require 'spec_helper'
 
 RSpec.describe BillingPlansHelper do
+  include Devise::Test::ControllerHelpers
+
   describe '#subscription_plan_data_attributes' do
     let(:customer_portal_url) { "#{EE::SUBSCRIPTIONS_URL}/subscriptions" }
 
@@ -356,8 +358,33 @@ RSpec.describe BillingPlansHelper do
       group = double('Group', upgradable?: false)
 
       expect(helper).to receive(:plan_purchase_url)
-
       helper.plan_purchase_or_upgrade_url(group, plan)
+    end
+  end
+
+  describe "#plan_purchase_url" do
+    let_it_be(:group) { create(:group) }
+    let_it_be(:user) { create(:user) }
+
+    let(:plan) { double('Plan', id: '123456789', purchase_link: double('PurchaseLink', href: '987654321')) }
+
+    before do
+      allow(helper).to receive(:current_user).and_return(user)
+    end
+
+    it 'builds correct url with some source' do
+      allow(helper).to receive(:use_new_purchase_flow?).and_return(true)
+      allow(helper).to receive(:params).and_return({ source: 'some_source' })
+
+      expect(helper).to receive(:new_subscriptions_path).with(plan_id: plan.id, namespace_id: group.id, source: 'some_source')
+
+      helper.plan_purchase_url(group, plan)
+    end
+
+    it 'builds correct url for the old purchase flow' do
+      allow(helper).to receive(:use_new_purchase_flow?).and_return(false)
+
+      expect(helper.plan_purchase_url(group, plan)).to eq("#{plan.purchase_link.href}&gl_namespace_id=#{group.id}")
     end
   end
 

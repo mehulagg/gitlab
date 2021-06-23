@@ -4,15 +4,15 @@ require 'spec_helper'
 
 RSpec.describe IterationsUpdateStatusWorker do
   let_it_be(:closed_iteration1, reload: true) { create(:iteration, :skip_future_date_validation, start_date: 20.days.ago, due_date: 11.days.ago) }
-  let_it_be(:started_iteration1, reload: true) { create(:iteration, :skip_future_date_validation, start_date: 10.days.ago, due_date: 3.days.ago) }
-  let_it_be(:started_iteration2) { create(:iteration, :skip_future_date_validation, start_date: 2.days.ago, due_date: 5.days.from_now) }
+  let_it_be(:current_iteration1, reload: true) { create(:iteration, :skip_future_date_validation, start_date: 10.days.ago, due_date: 3.days.ago) }
+  let_it_be(:current_iteration2) { create(:iteration, :skip_future_date_validation, start_date: 2.days.ago, due_date: 5.days.from_now) }
   let_it_be(:upcoming_iteration) { create(:iteration, start_date: 11.days.from_now, due_date: 13.days.from_now) }
 
   subject(:worker) { described_class.new }
 
   describe '#perform' do
     before do
-      started_iteration1.update_column(:state_enum, 2)
+      current_iteration1.update_column(:state_enum, 2)
       closed_iteration1.update_column(:state_enum, 1)
     end
 
@@ -22,18 +22,18 @@ RSpec.describe IterationsUpdateStatusWorker do
       worker.perform
     end
 
-    context 'when iterations with passed due dates are in `upcoming`, `started` or `closes` states' do
+    context 'when iterations with passed due dates are in `upcoming`, `current` or `closes` states' do
       it 'updates the status of iterations that require it', :aggregate_failures do
         expect(closed_iteration1.state).to eq('upcoming')
-        expect(started_iteration1.state).to eq('started')
-        expect(started_iteration2.state).to eq('started')
+        expect(current_iteration1.state).to eq('current')
+        expect(current_iteration2.state).to eq('current')
         expect(upcoming_iteration.state).to eq('upcoming')
 
         worker.perform
 
         expect(closed_iteration1.reload.state).to eq('closed')
-        expect(started_iteration1.reload.state).to eq('closed')
-        expect(started_iteration2.reload.state).to eq('started')
+        expect(current_iteration1.reload.state).to eq('closed')
+        expect(current_iteration2.reload.state).to eq('current')
         expect(upcoming_iteration.reload.state).to eq('upcoming')
       end
 

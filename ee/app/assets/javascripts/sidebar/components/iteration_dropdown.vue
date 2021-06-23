@@ -108,24 +108,38 @@ export default {
 </script>
 
 <template>
-  <div data-qa-selector="iteration_container">
-    <gl-dropdown :text="title" class="gl-w-full" @show="onDropdownShow">
-      <gl-dropdown-section-header class="gl-display-flex! gl-justify-content-center">{{
-        __('Assign Iteration')
-      }}</gl-dropdown-section-header>
-      <gl-search-box-by-type v-model="searchTerm" />
+  <gl-dropdown :text="title" class="gl-w-full" @show="onDropdownShow">
+    <gl-dropdown-section-header class="gl-display-flex! gl-justify-content-center">{{
+      __('Assign Iteration')
+    }}</gl-dropdown-section-header>
+    <gl-search-box-by-type v-model="searchTerm" />
+    <gl-dropdown-item
+      :is-check-item="true"
+      :is-checked="isIterationChecked($options.noIteration.id)"
+      @click="onClick($options.noIteration)"
+    >
+      {{ $options.noIteration.title }}
+    </gl-dropdown-item>
+    <gl-dropdown-divider />
+    <gl-loading-icon v-if="$apollo.queries.iterations.loading" />
+    <template v-else-if="!glFeatures.iterationCadences">
       <gl-dropdown-item
+        v-for="iterationItem in iterations"
+        :key="iterationItem.id"
         :is-check-item="true"
-        :is-checked="isIterationChecked($options.noIteration.id)"
-        @click="onClick($options.noIteration)"
+        :is-checked="isIterationChecked(iterationItem.id)"
+        @click="onClick(iterationItem)"
+        >{{ iterationItem.title }}</gl-dropdown-item
       >
-        {{ $options.noIteration.title }}
-      </gl-dropdown-item>
-      <gl-dropdown-divider />
-      <gl-loading-icon v-if="$apollo.queries.iterations.loading" />
-      <template v-else-if="!glFeatures.iterationCadences">
+    </template>
+    <template v-else>
+      <template v-for="(cadence, index) in iterationCadences">
+        <gl-dropdown-divider v-if="index !== 0" :key="index" />
+        <gl-dropdown-section-header :key="cadence.title">
+          {{ cadence.title }}
+        </gl-dropdown-section-header>
         <gl-dropdown-item
-          v-for="iterationItem in iterations"
+          v-for="iterationItem in cadence.iterations"
           :key="iterationItem.id"
           :is-check-item="true"
           :is-checked="isIterationChecked(iterationItem.id)"
@@ -133,22 +147,6 @@ export default {
           >{{ iterationItem.title }}</gl-dropdown-item
         >
       </template>
-      <template v-else>
-        <template v-for="(cadence, index) in iterationCadences">
-          <gl-dropdown-divider v-if="index !== 0" :key="index" />
-          <gl-dropdown-section-header :key="cadence.title">
-            {{ cadence.title }}
-          </gl-dropdown-section-header>
-          <gl-dropdown-item
-            v-for="iterationItem in cadence.iterations"
-            :key="iterationItem.id"
-            :is-check-item="true"
-            :is-checked="isIterationChecked(iterationItem.id)"
-            @click="onClick(iterationItem)"
-            >{{ iterationItem.title }}</gl-dropdown-item
-          >
-        </template>
-      </template>
-    </gl-dropdown>
-  </div>
+    </template>
+  </gl-dropdown>
 </template>

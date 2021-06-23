@@ -17,6 +17,7 @@ import { toYmd } from 'ee/analytics/shared/utils';
 import waitForPromises from 'helpers/wait_for_promises';
 import PathNavigation from '~/cycle_analytics/components/path_navigation.vue';
 import { OVERVIEW_STAGE_ID } from '~/cycle_analytics/constants';
+import createFlash from '~/flash';
 import { getIdFromGraphQLId } from '~/graphql_shared/utils';
 import * as commonUtils from '~/lib/utils/common_utils';
 import { convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
@@ -33,6 +34,7 @@ const stage = null;
 
 const localVue = createLocalVue();
 localVue.use(Vuex);
+jest.mock('~/flash');
 
 const defaultStubs = {
   'stage-event-list': true,
@@ -364,8 +366,6 @@ describe('EE Value Stream Analytics component', () => {
 
   describe('with failed requests while loading', () => {
     beforeEach(async () => {
-      setFixtures('<div class="flash-container"></div>');
-
       mock = new MockAdapter(axios);
       mockRequiredRoutes(mock);
       wrapper = await createComponent();
@@ -377,25 +377,21 @@ describe('EE Value Stream Analytics component', () => {
       wrapper = null;
     });
 
-    const findFlashError = () => document.querySelector('.flash-container .flash-text');
-    const findError = async (msg) => {
-      await waitForPromises();
-      expect(findFlashError().innerText.trim()).toEqual(msg);
-    };
-
     it('will display an error if the fetchGroupStagesAndEvents request fails', async () => {
-      expect(await findFlashError()).toBeNull();
+      expect(createFlash).not.toHaveBeenCalled();
 
       mock
         .onGet(mockData.endpoints.baseStagesEndpoint)
         .reply(httpStatusCodes.NOT_FOUND, { response: { status: httpStatusCodes.NOT_FOUND } });
       wrapper = await createComponent();
 
-      await findError('There was an error fetching value stream analytics stages.');
+      expect(createFlash).toHaveBeenCalledWith({
+        message: 'There was an error fetching value stream analytics stages.',
+      });
     });
 
     it('will display an error if the fetchStageData request fails', async () => {
-      expect(await findFlashError()).toBeNull();
+      expect(createFlash).not.toHaveBeenCalled();
 
       mock
         .onGet(mockData.endpoints.stageData)
@@ -403,33 +399,41 @@ describe('EE Value Stream Analytics component', () => {
 
       await createComponent({ selectedStage: mockData.issueStage });
 
-      await findError('There was an error fetching data for the selected stage');
+      expect(createFlash).toHaveBeenCalledWith({
+        message: 'There was an error fetching data for the selected stage',
+      });
     });
 
     it('will display an error if the fetchTopRankedGroupLabels request fails', async () => {
-      expect(await findFlashError()).toBeNull();
+      expect(createFlash).not.toHaveBeenCalled();
 
       mock
         .onGet(mockData.endpoints.tasksByTypeTopLabelsData)
         .reply(httpStatusCodes.NOT_FOUND, { response: { status: httpStatusCodes.NOT_FOUND } });
       await createComponent();
+      await waitForPromises();
 
-      await findError('There was an error fetching the top labels for the selected group');
+      expect(createFlash).toHaveBeenCalledWith({
+        message: 'There was an error fetching the top labels for the selected group',
+      });
     });
 
     it('will display an error if the fetchTasksByTypeData request fails', async () => {
-      expect(await findFlashError()).toBeNull();
+      expect(createFlash).not.toHaveBeenCalled();
 
       mock
         .onGet(mockData.endpoints.tasksByTypeData)
         .reply(httpStatusCodes.NOT_FOUND, { response: { status: httpStatusCodes.NOT_FOUND } });
       await createComponent();
+      await waitForPromises();
 
-      await findError('There was an error fetching data for the tasks by type chart');
+      expect(createFlash).toHaveBeenCalledWith({
+        message: 'There was an error fetching data for the tasks by type chart',
+      });
     });
 
     it('will display an error if the fetchStageMedian request fails', async () => {
-      expect(await findFlashError()).toBeNull();
+      expect(createFlash).not.toHaveBeenCalled();
 
       mock
         .onGet(mockData.endpoints.stageMedian)
@@ -437,9 +441,9 @@ describe('EE Value Stream Analytics component', () => {
       await createComponent();
 
       await waitForPromises();
-      expect(await findFlashError().innerText.trim()).toEqual(
-        'There was an error fetching median data for stages',
-      );
+      expect(createFlash).toHaveBeenCalledWith({
+        message: 'There was an error fetching median data for stages',
+      });
     });
   });
 

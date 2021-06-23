@@ -2,7 +2,7 @@
 import { GlButton, GlModalDirective } from '@gitlab/ui';
 import axios from '~/lib/utils/axios_utils';
 import {
-  enterActivationCode,
+  activateCloudLicense,
   licensedToHeaderText,
   manageSubscriptionButtonText,
   subscriptionSyncStatus,
@@ -24,7 +24,7 @@ export const modalId = 'subscription-activation-modal';
 
 export default {
   i18n: {
-    enterActivationCode,
+    activateCloudLicense,
     licensedToHeaderText,
     manageSubscriptionButtonText,
     removeLicense,
@@ -69,6 +69,9 @@ export default {
     };
   },
   computed: {
+    canActivateSubscription() {
+      return this.isLicenseFileType;
+    },
     canManageSubscription() {
       return this.customersPortalUrl && this.hasSubscription;
     },
@@ -95,6 +98,7 @@ export default {
     },
     shouldShowFooter() {
       return (
+        this.canActivateSubscription ||
         this.canRemoveLicense ||
         this.canManageSubscription ||
         this.canSyncSubscription ||
@@ -144,6 +148,7 @@ export default {
     <section class="row gl-mb-5">
       <div class="col-md-6 gl-mb-5">
         <subscription-details-card
+          class="gl-h-full"
           :details-fields="subscriptionDetailsFields"
           :header-text="$options.i18n.subscriptionDetailsHeaderText"
           :subscription="subscription"
@@ -161,13 +166,13 @@ export default {
               {{ $options.i18n.syncSubscriptionButtonText }}
             </gl-button>
             <gl-button
-              v-if="hasSubscription"
+              v-if="canActivateSubscription"
               v-gl-modal="$options.modal.id"
               category="primary"
               variant="confirm"
-              data-testid="subscription-activation-action"
+              data-testid="subscription-activate-subscription-action"
             >
-              {{ $options.i18n.enterActivationCode }}
+              {{ $options.i18n.activateCloudLicense }}
             </gl-button>
             <gl-button
               v-if="canUploadLicense"
@@ -207,6 +212,7 @@ export default {
 
       <div class="col-md-6 gl-mb-5">
         <subscription-details-card
+          class="gl-h-full"
           :details-fields="licensedToFields"
           :header-text="$options.i18n.licensedToHeaderText"
           :subscription="subscription"

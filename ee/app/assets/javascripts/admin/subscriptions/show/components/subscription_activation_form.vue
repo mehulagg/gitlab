@@ -23,7 +23,7 @@ export const SUBSCRIPTION_ACTIVATION_FAILURE_EVENT = 'subscription-activation-fa
 export const SUBSCRIPTION_ACTIVATION_SUCCESS_EVENT = 'subscription-activation-success';
 
 export default {
-  name: 'CloudLicenseSubscriptionActivationForm',
+  name: 'SubscriptionActivationForm',
   components: {
     GlButton,
     GlForm,
@@ -64,6 +64,7 @@ export default {
         terms: {
           required: true,
           state: null,
+          value: null,
         },
       },
     };
@@ -73,12 +74,6 @@ export default {
     };
   },
   computed: {
-    isCheckboxValid() {
-      if (this.form.showValidation) {
-        return this.form.fields.terms.state ? null : false;
-      }
-      return null;
-    },
     isRequestingActivation() {
       return this.isLoading;
     },
@@ -149,22 +144,26 @@ export default {
 
       <gl-form-group
         class="gl-mb-0"
-        :state="isCheckboxValid"
         :invalid-feedback="$options.i18n.fieldRequiredMessage"
         data-testid="form-group-terms"
       >
         <gl-form-checkbox
           id="subscription-form-terms-check"
-          v-model="form.fields.terms.state"
-          :state="isCheckboxValid"
+          v-model="form.fields.terms.value"
+          v-validation:[form.showValidation]
+          :state="form.fields.terms.state"
+          name="terms"
+          required
         >
-          <gl-sprintf :message="$options.i18n.acceptTerms">
-            <template #link="{ content }">
-              <gl-link href="https://about.gitlab.com/terms/" target="_blank">{{
-                content
-              }}</gl-link>
-            </template>
-          </gl-sprintf>
+          <span class="gl-text-gray-900!">
+            <gl-sprintf :message="$options.i18n.acceptTerms">
+              <template #link="{ content }">
+                <gl-link href="https://about.gitlab.com/terms/" target="_blank">{{
+                  content
+                }}</gl-link>
+              </template>
+            </gl-sprintf>
+          </span>
         </gl-form-checkbox>
       </gl-form-group>
 

@@ -663,10 +663,6 @@ describe('RelatedItemTree', () => {
       });
 
       describe('receiveRemoveItemFailure', () => {
-        beforeEach(() => {
-          setFixtures('<div class="flash-container"></div>');
-        });
-
         it('should set `state.childrenFlags[ref].itemRemoveInProgress` to false', () => {
           testAction(
             actions.receiveRemoveItemFailure,

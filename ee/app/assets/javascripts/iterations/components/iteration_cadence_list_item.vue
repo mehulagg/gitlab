@@ -7,6 +7,7 @@ import {
   GlDropdownItem,
   GlIcon,
   GlInfiniteScroll,
+  GlModal,
   GlSkeletonLoader,
 } from '@gitlab/ui';
 import { getIdFromGraphQLId } from '~/graphql_shared/utils';
@@ -18,6 +19,14 @@ const pageSize = 20;
 const i18n = Object.freeze({
   noResults: s__('Iterations|No iterations in cadence.'),
   error: __('Error loading iterations'),
+
+  deleteCadence: s__('Iterations|Delete cadence'),
+  modalTitle: s__('Iterations|Delete iteration cadence?'),
+  modalText: s__(
+    'Iterations|This will delete the cadence as well as all of the iterations within it.',
+  ),
+  modalConfirm: s__('Iterations|Delete cadence'),
+  modalCancel: __('Cancel'),
 });
 
 export default {
@@ -30,6 +39,7 @@ export default {
     GlDropdownItem,
     GlIcon,
     GlInfiniteScroll,
+    GlModal,
     GlSkeletonLoader,
   },
   apollo: {
@@ -154,6 +164,12 @@ export default {
         },
       };
     },
+    showModal() {
+      this.$refs.modal.show();
+    },
+    focusMenu() {
+      this.$refs.menu.$el.focus();
+    },
   },
 };
 </script>
@@ -181,17 +197,31 @@ export default {
       >
       <gl-dropdown
         v-if="canEditCadence"
+        ref="menu"
         icon="ellipsis_v"
         category="tertiary"
         right
-        lazy
         text-sr-only
         no-caret
       >
         <gl-dropdown-item :to="editCadence">
           {{ s__('Iterations|Edit cadence') }}
         </gl-dropdown-item>
+        <gl-dropdown-item data-testid="delete-cadence" @click="showModal">
+          {{ i18n.deleteCadence }}
+        </gl-dropdown-item>
       </gl-dropdown>
+      <gl-modal
+        ref="modal"
+        :modal-id="`${cadenceId}-delete-modal`"
+        :title="i18n.modalTitle"
+        :ok-title="i18n.modalConfirm"
+        ok-variant="danger"
+        @hidden="focusMenu"
+        @ok="$emit('delete-cadence', cadenceId)"
+      >
+        {{ i18n.modalText }}
+      </gl-modal>
     </div>
 
     <gl-alert v-if="error" variant="danger" :dismissible="true" @dismiss="error = ''">

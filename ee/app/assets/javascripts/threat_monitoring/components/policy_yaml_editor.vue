@@ -1,9 +1,9 @@
 <script>
-import EditorLite from '~/vue_shared/components/editor_lite.vue';
+import SourceEditor from '~/vue_shared/components/source_editor.vue';
 
 export default {
   components: {
-    EditorLite,
+    SourceEditor,
   },
   props: {
     value: {
@@ -44,5 +44,10 @@ export default {
 </script>
 
 <template>
-  <editor-lite :value="value" file-name="*.yaml" :editor-options="editorOptions" @input="onInput" />
+  <source-editor
+    :value="value"
+    file-name="*.yaml"
+    :editor-options="editorOptions"
+    @input="onInput"
+  />
 </template>

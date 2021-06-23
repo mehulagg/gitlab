@@ -11,7 +11,12 @@ module EE
 
         override :clone_accessors
         def clone_accessors
-          (super + %i[secrets]).freeze
+          (super + extra_accessors).freeze
+        end
+
+        override :extra_accessors
+        def extra_accessors
+          %i[dast_site_profile dast_scanner_profile secrets].freeze
         end
       end
 
@@ -31,6 +36,16 @@ module EE
 
           raise ::Gitlab::Access::AccessDeniedError, 'Credit card required to be on file in order to retry a build'
         end
+      end
+
+      override :check_assignable_runners!
+      def check_assignable_runners!(build)
+        return unless ::Feature.enabled?(:ci_quota_check_on_retries, project, default_enabled: :yaml)
+
+        runner_minutes = ::Gitlab::Ci::Minutes::RunnersAvailability.new(project)
+        return if runner_minutes.available?(build.build_matcher)
+
+        build.drop!(:ci_quota_exceeded)
       end
     end
   end

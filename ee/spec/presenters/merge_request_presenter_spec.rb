@@ -200,7 +200,7 @@ RSpec.describe MergeRequestPresenter do
       let(:path) { exposes_path? ? expose_path("/api/v4/projects/#{merge_request.project.id}/merge_requests/#{merge_request.iid}/status_checks") : nil }
 
       before do
-        stub_feature_flags(ff_compliance_approval_gates: feature_flag_enabled?)
+        stub_feature_flags(ff_external_status_checks: feature_flag_enabled?)
         allow(project.external_status_checks).to receive(:any?).and_return(has_status_checks?)
       end
 

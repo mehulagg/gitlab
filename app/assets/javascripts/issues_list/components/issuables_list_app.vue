@@ -6,15 +6,11 @@ import {
   GlSafeHtmlDirective as SafeHtml,
 } from '@gitlab/ui';
 import { toNumber, omit } from 'lodash';
-import { deprecatedCreateFlash as flash } from '~/flash';
+import createFlash from '~/flash';
 import axios from '~/lib/utils/axios_utils';
-import {
-  scrollToElement,
-  urlParamsToObject,
-  historyPushState,
-  getParameterByName,
-} from '~/lib/utils/common_utils';
-import { setUrlParams } from '~/lib/utils/url_utility';
+import { scrollToElement, historyPushState, getParameterByName } from '~/lib/utils/common_utils';
+// eslint-disable-next-line import/no-deprecated
+import { setUrlParams, urlParamsToObject } from '~/lib/utils/url_utility';
 import { __ } from '~/locale';
 import initManualOrdering from '~/manual_ordering';
 import FilteredSearchBar from '~/vue_shared/components/filtered_search_bar/filtered_search_bar_root.vue';
@@ -265,10 +261,13 @@ export default {
         })
         .catch(() => {
           this.loading = false;
-          return flash(__('An error occurred while loading issues'));
+          return createFlash({
+            message: __('An error occurred while loading issues'),
+          });
         });
     },
     getQueryObject() {
+      // eslint-disable-next-line import/no-deprecated
       return urlParamsToObject(window.location.search);
     },
     onPaginate(newPage) {

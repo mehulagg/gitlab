@@ -66,7 +66,7 @@ automatically. If you're using [Auto DevOps](../../../topics/autodevops/index.md
 for deployments with a cluster not managed by GitLab, you must ensure:
 
 - The project's deployment service account has permissions to deploy to
-  [`KUBE_NAMESPACE`](../../project/clusters/index.md#deployment-variables).
+  [`KUBE_NAMESPACE`](../../project/clusters/deploy_to_cluster.md#deployment-variables).
 - `KUBECONFIG` correctly reflects any changes to `KUBE_NAMESPACE`
   (this is [not automatic](https://gitlab.com/gitlab-org/gitlab/-/issues/31519)). Editing
   `KUBE_NAMESPACE` directly is discouraged.
@@ -96,7 +96,7 @@ per [multiple Kubernetes clusters](#multiple-kubernetes-clusters) When specifyin
 this is automatically set as an environment variable (`KUBE_INGRESS_BASE_DOMAIN`) during
 the [Auto DevOps](../../../topics/autodevops/index.md) stages.
 
-The domain should have a wildcard DNS configured to the Ingress IP address. [More details](../../project/clusters/index.md#base-domain).
+The domain should have a wildcard DNS configured to the Ingress IP address. [More details](../../project/clusters/gitlab_managed_clusters.md#base-domain).
 
 ## Environment scopes **(PREMIUM)**
 
@@ -163,7 +163,7 @@ are deployed to the Kubernetes cluster, see the documentation for
 ## Security of runners
 
 For important information about securely configuring runners, see
-[Security of runners](../../project/clusters/add_remove_clusters.md#security-of-runners)
+[Security of runners](../../project/clusters/cluster_access.md#security-of-runners)
 documentation for project-level clusters.
 
 ## More information

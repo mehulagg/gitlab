@@ -11,7 +11,8 @@ RSpec.describe GitlabSubscriptions::UpcomingReconciliation do
     # This is needed for the validate_uniqueness_of expectation.
     let_it_be(:upcoming_reconciliation) { create(:upcoming_reconciliation, :saas) }
 
-    it { is_expected.to validate_uniqueness_of(:namespace) }
+    it { is_expected.to validate_presence_of(:next_reconciliation_date) }
+    it { is_expected.to validate_presence_of(:display_alert_from) }
 
     it 'does not allow multiple rows with namespace_id nil' do
       create(:upcoming_reconciliation, :self_managed)
@@ -28,10 +29,28 @@ RSpec.describe GitlabSubscriptions::UpcomingReconciliation do
       end
 
       it { is_expected.to validate_presence_of(:namespace) }
+      it { is_expected.not_to validate_uniqueness_of(:namespace) }
     end
 
     context 'when namespaces are not paid (ex: self managed instance)' do
       it { is_expected.not_to validate_presence_of(:namespace) }
+      it { is_expected.to validate_uniqueness_of(:namespace) }
+    end
+  end
+
+  describe 'scopes' do
+    let_it_be(:namespace1) { create(:namespace) }
+    let_it_be(:namespace2) { create(:namespace) }
+    let_it_be(:namespace3) { create(:namespace) }
+    let_it_be(:upcoming_reconciliation1) { create(:upcoming_reconciliation, :saas, namespace: namespace1) }
+    let_it_be(:upcoming_reconciliation2) { create(:upcoming_reconciliation, :saas, namespace: namespace2) }
+    let_it_be(:upcoming_reconciliation3) { create(:upcoming_reconciliation, :saas, namespace: namespace3) }
+
+    describe '.by_namespace_ids' do
+      it 'returns only upcoming reconciliations for given namespaces' do
+        expect(described_class.by_namespace_ids([namespace1.id, namespace3.id]))
+          .to contain_exactly(upcoming_reconciliation1, upcoming_reconciliation3)
+      end
     end
   end
 

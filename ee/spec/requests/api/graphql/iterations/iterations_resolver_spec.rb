@@ -11,9 +11,9 @@ RSpec.describe 'getting iterations' do
   let_it_be(:iteration_cadence1) { create(:iterations_cadence, group: group, active: true, duration_in_weeks: 1, title: 'one week iterations') }
   let_it_be(:iteration_cadence2) { create(:iterations_cadence, group: group, active: true, duration_in_weeks: 2, title: 'two week iterations') }
 
-  let_it_be(:started_group_iteration) { create(:started_iteration, :skip_future_date_validation, iterations_cadence: iteration_cadence1, group: iteration_cadence1.group, title: 'one test', start_date: now - 1.day, due_date: now) }
+  let_it_be(:current_group_iteration) { create(:iteration, :skip_future_date_validation, iterations_cadence: iteration_cadence1, group: iteration_cadence1.group, title: 'one test', start_date: 1.day.ago, due_date: 1.week.from_now) }
   let_it_be(:upcoming_group_iteration) { create(:iteration, iterations_cadence: iteration_cadence2, group: iteration_cadence2.group, start_date: 1.day.from_now, due_date: 2.days.from_now) }
-  let_it_be(:closed_group_iteration) { create(:closed_iteration, :skip_project_validation, iterations_cadence: iteration_cadence1, group: iteration_cadence1.group, start_date: 3.days.from_now, due_date: 4.days.from_now) }
+  let_it_be(:closed_group_iteration) { create(:iteration, :skip_project_validation, iterations_cadence: iteration_cadence1, group: iteration_cadence1.group, start_date: 3.weeks.ago, due_date: 1.week.ago) }
 
   before do
     group.add_maintainer(user)
@@ -50,7 +50,33 @@ RSpec.describe 'getting iterations' do
       it 'returns iterations' do
         post_graphql(iteration_cadence_query(group, [iteration_cadence1.to_global_id, iteration_cadence2.to_global_id]), current_user: user)
 
-        expect_iterations_response(started_group_iteration, closed_group_iteration, upcoming_group_iteration)
+        expect_iterations_response(current_group_iteration, closed_group_iteration, upcoming_group_iteration)
+      end
+    end
+  end
+
+  describe 'query for iterations by state' do
+    context 'with DEPRECATED `started` state' do
+      it 'returns `current` iteration' do
+        post_graphql(iterations_query(group, "state: started"), current_user: user)
+
+        expect_iterations_response(current_group_iteration)
+      end
+    end
+
+    context 'with `current` state' do
+      it 'returns `current` iteration' do
+        post_graphql(iterations_query(group, "state: current"), current_user: user)
+
+        expect_iterations_response(current_group_iteration)
+      end
+    end
+
+    context 'with `closed` state' do
+      it 'returns `closed` iteration' do
+        post_graphql(iterations_query(group, "state: closed"), current_user: user)
+
+        expect_iterations_response(closed_group_iteration)
       end
     end
   end

@@ -173,6 +173,12 @@ RSpec.describe Iterations::Cadences::CreateIterationsInAdvanceService do
                   "Iteration 5: #{(initial_due_date + 1.week + 1.day).strftime(Date::DATE_FORMATS[:long])} - #{(initial_due_date + 2.weeks).strftime(Date::DATE_FORMATS[:long])}"
                 ])
               end
+
+              it 'sets the states correctly based on iterations dates' do
+                subject
+
+                expect(group.reload.iterations.order(:start_date).map(&:state)).to eq(%w[closed closed current upcoming upcoming])
+              end
             end
           end
         end

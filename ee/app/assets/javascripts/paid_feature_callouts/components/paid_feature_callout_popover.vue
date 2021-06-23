@@ -2,12 +2,17 @@
 import { GlButton, GlPopover } from '@gitlab/ui';
 import { GlBreakpointInstance as bp } from '@gitlab/ui/dist/utils';
 import { debounce } from 'lodash';
-import { __, n__, s__, sprintf } from '~/locale';
+import { sprintf } from '~/locale';
 import Tracking from '~/tracking';
+import {
+  POPOVER,
+  EXPERIMENT_KEY,
+  POPOVER_OR_TOOLTIP_BREAKPOINT,
+  RESIZE_EVENT_DEBOUNCE_MS,
+} from '../constants';
 
-const RESIZE_EVENT_DEBOUNCE_MS = 150;
-const CLICK_BUTTON = 'click_button';
-const trackingMixin = Tracking.mixin({ experiment: 'highlight_paid_features_during_active_trial' });
+const { i18n, trackingEvents } = POPOVER;
+const trackingMixin = Tracking.mixin({ experiment: EXPERIMENT_KEY });
 
 export default {
   components: {
@@ -48,7 +53,7 @@ export default {
     promoImageAltText: {
       type: String,
       required: false,
-      default: __('SVG illustration'),
+      default: i18n.defaultImgAltText,
     },
     promoImagePath: {
       type: String,
@@ -65,43 +70,29 @@ export default {
       disabled: false,
     };
   },
-  i18n: {
-    compareAllButtonTitle: s__('BillingPlans|Compare all plans'),
-  },
-  trackingEvents: {
-    popoverShown: { action: 'popover_shown', label: 'feature_highlight_popover' },
-    upgradeBtnClick: { action: CLICK_BUTTON, label: 'upgrade_to_premium' },
-    compareBtnClick: { action: CLICK_BUTTON, label: 'compare_all_plans' },
-  },
+  i18n,
+  trackingEvents,
   computed: {
-    popoverTitle() {
-      const i18nPopoverTitle = n__(
-        'FeatureHighlight|%{daysRemaining} day remaining to enjoy %{featureName}',
-        'FeatureHighlight|%{daysRemaining} days remaining to enjoy %{featureName}',
-        this.daysRemaining,
-      );
-
-      return sprintf(i18nPopoverTitle, {
+    title() {
+      return sprintf(this.$options.i18n.title.countableTranslator(this.daysRemaining), {
         daysRemaining: this.daysRemaining,
         featureName: this.featureName,
       });
     },
-    popoverContent() {
-      const i18nPopoverContent = s__(`FeatureHighlight|Enjoying your GitLab %{planNameForTrial} trial? To continue
-        using %{featureName} after your trial ends, upgrade to GitLab %{planNameForUpgrade}.`);
-
-      return sprintf(i18nPopoverContent, {
+    content() {
+      return sprintf(this.$options.i18n.content, {
         featureName: this.featureName,
         planNameForTrial: this.planNameForTrial,
         planNameForUpgrade: this.planNameForUpgrade,
       });
     },
-    upgradeButtonTitle() {
-      const i18nUpgradeButtonTitle = s__('BillingPlans|Upgrade to GitLab %{planNameForUpgrade}');
-
-      return sprintf(i18nUpgradeButtonTitle, {
+    upgradeButtonLabel() {
+      return sprintf(this.$options.i18n.buttons.upgrade, {
         planNameForUpgrade: this.planNameForUpgrade,
       });
+    },
+    comparePlansButtonLabel() {
+      return this.$options.i18n.buttons.comparePlans;
     },
   },
   created() {
@@ -119,11 +110,11 @@ export default {
       this.updateDisabledState();
     },
     updateDisabledState() {
-      this.disabled = bp.getBreakpointSize() === 'xs';
+      this.disabled = bp.getBreakpointSize() === POPOVER_OR_TOOLTIP_BREAKPOINT;
     },
     onShown() {
       const { action, ...options } = this.$options.trackingEvents.popoverShown;
-      this.track(action, options);
+      this.track(action, { ...options, label: `${options.label}:${this.featureName}` });
     },
     onUpgradeBtnClick() {
       const { action, ...options } = this.$options.trackingEvents.upgradeBtnClick;
@@ -147,7 +138,7 @@ export default {
     :delay="{ hide: 400 }"
     @shown="onShown"
   >
-    <template #title>{{ popoverTitle }}</template>
+    <template #title>{{ title }}</template>
 
     <div v-if="promoImagePath" class="gl-display-flex gl-justify-content-center gl-mt-n3 gl-mb-4">
       <img
@@ -159,7 +150,7 @@ export default {
       />
     </div>
 
-    {{ popoverContent }}
+    {{ content }}
 
     <div class="gl-mt-5">
       <gl-button
@@ -173,7 +164,7 @@ export default {
         data-testid="upgradeBtn"
         @click="onUpgradeBtnClick"
       >
-        <span class="gl-font-sm">{{ upgradeButtonTitle }}</span>
+        <span class="gl-font-sm">{{ upgradeButtonLabel }}</span>
       </gl-button>
       <gl-button
         :href="hrefComparePlans"
@@ -186,7 +177,7 @@ export default {
         data-testid="compareBtn"
         @click="onCompareBtnClick"
       >
-        <span class="gl-font-sm">{{ $options.i18n.compareAllButtonTitle }}</span>
+        <span class="gl-font-sm">{{ comparePlansButtonLabel }}</span>
       </gl-button>
     </div>
   </gl-popover>

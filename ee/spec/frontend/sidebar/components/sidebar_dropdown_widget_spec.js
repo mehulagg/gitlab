@@ -450,8 +450,9 @@ describe('SidebarDropdownWidget', () => {
 
             expect(groupEpicsSpy).toHaveBeenNthCalledWith(1, {
               fullPath: mockIssue.groupPath,
-              title: '',
+              sort: 'TITLE_ASC',
               state: 'opened',
+              title: '',
             });
           });
 
@@ -474,8 +475,9 @@ describe('SidebarDropdownWidget', () => {
 
               expect(groupEpicsSpy).toHaveBeenNthCalledWith(2, {
                 fullPath: mockIssue.groupPath,
-                title: mockSearchTerm,
+                sort: 'TITLE_ASC',
                 state: 'opened',
+                title: mockSearchTerm,
               });
             });
           });

@@ -35,10 +35,8 @@ class SyncSeatLinkRequestWorker
   private
 
   def reset_license!(license_data)
-    current_license = License.current if License.current&.cloud_license?
-
     License.transaction do
-      current_license&.destroy!
+      License.cloud.delete_all
       License.create!(data: license_data, cloud: true)
     end
   rescue StandardError => e

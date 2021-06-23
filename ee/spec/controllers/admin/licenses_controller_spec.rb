@@ -122,12 +122,11 @@ RSpec.describe Admin::LicensesController do
     let_it_be(:historical_data) { create(:historical_data, recorded_at: Time.current) }
 
     before do
-      allow(License).to receive(:current).and_return(create(:license))
-      allow(Settings.gitlab).to receive(:seat_link_enabled).and_return(seat_link_enabled)
+      allow(License).to receive(:current).and_return(create(:license, cloud: cloud_license_enabled ))
     end
 
-    context 'with seat link enabled' do
-      let(:seat_link_enabled) { true }
+    context 'with a cloud license' do
+      let(:cloud_license_enabled) { true }
 
       it 'returns a success response' do
         post :sync_seat_link, format: :json
@@ -137,8 +136,8 @@ RSpec.describe Admin::LicensesController do
       end
     end
 
-    context 'with seat link disabled' do
-      let(:seat_link_enabled) { false }
+    context 'without a cloud license' do
+      let(:cloud_license_enabled) { false }
 
       it 'returns a failure response' do
         post :sync_seat_link, format: :json

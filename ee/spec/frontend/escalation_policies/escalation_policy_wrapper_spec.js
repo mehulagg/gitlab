@@ -44,8 +44,6 @@ describe('Escalation Policies Wrapper', () => {
   const findLoader = () => wrapper.findComponent(GlLoadingIcon);
   const findEmptyState = () => wrapper.findComponent(GlEmptyState);
   const findEscalationPolicies = () => wrapper.findAllComponents(EscalationPolicy);
-  const findAddPolicyBtn = () =>
-    wrapper.findByRole('button', { name: EscalationPoliciesWrapper.i18n.addPolicy });
 
   describe.each`
     state             | loading  | escalationPolicies        | showsEmptyState | showsLoader
@@ -71,10 +69,6 @@ describe('Escalation Policies Wrapper', () => {
 
       it(`does ${escalationPolicies.length ? 'show' : 'not show'} escalation policies`, () => {
         expect(findEscalationPolicies()).toHaveLength(escalationPolicies.length);
-      });
-
-      it(`does ${escalationPolicies.length ? 'show' : 'not show'} "Add policy" button`, () => {
-        expect(findAddPolicyBtn().exists()).toBe(Boolean(escalationPolicies.length));
       });
     });
   });

@@ -65,7 +65,7 @@ export default {
           symbol: '@',
           token: AuthorToken,
           operators: OPERATOR_IS_ONLY,
-          recentTokenValuesStorageKey: `${this.groupFullPath}-epics-recent-tokens-author_username`,
+          recentSuggestionsStorageKey: `${this.groupFullPath}-epics-recent-tokens-author_username`,
           fetchAuthors: Api.users.bind(Api),
           preloadedAuthors,
         },
@@ -77,7 +77,7 @@ export default {
           symbol: '~',
           token: LabelToken,
           operators: OPERATOR_IS_ONLY,
-          recentTokenValuesStorageKey: `${this.groupFullPath}-epics-recent-tokens-label_name`,
+          recentSuggestionsStorageKey: `${this.groupFullPath}-epics-recent-tokens-label_name`,
           fetchLabels: (search = '') => {
             const params = {
               only_group_labels: true,

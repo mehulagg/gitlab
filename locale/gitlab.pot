@@ -436,6 +436,9 @@ msgid_plural "%{bold_start}%{count}%{bold_end} opened merge requests"
 msgstr[0] ""
 msgstr[1] ""
 
+msgid "%{closedWeight} complete, %{openWeight} incomplete"
+msgstr ""
+
 msgid "%{code_open}Masked:%{code_close} Hidden in job logs. Must match masking requirements."
 msgstr ""
 
@@ -1000,6 +1003,9 @@ msgid "%{user} created an epic: %{epic_link}"
 msgstr ""
 
 msgid "%{user} created an issue: %{issue_link}"
+msgstr ""
+
+msgid "%{value} is not included in the list"
 msgstr ""
 
 msgid "%{value} s"
@@ -1921,6 +1927,9 @@ msgstr ""
 msgid "Add a homepage to your wiki that contains information about your project and GitLab will display it here instead of this message."
 msgstr ""
 
+msgid "Add a horizontal rule"
+msgstr ""
+
 msgid "Add a line"
 msgstr ""
 
@@ -1982,6 +1991,9 @@ msgid "Add comment to design"
 msgstr ""
 
 msgid "Add commit messages as comments to Asana tasks. %{docs_link}"
+msgstr ""
+
+msgid "Add commit messages as comments to Pivotal Tracker stories. %{docs_link}"
 msgstr ""
 
 msgid "Add deploy freeze"
@@ -2806,13 +2818,16 @@ msgstr ""
 msgid "Admin|Admin notes"
 msgstr ""
 
-msgid "Admin|Learn more about quarterly reconcilliation"
+msgid "Admin|Learn more about quarterly reconciliation"
 msgstr ""
 
 msgid "Admin|Note"
 msgstr ""
 
-msgid "Admin|Quarterly reconcilliation will occur on %{qrtlyDate}"
+msgid "Admin|Quarterly reconciliation will occur on %{qrtlyDate}"
+msgstr ""
+
+msgid "Admin|The number of max seats used for your namespace is currently exceeding the number of seats in your subscription. On %{qrtlyDate}, GitLab will process a quarterly reconciliation and automatically bill you a prorated amount for the overage. There is no action needed from you. If you have a credit card on file, it will be charged. Otherwise, you will receive an invoice."
 msgstr ""
 
 msgid "Admin|The number of maximum users for your instance is currently exceeding the number of users in license. On %{qrtlyDate}, GitLab will process a quarterly reconciliation and automatically bill you a prorated amount for the overage. There is no action needed from you. If you have a credit card on file, it will be charged. Otherwise, you will receive an invoice."
@@ -3400,9 +3415,6 @@ msgid "Amazon EKS"
 msgstr ""
 
 msgid "Amazon EKS integration allows you to provision EKS clusters from GitLab."
-msgstr ""
-
-msgid "Amazon Web Services"
 msgstr ""
 
 msgid "Amazon Web Services Logo"
@@ -5247,6 +5259,9 @@ msgid_plural "Boards|+ %{displayedIssuablesCount} more %{issuableType}s"
 msgstr[0] ""
 msgstr[1] ""
 
+msgid "Boards|An error occurred while creating the epic. Please try again."
+msgstr ""
+
 msgid "Boards|An error occurred while creating the issue. Please try again."
 msgstr ""
 
@@ -5306,6 +5321,9 @@ msgstr ""
 msgid "Boards|Failed to fetch blocking %{issuableType}s"
 msgstr ""
 
+msgid "Boards|New epic"
+msgstr ""
+
 msgid "Boards|Retrieving blocking %{issuableType}s"
 msgstr ""
 
@@ -5334,6 +5352,9 @@ msgid "Board|Edit board"
 msgstr ""
 
 msgid "Board|Enter board name"
+msgstr ""
+
+msgid "Board|Failed to create epic. Please try again."
 msgstr ""
 
 msgid "Board|Failed to delete board. Please try again."
@@ -5556,6 +5577,9 @@ msgid "Browse artifacts"
 msgstr ""
 
 msgid "Browse files"
+msgstr ""
+
+msgid "Browse templates"
 msgstr ""
 
 msgid "BuildArtifacts|An error occurred while fetching the artifacts"
@@ -5950,9 +5974,6 @@ msgstr ""
 msgid "Cannot delete %{profile_name} referenced in security policy"
 msgstr ""
 
-msgid "Cannot enable shared runners because parent group does not allow it"
-msgstr ""
-
 msgid "Cannot have multiple Jira imports running at the same time"
 msgstr ""
 
@@ -6341,6 +6362,9 @@ msgid "Checkout|Failed to load countries. Please try again."
 msgstr ""
 
 msgid "Checkout|Failed to load states. Please try again."
+msgstr ""
+
+msgid "Checkout|Failed to load the payment form. Please try again."
 msgstr ""
 
 msgid "Checkout|Failed to register credit card. Please try again."
@@ -6919,19 +6943,7 @@ msgstr ""
 msgid "ClusterApplicationsRemoved|One-click application management was removed in GitLab 14.0. Your applications are still installed in your cluster, and integrations continue working."
 msgstr ""
 
-msgid "ClusterIntegration|%{appList} was successfully installed on your Kubernetes cluster"
-msgstr ""
-
-msgid "ClusterIntegration|%{boldStart}Note:%{boldEnd} Requires Ingress to be installed."
-msgstr ""
-
 msgid "ClusterIntegration|%{linkStart}More information%{linkEnd}"
-msgstr ""
-
-msgid "ClusterIntegration|%{title} uninstalled successfully."
-msgstr ""
-
-msgid "ClusterIntegration|%{title} updated successfully."
 msgstr ""
 
 msgid "ClusterIntegration|A cluster management project can be used to run deployment jobs with Kubernetes %{code_open}cluster-admin%{code_close} privileges."
@@ -6967,12 +6979,6 @@ msgstr ""
 msgid "ClusterIntegration|Advanced options on this Kubernetes cluster’s integration"
 msgstr ""
 
-msgid "ClusterIntegration|All data not committed to GitLab will be deleted and cannot be restored."
-msgstr ""
-
-msgid "ClusterIntegration|All data will be deleted and cannot be restored."
-msgstr ""
-
 msgid "ClusterIntegration|Allow GitLab to manage namespace and service accounts for this cluster. %{linkStart}More information%{linkEnd}"
 msgstr ""
 
@@ -7006,9 +7012,6 @@ msgstr ""
 msgid "ClusterIntegration|Any project namespaces"
 msgstr ""
 
-msgid "ClusterIntegration|Any running pipelines will be canceled."
-msgstr ""
-
 msgid "ClusterIntegration|Apply for credit"
 msgstr ""
 
@@ -7025,15 +7028,6 @@ msgid "ClusterIntegration|Base domain"
 msgstr ""
 
 msgid "ClusterIntegration|CA Certificate"
-msgstr ""
-
-msgid "ClusterIntegration|Can be safely removed. Prior to GitLab 13.2, GitLab used a remote Tiller server to manage the applications. GitLab no longer uses this server. Uninstalling this server will not affect your other applications. This row will disappear afterwards."
-msgstr ""
-
-msgid "ClusterIntegration|Cert-Manager"
-msgstr ""
-
-msgid "ClusterIntegration|Cert-Manager is a native Kubernetes certificate management controller that helps with issuing certificates. Installing Cert-Manager on your cluster will issue a certificate by %{linkStart}Let's Encrypt%{linkEnd} and ensure that certificates are valid and up-to-date."
 msgstr ""
 
 msgid "ClusterIntegration|Certificate Authority bundle (PEM format)"
@@ -7055,9 +7049,6 @@ msgid "ClusterIntegration|Choose the %{linkStart}subnets %{linkEnd} in your VPC 
 msgstr ""
 
 msgid "ClusterIntegration|Choose the worker node %{linkStart}instance type%{linkEnd}."
-msgstr ""
-
-msgid "ClusterIntegration|Choose which applications to install on your Kubernetes cluster."
 msgstr ""
 
 msgid "ClusterIntegration|Choose which of your environments will use this cluster."
@@ -7097,15 +7088,6 @@ msgid "ClusterIntegration|Copy API URL"
 msgstr ""
 
 msgid "ClusterIntegration|Copy CA Certificate"
-msgstr ""
-
-msgid "ClusterIntegration|Copy Ingress Endpoint"
-msgstr ""
-
-msgid "ClusterIntegration|Copy Jupyter Hostname"
-msgstr ""
-
-msgid "ClusterIntegration|Copy Knative Endpoint"
 msgstr ""
 
 msgid "ClusterIntegration|Copy Kubernetes cluster name"
@@ -7156,12 +7138,6 @@ msgstr ""
 msgid "ClusterIntegration|Creating Kubernetes cluster"
 msgstr ""
 
-msgid "ClusterIntegration|Crossplane"
-msgstr ""
-
-msgid "ClusterIntegration|Crossplane enables declarative provisioning of managed services from your cloud of choice using %{codeStart}kubectl%{codeEnd} or %{linkStart}GitLab Integration%{linkEnd}. Crossplane runs inside your Kubernetes cluster and supports secure connectivity and secrets management between app containers and the cloud services they depend on."
-msgstr ""
-
 msgid "ClusterIntegration|Deletes all GitLab resources attached to this cluster during removal"
 msgstr ""
 
@@ -7177,9 +7153,6 @@ msgstr ""
 msgid "ClusterIntegration|Elastic Kubernetes Service"
 msgstr ""
 
-msgid "ClusterIntegration|Elastic Stack"
-msgstr ""
-
 msgid "ClusterIntegration|Enable Cloud Run for Anthos"
 msgstr ""
 
@@ -7193,9 +7166,6 @@ msgid "ClusterIntegration|Enable or disable GitLab's connection to your Kubernet
 msgstr ""
 
 msgid "ClusterIntegration|Enable this setting if using role-based access control (RBAC)."
-msgstr ""
-
-msgid "ClusterIntegration|Enabled stack"
 msgstr ""
 
 msgid "ClusterIntegration|Enter new Service Token"
@@ -7243,16 +7213,7 @@ msgstr ""
 msgid "ClusterIntegration|GitLab Agent managed clusters"
 msgstr ""
 
-msgid "ClusterIntegration|GitLab Container Network Policies"
-msgstr ""
-
 msgid "ClusterIntegration|GitLab Integration"
-msgstr ""
-
-msgid "ClusterIntegration|GitLab Runner"
-msgstr ""
-
-msgid "ClusterIntegration|GitLab Runner connects to the repository and executes CI/CD jobs, pushing results back and deploying applications to production."
 msgstr ""
 
 msgid "ClusterIntegration|GitLab failed to authenticate."
@@ -7291,18 +7252,6 @@ msgstr ""
 msgid "ClusterIntegration|In order to view the health of your cluster, you must first enable Prometheus in the Integrations tab."
 msgstr ""
 
-msgid "ClusterIntegration|Ingress"
-msgstr ""
-
-msgid "ClusterIntegration|Ingress Endpoint"
-msgstr ""
-
-msgid "ClusterIntegration|Ingress gives you a way to route requests to services based on the request host or path, centralizing a number of services into a single entrypoint."
-msgstr ""
-
-msgid "ClusterIntegration|Installing Ingress may incur additional costs. Learn more about %{linkStart}pricing%{linkEnd}."
-msgstr ""
-
 msgid "ClusterIntegration|Instance cluster"
 msgstr ""
 
@@ -7324,37 +7273,7 @@ msgstr ""
 msgid "ClusterIntegration|Integrations allow you to use applications installed in your cluster as part of your GitLab workflow."
 msgstr ""
 
-msgid "ClusterIntegration|Issuer Email"
-msgstr ""
-
-msgid "ClusterIntegration|Issuers represent a certificate authority. You must provide an email address for your Issuer."
-msgstr ""
-
-msgid "ClusterIntegration|Jupyter Hostname"
-msgstr ""
-
-msgid "ClusterIntegration|JupyterHub"
-msgstr ""
-
-msgid "ClusterIntegration|JupyterHub, a multi-user Hub, spawns, manages, and proxies multiple instances of the single-user Jupyter notebook server. JupyterHub can be used to serve notebooks to a class of students, a corporate data science group, or a scientific research group."
-msgstr ""
-
 msgid "ClusterIntegration|Key pair name"
-msgstr ""
-
-msgid "ClusterIntegration|Knative"
-msgstr ""
-
-msgid "ClusterIntegration|Knative Domain Name:"
-msgstr ""
-
-msgid "ClusterIntegration|Knative Endpoint:"
-msgstr ""
-
-msgid "ClusterIntegration|Knative domain name was updated successfully."
-msgstr ""
-
-msgid "ClusterIntegration|Knative extends Kubernetes to provide a set of middleware components that are essential to build modern, source-centric, and container-based applications that can run anywhere: on premises, in the cloud, or even in a third-party data center."
 msgstr ""
 
 msgid "ClusterIntegration|Kubernetes cluster is being created..."
@@ -7388,9 +7307,6 @@ msgid "ClusterIntegration|Learn more about group Kubernetes clusters"
 msgstr ""
 
 msgid "ClusterIntegration|Learn more about instance Kubernetes clusters"
-msgstr ""
-
-msgid "ClusterIntegration|Legacy Helm Tiller server"
 msgstr ""
 
 msgid "ClusterIntegration|Loading IAM Roles"
@@ -7483,9 +7399,6 @@ msgstr ""
 msgid "ClusterIntegration|Please make sure that your Google account meets the following requirements:"
 msgstr ""
 
-msgid "ClusterIntegration|Point a wildcard DNS to this generated endpoint in order to access your application after it has been deployed."
-msgstr ""
-
 msgid "ClusterIntegration|Project cluster"
 msgstr ""
 
@@ -7493,15 +7406,6 @@ msgid "ClusterIntegration|Project namespace (optional, unique)"
 msgstr ""
 
 msgid "ClusterIntegration|Project namespace prefix (optional, unique)"
-msgstr ""
-
-msgid "ClusterIntegration|Prometheus"
-msgstr ""
-
-msgid "ClusterIntegration|Prometheus is an open-source monitoring system with %{linkStart}GitLab Integration%{linkEnd} to monitor deployed applications."
-msgstr ""
-
-msgid "ClusterIntegration|Protect your clusters with GitLab Container Network Policies by enforcing how pods communicate with each other and other network endpoints. %{linkStart}Learn more about configuring Network Policies here.%{linkEnd}"
 msgstr ""
 
 msgid "ClusterIntegration|Provider details"
@@ -7540,15 +7444,6 @@ msgstr ""
 msgid "ClusterIntegration|Removes cluster from project but keeps associated resources"
 msgstr ""
 
-msgid "ClusterIntegration|Replace this with your own hostname if you want. If you do so, point hostname to Ingress IP Address from above."
-msgstr ""
-
-msgid "ClusterIntegration|Request to begin installing failed"
-msgstr ""
-
-msgid "ClusterIntegration|Request to begin uninstalling failed"
-msgstr ""
-
 msgid "ClusterIntegration|Save changes"
 msgstr ""
 
@@ -7559,9 +7454,6 @@ msgid "ClusterIntegration|Search Key Pairs"
 msgstr ""
 
 msgid "ClusterIntegration|Search VPCs"
-msgstr ""
-
-msgid "ClusterIntegration|Search domains"
 msgstr ""
 
 msgid "ClusterIntegration|Search instance types"
@@ -7612,13 +7504,7 @@ msgstr ""
 msgid "ClusterIntegration|Select a region to choose a VPC"
 msgstr ""
 
-msgid "ClusterIntegration|Select a stack to install Crossplane."
-msgstr ""
-
 msgid "ClusterIntegration|Select a zone to choose a network"
-msgstr ""
-
-msgid "ClusterIntegration|Select existing domain or use new"
 msgstr ""
 
 msgid "ClusterIntegration|Select machine type"
@@ -7663,15 +7549,6 @@ msgstr ""
 msgid "ClusterIntegration|Something went wrong while creating your Kubernetes cluster"
 msgstr ""
 
-msgid "ClusterIntegration|Something went wrong while installing %{title}"
-msgstr ""
-
-msgid "ClusterIntegration|Something went wrong while uninstalling %{title}"
-msgstr ""
-
-msgid "ClusterIntegration|Something went wrong while updating Knative domain name."
-msgstr ""
-
 msgid "ClusterIntegration|Specifying a domain will allow you to use Auto Review Apps and Auto Deploy stages for %{linkStart}Auto DevOps.%{linkEnd} The domain should have a wildcard DNS configured matching the domain. "
 msgstr ""
 
@@ -7685,24 +7562,6 @@ msgid "ClusterIntegration|The Kubernetes certificate used to authenticate to the
 msgstr ""
 
 msgid "ClusterIntegration|The URL used to access the Kubernetes API."
-msgstr ""
-
-msgid "ClusterIntegration|The associated IP and all deployed services will be deleted and cannot be restored. Uninstalling Knative will also remove Istio from your cluster. This will not effect any other applications."
-msgstr ""
-
-msgid "ClusterIntegration|The associated Tiller pod will be deleted and cannot be restored. Your other applications will remain unaffected."
-msgstr ""
-
-msgid "ClusterIntegration|The associated load balancer and IP will be deleted and cannot be restored."
-msgstr ""
-
-msgid "ClusterIntegration|The associated private key will be deleted and cannot be restored."
-msgstr ""
-
-msgid "ClusterIntegration|The elastic stack collects logs from all pods in your cluster"
-msgstr ""
-
-msgid "ClusterIntegration|The endpoint is in the process of being assigned. Please check your Kubernetes cluster or Quotas on Google Kubernetes Engine if it takes a long time."
 msgstr ""
 
 msgid "ClusterIntegration|The namespace associated with your project. This will be used for deploy boards, logs, and Web terminals."
@@ -7735,9 +7594,6 @@ msgstr ""
 msgid "ClusterIntegration|This will permanently delete the following resources:"
 msgstr ""
 
-msgid "ClusterIntegration|To access your application after deployment, point a wildcard DNS to the Knative Endpoint."
-msgstr ""
-
 msgid "ClusterIntegration|To create a cluster, first create a project on %{docsLinkStart}Google Cloud Platform%{docsLinkEnd}."
 msgstr ""
 
@@ -7759,19 +7615,7 @@ msgstr ""
 msgid "ClusterIntegration|Unable to Connect"
 msgstr ""
 
-msgid "ClusterIntegration|Uninstall %{appTitle}"
-msgstr ""
-
 msgid "ClusterIntegration|Unknown Error"
-msgstr ""
-
-msgid "ClusterIntegration|Update %{appTitle}"
-msgstr ""
-
-msgid "ClusterIntegration|Update failed. Please check the logs and try again."
-msgstr ""
-
-msgid "ClusterIntegration|Use %{query}"
 msgstr ""
 
 msgid "ClusterIntegration|Uses the Cloud Run, Istio, and HTTP Load Balancing addons for this cluster."
@@ -7798,25 +7642,10 @@ msgstr ""
 msgid "ClusterIntegration|You are about to remove your cluster integration."
 msgstr ""
 
-msgid "ClusterIntegration|You are about to uninstall %{appTitle} from your cluster."
-msgstr ""
-
-msgid "ClusterIntegration|You are about to update %{appTitle} on your cluster."
-msgstr ""
-
 msgid "ClusterIntegration|You must grant access to your organization’s AWS resources in order to create a new EKS cluster. To grant access, create a provision role using the account and external ID below and provide us the ARN."
 msgstr ""
 
-msgid "ClusterIntegration|You must have an RBAC-enabled cluster to install Knative."
-msgstr ""
-
-msgid "ClusterIntegration|You must specify a domain before you can install Knative."
-msgstr ""
-
 msgid "ClusterIntegration|You should select at least two subnets"
-msgstr ""
-
-msgid "ClusterIntegration|Your Elasticsearch cluster will be re-created during this upgrade. Your logs will be re-indexed, and you will lose historical logs from hosts terminated in the last 30 days."
 msgstr ""
 
 msgid "ClusterIntegration|Your account must have %{link_to_kubernetes_engine}"
@@ -7832,9 +7661,6 @@ msgid "ClusterIntegration|Zone"
 msgstr ""
 
 msgid "ClusterIntegration|access to Google Kubernetes Engine"
-msgstr ""
-
-msgid "ClusterIntegration|installed via %{linkStart}Cloud Run%{linkEnd}"
 msgstr ""
 
 msgid "ClusterIntegration|meets the requirements"
@@ -8310,6 +8136,9 @@ msgstr ""
 msgid "Configuration help"
 msgstr ""
 
+msgid "Configure %{link} to track events. %{link_start}Learn more.%{link_end}"
+msgstr ""
+
 msgid "Configure GitLab runners to start using the Web Terminal. %{helpStart}Learn more.%{helpEnd}"
 msgstr ""
 
@@ -8380,9 +8209,6 @@ msgid "Configure specific limits for Packages API requests that supersede the ge
 msgstr ""
 
 msgid "Configure storage path settings."
-msgstr ""
-
-msgid "Configure the %{link} integration."
 msgstr ""
 
 msgid "Configure the way a user creates a new account."
@@ -9396,9 +9222,6 @@ msgstr ""
 msgid "Create your group"
 msgstr ""
 
-msgid "Create your own profile to collaborate with your teammates in issues, merge requests, and more."
-msgstr ""
-
 msgid "Create/import your first project"
 msgstr ""
 
@@ -9643,9 +9466,6 @@ msgid "Cron Timezone"
 msgstr ""
 
 msgid "Cron time zone"
-msgstr ""
-
-msgid "Crossplane"
 msgstr ""
 
 msgid "Crowd"
@@ -11932,9 +11752,6 @@ msgstr ""
 msgid "Editing"
 msgstr ""
 
-msgid "Editor Lite instance is required to set up an extension."
-msgstr ""
-
 msgid "Elapsed time"
 msgstr ""
 
@@ -12139,7 +11956,7 @@ msgstr ""
 msgid "Enable SSL verification"
 msgstr ""
 
-msgid "Enable Seat Link"
+msgid "Enable Snowplow tracking"
 msgstr ""
 
 msgid "Enable Spam Check via external API endpoint"
@@ -12220,9 +12037,6 @@ msgstr ""
 msgid "Enable mirror configuration"
 msgstr ""
 
-msgid "Enable or disable Seat Link."
-msgstr ""
-
 msgid "Enable or disable the Pseudonymizer data collection."
 msgstr ""
 
@@ -12257,9 +12071,6 @@ msgid "Enable smartcn custom analyzer: Indexing"
 msgstr ""
 
 msgid "Enable smartcn custom analyzer: Search"
-msgstr ""
-
-msgid "Enable snowplow tracking"
 msgstr ""
 
 msgid "Enable two-factor authentication"
@@ -13120,6 +12931,9 @@ msgstr ""
 msgid "EscalationPolicies|The escalation policy could not be deleted. Please try again."
 msgstr ""
 
+msgid "EscalationPolicies|The escalation policy could not be updated. Please try again"
+msgstr ""
+
 msgid "EscalationPolicies|mins"
 msgstr ""
 
@@ -13440,9 +13254,6 @@ msgstr ""
 msgid "ExternalWikiService|https://example.com/xxx/wiki/..."
 msgstr ""
 
-msgid "Externally installed"
-msgstr ""
-
 msgid "Facebook"
 msgstr ""
 
@@ -13757,9 +13568,6 @@ msgstr ""
 msgid "FeatureFlags|* (All Environments)"
 msgstr ""
 
-msgid "FeatureFlags|* (All environments)"
-msgstr ""
-
 msgid "FeatureFlags|API URL"
 msgstr ""
 
@@ -13839,9 +13647,6 @@ msgid "FeatureFlags|Feature flags allow you to configure your code into differen
 msgstr ""
 
 msgid "FeatureFlags|Feature flags limit reached (%{featureFlagsLimit}). Delete one or more feature flags before adding new ones."
-msgstr ""
-
-msgid "FeatureFlags|Flag is read-only"
 msgstr ""
 
 msgid "FeatureFlags|Get started with feature flags"
@@ -14288,9 +14093,6 @@ msgid "For more information, see the File Hooks documentation."
 msgstr ""
 
 msgid "For more information, see the documentation on %{deactivating_usage_ping_link_start}deactivating the usage ping%{deactivating_usage_ping_link_end}."
-msgstr ""
-
-msgid "For more information, see the documentation on %{link_start}disabling Seat Link%{link_end}."
 msgstr ""
 
 msgid "Forgot your password?"
@@ -15391,9 +15193,6 @@ msgstr ""
 msgid "Goal of the changes and what reviewers should be aware of"
 msgstr ""
 
-msgid "Google Cloud Platform"
-msgstr ""
-
 msgid "Google authentication is not %{link_start}properly configured%{link_end}. Ask your GitLab administrator if you want to use this service."
 msgstr ""
 
@@ -15569,9 +15368,6 @@ msgid "Group name (your organization)"
 msgstr ""
 
 msgid "Group navigation"
-msgstr ""
-
-msgid "Group overview"
 msgstr ""
 
 msgid "Group overview content"
@@ -15934,13 +15730,7 @@ msgstr ""
 msgid "GroupSettings|Prevent sharing a project within %{group} with other groups"
 msgstr ""
 
-msgid "GroupSettings|Projects will be permanently deleted after a %{waiting_period}-day delay."
-msgstr ""
-
 msgid "GroupSettings|Projects will be permanently deleted after a %{waiting_period}-day delay. Inherited by subgroups."
-msgstr ""
-
-msgid "GroupSettings|Projects will be permanently deleted after a %{waiting_period}-day delay. This delay can be %{link_start}customized by an admin%{link_end} in instance settings."
 msgstr ""
 
 msgid "GroupSettings|Projects will be permanently deleted after a %{waiting_period}-day delay. This delay can be %{link_start}customized by an admin%{link_end} in instance settings. Inherited by subgroups."
@@ -16548,6 +16338,9 @@ msgid "If enabled, access to projects will be validated on an external service u
 msgstr ""
 
 msgid "If enabled, only protected branches will be mirrored."
+msgstr ""
+
+msgid "If no options are selected, only administrators can register runners."
 msgstr ""
 
 msgid "If the YouTube URL is https://www.youtube.com/watch?v=0t1DgySidms then the video ID is %{id}"
@@ -17567,9 +17360,6 @@ msgstr ""
 msgid "Insights|This project is filtered out in the insights.yml file (see the projects.only config for more information)."
 msgstr ""
 
-msgid "Install"
-msgstr ""
-
 msgid "Install GitLab Runner and ensure it's running."
 msgstr ""
 
@@ -17580,12 +17370,6 @@ msgid "Install on clusters"
 msgstr ""
 
 msgid "Installation"
-msgstr ""
-
-msgid "Installed"
-msgstr ""
-
-msgid "Installing"
 msgstr ""
 
 msgid "Instance"
@@ -18451,6 +18235,12 @@ msgstr ""
 msgid "Iterations|Create cadence"
 msgstr ""
 
+msgid "Iterations|Delete cadence"
+msgstr ""
+
+msgid "Iterations|Delete iteration cadence?"
+msgstr ""
+
 msgid "Iterations|Duration"
 msgstr ""
 
@@ -18506,6 +18296,9 @@ msgid "Iterations|The duration for each iteration (in weeks)"
 msgstr ""
 
 msgid "Iterations|The start date of your first iteration"
+msgstr ""
+
+msgid "Iterations|This will delete the cadence as well as all of the iterations within it."
 msgstr ""
 
 msgid "Iterations|Title"
@@ -18887,9 +18680,6 @@ msgid "Job|with"
 msgstr ""
 
 msgid "Join Zoom meeting"
-msgstr ""
-
-msgid "Join your team"
 msgstr ""
 
 msgid "Joined %{time_ago}"
@@ -19965,9 +19755,6 @@ msgid "Make sure you save it - you won't be able to access it again."
 msgstr ""
 
 msgid "Makes this issue confidential."
-msgstr ""
-
-msgid "Manage"
 msgstr ""
 
 msgid "Manage Web IDE features."
@@ -21134,9 +20921,6 @@ msgid "Metrics|e.g. req/sec"
 msgstr ""
 
 msgid "Mi"
-msgstr ""
-
-msgid "Microsoft Azure"
 msgstr ""
 
 msgid "Middleman project with Static Site Editor support"
@@ -23423,6 +23207,9 @@ msgstr ""
 msgid "PackageRegistry|Created by commit %{link} on branch %{branch}"
 msgstr ""
 
+msgid "PackageRegistry|Debian"
+msgstr ""
+
 msgid "PackageRegistry|Delete Package File"
 msgstr ""
 
@@ -24461,13 +24248,13 @@ msgstr ""
 msgid "Pipeline|with stages"
 msgstr ""
 
-msgid "PivotalTrackerService|Add commit messages as comments to PivotalTracker stories."
+msgid "PivotalTrackerService|Add commit messages as comments to Pivotal Tracker stories."
 msgstr ""
 
-msgid "PivotalTrackerService|Comma-separated list of branches which will be automatically inspected. Leave blank to include all branches."
+msgid "PivotalTrackerService|Comma-separated list of branches to automatically inspect. Leave blank to include all branches."
 msgstr ""
 
-msgid "PivotalTrackerService|Pivotal Tracker API token."
+msgid "PivotalTrackerService|Pivotal Tracker API token. User must have access to the story. All comments are attributed to this user."
 msgstr ""
 
 msgid "Plain diff"
@@ -24525,6 +24312,9 @@ msgid "Please choose a group URL with no special characters."
 msgstr ""
 
 msgid "Please complete your profile with email address"
+msgstr ""
+
+msgid "Please contact an admin to register runners."
 msgstr ""
 
 msgid "Please contact your GitLab administrator if you think this is an error."
@@ -25469,9 +25259,6 @@ msgstr ""
 msgid "Project description (optional)"
 msgstr ""
 
-msgid "Project details"
-msgstr ""
-
 msgid "Project does not exist or you don't have permission to perform this action"
 msgstr ""
 
@@ -25518,9 +25305,6 @@ msgid "Project navigation"
 msgstr ""
 
 msgid "Project order will not be saved as local storage is not available."
-msgstr ""
-
-msgid "Project overview"
 msgstr ""
 
 msgid "Project path"
@@ -26390,9 +26174,6 @@ msgstr ""
 msgid "Promote"
 msgstr ""
 
-msgid "Promote confidential issue to a non-confidential epic"
-msgstr ""
-
 msgid "Promote issue to an epic"
 msgstr ""
 
@@ -26409,9 +26190,6 @@ msgid "PromoteMilestone|Project does not belong to a group."
 msgstr ""
 
 msgid "PromoteMilestone|Promotion failed - %{message}"
-msgstr ""
-
-msgid "Promoted confidential issue to a non-confidential epic. Information in this issue is no longer confidential as epics are public to group members."
 msgstr ""
 
 msgid "Promoted issue to an epic."
@@ -26567,10 +26345,19 @@ msgstr ""
 msgid "ProtectedBranch|Branch:"
 msgstr ""
 
+msgid "ProtectedBranch|By default, protected branches restrict who can modify the branch."
+msgstr ""
+
 msgid "ProtectedBranch|Code owner approval"
 msgstr ""
 
 msgid "ProtectedBranch|Does not apply to users allowed to push. Optional sections are not enforced."
+msgstr ""
+
+msgid "ProtectedBranch|Keep stable branches secure and force developers to use merge requests."
+msgstr ""
+
+msgid "ProtectedBranch|Learn more."
 msgstr ""
 
 msgid "ProtectedBranch|Protect"
@@ -26580,6 +26367,9 @@ msgid "ProtectedBranch|Protect a branch"
 msgstr ""
 
 msgid "ProtectedBranch|Protected branch (%{protected_branches_count})"
+msgstr ""
+
+msgid "ProtectedBranch|Protected branches"
 msgstr ""
 
 msgid "ProtectedBranch|Reject code pushes that change files listed in the CODEOWNERS file."
@@ -26595,6 +26385,9 @@ msgid "ProtectedBranch|Toggle allowed to force push"
 msgstr ""
 
 msgid "ProtectedBranch|Toggle code owner approval"
+msgstr ""
+
+msgid "ProtectedBranch|What are protected branches?"
 msgstr ""
 
 msgid "ProtectedEnvironment|%{environment_name} will be writable for developers. Are you sure?"
@@ -26640,6 +26433,21 @@ msgid "ProtectedEnvironment|Your environment has been protected."
 msgstr ""
 
 msgid "ProtectedEnvironment|Your environment has been unprotected"
+msgstr ""
+
+msgid "ProtectedTag|By default, protected branches restrict who can modify the tag."
+msgstr ""
+
+msgid "ProtectedTag|Learn more."
+msgstr ""
+
+msgid "ProtectedTag|Limit access to creating and updating tags."
+msgstr ""
+
+msgid "ProtectedTag|Protected tags"
+msgstr ""
+
+msgid "ProtectedTag|What are protected tags?"
 msgstr ""
 
 msgid "Protip: %{linkStart}Auto DevOps%{linkEnd} uses Kubernetes clusters to deploy your code!"
@@ -28032,9 +27840,6 @@ msgstr ""
 msgid "Retry this job in order to create the necessary resources."
 msgstr ""
 
-msgid "Retry update"
-msgstr ""
-
 msgid "Retry verification"
 msgstr ""
 
@@ -28139,9 +27944,6 @@ msgid "Role"
 msgstr ""
 
 msgid "Rollback"
-msgstr ""
-
-msgid "Rook"
 msgstr ""
 
 msgid "Ruby"
@@ -28270,6 +28072,9 @@ msgstr ""
 msgid "Runners|Maximum job timeout"
 msgstr ""
 
+msgid "Runners|Members of the %{type} can register runners"
+msgstr ""
+
 msgid "Runners|Name"
 msgstr ""
 
@@ -28318,10 +28123,16 @@ msgstr ""
 msgid "Runners|Runner is paused, last contact was %{runner_contact} ago"
 msgstr ""
 
+msgid "Runners|Runner registration"
+msgstr ""
+
 msgid "Runners|Shared runners are available to every project in a GitLab instance. If you want a runner to build only specific projects, restrict the project in the table below. After you restrict a runner to a project, you cannot change it back to a shared runner."
 msgstr ""
 
 msgid "Runners|Show Runner installation instructions"
+msgstr ""
+
+msgid "Runners|Something went wrong while fetching the tags suggestions"
 msgstr ""
 
 msgid "Runners|Tags"
@@ -28498,9 +28309,6 @@ msgstr ""
 msgid "Save space and find images in the container Registry. remove unneeded tags and keep only the ones you want. %{linkStart}How does cleanup work?%{linkEnd}"
 msgstr ""
 
-msgid "Saved scan settings and target site settings which are reusable."
-msgstr ""
-
 msgid "Saving"
 msgstr ""
 
@@ -28585,6 +28393,9 @@ msgstr ""
 msgid "Search"
 msgstr ""
 
+msgid "Search GitLab"
+msgstr ""
+
 msgid "Search Jira issues"
 msgstr ""
 
@@ -28667,9 +28478,6 @@ msgid "Search or filter results..."
 msgstr ""
 
 msgid "Search or filter results…"
-msgstr ""
-
-msgid "Search or jump to…"
 msgstr ""
 
 msgid "Search project"
@@ -28802,12 +28610,6 @@ msgstr[1] ""
 msgid "Searching by both author and message is currently not supported."
 msgstr ""
 
-msgid "Seat Link"
-msgstr ""
-
-msgid "Seat Link is disabled, and cannot be configured through this form."
-msgstr ""
-
 msgid "SeatUsage|Seat usage"
 msgstr ""
 
@@ -28898,6 +28700,9 @@ msgstr ""
 msgid "SecurityConfiguration|Configuration guide"
 msgstr ""
 
+msgid "SecurityConfiguration|Configuration history"
+msgstr ""
+
 msgid "SecurityConfiguration|Configure"
 msgstr ""
 
@@ -28946,6 +28751,9 @@ msgstr ""
 msgid "SecurityConfiguration|Manage"
 msgstr ""
 
+msgid "SecurityConfiguration|Manage profiles for use by DAST scans."
+msgstr ""
+
 msgid "SecurityConfiguration|Manage scans"
 msgstr ""
 
@@ -28953,6 +28761,9 @@ msgid "SecurityConfiguration|More information"
 msgstr ""
 
 msgid "SecurityConfiguration|Not enabled"
+msgstr ""
+
+msgid "SecurityConfiguration|Once you've enabled a scan for the default branch, any subsequent feature branch you create will include the scan."
 msgstr ""
 
 msgid "SecurityConfiguration|Runtime security metrics for application environments."
@@ -28979,7 +28790,7 @@ msgstr ""
 msgid "SecurityConfiguration|Testing & Compliance"
 msgstr ""
 
-msgid "SecurityConfiguration|The status of the tools only applies to the default branch and is based on the %{linkStart}latest pipeline%{linkEnd}. Once you've enabled a scan for the default branch, any subsequent feature branch you create will include the scan."
+msgid "SecurityConfiguration|The status of the tools only applies to the default branch and is based on the %{linkStart}latest pipeline%{linkEnd}."
 msgstr ""
 
 msgid "SecurityConfiguration|Upgrade or start a free trial"
@@ -29310,9 +29121,6 @@ msgid "Select GitLab project to link with your Slack team"
 msgstr ""
 
 msgid "Select Page"
-msgstr ""
-
-msgid "Select Stack"
 msgstr ""
 
 msgid "Select a branch"
@@ -30774,6 +30582,9 @@ msgstr ""
 msgid "Source Branch"
 msgstr ""
 
+msgid "Source Editor instance is required to set up an extension."
+msgstr ""
+
 msgid "Source IP"
 msgstr ""
 
@@ -31254,9 +31065,6 @@ msgstr ""
 msgid "Subgroup navigation"
 msgstr ""
 
-msgid "Subgroup overview"
-msgstr ""
-
 msgid "SubgroupCreationLevel|Allowed to create subgroups"
 msgstr ""
 
@@ -31611,6 +31419,9 @@ msgstr ""
 msgid "SuperSonics|Activate"
 msgstr ""
 
+msgid "SuperSonics|Activate cloud license"
+msgstr ""
+
 msgid "SuperSonics|Activate subscription"
 msgstr ""
 
@@ -31630,9 +31441,6 @@ msgid "SuperSonics|Buy subscription"
 msgstr ""
 
 msgid "SuperSonics|Cloud license"
-msgstr ""
-
-msgid "SuperSonics|Enter activation code"
 msgstr ""
 
 msgid "SuperSonics|Expires on"
@@ -32347,6 +32155,9 @@ msgstr ""
 msgid "The GitLab user to which the Jira user %{jiraDisplayName} will be mapped"
 msgstr ""
 
+msgid "The ID of the application."
+msgstr ""
+
 msgid "The Issue Tracker is the place to add things that need to be improved or solved in a project"
 msgstr ""
 
@@ -32354,6 +32165,9 @@ msgid "The Issue Tracker is the place to add things that need to be improved or 
 msgstr ""
 
 msgid "The Prometheus server responded with \"bad request\". Please check your queries are correct and are supported in your Prometheus version. %{documentationLink}"
+msgstr ""
+
+msgid "The Snowplow cookie domain."
 msgstr ""
 
 msgid "The URL defined on the primary node that secondary nodes should use to contact it."
@@ -32527,6 +32341,9 @@ msgid "The group will be placed in 'pending removal' state"
 msgstr ""
 
 msgid "The group_project_ids parameter is only allowed for a group"
+msgstr ""
+
+msgid "The hostname of your Snowplow collector."
 msgstr ""
 
 msgid "The import will time out after %{timeout}. For repositories that take longer, use a clone/push combination."
@@ -34201,9 +34018,6 @@ msgstr ""
 msgid "To set up this service:"
 msgstr ""
 
-msgid "To simplify the billing process, GitLab will collect user counts in order to prorate charges for user growth throughout the year using a quarterly reconciliation process."
-msgstr ""
-
 msgid "To specify the notification level per project of a group you belong to, you need to visit project page and change notification level there."
 msgstr ""
 
@@ -34857,12 +34671,6 @@ msgstr ""
 msgid "Unhappy?"
 msgstr ""
 
-msgid "Uninstall"
-msgstr ""
-
-msgid "Uninstalling"
-msgstr ""
-
 msgid "Units|ms"
 msgstr ""
 
@@ -35086,9 +34894,6 @@ msgid "Updated"
 msgstr ""
 
 msgid "Updated %{updated_at} by %{updated_by}"
-msgstr ""
-
-msgid "Updated to %{linkStart}chart v%{linkEnd}"
 msgstr ""
 
 msgid "Updates"
@@ -35563,6 +35368,9 @@ msgid "User was successfully removed from project."
 msgstr ""
 
 msgid "User was successfully updated."
+msgstr ""
+
+msgid "UserAvailability|%{author} %{spanStart}(Busy)%{spanEnd}"
 msgstr ""
 
 msgid "UserAvailability|%{author} (Busy)"
@@ -37584,9 +37392,6 @@ msgstr ""
 msgid "You must provide your current password in order to change it."
 msgstr ""
 
-msgid "You must select a stack for configuring your cloud provider. Learn more about"
-msgstr ""
-
 msgid "You must solve the CAPTCHA in order to submit"
 msgstr ""
 
@@ -38157,6 +37962,9 @@ msgid "cannot be enabled because parent group has shared Runners disabled"
 msgstr ""
 
 msgid "cannot be enabled unless all domains have TLS certificates"
+msgstr ""
+
+msgid "cannot be enabled until a valid credit credit is on file"
 msgstr ""
 
 msgid "cannot be modified"
@@ -39274,6 +39082,9 @@ msgid "nounSeries|%{item}, and %{lastItem}"
 msgstr ""
 
 msgid "on track"
+msgstr ""
+
+msgid "only available on top-level groups."
 msgstr ""
 
 msgid "open issue"

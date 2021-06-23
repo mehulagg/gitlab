@@ -18,7 +18,7 @@ RSpec.describe 'Merge request > User sees status checks widget', :js do
   end
 
   before do
-    stub_licensed_features(compliance_approval_gates: true)
+    stub_licensed_features(external_status_checks: true)
   end
 
   context 'user is authorized' do
@@ -31,7 +31,7 @@ RSpec.describe 'Merge request > User sees status checks widget', :js do
 
     context 'feature flag is enabled' do
       before do
-        stub_feature_flags(ff_compliance_approval_gates: true)
+        stub_feature_flags(ff_external_status_checks: true)
       end
 
       it 'shows the widget' do
@@ -55,7 +55,7 @@ RSpec.describe 'Merge request > User sees status checks widget', :js do
 
     context 'feature flag is disabled' do
       before do
-        stub_feature_flags(ff_compliance_approval_gates: false)
+        stub_feature_flags(ff_external_status_checks: false)
       end
 
       it_behaves_like 'no status checks widget'

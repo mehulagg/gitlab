@@ -13,16 +13,16 @@ import projectBoardMembersQuery from '~/boards/graphql/project_board_members.que
 import actionsCE, { gqlClient } from '~/boards/stores/actions';
 import boardsStore from '~/boards/stores/boards_store';
 import * as typesCE from '~/boards/stores/mutation_types';
+import { getIdFromGraphQLId } from '~/graphql_shared/utils';
 import axios from '~/lib/utils/axios_utils';
-import {
-  historyPushState,
-  convertObjectPropsToCamelCase,
-  urlParamsToObject,
-} from '~/lib/utils/common_utils';
-import { mergeUrlParams, removeParams } from '~/lib/utils/url_utility';
+import { historyPushState, convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
+// eslint-disable-next-line import/no-deprecated
+import { mergeUrlParams, removeParams, urlParamsToObject } from '~/lib/utils/url_utility';
+import { s__ } from '~/locale';
 import {
   fullEpicId,
   fullEpicBoardId,
+  formatEpic,
   formatListEpics,
   formatEpicListsPageInfo,
   FiltersInfo,
@@ -30,6 +30,7 @@ import {
 
 import { EpicFilterType, GroupByParamType, FilterFields } from '../constants';
 import createEpicBoardListMutation from '../graphql/epic_board_list_create.mutation.graphql';
+import epicCreateMutation from '../graphql/epic_create.mutation.graphql';
 import epicMoveListMutation from '../graphql/epic_move_list.mutation.graphql';
 import epicsSwimlanesQuery from '../graphql/epics_swimlanes.query.graphql';
 import groupBoardIterationsQuery from '../graphql/group_board_iterations.query.graphql';
@@ -119,6 +120,7 @@ export default {
   performSearch({ dispatch, getters }) {
     dispatch(
       'setFilters',
+      // eslint-disable-next-line import/no-deprecated
       convertObjectPropsToCamelCase(urlParamsToObject(window.location.search)),
     );
 
@@ -601,6 +603,49 @@ export default {
       .catch((e) => {
         commit(types.CREATE_LIST_FAILURE);
         throw e;
+      });
+  },
+
+  addListNewEpic: (
+    { state: { fullPath }, dispatch, commit },
+    { epicInput, list, placeholderId = `tmp-${new Date().getTime()}` },
+  ) => {
+    const input = {
+      ...epicInput,
+      groupPath: fullPath,
+    };
+
+    const placeholderEpic = {
+      ...epicInput,
+      id: placeholderId,
+      isLoading: true,
+      labels: [],
+      assignees: [],
+    };
+
+    dispatch('addListItem', { list, item: placeholderEpic, position: 0, inProgress: true });
+
+    gqlClient
+      .mutate({
+        mutation: epicCreateMutation,
+        variables: { input },
+      })
+      .then(({ data }) => {
+        if (data.boardEpicCreate.errors?.length) {
+          throw new Error();
+        }
+
+        const rawEpic = data.boardEpicCreate?.epic;
+        const formattedEpic = formatEpic({ ...rawEpic, id: getIdFromGraphQLId(rawEpic.id) });
+        dispatch('removeListItem', { listId: list.id, itemId: placeholderId });
+        dispatch('addListItem', { list, item: formattedEpic, position: 0 });
+      })
+      .catch(() => {
+        dispatch('removeListItem', { listId: list.id, itemId: placeholderId });
+        commit(
+          types.SET_ERROR,
+          s__('Boards|An error occurred while creating the epic. Please try again.'),
+        );
       });
   },
 

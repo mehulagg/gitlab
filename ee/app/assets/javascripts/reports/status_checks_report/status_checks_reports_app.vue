@@ -72,8 +72,8 @@ export default {
     ),
     errorText: s__('StatusCheck|Failed to load status checks.'),
   },
-  docsLink: helpPagePath('user/project/merge_requests/approvals/index.md', {
-    anchor: 'notify-external-services',
+  docsLink: helpPagePath('user/project/merge_requests/status_checks.md', {
+    anchor: 'status-checks-widget',
   }),
 };
 </script>

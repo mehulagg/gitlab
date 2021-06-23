@@ -1,5 +1,5 @@
 import { GlForm, GlFormCheckbox, GlFormInput } from '@gitlab/ui';
-import { createLocalVue, shallowMount } from '@vue/test-utils';
+import { createLocalVue, mount, shallowMount } from '@vue/test-utils';
 import VueApollo from 'vue-apollo';
 import SubscriptionActivationForm, {
   SUBSCRIPTION_ACTIVATION_FAILURE_EVENT,
@@ -33,6 +33,7 @@ describe('CloudLicenseApp', () => {
 
   const findActivateButton = () => wrapper.findByTestId('activate-button');
   const findAgreementCheckbox = () => wrapper.findComponent(GlFormCheckbox);
+  const findAgreementCheckboxInput = () => findAgreementCheckbox().find('input');
   const findAgreementCheckboxFormGroup = () => wrapper.findByTestId('form-group-terms');
   const findActivationCodeFormGroup = () => wrapper.findByTestId('form-group-activation-code');
   const findActivationCodeInput = () => wrapper.findComponent(GlFormInput);
@@ -42,14 +43,14 @@ describe('CloudLicenseApp', () => {
     template: `<input />`,
   });
 
-  const createFakeEvent = () => ({
-    preventDefault,
-    stopPropagation,
-  });
-
-  const createComponentWithApollo = ({ props = {}, mutationMock } = {}) => {
+  const createFakeEvent = () => ({ preventDefault, stopPropagation });
+  const createComponentWithApollo = ({
+    props = {},
+    mutationMock,
+    mountMethod = shallowMount,
+  } = {}) => {
     wrapper = extendedWrapper(
-      shallowMount(SubscriptionActivationForm, {
+      mountMethod(SubscriptionActivationForm, {
         localVue,
         apolloProvider: createMockApolloProvider(mutationMock),
         propsData: {
@@ -121,10 +122,10 @@ describe('CloudLicenseApp', () => {
     describe('when submitting the mutation is successful', () => {
       const mutationMock = jest.fn().mockResolvedValue(activateLicenseMutationResponse.SUCCESS);
       beforeEach(async () => {
-        createComponentWithApollo({ mutationMock });
+        createComponentWithApollo({ mutationMock, mountMethod: mount });
         jest.spyOn(wrapper.vm, 'updateSubscriptionAppCache').mockImplementation();
         await findActivationCodeInput().vm.$emit('input', fakeActivationCode);
-        await findAgreementCheckbox().vm.$emit('input', true);
+        await findAgreementCheckboxInput().trigger('click');
         findActivateSubscriptionForm().vm.$emit('submit', createFakeEvent());
       });
 
@@ -168,9 +169,9 @@ describe('CloudLicenseApp', () => {
         .fn()
         .mockResolvedValue(activateLicenseMutationResponse.CONNECTIVITY_ERROR);
       beforeEach(async () => {
-        createComponentWithApollo({ mutationMock });
+        createComponentWithApollo({ mutationMock, mountMethod: mount });
         await findActivationCodeInput().vm.$emit('input', fakeActivationCode);
-        await findAgreementCheckbox().vm.$emit('input', true);
+        await findAgreementCheckboxInput().trigger('click');
         findActivateSubscriptionForm().vm.$emit('submit', createFakeEvent());
       });
 
@@ -186,9 +187,9 @@ describe('CloudLicenseApp', () => {
         .fn()
         .mockResolvedValue(activateLicenseMutationResponse.INVALID_CODE_ERROR);
       beforeEach(async () => {
-        createComponentWithApollo({ mutationMock });
+        createComponentWithApollo({ mutationMock, mountMethod: mount });
         await findActivationCodeInput().vm.$emit('input', fakeActivationCode);
-        await findAgreementCheckbox().vm.$emit('input', true);
+        await findAgreementCheckboxInput().trigger('click');
         findActivateSubscriptionForm().vm.$emit('submit', createFakeEvent());
       });
 

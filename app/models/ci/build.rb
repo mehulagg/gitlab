@@ -11,7 +11,6 @@ module Ci
     include Importable
     include Ci::HasRef
     include IgnorableColumns
-    include TaggableQueries
 
     BuildArchivedError = Class.new(StandardError)
 
@@ -136,6 +135,7 @@ module Ci
 
     scope :eager_load_job_artifacts, -> { includes(:job_artifacts) }
     scope :eager_load_job_artifacts_archive, -> { includes(:job_artifacts_archive) }
+    scope :eager_load_tags, -> { includes(:tags) }
 
     scope :eager_load_everything, -> do
       includes(
@@ -178,25 +178,6 @@ module Ci
       joins(:metadata).where("ci_builds_metadata.config_options -> 'artifacts' -> 'reports' ?| array[:job_types]", job_types: job_types)
     end
 
-    scope :matches_tag_ids, -> (tag_ids) do
-      matcher = ::ActsAsTaggableOn::Tagging
-        .where(taggable_type: CommitStatus.name)
-        .where(context: 'tags')
-        .where('taggable_id = ci_builds.id')
-        .where.not(tag_id: tag_ids).select('1')
-
-      where("NOT EXISTS (?)", matcher)
-    end
-
-    scope :with_any_tags, -> do
-      matcher = ::ActsAsTaggableOn::Tagging
-        .where(taggable_type: CommitStatus.name)
-        .where(context: 'tags')
-        .where('taggable_id = ci_builds.id').select('1')
-
-      where("EXISTS (?)", matcher)
-    end
-
     scope :queued_before, ->(time) { where(arel_table[:queued_at].lt(time)) }
 
     scope :preload_project_and_pipeline_project, -> do
@@ -212,7 +193,8 @@ module Ci
 
     acts_as_taggable
 
-    add_authentication_token_field :token, encrypted: :optional
+    add_authentication_token_field :token,
+      encrypted: -> { Gitlab::Ci::Features.require_builds_token_encryption? ? :required : :optional }
 
     before_save :ensure_token
     before_destroy { unscoped_project }
@@ -758,6 +740,14 @@ module Ci
       self.token && ActiveSupport::SecurityUtils.secure_compare(token, self.token)
     end
 
+    def tag_list
+      if tags.loaded?
+        tags.map(&:name)
+      else
+        super
+      end
+    end
+
     def has_tags?
       tag_list.any?
     end
@@ -939,8 +929,7 @@ module Ci
     end
 
     def supports_artifacts_exclude?
-      options&.dig(:artifacts, :exclude)&.any? &&
-        Gitlab::Ci::Features.artifacts_exclude_enabled?
+      options&.dig(:artifacts, :exclude)&.any?
     end
 
     def multi_build_steps?

@@ -3,23 +3,26 @@ import { GlButton, GlPopover, GlSprintf } from '@gitlab/ui';
 import { GlBreakpointInstance as bp } from '@gitlab/ui/dist/utils';
 import { debounce } from 'lodash';
 import { formatDate } from '~/lib/utils/datetime_utility';
-import { s__ } from '~/locale';
+import { sprintf } from '~/locale';
 import Tracking from '~/tracking';
+import { POPOVER, RESIZE_EVENT, TRACKING_PROPERTY } from './constants';
 
-const RESIZE_EVENT_DEBOUNCE_MS = 150;
+const {
+  i18n,
+  trackingEvents,
+  trialEndDateFormatString,
+  resizeEventDebounceMS,
+  disabledBreakpoints,
+} = POPOVER;
+const trackingMixin = Tracking.mixin({ property: TRACKING_PROPERTY });
 
 export default {
-  tracking: {
-    event: 'click_button',
-    labels: { upgrade: 'upgrade_to_ultimate', compare: 'compare_all_plans' },
-    property: 'experiment:show_trial_status_in_sidebar',
-  },
   components: {
     GlButton,
     GlPopover,
     GlSprintf,
   },
-  mixins: [Tracking.mixin()],
+  mixins: [trackingMixin],
   props: {
     containerId: {
       type: [String, null],
@@ -56,43 +59,47 @@ export default {
       disabled: false,
     };
   },
-  i18n: {
-    compareAllButtonTitle: s__('Trials|Compare all plans'),
-    popoverTitle: s__('Trials|Hey there'),
-    popoverContent: s__(`Trials|Your trial ends on
-      %{boldStart}%{trialEndDate}%{boldEnd}. We hope you’re enjoying the
-      features of GitLab %{planName}. To keep those features after your trial
-      ends, you’ll need to buy a subscription. (You can also choose GitLab
-      Premium if it meets your needs.)`),
-    upgradeButtonTitle: s__('Trials|Upgrade %{groupName} to %{planName}'),
-  },
+  i18n,
+  trackingEvents,
   computed: {
     formattedTrialEndDate() {
-      return formatDate(this.trialEndDate, 'mmmm d');
+      return formatDate(this.trialEndDate, trialEndDateFormatString);
+    },
+    upgradeButtonTitle() {
+      return sprintf(this.$options.i18n.upgradeButtonTitle, {
+        groupName: this.groupName,
+        planName: this.planName,
+      });
     },
   },
   created() {
-    this.debouncedResize = debounce(() => this.onResize(), RESIZE_EVENT_DEBOUNCE_MS);
-    window.addEventListener('resize', this.debouncedResize);
+    this.debouncedResize = debounce(() => this.onResize(), resizeEventDebounceMS);
+    window.addEventListener(RESIZE_EVENT, this.debouncedResize);
   },
   mounted() {
     this.onResize();
   },
   beforeDestroy() {
-    window.removeEventListener('resize', this.debouncedResize);
+    window.removeEventListener(RESIZE_EVENT, this.debouncedResize);
   },
   methods: {
     onResize() {
       this.updateDisabledState();
     },
     onShown() {
-      this.track('popover_shown', {
-        label: 'trial_status_popover',
-        property: 'experiment:show_trial_status_in_sidebar',
-      });
+      const { action, ...options } = this.$options.trackingEvents.popoverShown;
+      this.track(action, options);
+    },
+    onUpgradeBtnClick() {
+      const { action, ...options } = this.$options.trackingEvents.upgradeBtnClick;
+      this.track(action, options);
+    },
+    onCompareBtnClick() {
+      const { action, ...options } = this.$options.trackingEvents.compareBtnClick;
+      this.track(action, options);
     },
     updateDisabledState() {
-      this.disabled = ['xs', 'sm'].includes(bp.getBreakpointSize());
+      this.disabled = disabledBreakpoints.includes(bp.getBreakpointSize());
     },
   },
 };
@@ -129,17 +136,11 @@ export default {
         class="gl-mb-0"
         block
         data-testid="upgradeBtn"
-        :data-track-event="$options.tracking.event"
-        :data-track-label="$options.tracking.labels.upgrade"
-        :data-track-property="$options.tracking.property"
+        @click="onUpgradeBtnClick"
       >
-        <span class="gl-font-sm">
-          <gl-sprintf :message="$options.i18n.upgradeButtonTitle">
-            <template #groupName>{{ groupName }}</template>
-            <template #planName>{{ planName }}</template>
-          </gl-sprintf>
-        </span>
+        <span class="gl-font-sm">{{ upgradeButtonTitle }}</span>
       </gl-button>
+
       <gl-button
         :href="plansHref"
         category="secondary"
@@ -149,9 +150,7 @@ export default {
         block
         data-testid="compareBtn"
         :title="$options.i18n.compareAllButtonTitle"
-        :data-track-event="$options.tracking.event"
-        :data-track-label="$options.tracking.labels.compare"
-        :data-track-property="$options.tracking.property"
+        @click="onCompareBtnClick"
       >
         <span class="gl-font-sm">{{ $options.i18n.compareAllButtonTitle }}</span>
       </gl-button>

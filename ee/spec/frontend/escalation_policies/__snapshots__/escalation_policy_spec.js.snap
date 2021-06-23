@@ -117,5 +117,11 @@ exports[`EscalationPolicy renders policy with rules 1`] = `
     escalationpolicy="[object Object]"
     modalid="deleteEscalationPolicyModal-37"
   />
+   
+  <edit-escalation-policy-modal-stub
+    escalationpolicy="[object Object]"
+    iseditmode="true"
+    modalid="editEscalationPolicyModal-37"
+  />
 </div>
 `;

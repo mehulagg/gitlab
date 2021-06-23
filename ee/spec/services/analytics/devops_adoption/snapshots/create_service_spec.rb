@@ -8,10 +8,10 @@ RSpec.describe Analytics::DevopsAdoption::Snapshots::CreateService do
   let(:snapshot) { service_response.payload[:snapshot] }
   let(:params) do
     params = {}
-    Analytics::DevopsAdoption::SnapshotCalculator::BOOLEAN_METRICS.each.with_index do |attribute, i|
+    Analytics::DevopsAdoption::Snapshot::BOOLEAN_METRICS.each.with_index do |attribute, i|
       params[attribute] = i.odd?
     end
-    Analytics::DevopsAdoption::SnapshotCalculator::NUMERIC_METRICS.each.with_index do |attribute, i|
+    Analytics::DevopsAdoption::Snapshot::NUMERIC_METRICS.each.with_index do |attribute, i|
       params[attribute] = i
     end
 

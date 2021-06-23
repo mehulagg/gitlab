@@ -54,6 +54,16 @@ RSpec.describe Gitlab::GitAccessWiki do
             expect { pull_changes(changes) }.not_to raise_error
           end
         end
+
+        context 'when the group is renamed' do
+          let(:redirected_path) { 'some/other-path' }
+
+          it 'enqueues a redirected message for pushing' do
+            subject
+
+            expect(Gitlab::Checks::ContainerMoved.fetch_message(user, wiki.repository)).not_to be_nil
+          end
+        end
       end
 
       context 'when user cannot :create_wiki' do

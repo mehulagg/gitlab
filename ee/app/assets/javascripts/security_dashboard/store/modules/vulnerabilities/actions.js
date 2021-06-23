@@ -1,7 +1,11 @@
 import _ from 'lodash';
 import createFlash from '~/flash';
 import axios from '~/lib/utils/axios_utils';
-import { parseIntPagination, normalizeHeaders } from '~/lib/utils/common_utils';
+import {
+  parseIntPagination,
+  normalizeHeaders,
+  convertObjectPropsToCamelCase,
+} from '~/lib/utils/common_utils';
 import download from '~/lib/utils/downloader';
 import { s__, n__, sprintf } from '~/locale';
 import toast from '~/vue_shared/plugins/global_toast';
@@ -72,11 +76,16 @@ export const requestVulnerabilities = ({ commit }) => {
 export const receiveVulnerabilitiesSuccess = ({ commit }, { headers, data }) => {
   const normalizedHeaders = normalizeHeaders(headers);
   const pageInfo = parseIntPagination(normalizedHeaders);
-  // Vulnerabilities on pipelines don't have IDs.
-  // We need to add dummy IDs here to avoid rendering issues.
+
   const vulnerabilities = data.map((vulnerability) => ({
     ...vulnerability,
+    // Vulnerabilities on pipelines don't have IDs.
+    // We need to add dummy IDs here to avoid rendering issues.
     id: vulnerability.id || _.uniqueId('client_'),
+    // The generic report component expects all fields within `vulnerability.details` to be in camelCase
+    ...(vulnerability.details && {
+      details: convertObjectPropsToCamelCase(vulnerability.details, { deep: true }),
+    }),
   }));
 
   commit(types.RECEIVE_VULNERABILITIES_SUCCESS, { pageInfo, vulnerabilities });

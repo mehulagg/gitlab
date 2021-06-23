@@ -1,4 +1,4 @@
-import { GlFormGroup, GlFormInput, GlFormText } from '@gitlab/ui';
+import { GlFormGroup, GlFormInput } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
 import DefaultStageFields from 'ee/analytics/cycle_analytics/components/create_value_stream_form/default_stage_fields.vue';
 import StageFieldActions from 'ee/analytics/cycle_analytics/components/create_value_stream_form/stage_field_actions.vue';
@@ -37,13 +37,11 @@ describe('DefaultStageFields', () => {
   }
 
   const findStageFieldName = () => wrapper.find('[name="create-value-stream-stage-0"]');
-  const findStageFieldNameInput = () => findStageFieldName().find(GlFormInput);
+  const findStageFieldNameInput = () => findStageFieldName().findComponent(GlFormInput);
   const findStartEvent = () => wrapper.find('[data-testid="stage-start-event-0"]');
-  const findStartEventInput = () => findStartEvent().find(GlFormText);
   const findEndEvent = () => wrapper.find('[data-testid="stage-end-event-0"]');
-  const findEndEventInput = () => findEndEvent().find(GlFormText);
-  const findFormGroup = () => wrapper.find(GlFormGroup);
-  const findFieldActions = () => wrapper.find(StageFieldActions);
+  const findFormGroup = () => wrapper.findComponent(GlFormGroup);
+  const findFieldActions = () => wrapper.findComponent(StageFieldActions);
 
   beforeEach(() => {
     wrapper = createComponent();
@@ -64,12 +62,11 @@ describe('DefaultStageFields', () => {
   });
 
   it('renders the field start event', () => {
-    expect(findStartEventInput().exists()).toBe(true);
-    expect(findStartEventInput().text()).toBe(ISSUE_CREATED.name);
+    expect(findStartEvent().text()).toContain(ISSUE_CREATED.name);
   });
 
   it('renders the field end event', () => {
-    expect(findEndEventInput().text()).toBe(ISSUE_CLOSED.name);
+    expect(findEndEvent().text()).toContain(ISSUE_CLOSED.name);
   });
 
   it('does not emits any input', () => {

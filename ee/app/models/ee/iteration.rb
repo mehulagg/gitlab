@@ -6,7 +6,7 @@ module EE
 
     STATE_ENUM_MAP = {
       upcoming: 1,
-      started: 2,
+      current: 2,
       closed: 3
     }.with_indifferent_access.freeze
 
@@ -55,8 +55,9 @@ module EE
       scope :due_date_order_asc, -> { order(:due_date) }
       scope :due_date_order_desc, -> { order(due_date: :desc) }
       scope :upcoming, -> { with_state(:upcoming) }
-      scope :started, -> { with_state(:started) }
+      scope :current, -> { with_state(:current) }
       scope :closed, -> { with_state(:closed) }
+      scope :opened, -> { with_states(:current, :upcoming) }
       scope :by_iteration_cadence_ids, ->(cadence_ids) { where(iterations_cadence_id: cadence_ids) }
       scope :with_start_date_after, ->(date) { where('start_date > :date', date: date) }
 
@@ -70,11 +71,11 @@ module EE
 
       state_machine :state_enum, initial: :upcoming do
         event :start do
-          transition upcoming: :started
+          transition upcoming: :current
         end
 
         event :close do
-          transition [:upcoming, :started] => :closed
+          transition [:upcoming, :current] => :closed
         end
 
         after_transition any => [:closed] do |iteration|
@@ -84,13 +85,25 @@ module EE
         end
 
         state :upcoming, value: Iteration::STATE_ENUM_MAP[:upcoming]
-        state :started, value: Iteration::STATE_ENUM_MAP[:started]
+        state :current, value: Iteration::STATE_ENUM_MAP[:current]
         state :closed, value: Iteration::STATE_ENUM_MAP[:closed]
       end
 
       class << self
         alias_method :with_state, :with_state_enum
         alias_method :with_states, :with_state_enums
+
+        def compute_state(start_date, due_date)
+          today = Date.today
+
+          if start_date > today
+            :upcoming
+          elsif due_date < today
+            :closed
+          else
+            :current
+          end
+        end
       end
     end
 
@@ -121,9 +134,9 @@ module EE
       def filter_by_state(iterations, state)
         case state
         when 'closed' then iterations.closed
-        when 'started' then iterations.started
+        when 'current' then iterations.current
         when 'upcoming' then iterations.upcoming
-        when 'opened' then iterations.started.or(iterations.upcoming)
+        when 'opened' then iterations.opened
         when 'all' then iterations
         else raise ArgumentError, "Unknown state filter: #{state}"
         end
@@ -219,19 +232,7 @@ module EE
     end
 
     def set_iteration_state
-      self.state = compute_state
-    end
-
-    def compute_state
-      today = Date.today
-
-      if start_date > today
-        :upcoming
-      elsif due_date < today
-        :closed
-      else
-        :started
-      end
+      self.state = self.class.compute_state(start_date, due_date)
     end
 
     # TODO: this method should be removed as part of https://gitlab.com/gitlab-org/gitlab/-/issues/296099

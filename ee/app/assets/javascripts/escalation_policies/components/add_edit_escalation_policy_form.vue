@@ -1,9 +1,9 @@
 <script>
 import { GlLink, GlForm, GlFormGroup, GlFormInput } from '@gitlab/ui';
-import { cloneDeep } from 'lodash';
+import { cloneDeep, uniqueId } from 'lodash';
 import createFlash from '~/flash';
 import { s__, __ } from '~/locale';
-import { DEFAULT_ESCALATION_RULE } from '../constants';
+import { DEFAULT_ACTION, DEFAULT_ESCALATION_RULE } from '../constants';
 import getOncallSchedulesQuery from '../graphql/queries/get_oncall_schedules.query.graphql';
 import EscalationRule from './escalation_rule.vue';
 
@@ -48,7 +48,6 @@ export default {
     return {
       schedules: [],
       rules: [],
-      uid: 0,
     };
   },
   apollo: {
@@ -74,11 +73,29 @@ export default {
     },
   },
   mounted() {
-    this.addRule();
+    this.rules = this.form.rules.map((rule) => {
+      const {
+        status,
+        elapsedTimeSeconds,
+        oncallSchedule: { iid: oncallScheduleIid },
+      } = rule;
+
+      return {
+        status,
+        elapsedTimeSeconds,
+        action: DEFAULT_ACTION,
+        oncallScheduleIid,
+        key: uniqueId(),
+      };
+    });
+
+    if (!this.rules.length) {
+      this.addRule();
+    }
   },
   methods: {
     addRule() {
-      this.rules.push({ ...cloneDeep(DEFAULT_ESCALATION_RULE), key: this.getUid() });
+      this.rules.push({ ...cloneDeep(DEFAULT_ESCALATION_RULE), key: uniqueId() });
     },
     updateEscalationRules(index, rule) {
       this.rules[index] = { ...this.rules[index], ...rule };
@@ -90,10 +107,6 @@ export default {
     },
     emitRulesUpdate() {
       this.$emit('update-escalation-policy-form', { field: 'rules', value: this.rules });
-    },
-    getUid() {
-      this.uid += 1;
-      return this.uid;
     },
   },
 };

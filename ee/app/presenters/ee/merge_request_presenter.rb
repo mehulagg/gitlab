@@ -69,7 +69,7 @@ module EE
     private
 
     def expose_mr_status_checks?
-      ::Feature.enabled?(:ff_compliance_approval_gates, project, default_enabled: :yaml) &&
+      ::Feature.enabled?(:ff_external_status_checks, project, default_enabled: :yaml) &&
         current_user.present? &&
         project.external_status_checks.any?
     end

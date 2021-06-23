@@ -16,7 +16,7 @@ module QA
       # The user that signs in via the IDP with username `user3` and password `user3pass`
       # will have `user_3` as username in GitLab
       let(:user) do
-        QA::Resource::User.new.tap do |user|
+        QA::Resource::User.init do |user|
           user.username = 'user_3'
           user.email = 'user_3@example.com'
           user.name = 'User Three'

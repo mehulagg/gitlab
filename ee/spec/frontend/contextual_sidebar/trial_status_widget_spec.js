@@ -1,10 +1,13 @@
 import { GlLink } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
-
+import { TRACKING_PROPERTY, WIDGET } from 'ee/contextual_sidebar/components/constants';
 import TrialStatusWidget from 'ee/contextual_sidebar/components/trial_status_widget.vue';
+import { mockTracking, unmockTracking } from 'helpers/tracking_helper';
 
 describe('TrialStatusWidget component', () => {
   let wrapper;
+
+  const { trackingEvents } = WIDGET;
 
   const findGlLink = () => wrapper.findComponent(GlLink);
 
@@ -26,6 +29,14 @@ describe('TrialStatusWidget component', () => {
     wrapper = null;
   });
 
+  describe('interpolated strings', () => {
+    it('correctly interpolates them all', () => {
+      wrapper = createComponent();
+
+      expect(wrapper.text()).not.toMatch(/%{\w+}/);
+    });
+  });
+
   describe('without the optional containerId prop', () => {
     beforeEach(() => {
       wrapper = createComponent();
@@ -39,11 +50,18 @@ describe('TrialStatusWidget component', () => {
       expect(findGlLink().attributes('id')).toBe(undefined);
     });
 
-    it('renders with the correct tracking data attributes', () => {
-      const attrs = findGlLink().attributes();
-      expect(attrs['data-track-event']).toBe('click_link');
-      expect(attrs['data-track-label']).toBe('trial_status_widget');
-      expect(attrs['data-track-property']).toBe('experiment:show_trial_status_in_sidebar');
+    it('tracks when the widget is clicked', () => {
+      const { action, ...options } = trackingEvents.widgetClick;
+      const trackingSpy = mockTracking(undefined, undefined, jest.spyOn);
+
+      findGlLink().vm.$emit('click');
+
+      expect(trackingSpy).toHaveBeenCalledWith(undefined, action, {
+        ...options,
+        property: TRACKING_PROPERTY,
+      });
+
+      unmockTracking();
     });
   });
 

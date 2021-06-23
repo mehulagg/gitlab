@@ -35,14 +35,14 @@ RSpec.describe Project, factory_default: :keep do
     it { is_expected.to have_many(:hooks) }
     it { is_expected.to have_many(:protected_branches) }
     it { is_expected.to have_many(:exported_protected_branches) }
-    it { is_expected.to have_one(:slack_service) }
-    it { is_expected.to have_one(:microsoft_teams_service) }
-    it { is_expected.to have_one(:mattermost_service) }
+    it { is_expected.to have_one(:slack_integration) }
+    it { is_expected.to have_one(:microsoft_teams_integration) }
+    it { is_expected.to have_one(:mattermost_integration) }
     it { is_expected.to have_one(:hangouts_chat_integration) }
-    it { is_expected.to have_one(:unify_circuit_service) }
-    it { is_expected.to have_one(:webex_teams_service) }
-    it { is_expected.to have_one(:packagist_service) }
-    it { is_expected.to have_one(:pushover_service) }
+    it { is_expected.to have_one(:unify_circuit_integration) }
+    it { is_expected.to have_one(:webex_teams_integration) }
+    it { is_expected.to have_one(:packagist_integration) }
+    it { is_expected.to have_one(:pushover_integration) }
     it { is_expected.to have_one(:asana_integration) }
     it { is_expected.to have_many(:boards) }
     it { is_expected.to have_one(:campfire_integration) }
@@ -50,19 +50,19 @@ RSpec.describe Project, factory_default: :keep do
     it { is_expected.to have_one(:discord_integration) }
     it { is_expected.to have_one(:drone_ci_integration) }
     it { is_expected.to have_one(:emails_on_push_integration) }
-    it { is_expected.to have_one(:pipelines_email_service) }
+    it { is_expected.to have_one(:pipelines_email_integration) }
     it { is_expected.to have_one(:irker_integration) }
-    it { is_expected.to have_one(:pivotaltracker_service) }
+    it { is_expected.to have_one(:pivotaltracker_integration) }
     it { is_expected.to have_one(:flowdock_integration) }
     it { is_expected.to have_one(:assembla_integration) }
-    it { is_expected.to have_one(:slack_slash_commands_service) }
-    it { is_expected.to have_one(:mattermost_slash_commands_service) }
+    it { is_expected.to have_one(:slack_slash_commands_integration) }
+    it { is_expected.to have_one(:mattermost_slash_commands_integration) }
     it { is_expected.to have_one(:buildkite_integration) }
     it { is_expected.to have_one(:bamboo_integration) }
-    it { is_expected.to have_one(:teamcity_service) }
-    it { is_expected.to have_one(:jira_service) }
-    it { is_expected.to have_one(:redmine_service) }
-    it { is_expected.to have_one(:youtrack_service) }
+    it { is_expected.to have_one(:teamcity_integration) }
+    it { is_expected.to have_one(:jira_integration) }
+    it { is_expected.to have_one(:redmine_integration) }
+    it { is_expected.to have_one(:youtrack_integration) }
     it { is_expected.to have_one(:custom_issue_tracker_integration) }
     it { is_expected.to have_one(:bugzilla_integration) }
     it { is_expected.to have_one(:ewm_integration) }
@@ -80,6 +80,8 @@ RSpec.describe Project, factory_default: :keep do
     it { is_expected.to have_one(:error_tracking_setting).class_name('ErrorTracking::ProjectErrorTrackingSetting') }
     it { is_expected.to have_one(:project_setting) }
     it { is_expected.to have_one(:alerting_setting).class_name('Alerting::ProjectAlertingSetting') }
+    it { is_expected.to have_one(:mock_ci_integration) }
+    it { is_expected.to have_one(:mock_monitoring_integration) }
     it { is_expected.to have_many(:commit_statuses) }
     it { is_expected.to have_many(:ci_pipelines) }
     it { is_expected.to have_many(:ci_refs) }
@@ -1444,13 +1446,13 @@ RSpec.describe Project, factory_default: :keep do
     end
   end
 
-  describe '.with_active_jira_services' do
-    it 'returns the correct project' do
-      active_jira_service = create(:jira_service)
+  describe '.with_active_jira_integrations' do
+    it 'returns the correct integrations' do
+      active_jira_integration = create(:jira_integration)
       active_service = create(:service, active: true)
 
-      expect(described_class.with_active_jira_services).to include(active_jira_service.project)
-      expect(described_class.with_active_jira_services).not_to include(active_service.project)
+      expect(described_class.with_active_jira_integrations).to include(active_jira_integration.project)
+      expect(described_class.with_active_jira_integrations).not_to include(active_service.project)
     end
   end
 
@@ -1561,7 +1563,7 @@ RSpec.describe Project, factory_default: :keep do
     end
 
     it 'avoid n + 1' do
-      expect { described_class.with_service(:prometheus_service).map(&:prometheus_service) }.not_to exceed_query_limit(1)
+      expect { described_class.with_service(:prometheus_integration).map(&:prometheus_integration) }.not_to exceed_query_limit(1)
     end
   end
 
@@ -3083,8 +3085,8 @@ RSpec.describe Project, factory_default: :keep do
 
     context 'LFS disabled in group' do
       before do
+        stub_lfs_setting(enabled: true)
         project.namespace.update_attribute(:lfs_enabled, false)
-        enable_lfs
       end
 
       it_behaves_like 'project overrides group'
@@ -3092,14 +3094,18 @@ RSpec.describe Project, factory_default: :keep do
 
     context 'LFS enabled in group' do
       before do
+        stub_lfs_setting(enabled: true)
         project.namespace.update_attribute(:lfs_enabled, true)
-        enable_lfs
       end
 
       it_behaves_like 'project overrides group'
     end
 
     describe 'LFS disabled globally' do
+      before do
+        stub_lfs_setting(enabled: false)
+      end
+
       shared_examples 'it always returns false' do
         it do
           expect(project.lfs_enabled?).to be_falsey
@@ -3910,10 +3916,6 @@ RSpec.describe Project, factory_default: :keep do
         expect(project.mr_can_target_upstream?).to be_falsey
       end
     end
-  end
-
-  def enable_lfs
-    allow(Gitlab.config.lfs).to receive(:enabled).and_return(true)
   end
 
   describe '#pages_url' do
@@ -5367,26 +5369,26 @@ RSpec.describe Project, factory_default: :keep do
   end
 
   describe '#execute_services' do
-    let(:service) { create(:slack_service, push_events: true, merge_requests_events: false, active: true) }
+    let(:integration) { create(:integrations_slack, push_events: true, merge_requests_events: false, active: true) }
 
-    it 'executes services with the specified scope' do
+    it 'executes integrations with the specified scope' do
       data = 'any data'
 
       expect_next_found_instance_of(Integrations::Slack) do |instance|
         expect(instance).to receive(:async_execute).with(data).once
       end
 
-      service.project.execute_services(data, :push_hooks)
+      integration.project.execute_services(data, :push_hooks)
     end
 
-    it 'does not execute services that don\'t match the specified scope' do
+    it 'does not execute integration that don\'t match the specified scope' do
       expect(Integrations::Slack).not_to receive(:allocate).and_wrap_original do |method|
         method.call.tap do |instance|
           expect(instance).not_to receive(:async_execute)
         end
       end
 
-      service.project.execute_services(anything, :merge_request_hooks)
+      integration.project.execute_services(anything, :merge_request_hooks)
     end
   end
 
@@ -5868,26 +5870,6 @@ RSpec.describe Project, factory_default: :keep do
     end
   end
 
-  describe '#disabled_services' do
-    subject { build(:project).disabled_services }
-
-    context 'without datadog_ci_integration' do
-      before do
-        stub_feature_flags(datadog_ci_integration: false)
-      end
-
-      it { is_expected.to include('datadog') }
-    end
-
-    context 'with datadog_ci_integration' do
-      before do
-        stub_feature_flags(datadog_ci_integration: true)
-      end
-
-      it { is_expected.not_to include('datadog') }
-    end
-  end
-
   describe '#find_or_initialize_service' do
     it 'avoids N+1 database queries' do
       allow(Integration).to receive(:available_services_names).and_return(%w[prometheus pushover])
@@ -5909,7 +5891,7 @@ RSpec.describe Project, factory_default: :keep do
       subject { create(:project) }
 
       before do
-        create(:prometheus_service, project: subject, api_url: 'https://prometheus.project.com/')
+        create(:prometheus_integration, project: subject, api_url: 'https://prometheus.project.com/')
       end
 
       it 'retrieves the integration' do
@@ -5919,8 +5901,8 @@ RSpec.describe Project, factory_default: :keep do
 
     context 'with an instance-level and template integrations' do
       before do
-        create(:prometheus_service, :instance, api_url: 'https://prometheus.instance.com/')
-        create(:prometheus_service, :template, api_url: 'https://prometheus.template.com/')
+        create(:prometheus_integration, :instance, api_url: 'https://prometheus.instance.com/')
+        create(:prometheus_integration, :template, api_url: 'https://prometheus.template.com/')
       end
 
       it 'builds the service from the instance if exists' do
@@ -5930,7 +5912,7 @@ RSpec.describe Project, factory_default: :keep do
 
     context 'with an instance-level and template integrations' do
       before do
-        create(:prometheus_service, :template, api_url: 'https://prometheus.template.com/')
+        create(:prometheus_integration, :template, api_url: 'https://prometheus.template.com/')
       end
 
       it 'builds the service from the template if instance does not exists' do
@@ -5940,7 +5922,7 @@ RSpec.describe Project, factory_default: :keep do
 
     context 'without an exisiting integration, nor instance-level or template' do
       it 'builds the service if instance or template does not exists' do
-        expect(subject.find_or_initialize_service('prometheus')).to be_a(PrometheusService)
+        expect(subject.find_or_initialize_service('prometheus')).to be_a(::Integrations::Prometheus)
         expect(subject.find_or_initialize_service('prometheus').api_url).to be_nil
       end
     end
@@ -6621,13 +6603,13 @@ RSpec.describe Project, factory_default: :keep do
     end
   end
 
-  describe '#prometheus_service_active?' do
+  describe '#prometheus_integration_active?' do
     let(:project) { create(:project) }
 
-    subject { project.prometheus_service_active? }
+    subject { project.prometheus_integration_active? }
 
     before do
-      create(:prometheus_service, project: project, manual_configuration: manual_configuration)
+      create(:prometheus_integration, project: project, manual_configuration: manual_configuration)
     end
 
     context 'when project has an activated prometheus service' do

@@ -14,7 +14,7 @@ class Groups::EpicBoardsController < Groups::ApplicationController
 
   track_redis_hll_event :index, :show, name: 'g_project_management_users_viewing_epic_boards'
 
-  feature_category :boards
+  feature_category :epics
 
   private
 

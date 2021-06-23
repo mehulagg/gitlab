@@ -31,8 +31,8 @@ exports[`IterationDropdown default shows gl-dropdown 1`] = `
     secondarytext=""
   >
     
-      No iteration
-    
+    No iteration
+  
   </gl-dropdown-item-stub>
    
   <gl-dropdown-divider-stub />

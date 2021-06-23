@@ -112,6 +112,14 @@ You can filter by the following:
 - Author
 - Label
 
+### View count of issues and weight in an epic
+
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/331330) in GitLab 14.1.
+
+Epics on an epic board show a summary of their issues and weight.
+To see the number of open and closed issues and the completed and incomplete weight,
+hover over the issues icon **{issues}** or weight icon **{weight}**.
+
 ### Move epics and lists
 
 > [Introduced](https://gitlab.com/groups/gitlab-org/-/epics/5079) in GitLab 14.0.

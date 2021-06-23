@@ -10,10 +10,17 @@ module Ci
          resource_group scheduling_type].freeze
     end
 
+    def self.extra_accessors
+      []
+    end
+
     def execute(build)
       build.ensure_scheduling_type!
 
       reprocess!(build).tap do |new_build|
+        check_assignable_runners!(new_build)
+        next if new_build.failed?
+
         Gitlab::OptimisticLocking.retry_lock(new_build, name: 'retry_build', &:enqueue)
         AfterRequeueJobService.new(project, current_user).execute(build)
 
@@ -49,6 +56,8 @@ module Ci
         raise Gitlab::Access::AccessDeniedError
       end
     end
+
+    def check_assignable_runners!(build); end
 
     def create_build!(attributes)
       build = project.builds.new(attributes)

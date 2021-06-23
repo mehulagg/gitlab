@@ -18,9 +18,10 @@ import { groupLabels } from '../../mock_data';
 
 const selectedLabelIds = [groupLabels[0].id];
 
-const findSubjectFilters = (ctx) => ctx.find(GlSegmentedControl);
+const findSubjectFilters = (ctx) => ctx.findComponent(GlSegmentedControl);
 const findSelectedSubjectFilters = (ctx) => findSubjectFilters(ctx).attributes('checked');
-const findDropdownLabels = (ctx) => ctx.find(LabelsSelector).findAll(GlDropdownItem);
+const findDropdownLabels = (ctx) =>
+  ctx.findComponent(LabelsSelector).findAllComponents(GlDropdownItem);
 
 const selectLabelAtIndex = (ctx, index) => {
   findDropdownLabels(ctx).at(index).trigger('click');
@@ -117,7 +118,7 @@ describe('TasksByTypeFilters', () => {
     it('emits the `update-filter` event when a label is selected', () => {
       expect(wrapper.emitted('update-filter')).toBeUndefined();
 
-      wrapper.find(LabelsSelector).vm.$emit('select-label', groupLabels[0].id);
+      wrapper.findComponent(LabelsSelector).vm.$emit('select-label', groupLabels[0].id);
 
       expect(wrapper.emitted('update-filter')).toBeDefined();
       expect(wrapper.emitted('update-filter')[0]).toEqual([
@@ -161,7 +162,7 @@ describe('TasksByTypeFilters', () => {
         });
 
         return waitForPromises().then(() => {
-          wrapper.find(LabelsSelector).vm.$emit('select-label', groupLabels[2].id);
+          wrapper.findComponent(LabelsSelector).vm.$emit('select-label', groupLabels[2].id);
         });
       });
 

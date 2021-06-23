@@ -1,10 +1,13 @@
 <script>
 import { GlModal, GlAlert } from '@gitlab/ui';
-import { set } from 'lodash';
+import { set, isEqual } from 'lodash';
 import { s__, __ } from '~/locale';
-import { addEscalationPolicyModalId } from '../constants';
-import { updateStoreOnEscalationPolicyCreate } from '../graphql/cache_updates';
+import {
+  updateStoreOnEscalationPolicyCreate,
+  updateStoreOnEscalationPolicyUpdate,
+} from '../graphql/cache_updates';
 import createEscalationPolicyMutation from '../graphql/mutations/create_escalation_policy.mutation.graphql';
+import updateEscalationPolicyMutation from '../graphql/mutations/update_escalation_policy.mutation.graphql';
 import getEscalationPoliciesQuery from '../graphql/queries/get_escalation_policies.query.graphql';
 import { isNameFieldValid, getRulesValidationState } from '../utils';
 import AddEditEscalationPolicyForm from './add_edit_escalation_policy_form.vue';
@@ -17,7 +20,6 @@ export const i18n = {
 
 export default {
   i18n,
-  addEscalationPolicyModalId,
   components: {
     GlModal,
     GlAlert,
@@ -30,15 +32,21 @@ export default {
       required: false,
       default: () => ({}),
     },
+    isEditMode: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
+    modalId: {
+      type: String,
+      required: true,
+    },
   },
   data() {
     return {
       loading: false,
-      form: {
-        name: this.escalationPolicy.name,
-        description: this.escalationPolicy.description,
-        rules: [],
-      },
+      form: this.getInitialState(),
+      initialState: this.getInitialState(),
       validationState: {
         name: null,
         rules: [],
@@ -47,14 +55,17 @@ export default {
     };
   },
   computed: {
+    title() {
+      return this.isEditMode ? i18n.editEscalationPolicy : i18n.addEscalationPolicy;
+    },
     actionsProps() {
       return {
         primary: {
-          text: i18n.addEscalationPolicy,
+          text: this.title,
           attributes: [
             { variant: 'info' },
             { loading: this.loading },
-            { disabled: !this.isFormValid },
+            { disabled: !this.isFormValid || !this.isFormDirty },
           ],
         },
         cancel: {
@@ -65,13 +76,32 @@ export default {
     isFormValid() {
       return (
         this.validationState.name &&
+        (this.isEditMode ? true : this.validationState.rules.length) &&
         this.validationState.rules.every(
           ({ isTimeValid, isScheduleValid }) => isTimeValid && isScheduleValid,
         )
       );
     },
+    isFormDirty() {
+      return (
+        this.form.name !== this.initialState.name ||
+        this.form.description !== this.initialState.description ||
+        !isEqual(this.getRules(this.form.rules), this.getRules(this.initialState.rules))
+      );
+    },
+    requestParams() {
+      const id = this.isEditMode ? { id: this.escalationPolicy.id } : {};
+      return { ...this.form, ...id, rules: this.getRules(this.form.rules) };
+    },
   },
   methods: {
+    getInitialState() {
+      return {
+        name: this.escalationPolicy.name ?? '',
+        description: this.escalationPolicy.description ?? '',
+        rules: this.escalationPolicy.rules ?? [],
+      };
+    },
     updateForm({ field, value }) {
       set(this.form, field, value);
       this.validateForm(field);
@@ -85,7 +115,7 @@ export default {
           variables: {
             input: {
               projectPath,
-              ...this.getRequestParams(),
+              ...this.requestParams,
             },
           },
           update(store, { data }) {
@@ -117,14 +147,51 @@ export default {
           this.loading = false;
         });
     },
-    getRequestParams() {
-      const rules = this.form.rules.map(({ status, elapsedTimeSeconds, oncallScheduleIid }) => ({
-        status,
-        elapsedTimeSeconds,
-        oncallScheduleIid,
-      }));
-
-      return { ...this.form, rules };
+    updateEscalationPolicy() {
+      this.loading = true;
+      const { projectPath } = this;
+      this.$apollo
+        .mutate({
+          mutation: updateEscalationPolicyMutation,
+          variables: {
+            input: this.requestParams,
+          },
+          update(store, { data }) {
+            updateStoreOnEscalationPolicyUpdate(store, getEscalationPoliciesQuery, data, {
+              projectPath,
+            });
+          },
+        })
+        .then(
+          ({
+            data: {
+              escalationPolicyUpdate: {
+                errors: [error],
+              },
+            },
+          }) => {
+            if (error) {
+              throw error;
+            }
+            this.$refs.addUpdateEscalationPolicyModal.hide();
+            this.resetForm();
+          },
+        )
+        .catch((error) => {
+          this.error = error;
+        })
+        .finally(() => {
+          this.loading = false;
+        });
+    },
+    getRules(rules) {
+      return rules.map(
+        ({ status, elapsedTimeSeconds, oncallScheduleIid, oncallSchedule: { iid } = {} }) => ({
+          status,
+          elapsedTimeSeconds,
+          oncallScheduleIid: oncallScheduleIid || iid,
+        }),
+      );
     },
     validateForm(field) {
       if (field === 'name') {
@@ -138,11 +205,21 @@ export default {
       this.error = null;
     },
     resetForm() {
-      this.form = {
-        name: '',
-        description: '',
-        rules: [],
-      };
+      if (this.isEditMode) {
+        const { name, description, rules } = this.escalationPolicy;
+        this.form = {
+          name,
+          description,
+          rules,
+        };
+      } else {
+        this.form = {
+          name: '',
+          description: '',
+          rules: [],
+        };
+      }
+
       this.validationState = {
         name: null,
         rules: [],
@@ -157,11 +234,11 @@ export default {
   <gl-modal
     ref="addUpdateEscalationPolicyModal"
     class="escalation-policy-modal"
-    :modal-id="$options.addEscalationPolicyModalId"
-    :title="$options.i18n.addEscalationPolicy"
+    :modal-id="modalId"
+    :title="title"
     :action-primary="actionsProps.primary"
     :action-cancel="actionsProps.cancel"
-    @primary.prevent="createEscalationPolicy"
+    @primary.prevent="isEditMode ? updateEscalationPolicy() : createEscalationPolicy()"
     @canceled="resetForm"
     @close="resetForm"
   >

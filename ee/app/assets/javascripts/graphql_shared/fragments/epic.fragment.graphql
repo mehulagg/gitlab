@@ -7,6 +7,7 @@ fragment EpicNode on Epic {
   title
   state
   reference
+  referencePath: reference(full: true)
   webPath
   webUrl
   createdAt

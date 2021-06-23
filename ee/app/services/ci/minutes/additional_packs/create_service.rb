@@ -3,9 +3,7 @@
 module Ci
   module Minutes
     module AdditionalPacks
-      class CreateService
-        include BaseServiceUtility
-
+      class CreateService < ::Ci::Minutes::AdditionalPacks::BaseService
         def initialize(current_user, namespace, params = {})
           @current_user = current_user
           @namespace = namespace

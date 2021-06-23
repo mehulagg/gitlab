@@ -180,29 +180,42 @@ RSpec.describe Resolvers::EpicsResolver do
         let!(:epic1) { create(:epic, group: group, title: 'first created', description: 'description', start_date: 10.days.ago, end_date: 10.days.from_now) }
         let!(:epic2) { create(:epic, group: group, title: 'second created', description: 'text 1', start_date: 20.days.ago, end_date: 20.days.from_now) }
         let!(:epic3) { create(:epic, group: group, title: 'third', description: 'text 2', start_date: 30.days.ago, end_date: 30.days.from_now) }
+        let!(:epic4) { create(:epic, group: group, title: 'forth created', description: 'four', start_date: 40.days.ago, end_date: 40.days.from_now) }
 
         it 'orders epics by start date in descending order' do
           epics = resolve_epics(sort: 'start_date_desc')
 
-          expect(epics).to eq([epic1, epic2, epic3])
+          expect(epics).to eq([epic1, epic2, epic3, epic4])
         end
 
         it 'orders epics by start date in ascending order' do
           epics = resolve_epics(sort: 'start_date_asc')
 
-          expect(epics).to eq([epic3, epic2, epic1])
+          expect(epics).to eq([epic4, epic3, epic2, epic1])
         end
 
         it 'orders epics by end date in descending order' do
           epics = resolve_epics(sort: 'end_date_desc')
 
-          expect(epics).to eq([epic3, epic2, epic1])
+          expect(epics).to eq([epic4, epic3, epic2, epic1])
         end
 
         it 'orders epics by end date in ascending order' do
           epics = resolve_epics(sort: 'end_date_asc')
 
-          expect(epics).to eq([epic1, epic2, epic3])
+          expect(epics).to eq([epic1, epic2, epic3, epic4])
+        end
+
+        it 'orders epics by title in descending order' do
+          epics = resolve_epics(sort: 'title_desc')
+
+          expect(epics).to eq([epic3, epic2, epic4, epic1])
+        end
+
+        it 'orders epics by title in ascending order' do
+          epics = resolve_epics(sort: 'title_asc')
+
+          expect(epics).to eq([epic1, epic4, epic2, epic3])
         end
       end
 
