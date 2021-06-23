@@ -37,7 +37,7 @@ module Gitlab
 
         allow_webpack_dev_server(settings_hash) if Rails.env.development?
         allow_cdn(settings_hash) if ENV['GITLAB_CDN_HOST'].present?
-        allow_customersdot(settings_hash) if ENV['CUSTOMER_PORTAL_URL'].present?
+        allow_customersdot(settings_hash) if Rails.env.development? && ENV['CUSTOMER_PORTAL_URL'].present?
 
         settings_hash
       end
