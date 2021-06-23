@@ -988,5 +988,5 @@ end
 
 It is *vital* that this happen in a post-deployment migration not a normal
 migration as otherwise it will run too early, before all workers that might
-schedule these jobs have stopped running.  See also the "other examples" at
+schedule these jobs have stopped running. See also the "other examples" at
 https://docs.gitlab.com/ee/development/post_deployment_migrations.html#use-cases
