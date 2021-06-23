@@ -23387,7 +23387,7 @@ msgstr ""
 msgid "PackageRegistry|Unable to load package"
 msgstr ""
 
-msgid "PackageRegistry|Use GitLab as a private repository for common package formats. %{linkStart}More Information%{linkEnd}"
+msgid "PackageRegistry|Use GitLab as a private registry for common package formats. %{linkStart}Learn more.%{linkEnd}"
 msgstr ""
 
 msgid "PackageRegistry|You are about to delete %{filename}. This is a destructive action that may render your package unusable. Are you sure?"
