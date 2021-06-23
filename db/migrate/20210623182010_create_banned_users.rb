@@ -17,9 +17,6 @@ class CreateBannedUsers < ActiveRecord::Migration[6.1]
 
   def down
     drop_table :banned_users
-
-    with_lock_retries do
-      remove_foreign_key_if_exists :banned_users, :users
-    end
+    remove_foreign_key_if_exists :banned_users, :users
   end
 end
