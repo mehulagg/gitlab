@@ -21,9 +21,9 @@ module API
 
           next unauthorized! unless current_user.can?(:read_resource_access_tokens, resource)
 
-          tokens = PersonalAccessTokensFinder.new({ user: resource.bots, impersonation: false }).execute
+          tokens = ResourceAccessTokensFinder.new({ project: resource }).execute
 
-          present paginate(tokens), with: Entities::PersonalAccessToken
+          present paginate(tokens), with: Entities::ResourceAccessToken, project: resource
         end
 
         desc 'Revoke a resource access token' do
@@ -69,7 +69,7 @@ module API
           ).execute
 
           if token_response.success?
-            present token_response.payload[:access_token], with: Entities::PersonalAccessTokenWithToken
+            present token_response.payload[:access_token], with: Entities::ResourceAccessTokenWithToken, project: resource
           else
             bad_request!(token_response.message)
           end
@@ -83,7 +83,7 @@ module API
       end
 
       def find_token(resource, token_id)
-        PersonalAccessTokensFinder.new({ user: resource.bots, impersonation: false }).find_by_id(token_id)
+        ResourceAccessTokensFinder.new({ project: resource, impersonation: false }).find_by_id(token_id)
       end
     end
   end

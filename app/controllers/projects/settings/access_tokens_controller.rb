@@ -61,7 +61,7 @@ module Projects
       end
 
       def finder(options = {})
-        PersonalAccessTokensFinder.new({ user: bot_users, impersonation: false }.merge(options))
+        ResourceAccessTokensFinder.new({ project: @project, impersonation: false }.merge(options))
       end
 
       def bot_users

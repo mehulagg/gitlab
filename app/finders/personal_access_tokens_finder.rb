@@ -10,8 +10,12 @@ class PersonalAccessTokensFinder
     @current_user = current_user
   end
 
+  def applicable_tokens
+    PersonalAccessToken.all
+  end
+
   def execute
-    tokens = PersonalAccessToken.all
+    tokens = applicable_tokens
     tokens = by_current_user(tokens)
     tokens = by_user(tokens)
     tokens = by_users(tokens)
