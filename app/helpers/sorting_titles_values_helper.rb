@@ -34,6 +34,10 @@ module SortingTitlesValuesHelper
     s_('SortOptions|Label priority')
   end
 
+  def sort_title_merged_at
+    s_('SortOptions|Merged at')
+  end
+
   def sort_title_largest_group
     s_('SortOptions|Largest group')
   end
@@ -197,6 +201,10 @@ module SortingTitlesValuesHelper
 
   def sort_value_label_priority
     'label_priority'
+  end
+
+  def sort_value_merged_at
+    'merged_at'
   end
 
   def sort_value_largest_group
