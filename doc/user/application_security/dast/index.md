@@ -570,6 +570,7 @@ dast:
   variables:
     DAST_WEBSITE: "https://example.com"
     DAST_AUTH_URL: "https://login.example.com/"
+    DAST_BROWSER_PATH_TO_LOGIN_FORM: "css:.navigation-menu,css:.login-menu-item" # optional list of selectors that should be clicked on prior to attempting to input username/password into the sign-in HTML form 
     DAST_USERNAME: "admin"
     DAST_PASSWORD: "P@55w0rd!"
     DAST_USERNAME_FIELD: "name:username" # a selector describing the element containing the username field at the sign-in HTML form
@@ -684,6 +685,30 @@ dast:
     DAST_AUTH_VERIFICATION_LOGIN_FORM: "true"
 ```  
 
+### Navigating to the login form
+
+Many web applications show the user the login form in a pop-up/modal window.
+For these applications, navigating to the form requires both a starting URL and a list of elements to click on to make the modal window appear.
+
+When `DAST_BROWSER_PATH_TO_LOGIN_FORM` is present, DAST will first load the page at `DAST_AUTH_URL`. Once the page has loaded, DAST will click
+on elements found by the selectors described in `DAST_BROWSER_PATH_TO_LOGIN_FORM`. DAST will then continue the authentication process by filling 
+in the username/password on the login form.
+
+In the following example, `https://my.site.com/admin` will be loaded by DAST. The navigation menu will be opened and the login menu item clicked, showing the
+login modal window. DAST will continue authentication using the form in the login modal window.
+
+```yaml
+include:
+  - template: DAST.gitlab-ci.yml
+
+dast:
+  variables:
+    DAST_WEBSITE: "https://my.site.com"
+    ...
+    DAST_AUTH_URL: "https://my.site.com/admin"
+    DAST_BROWSER_PATH_TO_LOGIN_FORM: "css:.navigation-menu,css:.login-menu-item"
+```  
+
 ### Configure the authentication debug output
 
 It is often difficult to understand the cause of an authentication failure when running DAST in a CI/CD pipeline.
@@ -716,11 +741,11 @@ DAST can be [configured](#customizing-the-dast-settings) using CI/CD variables.
 | `DAST_API_SPECIFICATION` (**1**)            | URL or string | [Deprecated](https://gitlab.com/gitlab-org/gitlab/-/issues/290241) in GitLab 13.12 and replaced by `DAST_API_OPENAPI`. To be removed in GitLab 15.0. The API specification to import. The specification can be hosted at a URL, or the name of a file present in the `/zap/wrk` directory. `DAST_WEBSITE` must be specified if this is omitted. |
 | `DAST_SPIDER_START_AT_HOST`                 | boolean       | Set to `false` to prevent DAST from resetting the target to its host before scanning. When `true`, non-host targets `http://test.site/some_path` is reset to `http://test.site` before scan. Default: `false`. [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/258805) in GitLab 13.6. |
 | `DAST_AUTH_URL` (**1**)                     | URL           | The URL of the page containing the sign-in HTML form on the target website. `DAST_USERNAME` and `DAST_PASSWORD` are submitted with the login form to create an authenticated scan. Not supported for API scans. |
-| `DAST_AUTH_VERIFICATION_URL` (**1**)        | URL           | A URL only accessible to logged in users that DAST can use to confirm successful authentication. If provided, DAST exits if it cannot access the URL. [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/207335) in GitLab 13.8. |
+| `DAST_BROWSER_PATH_TO_LOGIN_FORM` (**1**)   | selector      | Comma-separated list of selectors that will be clicked on prior to attempting to enter `DAST_USERNAME` and `DAST_PASSWORD` into the login form. [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/326633) in GitLab 14.1. |
 | `DAST_USERNAME` (**1**)                     | string        | The username to enter into the username field on the sign-in HTML form. |
 | `DAST_PASSWORD` (**1**)                     | string        | The password to enter into the password field on the sign-in HTML form. |
-| `DAST_USERNAME_FIELD` (**1**)               | selector        | A selector describing the username field on the sign-in HTML form. Example: `id:user` |
-| `DAST_PASSWORD_FIELD` (**1**)               | selector        | A selector describing the password field on the sign-in HTML form. Example: `css:.password-field` |
+| `DAST_USERNAME_FIELD` (**1**)               | selector      | A selector describing the username field on the sign-in HTML form. Example: `id:user` |
+| `DAST_PASSWORD_FIELD` (**1**)               | selector      | A selector describing the password field on the sign-in HTML form. Example: `css:.password-field` |
 | `DAST_SKIP_TARGET_CHECK`                    | boolean       | Set to `true` to prevent DAST from checking that the target is available before scanning. Default: `false`. [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/229067) in GitLab 13.8. |
 | `DAST_MASK_HTTP_HEADERS`                    | string        | Comma-separated list of request and response headers to be masked (GitLab 13.1). Must contain **all** headers to be masked. Refer to [list of headers that are masked by default](#hide-sensitive-information). |
 | `DAST_EXCLUDE_URLS` (**1**)                 | URLs          | The URLs to skip during the authenticated scan; comma-separated. Regular expression syntax can be used to match multiple URLs. For example, `.*` matches an arbitrary character sequence. Not supported for API scans. |
@@ -746,9 +771,10 @@ DAST can be [configured](#customizing-the-dast-settings) using CI/CD variables.
 | `DAST_ZAP_LOG_CONFIGURATION`                | string        | Set to a semicolon-separated list of additional log4j properties for the ZAP Server. |
 | `DAST_AGGREGATE_VULNERABILITIES`            | boolean       | Vulnerability aggregation is set to `true` by default. To disable this feature and see each vulnerability individually set to `false`. [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/254043) in GitLab 14.0. |
 | `DAST_MAX_URLS_PER_VULNERABILITY`           | number        | The maximum number of URLs reported for a single vulnerability. `DAST_MAX_URLS_PER_VULNERABILITY` is set to `50` by default. To list all the URLs set to `0`. [Introduced](https://gitlab.com/gitlab-org/security-products/dast/-/merge_requests/433) in GitLab 13.12. |
-| `DAST_AUTH_REPORT`                  | boolean       | Used in combination with exporting the `gl-dast-debug-auth-report.html` artifact to aid in debugging authentication issues. |
-| `DAST_AUTH_VERIFICATION_SELECTOR`   | selector      | Verifies successful authentication by checking for presence of a selector once the login form has been submitted. Example: `css:.user-photo` |
-| `DAST_AUTH_VERIFICATION_LOGIN_FORM` | boolean       | Verifies successful authentication by checking for the lack of a login form once the login form has been submitted. |
+| `DAST_AUTH_REPORT`                          | boolean       | Used in combination with exporting the `gl-dast-debug-auth-report.html` artifact to aid in debugging authentication issues. |
+| `DAST_AUTH_VERIFICATION_URL` (**1**)        | URL           | A URL only accessible to logged in users that DAST can use to confirm successful authentication. If provided, DAST exits if it cannot access the URL. [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/207335) in GitLab 13.8. |
+| `DAST_AUTH_VERIFICATION_SELECTOR`           | selector      | Verifies successful authentication by checking for presence of a selector once the login form has been submitted. Example: `css:.user-photo` |
+| `DAST_AUTH_VERIFICATION_LOGIN_FORM`         | boolean       | Verifies successful authentication by checking for the lack of a login form once the login form has been submitted. |
 
 1. DAST CI/CD variable available to an on-demand scan.
 
