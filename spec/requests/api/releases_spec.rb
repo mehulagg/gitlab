@@ -475,6 +475,12 @@ RSpec.describe API::Releases do
         expect(response).to have_gitlab_http_status(:not_found)
         expect(json_response['message']).to eq('404 Project Not Found')
       end
+
+      it 'returns 404 for guest' do
+        get api("/projects/#{project.id}/releases/non_exist_tag", guest)
+
+        expect(response).to have_gitlab_http_status(:not_found)
+      end
     end
 
     context 'when user is not a project member' do
