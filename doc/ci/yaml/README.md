@@ -1419,6 +1419,11 @@ deploy:
       - $STAGING
 ```
 
+**Note**:
+
+When multiple entries are specified in `only:variables`, the job runs when at least one of them evaluates to `true`.
+You can use `&&` in a single entry when multiple conditions must be satisfied at the same time.
+
 **Related topics**:
 
 - [`only:variables` and `except:variables` examples](../jobs/job_control.md#only-variables--except-variables-examples).
