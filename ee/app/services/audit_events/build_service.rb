@@ -9,6 +9,11 @@ module AuditEvents
     #
     # @return [BuildService]
     def initialize(author:, scope:, target:, ip_address:, message:)
+      raise MissingAttributeError if author.blank?
+      raise MissingAttributeError if scope.blank?
+      raise MissingAttributeError if target.blank?
+      raise MissingAttributeError if message.blank?
+
       raise MissingAttributeError if missing_attribute?(author, scope, target, ip_address, message)
 
       @author = build_author(author)
