@@ -41,7 +41,7 @@ Large tables on GitLab.com are a major problem - for both operations and develop
 
 ## Examples
 
-Most priminently, the `ci_builds` table is 1.5 TB in size as of June 2021 and has 31 indexes associated with it which sum up to 1 TB in size. The overall on-disk size for this table is 2.5 TB. Currently, this grows at 300 GB per month. By the end of the year, this is thought to be close to 5 TB if we don't take measures against.
+Most prominently, the `ci_builds` table is 1.5 TB in size as of June 2021 and has 31 indexes associated with it which sum up to 1 TB in size. The overall on-disk size for this table is 2.5 TB. Currently, this grows at 300 GB per month. By the end of the year, this is thought to be close to 5 TB if we don't take measures against.
 
 The following examples show that very large tables often constitute the root cause of incidents on GitLab.com.
 
