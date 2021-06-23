@@ -17,10 +17,6 @@ localVue.use(VueApollo);
 describe('Selection Summary component', () => {
   let wrapper;
 
-  const defaultData = {
-    dismissalReason: null,
-  };
-
   const createApolloProvider = (...queries) => {
     return createMockApollo([...queries]);
   };
@@ -31,7 +27,7 @@ describe('Selection Summary component', () => {
   const findSubmitButton = () => wrapper.find('[type="submit"]');
   const isSubmitButtonDisabled = () => findSubmitButton().props('disabled');
 
-  const createComponent = ({ props = {}, data = defaultData, apolloProvider } = {}) => {
+  const createComponent = ({ props = {}, apolloProvider } = {}) => {
     wrapper = shallowMount(SelectionSummary, {
       localVue,
       apolloProvider,
@@ -42,7 +38,6 @@ describe('Selection Summary component', () => {
         selectedVulnerabilities: [],
         ...props,
       },
-      data: () => data,
     });
   };
 
@@ -173,7 +168,6 @@ describe('Selection Summary component', () => {
         createComponent({
           apolloProvider,
           props: { selectedVulnerabilities },
-          data: { selectedStatus: null },
         });
       });
 
