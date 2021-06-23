@@ -63,7 +63,11 @@ describe('Commits edit component', () => {
     beforeEach(() => {
       createComponent({
         header: `<div class="test-header">${testCommitMessage}</div>`,
-        checkbox: `<label slot="checkbox" class="test-checkbox">${testLabel}</label >`,
+        checkbox: `
+          <template #checkbox>
+            <label class="test-checkbox">${testLabel}</label >
+          </template>
+        `,
       });
     });
 
