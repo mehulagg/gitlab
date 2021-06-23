@@ -9,7 +9,11 @@ module Branches
 
       return result if result[:status] == :error
 
-      new_branch = repository.add_branch(current_user, branch_name, ref)
+      begin
+        new_branch = repository.add_branch(current_user, branch_name, ref)
+      rescue Gitlab::Git::CommandError => e
+        return error("Failed to create branch '#{branch_name}': #{e}")
+      end
 
       if new_branch
         success(new_branch)
