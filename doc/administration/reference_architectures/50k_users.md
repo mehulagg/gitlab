@@ -2413,7 +2413,7 @@ future with further specific cloud provider details.
 
 | Service                                               | Nodes(1) | Configuration           | GCP              | Allocatable CPUs and Memory |
 |-------------------------------------------------------|----------|-------------------------|------------------|-----------------------------|
-| Webservice                                            | 16       | 32 vCPU, 28.8 GB memory | `n1-highcpu-32` | 510 vCPU, 472 GB memory   |
+| Webservice                                            | 16       | 32 vCPU, 28.8 GB memory | `n1-highcpu-32`  | 510 vCPU, 472 GB memory   |
 | Sidekiq                                               | 4        | 4 vCPU, 15 GB memory    | `n1-standard-4`  | 15.5 vCPU, 50 GB memory     |
 | Supporting services such as NGINX, Prometheus, etc.   | 2        | 4 vCPU, 15 GB memory    | `n1-standard-4`  | 7.75 vCPU, 25 GB memory     |
 
@@ -2429,7 +2429,7 @@ services where applicable):
 | Service                                    | Nodes | Configuration           | GCP              |
 |--------------------------------------------|-------|-------------------------|------------------|
 | Consul(1)                                  | 3     | 2 vCPU, 1.8 GB memory   | `n1-highcpu-2`   |
-| PostgreSQL(1)                              | 3     | 32 vCPU, 120 GB memory  | `n1-standard-32`  |
+| PostgreSQL(1)                              | 3     | 32 vCPU, 120 GB memory  | `n1-standard-32` |
 | PgBouncer(1)                               | 3     | 2 vCPU, 1.8 GB memory   | `n1-highcpu-2`   |
 | Internal load balancing node(3)            | 1     | 8 vCPU, 7.2 GB memory   | `n1-highcpu-8`   |
 | Redis - Cache(2)                           | 3     | 4 vCPU, 15 GB memory    | `n1-standard-4`  |
