@@ -8,7 +8,7 @@ module Elastic
 
         # We don't use as_json(only: ...) because it calls all virtual and serialized attributes
         # https://gitlab.com/gitlab-org/gitlab/issues/349
-        [:id, :iid, :title, :description, :created_at, :updated_at, :state, :project_id, :author_id, :confidential, :upvotes].each do |attr|
+        [:id, :iid, :title, :description, :created_at, :updated_at, :state, :project_id, :author_id, :confidential].each do |attr|
           data[attr.to_s] = safely_read_attribute_for_elasticsearch(attr)
         end
 
@@ -19,6 +19,8 @@ module Elastic
 
         data['visibility_level'] = target.project.visibility_level
         data['issues_access_level'] = safely_read_project_feature_for_elasticsearch(:issues)
+
+        data['upvotes'] = safely_read_attribute_for_elasticsearch(:upvotes) # if true # TODO: replace with migration check
 
         data.merge(generic_attributes)
       end
