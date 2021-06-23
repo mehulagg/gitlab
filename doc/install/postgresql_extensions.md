@@ -14,8 +14,9 @@ The following extensions must be loaded into the GitLab database:
 | Extension    | Minimum GitLab version |
 |--------------|------------------------|
 | `pg_trgm`    | 8.6                    |
-| `btree_gist` | 13.1                   |
 | `plpgsql`    | 11.7                   |
+| `btree_gist` | 13.1                   |
+| `btree_gin`  | 14.1                   |
 
 In order to install extensions, PostgreSQL requires the user to have superuser privileges.
 Typically, the GitLab database user is not a superuser. Therefore, regular database migrations
