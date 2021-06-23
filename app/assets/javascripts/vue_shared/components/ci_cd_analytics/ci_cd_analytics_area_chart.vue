@@ -28,7 +28,7 @@ export default {
       <slot></slot>
     </p>
     <resizable-chart-container>
-      <template #default="width">
+      <template #default="{ width }">
         <gl-area-chart
           v-bind="$attrs"
           :width="width"
