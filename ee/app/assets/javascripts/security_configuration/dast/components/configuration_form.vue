@@ -1,5 +1,6 @@
 <script>
-import { GlLink, GlSprintf, GlButton, GlForm } from '@gitlab/ui';
+import { GlLink, GlSprintf, GlButton, GlForm, GlAlert } from '@gitlab/ui';
+import DastProfilesSelector from 'ee/on_demand_scans/components/profile_selector/dast_profiles_selector.vue';
 import ConfigurationSnippetModal from 'ee/security_configuration/components/configuration_snippet_modal.vue';
 import { CONFIGURATION_SNIPPET_MODAL_ID } from 'ee/security_configuration/components/constants';
 import { s__, __ } from '~/locale';
@@ -20,9 +21,11 @@ export default {
     GlSprintf,
     GlButton,
     GlForm,
+    GlAlert,
     ConfigurationSnippetModal,
+    DastProfilesSelector,
   },
-  inject: ['gitlabCiYamlEditPath', 'securityConfigurationPath'],
+  inject: ['gitlabCiYamlEditPath', 'securityConfigurationPath', 'fullPath'],
   i18n: {
     helpText: s__(`
       DastConfig|Customize DAST settings to suit your requirements. Configuration changes made here override those provided by GitLab and are excluded from updates. For details of more advanced configuration options, see the %{docsLinkStart}GitLab DAST documentation%{docsLinkEnd}.`),
@@ -31,11 +34,12 @@ export default {
   },
   data() {
     return {
-      // eslint-disable-next-line @gitlab/require-i18n-strings
-      selectedScannerProfileName: 'My DAST Scanner Profile',
-      // eslint-disable-next-line @gitlab/require-i18n-strings
-      selectedSiteProfileName: 'My DAST Site Profile',
+      selectedScannerProfileName: '',
+      selectedSiteProfileName: '',
       isLoading: false,
+      hasProfilesConflict: false,
+      errorMessage: '',
+      showAlert: false,
     };
   },
   computed: {
@@ -45,12 +49,24 @@ export default {
         .replace(DAST_SCANNER_PROFILE_PLACEHOLDER, this.selectedScannerProfileName);
     },
     isSubmitDisabled() {
-      return !this.selectedScannerProfileName || !this.selectedSiteProfileName;
+      return (
+        !this.selectedScannerProfileName ||
+        !this.selectedSiteProfileName ||
+        this.hasProfilesConflict
+      );
     },
   },
   methods: {
     onSubmit() {
       this.$refs[CONFIGURATION_SNIPPET_MODAL_ID].show();
+    },
+    updateProfiles(profiles) {
+      this.selectedScannerProfileName = profiles.scannerProfile?.profileName;
+      this.selectedSiteProfileName = profiles.siteProfile?.profileName;
+    },
+    showErrors(error) {
+      this.errorMessage = error;
+      this.showAlert = true;
     },
   },
 };
@@ -67,6 +83,23 @@ export default {
         </gl-sprintf>
       </p>
     </section>
+
+    <gl-alert
+      v-if="showAlert"
+      variant="danger"
+      class="gl-mb-5"
+      data-testid="dast-configuration-error"
+      dismissible="false"
+    >
+      {{ errorMessage }}
+    </gl-alert>
+
+    <dast-profiles-selector
+      :full-path="fullPath"
+      @profiles="updateProfiles"
+      @error="showErrors"
+      @hasProfilesConflict="hasProfilesConflict = $event"
+    />
 
     <gl-button
       :disabled="isSubmitDisabled"
