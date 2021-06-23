@@ -11,6 +11,7 @@ class GitlabUsagePingWorker # rubocop:disable Scalability/IdempotentWorker
   feature_category :usage_ping
   sidekiq_options retry: 3, dead: false
   sidekiq_retry_in { |count| (count + 1) * 8.hours.to_i }
+  data_consistency :delayed, feature_flag: :load_balancing_for_usage_ping
 
   def perform
     # Disable usage ping for GitLab.com

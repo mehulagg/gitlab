@@ -8,6 +8,11 @@ RSpec.describe GitlabUsagePingWorker, :clean_gitlab_redis_shared_state do
     allow(subject).to receive(:sleep)
   end
 
+  it_behaves_like 'worker with data consistency',
+                  described_class,
+                  feature_flag: :load_balancing_for_usage_ping,
+                  data_consistency: :delayed
+
   it 'does not run for GitLab.com' do
     allow(Gitlab).to receive(:com?).and_return(true)
     expect(SubmitUsagePingService).not_to receive(:new)
