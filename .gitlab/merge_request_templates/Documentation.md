@@ -23,7 +23,7 @@ To avoid having this MR be added to code verification QA issues, don't add these
 
 ## Review checklist
 
-Documentation-related MRs should be reviewed by a Technical Writer for a non-blocking review. The Technical Writer review will ensure that grammaAll reviewers can help ensure accuracy, clarity, completeness, and adherence to the [Documentation Guidelines](https://docs.gitlab.com/ee/development/documentation/) and [Style Guide](https://docs.gitlab.com/ee/development/documentation/styleguide/).
+Documentation-related MRs should be reviewed by a Technical Writer for a non-blocking review, based on [Documentation Guidelines](https://docs.gitlab.com/ee/development/documentation/) and the [Style Guide](https://docs.gitlab.com/ee/development/documentation/styleguide/).
 
 - [ ] If the content requires it, ensure the information is reviewed by a subject matter expert.
 - Technical writer review items:
