@@ -115,7 +115,7 @@ There is no standard solution to reduce table sizes - there are many!
 1. **Partitioning**: Apply a partitioning scheme if there is a common access dimension.
 1. **Retention**: Delete unnecessary data, for example expire old and unneeded records.
 1. **Externalize**: Move large data types out of the database entirely. For example, JSON documents, especially when not used for filtering, may be better stored outside the database, e.g. in object storage.
-1. **Remove STI**: We still use [single-table inheritance](https://docs.gitlab.com/ee/development/single_table_inheritance.html) in a few places. Redesigning this, we can split data into multiple tables.
+1. **Remove STI**: We still use [single-table inheritance](../../../development/single_table_inheritance.md) in a few places. Redesigning this, we can split data into multiple tables.
 1. **Index optimization**: Drop unnecessary indexes and consolidate overlapping indexes if possible.
 
 ### Example efforts
@@ -123,7 +123,7 @@ There is no standard solution to reduce table sizes - there are many!
 A few examples can be found below, many more are organized under the epic [Database efficiency](https://gitlab.com/groups/gitlab-org/-/epics/5585).
 
 1. [Reduce number of indexes on `ci_builds`](https://gitlab.com/groups/gitlab-org/-/epics/6203)
-1. [Normalise and de-duplicate committer and author details in merge_request_diff_commits](https://gitlab.com/gitlab-org/gitlab/-/issues/331823)
+1. [Normalize and de-duplicate committer and author details in merge_request_diff_commits](https://gitlab.com/gitlab-org/gitlab/-/issues/331823)
 1. [Retention strategy for `ci_build_trace_sections`](https://gitlab.com/gitlab-org/gitlab/-/issues/32565#note_603138100)
 1. [Implement worker that hard-deletes old CI jobs metadata](https://gitlab.com/gitlab-org/gitlab/-/issues/215646)
 
