@@ -16,7 +16,15 @@ export default function init() {
     defaultClient: createDefaultClient({}, { assumeImmutableResults: true }),
   });
 
-  const { securityConfigurationPath, fullPath, gitlabCiYamlEditPath } = el.dataset;
+  const {
+    securityConfigurationPath,
+    fullPath,
+    gitlabCiYamlEditPath,
+    siteProfilesLibraryPath,
+    scannerProfilesLibraryPath,
+    newScannerProfilePath,
+    newSiteProfilePath,
+  } = el.dataset;
 
   return new Vue({
     el,
@@ -25,6 +33,10 @@ export default function init() {
       securityConfigurationPath,
       fullPath,
       gitlabCiYamlEditPath,
+      siteProfilesLibraryPath,
+      scannerProfilesLibraryPath,
+      newScannerProfilePath,
+      newSiteProfilePath,
     },
     render(createElement) {
       return createElement(DastConfigurationApp);

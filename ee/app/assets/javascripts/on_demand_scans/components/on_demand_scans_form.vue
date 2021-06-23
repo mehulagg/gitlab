@@ -14,12 +14,9 @@ import {
   GlTooltipDirective,
 } from '@gitlab/ui';
 import * as Sentry from '@sentry/browser';
-import { SCAN_TYPE } from 'ee/security_configuration/dast_scanner_profiles/constants';
-import { DAST_SITE_VALIDATION_STATUS } from 'ee/security_configuration/dast_site_validation/constants';
 import { initFormField } from 'ee/security_configuration/utils';
-import { convertToGraphQLId } from '~/graphql_shared/utils';
 import { serializeFormObject } from '~/lib/utils/forms';
-import { redirectTo, queryToObject } from '~/lib/utils/url_utility';
+import { redirectTo } from '~/lib/utils/url_utility';
 import { s__ } from '~/locale';
 import RefSelector from '~/ref/components/ref_selector.vue';
 import { REF_TYPE_BRANCHES } from '~/ref/constants';
@@ -27,40 +24,10 @@ import LocalStorageSync from '~/vue_shared/components/local_storage_sync.vue';
 import validation from '~/vue_shared/directives/validation';
 import dastProfileCreateMutation from '../graphql/dast_profile_create.mutation.graphql';
 import dastProfileUpdateMutation from '../graphql/dast_profile_update.mutation.graphql';
-import {
-  ERROR_RUN_SCAN,
-  ERROR_FETCH_SCANNER_PROFILES,
-  ERROR_FETCH_SITE_PROFILES,
-  ERROR_MESSAGES,
-  SCANNER_PROFILES_QUERY,
-  SITE_PROFILES_QUERY,
-  TYPE_SITE_PROFILE,
-  TYPE_SCANNER_PROFILE,
-} from '../settings';
-import ScannerProfileSelector from './profile_selector/scanner_profile_selector.vue';
-import SiteProfileSelector from './profile_selector/site_profile_selector.vue';
+import { ERROR_RUN_SCAN, ERROR_MESSAGES } from '../settings';
+import DastProfilesSelector from './profile_selector/scanner_profile_selector.vue';
 
 export const ON_DEMAND_SCANS_STORAGE_KEY = 'on-demand-scans-new-form';
-
-const createProfilesApolloOptions = (name, field, { fetchQuery, fetchError }) => ({
-  query: fetchQuery,
-  variables() {
-    return {
-      fullPath: this.projectPath,
-    };
-  },
-  update(data) {
-    const edges = data?.project?.[name]?.edges ?? [];
-    if (edges.length === 1) {
-      this[field] = edges[0].node.id;
-    }
-    return edges.map(({ node }) => node);
-  },
-  error(e) {
-    Sentry.captureException(e);
-    this.showErrors(fetchError);
-  },
-});
 
 export default {
   enabledRefTypes: [REF_TYPE_BRANCHES],
@@ -68,8 +35,6 @@ export default {
   saveScanBtnId: 'scan-save-button',
   components: {
     RefSelector,
-    ScannerProfileSelector,
-    SiteProfileSelector,
     GlAlert,
     GlButton,
     GlCard,
@@ -81,28 +46,14 @@ export default {
     GlSkeletonLoader,
     GlSprintf,
     LocalStorageSync,
+    DastProfilesSelector,
   },
   directives: {
     SafeHtml: GlSafeHtmlDirective,
     GlTooltip: GlTooltipDirective,
     validation: validation(),
   },
-  apollo: {
-    scannerProfiles: createProfilesApolloOptions(
-      'scannerProfiles',
-      'selectedScannerProfileId',
-      SCANNER_PROFILES_QUERY,
-    ),
-    siteProfiles: createProfilesApolloOptions(
-      'siteProfiles',
-      'selectedSiteProfileId',
-      SITE_PROFILES_QUERY,
-    ),
-  },
   inject: {
-    dastSiteValidationDocsPath: {
-      default: '',
-    },
     profilesLibraryPath: {
       default: '',
     },
@@ -141,8 +92,6 @@ export default {
           }),
         },
       },
-      scannerProfiles: [],
-      siteProfiles: [],
       selectedBranch: this.dastScan?.branch?.name ?? this.defaultBranch,
       selectedScannerProfileId: this.dastScan?.scannerProfileId || null,
       selectedSiteProfileId: this.dastScan?.siteProfileId || null,
@@ -162,37 +111,9 @@ export default {
         ? s__('OnDemandScans|Edit on-demand DAST scan')
         : s__('OnDemandScans|New on-demand DAST scan');
     },
-    selectedScannerProfile() {
-      return this.selectedScannerProfileId
-        ? this.scannerProfiles.find(({ id }) => id === this.selectedScannerProfileId)
-        : null;
-    },
-    selectedSiteProfile() {
-      return this.selectedSiteProfileId
-        ? this.siteProfiles.find(({ id }) => id === this.selectedSiteProfileId)
-        : null;
-    },
-    errorMessage() {
-      return ERROR_MESSAGES[this.errorType] || null;
-    },
-    isLoadingProfiles() {
-      return ['scannerProfiles', 'siteProfiles'].some((name) => this.$apollo.queries[name].loading);
-    },
-    failedToLoadProfiles() {
-      return [ERROR_FETCH_SCANNER_PROFILES, ERROR_FETCH_SITE_PROFILES].includes(this.errorType);
-    },
     someFieldEmpty() {
       const { selectedScannerProfile, selectedSiteProfile } = this;
       return !selectedScannerProfile || !selectedSiteProfile;
-    },
-    isActiveScannerProfile() {
-      return this.selectedScannerProfile?.scanType === SCAN_TYPE.ACTIVE;
-    },
-    isValidatedSiteProfile() {
-      return this.selectedSiteProfile?.validationStatus === DAST_SITE_VALIDATION_STATUS.PASSED;
-    },
-    hasProfilesConflict() {
-      return !this.someFieldEmpty && this.isActiveScannerProfile && !this.isValidatedSiteProfile;
     },
     isFormInvalid() {
       return this.someFieldEmpty || this.hasProfilesConflict;
@@ -225,16 +146,9 @@ export default {
     storageKey() {
       return `${this.projectPath}/${ON_DEMAND_SCANS_STORAGE_KEY}`;
     },
-  },
-  created() {
-    const params = queryToObject(window.location.search, { legacySpacesDecode: true });
-
-    this.selectedSiteProfileId = params.site_profile_id
-      ? convertToGraphQLId(TYPE_SITE_PROFILE, params.site_profile_id)
-      : this.selectedSiteProfileId;
-    this.selectedScannerProfileId = params.scanner_profile_id
-      ? convertToGraphQLId(TYPE_SCANNER_PROFILE, params.scanner_profile_id)
-      : this.selectedScannerProfileId;
+    errorMessage() {
+      return ERROR_MESSAGES[this.errorType] || null;
+    },
   },
   methods: {
     onSubmit({ runAfter = true, button = this.$options.saveAndRunScanBtnId } = {}) {
@@ -437,40 +351,10 @@ export default {
         </div>
       </gl-form-group>
 
-      <scanner-profile-selector
-        v-model="selectedScannerProfileId"
-        class="gl-mb-5"
-        :profiles="scannerProfiles"
-        :selected-profile="selectedScannerProfile"
-        :has-conflict="hasProfilesConflict"
+      <dast-profiles-selector
+        :full-path="projectPath"
+        @update-profile-conflict="hasProfilesConflict = $event"
       />
-      <site-profile-selector
-        v-model="selectedSiteProfileId"
-        class="gl-mb-5"
-        :profiles="siteProfiles"
-        :selected-profile="selectedSiteProfile"
-        :has-conflict="hasProfilesConflict"
-      />
-
-      <gl-alert
-        v-if="hasProfilesConflict"
-        :title="s__('OnDemandScans|You cannot run an active scan against an unvalidated site.')"
-        :dismissible="false"
-        variant="danger"
-        data-testid="on-demand-scans-profiles-conflict-alert"
-      >
-        <gl-sprintf
-          :message="
-            s__(
-              'OnDemandScans|You can either choose a passive scan or validate the target site in your chosen site profile. %{docsLinkStart}Learn more about site validation.%{docsLinkEnd}',
-            )
-          "
-        >
-          <template #docsLink="{ content }">
-            <gl-link :href="dastSiteValidationDocsPath">{{ content }}</gl-link>
-          </template>
-        </gl-sprintf>
-      </gl-alert>
 
       <div class="gl-mt-6 gl-pt-6">
         <gl-button
