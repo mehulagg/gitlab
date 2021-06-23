@@ -746,6 +746,7 @@ You can use CI/CD variables to customize DAST.
 
 1. Available to an on-demand DAST scan.
 
+### DAST command-line options
 
 Not all DAST configuration is available via CI/CD variables. To find out all
 possible options, run the following configuration.
