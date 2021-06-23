@@ -25,19 +25,24 @@ with a [microservices architecture](https://about.gitlab.com/blog/2016/08/16/tre
 Learn more in the [Cross-project Pipeline Triggering and Visualization demo](https://about.gitlab.com/learn/)
 at GitLab@learn, in the Continuous Integration section.
 
+If you trigger a pipeline in a downstream private project, the name of the project
+and the status of the pipeline is visible in the upstream project's pipelines page.
+Make sure that there are no confidentiality problems if you have a public project
+that can trigger downstream pipelines in a private project.
+
 ## Create multi-project pipelines
 
-In GitLab 11.8 and later, you can [use the CI/CD configuration syntax](#create-multi-project-pipelines-in-your-gitlab-ciyml-file)
-to trigger a pipeline in a different project.
+To create multi-project pipelines, you can:
 
-In GitLab 11.8 and earlier, you can [use the API](#create-multi-project-pipelines-by-using-the-api).
+- [Use the CI/CD configuration syntax](#create-multi-project-pipelines-in-your-gitlab-ciyml-file).
+- [Use the API](#create-multi-project-pipelines-by-using-the-api).
 
 ### Create multi-project pipelines in your `.gitlab-ci.yml` file
 
 > [Moved](https://gitlab.com/gitlab-org/gitlab/-/issues/199224) to GitLab Free in 12.8.
 
 When you create a multi-project pipeline in your `.gitlab-ci.yml` file,
-you create what is called "a bridge job." For example:
+you create what is called a "trigger job". For example:
 
 ```yaml
 rspec:
@@ -51,8 +56,8 @@ staging:
   trigger: my/deployment
 ```
 
-In this example, when the `rspec` job succeeds in the `test` stage,
-the `staging` bridge job starts. The initial status of this
+In this example, after the `rspec` job succeeds in the `test` stage,
+the `staging` trigger job starts. The initial status of this
 job is `pending`.
 
 GitLab then creates a downstream pipeline in the
@@ -66,6 +71,18 @@ The user that creates the upstream pipeline must be able to create pipelines in 
 downstream project (`my/deployment`) too. If the downstream project is not found,
 or the user does not have [permission](../user/permissions.md) to create a pipeline there,
 the `staging` job is marked as _failed_.
+
+Trigger jobs can only use a limited set of the GitLab CI/CD [configuration keywords](yaml/README.md).
+The keywords available for use in trigger jobs are:
+
+- [`trigger`](yaml/README.md#trigger)
+- [`stage`](yaml/README.md#stage)
+- [`allow_failure`](yaml/README.md#allow_failure)
+- [`rules`](yaml/README.md#rules)
+- [`only` and `except`](yaml/README.md#only--except)
+- [`when`](yaml/README.md#when) (only with a value of `on_success`, `on_failure`, or `always`)
+- [`extends`](yaml/README.md#extends)
+- [`needs`](yaml/README.md#needs)
 
 #### Specify a downstream pipeline branch
 
@@ -92,27 +109,12 @@ Use:
   [In GitLab 12.4](https://gitlab.com/gitlab-org/gitlab/-/issues/10126) and later, variable expansion is
   supported.
 
-NOTE:
 Pipelines triggered on a protected branch in a downstream project use the [role](../user/permissions.md)
 of the user that ran the trigger job in the upstream project. If the user does not
 have permission to run CI/CD pipelines against the protected branch, the pipeline fails. See
 [pipeline security for protected branches](pipelines/index.md#pipeline-security-on-protected-branches).
 
-#### Pass CI/CD variables to a downstream pipeline
-
-If you use CI/CD variables or the [`rules`](yaml/README.md#rulesif) keyword to control job behavior,
-the value of the [`$CI_PIPELINE_SOURCE` predefined variable](variables/predefined_variables.md) is
-`pipeline`. This value is used for multi-project pipelines triggered by a bridge job (using the
-[`trigger:`](yaml/README.md#trigger) keyword).
-
-If you use [`only/except`](yaml/README.md#only--except) to control job behavior, use the
-`pipelines` keyword.
-
-Bridge jobs [do not support every configuration keyword](#limitations) that can be used
-with other jobs. If you try to use unsupported configuration keywords, YAML
-validation fails when the pipeline is created.
-
-##### Use the `variables` keyword
+#### Pass CI/CD variables to a downstream pipeline by using the `variables` keyword
 
 Sometimes you might want to pass CI/CD variables to a downstream pipeline.
 You can do that by using the `variables` keyword, just like you would for any other job.
@@ -158,14 +160,14 @@ downstream-job:
 ```
 
 In this scenario, the `UPSTREAM_BRANCH` variable with a value related to the
-upstream pipeline is passed to the `downstream-job` job, and is available
-within the context of all downstream builds.
+upstream pipeline is passed to the `downstream-job` job. It is available
+in the context of all downstream builds.
 
 Upstream pipelines take precedence over downstream ones. If there are two
 variables with the same name defined in both upstream and downstream projects,
 the ones defined in the upstream project take precedence.
 
-##### Use variable inheritance
+#### Pass CI/CD variables to a downstream pipeline by using variable inheritance
 
 You can pass variables to a downstream pipeline with [`dotenv` variable inheritance](variables/README.md#pass-an-environment-variable-to-another-job) and [cross project artifact downloads](yaml/README.md#cross-project-artifact-downloads-with-needs).
 
@@ -205,13 +207,24 @@ test:
       artifacts: true
 ```
 
-#### Mirror status from triggered pipeline
+#### Use `rules` or `only`/`except` with multi-project pipelines
+
+You can use CI/CD variables or the [`rules`](yaml/README.md#rulesif) keyword to
+[control job behavior](jobs/job_control.md) for multi-project pipelines. When a
+downstream pipeline is triggered with the [`trigger`](yaml/README.md#trigger) keyword,
+the value of the [`$CI_PIPELINE_SOURCE` predefined variable](variables/predefined_variables.md)
+is `pipeline` for all its jobs.
+
+If you use [`only/except`](yaml/README.md#only--except) to control job behavior, use the
+[`pipelines`](yaml/README.md#onlyrefs--exceptrefs) keyword.
+
+#### Mirror status of a triggered pipeline in the trigger job
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/11238) in GitLab Premium 12.3.
 > - [Moved](https://gitlab.com/gitlab-org/gitlab/-/issues/199224) to GitLab Free in 12.8.
 
 You can mirror the pipeline status from the triggered pipeline to the source
-bridge job by using `strategy: depend`. For example:
+trigger job by using `strategy: depend`. For example:
 
 ```yaml
 trigger_job:
@@ -235,32 +248,13 @@ upstream_bridge:
     pipeline: other/project
 ```
 
-#### Limitations
-
-Bridge jobs are a little different from regular jobs. It is not
-possible to use exactly the same configuration syntax as when defining regular jobs
-that are picked by a runner.
-
-Some features are not implemented yet. For example, support for environments.
-
-[Configuration keywords](yaml/README.md) available for bridge jobs are:
-
-- `trigger` (to define a downstream pipeline trigger)
-- `stage`
-- `allow_failure`
-- [`rules`](yaml/README.md#rules)
-- `only` and `except`
-- `when` (only with `on_success`, `on_failure`, and `always` values)
-- `extends`
-- `needs`
-
 ### Create multi-project pipelines by using the API
 
 > [Moved](https://gitlab.com/gitlab-org/gitlab/-/issues/31573) to GitLab Free in 12.4.
 
-When you use the [`CI_JOB_TOKEN` to trigger pipelines](triggers/README.md#ci-job-token), GitLab
-recognizes the source of the job token, and thus internally ties these pipelines
-together, allowing you to visualize their relationships on pipeline graphs.
+When you use the [`CI_JOB_TOKEN` to trigger pipelines](triggers/README.md#ci-job-token),
+GitLab recognizes the source of the job token. The pipelines become related,
+so you can visualize their relationships on pipeline graphs.
 
 These relationships are displayed in the pipeline graph by showing inbound and
 outbound connections for upstream and downstream pipeline dependencies.
@@ -291,8 +285,8 @@ number of upstream pipeline subscriptions is 2 by default, for both the upstream
 downstream projects. This [application limit](../administration/instance_limits.md#number-of-cicd-subscriptions-to-a-project) can be changed on self-managed instances by a GitLab administrator.
 
 The upstream project needs to be [public](../public_access/public_access.md)
-and the user must have [developer permissions](../user/permissions.md#project-members-permissions)
-for the upstream project.
+and the user must have the [developer role](../user/permissions.md#project-members-permissions)
+in the upstream project.
 
 ## Multi-project pipeline visualization **(PREMIUM)**
 
@@ -301,15 +295,7 @@ When you configure GitLab CI/CD for your project, you can visualize the stages o
 
 ![Multi-project pipeline graph](img/multi_project_pipeline_graph.png)
 
-In the Merge Request Widget, multi-project pipeline mini-graphs are displayed,
-and when hovering or tapping (on touchscreen devices) they expand and are shown adjacent to each other.
+In the Merge Request Widget, multi-project pipeline mini-graphs are displayed.
+They expand and are shown adjacent to each other when hovering (or tapping on touchscreen devices).
 
 ![Multi-project mini graph](img/multi_pipeline_mini_graph.gif)
-
-## Downstream private projects confidentiality concern
-
-If you trigger a pipeline in a downstream private project, the name of the project
-and the status of the pipeline is visible in the upstream project's pipelines page.
-
-If you have a public project that can trigger downstream pipelines in a private
-project, make sure to check that there are no confidentiality problems.
