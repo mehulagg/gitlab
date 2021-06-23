@@ -10,7 +10,7 @@ This document is a proposal to work towards reducing and limiting table sizes on
 
 Note that this is not meant to be a hard rule but rather a strong indication that work needs to be done to break a table apart or otherwise reduce its size.
 
-This is meant to be read in context with https://gitlab.com/gitlab-org/gitlab/-/merge_requests/64115,
+This is meant to be read in context with the [Database Sharding blueprint](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/64115),
 which paints the bigger picture. This proposal here is thought to be part of the "debloating step" below, as we aim to reduce storage requirements and improve data modeling. Partitioning is part of the standard tool-belt: where possible, we can already use partitioning as a solution to cut physical table sizes significantly. Both will help to prepare efforts like decomposition (database usage is already optimized) and sharding (database is already partitioned along an identified data access dimension).
 
 ```mermaid
