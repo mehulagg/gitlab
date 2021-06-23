@@ -8,8 +8,9 @@ module JiraConnect
 
     queue_namespace :jira_connect
     feature_category :integrations
-    idempotent!
+    data_consistency :delayed, feature_flag: :load_balancing_for_jira_connect_workers
 
+    idempotent!
     worker_has_external_dependencies!
 
     def perform(merge_request_id, update_sequence_id)

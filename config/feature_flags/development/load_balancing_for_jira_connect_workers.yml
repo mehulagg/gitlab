@@ -1,0 +1,8 @@
+---
+name: load_balancing_for_jira_connect_workers
+introduced_by_url: 
+rollout_issue_url: 
+milestone: '14.1'
+type: development
+group: group::ecosystem
+default_enabled: false
