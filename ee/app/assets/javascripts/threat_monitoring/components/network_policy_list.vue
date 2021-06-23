@@ -100,23 +100,20 @@ export default {
       const namespace = {
         key: 'namespace',
         label: s__('NetworkPolicies|Namespace'),
-        thClass: 'font-weight-bold',
       };
       const fields = [
         {
           key: 'name',
           label: s__('NetworkPolicies|Name'),
-          thClass: 'w-50 font-weight-bold',
+          thClass: 'gl-w-half',
         },
         {
           key: 'status',
           label: s__('NetworkPolicies|Status'),
-          thClass: 'font-weight-bold',
         },
         {
           key: 'updatedAt',
           label: s__('NetworkPolicies|Last modified'),
-          thClass: 'font-weight-bold',
         },
       ];
       // Adds column 'namespace' only while 'all environments' option is selected
