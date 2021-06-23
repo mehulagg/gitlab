@@ -4,6 +4,7 @@ import { mount, shallowMount } from '@vue/test-utils';
 import Vue from 'vue';
 import TrialStatusPopover from 'ee/contextual_sidebar/components/trial_status_popover.vue';
 import { mockTracking } from 'helpers/tracking_helper';
+import axios from '~/lib/utils/axios_utils';
 
 Vue.config.ignoredElements = ['gl-emoji'];
 
@@ -113,6 +114,51 @@ describe('TrialStatusPopover component', () => {
   });
 
   describe('methods', () => {
+    describe('onForciblyShown', () => {
+      beforeEach(() => {
+        jest.spyOn(axios, 'post').mockReturnValue(Promise.resolve('success'));
+      });
+
+      describe('when userCalloutsPath and userCalloutsFeatureId are present', () => {
+        const userCalloutProps = {
+          userCalloutsPath: 'user_callouts/path',
+          userCalloutsFeatureId: 'feature_id',
+        };
+
+        beforeEach(() => {
+          wrapper = createComponent(userCalloutProps);
+          wrapper.vm.onForciblyShown();
+        });
+
+        it('sends a request to update the specified UserCallout record', () => {
+          expect(axios.post).toHaveBeenCalledWith(userCalloutProps.userCalloutsPath, {
+            feature_name: userCalloutProps.userCalloutsFeatureId,
+          });
+        });
+      });
+
+      describe.each`
+        path                    | featureId
+        ${'user_callouts/path'} | ${undefined}
+        ${undefined}            | ${'feature_id'}
+        ${undefined}            | ${undefined}
+      `(
+        'when userCalloutsPath is `$path` and userCalloutsFeatureId is `$featureId`',
+        ({ path, featureId }) => {
+          beforeEach(() => {
+            wrapper = createComponent({
+              provide: { userCalloutsPath: path, userCalloutsFeatureId: featureId },
+            });
+            wrapper.vm.onForciblyShown();
+          });
+
+          it('does not send a request', () => {
+            expect(axios.post).not.toHaveBeenCalled();
+          });
+        },
+      );
+    });
+
     describe('onResize', () => {
       it.each`
         bp      | isDisabled

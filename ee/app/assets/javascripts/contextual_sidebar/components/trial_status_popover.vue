@@ -2,6 +2,7 @@
 import { GlButton, GlPopover, GlSprintf } from '@gitlab/ui';
 import { GlBreakpointInstance as bp } from '@gitlab/ui/dist/utils';
 import { debounce } from 'lodash';
+import axios from '~/lib/utils/axios_utils';
 import { formatDate } from '~/lib/utils/datetime_utility';
 import { __, s__ } from '~/locale';
 import Tracking from '~/tracking';
@@ -55,6 +56,16 @@ export default {
       type: Date,
       required: true,
     },
+    userCalloutsPath: {
+      type: String,
+      required: false,
+      default: undefined,
+    },
+    userCalloutsFeatureId: {
+      type: String,
+      required: false,
+      default: undefined,
+    },
   },
   data() {
     return {
@@ -106,6 +117,18 @@ export default {
 
       const { action, ...options } = this.$options.trackingEvents.clickCloseBtn;
       this.track(action, options);
+    },
+    onForciblyShown() {
+      if (this.userCalloutsPath && this.userCalloutsFeatureId) {
+        axios
+          .post(this.userCalloutsPath, {
+            feature_name: this.userCalloutsFeatureId,
+          })
+          .catch((e) => {
+            // eslint-disable-next-line no-console, @gitlab/require-i18n-strings
+            console.error('Failed to dismiss trial status popover.', e);
+          });
+      }
     },
     onResize() {
       this.updateDisabledState();

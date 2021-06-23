@@ -46,6 +46,8 @@ export const initTrialStatusPopover = () => {
     startInitiallyShown,
     targetId,
     trialEndDate,
+    userCalloutsPath,
+    userCalloutsFeatureId,
   } = el.dataset;
 
   return new Vue({
@@ -61,6 +63,8 @@ export const initTrialStatusPopover = () => {
           startInitiallyShown: startInitiallyShown !== undefined,
           targetId,
           trialEndDate: new Date(trialEndDate),
+          userCalloutsPath,
+          userCalloutsFeatureId,
         },
       }),
   });

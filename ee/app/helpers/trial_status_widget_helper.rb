@@ -6,6 +6,9 @@
 # the codebase) could trigger the need to extract these patterns into a single,
 # reusable, sharable helper.
 module TrialStatusWidgetHelper
+  D14_CALLOUT_ID = 'trial_status_reminder_d14'
+  D3_CALLOUT_ID = 'trial_status_reminder_d3'
+
   # NOTE: We are okay hard-coding the production value for the Ulitmate 1-year
   # SaaS plan ID while this is all part of an active experiment. If & when the
   # experiment is deemed a success, part of the clean-up effort will be to
@@ -20,7 +23,9 @@ module TrialStatusWidgetHelper
       purchase_href: ultimate_subscription_path_for_group(group),
       start_initially_shown: force_popover_to_be_shown?(group.trial_days_remaining),
       target_id: base_attrs[:container_id],
-      trial_end_date: group.trial_ends_on
+      trial_end_date: group.trial_ends_on,
+      user_callouts_path: user_callouts_path,
+      user_callouts_feature_id: current_user_callout_feature_id(group.trial_days_remaining)
     )
   end
 
@@ -47,7 +52,15 @@ module TrialStatusWidgetHelper
   end
 
   def force_popover_to_be_shown?(days_remaining)
-    within_d14_callout_range?(days_remaining) || within_d3_callout_range?(days_remaining)
+    if within_d14_callout_range?(days_remaining)
+      return !current_user.dismissed_callout?(feature_name: D14_CALLOUT_ID)
+    end
+
+    if within_d3_callout_range?(days_remaining)
+      return !current_user.dismissed_callout?(feature_name: D3_CALLOUT_ID)
+    end
+
+    false
   end
 
   def within_d14_callout_range?(days_remaining)
@@ -56,6 +69,11 @@ module TrialStatusWidgetHelper
 
   def within_d3_callout_range?(days_remaining)
     (0..3).cover?(days_remaining)
+  end
+
+  def current_user_callout_feature_id(days_remaining)
+    return D14_CALLOUT_ID if within_d14_callout_range?(days_remaining)
+    return D3_CALLOUT_ID if within_d3_callout_range?(days_remaining)
   end
 
   def trial_status_common_data_attrs(group)

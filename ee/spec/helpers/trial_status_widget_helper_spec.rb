@@ -27,7 +27,7 @@ RSpec.describe TrialStatusWidgetHelper do
       {
         container_id: 'trial-status-sidebar-widget',
         plan_name: 'Ultimate',
-        plans_href: '/groups/pants-group/-/billings'
+        plans_href: group_billings_path(group)
       }
     end
 
@@ -36,30 +36,48 @@ RSpec.describe TrialStatusWidgetHelper do
     end
 
     describe '#trial_status_popover_data_attrs' do
+      let_it_be(:user) { create(:user) }
+
+      let(:dismissed_d14_callout) { false }
+      let(:dismissed_d3_callout) { false }
+
       let(:popover_shared_expected_attrs) do
         shared_expected_attrs.merge(
           group_name: group.name,
           purchase_href: new_subscriptions_path(namespace_id: group.id, plan_id: described_class::ZUORA_ULTIMATE_PLAN_ID),
           target_id: shared_expected_attrs[:container_id],
           start_initially_shown: false,
-          trial_end_date: trial_end_date
+          trial_end_date: trial_end_date,
+          user_callouts_path: user_callouts_path,
+          user_callouts_feature_id: nil
         )
+      end
+
+      before do
+        allow(helper).to receive(:current_user).and_return(user)
+        allow(user).to receive(:dismissed_callout?).with(feature_name: described_class::D14_CALLOUT_ID).and_return(dismissed_d14_callout)
+        allow(user).to receive(:dismissed_callout?).with(feature_name: described_class::D3_CALLOUT_ID).and_return(dismissed_d3_callout)
       end
 
       subject(:data_attrs) { helper.trial_status_popover_data_attrs(group) }
 
-      shared_examples 'returned data attributes' do |shown: false|
+      shared_examples 'returned data attributes' do |shown: false, feature_id: nil|
         it 'returns the correct set of data attributes' do
           expect(data_attrs).to match(
             popover_shared_expected_attrs.merge(
-              start_initially_shown: shown
+              start_initially_shown: shown,
+              user_callouts_feature_id: feature_id
             )
           )
         end
       end
 
-      context 'when more than 14 days remain' do
-        where trial_days_remaining: [15, 22, 30]
+      context 'when more than 14 days remain, regardless of any UserCallout dismissals' do
+        where(
+          trial_days_remaining: [15, 22, 30],
+          dismissed_d14_callout: [true, false],
+          dismissed_d3_callout: [true, false]
+        )
 
         with_them do
           include_examples 'returned data attributes'
@@ -67,15 +85,32 @@ RSpec.describe TrialStatusWidgetHelper do
       end
 
       context 'when between 7 & 14 days remain' do
-        where trial_days_remaining: [7, 10, 14]
+        where(
+          trial_days_remaining: [7, 10, 14],
+          dismissed_d3_callout: [true, false]
+        )
 
         with_them do
-          include_examples 'returned data attributes', shown: true
+          context 'and the user has not dismissed the D14 callout' do
+            let(:dismissed_d14_callout) { false }
+
+            include_examples 'returned data attributes', shown: true, feature_id: described_class::D14_CALLOUT_ID
+          end
+
+          context 'but the user has already dismissed the D14 callout' do
+            let(:dismissed_d14_callout) { true }
+
+            include_examples 'returned data attributes', feature_id: described_class::D14_CALLOUT_ID
+          end
         end
       end
 
       context 'when between 4 & 6 days remain' do
-        where trial_days_remaining: [4, 5, 6]
+        where(
+          trial_days_remaining: [4, 5, 6],
+          dismissed_d14_callout: [true, false],
+          dismissed_d3_callout: [true, false]
+        )
 
         with_them do
           include_examples 'returned data attributes'
@@ -83,15 +118,32 @@ RSpec.describe TrialStatusWidgetHelper do
       end
 
       context 'when between 0 & 3 days remain' do
-        where trial_days_remaining: [0, 1, 3]
+        where(
+          trial_days_remaining: [0, 1, 3],
+          dismissed_d14_callout: [true, false]
+        )
 
         with_them do
-          include_examples 'returned data attributes', shown: true
+          context 'and the user has not dismissed the D3 callout' do
+            let(:dismissed_d3_callout) { false }
+
+            include_examples 'returned data attributes', shown: true, feature_id: described_class::D3_CALLOUT_ID
+          end
+
+          context 'but the user has already dismissed the D3 callout' do
+            let(:dismissed_d3_callout) { true }
+
+            include_examples 'returned data attributes', feature_id: described_class::D3_CALLOUT_ID
+          end
         end
       end
 
       context 'when fewer than 0 days remain' do
-        where trial_days_remaining: [-1, -5, -12]
+        where(
+          trial_days_remaining: [-1, -5, -12],
+          dismissed_d14_callout: [true, false],
+          dismissed_d3_callout: [true, false]
+        )
 
         with_them do
           include_examples 'returned data attributes'
