@@ -745,7 +745,7 @@ You can use CI/CD variables to customize DAST.
 | `DAST_AUTH_EXCLUDE_URLS`                        | URLs          | [Deprecated](https://gitlab.com/gitlab-org/gitlab/-/issues/289959) in GitLab 13.8, to be removed in 14.0, and replaced by `DAST_EXCLUDE_URLS`. The URLs to skip during the authenticated scan; comma-separated. Regular expression syntax can be used to match multiple URLs. For example, `.*` matches an arbitrary character sequence. Not supported for API scans. |
 
 1. Available to an on-demand DAST scan.
-### DAST command-line options
+
 
 Not all DAST configuration is available via CI/CD variables. To find out all
 possible options, run the following configuration.
