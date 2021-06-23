@@ -14037,6 +14037,32 @@ CREATE TABLE issue_assignees (
     issue_id integer NOT NULL
 );
 
+CREATE TABLE issue_custom_types (
+    id bigint NOT NULL,
+    name text NOT NULL,
+    summary text,
+    description text,
+    description_html text,
+    cached_markdown_version integer,
+    issue_type smallint DEFAULT 0 NOT NULL,
+    icon_name text,
+    namespace_id bigint,
+    created_at timestamp with time zone NOT NULL,
+    updated_at timestamp with time zone NOT NULL,
+    CONSTRAINT check_35f0640607 CHECK ((char_length(icon_name) <= 255)),
+    CONSTRAINT check_4395557e0a CHECK ((char_length(name) <= 255)),
+    CONSTRAINT check_88e482a016 CHECK ((char_length(summary) <= 255))
+);
+
+CREATE SEQUENCE issue_custom_types_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE issue_custom_types_id_seq OWNED BY issue_custom_types.id;
+
 CREATE TABLE issue_email_participants (
     id bigint NOT NULL,
     issue_id bigint NOT NULL,
@@ -14167,6 +14193,7 @@ CREATE TABLE issues (
     sprint_id bigint,
     issue_type smallint DEFAULT 0 NOT NULL,
     blocking_issues_count integer DEFAULT 0 NOT NULL,
+    issue_custom_type_id bigint,
     CONSTRAINT check_fba63f706d CHECK ((lock_version IS NOT NULL))
 );
 
@@ -20031,6 +20058,8 @@ ALTER TABLE ONLY issuable_severities ALTER COLUMN id SET DEFAULT nextval('issuab
 
 ALTER TABLE ONLY issuable_slas ALTER COLUMN id SET DEFAULT nextval('issuable_slas_id_seq'::regclass);
 
+ALTER TABLE ONLY issue_custom_types ALTER COLUMN id SET DEFAULT nextval('issue_custom_types_id_seq'::regclass);
+
 ALTER TABLE ONLY issue_email_participants ALTER COLUMN id SET DEFAULT nextval('issue_email_participants_id_seq'::regclass);
 
 ALTER TABLE ONLY issue_links ALTER COLUMN id SET DEFAULT nextval('issue_links_id_seq'::regclass);
@@ -21421,6 +21450,9 @@ ALTER TABLE ONLY issuable_slas
 
 ALTER TABLE ONLY issue_assignees
     ADD CONSTRAINT issue_assignees_pkey PRIMARY KEY (issue_id, user_id);
+
+ALTER TABLE ONLY issue_custom_types
+    ADD CONSTRAINT issue_custom_types_pkey PRIMARY KEY (id);
 
 ALTER TABLE ONLY issue_email_participants
     ADD CONSTRAINT issue_email_participants_pkey PRIMARY KEY (id);
@@ -23632,6 +23664,8 @@ CREATE UNIQUE INDEX index_issuable_slas_on_issue_id ON issuable_slas USING btree
 
 CREATE INDEX index_issue_assignees_on_user_id ON issue_assignees USING btree (user_id);
 
+CREATE INDEX index_issue_custom_types_on_namespace_id ON issue_custom_types USING btree (namespace_id);
+
 CREATE UNIQUE INDEX index_issue_email_participants_on_issue_id_and_lower_email ON issue_email_participants USING btree (issue_id, lower(email));
 
 CREATE INDEX index_issue_links_on_source_id ON issue_links USING btree (source_id);
@@ -23661,6 +23695,8 @@ CREATE INDEX index_issues_on_description_trigram ON issues USING gin (descriptio
 CREATE INDEX index_issues_on_duplicated_to_id ON issues USING btree (duplicated_to_id) WHERE (duplicated_to_id IS NOT NULL);
 
 CREATE INDEX index_issues_on_incident_issue_type ON issues USING btree (issue_type) WHERE (issue_type = 1);
+
+CREATE INDEX index_issues_on_issue_custom_type_id ON issues USING btree (issue_custom_type_id);
 
 CREATE INDEX index_issues_on_last_edited_by_id ON issues USING btree (last_edited_by_id);
 
@@ -25568,6 +25604,9 @@ ALTER TABLE ONLY internal_ids
 ALTER TABLE ONLY geo_event_log
     ADD CONSTRAINT fk_176d3fbb5d FOREIGN KEY (job_artifact_deleted_event_id) REFERENCES geo_job_artifact_deleted_events(id) ON DELETE CASCADE;
 
+ALTER TABLE ONLY issues
+    ADD CONSTRAINT fk_17dbd67d7a FOREIGN KEY (issue_custom_type_id) REFERENCES issue_custom_types(id) ON DELETE SET NULL;
+
 ALTER TABLE ONLY project_features
     ADD CONSTRAINT fk_18513d9b92 FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE;
 
@@ -26332,6 +26371,9 @@ ALTER TABLE ONLY ci_subscriptions_projects
 
 ALTER TABLE ONLY trending_projects
     ADD CONSTRAINT fk_rails_09feecd872 FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE;
+
+ALTER TABLE ONLY issue_custom_types
+    ADD CONSTRAINT fk_rails_0a22cc0d7a FOREIGN KEY (namespace_id) REFERENCES namespaces(id) ON DELETE CASCADE;
 
 ALTER TABLE ONLY security_orchestration_policy_configurations
     ADD CONSTRAINT fk_rails_0a22dcd52d FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE;

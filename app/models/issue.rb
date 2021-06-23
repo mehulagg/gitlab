@@ -48,6 +48,7 @@ class Issue < ApplicationRecord
   belongs_to :duplicated_to, class_name: 'Issue'
   belongs_to :closed_by, class_name: 'User'
   belongs_to :iteration, foreign_key: 'sprint_id'
+  belongs_to :issue_custom_type, class_name: 'Issues::CustomType', inverse_of: :issues
 
   belongs_to :moved_to, class_name: 'Issue'
   has_one :moved_from, class_name: 'Issue', foreign_key: :moved_to_id
@@ -129,6 +130,7 @@ class Issue < ApplicationRecord
       project: [:route, { namespace: :route }])
   }
   scope :with_issue_type, ->(types) { where(issue_type: types) }
+  scope :with_issue_custom_type_id, ->(ids) { where(issue_custom_type_id: ids) }
 
   scope :public_only, -> { where(confidential: false) }
   scope :confidential_only, -> { where(confidential: true) }
@@ -471,6 +473,16 @@ class Issue < ApplicationRecord
 
   def email_participants_emails
     issue_email_participants.pluck(:email)
+  end
+
+  def issue_type_human
+    return issue_type.capitalize unless issue_custom_type_id.present?
+
+    issue_custom_type.name
+  end
+
+  def issue_type_matches?(to_match)
+    self[:issue_type] == to_match[:issue_type] && self[:issue_custom_type_id] == to_match[:issue_custom_type_id]
   end
 
   def email_participants_emails_downcase

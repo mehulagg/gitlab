@@ -81,7 +81,9 @@ class IssuesFinder < IssuableFinder
     issues = super
     issues = by_due_date(issues)
     issues = by_confidential(issues)
-    by_issue_types(issues)
+    issues = by_issue_types(issues)
+    issues = by_issue_custom_types(issues)
+    issues
   end
 
   def by_confidential(items)
@@ -114,6 +116,14 @@ class IssuesFinder < IssuableFinder
     return Issue.none unless (Issue.issue_types.keys & issue_type_params).sort == issue_type_params.sort
 
     items.with_issue_type(params[:issue_types])
+  end
+
+  def by_issue_custom_types(items)
+    issue_custom_type_params = Array(params[:issue_custom_type_ids])
+
+    return items if issue_custom_type_params.blank?
+
+    items.with_issue_custom_type_id(issue_custom_type_params)
   end
 end
 

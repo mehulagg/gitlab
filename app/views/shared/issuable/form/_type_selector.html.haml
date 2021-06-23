@@ -8,7 +8,7 @@
         .dropdown.js-issuable-type-filter-dropdown-wrap
           %button.dropdown-menu-toggle{ type: 'button', 'data-toggle' => 'dropdown' }
             %span.dropdown-toggle-text.is-default
-              = issuable.issue_type.capitalize || _("Select type")
+              = issuable.issue_type_human || _("Select type")
             = sprite_icon('chevron-down', css_class: "dropdown-menu-toggle-icon gl-top-3")
           .dropdown-menu.dropdown-menu-selectable.dropdown-select
             .dropdown-title.gl-display-flex
@@ -18,12 +18,15 @@
                 = sprite_icon('close', size: 16, css_class: 'dropdown-menu-close-icon')
             .dropdown-content
               %ul
-                %li.js-filter-issuable-type
-                  = link_to new_project_issue_path(@project), class: ("is-active" if issuable.issue?) do
-                    = _("Issue")
-                %li.js-filter-issuable-type{ data: { track: { event: "select_issue_type_incident", label: "select_issue_type_incident_dropdown_option" } } }
-                  = link_to new_project_issue_path(@project, { issuable_template: 'incident', issue: { issue_type: 'incident' } }), class: ("is-active" if issuable.incident?) do
-                    = _("Incident")
+                - issues_done = false
+                - @project.group.issue_types.each do |custom_type|
+                  - binding.pry
+                  - if !issues_done && custom_type.issue_type != 'issue'
+                    - issues_done = true
+                    %li.divider.droplab-item-ignore
+                  %li.js-filter-issuable-type
+                    = link_to new_project_issue_path(@project, { issue: { issue_type: custom_type.issue_type, issue_custom_type_id: custom_type.id } } ), class: ("is-active" if issuable.issue_type_matches?(custom_type)) do
+                      = "#{issue_type_icon('issue', custom_type)} #{custom_type.name}"
 
       #js-type-popover
 

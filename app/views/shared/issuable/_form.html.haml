@@ -76,6 +76,7 @@
 
 - if issuable.respond_to?(:issue_type)
   = form.hidden_field :issue_type
+  = form.hidden_field :issue_custom_type_id
 
 = form.hidden_field :lock_version
 

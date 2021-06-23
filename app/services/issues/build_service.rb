@@ -6,6 +6,7 @@ module Issues
 
     def execute
       filter_resolve_discussion_params
+      binding.pry
       @issue = project.issues.new(issue_params).tap do |issue|
         ensure_milestone_available(issue)
       end
@@ -73,6 +74,7 @@ module Issues
 
       allowed_params << :milestone_id if can?(current_user, :admin_issue, project)
       allowed_params << :issue_type if issue_type_allowed?(project)
+      allowed_params << : issue_custom_type_id if issue_type_allowed?(project)
 
       params.slice(*allowed_params)
     end

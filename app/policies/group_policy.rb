@@ -103,6 +103,7 @@ class GroupPolicy < BasePolicy
     enable :read_issue_board
     enable :read_group_member
     enable :read_custom_emoji
+    enable :read_issue_custom_type
   end
 
   rule { ~can?(:read_group) }.policy do
@@ -227,6 +228,7 @@ class GroupPolicy < BasePolicy
 
   rule { support_bot & has_project_with_service_desk_enabled }.policy do
     enable :read_label
+    enable :read_issue_custom_type
   end
 
   def access_level

@@ -734,6 +734,21 @@ class Group < Namespace
   end
   # rubocop: enable CodeReuse/ServiceClass
 
+    # Build a list of issue types, including custom and default types
+  def issue_types
+    issue_types = []
+
+    Issues::CustomType.all.where(namespace_id: root_ancestor).order(:name).find_each do |type|
+      issue_types << type
+    end
+
+    issue_types << Issues::CustomType.default_custom_issue if issue_types.empty?
+    issue_types << Issues::CustomType.default_custom_incident
+    issue_types << Issues::CustomType.default_custom_test_case
+
+    issue_types
+  end
+
   private
 
   def max_member_access(user_ids)

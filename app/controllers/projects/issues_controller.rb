@@ -18,7 +18,7 @@ class Projects::IssuesController < Projects::ApplicationController
   prepend_before_action :authenticate_user!, only: [:new, :export_csv]
   prepend_before_action :store_uri, only: [:new, :show, :designs]
 
-  before_action :disable_query_limiting, only: [:create_merge_request, :move, :bulk_update]
+  before_action :disable_query_limiting, only: [:create, :create_merge_request, :move, :bulk_update]
   before_action :check_issues_available!
   before_action :issue, unless: ->(c) { ISSUES_EXCEPT_ACTIONS.include?(c.action_name.to_sym) }
   after_action :log_issue_show, unless: ->(c) { ISSUES_EXCEPT_ACTIONS.include?(c.action_name.to_sym) }
@@ -109,6 +109,7 @@ class Projects::IssuesController < Projects::ApplicationController
     params[:issue] ||= ActionController::Parameters.new(
       assignee_ids: ""
     )
+
     build_params = issue_params.merge(
       merge_request_to_resolve_discussions_of: params[:merge_request_to_resolve_discussions_of],
       discussion_to_resolve: params[:discussion_to_resolve],
@@ -318,6 +319,7 @@ class Projects::IssuesController < Projects::ApplicationController
       lock_version
       discussion_locked
       issue_type
+      issue_custom_type_id
     ] + [{ label_ids: [], assignee_ids: [], update_task: [:index, :checked, :line_number, :line_source] }]
   end
 
