@@ -2535,7 +2535,7 @@ For further information on resource usage, see the [Webservice resources](https:
 Sidekiq pods should generally have 1 vCPU and 2 GB of memory.
 
 [The provided starting point](#cluster-topology) allows the deployment of up to
-16 Sidekiq pods. Expand available resources using the 1 vCPU to 2GB memory
+14 Sidekiq pods. Expand available resources using the 1 vCPU to 2GB memory
 ratio for each additional pod.
 
 For further information on resource usage, see the [Sidekiq resources](https://docs.gitlab.com/charts/charts/gitlab/sidekiq/#resources).
