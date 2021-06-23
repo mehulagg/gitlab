@@ -121,7 +121,7 @@ constraints(::Constraints::GroupUrlConstrainer.new) do
     resources :iterations, only: [:index, :new, :edit, :show], constraints: { id: /\d+/ }
 
     resources :iteration_cadences, path: 'cadences(/*vueroute)', action: :index do
-      resources :iterations, only: [:index, :new, :edit, :show], constraints: { id: /\d+/ }, controller: :iteration_cadences, action: :index
+      resources :iterations, only: [:index, :new, :edit, :show], constraints: { id: /\d+/ }, path: 'cadences(/*vueroute)', action: :index
     end
 
     resources :issues, only: [] do
