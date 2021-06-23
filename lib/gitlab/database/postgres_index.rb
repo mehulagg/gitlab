@@ -24,6 +24,8 @@ module Gitlab
 
       scope :not_match, ->(regex) { where("name !~ ?", regex)}
 
+      scope :match, ->(regex) { where("name ~* ?", regex)}
+
       scope :not_recently_reindexed, -> do
         recent_actions = Reindexing::ReindexAction.recent.where('index_identifier = identifier')
 
