@@ -51,6 +51,8 @@ describe('Time series component', () => {
       },
       stubs: {
         GlPopover: true,
+        GlLineChart,
+        GlAreaChart,
       },
       attachTo: document.body,
     });
