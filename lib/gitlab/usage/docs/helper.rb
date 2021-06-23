@@ -52,7 +52,7 @@ module Gitlab
         end
 
         def render_data_category(object)
-          "Data Category: `#{object[:data_category]}`" if object[:data_category].present?
+          "Data Category: `#{object[:data_category]}`"
         end
 
         def format(key, value)
