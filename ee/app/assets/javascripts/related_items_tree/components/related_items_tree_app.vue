@@ -173,19 +173,21 @@ export default {
         :active-slot-names="[visibleForm]"
         class="gl-p-5 gl-pb-0"
       >
-        <h6 v-for="slot in formSlots" :key="slot.name" :slot="slot.name">
-          {{ slot.value }}
-          <gl-icon
-            v-gl-tooltip.hover
-            name="question-o"
-            class="gl-text-gray-500"
-            :title="
-              __(
-                'The parent epic is confidential and can only contain confidential epics and issues',
-              )
-            "
-          />
-        </h6>
+        <template v-for="slot in formSlots" #[slot.name]>
+          <h6 :key="slot.name">
+            {{ slot.value }}
+            <gl-icon
+              v-gl-tooltip.hover
+              name="question-o"
+              class="gl-text-gray-500"
+              :title="
+                __(
+                  'The parent epic is confidential and can only contain confidential epics and issues',
+                )
+              "
+            />
+          </h6>
+        </template>
       </slot-switch>
       <slot-switch
         v-if="visibleForm"
