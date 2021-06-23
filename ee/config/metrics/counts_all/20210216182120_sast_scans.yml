@@ -12,4 +12,5 @@ data_source: database
 data_category: Optional
 distribution:
 - ee
-tier: []
+tier:
+- ultimate
