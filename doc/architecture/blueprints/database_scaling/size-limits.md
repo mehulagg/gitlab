@@ -60,40 +60,56 @@ As we can see, there are currently very large tables greater than 1 TB in size, 
 
 The other observation here is that there are also tables with a large number of indexes and total index size can be significantly larger than the data stored. For example, `deployments` is 30 GB in size plus additional 123 GB of index data spread across 24 indexes.
 
-```
-         tablename          | total_size | table_size | index_size | index_count | percentage_of_total_database_size
-----------------------------+------------+------------+------------+-------------+-----------------------------------
- ci_builds                  | 2964 GB    | 1537 GB    | 947 GB     |          31 |                              22.8
- merge_request_diff_commits | 1883 GB    | 1449 GB    | 412 GB     |           2 |                              14.5
- ci_build_trace_sections    | 1116 GB    | 539 GB     | 577 GB     |           3 |                               8.6
- notes                      | 743 GB     | 387 GB     | 330 GB     |          13 |                               5.7
- merge_request_diff_files   | 571 GB     | 478 GB     | 88 GB      |           1 |                               4.4
- events                     | 439 GB     | 95 GB      | 344 GB     |          12 |                               3.4
- ci_job_artifacts           | 394 GB     | 186 GB     | 208 GB     |          10 |                               3.0
- ci_pipelines               | 263 GB     | 66 GB      | 197 GB     |          23 |                               2.0
- taggings                   | 237 GB     | 59 GB      | 178 GB     |           5 |                               1.8
- ci_builds_metadata         | 235 GB     | 87 GB      | 148 GB     |           5 |                               1.8
- issues                     | 218 GB     | 47 GB      | 150 GB     |          28 |                               1.7
- web_hook_logs_202103       | 186 GB     | 122 GB     | 8416 MB    |           3 |                               1.4
- ci_stages                  | 181 GB     | 58 GB      | 123 GB     |           6 |                               1.4
- web_hook_logs_202105       | 180 GB     | 115 GB     | 7868 MB    |           3 |                               1.4
- web_hook_logs_202104       | 176 GB     | 115 GB     | 7472 MB    |           3 |                               1.4
- merge_requests             | 175 GB     | 44 GB      | 123 GB     |          36 |                               1.3
- web_hook_logs_202101       | 169 GB     | 112 GB     | 7231 MB    |           3 |                               1.3
- web_hook_logs_202102       | 167 GB     | 111 GB     | 7106 MB    |           3 |                               1.3
- sent_notifications         | 166 GB     | 87 GB      | 78 GB      |           3 |                               1.3
- web_hook_logs_202011       | 163 GB     | 113 GB     | 7125 MB    |           3 |                               1.3
- push_event_payloads        | 162 GB     | 114 GB     | 47 GB      |           1 |                               1.2
- web_hook_logs_202012       | 159 GB     | 106 GB     | 6771 MB    |           3 |                               1.2
- deployments                | 153 GB     | 30 GB      | 123 GB     |          24 |                               1.2
- web_hook_logs_202010       | 136 GB     | 98 GB      | 6116 MB    |           3 |                               1.0
- web_hook_logs_202106       | 135 GB     | 88 GB      | 5913 MB    |           3 |                               1.0
- web_hook_logs_202009       | 114 GB     | 82 GB      | 5168 MB    |           3 |                               0.9
- security_findings          | 103 GB     | 20 GB      | 82 GB      |           8 |                               0.8
- web_hook_logs_202008       | 92 GB      | 66 GB      | 3983 MB    |           3 |                               0.7
- resource_label_events      | 65 GB      | 46 GB      | 19 GB      |           6 |                               0.5
- merge_request_diffs        | 62 GB      | 38 GB      | 22 GB      |           5 |                               0.5
-```
+<!--
+select tablename,
+       pg_size_pretty(pg_total_relation_size(t.schemaname || '.' || t.tablename)) as total_size,
+       pg_size_pretty(pg_relation_size(t.schemaname || '.' || t.tablename)) as table_size,
+       pg_size_pretty(pg_indexes_size(t.schemaname || '.' || t.tablename)) as index_size,
+       count(*) as index_count,
+       round(pg_total_relation_size(t.schemaname || '.' || t.tablename) / pg_database_size('gitlabhq_production')::numeric * 100, 1) as percentage_of_total_database_size
+from pg_indexes i
+join pg_tables t USING (tablename)
+group by 1,
+         2,
+         3,
+         t.schemaname,
+         t.tablename
+order by pg_total_relation_size(t.schemaname || '.' || t.tablename) desc
+limit 30;
+-->
+
+| Table                        | Total size | Table size | Index size | Index count | Percentage of total database size |
+|------------------------------|------------|------------|------------|-------------|-----------------------------------|
+| `ci_builds`                  | 2975 GB    | 1551 GB    | 941 GB     | 30          | 22.7                              |
+| `merge_request_diff_commits` | 1890 GB    | 1454 GB    | 414 GB     | 2           | 14.4                              |
+| `ci_build_trace_sections`    | 1123 GB    | 542 GB     | 581 GB     | 3           | 8.6                               |
+| `notes`                      | 748 GB     | 390 GB     | 332 GB     | 13          | 5.7                               |
+| `merge_request_diff_files`   | 575 GB     | 481 GB     | 88 GB      | 1           | 4.4                               |
+| `events`                     | 441 GB     | 95 GB      | 346 GB     | 12          | 3.4                               |
+| `ci_job_artifacts`           | 397 GB     | 187 GB     | 210 GB     | 10          | 3.0                               |
+| `ci_pipelines`               | 266 GB     | 66 GB      | 200 GB     | 23          | 2.0                               |
+| `taggings`                   | 238 GB     | 60 GB      | 179 GB     | 5           | 1.8                               |
+| `ci_builds_metadata`         | 237 GB     | 88 GB      | 149 GB     | 5           | 1.8                               |
+| `issues`                     | 219 GB     | 47 GB      | 150 GB     | 28          | 1.7                               |
+| `web_hook_logs_202103`       | 186 GB     | 122 GB     | 8416 MB    | 3           | 1.4                               |
+| `ci_stages`                  | 182 GB     | 58 GB      | 124 GB     | 6           | 1.4                               |
+| `web_hook_logs_202105`       | 180 GB     | 115 GB     | 7868 MB    | 3           | 1.4                               |
+| `merge_requests`             | 176 GB     | 44 GB      | 125 GB     | 36          | 1.3                               |
+| `web_hook_logs_202104`       | 176 GB     | 115 GB     | 7472 MB    | 3           | 1.3                               |
+| `web_hook_logs_202101`       | 169 GB     | 112 GB     | 7231 MB    | 3           | 1.3                               |
+| `web_hook_logs_202102`       | 167 GB     | 111 GB     | 7106 MB    | 3           | 1.3                               |
+| `sent_notifications`         | 166 GB     | 88 GB      | 79 GB      | 3           | 1.3                               |
+| `web_hook_logs_202011`       | 163 GB     | 113 GB     | 7125 MB    | 3           | 1.2                               |
+| `push_event_payloads`        | 162 GB     | 114 GB     | 48 GB      | 1           | 1.2                               |
+| `web_hook_logs_202012`       | 159 GB     | 106 GB     | 6771 MB    | 3           | 1.2                               |
+| `web_hook_logs_202106`       | 156 GB     | 101 GB     | 6752 MB    | 3           | 1.2                               |
+| `deployments`                | 155 GB     | 30 GB      | 125 GB     | 24          | 1.2                               |
+| `web_hook_logs_202010`       | 136 GB     | 98 GB      | 6116 MB    | 3           | 1.0                               |
+| `web_hook_logs_202009`       | 114 GB     | 82 GB      | 5168 MB    | 3           | 0.9                               |
+| `security_findings`          | 109 GB     | 21 GB      | 88 GB      | 8           | 0.8                               |
+| `web_hook_logs_202008`       | 92 GB      | 66 GB      | 3983 MB    | 3           | 0.7                               |
+| `resource_label_events`      | 66 GB      | 47 GB      | 19 GB      | 6           | 0.5                               |
+| `merge_request_diffs`        | 63 GB      | 39 GB      | 22 GB      | 5           | 0.5                               |
 
 ## Target: All physical tables on GitLab.com are < 100 GB including indexes
 
