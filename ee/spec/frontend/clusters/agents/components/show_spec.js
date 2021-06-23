@@ -1,4 +1,4 @@
-import { GlAlert, GlKeysetPagination, GlLoadingIcon, GlSprintf } from '@gitlab/ui';
+import { GlAlert, GlKeysetPagination, GlLoadingIcon, GlSprintf, GlTab } from '@gitlab/ui';
 import { createLocalVue, shallowMount } from '@vue/test-utils';
 import VueApollo from 'vue-apollo';
 import ClusterAgentShow from 'ee/clusters/agents/components/show.vue';
@@ -44,7 +44,7 @@ describe('ClusterAgentShow', () => {
       localVue,
       apolloProvider,
       propsData,
-      stubs: { GlSprintf, TimeAgoTooltip },
+      stubs: { GlSprintf, TimeAgoTooltip, GlTab },
     });
   };
 
@@ -54,6 +54,7 @@ describe('ClusterAgentShow', () => {
     wrapper = shallowMount(ClusterAgentShow, {
       propsData,
       mocks: { $apollo, clusterAgent },
+      stubs: { GlTab },
     });
   };
 
