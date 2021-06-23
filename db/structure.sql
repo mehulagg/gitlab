@@ -16276,6 +16276,24 @@ CREATE SEQUENCE path_locks_id_seq
 
 ALTER SEQUENCE path_locks_id_seq OWNED BY path_locks.id;
 
+CREATE TABLE pending_partition_drops (
+    id bigint NOT NULL,
+    created_at timestamp(6) without time zone NOT NULL,
+    updated_at timestamp(6) without time zone NOT NULL,
+    drop_after timestamp with time zone NOT NULL,
+    table_name text NOT NULL,
+    schema_name text NOT NULL
+);
+
+CREATE SEQUENCE pending_partition_drops_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE pending_partition_drops_id_seq OWNED BY pending_partition_drops.id;
+
 CREATE TABLE personal_access_tokens (
     id integer NOT NULL,
     user_id integer NOT NULL,
@@ -20276,6 +20294,8 @@ ALTER TABLE ONLY partitioned_foreign_keys ALTER COLUMN id SET DEFAULT nextval('p
 
 ALTER TABLE ONLY path_locks ALTER COLUMN id SET DEFAULT nextval('path_locks_id_seq'::regclass);
 
+ALTER TABLE ONLY pending_partition_drops ALTER COLUMN id SET DEFAULT nextval('pending_partition_drops_id_seq'::regclass);
+
 ALTER TABLE ONLY personal_access_tokens ALTER COLUMN id SET DEFAULT nextval('personal_access_tokens_id_seq'::regclass);
 
 ALTER TABLE ONLY plan_limits ALTER COLUMN id SET DEFAULT nextval('plan_limits_id_seq'::regclass);
@@ -21818,6 +21838,9 @@ ALTER TABLE ONLY partitioned_foreign_keys
 
 ALTER TABLE ONLY path_locks
     ADD CONSTRAINT path_locks_pkey PRIMARY KEY (id);
+
+ALTER TABLE ONLY pending_partition_drops
+    ADD CONSTRAINT pending_partition_drops_pkey PRIMARY KEY (id);
 
 ALTER TABLE ONLY personal_access_tokens
     ADD CONSTRAINT personal_access_tokens_pkey PRIMARY KEY (id);

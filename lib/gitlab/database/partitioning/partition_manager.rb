@@ -16,6 +16,7 @@ module Gitlab
 
         LEASE_TIMEOUT = 1.minute
         MANAGEMENT_LEASE_KEY = 'database_partition_management_%s'
+        RETAIN_DETACHED_PARTITIONS_FOR = 1.week
 
         attr_reader :models
 
@@ -90,6 +91,10 @@ module Gitlab
 
         def detach_one_partition(partition)
           connection.execute partition.to_detach_sql
+
+          Postgresql::PendingPartitionDrop.create!(table_name: partition.partition_name,
+                                             schema_name: Gitlab::Database::DYNAMIC_PARTITIONS_SCHEMA,
+                                             drop_after: RETAIN_DETACHED_PARTITIONS_FOR.from_now)
 
           Gitlab::AppLogger.info("Detached partition #{partition.partition_name} for table #{partition.table}")
         end

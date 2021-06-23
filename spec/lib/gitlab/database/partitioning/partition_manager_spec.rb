@@ -4,8 +4,13 @@ require 'spec_helper'
 
 RSpec.describe Gitlab::Database::Partitioning::PartitionManager do
   include Database::PartitioningHelpers
-  include Database::TableSchemaHelpers
   include ExclusiveLeaseHelpers
+
+  def has_partition(model, month)
+    Gitlab::Database::PostgresPartition.for_parent_table(model.table_name).any? do |partition|
+      Gitlab::Database::Partitioning::TimePartition.from_sql(model.table_name, partition.name, partition.condition).from == month
+    end
+  end
 
   describe '.register' do
     let(:model) { double(partitioning_strategy: nil) }
@@ -167,8 +172,69 @@ RSpec.describe Gitlab::Database::Partitioning::PartitionManager do
       end
     end
 
-    subject { described_class.new([my_model]).detach_partitions }
+    subject { described_class.new([my_model]).sync_partitions }
 
+    let(:connection) { ActiveRecord::Base.connection }
+    let(:my_model) do
+      Class.new(ApplicationRecord) do
+        include PartitionedTable
+
+        self.table_name = 'my_model_example_table'
+
+        partitioned_by :created_at, strategy: :monthly, retain_for: 1.month
+      end
+    end
+
+    before(:each) do
+      connection.execute(<<~SQL)
+        CREATE TABLE my_model_example_table
+        (id serial not null, created_at timestamptz not null, primary key (id, created_at))
+        PARTITION BY RANGE (created_at);
+
+        CREATE TABLE #{Gitlab::Database::DYNAMIC_PARTITIONS_SCHEMA}.my_model_example_table_202104
+        PARTITION OF my_model_example_table
+        FOR VALUES FROM ('2021-04-01') TO ('2021-05-01');
+
+        CREATE TABLE #{Gitlab::Database::DYNAMIC_PARTITIONS_SCHEMA}.my_model_example_table_202105
+        PARTITION OF my_model_example_table
+        FOR VALUES FROM ('2021-05-01') TO ('2021-06-01');
+      SQL
+
+      # Also create all future partitions so that the sync is only trying to detach old partitions
+      my_model.partitioning_strategy.missing_partitions.each do |p|
+        connection.execute p.to_sql
+      end
+    end
+
+    def num_tables
+      connection.select_value(<<~SQL)
+        SELECT COUNT(*)
+        FROM pg_class
+        where relkind IN ('r', 'p')
+      SQL
+    end
+
+    it 'detaches exactly one partition' do
+      expect { subject }.to change { find_partitions(my_model.table_name, schema: Gitlab::Database::DYNAMIC_PARTITIONS_SCHEMA).size }.from(9).to(8)
+    end
+
+    it 'detaches the old partition' do
+      expect { subject }.to change { has_partition(my_model, 2.months.ago.beginning_of_month) }.from(true).to(false)
+    end
+
+    it 'deletes zero tables' do
+      expect { subject }.not_to change { num_tables }
+    end
+
+    it 'creates the appropriate PendingPartitionDrop entry' do
+      subject
+
+      pending_drop = Postgresql::PendingPartitionDrop.find_by!(table_name: 'my_model_example_table_202104', schema_name: Gitlab::Database::DYNAMIC_PARTITIONS_SCHEMA)
+      expect(pending_drop.drop_after).to eq(Time.current + described_class::RETAIN_DETACHED_PARTITIONS_FOR)
+    end
+  end
+
+  context 'creating and then detaching partitions for a table' do
     let(:connection) { ActiveRecord::Base.connection }
     let(:my_model) do
       Class.new(ApplicationRecord) do
@@ -185,21 +251,21 @@ RSpec.describe Gitlab::Database::Partitioning::PartitionManager do
         CREATE TABLE my_model_example_table
         (id serial not null, created_at timestamptz not null, primary key (id, created_at))
         PARTITION BY RANGE (created_at);
-
-        CREATE TABLE #{Gitlab::Database::DYNAMIC_PARTITIONS_SCHEMA}.my_model_example_table_202104
-        PARTITION OF my_model_example_table
-        FOR VALUES FROM ('2021-04-01') TO ('2021-05-01')
       SQL
     end
 
-    it 'detaches the old partition' do
-      expect { subject }.to change { find_partitions(my_model.table_name, schema: Gitlab::Database::DYNAMIC_PARTITIONS_SCHEMA).size }.from(1).to(0)
+    def num_partitions(model)
+      find_partitions(model.table_name, schema: Gitlab::Database::DYNAMIC_PARTITIONS_SCHEMA).size
     end
 
-    it 'does not delete the old partition' do
-      subject
+    it 'creates partitions for the future then drops the oldest one after a month' do
+      # 1 month for the current month, 1 month for the old month that we're retaining data for, headroom
+      expected_num_partitions = (Gitlab::Database::Partitioning::MonthlyStrategy::HEADROOM + 2.months) / 1.month
+      expect { described_class.new([my_model]).sync_partitions }.to change { num_partitions(my_model) }.from(0).to(expected_num_partitions)
 
-      expect(table_oid('my_model_example_table_202104')).not_to be_nil
+      travel 1.month
+
+      expect { described_class.new([my_model]).sync_partitions }.to change { has_partition(my_model, 2.months.ago.beginning_of_month) }.from(true).to(false).and(change { num_partitions(my_model) }.by(0))
     end
   end
 end
