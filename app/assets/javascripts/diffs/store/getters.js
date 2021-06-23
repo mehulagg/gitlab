@@ -74,7 +74,9 @@ export const diffHasExpandedDiscussions = () => (diff) => {
  * @returns {Boolean}
  */
 export const diffHasDiscussions = () => (diff) => {
-  return diff[INLINE_DIFF_LINES_KEY].some((l) => l.discussions.length >= 1);
+  return diff[INLINE_DIFF_LINES_KEY].some(
+    (l) => l.left?.discussions.length >= 1 || l.right?.discussions.length >= 1,
+  );
 };
 
 /**

@@ -108,7 +108,15 @@ export default {
 
     if (!diffFile) return;
 
-    diffFile[INLINE_DIFF_LINES_KEY].find((l) => l.line_code === lineCode).hasForm = hasForm;
+    const { left, right } = diffFile[INLINE_DIFF_LINES_KEY].find(
+      (l) => l.left?.line_code === lineCode || l.right?.line_code === lineCode,
+    );
+
+    if (left && left.line_code === lineCode) {
+      left.hasForm = hasForm;
+    } else {
+      right.hasForm = hasForm;
+    }
   },
 
   [types.ADD_CONTEXT_LINES](state, options) {

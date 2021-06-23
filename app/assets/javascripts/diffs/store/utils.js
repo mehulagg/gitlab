@@ -1,5 +1,6 @@
 import { property, isEqual } from 'lodash';
 import { diffModes, diffViewerModes } from '~/ide/constants';
+import { mapParallel } from '../components/diff_row_utils';
 import {
   LINE_POSITION_LEFT,
   LINE_POSITION_RIGHT,
@@ -113,6 +114,72 @@ export const parallelizeDiffLines = (diffLines, inline) => {
         index += 1;
       } else {
         lines[conflictStartIndex][LINE_POSITION_RIGHT] = line;
+        conflictStartIndex = -1;
+      }
+    }
+  }
+
+  return lines;
+};
+
+export const parallelizeDiffLinesFlat = (diffLines, inline) => {
+  let freeRightIndex = null;
+  let conflictStartIndex = -1;
+  const lines = [];
+
+  for (let i = 0, diffLinesLength = diffLines.length, index = 0; i < diffLinesLength; i += 1) {
+    const line = diffLines[i];
+
+    if (isRemoved(line) || isConflictOur(line) || inline) {
+      lines.push({
+        [LINE_POSITION_LEFT]: line.line_code,
+        [LINE_POSITION_RIGHT]: null,
+      });
+
+      if (freeRightIndex === null) {
+        // Once we come upon a new line it can be put on the right of this old line
+        freeRightIndex = index;
+      }
+      index += 1;
+    } else if (isAdded(line) || isConflictTheir(line)) {
+      if (freeRightIndex !== null) {
+        // If an old line came before this without a line on the right, this
+        // line can be put to the right of it.
+        lines[freeRightIndex].right = line.line_code;
+
+        // If there are any other old lines on the left that don't yet have
+        // a new counterpart on the right, update the free_right_index
+        const nextFreeRightIndex = freeRightIndex + 1;
+        freeRightIndex = nextFreeRightIndex < index ? nextFreeRightIndex : null;
+      } else {
+        lines.push({
+          [LINE_POSITION_LEFT]: null,
+          [LINE_POSITION_RIGHT]: line.line_code,
+        });
+
+        freeRightIndex = null;
+        index += 1;
+      }
+    } else if (
+      isMeta(line) ||
+      isUnchanged(line) ||
+      isConflictMarker(line) ||
+      (isConflictSeperator(line) && inline)
+    ) {
+      if (conflictStartIndex <= 0) {
+        // line in the right panel is the same as in the left one
+        lines.push({
+          [LINE_POSITION_LEFT]: line.line_code,
+          [LINE_POSITION_RIGHT]: !inline && line.line_code,
+        });
+
+        if (!inline && isConflictMarker(line)) {
+          conflictStartIndex = index;
+        }
+        freeRightIndex = null;
+        index += 1;
+      } else {
+        lines[conflictStartIndex][LINE_POSITION_RIGHT] = line.line_code;
         conflictStartIndex = -1;
       }
     }
@@ -381,6 +448,8 @@ function prepareDiffFileLines(file) {
 }
 
 function finalizeDiffFile(file, index) {
+  const lines = parallelizeDiffLines(file[INLINE_DIFF_LINES_KEY], true);
+
   Object.assign(file, {
     renderIt:
       index < 3 ? file[INLINE_DIFF_LINES_KEY].length < LINES_TO_BE_RENDERED_DIRECTLY : false,
@@ -388,6 +457,7 @@ function finalizeDiffFile(file, index) {
     isLoadingFullFile: false,
     discussions: [],
     renderingLines: false,
+    [INLINE_DIFF_LINES_KEY]: lines.map(mapParallel),
   });
 
   return file;

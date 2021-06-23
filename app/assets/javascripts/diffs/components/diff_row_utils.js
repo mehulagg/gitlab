@@ -88,54 +88,38 @@ export const shouldShowCommentButton = (hover, context, meta, discussions) => {
   return hover && !context && !meta && !discussions;
 };
 
-export const mapParallel = (content) => (line) => {
+export const mapParallel = (line) => {
   let { left, right } = line;
 
-  // Dicussions/Comments
-  const hasExpandedDiscussionOnLeft =
-    left?.discussions?.length > 0 ? left?.discussionsExpanded : false;
-  const hasExpandedDiscussionOnRight =
-    right?.discussions?.length > 0 ? right?.discussionsExpanded : false;
-
-  const renderCommentRow =
-    hasExpandedDiscussionOnLeft || hasExpandedDiscussionOnRight || left?.hasForm || right?.hasForm;
-
   if (left) {
+    const { type } = left;
+
     left = {
       ...left,
-      renderDiscussion: hasExpandedDiscussionOnLeft,
-      hasDraft: content.hasParallelDraftLeft(content.diffFile.file_hash, line),
-      lineDraft: content.draftForLine(content.diffFile.file_hash, line, 'left'),
-      hasCommentForm: left.hasForm,
+      hasDiscussions: hasDiscussions(left),
+      isMatchLine: isMatchLine(type),
+      isContextLine: isContextLine(type),
+      lineHref: lineHref(left),
+      isMetaLine: isMetaLine(type),
+      get renderDiscussion() {
+        return this.discussions.length > 0 ? this.discussionsExpanded : false;
+      },
     };
   }
   if (right) {
     right = {
       ...right,
-      renderDiscussion: Boolean(hasExpandedDiscussionOnRight && right.type),
-      hasDraft: content.hasParallelDraftRight(content.diffFile.file_hash, line),
-      lineDraft: content.draftForLine(content.diffFile.file_hash, line, 'right'),
-      hasCommentForm: Boolean(right.hasForm && right.type),
+      hasDiscussions: hasDiscussions(right),
+      isMatchLine: isMatchLine(right.type),
+      lineHref: lineHref(right),
+      get renderDiscussion() {
+        return this.discussions.length > 0 ? this.discussionsExpanded : false;
+      },
     };
   }
 
   return {
-    ...line,
     left,
     right,
-    isMatchLineLeft: isMatchLine(left?.type),
-    isMatchLineRight: isMatchLine(right?.type),
-    isContextLineLeft: isContextLine(left?.type),
-    isContextLineRight: isContextLine(right?.type),
-    hasDiscussionsLeft: hasDiscussions(left),
-    hasDiscussionsRight: hasDiscussions(right),
-    lineHrefOld: lineHref(left),
-    lineHrefNew: lineHref(right),
-    lineCode: lineCode(line),
-    isMetaLineLeft: isMetaLine(left?.type),
-    isMetaLineRight: isMetaLine(right?.type),
-    draftRowClasses: left?.lineDraft > 0 || right?.lineDraft > 0 ? '' : 'js-temp-notes-holder',
-    renderCommentRow,
-    commentRowClasses: hasDiscussions(left) || hasDiscussions(right) ? '' : 'js-temp-notes-holder',
   };
 };

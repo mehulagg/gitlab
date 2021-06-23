@@ -75,7 +75,7 @@ export default {
     }),
     classNameMap() {
       return {
-        [CONTEXT_LINE_CLASS_NAME]: this.line.isContextLineLeft,
+        [CONTEXT_LINE_CLASS_NAME]: this.line.left?.isContextLine,
         [PARALLEL_DIFF_VIEW_TYPE]: !this.inline,
         commented: this.isCommented,
       };
@@ -132,7 +132,7 @@ export default {
       return { conflict_our: this.line.right?.type === CONFLICT_THEIR };
     },
     shouldRenderCommentButton() {
-      return this.isLoggedIn && !this.line.isContextLineLeft && !this.line.isMetaLineLeft;
+      return this.isLoggedIn && !this.line.left?.isContextLine && !this.line.left?.isMetaLine;
     },
     isLeftConflictMarker() {
       return [CONFLICT_MARKER_OUR, CONFLICT_MARKER_THEIR].includes(this.line.left?.type);
@@ -158,6 +158,9 @@ export default {
       'setHighlightedRow',
       'toggleLineDiscussions',
     ]),
+    lineCode(line) {
+      return line.line_code || line.left?.line_code || line.right?.line_code;
+    },
     // Prevent text selecting on both sides of parallel diff view
     // Backport of the same code from legacy diff notes.
     handleParallelLineMouseDown(e) {
@@ -227,7 +230,7 @@ export default {
         >
           <template v-if="!isLeftConflictMarker">
             <span
-              v-if="shouldRenderCommentButton && !line.hasDiscussionsLeft"
+              v-if="shouldRenderCommentButton && !line.left.hasDiscussions"
               v-gl-tooltip
               class="add-diff-note tooltip-wrapper"
               :title="addCommentTooltipLeft"
@@ -253,12 +256,12 @@ export default {
           <a
             v-if="line.left.old_line && line.left.type !== $options.CONFLICT_THEIR"
             :data-linenumber="line.left.old_line"
-            :href="line.lineHrefOld"
-            @click="setHighlightedRow(line.lineCode)"
+            :href="line.left.lineHref"
+            @click="setHighlightedRow(lineCode(line))"
           >
           </a>
           <diff-gutter-avatars
-            v-if="line.hasDiscussionsLeft"
+            v-if="line.left.hasDiscussions"
             :discussions="line.left.discussions"
             :discussions-expanded="line.left.discussionsExpanded"
             data-testid="left-discussions"
@@ -275,8 +278,8 @@ export default {
           <a
             v-if="line.left.new_line && line.left.type !== $options.CONFLICT_OUR"
             :data-linenumber="line.left.new_line"
-            :href="line.lineHrefOld"
-            @click="setHighlightedRow(line.lineCode)"
+            :href="line.left.lineHref"
+            @click="setHighlightedRow(lineCode(line))"
           >
           </a>
         </div>
@@ -346,7 +349,7 @@ export default {
         <div :class="classNameMapCellRight" class="diff-td diff-line-num new_line">
           <template v-if="line.right.type !== $options.CONFLICT_MARKER_THEIR">
             <span
-              v-if="shouldRenderCommentButton && !line.hasDiscussionsRight"
+              v-if="shouldRenderCommentButton && !line.right.hasDiscussions"
               v-gl-tooltip
               class="add-diff-note tooltip-wrapper"
               :title="addCommentTooltipRight"
@@ -371,12 +374,12 @@ export default {
           <a
             v-if="line.right.new_line"
             :data-linenumber="line.right.new_line"
-            :href="line.lineHrefNew"
-            @click="setHighlightedRow(line.lineCode)"
+            :href="line.right.lineHref"
+            @click="setHighlightedRow(lineCode(line))"
           >
           </a>
           <diff-gutter-avatars
-            v-if="line.hasDiscussionsRight"
+            v-if="line.right.hasDiscussions"
             :discussions="line.right.discussions"
             :discussions-expanded="line.right.discussionsExpanded"
             data-testid="right-discussions"

@@ -1,7 +1,6 @@
 <script>
 import { GlLoadingIcon } from '@gitlab/ui';
 import { mapActions, mapGetters, mapState } from 'vuex';
-import { mapParallel } from 'ee_else_ce/diffs/components/diff_row_utils';
 import DiffFileDrafts from '~/batch_comments/components/diff_file_drafts.vue';
 import draftCommentsMixin from '~/diffs/mixins/draft_comments';
 import { diffViewerModes } from '~/ide/constants';
@@ -79,10 +78,6 @@ export default {
     author() {
       return this.getUserData;
     },
-    mappedLines() {
-      // TODO: Do this data generation when we recieve a response to save a computed property being created
-      return this.diffLines(this.diffFile).map(mapParallel(this)) || [];
-    },
   },
   updated() {
     this.$nextTick(() => {
@@ -116,7 +111,7 @@ export default {
       <template v-if="isTextFile">
         <diff-view
           :diff-file="diffFile"
-          :diff-lines="mappedLines"
+          :diff-lines="diffFile.highlighted_diff_lines"
           :help-page-path="helpPagePath"
           :inline="isInlineView"
         />
