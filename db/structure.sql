@@ -9876,7 +9876,7 @@ ALTER SEQUENCE badges_id_seq OWNED BY badges.id;
 CREATE TABLE banned_users (
     id bigint NOT NULL,
     user_id integer,
-    ban_state integer,
+    ban_state smallint,
     created_at timestamp with time zone NOT NULL,
     updated_at timestamp with time zone NOT NULL
 );
@@ -27826,6 +27826,9 @@ ALTER TABLE ONLY merge_trains
 
 ALTER TABLE ONLY ci_runner_namespaces
     ADD CONSTRAINT fk_rails_f9d9ed3308 FOREIGN KEY (namespace_id) REFERENCES namespaces(id) ON DELETE CASCADE;
+
+ALTER TABLE ONLY banned_users
+    ADD CONSTRAINT fk_rails_fa5bb598e5 FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE;
 
 ALTER TABLE ONLY requirements_management_test_reports
     ADD CONSTRAINT fk_rails_fb3308ad55 FOREIGN KEY (requirement_id) REFERENCES requirements(id) ON DELETE CASCADE;
