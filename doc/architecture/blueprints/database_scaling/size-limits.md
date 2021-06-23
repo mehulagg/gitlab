@@ -113,6 +113,8 @@ limit 30;
 
 ## Target: All physical tables on GitLab.com are < 100 GB including indexes
 
+Note: In PostgreSQL context, a **physical table** is either a regular table or a partition of a partitioned table.
+
 In order to maintain and improve operational stability and lessen development burden, we target a **table size less than 100 GB for a physical table on GitLab.com** (including its indexes). This has numerous benefits:
 
 1. Improved query performance and more stable query plans
@@ -123,7 +125,6 @@ In order to maintain and improve operational stability and lessen development bu
 
 Note that this target is *pragmatic*: We understand table sizes depend on feature usage, code changes and other factors - which all change over time. We may not always find solutions where we can tightly limit the size of physical tables once and for all. That is acceptable though and we primarily aim to keep the situation on GitLab.com under control. We adapt our efforts to the situation present on GitLab.com and will re-evaluate frequently.
 
-In PostgreSQL context, a **physical table** is either a regular table or a partition of a partitioned table.
 
 ## Solutions
 
