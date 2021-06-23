@@ -35,7 +35,7 @@ export const getTopFrequentItems = (items) => {
 };
 
 export const updateExistingFrequentItem = (frequentItem, item) => {
-  const accessedOverHourAgo =
+  const accessedOverHourAgo = !frequentItem.lastAccessedOn ||
     Math.abs(item.lastAccessedOn - frequentItem.lastAccessedOn) / HOUR_IN_MS > 1;
 
   return {
