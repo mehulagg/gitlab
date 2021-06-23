@@ -52,5 +52,65 @@ RSpec.describe 'merge requests discussions' do
       expect { send_request }
         .to change { Gitlab::GitalyClient.get_request_count }.by_at_most(4)
     end
+
+    context 'caching', :use_clean_rails_memory_store_caching do
+      let!(:first_note) { create(:diff_note_on_merge_request, noteable: merge_request, project: project) }
+      let!(:second_note) { create(:diff_note_on_merge_request, in_reply_to: first_note, noteable: merge_request, project: project) }
+
+      before do
+        # Make a request to cache the discussions
+        send_request
+      end
+
+      shared_examples 'cache miss' do
+        it 'does not hit a warm cache' do
+          expect_next_instance_of(DiscussionSerializer) do |serializer|
+            expect(serializer).to receive(:represent).and_call_original
+          end
+
+          send_request
+        end
+      end
+
+      it 'gets cached on subsequent requests' do
+        expect_next_instance_of(DiscussionSerializer) do |serializer|
+          expect(serializer).not_to receive(:represent)
+        end
+
+        send_request
+      end
+
+      context 'when a note in a discussion got updated' do
+        before do
+          first_note.update!(updated_at: 1.minute.from_now)
+        end
+
+        it_behaves_like 'cache miss'
+      end
+
+      context 'when a note is added to a discussion' do
+        before do
+          create(:diff_note_on_merge_request, in_reply_to: first_note, noteable: merge_request, project: project)
+        end
+
+        it_behaves_like 'cache miss'
+      end
+
+      context 'when a note is removed from a discussion' do
+        before do
+          second_note.destroy!
+        end
+
+        it_behaves_like 'cache miss'
+      end
+
+      context 'when merge_request_discussion_cache is disabled' do
+        before do
+          stub_feature_flags(merge_request_discussion_cache: false)
+        end
+
+        it_behaves_like 'cache miss'
+      end
+    end
   end
 end
