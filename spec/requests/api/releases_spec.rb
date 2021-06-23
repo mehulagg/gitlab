@@ -469,10 +469,11 @@ RSpec.describe API::Releases do
         expect(response).to have_gitlab_http_status(:not_found)
       end
 
-      it 'returns 403 for non_project_member' do
-        get api("/projects/#{project.id}/releases/non_exist_tag", non_project_member)
+      it 'returns project not found for no user' do
+        get api("/projects/#{project.id}/releases/non_exist_tag", nil)
 
-        expect(response).to have_gitlab_http_status(:forbidden)
+        expect(response).to have_gitlab_http_status(:not_found)
+        expect(json_response['message']).to eq('404 Project Not Found')
       end
     end
 
