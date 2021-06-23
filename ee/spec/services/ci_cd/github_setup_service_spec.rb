@@ -29,7 +29,7 @@ RSpec.describe CiCd::GithubSetupService do
 
       subject.execute
 
-      expect(project.github_service).to be_active
+      expect(project.github_integration).to be_active
     end
   end
 end

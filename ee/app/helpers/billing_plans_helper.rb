@@ -133,20 +133,20 @@ module BillingPlansHelper
     !namespace.free_personal? && namespace.eligible_for_trial?
   end
 
+  def plan_purchase_url(group, plan)
+    if use_new_purchase_flow?(group)
+      new_subscriptions_path(plan_id: plan.id, namespace_id: group.id, source: params[:source])
+    else
+      "#{plan.purchase_link.href}&gl_namespace_id=#{group.id}"
+    end
+  end
+
   private
 
   def add_seats_url(group)
     return unless group
 
     "#{EE::SUBSCRIPTIONS_URL}/gitlab/namespaces/#{group.id}/extra_seats"
-  end
-
-  def plan_purchase_url(group, plan)
-    if use_new_purchase_flow?(group)
-      new_subscriptions_path(plan_id: plan.id, namespace_id: group.id)
-    else
-      "#{plan.purchase_link.href}&gl_namespace_id=#{group.id}"
-    end
   end
 
   def plan_upgrade_url(group, plan)

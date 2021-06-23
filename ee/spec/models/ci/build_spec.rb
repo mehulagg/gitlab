@@ -221,7 +221,7 @@ RSpec.describe Ci::Build do
           context 'when dast_configuration is absent from the options' do
             let(:options) { {} }
 
-            it 'does not attempt look up any dast profiles', :aggregate_failures do
+            it 'does not attempt look up any dast profiles to avoid unnecessary queries', :aggregate_failures do
               expect(job).not_to receive(:dast_site_profile)
               expect(job).not_to receive(:dast_scanner_profile)
 
@@ -232,7 +232,7 @@ RSpec.describe Ci::Build do
           context 'when site_profile is absent from the dast_configuration' do
             let(:options) { { dast_configuration: { scanner_profile: dast_scanner_profile.name } } }
 
-            it 'does not attempt look up the site profile' do
+            it 'does not attempt look up the site profile to avoid unnecessary queries' do
               expect(job).not_to receive(:dast_site_profile)
 
               subject
@@ -242,7 +242,7 @@ RSpec.describe Ci::Build do
           context 'when scanner_profile is absent from the dast_configuration' do
             let(:options) { { dast_configuration: { site_profile: dast_site_profile.name } } }
 
-            it 'does not attempt look up the scanner profile' do
+            it 'does not attempt look up the scanner profile to avoid unnecessary queries' do
               expect(job).not_to receive(:dast_scanner_profile)
 
               subject

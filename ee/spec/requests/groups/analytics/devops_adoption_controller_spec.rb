@@ -10,7 +10,6 @@ RSpec.describe Groups::Analytics::DevopsAdoptionController do
     sign_in(current_user)
 
     stub_licensed_features(group_level_devops_adoption: true)
-    stub_feature_flags(group_devops_adoption: true)
   end
 
   describe 'GET show' do
@@ -26,18 +25,6 @@ RSpec.describe Groups::Analytics::DevopsAdoptionController do
       subject
 
       expect(response).to render_template :show
-    end
-
-    context 'when the feature flag is false' do
-      before do
-        stub_feature_flags(group_devops_adoption: false)
-      end
-
-      it 'renders forbidden' do
-        subject
-
-        expect(response).to have_gitlab_http_status(:forbidden)
-      end
     end
 
     context 'when the feature is not available' do

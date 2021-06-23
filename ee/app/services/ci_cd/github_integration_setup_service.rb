@@ -15,7 +15,7 @@ module CiCd
     private
 
     def github_integration
-      @github_integration ||= project.build_github_service(github_params)
+      @github_integration ||= project.build_github_integration(github_params)
     end
 
     def github_params
