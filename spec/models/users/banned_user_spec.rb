@@ -6,7 +6,15 @@ RSpec.describe Users::BannedUser do
   it { is_expected.to belong_to(:user) }
 
   it do
-    is_expected.to validate_uniqueness_of(:user_id)
-                     .with_message("banned user already exists")
+    is_expected.to validate_uniqueness_of(:user_id).with_message("banned user already exists")
+  end
+
+  context 'creates a new banned user with is_banned state' do
+    let(:user) { create(:user) }
+
+    it 'creates a new banned user object with is_banned ban state' do
+      expect { described_class.new(user: user, ban_state: 3).save! }.to change { described_class.count }.by(1)
+      expect(described_class.last.ban_state).to eq("is_banned")
+    end
   end
 end
