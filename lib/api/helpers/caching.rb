@@ -90,6 +90,14 @@ module API
           end
         end
 
+        cached_headers = cache.fetch(key + ['header'], **apply_default_cache_options(cache_opts)) do
+          header
+        end
+
+        cached_headers.each do |key, value|
+          header key, value
+        end
+
         body Gitlab::Json::PrecompiledJson.new(json)
       end
 
