@@ -3,6 +3,9 @@
 class AddUpvotesToIssues < Elastic::Migration
   DOCUMENT_TYPE = Issue
 
+  batched!
+  throttle_delay 3.minutes
+
   def migrate
     client.indices.put_mapping index: index_name, body: {
       properties: {

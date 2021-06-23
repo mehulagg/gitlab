@@ -105,31 +105,50 @@ RSpec.describe Issue, :elastic do
     expect(results.first.title).to eq('bla-bla issue')
   end
 
-  it "returns json with all needed elements" do
-    assignee = create(:user)
-    project = create(:project, :internal)
-    issue = create :issue, project: project, assignees: [assignee]
+  context 'without add_upvotes_to_issues migration' do
+    before do
+      set_elasticsearch_migration_to :add_upvotes_to_issues, including: false
+    end
 
-    expected_hash = issue.attributes.extract!(
-      'id',
-      'iid',
-      'title',
-      'description',
-      'created_at',
-      'updated_at',
-      'project_id',
-      'author_id',
-      'confidential'
-    ).merge({
-      'type' => issue.es_type,
-      'state' => issue.state
-    })
+    it "returns json with all needed elements" do
+      assignee = create(:user)
+      project = create(:project, :internal)
+      issue = create :issue, project: project, assignees: [assignee]
 
-    expected_hash['assignee_id'] = [assignee.id]
-    expected_hash['issues_access_level'] = ProjectFeature::ENABLED
-    expected_hash['visibility_level'] = Gitlab::VisibilityLevel::INTERNAL
+      expected_hash = issue.attributes.extract!(
+        'id',
+        'iid',
+        'title',
+        'description',
+        'created_at',
+        'updated_at',
+        'project_id',
+        'author_id',
+        'confidential'
+      ).merge({
+        'type' => issue.es_type,
+        'state' => issue.state
+      })
 
-    expect(issue.__elasticsearch__.as_indexed_json).to eq(expected_hash)
+      expected_hash['assignee_id'] = [assignee.id]
+      expected_hash['issues_access_level'] = ProjectFeature::ENABLED
+      expected_hash['visibility_level'] = Gitlab::VisibilityLevel::INTERNAL
+
+      expect(issue.__elasticsearch__.as_indexed_json).to eq(expected_hash)
+    end
+  end
+
+  context 'with add_upvotes_to_issues migration' do
+    before do
+      set_elasticsearch_migration_to :add_upvotes_to_issues, including: true
+    end
+
+    it "includes upvotes field" do
+      issue = create(:issue)
+      create(:award_emoji, :upvote, awardable: issue)
+
+      expect(issue.__elasticsearch__.as_indexed_json).to include('upvotes' => 1)
+    end
   end
 
   it 'handles a project missing project_feature', :aggregate_failures do
