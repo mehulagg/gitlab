@@ -9876,7 +9876,7 @@ ALTER SEQUENCE badges_id_seq OWNED BY badges.id;
 CREATE TABLE banned_users (
     id bigint NOT NULL,
     user_id integer,
-    ban_state character varying,
+    ban_state integer,
     created_at timestamp with time zone NOT NULL,
     updated_at timestamp with time zone NOT NULL
 );
