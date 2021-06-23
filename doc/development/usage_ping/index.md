@@ -60,6 +60,16 @@ We use the following terminology to describe the Usage Ping components:
 - You get insight and advice into how to get the most value out of your investment in GitLab. Wouldn't you want to know that a number of features or values are not being adopted in your organization?
 - You get a report that illustrates how you compare against other similar organizations (anonymized), with specific advice and recommendations on how to improve your DevOps processes.
 - Usage Ping is enabled by default. To disable it, see [Disable Usage Ping](#disable-usage-ping).
+- When Usage Ping is enabled, you have the option to participate in our [Registration Features Program](#registration-features-program) and receive free paid features.
+
+#### Registration Features Program
+
+Starting with version 14.1, free self-managed users running [GitLab EE](https://docs.gitlab.com/ee/development/ee_features.html) have an opportunity to receive paid features by registering with GitLab and sending us activity data via [Usage Ping](https://docs.gitlab.com/ee/development/usage_ping/#what-is-usage-ping).
+
+The paid feature currently available in this offering is [Email from GitLab](https://docs.gitlab.com/ee/tools/email.html). Administrators can streamline their workflow by emailing all or segments of instance users directly from within the GitLab admin panel with this [Premium](https://about.gitlab.com/pricing/premium/) feature. 
+
+_Note, registration is not yet required for participation, but will be added in a future milestone._ 
+
 
 ### Limitations
 
