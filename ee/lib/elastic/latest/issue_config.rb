@@ -35,6 +35,7 @@ module Elastic
 
         indexes :visibility_level, type: :integer
         indexes :issues_access_level, type: :integer
+        indexes :upvotes, type: :integer
       end
     end
   end
