@@ -56,6 +56,10 @@ The following examples show that very large tables often constitute the root cau
 
 This shows the TOP30 tables by their total size (includes index sizes). `table_size, index_size` is the on-disk size of the actual data and associated indexes, respectively. `percentage_of_total_database_size` displays the ratio of total table size to database size.
 
+As we can see, there are currently very large tables greater than 1 TB in size, which also tend to have very large indexes.
+
+The other observation here is that there are also tables with a large number of indexes and total index size can be significantly larger than the data stored. For example, `deployments` is 30 GB in size plus additional 123 GB of index data spread across 24 indexes.
+
 ```
          tablename          | total_size | table_size | index_size | index_count | percentage_of_total_database_size
 ----------------------------+------------+------------+------------+-------------+-----------------------------------
