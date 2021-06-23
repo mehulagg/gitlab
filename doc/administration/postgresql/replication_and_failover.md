@@ -1017,6 +1017,22 @@ postgresql['trust_auth_cidr_addresses'] = %w(123.123.123.123/32 <other_cidrs>)
 
 [Reconfigure GitLab](../restart_gitlab.md#omnibus-gitlab-reconfigure) for the changes to take effect.
 
+### Resetting the Patroni state in Consul
+
+As a last resort, if your Patroni cluster is in an unknown/bad state and no node can start, you can
+reset the Patroni state in Consul completely, resulting in a reinitialized Patroni cluster when
+the first Patroni node starts.
+
+WARNING:
+This can be destructive and lead the cluster into a bad state, make sure you stop all Patroni services as part of these steps.
+
+The procedure for resetting the Patroni state in Consul is:
+
+1. Stop Patroni on all nodes using `gitlab-ctl stop patroni`.
+1. Reset the state in Consul using `/opt/gitlab/embedded/bin/consul kv delete -recurse /service/postgresql-ha/`.
+1. Start the first Patroni node, which will initialize the Patroni cluster and be elected as a leader, using `gitlab-ctl start patroni`.
+1. Start all other Patroni nodes that will join the Patroni cluster as replicas, using `gitlab-ctl start patroni`.
+
 ### Issues with other components
 
 If you're running into an issue with a component not outlined here, be sure to check the troubleshooting section of their specific documentation page:
