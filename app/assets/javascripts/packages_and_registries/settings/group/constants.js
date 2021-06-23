@@ -3,7 +3,7 @@ import { s__, __ } from '~/locale';
 
 export const PACKAGE_SETTINGS_HEADER = s__('PackageRegistry|Package Registry');
 export const PACKAGE_SETTINGS_DESCRIPTION = s__(
-  'PackageRegistry|Use GitLab as a private repository for common package formats. %{linkStart}More Information%{linkEnd}',
+  'PackageRegistry|Use GitLab as a private registry for common package formats. %{linkStart}Learn more.%{linkEnd}',
 );
 
 export const DUPLICATES_TOGGLE_LABEL = s__('PackageRegistry|Allow duplicates');
