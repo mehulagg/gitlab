@@ -101,6 +101,22 @@ RSpec.describe Ci::CreatePipelineService do
             expect(dast_variables).to include(*dast_secret_variables)
           end
         end
+
+        context 'when the site profile does not exist' do
+          let(:dast_site_profile) { double(DastSiteProfile, name: SecureRandom.hex) }
+
+          it 'raises an error' do
+            expect { subject }.to raise_error(Ci::CreatePipelineService::CreateError, "DAST site profile does not exist: #{dast_site_profile.name}")
+          end
+        end
+
+        context 'when the scanner profile does not exist' do
+          let(:dast_scanner_profile) { double(DastScannerProfile, name: SecureRandom.hex) }
+
+          it 'raises an error' do
+            expect { subject }.to raise_error(Ci::CreatePipelineService::CreateError, "DAST scanner profile does not exist: #{dast_scanner_profile.name}")
+          end
+        end
       end
 
       context 'when the stage is not dast' do
