@@ -36,7 +36,7 @@ export default {
     },
   },
   methods: {
-    ...mapActions(['setActiveIssueWeight', 'setError']),
+    ...mapActions(['setActiveItemWeight', 'setError']),
     handleFormSubmit() {
       this.$refs.sidebarItem.collapse({ emitEvent: false });
       this.setWeight();
@@ -51,7 +51,7 @@ export default {
       this.loading = true;
 
       try {
-        await this.setActiveIssueWeight({ weight, projectPath: this.projectPathForActiveIssue });
+        await this.setActiveItemWeight({ weight, projectPath: this.projectPathForActiveIssue });
         this.weight = weight;
       } catch (e) {
         this.weight = this.activeBoardItem.weight;

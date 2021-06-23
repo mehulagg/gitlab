@@ -35,7 +35,6 @@ import epicMoveListMutation from '../graphql/epic_move_list.mutation.graphql';
 import epicsSwimlanesQuery from '../graphql/epics_swimlanes.query.graphql';
 import groupBoardIterationsQuery from '../graphql/group_board_iterations.query.graphql';
 import groupBoardMilestonesQuery from '../graphql/group_board_milestones.query.graphql';
-import issueSetWeightMutation from '../graphql/issue_set_weight.mutation.graphql';
 import listUpdateLimitMetricsMutation from '../graphql/list_update_limit_metrics.mutation.graphql';
 import listsEpicsQuery from '../graphql/lists_epics.query.graphql';
 import projectBoardIterationsQuery from '../graphql/project_board_iterations.query.graphql';
@@ -326,26 +325,11 @@ export default {
     commit(types.RESET_EPICS);
   },
 
-  setActiveIssueWeight: async ({ commit, getters }, input) => {
-    const { data } = await gqlClient.mutate({
-      mutation: issueSetWeightMutation,
-      variables: {
-        input: {
-          iid: String(getters.activeBoardItem.iid),
-          weight: input.weight,
-          projectPath: input.projectPath,
-        },
-      },
-    });
-
-    if (!data.issueSetWeight || data.issueSetWeight?.errors?.length > 0) {
-      throw new Error(data.issueSetWeight?.errors);
-    }
-
+  setActiveItemWeight: async ({ commit, getters }, weight) => {
     commit(typesCE.UPDATE_BOARD_ITEM_BY_ID, {
       itemId: getters.activeBoardItem.id,
       prop: 'weight',
-      value: data.issueSetWeight.issue.weight,
+      value: weight,
     });
   },
 

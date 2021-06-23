@@ -52,7 +52,7 @@ describe('ee/boards/components/sidebar/board_sidebar_weight_input.vue', () => {
   describe('when weight is submitted', () => {
     beforeEach(async () => {
       createWrapper();
-      jest.spyOn(wrapper.vm, 'setActiveIssueWeight');
+      jest.spyOn(wrapper.vm, 'setActiveItemWeight');
       findWeightInput().vm.$emit('input', TEST_WEIGHT);
       findWeightForm().vm.$emit('submit', { preventDefault: () => {} });
       store.state.boardItems[TEST_ISSUE.id].weight = TEST_WEIGHT;
@@ -66,7 +66,7 @@ describe('ee/boards/components/sidebar/board_sidebar_weight_input.vue', () => {
     });
 
     it('commits change to the server', () => {
-      expect(wrapper.vm.setActiveIssueWeight).toHaveBeenCalledWith({
+      expect(wrapper.vm.setActiveItemWeight).toHaveBeenCalledWith({
         weight: TEST_WEIGHT,
         projectPath: 'h/b',
       });
@@ -76,7 +76,7 @@ describe('ee/boards/components/sidebar/board_sidebar_weight_input.vue', () => {
   describe('when weight is set to 0', () => {
     beforeEach(async () => {
       createWrapper({ weight: TEST_WEIGHT });
-      jest.spyOn(wrapper.vm, 'setActiveIssueWeight');
+      jest.spyOn(wrapper.vm, 'setActiveItemWeight');
       findWeightInput().vm.$emit('input', 0);
       findWeightForm().vm.$emit('submit', { preventDefault: () => {} });
       store.state.boardItems[TEST_ISSUE.id].weight = 0;
@@ -84,7 +84,7 @@ describe('ee/boards/components/sidebar/board_sidebar_weight_input.vue', () => {
     });
 
     it('collapses sidebar and renders "None"', () => {
-      expect(wrapper.vm.setActiveIssueWeight).toHaveBeenCalled();
+      expect(wrapper.vm.setActiveItemWeight).toHaveBeenCalled();
       expect(findCollapsed().isVisible()).toBe(true);
       expect(findCollapsed().text()).toBe('None');
     });
@@ -93,14 +93,14 @@ describe('ee/boards/components/sidebar/board_sidebar_weight_input.vue', () => {
   describe('when weight is resetted', () => {
     beforeEach(async () => {
       createWrapper({ weight: TEST_WEIGHT });
-      jest.spyOn(wrapper.vm, 'setActiveIssueWeight');
+      jest.spyOn(wrapper.vm, 'setActiveItemWeight');
       findResetButton().vm.$emit('click');
       store.state.boardItems[TEST_ISSUE.id].weight = 0;
       await wrapper.vm.$nextTick();
     });
 
     it('collapses sidebar and renders "None"', () => {
-      expect(wrapper.vm.setActiveIssueWeight).toHaveBeenCalled();
+      expect(wrapper.vm.setActiveItemWeight).toHaveBeenCalled();
       expect(findCollapsed().isVisible()).toBe(true);
       expect(findCollapsed().text()).toBe('None');
     });
@@ -109,7 +109,7 @@ describe('ee/boards/components/sidebar/board_sidebar_weight_input.vue', () => {
   describe('when the mutation fails', () => {
     beforeEach(async () => {
       createWrapper({ weight: TEST_WEIGHT });
-      jest.spyOn(wrapper.vm, 'setActiveIssueWeight').mockImplementation(() => {
+      jest.spyOn(wrapper.vm, 'setActiveItemWeight').mockImplementation(() => {
         throw new Error(['failed mutation']);
       });
       jest.spyOn(wrapper.vm, 'setError').mockImplementation(() => {});

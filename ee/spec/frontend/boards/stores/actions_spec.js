@@ -608,7 +608,7 @@ describe('resetEpics', () => {
   });
 });
 
-describe('setActiveIssueWeight', () => {
+describe('setActiveItemWeight', () => {
   const state = { boardItems: { [mockIssue.id]: mockIssue } };
   const getters = { activeBoardItem: mockIssue };
   const testWeight = mockIssue.weight + 1;
@@ -636,7 +636,7 @@ describe('setActiveIssueWeight', () => {
     };
 
     testAction(
-      actions.setActiveIssueWeight,
+      actions.setActiveItemWeight,
       input,
       { ...state, ...getters },
       [
@@ -655,7 +655,7 @@ describe('setActiveIssueWeight', () => {
       .spyOn(gqlClient, 'mutate')
       .mockResolvedValue({ data: { issueSetWeight: { errors: ['failed mutation'] } } });
 
-    await expect(actions.setActiveIssueWeight({ getters }, input)).rejects.toThrow(Error);
+    await expect(actions.setActiveItemWeight({ getters }, input)).rejects.toThrow(Error);
   });
 });
 
