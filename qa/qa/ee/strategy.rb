@@ -18,6 +18,8 @@ module QA
         end
 
         QA::Support::Retrier.retry_on_exception do
+          Page::Main::Menu.perform(&:sign_out_if_signed_in)
+
           QA::Runtime::Browser.visit(:gitlab, QA::Page::Main::Login) do
             EE::Resource::License.fabricate!(ENV['EE_LICENSE'])
           end
