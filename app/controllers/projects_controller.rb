@@ -44,6 +44,8 @@ class ProjectsController < Projects::ApplicationController
     helpers.new_repo_experiment_text
   end
 
+  after_action :log_project_show
+
   layout :determine_layout
 
   feature_category :projects, [
@@ -329,6 +331,12 @@ class ProjectsController < Projects::ApplicationController
   end
 
   private
+
+  def log_project_show
+    return unless current_user && @project
+
+    ::Gitlab::Search::RecentProjects.new(user: current_user).log_view(@project)
+  end
 
   # Render project landing depending of which features are available
   # So if page is not available in the list it renders the next page

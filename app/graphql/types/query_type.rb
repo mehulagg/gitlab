@@ -17,6 +17,11 @@ module Types
           resolver: Resolvers::ProjectsResolver,
           description: "Find projects visible to the current user."
 
+    field :recent_projects, Types::ProjectType.connection_type,
+          null: true,
+          resolver: Resolvers::RecentProjectsResolver,
+          description: "Find recently visited projects of the current user."
+
     field :group, Types::GroupType,
           null: true,
           resolver: Resolvers::GroupResolver,

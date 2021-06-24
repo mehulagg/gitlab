@@ -33,7 +33,7 @@ module Gitlab
       end
 
       def search(term)
-        finder.new(user, search: term, in: 'title')
+        finder.new(current_user: user, params: { search: term, in: 'title' })
           .execute
           .limit(SEARCH_LIMIT).reorder(nil).id_in_ordered(latest_ids) # rubocop: disable CodeReuse/ActiveRecord
       end
