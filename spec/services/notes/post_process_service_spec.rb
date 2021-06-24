@@ -21,7 +21,7 @@ RSpec.describe Notes::PostProcessService do
 
     it do
       expect(project).to receive(:execute_hooks)
-      expect(project).to receive(:execute_services)
+      expect(project).to receive(:execute_integrations)
 
       described_class.new(@note).execute
     end
@@ -31,14 +31,14 @@ RSpec.describe Notes::PostProcessService do
 
       it "doesn't call note hooks/services" do
         expect(project).not_to receive(:execute_hooks).with(anything, :note_hooks)
-        expect(project).not_to receive(:execute_services).with(anything, :note_hooks)
+        expect(project).not_to receive(:execute_integrations).with(anything, :note_hooks)
 
         described_class.new(@note).execute
       end
 
       it "calls confidential-note hooks/services" do
         expect(project).to receive(:execute_hooks).with(anything, :confidential_note_hooks)
-        expect(project).to receive(:execute_services).with(anything, :confidential_note_hooks)
+        expect(project).to receive(:execute_integrations).with(anything, :confidential_note_hooks)
 
         described_class.new(@note).execute
       end

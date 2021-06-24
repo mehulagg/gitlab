@@ -98,7 +98,7 @@ RSpec.describe Git::BaseHooksService do
 
         it 'executes the services' do
           expect(subject).to receive(:push_data).at_least(:once).and_call_original
-          expect(project).to receive(:execute_services)
+          expect(project).to receive(:execute_integrations)
 
           subject.execute
         end
@@ -109,7 +109,7 @@ RSpec.describe Git::BaseHooksService do
 
         it 'does not execute the services' do
           expect(subject).not_to receive(:push_data)
-          expect(project).not_to receive(:execute_services)
+          expect(project).not_to receive(:execute_integrations)
 
           subject.execute
         end
@@ -126,7 +126,7 @@ RSpec.describe Git::BaseHooksService do
 
       it 'does not execute hooks and services' do
         expect(project).not_to receive(:execute_hooks)
-        expect(project).not_to receive(:execute_services)
+        expect(project).not_to receive(:execute_integrations)
 
         subject.execute
       end

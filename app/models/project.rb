@@ -146,14 +146,6 @@ class Project < ApplicationRecord
   has_one :last_event, -> {order 'events.created_at DESC'}, class_name: 'Event'
   has_many :boards
 
-  def self.integration_association_name(name)
-    if ::Integration.renamed?(name)
-      "#{name}_integration"
-    else
-      "#{name}_service"
-    end
-  end
-
   # Project integrations
   has_one :asana_integration, class_name: 'Integrations::Asana'
   has_one :assembla_integration, class_name: 'Integrations::Assembla'
@@ -1426,20 +1418,12 @@ class Project < ApplicationRecord
   end
   # rubocop: enable CodeReuse/ServiceClass
 
-  def ci_services
+  def ci_integrations
     integrations.where(category: :ci)
   end
 
-  def ci_service
-    @ci_service ||= ci_services.reorder(nil).find_by(active: true)
-  end
-
-  def monitoring_services
-    integrations.where(category: :monitoring)
-  end
-
-  def monitoring_service
-    @monitoring_service ||= monitoring_services.reorder(nil).find_by(active: true)
+  def ci_integration
+    @ci_integration ||= ci_integrations.reorder(nil).find_by(active: true)
   end
 
   def avatar_in_git
@@ -1510,7 +1494,7 @@ class Project < ApplicationRecord
   end
   # rubocop: enable CodeReuse/ServiceClass
 
-  def execute_services(data, hooks_scope = :push_hooks)
+  def execute_integrations(data, hooks_scope = :push_hooks)
     # Call only service hooks that are active for this scope
     run_after_commit_or_now do
       integrations.public_send(hooks_scope).each do |integration| # rubocop:disable GitlabSecurity/PublicSend
@@ -1523,7 +1507,7 @@ class Project < ApplicationRecord
     hooks.hooks_for(hooks_scope).any? || SystemHook.hooks_for(hooks_scope).any? || Gitlab::FileHook.any?
   end
 
-  def has_active_services?(hooks_scope = :push_hooks)
+  def has_active_integrations?(hooks_scope = :push_hooks)
     integrations.public_send(hooks_scope).any? # rubocop:disable GitlabSecurity/PublicSend
   end
 
@@ -2664,10 +2648,10 @@ class Project < ApplicationRecord
   end
 
   def build_from_instance_or_template(name)
-    instance = find_integration(services_instances, name)
+    instance = find_integration(integration_instances, name)
     return Integration.build_from_integration(instance, project_id: id) if instance
 
-    template = find_integration(services_templates, name)
+    template = find_integration(integration_templates, name)
     return Integration.build_from_integration(template, project_id: id) if template
   end
 
@@ -2675,12 +2659,12 @@ class Project < ApplicationRecord
     Integration.integration_name_to_model(name).new(project_id: id)
   end
 
-  def services_templates
-    @services_templates ||= Integration.for_template
+  def integration_templates
+    @integration_templates ||= Integration.for_template
   end
 
-  def services_instances
-    @services_instances ||= Integration.for_instance
+  def integration_instances
+    @integration_instances ||= Integration.for_instance
   end
 
   def closest_namespace_setting(name)

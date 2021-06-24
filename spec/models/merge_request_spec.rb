@@ -1898,7 +1898,7 @@ RSpec.describe MergeRequest, factory_default: :keep do
 
     context 'has ci' do
       it 'returns true if MR has head_pipeline_id and commits' do
-        allow(merge_request).to receive_message_chain(:source_project, :ci_service) { nil }
+        allow(merge_request).to receive_message_chain(:source_project, :ci_integration) { nil }
         allow(merge_request).to receive(:head_pipeline_id) { double }
         allow(merge_request).to receive(:has_no_commits?) { false }
 
@@ -1906,7 +1906,7 @@ RSpec.describe MergeRequest, factory_default: :keep do
       end
 
       it 'returns true if MR has any pipeline and commits' do
-        allow(merge_request).to receive_message_chain(:source_project, :ci_service) { nil }
+        allow(merge_request).to receive_message_chain(:source_project, :ci_integration) { nil }
         allow(merge_request).to receive(:head_pipeline_id) { nil }
         allow(merge_request).to receive(:has_no_commits?) { false }
         allow(merge_request).to receive(:all_pipelines) { [double] }
@@ -1915,7 +1915,7 @@ RSpec.describe MergeRequest, factory_default: :keep do
       end
 
       it 'returns true if MR has CI service and commits' do
-        allow(merge_request).to receive_message_chain(:source_project, :ci_service) { double }
+        allow(merge_request).to receive_message_chain(:source_project, :ci_integration) { double }
         allow(merge_request).to receive(:head_pipeline_id) { nil }
         allow(merge_request).to receive(:has_no_commits?) { false }
         allow(merge_request).to receive(:all_pipelines) { [] }
@@ -1926,7 +1926,7 @@ RSpec.describe MergeRequest, factory_default: :keep do
 
     context 'has no ci' do
       it 'returns false if MR has no CI service nor pipeline, and no commits' do
-        allow(merge_request).to receive_message_chain(:source_project, :ci_service) { nil }
+        allow(merge_request).to receive_message_chain(:source_project, :ci_integration) { nil }
         allow(merge_request).to receive(:head_pipeline_id) { nil }
         allow(merge_request).to receive(:all_pipelines) { [] }
         allow(merge_request).to receive(:has_no_commits?) { true }

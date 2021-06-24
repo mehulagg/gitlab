@@ -106,7 +106,7 @@ RSpec.describe MergeRequests::HandleAssigneesChangeService do
 
       it 'execute hooks and services' do
         expect(merge_request.project).to receive(:execute_hooks).with(anything, :merge_request_hooks)
-        expect(merge_request.project).to receive(:execute_services).with(anything, :merge_request_hooks)
+        expect(merge_request.project).to receive(:execute_integrations).with(anything, :merge_request_hooks)
         expect(service).to receive(:enqueue_jira_connect_messages_for).with(merge_request)
 
         execute

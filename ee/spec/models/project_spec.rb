@@ -255,13 +255,13 @@ RSpec.describe Project do
       end
     end
 
-    describe '.with_active_services' do
+    describe '.with_active_integrations' do
       it 'returns the correct project' do
-        active_service = create(:service, active: true)
-        inactive_service = create(:service, active: false)
+        active = create(:service, active: true)
+        inactive = create(:service, active: false)
 
-        expect(described_class.with_active_services).to include(active_service.project)
-        expect(described_class.with_active_services).not_to include(inactive_service.project)
+        expect(described_class.with_active_integrations).to include(active.project)
+        expect(described_class.with_active_integrations).not_to include(inactive.project)
       end
     end
 
@@ -913,14 +913,14 @@ RSpec.describe Project do
         before do
           stub_licensed_features(group_webhooks: true)
         end
-        let(:fake_service) { double }
+        let(:fake_integration) { double }
 
         shared_examples 'triggering group webhook' do
           it 'executes the hook' do
-            expect(fake_service).to receive(:async_execute).once
+            expect(fake_integration).to receive(:async_execute).once
 
-            expect(WebHookService).to receive(:new)
-                                        .with(group_hook, { some: 'info' }, 'push_hooks') { fake_service }
+            expect(WebHookService)
+              .to receive(:new).with(group_hook, { some: 'info' }, 'push_hooks') { fake_integration }
 
             project.execute_hooks(some: 'info')
           end

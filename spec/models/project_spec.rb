@@ -5371,7 +5371,7 @@ RSpec.describe Project, factory_default: :keep do
     end
   end
 
-  describe '#execute_services' do
+  describe '#execute_integrations' do
     let(:integration) { create(:integrations_slack, push_events: true, merge_requests_events: false, active: true) }
 
     it 'executes integrations with the specified scope' do
@@ -5381,7 +5381,7 @@ RSpec.describe Project, factory_default: :keep do
         expect(instance).to receive(:async_execute).with(data).once
       end
 
-      integration.project.execute_services(data, :push_hooks)
+      integration.project.execute_integrations(data, :push_hooks)
     end
 
     it 'does not execute integration that don\'t match the specified scope' do
@@ -5391,7 +5391,7 @@ RSpec.describe Project, factory_default: :keep do
         end
       end
 
-      integration.project.execute_services(anything, :merge_request_hooks)
+      integration.project.execute_integrations(anything, :merge_request_hooks)
     end
   end
 
