@@ -119,6 +119,9 @@ module Security
       params[:state].blank? || states.include?(computed_finding_state(finding))
     end
 
+    # Here we are checking the state of the `vulnerability` and preloaded `feedback` records
+    # instead of checking the `finding.state` as the `state` method of the `finding` fires
+    # an additional database query to load the `feedback` record for each `finding`.
     def computed_finding_state(finding)
       finding.vulnerability&.state ||
         (dismissal_feedback?(finding) ? 'dismissed' : 'detected')
@@ -128,6 +131,8 @@ module Security
       skip_scope_parameter? || params[:scope] == 'all'
     end
 
+    # If the client explicitly asks for the dismissed findings, we shouldn't
+    # filter by the `scope` parameter as it's `skip_dismissed` by default.
     def skip_scope_parameter?
       params[:state].present? && states.include?('dismissed')
     end
