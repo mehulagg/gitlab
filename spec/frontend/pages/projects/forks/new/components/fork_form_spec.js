@@ -1,4 +1,11 @@
-import { GlFormInputGroup, GlFormInput, GlForm, GlFormRadioGroup, GlFormRadio } from '@gitlab/ui';
+import {
+  GlFormInputGroup,
+  GlFormInput,
+  GlForm,
+  GlFormRadioGroup,
+  GlFormRadio,
+  GlFormSelect,
+} from '@gitlab/ui';
 import { getByRole, getAllByRole } from '@testing-library/dom';
 import { mount, shallowMount } from '@vue/test-utils';
 import axios from 'axios';
@@ -155,7 +162,7 @@ describe('ForkForm component', () => {
   describe('forks namespaces', () => {
     beforeEach(() => {
       mockGetRequest({ namespaces: MOCK_NAMESPACES_RESPONSE });
-      createComponent();
+      createFullComponent();
     });
 
     it('make GET request from endpoint', async () => {
