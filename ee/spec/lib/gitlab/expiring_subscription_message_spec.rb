@@ -208,9 +208,10 @@ RSpec.describe Gitlab::ExpiringSubscriptionMessage do
               context 'with namespace' do
                 using RSpec::Parameterized::TableSyntax
 
-                let(:has_future_renewal) { false }
+                let_it_be(:group_with_plan) { create(:group_with_plan, name: 'No Limit Records') }
 
-                let_it_be(:namespace) { create(:group_with_plan, name: 'No Limit Records') }
+                let(:has_future_renewal) { false }
+                let(:namespace) { group_with_plan }
 
                 before do
                   allow_next_instance_of(GitlabSubscriptions::CheckFutureRenewalService, namespace: namespace) do |service|
@@ -277,6 +278,22 @@ RSpec.describe Gitlab::ExpiringSubscriptionMessage do
                     expect(GitlabSubscriptions::CheckFutureRenewalService).not_to receive(:new)
 
                     subject
+                  end
+                end
+
+                context 'with a sub-group' do
+                  let(:namespace) { build(:group, parent: group_with_plan) }
+
+                  it 'checks for a future renewal' do
+                    expect(GitlabSubscriptions::CheckFutureRenewalService).to receive(:new)
+
+                    subject
+                  end
+
+                  context 'when parent namespace has a future renewal' do
+                    let(:has_future_renewal) { true }
+
+                    it { is_expected.to be_nil }
                   end
                 end
               end

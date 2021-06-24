@@ -47,7 +47,7 @@ module Projects
       def redirect_to_service_page
         redirect_to edit_project_service_path(
           project,
-          project.gitlab_slack_application_service || project.build_gitlab_slack_application_service
+          project.gitlab_slack_application_integration || project.build_gitlab_slack_application_integration
         )
       end
 
@@ -65,11 +65,11 @@ module Projects
       end
 
       def slack_integration
-        @slack_integration ||= project.gitlab_slack_application_service.slack_integration
+        @slack_integration ||= project.gitlab_slack_application_integration.slack_integration
       end
 
       def service
-        @service = project.gitlab_slack_application_service
+        @service = project.gitlab_slack_application_integration
       end
 
       def slack_integration_params

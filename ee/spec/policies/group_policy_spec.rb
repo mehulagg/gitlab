@@ -1566,19 +1566,10 @@ RSpec.describe GroupPolicy do
     let(:current_user) { owner }
     let(:policy) { :view_group_devops_adoption }
 
-    context 'when feature is disabled' do
-      before do
-        stub_feature_flags(group_devops_adoption: false)
-      end
-
-      it { is_expected.to be_disallowed(policy) }
-    end
-
     context 'when license does not include the feature' do
       let(:current_user) { admin }
 
       before do
-        stub_feature_flags(group_devops_adoption: true)
         stub_licensed_features(group_level_devops_adoption: false)
         enable_admin_mode!(current_user)
       end
@@ -1586,7 +1577,7 @@ RSpec.describe GroupPolicy do
       it { is_expected.to be_disallowed(policy) }
     end
 
-    context 'when feature is enabled and license includes the feature' do
+    context 'when license includes the feature' do
       using RSpec::Parameterized::TableSyntax
 
       where(:role, :allowed) do
@@ -1600,7 +1591,6 @@ RSpec.describe GroupPolicy do
       end
 
       before do
-        stub_feature_flags(group_devops_adoption: true)
         stub_licensed_features(group_level_devops_adoption: true)
         enable_admin_mode!(current_user) if current_user.admin?
       end
@@ -1617,19 +1607,10 @@ RSpec.describe GroupPolicy do
     let(:current_user) { owner }
     let(:policy) { :manage_devops_adoption_namespaces }
 
-    context 'when feature is disabled' do
-      before do
-        stub_feature_flags(group_devops_adoption: false)
-      end
-
-      it { is_expected.to be_disallowed(policy) }
-    end
-
     context 'when license does not include the feature' do
       let(:current_user) { admin }
 
       before do
-        stub_feature_flags(group_devops_adoption: true)
         stub_licensed_features(group_level_devops_adoption: false)
         enable_admin_mode!(current_user)
       end
@@ -1637,60 +1618,54 @@ RSpec.describe GroupPolicy do
       it { is_expected.to be_disallowed(policy) }
     end
 
-    context 'when feature is enabled' do
+    context 'when license includes the feature' do
+      using RSpec::Parameterized::TableSyntax
+
+      where(:role, :allowed) do
+        :admin            | true
+        :owner            | true
+        :maintainer       | true
+        :developer        | true
+        :reporter         | true
+        :guest            | false
+        :non_group_member | false
+      end
+
       before do
-        stub_feature_flags(group_devops_adoption: true)
+        stub_licensed_features(group_level_devops_adoption: true)
+        enable_admin_mode!(current_user) if current_user.admin?
       end
 
-      context 'when license includes the feature' do
-        using RSpec::Parameterized::TableSyntax
+      with_them do
+        let(:current_user) { public_send(role) }
 
-        where(:role, :allowed) do
-          :admin            | true
-          :owner            | true
-          :maintainer       | true
-          :developer        | true
-          :reporter         | true
-          :guest            | false
-          :non_group_member | false
-        end
+        it { is_expected.to(allowed ? be_allowed(policy) : be_disallowed(policy)) }
+      end
+    end
 
-        before do
-          stub_licensed_features(group_level_devops_adoption: true)
-          enable_admin_mode!(current_user) if current_user.admin?
-        end
+    context 'when license plan does not include the feature' do
+      using RSpec::Parameterized::TableSyntax
 
-        with_them do
-          let(:current_user) { public_send(role) }
-
-          it { is_expected.to(allowed ? be_allowed(policy) : be_disallowed(policy)) }
-        end
+      where(:role, :allowed) do
+        :admin            | true
+        :owner            | false
+        :maintainer       | false
+        :developer        | false
+        :reporter         | false
+        :guest            | false
+        :non_group_member | false
       end
 
-      context 'when license plan does not include the feature' do
-        using RSpec::Parameterized::TableSyntax
+      before do
+        stub_licensed_features(group_level_devops_adoption: true)
+        allow(group).to receive(:feature_available?).with(:group_level_devops_adoption).and_return(false)
+        enable_admin_mode!(current_user) if current_user.admin?
+      end
 
-        where(:role, :allowed) do
-          :admin            | true
-          :owner            | false
-          :maintainer       | false
-          :developer        | false
-          :reporter         | false
-          :guest            | false
-          :non_group_member | false
-        end
+      with_them do
+        let(:current_user) { public_send(role) }
 
-        before do
-          stub_licensed_features(group_level_devops_adoption: true)
-          allow(group).to receive(:feature_available?).with(:group_level_devops_adoption).and_return(false)
-          enable_admin_mode!(current_user) if current_user.admin?
-        end
-
-        with_them do
-          let(:current_user) { public_send(role) }
-
-          it { is_expected.to(allowed ? be_allowed(policy) : be_disallowed(policy)) }
-        end
+        it { is_expected.to(allowed ? be_allowed(policy) : be_disallowed(policy)) }
       end
     end
   end

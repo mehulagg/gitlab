@@ -17715,7 +17715,8 @@ CREATE SEQUENCE saml_providers_id_seq
 ALTER SEQUENCE saml_providers_id_seq OWNED BY saml_providers.id;
 
 CREATE TABLE schema_migrations (
-    version character varying NOT NULL
+    version character varying NOT NULL,
+    finished_at timestamp with time zone DEFAULT now()
 );
 
 CREATE TABLE scim_identities (
@@ -22817,8 +22818,6 @@ CREATE INDEX index_ci_builds_on_project_id_and_name_and_ref ON ci_builds USING b
 
 CREATE INDEX index_ci_builds_on_project_id_for_successfull_pages_deploy ON ci_builds USING btree (project_id) WHERE (((type)::text = 'GenericCommitStatus'::text) AND ((stage)::text = 'deploy'::text) AND ((name)::text = 'pages:deploy'::text) AND ((status)::text = 'success'::text));
 
-CREATE INDEX index_ci_builds_on_protected ON ci_builds USING btree (protected);
-
 CREATE INDEX index_ci_builds_on_queued_at ON ci_builds USING btree (queued_at);
 
 CREATE INDEX index_ci_builds_on_runner_id_and_id_desc ON ci_builds USING btree (runner_id, id DESC);
@@ -22830,6 +22829,8 @@ CREATE INDEX index_ci_builds_on_status_and_type_and_runner_id ON ci_builds USING
 CREATE UNIQUE INDEX index_ci_builds_on_token ON ci_builds USING btree (token);
 
 CREATE UNIQUE INDEX index_ci_builds_on_token_encrypted ON ci_builds USING btree (token_encrypted) WHERE (token_encrypted IS NOT NULL);
+
+CREATE UNIQUE INDEX index_ci_builds_on_token_partial ON ci_builds USING btree (token) WHERE (token IS NOT NULL);
 
 CREATE INDEX index_ci_builds_on_updated_at ON ci_builds USING btree (updated_at);
 
@@ -24253,7 +24254,7 @@ CREATE UNIQUE INDEX index_project_aliases_on_name ON project_aliases USING btree
 
 CREATE INDEX index_project_aliases_on_project_id ON project_aliases USING btree (project_id);
 
-CREATE INDEX index_project_authorizations_on_project_id ON project_authorizations USING btree (project_id);
+CREATE INDEX index_project_authorizations_on_project_id_user_id ON project_authorizations USING btree (project_id, user_id);
 
 CREATE UNIQUE INDEX index_project_auto_devops_on_project_id ON project_auto_devops USING btree (project_id);
 

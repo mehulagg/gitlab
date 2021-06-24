@@ -1,5 +1,6 @@
 import { GlDrawer } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
+import { MountingPortal } from 'portal-vue';
 import Vuex from 'vuex';
 import EpicBoardContentSidebar from 'ee_component/boards/components/epic_board_content_sidebar.vue';
 import SidebarAncestorsWidget from 'ee_component/sidebar/components/ancestors_tree/sidebar_ancestors_widget.vue';
@@ -64,6 +65,14 @@ describe('EpicBoardContentSidebar', () => {
 
   it('confirms we render GlDrawer', () => {
     expect(wrapper.findComponent(GlDrawer).exists()).toBe(true);
+  });
+
+  it('confirms we render MountingPortal', () => {
+    expect(wrapper.find(MountingPortal).props()).toMatchObject({
+      mountTo: '#js-right-sidebar-portal',
+      append: true,
+      name: 'epic-board-sidebar',
+    });
   });
 
   it('does not render GlDrawer when isSidebarOpen is false', () => {

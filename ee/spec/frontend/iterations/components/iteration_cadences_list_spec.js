@@ -2,19 +2,20 @@ import { GlKeysetPagination, GlLoadingIcon } from '@gitlab/ui';
 import { createLocalVue } from '@vue/test-utils';
 import { nextTick } from 'vue';
 import VueApollo from 'vue-apollo';
+import IterationCadenceListItem from 'ee/iterations/components/iteration_cadence_list_item.vue';
 import IterationCadencesList from 'ee/iterations/components/iteration_cadences_list.vue';
+import destroyIterationCadence from 'ee/iterations/queries/destroy_cadence.mutation.graphql';
 import cadencesListQuery from 'ee/iterations/queries/iteration_cadences_list.query.graphql';
+import createRouter from 'ee/iterations/router';
 import createMockApollo from 'helpers/mock_apollo_helper';
 import { TEST_HOST } from 'helpers/test_constants';
 import { mountExtended as mount } from 'helpers/vue_test_utils_helper';
 import waitForPromises from 'helpers/wait_for_promises';
 
-const push = jest.fn();
-const $router = {
-  push,
-};
-
 const localVue = createLocalVue();
+
+const baseUrl = '/cadences/';
+const router = createRouter(baseUrl);
 
 function createMockApolloProvider(requestHandlers) {
   localVue.use(VueApollo);
@@ -84,15 +85,19 @@ describe('Iteration cadences list', () => {
     canCreateCadence,
     canEditCadence,
     resolverMock = jest.fn().mockResolvedValue(querySuccessResponse),
+    destroyMutationMock = jest
+      .fn()
+      .mockResolvedValue({ data: { iterationCadenceDestroy: { errors: [] } } }),
   } = {}) {
-    apolloProvider = createMockApolloProvider([[cadencesListQuery, resolverMock]]);
+    apolloProvider = createMockApolloProvider([
+      [cadencesListQuery, resolverMock],
+      [destroyIterationCadence, destroyMutationMock],
+    ]);
 
     wrapper = mount(IterationCadencesList, {
       localVue,
       apolloProvider,
-      mocks: {
-        $router,
-      },
+      router,
       provide: {
         groupPath,
         cadencesListPath,
@@ -184,9 +189,9 @@ describe('Iteration cadences list', () => {
         resolverMock.mockReset();
       });
 
-      it('correctly disables pagination buttons', async () => {
-        expect(findNextPageButton().element.disabled).toBe(false);
-        expect(findPrevPageButton().element.disabled).toBe(true);
+      it('correctly disables pagination buttons', () => {
+        expect(findNextPageButton().element).not.toBeDisabled();
+        expect(findPrevPageButton().element).toBeDisabled();
       });
 
       it('updates query when next page clicked', async () => {
@@ -213,6 +218,27 @@ describe('Iteration cadences list', () => {
             afterCursor: '',
           }),
         );
+      });
+    });
+
+    describe('deleting cadence', () => {
+      it('removes item from list', async () => {
+        await createComponent({
+          canEditCadence: true,
+        });
+
+        await waitForPromises();
+
+        // 3 cadences * 3 tabs, so 9 in total
+        expect(wrapper.findAllComponents(IterationCadenceListItem).length).toBe(9);
+        expect(wrapper.text()).toContain(cadences[0].title);
+
+        wrapper.findComponent(IterationCadenceListItem).vm.$emit('delete-cadence', cadences[0].id);
+
+        await waitForPromises();
+
+        expect(wrapper.findAllComponents(IterationCadenceListItem).length).toBe(6);
+        expect(wrapper.text()).not.toContain(cadences[0].title);
       });
     });
   });

@@ -87,6 +87,7 @@ module QA
     autoload :CiVariable, 'qa/resource/ci_variable'
     autoload :Runner, 'qa/resource/runner'
     autoload :PersonalAccessToken, 'qa/resource/personal_access_token'
+    autoload :PersonalAccessTokenCache, 'qa/resource/personal_access_token_cache'
     autoload :ProjectAccessToken, 'qa/resource/project_access_token'
     autoload :User, 'qa/resource/user'
     autoload :ProjectMilestone, 'qa/resource/project_milestone'
@@ -106,6 +107,7 @@ module QA
     autoload :RegistryRepository, 'qa/resource/registry_repository'
     autoload :Package, 'qa/resource/package'
     autoload :PipelineSchedules, 'qa/resource/pipeline_schedules'
+    autoload :ImportProject, 'qa/resource/import_project'
 
     module KubernetesCluster
       autoload :Base, 'qa/resource/kubernetes_cluster/base'
@@ -528,6 +530,11 @@ module QA
       autoload :AccessTokens, 'qa/page/component/access_tokens'
       autoload :CommitModal, 'qa/page/component/commit_modal'
       autoload :VisibilitySetting, 'qa/page/component/visibility_setting'
+
+      module Import
+        autoload :Gitlab, 'qa/page/component/import/gitlab'
+        autoload :Selection, 'qa/page/component/import/selection'
+      end
 
       module Issuable
         autoload :Common, 'qa/page/component/issuable/common'

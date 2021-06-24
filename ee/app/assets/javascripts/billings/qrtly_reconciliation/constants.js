@@ -14,7 +14,7 @@ On %{qrtlyDate}, GitLab will process a quarterly reconciliation
 and automatically bill you a prorated amount for the overage.
 There is no action needed from you. If you have a credit card on file,
 it will be charged. Otherwise, you will receive an invoice.`),
-    dotCom: s__(`Admin|The number of max seats used for your namespace is currently
+    usesNamespacePlan: s__(`Admin|The number of max seats used for your namespace is currently
 exceeding the number of seats in your subscription.
 On %{qrtlyDate}, GitLab will process a quarterly reconciliation and
 automatically bill you a prorated amount for the overage.

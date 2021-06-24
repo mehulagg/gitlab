@@ -9,7 +9,10 @@ module EE
 
         class << self
           def member_sort_options
-            %w(access_level_asc access_level_desc last_joined name_asc name_desc oldest_joined oldest_sign_in recent_sign_in)
+            %w[
+              access_level_asc access_level_desc last_joined name_asc name_desc oldest_joined oldest_sign_in
+              recent_sign_in last_activity_on_asc last_activity_on_desc
+            ]
           end
         end
 

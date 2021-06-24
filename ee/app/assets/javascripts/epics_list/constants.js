@@ -18,6 +18,14 @@ export const EpicsSortOptions = [
       ascending: 'end_date_asc',
     },
   },
+  {
+    id: AvailableSortOptions.length + 30,
+    title: __('Title'),
+    sortDirection: {
+      descending: 'title_desc',
+      ascending: 'title_asc',
+    },
+  },
 ];
 
 export const FilterStateEmptyMessage = {

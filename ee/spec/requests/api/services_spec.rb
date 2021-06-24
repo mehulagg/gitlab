@@ -11,7 +11,7 @@ RSpec.describe API::Services do
 
   describe 'Slack application Service' do
     before do
-      project.create_gitlab_slack_application_service
+      project.create_gitlab_slack_application_integration
 
       stub_application_setting(
         slack_app_verification_token: 'token'
