@@ -125,13 +125,11 @@ export default {
 
     <board-content-sidebar
       v-if="isSwimlanesOn || glFeatures.graphqlBoardLists"
-      class="boards-sidebar"
       data-testid="issue-boards-sidebar"
     />
 
     <epic-board-content-sidebar
       v-else-if="isEpicBoard"
-      class="boards-sidebar"
       data-testid="epic-boards-sidebar"
     />
   </div>
