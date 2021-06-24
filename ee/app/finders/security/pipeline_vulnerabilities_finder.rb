@@ -164,19 +164,19 @@ module Security
     end
 
     def confidence_levels
-      Array(params.fetch(:confidence, Vulnerabilities::Finding.confidences.keys))
+      @confidence_levels ||= Array(params.fetch(:confidence, Vulnerabilities::Finding.confidences.keys))
     end
 
     def report_types
-      Array(params.fetch(:report_type, Vulnerabilities::Finding.report_types.keys))
+      @report_types ||= Array(params.fetch(:report_type, Vulnerabilities::Finding.report_types.keys))
     end
 
     def severity_levels
-      Array(params.fetch(:severity, Vulnerabilities::Finding.severities.keys))
+      @severity_levels ||= Array(params.fetch(:severity, Vulnerabilities::Finding.severities.keys))
     end
 
     def scanners
-      Array(params.fetch(:scanner, []))
+      @scanners ||= Array(params.fetch(:scanner, []))
     end
 
     def states
