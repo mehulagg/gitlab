@@ -2808,6 +2808,15 @@
   :weight: 1
   :idempotent:
   :tags: []
+- :name: users_hide_contributions
+  :worker_name: Users::HideContributionsWorker
+  :feature_category: :users
+  :has_external_dependencies:
+  :urgency: :low
+  :resource_boundary: :unknown
+  :weight: 1
+  :idempotent: true
+  :tags: []
 - :name: web_hook
   :worker_name: WebHookWorker
   :feature_category: :integrations

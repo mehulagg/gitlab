@@ -14184,6 +14184,7 @@ CREATE TABLE issues (
     sprint_id bigint,
     issue_type smallint DEFAULT 0 NOT NULL,
     blocking_issues_count integer DEFAULT 0 NOT NULL,
+    hidden boolean DEFAULT false,
     CONSTRAINT check_fba63f706d CHECK ((lock_version IS NOT NULL))
 );
 

@@ -95,6 +95,7 @@ class Issue < ApplicationRecord
   alias_method :issuing_parent, :project
 
   alias_attribute :external_author, :service_desk_reply_to
+  alias_attribute :hidden?, :hidden
 
   scope :in_projects, ->(project_ids) { where(project_id: project_ids) }
   scope :not_in_projects, ->(project_ids) { where.not(project_id: project_ids) }
