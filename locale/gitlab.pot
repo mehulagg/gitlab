@@ -37005,6 +37005,9 @@ msgstr ""
 msgid "You are not allowed to approve a user"
 msgstr ""
 
+msgid "You are not allowed to ban a user"
+msgstr ""
+
 msgid "You are not allowed to log in using password"
 msgstr ""
 
