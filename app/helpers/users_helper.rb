@@ -231,6 +231,25 @@ module UsersHelper
     }
   end
 
+  def confirm_user_data(user)
+    message = if user.unconfirmed_email.present?
+                _('This user has an unconfirmed email address (%{email}). You may force a confirmation.') % { email: user.unconfirmed_email } 
+              else 
+                _('This user has an unconfirmed email address. You may force a confirmation.')
+              end
+
+    {
+      path: confirm_admin_user_path(user),
+      method: 'put',
+      modal_attributes: {
+        title: s_('AdminUsers|Confirm user %{username}?') % { username: sanitize_name(user.name) },
+        messageHtml: message,
+        okVariant: 'info',
+        okTitle: s_('AdminUsers|Confirm user')
+      }.to_json
+    }
+  end
+
   def user_deactivation_effects
     header = tag.p s_('AdminUsers|Deactivating a user has the following effects:')
 
