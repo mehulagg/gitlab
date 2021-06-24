@@ -39,6 +39,10 @@ and has its own dedicated IP address (`192.237.158.143`).
 
 The IP address for `mg.gitlab.com` is subject to change at any time.
 
+### Service Desk Custom Mailbox
+
+On GitLab.com a mailbox is configured for Service Desk with `contact-project+%{key}@incoming.gitlab.com` as the email address. This mailbox is used when the [custom suffix](../project/service_desk.html#configuring-a-custom-email-address-suffix) is configured in project settings.
+
 ## Backups
 
 [See our backup strategy](https://about.gitlab.com/handbook/engineering/infrastructure/production/#backups).
