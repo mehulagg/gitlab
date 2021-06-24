@@ -1,11 +1,4 @@
-import {
-  GlFormInputGroup,
-  GlFormInput,
-  GlForm,
-  GlFormRadioGroup,
-  GlFormRadio,
-  GlFormSelect,
-} from '@gitlab/ui';
+import { GlFormInputGroup, GlFormInput, GlForm, GlFormRadioGroup, GlFormRadio } from '@gitlab/ui';
 import { getByRole, getAllByRole } from '@testing-library/dom';
 import { mount, shallowMount } from '@vue/test-utils';
 import axios from 'axios';
