@@ -42,13 +42,8 @@ We're currently displaying the information in 2 formats:
 1. Budget Spent: This shows the time over the past 28 days that
    features owned by the group have not been performing adequately.
 
-We're still discussing which of these is more understandable, please
-contribute in
-[Scalability issue #946](https://gitlab.com/gitlab-com/gl-infra/scalability/-/issues/946)
-if you have thoughts on this topic.
-
 The budget is calculated based on indicators per component. Each
-component has 2 indicators:
+component can have 2 indicators:
 
 1. [Apdex](https://en.wikipedia.org/wiki/Apdex): The rate of
    operations that performed adequately.
@@ -80,14 +75,69 @@ The calculation to a ratio then happens as follows:
 \frac {operations\_meeting\_apdex + (total\_operations - operations\_with\_errors)} {total\_apdex\_measurements + total\_operations}
 ```
 
-*Caveat:* Not all components are included, causing the
-calculation to be less accurate for some groups. We're working on
-adding all components in
-[&437](https://gitlab.com/groups/gitlab-com/gl-infra/-/epics/437). This
-could cause the dashboard to display "No Data" for features with lower
-traffic.
+### Seeing where budget is being spent
 
-## Usage
+The row below the error budget row is collapsed by default. Expanding
+it will show which component and violation type had the most offending
+operations in the past 28 days.
+
+![Error attribution](img/stage_group_dashboards_error_attribution.png)
+
+The first panel on the left shows a table with the number of errors per
+component. Digging in to the first row in that table is going to have
+the biggest impact on the budget spend.
+
+The most common problems happen inside Sidekiq and Puma, the panel in
+the center explain what these violation types mean, and how to dig
+deeper in the logs.
+
+The panel on the right provides links to to Kibana that should help
+digging in to which endpoints or Sidekiq jobs are causing the errors
+in those cases.
+
+There is a short video showing how to use these panels and logs for
+detirmining which Rails endpoints are slow on [GitLab
+Unfiltered](https://youtu.be/M9u6unON7bU).
+
+Other components that are visible in the panels for groups that are
+running a services with SLIs attributed to them:
+
+TODO: NEEDS MOAR ELISP
+
+| component                    | type                                | group             |
+|------------------------------|-------------------------------------|-------------------|
+| storage                      | registry                            |                   |
+| praefect_cloudsql            | gitaly                              | praefect          |
+| server                       | package                             | registry"         |
+| polling                      | runner                              | ci-runners"       |
+| trace_archiving_ci_jobs      | pipeline_execution                  | ci-runners"       |
+| server                       | release                             | web-pages"        |
+| gitalyruby                   | gitaly                              | gitaly"           |
+| server_route_manifest_writes | registry"                           |                   |
+| shared_runner_queues         | ci-runners"                         |                   |
+| goserver                     | gitaly"                             |                   |
+| imagescaler                  | web"                                |                   |
+| goserver_op_service          | gitaly                              |                   |
+| server_route_manifest_reads  | registry                            |                   |
+| proxy                        | gitaly                              | type="praefect"   |
+| shared_runner_queues         | runner                              | type="ci-runners" |
+| server                       | web-pages                           |                   |
+| trace_archiving_ci_jobs      | stage_group="continuous_integration | type="ci-runners" |
+| loadbalancer                 | stage_group="release                | type="pages"      |
+| goserver                     | stage_group="gitaly                 | type="gitaly"     |
+| proxy                        | type="praefect"                     |                   |
+| replicator_queue             | type="praefect"                     |                   |
+| server                       | type="registry"                     |                   |
+| gitalyruby                   | type="gitaly"                       |                   |
+| goserver_op_service          | stage_group="gitaly                 | type="gitaly"     |
+| grpc_requests                | stage_group="configure              | type="kas"        |
+| imagescaler                  | stage_group="access                 | type="web"        |
+
+| Group | Type | Component | SLI | Description |
+|-------|------|-----------|-----|-------------|
+|       |      |           |     |             |
+
+## Usage of the dasbhoard
 
 Inside a stage group dashboard, there are some notable components. Let's take the [Source Code group's dashboard](https://dashboards.gitlab.net/d/stage-groups-source_code/stage-groups-group-dashboard-create-source-code?orgId=1) as an example.
 
