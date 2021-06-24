@@ -3,6 +3,11 @@
   min-width: 550px;
 
   .dashboard-grid {
-    grid-template-columns: 1fr auto auto 35%;
+    // Column widths: Merge request | approval status | pipeline status | updates
+    grid-template-columns: 1fr 12% 8% 35%;
+  }
+
+  .dashboard-merge-request {
+    grid-column: auto / span 4;
   }
 }
