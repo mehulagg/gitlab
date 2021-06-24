@@ -19,8 +19,8 @@ export const RULE_NAME_ANY_APPROVER = 'All Members';
 
 export const VULNERABILITY_CHECK_NAME = 'Vulnerability-Check';
 export const LICENSE_CHECK_NAME = 'License-Check';
-
 export const LICENSE_SCANNING = 'license_scanning';
+export const COVERAGE_CHECK_NAME = 'Coverage-Check';
 
 export const APPROVAL_RULE_CONFIGS = {
   [VULNERABILITY_CHECK_NAME]: {
@@ -36,6 +36,11 @@ export const APPROVAL_RULE_CONFIGS = {
       'A merge request approval is required when the license compliance report contains a denied license.',
     ),
     documentationText: __('Learn more about License-Check'),
+  },
+  [COVERAGE_CHECK_NAME]: {
+    title: __('Coverage-Check'),
+    popoverText: __('A merge request approval is required when test coverage declines.'),
+    documentationText: __('Learn more about Coverage-Check'),
   },
 };
 

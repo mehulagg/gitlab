@@ -5,6 +5,7 @@ import {
   LICENSE_CHECK_NAME,
   VULNERABILITY_CHECK_NAME,
   LICENSE_SCANNING,
+  COVERAGE_CHECK_NAME,
 } from 'ee/approvals/constants';
 import { s__ } from '~/locale';
 import UnconfiguredSecurityRule from './unconfigured_security_rule.vue';
@@ -21,6 +22,10 @@ export default {
     },
     licenseCheckHelpPagePath: {
       from: 'licenseCheckHelpPagePath',
+      default: '',
+    },
+    coverageCheckHelpPagePath: {
+      from: 'coverageCheckHelpPagePath',
       default: '',
     },
   },
@@ -55,6 +60,16 @@ export default {
             'SecurityApprovals|Requires approval for Denied licenses. %{linkStart}More information%{linkEnd}',
           ),
           docsPath: this.licenseCheckHelpPagePath,
+        },
+        {
+          name: COVERAGE_CHECK_NAME,
+          description: s__(
+            'SecurityApprovals|Test coverage must be enabled. %{linkStart}Learn more%{linkEnd}.',
+          ),
+          enableDescription: s__(
+            'SecurityApprovals|Requires approval for decreases in test coverage. %{linkStart}More information%{linkEnd}',
+          ),
+          docsPath: this.coverageCheckHelpPagePath,
         },
       ];
     },

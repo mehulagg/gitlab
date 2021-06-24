@@ -515,6 +515,7 @@ describe('EE Approvals RuleForm', () => {
         defaultRuleName          | expectedDisabledAttribute
         ${'Vulnerability-Check'} | ${true}
         ${'License-Check'}       | ${true}
+        ${'Coverage-Check'}      | ${true}
         ${'Foo Bar Baz'}         | ${false}
       `(
         'with defaultRuleName set to $defaultRuleName',
@@ -560,6 +561,18 @@ describe('EE Approvals RuleForm', () => {
       });
     });
 
+    describe('with new Coverage-Check rule', () => {
+      beforeEach(() => {
+        createComponent({
+          initRule: { ...TEST_RULE, id: null, name: 'Coverage-Check' },
+        });
+      });
+
+      it('does not disable the name text field', () => {
+        expect(findNameInput().props('disabled')).toBe(false);
+      });
+    });
+
     describe('with editing the License-Check rule', () => {
       beforeEach(() => {
         createComponent({
@@ -576,6 +589,18 @@ describe('EE Approvals RuleForm', () => {
       beforeEach(() => {
         createComponent({
           initRule: { ...TEST_RULE, name: 'Vulnerability-Check' },
+        });
+      });
+
+      it('disables the name text field', () => {
+        expect(findNameInput().props('disabled')).toBe(true);
+      });
+    });
+
+    describe('with editing the Coverage-Check rule', () => {
+      beforeEach(() => {
+        createComponent({
+          initRule: { ...TEST_RULE, name: 'Coverage-Check' },
         });
       });
 

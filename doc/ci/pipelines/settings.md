@@ -168,6 +168,13 @@ you can view a graph or download a CSV file with this data. From your project:
 
 Code coverage data is also [available at the group level](../../user/group/repositories_analytics/index.md).
 
+### Coverage check approval rule  **(PREMIUM)**
+
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/15765) in GitLab Premium 14.0.
+> - [Made configurable via the UI](https://gitlab.com/gitlab-org/gitlab/-/issues/331001) in GitLab Premium 14.1.
+
+TODO: write blurb
+
 ### Removing color codes
 
 Some test coverage tools output with ANSI color codes that aren't

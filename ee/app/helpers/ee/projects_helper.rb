@@ -79,8 +79,9 @@ module EE
           'eligible_approvers_docs_path': help_page_path('user/project/merge_requests/approvals/rules', anchor: 'eligible-approvers'),
           'security_approvals_help_page_path': help_page_path('user/application_security/index', anchor: 'security-approvals-in-merge-requests'),
           'security_configuration_path': project_security_configuration_path(project),
-          'vulnerability_check_help_page_path': help_page_path('user/application_security/index', anchor: 'security-approvals-in-merge-requests'),
-          'license_check_help_page_path': help_page_path('user/application_security/index', anchor: 'enabling-license-approvals-within-a-project')
+          'vulnerability_check_help_page_path': help_page_path('user/application_security/index', anchor: 'enable-the-vulnerability-check-rule'),
+          'license_check_help_page_path': help_page_path('user/compliance/license_compliance/index', anchor: 'enabling-license-approvals-within-a-project'),
+          'coverage_check_help_page_path': help_page_path('ci/pipelines/settings', anchor: 'coverage-check-approval-rule')
         }
       }
     end

@@ -11,7 +11,12 @@ import ApproversSelect from './approvers_select.vue';
 const DEFAULT_NAME = 'Default';
 const DEFAULT_NAME_FOR_LICENSE_REPORT = 'License-Check';
 const DEFAULT_NAME_FOR_VULNERABILITY_CHECK = 'Vulnerability-Check';
-const READONLY_NAMES = [DEFAULT_NAME_FOR_LICENSE_REPORT, DEFAULT_NAME_FOR_VULNERABILITY_CHECK];
+const DEFAULT_NAME_FOR_COVERAGE_CHECK = 'Coverage-Check';
+const READONLY_NAMES = [
+  DEFAULT_NAME_FOR_LICENSE_REPORT,
+  DEFAULT_NAME_FOR_VULNERABILITY_CHECK,
+  DEFAULT_NAME_FOR_COVERAGE_CHECK,
+];
 
 function mapServerResponseToValidationErrors(messages) {
   return Object.entries(messages).flatMap(([key, msgs]) => msgs.map((msg) => `${key} ${msg}`));
