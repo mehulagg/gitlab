@@ -39,9 +39,7 @@ class AddUpvotesToIssues < Elastic::Migration
       es_id = hit.dig('_id')
       es_parent = "project_#{hit.dig('_source', 'project_id')}"
 
-      # ensure that any issues missing from the database will be removed from Elasticsearch
-      # as the data is back-filled
-      Gitlab::Elastic::DocumentReference.new(Issue, id, es_id, es_parent)
+      Gitlab::Elastic::DocumentReference.new(DOCUMENT_TYPE, id, es_id, es_parent)
     end
 
     document_references.each_slice(UPDATE_BATCH_SIZE) do |refs|
