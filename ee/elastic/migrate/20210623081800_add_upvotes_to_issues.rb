@@ -63,6 +63,9 @@ class AddUpvotesToIssues < Elastic::Migration
 
     results = client.search(index: index_name, body: query)
     doc_count = results.dig('aggregations', 'issues', 'doc_count')
+
+    log "Checking if there are documents without upvotes field: #{doc_count} documents left"
+
     doc_count && doc_count == 0
   end
 
