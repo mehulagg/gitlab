@@ -1,4 +1,5 @@
 <script>
+import { GlDropdown, GlDropdownItem } from '@gitlab/ui';
 import { createJobsHash, generateJobNeedsDict, reportToSentry } from '../../utils';
 import LinkedGraphWrapper from '../graph_shared/linked_graph_wrapper.vue';
 import LinksLayer from '../graph_shared/links_layer.vue';
@@ -13,6 +14,8 @@ import JobItem from './job_item.vue';
 export default {
   name: 'PipelineGraph',
   components: {
+    GlDropdown,
+    GlDropdownItem,
     JobGroupDropdown,
     JobItem,
     LinksLayer,
@@ -74,11 +77,15 @@ export default {
         expanded: false,
       },
       needsObject: {},
+      selectedJob: '',
     };
   },
   computed: {
     allGroups() {
       return this.layout.flatMap(({ groups }) => groups);
+    },
+    allGroupNames() {
+      return this.allGroups.map(({ name }) => name);
     },
     containerId() {
       return `${this.$options.BASE_CONTAINER_ID}-${this.pipeline.id}`;
@@ -124,6 +131,9 @@ export default {
     upstreamPipelines() {
       return this.hasUpstreamPipelines ? this.pipeline.upstream : [];
     },
+    dropdownText() {
+      return this.selectedJob || 'Select Job to See Dependency List';
+    },
   },
   errorCaptured(err, _vm, info) {
     reportToSentry(this.$options.name, `error: ${err}, info: ${info}`);
@@ -146,6 +156,9 @@ export default {
     },
     onError(payload) {
       this.$emit('error', payload);
+    },
+    setDropJob(item) {
+      this.selectedJob = item;
     },
     setJob(jobName) {
       this.hoveredJobName = jobName;
@@ -194,7 +207,13 @@ export default {
         </template>
         <template #main>
           <div :id="containerId" :ref="containerId">
+            <gl-dropdown :text="dropdownText">
+              <gl-dropdown-item v-for="item in allGroupNames" :key="item" @click="setDropJob(item)">
+                {{ item }}
+              </gl-dropdown-item>
+            </gl-dropdown>
             <div v-for="group in allGroups" class="gl-mb-8">
+              <div v-if="group.name === selectedJob">
               <h3> {{ group.name }} </h3>
               <job-item
                 v-if="group.size === 1"
@@ -218,6 +237,7 @@ export default {
                     :pipeline-id="pipelineId"
                   />
                 </div>
+              </div>
               </div>
             </div>
             <hr />
