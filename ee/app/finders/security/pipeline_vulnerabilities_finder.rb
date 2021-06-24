@@ -10,6 +10,10 @@
 #   params:
 #     report_type: Array<String>
 
+# DEPRECATED: This finder class is deprecated and will be removed
+# by https://gitlab.com/gitlab-org/gitlab/-/issues/334488.
+# Please inform us by adding a comment to aforementioned issue,
+# if you need to add an extra feature to this class.
 module Security
   class PipelineVulnerabilitiesFinder
     include Gitlab::Utils::StrongMemoize
