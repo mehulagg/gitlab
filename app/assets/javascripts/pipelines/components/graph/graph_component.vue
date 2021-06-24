@@ -1,5 +1,5 @@
 <script>
-import { reportToSentry } from '../../utils';
+import { createJobsHash, generateJobNeedsDict, reportToSentry } from '../../utils';
 import LinkedGraphWrapper from '../graph_shared/linked_graph_wrapper.vue';
 import LinksLayer from '../graph_shared/links_layer.vue';
 import { generateColumnsFromLayersListMemoized } from '../parsing_utils';
@@ -7,10 +7,14 @@ import { DOWNSTREAM, MAIN, UPSTREAM, ONE_COL_WIDTH, STAGE_VIEW } from './constan
 import LinkedPipelinesColumn from './linked_pipelines_column.vue';
 import StageColumnComponent from './stage_column_component.vue';
 import { validateConfigPaths } from './utils';
+import JobGroupDropdown from './job_group_dropdown.vue';
+import JobItem from './job_item.vue';
 
 export default {
   name: 'PipelineGraph',
   components: {
+    JobGroupDropdown,
+    JobItem,
     LinksLayer,
     LinkedGraphWrapper,
     LinkedPipelinesColumn,
@@ -69,9 +73,13 @@ export default {
         jobName: '',
         expanded: false,
       },
+      needsObject: {},
     };
   },
   computed: {
+    allGroups() {
+      return this.layout.flatMap(({ groups }) => groups);
+    },
     containerId() {
       return `${this.$options.BASE_CONTAINER_ID}-${this.pipeline.id}`;
     },
@@ -121,9 +129,15 @@ export default {
     reportToSentry(this.$options.name, `error: ${err}, info: ${info}`);
   },
   mounted() {
-    this.getMeasurements();
+    // this.getMeasurements();
+    const jobs = createJobsHash(this.layout);
+    this.needsObject = generateJobNeedsDict(jobs);
   },
   methods: {
+    getAncestorJob(name) {
+      const { groupIdx, stageIdx } = this.pipeline.stagesLookup[name];
+      return this.pipeline.stages[stageIdx].groups[groupIdx];
+    },
     getMeasurements() {
       this.measurements = {
         width: this.$refs[this.containerId].scrollWidth,
@@ -162,7 +176,7 @@ export default {
   <div class="js-pipeline-graph">
     <div
       ref="mainPipelineContainer"
-      class="gl-display-flex gl-position-relative gl-bg-gray-10 gl-white-space-nowrap gl-border-t-solid gl-border-t-1 gl-border-gray-100"
+      class="gl-justify-content-center gl-display-flex gl-position-relative gl-bg-gray-10 gl-white-space-nowrap gl-border-t-solid gl-border-t-1 gl-border-gray-100"
       :class="{ 'gl-pipeline-min-h gl-py-5 gl-overflow-auto': !isLinkedPipeline }"
     >
       <linked-graph-wrapper>
@@ -180,36 +194,33 @@ export default {
         </template>
         <template #main>
           <div :id="containerId" :ref="containerId">
-            <links-layer
-              :pipeline-data="layout"
-              :pipeline-id="pipeline.id"
-              :container-id="containerId"
-              :container-measurements="measurements"
-              :highlighted-job="hoveredJobName"
-              :metrics-config="metricsConfig"
-              :show-links="showJobLinks"
-              :view-type="viewType"
-              @error="onError"
-              @highlightedJobsChange="updateHighlightedJobs"
-            >
-              <stage-column-component
-                v-for="column in layout"
-                :key="column.id || column.name"
-                :name="column.name"
-                :groups="column.groups"
-                :action="column.status.action"
-                :highlighted-jobs="highlightedJobs"
-                :is-stage-view="isStageView"
-                :job-hovered="hoveredJobName"
-                :source-job-hovered="hoveredSourceJobName"
-                :pipeline-expanded="pipelineExpanded"
-                :pipeline-id="pipeline.id"
-                :user-permissions="pipeline.userPermissions"
-                @refreshPipelineGraph="$emit('refreshPipelineGraph')"
-                @jobHover="setJob"
-                @updateMeasurements="getMeasurements"
+            <div v-for="group in allGroups" class="gl-mb-8">
+              <h3> {{ group.name }} </h3>
+              <job-item
+                v-if="group.size === 1"
+                :job="group.jobs[0]"
               />
-            </links-layer>
+              <div v-else>
+                <job-group-dropdown
+                  :group="group"
+                  :pipeline-id="pipelineId"
+                />
+              </div>
+
+              <div v-for="ancestor in needsObject[group.name]">
+                <job-item
+                  v-if="getAncestorJob(ancestor).size === 1"
+                  :job="getAncestorJob(ancestor).jobs[0]"
+                />
+                <div v-else>
+                  <job-group-dropdown
+                    :group="getAncestorJob(ancestor)"
+                    :pipeline-id="pipelineId"
+                  />
+                </div>
+              </div>
+            </div>
+            <hr />
           </div>
         </template>
         <template #downstream>

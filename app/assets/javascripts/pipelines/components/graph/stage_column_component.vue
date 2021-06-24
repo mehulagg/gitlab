@@ -1,7 +1,7 @@
 <script>
 import { capitalize, escape, isEmpty } from 'lodash';
 import glFeatureFlagMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
-import { reportToSentry } from '../../utils';
+import { createJobsHash, generateJobNeedsDict, reportToSentry } from '../../utils';
 import MainGraphWrapper from '../graph_shared/main_graph_wrapper.vue';
 import ActionComponent from '../jobs_shared/action_component.vue';
 import { accessValue } from './accessors';
@@ -24,6 +24,10 @@ export default {
     },
     name: {
       type: String,
+      required: true,
+    },
+    needsObject: {
+      type: Object,
       required: true,
     },
     pipelineId: {
@@ -93,7 +97,8 @@ export default {
     reportToSentry('stage_column_component', `error: ${err}, info: ${info}`);
   },
   mounted() {
-    this.$emit('updateMeasurements');
+    // this.$emit('updateMeasurements');
+
   },
   methods: {
     getGroupId(group) {
