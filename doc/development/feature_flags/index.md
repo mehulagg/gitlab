@@ -23,7 +23,7 @@ This document is the subject of continued work as part of an epic to [improve in
 
 ## When to use feature flags
 
-Moved to https://about.gitlab.com/handbook/product-development-flow/feature-flag-lifecycle/#when-to-use-feature-flags
+Moved to the ["When to use feature flags"](https://about.gitlab.com/handbook/product-development-flow/feature-flag-lifecycle/#when-to-use-feature-flags) section in the handbook.
 
 ## Feature flags in GitLab development
 
