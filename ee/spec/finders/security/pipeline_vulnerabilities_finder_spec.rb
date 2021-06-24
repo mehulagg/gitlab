@@ -333,6 +333,74 @@ RSpec.describe Security::PipelineVulnerabilitiesFinder do
       end
     end
 
+    context 'by state' do
+      let(:params) { {} }
+      let(:aggregated_report) { described_class.new(pipeline: pipeline, params: params).execute }
+
+      subject(:finding_uuids) { aggregated_report.findings.map(&:uuid) }
+
+      let(:finding_with_feedback) { pipeline.security_reports.reports['sast'].findings.first }
+
+      before do
+        create(:vulnerability_feedback, :dismissal,
+               :sast,
+               project: project,
+               pipeline: pipeline,
+               category: finding_with_feedback.report_type,
+               project_fingerprint: finding_with_feedback.project_fingerprint,
+               vulnerability_data: finding_with_feedback.raw_metadata,
+               finding_uuid: finding_with_feedback.uuid)
+      end
+
+      context 'when the state parameter is not given' do
+        it 'returns all findings' do
+          expect(finding_uuids.length).to be(40)
+        end
+      end
+
+      context 'when the state parameter is given' do
+        let(:params) { { state: state } }
+        let(:finding_with_associated_vulnerability) { pipeline.security_reports.reports['dependency_scanning'].findings.first }
+
+        before do
+          vulnerability = create(:vulnerability, state, project: project)
+
+          create(:vulnerabilities_finding, :identifier,
+                 vulnerability: vulnerability,
+                 report_type: finding_with_associated_vulnerability.report_type,
+                 project: project,
+                 project_fingerprint: finding_with_associated_vulnerability.project_fingerprint,
+                 uuid: finding_with_associated_vulnerability.uuid)
+        end
+
+        context 'when the given state is `dismissed`' do
+          let(:state) { 'dismissed' }
+
+          it { is_expected.to match_array([finding_with_associated_vulnerability.uuid, finding_with_feedback.uuid]) }
+        end
+
+        context 'when the given state is `detected`' do
+          let(:state) { 'detected' }
+
+          it 'returns all detected findings' do
+            expect(finding_uuids.length).to be(40)
+          end
+        end
+
+        context 'when the given state is `confirmed`' do
+          let(:state) { 'confirmed' }
+
+          it { is_expected.to match_array([finding_with_associated_vulnerability.uuid]) }
+        end
+
+        context 'when the given state is `resolved`' do
+          let(:state) { 'resolved' }
+
+          it { is_expected.to match_array([finding_with_associated_vulnerability.uuid]) }
+        end
+      end
+    end
+
     context 'by all filters' do
       context 'with found entity' do
         let(:params) { { report_type: %w[sast dast container_scanning dependency_scanning], scanner: %w[bundler_audit find_sec_bugs gemnasium trivy zaproxy], scope: 'all' } }
