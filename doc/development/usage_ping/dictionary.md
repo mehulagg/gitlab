@@ -17316,7 +17316,7 @@ Group: `group::dynamic analysis`
 
 Status: `data_available`
 
-Tiers:
+Tiers: `ultimate`
 
 ### `usage_activity_by_stage.secure.dependency_scanning_scans`
 
@@ -17340,7 +17340,7 @@ Group: `group::static analysis`
 
 Status: `data_available`
 
-Tiers:
+Tiers: `ultimate`
 
 ### `usage_activity_by_stage.secure.secret_detection_scans`
 
@@ -17464,7 +17464,7 @@ Tiers: `free`, `premium`, `ultimate`
 
 ### `usage_activity_by_stage.secure.user_secret_detection_jobs`
 
-Count of Secret Detection Jobs per user per month
+Count of Secret Detection Jobs per user
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216182118_user_secret_detection_jobs.yml)
 
