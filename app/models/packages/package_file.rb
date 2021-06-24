@@ -27,6 +27,7 @@ class Packages::PackageFile < ApplicationRecord
   validates :file_name, uniqueness: { scope: :package }, if: -> { package&.pypi? }
 
   scope :recent, -> { order(id: :desc) }
+  scope :with_format, ->(format) { where(::Packages::PackageFile.arel_table[:file_name].matches("%.#{format}")) }
   scope :for_package_ids, ->(ids) { where(package_id: ids) }
   scope :with_file_name, ->(file_name) { where(file_name: file_name) }
   scope :with_file_name_like, ->(file_name) { where(arel_table[:file_name].matches(file_name)) }
