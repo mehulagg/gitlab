@@ -9,7 +9,7 @@ RSpec.describe Resolvers::PipelineSecurityReportFindingsResolver do
   let_it_be(:pipeline, reload: true) { create(:ci_pipeline, :success, project: project) }
 
   describe '#resolve' do
-    subject { resolve(described_class, obj: pipeline, args: params) }
+    subject(:resolve_query) { resolve(described_class, obj: pipeline, args: params) }
 
     let_it_be(:low_vulnerability_finding) { build(:vulnerabilities_finding, severity: :low, report_type: :dast, project: project) }
     let_it_be(:critical_vulnerability_finding) { build(:vulnerabilities_finding, severity: :critical, report_type: :sast, project: project) }
@@ -47,6 +47,20 @@ RSpec.describe Resolvers::PipelineSecurityReportFindingsResolver do
 
       it 'returns vulnerabilities of the given report types' do
         is_expected.to contain_exactly(critical_vulnerability_finding, low_vulnerability_finding)
+      end
+    end
+
+    context 'when given states' do
+      let(:params) { { state: %w(detected confirmed) } }
+
+      before do
+        allow(Security::PipelineVulnerabilitiesFinder).to receive(:new).and_call_original
+      end
+
+      it 'calls the finder class with given parameters' do
+        resolve_query
+
+        expect(Security::PipelineVulnerabilitiesFinder).to have_received(:new).with(pipeline: pipeline, params: params)
       end
     end
   end
