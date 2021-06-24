@@ -6,7 +6,7 @@ class CreateCiInstanceVariablesOnCi < ActiveRecord::Migration[6.1]
   disable_ddl_transaction!
 
   def up
-    # db/ci_migrate migrations will run on the main database as well as the CI database.
+    # db/migrate/ci migrations will run on the main database as well as the CI database.
     # This migration is just to create the existing table to the new CI database and
     # should not do anything for the main database
     return unless ci_database?
@@ -31,7 +31,7 @@ class CreateCiInstanceVariablesOnCi < ActiveRecord::Migration[6.1]
   end
 
   def down
-    # db/ci_migrate migrations will run on the main database as well as the CI database.
+    # db/migrate/ci migrations will run on the main database as well as the CI database.
     # This migration is just to create the existing table to the new CI database and
     # should not do anything for the main database
     return unless ci_database?

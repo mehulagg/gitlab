@@ -27,7 +27,7 @@ development:
   adapter: postgresql
   encoding: unicode
   database: gitlabhq_development
-  host: /Users/tkuah/code/ee-gdk/postgresql
+  host: /path/to/gdk/postgresql
   pool: 10
   prepared_statements: false
   variables:
@@ -37,7 +37,7 @@ test: &test
   adapter: postgresql
   encoding: unicode
   database: gitlabhq_test
-  host: /Users/tkuah/code/ee-gdk/postgresql
+  host: /path/to/gdk/postgresql
   pool: 10
   prepared_statements: false
   variables:
@@ -52,7 +52,7 @@ development:
     adapter: postgresql
     encoding: unicode
     database: gitlabhq_development
-    host: /Users/tkuah/code/ee-gdk/postgresql
+    host: /path/to/gdk/postgresql
     pool: 10
     prepared_statements: false
     variables:
@@ -61,8 +61,8 @@ development:
     adapter: postgresql
     encoding: unicode
     database: gitlabhq_development_ci
-    migrations_paths: db/ci_migrate
-    host: /Users/tkuah/code/ee-gdk/postgresql
+    migrations_paths: db/migrate/ci
+    host: /path/to/gdk/postgresql
     pool: 10
     prepared_statements: false
     variables:
@@ -73,7 +73,7 @@ test: &test
     adapter: postgresql
     encoding: unicode
     database: gitlabhq_test
-    host: /Users/tkuah/code/ee-gdk/postgresql
+    host: /path/to/gdk/postgresql
     pool: 10
     prepared_statements: false
     variables:
@@ -82,8 +82,8 @@ test: &test
     adapter: postgresql
     encoding: unicode
     database: gitlabhq_test_ci
-    migrations_paths: db/ci_migrate
-    host: /Users/tkuah/code/ee-gdk/postgresql
+    migrations_paths: db/migrate/ci
+    host: /path/to/gdk/postgresql
     pool: 10
     prepared_statements: false
     variables:
@@ -96,7 +96,7 @@ database. This is to match the default name Rails has.
 ### Migrations
 
 Any migrations that will affect `Ci::ApplicationRecord` models must be
-placed in the `db/ci_migrate` directory.
+placed in the `db/migrate/ci` directory.
 
 This migration will be run for both the Main database, and the CI
 database, for convienence.

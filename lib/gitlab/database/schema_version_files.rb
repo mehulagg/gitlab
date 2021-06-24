@@ -4,7 +4,7 @@ module Gitlab
   module Database
     class SchemaVersionFiles
       SCHEMA_DIRECTORY = 'db/schema_migrations'
-      MIGRATION_DIRECTORIES = %w[db/migrate db/post_migrate db/ci_migrate].freeze
+      MIGRATION_DIRECTORIES = %w[db/migrate db/post_migrate db/migrate/ci].freeze
       MIGRATION_VERSION_GLOB = '20[0-9][0-9]*'
 
       def self.touch_all(versions_from_database)
