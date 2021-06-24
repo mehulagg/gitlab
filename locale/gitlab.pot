@@ -37934,7 +37934,7 @@ msgstr ""
 msgid "cannot be enabled unless all domains have TLS certificates"
 msgstr ""
 
-msgid "cannot be enabled until a valid credit credit is on file"
+msgid "cannot be enabled until a valid credit card is on file"
 msgstr ""
 
 msgid "cannot be modified"
