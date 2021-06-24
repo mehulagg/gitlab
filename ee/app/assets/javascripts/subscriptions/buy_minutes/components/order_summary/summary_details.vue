@@ -39,13 +39,11 @@ export default {
       default: null,
     },
   },
-  computed: {
-    startDate() {
-      return new Date(Date.now());
-    },
-    endDate() {
-      return new Date(this.startDate).setFullYear(this.startDate.getFullYear() + 1);
-    },
+  data() {
+    return {
+      startDate: new Date(),
+      endDate: new Date().setFullYear(new Date().getFullYear() + 1),
+    };
   },
   i18n: {
     selectedPlanText: s__('Checkout|%{selectedPlanText} plan'),

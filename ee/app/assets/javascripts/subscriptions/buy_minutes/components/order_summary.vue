@@ -1,6 +1,6 @@
 <script>
-import { GlIcon } from '@gitlab/ui';
-import STATE_QUERY from 'ee/subscriptions/graphql/queries/state.query.graphql';
+import { GlIcon, GlCollapse, GlCollapseToggleDirective } from '@gitlab/ui';
+import stateQuery from 'ee/subscriptions/graphql/queries/state.query.graphql';
 import { TAX_RATE, NEW_GROUP } from 'ee/subscriptions/new/constants';
 import formattingMixins from 'ee/subscriptions/new/formatting_mixins';
 import { sprintf, s__ } from '~/locale';
@@ -10,6 +10,10 @@ export default {
   components: {
     SummaryDetails,
     GlIcon,
+    GlCollapse,
+  },
+  directives: {
+    CollapseToggle: GlCollapseToggleDirective,
   },
   mixins: [formattingMixins],
   props: {
@@ -20,7 +24,7 @@ export default {
   },
   apollo: {
     state: {
-      query: STATE_QUERY,
+      query: stateQuery,
       manual: true,
       result({ data }) {
         this.subscription = data.subscription;
@@ -117,7 +121,7 @@ export default {
     class="order-summary gl-display-flex gl-flex-direction-column gl-flex-grow-1 gl-mt-2 mt-lg-5"
   >
     <div class="d-lg-none">
-      <div @click="toggleCollapse">
+      <div collapse-toggle.summary-details>
         <h4 class="d-flex justify-content-between gl-font-lg" :class="{ 'gl-mb-7': !collapsed }">
           <div class="d-flex">
             <gl-icon v-if="collapsed" name="chevron-right" :size="18" use-deprecated-sizes />
@@ -127,17 +131,18 @@ export default {
           <div class="gl-ml-3">{{ formatAmount(totalAmount, usersPresent) }}</div>
         </h4>
       </div>
-      <summary-details
-        v-show="!collapsed"
-        :vat="vat"
-        :total-ex-vat="totalExVat"
-        :users-present="usersPresent"
-        :selected-plan-text="selectedPlan.name"
-        :selected-plan-price="selectedPlanPrice"
-        :total-amount="totalAmount"
-        :number-of-users="subscription.quantity"
-        :tax-rate="$options.taxRate"
-      />
+      <gl-collapse id="summary-details">
+        <summary-details
+          :vat="vat"
+          :total-ex-vat="totalExVat"
+          :users-present="usersPresent"
+          :selected-plan-text="selectedPlan.name"
+          :selected-plan-price="selectedPlanPrice"
+          :total-amount="totalAmount"
+          :number-of-users="subscription.quantity"
+          :tax-rate="$options.taxRate"
+        />
+      </gl-collapse>
     </div>
     <div class="d-none d-lg-block">
       <div class="append-bottom-20">
