@@ -89,6 +89,14 @@ rules:
           group: internal
       alphabetize:
         order: asc
+  # BEGIN HACK
+  # Temporarily disable these, as they're being handled in
+  # https://gitlab.com/gitlab-org/gitlab/-/merge_requests/64604
+  # Once that's merged, remove this
+  vue/no-deprecated-scope-attribute: off
+  vue/no-deprecated-slot-attribute: off
+  vue/no-deprecated-slot-scope-attribute: off
+  # END HACK
 overrides:
   - files:
       - '**/spec/**/*'
