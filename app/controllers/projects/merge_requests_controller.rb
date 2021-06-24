@@ -451,6 +451,7 @@ class Projects::MergeRequestsController < Projects::MergeRequests::ApplicationCo
   def serialize_widget(merge_request)
     cached_data = serializer.represent(merge_request, serializer: 'poll_cached_widget')
     widget_data = serializer.represent(merge_request, serializer: 'poll_widget')
+    binding.pry
     cached_data.merge!(widget_data)
   end
 
