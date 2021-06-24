@@ -269,7 +269,7 @@ export default {
       </template>
     </gl-table>
     <gl-pagination
-      v-if="!isLoading"
+      v-if="!isLoading && !isEmptyStage"
       :value="pagination.page"
       :prev-page="prevPage"
       :next-page="nextPage"

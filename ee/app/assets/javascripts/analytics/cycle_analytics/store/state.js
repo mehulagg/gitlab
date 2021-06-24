@@ -17,7 +17,7 @@ export default () => ({
   selectedStage: null,
   selectedValueStream: null,
 
-  currentStageEvents: [],
+  selectedStageEvents: [],
 
   isLoadingValueStreams: false,
   isCreatingValueStream: false,

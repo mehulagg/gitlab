@@ -37,7 +37,7 @@ export default {
     state.selectedStageError = '';
   },
   [types.RECEIVE_STAGE_DATA_SUCCESS](state, events = []) {
-    state.currentStageEvents = events.map((fields) =>
+    state.selectedStageEvents = events.map((fields) =>
       convertObjectPropsToCamelCase(fields, { deep: true }),
     );
     state.isLoadingStage = false;
@@ -46,6 +46,7 @@ export default {
   [types.RECEIVE_STAGE_DATA_ERROR](state, message) {
     state.isLoadingStage = false;
     state.selectedStageError = message;
+    state.selectedStageEvents = []
   },
   [types.REQUEST_STAGE_MEDIANS](state) {
     state.medians = {};
