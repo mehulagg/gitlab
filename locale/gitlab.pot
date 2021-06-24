@@ -37536,7 +37536,7 @@ msgstr ""
 msgid "Your CSV import for project"
 msgstr ""
 
-msgid "Your DevOps Report gives an overview of how you are using GitLab from a feature perspective. View how you compare with other organizations, discover features you are not using, and learn best practices through blog posts and white papers."
+msgid "Your DevOps Report gives an overview of how you are using GitLab from a feature perspective. Use it to view how you compare with other organizations."
 msgstr ""
 
 msgid "Your GPG keys (%{count})"

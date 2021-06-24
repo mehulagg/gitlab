@@ -20,21 +20,22 @@ To see DevOps Report:
 ## DevOps Score
 
 NOTE:
-Your GitLab instance's [usage ping](../settings/usage_statistics.md#usage-ping) must be activated in order to use this feature.
+To see the DevOps score, you must activate your GitLab instance's [usage ping](../settings/usage_statistics.md#usage-ping).
+
+You can use the DevOps score to compare your DevOps status to other organizations.
 
 The DevOps Score tab displays the usage of major GitLab features on your instance over
-the last 30 days, averaged over the number of billable users in that time period. It also
-provides a Lead score per feature, which is calculated based on GitLab analysis
-of top-performing instances based on [usage ping data](../settings/usage_statistics.md#usage-ping) that GitLab has
-collected. Your score is compared to the lead score of each feature and then expressed as a percentage at the bottom of said feature.
-Your overall **DevOps Score** is an average of your feature scores. You can use this score to compare your DevOps status to other organizations.
-
-The page also provides helpful links to articles and GitLab docs, to help you
-improve your scores.
+the last 30 days, averaged over the number of billable users in that time period.
+You can also see the Leader usage score, calculated from top-performing instances based on
+[usage ping data](../settings/usage_statistics.md#usage-ping) that GitLab has collected.
+Your score is compared to the lead score of each feature and then expressed
+as a percentage at the bottom of said feature. Your overall **DevOps Score** is an average of your
+feature scores.
 
 Usage ping data is aggregated on GitLab servers for analysis. Your usage
-information is **not sent** to any other GitLab instances. If you have just started using GitLab, it may take a few weeks for data to be
-collected before this feature is available.
+information is **not sent** to any other GitLab instances.
+If you have just started using GitLab, it might take a few weeks for data to be collected before this
+feature is available.
 
 ## DevOps Adoption **(ULTIMATE SELF)**
 
@@ -44,7 +45,7 @@ collected before this feature is available.
 > - Enabled on GitLab.com.
 > - For GitLab self-managed instances, GitLab administrators can opt to [disable it](#disable-or-enable-devops-adoption). **(ULTIMATE SELF)**
 
-The DevOps Adoption tab shows you which groups within your organization are using the most essential features of GitLab:
+The DevOps Adoption tab shows you which groups in your organization are using the most essential features of GitLab:
 
 - Dev
   - Issues
@@ -58,8 +59,7 @@ The DevOps Adoption tab shows you which groups within your organization are usin
   - Pipelines
   - Deployments
 
-When managing groups in the UI, you can add your groups with the **Add group to table**
-button, in the top right hand section the page.
+To add your groups, in the top right-hand section the page, select **Add group to table**.
 
 DevOps Adoption allows you to:
 
