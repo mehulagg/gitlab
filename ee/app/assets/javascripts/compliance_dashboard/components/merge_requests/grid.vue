@@ -65,7 +65,12 @@ export default {
       <grid-column-heading :heading="$options.strings.pipelineStatusLabel" class="gl-text-center" />
       <grid-column-heading :heading="$options.strings.updatesLabel" class="gl-text-right" />
 
-      <template v-for="mergeRequest in mergeRequests">
+      <a
+        v-for="mergeRequest in mergeRequests"
+        :key="mergeRequest.id"
+        class="dashboard-merge-request dashboard-grid gl-display-grid gl-grid-tpl-rows-auto gl-hover-bg-blue-50 gl-hover-text-decoration-none gl-hover-cursor-pointer"
+        @click="$emit('toggleDrawer', mergeRequest)"
+      >
         <merge-request
           :key="key(mergeRequest.id, $options.keyTypes.mergeRequest)"
           :merge-request="mergeRequest"
@@ -109,7 +114,7 @@ export default {
             </template>
           </time-ago-tooltip>
         </div>
-      </template>
+      </a>
     </div>
 
     <pagination class="gl-mt-5" :is-last-page="isLastPage" />
