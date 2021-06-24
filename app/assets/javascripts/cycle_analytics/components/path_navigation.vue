@@ -5,6 +5,7 @@ import {
   GlDeprecatedSkeletonLoading as GlSkeletonLoading,
   GlSafeHtmlDirective as SafeHtml,
 } from '@gitlab/ui';
+import StageCount from './stage_count.vue';
 import Tracking from '~/tracking';
 import { OVERVIEW_STAGE_ID } from '../constants';
 
@@ -14,6 +15,7 @@ export default {
     GlPath,
     GlSkeletonLoading,
     GlPopover,
+    StageCount,
   },
   directives: {
     SafeHtml,
@@ -88,10 +90,9 @@ export default {
               {{ s__('ValueStreamEvent|Items in stage') }}
             </div>
             <div class="gl-pb-4 gl-font-weight-bold">
-              <template v-if="hasStageCount(pathItem)">{{
-                n__('%d item', '%d items', pathItem.stageCount)
-              }}</template>
-              <template v-else>-</template>
+              <stage-count #default="{ formattedStageCount }" :stage-count="pathItem.stageCount">
+                {{ formattedStageCount }}
+              </stage-count>
             </div>
           </div>
         </div>

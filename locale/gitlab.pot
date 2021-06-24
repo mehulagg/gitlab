@@ -89,6 +89,9 @@ msgstr ""
 msgid "#general, #development"
 msgstr ""
 
+msgid "%ValueStreamAnalytics|%{stageCount} items"
+msgstr ""
+
 msgid "%d Approval"
 msgid_plural "%d Approvals"
 msgstr[0] ""

@@ -18,6 +18,7 @@ import {
   PAGINATION_SORT_DIRECTION_DESC,
 } from '../constants';
 import TotalTime from './total_time_component.vue';
+import StageCount from '~/cycle_analytics/components/stage_count.vue';
 
 const DEFAULT_WORKFLOW_TITLE_PROPERTIES = {
   thClass: 'gl-w-half',
@@ -42,6 +43,7 @@ export default {
     GlTable,
     GlBadge,
     TotalTime,
+    StageCount,
   },
   mixins: [Tracking.mixin()],
   props: {
@@ -174,8 +176,10 @@ export default {
       @sort-changed="onSort"
     >
       <template #head(end_event)="data">
-        <span>{{ data.label }}</span
-        ><gl-badge v-if="stageCount" class="gl-ml-2" size="sm">{{ stageCount }}</gl-badge>
+        <span>{{ data.label }}</span>
+        <stage-count #default="{ formattedStageCount }" :stage-count="stageCount"
+          ><gl-badge class="gl-ml-2" size="sm">{{ formattedStageCount }}</gl-badge></stage-count
+        >
       </template>
       <template #cell(end_event)="{ item }">
         <div data-testid="vsa-stage-event">
