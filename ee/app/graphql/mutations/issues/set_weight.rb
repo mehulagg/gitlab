@@ -7,8 +7,17 @@ module Mutations
 
       argument :weight,
                GraphQL::INT_TYPE,
-               required: true,
-               description: 'The desired weight for the issue.'
+               required: false,
+               description: 'The desired weight for the issue, ' \
+               'weight will be removed if set to null'
+
+      def ready?(**args)
+        unless args.key?(:weight)
+          raise Gitlab::Graphql::Errors::ArgumentError, 'Argument weight must be provided (`null` accepted)'
+        end
+
+        super
+      end
 
       def resolve(project_path:, iid:, weight:)
         issue = authorized_find!(project_path: project_path, iid: iid)
