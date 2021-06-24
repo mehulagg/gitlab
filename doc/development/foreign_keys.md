@@ -30,6 +30,15 @@ Keep in mind that you can only safely add foreign keys to existing tables after
 you have removed any orphaned rows. The method `add_concurrent_foreign_key`
 does not take care of this so you'll need to do so manually.
 
+Here are the steps to add a foreign key constraint to a relation which already 
+has orhaned rows.
+
+1. Make sure orphaned records aren't updateable in the UI, API or background jobs. 
+Also make sure an ActiveRecord validation covers the constraint.
+2. Use add_concurrent_foreign_key with validate: false
+3. Do a background migration to delete orphaned rows
+4. Add a migration to run `ALTER TABLE deployments VALIDATE CONSTRAINT`
+
 ## Cascading Deletes
 
 Every foreign key must define an `ON DELETE` clause, and in 99% of the cases
