@@ -39,7 +39,11 @@ describe('Value Stream Analytics mutations', () => {
     ${types.REQUEST_VALUE_STREAMS}               | ${'isLoadingValueStreams'}   | ${true}
     ${types.RECEIVE_VALUE_STREAMS_ERROR}         | ${'isLoadingValueStreams'}   | ${false}
     ${types.REQUEST_STAGE_DATA}                  | ${'isLoadingStage'}          | ${true}
+    ${types.REQUEST_STAGE_DATA}                  | ${'selectedStageEvents'}     | ${[]}
+    ${types.REQUEST_STAGE_DATA}                  | ${'pagination'}              | ${{}}
     ${types.RECEIVE_STAGE_DATA_ERROR}            | ${'isLoadingStage'}          | ${false}
+    ${types.RECEIVE_STAGE_DATA_ERROR}            | ${'selectedStageEvents'}     | ${[]}
+    ${types.RECEIVE_STAGE_DATA_ERROR}            | ${'pagination'}              | ${{}}
     ${types.REQUEST_VALUE_STREAM_DATA}           | ${'isLoading'}               | ${true}
     ${types.RECEIVE_GROUP_STAGES_ERROR}          | ${'stages'}                  | ${[]}
     ${types.REQUEST_GROUP_STAGES}                | ${'stages'}                  | ${[]}

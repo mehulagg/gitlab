@@ -267,6 +267,10 @@ describe('StageTable', () => {
     it('will display the default no data message', () => {
       expect(wrapper.html()).toContain(notEnoughDataError);
     });
+
+    it('will not display the pagination component', () => {
+      expect(findPagination().exists()).toBe(false);
+    });
   });
 
   describe('emptyStateMessage set', () => {
