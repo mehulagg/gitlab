@@ -862,6 +862,31 @@ Input type: `CommitCreateInput`
 | <a id="mutationcommitcreatecontent"></a>`content` | [`[String!]`](#string) | Contents of the commit. |
 | <a id="mutationcommitcreateerrors"></a>`errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 
+### `Mutation.configureDependencyScanning`
+
+Configure Dependency Scanning for a project by enabling Dependency Scanning in a new or modified
+`.gitlab-ci.yml` file in a new branch. The new branch and a URL to
+create a Merge Request are a part of the response.
+
+Input type: `ConfigureDependencyScanningInput`
+
+#### Arguments
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| <a id="mutationconfiguredependencyscanningclientmutationid"></a>`clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
+| <a id="mutationconfiguredependencyscanningconfiguration"></a>`configuration` | [`DependencyScanningCiConfigurationInput!`](#dependencyscanningciconfigurationinput) | Dependency Scanning CI configuration for the project. |
+| <a id="mutationconfiguredependencyscanningprojectpath"></a>`projectPath` | [`ID!`](#id) | Full path of the project. |
+
+#### Fields
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| <a id="mutationconfiguredependencyscanningbranch"></a>`branch` | [`String`](#string) | Branch that has the new/modified `.gitlab-ci.yml` file. |
+| <a id="mutationconfiguredependencyscanningclientmutationid"></a>`clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
+| <a id="mutationconfiguredependencyscanningerrors"></a>`errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
+| <a id="mutationconfiguredependencyscanningsuccesspath"></a>`successPath` | [`String`](#string) | Redirect path to use when the response is successful. |
+
 ### `Mutation.configureSast`
 
 Configure SAST for a project by enabling SAST in a new or modified
@@ -16120,6 +16145,42 @@ Input type for DastSiteProfile authentication.
 | <a id="dastsiteprofileauthinputurl"></a>`url` | [`String`](#string) | The URL of the page containing the sign-in HTML form on the target website. |
 | <a id="dastsiteprofileauthinputusername"></a>`username` | [`String`](#string) | The username to authenticate with on the target website. |
 | <a id="dastsiteprofileauthinputusernamefield"></a>`usernameField` | [`String`](#string) | The name of username field at the sign-in HTML form. |
+
+### `DependencyScanningCiConfigurationAnalyzersEntityInput`
+
+Represents the analyzers entity in Dependency Scanning CI configuration.
+
+#### Arguments
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| <a id="dependencyscanningciconfigurationanalyzersentityinputenabled"></a>`enabled` | [`Boolean!`](#boolean) | State of the analyzer. |
+| <a id="dependencyscanningciconfigurationanalyzersentityinputname"></a>`name` | [`String!`](#string) | Name of analyzer. |
+| <a id="dependencyscanningciconfigurationanalyzersentityinputvariables"></a>`variables` | [`[DependencyScanningCiConfigurationEntityInput!]`](#dependencyscanningciconfigurationentityinput) | List of variables for the analyzer. |
+
+### `DependencyScanningCiConfigurationEntityInput`
+
+Represents an entity in Dependency Scanning CI configuration.
+
+#### Arguments
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| <a id="dependencyscanningciconfigurationentityinputdefaultvalue"></a>`defaultValue` | [`String!`](#string) | Default value that is used if value is empty. |
+| <a id="dependencyscanningciconfigurationentityinputfield"></a>`field` | [`String!`](#string) | CI keyword of entity. |
+| <a id="dependencyscanningciconfigurationentityinputvalue"></a>`value` | [`String!`](#string) | Current value of the entity. |
+
+### `DependencyScanningCiConfigurationInput`
+
+Represents a CI configuration of Dependency Scanning.
+
+#### Arguments
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| <a id="dependencyscanningciconfigurationinputanalyzers"></a>`analyzers` | [`[DependencyScanningCiConfigurationAnalyzersEntityInput!]`](#dependencyscanningciconfigurationanalyzersentityinput) | List of analyzers and related variables for the Dependency Scanning configuration. |
+| <a id="dependencyscanningciconfigurationinputglobal"></a>`global` | [`[DependencyScanningCiConfigurationEntityInput!]`](#dependencyscanningciconfigurationentityinput) | List of global entities related to Dependency Scanning configuration. |
+| <a id="dependencyscanningciconfigurationinputpipeline"></a>`pipeline` | [`[DependencyScanningCiConfigurationEntityInput!]`](#dependencyscanningciconfigurationentityinput) | List of pipeline entities related to Dependency Scanning configuration. |
 
 ### `DiffImagePositionInput`
 

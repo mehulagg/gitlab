@@ -2,21 +2,21 @@
 
 require 'spec_helper'
 
-RSpec.describe Security::CiConfiguration::SastCreateService, :snowplow do
+RSpec.describe Security::CiConfiguration::DependencyScanningCreateService, :snowplow do
   subject(:result) { described_class.new(project, user, params).execute }
 
-  let(:branch_name) { 'set-sast-config-1' }
+  let(:branch_name) { 'set-dependency-scanning-config-1' }
 
   let(:non_empty_params) do
     { 'stage' => 'security',
-      'SEARCH_MAX_DEPTH' => 1,
+      'SECURE_LOG_LEVEL' => 'debug',
       'SECURE_ANALYZERS_PREFIX' => 'new_registry',
-      'SAST_EXCLUDED_PATHS' => 'spec,docs' }
+      'DS_EXCLUDED_PATHS' => 'spec,docs' }
   end
 
   let(:snowplow_event) do
     {
-      category: 'Security::CiConfiguration::SastCreateService',
+      category: 'Security::CiConfiguration::DependencyScanningCreateService',
       action: 'create',
       label: 'false'
     }
