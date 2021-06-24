@@ -1188,14 +1188,14 @@ RSpec.describe API::MergeRequests do
       expect(json_response['target_project_id']).to eq(merge_request.target_project.id)
       expect(json_response['draft']).to be false
       expect(json_response['work_in_progress']).to be false
-      expect(json_response['merge_when_pipeline_succeeds']).to be_falsy
+      expect(json_response['merge_when_pipeline_succeeds']).to be false
       expect(json_response['merge_status']).to eq('can_be_merged')
       expect(json_response['changes_count']).to eq(merge_request.merge_request_diff.real_size)
       expect(json_response['merge_error']).to eq(merge_request.merge_error)
       expect(json_response['user']['can_merge']).to be_truthy
       expect(json_response).not_to include('rebase_in_progress')
-      expect(json_response['first_contribution']).to be_falsy
-      expect(json_response['has_conflicts']).to be_falsy
+      expect(json_response['first_contribution']).to be false
+      expect(json_response['has_conflicts']).to be false
       expect(json_response['blocking_discussions_resolved']).to be_truthy
       expect(json_response['references']['short']).to eq("!#{merge_request.iid}")
       expect(json_response['references']['relative']).to eq("!#{merge_request.iid}")
