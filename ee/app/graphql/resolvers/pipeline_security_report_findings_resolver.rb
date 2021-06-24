@@ -18,6 +18,10 @@ module Resolvers
              required: false,
              description: 'Filter vulnerability findings by Scanner.externalId.'
 
+    argument :state, [Types::VulnerabilityStateEnum],
+             required: false,
+             description: 'Filter vulnerability findings by state.'
+
     def resolve(**args)
       Security::PipelineVulnerabilitiesFinder.new(pipeline: pipeline, params: args).execute.findings
     end
