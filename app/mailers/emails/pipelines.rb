@@ -55,6 +55,7 @@ module Emails
       subject << "#{status} pipeline for #{@pipeline.source_ref}"
       subject << @project.name if @project
       subject << @pipeline.short_sha
+      subject << Gitlab.config.gitlab.email_subject_suffix if Gitlab.config.gitlab.email_subject_suffix.present?
 
       subject.join(' | ')
     end
