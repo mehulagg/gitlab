@@ -457,6 +457,7 @@ module Issuable
     if old_associations
       old_labels = old_associations.fetch(:labels, labels)
       old_assignees = old_associations.fetch(:assignees, assignees)
+      old_severity = old_associations.fetch(:severity, severity)
 
       if old_labels != labels
         changes[:labels] = [old_labels.map(&:hook_attrs), labels.map(&:hook_attrs)]
@@ -464,6 +465,10 @@ module Issuable
 
       if old_assignees != assignees
         changes[:assignees] = [old_assignees.map(&:hook_attrs), assignees.map(&:hook_attrs)]
+      end
+
+      if supports_severity? && old_severity != severity
+        changes[:severity] = [old_severity, severity]
       end
 
       if self.respond_to?(:total_time_spent)
