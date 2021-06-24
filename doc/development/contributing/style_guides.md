@@ -91,6 +91,15 @@ To skip some checks based on tags when pushing, you can set the `LEFTHOOK_EXCLUD
 LEFTHOOK_EXCLUDE=frontend,documentation git push ...
 ```
 
+As an alternative, you can create `lefthook-local.yml` with this structure:
+
+```
+pre-commit:
+  exclude_tags:
+    - frontend
+    - documentation
+```
+
 For more information, check out [Lefthook documentation](https://github.com/Arkweid/lefthook/blob/master/docs/full_guide.md#skip-some-tags-on-the-fly).
 
 ## Ruby, Rails, RSpec

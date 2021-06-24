@@ -38,3 +38,8 @@ pre-push:
       files: git diff --name-only --diff-filter=d $(git merge-base origin/master HEAD)..HEAD
       glob: 'doc/*.md'
       run: if command -v vale 2> /dev/null; then vale --config .vale.ini --minAlertLevel error {files}; else echo "Vale not found. Install Vale"; fi
+    gettext:
+      tags: backend view
+      files: git diff --name-only --diff-filter=d $(git merge-base origin/master HEAD)..HEAD | while read file;do git diff --unified=0 --diff-filter=d $(git merge-base origin/master HEAD)..HEAD $file | grep -Fqe '_(' && echo $file;done; true
+      glob: "*.{haml,rb}"
+      run: bin/rake gettext:updated_check
