@@ -436,5 +436,36 @@ module Gitlab
         end
       end
     end
+
+    initializer :setup_purgecss, group: :all do |app|
+      app.config.assets.configure do |env|
+        if env.respond_to?(:register_transformer)
+          puts "[application.rb...respond_to?(:register_transformer)] I'm here! Look at me!"
+          puts "[application.rb...respond_to?(:register_transformer)] I'm here! Look at me!"
+          puts "[application.rb...respond_to?(:register_transformer)] I'm here! Look at me!"
+          puts "[application.rb...respond_to?(:register_transformer)] I'm here! Look at me!"
+          puts "[application.rb...respond_to?(:register_transformer)] I'm here! Look at me!"
+          puts "[application.rb...respond_to?(:register_transformer)] I'm here! Look at me!"
+          env.register_transformer 'text/sass', 'text/css', Gitlab::Purgecss::PurgecssTransformer.new
+          env.register_transformer 'text/scss', 'text/css', Gitlab::Purgecss::PurgecssTransformer.new
+        end
+
+        if env.respond_to?(:register_engine)
+          puts "[application.rb...respond_to?(:register_engine)] I'm here! Look at me!"
+          puts "[application.rb...respond_to?(:register_engine)] I'm here! Look at me!"
+          puts "[application.rb...respond_to?(:register_engine)] I'm here! Look at me!"
+          puts "[application.rb...respond_to?(:register_engine)] I'm here! Look at me!"
+          puts "[application.rb...respond_to?(:register_engine)] I'm here! Look at me!"
+          puts "[application.rb...respond_to?(:register_engine)] I'm here! Look at me!"
+          [
+            ['.sass', Gitlab::Purgecss::PurgecssTransformer.new],
+            ['.scss', Gitlab::Purgecss::PurgecssTransformer.new]
+          ].each do |engine|
+            engine << { silence_deprecation: true } if Sprockets::VERSION.start_with?("3")
+            env.register_engine(*engine)
+          end
+        end
+      end
+    end
   end
 end
