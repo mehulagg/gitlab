@@ -53,7 +53,7 @@ module Emails
 
       return unless member_exists?
 
-      mail(to: member.invite_email, subject: invite_email_subject, **invite_email_headers) do |format|
+      mail(to: member.invite_email, subject: subject(invite_email_subject), **invite_email_headers) do |format|
         format.html { render layout: 'unknown_user_mailer' }
         format.text { render layout: 'unknown_user_mailer' }
       end
