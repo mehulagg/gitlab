@@ -14,8 +14,9 @@ To introduce a checkpoint in your source code history, you can assign a
 However, in most cases, your users need more than just the raw source code.
 They need compiled objects or other assets output by your CI/CD system.
 
-A GitLab *Release* is a snapshot of the source, build output, artifacts, and other metadata
-associated with a released version of your code.
+A GitLab *Release* is a snapshot of the source,
+[generic packages](../../packages/generic_packages/index.md) that created from job artifacts,
+and other metadata associated with a released version of your code.
 
 You can create a GitLab release on any branch. When you create a release:
 
@@ -329,13 +330,20 @@ https://gitlab.com/gitlab-org/gitlab-runner/releases/v11.9.0-rc2/downloads/binar
 
 The physical location of the asset can change at any time and the direct link remains unchanged.
 
-### Links
+##### Using generic package for attaching binaries
 
-A link is any URL which can point to whatever you like: documentation, built
-binaries, or other related materials. These can be both internal or external
-links from your GitLab instance.
+[Generic Package](../../packages/generic_packages/index.md)
+is a permanent storage to store any artifacts from a release/tag pipeline,
+that can also be used for attaching binary files to an individual release entry.
+The steps are quite simple, [pushing the artifacts to the generic package regisry](../../packages/generic_packages/index.md#publish-a-package-file) at first,
+and [attaching the package link to the release](#permanent-links-to-release-assets) at second.
+Here is [an example of CI/CD workflow](https://gitlab.com/gitlab-org/release-cli/-/tree/master/docs/examples/release-assets-as-generic-package)
+that automates this process.
 
-The four types of links are "Runbook," "Package," "Image," and "Other."
+Please note that directly attaching [job artifacts](../../../ci/pipelines/job_artifacts.md)
+links to a release is not recommended,
+because they are ephmeral by concept for passing data in the same pipeline,
+so that there is always a risk to be automatically expired or manually deleted.
 
 ## Release evidence
 
