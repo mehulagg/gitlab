@@ -28,18 +28,18 @@ module Security
     end
 
     def execute
-      findings = requested_reports.each_with_object([]) do |(type, report), findings|
+      findings = requested_reports.each_with_object([]) do |report, findings|
         raise ParseError, 'JSON parsing failed' if report.errored?
 
         normalized_findings = normalize_report_findings(
           report.findings,
-          vulnerabilities_by_finding_fingerprint(type, report))
+          vulnerabilities_by_finding_fingerprint(report))
         filtered_findings = filter(normalized_findings)
 
         findings.concat(filtered_findings)
       end
 
-      Gitlab::Ci::Reports::Security::AggregatedReport.new(requested_reports.values, sort_findings(findings))
+      Gitlab::Ci::Reports::Security::AggregatedReport.new(requested_reports, sort_findings(findings))
     end
 
     private
@@ -57,19 +57,21 @@ module Security
     end
 
     def requested_reports
-      @requested_reports ||= pipeline&.security_reports(report_types: report_types)&.reports || {}
+      @requested_reports ||= pipeline&.security_reports(report_types: report_types)&.reports&.values || []
     end
 
-    def vulnerabilities_by_finding_fingerprint(report_type, report)
-      Vulnerabilities::Finding
-        .by_project_fingerprints(report.findings.map(&:project_fingerprint))
-        .by_projects(pipeline.project)
-        .by_report_types(report_type)
-        .includes(:vulnerability)
-        .select(:vulnerability_id, :project_fingerprint)
-        .each_with_object({}) do |finding, hash|
-          hash[finding.project_fingerprint] = finding.vulnerability
+    def vulnerabilities_by_finding_fingerprint(report)
+      existing_findings_for(report).each_with_object({}) do |finding, memo|
+        memo[finding.project_fingerprint] = finding.vulnerability
       end
+    end
+
+    def existing_findings_for(report)
+      Vulnerabilities::Finding.by_project_fingerprints(report.findings.map(&:project_fingerprint))
+                              .by_projects(pipeline.project)
+                              .by_report_types(report.type)
+                              .includes(:vulnerability) # rubocop:disable CodeReuse/ActiveRecord (We will remove this class)
+                              .select(:vulnerability_id, :project_fingerprint)
     end
 
     # This finder is used for fetching vulnerabilities for any pipeline, if we used it to fetch
