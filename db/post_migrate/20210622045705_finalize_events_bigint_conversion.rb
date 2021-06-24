@@ -61,11 +61,7 @@ class FinalizeEventsBigintConversion < ActiveRecord::Migration[6.1]
       # rename_index TABLE_NAME, 'index_events_on_project_id_and_id_bigint_desc_on_merged_action', 'index_events_on_project_id_and_id_desc_on_merged_action'
 
       # Change the name of the temporary FK
-      execute <<~SQL
-          ALTER TABLE push_event_payloads
-          RENAME CONSTRAINT #{fk_event_id_tmp}
-          TO #{fk_event_id}
-      SQL
+      rename_constraint(:push_event_payloads, fk_event_id_tmp, fk_event_id)
     end
   end
 end
