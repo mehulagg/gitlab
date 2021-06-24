@@ -19,6 +19,7 @@ describe('Issuable Time Tracker', () => {
   const defaultProps = {
     limitToHours: false,
     fullPath: 'gitlab-org/gitlab-test',
+    issuable: '1',
     issuableIid: '1',
     initialTimeTracking: {
       ...issuableTimeTrackingResponse.data.workspace.issuable,
