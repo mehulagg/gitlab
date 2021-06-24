@@ -35,9 +35,9 @@ has orhaned rows.
 
 1. Make sure orphaned records aren't updateable in the UI, API or background jobs. 
 Also make sure an ActiveRecord validation covers the constraint.
-2. Use add_concurrent_foreign_key with validate: false
-3. Do a background migration to delete orphaned rows
-4. Add a migration to run `ALTER TABLE deployments VALIDATE CONSTRAINT`
+1. Use add_concurrent_foreign_key with validate: false
+1. Do a background migration to delete orphaned rows
+1. Add a migration to run `ALTER TABLE deployments VALIDATE CONSTRAINT`
 
 ## Cascading Deletes
 
