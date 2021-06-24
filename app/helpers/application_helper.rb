@@ -251,8 +251,8 @@ module ApplicationHelper
     "#{request.path}?#{options.compact.to_param}"
   end
 
-  def stylesheet_link_tag_defer(path)
-    stylesheet_link_tag(path, media: "print", crossorigin: ActionController::Base.asset_host ? 'anonymous' : nil)
+  def stylesheet_link_tag_defer(path, data: nil)
+    stylesheet_link_tag(path, data: data, media: "print", crossorigin: ActionController::Base.asset_host ? 'anonymous' : nil)
   end
 
   def outdated_browser?

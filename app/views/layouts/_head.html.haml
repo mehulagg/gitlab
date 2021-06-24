@@ -40,11 +40,11 @@
   - if user_application_theme == 'gl-dark'
     = stylesheet_link_tag_defer "application_dark"
     = yield :page_specific_styles
-    = stylesheet_link_tag_defer "application_utilities_dark"
+    = stylesheet_link_tag_defer "application_utilities_dark" , data: {startup_priority: '1'}
   - else
     = stylesheet_link_tag_defer "application"
     = yield :page_specific_styles
-    = stylesheet_link_tag_defer "application_utilities"
+    = stylesheet_link_tag_defer "application_utilities", data: {startup_priority: '1'}
   = stylesheet_link_tag "disable_animations", media: "all" if Rails.env.test? || Gitlab.config.gitlab['disable_animations']
   = stylesheet_link_tag "test_environment", media: "all" if Rails.env.test?
 
