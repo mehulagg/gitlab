@@ -64,6 +64,32 @@ RSpec.describe API::Members do
           expect(json_response['id']).to eq(stranger.id)
         end
       end
+
+      context 'when adding an existing user whose email address is restricted by the group settings' do
+        let(:user) { create(:user, email: 'restricted@example.com', username: 'test.example') }
+        let(:group) { create(:group )}
+
+        # This response code should potentially be changed to 4xx: https://gitlab.com/gitlab-org/gitlab/-/issues/321706
+        it 'returns a 200 success and the member validation message' do
+          post api("/projects/#{project.id}/members", owner),
+               params: { user_id: user.id, access_level: Member::MAINTAINER }
+
+          expect(response).to have_gitlab_http_status(:method_not_allowed)
+          expect(json_response['message']).to eq "email 'restricted@example.com' does not match the allowed domain of allowed-example.com"
+        end
+
+        it 'returns a 200 success when there was partial success and multiple other invitees received the error' do
+          let(:user2) { create(:user, email: 'restricted2@example.com', username: 'test2.example') }
+          let(:user3) { create(:user, email: 'allowed@example.com') }
+
+          post api("/projects/#{project.id}/members", owner),
+               params: { user_id: [user.id, user2.id, user3.id], access_level: Member::MAINTAINER }
+
+          expect(response).to have_gitlab_http_status(:success)
+          expect(json_response['message']).to eq ["test.example: User email'restricted@example.com' does not match the allowed domain of allowed-example.com",
+                                                  "test2.example: User email'restricted2@example.com' does not match the allowed domain of allowed-example.com"]
+        end
+      end
     end
 
     describe 'PUT /groups/:id/members/:user_id' do
@@ -693,6 +719,20 @@ RSpec.describe API::Members do
 
             expect(response).to have_gitlab_http_status(:method_not_allowed)
           end
+        end
+      end
+
+      context 'when adding an existing user whose email address is restricted by the parent group settings of this project' do
+        let(:user) { create(:user, email: 'restricted@example.com') }
+        let(:group) { create(:group )}
+        let(:project) { create(:project, group: group) }
+
+        it 'returns a 405 method not allowed error and the member validation message' do
+          post api("/projects/#{project.id}/members", owner),
+               params: { user_id: user.id, access_level: Member::MAINTAINER }
+
+          expect(response).to have_gitlab_http_status(:method_not_allowed)
+          expect(json_response['message']).to eq "email 'restricted@example.com' does not match the allowed domain of allowed-example.com"
         end
       end
     end
