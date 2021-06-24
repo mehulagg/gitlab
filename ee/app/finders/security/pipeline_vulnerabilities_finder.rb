@@ -61,9 +61,10 @@ module Security
         .by_project_fingerprints(report.findings.map(&:project_fingerprint))
         .by_projects(pipeline.project)
         .by_report_types(report_type)
+        .includes(:vulnerability)
         .select(:vulnerability_id, :project_fingerprint)
-       .each_with_object({}) do |finding, hash|
-        hash[finding.project_fingerprint] = finding.vulnerability_id
+        .each_with_object({}) do |finding, hash|
+          hash[finding.project_fingerprint] = finding.vulnerability
       end
     end
 
@@ -80,7 +81,7 @@ module Security
         finding = Vulnerabilities::Finding.new(finding_hash)
         # assigning Vulnerabilities to Findings to enable the computed state
         finding.location_fingerprint = report_finding.location.fingerprint
-        finding.vulnerability_id = vulnerabilities[finding.project_fingerprint]
+        finding.vulnerability = vulnerabilities[finding.project_fingerprint]
         finding.project = pipeline.project
         finding.sha = pipeline.sha
         finding.build_scanner(report_finding.scanner&.to_hash)
@@ -100,6 +101,7 @@ module Security
 
     def filter(findings)
       findings.select do |finding|
+        next unless in_selected_state?(finding)
         next if !include_dismissed? && dismissal_feedback?(finding)
         next unless confidence_levels.include?(finding.confidence)
         next unless severity_levels.include?(finding.severity)
@@ -109,8 +111,21 @@ module Security
       end
     end
 
+    def in_selected_state?(finding)
+      params[:state].blank? || states.include?(computed_finding_state(finding))
+    end
+
+    def computed_finding_state(finding)
+      finding.vulnerability&.state ||
+        (dismissal_feedback?(finding) ? 'dismissed' : 'detected')
+    end
+
     def include_dismissed?
-      params[:scope] == 'all'
+      skip_scope_parameter? || params[:scope] == 'all'
+    end
+
+    def skip_scope_parameter?
+      params[:state].present? && states.include?('dismissed')
     end
 
     def dismissal_feedback?(finding)
@@ -158,6 +173,10 @@ module Security
 
     def scanners
       Array(params.fetch(:scanner, []))
+    end
+
+    def states
+      @state ||= Array(params.fetch(:state, Vulnerability.states.keys))
     end
   end
 end
