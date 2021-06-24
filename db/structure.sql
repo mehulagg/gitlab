@@ -9129,6 +9129,7 @@ CREATE TABLE analytics_devops_adoption_snapshots (
     sast_enabled_count integer,
     dast_enabled_count integer,
     dependency_scanning_enabled_count integer,
+    coverage_fuzzing_enabled_count integer,
     CONSTRAINT check_3f472de131 CHECK ((namespace_id IS NOT NULL))
 );
 
