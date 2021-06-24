@@ -195,11 +195,16 @@ module Backup
       @backup_file_list.map {|item| item.gsub("#{FILE_NAME_SUFFIX}", "")}
     end
 
-    def connect_to_remote_directory(options)
-      config = ObjectStorage::Config.new(options)
-      config.load_provider
+    def object_storage_config
+      @object_storage_config ||= begin
+        config = ObjectStorage::Config.new(Gitlab.config.backup.upload)
+        config.load_provider
+        config
+      end
+    end
 
-      connection = ::Fog::Storage.new(config.credentials)
+    def connect_to_remote_directory(options)
+      connection = ::Fog::Storage.new(object_storage_config.credentials)
 
       # We only attempt to create the directory for local backups. For AWS
       # and other cloud providers, we cannot guarantee the user will have
@@ -269,10 +274,8 @@ module Backup
         key: remote_target,
         body: File.open(File.join(backup_path, tar_file)),
         multipart_chunk_size: Gitlab.config.backup.upload.multipart_chunk_size,
-        encryption: Gitlab.config.backup.upload.encryption,
-        encryption_key: Gitlab.config.backup.upload.encryption_key,
         storage_class: Gitlab.config.backup.upload.storage_class
-      }
+      }.merge(encryption_attributes)
 
       # Google bucket-only policies prevent setting an ACL. In any case, by default,
       # all objects are set to the default ACL, which is project-private:
@@ -280,6 +283,16 @@ module Backup
       attrs[:public] = false unless google_provider?
 
       attrs
+    end
+
+    def encryption_attributes
+      return object_storage_config.fog_attributes if object_storage_config.aws_server_side_encryption_enabled?
+
+      # Use customer-managed keys
+      {
+        encryption_key: Gitlab.config.backup.upload.encryption_key,
+        encryption: Gitlab.config.backup.upload.encryption,
+      }
     end
 
     def google_provider?
