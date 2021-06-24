@@ -46,16 +46,6 @@ RSpec.describe Resolvers::Boards::EpicBoardsResolver do
             .to contain_exactly(epic_board2, epic_board1)
             .and be_sorted.asc.by(&:name)
         end
-
-        context 'when epic_boards flag is disabled' do
-          before do
-            stub_feature_flags(epic_boards: false)
-          end
-
-          it 'returns nil' do
-            expect(result).to be_nil
-          end
-        end
       end
     end
   end

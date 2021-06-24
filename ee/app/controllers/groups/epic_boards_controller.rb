@@ -8,9 +8,6 @@ class Groups::EpicBoardsController < Groups::ApplicationController
 
   before_action :redirect_to_recent_board, only: [:index]
   before_action :assign_endpoint_vars
-  before_action do
-    push_frontend_feature_flag(:epic_boards, group, default_enabled: :yaml)
-  end
 
   track_redis_hll_event :index, :show, name: 'g_project_management_users_viewing_epic_boards'
 
@@ -70,6 +67,6 @@ class Groups::EpicBoardsController < Groups::ApplicationController
   end
 
   def authorize_read_board!
-    access_denied! unless Feature.enabled?(:epic_boards, group, default_enabled: :yaml) && can?(current_user, :read_epic_board, group)
+    access_denied! unless can?(current_user, :read_epic_board, group)
   end
 end

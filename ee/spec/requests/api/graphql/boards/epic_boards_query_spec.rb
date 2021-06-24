@@ -69,18 +69,5 @@ RSpec.describe 'get list of epic boards' do
         expect(graphql_data.dig('group', 'epicBoard', 'hideClosedList')).to eq board1.hide_closed_list
       end
     end
-
-    context 'when epic_boards flag is disabled' do
-      before do
-        stub_feature_flags(epic_boards: false)
-      end
-
-      it 'returns nil epic_boards' do
-        post_graphql(pagination_query, current_user: current_user)
-
-        boards = graphql_data.dig('group', 'epicBoards')
-        expect(boards).to be_nil
-      end
-    end
   end
 end
