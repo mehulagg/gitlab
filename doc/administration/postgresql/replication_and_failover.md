@@ -1024,7 +1024,7 @@ reset the Patroni state in Consul completely, resulting in a reinitialized Patro
 the first Patroni node starts.
 
 WARNING:
-This can be destructive and lead the cluster into a bad state, make sure you stop all Patroni services as part of these steps.
+This is a destructive process and may lead the cluster into a bad state. Make sure that you have a healthy backup before running this process.
 
 The procedure for resetting the Patroni state in Consul is:
 
