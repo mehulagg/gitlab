@@ -10,10 +10,10 @@ echo "-----------------------------------------------------------"
 startup_glob="*stylesheets/startup*"
 
 echo "Staging changes to '${startup_glob}' so we can check for untracked files..."
-git add ${startup_glob}
+git add "${startup_glob}"
 
-if [ -n "$(git diff HEAD --name-only -- ${startup_glob})" ]; then
-  diff=$(git diff HEAD -- ${startup_glob})
+if [ -n "$(git diff HEAD --name-only -- "${startup_glob}")" ]; then
+  diff=$(git diff HEAD -- "${startup_glob}")
   cat <<EOF
 
 Startup CSS changes detected!
@@ -25,7 +25,7 @@ IMPORTANT:
 
   - If you are making changes to any Startup CSS file, it is very likely that
     **both** the CE and EE Startup CSS files will need to be updated.
-  - Changing any Startup CSS file will trigger the `as-if-foss` job to also run.
+  - Changing any Startup CSS file will trigger the "as-if-foss" job to also run.
 
 HOW TO FIX:
 
