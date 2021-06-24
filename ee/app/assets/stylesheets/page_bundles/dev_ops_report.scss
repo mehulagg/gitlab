@@ -1,5 +1,14 @@
 @import 'page_bundles/mixins_and_variables_and_functions';
 
+@mixin important_background($color) {
+  background-color: $color !important;
+}
+
+@mixin circle_fill($color) {
+  border: 1px solid $color;
+  @include important_background($color)
+}
+
 .circle {
   width: $gl-spacing-scale-3;
   height: $gl-spacing-scale-3;
@@ -10,6 +19,25 @@
   &-enabled {
     border: 1px solid var(--indigo-800, $indigo-800);
     background-color: var(--indigo-600, $indigo-600);
+    &-default {
+      @include circle_fill($indigo-600)
+    }
+
+    &-primary {
+      @include circle_fill($data-viz-blue-600)
+    }
+
+    &-warning {
+      @include circle_fill($data-viz-orange-600)
+    }
+
+    &-info {
+      @include circle_fill($data-viz-aqua-500)
+    }
+
+    &-success {
+      @include circle_fill($data-viz-green-600)
+    }
   }
 }
 
@@ -29,5 +57,23 @@
 
   .actions-cell::before {
     @include gl-display-none;
+  }
+}
+
+.progress-bar {
+  &.bg-primary {
+    @include important_background($data-viz-blue-600)
+  }
+
+  &.bg-warning {
+    @include important_background($data-viz-orange-600)
+  }
+
+  &.bg-info {
+    @include important_background($data-viz-aqua-500)
+  }
+
+  &.bg-success {
+    @include important_background($data-viz-green-600)
   }
 }
