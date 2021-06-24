@@ -26,7 +26,8 @@ const createProfilesApolloOptions = (name, field, { fetchQuery, fetchError }) =>
   update(data) {
     const edges = data?.project?.[name]?.edges ?? [];
     if (edges.length === 1) {
-      this[field] = edges[0].node.id;
+      // automatically select profile when it's not set already
+      this[field] = this[field] ?? edges[0].node.id;
     }
     return edges.map(({ node }) => node);
   },
@@ -64,13 +65,23 @@ export default {
       type: String,
       required: true,
     },
+    siteProfileId: {
+      type: String,
+      required: false,
+      default: null,
+    },
+    scannerProfileId: {
+      type: String,
+      required: false,
+      default: null,
+    },
   },
   data() {
     return {
       scannerProfiles: [],
       siteProfiles: [],
-      selectedScannerProfileId: this.dastScan?.scannerProfileId || null,
-      selectedSiteProfileId: this.dastScan?.siteProfileId || null,
+      selectedScannerProfileId: this.scannerProfileId || null,
+      selectedSiteProfileId: this.siteProfileId || null,
       errorType: null,
       errors: [],
       dastSiteValidationDocsPath: helpPagePath('user/application_security/dast/index', {
@@ -106,6 +117,12 @@ export default {
     },
   },
   watch: {
+    scannerProfileId(id) {
+      this.selectedScannerProfileId = id;
+    },
+    siteProfileId(id) {
+      this.selectedSiteProfileId = id;
+    },
     selectedScannerProfileId() {
       this.updateProfiles();
     },
@@ -116,6 +133,7 @@ export default {
   created() {
     const params = queryToObject(window.location.search, { legacySpacesDecode: true });
 
+    // precedence is given to profile IDs passed from the query params
     this.selectedSiteProfileId = params.site_profile_id
       ? convertToGraphQLId(TYPE_SITE_PROFILE, params.site_profile_id)
       : this.selectedSiteProfileId;

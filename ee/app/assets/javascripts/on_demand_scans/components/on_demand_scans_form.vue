@@ -2,13 +2,11 @@
 import {
   GlAlert,
   GlButton,
-  GlCard,
   GlForm,
   GlFormGroup,
   GlFormInput,
   GlFormTextarea,
   GlLink,
-  GlSkeletonLoader,
   GlSprintf,
   GlSafeHtmlDirective,
   GlTooltipDirective,
@@ -25,7 +23,7 @@ import validation from '~/vue_shared/directives/validation';
 import dastProfileCreateMutation from '../graphql/dast_profile_create.mutation.graphql';
 import dastProfileUpdateMutation from '../graphql/dast_profile_update.mutation.graphql';
 import { ERROR_RUN_SCAN, ERROR_MESSAGES } from '../settings';
-import DastProfilesSelector from './profile_selector/scanner_profile_selector.vue';
+import DastProfilesSelector from './profile_selector/dast_profiles_selector.vue';
 
 export const ON_DEMAND_SCANS_STORAGE_KEY = 'on-demand-scans-new-form';
 
@@ -37,13 +35,11 @@ export default {
     RefSelector,
     GlAlert,
     GlButton,
-    GlCard,
     GlForm,
     GlFormGroup,
     GlFormInput,
     GlFormTextarea,
     GlLink,
-    GlSkeletonLoader,
     GlSprintf,
     LocalStorageSync,
     DastProfilesSelector,
@@ -112,8 +108,8 @@ export default {
         : s__('OnDemandScans|New on-demand DAST scan');
     },
     someFieldEmpty() {
-      const { selectedScannerProfile, selectedSiteProfile } = this;
-      return !selectedScannerProfile || !selectedSiteProfile;
+      const { selectedScannerProfileId, selectedSiteProfileId } = this;
+      return !selectedScannerProfileId || !selectedSiteProfileId;
     },
     isFormInvalid() {
       return this.someFieldEmpty || this.hasProfilesConflict;
@@ -163,8 +159,8 @@ export default {
       const responseType = this.isEdit ? 'dastProfileUpdate' : 'dastProfileCreate';
       const input = {
         fullPath: this.projectPath,
-        dastScannerProfileId: this.selectedScannerProfile.id,
-        dastSiteProfileId: this.selectedSiteProfile.id,
+        dastScannerProfileId: this.selectedScannerProfileId,
+        dastSiteProfileId: this.selectedSiteProfileId,
         branchName: this.selectedBranch,
         ...(this.isEdit ? { id: this.dastScan.id } : {}),
         ...serializeFormObject(this.form.fields),
@@ -211,6 +207,10 @@ export default {
       this.errorType = null;
       this.errors = [];
       this.showAlert = false;
+    },
+    updateSelectedProfiles(profiles) {
+      this.selectedSiteProfileId = profiles.siteProfile?.id;
+      this.selectedScannerProfileId = profiles.scannerProfile?.id;
     },
     updateFromStorage(val) {
       const {
@@ -280,111 +280,92 @@ export default {
       </ul>
     </gl-alert>
 
-    <template v-if="isLoadingProfiles">
-      <gl-skeleton-loader :width="1248" :height="180">
-        <rect x="0" y="0" width="100" height="15" rx="4" />
-        <rect x="0" y="24" width="460" height="32" rx="4" />
-        <rect x="0" y="71" width="100" height="15" rx="4" />
-        <rect x="0" y="95" width="460" height="72" rx="4" />
-      </gl-skeleton-loader>
-      <gl-card v-for="i in 2" :key="i" class="gl-mb-5">
-        <template #header>
-          <gl-skeleton-loader :width="1248" :height="15">
-            <rect x="0" y="0" width="300" height="15" rx="4" />
-          </gl-skeleton-loader>
-        </template>
-        <gl-skeleton-loader :width="1248" :height="15">
-          <rect x="0" y="0" width="600" height="15" rx="4" />
-        </gl-skeleton-loader>
-        <gl-skeleton-loader :width="1248" :height="15">
-          <rect x="0" y="0" width="300" height="15" rx="4" />
-        </gl-skeleton-loader>
-      </gl-card>
-    </template>
-    <template v-else-if="!failedToLoadProfiles">
-      <gl-form-group
-        :label="s__('OnDemandScans|Scan name')"
-        :invalid-feedback="form.fields.name.feedback"
-      >
-        <gl-form-input
-          v-model="form.fields.name.value"
-          v-validation:[form.showValidation]
-          class="mw-460"
-          data-testid="dast-scan-name-input"
-          type="text"
-          :placeholder="s__('OnDemandScans|My daily scan')"
-          :state="form.fields.name.state"
-          name="name"
-          required
-        />
-      </gl-form-group>
-      <gl-form-group :label="s__('OnDemandScans|Description (optional)')">
-        <gl-form-textarea
-          v-model="form.fields.description.value"
-          class="mw-460"
-          data-testid="dast-scan-description-input"
-          :placeholder="s__(`OnDemandScans|For example: Tests the login page for SQL injections`)"
-          :state="form.fields.description.state"
-        />
-      </gl-form-group>
-
-      <gl-form-group :label="__('Branch')">
-        <ref-selector
-          v-model="selectedBranch"
-          data-testid="dast-scan-branch-input"
-          no-flip
-          :enabled-ref-types="$options.enabledRefTypes"
-          :project-id="projectPath"
-          :translations="{
-            dropdownHeader: __('Select a branch'),
-            searchPlaceholder: __('Search'),
-            noRefSelected: __('No available branches'),
-            noResults: __('No available branches'),
-          }"
-        />
-        <div v-if="!defaultBranch" class="gl-text-red-500 gl-mt-3">
-          {{
-            s__(
-              'OnDemandScans|You must create a repository within your project to run an on-demand scan.',
-            )
-          }}
-        </div>
-      </gl-form-group>
-
-      <dast-profiles-selector
-        :full-path="projectPath"
-        @update-profile-conflict="hasProfilesConflict = $event"
+    <gl-form-group
+      :label="s__('OnDemandScans|Scan name')"
+      :invalid-feedback="form.fields.name.feedback"
+    >
+      <gl-form-input
+        v-model="form.fields.name.value"
+        v-validation:[form.showValidation]
+        class="mw-460"
+        data-testid="dast-scan-name-input"
+        type="text"
+        :placeholder="s__('OnDemandScans|My daily scan')"
+        :state="form.fields.name.state"
+        name="name"
+        required
       />
+    </gl-form-group>
+    <gl-form-group :label="s__('OnDemandScans|Description (optional)')">
+      <gl-form-textarea
+        v-model="form.fields.description.value"
+        class="mw-460"
+        data-testid="dast-scan-description-input"
+        :placeholder="s__(`OnDemandScans|For example: Tests the login page for SQL injections`)"
+        :state="form.fields.description.state"
+      />
+    </gl-form-group>
 
-      <div class="gl-mt-6 gl-pt-6">
-        <gl-button
-          type="submit"
-          variant="success"
-          class="js-no-auto-disable"
-          data-testid="on-demand-scan-submit-button"
-          :disabled="isSubmitButtonDisabled"
-          :loading="loading === $options.saveAndRunScanBtnId"
-        >
-          {{ s__('OnDemandScans|Save and run scan') }}
-        </gl-button>
-        <gl-button
-          variant="success"
-          category="secondary"
-          data-testid="on-demand-scan-save-button"
-          :disabled="isSaveButtonDisabled"
-          :loading="loading === $options.saveScanBtnId"
-          @click="onSubmit({ runAfter: false, button: $options.saveScanBtnId })"
-        >
-          {{ s__('OnDemandScans|Save scan') }}
-        </gl-button>
-        <gl-button
-          data-testid="on-demand-scan-cancel-button"
-          :disabled="Boolean(loading)"
-          @click="onCancelClicked"
-        >
-          {{ __('Cancel') }}
-        </gl-button>
+    <gl-form-group :label="__('Branch')">
+      <ref-selector
+        v-model="selectedBranch"
+        data-testid="dast-scan-branch-input"
+        no-flip
+        :enabled-ref-types="$options.enabledRefTypes"
+        :project-id="projectPath"
+        :translations="{
+          dropdownHeader: __('Select a branch'),
+          searchPlaceholder: __('Search'),
+          noRefSelected: __('No available branches'),
+          noResults: __('No available branches'),
+        }"
+      />
+      <div v-if="!defaultBranch" class="gl-text-red-500 gl-mt-3">
+        {{
+          s__(
+            'OnDemandScans|You must create a repository within your project to run an on-demand scan.',
+          )
+        }}
       </div>
-    </template>
+    </gl-form-group>
+
+    <dast-profiles-selector
+      :full-path="projectPath"
+      :site-profile-id="selectedSiteProfileId"
+      :scanner-profile-id="selectedScannerProfileId"
+      @profiles="updateSelectedProfiles"
+      @error="showErrors"
+      @hasProfilesConflict="hasProfilesConflict = $event"
+    />
+
+    <div class="gl-mt-6 gl-pt-6">
+      <gl-button
+        type="submit"
+        variant="success"
+        class="js-no-auto-disable"
+        data-testid="on-demand-scan-submit-button"
+        :disabled="isSubmitButtonDisabled"
+        :loading="loading === $options.saveAndRunScanBtnId"
+      >
+        {{ s__('OnDemandScans|Save and run scan') }}
+      </gl-button>
+      <gl-button
+        variant="success"
+        category="secondary"
+        data-testid="on-demand-scan-save-button"
+        :disabled="isSaveButtonDisabled"
+        :loading="loading === $options.saveScanBtnId"
+        @click="onSubmit({ runAfter: false, button: $options.saveScanBtnId })"
+      >
+        {{ s__('OnDemandScans|Save scan') }}
+      </gl-button>
+      <gl-button
+        data-testid="on-demand-scan-cancel-button"
+        :disabled="Boolean(loading)"
+        @click="onCancelClicked"
+      >
+        {{ __('Cancel') }}
+      </gl-button>
+    </div>
   </gl-form>
 </template>
