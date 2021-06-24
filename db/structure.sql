@@ -22695,6 +22695,8 @@ CREATE INDEX index_badges_on_group_id ON badges USING btree (group_id);
 
 CREATE INDEX index_badges_on_project_id ON badges USING btree (project_id);
 
+CREATE INDEX index_banned_users_on_user_id ON banned_users USING btree (user_id);
+
 CREATE UNIQUE INDEX index_batched_background_migrations_on_unique_configuration ON batched_background_migrations USING btree (job_class_name, table_name, column_name, job_arguments);
 
 CREATE INDEX index_batched_jobs_by_batched_migration_id_and_id ON batched_background_migration_jobs USING btree (batched_background_migration_id, id);

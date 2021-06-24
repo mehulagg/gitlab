@@ -11,6 +11,8 @@ RSpec.describe Users::BannedUser do
   end
 
   context 'creates a new banned user' do
+    let(:user) { create(:user) }
+
     it 'creates a new banned user object with is_banned ban state' do
       expect { described_class.new(user: user, ban_state: 3).save! }.to change { described_class.count }.by(1)
       expect(described_class.last.ban_state).to eq("is_banned")
