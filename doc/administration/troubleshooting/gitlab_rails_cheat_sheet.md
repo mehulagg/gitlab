@@ -981,6 +981,16 @@ o.destroy
 You would also want to combine this with deleting the LFS file in the LFS storage
 area on disk. It remains to be seen exactly how or whether the deletion is useful, however.
 
+### Calculate instance-wide LFS storage sizes
+
+```ruby
+lfs_total_size = 0
+LfsObject.find_each do |o|
+  lfs_total_size += o.size
+end
+lfs_total_size / (1000 ** 3) # Gigabytes
+```
+
 ## Decryption Problems
 
 ### Bad Decrypt Script (for encrypted variables)
