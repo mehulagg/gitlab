@@ -581,6 +581,29 @@ Read about [Git Fusion settings on Perforce.com](https://www.perforce.com/manual
 
 Should an error occur during a push, GitLab displays an **Error** highlight for that repository. Details on the error can then be seen by hovering over the highlight text.
 
+### Detailed code walkthrough of mirroring process
+
+If the pull mirror is triggered by an [API call](https://docs.gitlab.com/ee/api/projects.html#start-the-pull-mirroring-process-for-a-project) the steps listed below are valid from GitLab verison 14. They should be mostly the same for scheduled mirror updates, without the API call but do explore the code to confirm.
+
+1. The API Call
+  - This is where the request originates and it triggers a start_pull_mirroring_service - https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/lib/api/project_mirror.rb
+1. Start Pull Mirroring Service
+  - This service effectively updates the project state and forces the job to start immediately. - https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/app/services/start_pull_mirroring_service.rb
+1. Project Import State gets updated
+  - Which then goes and triggers an update_all_mirrors_worker. - https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/app/models/ee/project_import_state.rb#L170
+1. Update All Mirrors worker
+  - This sort of acts like a leaky bucket trying to schedule mirrors to avoid a thundering heard effect by calling the project_import_schedule worker - https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/app/workers/update_all_mirrors_worker.rb
+1. Project Import Schedule Worker
+  - this worker updates the state of the project, which starts a ruby state_machine in motion to manage the import transition process. - https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/app/workers/project_import_schedule_worker.rb#L21
+1. Project State gets updated
+  - During that process we make our way to this call which starts the repository_update_mirror worker. - https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/app/models/ee/project.rb#L426
+1. Sidekiq background Mirror Workers
+  - This  tracks the state of the mirroring task and gives us good error state information. If the process was hung I'd expect to see it here as this manages the git steps. - https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/app/workers/repository_update_mirror_worker.rb
+1. Update Mirror Service
+   - This service does the git operations, and at the end of this, the "import/mirror" update process is done and depending on changes other "following" tasks will get triggered. (pipelines for commits, etc.) - https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/app/services/projects/update_mirror_service.rb
+
+
+
 ### 13:Received RST_STREAM with error code 2 with GitHub
 
 If you receive an "13:Received RST_STREAM with error code 2" while mirroring to a GitHub repository, your GitHub settings might be set to block pushes that expose your email address used in commits. Either set your email address on GitHub to be public, or disable the [Block command line pushes that expose my email](https://github.com/settings/emails) setting.
