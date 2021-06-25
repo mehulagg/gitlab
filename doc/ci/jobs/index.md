@@ -264,7 +264,7 @@ job1:
 
 Deployment jobs are a specific kind of CI job. Deployment jobs deploy code to [environments](../environments/index.md). A deployment jobs is any job that has the `environment` keyword with the default `action` of `start`. Deployment jobs do not need to be in the `deploy` stage. The `deploy me` job below is an example of a deployment job:
 
-```
+```yaml
 deploy me:
   script:
     - deploy-to-cats.sh
