@@ -6,17 +6,23 @@ module BulkImports
       class MemberAttributesTransformer
         def transform(context, data)
           data
-            .then { |data| add_user(data) }
+            .then { |data| add_user(data, context) }
             .then { |data| add_access_level(data) }
             .then { |data| add_author(data, context) }
         end
 
         private
 
-        def add_user(data)
+        def add_user(data, context)
           user = find_user(data&.dig('user', 'public_email'))
 
           return unless user
+
+          source_user_id = data&.dig('user', 'identifier')
+
+          ::BulkImports::UsersMapper
+            .new(context: context)
+            .cache_source_user_id(source_user_id, user.id)
 
           data
             .except('user')
