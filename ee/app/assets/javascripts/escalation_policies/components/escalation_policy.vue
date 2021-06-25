@@ -13,7 +13,7 @@ import { s__, __ } from '~/locale';
 import {
   ACTIONS,
   ALERT_STATUSES,
-  DEFAULT_ACTION,
+  EMAIL_ONCALL_SCHEDULE_USER,
   deleteEscalationPolicyModalId,
   editEscalationPolicyModalId,
 } from '../constants';
@@ -38,7 +38,7 @@ export default {
   i18n,
   ACTIONS,
   ALERT_STATUSES,
-  DEFAULT_ACTION,
+  EMAIL_ONCALL_SCHEDULE_USER,
   components: {
     GlButton,
     GlButtonGroup,
@@ -155,7 +155,7 @@ export default {
                 <gl-icon name="notifications" class="gl-mr-3" />
               </template>
               <template #doAction>
-                {{ $options.ACTIONS[$options.DEFAULT_ACTION].toLowerCase() }}
+                {{ $options.ACTIONS[$options.EMAIL_ONCALL_SCHEDULE_USER].toLowerCase() }}
               </template>
               <template #schedule>
                 <span class="gl-font-weight-bold">

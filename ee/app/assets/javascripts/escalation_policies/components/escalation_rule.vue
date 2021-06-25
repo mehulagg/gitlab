@@ -11,7 +11,8 @@ import {
   GlTooltipDirective as GlTooltip,
 } from '@gitlab/ui';
 import { s__ } from '~/locale';
-import { ACTIONS, ALERT_STATUSES } from '../constants';
+import { ACTIONS, ALERT_STATUSES, EMAIL_ONCALL_SCHEDULE_USER, EMAIL_USER } from '../constants';
+import UsersList from './users_list.vue';
 
 export const i18n = {
   fields: {
@@ -37,6 +38,8 @@ export default {
   i18n,
   ALERT_STATUSES,
   ACTIONS,
+  EMAIL_ONCALL_SCHEDULE_USER,
+  EMAIL_USER,
   components: {
     GlFormGroup,
     GlFormInput,
@@ -46,6 +49,7 @@ export default {
     GlButton,
     GlIcon,
     GlSprintf,
+    UsersList,
   },
   directives: {
     GlTooltip,
@@ -102,19 +106,34 @@ export default {
     isScheduleValid() {
       return this.validationState?.isScheduleValid;
     },
+    actionBasedRequestParams() {
+      if (this.action === EMAIL_ONCALL_SCHEDULE_USER) {
+        return { oncallScheduleIid: parseInt(this.oncallScheduleIid, 10) };
+      }
+
+      return { user: this.user };
+    },
   },
   methods: {
     setOncallSchedule({ iid }) {
       this.oncallScheduleIid = this.oncallScheduleIid === iid ? null : iid;
       this.emitUpdate();
     },
+    setAction(action) {
+      this.action = action;
+      this.emitUpdate();
+    },
     setStatus(status) {
       this.status = status;
       this.emitUpdate();
     },
+    setSelectedUser(user) {
+      this.user = user;
+      this.emitUpdate();
+    },
     emitUpdate() {
       this.$emit('update-escalation-rule', this.index, {
-        oncallScheduleIid: parseInt(this.oncallScheduleIid, 10),
+        ...this.actionBasedRequestParams,
         action: this.action,
         status: this.status,
         elapsedTimeSeconds: parseInt(this.elapsedTimeSeconds, 10),
@@ -188,41 +207,45 @@ export default {
                 :key="ruleAction"
                 :is-checked="rule.action === ruleAction"
                 is-check-item
+                @click="setAction(ruleAction)"
               >
                 {{ label }}
               </gl-dropdown-item>
             </gl-dropdown>
           </template>
           <template #schedule>
-            <gl-dropdown
-              :disabled="noSchedules"
-              class="rule-control"
-              :text="scheduleDropdownTitle"
-              data-testid="schedules-dropdown"
-            >
-              <template #button-text>
-                <span :class="{ 'gl-text-gray-400': !oncallScheduleIid }">
-                  {{ scheduleDropdownTitle }}
-                </span>
-              </template>
-              <gl-dropdown-item
-                v-for="schedule in schedules"
-                :key="schedule.iid"
-                :is-checked="schedule.iid === oncallScheduleIid"
-                is-check-item
-                @click="setOncallSchedule(schedule)"
+            <template v-if="action === $options.EMAIL_ONCALL_SCHEDULE_USER">
+              <gl-dropdown
+                :disabled="noSchedules"
+                class="rule-control"
+                :text="scheduleDropdownTitle"
+                data-testid="schedules-dropdown"
               >
-                {{ schedule.name }}
-              </gl-dropdown-item>
-            </gl-dropdown>
-            <gl-icon
-              v-if="noSchedules"
-              v-gl-tooltip
-              :title="$options.i18n.fields.rules.noSchedules"
-              name="information-o"
-              class="gl-text-gray-500 gl-ml-3"
-              data-testid="no-schedules-info-icon"
-            />
+                <template #button-text>
+                  <span :class="{ 'gl-text-gray-400': !oncallScheduleIid }">
+                    {{ scheduleDropdownTitle }}
+                  </span>
+                </template>
+                <gl-dropdown-item
+                  v-for="schedule in schedules"
+                  :key="schedule.iid"
+                  :is-checked="schedule.iid === oncallScheduleIid"
+                  is-check-item
+                  @click="setOncallSchedule(schedule)"
+                >
+                  {{ schedule.name }}
+                </gl-dropdown-item>
+              </gl-dropdown>
+              <gl-icon
+                v-if="noSchedules"
+                v-gl-tooltip
+                :title="$options.i18n.fields.rules.noSchedules"
+                name="information-o"
+                class="gl-text-gray-500 gl-ml-3"
+                data-testid="no-schedules-info-icon"
+              />
+            </template>
+            <users-list v-else @selectUser="setSelectedUser" />
           </template>
         </gl-sprintf>
       </div>

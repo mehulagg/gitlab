@@ -3,7 +3,7 @@ import { GlLink, GlForm, GlFormGroup, GlFormInput } from '@gitlab/ui';
 import { cloneDeep, uniqueId } from 'lodash';
 import createFlash from '~/flash';
 import { s__, __ } from '~/locale';
-import { DEFAULT_ACTION, DEFAULT_ESCALATION_RULE } from '../constants';
+import { EMAIL_ONCALL_SCHEDULE_USER, DEFAULT_ESCALATION_RULE } from '../constants';
 import getOncallSchedulesQuery from '../graphql/queries/get_oncall_schedules.query.graphql';
 import EscalationRule from './escalation_rule.vue';
 
@@ -83,7 +83,7 @@ export default {
       return {
         status,
         elapsedTimeSeconds,
-        action: DEFAULT_ACTION,
+        action: EMAIL_ONCALL_SCHEDULE_USER,
         oncallScheduleIid,
         key: uniqueId(),
       };
