@@ -440,11 +440,12 @@ A pipeline can have one of several statuses. The legend below includes a list of
 
 | Pipeline Status | Icon | Alt Text |
 | ------ | ------ | ------ |
-| canceled | ![canceled](img/pipeline_status_canceled_v14_0.png) | dark gray slash (top left to bottom right) in dark gray circle |
-| passed | ![passed](img/pipeline_status_passed_v14_0.png) | green checkmark in green circle |
-| failed | ![failed](img/pipeline_status_failed_v14_0.png) | red x in red circle |
 | pending | ![pending](img/pipeline_status_pending_v14_0.png) | yellow "pause" sign | 
 | running | ![running](img/pipeline_status_running_v14_0.png) | circle two-thirds filled with blue |
+| passed | ![passed](img/pipeline_status_passed_v14_0.png) | green checkmark in green circle |
+| failed | ![failed](img/pipeline_status_failed_v14_0.png) | red x in red circle |
+| skipped | ![skipped](img/pipeline_status_skipped_v14_0.png) | twogray arrows pointing right |
+| canceled | ![canceled](img/pipeline_status_canceled_v14_0.png) | dark gray slash (top left to bottom right) in dark gray circle |
 
 ## Pipelines API
 
