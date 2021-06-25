@@ -444,7 +444,7 @@ A pipeline can have one of several statuses. The legend below includes a list of
 | passed | ![passed](img/pipeline_status_passed_v14_0.png) | green checkmark in green circle |
 | failed | ![failed](img/pipeline_status_failed_v14_0.png) | red x in red circle |
 | pending | ![pending](img/pipeline_status_pending_v14_0.png) | yellow "pause" sign | 
-| running | ![running](iimg/pipeline_status_running_v14_0.png) | circle two-thirds filled with blue |
+| running | ![running](img/pipeline_status_running_v14_0.png) | circle two-thirds filled with blue |
 
 ## Pipelines API
 
