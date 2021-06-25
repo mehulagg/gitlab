@@ -37,7 +37,7 @@ has orhaned rows.
 Also make sure an ActiveRecord validation covers the constraint.
 1. Use add_concurrent_foreign_key with validate: false
 1. Do a background migration to delete orphaned rows
-1. Add a migration to run `ALTER TABLE deployments VALIDATE CONSTRAINT`
+1. Add a migration to run `ALTER TABLE <table_name> VALIDATE CONSTRAINT`
 
 ## Cascading Deletes
 
