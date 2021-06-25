@@ -2158,6 +2158,15 @@ msgstr ""
 msgid "Additional text"
 msgstr ""
 
+msgid "Additional text for login page and support page URL."
+msgstr ""
+
+msgid "Additional text shown on the Help page"
+msgstr ""
+
+msgid "Additional text shown on the login page"
+msgstr ""
+
 msgid "Address"
 msgstr ""
 
@@ -3393,7 +3402,7 @@ msgstr ""
 msgid "Also unassign this user from related issues and merge requests"
 msgstr ""
 
-msgid "Alternate support URL for help page and help dropdown"
+msgid "Alternate support URL for Help page and Help dropdown"
 msgstr ""
 
 msgid "Alternatively, you can convert your account to a managed account by the %{group_name} group."
@@ -16045,9 +16054,6 @@ msgstr ""
 msgid "Help page"
 msgstr ""
 
-msgid "Help page text and support page url."
-msgstr ""
-
 msgid "Helps prevent bots from brute-force attacks."
 msgstr ""
 
@@ -16104,7 +16110,7 @@ msgstr ""
 msgid "Hide list"
 msgstr ""
 
-msgid "Hide marketing-related entries from help"
+msgid "Hide marketing-related entries from the Help page."
 msgstr ""
 
 msgid "Hide payload"
