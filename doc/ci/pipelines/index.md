@@ -440,11 +440,11 @@ A pipeline can have one of several statuses. The legend below includes a list of
 
 | Pipeline Status | Icon | Alt Text |
 | ------ | ------ | ------ |
-| canceled | ![canceled](https://omg.brie.dev/assets/ci_favicons/favicon_status_canceled-ca35321a6cda9943ebdf6631c8057ffd54064f3ba20cfe0ebc4b0b992041c430.png) | dark gray slash (top left to bottom right) in dark gray circle |
-| success | ![success](https://omg.brie.dev/assets/ci_favicons/favicon_status_success-8451333011eee8ce9f2ab25dc487fe24a8758c694827a582f17f42b0a90446a2.png) | green checkmark in green circle |
-| failed | ![failed](https://omg.brie.dev/assets/ci_favicons/favicon_status_failed-41304d7f7e3828808b0c26771f0309e55296819a9beea3ea9fbf6689d9857c12.png) | red x in red circle |
-| pending | ![pending](https://omg.brie.dev/assets/ci_favicons/favicon_status_pending-5bdf338420e5221ca24353b6bff1c9367189588750632e9a871b7af09ff6a2ae.png) | yellow "pause" sign | 
-| running | ![running](https://omg.brie.dev/assets/ci_favicons/favicon_status_running-9c635b2419a8e1ec991c993061b89cc5aefc0743bb238ecd0c381e7741a70e8c.png) | circle two-thirds filled with blue |
+| canceled | ![canceled](img/ci_favicons/favicon_status_canceled-ca35321a6cda9943ebdf6631c8057ffd54064f3ba20cfe0ebc4b0b992041c430.png) | dark gray slash (top left to bottom right) in dark gray circle |
+| passed | ![passed](img/favicon_status_success-8451333011eee8ce9f2ab25dc487fe24a8758c694827a582f17f42b0a90446a2.png) | green checkmark in green circle |
+| failed | ![failed](img/favicon_status_failed-41304d7f7e3828808b0c26771f0309e55296819a9beea3ea9fbf6689d9857c12.png) | red x in red circle |
+| pending | ![pending](img/ci_favicons/favicon_status_pending-5bdf338420e5221ca24353b6bff1c9367189588750632e9a871b7af09ff6a2ae.png) | yellow "pause" sign | 
+| running | ![running](img/assets/ci_favicons/favicon_status_running-9c635b2419a8e1ec991c993061b89cc5aefc0743bb238ecd0c381e7741a70e8c.png) | circle two-thirds filled with blue |
 
 ## Pipelines API
 
