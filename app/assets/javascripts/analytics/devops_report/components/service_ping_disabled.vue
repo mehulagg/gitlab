@@ -25,13 +25,13 @@ export default {
 };
 </script>
 <template>
-  <gl-empty-state class="js-empty-state" :title="__('Usage ping is off')" :svg-path="svgPath">
+  <gl-empty-state class="js-empty-state" :title="__('Service ping is off')" :svg-path="svgPath">
     <template #description>
       <gl-sprintf
         v-if="!isAdmin"
         :message="
           __(
-            'To view instance-level analytics, ask an admin to turn on %{docLinkStart}usage ping%{docLinkEnd}.',
+            'To view instance-level analytics, ask an admin to turn on %{docLinkStart}service ping%{docLinkEnd}.',
           )
         "
       >
@@ -39,14 +39,14 @@ export default {
           <gl-link :href="docsLink" target="_blank">{{ content }}</gl-link>
         </template>
       </gl-sprintf>
-      <template v-else
-        ><p>
-          {{ __('Turn on usage ping to review instance-level analytics.') }}
+      <template v-else>
+        <p>
+          {{ __('Turn on service ping to review instance-level analytics.') }}
         </p>
 
         <gl-button category="primary" variant="success" :href="primaryButtonPath">
-          {{ __('Turn on usage ping') }}</gl-button
-        >
+          {{ __('Turn on service ping') }}
+        </gl-button>
       </template>
     </template>
   </gl-empty-state>

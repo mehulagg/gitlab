@@ -1,27 +1,32 @@
 import Vue from 'vue';
 import UserCallout from '~/user_callout';
-import UsagePingDisabled from './components/usage_ping_disabled.vue';
+import ServicePingDisabled from './components/service_ping_disabled.vue';
 
 export default () => {
   // eslint-disable-next-line no-new
   new UserCallout();
 
-  const emptyStateContainer = document.getElementById('js-devops-usage-ping-disabled');
+  const emptyStateContainer = document.getElementById('js-devops-service-ping-disabled');
 
   if (!emptyStateContainer) return false;
 
-  const { emptyStateSvgPath, enableUsagePingLink, docsLink, isAdmin } = emptyStateContainer.dataset;
+  const {
+    emptyStateSvgPath,
+    enableServicePingLink,
+    docsLink,
+    isAdmin,
+  } = emptyStateContainer.dataset;
 
   return new Vue({
     el: emptyStateContainer,
     provide: {
       isAdmin: Boolean(isAdmin),
       svgPath: emptyStateSvgPath,
-      primaryButtonPath: enableUsagePingLink,
+      primaryButtonPath: enableServicePingLink,
       docsLink,
     },
     render(h) {
-      return h(UsagePingDisabled);
+      return h(ServicePingDisabled);
     },
   });
 };

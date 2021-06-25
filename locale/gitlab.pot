@@ -29465,6 +29465,9 @@ msgstr ""
 msgid "Service URL"
 msgstr ""
 
+msgid "Service ping is off"
+msgstr ""
+
 msgid "ServiceDesk|Enable Service Desk"
 msgstr ""
 
@@ -34003,7 +34006,7 @@ msgstr ""
 msgid "To view all %{scannedResourcesCount} scanned URLs, %{linkStart}please download the CSV file%{linkEnd}"
 msgstr ""
 
-msgid "To view instance-level analytics, ask an admin to turn on %{docLinkStart}usage ping%{docLinkEnd}."
+msgid "To view instance-level analytics, ask an admin to turn on %{docLinkStart}service ping%{docLinkEnd}."
 msgstr ""
 
 msgid "To widen your search, change or remove filters above"
@@ -34395,10 +34398,10 @@ msgstr ""
 msgid "Turn on"
 msgstr ""
 
-msgid "Turn on usage ping"
+msgid "Turn on service ping"
 msgstr ""
 
-msgid "Turn on usage ping to review instance-level analytics."
+msgid "Turn on service ping to review instance-level analytics."
 msgstr ""
 
 msgid "Twitter"
@@ -34960,9 +34963,6 @@ msgid "Usage"
 msgstr ""
 
 msgid "Usage Trends"
-msgstr ""
-
-msgid "Usage ping is off"
 msgstr ""
 
 msgid "Usage statistics"
