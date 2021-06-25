@@ -89,7 +89,7 @@ test-job:
     - echo Run tests...
 ```
 
-If multiple caches are combined with a [fallback cache key](#fallback-cache-key),
+If multiple caches are combined with a fallback cache key,
 the fallback cache is fetched every time a cache is not found.
 
 ## Use a fallback cache key
