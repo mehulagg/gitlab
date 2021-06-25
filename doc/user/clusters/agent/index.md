@@ -517,6 +517,13 @@ This error is shown if there are some connectivity issues between the address
 specified as `kas-address`, and your Agent pod. To fix it, make sure that you
 specified the `kas-address` correctly.
 
+```json
+│ {"level":"error","time":"2021-06-25T21:15:45.335Z","msg":"Reverse tunnel","mod_name":"reverse_tunnel","error":"Connect(): rpc error: code = Unavailable desc = connection error: desc  │
+│ = \"transport: Error while dialing failed to WebSocket dial: expected handshake response status code 101 but got 301\""}
+```
+
+This error will also occur if the Kubernetes Agent Server host is specified correctly - but you are using websockets with the default `GitLab.host.tld/-/kubernetes-agent/` KAS url and the `kas-address` doesn't include a trailing slash. Make sure that you have a trailing slash on your `wss` or `ws` url - e.g. `wss://GitLab.host.tld:443/-/kubernetes-agent/` or `ws://GitLab.host.tld:80/-/kubernetes-agent/`
+
 ### Agent logs - ValidationError(Deployment.metadata)
 
 ```plaintext
