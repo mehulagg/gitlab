@@ -793,6 +793,8 @@ Settings.backup['upload']['multipart_chunk_size'] ||= 104857600
 Settings.backup['upload']['encryption'] ||= nil
 Settings.backup['upload']['encryption_key'] ||= ENV['GITLAB_BACKUP_ENCRYPTION_KEY']
 Settings.backup['upload']['storage_class'] ||= nil
+Settings.backup['gitaly_backup_path'] ||= Gitlab::Utils.which('gitaly-backup') ||
+  File.join(Settings.gitaly.client_path, 'gitaly-backup')
 
 #
 # Pseudonymizer

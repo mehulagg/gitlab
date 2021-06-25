@@ -1431,6 +1431,7 @@ test:
     secret_file: tmp/gitlab_workhorse_test_secret
   backup:
     path: tmp/tests/backups
+    gitaly_backup_path: tmp/tests/gitaly/_build/bin/gitaly-backup
   pseudonymizer:
     manifest: config/pseudonymizer.yml
     upload:
