@@ -111,7 +111,7 @@ https://docs.google.com/drawings/d/1fBzAyklyveF-i-2q-OHUIqDkYfjjxC4mq5shwKSZHLs/
 ### Component diagram
 
 ```mermaid
-grpah LR
+graph LR
   %% Anchor items in the appropriate subgraph.
   %% Link them where the destination* is.
 
