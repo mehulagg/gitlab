@@ -46,7 +46,7 @@ module Gitlab
 
   def self.com?
     # Check `gl_subdomain?` as well to keep parity with gitlab.com
-    Gitlab.config.gitlab.url == Gitlab::Saas.com_url || gl_subdomain?
+    true#Gitlab.config.gitlab.url == Gitlab::Saas.com_url || gl_subdomain?
   end
 
   def self.com
