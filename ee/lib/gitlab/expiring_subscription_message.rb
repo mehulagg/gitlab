@@ -7,15 +7,16 @@ module Gitlab
     include Gitlab::Utils::StrongMemoize
     include ActionView::Helpers::TextHelper
 
-    attr_reader :subscribable, :signed_in, :is_admin, :namespace
+    attr_reader :subscribable, :signed_in, :is_admin, :namespace, :force_notification
 
     delegate :auto_renew, to: :subscribable
 
-    def initialize(subscribable:, signed_in:, is_admin:, namespace: nil)
+    def initialize(subscribable:, signed_in:, is_admin:, namespace: nil, force_notification: false)
       @subscribable = subscribable
       @signed_in = signed_in
       @is_admin = is_admin
       @namespace = namespace
+      @force_notification = force_notification
     end
 
     def message
@@ -140,6 +141,7 @@ module Gitlab
     end
 
     def expired_subscribable_within_notification_window?
+      return true if force_notification && subscribable.expired?
       return true unless expired_but_within_cutoff?
 
       (expires_at_or_cutoff_at + GRACE_PERIOD_EXTENSION_DAYS) > Date.today

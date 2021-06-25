@@ -12,12 +12,14 @@ RSpec.describe Gitlab::ExpiringSubscriptionMessage do
 
     let(:subscribable) { double(:license) }
     let(:namespace) { nil }
+    let(:force_notification) { false }
     let(:message) do
       described_class.new(
         subscribable: subscribable,
         signed_in: true,
         is_admin: true,
-        namespace: namespace
+        namespace: namespace,
+        force_notification: force_notification
       ).message
     end
 
@@ -325,6 +327,14 @@ RSpec.describe Gitlab::ExpiringSubscriptionMessage do
 
                 it 'stops displaying' do
                   expect(subject).to be nil
+                end
+
+                context 'and force_notification is true' do
+                  let(:force_notification) { true }
+
+                  it 'returns a message' do
+                    expect(subject).to include('Your subscription has been downgraded')
+                  end
                 end
               end
 
