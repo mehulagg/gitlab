@@ -28,7 +28,7 @@
               = form.label :forward_deployment_enabled, class: 'form-check-label' do
                 %strong= _("Skip outdated deployment jobs")
               .form-text.text-muted
-                = _("When a deployment job is successful, skip older deployment jobs that are still pending.")
+                = _("When a deployment job is successful, skip older deployment jobs.")
                 = link_to sprite_icon('question-o'), help_page_path('ci/pipelines/settings', anchor: 'skip-outdated-deployment-jobs'), target: '_blank'
 
         .form-group
