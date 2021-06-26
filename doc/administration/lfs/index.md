@@ -276,7 +276,7 @@ To delete these references:
    lfs_object.file.path
    ```
 
-1. Check on disk if it exists:
+1. Check on disk or object storage if it exists:
 
    ```shell
    ls -al /var/opt/gitlab/gitlab-rails/shared/lfs-objects/00/66/22269c61b41bf14a22bbe0e43be3acf86a4a446afb4250c3794ea47541a7
