@@ -10,6 +10,8 @@ export default {
     GlAlert,
     GlToggle,
     GlTooltip,
+    CcValidationRequiredAlert: () =>
+      import('ee_component/billings/components/cc_validation_required_alert.vue'),
   },
   props: {
     isDisabledAndUnoverridable: {
@@ -19,6 +21,10 @@ export default {
     isEnabled: {
       type: Boolean,
       required: true,
+    },
+    isCreditCardValidationRequired: {
+      type: Boolean,
+      required: false,
     },
     updatePath: {
       type: String,
@@ -34,6 +40,7 @@ export default {
   },
   created() {
     this.isSharedRunnerEnabled = this.isEnabled;
+    this.ccValidationRequired = this.isCreditCardValidationRequired;
   },
   methods: {
     toggleSharedRunners() {
@@ -45,6 +52,7 @@ export default {
         .then(() => {
           this.isLoading = false;
           this.isSharedRunnerEnabled = !this.isSharedRunnerEnabled;
+          this.ccValidationRequired = this.isCreditCardValidationRequired;
         })
         .catch((error) => {
           this.isLoading = false;
@@ -61,7 +69,11 @@ export default {
       <gl-alert v-if="errorMessage" class="gl-mb-3" variant="danger" :dismissible="false">
         {{ errorMessage }}
       </gl-alert>
-      <div ref="sharedRunnersToggle">
+
+      <div v-if="this.isCreditCardValidationRequired && !this.isSharedRunnerEnabled">
+        <cc-validation-required-alert class="gl-pb-5" />
+      </div>
+      <div v-else ref="sharedRunnersToggle">
         <gl-toggle
           :disabled="isDisabledAndUnoverridable"
           :is-loading="isLoading"
@@ -71,6 +83,7 @@ export default {
           @change="toggleSharedRunners"
         />
       </div>
+
       <gl-tooltip v-if="isDisabledAndUnoverridable" :target="() => $refs.sharedRunnersToggle">
         {{ __('Shared runners are disabled on group level') }}
       </gl-tooltip>
