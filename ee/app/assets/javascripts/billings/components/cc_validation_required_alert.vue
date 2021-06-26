@@ -48,6 +48,7 @@ export default {
     handleSuccessfulVerification() {
       this.$refs.modal.hide();
       this.shouldRenderSuccess = true;
+      this.$emit('verifiedCreditCard');
     },
   },
   i18n,

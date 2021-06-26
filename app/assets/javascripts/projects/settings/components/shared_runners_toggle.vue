@@ -36,13 +36,17 @@ export default {
       isLoading: false,
       isSharedRunnerEnabled: false,
       errorMessage: null,
+      isCcValidationRequired: false
     };
   },
   created() {
     this.isSharedRunnerEnabled = this.isEnabled;
-    this.ccValidationRequired = this.isCreditCardValidationRequired;
+    this.isCcValidationRequired = this.isCreditCardValidationRequired;
   },
   methods: {
+    creditCardValidated() {
+      this.isCcValidationRequired = false;
+    },
     toggleSharedRunners() {
       this.isLoading = true;
       this.errorMessage = null;
@@ -52,7 +56,7 @@ export default {
         .then(() => {
           this.isLoading = false;
           this.isSharedRunnerEnabled = !this.isSharedRunnerEnabled;
-          this.ccValidationRequired = this.isCreditCardValidationRequired;
+          this.isCcValidationRequired = this.isCreditCardValidationRequired;
         })
         .catch((error) => {
           this.isLoading = false;
@@ -70,8 +74,8 @@ export default {
         {{ errorMessage }}
       </gl-alert>
 
-      <div v-if="this.isCreditCardValidationRequired && !this.isSharedRunnerEnabled">
-        <cc-validation-required-alert class="gl-pb-5" />
+      <div v-if="this.isCcValidationRequired && !this.isSharedRunnerEnabled">
+        <cc-validation-required-alert class="gl-pb-5" @verifiedCreditCard="creditCardValidated"/>
       </div>
       <div v-else ref="sharedRunnersToggle">
         <gl-toggle
