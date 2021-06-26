@@ -213,7 +213,7 @@ upgrade paths.
 Upgrading the *major* version requires more attention.
 Backward-incompatible changes and migrations are reserved for major versions.
 We cannot guarantee that upgrading between major versions will be seamless.
-It is suggested to upgrade to the latest available *minor* version within
+It is required to upgrade to the latest available *minor* version within
 your major version before proceeding to the next major version.
 Doing this addresses any backward-incompatible changes or deprecations
 to help ensure a successful upgrade to the next major release.
