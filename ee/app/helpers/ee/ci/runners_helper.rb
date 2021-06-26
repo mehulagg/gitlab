@@ -9,7 +9,11 @@ module EE
 
       override :toggle_shared_runners_settings_data
       def toggle_shared_runners_settings_data(project)
-        super.merge(is_credit_card_validation_required: "#{!current_user&.has_required_credit_card_to_enable_shared_runners?(project)}")
+        super.merge(is_credit_card_validation_required: "#{validate_credit_card?(project)}")
+      end
+
+      def validate_credit_card?(project)
+        !current_user.has_required_credit_card_to_enable_shared_runners?(project)
       end
 
       def show_buy_pipeline_minutes?(project, namespace)

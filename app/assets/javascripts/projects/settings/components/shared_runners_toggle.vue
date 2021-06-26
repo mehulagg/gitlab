@@ -36,7 +36,7 @@ export default {
       isLoading: false,
       isSharedRunnerEnabled: false,
       errorMessage: null,
-      isCcValidationRequired: false
+      isCcValidationRequired: false,
     };
   },
   created() {
@@ -74,8 +74,8 @@ export default {
         {{ errorMessage }}
       </gl-alert>
 
-      <div v-if="this.isCcValidationRequired && !this.isSharedRunnerEnabled">
-        <cc-validation-required-alert class="gl-pb-5" @verifiedCreditCard="creditCardValidated"/>
+      <div v-if="isCcValidationRequired && !isSharedRunnerEnabled">
+        <cc-validation-required-alert class="gl-pb-5" @verifiedCreditCard="creditCardValidated" />
       </div>
       <div v-else ref="sharedRunnersToggle">
         <gl-toggle
