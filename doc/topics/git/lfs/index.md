@@ -296,7 +296,7 @@ An error about a missing LFS object may occur in either of these situations:
   with the `VERBOSE=1` parameter.
 
 The database can have records for LFS objects which are not on disk. The database entry may
-[prevent a new copy of the object being pushed](https://gitlab.com/gitlab-org/gitlab-foss/-/issues/49241).
+[prevent a new copy of the object from being pushed](https://gitlab.com/gitlab-org/gitlab-foss/-/issues/49241).
 To delete these references:
 
 1. [Start a rails console](../../../administration/operations/rails_console.md).
