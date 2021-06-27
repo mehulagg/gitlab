@@ -1,7 +1,7 @@
 
 ---
-key_path: usage_activity_by_stage_monthly.secure.running_container_scanning_pipeline
-description: Pipelines containing a Running Container Scanning job
+key_path: usage_activity_by_stage_monthly.secure.cluster_image_scanning_pipeline
+description: Pipelines containing a Cluster Image Scanning job
 product_section: sec
 product_stage: protect
 product_group: group::container security

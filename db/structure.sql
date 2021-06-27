@@ -142,6 +142,15 @@ BEGIN
 END;
 $$;
 
+CREATE FUNCTION trigger_b5651783d761() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+  NEW."ci_max_artifact_size_cluster_image_scanning" := NEW."ci_max_artifact_size_running_container_scanning";
+  RETURN NEW;
+END;
+$$;
+
 CREATE FUNCTION trigger_be1804f21693() RETURNS trigger
     LANGUAGE plpgsql
     AS $$
@@ -16276,7 +16285,8 @@ CREATE TABLE plan_limits (
     ci_registered_project_runners integer DEFAULT 1000 NOT NULL,
     web_hook_calls integer DEFAULT 0 NOT NULL,
     ci_daily_pipeline_schedule_triggers integer DEFAULT 0 NOT NULL,
-    ci_max_artifact_size_running_container_scanning integer DEFAULT 0 NOT NULL
+    ci_max_artifact_size_cluster_image_scanning integer DEFAULT 0,
+    CONSTRAINT check_7f28fac07c CHECK ((ci_max_artifact_size_cluster_image_scanning IS NOT NULL))
 );
 
 CREATE SEQUENCE plan_limits_id_seq
@@ -25454,6 +25464,8 @@ CREATE TRIGGER trigger_8487d4de3e7b BEFORE INSERT OR UPDATE ON ci_builds_metadat
 CREATE TRIGGER trigger_91dc388a5fe6 BEFORE INSERT OR UPDATE ON ci_build_trace_sections FOR EACH ROW EXECUTE FUNCTION trigger_91dc388a5fe6();
 
 CREATE TRIGGER trigger_aebe8b822ad3 BEFORE INSERT OR UPDATE ON taggings FOR EACH ROW EXECUTE FUNCTION trigger_aebe8b822ad3();
+
+CREATE TRIGGER trigger_b5651783d761 BEFORE INSERT OR UPDATE ON plan_limits FOR EACH ROW EXECUTE FUNCTION trigger_b5651783d761();
 
 CREATE TRIGGER trigger_be1804f21693 BEFORE INSERT OR UPDATE ON ci_job_artifacts FOR EACH ROW EXECUTE FUNCTION trigger_be1804f21693();
 

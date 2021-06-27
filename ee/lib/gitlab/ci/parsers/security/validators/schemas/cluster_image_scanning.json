@@ -1,7 +1,7 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "title": "Report format for GitLab Running Container Scanning",
-  "description": "This schema provides the the report format for Running Container Scanning (https://docs.gitlab.com/ee/user/application_security/running_container_scanning).",
+  "title": "Report format for GitLab Cluster Image Scanning",
+  "description": "This schema provides the the report format for Cluster Image Scanning (https://docs.gitlab.com/ee/user/application_security/cluster_image_scanning).",
   "definitions": {
     "detail_type": {
       "oneOf": [

@@ -24,7 +24,7 @@ module Security
       secret_detection: 5,
       coverage_fuzzing: 6,
       api_fuzzing: 7,
-      running_container_scanning: 8
+      cluster_image_scanning: 8
     }
 
     scope :by_scan_types, -> (scan_types) { where(scan_type: scan_types) }
