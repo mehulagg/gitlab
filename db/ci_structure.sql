@@ -115,7 +115,5 @@ CREATE UNIQUE INDEX index_ci_instance_variables_on_key ON public.ci_instance_var
 
 SET search_path TO "$user", public;
 
-INSERT INTO "schema_migrations" (version) VALUES
-('20210617101848');
 
 

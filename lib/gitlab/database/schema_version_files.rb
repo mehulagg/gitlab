@@ -3,19 +3,18 @@
 module Gitlab
   module Database
     class SchemaVersionFiles
-      SCHEMA_DIRECTORY = 'db/schema_migrations'
-      MIGRATION_DIRECTORIES = %w[db/migrate db/post_migrate db/migrate/ci].freeze
+      SCHEMA_DIRECTORY = 'schema_migrations'
       MIGRATION_VERSION_GLOB = '20[0-9][0-9]*'
 
-      def self.touch_all(versions_from_database)
-        versions_from_migration_files = find_versions_from_migration_files
+      def self.touch_all(database_name, versions_from_database, versions_from_migration_files)
+        schema_directory = schema_directory_for(database_name)
 
-        version_filepaths = find_version_filenames.map { |f| schema_directory.join(f) }
+        version_filepaths = find_version_filenames(schema_directory).map { |f| File.join(schema_directory, f) }
         FileUtils.rm(version_filepaths)
 
         versions_to_create = versions_from_database & versions_from_migration_files
         versions_to_create.each do |version|
-          version_filepath = schema_directory.join(version)
+          version_filepath = File.join(schema_directory, version)
 
           File.open(version_filepath, 'w') do |file|
             file << Digest::SHA256.hexdigest(version)
@@ -35,25 +34,20 @@ module Gitlab
         SQL
       end
 
-      def self.schema_directory
-        @schema_directory ||= Rails.root.join(SCHEMA_DIRECTORY)
+      def self.db_dir
+        @db_dir ||= Rails.application.config.paths["db"].first
       end
 
-      def self.migration_directories
-        @migration_directories ||= MIGRATION_DIRECTORIES.map { |dir| Rails.root.join(dir) }
-      end
-
-      def self.find_version_filenames
-        Dir.glob(MIGRATION_VERSION_GLOB, base: schema_directory)
-      end
-
-      def self.find_versions_from_migration_files
-        migration_directories.each_with_object([]) do |directory, migration_versions|
-          directory_migrations = Dir.glob(MIGRATION_VERSION_GLOB, base: directory)
-          directory_versions = directory_migrations.map! { |m| m.split('_').first }
-
-          migration_versions.concat(directory_versions)
+      def self.schema_directory_for(database_name)
+        if ActiveRecord::Base.configurations.primary?(database_name)
+          File.join(db_dir, SCHEMA_DIRECTORY)
+        else
+          File.join(db_dir, "#{database_name}_#{SCHEMA_DIRECTORY}")
         end
+      end
+
+      def self.find_version_filenames(schema_directory)
+        Dir.glob(MIGRATION_VERSION_GLOB, base: schema_directory)
       end
 
       def self.connection
