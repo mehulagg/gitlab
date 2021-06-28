@@ -408,8 +408,16 @@ to perform these additional steps for the zero-downtime upgrade:
    ```
 
 If you have already run the final `sudo gitlab-rake db:migrate` command on the deploy node and have
-encountered the [column rename issue](https://gitlab.com/gitlab-org/gitlab/-/issues/324160), you can still
-follow the previous steps to complete the update.
+encountered the [column rename issue](https://gitlab.com/gitlab-org/gitlab/-/issues/324160), you will
+see this error below. You can follow the steps above to workaround the issue and complete the update.
+
+```shell
+-- remove_column(:application_settings, :asset_proxy_whitelist)
+rake aborted!
+StandardError: An error has occurred, all later migrations canceled:
+PG::DependentObjectsStillExist: ERROR: cannot drop column asset_proxy_whitelist of table application_settings because other objects depend on it
+DETAIL: trigger trigger_0d588df444c8 on table application_settings depends on column asset_proxy_whitelist of table application_settings
+```
 
 More details are available [in this issue](https://gitlab.com/gitlab-org/gitlab/-/issues/324160).
 
