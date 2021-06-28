@@ -18,6 +18,14 @@ RSpec.describe Users::BlockService do
       it "change the user's state" do
         expect { operation }.to change { user.state }.to('blocked')
       end
+
+      it 'emails the user', :sidekiq_inline do
+        expect_next_instance_of(NotificationService) do |notification|
+          allow(notification).to receive(:user_blocked).with(user.name, user.notification_email)
+        end
+
+        subject
+      end
     end
 
     context 'when failed' do

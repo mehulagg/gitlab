@@ -2613,6 +2613,16 @@ RSpec.describe NotificationService, :mailer do
     end
   end
 
+  describe '#user_blocked', :deliver_mails_inline do
+    let_it_be(:user) { create(:user) }
+
+    it 'sends the user an email' do
+      notification.user_blocked(user.name, user.notification_email)
+
+      should_only_email(user)
+    end
+  end
+
   describe 'GroupMember', :deliver_mails_inline do
     let(:added_user) { create(:user) }
 
