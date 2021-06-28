@@ -72,8 +72,8 @@ The paid feature available in this offering is [Email from GitLab](../../tools/e
 Administrators can use this [Premium](https://about.gitlab.com/pricing/premium/) feature to streamline
 their workflow by emailing all or some instance users directly from the Admin Area.
 
-_Note, registration is not yet required for participation, but will be added in a future milestone._ 
-
+NOTE:
+Registration is not yet required for participation, but will be added in a future milestone.
 
 ### Limitations
 
