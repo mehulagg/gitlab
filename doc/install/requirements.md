@@ -187,9 +187,9 @@ The recommended number of workers is calculated as the highest of the following:
 
 For example 
 
-- a node with 2 cores / 8 GB memory should be configured with 2 Puma workers.
-- a node with 4 cores / 4 GB memory should be configured with 4 Puma workers
-- a node with 4 cores / 8 GB memory should be configured with 6 Puma workers
+- a node with 2 cores / 8 GB memory should be configured with 2 Puma workers (Any more than 2 workers would exceed CPU limit)
+- a node with 4 cores / 4 GB memory should be configured with 2 Puma workers (Any more than 2 workers would exceed memory limit)
+- a node with 4 cores / 8 GB memory should be configured with 3 Puma workers (Any more than 3 would exceed CPU limit)
 
 You can increase the number of Puma workers, providing enough CPU and memory capacity is available.
 A higher number of Puma workers usually helps to reduce the response time of the application
