@@ -70,6 +70,10 @@ Instructions on how to update a cloud-native deployment are in
 Use the [version mapping](https://docs.gitlab.com/charts/installation/version_mappings.html)
 from the chart version to GitLab version to determine the [upgrade path](#upgrade-paths).
 
+## Planning your upgrade
+
+Please see [our guide to planning your GitLab upgrade](planning_your_upgrade.md).
+
 ## Checking for background migrations before upgrading
 
 Certain major/minor releases may require a set of background migrations to be

@@ -6,9 +6,6 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 
 # Guide to creating a GitLab upgrade plan
 
-NOTE:
-This document is currently a work in progress. We welcome [your feedback and contributions](#help-feedback-content).
-
 This document is a customer's guide to creating a strong plan to upgrade a self-managed GitLab instance.
 
 It will leverage the [GitLab documentation](https://docs.gitlab.com/) extensively because [documentation is the single source of truth](../development/documentation/styleguide/index.md#documentation-is-the-single-source-of-truth-ssot) for all information about the upgrade process. Please read any applicable sections of the documentation in their entirety.
