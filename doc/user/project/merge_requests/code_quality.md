@@ -262,13 +262,13 @@ was chosen as an operational decision by the runner team, instead of exposing `d
 ### Disabling the code quality job
 
 The `code_quality` job doesn't run if the `$CODE_QUALITY_DISABLED` CI/CD variable
-is present. Please refer to the CI/CD variables [documentation](../../../ci/variables/README.md)
+is present. Please refer to the CI/CD variables [documentation](../../../ci/variables/index.md)
 to learn more about how to define one.
 
 To disable the `code_quality` job, add `CODE_QUALITY_DISABLED` as a custom CI/CD variable.
 This can be done:
 
-- For [the whole project](../../../ci/variables/README.md#custom-cicd-variables).
+- For [the whole project](../../../ci/variables/index.md#custom-cicd-variables).
 - For a single pipeline run:
 
   1. Go to **CI/CD > Pipelines**

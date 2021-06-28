@@ -175,7 +175,7 @@ the ones defined in the upstream project take precedence.
 
 #### Pass CI/CD variables to a downstream pipeline by using variable inheritance
 
-You can pass variables to a downstream pipeline with [`dotenv` variable inheritance](variables/README.md#pass-an-environment-variable-to-another-job) and [cross project artifact downloads](yaml/README.md#cross-project-artifact-downloads-with-needs).
+You can pass variables to a downstream pipeline with [`dotenv` variable inheritance](variables/index.md#pass-an-environment-variable-to-another-job) and [cross project artifact downloads](yaml/README.md#cross-project-artifact-downloads-with-needs).
 
 In the upstream pipeline:
 

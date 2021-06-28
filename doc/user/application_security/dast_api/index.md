@@ -435,7 +435,7 @@ To use HTTP basic authentication, two CI/CD variables are added to your `.gitlab
 - `DAST_API_HTTP_USERNAME`: The username for authentication.
 - `DAST_API_HTTP_PASSWORD`: The password for authentication.
 
-For the password, we recommended that you [create a CI/CD variable](../../../ci/variables/README.md#custom-cicd-variables)
+For the password, we recommended that you [create a CI/CD variable](../../../ci/variables/index.md#custom-cicd-variables)
 (for example, `TEST_API_PASSWORD`) set to the password. You can create CI/CD variables from the
 GitLab projects page at **Settings > CI/CD**, in the **Variables** section. Use that variable
 as the value for `DAST_API_HTTP_PASSWORD`:
@@ -473,7 +473,7 @@ outgoing HTTP requests.
 
 Follow these steps to provide the bearer token with `DAST_API_OVERRIDES_ENV`:
 
-1. [Create a CI/CD variable](../../../ci/variables/README.md#custom-cicd-variables),
+1. [Create a CI/CD variable](../../../ci/variables/index.md#custom-cicd-variables),
    for example `TEST_API_BEARERAUTH`, with the value
    `{"headers":{"Authorization":"Bearer dXNlcm5hbWU6cGFzc3dvcmQ="}}` (substitute your token). You
    can create CI/CD variables from the GitLab projects page at **Settings > CI/CD**, in the
@@ -849,7 +849,7 @@ variables:
 ```
 
 In this example `.gitlab-ci.yml`, the `SECRET_OVERRIDES` variable provides the JSON. This is a
-[group or instance level CI/CD variable defined in the UI](../../../ci/variables/README.md#add-a-cicd-variable-to-an-instance):
+[group or instance level CI/CD variable defined in the UI](../../../ci/variables/index.md#add-a-cicd-variable-to-an-instance):
 
 ```yaml
 stages:

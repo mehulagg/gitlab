@@ -89,7 +89,7 @@ POST /groups/:id/variables
 | `variable_type` | string  | no       | The type of a variable. Available types are: `env_var` (default) and `file` |
 | `protected`     | boolean | no       | Whether the variable is protected |
 | `masked`        | boolean | no       | Whether the variable is masked |
-| `environment_scope` **(PREMIUM)** | string | no | The [environment scope](../ci/variables/README.md#limit-the-environment-scope-of-a-cicd-variable) of a variable |
+| `environment_scope` **(PREMIUM)** | string | no | The [environment scope](../ci/variables/index.md#limit-the-environment-scope-of-a-cicd-variable) of a variable |
 
 ```shell
 curl --request POST --header "PRIVATE-TOKEN: <your_access_token>" \
@@ -123,7 +123,7 @@ PUT /groups/:id/variables/:key
 | `variable_type` | string  | no       | The type of a variable. Available types are: `env_var` (default) and `file` |
 | `protected`     | boolean | no       | Whether the variable is protected |
 | `masked`        | boolean | no       | Whether the variable is masked |
-| `environment_scope` **(PREMIUM)** | string | no | The [environment scope](../ci/variables/README.md#limit-the-environment-scope-of-a-cicd-variable) of a variable |
+| `environment_scope` **(PREMIUM)** | string | no | The [environment scope](../ci/variables/index.md#limit-the-environment-scope-of-a-cicd-variable) of a variable |
 
 ```shell
 curl --request PUT --header "PRIVATE-TOKEN: <your_access_token>" \
