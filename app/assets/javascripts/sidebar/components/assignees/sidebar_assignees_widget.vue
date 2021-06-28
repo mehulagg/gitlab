@@ -3,6 +3,7 @@ import { GlDropdownItem } from '@gitlab/ui';
 import { cloneDeep } from 'lodash';
 import Vue from 'vue';
 import createFlash from '~/flash';
+import { getIdFromGraphQLId } from '~/graphql_shared/utils';
 import { IssuableType } from '~/issue_show/constants';
 import { __, n__ } from '~/locale';
 import SidebarAssigneesRealtime from '~/sidebar/components/assignees/assignees_realtime.vue';
@@ -80,6 +81,7 @@ export default {
       selected: [],
       isSettingAssignees: false,
       isDirty: false,
+      oldIid: null,
     };
   },
   apollo: {
@@ -142,6 +144,13 @@ export default {
       return this.currentUser.username !== undefined;
     },
   },
+  watch: {
+    iid(_, oldIid) {
+      if (this.isDirty) {
+        this.oldIid = oldIid;
+      }
+    },
+  },
   created() {
     assigneesWidget.updateAssignees = this.updateAssignees;
   },
@@ -157,10 +166,14 @@ export default {
           variables: {
             ...this.queryVariables,
             assigneeUsernames,
+            iid: this.oldIid || this.iid,
           },
         })
         .then(({ data }) => {
-          this.$emit('assignees-updated', data.issuableSetAssignees.issuable.assignees.nodes);
+          this.$emit('assignees-updated', {
+            id: getIdFromGraphQLId(data.issuableSetAssignees.issuable.id),
+            assignees: data.issuableSetAssignees.issuable.assignees.nodes,
+          });
           return data;
         })
         .catch(() => {
@@ -177,6 +190,7 @@ export default {
       if (this.isDirty) {
         this.isDirty = false;
         this.updateAssignees(this.selected.map(({ username }) => username));
+        this.oldIid = null;
       }
       this.$el.dispatchEvent(hideDropdownEvent);
     },
