@@ -8,6 +8,8 @@ RSpec.describe Gitlab::Database::SchemaVersionFiles do
     let(:version2) { '20200410' }
     let(:version3) { '20200602' }
     let(:version4) { '20200809' }
+
+    let(:database_name) { 'primary' }
     let(:relative_schema_directory) { 'db/schema_migrations' }
     let(:relative_migrate_directory) { 'db/migrate' }
     let(:relative_post_migrate_directory) { 'db/post_migrate' }
@@ -33,10 +35,9 @@ RSpec.describe Gitlab::Database::SchemaVersionFiles do
 
         expect(File.exist?(old_version_filepath)).to be(true)
 
-        allow(described_class).to receive(:schema_directory).and_return(schema_directory)
-        allow(described_class).to receive(:migration_directories).and_return([migrate_directory, post_migrate_directory])
+        allow(described_class).to receive(:schema_directory_for).with(database_name).and_return(schema_directory)
 
-        described_class.touch_all([version1, version2, version3, version4])
+        described_class.touch_all(database_name, [version1, version2, version3, version4], [version1, version2])
 
         expect(File.exist?(old_version_filepath)).to be(false)
         [version1, version2].each do |version|
@@ -56,6 +57,7 @@ RSpec.describe Gitlab::Database::SchemaVersionFiles do
   end
 
   describe '.load_all' do
+    let(:database_name) { 'primary' }
     let(:connection) { double('connection') }
 
     before do
@@ -70,7 +72,7 @@ RSpec.describe Gitlab::Database::SchemaVersionFiles do
         expect(connection).not_to receive(:quote_string)
         expect(connection).not_to receive(:execute)
 
-        described_class.load_all
+        described_class.load_all(database_name)
       end
     end
 
@@ -88,7 +90,7 @@ RSpec.describe Gitlab::Database::SchemaVersionFiles do
           ON CONFLICT DO NOTHING
         SQL
 
-        described_class.load_all
+        described_class.load_all(database_name)
       end
     end
   end

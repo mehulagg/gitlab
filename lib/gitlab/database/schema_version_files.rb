@@ -22,8 +22,9 @@ module Gitlab
         end
       end
 
-      def self.load_all
-        version_filenames = find_version_filenames
+      def self.load_all(database_name)
+        schema_directory = schema_directory_for(database_name)
+        version_filenames = find_version_filenames(schema_directory)
         return if version_filenames.empty?
 
         values = version_filenames.map { |vf| "('#{connection.quote_string(vf)}')" }
