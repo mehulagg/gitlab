@@ -4,11 +4,15 @@ class Projects::RunnersController < Projects::ApplicationController
   before_action :authorize_admin_build!
   before_action :runner, only: [:edit, :update, :destroy, :pause, :resume, :show]
 
-  layout 'project_settings'
-
   feature_category :runner
 
   def index
+    unless Feature.enabled?(:runner_list_project_view_vue_ui, @project, default_enabled: :yaml)
+      render_404
+    end
+  end
+
+  def settings
     redirect_to project_settings_ci_cd_path(@project, anchor: 'js-runners-settings')
   end
 
@@ -28,22 +32,22 @@ class Projects::RunnersController < Projects::ApplicationController
       @runner.destroy
     end
 
-    redirect_to project_runners_path(@project), status: :found
+    redirect_to settings_project_runners_path(@project), status: :found
   end
 
   def resume
     if Ci::UpdateRunnerService.new(@runner).update(active: true)
-      redirect_to project_runners_path(@project), notice: _('Runner was successfully updated.')
+      redirect_to settings_project_runners_path(@project), notice: _('Runner was successfully updated.')
     else
-      redirect_to project_runners_path(@project), alert: _('Runner was not updated.')
+      redirect_to settings_project_runners_path(@project), alert: _('Runner was not updated.')
     end
   end
 
   def pause
     if Ci::UpdateRunnerService.new(@runner).update(active: false)
-      redirect_to project_runners_path(@project), notice: _('Runner was successfully updated.')
+      redirect_to settings_project_runners_path(@project), notice: _('Runner was successfully updated.')
     else
-      redirect_to project_runners_path(@project), alert: _('Runner was not updated.')
+      redirect_to settings_project_runners_path(@project), alert: _('Runner was not updated.')
     end
   end
 

@@ -103,7 +103,7 @@ class BuildDetailsEntity < JobEntity
     end
 
     expose :settings_path, if: -> (*) { can_admin_build? } do |build|
-      project_runners_path(project)
+      settings_project_runners_path(project)
     end
   end
 

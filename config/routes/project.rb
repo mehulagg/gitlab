@@ -107,6 +107,7 @@ constraints(::Constraints::ProjectUrlConstrainer.new) do
           end
 
           collection do
+            get :settings
             post :toggle_shared_runners
             post :toggle_group_runners
           end

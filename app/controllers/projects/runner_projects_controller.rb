@@ -12,7 +12,7 @@ class Projects::RunnerProjectsController < Projects::ApplicationController
 
     return head(403) unless can?(current_user, :assign_runner, @runner)
 
-    path = project_runners_path(project)
+    path = settings_project_runners_path(project)
 
     if @runner.assign_to(project, current_user)
       redirect_to path
@@ -28,6 +28,6 @@ class Projects::RunnerProjectsController < Projects::ApplicationController
     runner_project = project.runner_projects.find(params[:id])
     runner_project.destroy
 
-    redirect_to project_runners_path(project), status: :found
+    redirect_to settings_project_runners_path(project), status: :found
   end
 end
