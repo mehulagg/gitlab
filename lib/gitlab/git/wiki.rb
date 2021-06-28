@@ -54,7 +54,7 @@ module Gitlab
 
       attr_reader :repository
 
-      def self.default_ref
+      def self.default_ref(container = nil)
         Gitlab::DefaultBranch.value(object: container)
       end
 
