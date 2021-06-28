@@ -2,50 +2,64 @@
 
 module ProductIntelligence
   class CollectServicePingService
-    def execute
-      return {} unless ::License.current&.usage_ping? || ::Gitlab::CurrentSettings.usage_ping_enabled?
+    STANDARD_CATEGORY = 'Standard'
+    SUBSCRIPTION_CATEGORY = 'Subscription'
+    OPTIONAL_CATEGORY = 'Optional'
+    OPERATIONAL_CATEGORY = 'Operational'
+    EMPTY_PAYLOAD = {}.freeze
 
-      filtered_usage_data(required_categories)
+    def initialize
+      @permitted_categories = filter_permitted_categories
+    end
+
+    def execute
+      return EMPTY_PAYLOAD if User.single_user&.requires_usage_stats_consent?
+      return EMPTY_PAYLOAD unless product_intelligence_enabled?
+
+      filtered_usage_data
     end
 
     private
 
-    def filtered_usage_data(allowed_categories, payload = raw_payload, parent_keys = [])
-      payload.keep_if do |key, value|
-        if value.kind_of?(Hash)
-          filtered_usage_data(allowed_categories, value, parent_keys.dup << key)
-          true
+    attr_reader :permitted_categories
+
+    def product_intelligence_enabled?
+      ::Gitlab::CurrentSettings.usage_ping_enabled?
+    end
+
+    def filtered_usage_data(payload = raw_payload, parents = [])
+      payload.keep_if do |label, node|
+        if leaf?(node)
+          permitted_categories.include?(metric_category(label, parents))
         else
-          key_path = parent_keys.dup.append(key).join('.')
-          metric_data_category = metric_definitions[key_path]&.attributes&.fetch('data_category', nil)
-          allowed_categories.include?(metric_data_category)
+          filtered_usage_data(node, parents.dup << label)
         end
       end
     end
 
-    def required_categories
-      optional_enabled = ::Gitlab::CurrentSettings.usage_ping_enabled?
-      license_present = ::License.current.present?
-      operational_enabled = ::License.current&.usage_ping?
-      all_categories = %w[Standard Subscription Optional Operational]
+    def metric_category(key, parent_keys)
+      key_path = parent_keys.dup.append(key).join('.')
+      metric_definitions[key_path]&.attributes&.fetch('data_category', nil)
+    end
 
-      return all_categories if !license_present && optional_enabled
+    def filter_permitted_categories
+      return [] unless ::Gitlab::CurrentSettings.usage_ping_enabled?
 
-      return all_categories if optional_enabled && operational_enabled
-
-      return %w[Standard Subscription Optional] if optional_enabled && !operational_enabled
-
-      return %w[Standard Subscription Operational] if !optional_enabled && operational_enabled
-
-      []
+      [STANDARD_CATEGORY, SUBSCRIPTION_CATEGORY, OPTIONAL_CATEGORY, OPERATIONAL_CATEGORY]
     end
 
     def raw_payload
-      @raw_payload ||= ::Gitlab::UsageData.data
+      @raw_payload ||= ::Gitlab::UsageData.data(force_refresh: true)
     end
 
     def metric_definitions
       @metric_definitions ||= Gitlab::Usage::MetricDefinition.definitions
     end
+
+    def leaf?(node)
+      !node.is_a?(Hash)
+    end
   end
 end
+
+ProductIntelligence::CollectServicePingService.prepend_mod_with('ProductIntelligence::CollectServicePingService')
