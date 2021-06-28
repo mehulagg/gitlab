@@ -167,7 +167,7 @@ export default {
       <gl-button
         v-if="!hasValidationPassed(profile.validationStatus)"
         :disabled="!canValidateProfile(profile.validationStatus)"
-        variant="info"
+        variant="confirm"
         category="tertiary"
         size="small"
         @click="setValidatingProfile(profile)"
@@ -175,7 +175,7 @@ export default {
       >
       <gl-button
         v-else
-        variant="info"
+        variant="confirm"
         category="tertiary"
         size="small"
         @click="setRevokeValidationProfile(profile)"
