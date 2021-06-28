@@ -189,7 +189,7 @@ POST request with data to the webhook URL.
 
 ## API
 
-Automate GitLab via [API](../api/README.md).
+Automate GitLab via [API](../api/index.md).
 
 ## Git and GitLab
 

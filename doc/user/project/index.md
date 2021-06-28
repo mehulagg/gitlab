@@ -134,7 +134,7 @@ To review or contribute to the extension's code, visit [its codebase in GitLab](
 
 ## Project APIs
 
-There are numerous [APIs](../../api/README.md) to use with your projects:
+There are numerous [APIs](../../api/index.md) to use with your projects:
 
 - [Badges](../../api/project_badges.md)
 - [Clusters](../../api/project_clusters.md)
