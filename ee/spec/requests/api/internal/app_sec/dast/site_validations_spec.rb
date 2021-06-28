@@ -68,6 +68,10 @@ RSpec.describe API::Internal::AppSec::Dast::SiteValidations do
       context 'when site validation and job are associated with different projects' do
         let_it_be(:job) { create(:ci_build, :running, user: developer) }
 
+        before do
+          job.project.update!(ci_job_token_scope_enabled: true)
+        end
+
         it 'returns 403', :aggregate_failures do
           subject
 
