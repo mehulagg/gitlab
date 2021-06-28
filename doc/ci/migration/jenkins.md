@@ -77,8 +77,8 @@ There are some high level differences between the products worth mentioning:
   - on push
   - on [schedule](../pipelines/schedules.md)
   - from the [GitLab UI](../pipelines/index.md#run-a-pipeline-manually)
-  - by [API call](../triggers/README.md)
-  - by [webhook](../triggers/README.md#triggering-a-pipeline-from-a-webhook)
+  - by [API call](../triggers/index.md)
+  - by [webhook](../triggers/index.md#triggering-a-pipeline-from-a-webhook)
   - by [ChatOps](../chatops/index.md)
 
 - You can control which jobs run in which cases, depending on how they are triggered,

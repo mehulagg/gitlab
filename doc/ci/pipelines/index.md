@@ -441,5 +441,5 @@ GitLab provides API endpoints to:
 - Perform basic functions. For more information, see [Pipelines API](../../api/pipelines.md).
 - Maintain pipeline schedules. For more information, see [Pipeline schedules API](../../api/pipeline_schedules.md).
 - Trigger pipeline runs. For more information, see:
-  - [Triggering pipelines through the API](../triggers/README.md).
+  - [Triggering pipelines through the API](../triggers/index.md).
   - [Pipeline triggers API](../../api/pipeline_triggers.md).
