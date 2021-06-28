@@ -2115,3 +2115,4 @@ class User < ApplicationRecord
 end
 
 User.prepend_mod_with('User')
+# test comment
