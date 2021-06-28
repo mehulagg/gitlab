@@ -1028,10 +1028,13 @@ This is a destructive process and may lead the cluster into a bad state. Make su
 
 The procedure for resetting the Patroni state in Consul is:
 
+1. Take note of the Patroni node that was the leader, or that the application thinks is the current leader, if the current state shows more than one, or none. One way to do this is to look on the PgBouncer nodes at `/var/opt/gitlab/consul/databases.ini` - this will contain the hostname of the current leader.
 1. Stop Patroni on all nodes using `gitlab-ctl stop patroni`.
 1. Reset the state in Consul using `/opt/gitlab/embedded/bin/consul kv delete -recurse /service/postgresql-ha/`.
-1. Start the first Patroni node, which will initialize the Patroni cluster and be elected as a leader, using `gitlab-ctl start patroni`.
+1. Start one Patroni node, which will initialize the Patroni cluster and be elected as a leader, using `gitlab-ctl start patroni`. It's highly recommended to start the previous leader (noted in point 1), to not lose existing writes that may have not been replicated because of the broken cluster state.
 1. Start all other Patroni nodes that will join the Patroni cluster as replicas, using `gitlab-ctl start patroni`.
+
+If you are still seeing issues after this point, the next step is restoring the last healthy backup.
 
 ### Issues with other components
 
