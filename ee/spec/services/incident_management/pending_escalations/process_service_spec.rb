@@ -48,6 +48,14 @@ RSpec.describe IncidentManagement::PendingEscalations::ProcessService do
       it_behaves_like 'sends on-call notification'
       it_behaves_like 'deletes the escalation'
 
+      it 'creates a system note' do
+        expect(SystemNoteService)
+          .to receive(:alert_via_escalation).with(alert, project, [a_kind_of(User)], escalation_policy)
+          .and_call_original
+
+        expect { execute }.to change(Note, :count).by(1)
+      end
+
       context 'feature flag is off' do
         before do
           stub_feature_flags(escalation_policies_mvc: false)
