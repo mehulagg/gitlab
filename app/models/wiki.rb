@@ -323,9 +323,9 @@ class Wiki
   end
 
   def change_head_to_default_branch
-    # repository.before_change_head
+    repository.before_change_head
     repository.raw_repository.write_ref('HEAD', "refs/heads/#{default_branch}")
-    # repository.after_change_head
+    repository.after_change_head
   end
 end
 
