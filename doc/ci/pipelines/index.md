@@ -20,7 +20,7 @@ Pipelines comprise:
 - Jobs, which define *what* to do. For example, jobs that compile or test code.
 - Stages, which define *when* to run the jobs. For example, stages that run tests after stages that compile the code.
 
-Jobs are executed by [runners](../runners/README.md). Multiple jobs in the same stage are executed in parallel,
+Jobs are executed by [runners](../runners/index.md). Multiple jobs in the same stage are executed in parallel,
 if there are enough concurrent runners.
 
 If *all* jobs in a stage succeed, the pipeline moves on to the next stage.

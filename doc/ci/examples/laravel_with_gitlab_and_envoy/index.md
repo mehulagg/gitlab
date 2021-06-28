@@ -530,7 +530,7 @@ That's a lot to take in, isn't it? Let's run through it step by step.
 
 #### Image and Services
 
-[Runners](../../runners/README.md) run the script defined by `.gitlab-ci.yml`.
+[Runners](../../runners/index.md) run the script defined by `.gitlab-ci.yml`.
 The `image` keyword tells the runners which image to use.
 The `services` keyword defines additional images [that are linked to the main image](../../services/index.md).
 Here we use the container image we created before as our main image and also use MySQL 5.7 as a service.
