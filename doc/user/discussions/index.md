@@ -42,7 +42,7 @@ When you reply to a standard comment, you create a thread.
 
 Prerequisites:
 
-- You must have permissions to reply to an existing thread, or to start a thread from a standard comment.
+- You must have at least the [Guest role](../permissions.md#project-members-permissions).
 - You must be in an issue, merge request, or epic. Commits, snippets, and merge request diff threads
   are not supported.
 
@@ -57,8 +57,7 @@ To create a thread by replying to a comment:
 1. Type your reply.
 1. Select **Comment** or **Add comment now** (depending on where in the UI you are replying).
 
-The comment is converted to a thread. This conversion is considered an edit
-to the original comment, so a note about when it was last edited appears underneath it.
+The top comment is converted to a thread.
 
 ## Create a thread without replying to a comment
 
@@ -66,6 +65,7 @@ You can create a thread without replying to a standard comment.
 
 Prerequisites:
 
+- You must have at least the [Guest role](../permissions.md#project-members-permissions).
 - You must be in an issue, commit, snippet, or merge request.
 
 To create a thread:
@@ -239,6 +239,8 @@ You can add comments and threads to a particular commit.
 
 1. On the top bar, select **Menu > Projects** and find your project.
 1. On the left sidebar, select **Repository > Commits**.
+1. Below the commits, in the **Comment** field, enter a comment.
+1. Select **Comment**.
 
 WARNING:
 Threads created this way are lost if the commit ID changes after a
