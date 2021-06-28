@@ -22,6 +22,9 @@ const runnerToModel = (runner) => {
     locked,
     runUntagged,
     tagList = [],
+
+    privateProjectsMinutesCostFactor,
+    publicProjectsMinutesCostFactor,
   } = runner || {};
 
   return {
@@ -33,6 +36,9 @@ const runnerToModel = (runner) => {
     locked,
     runUntagged,
     tagList: tagList.join(', '),
+
+    privateProjectsMinutesCostFactor,
+    publicProjectsMinutesCostFactor,
   };
 };
 
@@ -43,6 +49,8 @@ export default {
     GlFormCheckbox,
     GlFormGroup,
     GlFormInputGroup,
+    RunnerUpdateCostFactorFields: () =>
+      import('ee_component/runner/components/runner_update_cost_factor_fields.vue'),
   },
   directives: {
     GlTooltip: GlTooltipDirective,
@@ -130,6 +138,8 @@ export default {
 </script>
 <template>
   <gl-form @submit.prevent="onSubmit">
+    <pre>{{ model }}</pre>
+
     <gl-form-checkbox
       v-model="model.active"
       data-testid="runner-field-paused"
@@ -212,6 +222,8 @@ export default {
     >
       <gl-form-input-group v-model="model.tagList" />
     </gl-form-group>
+
+    <runner-update-cost-factor-fields v-model="model" />
 
     <div class="form-actions">
       <gl-button
