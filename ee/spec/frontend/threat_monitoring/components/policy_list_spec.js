@@ -77,6 +77,7 @@ describe('PolicyList component', () => {
 
   const findEnvironmentsPicker = () => wrapper.find({ ref: 'environmentsPicker' });
   const findPoliciesTable = () => wrapper.findComponent(GlTable);
+  const findPolicyStatusCells = () => wrapper.findAllByTestId('policy-status-cell');
   const findPolicyDrawer = () => wrapper.findByTestId('policyDrawer');
   const findAutodevopsAlert = () => wrapper.findByTestId('autodevopsAlert');
 
@@ -167,14 +168,36 @@ describe('PolicyList component', () => {
     });
   });
 
+  describe('status column', () => {
+    beforeEach(() => {
+      mountWrapper();
+    });
+
+    it('renders a checkmark icon for enabled policies', () => {
+      const icon = findPolicyStatusCells().at(0).find('svg');
+
+      expect(icon.exists()).toBe(true);
+      expect(icon.props('name')).toBe('check-circle-filled');
+      expect(icon.props('ariaLabel')).toBe('Enabled');
+    });
+
+    it('renders a "Disabled" label for screen readers for disabled policies', () => {
+      const span = findPolicyStatusCells().at(1).find('span');
+
+      expect(span.exists()).toBe(true);
+      expect(span.attributes('class')).toBe('gl-sr-only');
+      expect(span.text()).toBe('Disabled');
+    });
+  });
+
   describe('with allEnvironments enabled', () => {
     beforeEach(() => {
       mountWrapper();
       wrapper.vm.$store.state.threatMonitoring.allEnvironments = true;
     });
 
-    it('renders policies table', () => {
-      const namespaceHeader = findPoliciesTable().findAll('[role="columnheader"]').at(1);
+    it('renders namespace column', () => {
+      const namespaceHeader = findPoliciesTable().findAll('[role="columnheader"]').at(2);
       expect(namespaceHeader.text()).toBe('Namespace');
     });
   });
