@@ -48,6 +48,10 @@ module Gitlab
           @merge_request_diff.real_size
         end
 
+        def cache_key
+          @merge_request_diff.cache_key
+        end
+
         private
 
         def highlight_cache
@@ -58,7 +62,7 @@ module Gitlab
 
         def diff_stats_cache
           strong_memoize(:diff_stats_cache) do
-            Gitlab::Diff::StatsCache.new(cachable_key: @merge_request_diff.cache_key)
+            Gitlab::Diff::StatsCache.new(cachable_key: cache_key)
           end
         end
 
