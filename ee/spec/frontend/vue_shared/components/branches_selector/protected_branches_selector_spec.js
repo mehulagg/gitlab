@@ -82,7 +82,7 @@ describe('Protected Branches Selector', () => {
       expect(findDropdown().props('loading')).toBe(true);
       await waitForPromises();
 
-      expect(wrapper.emitted('apiError')).toStrictEqual([[false]]);
+      expect(wrapper.emitted('apiError')).toStrictEqual([[{ hasErrored: false }]]);
       expect(findDropdownItems()).toHaveLength(branchNames().length);
       expect(findDropdown().props('loading')).toBe(false);
     });
@@ -94,7 +94,7 @@ describe('Protected Branches Selector', () => {
       });
 
       it('emits the `apiError` event', () => {
-        expect(wrapper.emitted('apiError')).toStrictEqual([[true, error]]);
+        expect(wrapper.emitted('apiError')).toStrictEqual([[{ hasErrored: true, error }]]);
       });
 
       it('returns just the any branch dropdown items', () => {
@@ -119,7 +119,10 @@ describe('Protected Branches Selector', () => {
       await waitForPromises();
 
       expect(Api.projectProtectedBranches).toHaveBeenCalledWith(TEST_PROJECT_ID, term);
-      expect(wrapper.emitted('apiError')).toStrictEqual([[false], [false]]);
+      expect(wrapper.emitted('apiError')).toStrictEqual([
+        [{ hasErrored: false }],
+        [{ hasErrored: false }],
+      ]);
       expect(findSearch().props('isLoading')).toBe(false);
     });
 
@@ -146,7 +149,10 @@ describe('Protected Branches Selector', () => {
       });
 
       it('emits the `apiError` event', () => {
-        expect(wrapper.emitted('apiError')).toStrictEqual([[false], [true, error]]);
+        expect(wrapper.emitted('apiError')).toStrictEqual([
+          [{ hasErrored: false }],
+          [{ hasErrored: true, error }],
+        ]);
       });
 
       it('returns no dropdown items', () => {
@@ -163,7 +169,10 @@ describe('Protected Branches Selector', () => {
       });
 
       it('emits the `apiError` event', () => {
-        expect(wrapper.emitted('apiError')).toStrictEqual([[false], [true, error]]);
+        expect(wrapper.emitted('apiError')).toStrictEqual([
+          [{ hasErrored: false }],
+          [{ hasErrored: true, error }],
+        ]);
       });
 
       it('returns just the any branch dropdown item', () => {

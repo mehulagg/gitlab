@@ -5579,6 +5579,9 @@ msgstr ""
 msgid "Browse files"
 msgstr ""
 
+msgid "Browse templates"
+msgstr ""
+
 msgid "BuildArtifacts|An error occurred while fetching the artifacts"
 msgstr ""
 
@@ -8052,9 +8055,6 @@ msgstr ""
 msgid "ComplianceFrameworks|Add framework"
 msgstr ""
 
-msgid "ComplianceFrameworks|All"
-msgstr ""
-
 msgid "ComplianceFrameworks|Combines with the CI configuration at runtime."
 msgstr ""
 
@@ -8089,9 +8089,6 @@ msgid "ComplianceFrameworks|Invalid format: it should follow the format [PATH].y
 msgstr ""
 
 msgid "ComplianceFrameworks|Once a compliance framework is added it will appear here."
-msgstr ""
-
-msgid "ComplianceFrameworks|Regulated"
 msgstr ""
 
 msgid "ComplianceFrameworks|There are no compliance frameworks set up yet"
@@ -8131,6 +8128,9 @@ msgid "Configuration"
 msgstr ""
 
 msgid "Configuration help"
+msgstr ""
+
+msgid "Configure %{link} to track events. %{link_start}Learn more.%{link_end}"
 msgstr ""
 
 msgid "Configure GitLab runners to start using the Web Terminal. %{helpStart}Learn more.%{helpEnd}"
@@ -8203,9 +8203,6 @@ msgid "Configure specific limits for Packages API requests that supersede the ge
 msgstr ""
 
 msgid "Configure storage path settings."
-msgstr ""
-
-msgid "Configure the %{link} integration."
 msgstr ""
 
 msgid "Configure the way a user creates a new account."
@@ -11953,7 +11950,7 @@ msgstr ""
 msgid "Enable SSL verification"
 msgstr ""
 
-msgid "Enable Seat Link"
+msgid "Enable Snowplow tracking"
 msgstr ""
 
 msgid "Enable Spam Check via external API endpoint"
@@ -12034,9 +12031,6 @@ msgstr ""
 msgid "Enable mirror configuration"
 msgstr ""
 
-msgid "Enable or disable Seat Link."
-msgstr ""
-
 msgid "Enable or disable the Pseudonymizer data collection."
 msgstr ""
 
@@ -12071,9 +12065,6 @@ msgid "Enable smartcn custom analyzer: Indexing"
 msgstr ""
 
 msgid "Enable smartcn custom analyzer: Search"
-msgstr ""
-
-msgid "Enable snowplow tracking"
 msgstr ""
 
 msgid "Enable two-factor authentication"
@@ -13619,9 +13610,6 @@ msgstr ""
 msgid "FeatureFlags|Enable features for specific users and environments by configuring feature flag strategies."
 msgstr ""
 
-msgid "FeatureFlags|Environment Spec"
-msgstr ""
-
 msgid "FeatureFlags|Environment Specs"
 msgstr ""
 
@@ -13667,9 +13655,6 @@ msgstr ""
 msgid "FeatureFlags|Inactive flag for %{scope}"
 msgstr ""
 
-msgid "FeatureFlags|Include additional user IDs"
-msgstr ""
-
 msgid "FeatureFlags|Install a %{docsLinkAnchoredStart}compatible client library%{docsLinkAnchoredEnd} and specify the API URL, application name, and instance ID during the configuration setup. %{docsLinkStart}More Information%{docsLinkEnd}"
 msgstr ""
 
@@ -13709,22 +13694,10 @@ msgstr ""
 msgid "FeatureFlags|Percent rollout"
 msgstr ""
 
-msgid "FeatureFlags|Percent rollout (logged in users)"
-msgstr ""
-
 msgid "FeatureFlags|Percent rollout must be an integer number between 0 and 100"
 msgstr ""
 
-msgid "FeatureFlags|Protected"
-msgstr ""
-
 msgid "FeatureFlags|Remove"
-msgstr ""
-
-msgid "FeatureFlags|Rollout Percentage"
-msgstr ""
-
-msgid "FeatureFlags|Rollout Strategy"
 msgstr ""
 
 msgid "FeatureFlags|Set the Unleash client application name to the name of the environment your application runs in. This value is used to match environment scopes. See the %{linkStart}example client configuration%{linkEnd}."
@@ -13734,9 +13707,6 @@ msgid "FeatureFlags|Status"
 msgstr ""
 
 msgid "FeatureFlags|Strategies"
-msgstr ""
-
-msgid "FeatureFlags|Target environments"
 msgstr ""
 
 msgid "FeatureFlags|There was an error fetching the feature flags."
@@ -14096,9 +14066,6 @@ msgid "For more information, see the File Hooks documentation."
 msgstr ""
 
 msgid "For more information, see the documentation on %{deactivating_usage_ping_link_start}deactivating the usage ping%{deactivating_usage_ping_link_end}."
-msgstr ""
-
-msgid "For more information, see the documentation on %{link_start}disabling Seat Link%{link_end}."
 msgstr ""
 
 msgid "Forgot your password?"
@@ -15379,7 +15346,7 @@ msgstr ""
 msgid "Group overview content"
 msgstr ""
 
-msgid "Group path is already taken. Suggestions: "
+msgid "Group path is already taken. We've suggested one that is available."
 msgstr ""
 
 msgid "Group path is available."
@@ -15736,13 +15703,7 @@ msgstr ""
 msgid "GroupSettings|Prevent sharing a project within %{group} with other groups"
 msgstr ""
 
-msgid "GroupSettings|Projects will be permanently deleted after a %{waiting_period}-day delay."
-msgstr ""
-
 msgid "GroupSettings|Projects will be permanently deleted after a %{waiting_period}-day delay. Inherited by subgroups."
-msgstr ""
-
-msgid "GroupSettings|Projects will be permanently deleted after a %{waiting_period}-day delay. This delay can be %{link_start}customized by an admin%{link_end} in instance settings."
 msgstr ""
 
 msgid "GroupSettings|Projects will be permanently deleted after a %{waiting_period}-day delay. This delay can be %{link_start}customized by an admin%{link_end} in instance settings. Inherited by subgroups."
@@ -17039,6 +17000,9 @@ msgstr ""
 msgid "InProductMarketing|you may %{unsubscribe_link} at any time."
 msgstr ""
 
+msgid "Inactive"
+msgstr ""
+
 msgid "Incident"
 msgstr ""
 
@@ -18247,6 +18211,12 @@ msgstr ""
 msgid "Iterations|Create cadence"
 msgstr ""
 
+msgid "Iterations|Delete cadence"
+msgstr ""
+
+msgid "Iterations|Delete iteration cadence?"
+msgstr ""
+
 msgid "Iterations|Duration"
 msgstr ""
 
@@ -18302,6 +18272,9 @@ msgid "Iterations|The duration for each iteration (in weeks)"
 msgstr ""
 
 msgid "Iterations|The start date of your first iteration"
+msgstr ""
+
+msgid "Iterations|This will delete the cadence as well as all of the iterations within it."
 msgstr ""
 
 msgid "Iterations|Title"
@@ -22138,9 +22111,6 @@ msgstr ""
 msgid "No repository"
 msgstr ""
 
-msgid "No required pipeline"
-msgstr ""
-
 msgid "No runner executable"
 msgstr ""
 
@@ -23096,10 +23066,10 @@ msgstr ""
 msgid "Package type must be RubyGems"
 msgstr ""
 
-msgid "PackageRegistry|%{boldStart}Allow duplicates%{boldEnd} - Packages with the same name and version are accepted."
+msgid "PackageRegistry|%{boldStart}Allow duplicates%{boldEnd} - Accept packages with the same name and version."
 msgstr ""
 
-msgid "PackageRegistry|%{boldStart}Do not allow duplicates%{boldEnd} - Packages with the same name and version are rejected."
+msgid "PackageRegistry|%{boldStart}Do not allow duplicates%{boldEnd} - Reject packages with the same name and version."
 msgstr ""
 
 msgid "PackageRegistry|%{name} version %{version} was first created %{datetime}"
@@ -23210,6 +23180,9 @@ msgstr ""
 msgid "PackageRegistry|Created by commit %{link} on branch %{branch}"
 msgstr ""
 
+msgid "PackageRegistry|Debian"
+msgstr ""
+
 msgid "PackageRegistry|Delete Package File"
 msgstr ""
 
@@ -23235,9 +23208,6 @@ msgid "PackageRegistry|For more information on the PyPi registry, %{linkStart}se
 msgstr ""
 
 msgid "PackageRegistry|Generic"
-msgstr ""
-
-msgid "PackageRegistry|GitLab Packages allows organizations to utilize GitLab as a private repository for a variety of common package formats. %{linkStart}More Information%{linkEnd}"
 msgstr ""
 
 msgid "PackageRegistry|Gradle Groovy DSL"
@@ -23303,13 +23273,13 @@ msgstr ""
 msgid "PackageRegistry|Package updated by commit %{link} on branch %{branch}, built by pipeline %{pipeline}, and published to the registry %{datetime}"
 msgstr ""
 
-msgid "PackageRegistry|Packages can be published if their name or version matches this regex"
-msgstr ""
-
 msgid "PackageRegistry|Pip Command"
 msgstr ""
 
 msgid "PackageRegistry|Publish and share packages for a variety of common package managers. %{docLinkStart}More information%{docLinkEnd}"
+msgstr ""
+
+msgid "PackageRegistry|Publish packages if their name or version matches this regex."
 msgstr ""
 
 msgid "PackageRegistry|Published to the %{project} Package Registry %{datetime}"
@@ -23391,6 +23361,9 @@ msgid "PackageRegistry|Unable to fetch package version information."
 msgstr ""
 
 msgid "PackageRegistry|Unable to load package"
+msgstr ""
+
+msgid "PackageRegistry|Use GitLab as a private registry for common package formats. %{linkStart}Learn more.%{linkEnd}"
 msgstr ""
 
 msgid "PackageRegistry|You are about to delete %{filename}. This is a destructive action that may render your package unusable. Are you sure?"
@@ -24312,6 +24285,9 @@ msgid "Please choose a group URL with no special characters."
 msgstr ""
 
 msgid "Please complete your profile with email address"
+msgstr ""
+
+msgid "Please confirm your email address"
 msgstr ""
 
 msgid "Please contact an admin to register runners."
@@ -26890,6 +26866,9 @@ msgstr ""
 msgid "Related Issues"
 msgstr ""
 
+msgid "Related feature flags"
+msgstr ""
+
 msgid "Related issues"
 msgstr ""
 
@@ -28132,6 +28111,9 @@ msgstr ""
 msgid "Runners|Show Runner installation instructions"
 msgstr ""
 
+msgid "Runners|Something went wrong while fetching the tags suggestions"
+msgstr ""
+
 msgid "Runners|Tags"
 msgstr ""
 
@@ -28306,9 +28288,6 @@ msgstr ""
 msgid "Save space and find images in the container Registry. remove unneeded tags and keep only the ones you want. %{linkStart}How does cleanup work?%{linkEnd}"
 msgstr ""
 
-msgid "Saved scan settings and target site settings which are reusable."
-msgstr ""
-
 msgid "Saving"
 msgstr ""
 
@@ -28393,6 +28372,9 @@ msgstr ""
 msgid "Search"
 msgstr ""
 
+msgid "Search GitLab"
+msgstr ""
+
 msgid "Search Jira issues"
 msgstr ""
 
@@ -28475,9 +28457,6 @@ msgid "Search or filter results..."
 msgstr ""
 
 msgid "Search or filter results…"
-msgstr ""
-
-msgid "Search or jump to…"
 msgstr ""
 
 msgid "Search project"
@@ -28610,12 +28589,6 @@ msgstr[1] ""
 msgid "Searching by both author and message is currently not supported."
 msgstr ""
 
-msgid "Seat Link"
-msgstr ""
-
-msgid "Seat Link is disabled, and cannot be configured through this form."
-msgstr ""
-
 msgid "SeatUsage|Seat usage"
 msgstr ""
 
@@ -28682,6 +28655,9 @@ msgstr ""
 msgid "SecurityConfiguration|%{featureName} merge request creation mutation failed"
 msgstr ""
 
+msgid "SecurityConfiguration|%{scanType} configuration code snippet"
+msgstr ""
+
 msgid "SecurityConfiguration|An error occurred while creating the merge request."
 msgstr ""
 
@@ -28697,13 +28673,13 @@ msgstr ""
 msgid "SecurityConfiguration|By default, all analyzers are applied in order to cover all languages across your project, and only run if the language is detected in the Merge Request."
 msgstr ""
 
-msgid "SecurityConfiguration|Code snippet for the %{scanType} configuration"
-msgstr ""
-
 msgid "SecurityConfiguration|Compliance"
 msgstr ""
 
 msgid "SecurityConfiguration|Configuration guide"
+msgstr ""
+
+msgid "SecurityConfiguration|Configuration history"
 msgstr ""
 
 msgid "SecurityConfiguration|Configure"
@@ -28754,6 +28730,9 @@ msgstr ""
 msgid "SecurityConfiguration|Manage"
 msgstr ""
 
+msgid "SecurityConfiguration|Manage profiles for use by DAST scans."
+msgstr ""
+
 msgid "SecurityConfiguration|Manage scans"
 msgstr ""
 
@@ -28761,6 +28740,9 @@ msgid "SecurityConfiguration|More information"
 msgstr ""
 
 msgid "SecurityConfiguration|Not enabled"
+msgstr ""
+
+msgid "SecurityConfiguration|Once you've enabled a scan for the default branch, any subsequent feature branch you create will include the scan."
 msgstr ""
 
 msgid "SecurityConfiguration|Runtime security metrics for application environments."
@@ -28787,7 +28769,7 @@ msgstr ""
 msgid "SecurityConfiguration|Testing & Compliance"
 msgstr ""
 
-msgid "SecurityConfiguration|The status of the tools only applies to the default branch and is based on the %{linkStart}latest pipeline%{linkEnd}. Once you've enabled a scan for the default branch, any subsequent feature branch you create will include the scan."
+msgid "SecurityConfiguration|The status of the tools only applies to the default branch and is based on the %{linkStart}latest pipeline%{linkEnd}."
 msgstr ""
 
 msgid "SecurityConfiguration|Upgrade or start a free trial"
@@ -29804,9 +29786,6 @@ msgstr ""
 msgid "Show all issues."
 msgstr ""
 
-msgid "Show all members"
-msgstr ""
-
 msgid "Show all test cases."
 msgstr ""
 
@@ -29865,12 +29844,6 @@ msgid "Show me the basics"
 msgstr ""
 
 msgid "Show one file at a time"
-msgstr ""
-
-msgid "Show only direct members"
-msgstr ""
-
-msgid "Show only inherited members"
 msgstr ""
 
 msgid "Show parent pages"
@@ -30423,12 +30396,6 @@ msgstr ""
 msgid "Sort direction: Descending"
 msgstr ""
 
-msgid "SortOptions|Access level, ascending"
-msgstr ""
-
-msgid "SortOptions|Access level, descending"
-msgstr ""
-
 msgid "SortOptions|Blocking"
 msgstr ""
 
@@ -30460,9 +30427,6 @@ msgid "SortOptions|Last Contact"
 msgstr ""
 
 msgid "SortOptions|Last created"
-msgstr ""
-
-msgid "SortOptions|Last joined"
 msgstr ""
 
 msgid "SortOptions|Last updated"
@@ -30505,9 +30469,6 @@ msgid "SortOptions|Name, descending"
 msgstr ""
 
 msgid "SortOptions|Oldest created"
-msgstr ""
-
-msgid "SortOptions|Oldest joined"
 msgstr ""
 
 msgid "SortOptions|Oldest last activity"
@@ -30559,6 +30520,9 @@ msgid "SortOptions|Start later"
 msgstr ""
 
 msgid "SortOptions|Start soon"
+msgstr ""
+
+msgid "SortOptions|Title"
 msgstr ""
 
 msgid "SortOptions|Type"
@@ -31587,6 +31551,9 @@ msgstr ""
 msgid "Symbolic link"
 msgstr ""
 
+msgid "Sync LDAP"
+msgstr ""
+
 msgid "Sync now"
 msgstr ""
 
@@ -31594,6 +31561,9 @@ msgid "Synced"
 msgstr ""
 
 msgid "Synchronization settings"
+msgstr ""
+
+msgid "Synchronize LDAP"
 msgstr ""
 
 msgid "Syncing…"
@@ -32152,6 +32122,9 @@ msgstr ""
 msgid "The GitLab user to which the Jira user %{jiraDisplayName} will be mapped"
 msgstr ""
 
+msgid "The ID of the application."
+msgstr ""
+
 msgid "The Issue Tracker is the place to add things that need to be improved or solved in a project"
 msgstr ""
 
@@ -32159,6 +32132,9 @@ msgid "The Issue Tracker is the place to add things that need to be improved or 
 msgstr ""
 
 msgid "The Prometheus server responded with \"bad request\". Please check your queries are correct and are supported in your Prometheus version. %{documentationLink}"
+msgstr ""
+
+msgid "The Snowplow cookie domain."
 msgstr ""
 
 msgid "The URL defined on the primary node that secondary nodes should use to contact it."
@@ -32332,6 +32308,9 @@ msgid "The group will be placed in 'pending removal' state"
 msgstr ""
 
 msgid "The group_project_ids parameter is only allowed for a group"
+msgstr ""
+
+msgid "The hostname of your Snowplow collector."
 msgstr ""
 
 msgid "The import will time out after %{timeout}. For repositories that take longer, use a clone/push combination."
@@ -32842,6 +32821,9 @@ msgid "There was an error importing the Jira project."
 msgstr ""
 
 msgid "There was an error loading merge request approval settings."
+msgstr ""
+
+msgid "There was an error loading related feature flags"
 msgstr ""
 
 msgid "There was an error loading users activity calendar."
@@ -33919,6 +33901,9 @@ msgstr ""
 msgid "To connect an SVN repository, check out %{svn_link}."
 msgstr ""
 
+msgid "To continue, you need to select the link in the confirmation email we sent to verify your email address. If you didn't get our email, select %{strongStart}Resend confirmation email.%{strongEnd}"
+msgstr ""
+
 msgid "To define internal users, first enable new users set to external"
 msgstr ""
 
@@ -34004,9 +33989,6 @@ msgid "To set up SAML authentication for your group through an identity provider
 msgstr ""
 
 msgid "To set up this service:"
-msgstr ""
-
-msgid "To simplify the billing process, GitLab will collect user counts in order to prorate charges for user growth throughout the year using a quarterly reconciliation process."
 msgstr ""
 
 msgid "To specify the notification level per project of a group you belong to, you need to visit project page and change notification level there."
@@ -35676,6 +35658,9 @@ msgstr ""
 msgid "ValueStreamAnalyticsStage|We don't have enough data to show this stage."
 msgstr ""
 
+msgid "ValueStreamAnalytics|%{stageCount} items"
+msgstr ""
+
 msgid "ValueStreamAnalytics|%{value}M"
 msgstr ""
 
@@ -36236,6 +36221,9 @@ msgid "Warning:"
 msgstr ""
 
 msgid "Warning: Displaying this diagram might cause performance issues on this page."
+msgstr ""
+
+msgid "Warning: Synchronizing LDAP removes direct members' access."
 msgstr ""
 
 msgid "We are currently unable to fetch data for the pipeline header."
@@ -37919,6 +37907,9 @@ msgstr ""
 msgid "can contain only letters of the Base64 alphabet (RFC4648) with the addition of '@', ':' and '.'"
 msgstr ""
 
+msgid "can contain only lowercase letters, digits, and '_'."
+msgstr ""
+
 msgid "can only be changed by a group admin."
 msgstr ""
 
@@ -37955,7 +37946,7 @@ msgstr ""
 msgid "cannot be enabled unless all domains have TLS certificates"
 msgstr ""
 
-msgid "cannot be enabled until a valid credit credit is on file"
+msgid "cannot be enabled until a valid credit card is on file"
 msgstr ""
 
 msgid "cannot be modified"
@@ -39073,6 +39064,9 @@ msgid "nounSeries|%{item}, and %{lastItem}"
 msgstr ""
 
 msgid "on track"
+msgstr ""
+
+msgid "only available on top-level groups."
 msgstr ""
 
 msgid "open issue"

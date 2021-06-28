@@ -1,6 +1,8 @@
 <script>
 import { GlAlert, GlButton, GlLoadingIcon, GlKeysetPagination, GlTab, GlTabs } from '@gitlab/ui';
+import produce from 'immer';
 import { __, s__ } from '~/locale';
+import destroyIterationCadence from '../queries/destroy_cadence.mutation.graphql';
 import query from '../queries/iteration_cadences_list.query.graphql';
 import IterationCadenceListItem from './iteration_cadence_list_item.vue';
 
@@ -96,6 +98,40 @@ export default {
     handleTabChange() {
       this.pagination = {};
     },
+    deleteCadence(cadenceId) {
+      this.$apollo
+        .mutate({
+          mutation: destroyIterationCadence,
+          variables: {
+            id: cadenceId,
+          },
+          update: (store, { data: { iterationCadenceDestroy } }) => {
+            if (iterationCadenceDestroy.errors?.length) {
+              throw iterationCadenceDestroy.errors[0];
+            }
+
+            const sourceData = store.readQuery({
+              query,
+              variables: this.queryVariables,
+            });
+
+            const data = produce(sourceData, (draftData) => {
+              draftData.group.iterationCadences.nodes = draftData.group.iterationCadences.nodes.filter(
+                ({ id }) => id !== cadenceId,
+              );
+            });
+
+            store.writeQuery({
+              query,
+              variables: this.queryVariables,
+              data,
+            });
+          },
+        })
+        .catch((err) => {
+          this.error = err;
+        });
+    },
   },
 };
 </script>
@@ -122,6 +158,7 @@ export default {
             :duration-in-weeks="cadence.durationInWeeks"
             :title="cadence.title"
             :iteration-state="state"
+            @delete-cadence="deleteCadence"
           />
         </ul>
         <p v-else class="nothing-here-block">

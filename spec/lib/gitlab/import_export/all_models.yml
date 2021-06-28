@@ -54,6 +54,8 @@ issues:
 - namespace
 - note_authors
 - issue_email_participants
+- test_reports
+- requirement
 events:
 - author
 - project
@@ -480,8 +482,8 @@ project:
 - kubernetes_namespaces
 - error_tracking_setting
 - metrics_setting
-- gitlab_slack_application_service
-- github_service
+- gitlab_slack_application_integration
+- github_integration
 - protected_environments
 - mirror_user
 - push_rule

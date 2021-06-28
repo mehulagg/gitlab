@@ -90,7 +90,7 @@ RSpec.describe Issues::CreateService do
               expect(epic.due_date).to eq(milestone.due_date)
             end
 
-            it 'generates system notes for adding an epic and milestone' do
+            it 'generates system notes for adding an epic and milestone', :sidekiq_inline do
               expect { service.execute }.to change(Note, :count).by(3).and(change(ResourceMilestoneEvent, :count).by(1))
             end
 

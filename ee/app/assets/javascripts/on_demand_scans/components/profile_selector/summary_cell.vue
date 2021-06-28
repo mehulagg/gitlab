@@ -1,4 +1,6 @@
 <script>
+import { __ } from '~/locale';
+
 export default {
   name: 'OnDemandScansProfileSummaryCell',
   props: {
@@ -8,7 +10,8 @@ export default {
     },
     value: {
       type: String,
-      required: true,
+      required: false,
+      default: __('None'),
     },
   },
 };
@@ -19,7 +22,7 @@ export default {
     <div class="row gl-my-2">
       <div class="col-md-4">{{ label }}:</div>
       <div class="col-md-8">
-        <strong>{{ value }}</strong>
+        <strong data-testid="summary-value">{{ value }}</strong>
       </div>
     </div>
   </div>

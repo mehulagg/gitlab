@@ -2,6 +2,7 @@ import AvailableDropdownMappingsCE from '~/filtered_search/available_dropdown_ma
 import DropdownAjaxFilter from '~/filtered_search/dropdown_ajax_filter';
 import DropdownNonUser from '~/filtered_search/dropdown_non_user';
 import DropdownUser from '~/filtered_search/dropdown_user';
+import { sortMilestonesByDueDate } from '~/milestones/milestone_utils';
 import DropdownWeight from './dropdown_weight';
 
 export default class AvailableDropdownMappings {
@@ -42,6 +43,7 @@ export default class AvailableDropdownMappings {
       extraArguments: {
         endpoint: this.getMilestoneEndpoint(),
         symbol: '%',
+        preprocessing: (milestones) => milestones.sort(sortMilestonesByDueDate),
       },
       element: this.container.querySelector('#js-dropdown-milestone'),
     };

@@ -11633,30 +11633,6 @@ CREATE SEQUENCE clusters_applications_elastic_stacks_id_seq
 
 ALTER SEQUENCE clusters_applications_elastic_stacks_id_seq OWNED BY clusters_applications_elastic_stacks.id;
 
-CREATE TABLE clusters_applications_fluentd (
-    id bigint NOT NULL,
-    protocol smallint NOT NULL,
-    status integer NOT NULL,
-    port integer NOT NULL,
-    cluster_id bigint NOT NULL,
-    created_at timestamp with time zone NOT NULL,
-    updated_at timestamp with time zone NOT NULL,
-    version character varying(255) NOT NULL,
-    host character varying(255) NOT NULL,
-    status_reason text,
-    waf_log_enabled boolean DEFAULT true NOT NULL,
-    cilium_log_enabled boolean DEFAULT true NOT NULL
-);
-
-CREATE SEQUENCE clusters_applications_fluentd_id_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-ALTER SEQUENCE clusters_applications_fluentd_id_seq OWNED BY clusters_applications_fluentd.id;
-
 CREATE TABLE clusters_applications_helm (
     id integer NOT NULL,
     cluster_id integer NOT NULL,
@@ -16299,7 +16275,8 @@ CREATE TABLE plan_limits (
     ci_registered_group_runners integer DEFAULT 1000 NOT NULL,
     ci_registered_project_runners integer DEFAULT 1000 NOT NULL,
     web_hook_calls integer DEFAULT 0 NOT NULL,
-    ci_daily_pipeline_schedule_triggers integer DEFAULT 0 NOT NULL
+    ci_daily_pipeline_schedule_triggers integer DEFAULT 0 NOT NULL,
+    ci_max_artifact_size_running_container_scanning integer DEFAULT 0 NOT NULL
 );
 
 CREATE SEQUENCE plan_limits_id_seq
@@ -17312,7 +17289,7 @@ ALTER SEQUENCE protected_tags_id_seq OWNED BY protected_tags.id;
 
 CREATE TABLE push_event_payloads (
     commit_count bigint NOT NULL,
-    event_id integer NOT NULL,
+    event_id_convert_to_bigint integer DEFAULT 0 NOT NULL,
     action smallint NOT NULL,
     ref_type smallint NOT NULL,
     commit_from bytea,
@@ -17320,7 +17297,7 @@ CREATE TABLE push_event_payloads (
     ref text,
     commit_title character varying(70),
     ref_count integer,
-    event_id_convert_to_bigint bigint DEFAULT 0 NOT NULL
+    event_id bigint NOT NULL
 );
 
 CREATE TABLE push_rules (
@@ -17500,6 +17477,7 @@ CREATE TABLE requirements (
     title_html text,
     description text,
     description_html text,
+    issue_id bigint,
     CONSTRAINT check_785ae25b9d CHECK ((char_length(description) <= 10000))
 );
 
@@ -17714,7 +17692,8 @@ CREATE SEQUENCE saml_providers_id_seq
 ALTER SEQUENCE saml_providers_id_seq OWNED BY saml_providers.id;
 
 CREATE TABLE schema_migrations (
-    version character varying NOT NULL
+    version character varying NOT NULL,
+    finished_at timestamp with time zone DEFAULT now()
 );
 
 CREATE TABLE scim_identities (
@@ -18946,7 +18925,8 @@ CREATE TABLE vulnerabilities (
     confirmed_at timestamp with time zone,
     dismissed_at timestamp with time zone,
     dismissed_by_id bigint,
-    resolved_on_default_branch boolean DEFAULT false NOT NULL
+    resolved_on_default_branch boolean DEFAULT false NOT NULL,
+    present_on_default_branch boolean DEFAULT true NOT NULL
 );
 
 CREATE SEQUENCE vulnerabilities_id_seq
@@ -19814,8 +19794,6 @@ ALTER TABLE ONLY clusters_applications_cilium ALTER COLUMN id SET DEFAULT nextva
 ALTER TABLE ONLY clusters_applications_crossplane ALTER COLUMN id SET DEFAULT nextval('clusters_applications_crossplane_id_seq'::regclass);
 
 ALTER TABLE ONLY clusters_applications_elastic_stacks ALTER COLUMN id SET DEFAULT nextval('clusters_applications_elastic_stacks_id_seq'::regclass);
-
-ALTER TABLE ONLY clusters_applications_fluentd ALTER COLUMN id SET DEFAULT nextval('clusters_applications_fluentd_id_seq'::regclass);
 
 ALTER TABLE ONLY clusters_applications_helm ALTER COLUMN id SET DEFAULT nextval('clusters_applications_helm_id_seq'::regclass);
 
@@ -21046,9 +21024,6 @@ ALTER TABLE ONLY clusters_applications_crossplane
 
 ALTER TABLE ONLY clusters_applications_elastic_stacks
     ADD CONSTRAINT clusters_applications_elastic_stacks_pkey PRIMARY KEY (id);
-
-ALTER TABLE ONLY clusters_applications_fluentd
-    ADD CONSTRAINT clusters_applications_fluentd_pkey PRIMARY KEY (id);
 
 ALTER TABLE ONLY clusters_applications_helm
     ADD CONSTRAINT clusters_applications_helm_pkey PRIMARY KEY (id);
@@ -22816,8 +22791,6 @@ CREATE INDEX index_ci_builds_on_project_id_and_name_and_ref ON ci_builds USING b
 
 CREATE INDEX index_ci_builds_on_project_id_for_successfull_pages_deploy ON ci_builds USING btree (project_id) WHERE (((type)::text = 'GenericCommitStatus'::text) AND ((stage)::text = 'deploy'::text) AND ((name)::text = 'pages:deploy'::text) AND ((status)::text = 'success'::text));
 
-CREATE INDEX index_ci_builds_on_protected ON ci_builds USING btree (protected);
-
 CREATE INDEX index_ci_builds_on_queued_at ON ci_builds USING btree (queued_at);
 
 CREATE INDEX index_ci_builds_on_runner_id_and_id_desc ON ci_builds USING btree (runner_id, id DESC);
@@ -22829,6 +22802,8 @@ CREATE INDEX index_ci_builds_on_status_and_type_and_runner_id ON ci_builds USING
 CREATE UNIQUE INDEX index_ci_builds_on_token ON ci_builds USING btree (token);
 
 CREATE UNIQUE INDEX index_ci_builds_on_token_encrypted ON ci_builds USING btree (token_encrypted) WHERE (token_encrypted IS NOT NULL);
+
+CREATE UNIQUE INDEX index_ci_builds_on_token_partial ON ci_builds USING btree (token) WHERE (token IS NOT NULL);
 
 CREATE INDEX index_ci_builds_on_updated_at ON ci_builds USING btree (updated_at);
 
@@ -23097,8 +23072,6 @@ CREATE UNIQUE INDEX index_clusters_applications_cilium_on_cluster_id ON clusters
 CREATE UNIQUE INDEX index_clusters_applications_crossplane_on_cluster_id ON clusters_applications_crossplane USING btree (cluster_id);
 
 CREATE UNIQUE INDEX index_clusters_applications_elastic_stacks_on_cluster_id ON clusters_applications_elastic_stacks USING btree (cluster_id);
-
-CREATE UNIQUE INDEX index_clusters_applications_fluentd_on_cluster_id ON clusters_applications_fluentd USING btree (cluster_id);
 
 CREATE UNIQUE INDEX index_clusters_applications_helm_on_cluster_id ON clusters_applications_helm USING btree (cluster_id);
 
@@ -24252,7 +24225,7 @@ CREATE UNIQUE INDEX index_project_aliases_on_name ON project_aliases USING btree
 
 CREATE INDEX index_project_aliases_on_project_id ON project_aliases USING btree (project_id);
 
-CREATE INDEX index_project_authorizations_on_project_id ON project_authorizations USING btree (project_id);
+CREATE INDEX index_project_authorizations_on_project_id_user_id ON project_authorizations USING btree (project_id, user_id);
 
 CREATE UNIQUE INDEX index_project_auto_devops_on_project_id ON project_auto_devops USING btree (project_id);
 
@@ -24531,6 +24504,8 @@ CREATE INDEX index_requirements_management_test_reports_on_requirement_id ON req
 CREATE INDEX index_requirements_on_author_id ON requirements USING btree (author_id);
 
 CREATE INDEX index_requirements_on_created_at ON requirements USING btree (created_at);
+
+CREATE UNIQUE INDEX index_requirements_on_issue_id ON requirements USING btree (issue_id);
 
 CREATE INDEX index_requirements_on_project_id ON requirements USING btree (project_id);
 
@@ -25505,6 +25480,9 @@ CREATE TRIGGER trigger_has_external_wiki_on_update AFTER UPDATE ON services FOR 
 ALTER TABLE ONLY chat_names
     ADD CONSTRAINT fk_00797a2bf9 FOREIGN KEY (service_id) REFERENCES services(id) ON DELETE CASCADE;
 
+ALTER TABLE ONLY deployments
+    ADD CONSTRAINT fk_009fd21147 FOREIGN KEY (environment_id) REFERENCES environments(id) ON DELETE CASCADE NOT VALID;
+
 ALTER TABLE ONLY epics
     ADD CONSTRAINT fk_013c9f36ca FOREIGN KEY (due_date_sourcing_epic_id) REFERENCES epics(id) ON DELETE SET NULL;
 
@@ -25852,6 +25830,9 @@ ALTER TABLE ONLY experiment_subjects
 
 ALTER TABLE ONLY merge_request_diffs
     ADD CONSTRAINT fk_8483f3258f FOREIGN KEY (merge_request_id) REFERENCES merge_requests(id) ON DELETE CASCADE;
+
+ALTER TABLE ONLY requirements
+    ADD CONSTRAINT fk_85044baef0 FOREIGN KEY (issue_id) REFERENCES issues(id) ON DELETE CASCADE;
 
 ALTER TABLE ONLY ci_pipelines
     ADD CONSTRAINT fk_86635dbd80 FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE;
@@ -26704,9 +26685,6 @@ ALTER TABLE ONLY security_orchestration_policy_configurations
 
 ALTER TABLE ONLY ci_resources
     ADD CONSTRAINT fk_rails_430336af2d FOREIGN KEY (resource_group_id) REFERENCES ci_resource_groups(id) ON DELETE CASCADE;
-
-ALTER TABLE ONLY clusters_applications_fluentd
-    ADD CONSTRAINT fk_rails_4319b1dcd2 FOREIGN KEY (cluster_id) REFERENCES clusters(id) ON DELETE CASCADE;
 
 ALTER TABLE ONLY batched_background_migration_jobs
     ADD CONSTRAINT fk_rails_432153b86d FOREIGN KEY (batched_background_migration_id) REFERENCES batched_background_migrations(id) ON DELETE CASCADE;

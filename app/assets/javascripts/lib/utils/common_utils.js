@@ -720,7 +720,18 @@ export const searchBy = (query = '', searchSpace = {}) => {
  * @param {Object} label
  * @returns Boolean
  */
-export const isScopedLabel = ({ title = '' }) => title.indexOf('::') !== -1;
+export const isScopedLabel = ({ title = '' } = {}) => title.indexOf('::') !== -1;
+
+/**
+ * Returns the base value of the scoped label
+ *
+ * Expected Label to be an Object with `title` as a key:
+ *   { title: 'LabelTitle', ...otherProperties };
+ *
+ * @param {Object} label
+ * @returns String
+ */
+export const scopedLabelKey = ({ title = '' }) => isScopedLabel({ title }) && title.split('::')[0];
 
 // Methods to set and get Cookie
 export const setCookie = (name, value) => Cookies.set(name, value, { expires: 365 });
@@ -752,3 +763,5 @@ export const isFeatureFlagEnabled = (flag) => window.gon.features?.[flag];
  * @returns {Array[String]} Converted array
  */
 export const convertArrayToCamelCase = (array) => array.map((i) => convertToCamelCase(i));
+
+export const isLoggedIn = () => Boolean(window.gon?.current_user_id);

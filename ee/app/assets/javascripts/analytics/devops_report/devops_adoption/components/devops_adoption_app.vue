@@ -178,6 +178,7 @@ export default {
           mutation: bulkEnableDevopsAdoptionNamespacesMutation,
           variables: {
             namespaceIds: [this.groupGid],
+            displayNamespaceId: this.groupGid,
           },
           update: (store, { data }) => {
             const {

@@ -138,8 +138,8 @@ export default {
       :include-legend-avg-max="false"
       @created="setChart"
     >
-      <template slot="tooltip-title">{{ tooltip.title }}</template>
-      <template slot="tooltip-content">
+      <template #tooltip-title>{{ tooltip.title }}</template>
+      <template #tooltip-content>
         <div>{{ tooltip.total }}</div>
         <div>{{ tooltip.completed }}</div>
       </template>

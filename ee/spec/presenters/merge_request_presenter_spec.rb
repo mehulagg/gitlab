@@ -184,6 +184,8 @@ RSpec.describe MergeRequestPresenter do
   describe '#api_status_checks_path' do
     subject { presenter.api_status_checks_path }
 
+    let(:exposed_path) { expose_path("/api/v4/projects/#{merge_request.project.id}/merge_requests/#{merge_request.iid}/status_checks") }
+
     where(:feature_flag_enabled?, :authenticated?, :has_status_checks?, :exposes_path?) do
       false | false | false | false
       false | false | true  | false
@@ -197,14 +199,47 @@ RSpec.describe MergeRequestPresenter do
 
     with_them do
       let(:presenter) { described_class.new(merge_request, current_user: authenticated? ? user : nil) }
-      let(:path) { exposes_path? ? expose_path("/api/v4/projects/#{merge_request.project.id}/merge_requests/#{merge_request.iid}/status_checks") : nil }
+      let(:path) { exposes_path? ? exposed_path : nil }
 
       before do
         stub_feature_flags(ff_external_status_checks: feature_flag_enabled?)
-        allow(project.external_status_checks).to receive(:any?).and_return(has_status_checks?)
+        allow(project.external_status_checks).to receive(:applicable_to_branch).and_return([{ branch: 'foo' }])
+        allow(project.external_status_checks.applicable_to_branch).to receive(:any?).and_return(has_status_checks?)
       end
 
       it { is_expected.to eq(path) }
+    end
+
+    context 'with the feature flag enabled and user authenticated' do
+      let(:presenter) { described_class.new(merge_request, current_user: user) }
+
+      before do
+        stub_feature_flags(ff_external_status_checks: true)
+      end
+
+      context 'without applicable branches' do
+        before do
+          create(:external_status_check, project: project, protected_branches: [create(:protected_branch, name: 'testbranch')])
+        end
+
+        it { is_expected.to eq(nil) }
+      end
+
+      context 'with no branches at all (any branch selected)' do
+        before do
+          create(:external_status_check, project: project, protected_branches: [])
+        end
+
+        it { is_expected.to eq(exposed_path) }
+      end
+
+      context 'with applicable branches' do
+        before do
+          create(:external_status_check, project: project, protected_branches: [create(:protected_branch, name: merge_request.target_branch)])
+        end
+
+        it { is_expected.to eq(exposed_path) }
+      end
     end
   end
 end

@@ -777,7 +777,7 @@ RSpec.describe Gitlab::UsageData do
   describe 'usage_activity_by_stage_verify' do
     it 'includes accurate usage_activity_by_stage data' do
       for_defined_days_back do
-        create(:github_service)
+        create(:github_integration)
       end
 
       expect(described_class.usage_activity_by_stage_verify({})).to include(

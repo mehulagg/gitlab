@@ -1,5 +1,5 @@
 <script>
-import { GlAlert, GlButton, GlLoadingIcon, GlTab, GlTabs } from '@gitlab/ui';
+import { GlAlert, GlButton, GlLoadingIcon } from '@gitlab/ui';
 import * as Sentry from '@sentry/browser';
 
 import { getIdFromGraphQLId } from '~/graphql_shared/utils';
@@ -20,8 +20,6 @@ export default {
     GlButton,
     GlLoadingIcon,
     ListItem,
-    GlTab,
-    GlTabs,
   },
   props: {
     addFrameworkPath: {
@@ -96,9 +94,6 @@ export default {
     hasFrameworks() {
       return this.hasLoaded && this.frameworksCount > 0;
     },
-    regulatedCount() {
-      return 0;
-    },
     alertDismissible() {
       return !this.error;
     },
@@ -107,6 +102,9 @@ export default {
     },
     alertMessage() {
       return this.error || this.message;
+    },
+    showAddButton() {
+      return this.hasLoaded && this.addFrameworkPath && !this.isEmpty;
     },
   },
   methods: {
@@ -142,14 +140,12 @@ export default {
     fetchError: s__(
       'ComplianceFrameworks|Error fetching compliance frameworks data. Please refresh the page',
     ),
-    allTab: s__('ComplianceFrameworks|All'),
-    regulatedTab: s__('ComplianceFrameworks|Regulated'),
     addBtn: s__('ComplianceFrameworks|Add framework'),
   },
 };
 </script>
 <template>
-  <div class="gl-border-t-1 gl-border-t-solid gl-border-t-gray-100">
+  <div :class="{ 'gl-border-t-1 gl-border-t-solid gl-border-t-gray-100': isEmpty }">
     <gl-alert
       v-if="alertMessage"
       class="gl-mt-5"
@@ -166,29 +162,23 @@ export default {
       :add-framework-path="addFrameworkPath"
     />
 
-    <gl-tabs v-if="hasFrameworks">
-      <gl-tab class="gl-mt-6" :title="$options.i18n.allTab">
-        <list-item
-          v-for="framework in complianceFrameworks"
-          :key="framework.parsedId"
-          :framework="framework"
-          :loading="isDeleting(framework.id)"
-          @delete="markForDeletion"
-        />
-      </gl-tab>
-      <gl-tab disabled :title="$options.i18n.regulatedTab" />
-      <template #tabs-end>
-        <gl-button
-          v-if="addFrameworkPath"
-          class="gl-align-self-center gl-ml-auto"
-          category="primary"
-          variant="confirm"
-          :href="addFrameworkPath"
-        >
-          {{ $options.i18n.addBtn }}
-        </gl-button>
-      </template>
-    </gl-tabs>
+    <list-item
+      v-for="framework in complianceFrameworks"
+      :key="framework.parsedId"
+      :framework="framework"
+      :loading="isDeleting(framework.id)"
+      @delete="markForDeletion"
+    />
+
+    <gl-button
+      v-if="showAddButton"
+      class="gl-mt-3"
+      category="primary"
+      variant="confirm"
+      :href="addFrameworkPath"
+    >
+      {{ $options.i18n.addBtn }}
+    </gl-button>
     <delete-modal
       v-if="hasFrameworks"
       :id="markedForDeletion.id"

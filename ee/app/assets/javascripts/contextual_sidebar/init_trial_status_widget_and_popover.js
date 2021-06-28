@@ -18,17 +18,15 @@ export const initTrialStatusWidget = () => {
 
   return new Vue({
     el,
-    render: (createElement) =>
-      createElement(TrialStatusWidget, {
-        props: {
-          containerId,
-          daysRemaining: Number(daysRemaining),
-          navIconImagePath,
-          percentageComplete: Number(percentageComplete),
-          planName,
-          plansHref,
-        },
-      }),
+    provide: {
+      containerId,
+      daysRemaining: Number(daysRemaining),
+      navIconImagePath,
+      percentageComplete: Number(percentageComplete),
+      planName,
+      plansHref,
+    },
+    render: (createElement) => createElement(TrialStatusWidget),
   });
 };
 
@@ -49,18 +47,16 @@ export const initTrialStatusPopover = () => {
 
   return new Vue({
     el,
-    render: (createElement) =>
-      createElement(TrialStatusPopover, {
-        props: {
-          containerId,
-          groupName,
-          planName,
-          plansHref,
-          purchaseHref,
-          targetId,
-          trialEndDate: new Date(trialEndDate),
-        },
-      }),
+    provide: {
+      containerId,
+      groupName,
+      planName,
+      plansHref,
+      purchaseHref,
+      targetId,
+      trialEndDate: new Date(trialEndDate),
+    },
+    render: (createElement) => createElement(TrialStatusPopover),
   });
 };
 

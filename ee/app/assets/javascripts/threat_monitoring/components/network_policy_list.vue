@@ -1,9 +1,12 @@
 <script>
 import { GlTable, GlEmptyState, GlButton, GlAlert, GlSprintf, GlLink } from '@gitlab/ui';
-import { mapState, mapActions, mapGetters } from 'vuex';
+import { mapState, mapGetters } from 'vuex';
+import { PREDEFINED_NETWORK_POLICIES } from 'ee/threat_monitoring/constants';
+import createFlash from '~/flash';
 import { getTimeago } from '~/lib/utils/datetime_utility';
 import { setUrlFragment, mergeUrlParams } from '~/lib/utils/url_utility';
 import { s__ } from '~/locale';
+import networkPoliciesQuery from '../graphql/queries/network_policies.query.graphql';
 import EnvironmentPicker from './environment_picker.vue';
 import PolicyDrawer from './policy_drawer/policy_drawer.vue';
 
@@ -18,6 +21,7 @@ export default {
     EnvironmentPicker,
     PolicyDrawer,
   },
+  inject: ['projectPath'],
   props: {
     documentationPath: {
       type: String,
@@ -28,26 +32,61 @@ export default {
       required: true,
     },
   },
+  apollo: {
+    networkPolicies: {
+      query: networkPoliciesQuery,
+      variables() {
+        return {
+          fullPath: this.projectPath,
+          environmentId: this.allEnvironments ? null : this.currentEnvironmentGid,
+        };
+      },
+      update(data) {
+        const policies = data?.project?.networkPolicies?.nodes ?? [];
+        const predefined = PREDEFINED_NETWORK_POLICIES.filter(
+          ({ name }) => !policies.some((policy) => name === policy.name),
+        );
+        return [...policies, ...predefined];
+      },
+      error({ gqlError, networkError }) {
+        const error =
+          gqlError?.message ||
+          networkError?.message ||
+          s__('NetworkPolicies|Something went wrong, unable to fetch policies');
+        createFlash({
+          message: error,
+        });
+      },
+      skip() {
+        return this.isLoadingEnvironments;
+      },
+    },
+  },
   data() {
     return { selectedPolicyName: null, initialManifest: null, initialEnforcementStatus: null };
   },
   computed: {
-    ...mapState('networkPolicies', ['policies', 'isLoadingPolicies']),
-    ...mapState('threatMonitoring', ['currentEnvironmentId', 'allEnvironments']),
-    ...mapGetters('networkPolicies', ['policiesWithDefaults']),
+    ...mapState('threatMonitoring', [
+      'currentEnvironmentId',
+      'allEnvironments',
+      'isLoadingEnvironments',
+    ]),
+    ...mapGetters('threatMonitoring', ['currentEnvironmentGid']),
     documentationFullPath() {
       return setUrlFragment(this.documentationPath, 'container-network-policy');
+    },
+    isLoadingPolicies() {
+      return this.isLoadingEnvironments || this.$apollo.queries.networkPolicies.loading;
     },
     hasSelectedPolicy() {
       return Boolean(this.selectedPolicyName);
     },
     selectedPolicy() {
       if (!this.hasSelectedPolicy) return null;
-
-      return this.policiesWithDefaults.find((policy) => policy.name === this.selectedPolicyName);
+      return this.networkPolicies.find((policy) => policy.name === this.selectedPolicyName);
     },
     hasAutoDevopsPolicy() {
-      return this.policiesWithDefaults.some((policy) => policy.isAutodevops);
+      return Boolean(this.networkPolicies?.some((policy) => policy.fromAutoDevops));
     },
     editPolicyPath() {
       return this.hasSelectedPolicy
@@ -75,7 +114,7 @@ export default {
           thClass: 'font-weight-bold',
         },
         {
-          key: 'creationTimestamp',
+          key: 'updatedAt',
           label: s__('NetworkPolicies|Last modified'),
           thClass: 'font-weight-bold',
         },
@@ -86,27 +125,18 @@ export default {
       return fields;
     },
   },
-  watch: {
-    currentEnvironmentId(envId) {
-      this.fetchPolicies(envId);
-    },
-  },
-  created() {
-    this.fetchPolicies(this.currentEnvironmentId);
-  },
   methods: {
-    ...mapActions('networkPolicies', ['fetchPolicies', 'createPolicy', 'updatePolicy']),
-    getTimeAgoString(creationTimestamp) {
-      if (!creationTimestamp) return '';
-      return getTimeago().format(creationTimestamp);
+    getTimeAgoString(updatedAt) {
+      if (!updatedAt) return '';
+      return getTimeago().format(updatedAt);
     },
     presentPolicyDrawer(rows) {
       if (rows.length === 0) return;
 
       const [selectedPolicy] = rows;
       this.selectedPolicyName = selectedPolicy?.name;
-      this.initialManifest = selectedPolicy?.manifest;
-      this.initialEnforcementStatus = selectedPolicy?.isEnabled;
+      this.initialManifest = selectedPolicy?.yaml;
+      this.initialEnforcementStatus = selectedPolicy?.enabled;
     },
     deselectPolicy() {
       this.selectedPolicyName = null;
@@ -161,7 +191,7 @@ export default {
     <gl-table
       ref="policiesTable"
       :busy="isLoadingPolicies"
-      :items="policiesWithDefaults"
+      :items="networkPolicies"
       :fields="fields"
       head-variant="white"
       stacked="md"
@@ -175,11 +205,11 @@ export default {
       @row-selected="presentPolicyDrawer"
     >
       <template #cell(status)="value">
-        {{ value.item.isEnabled ? __('Enabled') : __('Disabled') }}
+        {{ value.item.enabled ? __('Enabled') : __('Disabled') }}
       </template>
 
-      <template #cell(creationTimestamp)="value">
-        {{ getTimeAgoString(value.item.creationTimestamp) }}
+      <template #cell(updatedAt)="value">
+        {{ getTimeAgoString(value.item.updatedAt) }}
       </template>
 
       <template #empty>

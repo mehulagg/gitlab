@@ -23,6 +23,7 @@ export default () => {
     vulnerabilitiesEndpoint,
     emptyStateUnauthorizedSvgPath,
     emptyStateForbiddenSvgPath,
+    commitPathTemplate,
     projectFullPath,
     pipelineJobsPath,
     canAdminVulnerability,
@@ -43,6 +44,7 @@ export default () => {
     provide: {
       dashboardType: DASHBOARD_TYPES.PIPELINE,
       projectId: parseInt(projectId, 10),
+      commitPathTemplate,
       projectFullPath,
       dashboardDocumentation,
       emptyStateSvgPath,

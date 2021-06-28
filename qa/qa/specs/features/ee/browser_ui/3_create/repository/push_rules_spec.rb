@@ -114,7 +114,7 @@ module QA
         end
 
         it 'rejects non-member users', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/1778', quarantine: { issue: 'https://gitlab.com/gitlab-org/gitlab/-/issues/224465', type: :investigating } do
-          non_member_user = Resource::User.new.tap do |user|
+          non_member_user = Resource::User.init do |user|
             user.username = ''
             user.password = ''
             user.name = 'non_member_user'
@@ -205,7 +205,7 @@ module QA
           user.password = Runtime::User.password
         end
 
-        @root = Resource::User.new.tap do |user|
+        @root = Resource::User.init do |user|
           user.username = 'root'
           user.name = 'GitLab QA'
           user.email = 'root@gitlab.com'

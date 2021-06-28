@@ -68,7 +68,7 @@ describe('EpicSidebarComponent', () => {
       it('calls `toggleStartDateType` on component with `dateTypeIsFixed` param', () => {
         jest.spyOn(wrapper.vm, 'toggleStartDateType');
 
-        wrapper.vm.changeStartDateType(true, true);
+        wrapper.vm.changeStartDateType({ dateTypeIsFixed: true, typeChangeOnEdit: true });
 
         expect(wrapper.vm.toggleStartDateType).toHaveBeenCalledWith(
           expect.objectContaining({
@@ -80,7 +80,7 @@ describe('EpicSidebarComponent', () => {
       it('calls `saveDate` on component when `typeChangeOnEdit` param false', () => {
         jest.spyOn(wrapper.vm, 'saveDate');
 
-        wrapper.vm.changeStartDateType(true, false);
+        wrapper.vm.changeStartDateType({ dateTypeIsFixed: true, typeChangeOnEdit: false });
 
         expect(wrapper.vm.saveDate).toHaveBeenCalledWith(
           expect.objectContaining({
@@ -112,7 +112,7 @@ describe('EpicSidebarComponent', () => {
       it('calls `toggleDueDateType` on component with `dateTypeIsFixed` param', () => {
         jest.spyOn(wrapper.vm, 'toggleDueDateType');
 
-        wrapper.vm.changeDueDateType(true, true);
+        wrapper.vm.changeDueDateType({ dateTypeIsFixed: true, typeChangeOnEdit: true });
 
         expect(wrapper.vm.toggleDueDateType).toHaveBeenCalledWith(
           expect.objectContaining({
@@ -124,7 +124,7 @@ describe('EpicSidebarComponent', () => {
       it('calls `saveDate` on component when `typeChangeOnEdit` param false', () => {
         jest.spyOn(wrapper.vm, 'saveDate');
 
-        wrapper.vm.changeDueDateType(true, false);
+        wrapper.vm.changeDueDateType({ dateTypeIsFixed: true, typeChangeOnEdit: false });
 
         expect(wrapper.vm.saveDate).toHaveBeenCalledWith(
           expect.objectContaining({

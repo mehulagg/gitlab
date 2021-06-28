@@ -86,7 +86,7 @@ RSpec.describe Projects::UpdateMirrorService do
       end
     end
 
-    context "when given URLs containing escaped elements" do
+    context "when given URLs contain escaped elements" do
       it_behaves_like "URLs containing escaped elements return expected status" do
         let(:result) { service.execute }
 

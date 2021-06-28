@@ -1,4 +1,4 @@
-import { GlAlert, GlButton, GlLoadingIcon, GlTab, GlTabs } from '@gitlab/ui';
+import { GlAlert, GlButton, GlLoadingIcon } from '@gitlab/ui';
 import * as Sentry from '@sentry/browser';
 import { createLocalVue, shallowMount } from '@vue/test-utils';
 import { nextTick } from 'vue';
@@ -30,9 +30,7 @@ describe('List', () => {
   const findDeleteModal = () => wrapper.findComponent(DeleteModal);
   const findLoadingIcon = () => wrapper.findComponent(GlLoadingIcon);
   const findEmptyState = () => wrapper.findComponent(EmptyState);
-  const findTabs = () => wrapper.findAllComponents(GlTab);
   const findAddBtn = () => wrapper.findComponent(GlButton);
-  const findTabsContainer = () => wrapper.findComponent(GlTabs);
   const findListItems = () => wrapper.findAllComponents(ListItem);
 
   function createMockApolloProvider(resolverMock) {
@@ -56,8 +54,6 @@ describe('List', () => {
       },
       stubs: {
         GlLoadingIcon,
-        GlTab,
-        GlTabs,
       },
     });
   }
@@ -77,7 +73,8 @@ describe('List', () => {
 
     it('does not show the other parts of the app', () => {
       expect(findAlert().exists()).toBe(false);
-      expect(findTabsContainer().exists()).toBe(false);
+      expect(findListItems().exists()).toBe(false);
+      expect(findAddBtn().exists()).toBe(false);
       expect(findEmptyState().exists()).toBe(false);
     });
   });
@@ -97,7 +94,8 @@ describe('List', () => {
 
     it('does not show the other parts of the app', () => {
       expect(findLoadingIcon().exists()).toBe(false);
-      expect(findTabsContainer().exists()).toBe(false);
+      expect(findListItems().exists()).toBe(false);
+      expect(findAddBtn().exists()).toBe(false);
       expect(findEmptyState().exists()).toBe(false);
     });
 
@@ -128,7 +126,8 @@ describe('List', () => {
     it('does not show the other parts of the app', () => {
       expect(findAlert().exists()).toBe(false);
       expect(findLoadingIcon().exists()).toBe(false);
-      expect(findTabsContainer().exists()).toBe(false);
+      expect(findListItems().exists()).toBe(false);
+      expect(findAddBtn().exists()).toBe(false);
       expect(findDeleteModal().exists()).toBe(false);
     });
   });
@@ -142,22 +141,6 @@ describe('List', () => {
       expect(findAlert().exists()).toBe(false);
       expect(findLoadingIcon().exists()).toBe(false);
       expect(findEmptyState().exists()).toBe(false);
-    });
-
-    it('shows the tabs', () => {
-      expect(findTabsContainer().exists()).toBe(true);
-      expect(findTabs()).toHaveLength(2);
-    });
-
-    it('shows the all tab', () => {
-      expect(findTabs().at(0).attributes('title')).toBe('All');
-    });
-
-    it('shows the disabled regulated tab', () => {
-      const tab = findTabs().at(1);
-
-      expect(tab.attributes('title')).toBe('Regulated');
-      expect(tab.attributes('disabled')).toBe('true');
     });
 
     it('shows the add framework button', () => {

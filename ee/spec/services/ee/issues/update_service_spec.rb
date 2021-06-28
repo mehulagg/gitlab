@@ -322,7 +322,7 @@ RSpec.describe Issues::UpdateService do
             project.add_guest(assignee_user1)
           end
 
-          it 'assigns the issue passed to the provided epic' do
+          it 'assigns the issue passed to the provided epic', :sidekiq_inline do
             expect do
               subject
               issue.reload
@@ -335,7 +335,7 @@ RSpec.describe Issues::UpdateService do
           context 'when milestone and epic attributes are changed from description' do
             let(:params) { { description: %(/epic #{epic.to_reference}\n/milestone #{milestone.to_reference}\n/assign #{assignee_user1.to_reference}) } }
 
-            it 'assigns the issue passed to the provided epic' do
+            it 'assigns the issue passed to the provided epic', :sidekiq_inline do
               expect do
                 subject
                 issue.reload

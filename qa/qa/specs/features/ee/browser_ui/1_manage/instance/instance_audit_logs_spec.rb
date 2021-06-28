@@ -22,7 +22,7 @@ module QA
       context 'Failed sign in', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/736' do
         before do
           Runtime::Browser.visit(:gitlab, Page::Main::Login)
-          invalid_user = QA::Resource::User.new.tap do |user|
+          invalid_user = Resource::User.init do |user|
             user.username = 'bad_user_name'
             user.password = 'bad_pasword'
           end

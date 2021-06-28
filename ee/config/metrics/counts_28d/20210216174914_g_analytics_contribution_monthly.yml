@@ -1,4 +1,5 @@
 ---
+data_category: Optional
 key_path: redis_hll_counters.analytics.g_analytics_contribution_monthly
 description: Unique visitors to /groups/:group/-/contribution_analytics by month
 product_section: dev

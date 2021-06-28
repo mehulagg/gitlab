@@ -16,7 +16,9 @@ exports[`OnDemandScansProfileSummaryCell renders properly 1`] = `
     <div
       class="col-md-8"
     >
-      <strong>
+      <strong
+        data-testid="summary-value"
+      >
         Row Value
       </strong>
     </div>

@@ -17,12 +17,12 @@ RSpec.describe Projects::SlackApplicationInstallService do
   end
 
   def expect_slack_integration_is_created(project)
-    integration = SlackIntegration.find_by(service_id: project.gitlab_slack_application_service.id)
+    integration = SlackIntegration.find_by(service_id: project.gitlab_slack_application_integration.id)
     expect(integration).to be_present
   end
 
   def expect_chat_name_is_created(project)
-    chat_name = ChatName.find_by(service_id: project.gitlab_slack_application_service.id)
+    chat_name = ChatName.find_by(service_id: project.gitlab_slack_application_integration.id)
     expect(chat_name).to be_present
   end
 

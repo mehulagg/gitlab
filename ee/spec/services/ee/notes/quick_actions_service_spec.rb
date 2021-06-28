@@ -48,7 +48,7 @@ RSpec.describe Notes::QuickActionsService do
           expect(execute(note)).to eq('')
         end
 
-        it 'creates a system note' do
+        it 'creates a system note', :sidekiq_inline do
           expect { execute(note) }.to change { Note.system.count }.from(0).to(2)
         end
       end

@@ -13,6 +13,7 @@ module EE
       include IgnorableColumns
 
       ignore_columns %i[elasticsearch_shards elasticsearch_replicas], remove_with: '14.1', remove_after: '2021-06-22'
+      ignore_column :seat_link_enabled, remove_with: '14.2', remove_after: '2021-07-22'
 
       EMAIL_ADDITIONAL_TEXT_CHARACTER_LIMIT = 10_000
       DEFAULT_NUMBER_OF_DAYS_BEFORE_REMOVAL = 7
@@ -162,7 +163,6 @@ module EE
           mirror_max_delay: Settings.gitlab['mirror_max_delay'],
           pseudonymizer_enabled: false,
           repository_size_limit: 0,
-          seat_link_enabled: Settings.gitlab['seat_link_enabled'],
           secret_detection_token_revocation_enabled: false,
           secret_detection_token_revocation_url: nil,
           secret_detection_token_revocation_token: nil,
@@ -244,19 +244,6 @@ module EE
     def pseudonymizer_enabled?
       pseudonymizer_available? && super
     end
-
-    def seat_link_available?
-      License.feature_available?(:seat_link)
-    end
-
-    def seat_link_can_be_configured?
-      Settings.gitlab.seat_link_enabled
-    end
-
-    def seat_link_enabled
-      seat_link_available? && seat_link_can_be_configured? && super
-    end
-    alias_method :seat_link_enabled?, :seat_link_enabled
 
     def should_check_namespace_plan?
       check_namespace_plan? && (Rails.env.test? || ::Gitlab.dev_env_org_or_com?)

@@ -206,6 +206,7 @@ describe('DevopsAdoptionApp', () => {
             expect(addSegmentMutationSpy).toHaveBeenCalledWith(
               expect.objectContaining({
                 namespaceIds: [groupGid],
+                displayNamespaceId: groupGid,
               }),
             );
           });

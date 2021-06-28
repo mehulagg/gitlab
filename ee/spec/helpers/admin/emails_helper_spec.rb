@@ -22,9 +22,21 @@ RSpec.describe Admin::EmailsHelper, :clean_gitlab_redis_shared_state do
     context 'when `send_emails_from_admin_area` feature is disabled' do
       before do
         stub_licensed_features(send_emails_from_admin_area: false)
+        allow(Gitlab::CurrentSettings).to receive(:usage_ping_enabled?).and_return(false)
       end
 
       it { is_expected.to be_falsey }
+    end
+
+    context 'when usage ping is enabled' do
+      before do
+        stub_licensed_features(send_emails_from_admin_area: false)
+        allow(Gitlab::CurrentSettings).to receive(:usage_ping_enabled?).and_return(true)
+      end
+
+      it 'returns true' do
+        expect(subject).to eq(true)
+      end
     end
   end
 

@@ -54,7 +54,7 @@ RSpec.describe Project do
     it { is_expected.to have_many(:vulnerability_historical_statistics).class_name('Vulnerabilities::HistoricalStatistic') }
     it { is_expected.to have_many(:vulnerability_remediations).class_name('Vulnerabilities::Remediation') }
 
-    it { is_expected.to have_one(:github_service) }
+    it { is_expected.to have_one(:github_integration) }
     it { is_expected.to have_many(:project_aliases) }
     it { is_expected.to have_many(:approval_rules) }
 
@@ -295,13 +295,15 @@ RSpec.describe Project do
       end
     end
 
-    describe '.with_github_service_pipeline_events' do
+    describe '.with_github_integration_pipeline_events' do
       it 'returns the correct project' do
-        project_with_github_service_pipeline_events = create(:project, github_service: create(:github_service))
-        project_without_github_service_pipeline_events = create(:project)
+        project_with_github_integration_pipeline_events = create(:project, github_integration: create(:github_integration))
+        project_without_github_integration_pipeline_events = create(:project)
 
-        expect(described_class.with_github_service_pipeline_events).to include(project_with_github_service_pipeline_events)
-        expect(described_class.with_github_service_pipeline_events).not_to include(project_without_github_service_pipeline_events)
+        expect(described_class.with_github_integration_pipeline_events)
+          .to include(project_with_github_integration_pipeline_events)
+        expect(described_class.with_github_integration_pipeline_events)
+          .not_to include(project_without_github_integration_pipeline_events)
       end
     end
 
@@ -1461,13 +1463,13 @@ RSpec.describe Project do
     end
   end
 
-  describe '#disabled_services' do
+  describe '#disabled_integrations' do
     let(:project) { build(:project) }
 
-    subject { project.disabled_services }
+    subject { project.disabled_integrations }
 
-    where(:license_feature, :disabled_services) do
-      :github_project_service_integration | %w(github)
+    where(:license_feature, :disabled_integrations) do
+      :github_project_service_integration | %w[github]
     end
 
     with_them do
@@ -1476,7 +1478,7 @@ RSpec.describe Project do
           stub_licensed_features(license_feature => true)
         end
 
-        it { is_expected.not_to include(*disabled_services) }
+        it { is_expected.not_to include(*disabled_integrations) }
       end
 
       context 'when feature is unavailable' do
@@ -1484,7 +1486,7 @@ RSpec.describe Project do
           stub_licensed_features(license_feature => false)
         end
 
-        it { is_expected.to include(*disabled_services) }
+        it { is_expected.to include(*disabled_integrations) }
       end
     end
   end
@@ -1569,7 +1571,7 @@ RSpec.describe Project do
     it 'returns projects where Slack application is disabled' do
       project1 = create(:project)
       project2 = create(:project)
-      create(:gitlab_slack_application_service, project: project2)
+      create(:gitlab_slack_application_integration, project: project2)
 
       projects = described_class.with_slack_application_disabled
 

@@ -25,6 +25,8 @@ module Gitlab
 
             create_scanner
             create_scan
+            create_analyzer
+            set_report_version
             collate_remediations.each { |vulnerability| create_vulnerability(vulnerability) }
 
             report_data
@@ -65,6 +67,10 @@ module Gitlab
 
           def scan_data
             @scan_data ||= report_data.dig('scan')
+          end
+
+          def analyzer_data
+            @analyzer_data ||= report_data.dig('scan', 'analyzer')
           end
 
           # map remediations to relevant vulnerabilities
@@ -166,6 +172,25 @@ module Gitlab
             report.scan = ::Gitlab::Ci::Reports::Security::Scan.new(scan_data)
           end
 
+          def set_report_version
+            report.version = report_version
+          end
+
+          def create_analyzer
+            return unless analyzer_data.is_a?(Hash)
+
+            params = {
+              id: analyzer_data.dig('id'),
+              name: analyzer_data.dig('name'),
+              version: analyzer_data.dig('version'),
+              vendor: analyzer_data.dig('vendor', 'name')
+            }
+
+            return unless params.values.all?
+
+            report.analyzer = ::Gitlab::Ci::Reports::Security::Analyzer.new(**params)
+          end
+
           def create_scanner(scanner_data = top_level_scanner)
             return unless scanner_data.is_a?(Hash)
 
@@ -173,7 +198,8 @@ module Gitlab
               ::Gitlab::Ci::Reports::Security::Scanner.new(
                 external_id: scanner_data['id'],
                 name: scanner_data['name'],
-                vendor: scanner_data.dig('vendor', 'name')))
+                vendor: scanner_data.dig('vendor', 'name'),
+                version: scanner_data.dig('version')))
           end
 
           def create_identifiers(identifiers)

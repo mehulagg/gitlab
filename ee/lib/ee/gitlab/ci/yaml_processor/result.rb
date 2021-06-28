@@ -11,7 +11,9 @@ module EE
           def build_attributes(name)
             job = jobs.fetch(name.to_sym, {})
 
-            super.deep_merge(dast_configuration: job[:dast_configuration]).compact
+            super.deep_merge(
+              options: { dast_configuration: job[:dast_configuration] }.compact
+            )
           end
         end
       end

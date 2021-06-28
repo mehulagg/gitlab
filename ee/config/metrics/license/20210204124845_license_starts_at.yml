@@ -1,4 +1,5 @@
 ---
+data_category: Optional
 key_path: license_starts_at
 description: The date the license starts
 product_section: fulfillment

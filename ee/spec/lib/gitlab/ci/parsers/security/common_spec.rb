@@ -195,6 +195,22 @@ RSpec.describe Gitlab::Ci::Parsers::Security::Common do
         end
       end
 
+      describe 'top-level scanner' do
+        it 'is the primary scanner' do
+          expect(report.primary_scanner.external_id).to eq('gemnasium')
+          expect(report.primary_scanner.name).to eq('Gemnasium')
+          expect(report.primary_scanner.vendor).to eq('GitLab')
+          expect(report.primary_scanner.version).to eq('2.18.0')
+        end
+
+        it 'returns nil report has no scanner' do
+          empty_report = Gitlab::Ci::Reports::Security::Report.new(artifact.file_type, pipeline, 2.weeks.ago)
+          described_class.parse!({}.to_json, empty_report)
+
+          expect(empty_report.primary_scanner).to be_nil
+        end
+      end
+
       describe 'parsing scanners' do
         subject(:scanner) { report.findings.first.scanner }
 
@@ -222,6 +238,35 @@ RSpec.describe Gitlab::Ci::Parsers::Security::Common do
           described_class.parse!({}.to_json, empty_report)
 
           expect(empty_report.scan).to be(nil)
+        end
+      end
+
+      describe 'parsing schema version' do
+        it 'parses the version' do
+          expect(report.version).to eq('14.0.2')
+        end
+
+        it 'returns nil when there is no version' do
+          empty_report = Gitlab::Ci::Reports::Security::Report.new(artifact.file_type, pipeline, 2.weeks.ago)
+          described_class.parse!({}.to_json, empty_report)
+
+          expect(empty_report.version).to be_nil
+        end
+      end
+
+      describe 'parsing analyzer' do
+        it 'associates analyzer with report' do
+          expect(report.analyzer.id).to eq('common-analyzer')
+          expect(report.analyzer.name).to eq('Common Analyzer')
+          expect(report.analyzer.version).to eq('2.0.1')
+          expect(report.analyzer.vendor).to eq('Common')
+        end
+
+        it 'returns nil when analyzer data is not available' do
+          empty_report = Gitlab::Ci::Reports::Security::Report.new(artifact.file_type, pipeline, 2.weeks.ago)
+          described_class.parse!({}.to_json, empty_report)
+
+          expect(empty_report.analyzer).to be_nil
         end
       end
 

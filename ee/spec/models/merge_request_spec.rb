@@ -1062,6 +1062,49 @@ RSpec.describe MergeRequest do
     end
   end
 
+  describe '#predefined_variables' do
+    context 'when merge request has approver feature' do
+      before do
+        stub_licensed_features(merge_request_approvers: true)
+      end
+
+      context 'without any rules' do
+        it 'includes variable CI_MERGE_REQUEST_APPROVED=true' do
+          expect(merge_request.predefined_variables.to_hash).to include('CI_MERGE_REQUEST_APPROVED' => 'true')
+        end
+      end
+
+      context 'with a rule' do
+        let(:approver) { create(:user) }
+        let!(:rule) { create(:approval_merge_request_rule, merge_request: merge_request, approvals_required: 1, users: [approver]) }
+
+        context 'that has been approved' do
+          it 'includes variable CI_MERGE_REQUEST_APPROVED=true' do
+            create(:approval, merge_request: merge_request, user: approver)
+
+            expect(merge_request.predefined_variables.to_hash).to include('CI_MERGE_REQUEST_APPROVED' => 'true')
+          end
+        end
+
+        context 'that has not been approved' do
+          it 'does not include variable CI_MERGE_REQUEST_APPROVED' do
+            expect(merge_request.predefined_variables.to_hash.keys).not_to include('CI_MERGE_REQUEST_APPROVED')
+          end
+        end
+      end
+    end
+
+    context 'when merge request does not have approver feature' do
+      before do
+        stub_licensed_features(merge_request_approvers: false)
+      end
+
+      it 'does not include variable CI_MERGE_REQUEST_APPROVED' do
+        expect(merge_request.predefined_variables.to_hash.keys).not_to include('CI_MERGE_REQUEST_APPROVED')
+      end
+    end
+  end
+
   describe '#mergeable?' do
     subject { merge_request.mergeable? }
 

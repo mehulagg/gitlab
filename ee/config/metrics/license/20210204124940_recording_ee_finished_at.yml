@@ -1,4 +1,5 @@
 ---
+data_category: Optional
 key_path: recording_ee_finished_at
 description: When the EE-specific features were computed
 product_section: growth

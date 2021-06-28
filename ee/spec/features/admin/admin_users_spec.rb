@@ -28,12 +28,26 @@ RSpec.describe "Admin::Users", :js do
       context 'when `send_emails_from_admin_area` feature is disabled' do
         before do
           stub_licensed_features(send_emails_from_admin_area: false)
+          allow(Gitlab::CurrentSettings).to receive(:usage_ping_enabled?).and_return(false)
         end
 
         it "does not show the 'Send email to users' link" do
           visit admin_users_path
 
           expect(page).not_to have_link(href: admin_email_path)
+        end
+      end
+
+      context 'when usage ping is enabled' do
+        before do
+          stub_licensed_features(send_emails_from_admin_area: false)
+          allow(Gitlab::CurrentSettings).to receive(:usage_ping_enabled?).and_return(true)
+        end
+
+        it "shows the 'Send email to users' link" do
+          visit admin_users_path
+
+          expect(page).to have_link(href: admin_email_path)
         end
       end
     end
