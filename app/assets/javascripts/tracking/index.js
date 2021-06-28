@@ -1,6 +1,6 @@
 import { omitBy, isUndefined } from 'lodash';
 import { TRACKING_CONTEXT_SCHEMA } from '~/experimentation/constants';
-import { getExperimentData } from '~/experimentation/utils';
+import { getExperimentData, getAllExperimentContexts } from '~/experimentation/utils';
 import getStandardContext from './get_standard_context';
 
 const DEFAULT_SNOWPLOW_OPTIONS = {
@@ -241,7 +241,8 @@ export function initDefaultTrackers() {
   window.snowplow('enableActivityTracking', 30, 30);
   // must be after enableActivityTracking
   const standardContext = getStandardContext();
-  window.snowplow('trackPageView', null, [standardContext]);
+  const experimentContexts = getAllExperimentContexts();
+  window.snowplow('trackPageView', null, [standardContext, ...experimentContexts]);
 
   if (window.snowplowOptions.formTracking) Tracking.enableFormTracking(opts.formTrackingConfig);
   if (window.snowplowOptions.linkClickTracking) window.snowplow('enableLinkClickTracking');
