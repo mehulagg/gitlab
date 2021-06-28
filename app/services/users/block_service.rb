@@ -11,6 +11,8 @@ module Users
 
       if user.block
         after_block_hook(user)
+        NotificationService.new.user_blocked(user.name, user.notification_email)
+
         success
       else
         messages = user.errors.full_messages
