@@ -326,7 +326,7 @@ module Ci
         build.run_after_commit do
           build.run_status_commit_hooks!
 
-          BuildFinishedWorker.perform_async(id)
+          Ci::BuildFinishedWorker.perform_async(id)
         end
       end
 
