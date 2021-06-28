@@ -363,7 +363,7 @@ exports[`OnDemandScansScannerProfileSelector renders properly without profiles 1
     </p>
      
     <a
-      class="btn btn-success btn-md gl-button btn-success-secondary"
+      class="btn btn-confirm btn-md gl-button btn-confirm-secondary"
       data-testid="create-profile-link"
       href="/test/new/scanner/profile/path"
     >
