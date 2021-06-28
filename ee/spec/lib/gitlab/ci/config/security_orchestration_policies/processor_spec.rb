@@ -124,22 +124,14 @@ RSpec.describe Gitlab::Ci::Config::SecurityOrchestrationPolicies::Processor do
             {
               image: 'ruby:3.0.1',
               'dast-on-demand-0': {
-                stage: 'test',
+                stage: 'dast',
                 image: {
                   name: '$SECURE_ANALYZERS_PREFIX/dast:$DAST_VERSION'
                 },
                 variables: {
-                  DAST_AUTH_URL: dast_site_profile.auth_url,
                   DAST_VERSION: 1,
                   SECURE_ANALYZERS_PREFIX: 'registry.gitlab.com/gitlab-org/security-products/analyzers',
-                  DAST_WEBSITE: dast_site_profile.dast_site.url,
-                  DAST_FULL_SCAN_ENABLED: 'false',
-                  DAST_USE_AJAX_SPIDER: 'false',
-                  DAST_DEBUG: 'false',
-                  DAST_USERNAME:  dast_site_profile.auth_username,
-                  DAST_EXCLUDE_URLS: dast_site_profile.excluded_urls.join(','),
-                  DAST_USERNAME_FIELD: 'session[username]',
-                  DAST_PASSWORD_FIELD: 'session[password]'
+                  GIT_STRATEGY: 'none'
                 },
                 allow_failure: true,
                 script: ['/analyze'],
@@ -147,6 +139,10 @@ RSpec.describe Gitlab::Ci::Config::SecurityOrchestrationPolicies::Processor do
                   reports: {
                     dast: 'gl-dast-report.json'
                   }
+                },
+                dast_configuration: {
+                  site_profile: dast_site_profile.name,
+                  scanner_profile: dast_scanner_profile.name
                 }
               }
             }
