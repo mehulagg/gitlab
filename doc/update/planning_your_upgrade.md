@@ -31,24 +31,24 @@ Right before the upgrade, perform the [pre-upgrade and post-upgrade checks](#pre
 
 ## Pre-upgrade and post-upgrade checks
 
-  - Run `gitlab-rake gitlab:check` - [docs](../administration/raketasks/maintenance.md#check-gitlab-configuration)
-  - Run `gitlab-rake gitlab:doctor:secrets` to confirm that encrypted database values can be decrypted - [docs](../administration/raketasks/doctor.md#verify-database-values-can-be-decrypted-using-the-current-secrets)
+- Run `gitlab-rake gitlab:check` - [docs](../administration/raketasks/maintenance.md#check-gitlab-configuration)
+- Run `gitlab-rake gitlab:doctor:secrets` to confirm that encrypted database values can be decrypted - [docs](../administration/raketasks/doctor.md#verify-database-values-can-be-decrypted-using-the-current-secrets)
 
-  - In UI:
-    - Users can log in
-    - Project list is visible
-    - Project issues and MRs are accessible
-    - Users can clone repositories from GitLab
-    - Users can push commits to GitLab
+- In UI:
+  - Users can log in
+  - Project list is visible
+  - Project issues and MRs are accessible
+  - Users can clone repositories from GitLab
+  - Users can push commits to GitLab
 
-  - CI:
-    - Runners pick up jobs
-    - Images can be pushed/pulled from the registry
+- CI:
+  - Runners pick up jobs
+  - Images can be pushed/pulled from the registry
 
-  - If using Geo:
-    - `gitlab-rake gitlab:geo:check` - on primary and each secondary
+- If using Geo:
+  - `gitlab-rake gitlab:geo:check` - on primary and each secondary
   
-  - If using Elasticsearch, searches are successful
+- If using Elasticsearch, searches are successful
 
 ## Rollback plan
 
