@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
 module IncidentManagement
-  module Escalations
-    class PendingAlertEscalationCheckWorker
+  module PendingEscalations
+    class AlertCheckWorker
       include ApplicationWorker
 
       urgency :high

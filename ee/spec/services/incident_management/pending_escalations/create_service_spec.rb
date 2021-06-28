@@ -54,7 +54,7 @@ RSpec.describe IncidentManagement::PendingEscalations::CreateService do
     end
 
     it 'creates the escalations and queues the escalation process check' do
-      expect(IncidentManagement::Escalations::PendingAlertEscalationCheckWorker)
+      expect(IncidentManagement::PendingEscalations::AlertCheckWorker)
         .to receive(:bulk_perform_async)
         .with([[a_kind_of(Integer)], [a_kind_of(Integer)]])
 

@@ -647,7 +647,7 @@ Gitlab.ee do
   Settings.cron_jobs['incident_management_persist_oncall_rotation_worker']['job_class'] = 'IncidentManagement::OncallRotations::PersistAllRotationsShiftsJob'
   Settings.cron_jobs['incident_management_schedule_escalation_check_worker'] ||= Settingslogic.new({})
   Settings.cron_jobs['incident_management_schedule_escalation_check_worker']['cron'] ||= '*/1 * * * *'
-  Settings.cron_jobs['incident_management_schedule_escalation_check_worker']['job_class'] = 'IncidentManagement::Escalations::ScheduleEscalationCheckCronWorker'
+  Settings.cron_jobs['incident_management_schedule_escalation_check_worker']['job_class'] = 'IncidentManagement::PendingEscalations::ScheduleCheckCronWorker'
   Settings.cron_jobs['import_software_licenses_worker'] ||= Settingslogic.new({})
   Settings.cron_jobs['import_software_licenses_worker']['cron'] ||= '0 3 * * 0'
   Settings.cron_jobs['import_software_licenses_worker']['job_class'] = 'ImportSoftwareLicensesWorker'

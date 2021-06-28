@@ -11,7 +11,7 @@ RSpec.shared_examples 'creates an escalation' do |count|
     expected_args = []
     count.times { expected_args << [a_kind_of(Integer)]}
 
-    expect(IncidentManagement::Escalations::PendingAlertEscalationCheckWorker)
+    expect(IncidentManagement::PendingEscalations::AlertCheckWorker)
       .to receive(:bulk_perform_async)
       .with(expected_args)
 

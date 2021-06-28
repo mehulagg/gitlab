@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe IncidentManagement::Escalations::PendingAlertEscalationCheckWorker do
+RSpec.describe IncidentManagement::PendingEscalations::AlertCheckWorker do
   let(:worker) { described_class.new(escalation.id) }
 
   let_it_be(:escalation) { create(:incident_management_pending_alert_escalation) }

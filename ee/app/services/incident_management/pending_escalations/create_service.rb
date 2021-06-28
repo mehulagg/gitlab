@@ -52,7 +52,7 @@ module IncidentManagement
       def process_escalations(escalation_ids)
         args = escalation_ids.map { |id| [id] }
 
-        ::IncidentManagement::Escalations::PendingAlertEscalationCheckWorker.bulk_perform_async(args) # rubocop:disable Scalability/BulkPerformWithContext
+        ::IncidentManagement::PendingEscalations::AlertCheckWorker.bulk_perform_async(args) # rubocop:disable Scalability/BulkPerformWithContext
       end
     end
   end

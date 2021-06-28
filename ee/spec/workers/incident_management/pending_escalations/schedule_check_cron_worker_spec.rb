@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe IncidentManagement::Escalations::ScheduleEscalationCheckCronWorker do
+RSpec.describe IncidentManagement::PendingEscalations::ScheduleCheckCronWorker do
   let(:worker) { described_class.new }
 
   let_it_be(:escalation_1) { create(:incident_management_pending_alert_escalation, process_at: 5.minutes.ago) }
@@ -13,7 +13,7 @@ RSpec.describe IncidentManagement::Escalations::ScheduleEscalationCheckCronWorke
     subject { worker.perform }
 
     it 'schedules a job for each processable escalation' do
-      expect(IncidentManagement::Escalations::PendingAlertEscalationCheckWorker).to receive(:bulk_perform_async)
+      expect(IncidentManagement::PendingEscalations::AlertCheckWorker).to receive(:bulk_perform_async)
         .with(array_including([escalation_2.id], [escalation_1.id]))
 
       subject
