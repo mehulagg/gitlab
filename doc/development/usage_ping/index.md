@@ -66,7 +66,7 @@ We use the following terminology to describe the Usage Ping components:
 
 > Introduced in GitLab 14.1.
 
-Starting with version 14.1, free self-managed users running [GitLab EE](https://docs.gitlab.com/ee/development/ee_features.html) have an opportunity to receive paid features by registering with GitLab and sending us activity data via [Usage Ping](https://docs.gitlab.com/ee/development/usage_ping/#what-is-usage-ping).
+Starting with GitLab version 14.1, free self-managed users running [GitLab EE](../ee_features.md) can receive paid features by registering with GitLab and sending us activity data via [Usage Ping](#what-is-usage-ping).
 
 The paid feature currently available in this offering is [Email from GitLab](https://docs.gitlab.com/ee/tools/email.html). Administrators can streamline their workflow by emailing all or segments of instance users directly from within the GitLab admin panel with this [Premium](https://about.gitlab.com/pricing/premium/) feature. 
 
