@@ -670,3 +670,4 @@ module QA
 end
 
 QA::Runtime::Release.extend_autoloads!
+# test comment
