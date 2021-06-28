@@ -9,11 +9,11 @@ module Mutations
                GraphQL::INT_TYPE,
                required: false,
                description: 'The desired weight for the issue, ' \
-               'weight will be removed if set to null'
+               'weight will be removed if set to null.'
 
       def ready?(**args)
         unless args.key?(:weight)
-          raise Gitlab::Graphql::Errors::ArgumentError, 'Argument weight must be provided (`null` accepted)'
+          raise Gitlab::Graphql::Errors::ArgumentError, 'Argument weight must be provided (`null` accepted).'
         end
 
         super
