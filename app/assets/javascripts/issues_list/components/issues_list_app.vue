@@ -10,11 +10,13 @@ import {
 } from '@gitlab/ui';
 import fuzzaldrinPlus from 'fuzzaldrin-plus';
 import getIssuesQuery from 'ee_else_ce/issues_list/queries/get_issues.query.graphql';
+import getIssuesCountQuery from 'ee_else_ce/issues_list/queries/get_issues_count.query.graphql';
 import createFlash from '~/flash';
 import CsvImportExportButtons from '~/issuable/components/csv_import_export_buttons.vue';
 import IssuableByEmail from '~/issuable/components/issuable_by_email.vue';
 import IssuableList from '~/issuable_list/components/issuable_list_root.vue';
 import { IssuableListTabs, IssuableStates } from '~/issuable_list/constants';
+
 import {
   CREATED_DESC,
   i18n,
@@ -175,26 +177,17 @@ export default {
       showBulkEditSidebar: false,
       sortKey: getSortKey(getParameterByName(PARAM_SORT)) || defaultSortKey,
       state: state || IssuableStates.Opened,
-      totalIssues: 0,
     };
   },
   apollo: {
     issues: {
       query: getIssuesQuery,
       variables() {
-        return {
-          projectPath: this.projectPath,
-          search: this.searchQuery,
-          sort: this.sortKey,
-          state: this.state,
-          ...this.pageParams,
-          ...this.apiFilterParams,
-        };
+        return this.queryVariables;
       },
       update: ({ project }) => project?.issues.nodes ?? [],
       result({ data }) {
         this.pageInfo = data.project?.issues.pageInfo ?? {};
-        this.totalIssues = data.project?.issues.count ?? 0;
         this.exportCsvPathWithQuery = this.getExportCsvPathWithQuery();
       },
       error(error) {
@@ -205,8 +198,70 @@ export default {
       },
       debounce: 200,
     },
+    countOpened: {
+      query: getIssuesCountQuery,
+      context: {
+        isSingleRequest: true,
+      },
+      variables() {
+        return {
+          ...this.queryVariables,
+          state: IssuableStates.Opened,
+        };
+      },
+      update: ({ project }) => project?.issues.count,
+      skip() {
+        return !this.hasProjectIssues;
+      },
+      debounce: 200,
+    },
+    countClosed: {
+      query: getIssuesCountQuery,
+      context: {
+        isSingleRequest: true,
+      },
+      variables() {
+        return {
+          ...this.queryVariables,
+          state: IssuableStates.Closed,
+        };
+      },
+      update: ({ project }) => project?.issues.count,
+      skip() {
+        return !this.hasProjectIssues;
+      },
+      debounce: 200,
+    },
+    countAll: {
+      query: getIssuesCountQuery,
+      context: {
+        isSingleRequest: true,
+      },
+      variables() {
+        return {
+          ...this.queryVariables,
+          state: IssuableStates.All,
+        };
+      },
+      update: ({ project }) => project?.issues.count,
+      skip() {
+        return !this.hasProjectIssues;
+      },
+      debounce: 200,
+    },
   },
   computed: {
+    queryVariables() {
+      return {
+        isSignedIn: this.isSignedIn,
+        projectPath: this.projectPath,
+        search: this.searchQuery,
+        sort: this.sortKey,
+        state: this.state,
+        ...this.pageParams,
+        ...this.apiFilterParams,
+      };
+    },
     hasSearch() {
       return this.searchQuery || Object.keys(this.urlFilterParams).length;
     },
@@ -351,13 +406,14 @@ export default {
       return getSortOptions(this.hasIssueWeightsFeature, this.hasBlockedIssuesFeature);
     },
     tabCounts() {
-      return Object.values(IssuableStates).reduce(
-        (acc, state) => ({
-          ...acc,
-          [state]: this.state === state ? this.totalIssues : undefined,
-        }),
-        {},
-      );
+      return {
+        [IssuableStates.Opened]: this.countOpened,
+        [IssuableStates.Closed]: this.countClosed,
+        [IssuableStates.All]: this.countAll,
+      };
+    },
+    currentTabCount() {
+      return this.tabCounts[this.state] ?? 0;
     },
     urlParams() {
       return {
@@ -576,7 +632,7 @@ export default {
           v-if="isSignedIn"
           class="gl-md-mr-3"
           :export-csv-path="exportCsvPathWithQuery"
-          :issuable-count="totalIssues"
+          :issuable-count="currentTabCount"
         />
         <gl-button
           v-if="canBulkUpdate"
@@ -687,7 +743,7 @@ export default {
         <csv-import-export-buttons
           class="gl-mr-3"
           :export-csv-path="exportCsvPathWithQuery"
-          :issuable-count="totalIssues"
+          :issuable-count="currentTabCount"
         />
       </template>
     </gl-empty-state>

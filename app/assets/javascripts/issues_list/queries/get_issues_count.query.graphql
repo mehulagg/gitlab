@@ -1,8 +1,4 @@
-#import "~/graphql_shared/fragments/pageInfo.fragment.graphql"
-#import "./issue.fragment.graphql"
-
-query getProjectIssues(
-  $isSignedIn: Boolean = false
+query getProjectIssuesCount(
   $projectPath: ID!
   $search: String
   $sort: IssueSort
@@ -34,12 +30,7 @@ query getProjectIssues(
       first: $firstPageSize
       last: $lastPageSize
     ) {
-      pageInfo {
-        ...PageInfo
-      }
-      nodes {
-        ...IssueFragment
-      }
+      count
     }
   }
 }

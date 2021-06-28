@@ -5,6 +5,7 @@ import { cloneDeep } from 'lodash';
 import { nextTick } from 'vue';
 import VueApollo from 'vue-apollo';
 import getIssuesQuery from 'ee_else_ce/issues_list/queries/get_issues.query.graphql';
+import getIssuesCountQuery from 'ee_else_ce/issues_list/queries/get_issues_count.query.graphql';
 import createMockApollo from 'helpers/mock_apollo_helper';
 import { TEST_HOST } from 'helpers/test_constants';
 import waitForPromises from 'helpers/wait_for_promises';
@@ -13,6 +14,7 @@ import {
   filteredTokens,
   locationSearch,
   urlParams,
+  getIssuesCountQueryResponse,
 } from 'jest/issues_list/mock_data';
 import createFlash from '~/flash';
 import CsvImportExportButtons from '~/issuable/components/csv_import_export_buttons.vue';
@@ -62,7 +64,7 @@ describe('IssuesListApp component', () => {
     hasBlockedIssuesFeature: true,
     hasIssueWeightsFeature: true,
     hasProjectIssues: true,
-    isSignedIn: false,
+    isSignedIn: true,
     issuesPath: 'path/to/issues',
     jiraIntegrationPath: 'jira/integration/path',
     newIssuePath: 'new/issue/path',
@@ -95,7 +97,10 @@ describe('IssuesListApp component', () => {
     response = defaultQueryResponse,
     mountFn = shallowMount,
   } = {}) => {
-    const requestHandlers = [[getIssuesQuery, jest.fn().mockResolvedValue(response)]];
+    const requestHandlers = [
+      [getIssuesQuery, jest.fn().mockResolvedValue(response)],
+      [getIssuesCountQuery, jest.fn().mockResolvedValue(getIssuesCountQueryResponse)],
+    ];
     const apolloProvider = createMockApollo(requestHandlers);
 
     return mountFn(IssuesListApp, {
@@ -136,8 +141,8 @@ describe('IssuesListApp component', () => {
         currentTab: IssuableStates.Opened,
         tabCounts: {
           opened: 1,
-          closed: undefined,
-          all: undefined,
+          closed: 1,
+          all: 1,
         },
         issuablesLoading: false,
         isManualOrdering: false,
