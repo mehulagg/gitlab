@@ -54,12 +54,10 @@ module Gitlab
 
       private
 
-      # rubocop: disable CodeReuse/ActiveRecord
       def gitlab_user_id(project, gitlab_id)
-        user = User.joins(:identities).find_by("identities.extern_uid = ? AND identities.provider = 'gitlab'", gitlab_id.to_s)
+        user = User.by_provider_and_extern_uid(:gitlab, gitlab_id)
         (user && user.id) || project.creator_id
       end
-      # rubocop: enable CodeReuse/ActiveRecord
     end
   end
 end

@@ -429,6 +429,7 @@ class User < ApplicationRecord
   scope :by_id_and_login, ->(id, login) { where(id: id).where('username = LOWER(:login) OR email = LOWER(:login)', login: login) }
   scope :dormant, -> { active.where('last_activity_on <= ?', MINIMUM_INACTIVE_DAYS.day.ago.to_date) }
   scope :with_no_activity, -> { active.where(last_activity_on: nil) }
+  scope :by_provider_and_extern_uid, ->(provider, extern_uid) { joins(:identities).merge(Identity.with_extern_uid(provider, extern_uid)) }
 
   def preferred_language
     read_attribute('preferred_language') ||

@@ -138,7 +138,7 @@ module Gitlab
 
       # rubocop: disable CodeReuse/ActiveRecord
       def query_id_for_github_id(id)
-        User.for_github_id(id).pluck(:id).first
+        User.by_provider_and_extern_uid(:github, id).pluck(:id).first
       end
       # rubocop: enable CodeReuse/ActiveRecord
 
