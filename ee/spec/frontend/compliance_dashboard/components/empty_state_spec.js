@@ -34,7 +34,7 @@ describe('EmptyState component', () => {
 
     it('sets the description', () => {
       expect(emptyStateProp('description')).toBe(
-        "The Compliance Dashboard gives you the ability to see a group's merge request activity by providing a high-level view for all projects in the group.",
+        'The Compliance Report captures merged changes that violate compliance best practices.',
       );
     });
   });
