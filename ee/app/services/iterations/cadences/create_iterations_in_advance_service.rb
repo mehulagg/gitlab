@@ -124,8 +124,11 @@ module Iterations
 
         existing_iterations_in_advance.each do |iteration|
           if iteration.duration_in_days != cadence.duration_in_days
+            old_title_dates_substring = "#{iteration.start_date.strftime(Date::DATE_FORMATS[:long])} - #{iteration.due_date.strftime(Date::DATE_FORMATS[:long])}"
             iteration.start_date = prev_iteration.due_date + 1.day if prev_iteration
             iteration.due_date = iteration.start_date + cadence.duration_in_days.days - 1.day
+            new_title_dates_substring = "#{iteration.start_date.strftime(Date::DATE_FORMATS[:long])} - #{iteration.due_date.strftime(Date::DATE_FORMATS[:long])}"
+            iteration.title = iteration.title.gsub(old_title_dates_substring, new_title_dates_substring)
           end
 
           prev_iteration = iteration

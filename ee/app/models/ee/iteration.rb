@@ -158,7 +158,7 @@ module EE
     # Show just the title when we manage to find an iteration, without the reference pattern,
     # since it's long and unsightly.
     def reference_link_text(from = nil)
-      self.title
+      self.attributes['title']
     end
 
     def supports_timebox_charts?
@@ -172,6 +172,10 @@ module EE
     # we end up having 2020-01-01(beginning of day) - 2020-01-07(end of day)
     def duration_in_days
       (due_date - start_date + 1).to_i
+    end
+
+    def title
+      "#{attributes['title']}: #{start_date.strftime(Date::DATE_FORMATS[:long])} - #{due_date.strftime(Date::DATE_FORMATS[:long])}"
     end
 
     private
@@ -276,7 +280,7 @@ module EE
 
     def uniqueness_of_title
       relation = self.class.where(iterations_cadence_id: self.iterations_cadence)
-      title_exists = relation.find_by_title(title)
+      title_exists = relation.find_by_title(attributes['title'])
 
       errors.add(:title, _('already being used for another iteration within this cadence.')) if title_exists
     end
