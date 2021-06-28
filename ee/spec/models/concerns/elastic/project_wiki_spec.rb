@@ -3,7 +3,7 @@
 require 'spec_helper'
 
 RSpec.describe ProjectWiki, :elastic do
-  let_it_be(:project) { create(:project, :wiki_repo) }
+  let(:project) { create(:project, :wiki_repo) }
 
   before do
     stub_ee_application_setting(elasticsearch_search: true, elasticsearch_indexing: true)

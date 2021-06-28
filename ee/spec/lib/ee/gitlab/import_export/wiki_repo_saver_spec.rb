@@ -25,6 +25,7 @@ RSpec.describe Gitlab::ImportExport::WikiRepoSaver do
       end
 
       group_wiki.create_page('index', 'test content')
+      group.wiki.repository.expire_status_cache
     end
 
     after do
