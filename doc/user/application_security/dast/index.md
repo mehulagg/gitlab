@@ -202,7 +202,7 @@ To include the DAST template:
 
 1. Add the template to GitLab, based on your version of GitLab:
 
-   - In GitLab 11.9 and later, [include](../../../ci/yaml/README.md#includetemplate)
+   - In GitLab 11.9 and later, [include](../../../ci/yaml/index.md#includetemplate)
      the template by adding the following to your `.gitlab-ci.yml` file:
 
      ```yaml
@@ -218,7 +218,7 @@ To include the DAST template:
 
 1. Define the URL to be scanned by DAST by using one of these methods:
 
-   - Set the `DAST_WEBSITE` [CI/CD variable](../../../ci/yaml/README.md#variables).
+   - Set the `DAST_WEBSITE` [CI/CD variable](../../../ci/yaml/index.md#variables).
      If set, this value takes precedence.
 
    - Add the URL in an `environment_url.txt` file at the root of your project. This is
@@ -247,7 +247,7 @@ The included template creates a `dast` job in your CI/CD pipeline and scans
 your project's running application for possible vulnerabilities.
 
 The results are saved as a
-[DAST report artifact](../../../ci/yaml/README.md#artifactsreportsdast)
+[DAST report artifact](../../../ci/yaml/index.md#artifactsreportsdast)
 that you can later download and analyze. Due to implementation limitations, we
 always take the latest DAST artifact available. Behind the scenes, the
 [GitLab DAST Docker image](https://gitlab.com/gitlab-org/security-products/dast)
@@ -487,11 +487,11 @@ To view details of vulnerabilities detected by DAST:
 ### Customizing the DAST settings
 
 WARNING:
-Beginning in GitLab 13.0, the use of [`only` and `except`](../../../ci/yaml/README.md#only--except)
-is no longer supported. When overriding the template, you must use [`rules`](../../../ci/yaml/README.md#rules) instead.
+Beginning in GitLab 13.0, the use of [`only` and `except`](../../../ci/yaml/index.md#only--except)
+is no longer supported. When overriding the template, you must use [`rules`](../../../ci/yaml/index.md#rules) instead.
 
 The DAST settings can be changed through CI/CD variables by using the
-[`variables`](../../../ci/yaml/README.md#variables) parameter in `.gitlab-ci.yml`.
+[`variables`](../../../ci/yaml/index.md#variables) parameter in `.gitlab-ci.yml`.
 These variables are documented in [available variables](#available-cicd-variables).
 
 For example:
@@ -505,7 +505,7 @@ variables:
   DAST_SPIDER_MINS: 120
 ```
 
-Because the template is [evaluated before](../../../ci/yaml/README.md#include) the pipeline
+Because the template is [evaluated before](../../../ci/yaml/index.md#include) the pipeline
 configuration, the last mention of the variable takes precedence.
 
 #### Enabling and disabling rules
