@@ -289,6 +289,14 @@ HELM_CMD=$(cat << EOF
 EOF
 )
 
+if ! deploy_exists "${namespace}" "${release}"; then
+HELM_CMD=$(cat << EOF
+  ${HELM_CMD} \
+  --set gitlab.gitaly.persistence.storageClass="ssd"
+EOF
+)
+fi
+
 if [ -n "${REVIEW_APPS_EE_LICENSE_FILE}" ]; then
 HELM_CMD=$(cat << EOF
   ${HELM_CMD} \
