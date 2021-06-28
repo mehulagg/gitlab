@@ -1,6 +1,6 @@
 ---
 key_path: usage_activity_by_stage.secure.user_sast_jobs
-description: Count of SAST jobs per user per month
+description: Count of SAST jobs per user
 product_section: sec
 product_stage: secure
 product_group: group::static analysis

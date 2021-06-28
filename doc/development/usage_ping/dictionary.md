@@ -5676,7 +5676,7 @@ Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.secret_detection_jobs`
 
-Count of 'secret-detection' CI jobs for the month.
+Count of all 'secret-detection' CI jobs.
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216182114_secret_detection_jobs.yml)
 
@@ -17452,7 +17452,7 @@ Tiers: `ultimate`
 
 ### `usage_activity_by_stage.secure.user_sast_jobs`
 
-Count of SAST jobs per user per month
+Count of SAST jobs per user
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216182116_user_sast_jobs.yml)
 
