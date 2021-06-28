@@ -7,6 +7,7 @@ class ArchiveTraceWorker # rubocop:disable Scalability/IdempotentWorker
   include PipelineBackgroundQueue
 
   # rubocop: disable CodeReuse/ActiveRecord
+  # DEPRECATED: Not triggered since <THIS MR>
   def perform(job_id)
     Ci::Build.without_archived_trace.find_by(id: job_id).try do |job|
       Ci::ArchiveTraceService.new.execute(job, worker_name: self.class.name)

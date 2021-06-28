@@ -13,6 +13,7 @@ class BuildFinishedWorker # rubocop:disable Scalability/IdempotentWorker
   ARCHIVE_TRACES_IN = 2.minutes.freeze
 
   # rubocop: disable CodeReuse/ActiveRecord
+  # DEPRECATED: Not triggered since <THIS MR>
   def perform(build_id)
     Ci::Build.find_by(id: build_id).try do |build|
       process_build(build)

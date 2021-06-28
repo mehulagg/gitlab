@@ -1356,6 +1356,15 @@
   :weight: 1
   :idempotent:
   :tags: []
+- :name: pipeline_background:ci_archive_trace
+  :worker_name: Ci::ArchiveTraceWorker
+  :feature_category: :continuous_integration
+  :has_external_dependencies:
+  :urgency: :low
+  :resource_boundary: :unknown
+  :weight: 1
+  :idempotent:
+  :tags: []
 - :name: pipeline_background:ci_build_trace_chunk_flush
   :worker_name: Ci::BuildTraceChunkFlushWorker
   :feature_category: :continuous_integration
@@ -1573,6 +1582,15 @@
   :has_external_dependencies:
   :urgency: :high
   :resource_boundary: :unknown
+  :weight: 5
+  :idempotent:
+  :tags: []
+- :name: pipeline_processing:ci_build_finished
+  :worker_name: Ci::BuildFinishedWorker
+  :feature_category: :continuous_integration
+  :has_external_dependencies:
+  :urgency: :high
+  :resource_boundary: :cpu
   :weight: 5
   :idempotent:
   :tags: []
