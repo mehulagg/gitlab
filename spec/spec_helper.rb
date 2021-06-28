@@ -219,6 +219,11 @@ RSpec.configure do |config|
     # Enable all features by default for testing
     # Reset any changes in after hook.
     stub_all_feature_flags
+
+    # There are some objects that create the repository inside a `let_it_be`,
+    # therefore, the `default_branch` can be called outside specs and we need
+    # to set the feature flag before the suite starts.
+    stub_feature_flags(main_branch_over_master: false)
   end
 
   config.after(:all) do
