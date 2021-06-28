@@ -49,24 +49,14 @@ RSpec.describe GitlabSchema.types['CiJobTokenScopeType'] do
             link.target_project.add_user(current_user, :developer)
           end
 
-          it 'returns readable projects in scope' do # temporarily forcing setting to be disabled
-            expect(subject.dig('data', 'project', 'ciJobTokenScope')).to be_nil
+          it 'returns readable projects in scope' do
+            expect(returned_project_paths).to contain_exactly(project.path, link.target_project.path)
           end
         end
 
         context 'when linked project is not readable' do
           it 'returns readable projects in scope' do
-            expect(subject.dig('data', 'project', 'ciJobTokenScope')).to be_nil
-          end
-        end
-
-        context 'when job token scope is disabled' do
-          before do
-            project.ci_cd_settings.update!(job_token_scope_enabled: false)
-          end
-
-          it 'returns nil' do
-            expect(subject.dig('data', 'project', 'ciJobTokenScope')).to be_nil
+            expect(returned_project_paths).to contain_exactly(project.path)
           end
         end
 

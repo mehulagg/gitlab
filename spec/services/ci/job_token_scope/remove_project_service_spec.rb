@@ -24,9 +24,10 @@ RSpec.describe Ci::JobTokenScope::RemoveProjectService do
           target_project.add_developer(current_user)
         end
 
-        it 'temporarily disallows the operation' do
-          expect(result).to be_error
-          expect(result.message).to eq('Job token scope is disabled for this project')
+        it 'removes the project from the scope' do
+          expect do
+            expect(result).to be_success
+          end.to change { Ci::JobToken::ProjectScopeLink.count }.by(-1)
         end
       end
 
@@ -37,7 +38,7 @@ RSpec.describe Ci::JobTokenScope::RemoveProjectService do
 
         let(:target_project) { project }
 
-        it_behaves_like 'returns error', "Job token scope is disabled for this project"
+        it_behaves_like 'returns error', "Source project cannot be removed from the job token scope"
       end
     end
   end

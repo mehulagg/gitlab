@@ -17,7 +17,7 @@ RSpec.shared_examples 'editable job token scope' do
   end
 
   context 'when user does not have permissions to edit the job token scope' do
-    it_behaves_like 'returns error', 'Job token scope is disabled for this project'
+    it_behaves_like 'returns error', 'Insufficient permissions to modify the job token scope'
   end
 
   context 'when user has permissions to edit the job token scope' do
@@ -28,12 +28,12 @@ RSpec.shared_examples 'editable job token scope' do
     context 'when target project is not provided' do
       let(:target_project) { nil }
 
-      it_behaves_like 'returns error', 'Job token scope is disabled for this project'
+      it_behaves_like 'returns error', Ci::JobTokenScope::EditScopeValidations::TARGET_PROJECT_UNAUTHORIZED_OR_UNFOUND
     end
 
     context 'when target project is provided' do
       context 'when user does not have permissions to read the target project' do
-        it_behaves_like 'returns error', 'Job token scope is disabled for this project'
+        it_behaves_like 'returns error', Ci::JobTokenScope::EditScopeValidations::TARGET_PROJECT_UNAUTHORIZED_OR_UNFOUND
       end
     end
   end

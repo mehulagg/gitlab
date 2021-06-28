@@ -18,9 +18,10 @@ RSpec.describe Ci::JobTokenScope::AddProjectService do
           target_project.add_developer(current_user)
         end
 
-        it 'temporarily disallows the operation' do
-          expect(result).to be_error
-          expect(result.message).to eq('Job token scope is disabled for this project')
+        it 'adds the project to the scope' do
+          expect do
+            expect(result).to be_success
+          end.to change { Ci::JobToken::ProjectScopeLink.count }.by(1)
         end
       end
 
@@ -31,7 +32,7 @@ RSpec.describe Ci::JobTokenScope::AddProjectService do
 
         let(:target_project) { project }
 
-        it_behaves_like 'returns error', 'Job token scope is disabled for this project'
+        it_behaves_like 'returns error', "Validation failed: Target project can't be the same as the source project"
       end
     end
   end

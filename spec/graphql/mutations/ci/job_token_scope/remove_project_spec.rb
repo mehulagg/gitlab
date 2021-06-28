@@ -45,10 +45,10 @@ RSpec.describe Mutations::Ci::JobTokenScope::RemoveProject do
           target_project.add_guest(current_user)
         end
 
-        it 'temporarily disallow the operation' do
+        it 'removes target project from the job token scope' do
           expect do
-            expect(subject).to include(ci_job_token_scope: be_nil, errors: ['Job token scope is disabled for this project'])
-          end.not_to change { Ci::JobToken::ProjectScopeLink.count }
+            expect(subject).to include(ci_job_token_scope: be_present, errors: be_empty)
+          end.to change { Ci::JobToken::ProjectScopeLink.count }.by(-1)
         end
 
         context 'when the service returns an error' do

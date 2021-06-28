@@ -27,24 +27,14 @@ RSpec.describe Resolvers::Ci::JobTokenScopeResolver do
       end
 
       it 'returns the same project in the allow list of projects for the Ci Job Token' do
-        expect(resolve_scope).to eq(nil) # temporarily disable scope
+        expect(resolve_scope.all_projects).to contain_exactly(project)
       end
 
       context 'when another projects gets added to the allow list' do
         let!(:link) { create(:ci_job_token_project_scope_link, source_project: project) }
 
-        it 'temporarily has disabled scope' do
-          expect(resolve_scope).to eq(nil)
-        end
-      end
-
-      context 'when job token scope is disabled' do
-        before do
-          project.update!(ci_job_token_scope_enabled: false)
-        end
-
-        it 'returns nil' do
-          expect(resolve_scope).to be_nil
+        it 'returns both projects' do
+          expect(resolve_scope.all_projects).to contain_exactly(project, link.target_project)
         end
       end
 

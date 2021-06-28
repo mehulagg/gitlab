@@ -1442,7 +1442,7 @@ RSpec.describe ProjectPolicy do
           scope_project.add_developer(current_user)
         end
 
-        it { is_expected.to be_allowed(:guest_access) } # temporarily disabling scope
+        it { is_expected.to be_disallowed(:guest_access) }
 
         context 'when job token scope is disabled' do
           before do
@@ -1470,7 +1470,7 @@ RSpec.describe ProjectPolicy do
           scope_project.add_developer(current_user)
         end
 
-        it { is_expected.to be_allowed(:public_access) } # temporarily disabling scope
+        it { is_expected.to be_disallowed(:public_access) }
 
         context 'when job token scope is disabled' do
           before do

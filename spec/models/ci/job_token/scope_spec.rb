@@ -49,7 +49,7 @@ RSpec.describe Ci::JobToken::Scope do
       let(:scope_link) { create(:ci_job_token_project_scope_link) }
       let(:target_project) { scope_link.target_project }
 
-      it { is_expected.to be_truthy } # temporarily forcing setting to be false
+      it { is_expected.to be_falsey }
 
       context 'when project scope setting is disabled' do
         before do

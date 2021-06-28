@@ -61,10 +61,12 @@ RSpec.describe 'CiJobTokenScopeRemoveProject' do
       target_project.add_guest(current_user)
     end
 
-    it 'temporarily disables the operation' do
-      post_graphql_mutation(mutation, current_user: current_user)
-      expect(response).to have_gitlab_http_status(:success)
-      expect(mutation_response.dig('ciJobTokenScope', 'projects', 'nodes')).to be_nil
+    it 'removes the target project from the job token scope' do
+      expect do
+        post_graphql_mutation(mutation, current_user: current_user)
+        expect(response).to have_gitlab_http_status(:success)
+        expect(mutation_response.dig('ciJobTokenScope', 'projects', 'nodes')).not_to be_empty
+      end.to change { Ci::JobToken::Scope.new(project).includes?(target_project) }.from(true).to(false)
     end
 
     context 'when invalid target project is provided' do
@@ -75,7 +77,7 @@ RSpec.describe 'CiJobTokenScopeRemoveProject' do
       it 'has mutation errors' do
         post_graphql_mutation(mutation, current_user: current_user)
 
-        expect(mutation_response['errors']).to contain_exactly('Job token scope is disabled for this project')
+        expect(mutation_response['errors']).to contain_exactly(Ci::JobTokenScope::EditScopeValidations::TARGET_PROJECT_UNAUTHORIZED_OR_UNFOUND)
       end
     end
   end
