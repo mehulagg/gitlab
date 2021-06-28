@@ -240,7 +240,7 @@ You can add comments and threads to a particular commit.
 1. On the top bar, select **Menu > Projects** and find your project.
 1. On the left sidebar, select **Repository > Commits**.
 1. Below the commits, in the **Comment** field, enter a comment.
-1. Select **Comment**.
+1. Select **Comment** or select the down arrow (**{chevron-down}**) to select **Start thread**.
 
 WARNING:
 Threads created this way are lost if the commit ID changes after a
