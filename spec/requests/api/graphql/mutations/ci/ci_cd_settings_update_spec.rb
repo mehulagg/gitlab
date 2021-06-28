@@ -73,7 +73,7 @@ RSpec.describe 'CiCdSettingsUpdate' do
       project.reload
 
       expect(response).to have_gitlab_http_status(:success)
-      expect(project.ci_job_token_scope_enabled).to eq(true)
+      expect(project.ci_job_token_scope_enabled).to eq(false) # Temporarily returning always false
     end
 
     context 'when bad arguments are provided' do

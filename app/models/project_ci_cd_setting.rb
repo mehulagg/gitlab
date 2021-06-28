@@ -26,6 +26,21 @@ class ProjectCiCdSetting < ApplicationRecord
     Gitlab::CurrentSettings.current_application_settings.keep_latest_artifact? && keep_latest_artifact?
   end
 
+  # Temporarily overriding this setting so that we can drop and readd the
+  # columnn in order to reset the values to `false`.
+  # https://gitlab.com/gitlab-org/gitlab/-/issues/333002
+  def job_token_scope_enabled
+    false
+  end
+
+  def job_token_scope_enabled?
+    job_token_scope_enabled
+  end
+
+  def job_token_scope_enabled=(_value)
+    nil
+  end
+
   private
 
   def set_default_git_depth
