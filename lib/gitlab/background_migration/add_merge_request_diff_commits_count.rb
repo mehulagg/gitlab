@@ -23,3 +23,4 @@ module Gitlab
     end
   end
 end
+# test comment
