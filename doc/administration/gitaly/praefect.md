@@ -981,6 +981,24 @@ To get started quickly:
 Congratulations! You've configured an observable fault-tolerant Praefect
 cluster.
 
+## Required Firewall Rules
+
+Components of Gitaly Cluster will communicate with each other over a variety of routes.
+Your firewall rules must allow incoming traffic as outlined below:
+
+- GitLab Nodes
+  - Port 80/443 from Gitaly nodes
+  - Port 80/443 from external clients
+- Praefect Load Balancer
+  - Port 2305/3305 from GitLab nodes
+  - Port 2305/3305 from Gitaly nodes
+- Praefect Nodes
+  - Port 2305/3305 from Praefect Load Balancer
+  - Port 2305/3305 from Gitaly nodes
+- Gitaly
+  - Port 8075/9999 from Praefect nodes
+  - Port 8075/9999 from all Gitaly nodes including itself
+
 ## Distributed reads
 
 > - Introduced in GitLab 13.1 in [beta](https://about.gitlab.com/handbook/product/gitlab-the-product/#alpha-beta-ga) with feature flag `gitaly_distributed_reads` set to disabled.
