@@ -63,6 +63,10 @@ export default {
     },
   },
   computed: {
+    canCreateJiraIssue() {
+      return Boolean(this.vulnerability.create_jira_issue_url);
+    },
+
     createIssueButtonText() {
       return this.vulnerability.create_jira_issue_url
         ? s__('ciReport|Create Jira issue')
@@ -100,7 +104,7 @@ export default {
         buttons.push(DownloadButton);
       }
 
-      if (this.canCreateIssue) {
+      if (this.canCreateIssue || this.canCreateJiraIssue) {
         buttons.push(issueButton);
       }
 
