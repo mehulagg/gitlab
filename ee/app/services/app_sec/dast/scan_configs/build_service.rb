@@ -44,7 +44,7 @@ module AppSec
             'stages' => ['dast'],
             'include' => [{ 'template' => 'DAST-On-Demand-Scan.gitlab-ci.yml' }],
             'dast' => {
-              'dast_configuration' => { 'site_profile' => dast_site_profile.name, 'scanner_profile' => dast_scanner_profile.name }
+              'dast_configuration' => { 'site_profile' => dast_site_profile.name, 'scanner_profile' => dast_scanner_profile&.name }.compact
             }
           }.to_yaml
         end
