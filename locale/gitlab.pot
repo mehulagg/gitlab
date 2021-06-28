@@ -6823,6 +6823,9 @@ msgstr ""
 msgid "Cluster Health"
 msgstr ""
 
+msgid "Cluster Image Scanning"
+msgstr ""
+
 msgid "Cluster cache cleared."
 msgstr ""
 
@@ -28369,9 +28372,6 @@ msgstr ""
 msgid "Running"
 msgstr ""
 
-msgid "Running Container Scanning"
-msgstr ""
-
 msgid "Runs a number of housekeeping tasks within the current repository, such as compressing file revisions and removing unreachable objects."
 msgstr ""
 
@@ -38237,6 +38237,9 @@ msgstr ""
 msgid "ciReport|Checks"
 msgstr ""
 
+msgid "ciReport|Cluster Image Scanning"
+msgstr ""
+
 msgid "ciReport|Code quality"
 msgstr ""
 
@@ -38325,9 +38328,6 @@ msgid "ciReport|RPS"
 msgstr ""
 
 msgid "ciReport|Resolve with merge request"
-msgstr ""
-
-msgid "ciReport|Running Container Scanning"
 msgstr ""
 
 msgid "ciReport|SAST"

@@ -26,7 +26,7 @@ const defaultScanners = [
   createScannerConfig(DEFAULT_SCANNER, 'CONTAINER_SCANNING', 6),
   createScannerConfig(DEFAULT_SCANNER, 'DAST', 7),
   createScannerConfig(DEFAULT_SCANNER, 'DAST', 8),
-  createScannerConfig(DEFAULT_SCANNER, 'RUNNING_CONTAINER_SCANNING', 9),
+  createScannerConfig(DEFAULT_SCANNER, 'CLUSTER_IMAGE_SCANNING', 9),
 ];
 
 const customScanners = [
