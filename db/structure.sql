@@ -14533,7 +14533,9 @@ CREATE TABLE members (
     requested_at timestamp without time zone,
     expires_at date,
     ldap boolean DEFAULT false NOT NULL,
-    override boolean DEFAULT false NOT NULL
+    override boolean DEFAULT false NOT NULL,
+    area_of_focus text,
+    CONSTRAINT check_2f2e2cf719 CHECK ((char_length(area_of_focus) <= 255))
 );
 
 CREATE SEQUENCE members_id_seq
