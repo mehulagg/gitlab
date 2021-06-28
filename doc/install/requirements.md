@@ -183,9 +183,13 @@ tune the Puma settings:
 The recommended number of workers is calculated as the highest of the following:
 
 - `2`
-- Number of CPU cores - 1
+- A calculation combining CPU and Memory resource availability - [Puma workers](https://gitlab.com/gitlab-org/omnibus-gitlab/-/blob/master/files/gitlab-cookbooks/gitlab/libraries/puma.rb#L31-46)
 
-For example a node with 4 cores should be configured with 3 Puma workers.
+For example 
+
+- a node with 2 cores / 8 GB memory should be configured with 2 Puma workers.
+- a node with 4 cores / 4 GB memory should be configured with 4 Puma workers
+- a node with 4 cores / 8 GB memory should be configured with 6 Puma workers
 
 You can increase the number of Puma workers, providing enough CPU and memory capacity is available.
 A higher number of Puma workers usually helps to reduce the response time of the application
