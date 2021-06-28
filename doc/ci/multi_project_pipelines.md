@@ -9,7 +9,7 @@ type: reference
 
 > [Moved](https://gitlab.com/gitlab-org/gitlab/-/issues/199224) to GitLab Free in 12.8.
 
-You can set up [GitLab CI/CD](README.md) across multiple projects, so that a pipeline
+You can set up [GitLab CI/CD](index.md) across multiple projects, so that a pipeline
 in one project can trigger a pipeline in another project. You can visualize the entire pipeline
 in one place, including all cross-project interdependencies.
 

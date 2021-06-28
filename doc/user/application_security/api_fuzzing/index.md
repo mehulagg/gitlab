@@ -13,7 +13,7 @@ backend. This helps you discover bugs and potential security issues that other Q
 miss.
 
 We recommend that you use fuzz testing in addition to [GitLab Secure](../index.md)'s
-other security scanners and your own test processes. If you're using [GitLab CI/CD](../../../ci/README.md),
+other security scanners and your own test processes. If you're using [GitLab CI/CD](../../../ci/index.md),
 you can run fuzz tests as part your CI/CD workflow.
 
 ## When Web API fuzzing runs

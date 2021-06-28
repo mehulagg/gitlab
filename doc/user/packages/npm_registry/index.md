@@ -287,7 +287,7 @@ Prerequisites:
   It must match exactly, including the case. This is different than the
   npm naming convention, but it is required to work with the GitLab Package Registry.
 
-To work with npm commands within [GitLab CI/CD](../../../ci/README.md), you can use
+To work with npm commands within [GitLab CI/CD](../../../ci/index.md), you can use
 `CI_JOB_TOKEN` in place of the personal access token or deploy token in your commands.
 
 An example `.gitlab-ci.yml` file for publishing npm packages:

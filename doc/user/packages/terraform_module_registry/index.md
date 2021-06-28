@@ -99,7 +99,7 @@ module "<module>" {
 
 ## Publish a Terraform module by using CI/CD
 
-To work with Terraform modules in [GitLab CI/CD](../../../ci/README.md), you can use
+To work with Terraform modules in [GitLab CI/CD](../../../ci/index.md), you can use
 `CI_JOB_TOKEN` in place of the personal access token in your commands.
 
 For example:

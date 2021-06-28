@@ -10,7 +10,7 @@ type: reference, howto
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/1984) in GitLab 9.3.
 > - Made [available in all tiers](https://gitlab.com/gitlab-org/gitlab/-/issues/212499) in 13.2.
 
-Ensuring your project's code stays simple, readable and easy to contribute to can be problematic. With the help of [GitLab CI/CD](../../../ci/README.md), you can analyze your
+Ensuring your project's code stays simple, readable and easy to contribute to can be problematic. With the help of [GitLab CI/CD](../../../ci/index.md), you can analyze your
 source code quality using GitLab Code Quality.
 
 Code Quality:

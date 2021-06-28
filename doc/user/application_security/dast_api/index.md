@@ -7,11 +7,11 @@ type: reference, howto
 
 # DAST API **(ULTIMATE)**
 
-You can add dynamic application security testing of web APIs to your [GitLab CI/CD](../../../ci/README.md) pipelines.
+You can add dynamic application security testing of web APIs to your [GitLab CI/CD](../../../ci/index.md) pipelines.
 This helps you discover bugs and potential security issues that other QA processes may miss.
 
 We recommend that you use DAST API testing in addition to [GitLab Secure](../index.md)'s
-other security scanners and your own test processes. If you're using [GitLab CI/CD](../../../ci/README.md),
+other security scanners and your own test processes. If you're using [GitLab CI/CD](../../../ci/index.md),
 you can run DAST API tests as part your CI/CD workflow.
 
 ## Requirements

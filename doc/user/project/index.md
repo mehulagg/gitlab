@@ -65,7 +65,7 @@ Projects include the following [features](https://about.gitlab.com/features/):
 
 **GitLab CI/CD:**
 
-- [GitLab CI/CD](../../ci/README.md): Use the built-in [Continuous Integration, Delivery, and Deployment](https://about.gitlab.com/blog/2016/08/05/continuous-integration-delivery-and-deployment-with-gitlab/) tool.
+- [GitLab CI/CD](../../ci/index.md): Use the built-in [Continuous Integration, Delivery, and Deployment](https://about.gitlab.com/blog/2016/08/05/continuous-integration-delivery-and-deployment-with-gitlab/) tool.
   - [Container Registry](../packages/container_registry/index.md): Build and push Docker
   images.
   - [Auto Deploy](../../topics/autodevops/stages.md#auto-deploy): Configure GitLab CI/CD

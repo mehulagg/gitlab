@@ -9,7 +9,7 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/5483) in [GitLab Ultimate](https://about.gitlab.com/pricing/) 11.0.
 
-If you're using [GitLab CI/CD](../../../ci/README.md), you can use License Compliance to search your
+If you're using [GitLab CI/CD](../../../ci/index.md), you can use License Compliance to search your
 project's dependencies for their licenses. You can then decide whether to allow or deny the use of
 each license. For example, if your application uses an external (open source) library whose license
 is incompatible with yours, then you can deny the use of that license.
