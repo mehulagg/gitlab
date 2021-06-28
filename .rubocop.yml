@@ -267,6 +267,14 @@ Gitlab/AvoidUploadedFileFromParams:
     - 'spec/**/*'
     - 'ee/spec/**/*'
 
+Gitlab/AvoidReferencingActiveRecordBase:
+  Enabled: true
+  Exclude:
+    - 'ee/app/**/*.rb'
+    - 'ee/lib/**/*.rb'
+    - 'spec/**/*.rb'
+    - 'ee/spec/**/*.rb'
+
 GitlabSecurity/PublicSend:
   Enabled: true
   Exclude:
