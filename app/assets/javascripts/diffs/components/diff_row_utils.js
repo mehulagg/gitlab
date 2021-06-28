@@ -6,17 +6,13 @@ import {
   OLD_NO_NEW_LINE_TYPE,
   NEW_NO_NEW_LINE_TYPE,
   EMPTY_CELL_TYPE,
-  CONFLICT_MARKER_OUR,
-  CONFLICT_MARKER_THEIR,
-  CONFLICT_THEIR,
-  CONFLICT_OUR,
 } from '../constants';
 
-export const isHighlighted = (highlightedRow, line, isCommented) => {
+export const isHighlighted = (state, line, isCommented) => {
   if (isCommented) return true;
 
   const lineCode = line?.line_code;
-  return lineCode ? lineCode === highlightedRow : false;
+  return lineCode ? lineCode === state.diffs.highlightedRow : false;
 };
 
 export const isContextLine = (type) => type === CONTEXT_LINE_TYPE;
@@ -54,11 +50,13 @@ export const classNameMapCell = ({ line, hll, isLoggedIn, isHover }) => {
   ];
 };
 
-export const addCommentTooltip = (line) => {
+export const addCommentTooltip = (line, dragCommentSelectionEnabled = false) => {
   let tooltip;
   if (!line) return tooltip;
 
-  tooltip = __('Add a comment to this line or drag for multiple lines');
+  tooltip = dragCommentSelectionEnabled
+    ? __('Add a comment to this line or drag for multiple lines')
+    : __('Add a comment to this line');
   const brokenSymlinks = line.commentsDisabled;
 
   if (brokenSymlinks) {
@@ -109,10 +107,6 @@ export const mapParallel = (content) => (line) => {
       hasDraft: content.hasParallelDraftLeft(content.diffFile.file_hash, line),
       lineDraft: content.draftForLine(content.diffFile.file_hash, line, 'left'),
       hasCommentForm: left.hasForm,
-      isConflictMarker:
-        line.left.type === CONFLICT_MARKER_OUR || line.left.type === CONFLICT_MARKER_THEIR,
-      emptyCellClassMap: { conflict_our: line.right?.type === CONFLICT_THEIR },
-      addCommentTooltip: addCommentTooltip(line.left),
     };
   }
   if (right) {
@@ -122,8 +116,6 @@ export const mapParallel = (content) => (line) => {
       hasDraft: content.hasParallelDraftRight(content.diffFile.file_hash, line),
       lineDraft: content.draftForLine(content.diffFile.file_hash, line, 'right'),
       hasCommentForm: Boolean(right.hasForm && right.type),
-      emptyCellClassMap: { conflict_their: line.left?.type === CONFLICT_OUR },
-      addCommentTooltip: addCommentTooltip(line.right),
     };
   }
 

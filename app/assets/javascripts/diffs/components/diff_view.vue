@@ -3,12 +3,10 @@ import { mapGetters, mapState, mapActions } from 'vuex';
 import DraftNote from '~/batch_comments/components/draft_note.vue';
 import draftCommentsMixin from '~/diffs/mixins/draft_comments';
 import { getCommentedLines } from '~/notes/components/multiline_comment_utils';
-import { hide } from '~/tooltips';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import DiffCommentCell from './diff_comment_cell.vue';
 import DiffExpansionCell from './diff_expansion_cell.vue';
 import DiffRow from './diff_row.vue';
-import { isHighlighted } from './diff_row_utils';
 
 export default {
   components: {
@@ -45,8 +43,8 @@ export default {
     };
   },
   computed: {
-    ...mapGetters('diffs', ['commitId', 'fileLineCoverage']),
-    ...mapState('diffs', ['codequalityDiff', 'highlightedRow']),
+    ...mapGetters('diffs', ['commitId']),
+    ...mapState('diffs', ['codequalityDiff']),
     ...mapState({
       selectedCommentPosition: ({ notes }) => notes.selectedCommentPosition,
       selectedCommentPositionHover: ({ notes }) => notes.selectedCommentPositionHover,
@@ -69,17 +67,14 @@ export default {
   },
   methods: {
     ...mapActions(['setSelectedCommentPosition']),
-    ...mapActions('diffs', ['showCommentForm', 'setHighlightedRow', 'toggleLineDiscussions']),
+    ...mapActions('diffs', ['showCommentForm']),
     showCommentLeft(line) {
       return line.left && !line.right;
     },
     showCommentRight(line) {
       return line.right && !line.left;
     },
-    onStartDragging({ event = {}, line }) {
-      if (event.target?.parentNode) {
-        hide(event.target.parentNode);
-      }
+    onStartDragging(line) {
       this.dragStart = line;
     },
     onDragOver(line) {
@@ -104,26 +99,6 @@ export default {
       });
       this.dragStart = null;
     },
-    isHighlighted(line) {
-      return isHighlighted(
-        this.highlightedRow,
-        line.left?.line_code ? line.left : line.right,
-        false,
-      );
-    },
-    handleParallelLineMouseDown(e) {
-      const line = e.target.closest('.diff-td');
-      const table = line.closest('.diff-table');
-
-      table.classList.remove('left-side-selected', 'right-side-selected');
-      const [lineClass] = ['left-side', 'right-side'].filter((name) =>
-        line.classList.contains(name),
-      );
-
-      if (lineClass) {
-        table.classList.add(`${lineClass}-selected`);
-      }
-    },
   },
   userColorScheme: window.gon.user_color_scheme,
 };
@@ -134,7 +109,6 @@ export default {
     :class="[$options.userColorScheme, { inline, 'with-codequality': hasCodequalityChanges }]"
     :data-commit-id="commitId"
     class="diff-grid diff-table code diff-wrap-lines js-syntax-highlight text-file"
-    @mousedown="handleParallelLineMouseDown"
   >
     <template v-for="(line, index) in diffLines">
       <div
@@ -162,14 +136,6 @@ export default {
         :is-commented="index >= commentedLines.startLine && index <= commentedLines.endLine"
         :inline="inline"
         :index="index"
-        :is-highlighted="isHighlighted(line)"
-        :file-line-coverage="fileLineCoverage"
-        @showCommentForm="(lineCode) => showCommentForm({ lineCode, fileHash: diffFile.file_hash })"
-        @setHighlightedRow="setHighlightedRow"
-        @toggleLineDiscussions="
-          ({ lineCode, expanded }) =>
-            toggleLineDiscussions({ lineCode, fileHash: diffFile.file_hash, expanded })
-        "
         @enterdragging="onDragOver"
         @startdragging="onStartDragging"
         @stopdragging="onStopDragging"

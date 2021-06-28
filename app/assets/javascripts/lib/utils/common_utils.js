@@ -763,5 +763,3 @@ export const isFeatureFlagEnabled = (flag) => window.gon.features?.[flag];
  * @returns {Array[String]} Converted array
  */
 export const convertArrayToCamelCase = (array) => array.map((i) => convertToCamelCase(i));
-
-export const isLoggedIn = () => Boolean(window.gon?.current_user_id);

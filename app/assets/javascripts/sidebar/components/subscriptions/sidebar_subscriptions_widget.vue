@@ -2,7 +2,6 @@
 import { GlIcon, GlLoadingIcon, GlToggle, GlTooltipDirective } from '@gitlab/ui';
 import createFlash from '~/flash';
 import { IssuableType } from '~/issue_show/constants';
-import { isLoggedIn } from '~/lib/utils/common_utils';
 import { __, sprintf } from '~/locale';
 import SidebarEditableItem from '~/sidebar/components/sidebar_editable_item.vue';
 import { subscribedQueries } from '~/sidebar/constants';
@@ -103,7 +102,7 @@ export default {
       });
     },
     isLoggedIn() {
-      return isLoggedIn();
+      return Boolean(gon.current_user_id);
     },
     canSubscribe() {
       return this.emailsDisabled || !this.isLoggedIn;

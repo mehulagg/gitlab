@@ -1,6 +1,7 @@
 import { shallowMount } from '@vue/test-utils';
 import Vue from 'vue';
 import Vuex from 'vuex';
+import CodeQualityGutterIcon from 'ee/diffs/components/code_quality_gutter_icon.vue';
 import DiffRow from '~/diffs/components/diff_row.vue';
 import diffsModule from '~/diffs/store/modules';
 
@@ -9,24 +10,16 @@ Vue.use(Vuex);
 describe('EE DiffRow', () => {
   let wrapper;
 
-  const findIcon = () => wrapper.find('[data-testid="codeQualityIcon"]');
+  const findIcon = () => wrapper.findComponent(CodeQualityGutterIcon);
 
   const defaultProps = {
     fileHash: 'abc',
     filePath: 'abc',
     line: {},
     index: 0,
-    isHighlighted: false,
-    fileLineCoverage: () => ({}),
   };
 
-  const createComponent = ({
-    props,
-    state,
-    actions,
-    isLoggedIn = true,
-    codequalityMrDiffAnnotations,
-  }) => {
+  const createComponent = ({ props, state, actions, isLoggedIn = true, provide }) => {
     const diffs = diffsModule();
     diffs.state = { ...diffs.state, ...state };
     diffs.actions = { ...diffs.actions, ...actions };
@@ -38,38 +31,18 @@ describe('EE DiffRow', () => {
       getters,
     });
 
-    window.gon = { features: { codequalityMrDiffAnnotations } };
-
-    wrapper = shallowMount(DiffRow, {
-      propsData: { ...defaultProps, ...props },
-      store,
-      listeners: {
-        enterdragging: () => {},
-        stopdragging: () => {},
-        showCommentForm: () => {},
-        setHighlightedRow: () => {},
-      },
-    });
+    wrapper = shallowMount(DiffRow, { propsData: { ...defaultProps, ...props }, store, provide });
   };
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
-
-    window.gon = {};
-
-    Object.values(DiffRow).forEach(({ cache }) => {
-      if (cache) {
-        cache.clear();
-      }
-    });
   });
 
   describe('with feature flag enabled', () => {
     beforeEach(() => {
       createComponent({
         props: { line: { right: { codequality: [{ severity: 'critical' }] } } },
-        codequalityMrDiffAnnotations: true,
+        provide: { glFeatures: { codequalityMrDiffAnnotations: true } },
       });
     });
 
@@ -82,7 +55,7 @@ describe('EE DiffRow', () => {
     beforeEach(() => {
       createComponent({
         props: { line: { right: { codequality: [{ severity: 'critical' }] } } },
-        codequalityMrDiffAnnotations: false,
+        provide: { glFeatures: { codequalityMrDiffAnnotations: false } },
       });
     });
 

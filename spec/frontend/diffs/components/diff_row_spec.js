@@ -8,12 +8,6 @@ import diffsModule from '~/diffs/store/modules';
 import { findInteropAttributes } from '../find_interop_attributes';
 import diffFileMockData from '../mock_data/diff_file';
 
-const showCommentForm = jest.fn();
-const enterdragging = jest.fn();
-const stopdragging = jest.fn();
-const setHighlightedRow = jest.fn();
-let wrapper;
-
 describe('DiffRow', () => {
   const testLines = [
     {
@@ -35,7 +29,7 @@ describe('DiffRow', () => {
     },
   ];
 
-  const createWrapper = ({ props, state = {}, actions, isLoggedIn = true }) => {
+  const createWrapper = ({ props, state, actions, isLoggedIn = true }) => {
     Vue.use(Vuex);
 
     const diffs = diffsModule();
@@ -49,25 +43,11 @@ describe('DiffRow', () => {
       getters,
     });
 
-    window.gon = { current_user_id: isLoggedIn ? 1 : 0 };
-    const coverageFileData = state.coverageFiles?.files ? state.coverageFiles.files : {};
-
     const propsData = {
       fileHash: 'abc',
       filePath: 'abc',
       line: {},
       index: 0,
-      isHighlighted: false,
-      fileLineCoverage: (file, line) => {
-        const hits = coverageFileData[file]?.[line];
-        if (hits) {
-          return { text: `Test coverage: ${hits} hits`, class: 'coverage' };
-        } else if (hits === 0) {
-          return { text: 'No test coverage', class: 'no-coverage' };
-        }
-
-        return {};
-      },
       ...props,
     };
 
@@ -75,37 +55,49 @@ describe('DiffRow', () => {
       glFeatures: { dragCommentSelection: true },
     };
 
-    return shallowMount(DiffRow, {
-      propsData,
-      store,
-      provide,
-      listeners: {
-        enterdragging,
-        stopdragging,
-        setHighlightedRow,
-        showCommentForm,
-      },
-    });
+    return shallowMount(DiffRow, { propsData, store, provide });
   };
 
-  afterEach(() => {
-    wrapper.destroy();
-    wrapper = null;
-
-    window.gon = {};
-    showCommentForm.mockReset();
-    enterdragging.mockReset();
-    stopdragging.mockReset();
-    setHighlightedRow.mockReset();
-
-    Object.values(DiffRow).forEach(({ cache }) => {
-      if (cache) {
-        cache.clear();
-      }
-    });
+  it('isHighlighted returns true given line.left', () => {
+    const props = {
+      line: {
+        left: {
+          line_code: 'abc',
+        },
+      },
+    };
+    const state = { highlightedRow: 'abc' };
+    const wrapper = createWrapper({ props, state });
+    expect(wrapper.vm.isHighlighted).toBe(true);
   });
 
-  const getCommentButton = (side) => wrapper.find(`[data-testid="${side}-comment-button"]`);
+  it('isHighlighted returns true given line.right', () => {
+    const props = {
+      line: {
+        right: {
+          line_code: 'abc',
+        },
+      },
+    };
+    const state = { highlightedRow: 'abc' };
+    const wrapper = createWrapper({ props, state });
+    expect(wrapper.vm.isHighlighted).toBe(true);
+  });
+
+  it('isHighlighted returns false given line.left', () => {
+    const props = {
+      line: {
+        left: {
+          line_code: 'abc',
+        },
+      },
+    };
+    const wrapper = createWrapper({ props });
+    expect(wrapper.vm.isHighlighted).toBe(false);
+  });
+
+  const getCommentButton = (wrapper, side) =>
+    wrapper.find(`[data-testid="${side}-comment-button"]`);
 
   describe.each`
     side
@@ -113,30 +105,33 @@ describe('DiffRow', () => {
     ${'right'}
   `('$side side', ({ side }) => {
     it(`renders empty cells if ${side} is unavailable`, () => {
-      wrapper = createWrapper({ props: { line: testLines[2], inline: false } });
+      const wrapper = createWrapper({ props: { line: testLines[2], inline: false } });
       expect(wrapper.find(`[data-testid="${side}-line-number"]`).exists()).toBe(false);
       expect(wrapper.find(`[data-testid="${side}-empty-cell"]`).exists()).toBe(true);
     });
 
     describe('comment button', () => {
+      const showCommentForm = jest.fn();
       let line;
 
       beforeEach(() => {
+        showCommentForm.mockReset();
         // https://eslint.org/docs/rules/prefer-destructuring#when-not-to-use-it
         // eslint-disable-next-line prefer-destructuring
         line = testLines[3];
       });
 
       it('renders', () => {
-        wrapper = createWrapper({ props: { line, inline: false } });
-        expect(getCommentButton(side).exists()).toBe(true);
+        const wrapper = createWrapper({ props: { line, inline: false } });
+        expect(getCommentButton(wrapper, side).exists()).toBe(true);
       });
 
       it('responds to click and keyboard events', async () => {
-        wrapper = createWrapper({
+        const wrapper = createWrapper({
           props: { line, inline: false },
+          actions: { showCommentForm },
         });
-        const commentButton = getCommentButton(side);
+        const commentButton = getCommentButton(wrapper, side);
 
         await commentButton.trigger('click');
         await commentButton.trigger('keydown.enter');
@@ -147,10 +142,11 @@ describe('DiffRow', () => {
 
       it('ignores click and keyboard events when comments are disabled', async () => {
         line[side].commentsDisabled = true;
-        wrapper = createWrapper({
+        const wrapper = createWrapper({
           props: { line, inline: false },
+          actions: { showCommentForm },
         });
-        const commentButton = getCommentButton(side);
+        const commentButton = getCommentButton(wrapper, side);
 
         await commentButton.trigger('click');
         await commentButton.trigger('keydown.enter');
@@ -161,20 +157,19 @@ describe('DiffRow', () => {
     });
 
     it('renders avatars', () => {
-      wrapper = createWrapper({ props: { line: testLines[0], inline: false } });
-
+      const wrapper = createWrapper({ props: { line: testLines[0], inline: false } });
       expect(wrapper.find(`[data-testid="${side}-discussions"]`).exists()).toBe(true);
     });
   });
 
   it('renders left line numbers', () => {
-    wrapper = createWrapper({ props: { line: testLines[0] } });
+    const wrapper = createWrapper({ props: { line: testLines[0] } });
     const lineNumber = testLines[0].left.old_line;
     expect(wrapper.find(`[data-linenumber="${lineNumber}"]`).exists()).toBe(true);
   });
 
   it('renders right line numbers', () => {
-    wrapper = createWrapper({ props: { line: testLines[0] } });
+    const wrapper = createWrapper({ props: { line: testLines[0] } });
     const lineNumber = testLines[0].right.new_line;
     expect(wrapper.find(`[data-linenumber="${lineNumber}"]`).exists()).toBe(true);
   });
@@ -191,10 +186,12 @@ describe('DiffRow', () => {
       ${'left'}
       ${'right'}
     `('emits `enterdragging` onDragEnter $side side', ({ side }) => {
-      wrapper = createWrapper({ props: { line } });
+      const expectation = { ...line[side], index: 0 };
+      const wrapper = createWrapper({ props: { line } });
       fireEvent.dragEnter(getByTestId(wrapper.element, `${side}-side`));
 
-      expect(enterdragging).toHaveBeenCalledWith({ ...line[side], index: 0 });
+      expect(wrapper.emitted().enterdragging).toBeTruthy();
+      expect(wrapper.emitted().enterdragging[0]).toEqual([expectation]);
     });
 
     it.each`
@@ -202,10 +199,10 @@ describe('DiffRow', () => {
       ${'left'}
       ${'right'}
     `('emits `stopdragging` onDrop $side side', ({ side }) => {
-      wrapper = createWrapper({ props: { line } });
+      const wrapper = createWrapper({ props: { line } });
       fireEvent.dragEnd(getByTestId(wrapper.element, `${side}-side`));
 
-      expect(stopdragging).toHaveBeenCalled();
+      expect(wrapper.emitted().stopdragging).toBeTruthy();
     });
   });
 
@@ -234,7 +231,7 @@ describe('DiffRow', () => {
 
     it('for lines with coverage', () => {
       const coverageFiles = { files: { [name]: { [line]: 5 } } };
-      wrapper = createWrapper({ props, state: { coverageFiles } });
+      const wrapper = createWrapper({ props, state: { coverageFiles } });
       const coverage = wrapper.find('.line-coverage.right-side');
 
       expect(coverage.attributes('title')).toContain('Test coverage: 5 hits');
@@ -243,7 +240,7 @@ describe('DiffRow', () => {
 
     it('for lines without coverage', () => {
       const coverageFiles = { files: { [name]: { [line]: 0 } } };
-      wrapper = createWrapper({ props, state: { coverageFiles } });
+      const wrapper = createWrapper({ props, state: { coverageFiles } });
       const coverage = wrapper.find('.line-coverage.right-side');
 
       expect(coverage.attributes('title')).toContain('No test coverage');
@@ -252,7 +249,7 @@ describe('DiffRow', () => {
 
     it('for unknown lines', () => {
       const coverageFiles = {};
-      wrapper = createWrapper({ props, state: { coverageFiles } });
+      const wrapper = createWrapper({ props, state: { coverageFiles } });
       const coverage = wrapper.find('.line-coverage.right-side');
 
       expect(coverage.attributes('title')).toBeFalsy();
@@ -270,7 +267,7 @@ describe('DiffRow', () => {
       ${'with parallel and no left side'}  | ${{ right: { old_line: 3, new_line: 5 } }}             | ${false} | ${null}                                                   | ${{ type: 'new', line: '5', newLine: '5' }}
       ${'with parallel and right side'}    | ${{ left: { old_line: 3 }, right: { new_line: 5 } }}   | ${false} | ${{ type: 'old', line: '3', oldLine: '3' }}               | ${{ type: 'new', line: '5', newLine: '5' }}
     `('$desc, sets interop data attributes', ({ line, inline, leftSide, rightSide }) => {
-      wrapper = createWrapper({ props: { line, inline } });
+      const wrapper = createWrapper({ props: { line, inline } });
 
       expect(findInteropAttributes(wrapper, '[data-testid="left-side"]')).toEqual(leftSide);
       expect(findInteropAttributes(wrapper, '[data-testid="right-side"]')).toEqual(rightSide);

@@ -1,6 +1,5 @@
 <script>
 import { GlButton, GlLoadingIcon, GlTooltipDirective, GlIcon } from '@gitlab/ui';
-import { isLoggedIn } from '~/lib/utils/common_utils';
 import { __ } from '~/locale';
 import ApplySuggestion from './apply_suggestion.vue';
 
@@ -74,7 +73,7 @@ export default {
       return __('Applying suggestions...');
     },
     isLoggedIn() {
-      return isLoggedIn();
+      return Boolean(gon.current_user_id);
     },
   },
   methods: {
