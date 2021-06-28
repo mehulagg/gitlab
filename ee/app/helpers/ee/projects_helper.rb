@@ -225,8 +225,8 @@ module EE
         can?(current_user, :admin_namespace, project.root_ancestor)
     end
 
-    override :can_import_members?
-    def can_import_members?
+    override :can_manage_project_members?
+    def can_manage_project_members?(_project)
       super && !membership_locked?
     end
 

@@ -20,7 +20,7 @@ RSpec.describe ProjectsHelper do
     end
   end
 
-  describe '#can_import_members?' do
+  describe '#can_manage_project_members?' do
     let(:owner) { project.owner }
 
     before do
@@ -29,12 +29,12 @@ RSpec.describe ProjectsHelper do
 
     it 'returns false if membership is locked' do
       allow(helper).to receive(:membership_locked?) { true }
-      expect(helper.can_import_members?).to eq false
+      expect(helper.can_manage_project_members?(project)).to eq false
     end
 
     it 'returns true if membership is not locked' do
       allow(helper).to receive(:membership_locked?) { false }
-      expect(helper.can_import_members?).to eq true
+      expect(helper.can_manage_project_members?(project)).to eq true
     end
   end
 

@@ -720,21 +720,21 @@ RSpec.describe ProjectsHelper do
     end
   end
 
-  describe '#can_import_members?' do
+  describe '#can_manage_project_members?' do
     context 'when user is project owner' do
       before do
         allow(helper).to receive(:current_user) { project.owner }
       end
 
       it 'returns true for owner of project' do
-        expect(helper.can_import_members?).to eq true
+        expect(helper.can_manage_project_members?(project)).to eq true
       end
     end
 
     context 'when user is not a project owner' do
       using RSpec::Parameterized::TableSyntax
 
-      where(:user_project_role, :can_import) do
+      where(:user_project_role, :can_manage) do
         :maintainer | true
         :developer | false
         :reporter | false
@@ -747,8 +747,8 @@ RSpec.describe ProjectsHelper do
           allow(helper).to receive(:current_user) { user }
         end
 
-        it 'resolves if the user can import members' do
-          expect(helper.can_import_members?).to eq can_import
+        it 'resolves if the user can manage members' do
+          expect(helper.can_manage_project_members?(project)).to eq can_manage
         end
       end
     end

@@ -47,10 +47,10 @@ RSpec.describe 'projects/empty' do
   end
 
   context 'with invite button on empty projects' do
-    let(:can_import_members) { true }
+    let(:can_manage_members) { true }
 
     before do
-      allow(view).to receive(:can_import_members?).and_return(can_import_members)
+      allow(view).to receive(:can_manage_project_members?).and_return(can_manage_members)
     end
 
     it 'shows invite members info', :aggregate_failures do
@@ -67,7 +67,7 @@ RSpec.describe 'projects/empty' do
     end
 
     context 'when user does not have permissions to invite members' do
-      let(:can_import_members) { false }
+      let(:can_manage_members) { false }
 
       it 'does not show invite member info', :aggregate_failures do
         render

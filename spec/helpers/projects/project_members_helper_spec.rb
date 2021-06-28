@@ -21,18 +21,6 @@ RSpec.describe Projects::ProjectMembersHelper do
     it { is_expected.to be(false) }
   end
 
-  describe '#can_manage_project_members?' do
-    subject { helper.can_manage_project_members?(project) }
-
-    context 'when `current_user` has `admin_project_member` permissions' do
-      let(:allow_admin_project) { true }
-
-      it { is_expected.to be(true) }
-    end
-
-    include_examples 'when `current_user` does not have `admin_project_member` permissions'
-  end
-
   describe '#show_groups?' do
     subject { helper.show_groups?(project.project_group_links) }
 

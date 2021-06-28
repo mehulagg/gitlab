@@ -240,13 +240,13 @@ RSpec.describe Nav::NewDropdownHelper do
       let(:with_show_new_issue_link) { false }
       let(:with_merge_project) { nil }
       let(:with_can_create_snippet_in_project) { false }
-      let(:with_can_import_members) { false }
+      let(:with_can_manage_members) { false }
 
       before do
         allow(helper).to receive(:show_new_issue_link?).with(project) { with_show_new_issue_link }
         allow(helper).to receive(:merge_request_source_project_for_project).with(project) { with_merge_project }
         allow(helper).to receive(:can?).with(user, :create_snippet, project) { with_can_create_snippet_in_project }
-        allow(helper).to receive(:can_import_members?) { with_can_import_members }
+        allow(helper).to receive(:can_manage_project_members?) { with_can_manage_members }
       end
 
       it 'has no menu sections' do
@@ -309,7 +309,7 @@ RSpec.describe Nav::NewDropdownHelper do
 
       context 'when invite members experiment' do
         let(:with_invite_members_experiment) { true }
-        let(:with_can_import_members) { true }
+        let(:with_can_manage_members) { true }
         let(:expected_title) { 'This project' }
         let(:expected_href) { "/#{project.path_with_namespace}/-/project_members" }
 

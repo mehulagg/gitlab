@@ -53,28 +53,6 @@ RSpec.describe InviteMembersHelper do
         end
       end
     end
-
-    describe "#directly_invite_members?" do
-      context 'when the user is an owner' do
-        before do
-          allow(helper).to receive(:current_user) { owner }
-        end
-
-        it 'returns true' do
-          expect(helper.directly_invite_members?).to eq true
-        end
-      end
-
-      context 'when the user is a developer' do
-        before do
-          allow(helper).to receive(:current_user) { developer }
-        end
-
-        it 'returns false' do
-          expect(helper.directly_invite_members?).to eq false
-        end
-      end
-    end
   end
 
   context 'with group' do

@@ -47,7 +47,7 @@ class Projects::MergeRequestsController < Projects::MergeRequests::ApplicationCo
     push_frontend_feature_flag(:diff_settings_usage_data, default_enabled: :yaml)
 
     experiment(:invite_members_in_comment, namespace: @project.root_ancestor) do |experiment_instance|
-      experiment_instance.exclude! unless helpers.can_import_members?
+      experiment_instance.exclude! unless helpers.can_manage_project_members?(@project)
 
       experiment_instance.use {}
       experiment_instance.try(:invite_member_link) {}

@@ -108,7 +108,7 @@ module Nav
         )
       end
 
-      if Gitlab::Experimentation.active?(:invite_members_new_dropdown) && can_import_members?
+      if Gitlab::Experimentation.active?(:invite_members_new_dropdown) && can_manage_project_members?(project)
         menu_items.push(
           invite_members_menu_item(
             href: project_project_members_path(project)
