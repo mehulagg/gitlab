@@ -11,26 +11,4 @@
   = _('New Branch')
 %hr
 
-= form_tag jira_connect_branches_path, method: :post, id: "new-branch-form", class: "js-create-branch-form js-requires-input" do
-  .form-group.row
-    = label_tag :project_id, _('Project'), class: 'col-form-label col-sm-2'
-    .col-sm-10
-      = project_select_tag :project_id, data: { simple_filter: true }
-  .form-group.row
-    = label_tag :branch_name, nil, class: 'col-form-label col-sm-2'
-    .col-sm-10
-      = text_field_tag :branch_name, params[:branch_name], required: true, class: 'form-control js-branch-name monospace'
-      .form-text.text-muted.text-danger.js-branch-name-error
-  .form-group.row
-    = label_tag :source_branch, _('Create from'), class: 'col-form-label col-sm-2'
-    .col-sm-10.create-from
-      .dropdown
-        = hidden_field_tag :source_branch, ''
-        = button_tag type: 'button', title: '', class: 'dropdown-menu-toggle wide js-branch-select js-gl-dropdown-refresh-on-open monospace', required: true, data: { toggle: 'dropdown', selected: '', field_name: 'source_branch' } do
-          .text-left.dropdown-toggle-text &nbsp;
-          = sprite_icon('chevron-down', css_class: "dropdown-menu-toggle-icon gl-top-3")
-        = render 'shared/ref_dropdown', dropdown_class: 'wide'
-      .form-text.text-muted= _('Existing branch name, tag, or commit SHA')
-  .form-actions
-    = button_tag _('Create branch'), class: 'gl-button btn btn-success'
-%script#availableRefs{ type: "application/json" }= [].to_json.html_safe
+.js-jira-connect-create-branch
