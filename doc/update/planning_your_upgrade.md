@@ -35,7 +35,7 @@ Right before the upgrade, perform the [pre-upgrade and post-upgrade checks](#pre
   - Run `gitlab-rake gitlab:doctor:secrets` to confirm that encrypted database values can be decrypted - [docs](../administration/raketasks/doctor.md#verify-database-values-can-be-decrypted-using-the-current-secrets)
 
   - In UI:
-    - Users can login
+    - Users can log in
     - Project list is visible
     - Project issues and MRs are accessible
     - Users can clone repositories from GitLab
