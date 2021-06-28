@@ -265,3 +265,4 @@ document.addEventListener('DOMContentLoaded', () => {
 
   requestIdleCallback(deferredInitialisation);
 });
+// test comment
