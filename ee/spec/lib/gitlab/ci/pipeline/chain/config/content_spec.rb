@@ -8,9 +8,6 @@ RSpec.describe ::Gitlab::Ci::Pipeline::Chain::Config::Content do
   let(:content) { nil }
   let(:source) { :push }
   let(:command) { Gitlab::Ci::Pipeline::Chain::Command.new(project: project, content: content, source: source) }
-
-  subject { described_class.new(pipeline, command) }
-
   let(:content_result) do
     <<~EOY
     ---
@@ -19,6 +16,8 @@ RSpec.describe ::Gitlab::Ci::Pipeline::Chain::Config::Content do
       file: ".compliance-gitlab-ci.yml"
     EOY
   end
+
+  subject { described_class.new(pipeline, command) }
 
   shared_examples 'does not include compliance pipeline configuration content' do
     it do
@@ -50,6 +49,20 @@ RSpec.describe ::Gitlab::Ci::Pipeline::Chain::Config::Content do
         expect(pipeline.config_source).to eq 'compliance_source'
         expect(pipeline.pipeline_config.content).to eq(content_result)
         expect(command.config_content).to eq(content_result)
+      end
+
+      context 'when project does not have compliance pipeline configuration' do
+        let(:framework) { create(:compliance_framework, namespace_id: compliance_group.id) }
+
+        it_behaves_like 'does not include compliance pipeline configuration content'
+      end
+
+      context 'when project has a blank compliance pipeline configuration' do
+        let(:framework) do
+          create(:compliance_framework, namespace_id: compliance_group.id, pipeline_configuration_full_path: '')
+        end
+
+        it_behaves_like 'does not include compliance pipeline configuration content'
       end
     end
 
