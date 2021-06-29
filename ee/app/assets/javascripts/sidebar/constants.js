@@ -12,6 +12,8 @@ import projectIssueEpicMutation from './queries/project_issue_epic.mutation.grap
 import projectIssueEpicQuery from './queries/project_issue_epic.query.graphql';
 import projectIssueIterationMutation from './queries/project_issue_iteration.mutation.graphql';
 import projectIssueIterationQuery from './queries/project_issue_iteration.query.graphql';
+import updateStatusMutation from '~/sidebar/queries/updateStatus.mutation.graphql';
+import issueHealthStatusQuery from './queries/issue_health_status.query.graphql';
 
 export const healthStatus = {
   ON_TRACK: 'onTrack',
@@ -126,5 +128,16 @@ export const issuableAttributesQueries = {
 export const ancestorsQueries = {
   [IssuableType.Epic]: {
     query: epicAncestorsQuery,
+  },
+};
+
+export const healthStatusQueries = {
+  [IssuableType.Issue]: {
+    mutation: updateStatusMutation,
+    query: issueHealthStatusQuery,
+  },
+  [IssuableType.Epic]: {
+    mutation: updateStatusMutation,
+    query: issueHealthStatusQuery,
   },
 };
