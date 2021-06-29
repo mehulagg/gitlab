@@ -162,7 +162,7 @@ Missing description
 
 Group: ``
 
-Status: `implemented`
+Status: `data_available`
 
 Tiers:
 
@@ -282,7 +282,7 @@ Missing description
 
 Group: ``
 
-Status: `implemented`
+Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
 
@@ -412,7 +412,7 @@ Count of issues created by the alert bot automatically
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216180449_alert_bot_incident_issues.yml)
 
-Group: `group::health`
+Group: `group::monitor`
 
 Status: `data_available`
 
@@ -508,7 +508,7 @@ Unique builds in project
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216175510_ci_builds.yml)
 
-Group: `group::continuous integration`
+Group: `group::pipeline execution`
 
 Status: `data_available`
 
@@ -520,7 +520,7 @@ Total pipelines in external repositories
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216175514_ci_external_pipelines.yml)
 
-Group: `group::continuous integration`
+Group: `group::pipeline execution`
 
 Status: `data_available`
 
@@ -532,7 +532,7 @@ Total pipelines in GitLab repositories
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216175512_ci_internal_pipelines.yml)
 
-Group: `group::continuous integration`
+Group: `group::pipeline execution`
 
 Status: `data_available`
 
@@ -556,7 +556,7 @@ Total Pipelines from templates in repository
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216175518_ci_pipeline_config_repository.yml)
 
-Group: `group::continuous integration`
+Group: `group::pipeline execution`
 
 Status: `data_available`
 
@@ -568,7 +568,7 @@ Pipeline schedules in GitLab
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216175523_ci_pipeline_schedules.yml)
 
-Group: `group::continuous integration`
+Group: `group::pipeline execution`
 
 Status: `data_available`
 
@@ -580,7 +580,7 @@ Total configured Runners in project
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216175520_ci_runners.yml)
 
-Group: `group::continuous integration`
+Group: `group::pipeline execution`
 
 Status: `data_available`
 
@@ -592,9 +592,9 @@ Total active instance Runners
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210502050341_ci_runners_group_type_active.yml)
 
-Group: `group::continuous integration`
+Group: `group::pipeline execution`
 
-Status: `implemented`
+Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
 
@@ -604,9 +604,9 @@ Total active and online group Runners
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210502051922_ci_runners_group_type_active_online.yml)
 
-Group: `group::continuous integration`
+Group: `group::pipeline execution`
 
-Status: `implemented`
+Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
 
@@ -616,9 +616,9 @@ Total active group Runners
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210502045402_ci_runners_instance_type_active.yml)
 
-Group: `group::continuous integration`
+Group: `group::pipeline execution`
 
-Status: `implemented`
+Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
 
@@ -628,9 +628,9 @@ Total active and online instance Runners
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210502051651_ci_runners_instance_type_active_online.yml)
 
-Group: `group::continuous integration`
+Group: `group::pipeline execution`
 
-Status: `implemented`
+Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
 
@@ -640,9 +640,9 @@ Total online Runners
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210502050942_ci_runners_online.yml)
 
-Group: `group::continuous integration`
+Group: `group::pipeline execution`
 
-Status: `implemented`
+Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
 
@@ -652,9 +652,9 @@ Total active project Runners
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210502050834_ci_runners_project_type_active.yml)
 
-Group: `group::continuous integration`
+Group: `group::pipeline execution`
 
-Status: `implemented`
+Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
 
@@ -664,9 +664,9 @@ Total active and online project Runners
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210502052036_ci_runners_project_type_active_online.yml)
 
-Group: `group::continuous integration`
+Group: `group::pipeline execution`
 
-Status: `implemented`
+Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
 
@@ -676,7 +676,7 @@ Total configured Triggers in project
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216175521_ci_triggers.yml)
 
-Group: `group::continuous integration`
+Group: `group::pipeline execution`
 
 Status: `data_available`
 
@@ -2118,7 +2118,7 @@ Total clicks on the create track's first email
 
 Group: `group::activation`
 
-Status: `implemented`
+Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
 
@@ -2130,7 +2130,7 @@ Total sent emails of the create track's first email
 
 Group: `group::activation`
 
-Status: `implemented`
+Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
 
@@ -2142,7 +2142,7 @@ Total clicks on the create track's second email
 
 Group: `group::activation`
 
-Status: `implemented`
+Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
 
@@ -2154,7 +2154,7 @@ Total sent emails of the create track's second email
 
 Group: `group::activation`
 
-Status: `implemented`
+Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
 
@@ -2166,7 +2166,7 @@ Total clicks on the create track's third email
 
 Group: `group::activation`
 
-Status: `implemented`
+Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
 
@@ -2178,7 +2178,7 @@ Total sent emails of the create track's third email
 
 Group: `group::activation`
 
-Status: `implemented`
+Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
 
@@ -2190,7 +2190,7 @@ Total sent emails of the experience track's first email
 
 Group: `group::activation`
 
-Status: `implemented`
+Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
 
@@ -2202,7 +2202,7 @@ Total clicks on the team track's first email
 
 Group: `group::activation`
 
-Status: `implemented`
+Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
 
@@ -2214,7 +2214,7 @@ Total sent emails of the team track's first email
 
 Group: `group::activation`
 
-Status: `implemented`
+Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
 
@@ -2226,7 +2226,7 @@ Total clicks on the team track's second email
 
 Group: `group::activation`
 
-Status: `implemented`
+Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
 
@@ -2238,7 +2238,7 @@ Total sent emails of the team track's second email
 
 Group: `group::activation`
 
-Status: `implemented`
+Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
 
@@ -2250,7 +2250,7 @@ Total clicks on the team track's third email
 
 Group: `group::activation`
 
-Status: `implemented`
+Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
 
@@ -2262,7 +2262,7 @@ Total sent emails of the team track's third email
 
 Group: `group::activation`
 
-Status: `implemented`
+Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
 
@@ -2274,7 +2274,7 @@ Total clicks on the verify trial's first email
 
 Group: `group::activation`
 
-Status: `implemented`
+Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
 
@@ -2286,7 +2286,7 @@ Total sent emails of the trial track's first email
 
 Group: `group::activation`
 
-Status: `implemented`
+Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
 
@@ -2298,7 +2298,7 @@ Total clicks on the trial track's second email
 
 Group: `group::activation`
 
-Status: `implemented`
+Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
 
@@ -2310,7 +2310,7 @@ Total sent emails of the trial track's second email
 
 Group: `group::activation`
 
-Status: `implemented`
+Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
 
@@ -2322,7 +2322,7 @@ Total clicks on the trial track's third email
 
 Group: `group::activation`
 
-Status: `implemented`
+Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
 
@@ -2334,7 +2334,7 @@ Total sent emails of the trial track's third email
 
 Group: `group::activation`
 
-Status: `implemented`
+Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
 
@@ -2346,7 +2346,7 @@ Total clicks on the verify track's first email
 
 Group: `group::activation`
 
-Status: `implemented`
+Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
 
@@ -2358,7 +2358,7 @@ Total sent emails of the verify track's first email
 
 Group: `group::activation`
 
-Status: `implemented`
+Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
 
@@ -2370,7 +2370,7 @@ Total clicks on the verify track's second email
 
 Group: `group::activation`
 
-Status: `implemented`
+Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
 
@@ -2382,7 +2382,7 @@ Total sent emails of the verify track's second email
 
 Group: `group::activation`
 
-Status: `implemented`
+Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
 
@@ -2394,7 +2394,7 @@ Total clicks on the verify track's third email
 
 Group: `group::activation`
 
-Status: `implemented`
+Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
 
@@ -2406,7 +2406,7 @@ Total sent emails of the verify track's third email
 
 Group: `group::activation`
 
-Status: `implemented`
+Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
 
@@ -2428,7 +2428,7 @@ Count of incidents (issues where issue_type=incident)
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216180447_incident_issues.yml)
 
-Group: `group::health`
+Group: `group::monitor`
 
 Status: `data_available`
 
@@ -2440,7 +2440,7 @@ Count of all issues with the label=incident
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216180451_incident_labeled_issues.yml)
 
-Group: `group::health`
+Group: `group::monitor`
 
 Status: `data_available`
 
@@ -2454,7 +2454,7 @@ Whether or not ModSecurity is set to blocking mode
 
 Group: `group::container security`
 
-Status: `deprecated`
+Status: `removed`
 
 Tiers: `free`, `premium`, `ultimate`
 
@@ -2466,7 +2466,7 @@ Whether or not ModSecurity is disabled within Ingress
 
 Group: `group::container security`
 
-Status: `deprecated`
+Status: `removed`
 
 Tiers: `free`, `premium`, `ultimate`
 
@@ -2478,7 +2478,7 @@ Whether or not ModSecurity is set to logging mode
 
 Group: `group::container security`
 
-Status: `deprecated`
+Status: `removed`
 
 Tiers: `free`, `premium`, `ultimate`
 
@@ -2490,7 +2490,7 @@ Whether or not ModSecurity has not been installed into the cluster
 
 Group: `group::container security`
 
-Status: `deprecated`
+Status: `removed`
 
 Tiers: `free`, `premium`, `ultimate`
 
@@ -2502,7 +2502,7 @@ Cumulative count of packets identified as anomalous by ModSecurity since Usage P
 
 Group: `group::container security`
 
-Status: `deprecated`
+Status: `removed`
 
 Tiers: `free`, `premium`, `ultimate`
 
@@ -2514,7 +2514,7 @@ Cumulative count of packets processed by ModSecurity since Usage Ping was last r
 
 Group: `group::container security`
 
-Status: `deprecated`
+Status: `removed`
 
 Tiers: `free`, `premium`, `ultimate`
 
@@ -2526,7 +2526,7 @@ Whether or not ModSecurity statistics are unavailable
 
 Group: `group::container security`
 
-Status: `deprecated`
+Status: `removed`
 
 Tiers: `ultimate`
 
@@ -3028,7 +3028,7 @@ Count of issues created automatically on alerts from GitLab-Managed Prometheus
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216180441_issues_created_from_alerts.yml)
 
-Group: `group::health`
+Group: `group::monitor`
 
 Status: `data_available`
 
@@ -3040,11 +3040,11 @@ Count of issues manually created from the GitLab UI on Sentry errors
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216180434_issues_created_from_gitlab_error_tracking_ui.yml)
 
-Group: `group::health`
+Group: `group::monitor`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.issues_created_gitlab_alerts`
 
@@ -3052,7 +3052,7 @@ Count of all issues created from GitLab alerts (bot and non-bot)
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216180443_issues_created_gitlab_alerts.yml)
 
-Group: `group::health`
+Group: `group::monitor`
 
 Status: `data_available`
 
@@ -3064,7 +3064,7 @@ Count of issues created manually by non-bot users from GitLab alerts
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216180445_issues_created_manually_from_alerts.yml)
 
-Group: `group::health`
+Group: `group::monitor`
 
 Status: `data_available`
 
@@ -3076,7 +3076,7 @@ Count of issues where a user have added AND removed a zoom meeting using slash c
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216180438_issues_using_zoom_quick_actions.yml)
 
-Group: `group::health`
+Group: `group::monitor`
 
 Status: `data_available`
 
@@ -3088,7 +3088,7 @@ Count of issues where a user has linked a Zoom meeting
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216180436_issues_with_associated_zoom_link.yml)
 
-Group: `group::health`
+Group: `group::monitor`
 
 Status: `data_available`
 
@@ -3100,7 +3100,7 @@ Count of issues where a user has embedded a Grafana chart
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216180440_issues_with_embedded_grafana_charts_approx.yml)
 
-Group: `group::health`
+Group: `group::monitor`
 
 Status: `data_available`
 
@@ -3186,7 +3186,7 @@ Count of Kubernetes API proxy requests
 
 Group: `group::configure`
 
-Status: `implemented`
+Status: `data_available`
 
 Tiers: `premium`, `ultimate`
 
@@ -3288,15 +3288,15 @@ Tiers: `free`
 
 ### `counts.license_management_jobs`
 
-Name on the GitLab license
+Count of License Scanning jobs run
 
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/license/20210204124854_license_management_jobs.yml)
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_all/20210204124854_license_management_jobs.yml)
 
-Group: `group::product intelligence`
+Group: `group::composition analysis`
 
 Status: `data_available`
 
-Tiers: `premium`, `ultimate`
+Tiers: `ultimate`
 
 ### `counts.licenses_list_views`
 
@@ -4288,11 +4288,11 @@ Counts of Projects that have incident issues, regardless of status.
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216180453_projects_creating_incidents.yml)
 
-Group: `group::health`
+Group: `group::monitor`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.projects_custom_issue_tracker_active`
 
@@ -5032,7 +5032,7 @@ Projects with repository mirroring enabled
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_all/20210216181920_projects_mirrored_with_pipelines_enabled.yml)
 
-Group: `group::continuous integration`
+Group: `group::pipeline execution`
 
 Status: `data_available`
 
@@ -5212,11 +5212,11 @@ Count of projects with alerts created in given time period
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216180458_projects_with_alerts_created.yml)
 
-Group: `group::health`
+Group: `group::monitor`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.projects_with_alerts_service_enabled`
 
@@ -5224,7 +5224,7 @@ Count of projects that have enabled the Alerts service
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216180456_projects_with_alerts_service_enabled.yml)
 
-Group: `group::health`
+Group: `group::monitor`
 
 Status: `removed`
 
@@ -5236,11 +5236,11 @@ Count of projects with at least 1 enabled integration
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216180500_projects_with_enabled_alert_integrations.yml)
 
-Group: `group::health`
+Group: `group::monitor`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.projects_with_error_tracking_enabled`
 
@@ -5248,7 +5248,7 @@ Count of projects that have enabled Error tracking via Sentry
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216180454_projects_with_error_tracking_enabled.yml)
 
-Group: `group::health`
+Group: `group::monitor`
 
 Status: `data_available`
 
@@ -5676,7 +5676,7 @@ Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.secret_detection_jobs`
 
-Count of 'secret-detection' CI jobs fro the month.
+Count of all 'secret-detection' CI jobs.
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216182114_secret_detection_jobs.yml)
 
@@ -5810,49 +5810,49 @@ Tiers: `free`, `premium`, `ultimate`
 
 Cumulative count of usages of publish operation
 
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216180502_status_page_incident_publishes.yml)
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_all/20210216180502_status_page_incident_publishes.yml)
 
-Group: `group::health`
+Group: `group::monitor`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `ultimate`
 
 ### `counts.status_page_incident_unpublishes`
 
 Cumulative count of usages of unpublish operation
 
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216180504_status_page_incident_unpublishes.yml)
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_all/20210216180504_status_page_incident_unpublishes.yml)
 
-Group: `group::health`
+Group: `group::monitor`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `ultimate`
 
 ### `counts.status_page_issues`
 
 Issues published to a Status Page
 
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216180507_status_page_issues.yml)
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_all/20210216180507_status_page_issues.yml)
 
-Group: `group::health`
+Group: `group::monitor`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `ultimate`
 
 ### `counts.status_page_projects`
 
 Projects with status page enabled
 
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216180506_status_page_projects.yml)
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_all/20210216180506_status_page_projects.yml)
 
-Group: `group::health`
+Group: `group::monitor`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `ultimate`
 
 ### `counts.successful_deployments`
 
@@ -6396,7 +6396,7 @@ Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.user_preferences_group_overview_details`
 
-Count of users who set personal preference to see Details on Group overview page
+Count of users who set personal preference to see Details on Group information page
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_all/20210216182203_user_preferences_group_overview_details.yml)
 
@@ -6408,7 +6408,7 @@ Tiers: `ultimate`
 
 ### `counts.user_preferences_group_overview_security_dashboard`
 
-Count of users who set personal preference to see Security Dashboard on Group overview page
+Count of users who set personal preference to see Security Dashboard on Group information page
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_all/20210216182205_user_preferences_group_overview_security_dashboard.yml)
 
@@ -6570,7 +6570,7 @@ Missing description
 
 Group: ``
 
-Status: `implemented`
+Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
 
@@ -6582,7 +6582,7 @@ Missing description
 
 Group: ``
 
-Status: `implemented`
+Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
 
@@ -6594,7 +6594,7 @@ Missing description
 
 Group: ``
 
-Status: `implemented`
+Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
 
@@ -6628,11 +6628,11 @@ Count of unique users per month to take an action on an alert
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216180509_incident_management_alerts_total_unique_counts.yml)
 
-Group: `group::health`
+Group: `group::monitor`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `counts_monthly.aggregated_metrics.incident_management_incidents_total_unique_counts`
 
@@ -6640,11 +6640,11 @@ Count of unique users per month to take an action on an incident
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216180511_incident_management_incidents_total_unique_counts.yml)
 
-Group: `group::health`
+Group: `group::monitor`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `counts_monthly.aggregated_metrics.product_analytics_test_metrics_intersection`
 
@@ -6786,7 +6786,7 @@ Missing description
 
 Group: ``
 
-Status: `implemented`
+Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
 
@@ -6798,7 +6798,7 @@ Missing description
 
 Group: ``
 
-Status: `implemented`
+Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
 
@@ -6810,7 +6810,7 @@ Missing description
 
 Group: ``
 
-Status: `implemented`
+Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
 
@@ -6842,25 +6842,25 @@ Tiers: `premium`, `ultimate`
 
 Count of unique users per week to take an action on an alert
 
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_7d/20210216180513_incident_management_alerts_total_unique_counts.yml)
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_7d/20210216180513_incident_management_alerts_total_unique_counts.yml)
 
-Group: `group::health`
+Group: `group::monitor`
 
 Status: `data_available`
 
-Tiers:
+Tiers: `free`, `premium`, `ultimate`
 
 ### `counts_weekly.aggregated_metrics.incident_management_incidents_total_unique_counts`
 
 Count of unique users per week to take an action on an incident
 
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_7d/20210216180515_incident_management_incidents_total_unique_counts.yml)
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_7d/20210216180515_incident_management_incidents_total_unique_counts.yml)
 
-Group: `group::health`
+Group: `group::monitor`
 
 Status: `data_available`
 
-Tiers:
+Tiers: `free`, `premium`, `ultimate`
 
 ### `counts_weekly.aggregated_metrics.product_analytics_test_metrics_intersection`
 
@@ -7348,11 +7348,11 @@ Whether Mattermost is enabled
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/settings/20210204124908_mattermost_enabled.yml)
 
-Group: `group::product intelligence`
+Group: `group::ecosystem`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `object_store.artifacts.enabled`
 
@@ -8166,7 +8166,7 @@ Counts visits to DevOps Adoption page per month
 
 Group: `group::optimize`
 
-Status: `implemented`
+Status: `data_available`
 
 Tiers: `premium`, `ultimate`
 
@@ -8178,7 +8178,7 @@ Counts visits to DevOps Adoption page per week
 
 Group: `group::optimize`
 
-Status: `implemented`
+Status: `data_available`
 
 Tiers: `premium`, `ultimate`
 
@@ -8622,7 +8622,7 @@ Count of users clicking diff view setting
 
 Group: `group::code review`
 
-Status: `implemented`
+Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
 
@@ -8634,7 +8634,7 @@ Count of users clicking diff view setting
 
 Group: `group::code review`
 
-Status: `implemented`
+Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
 
@@ -8646,7 +8646,7 @@ Count of users clicking merge request file browser setting
 
 Group: `group::code review`
 
-Status: `implemented`
+Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
 
@@ -8658,7 +8658,7 @@ Count of users with merge request file list setting
 
 Group: `group::code review`
 
-Status: `implemented`
+Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
 
@@ -8670,7 +8670,7 @@ Count of users clicking single file mode setting
 
 Group: `group::code review`
 
-Status: `implemented`
+Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
 
@@ -8682,7 +8682,7 @@ Count of users clicking single file mode setting
 
 Group: `group::code review`
 
-Status: `implemented`
+Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
 
@@ -8694,7 +8694,7 @@ Count of users clicking merge request whitespae setting
 
 Group: `group::code review`
 
-Status: `implemented`
+Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
 
@@ -8706,7 +8706,7 @@ Count of users clicking merge request whitespae setting
 
 Group: `group::code review`
 
-Status: `implemented`
+Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
 
@@ -8718,7 +8718,7 @@ Count of users with show whitespace disabled
 
 Group: `group::code review`
 
-Status: `implemented`
+Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
 
@@ -8730,7 +8730,7 @@ Count of users with show whitespace disabled
 
 Group: `group::code review`
 
-Status: `implemented`
+Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
 
@@ -8742,7 +8742,7 @@ Count of users with single mode disabled
 
 Group: `group::code review`
 
-Status: `implemented`
+Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
 
@@ -8754,7 +8754,7 @@ Count of users with single mode disabled
 
 Group: `group::code review`
 
-Status: `implemented`
+Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
 
@@ -8766,7 +8766,7 @@ Count of users with show whitespace enabled
 
 Group: `group::code review`
 
-Status: `implemented`
+Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
 
@@ -8778,7 +8778,7 @@ Count of users with show whitespace enabled
 
 Group: `group::code review`
 
-Status: `implemented`
+Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
 
@@ -8790,7 +8790,7 @@ Count of users with single file mode enabled
 
 Group: `group::code review`
 
-Status: `implemented`
+Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
 
@@ -8802,7 +8802,7 @@ Count of users with single file mode enabled
 
 Group: `group::code review`
 
-Status: `implemented`
+Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
 
@@ -8814,7 +8814,7 @@ Count of users with merge request view type as inline
 
 Group: `group::code review`
 
-Status: `implemented`
+Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
 
@@ -8826,7 +8826,7 @@ Count of users with merge request view type as inline
 
 Group: `group::code review`
 
-Status: `implemented`
+Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
 
@@ -8838,7 +8838,7 @@ Count of users with merge request view type as parallel
 
 Group: `group::code review`
 
-Status: `implemented`
+Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
 
@@ -8850,7 +8850,7 @@ Count of users with merge request view type as parallel
 
 Group: `group::code review`
 
-Status: `implemented`
+Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
 
@@ -8910,7 +8910,7 @@ Count of users with merge request file list setting
 
 Group: `group::code review`
 
-Status: `implemented`
+Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
 
@@ -8922,7 +8922,7 @@ Count of users with merge request file list setting
 
 Group: `group::code review`
 
-Status: `implemented`
+Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
 
@@ -8934,7 +8934,7 @@ Count of users with merge request file tree setting
 
 Group: `group::code review`
 
-Status: `implemented`
+Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
 
@@ -8946,7 +8946,7 @@ Count of users with merge request file tree setting
 
 Group: `group::code review`
 
-Status: `implemented`
+Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
 
@@ -9414,7 +9414,7 @@ Count of unique users per week who load the conflict resolution page
 
 Group: `group::code review`
 
-Status: `implemented`
+Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
 
@@ -9426,7 +9426,7 @@ Count of unique users per week who load the conflict resolution page
 
 Group: `group::code review`
 
-Status: `implemented`
+Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
 
@@ -9654,7 +9654,7 @@ Count of unique users per week who attempt to resolve a conflict through the ui
 
 Group: `group::code review`
 
-Status: `implemented`
+Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
 
@@ -9666,7 +9666,7 @@ Count of unique users per week who attempt to resolve a conflict through the ui
 
 Group: `group::code review`
 
-Status: `implemented`
+Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
 
@@ -10782,7 +10782,7 @@ Missing description
 
 Group: ``
 
-Status: `implemented`
+Status: `data_available`
 
 Tiers: `ultimate`
 
@@ -10794,7 +10794,7 @@ Missing description
 
 Group: ``
 
-Status: `implemented`
+Status: `data_available`
 
 Tiers: `ultimate`
 
@@ -10806,7 +10806,7 @@ Count of MAU creating epic boards
 
 Group: `group::product planning`
 
-Status: `implemented`
+Status: `data_available`
 
 Tiers: `premium`, `ultimate`
 
@@ -10818,7 +10818,7 @@ Count of WAU creating epic boards
 
 Group: `group::product planning`
 
-Status: `implemented`
+Status: `data_available`
 
 Tiers: `premium`, `ultimate`
 
@@ -10830,7 +10830,7 @@ Count of MAU updating epic board names
 
 Group: `group::product planning`
 
-Status: `implemented`
+Status: `data_available`
 
 Tiers: `premium`, `ultimate`
 
@@ -10842,7 +10842,7 @@ Count of WAU updating epic board names
 
 Group: `group::product planning`
 
-Status: `implemented`
+Status: `data_available`
 
 Tiers: `premium`, `ultimate`
 
@@ -10854,7 +10854,7 @@ Count of MAU viewing epic boards
 
 Group: `group::product planning`
 
-Status: `implemented`
+Status: `data_available`
 
 Tiers: `premium`, `ultimate`
 
@@ -10866,7 +10866,7 @@ Count of WAU viewing epic boards
 
 Group: `group::product planning`
 
-Status: `implemented`
+Status: `data_available`
 
 Tiers: `premium`, `ultimate`
 
@@ -10950,7 +10950,7 @@ Count of MAU cross referencing epics
 
 Group: `group::product planning`
 
-Status: `implemented`
+Status: `data_available`
 
 Tiers: `premium`, `ultimate`
 
@@ -10962,7 +10962,7 @@ Counts of WAU cross referencing epics
 
 Group: `group::product planning`
 
-Status: `implemented`
+Status: `data_available`
 
 Tiers: `premium`, `ultimate`
 
@@ -11142,7 +11142,7 @@ Counts of MAU awarding emoji on epic
 
 Group: `group::product planning`
 
-Status: `implemented`
+Status: `data_available`
 
 Tiers: `premium`, `ultimate`
 
@@ -11154,7 +11154,7 @@ Counts of WAU awarding emoji on epic
 
 Group: `group::product planning`
 
-Status: `implemented`
+Status: `data_available`
 
 Tiers: `premium`, `ultimate`
 
@@ -11206,6 +11206,30 @@ Status: `data_available`
 
 Tiers: `premium`, `ultimate`
 
+### `redis_hll_counters.epics_usage.g_project_management_users_epic_issue_added_from_epic_monthly`
+
+Number of users creating an issue from an epic
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210608191652_g_project_management_users_epic_issue_added_from_epic_monthly.yml)
+
+Group: `group::product planning`
+
+Status: `data_available`
+
+Tiers: `premium`
+
+### `redis_hll_counters.epics_usage.g_project_management_users_epic_issue_added_from_epic_weekly`
+
+Number of users creating an issue from an epic
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_7d/20210608191647_g_project_management_users_epic_issue_added_from_epic_weekly.yml)
+
+Group: `group::product planning`
+
+Status: `data_available`
+
+Tiers: `premium`
+
 ### `redis_hll_counters.epics_usage.g_project_management_users_removing_epic_emoji_monthly`
 
 Counts of MAU removing emoji on epic
@@ -11214,7 +11238,7 @@ Counts of MAU removing emoji on epic
 
 Group: `group::product planning`
 
-Status: `implemented`
+Status: `data_available`
 
 Tiers: `premium`, `ultimate`
 
@@ -11226,7 +11250,7 @@ Counts of WAU removing emoji on epic
 
 Group: `group::product planning`
 
-Status: `implemented`
+Status: `data_available`
 
 Tiers: `premium`, `ultimate`
 
@@ -11430,7 +11454,7 @@ Counts of MAU updating parent on epic
 
 Group: `group::product planning`
 
-Status: `implemented`
+Status: `data_available`
 
 Tiers: `premium`, `ultimate`
 
@@ -11442,7 +11466,7 @@ Counts of WAU updating parent on epic
 
 Group: `group::product planning`
 
-Status: `implemented`
+Status: `data_available`
 
 Tiers: `premium`, `ultimate`
 
@@ -11526,7 +11550,7 @@ Counts of MAU checking epic task
 
 Group: `group::product planning`
 
-Status: `implemented`
+Status: `data_available`
 
 Tiers: `premium`, `ultimate`
 
@@ -11538,7 +11562,7 @@ Counts of WAU checking epic task
 
 Group: `group::product planning`
 
-Status: `implemented`
+Status: `data_available`
 
 Tiers: `premium`, `ultimate`
 
@@ -11550,7 +11574,7 @@ Counts of MAU unchecking epic task
 
 Group: `group::product planning`
 
-Status: `implemented`
+Status: `data_available`
 
 Tiers: `premium`, `ultimate`
 
@@ -11562,7 +11586,7 @@ Counts of WAU unchecking epic task
 
 Group: `group::product planning`
 
-Status: `implemented`
+Status: `data_available`
 
 Tiers: `premium`, `ultimate`
 
@@ -11688,363 +11712,363 @@ Tiers: `free`, `premium`, `ultimate`
 
 ### `redis_hll_counters.incident_management.incident_management_alert_assigned_monthly`
 
-Missing description
+Count of an alert's assignments per month
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216180533_incident_management_alert_assigned_monthly.yml)
 
-Group: `group::health`
+Group: `group::monitor`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `redis_hll_counters.incident_management.incident_management_alert_assigned_weekly`
 
-Missing description
+Count of an alert's assignments per week
 
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_7d/20210216180532_incident_management_alert_assigned_weekly.yml)
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_7d/20210216180532_incident_management_alert_assigned_weekly.yml)
 
-Group: `group::health`
+Group: `group::monitor`
 
 Status: `data_available`
 
-Tiers:
+Tiers: `free`, `premium`, `ultimate`
 
 ### `redis_hll_counters.incident_management.incident_management_alert_status_changed_monthly`
 
-Missing description
+Count of an alert's status changes per month
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216180530_incident_management_alert_status_changed_monthly.yml)
 
-Group: `group::health`
+Group: `group::monitor`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `redis_hll_counters.incident_management.incident_management_alert_status_changed_weekly`
 
-Missing description
+Count of an alert's status changes per week
 
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_7d/20210216180528_incident_management_alert_status_changed_weekly.yml)
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_7d/20210216180528_incident_management_alert_status_changed_weekly.yml)
 
-Group: `group::health`
+Group: `group::monitor`
 
 Status: `data_available`
 
-Tiers:
+Tiers: `free`, `premium`, `ultimate`
 
 ### `redis_hll_counters.incident_management.incident_management_alert_todo_monthly`
 
-Missing description
+Count of alerts added to the TODO list per month
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216180537_incident_management_alert_todo_monthly.yml)
 
-Group: `group::health`
+Group: `group::monitor`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `redis_hll_counters.incident_management.incident_management_alert_todo_weekly`
 
-Missing description
+Count of alerts added to the TODO list per week
 
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_7d/20210216180535_incident_management_alert_todo_weekly.yml)
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_7d/20210216180535_incident_management_alert_todo_weekly.yml)
 
-Group: `group::health`
+Group: `group::monitor`
 
 Status: `data_available`
 
-Tiers:
+Tiers: `free`, `premium`, `ultimate`
 
 ### `redis_hll_counters.incident_management.incident_management_incident_assigned_monthly`
 
-Missing description
+Count of an incidents's assignments per month
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216180552_incident_management_incident_assigned_monthly.yml)
 
-Group: `group::health`
+Group: `group::monitor`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `redis_hll_counters.incident_management.incident_management_incident_assigned_weekly`
 
-Missing description
+Count of an incidents's assignments per week
 
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_7d/20210216180550_incident_management_incident_assigned_weekly.yml)
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_7d/20210216180550_incident_management_incident_assigned_weekly.yml)
 
-Group: `group::health`
+Group: `group::monitor`
 
 Status: `data_available`
 
-Tiers:
+Tiers: `free`, `premium`, `ultimate`
 
 ### `redis_hll_counters.incident_management.incident_management_incident_change_confidential_monthly`
 
-Missing description
+Count of incidents changed to confidential per month
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216180618_incident_management_incident_change_confidential_monthly.yml)
 
-Group: `group::health`
+Group: `group::monitor`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `redis_hll_counters.incident_management.incident_management_incident_change_confidential_weekly`
 
-Missing description
+Count of incidents changed to confidential per week
 
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_7d/20210216180616_incident_management_incident_change_confidential_weekly.yml)
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_7d/20210216180616_incident_management_incident_change_confidential_weekly.yml)
 
-Group: `group::health`
+Group: `group::monitor`
 
 Status: `data_available`
 
-Tiers:
+Tiers: `free`, `premium`, `ultimate`
 
 ### `redis_hll_counters.incident_management.incident_management_incident_closed_monthly`
 
-Missing description
+Count of incidents closed per month
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216180548_incident_management_incident_closed_monthly.yml)
 
-Group: `group::health`
+Group: `group::monitor`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `redis_hll_counters.incident_management.incident_management_incident_closed_weekly`
 
-Missing description
+Count of incidents closed per week
 
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_7d/20210216180546_incident_management_incident_closed_weekly.yml)
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_7d/20210216180546_incident_management_incident_closed_weekly.yml)
 
-Group: `group::health`
+Group: `group::monitor`
 
 Status: `data_available`
 
-Tiers:
+Tiers: `free`, `premium`, `ultimate`
 
 ### `redis_hll_counters.incident_management.incident_management_incident_comment_monthly`
 
-Missing description
+Count of comments per month on incidents
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216180559_incident_management_incident_comment_monthly.yml)
 
-Group: `group::health`
+Group: `group::monitor`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `redis_hll_counters.incident_management.incident_management_incident_comment_weekly`
 
-Missing description
+Count of comments per week on incidents
 
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_7d/20210216180558_incident_management_incident_comment_weekly.yml)
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_7d/20210216180558_incident_management_incident_comment_weekly.yml)
 
-Group: `group::health`
+Group: `group::monitor`
 
 Status: `data_available`
 
-Tiers:
+Tiers: `free`, `premium`, `ultimate`
 
 ### `redis_hll_counters.incident_management.incident_management_incident_created_monthly`
 
-Missing description
+Count of incidents created per month
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216180541_incident_management_incident_created_monthly.yml)
 
-Group: `group::health`
+Group: `group::monitor`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `redis_hll_counters.incident_management.incident_management_incident_created_weekly`
 
-Missing description
+Count of incidents created per week
 
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_7d/20210216180539_incident_management_incident_created_weekly.yml)
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_7d/20210216180539_incident_management_incident_created_weekly.yml)
 
-Group: `group::health`
+Group: `group::monitor`
 
 Status: `data_available`
 
-Tiers:
+Tiers: `free`, `premium`, `ultimate`
 
 ### `redis_hll_counters.incident_management.incident_management_incident_published_monthly`
 
-Missing description
+Count of published incidents per month
 
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216180607_incident_management_incident_published_monthly.yml)
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210216180607_incident_management_incident_published_monthly.yml)
 
-Group: `group::health`
+Group: `group::monitor`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `redis_hll_counters.incident_management.incident_management_incident_published_weekly`
 
-Missing description
+Count of published incidents per week
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_7d/20210216180605_incident_management_incident_published_weekly.yml)
 
-Group: `group::health`
+Group: `group::monitor`
 
 Status: `data_available`
 
-Tiers:
+Tiers: `free`, `premium`, `ultimate`
 
 ### `redis_hll_counters.incident_management.incident_management_incident_relate_monthly`
 
-Missing description
+Count of issues added per month that are related to an incident
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216180611_incident_management_incident_relate_monthly.yml)
 
-Group: `group::health`
+Group: `group::monitor`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `redis_hll_counters.incident_management.incident_management_incident_relate_weekly`
 
-Missing description
+Count of issues added per week that are related to an incident
 
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_7d/20210216180609_incident_management_incident_relate_weekly.yml)
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_7d/20210216180609_incident_management_incident_relate_weekly.yml)
 
-Group: `group::health`
+Group: `group::monitor`
 
 Status: `data_available`
 
-Tiers:
+Tiers: `free`, `premium`, `ultimate`
 
 ### `redis_hll_counters.incident_management.incident_management_incident_reopened_monthly`
 
-Missing description
+Count of incidents reopened per month
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216180545_incident_management_incident_reopened_monthly.yml)
 
-Group: `group::health`
+Group: `group::monitor`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `redis_hll_counters.incident_management.incident_management_incident_reopened_weekly`
 
-Missing description
+Count of incidents reopened per week
 
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_7d/20210216180543_incident_management_incident_reopened_weekly.yml)
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_7d/20210216180543_incident_management_incident_reopened_weekly.yml)
 
-Group: `group::health`
+Group: `group::monitor`
 
 Status: `data_available`
 
-Tiers:
+Tiers: `free`, `premium`, `ultimate`
 
 ### `redis_hll_counters.incident_management.incident_management_incident_todo_monthly`
 
-Missing description
+Count of incidents added to the TODO list per month
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216180556_incident_management_incident_todo_monthly.yml)
 
-Group: `group::health`
+Group: `group::monitor`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `redis_hll_counters.incident_management.incident_management_incident_todo_weekly`
 
-Missing description
+Count of incidents added to the TODO list per week
 
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_7d/20210216180554_incident_management_incident_todo_weekly.yml)
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_7d/20210216180554_incident_management_incident_todo_weekly.yml)
 
-Group: `group::health`
+Group: `group::monitor`
 
 Status: `data_available`
 
-Tiers:
+Tiers: `free`, `premium`, `ultimate`
 
 ### `redis_hll_counters.incident_management.incident_management_incident_unrelate_monthly`
 
-Missing description
+Count of issues removed per month that are related to an incident
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216180614_incident_management_incident_unrelate_monthly.yml)
 
-Group: `group::health`
+Group: `group::monitor`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `redis_hll_counters.incident_management.incident_management_incident_unrelate_weekly`
 
-Missing description
+Count of issues removed per week that are related to an incident
 
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_7d/20210216180612_incident_management_incident_unrelate_weekly.yml)
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_7d/20210216180612_incident_management_incident_unrelate_weekly.yml)
 
-Group: `group::health`
+Group: `group::monitor`
 
 Status: `data_available`
 
-Tiers:
+Tiers: `free`, `premium`, `ultimate`
 
 ### `redis_hll_counters.incident_management.incident_management_incident_zoom_meeting_monthly`
 
-Missing description
+Count of Zoom meetings about incidents per month
 
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210216180603_incident_management_incident_zoom_meeting_monthly.yml)
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216180603_incident_management_incident_zoom_meeting_monthly.yml)
 
-Group: `group::health`
+Group: `group::monitor`
 
 Status: `data_available`
 
-Tiers:
+Tiers: `free`, `premium`, `ultimate`
 
 ### `redis_hll_counters.incident_management.incident_management_incident_zoom_meeting_weekly`
 
-Missing description
+Count of Zoom meetings about incidents per week
 
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_7d/20210216180601_incident_management_incident_zoom_meeting_weekly.yml)
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_7d/20210216180601_incident_management_incident_zoom_meeting_weekly.yml)
 
-Group: `group::health`
+Group: `group::monitor`
 
 Status: `data_available`
 
-Tiers:
+Tiers: `free`, `premium`, `ultimate`
 
 ### `redis_hll_counters.incident_management.incident_management_total_unique_counts_monthly`
 
-Missing description
+Count of total unique incidents per month
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216180622_incident_management_total_unique_counts_monthly.yml)
 
-Group: `group::health`
+Group: `group::monitor`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `redis_hll_counters.incident_management.incident_management_total_unique_counts_weekly`
 
-Missing description
+Count of total unique incidents per week
 
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_7d/20210216180620_incident_management_total_unique_counts_weekly.yml)
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_7d/20210216180620_incident_management_total_unique_counts_weekly.yml)
 
-Group: `group::health`
+Group: `group::monitor`
 
 Status: `data_available`
 
-Tiers:
+Tiers: `free`, `premium`, `ultimate`
 
 ### `redis_hll_counters.incident_management_alerts.incident_management_alert_create_incident_monthly`
 
@@ -12052,23 +12076,23 @@ Count of unique users per month to create an incident corresponding to an alert
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216180625_incident_management_alert_create_incident_monthly.yml)
 
-Group: `group::health`
+Group: `group::monitor`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `redis_hll_counters.incident_management_alerts.incident_management_alert_create_incident_weekly`
 
 Count of unique users per week to create an incident corresponding to an alert
 
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_7d/20210216180623_incident_management_alert_create_incident_weekly.yml)
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_7d/20210216180623_incident_management_alert_create_incident_weekly.yml)
 
-Group: `group::health`
+Group: `group::monitor`
 
 Status: `data_available`
 
-Tiers:
+Tiers: `free`, `premium`, `ultimate`
 
 ### `redis_hll_counters.incident_management_oncall.i_incident_management_oncall_notification_sent_monthly`
 
@@ -12966,7 +12990,7 @@ Missing description
 
 Group: ``
 
-Status: `implemented`
+Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
 
@@ -12978,7 +13002,7 @@ Missing description
 
 Group: ``
 
-Status: `implemented`
+Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
 
@@ -16280,7 +16304,7 @@ Missing description
 
 Group: ``
 
-Status: `implemented`
+Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
 
@@ -16316,7 +16340,7 @@ Total count of all custom compliance framework labels
 
 Group: `compliance`
 
-Status: `implemented`
+Status: `data_available`
 
 Tiers: `premium`, `ultimate`
 
@@ -16948,13 +16972,13 @@ Tiers: `free`, `premium`, `ultimate`
 
 Projects where Incident SLA is enabled
 
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216180522_projects_incident_sla_enabled.yml)
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_all/20210216180522_projects_incident_sla_enabled.yml)
 
-Group: `group::health`
+Group: `group::monitor`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `premium`, `ultimate`
 
 ### `usage_activity_by_stage.monitor.projects_with_alert_incidents`
 
@@ -16962,11 +16986,11 @@ Count of unique projects with an incident from an alert
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216180520_projects_with_alert_incidents.yml)
 
-Group: `group::health`
+Group: `group::monitor`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `usage_activity_by_stage.monitor.projects_with_enabled_alert_integrations_histogram`
 
@@ -16988,11 +17012,11 @@ Projects where error tracking is enabled
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216180517_projects_with_error_tracking_enabled.yml)
 
-Group: `group::health`
+Group: `group::monitor`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `usage_activity_by_stage.monitor.projects_with_incidents`
 
@@ -17000,11 +17024,11 @@ Count of unique projects with an incident
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216180518_projects_with_incidents.yml)
 
-Group: `group::health`
+Group: `group::monitor`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `usage_activity_by_stage.monitor.projects_with_tracing_enabled`
 
@@ -17216,7 +17240,7 @@ Count creator_id from projects with repository mirroring enabled.
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_all/20210216181934_projects_mirrored_with_pipelines_enabled.yml)
 
-Group: `group::continuous integration`
+Group: `group::pipeline execution`
 
 Status: `data_available`
 
@@ -17288,19 +17312,31 @@ Counts dast jobs
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_all/20210216182122_dast_scans.yml)
 
-Group: `group::static analysis`
+Group: `group::dynamic analysis`
 
 Status: `data_available`
 
-Tiers:
+Tiers: `ultimate`
 
 ### `usage_activity_by_stage.secure.dependency_scanning_scans`
 
-Counts dependency scanning jobs
+Total number of users running Dependency Scanning Scans
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_all/20210216175220_dependency_scanning_scans.yml)
 
 Group: `group::composition analysis`
+
+Status: `data_available`
+
+Tiers: `ultimate`
+
+### `usage_activity_by_stage.secure.running_container_scanning_scans`
+
+Counts running container scanning jobs
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_all/20210618124854_running_container_scanning_scans.yml)
+
+Group: `group::container security`
 
 Status: `data_available`
 
@@ -17316,11 +17352,11 @@ Group: `group::static analysis`
 
 Status: `data_available`
 
-Tiers:
+Tiers: `ultimate`
 
 ### `usage_activity_by_stage.secure.secret_detection_scans`
 
-Counts secret detection jobs
+counts secret detection jobs
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_all/20210216182123_secret_detection_scans.yml)
 
@@ -17328,7 +17364,7 @@ Group: `group::static analysis`
 
 Status: `data_available`
 
-Tiers:
+Tiers: `ultimate`
 
 ### `usage_activity_by_stage.secure.user_api_fuzzing_dnd_jobs`
 
@@ -17354,6 +17390,18 @@ Status: `data_available`
 
 Tiers: `free`
 
+### `usage_activity_by_stage.secure.user_api_fuzzing_scans`
+
+Number of users who have run a API Fuzzing scan
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_all/20210607044126_user_api_fuzzing_scans.yml)
+
+Group: `category::fuzz testing`
+
+Status: `data_available`
+
+Tiers: `ultimate`
+
 ### `usage_activity_by_stage.secure.user_container_scanning_jobs`
 
 Distinct count per user of Container Scanning jobs run
@@ -17361,6 +17409,18 @@ Distinct count per user of Container Scanning jobs run
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_all/20210216175501_user_container_scanning_jobs.yml)
 
 Group: `group::container security`
+
+Status: `data_available`
+
+Tiers: `ultimate`
+
+### `usage_activity_by_stage.secure.user_container_scanning_scans`
+
+Number of users who have run a Container Scanning scan
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_all/20210607043902_user_container_scanning_scans.yml)
+
+Group: `group::composition analysis`
 
 Status: `data_available`
 
@@ -17378,6 +17438,18 @@ Status: `data_available`
 
 Tiers: `free`
 
+### `usage_activity_by_stage.secure.user_coverage_fuzzing_scans`
+
+Number of users who have run a Coverage Fuzzing scan
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_all/20210607044040_user_coverage_fuzzing_scans.yml)
+
+Group: `category::fuzz testing`
+
+Status: `data_available`
+
+Tiers: `ultimate`
+
 ### `usage_activity_by_stage.secure.user_dast_jobs`
 
 Count of DAST jobs
@@ -17390,9 +17462,21 @@ Status: `data_available`
 
 Tiers: `free`
 
+### `usage_activity_by_stage.secure.user_dast_scans`
+
+Number of users who have run a DAST scan
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_all/20210607043109_user_dast_scans.yml)
+
+Group: `group::dynamic analysis`
+
+Status: `data_available`
+
+Tiers: `ultimate`
+
 ### `usage_activity_by_stage.secure.user_dependency_scanning_jobs`
 
-no idea, Count of Dependency Scanning jobs run, it implies user but AFAIK we don't track per user
+Total number of users running Dependency Scanning jobs
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_all/20210216175216_user_dependency_scanning_jobs.yml)
 
@@ -17402,11 +17486,23 @@ Status: `data_available`
 
 Tiers: `ultimate`
 
+### `usage_activity_by_stage.secure.user_dependency_scanning_scans`
+
+Number of users who have run a Dependency Scanning scan
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_all/20210607043819_user_dependency_scanning_scans.yml)
+
+Group: `group::composition analysis`
+
+Status: `data_available`
+
+Tiers: `ultimate`
+
 ### `usage_activity_by_stage.secure.user_license_management_jobs`
 
-no idea, Count of License Scanning jobs run, it implies user but AFAIK we don't track per user
+Total number of users running License Scanning jobs
 
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/license/20210216175218_user_license_management_jobs.yml)
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_all/20210216175218_user_license_management_jobs.yml)
 
 Group: `group::composition analysis`
 
@@ -17416,7 +17512,7 @@ Tiers: `ultimate`
 
 ### `usage_activity_by_stage.secure.user_preferences_group_overview_security_dashboard`
 
-Users who set personal preference to see Details on Group overview page
+Users who set personal preference to see Details on Group information page
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_all/20210216182207_user_preferences_group_overview_security_dashboard.yml)
 
@@ -17428,7 +17524,7 @@ Tiers: `ultimate`
 
 ### `usage_activity_by_stage.secure.user_sast_jobs`
 
-Count of SAST jobs
+Count of SAST jobs per user
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216182116_user_sast_jobs.yml)
 
@@ -17438,9 +17534,21 @@ Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
 
+### `usage_activity_by_stage.secure.user_sast_scans`
+
+Number of users who have run a SAST scan
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_all/20210607043741_user_sast_scans.yml)
+
+Group: `group::static analysis`
+
+Status: `data_available`
+
+Tiers: `ultimate`
+
 ### `usage_activity_by_stage.secure.user_secret_detection_jobs`
 
-Count of Secret Detection Jobs
+Count of Secret Detection Jobs per user
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216182118_user_secret_detection_jobs.yml)
 
@@ -17449,6 +17557,18 @@ Group: `group::static analysis`
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
+
+### `usage_activity_by_stage.secure.user_secret_detection_scans`
+
+Number of users who have run a Secret Detection scan
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_all/20210607043957_user_secret_detection_scans.yml)
+
+Group: `group::static analysis`
+
+Status: `data_available`
+
+Tiers: `ultimate`
 
 ### `usage_activity_by_stage.secure.user_unique_users_all_secure_scanners`
 
@@ -17468,7 +17588,7 @@ Unique count of builds in project
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216175525_ci_builds.yml)
 
-Group: `group::continuous integration`
+Group: `group::pipeline execution`
 
 Status: `data_available`
 
@@ -17480,7 +17600,7 @@ Total pipelines in external repositories
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216175527_ci_external_pipelines.yml)
 
-Group: `group::continuous integration`
+Group: `group::pipeline execution`
 
 Status: `data_available`
 
@@ -17492,7 +17612,7 @@ Total pipelines in GitLab repositories
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216175529_ci_internal_pipelines.yml)
 
-Group: `group::continuous integration`
+Group: `group::pipeline execution`
 
 Status: `data_available`
 
@@ -17516,7 +17636,7 @@ Total Pipelines from templates in repository
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216175533_ci_pipeline_config_repository.yml)
 
-Group: `group::continuous integration`
+Group: `group::pipeline execution`
 
 Status: `data_available`
 
@@ -17528,7 +17648,7 @@ Pipeline schedules in GitLab
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216175535_ci_pipeline_schedules.yml)
 
-Group: `group::continuous integration`
+Group: `group::pipeline execution`
 
 Status: `data_available`
 
@@ -17540,7 +17660,7 @@ Distinct Users triggering Total pipelines
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216175537_ci_pipelines.yml)
 
-Group: `group::continuous integration`
+Group: `group::pipeline execution`
 
 Status: `data_available`
 
@@ -17552,7 +17672,7 @@ Total configured Triggers in project
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216175539_ci_triggers.yml)
 
-Group: `group::continuous integration`
+Group: `group::pipeline execution`
 
 Status: `data_available`
 
@@ -17576,7 +17696,7 @@ Projects with a GitHub service pipeline enabled
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_all/20210216175540_projects_reporting_ci_cd_back_to_github.yml)
 
-Group: `group::continuous integration`
+Group: `group::pipeline execution`
 
 Status: `data_available`
 
@@ -18250,7 +18370,7 @@ Missing description
 
 Group: ``
 
-Status: `implemented`
+Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
 
@@ -18286,7 +18406,7 @@ Monthly count of all custom compliance framework labels
 
 Group: `compliance`
 
-Status: `implemented`
+Status: `data_available`
 
 Tiers: `premium`, `ultimate`
 
@@ -18932,11 +19052,11 @@ Count of unique projects with an incident from an alert created in the last mont
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216180526_projects_with_alert_incidents.yml)
 
-Group: `group::health`
+Group: `group::monitor`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `usage_activity_by_stage_monthly.monitor.projects_with_error_tracking_enabled`
 
@@ -18956,11 +19076,11 @@ Count of unique projects with an incident created in the last month
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216180524_projects_with_incidents.yml)
 
-Group: `group::health`
+Group: `group::monitor`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `free`, `premium`, `ultimate`
 
 ### `usage_activity_by_stage_monthly.monitor.projects_with_tracing_enabled`
 
@@ -19172,7 +19292,7 @@ Count creator_id from projects with repository mirroring enabled.
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210216181943_projects_mirrored_with_pipelines_enabled.yml)
 
-Group: `group::continuous integration`
+Group: `group::pipeline execution`
 
 Status: `data_available`
 
@@ -19300,7 +19420,7 @@ Tiers: `free`
 
 ### `usage_activity_by_stage_monthly.secure.dependency_scanning_pipeline`
 
-no idea, what is this when did it get added? guess pipelines containing a DS job
+Count of pipelines with successful Dependency Scanning jobs
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210216175226_dependency_scanning_pipeline.yml)
 
@@ -19312,15 +19432,39 @@ Tiers: `ultimate`
 
 ### `usage_activity_by_stage_monthly.secure.dependency_scanning_scans`
 
-Missing description
+Monthly number of users running Dependency Scanning Scans
 
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216183828_dependency_scanning_scans.yml)
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210216183828_dependency_scanning_scans.yml)
 
-Group: ``
+Group: `group::composition analysis`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `ultimate`
+
+### `usage_activity_by_stage_monthly.secure.running_container_scanning_pipeline`
+
+Pipelines containing a Running Container Scanning job
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210618125224_running_container_scanning_pipeline.yml)
+
+Group: `group::container security`
+
+Status: `data_available`
+
+Tiers: `ultimate`
+
+### `usage_activity_by_stage_monthly.secure.running_container_scanning_scans`
+
+Counts running container scanning jobs
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210618101233_running_container_scanning_scans.yml)
+
+Group: `group::container security`
+
+Status: `data_available`
+
+Tiers: `ultimate`
 
 ### `usage_activity_by_stage_monthly.secure.sast_pipeline`
 
@@ -19394,6 +19538,18 @@ Status: `data_available`
 
 Tiers: `free`
 
+### `usage_activity_by_stage_monthly.secure.user_api_fuzzing_scans`
+
+Number of users who have run a API Fuzzing scan
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210607043622_user_api_fuzzing_scans.yml)
+
+Group: `category::fuzz testing`
+
+Status: `data_available`
+
+Tiers: `ultimate`
+
 ### `usage_activity_by_stage_monthly.secure.user_container_scanning_jobs`
 
 Distinct count per user of Container Scanning jobs run monthly
@@ -19401,6 +19557,18 @@ Distinct count per user of Container Scanning jobs run monthly
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210216175505_user_container_scanning_jobs.yml)
 
 Group: `group::container security`
+
+Status: `data_available`
+
+Tiers: `ultimate`
+
+### `usage_activity_by_stage_monthly.secure.user_container_scanning_scans`
+
+Number of users who have run a Container Scanning scan
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210607043336_user_container_scanning_scans.yml)
+
+Group: `group::composition analysis`
 
 Status: `data_available`
 
@@ -19418,6 +19586,18 @@ Status: `data_available`
 
 Tiers: `free`
 
+### `usage_activity_by_stage_monthly.secure.user_coverage_fuzzing_scans`
+
+Number of users who have run a Coverage Fuzzing scan
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210607043509_user_coverage_fuzzing_scans.yml)
+
+Group: `category::fuzz testing`
+
+Status: `data_available`
+
+Tiers: `ultimate`
+
 ### `usage_activity_by_stage_monthly.secure.user_dast_jobs`
 
 Users who run a DAST job
@@ -19430,9 +19610,21 @@ Status: `data_available`
 
 Tiers: `free`
 
+### `usage_activity_by_stage_monthly.secure.user_dast_scans`
+
+Number of users who have run a DAST scan
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210607041718_user_dast_scans.yml)
+
+Group: `group::dynamic analysis`
+
+Status: `data_available`
+
+Tiers: `ultimate`
+
 ### `usage_activity_by_stage_monthly.secure.user_dependency_scanning_jobs`
 
-no idea, Count of Dependency Scanning jobs run, it implies user and monthly, but AFAIK we don't track per user
+Monthly number of users creating Dependency Scanning jobs
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210216175222_user_dependency_scanning_jobs.yml)
 
@@ -19442,11 +19634,23 @@ Status: `data_available`
 
 Tiers: `ultimate`
 
+### `usage_activity_by_stage_monthly.secure.user_dependency_scanning_scans`
+
+Number of users who have run a Dependency Scanning scan
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210607043301_user_dependency_scanning_scans.yml)
+
+Group: `group::composition analysis`
+
+Status: `data_available`
+
+Tiers: `ultimate`
+
 ### `usage_activity_by_stage_monthly.secure.user_license_management_jobs`
 
-no idea, Count of License Scanning jobs run, it implies user and monthly, but AFAIK we don't track per user
+Monthly number of users running License Scanning jobs
 
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/license/20210216175224_user_license_management_jobs.yml)
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210216175224_user_license_management_jobs.yml)
 
 Group: `group::composition analysis`
 
@@ -19456,7 +19660,7 @@ Tiers: `ultimate`
 
 ### `usage_activity_by_stage_monthly.secure.user_preferences_group_overview_security_dashboard`
 
-Users who set personal preference to see Security Dashboard on Group overview page
+Users who set personal preference to see Security Dashboard on Group information page
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210216182209_user_preferences_group_overview_security_dashboard.yml)
 
@@ -19478,6 +19682,18 @@ Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
 
+### `usage_activity_by_stage_monthly.secure.user_sast_scans`
+
+Number of users who have run a SAST scan
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210607043218_user_sast_scans.yml)
+
+Group: `group::static analysis`
+
+Status: `data_available`
+
+Tiers: `ultimate`
+
 ### `usage_activity_by_stage_monthly.secure.user_secret_detection_jobs`
 
 Users who run a Secret Detection job
@@ -19489,6 +19705,18 @@ Group: `group::static analysis`
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
+
+### `usage_activity_by_stage_monthly.secure.user_secret_detection_scans`
+
+Number of users who have run a Secret Detection scan
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210607043410_user_secret_detection_scans.yml)
+
+Group: `group::static analysis`
+
+Status: `data_available`
+
+Tiers: `ultimate`
 
 ### `usage_activity_by_stage_monthly.secure.user_unique_users_all_secure_scanners`
 
@@ -19508,7 +19736,7 @@ Unique monthly builds in project
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216175542_ci_builds.yml)
 
-Group: `group::continuous integration`
+Group: `group::pipeline execution`
 
 Status: `data_available`
 
@@ -19520,7 +19748,7 @@ Total pipelines in external repositories in a month
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216175544_ci_external_pipelines.yml)
 
-Group: `group::continuous integration`
+Group: `group::pipeline execution`
 
 Status: `data_available`
 
@@ -19532,7 +19760,7 @@ Total pipelines in GitLab repositories in a month
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216175546_ci_internal_pipelines.yml)
 
-Group: `group::continuous integration`
+Group: `group::pipeline execution`
 
 Status: `data_available`
 
@@ -19556,7 +19784,7 @@ Total Monthly Pipelines from templates in repository
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216175550_ci_pipeline_config_repository.yml)
 
-Group: `group::continuous integration`
+Group: `group::pipeline execution`
 
 Status: `data_available`
 
@@ -19568,7 +19796,7 @@ Total monthly Pipeline schedules in GitLab
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216175552_ci_pipeline_schedules.yml)
 
-Group: `group::continuous integration`
+Group: `group::pipeline execution`
 
 Status: `data_available`
 
@@ -19580,7 +19808,7 @@ Distinct users triggering pipelines in a month
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216175554_ci_pipelines.yml)
 
-Group: `group::continuous integration`
+Group: `group::pipeline execution`
 
 Status: `data_available`
 
@@ -19592,7 +19820,7 @@ Total configured Triggers in project
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216175556_ci_triggers.yml)
 
-Group: `group::continuous integration`
+Group: `group::pipeline execution`
 
 Status: `data_available`
 
@@ -19616,7 +19844,7 @@ Projects with a GitHub repository mirror pipeline enabled
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210216175558_projects_reporting_ci_cd_back_to_github.yml)
 
-Group: `group::continuous integration`
+Group: `group::pipeline execution`
 
 Status: `data_available`
 

@@ -13,18 +13,10 @@ module Groups
     private
 
     def delayed_project_removal_i18n_string
-      if cascading_namespace_settings_enabled?
-        if current_user&.can_admin_all_resources?
-          s_('GroupSettings|Projects will be permanently deleted after a %{waiting_period}-day delay. This delay can be %{link_start}customized by an admin%{link_end} in instance settings. Inherited by subgroups.')
-        else
-          s_('GroupSettings|Projects will be permanently deleted after a %{waiting_period}-day delay. Inherited by subgroups.')
-        end
+      if current_user&.can_admin_all_resources?
+        s_('GroupSettings|Projects will be permanently deleted after a %{waiting_period}-day delay. This delay can be %{link_start}customized by an admin%{link_end} in instance settings. Inherited by subgroups.')
       else
-        if current_user&.can_admin_all_resources?
-          s_('GroupSettings|Projects will be permanently deleted after a %{waiting_period}-day delay. This delay can be %{link_start}customized by an admin%{link_end} in instance settings.')
-        else
-          s_('GroupSettings|Projects will be permanently deleted after a %{waiting_period}-day delay.')
-        end
+        s_('GroupSettings|Projects will be permanently deleted after a %{waiting_period}-day delay. Inherited by subgroups.')
       end
     end
   end

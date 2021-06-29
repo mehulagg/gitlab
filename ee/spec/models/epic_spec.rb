@@ -62,7 +62,7 @@ RSpec.describe Epic do
 
       describe '.order_relative_position_on_board' do
         it 'returns epics ordered by position on the board, null last' do
-          epics = described_class.order_relative_position_on_board(board.id)
+          epics = described_class.join_board_position(board.id).order_relative_position_on_board(board.id)
 
           expect(epics).to eq([epic2, epic3, epic1, public_epic, confidential_epic])
         end
@@ -83,6 +83,24 @@ RSpec.describe Epic do
 
           # confidential_epic and public_epic should have both nil position for the board
           expect(positions).to match_array([20, 10, 20, nil, nil])
+        end
+      end
+    end
+
+    describe 'title sort scopes' do
+      let_it_be(:epic1) { create(:epic, title: 'foo') }
+      let_it_be(:epic2) { create(:epic, title: 'bar') }
+      let_it_be(:epic3) { create(:epic, title: 'baz') }
+
+      describe '.order_title_asc' do
+        it 'returns epics ordered by title, ascending' do
+          expect(described_class.order_title_asc).to eq([epic2, epic3, epic1, confidential_epic, public_epic])
+        end
+
+        describe '.order_title_desc' do
+          it 'returns epics ordered by title, decending' do
+            expect(described_class.order_title_desc).to eq([public_epic, confidential_epic, epic1, epic3, epic2])
+          end
         end
       end
     end
@@ -182,10 +200,10 @@ RSpec.describe Epic do
   end
 
   describe 'ordering' do
-    let!(:epic1) { create(:epic, start_date: 7.days.ago, end_date: 3.days.ago, updated_at: 3.days.ago, created_at: 7.days.ago, relative_position: 3) }
-    let!(:epic2) { create(:epic, start_date: 3.days.ago, updated_at: 10.days.ago, created_at: 12.days.ago, relative_position: 1) }
-    let!(:epic3) { create(:epic, end_date: 5.days.ago, updated_at: 5.days.ago, created_at: 6.days.ago, relative_position: 2) }
-    let!(:epic4) { create(:epic, relative_position: 4) }
+    let!(:epic1) { create(:epic, start_date: 7.days.ago, end_date: 3.days.ago, updated_at: 3.days.ago, created_at: 7.days.ago, relative_position: 3, title: 'foo') }
+    let!(:epic2) { create(:epic, start_date: 3.days.ago, updated_at: 10.days.ago, created_at: 12.days.ago, relative_position: 1, title: 'bar') }
+    let!(:epic3) { create(:epic, end_date: 5.days.ago, updated_at: 5.days.ago, created_at: 6.days.ago, relative_position: 2, title: 'baz') }
+    let!(:epic4) { create(:epic, relative_position: 4, title: 'world') }
 
     def epics(order_by)
       described_class.order_by(order_by)
@@ -229,6 +247,14 @@ RSpec.describe Epic do
 
     it 'orders by relative_position ASC' do
       expect(epics(:relative_position)).to eq([epic2, epic3, epic1, epic4])
+    end
+
+    it 'orders by title ASC' do
+      expect(epics(:title_asc)).to eq([epic2, epic3, epic1, epic4])
+    end
+
+    it 'orders by title DESC' do
+      expect(epics(:title_desc)).to eq([epic4, epic1, epic3, epic2])
     end
   end
 

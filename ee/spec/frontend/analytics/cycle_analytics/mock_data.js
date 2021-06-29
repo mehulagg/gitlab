@@ -187,20 +187,20 @@ export const camelCasedStageEvents = rawCustomStageEvents.map(deepCamelCase);
 export const customStageLabelEvents = camelCasedStageEvents.filter((ev) => ev.type === 'label');
 export const customStageStartEvents = camelCasedStageEvents.filter((ev) => ev.canBeStartEvent);
 
-// get all the possible stop events
+// get all the possible end events
 const allowedEndEventIds = new Set(customStageStartEvents.flatMap((e) => e.allowedEndEvents));
-export const customStageStopEvents = camelCasedStageEvents.filter((ev) =>
+export const customStageEndEvents = camelCasedStageEvents.filter((ev) =>
   allowedEndEventIds.has(ev.identifier),
 );
 
 export const customStageEvents = uniq(
-  [...customStageStartEvents, ...customStageStopEvents],
+  [...customStageStartEvents, ...customStageEndEvents],
   false,
   (ev) => ev.identifier,
 );
 
 export const labelStartEvent = customStageLabelEvents[0];
-export const labelStopEvent = customStageLabelEvents.find(
+export const labelEndEvent = customStageLabelEvents.find(
   (ev) => ev.identifier === labelStartEvent.allowedEndEvents[0],
 );
 

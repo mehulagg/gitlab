@@ -18,32 +18,34 @@ RSpec.describe Registrations::ProjectsController do
     end
 
     context 'with an authenticated user' do
-      let(:signup_onboarding_enabled) { true }
+      let(:dev_env_or_com) { true }
 
       before do
         sign_in(user)
-        allow(controller.helpers).to receive(:signup_onboarding_enabled?).and_return(signup_onboarding_enabled)
+        allow(::Gitlab).to receive(:dev_env_or_com?).and_return(dev_env_or_com)
       end
 
-      it { is_expected.to have_gitlab_http_status(:not_found) }
-
-      context 'with a namespace in the URL' do
-        subject { get :new, params: { namespace_id: namespace.id } }
-
+      context 'when on .com' do
         it { is_expected.to have_gitlab_http_status(:not_found) }
 
-        context 'with sufficient access' do
-          before do
-            namespace.add_owner(user)
-          end
+        context 'with a namespace in the URL' do
+          subject { get :new, params: { namespace_id: namespace.id } }
 
-          it { is_expected.to have_gitlab_http_status(:ok) }
-          it { is_expected.to render_template(:new) }
+          it { is_expected.to have_gitlab_http_status(:not_found) }
+
+          context 'with sufficient access' do
+            before do
+              namespace.add_owner(user)
+            end
+
+            it { is_expected.to have_gitlab_http_status(:ok) }
+            it { is_expected.to render_template(:new) }
+          end
         end
       end
 
-      context 'with signup onboarding not enabled' do
-        let(:signup_onboarding_enabled) { false }
+      context 'when not on .com' do
+        let(:dev_env_or_com) { false }
 
         it { is_expected.to have_gitlab_http_status(:not_found) }
       end
@@ -56,7 +58,7 @@ RSpec.describe Registrations::ProjectsController do
     let_it_be(:trial_onboarding_flow_params) { {} }
 
     let(:params) { { namespace_id: namespace.id, name: 'New project', path: 'project-path', visibility_level: Gitlab::VisibilityLevel::PRIVATE } }
-    let(:signup_onboarding_enabled) { true }
+    let(:dev_env_or_com) { true }
 
     context 'with an unauthenticated user' do
       it { is_expected.to have_gitlab_http_status(:redirect) }
@@ -74,7 +76,7 @@ RSpec.describe Registrations::ProjectsController do
         namespace.add_owner(user)
         sign_in(user)
         stub_experiment_for_subject(trial_onboarding_issues: trial_onboarding_issues_enabled)
-        allow(controller.helpers).to receive(:signup_onboarding_enabled?).and_return(signup_onboarding_enabled)
+        allow(::Gitlab).to receive(:dev_env_or_com?).and_return(dev_env_or_com)
       end
 
       it 'creates a new project, a "Learn GitLab" project, sets a cookie and redirects to the experience level page' do
@@ -104,15 +106,6 @@ RSpec.describe Registrations::ProjectsController do
         end
         expect(controller).to receive(:record_experiment_user).with(:learn_gitlab_a, onboarding_context)
         expect(controller).to receive(:record_experiment_user).with(:learn_gitlab_b, onboarding_context)
-
-        subject
-      end
-
-      it 'tracks the registrations_group_invite experiment as expected', :experiment do
-        expect(experiment(:registrations_group_invite))
-          .to track(:signup_successful, { property: namespace.id.to_s })
-                .on_next_instance
-                .with_context(actor: user)
 
         subject
       end
@@ -183,7 +176,7 @@ RSpec.describe Registrations::ProjectsController do
       end
 
       context 'with signup onboarding not enabled' do
-        let(:signup_onboarding_enabled) { false }
+        let(:dev_env_or_com) { false }
 
         it { is_expected.to have_gitlab_http_status(:not_found) }
       end

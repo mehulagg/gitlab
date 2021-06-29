@@ -66,7 +66,7 @@ class MergeRequestsComplianceFinder < MergeRequestsFinder
       :approved_by_users,
       :metrics,
       source_project: :route,
-      target_project: :namespace,
+      target_project: [:namespace, :compliance_management_framework],
       head_pipeline: [project: :project_feature]
     ]
   end

@@ -9,13 +9,16 @@ type: index
 
 As an administrator of a GitLab self-managed instance, you can manage the behavior of your deployment. To do so, select **Admin Area > Settings**.
 
-The admin area is not accessible on GitLab.com, and settings can only be changed by the
+The Admin Area is not accessible on GitLab.com, and settings can only be changed by the
 GitLab.com administrators. See the [GitLab.com settings](../../gitlab_com/index.md)
 documentation for all current settings and limits on the GitLab.com instance.
 
 ## General
 
-Access the default page for Admin Area settings by navigating to **Admin Area > Settings > General**:
+To access the default page for Admin Area settings:
+
+1. On the top bar, select **Menu >** **{admin}** **Admin**.
+1. In the left sidebar, select **Settings > General**.
 
 | Option | Description |
 | ------ | ----------- |
@@ -65,7 +68,7 @@ Access the default page for Admin Area settings by navigating to **Admin Area > 
 | Option | Description |
 | ------ | ----------- |
 | [Continuous Integration and Deployment](continuous_integration.md) | Auto DevOps, runners and job artifacts. |
-| [Required pipeline configuration](continuous_integration.md#required-pipeline-configuration) **(PREMIUM SELF)** | Set an instance-wide auto included [pipeline configuration](../../../ci/yaml/README.md). This pipeline configuration is run after the project's own configuration. |
+| [Required pipeline configuration](continuous_integration.md#required-pipeline-configuration) **(PREMIUM SELF)** | Set an instance-wide auto included [pipeline configuration](../../../ci/yaml/index.md). This pipeline configuration is run after the project's own configuration. |
 | [Package Registry](continuous_integration.md#package-registry-configuration) | Settings related to the use and experience of using the GitLab Package Registry. Note there are [risks involved](../../packages/container_registry/index.md#use-with-external-container-registries) in enabling some of these settings. |
 
 ## Reporting
@@ -116,6 +119,11 @@ Access the default page for Admin Area settings by navigating to **Admin Area > 
 | [Gitaly timeouts](gitaly_timeouts.md) | Configure Gitaly timeouts. |
 | Localization | [Default first day of the week](../../profile/preferences.md) and [Time tracking](../../project/time_tracking.md#limit-displayed-units-to-hours). |
 
-NOTE:
-You can change the [Default first day of the week](../../profile/preferences.md) for the entire GitLab instance
-in the **Localization** section of **Admin Area > Settings > Preferences**.
+### Default first day of the week
+
+You can change the [Default first day of the week](../../profile/preferences.md)
+for the entire GitLab instance:
+
+1. On the top bar, select **Menu >** **{admin}** **Admin**.
+1. In the left sidebar, select **Settings > Preferences**.
+1. Scroll to the **Localization** section, and select your desired first day of the week.

@@ -22,7 +22,7 @@ module Nav
 
       new_view_model = new_dropdown_view_model(project: project, group: group)
 
-      if new_view_model
+      if new_view_model && new_view_model.fetch(:menu_sections)&.any?
         builder.add_view(NEW_VIEW, new_view_model)
       end
 
@@ -276,7 +276,11 @@ module Nav
       builder = ::Gitlab::Nav::TopNavMenuBuilder.new
       builder.add_primary_menu_item(id: 'your', title: _('Your groups'), href: dashboard_groups_path)
       builder.add_primary_menu_item(id: 'explore', title: _('Explore groups'), href: explore_groups_path)
-      builder.add_secondary_menu_item(id: 'create', title: _('Create group'), href: new_group_path(anchor: 'create-group-pane'))
+
+      if current_user.can_create_group?
+        builder.add_secondary_menu_item(id: 'create', title: _('Create group'), href: new_group_path)
+      end
+
       builder.build
     end
   end

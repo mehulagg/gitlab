@@ -8,6 +8,7 @@ RSpec.describe 'parse alert payload fields' do
   let_it_be_with_refind(:project) { create(:project) }
   let_it_be(:maintainer) { create(:user) }
   let_it_be(:developer) { create(:user) }
+
   let(:current_user) { maintainer }
   let(:license) { true }
   let(:feature_flag) { true }

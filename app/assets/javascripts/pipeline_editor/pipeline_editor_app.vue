@@ -1,7 +1,6 @@
 <script>
 import { GlLoadingIcon } from '@gitlab/ui';
 import { fetchPolicies } from '~/lib/graphql';
-import httpStatusCodes from '~/lib/utils/http_status';
 import { s__ } from '~/locale';
 
 import { unwrapStagesWithNeeds } from '~/pipelines/components/unwrapping_utils';
@@ -14,12 +13,14 @@ import {
   EDITOR_APP_STATUS_ERROR,
   EDITOR_APP_STATUS_LOADING,
   LOAD_FAILURE_UNKNOWN,
+  STARTER_TEMPLATE_NAME,
 } from './constants';
 import getBlobContent from './graphql/queries/blob_content.graphql';
 import getCiConfigData from './graphql/queries/ci_config.graphql';
 import getAppStatus from './graphql/queries/client/app_status.graphql';
 import getCurrentBranch from './graphql/queries/client/current_branch.graphql';
 import getIsNewCiConfigFile from './graphql/queries/client/is_new_ci_config_file.graphql';
+import getTemplate from './graphql/queries/get_starter_template.query.graphql';
 import PipelineEditorHome from './pipeline_editor_home.vue';
 
 export default {
@@ -51,12 +52,13 @@ export default {
       showStartScreen: false,
       showSuccess: false,
       showFailure: false,
+      starterTemplate: '',
     };
   },
 
   apollo: {
     initialCiFileContent: {
-      fetchPolicy: fetchPolicies.NETWORK,
+      fetchPolicy: fetchPolicies.NETWORK_ONLY,
       query: getBlobContent,
       // If it's a brand new file, we don't want to fetch the content.
       // Then when the user commits the first time, the query would run
@@ -73,22 +75,40 @@ export default {
         };
       },
       update(data) {
-        return data?.blobContent?.rawData;
+        return data?.project?.repository?.blobs?.nodes[0]?.rawBlob;
       },
       result({ data }) {
-        const fileContent = data?.blobContent?.rawData ?? '';
+        const nodes = data?.project?.repository?.blobs?.nodes;
+        if (!nodes) {
+          this.reportFailure(LOAD_FAILURE_UNKNOWN);
+        } else {
+          const rawBlob = nodes[0]?.rawBlob;
+          const fileContent = rawBlob ?? '';
 
-        this.lastCommittedContent = fileContent;
-        this.currentCiFileContent = fileContent;
+          this.lastCommittedContent = fileContent;
+          this.currentCiFileContent = fileContent;
 
-        // make sure to reset the start screen flag during a refetch
-        // e.g. when switching branches
-        if (fileContent.length) {
-          this.showStartScreen = false;
+          // If rawBlob is defined and returns a string, it means that there is
+          // a CI config file with empty content. If `rawBlob` is not defined
+          // at all, it means there was no file found.
+          const hasCIFile = rawBlob === '' || fileContent.length > 0;
+
+          if (!fileContent.length) {
+            this.setAppStatus(EDITOR_APP_STATUS_EMPTY);
+          }
+
+          if (!hasCIFile) {
+            this.showStartScreen = true;
+          } else if (fileContent.length) {
+            // If the file content is > 0, then we make sure to reset the
+            // start screen flag during a refetch
+            // e.g. when switching branches
+            this.showStartScreen = false;
+          }
         }
       },
-      error(error) {
-        this.handleBlobContentError(error);
+      error() {
+        this.reportFailure(LOAD_FAILURE_UNKNOWN);
       },
       watchLoading(isLoading) {
         if (isLoading) {
@@ -135,6 +155,27 @@ export default {
     isNewCiConfigFile: {
       query: getIsNewCiConfigFile,
     },
+    starterTemplate: {
+      query: getTemplate,
+      variables() {
+        return {
+          projectPath: this.projectFullPath,
+          templateName: STARTER_TEMPLATE_NAME,
+        };
+      },
+      skip({ isNewCiConfigFile }) {
+        return !isNewCiConfigFile;
+      },
+      update(data) {
+        return data.project?.ciTemplate?.content || '';
+      },
+      result({ data }) {
+        this.updateCiConfig(data.project?.ciTemplate?.content || '');
+      },
+      error() {
+        this.reportFailure(LOAD_FAILURE_UNKNOWN);
+      },
+    },
   },
   computed: {
     hasUnsavedChanges() {
@@ -163,22 +204,6 @@ export default {
     },
   },
   methods: {
-    handleBlobContentError(error = {}) {
-      const { networkError } = error;
-
-      const { response } = networkError;
-      // 404 for missing CI file
-      // 400 for blank projects with no repository
-      if (
-        response?.status === httpStatusCodes.NOT_FOUND ||
-        response?.status === httpStatusCodes.BAD_REQUEST
-      ) {
-        this.setAppStatus(EDITOR_APP_STATUS_EMPTY);
-        this.showStartScreen = true;
-      } else {
-        this.reportFailure(LOAD_FAILURE_UNKNOWN);
-      }
-    },
     hideFailure() {
       this.showFailure = false;
     },
@@ -228,7 +253,8 @@ export default {
           .getClient()
           .writeQuery({ query: getIsNewCiConfigFile, data: { isNewCiConfigFile: false } });
       }
-      // Keep track of the latest commited content to know
+
+      // Keep track of the latest committed content to know
       // if the user has made changes to the file that are unsaved.
       this.lastCommittedContent = this.currentCiFileContent;
     },

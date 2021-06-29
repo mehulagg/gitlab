@@ -6,6 +6,7 @@ import { store } from '~/notes/stores';
 import { apolloProvider } from '~/sidebar/graphql';
 import * as CEMountSidebar from '~/sidebar/mount_sidebar';
 import CveIdRequest from './components/cve_id_request/cve_id_request_sidebar.vue';
+import IterationSidebarDropdownWidget from './components/iteration_sidebar_dropdown_widget.vue';
 import SidebarDropdownWidget from './components/sidebar_dropdown_widget.vue';
 import SidebarStatus from './components/status/sidebar_status.vue';
 import SidebarWeight from './components/weight/sidebar_weight.vue';
@@ -13,7 +14,7 @@ import { IssuableAttributeType } from './constants';
 
 Vue.use(VueApollo);
 
-const mountWeightComponent = (mediator) => {
+const mountWeightComponent = () => {
   const el = document.querySelector('.js-sidebar-weight-entry-point');
 
   if (!el) return false;
@@ -23,12 +24,7 @@ const mountWeightComponent = (mediator) => {
     components: {
       SidebarWeight,
     },
-    render: (createElement) =>
-      createElement('sidebar-weight', {
-        props: {
-          mediator,
-        },
-      }),
+    render: (createElement) => createElement('sidebar-weight'),
   });
 };
 
@@ -113,18 +109,19 @@ function mountIterationSelect() {
 
   const { groupPath, canEdit, projectPath, issueIid } = el.dataset;
 
+  const IterationDropdown = gon.features.iterationCadences
+    ? IterationSidebarDropdownWidget
+    : SidebarDropdownWidget;
+
   return new Vue({
     el,
     apolloProvider,
-    components: {
-      SidebarDropdownWidget,
-    },
     provide: {
       canUpdate: parseBoolean(canEdit),
       isClassicSidebar: true,
     },
     render: (createElement) =>
-      createElement('sidebar-dropdown-widget', {
+      createElement(IterationDropdown, {
         props: {
           attrWorkspacePath: groupPath,
           workspacePath: projectPath,
@@ -138,7 +135,7 @@ function mountIterationSelect() {
 
 export default function mountSidebar(mediator) {
   CEMountSidebar.mountSidebar(mediator);
-  mountWeightComponent(mediator);
+  mountWeightComponent();
   mountStatusComponent(mediator);
   mountEpicsSelect();
   mountIterationSelect();

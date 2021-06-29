@@ -24,11 +24,11 @@ RSpec.describe API::Services do
       expect(response).to have_gitlab_http_status(:forbidden)
     end
 
-    context 'project with services' do
-      let!(:active_service) { create(:emails_on_push_service, project: project, active: true) }
-      let!(:service) { create(:custom_issue_tracker_integration, project: project, active: false) }
+    context 'with integrations' do
+      let!(:active_integration) { create(:emails_on_push_integration, project: project, active: true) }
+      let!(:integration) { create(:custom_issue_tracker_integration, project: project, active: false) }
 
-      it "returns a list of all active services" do
+      it "returns a list of all active integrations" do
         get api("/projects/#{project.id}/services", user)
 
         aggregate_failures 'expect successful response with all active services' do
@@ -42,7 +42,7 @@ RSpec.describe API::Services do
     end
   end
 
-  Integration.available_services_names.each do |service|
+  Integration.available_integration_names.each do |service|
     describe "PUT /projects/:id/services/#{service.dasherize}" do
       include_context service
 
@@ -99,7 +99,7 @@ RSpec.describe API::Services do
       include_context service
 
       before do
-        initialize_service(service)
+        initialize_integration(service)
       end
 
       it "deletes #{service}" do
@@ -114,16 +114,16 @@ RSpec.describe API::Services do
     describe "GET /projects/:id/services/#{service.dasherize}" do
       include_context service
 
-      let!(:initialized_service) { initialize_service(service, active: true) }
+      let!(:initialized_service) { initialize_integration(service, active: true) }
 
       let_it_be(:project2) do
         create(:project, creator_id: user.id, namespace: user.namespace)
       end
 
       def deactive_service!
-        return initialized_service.update!(active: false) unless initialized_service.is_a?(PrometheusService)
+        return initialized_service.update!(active: false) unless initialized_service.is_a?(::Integrations::Prometheus)
 
-        # PrometheusService sets `#active` itself within a `before_save`:
+        # Integrations::Prometheus sets `#active` itself within a `before_save`:
         initialized_service.manual_configuration = false
         initialized_service.save!
       end
@@ -141,7 +141,7 @@ RSpec.describe API::Services do
         expect(json_response['properties'].keys).to match_array(service_instance.api_field_names)
       end
 
-      it "returns all properties of inactive service #{service}" do
+      it "returns all properties of inactive integration #{service}" do
         deactive_service!
 
         get api("/projects/#{project.id}/services/#{dashed_service}", user)
@@ -151,16 +151,16 @@ RSpec.describe API::Services do
         expect(json_response['properties'].keys).to match_array(service_instance.api_field_names)
       end
 
-      it "returns not found if service does not exist" do
+      it "returns not found if integration does not exist" do
         get api("/projects/#{project2.id}/services/#{dashed_service}", user)
 
         expect(response).to have_gitlab_http_status(:not_found)
         expect(json_response['message']).to eq('404 Service Not Found')
       end
 
-      it "returns not found if service exists but is in `Project#disabled_services`" do
+      it "returns not found if service exists but is in `Project#disabled_integrations`" do
         expect_next_found_instance_of(Project) do |project|
-          expect(project).to receive(:disabled_services).at_least(:once).and_return([service])
+          expect(project).to receive(:disabled_integrations).at_least(:once).and_return([service])
         end
 
         get api("/projects/#{project.id}/services/#{dashed_service}", user)
@@ -179,10 +179,10 @@ RSpec.describe API::Services do
   end
 
   describe 'POST /projects/:id/services/:slug/trigger' do
-    describe 'Mattermost Service' do
-      let(:service_name) { 'mattermost_slash_commands' }
+    describe 'Mattermost integration' do
+      let(:integration_name) { 'mattermost_slash_commands' }
 
-      context 'no service is available' do
+      context 'when no integration is available' do
         it 'returns a not found message' do
           post api("/projects/#{project.id}/services/idonotexist/trigger")
 
@@ -191,34 +191,34 @@ RSpec.describe API::Services do
         end
       end
 
-      context 'the service exists' do
+      context 'when the integration exists' do
         let(:params) { { token: 'token' } }
 
-        context 'the service is not active' do
+        context 'when the integration is not active' do
           before do
-            project.create_mattermost_slash_commands_service(
+            project.create_mattermost_slash_commands_integration(
               active: false,
               properties: params
             )
           end
 
-          it 'when the service is inactive' do
-            post api("/projects/#{project.id}/services/#{service_name}/trigger"), params: params
+          it 'when the integration is inactive' do
+            post api("/projects/#{project.id}/services/#{integration_name}/trigger"), params: params
 
             expect(response).to have_gitlab_http_status(:not_found)
           end
         end
 
-        context 'the service is active' do
+        context 'when the integration is active' do
           before do
-            project.create_mattermost_slash_commands_service(
+            project.create_mattermost_slash_commands_integration(
               active: true,
               properties: params
             )
           end
 
           it 'returns status 200' do
-            post api("/projects/#{project.id}/services/#{service_name}/trigger"), params: params
+            post api("/projects/#{project.id}/services/#{integration_name}/trigger"), params: params
 
             expect(response).to have_gitlab_http_status(:ok)
           end
@@ -226,7 +226,7 @@ RSpec.describe API::Services do
 
         context 'when the project can not be found' do
           it 'returns a generic 404' do
-            post api("/projects/404/services/#{service_name}/trigger"), params: params
+            post api("/projects/404/services/#{integration_name}/trigger"), params: params
 
             expect(response).to have_gitlab_http_status(:not_found)
             expect(json_response["message"]).to eq("404 Service Not Found")
@@ -239,7 +239,7 @@ RSpec.describe API::Services do
       let(:service_name) { 'slack_slash_commands' }
 
       before do
-        project.create_slack_slash_commands_service(
+        project.create_slack_slash_commands_integration(
           active: true,
           properties: { token: 'token' }
         )
@@ -254,29 +254,29 @@ RSpec.describe API::Services do
     end
   end
 
-  describe 'Mattermost service' do
-    let(:service_name) { 'mattermost' }
+  describe 'Mattermost integration' do
+    let(:integration_name) { 'mattermost' }
     let(:params) do
       { webhook: 'https://hook.example.com', username: 'username' }
     end
 
     before do
-      project.create_mattermost_service(
+      project.create_mattermost_integration(
         active: true,
         properties: params
       )
     end
 
     it 'accepts a username for update' do
-      put api("/projects/#{project.id}/services/#{service_name}", user), params: params.merge(username: 'new_username')
+      put api("/projects/#{project.id}/services/#{integration_name}", user), params: params.merge(username: 'new_username')
 
       expect(response).to have_gitlab_http_status(:ok)
       expect(json_response['properties']['username']).to eq('new_username')
     end
   end
 
-  describe 'Microsoft Teams service' do
-    let(:service_name) { 'microsoft-teams' }
+  describe 'Microsoft Teams integration' do
+    let(:integration_name) { 'microsoft-teams' }
     let(:params) do
       {
         webhook: 'https://hook.example.com',
@@ -286,21 +286,23 @@ RSpec.describe API::Services do
     end
 
     before do
-      project.create_microsoft_teams_service(
+      project.create_microsoft_teams_integration(
         active: true,
         properties: params
       )
     end
 
     it 'accepts branches_to_be_notified for update' do
-      put api("/projects/#{project.id}/services/#{service_name}", user), params: params.merge(branches_to_be_notified: 'all')
+      put api("/projects/#{project.id}/services/#{integration_name}", user),
+          params: params.merge(branches_to_be_notified: 'all')
 
       expect(response).to have_gitlab_http_status(:ok)
       expect(json_response['properties']['branches_to_be_notified']).to eq('all')
     end
 
     it 'accepts notify_only_broken_pipelines for update' do
-      put api("/projects/#{project.id}/services/#{service_name}", user), params: params.merge(notify_only_broken_pipelines: true)
+      put api("/projects/#{project.id}/services/#{integration_name}", user),
+          params: params.merge(notify_only_broken_pipelines: true)
 
       expect(response).to have_gitlab_http_status(:ok)
       expect(json_response['properties']['notify_only_broken_pipelines']).to eq(true)
@@ -317,7 +319,7 @@ RSpec.describe API::Services do
     end
 
     before do
-      project.create_hangouts_chat_service(
+      project.create_hangouts_chat_integration(
         active: true,
         properties: params
       )
@@ -334,6 +336,28 @@ RSpec.describe API::Services do
       put api("/projects/#{project.id}/services/#{service_name}", user), params: { webhook: 'https://hook.example.com' }
 
       expect(response).to have_gitlab_http_status(:ok)
+    end
+  end
+
+  describe 'Pipelines Email Integration' do
+    let(:service_name) { 'pipelines-email' }
+
+    context 'notify_only_broken_pipelines property was saved as a string' do
+      before do
+        project.create_pipelines_email_integration(
+          active: false,
+          properties: {
+            "notify_only_broken_pipelines": "true",
+            "branches_to_be_notified": "default"
+          }
+        )
+      end
+
+      it 'returns boolean values for notify_only_broken_pipelines' do
+        get api("/projects/#{project.id}/services/#{service_name}", user)
+
+        expect(json_response['properties']['notify_only_broken_pipelines']).to eq(true)
+      end
     end
   end
 end

@@ -88,4 +88,12 @@ RSpec.describe ProjectMember do
       end
     end
   end
+
+  describe '#provisioned_by_this_group?' do
+    let_it_be(:member) { build(:project_member) }
+
+    subject { member.provisioned_by_this_group? }
+
+    it { is_expected.to eq(false) }
+  end
 end

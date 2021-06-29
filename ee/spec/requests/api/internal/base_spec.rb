@@ -10,11 +10,13 @@ RSpec.describe API::Internal::Base do
   let_it_be(:primary_node, reload: true) { create(:geo_node, :primary, url: primary_url) }
   let_it_be(:secondary_node, reload: true) { create(:geo_node, url: secondary_url) }
   let_it_be(:user) { create(:user) }
+
   let(:secret_token) { Gitlab::Shell.secret_token }
 
   describe 'POST /internal/post_receive', :geo do
     let(:key) { create(:key, user: user) }
     let_it_be(:project, reload: true) { create(:project, :repository, :wiki_repo) }
+
     let(:gl_repository) { "project-#{project.id}" }
     let(:reference_counter) { double('ReferenceCounter') }
 
@@ -197,6 +199,7 @@ RSpec.describe API::Internal::Base do
     context 'ip restriction' do
       let_it_be(:group) { create(:group)}
       let_it_be(:project) { create(:project, :repository, namespace: group) }
+
       let(:params) do
         {
           key_id: key.id,
@@ -310,6 +313,7 @@ RSpec.describe API::Internal::Base do
 
   describe 'POST /internal/personal_access_token' do
     let_it_be(:key) { create(:key, user: user) }
+
     let(:instance_level_max_personal_access_token_lifetime) { nil }
 
     before do
@@ -361,6 +365,7 @@ RSpec.describe API::Internal::Base do
 
   describe 'POST /internal/two_factor_otp_check' do
     let_it_be(:key) { create(:key, user: user) }
+
     let(:key_id) { key.id }
     let(:otp) { '123456'}
 
@@ -471,83 +476,6 @@ RSpec.describe API::Internal::Base do
 
           expect(json_response['success']).to be_falsey
         end
-      end
-    end
-  end
-
-  describe 'GET /internal/geo_proxy' do
-    subject { get api('/internal/geo_proxy'), params: { secret_token: secret_token } }
-
-    context 'with valid auth' do
-      context 'when Geo is not being used' do
-        it 'returns empty data' do
-          allow(::Gitlab::Geo).to receive(:enabled?).and_return(false)
-
-          subject
-
-          expect(response).to have_gitlab_http_status(:ok)
-          expect(json_response).to be_empty
-        end
-      end
-
-      context 'when this is a primary site' do
-        it 'returns empty data' do
-          stub_current_geo_node(primary_node)
-
-          subject
-
-          expect(response).to have_gitlab_http_status(:ok)
-          expect(json_response).to be_empty
-        end
-      end
-
-      context 'when this is a secondary site' do
-        before do
-          stub_current_geo_node(secondary_node)
-        end
-
-        context 'when a primary exists' do
-          it 'returns the primary internal URL' do
-            subject
-
-            expect(response).to have_gitlab_http_status(:ok)
-            expect(json_response['geo_proxy_url']).to match(primary_node.internal_url)
-          end
-        end
-
-        context 'when a primary does not exist' do
-          it 'returns empty data' do
-            allow(::Gitlab::Geo).to receive(:primary_node_configured?).and_return(false)
-
-            subject
-
-            expect(response).to have_gitlab_http_status(:ok)
-            expect(json_response).to be_empty
-          end
-        end
-      end
-
-      context 'when geo_secondary_proxy feature flag is disabled' do
-        before do
-          stub_feature_flags(geo_secondary_proxy: false)
-        end
-
-        it 'returns empty data' do
-          subject
-
-          expect(response).to have_gitlab_http_status(:ok)
-          expect(json_response).to be_empty
-        end
-      end
-    end
-
-    context 'with invalid auth' do
-      let(:secret_token) { 'invalid_token' }
-
-      it 'returns unauthorized' do
-        subject
-
-        expect(response).to have_gitlab_http_status(:unauthorized)
       end
     end
   end

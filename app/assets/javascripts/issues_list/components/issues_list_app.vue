@@ -9,24 +9,22 @@ import {
   GlTooltipDirective,
 } from '@gitlab/ui';
 import fuzzaldrinPlus from 'fuzzaldrin-plus';
-import { toNumber } from 'lodash';
+import getIssuesQuery from 'ee_else_ce/issues_list/queries/get_issues.query.graphql';
 import createFlash from '~/flash';
 import CsvImportExportButtons from '~/issuable/components/csv_import_export_buttons.vue';
 import IssuableByEmail from '~/issuable/components/issuable_by_email.vue';
 import IssuableList from '~/issuable_list/components/issuable_list_root.vue';
 import { IssuableListTabs, IssuableStates } from '~/issuable_list/constants';
 import {
-  API_PARAM,
-  apiSortParams,
   CREATED_DESC,
   i18n,
+  initialPageParams,
   MAX_LIST_SIZE,
   PAGE_SIZE,
   PARAM_DUE_DATE,
-  PARAM_PAGE,
   PARAM_SORT,
   PARAM_STATE,
-  RELATIVE_POSITION_DESC,
+  RELATIVE_POSITION_ASC,
   TOKEN_TYPE_ASSIGNEE,
   TOKEN_TYPE_AUTHOR,
   TOKEN_TYPE_CONFIDENTIAL,
@@ -37,19 +35,20 @@ import {
   TOKEN_TYPE_MILESTONE,
   TOKEN_TYPE_WEIGHT,
   UPDATED_DESC,
-  URL_PARAM,
   urlSortParams,
 } from '~/issues_list/constants';
 import {
-  convertToParams,
+  convertToApiParams,
   convertToSearchQuery,
+  convertToUrlParams,
   getDueDateValue,
   getFilterTokens,
   getSortKey,
   getSortOptions,
 } from '~/issues_list/utils';
 import axios from '~/lib/utils/axios_utils';
-import { convertObjectPropsToCamelCase, getParameterByName } from '~/lib/utils/common_utils';
+import { getParameterByName } from '~/lib/utils/common_utils';
+import { scrollUp } from '~/lib/utils/scroll_utils';
 import {
   DEFAULT_NONE_ANY,
   OPERATOR_IS_ONLY,
@@ -105,9 +104,6 @@ export default {
       default: false,
     },
     emptyStateSvgPath: {
-      default: '',
-    },
-    endpoint: {
       default: '',
     },
     exportCsvPath: {
@@ -173,14 +169,42 @@ export default {
       dueDateFilter: getDueDateValue(getParameterByName(PARAM_DUE_DATE)),
       exportCsvPathWithQuery: this.getExportCsvPathWithQuery(),
       filterTokens: getFilterTokens(window.location.search),
-      isLoading: false,
       issues: [],
-      page: toNumber(getParameterByName(PARAM_PAGE)) || 1,
+      pageInfo: {},
+      pageParams: initialPageParams,
       showBulkEditSidebar: false,
       sortKey: getSortKey(getParameterByName(PARAM_SORT)) || defaultSortKey,
       state: state || IssuableStates.Opened,
       totalIssues: 0,
     };
+  },
+  apollo: {
+    issues: {
+      query: getIssuesQuery,
+      variables() {
+        return {
+          projectPath: this.projectPath,
+          search: this.searchQuery,
+          sort: this.sortKey,
+          state: this.state,
+          ...this.pageParams,
+          ...this.apiFilterParams,
+        };
+      },
+      update: ({ project }) => project?.issues.nodes ?? [],
+      result({ data }) {
+        this.pageInfo = data.project?.issues.pageInfo ?? {};
+        this.totalIssues = data.project?.issues.count ?? 0;
+        this.exportCsvPathWithQuery = this.getExportCsvPathWithQuery();
+      },
+      error(error) {
+        createFlash({ message: this.$options.i18n.errorFetchingIssues, captureError: true, error });
+      },
+      skip() {
+        return !this.hasProjectIssues;
+      },
+      debounce: 200,
+    },
   },
   computed: {
     hasSearch() {
@@ -190,21 +214,32 @@ export default {
       return this.showBulkEditSidebar || !this.issues.length;
     },
     isManualOrdering() {
-      return this.sortKey === RELATIVE_POSITION_DESC;
+      return this.sortKey === RELATIVE_POSITION_ASC;
     },
     isOpenTab() {
       return this.state === IssuableStates.Opened;
     },
     apiFilterParams() {
-      return convertToParams(this.filterTokens, API_PARAM);
+      return convertToApiParams(this.filterTokens);
     },
     urlFilterParams() {
-      return convertToParams(this.filterTokens, URL_PARAM);
+      return convertToUrlParams(this.filterTokens);
     },
     searchQuery() {
       return convertToSearchQuery(this.filterTokens) || undefined;
     },
     searchTokens() {
+      const preloadedAuthors = [];
+
+      if (gon.current_user_id) {
+        preloadedAuthors.push({
+          id: gon.current_user_id,
+          name: gon.current_user_fullname,
+          username: gon.current_username,
+          avatar_url: gon.current_user_avatar_url,
+        });
+      }
+
       const tokens = [
         {
           type: TOKEN_TYPE_AUTHOR,
@@ -214,7 +249,9 @@ export default {
           dataType: 'user',
           unique: true,
           defaultAuthors: [],
+          operators: OPERATOR_IS_ONLY,
           fetchAuthors: this.fetchUsers,
+          preloadedAuthors,
         },
         {
           type: TOKEN_TYPE_ASSIGNEE,
@@ -225,6 +262,7 @@ export default {
           unique: !this.hasMultipleIssueAssigneesFeature,
           defaultAuthors: DEFAULT_NONE_ANY,
           fetchAuthors: this.fetchUsers,
+          preloadedAuthors,
         },
         {
           type: TOKEN_TYPE_MILESTONE,
@@ -240,7 +278,7 @@ export default {
           title: TOKEN_TITLE_LABEL,
           icon: 'labels',
           token: LabelToken,
-          defaultLabels: [],
+          defaultLabels: DEFAULT_NONE_ANY,
           fetchLabels: this.fetchLabels,
         },
       ];
@@ -289,6 +327,7 @@ export default {
           token: EpicToken,
           unique: true,
           idProperty: 'id',
+          useIdValue: true,
           fetchEpics: this.fetchEpics,
         });
       }
@@ -306,7 +345,7 @@ export default {
       return tokens;
     },
     showPaginationControls() {
-      return this.issues.length > 0;
+      return this.issues.length > 0 && (this.pageInfo.hasNextPage || this.pageInfo.hasPreviousPage);
     },
     sortOptions() {
       return getSortOptions(this.hasIssueWeightsFeature, this.hasBlockedIssuesFeature);
@@ -321,23 +360,12 @@ export default {
       );
     },
     urlParams() {
-      const filterParams = {
-        ...this.urlFilterParams,
-      };
-
-      if (filterParams.epic_id) {
-        filterParams.epic_id = encodeURIComponent(filterParams.epic_id);
-      } else if (filterParams['not[epic_id]']) {
-        filterParams['not[epic_id]'] = encodeURIComponent(filterParams['not[epic_id]']);
-      }
-
       return {
         due_date: this.dueDateFilter,
-        page: this.page,
         search: this.searchQuery,
+        sort: urlSortParams[this.sortKey],
         state: this.state,
-        ...urlSortParams[this.sortKey],
-        ...filterParams,
+        ...this.urlFilterParams,
       };
     },
   },
@@ -346,7 +374,6 @@ export default {
   },
   mounted() {
     eventHub.$on('issuables:toggleBulkEdit', this.toggleBulkEditSidebar);
-    this.fetchIssues();
   },
   beforeDestroy() {
     eventHub.$off('issuables:toggleBulkEdit', this.toggleBulkEditSidebar);
@@ -386,59 +413,19 @@ export default {
       return this.fetchWithCache(this.projectMilestonesPath, 'milestones', 'title', search, true);
     },
     fetchIterations(search) {
-      return axios.get(this.projectIterationsPath, { params: { search } });
+      const id = Number(search);
+      return !search || Number.isNaN(id)
+        ? axios.get(this.projectIterationsPath, { params: { search } })
+        : axios.get(this.projectIterationsPath, { params: { id } });
     },
     fetchUsers(search) {
       return axios.get(this.autocompleteUsersPath, { params: { search } });
-    },
-    fetchIssues() {
-      if (!this.hasProjectIssues) {
-        return undefined;
-      }
-
-      this.isLoading = true;
-
-      const filterParams = {
-        ...this.apiFilterParams,
-      };
-
-      if (filterParams.epic_id) {
-        filterParams.epic_id = filterParams.epic_id.split('::&').pop();
-      } else if (filterParams['not[epic_id]']) {
-        filterParams['not[epic_id]'] = filterParams['not[epic_id]'].split('::&').pop();
-      }
-
-      return axios
-        .get(this.endpoint, {
-          params: {
-            due_date: this.dueDateFilter,
-            page: this.page,
-            per_page: PAGE_SIZE,
-            search: this.searchQuery,
-            state: this.state,
-            with_labels_details: true,
-            ...apiSortParams[this.sortKey],
-            ...filterParams,
-          },
-        })
-        .then(({ data, headers }) => {
-          this.page = Number(headers['x-page']);
-          this.totalIssues = Number(headers['x-total']);
-          this.issues = data.map((issue) => convertObjectPropsToCamelCase(issue, { deep: true }));
-          this.exportCsvPathWithQuery = this.getExportCsvPathWithQuery();
-        })
-        .catch(() => {
-          createFlash({ message: this.$options.i18n.errorFetchingIssues });
-        })
-        .finally(() => {
-          this.isLoading = false;
-        });
     },
     getExportCsvPathWithQuery() {
       return `${this.exportCsvPath}${window.location.search}`;
     },
     getStatus(issue) {
-      if (issue.closedAt && issue.movedToId) {
+      if (issue.closedAt && issue.moved) {
         return this.$options.i18n.closedMoved;
       }
       if (issue.closedAt) {
@@ -455,7 +442,9 @@ export default {
     },
     async handleBulkUpdateClick() {
       if (!this.hasInitBulkEdit) {
-        const initBulkUpdateSidebar = await import('~/issuable_init_bulk_update_sidebar');
+        const initBulkUpdateSidebar = await import(
+          '~/issuable_bulk_update_sidebar/issuable_init_bulk_update_sidebar'
+        );
         initBulkUpdateSidebar.default.init('issuable_');
 
         const usersSelect = await import('~/users_select');
@@ -469,18 +458,27 @@ export default {
     },
     handleClickTab(state) {
       if (this.state !== state) {
-        this.page = 1;
+        this.pageParams = initialPageParams;
       }
       this.state = state;
-      this.fetchIssues();
     },
     handleFilter(filter) {
+      this.pageParams = initialPageParams;
       this.filterTokens = filter;
-      this.fetchIssues();
     },
-    handlePageChange(page) {
-      this.page = page;
-      this.fetchIssues();
+    handleNextPage() {
+      this.pageParams = {
+        afterCursor: this.pageInfo.endCursor,
+        firstPageSize: PAGE_SIZE,
+      };
+      scrollUp();
+    },
+    handlePreviousPage() {
+      this.pageParams = {
+        beforeCursor: this.pageInfo.startCursor,
+        lastPageSize: PAGE_SIZE,
+      };
+      scrollUp();
     },
     handleReorder({ newIndex, oldIndex }) {
       const issueToMove = this.issues[oldIndex];
@@ -515,9 +513,11 @@ export default {
           createFlash({ message: this.$options.i18n.reorderError });
         });
     },
-    handleSort(value) {
-      this.sortKey = value;
-      this.fetchIssues();
+    handleSort(sortKey) {
+      if (this.sortKey !== sortKey) {
+        this.pageParams = initialPageParams;
+      }
+      this.sortKey = sortKey;
     },
     toggleBulkEditSidebar(showBulkEditSidebar) {
       this.showBulkEditSidebar = showBulkEditSidebar;
@@ -541,18 +541,18 @@ export default {
       :tabs="$options.IssuableListTabs"
       :current-tab="state"
       :tab-counts="tabCounts"
-      :issuables-loading="isLoading"
+      :issuables-loading="$apollo.queries.issues.loading"
       :is-manual-ordering="isManualOrdering"
       :show-bulk-edit-sidebar="showBulkEditSidebar"
       :show-pagination-controls="showPaginationControls"
-      :total-items="totalIssues"
-      :current-page="page"
-      :previous-page="page - 1"
-      :next-page="page + 1"
+      :use-keyset-pagination="true"
+      :has-next-page="pageInfo.hasNextPage"
+      :has-previous-page="pageInfo.hasPreviousPage"
       :url-params="urlParams"
       @click-tab="handleClickTab"
       @filter="handleFilter"
-      @page-change="handlePageChange"
+      @next-page="handleNextPage"
+      @previous-page="handlePreviousPage"
       @reorder="handleReorder"
       @sort="handleSort"
       @update-legacy-bulk-edit="handleUpdateLegacyBulkEdit"
@@ -631,7 +631,7 @@ export default {
         </li>
         <blocking-issues-count
           class="gl-display-none gl-sm-display-block"
-          :blocking-issues-count="issuable.blockingIssuesCount"
+          :blocking-issues-count="issuable.blockedByCount"
           :is-list-item="true"
         />
       </template>

@@ -37,6 +37,9 @@ exports[`Event Item with action buttons renders the action buttons 1`] = `
           class="note-header-author-name gl-font-weight-bold"
         >
           Tanuki
+      
+          <!---->
+           
         </span>
       </a>
        

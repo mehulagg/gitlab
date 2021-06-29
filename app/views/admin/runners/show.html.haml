@@ -10,11 +10,9 @@
   %h2.page-title
     = s_('Runners|Runner #%{runner_id}' % { runner_id: @runner.id })
     = render 'shared/runners/runner_type_badge', runner: @runner
-
-= render 'shared/runners/runner_type_alert', runner: @runner
-
-.gl-mb-6
-  = render 'shared/runners/form', runner: @runner, runner_form_url: admin_runner_path(@runner), in_gitlab_com_admin_context: Gitlab.com?
+  = render 'shared/runners/runner_type_alert', runner: @runner
+  .gl-mb-6
+    = render 'shared/runners/form', runner: @runner, runner_form_url: admin_runner_path(@runner), in_gitlab_com_admin_context: Gitlab.com?
 
 .row
   .col-md-6
@@ -30,12 +28,14 @@
             %tr
               %td
                 .gl-alert.gl-alert-danger
-                  = sprite_icon('error', size: 16, css_class: 'gl-icon gl-alert-icon gl-alert-icon-no-title')
-                  .gl-alert-body
-                    %strong
-                      = project.full_name
-                  .gl-alert-actions
-                    = link_to s_('Disable'), admin_namespace_project_runner_project_path(project.namespace, project, runner_project), method: :delete, class: 'btn gl-alert-action btn-info btn-md gl-button'
+                  .gl-alert-container
+                    = sprite_icon('error', size: 16, css_class: 'gl-icon gl-alert-icon gl-alert-icon-no-title')
+                    .gl-alert-content
+                      .gl-alert-body
+                        %strong
+                          = project.full_name
+                      .gl-alert-actions
+                        = link_to s_('Disable'), admin_namespace_project_runner_project_path(project.namespace, project, runner_project), method: :delete, class: 'btn gl-alert-action btn-confirm btn-md gl-button'
 
     %table.table{ data: { testid: 'unassigned-projects' } }
       %thead

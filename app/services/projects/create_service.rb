@@ -11,6 +11,7 @@ module Projects
       @initialize_with_readme = Gitlab::Utils.to_boolean(@params.delete(:initialize_with_readme))
       @import_data = @params.delete(:import_data)
       @relations_block = @params.delete(:relations_block)
+      @default_branch = @params.delete(:default_branch)
 
       build_topics
     end
@@ -110,7 +111,7 @@ module Projects
       if Feature.enabled?(:projects_post_creation_worker, current_user, default_enabled: :yaml)
         Projects::PostCreationWorker.perform_async(@project.id)
       else
-        create_prometheus_service
+        create_prometheus_integration
       end
 
       create_readme if @initialize_with_readme
@@ -130,20 +131,16 @@ module Projects
             access_level: group_access_level)
         end
 
-        if Feature.enabled?(:specialized_project_authorization_workers, default_enabled: :yaml)
-          AuthorizedProjectUpdate::ProjectCreateWorker.perform_async(@project.id)
-          # AuthorizedProjectsWorker uses an exclusive lease per user but
-          # specialized workers might have synchronization issues. Until we
-          # compare the inconsistency rates of both approaches, we still run
-          # AuthorizedProjectsWorker but with some delay and lower urgency as a
-          # safety net.
-          @project.group.refresh_members_authorized_projects(
-            blocking: false,
-            priority: UserProjectAccessChangedService::LOW_PRIORITY
-          )
-        else
-          @project.group.refresh_members_authorized_projects(blocking: false)
-        end
+        AuthorizedProjectUpdate::ProjectCreateWorker.perform_async(@project.id)
+        # AuthorizedProjectsWorker uses an exclusive lease per user but
+        # specialized workers might have synchronization issues. Until we
+        # compare the inconsistency rates of both approaches, we still run
+        # AuthorizedProjectsWorker but with some delay and lower urgency as a
+        # safety net.
+        @project.group.refresh_members_authorized_projects(
+          blocking: false,
+          priority: UserProjectAccessChangedService::LOW_PRIORITY
+        )
       else
         @project.add_maintainer(@project.namespace.owner, current_user: current_user)
       end
@@ -151,10 +148,10 @@ module Projects
 
     def create_readme
       commit_attrs = {
-        branch_name: @project.default_branch_or_main,
+        branch_name: @default_branch.presence || @project.default_branch_or_main,
         commit_message: 'Initial commit',
         file_path: 'README.md',
-        file_content: "# #{@project.name}\n\n#{@project.description}"
+        file_content: experiment(:new_project_readme_content, namespace: @project.namespace).run_with(@project)
       }
 
       Files::CreateService.new(@project, current_user, commit_attrs).execute
@@ -195,22 +192,22 @@ module Projects
     end
 
     # Deprecated: https://gitlab.com/gitlab-org/gitlab/-/issues/326665
-    def create_prometheus_service
-      service = @project.find_or_initialize_service(::PrometheusService.to_param)
+    def create_prometheus_integration
+      integration = @project.find_or_initialize_integration(::Integrations::Prometheus.to_param)
 
       # If the service has already been inserted in the database, that
       # means it came from a template, and there's nothing more to do.
-      return if service.persisted?
+      return if integration.persisted?
 
-      if service.prometheus_available?
-        service.save!
+      if integration.prometheus_available?
+        integration.save!
       else
-        @project.prometheus_service = nil
+        @project.prometheus_integration = nil
       end
 
     rescue ActiveRecord::RecordInvalid => e
       Gitlab::ErrorTracking.track_exception(e, extra: { project_id: project.id })
-      @project.prometheus_service = nil
+      @project.prometheus_integration = nil
     end
 
     def set_project_name_from_path

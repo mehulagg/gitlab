@@ -168,11 +168,11 @@ module API
       mount ::API::ErrorTracking
       mount ::API::Events
       mount ::API::FeatureFlags
-      mount ::API::FeatureFlagScopes
       mount ::API::FeatureFlagsUserLists
       mount ::API::Features
       mount ::API::Files
       mount ::API::FreezePeriods
+      mount ::API::Geo
       mount ::API::GroupAvatar
       mount ::API::GroupBoards
       mount ::API::GroupClusters
@@ -228,6 +228,7 @@ module API
       mount ::API::PagesDomains
       mount ::API::ProjectClusters
       mount ::API::ProjectContainerRepositories
+      mount ::API::ProjectDebianDistributions
       mount ::API::ProjectEvents
       mount ::API::ProjectExport
       mount ::API::ProjectImport

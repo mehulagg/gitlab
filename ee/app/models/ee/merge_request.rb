@@ -110,6 +110,11 @@ module EE
       end
     end
 
+    override :predefined_variables
+    def predefined_variables
+      super.concat(merge_request_approval_variables)
+    end
+
     override :mergeable?
     def mergeable?(skip_ci_check: false, skip_discussions_check: false)
       return false unless approved?
@@ -161,11 +166,22 @@ module EE
     end
 
     def has_denied_policies?
+      return false unless project.feature_available?(:license_scanning)
+
       return false unless has_license_scanning_reports?
 
       return false if has_approved_license_check?
 
-      actual_head_pipeline.license_scanning_report.violates?(project.software_license_policies)
+      report_diff = compare_reports(::Ci::CompareLicenseScanningReportsService)
+
+      licenses = report_diff.dig(:data, 'new_licenses')
+
+      return false if licenses.nil? || licenses.empty?
+
+      licenses.any? do |l|
+        status = l.dig('classification', 'approval_status')
+        %w(blacklisted denied).include?(status)
+      end
     end
 
     def enabled_reports
@@ -285,6 +301,16 @@ module EE
     def has_approved_license_check?
       if rule = approval_rules.license_compliance.last
         ApprovalWrappedRule.wrap(self, rule).approved?
+      end
+    end
+
+    def merge_request_approval_variables
+      return unless approval_feature_available?
+
+      strong_memoize(:merge_request_approval_variables) do
+        ::Gitlab::Ci::Variables::Collection.new.tap do |variables|
+          variables.append(key: 'CI_MERGE_REQUEST_APPROVED', value: approved?.to_s) if approved?
+        end
       end
     end
   end

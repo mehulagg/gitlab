@@ -10,7 +10,8 @@ RSpec.describe Gitlab::Ci::Reports::Security::Scanner do
       {
         external_id: 'brakeman',
         name: 'Brakeman',
-        vendor: 'GitLab'
+        vendor: 'GitLab',
+        version: '1.0.1'
       }
     end
 

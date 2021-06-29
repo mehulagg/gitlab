@@ -1,49 +1,31 @@
 <script>
 import { GlLink, GlProgressBar } from '@gitlab/ui';
-import { n__, sprintf } from '~/locale';
+import { sprintf } from '~/locale';
+import Tracking from '~/tracking';
+import { TRACKING_PROPERTY, WIDGET } from './constants';
+
+const { i18n, trackingEvents } = WIDGET;
+const trackingMixin = Tracking.mixin({ property: TRACKING_PROPERTY });
 
 export default {
-  tracking: {
-    event: 'click_link',
-    label: 'trial_status_widget',
-    property: 'experiment:show_trial_status_in_sidebar',
-  },
   components: {
     GlLink,
     GlProgressBar,
   },
-  props: {
-    containerId: {
-      type: [String, null],
-      required: false,
-      default: null,
-    },
-    daysRemaining: {
-      type: Number,
-      required: true,
-    },
-    navIconImagePath: {
-      type: String,
-      required: true,
-    },
-    percentageComplete: {
-      type: Number,
-      required: true,
-    },
-    planName: {
-      type: String,
-      required: true,
-    },
-    plansHref: {
-      type: String,
-      required: true,
-    },
+  mixins: [trackingMixin],
+  inject: {
+    containerId: { default: null },
+    daysRemaining: {},
+    navIconImagePath: {},
+    percentageComplete: {},
+    planName: {},
+    plansHref: {},
   },
+  i18n,
+  trackingEvents,
   computed: {
     widgetTitle() {
-      const i18nWidgetTitle = n__(
-        'Trials|%{planName} Trial %{enDash} %{num} day left',
-        'Trials|%{planName} Trial %{enDash} %{num} days left',
+      const i18nWidgetTitle = this.$options.i18n.widgetTitle.countableTranslator(
         this.daysRemaining,
       );
 
@@ -54,18 +36,17 @@ export default {
       });
     },
   },
+  methods: {
+    onWidgetClick() {
+      const { action, ...options } = this.$options.trackingEvents.widgetClick;
+      this.track(action, options);
+    },
+  },
 };
 </script>
 
 <template>
-  <gl-link
-    :id="containerId"
-    :title="widgetTitle"
-    :href="plansHref"
-    :data-track-event="$options.tracking.event"
-    :data-track-label="$options.tracking.label"
-    :data-track-property="$options.tracking.property"
-  >
+  <gl-link :id="containerId" :title="widgetTitle" :href="plansHref" @click="onWidgetClick">
     <div class="gl-display-flex gl-flex-direction-column gl-align-items-stretch gl-w-full">
       <span class="gl-display-flex gl-align-items-center">
         <span class="nav-icon-container svg-container">

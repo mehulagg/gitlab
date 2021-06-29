@@ -13,7 +13,6 @@ RSpec.describe Namespaces::InProductMarketingEmailsService, '#execute' do
     create(:onboarding_progress, namespace: group, created_at: frozen_time - 2.days, git_write_at: nil)
     group.add_developer(user)
 
-    stub_experiment_for_subject(in_product_marketing_emails: true)
     allow(Ability).to receive(:allowed?).with(user, anything, anything).and_return(true)
     allow(Notify).to receive(:in_product_marketing_email).and_return(double(deliver_later: nil))
   end

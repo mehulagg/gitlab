@@ -12,15 +12,15 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 > - [Token lifetime limits](https://gitlab.com/gitlab-org/gitlab/-/issues/3649) added in [GitLab Ultimate](https://about.gitlab.com/pricing/) 12.6.
 > - [Additional notifications for expiring tokens](https://gitlab.com/gitlab-org/gitlab/-/issues/214721) added in GitLab 13.3.
 
-If you're unable to use [OAuth2](../../api/oauth2.md), you can use a personal access token to authenticate with the [GitLab API](../../api/README.md#personalproject-access-tokens). You can also use a personal access token with Git to authenticate over HTTP.
+If you're unable to use [OAuth2](../../api/oauth2.md), you can use a personal access token to authenticate with the [GitLab API](../../api/index.md#personalproject-access-tokens). You can also use a personal access token with Git to authenticate over HTTP.
 
 In both cases, you authenticate with a personal access token in place of your password.
 
-Personal access tokens are required when [Two-Factor Authentication (2FA)](account/two_factor_authentication.md) is enabled. 
+Personal access tokens are required when [Two-Factor Authentication (2FA)](account/two_factor_authentication.md) is enabled.
 
-For examples of how you can use a personal access token to authenticate with the API, see the [API documentation](../../api/README.md#personalproject-access-tokens).
+For examples of how you can use a personal access token to authenticate with the API, see the [API documentation](../../api/index.md#personalproject-access-tokens).
 
-Alternately, GitLab administrators can use the API to create [impersonation tokens](../../api/README.md#impersonation-tokens).
+Alternately, GitLab administrators can use the API to create [impersonation tokens](../../api/index.md#impersonation-tokens).
 Use impersonation tokens to automate authentication as a specific user.
 
 ## Create a personal access token
@@ -82,7 +82,7 @@ Personal access tokens expire on the date you define, at midnight UTC.
 - In GitLab Ultimate, administrators can
   [limit the lifetime of personal access tokens](../admin_area/settings/account_and_limit_settings.md#limit-the-lifetime-of-personal-access-tokens).
 - In GitLab Ultimate, administrators can choose whether or not to
-  [enforce personal access token expiration](../admin_area/settings/account_and_limit_settings.md#do-not-enforce-personal-access-token-expiration).
+  [enforce personal access token expiration](../admin_area/settings/account_and_limit_settings.md#allow-expired-personal-access-tokens-to-be-used).
 
 ## Create a personal access token programmatically **(FREE SELF)**
 
@@ -104,10 +104,10 @@ To create a personal access token programmatically:
    ```
 
 1. Run the following commands to reference the username, the token, and the scopes.
-   
+
    The token must be 20 characters long. The scopes must be valid and are visible
    [in the source code](https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/auth.rb).
-   
+
    For example, to create a token that belongs to a user with username `automation-bot`:
 
    ```ruby
@@ -141,7 +141,7 @@ To revoke a token programmatically:
    ```shell
    sudo gitlab-rails console
    ```
-   
+
 1. To revoke a token of `token-string-here123`, run the following commands:
 
    ```ruby

@@ -11,7 +11,7 @@ module Resolvers
 
     argument :iids, [GraphQL::ID_TYPE],
              required: false,
-             description: 'List of IIDs of epics, e.g., [1, 2].'
+             description: 'List of IIDs of epics, e.g., `[1, 2]`.'
 
     argument :state, Types::EpicStateEnum,
              required: false,
@@ -40,6 +40,11 @@ module Resolvers
     argument :iid_starts_with, GraphQL::STRING_TYPE,
              required: false,
              description: 'Filter epics by IID for autocomplete.'
+
+    argument :include_ancestor_groups, GraphQL::BOOLEAN_TYPE,
+             required: false,
+             description: 'Include epics from ancestor groups.',
+             default_value: false
 
     argument :include_descendant_groups, GraphQL::BOOLEAN_TYPE,
              required: false,

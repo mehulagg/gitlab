@@ -157,12 +157,15 @@ module CacheMarkdownField
   end
 
   def store_mentions!
+    # We can only store mentions if the mentionable is a database object
+    return unless self.is_a?(ApplicationRecord)
+
     refs = all_references(self.author)
 
     references = {}
-    references[:mentioned_users_ids] = refs.mentioned_users&.pluck(:id).presence
-    references[:mentioned_groups_ids] = refs.mentioned_groups&.pluck(:id).presence
-    references[:mentioned_projects_ids] = refs.mentioned_projects&.pluck(:id).presence
+    references[:mentioned_users_ids] = refs.mentioned_user_ids.presence
+    references[:mentioned_groups_ids] = refs.mentioned_group_ids.presence
+    references[:mentioned_projects_ids] = refs.mentioned_project_ids.presence
 
     # One retry is enough as next time `model_user_mention` should return the existing mention record,
     # that threw the `ActiveRecord::RecordNotUnique` exception in first place.

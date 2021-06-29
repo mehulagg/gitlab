@@ -56,6 +56,19 @@ describe('Global Search Store Actions', () => {
     });
   });
 
+  describe('getGroupsData', () => {
+    const mockCommit = () => {};
+    beforeEach(() => {
+      jest.spyOn(Api, 'groups').mockResolvedValue(MOCK_GROUPS);
+    });
+
+    it('calls Api.groups with order_by set to similarity', () => {
+      actions.fetchGroups({ commit: mockCommit }, 'test');
+
+      expect(Api.groups).toHaveBeenCalledWith('test', { order_by: 'similarity' });
+    });
+  });
+
   describe('getProjectsData', () => {
     const mockCommit = () => {};
     beforeEach(() => {
@@ -67,7 +80,14 @@ describe('Global Search Store Actions', () => {
       it('calls Api.groupProjects', () => {
         actions.fetchProjects({ commit: mockCommit, state });
 
-        expect(Api.groupProjects).toHaveBeenCalled();
+        expect(Api.groupProjects).toHaveBeenCalledWith(
+          state.query.group_id,
+          state.query.search,
+          {
+            order_by: 'similarity',
+          },
+          expect.any(Function),
+        );
         expect(Api.projects).not.toHaveBeenCalled();
       });
     });

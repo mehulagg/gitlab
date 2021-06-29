@@ -87,6 +87,7 @@ module QA
     autoload :CiVariable, 'qa/resource/ci_variable'
     autoload :Runner, 'qa/resource/runner'
     autoload :PersonalAccessToken, 'qa/resource/personal_access_token'
+    autoload :PersonalAccessTokenCache, 'qa/resource/personal_access_token_cache'
     autoload :ProjectAccessToken, 'qa/resource/project_access_token'
     autoload :User, 'qa/resource/user'
     autoload :ProjectMilestone, 'qa/resource/project_milestone'
@@ -106,6 +107,7 @@ module QA
     autoload :RegistryRepository, 'qa/resource/registry_repository'
     autoload :Package, 'qa/resource/package'
     autoload :PipelineSchedules, 'qa/resource/pipeline_schedules'
+    autoload :ImportProject, 'qa/resource/import_project'
 
     module KubernetesCluster
       autoload :Base, 'qa/resource/kubernetes_cluster/base'
@@ -338,7 +340,7 @@ module QA
           autoload :Jenkins, 'qa/page/project/settings/services/jenkins'
           autoload :Prometheus, 'qa/page/project/settings/services/prometheus'
         end
-        autoload :Operations, 'qa/page/project/settings/operations'
+        autoload :Monitor, 'qa/page/project/settings/monitor'
         autoload :Alerts, 'qa/page/project/settings/alerts'
         autoload :Integrations, 'qa/page/project/settings/integrations'
       end
@@ -347,7 +349,9 @@ module QA
         autoload :CiCd, 'qa/page/project/sub_menus/ci_cd'
         autoload :Common, 'qa/page/project/sub_menus/common'
         autoload :Issues, 'qa/page/project/sub_menus/issues'
-        autoload :Operations, 'qa/page/project/sub_menus/operations'
+        autoload :Monitor, 'qa/page/project/sub_menus/monitor'
+        autoload :Deployments, 'qa/page/project/sub_menus/deployments'
+        autoload :Infrastructure, 'qa/page/project/sub_menus/infrastructure'
         autoload :Repository, 'qa/page/project/sub_menus/repository'
         autoload :Settings, 'qa/page/project/sub_menus/settings'
         autoload :Project, 'qa/page/project/sub_menus/project'
@@ -370,25 +374,29 @@ module QA
         autoload :Index, 'qa/page/project/milestone/index'
       end
 
-      module Operations
+      module Deployments
         module Environments
-          autoload :Index, 'qa/page/project/operations/environments/index'
-          autoload :Show, 'qa/page/project/operations/environments/show'
+          autoload :Index, 'qa/page/project/deployments/environments/index'
+          autoload :Show, 'qa/page/project/deployments/environments/show'
         end
+      end
 
+      module Infrastructure
         module Kubernetes
-          autoload :Index, 'qa/page/project/operations/kubernetes/index'
-          autoload :Add, 'qa/page/project/operations/kubernetes/add'
-          autoload :AddExisting, 'qa/page/project/operations/kubernetes/add_existing'
-          autoload :Show, 'qa/page/project/operations/kubernetes/show'
+          autoload :Index, 'qa/page/project/infrastructure/kubernetes/index'
+          autoload :Add, 'qa/page/project/infrastructure/kubernetes/add'
+          autoload :AddExisting, 'qa/page/project/infrastructure/kubernetes/add_existing'
+          autoload :Show, 'qa/page/project/infrastructure/kubernetes/show'
         end
+      end
 
+      module Monitor
         module Metrics
-          autoload :Show, 'qa/page/project/operations/metrics/show'
+          autoload :Show, 'qa/page/project/monitor/metrics/show'
         end
 
         module Incidents
-          autoload :Index, 'qa/page/project/operations/incidents/index'
+          autoload :Index, 'qa/page/project/monitor/incidents/index'
         end
       end
 
@@ -522,6 +530,11 @@ module QA
       autoload :AccessTokens, 'qa/page/component/access_tokens'
       autoload :CommitModal, 'qa/page/component/commit_modal'
       autoload :VisibilitySetting, 'qa/page/component/visibility_setting'
+
+      module Import
+        autoload :Gitlab, 'qa/page/component/import/gitlab'
+        autoload :Selection, 'qa/page/component/import/selection'
+      end
 
       module Issuable
         autoload :Common, 'qa/page/component/issuable/common'

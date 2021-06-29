@@ -45,11 +45,7 @@ module GroupsHelper
   end
 
   def group_information_title(group)
-    if Feature.enabled?(:sidebar_refactor, current_user, default_enabled: :yaml)
-      group.subgroup? ? _('Subgroup information') : _('Group information')
-    else
-      group.subgroup? ? _('Subgroup overview') : _('Group overview')
-    end
+    group.subgroup? ? _('Subgroup information') : _('Group information')
   end
 
   def group_container_registry_nav?
@@ -75,6 +71,10 @@ module GroupsHelper
 
   def can_change_share_with_group_lock?(group)
     can?(current_user, :change_share_with_group_lock, group)
+  end
+
+  def can_change_prevent_sharing_groups_outside_hierarchy?(group)
+    can?(current_user, :change_prevent_sharing_groups_outside_hierarchy, group)
   end
 
   def can_disable_group_emails?(group)
@@ -186,6 +186,14 @@ module GroupsHelper
     else
       ancestor_locked_and_has_been_overridden(group)
     end
+  end
+
+  def link_to_group(group)
+    link_to(group.name, group_path(group))
+  end
+
+  def prevent_sharing_groups_outside_hierarchy_help_text(group)
+    s_("GroupSettings|This setting is only available on the top-level group and it applies to all subgroups. Groups that have already been shared with a group outside %{group} will still be shared, and this access will have to be revoked manually.").html_safe % { group: link_to_group(group) }
   end
 
   def parent_group_options(current_group)

@@ -7,6 +7,7 @@ RSpec.describe 'Activate a subscription' do
 
   let_it_be(:current_user) { create(:admin) }
   let_it_be(:license_key) { build(:gitlab_license).export }
+
   let(:activation_code) { 'activation_code' }
   let(:mutation) do
     graphql_mutation(:gitlab_subscription_activate, { activation_code: activation_code })
@@ -53,7 +54,7 @@ RSpec.describe 'Activate a subscription' do
     expect(mutation_response['license']).to eq(
       {
         'id' => "gid://gitlab/License/#{created_license.id}",
-        'type' => License::LEGACY_LICENSE_TYPE,
+        'type' => License::LICENSE_FILE_TYPE,
         'plan' => created_license.plan,
         'name' => created_license.licensee_name,
         'email' => created_license.licensee_email,

@@ -1,6 +1,6 @@
 ---
-stage: Release
-group: Release
+stage: Configure
+group: Configure
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 type: reference
 ---
@@ -31,11 +31,11 @@ are using. First verify which template is in use:
 - [The GitLab.com stable Auto Deploy template](https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/Jobs/Deploy.gitlab-ci.yml)
   is being used if **one** of the following is true:
   - Your Auto DevOps project doesn't have a `.gitlab-ci.yml` file.
-  - Your Auto DevOps project has a `.gitlab-ci.yml` and [includes](../../ci/yaml/README.md#includetemplate)
+  - Your Auto DevOps project has a `.gitlab-ci.yml` and [includes](../../ci/yaml/index.md#includetemplate)
     the `Auto-DevOps.gitlab-ci.yml` template.
 - [The latest Auto Deploy template](https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/Jobs/Deploy.latest.gitlab-ci.yml)
   is being used if **both** of the following is true:
-  - Your Auto DevOps project has a `.gitlab-ci.yml` file and [includes](../../ci/yaml/README.md#includetemplate)
+  - Your Auto DevOps project has a `.gitlab-ci.yml` file and [includes](../../ci/yaml/index.md#includetemplate)
     the `Auto-DevOps.gitlab-ci.yml` template.
   - It also includes [the latest Auto Deploy template](#early-adopters)
 
@@ -77,7 +77,7 @@ The v2 auto-deploy-image drops support for Kubernetes 1.15 and lower. If you nee
 Kubernetes cluster, follow your cloud provider's instructions. Here's
 [an example on GKE](https://cloud.google.com/kubernetes-engine/docs/how-to/upgrading-a-cluster).
 
-#### Helm 3
+#### Helm v3
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/228609) in GitLab 13.4.
 
@@ -86,45 +86,38 @@ Previously, `auto-deploy-image` used Helm v2, which used Tiller in a cluster.
 In the v2 `auto-deploy-image`, it uses Helm v3 that doesn't require Tiller anymore.
 
 If your Auto DevOps project has an active environment that was deployed with the v1
-`auto-deploy-image`, use the following steps to upgrade to v2, which uses Helm 3:
+`auto-deploy-image`, use the following steps to upgrade to v2, which uses Helm v3:
 
-1. Modify your `.gitlab-ci.yml` with:
+1. Include the [Helm 2to3 migration CI/CD template](https://gitlab.com/gitlab-org/gitlab/-/raw/master/lib/gitlab/ci/templates/Jobs/Helm-2to3.gitlab-ci.yml):
 
-   ```yaml
-   include:
-     - template: Auto-DevOps.gitlab-ci.yml
-     - remote: https://gitlab.com/hfyngvason/ci-templates/-/raw/master/Helm-2to3.gitlab-ci.yml
+   - If you are on GitLab.com, or GitLab 14.0.1 or later, this template is already included in Auto DevOps.
+   - On other versions of GitLab, you can modify your `.gitlab-ci.yml` to include the templates:
 
-   variables:
-     # If this variable is not present, the migration jobs will not show up
-     MIGRATE_HELM_2TO3: "true"
+     ```yaml
+     include:
+       - template: Auto-DevOps.gitlab-ci.yml
+       - remote: https://gitlab.com/gitlab-org/gitlab/-/raw/master/lib/gitlab/ci/templates/Jobs/Helm-2to3.gitlab-ci.yml
+     ```
 
-   .auto-deploy:
-     # Optional: If you are on GitLab 13.12 or older, pin the auto-deploy-image
-     # image: registry.gitlab.com/gitlab-org/cluster-integration/auto-deploy-image:v2.6.0
-     variables:
-       AUTO_DEVOPS_FORCE_DEPLOY_V2: 1
-       # If you have non-public pipelines, you can back up the entire namespace in a job artifact
-       # prior to the migration by setting the CI variable BACKUP_NAMESPACE to a non-empty value.
-       # WARNING: If you have public pipelines, this artifact will be public and can
-       #          expose your secrets.
-       # BACKUP_HELM2_RELEASES: 1
-   ```
+1. Set the following CI/CD variables:
 
-1. Run the `<environment-name>:helm-2to3:migrate` job.
-1. Deploy your environment as usual. This deployment uses Helm 3.
-1. If the deployment succeeds, you can safely run `environment:helm-2to3:cleanup`.
-   This deletes all Helm 2 release data from the namespace.
+   - `MIGRATE_HELM_2TO3` to `true`. If this variable is not present, migration jobs do not run.
+   - `AUTO_DEVOPS_FORCE_DEPLOY_V2` to `1`.
+   - **Optional:** `BACKUP_HELM2_RELEASES` to `1`. If you set this variable, the migration
+     job saves a backup for 1 week in a job artifact called `helm-2-release-backups`.
+     If you accidentally delete the Helm v2 releases before you are ready, you can restore
+     this backup from a Kubernetes manifest file by using `kubectl apply -f $backup`.
 
-   If you set `BACKUP_HELM2_RELEASES` to a non-empty value, then the 
-   the `<environment-name>:helm2to3:migrate` job
-   job saves a backup for 1 week in a job artifact called `helm-2-release-backups`.
-   If you accidentally delete the Helm 2 releases before you are ready, then
-   this backup is in a Kubernetes manifest file that can be restored using
-   `kubectl apply -f $backup`. 
-   **WARNING:** This artifact can contain secrets and will be visible to any
-   user who can see your job. 
-1. Remove the `MIGRATE_HELM_2TO3` CI/CD variable.
+     **WARNING:**
+     *Do not use this if you have public pipelines*.
+     This artifact can contain secrets and is visible to any
+     user who can see your job.
+
+1. Run a pipeline and trigger the `<environment-name>:helm-2to3:migrate` job.
+1. Deploy your environment as usual. This deployment uses Helm v3.
+1. If the deployment succeeds, you can safely run `<environment-name>:helm-2to3:cleanup`.
+   This deletes all Helm v2 release data from the namespace.
+1. Remove the `MIGRATE_HELM_2TO3` CI/CD variable or set it to `false`. You can do this one environment at a time using [environment scopes](../../ci/environments/index.md#scoping-environments-with-specs).
 
 #### In-Cluster PostgreSQL Channel 2
 
@@ -173,6 +166,8 @@ include:
   - template: Auto-DevOps.gitlab-ci.yml
   - remote: https://gitlab.com/gitlab-org/gitlab/-/raw/v13.3.0-ee/lib/gitlab/ci/templates/Jobs/Deploy.gitlab-ci.yml
 ```
+
+Alternatively, you can use the [v13.12 Auto DevOps templates archive](https://gitlab.com/hfyngvason/auto-devops-v13-12).
 
 ### Ignore warnings and continue deploying
 

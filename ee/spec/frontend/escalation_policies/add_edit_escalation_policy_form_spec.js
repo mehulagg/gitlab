@@ -18,6 +18,7 @@ describe('AddEscalationPolicyForm', () => {
         form: {
           name: mockPolicies[1].name,
           description: mockPolicies[1].description,
+          rules: [],
         },
         validationState: {
           name: true,
@@ -48,8 +49,14 @@ describe('AddEscalationPolicyForm', () => {
   const findAddRuleLink = () => wrapper.findComponent(GlLink);
 
   describe('Escalation rules', () => {
-    it('should render one default rule', () => {
-      expect(findRules().length).toBe(1);
+    it('should render one default rule when rules were not provided', () => {
+      expect(findRules()).toHaveLength(1);
+    });
+
+    it('should render all the rules if they were provided', async () => {
+      createComponent({ props: { form: { rules: mockPolicies[1].rules } } });
+      await wrapper.vm.$nextTick();
+      expect(findRules()).toHaveLength(mockPolicies[1].rules.length);
     });
 
     it('should contain a link to add escalation rules', () => {
@@ -78,7 +85,7 @@ describe('AddEscalationPolicyForm', () => {
         elapsedTimeSeconds: 30,
         oncallScheduleIid: 2,
       };
-      findRules().at(0).vm.$emit('update-escalation-rule', 0, updatedRule);
+      findRules().at(0).vm.$emit('update-escalation-rule', { index: 0, rule: updatedRule });
       expect(wrapper.emitted('update-escalation-policy-form')[0]).toEqual([
         { field: 'rules', value: [expect.objectContaining(updatedRule)] },
       ]);

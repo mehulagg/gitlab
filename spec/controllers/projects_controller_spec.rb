@@ -7,7 +7,7 @@ RSpec.describe ProjectsController do
   include ProjectForksHelper
   using RSpec::Parameterized::TableSyntax
 
-  let_it_be(:project, reload: true) { create(:project, service_desk_enabled: false) }
+  let_it_be(:project, reload: true) { create(:project, :with_export, service_desk_enabled: false) }
   let_it_be(:public_project) { create(:project, :public) }
   let_it_be(:user) { create(:user) }
 
@@ -119,11 +119,6 @@ RSpec.describe ProjectsController do
         get :activity, params: { namespace_id: project.namespace, id: project, format: :json }
 
         expect(json_response['html']).to eq("\n")
-      end
-
-      it 'filters out invisible event when calculating the count' do
-        get :activity, params: { namespace_id: project.namespace, id: project, format: :json }
-
         expect(json_response['count']).to eq(0)
       end
     end
@@ -1349,7 +1344,7 @@ RSpec.describe ProjectsController do
       end
     end
 
-    describe '#download_export' do
+    describe '#download_export', :clean_gitlab_redis_cache do
       let(:action) { :download_export }
 
       context 'object storage enabled' do
@@ -1357,6 +1352,17 @@ RSpec.describe ProjectsController do
           it 'returns 302' do
             get action, params: { namespace_id: project.namespace, id: project }
 
+            expect(response).to have_gitlab_http_status(:found)
+          end
+        end
+
+        context 'when project export file is absent' do
+          it 'alerts the user and returns 302' do
+            project.export_file.file.delete
+
+            get action, params: { namespace_id: project.namespace, id: project }
+
+            expect(flash[:alert]).to include('file containing the export is not available yet')
             expect(response).to have_gitlab_http_status(:found)
           end
         end
@@ -1470,6 +1476,30 @@ RSpec.describe ProjectsController do
       before do
         default_params.merge!(id: public_project, namespace_id: public_project.namespace)
       end
+    end
+  end
+
+  context 'GET show.atom' do
+    let_it_be(:public_project) { create(:project, :public) }
+    let_it_be(:event) { create(:event, :commented, project: public_project, target: create(:note, project: public_project)) }
+    let_it_be(:invisible_event) { create(:event, :commented, project: public_project, target: create(:note, :confidential, project: public_project)) }
+
+    it 'filters by calling event.visible_to_user?' do
+      expect(EventCollection).to receive_message_chain(:new, :to_a).and_return([event, invisible_event])
+      expect(event).to receive(:visible_to_user?).and_return(true)
+      expect(invisible_event).to receive(:visible_to_user?).and_return(false)
+
+      get :show, format: :atom, params: { id: public_project, namespace_id: public_project.namespace }
+
+      expect(response).to render_template('xml.atom')
+      expect(assigns(:events)).to eq([event])
+    end
+
+    it 'filters by calling event.visible_to_user?' do
+      get :show, format: :atom, params: { id: public_project, namespace_id: public_project.namespace }
+
+      expect(response).to render_template('xml.atom')
+      expect(assigns(:events)).to eq([event])
     end
   end
 

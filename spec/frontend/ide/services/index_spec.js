@@ -15,7 +15,7 @@ jest.mock('~/ide/services/gql');
 const TEST_NAMESPACE = 'alice';
 const TEST_PROJECT = 'wonderland';
 const TEST_PROJECT_ID = `${TEST_NAMESPACE}/${TEST_PROJECT}`;
-const TEST_BRANCH = 'master-patch-123';
+const TEST_BRANCH = 'main-patch-123';
 const TEST_COMMIT_SHA = '123456789';
 const TEST_FILE_PATH = 'README2.md';
 const TEST_FILE_OLD_PATH = 'OLD_README2.md';
@@ -292,7 +292,7 @@ describe('IDE services', () => {
 
     it('posts to usage endpoint', () => {
       const TEST_PROJECT_PATH = 'foo/bar';
-      const axiosURL = `${TEST_RELATIVE_URL_ROOT}/${TEST_PROJECT_PATH}/usage_ping/web_ide_pipelines_count`;
+      const axiosURL = `${TEST_RELATIVE_URL_ROOT}/${TEST_PROJECT_PATH}/service_ping/web_ide_pipelines_count`;
 
       mock.onPost(axiosURL).reply(200);
 

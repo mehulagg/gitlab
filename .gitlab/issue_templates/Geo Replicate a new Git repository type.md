@@ -1,6 +1,6 @@
 <!--
 
-This template is based on a model named `CoolWidget`. 
+This template is based on a model named `CoolWidget`.
 
 To adapt this template, find and replace the following tokens:
 
@@ -33,6 +33,9 @@ There are three main sections below. It is a good idea to structure your merge r
 1. Release Geo support of Cool Widgets
 
 It is also a good idea to first open a proof-of-concept merge request. It can be helpful for working out kinks and getting initial support and feedback from the Geo team. As an example, see the [Proof of Concept to replicate Pipeline Artifacts](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/56423).
+
+You can look into the following example for implementing replication/verification for a new Git repository type:
+- [Add snippet repository verification](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/56596)
 
 ### Modify database schemas to prepare to add Geo support for Cool Widgets
 
@@ -342,39 +345,6 @@ That's all of the required database changes.
 
 - [ ] Implement `CoolWidget.replicables_for_current_secondary` above.
 - [ ] Ensure `CoolWidget.replicables_for_current_secondary` is well-tested. Search the codebase for `replicables_for_current_secondary` to find examples of parameterized table specs. You may need to add more `FactoryBot` traits.
-- [ ] If you are using a separate table `cool_widget_states` to track verification state on the Geo primary site, then:
-  - [ ] Do not include `::Gitlab::Geo::VerificationState` on the `CoolWidget` class.
-  - [ ] Add the following lines to the `cool_widget_state.rb` model:
-
-    ```ruby
-    class CoolWidgetState < ApplicationRecord
-      ...
-      self.primary_key = :cool_widget_id
-
-      include ::Gitlab::Geo::VerificationState
-
-      belongs_to :cool_widget, inverse_of: :cool_widget_state
-      ...
-    end
-    ```
-
-  - [ ] Add the following lines to the `cool_widget` model:
-
-    ```ruby
-    class CoolWidget < ApplicationRecord
-      ...
-      has_one :cool_widget_state, inverse_of: :cool_widget
-
-      delegate :verification_retry_at, :verification_retry_at=,
-              :verified_at, :verified_at=,
-              :verification_checksum, :verification_checksum=,
-              :verification_failure, :verification_failure=,
-              :verification_retry_count, :verification_retry_count=,
-              to: :cool_widget_state
-      ...
-    end
-    ```
-
 - [ ] Create `ee/app/replicators/geo/cool_widget_replicator.rb`. Implement the `#repository` method which should return a `<Repository>` instance, and implement the class method `.model` to return the `CoolWidget` class:
 
   ```ruby
@@ -383,6 +353,7 @@ That's all of the required database changes.
   module Geo
     class CoolWidgetReplicator < Gitlab::Geo::Replicator
       include ::Geo::RepositoryReplicatorStrategy
+      extend ::Gitlab::Utils::Override
 
       def self.model
         ::CoolWidget
@@ -493,7 +464,7 @@ That's all of the required database changes.
 
   FactoryBot.define do
     factory :geo_cool_widget_registry, class: 'Geo::CoolWidgetRegistry' do
-      cool_widget
+      cool_widget # This association should have data, like a file or repository
       state { Geo::CoolWidgetRegistry.state_value(:pending) }
 
       trait :synced do
@@ -539,6 +510,73 @@ That's all of the required database changes.
 
     include_examples 'a Geo framework registry'
     include_examples 'a Geo verifiable registry'
+  end
+  ```
+
+##### If you added verification state fields to a separate table (option 2 above), then you need to make additional model changes
+
+If you did not add verification state fields to a separate table, `cool_widget_states`, then skip to [Step 2. Implement metrics gathering](#step-2-implement-metrics-gathering).
+
+Otherwise, you can follow [the example of Merge Request Diffs](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/63309).
+
+- [ ] Add the following lines to the `cool_widget_state.rb` model:
+
+  ``` ruby
+  class CoolWidgetState < ApplicationRecord
+    self.primary_key = :cool_widget_id
+
+    belongs_to :cool_widget, inverse_of: :cool_widget_state
+  end
+  ```
+
+- [ ] Add the following lines to the `cool_widget` model to accomplish some important tasks:
+  - Include the `::Gitlab::Geo::VerificationState` concern.
+  - Delegate verification related methods to the `cool_widget_state` model.
+  - Override some scopes to use the `cool_widget_states` table instead of the model table, for verification.
+  - Override some methods to use the `cool_widget_states` table in verification related queries.
+
+  ```ruby
+  class CoolWidget < ApplicationRecord
+    ...
+    include ::Gitlab::Geo::VerificationState
+
+    has_one :cool_widget_state, autosave: true, inverse_of: :cool_widget
+
+    delegate :verification_retry_at, :verification_retry_at=,
+             :verified_at, :verified_at=,
+             :verification_checksum, :verification_checksum=,
+             :verification_failure, :verification_failure=,
+             :verification_retry_count, :verification_retry_count=,
+             :verification_state=, :verification_state,
+             :verification_started_at=, :verification_started_at,
+             to: :cool_widget_state
+    ...
+
+    scope :with_verification_state, ->(state) { joins(:cool_widget_state).where(cool_widget_states: { verification_state: verification_state_value(state) }) }
+    scope :checksummed, -> { joins(:cool_widget_state).where.not(cool_widget_states: { verification_checksum: nil } ) }
+    scope :not_checksummed, -> { joins(:cool_widget_state).where(cool_widget_states: { verification_checksum: nil } ) }
+
+    ...
+
+    class_methods do
+      extend ::Gitlab::Utils::Override
+      ...
+      override :verification_state_table_name
+      def verification_state_table_name
+        'cool_widget_states'
+      end
+
+      override :verification_state_model_key
+      def verification_state_model_key
+        'cool_widget_id'
+      end
+
+      override :verification_arel_table
+      def verification_arel_table
+        CoolWidgetState.arel_table
+      end
+    end
+    ...
   end
   ```
 
@@ -736,6 +774,8 @@ Individual Cool Widget replication and verification data should now be available
   module Geo
     class CoolWidgetReplicator < Gitlab::Geo::Replicator
       ...
+      # REMOVE THIS LINE IF IT IS NO LONGER NEEDED
+      extend ::Gitlab::Utils::Override
 
       # REMOVE THIS METHOD
       def self.replication_enabled_by_default?

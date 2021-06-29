@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe 'Setting assignees of a merge request' do
+RSpec.describe 'Setting assignees of a merge request', :assume_throttled do
   include GraphqlHelpers
 
   let_it_be(:project) { create(:project, :repository) }
@@ -115,7 +115,7 @@ RSpec.describe 'Setting assignees of a merge request' do
   context 'when passing append as true' do
     let(:mode) { Types::MutationOperationModeEnum.enum[:append] }
     let(:input) { { assignee_usernames: [assignee2.username], operation_mode: mode } }
-    let(:db_query_limit) { 20 }
+    let(:db_query_limit) { 21 }
 
     before do
       # In CE, APPEND is a NOOP as you can't have multiple assignees

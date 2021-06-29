@@ -10,18 +10,18 @@ type: reference, howto
 NOTE:
 Project access tokens are supported for self-managed instances on Free and above. They are also supported on GitLab SaaS Premium and above (excluding [trial licenses](https://about.gitlab.com/free-trial/)).
 
-> - [Introduced](https://gitlab.com/groups/gitlab-org/-/epics/2587) in GitLab 13.0.
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/210181) in GitLab 13.0.
 > - [Became available on GitLab.com](https://gitlab.com/gitlab-org/gitlab/-/issues/235765) in GitLab 13.5 for paid groups only.
 > - [Feature flag removed](https://gitlab.com/gitlab-org/gitlab/-/issues/235765) in GitLab 13.5.
 
 WARNING:
 This feature might not be available to you. Check the **version history** note above for details.
 
-Project access tokens are scoped to a project and can be used to authenticate with the [GitLab API](../../../api/README.md#personalproject-access-tokens). You can also use project access tokens with Git to authenticate over HTTP.
+Project access tokens are scoped to a project and can be used to authenticate with the [GitLab API](../../../api/index.md#personalproject-access-tokens). You can also use project access tokens with Git to authenticate over HTTP.
 
 Project access tokens expire on the date you define, at midnight UTC.
 
-For examples of how you can use a project access token to authenticate with the API, see the following section from our [API Docs](../../../api/README.md#personalproject-access-tokens).
+For examples of how you can use a project access token to authenticate with the API, see the following section from our [API Docs](../../../api/index.md#personalproject-access-tokens).
 
 ## Creating a project access token
 
@@ -36,6 +36,9 @@ For examples of how you can use a project access token to authenticate with the 
 
 ## Project bot users
 
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/210181) in GitLab 13.0.
+> - [Excluded from license seat use](https://gitlab.com/gitlab-org/gitlab/-/issues/223695) in GitLab 13.5.
+
 Project bot users are [GitLab-created service accounts](../../../subscriptions/self_managed/index.md#billable-users) and do not count as licensed seats.
 
 For each project access token created, a bot user is created and added to the project with
@@ -49,7 +52,7 @@ For the bot:
 
 API calls made with a project access token are associated with the corresponding bot user.
 
-These bot users are included in a project's **Members** list but cannot be modified. Also, a bot
+These bot users are included in a project's **Project information > Members** list but cannot be modified. Also, a bot
 user cannot be added to any other project.
 
 - The username is set to `project_{project_id}_bot` for the first access token, such as `project_123_bot`.

@@ -1,3 +1,5 @@
+import '../webpack';
+
 import SentryConfig from './sentry_config';
 
 const index = function index() {
@@ -12,6 +14,7 @@ const index = function index() {
     release: gon.revision,
     tags: {
       revision: gon.revision,
+      feature_category: gon.feature_category,
     },
   });
 

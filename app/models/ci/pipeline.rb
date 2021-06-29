@@ -577,11 +577,11 @@ module Ci
       canceled? && auto_canceled_by_id?
     end
 
-    def cancel_running(retries: nil)
+    def cancel_running(retries: 1)
       commit_status_relations = [:project, :pipeline]
       ci_build_relations = [:deployment, :taggings]
 
-      retry_optimistic_lock(cancelable_statuses, retries, name: 'ci_pipeline_cancel_running') do |cancelables|
+      retry_lock(cancelable_statuses, retries, name: 'ci_pipeline_cancel_running') do |cancelables|
         cancelables.find_in_batches do |batch|
           ActiveRecord::Associations::Preloader.new.preload(batch, commit_status_relations)
           ActiveRecord::Associations::Preloader.new.preload(batch.select { |job| job.is_a?(Ci::Build) }, ci_build_relations)
@@ -594,7 +594,7 @@ module Ci
       end
     end
 
-    def auto_cancel_running(pipeline, retries: nil)
+    def auto_cancel_running(pipeline, retries: 1)
       update(auto_canceled_by: pipeline)
 
       cancel_running(retries: retries) do |job|
@@ -610,8 +610,6 @@ module Ci
     # rubocop: enable CodeReuse/ServiceClass
 
     def lazy_ref_commit
-      return unless ::Gitlab::Ci::Features.pipeline_latest?
-
       BatchLoader.for(ref).batch do |refs, loader|
         next unless project.repository_exists?
 
@@ -623,11 +621,6 @@ module Ci
 
     def latest?
       return false unless git_ref && commit.present?
-
-      unless ::Gitlab::Ci::Features.pipeline_latest?
-        return project.commit(git_ref) == commit
-      end
-
       return false if lazy_ref_commit.nil?
 
       lazy_ref_commit.id == commit.id
@@ -642,6 +635,10 @@ module Ci
       if coverage_array.size >= 1
         '%.2f' % (coverage_array.reduce(:+) / coverage_array.size)
       end
+    end
+
+    def update_builds_coverage
+      builds.with_coverage_regex.without_coverage.each(&:update_coverage)
     end
 
     def batch_lookup_report_artifact_for_file_type(file_type)
@@ -907,7 +904,7 @@ module Ci
 
     def same_family_pipeline_ids
       ::Gitlab::Ci::PipelineObjectHierarchy.new(
-        self.class.default_scoped.where(id: root_ancestor), options: { same_project: true }
+        self.class.default_scoped.where(id: root_ancestor), options: { project_condition: :same }
       ).base_and_descendants.select(:id)
     end
 
@@ -928,27 +925,32 @@ module Ci
       Environment.where(id: environment_ids)
     end
 
-    # Without using `unscoped`, caller scope is also included into the query.
-    # Using `unscoped` here will be redundant after Rails 6.1
+    # With multi-project and parent-child pipelines
+    def self_and_upstreams
+      object_hierarchy.base_and_ancestors
+    end
+
+    # With multi-project and parent-child pipelines
+    def self_with_upstreams_and_downstreams
+      object_hierarchy.all_objects
+    end
+
+    # With only parent-child pipelines
+    def self_and_ancestors
+      object_hierarchy(project_condition: :same).base_and_ancestors
+    end
+
+    # With only parent-child pipelines
     def self_and_descendants
-      ::Gitlab::Ci::PipelineObjectHierarchy
-        .new(self.class.unscoped.where(id: id), options: { same_project: true })
-        .base_and_descendants
+      object_hierarchy(project_condition: :same).base_and_descendants
     end
 
     def root_ancestor
       return self unless child?
 
-      Gitlab::Ci::PipelineObjectHierarchy
-        .new(self.class.unscoped.where(id: id), options: { same_project: true })
+      object_hierarchy(project_condition: :same)
         .base_and_ancestors(hierarchy_order: :desc)
         .first
-    end
-
-    def self_with_ancestors_and_descendants(same_project: false)
-      ::Gitlab::Ci::PipelineObjectHierarchy
-        .new(self.class.unscoped.where(id: id), options: { same_project: same_project })
-        .all_objects
     end
 
     def bridge_triggered?
@@ -1210,14 +1212,6 @@ module Ci
       self.ci_ref = Ci::Ref.ensure_for(self)
     end
 
-    def base_and_ancestors(same_project: false)
-      # Without using `unscoped`, caller scope is also included into the query.
-      # Using `unscoped` here will be redundant after Rails 6.1
-      ::Gitlab::Ci::PipelineObjectHierarchy
-        .new(self.class.unscoped.where(id: id), options: { same_project: same_project })
-        .base_and_ancestors
-    end
-
     # We need `base_and_ancestors` in a specific order to "break" when needed.
     # If we use `find_each`, then the order is broken.
     # rubocop:disable Rails/FindEach
@@ -1228,7 +1222,7 @@ module Ci
         source_bridge.pending!
         Ci::AfterRequeueJobService.new(project, current_user).execute(source_bridge) # rubocop:disable CodeReuse/ServiceClass
       else
-        base_and_ancestors.includes(:source_bridge).each do |pipeline|
+        self_and_upstreams.includes(:source_bridge).each do |pipeline|
           break unless pipeline.bridge_waiting?
 
           pipeline.source_bridge.pending!
@@ -1253,7 +1247,7 @@ module Ci
     end
 
     def build_matchers
-      self.builds.build_matchers(project)
+      self.builds.latest.build_matchers(project)
     end
 
     private
@@ -1310,6 +1304,13 @@ module Ci
       return unless project
 
       project.repository.keep_around(self.sha, self.before_sha)
+    end
+
+    # Without using `unscoped`, caller scope is also included into the query.
+    # Using `unscoped` here will be redundant after Rails 6.1
+    def object_hierarchy(options = {})
+      ::Gitlab::Ci::PipelineObjectHierarchy
+        .new(self.class.unscoped.where(id: id), options: options)
     end
   end
 end

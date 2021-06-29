@@ -96,9 +96,9 @@ You can learn more about these metrics in our [analytics definitions](../../anal
 
 ## How the stages are measured
 
-Value Stream Analytics measures each stage from its start event to its stop event.
+Value Stream Analytics measures each stage from its start event to its end event.
 For example, a stage might start when one label is added to an issue, and end when another label is added.
-Value Stream Analytics excludes work in progress, meaning it ignores any items that have not reached the stop event.
+Value Stream Analytics excludes work in progress, meaning it ignores any items that have not reached the end event.
 
 Each stage of Value Stream Analytics is further described in the table below.
 
@@ -133,7 +133,7 @@ Value Stream Analytics dashboard does not present any data for:
 ## How the production environment is identified
 
 Value Stream Analytics identifies production environments by looking for project
-[environments](../../../ci/yaml/README.md#environment) with a name matching any of these patterns:
+[environments](../../../ci/yaml/index.md#environment) with a name matching any of these patterns:
 
 - `prod` or `prod/*`
 - `production` or `production/*`
@@ -162,7 +162,7 @@ environments is configured.
 1. Push branch and create a merge request that contains the [issue closing pattern](../../project/issues/managing_issues.md#closing-issues-automatically)
    in its description at 14:00 (stop of **Code** stage / start of **Test** and
    **Review** stages).
-1. The CI starts running your scripts defined in [`.gitlab-ci.yml`](../../../ci/yaml/README.md) and
+1. The CI starts running your scripts defined in [`.gitlab-ci.yml`](../../../ci/yaml/index.md) and
    takes 5min (stop of **Test** stage).
 1. Review merge request, ensure that everything is OK and merge the merge
    request at 19:00. (stop of **Review** stage / start of **Staging** stage).

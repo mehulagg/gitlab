@@ -130,6 +130,8 @@
   - 1
 - - epics
   - 2
+- - epics_new_epic_issue
+  - 1
 - - error_tracking_issue_link
   - 1
 - - experiments_record_conversion_event
@@ -195,6 +197,8 @@
 - - issue_placement
   - 2
 - - issue_rebalancing
+  - 1
+- - iterations
   - 1
 - - jira_connect
   - 1

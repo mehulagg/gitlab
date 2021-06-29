@@ -32,7 +32,13 @@ module EE
     end
 
     def iterations_sub_menu_controllers
-      ['iterations#index', 'iterations#show']
+      paths = ['iterations#index', 'iterations#show']
+
+      if ::Feature.enabled?(:iteration_cadences, @group, default_enabled: :yaml)
+        paths << 'iteration_cadences#index'
+      end
+
+      paths
     end
   end
 end

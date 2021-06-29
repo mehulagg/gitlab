@@ -21,6 +21,8 @@ module EE
         ::AuditEventService.new(
           current_user,
           resource,
+          target_id: token&.id,
+          target_type: token&.class&.name,
           target_details: token&.user&.name,
           action: :custom,
           custom_message: message,

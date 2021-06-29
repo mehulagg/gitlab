@@ -40,6 +40,11 @@ export default {
       required: false,
       default: () => [],
     },
+    isStageView: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
     jobHovered: {
       type: String,
       required: false,
@@ -50,15 +55,14 @@ export default {
       required: false,
       default: () => ({}),
     },
-    showStageName: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
     sourceJobHovered: {
       type: String,
       required: false,
       default: '',
+    },
+    userPermissions: {
+      type: Object,
+      required: true,
     },
   },
   titleClasses: [
@@ -69,6 +73,12 @@ export default {
     'gl-pl-3',
   ],
   computed: {
+    canUpdatePipeline() {
+      return this.userPermissions.updatePipeline;
+    },
+    columnSpacingClass() {
+      return this.isStageView ? 'gl-px-6' : 'gl-px-9';
+    },
     /*
       currentGroups and filteredGroups are part of
       a test to hunt down a bug
@@ -89,6 +99,9 @@ export default {
     },
     hasAction() {
       return !isEmpty(this.action);
+    },
+    showStageName() {
+      return !this.isStageView;
     },
   },
   errorCaptured(err, _vm, info) {
@@ -123,7 +136,7 @@ export default {
 };
 </script>
 <template>
-  <main-graph-wrapper class="gl-px-6" data-testid="stage-column">
+  <main-graph-wrapper :class="columnSpacingClass" data-testid="stage-column">
     <template #stages>
       <div
         data-testid="stage-column-title"
@@ -132,7 +145,7 @@ export default {
       >
         <div>{{ formattedTitle }}</div>
         <action-component
-          v-if="hasAction"
+          v-if="hasAction && canUpdatePipeline"
           :action-icon="action.icon"
           :tooltip-text="action.title"
           :link="action.path"

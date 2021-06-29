@@ -1190,8 +1190,6 @@ RSpec.describe API::MergeRequests do
       expect(json_response['work_in_progress']).to be false
       expect(json_response['merge_when_pipeline_succeeds']).to be_falsy
       expect(json_response['merge_status']).to eq('can_be_merged')
-      expect(json_response['should_close_merge_request']).to be_falsy
-      expect(json_response['force_close_merge_request']).to be_falsy
       expect(json_response['changes_count']).to eq(merge_request.merge_request_diff.real_size)
       expect(json_response['merge_error']).to eq(merge_request.merge_error)
       expect(json_response['user']['can_merge']).to be_truthy
@@ -1353,7 +1351,7 @@ RSpec.describe API::MergeRequests do
 
     context 'when a merge request has more than the changes limit' do
       it "returns a string indicating that more changes were made" do
-        allow(Commit).to receive(:diff_hard_limit_files).and_return(5)
+        allow(Commit).to receive(:diff_max_files).and_return(5)
 
         merge_request_overflow = create(:merge_request, :simple,
                                         author: user,
@@ -2009,6 +2007,7 @@ RSpec.describe API::MergeRequests do
 
     context 'forked projects', :sidekiq_might_not_need_inline do
       let_it_be(:user2) { create(:user) }
+
       let(:project) { create(:project, :public, :repository) }
       let!(:forked_project) { fork_project(project, user2, repository: true) }
       let!(:unrelated_project) { create(:project, namespace: create(:user).namespace, creator_id: user2.id) }
@@ -2889,6 +2888,7 @@ RSpec.describe API::MergeRequests do
 
     context "forked projects" do
       let_it_be(:user2) { create(:user) }
+
       let(:project) { create(:project, :public, :repository) }
       let!(:forked_project) { fork_project(project, user2, repository: true) }
       let(:merge_request) do

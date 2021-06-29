@@ -6,7 +6,6 @@ RSpec.describe IncidentManagement::EscalationPoliciesFinder do
   let_it_be(:current_user) { create(:user) }
   let_it_be_with_refind(:project) { create(:project) }
   let_it_be(:escalation_policy) { create(:incident_management_escalation_policy, project: project) }
-  let_it_be(:escalation_policy_2) { create(:incident_management_escalation_policy, project: project) }
   let_it_be(:escalation_policy_from_another_project) { create(:incident_management_escalation_policy) }
 
   let(:params) { {} }
@@ -26,19 +25,13 @@ RSpec.describe IncidentManagement::EscalationPoliciesFinder do
         end
 
         it 'returns project escalation policies' do
-          is_expected.to contain_exactly(escalation_policy, escalation_policy_2)
+          is_expected.to contain_exactly(escalation_policy)
         end
 
         context 'when id given' do
           let(:params) { { id: escalation_policy.id } }
 
           it { is_expected.to contain_exactly(escalation_policy) }
-
-          context 'an array of ids given' do
-            let(:params) { { id: [escalation_policy.id, escalation_policy_2.id] } }
-
-            it { is_expected.to contain_exactly(escalation_policy, escalation_policy_2) }
-          end
         end
       end
 

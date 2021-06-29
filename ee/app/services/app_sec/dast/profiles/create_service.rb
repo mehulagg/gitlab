@@ -16,6 +16,8 @@ module AppSec
             dast_scanner_profile: dast_scanner_profile
           )
 
+          create_audit_event(dast_profile)
+
           return ServiceResponse.success(payload: { dast_profile: dast_profile, pipeline_url: nil }) unless params.fetch(:run_after_create)
 
           response = ::DastOnDemandScans::CreateService.new(
@@ -45,6 +47,16 @@ module AppSec
 
         def dast_scanner_profile
           @dast_scanner_profile ||= params.fetch(:dast_scanner_profile)
+        end
+
+        def create_audit_event(profile)
+          ::Gitlab::Audit::Auditor.audit(
+            name: 'dast_profile_create',
+            author: current_user,
+            scope: container,
+            target: profile,
+            message: "Added DAST profile"
+          )
         end
       end
     end

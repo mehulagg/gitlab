@@ -111,6 +111,9 @@
   - ".gitlab/ci/build-images.gitlab-ci.yml"
   - ".gitlab/ci/qa.gitlab-ci.yml"
 
+.gitaly-patterns: &gitaly-patterns
+  - "GITALY_SERVER_VERSION"
+
 .workhorse-patterns: &workhorse-patterns
   - "GITLAB_WORKHORSE_VERSION"
   - "workhorse/**/*"
@@ -127,6 +130,30 @@
   - "doc/**/*"
   - ".markdownlint.yml"
   - "scripts/lint-doc.sh"
+
+.bundler-patterns: &bundler-patterns
+  - '{Gemfile.lock,*/Gemfile.lock,*/*/Gemfile.lock}'
+
+.nodejs-patterns: &nodejs-patterns
+  - '{package.json,*/package.json,*/*/package.json}'
+
+.python-patterns: &python-patterns
+  - '{requirements.txt,*/requirements.txt,*/*/requirements.txt}'
+  - '{requirements.pip,*/requirements.pip,*/*/requirements.pip}'
+  - '{Pipfile,*/Pipfile,*/*/Pipfile}'
+  - '{requires.txt,*/requires.txt,*/*/requires.txt}'
+  - '{setup.py,*/setup.py,*/*/setup.py}'
+
+.dependency-patterns: &dependency-patterns
+  - '{Gemfile.lock,*/Gemfile.lock,*/*/Gemfile.lock}'
+  - '{composer.lock,*/composer.lock,*/*/composer.lock}'
+  - '{gems.locked,*/gems.locked,*/*/gems.locked}'
+  - '{go.sum,*/go.sum,*/*/go.sum}'
+  - '{npm-shrinkwrap.json,*/npm-shrinkwrap.json,*/*/npm-shrinkwrap.json}'
+  - '{package-lock.json,*/package-lock.json,*/*/package-lock.json}'
+  - '{yarn.lock,*/yarn.lock,*/*/yarn.lock}'
+  - '{packages.lock.json,*/packages.lock.json,*/*/packages.lock.json}'
+  - '{conan.lock,*/conan.lock,*/*/conan.lock}'
 
 .frontend-dependency-patterns: &frontend-dependency-patterns
   - "{package.json,yarn.lock}"
@@ -310,6 +337,11 @@
     - <<: *if-security-schedule
     - <<: *if-merge-request-title-update-caches
 
+.shared:rules:update-gitaly-binaries-cache:
+  rules:
+    - <<: *if-merge-request-title-update-caches
+    - changes: *gitaly-patterns
+
 ######################
 # Build images rules #
 ######################
@@ -320,6 +352,8 @@
     - <<: *if-dot-com-gitlab-org-and-security-merge-request
       changes: *ci-build-images-patterns
     - <<: *if-dot-com-gitlab-org-and-security-merge-request
+      changes: *code-qa-patterns
+    - <<: *if-dot-com-gitlab-org-default-branch
       changes: *code-qa-patterns
     - <<: *if-dot-com-gitlab-org-schedule
 
@@ -922,14 +956,6 @@
     - <<: *if-merge-request-title-run-all-rspec
       when: always
 
-.rails:rules:rspec-feature-flags:
-  rules:
-    - <<: *if-not-ee
-      when: never
-    - <<: *if-default-branch-schedule-2-hourly
-      allow_failure: true
-    - <<: *if-merge-request-title-run-all-rspec
-
 .rails:rules:default-branch-schedule-nightly--code-backstage:
   rules:
     - <<: *if-default-branch-schedule-nightly
@@ -943,6 +969,12 @@
     - <<: *if-default-branch-schedule-nightly
     - <<: *if-merge-request
       changes: [".gitlab/ci/rails.gitlab-ci.yml"]
+
+.rails:rules:rspec-feature-flags:
+  rules:
+    - <<: *if-not-ee
+      when: never
+    - changes: *code-backstage-patterns
 
 #########################
 # Static analysis rules #
@@ -995,7 +1027,6 @@
   rules:
     - if: '$CODE_QUALITY_DISABLED'
       when: never
-    # - <<: *if-default-branch-refs  # To be done in a later iteration: https://gitlab.com/gitlab-org/gitlab/issues/31160#note_278188255
     - <<: *if-default-refs
       changes: *code-backstage-patterns
       allow_failure: true
@@ -1004,7 +1035,6 @@
   rules:
     - if: '$SAST_DISABLED || $GITLAB_FEATURES !~ /\bsast\b/'
       when: never
-    # - <<: *if-default-branch-refs  # To be done in a later iteration: https://gitlab.com/gitlab-org/gitlab/issues/31160#note_278188255
     - <<: *if-default-refs
       changes: *code-backstage-qa-patterns
       allow_failure: true
@@ -1015,17 +1045,39 @@
       when: never
     - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'  # The Secret-Detection template already has a `secret_detection_default_branch` job
       when: never
-    # - <<: *if-default-branch-refs  # To be done in a later iteration: https://gitlab.com/gitlab-org/gitlab/issues/31160#note_278188255
     - changes: *code-backstage-qa-patterns
       allow_failure: true
 
-.reports:rules:dependency_scanning:
+.reports:rules:gemnasium-dependency_scanning:
   rules:
-    - if: '$DEPENDENCY_SCANNING_DISABLED || $GITLAB_FEATURES !~ /\bdependency_scanning\b/'
+    - if: '$DEPENDENCY_SCANNING_DISABLED || $GITLAB_FEATURES !~ /\bdependency_scanning\b/ || $DS_EXCLUDED_ANALYZERS =~ /gemnasium([^-]|$)/'
       when: never
-    # - <<: *if-default-branch-refs  # To be done in a later iteration: https://gitlab.com/gitlab-org/gitlab/issues/31160#note_278188255
     - <<: *if-default-refs
-      changes: *code-backstage-qa-patterns
+      changes: *dependency-patterns
+      allow_failure: true
+
+.reports:rules:bundler-audit-dependency_scanning:
+  rules:
+    - if: '$DEPENDENCY_SCANNING_DISABLED || $GITLAB_FEATURES !~ /\bdependency_scanning\b/ || $DS_EXCLUDED_ANALYZERS =~ /bundler-audit/'
+      when: never
+    - <<: *if-default-refs
+      changes: *bundler-patterns
+      allow_failure: true
+
+.reports:rules:retire-js-dependency_scanning:
+  rules:
+    - if: '$DEPENDENCY_SCANNING_DISABLED || $GITLAB_FEATURES !~ /\bdependency_scanning\b/ || $DS_EXCLUDED_ANALYZERS =~ /retire.js/'
+      when: never
+    - <<: *if-default-refs
+      changes: *nodejs-patterns
+      allow_failure: true
+
+.reports:rules:gemnasium-python-dependency_scanning:
+  rules:
+    - if: '$DEPENDENCY_SCANNING_DISABLED || $GITLAB_FEATURES !~ /\bdependency_scanning\b/ || $DS_EXCLUDED_ANALYZERS =~ /gemnasium-python/'
+      when: never
+    - <<: *if-default-refs
+      changes: *python-patterns
       allow_failure: true
 
 .reports:rules:dast:
@@ -1049,6 +1101,8 @@
 
 .reports:rules:package_hunter:
   rules:
+    - if: "$PACKAGE_HUNTER_USER == null || $PACKAGE_HUNTER_USER == ''"
+      when: never
     - <<: *if-default-branch-schedule-2-hourly
     - <<: *if-merge-request
       changes: ["yarn.lock"]

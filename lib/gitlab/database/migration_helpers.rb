@@ -5,7 +5,7 @@ module Gitlab
     module MigrationHelpers
       include Migrations::BackgroundMigrationHelpers
       include DynamicModelHelpers
-      include Migrations::RenameTableHelpers
+      include RenameTableHelpers
 
       # https://www.postgresql.org/docs/current/sql-syntax-lexical.html#SQL-SYNTAX-IDENTIFIERS
       MAX_IDENTIFIER_NAME_LENGTH = 63
@@ -389,12 +389,14 @@ module Gitlab
       # * +logger+ - [Gitlab::JsonLogger]
       # * +env+ - [Hash] custom environment hash, see the example with `DISABLE_LOCK_RETRIES`
       def with_lock_retries(*args, **kwargs, &block)
+        raise_on_exhaustion = !!kwargs.delete(:raise_on_exhaustion)
         merged_args = {
           klass: self.class,
           logger: Gitlab::BackgroundMigration::Logger
         }.merge(kwargs)
 
-        Gitlab::Database::WithLockRetries.new(**merged_args).run(&block)
+        Gitlab::Database::WithLockRetries.new(**merged_args)
+          .run(raise_on_exhaustion: raise_on_exhaustion, &block)
       end
 
       def true_value
@@ -1091,6 +1093,29 @@ module Gitlab
         execute("DELETE FROM batched_background_migrations WHERE #{conditions}")
       end
 
+      def ensure_batched_background_migration_is_finished(job_class_name:, table_name:, column_name:, job_arguments:)
+        migration = Gitlab::Database::BackgroundMigration::BatchedMigration
+          .for_configuration(job_class_name, table_name, column_name, job_arguments).first
+
+        configuration = {
+          job_class_name: job_class_name,
+          table_name: table_name,
+          column_name: column_name,
+          job_arguments: job_arguments
+        }
+
+        if migration.nil?
+          Gitlab::AppLogger.warn "Could not find batched background migration for the given configuration: #{configuration}"
+        elsif !migration.finished?
+          raise "Expected batched background migration for the given configuration to be marked as 'finished', " \
+            "but it is '#{migration.status}': #{configuration}" \
+            "\n\n" \
+            "Finalize it manualy by running" \
+            "\n\n" \
+            "\tgitlab-rake gitlab:background_migrations:finalize[#{job_class_name},#{table_name},#{column_name},'#{job_arguments.inspect.gsub(',', '\,')}']"
+        end
+      end
+
       # Returns an Array containing the indexes for the given column
       def indexes_for(table, column)
         column = column.to_s
@@ -1589,6 +1614,13 @@ into similar problems in the future (e.g. when new tables are created).
         MSG
 
         raise
+      end
+
+      def rename_constraint(table_name, old_name, new_name)
+        execute <<~SQL
+          ALTER TABLE #{quote_table_name(table_name)}
+          RENAME CONSTRAINT #{quote_column_name(old_name)} TO #{quote_column_name(new_name)}
+        SQL
       end
 
       private

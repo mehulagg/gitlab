@@ -7,6 +7,14 @@ module API
     end
 
     resource :groups, requirements: API::NAMESPACE_OR_PROJECT_REQUIREMENTS do
+      rescue_from ArgumentError do |e|
+        render_api_error!(e.message, 400)
+      end
+
+      rescue_from ActiveRecord::RecordInvalid do |e|
+        render_api_error!(e.message, 400)
+      end
+
       before do
         require_packages_enabled!
 
@@ -16,7 +24,13 @@ module API
       end
 
       namespace ':id/-' do
-        include ::API::Concerns::Packages::DebianEndpoints
+        helpers do
+          def project_or_group
+            user_group
+          end
+        end
+
+        include ::API::Concerns::Packages::DebianPackageEndpoints
       end
     end
   end

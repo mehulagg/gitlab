@@ -100,6 +100,17 @@ RSpec.describe 'Releases (JavaScript fixtures)' do
            link_type: :image)
   end
 
+  let_it_be(:another_release) do
+    create(:release,
+           project: project,
+           tag: 'v1.2',
+           name: 'The second release',
+           author: admin,
+           description: 'An okay release :shrug:',
+           created_at: Time.zone.parse('2019-01-03'),
+           released_at: Time.zone.parse('2019-01-10'))
+  end
+
   after(:all) do
     remove_repository(project)
   end
@@ -135,6 +146,7 @@ RSpec.describe 'Releases (JavaScript fixtures)' do
       post_graphql(query, current_user: admin, variables: { fullPath: project.full_path })
 
       expect_graphql_errors_to_be_empty
+      expect(graphql_data_at(:project, :releases)).to be_present
     end
 
     it "graphql/#{one_release_query_path}.json" do
@@ -143,6 +155,7 @@ RSpec.describe 'Releases (JavaScript fixtures)' do
       post_graphql(query, current_user: admin, variables: { fullPath: project.full_path, tagName: release.tag })
 
       expect_graphql_errors_to_be_empty
+      expect(graphql_data_at(:project, :release)).to be_present
     end
 
     it "graphql/#{one_release_for_editing_query_path}.json" do
@@ -151,6 +164,7 @@ RSpec.describe 'Releases (JavaScript fixtures)' do
       post_graphql(query, current_user: admin, variables: { fullPath: project.full_path, tagName: release.tag })
 
       expect_graphql_errors_to_be_empty
+      expect(graphql_data_at(:project, :release)).to be_present
     end
   end
 end

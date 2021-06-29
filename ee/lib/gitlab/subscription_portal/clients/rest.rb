@@ -3,7 +3,7 @@
 module Gitlab
   module SubscriptionPortal
     module Clients
-      module REST
+      module Rest
         extend ActiveSupport::Concern
 
         class_methods do
@@ -31,6 +31,10 @@ module Gitlab
 
           def payment_method(id)
             http_get("api/payment_methods/#{id}", admin_headers)
+          end
+
+          def customers_oauth_app_id
+            http_get("api/v1/oauth_app_id", admin_headers)
           end
 
           private

@@ -9,6 +9,20 @@ export default {
   inject: ['timeTrackingLimitToHours'],
   computed: {
     ...mapGetters(['activeBoardItem']),
+    initialTimeTracking() {
+      const {
+        timeEstimate,
+        totalTimeSpent,
+        humanTimeEstimate,
+        humanTotalTimeSpent,
+      } = this.activeBoardItem;
+      return {
+        timeEstimate,
+        totalTimeSpent,
+        humanTimeEstimate,
+        humanTotalTimeSpent,
+      };
+    },
   },
 };
 </script>
@@ -16,11 +30,9 @@ export default {
 <template>
   <issuable-time-tracker
     :issuable-id="activeBoardItem.id.toString()"
-    :time-estimate="activeBoardItem.timeEstimate"
-    :time-spent="activeBoardItem.totalTimeSpent"
-    :human-time-estimate="activeBoardItem.humanTimeEstimate"
-    :human-time-spent="activeBoardItem.humanTotalTimeSpent"
+    :issuable-iid="activeBoardItem.iid.toString()"
     :limit-to-hours="timeTrackingLimitToHours"
+    :initial-time-tracking="initialTimeTracking"
     :show-collapsed="false"
   />
 </template>

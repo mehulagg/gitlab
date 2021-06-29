@@ -15,8 +15,8 @@ RSpec.describe 'projects/services/_form' do
       current_user: user,
       can?: true,
       current_application_settings: Gitlab::CurrentSettings.current_application_settings,
-      integration: project.redmine_service,
-      request: double(referrer: '/services')
+      integration: project.redmine_integration,
+      request: double(referer: '/services')
     )
   end
 

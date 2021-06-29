@@ -565,11 +565,11 @@ RSpec.describe Group do
 
   describe '.without_integration' do
     let(:another_group) { create(:group) }
-    let(:instance_integration) { build(:jira_service, :instance) }
+    let(:instance_integration) { build(:jira_integration, :instance) }
 
     before do
-      create(:jira_service, group: group, project: nil)
-      create(:slack_service, group: another_group, project: nil)
+      create(:jira_integration, group: group, project: nil)
+      create(:integrations_slack, group: another_group, project: nil)
     end
 
     it 'returns groups without integration' do
@@ -2611,6 +2611,68 @@ RSpec.describe Group do
       expected_path = "/groups/#{group.name}/-/activity"
 
       expect(group.activity_path).to eq(expected_path)
+    end
+  end
+
+  context 'with export' do
+    let(:group) { create(:group, :with_export) }
+
+    it '#export_file_exists? returns true' do
+      expect(group.export_file_exists?).to be true
+    end
+
+    it '#export_archive_exists? returns true' do
+      expect(group.export_archive_exists?).to be true
+    end
+  end
+
+  describe '#open_issues_count', :aggregate_failures do
+    let(:group) { build(:group) }
+
+    it 'provides the issue count' do
+      expect(group.open_issues_count).to eq 0
+    end
+
+    it 'invokes the count service with current_user' do
+      user = build(:user)
+      count_service = instance_double(Groups::OpenIssuesCountService)
+      expect(Groups::OpenIssuesCountService).to receive(:new).with(group, user).and_return(count_service)
+      expect(count_service).to receive(:count)
+
+      group.open_issues_count(user)
+    end
+
+    it 'invokes the count service with no current_user' do
+      count_service = instance_double(Groups::OpenIssuesCountService)
+      expect(Groups::OpenIssuesCountService).to receive(:new).with(group, nil).and_return(count_service)
+      expect(count_service).to receive(:count)
+
+      group.open_issues_count
+    end
+  end
+
+  describe '#open_merge_requests_count', :aggregate_failures do
+    let(:group) { build(:group) }
+
+    it 'provides the merge request count' do
+      expect(group.open_merge_requests_count).to eq 0
+    end
+
+    it 'invokes the count service with current_user' do
+      user = build(:user)
+      count_service = instance_double(Groups::MergeRequestsCountService)
+      expect(Groups::MergeRequestsCountService).to receive(:new).with(group, user).and_return(count_service)
+      expect(count_service).to receive(:count)
+
+      group.open_merge_requests_count(user)
+    end
+
+    it 'invokes the count service with no current_user' do
+      count_service = instance_double(Groups::MergeRequestsCountService)
+      expect(Groups::MergeRequestsCountService).to receive(:new).with(group, nil).and_return(count_service)
+      expect(count_service).to receive(:count)
+
+      group.open_merge_requests_count
     end
   end
 end

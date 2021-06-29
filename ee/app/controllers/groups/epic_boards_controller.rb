@@ -14,7 +14,7 @@ class Groups::EpicBoardsController < Groups::ApplicationController
 
   track_redis_hll_event :index, :show, name: 'g_project_management_users_viewing_epic_boards'
 
-  feature_category :boards
+  feature_category :epics
 
   private
 
@@ -70,6 +70,6 @@ class Groups::EpicBoardsController < Groups::ApplicationController
   end
 
   def authorize_read_board!
-    access_denied! unless Feature.enabled?(:epic_boards, group) && can?(current_user, :read_epic_board, group)
+    access_denied! unless Feature.enabled?(:epic_boards, group, default_enabled: :yaml) && can?(current_user, :read_epic_board, group)
   end
 end

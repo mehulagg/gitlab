@@ -143,8 +143,12 @@ module EE
         links << :productivity_analytics
       end
 
-      if ::Feature.enabled?(:group_iterations, @group, default_enabled: true) && @group.licensed_feature_available?(:iterations) && can?(current_user, :read_iteration, @group)
-        links << :iterations
+      if ::Feature.enabled?(:group_iterations, @group, default_enabled: true) && @group.licensed_feature_available?(:iterations)
+        if ::Feature.enabled?(:iteration_cadences, @group, default_enabled: :yaml) && can?(current_user, :read_iteration_cadence, @group)
+          links << :iteration_cadences
+        elsif can?(current_user, :read_iteration, @group)
+          links << :iterations
+        end
       end
 
       if ::Feature.enabled?(:group_ci_cd_analytics_page, @group, default_enabled: true) && @group.licensed_feature_available?(:group_ci_cd_analytics) && can?(current_user, :view_group_ci_cd_analytics, @group)

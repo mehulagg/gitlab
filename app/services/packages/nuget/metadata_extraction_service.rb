@@ -18,6 +18,7 @@ module Packages
       XPATH_DEPENDENCIES = '//xmlns:package/xmlns:metadata/xmlns:dependencies/xmlns:dependency'
       XPATH_DEPENDENCY_GROUPS = '//xmlns:package/xmlns:metadata/xmlns:dependencies/xmlns:group'
       XPATH_TAGS = '//xmlns:package/xmlns:metadata/xmlns:tags'
+      XPATH_PACKAGE_TYPES = '//xmlns:package/xmlns:metadata/xmlns:packageTypes/xmlns:packageType'
 
       MAX_FILE_SIZE = 4.megabytes.freeze
 
@@ -57,6 +58,7 @@ module Packages
               .tap do |metadata|
                 metadata[:package_dependencies] = extract_dependencies(doc)
                 metadata[:package_tags] = extract_tags(doc)
+                metadata[:package_types] = extract_package_types(doc)
               end
       end
 
@@ -85,6 +87,10 @@ module Packages
         }.compact
       end
 
+      def extract_package_types(doc)
+        doc.xpath(XPATH_PACKAGE_TYPES).map { |node| node.attr('name') }.uniq
+      end
+
       def extract_tags(doc)
         tags = doc.xpath(XPATH_TAGS).text
 
@@ -105,22 +111,6 @@ module Packages
       end
 
       def with_zip_file(&block)
-        if ::Feature.enabled?(:packages_nuget_archive_new_file_reader, project, default_enabled: :yaml)
-          with_new_file_reader(&block)
-        else
-          with_legacy_file_reader(&block)
-        end
-      end
-
-      def with_legacy_file_reader
-        package_file.file.use_file do |file_path|
-          Zip::File.open(file_path) do |zip_file|
-            yield(zip_file)
-          end
-        end
-      end
-
-      def with_new_file_reader
         package_file.file.use_open_file do |open_file|
           zip_file = Zip::File.new(open_file, false, true)
           yield(zip_file)

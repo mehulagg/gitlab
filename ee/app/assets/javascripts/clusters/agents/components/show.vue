@@ -129,7 +129,7 @@ export default {
 
       <gl-tabs>
         <gl-tab>
-          <template slot="title">
+          <template #title>
             <span data-testid="cluster-agent-token-count">
               {{ $options.i18n.tokens }}
 

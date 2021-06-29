@@ -1,9 +1,10 @@
 ---
+data_category: Optional
 key_path: usage_activity_by_stage.release.projects_mirrored_with_pipelines_enabled
 description: Count creator_id from projects with repository mirroring enabled.
 product_section: ops
 product_stage: verify
-product_group: group::continuous integration
+product_group: group::pipeline execution
 product_category:
 value_type: number
 status: data_available

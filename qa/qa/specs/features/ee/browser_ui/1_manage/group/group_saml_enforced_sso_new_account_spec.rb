@@ -16,7 +16,7 @@ module QA
       # The user that signs in via the IDP with username `user3` and password `user3pass`
       # will have `user_3` as username in GitLab
       let(:user) do
-        QA::Resource::User.new.tap do |user|
+        QA::Resource::User.init do |user|
           user.username = 'user_3'
           user.email = 'user_3@example.com'
           user.name = 'User Three'
@@ -42,7 +42,7 @@ module QA
 
         Flow::Saml.login_to_idp_if_required(idp_user.username, idp_user.password)
 
-        expect(page).to have_text("You have to confirm your email address before continuing")
+        expect(page).to have_text("Please confirm your email address")
 
         QA::Flow::User.confirm_user(user)
 
@@ -82,7 +82,7 @@ module QA
 
         Flow::Saml.login_to_idp_if_required(idp_user.username, idp_user.password)
 
-        expect(page).to have_text("You have to confirm your email address before continuing")
+        expect(page).to have_text("Please confirm your email address")
       end
 
       after do

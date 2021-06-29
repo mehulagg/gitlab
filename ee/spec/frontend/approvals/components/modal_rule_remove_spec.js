@@ -4,7 +4,6 @@ import Vuex from 'vuex';
 import ModalRuleRemove from 'ee/approvals/components/modal_rule_remove.vue';
 import { stubComponent } from 'helpers/stub_component';
 import GlModalVuex from '~/vue_shared/components/gl_modal_vuex.vue';
-import { createExternalRule } from '../mocks';
 
 const MODAL_MODULE = 'deleteModal';
 const TEST_MODAL_ID = 'test-delete-modal-id';
@@ -19,7 +18,6 @@ const SINGLE_APPROVER = {
   ...TEST_RULE,
   approvers: [{ id: 1 }],
 };
-const EXTERNAL_RULE = createExternalRule();
 
 const localVue = createLocalVue();
 localVue.use(Vuex);
@@ -67,7 +65,6 @@ describe('Approvals ModalRuleRemove', () => {
     };
     actions = {
       deleteRule: jest.fn(),
-      deleteExternalApprovalRule: jest.fn(),
     };
   });
 
@@ -94,7 +91,6 @@ describe('Approvals ModalRuleRemove', () => {
     type                    | rule
     ${'multiple approvers'} | ${TEST_RULE}
     ${'singular approver'}  | ${SINGLE_APPROVER}
-    ${'external approval'}  | ${EXTERNAL_RULE}
   `('matches the snapshot for $type', ({ rule }) => {
     deleteModalState.data = rule;
     factory();
@@ -102,19 +98,15 @@ describe('Approvals ModalRuleRemove', () => {
     expect(findModal().element).toMatchSnapshot();
   });
 
-  it.each`
-    typeType      | action                          | rule
-    ${'regular'}  | ${'deleteRule'}                 | ${TEST_RULE}
-    ${'external'} | ${'deleteExternalApprovalRule'} | ${EXTERNAL_RULE}
-  `('calls $action when the modal is submitted for a $typeType rule', ({ action, rule }) => {
-    deleteModalState.data = rule;
+  it('calls deleteRule when the modal is submitted', () => {
+    deleteModalState.data = TEST_RULE;
     factory();
 
-    expect(actions[action]).not.toHaveBeenCalled();
+    expect(actions.deleteRule).not.toHaveBeenCalled();
 
     const modal = findModal();
     modal.vm.$emit('ok', new Event('submit'));
 
-    expect(actions[action]).toHaveBeenCalledWith(expect.anything(), rule.id);
+    expect(actions.deleteRule).toHaveBeenCalledWith(expect.anything(), TEST_RULE.id);
   });
 });

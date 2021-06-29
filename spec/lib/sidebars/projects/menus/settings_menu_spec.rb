@@ -3,7 +3,8 @@
 require 'spec_helper'
 
 RSpec.describe Sidebars::Projects::Menus::SettingsMenu do
-  let(:project) { build(:project) }
+  let_it_be(:project) { create(:project) }
+
   let(:user) { project.owner }
   let(:context) { Sidebars::Projects::Context.new(current_user: user, container: project) }
 
@@ -98,14 +99,6 @@ RSpec.describe Sidebars::Projects::Menus::SettingsMenu do
 
         specify { expect(subject.title).to eq 'Monitor' }
 
-        context 'when feature flag :sidebar_refactor is disabled' do
-          before do
-            stub_feature_flags(sidebar_refactor: false)
-          end
-
-          specify { expect(subject.title).to eq 'Operations' }
-        end
-
         describe 'when the user does not have access' do
           let(:user) { nil }
 
@@ -157,14 +150,6 @@ RSpec.describe Sidebars::Projects::Menus::SettingsMenu do
         let(:container_enabled) { true }
 
         specify { is_expected.not_to be_nil }
-
-        context 'when feature flag :sidebar_refactor is disabled' do
-          before do
-            stub_feature_flags(sidebar_refactor: false)
-          end
-
-          specify { is_expected.to be_nil }
-        end
 
         describe 'when the user does not have access' do
           let(:user) { nil }

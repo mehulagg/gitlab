@@ -109,7 +109,7 @@ Create an issue when you want to track bugs or future work.
 
 Prerequisites:
 
-- A minimum of Contributor access to a project in GitLab.
+- You must have at least the Developer role for a project.
 
 To create an issue:
 
@@ -210,7 +210,7 @@ comments: false
 ---
 ```
 
-We're hiding comments only in main index pages, such as [the main documentation index](../../README.md),
+We're hiding comments only in main index pages, such as [the main documentation index](../../index.md),
 since its content is too broad to comment on. Before omitting Disqus, you must
 check with a technical writer.
 

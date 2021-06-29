@@ -30,6 +30,15 @@ const defaultStubs = {
   },
 };
 
+const mockPreloadedAuthors = [
+  {
+    id: 13,
+    name: 'Administrator',
+    username: 'root',
+    avatar_url: 'avatar/url',
+  },
+];
+
 function createComponent(options = {}) {
   const {
     config = mockAuthorToken,
@@ -37,6 +46,7 @@ function createComponent(options = {}) {
     active = false,
     stubs = defaultStubs,
     data = {},
+    listeners = {},
   } = options;
   return mount(AuthorToken, {
     propsData: {
@@ -53,6 +63,7 @@ function createComponent(options = {}) {
       return { ...data };
     },
     stubs,
+    listeners,
   });
 }
 
@@ -65,13 +76,6 @@ describe('AuthorToken', () => {
   const getBaseToken = () => wrapper.findComponent(BaseToken);
 
   beforeEach(() => {
-    window.gon = {
-      ...originalGon,
-      current_user_id: 13,
-      current_user_fullname: 'Administrator',
-      current_username: 'root',
-      current_user_avatar_url: 'avatar/url',
-    };
     mock = new MockAdapter(axios);
   });
 
@@ -90,7 +94,7 @@ describe('AuthorToken', () => {
       it('calls `config.fetchAuthors` with provided searchTerm param', () => {
         jest.spyOn(wrapper.vm.config, 'fetchAuthors');
 
-        getBaseToken().vm.$emit('fetch-token-values', mockAuthors[0].username);
+        getBaseToken().vm.$emit('fetch-suggestions', mockAuthors[0].username);
 
         expect(wrapper.vm.config.fetchAuthors).toHaveBeenCalledWith(
           mockAuthorToken.fetchPath,
@@ -101,17 +105,17 @@ describe('AuthorToken', () => {
       it('sets response to `authors` when request is succesful', () => {
         jest.spyOn(wrapper.vm.config, 'fetchAuthors').mockResolvedValue(mockAuthors);
 
-        getBaseToken().vm.$emit('fetch-token-values', 'root');
+        getBaseToken().vm.$emit('fetch-suggestions', 'root');
 
         return waitForPromises().then(() => {
-          expect(getBaseToken().props('tokenValues')).toEqual(mockAuthors);
+          expect(getBaseToken().props('suggestions')).toEqual(mockAuthors);
         });
       });
 
       it('calls `createFlash` with flash error message when request fails', () => {
         jest.spyOn(wrapper.vm.config, 'fetchAuthors').mockRejectedValue({});
 
-        getBaseToken().vm.$emit('fetch-token-values', 'root');
+        getBaseToken().vm.$emit('fetch-suggestions', 'root');
 
         return waitForPromises().then(() => {
           expect(createFlash).toHaveBeenCalledWith({
@@ -123,16 +127,23 @@ describe('AuthorToken', () => {
       it('sets `loading` to false when request completes', async () => {
         jest.spyOn(wrapper.vm.config, 'fetchAuthors').mockRejectedValue({});
 
-        getBaseToken().vm.$emit('fetch-token-values', 'root');
+        getBaseToken().vm.$emit('fetch-suggestions', 'root');
 
         await waitForPromises();
 
-        expect(getBaseToken().props('tokensListLoading')).toBe(false);
+        expect(getBaseToken().props('suggestionsLoading')).toBe(false);
       });
     });
   });
 
   describe('template', () => {
+    const activateSuggestionsList = async () => {
+      const tokenSegments = wrapper.findAllComponents(GlFilteredSearchTokenSegment);
+      const suggestionsSegment = tokenSegments.at(2);
+      suggestionsSegment.vm.$emit('activate');
+      await wrapper.vm.$nextTick();
+    };
+
     it('renders base-token component', () => {
       wrapper = createComponent({
         value: { data: mockAuthors[0].username },
@@ -143,7 +154,7 @@ describe('AuthorToken', () => {
 
       expect(baseTokenEl.exists()).toBe(true);
       expect(baseTokenEl.props()).toMatchObject({
-        tokenValues: mockAuthors,
+        suggestions: mockAuthors,
         fnActiveTokenValue: wrapper.vm.getActiveAuthor,
       });
     });
@@ -206,13 +217,11 @@ describe('AuthorToken', () => {
       const defaultAuthors = DEFAULT_NONE_ANY;
       wrapper = createComponent({
         active: true,
-        config: { ...mockAuthorToken, defaultAuthors },
+        config: { ...mockAuthorToken, defaultAuthors, preloadedAuthors: mockPreloadedAuthors },
         stubs: { Portal: true },
       });
-      const tokenSegments = wrapper.findAll(GlFilteredSearchTokenSegment);
-      const suggestionsSegment = tokenSegments.at(2);
-      suggestionsSegment.vm.$emit('activate');
-      await wrapper.vm.$nextTick();
+
+      await activateSuggestionsList();
 
       const suggestions = wrapper.findAll(GlFilteredSearchSuggestion);
 
@@ -239,13 +248,11 @@ describe('AuthorToken', () => {
     it('renders `DEFAULT_LABEL_ANY` as default suggestions', async () => {
       wrapper = createComponent({
         active: true,
-        config: { ...mockAuthorToken },
+        config: { ...mockAuthorToken, preloadedAuthors: mockPreloadedAuthors },
         stubs: { Portal: true },
       });
-      const tokenSegments = wrapper.findAll(GlFilteredSearchTokenSegment);
-      const suggestionsSegment = tokenSegments.at(2);
-      suggestionsSegment.vm.$emit('activate');
-      await wrapper.vm.$nextTick();
+
+      await activateSuggestionsList();
 
       const suggestions = wrapper.findAll(GlFilteredSearchSuggestion);
 
@@ -253,11 +260,27 @@ describe('AuthorToken', () => {
       expect(suggestions.at(0).text()).toBe(DEFAULT_LABEL_ANY.text);
     });
 
+    it('emits listeners in the base-token', () => {
+      const mockInput = jest.fn();
+      wrapper = createComponent({
+        listeners: {
+          input: mockInput,
+        },
+      });
+      wrapper.findComponent(BaseToken).vm.$emit('input', [{ data: 'mockData', operator: '=' }]);
+
+      expect(mockInput).toHaveBeenLastCalledWith([{ data: 'mockData', operator: '=' }]);
+    });
+
     describe('when loading', () => {
       beforeEach(() => {
         wrapper = createComponent({
           active: true,
-          config: { ...mockAuthorToken, defaultAuthors: [] },
+          config: {
+            ...mockAuthorToken,
+            preloadedAuthors: mockPreloadedAuthors,
+            defaultAuthors: [],
+          },
           stubs: { Portal: true },
         });
       });
@@ -266,6 +289,14 @@ describe('AuthorToken', () => {
         const firstSuggestion = wrapper.findComponent(GlFilteredSearchSuggestion).text();
         expect(firstSuggestion).toContain('Administrator');
         expect(firstSuggestion).toContain('@root');
+      });
+
+      it('does not show current user while searching', async () => {
+        wrapper.findComponent(BaseToken).vm.handleInput({ data: 'foo' });
+
+        await wrapper.vm.$nextTick();
+
+        expect(wrapper.findComponent(GlFilteredSearchSuggestion).exists()).toBe(false);
       });
     });
   });

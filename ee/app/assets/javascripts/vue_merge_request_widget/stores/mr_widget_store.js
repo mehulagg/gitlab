@@ -56,6 +56,7 @@ export default class MergeRequestStore extends CEMergeRequestStore {
     super.setPaths(data);
 
     this.discoverProjectSecurityPath = data.discover_project_security_path;
+    this.apiStatusChecksPath = data.api_status_checks_path;
 
     // Security scan diff paths
     this.containerScanningComparisonPath = data.container_scanning_comparison_path;

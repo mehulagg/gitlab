@@ -6,6 +6,7 @@ RSpec.describe AuditEventService do
   let(:project) { build_stubbed(:project) }
   let_it_be(:user) { create(:user, current_sign_in_ip: '192.168.68.104') }
   let_it_be(:project_member) { create(:project_member, user: user, expires_at: 1.day.from_now) }
+
   let(:request_ip_address) { '127.0.0.1' }
 
   let(:details) { { action: :destroy, ip_address: request_ip_address } }
@@ -453,6 +454,7 @@ RSpec.describe AuditEventService do
   describe '#for_project' do
     let_it_be(:current_user) { create(:user, name: 'Test User') }
     let_it_be(:project) { create(:project) }
+
     let(:action) { :destroy }
     let(:options) { { action: action } }
 
@@ -476,6 +478,7 @@ RSpec.describe AuditEventService do
   describe '#for_group' do
     let_it_be(:user) { create(:user, name: 'Test User') }
     let_it_be(:group) { create(:group) }
+
     let(:action) { :destroy }
     let(:options) { { action: action } }
     let(:service) { described_class.new(user, group, options).for_group }

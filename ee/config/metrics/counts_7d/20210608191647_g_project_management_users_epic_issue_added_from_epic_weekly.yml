@@ -1,0 +1,18 @@
+---
+data_category: Optional
+key_path: redis_hll_counters.epics_usage.g_project_management_users_epic_issue_added_from_epic_weekly
+description: Number of users creating an issue from an epic
+product_section: dev
+product_stage: plan
+product_group: group::product planning
+product_category: epics_usage
+value_type: number
+status: data_available
+milestone: "13.12"
+introduced_by_url: https://gitlab.com/gitlab-org/gitlab/-/merge_requests/61822
+time_frame: 7d
+data_source: redis_hll
+distribution:
+- ee
+tier:
+- premium

@@ -43,12 +43,17 @@ export default {
           type: this.type,
           path: this.currentPath,
           projectPath: this.projectPath,
+          maxOffset: this.totalEntries,
         };
       },
     },
   },
   mixins: [getRefMixin, glFeatureFlagMixin()],
   props: {
+    totalEntries: {
+      type: Number,
+      required: true,
+    },
     id: {
       type: String,
       required: true,
@@ -181,6 +186,8 @@ export default {
         :is="linkComponent"
         ref="link"
         v-gl-hover-load="handlePreload"
+        v-gl-tooltip:tooltip-container
+        :title="fullPath"
         :to="routerLinkTo"
         :href="url"
         :class="{

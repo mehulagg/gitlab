@@ -11,7 +11,6 @@ module Ci
     include Importable
     include Ci::HasRef
     include IgnorableColumns
-    include TaggableQueries
 
     BuildArchivedError = Class.new(StandardError)
 
@@ -39,6 +38,7 @@ module Ci
     has_one :deployment, as: :deployable, class_name: 'Deployment'
     has_one :pending_state, class_name: 'Ci::BuildPendingState', inverse_of: :build
     has_one :queuing_entry, class_name: 'Ci::PendingBuild', foreign_key: :build_id
+    has_one :runtime_metadata, class_name: 'Ci::RunningBuild', foreign_key: :build_id
     has_many :trace_sections, class_name: 'Ci::BuildTraceSection'
     has_many :trace_chunks, class_name: 'Ci::BuildTraceChunk', foreign_key: :build_id, inverse_of: :build
     has_many :report_results, class_name: 'Ci::BuildReportResult', inverse_of: :build
@@ -135,6 +135,7 @@ module Ci
 
     scope :eager_load_job_artifacts, -> { includes(:job_artifacts) }
     scope :eager_load_job_artifacts_archive, -> { includes(:job_artifacts_archive) }
+    scope :eager_load_tags, -> { includes(:tags) }
 
     scope :eager_load_everything, -> do
       includes(
@@ -177,25 +178,6 @@ module Ci
       joins(:metadata).where("ci_builds_metadata.config_options -> 'artifacts' -> 'reports' ?| array[:job_types]", job_types: job_types)
     end
 
-    scope :matches_tag_ids, -> (tag_ids) do
-      matcher = ::ActsAsTaggableOn::Tagging
-        .where(taggable_type: CommitStatus.name)
-        .where(context: 'tags')
-        .where('taggable_id = ci_builds.id')
-        .where.not(tag_id: tag_ids).select('1')
-
-      where("NOT EXISTS (?)", matcher)
-    end
-
-    scope :with_any_tags, -> do
-      matcher = ::ActsAsTaggableOn::Tagging
-        .where(taggable_type: CommitStatus.name)
-        .where(context: 'tags')
-        .where('taggable_id = ci_builds.id').select('1')
-
-      where("EXISTS (?)", matcher)
-    end
-
     scope :queued_before, ->(time) { where(arel_table[:queued_at].lt(time)) }
 
     scope :preload_project_and_pipeline_project, -> do
@@ -204,12 +186,15 @@ module Ci
     end
 
     scope :with_coverage, -> { where.not(coverage: nil) }
+    scope :without_coverage, -> { where(coverage: nil) }
+    scope :with_coverage_regex, -> { where.not(coverage_regex: nil) }
 
     scope :for_project, -> (project_id) { where(project_id: project_id) }
 
     acts_as_taggable
 
-    add_authentication_token_field :token, encrypted: :optional
+    add_authentication_token_field :token,
+      encrypted: -> { Gitlab::Ci::Features.require_builds_token_encryption? ? :required : :optional }
 
     before_save :ensure_token
     before_destroy { unscoped_project }
@@ -310,7 +295,22 @@ module Ci
       after_transition pending: any do |build, transition|
         Ci::UpdateBuildQueueService.new.pop(build, transition)
       end
+
+      after_transition any => [:running] do |build, transition|
+        Ci::UpdateBuildQueueService.new.track(build, transition)
+      end
+
+      after_transition running: any do |build, transition|
+        Ci::UpdateBuildQueueService.new.untrack(build, transition)
+
+        Ci::BuildRunnerSession.where(build: build).delete_all
+      end
+
       # rubocop:enable CodeReuse/ServiceClass
+      #
+      after_transition pending: :running do |build|
+        build.ensure_metadata.update_timeout_state
+      end
 
       after_transition pending: :running do |build|
         build.deployment&.run
@@ -362,14 +362,6 @@ module Ci
             Gitlab::AppLogger.error "Unable to auto-retry job #{build.id}: #{ex}"
           end
         end
-      end
-
-      after_transition pending: :running do |build|
-        build.ensure_metadata.update_timeout_state
-      end
-
-      after_transition running: any do |build|
-        Ci::BuildRunnerSession.where(build: build).delete_all
       end
 
       after_transition any => [:skipped, :canceled] do |build, transition|
@@ -748,6 +740,14 @@ module Ci
       self.token && ActiveSupport::SecurityUtils.secure_compare(token, self.token)
     end
 
+    def tag_list
+      if tags.loaded?
+        tags.map(&:name)
+      else
+        super
+      end
+    end
+
     def has_tags?
       tag_list.any?
     end
@@ -929,8 +929,7 @@ module Ci
     end
 
     def supports_artifacts_exclude?
-      options&.dig(:artifacts, :exclude)&.any? &&
-        Gitlab::Ci::Features.artifacts_exclude_enabled?
+      options&.dig(:artifacts, :exclude)&.any?
     end
 
     def multi_build_steps?
@@ -1068,16 +1067,26 @@ module Ci
       options.dig(:allow_failure_criteria, :exit_codes).present?
     end
 
-    def all_queuing_entries
-      # We can have only one queuing entry, because there is a unique index on
-      # `build_id`, but we need a relation to remove this single queuing entry
-      # more efficiently in a single statement without actually load data.
+    def create_queuing_entry!
+      ::Ci::PendingBuild.upsert_from_build!(self)
+    end
 
+    ##
+    # We can have only one queuing entry or running build tracking entry,
+    # because there is a unique index on `build_id` in each table, but we need
+    # a relation to remove these entries more efficiently in a single statement
+    # without actually loading data.
+    #
+    def all_queuing_entries
       ::Ci::PendingBuild.where(build_id: self.id)
     end
 
-    def create_queuing_entry!
-      ::Ci::PendingBuild.upsert_from_build!(self)
+    def all_runtime_metadata
+      ::Ci::RunningBuild.where(build_id: self.id)
+    end
+
+    def shared_runner_build?
+      runner&.instance_type?
     end
 
     protected

@@ -5,7 +5,7 @@ import getGroupsQuery from 'ee/analytics/devops_report/devops_adoption/graphql/q
 import Api from 'ee/api';
 import axios from '~/lib/utils/axios_utils';
 import httpStatus from '~/lib/utils/http_status';
-import { groupData, pageData, groupNodes, groupPageInfo } from '../mock_data';
+import { groupData, groupNodes } from '../mock_data';
 
 const fetchGroupsUrl = Api.buildUrl(Api.groupsPath);
 const fetchSubGroupsUrl = Api.buildUrl(Api.subgroupsPath).replace(':id', 1);
@@ -29,7 +29,7 @@ describe('DevOps GraphQL resolvers', () => {
     });
 
     it('fetches all relevent groups / subgroups', async () => {
-      mockAdapter.onGet(url).reply(httpStatus.OK, groupData, pageData);
+      mockAdapter.onGet(url).reply(httpStatus.OK, groupData);
       await mockClient.query({ query: getGroupsQuery });
 
       expect(mockAdapter.history.get[0].params).not.toEqual(
@@ -38,40 +38,25 @@ describe('DevOps GraphQL resolvers', () => {
     });
 
     it('when receiving groups data', async () => {
-      mockAdapter.onGet(url).reply(httpStatus.OK, groupData, pageData);
+      mockAdapter.onGet(url).reply(httpStatus.OK, groupData);
       const result = await mockClient.query({ query: getGroupsQuery });
 
       expect(result.data).toEqual({
         groups: {
           __typename: 'Groups',
           nodes: groupNodes,
-          pageInfo: groupPageInfo,
         },
       });
     });
 
     it('when receiving empty groups data', async () => {
-      mockAdapter.onGet(url).reply(httpStatus.OK, [], pageData);
+      mockAdapter.onGet(url).reply(httpStatus.OK, []);
       const result = await mockClient.query({ query: getGroupsQuery });
 
       expect(result.data).toEqual({
         groups: {
           __typename: 'Groups',
           nodes: [],
-          pageInfo: groupPageInfo,
-        },
-      });
-    });
-
-    it('with no page information', async () => {
-      mockAdapter.onGet(url).reply(httpStatus.OK, [], {});
-      const result = await mockClient.query({ query: getGroupsQuery });
-
-      expect(result.data).toEqual({
-        groups: {
-          __typename: 'Groups',
-          nodes: [],
-          pageInfo: {},
         },
       });
     });

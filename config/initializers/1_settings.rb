@@ -222,7 +222,6 @@ Gitlab.ee do
   Settings.gitlab['mirror_max_delay'] ||= 300
   Settings.gitlab['mirror_max_capacity'] ||= 30
   Settings.gitlab['mirror_capacity_threshold'] ||= 15
-  Settings.gitlab['seat_link_enabled'] = true if Settings.gitlab['seat_link_enabled'].nil?
 end
 
 #
@@ -586,7 +585,7 @@ end
 
 Gitlab.ee do
   Settings.cron_jobs['analytics_devops_adoption_create_all_snapshots_worker'] ||= Settingslogic.new({})
-  Settings.cron_jobs['analytics_devops_adoption_create_all_snapshots_worker']['cron'] ||= '0 4 * * 0'
+  Settings.cron_jobs['analytics_devops_adoption_create_all_snapshots_worker']['cron'] ||= '0 0 1 * *'
   Settings.cron_jobs['analytics_devops_adoption_create_all_snapshots_worker']['job_class'] = 'Analytics::DevopsAdoption::CreateAllSnapshotsWorker'
   Settings.cron_jobs['active_user_count_threshold_worker'] ||= Settingslogic.new({})
   Settings.cron_jobs['active_user_count_threshold_worker']['cron'] ||= '0 12 * * *'
@@ -918,13 +917,8 @@ Settings.monitoring.web_exporter['port'] ||= 8083
 # Prometheus settings
 #
 Settings['prometheus'] ||= Settingslogic.new({})
-# TODO: Remove listen_address and enable in GitLab 14.0 and set default value
-# of server_address to be nil and enabled to be false -
-# https://gitlab.com/gitlab-org/gitlab/-/issues/296022
-Settings.prometheus['enable'] ||= false
-Settings.prometheus['listen_address'] ||= nil
-Settings.prometheus['enabled'] = Settings.prometheus['enable'] if Settings.prometheus['enabled'].nil?
-Settings.prometheus['server_address'] ||= Settings.prometheus['listen_address']
+Settings.prometheus['enabled'] ||= false
+Settings.prometheus['server_address'] ||= nil
 
 #
 # Shutdown settings

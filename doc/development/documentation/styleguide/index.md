@@ -216,15 +216,15 @@ to update.
 
 Put files for a specific product area into the related folder:
 
-| Directory             | What belongs here |
+| Directory             | Contents |
 |:----------------------|:------------------|
-| `doc/user/`           | User related documentation. Anything that can be done in the GitLab user interface goes here, including usage of the `/admin` interface. |
+| `doc/user/`           | Documentation for users. Anything that can be done in the GitLab user interface goes here, including usage of the `/admin` interface. |
 | `doc/administration/` | Documentation that requires the user to have access to the server where GitLab is installed. Administrator settings in the GitLab user interface are under `doc/user/admin_area/`. |
-| `doc/api/`            | API-related documentation. |
+| `doc/api/`            | Documentation for the API. |
 | `doc/development/`    | Documentation related to the development of GitLab, whether contributing code or documentation. Related process and style guides should go here. |
 | `doc/legal/`          | Legal documents about contributing to GitLab. |
-| `doc/install/`        | Contains instructions for installing GitLab. |
-| `doc/update/`         | Contains instructions for updating GitLab. |
+| `doc/install/`        | Instructions for installing GitLab. |
+| `doc/update/`         | Instructions for updating GitLab. |
 | `doc/topics/`         | Indexes per topic (`doc/topics/topic_name/index.md`): all resources for that topic. |
 
 ### Work with directories and files
@@ -300,11 +300,16 @@ Do not include the same information in multiple places.
 
 ## Language
 
-GitLab documentation should be clear and easy to understand.
+GitLab documentation should be clear and easy to understand. Avoid unnecessary words.
 
-- Be clear, concise, and stick to the goal of the documentation.
+- Be clear, concise, and stick to the goal of the topic.
 - Write in US English with US grammar. (Tested in [`British.yml`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/doc/.vale/gitlab/British.yml).)
-- Use [inclusive language](#inclusive-language).
+- Rewrite to avoid wordiness:
+  - there is
+  - there are
+  - enables you to
+  - in order to
+  - because of the fact that
 
 ### Capitalization
 
@@ -378,80 +383,6 @@ Exceptions to this rule include the concept of *single sign-on* and
 references to user interface elements. For example:
 
 - To sign in to product X, enter your credentials, and then select **Log in**.
-
-### Inclusive language
-
-We strive to create documentation that's inclusive. This section includes
-guidance and examples for these categories:
-
-- [Gender-specific wording](#avoid-gender-specific-wording).
-  (Tested in [`InclusionGender.yml`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/doc/.vale/gitlab/InclusionGender.yml).)
-- [Ableist language](#avoid-ableist-language).
-  (Tested in [`InclusionAbleism.yml`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/doc/.vale/gitlab/InclusionAbleism.yml).)
-- [Cultural sensitivity](#culturally-sensitive-language).
-  (Tested in [`InclusionCultural.yml`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/doc/.vale/gitlab/InclusionCultural.yml).)
-
-We write our developer documentation with inclusivity and diversity in mind. This
-page is not an exhaustive reference, but describes some general guidelines and
-examples that illustrate some best practices to follow.
-
-#### Avoid gender-specific wording
-
-When possible, use gender-neutral pronouns. For example, you can use a singular
-[they](https://developers.google.com/style/pronouns#gender-neutral-pronouns) as
-a gender-neutral pronoun.
-
-Avoid the use of gender-specific pronouns, unless referring to a specific person.
-
-<!-- vale gitlab.InclusionGender = NO -->
-
-| Use                               | Avoid                           |
-|-----------------------------------|---------------------------------|
-| People, humanity                  | Mankind                         |
-| GitLab Team Members               | Manpower                        |
-| You can install; They can install | He can install; She can install |
-
-<!-- vale gitlab.InclusionGender = YES -->
-
-If you need to set up [Fake user information](#fake-user-information), use
-diverse or non-gendered names with common surnames.
-
-#### Avoid ableist language
-
-Avoid terms that are also used in negative stereotypes for different groups.
-
-<!-- vale gitlab.InclusionAbleism = NO -->
-
-| Use                    | Avoid                |
-|------------------------|----------------------|
-| Check for completeness | Sanity check         |
-| Uncertain outliers     | Crazy outliers       |
-| Slows the service      | Cripples the service |
-| Placeholder variable   | Dummy variable       |
-| Active/Inactive        | Enabled/Disabled     |
-| On/Off                 | Enabled/Disabled     |
-
-<!-- vale gitlab.InclusionAbleism = YES -->
-
-Credit: [Avoid ableist language](https://developers.google.com/style/inclusive-documentation#ableist-language)
-in the Google Developer Style Guide.
-
-#### Culturally sensitive language
-
-Avoid terms that reflect negative cultural stereotypes and history. In most
-cases, you can replace terms such as `master` and `slave` with terms that are
-more precise and functional, such as `primary` and `secondary`.
-
-<!-- vale gitlab.InclusionCultural = NO -->
-
-| Use                  | Avoid                 |
-|----------------------|-----------------------|
-| Primary / secondary  | Master / slave        |
-| Allowlist / denylist | Blacklist / whitelist |
-
-<!-- vale gitlab.InclusionCultural = YES -->
-
-For more information see the [Internet Draft specification](https://tools.ietf.org/html/draft-knodel-terminology-02).
 
 ### Fake user information
 
@@ -806,6 +737,35 @@ page), use these phrases:
 | No     | `**{dotted-circle}** No` | **{dotted-circle}** No |
 | Yes    | `**{check-circle}** Yes` | **{check-circle}** Yes |
 
+### Footnotes
+
+To indicate a footnote, use the HTML tag `<sup>` with a number.
+Put the tag at the end of the sentence or term.
+
+For the footnotes below the table, use a bold number followed by a sentence.
+
+For example:
+
+```markdown
+| App name | Description                      |
+|:---------|:---------------------------------|
+| App A    | Description text. <sup>1</sup>   |
+| App B    | Description text. <sup>2</sup>   | 
+
+1. This is the footnote.
+1. This is the other footnote.
+```
+
+This text renders this output:
+
+| App name | Description                      |
+|:---------|:---------------------------------|
+| App A    | Description text. <sup>1</sup>   |
+| App B    | Description text. <sup>2</sup>   |
+
+1. This is the footnote.
+1. This is the other footnote.
+
 ## Quotes
 
 Valid for Markdown content only, not for front matter entries:
@@ -1069,35 +1029,43 @@ document to ensure it links to the most recent version of the file.
 
 ## Navigation
 
-When documenting navigation through the user interface:
-
-- Use the exact wording as shown in the UI, including any capital letters as-is.
-- Use bold text for navigation items.
+When documenting navigation through the user interface, use these terms and styles.
 
 ### What to call the menus
 
 Use these terms when referring to the main GitLab user interface
 elements:
 
-- **Top menu**: This is the top menu that spans the width of the user interface.
-  It includes the GitLab logo, search field, counters, and the user's avatar.
+- **Top bar**: This is the top bar that spans the width of the user interface.
+  It includes the menu, the GitLab logo, search field, counters, and the user's avatar.
 - **Left sidebar**: This is the navigation sidebar on the left of the user
   interface, specific to the project or group.
 - **Right sidebar**: This is the navigation sidebar on the right of the user
   interface, specific to the open issue, merge request, or epic.
 
-### How to document the left sidebar
+### How to document the menus
 
-To be consistent, use this format when you refer to the left sidebar.
+To be consistent, use this format when you write about UI navigation.
 
-- Go to your project and select **Settings > CI/CD**.
-- Go to your group and select **Settings > CI/CD**.
-- Go to the Admin Area (**{admin}**) and select **Overview > Projects**.
-
-For expandable menus, use this format:
-
-1. Go to your group and select **Settings > CI/CD**.
+1. On the top bar, select **Menu > Projects** and find your project.
+1. On the left sidebar, select **Settings > CI/CD**.
 1. Expand **General pipelines**.
+
+Another example:
+
+1. On the top bar, select **Menu > Groups** and find your group.
+1. On the left sidebar, select **Settings > CI/CD**.
+1. Expand **General pipelines**.
+
+An Admin Area example:
+
+```markdown
+1. On the top bar, select **Menu >** **{admin}** **Admin**.
+```
+
+This text renders this output:
+
+1. On the top bar, select **Menu >** **{admin}** **Admin**.
 
 ## Images
 
@@ -1270,7 +1238,7 @@ hidden on the documentation site, but is displayed by `/help`.
 ## Code blocks
 
 - Always wrap code added to a sentence in inline code blocks (`` ` ``).
-  For example, `.gitlab-ci.yml`, `git add .`, `CODEOWNERS`, or `only: [master]`.
+  For example, `.gitlab-ci.yml`, `git add .`, `CODEOWNERS`, or `only: [main]`.
   File names, commands, entries, and anything that refers to code should be
   added to code blocks. To make things easier for the user, always add a full
   code block for things that can be useful to copy and paste, as they can do it
@@ -1377,10 +1345,10 @@ readability of the text.
 For example, this Markdown adds little to the accompanying text:
 
 ```markdown
-1. Go to **{home}** **Project overview > Details**.
+1. Go to **{home}** **Project information > Details**.
 ```
 
-1. Go to **{home}** **Project overview > Details**.
+1. Go to **{home}** **Project information > Details**.
 
 However, these tables might help the reader connect the text to the user
 interface:
@@ -1498,25 +1466,6 @@ It renders on the GitLab documentation site as:
 
 To maintain consistency through GitLab documentation, use these styles and terms.
 
-### Merge requests (MRs)
-
-Merge requests allow you to exchange changes you made to source code and
-collaborate with other people on the same project.
-
-- Use lowercase _merge requests_ regardless of whether referring to the feature
-  or individual merge requests.
-
-As noted in the GitLab [Writing Style Guidelines](https://about.gitlab.com/handbook/communication/#writing-style-guidelines),
-if you use the _MR_ acronym, expand it at least once per document page.
-Typically, the first use would be phrased as _merge request (MR)_ with subsequent
-instances being _MR_.
-
-Examples:
-
-- "We prefer GitLab merge requests".
-- "Open a merge request to fix a broken link".
-- "After you open a merge request (MR), submit your MR for review and approval".
-
 ### Describe UI elements
 
 Follow these styles when you're describing user interface elements in an
@@ -1546,7 +1495,7 @@ elements:
 
 ## GitLab versions
 
-GitLab product documentation pages (not including [Contributor and Development](../../README.md)
+GitLab product documentation pages (not including [Contributor and Development](../../index.md)
 pages in the `/development` directory) can include version information to help
 users be aware of recent improvements or additions.
 
@@ -1745,7 +1694,7 @@ badges and tooltips (`<span class="badge-trigger free">`).
 | _Only_ GitLab Ultimate SaaS (no self-managed instances)                   | `**(ULTIMATE SAAS)**` |
 
 Topics that mention the `gitlab.rb` file are referring to
-self-managed instances of GitLab. To prevent confusion, include the relevant `TIER ONLY`
+self-managed instances of GitLab. To prevent confusion, include the relevant `TIER SELF`
 tier badge on the highest applicable heading level on
 the page.
 

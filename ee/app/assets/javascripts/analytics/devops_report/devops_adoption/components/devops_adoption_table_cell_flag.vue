@@ -16,6 +16,11 @@ export default {
       type: Boolean,
       required: true,
     },
+    variant: {
+      type: String,
+      required: false,
+      default: 'default',
+    },
   },
   computed: {
     tooltipText() {
@@ -28,6 +33,6 @@ export default {
   <span
     v-gl-tooltip.hover="tooltipText"
     class="circle"
-    :class="{ 'circle-enabled': enabled }"
+    :class="{ [`circle-enabled-${variant}`]: enabled }"
   ></span>
 </template>

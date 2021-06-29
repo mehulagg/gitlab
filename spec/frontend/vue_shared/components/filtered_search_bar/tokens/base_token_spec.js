@@ -7,7 +7,7 @@ import {
 
 import { DEFAULT_LABELS } from '~/vue_shared/components/filtered_search_bar/constants';
 import {
-  getRecentlyUsedTokenValues,
+  getRecentlyUsedSuggestions,
   setTokenValueToRecentlyUsed,
 } from '~/vue_shared/components/filtered_search_bar/filtered_search_utils';
 import BaseToken from '~/vue_shared/components/filtered_search_bar/tokens/base_token.vue';
@@ -46,14 +46,13 @@ const defaultSlots = {
 };
 
 const mockProps = {
-  tokenConfig: mockLabelToken,
-  tokenValue: { data: '' },
-  tokenActive: false,
-  tokensListLoading: false,
-  tokenValues: [],
-  fnActiveTokenValue: jest.fn(),
-  defaultTokenValues: DEFAULT_LABELS,
-  recentTokenValuesStorageKey: mockStorageKey,
+  config: mockLabelToken,
+  value: { data: '' },
+  active: false,
+  suggestions: [],
+  suggestionsLoading: false,
+  defaultSuggestions: DEFAULT_LABELS,
+  recentSuggestionsStorageKey: mockStorageKey,
   fnCurrentTokenValue: jest.fn(),
 };
 
@@ -83,8 +82,8 @@ describe('BaseToken', () => {
     wrapper = createComponent({
       props: {
         ...mockProps,
-        tokenValue: { data: `"${mockRegularLabel.title}"` },
-        tokenValues: mockLabels,
+        value: { data: `"${mockRegularLabel.title}"` },
+        suggestions: mockLabels,
       },
     });
   });
@@ -94,8 +93,8 @@ describe('BaseToken', () => {
   });
 
   describe('data', () => {
-    it('calls `getRecentlyUsedTokenValues` to populate `recentTokenValues` when `recentTokenValuesStorageKey` is defined', () => {
-      expect(getRecentlyUsedTokenValues).toHaveBeenCalledWith(mockStorageKey);
+    it('calls `getRecentlyUsedSuggestions` to populate `recentSuggestions` when `recentSuggestionsStorageKey` is defined', () => {
+      expect(getRecentlyUsedSuggestions).toHaveBeenCalledWith(mockStorageKey);
     });
   });
 
@@ -112,17 +111,17 @@ describe('BaseToken', () => {
 
     describe('activeTokenValue', () => {
       it('calls `fnActiveTokenValue` when it is provided', async () => {
+        const mockFnActiveTokenValue = jest.fn();
+
         wrapper.setProps({
+          fnActiveTokenValue: mockFnActiveTokenValue,
           fnCurrentTokenValue: undefined,
         });
 
         await wrapper.vm.$nextTick();
 
-        // We're disabling lint to trigger computed prop execution for this test.
-        // eslint-disable-next-line no-unused-vars
-        const { activeTokenValue } = wrapper.vm;
-
-        expect(wrapper.vm.fnActiveTokenValue).toHaveBeenCalledWith(
+        expect(mockFnActiveTokenValue).toHaveBeenCalledTimes(1);
+        expect(mockFnActiveTokenValue).toHaveBeenCalledWith(
           mockLabels,
           `"${mockRegularLabel.title.toLowerCase()}"`,
         );
@@ -131,15 +130,15 @@ describe('BaseToken', () => {
   });
 
   describe('watch', () => {
-    describe('tokenActive', () => {
+    describe('active', () => {
       let wrapperWithTokenActive;
 
       beforeEach(() => {
         wrapperWithTokenActive = createComponent({
           props: {
             ...mockProps,
-            tokenActive: true,
-            tokenValue: { data: `"${mockRegularLabel.title}"` },
+            value: { data: `"${mockRegularLabel.title}"` },
+            active: true,
           },
         });
       });
@@ -148,15 +147,15 @@ describe('BaseToken', () => {
         wrapperWithTokenActive.destroy();
       });
 
-      it('emits `fetch-token-values` event on the component when value of this prop is changed to false and `tokenValues` array is empty', async () => {
+      it('emits `fetch-suggestions` event on the component when value of this prop is changed to false and `suggestions` array is empty', async () => {
         wrapperWithTokenActive.setProps({
-          tokenActive: false,
+          active: false,
         });
 
         await wrapperWithTokenActive.vm.$nextTick();
 
-        expect(wrapperWithTokenActive.emitted('fetch-token-values')).toBeTruthy();
-        expect(wrapperWithTokenActive.emitted('fetch-token-values')).toEqual([
+        expect(wrapperWithTokenActive.emitted('fetch-suggestions')).toBeTruthy();
+        expect(wrapperWithTokenActive.emitted('fetch-suggestions')).toEqual([
           [`"${mockRegularLabel.title}"`],
         ]);
       });
@@ -165,7 +164,7 @@ describe('BaseToken', () => {
 
   describe('methods', () => {
     describe('handleTokenValueSelected', () => {
-      it('calls `setTokenValueToRecentlyUsed` when `recentTokenValuesStorageKey` is defined', () => {
+      it('calls `setTokenValueToRecentlyUsed` when `recentSuggestionsStorageKey` is defined', () => {
         const mockTokenValue = {
           id: 1,
           title: 'Foo',
@@ -174,6 +173,23 @@ describe('BaseToken', () => {
         wrapper.vm.handleTokenValueSelected(mockTokenValue);
 
         expect(setTokenValueToRecentlyUsed).toHaveBeenCalledWith(mockStorageKey, mockTokenValue);
+      });
+
+      it('does not add token from preloadedSuggestions', async () => {
+        const mockTokenValue = {
+          id: 1,
+          title: 'Foo',
+        };
+
+        wrapper.setProps({
+          preloadedSuggestions: [mockTokenValue],
+        });
+
+        await wrapper.vm.$nextTick();
+
+        wrapper.vm.handleTokenValueSelected(mockTokenValue);
+
+        expect(setTokenValueToRecentlyUsed).not.toHaveBeenCalled();
       });
     });
   });
@@ -212,7 +228,7 @@ describe('BaseToken', () => {
         wrapperWithNoStubs.destroy();
       });
 
-      it('emits `fetch-token-values` event on component after a delay when component emits `input` event', async () => {
+      it('emits `fetch-suggestions` event on component after a delay when component emits `input` event', async () => {
         jest.useFakeTimers();
 
         wrapperWithNoStubs.find(GlFilteredSearchToken).vm.$emit('input', { data: 'foo' });
@@ -220,8 +236,8 @@ describe('BaseToken', () => {
 
         jest.runAllTimers();
 
-        expect(wrapperWithNoStubs.emitted('fetch-token-values')).toBeTruthy();
-        expect(wrapperWithNoStubs.emitted('fetch-token-values')[1]).toEqual(['foo']);
+        expect(wrapperWithNoStubs.emitted('fetch-suggestions')).toBeTruthy();
+        expect(wrapperWithNoStubs.emitted('fetch-suggestions')[2]).toEqual(['foo']);
       });
     });
   });

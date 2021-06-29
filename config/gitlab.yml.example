@@ -505,7 +505,7 @@ production: &base
   ee_cron_jobs:
     # Schedule snapshots for all devops adoption segments
     analytics_devops_adoption_create_all_snapshots_worker:
-      cron: 0 4 * * 0
+      cron: 0 0 1 * *
 
     # Snapshot active users statistics
     historical_data_worker:
@@ -827,6 +827,11 @@ production: &base
         #   Ex. sshpublickey
         #
         sync_ssh_keys: false
+
+        # Retry ldap search connection if got empty results with specified response code(s)
+        #
+        #   Ex. [80]
+        # retry_empty_result_with_codes: []
 
         # LDAP attributes that GitLab will use to create an account for the LDAP user.
         # The specified attribute can either be the attribute name as a string (e.g. 'mail'),

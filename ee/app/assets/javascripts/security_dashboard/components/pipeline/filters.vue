@@ -1,10 +1,10 @@
 <script>
 import { GlToggle } from '@gitlab/ui';
 import { mapState, mapActions } from 'vuex';
-import { severityFilter, pipelineScannerFilter } from 'ee/security_dashboard/helpers';
+import { severityFilter, standardScannerFilter } from 'ee/security_dashboard/helpers';
 import { DISMISSAL_STATES } from 'ee/security_dashboard/store/modules/filters/constants';
 import { s__ } from '~/locale';
-import StandardFilter from '../filters/standard_filter.vue';
+import StandardFilter from '../shared/filters/standard_filter.vue';
 
 export default {
   i18n: {
@@ -16,7 +16,7 @@ export default {
   },
   data() {
     return {
-      filterConfigs: [severityFilter, pipelineScannerFilter],
+      filterConfigs: [severityFilter, standardScannerFilter],
     };
   },
   computed: {

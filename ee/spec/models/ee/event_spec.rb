@@ -10,7 +10,6 @@ RSpec.describe Event do
     let_it_be(:reporter) { create(:user) }
     let_it_be(:author) { create(:author) }
     let_it_be(:admin) { create(:admin) }
-    let_it_be(:project) { create(:project) }
 
     let(:users) { [non_member, member, reporter, guest, author, admin] }
 
@@ -20,10 +19,6 @@ RSpec.describe Event do
 
     before do
       stub_licensed_features(epics: true)
-
-      project.add_developer(member)
-      project.add_guest(guest)
-      project.add_reporter(reporter)
 
       if defined?(group)
         group.add_developer(member)

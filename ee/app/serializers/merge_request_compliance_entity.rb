@@ -30,6 +30,7 @@ class MergeRequestComplianceEntity < Grape::Entity
   expose :target_branch_uri, if: -> (merge_request) { merge_request.target_branch_exists? }
   expose :source_branch
   expose :source_branch_uri, if: -> (merge_request) { merge_request.source_branch_exists? }
+  expose :compliance_management_framework
 
   private
 
@@ -64,5 +65,9 @@ class MergeRequestComplianceEntity < Grape::Entity
 
   def source_branch_uri
     project_ref_path(merge_request.project, merge_request.source_branch)
+  end
+
+  def compliance_management_framework
+    merge_request.project&.compliance_management_framework
   end
 end

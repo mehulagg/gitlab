@@ -93,15 +93,16 @@ export default {
 
 <template>
   <base-token
-    :token-config="config"
-    :token-value="value"
-    :token-active="active"
-    :tokens-list-loading="loading"
-    :token-values="labels"
+    :config="config"
+    :value="value"
+    :active="active"
+    :suggestions-loading="loading"
+    :suggestions="labels"
     :fn-active-token-value="getActiveLabel"
-    :default-token-values="defaultLabels"
-    :recent-token-values-storage-key="config.recentTokenValuesStorageKey"
-    @fetch-token-values="fetchLabelBySearchTerm"
+    :default-suggestions="defaultLabels"
+    :recent-suggestions-storage-key="config.recentSuggestionsStorageKey"
+    @fetch-suggestions="fetchLabelBySearchTerm"
+    v-on="$listeners"
   >
     <template
       #view-token="{ viewTokenProps: { inputValue, cssClasses, listeners, activeTokenValue } }"
@@ -114,9 +115,9 @@ export default {
         >~{{ activeTokenValue ? getLabelName(activeTokenValue) : inputValue }}</gl-token
       >
     </template>
-    <template #token-values-list="{ tokenValues }">
+    <template #suggestions-list="{ suggestions }">
       <gl-filtered-search-suggestion
-        v-for="label in tokenValues"
+        v-for="label in suggestions"
         :key="label.id"
         :value="getLabelName(label)"
       >

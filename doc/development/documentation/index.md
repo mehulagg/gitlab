@@ -115,15 +115,15 @@ each page should have a metadata tag called `type`. It can be one or more of the
 following:
 
 - `index`: It consists mostly of a list of links to other pages.
-  [Example page](../../README.md).
+  [Example page](../../index.md).
 - `concepts`: The background or context of a subject.
   [Example page](../../topics/autodevops/index.md).
 - `howto`: Specific use case instructions.
-  [Example page](../../ssh/README.md).
+  [Example page](../../ssh/index.md).
 - `tutorial`: Learn a process/concept by doing.
   [Example page](../../gitlab-basics/start-using-git.md).
 - `reference`: A collection of information used as a reference to use a feature
-  or a functionality. [Example page](../../ci/yaml/README.md).
+  or a functionality. [Example page](../../ci/yaml/index.md).
 
 ### Redirection metadata
 
@@ -317,7 +317,8 @@ it increases the work of the release managers.
 Every GitLab instance includes the documentation, which is available at `/help`
 (`https://gitlab.example.com/help`). For example, <https://gitlab.com/help>.
 
-The documentation available online on <https://docs.gitlab.com> is deployed every four hours from the `master` branch of GitLab, Omnibus, and Runner. Therefore,
+The documentation available online on <https://docs.gitlab.com> is deployed every
+four hours from the `main` branch of GitLab, Omnibus, and Runner. Therefore,
 after a merge request gets merged, it is available online on the same day.
 However, it's shipped (and available on `/help`) within the milestone assigned
 to the MR.
@@ -394,7 +395,7 @@ This is preferred over static paths, as the helper also works on instances insta
 ### GitLab `/help` tests
 
 Several [RSpec tests](https://gitlab.com/gitlab-org/gitlab/-/blob/master/spec/features/help_pages_spec.rb)
-are run to ensure GitLab documentation renders and works correctly. In particular, that [main docs landing page](../../README.md) works correctly from `/help`.
+are run to ensure GitLab documentation renders and works correctly. In particular, that [main docs landing page](../../index.md) works correctly from `/help`.
 For example, [GitLab.com's `/help`](https://gitlab.com/help).
 
 ## Docs site architecture
@@ -461,7 +462,7 @@ If you want to know the in-depth details, here's what's really happening:
 1. You manually run the `review-docs-deploy` job in a merge request.
 1. The job runs the [`scripts/trigger-build`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/scripts/trigger-build)
    script with the `docs deploy` flag, which triggers the "Triggered from `gitlab-org/gitlab` 'review-docs-deploy' job"
-   pipeline trigger in the `gitlab-org/gitlab-docs` project for the `$DOCS_BRANCH` (defaults to `master`).
+   pipeline trigger in the `gitlab-org/gitlab-docs` project for the `$DOCS_BRANCH` (defaults to `main`).
 1. The preview URL is shown both at the job output and in the merge request
    widget. You also get the link to the remote pipeline.
 1. In the `gitlab-org/gitlab-docs` project, the pipeline is created and it
@@ -474,10 +475,10 @@ If you want to know the in-depth details, here's what's really happening:
 
 The following GitLab features are used among others:
 
-- [Manual actions](../../ci/yaml/README.md#whenmanual)
+- [Manual actions](../../ci/yaml/index.md#whenmanual)
 - [Multi project pipelines](../../ci/multi_project_pipelines.md)
 - [Review Apps](../../ci/review_apps/index.md)
-- [Artifacts](../../ci/yaml/README.md#artifacts)
+- [Artifacts](../../ci/yaml/index.md#artifacts)
 - [Specific runner](../../ci/runners/runners_scope.md#prevent-a-specific-runner-from-being-enabled-for-other-projects)
 - [Pipelines for merge requests](../../ci/merge_request_pipelines/index.md)
 
@@ -555,6 +556,3 @@ padding. The padding is added around the element, enlarging the screenshot area.
 #### Live example
 
 Please use `spec/docs_screenshots/container_registry_docs.rb` as a guide and as an example to create your own scripts.
-
-<!-- This redirect file can be deleted after February 1, 2021. -->
-<!-- Before deletion, see: https://docs.gitlab.com/ee/development/documentation/#move-or-rename-a-page -->

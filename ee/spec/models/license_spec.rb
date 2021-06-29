@@ -399,6 +399,20 @@ RSpec.describe License do
     end
   end
 
+  describe 'Scopes' do
+    describe '.cloud' do
+      it 'includes cloud licenses' do
+        create(:license)
+        cloud_license_1 = create(:license, cloud: true)
+        cloud_license_2 = create(:license, cloud: true)
+
+        result = described_class.cloud
+
+        expect(result).to contain_exactly(cloud_license_1, cloud_license_2)
+      end
+    end
+  end
+
   describe "Class methods" do
     before do
       described_class.reset_current
@@ -1459,7 +1473,7 @@ RSpec.describe License do
     subject { license.license_type }
 
     context 'when the license is not a cloud license' do
-      it { is_expected.to eq(described_class::LEGACY_LICENSE_TYPE) }
+      it { is_expected.to eq(described_class::LICENSE_FILE_TYPE) }
     end
 
     context 'when the license is a cloud license' do

@@ -20,7 +20,7 @@ RSpec.describe Groups::Analytics::CycleAnalytics::SummaryController do
       subject
 
       expect(response).to be_successful
-      expect(response).to match_response_schema('analytics/cycle_analytics/summary', dir: 'ee')
+      expect(response).to match_response_schema('analytics/cycle_analytics/summary')
     end
 
     include_examples 'Value Stream Analytics data endpoint examples'

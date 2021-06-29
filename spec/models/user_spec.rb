@@ -991,6 +991,7 @@ RSpec.describe User do
       let_it_be(:valid_token_and_notified) { create(:personal_access_token, user: user2, expires_at: 2.days.from_now, expire_notification_delivered: true) }
       let_it_be(:valid_token1) { create(:personal_access_token, user: user2, expires_at: 2.days.from_now) }
       let_it_be(:valid_token2) { create(:personal_access_token, user: user2, expires_at: 2.days.from_now) }
+
       let(:users) { described_class.with_expiring_and_not_notified_personal_access_tokens(from) }
 
       context 'in one day' do
@@ -4208,6 +4209,7 @@ RSpec.describe User do
 
   describe '#source_groups_of_two_factor_authentication_requirement' do
     let_it_be(:group_not_requiring_2FA) { create :group }
+
     let(:user) { create :user }
 
     before do
@@ -5220,6 +5222,70 @@ RSpec.describe User do
 
       it 'returns false' do
         is_expected.to be_falsey
+      end
+    end
+  end
+
+  describe '#password_expired_if_applicable?' do
+    let(:user) { build(:user, password_expires_at: password_expires_at) }
+
+    subject { user.password_expired_if_applicable? }
+
+    context 'when user is not ldap user' do
+      context 'when password_expires_at is not set' do
+        let(:password_expires_at) {}
+
+        it 'returns false' do
+          is_expected.to be_falsey
+        end
+      end
+
+      context 'when password_expires_at is in the past' do
+        let(:password_expires_at) { 1.minute.ago }
+
+        it 'returns true' do
+          is_expected.to be_truthy
+        end
+      end
+
+      context 'when password_expires_at is in the future' do
+        let(:password_expires_at) { 1.minute.from_now }
+
+        it 'returns false' do
+          is_expected.to be_falsey
+        end
+      end
+    end
+
+    context 'when user is ldap user' do
+      let(:user) { build(:user, password_expires_at: password_expires_at) }
+
+      before do
+        allow(user).to receive(:ldap_user?).and_return(true)
+      end
+
+      context 'when password_expires_at is not set' do
+        let(:password_expires_at) {}
+
+        it 'returns false' do
+          is_expected.to be_falsey
+        end
+      end
+
+      context 'when password_expires_at is in the past' do
+        let(:password_expires_at) { 1.minute.ago }
+
+        it 'returns false' do
+          is_expected.to be_falsey
+        end
+      end
+
+      context 'when password_expires_at is in the future' do
+        let(:password_expires_at) { 1.minute.from_now }
+
+        it 'returns false' do
+          is_expected.to be_falsey
+        end
       end
     end
   end

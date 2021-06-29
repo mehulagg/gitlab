@@ -8,10 +8,14 @@ class License < ApplicationRecord
   PREMIUM_PLAN = 'premium'
   ULTIMATE_PLAN = 'ultimate'
   CLOUD_LICENSE_TYPE = 'cloud'
-  LEGACY_LICENSE_TYPE = 'legacy'
+  LICENSE_FILE_TYPE = 'license_file'
   ALLOWED_PERCENTAGE_OF_USERS_OVERAGE = (10 / 100.0)
 
   EE_ALL_PLANS = [STARTER_PLAN, PREMIUM_PLAN, ULTIMATE_PLAN].freeze
+
+  EES_FEATURES_WITH_USAGE_PING = %i[
+    send_emails_from_admin_area
+  ].freeze
 
   EES_FEATURES = %i[
     audit_events
@@ -44,12 +48,11 @@ class License < ApplicationRecord
     repository_size_limit
     resource_access_token
     seat_link
-    send_emails_from_admin_area
     scoped_issue_board
     usage_quotas
     visual_review_app
     wip_limits
-  ].freeze
+  ].freeze + EES_FEATURES_WITH_USAGE_PING
 
   EEP_FEATURES = EES_FEATURES + %i[
     adjourned_deletion_for_projects_and_groups
@@ -71,6 +74,7 @@ class License < ApplicationRecord
     custom_file_templates_for_namespace
     custom_project_templates
     cycle_analytics_for_groups
+    cycle_analytics_for_projects
     db_load_balancing
     default_branch_protection_restriction_in_groups
     default_project_deletion_protection
@@ -140,7 +144,7 @@ class License < ApplicationRecord
     api_fuzzing
     auto_rollback
     cilium_alerts
-    compliance_approval_gates
+    external_status_checks
     container_scanning
     coverage_fuzzing
     credentials_inventory
@@ -197,6 +201,8 @@ class License < ApplicationRecord
       hash[feature] << plan
     end
   end.freeze
+
+  FEATURES_WITH_USAGE_PING = EES_FEATURES_WITH_USAGE_PING
 
   # Add on codes that may occur in legacy licenses that don't have a plan yet.
   FEATURES_FOR_ADD_ONS = {
@@ -255,6 +261,7 @@ class License < ApplicationRecord
   after_commit :reset_future_dated, on: [:create, :destroy]
   after_commit :reset_previous, on: [:create, :destroy]
 
+  scope :cloud, -> { where(cloud: true) }
   scope :recent, -> { reorder(id: :desc) }
   scope :last_hundred, -> { recent.limit(100) }
 
@@ -271,6 +278,12 @@ class License < ApplicationRecord
       end
 
       PLANS_BY_FEATURE.fetch(feature, [])
+    end
+
+    def features_with_usage_ping
+      return FEATURES_WITH_USAGE_PING if Gitlab::CurrentSettings.usage_ping_enabled?
+
+      []
     end
 
     def plan_includes_feature?(plan, feature)
@@ -560,7 +573,7 @@ class License < ApplicationRecord
   end
 
   def license_type
-    cloud_license? ? CLOUD_LICENSE_TYPE : LEGACY_LICENSE_TYPE
+    cloud_license? ? CLOUD_LICENSE_TYPE : LICENSE_FILE_TYPE
   end
 
   def auto_renew

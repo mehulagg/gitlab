@@ -8,6 +8,7 @@ RSpec.describe EventFilter do
     let_it_be(:project) { create(:project, :public) }
     let_it_be(:epic_event) { create(:event, :created, group: group, target: create(:epic, group: group)) }
     let_it_be(:issue_event) { create(:event, :created, project: project, target: create(:issue, project: project)) }
+
     let(:filtered_events) { described_class.new(filter).apply_filter(Event.all) }
 
     context 'with the "epic" filter' do

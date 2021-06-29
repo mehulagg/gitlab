@@ -1,3 +1,4 @@
+import { isScopedLabel, scopedLabelKey } from '~/lib/utils/common_utils';
 import { DropdownVariant } from '../constants';
 import * as types from './mutation_types';
 
@@ -46,17 +47,6 @@ export default {
   [types.RECEIVE_SET_LABELS_FAILURE](state) {
     state.labelsFetchInProgress = false;
   },
-
-  [types.REQUEST_CREATE_LABEL](state) {
-    state.labelCreateInProgress = true;
-  },
-  [types.RECEIVE_CREATE_LABEL_SUCCESS](state) {
-    state.labelCreateInProgress = false;
-  },
-  [types.RECEIVE_CREATE_LABEL_FAILURE](state) {
-    state.labelCreateInProgress = false;
-  },
-
   [types.UPDATE_SELECTED_LABELS](state, { labels }) {
     // Find the label to update from all the labels
     // and change `set` prop value to represent their current state.
@@ -65,6 +55,17 @@ export default {
     if (candidateLabel) {
       candidateLabel.touched = true;
       candidateLabel.set = !candidateLabel.set;
+    }
+
+    if (isScopedLabel(candidateLabel)) {
+      const scopedBase = scopedLabelKey(candidateLabel);
+      const currentActiveScopedLabel = state.labels.find(
+        ({ title }) => title.indexOf(scopedBase) === 0 && title !== candidateLabel.title,
+      );
+
+      if (currentActiveScopedLabel) {
+        currentActiveScopedLabel.set = false;
+      }
     }
   },
 };

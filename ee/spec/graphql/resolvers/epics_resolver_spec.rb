@@ -180,29 +180,42 @@ RSpec.describe Resolvers::EpicsResolver do
         let!(:epic1) { create(:epic, group: group, title: 'first created', description: 'description', start_date: 10.days.ago, end_date: 10.days.from_now) }
         let!(:epic2) { create(:epic, group: group, title: 'second created', description: 'text 1', start_date: 20.days.ago, end_date: 20.days.from_now) }
         let!(:epic3) { create(:epic, group: group, title: 'third', description: 'text 2', start_date: 30.days.ago, end_date: 30.days.from_now) }
+        let!(:epic4) { create(:epic, group: group, title: 'forth created', description: 'four', start_date: 40.days.ago, end_date: 40.days.from_now) }
 
         it 'orders epics by start date in descending order' do
           epics = resolve_epics(sort: 'start_date_desc')
 
-          expect(epics).to eq([epic1, epic2, epic3])
+          expect(epics).to eq([epic1, epic2, epic3, epic4])
         end
 
         it 'orders epics by start date in ascending order' do
           epics = resolve_epics(sort: 'start_date_asc')
 
-          expect(epics).to eq([epic3, epic2, epic1])
+          expect(epics).to eq([epic4, epic3, epic2, epic1])
         end
 
         it 'orders epics by end date in descending order' do
           epics = resolve_epics(sort: 'end_date_desc')
 
-          expect(epics).to eq([epic3, epic2, epic1])
+          expect(epics).to eq([epic4, epic3, epic2, epic1])
         end
 
         it 'orders epics by end date in ascending order' do
           epics = resolve_epics(sort: 'end_date_asc')
 
-          expect(epics).to eq([epic1, epic2, epic3])
+          expect(epics).to eq([epic1, epic2, epic3, epic4])
+        end
+
+        it 'orders epics by title in descending order' do
+          epics = resolve_epics(sort: 'title_desc')
+
+          expect(epics).to eq([epic3, epic2, epic4, epic1])
+        end
+
+        it 'orders epics by title in ascending order' do
+          epics = resolve_epics(sort: 'title_asc')
+
+          expect(epics).to eq([epic1, epic4, epic2, epic3])
         end
       end
 
@@ -235,6 +248,16 @@ RSpec.describe Resolvers::EpicsResolver do
           create(:issue, project: subgroup_project, epic: epic3, milestone: milestone)
 
           expect(resolve_epics(milestone_title: milestone.title)).to contain_exactly(epic1, epic3)
+        end
+
+        context 'when the resolved group is a subgroup' do
+          it 'returns only the epics belonging to the subgroup by default' do
+            expect(resolve_epics({}, sub_group)).to contain_exactly(epic3, epic4)
+          end
+
+          it 'returns the epics belonging to the ancestor groups when include_ancestor_groups is true' do
+            expect(resolve_epics({ include_ancestor_groups: true }, sub_group)).to contain_exactly(epic1, epic2, epic3, epic4)
+          end
         end
       end
 
@@ -315,7 +338,7 @@ RSpec.describe Resolvers::EpicsResolver do
     end
   end
 
-  def resolve_epics(args = {}, context = { current_user: current_user })
-    resolve(described_class, obj: group, args: args, ctx: context)
+  def resolve_epics(args = {}, obj = group, context = { current_user: current_user })
+    resolve(described_class, obj: obj, args: args, ctx: context)
   end
 end

@@ -59,7 +59,7 @@ The following table lists project permissions available for each role:
 | View wiki pages                                   | ✓       | ✓          | ✓           | ✓        | ✓      |
 | See a list of jobs                                | ✓ (*3*) | ✓          | ✓           | ✓        | ✓      |
 | See a job log                                     | ✓ (*3*) | ✓          | ✓           | ✓        | ✓      |
-| See a job with [debug logging](../ci/variables/README.md#debug-logging) |         |            | ✓           | ✓        | ✓      |
+| See a job with [debug logging](../ci/variables/index.md#debug-logging) |         |            | ✓           | ✓        | ✓      |
 | Download and browse job artifacts                 | ✓ (*3*) | ✓          | ✓           | ✓        | ✓      |
 | Create confidential issue                         | ✓       | ✓          | ✓           | ✓        | ✓      |
 | Create new issue                                  | ✓       | ✓          | ✓           | ✓        | ✓      |
@@ -195,7 +195,7 @@ The following table lists project permissions available for each role:
 1. Guest users can only view the confidential issues they created themselves.
 1. If **Public pipelines** is enabled in **Project Settings > CI/CD**.
 1. Not allowed for Guest, Reporter, Developer, Maintainer, or Owner. See [protected branches](project/protected_branches.md).
-1. If the [branch is protected](project/protected_branches.md#using-the-allowed-to-merge-and-allowed-to-push-settings), this depends on the access Developers and Maintainers are given.
+1. If the [branch is protected](project/protected_branches.md), this depends on the access Developers and Maintainers are given.
 1. Guest users can access GitLab [**Releases**](project/releases/index.md) for downloading assets but are not allowed to download the source code nor see repository information like tags and commits.
 1. Actions are limited only to records owned (referenced) by user.
 1. When [Share Group Lock](group/index.md#prevent-a-project-from-being-shared-with-groups) is enabled the project can't be shared with other groups. It does not affect group with group sharing.
@@ -223,7 +223,7 @@ which visibility level you select on project settings.
 Additional restrictions can be applied on a per-branch basis with [protected branches](project/protected_branches.md).
 Additionally, you can customize permissions to allow or prevent project
 Maintainers and Developers from pushing to a protected branch. Read through the documentation on
-[Allowed to Merge and Allowed to Push settings](project/protected_branches.md#using-the-allowed-to-merge-and-allowed-to-push-settings)
+[protected branches](project/protected_branches.md)
 to learn more.
 
 ### Value Stream Analytics permissions
@@ -263,8 +263,9 @@ The following table lists group permissions available for each role:
 | Browse group                                           | ✓     | ✓        | ✓         | ✓          | ✓     |
 | View group wiki pages **(PREMIUM)**                    | ✓ (6) | ✓        | ✓         | ✓          | ✓     |
 | View Insights charts **(ULTIMATE)**                    | ✓     | ✓        | ✓         | ✓          | ✓     |
-| View group epic **(PREMIUM)**                         | ✓     | ✓        | ✓         | ✓          | ✓     |
-| Create/edit group epic **(PREMIUM)**                  |       | ✓        | ✓         | ✓          | ✓     |
+| View group epic **(PREMIUM)**                          | ✓     | ✓        | ✓         | ✓          | ✓     |
+| Create/edit group epic **(PREMIUM)**                   |       | ✓        | ✓         | ✓          | ✓     |
+| Create/edit/delete epic boards **(PREMIUM)**           |       | ✓        | ✓         | ✓          | ✓     |
 | Manage group labels                                    |       | ✓        | ✓         | ✓          | ✓     |
 | See a container registry                               |       | ✓        | ✓         | ✓          | ✓     |
 | Pull [packages](packages/index.md)                     |       | ✓        | ✓         | ✓          | ✓     |
@@ -288,8 +289,8 @@ The following table lists group permissions available for each role:
 | Create/Delete group deploy tokens                      |       |          |           |            | ✓     |
 | Manage group members                                   |       |          |           |            | ✓     |
 | Delete group                                           |       |          |           |            | ✓     |
-| Delete group epic **(PREMIUM)**                       |       |          |           |            | ✓     |
-| Edit SAML SSO Billing **(PREMIUM SAAS)**                | ✓     | ✓        | ✓         | ✓          | ✓ (4) |
+| Delete group epic **(PREMIUM)**                        |       |          |           |            | ✓     |
+| Edit SAML SSO Billing **(PREMIUM SAAS)**               | ✓     | ✓        | ✓         | ✓          | ✓ (4) |
 | View group Audit Events                                |       |          | ✓ (7)     | ✓ (7)      | ✓     |
 | Disable notification emails                            |       |          |           |            | ✓     |
 | View Contribution analytics                            | ✓     | ✓        | ✓         | ✓          | ✓     |
@@ -358,10 +359,11 @@ External users still count towards a license seat.
 
 An administrator can flag a user as external by either of the following methods:
 
-- Either [through the API](../api/users.md#user-modification).
-- Or by navigating to the **Admin Area > Overview > Users** to create a new user
-  or edit an existing one. There, you can find the option to flag the user as
-  external.
+- [Through the API](../api/users.md#user-modification).
+- Using the GitLab UI:
+  1. On the top bar, select **Menu >** **{admin}** **Admin**.
+  1. On the left sidebar, select **Overview > Users** to create a new user or edit an existing one.
+     There, you can find the option to flag the user as external.
 
 Additionally users can be set as external users using [SAML groups](../integration/saml.md#external-groups)
 and [LDAP groups](../administration/auth/ldap/index.md#external-groups).
@@ -369,7 +371,11 @@ and [LDAP groups](../administration/auth/ldap/index.md#external-groups).
 ### Setting new users to external
 
 By default, new users are not set as external users. This behavior can be changed
-by an administrator on the **Admin Area > Settings > General** page, under **Account and limit**.
+by an administrator:
+
+1. On the top bar, select **Menu >** **{admin}** **Admin**.
+1. On the left sidebar, select **Settings > General**.
+1. Expand the **Account and limit** section.
 
 If you change the default behavior of creating new users as external, you
 have the option to narrow it down by defining a set of internal users.
@@ -454,33 +460,32 @@ NOTE:
 In GitLab 11.0, the Master role was renamed to Maintainer.
 
 GitLab CI/CD permissions rely on the role the user has in GitLab. There are four
-permission levels in total:
+roles:
 
-- admin
-- maintainer
-- developer
-- guest/reporter
+- Administrator
+- Maintainer
+- Developer
+- Guest/Reporter
 
-The admin user can perform any action on GitLab CI/CD in scope of the GitLab
-instance and project. In addition, all admins can use the admin interface under
-`/admin/runners`.
+The Administrator role can perform any action on GitLab CI/CD in scope of the GitLab
+instance and project.
 
-| Action                                | Guest, Reporter | Developer   |Maintainer| Admin  |
-|---------------------------------------|-----------------|-------------|----------|--------|
-| See commits and jobs                  | ✓               | ✓           | ✓        | ✓      |
-| Retry or cancel job                   |                 | ✓           | ✓        | ✓      |
-| Erase job artifacts and job logs      |                 | ✓ (*1*)     | ✓        | ✓      |
-| Delete project                        |                 |             | ✓        | ✓      |
-| Create project                        |                 |             | ✓        | ✓      |
-| Change project configuration          |                 |             | ✓        | ✓      |
-| Add specific runners                  |                 |             | ✓        | ✓      |
-| Add shared runners                    |                 |             |          | ✓      |
-| See events in the system              |                 |             |          | ✓      |
-| Admin interface                       |                 |             |          | ✓      |
+| Action                                | Guest, Reporter | Developer   |Maintainer| Administrator |
+|---------------------------------------|-----------------|-------------|----------|---------------|
+| See commits and jobs                  | ✓               | ✓           | ✓        | ✓             |
+| Retry or cancel job                   |                 | ✓           | ✓        | ✓             |
+| Erase job artifacts and job logs      |                 | ✓ (*1*)     | ✓        | ✓             |
+| Delete project                        |                 |             | ✓        | ✓             |
+| Create project                        |                 |             | ✓        | ✓             |
+| Change project configuration           |                 |             | ✓        | ✓             |
+| Add specific runners                   |                 |             | ✓        | ✓             |
+| Add shared runners                    |                 |             |          | ✓             |
+| See events in the system              |                 |             |          | ✓             |
+| Admin Area                            |                 |             |          | ✓             |
 
 1. Only if the job was:
    - Triggered by the user
-   - [In GitLab 13.0](https://gitlab.com/gitlab-org/gitlab/-/issues/35069) and later, not run for a protected branch
+   - [In GitLab 13.0](https://gitlab.com/gitlab-org/gitlab/-/issues/35069) and later, run for a non-protected branch.
 
 ### Job permissions
 

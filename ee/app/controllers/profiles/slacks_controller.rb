@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 class Profiles::SlacksController < Profiles::ApplicationController
-  include ServicesHelper
+  include IntegrationsHelper
 
   skip_before_action :authenticate_user!
 

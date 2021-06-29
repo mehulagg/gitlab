@@ -42,7 +42,6 @@ module EE
       end
 
       condition(:group_devops_adoption_enabled) do
-        ::Feature.enabled?(:group_devops_adoption, @subject, default_enabled: :yaml) &&
         ::License.feature_available?(:group_level_devops_adoption)
       end
 
@@ -214,6 +213,10 @@ module EE
         enable :admin_iteration
         enable :create_iteration_cadence
         enable :admin_iteration_cadence
+      end
+
+      rule { (automation_bot | developer) & iterations_available }.policy do
+        enable :rollover_issues
       end
 
       rule { reporter & epics_available }.policy do

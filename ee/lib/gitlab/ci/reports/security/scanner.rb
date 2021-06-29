@@ -15,14 +15,15 @@ module Gitlab
             "semgrep" =>  2
           }.freeze
 
-          attr_accessor :external_id, :name, :vendor
+          attr_accessor :external_id, :name, :vendor, :version
 
           alias_method :key, :external_id
 
-          def initialize(external_id:, name:, vendor:)
+          def initialize(external_id:, name:, vendor:, version:)
             @external_id = external_id
             @name = name
             @vendor = vendor
+            @version = version
           end
 
           def to_hash

@@ -8,6 +8,7 @@ RSpec.describe 'Removing an on-call schedule' do
   let_it_be(:user) { create(:user) }
   let_it_be(:project) { create(:project) }
   let_it_be(:oncall_schedule) { create(:incident_management_oncall_schedule, project: project) }
+
   let(:variables) { { project_path: project.full_path, iid: oncall_schedule.iid.to_s } }
 
   let(:mutation) do

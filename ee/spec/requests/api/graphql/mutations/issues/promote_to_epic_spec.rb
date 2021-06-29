@@ -12,6 +12,7 @@ RSpec.describe 'Setting the epic of an issue' do
   let_it_be(:project) { create(:project, group: group) }
   let_it_be(:issue) { create(:issue, project: project) }
   let_it_be(:user) { create(:user) }
+
   let(:input) { { group_path: new_epic_group&.full_path } }
 
   let(:mutation) do
@@ -48,6 +49,10 @@ RSpec.describe 'Setting the epic of an issue' do
 
   before do
     stub_licensed_features(epics: true)
+    # todo: investigate too many qeuries issue as part of Project Management Database and Query Performance
+    # epic: https://gitlab.com/groups/gitlab-org/-/epics/5804
+    # specific issue: https://gitlab.com/gitlab-org/gitlab/-/issues/333845
+    stub_const('Gitlab::QueryLimiting::Transaction::THRESHOLD', 110)
   end
 
   it 'returns an error if the user is not allowed to update the issue' do

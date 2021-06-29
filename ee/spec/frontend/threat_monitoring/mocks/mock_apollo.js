@@ -27,3 +27,14 @@ export const getAlertDetailsQueryErrorMessage =
 export const erroredGetAlertDetailsQuerySpy = jest.fn().mockResolvedValue({
   errors: [{ message: getAlertDetailsQueryErrorMessage }],
 });
+
+export const networkPolicies = (nodes) =>
+  jest.fn().mockResolvedValue({
+    data: {
+      project: {
+        networkPolicies: {
+          nodes,
+        },
+      },
+    },
+  });

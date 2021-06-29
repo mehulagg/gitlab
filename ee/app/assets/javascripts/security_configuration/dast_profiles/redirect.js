@@ -6,12 +6,18 @@ import {
   getBaseURL,
 } from '~/lib/utils/url_utility';
 
+const getReferrerPath = (referrer) => {
+  if (!referrer) return '';
+  return new URL(referrer).pathname;
+};
+
 export const returnToPreviousPageFactory = ({
   allowedPaths,
   profilesLibraryPath,
   urlParamKey,
 }) => ({ id } = {}) => {
-  const redirectPath = allowedPaths.find((path) => document.referrer?.includes(path));
+  const referrerPath = getReferrerPath(document.referrer);
+  const redirectPath = allowedPaths.find((allowedPath) => referrerPath === allowedPath);
 
   // when previous page is not an allowed path
   if (!redirectPath) return redirectTo(profilesLibraryPath);

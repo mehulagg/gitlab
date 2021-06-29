@@ -10,7 +10,7 @@ RSpec.describe API::Groups do
   let_it_be(:project) { create(:project, group: group) }
   let_it_be(:user) { create(:user) }
   let_it_be(:another_user) { create(:user) }
-  let(:admin) { create(:admin) }
+  let_it_be(:admin) { create(:admin) }
 
   before do
     group.add_owner(user)

@@ -5,6 +5,7 @@ export const mockProjectNamespace = 'user1';
 export const mockProjectPath = 'project1';
 export const mockProjectFullPath = `${mockProjectNamespace}/${mockProjectPath}`;
 export const mockDefaultBranch = 'main';
+export const mockNewBranch = 'new-branch';
 export const mockNewMergeRequestPath = '/-/merge_requests/new';
 export const mockCommitSha = 'aabbccdd';
 export const mockCommitNextSha = 'eeffgghh';
@@ -34,6 +35,23 @@ job_build:
     - echo "build"
   needs: ["job_test_2"]
 `;
+export const mockBlobContentQueryResponse = {
+  data: {
+    project: { repository: { blobs: { nodes: [{ rawBlob: mockCiYml }] } } },
+  },
+};
+
+export const mockBlobContentQueryResponseNoCiFile = {
+  data: {
+    project: { repository: { blobs: { nodes: [] } } },
+  },
+};
+
+export const mockBlobContentQueryResponseEmptyCiFile = {
+  data: {
+    project: { repository: { blobs: { nodes: [{ rawBlob: '' }] } } },
+  },
+};
 
 const mockJobFields = {
   beforeScript: [],

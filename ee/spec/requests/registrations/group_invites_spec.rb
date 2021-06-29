@@ -7,12 +7,15 @@ RSpec.describe 'view group invites' do
   let_it_be(:user) { create(:user) }
   let_it_be(:not_authorized_group) { create(:group) }
 
+  let(:dev_env_or_com) { true }
+
   before_all do
     group.add_owner(user)
   end
 
   before do
     login_as(user)
+    allow(::Gitlab).to receive(:dev_env_or_com?).and_return(dev_env_or_com)
   end
 
   describe 'GET /users/sign_up/group_invites/new' do
@@ -25,6 +28,16 @@ RSpec.describe 'view group invites' do
         get_request
 
         expect(response).to have_gitlab_http_status(:ok)
+      end
+    end
+
+    context 'when not on .com' do
+      let(:dev_env_or_com) { false }
+
+      it 'returns not_found' do
+        get_request
+
+        expect(response).to have_gitlab_http_status(:not_found)
       end
     end
 
@@ -59,12 +72,6 @@ RSpec.describe 'view group invites' do
 
             expect(group.members.invite).to be_empty
           end
-
-          it 'does not track experiment', :experiment do
-            expect(experiment(:registrations_group_invite)).not_to track(:invites_sent)
-
-            post_request
-          end
         end
 
         context 'with valid emails in the params' do
@@ -85,15 +92,6 @@ RSpec.describe 'view group invites' do
               user: user
             )
           end
-
-          it 'tracks experiment as expected', :experiment do
-            expect(experiment(:registrations_group_invite))
-              .to track(:invites_sent, { property: group.id.to_s, value: valid_emails.size })
-                    .on_next_instance
-                    .with_context(actor: user)
-
-            post_request
-          end
         end
       end
 
@@ -106,6 +104,16 @@ RSpec.describe 'view group invites' do
                                                                     trial_onboarding_flow: true,
                                                                     hide_trial_activation_banner: true))
         end
+      end
+    end
+
+    context 'when not on .com' do
+      let(:dev_env_or_com) { false }
+
+      it 'returns not_found' do
+        post_request
+
+        expect(response).to have_gitlab_http_status(:not_found)
       end
     end
 

@@ -14,17 +14,17 @@ which itself includes files under
 for easier maintenance.
 
 We're striving to [dogfood](https://about.gitlab.com/handbook/engineering/#dogfooding)
-GitLab [CI/CD features and best-practices](../ci/yaml/README.md)
+GitLab [CI/CD features and best-practices](../ci/yaml/index.md)
 as much as possible.
 
 ## Overview
 
-Pipelines for the GitLab project are created using the [`workflow:rules` keyword](../ci/yaml/README.md#workflow)
+Pipelines for the GitLab project are created using the [`workflow:rules` keyword](../ci/yaml/index.md#workflow)
 feature of the GitLab CI/CD.
 
 Pipelines are always created for the following scenarios:
 
-- `master` branch, including on schedules, pushes, merges, and so on.
+- `main` branch, including on schedules, pushes, merges, and so on.
 - Merge requests.
 - Tags.
 - Stable, `auto-deploy`, and security branches.
@@ -49,7 +49,7 @@ depending on the changes made in the MR:
 - [Frontend-only MR pipeline](#frontend-only-mr-pipeline): This is typically created for an MR that only changes frontend code.
 - [QA-only MR pipeline](#qa-only-mr-pipeline): This is typically created for an MR that only changes end to end tests related code.
 
-We use the [`rules:`](../ci/yaml/README.md#rules) and [`needs:`](../ci/yaml/README.md#needs) keywords extensively
+We use the [`rules:`](../ci/yaml/index.md#rules) and [`needs:`](../ci/yaml/index.md#needs) keywords extensively
 to determine the jobs that need to be run in a pipeline. Note that an MR that includes multiple types of changes would
 have a pipelines that include jobs from multiple types (e.g. a combination of docs-only and code-only pipelines).
 
@@ -428,7 +428,7 @@ We are using a custom mapping between source file to test files, maintained in t
 
 As part of the objective to improve overall pipeline duration, we are experimenting with a minimal set of RSpec tests.
 The purpose of this experiment is to verify if we are able to run a minimal set of RSpec tests in a Merge Request pipeline,
-without resulting in increased number of broken master.
+without resulting in increased number of broken main branch.
 
 To identify the minimal set of tests needed, we use [Crystalball gem](https://github.com/toptal/crystalball) to create a test mapping.
 The test mapping contains a map of each source files to a list of test files which is dependent of the source file.
@@ -484,14 +484,14 @@ Our test suite runs against PG12 as GitLab.com runs on PG12 and
 Our test suite is currently running against PG11, since GitLab.com still runs on PG11.
 
 We do run our test suite against PG11 on nightly scheduled pipelines as well as upon specific
-database library changes in MRs and `master` pipelines (with the `rspec db-library-code pg11` job).
+database library changes in MRs and `main` pipelines (with the `rspec db-library-code pg11` job).
 
 #### Current versions testing
 
 | Where? | PostgreSQL version |
 | ------ | ------------------ |
 | MRs    | 12, 11 for DB library changes |
-| `master` (non-scheduled pipelines) | 12, 11 for DB library changes |
+| `main` (non-scheduled pipelines) | 12, 11 for DB library changes |
 | 2-hourly scheduled pipelines | 12, 11 for DB library changes |
 | `nightly` scheduled pipelines | 12, 11 |
 
@@ -537,8 +537,8 @@ the `gitlab-org/gitlab-foss` project.
 
 ### Interruptible pipelines
 
-By default, all jobs are [interruptible](../ci/yaml/README.md#interruptible), except the
-`dont-interrupt-me` job which runs automatically on `master`, and is `manual`
+By default, all jobs are [interruptible](../ci/yaml/index.md#interruptible), except the
+`dont-interrupt-me` job which runs automatically on `main`, and is `manual`
 otherwise.
 
 If you want a running pipeline to finish even if you push new commits to a merge
@@ -559,14 +559,16 @@ request, be sure to start the `dont-interrupt-me` job before pushing.
    - `.qa-cache`
    - `.yarn-cache`
    - `.assets-compile-cache` (the key includes `${NODE_ENV}` so it's actually two different caches).
-1. These cache definitions are composed of [multiple atomic caches](../ci/yaml/README.md#multiple-caches).
-1. Only 6 specific jobs, running in 2-hourly scheduled pipelines, are pushing (i.e. updating) to the caches:
+1. These cache definitions are composed of [multiple atomic caches](../ci/caching/index.md#use-multiple-caches).
+1. Only the following jobs, running in 2-hourly scheduled pipelines, are pushing (i.e. updating) to the caches:
    - `update-setup-test-env-cache`, defined in [`.gitlab/ci/rails.gitlab-ci.yml`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/.gitlab/ci/rails.gitlab-ci.yml).
+   - `update-gitaly-binaries-cache`, defined in [`.gitlab/ci/rails.gitlab-ci.yml`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/.gitlab/ci/rails.gitlab-ci.yml).
    - `update-static-analysis-cache`, defined in [`.gitlab/ci/rails.gitlab-ci.yml`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/.gitlab/ci/rails.gitlab-ci.yml).
    - `update-qa-cache`, defined in [`.gitlab/ci/qa.gitlab-ci.yml`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/.gitlab/ci/qa.gitlab-ci.yml).
    - `update-assets-compile-production-cache`, defined in [`.gitlab/ci/frontend.gitlab-ci.yml`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/.gitlab/ci/frontend.gitlab-ci.yml).
    - `update-assets-compile-test-cache`, defined in [`.gitlab/ci/frontend.gitlab-ci.yml`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/.gitlab/ci/frontend.gitlab-ci.yml).
    - `update-yarn-cache`, defined in [`.gitlab/ci/frontend.gitlab-ci.yml`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/.gitlab/ci/frontend.gitlab-ci.yml).
+   - `update-storybook-yarn-cache`, defined in [`.gitlab/ci/frontend.gitlab-ci.yml`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/.gitlab/ci/frontend.gitlab-ci.yml).
 1. These jobs can also be forced to run in merge requests whose title include `UPDATE CACHE` (this can be useful to warm the caches in a MR that updates the cache keys).
 
 ### Artifacts strategy
@@ -583,7 +585,7 @@ several reasons:
 - It significantly reduces load on the file server, as smaller deltas mean less time spent in `git pack-objects`.
 
 The pre-clone step works by using the `CI_PRE_CLONE_SCRIPT` variable
-[defined by GitLab.com shared runners](../ci/runners/README.md#pre-clone-script).
+[defined by GitLab.com shared runners](../ci/runners/index.md#pre-clone-script).
 
 The `CI_PRE_CLONE_SCRIPT` is currently defined as a project CI/CD variable:
 
@@ -715,13 +717,13 @@ each pipeline includes default variables defined in
 
 ### Common job definitions
 
-Most of the jobs [extend from a few CI definitions](../ci/yaml/README.md#extends)
+Most of the jobs [extend from a few CI definitions](../ci/yaml/index.md#extends)
 defined in [`.gitlab/ci/global.gitlab-ci.yml`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/.gitlab/ci/global.gitlab-ci.yml)
-that are scoped to a single [configuration keyword](../ci/yaml/README.md#job-keywords).
+that are scoped to a single [configuration keyword](../ci/yaml/index.md#job-keywords).
 
 | Job definitions  | Description |
 |------------------|-------------|
-| `.default-retry` | Allows a job to [retry](../ci/yaml/README.md#retry) upon `unknown_failure`, `api_failure`, `runner_system_failure`, `job_execution_timeout`, or `stuck_or_timeout_failure`. |
+| `.default-retry` | Allows a job to [retry](../ci/yaml/index.md#retry) upon `unknown_failure`, `api_failure`, `runner_system_failure`, `job_execution_timeout`, or `stuck_or_timeout_failure`. |
 | `.default-before_script` | Allows a job to use a default `before_script` definition suitable for Ruby/Rails tasks that may need a database running (e.g. tests). |
 | `.setup-test-env-cache` | Allows a job to use a default `cache` definition suitable for setting up test environment for subsequent Ruby/Rails tasks. |
 | `.rails-cache` | Allows a job to use a default `cache` definition suitable for Ruby/Rails tasks. |
@@ -740,16 +742,16 @@ that are scoped to a single [configuration keyword](../ci/yaml/README.md#job-key
 
 ### `rules`, `if:` conditions and `changes:` patterns
 
-We're using the [`rules` keyword](../ci/yaml/README.md#rules) extensively.
+We're using the [`rules` keyword](../ci/yaml/index.md#rules) extensively.
 
 All `rules` definitions are defined in
 [`rules.gitlab-ci.yml`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/.gitlab/ci/rules.gitlab-ci.yml),
-then included in individual jobs via [`extends`](../ci/yaml/README.md#extends).
+then included in individual jobs via [`extends`](../ci/yaml/index.md#extends).
 
 The `rules` definitions are composed of `if:` conditions and `changes:` patterns,
 which are also defined in
 [`rules.gitlab-ci.yml`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/.gitlab/ci/rules.gitlab-ci.yml)
-and included in `rules` definitions via [YAML anchors](../ci/yaml/README.md#anchors)
+and included in `rules` definitions via [YAML anchors](../ci/yaml/index.md#anchors)
 
 #### `if:` conditions
 
@@ -811,4 +813,4 @@ and included in `rules` definitions via [YAML anchors](../ci/yaml/README.md#anch
 
 ---
 
-[Return to Development documentation](README.md)
+[Return to Development documentation](index.md)

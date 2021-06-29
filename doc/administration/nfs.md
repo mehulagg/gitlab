@@ -8,8 +8,7 @@ type: reference
 # Using NFS with GitLab **(FREE SELF)**
 
 NFS can be used as an alternative for object storage but this isn't typically
-recommended for performance reasons. Note however it is required for [GitLab
-Pages](https://gitlab.com/gitlab-org/gitlab-pages/-/issues/196).
+recommended for performance reasons.
 
 For data objects such as LFS, Uploads, Artifacts, etc., an [Object Storage service](object_storage.md)
 is recommended over NFS where possible, due to better performance.
@@ -17,15 +16,17 @@ is recommended over NFS where possible, due to better performance.
 File system performance can impact overall GitLab performance, especially for
 actions that read or write to Git repositories. For steps you can use to test
 file system performance, see
-[File system Performance Benchmarking](operations/filesystem_benchmarking.md).
+[File System Performance Benchmarking](operations/filesystem_benchmarking.md).
 
 ## Gitaly and NFS deprecation
 
-WARNING:
-From GitLab 14.0, enhancements and bug fixes for NFS for Git repositories are no longer
-considered and customer technical support is considered out of scope.
-[Read more about Gitaly and NFS](gitaly/index.md#nfs-deprecation-notice) and
-[the correct mount options to use](#upgrade-to-gitaly-cluster-or-disable-caching-if-experiencing-data-loss).
+Engineering support for NFS for Git repositories is deprecated. Technical support is planned to be
+unavailable from GitLab 15.0. No further enhancements are planned for this feature.
+
+Read:
+
+- The [Gitaly and NFS deprecation notice](gitaly/index.md#nfs-deprecation-notice).
+- About the [correct mount options to use](#upgrade-to-gitaly-cluster-or-disable-caching-if-experiencing-data-loss).
 
 ## Known kernel version incompatibilities
 
@@ -369,9 +370,8 @@ sudo ufw allow from <client_ip_address> to any port nfs
 ### Upgrade to Gitaly Cluster or disable caching if experiencing data loss
 
 WARNING:
-From GitLab 13.0, using NFS for Git repositories is deprecated.
-As of GitLab 14.0, NFS-related issues with Gitaly are no longer addressed. Read
-more about [Gitaly and NFS deprecation](gitaly/index.md#nfs-deprecation-notice).
+Engineering support for NFS for Git repositories is deprecated. Read the
+[Gitaly and NFS deprecation notice](gitaly/index.md#nfs-deprecation-notice).
 
 Customers and users have reported data loss on high-traffic repositories when using NFS for Git repositories.
 For example, we have seen:

@@ -1,3 +1,3 @@
-import { initGeoNodesBeta } from 'ee/geo_nodes_beta';
+import { initGeoNodes } from 'ee/geo_nodes';
 
-initGeoNodesBeta();
+initGeoNodes();

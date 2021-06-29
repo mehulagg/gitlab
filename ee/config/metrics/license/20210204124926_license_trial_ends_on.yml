@@ -1,4 +1,5 @@
 ---
+data_category: Optional
 key_path: license_trial_ends_on
 description: Date the trial license ends on
 product_section: fulfillment

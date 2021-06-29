@@ -1,4 +1,5 @@
 import { IntrospectionFragmentMatcher } from 'apollo-cache-inmemory';
+import PortalVue from 'portal-vue';
 import Vue from 'vue';
 import VueApollo from 'vue-apollo';
 import { mapActions, mapGetters } from 'vuex';
@@ -41,6 +42,7 @@ import boardConfigToggle from './config_toggle';
 import mountMultipleBoardsSwitcher from './mount_multiple_boards_switcher';
 
 Vue.use(VueApollo);
+Vue.use(PortalVue);
 
 const fragmentMatcher = new IntrospectionFragmentMatcher({
   introspectionQueryResultData,
@@ -304,9 +306,11 @@ export default () => {
   // eslint-disable-next-line no-new, @gitlab/no-runtime-template-compiler
   new Vue({
     el: document.getElementById('js-add-list'),
-    data: {
-      filters: boardsStore.state.filters,
-      ...getMilestoneTitle($boardApp),
+    data() {
+      return {
+        filters: boardsStore.state.filters,
+        ...getMilestoneTitle($boardApp),
+      };
     },
     mounted() {
       initNewListDropdown();

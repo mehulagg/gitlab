@@ -83,9 +83,9 @@ export default {
       </div>
     </form>
 
-    <template slot="modal-cancel">{{ s__('Cancel') }}</template>
+    <template #modal-cancel>{{ s__('Cancel') }}</template>
 
-    <template slot="modal-ok">
+    <template #modal-ok>
       <gl-loading-icon v-if="isApproving" inline />
       {{ s__('Approve') }}
     </template>

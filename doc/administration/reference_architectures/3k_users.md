@@ -27,26 +27,31 @@ For a full list of reference architectures, see
 
 | Service                                    | Nodes       | Configuration         | GCP             | AWS          | Azure    |
 |--------------------------------------------|-------------|-----------------------|-----------------|--------------|----------|
-| External load balancing node               | 1           | 2 vCPU, 1.8 GB memory | `n1-highcpu-2`  | `c5.large`   | `F2s v2` |
-| Redis**                                    | 3           | 2 vCPU, 7.5 GB memory | `n1-standard-2` | `m5.large`   | `D2s v3` |
-| Consul* + Sentinel**                       | 3           | 2 vCPU, 1.8 GB memory | `n1-highcpu-2`  | `c5.large`   | `F2s v2` |
-| PostgreSQL*                                | 3           | 2 vCPU, 7.5 GB memory | `n1-standard-2` | `m5.large`   | `D2s v3` |
-| PgBouncer*                                 | 3           | 2 vCPU, 1.8 GB memory | `n1-highcpu-2`  | `c5.large`   | `F2s v2` |
-| Internal load balancing node               | 1           | 2 vCPU, 1.8 GB memory | `n1-highcpu-2`  | `c5.large`   | `F2s v2` |
+| External load balancing node(3)            | 1           | 2 vCPU, 1.8 GB memory | `n1-highcpu-2`  | `c5.large`   | `F2s v2` |
+| Redis(2)                                   | 3           | 2 vCPU, 7.5 GB memory | `n1-standard-2` | `m5.large`   | `D2s v3` |
+| Consul(1) + Sentinel(2)                    | 3           | 2 vCPU, 1.8 GB memory | `n1-highcpu-2`  | `c5.large`   | `F2s v2` |
+| PostgreSQL(1)                              | 3           | 2 vCPU, 7.5 GB memory | `n1-standard-2` | `m5.large`   | `D2s v3` |
+| PgBouncer(1)                               | 3           | 2 vCPU, 1.8 GB memory | `n1-highcpu-2`  | `c5.large`   | `F2s v2` |
+| Internal load balancing node(3)            | 1           | 2 vCPU, 1.8 GB memory | `n1-highcpu-2`  | `c5.large`   | `F2s v2` |
 | Gitaly                                     | 3           | 4 vCPU, 15 GB memory  | `n1-standard-4` | `m5.xlarge`  | `D4s v3` |
 | Praefect                                   | 3           | 2 vCPU, 1.8 GB memory | `n1-highcpu-2`  | `c5.large`   | `F2s v2` |
-| Praefect PostgreSQL*                       | 1+          | 2 vCPU, 1.8 GB memory | `n1-highcpu-2`  | `c5.large`   | `F2s v2` |
+| Praefect PostgreSQL(1)                     | 1+          | 2 vCPU, 1.8 GB memory | `n1-highcpu-2`  | `c5.large`   | `F2s v2` |
 | Sidekiq                                    | 4           | 2 vCPU, 7.5 GB memory | `n1-standard-2` | `m5.large`   | `D2s v3` |
 | GitLab Rails                               | 3           | 8 vCPU, 7.2 GB memory | `n1-highcpu-8`  | `c5.2xlarge` | `F8s v2` |
 | Monitoring node                            | 1           | 2 vCPU, 1.8 GB memory | `n1-highcpu-2`  | `c5.large`   | `F2s v2` |
-| Object storage                             | n/a         | n/a                   | n/a             | n/a          | n/a      |
+| Object storage(4)                          | n/a         | n/a                   | n/a             | n/a          | n/a      |
 | NFS server (optional, not recommended)     | 1           | 4 vCPU, 3.6 GB memory | `n1-highcpu-4`  | `c5.xlarge`  | `F4s v2` |
 
+<!-- Disable ordered list rule https://github.com/DavidAnson/markdownlint/blob/main/doc/Rules.md#md029---ordered-list-item-prefix -->
+<!-- markdownlint-disable MD029 -->
+1. Can be optionally run on reputable third-party external PaaS PostgreSQL solutions. Google Cloud SQL and AWS RDS are known to work, however Azure Database for PostgreSQL is [not recommended](https://gitlab.com/gitlab-org/quality/reference-architectures/-/issues/61) due to performance issues. Consul is primarily used for PostgreSQL high availability so can be ignored when using a PostgreSQL PaaS setup. However it is also used optionally by Prometheus for Omnibus auto host discovery.
+2. Can be optionally run on reputable third-party external PaaS Redis solutions. Google Memorystore and AWS Elasticache are known to work.
+3. Can be optionally run on reputable third-party load balancing services (LB PaaS). AWS ELB is known to work.
+4. Should be run on reputable third party object storage (storage PaaS) for cloud implementations. Google Cloud Storage and AWS S3 are known to work.
+<!-- markdownlint-enable MD029 -->
+
 NOTE:
-Components marked with * can be optionally run on reputable
-third party external PaaS PostgreSQL solutions. Google Cloud SQL and AWS RDS are known to work.
-Components marked with ** can be optionally run on reputable
-third party external PaaS Redis solutions. Google Memorystore and AWS ElastiCache are known to work.
+For all PaaS solutions that involve configuring instances, it is strongly recommended to implement a minimum of three nodes in three different availability zones to align with resilient cloud architecture practices.
 
 ```plantuml
 @startuml 3k
@@ -470,8 +475,8 @@ a node and change its status from primary to replica (and vice versa).
 1. Edit `/etc/gitlab/gitlab.rb` and add the contents:
 
    ```ruby
-   # Specify server role as 'redis_master_role'
-   roles ['redis_master_role']
+   # Specify server role as 'redis_master_role' and enable Consul agent
+   roles(['redis_master_role', 'consul_role'])
 
    # IP address pointing to a local IP that the other machines can reach to.
    # You can also set bind to '0.0.0.0' which listen in all interfaces.
@@ -487,7 +492,6 @@ a node and change its status from primary to replica (and vice versa).
    redis['password'] = 'redis-password-goes-here'
 
    ## Enable service discovery for Prometheus
-   consul['enable'] = true
    consul['monitoring_service_discovery'] =  true
 
    ## The IPs of the Consul server nodes
@@ -549,8 +553,8 @@ run: redis-exporter: (pid 30075) 76861s; run: log: (pid 29674) 76896s
 1. Edit `/etc/gitlab/gitlab.rb` and add the contents:
 
    ```ruby
-   # Specify server role as 'redis_replica_role'
-   roles ['redis_replica_role']
+   # Specify server role as 'redis_replica_role' and enable Consul agent
+   roles(['redis_replica_role', 'consul_role'])
 
    # IP address pointing to a local IP that the other machines can reach to.
    # You can also set bind to '0.0.0.0' which listen in all interfaces.
@@ -573,7 +577,6 @@ run: redis-exporter: (pid 30075) 76861s; run: log: (pid 29674) 76896s
    #redis['master_port'] = 6379
 
    ## Enable service discovery for Prometheus
-   consul['enable'] = true
    consul['monitoring_service_discovery'] =  true
 
    ## The IPs of the Consul server nodes
@@ -602,7 +605,7 @@ run: redis-exporter: (pid 30075) 76861s; run: log: (pid 29674) 76896s
    make sure to set up the IPs correctly.
 
 You can specify multiple roles, like sentinel and Redis, as:
-`roles ['redis_sentinel_role', 'redis_master_role']`. Read more about
+`roles(['redis_sentinel_role', 'redis_master_role'])`. Read more about
 [roles](https://docs.gitlab.com/omnibus/roles/).
 
 These values don't have to be changed again in `/etc/gitlab/gitlab.rb` after
@@ -644,7 +647,7 @@ To configure the Sentinel:
 1. Edit `/etc/gitlab/gitlab.rb` and add the contents:
 
    ```ruby
-   roles ['redis_sentinel_role', 'consul_role']
+   roles(['redis_sentinel_role', 'consul_role'])
 
    # Must be the same in every sentinel node
    redis['master_name'] = 'gitlab-redis'
@@ -708,7 +711,6 @@ To configure the Sentinel:
    # sentinel['failover_timeout'] = 60000
 
    ## Enable service discovery for Prometheus
-   consul['enable'] = true
    consul['monitoring_service_discovery'] =  true
 
    ## The IPs of the Consul server nodes
@@ -823,6 +825,15 @@ in the second step, do not supply the `EXTERNAL_URL` value.
    sudo gitlab-ctl pg-password-md5 pgbouncer
    ```
 
+1. Generate a password hash for the PostgreSQL replication username/password pair. This assumes you will use the default
+   username of `gitlab_replicator` (recommended). The command will request a password
+   and a confirmation. Use the value that is output by this command in the next step
+   as the value of `<postgresql_replication_password_hash>`:
+   
+   ```shell
+   sudo gitlab-ctl pg-password-md5 gitlab_replicator
+   ```
+
 1. Generate a password hash for the Consul database username/password pair. This assumes you will use the default
    username of `gitlab-consul` (recommended). The command will request a password
    and confirmation. Use the value that is output by this command in the next
@@ -835,27 +846,28 @@ in the second step, do not supply the `EXTERNAL_URL` value.
 1. On every database node, edit `/etc/gitlab/gitlab.rb` replacing values noted in the `# START user configuration` section:
 
    ```ruby
-   # Disable all components except PostgreSQL, Patroni, and Consul
-   roles ['postgres_role']
-
+   # Disable all components except Patroni and Consul
+   roles(['patroni_role'])
+   
    # PostgreSQL configuration
    postgresql['listen_address'] = '0.0.0.0'
 
-   # Enable Patroni
-   patroni['enable'] = true
-   # Set `max_wal_senders` to one more than the number of database nodes in the cluster.
+   # Sets `max_replication_slots` to double the number of database nodes.
+   # Patroni uses one extra slot per node when initiating the replication.
+   patroni['postgresql']['max_replication_slots'] = 6
+
+   # Set `max_wal_senders` to one more than the number of replication slots in the cluster.
    # This is used to prevent replication from using up all of the
    # available database connections.
-   patroni['postgresql']['max_wal_senders'] = 4
-   patroni['postgresql']['max_replication_slots'] = 4
+   patroni['postgresql']['max_wal_senders'] = 7
+
    # Incoming recommended value for max connections is 500. See https://gitlab.com/gitlab-org/omnibus-gitlab/-/issues/5691.
    patroni['postgresql']['max_connections'] = 500
 
    # Prevent database migrations from running on upgrade automatically
    gitlab_rails['auto_migrate'] = false
-
+   
    # Configure the Consul agent
-   consul['enable'] = true
    consul['services'] = %w(postgresql)
    ## Enable service discovery for Prometheus
    consul['monitoring_service_discovery'] =  true
@@ -865,6 +877,8 @@ in the second step, do not supply the `EXTERNAL_URL` value.
    #
    # Replace PGBOUNCER_PASSWORD_HASH with a generated md5 value
    postgresql['pgbouncer_user_password'] = '<pgbouncer_password_hash>'
+   # Replace POSTGRESQL_REPLICATION_PASSWORD_HASH with a generated md5 value
+   postgresql['sql_replication_password'] = '<postgresql_replication_password_hash>'
    # Replace POSTGRESQL_PASSWORD_HASH with a generated md5 value
    postgresql['sql_user_password'] = '<postgresql_password_hash>'
 
@@ -904,22 +918,7 @@ are supported and can be added if needed.
 
 #### PostgreSQL post-configuration
 
-SSH in to the **primary node**:
-
-1. Open a database prompt:
-
-   ```shell
-   gitlab-psql -d gitlabhq_production
-   ```
-
-1. Enable the `pg_trgm` and `btree_gist` extensions:
-
-   ```shell
-   CREATE EXTENSION pg_trgm;
-   CREATE EXTENSION btree_gist;
-   ```
-
-1. Exit the database prompt by typing `\q` and Enter.
+SSH in to any of the Patroni nodes on the **primary site**:
 
 1. Check the status of the leader and cluster:
 
@@ -961,7 +960,7 @@ The following IPs will be used as an example:
 
    ```ruby
    # Disable all components except Pgbouncer and Consul agent
-   roles ['pgbouncer_role']
+   roles(['pgbouncer_role'])
 
    # Configure PgBouncer
    pgbouncer['admin_users'] = %w(pgbouncer gitlab-consul)
@@ -978,7 +977,6 @@ The following IPs will be used as an example:
 
    # Configure Consul agent
    consul['watchers'] = %w(postgresql)
-   consul['enable'] = true
    consul['configuration'] = {
    retry_join: %w(10.6.0.11 10.6.0.12 10.6.0.13)
    }
@@ -1109,9 +1107,7 @@ in the second step, do not supply the `EXTERNAL_URL` value.
 
    ```ruby
    # Disable all components except PostgreSQL and Consul
-   roles ['postgres_role']
-   repmgr['enable'] = false
-   patroni['enable'] = false
+   roles(['postgres_role', 'consul_role'])
 
    # PostgreSQL configuration
    postgresql['listen_address'] = '0.0.0.0'
@@ -1121,7 +1117,6 @@ in the second step, do not supply the `EXTERNAL_URL` value.
    gitlab_rails['auto_migrate'] = false
 
    # Configure the Consul agent
-   consul['enable'] = true
    ## Enable service discovery for Prometheus
    consul['monitoring_service_discovery'] =  true
 
@@ -1752,7 +1747,7 @@ On each node perform the following:
    })
 
    ## Disable components that will not be on the GitLab application server
-   roles ['application_role']
+   roles(['application_role'])
    gitaly['enable'] = false
    nginx['enable'] = true
    sidekiq['enable'] = false
@@ -1938,39 +1933,26 @@ running [Prometheus](../monitoring/prometheus/index.md) and
 1. Edit `/etc/gitlab/gitlab.rb` and add the contents:
 
    ```ruby
+   roles(['monitoring_role', 'consul_role'])
+
    external_url 'http://gitlab.example.com'
 
-   # Avoid running unnecessary services on the Prometheus server
-   gitaly['enable'] = false
-   postgresql['enable'] = false
-   redis['enable'] = false
-   puma['enable'] = false
-   sidekiq['enable'] = false
-   gitlab_workhorse['enable'] = false
-   alertmanager['enable'] = false
-   gitlab_exporter['enable'] = false
-
-   # Enable Prometheus
-   prometheus['enable'] = true
+   # Prometheus
    prometheus['listen_address'] = '0.0.0.0:9090'
    prometheus['monitor_kubernetes'] = false
 
-   # Enable Login form
+   # Grafana
+   grafana['admin_password'] = '<grafana_password>'
    grafana['disable_login_form'] = false
 
-   # Enable Grafana
-   grafana['enable'] = true
-   grafana['admin_password'] = '<grafana_password>'
-
    # Enable service discovery for Prometheus
-   consul['enable'] = true
    consul['monitoring_service_discovery'] =  true
    consul['configuration'] = {
       retry_join: %w(10.6.0.11 10.6.0.12 10.6.0.13)
    }
 
-   # Prevent database migrations from running on upgrade automatically
-   gitlab_rails['auto_migrate'] = false
+   # Nginx - For Grafana access
+   nginx['enable'] = true
    ```
 
 1. Save the file and [reconfigure GitLab](../restart_gitlab.md#omnibus-gitlab-reconfigure).
@@ -2080,10 +2062,13 @@ to use GitLab Pages, this currently [requires NFS](troubleshooting.md#gitlab-pag
 See how to [configure NFS](../nfs.md).
 
 WARNING:
-From GitLab 14.0, enhancements and bug fixes for NFS for Git repositories will no longer be
-considered and customer technical support will be considered out of scope.
-[Read more about Gitaly and NFS](../gitaly/index.md#nfs-deprecation-notice) and
-[the correct mount options to use](../nfs.md#upgrade-to-gitaly-cluster-or-disable-caching-if-experiencing-data-loss).
+Engineering support for NFS for Git repositories is deprecated. Technical support is planned to be
+unavailable from GitLab 15.0. No further enhancements are planned for this feature.
+
+Read:
+
+- The [Gitaly and NFS deprecation notice](../gitaly/index.md#nfs-deprecation-notice).
+- About the [correct mount options to use](../nfs.md#upgrade-to-gitaly-cluster-or-disable-caching-if-experiencing-data-loss).
 
 ## Supported modifications for lower user counts (HA)
 

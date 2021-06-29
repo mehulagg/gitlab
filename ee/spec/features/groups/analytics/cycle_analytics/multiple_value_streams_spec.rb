@@ -134,18 +134,27 @@ RSpec.describe 'Multiple value streams', :js do
         expect(path_nav_elem).not_to have_text("Cool custom stage - name")
       end
 
-      it 'can hide default stages' do
+      it 'can hide and restore default stages' do
         click_action_button('hide', 5)
         click_action_button('hide', 4)
         click_action_button('hide', 3)
 
-        page.find_button(_('Save Value Stream')).click
+        click_button(_('Save Value Stream'))
         wait_for_requests
 
         expect(page).to have_text(_("'%{name}' Value Stream saved") % { name: custom_value_stream_name })
         expect(path_nav_elem).not_to have_text("Staging")
         expect(path_nav_elem).not_to have_text("Review")
         expect(path_nav_elem).not_to have_text("Test")
+
+        click_button(_('Edit'))
+        click_action_button('restore', 0)
+
+        click_button(_('Save Value Stream'))
+        wait_for_requests
+
+        expect(page).to have_text(_("'%{name}' Value Stream saved") % { name: custom_value_stream_name })
+        expect(path_nav_elem).to have_text("Test")
       end
     end
   end

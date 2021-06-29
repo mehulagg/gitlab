@@ -5,6 +5,7 @@ FactoryBot.define do
     external_id { 'find_sec_bugs' }
     name { 'Find Security Bugs' }
     vendor { 'Security Scanner Vendor' }
+    version { '1.0.0' }
 
     skip_create
 

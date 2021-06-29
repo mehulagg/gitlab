@@ -19,14 +19,15 @@ RSpec.describe GitlabSubscriptions::UpcomingReconciliationHelper do
     end
 
     before do
-      allow(::Gitlab).to receive(:com?).and_return(true)
+      stub_application_setting(check_namespace_plan: true)
     end
 
     it 'returns true and reconciliation date' do
       expect(helper.display_upcoming_reconciliation_alert?(namespace)).to eq(true)
       expect(helper.upcoming_reconciliation_hash(namespace)).to eq(
         reconciliation_date: upcoming_reconciliation.next_reconciliation_date.to_s,
-        cookie_key: cookie_key
+        cookie_key: cookie_key,
+        uses_namespace_plan: true
       )
     end
 
@@ -46,14 +47,15 @@ RSpec.describe GitlabSubscriptions::UpcomingReconciliationHelper do
         expect(helper.display_upcoming_reconciliation_alert?(group)).to eq(true)
         expect(helper.upcoming_reconciliation_hash(group)).to eq(
           reconciliation_date: upcoming_reconciliation2.next_reconciliation_date.to_s,
-          cookie_key: cookie_key
+          cookie_key: cookie_key,
+          uses_namespace_plan: true
         )
       end
     end
 
-    context 'when not gitlab.com' do
+    context 'when instance does not have paid namespaces (ex: self managed instance)' do
       it 'returns false and empty hash' do
-        allow(::Gitlab).to receive(:com?).and_return(false)
+        stub_application_setting(check_namespace_plan: false)
 
         expect(helper.display_upcoming_reconciliation_alert?(namespace)).to eq(false)
         expect(helper.upcoming_reconciliation_hash(namespace)).to eq({})
@@ -97,7 +99,8 @@ RSpec.describe GitlabSubscriptions::UpcomingReconciliationHelper do
       expect(helper.display_upcoming_reconciliation_alert?).to eq(true)
       expect(helper.upcoming_reconciliation_hash).to eq(
         reconciliation_date: upcoming_reconciliation.next_reconciliation_date.to_s,
-        cookie_key: cookie_key
+        cookie_key: cookie_key,
+        uses_namespace_plan: false
       )
     end
 
@@ -117,11 +120,9 @@ RSpec.describe GitlabSubscriptions::UpcomingReconciliationHelper do
         expect(helper.display_upcoming_reconciliation_alert?).to eq(false)
         expect(helper.upcoming_reconciliation_hash).to eq({})
       end
-    end
 
-    context 'when gitlab.com' do
       it 'returns false and empty hash' do
-        allow(::Gitlab).to receive(:com?).and_return(true)
+        stub_application_setting(check_namespace_plan: true)
         enable_admin_mode!(user)
 
         expect(helper.display_upcoming_reconciliation_alert?).to eq(false)

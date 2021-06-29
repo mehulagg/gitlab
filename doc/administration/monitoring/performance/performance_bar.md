@@ -12,7 +12,7 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 You can display the GitLab Performance Bar to see statistics for the performance
 of a page. When activated, it looks as follows:
 
-![Performance Bar](img/performance_bar.png)
+![Performance Bar](img/performance_bar_v14_0.png)
 
 From left to right, it displays:
 
@@ -80,9 +80,9 @@ The GitLab Performance Bar is disabled by default for non-administrators. To ena
 for a given group:
 
 1. Sign in as a user with Administrator [permissions](../../../user/permissions.md).
-1. In the menu bar, click **Admin Area**.
-1. Go to **Settings > Metrics and profiling**
-   (`admin/application_settings/metrics_and_profiling`), and expand the section
+1. On the top bar, select **Menu >** **{admin}** **Admin**.
+1. On the left sidebar, select **Settings > Metrics and profiling**
+   (`admin/application_settings/metrics_and_profiling`), and expand
    **Profiling - Performance bar**.
 1. Click **Enable access to the Performance Bar**.
 1. In the **Allowed group** field, provide the full path of the group allowed

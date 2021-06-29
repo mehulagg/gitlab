@@ -101,9 +101,6 @@ export default {
     showJobLinks() {
       return !this.isStageView && this.showLinks;
     },
-    shouldShowStageName() {
-      return !this.isStageView;
-    },
     // The show downstream check prevents showing redundant linked columns
     showDownstreamPipelines() {
       return (
@@ -202,11 +199,12 @@ export default {
                 :groups="column.groups"
                 :action="column.status.action"
                 :highlighted-jobs="highlightedJobs"
-                :show-stage-name="shouldShowStageName"
+                :is-stage-view="isStageView"
                 :job-hovered="hoveredJobName"
                 :source-job-hovered="hoveredSourceJobName"
                 :pipeline-expanded="pipelineExpanded"
                 :pipeline-id="pipeline.id"
+                :user-permissions="pipeline.userPermissions"
                 @refreshPipelineGraph="$emit('refreshPipelineGraph')"
                 @jobHover="setJob"
                 @updateMeasurements="getMeasurements"

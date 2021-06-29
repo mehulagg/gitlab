@@ -18,7 +18,7 @@ class Groups::AuditEventsController < Groups::ApplicationController
     @is_last_page = events.last_page?
     @events = AuditEventSerializer.new.represent(events)
 
-    Gitlab::Tracking.event(self.class.name, 'search_audit_event')
+    Gitlab::Tracking.event(self.class.name, 'search_audit_event', user: current_user, namespace: group)
   end
 
   private

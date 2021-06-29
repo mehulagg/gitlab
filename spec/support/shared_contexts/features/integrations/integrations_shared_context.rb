@@ -1,11 +1,11 @@
 # frozen_string_literal: true
 
-Integration.available_services_names.each do |service|
+Integration.available_integration_names.each do |service|
   RSpec.shared_context service do
     include JiraServiceHelper if service == 'jira'
 
     let(:dashed_service) { service.dasherize }
-    let(:service_method) { integration_association(service) }
+    let(:service_method) { Project.integration_association_name(service) }
     let(:service_klass) { Integration.integration_name_to_model(service) }
     let(:service_instance) { service_klass.new }
     let(:service_fields) { service_instance.fields }
@@ -46,25 +46,15 @@ Integration.available_services_names.each do |service|
 
     before do
       enable_license_for_service(service)
-      stub_jira_service_test if service == 'jira'
+      stub_jira_integration_test if service == 'jira'
     end
 
-    def initialize_service(service, attrs = {})
-      service_item = project.find_or_initialize_service(service)
-      service_item.attributes = attrs
-      service_item.properties = service_attrs
-      service_item.save!
-      service_item
-    end
-
-    # Returns the association name for the given integration.
-    # Example: 'asana' => 'asana_integration'
-    def integration_association(name)
-      if Integration::RENAMED_TO_INTEGRATION.include?(name)
-        "#{name}_integration".to_sym
-      else
-        "#{name}_service".to_sym
-      end
+    def initialize_integration(integration, attrs = {})
+      record = project.find_or_initialize_integration(integration)
+      record.attributes = attrs
+      record.properties = service_attrs
+      record.save!
+      record
     end
 
     private
@@ -76,7 +66,7 @@ Integration.available_services_names.each do |service|
       return unless licensed_feature
 
       stub_licensed_features(licensed_feature => true)
-      project.clear_memoization(:disabled_services)
+      project.clear_memoization(:disabled_integrations)
     end
   end
 end

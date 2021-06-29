@@ -39,7 +39,9 @@ exports[`IncidentsSettingTabs should render the component 1`] = `
     class="settings-content"
   >
     <gl-tabs-stub
+      queryparamname="tab"
       theme="indigo"
+      value="0"
     >
       <!---->
        
@@ -52,7 +54,6 @@ exports[`IncidentsSettingTabs should render the component 1`] = `
           data-testid="PagerDutySettingsForm-tab"
         />
       </gl-tab-stub>
-      <!---->
     </gl-tabs-stub>
   </div>
 </section>

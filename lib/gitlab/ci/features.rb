@@ -6,18 +6,6 @@ module Gitlab
     # Ci::Features is a class that aggregates all CI/CD feature flags in one place.
     #
     module Features
-      def self.artifacts_exclude_enabled?
-        ::Feature.enabled?(:ci_artifacts_exclude, default_enabled: true)
-      end
-
-      def self.pipeline_latest?
-        ::Feature.enabled?(:ci_pipeline_latest, default_enabled: true)
-      end
-
-      def self.pipeline_status_omit_commit_sha_in_cache_key?(project)
-        Feature.enabled?(:ci_pipeline_status_omit_commit_sha_in_cache_key, project, default_enabled: true)
-      end
-
       # NOTE: The feature flag `disallow_to_create_merge_request_pipelines_in_target_project`
       # is a safe switch to disable the feature for a particular project when something went wrong,
       # therefore it's not supposed to be enabled by default.
@@ -42,8 +30,8 @@ module Gitlab
         ::Feature.enabled?(:gldropdown_tags, default_enabled: :yaml)
       end
 
-      def self.background_pipeline_retry_endpoint?(project)
-        ::Feature.enabled?(:background_pipeline_retry_endpoint, project)
+      def self.require_builds_token_encryption?
+        Feature.enabled?(:ci_builds_tokens_required_encryption, default_enabled: :yaml)
       end
     end
   end

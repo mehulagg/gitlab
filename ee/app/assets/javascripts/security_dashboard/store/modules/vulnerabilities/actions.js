@@ -1,7 +1,11 @@
 import _ from 'lodash';
 import createFlash from '~/flash';
 import axios from '~/lib/utils/axios_utils';
-import { parseIntPagination, normalizeHeaders } from '~/lib/utils/common_utils';
+import {
+  parseIntPagination,
+  normalizeHeaders,
+  convertObjectPropsToCamelCase,
+} from '~/lib/utils/common_utils';
 import download from '~/lib/utils/downloader';
 import { s__, n__, sprintf } from '~/locale';
 import toast from '~/vue_shared/plugins/global_toast';
@@ -72,11 +76,16 @@ export const requestVulnerabilities = ({ commit }) => {
 export const receiveVulnerabilitiesSuccess = ({ commit }, { headers, data }) => {
   const normalizedHeaders = normalizeHeaders(headers);
   const pageInfo = parseIntPagination(normalizedHeaders);
-  // Vulnerabilities on pipelines don't have IDs.
-  // We need to add dummy IDs here to avoid rendering issues.
+
   const vulnerabilities = data.map((vulnerability) => ({
     ...vulnerability,
+    // Vulnerabilities on pipelines don't have IDs.
+    // We need to add dummy IDs here to avoid rendering issues.
     id: vulnerability.id || _.uniqueId('client_'),
+    // The generic report component expects all fields within `vulnerability.details` to be in camelCase
+    ...(vulnerability.details && {
+      details: convertObjectPropsToCamelCase(vulnerability.details, { deep: true }),
+    }),
   }));
 
   commit(types.RECEIVE_VULNERABILITIES_SUCCESS, { pageInfo, vulnerabilities });
@@ -127,7 +136,6 @@ export const receiveCreateIssueError = ({ commit }, { flashError }) => {
   if (flashError) {
     createFlash({
       message: s__('SecurityReports|There was an error creating the issue.'),
-      type: 'alert',
       parent: document.querySelector('.ci-table'),
     });
   }
@@ -199,7 +207,6 @@ export const receiveDismissSelectedVulnerabilitiesError = ({ commit }, { flashEr
   if (flashError) {
     createFlash({
       message: s__('SecurityReports|There was an error dismissing the vulnerabilities.'),
-      type: 'alert',
       parent: document.querySelector('.ci-table'),
     });
   }
@@ -234,7 +241,7 @@ export const dismissVulnerability = (
               dispatch('revertDismissVulnerability', { vulnerability })
                 .then(() => dispatch('fetchVulnerabilities', { page }))
                 .catch(() => {});
-              toastObject.goAway(0);
+              toastObject.hide();
             }
           },
         },
@@ -286,7 +293,6 @@ export const receiveDismissVulnerabilityError = ({ commit }, { flashError }) => 
   if (flashError) {
     createFlash({
       message: s__('SecurityReports|There was an error dismissing the vulnerability.'),
-      type: 'alert',
       parent: document.querySelector('.ci-table'),
     });
   }
@@ -409,7 +415,6 @@ export const receiveUndoDismissError = ({ commit }, { flashError }) => {
   if (flashError) {
     createFlash({
       message: s__('SecurityReports|There was an error reverting this dismissal.'),
-      type: 'alert',
       parent: document.querySelector('.ci-table'),
     });
   }
@@ -477,7 +482,6 @@ export const receiveCreateMergeRequestError = ({ commit }, { flashError }) => {
   if (flashError) {
     createFlash({
       message: s__('SecurityReports|There was an error creating the merge request.'),
-      type: 'alert',
       parent: document.querySelector('.ci-table'),
     });
   }

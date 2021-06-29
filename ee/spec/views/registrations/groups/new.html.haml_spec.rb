@@ -35,9 +35,8 @@ RSpec.describe 'registrations/groups/new' do
   context 'in trial onboarding' do
     let_it_be(:trial_onboarding_flow) { true }
 
-    it 'hides trial form and shows invite members' do
+    it 'hides trial form' do
       is_expected.not_to have_content('Company name')
-      is_expected.to have_selector('.js-invite-members')
     end
 
     it 'hides the progress bar' do

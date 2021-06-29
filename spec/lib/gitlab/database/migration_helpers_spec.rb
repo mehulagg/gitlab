@@ -2001,6 +2001,45 @@ RSpec.describe Gitlab::Database::MigrationHelpers do
     end
   end
 
+  describe '#ensure_batched_background_migration_is_finished' do
+    let(:configuration) do
+      {
+        job_class_name: 'CopyColumnUsingBackgroundMigrationJob',
+        table_name: :events,
+        column_name: :id,
+        job_arguments: [["id"], ["id_convert_to_bigint"]]
+      }
+    end
+
+    subject(:ensure_batched_background_migration_is_finished) { model.ensure_batched_background_migration_is_finished(**configuration) }
+
+    it 'raises an error when migration exists and is not marked as finished' do
+      create(:batched_background_migration, configuration.merge(status: :active))
+
+      expect { ensure_batched_background_migration_is_finished }
+        .to raise_error "Expected batched background migration for the given configuration to be marked as 'finished', but it is 'active': #{configuration}" \
+            "\n\n" \
+            "Finalize it manualy by running" \
+            "\n\n" \
+            "\tgitlab-rake gitlab:background_migrations:finalize[CopyColumnUsingBackgroundMigrationJob,events,id,'[[\"id\"]\\, [\"id_convert_to_bigint\"]]']"
+    end
+
+    it 'does not raise error when migration exists and is marked as finished' do
+      create(:batched_background_migration, configuration.merge(status: :finished))
+
+      expect { ensure_batched_background_migration_is_finished }
+        .not_to raise_error
+    end
+
+    it 'logs a warning when migration does not exist' do
+      expect(Gitlab::AppLogger).to receive(:warn)
+        .with("Could not find batched background migration for the given configuration: #{configuration}")
+
+      expect { ensure_batched_background_migration_is_finished }
+        .not_to raise_error
+    end
+  end
+
   describe '#index_exists_by_name?' do
     it 'returns true if an index exists' do
       ActiveRecord::Base.connection.execute(
@@ -2117,6 +2156,28 @@ RSpec.describe Gitlab::Database::MigrationHelpers do
 
       buffer.rewind
       expect(buffer.read).to include("\"class\":\"#{model.class}\"")
+    end
+
+    using RSpec::Parameterized::TableSyntax
+
+    where(raise_on_exhaustion: [true, false])
+
+    with_them do
+      it 'sets raise_on_exhaustion as requested' do
+        with_lock_retries = double
+        expect(Gitlab::Database::WithLockRetries).to receive(:new).and_return(with_lock_retries)
+        expect(with_lock_retries).to receive(:run).with(raise_on_exhaustion: raise_on_exhaustion)
+
+        model.with_lock_retries(env: env, logger: in_memory_logger, raise_on_exhaustion: raise_on_exhaustion) { }
+      end
+    end
+
+    it 'does not raise on exhaustion by default' do
+      with_lock_retries = double
+      expect(Gitlab::Database::WithLockRetries).to receive(:new).and_return(with_lock_retries)
+      expect(with_lock_retries).to receive(:run).with(raise_on_exhaustion: false)
+
+      model.with_lock_retries(env: env, logger: in_memory_logger) { }
     end
   end
 
@@ -2914,6 +2975,14 @@ RSpec.describe Gitlab::Database::MigrationHelpers do
       it 'prints an error message' do
         expect { subject }.to output(/user is not allowed/).to_stderr.and raise_error
       end
+    end
+  end
+
+  describe '#rename_constraint' do
+    it "executes the statement to rename constraint" do
+      expect(model).to receive(:execute).with /ALTER TABLE "test_table"\nRENAME CONSTRAINT "fk_old_name" TO "fk_new_name"/
+
+      model.rename_constraint(:test_table, :fk_old_name, :fk_new_name)
     end
   end
 end

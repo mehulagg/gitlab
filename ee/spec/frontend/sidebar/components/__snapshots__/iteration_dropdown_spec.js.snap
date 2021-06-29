@@ -21,5 +21,21 @@ exports[`IterationDropdown default shows gl-dropdown 1`] = `
     value=""
   />
    
+  <gl-dropdown-item-stub
+    avatarurl=""
+    iconcolor=""
+    iconname=""
+    iconrightarialabel=""
+    iconrightname=""
+    ischeckitem="true"
+    secondarytext=""
+  >
+    
+    No iteration
+  
+  </gl-dropdown-item-stub>
+   
+  <gl-dropdown-divider-stub />
+   
 </gl-dropdown-stub>
 `;

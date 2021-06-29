@@ -7,6 +7,7 @@ RSpec.describe Mutations::Epics::Update do
 
   let_it_be(:current_user) { create(:user) }
   let_it_be(:group) { create(:group) }
+
   let(:label_1) { create(:group_label, group: group) }
   let(:label_2) { create(:group_label, group: group) }
   let(:label_3) { create(:group_label, group: group) }

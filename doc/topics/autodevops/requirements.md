@@ -30,8 +30,8 @@ To make full use of Auto DevOps with Kubernetes, you need:
      deployments, any Ingress controller should work, but as of GitLab 14.0,
      [canary deployments](../../user/project/canary_deployments.md) require
      NGINX Ingress. You can deploy the NGINX Ingress controller to your
-     Kubernetes cluster by installing the
-     [`ingress-nginx`](https://github.com/kubernetes/ingress-nginx/tree/master/charts/ingress-nginx)
+     Kubernetes cluster either through the GitLab [Cluster management project template](../../user/clusters/management_project_template.md)
+     or manually by using the [`ingress-nginx`](https://github.com/kubernetes/ingress-nginx/tree/master/charts/ingress-nginx)
      Helm chart.
 
      NOTE:
@@ -66,8 +66,7 @@ To make full use of Auto DevOps with Kubernetes, you need:
 
   Runners should be registered as [shared runners](../../ci/runners/runners_scope.md#shared-runners)
   for the entire GitLab instance, or [specific runners](../../ci/runners/runners_scope.md#specific-runners)
-  that are assigned to specific projects (the default if you've installed the
-  GitLab Runner managed application).
+  that are assigned to specific projects.
 
 - **Prometheus** (for [Auto Monitoring](stages.md#auto-monitoring))
 
@@ -126,7 +125,7 @@ only the deployment to Kubernetes runs.
 WARNING:
 Setting the `AUTO_DEVOPS_PLATFORM_TARGET` variable to `ECS` triggers jobs
 defined in the [`Jobs/Deploy/ECS.gitlab-ci.yml` template](https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/Jobs/Deploy/ECS.gitlab-ci.yml).
-However, it's not recommended to [include](../../ci/yaml/README.md#includetemplate)
+However, it's not recommended to [include](../../ci/yaml/index.md#includetemplate)
 it on its own. This template is designed to be used with Auto DevOps only. It may change
 unexpectedly causing your pipeline to fail if included on its own. Also, the job
 names within this template may also change. Do not override these jobs' names in your

@@ -44,12 +44,12 @@ export default {
       const { targetBranch } = this;
 
       return this.fetchRules({ targetBranch, resetToDefault: true }).then(() => {
-        const toast = showToast(__('Approval rules reset to project defaults'), {
+        showToast(__('Approval rules reset to project defaults'), {
           action: {
             text: __('Undo'),
-            onClick: () => {
+            onClick: (_, toast) => {
               this.undoRulesChange();
-              toast.goAway(0);
+              toast.hide();
             },
           },
         });

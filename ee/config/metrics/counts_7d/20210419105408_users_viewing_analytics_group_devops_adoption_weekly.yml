@@ -1,4 +1,5 @@
 ---
+data_category: Optional
 key_path: redis_hll_counters.analytics.users_viewing_analytics_group_devops_adoption_weekly
 description: Counts visits to DevOps Adoption page per week
 product_section: dev
@@ -6,7 +7,7 @@ product_stage: manage
 product_group: group::optimize
 product_category: devops_reports
 value_type: number
-status: implemented
+status: data_available
 milestone: "13.12"
 introduced_by_url: "https://gitlab.com/gitlab-org/gitlab/-/merge_requests/59738"
 time_frame: 7d

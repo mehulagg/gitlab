@@ -755,6 +755,15 @@
   :tags:
   - :exclude_from_kubernetes
   - :exclude_from_gitlab_com
+- :name: iterations:iterations_roll_over_issues
+  :worker_name: Iterations::RollOverIssuesWorker
+  :feature_category: :issue_tracking
+  :has_external_dependencies:
+  :urgency: :low
+  :resource_boundary: :unknown
+  :weight: 1
+  :idempotent: true
+  :tags: []
 - :name: personal_access_tokens:personal_access_tokens_groups_policy
   :worker_name: PersonalAccessTokens::Groups::PolicyWorker
   :feature_category: :authentication_and_authorization
@@ -773,6 +782,15 @@
   :weight: 1
   :idempotent:
   :tags: []
+- :name: pipeline_background:ci_sync_reports_to_report_approval_rules
+  :worker_name: Ci::SyncReportsToReportApprovalRulesWorker
+  :feature_category: :continuous_integration
+  :has_external_dependencies:
+  :urgency: :high
+  :resource_boundary: :cpu
+  :weight: 1
+  :idempotent:
+  :tags: []
 - :name: pipeline_default:ci_trigger_downstream_subscriptions
   :worker_name: Ci::TriggerDownstreamSubscriptionsWorker
   :feature_category: :continuous_integration
@@ -784,7 +802,7 @@
   :tags: []
 - :name: security_scans:scan_security_report_secrets
   :worker_name: ScanSecurityReportSecretsWorker
-  :feature_category: :static_application_security_testing
+  :feature_category: :secret_detection
   :has_external_dependencies: true
   :urgency: :low
   :resource_boundary: :cpu
@@ -793,7 +811,7 @@
   :tags: []
 - :name: security_scans:security_store_scans
   :worker_name: Security::StoreScansWorker
-  :feature_category: :static_application_security_testing
+  :feature_category: :vulnerability_management
   :has_external_dependencies:
   :urgency: :low
   :resource_boundary: :unknown
@@ -803,7 +821,7 @@
   - :exclude_from_kubernetes
 - :name: security_scans:store_security_reports
   :worker_name: StoreSecurityReportsWorker
-  :feature_category: :static_application_security_testing
+  :feature_category: :vulnerability_management
   :has_external_dependencies:
   :urgency: :low
   :resource_boundary: :cpu
@@ -812,19 +830,10 @@
   :tags: []
 - :name: security_scans:store_security_scans
   :worker_name: StoreSecurityScansWorker
-  :feature_category: :static_application_security_testing
+  :feature_category: :vulnerability_management
   :has_external_dependencies:
   :urgency: :low
   :resource_boundary: :unknown
-  :weight: 2
-  :idempotent:
-  :tags: []
-- :name: security_scans:sync_security_reports_to_report_approval_rules
-  :worker_name: SyncSecurityReportsToReportApprovalRulesWorker
-  :feature_category: :static_application_security_testing
-  :has_external_dependencies:
-  :urgency: :high
-  :resource_boundary: :cpu
   :weight: 2
   :idempotent:
   :tags: []
@@ -971,6 +980,15 @@
 - :name: elastic_namespace_rollout
   :worker_name: ElasticNamespaceRolloutWorker
   :feature_category: :global_search
+  :has_external_dependencies:
+  :urgency: :low
+  :resource_boundary: :unknown
+  :weight: 1
+  :idempotent:
+  :tags: []
+- :name: epics_new_epic_issue
+  :worker_name: Epics::NewEpicIssueWorker
+  :feature_category: :epics
   :has_external_dependencies:
   :urgency: :low
   :resource_boundary: :unknown

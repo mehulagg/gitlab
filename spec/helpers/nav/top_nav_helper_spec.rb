@@ -7,6 +7,7 @@ RSpec.describe Nav::TopNavHelper do
 
   let_it_be(:user) { build_stubbed(:user) }
   let_it_be(:admin) { build_stubbed(:user, :admin) }
+  let_it_be(:external_user) { build_stubbed(:user, :external, can_create_group: false) }
 
   let(:current_user) { nil }
 
@@ -297,12 +298,20 @@ RSpec.describe Nav::TopNavHelper do
           it 'has expected :linksSecondary' do
             expected_links_secondary = [
               ::Gitlab::Nav::TopNavMenuItem.build(
-                href: '/groups/new#create-group-pane',
+                href: '/groups/new',
                 id: 'create',
                 title: 'Create group'
               )
             ]
             expect(groups_view[:linksSecondary]).to eq(expected_links_secondary)
+          end
+
+          context 'with external user' do
+            let(:current_user) { external_user }
+
+            it 'does not have create group link' do
+              expect(groups_view[:linksSecondary]).to eq([])
+            end
           end
 
           context 'with current nav as group' do
@@ -530,10 +539,18 @@ RSpec.describe Nav::TopNavHelper do
     end
 
     context 'with new' do
-      let(:with_new_view_model) { { id: 'test-new-view-model' } }
+      let(:with_new_view_model) { { menu_sections: [{ id: 'test-new-view-model' }] } }
 
       it 'has new subview' do
-        expect(subject[:views][:new]).to eq({ id: 'test-new-view-model' })
+        expect(subject[:views][:new]).to eq(with_new_view_model)
+      end
+    end
+
+    context 'with new and no menu_sections' do
+      let(:with_new_view_model) { { menu_sections: [] } }
+
+      it 'has new subview' do
+        expect(subject[:views][:new]).to be_nil
       end
     end
   end

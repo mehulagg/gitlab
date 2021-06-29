@@ -3,11 +3,11 @@ module API
   class Services < ::API::Base
     feature_category :integrations
 
-    services = Helpers::ServicesHelpers.services
-    service_classes = Helpers::ServicesHelpers.service_classes
+    integrations = Helpers::IntegrationsHelpers.integrations
+    integration_classes = Helpers::IntegrationsHelpers.integration_classes
 
     if Rails.env.development?
-      services['mock-ci'] = [
+      integrations['mock-ci'] = [
         {
           required: true,
           name: :mock_service_url,
@@ -15,19 +15,18 @@ module API
           desc: 'URL to the mock service'
         }
       ]
-      services['mock-deployment'] = []
-      services['mock-monitoring'] = []
+      integrations['mock-deployment'] = []
+      integrations['mock-monitoring'] = []
 
-      service_classes += Helpers::ServicesHelpers.development_service_classes
+      integration_classes += Helpers::IntegrationsHelpers.development_integration_classes
     end
 
-    SERVICES = services.freeze
-    SERVICE_CLASSES = service_classes.freeze
+    INTEGRATIONS = integrations.freeze
 
-    SERVICE_CLASSES.each do |service|
+    integration_classes.each do |service|
       event_names = service.try(:event_names) || next
       event_names.each do |event_name|
-        SERVICES[service.to_param.tr("_", "-")] << {
+        INTEGRATIONS[service.to_param.tr("_", "-")] << {
           required: false,
           name: event_name.to_sym,
           type: String,
@@ -77,8 +76,8 @@ module API
         present services, with: Entities::ProjectServiceBasic
       end
 
-      SERVICES.each do |service_slug, settings|
-        desc "Set #{service_slug} service for project"
+      INTEGRATIONS.each do |slug, settings|
+        desc "Set #{slug} service for project"
         params do
           settings.each do |setting|
             if setting[:required]
@@ -88,44 +87,40 @@ module API
             end
           end
         end
-        put ":id/services/#{service_slug}" do
-          service = user_project.find_or_initialize_service(service_slug.underscore)
-          service_params = declared_params(include_missing: false).merge(active: true)
+        put ":id/services/#{slug}" do
+          integration = user_project.find_or_initialize_integration(slug.underscore)
+          params = declared_params(include_missing: false).merge(active: true)
 
-          if service.update(service_params)
-            present service, with: Entities::ProjectService
+          if integration.update(params)
+            present integration, with: Entities::ProjectService
           else
             render_api_error!('400 Bad Request', 400)
           end
         end
       end
 
-      desc "Delete a service for project"
+      desc "Delete an integration from a project"
       params do
-        requires :service_slug, type: String, values: SERVICES.keys, desc: 'The name of the service'
+        requires :slug, type: String, values: INTEGRATIONS.keys, desc: 'The name of the service'
       end
-      delete ":id/services/:service_slug" do
-        service = user_project.find_or_initialize_service(params[:service_slug].underscore)
+      delete ":id/services/:slug" do
+        integration = user_project.find_or_initialize_integration(params[:slug].underscore)
 
-        destroy_conditionally!(service) do
-          attrs = service_attributes(service).inject({}) do |hash, key|
-            hash.merge!(key => nil)
-          end
+        destroy_conditionally!(integration) do
+          attrs = service_attributes(integration).index_with { nil }.merge(active: false)
 
-          unless service.update(attrs.merge(active: false))
-            render_api_error!('400 Bad Request', 400)
-          end
+          render_api_error!('400 Bad Request', 400) unless integration.update(attrs)
         end
       end
 
-      desc 'Get the service settings for project' do
+      desc 'Get the integration settings for a project' do
         success Entities::ProjectService
       end
       params do
-        requires :service_slug, type: String, values: SERVICES.keys, desc: 'The name of the service'
+        requires :slug, type: String, values: INTEGRATIONS.keys, desc: 'The name of the service'
       end
-      get ":id/services/:service_slug" do
-        integration = user_project.find_or_initialize_service(params[:service_slug].underscore)
+      get ":id/services/:slug" do
+        integration = user_project.find_or_initialize_integration(params[:slug].underscore)
 
         not_found!('Service') unless integration&.persisted?
 

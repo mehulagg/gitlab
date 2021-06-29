@@ -51,7 +51,7 @@ RSpec.describe MergeRequests::UpdateAssigneesService do
         let(:opts) { { assignee_ids: [0, user2.id, 0, user3.id, 0] } }
 
         it 'ignores 0 IDs' do
-          expect { update_merge_request }.to change(merge_request, :assignees).to([user2, user3])
+          expect { update_merge_request }.to change(merge_request, :assignees).to(match_array([user2, user3]))
         end
       end
     end

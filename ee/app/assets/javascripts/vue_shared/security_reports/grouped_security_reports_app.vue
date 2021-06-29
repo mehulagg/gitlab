@@ -309,7 +309,7 @@ export default {
     isMRActive() {
       return this.mrState !== mrStates.merged && this.mrState !== mrStates.closed;
     },
-    isMRBranchOutdated() {
+    hasDivergedFromTargetBranch() {
       return this.divergedCommitsCount > 0;
     },
     hasDastScannedResources() {
@@ -482,10 +482,10 @@ export default {
       </gl-button>
     </template>
 
-    <template v-if="isMRActive && isBaseSecurityReportOutOfDate" #sub-heading>
-      <div class="text-secondary-700 text-1">
+    <template v-if="isMRActive" #sub-heading>
+      <div class="gl-text-gray-700 gl-font-sm">
         <gl-sprintf
-          v-if="isMRBranchOutdated"
+          v-if="hasDivergedFromTargetBranch"
           :message="
             __(
               'Security report is out of date. Please update your branch with the latest changes from the target branch (%{targetBranchName})',
@@ -493,12 +493,12 @@ export default {
           "
         >
           <template #targetBranchName>
-            <gl-link class="text-1" :href="targetBranchTreePath">{{ targetBranch }}</gl-link>
+            <gl-link class="gl-font-sm" :href="targetBranchTreePath">{{ targetBranch }}</gl-link>
           </template>
         </gl-sprintf>
 
         <gl-sprintf
-          v-else
+          v-else-if="isBaseSecurityReportOutOfDate"
           :message="
             __(
               'Security report is out of date. Run %{newPipelineLinkStart}a new pipeline%{newPipelineLinkEnd} for the target branch (%{targetBranchName})',
@@ -506,12 +506,12 @@ export default {
           "
         >
           <template #newPipelineLink="{ content }">
-            <gl-link class="text-1" :href="`${newPipelinePath}?ref=${targetBranch}`">{{
+            <gl-link class="gl-font-sm" :href="`${newPipelinePath}?ref=${targetBranch}`">{{
               content
             }}</gl-link>
           </template>
           <template #targetBranchName>
-            <gl-link class="text-1" :href="targetBranchTreePath">{{ targetBranch }}</gl-link>
+            <gl-link class="gl-font-sm" :href="targetBranchTreePath">{{ targetBranch }}</gl-link>
           </template>
         </gl-sprintf>
       </div>

@@ -9,6 +9,7 @@ RSpec.describe IncidentManagement::OncallRotations::EditService do
 
   let_it_be_with_refind(:oncall_schedule) { create(:incident_management_oncall_schedule, :utc, project: project) }
   let_it_be_with_refind(:oncall_rotation) { create(:incident_management_oncall_rotation, :with_participants, schedule: oncall_schedule, participants_count: 2) }
+
   let(:current_user) { user_with_permissions }
   let(:params) { rotation_params }
   let(:service) { described_class.new(oncall_rotation, current_user, params) }

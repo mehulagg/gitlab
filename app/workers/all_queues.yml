@@ -30,6 +30,15 @@
   :weight: 1
   :idempotent: true
   :tags: []
+- :name: authorized_project_update:authorized_project_update_user_refresh_from_replica
+  :worker_name: AuthorizedProjectUpdate::UserRefreshFromReplicaWorker
+  :feature_category: :authentication_and_authorization
+  :has_external_dependencies:
+  :urgency: :low
+  :resource_boundary: :unknown
+  :weight: 1
+  :idempotent: true
+  :tags: []
 - :name: authorized_project_update:authorized_project_update_user_refresh_over_user_range
   :worker_name: AuthorizedProjectUpdate::UserRefreshOverUserRangeWorker
   :feature_category: :authentication_and_authorization
@@ -808,15 +817,6 @@
   :weight: 1
   :idempotent:
   :tags: []
-- :name: gcp_cluster:clusters_cleanup_app
-  :worker_name: Clusters::Cleanup::AppWorker
-  :feature_category: :kubernetes_management
-  :has_external_dependencies: true
-  :urgency: :low
-  :resource_boundary: :unknown
-  :weight: 1
-  :idempotent:
-  :tags: []
 - :name: gcp_cluster:clusters_cleanup_project_namespace
   :worker_name: Clusters::Cleanup::ProjectNamespaceWorker
   :feature_category: :kubernetes_management
@@ -1309,6 +1309,15 @@
   :idempotent: true
   :tags:
   - :exclude_from_kubernetes
+- :name: package_repositories:packages_helm_extraction
+  :worker_name: Packages::Helm::ExtractionWorker
+  :feature_category: :package_registry
+  :has_external_dependencies:
+  :urgency: :low
+  :resource_boundary: :unknown
+  :weight: 1
+  :idempotent: true
+  :tags: []
 - :name: package_repositories:packages_maven_metadata_sync
   :worker_name: Packages::Maven::Metadata::SyncWorker
   :feature_category: :package_registry
@@ -1373,8 +1382,7 @@
   :resource_boundary: :unknown
   :weight: 1
   :idempotent: true
-  :tags:
-  - :exclude_from_kubernetes
+  :tags: []
 - :name: pipeline_background:ci_pipeline_artifacts_create_quality_report
   :worker_name: Ci::PipelineArtifacts::CreateQualityReportWorker
   :feature_category: :code_testing
@@ -1429,7 +1437,7 @@
   :urgency: :high
   :resource_boundary: :cpu
   :weight: 3
-  :idempotent: true
+  :idempotent:
   :tags: []
 - :name: pipeline_creation:create_pipeline
   :worker_name: CreatePipelineWorker
@@ -1536,7 +1544,7 @@
   :worker_name: PipelineHooksWorker
   :feature_category: :continuous_integration
   :has_external_dependencies:
-  :urgency: :high
+  :urgency: :low
   :resource_boundary: :cpu
   :weight: 2
   :idempotent:
@@ -1611,7 +1619,7 @@
   :urgency: :high
   :resource_boundary: :unknown
   :weight: 5
-  :idempotent:
+  :idempotent: true
   :tags: []
 - :name: pipeline_processing:stage_update
   :worker_name: StageUpdateWorker

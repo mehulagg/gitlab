@@ -471,6 +471,7 @@ describe('URL utility', () => {
       ${'notaurl'}                              | ${false}
       ${'../relative_url'}                      | ${false}
       ${'<a></a>'}                              | ${false}
+      ${'//other-host.test'}                    | ${false}
     `('returns $valid for $url', ({ url, valid }) => {
       expect(urlUtils.isRootRelative(url)).toBe(valid);
     });
@@ -649,46 +650,64 @@ describe('URL utility', () => {
     });
   });
 
+  describe('urlParamsToArray', () => {
+    it('returns empty array for empty querystring', () => {
+      expect(urlUtils.urlParamsToArray('')).toEqual([]);
+    });
+
+    it('should decode params', () => {
+      expect(urlUtils.urlParamsToArray('?label_name%5B%5D=test')[0]).toBe('label_name[]=test');
+    });
+
+    it('should remove the question mark from the search params', () => {
+      const paramsArray = urlUtils.urlParamsToArray('?test=thing');
+
+      expect(paramsArray[0][0]).not.toBe('?');
+    });
+  });
+
+  describe('urlParamsToObject', () => {
+    it('parses path for label with trailing +', () => {
+      // eslint-disable-next-line import/no-deprecated
+      expect(urlUtils.urlParamsToObject('label_name[]=label%2B', {})).toEqual({
+        label_name: ['label+'],
+      });
+    });
+
+    it('parses path for milestone with trailing +', () => {
+      // eslint-disable-next-line import/no-deprecated
+      expect(urlUtils.urlParamsToObject('milestone_title=A%2B', {})).toEqual({
+        milestone_title: 'A+',
+      });
+    });
+
+    it('parses path for search terms with spaces', () => {
+      // eslint-disable-next-line import/no-deprecated
+      expect(urlUtils.urlParamsToObject('search=two+words', {})).toEqual({
+        search: 'two words',
+      });
+    });
+  });
+
   describe('queryToObject', () => {
-    it('converts search query into an object', () => {
-      const searchQuery = '?one=1&two=2';
-
-      expect(urlUtils.queryToObject(searchQuery)).toEqual({ one: '1', two: '2' });
-    });
-
-    it('removes undefined values from the search query', () => {
-      const searchQuery = '?one=1&two=2&three';
-
-      expect(urlUtils.queryToObject(searchQuery)).toEqual({ one: '1', two: '2' });
-    });
-
-    describe('with gatherArrays=false', () => {
-      it('overwrites values with the same array-key and does not change the key', () => {
-        const searchQuery = '?one[]=1&one[]=2&two=2&two=3';
-
-        expect(urlUtils.queryToObject(searchQuery)).toEqual({ 'one[]': '2', two: '3' });
-      });
-    });
-
-    describe('with gatherArrays=true', () => {
-      const options = { gatherArrays: true };
-      it('gathers only values with the same array-key and strips `[]` from the key', () => {
-        const searchQuery = '?one[]=1&one[]=2&two=2&two=3';
-
-        expect(urlUtils.queryToObject(searchQuery, options)).toEqual({ one: ['1', '2'], two: '3' });
-      });
-
-      it('overwrites values with the same array-key name', () => {
-        const searchQuery = '?one=1&one[]=2&two=2&two=3';
-
-        expect(urlUtils.queryToObject(searchQuery, options)).toEqual({ one: ['2'], two: '3' });
-      });
-
-      it('overwrites values with the same key name', () => {
-        const searchQuery = '?one[]=1&one=2&two=2&two=3';
-
-        expect(urlUtils.queryToObject(searchQuery, options)).toEqual({ one: '2', two: '3' });
-      });
+    it.each`
+      case                                                                      | query                             | options                                             | result
+      ${'converts query'}                                                       | ${'?one=1&two=2'}                 | ${undefined}                                        | ${{ one: '1', two: '2' }}
+      ${'converts query without ?'}                                             | ${'one=1&two=2'}                  | ${undefined}                                        | ${{ one: '1', two: '2' }}
+      ${'removes undefined values'}                                             | ${'?one=1&two=2&three'}           | ${undefined}                                        | ${{ one: '1', two: '2' }}
+      ${'overwrites values with same key and does not change key'}              | ${'?one[]=1&one[]=2&two=2&two=3'} | ${undefined}                                        | ${{ 'one[]': '2', two: '3' }}
+      ${'gathers values with the same array-key, strips `[]` from key'}         | ${'?one[]=1&one[]=2&two=2&two=3'} | ${{ gatherArrays: true }}                           | ${{ one: ['1', '2'], two: '3' }}
+      ${'overwrites values with the same array-key name'}                       | ${'?one=1&one[]=2&two=2&two=3'}   | ${{ gatherArrays: true }}                           | ${{ one: ['2'], two: '3' }}
+      ${'overwrites values with the same key name'}                             | ${'?one[]=1&one=2&two=2&two=3'}   | ${{ gatherArrays: true }}                           | ${{ one: '2', two: '3' }}
+      ${'ignores plus symbols'}                                                 | ${'?search=a+b'}                  | ${{ legacySpacesDecode: true }}                     | ${{ search: 'a+b' }}
+      ${'ignores plus symbols in keys'}                                         | ${'?search+term=a'}               | ${{ legacySpacesDecode: true }}                     | ${{ 'search+term': 'a' }}
+      ${'ignores plus symbols when gathering arrays'}                           | ${'?search[]=a+b'}                | ${{ gatherArrays: true, legacySpacesDecode: true }} | ${{ search: ['a+b'] }}
+      ${'replaces plus symbols with spaces'}                                    | ${'?search=a+b'}                  | ${undefined}                                        | ${{ search: 'a b' }}
+      ${'replaces plus symbols in keys with spaces'}                            | ${'?search+term=a'}               | ${undefined}                                        | ${{ 'search term': 'a' }}
+      ${'replaces plus symbols when gathering arrays'}                          | ${'?search[]=a+b'}                | ${{ gatherArrays: true }}                           | ${{ search: ['a b'] }}
+      ${'replaces plus symbols when gathering arrays for values with same key'} | ${'?search[]=a+b&search[]=c+d'}   | ${{ gatherArrays: true }}                           | ${{ search: ['a b', 'c d'] }}
+    `('$case', ({ query, options, result }) => {
+      expect(urlUtils.queryToObject(query, options)).toEqual(result);
     });
   });
 

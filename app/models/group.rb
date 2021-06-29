@@ -80,6 +80,8 @@ class Group < Namespace
   # debian_distributions and associated component_files must be destroyed by ruby code in order to properly remove carrierwave uploads
   has_many :debian_distributions, class_name: 'Packages::Debian::GroupDistribution', dependent: :destroy # rubocop:disable Cop/ActiveRecordDependent
 
+  delegate :prevent_sharing_groups_outside_hierarchy, to: :namespace_settings
+
   accepts_nested_attributes_for :variables, allow_destroy: true
 
   validate :visibility_level_allowed_by_projects
@@ -294,7 +296,7 @@ class Group < Namespace
   end
 
   def add_users(users, access_level, current_user: nil, expires_at: nil)
-    GroupMember.add_users(
+    Members::Groups::CreatorService.add_users( # rubocop:todo CodeReuse/ServiceClass
       self,
       users,
       access_level,
@@ -304,14 +306,13 @@ class Group < Namespace
   end
 
   def add_user(user, access_level, current_user: nil, expires_at: nil, ldap: false)
-    GroupMember.add_user(
-      self,
-      user,
-      access_level,
-      current_user: current_user,
-      expires_at: expires_at,
-      ldap: ldap
-    )
+    Members::Groups::CreatorService.new(self, # rubocop:todo CodeReuse/ServiceClass
+                                        user,
+                                        access_level,
+                                        current_user: current_user,
+                                        expires_at: expires_at,
+                                        ldap: ldap)
+                                   .execute
   end
 
   def add_guest(user, current_user = nil)
@@ -645,11 +646,15 @@ class Group < Namespace
   end
 
   def export_file_exists?
-    export_file&.file
+    import_export_upload&.export_file_exists?
   end
 
   def export_file
     import_export_upload&.export_file
+  end
+
+  def export_archive_exists?
+    import_export_upload&.export_archive_exists?
   end
 
   def adjourned_deletion?
@@ -715,6 +720,18 @@ class Group < Namespace
   def activity_path
     Gitlab::Routing.url_helpers.activity_group_path(self)
   end
+
+  # rubocop: disable CodeReuse/ServiceClass
+  def open_issues_count(current_user = nil)
+    Groups::OpenIssuesCountService.new(self, current_user).count
+  end
+  # rubocop: enable CodeReuse/ServiceClass
+
+  # rubocop: disable CodeReuse/ServiceClass
+  def open_merge_requests_count(current_user = nil)
+    Groups::MergeRequestsCountService.new(self, current_user).count
+  end
+  # rubocop: enable CodeReuse/ServiceClass
 
   private
 

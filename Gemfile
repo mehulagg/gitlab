@@ -35,7 +35,7 @@ gem 'rexml', '~> 3.2.5'
 gem 'ruby-saml', '~> 1.12.1'
 gem 'omniauth', '~> 1.8'
 gem 'omniauth-auth0', '~> 2.0.0'
-gem 'omniauth-azure-activedirectory-v2', '~> 0.1'
+gem 'omniauth-azure-activedirectory-v2', '~> 1.0'
 gem 'omniauth-azure-oauth2', '~> 0.0.9' # Deprecated v1 version
 gem 'omniauth-cas3', '~> 1.1.4'
 gem 'omniauth-facebook', '~> 4.0.0'
@@ -124,7 +124,7 @@ gem 'fog-aws', '~> 3.9'
 # Locked until fog-google resolves https://github.com/fog/fog-google/issues/421.
 # Also see config/initializers/fog_core_patch.rb.
 gem 'fog-core', '= 2.1.0'
-gem 'gitlab-fog-google', '~> 1.13', require: 'fog/google'
+gem 'fog-google', '~> 1.15', require: 'fog/google'
 gem 'fog-local', '~> 0.6'
 gem 'fog-openstack', '~> 1.0'
 gem 'fog-rackspace', '~> 0.1.1'
@@ -345,7 +345,7 @@ end
 
 group :development do
   gem 'lefthook', '~> 0.7.0', require: false
-  gem 'solargraph', '~> 0.40.4', require: false
+  gem 'solargraph', '~> 0.42', require: false
 
   gem 'letter_opener_web', '~> 1.4.0'
 
@@ -402,7 +402,7 @@ group :development, :test do
 end
 
 group :development, :test, :danger do
-  gem 'gitlab-dangerfiles', '~> 2.0.0', require: false
+  gem 'gitlab-dangerfiles', '~> 2.1.2', require: false
 end
 
 group :development, :test, :coverage do
@@ -480,7 +480,10 @@ end
 gem 'spamcheck', '~> 0.1.0'
 
 # Gitaly GRPC protocol definitions
-gem 'gitaly', '~> 13.12.0.pre.rc1'
+gem 'gitaly', '~> 14.1.0.pre.rc1'
+
+# KAS GRPC protocol definitions
+gem 'kas-grpc', '~> 0.0.2'
 
 gem 'grpc', '~> 1.30.2'
 
@@ -493,7 +496,7 @@ gem 'flipper', '~> 0.21.0'
 gem 'flipper-active_record', '~> 0.21.0'
 gem 'flipper-active_support_cache_store', '~> 0.21.0'
 gem 'unleash', '~> 0.1.5'
-gem 'gitlab-experiment', '~> 0.5.4'
+gem 'gitlab-experiment', '~> 0.6.1'
 
 # Structured logging
 gem 'lograge', '~> 0.5'

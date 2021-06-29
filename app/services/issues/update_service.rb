@@ -4,11 +4,16 @@ module Issues
   class UpdateService < Issues::BaseService
     extend ::Gitlab::Utils::Override
 
+    # NOTE: For Issues::UpdateService, we default the spam_params to nil, because spam_checking is not
+    # necessary in many cases, and we don't want to require every caller to explicitly pass it as nil
+    # to disable spam checking.
+    def initialize(project:, current_user: nil, params: {}, spam_params: nil)
+      super(project: project, current_user: current_user, params: params)
+      @spam_params = spam_params
+    end
+
     def execute(issue)
       handle_move_between_ids(issue)
-
-      @request = params.delete(:request)
-      @spam_params = Spam::SpamActionService.filter_spam_params!(params, @request)
 
       change_issue_duplicate(issue)
       move_issue_to_new_project(issue) || clone_issue(issue) || update_task_event(issue) || update(issue)
@@ -20,26 +25,15 @@ module Issues
       super
     end
 
-    override :filter_params
-    def filter_params(issue)
-      super
-
-      # filter confidential in `Issues::UpdateService` and not in `IssuableBaseService#filter_params`
-      # because we do allow users that cannot admin issues to set confidential flag when creating an issue
-      unless can_admin_issuable?(issue)
-        params.delete(:confidential)
-      end
-    end
-
     def before_update(issue, skip_spam_check: false)
       return if skip_spam_check
 
       Spam::SpamActionService.new(
         spammable: issue,
-        request: request,
+        spam_params: spam_params,
         user: current_user,
         action: :update
-      ).execute(spam_params: spam_params)
+      ).execute
     end
 
     def handle_changes(issue, options)
@@ -138,7 +132,7 @@ module Issues
 
     private
 
-    attr_reader :request, :spam_params
+    attr_reader :spam_params
 
     def clone_issue(issue)
       target_project = params.delete(:target_clone_project)

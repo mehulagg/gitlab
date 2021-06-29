@@ -168,7 +168,8 @@ Click on **Compare branches and continue** to go to the
 After forking a project and applying your local changes, complete the following steps to
 create a merge request from your fork to contribute back to the main project:
 
-1. Go to **Projects > Your Projects** and select your fork of the repository.
+1. On the top bar, select **Menu > Project**.
+1. Select **Your Projects**, then select your fork of the repository.
 1. In the left menu, go to **Merge requests**, and click **New merge request**.
 1. In the **Source branch** drop-down list box, select your branch in your forked repository as the source branch.
 1. In the **Target branch** drop-down list box, select the branch from the upstream repository as the target branch.
@@ -230,7 +231,7 @@ _In GitLab 11.7, we updated the format of the generated email address.
 However the older format is still supported, allowing existing aliases
 or contacts to continue working._
 
-### Adding patches when creating a merge request via e-mail
+### Adding patches when creating a merge request via email
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/22723) in GitLab 11.5.
 

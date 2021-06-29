@@ -174,7 +174,7 @@ RSpec.describe IssuesFinder do
           end
 
           context 'when current iteration exists' do
-            let(:current_iteration) { create(:iteration, :started, group: group, start_date: Date.today, due_date: 1.day.from_now) }
+            let(:current_iteration) { create(:iteration, :current, group: group, start_date: Date.yesterday, due_date: 1.day.from_now) }
 
             it 'returns filtered issues' do
               expect(issues).to contain_exactly(current_iteration_issue)

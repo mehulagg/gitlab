@@ -64,6 +64,15 @@ export default {
       @execute="trackToolbarControlExecution"
     />
     <toolbar-button
+      data-testid="strike"
+      content-type="strike"
+      icon-name="strikethrough"
+      editor-command="toggleStrike"
+      :label="__('Strikethrough')"
+      :tiptap-editor="contentEditor.tiptapEditor"
+      @execute="trackToolbarControlExecution"
+    />
+    <toolbar-button
       data-testid="code"
       content-type="code"
       icon-name="code"
@@ -72,7 +81,11 @@ export default {
       :tiptap-editor="contentEditor.tiptapEditor"
       @execute="trackToolbarControlExecution"
     />
-    <toolbar-link-button :tiptap-editor="contentEditor.tiptapEditor" />
+    <toolbar-link-button
+      data-testid="link"
+      :tiptap-editor="contentEditor.tiptapEditor"
+      @execute="trackToolbarControlExecution"
+    />
     <divider />
     <toolbar-button
       data-testid="blockquote"
@@ -107,6 +120,15 @@ export default {
       icon-name="list-numbered"
       editor-command="toggleOrderedList"
       :label="__('Add a numbered list')"
+      :tiptap-editor="contentEditor.tiptapEditor"
+      @execute="trackToolbarControlExecution"
+    />
+    <toolbar-button
+      data-testid="horizontal-rule"
+      content-type="horizontalRule"
+      icon-name="dash"
+      editor-command="setHorizontalRule"
+      :label="__('Add a horizontal rule')"
       :tiptap-editor="contentEditor.tiptapEditor"
       @execute="trackToolbarControlExecution"
     />

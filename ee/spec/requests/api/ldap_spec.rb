@@ -8,6 +8,7 @@ RSpec.describe API::Ldap do
 
   let_it_be(:user) { create(:user) }
   let_it_be(:admin) { create(:admin) }
+
   let(:adapter) { ldap_adapter }
 
   before do

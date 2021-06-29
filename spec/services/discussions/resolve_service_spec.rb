@@ -7,6 +7,7 @@ RSpec.describe Discussions::ResolveService do
     let_it_be(:project) { create(:project, :repository) }
     let_it_be(:user) { create(:user, developer_projects: [project]) }
     let_it_be(:merge_request) { create(:merge_request, :merge_when_pipeline_succeeds, source_project: project) }
+
     let(:discussion) { create(:diff_note_on_merge_request, noteable: merge_request, project: project).to_discussion }
     let(:service) { described_class.new(project, user, one_or_more_discussions: discussion) }
 
@@ -100,6 +101,7 @@ RSpec.describe Discussions::ResolveService do
 
     context 'when discussion is not for a merge request' do
       let_it_be(:design) { create(:design, :with_file, issue: create(:issue, project: project)) }
+
       let(:discussion) { create(:diff_note_on_design, noteable: design, project: project).to_discussion }
 
       it 'does not execute the notification service' do
@@ -119,6 +121,51 @@ RSpec.describe Discussions::ResolveService do
         expect(AutoMergeProcessWorker).not_to receive(:perform_async)
 
         service.execute
+      end
+    end
+
+    context 'when resolving a discussion' do
+      def resolve_discussion(discussion, user)
+        described_class.new(project, user, one_or_more_discussions: discussion).execute
+      end
+
+      context 'in a design' do
+        let_it_be(:design) { create(:design, :with_file, issue: create(:issue, project: project)) }
+        let_it_be(:user_1) { create(:user) }
+        let_it_be(:user_2) { create(:user) }
+        let_it_be(:discussion_1) { create(:diff_note_on_design, noteable: design, project: project, author: user_1).to_discussion }
+        let_it_be(:discussion_2) { create(:diff_note_on_design, noteable: design, project: project, author: user_2).to_discussion }
+
+        before do
+          project.add_developer(user_1)
+          project.add_developer(user_2)
+        end
+
+        context 'when user resolving discussion has open todos' do
+          let!(:user_1_todo_for_discussion_1) { create(:todo, :pending, user: user_1, target: design, note: discussion_1.notes.first, project: project) }
+          let!(:user_1_todo_2_for_discussion_1) { create(:todo, :pending, user: user_1, target: design, note: discussion_1.notes.first, project: project) }
+          let!(:user_1_todo_for_discussion_2) { create(:todo, :pending, user: user_1, target: design, note: discussion_2.notes.first, project: project) }
+          let!(:user_2_todo_for_discussion_1) { create(:todo, :pending, user: user_2, target: design, note: discussion_1.notes.first, project: project) }
+
+          it 'marks user todos for given discussion as done' do
+            resolve_discussion(discussion_1, user_1)
+
+            expect(user_1_todo_for_discussion_1.reload).to be_done
+            expect(user_1_todo_2_for_discussion_1.reload).to be_done
+            expect(user_1_todo_for_discussion_2.reload).to be_pending
+            expect(user_2_todo_for_discussion_1.reload).to be_pending
+          end
+        end
+      end
+
+      context 'in a merge request' do
+        let!(:user_todo_for_discussion) { create(:todo, :pending, user: user, target: merge_request, note: discussion.notes.first, project: project) }
+
+        it 'does not mark user todo as done' do
+          resolve_discussion(discussion, user)
+
+          expect(user_todo_for_discussion).to be_pending
+        end
       end
     end
   end

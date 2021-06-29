@@ -513,14 +513,14 @@ Finished in 34.51 seconds (files took 0.76702 seconds to load)
 
 #### Run `:js` spec in a visible browser
 
-Run the spec with `CHROME_HEADLESS=0`, like this:
+Run the spec with `WEBDRIVER_HEADLESS=0`, like this:
 
 ```shell
-CHROME_HEADLESS=0 bin/rspec some_spec.rb
+WEBDRIVER_HEADLESS=0 bin/rspec some_spec.rb
 ```
 
 The test completes quickly, but this gives you an idea of what's happening.
-Using `live_debug` with `CHROME_HEADLESS=0` pauses the open browser, and does not
+Using `live_debug` with `WEBDRIVER_HEADLESS=0` pauses the open browser, and does not
 open the page again. This can be used to debug and inspect elements.
 
 You can also add `byebug` or `binding.pry` to pause execution and [step through](../pry_debugging.md#stepping)
@@ -871,7 +871,8 @@ at the start and end of each context only. The [Elasticsearch DeleteByQuery API]
 is used to delete data in all indices in between examples to ensure a clean index.
 
 Note that Elasticsearch indexing uses [`Gitlab::Redis::SharedState`](../../../ee/development/redis.md#gitlabrediscachesharedstatequeues).
-Therefore, it is recommended to use `:clean_gitlab_redis_shared_state` in conjunction with the Elasticsearch traits.
+Therefore, the Elasticsearch traits dynamically use the `:clean_gitlab_redis_shared_state` trait.
+You do NOT need to add `:clean_gitlab_redis_shared_state` manually.
 
 Specs using Elasticsearch require that you:
 
@@ -1148,7 +1149,7 @@ module Spec
     module Helpers
       module CycleAnalyticsHelpers
         def create_commit_referencing_issue(issue, branch_name: random_git_name)
-          project.repository.add_branch(user, branch_name, 'master')
+          project.repository.add_branch(user, branch_name, 'main')
           create_commit("Commit for ##{issue.iid}", issue.project, user, branch_name)
         end
       end
@@ -1205,7 +1206,7 @@ let(:project) { create(:project, :repository) }
 ```
 
 Where you can, consider using the `:custom_repo` trait instead of `:repository`.
-This allows you to specify exactly what files appear in the `master` branch
+This allows you to specify exactly what files appear in the `main` branch
 of the project's repository. For example:
 
 ```ruby

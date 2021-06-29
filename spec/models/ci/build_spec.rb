@@ -111,10 +111,6 @@ RSpec.describe Ci::Build do
   describe '.with_downloadable_artifacts' do
     subject { described_class.with_downloadable_artifacts }
 
-    before do
-      stub_feature_flags(drop_license_management_artifact: false)
-    end
-
     context 'when job does not have a downloadable artifact' do
       let!(:job) { create(:ci_build) }
 
@@ -388,7 +384,7 @@ RSpec.describe Ci::Build do
 
       context 'when there is a queuing entry already present' do
         before do
-          ::Ci::PendingBuild.create!(build: build, project: build.project)
+          create(:ci_pending_build, build: build, project: build.project)
         end
 
         it 'does not raise an error' do
@@ -400,7 +396,7 @@ RSpec.describe Ci::Build do
       context 'when both failure scenario happen at the same time' do
         before do
           ::Ci::Build.find(build.id).update_column(:lock_version, 100)
-          ::Ci::PendingBuild.create!(build: build, project: build.project)
+          create(:ci_pending_build, build: build, project: build.project)
         end
 
         it 'raises stale object error exception' do
@@ -482,7 +478,7 @@ RSpec.describe Ci::Build do
       let(:build) { create(:ci_build, :pending) }
 
       before do
-        ::Ci::PendingBuild.create!(build: build, project: build.project)
+        create(:ci_pending_build, build: build, project: build.project)
         ::Ci::Build.find(build.id).update_column(:lock_version, 100)
       end
 
@@ -491,6 +487,34 @@ RSpec.describe Ci::Build do
           .to raise_error(ActiveRecord::StaleObjectError)
 
         expect(build.queuing_entry).to be_present
+      end
+    end
+
+    context 'when build has been picked by a shared runner' do
+      let(:build) { create(:ci_build, :pending) }
+
+      it 'creates runtime metadata entry' do
+        build.runner = create(:ci_runner, :instance_type)
+
+        build.run!
+
+        expect(build.reload.runtime_metadata).to be_present
+      end
+    end
+  end
+
+  describe '#drop' do
+    context 'when has a runtime tracking entry' do
+      let(:build) { create(:ci_build, :pending) }
+
+      it 'removes runtime tracking entry' do
+        build.runner = create(:ci_runner, :instance_type)
+
+        build.run!
+        expect(build.reload.runtime_metadata).to be_present
+
+        build.drop!
+        expect(build.reload.runtime_metadata).not_to be_present
       end
     end
   end
@@ -1704,8 +1728,6 @@ RSpec.describe Ci::Build do
     subject { build.erase_erasable_artifacts! }
 
     before do
-      stub_feature_flags(drop_license_management_artifact: false)
-
       Ci::JobArtifact.file_types.keys.each do |file_type|
         create(:ci_job_artifact, job: build, file_type: file_type, file_format: Ci::JobArtifact::TYPE_AND_FORMAT_PAIRS[file_type.to_sym])
       end
@@ -1941,6 +1963,23 @@ RSpec.describe Ci::Build do
 
         it { is_expected.to be_falsey }
       end
+    end
+  end
+
+  describe '#tag_list' do
+    let_it_be(:build) { create(:ci_build, tag_list: ['tag']) }
+
+    context 'when tags are preloaded' do
+      it 'does not trigger queries' do
+        build_with_tags = described_class.eager_load_tags.id_in([build]).to_a.first
+
+        expect { build_with_tags.tag_list }.not_to exceed_all_query_limit(0)
+        expect(build_with_tags.tag_list).to eq(['tag'])
+      end
+    end
+
+    context 'when tags are not preloaded' do
+      it { expect(described_class.find(build.id).tag_list).to eq(['tag']) }
     end
   end
 
@@ -2599,7 +2638,6 @@ RSpec.describe Ci::Build do
           { key: 'CI_PROJECT_VISIBILITY', value: 'private', public: true, masked: false },
           { key: 'CI_PROJECT_REPOSITORY_LANGUAGES', value: project.repository_languages.map(&:name).join(',').downcase, public: true, masked: false },
           { key: 'CI_DEFAULT_BRANCH', value: project.default_branch, public: true, masked: false },
-          { key: 'CI_PROJECT_CONFIG_PATH', value: project.ci_config_path_or_default, public: true, masked: false },
           { key: 'CI_CONFIG_PATH', value: project.ci_config_path_or_default, public: true, masked: false },
           { key: 'CI_PAGES_DOMAIN', value: Gitlab.config.pages.host, public: true, masked: false },
           { key: 'CI_PAGES_URL', value: project.pages_url, public: true, masked: false },
@@ -4455,26 +4493,12 @@ RSpec.describe Ci::Build do
       it { is_expected.to include(:upload_multiple_artifacts) }
     end
 
-    context 'when artifacts exclude is defined and the is feature enabled' do
+    context 'when artifacts exclude is defined' do
       let(:options) do
         { artifacts: { exclude: %w[something] } }
       end
 
-      context 'when a feature flag is enabled' do
-        before do
-          stub_feature_flags(ci_artifacts_exclude: true)
-        end
-
-        it { is_expected.to include(:artifacts_exclude) }
-      end
-
-      context 'when a feature flag is disabled' do
-        before do
-          stub_feature_flags(ci_artifacts_exclude: false)
-        end
-
-        it { is_expected.not_to include(:artifacts_exclude) }
-      end
+      it { is_expected.to include(:artifacts_exclude) }
     end
   end
 
@@ -5180,5 +5204,51 @@ RSpec.describe Ci::Build do
     it { expect(matcher.protected?).to eq(build.protected?) }
 
     it { expect(matcher.project).to eq(build.project) }
+  end
+
+  describe '#shared_runner_build?' do
+    context 'when build does not have a runner assigned' do
+      it 'is not a shared runner build' do
+        expect(build.runner).to be_nil
+
+        expect(build).not_to be_shared_runner_build
+      end
+    end
+
+    context 'when build has a project runner assigned' do
+      before do
+        build.runner = create(:ci_runner, :project)
+      end
+
+      it 'is not a shared runner build' do
+        expect(build).not_to be_shared_runner_build
+      end
+    end
+
+    context 'when build has an instance runner assigned' do
+      before do
+        build.runner = create(:ci_runner, :instance_type)
+      end
+
+      it 'is a shared runner build' do
+        expect(build).to be_shared_runner_build
+      end
+    end
+  end
+
+  describe '.without_coverage' do
+    let!(:build_with_coverage) { create(:ci_build, pipeline: pipeline, coverage: 100.0) }
+
+    it 'returns builds without coverage values' do
+      expect(described_class.without_coverage).to eq([build])
+    end
+  end
+
+  describe '.with_coverage_regex' do
+    let!(:build_with_coverage_regex) { create(:ci_build, pipeline: pipeline, coverage_regex: '\d') }
+
+    it 'returns builds with coverage regex values' do
+      expect(described_class.with_coverage_regex).to eq([build_with_coverage_regex])
+    end
   end
 end

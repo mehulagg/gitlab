@@ -10,7 +10,7 @@ type: reference, howto
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/1984) in GitLab 9.3.
 > - Made [available in all tiers](https://gitlab.com/gitlab-org/gitlab/-/issues/212499) in 13.2.
 
-Ensuring your project's code stays simple, readable and easy to contribute to can be problematic. With the help of [GitLab CI/CD](../../../ci/README.md), you can analyze your
+Ensuring your project's code stays simple, readable and easy to contribute to can be problematic. With the help of [GitLab CI/CD](../../../ci/index.md), you can analyze your
 source code quality using GitLab Code Quality.
 
 Code Quality:
@@ -54,20 +54,25 @@ See also the Code Climate list of [Supported Languages for Maintainability](http
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/267612) in [GitLab Ultimate](https://about.gitlab.com/pricing/) 13.11.
 > - [Deployed behind a feature flag](../../../user/feature_flags.md), disabled by default.
 > - [Enabled by default](https://gitlab.com/gitlab-org/gitlab/-/issues/284140) in GitLab 13.12.
+> - [Feature enhanced](https://gitlab.com/gitlab-org/gitlab/-/issues/2526) in GitLab 14.0.
 
 Changes to files in merge requests can cause Code Quality to fall if merged. In these cases,
-an indicator is displayed (**{information-o}** **Code Quality**) on the file in the merge request's diff view. For example:
+the merge request's diff view displays an indicator next to lines with new Code Quality violations. For example:
+
+![Code Quality MR diff report](img/code_quality_mr_diff_report_v14.png)
+
+Previously, an indicator was displayed (**{information-o}** **Code Quality**) on the file in the merge request's diff view:
 
 ![Code Quality MR diff report](img/code_quality_mr_diff_report_v13_11.png)
 
-To disable this feature, a GitLab administrator can run the following in a
+To switch to the previous version of this feature, a GitLab administrator can run the following in a
 [Rails console](../../../administration/operations/rails_console.md):
 
 ```ruby
 # For the instance
-Feature.disable(:codequality_mr_diff)
+Feature.disable(:codequality_mr_diff_annotations)
 # For a single project
-Feature.disable(:codequality_mr_diff, Project.find(<project id>))
+Feature.disable(:codequality_mr_diff_annotations, Project.find(<project id>))
 ```
 
 ## Use cases
@@ -106,7 +111,7 @@ include:
 
 The above example creates a `code_quality` job in your CI/CD pipeline which
 scans your source code for code quality issues. The report is saved as a
-[Code Quality report artifact](../../../ci/yaml/README.md#artifactsreportscodequality)
+[Code Quality report artifact](../../../ci/yaml/index.md#artifactsreportscodequality)
 that you can later download and analyze.
 
 It's also possible to override the URL to the Code Quality image by
@@ -257,13 +262,13 @@ was chosen as an operational decision by the runner team, instead of exposing `d
 ### Disabling the code quality job
 
 The `code_quality` job doesn't run if the `$CODE_QUALITY_DISABLED` CI/CD variable
-is present. Please refer to the CI/CD variables [documentation](../../../ci/variables/README.md)
+is present. Please refer to the CI/CD variables [documentation](../../../ci/variables/index.md)
 to learn more about how to define one.
 
 To disable the `code_quality` job, add `CODE_QUALITY_DISABLED` as a custom CI/CD variable.
 This can be done:
 
-- For [the whole project](../../../ci/variables/README.md#custom-cicd-variables).
+- For [the whole project](../../../ci/variables/index.md#custom-cicd-variables).
 - For a single pipeline run:
 
   1. Go to **CI/CD > Pipelines**
@@ -277,7 +282,7 @@ run on [pipelines for merge requests](../../../ci/merge_request_pipelines/index.
 
 If pipelines for merge requests is enabled, the `code_quality:rules` must be redefined.
 
-The template has these [`rules`](../../../ci/yaml/README.md#rules) for the `code quality` job:
+The template has these [`rules`](../../../ci/yaml/index.md#rules) for the `code quality` job:
 
 ```yaml
 code_quality:
@@ -287,7 +292,7 @@ code_quality:
     - if: '$CI_COMMIT_TAG || $CI_COMMIT_BRANCH'
 ```
 
-If you are using merge request pipelines, your `rules` (or [`workflow: rules`](../../../ci/yaml/README.md#workflow))
+If you are using merge request pipelines, your `rules` (or [`workflow: rules`](../../../ci/yaml/index.md#workflow))
 might look like this example:
 
 ```yaml
@@ -329,7 +334,7 @@ do this:
 
 1. Define a job in your `.gitlab-ci.yml` file that generates the
    [Code Quality report
-   artifact](../../../ci/yaml/README.md#artifactsreportscodequality).
+   artifact](../../../ci/yaml/index.md#artifactsreportscodequality).
 1. Configure your tool to generate the Code Quality report artifact as a JSON
    file that implements a subset of the [Code Climate
    spec](https://github.com/codeclimate/platform/blob/master/spec/analyzers/SPEC.md#data-types).
@@ -337,13 +342,13 @@ do this:
 The Code Quality report artifact JSON file must contain an array of objects
 with the following properties:
 
-| Name                   | Description                                                                            |
-| ---------------------- | -------------------------------------------------------------------------------------- |
-| `description`          | A description of the code quality violation.                                           |
-| `fingerprint`          | A unique fingerprint to identify the code quality violation. For example, an MD5 hash. |
-| `severity`             | A severity string (can be `info`, `minor`, `major`, `critical`, or `blocker`).                          |
-| `location.path`        | The relative path to the file containing the code quality violation.                   |
-| `location.lines.begin` | The line on which the code quality violation occurred.                                 |
+| Name                   | Description                                                                               |
+| ---------------------- | ----------------------------------------------------------------------------------------- |
+| `description`          | A description of the code quality violation.                                              |
+| `fingerprint`          | A unique fingerprint to identify the code quality violation. For example, an MD5 hash.    |
+| `severity`             | A severity string (can be `info`, `minor`, `major`, `critical`, or `blocker`).            |
+| `location.path`        | The relative path to the file containing the code quality violation.                      |
+| `location.lines.begin` or `location.positions.begin.line` | The line on which the code quality violation occurred. |
 
 Example:
 
@@ -530,7 +535,7 @@ This can be due to multiple reasons:
 - Your pipeline is not set to run the code quality job on your target branch. If there is no report generated from the target branch, your MR branch reports have nothing to compare to.
 - If no [degradation or error is detected](https://docs.codeclimate.com/docs/maintainability#section-checks),
   nothing is displayed.
-- The [`artifacts:expire_in`](../../../ci/yaml/README.md#artifactsexpire_in) CI/CD
+- The [`artifacts:expire_in`](../../../ci/yaml/index.md#artifactsexpire_in) CI/CD
   setting can cause the Code Quality artifact(s) to expire faster than desired.
 - The widgets use the pipeline of the latest commit to the target branch. If commits are made to the default branch that do not run the code quality job, this may cause the merge request widget to have no base report for comparison.
 - If you use the [`REPORT_STDOUT` environment variable](https://gitlab.com/gitlab-org/ci-cd/codequality#environment-variables), no report file is generated and nothing displays in the merge request.

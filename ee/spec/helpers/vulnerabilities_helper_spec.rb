@@ -184,11 +184,11 @@ RSpec.describe VulnerabilitiesHelper do
   describe '#create_jira_issue_url_for' do
     subject { helper.vulnerability_details(vulnerability, pipeline) }
 
-    let(:jira_service) { double('Integrations::Jira', new_issue_url_with_predefined_fields: 'https://jira.example.com/new') }
+    let(:jira_integration) { double('Integrations::Jira', new_issue_url_with_predefined_fields: 'https://jira.example.com/new') }
 
     before do
       allow(helper).to receive(:can?).and_return(true)
-      allow(vulnerability.project).to receive(:jira_service).and_return(jira_service)
+      allow(vulnerability.project).to receive(:jira_integration).and_return(jira_integration)
     end
 
     context 'with jira vulnerabilities integration enabled' do
@@ -232,7 +232,7 @@ RSpec.describe VulnerabilitiesHelper do
       end
 
       it 'delegates rendering URL to Integrations::Jira' do
-        expect(jira_service).to receive(:new_issue_url_with_predefined_fields).with("Investigate vulnerability: #{vulnerability.title}", expected_jira_issue_description)
+        expect(jira_integration).to receive(:new_issue_url_with_predefined_fields).with("Investigate vulnerability: #{vulnerability.title}", expected_jira_issue_description)
 
         subject
       end

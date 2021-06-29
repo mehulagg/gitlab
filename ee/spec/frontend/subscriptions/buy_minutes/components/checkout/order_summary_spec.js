@@ -17,7 +17,7 @@ localVue.use(VueApollo);
 describe('Order Summary', () => {
   const resolvers = { ...purchaseFlowResolvers, ...subscriptionsResolvers };
   const initialStateData = {
-    selectedPlanId: 'silver',
+    selectedPlanId: 'secondPlanId',
   };
   let wrapper;
 
@@ -106,7 +106,7 @@ describe('Order Summary', () => {
       beforeEach(() => {
         createComponent({
           subscription: { quantity: 1 },
-          selectedPlanId: 'bronze',
+          selectedPlanId: 'firstPlanId',
         });
       });
 
@@ -128,7 +128,6 @@ describe('Order Summary', () => {
     beforeEach(() => {
       createComponent({
         subscription: { quantity: 1 },
-        selectedPlanId: 'silver',
       });
     });
 
@@ -154,7 +153,6 @@ describe('Order Summary', () => {
       beforeEach(() => {
         createComponent({
           subscription: { quantity: 3 },
-          selectedPlanId: 'silver',
         });
       });
 
@@ -179,7 +177,6 @@ describe('Order Summary', () => {
       beforeEach(() => {
         createComponent({
           subscription: { quantity: 0 },
-          selectedPlanId: 'silver',
         });
       });
 

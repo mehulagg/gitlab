@@ -18,20 +18,24 @@ For a full list of reference architectures, see
 
 | Service                                  | Nodes  | Configuration           | GCP             | AWS          | Azure    |
 |------------------------------------------|--------|-------------------------|-----------------|--------------|----------|
-| Load balancer                            | 1      | 2 vCPU, 1.8 GB memory   | `n1-highcpu-2`  | `c5.large`   | `F2s v2` |
-| PostgreSQL*                              | 1      | 2 vCPU, 7.5 GB memory   | `n1-standard-2` | `m5.large`   | `D2s v3` |
-| Redis**                                  | 1      | 1 vCPU, 3.75 GB memory  | `n1-standard-1` | `m5.large`   | `D2s v3` |
+| Load balancer(3)                         | 1      | 2 vCPU, 1.8 GB memory   | `n1-highcpu-2`  | `c5.large`   | `F2s v2` |
+| PostgreSQL(1)                            | 1      | 2 vCPU, 7.5 GB memory   | `n1-standard-2` | `m5.large`   | `D2s v3` |
+| Redis(2)                                 | 1      | 1 vCPU, 3.75 GB memory  | `n1-standard-1` | `m5.large`   | `D2s v3` |
 | Gitaly                                   | 1      | 4 vCPU, 15 GB memory    | `n1-standard-4` | `m5.xlarge`  | `D4s v3` |
 | GitLab Rails                             | 2      | 8 vCPU, 7.2 GB memory   | `n1-highcpu-8`  | `c5.2xlarge` | `F8s v2` |
 | Monitoring node                          | 1      | 2 vCPU, 1.8 GB memory   | `n1-highcpu-2`  | `c5.large`   | `F2s v2` |
-| Object storage                           | n/a    | n/a                     | n/a             | n/a          | n/a      |
+| Object storage(4)                        | n/a    | n/a                     | n/a             | n/a          | n/a      |
 | NFS server (optional, not recommended)   | 1      | 4 vCPU, 3.6 GB memory   | `n1-highcpu-4`  | `c5.xlarge`  | `F4s v2` |
 
+<!-- markdownlint-disable MD029 -->
+1. Can be optionally run on reputable third party external PaaS PostgreSQL solutions. Google Cloud SQL and AWS RDS are known to work, however Azure Database for PostgreSQL is [not recommended](https://gitlab.com/gitlab-org/quality/reference-architectures/-/issues/61) due to performance issues. Consul is primarily used for PostgreSQL high availability so can be ignored when using a PostgreSQL PaaS setup. However it is also used optionally by Prometheus for Omnibus auto host discovery.
+2. Can be optionally run as reputable third party external PaaS Redis solutions. Google Memorystore and AWS Elasticache are known to work.
+3. Can be optionally run as reputable third party load balancing services (LB PaaS). AWS ELB is known to work.
+4. Should be run on reputable third party object storage (storage PaaS) for cloud implementations. Google Cloud Storage and AWS S3 are known to work.
+<!-- markdownlint-enable MD029 -->
+
 NOTE:
-Components marked with * can be optionally run on reputable
-third party external PaaS PostgreSQL solutions. Google Cloud SQL and AWS RDS are known to work.
-Components marked with ** can be optionally run on reputable
-third party external PaaS Redis solutions. Google Memorystore and AWS ElastiCache are known to work.
+For all PaaS solutions that involve configuring instances, it is strongly recommended to implement a minimum of three nodes in three different availability zones to align with resilient cloud architecture practices.
 
 ```plantuml
 @startuml 2k
@@ -265,10 +269,8 @@ further configuration steps.
      database. Example: `%w(123.123.123.123/32 123.123.123.234/32)`
 
    ```ruby
-   # Disable all components except PostgreSQL
-   roles ['postgres_role']
-   patroni['enable'] = false
-   consul['enable'] = false
+   # Disable all components except PostgreSQL related ones
+   roles(['postgres_role'])
    prometheus['enable'] = false
    alertmanager['enable'] = false
    pgbouncer_exporter['enable'] = false
@@ -349,7 +351,7 @@ Omnibus:
    ```ruby
    ## Enable Redis
    redis['enable'] = true
-
+   
    # Avoid running unnecessary services on the Redis server
    gitaly['enable'] = false
    postgresql['enable'] = false
@@ -638,7 +640,7 @@ On each node perform the following:
    })
 
    ## Disable components that will not be on the GitLab application server
-   roles ['application_role']
+   roles(['application_role'])
    gitaly['enable'] = false
    nginx['enable'] = true
 
@@ -786,32 +788,21 @@ running [Prometheus](../monitoring/prometheus/index.md) and
 1. Edit `/etc/gitlab/gitlab.rb` and add the contents:
 
    ```ruby
+   roles(['monitoring_role'])
+
    external_url 'http://gitlab.example.com'
 
-   # Enable Prometheus
-   prometheus['enable'] = true
+   # Prometheus
    prometheus['listen_address'] = '0.0.0.0:9090'
    prometheus['monitor_kubernetes'] = false
 
-   # Enable Login form
+   # Grafana
+   grafana['enable'] = true
+   grafana['admin_password'] = '<grafana_password>'
    grafana['disable_login_form'] = false
 
-   # Enable Grafana
-   grafana['enable'] = true
-   grafana['admin_password'] = 'toomanysecrets'
-
-   # Avoid running unnecessary services on the Prometheus server
-   gitaly['enable'] = false
-   postgresql['enable'] = false
-   redis['enable'] = false
-   puma['enable'] = false
-   sidekiq['enable'] = false
-   gitlab_workhorse['enable'] = false
-   alertmanager['enable'] = false
-   gitlab_exporter['enable'] = false
-
-   # Prevent database migrations from running on upgrade automatically
-   gitlab_rails['auto_migrate'] = false
+   # Nginx - For Grafana access
+   nginx['enable'] = true
    ```
 
 1. Prometheus also needs some scrape configurations to pull all the data from the various
@@ -974,10 +965,13 @@ possible. However, if you intend to use GitLab Pages,
 See how to [configure NFS](../nfs.md).
 
 WARNING:
-From GitLab 14.0, enhancements and bug fixes for NFS for Git repositories will no longer be
-considered and customer technical support will be considered out of scope.
-[Read more about Gitaly and NFS](../gitaly/index.md#nfs-deprecation-notice) and
-[the correct mount options to use](../nfs.md#upgrade-to-gitaly-cluster-or-disable-caching-if-experiencing-data-loss).
+Engineering support for NFS for Git repositories is deprecated. Technical support is planned to be
+unavailable from GitLab 15.0. No further enhancements are planned for this feature.
+
+Read:
+
+- The [Gitaly and NFS deprecation notice](../gitaly/index.md#nfs-deprecation-notice).
+- About the [correct mount options to use](../nfs.md#upgrade-to-gitaly-cluster-or-disable-caching-if-experiencing-data-loss).
 
 <div align="right">
   <a type="button" class="btn btn-default" href="#setup-components">

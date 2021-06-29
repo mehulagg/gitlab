@@ -2,7 +2,7 @@
 
 class Admin::ApplicationSettingsController < Admin::ApplicationController
   include InternalRedirect
-  include ServicesHelper
+  include IntegrationsHelper
 
   # NOTE: Use @application_setting in this controller when you need to access
   # application_settings after it has been modified. This is because the
@@ -207,8 +207,12 @@ class Admin::ApplicationSettingsController < Admin::ApplicationController
     end
 
     params[:application_setting][:import_sources]&.delete("")
+    params[:application_setting][:valid_runner_registrars]&.delete("")
     params[:application_setting][:restricted_visibility_levels]&.delete("")
-    params[:application_setting][:required_instance_ci_template] = nil if params[:application_setting][:required_instance_ci_template].blank?
+
+    if params[:application_setting].key?(:required_instance_ci_template)
+      params[:application_setting][:required_instance_ci_template] = nil if params[:application_setting][:required_instance_ci_template].empty?
+    end
 
     remove_blank_params_for!(:elasticsearch_aws_secret_access_key, :eks_secret_access_key)
 
@@ -217,9 +221,7 @@ class Admin::ApplicationSettingsController < Admin::ApplicationController
     params.delete(:domain_denylist_raw) if params[:domain_denylist]
     params.delete(:domain_allowlist_raw) if params[:domain_allowlist]
 
-    params.require(:application_setting).permit(
-      visible_application_setting_attributes
-    )
+    params[:application_setting].permit(visible_application_setting_attributes)
   end
 
   def recheck_user_consent?
@@ -244,7 +246,8 @@ class Admin::ApplicationSettingsController < Admin::ApplicationController
       disabled_oauth_sign_in_sources: [],
       import_sources: [],
       restricted_visibility_levels: [],
-      repository_storages_weighted: {}
+      repository_storages_weighted: {},
+      valid_runner_registrars: []
     ]
   end
 
@@ -253,7 +256,7 @@ class Admin::ApplicationSettingsController < Admin::ApplicationController
   end
 
   def perform_update
-    successful = ApplicationSettings::UpdateService
+    successful = ::ApplicationSettings::UpdateService
       .new(@application_setting, current_user, application_setting_params)
       .execute
 

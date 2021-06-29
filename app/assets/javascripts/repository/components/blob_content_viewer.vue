@@ -5,14 +5,17 @@ import BlobContent from '~/blob/components/blob_content.vue';
 import BlobHeader from '~/blob/components/blob_header.vue';
 import { SIMPLE_BLOB_VIEWER, RICH_BLOB_VIEWER } from '~/blob/components/constants';
 import createFlash from '~/flash';
+import { isLoggedIn } from '~/lib/utils/common_utils';
 import { __ } from '~/locale';
 import blobInfoQuery from '../queries/blob_info.query.graphql';
-import BlobHeaderEdit from './blob_header_edit.vue';
+import BlobButtonGroup from './blob_button_group.vue';
+import BlobEdit from './blob_edit.vue';
 
 export default {
   components: {
     BlobHeader,
-    BlobHeaderEdit,
+    BlobEdit,
+    BlobButtonGroup,
     BlobContent,
     GlLoadingIcon,
   },
@@ -87,6 +90,9 @@ export default {
     };
   },
   computed: {
+    isLoggedIn() {
+      return isLoggedIn();
+    },
     isLoading() {
       return this.$apollo.queries.project.loading;
     },
@@ -126,9 +132,13 @@ export default {
         @viewer-changed="switchViewer"
       >
         <template #actions>
-          <blob-header-edit
-            :edit-path="blobInfo.editBlobPath"
-            :web-ide-path="blobInfo.ideEditPath"
+          <blob-edit :edit-path="blobInfo.editBlobPath" :web-ide-path="blobInfo.ideEditPath" />
+          <blob-button-group
+            v-if="isLoggedIn"
+            :path="path"
+            :name="blobInfo.name"
+            :replace-path="blobInfo.replacePath"
+            :can-push-code="blobInfo.canModifyBlob"
           />
         </template>
       </blob-header>

@@ -63,7 +63,7 @@ Since [GitLab 12.7](https://gitlab.com/gitlab-org/gitlab/-/issues/26655),
 Auto DevOps runs on pipelines automatically only if a [`Dockerfile` or matching buildpack](stages.md#auto-build)
 exists.
 
-If a [CI/CD configuration file](../../ci/yaml/README.md) is present in the
+If a [CI/CD configuration file](../../ci/yaml/index.md) is present in the
 project, it isn't changed and won't be affected by Auto DevOps.
 
 ### At the project level
@@ -80,7 +80,7 @@ To enable it:
    and choose the [deployment strategy](#deployment-strategy).
 1. Click **Save changes** for the changes to take effect.
 
-After enabling the feature, an Auto DevOps pipeline is triggered on the `master` branch.
+After enabling the feature, an Auto DevOps pipeline is triggered on the default branch.
 
 ### At the group level
 
@@ -103,7 +103,8 @@ To enable or disable Auto DevOps at the group level:
 Even when disabled at the instance level, group owners and project maintainers
 can still enable Auto DevOps at the group and project level, respectively.
 
-1. As an administrator, go to **Admin Area > Settings > CI/CD > Continuous Integration and Deployment**.
+1. As an administrator, on the top bar, select **Menu >** **{admin}** **Admin**.
+1. Go to **Settings > CI/CD > Continuous Integration and Deployment**.
 1. Select **Default to Auto DevOps pipeline for all projects** to enable it.
 1. (Optional) You can set up the Auto DevOps [base domain](#auto-devops-base-domain),
    for Auto Deploy and Auto Review Apps to use.
@@ -118,7 +119,7 @@ project's **Settings > CI/CD > Auto DevOps**. The following options
 are available:
 
 - **Continuous deployment to production**: Enables [Auto Deploy](stages.md#auto-deploy)
-  with `master` branch directly deployed to production.
+  with the default branch directly deployed to production.
 - **Continuous deployment to production using timed incremental rollout**: Sets the
   [`INCREMENTAL_ROLLOUT_MODE`](customize.md#timed-incremental-rollout-to-production) variable
   to `timed`. Production deployments execute with a 5 minute delay between
@@ -128,7 +129,7 @@ are available:
   [`INCREMENTAL_ROLLOUT_MODE`](customize.md#incremental-rollout-to-production) variables
   to `1` and `manual`. This means:
 
-  - `master` branch is directly deployed to staging.
+  - The default branch is directly deployed to staging.
   - Manual actions are provided for incremental rollout to production.
 
 NOTE:
@@ -222,16 +223,16 @@ The Auto DevOps base domain is required to use
 [Auto Monitoring](stages.md#auto-monitoring). You can define the base domain in
 any of the following places:
 
-- either under the cluster's settings, whether for an instance,
-  [projects](../../user/project/clusters/index.md#base-domain) or
+- Either under the cluster's settings, whether for an instance,
+  [projects](../../user/project/clusters/gitlab_managed_clusters.md#base-domain) or
   [groups](../../user/group/clusters/index.md#base-domain)
-- or at the project level as a variable: `KUBE_INGRESS_BASE_DOMAIN`
-- or at the group level as a variable: `KUBE_INGRESS_BASE_DOMAIN`
-- or as an instance-wide fallback in **Admin Area > Settings > CI/CD** under the
-  **Continuous Integration and Delivery** section
+- Or at the project level as a variable: `KUBE_INGRESS_BASE_DOMAIN`
+- Or at the group level as a variable: `KUBE_INGRESS_BASE_DOMAIN`
+- Or as an instance-wide fallback in **Menu >** **{admin}** **Admin >**
+  **Settings > CI/CD** under the **Continuous Integration and Delivery** section.
 
 The base domain variable `KUBE_INGRESS_BASE_DOMAIN` follows the same order of precedence
-as other environment [variables](../../ci/variables/README.md#cicd-variable-precedence).
+as other environment [variables](../../ci/variables/index.md#cicd-variable-precedence).
 If the CI/CD variable is not set and the cluster setting is left blank, the instance-wide **Auto DevOps domain**
 setting is used if set.
 
@@ -262,7 +263,7 @@ See [Auto DevOps requirements for Amazon ECS](requirements.md#auto-devops-requir
 
 When using Auto DevOps, you can deploy different environments to
 different Kubernetes clusters, due to the 1:1 connection
-[existing between them](../../user/project/clusters/index.md#multiple-kubernetes-clusters).
+[existing between them](../../user/project/clusters/multiple_kubernetes_clusters.md).
 
 The [Deploy Job template](https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/Jobs/Deploy.gitlab-ci.yml)
 used by Auto DevOps currently defines 3 environment names:
@@ -274,7 +275,7 @@ used by Auto DevOps currently defines 3 environment names:
 Those environments are tied to jobs using [Auto Deploy](stages.md#auto-deploy), so
 except for the environment scope, they must have a different deployment domain.
 You must define a separate `KUBE_INGRESS_BASE_DOMAIN` variable for each of the above
-[based on the environment](../../ci/variables/README.md#limit-the-environment-scope-of-a-cicd-variable).
+[based on the environment](../../ci/variables/index.md#limit-the-environment-scope-of-a-cicd-variable).
 
 The following table is an example of how to configure the three different clusters:
 
@@ -286,14 +287,14 @@ The following table is an example of how to configure the three different cluste
 
 To add a different cluster for each environment:
 
-1. Navigate to your project's **Operations > Kubernetes**.
+1. Navigate to your project's **Infrastructure > Kubernetes clusters**.
 1. Create the Kubernetes clusters with their respective environment scope, as
    described from the table above.
-1. After creating the clusters, navigate to each cluster and install
-   Ingress. Wait for the Ingress IP address to be assigned.
+1. After creating the clusters, navigate to each cluster and [install
+   Ingress](quick_start_guide.md#install-ingress). Wait for the Ingress IP address to be assigned.
 1. Make sure you've [configured your DNS](#auto-devops-base-domain) with the
    specified Auto DevOps domains.
-1. Navigate to each cluster's page, through **Operations > Kubernetes**,
+1. Navigate to each cluster's page, through **Infrastructure > Kubernetes clusters**,
    and add the domain based on its Ingress IP address.
 
 After completing configuration, you can test your setup by creating a merge request

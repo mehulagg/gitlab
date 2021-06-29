@@ -103,7 +103,7 @@ export default {
         dueDateTimeFromMilestones: this.dueDateTimeFromMilestones,
       });
     },
-    changeStartDateType(dateTypeIsFixed, typeChangeOnEdit) {
+    changeStartDateType({ dateTypeIsFixed, typeChangeOnEdit }) {
       this.toggleStartDateType({ dateTypeIsFixed });
       if (!typeChangeOnEdit) {
         this.saveDate({
@@ -120,7 +120,7 @@ export default {
         dateTypeIsFixed: true,
       });
     },
-    changeDueDateType(dateTypeIsFixed, typeChangeOnEdit) {
+    changeDueDateType({ dateTypeIsFixed, typeChangeOnEdit }) {
       this.toggleDueDateType({ dateTypeIsFixed });
       if (!typeChangeOnEdit) {
         this.saveDate({

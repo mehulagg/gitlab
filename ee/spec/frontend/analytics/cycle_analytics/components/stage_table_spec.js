@@ -247,7 +247,7 @@ describe('StageTable', () => {
     });
 
     it('will display the loading icon', () => {
-      expect(wrapper.find(GlLoadingIcon).exists()).toBe(true);
+      expect(wrapper.findComponent(GlLoadingIcon).exists()).toBe(true);
     });
 
     it('will not display pagination', () => {
@@ -261,11 +261,15 @@ describe('StageTable', () => {
     });
 
     it('will render the empty state', () => {
-      expect(wrapper.find(GlEmptyState).exists()).toBe(true);
+      expect(wrapper.findComponent(GlEmptyState).exists()).toBe(true);
     });
 
     it('will display the default no data message', () => {
       expect(wrapper.html()).toContain(notEnoughDataError);
+    });
+
+    it('will not display the pagination component', () => {
+      expect(findPagination().exists()).toBe(false);
     });
   });
 

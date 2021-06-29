@@ -1,8 +1,9 @@
 <script>
 import { GlButton, GlForm, GlFormInput, GlFormGroup, GlFormRadioGroup, GlModal } from '@gitlab/ui';
-import { cloneDeep } from 'lodash';
+import { cloneDeep, uniqueId } from 'lodash';
 import Vue from 'vue';
 import { mapState, mapActions } from 'vuex';
+import { filterStagesByHiddenStatus } from '~/cycle_analytics/utils';
 import { swapArrayItems } from '~/lib/utils/array_utility';
 import { sprintf } from '~/locale';
 import Tracking from '~/tracking';
@@ -25,10 +26,14 @@ import {
 const initializeStageErrors = (defaultStageConfig, selectedPreset = PRESET_OPTIONS_DEFAULT) =>
   selectedPreset === PRESET_OPTIONS_DEFAULT ? defaultStageConfig.map(() => ({})) : [{}];
 
-const initializeStages = (defaultStageConfig, selectedPreset = PRESET_OPTIONS_DEFAULT) =>
-  selectedPreset === PRESET_OPTIONS_DEFAULT
-    ? defaultStageConfig
-    : [{ ...defaultCustomStageFields }];
+const initializeStages = (defaultStageConfig, selectedPreset = PRESET_OPTIONS_DEFAULT) => {
+  const stages =
+    selectedPreset === PRESET_OPTIONS_DEFAULT
+      ? defaultStageConfig
+      : [{ ...defaultCustomStageFields }];
+
+  return stages.map((stage) => ({ ...stage, transitionKey: uniqueId('stage-') }));
+};
 
 export default {
   name: 'ValueStreamForm',
@@ -72,20 +77,21 @@ export default {
   data() {
     const {
       defaultStageConfig = [],
-      initialData: { name: initialName, stages: initialStages },
+      initialData: { name: initialName, stages: initialStages = [] },
       initialFormErrors,
       initialPreset,
     } = this;
     const { name: nameError = [], stages: stageErrors = [{}] } = initialFormErrors;
     const additionalFields = {
       stages: this.isEditing
-        ? cloneDeep(initialStages)
+        ? filterStagesByHiddenStatus(cloneDeep(initialStages), false)
         : initializeStages(defaultStageConfig, initialPreset),
       stageErrors:
         cloneDeep(stageErrors) || initializeStageErrors(defaultStageConfig, initialPreset),
     };
+
     return {
-      hiddenStages: [],
+      hiddenStages: filterStagesByHiddenStatus(initialStages),
       selectedPreset: initialPreset,
       presetOptions: PRESET_OPTIONS,
       name: initialName,
@@ -139,6 +145,9 @@ export default {
     canRestore() {
       return this.hiddenStages.length || this.isDirtyEditing;
     },
+    defaultValueStreamNames() {
+      return this.defaultStageConfig.map(({ name }) => name);
+    },
   },
   methods: {
     ...mapActions(['createValueStream', 'updateValueStream']),
@@ -164,9 +173,7 @@ export default {
           const msg = this.isEditing
             ? this.$options.i18n.FORM_EDITED
             : this.$options.i18n.FORM_CREATED;
-          this.$toast.show(sprintf(msg, { name: this.name }), {
-            position: 'top-center',
-          });
+          this.$toast.show(sprintf(msg, { name: this.name }));
           this.name = '';
           this.nameError = [];
           this.stages = initializeStages(this.defaultStageConfig, this.selectedPreset);
@@ -176,11 +183,6 @@ export default {
           });
         }
       });
-    },
-    stageKey(index) {
-      return this.selectedPreset === PRESET_OPTIONS_DEFAULT
-        ? `default-template-stage-${index}`
-        : `custom-template-stage-${index}`;
     },
     stageGroupLabel(index) {
       return sprintf(this.$options.i18n.STAGE_INDEX, { index: index + 1 });
@@ -192,7 +194,7 @@ export default {
       return current.trim().toLowerCase() !== original.trim().toLowerCase();
     },
     validateStages() {
-      return this.stages.map(validateStage);
+      return this.stages.map((stage) => validateStage(stage, this.defaultValueStreamNames));
     },
     validate() {
       const { name } = this;
@@ -247,7 +249,10 @@ export default {
     addNewStage() {
       // validate previous stages only and add a new stage
       this.validate();
-      Vue.set(this, 'stages', [...this.stages, { ...defaultCustomStageFields }]);
+      Vue.set(this, 'stages', [
+        ...this.stages,
+        { ...defaultCustomStageFields, transitionKey: uniqueId('stage-') },
+      ]);
       Vue.set(this, 'stageErrors', [...this.stageErrors, {}]);
     },
     onAddStage() {
@@ -289,6 +294,9 @@ export default {
         'stageErrors',
         initializeStageErrors(this.defaultStageConfig, this.selectedPreset),
       );
+    },
+    restoreActionTestId(index) {
+      return `stage-action-restore-${index}`;
     },
   },
   i18n,
@@ -346,48 +354,57 @@ export default {
         @input="onSelectPreset"
       />
       <div data-testid="extended-form-fields">
-        <div
-          v-for="(stage, activeStageIndex) in stages"
-          ref="formStages"
-          :key="stageKey(activeStageIndex)"
-        >
-          <hr class="gl-my-3" />
-          <span
-            class="gl-display-flex gl-m-0 gl-vertical-align-middle gl-mr-2 gl-font-weight-bold gl-display-flex gl-pb-3"
-            >{{ stageGroupLabel(activeStageIndex) }}</span
+        <transition-group name="stage-list" tag="div">
+          <div
+            v-for="(stage, activeStageIndex) in stages"
+            ref="formStages"
+            :key="stage.id || stage.transitionKey"
           >
-          <custom-stage-fields
-            v-if="stage.custom"
-            :stage="stage"
-            :stage-events="formEvents"
-            :index="activeStageIndex"
-            :total-stages="stages.length"
-            :errors="fieldErrors(activeStageIndex)"
-            @move="handleMove"
-            @remove="onRemove"
-            @input="onFieldInput(activeStageIndex, $event)"
-          />
-          <default-stage-fields
-            v-else
-            :stage="stage"
-            :stage-events="formEvents"
-            :index="activeStageIndex"
-            :total-stages="stages.length"
-            :errors="fieldErrors(activeStageIndex)"
-            @move="handleMove"
-            @hide="onHide"
-            @input="validateStageFields(activeStageIndex)"
-          />
-        </div>
+            <hr class="gl-my-3" />
+            <span
+              class="gl-display-flex gl-m-0 gl-vertical-align-middle gl-mr-2 gl-font-weight-bold gl-display-flex gl-pb-3"
+              >{{ stageGroupLabel(activeStageIndex) }}</span
+            >
+            <custom-stage-fields
+              v-if="stage.custom"
+              :stage="stage"
+              :stage-events="formEvents"
+              :index="activeStageIndex"
+              :total-stages="stages.length"
+              :errors="fieldErrors(activeStageIndex)"
+              @move="handleMove"
+              @remove="onRemove"
+              @input="onFieldInput(activeStageIndex, $event)"
+            />
+            <default-stage-fields
+              v-else
+              :stage="stage"
+              :stage-events="formEvents"
+              :index="activeStageIndex"
+              :total-stages="stages.length"
+              :errors="fieldErrors(activeStageIndex)"
+              @move="handleMove"
+              @hide="onHide"
+              @input="validateStageFields(activeStageIndex)"
+            />
+          </div>
+        </transition-group>
         <div v-if="hiddenStages.length">
           <hr />
-          <gl-form-group v-for="(stage, hiddenStageIndex) in hiddenStages" :key="stage.id">
+          <gl-form-group
+            v-for="(stage, hiddenStageIndex) in hiddenStages"
+            :key="stage.id"
+            data-testid="vsa-hidden-stage"
+          >
             <span class="gl-m-0 gl-vertical-align-middle gl-mr-3 gl-font-weight-bold">{{
               recoverStageTitle(stage.name)
             }}</span>
-            <gl-button variant="link" @click="onRestore(hiddenStageIndex)">{{
-              $options.i18n.RESTORE_HIDDEN_STAGE
-            }}</gl-button>
+            <gl-button
+              variant="link"
+              :data-testid="restoreActionTestId(hiddenStageIndex)"
+              @click="onRestore(hiddenStageIndex)"
+              >{{ $options.i18n.RESTORE_HIDDEN_STAGE }}</gl-button
+            >
           </gl-form-group>
         </div>
       </div>

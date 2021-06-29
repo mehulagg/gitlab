@@ -18,7 +18,9 @@ import createBoardListMutation from 'ee_else_ce/boards/graphql/board_list_create
 import issueMoveListMutation from 'ee_else_ce/boards/graphql/issue_move_list.mutation.graphql';
 import { getIdFromGraphQLId } from '~/graphql_shared/utils';
 import createGqClient, { fetchPolicies } from '~/lib/graphql';
-import { convertObjectPropsToCamelCase, urlParamsToObject } from '~/lib/utils/common_utils';
+import { convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
+// eslint-disable-next-line import/no-deprecated
+import { urlParamsToObject } from '~/lib/utils/url_utility';
 import { s__ } from '~/locale';
 import {
   formatBoardLists,
@@ -35,9 +37,7 @@ import {
 import boardLabelsQuery from '../graphql/board_labels.query.graphql';
 import groupProjectsQuery from '../graphql/group_projects.query.graphql';
 import issueCreateMutation from '../graphql/issue_create.mutation.graphql';
-import issueSetDueDateMutation from '../graphql/issue_set_due_date.mutation.graphql';
 import issueSetLabelsMutation from '../graphql/issue_set_labels.mutation.graphql';
-import issueSetMilestoneMutation from '../graphql/issue_set_milestone.mutation.graphql';
 import listsIssuesQuery from '../graphql/lists_issues.query.graphql';
 import * as types from './mutation_types';
 
@@ -76,6 +76,7 @@ export default {
   performSearch({ dispatch }) {
     dispatch(
       'setFilters',
+      // eslint-disable-next-line import/no-deprecated
       convertObjectPropsToCamelCase(urlParamsToObject(window.location.search)),
     );
 
@@ -479,30 +480,6 @@ export default {
     });
   },
 
-  setActiveIssueMilestone: async ({ commit, getters }, input) => {
-    const { activeBoardItem } = getters;
-    const { data } = await gqlClient.mutate({
-      mutation: issueSetMilestoneMutation,
-      variables: {
-        input: {
-          iid: String(activeBoardItem.iid),
-          milestoneId: getIdFromGraphQLId(input.milestoneId),
-          projectPath: input.projectPath,
-        },
-      },
-    });
-
-    if (data.updateIssue.errors?.length > 0) {
-      throw new Error(data.updateIssue.errors);
-    }
-
-    commit(types.UPDATE_BOARD_ITEM_BY_ID, {
-      itemId: activeBoardItem.id,
-      prop: 'milestone',
-      value: data.updateIssue.issue.milestone,
-    });
-  },
-
   addListItem: ({ commit }, { list, item, position, inProgress = false }) => {
     commit(types.ADD_BOARD_ITEM_TO_LIST, {
       listId: list.id,
@@ -581,30 +558,6 @@ export default {
       itemId: activeBoardItem.id,
       prop: 'labels',
       value: data.updateIssue.issue.labels.nodes,
-    });
-  },
-
-  setActiveIssueDueDate: async ({ commit, getters }, input) => {
-    const { activeBoardItem } = getters;
-    const { data } = await gqlClient.mutate({
-      mutation: issueSetDueDateMutation,
-      variables: {
-        input: {
-          iid: String(activeBoardItem.iid),
-          projectPath: input.projectPath,
-          dueDate: input.dueDate,
-        },
-      },
-    });
-
-    if (data.updateIssue?.errors?.length > 0) {
-      throw new Error(data.updateIssue.errors);
-    }
-
-    commit(types.UPDATE_BOARD_ITEM_BY_ID, {
-      itemId: activeBoardItem.id,
-      prop: 'dueDate',
-      value: data.updateIssue.issue.dueDate,
     });
   },
 

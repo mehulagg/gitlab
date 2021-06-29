@@ -1,9 +1,10 @@
+- @html_class = "subscriptions-layout-html"
 - page_title _('Your GitLab group')
 - form_params = { trial_onboarding_flow: params[:trial_onboarding_flow], glm_source: params[:glm_source], glm_content: params[:glm_content] }
 
 .row.gl-flex-grow-1
-  .gl-display-flex.gl-flex-direction-column.gl-align-items-center.gl-w-full.gl-p-5.gl-bg-gray-10
-    .edit-group.gl-display-flex.gl-flex-direction-column.gl-align-items-center.gl-pt-7
+  .gl-display-flex.gl-flex-direction-column.gl-align-items-center.gl-w-full.gl-px-5.gl-pb-5
+    .edit-group.gl-display-flex.gl-flex-direction-column.gl-align-items-center
       - unless in_trial_onboarding_flow?
         #progress-bar
       %h2.center= _('Create your group')
@@ -34,8 +35,7 @@
                 pattern: Gitlab::PathRegex::NAMESPACE_FORMAT_REGEX_JS,
                 title: _('Please choose a group URL with no special characters.')
             %p.validation-error.gl-field-error.field-validation.hide
-              = _('Group path is already taken. Suggestions: ')
-              %span.gl-path-suggestions
+              = _("Group path is already taken. We've suggested one that is available.")
             %p.validation-success.gl-field-success.field-validation.hide= _('Group path is available.')
             %p.validation-pending.gl-field-error-ignore.field-validation.hide= _('Checking group path availability...')
         .row
@@ -43,11 +43,7 @@
             = render partial: 'shared/groups/visibility_level', locals: { f: f }
         - if !in_trial_onboarding_flow? && show_trial_during_signup?
           = render partial: 'shared/groups/trial_form'
-        - else
-          - experiment(:registrations_group_invite, actor: current_user) do |experiment_instance|
-            - experiment_instance.use do
-              = render partial: 'shared/groups/invite_members'
-            - experiment_instance.try(:invite_page) {}
+
         .row
           .form-group.col-sm-12.gl-mb-0
             = button_tag class: %w[btn gl-button btn-success gl-w-full!] do

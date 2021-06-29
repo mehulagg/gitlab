@@ -1,13 +1,14 @@
 import { GlDrawer } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
+import { MountingPortal } from 'portal-vue';
 import Vuex from 'vuex';
 import SidebarDropdownWidget from 'ee_else_ce/sidebar/components/sidebar_dropdown_widget.vue';
 import { stubComponent } from 'helpers/stub_component';
 import BoardContentSidebar from '~/boards/components/board_content_sidebar.vue';
-import BoardSidebarDueDate from '~/boards/components/sidebar/board_sidebar_due_date.vue';
 import BoardSidebarLabelsSelect from '~/boards/components/sidebar/board_sidebar_labels_select.vue';
 import BoardSidebarTitle from '~/boards/components/sidebar/board_sidebar_title.vue';
 import { ISSUABLE } from '~/boards/constants';
+import SidebarDateWidget from '~/sidebar/components/date/sidebar_date_widget.vue';
 import SidebarSubscriptionsWidget from '~/sidebar/components/subscriptions/sidebar_subscriptions_widget.vue';
 import { mockIssue, mockIssueGroupPath, mockIssueProjectPath } from '../mock_data';
 
@@ -90,6 +91,14 @@ describe('BoardContentSidebar', () => {
     expect(wrapper.findComponent(GlDrawer).exists()).toBe(true);
   });
 
+  it('confirms we render MountingPortal', () => {
+    expect(wrapper.find(MountingPortal).props()).toMatchObject({
+      mountTo: '#js-right-sidebar-portal',
+      append: true,
+      name: 'board-content-sidebar',
+    });
+  });
+
   it('does not render GlDrawer when isSidebarOpen is false', () => {
     createStore({ mockGetters: { isSidebarOpen: () => false } });
     createComponent();
@@ -109,8 +118,8 @@ describe('BoardContentSidebar', () => {
     expect(wrapper.findComponent(BoardSidebarTitle).exists()).toBe(true);
   });
 
-  it('renders BoardSidebarDueDate', () => {
-    expect(wrapper.findComponent(BoardSidebarDueDate).exists()).toBe(true);
+  it('renders SidebarDateWidget', () => {
+    expect(wrapper.findComponent(SidebarDateWidget).exists()).toBe(true);
   });
 
   it('renders BoardSidebarSubscription', () => {

@@ -18,6 +18,9 @@ module EE
       include IterationEventable
       include HealthStatus
 
+      # widget supporting custom issue types - see https://gitlab.com/gitlab-org/gitlab/-/issues/292035
+      include IssueWidgets::ActsLikeRequirement
+
       scope :order_blocking_issues_desc, -> { reorder(blocking_issues_count: :desc) }
       scope :order_weight_desc, -> { reorder ::Gitlab::Database.nulls_last_order('weight', 'DESC') }
       scope :order_weight_asc, -> { reorder ::Gitlab::Database.nulls_last_order('weight') }
@@ -216,6 +219,20 @@ module EE
         FROM (#{blocking_issues_count_by_id}) AS grouped_counts
         WHERE issues.id = grouped_counts.blocking_issue_id
       SQL
+    end
+
+    def related_feature_flags(current_user, preload: nil)
+      feature_flags = ::Operations::FeatureFlag
+        .select('operations_feature_flags.*, operations_feature_flags_issues.id AS link_id')
+        .joins(:feature_flag_issues)
+        .where(operations_feature_flags_issues: { issue_id: id })
+        .order('operations_feature_flags_issues.id ASC')
+        .includes(preload)
+
+      cross_project_filter = -> (feature_flags) { feature_flags.where(project: project) }
+      Ability.feature_flags_readable_by_user(feature_flags,
+        current_user,
+        filters: { read_cross_project: cross_project_filter })
     end
 
     override :relocation_target

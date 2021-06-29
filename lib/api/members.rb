@@ -93,10 +93,12 @@ module API
           requires :access_level, type: Integer, desc: 'A valid access level (defaults: `30`, developer access level)'
           requires :user_id, types: [Integer, String], desc: 'The user ID of the new member or multiple IDs separated by commas.'
           optional :expires_at, type: DateTime, desc: 'Date string in the format YEAR-MONTH-DAY'
-          optional :invite_source, type: String, desc: 'Source that triggered the member creation process', default: 'api'
+          optional :invite_source, type: String, desc: 'Source that triggered the member creation process', default: 'members-api'
         end
         # rubocop: disable CodeReuse/ActiveRecord
         post ":id/members" do
+          ::Gitlab::QueryLimiting.disable!('https://gitlab.com/gitlab-org/gitlab/-/issues/333434')
+
           source = find_source(source_type, params[:id])
           authorize_admin_source!(source_type, source)
 

@@ -8,6 +8,8 @@ query getRunners(
   $last: Int
   $status: CiRunnerStatus
   $type: CiRunnerType
+  $tagList: [String!]
+  $search: String
   $sort: CiRunnerSort
 ) {
   runners(
@@ -17,6 +19,8 @@ query getRunners(
     last: $last
     status: $status
     type: $type
+    tagList: $tagList
+    search: $search
     sort: $sort
   ) {
     nodes {

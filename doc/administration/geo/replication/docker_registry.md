@@ -109,11 +109,14 @@ For each application and Sidekiq node on the **secondary** site:
 
 1. Copy `/var/opt/gitlab/gitlab-rails/etc/gitlab-registry.key` from the **primary** to the node.
 
-1. Edit `/etc/gitlab/gitlab.rb`:
+1. Edit `/etc/gitlab/gitlab.rb` and add:
 
    ```ruby
    gitlab_rails['geo_registry_replication_enabled'] = true
-   gitlab_rails['geo_registry_replication_primary_api_url'] = 'https://primary.example.com:5050/' # Primary registry address, it will be used by the secondary node to directly communicate to primary registry
+   
+   # Primary registry's hostname and port, it will be used by
+   # the secondary node to directly communicate to primary registry
+   gitlab_rails['geo_registry_replication_primary_api_url'] = 'https://primary.example.com:5050/' 
    ```
 
 1. Reconfigure the node for the change to take effect:
@@ -124,7 +127,10 @@ For each application and Sidekiq node on the **secondary** site:
 
 ### Verify replication
 
-To verify Container Registry replication is working, go to **Admin Area > Geo**
-(`/admin/geo/nodes`) on the **secondary** site.
-The initial replication, or "backfill", is probably still in progress.
+To verify Container Registry replication is working, on the **secondary** site:
+
+1. On the top bar, select **Menu >** **{admin}** **Admin**.
+1. On the left sidebar, select **Geo > Nodes**.
+   The initial replication, or "backfill", is probably still in progress.
+
 You can monitor the synchronization process on each Geo site from the **primary** site's **Geo Nodes** dashboard in your browser.

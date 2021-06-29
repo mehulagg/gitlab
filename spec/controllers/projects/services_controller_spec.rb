@@ -8,7 +8,7 @@ RSpec.describe Projects::ServicesController do
 
   let(:project) { create(:project, :repository) }
   let(:user)    { create(:user) }
-  let(:service) { create(:jira_service, project: project) }
+  let(:service) { create(:jira_integration, project: project) }
   let(:service_params) { { username: 'username', password: 'password', url: 'http://example.com' } }
 
   before do
@@ -44,10 +44,10 @@ RSpec.describe Projects::ServicesController do
         let(:project) { create(:project) }
 
         context 'with chat notification service' do
-          let(:service) { project.create_microsoft_teams_service(webhook: 'http://webhook.com') }
+          let(:service) { project.create_microsoft_teams_integration(webhook: 'http://webhook.com') }
 
           it 'returns success' do
-            allow_any_instance_of(::MicrosoftTeams::Notifier).to receive(:ping).and_return(true)
+            allow_next(::MicrosoftTeams::Notifier).to receive(:ping).and_return(true)
 
             put :test, params: project_params
 
@@ -56,7 +56,7 @@ RSpec.describe Projects::ServicesController do
         end
 
         it 'returns success' do
-          stub_jira_service_test
+          stub_jira_integration_test
 
           expect(Gitlab::HTTP).to receive(:get).with('/rest/api/2/serverInfo', any_args).and_call_original
 
@@ -67,7 +67,7 @@ RSpec.describe Projects::ServicesController do
       end
 
       it 'returns success' do
-        stub_jira_service_test
+        stub_jira_integration_test
 
         expect(Gitlab::HTTP).to receive(:get).with('/rest/api/2/serverInfo', any_args).and_call_original
 
@@ -130,7 +130,9 @@ RSpec.describe Projects::ServicesController do
       end
 
       context 'with the Slack integration' do
-        let_it_be(:service) { build(:slack_service) }
+        let_it_be(:integration) { build(:integrations_slack) }
+
+        let(:service) { integration } # TODO: remove when https://gitlab.com/gitlab-org/gitlab/-/issues/330300 is complete
 
         it 'returns an error response when the URL is blocked' do
           put :test, params: project_params(service: { webhook: 'http://127.0.0.1' })
@@ -210,7 +212,7 @@ RSpec.describe Projects::ServicesController do
         it_behaves_like 'service update'
       end
 
-      context 'wehn param `inherit_from_id` is set to empty string' do
+      context 'when param `inherit_from_id` is set to empty string' do
         let(:service_params) { { inherit_from_id: '' } }
 
         it 'sets inherit_from_id to nil' do
@@ -218,8 +220,8 @@ RSpec.describe Projects::ServicesController do
         end
       end
 
-      context 'wehn param `inherit_from_id` is set to some value' do
-        let(:instance_service) { create(:jira_service, :instance) }
+      context 'when param `inherit_from_id` is set to some value' do
+        let(:instance_service) { create(:jira_integration, :instance) }
         let(:service_params) { { inherit_from_id: instance_service.id } }
 
         it 'sets inherit_from_id to value' do
@@ -230,7 +232,7 @@ RSpec.describe Projects::ServicesController do
 
     describe 'as JSON' do
       before do
-        stub_jira_service_test
+        stub_jira_integration_test
         put :update, params: project_params(service: service_params, format: :json)
       end
 
@@ -256,8 +258,8 @@ RSpec.describe Projects::ServicesController do
       end
     end
 
-    context 'Prometheus service' do
-      let!(:service) { create(:prometheus_service, project: project) }
+    context 'Prometheus integration' do
+      let!(:service) { create(:prometheus_integration, project: project) }
       let(:service_params) { { manual_configuration: '1', api_url: 'http://example.com' } }
 
       context 'feature flag :settings_operations_prometheus_service is enabled' do
@@ -274,8 +276,8 @@ RSpec.describe Projects::ServicesController do
           expect(controller).to set_flash.now[:alert].to(expected_alert)
         end
 
-        it 'does not modify service' do
-          expect { put :update, params: project_params.merge(service: service_params) }.not_to change { project.prometheus_service.reload.attributes }
+        it 'does not modify integration' do
+          expect { put :update, params: project_params.merge(service: service_params) }.not_to change { project.prometheus_integration.reload.attributes }
         end
       end
 
@@ -284,8 +286,8 @@ RSpec.describe Projects::ServicesController do
           stub_feature_flags(settings_operations_prometheus_service: false)
         end
 
-        it 'modifies service' do
-          expect { put :update, params: project_params.merge(service: service_params) }.to change { project.prometheus_service.reload.attributes }
+        it 'modifies integration' do
+          expect { put :update, params: project_params.merge(service: service_params) }.to change { project.prometheus_integration.reload.attributes }
         end
       end
     end

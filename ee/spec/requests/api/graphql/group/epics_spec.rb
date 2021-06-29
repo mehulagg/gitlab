@@ -75,6 +75,7 @@ RSpec.describe 'Epics through GroupQuery' do
       context 'with sort and pagination' do
         let_it_be(:epic3) { create(:epic, group: group, start_date: 4.days.ago, end_date: 7.days.ago ) }
         let_it_be(:epic4) { create(:epic, group: group, start_date: 5.days.ago, end_date: 6.days.ago ) }
+
         let(:current_user) { user }
         let(:data_path) { [:group, :epics] }
 
@@ -169,6 +170,7 @@ RSpec.describe 'Epics through GroupQuery' do
 
       context 'query performance' do
         let_it_be(:child_epic) { create(:epic, group: group, parent: create(:epic, group: group)) }
+
         let(:epic_node) do
           <<~NODE
             edges {

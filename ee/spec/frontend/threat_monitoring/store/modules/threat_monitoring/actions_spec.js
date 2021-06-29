@@ -221,12 +221,6 @@ describe('Threat Monitoring actions', () => {
 
   describe('setAllEnvironments', () => {
     it('commits the SET_ALL_ENVIRONMENTS mutation and dispatches Network Policy fetch action', () =>
-      testAction(
-        actions.setAllEnvironments,
-        null,
-        state,
-        [{ type: types.SET_ALL_ENVIRONMENTS }],
-        [{ type: 'networkPolicies/fetchPolicies', payload: null }],
-      ));
+      testAction(actions.setAllEnvironments, null, state, [{ type: types.SET_ALL_ENVIRONMENTS }]));
   });
 });

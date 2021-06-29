@@ -11,6 +11,7 @@ module Gitlab
   module Experimentation
     module ControllerConcern
       include ::Gitlab::Experimentation::GroupTypes
+      include Gitlab::Tracking::Helpers
       extend ActiveSupport::Concern
 
       included do
@@ -56,7 +57,7 @@ module Gitlab
         return if dnt_enabled?
 
         track_experiment_event_for(experiment_key, action, value, subject: subject) do |tracking_data|
-          ::Gitlab::Tracking.event(tracking_data.delete(:category), tracking_data.delete(:action), **tracking_data)
+          ::Gitlab::Tracking.event(tracking_data.delete(:category), tracking_data.delete(:action), **tracking_data.merge!(user: current_user))
         end
       end
 
@@ -100,10 +101,6 @@ module Gitlab
       end
 
       private
-
-      def dnt_enabled?
-        Gitlab::Utils.to_boolean(request.headers['DNT'])
-      end
 
       def experimentation_subject_id
         cookies.signed[:experimentation_subject_id]

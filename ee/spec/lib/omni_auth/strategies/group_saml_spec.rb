@@ -51,10 +51,12 @@ RSpec.describe OmniAuth::Strategies::GroupSaml, type: :strategy do
   describe 'POST /groups/:group_path/-/saml/callback' do
     context 'with valid SAMLResponse' do
       before do
-        allow_any_instance_of(OneLogin::RubySaml::Response).to receive(:validate_signature) { true }
-        allow_any_instance_of(OneLogin::RubySaml::Response).to receive(:validate_session_expiration) { true }
-        allow_any_instance_of(OneLogin::RubySaml::Response).to receive(:validate_subject_confirmation) { true }
-        allow_any_instance_of(OneLogin::RubySaml::Response).to receive(:validate_conditions) { true }
+        allow_next_instance_of(OneLogin::RubySaml::Response) do |instance|
+          allow(instance).to receive(:validate_signature) { true }
+          allow(instance).to receive(:validate_session_expiration) { true }
+          allow(instance).to receive(:validate_subject_confirmation) { true }
+          allow(instance).to receive(:validate_conditions) { true }
+        end
       end
 
       it 'sets the auth hash based on the response' do
@@ -82,7 +84,9 @@ RSpec.describe OmniAuth::Strategies::GroupSaml, type: :strategy do
         let(:relay_state) { ::OmniAuth::Strategies::GroupSaml::VERIFY_SAML_RESPONSE }
 
         it 'stores the saml response for retrieval after redirect' do
-          expect_any_instance_of(::Gitlab::Auth::GroupSaml::ResponseStore).to receive(:set_raw).with(saml_response)
+          expect_next_instance_of(::Gitlab::Auth::GroupSaml::ResponseStore) do |instance|
+            allow(instance).to receive(:set_raw).with(saml_response)
+          end
 
           post "/groups/my-group/-/saml/callback", SAMLResponse: saml_response, RelayState: relay_state
         end
@@ -149,7 +153,9 @@ RSpec.describe OmniAuth::Strategies::GroupSaml, type: :strategy do
 
     it "stores request ID during request phase" do
       request_id = double
-      allow_any_instance_of(OneLogin::RubySaml::Authrequest).to receive(:uuid).and_return(request_id)
+      allow_next_instance_of(OneLogin::RubySaml::Authrequest) do |instance|
+        allow(instance).to receive(:uuid).and_return(request_id)
+      end
 
       post '/users/auth/group_saml', group_path: 'my-group'
 

@@ -275,7 +275,7 @@ integration active:
 p = Project.find_by_sql("SELECT p.id FROM projects p LEFT JOIN services s ON p.id = s.project_id WHERE s.type = 'JiraService' AND s.active = true")
 
 p.each do |project|
-  project.jira_service.update_attribute(:password, '<your-new-password>')
+  project.jira_integration.update_attribute(:password, '<your-new-password>')
 end
 ```
 
@@ -286,9 +286,9 @@ To change all Jira project to use the instance-level integration settings:
 1. In a Rails console:
 
    ```ruby
-   jira_service_instance_id = JiraService.find_by(instance: true).id
-   JiraService.where(active: true, instance: false, template: false, inherit_from_id: nil).find_each do |service|
-     service.update_attribute(inherit_from_id: jira_service_instance_id)
+   jira_integration_instance_id = Integrations::Jira.find_by(instance: true).id
+   Integrations::Jira.where(active: true, instance: false, template: false, inherit_from_id: nil).find_each do |integration|
+     integration.update_attribute(:inherit_from_id, jira_integration_instance_id)
    end
    ```
 
@@ -317,7 +317,18 @@ the displayed size may still show old sizes or commit numbers. To force an updat
 p = Project.find_by_full_path('<namespace>/<project>')
 pp p.statistics
 p.statistics.refresh!
-pp p.statistics  # compare with earlier values
+pp p.statistics
+# compare with earlier values
+
+# check the total artifact storage space separately
+builds_with_artifacts = p.builds.with_downloadable_artifacts.all
+
+artifact_storage = 0
+builds_with_artifacts.find_each do |build|
+  artifact_storage += build.artifacts_size
+end
+
+puts "#{artifact_storage} bytes"
 ```
 
 ### Identify deploy keys associated with blocked and non-member users 
@@ -546,7 +557,7 @@ User.billable.count
 ::HistoricalData.max_historical_user_count
 ```
 
-Using cURL and jq (up to a max 100, see the [pagination docs](../../api/README.md#pagination)):
+Using cURL and jq (up to a max 100, see the [pagination docs](../../api/index.md#pagination)):
 
 ```shell
 curl --silent --header "Private-Token: ********************" \

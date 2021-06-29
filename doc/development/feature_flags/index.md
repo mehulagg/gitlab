@@ -41,7 +41,7 @@ should be leveraged:
 
   1. [Create a new feature flag](#create-a-new-feature-flag)
      which is **off** by default, in the first merge request which uses the flag.
-     Flags [should not be added separately](#risk-of-a-broken-master-main-branch).
+     Flags [should not be added separately](#risk-of-a-broken-main-branch).
   1. Submit incremental changes via one or more merge requests, ensuring that any
      new code added can only be reached if the feature flag is **on**.
      You can keep the feature flag enabled on your local GDK during development.
@@ -59,11 +59,11 @@ flag does not have to stick around for a specific amount of time
 is deemed stable. Stable means it works on GitLab.com without causing any
 problems, such as outages.
 
-## Risk of a broken master (main) branch
+## Risk of a broken main branch
 
-Feature flags **must** be used in the MR that introduces them. Not doing so causes a
-[broken master](https://about.gitlab.com/handbook/engineering/workflow/#broken-master) scenario due
-to the `rspec:feature-flags` job that only runs on the `master` branch.
+Feature flags must be used in the MR that introduces them. Not doing so causes a
+[broken main branch](https://about.gitlab.com/handbook/engineering/workflow/#broken-master) scenario due
+to the `rspec:feature-flags` job that only runs on the `main` branch.
 
 ## Types of feature flags
 
@@ -364,6 +364,8 @@ Feature.enabled?(:feature_flag, group)
 Feature.enabled?(:feature_flag, user)
 ```
 
+Please see [Feature flag controls](controls.md#process) for more details on working with feature flags.
+
 #### Selectively disable by actor
 
 By default you cannot selectively disable a feature flag by actor.
@@ -461,7 +463,7 @@ Feature.remove(:feature_flag_name)
   - **Exception:** database migrations **should** have a changelog entry.
 - Any change related to a feature flag itself (flag removal, default-on setting) **should** have a changelog entry.
   Use the flowchart to determine the changelog entry type.
-  
+
   ```mermaid
   graph LR
       A[flag: default off] -->|'added' / 'changed'| B(flag: default on)
@@ -470,7 +472,7 @@ Feature.remove(:feature_flag_name)
       A -->|'added' / 'changed'| C
       A -->|no changelog| D
   ```
-  
+
 - Any change behind a feature flag that is **enabled** by default **should** have a changelog entry.
 
 ## Feature flags in tests

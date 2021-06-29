@@ -17,14 +17,16 @@ module Types
         field :display_namespace, Types::NamespaceType, null: true,
               description: 'Namespace where data should be displayed.'
 
+        field :snapshots,
+              description: 'Data snapshots of the namespace.',
+              resolver: Resolvers::Analytics::DevopsAdoption::SnapshotsResolver
+
         field :latest_snapshot, SnapshotType, null: true,
-              description: 'The latest adoption metrics for the enabled namespace.'
+              description: 'Metrics snapshot for previous month for the enabled namespace.'
 
         def latest_snapshot
-          BatchLoader::GraphQL.for(object.namespace_id).batch(key: :devops_adoption_latest_snapshots) do |ids, loader, args|
-            snapshots = ::Analytics::DevopsAdoption::Snapshot
-              .latest_snapshot_for_namespace_ids(ids)
-              .index_by(&:namespace_id)
+          BatchLoader::GraphQL.for(object.namespace_id).batch(key: :devops_adoption_latest_snapshots) do |ids, loader, _args|
+            snapshots = ::Analytics::DevopsAdoption::Snapshot.latest_for_namespace_ids(ids).index_by(&:namespace_id)
 
             ids.each do |id|
               loader.call(id, snapshots[id])

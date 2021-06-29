@@ -67,9 +67,9 @@ After you enable custom slash commands in Mattermost, you need configuration
 information from GitLab. To get this information:
 
 1. In a different browser tab than your current Mattermost session, sign in to
-   GitLab as a user with [administrator permissions](../../permissions.md).
-1. In the top navigation bar, go to **{admin}** **Admin Area**.
-1. In the left menu, go to **Settings > Integrations** and select
+   GitLab as a user with [Administrator role](../../permissions.md).
+1. On the top bar, select **Menu >** **{admin}** **Admin**.
+1. In the left menu, select **Settings > Integrations**, then select
    **Mattermost slash commands**.
 1. GitLab displays potential values for Mattermost settings. Copy the **Request URL**
    as you need it for the next step. All other values are suggestions.
@@ -141,7 +141,7 @@ The available slash commands for Mattermost are:
 | ------- | ----------- | ------- |
 | <kbd>/&lt;trigger&gt; issue new &lt;title&gt; <kbd>⇧ Shift</kbd>+<kbd>↵ Enter</kbd> &lt;description&gt;</kbd> | Create a new issue in the project that `<trigger>` is tied to. `<description>` is optional. | `/gitlab issue new We need to change the homepage` |
 | <kbd>/&lt;trigger&gt; issue show &lt;issue-number&gt;</kbd> | Show the issue with ID `<issue-number>` from the project that `<trigger>` is tied to. | `/gitlab issue show 42` |
-| <kbd>/&lt;trigger&gt; deploy &lt;environment&gt; to &lt;environment&gt;</kbd> | Start the CI job that deploys from one environment to another, for example `staging` to `production`. CI/CD must be [properly configured](../../../ci/yaml/README.md). | `/gitlab deploy staging to production` |
+| <kbd>/&lt;trigger&gt; deploy &lt;environment&gt; to &lt;environment&gt;</kbd> | Start the CI job that deploys from one environment to another, for example `staging` to `production`. CI/CD must be [properly configured](../../../ci/yaml/index.md). | `/gitlab deploy staging to production` |
 
 To see a list of available commands to interact with GitLab, type the
 trigger word followed by <kbd>help</kbd>. Example: `/gitlab help`

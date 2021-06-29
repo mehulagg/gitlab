@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe Gitlab::SubscriptionPortal::Clients::REST do
+RSpec.describe Gitlab::SubscriptionPortal::Clients::Rest do
   let(:client) { Gitlab::SubscriptionPortal::Client }
   let(:http_response) { nil }
   let(:http_method) { :post }
@@ -115,6 +115,19 @@ RSpec.describe Gitlab::SubscriptionPortal::Clients::REST do
   describe '#payment_method' do
     subject do
       client.payment_method('1')
+    end
+
+    let(:http_method) { :get }
+
+    it_behaves_like 'when response is successful'
+    it_behaves_like 'when response code is 422'
+    it_behaves_like 'when response code is 500'
+    it_behaves_like 'when http call raises an exception'
+  end
+
+  describe '#customers_oauth_app_id' do
+    subject do
+      client.customers_oauth_app_id
     end
 
     let(:http_method) { :get }

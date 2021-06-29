@@ -21,7 +21,8 @@ JS_CONSOLE_FILTER = Regexp.union([
   '"[WDS] Hot Module Replacement enabled."',
   '"[WDS] Live Reloading enabled."',
   'Download the Vue Devtools extension',
-  'Download the Apollo DevTools'
+  'Download the Apollo DevTools',
+  "Unrecognized feature: 'interest-cohort'"
 ])
 
 CAPYBARA_WINDOW_SIZE = [1366, 768].freeze
@@ -59,8 +60,8 @@ Capybara.register_driver :chrome do |app|
   # Chrome won't work properly in a Docker container in sandbox mode
   options.add_argument("no-sandbox")
 
-  # Run headless by default unless CHROME_HEADLESS specified
-  options.add_argument("headless") unless ENV['CHROME_HEADLESS'] =~ /^(false|no|0)$/i
+  # Run headless by default unless WEBDRIVER_HEADLESS specified
+  options.add_argument("headless") unless ENV['WEBDRIVER_HEADLESS'] =~ /^(false|no|0)$/i || ENV['CHROME_HEADLESS'] =~ /^(false|no|0)$/i
 
   # Disable /dev/shm use in CI. See https://gitlab.com/gitlab-org/gitlab/issues/4252
   options.add_argument("disable-dev-shm-usage") if ENV['CI'] || ENV['CI_SERVER']

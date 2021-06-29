@@ -6,7 +6,7 @@ RSpec.describe Integrations::JiraSerializers::IssueDetailEntity do
   include JiraServiceHelper
 
   let_it_be(:project) { create(:project) }
-  let_it_be(:jira_service) { create(:jira_service, project: project, url: 'http://jira.com', api_url: 'http://api.jira.com') }
+  let_it_be(:jira_integration) { create(:jira_integration, project: project, url: 'http://jira.com', api_url: 'http://api.jira.com') }
 
   let(:reporter) do
     {
@@ -122,19 +122,19 @@ RSpec.describe Integrations::JiraSerializers::IssueDetailEntity do
 
   context 'with Jira Server configuration' do
     it 'returns the Jira Server profile URL' do
-      expect(subject[:author]).to include(web_url: 'http://jira.com/secure/ViewProfile.jspa?name=reporter@reporter.com')
-      expect(subject[:assignees].first).to include(web_url: 'http://jira.com/secure/ViewProfile.jspa?name=assignee@assignee.com')
-      expect(subject[:comments].first[:author]).to include(web_url: 'http://jira.com/secure/ViewProfile.jspa?name=comment@author.com')
+      expect(subject[:author]).to include(web_url: 'http://jira.com/secure/ViewProfile.jspa?name=reporter%40reporter.com')
+      expect(subject[:assignees].first).to include(web_url: 'http://jira.com/secure/ViewProfile.jspa?name=assignee%40assignee.com')
+      expect(subject[:comments].first[:author]).to include(web_url: 'http://jira.com/secure/ViewProfile.jspa?name=comment%40author.com')
     end
 
     context 'with only url' do
       before do
-        stub_jira_service_test
-        jira_service.update!(api_url: nil)
+        stub_jira_integration_test
+        jira_integration.update!(api_url: nil)
       end
 
       it 'returns URLs with the web url' do
-        expect(subject[:author]).to include(web_url: 'http://jira.com/secure/ViewProfile.jspa?name=reporter@reporter.com')
+        expect(subject[:author]).to include(web_url: 'http://jira.com/secure/ViewProfile.jspa?name=reporter%40reporter.com')
         expect(subject[:web_url]).to eq('http://jira.com/browse/GL-5')
       end
     end

@@ -19,6 +19,25 @@ module Gitlab
         consume_blob_response(response)
       end
 
+      def list_blobs(revisions, limit: 0, bytes_limit: 0, dynamic_timeout: nil)
+        request = Gitaly::ListBlobsRequest.new(
+          repository: @gitaly_repo,
+          revisions: Array.wrap(revisions),
+          limit: limit,
+          bytes_limit: bytes_limit
+        )
+
+        timeout =
+          if dynamic_timeout
+            [dynamic_timeout, GitalyClient.medium_timeout].min
+          else
+            GitalyClient.medium_timeout
+          end
+
+        response = GitalyClient.call(@gitaly_repo.storage_name, :blob_service, :list_blobs, request, timeout: timeout)
+        GitalyClient::BlobsStitcher.new(GitalyClient::ListBlobsAdapter.new(response))
+      end
+
       def batch_lfs_pointers(blob_ids)
         return [] if blob_ids.empty?
 
@@ -77,8 +96,8 @@ module Gitlab
         map_blob_types(response)
       end
 
-      def get_new_lfs_pointers(revision, limit, not_in, dynamic_timeout = nil)
-        request, rpc = create_new_lfs_pointers_request(revision, limit, not_in)
+      def get_new_lfs_pointers(revisions, limit, not_in, dynamic_timeout = nil)
+        request, rpc = create_new_lfs_pointers_request(revisions, limit, not_in)
 
         timeout =
           if dynamic_timeout
@@ -109,7 +128,7 @@ module Gitlab
 
       private
 
-      def create_new_lfs_pointers_request(revision, limit, not_in)
+      def create_new_lfs_pointers_request(revisions, limit, not_in)
         # If the check happens for a change which is using a quarantine
         # environment for incoming objects, then we can avoid doing the
         # necessary graph walk to detect only new LFS pointers and instead scan
@@ -126,7 +145,7 @@ module Gitlab
 
           [request, :list_all_lfs_pointers]
         else
-          revisions = [revision]
+          revisions = Array.wrap(revisions)
           revisions += if not_in.nil? || not_in == :all
                          ["--not", "--all"]
                        else

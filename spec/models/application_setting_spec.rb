@@ -134,6 +134,14 @@ RSpec.describe ApplicationSetting do
     it { is_expected.to allow_value('disabled').for(:whats_new_variant) }
     it { is_expected.not_to allow_value(nil).for(:whats_new_variant) }
 
+    it { is_expected.not_to allow_value(['']).for(:valid_runner_registrars) }
+    it { is_expected.not_to allow_value(['OBVIOUSLY_WRONG']).for(:valid_runner_registrars) }
+    it { is_expected.not_to allow_value(%w(project project)).for(:valid_runner_registrars) }
+    it { is_expected.not_to allow_value([nil]).for(:valid_runner_registrars) }
+    it { is_expected.not_to allow_value(nil).for(:valid_runner_registrars) }
+    it { is_expected.to allow_value([]).for(:valid_runner_registrars) }
+    it { is_expected.to allow_value(%w(project group)).for(:valid_runner_registrars) }
+
     context 'help_page_documentation_base_url validations' do
       it { is_expected.to allow_value(nil).for(:help_page_documentation_base_url) }
       it { is_expected.to allow_value('https://docs.gitlab.com').for(:help_page_documentation_base_url) }
@@ -361,6 +369,85 @@ RSpec.describe ApplicationSetting do
         .only_integer
         .is_greater_than_or_equal_to(0)
         .is_less_than(65536)
+    end
+
+    describe 'usage_ping_enabled setting' do
+      shared_examples 'usage ping enabled' do
+        it do
+          expect(setting.usage_ping_enabled).to eq(true)
+          expect(setting.usage_ping_enabled?).to eq(true)
+        end
+      end
+
+      shared_examples 'usage ping disabled' do
+        it do
+          expect(setting.usage_ping_enabled).to eq(false)
+          expect(setting.usage_ping_enabled?).to eq(false)
+        end
+      end
+
+      context 'when setting is in database' do
+        context 'with usage_ping_enabled disabled' do
+          before do
+            setting.update!(usage_ping_enabled: false)
+          end
+
+          it_behaves_like 'usage ping disabled'
+        end
+
+        context 'with usage_ping_enabled enabled' do
+          before do
+            setting.update!(usage_ping_enabled: true)
+          end
+
+          it_behaves_like 'usage ping enabled'
+        end
+      end
+
+      context 'when setting is in GitLab config' do
+        context 'with usage_ping_enabled disabled' do
+          before do
+            allow(Settings.gitlab).to receive(:usage_ping_enabled).and_return(false)
+          end
+
+          it_behaves_like 'usage ping disabled'
+        end
+
+        context 'with usage_ping_enabled enabled' do
+          before do
+            allow(Settings.gitlab).to receive(:usage_ping_enabled).and_return(true)
+          end
+
+          it_behaves_like 'usage ping enabled'
+        end
+      end
+
+      context 'when setting in database false and setting in GitLab config true' do
+        before do
+          setting.update!(usage_ping_enabled: false)
+          allow(Settings.gitlab).to receive(:usage_ping_enabled).and_return(true)
+        end
+
+        it_behaves_like 'usage ping disabled'
+      end
+
+      context 'when setting database true and setting in GitLab config false' do
+        before do
+          setting.update!(usage_ping_enabled: true)
+          allow(Settings.gitlab).to receive(:usage_ping_enabled).and_return(false)
+        end
+
+        it_behaves_like 'usage ping disabled'
+      end
+
+      context 'when setting database true and setting in GitLab config true' do
+        before do
+          setting.update!(usage_ping_enabled: true)
+          allow(Settings.gitlab).to receive(:usage_ping_enabled).and_return(true)
+        end
+
+        it_behaves_like 'usage ping enabled'
+      end
     end
 
     context 'key restrictions' do
@@ -908,6 +995,34 @@ RSpec.describe ApplicationSetting do
           .only_integer
           .is_greater_than_or_equal_to(Gitlab::Git::Diff::DEFAULT_MAX_PATCH_BYTES)
           .is_less_than_or_equal_to(Gitlab::Git::Diff::MAX_PATCH_BYTES_UPPER_BOUND)
+        end
+      end
+    end
+
+    describe '#diff_max_files' do
+      context 'validations' do
+        it { is_expected.to validate_presence_of(:diff_max_files) }
+
+        specify do
+          is_expected
+            .to validate_numericality_of(:diff_max_files)
+            .only_integer
+            .is_greater_than_or_equal_to(Commit::DEFAULT_MAX_DIFF_FILES_SETTING)
+            .is_less_than_or_equal_to(Commit::MAX_DIFF_FILES_SETTING_UPPER_BOUND)
+        end
+      end
+    end
+
+    describe '#diff_max_lines' do
+      context 'validations' do
+        it { is_expected.to validate_presence_of(:diff_max_lines) }
+
+        specify do
+          is_expected
+            .to validate_numericality_of(:diff_max_lines)
+            .only_integer
+            .is_greater_than_or_equal_to(Commit::DEFAULT_MAX_DIFF_LINES_SETTING)
+            .is_less_than_or_equal_to(Commit::MAX_DIFF_LINES_SETTING_UPPER_BOUND)
         end
       end
     end

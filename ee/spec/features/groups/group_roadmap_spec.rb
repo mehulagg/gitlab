@@ -60,7 +60,7 @@ RSpec.describe 'group epic roadmap', :js do
           expect(page).to have_css('.filter-dropdown-container')
           find('.epics-sort-btn').click
           page.within('.dropdown-menu') do
-            expect(page).to have_selector('li a', count: 2)
+            expect(page).to have_selector('li a', count: 3)
             expect(page).to have_content('Start date')
             expect(page).to have_content('Due date')
           end

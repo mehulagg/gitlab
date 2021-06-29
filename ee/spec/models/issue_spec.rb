@@ -14,6 +14,29 @@ RSpec.describe Issue do
     it { is_expected.to have_many(:resource_iteration_events) }
     it { is_expected.to have_one(:issuable_sla) }
     it { is_expected.to have_many(:metric_images) }
+
+    it { is_expected.to have_one(:requirement) }
+    it { is_expected.to have_many(:test_reports) }
+
+    context 'for an issue with associated test report' do
+      let_it_be(:requirement_issue) do
+        ri = create(:requirement_issue)
+        create(:test_report, requirement_issue: ri, requirement: nil)
+        ri
+      end
+
+      context 'for an issue of type Requirement' do
+        specify { expect(requirement_issue.test_reports.count).to eq(1) }
+      end
+
+      context 'for an issue of a different type' do
+        before do
+          requirement_issue.update_attribute(:issue_type, :incident)
+        end
+
+        specify { expect(requirement_issue.test_reports.count).to eq(0) }
+      end
+    end
   end
 
   describe 'modules' do
@@ -1035,6 +1058,44 @@ RSpec.describe Issue do
 
       it do
         expect(issue.supports_time_tracking?).to eq(supports_time_tracking)
+      end
+    end
+  end
+
+  describe '#related_feature_flags' do
+    let_it_be(:user) { create(:user) }
+
+    let_it_be(:authorized_project) { create(:project) }
+    let_it_be(:authorized_project2) { create(:project) }
+    let_it_be(:unauthorized_project) { create(:project) }
+
+    let_it_be(:issue) { create(:issue, project: authorized_project) }
+
+    let_it_be(:authorized_feature_flag) { create(:operations_feature_flag, project: authorized_project) }
+    let_it_be(:authorized_feature_flag_b) { create(:operations_feature_flag, project: authorized_project2) }
+
+    let_it_be(:unauthorized_feature_flag) { create(:operations_feature_flag, project: unauthorized_project) }
+
+    let_it_be(:issue_link_a) { create(:feature_flag_issue, issue: issue, feature_flag: authorized_feature_flag) }
+    let_it_be(:issue_link_b) { create(:feature_flag_issue, issue: issue, feature_flag: unauthorized_feature_flag) }
+    let_it_be(:issue_link_c) { create(:feature_flag_issue, issue: issue, feature_flag: authorized_feature_flag_b) }
+
+    before_all do
+      authorized_project.add_developer(user)
+      authorized_project2.add_developer(user)
+    end
+
+    it 'returns only authorized related feature flags for a given user' do
+      expect(issue.related_feature_flags(user)).to contain_exactly(authorized_feature_flag, authorized_feature_flag_b)
+    end
+
+    describe 'when a user cannot read cross project' do
+      it 'only returns feature_flags within the same project' do
+        expect(Ability).to receive(:allowed?).with(user, :read_feature_flag, authorized_feature_flag).and_return(true)
+        expect(Ability).to receive(:allowed?).with(user, :read_cross_project).and_return(false)
+
+        expect(issue.related_feature_flags(user))
+          .to contain_exactly(authorized_feature_flag)
       end
     end
   end

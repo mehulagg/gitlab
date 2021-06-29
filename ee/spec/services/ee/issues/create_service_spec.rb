@@ -8,7 +8,7 @@ RSpec.describe Issues::CreateService do
   let_it_be_with_reload(:project) { create(:project, group: group) }
 
   let(:params) { { title: 'Awesome issue', description: 'please fix', weight: 9 } }
-  let(:service) { described_class.new(project: project, current_user: user, params: params) }
+  let(:service) { described_class.new(project: project, current_user: user, params: params, spam_params: nil) }
 
   describe '#execute' do
     context 'when current user cannot admin issues in the project' do
@@ -90,7 +90,7 @@ RSpec.describe Issues::CreateService do
               expect(epic.due_date).to eq(milestone.due_date)
             end
 
-            it 'generates system notes for adding an epic and milestone' do
+            it 'generates system notes for adding an epic and milestone', :sidekiq_inline do
               expect { service.execute }.to change(Note, :count).by(3).and(change(ResourceMilestoneEvent, :count).by(1))
             end
 
@@ -110,7 +110,7 @@ RSpec.describe Issues::CreateService do
               confidential_epic = create(:epic, group: group, confidential: true)
               params = { title: 'confidential issue', epic_id: confidential_epic.id }
 
-              issue = described_class.new(project: project, current_user: user, params: params).execute
+              issue = described_class.new(project: project, current_user: user, params: params, spam_params: nil).execute
 
               expect(issue.confidential).to eq(true)
             end
@@ -120,7 +120,7 @@ RSpec.describe Issues::CreateService do
             it 'creates a confidential child issue' do
               params = { title: 'confidential issue', epic_id: epic.id, confidential: true }
 
-              issue = described_class.new(project: project, current_user: user, params: params).execute
+              issue = described_class.new(project: project, current_user: user, params: params, spam_params: nil).execute
 
               expect(issue.confidential).to eq(true)
             end

@@ -2,7 +2,7 @@
 
 module Registrations
   class WelcomeController < ApplicationController
-    layout 'welcome'
+    layout 'minimal'
     skip_before_action :authenticate_user!, :required_signup_info, :check_two_factor_requirement, only: [:show, :update]
     before_action :require_current_user
 
@@ -52,7 +52,7 @@ module Registrations
     end
 
     def path_for_signed_in_user(user)
-      return users_almost_there_path if requires_confirmation?(user)
+      return users_almost_there_path(email: user.email) if requires_confirmation?(user)
 
       stored_location_for(user) || members_activity_path(user.members)
     end

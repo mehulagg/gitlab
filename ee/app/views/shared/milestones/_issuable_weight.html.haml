@@ -1,0 +1,8 @@
+- issuable = local_assigns.fetch(:issuable)
+
+- return unless issuable.weight_available?
+- return unless issuable.weight?
+
+%span.issuable-number
+  = sprite_icon('weight', css_class: 'gl-vertical-align-text-bottom')
+  = issuable.weight

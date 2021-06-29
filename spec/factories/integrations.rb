@@ -12,7 +12,7 @@ FactoryBot.define do
     issue_tracker
   end
 
-  factory :emails_on_push_service, class: 'Integrations::EmailsOnPush' do
+  factory :emails_on_push_integration, class: 'Integrations::EmailsOnPush' do
     project
     type { 'EmailsOnPushService' }
     active { true }
@@ -27,7 +27,7 @@ FactoryBot.define do
     end
   end
 
-  factory :prometheus_service do
+  factory :prometheus_integration, class: 'Integrations::Prometheus' do
     project
     active { true }
     properties do
@@ -38,14 +38,14 @@ FactoryBot.define do
     end
   end
 
-  factory :drone_ci_service, class: 'Integrations::DroneCi' do
+  factory :drone_ci_integration, class: 'Integrations::DroneCi' do
     project
     active { true }
     drone_url { 'https://bamboo.example.com' }
     token { 'test' }
   end
 
-  factory :jira_service, class: 'Integrations::Jira' do
+  factory :jira_integration, class: 'Integrations::Jira' do
     project
     active { true }
     type { 'JiraService' }
@@ -91,19 +91,19 @@ FactoryBot.define do
     issue_tracker
   end
 
-  factory :redmine_service, class: 'Integrations::Redmine' do
+  factory :redmine_integration, class: 'Integrations::Redmine' do
     project
     active { true }
     issue_tracker
   end
 
-  factory :youtrack_service, class: 'Integrations::Youtrack' do
+  factory :youtrack_integration, class: 'Integrations::Youtrack' do
     project
     active { true }
     issue_tracker
   end
 
-  factory :ewm_service, class: 'Integrations::Ewm' do
+  factory :ewm_integration, class: 'Integrations::Ewm' do
     project
     active { true }
     issue_tracker
@@ -127,7 +127,7 @@ FactoryBot.define do
     end
   end
 
-  factory :external_wiki_service, class: 'Integrations::ExternalWiki' do
+  factory :external_wiki_integration, class: 'Integrations::ExternalWiki' do
     project
     type { 'ExternalWikiService' }
     active { true }
@@ -160,20 +160,21 @@ FactoryBot.define do
     password { 'my-secret-password' }
   end
 
-  factory :slack_service, class: 'Integrations::Slack' do
+  # avoids conflict with slack_integration factory
+  factory :integrations_slack, class: 'Integrations::Slack' do
     project
     active { true }
     webhook { 'https://slack.service.url' }
     type { 'SlackService' }
   end
 
-  factory :slack_slash_commands_service, class: 'Integrations::SlackSlashCommands' do
+  factory :slack_slash_commands_integration, class: 'Integrations::SlackSlashCommands' do
     project
     active { true }
     type { 'SlackSlashCommandsService' }
   end
 
-  factory :pipelines_email_service, class: 'Integrations::PipelinesEmail' do
+  factory :pipelines_email_integration, class: 'Integrations::PipelinesEmail' do
     project
     active { true }
     type { 'PipelinesEmailService' }

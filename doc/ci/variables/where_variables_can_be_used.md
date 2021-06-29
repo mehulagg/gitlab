@@ -7,7 +7,7 @@ type: reference
 
 # Where variables can be used
 
-As it's described in the [CI/CD variables](README.md) docs, you can
+As it's described in the [CI/CD variables](index.md) docs, you can
 define many different variables. Some of them can be used for all GitLab CI/CD
 features, but some of them are more or less limited.
 
@@ -35,7 +35,7 @@ There are two places defined variables can be used. On the:
 | `cache:key`                                | yes              | Runner                 | The variable expansion is made by GitLab Runner's [internal variable expansion mechanism](#gitlab-runner-internal-variable-expansion-mechanism)                                                                                                                                                                                                                                                                                   |
 | `artifacts:name`                           | yes              | Runner                 | The variable expansion is made by GitLab Runner's shell environment                                                                                                                                                                                                                                                                                                                                                               |
 | `script`, `before_script`, `after_script`  | yes              | Script execution shell | The variable expansion is made by the [execution shell environment](#execution-shell-environment)                                                                                                                                                                                                                                                                                                                                 |
-| `only:variables:[]`, `except:variables:[]`, `rules:if` | no               | n/a                    | The variable must be in the form of `$variable`. Not supported are the following:<br/><br/>- Variables that are based on the environment's name (`CI_ENVIRONMENT_NAME`, `CI_ENVIRONMENT_SLUG`).<br/>- Any other variables related to environment (currently only `CI_ENVIRONMENT_URL`).<br/>- [Persisted variables](#persisted-variables).                                                                                            |
+| `only:variables:[]`, `except:variables:[]`, `rules:if` | no   | n/a                    | The variable must be in the form of `$variable`. Not supported are the following:<br/><br/>- Variables that are based on the environment's name (`CI_ENVIRONMENT_NAME`, `CI_ENVIRONMENT_SLUG`).<br/>- Any other variables related to environment (currently only `CI_ENVIRONMENT_URL`).<br/>- [Persisted variables](#persisted-variables).                                                                                        |
 
 ### `config.toml` file
 
@@ -149,7 +149,7 @@ In the case of `after_script` scripts, they can:
 - Not use variables defined in `before_script` and `script`.
 
 These restrictions exist because `after_script` scripts are executed in a
-[separated shell context](../yaml/README.md#after_script).
+[separated shell context](../yaml/index.md#after_script).
 
 ## Persisted variables
 
@@ -174,7 +174,7 @@ They are:
   - Script execution shell.
 - Not supported:
   - For definitions where the ["Expansion place"](#gitlab-ciyml-file) is GitLab.
-  - In the `only` and `except` [variables expressions](README.md#cicd-variable-expressions).
+  - In the `only` and `except` [variables expressions](../jobs/job_control.md#cicd-variable-expressions).
 
 Some of the persisted variables contain tokens and cannot be used by some definitions
 due to security reasons.
@@ -193,7 +193,6 @@ my-job:
     name: review/$CI_JOB_STAGE/deploy
   script:
     - 'deploy staging'
-  only:
-    variables:
-      - $STAGING_SECRET == 'something'
+  rules:
+    - if: $STAGING_SECRET == 'something'
 ```

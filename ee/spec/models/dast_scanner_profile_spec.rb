@@ -7,6 +7,8 @@ RSpec.describe DastScannerProfile, type: :model do
 
   describe 'associations' do
     it { is_expected.to belong_to(:project) }
+    it { is_expected.to have_many(:dast_scanner_profiles_builds).class_name('Dast::ScannerProfilesBuild').with_foreign_key(:dast_scanner_profile_id).inverse_of(:dast_scanner_profile) }
+    it { is_expected.to have_many(:ci_builds).class_name('Ci::Build').through(:dast_scanner_profiles_builds) }
   end
 
   describe 'validations' do
@@ -29,6 +31,25 @@ RSpec.describe DastScannerProfile, type: :model do
       it 'returns the dast_scanner_profiles with given name' do
         result = DastScannerProfile.with_name(subject.name)
         expect(result).to eq([subject])
+      end
+    end
+  end
+
+  describe '.names' do
+    it 'returns the names for the DAST scanner profiles with the given IDs' do
+      first_profile = create(:dast_scanner_profile, name: 'First profile')
+      second_profile = create(:dast_scanner_profile, name: 'Second profile')
+
+      names = described_class.names([first_profile.id, second_profile.id])
+
+      expect(names).to contain_exactly('First profile', 'Second profile')
+    end
+
+    context 'when a profile is not found' do
+      it 'rescues the error and returns an empty array' do
+        names = described_class.names([0])
+
+        expect(names).to be_empty
       end
     end
   end

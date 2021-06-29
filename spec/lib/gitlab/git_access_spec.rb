@@ -265,7 +265,7 @@ RSpec.describe Gitlab::GitAccess do
     it 'enqueues a redirected message for pushing' do
       push_access_check
 
-      expect(Gitlab::Checks::ProjectMoved.fetch_message(user.id, project.id)).not_to be_nil
+      expect(Gitlab::Checks::ContainerMoved.fetch_message(user, project.repository)).not_to be_nil
     end
 
     it 'allows push and pull access' do
@@ -438,6 +438,14 @@ RSpec.describe Gitlab::GitAccess do
       user.update!(password_expires_at: 2.minutes.ago)
 
       expect { pull_access_check }.to raise_forbidden("Your password expired. Please access GitLab from a web browser to update your password.")
+    end
+
+    it 'allows ldap users with expired password to pull' do
+      project.add_maintainer(user)
+      user.update!(password_expires_at: 2.minutes.ago)
+      allow(user).to receive(:ldap_user?).and_return(true)
+
+      expect { pull_access_check }.not_to raise_error
     end
 
     context 'when the project repository does not exist' do
@@ -731,6 +739,8 @@ RSpec.describe Gitlab::GitAccess do
 
     context 'when LFS is not enabled' do
       it 'does not run LFSIntegrity check' do
+        allow(project).to receive(:lfs_enabled?).and_return(false)
+
         expect(Gitlab::Checks::LfsIntegrity).not_to receive(:new)
 
         push_access_check
@@ -977,10 +987,24 @@ RSpec.describe Gitlab::GitAccess do
       end
 
       it 'disallows users with expired password to push' do
-        project.add_maintainer(user)
         user.update!(password_expires_at: 2.minutes.ago)
 
         expect { push_access_check }.to raise_forbidden("Your password expired. Please access GitLab from a web browser to update your password.")
+      end
+
+      it 'allows ldap users with expired password to push' do
+        user.update!(password_expires_at: 2.minutes.ago)
+        allow(user).to receive(:ldap_user?).and_return(true)
+
+        expect { push_access_check }.not_to raise_error
+      end
+
+      it 'disallows blocked ldap users with expired password to push' do
+        user.block
+        user.update!(password_expires_at: 2.minutes.ago)
+        allow(user).to receive(:ldap_user?).and_return(true)
+
+        expect { push_access_check }.to raise_forbidden("Your account has been blocked.")
       end
 
       it 'cleans up the files' do
@@ -1004,10 +1028,10 @@ RSpec.describe Gitlab::GitAccess do
         expect { access.check('git-receive-pack', changes) }.not_to exceed_query_limit(control_count).with_threshold(2)
       end
 
-      it 'raises TimeoutError when #check_single_change_access raises a timeout error' do
+      it 'raises TimeoutError when #check_access! raises a timeout error' do
         message = "Push operation timed out\n\nTiming information for debugging purposes:\nRunning checks for ref: wow"
 
-        expect_next_instance_of(Gitlab::Checks::ChangeAccess) do |check|
+        expect_next_instance_of(Gitlab::Checks::SingleChangeAccess) do |check|
           expect(check).to receive(:validate!).and_raise(Gitlab::Checks::TimedLogger::TimeoutError)
         end
 
