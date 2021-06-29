@@ -103,7 +103,7 @@ follow these steps to avoid unnecessary data loss:
       ```
 
       From this point, users are unable to view their data or make changes on the
-      **primary** node. Also they would be unable to log in to the **secondary** node.
+      **primary** node. They are also unable to log in to the **secondary** node.
       However, existing sessions need to work for the remainder of the maintenance period, and
       so public data is accessible throughout.
 
@@ -198,7 +198,7 @@ follow these steps to avoid unnecessary data loss:
 
    - If you do not have SSH access to the **primary** node, take the machine offline and
      prevent it from rebooting. Since there are many ways you may prefer to accomplish
-     this, we do avoid a single recommendation. You may need to:
+     this, we avoid a single recommendation. You may need to:
 
      - Reconfigure the load balancers.
      - Change DNS records (for example, point the **primary** DNS record to the
