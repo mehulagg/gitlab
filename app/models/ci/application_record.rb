@@ -9,6 +9,7 @@ module Ci
   # Do not extend this class in any other models.
   class ApplicationRecord < ::ApplicationRecord
     self.abstract_class = true
+    self.schema_name = :gitlab_ci
 
     if Gitlab::Database.has_config?(:ci)
       connects_to database: { writing: :ci, reading: :ci }
