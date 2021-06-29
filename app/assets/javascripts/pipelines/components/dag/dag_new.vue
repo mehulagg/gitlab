@@ -1,20 +1,18 @@
 <script>
 import { GlAlert, GlButton, GlEmptyState, GlLink, GlSprintf } from '@gitlab/ui';
 import { isEmpty } from 'lodash';
-import { fetchPolicies } from '~/lib/graphql';
 import { __ } from '~/locale';
 import { DEFAULT, PARSE_FAILURE, LOAD_FAILURE, UNSUPPORTED_DATA } from '../../constants';
-import getDagVisData from '../../graphql/queries/get_dag_vis_data.query.graphql';
 import { parseData } from '../parsing_utils';
 import { ADD_NOTE, REMOVE_NOTE, REPLACE_NOTES } from './constants';
-import DagAnnotations from './dag_annotations.vue';
+import DagAnnotationsNew from './dag_annotations_new.vue';
 import DagGraph from './dag_graph.vue';
 
 export default {
   // eslint-disable-next-line @gitlab/require-i18n-strings
   name: 'Dag',
   components: {
-    DagAnnotations,
+    DagAnnotationsNew,
     DagGraph,
     GlAlert,
     GlButton,
@@ -22,70 +20,16 @@ export default {
     GlLink,
     GlSprintf,
   },
-  inject: {
-    aboutDagDocPath: {
-      default: null,
-    },
-    dagDocPath: {
-      default: null,
-    },
-    emptySvgPath: {
-      default: '',
-    },
-    pipelineIid: {
-      default: '',
-    },
-    pipelineProjectPath: {
-      default: '',
-    },
-  },
-  apollo: {
+  props: {
     graphData: {
-      fetchPolicy: fetchPolicies.CACHE_AND_NETWORK,
-      query: getDagVisData,
-      variables() {
-        return {
-          projectPath: this.pipelineProjectPath,
-          iid: this.pipelineIid,
-        };
-      },
-      update(data) {
-        if (!data?.project?.pipeline) {
-          return this.graphData;
-        }
-
-        const {
-          stages: { nodes: stages },
-        } = data.project.pipeline;
-
-        const unwrappedGroups = stages
-          .map(({ name, groups: { nodes: groups } }) => {
-            return groups.map((group) => {
-              return { category: name, ...group };
-            });
-          })
-          .flat(2);
-
-        const nodes = unwrappedGroups.map((group) => {
-          const jobs = group.jobs.nodes.map(({ name, needs }) => {
-            return { name, needs: needs.nodes.map((need) => need.name) };
-          });
-
-          return { ...group, jobs };
-        });
-
-        return nodes;
-      },
-      error() {
-        this.reportFailure(LOAD_FAILURE);
-      },
+      type: Object,
+      required: true,
     },
   },
   data() {
     return {
       annotationsMap: {},
       failureType: null,
-      graphData: null,
       showFailureAlert: false,
       hasNoDependentJobs: false,
     };
@@ -132,14 +76,14 @@ export default {
       }
     },
     processedData() {
-      console.log(this.graphData);
-      return this.processGraphData(this.graphData);
+      const arrayOfJobs = this.graphData.stages.flatMap(({ groups }) => groups);
+      return parseData(arrayOfJobs);
     },
     shouldDisplayAnnotations() {
       return !isEmpty(this.annotationsMap);
     },
     shouldDisplayGraph() {
-      return Boolean(!this.showFailureAlert && !this.hasNoDependentJobs && this.graphData);
+      return true;
     },
   },
   methods: {
@@ -205,7 +149,7 @@ export default {
     </gl-alert>
 
     <div class="gl-relative">
-      <dag-annotations v-if="shouldDisplayAnnotations" :annotations="annotationsMap" />
+      <dag-annotations-new v-if="shouldDisplayAnnotations" :annotations="annotationsMap" />
       <dag-graph
         v-if="shouldDisplayGraph"
         :graph-data="processedData"

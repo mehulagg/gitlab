@@ -1,6 +1,7 @@
 <script>
 import { GlAlert, GlLoadingIcon, GlTabs } from '@gitlab/ui';
 import { s__ } from '~/locale';
+import GraphComponent from '~/pipelines/components/pipeline_graph/graph_component.vue';
 import PipelineGraph from '~/pipelines/components/pipeline_graph/pipeline_graph.vue';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import {
@@ -56,7 +57,7 @@ export default {
     GlAlert,
     GlLoadingIcon,
     GlTabs,
-    PipelineGraph,
+    GraphComponent,
     TextEditor,
   },
   mixins: [glFeatureFlagsMixin()],
@@ -124,7 +125,7 @@ export default {
       @click="setCurrentTab($options.tabConstants.VISUALIZE_TAB)"
     >
       <gl-loading-icon v-if="isLoading" size="lg" class="gl-m-3" />
-      <pipeline-graph v-else :pipeline-data="ciConfigData" />
+      <graph-component v-else :ci-config-data="ciConfigData" />
     </editor-tab>
     <editor-tab
       class="gl-mb-3"
