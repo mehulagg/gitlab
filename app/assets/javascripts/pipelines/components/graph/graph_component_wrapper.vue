@@ -51,7 +51,6 @@ export default {
       alertType: null,
       callouts: [],
       currentViewType: STAGE_VIEW,
-      // pipeline: null,
       rawPipeline: null,
       pipelineLayers: null,
       showAlert: false,
@@ -107,7 +106,6 @@ export default {
         }
 
         return data || null;
-
       },
       error(err) {
         this.reportFailure({ type: LOAD_FAILURE, skipSentry: true });
@@ -173,7 +171,9 @@ export default {
       return this.callouts.includes(enumFeatureName);
     },
     pipeline() {
-      return this.rawPipeline ? unwrapPipelineData(this.pipelineProjectPath, this.rawPipeline) : null;
+      return this.rawPipeline
+        ? unwrapPipelineData(this.pipelineProjectPath, JSON.parse(JSON.stringify(this.rawPipeline)))
+        : null;
     },
     showLoadingIcon() {
       /*

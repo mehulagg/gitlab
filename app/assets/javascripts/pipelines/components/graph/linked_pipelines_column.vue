@@ -80,7 +80,10 @@ export default {
     },
     currentPipeline() {
       return this.currentPipelineRaw
-        ? unwrapPipelineData(this.currentPipelineProjectPath, this.currentPipelineRaw)
+        ? unwrapPipelineData(
+            this.currentPipelineProjectPath,
+            JSON.parse(JSON.stringify(this.currentPipelineRaw)),
+          )
         : null;
     },
     graphPosition() {
