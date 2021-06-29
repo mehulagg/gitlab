@@ -193,18 +193,21 @@ describe('Sidebar assignees widget', () => {
 
       expect(wrapper.emitted('assignees-updated')).toEqual([
         [
-          [
-            {
-              __typename: 'User',
-              avatarUrl:
-                'https://www.gravatar.com/avatar/e64c7d89f26bd1972efa854d13d7dd61?s=80&d=identicon',
-              id: 'gid://gitlab/User/1',
-              name: 'Administrator',
-              username: 'root',
-              webUrl: '/root',
-              status: null,
-            },
-          ],
+          {
+            assignees: [
+              {
+                __typename: 'User',
+                avatarUrl:
+                  'https://www.gravatar.com/avatar/e64c7d89f26bd1972efa854d13d7dd61?s=80&d=identicon',
+                id: 'gid://gitlab/User/1',
+                name: 'Administrator',
+                username: 'root',
+                webUrl: '/root',
+                status: null,
+              },
+            ],
+            id: 1,
+          },
         ],
       ]);
     });
