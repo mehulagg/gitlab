@@ -9,6 +9,12 @@ module DynamicShards
       end
 
       configs.each do |config_name, config|
+        if config_name == 'main'
+          config["schema_search_paths"] ||= "public,ci"
+        elsif config_name == 'ci'
+          config["schema_search_paths"] ||= "ci"
+        end
+
         # Hack for CI tests to ensure that we always have `gitlabhq_test` since code depends on it...
         next if Gitlab::Utils.to_boolean(ENV['CI']) && config_name == 'main'
 
