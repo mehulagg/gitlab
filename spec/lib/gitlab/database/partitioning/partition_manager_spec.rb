@@ -113,8 +113,8 @@ RSpec.describe Gitlab::Database::Partitioning::PartitionManager do
 
     let(:extra_partitions) do
       [
-        instance_double(Gitlab::Database::Partitioning::TimePartition, table: table, partition_name: 'foo1'),
-        instance_double(Gitlab::Database::Partitioning::TimePartition, table: table, partition_name: 'foo2')
+        instance_double(Gitlab::Database::Partitioning::TimePartition, table: table, partition_name: 'foo1', to_detach_sql: 'SELECT 1'),
+        instance_double(Gitlab::Database::Partitioning::TimePartition, table: table, partition_name: 'foo2', to_detach_sql: 'SELECT 2')
       ]
     end
 
@@ -156,6 +156,50 @@ RSpec.describe Gitlab::Database::Partitioning::PartitionManager do
 
         subject
       end
+    end
+  end
+
+  describe '#detach_partitions' do
+
+    around do |ex|
+      travel_to(Date.parse('2021-06-23')) do
+        ex.run
+      end
+    end
+
+    subject { described_class.new([my_model]).detach_partitions }
+
+    let(:connection) { ActiveRecord::Base.connection }
+    let(:my_model) do
+      Class.new(ApplicationRecord) do
+        include PartitionedTable
+
+        self.table_name = 'my_model_example_table'
+
+        partitioned_by :created_at, strategy: :monthly, retain_for: 1.month
+      end
+    end
+
+    before do
+      connection.execute(<<~SQL)
+        CREATE TABLE my_model_example_table
+        (id serial not null, created_at timestamptz not null, primary key (id, created_at))
+        PARTITION BY RANGE (created_at);
+
+        CREATE TABLE #{Gitlab::Database::DYNAMIC_PARTITIONS_SCHEMA}.my_model_example_table_202104
+        PARTITION OF my_model_example_table
+        FOR VALUES FROM ('2021-04-01') TO ('2021-05-01')
+      SQL
+    end
+
+    it 'detaches the old partition' do
+      expect { subject }.to change { find_partitions(my_model.table_name, schema: Gitlab::Database::DYNAMIC_PARTITIONS_SCHEMA).size }.from(1).to(0)
+    end
+
+    it 'does not delete the old partition' do
+      subject
+
+      expect(table_oid('my_model_example_table_202104')).not_to be_nil
     end
   end
 end

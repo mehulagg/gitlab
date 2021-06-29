@@ -89,7 +89,9 @@ module Gitlab
         end
 
         def detach_one_partition(partition)
-          Gitlab::AppLogger.info("Planning to detach #{partition.partition_name} for table #{partition.table}")
+          connection.execute partition.to_detach_sql
+
+          Gitlab::AppLogger.info("Detached partition #{partition.partition_name} for table #{partition.table}")
         end
 
         def with_lock_retries(&block)
