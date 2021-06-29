@@ -24,6 +24,6 @@ run_depscore:
     - ruby -v
     - ls -la
     - ruby ./depscore/main.rb -d gl-dependency-scanning-report.json
-  rtifacts:
+  artifacts:
     paths:
       - dep_scores.csv
