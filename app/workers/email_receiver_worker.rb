@@ -85,6 +85,8 @@ class EmailReceiverWorker # rubocop:disable Scalability/IdempotentWorker
   def handle_failure(error)
     return unless raw.present?
 
+    Gitlab::Metrics::BackgroundTransaction.current&.add_event('email_receiver_error', error_class: error.class.name)
+
     can_retry = false
     reason =
       case error

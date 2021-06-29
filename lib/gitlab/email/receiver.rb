@@ -33,7 +33,11 @@ module Gitlab
           references: Array(mail.references),
           delivered_to: delivered_to.map(&:value),
           envelope_to: envelope_to.map(&:value),
-          x_envelope_to: x_envelope_to.map(&:value)
+          x_envelope_to: x_envelope_to.map(&:value),
+          meta: {
+            client_id: "email/#{mail.from.first}",
+            project: handler&.project&.full_path
+          }
         }
       end
 

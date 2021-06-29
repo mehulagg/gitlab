@@ -23,12 +23,13 @@ RSpec.describe Gitlab::Email::Receiver do
 
     before do
       allow(handler).to receive(:execute)
+      allow(handler).to receive(:project)
       allow(handler).to receive(:metrics_params)
       allow(handler).to receive(:metrics_event)
 
       stub_incoming_email_setting(enabled: true, address: "incoming+%{key}@appmail.example.com")
 
-      expect(receiver.mail_metadata.keys).to match_array(%i(mail_uid from_address to_address mail_key references delivered_to envelope_to x_envelope_to))
+      expect(metadata.keys).to match_array(%i(mail_uid from_address to_address mail_key references delivered_to envelope_to x_envelope_to meta))
     end
 
     context 'when in a Delivered-To header' do
@@ -106,5 +107,11 @@ RSpec.describe Gitlab::Email::Receiver do
     end
 
     expect(events.uniq.count).to eq events.count
+  end
+
+  it "requires all handlers to respond to #project" do
+    Gitlab::Email::Handler.load_handlers.each do |handler|
+      expect { handler.new(nil, nil).project }.not_to raise_error
+    end
   end
 end

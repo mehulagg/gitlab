@@ -50,10 +50,6 @@ module Gitlab
           :receive_email_service_desk
         end
 
-        private
-
-        attr_reader :project_id, :project_path, :service_desk_key
-
         def project
           strong_memoize(:project) do
             @project = service_desk_key ? project_from_key : super
@@ -61,6 +57,10 @@ module Gitlab
             @project
           end
         end
+
+        private
+
+        attr_reader :project_id, :project_path, :service_desk_key
 
         def project_from_key
           return unless match = service_desk_key.match(PROJECT_KEY_PATTERN)
