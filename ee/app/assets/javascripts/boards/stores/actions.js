@@ -558,6 +558,33 @@ export default {
       });
   },
 
+  fetchSubGroups: ({ commit, state }, { search = '', fetchNext = false }) => {
+    commit(types.REQUEST_SUB_GROUPS, fetchNext);
+
+    const { fullPath } = state;
+
+    const variables = {
+      fullPath,
+      search: search !== '' ? search : undefined,
+      after: fetchNext ? state.subGroupsFlags.pageInfo.endCursor : undefined,
+    };
+
+    // return gqlClient
+    //   .query({
+    //     query: groupProjectsQuery,
+    //     variables,
+    //   })
+    //   .then(({ data }) => {
+    //     const { groups } = data.group;
+    //     commit(types.RECEIVE_SUB_GROUPS_SUCCESS, {
+    //       projects: projects.nodes,
+    //       pageInfo: projects.pageInfo,
+    //       fetchNext,
+    //     });
+    //   })
+    //   .catch(() => commit(types.RECEIVE_SUB_GROUPS_FAILURE));
+  },
+
   createList: (
     { getters, dispatch },
     { backlog, labelId, milestoneId, assigneeId, iterationId },

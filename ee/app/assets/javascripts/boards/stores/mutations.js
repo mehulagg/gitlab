@@ -175,6 +175,23 @@ export default {
     }
   },
 
+  [mutationTypes.REQUEST_SUB_GROUPS]: (state, fetchNext) => {
+    Vue.set(state, 'subGroupsFlags', {
+      [fetchNext ? 'isLoadingMore' : 'isLoading']: true,
+      pageInfo: state.subGroupsFlags.pageInfo,
+    });
+  },
+
+  [mutationTypes.RECEIVE_SUB_GROUPS_SUCCESS]: (state, { subGroups, pageInfo, fetchNext }) => {
+    Vue.set(state, 'subGroups', fetchNext ? [...state.subGroups, ...subGroups] : subGroups);
+    Vue.set(state, 'subGroupsFlags', { isLoading: false, isLoadingMore: false, pageInfo });
+  },
+
+  [mutationTypes.RECEIVE_SUB_GROUPS_FAILURE]: (state) => {
+    state.error = s__('Boards|An error occurred while fetching child groups. Please try again.');
+    Vue.set(state, 'subGroupsFlags', { isLoading: false, isLoadingMore: false });
+  },
+
   [mutationTypes.RECEIVE_MILESTONES_REQUEST](state) {
     state.milestonesLoading = true;
   },
