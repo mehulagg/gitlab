@@ -419,6 +419,7 @@ PG::DependentObjectsStillExist: ERROR: cannot drop column asset_proxy_whitelist 
 DETAIL: trigger trigger_0d588df444c8 on table application_settings depends on column asset_proxy_whitelist of table application_settings
 ```
 
+To work around this bug, follow the previous steps to complete the update.
 More details are available [in this issue](https://gitlab.com/gitlab-org/gitlab/-/issues/324160).
 
 ### 13.6.0
