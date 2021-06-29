@@ -95,7 +95,7 @@ func buildConfig(arg0 string, args []string) (*bootConfig, *config.Config, error
 	fset.StringVar(&cfg.Socket, "authSocket", "", "Optional: Unix domain socket to dial authBackend at")
 
 	// actioncable backend
-	cableBackend := fset.String("cableBackend", upstream.DefaultBackend.String(), "ActionCable backend")
+	cableBackend := fset.String("cableBackend", *authBackend, "ActionCable backend")
 	fset.StringVar(&cfg.CableSocket, "cableSocket", "", "Optional: Unix domain socket to dial cableBackend at")
 
 	fset.StringVar(&cfg.DocumentRoot, "documentRoot", "public", "Path to static files content")
