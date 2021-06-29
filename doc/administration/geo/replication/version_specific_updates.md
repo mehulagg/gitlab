@@ -18,7 +18,7 @@ We found an [issue with Git clone/pull through HTTP(s)](https://gitlab.com/gitla
 ## Updating to GitLab 13.9
 
 We've detected an issue [with a column rename](https://gitlab.com/gitlab-org/gitlab/-/issues/324160)
-that may prevent upgrades to GitLab 13.9.0, 13.9.1, 13.9.2 and 13.9.3. It might be neccessary
+that will prevent upgrades to GitLab 13.9.0, 13.9.1, 13.9.2 and 13.9.3 when following the zero-downtime steps. It is necessary
 to perform the following additional steps for the zero-downtime upgrade:
 
 1. Before running the final `sudo gitlab-rake db:migrate` command on the deploy node,
