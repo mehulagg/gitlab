@@ -190,13 +190,13 @@ describe('Pipeline graph wrapper', () => {
   describe('when refresh action is emitted', () => {
     beforeEach(async () => {
       createComponentWithApollo();
-      jest.spyOn(wrapper.vm.$apollo.queries.pipeline, 'refetch');
+      jest.spyOn(wrapper.vm.$apollo.queries.rawPipeline, 'refetch');
       await wrapper.vm.$nextTick();
       getGraph().vm.$emit('refreshPipelineGraph');
     });
 
     it('calls refetch', () => {
-      expect(wrapper.vm.$apollo.queries.pipeline.refetch).toHaveBeenCalled();
+      expect(wrapper.vm.$apollo.queries.rawPipeline.refetch).toHaveBeenCalled();
     });
   });
 

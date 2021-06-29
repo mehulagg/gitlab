@@ -51,7 +51,8 @@ export default {
       alertType: null,
       callouts: [],
       currentViewType: STAGE_VIEW,
-      pipeline: null,
+      // pipeline: null,
+      rawPipeline: null,
       pipelineLayers: null,
       showAlert: false,
       showLinks: false,
@@ -78,7 +79,7 @@ export default {
         );
       },
     },
-    pipeline: {
+    rawPipeline: {
       context() {
         return getQueryHeaders(this.graphqlResourceEtag);
       },
@@ -101,11 +102,12 @@ export default {
           See: https://gitlab.com/gitlab-org/gitlab/-/issues/323213.
         */
 
-        if (!data?.project?.pipeline) {
-          return this.pipeline;
+        if (!data?.project?.pipeline && this.pipeline) {
+          return this.rawPipeline;
         }
 
-        return unwrapPipelineData(this.pipelineProjectPath, data);
+        return data || null;
+
       },
       error(err) {
         this.reportFailure({ type: LOAD_FAILURE, skipSentry: true });
@@ -170,12 +172,15 @@ export default {
     hoverTipPreviouslyDismissed() {
       return this.callouts.includes(enumFeatureName);
     },
+    pipeline() {
+      return this.rawPipeline ? unwrapPipelineData(this.pipelineProjectPath, this.rawPipeline) : null;
+    },
     showLoadingIcon() {
       /*
         Shows the icon only when the graph is empty, not when it is is
         being refetched, for instance, on action completion
       */
-      return this.$apollo.queries.pipeline.loading && !this.pipeline;
+      return this.$apollo.queries.rawPipeline.loading && !this.pipeline;
     },
     showGraphViewSelector() {
       return Boolean(this.glFeatures.pipelineGraphLayersView && this.pipeline?.usesNeeds);
@@ -186,7 +191,7 @@ export default {
       this.reportFailure({ type: IID_FAILURE, skipSentry: true });
     }
 
-    toggleQueryPollingByVisibility(this.$apollo.queries.pipeline);
+    toggleQueryPollingByVisibility(this.$apollo.queries.rawPipeline);
   },
   errorCaptured(err, _vm, info) {
     reportToSentry(this.$options.name, `error: ${err}, info: ${info}`);
@@ -216,7 +221,7 @@ export default {
       this.alertType = null;
     },
     refreshPipelineGraph() {
-      this.$apollo.queries.pipeline.refetch();
+      this.$apollo.queries.rawPipeline.refetch();
     },
     /* eslint-disable @gitlab/require-i18n-strings */
     reportFailure({ type, err = 'No error string passed.', skipSentry = false }) {
