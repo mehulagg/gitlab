@@ -58,11 +58,12 @@ POST /projects/:id/merge_requests/:merge_request_iid/status_check_responses
 
 **Parameters:**
 
-| Attribute                | Type    | Required | Description                            |
-| ------------------------ | ------- | -------- | -------------------------------------- |
-| `id`                     | integer | yes      | ID of a project                    |
-| `merge_request_iid`      | integer | yes      | IID of a merge request             |
-| `sha`                    | string  | yes      | SHA at `HEAD` of the source branch |
+| Attribute                 | Type     | Required | Description                           |
+| -------------------------- | ------- | -------- | ------------------------------------- |
+| `id`                       | integer | yes      | ID of a project                       |
+| `merge_request_iid`        | integer | yes      | IID of a merge request                |
+| `sha`                      | string  | yes      | SHA at `HEAD` of the source branch    |
+| `external_status_check_id` | integer | yes      | ID of an external status check        |
 
 NOTE:
 `sha` must be the SHA at the `HEAD` of the merge request's source branch.
