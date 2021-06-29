@@ -9,7 +9,7 @@ module Gitlab
         def structure_load(...)
           result = super(...)
 
-          if ActiveRecord::Base.configurations.primary?(connection.pool.db_config.name)
+          if Gitlab::Database.main_database?(connection.pool.db_config.name)
             Gitlab::Database::SchemaVersionFiles.load_all
           else
             result
