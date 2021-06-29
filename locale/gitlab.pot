@@ -31761,6 +31761,12 @@ msgstr ""
 msgid "Team domain"
 msgstr ""
 
+msgid "TeamcityIntegration|TeamCity CI will be triggered after a merge request has been created or updated"
+msgstr ""
+
+msgid "TeamcityIntegration|TeamCity CI will be triggered after every push to the repository except branch delete"
+msgstr ""
+
 msgid "Telephone number"
 msgstr ""
 

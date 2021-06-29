@@ -30,7 +30,7 @@ module API
           required: false,
           name: event_name.to_sym,
           type: String,
-          desc: service.event_description(event_name)
+          desc: IntegrationsHelper.integration_event_description(service, event_name)
         }
       end
     end
