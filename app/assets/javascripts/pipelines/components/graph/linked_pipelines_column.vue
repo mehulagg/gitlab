@@ -47,7 +47,8 @@ export default {
   },
   data() {
     return {
-      currentPipeline: null,
+      currentPipelineProjectPath: '',
+      currentPipelineRaw: null,
       loadingPipelineId: null,
       pipelineLayers: {},
       pipelineExpanded: false,
@@ -77,6 +78,11 @@ export default {
 
       return [...this.$options.titleClasses, ...positionalClasses];
     },
+    currentPipeline() {
+      return this.currentPipelineRaw
+        ? unwrapPipelineData(this.currentPipelineProjectPath, this.currentPipelineRaw)
+        : null;
+    },
     graphPosition() {
       return this.isUpstream ? 'left' : 'right';
     },
@@ -92,9 +98,9 @@ export default {
   },
   methods: {
     getPipelineData(pipeline) {
-      const projectPath = pipeline.project.fullPath;
+      this.currentPipelineProjectPath = pipeline.project.fullPath;
 
-      this.$apollo.addSmartQuery('currentPipeline', {
+      this.$apollo.addSmartQuery('currentPipelineRaw', {
         query: getPipelineDetails,
         pollInterval: 10000,
         context() {
@@ -102,9 +108,12 @@ export default {
         },
         variables() {
           return {
-            projectPath,
+            projectPath: this.currentPipelineProjectPath,
             iid: pipeline.iid,
           };
+        },
+        skip() {
+          return !this.currentPipelineProjectPath;
         },
         update(data) {
           /*
@@ -115,10 +124,10 @@ export default {
           */
 
           if (!data?.project?.pipeline) {
-            return this.currentPipeline;
+            return this.currentPipelineRaw;
           }
 
-          return unwrapPipelineData(projectPath, data);
+          return data || null;
         },
         result() {
           this.loadingPipelineId = null;
@@ -134,7 +143,7 @@ export default {
         },
       });
 
-      toggleQueryPollingByVisibility(this.$apollo.queries.currentPipeline);
+      toggleQueryPollingByVisibility(this.$apollo.queries.currentPipelineRaw);
     },
     getPipelineLayers(id) {
       if (this.viewType === LAYER_VIEW && !this.pipelineLayers[id]) {
@@ -153,7 +162,8 @@ export default {
       /* If the clicked pipeline has been expanded already, close it, clear, exit */
       if (this.currentPipeline?.id === pipeline.id) {
         this.pipelineExpanded = false;
-        this.currentPipeline = null;
+        this.currentPipelineRaw = null;
+        this.currentPipelineProjectPath = null;
         return;
       }
 
