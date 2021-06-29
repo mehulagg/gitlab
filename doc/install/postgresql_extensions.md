@@ -9,8 +9,7 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 This guide documents how to manage PostgreSQL extensions for installations with an external
 PostgreSQL database.
 
-The following extensions must be loaded into the main GitLab database (normally called
-`gitlabhq_production`):
+You must load the following extensions into the main GitLab database (defaults to `gitlabhq_production`):
 
 | Extension    | Minimum GitLab version |
 |--------------|------------------------|
