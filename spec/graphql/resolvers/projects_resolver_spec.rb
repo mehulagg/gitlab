@@ -27,10 +27,6 @@ RSpec.describe Resolvers::ProjectsResolver do
       private_group.add_developer(user)
     end
 
-    before do
-      stub_feature_flags(project_finder_similarity_sort: false)
-    end
-
     context 'when user is not logged in' do
       let(:current_user) { nil }
 
@@ -137,13 +133,7 @@ RSpec.describe Resolvers::ProjectsResolver do
           let(:filters) { { search: 'projA', sort: 'similarity' } }
 
           it 'returns projects in order of similarity to search' do
-            stub_feature_flags(project_finder_similarity_sort: current_user)
-
             is_expected.to eq([named_project3, named_project1, named_project2])
-          end
-
-          it 'returns projects in any order if flag is off' do
-            is_expected.to match_array([named_project3, named_project1, named_project2])
           end
         end
 
