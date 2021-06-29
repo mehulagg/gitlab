@@ -77,7 +77,7 @@ quality_level = Quality::TestLevel.new
 
 RSpec.configure do |config|
   config.filter_run focus: true
-  config.run_all_when_everything_filtered = true
+  config.run_all_when_everything_filtered = true unless ENV['CI']
 
   config.use_transactional_fixtures = true
   config.use_instantiated_fixtures = false
