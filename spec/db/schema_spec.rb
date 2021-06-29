@@ -277,6 +277,37 @@ RSpec.describe 'Database schema' do
     end
   end
 
+  describe 'table follows schemas boundaries' do
+    include DatabaseSchemaHelper
+
+    ApplicationRecord.descendants.select(&:table_name).select(&:connected?).each do |record_class|
+      context record_class do
+        let(:connection) { record_class.connection }
+        let(:schema_name) { record_class.schema_name }
+        let(:table_name) { record_class.table_name }
+        let(:full_table_name) { "#{schema_name}.#{table_name}" }
+
+        it "expects to exists in a given schema" do
+          expect(connection.table_exists?(full_table_name)).to be_truthy
+        end
+
+        it "expects to not have foreign keys to another schema" do
+          # when using `:undefined` it will generate a FK specification
+          # in an expanded format
+          with_search_paths(connection, :undefined) do
+            invalid_foreign_keys =
+              connection.foreign_keys(full_table_name)
+                .reject { |fk| fk.to_table.start_with?("#{schema_name}.") }
+                .map(&:to_table)
+                .sort
+
+            expect(invalid_foreign_keys).to eq([])
+          end
+        end
+      end
+    end
+  end
+
   private
 
   def retrieve_columns_name_with_jsonb
