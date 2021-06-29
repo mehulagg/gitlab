@@ -93,7 +93,10 @@ The variable names are prefixed with `CI_EXTERNAL_PULL_REQUEST_`.
 
 ### Limitations
 
-This feature currently does not support Pull Requests from fork repositories. Any Pull Requests from fork repositories are ignored. [Read more](https://gitlab.com/gitlab-org/gitlab/-/issues/5667).
+This feature currently does not support:
+- Pull Requests from fork repositories. Any Pull Requests from fork repositories are ignored. [Read more](https://gitlab.com/gitlab-org/gitlab/-/issues/5667).
+- Syncing GitHub pull request titles or description changes after the initial import
+- Syncing any new GitHub pull requests that were created after the initial import
 
 Given that GitLab creates 2 pipelines, if changes are pushed to a remote branch that
 references an open Pull Request, both contribute to the status of the Pull Request
