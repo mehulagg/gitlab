@@ -24,4 +24,4 @@ run_depscore:
   script:
     - ruby -v
     - ls -la
-    - ruby ./depscore/main.rb gl-dependency-scanning-report.json
+    - ruby ./depscore/main.rb -d gl-dependency-scanning-report.json
