@@ -82,7 +82,7 @@ describe('AddEscalationPolicyForm', () => {
     it('on rule update emitted should update rules array and emit updates up', () => {
       const updatedRule = {
         status: 'TRIGGERED',
-        elapsedTimeSeconds: 30,
+        elapsedTimeMinutes: 3,
         oncallScheduleIid: 2,
       };
       findRules().at(0).vm.$emit('update-escalation-rule', { index: 0, rule: updatedRule });

@@ -1,6 +1,7 @@
 import { GlEmptyState, GlLoadingIcon } from '@gitlab/ui';
 import EscalationPoliciesWrapper from 'ee/escalation_policies/components/escalation_policies_wrapper.vue';
 import EscalationPolicy from 'ee/escalation_policies/components/escalation_policy.vue';
+import { parsePolicy } from 'ee/escalation_policies/utils';
 import { shallowMountExtended } from 'helpers/vue_test_utils_helper';
 import mockEscalationPolicies from './mocks/mockPolicies.json';
 
@@ -55,7 +56,7 @@ describe('Escalation Policies Wrapper', () => {
       beforeEach(() => {
         mountComponent({
           loading,
-          escalationPolicies,
+          escalationPolicies: escalationPolicies.map(parsePolicy),
         });
       });
 

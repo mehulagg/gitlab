@@ -9,11 +9,12 @@ import {
   deleteEscalationPolicyModalId,
   editEscalationPolicyModalId,
 } from 'ee/escalation_policies/constants';
+import { parsePolicy } from 'ee/escalation_policies/utils';
 import mockPolicies from './mocks/mockPolicies.json';
 
 describe('EscalationPolicy', () => {
   let wrapper;
-  const escalationPolicy = cloneDeep(mockPolicies[0]);
+  const escalationPolicy = parsePolicy(cloneDeep(mockPolicies[0]));
 
   const createComponent = () => {
     wrapper = shallowMount(EscalationPolicy, {
