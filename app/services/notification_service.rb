@@ -428,8 +428,8 @@ class NotificationService
     mailer.user_admin_rejection_email(name, email).deliver_later
   end
 
-  def user_blocked(name, email)
-    mailer.user_blocked_email(name, email).deliver_later
+  def user_deactivated(name, email)
+    mailer.user_deactivated_email(name, email).deliver_later
   end
 
   # Members

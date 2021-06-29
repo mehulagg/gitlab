@@ -102,6 +102,8 @@ class Admin::UsersController < Admin::ApplicationController
     return redirect_back_or_admin_user(notice: _("The user you are trying to deactivate has been active in the past %{minimum_inactive_days} days and cannot be deactivated") % { minimum_inactive_days: ::User::MINIMUM_INACTIVE_DAYS }) unless user.can_be_deactivated?
 
     user.deactivate
+    NotificationService.new.user_deactivated(user.name, user.notification_email)
+
     redirect_back_or_admin_user(notice: _("Successfully deactivated"))
   end
 
