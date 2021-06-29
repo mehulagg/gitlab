@@ -1,3 +1,7 @@
+CREATE SCHEMA gitlab_ci;
+
+COMMENT ON SCHEMA gitlab_ci IS 'Schema to hold all tables owned by GitLab CI feature';
+
 CREATE SCHEMA gitlab_partitions_dynamic;
 
 COMMENT ON SCHEMA gitlab_partitions_dynamic IS 'Schema to hold partitions managed dynamically from the application, e.g. for time space partitioning.';
