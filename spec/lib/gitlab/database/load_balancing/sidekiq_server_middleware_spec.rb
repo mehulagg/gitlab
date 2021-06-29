@@ -8,7 +8,12 @@ RSpec.describe Gitlab::Database::LoadBalancing::SidekiqServerMiddleware do
   let(:load_balancer) { double.as_null_object }
   let(:has_replication_lag) { false }
 
+  let(:worker) { worker_class.new }
+  let(:job) { { "retry" => 3, "job_id" => "a180b47c-3fd6-41b8-81e9-34da61c3400e", 'database_replica_location' => '0/D525E3A8' } }
+
   before do
+    skip_feature_flags_yaml_validation
+    skip_default_enabled_yaml_check
     allow(::Gitlab::Database::LoadBalancing).to receive_message_chain(:proxy, :load_balancer).and_return(load_balancer)
     allow(load_balancer).to receive(:select_up_to_date_host).and_return(!has_replication_lag)
   end
@@ -41,7 +46,7 @@ RSpec.describe Gitlab::Database::LoadBalancing::SidekiqServerMiddleware do
 
     shared_examples_for 'stick to the primary' do
       it 'sticks to the primary' do
-        middleware.call(worker, job, double(:queue)) do
+        run_middleware do
           expect(Gitlab::Database::LoadBalancing::Session.current.use_primary?).to be_truthy
         end
       end
@@ -51,11 +56,10 @@ RSpec.describe Gitlab::Database::LoadBalancing::SidekiqServerMiddleware do
       it 'does not stick to the primary', :aggregate_failures do
         expect(middleware).to receive(:replica_caught_up?).with(location).and_return(true)
 
-        middleware.call(worker, job, double(:queue)) do
+        run_middleware do
           expect(Gitlab::Database::LoadBalancing::Session.current.use_primary?).not_to be_truthy
+          expect(job['load_balancing_strategy']).to eq('replica')
         end
-
-        expect(job['load_balancing_strategy']).to eq('replica')
       end
     end
 
@@ -68,6 +72,12 @@ RSpec.describe Gitlab::Database::LoadBalancing::SidekiqServerMiddleware do
         end
 
         include_examples 'stick to the primary'
+
+        it 'updates job hash with load balancing strategy' do
+          run_middleware do
+            expect(job['load_balancing_strategy']).to eq('primary_lb_na')
+          end
+        end
       end
 
       context 'when database replica location is set' do
@@ -94,26 +104,25 @@ RSpec.describe Gitlab::Database::LoadBalancing::SidekiqServerMiddleware do
         let(:job) { { 'job_id' => 'a180b47c-3fd6-41b8-81e9-34da61c3400e' } }
 
         it_behaves_like 'stick to the primary'
+
+        it 'updates job hash with load balancing strategy' do
+          run_middleware do
+            expect(job['load_balancing_strategy']).to eq('primary_no_wal')
+          end
+        end
       end
-    end
-
-    let(:queue) { 'default' }
-    let(:redis_pool) { Sidekiq.redis_pool }
-    let(:worker) { worker_class.new }
-    let(:job) { { "retry" => 3, "job_id" => "a180b47c-3fd6-41b8-81e9-34da61c3400e", 'database_replica_location' => '0/D525E3A8' } }
-    let(:block) { 10 }
-
-    before do
-      skip_feature_flags_yaml_validation
-      skip_default_enabled_yaml_check
-      allow(middleware).to receive(:clear)
-      allow(Gitlab::Database::LoadBalancing::Session.current).to receive(:performed_write?).and_return(true)
     end
 
     context 'when worker class does not include ApplicationWorker' do
       let(:worker) { ActiveJob::QueueAdapters::SidekiqAdapter::JobWrapper.new }
 
       include_examples 'stick to the primary'
+
+      it 'updates job hash with load balancing strategy' do
+        run_middleware do
+          expect(job['load_balancing_strategy']).to eq('primary_lb_na')
+        end
+      end
     end
 
     context 'when worker data consistency is :always' do
@@ -169,8 +178,8 @@ RSpec.describe Gitlab::Database::LoadBalancing::SidekiqServerMiddleware do
 
         include_examples 'stick to the primary'
 
-        it 'updates job hash with primary database chosen', :aggregate_failures do
-          middleware.call(worker, job, double(:queue)) do
+        it 'updates job hash with load balancing strategy' do
+          run_middleware do
             expect(job['load_balancing_strategy']).to eq('primary')
           end
         end
@@ -179,8 +188,12 @@ RSpec.describe Gitlab::Database::LoadBalancing::SidekiqServerMiddleware do
   end
 
   def process_job(job)
-    Sidekiq::JobRetry.new.local(worker_class, job, queue) do
+    Sidekiq::JobRetry.new.local(worker_class, job, 'default') do
       worker_class.process_job(job)
     end
+  end
+
+  def run_middleware
+    middleware.call(worker, job, double(:queue)) { yield }
   end
 end
