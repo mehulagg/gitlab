@@ -151,7 +151,7 @@ describe('SubscriptionTable component', () => {
               },
               billing: {
                 subscriptionEndDate: new Date(),
-              }
+              },
             },
           });
         });
@@ -179,7 +179,7 @@ describe('SubscriptionTable component', () => {
             },
             billing: {
               subscriptionEndDate: getOffsetDateString(16),
-            }
+            },
           },
         });
       });
@@ -187,7 +187,7 @@ describe('SubscriptionTable component', () => {
       it('does not display the renew button', () => {
         expect(findRenewButton().exists()).toBe(false);
       });
-    })
+    });
   });
 
   describe('Add seats button', () => {

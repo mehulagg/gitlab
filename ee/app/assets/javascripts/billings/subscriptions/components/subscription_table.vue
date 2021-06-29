@@ -2,7 +2,12 @@
 import { GlButton, GlLoadingIcon } from '@gitlab/ui';
 import { escape } from 'lodash';
 import { mapActions, mapState, mapGetters } from 'vuex';
-import { TABLE_TYPE_DEFAULT, TABLE_TYPE_FREE, TABLE_TYPE_TRIAL, DAYS_FOR_RENEWAL } from 'ee/billings/constants';
+import {
+  TABLE_TYPE_DEFAULT,
+  TABLE_TYPE_FREE,
+  TABLE_TYPE_TRIAL,
+  DAYS_FOR_RENEWAL,
+} from 'ee/billings/constants';
 import { s__ } from '~/locale';
 import SubscriptionTableRow from './subscription_table_row.vue';
 
@@ -42,7 +47,14 @@ export default {
     },
   },
   computed: {
-    ...mapState(['isLoadingSubscription', 'hasErrorSubscription', 'plan', 'billing', 'tables', 'endpoint']),
+    ...mapState([
+      'isLoadingSubscription',
+      'hasErrorSubscription',
+      'plan',
+      'billing',
+      'tables',
+      'endpoint',
+    ]),
     ...mapGetters(['isFreePlan']),
     isSubscription() {
       return !this.isFreePlan;
