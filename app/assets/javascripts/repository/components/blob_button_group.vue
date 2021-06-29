@@ -54,6 +54,11 @@ export default {
       return sprintf(__('Replace %{name}'), { name: this.name });
     },
   },
+  methods: {
+    deleteFile() {
+      this.$emit('delete');
+    },
+  },
 };
 </script>
 
@@ -63,7 +68,7 @@ export default {
       <gl-button v-gl-modal="replaceModalId">
         {{ $options.i18n.replace }}
       </gl-button>
-      <gl-button>{{ $options.i18n.delete }}</gl-button>
+      <gl-button @click="deleteFile">{{ $options.i18n.delete }}</gl-button>
     </gl-button-group>
     <upload-blob-modal
       :modal-id="replaceModalId"

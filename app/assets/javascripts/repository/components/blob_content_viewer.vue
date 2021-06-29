@@ -7,6 +7,7 @@ import { SIMPLE_BLOB_VIEWER, RICH_BLOB_VIEWER } from '~/blob/components/constant
 import createFlash from '~/flash';
 import { isLoggedIn } from '~/lib/utils/common_utils';
 import { __ } from '~/locale';
+import deleteBlobMutation from '../mutations/blob_delete.mutation.graphql';
 import blobInfoQuery from '../queries/blob_info.query.graphql';
 import BlobButtonGroup from './blob_button_group.vue';
 import BlobEdit from './blob_edit.vue';
@@ -116,6 +117,23 @@ export default {
     switchViewer(newViewer) {
       this.activeViewerType = newViewer || SIMPLE_BLOB_VIEWER;
     },
+    deleteFile() {
+      const project = this.projectPath;
+      const file = this.path;
+      const branch = 'master';
+      const message = `Deleted ${file}`;
+      this.$apollo
+        .mutate({
+          mutation: deleteBlobMutation,
+          variables: { project, file, branch, message },
+        })
+        .then(() => {
+          // TODO - redirect to repository list
+        })
+        .catch(() => {
+          // TODO - handle error
+        });
+    },
   },
 };
 </script>
@@ -139,6 +157,7 @@ export default {
             :name="blobInfo.name"
             :replace-path="blobInfo.replacePath"
             :can-push-code="blobInfo.canModifyBlob"
+            @delete="deleteFile"
           />
         </template>
       </blob-header>
