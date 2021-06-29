@@ -183,7 +183,7 @@ tune the Puma settings:
 The recommended number of workers is calculated as the highest of the following:
 
 - `2`
-- A calculation combining CPU and Memory resource availability - [Puma workers](https://gitlab.com/gitlab-org/omnibus-gitlab/-/blob/master/files/gitlab-cookbooks/gitlab/libraries/puma.rb#L31-46)
+- A combination of CPU and memory resource availability (see how this is configured automatically for the [Linux package](https://gitlab.com/gitlab-org/omnibus-gitlab/-/blob/ef9facdc927e7389db6a5e0655414ba8318c7b8a/files/gitlab-cookbooks/gitlab/libraries/puma.rb#L31-46)).
 
 For example ( # CPU / # Memory) 
 
