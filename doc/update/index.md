@@ -409,7 +409,7 @@ to perform the following additional steps for the zero-downtime upgrade:
 
 If you have already run the final `sudo gitlab-rake db:migrate` command on the deploy node and have
 encountered the [column rename issue](https://gitlab.com/gitlab-org/gitlab/-/issues/324160), you will
-see the error below. You can follow the steps above to workaround the issue and complete the update.
+see the following error:
 
 ```shell
 -- remove_column(:application_settings, :asset_proxy_whitelist)
