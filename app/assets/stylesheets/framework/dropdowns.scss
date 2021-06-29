@@ -30,7 +30,7 @@
   .dropdown-menu {
     @include set-visible;
     min-height: $dropdown-min-height;
-    max-height: $dropdown-max-height;
+    max-height: initial;
     overflow-y: auto;
 
     &.dropdown-extended-height {
