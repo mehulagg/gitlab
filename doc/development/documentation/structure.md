@@ -18,7 +18,7 @@ move in this direction, and we now use four primary content types:
 Each page can contain multiple types. For example,
 a page with the title `Pipelines` can include a concept and multiple tasks.
 A page might also contain only one type. These pages are generally one of our
-[other content types](#other-content-types).
+[other content types](#other-types-of-content).
 
 ## Concept
 
