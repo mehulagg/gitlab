@@ -244,7 +244,7 @@ Refer to these resources for more information about <this feature>:
 - Link 3
 ```
 
-### Help and feedback section
+## Help and feedback section
 
 This section ([introduced](https://gitlab.com/gitlab-org/gitlab-docs/-/merge_requests/319) in GitLab 11.4)
 is displayed at the end of each document and can be omitted by adding a key into
@@ -259,7 +259,7 @@ feedback: false
 The default is to leave it there. If you want to omit it from a document, you
 must check with a technical writer before doing so.
 
-#### Disqus
+### Disqus
 
 We also have integrated the docs site with Disqus (introduced by
 [!151](https://gitlab.com/gitlab-org/gitlab-docs/-/merge_requests/151)),
@@ -285,7 +285,7 @@ The click events in the feedback section are tracked with Google Tag Manager.
 The conversions can be viewed on Google Analytics by navigating to
 **Behavior > Events > Top events > docs**.
 
-### Guidelines for good practices
+## Guidelines for good practices
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/36576/) in GitLab 13.2 as GitLab Development documentation.
 
