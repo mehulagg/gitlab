@@ -1,5 +1,3 @@
-image: ruby:2.6-alpine3.13
-
 stages:
   - test
   - depscore
@@ -15,6 +13,7 @@ gemnasium-dependency_scanning:
       dependency_scanning: gl-dependency-scanning-report.json
 
 run_depscore:
+  image: ruby:2.6-alpine3.13
   stage: depscore
   needs: ["gemnasium-dependency_scanning"]
   before_script:
