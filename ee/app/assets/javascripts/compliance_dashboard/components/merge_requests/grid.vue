@@ -70,6 +70,7 @@ export default {
       <grid-column-heading :heading="$options.strings.pipelineStatusLabel" class="gl-text-center" />
       <grid-column-heading :heading="$options.strings.updatesLabel" class="gl-text-right" />
 
+      <!-- TODO: Remove the if/else and duplicate components with https://gitlab.com/gitlab-org/gitlab/-/issues/334682 -->
       <template v-if="drawerEnabled">
         <a
           v-for="mergeRequest in mergeRequests"

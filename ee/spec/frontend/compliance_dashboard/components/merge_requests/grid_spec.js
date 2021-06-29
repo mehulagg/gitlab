@@ -36,6 +36,7 @@ describe('MergeRequestsGrid component', () => {
     wrapper.destroy();
   });
 
+  // TODO: Remove the each with https://gitlab.com/gitlab-org/gitlab/-/issues/334682
   describe.each([true, false])('when drawer enabled is %s', (drawerEnabled) => {
     describe('when initialized', () => {
       beforeEach(() => {
