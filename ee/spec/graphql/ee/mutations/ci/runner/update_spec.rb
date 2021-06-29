@@ -5,21 +5,21 @@ require 'spec_helper'
 RSpec.describe Mutations::Ci::Runner::Update do
   include GraphqlHelpers
 
-  let_it_be(:runner) do
-    create(:ci_runner, active: true, locked: false, run_untagged: true, public_projects_minutes_cost_factor: 0.0,
-      private_projects_minutes_cost_factor: 0.0)
-  end
-
-  let(:mutation) { described_class.new(object: nil, context: current_ctx, field: nil) }
-
-  subject { mutation.resolve(id: runner.to_global_id, **mutation_params) }
-
-  before do
-    subject
-    runner.reload
-  end
-
   describe '#resolve' do
+    let_it_be(:runner) do
+      create(:ci_runner, active: true, locked: false, run_untagged: true, public_projects_minutes_cost_factor: 0.0,
+             private_projects_minutes_cost_factor: 0.0)
+    end
+
+    let(:mutation) { described_class.new(object: nil, context: current_ctx, field: nil) }
+
+    subject(:mutation_result) { mutation.resolve(id: runner.to_global_id, **mutation_params) }
+
+    def resolve
+      mutation_result
+      runner.reload
+    end
+
     context 'when user can update runner', :enable_admin_mode do
       let_it_be(:admin_user) { create(:user, :admin) }
 
@@ -33,12 +33,10 @@ RSpec.describe Mutations::Ci::Runner::Update do
           }
         end
 
-        it 'updates public_projects_minutes_cost_factor to 2.5' do
-          expect(runner.public_projects_minutes_cost_factor).to eq(2.5)
-        end
-
-        it 'updates private_projects_minutes_cost_factor to 0.5' do
-          expect(runner.private_projects_minutes_cost_factor).to eq(0.5)
+        it 'updates cost factors to specified values', :aggregate_failures do
+          expect { resolve }
+            .to change { runner.public_projects_minutes_cost_factor }.from(0).to(2.5)
+            .and change { runner.private_projects_minutes_cost_factor }.from(0).to(0.5)
         end
       end
     end
