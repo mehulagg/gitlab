@@ -3,6 +3,7 @@
 module IssuableActions
   extend ActiveSupport::Concern
   include Gitlab::Utils::StrongMemoize
+  include API::Helpers::Caching
 
   included do
     before_action :authorize_destroy_issuable!, only: :destroy
@@ -129,7 +130,8 @@ module IssuableActions
 
     discussions = Discussion.build_collection(notes, issuable)
 
-    render json: discussion_serializer.represent(discussions, context: self)
+    # render json: discussion_serializer.represent(discussions, context: self)
+    render_cached(discussions, with: discussion_serializer, opts: { context: self })
   end
   # rubocop:enable CodeReuse/ActiveRecord
 

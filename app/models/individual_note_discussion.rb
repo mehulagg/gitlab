@@ -9,6 +9,10 @@ class IndividualNoteDiscussion < Discussion
     Note
   end
 
+  def cache_key
+    "#{id}-#{notes.max { |a, b| a.updated_at <=> b.updated_at }.updated_at}"
+  end
+
   def individual_note?
     true
   end
