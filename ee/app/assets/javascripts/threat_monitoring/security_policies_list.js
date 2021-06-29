@@ -1,7 +1,7 @@
 import Vue from 'vue';
 import VueApollo from 'vue-apollo';
 import createDefaultClient from '~/lib/graphql';
-import SecurityPoliciesListApp from './components/security_policies_list/app.vue';
+import SecurityPolicyProjectSelector from './components/security_policy_project_selector.vue';
 
 Vue.use(VueApollo);
 
@@ -11,17 +11,18 @@ const apolloProvider = new VueApollo({
 
 export default () => {
   const el = document.querySelector('#js-security-policies-list');
-  const { documentationPath, assignedPolicyProject, selectProjectPath } = el.dataset;
+  const { assignedPolicyProject, documentationPath, projectPath, selectProjectPath } = el.dataset;
 
   return new Vue({
     apolloProvider,
     el,
     provide: {
       documentationPath,
+      projectPath,
       selectProjectPath,
     },
     render(createElement) {
-      return createElement(SecurityPoliciesListApp, {
+      return createElement(SecurityPolicyProjectSelector, {
         props: {
           assignedPolicyProject: JSON.parse(assignedPolicyProject),
         },

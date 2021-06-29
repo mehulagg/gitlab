@@ -1,25 +1,31 @@
 <script>
-import { GlButton, GlDropdown, GlSprintf } from '@gitlab/ui';
+import { GlAlert, GlButton, GlDropdown, GlSprintf } from '@gitlab/ui';
 import getUsersProjects from '~/graphql_shared/queries/get_users_projects.query.graphql';
-import axios from '~/lib/utils/axios_utils';
 import { s__ } from '~/locale';
 import ProjectSelector from '~/vue_shared/components/project_selector/project_selector.vue';
+import assignSecurityPolicyProject from '../graphql/mutations/assign_security_policy_project.mutation.graphql';
 
 export default {
+  PROJECT_SELECTOR_HEIGHT: 204,
   MINIMUM_QUERY_LENGTH: 3,
   PROJECTS_PER_PAGE: 20,
   i18n: {
+    assignError: s__(
+      'SecurityOrchestration|An error has occured when assigning your security policy project',
+    ),
+    assignSuccess: s__('SecurityOrchestration|A security policy project was successfully linked'),
     securityProject: s__(
       'SecurityOrchestration|A security policy project can be used enforce policies for a given project, group, or instance. It allows you to specify security policies that are important to you  and enforce them with every commit. %{linkStart}More information%{linkEnd}',
     ),
   },
   components: {
+    GlAlert,
     GlButton,
     GlDropdown,
     GlSprintf,
     ProjectSelector,
   },
-  inject: ['documentationPath', 'selectProjectPath'],
+  inject: ['documentationPath', 'projectPath', 'selectProjectPath'],
   props: {
     assignedPolicyProject: {
       type: Object,
@@ -29,14 +35,16 @@ export default {
   },
   data() {
     return {
-      searchQuery: this.assignedPolicyProject.name,
+      currentProjectId: this.assignedPolicyProject.id,
+      searchQuery: '',
       projectSearchResults: [],
       selectedProjects: [this.assignedPolicyProject],
-      messages: {
-        noResults: false,
-        searchError: false,
-        minimumQuery: false,
-      },
+      isAssigningProject: false,
+      assignError: false,
+      minimumQuery: false,
+      noResults: false,
+      searchError: false,
+      showAssignSuccess: false,
       searchCount: 0,
       pageInfo: {
         endCursor: '',
@@ -45,33 +53,25 @@ export default {
     };
   },
   computed: {
+    isNewProject() {
+      return this.currentProjectId !== this.selectedProjects[0].id;
+    },
     isSearchingProjects() {
       return this.searchCount > 0;
     },
   },
   methods: {
-    async saveChanges() {
-      const { id } = this.selectedProjects[0];
-      try {
-        const resp = await axios.post(this.selectProjectPath, {
-          orchestration: { policy_project_id: id },
-        });
-        const { data } = resp;
-        return data;
-      } catch (e) {
-        return e;
-      }
+    cancelSearch() {
+      this.projectSearchResults = [];
+      this.pageInfo = {
+        endCursor: '',
+        hasNextPage: true,
+      };
+      this.updateMessagesData(false, false, true);
+      this.searchCount = Math.max(0, this.searchCount - 1);
     },
-    toggleSelectedProject(data) {
-      this.selectedProjects = [data];
-      this.$refs.dropdown.hide(true);
-    },
-    searched(query) {
-      this.searchQuery = query;
-      this.pageInfo = { endCursor: '', hasNextPage: true };
-      this.messages.minimumQuery = false;
-      this.searchCount += 1;
-      this.fetchSearchResults(true);
+    dismissAlert(type) {
+      this[type] = false;
     },
     fetchSearchResults(isFirstSearch) {
       if (!this.pageInfo.hasNextPage) {
@@ -101,14 +101,40 @@ export default {
         })
         .catch(this.fetchSearchResultsError);
     },
-    cancelSearch() {
+    fetchSearchResultsError() {
       this.projectSearchResults = [];
-      this.pageInfo = {
-        endCursor: '',
-        hasNextPage: true,
-      };
-      this.updateMessagesData(false, false, true);
+      this.updateMessagesData(false, true, false);
       this.searchCount = Math.max(0, this.searchCount - 1);
+    },
+    async saveChanges() {
+      this.isAssigningProject = true;
+      const { id } = this.selectedProjects[0];
+      try {
+        const { data } = await this.$apollo.mutate({
+          mutation: assignSecurityPolicyProject,
+          variables: {
+            projectPath: this.projectPath,
+            securityPolicyProjectId: id,
+          },
+        });
+        if (data.securityPolicyProjectAssign.errors.length) {
+          this.assignError = true;
+        } else {
+          this.showAssignSuccess = true;
+          this.currentProjectId = id;
+        }
+      } catch (e) {
+        this.assignError = true;
+      } finally {
+        this.isAssigningProject = false;
+      }
+    },
+    searched(query) {
+      this.searchQuery = query;
+      this.pageInfo = { endCursor: '', hasNextPage: true };
+      this.minimumQuery = false;
+      this.searchCount += 1;
+      this.fetchSearchResults(true);
     },
     searchProjects(searchQuery, pageInfo) {
       return this.$apollo.query({
@@ -122,17 +148,14 @@ export default {
         },
       });
     },
-    fetchSearchResultsError() {
-      this.projectSearchResults = [];
-      this.updateMessagesData(false, true, false);
-      this.searchCount = Math.max(0, this.searchCount - 1);
+    toggleSelectedProject(data) {
+      this.selectedProjects = [data];
+      this.$refs.dropdown.hide(true);
     },
     updateMessagesData(noResults, searchError, minimumQuery) {
-      this.messages = {
-        noResults,
-        searchError,
-        minimumQuery,
-      };
+      this.minimumQuery = minimumQuery;
+      this.noResults = noResults;
+      this.searchError = searchError;
     },
   },
 };
@@ -140,6 +163,24 @@ export default {
 
 <template>
   <section>
+    <gl-alert
+      v-if="assignError"
+      class="gl-mt-3"
+      variant="danger"
+      :dismissible="true"
+      @dismiss="dismissAlert('assignError')"
+    >
+      {{ $options.i18n.assignError }}
+    </gl-alert>
+    <gl-alert
+      v-else-if="showAssignSuccess"
+      class="gl-mt-3"
+      variant="success"
+      :dismissible="true"
+      @dismiss="dismissAlert('showAssignSuccess')"
+    >
+      {{ $options.i18n.assignSuccess }}
+    </gl-alert>
     <h2 class="gl-mb-8">
       {{ s__('SecurityOrchestration|Create a policy') }}
     </h2>
@@ -154,19 +195,20 @@ export default {
       >
         <project-selector
           class="gl-w-full"
+          :max-list-height="$options.PROJECT_SELECTOR_HEIGHT"
           :project-search-results="projectSearchResults"
           :selected-projects="selectedProjects"
-          :show-no-results-message="messages.noResults"
+          :show-no-results-message="noResults"
           :show-loading-indicator="isSearchingProjects"
-          :show-minimum-search-query-message="messages.minimumQuery"
-          :show-search-error-message="messages.searchError"
+          :show-minimum-search-query-message="minimumQuery"
+          :show-search-error-message="searchError"
           @searched="searched"
           @projectClicked="toggleSelectedProject"
           @bottomReached="fetchSearchResults"
         />
       </gl-dropdown>
       <div class="gl-pb-5">
-        <gl-sprintf class="text-muted" :message="$options.i18n.securityProject">
+        <gl-sprintf :message="$options.i18n.securityProject">
           <template #link="{ content }">
             <gl-button class="gl-pb-1!" variant="link" :href="documentationPath" target="_blank">
               {{ content }}
@@ -174,7 +216,13 @@ export default {
           </template>
         </gl-sprintf>
       </div>
-      <gl-button class="gl-display-block" variant="success" @click="saveChanges">
+      <gl-button
+        class="gl-display-block"
+        variant="success"
+        :disabled="!isNewProject"
+        :loading="isAssigningProject"
+        @click="saveChanges"
+      >
         {{ __('Save changes') }}
       </gl-button>
     </div>
