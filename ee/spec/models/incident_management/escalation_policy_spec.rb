@@ -12,6 +12,7 @@ RSpec.describe IncidentManagement::EscalationPolicy do
   describe 'associations' do
     it { is_expected.to belong_to(:project) }
     it { is_expected.to have_many(:rules) }
+    it { is_expected.to have_many(:ordered_rules).order(elapsed_time_seconds: :asc, status: :asc) }
   end
 
   describe 'validations' do
