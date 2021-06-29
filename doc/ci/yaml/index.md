@@ -298,9 +298,9 @@ makes your pipelines run for branches and tags.
 
 Branch pipeline status is displayed in merge requests that use the branch
 as a source. However, this pipeline type does not support any features offered by
-[merge request pipelines](../merge_request_pipelines/), like
+[merge request pipelines](../pipelines/merge_request_pipelines.md), like
 [pipelines for merged results](../pipelines/pipelines_for_merged_results.md)
-or [merge trains](../merge_request_pipelines/pipelines_for_merged_results/merge_trains/).
+or [merge trains](../pipelines/merge_trains.md).
 This template intentionally avoids those features.
 
 To [include](#include) it:
@@ -313,7 +313,7 @@ include:
 The [`MergeRequest-Pipelines` template](https://gitlab.com/gitlab-org/gitlab/-/tree/master/lib/gitlab/ci/templates/Workflows/MergeRequest-Pipelines.gitlab-ci.yml)
 makes your pipelines run for the default branch, tags, and
 all types of merge request pipelines. Use this template if you use any of the
-the [pipelines for merge requests features](../merge_request_pipelines/).
+the [pipelines for merge requests features](../pipelines/merge_request_pipelines.md).
 
 To [include](#include) it:
 
