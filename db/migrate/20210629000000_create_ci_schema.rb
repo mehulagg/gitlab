@@ -6,7 +6,7 @@ class CreateCiSchema < ActiveRecord::Migration[6.1]
   DOWNTIME = false
 
   def up
-    execute 'CREATE SCHEMA gitlab_ci'
+    create_schema('gitlab_ci')
 
     create_comment(:schema, :gitlab_ci, <<~EOS.strip)
       Schema to hold all tables owned by GitLab CI feature
@@ -14,6 +14,6 @@ class CreateCiSchema < ActiveRecord::Migration[6.1]
   end
 
   def down
-    execute 'DROP SCHEMA gitlab_ci'
+    drop_schema('gitlab_ci')
   end
 end
