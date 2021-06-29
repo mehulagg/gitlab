@@ -53,7 +53,7 @@ graph TD;
   B5 --> |No| B7
   B7 --> B8
   B{Is GitLab using<br>Elasticsearch for<br>searching?}
-  B1[Select **Menu >** **{admin}** **Admin > Integrations**<br>to ensure the settings are correct]
+  B1[On the top bar, select **Menu > Admin**,<br>and on the left sidebar, select<br>**Integrations** to ensure the<br>settings are correct.]
   B2[Perform a search via<br>the rails console]
   B3[If all settings are correct<br>and it still doesn't show Elasticsearch<br>doing the searches, escalate<br>to GitLab support.]
   B4[Perform<br>the same search via the<br>Elasticsearch API]
