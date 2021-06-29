@@ -156,9 +156,15 @@ class IssuableFinder
   end
 
   def row_count
-    Gitlab::IssuablesCountForState
-      .new(self, nil, fast_fail: true)
-      .for_state_or_opened(params[:state])
+    if Feature.enabled?(:cached_issuables_state_count, feature_flag_scope, default_enabled: :yaml)
+      Gitlab::CachedIssuablesCountForState
+        .new(self, feature_flag_scope, fast_fail: true)
+        .for_state_or_opened(params[:state])
+    else
+      Gitlab::IssuablesCountForState
+        .new(self, nil, fast_fail: true)
+        .for_state_or_opened(params[:state])
+    end
   end
 
   # We often get counts for each state by running a query per state, and

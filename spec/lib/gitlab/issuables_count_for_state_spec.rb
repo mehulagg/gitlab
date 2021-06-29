@@ -41,7 +41,8 @@ RSpec.describe Gitlab::IssuablesCountForState do
 
   describe '#[]' do
     it 'returns the number of issuables for the given state' do
-      expect(counter[:closed]).to eq(1)
+      expect(described_class.new(finder, project, fast_fail: fast_fail, redis_cache: true)[:closed]).to eq(1)
+      # expect(counter[:closed]).to eq(1)
     end
 
     it 'casts valid states from Strings to Symbols' do
