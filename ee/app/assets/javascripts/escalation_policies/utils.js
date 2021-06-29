@@ -23,27 +23,35 @@ export const getRulesValidationState = (rules) => {
   });
 };
 
-export const serializeRules = (rules) => {
-  return rules.map((rule) => {
-    const { elapsedTimeMinutes, ...ruleParams } = rule;
+/**
+ * Serializes a rule by converting elapsed minutes to seconds
+ * @param {Object} rule
+ *
+ * @returns {Object} rule
+ */
+export const serializeRule = (rule) => {
+  const { elapsedTimeMinutes, ...ruleParams } = rule;
+
+  return {
+    ...ruleParams,
+    elapsedTimeSeconds: rule.elapsedTimeMinutes * 60,
+  };
+};
+
+/**
+ * Parses a policy by converting elapsed seconds to minutes
+ * @param {Object} policy
+ *
+ * @returns {Object} policy
+ */
+export const parsePolicy = (policy) => ({
+  ...policy,
+  rules: policy.rules.map((rule) => {
+    const { elapsedTimeSeconds, ...ruleParams } = rule;
 
     return {
       ...ruleParams,
-      elapsedTimeSeconds: rule.elapsedTimeMinutes * 60,
+      elapsedTimeMinutes: rule.elapsedTimeSeconds / 60,
     };
-  });
-};
-
-export const parsePolicy = (policy) => {
-  return {
-    ...policy,
-    rules: policy.rules.map((rule) => {
-      const { elapsedTimeSeconds, ...ruleParams } = rule;
-
-      return {
-        ...ruleParams,
-        elapsedTimeMinutes: rule.elapsedTimeSeconds / 60,
-      };
-    }),
-  };
-};
+  }),
+});
