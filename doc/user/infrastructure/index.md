@@ -89,7 +89,7 @@ tools or rely on 3rd party solutions to streamline their IaC workflows.
 
 Read more on setting up and [using the merge request integrations](mr_integration.md).
 
-## The GitLab terraform provider
+## The GitLab Terraform provider
 
 WARNING:
 The GitLab Terraform provider is released separately from GitLab.
@@ -101,3 +101,23 @@ owned by GitLab, where everyone can contribute.
 
 The [documentation of the provider](https://registry.terraform.io/providers/gitlabhq/gitlab/latest/docs)
 is available as part of the official Terraform provider documentations.
+
+## Troubleshooting
+
+### GitLab Terraform provider gitlab_group_share_group resources not detected when subgroup state refreshed
+
+The GitLab Terraform provider can fail to detect existing `gitlab_group_share_group resources` due to an issue [User with permissions cannot retrieve share_with_groups from API](https://gitlab.com/gitlab-org/gitlab/-/issues/328428). This results in an error when `terraform apply` is run and Terraform attempts to recreate an existing resource. 
+
+The issue occurs when:
+- Terraform is used to manage subgroups that already exist in GitLab
+- subgroup A is shared to another subgroup B
+- the user running `terraform plan/apply` is not the creator of subgroup B
+- the Terraform user has inherited their access to subgroup B from a parent group
+- there are no projects in subgroup B
+
+The result is that the `GET /groups/:id_A` query issued by the provider when refreshing state will not return details of the share with subgroup B in the `shared_with_groups` array, despite the Terraform user having full access to manage all resources.
+
+There are three workarounds available:
+1. ensure all subgroup resources are created by the Terraform user
+2. grant direct access to the Terraform user on all subgroup resources
+3. ensure at least one project exists in each subgroup
