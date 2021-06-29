@@ -8,8 +8,8 @@ module Mutations
       argument :weight,
                GraphQL::INT_TYPE,
                required: false,
-               description: 'The desired weight for the issue, ' \
-               'weight will be removed if set to null.'
+               description: 'The desired weight for the issue. ' \
+               'If set to null, weight is removed.'
 
       def ready?(**args)
         unless args.key?(:weight)
