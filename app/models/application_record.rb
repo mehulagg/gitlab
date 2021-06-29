@@ -5,6 +5,8 @@ class ApplicationRecord < ActiveRecord::Base
 
   alias_method :reset, :reload
 
+  class_attribute :schema_name, default: :public
+
   def self.without_order
     reorder(nil)
   end
