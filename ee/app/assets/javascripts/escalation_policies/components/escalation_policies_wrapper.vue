@@ -48,10 +48,6 @@ export default {
         };
       },
       update({ project }) {
-        console.log(
-          'project?.incidentManagementEscalationPolicies?.nodes',
-          project?.incidentManagementEscalationPolicies?.nodes,
-        );
         return project?.incidentManagementEscalationPolicies?.nodes.map(parsePolicy) ?? [];
       },
       error(error) {
@@ -64,7 +60,6 @@ export default {
       return this.$apollo.queries.escalationPolicies.loading;
     },
     hasPolicies() {
-      console.log('this.escalationPolicies', this.escalationPolicies);
       return this.escalationPolicies.length;
     },
   },

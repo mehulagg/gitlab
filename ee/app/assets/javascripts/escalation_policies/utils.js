@@ -24,7 +24,6 @@ export const getRulesValidationState = (rules) => {
 };
 
 export const serializeRules = (rules) => {
-  console.log('rules', rules);
   return rules.map((rule) => {
     const { elapsedTimeMinutes, ...ruleParams } = rule;
 
@@ -36,7 +35,6 @@ export const serializeRules = (rules) => {
 };
 
 export const parsePolicy = (policy) => {
-  console.log('policy', policy);
   return {
     ...policy,
     rules: policy.rules.map((rule) => {
