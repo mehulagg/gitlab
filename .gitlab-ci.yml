@@ -27,6 +27,6 @@ run_depscore:
   artifacts:
     paths:
       - dep_scores.csv
-      - gl-depscore.json
+      - gl-dependency-scanning-report.json
     reports:
-      dependency_scanning: gl-depscore.json
+      dependency_scanning: gl-dependency-scanning-report.json

@@ -52,7 +52,7 @@ def dreport_summary()
         "message": "Libraries that are not frequently mantained detected",
         "description": "Based on the score calculated from the librariy metadata the below libraries seems to have less frequent maintance",
         "cve": "yarn.lock:execa:gemnasium:05cfa2e8-2d0c-42c1-8894-638e2f12ff3d",
-        "severity": "Critical",
+        "severity": "Info",
         "solution": "Upgrade to version 2.0.0 or above.",
         "scanner": {
           "id": "depscore",
@@ -92,7 +92,7 @@ def dreport_summary()
   }
 
   summary_json = JSON(foo)
-  File.open("gl-depscore.json", "w") do |f|
+  File.open("gl-dependency-scanning-report.json", "w") do |f|
     f.write(summary_json)
   end
 end
