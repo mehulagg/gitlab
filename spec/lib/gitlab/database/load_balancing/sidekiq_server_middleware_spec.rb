@@ -44,12 +44,22 @@ RSpec.describe Gitlab::Database::LoadBalancing::SidekiqServerMiddleware do
       end
     end
 
-    shared_examples_for 'stick to the primary' do
+    shared_examples_for 'load balancing strategy' do |strategy|
+      it "sets load balancing strategy to #{strategy}" do
+        run_middleware do
+          expect(job['load_balancing_strategy']).to eq(strategy)
+        end
+      end
+    end
+
+    shared_examples_for 'stick to the primary' do |expected_strategy|
       it 'sticks to the primary' do
         run_middleware do
           expect(Gitlab::Database::LoadBalancing::Session.current.use_primary?).to be_truthy
         end
       end
+
+      include_examples 'load balancing strategy', expected_strategy
     end
 
     shared_examples_for 'replica is up to date' do |location|
@@ -58,9 +68,10 @@ RSpec.describe Gitlab::Database::LoadBalancing::SidekiqServerMiddleware do
 
         run_middleware do
           expect(Gitlab::Database::LoadBalancing::Session.current.use_primary?).not_to be_truthy
-          expect(job['load_balancing_strategy']).to eq('replica')
         end
       end
+
+      include_examples 'load balancing strategy', 'replica'
     end
 
     shared_examples_for 'sticks based on data consistency' do |data_consistency|
@@ -71,13 +82,7 @@ RSpec.describe Gitlab::Database::LoadBalancing::SidekiqServerMiddleware do
           stub_feature_flags(load_balancing_for_test_data_consistency_worker: false)
         end
 
-        include_examples 'stick to the primary'
-
-        it 'updates job hash with load balancing strategy' do
-          run_middleware do
-            expect(job['load_balancing_strategy']).to eq('primary_lb_na')
-          end
-        end
+        include_examples 'stick to the primary', 'primary_lb_na'
       end
 
       context 'when database replica location is set' do
@@ -103,32 +108,20 @@ RSpec.describe Gitlab::Database::LoadBalancing::SidekiqServerMiddleware do
       context 'when database location is not set' do
         let(:job) { { 'job_id' => 'a180b47c-3fd6-41b8-81e9-34da61c3400e' } }
 
-        it_behaves_like 'stick to the primary'
-
-        it 'updates job hash with load balancing strategy' do
-          run_middleware do
-            expect(job['load_balancing_strategy']).to eq('primary_no_wal')
-          end
-        end
+        it_behaves_like 'stick to the primary', 'primary_no_wal'
       end
     end
 
     context 'when worker class does not include ApplicationWorker' do
       let(:worker) { ActiveJob::QueueAdapters::SidekiqAdapter::JobWrapper.new }
 
-      include_examples 'stick to the primary'
-
-      it 'updates job hash with load balancing strategy' do
-        run_middleware do
-          expect(job['load_balancing_strategy']).to eq('primary_lb_na')
-        end
-      end
+      include_examples 'stick to the primary', 'primary_lb_na'
     end
 
     context 'when worker data consistency is :always' do
       include_context 'data consistency worker class', :always, :load_balancing_for_test_data_consistency_worker
 
-      include_examples 'stick to the primary'
+      include_examples 'stick to the primary', 'primary'
     end
 
     context 'when worker data consistency is :delayed' do
@@ -145,14 +138,15 @@ RSpec.describe Gitlab::Database::LoadBalancing::SidekiqServerMiddleware do
         end
 
         context 'when job is executed first' do
-          it 'raise an error and retries', :aggregate_failures do
+          it 'raises an error and retries', :aggregate_failures do
             expect do
               process_job(job)
             end.to raise_error(Sidekiq::JobRetry::Skip)
 
             expect(job['error_class']).to eq('Gitlab::Database::LoadBalancing::SidekiqServerMiddleware::JobReplicaNotUpToDate')
-            expect(job['load_balancing_strategy']).to eq('retry_replica')
           end
+
+          include_examples 'load balancing strategy', 'retry'
         end
 
         context 'when job is retried' do
@@ -162,8 +156,9 @@ RSpec.describe Gitlab::Database::LoadBalancing::SidekiqServerMiddleware do
             end.to raise_error(Sidekiq::JobRetry::Skip)
 
             process_job(job)
-            expect(job['load_balancing_strategy']).to eq('retry_primary')
           end
+
+          include_examples 'load balancing strategy', 'primary_failover'
         end
       end
     end
@@ -176,13 +171,7 @@ RSpec.describe Gitlab::Database::LoadBalancing::SidekiqServerMiddleware do
           allow(middleware).to receive(:replica_caught_up?).and_return(false)
         end
 
-        include_examples 'stick to the primary'
-
-        it 'updates job hash with load balancing strategy' do
-          run_middleware do
-            expect(job['load_balancing_strategy']).to eq('primary')
-          end
-        end
+        include_examples 'stick to the primary', 'primary_failover'
       end
     end
   end
@@ -195,5 +184,7 @@ RSpec.describe Gitlab::Database::LoadBalancing::SidekiqServerMiddleware do
 
   def run_middleware
     middleware.call(worker, job, double(:queue)) { yield }
+  rescue described_class::JobReplicaNotUpToDate
+    # we silence errors here that cause the job to retry
   end
 end
