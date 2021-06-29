@@ -13,7 +13,7 @@ module Mutations
 
       def ready?(**args)
         unless args.key?(:weight)
-          raise Gitlab::Graphql::Errors::ArgumentError, 'Argument weight must be provided (`null` accepted).'
+          raise Gitlab::Graphql::Errors::ArgumentError, 'The `weight` argument is required (`null` accepted).'
         end
 
         super
