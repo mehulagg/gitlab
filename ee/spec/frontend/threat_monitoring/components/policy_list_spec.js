@@ -145,18 +145,27 @@ describe('PolicyList component', () => {
       rows = wrapper.findAll('tr');
     });
 
-    it.each`
-      rowIndex | expectedPolicyName
-      ${1}     | ${mockNetworkPoliciesResponse[0].name}
-      ${2}     | ${'drop-outbound'}
-      ${3}     | ${'allow-inbound-http'}
-      ${4}     | ${mockScanExecutionPoliciesResponse[0].name}
-    `(
-      'renders "$expectedPolicyName" policy in row #$rowIndex',
-      ({ expectedPolicyName, rowIndex }) => {
-        expect(rows.at(rowIndex).text()).toContain(expectedPolicyName);
-      },
-    );
+    describe.each`
+      rowIndex | expectedPolicyName                           | expectedPolicyType
+      ${1}     | ${mockNetworkPoliciesResponse[0].name}       | ${'Network'}
+      ${2}     | ${'drop-outbound'}                           | ${'Network'}
+      ${3}     | ${'allow-inbound-http'}                      | ${'Network'}
+      ${4}     | ${mockScanExecutionPoliciesResponse[0].name} | ${'Scan execution'}
+    `('policy in row #$rowIndex', ({ rowIndex, expectedPolicyName, expectedPolicyType }) => {
+      let row;
+
+      beforeEach(() => {
+        row = rows.at(rowIndex);
+      });
+
+      it(`renders ${expectedPolicyName} in the name cell`, () => {
+        expect(row.findAll('td').at(0).text()).toBe(expectedPolicyName);
+      });
+
+      it(`renders ${expectedPolicyType} in the policy type cell`, () => {
+        expect(row.findAll('td').at(1).text()).toBe(expectedPolicyType);
+      });
+    });
   });
 
   describe('with allEnvironments enabled', () => {
@@ -166,7 +175,7 @@ describe('PolicyList component', () => {
     });
 
     it('renders policies table', () => {
-      const namespaceHeader = findPoliciesTable().findAll('[role="columnheader"]').at(1);
+      const namespaceHeader = findPoliciesTable().findAll('[role="columnheader"]').at(2);
       expect(namespaceHeader.text()).toBe('Namespace');
     });
   });

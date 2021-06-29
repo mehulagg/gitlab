@@ -21,6 +21,12 @@ const createPolicyFetchError = ({ gqlError, networkError }) => {
   });
 };
 
+const getPoliciesWithType = (policies, policyType) =>
+  policies.map((policy) => ({
+    ...policy,
+    policyType,
+  }));
+
 export default {
   components: {
     GlTable,
@@ -97,7 +103,10 @@ export default {
       return setUrlFragment(this.documentationPath, 'container-network-policy');
     },
     policies() {
-      return [...this.networkPolicies, ...this.scanExecutionPolicies];
+      return [
+        ...getPoliciesWithType(this.networkPolicies, s__('SecurityPolicies|Network')),
+        ...getPoliciesWithType(this.scanExecutionPolicies, s__('SecurityPolicies|Scan execution')),
+      ];
     },
     isLoadingPolicies() {
       return (
@@ -136,16 +145,22 @@ export default {
           thClass: 'gl-w-half',
         },
         {
+          key: 'policyType',
+          label: s__('SecurityPolicies|Policy type'),
+          sortable: true,
+        },
+        {
           key: 'status',
           label: s__('NetworkPolicies|Status'),
         },
         {
           key: 'updatedAt',
           label: s__('NetworkPolicies|Last modified'),
+          sortable: true,
         },
       ];
       // Adds column 'namespace' only while 'all environments' option is selected
-      if (this.allEnvironments) fields.splice(1, 0, namespace);
+      if (this.allEnvironments) fields.splice(2, 0, namespace);
 
       return fields;
     },
@@ -218,6 +233,8 @@ export default {
       :busy="isLoadingPolicies"
       :items="policies"
       :fields="fields"
+      sort-by="updatedAt"
+      sort-desc
       head-variant="white"
       stacked="md"
       thead-class="gl-text-gray-900 border-bottom"

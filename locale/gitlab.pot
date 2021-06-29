@@ -28823,6 +28823,12 @@ msgstr ""
 msgid "SecurityPolicies|Latest scan"
 msgstr ""
 
+msgid "SecurityPolicies|Network"
+msgstr ""
+
+msgid "SecurityPolicies|Policy type"
+msgstr ""
+
 msgid "SecurityPolicies|Scan execution"
 msgstr ""
 
