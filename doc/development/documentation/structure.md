@@ -19,30 +19,6 @@ Each page contains multiple topic types. For example,
 a page with the title `Pipelines`, which is generated from a file called `index.md`,
 can include a concept and multiple task and reference topics.
 
-GitLab also uses high-level landing pages.
-
-## Landing pages
-
-Landing pages are topics that group other topics and help a user to navigate a section.
-
-Users who are using the in-product help do not have a left nav,
-and need these topics to navigate the documentation.
-
-These topics can also help other users find the most important topics
-in a section.
-
-Landing page topics should be in this format:
-
-```markdown
-# Title (a noun, like "CI/CD or "Analytics")
-
-Brief introduction to the concept or product area.
-Include the reason why someone would use this thing.
-
-- Bulleted list of important related topics.
-- These links are needed because users of in-product help do not have left navigation.
-```
-
 ## Concept
 
 A concept topic introduces a single feature or concept.
