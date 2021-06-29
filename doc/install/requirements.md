@@ -189,7 +189,54 @@ For example ( # CPU / # Memory)
 
 - 2 CPU / 8 GB is configured with 2 Puma workers ( > 2 workers exceeds CPU limit)
 - 4 CPU / 4 GB is configured with 2 Puma workers ( > 2 workers exceeds Memory limit)
-- 4 CPU / 8 GB is configured with 4 Puma workers ( > 4 workers exceeds CPU limit)
+Take for example the following scenarios:
+
+- A node with 2 cores / 8 GB memory should be configured with **2 Puma workers**.
+
+  Calculated as:
+
+  ```plaintext
+  The highest number from
+  2
+  And 
+  [
+  the lowest number from
+    - number of cores: 2
+    - memory limit: (8 - 1.5) = 6
+  ]
+  ```
+
+  So, the highest from 2 and 2 is 2.
+
+- A node with 4 cores / 4 GB memory should be configured with **2 Puma workers**.
+
+  ```plaintext
+  The highest number from
+  2
+  And 
+  [
+  the lowest number from
+    - number of cores: 4
+    - memory limit: (4 - 1.5) = 2.5 
+  ]
+  ``
+
+  So, the highest from 2 and 2 is 2.
+
+- A node with 4 cores / 8 GB memory should be configured with **4 Puma workers**.
+
+  ```plaintext
+  The highest number from
+  2
+  And 
+  [
+  the lowest number from
+    - number of cores: 4
+    - memory limit: (8 - 1.5) = 6.5
+  ]
+  ```
+
+  So, the highest from 2 and 4 is 4.
 
 You can increase the number of Puma workers, provided enough CPU and memory capacity is available.
 A higher number of Puma workers usually helps to reduce the response time of the application
