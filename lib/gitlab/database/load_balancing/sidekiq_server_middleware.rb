@@ -47,7 +47,7 @@ module Gitlab
 
           if replica_caught_up?(location)
             # Happy case: we can read from a replica.
-            :replica
+            retried_before?(worker_class, job) ? :replica_retried : :replica
           elsif can_retry?(worker_class, job)
             # Optimistic case: The worker allows retries and we have retries left.
             :retry
@@ -59,6 +59,10 @@ module Gitlab
 
         def can_retry?(worker_class, job)
           worker_class.get_data_consistency == :delayed && not_yet_retried?(job)
+        end
+
+        def retried_before?(worker_class, job)
+          worker_class.get_data_consistency == :delayed && !not_yet_retried?(job)
         end
 
         def not_yet_retried?(job)
