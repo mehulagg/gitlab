@@ -1,27 +1,21 @@
 module DynamicShards
+  # This is temporary hack to ensure that we don't affect development envs
+  # using this MR, so we append to database name some string
   def database_configuration
-    super.to_h do |env, config|
-      if config.is_a?(Hash) && config.all? { |_, v| v.is_a?(Hash) }
-        # if all hash, it means that this is new multi-database spec
-        # activerecord/lib/active_record/database_configurations.rb:123
-        next config
+    super.to_h do |env, configs|
+      # convert '{adapter: postgresql}' to '{main:{adapter: postgresql}}'
+      if configs.is_a?(Hash) && !configs.all? { |_, v| v.is_a?(Hash) }
+        configs = {"main" => configs}
       end
 
-      # Hack for CI tests to ensure that we always have `gitlabhq_test` since code depends on it...
-      # This is in dev env to not mangle other testing DBs
-      unless ENV['CI']
-        config["database"] += "_primary"
+      configs.each do |config_name, config|
+        # Hack for CI tests to ensure that we always have `gitlabhq_test` since code depends on it...
+        next if Gitlab::Utils.to_boolean(ENV['CI']) && config_name == 'main'
+
+        config["database"] += "_poc"
       end
 
-      shards = {
-        "primary" => config,
-        "ci" => config.merge(
-          database: "#{config["database"]}_ci",
-          migrations_paths: "db/migrate_ci"
-        )
-      }
-
-      [env, shards]
+      [env, configs]
     end
   end
 end
