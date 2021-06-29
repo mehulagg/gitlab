@@ -29,36 +29,22 @@ RSpec.describe 'Merge request > User sees status checks widget', :js do
       visit project_merge_request_path(project, merge_request)
     end
 
-    context 'feature flag is enabled' do
-      before do
-        stub_feature_flags(ff_external_status_checks: true)
-      end
-
-      it 'shows the widget' do
-        expect(page).to have_content('Status checks 1 pending')
-      end
-
-      it 'shows the status check issues', :aggregate_failures do
-        within '[data-test-id="mr-status-checks"]' do
-          click_button 'Expand'
-        end
-
-        [check1, check2].each do |rule|
-          within "[data-testid='mr-status-check-issue-#{rule.id}']" do
-            icon_type = rule.approved?(merge_request, merge_request.source_branch_sha) ? 'success' : 'pending'
-            expect(page).to have_css(".ci-status-icon-#{icon_type}")
-            expect(page).to have_content("#{rule.name}, #{rule.external_url}")
-          end
-        end
-      end
+    it 'shows the widget' do
+      expect(page).to have_content('Status checks 1 pending')
     end
 
-    context 'feature flag is disabled' do
-      before do
-        stub_feature_flags(ff_external_status_checks: false)
+    it 'shows the status check issues', :aggregate_failures do
+      within '[data-test-id="mr-status-checks"]' do
+        click_button 'Expand'
       end
 
-      it_behaves_like 'no status checks widget'
+      [check1, check2].each do |rule|
+        within "[data-testid='mr-status-check-issue-#{rule.id}']" do
+          icon_type = rule.approved?(merge_request, merge_request.source_branch_sha) ? 'success' : 'pending'
+          expect(page).to have_css(".ci-status-icon-#{icon_type}")
+          expect(page).to have_content("#{rule.name}, #{rule.external_url}")
+        end
+      end
     end
   end
 

@@ -13,8 +13,7 @@ module API
 
     helpers do
       def check_feature_enabled!
-        unauthorized! unless user_project.licensed_feature_available?(:external_status_checks) &&
-          Feature.enabled?(:ff_external_status_checks, user_project)
+        unauthorized! unless user_project.licensed_feature_available?(:external_status_checks)
       end
     end
 
@@ -22,7 +21,6 @@ module API
       segment ':id/external_status_checks' do
         desc 'Create a new external status check' do
           success ::API::Entities::ExternalStatusCheck
-          detail 'This feature is gated by the :ff_external_status_checks feature flag.'
         end
         params do
           requires :name, type: String, desc: 'The name of the external status check'
@@ -45,9 +43,7 @@ module API
             render_api_error!(service.payload[:errors], service.http_status)
           end
         end
-        desc 'List project\'s external approval rules' do
-          detail 'This feature is gated by the :ff_external_status_checks feature flag.'
-        end
+        desc 'List project\'s external approval rules'
         params do
           use :pagination
         end
@@ -60,7 +56,6 @@ module API
         segment ':check_id' do
           desc 'Update an external approval rule' do
             success ::API::Entities::ExternalStatusCheck
-            detail 'This feature is gated by the :ff_external_status_checks feature flag.'
           end
           params do
             requires :check_id, type: Integer, desc: 'The ID of the external status check'
@@ -85,9 +80,7 @@ module API
             end
           end
 
-          desc 'Delete an external status check' do
-            detail 'This feature is gated by the :ff_external_status_checks feature flag.'
-          end
+          desc 'Delete an external status check'
           params do
             requires :check_id, type: Integer, desc: 'The ID of the status check'
           end
@@ -106,7 +99,6 @@ module API
 
       segment ':id/merge_requests/:merge_request_iid' do
         desc 'Externally approve a merge request' do
-          detail 'This feature was introduced in 13.12 and is gated behind the :ff_external_status_checks feature flag.'
           success Entities::MergeRequests::StatusCheckResponse
         end
         params do
@@ -116,8 +108,6 @@ module API
           requires :sha, type: String, desc: 'The current SHA at HEAD of the merge request.'
         end
         post 'status_check_responses' do
-          not_found! unless ::Feature.enabled?(:ff_external_status_checks, user_project)
-
           merge_request = find_merge_request_with_access(params[:merge_request_iid], :approve_merge_request)
 
           check_sha_param!(params, merge_request)
@@ -127,12 +117,8 @@ module API
           present(approval, with: Entities::MergeRequests::StatusCheckResponse)
         end
 
-        desc 'List all status checks for a merge request and their state.' do
-          detail 'This feature was introduced in 13.12 and is gated behind the :ff_external_status_checks feature flag.'
-        end
+        desc 'List all status checks for a merge request and their state.'
         get 'status_checks' do
-          not_found! unless ::Feature.enabled?(:ff_external_status_checks, user_project)
-
           merge_request = find_merge_request_with_access(params[:merge_request_iid], :approve_merge_request)
 
           present(paginate(user_project.external_status_checks.applicable_to_branch(merge_request.target_branch)), with: Entities::MergeRequests::StatusCheck, merge_request: merge_request, sha: merge_request.source_branch_sha)
