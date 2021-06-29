@@ -40,6 +40,11 @@ export const createMergeRequest = ({ id = 1, props } = {}) => {
     author: createUser(id),
     pipeline_status: createPipelineStatus('success'),
     approval_status: 'success',
+    project: {
+      avatar_url: '/foo/bar.png',
+      name: 'Foo',
+      web_url: 'https://foo.com/project',
+    },
   };
 
   return { ...mergeRequest, ...props };
