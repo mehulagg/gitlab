@@ -89,10 +89,6 @@ export default {
         !isEqual(this.getRules(this.form.rules), this.getRules(this.initialState.rules))
       );
     },
-    requestParams() {
-      const id = this.isEditMode ? { id: this.escalationPolicy.id } : {};
-      return { ...this.form, ...id, rules: this.getRules(this.form.rules) };
-    },
   },
   methods: {
     getInitialState() {
@@ -115,7 +111,7 @@ export default {
           variables: {
             input: {
               projectPath,
-              ...this.requestParams,
+              ...this.getRequestParams(),
             },
           },
           update(store, { data }) {
@@ -154,7 +150,7 @@ export default {
         .mutate({
           mutation: updateEscalationPolicyMutation,
           variables: {
-            input: this.requestParams,
+            input: this.getRequestParams(),
           },
           update(store, { data }) {
             updateStoreOnEscalationPolicyUpdate(store, getEscalationPoliciesQuery, data, {
@@ -183,6 +179,10 @@ export default {
         .finally(() => {
           this.loading = false;
         });
+    },
+    getRequestParams() {
+      const id = this.isEditMode ? { id: this.escalationPolicy.id } : {};
+      return { ...this.form, ...id, rules: this.getRules(this.form.rules) };
     },
     getRules(rules) {
       return rules.map(
