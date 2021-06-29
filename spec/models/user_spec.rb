@@ -20,7 +20,7 @@ RSpec.describe User do
     it { is_expected.to include_module(AsyncDeviseEmail) }
   end
 
-  describe 'constants' do
+  describe 'constants', :focus do
     it { expect(described_class::COUNT_CACHE_VALIDITY_PERIOD).to be_a(Integer) }
     it { expect(described_class::MAX_USERNAME_LENGTH).to be_a(Integer) }
     it { expect(described_class::MIN_USERNAME_LENGTH).to be_a(Integer) }
