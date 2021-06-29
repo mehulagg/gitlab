@@ -176,7 +176,7 @@ describe('Sidebar assignees widget', () => {
       ).toBe(true);
     });
 
-    it('emits an event with assignees list on successful mutation', async () => {
+    it('emits an event with assignees list and issuable id on successful mutation', async () => {
       createComponent();
 
       await waitForPromises();
@@ -287,6 +287,21 @@ describe('Sidebar assignees widget', () => {
 
         expect(updateIssueAssigneesMutationSuccess).not.toHaveBeenCalled();
         expect(findUserSelect().isVisible()).toBe(true);
+      });
+
+      it('calls the mutation old issuable id if `iid` prop was changed', async () => {
+        findUserSelect().vm.$emit('input', [{ username: 'francina.skiles' }]);
+        wrapper.setProps({
+          iid: '2',
+        });
+        await nextTick();
+        findEditableItem().vm.$emit('close');
+
+        expect(updateIssueAssigneesMutationSuccess).toHaveBeenCalledWith({
+          assigneeUsernames: ['francina.skiles'],
+          fullPath: '/mygroup/myProject',
+          iid: '1',
+        });
       });
     });
 
