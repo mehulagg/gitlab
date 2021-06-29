@@ -5,7 +5,7 @@ info: "To determine the technical writer assigned to the Stage/Group associated 
 type: reference, concepts
 ---
 
-# Merge request approval rules **(FREE)**
+# Merge request approval rules **(PREMIUM)**
 
 Approval rules define how many [approvals](index.md) a merge request must receive before it can
 be merged, and which users should do the approving. You can define approval rules:
@@ -203,7 +203,7 @@ on a merge request, you can either add or remove approvers:
 Administrators can change the [merge request approvals settings](settings.md#prevent-overrides-of-default-approvals)
 to prevent users from overriding approval rules for merge requests.
 
-## Configure optional approval rules
+## Configure optional approval rules **(FREE)**
 
 Merge request approvals can be optional for projects where approvals are
 appreciated, but not required. To make an approval rule optional:
