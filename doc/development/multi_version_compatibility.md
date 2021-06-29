@@ -106,9 +106,9 @@ Yes! We have specific instructions for [zero-downtime updates](../update/index.m
 
 ## I've identified a potential backwards compatibility problem, what can I do about it?
 
-### Co-ordinate
+### Coordinate
 
-For major, or minor version updates of Rails, or Puma, you are encouraged to:
+For major or minor version updates of Rails or Puma:
 
 - Engage the Quality team to thoroughly test the MR.
 - Notify the `@gitlab-org/release/managers` on the MR prior to merging.
