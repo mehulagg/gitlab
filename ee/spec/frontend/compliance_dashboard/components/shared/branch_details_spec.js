@@ -1,17 +1,16 @@
 import { GlLink } from '@gitlab/ui';
-import { mount } from '@vue/test-utils';
-
-import BranchDetails from 'ee/compliance_dashboard/components/merge_requests/branch_details.vue';
+import BranchDetails from 'ee/compliance_dashboard/components/shared/branch_details.vue';
+import { mountExtended } from 'helpers/vue_test_utils_helper';
 
 describe('BranchDetails component', () => {
   let wrapper;
 
   // The truncate component adds left-to-right marks into the text that we have to remove
   const getText = () => wrapper.text().replace(/\u200E/gi, '');
-  const linkExists = (testId) => wrapper.find(`[data-testid="${testId}"]`).exists();
+  const linkExists = (testId) => wrapper.findByTestId(testId).exists();
 
   const createComponent = ({ sourceUri = '', targetUri = '' } = {}) => {
-    return mount(BranchDetails, {
+    return mountExtended(BranchDetails, {
       propsData: {
         sourceBranch: {
           name: 'feature',

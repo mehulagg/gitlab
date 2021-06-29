@@ -23,6 +23,7 @@ RSpec.describe MergeRequestComplianceEntity do
         :milestone,
         :path,
         :issuable_reference,
+        :reference,
         :author,
         :approved_by_users,
         :approval_status,

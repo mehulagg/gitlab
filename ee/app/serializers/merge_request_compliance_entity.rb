@@ -20,6 +20,10 @@ class MergeRequestComplianceEntity < Grape::Entity
     merge_request.to_reference(merge_request.project.group)
   end
 
+  expose :reference do |merge_request|
+    merge_request.to_reference
+  end
+
   expose :project do |merge_request|
     {
       avatar_url: merge_request.project.avatar_url,

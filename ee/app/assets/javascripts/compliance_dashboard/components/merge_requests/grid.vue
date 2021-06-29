@@ -4,10 +4,10 @@ import { GlSprintf } from '@gitlab/ui';
 import { __ } from '~/locale';
 import TimeAgoTooltip from '~/vue_shared/components/time_ago_tooltip.vue';
 
+import BranchDetails from '../shared/branch_details.vue';
 import GridColumnHeading from '../shared/grid_column_heading.vue';
 import Pagination from '../shared/pagination.vue';
 import Approvers from './approvers.vue';
-import BranchDetails from './branch_details.vue';
 import MergeRequest from './merge_request.vue';
 import Status from './status.vue';
 
@@ -101,6 +101,7 @@ export default {
             <approvers :approvers="mergeRequest.approved_by_users" />
             <branch-details
               v-if="hasBranchDetails(mergeRequest)"
+              class="gl-justify-content-end gl-text-gray-900"
               :source-branch="{
                 name: mergeRequest.source_branch,
                 uri: mergeRequest.source_branch_uri,
@@ -148,6 +149,7 @@ export default {
             <approvers :approvers="mergeRequest.approved_by_users" />
             <branch-details
               v-if="hasBranchDetails(mergeRequest)"
+              class="gl-justify-content-end gl-text-gray-900"
               :source-branch="{
                 name: mergeRequest.source_branch,
                 uri: mergeRequest.source_branch_uri,
