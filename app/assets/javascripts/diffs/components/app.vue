@@ -474,7 +474,11 @@ export default {
     },
     setDiscussions() {
       requestIdleCallback(
-        () => this.assignDiscussionsToDiff().then(this.$nextTick).then(this.startTaskList),
+        () =>
+          this.assignDiscussionsToDiff()
+            .then(this.$nextTick)
+            .then(this.startTaskList)
+            .then(this.scrollVirtualScrollerToDiffNote),
         { timeout: 1000 },
       );
     },
@@ -537,6 +541,22 @@ export default {
       await this.$nextTick();
 
       this.virtualScrollCurrentIndex = -1;
+    },
+    scrollVirtualScrollerToDiffNote() {
+      if (!window.gon?.features?.diffsVirtualScrolling) return;
+
+      const id = window?.location?.hash;
+
+      if (id.startsWith('#note_')) {
+        const noteId = id.replace('#note_', '');
+        const discussion = this.$store.state.notes.discussions.find((d) =>
+          d.notes.find((n) => n.id === noteId),
+        );
+
+        if (discussion) {
+          this.scrollVirtualScrollerToFileHash(discussion.diff_file.file_hash);
+        }
+      }
     },
   },
   minTreeWidth: MIN_TREE_WIDTH,
