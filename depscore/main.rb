@@ -9,6 +9,28 @@ require "optparse"
 
 gem_hash = {}
 
+
+def write_csv(csv_data)
+  CSV.open("dep_scores.csv", "a+") do |csv|
+    # p "Wriritng csv"
+    # p csv_data
+    csv << csv_data
+  end
+end
+
+def dreport_csvprep()
+  headers = ["Name", "Type", "tot_downloads", "reverse_dep_count", "latest_vesion_age(in Months)",
+             "latest_release_on", "rel_freq_last_4quater" "score"]
+  write_csv(headers)
+
+  all_gems = LibData.all_instances
+  all_gems.each do |gem|
+    write_csv([gem.name, gem.signals[:lang], gem.signals[:tot_downloads], gem.signals[:reverse_dep_count],
+               gem.signals[:latest_vesion_age], gem.signals[:latest_release_on], gem.signals[:rel_freq_last_4quater],
+               gem.signals[:score]])
+  end
+end
+
 def dreport_readgems(dependencies)
   puts "[*] Reading all gems"
   # puts dependencies
@@ -23,8 +45,6 @@ def dreport_readgems(dependencies)
   # utils = Utils.new
   # utils.debug_libdata
 end
-
-
 
 def dreport_read(dreport_path)
   if (!File.exist?(dreport_path))
@@ -45,19 +65,16 @@ def dreport_read(dreport_path)
     puts dep_file["path"]
     if dep_file["path"] == "Gemfile.lock"
       dreport_readgems(dep_file["dependencies"])
-      # rubytoolbox = RubyToolbox.new
-      # rubytoolbox.fetch_metadata
+      rubytoolbox = RubyToolbox.new
+      rubytoolbox.fetch_metadata
+      # utils = Utils.new
+      # utils.debug_libdata
+      dreport_csvprep()
     end
   end
 end
 
-def write_csv(csv_data)
-  CSV.open("scores.csv", "a+") do |csv|
-    # p "Wriritng csv"
-    # p csv_data
-    csv << csv_data
-  end
-end
+
 
 def gofor_gemfile
   gemscore = GemScore.new

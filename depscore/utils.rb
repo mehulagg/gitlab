@@ -40,14 +40,14 @@ class Utils
     puts "Number of gems: #{all_gems.count}"
     all_gems.each do |gem|
       puts "Name: #{gem.name}"
-      puts "#{gem.signals}"
-      # puts "#{gem.signals[:tot_downloads]}" if gem.signals[:tot_downloads]
-      # puts "#{gem.signals[:reverse_dep_count]}" if gem.signals[:reverse_dep_count]
-      # puts "#{gem.signals[:latest_vesion_age]}" if gem.signals[:latest_vesion_age]
-      # puts "#{gem.signals[:version]}" if gem.signals[:version]
-      # puts "#{gem.signals[:lang]}" if gem.signals[:lang]
-      # puts "#{gem.signals[:score]}" if gem.signals[:score]
-
+      # puts "#{gem.signals}"
+      puts "tot_downloads: #{gem.signals[:tot_downloads]}" if gem.signals[:tot_downloads]
+      puts "reverse_dep_count: #{gem.signals[:reverse_dep_count]}" if gem.signals[:reverse_dep_count]
+      puts "latest_vesion_age: #{gem.signals[:latest_vesion_age]}" if gem.signals[:latest_vesion_age]
+      puts "version: #{gem.signals[:version]}" if gem.signals[:version]
+      puts "lang: #{gem.signals[:lang]}" if gem.signals[:lang]
+      puts "rel_freq_last_4quater: #{gem.signals[:rel_freq_last_4quater]}" if gem.signals[:rel_freq_last_4quater]
+      puts "score: #{gem.signals[:score]}" if gem.signals[:score]
       puts "----"
     end
   end
