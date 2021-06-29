@@ -1,0 +1,8 @@
+---
+name: categorized_service_ping_filtering
+introduced_by_url: 
+rollout_issue_url: https://gitlab.com/gitlab-org/gitlab/-/issues/334798
+milestone: '14.1'
+type: development
+group: group::product intelligence
+default_enabled: false

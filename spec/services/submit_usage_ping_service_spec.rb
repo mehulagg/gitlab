@@ -51,6 +51,10 @@ RSpec.describe SubmitUsagePingService do
   let(:with_dev_ops_score_params) { { dev_ops_score: score_params[:score] } }
   let(:with_conv_index_params) { { conv_index: score_params[:score] } }
 
+  before do
+    stub_feature_flags(categorized_service_ping_filtering: true)
+  end
+
   shared_examples 'does not run' do
     it do
       expect(Gitlab::HTTP).not_to receive(:post)
