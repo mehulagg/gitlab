@@ -70,7 +70,7 @@ RSpec.describe 'Setting weight of an issue' do
     it 'returns an error' do
       post_graphql_mutation(mutation, current_user: current_user)
 
-      expect(graphql_errors).to include(a_hash_including('message' => /Argument weight must be provided/))
+      expect(graphql_errors).to include(a_hash_including('message' => /The `weight` argument is required \(`null` accepted\)/))
     end
   end
 
