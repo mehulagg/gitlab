@@ -88,7 +88,7 @@ export default {
 
 <template>
   <div class="list-section">
-    <gl-loading-icon v-if="loading" />
+    <gl-loading-icon v-if="loading" size="sm" />
     <div v-else-if="rotations.length === 0 && !loading" class="gl-clearfix">
       <span
         class="details-cell gl-display-flex gl-justify-content-space-between gl-align-items-center gl-pl-3"

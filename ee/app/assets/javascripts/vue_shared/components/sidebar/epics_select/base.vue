@@ -278,7 +278,7 @@ export default {
         <p v-else-if="epicListNotValid" class="gl-mx-5 gl-my-4">
           {{ $options.i18n.noMatch }}
         </p>
-        <gl-loading-icon v-else />
+        <gl-loading-icon v-else size="sm" />
       </gl-dropdown>
     </div>
 

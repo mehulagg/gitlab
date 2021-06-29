@@ -121,7 +121,7 @@ export default {
       {{ $options.noIteration.title }}
     </gl-dropdown-item>
     <gl-dropdown-divider />
-    <gl-loading-icon v-if="$apollo.queries.iterations.loading" />
+    <gl-loading-icon v-if="$apollo.queries.iterations.loading" size="sm" />
     <template v-else-if="!glFeatures.iterationCadences">
       <gl-dropdown-item
         v-for="iterationItem in iterations"

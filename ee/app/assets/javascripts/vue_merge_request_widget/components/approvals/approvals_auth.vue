@@ -86,7 +86,7 @@ export default {
     <template #modal-cancel>{{ s__('Cancel') }}</template>
 
     <template #modal-ok>
-      <gl-loading-icon v-if="isApproving" inline />
+      <gl-loading-icon v-if="isApproving" size="sm" inline />
       {{ s__('Approve') }}
     </template>
   </gl-modal>

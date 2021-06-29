@@ -265,7 +265,7 @@ export default {
         class="detail-page-header-body align-items-center"
         data-testid="vulnerability-detail-body"
       >
-        <gl-loading-icon v-if="isLoadingVulnerability" class="mr-2" />
+        <gl-loading-icon v-if="isLoadingVulnerability" size="sm" class="mr-2" />
         <gl-badge v-else class="gl-mr-4 text-capitalize" :variant="stateVariant">
           {{ vulnerability.state }}
         </gl-badge>
@@ -281,7 +281,7 @@ export default {
 
       <div class="detail-page-header-actions align-items-center">
         <label class="mb-0 mx-2">{{ __('Status') }}</label>
-        <gl-loading-icon v-if="isLoadingVulnerability" class="d-inline" />
+        <gl-loading-icon v-if="isLoadingVulnerability" size="sm" class="d-inline" />
         <vulnerability-state-dropdown
           v-else
           :initial-state="vulnerability.state"

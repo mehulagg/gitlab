@@ -181,7 +181,7 @@ export default {
           class="btn-blank sidebar-collapsed-icon"
           @click="handleTodoButtonClick"
         >
-          <gl-loading-icon v-if="todoUpdateInProgress" />
+          <gl-loading-icon v-if="todoUpdateInProgress" size="sm" />
           <gl-icon v-else :name="todoIcon" :class="{ 'todo-undone': isTodoPending }" />
         </button>
       </div>

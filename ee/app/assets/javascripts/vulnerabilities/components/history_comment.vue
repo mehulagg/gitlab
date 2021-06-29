@@ -171,7 +171,7 @@ export default {
     class="m-3"
   >
     <div v-safe-html="noteHtml" class="md">
-      <gl-loading-icon />
+      <gl-loading-icon size="sm" />
     </div>
 
     <template #right-content>

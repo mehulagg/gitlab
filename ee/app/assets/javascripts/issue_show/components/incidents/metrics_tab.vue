@@ -80,7 +80,7 @@ export default {
 <template>
   <gl-tab :title="s__('Incident|Metrics')" data-testid="metrics-tab">
     <div v-if="isLoadingMetricImages">
-      <gl-loading-icon class="gl-p-5" />
+      <gl-loading-icon class="gl-p-5" size="sm" />
     </div>
     <gl-modal
       modal-id="upload-metric-modal"

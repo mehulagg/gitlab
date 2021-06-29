@@ -90,6 +90,6 @@ export default {
       <span class="no-value">{{ __('None') }}</span>
     </div>
 
-    <gl-loading-icon v-if="isFetching" />
+    <gl-loading-icon v-if="isFetching" size="sm" />
   </div>
 </template>

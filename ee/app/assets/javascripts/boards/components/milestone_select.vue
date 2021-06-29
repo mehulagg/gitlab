@@ -131,7 +131,7 @@ export default {
             />
           </div>
           <div class="dropdown-content"></div>
-          <div class="dropdown-loading"><gl-loading-icon /></div>
+          <div class="dropdown-loading"><gl-loading-icon size="sm" /></div>
         </div>
       </div>
     </div>

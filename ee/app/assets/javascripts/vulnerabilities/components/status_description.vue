@@ -95,7 +95,7 @@ export default {
         <time-ago-tooltip ref="timeAgo" :time="time" />
       </template>
       <template #user>
-        <gl-loading-icon v-if="isLoadingUser" class="d-inline ml-1" />
+        <gl-loading-icon v-if="isLoadingUser" class="d-inline ml-1" size="sm" />
         <user-avatar-link
           v-else-if="user"
           :link-href="user.user_path"

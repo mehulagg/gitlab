@@ -93,7 +93,7 @@ export default {
         <span class="h5">{{ numberOfFeatureFlags }}</span>
       </h3>
     </div>
-    <gl-loading-icon v-if="loading" class="gl-my-3" />
+    <gl-loading-icon v-if="loading" size="sm" class="gl-my-3" />
     <ul v-else class="content-list related-items-list">
       <li
         v-for="flag in featureFlags"
