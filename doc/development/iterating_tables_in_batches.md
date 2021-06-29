@@ -395,3 +395,101 @@ end
 ### `EachBatch` vs `BatchCount`
 
 When adding new counters for usage ping, the preferred way to count records is using the `Gitlab::Database::BatchCount` class. The iteration logic implemented in `BatchCount` has similar performance characteristics like `EachBatch`. Most of the tips and suggestions for improving `BatchCount` mentioned above applies to `BatchCount` as well.
+
+## Keyset pagination
+
+For special use cases where `EachBatch` does not work, [keyset pagination](database/pagination_guidelines.md#keyset-pagination) can be used to iterate over table or a range of rows. The scaling and performance characteristics are very similar to `EachBatch`. 
+
+Examples:
+
+- Iterate over the table in a specific order (timestamp columns).
+- Iterate over the table with composite primary keys.
+
+### Iterate over the issues in a project by creation date
+
+Keyset pagination requires distinct columns in the `ORDER BY` clause. The `created_at` column in the `issues` table is not distinct, so we'll need to use a tie-breaker column (`id`) when ordering the records.
+
+In the `issues` table we have the following index which full supports our keyset pagination query:
+
+```sql
+idx_issues_on_project_id_and_created_at_and_id_and_state_id" btree (project_id, created_at, id, state_id)
+```
+
+Note: we can ignore the `state_id` column, it does not play any role in this example.
+
+Iterating over the `issues` rows:
+
+```ruby
+scope = Issue.where(project_id: 278964).order(:created_at, :id) # id is the tie-breaker
+
+iterator = Gitlab::Pagination::Keyset::Iterator.new(scope: scope, use_union_optimization: true)
+
+iterator.each_batch(of: 100) do |records|
+  puts records.map(&:id)
+end
+```
+
+Adding extra filters to the query is possible. In this example we only list the issue ids which were created in the last 30 days:
+
+```ruby
+scope = Issue.where(project_id: 278964).where('created_at > ?', 30.days.ago).order(:created_at, :id) # id is the tie-breaker
+
+iterator = Gitlab::Pagination::Keyset::Iterator.new(scope: scope, use_union_optimization: true)
+
+iterator.each_batch(of: 100) do |records|
+  puts records.map(&:id)
+end
+```
+
+For complex `ActiveRecord` queries, the `.update_all` method does not work well, it generates an incorrect `UPDATE` statement. You can use raw SQL for updating records in batches:
+
+```ruby
+scope = Issue.where(project_id: 278964).order(:created_at, :id) # id is the tie-breaker
+
+iterator = Gitlab::Pagination::Keyset::Iterator.new(scope: scope, use_union_optimization: true)
+
+iterator.each_batch(of: 100) do |records|
+  ApplicationRecord.connection.execute("UPDATE issues SET updated_at=NOW() WHERE issues.id in (#{records.dup.reselect(:id).to_sql})")
+end
+```
+
+Note: to keep the iteration stable and predictable, avoid updating the columns in the `ORDER BY` clause.
+
+### Iterate over the `merge_request_diff_commits` table
+
+The `merge_request_diff_commits` uses a composite primary key (`merge_request_diff_id, relative_order`) which makes `EachBatch` impossible to use efficiently.
+
+Keyset pagination over the `merge_request_diff_commits` table:
+
+```ruby
+# Custom order object configuration:
+order = Gitlab::Pagination::Keyset::Order.build([
+  Gitlab::Pagination::Keyset::ColumnOrderDefinition.new(
+    attribute_name: 'merge_request_diff_id',
+    order_expression: MergeRequestDiffCommit.arel_table[:merge_request_diff_id].asc,
+    nullable: :not_nullable,
+    distinct: false,
+  ),
+  Gitlab::Pagination::Keyset::ColumnOrderDefinition.new(
+    attribute_name: 'relative_order',
+    order_expression: MergeRequestDiffCommit.arel_table[:relative_order].asc,
+    nullable: :not_nullable,
+    distinct: false,
+  )
+])
+MergeRequestDiffCommit.include(FromUnion) # keyset pagination uses UNION
+
+scope = MergeRequestDiffCommit.order(order)
+
+iterator = Gitlab::Pagination::Keyset::Iterator.new(scope: scope, use_union_optimization: true)
+
+iterator.each_batch(of: 100) do |records|
+  puts records.map { |record| [record.merge_request_diff_id, record.relative_order] }.inspect
+end
+```
+
+### Order object configuration
+
+Keyset pagination works well with simple `ActiveRecord` `order` scopes (first example) however, in special cases we'll need to describe the columns in the `ORDER BY` clause (second example) for the underlying keyset pagination library. When the `ORDER BY` configuration cannot be automatically determined by the keyset pagination library an error will be raised.
+
+The documentation of the [`Gitlab::Pagination::Keyset::Order`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/pagination/keyset/order.rb) and [`Gitlab::Pagination::Keyset::ColumnOrderDefinition`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/pagination/keyset/column_order_definition.rb) classes give an overview of the possible options for configuring the `ORDER BY` clause. You can also find a few code examples in the [keyset pagination](database/keyset_pagination.md#complex-order-configuration) documentation.
