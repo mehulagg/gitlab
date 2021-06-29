@@ -2,7 +2,6 @@
 
 module Ci
   class PipelineSchedule < Ci::ApplicationRecord
-    extend Gitlab::Ci::Model
     extend ::Gitlab::Utils::Override
     include Importable
     include StripAttribute

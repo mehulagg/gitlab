@@ -2,7 +2,6 @@
 
 module Ci
   class InstanceVariable < ::Ci::ApplicationRecord
-    extend Gitlab::Ci::Model
     extend Gitlab::ProcessMemoryCache::Helper
     include Ci::NewHasVariable
     include Ci::Maskable

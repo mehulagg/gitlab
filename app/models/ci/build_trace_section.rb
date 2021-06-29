@@ -3,7 +3,6 @@
 module Ci
   class BuildTraceSection < Ci::ApplicationRecord
     extend SuppressCompositePrimaryKeyWarning
-    extend Gitlab::Ci::Model
     include IgnorableColumns
 
     belongs_to :build, class_name: 'Ci::Build'
