@@ -59,11 +59,11 @@ def dreport_summary()
           "name": "depscore",
         },
         "location": {
-          "file": "Gem.lock",
+          "file": "Gemfile.lock",
           "dependency": {
             "iid": 333,
             "package": {
-              "name": summary,
+              "name": "abstract_type"
             },
             "version": "1.0.0",
           },
