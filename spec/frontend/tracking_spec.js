@@ -207,6 +207,44 @@ describe('Tracking', () => {
         [],
       );
     });
+
+    describe('when `document.readyState` is not `complete`', () => {
+      const originalReadyState = document.readyState;
+      const setReadyState = (value) => {
+        Object.defineProperty(document, 'readyState', {
+          value,
+          configurable: true,
+        });
+      };
+      const fireReadyStateChangeEvent = () => {
+        document.dispatchEvent(new Event('readystatechange'));
+      };
+
+      afterEach(() => {
+        setReadyState(originalReadyState);
+      });
+
+      describe('when `document.readyState` does not equal `complete`', () => {
+        beforeEach(() => {
+          setReadyState('interactive');
+        });
+
+        it('does not call `window.snowplow` until `readystatechange` is fired and `document.readyState` equals `complete`', () => {
+          Tracking.enableFormTracking({ fields: { allow: ['input-class1'] } });
+
+          expect(snowplowSpy).not.toHaveBeenCalled();
+
+          fireReadyStateChangeEvent();
+
+          expect(snowplowSpy).not.toHaveBeenCalled();
+
+          setReadyState('complete');
+          fireReadyStateChangeEvent();
+
+          expect(snowplowSpy).toHaveBeenCalled();
+        });
+      });
+    });
   });
 
   describe('.flushPendingEvents', () => {
