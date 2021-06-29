@@ -111,7 +111,7 @@ function mountAssigneesComponent() {
               ? IssuableType.Issue
               : IssuableType.MergeRequest,
           issuableId: id,
-          allowMultipleAssignees: !el.dataset.maxAssignees,
+          allowMultipleAssignees: el.dataset.allowMultipleAssignees,
         },
         scopedSlots: {
           collapsed: ({ users, onClick }) =>
