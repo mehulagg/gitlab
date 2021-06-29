@@ -121,5 +121,5 @@ The result is that the `GET /groups/:id_A` query issued by the provider when ref
 There are three workarounds available:
 
 1. ensure all subgroup resources are created by the Terraform user
-2. grant direct access to the Terraform user on all subgroup resources
-3. ensure at least one project exists in each subgroup
+1. grant direct access to the Terraform user on all subgroup resources
+1. ensure at least one project exists in each subgroup
