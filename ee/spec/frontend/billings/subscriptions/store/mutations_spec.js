@@ -71,6 +71,12 @@ describe('EE billings subscription module mutations', () => {
         expect(state.plan).toEqual(plan);
       });
 
+      it('sets billing information', () => {
+        const { billing } = convertObjectPropsToCamelCase(subscription, { deep: true });
+
+        expect(state.billing).toEqual(billing);
+      });
+
       it(`it updates table ${tableKey} with subscription plan`, () => {
         expect(getStateTableValues(tableKey)).toMatchSnapshot();
       });

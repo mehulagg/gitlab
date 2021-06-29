@@ -76,7 +76,7 @@ describe('SubscriptionTable component', () => {
     beforeEach(() => {
       createComponentWithStore();
       store.state.isLoadingSubscription = false;
-      store.commit(`${types.RECEIVE_SUBSCRIPTION_SUCCESS}`, mockDataSubscription.gold);
+      store.commit(types.RECEIVE_SUBSCRIPTION_SUCCESS, mockDataSubscription.gold);
       return wrapper.vm.$nextTick();
     });
 
@@ -149,6 +149,9 @@ describe('SubscriptionTable component', () => {
                 code: planCode,
                 trial,
               },
+              billing: {
+                subscriptionEndDate: new Date(),
+              }
             },
           });
         });
@@ -158,6 +161,33 @@ describe('SubscriptionTable component', () => {
         });
       },
     );
+
+    describe('when subscriptionEndDate is more than 15 days', () => {
+      const getOffsetDateString = (days) => {
+        const date = new Date();
+        date.setDate(date.getDate() + days);
+        return date.toISOString();
+      };
+
+      beforeEach(() => {
+        createComponentWithStore({
+          state: {
+            isLoadingSubscription: false,
+            plan: {
+              code: mockDataSubscription.planCode,
+              trial: false,
+            },
+            billing: {
+              subscriptionEndDate: getOffsetDateString(16),
+            }
+          },
+        });
+      });
+
+      it('does not display the renew button', () => {
+        expect(findRenewButton().exists()).toBe(false);
+      });
+    })
   });
 
   describe('Add seats button', () => {
