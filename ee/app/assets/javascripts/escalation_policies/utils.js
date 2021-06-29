@@ -17,8 +17,35 @@ export const isNameFieldValid = (name) => {
 export const getRulesValidationState = (rules) => {
   return rules.map((rule) => {
     return {
-      isTimeValid: parseInt(rule.elapsedTimeSeconds, 10) >= 0,
+      isTimeValid: parseInt(rule.elapsedTimeMinutes, 10) >= 0,
       isScheduleValid: Boolean(rule.oncallScheduleIid),
     };
   });
+};
+
+export const serializeRules = (rules) => {
+  console.log('rules', rules);
+  return rules.map((rule) => {
+    const { elapsedTimeMinutes, ...ruleParams } = rule;
+
+    return {
+      ...ruleParams,
+      elapsedTimeSeconds: rule.elapsedTimeMinutes * 60,
+    };
+  });
+};
+
+export const parsePolicy = (policy) => {
+  console.log('policy', policy);
+  return {
+    ...policy,
+    rules: policy.rules.map((rule) => {
+      const { elapsedTimeSeconds, ...ruleParams } = rule;
+
+      return {
+        ...ruleParams,
+        elapsedTimeMinutes: rule.elapsedTimeSeconds / 60,
+      };
+    }),
+  };
 };

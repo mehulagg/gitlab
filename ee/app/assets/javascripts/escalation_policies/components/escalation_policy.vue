@@ -29,9 +29,9 @@ export const i18n = {
   minutes: s__('EscalationPolicies|mins'),
 };
 
-const isRuleValid = ({ status, elapsedTimeSeconds, oncallSchedule: { name } }) =>
+const isRuleValid = ({ status, elapsedTimeMinutes, oncallSchedule: { name } }) =>
   Object.keys(ALERT_STATUSES).includes(status) &&
-  typeof elapsedTimeSeconds === 'number' &&
+  typeof elapsedTimeMinutes === 'number' &&
   typeof name === 'string';
 
 export default {
@@ -145,7 +145,7 @@ export default {
               </template>
               <template #minutes>
                 <span class="gl-font-weight-bold">
-                  {{ rule.elapsedTimeSeconds }} {{ $options.i18n.minutes }}
+                  {{ rule.elapsedTimeMinutes }} {{ $options.i18n.minutes }}
                 </span>
               </template>
               <template #then>
