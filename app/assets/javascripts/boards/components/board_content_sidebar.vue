@@ -86,6 +86,7 @@ export default {
       <template #default>
         <board-sidebar-title />
         <sidebar-assignees-widget
+          :id="activeBoardItem.id"
           :iid="activeBoardItem.iid"
           :full-path="fullPath"
           :initial-assignees="activeBoardItem.assignees"

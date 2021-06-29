@@ -1,6 +1,6 @@
 <script>
 import { GlDropdownItem } from '@gitlab/ui';
-import { cloneDeep } from 'lodash';
+import { cloneDeep, isEqual } from 'lodash';
 import Vue from 'vue';
 import createFlash from '~/flash';
 import { IssuableType } from '~/issue_show/constants';
@@ -43,6 +43,10 @@ export default {
     },
   },
   props: {
+    id: {
+      type: Number,
+      required: true,
+    },
     iid: {
       type: String,
       required: true,
@@ -78,6 +82,9 @@ export default {
     return {
       issuable: {},
       selected: [],
+      lastId: null,
+      lastIid: null,
+      lastFullPath: null,
       isSettingAssignees: false,
       isDirty: false,
     };
@@ -91,6 +98,15 @@ export default {
         return this.queryVariables;
       },
       update(data) {
+        // Always flush previous changes
+        if (this.isDirty) {
+          this.updateAssignees(
+            this.itemToComit,
+            this.itemToComit.selected.map(({ username }) => username),
+          );
+          this.isDirty = false;
+        }
+
         return data.workspace?.issuable;
       },
       result({ data }) {
@@ -108,6 +124,9 @@ export default {
     shouldEnableRealtime() {
       // Note: Realtime is only available on issues right now, future support for MR wil be built later.
       return this.glFeatures.realTimeIssueSidebar && this.issuableType === IssuableType.Issue;
+    },
+    itemToComit() {
+      return { iid: this.lastIid, id: this.lastId, fullPath: this.lastFullPath, selected: this.lastSelected };
     },
     queryVariables() {
       return {
@@ -149,18 +168,22 @@ export default {
     assigneesWidget.updateAssignees = null;
   },
   methods: {
-    updateAssignees(assigneeUsernames) {
+    updateAssignees({ id, iid, fullPath }, assigneeUsernames) {
       this.isSettingAssignees = true;
       return this.$apollo
         .mutate({
           mutation: assigneesQueries[this.issuableType].mutation,
           variables: {
-            ...this.queryVariables,
+            iid,
+            fullPath,
             assigneeUsernames,
           },
         })
         .then(({ data }) => {
-          this.$emit('assignees-updated', data.issuableSetAssignees.issuable.assignees.nodes);
+          this.$emit('assignees-updated', {
+            id,
+            assigneeUsernames: data.issuableSetAssignees.issuable.assignees.nodes,
+          });
           return data;
         })
         .catch(() => {
@@ -171,12 +194,15 @@ export default {
         });
     },
     assignSelf() {
-      this.updateAssignees([this.currentUser.username]);
+      this.updateAssignees(this.itemToComit, [this.currentUser.username]);
     },
     saveAssignees() {
       if (this.isDirty) {
         this.isDirty = false;
-        this.updateAssignees(this.selected.map(({ username }) => username));
+        this.updateAssignees(
+          this.itemToComit,
+          this.selected.map(({ username }) => username),
+        );
       }
       this.$el.dispatchEvent(hideDropdownEvent);
     },
@@ -194,6 +220,11 @@ export default {
     },
     setDirtyState() {
       this.isDirty = true;
+      this.lastId = this.id;
+      this.lastIid = this.iid;
+      this.lastFullPath = this.fullPath;
+      this.lastSelected = this.selected;
+
       if (!this.allowMultipleAssignees) {
         this.collapseWidget();
       }
