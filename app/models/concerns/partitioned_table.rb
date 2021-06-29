@@ -15,7 +15,7 @@ module PartitionedTable
 
       @partitioning_strategy = strategy_class.new(self, partitioning_key, **kwargs)
 
-      Gitlab::Database::Partitioning::PartitionCreator.register(self)
+      Gitlab::Database::Partitioning::PartitionManager.register(self)
     end
   end
 end

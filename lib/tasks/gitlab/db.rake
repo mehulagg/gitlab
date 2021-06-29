@@ -156,7 +156,7 @@ namespace :gitlab do
 
     desc 'Create missing dynamic database partitions'
     task :create_dynamic_partitions do
-      Gitlab::Database::Partitioning::PartitionCreator.new.create_partitions
+      Gitlab::Database::Partitioning::PartitionManager.new.create_partitions
     end
 
     # This is targeted towards deploys and upgrades of GitLab.

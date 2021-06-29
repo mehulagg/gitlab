@@ -2,8 +2,9 @@
 
 require 'spec_helper'
 
-RSpec.describe Gitlab::Database::Partitioning::PartitionCreator do
+RSpec.describe Gitlab::Database::Partitioning::PartitionManager do
   include Database::PartitioningHelpers
+  include Database::TableSchemaHelpers
   include ExclusiveLeaseHelpers
 
   describe '.register' do
@@ -27,7 +28,7 @@ RSpec.describe Gitlab::Database::Partitioning::PartitionCreator do
       allow(ActiveRecord::Base.connection).to receive(:table_exists?).with(table).and_return(true)
       allow(ActiveRecord::Base.connection).to receive(:execute).and_call_original
 
-      stub_exclusive_lease(described_class::LEASE_KEY % table, timeout: described_class::LEASE_TIMEOUT)
+      stub_exclusive_lease(described_class::CREATION_LEASE_KEY % table, timeout: described_class::LEASE_TIMEOUT)
     end
 
     let(:partitions) do
@@ -91,6 +92,54 @@ RSpec.describe Gitlab::Database::Partitioning::PartitionCreator do
       expect { subject }.to change { find_partitions(my_model.table_name, schema: Gitlab::Database::DYNAMIC_PARTITIONS_SCHEMA).size }.from(0)
 
       subject
+    end
+  end
+
+  describe '#detach_partitions (mocked)' do
+    subject { manager.detach_partitions }
+
+    let(:manager) { described_class.new(models) }
+    let(:models) { [model] }
+    let(:model) { double(partitioning_strategy: partitioning_strategy, table_name: table)}
+    let(:partitioning_strategy) { double(extra_partitions: extra_partitions) }
+    let(:table) { "foo" }
+
+    before do
+      allow(ActiveRecord::Base.connection).to receive(:table_exists?).and_call_original
+      allow(ActiveRecord::Base.connection).to receive(:table_exists?).with(table).and_return(true)
+
+      stub_exclusive_lease(described_class::DETACH_LEASE_KEY % table, timeout: described_class::LEASE_TIMEOUT)
+    end
+
+    let(:extra_partitions) do
+      [
+        instance_double(Gitlab::Database::Partitioning::TimePartition, table: table, partition_name: 'foo1', to_detach_sql: 'SELECT 1'),
+        instance_double(Gitlab::Database::Partitioning::TimePartition, table: table, partition_name: 'foo2', to_detach_sql: 'SELECT 2')
+      ]
+    end
+
+    it 'detaches each extra partition' do
+      extra_partitions.each { |p| expect(manager).to receive(:detach_one_partition).with(p) }
+
+      subject
+    end
+
+    context 'error handling' do
+      let(:models) do
+        [
+          double(partitioning_strategy: error_strategy, table_name: table),
+          model
+        ]
+      end
+
+      let(:error_strategy) { double }
+
+      it 'still drops partitions for the other model' do
+        expect(error_strategy).to receive(:extra_partitions).and_raise('injected error!')
+        extra_partitions.each { |p| expect(manager).to receive(:detach_one_partition).with(p) }
+
+        subject
+      end
     end
   end
 end

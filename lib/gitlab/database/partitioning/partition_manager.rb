@@ -3,7 +3,7 @@
 module Gitlab
   module Database
     module Partitioning
-      class PartitionCreator
+      class PartitionManager
         def self.register(model)
           raise ArgumentError, "Only models with a #partitioning_strategy can be registered." unless model.respond_to?(:partitioning_strategy)
 
@@ -15,7 +15,8 @@ module Gitlab
         end
 
         LEASE_TIMEOUT = 1.minute
-        LEASE_KEY = 'database_partition_creation_%s'
+        CREATION_LEASE_KEY = 'database_partition_creation_%s'
+        DETACH_LEASE_KEY = 'database_partition_detach_%s'
 
         attr_reader :models
 
@@ -31,7 +32,7 @@ module Gitlab
             # The prevailing situation is no missing partitions
             next if missing_partitions(model).empty?
 
-            only_with_exclusive_lease(model) do
+            only_with_exclusive_creation_lease(model) do
               partitions_to_create = missing_partitions(model)
 
               next if partitions_to_create.empty?
@@ -43,6 +44,22 @@ module Gitlab
           end
         end
 
+        def detach_partitions
+          models.each do |model|
+            next if extra_partitions(model).empty?
+
+            only_with_exclusive_removal_lease(model) do
+              partitions_to_detach = extra_partitions(model)
+
+              next if partitions_to_detach.empty?
+
+              detach(partitions_to_detach)
+            end
+          rescue StandardError => e
+            Gitlab::AppLogger.error("Failed to remove partition(s) for #{model.table_name}: #{e.class}: #{e.message}")
+          end
+        end
+
         private
 
         def missing_partitions(model)
@@ -51,12 +68,30 @@ module Gitlab
           model.partitioning_strategy.missing_partitions
         end
 
-        def only_with_exclusive_lease(model)
-          lease = Gitlab::ExclusiveLease.new(LEASE_KEY % model.table_name, timeout: LEASE_TIMEOUT)
+        def extra_partitions(model)
+          return [] unless connection.table_exists?(model.table_name)
+
+          model.partitioning_strategy.extra_partitions
+        end
+
+        def only_with_exclusive_lease(model, lease_key:)
+          lease = Gitlab::ExclusiveLease.new(lease_key % model.table_name, timeout: LEASE_TIMEOUT)
 
           yield if lease.try_obtain
         ensure
           lease&.cancel
+        end
+
+        def only_with_exclusive_creation_lease(model)
+          only_with_exclusive_lease(model, lease_key: CREATION_LEASE_KEY) do
+            yield
+          end
+        end
+
+        def only_with_exclusive_removal_lease(model)
+          only_with_exclusive_lease(model, lease_key: DETACH_LEASE_KEY) do
+            yield
+          end
         end
 
         def create(model, partitions)
@@ -69,6 +104,18 @@ module Gitlab
               end
             end
           end
+        end
+
+        def detach(partitions)
+          connection.transaction do
+            with_lock_retries do
+              partitions.each { |p| detach_one_partition(p) }
+            end
+          end
+        end
+
+        def detach_one_partition(partition)
+          Gitlab::AppLogger.info("Planning to detach #{partition.partition_name} for table #{partition.table}")
         end
 
         def with_lock_retries(&block)
