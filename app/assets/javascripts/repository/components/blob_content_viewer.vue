@@ -8,6 +8,7 @@ import createFlash from '~/flash';
 import { isLoggedIn } from '~/lib/utils/common_utils';
 import { __ } from '~/locale';
 import blobInfoQuery from '../queries/blob_info.query.graphql';
+import permissionsQuery from '../queries/permissions.query.graphql';
 import BlobButtonGroup from './blob_button_group.vue';
 import BlobEdit from './blob_edit.vue';
 
@@ -37,6 +38,18 @@ export default {
         createFlash({ message: __('An error occurred while loading the file. Please try again.') });
       },
     },
+    permissions: {
+      query: permissionsQuery,
+      variables() {
+        return {
+          projectPath: this.projectPath,
+        };
+      },
+      update: (data) => data.project?.userPermissions?.pushCode,
+      error(error) {
+        throw error;
+      },
+    },
   },
   provide() {
     return {
@@ -56,6 +69,7 @@ export default {
   data() {
     return {
       activeViewerType: SIMPLE_BLOB_VIEWER,
+      permissions: false,
       project: {
         repository: {
           blobs: {
@@ -138,7 +152,7 @@ export default {
             :path="path"
             :name="blobInfo.name"
             :replace-path="blobInfo.replacePath"
-            :can-push-code="blobInfo.canModifyBlob"
+            :can-push-code="permissions"
           />
         </template>
       </blob-header>
