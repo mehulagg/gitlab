@@ -111,6 +111,9 @@ You can create a new external status check for a project using the following end
 POST /projects/:id/external_status_checks
 ```
 
+WARNING:
+Creating an external status check will send information about all applicable merge requests to the defined external service. This includes confidential merge requests.
+
 | Attribute              | Type             | Required | Description                                    |
 |------------------------|------------------|----------|------------------------------------------------|
 | `id`                   | integer          | yes      | ID of a project                                |
