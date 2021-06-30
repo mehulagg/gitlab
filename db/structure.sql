@@ -10506,7 +10506,7 @@ CREATE TABLE ci_build_trace_sections (
 );
 
 CREATE TABLE ci_builds (
-    id integer NOT NULL,
+    id_convert_to_bigint integer DEFAULT 0 NOT NULL,
     status character varying,
     finished_at timestamp without time zone,
     trace text,
@@ -10551,7 +10551,7 @@ CREATE TABLE ci_builds (
     waiting_for_resource_at timestamp with time zone,
     processed boolean,
     scheduling_type smallint,
-    id_convert_to_bigint bigint DEFAULT 0 NOT NULL,
+    id bigint NOT NULL,
     stage_id_convert_to_bigint bigint,
     CONSTRAINT check_1e2fbd1b39 CHECK ((lock_version IS NOT NULL))
 );
