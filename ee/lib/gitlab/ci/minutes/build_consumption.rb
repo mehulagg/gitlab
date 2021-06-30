@@ -20,11 +20,7 @@ module Gitlab
         private
 
         def cost_factor
-          @build.runner.minutes_cost_factor(project_visibility_level)
-        end
-
-        def project_visibility_level
-          @build.project.visibility_level
+          @build.runner.cost_factor_for_project(@build.project)
         end
       end
     end

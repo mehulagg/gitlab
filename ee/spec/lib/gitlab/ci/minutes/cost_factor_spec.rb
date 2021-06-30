@@ -97,4 +97,58 @@ RSpec.describe Gitlab::Ci::Minutes::CostFactor do
       end
     end
   end
+
+  describe '#for_project' do
+    let(:project) { create(:project, namespace: namespace, visibility_level: visibility_level) }
+
+    subject { described_class.new(runner.runner_matcher).for_project(project) }
+
+    context 'before the public project cost factor release date' do
+      let(:namespace) do
+        travel_to(Date.new(2021, 7, 16)) do
+          create(:group)
+        end
+      end
+
+      where(:runner_type, :visibility_level, :public_cost_factor, :private_cost_factor, :result) do
+        :project  | Gitlab::VisibilityLevel::PRIVATE  | 1 | 1 | 0
+        :project  | Gitlab::VisibilityLevel::INTERNAL | 1 | 1 | 0
+        :project  | Gitlab::VisibilityLevel::PUBLIC   | 1 | 1 | 0
+        :group    | Gitlab::VisibilityLevel::PRIVATE  | 1 | 1 | 0
+        :group    | Gitlab::VisibilityLevel::INTERNAL | 1 | 1 | 0
+        :group    | Gitlab::VisibilityLevel::PUBLIC   | 1 | 1 | 0
+        :instance | Gitlab::VisibilityLevel::PUBLIC   | 0 | 5 | 0
+        :instance | Gitlab::VisibilityLevel::INTERNAL | 0 | 5 | 5
+        :instance | Gitlab::VisibilityLevel::PRIVATE  | 0 | 5 | 5
+      end
+
+      with_them do
+        it { is_expected.to eq(result) }
+      end
+    end
+
+    context 'after the public project cost factor release date' do
+      let(:namespace) do
+        travel_to(Date.new(2021, 7, 17)) do
+          create(:group)
+        end
+      end
+
+      where(:runner_type, :visibility_level, :public_cost_factor, :private_cost_factor, :result) do
+        :project  | Gitlab::VisibilityLevel::PRIVATE  | 1 | 1 | 0
+        :project  | Gitlab::VisibilityLevel::INTERNAL | 1 | 1 | 0
+        :project  | Gitlab::VisibilityLevel::PUBLIC   | 1 | 1 | 0
+        :group    | Gitlab::VisibilityLevel::PRIVATE  | 1 | 1 | 0
+        :group    | Gitlab::VisibilityLevel::INTERNAL | 1 | 1 | 0
+        :group    | Gitlab::VisibilityLevel::PUBLIC   | 1 | 1 | 0
+        :instance | Gitlab::VisibilityLevel::PUBLIC   | 0 | 5 | 0.01
+        :instance | Gitlab::VisibilityLevel::INTERNAL | 0 | 5 | 5
+        :instance | Gitlab::VisibilityLevel::PRIVATE  | 0 | 5 | 5
+      end
+
+      with_them do
+        it { is_expected.to eq(result) }
+      end
+    end
+  end
 end

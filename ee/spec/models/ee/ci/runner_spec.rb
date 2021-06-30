@@ -3,15 +3,15 @@
 require 'spec_helper'
 
 RSpec.describe EE::Ci::Runner do
-  describe '#minutes_cost_factor' do
-    subject { runner.minutes_cost_factor(visibility_level) }
+  describe '#cost_factor_for_project' do
+    subject { runner.cost_factor_for_project(project) }
 
     context 'with group type runner' do
       let(:runner) { create(:ci_runner, :group) }
 
       ::Gitlab::VisibilityLevel.options.each do |level_name, level_value|
         context "with #{level_name}" do
-          let(:visibility_level) {level_value}
+          let(:project) { create(:project, visibility_level: level_value) }
 
           it { is_expected.to eq(0.0) }
         end
@@ -23,7 +23,7 @@ RSpec.describe EE::Ci::Runner do
 
       ::Gitlab::VisibilityLevel.options.each do |level_name, level_value|
         context "with #{level_name}" do
-          let(:visibility_level) {level_value}
+          let(:project) { create(:project, visibility_level: level_value) }
 
           it { is_expected.to eq(0.0) }
         end
@@ -35,29 +35,47 @@ RSpec.describe EE::Ci::Runner do
         create(:ci_runner,
                :instance,
                private_projects_minutes_cost_factor: 1.1,
-               public_projects_minutes_cost_factor: 2.2)
+               public_projects_minutes_cost_factor: 0)
       end
 
       context 'with private visibility level' do
-        let(:visibility_level) { ::Gitlab::VisibilityLevel::PRIVATE }
+        let(:project) { create(:project, visibility_level: ::Gitlab::VisibilityLevel::PRIVATE) }
 
         it { is_expected.to eq(1.1) }
       end
 
       context 'with public visibility level' do
-        let(:visibility_level) { ::Gitlab::VisibilityLevel::PUBLIC }
+        let(:project) { create(:project, namespace: namespace, visibility_level: ::Gitlab::VisibilityLevel::PUBLIC) }
 
-        it { is_expected.to eq(2.2) }
+        context 'after the release date for public project cost factors' do
+          let(:namespace) do
+            travel_to(Date.new(2021, 7, 17)) do
+              create(:group)
+            end
+          end
+
+          it { is_expected.to eq(0.01) }
+        end
+
+        context 'before the release date for public project cost factors' do
+          let(:namespace) do
+            travel_to(Date.new(2021, 7, 16)) do
+              create(:group)
+            end
+          end
+
+          it { is_expected.to eq(0.0) }
+        end
       end
 
       context 'with internal visibility level' do
-        let(:visibility_level) { ::Gitlab::VisibilityLevel::INTERNAL }
+        let(:project) { create(:project, visibility_level: ::Gitlab::VisibilityLevel::INTERNAL) }
 
         it { is_expected.to eq(1.1) }
       end
 
       context 'with invalid visibility level' do
-        let(:visibility_level) { 123 }
+        let(:project) { create(:project, visibility_level: 123) }
 
         it 'raises an error' do
           expect { subject }.to raise_error(ArgumentError)
