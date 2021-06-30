@@ -1,7 +1,7 @@
 <script>
 import { GlLabel } from '@gitlab/ui';
 import { mapState } from 'vuex';
-
+import { getIdFromGraphQLId } from '~/graphql_shared/utils';
 import { isScopedLabel } from '~/lib/utils/common_utils';
 
 export default {
@@ -36,6 +36,9 @@ export default {
     scopedLabel(label) {
       return this.allowScopedLabels && isScopedLabel(label);
     },
+    removeLabel(labelId) {
+      this.$emit('onLabelRemove', getIdFromGraphQLId(labelId));
+    },
   },
 };
 </script>
@@ -63,7 +66,7 @@ export default {
         :show-close-button="allowLabelRemove"
         :disabled="disableLabels"
         tooltip-placement="top"
-        @close="$emit('onLabelRemove', label.id)"
+        @close="removeLabel(label.id)"
       />
     </template>
   </div>
