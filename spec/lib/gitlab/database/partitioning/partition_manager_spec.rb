@@ -28,7 +28,7 @@ RSpec.describe Gitlab::Database::Partitioning::PartitionManager do
       allow(ActiveRecord::Base.connection).to receive(:table_exists?).with(table).and_return(true)
       allow(ActiveRecord::Base.connection).to receive(:execute).and_call_original
 
-      stub_exclusive_lease(described_class::CREATION_LEASE_KEY % table, timeout: described_class::LEASE_TIMEOUT)
+      stub_exclusive_lease(described_class::LEASE_KEY % table, timeout: described_class::LEASE_TIMEOUT)
     end
 
     let(:partitions) do
@@ -108,7 +108,7 @@ RSpec.describe Gitlab::Database::Partitioning::PartitionManager do
       allow(ActiveRecord::Base.connection).to receive(:table_exists?).and_call_original
       allow(ActiveRecord::Base.connection).to receive(:table_exists?).with(table).and_return(true)
 
-      stub_exclusive_lease(described_class::DETACH_LEASE_KEY % table, timeout: described_class::LEASE_TIMEOUT)
+      stub_exclusive_lease(described_class::LEASE_KEY % table, timeout: described_class::LEASE_TIMEOUT)
     end
 
     let(:extra_partitions) do

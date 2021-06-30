@@ -4,6 +4,8 @@ module Gitlab
   module Database
     module Partitioning
       class PartitionManager
+        include Gitlab::ExclusiveLeaseHelpers
+
         def self.register(model)
           raise ArgumentError, "Only models with a #partitioning_strategy can be registered." unless model.respond_to?(:partitioning_strategy)
 
@@ -15,8 +17,7 @@ module Gitlab
         end
 
         LEASE_TIMEOUT = 1.minute
-        CREATION_LEASE_KEY = 'database_partition_creation_%s'
-        DETACH_LEASE_KEY = 'database_partition_detach_%s'
+        LEASE_KEY = 'database_partition_management_%s'
 
         attr_reader :models
 
@@ -32,7 +33,7 @@ module Gitlab
             # The prevailing situation is no missing partitions
             next if missing_partitions(model).empty?
 
-            only_with_exclusive_creation_lease(model) do
+            only_with_lease_lock(model) do
               partitions_to_create = missing_partitions(model)
 
               next if partitions_to_create.empty?
@@ -48,7 +49,7 @@ module Gitlab
           models.each do |model|
             next if extra_partitions(model).empty?
 
-            only_with_exclusive_removal_lease(model) do
+            only_with_lease_lock(model) do
               partitions_to_detach = extra_partitions(model)
 
               next if partitions_to_detach.empty?
@@ -74,22 +75,8 @@ module Gitlab
           model.partitioning_strategy.extra_partitions
         end
 
-        def only_with_exclusive_lease(model, lease_key:)
-          lease = Gitlab::ExclusiveLease.new(lease_key % model.table_name, timeout: LEASE_TIMEOUT)
-
-          yield if lease.try_obtain
-        ensure
-          lease&.cancel
-        end
-
-        def only_with_exclusive_creation_lease(model)
-          only_with_exclusive_lease(model, lease_key: CREATION_LEASE_KEY) do
-            yield
-          end
-        end
-
-        def only_with_exclusive_removal_lease(model)
-          only_with_exclusive_lease(model, lease_key: DETACH_LEASE_KEY) do
+        def only_with_lease_lock(model)
+          in_lock(LEASE_KEY % model.table_name, ttl: LEASE_TIMEOUT, sleep_sec: 3.seconds) do
             yield
           end
         end
