@@ -29,9 +29,14 @@ export default {
       type: Number,
       required: true,
     },
-    numberOfUsers: {
+    quantity: {
       type: Number,
       required: true,
+    },
+    purchaseType: {
+      type: String,
+      required: true,
+      default: 'addon',
     },
     taxRate: {
       type: Number,
@@ -48,11 +53,17 @@ export default {
     endDate() {
       return this.startDate.setFullYear(this.startDate.getFullYear() + 1);
     },
+    perPriceLabel() {
+      return this.purchaseType === 'addon'
+        ? this.$options.i18n.pricePerPack
+        : this.$options.i18n.pricePerUserPerYear;
+    },
   },
   i18n: {
     selectedPlanText: s__('Checkout|%{selectedPlanText} plan'),
-    numberOfUsers: s__('Checkout|(x%{numberOfUsers})'),
+    quantity: s__('Checkout|(x%{quantity})'),
     pricePerUserPerYear: s__('Checkout|$%{selectedPlanPrice} per user per year'),
+    pricePerPack: s__('Checkout|$%{selectedPlanPrice} per pack'),
     dates: s__('Checkout|%{startDate} - %{endDate}'),
     subtotal: s__('Checkout|Subtotal'),
     tax: s__('Checkout|Tax'),
@@ -66,14 +77,14 @@ export default {
       <div class="js-selected-plan">
         {{ sprintf($options.i18n.selectedPlanText, { selectedPlanText }) }}
         <span v-if="usersPresent" class="js-number-of-users">{{
-          sprintf($options.i18n.numberOfUsers, { numberOfUsers })
+          sprintf($options.i18n.quantity, { quantity })
         }}</span>
       </div>
       <div class="js-amount">{{ formatAmount(totalExVat, usersPresent) }}</div>
     </div>
     <div class="text-secondary js-per-user">
       {{
-        sprintf($options.i18n.pricePerUserPerYear, {
+        sprintf(perPriceLabel, {
           selectedPlanPrice: selectedPlanPrice.toLocaleString(),
         })
       }}

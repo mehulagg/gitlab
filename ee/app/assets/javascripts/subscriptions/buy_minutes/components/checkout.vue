@@ -37,7 +37,7 @@ export default {
       <progress-bar v-if="isNewUser" :steps="$options.steps" :current-step="$options.currentStep" />
       <div class="flash-container"></div>
       <h2 class="gl-mt-6 gl-mb-7 gl-mb-lg-5">{{ $options.i18n.checkout }}</h2>
-      <subscription-details :plans="plans" />
+      <subscription-details :plans="plans" purchase-type="addon" />
       <billing-address />
       <payment-method />
     </div>

@@ -29,6 +29,11 @@ export default {
       type: Array,
       required: true,
     },
+    purchaseType: {
+      type: String,
+      required: true,
+      default: 'addon',
+    },
   },
   data() {
     return {
@@ -78,9 +83,9 @@ export default {
         this.updateState({ subscription: { namespaceId, quantity } });
       },
     },
-    numberOfUsersModel: {
+    quantityModel: {
       get() {
-        return this.selectedGroupUsers || 1;
+        return this.purchaseType === 'addon' ? 1 : this.selectedGroupUsers || 1;
       },
       set(number) {
         this.updateState({ subscription: { quantity: number } });
@@ -115,9 +120,13 @@ export default {
       return this.subscription.namespaceId !== null;
     },
     isNumberOfUsersValid() {
-      return (
-        this.subscription.quantity > 0 && this.subscription.quantity >= this.selectedGroupUsers
-      );
+      if (this.purchaseType === 'addon') {
+        return this.subscription.quantity > 0;
+      } else {
+        return (
+          this.subscription.quantity > 0 && this.subscription.quantity >= this.selectedGroupUsers
+        );
+      }
     },
     isValid() {
       if (this.isSetupForCompany) {
@@ -156,6 +165,21 @@ export default {
       return this.isNewGroupSelected
         ? this.$options.i18n.createNewGroupDescription
         : this.$options.i18n.selectedGroupDescription;
+    },
+    minQuantity() {
+      return this.purchaseType === 'addon' ? 1 : this.selectedGroupUsers;
+    },
+    isQuantityDisabled() {
+      return this.purchaseType === 'addon' ? false : !this.isSetupForCompany;
+    },
+    quantityTotal() {
+      const quantityTitle =
+        this.purchaseType === 'addon' ? this.$options.i18n.packs : this.$options.i18n.users;
+
+      return sprintf(s__('Checkout|%{quantityTitle}: %{quantity}'), {
+        quantityTitle,
+        quantity: this.subscription.quantity,
+      });
     },
   },
   mounted() {
@@ -204,12 +228,13 @@ export default {
     selectedGroupDescription: s__('Checkout|Your subscription will be applied to this group'),
     createNewGroupDescription: s__("Checkout|You'll create your new group after checkout"),
     organizationNameLabel: s__('Checkout|Name of company or organization using GitLab'),
-    numberOfUsersLabel: s__('Checkout|Number of users'),
+    quantityLabel: s__('Checkout|Quantity'),
     needMoreUsersLink: s__('Checkout|Need more users? Purchase GitLab for your %{company}.'),
     companyOrTeam: s__('Checkout|company or team'),
-    selectedPlan: s__('Checkout|%{selectedPlanText} plan'),
+    selectedPlan: s__('Checkout|%{selectedPlanText}'),
     group: __('Group'),
     users: __('Users'),
+    packs: __('Packs'),
   },
   stepId: STEPS[0].id,
 };
@@ -260,12 +285,12 @@ export default {
       <div class="combined d-flex">
         <gl-form-group :label="$options.i18n.numberOfUsersLabel" label-size="sm" class="number">
           <gl-form-input
-            ref="number-of-users"
-            v-model.number="numberOfUsersModel"
+            ref="quantity"
+            v-model.number="quantityModel"
             type="number"
-            :min="selectedGroupUsers"
-            :disabled="!isSetupForCompany"
-            data-qa-selector="number_of_users"
+            :min="minQuantity"
+            :disabled="isQuantityDisabled"
+            data-qa-selector="quantity"
           />
         </gl-form-group>
         <gl-form-group
@@ -288,7 +313,7 @@ export default {
       <div v-if="isSetupForCompany" ref="summary-line-2">
         {{ $options.i18n.group }}: {{ customer.company || selectedGroup.name }}
       </div>
-      <div ref="summary-line-3">{{ $options.i18n.users }}: {{ subscription.quantity }}</div>
+      <div ref="summary-line-3">{{ quantityTotal }}</div>
     </template>
   </step>
 </template>

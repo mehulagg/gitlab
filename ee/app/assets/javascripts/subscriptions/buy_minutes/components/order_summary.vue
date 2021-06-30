@@ -134,8 +134,9 @@ export default {
           :selected-plan-text="selectedPlan.name"
           :selected-plan-price="selectedPlanPrice"
           :total-amount="totalAmount"
-          :number-of-users="subscription.quantity"
+          :quantity="subscription.quantity"
           :tax-rate="$options.taxRate"
+          purchase-type="addon"
         />
       </gl-collapse>
     </div>
@@ -152,8 +153,9 @@ export default {
         :selected-plan-text="selectedPlan.name"
         :selected-plan-price="selectedPlanPrice"
         :total-amount="totalAmount"
-        :number-of-users="subscription.quantity"
+        :quantity="subscription.quantity"
         :tax-rate="$options.taxRate"
+        purchase-type="addon"
       />
     </div>
   </div>
