@@ -597,7 +597,7 @@ is likely affected by
 It was [fixed in 13.4+](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/40643).
 
 To determine the actual replication status of design repositories in
-[Rails console](https://docs.gitlab.com/ee/administration/operations/rails_console.html):
+[Rails console](../../operations/rails_console.md):
 
 ```ruby
 secondary = Gitlab::Geo.current_node
