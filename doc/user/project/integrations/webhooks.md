@@ -1762,6 +1762,9 @@ On this page, you can see data that GitLab sends (request headers and body) and 
 From this page, you can repeat delivery with the same data by clicking `Resend Request` button.
 
 NOTE:
+This history is not available for Group-level webhooks. See issue [#325642](https://gitlab.com/gitlab-org/gitlab/-/issues/325642) for details.
+
+NOTE:
 If URL or secret token of the webhook were updated, data is delivered to the new address.
 
 ### Webhook fails or multiple webhook requests are triggered
