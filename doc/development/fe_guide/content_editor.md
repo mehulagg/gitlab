@@ -21,7 +21,8 @@ the native
 At a high level, the Content Editor:
 
 - Imports arbitrary Markdown.
-- Renders it in a HTML editing area.
+- Renders it.
+- Loads it in a HTML editing area.
 - Exports it back to Markdown with changes introduced by the user.
 
 The Content Editor relies on the
@@ -30,7 +31,27 @@ into HTML. It sends the Markdown input to the REST API and displays the API's
 HTML output in the editing area. The editor exports the content back to Markdown
 using a client-side library that serializes editable documents into Markdown.
 
-![Content Editor high level diagram](img/content_editor_highlevel_diagram.png)
+```mermaid
+stateDiagram-v2
+  s1 : Idle
+  s2 : Rendering
+  s2.1 : Markdown API (Renderer)
+  s3 : Editing
+  s3.1 : Updating document
+  s4 : Exporting
+  s1 --> s2: Imports Markdown
+  state s2 {
+    [*] --> s2.1 : sends markdown
+    s2.1 --> [*] : returns HTML
+  }
+  s2 --> s3: Loads HTML
+  state s3 {
+    [*] --> s3.1 : user modifies/adds content
+    s3.1 --> [*]
+  }
+  s3 --> s4: Export to Markdown
+  s4 --> [*]
+```
 
 Check the [Content Editor technical design document](https://docs.google.com/document/d/1fKOiWpdHned4KOLVOOFYVvX1euEjMP5rTntUhpapdBg)
 for more information about the design decisions that drive the development of the editor.
@@ -90,7 +111,7 @@ export default {
     try {
       await this.contentEditor.setSerializedContent(this.content);
     } catch (e) {
-      createFlash({ 
+      createFlash({
         message: __('There was an error loading content in the editor'), error: e
       });
     }
