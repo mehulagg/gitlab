@@ -1,5 +1,4 @@
 <script>
-import { SCAN_TYPE_LABEL } from 'ee/security_configuration/dast_scanner_profiles/constants';
 import ProfileSelector from './profile_selector.vue';
 import ScannerProfileSummary from './scanner_profile_summary.vue';
 
@@ -37,10 +36,9 @@ export default {
   computed: {
     formattedProfiles() {
       return this.profiles.map((profile) => {
-        const addSuffix = (str) => `${str} (${SCAN_TYPE_LABEL[profile.scanType]})`;
         return {
           ...profile,
-          dropdownLabel: addSuffix(profile.profileName),
+          dropdownLabel: profile.profileName,
         };
       });
     },

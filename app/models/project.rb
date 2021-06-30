@@ -147,11 +147,7 @@ class Project < ApplicationRecord
   has_many :boards
 
   def self.integration_association_name(name)
-    if ::Integration.renamed?(name)
-      "#{name}_integration"
-    else
-      "#{name}_service"
-    end
+    "#{name}_integration"
   end
 
   # Project integrations
@@ -424,17 +420,16 @@ class Project < ApplicationRecord
   delegate :members, to: :team, prefix: true
   delegate :add_user, :add_users, to: :team
   delegate :add_guest, :add_reporter, :add_developer, :add_maintainer, :add_role, to: :team
-  delegate :group_runners_enabled, :group_runners_enabled=, :group_runners_enabled?, to: :ci_cd_settings
+  delegate :group_runners_enabled, :group_runners_enabled=, to: :ci_cd_settings, allow_nil: true
   delegate :root_ancestor, to: :namespace, allow_nil: true
   delegate :last_pipeline, to: :commit, allow_nil: true
   delegate :external_dashboard_url, to: :metrics_setting, allow_nil: true, prefix: true
   delegate :dashboard_timezone, to: :metrics_setting, allow_nil: true, prefix: true
   delegate :default_git_depth, :default_git_depth=, to: :ci_cd_settings, prefix: :ci, allow_nil: true
-  delegate :forward_deployment_enabled, :forward_deployment_enabled=, :forward_deployment_enabled?, to: :ci_cd_settings, prefix: :ci, allow_nil: true
-  delegate :job_token_scope_enabled, :job_token_scope_enabled=, :job_token_scope_enabled?, to: :ci_cd_settings, prefix: :ci
-  delegate :keep_latest_artifact, :keep_latest_artifact=, :keep_latest_artifact?, :keep_latest_artifacts_available?, to: :ci_cd_settings, allow_nil: true
-  delegate :restrict_user_defined_variables, :restrict_user_defined_variables=, :restrict_user_defined_variables?,
-    to: :ci_cd_settings, allow_nil: true
+  delegate :forward_deployment_enabled, :forward_deployment_enabled=, to: :ci_cd_settings, prefix: :ci, allow_nil: true
+  delegate :job_token_scope_enabled, :job_token_scope_enabled=, to: :ci_cd_settings, prefix: :ci, allow_nil: true
+  delegate :keep_latest_artifact, :keep_latest_artifact=, to: :ci_cd_settings, allow_nil: true
+  delegate :restrict_user_defined_variables, :restrict_user_defined_variables=, to: :ci_cd_settings, allow_nil: true
   delegate :actual_limits, :actual_plan_name, to: :namespace, allow_nil: true
   delegate :allow_merge_on_skipped_pipeline, :allow_merge_on_skipped_pipeline?,
     :allow_merge_on_skipped_pipeline=, :has_confluence?, :allow_editing_commit_messages?,
@@ -550,7 +545,7 @@ class Project < ApplicationRecord
   scope :with_namespace, -> { includes(:namespace) }
   scope :with_import_state, -> { includes(:import_state) }
   scope :include_project_feature, -> { includes(:project_feature) }
-  scope :with_service, ->(service) { joins(service).eager_load(service) }
+  scope :with_integration, ->(integration) { joins(integration).eager_load(integration) }
   scope :with_shared_runners, -> { where(shared_runners_enabled: true) }
   scope :with_container_registry, -> { where(container_registry_enabled: true) }
   scope :inside_path, ->(path) do
@@ -1398,22 +1393,22 @@ class Project < ApplicationRecord
     @external_wiki ||= integrations.external_wikis.first
   end
 
-  def find_or_initialize_services
-    available_services_names = Integration.available_services_names - disabled_services
-
-    available_services_names.map do |service_name|
-      find_or_initialize_service(service_name)
-    end.sort_by(&:title)
+  def find_or_initialize_integrations
+    Integration
+      .available_integration_names
+      .difference(disabled_integrations)
+      .map { find_or_initialize_integration(_1) }
+      .sort_by(&:title)
   end
 
-  def disabled_services
+  def disabled_integrations
     []
   end
 
-  def find_or_initialize_service(name)
-    return if disabled_services.include?(name)
+  def find_or_initialize_integration(name)
+    return if disabled_integrations.include?(name)
 
-    find_service(integrations, name) || build_from_instance_or_template(name) || build_service(name)
+    find_integration(integrations, name) || build_from_instance_or_template(name) || build_integration(name)
   end
 
   # rubocop: disable CodeReuse/ServiceClass
@@ -1426,20 +1421,12 @@ class Project < ApplicationRecord
   end
   # rubocop: enable CodeReuse/ServiceClass
 
-  def ci_services
+  def ci_integrations
     integrations.where(category: :ci)
   end
 
-  def ci_service
-    @ci_service ||= ci_services.reorder(nil).find_by(active: true)
-  end
-
-  def monitoring_services
-    integrations.where(category: :monitoring)
-  end
-
-  def monitoring_service
-    @monitoring_service ||= monitoring_services.reorder(nil).find_by(active: true)
+  def ci_integration
+    @ci_integration ||= ci_integrations.reorder(nil).find_by(active: true)
   end
 
   def avatar_in_git
@@ -1510,7 +1497,7 @@ class Project < ApplicationRecord
   end
   # rubocop: enable CodeReuse/ServiceClass
 
-  def execute_services(data, hooks_scope = :push_hooks)
+  def execute_integrations(data, hooks_scope = :push_hooks)
     # Call only service hooks that are active for this scope
     run_after_commit_or_now do
       integrations.public_send(hooks_scope).each do |integration| # rubocop:disable GitlabSecurity/PublicSend
@@ -1523,7 +1510,7 @@ class Project < ApplicationRecord
     hooks.hooks_for(hooks_scope).any? || SystemHook.hooks_for(hooks_scope).any? || Gitlab::FileHook.any?
   end
 
-  def has_active_services?(hooks_scope = :push_hooks)
+  def has_active_integrations?(hooks_scope = :push_hooks)
     integrations.public_send(hooks_scope).any? # rubocop:disable GitlabSecurity/PublicSend
   end
 
@@ -2643,6 +2630,42 @@ class Project < ApplicationRecord
   end
   alias_method :container_registry_enabled?, :container_registry_enabled
 
+  def ci_forward_deployment_enabled?
+    return false unless ci_cd_settings
+
+    ci_cd_settings.forward_deployment_enabled?
+  end
+
+  def ci_job_token_scope_enabled?
+    return false unless ci_cd_settings
+
+    ci_cd_settings.job_token_scope_enabled?
+  end
+
+  def restrict_user_defined_variables?
+    return false unless ci_cd_settings
+
+    ci_cd_settings.restrict_user_defined_variables?
+  end
+
+  def keep_latest_artifacts_available?
+    return false unless ci_cd_settings
+
+    ci_cd_settings.keep_latest_artifacts_available?
+  end
+
+  def keep_latest_artifact?
+    return false unless ci_cd_settings
+
+    ci_cd_settings.keep_latest_artifact?
+  end
+
+  def group_runners_enabled?
+    return false unless ci_cd_settings
+
+    ci_cd_settings.group_runners_enabled?
+  end
+
   private
 
   def set_container_registry_access_level
@@ -2659,28 +2682,28 @@ class Project < ApplicationRecord
     project_feature.update!(container_registry_access_level: access_level)
   end
 
-  def find_service(services, name)
-    services.find { |service| service.to_param == name }
+  def find_integration(integrations, name)
+    integrations.find { _1.to_param == name }
   end
 
   def build_from_instance_or_template(name)
-    instance = find_service(services_instances, name)
+    instance = find_integration(integration_instances, name)
     return Integration.build_from_integration(instance, project_id: id) if instance
 
-    template = find_service(services_templates, name)
+    template = find_integration(integration_templates, name)
     return Integration.build_from_integration(template, project_id: id) if template
   end
 
-  def build_service(name)
+  def build_integration(name)
     Integration.integration_name_to_model(name).new(project_id: id)
   end
 
-  def services_templates
-    @services_templates ||= Integration.for_template
+  def integration_templates
+    @integration_templates ||= Integration.for_template
   end
 
-  def services_instances
-    @services_instances ||= Integration.for_instance
+  def integration_instances
+    @integration_instances ||= Integration.for_instance
   end
 
   def closest_namespace_setting(name)

@@ -17,10 +17,6 @@ localVue.use(VueApollo);
 describe('Selection Summary component', () => {
   let wrapper;
 
-  const defaultData = {
-    dismissalReason: null,
-  };
-
   const createApolloProvider = (...queries) => {
     return createMockApollo([...queries]);
   };
@@ -29,8 +25,9 @@ describe('Selection Summary component', () => {
   const findGlAlert = () => wrapper.findComponent(GlAlert);
   const findCancelButton = () => wrapper.find('[type="button"]');
   const findSubmitButton = () => wrapper.find('[type="submit"]');
+  const isSubmitButtonDisabled = () => findSubmitButton().props('disabled');
 
-  const createComponent = ({ props = {}, data = defaultData, apolloProvider } = {}) => {
+  const createComponent = ({ props = {}, apolloProvider } = {}) => {
     wrapper = shallowMount(SelectionSummary, {
       localVue,
       apolloProvider,
@@ -41,13 +38,11 @@ describe('Selection Summary component', () => {
         selectedVulnerabilities: [],
         ...props,
       },
-      data: () => data,
     });
   };
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   describe('with 1 vulnerability selected', () => {
@@ -116,7 +111,6 @@ describe('Selection Summary component', () => {
     const submitForm = async () => {
       wrapper.find(StatusDropdown).vm.$emit('change', { action, payload });
       findForm().trigger('submit');
-
       await waitForPromises();
     };
 
@@ -171,7 +165,10 @@ describe('Selection Summary component', () => {
           }),
         ]);
 
-        createComponent({ apolloProvider, props: { selectedVulnerabilities } });
+        createComponent({
+          apolloProvider,
+          props: { selectedVulnerabilities },
+        });
       });
 
       it(`emits an update for each vulnerability - ${action}`, async () => {
@@ -184,6 +181,15 @@ describe('Selection Summary component', () => {
       it(`calls the toaster - ${action}`, async () => {
         await submitForm();
         expect(toast).toHaveBeenLastCalledWith('3 vulnerabilities updated');
+      });
+
+      it(`the submit button is unclickable during form submission - ${action}`, async () => {
+        expect(findSubmitButton().exists()).toBe(false);
+        submitForm();
+        await wrapper.vm.$nextTick();
+        expect(isSubmitButtonDisabled()).toBe(true);
+        await waitForPromises();
+        expect(isSubmitButtonDisabled()).toBe(false);
       });
 
       it(`emits an event for the event hub - ${action}`, async () => {

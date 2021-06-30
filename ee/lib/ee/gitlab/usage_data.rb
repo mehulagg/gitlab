@@ -308,6 +308,7 @@ module EE
             value_stream_management_customized_group_stages: count(::Analytics::CycleAnalytics::GroupStage.where(custom: true)),
             projects_with_compliance_framework: count(::ComplianceManagement::ComplianceFramework::ProjectSettings),
             custom_compliance_frameworks: count(::ComplianceManagement::Framework),
+            compliance_frameworks_with_pipeline: count(::ComplianceManagement::Framework.where.not(pipeline_configuration_full_path: nil)),
             ldap_servers: ldap_available_servers.size,
             ldap_group_sync_enabled: ldap_config_present_for_any_provider?(:group_base),
             ldap_admin_sync_enabled: ldap_config_present_for_any_provider?(:admin_group),
@@ -348,7 +349,7 @@ module EE
         override :usage_activity_by_stage_verify
         def usage_activity_by_stage_verify(time_period)
           super.merge({
-            projects_reporting_ci_cd_back_to_github: distinct_count(::Project.with_github_service_pipeline_events.where(time_period), :creator_id)
+            projects_reporting_ci_cd_back_to_github: distinct_count(::Project.with_github_integration_pipeline_events.where(time_period), :creator_id)
           })
         end
 

@@ -1,0 +1,5 @@
+mutation destroyIterationCadence($id: IterationsCadenceID!) {
+  iterationCadenceDestroy(input: { id: $id }) {
+    errors
+  }
+}

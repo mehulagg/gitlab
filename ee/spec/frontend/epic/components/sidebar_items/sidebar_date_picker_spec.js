@@ -146,7 +146,9 @@ describe('SidebarDatePicker', () => {
       .$nextTick()
       .then(() => {
         wrapper.find(DatePicker).vm.$emit('hidePicker');
-        expect(wrapper.emitted().toggleDateType[0]).toStrictEqual([true, true]);
+        expect(wrapper.emitted().toggleDateType[0]).toStrictEqual([
+          { dateTypeIsFixed: true, typeChangeOnEdit: true },
+        ]);
       })
       .then(() => wrapper.vm.$nextTick())
       .then(() => {
@@ -184,7 +186,7 @@ describe('SidebarDatePicker', () => {
     wrapper.find('input').trigger('click');
 
     return wrapper.vm.$nextTick(() => {
-      expect(wrapper.emitted().toggleDateType).toStrictEqual([[true]]);
+      expect(wrapper.emitted().toggleDateType).toStrictEqual([[{ dateTypeIsFixed: true }]]);
     });
   });
 

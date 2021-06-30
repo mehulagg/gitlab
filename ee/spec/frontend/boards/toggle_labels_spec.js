@@ -1,7 +1,7 @@
 import { GlToggle } from '@gitlab/ui';
 import { shallowMount, createLocalVue } from '@vue/test-utils';
 import Vuex from 'vuex';
-import ToggleLabels from 'ee/boards/components/toggle_labels';
+import ToggleLabels from 'ee/boards/components/toggle_labels.vue';
 import LocalStorageSync from '~/vue_shared/components/local_storage_sync.vue';
 
 const localVue = createLocalVue();

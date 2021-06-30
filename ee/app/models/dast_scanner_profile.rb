@@ -17,6 +17,12 @@ class DastScannerProfile < ApplicationRecord
     active: 2
   }
 
+  def self.names(scanner_profile_ids)
+    find(*scanner_profile_ids).pluck(:name)
+  rescue ActiveRecord::RecordNotFound
+    []
+  end
+
   def ci_variables
     ::Gitlab::Ci::Variables::Collection.new.tap do |variables|
       variables.append(key: 'DAST_SPIDER_MINS', value: String(spider_timeout)) if spider_timeout

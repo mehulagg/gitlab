@@ -115,6 +115,37 @@ RSpec.describe Resolvers::EpicsResolver do
 
           expect(epics).to match_array([epic2, epic3])
         end
+
+        context 'with in param' do
+          it 'returns an error if param search is missing' do
+            error_message = "`search` should be present when including the `in` argument"
+            expect { resolve_epics(in: ['title']) }
+              .to raise_error(Gitlab::Graphql::Errors::ArgumentError, error_message)
+          end
+
+          it 'filters epics by description only' do
+            epics_with_text = resolve_epics(search: 'text', in: ['description'])
+            epics_with_created = resolve_epics(search: 'created', in: ['description'])
+
+            expect(epics_with_created).to be_empty
+            expect(epics_with_text).to match_array([epic2, epic3])
+          end
+
+          it 'filters epics by title only' do
+            epics_with_text = resolve_epics(search: 'text', in: ['title'])
+            epics_with_created = resolve_epics(search: 'created', in: ['title'])
+
+            expect(epics_with_created).to match_array([epic1, epic2])
+            expect(epics_with_text).to be_empty
+          end
+
+          it 'filters epics by title and description' do
+            epic4 = create(:epic, group: group, title: 'fourth text', description: ['description'])
+            epics = resolve_epics(search: 'text', in: %w(title description))
+
+            expect(epics).to match_array([epic2, epic3, epic4])
+          end
+        end
       end
 
       context 'with author_username' do

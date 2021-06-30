@@ -61,7 +61,6 @@ export const setCurrentTimeWindow = ({ commit }, timeWindow) => {
   commit(types.SET_CURRENT_TIME_WINDOW, timeWindow.name);
 };
 
-export const setAllEnvironments = ({ commit, dispatch }) => {
+export const setAllEnvironments = ({ commit }) => {
   commit(types.SET_ALL_ENVIRONMENTS);
-  dispatch(`networkPolicies/fetchPolicies`, null, { root: true });
 };

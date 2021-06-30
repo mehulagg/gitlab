@@ -2,7 +2,9 @@
   "customer": {
     "provider": "gitlab",
     "uid": 111,
-    "credentials": {},
+    "credentials": {
+      "token": "foo_token"
+    },
     "customer": {
       "country": "NLD",
       "address_1": "Address line 1",
@@ -28,6 +30,7 @@
     },
     "gl_namespace_id": 222,
     "gl_namespace_name": "Group name",
-    "preview": "false"
+    "preview": "false",
+    "source": "some_source"
   }
 }

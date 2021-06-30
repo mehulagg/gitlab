@@ -2,6 +2,7 @@ import $ from 'jquery';
 import Visibility from 'visibilityjs';
 import Vue from 'vue';
 import Api from '~/api';
+import createFlash from '~/flash';
 import { EVENT_ISSUABLE_VUE_APP_CHANGE } from '~/issuable/constants';
 import axios from '~/lib/utils/axios_utils';
 import { __, sprintf } from '~/locale';
@@ -9,7 +10,6 @@ import { confidentialWidget } from '~/sidebar/components/confidential/sidebar_co
 import updateIssueLockMutation from '~/sidebar/components/lock/mutations/update_issue_lock.mutation.graphql';
 import updateMergeRequestLockMutation from '~/sidebar/components/lock/mutations/update_merge_request_lock.mutation.graphql';
 import loadAwardsHandler from '../../awards_handler';
-import createFlash from '../../flash';
 import { isInViewport, scrollToElement, isInMRPage } from '../../lib/utils/common_utils';
 import Poll from '../../lib/utils/poll';
 import { create } from '../../lib/utils/recurrence';
@@ -381,7 +381,6 @@ export const saveNote = ({ commit, dispatch }, noteData) => {
       .catch(() => {
         createFlash({
           message: __('Something went wrong while adding your award. Please try again.'),
-          type: 'alert',
           parent: noteData.flashContainer,
         });
       })
@@ -423,7 +422,6 @@ export const saveNote = ({ commit, dispatch }, noteData) => {
         });
         createFlash({
           message: errorMsg,
-          type: 'alert',
           parent: noteData.flashContainer,
         });
         return { ...data, hasFlash: true };
@@ -627,7 +625,6 @@ export const submitSuggestion = (
 
       createFlash({
         message: __(flashMessage),
-        type: 'alert',
         parent: flashContainer,
       });
     })
@@ -664,7 +661,6 @@ export const submitSuggestionBatch = ({ commit, dispatch, state }, { flashContai
 
       createFlash({
         message: __(flashMessage),
-        type: 'alert',
         parent: flashContainer,
       });
     })

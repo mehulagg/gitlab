@@ -14,13 +14,13 @@ RSpec.shared_examples 'member validations' do
         end
 
         it 'allows adding the group member' do
-          member = described_class.add_user(entity, user, Member::DEVELOPER)
+          member = entity.add_user(user, Member::DEVELOPER)
 
           expect(member).to be_valid
         end
 
         it 'does not add the group member' do
-          member = described_class.add_user(entity, create(:user), Member::DEVELOPER)
+          member = entity.add_user(create(:user), Member::DEVELOPER)
 
           expect(member).not_to be_valid
           expect(member.errors.messages[:user]).to eq(['is not linked to a SAML account'])
@@ -34,7 +34,7 @@ RSpec.shared_examples 'member validations' do
           end
 
           it 'does not allow adding a group member with SSO enforced on subgroup' do
-            member = described_class.add_user(entity, create(:user), ProjectMember::DEVELOPER)
+            member = entity.add_user(create(:user), ProjectMember::DEVELOPER)
 
             expect(member).not_to be_valid
             expect(member.errors.messages[:user]).to eq(['is not linked to a SAML account'])
@@ -44,7 +44,7 @@ RSpec.shared_examples 'member validations' do
 
       context 'enforced SSO disabled' do
         it 'allows adding the group member' do
-          member = described_class.add_user(entity, user, Member::DEVELOPER)
+          member = entity.add_user(user, Member::DEVELOPER)
 
           expect(member).to be_valid
         end

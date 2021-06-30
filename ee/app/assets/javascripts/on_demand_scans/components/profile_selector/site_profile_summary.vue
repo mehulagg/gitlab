@@ -3,6 +3,7 @@ import {
   EXCLUDED_URLS_SEPARATOR,
   TARGET_TYPES,
 } from 'ee/security_configuration/dast_site_profiles_form/constants';
+import { DAST_SITE_VALIDATION_STATUS } from 'ee/security_configuration/dast_site_validation/constants';
 import { s__ } from '~/locale';
 import ProfileSelectorSummaryCell from './summary_cell.vue';
 
@@ -37,8 +38,18 @@ export default {
     hasExcludedUrls() {
       return this.profile.excludedUrls?.length > 0;
     },
+    displayExcludedUrls() {
+      return this.hasExcludedUrls
+        ? this.profile.excludedUrls.join(this.$options.EXCLUDED_URLS_SEPARATOR)
+        : undefined;
+    },
     targetTypeValue() {
       return TARGET_TYPES[this.profile.targetType].text;
+    },
+    isProfileValidated() {
+      return this.profile.validationStatus === DAST_SITE_VALIDATION_STATUS.PASSED
+        ? s__('DastProfiles|Validated')
+        : s__('DastProfiles|Not Validated');
     },
   },
   EXCLUDED_URLS_SEPARATOR,
@@ -79,14 +90,19 @@ export default {
     </template>
     <div class="row">
       <profile-selector-summary-cell
-        v-if="hasExcludedUrls"
         :label="$options.i18n.excludedUrls"
-        :value="profile.excludedUrls.join($options.EXCLUDED_URLS_SEPARATOR)"
+        :value="displayExcludedUrls"
       />
       <profile-selector-summary-cell
-        v-if="profile.requestHeaders"
         :label="$options.i18n.requestHeaders"
-        :value="__('[Redacted]')"
+        :value="profile.requestHeaders ? __('[Redacted]') : undefined"
+      />
+    </div>
+
+    <div class="row">
+      <profile-selector-summary-cell
+        :label="s__('DastProfiles|Validation status')"
+        :value="isProfileValidated"
       />
     </div>
   </div>

@@ -867,10 +867,10 @@
   resolved "https://registry.yarnpkg.com/@gitlab/at.js/-/at.js-1.5.7.tgz#1ee6f838cc4410a1d797770934df91d90df8179e"
   integrity sha512-c6ySRK/Ma7lxwpIVbSAF3P+xiTLrNTGTLRx4/pHK111AdFxwgUwrYF6aVZFXvmG65jHOJHoa0eQQ21RW6rm0Rg==
 
-"@gitlab/eslint-plugin@8.4.0":
-  version "8.4.0"
-  resolved "https://registry.yarnpkg.com/@gitlab/eslint-plugin/-/eslint-plugin-8.4.0.tgz#094fa4d41676a71146f82e1b19257a7ceabefd88"
-  integrity sha512-VE/c1yIMrj2igJWAALQtAKpnXL8fN5wJ1uKteZfi8xYbWouoUK6hizXSPrrEUWiM2FqcBI4Igcpz2JlJzDlAnA==
+"@gitlab/eslint-plugin@9.0.0":
+  version "9.0.0"
+  resolved "https://registry.yarnpkg.com/@gitlab/eslint-plugin/-/eslint-plugin-9.0.0.tgz#0c872428e3237e0dbd2cbbe74317fc3786cefdf9"
+  integrity sha512-TaKLzaAFQbsJJIbetLTARkJNapIWuis8RyOp/arbVS5Fl8IjBK8m3hPmqIc5CwOz9qK8o5eSW1MA9clU/dLY3w==
   dependencies:
     babel-eslint "^10.0.3"
     eslint-config-airbnb-base "^14.2.1"
@@ -898,23 +898,22 @@
     stylelint-declaration-strict-value "1.7.7"
     stylelint-scss "3.18.0"
 
-"@gitlab/svgs@1.199.0":
-  version "1.199.0"
-  resolved "https://registry.yarnpkg.com/@gitlab/svgs/-/svgs-1.199.0.tgz#0512a854018defc4e286b8ecb2143958bb535146"
-  integrity sha512-c/6SrvnQzkb4mfDzlHSnl/1zqUkqFZjkJmNHEb0E29l6XDLg3LQaUEMxSVGWIpW1D1RXG3zcGs845W12/WhciQ==
+"@gitlab/svgs@1.201.0":
+  version "1.201.0"
+  resolved "https://registry.yarnpkg.com/@gitlab/svgs/-/svgs-1.201.0.tgz#5b390ae497331ae18e3a913cc5557b03c1d91ca9"
+  integrity sha512-Tv5lAfgiWgSBepZ0bak+kPq7q1uhtNRkD3Ih9LAAPY70XWDKej3Yv3L5joGEn/Xny2vt8Z+EHXqGE/BRblsEQw==
 
 "@gitlab/tributejs@1.0.0":
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/@gitlab/tributejs/-/tributejs-1.0.0.tgz#672befa222aeffc83e7d799b0500a7a4418e59b8"
   integrity sha512-nmKw1+hB6MHvlmPz63yPwVs1qQkycHwsKgxpEbzmky16Y6mL4EJMk3w1b8QlOAF/AIAzjCERPhe/R4MJiohbZw==
 
-"@gitlab/ui@29.38.1":
-  version "29.38.1"
-  resolved "https://registry.yarnpkg.com/@gitlab/ui/-/ui-29.38.1.tgz#93ab2ad7cb8008b3050599b452b626c109630e97"
-  integrity sha512-5sKdbZI9Q9S7KW3/ybN40tFS/KInm76cog8O0SMe2Ne026ZZ18CAHEMvkfoVXTN3XMkWZnMlk92s8f/WqM5//A==
+"@gitlab/ui@30.0.1":
+  version "30.0.1"
+  resolved "https://registry.yarnpkg.com/@gitlab/ui/-/ui-30.0.1.tgz#34743506758b03c19d1f98e07e7e644313c701cf"
+  integrity sha512-sfq+cqHGq7QM3QVtH6yk5/vGMqYBAyaRWRDdCfOiggjXQJPxS49hkXUjVbVDOTQIysmSA9M29sjY3ZMa8hdyTg==
   dependencies:
     "@babel/standalone" "^7.0.0"
-    "@gitlab/vue-toasted" "^1.3.0"
     bootstrap-vue "2.18.1"
     copy-to-clipboard "^3.0.8"
     dompurify "^2.2.9"
@@ -931,11 +930,6 @@
   version "1.6.1"
   resolved "https://registry.yarnpkg.com/@gitlab/visual-review-tools/-/visual-review-tools-1.6.1.tgz#0d8f3ff9f51b05f7c80b9a107727703d48997e4e"
   integrity sha512-vY8K1igwZFoEOmU0h4E7XTLlilsQ4ylPr27O01UsSe6ZTKi6oEMREsRAEpNIUgRlxUARCsf+Opp4pgSFzFkFcw==
-
-"@gitlab/vue-toasted@^1.3.0":
-  version "1.3.0"
-  resolved "https://registry.yarnpkg.com/@gitlab/vue-toasted/-/vue-toasted-1.3.0.tgz#f21550d4ce406ee5f99447a02abf36250ecc922d"
-  integrity sha512-xexu7YbbIkQS5FDqPaewrOTQ4/myth5VyU8+hWZ+Tj1e5CuAlDNha3dHbvwyLW8/2flm/2mfslFNPAX2DRe8ZQ==
 
 "@istanbuljs/load-nyc-config@^1.0.0":
   version "1.1.0"
@@ -1257,10 +1251,10 @@
   dependencies:
     "@sinonjs/commons" "^1.7.0"
 
-"@sourcegraph/code-host-integration@0.0.57":
-  version "0.0.57"
-  resolved "https://registry.yarnpkg.com/@sourcegraph/code-host-integration/-/code-host-integration-0.0.57.tgz#aed4649a51745deef5e4ee79b9a4fdc092471237"
-  integrity sha512-LLQp58+fqzM1IjAgti4zPwXrVVu2mNC8fpwNVnF23ead6JZPQe6Ap5fhOTZVE7ILQcFt78brGX/49Qib1Hsq0A==
+"@sourcegraph/code-host-integration@0.0.58":
+  version "0.0.58"
+  resolved "https://registry.yarnpkg.com/@sourcegraph/code-host-integration/-/code-host-integration-0.0.58.tgz#7adc78c0a420e7527c68782e2f0c9c62652df02d"
+  integrity sha512-a1h/qZ1jFf8VBhqWVccGY9VRjjEbqIH7pfY9o2TmuB94aE7bqFgslINkSY6HjefCjDb8akMy//3AjUyFZyYWhQ==
 
 "@stylelint/postcss-css-in-js@^0.37.2":
   version "0.37.2"
@@ -5017,10 +5011,10 @@ eslint-visitor-keys@^2.0.0:
   resolved "https://registry.yarnpkg.com/eslint-visitor-keys/-/eslint-visitor-keys-2.0.0.tgz#21fdc8fbcd9c795cc0321f0563702095751511a8"
   integrity sha512-QudtT6av5WXels9WjIM7qz1XD1cWGvX4gGXvp/zBn9nXG02D0utdU3Em2m/QjTnrsk6bBjmCygl3rmj118msQQ==
 
-eslint@7.28.0:
-  version "7.28.0"
-  resolved "https://registry.yarnpkg.com/eslint/-/eslint-7.28.0.tgz#435aa17a0b82c13bb2be9d51408b617e49c1e820"
-  integrity sha512-UMfH0VSjP0G4p3EWirscJEQ/cHqnT/iuH6oNZOB94nBjWbMnhGEPxsZm1eyIW0C/9jLI0Fow4W5DXLjEI7mn1g==
+eslint@7.29.0:
+  version "7.29.0"
+  resolved "https://registry.yarnpkg.com/eslint/-/eslint-7.29.0.tgz#ee2a7648f2e729485e4d0bd6383ec1deabc8b3c0"
+  integrity sha512-82G/JToB9qIy/ArBzIWG9xvvwL3R86AlCjtGw+A29OMZDqhTybz/MByORSukGxeI+YPCR4coYyITKk8BFH9nDA==
   dependencies:
     "@babel/code-frame" "7.12.11"
     "@eslint/eslintrc" "^0.4.2"

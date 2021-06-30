@@ -266,7 +266,7 @@ RSpec.describe Gitlab::Ci::YamlProcessor do
       end
 
       it 'creates a job with a valid specification' do
-        expect(subject.builds[0]).to include(dast_configuration: { site_profile: 'Site profile', scanner_profile: 'Scanner profile' })
+        expect(subject.builds[0][:options]).to include(dast_configuration: { site_profile: 'Site profile', scanner_profile: 'Scanner profile' })
       end
     end
   end

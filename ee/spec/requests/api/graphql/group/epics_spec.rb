@@ -75,6 +75,7 @@ RSpec.describe 'Epics through GroupQuery' do
       context 'with sort and pagination' do
         let_it_be(:epic3) { create(:epic, group: group, start_date: 4.days.ago, end_date: 7.days.ago ) }
         let_it_be(:epic4) { create(:epic, group: group, start_date: 5.days.ago, end_date: 6.days.ago ) }
+
         let(:current_user) { user }
         let(:data_path) { [:group, :epics] }
 
@@ -169,6 +170,7 @@ RSpec.describe 'Epics through GroupQuery' do
 
       context 'query performance' do
         let_it_be(:child_epic) { create(:epic, group: group, parent: create(:epic, group: group)) }
+
         let(:epic_node) do
           <<~NODE
             edges {
@@ -209,6 +211,17 @@ RSpec.describe 'Epics through GroupQuery' do
           post_graphql(graphql_query, current_user: user)
 
           expect_array_response([epic.to_global_id.to_s])
+        end
+      end
+
+      context 'with search params' do
+        it 'returns only matching epics' do
+          filter_params = { search: 'bar', in: [:DESCRIPTION] }
+          graphql_query = query(filter_params)
+
+          post_graphql(graphql_query, current_user: user)
+
+          expect_array_response([epic2.to_global_id.to_s])
         end
       end
     end

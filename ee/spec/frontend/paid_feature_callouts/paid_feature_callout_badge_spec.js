@@ -3,11 +3,14 @@ import { GlBreakpointInstance } from '@gitlab/ui/dist/utils';
 import { shallowMount } from '@vue/test-utils';
 
 import PaidFeatureCalloutBadge from 'ee/paid_feature_callouts/components/paid_feature_callout_badge.vue';
+import { BADGE } from 'ee/paid_feature_callouts/constants';
 import { mockTracking } from 'helpers/tracking_helper';
+import { sprintf } from '~/locale';
 
 describe('PaidFeatureCalloutBadge component', () => {
   let trackingSpy;
   let wrapper;
+  const { i18n, trackingEvents } = BADGE;
 
   const findGlBadge = () => wrapper.findComponent(GlBadge);
   const findGlIcon = () => wrapper.findComponent(GlIcon);
@@ -27,7 +30,7 @@ describe('PaidFeatureCalloutBadge component', () => {
 
     it('sets attributes on the GlBadge component', () => {
       expect(findGlBadge().attributes()).toMatchObject({
-        title: 'This feature is part of your GitLab Ultimate trial.',
+        title: i18n.title.generic,
         tabindex: '0',
         size: 'sm',
         class: 'feature-highlight-badge',
@@ -46,18 +49,15 @@ describe('PaidFeatureCalloutBadge component', () => {
     describe('when no featureName is provided', () => {
       it('sets the title to a sensible default', () => {
         wrapper = createComponent();
-        expect(findGlBadge().attributes('title')).toBe(
-          'This feature is part of your GitLab Ultimate trial.',
-        );
+        expect(findGlBadge().attributes('title')).toBe(i18n.title.generic);
       });
     });
 
     describe('when an optional featureName is provided', () => {
       it('sets the title using the given feature name', () => {
-        wrapper = createComponent({ featureName: 'fantastical thing' });
-        expect(findGlBadge().attributes('title')).toBe(
-          'The fantastical thing feature is part of your GitLab Ultimate trial.',
-        );
+        const props = { featureName: 'fantastical thing' };
+        wrapper = createComponent(props);
+        expect(findGlBadge().attributes('title')).toBe(sprintf(i18n.title.specific, props));
       });
     });
   });
@@ -69,10 +69,12 @@ describe('PaidFeatureCalloutBadge component', () => {
     });
 
     it('tracks that the badge has been displayed when mounted', () => {
+      const { action, ...trackingOpts } = trackingEvents.displayBadge;
+
       expect(trackingSpy).toHaveBeenCalledWith(
         undefined,
-        'display_badge',
-        expect.objectContaining({ label: 'feature_highlight_badge' }),
+        action,
+        expect.objectContaining(trackingOpts),
       );
     });
   });

@@ -1,17 +1,14 @@
 import { shallowMount } from '@vue/test-utils';
-import App from 'ee/on_demand_scans/components/profile_selector/site_profile_summary';
+import App from 'ee/on_demand_scans/components/profile_selector/site_profile_summary.vue';
 import { siteProfiles } from 'ee_jest/on_demand_scans/mocks/mock_data';
-
-const [profile] = siteProfiles;
 
 describe('DastSiteProfileSummary', () => {
   let wrapper;
 
-  const createWrapper = (props = {}) => {
+  const createWrapper = (profile = {}) => {
     wrapper = shallowMount(App, {
       propsData: {
         profile,
-        ...props,
       },
     });
   };
@@ -20,9 +17,11 @@ describe('DastSiteProfileSummary', () => {
     wrapper.destroy();
   });
 
-  it('renders properly', () => {
-    createWrapper();
+  describe('renders properly', () => {
+    it.each(siteProfiles)('profile %#', (profile) => {
+      createWrapper(profile);
 
-    expect(wrapper.element).toMatchSnapshot();
+      expect(wrapper.element).toMatchSnapshot();
+    });
   });
 });

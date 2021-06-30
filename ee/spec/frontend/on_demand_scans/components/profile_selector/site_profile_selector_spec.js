@@ -11,10 +11,9 @@ const TEST_ATTRS = {
   'data-foo': 'bar',
 };
 const profiles = siteProfiles.map((x) => {
-  const suffix = x.validationStatus === 'PASSED_VALIDATION' ? 'Validated' : 'Not Validated';
   return {
     ...x,
-    dropdownLabel: `${x.profileName}: ${x.targetUrl} (${suffix})`,
+    dropdownLabel: `${x.profileName}: ${x.targetUrl}`,
   };
 });
 

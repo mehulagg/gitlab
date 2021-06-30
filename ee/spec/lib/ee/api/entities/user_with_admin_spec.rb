@@ -6,6 +6,7 @@ RSpec.describe ::EE::API::Entities::UserWithAdmin do
   subject { entity.as_json }
 
   let_it_be(:user) { create(:user) }
+
   let(:entity) { ::API::Entities::UserWithAdmin.new(user) }
 
   context 'using_license_seat' do

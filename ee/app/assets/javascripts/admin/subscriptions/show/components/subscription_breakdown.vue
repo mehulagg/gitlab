@@ -66,6 +66,7 @@ export default {
       shouldShowNotifications: false,
       subscriptionSyncStatus: null,
       subscriptionDetailsFields,
+      activationModalVisible: false,
     };
   },
   computed: {
@@ -138,7 +139,11 @@ export default {
 
 <template>
   <div>
-    <subscription-activation-modal v-if="hasSubscription" :modal-id="$options.modal.id" />
+    <subscription-activation-modal
+      v-if="hasSubscription"
+      v-model="activationModalVisible"
+      :modal-id="$options.modal.id"
+    />
     <subscription-sync-notifications
       v-if="shouldShowNotifications"
       class="mb-4"
@@ -148,6 +153,7 @@ export default {
     <section class="row gl-mb-5">
       <div class="col-md-6 gl-mb-5">
         <subscription-details-card
+          class="gl-h-full"
           :details-fields="subscriptionDetailsFields"
           :header-text="$options.i18n.subscriptionDetailsHeaderText"
           :subscription="subscription"
@@ -211,6 +217,7 @@ export default {
 
       <div class="col-md-6 gl-mb-5">
         <subscription-details-card
+          class="gl-h-full"
           :details-fields="licensedToFields"
           :header-text="$options.i18n.licensedToHeaderText"
           :subscription="subscription"

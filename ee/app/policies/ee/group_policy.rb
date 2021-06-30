@@ -42,7 +42,6 @@ module EE
       end
 
       condition(:group_devops_adoption_enabled) do
-        ::Feature.enabled?(:group_devops_adoption, @subject, default_enabled: :yaml) &&
         ::License.feature_available?(:group_level_devops_adoption)
       end
 

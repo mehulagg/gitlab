@@ -8,6 +8,7 @@ import {
   GlTable,
   GlBadge,
 } from '@gitlab/ui';
+import FormattedStageCount from '~/cycle_analytics/components/formatted_stage_count.vue';
 import { __ } from '~/locale';
 import Tracking from '~/tracking';
 import {
@@ -42,6 +43,7 @@ export default {
     GlTable,
     GlBadge,
     TotalTime,
+    FormattedStageCount,
   },
   mixins: [Tracking.mixin()],
   props: {
@@ -175,7 +177,9 @@ export default {
     >
       <template #head(end_event)="data">
         <span>{{ data.label }}</span
-        ><gl-badge v-if="stageCount" class="gl-ml-2" size="sm">{{ stageCount }}</gl-badge>
+        ><gl-badge class="gl-ml-2" size="sm">
+          <formatted-stage-count :stage-count="stageCount" />
+        </gl-badge>
       </template>
       <template #cell(end_event)="{ item }">
         <div data-testid="vsa-stage-event">
@@ -269,7 +273,7 @@ export default {
       </template>
     </gl-table>
     <gl-pagination
-      v-if="!isLoading"
+      v-if="!isLoading && !isEmptyStage"
       :value="pagination.page"
       :prev-page="prevPage"
       :next-page="nextPage"

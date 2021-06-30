@@ -7,10 +7,6 @@ module Boards
 
       override :execute
       def execute(board)
-        unless Feature.enabled?(:epic_boards, board.group, default_enabled: :yaml)
-          return ServiceResponse.error(message: 'Epic boards feature is not enabled.')
-        end
-
         super
       end
     end

@@ -5,6 +5,7 @@ require 'spec_helper'
 RSpec.describe API::Todos do
   let_it_be(:group) { create(:group) }
   let_it_be(:project) { create(:project, group: group) }
+
   let(:user) { create(:user) }
   let(:epic) { create(:epic, group: group) }
 

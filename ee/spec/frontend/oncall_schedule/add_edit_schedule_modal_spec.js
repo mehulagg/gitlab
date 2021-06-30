@@ -5,8 +5,8 @@ import AddEditScheduleForm from 'ee/oncall_schedules/components/add_edit_schedul
 import AddEditScheduleModal, {
   i18n,
 } from 'ee/oncall_schedules/components/add_edit_schedule_modal.vue';
-import { editScheduleModalId } from 'ee/oncall_schedules/components/oncall_schedule';
-import { addScheduleModalId } from 'ee/oncall_schedules/components/oncall_schedules_wrapper';
+import { editScheduleModalId } from 'ee/oncall_schedules/components/oncall_schedule.vue';
+import { addScheduleModalId } from 'ee/oncall_schedules/components/oncall_schedules_wrapper.vue';
 import updateOncallScheduleMutation from 'ee/oncall_schedules/graphql/mutations/update_oncall_schedule.mutation.graphql';
 import getOncallSchedulesWithRotationsQuery from 'ee/oncall_schedules/graphql/queries/get_oncall_schedules.query.graphql';
 import createMockApollo from 'helpers/mock_apollo_helper';

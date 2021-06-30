@@ -808,6 +808,10 @@ class User < ApplicationRecord
   # Instance methods
   #
 
+  def default_dashboard?
+    dashboard == self.class.column_defaults['dashboard']
+  end
+
   def full_path
     username
   end
@@ -1230,7 +1234,7 @@ class User < ApplicationRecord
   end
 
   def matches_identity?(provider, extern_uid)
-    identities.where(provider: provider, extern_uid: extern_uid).exists?
+    identities.with_extern_uid(provider, extern_uid).exists?
   end
 
   def project_deploy_keys
@@ -1870,9 +1874,10 @@ class User < ApplicationRecord
   end
 
   def password_expired_if_applicable?
+    return false unless password_expired?
     return false unless allow_password_authentication?
 
-    password_expired?
+    true
   end
 
   def can_be_deactivated?

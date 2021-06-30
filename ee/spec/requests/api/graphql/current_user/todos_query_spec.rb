@@ -7,6 +7,7 @@ RSpec.describe 'getting project information' do
 
   let_it_be(:current_user) { create(:user) }
   let_it_be(:epic_todo) { create(:todo, user: current_user, target: create(:epic)) }
+
   let(:fields) do
     <<~QUERY
     nodes {

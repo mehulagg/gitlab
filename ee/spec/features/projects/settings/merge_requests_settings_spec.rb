@@ -19,7 +19,7 @@ RSpec.describe 'Project settings > [EE] Merge Requests', :js do
   context 'Status checks' do
     context 'Feature is not available' do
       before do
-        stub_licensed_features(compliance_approval_gates: false)
+        stub_licensed_features(external_status_checks: false)
       end
 
       it 'does not render the status checks area' do
@@ -29,7 +29,7 @@ RSpec.describe 'Project settings > [EE] Merge Requests', :js do
 
     context 'Feature is available' do
       before do
-        stub_licensed_features(compliance_approval_gates: true)
+        stub_licensed_features(external_status_checks: true)
       end
 
       it 'adds a status check' do

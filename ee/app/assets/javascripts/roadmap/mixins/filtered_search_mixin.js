@@ -5,7 +5,12 @@ import axios from '~/lib/utils/axios_utils';
 import { joinPaths } from '~/lib/utils/url_utility';
 import { __ } from '~/locale';
 
-import { OPERATOR_IS_ONLY } from '~/vue_shared/components/filtered_search_bar/constants';
+import {
+  OPERATOR_IS_ONLY,
+  OPERATOR_IS_NOT,
+  OPERATOR_IS,
+  OPERATOR_IS_AND_IS_NOT,
+} from '~/vue_shared/components/filtered_search_bar/constants';
 import AuthorToken from '~/vue_shared/components/filtered_search_bar/tokens/author_token.vue';
 import EmojiToken from '~/vue_shared/components/filtered_search_bar/tokens/emoji_token.vue';
 import EpicToken from '~/vue_shared/components/filtered_search_bar/tokens/epic_token.vue';
@@ -24,7 +29,11 @@ export default {
         confidential,
         myReactionEmoji,
         epicIid,
+        'not[authorUsername]': notAuthorUsername,
+        'not[myReactionEmoji]': notMyReactionEmoji,
+        'not[labelName]': notLabelName,
       } = this.filterParams || {};
+
       return {
         state: this.currentState || this.epicsState,
         page: this.currentPage,
@@ -38,6 +47,9 @@ export default {
         my_reaction_emoji: myReactionEmoji,
         epic_iid: epicIid,
         search,
+        'not[author_username]': notAuthorUsername,
+        'not[my_reaction_emoji]': notMyReactionEmoji,
+        'not[label_name][]': notLabelName,
       };
     },
   },
@@ -64,7 +76,7 @@ export default {
           unique: true,
           symbol: '@',
           token: AuthorToken,
-          operators: OPERATOR_IS_ONLY,
+          operators: OPERATOR_IS_AND_IS_NOT,
           recentSuggestionsStorageKey: `${this.groupFullPath}-epics-recent-tokens-author_username`,
           fetchAuthors: Api.users.bind(Api),
           preloadedAuthors,
@@ -76,7 +88,7 @@ export default {
           unique: false,
           symbol: '~',
           token: LabelToken,
-          operators: OPERATOR_IS_ONLY,
+          operators: OPERATOR_IS_AND_IS_NOT,
           recentSuggestionsStorageKey: `${this.groupFullPath}-epics-recent-tokens-label_name`,
           fetchLabels: (search = '') => {
             const params = {
@@ -170,7 +182,7 @@ export default {
           title: __('My-Reaction'),
           unique: true,
           token: EmojiToken,
-          operators: OPERATOR_IS_ONLY,
+          operators: OPERATOR_IS_AND_IS_NOT,
           fetchEmojis: (search = '') => {
             return axios
               .get(`${gon.relative_url_root || ''}/-/autocomplete/award_emojis`)
@@ -197,13 +209,23 @@ export default {
         myReactionEmoji,
         search,
         epicIid,
+        'not[authorUsername]': notAuthorUsername,
+        'not[myReactionEmoji]': notMyReactionEmoji,
+        'not[labelName]': notLabelName,
       } = this.filterParams || {};
       const filteredSearchValue = [];
 
       if (authorUsername) {
         filteredSearchValue.push({
           type: 'author_username',
-          value: { data: authorUsername },
+          value: { data: authorUsername, operator: OPERATOR_IS },
+        });
+      }
+
+      if (notAuthorUsername) {
+        filteredSearchValue.push({
+          type: 'author_username',
+          value: { data: notAuthorUsername, operator: OPERATOR_IS_NOT },
         });
       }
 
@@ -211,7 +233,15 @@ export default {
         filteredSearchValue.push(
           ...labelName.map((label) => ({
             type: 'label_name',
-            value: { data: label },
+            value: { data: label, operator: OPERATOR_IS },
+          })),
+        );
+      }
+      if (notLabelName?.length) {
+        filteredSearchValue.push(
+          ...notLabelName.map((label) => ({
+            type: 'label_name',
+            value: { data: label, operator: OPERATOR_IS_NOT },
           })),
         );
       }
@@ -233,7 +263,13 @@ export default {
       if (myReactionEmoji) {
         filteredSearchValue.push({
           type: 'my_reaction_emoji',
-          value: { data: myReactionEmoji },
+          value: { data: myReactionEmoji, operator: OPERATOR_IS },
+        });
+      }
+      if (notMyReactionEmoji) {
+        filteredSearchValue.push({
+          type: 'my_reaction_emoji',
+          value: { data: notMyReactionEmoji, operator: OPERATOR_IS_NOT },
         });
       }
 
@@ -253,15 +289,23 @@ export default {
     getFilterParams(filters = []) {
       const filterParams = {};
       const labels = [];
+      const notLabels = [];
       const plainText = [];
 
       filters.forEach((filter) => {
         switch (filter.type) {
-          case 'author_username':
-            filterParams.authorUsername = filter.value.data;
+          case 'author_username': {
+            const key =
+              filter.value.operator === OPERATOR_IS_NOT ? 'not[authorUsername]' : 'authorUsername';
+            filterParams[key] = filter.value.data;
             break;
+          }
           case 'label_name':
-            labels.push(filter.value.data);
+            if (filter.value.operator === OPERATOR_IS_NOT) {
+              notLabels.push(filter.value.data);
+            } else {
+              labels.push(filter.value.data);
+            }
             break;
           case 'milestone_title':
             filterParams.milestoneTitle = filter.value.data;
@@ -269,9 +313,15 @@ export default {
           case 'confidential':
             filterParams.confidential = filter.value.data;
             break;
-          case 'my_reaction_emoji':
-            filterParams.myReactionEmoji = filter.value.data;
+          case 'my_reaction_emoji': {
+            const key =
+              filter.value.operator === OPERATOR_IS_NOT
+                ? 'not[myReactionEmoji]'
+                : 'myReactionEmoji';
+
+            filterParams[key] = filter.value.data;
             break;
+          }
           case 'epic_iid':
             filterParams.epicIid = filter.value.data;
             break;
@@ -285,6 +335,10 @@ export default {
 
       if (labels.length) {
         filterParams.labelName = labels;
+      }
+
+      if (notLabels.length) {
+        filterParams[`not[labelName]`] = notLabels;
       }
 
       if (plainText.length) {

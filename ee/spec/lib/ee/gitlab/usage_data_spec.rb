@@ -415,6 +415,7 @@ RSpec.describe Gitlab::UsageData do
         create(:cycle_analytics_group_stage)
         create(:compliance_framework_project_setting)
         create(:compliance_framework)
+        create(:compliance_framework, :with_pipeline)
       end
 
       expect(described_class.usage_activity_by_stage_manage({})).to include(
@@ -422,7 +423,8 @@ RSpec.describe Gitlab::UsageData do
         ldap_users: 2,
         value_stream_management_customized_group_stages: 2,
         projects_with_compliance_framework: 2,
-        custom_compliance_frameworks: 4,
+        custom_compliance_frameworks: 6,
+        compliance_frameworks_with_pipeline: 2,
         ldap_servers: 2,
         ldap_group_sync_enabled: true,
         ldap_admin_sync_enabled: true,
@@ -433,7 +435,8 @@ RSpec.describe Gitlab::UsageData do
         ldap_users: 1,
         value_stream_management_customized_group_stages: 2,
         projects_with_compliance_framework: 2,
-        custom_compliance_frameworks: 4,
+        custom_compliance_frameworks: 6,
+        compliance_frameworks_with_pipeline: 2,
         ldap_servers: 2,
         ldap_group_sync_enabled: true,
         ldap_admin_sync_enabled: true,
@@ -777,7 +780,7 @@ RSpec.describe Gitlab::UsageData do
   describe 'usage_activity_by_stage_verify' do
     it 'includes accurate usage_activity_by_stage data' do
       for_defined_days_back do
-        create(:github_service)
+        create(:github_integration)
       end
 
       expect(described_class.usage_activity_by_stage_verify({})).to include(

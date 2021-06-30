@@ -11,25 +11,25 @@ RSpec.describe Projects::Settings::IntegrationsController do
     sign_in(user)
   end
 
-  shared_examples 'endpoint with some disabled services' do
-    it 'has some disabled services' do
+  shared_examples 'endpoint with some disabled integrations' do
+    it 'has some disabled integrations' do
       get :show, params: { namespace_id: project.namespace, project_id: project }
 
-      expect(active_services).not_to include(*disabled_services)
+      expect(active_services).not_to include(*disabled_integrations)
     end
   end
 
-  shared_examples 'endpoint without disabled services' do
-    it 'does not have disabled services' do
+  shared_examples 'endpoint without disabled integrations' do
+    it 'does not have disabled integrations' do
       get :show, params: { namespace_id: project.namespace, project_id: project }
 
-      expect(active_services).to include(*disabled_services)
+      expect(active_services).to include(*disabled_integrations)
     end
   end
 
   context 'sets correct services list' do
     let(:active_services) { assigns(:integrations).map(&:model_name) }
-    let(:disabled_services) { %w[Integrations::Github] }
+    let(:disabled_integrations) { %w[Integrations::Github] }
 
     it 'enables SlackSlashCommands and disables GitlabSlackApplication' do
       get :show, params: { namespace_id: project.namespace, project_id: project }
@@ -49,7 +49,7 @@ RSpec.describe Projects::Settings::IntegrationsController do
     end
 
     context 'without a license key' do
-      it_behaves_like 'endpoint with some disabled services'
+      it_behaves_like 'endpoint with some disabled integrations'
     end
 
     context 'with a license key' do
@@ -65,7 +65,7 @@ RSpec.describe Projects::Settings::IntegrationsController do
           stub_application_setting(check_namespace_plan: true)
         end
 
-        it_behaves_like 'endpoint with some disabled services'
+        it_behaves_like 'endpoint with some disabled integrations'
       end
 
       context 'when checking if namespace plan is not enabled' do
@@ -73,7 +73,7 @@ RSpec.describe Projects::Settings::IntegrationsController do
           stub_application_setting(check_namespace_plan: false)
         end
 
-        it_behaves_like 'endpoint without disabled services'
+        it_behaves_like 'endpoint without disabled integrations'
       end
     end
   end

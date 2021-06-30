@@ -8,7 +8,7 @@ module Boards
 
       override :can_create_board?
       def can_create_board?
-        Feature.enabled?(:epic_boards, parent, default_enabled: :yaml)
+        true
       end
 
       override :parent_board_collection

@@ -11,11 +11,11 @@ module Projects
 
       return error("Slack: #{slack_data['error']}") unless slack_data['ok']
 
-      unless project.gitlab_slack_application_service
-        project.create_gitlab_slack_application_service
+      unless project.gitlab_slack_application_integration
+        project.create_gitlab_slack_application_integration
       end
 
-      service = project.gitlab_slack_application_service
+      service = project.gitlab_slack_application_integration
 
       SlackIntegration.create!(
         service_id: service.id,
@@ -34,17 +34,17 @@ module Projects
 
     # rubocop: disable CodeReuse/ActiveRecord
     def make_sure_chat_name_created(slack_data)
-      service = project.gitlab_slack_application_service
+      integration = project.gitlab_slack_application_integration
 
       chat_name = ChatName.find_by(
-        service_id: service.id,
+        service_id: integration.id,
         team_id: slack_data['team_id'],
         chat_id: slack_data['user_id']
       )
 
       unless chat_name
         ChatName.find_or_create_by!(
-          service_id: service.id,
+          service_id: integration.id,
           team_id: slack_data['team_id'],
           team_domain: slack_data['team_name'],
           chat_id: slack_data['user_id'],

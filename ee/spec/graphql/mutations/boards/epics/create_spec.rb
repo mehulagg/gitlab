@@ -18,7 +18,6 @@ RSpec.describe Mutations::Boards::Epics::Create do
 
   before do
     stub_licensed_features(epics: true)
-    stub_feature_flags(epic_boards: true)
   end
 
   let(:mutation) { described_class.new(object: nil, context: { current_user: user }, field: nil) }
@@ -105,16 +104,6 @@ RSpec.describe Mutations::Boards::Epics::Create do
           it 'returns an error' do
             expect(subject[:errors]).to include "Title can't be blank"
           end
-        end
-      end
-
-      context 'with epic boards disabled' do
-        before do
-          stub_feature_flags(epic_boards: false)
-        end
-
-        it 'returns an error' do
-          expect(subject[:errors]).to include 'This feature is not available'
         end
       end
 

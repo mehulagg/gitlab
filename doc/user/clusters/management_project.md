@@ -58,7 +58,7 @@ To select a cluster management project to use:
 ### Configuring your pipeline
 
 After designating a project as the management project for the cluster,
-write a [`.gitlab-ci.yml`](../../ci/yaml/README.md) in that project. For example:
+write a [`.gitlab-ci.yml`](../../ci/yaml/index.md) in that project. For example:
 
 ```yaml
 configure cluster:
@@ -71,7 +71,7 @@ configure cluster:
 ### Setting the environment scope
 
 [Environment
-scopes](../project/clusters/index.md#setting-the-environment-scope)
+scopes](../project/clusters/multiple_kubernetes_clusters.md#setting-the-environment-scope)
 are usable when associating multiple clusters to the same management
 project.
 
@@ -87,7 +87,7 @@ to a management project:
 | Production  | `production`      |
 
 The following environments set in
-[`.gitlab-ci.yml`](../../ci/yaml/README.md) deploy to the
+[`.gitlab-ci.yml`](../../ci/yaml/index.md) deploy to the
 Development, Staging, and Production cluster respectively.
 
 ```yaml

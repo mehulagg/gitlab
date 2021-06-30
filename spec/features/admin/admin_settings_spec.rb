@@ -269,18 +269,43 @@ RSpec.describe 'Admin updates settings' do
     end
 
     context 'Integrations page' do
+      let(:mailgun_events_receiver_enabled) { true }
+
       before do
+        stub_feature_flags(mailgun_events_receiver: mailgun_events_receiver_enabled)
         visit general_admin_application_settings_path
       end
 
       it 'enable hiding third party offers' do
         page.within('.as-third-party-offers') do
-          check 'Do not display offers from third parties within GitLab'
+          check 'Do not display offers from third parties'
           click_button 'Save changes'
         end
 
         expect(page).to have_content "Application settings saved successfully"
         expect(current_settings.hide_third_party_offers).to be true
+      end
+
+      context 'when mailgun_events_receiver feature flag is enabled' do
+        it 'enabling Mailgun events', :aggregate_failures do
+          page.within('.as-mailgun') do
+            check 'Enable Mailgun event receiver'
+            fill_in 'Mailgun HTTP webhook signing key', with: 'MAILGUN_SIGNING_KEY'
+            click_button 'Save changes'
+          end
+
+          expect(page).to have_content 'Application settings saved successfully'
+          expect(current_settings.mailgun_events_enabled).to be true
+          expect(current_settings.mailgun_signing_key).to eq 'MAILGUN_SIGNING_KEY'
+        end
+      end
+
+      context 'when mailgun_events_receiver feature flag is disabled' do
+        let(:mailgun_events_receiver_enabled) { false }
+
+        it 'does not have mailgun' do
+          expect(page).not_to have_selector('.as-mailgun')
+        end
       end
     end
 
@@ -368,6 +393,43 @@ RSpec.describe 'Admin updates settings' do
         expect(current_settings.auto_devops_domain).to eq('domain.com')
         expect(current_settings.keep_latest_artifact).to be false
         expect(page).to have_content "Application settings saved successfully"
+      end
+
+      context 'Runner Registration' do
+        context 'when feature is enabled' do
+          before do
+            stub_feature_flags(runner_registration_control: true)
+          end
+
+          it 'allows admins to control who has access to register runners' do
+            visit ci_cd_admin_application_settings_path
+
+            expect(current_settings.valid_runner_registrars).to eq(ApplicationSetting::VALID_RUNNER_REGISTRAR_TYPES)
+
+            page.within('.as-runner') do
+              find_all('.form-check-input').each(&:click)
+
+              click_button 'Save changes'
+            end
+
+            expect(current_settings.valid_runner_registrars).to eq([])
+            expect(page).to have_content "Application settings saved successfully"
+          end
+        end
+
+        context 'when feature is disabled' do
+          before do
+            stub_feature_flags(runner_registration_control: false)
+          end
+
+          it 'does not allow admins to control who has access to register runners' do
+            visit ci_cd_admin_application_settings_path
+
+            expect(current_settings.valid_runner_registrars).to eq(ApplicationSetting::VALID_RUNNER_REGISTRAR_TYPES)
+
+            expect(page).not_to have_css('.as-runner')
+          end
+        end
       end
 
       context 'Container Registry' do
@@ -530,7 +592,7 @@ RSpec.describe 'Admin updates settings' do
 
           wait_for_requests
 
-          expect(page).to have_selector '.js-usage-ping-payload'
+          expect(page).to have_selector '.js-service-ping-payload'
           expect(page).to have_button 'Hide payload'
           expect(page).to have_content expected_payload_content
         end

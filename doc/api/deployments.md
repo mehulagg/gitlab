@@ -9,9 +9,6 @@ type: concepts, howto
 
 ## List project deployments
 
-> The `updated_after` and `updated_before` attributes were removed and replaced
-  by `finished_after` and `finished_before` respectively in GitLab 14.0.
-
 Get a list of deployments in a project.
 
 ```plaintext
@@ -20,11 +17,11 @@ GET /projects/:id/deployments
 
 | Attribute        | Type           | Required | Description                                                                                                     |
 |------------------|----------------|----------|-----------------------------------------------------------------------------------------------------------------|
-| `id`             | integer/string | yes      | The ID or [URL-encoded path of the project](README.md#namespaced-path-encoding) owned by the authenticated user. |
+| `id`             | integer/string | yes      | The ID or [URL-encoded path of the project](index.md#namespaced-path-encoding) owned by the authenticated user. |
 | `order_by`       | string         | no       | Return deployments ordered by either one of `id`, `iid`, `created_at`, `updated_at` or `ref` fields. Default is `id`.    |
 | `sort`           | string         | no       | Return deployments sorted in `asc` or `desc` order. Default is `asc`.                                            |
-| `finished_after`  | datetime       | no       | Return deployments updated after the specified date. Expected in ISO 8601 format (`2019-03-15T08:00:00Z`). |
-| `finished_before` | datetime       | no       | Return deployments updated before the specified date. Expected in ISO 8601 format (`2019-03-15T08:00:00Z`). |
+| `updated_after`  | datetime       | no       | Return deployments updated after the specified date. Expected in ISO 8601 format (`2019-03-15T08:00:00Z`). |
+| `updated_before` | datetime       | no       | Return deployments updated before the specified date. Expected in ISO 8601 format (`2019-03-15T08:00:00Z`). |
 | `environment`    | string         | no       | The [name of the environment](../ci/environments/index.md) to filter deployments by.       |
 | `status`         | string         | no       | The status to filter deployments by. One of `created`, `running`, `success`, `failed`, `canceled`.
 
@@ -187,7 +184,7 @@ GET /projects/:id/deployments/:deployment_id
 
 | Attribute | Type    | Required | Description         |
 |-----------|---------|----------|---------------------|
-| `id`      | integer/string | yes      | The ID or [URL-encoded path of the project](README.md#namespaced-path-encoding) owned by the authenticated user |
+| `id`      | integer/string | yes      | The ID or [URL-encoded path of the project](index.md#namespaced-path-encoding) owned by the authenticated user |
 | `deployment_id` | integer | yes      | The ID of the deployment |
 
 ```shell
@@ -275,7 +272,7 @@ POST /projects/:id/deployments
 
 | Attribute     | Type           | Required | Description                                                                                                     |
 |---------------|----------------|----------|-----------------------------------------------------------------------------------------------------------------|
-| `id`          | integer/string | yes      | The ID or [URL-encoded path of the project](README.md#namespaced-path-encoding) owned by the authenticated user.|
+| `id`          | integer/string | yes      | The ID or [URL-encoded path of the project](index.md#namespaced-path-encoding) owned by the authenticated user.|
 | `environment` | string         | yes      | The [name of the environment](../ci/environments/index.md) to create the deployment for.                        |
 | `sha`         | string         | yes      | The SHA of the commit that is deployed.                                                                         |
 | `ref`         | string         | yes      | The name of the branch or tag that is deployed.                                                                 |
@@ -322,7 +319,7 @@ PUT /projects/:id/deployments/:deployment_id
 
 | Attribute        | Type           | Required | Description         |
 |------------------|----------------|----------|---------------------|
-| `id`             | integer/string | yes      | The ID or [URL-encoded path of the project](README.md#namespaced-path-encoding) owned by the authenticated user. |
+| `id`             | integer/string | yes      | The ID or [URL-encoded path of the project](index.md#namespaced-path-encoding) owned by the authenticated user. |
 | `deployment_id`  | integer        | yes      | The ID of the deployment to update. |
 | `status`         | string         | no       | The new status of the deployment. One of `created`, `running`, `success`, `failed`, or `canceled`.           |
 

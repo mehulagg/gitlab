@@ -7,7 +7,8 @@ import {
   GlTooltipDirective,
 } from '@gitlab/ui';
 import * as Sentry from '@sentry/browser';
-import { convertToGraphQLId, TYPE_GROUP } from '~/graphql_shared/utils';
+import { TYPE_GROUP } from '~/graphql_shared/constants';
+import { convertToGraphQLId } from '~/graphql_shared/utils';
 import {
   DEBOUNCE_DELAY,
   DEVOPS_ADOPTION_GROUP_DROPDOWN_TEXT,

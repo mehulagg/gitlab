@@ -12,7 +12,7 @@ exports[`PolicyPreview component with policy description renders policy preview 
     titlelinkclass=""
   >
     <div
-      class="gl-bg-white gl-rounded-top-left-none gl-rounded-top-right-none gl-rounded-bottom-left-base gl-rounded-bottom-right-base gl-py-3 gl-px-4 gl-border-1 gl-border-solid gl-border-gray-100"
+      class="gl-bg-white gl-rounded-top-left-none gl-rounded-top-right-none gl-rounded-bottom-left-base gl-rounded-bottom-right-base gl-py-3 gl-px-4 gl-border-1 gl-border-solid gl-border-gray-100 gl-border-t-none!"
     >
       <strong>
         bar
@@ -27,9 +27,10 @@ exports[`PolicyPreview component with policy description renders policy preview 
     titlelinkclass=""
   >
     <pre
-      class="gl-bg-white gl-rounded-top-left-none gl-rounded-top-right-none"
+      class="gl-bg-white gl-rounded-top-left-none gl-rounded-top-right-none gl-border-t-none"
     >
       foo
+    
     </pre>
   </gl-tab-stub>
 </gl-tabs-stub>

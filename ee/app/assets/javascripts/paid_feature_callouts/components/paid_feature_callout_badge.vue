@@ -2,11 +2,17 @@
 import { GlBadge, GlIcon, GlTooltipDirective } from '@gitlab/ui';
 import { GlBreakpointInstance as bp } from '@gitlab/ui/dist/utils';
 import { debounce } from 'lodash';
-import { __, sprintf } from '~/locale';
+import { sprintf } from '~/locale';
 import Tracking from '~/tracking';
+import {
+  BADGE,
+  EXPERIMENT_KEY,
+  POPOVER_OR_TOOLTIP_BREAKPOINT,
+  RESIZE_EVENT_DEBOUNCE_MS,
+} from '../constants';
 
-const RESIZE_EVENT_DEBOUNCE_MS = 150;
-const trackingMixin = Tracking.mixin({ experiment: 'highlight_paid_features_during_active_trial' });
+const { i18n, trackingEvents } = BADGE;
+const trackingMixin = Tracking.mixin({ experiment: EXPERIMENT_KEY });
 
 export default {
   components: {
@@ -24,20 +30,13 @@ export default {
       default: '',
     },
   },
-  i18n: {
-    title: {
-      generic: __('This feature is part of your GitLab Ultimate trial.'),
-      specific: __('The %{featureName} feature is part of your GitLab Ultimate trial.'),
-    },
-  },
-  trackingEvents: {
-    displayBadge: { action: 'display_badge', label: 'feature_highlight_badge' },
-  },
   data() {
     return {
       tooltipDisabled: false,
     };
   },
+  i18n,
+  trackingEvents,
   computed: {
     title() {
       if (this.featureName === '') return this.$options.i18n.title.generic;
@@ -65,7 +64,7 @@ export default {
       this.track(action, options);
     },
     updateTooltipDisabledState() {
-      this.tooltipDisabled = bp.getBreakpointSize() !== 'xs';
+      this.tooltipDisabled = bp.getBreakpointSize() !== POPOVER_OR_TOOLTIP_BREAKPOINT;
     },
   },
 };

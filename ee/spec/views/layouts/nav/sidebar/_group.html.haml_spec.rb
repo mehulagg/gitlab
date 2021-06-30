@@ -95,21 +95,9 @@ RSpec.describe 'layouts/nav/sidebar/_group' do
 
         expect(rendered).to have_text 'DevOps Adoption'
       end
-
-      context 'feature flag is disabled' do
-        before do
-          stub_feature_flags(group_devops_adoption: false)
-        end
-
-        it 'is not visible' do
-          render
-
-          expect(rendered).not_to have_text 'DevOps Adoption'
-        end
-      end
     end
 
-    context 'DevOps apoption feature is not available' do
+    context 'DevOps adoption feature is not available' do
       before do
         stub_licensed_features(group_level_devops_adoption: false)
       end
@@ -118,18 +106,6 @@ RSpec.describe 'layouts/nav/sidebar/_group' do
         render
 
         expect(rendered).not_to have_text 'DevOps Adoption'
-      end
-
-      context 'feature flag is disabled' do
-        before do
-          stub_feature_flags(group_devops_adoption: false)
-        end
-
-        it 'is not visible' do
-          render
-
-          expect(rendered).not_to have_text 'DevOps Adoption'
-        end
       end
     end
   end

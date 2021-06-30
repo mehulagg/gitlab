@@ -24,15 +24,15 @@ describe('Qrtly Reconciliation Alert', () => {
 
   const findAlert = () => wrapper.find(GlAlert);
 
-  beforeEach(() => {
-    wrapper = createComponent();
-  });
-
   afterEach(() => {
     wrapper.destroy();
   });
 
   describe('Rendering', () => {
+    beforeEach(() => {
+      wrapper = createComponent();
+    });
+
     it('renders alert title with date', () => {
       expect(findAlert().attributes('title')).toContain(`occur on 2020-07-10`);
     });
@@ -51,14 +51,14 @@ describe('Qrtly Reconciliation Alert', () => {
       expect(wrapper.findComponent(GlSprintf).attributes('message')).toContain(i18n.description.ee);
     });
 
-    describe('dotcom', () => {
+    describe('when gitlab.com', () => {
       beforeEach(() => {
-        wrapper = createComponent({ dotCom: true });
+        wrapper = createComponent({ usesNamespacePlan: true });
       });
 
       it('has the correct description', () => {
         expect(wrapper.findComponent(GlSprintf).attributes('message')).toContain(
-          i18n.description.dotCom,
+          i18n.description.usesNamespacePlan,
         );
       });
     });

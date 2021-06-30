@@ -31,7 +31,15 @@ describe('ee/BoardContentSidebar', () => {
     });
   };
 
+  const setPortalAnchorPoint = () => {
+    const el = document.createElement('div');
+    el.setAttribute('id', 'js-right-sidebar-portal');
+    document.body.appendChild(el);
+  };
+
   const createComponent = () => {
+    setPortalAnchorPoint();
+
     /*
       Dynamically imported components (in our case ee imports)
       aren't stubbed automatically when using shallow mount in VTU v1:
@@ -63,6 +71,7 @@ describe('ee/BoardContentSidebar', () => {
         SidebarSubscriptionsWidget: true,
         BoardSidebarWeightInput: true,
         SidebarDropdownWidget: true,
+        MountingPortal: true,
       },
     });
   };
@@ -78,6 +87,6 @@ describe('ee/BoardContentSidebar', () => {
   });
 
   it('matches the snapshot', () => {
-    expect(wrapper.element).toMatchSnapshot();
+    expect(wrapper.find(GlDrawer).element).toMatchSnapshot();
   });
 });

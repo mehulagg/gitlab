@@ -60,7 +60,8 @@ module LicenseHelper
       has_active_license: (has_active_license? ? 'true' : 'false'),
       license_upload_path: new_admin_license_path,
       license_remove_path: admin_license_path,
-      subscription_sync_path: sync_seat_link_admin_license_path
+      subscription_sync_path: sync_seat_link_admin_license_path,
+      congratulation_svg_path: image_path('illustrations/illustration-congratulation-purchase.svg')
     }
   end
 

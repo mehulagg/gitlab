@@ -15,8 +15,8 @@ module EE
     class_methods do
       extend ::Gitlab::Utils::Override
 
-      override :project_specific_services_names
-      def project_specific_services_names
+      override :project_specific_integration_names
+      def project_specific_integration_names
         integrations = super + EE_PROJECT_SPECIFIC_INTEGRATION_NAMES
         integrations += EE_COM_PROJECT_SPECIFIC_INTEGRATION_NAMES if ::Gitlab.com?
         integrations

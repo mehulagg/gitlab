@@ -36,7 +36,7 @@ describe('Group repository analytics app', () => {
     });
   });
 
-  describe('usage ping events', () => {
+  describe('service ping events', () => {
     describe('with the feature flag enabled', () => {
       beforeEach(() => {
         createComponent({ [VISIT_EVENT_FEATURE_FLAG]: true });

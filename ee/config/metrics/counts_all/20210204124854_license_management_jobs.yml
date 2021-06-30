@@ -1,4 +1,5 @@
 ---
+data_category: Optional
 key_path: counts.license_management_jobs
 description: Count of License Scanning jobs run
 product_section: sec

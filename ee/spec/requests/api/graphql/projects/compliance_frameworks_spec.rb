@@ -8,6 +8,7 @@ RSpec.describe 'getting compliance frameworks for a collection of projects' do
   let_it_be(:current_user) { create(:user) }
   let_it_be(:project_members) { create_list(:project_member, 2, :maintainer, user: current_user) }
   let_it_be(:project_ids) { project_members.map { |p| global_id_of(p.source) } }
+
   let(:query) do
     graphql_query_for(
       :projects, { ids: project_ids }, "nodes { #{query_nodes(:compliance_frameworks)} }"
@@ -43,6 +44,7 @@ RSpec.describe 'getting compliance frameworks for a collection of projects' do
   context 'projects can have a compliance framework' do
     let_it_be(:compliance_projects) { create_list(:project, 2, :with_compliance_framework) }
     let_it_be(:non_compliance_project) { create(:project) }
+
     let(:projects) { compliance_projects + [non_compliance_project] }
     let(:project_ids) { projects.map { |p| global_id_of(p) } }
 
@@ -70,6 +72,7 @@ RSpec.describe 'getting compliance frameworks for a collection of projects' do
     let_it_be(:framework) { create(:compliance_framework) }
     let_it_be(:project_1) { create(:project, compliance_framework_setting: create(:compliance_framework_project_setting, compliance_management_framework: framework )) }
     let_it_be(:project_2) { create(:project, compliance_framework_setting: create(:compliance_framework_project_setting, compliance_management_framework: framework )) }
+
     let(:projects) { [project_1, project_2] }
     let(:project_ids) { projects.map { |p| global_id_of(p) } }
     let(:query) do

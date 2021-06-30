@@ -6,6 +6,7 @@ RSpec.describe GitlabSubscriptions::ApplyTrialService do
   subject(:execute) { described_class.new.execute(apply_trial_params) }
 
   let_it_be(:namespace) { create(:namespace) }
+
   let(:apply_trial_params) do
     {
       trial_user: {

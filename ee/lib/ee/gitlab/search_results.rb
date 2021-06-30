@@ -15,12 +15,6 @@ module EE
         end
       end
 
-      def epics
-        groups_finder = GroupsFinder.new(current_user)
-
-        ::Epic.in_selected_groups(groups_finder.execute).search(query)
-      end
-
       private
 
       override :projects

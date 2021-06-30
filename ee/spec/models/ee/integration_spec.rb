@@ -3,11 +3,11 @@
 require 'spec_helper'
 
 RSpec.describe Integration do
-  describe '.available_services_names' do
-    it { expect(described_class.available_services_names).to include('github') }
+  describe '.available_integration_names' do
+    it { expect(described_class.available_integration_names).to include('github') }
   end
 
-  describe '.project_specific_services_names' do
+  describe '.project_specific_integration_names' do
     before do
       allow(::Gitlab).to receive(:com?).and_return(com)
     end
@@ -16,7 +16,7 @@ RSpec.describe Integration do
       let(:com) { false }
 
       it do
-        expect(described_class.project_specific_services_names)
+        expect(described_class.project_specific_integration_names)
           .to include(*described_class::EE_PROJECT_SPECIFIC_INTEGRATION_NAMES)
       end
     end
@@ -25,7 +25,7 @@ RSpec.describe Integration do
       let(:com) { true }
 
       it do
-        expect(described_class.project_specific_services_names)
+        expect(described_class.project_specific_integration_names)
           .to include(*described_class::EE_PROJECT_SPECIFIC_INTEGRATION_NAMES, *Integration::EE_COM_PROJECT_SPECIFIC_INTEGRATION_NAMES)
       end
     end

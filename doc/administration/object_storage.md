@@ -537,7 +537,7 @@ the original form is omitted. To move to the consolidated form, remove the
 original configuration (for example, `artifacts_object_store_enabled`, or
 `uploads_object_store_connection`)
 
-## Storage-specific configuration
+### Storage-specific configuration
 
 For configuring object storage in GitLab 13.1 and earlier, or for storage types not
 supported by consolidated configuration form, refer to the following guides:
@@ -580,7 +580,7 @@ There are plans to [enable the use of a single bucket](https://gitlab.com/gitlab
 in the future.
 
 Helm-based installs require separate buckets to
-[handle backup restorations](https://docs.gitlab.com/charts/advanced/external-object-storage/#lfs-artifacts-uploads-packages-external-diffs-pseudonymizer)
+[handle backup restorations](https://docs.gitlab.com/charts/advanced/external-object-storage/#lfs-artifacts-uploads-packages-external-diffs-pseudonymizer).
 
 ### S3 API compatibility issues
 
@@ -590,12 +590,6 @@ with the Fog library that GitLab uses. Symptoms include an error in `production.
 ```plaintext
 411 Length Required
 ```
-
-### Incremental logging is required for CI to use object storage
-
-If you configure GitLab to use object storage for CI logs and artifacts,
-you can avoid [local disk usage for job logs](job_logs.md#data-flow) by enabling
-[beta incremental logging](job_logs.md#incremental-logging-architecture).
 
 ### Proxy Download
 

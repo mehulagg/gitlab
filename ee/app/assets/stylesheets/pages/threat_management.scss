@@ -10,6 +10,14 @@
   align-items: flex-start;
 }
 
-.policy-editor .policy-table-left {
-  flex: 4;
+.gl-md-max-w-30p {
+  @media (min-width: $breakpoint-md) {
+    max-width: 30%;
+  }
+}
+
+.gl-md-w-50p {
+  @media (min-width: $breakpoint-md) {
+    width: 50%;
+  }
 }

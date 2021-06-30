@@ -22,9 +22,17 @@ export default {
     SubscriptionActivationErrors,
     SubscriptionActivationForm,
   },
+  model: {
+    prop: 'visible',
+    event: 'change',
+  },
   props: {
     modalId: {
       type: String,
+      required: true,
+    },
+    visible: {
+      type: Boolean,
       required: true,
     },
   },
@@ -38,7 +46,10 @@ export default {
       this.error = error;
     },
     handleActivationSuccess() {
-      this.$refs.modal.hide();
+      this.$emit('change', false);
+    },
+    handleChange(event) {
+      this.$emit('change', event);
     },
     handlePrimary() {
       this.$refs.form.submit();
@@ -52,13 +63,14 @@ export default {
 
 <template>
   <gl-modal
-    ref="modal"
+    :visible="visible"
     :modal-id="modalId"
     :title="$options.title"
     :action-cancel="$options.actionCancel"
     :action-primary="$options.actionPrimary"
     @primary.prevent="handlePrimary"
     @hidden="removeError"
+    @change="handleChange"
   >
     <subscription-activation-errors v-if="error" class="mb-4" :error="error" />
     <p>{{ $options.bodyText }}</p>

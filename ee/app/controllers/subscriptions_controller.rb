@@ -79,7 +79,7 @@ class SubscriptionsController < ApplicationController
   end
 
   def subscription_params
-    params.require(:subscription).permit(:plan_id, :payment_method_id, :quantity)
+    params.require(:subscription).permit(:plan_id, :payment_method_id, :quantity, :source)
   end
 
   def find_group

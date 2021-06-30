@@ -2,14 +2,14 @@
 
 require 'spec_helper'
 
-RSpec.describe Ci::RegisterJobService do
+RSpec.describe Ci::RegisterJobService, '#execute' do
   let_it_be_with_refind(:shared_runner) { create(:ci_runner, :instance) }
 
   let!(:project) { create(:project, shared_runners_enabled: true) }
   let!(:pipeline) { create(:ci_empty_pipeline, project: project) }
   let!(:pending_build) { create(:ci_build, :pending, :queued, pipeline: pipeline) }
 
-  describe '#execute' do
+  shared_examples 'namespace minutes quota' do
     context 'shared runners minutes limit' do
       subject { described_class.new(shared_runner).execute.build }
 
@@ -266,5 +266,21 @@ RSpec.describe Ci::RegisterJobService do
         end
       end
     end
+  end
+
+  context 'when legacy queuing is being used' do
+    before do
+      stub_feature_flags(ci_pending_builds_queue_source: false)
+    end
+
+    include_examples 'namespace minutes quota'
+  end
+
+  context 'when new pending builds table is used' do
+    before do
+      stub_feature_flags(ci_pending_builds_queue_source: true)
+    end
+
+    include_examples 'namespace minutes quota'
   end
 end

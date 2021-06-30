@@ -1,4 +1,5 @@
 ---
+data_category: Optional
 key_path: license_user_count
 description: The number of seats included in the license
 product_section: fulfillment

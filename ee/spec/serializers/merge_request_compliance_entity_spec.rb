@@ -29,7 +29,9 @@ RSpec.describe MergeRequestComplianceEntity do
         :target_branch,
         :target_branch_uri,
         :source_branch,
-        :source_branch_uri
+        :source_branch_uri,
+        :compliance_management_framework,
+        :project
       )
     end
 

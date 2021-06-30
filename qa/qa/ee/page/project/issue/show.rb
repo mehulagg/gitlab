@@ -16,8 +16,8 @@ module QA
                   element :edit_link
                 end
 
-                view 'app/assets/javascripts/sidebar/components/sidebar_dropdown_widget.vue' do
-                  element :iteration_link, "`${issuableAttribute}_link`" # rubocop:disable QA/ElementWithPattern
+                view 'ee/app/assets/javascripts/sidebar/components/iteration_sidebar_dropdown_widget.vue' do
+                  element :iteration_link
                 end
 
                 view 'app/views/shared/issuable/_sidebar.html.haml' do

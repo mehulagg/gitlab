@@ -35,7 +35,7 @@ Pipeline jobs in GitLab CI/CD run in parallel, so it's possible that two deploym
 jobs in two different pipelines attempt to deploy to the same environment at the same
 time. This is not desired behavior as deployments should happen sequentially.
 
-You can ensure only one deployment job runs at a time with the [`resource_group` keyword](../yaml/README.md#resource_group) in your `.gitlab-ci.yml`.
+You can ensure only one deployment job runs at a time with the [`resource_group` keyword](../yaml/index.md#resource_group) in your `.gitlab-ci.yml`.
 
 For example:
 
@@ -59,7 +59,7 @@ The improved pipeline flow **after** using the resource group:
 1. `deploy` job in Pipeline-A finishes.
 1. `deploy` job in Pipeline-B starts running.
 
-For more information, see [`resource_group` keyword in `.gitlab-ci.yml`](../yaml/README.md#resource_group).
+For more information, see [`resource_group` keyword in `.gitlab-ci.yml`](../yaml/index.md#resource_group).
 
 ## Skip outdated deployment jobs
 
@@ -110,7 +110,7 @@ for an explanation of these roles and the permissions of each.
 
 Production secrets are needed to deploy successfully. For example, when deploying to the cloud,
 cloud providers require these secrets to connect to their services. In the project settings, you can
-define and protect CI/CD variables for these secrets. [Protected variables](../variables/README.md#protect-a-cicd-variable)
+define and protect CI/CD variables for these secrets. [Protected variables](../variables/index.md#protect-a-cicd-variable)
 are only passed to pipelines running on [protected branches](../../user/project/protected_branches.md)
 or [protected tags](../../user/project/protected_tags.md).
 The other pipelines don't get the protected variable. You can also
@@ -129,7 +129,7 @@ All project maintainers have access to production secrets. If you need to limit 
 that can deploy to a production environment, you can create a separate project and configure a new
 permission model that isolates the CD permissions from the original project and prevents the
 original project's maintainers from accessing the production secret and CD configuration. You can
-connect the CD project to your development projects by using [multi-project pipelines](../multi_project_pipelines.md).
+connect the CD project to your development projects by using [multi-project pipelines](../pipelines/multi_project_pipelines.md).
 
 ## Protect `gitlab-ci.yml` from change
 

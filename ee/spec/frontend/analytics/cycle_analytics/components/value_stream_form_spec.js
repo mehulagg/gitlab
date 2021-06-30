@@ -315,9 +315,7 @@ describe('ValueStreamForm', () => {
           });
 
           it('displays a toast message', () => {
-            expect(mockToastShow).toHaveBeenCalledWith(`'${initialData.name}' Value Stream saved`, {
-              position: 'top-center',
-            });
+            expect(mockToastShow).toHaveBeenCalledWith(`'${initialData.name}' Value Stream saved`);
           });
 
           it('sends tracking information', () => {
@@ -411,9 +409,7 @@ describe('ValueStreamForm', () => {
       });
 
       it('displays a toast message', () => {
-        expect(mockToastShow).toHaveBeenCalledWith(`'${streamName}' Value Stream created`, {
-          position: 'top-center',
-        });
+        expect(mockToastShow).toHaveBeenCalledWith(`'${streamName}' Value Stream created`);
       });
 
       it('sends tracking information', () => {

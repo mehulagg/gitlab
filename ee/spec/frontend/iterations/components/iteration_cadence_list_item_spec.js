@@ -1,4 +1,4 @@
-import { GlDropdown, GlInfiniteScroll, GlSkeletonLoader } from '@gitlab/ui';
+import { GlDropdown, GlInfiniteScroll, GlModal, GlSkeletonLoader } from '@gitlab/ui';
 import { createLocalVue, RouterLinkStub } from '@vue/test-utils';
 import { nextTick } from 'vue';
 import VueApollo from 'vue-apollo';
@@ -186,6 +186,46 @@ describe('Iteration cadence list item', () => {
         }),
       }),
     );
+  });
+
+  describe('deleting cadence', () => {
+    describe('canEditCadence = false', () => {
+      beforeEach(async () => {
+        await createComponent({
+          canEditCadence: false,
+        });
+      });
+
+      it('hides dropdown and delete button', () => {
+        expect(wrapper.find(GlDropdown).exists()).toBe(false);
+      });
+    });
+
+    describe('canEditCadence = true', () => {
+      beforeEach(async () => {
+        createComponent({
+          canEditCadence: true,
+        });
+
+        wrapper.vm.$refs.modal.show = jest.fn();
+      });
+
+      it('shows delete button', () => {
+        expect(wrapper.find(GlDropdown).exists()).toBe(true);
+      });
+
+      it('opens confirmation modal to delete cadence', () => {
+        wrapper.findByTestId('delete-cadence').trigger('click');
+
+        expect(wrapper.vm.$refs.modal.show).toHaveBeenCalled();
+      });
+
+      it('emits delete-cadence event with cadence ID', () => {
+        wrapper.find(GlModal).vm.$emit('ok');
+
+        expect(wrapper.emitted('delete-cadence')).toEqual([[cadence.id]]);
+      });
+    });
   });
 
   it('hides dropdown when canEditCadence is false', async () => {

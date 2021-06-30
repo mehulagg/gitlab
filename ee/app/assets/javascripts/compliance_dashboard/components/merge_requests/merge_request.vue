@@ -1,10 +1,12 @@
 <script>
 import { GlAvatar, GlAvatarLink } from '@gitlab/ui';
+import ComplianceFrameworkLabel from 'ee/vue_shared/components/compliance_framework_label/compliance_framework_label.vue';
 
 import { s__ } from '~/locale';
 
 export default {
   components: {
+    ComplianceFrameworkLabel,
     GlAvatar,
     GlAvatarLink,
   },
@@ -12,6 +14,11 @@ export default {
     mergeRequest: {
       type: Object,
       required: true,
+    },
+  },
+  computed: {
+    complianceFramework() {
+      return this.mergeRequest.compliance_management_framework;
     },
   },
   strings: {
@@ -25,9 +32,11 @@ export default {
     class="gl-grid-col-start-1 gl-border-b-solid gl-border-b-1 gl-border-b-gray-100 gl-p-5"
     data-testid="merge-request"
   >
-    <a :href="mergeRequest.path" class="gl-display-block gl-text-gray-900 gl-font-weight-bold">
-      {{ mergeRequest.title }}
-    </a>
+    <div>
+      <a :href="mergeRequest.path" class="gl-text-gray-900 gl-font-weight-bold">
+        {{ mergeRequest.title }}
+      </a>
+    </div>
     <span class="gl-text-gray-500">{{ mergeRequest.issuable_reference }}</span>
     <span class="issuable-authored gl-text-gray-500 gl-display-inline-flex gl-align-items-center">
       - {{ $options.strings.createdBy }}
@@ -49,5 +58,13 @@ export default {
         <span>{{ mergeRequest.author.name }}</span>
       </gl-avatar-link>
     </span>
+    <div>
+      <compliance-framework-label
+        v-if="complianceFramework"
+        :name="complianceFramework.name"
+        :color="complianceFramework.color"
+        :description="complianceFramework.description"
+      />
+    </div>
   </div>
 </template>

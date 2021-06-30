@@ -187,6 +187,22 @@ describe('vulnerabilities actions', () => {
         },
       ]);
     });
+
+    it('should transform each details property to camelCase', () => {
+      const dataWithDetails = [{ id: '1', details: { prop_one: '1' } }];
+
+      return testAction(
+        actions.receiveVulnerabilitiesSuccess,
+        { headers, data: dataWithDetails },
+        state,
+        [
+          {
+            type: types.RECEIVE_VULNERABILITIES_SUCCESS,
+            payload: { pageInfo, vulnerabilities: [{ id: '1', details: { propOne: '1' } }] },
+          },
+        ],
+      );
+    });
   });
 
   describe('receiveVulnerabilitiesError', () => {

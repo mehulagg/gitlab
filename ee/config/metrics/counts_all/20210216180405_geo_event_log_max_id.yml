@@ -1,4 +1,5 @@
 ---
+data_category: Optional
 key_path: counts.geo_event_log_max_id
 description: Number of replication events on a Geo primary
 product_section: enablement

@@ -26,6 +26,7 @@ export const confirmOrderParams = (state, getters) => ({
     plan_id: state.selectedPlan,
     payment_method_id: state.paymentMethodId,
     quantity: state.numberOfUsers,
+    source: state.source,
   },
 });
 

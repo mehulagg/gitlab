@@ -151,7 +151,7 @@ module Projects
         branch_name: @default_branch.presence || @project.default_branch_or_main,
         commit_message: 'Initial commit',
         file_path: 'README.md',
-        file_content: "# #{@project.name}\n\n#{@project.description}"
+        file_content: experiment(:new_project_readme_content, namespace: @project.namespace).run_with(@project)
       }
 
       Files::CreateService.new(@project, current_user, commit_attrs).execute
@@ -193,14 +193,14 @@ module Projects
 
     # Deprecated: https://gitlab.com/gitlab-org/gitlab/-/issues/326665
     def create_prometheus_integration
-      service = @project.find_or_initialize_service(::Integrations::Prometheus.to_param)
+      integration = @project.find_or_initialize_integration(::Integrations::Prometheus.to_param)
 
       # If the service has already been inserted in the database, that
       # means it came from a template, and there's nothing more to do.
-      return if service.persisted?
+      return if integration.persisted?
 
-      if service.prometheus_available?
-        service.save!
+      if integration.prometheus_available?
+        integration.save!
       else
         @project.prometheus_integration = nil
       end

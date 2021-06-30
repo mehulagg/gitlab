@@ -3,7 +3,6 @@ import { shallowMount, createLocalVue } from '@vue/test-utils';
 import VueApollo from 'vue-apollo';
 import createMockApollo from 'helpers/mock_apollo_helper';
 import waitForPromises from 'helpers/wait_for_promises';
-import httpStatusCodes from '~/lib/utils/http_status';
 import CommitForm from '~/pipeline_editor/components/commit/commit_form.vue';
 import TextEditor from '~/pipeline_editor/components/editor/text_editor.vue';
 
@@ -11,15 +10,20 @@ import PipelineEditorTabs from '~/pipeline_editor/components/pipeline_editor_tab
 import PipelineEditorEmptyState from '~/pipeline_editor/components/ui/pipeline_editor_empty_state.vue';
 import PipelineEditorMessages from '~/pipeline_editor/components/ui/pipeline_editor_messages.vue';
 import { COMMIT_SUCCESS, COMMIT_FAILURE } from '~/pipeline_editor/constants';
+import getBlobContent from '~/pipeline_editor/graphql/queries/blob_content.graphql';
 import getCiConfigData from '~/pipeline_editor/graphql/queries/ci_config.graphql';
+import getTemplate from '~/pipeline_editor/graphql/queries/get_starter_template.query.graphql';
 import PipelineEditorApp from '~/pipeline_editor/pipeline_editor_app.vue';
 import PipelineEditorHome from '~/pipeline_editor/pipeline_editor_home.vue';
 import {
   mockCiConfigPath,
   mockCiConfigQueryResponse,
-  mockCiYml,
+  mockBlobContentQueryResponse,
+  mockBlobContentQueryResponseEmptyCiFile,
+  mockBlobContentQueryResponseNoCiFile,
   mockDefaultBranch,
   mockProjectFullPath,
+  mockCiYml,
 } from './mock_data';
 
 const localVue = createLocalVue();
@@ -44,6 +48,7 @@ describe('Pipeline editor app component', () => {
   let mockApollo;
   let mockBlobContentData;
   let mockCiConfigData;
+  let mockGetTemplate;
 
   const createComponent = ({ blobLoading = false, options = {}, provide = {} } = {}) => {
     wrapper = shallowMount(PipelineEditorApp, {
@@ -75,19 +80,13 @@ describe('Pipeline editor app component', () => {
   };
 
   const createComponentWithApollo = async ({ props = {}, provide = {} } = {}) => {
-    const handlers = [[getCiConfigData, mockCiConfigData]];
-    const resolvers = {
-      Query: {
-        blobContent() {
-          return {
-            __typename: 'BlobContent',
-            rawData: mockBlobContentData(),
-          };
-        },
-      },
-    };
+    const handlers = [
+      [getBlobContent, mockBlobContentData],
+      [getCiConfigData, mockCiConfigData],
+      [getTemplate, mockGetTemplate],
+    ];
 
-    mockApollo = createMockApollo(handlers, resolvers);
+    mockApollo = createMockApollo(handlers);
 
     const options = {
       localVue,
@@ -116,6 +115,7 @@ describe('Pipeline editor app component', () => {
   beforeEach(() => {
     mockBlobContentData = jest.fn();
     mockCiConfigData = jest.fn();
+    mockGetTemplate = jest.fn();
   });
 
   afterEach(() => {
@@ -133,7 +133,7 @@ describe('Pipeline editor app component', () => {
 
   describe('when queries are called', () => {
     beforeEach(() => {
-      mockBlobContentData.mockResolvedValue(mockCiYml);
+      mockBlobContentData.mockResolvedValue(mockBlobContentQueryResponse);
       mockCiConfigData.mockResolvedValue(mockCiConfigQueryResponse);
     });
 
@@ -159,34 +159,13 @@ describe('Pipeline editor app component', () => {
     });
 
     describe('when no CI config file exists', () => {
-      describe('in a project without a repository', () => {
-        it('shows an empty state and does not show editor home component', async () => {
-          mockBlobContentData.mockRejectedValueOnce({
-            response: {
-              status: httpStatusCodes.BAD_REQUEST,
-            },
-          });
-          await createComponentWithApollo();
+      it('shows an empty state and does not show editor home component', async () => {
+        mockBlobContentData.mockResolvedValue(mockBlobContentQueryResponseNoCiFile);
+        await createComponentWithApollo();
 
-          expect(findEmptyState().exists()).toBe(true);
-          expect(findAlert().exists()).toBe(false);
-          expect(findEditorHome().exists()).toBe(false);
-        });
-      });
-
-      describe('in a project with a repository', () => {
-        it('shows an empty state and does not show editor home component', async () => {
-          mockBlobContentData.mockRejectedValueOnce({
-            response: {
-              status: httpStatusCodes.NOT_FOUND,
-            },
-          });
-          await createComponentWithApollo();
-
-          expect(findEmptyState().exists()).toBe(true);
-          expect(findAlert().exists()).toBe(false);
-          expect(findEditorHome().exists()).toBe(false);
-        });
+        expect(findEmptyState().exists()).toBe(true);
+        expect(findAlert().exists()).toBe(false);
+        expect(findEditorHome().exists()).toBe(false);
       });
 
       describe('because of a fetching error', () => {
@@ -204,13 +183,28 @@ describe('Pipeline editor app component', () => {
       });
     });
 
+    describe('with an empty CI config file', () => {
+      describe('with empty state feature flag on', () => {
+        it('does not show the empty screen state', async () => {
+          mockBlobContentData.mockResolvedValue(mockBlobContentQueryResponseEmptyCiFile);
+
+          await createComponentWithApollo({
+            provide: {
+              glFeatures: {
+                pipelineEditorEmptyStateAction: true,
+              },
+            },
+          });
+
+          expect(findEmptyState().exists()).toBe(false);
+          expect(findTextEditor().exists()).toBe(true);
+        });
+      });
+    });
+
     describe('when landing on the empty state with feature flag on', () => {
       it('user can click on CTA button and see an empty editor', async () => {
-        mockBlobContentData.mockRejectedValueOnce({
-          response: {
-            status: httpStatusCodes.NOT_FOUND,
-          },
-        });
+        mockBlobContentData.mockResolvedValue(mockBlobContentQueryResponseNoCiFile);
 
         await createComponentWithApollo({
           provide: {
@@ -315,21 +309,42 @@ describe('Pipeline editor app component', () => {
     });
 
     it('hides start screen when refetch fetches CI file', async () => {
-      mockBlobContentData.mockRejectedValue({
-        response: {
-          status: httpStatusCodes.NOT_FOUND,
-        },
-      });
+      mockBlobContentData.mockResolvedValue(mockBlobContentQueryResponseNoCiFile);
       await createComponentWithApollo();
 
       expect(findEmptyState().exists()).toBe(true);
       expect(findEditorHome().exists()).toBe(false);
 
-      mockBlobContentData.mockResolvedValue(mockCiYml);
+      mockBlobContentData.mockResolvedValue(mockBlobContentQueryResponse);
       await wrapper.vm.$apollo.queries.initialCiFileContent.refetch();
 
       expect(findEmptyState().exists()).toBe(false);
       expect(findEditorHome().exists()).toBe(true);
+    });
+  });
+
+  describe('when a template parameter is present in the URL', () => {
+    const { location } = window;
+
+    beforeEach(() => {
+      delete window.location;
+      window.location = new URL('https://localhost?template=Android');
+    });
+
+    afterEach(() => {
+      window.location = location;
+    });
+
+    it('renders the given template', async () => {
+      await createComponentWithApollo();
+
+      expect(mockGetTemplate).toHaveBeenCalledWith({
+        projectPath: mockProjectFullPath,
+        templateName: 'Android',
+      });
+
+      expect(findEmptyState().exists()).toBe(false);
+      expect(findTextEditor().exists()).toBe(true);
     });
   });
 });

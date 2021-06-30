@@ -8,7 +8,7 @@ module Registrations
     LEARN_GITLAB_TEMPLATE = 'learn_gitlab.tar.gz'
     LEARN_GITLAB_ULTIMATE_TEMPLATE = 'learn_gitlab_ultimate_trial.tar.gz'
 
-    before_action :check_signup_onboarding_enabled
+    before_action :check_if_gl_com_or_dev
     before_action only: [:new] do
       set_namespace
       authorize_create_project!
@@ -31,8 +31,6 @@ module Registrations
           learn_gitlab_project_id: learn_gitlab_project.id
         }
 
-        experiment(:registrations_group_invite, actor: current_user)
-          .track(:signup_successful, property: @project.namespace_id.to_s)
         experiment(:jobs_to_be_done, user: current_user)
           .track(:create_project, project: @project)
 
@@ -57,10 +55,6 @@ module Registrations
     end
 
     private
-
-    def check_signup_onboarding_enabled
-      access_denied! unless helpers.signup_onboarding_enabled?
-    end
 
     def create_learn_gitlab_project
       File.open(learn_gitlab_template_path) do |archive|

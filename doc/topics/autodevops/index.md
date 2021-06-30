@@ -63,7 +63,7 @@ Since [GitLab 12.7](https://gitlab.com/gitlab-org/gitlab/-/issues/26655),
 Auto DevOps runs on pipelines automatically only if a [`Dockerfile` or matching buildpack](stages.md#auto-build)
 exists.
 
-If a [CI/CD configuration file](../../ci/yaml/README.md) is present in the
+If a [CI/CD configuration file](../../ci/yaml/index.md) is present in the
 project, it isn't changed and won't be affected by Auto DevOps.
 
 ### At the project level
@@ -224,7 +224,7 @@ The Auto DevOps base domain is required to use
 any of the following places:
 
 - Either under the cluster's settings, whether for an instance,
-  [projects](../../user/project/clusters/index.md#base-domain) or
+  [projects](../../user/project/clusters/gitlab_managed_clusters.md#base-domain) or
   [groups](../../user/group/clusters/index.md#base-domain)
 - Or at the project level as a variable: `KUBE_INGRESS_BASE_DOMAIN`
 - Or at the group level as a variable: `KUBE_INGRESS_BASE_DOMAIN`
@@ -232,7 +232,7 @@ any of the following places:
   **Settings > CI/CD** under the **Continuous Integration and Delivery** section.
 
 The base domain variable `KUBE_INGRESS_BASE_DOMAIN` follows the same order of precedence
-as other environment [variables](../../ci/variables/README.md#cicd-variable-precedence).
+as other environment [variables](../../ci/variables/index.md#cicd-variable-precedence).
 If the CI/CD variable is not set and the cluster setting is left blank, the instance-wide **Auto DevOps domain**
 setting is used if set.
 
@@ -263,7 +263,7 @@ See [Auto DevOps requirements for Amazon ECS](requirements.md#auto-devops-requir
 
 When using Auto DevOps, you can deploy different environments to
 different Kubernetes clusters, due to the 1:1 connection
-[existing between them](../../user/project/clusters/index.md#multiple-kubernetes-clusters).
+[existing between them](../../user/project/clusters/multiple_kubernetes_clusters.md).
 
 The [Deploy Job template](https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/Jobs/Deploy.gitlab-ci.yml)
 used by Auto DevOps currently defines 3 environment names:
@@ -275,7 +275,7 @@ used by Auto DevOps currently defines 3 environment names:
 Those environments are tied to jobs using [Auto Deploy](stages.md#auto-deploy), so
 except for the environment scope, they must have a different deployment domain.
 You must define a separate `KUBE_INGRESS_BASE_DOMAIN` variable for each of the above
-[based on the environment](../../ci/variables/README.md#limit-the-environment-scope-of-a-cicd-variable).
+[based on the environment](../../ci/variables/index.md#limit-the-environment-scope-of-a-cicd-variable).
 
 The following table is an example of how to configure the three different clusters:
 

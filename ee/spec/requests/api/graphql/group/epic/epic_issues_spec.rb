@@ -111,6 +111,7 @@ RSpec.describe 'Getting issues for an epic' do
       let_it_be(:epic2) { create(:epic, group: group) }
       let_it_be(:issue2) { create(:issue, project: project) }
       let_it_be(:epic_issue3) { create(:epic_issue, epic: epic2, issue: issue2, relative_position: 3) }
+
       let(:params) { { iids: [epic.iid, epic2.iid] } }
 
       it 'returns issues for each epic' do

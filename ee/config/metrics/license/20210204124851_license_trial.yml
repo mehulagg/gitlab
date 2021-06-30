@@ -1,4 +1,5 @@
 ---
+data_category: Optional
 key_path: license_trial
 description: Whether this is a trial license or not
 product_section: fulfillment

@@ -7,8 +7,8 @@ import { extendedWrapper } from 'helpers/vue_test_utils_helper';
 import {
   customStageEvents as stageEvents,
   labelStartEvent,
-  labelStopEvent,
-  customStageStopEvents as endEvents,
+  labelEndEvent,
+  customStageEndEvents as endEvents,
 } from '../../mock_data';
 import { emptyState, emptyErrorsState, firstLabel } from './mock_data';
 
@@ -174,7 +174,7 @@ describe('CustomStageFields', () => {
         wrapper = createComponent({
           stage: {
             startEventIdentifier: labelStartEvent.identifier,
-            endEventIdentifier: labelStopEvent.identifier,
+            endEventIdentifier: labelEndEvent.identifier,
           },
         });
       });

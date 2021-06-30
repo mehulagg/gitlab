@@ -7,6 +7,7 @@ RSpec.describe PersonalAccessTokens::Groups::UpdateLifetimeService do
 
   describe '#execute', :clean_gitlab_redis_shared_state do
     let_it_be(:group) { create(:group_with_managed_accounts)}
+
     subject { described_class.new(group) }
 
     let(:lease_key) { "personal_access_tokens/groups/update_lifetime_service:group_id:#{group.id}" }

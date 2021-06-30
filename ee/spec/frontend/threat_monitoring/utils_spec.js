@@ -32,12 +32,11 @@ describe('Threat Monitoring Utils', () => {
 
   describe('getPolicyKind', () => {
     it.each`
-      input                                          | output
-      ${{}}                                          | ${null}
-      ${{ manifest: '' }}                            | ${null}
-      ${{ manifest: 'ciliumNetworkPolicy' }}         | ${null}
-      ${{ manifest: mockL3Manifest }}                | ${POLICY_KINDS.ciliumNetwork}
-      ${{ manifest: mockDastScanExecutionManifest }} | ${POLICY_KINDS.scanExecution}
+      input                            | output
+      ${''}                            | ${null}
+      ${'ciliumNetworkPolicy'}         | ${null}
+      ${mockL3Manifest}                | ${POLICY_KINDS.ciliumNetwork}
+      ${mockDastScanExecutionManifest} | ${POLICY_KINDS.scanExecution}
     `('returns $output when used on $input', ({ input, output }) => {
       expect(getPolicyKind(input)).toBe(output);
     });

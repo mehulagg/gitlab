@@ -1,13 +1,14 @@
 import MockAdapter from 'axios-mock-adapter';
 import BoardListSelector from 'ee/boards/components/boards_list_selector/';
-
 import mountComponent from 'helpers/vue_mount_component_helper';
-
 import { mockAssigneesList } from 'jest/boards/mock_data';
 import { TEST_HOST } from 'spec/test_constants';
 import { createStore } from '~/boards/stores';
 import boardsStore from '~/boards/stores/boards_store';
+import createFlash from '~/flash';
 import axios from '~/lib/utils/axios_utils';
+
+jest.mock('~/flash');
 
 describe('BoardListSelector', () => {
   global.gon.features = {
@@ -32,7 +33,6 @@ describe('BoardListSelector', () => {
   beforeEach(() => {
     mock = new MockAdapter(axios);
 
-    setFixtures('<div class="flash-container"></div>');
     vm = createComponent();
     vm.vuexStore = createStore();
   });
@@ -83,9 +83,9 @@ describe('BoardListSelector', () => {
         vm.loadList()
           .then(() => {
             expect(vm.loading).toBe(false);
-            expect(document.querySelector('.flash-text').innerText.trim()).toBe(
-              'Something went wrong while fetching assignees list',
-            );
+            expect(createFlash).toHaveBeenCalledWith({
+              message: 'Something went wrong while fetching assignees list',
+            });
           })
           .then(done)
           .catch(done.fail);

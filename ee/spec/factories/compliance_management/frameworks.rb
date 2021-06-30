@@ -12,5 +12,9 @@ FactoryBot.define do
     trait :sox do
       name { 'SOX' }
     end
+
+    trait :with_pipeline do
+      pipeline_configuration_full_path { 'compliance.gitlab-ci.yml@test-project' }
+    end
   end
 end

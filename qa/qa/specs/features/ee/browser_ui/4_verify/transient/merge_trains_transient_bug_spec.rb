@@ -127,7 +127,7 @@ module QA
       def merge_request_state(merge_request)
         Resource::MergeRequest.fabricate_via_api! do |mr|
           mr.project = project
-          mr.id = merge_request[:iid]
+          mr.iid = merge_request[:iid]
         end.state
       end
     end

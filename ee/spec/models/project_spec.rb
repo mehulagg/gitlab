@@ -54,13 +54,39 @@ RSpec.describe Project do
     it { is_expected.to have_many(:vulnerability_historical_statistics).class_name('Vulnerabilities::HistoricalStatistic') }
     it { is_expected.to have_many(:vulnerability_remediations).class_name('Vulnerabilities::Remediation') }
 
-    it { is_expected.to have_one(:github_service) }
+    it { is_expected.to have_one(:github_integration) }
     it { is_expected.to have_many(:project_aliases) }
     it { is_expected.to have_many(:approval_rules) }
 
     it { is_expected.to have_many(:incident_management_oncall_schedules).class_name('IncidentManagement::OncallSchedule') }
     it { is_expected.to have_many(:incident_management_oncall_rotations).through(:incident_management_oncall_schedules).source(:rotations) }
     it { is_expected.to have_many(:incident_management_escalation_policies).class_name('IncidentManagement::EscalationPolicy') }
+
+    include_examples 'ci_cd_settings delegation'
+
+    describe '#merge_pipelines_enabled?' do
+      it_behaves_like 'a ci_cd_settings predicate method' do
+        let(:delegated_method) { :merge_pipelines_enabled? }
+      end
+    end
+
+    describe '#merge_pipelines_were_disabled?' do
+      it_behaves_like 'a ci_cd_settings predicate method' do
+        let(:delegated_method) { :merge_pipelines_were_disabled? }
+      end
+    end
+
+    describe '#merge_trains_enabled?' do
+      it_behaves_like 'a ci_cd_settings predicate method' do
+        let(:delegated_method) { :merge_trains_enabled? }
+      end
+    end
+
+    describe '#auto_rollback_enabled?' do
+      it_behaves_like 'a ci_cd_settings predicate method' do
+        let(:delegated_method) { :auto_rollback_enabled? }
+      end
+    end
 
     describe '#jira_vulnerabilities_integration_enabled?' do
       context 'when project lacks a jira_integration relation' do
@@ -255,13 +281,13 @@ RSpec.describe Project do
       end
     end
 
-    describe '.with_active_services' do
+    describe '.with_active_integrations' do
       it 'returns the correct project' do
-        active_service = create(:service, active: true)
-        inactive_service = create(:service, active: false)
+        active = create(:service, active: true)
+        inactive = create(:service, active: false)
 
-        expect(described_class.with_active_services).to include(active_service.project)
-        expect(described_class.with_active_services).not_to include(inactive_service.project)
+        expect(described_class.with_active_integrations).to include(active.project)
+        expect(described_class.with_active_integrations).not_to include(inactive.project)
       end
     end
 
@@ -295,13 +321,15 @@ RSpec.describe Project do
       end
     end
 
-    describe '.with_github_service_pipeline_events' do
+    describe '.with_github_integration_pipeline_events' do
       it 'returns the correct project' do
-        project_with_github_service_pipeline_events = create(:project, github_service: create(:github_service))
-        project_without_github_service_pipeline_events = create(:project)
+        project_with_github_integration_pipeline_events = create(:project, github_integration: create(:github_integration))
+        project_without_github_integration_pipeline_events = create(:project)
 
-        expect(described_class.with_github_service_pipeline_events).to include(project_with_github_service_pipeline_events)
-        expect(described_class.with_github_service_pipeline_events).not_to include(project_without_github_service_pipeline_events)
+        expect(described_class.with_github_integration_pipeline_events)
+          .to include(project_with_github_integration_pipeline_events)
+        expect(described_class.with_github_integration_pipeline_events)
+          .not_to include(project_without_github_integration_pipeline_events)
       end
     end
 
@@ -911,14 +939,14 @@ RSpec.describe Project do
         before do
           stub_licensed_features(group_webhooks: true)
         end
-        let(:fake_service) { double }
+        let(:fake_integration) { double }
 
         shared_examples 'triggering group webhook' do
           it 'executes the hook' do
-            expect(fake_service).to receive(:async_execute).once
+            expect(fake_integration).to receive(:async_execute).once
 
-            expect(WebHookService).to receive(:new)
-                                        .with(group_hook, { some: 'info' }, 'push_hooks') { fake_service }
+            expect(WebHookService)
+              .to receive(:new).with(group_hook, { some: 'info' }, 'push_hooks') { fake_integration }
 
             project.execute_hooks(some: 'info')
           end
@@ -1461,13 +1489,13 @@ RSpec.describe Project do
     end
   end
 
-  describe '#disabled_services' do
+  describe '#disabled_integrations' do
     let(:project) { build(:project) }
 
-    subject { project.disabled_services }
+    subject { project.disabled_integrations }
 
-    where(:license_feature, :disabled_services) do
-      :github_project_service_integration | %w(github)
+    where(:license_feature, :disabled_integrations) do
+      :github_project_service_integration | %w[github]
     end
 
     with_them do
@@ -1476,7 +1504,7 @@ RSpec.describe Project do
           stub_licensed_features(license_feature => true)
         end
 
-        it { is_expected.not_to include(*disabled_services) }
+        it { is_expected.not_to include(*disabled_integrations) }
       end
 
       context 'when feature is unavailable' do
@@ -1484,7 +1512,7 @@ RSpec.describe Project do
           stub_licensed_features(license_feature => false)
         end
 
-        it { is_expected.to include(*disabled_services) }
+        it { is_expected.to include(*disabled_integrations) }
       end
     end
   end
@@ -1569,7 +1597,7 @@ RSpec.describe Project do
     it 'returns projects where Slack application is disabled' do
       project1 = create(:project)
       project2 = create(:project)
-      create(:gitlab_slack_application_service, project: project2)
+      create(:gitlab_slack_application_integration, project: project2)
 
       projects = described_class.with_slack_application_disabled
 

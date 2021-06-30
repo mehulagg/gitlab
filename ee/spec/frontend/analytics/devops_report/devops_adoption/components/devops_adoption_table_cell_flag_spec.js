@@ -54,6 +54,18 @@ describe('DevopsAdoptionTableCellFlag', () => {
         expect(tooltip.value).toBe('Not adopted');
       });
     });
+
+    describe('with a variant specified', () => {
+      beforeEach(async () => {
+        wrapper.setProps({ variant: 'primary' });
+
+        await wrapper.vm.$nextTick();
+      });
+
+      it('matches the snapshot', () => {
+        expect(wrapper.element).toMatchSnapshot();
+      });
+    });
   });
 
   describe('disabled', () => {

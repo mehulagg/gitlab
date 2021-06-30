@@ -8,7 +8,7 @@ module EE
           return super unless License.feature_available?(:project_aliases)
 
           if project_alias = ProjectAlias.find_by_name(project_path)
-            [project_alias.project, nil]
+            project_alias.project
           else
             super
           end

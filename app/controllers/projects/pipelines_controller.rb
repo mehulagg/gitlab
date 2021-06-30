@@ -14,7 +14,6 @@ class Projects::PipelinesController < Projects::ApplicationController
   before_action :authorize_update_pipeline!, only: [:retry, :cancel]
   before_action do
     push_frontend_feature_flag(:pipeline_graph_layers_view, project, type: :development, default_enabled: :yaml)
-    push_frontend_feature_flag(:pipeline_filter_jobs, project, default_enabled: :yaml)
     push_frontend_feature_flag(:graphql_pipeline_details, project, type: :development, default_enabled: :yaml)
     push_frontend_feature_flag(:graphql_pipeline_details_users, current_user, type: :development, default_enabled: :yaml)
   end
@@ -43,13 +42,11 @@ class Projects::PipelinesController < Projects::ApplicationController
       .new(project, current_user, index_params)
       .execute
       .page(params[:page])
-      .per(20)
 
     @pipelines_count = limited_pipelines_count(project)
 
     respond_to do |format|
       format.html do
-        enable_pipeline_empty_state_templates_experiment
         enable_code_quality_walkthrough_experiment
         enable_ci_runner_templates_experiment
       end
@@ -299,18 +296,6 @@ class Projects::PipelinesController < Projects::ApplicationController
 
   def index_params
     params.permit(:scope, :username, :ref, :status)
-  end
-
-  def enable_pipeline_empty_state_templates_experiment
-    experiment(:pipeline_empty_state_templates, namespace: project.root_ancestor) do |e|
-      e.exclude! unless current_user
-      e.exclude! if @pipelines_count.to_i > 0
-      e.exclude! if helpers.has_gitlab_ci?(project)
-
-      e.control {}
-      e.candidate {}
-      e.record!
-    end
   end
 
   def enable_code_quality_walkthrough_experiment

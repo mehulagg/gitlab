@@ -6,6 +6,8 @@ RSpec.describe 'admin/application_settings/general.html.haml' do
   let_it_be(:user) { create(:admin) }
   let_it_be(:app_settings) { build(:application_setting) }
 
+  subject { rendered }
+
   before do
     assign(:application_setting, app_settings)
     allow(view).to receive(:current_user).and_return(user)

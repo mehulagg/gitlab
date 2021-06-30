@@ -40,6 +40,11 @@ export default {
       required: false,
       default: () => [],
     },
+    isStageView: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
     jobHovered: {
       type: String,
       required: false,
@@ -49,11 +54,6 @@ export default {
       type: Object,
       required: false,
       default: () => ({}),
-    },
-    showStageName: {
-      type: Boolean,
-      required: false,
-      default: false,
     },
     sourceJobHovered: {
       type: String,
@@ -73,20 +73,11 @@ export default {
     'gl-pl-3',
   ],
   computed: {
-    /*
-      currentGroups and filteredGroups are part of
-      a test to hunt down a bug
-      (see: https://gitlab.com/gitlab-org/gitlab/-/merge_requests/57142).
-
-      They should be removed when the bug is rectified.
-    */
-    currentGroups() {
-      return this.glFeatures.pipelineFilterJobs ? this.filteredGroups : this.groups;
+    canUpdatePipeline() {
+      return this.userPermissions.updatePipeline;
     },
-    filteredGroups() {
-      return this.groups.map((group) => {
-        return { ...group, jobs: group.jobs.filter(Boolean) };
-      });
+    columnSpacingClass() {
+      return this.isStageView ? 'gl-px-6' : 'gl-px-9';
     },
     formattedTitle() {
       return capitalize(escape(this.name));
@@ -94,8 +85,8 @@ export default {
     hasAction() {
       return !isEmpty(this.action);
     },
-    canUpdatePipeline() {
-      return this.userPermissions.updatePipeline;
+    showStageName() {
+      return !this.isStageView;
     },
   },
   errorCaptured(err, _vm, info) {
@@ -130,7 +121,7 @@ export default {
 };
 </script>
 <template>
-  <main-graph-wrapper class="gl-px-6" data-testid="stage-column">
+  <main-graph-wrapper :class="columnSpacingClass" data-testid="stage-column">
     <template #stages>
       <div
         data-testid="stage-column-title"
@@ -150,7 +141,7 @@ export default {
     </template>
     <template #jobs>
       <div
-        v-for="group in currentGroups"
+        v-for="group in groups"
         :id="groupId(group)"
         :key="getGroupId(group)"
         data-testid="stage-column-group"

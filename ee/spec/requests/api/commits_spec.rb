@@ -5,6 +5,7 @@ require "spec_helper"
 RSpec.describe API::Commits do
   let_it_be(:user) { create(:user) }
   let_it_be(:project) { create(:project, :repository, creator: user, path: "my.project") }
+
   let(:project_id) { project.id }
 
   before do

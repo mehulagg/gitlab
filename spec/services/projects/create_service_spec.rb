@@ -190,6 +190,7 @@ RSpec.describe Projects::CreateService, '#execute' do
     let_it_be(:group) { create(:group) }
     let_it_be(:shared_group) { create(:group) }
     let_it_be(:shared_group_user) { create(:user) }
+
     let(:opts) do
       {
         name: 'GitLab',
@@ -221,6 +222,7 @@ RSpec.describe Projects::CreateService, '#execute' do
     let_it_be(:subgroup_for_projects) { create(:group, :private, parent: group) }
     let_it_be(:subgroup_for_access) { create(:group, :private, parent: group) }
     let_it_be(:group_maintainer) { create(:user) }
+
     let(:group_access_level) { Gitlab::Access::REPORTER }
     let(:subgroup_access_level) { Gitlab::Access::DEVELOPER }
     let(:share_max_access_level) { Gitlab::Access::MAINTAINER }
@@ -581,6 +583,23 @@ RSpec.describe Projects::CreateService, '#execute' do
 
         expect(branches.size).to eq(1)
         expect(branches.collect(&:name)).to contain_exactly('example_branch')
+      end
+
+      describe 'advanced readme content', experiment: :new_project_readme_content do
+        before do
+          stub_experiments(new_project_readme_content: :advanced)
+        end
+
+        it_behaves_like 'creates README.md'
+
+        it 'includes advanced content in the README.md' do
+          content = project.repository.readme.data
+          expect(content).to include <<~MARKDOWN
+            git remote add origin #{project.http_url_to_repo}
+            git branch -M example_branch
+            git push -uf origin example_branch
+          MARKDOWN
+        end
       end
     end
   end

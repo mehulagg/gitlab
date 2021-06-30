@@ -240,6 +240,22 @@ export const mockEpic = {
   labels: [],
 };
 
+export const mockFormattedBoardEpic = {
+  fullId: 'gid://gitlab/Epic/41',
+  id: 41,
+  iid: '1',
+  title: 'Epic title',
+  state: 'opened',
+  webUrl: '/groups/gitlab-org/-/epics/1',
+  group: { fullPath: 'gitlab-org' },
+  descendantCounts: {
+    openedIssues: 3,
+    closedIssues: 2,
+  },
+  issues: [mockIssue],
+  labels: [],
+};
+
 export const mockEpics = [
   {
     id: 'gid://gitlab/Epic/41',

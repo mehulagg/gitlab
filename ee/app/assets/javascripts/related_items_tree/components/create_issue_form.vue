@@ -14,7 +14,7 @@ import { debounce } from 'lodash';
 import { mapState, mapActions } from 'vuex';
 
 import Api from '~/api';
-import createFlash, { FLASH_TYPES } from '~/flash';
+import createFlash from '~/flash';
 import { STORAGE_KEY } from '~/frequent_items/constants';
 import { getTopFrequentItems } from '~/frequent_items/utils';
 import AccessorUtilities from '~/lib/utils/accessor';
@@ -112,7 +112,6 @@ export default {
         .catch(() => {
           createFlash({
             message: __('Something went wrong while fetching details'),
-            type: FLASH_TYPES.ALERT,
           });
           this.selectedProject = null;
         })

@@ -165,7 +165,7 @@ cannot change them:
   - Includes any jobs that drive the logic of your job.
 - Explicitly set the container image file to run the job in. This ensures that your script
   steps execute in the correct environment.
-- Explicitly set any relevant GitLab pre-defined [job keywords](../../../ci/yaml/README.md#job-keywords).
+- Explicitly set any relevant GitLab pre-defined [job keywords](../../../ci/yaml/index.md#job-keywords).
   This ensures that your job uses the settings you intend and that they are not overriden by
   project-level pipelines.
 
@@ -189,7 +189,7 @@ Use the switches to enable or disable the following features:
 | **Repository**                    | ✓                         | Enables [repository](../repository/) functionality                                                                                                                                             |
 | **Merge Requests**                | ✓                         | Enables [merge request](../merge_requests/) functionality; also see [Merge request settings](#merge-request-settings)                                                                          |
 | **Forks**                         | ✓                         | Enables [forking](../working_with_projects.md#fork-a-project) functionality                                                                                                                                    |
-| **Pipelines**                     | ✓                         | Enables [CI/CD](../../../ci/README.md) functionality                                                                                                                                           |
+| **Pipelines**                     | ✓                         | Enables [CI/CD](../../../ci/index.md) functionality                                                                                                                                           |
 | **Container Registry**            |                           | Activates a [registry](../../packages/container_registry/) for your Docker images                                                                                                              |
 | **Git Large File Storage**        |                           | Enables the use of [large files](../../../topics/git/lfs/index.md#git-large-file-storage-lfs)                                                                                    |
 | **Packages**                      |                           | Supports configuration of a [package registry](../../../administration/packages/index.md#gitlab-package-registry-administration) functionality                                    |

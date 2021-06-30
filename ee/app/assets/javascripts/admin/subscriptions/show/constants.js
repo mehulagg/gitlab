@@ -137,3 +137,7 @@ export const connectivityErrorAlert = {
   ),
 };
 export const supportLink = 'https://about.gitlab.com/support/#contact-support';
+export const subscriptionBannerTitle = s__('SuperSonics|Cloud licensing');
+export const subscriptionBannerText = s__(
+  "SuperSonics|Cloud licensing is now available. It's an easier way to activate instances and manage subscriptions. Read more about it in our %{blogPostLinkStart}blog post%{blogPostLinkEnd}. Activation codes are available in the %{portalLinkStart}Customers Portal%{portalLinkEnd}.",
+);

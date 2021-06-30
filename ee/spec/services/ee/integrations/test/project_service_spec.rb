@@ -14,7 +14,7 @@ RSpec.describe ::Integrations::Test::ProjectService do
 
     context 'without event specified' do
       context 'GitHubService' do
-        let(:integration) { create(:github_service, project: project) }
+        let(:integration) { create(:github_integration, project: project) }
 
         it_behaves_like 'tests for integration with pipeline data'
       end

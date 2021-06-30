@@ -13,6 +13,7 @@ RSpec.describe API::ProjectApprovalRules do
 
   describe 'GET /projects/:id/approval_rules/:approval_rule_id' do
     let_it_be(:private_project) { create(:project, :private, creator: user, namespace: user.namespace) }
+
     let!(:approval_rule) { create(:approval_project_rule, project: private_project) }
     let(:url) { "/projects/#{private_project.id}/approval_rules/#{approval_rule.id}" }
 
@@ -118,6 +119,7 @@ RSpec.describe API::ProjectApprovalRules do
 
     context 'when project is archived' do
       let_it_be(:archived_project) { create(:project, :archived, creator: user) }
+
       let(:url) { "/projects/#{archived_project.id}/approval_rules" }
 
       context 'when user has normal permissions' do

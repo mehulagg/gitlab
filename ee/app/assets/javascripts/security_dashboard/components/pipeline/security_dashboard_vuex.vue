@@ -65,8 +65,10 @@ export default {
       return this.projectFullPath && this.pipelineIid && this.securityReportSummary.coverageFuzzing;
     },
     canCreateIssue() {
-      const path = this.vulnerability.create_vulnerability_feedback_issue_path;
-      return Boolean(path);
+      const gitLabIssuePath = this.vulnerability.create_vulnerability_feedback_issue_path;
+      const jiraIssueUrl = this.vulnerability.create_jira_issue_url;
+
+      return Boolean(gitLabIssuePath || jiraIssueUrl);
     },
     canCreateMergeRequest() {
       const path = this.vulnerability.create_vulnerability_feedback_merge_request_path;

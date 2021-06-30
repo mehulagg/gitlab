@@ -119,6 +119,7 @@ RSpec.describe API::ProjectApprovalSettings do
 
     context 'when project is archived' do
       let_it_be(:archived_project) { create(:project, :archived, creator: user) }
+
       let(:url) { "/projects/#{archived_project.id}/approval_settings" }
 
       context 'when user has normal permissions' do

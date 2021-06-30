@@ -276,28 +276,6 @@ RSpec.describe 'Admin updates EE-only settings' do
     end
   end
 
-  context 'Metrics and profiling page' do
-    before do
-      visit metrics_and_profiling_admin_application_settings_path
-    end
-
-    it 'loads seat link payload on click', :js do
-      page.within('#js-seat-link-settings') do
-        expected_payload_content = /(?=.*"date")(?=.*"timestamp")(?=.*"license_key")(?=.*"max_historical_user_count")(?=.*"billable_users_count")/m
-
-        expect(page).not_to have_content expected_payload_content
-
-        click_button('Preview payload')
-
-        wait_for_requests
-
-        expect(page).to have_selector '.js-seat-link-payload'
-        expect(page).to have_button 'Hide payload'
-        expect(page).to have_content expected_payload_content
-      end
-    end
-  end
-
   context 'sign up settings', :js do
     context 'when license has active user count' do
       let(:license) { create(:license, restrictions: { active_user_count: 1 }) }

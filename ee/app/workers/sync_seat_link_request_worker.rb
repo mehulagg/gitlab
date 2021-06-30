@@ -35,11 +35,9 @@ class SyncSeatLinkRequestWorker
   private
 
   def reset_license!(license_data)
-    current_license = License.current if License.current&.cloud_license?
-
     License.transaction do
-      current_license&.destroy!
-      License.create!(data: license_data, cloud: true)
+      License.cloud.delete_all
+      License.create!(data: license_data, cloud: true, last_synced_at: Time.current)
     end
   rescue StandardError => e
     Gitlab::ErrorTracking.track_and_raise_for_dev_exception(e)

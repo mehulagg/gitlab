@@ -107,6 +107,42 @@ RSpec.describe Security::OrchestrationPolicyConfiguration do
     end
   end
 
+  describe '#policy_hash' do
+    subject { security_orchestration_policy_configuration.policy_hash }
+
+    before do
+      allow(security_policy_management_project).to receive(:repository).and_return(repository)
+      allow(repository).to receive(:blob_data_at).with(default_branch, Security::OrchestrationPolicyConfiguration::POLICY_PATH).and_return(policy_yaml)
+    end
+
+    context 'when policy is present' do
+      let(:policy_yaml) do
+        <<-EOS
+        scan_execution_policy:
+        - name: Run DAST in every pipeline
+          description: This policy enforces to run DAST for every pipeline within the project
+          enabled: true
+          rules:
+          - type: pipeline
+            branches:
+            - "production"
+          actions:
+          - scan: dast
+            site_profile: Site Profile
+            scanner_profile: Scanner Profile
+        EOS
+      end
+
+      it { expect(subject.dig(:scan_execution_policy, 0, :name)).to eq('Run DAST in every pipeline') }
+    end
+
+    context 'when policy is nil' do
+      let(:policy_yaml) { nil }
+
+      it { expect(subject).to be_nil }
+    end
+  end
+
   describe '#policy_configuration_valid?' do
     subject { security_orchestration_policy_configuration.policy_configuration_valid? }
 

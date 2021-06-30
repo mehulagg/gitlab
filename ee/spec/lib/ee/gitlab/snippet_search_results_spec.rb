@@ -3,6 +3,7 @@ require 'spec_helper'
 
 RSpec.describe Gitlab::SnippetSearchResults do
   let_it_be(:snippet) { create(:snippet, title: 'foo', description: 'foo') }
+
   let(:user) { snippet.author }
   let(:com_value) { true }
 

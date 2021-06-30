@@ -10,7 +10,7 @@ RSpec.describe Projects::Security::ApiFuzzingConfigurationHelper do
   let(:full_path) { project.full_path }
   let(:api_fuzzing_documentation_path) { help_page_path('user/application_security/api_fuzzing/index') }
   let(:api_fuzzing_authentication_documentation_path) { help_page_path('user/application_security/api_fuzzing/index', anchor: 'authentication') }
-  let(:ci_variables_documentation_path) { help_page_path('ci/variables/README') }
+  let(:ci_variables_documentation_path) { help_page_path('ci/variables/index') }
   let(:project_ci_settings_path) { project_settings_ci_cd_path(project) }
 
   subject { helper.api_fuzzing_configuration_data(project) }

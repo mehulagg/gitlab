@@ -1,0 +1,12 @@
+query scanExecutionPolicies($fullPath: ID!) {
+  project(fullPath: $fullPath) {
+    scanExecutionPolicies {
+      nodes {
+        name
+        yaml
+        enabled
+        updatedAt
+      }
+    }
+  }
+}

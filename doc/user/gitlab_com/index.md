@@ -39,6 +39,13 @@ and has its own dedicated IP address (`192.237.158.143`).
 
 The IP address for `mg.gitlab.com` is subject to change at any time.
 
+### Service Desk custom mailbox
+
+On GitLab.com there's a mailbox configured for Service Desk with the email adress:
+`contact-project+%{key}@incoming.gitlab.com`. To use this mailbox, configure the
+[custom suffix](../project/service_desk.md#configuring-a-custom-email-address-suffix) in project
+settings.
+
 ## Backups
 
 [See our backup strategy](https://about.gitlab.com/handbook/engineering/infrastructure/production/#backups).
@@ -97,14 +104,14 @@ which is part of [GitLab CI/CD](#gitlab-cicd).
 
 ## GitLab CI/CD
 
-Below are the current settings regarding [GitLab CI/CD](../../ci/README.md).
+Below are the current settings regarding [GitLab CI/CD](../../ci/index.md).
 Any settings or feature limits not listed here are using the defaults listed in
 the related documentation.
 
 | Setting                             | GitLab.com | Default |
 |-------------------------------------|------------|---------|
 | Artifacts maximum size (compressed) | 1 GB       | 100 MB  |
-| Artifacts [expiry time](../../ci/yaml/README.md#artifactsexpire_in)   | From June 22, 2020, deleted after 30 days unless otherwise specified (artifacts created before that date have no expiry).           | deleted after 30 days unless otherwise specified    |
+| Artifacts [expiry time](../../ci/yaml/index.md#artifactsexpire_in)   | From June 22, 2020, deleted after 30 days unless otherwise specified (artifacts created before that date have no expiry).           | deleted after 30 days unless otherwise specified    |
 | Scheduled Pipeline Cron | `*/5 * * * *` | `3-59/10 * * * *` |
 | [Max jobs in active pipelines](../../administration/instance_limits.md#number-of-jobs-in-active-pipelines) | `500` for Free tier, unlimited otherwise | Unlimited |
 | [Max CI/CD subscriptions to a project](../../administration/instance_limits.md#number-of-cicd-subscriptions-to-a-project) | `2` | Unlimited |
@@ -118,8 +125,8 @@ the related documentation.
 GitLab.com has the following [account limits](../admin_area/settings/account_and_limit_settings.md)
 enabled. If a setting is not listed, it is set to the default value.
 
-If you are near or over the repository size limit, you can
-[reduce your repository size with Git](../project/repository/reducing_the_repo_size_using_git.md).
+If you are near or over the repository size limit, you can either
+[reduce your repository size with Git](../project/repository/reducing_the_repo_size_using_git.md) or [purchase additional storage](https://about.gitlab.com/pricing/licensing-faq/#can-i-buy-more-storage).
 
 | Setting                       | GitLab.com | Default |
 |-------------------------------|------------|---------|
@@ -174,7 +181,7 @@ The following limits apply for [Webhooks](../project/integrations/webhooks.md):
 
 GitLab has shared runners on GitLab.com that you can use to run your CI jobs.
 
-For more information, see [choosing a runner](../../ci/runners/README.md).
+For more information, see [choosing a runner](../../ci/runners/index.md).
 
 ## Sidekiq
 

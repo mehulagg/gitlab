@@ -488,6 +488,21 @@ RSpec.describe Issues::UpdateService, :mailer do
           end
         end
       end
+
+      it 'verifies the number of queries' do
+        update_issue(description: "- [ ] Task 1 #{user.to_reference}")
+
+        baseline = ActiveRecord::QueryRecorder.new do
+          update_issue(description: "- [x] Task 1 #{user.to_reference}")
+        end
+
+        recorded = ActiveRecord::QueryRecorder.new do
+          update_issue(description: "- [x] Task 1 #{user.to_reference}\n- [ ] Task 2 #{user.to_reference}")
+        end
+
+        expect(recorded.count).to eq(baseline.count - 1)
+        expect(recorded.cached_count).to eq(0)
+      end
     end
 
     context 'when description changed' do
@@ -522,7 +537,7 @@ RSpec.describe Issues::UpdateService, :mailer do
 
       it 'executes confidential issue hooks' do
         expect(project).to receive(:execute_hooks).with(an_instance_of(Hash), :confidential_issue_hooks)
-        expect(project).to receive(:execute_services).with(an_instance_of(Hash), :confidential_issue_hooks)
+        expect(project).to receive(:execute_integrations).with(an_instance_of(Hash), :confidential_issue_hooks)
 
         update_issue(confidential: true)
       end

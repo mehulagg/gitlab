@@ -44,7 +44,6 @@ RSpec.describe Mutations::Boards::Epics::Create do
     before do
       group.add_reporter(current_user)
       stub_licensed_features(epics: true)
-      stub_feature_flags(epic_boards: true)
     end
 
     context 'when all arguments are given' do

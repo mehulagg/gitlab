@@ -15,11 +15,10 @@ export const mockEnvironmentsResponse = {
   stopped_count: 5,
 };
 
-export const mockPoliciesResponse = [
+export const mockNetworkPoliciesResponse = [
   {
     name: 'policy',
-    namespace: 'production',
-    manifest: `---
+    yaml: `---
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
@@ -36,15 +35,16 @@ spec:
     - namespaceSelector:
         matchLabels:
           project: myproject`,
-    creation_timestamp: '2020-04-14T00:08:30Z',
-    is_enabled: true,
+    updatedAt: '2020-04-14T00:08:30Z',
+    enabled: true,
+    fromAutoDevops: false,
   },
 ];
 
 export const mockCiliumPolicy = {
   name: 'policy',
-  creationTimestamp: new Date('2021-06-07T00:00:00.000Z'),
-  manifest: `apiVersion: cilium.io/v2
+  updatedAt: new Date('2021-06-07T00:00:00.000Z'),
+  yaml: `apiVersion: cilium.io/v2
 kind: CiliumNetworkPolicy
 metadata:
   name: policy
@@ -54,8 +54,8 @@ spec:
 
 export const mockScanExecutionPolicy = {
   name: 'Scheduled DAST scan',
-  creationTimestamp: new Date('2021-06-07T00:00:00.000Z'),
-  manifest: `---
+  updatedAt: new Date('2021-06-07T00:00:00.000Z'),
+  yaml: `---
 name: Enforce DAST in every pipeline
 description: This policy enforces pipeline configuration to have a job with DAST scan
 enabled: true
@@ -68,7 +68,10 @@ actions:
   scanner_profile: Scanner Profile
   site_profile: Site Profile
 `,
+  enabled: true,
 };
+
+export const mockScanExecutionPoliciesResponse = [mockScanExecutionPolicy];
 
 export const mockNominalHistory = [
   ['2019-12-04T00:00:00.000Z', 56],

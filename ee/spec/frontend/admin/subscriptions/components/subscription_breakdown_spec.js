@@ -138,11 +138,18 @@ describe('Subscription Breakdown', () => {
     });
 
     it('presents a subscription activation modal', () => {
-      expect(findSubscriptionActivationModal().exists()).toBe(true);
+      expect(findSubscriptionActivationModal().props()).toMatchObject({
+        modalId,
+        visible: false,
+      });
     });
 
-    it('passes the correct modal id', () => {
-      expect(findSubscriptionActivationModal().attributes('modalid')).toBe(modalId);
+    it('updates visible of subscription activation modal when change emitted', async () => {
+      findSubscriptionActivationModal().vm.$emit('change', true);
+
+      await wrapper.vm.$nextTick();
+
+      expect(findSubscriptionActivationModal().props('visible')).toBe(true);
     });
 
     describe('footer buttons', () => {
@@ -279,9 +286,7 @@ describe('Subscription Breakdown', () => {
         expect(findSubscriptionSyncNotifications().exists()).toBe(false);
       });
 
-      it('shows a modal', () => {
-        const props = { subscription: { ...licenseFile } };
-        createComponent({ props, stubs: { GlCard, SubscriptionDetailsCard } });
+      it('shows modal when active subscription action clicked', () => {
         findActivateSubscriptionAction().vm.$emit('click');
 
         expect(glModalDirective).toHaveBeenCalledWith(modalId);

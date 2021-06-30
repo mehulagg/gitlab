@@ -50,10 +50,6 @@ module Mutations
           board = authorized_find!(id: args[:board_id])
           epic = authorized_find!(id: args[:epic_id])
 
-          unless Feature.enabled?(:epic_boards, board.resource_parent, default_enabled: :yaml)
-            raise Gitlab::Graphql::Errors::ResourceNotAvailable, 'epic_boards feature is disabled'
-          end
-
           move_epic(board, epic, move_list_arguments(args).merge(board_id: board.id))
 
           {

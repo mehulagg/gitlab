@@ -1,8 +1,14 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`ee/BoardContentSidebar matches the snapshot 1`] = `
-<div>
-  Issue details
+<div
+  class="boards-sidebar gl-absolute"
+>
+  <h2
+    class="gl-my-0 gl-font-size-h2 gl-line-height-24"
+  >
+    Issue details
+  </h2>
   <boardsidebartitle-stub />
    
   <sidebarassigneeswidget-stub

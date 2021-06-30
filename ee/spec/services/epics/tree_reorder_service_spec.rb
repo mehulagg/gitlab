@@ -103,7 +103,7 @@ RSpec.describe Epics::TreeReorderService do
               expect { subject }.to change { tree_object_2.reload.epic }.from(epic1).to(epic)
             end
 
-            it 'creates system notes' do
+            it 'creates system notes', :sidekiq_inline do
               expect { subject }.to change { Note.system.count }.by(3)
             end
           end
@@ -212,7 +212,7 @@ RSpec.describe Epics::TreeReorderService do
                 expect(tree_object_1.reload.relative_position).to be > tree_object_2.reload.relative_position
               end
 
-              it 'creates system notes' do
+              it 'creates system notes', :sidekiq_inline do
                 expect { subject }.to change { Note.system.count }.by(3)
               end
             end

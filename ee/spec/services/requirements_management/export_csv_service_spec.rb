@@ -7,6 +7,7 @@ RSpec.describe RequirementsManagement::ExportCsvService do
   let_it_be(:group) { create_default(:group) }
   let_it_be(:project) { create_default(:project, :public) }
   let_it_be_with_reload(:requirement) { create(:requirement, state: :opened, author: user) }
+
   let(:fields) { [] }
 
   subject { described_class.new(RequirementsManagement::Requirement.all, project, fields) }
@@ -39,6 +40,7 @@ RSpec.describe RequirementsManagement::ExportCsvService do
 
   context 'includes' do
     let_it_be(:report) { create(:test_report, requirement: requirement, state: :passed, build: nil, author: user) }
+
     let(:time_format) { '%Y-%m-%d %H:%M:%S %Z' }
 
     it 'includes the columns required for import' do

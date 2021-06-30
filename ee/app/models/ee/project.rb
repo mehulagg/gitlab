@@ -41,8 +41,8 @@ module EE
       has_one :push_rule, ->(project) { project&.feature_available?(:push_rules) ? all : none }, inverse_of: :project
       has_one :index_status
 
-      has_one :github_service, class_name: 'Integrations::Github'
-      has_one :gitlab_slack_application_service, class_name: 'Integrations::GitlabSlackApplication'
+      has_one :github_integration, class_name: 'Integrations::Github'
+      has_one :gitlab_slack_application_integration, class_name: 'Integrations::GitlabSlackApplication'
 
       has_one :status_page_setting, inverse_of: :project, class_name: 'StatusPage::ProjectSetting'
       has_one :compliance_framework_setting, class_name: 'ComplianceManagement::ComplianceFramework::ProjectSettings', inverse_of: :project
@@ -144,14 +144,14 @@ module EE
       scope :for_plan_name, -> (name) { joins(namespace: { gitlab_subscription: :hosted_plan }).where(plans: { name: name }) }
       scope :requiring_code_owner_approval,
             -> { joins(:protected_branches).where(protected_branches: { code_owner_approval_required: true }) }
-      scope :with_active_services, -> { joins(:integrations).merge(::Integration.active) }
+      scope :with_active_integrations, -> { joins(:integrations).merge(::Integration.active) }
       scope :github_imported, -> { where(import_type: 'github') }
       scope :with_protected_branches, -> { joins(:protected_branches) }
       scope :with_repositories_enabled, -> { joins(:project_feature).where(project_features: { repository_access_level: ::ProjectFeature::ENABLED }) }
 
       scope :with_security_reports_stored, -> { where('EXISTS (?)', ::Vulnerabilities::Finding.scoped_project.select(1)) }
       scope :with_security_reports, -> { where('EXISTS (?)', ::Ci::JobArtifact.security_reports.scoped_project.select(1)) }
-      scope :with_github_service_pipeline_events, -> { joins(:github_service).merge(::Integrations::Github.pipeline_hooks) }
+      scope :with_github_integration_pipeline_events, -> { joins(:github_integration).merge(::Integrations::Github.pipeline_hooks) }
       scope :with_active_prometheus_integration, -> { joins(:prometheus_integration).merge(::Integrations::Prometheus.active) }
       scope :with_enabled_incident_sla, -> { joins(:incident_management_setting).where(project_incident_management_settings: { sla_timer: true }) }
       scope :mirrored_with_enabled_pipelines, -> do
@@ -199,10 +199,10 @@ module EE
 
       delegate :ci_minutes_quota, to: :shared_runners_limit_namespace
 
-      delegate :merge_pipelines_enabled, :merge_pipelines_enabled=, :merge_pipelines_enabled?, :merge_pipelines_were_disabled?, to: :ci_cd_settings
-      delegate :merge_trains_enabled, :merge_trains_enabled=, :merge_trains_enabled?, to: :ci_cd_settings
+      delegate :merge_pipelines_enabled, :merge_pipelines_enabled=, to: :ci_cd_settings, allow_nil: true
+      delegate :merge_trains_enabled, :merge_trains_enabled=, to: :ci_cd_settings, allow_nil: true
 
-      delegate :auto_rollback_enabled, :auto_rollback_enabled=, :auto_rollback_enabled?, to: :ci_cd_settings
+      delegate :auto_rollback_enabled, :auto_rollback_enabled=, to: :ci_cd_settings, allow_nil: true
       delegate :closest_gitlab_subscription, to: :namespace
 
       delegate :requirements_access_level, to: :project_feature, allow_nil: true
@@ -634,13 +634,13 @@ module EE
     end
     alias_method :merge_requests_ff_only_enabled?, :merge_requests_ff_only_enabled
 
-    override :disabled_services
-    def disabled_services
-      strong_memoize(:disabled_services) do
-        super.tap do |services|
-          services.push('github') unless feature_available?(:github_project_service_integration)
-          ::Gitlab::CurrentSettings.slack_app_enabled ? services.push('slack_slash_commands') : services.push('gitlab_slack_application')
-        end
+    override :disabled_integrations
+    def disabled_integrations
+      strong_memoize(:disabled_integrations) do
+        gh = github_integration_enabled? ? [] : %w[github]
+        slack = ::Gitlab::CurrentSettings.slack_app_enabled ? %w[slack_slash_commands] : %w[gitlab_slack_application]
+
+        super + gh + slack
       end
     end
 
@@ -800,7 +800,35 @@ module EE
       available_features[feature]
     end
 
+    def merge_pipelines_enabled?
+      return false unless ci_cd_settings
+
+      ci_cd_settings.merge_pipelines_enabled?
+    end
+
+    def merge_pipelines_were_disabled?
+      return false unless ci_cd_settings
+
+      ci_cd_settings.merge_pipelines_were_disabled?
+    end
+
+    def merge_trains_enabled?
+      return false unless ci_cd_settings
+
+      ci_cd_settings.merge_trains_enabled?
+    end
+
+    def auto_rollback_enabled?
+      return false unless ci_cd_settings
+
+      ci_cd_settings.auto_rollback_enabled?
+    end
+
     private
+
+    def github_integration_enabled?
+      feature_available?(:github_project_service_integration)
+    end
 
     def group_hooks
       GroupHook.where(group_id: group.self_and_ancestors)

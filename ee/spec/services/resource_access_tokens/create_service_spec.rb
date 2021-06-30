@@ -84,9 +84,17 @@ RSpec.describe ResourceAccessTokens::CreateService do
           response = subject
 
           audit_event = AuditEvent.where(author_id: user.id).last
+          access_token = response.payload[:access_token]
+          custom_message = <<~MESSAGE.squish
+            Created project access token with token_id: #{access_token.id} with scopes: #{access_token.scopes} and Maintainer access level.
+          MESSAGE
 
-          expect(audit_event.details[:custom_message]).to eq("Created project access token with token_id: #{response.payload[:access_token].id} with scopes: #{response.payload[:access_token].scopes}")
-          expect(audit_event.details[:target_details]).to match(response.payload[:access_token].user.name)
+          expect(audit_event.details).to include(
+            custom_message: custom_message,
+            target_id: access_token.id,
+            target_type: access_token.class.name,
+            target_details: access_token.user.name
+          )
         end
       end
 
@@ -101,12 +109,24 @@ RSpec.describe ResourceAccessTokens::CreateService do
           it 'logs the permission error message' do
             subject
 
-            expect(AuditEvent.where(author_id: user.id).last.details[:custom_message]).to eq('Attempted to create project access token but failed with message: User does not have permission to create project access token')
+            audit_event = AuditEvent.where(author_id: user.id).last
+            custom_message = <<~MESSAGE.squish
+              Attempted to create project access token but failed with message:
+              User does not have permission to create project access token
+            MESSAGE
+
+            expect(audit_event.details).to include(
+              custom_message: custom_message,
+              target_id: nil,
+              target_type: nil,
+              target_details: nil
+            )
           end
         end
 
         context "when access provisioning fails" do
           let_it_be(:user) { create(:user) }
+
           let(:unpersisted_member) { build(:project_member, source: resource, user: user) }
 
           before do
@@ -123,7 +143,18 @@ RSpec.describe ResourceAccessTokens::CreateService do
           it 'logs the provisioning error message' do
             subject
 
-            expect(AuditEvent.where(author_id: user.id).last.details[:custom_message]).to eq('Attempted to create project access token but failed with message: Could not provision maintainer access to project access token')
+            audit_event = AuditEvent.where(author_id: user.id).last
+            custom_message = <<~MESSAGE.squish
+              Attempted to create project access token but failed with message:
+              Could not provision maintainer access to project access token
+            MESSAGE
+
+            expect(audit_event.details).to include(
+              custom_message: custom_message,
+              target_id: nil,
+              target_type: nil,
+              target_details: nil
+            )
           end
         end
       end

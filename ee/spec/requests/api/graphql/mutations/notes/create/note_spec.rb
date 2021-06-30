@@ -6,6 +6,7 @@ RSpec.describe 'Adding a Note to an Epic' do
   include GraphqlHelpers
 
   let_it_be(:current_user) { create(:user) }
+
   let(:epic) { create(:epic, group: group) }
   let(:mutation) do
     variables = {

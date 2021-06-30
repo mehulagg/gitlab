@@ -10,7 +10,7 @@ module GitlabSubscriptions
       {
         reconciliation_date: entity.next_reconciliation_date.to_s,
         cookie_key: entity.cookie_key,
-        dot_com: Gitlab::CurrentSettings.should_check_namespace_plan?
+        uses_namespace_plan: Gitlab::CurrentSettings.should_check_namespace_plan?
       }
     end
 

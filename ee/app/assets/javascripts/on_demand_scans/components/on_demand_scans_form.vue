@@ -17,6 +17,7 @@ import * as Sentry from '@sentry/browser';
 import { SCAN_TYPE } from 'ee/security_configuration/dast_scanner_profiles/constants';
 import { DAST_SITE_VALIDATION_STATUS } from 'ee/security_configuration/dast_site_validation/constants';
 import { initFormField } from 'ee/security_configuration/utils';
+import { TYPE_SCANNER_PROFILE, TYPE_SITE_PROFILE } from '~/graphql_shared/constants';
 import { convertToGraphQLId } from '~/graphql_shared/utils';
 import { serializeFormObject } from '~/lib/utils/forms';
 import { redirectTo, queryToObject } from '~/lib/utils/url_utility';
@@ -34,8 +35,6 @@ import {
   ERROR_MESSAGES,
   SCANNER_PROFILES_QUERY,
   SITE_PROFILES_QUERY,
-  TYPE_SITE_PROFILE,
-  TYPE_SCANNER_PROFILE,
 } from '../settings';
 import ScannerProfileSelector from './profile_selector/scanner_profile_selector.vue';
 import SiteProfileSelector from './profile_selector/site_profile_selector.vue';
@@ -475,7 +474,7 @@ export default {
       <div class="gl-mt-6 gl-pt-6">
         <gl-button
           type="submit"
-          variant="success"
+          variant="confirm"
           class="js-no-auto-disable"
           data-testid="on-demand-scan-submit-button"
           :disabled="isSubmitButtonDisabled"
@@ -484,7 +483,7 @@ export default {
           {{ s__('OnDemandScans|Save and run scan') }}
         </gl-button>
         <gl-button
-          variant="success"
+          variant="confirm"
           category="secondary"
           data-testid="on-demand-scan-save-button"
           :disabled="isSaveButtonDisabled"

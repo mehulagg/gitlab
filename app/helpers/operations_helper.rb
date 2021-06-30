@@ -2,10 +2,11 @@
 
 module OperationsHelper
   include Gitlab::Utils::StrongMemoize
+  include IntegrationsHelper
 
   def prometheus_integration
     strong_memoize(:prometheus_integration) do
-      @project.find_or_initialize_service(::Integrations::Prometheus.to_param)
+      @project.find_or_initialize_integration(::Integrations::Prometheus.to_param)
     end
   end
 

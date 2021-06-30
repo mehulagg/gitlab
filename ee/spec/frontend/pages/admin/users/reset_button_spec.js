@@ -87,9 +87,6 @@ describe('Reset pipeline minutes button', () => {
         expect(axiosSpy).toHaveBeenCalled();
         expect($toast.show).toHaveBeenCalledWith(
           'There was an error resetting user pipeline minutes.',
-          {
-            type: 'error',
-          },
         );
       });
     });

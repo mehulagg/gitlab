@@ -6,6 +6,7 @@ RSpec.describe BillableMembers::DestroyService do
   describe '#execute' do
     let_it_be(:current_user) { create(:user) }
     let_it_be(:root_group) { create(:group) }
+
     let(:group) { root_group }
 
     let(:user_id) { nil }

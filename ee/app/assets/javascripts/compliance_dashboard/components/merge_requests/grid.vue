@@ -32,6 +32,11 @@ export default {
       required: false,
       default: false,
     },
+    drawerEnabled: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
   },
   methods: {
     key(id, value) {
@@ -65,50 +70,106 @@ export default {
       <grid-column-heading :heading="$options.strings.pipelineStatusLabel" class="gl-text-center" />
       <grid-column-heading :heading="$options.strings.updatesLabel" class="gl-text-right" />
 
-      <template v-for="mergeRequest in mergeRequests">
-        <merge-request
-          :key="key(mergeRequest.id, $options.keyTypes.mergeRequest)"
-          :merge-request="mergeRequest"
-        />
-
-        <status
-          :key="key(mergeRequest.id, 'approval')"
-          :status="{ type: 'approval', data: mergeRequest.approval_status }"
-        />
-
-        <status
-          :key="key(mergeRequest.id, 'pipeline')"
-          :status="{ type: 'pipeline', data: mergeRequest.pipeline_status }"
-        />
-
-        <div
-          :key="key(mergeRequest.id, $options.keyTypes.updates)"
-          class="gl-text-right gl-border-b-solid gl-border-b-1 gl-border-b-gray-100 gl-p-5 gl-relative"
+      <!-- TODO: Remove the if/else and duplicate components with https://gitlab.com/gitlab-org/gitlab/-/issues/334682 -->
+      <template v-if="drawerEnabled">
+        <a
+          v-for="mergeRequest in mergeRequests"
+          :key="mergeRequest.id"
+          class="dashboard-merge-request dashboard-grid gl-display-grid gl-grid-tpl-rows-auto gl-hover-bg-blue-50 gl-hover-text-decoration-none gl-hover-cursor-pointer"
+          data-testid="merge-request-link"
+          @click="$emit('toggleDrawer', mergeRequest)"
         >
-          <approvers :approvers="mergeRequest.approved_by_users" />
-          <branch-details
-            v-if="hasBranchDetails(mergeRequest)"
-            :source-branch="{
-              name: mergeRequest.source_branch,
-              uri: mergeRequest.source_branch_uri,
-            }"
-            :target-branch="{
-              name: mergeRequest.target_branch,
-              uri: mergeRequest.target_branch_uri,
-            }"
+          <merge-request
+            :key="key(mergeRequest.id, $options.keyTypes.mergeRequest)"
+            :merge-request="mergeRequest"
           />
-          <time-ago-tooltip
-            :time="mergeRequest.merged_at"
-            tooltip-placement="bottom"
-            class="gl-text-gray-500"
+
+          <status
+            :key="key(mergeRequest.id, 'approval')"
+            :status="{ type: 'approval', data: mergeRequest.approval_status }"
+          />
+
+          <status
+            :key="key(mergeRequest.id, 'pipeline')"
+            :status="{ type: 'pipeline', data: mergeRequest.pipeline_status }"
+          />
+
+          <div
+            :key="key(mergeRequest.id, $options.keyTypes.updates)"
+            class="gl-text-right gl-border-b-solid gl-border-b-1 gl-border-b-gray-100 gl-p-5 gl-relative"
           >
-            <template #default="{ timeAgo }">
-              <gl-sprintf :message="$options.strings.mergedAtText">
-                <template #timeAgo>{{ timeAgo }}</template>
-              </gl-sprintf>
-            </template>
-          </time-ago-tooltip>
-        </div>
+            <approvers :approvers="mergeRequest.approved_by_users" />
+            <branch-details
+              v-if="hasBranchDetails(mergeRequest)"
+              :source-branch="{
+                name: mergeRequest.source_branch,
+                uri: mergeRequest.source_branch_uri,
+              }"
+              :target-branch="{
+                name: mergeRequest.target_branch,
+                uri: mergeRequest.target_branch_uri,
+              }"
+            />
+            <time-ago-tooltip
+              :time="mergeRequest.merged_at"
+              tooltip-placement="bottom"
+              class="gl-text-gray-500"
+            >
+              <template #default="{ timeAgo }">
+                <gl-sprintf :message="$options.strings.mergedAtText">
+                  <template #timeAgo>{{ timeAgo }}</template>
+                </gl-sprintf>
+              </template>
+            </time-ago-tooltip>
+          </div>
+        </a>
+      </template>
+      <template v-else>
+        <template v-for="mergeRequest in mergeRequests">
+          <merge-request
+            :key="key(mergeRequest.id, $options.keyTypes.mergeRequest)"
+            :merge-request="mergeRequest"
+          />
+
+          <status
+            :key="key(mergeRequest.id, 'approval')"
+            :status="{ type: 'approval', data: mergeRequest.approval_status }"
+          />
+
+          <status
+            :key="key(mergeRequest.id, 'pipeline')"
+            :status="{ type: 'pipeline', data: mergeRequest.pipeline_status }"
+          />
+
+          <div
+            :key="key(mergeRequest.id, $options.keyTypes.updates)"
+            class="gl-text-right gl-border-b-solid gl-border-b-1 gl-border-b-gray-100 gl-p-5 gl-relative"
+          >
+            <approvers :approvers="mergeRequest.approved_by_users" />
+            <branch-details
+              v-if="hasBranchDetails(mergeRequest)"
+              :source-branch="{
+                name: mergeRequest.source_branch,
+                uri: mergeRequest.source_branch_uri,
+              }"
+              :target-branch="{
+                name: mergeRequest.target_branch,
+                uri: mergeRequest.target_branch_uri,
+              }"
+            />
+            <time-ago-tooltip
+              :time="mergeRequest.merged_at"
+              tooltip-placement="bottom"
+              class="gl-text-gray-500"
+            >
+              <template #default="{ timeAgo }">
+                <gl-sprintf :message="$options.strings.mergedAtText">
+                  <template #timeAgo>{{ timeAgo }}</template>
+                </gl-sprintf>
+              </template>
+            </time-ago-tooltip>
+          </div>
+        </template>
       </template>
     </div>
 
