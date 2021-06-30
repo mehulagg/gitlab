@@ -23,16 +23,12 @@ module EE
         operational_enabled = ::License.current&.usage_ping?
 
         return super unless ::License.current.present?
+        return [] if !optional_enabled && !operational_enabled
 
-        if optional_enabled && operational_enabled
-          [STANDARD_CATEGORY, SUBSCRIPTION_CATEGORY, OPTIONAL_CATEGORY, OPERATIONAL_CATEGORY]
-        elsif optional_enabled && !operational_enabled
-          [STANDARD_CATEGORY, SUBSCRIPTION_CATEGORY, OPTIONAL_CATEGORY]
-        elsif !optional_enabled && operational_enabled
-          [STANDARD_CATEGORY, SUBSCRIPTION_CATEGORY, OPERATIONAL_CATEGORY]
-        else
-          []
-        end
+        categories = [STANDARD_CATEGORY, SUBSCRIPTION_CATEGORY]
+        categories << OPTIONAL_CATEGORY if optional_enabled
+        categories << OPERATIONAL_CATEGORY if operational_enabled
+        categories
       end
     end
   end

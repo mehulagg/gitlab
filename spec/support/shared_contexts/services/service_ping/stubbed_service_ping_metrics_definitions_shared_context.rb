@@ -6,20 +6,21 @@ RSpec.shared_context 'stubbed service ping metrics definitions' do
   let(:metrics_definitions) { standard_metrics + subscription_metrics + operational_metrics + optional_metrics }
   let(:standard_metrics) do
     [
-      metric_attributes('uuid', 'GitLab instance unique identifier', "Standard")
+      metric_attributes('uuid', "Standard")
     ]
   end
 
   let(:operational_metrics) do
     [
-      metric_attributes('counts.merge_requests', 'Count of the number of merge requests', "Operational"),
-      metric_attributes('counts.todos', 'Count of todos created', "Operational")
+      metric_attributes('counts.merge_requests', "Operational"),
+      metric_attributes('counts.todos', "Operational")
     ]
   end
 
   let(:optional_metrics) do
     [
-      metric_attributes('counts.boards', 'Count of Boards created', "Optional")
+      metric_attributes('counts.boards', "Optional"),
+      metric_attributes('gitaly.filesystems', '').except('data_category')
     ]
   end
 
@@ -29,14 +30,13 @@ RSpec.shared_context 'stubbed service ping metrics definitions' do
 
     allow(Gitlab::Usage::MetricDefinition).to(
       receive(:definitions)
-        .and_return(metrics_definitions.to_h { |definition| [definition['key_path'], double(attributes: definition)] })
+        .and_return(metrics_definitions.to_h { |definition| [definition['key_path'], Gitlab::Usage::MetricDefinition.new('', definition.symbolize_keys)] })
     )
   end
 
-  def metric_attributes(key_path, description, category)
+  def metric_attributes(key_path, category)
     {
       'key_path' => key_path,
-      'description' => description,
       'data_category' => category
     }
   end

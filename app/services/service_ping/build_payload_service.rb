@@ -8,10 +8,6 @@ module ServicePing
     OPERATIONAL_CATEGORY = 'Operational'
     EMPTY_PAYLOAD = {}.freeze
 
-    def initialize
-      @permitted_categories = filter_permitted_categories
-    end
-
     def execute
       return EMPTY_PAYLOAD if User.single_user&.requires_usage_stats_consent?
       return EMPTY_PAYLOAD unless product_intelligence_enabled?
@@ -20,8 +16,6 @@ module ServicePing
     end
 
     private
-
-    attr_reader :permitted_categories
 
     def product_intelligence_enabled?
       ::Gitlab::CurrentSettings.usage_ping_enabled?
@@ -39,7 +33,11 @@ module ServicePing
 
     def metric_category(key, parent_keys)
       key_path = parent_keys.dup.append(key).join('.')
-      metric_definitions[key_path]&.attributes&.fetch('data_category', nil)
+      metric_definitions[key_path]&.attributes&.fetch(:data_category, OPTIONAL_CATEGORY)
+    end
+
+    def permitted_categories
+      @permitted_categories ||= filter_permitted_categories
     end
 
     def filter_permitted_categories

@@ -9,7 +9,7 @@ RSpec.describe ServicePing::BuildPayloadService do
     include_context 'stubbed service ping metrics definitions' do
       let(:subscription_metrics) do
         [
-          metric_attributes('license_md5', 'The MD5 hash of license key of the GitLab instance', "Subscription")
+          metric_attributes('license_md5', "Subscription")
         ]
       end
     end
