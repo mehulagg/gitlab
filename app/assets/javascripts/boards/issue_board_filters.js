@@ -29,9 +29,7 @@ export default function issueBoardFilters(apollo, fullPath, boardType) {
          * are putting the current_user on top of the list to avoid duplicates
          */
 
-        data.workspace?.assignees.nodes
-          .map(({ user }) => user)
-          .filter(({ username }) => username !== gon.current_username),
+        data.workspace?.assignees.nodes.map(({ user }) => user),
       );
   };
 
