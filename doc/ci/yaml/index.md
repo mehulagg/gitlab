@@ -54,6 +54,7 @@ The keywords available for jobs are:
 | [`secrets`](#secrets)               | The CI/CD secrets the job needs. |
 | [`services`](#services)             | Use Docker services images. |
 | [`stage`](#stage)                   | Defines a job stage. |
+| [`status`](#status)                 | Adds status mirror job to reflect the status of another project pipeline. |
 | [`tags`](#tags)                     | List of tags that are used to select a runner. |
 | [`timeout`](#timeout)               | Define a custom job-level timeout that takes precedence over the project-wide setting. |
 | [`trigger`](#trigger)               | Defines a downstream pipeline trigger. |
@@ -1793,6 +1794,25 @@ rspec:
   needs:
     - job: build
       optional: true
+```
+
+##### Mirroring the status of another project pipeline **(PREMIUM)**
+
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/12334) in GitLab 12.2.
+> [Deprecated](https://gitlab.com/gitlab-org/gitlab/-/issues/280853) in GitLab 14.1.
+> [Will be removed](#TODO-open-an-issue) in GitLab 15.0.
+
+WARNING:
+`needs:pipeline` is deprecated, and could be removed in one of the future releases.
+Use [`status`](#status) instead.
+
+To mirror the status from an upstream pipeline:
+
+```yaml
+upstream_bridge:
+  stage: test
+  needs:
+    pipeline: other/project
 ```
 
 ### `tags`
@@ -3622,12 +3642,9 @@ trigger_job:
 
 To mirror the status from an upstream pipeline:
 
-```yaml
-upstream_bridge:
-  stage: test
-  needs:
-    pipeline: other/project
-```
+You can use [`status`](#status).
+
+Old usage: [`needs:pipeline`](#mirroring-the-status-of-another-project-pipeline).
 
 #### `trigger` syntax for child pipeline
 
@@ -3723,6 +3740,17 @@ with a trigger token.
 The trigger token is different than the [`trigger`](#trigger) keyword.
 
 [Read more in the triggers documentation.](../triggers/index.md)
+
+### `status`
+
+Use `status` to add a job that reflects the status of another project's pipeline.
+
+```yaml
+upstream-status:
+  status: root/my-project
+```
+
+In this case, the `upstream-status` job will reflect **the latest pipeline** in **the main branch** of the `root/my-project` project.
 
 ### `interruptible`
 

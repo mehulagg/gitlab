@@ -177,4 +177,6 @@ RSpec.describe Gitlab::Ci::Config::Entry::Bridge do
       end
     end
   end
+
+  # TODO: test at the same time status needs.
 end

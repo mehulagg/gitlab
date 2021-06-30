@@ -31,6 +31,8 @@ module EE
               end
             end
 
+            # Deprecated syntax
+            # TODO: issue link
             class BridgeHash < ::Gitlab::Config::Entry::Node
               include ::Gitlab::Config::Entry::Validatable
               include ::Gitlab::Config::Entry::Attributable
