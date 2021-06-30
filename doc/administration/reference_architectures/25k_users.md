@@ -2402,7 +2402,7 @@ future with further specific cloud provider details.
 
 | Service                                               | Nodes(1) | Configuration           | GCP              | Allocatable CPUs and Memory |
 |-------------------------------------------------------|----------|-------------------------|------------------|-----------------------------|
-| Webservice                                            | 7       | 32 vCPU, 28.8 GB memory | `n1-highcpu-32`  | 223 vCPU, 206.5 GB memory   |
+| Webservice                                            | 7        | 32 vCPU, 28.8 GB memory | `n1-highcpu-32`  | 223 vCPU, 206.5 GB memory   |
 | Sidekiq                                               | 4        | 4 vCPU, 15 GB memory    | `n1-standard-4`  | 15.5 vCPU, 50 GB memory     |
 | Supporting services such as NGINX, Prometheus, etc.   | 2        | 4 vCPU, 15 GB memory    | `n1-standard-4`  | 7.75 vCPU, 25 GB memory     |
 
