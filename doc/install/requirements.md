@@ -185,11 +185,6 @@ The recommended number of workers is calculated as the highest of the following:
 - `2`
 - A combination of CPU and memory resource availability (see how this is configured automatically for the [Linux package](https://gitlab.com/gitlab-org/omnibus-gitlab/-/blob/ef9facdc927e7389db6a5e0655414ba8318c7b8a/files/gitlab-cookbooks/gitlab/libraries/puma.rb#L31-46)).
 
-For example ( # CPU / # Memory) 
-
-- 2 CPU / 8 GB is configured with 2 Puma workers ( > 2 workers exceeds CPU limit)
-- 4 CPU / 4 GB is configured with 2 Puma workers ( > 2 workers exceeds Memory limit)
-
 Take for example the following scenarios:
 
 - A node with 2 cores / 8 GB memory should be configured with **2 Puma workers**.
