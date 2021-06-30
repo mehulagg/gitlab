@@ -3,8 +3,9 @@
 require 'spec_helper'
 
 RSpec.describe Projects::Security::PoliciesController, type: :request do
-  let_it_be(:project, reload: true) { create(:project) }
+  let_it_be(:owner) { create(:user) }
   let_it_be(:user) { create(:user) }
+  let_it_be(:project, reload: true) { create(:project, namespace: owner.namespace) }
 
   before do
     project.add_developer(user)
@@ -45,17 +46,32 @@ RSpec.describe Projects::Security::PoliciesController, type: :request do
       stub_licensed_features(security_orchestration_policies: true)
     end
 
-    it 'assigns policy project to project' do
-      post assign_project_security_policy_url(project), params: { orchestration: { policy_project_id: policy_project.id } }
+    context 'when user is not an owner of the project' do
+      it 'returns error message' do
+        post assign_project_security_policy_url(project), params: { orchestration: { policy_project_id: policy_project.id } }
 
-      expect(response).to redirect_to(project_security_policy_url(project))
-      expect(project.security_orchestration_policy_configuration.security_policy_management_project_id).to eq(policy_project.id)
+        expect(response).to have_gitlab_http_status(:not_found)
+        expect(response).not_to render_template('new')
+      end
     end
 
-    it 'returns error message for invalid input' do
-      post assign_project_security_policy_url(project), params: { orchestration: { policy_project_id: nil } }
+    context 'when user is an owner of the project' do
+      before do
+        login_as(owner)
+      end
 
-      expect(flash[:alert]).to eq 'Policy project doesn\'t exist'
+      it 'assigns policy project to project' do
+        post assign_project_security_policy_url(project), params: { orchestration: { policy_project_id: policy_project.id } }
+
+        expect(response).to redirect_to(project_security_policy_url(project))
+        expect(project.security_orchestration_policy_configuration.security_policy_management_project_id).to eq(policy_project.id)
+      end
+
+      it 'returns error message for invalid input' do
+        post assign_project_security_policy_url(project), params: { orchestration: { policy_project_id: nil } }
+
+        expect(flash[:alert]).to eq 'Policy project doesn\'t exist'
+      end
     end
   end
 end

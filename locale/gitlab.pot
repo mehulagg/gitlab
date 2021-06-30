@@ -22829,6 +22829,9 @@ msgstr ""
 msgid "Only admins can delete project"
 msgstr ""
 
+msgid "Only owners can update Security Policy Project"
+msgstr ""
+
 msgid "Only policy:"
 msgstr ""
 

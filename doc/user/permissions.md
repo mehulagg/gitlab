@@ -169,6 +169,8 @@ The following table lists project permissions available for each role:
 | Manage Project Operations                         |         |            |             | ✓        | ✓      |
 | Manage Terraform state                            |         |            |             | ✓        | ✓      |
 | Manage license policy **(ULTIMATE)**              |         |            |             | ✓        | ✓      |
+| Manage security policy **(ULTIMATE)**             |         |            | ✓           | ✓        | ✓      |
+| Assign security policy project **(ULTIMATE)**     |         |            |             |          | ✓      |
 | Edit comments (posted by any user)                |         |            |             | ✓        | ✓      |
 | Reposition comments on images (posted by any user)|✓ (*10*) | ✓ (*10*)   |  ✓ (*10*)   | ✓        | ✓      |
 | Manage Error Tracking                             |         |            |             | ✓        | ✓      |

@@ -7,8 +7,11 @@
     = s_('SecurityOrchestration|Security policy project')
   %p
     = project_select_tag('orchestration[policy_project_id]', class: 'hidden-filter-value', toggle_class: 'js-project-search js-project-filter js-filter-submit', dropdown_class: 'dropdown-menu-selectable dropdown-menu-project js-filter-submit',
-        placeholder: _('Select project'), idAttribute: 'id', data: { order_by: 'last_activity_at', idattribute: 'id', simple_filter: true, allow_clear: true, include_groups: false, include_projects_in_subgroups: true, user_id: current_user.id }, value: @assigned_policy_id)
+        placeholder: _('Select project'), idAttribute: 'id', disabled: !can_update_security_orchestration_policy_project?(@project), data: { order_by: 'last_activity_at', idattribute: 'id', simple_filter: true, allow_clear: true, include_groups: false, include_projects_in_subgroups: true, user_id: current_user.id }, value: @assigned_policy_id)
     .text-muted
       = html_escape(s_('SecurityOrchestration|A security policy project can be used enforce policies for a given project, group, or instance. It allows you to specify security policies that are important to you  and enforce them with every commit.')) % { code_open: '<code>'.html_safe, code_close: '</code>'.html_safe }
       = link_to _('More information'), help_page_path('user/project/clusters/protect/container_network_security/quick_start_guide'), target: '_blank'
-  = field.submit _('Save changes'), class: 'btn gl-button btn-success'
+  - if can_update_security_orchestration_policy_project?(@project)
+    = field.submit _('Save changes'), class: 'btn gl-button btn-success'
+  - else
+    = field.submit _('Save changes'), class: 'btn gl-button btn-success has-tooltip', disabled: true, title: _('Only owners can update Security Policy Project')

@@ -748,13 +748,25 @@ RSpec.describe ProjectPolicy do
       stub_licensed_features(security_orchestration_policies: true)
     end
 
-    context 'with developer or higher role' do
-      where(role: %w[owner maintainer developer])
+    context 'with developer or maintainer role' do
+      where(role: %w[maintainer developer])
 
       with_them do
         let(:current_user) { public_send(role) }
 
         it { is_expected.to be_allowed(:security_orchestration_policies) }
+        it { is_expected.to be_disallowed(:update_security_orchestration_policy_project) }
+      end
+    end
+
+    context 'with owner role' do
+      where(role: %w[owner])
+
+      with_them do
+        let(:current_user) { public_send(role) }
+
+        it { is_expected.to be_allowed(:security_orchestration_policies) }
+        it { is_expected.to be_allowed(:update_security_orchestration_policy_project) }
       end
     end
   end

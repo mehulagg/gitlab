@@ -7,7 +7,7 @@ module Mutations
 
       graphql_name 'SecurityPolicyProjectAssign'
 
-      authorize :security_orchestration_policies
+      authorize :update_security_orchestration_policy_project
 
       argument :project_path, GraphQL::ID_TYPE,
                required: true,

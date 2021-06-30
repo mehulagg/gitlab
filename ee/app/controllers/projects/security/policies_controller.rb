@@ -19,6 +19,8 @@ module Projects
       end
 
       def assign
+        return access_denied! unless can?(current_user, :update_security_orchestration_policy_project, project)
+
         result = ::Security::Orchestration::AssignService.new(project, nil, policy_project_id: policy_project_params[:policy_project_id]).execute
 
         if result.success?
