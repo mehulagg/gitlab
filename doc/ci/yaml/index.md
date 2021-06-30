@@ -1798,9 +1798,9 @@ rspec:
 
 ##### Mirroring the status of another project pipeline **(PREMIUM)**
 
-> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/12334) in GitLab 12.2.
-> [Deprecated](https://gitlab.com/gitlab-org/gitlab/-/issues/280853) in GitLab 14.1.
-> [Will be removed](#TODO-open-an-issue) in GitLab 15.0.
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/12334) in GitLab 12.2.
+> - [Deprecated](https://gitlab.com/gitlab-org/gitlab/-/issues/280853) in GitLab 14.1.
+> - [Will be removed](https://gitlab.com/gitlab-org/gitlab/-/issues/TODO-open-an-issue) in GitLab 15.0.
 
 WARNING:
 `needs:pipeline` is deprecated, and could be removed in one of the future releases.
