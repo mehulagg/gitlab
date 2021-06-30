@@ -20,6 +20,8 @@ export const initRedesignedSecurityConfiguration = (el) => {
     features,
     latestPipelinePath,
     gitlabCiHistoryPath,
+    autoDevopsDocsPath,
+    enableAutoDevopsPath,
   } = el.dataset;
 
   const { augmentedSecurityFeatures, augmentedComplianceFeatures } = augmentFeatures(
@@ -34,6 +36,8 @@ export const initRedesignedSecurityConfiguration = (el) => {
     provide: {
       projectPath,
       upgradePath,
+      autoDevopsDocsPath,
+      enableAutoDevopsPath,
     },
     render(createElement) {
       return createElement(RedesignedSecurityConfigurationApp, {

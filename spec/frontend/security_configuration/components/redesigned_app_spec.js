@@ -23,6 +23,8 @@ import {
 } from '~/vue_shared/security_reports/constants';
 
 const upgradePath = '/upgrade';
+const autoDevopsDocsPath = '/autoDevopsDocsPath';
+const enableAutoDevopsPath = '/enableAutoDevopsPats';
 const gitlabCiHistoryPath = 'test/historyPath';
 
 describe('redesigned App component', () => {
@@ -37,6 +39,8 @@ describe('redesigned App component', () => {
         propsData,
         provide: {
           upgradePath,
+          autoDevopsDocsPath,
+          enableAutoDevopsPath,
         },
         stubs: {
           UserCalloutDismisser: makeMockUserCalloutDismisser({
