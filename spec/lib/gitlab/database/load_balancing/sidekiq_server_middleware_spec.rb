@@ -82,7 +82,7 @@ RSpec.describe Gitlab::Database::LoadBalancing::SidekiqServerMiddleware do
           stub_feature_flags(load_balancing_for_test_data_consistency_worker: false)
         end
 
-        include_examples 'stick to the primary', 'primary_lb_na'
+        include_examples 'stick to the primary', 'primary'
       end
 
       context 'when database replica location is set' do
@@ -115,7 +115,7 @@ RSpec.describe Gitlab::Database::LoadBalancing::SidekiqServerMiddleware do
     context 'when worker class does not include ApplicationWorker' do
       let(:worker) { ActiveJob::QueueAdapters::SidekiqAdapter::JobWrapper.new }
 
-      include_examples 'stick to the primary', 'primary_lb_na'
+      include_examples 'stick to the primary', 'primary'
     end
 
     context 'when worker data consistency is :always' do
@@ -159,7 +159,7 @@ RSpec.describe Gitlab::Database::LoadBalancing::SidekiqServerMiddleware do
           end
 
           context 'and replica still lagging behind' do
-            include_examples 'stick to the primary', 'primary_failover'
+            include_examples 'stick to the primary', 'primary'
           end
 
           context 'and replica is now up-to-date' do
@@ -181,7 +181,7 @@ RSpec.describe Gitlab::Database::LoadBalancing::SidekiqServerMiddleware do
           allow(middleware).to receive(:replica_caught_up?).and_return(false)
         end
 
-        include_examples 'stick to the primary', 'primary_failover'
+        include_examples 'stick to the primary', 'primary'
       end
     end
   end

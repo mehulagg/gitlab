@@ -38,9 +38,7 @@ module Gitlab
         end
 
         def select_load_balancing_strategy(worker_class, job)
-          return :primary_lb_na unless worker_class.include?(::ApplicationWorker)
-          return :primary unless worker_class.utilizes_load_balancing_capabilities?
-          return :primary_lb_na unless worker_class.get_data_consistency_feature_flag_enabled?
+          return :primary unless load_balancing_available?(worker_class)
 
           location = job['database_write_location'] || job['database_replica_location']
           return :primary_no_wal unless location
@@ -52,9 +50,15 @@ module Gitlab
             # Optimistic case: The worker allows retries and we have retries left.
             :retry
           else
-            # Sad case: we need to use the primary.
-            :primary_failover
+            # Sad case: we need to fall back to the primary.
+            :primary
           end
+        end
+
+        def load_balancing_available?(worker_class)
+          worker_class.include?(::ApplicationWorker) &&
+            worker_class.utilizes_load_balancing_capabilities? &&
+            worker_class.get_data_consistency_feature_flag_enabled?
         end
 
         def can_retry?(worker_class, job)
