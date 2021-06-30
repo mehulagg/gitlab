@@ -1,7 +1,11 @@
+.compress-public: &compress-public
+  - find public -type f -regex '.*\.\(htm\|html\|txt\|text\|js\|json\|css\|svg\|xml\)$' -exec gzip -f -k {} \;
+  - find public -type f -regex '.*\.\(htm\|html\|txt\|text\|js\|json\|css\|svg\|xml\)$' -exec brotli -f -k {} \;
+
 pages:
   extends:
     - .default-retry
-    - .pages:rules
+    # - .pages:rules
   stage: pages
   needs:
     - rspec:coverage
@@ -17,7 +21,8 @@ pages:
     - mv coverage-javascript/ public/coverage-javascript/ || true
     - mv storybook/public public/storybook || true
     - cp .public/assets/application-*.css public/application.css || true
-    - cp .public/assets/application-*.css.gz public/application.css.gz || true
+    - *compress-public
+  when: manual
   artifacts:
     paths:
       - public
