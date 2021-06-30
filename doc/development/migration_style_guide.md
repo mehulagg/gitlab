@@ -207,6 +207,11 @@ end
 
 **Multiple changes on the same table:**
 
+The helper `with_lock_retries` wraps all operations into a single transaction. Once we have the lock
+we better do as much as possible inside the transaction than trying to get another lock later.
+The thing to watch for is doing something that takes too long.
+
+
 ```ruby
 include Gitlab::Database::MigrationHelpers
 
