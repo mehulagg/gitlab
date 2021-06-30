@@ -224,8 +224,6 @@ def down
   end
 end
 
-
-
 **Removing a foreign key:**
 
 ```ruby
