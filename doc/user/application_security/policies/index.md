@@ -192,8 +192,7 @@ You can always change the **Security policy project** by navigating to your proj
 **Security & Compliance > Policies** and modifying the selected project.
 
 NOTE:
-Only project Owners have the [permissions](../../permissions.md#project-members-permissions)
-to select Security Policy Project.
+To select the Security policy project, you must be assigned the Owner [role](../../permissions.md#project-members-permissions) for the project.
 
 ## Roadmap
 
