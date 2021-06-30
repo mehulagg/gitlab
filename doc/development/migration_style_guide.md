@@ -205,6 +205,27 @@ def down
 end
 ```
 
+**Multiple changes on the same table:**
+
+```ruby
+include Gitlab::Database::MigrationHelpers
+
+def up
+  with_lock_retries do
+    add_column :users, :full_name, :string
+    add_column :users, :bio, :string
+  end
+end
+
+def down
+  with_lock_retries do
+    remove_column :users, :full_name
+    remove_column :users, :bio
+  end
+end
+
+
+
 **Removing a foreign key:**
 
 ```ruby
