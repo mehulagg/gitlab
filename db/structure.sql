@@ -22,8 +22,8 @@ UPDATE projects SET has_external_issue_tracker = (
     WHERE project_id = COALESCE(NEW.project_id, OLD.project_id)
       AND active = TRUE
       AND category = 'issue_tracker'
+    )
   )
-)
 WHERE projects.id = COALESCE(NEW.project_id, OLD.project_id);
 RETURN NULL;
 
@@ -14537,7 +14537,8 @@ CREATE TABLE members (
     requested_at timestamp without time zone,
     expires_at date,
     ldap boolean DEFAULT false NOT NULL,
-    override boolean DEFAULT false NOT NULL
+    override boolean DEFAULT false NOT NULL,
+    invite_email_success boolean DEFAULT true NOT NULL
 );
 
 CREATE SEQUENCE members_id_seq
