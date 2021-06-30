@@ -1,4 +1,4 @@
-query issueLabels($fullPath: ID, $iid: String) {
+query issueLabels($fullPath: ID!, $iid: String) {
   workspace: project(fullPath: $fullPath) {
     issuable: issue(iid: $iid) {
       id

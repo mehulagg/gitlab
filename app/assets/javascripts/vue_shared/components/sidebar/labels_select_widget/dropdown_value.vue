@@ -14,10 +14,13 @@ export default {
       required: false,
       default: false,
     },
+    selectedLabels: {
+      type: Array,
+      required: true,
+    },
   },
   computed: {
     ...mapState([
-      'selectedLabels',
       'allowLabelRemove',
       'allowScopedLabels',
       'labelsFilterBasePath',
