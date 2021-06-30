@@ -282,21 +282,23 @@ RSpec.describe Gitlab::Ci::Parsers::Security::Common do
       end
 
       describe 'setting the uuid' do
+        let(:location) { build(:ci_reports_security_locations_sast) }
+
         let(:finding_uuids) { report.findings.map(&:uuid) }
         let(:uuid_1) do
           Security::VulnerabilityUUID.generate(
-            report_type: "dependency_scanning",
-            primary_identifier_fingerprint: "4ff8184cd18485b6e85d5b101e341b12eacd1b3b",
-            location_fingerprint: "33dc9f32c77dde16d39c69d3f78f27ca3114a7c5",
+            report_type: "sast",
+            primary_identifier_fingerprint: report.findings[0].identifiers.first.fingerprint,
+            location_fingerprint: location.fingerprint,
             project_id: pipeline.project_id
           )
         end
 
         let(:uuid_2) do
           Security::VulnerabilityUUID.generate(
-            report_type: "dependency_scanning",
-            primary_identifier_fingerprint: "d55f9e66e79882ae63af9fd55cc822ab75307e31",
-            location_fingerprint: "33dc9f32c77dde16d39c69d3f78f27ca3114a7c5",
+            report_type: "sast",
+            primary_identifier_fingerprint: report.findings[1].identifiers.first.fingerprint,
+            location_fingerprint: location.fingerprint,
             project_id: pipeline.project_id
           )
         end
@@ -304,7 +306,11 @@ RSpec.describe Gitlab::Ci::Parsers::Security::Common do
         let(:expected_uuids) { [uuid_1, uuid_2, nil] }
 
         it 'sets the UUIDv5 for findings', :aggregate_failures do
-          expect(finding_uuids).to match_array(expected_uuids)
+          allow_next_instance_of(Gitlab::Ci::Reports::Security::Report) do |report|
+            allow(report).to receive(:type).and_return('sast')
+
+            expect(finding_uuids).to match_array(expected_uuids)
+          end
         end
       end
 
