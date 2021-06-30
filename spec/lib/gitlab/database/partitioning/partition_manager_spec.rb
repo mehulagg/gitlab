@@ -113,8 +113,8 @@ RSpec.describe Gitlab::Database::Partitioning::PartitionManager do
 
     let(:extra_partitions) do
       [
-        instance_double(Gitlab::Database::Partitioning::TimePartition, table: table, partition_name: 'foo1', to_detach_sql: 'SELECT 1'),
-        instance_double(Gitlab::Database::Partitioning::TimePartition, table: table, partition_name: 'foo2', to_detach_sql: 'SELECT 2')
+        instance_double(Gitlab::Database::Partitioning::TimePartition, table: table, partition_name: 'foo1'),
+        instance_double(Gitlab::Database::Partitioning::TimePartition, table: table, partition_name: 'foo2')
       ]
     end
 
