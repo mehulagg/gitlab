@@ -56,6 +56,7 @@ issues:
 - issue_email_participants
 - test_reports
 - requirement
+- incident_management_issue_escalation_status
 events:
 - author
 - project
