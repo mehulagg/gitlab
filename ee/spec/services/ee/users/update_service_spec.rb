@@ -156,6 +156,28 @@ RSpec.describe Users::UpdateService do
         { name: 'John Doe', username: 'jduser', email: 'jd@example.com', password: 'mydummypass' }
       end
 
+      context 'updating administrator status' do
+        before do
+          stub_licensed_features(admin_audit_log: true)
+        end
+
+        it 'logs making a user an administrator' do
+          expect do
+            update_user_as(admin_user, user, admin: true)
+          end.to change { AuditEvent.count }.by(1)
+
+          expect(AuditEvent.last.present.action).to eq('Changed admin status from false to true')
+        end
+
+        it 'logs making an administrator a user' do
+          expect do
+            update_user_as(admin_user, create(:admin), admin: false)
+          end.to change { AuditEvent.count }.by(1)
+
+          expect(AuditEvent.last.present.action).to eq('Changed admin status from true to false')
+        end
+      end
+
       context 'allowed params' do
         context 'with identity' do
           let(:provider) { create(:saml_provider) }
