@@ -209,7 +209,7 @@ end
 
 The helper `with_lock_retries` wraps all operations into a single transaction. Once we have the lock
 we better do as much as possible inside the transaction than trying to get another lock later.
-The thing to watch for is doing something that takes too long.
+Be careful about running long database statements within the block. The acquired locks will be kept until the transaction (block) finishes and depending on the lock type it might block other database operations.
 
 ```ruby
 include Gitlab::Database::MigrationHelpers
