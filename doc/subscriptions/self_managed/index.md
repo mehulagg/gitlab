@@ -369,3 +369,12 @@ If your credit card is declined when purchasing a GitLab subscription, possible 
 
 Check with your financial institution to confirm if any of these reasons apply. If they don't
 apply, contact [GitLab Support](https://support.gitlab.com/hc/en-us/requests/new?ticket_form_id=360000071293).
+
+### Cloud Licensing not working
+
+Cloud license data is encrypted via SSL/TLS and transmitted to `customers.gitlab.com` port 443.
+
+If Cloud Licensing is not working as expected, verify that:
+
+- `customers.gitlab.com` address resolves and is accessible from your Gitlab instance
+- `104.46.106.135` port 443 is not blocked by your firewall or network restrictions
