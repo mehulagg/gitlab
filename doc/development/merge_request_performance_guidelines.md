@@ -197,7 +197,7 @@ costly, time-consuming query to the replicas.
 
 Read about [complex queries on the relation object](iterating_tables_in_batches.md#complex-queries-on-the-relation-object) for considerations on how to use CTEs. We have found in some situations that CTEs can become problematic in use (similar to the n+1 problem above). In particular, hierarchical recursive CTE queries such as the CTE in [AuthorizedProjectsWorker](https://gitlab.com/gitlab-org/gitlab/-/issues/325688) are very difficult to optimize and don't scale. We should avoid them when implementing new features that require any kind of hierarchical structure.
 
-However, in many simpler cases, such as this [example](https://gitlab.com/gitlab-org/gitlab-foss/-/issues/43242#note_61416277), CTEs can be quite effective as an optimization fence.
+CTEs have been effectively used as an optimization fence in many simpler cases, such as this [example](https://gitlab.com/gitlab-org/gitlab-foss/-/issues/43242#note_61416277). Beginning in PostgreSQL 12, [CTEs are inlined then optimized by default](https://paquier.xyz/postgresql-2/postgres-12-with-materialize/). To keep the old behavior, marking CTEs with keyword `MATERIALIZED` is necessary and we have [a custom Arel node](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/56976) that can optionally introduce `AS MATERIALIZED` SQL string depending on whether PostgreSQL 12 or 11 is running.
 
 ## Cached Queries
 
