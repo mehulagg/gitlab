@@ -6,7 +6,7 @@ class UpdateMaxSeatsUsedForGitlabComSubscriptionsWorker # rubocop:disable Scalab
   sidekiq_options retry: 3
   include CronjobQueue # rubocop:disable Scalability/CronWorkerContext
 
-  feature_category :license
+  feature_category :utilization
   worker_resource_boundary :cpu
 
   # rubocop: disable CodeReuse/ActiveRecord
@@ -14,7 +14,7 @@ class UpdateMaxSeatsUsedForGitlabComSubscriptionsWorker # rubocop:disable Scalab
     return if ::Gitlab::Database.read_only?
     return unless ::Gitlab::CurrentSettings.should_check_namespace_plan?
 
-    GitlabSubscription.with_a_paid_hosted_plan.preload_for_refresh_seat.find_in_batches(batch_size: 100) do |subscriptions|
+    GitlabSubscription.with_a_paid_hosted_plan.preload_fofr_refresh_seat.find_in_batches(batch_size: 100) do |subscriptions|
       tuples = []
 
       subscriptions.each do |subscription|
