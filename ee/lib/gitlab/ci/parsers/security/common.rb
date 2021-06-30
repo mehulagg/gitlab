@@ -27,7 +27,7 @@ module Gitlab
             create_scan
             create_analyzer
             set_report_version
-            collate_remediations.each { |vulnerability| create_vulnerability(vulnerability) }
+            collate_remediations.each { |finding| create_finding(finding) }
 
             report_data
           rescue JSON::ParserError
@@ -97,7 +97,7 @@ module Gitlab
             data['tracking']
           end
 
-          def create_vulnerability(data)
+          def create_finding(data)
             identifiers = create_identifiers(data['identifiers'])
             links = create_links(data['links'])
             location = create_location(data['location'] || {})
