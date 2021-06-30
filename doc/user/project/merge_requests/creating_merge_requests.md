@@ -47,7 +47,7 @@ You can create a merge request when you create a branch.
    A merge request is created. The default branch is the target.
 1. Fill out the fields and select **Create merge request**.
 
-## When you use git commands locally
+## When you use Git commands locally
 
 You can create a merge request by running Git commands on your local machine.
 
