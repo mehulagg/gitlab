@@ -22,6 +22,7 @@ describe('projectsSelector default state', () => {
     setupForCompany: 'true',
     fullName: 'Full Name',
     newUser: 'true',
+    source: 'some_source',
   };
 
   const currentDate = new Date('2020-01-07T12:44:08.135Z');
@@ -162,6 +163,10 @@ describe('projectsSelector default state', () => {
 
   it('sets the startDate to the current date', () => {
     expect(state.startDate).toEqual(currentDate);
+  });
+
+  it('sets the source to the initial value', () => {
+    expect(state.source).toEqual('some_source');
   });
 
   it('sets the paymentFormParams to an empty object', () => {

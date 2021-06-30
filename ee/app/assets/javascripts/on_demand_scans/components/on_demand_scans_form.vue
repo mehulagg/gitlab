@@ -475,7 +475,7 @@ export default {
       <div class="gl-mt-6 gl-pt-6">
         <gl-button
           type="submit"
-          variant="success"
+          variant="confirm"
           class="js-no-auto-disable"
           data-testid="on-demand-scan-submit-button"
           :disabled="isSubmitButtonDisabled"
@@ -484,7 +484,7 @@ export default {
           {{ s__('OnDemandScans|Save and run scan') }}
         </gl-button>
         <gl-button
-          variant="success"
+          variant="confirm"
           category="secondary"
           data-testid="on-demand-scan-save-button"
           :disabled="isSaveButtonDisabled"

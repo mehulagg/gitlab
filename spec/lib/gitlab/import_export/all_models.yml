@@ -54,6 +54,8 @@ issues:
 - namespace
 - note_authors
 - issue_email_participants
+- test_reports
+- requirement
 events:
 - author
 - project

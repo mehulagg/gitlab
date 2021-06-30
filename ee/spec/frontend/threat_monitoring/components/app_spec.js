@@ -1,8 +1,8 @@
 import { shallowMount } from '@vue/test-utils';
 import ThreatMonitoringAlerts from 'ee/threat_monitoring/components/alerts/alerts.vue';
 import ThreatMonitoringApp from 'ee/threat_monitoring/components/app.vue';
-import NetworkPolicyList from 'ee/threat_monitoring/components/network_policy_list.vue';
 import NoEnvironmentEmptyState from 'ee/threat_monitoring/components/no_environment_empty_state.vue';
+import PolicyList from 'ee/threat_monitoring/components/policy_list.vue';
 import ThreatMonitoringFilters from 'ee/threat_monitoring/components/threat_monitoring_filters.vue';
 import createStore from 'ee/threat_monitoring/store';
 import { TEST_HOST } from 'helpers/test_constants';
@@ -50,11 +50,11 @@ describe('ThreatMonitoringApp component', () => {
   };
 
   const findAlertsView = () => wrapper.find(ThreatMonitoringAlerts);
-  const findNetworkPolicyList = () => wrapper.find(NetworkPolicyList);
+  const findPolicyList = () => wrapper.find(PolicyList);
   const findFilters = () => wrapper.find(ThreatMonitoringFilters);
-  const findNetworkPolicySection = () => wrapper.find({ ref: 'networkPolicySection' });
+  const findPolicySection = () => wrapper.find({ ref: 'policySection' });
   const findNoEnvironmentEmptyStates = () => wrapper.findAll(NoEnvironmentEmptyState);
-  const findNetworkPolicyTab = () => wrapper.find({ ref: 'networkPolicyTab' });
+  const findPolicyTab = () => wrapper.find({ ref: 'policyTab' });
   const findAlertTab = () => wrapper.findByTestId('threat-monitoring-alerts-tab');
   const findStatisticsTab = () => wrapper.findByTestId('threat-monitoring-statistics-tab');
 
@@ -84,16 +84,16 @@ describe('ThreatMonitoringApp component', () => {
       });
 
       it('shows the tabs', () => {
-        expect(findNetworkPolicyTab().exists()).toBe(true);
+        expect(findPolicyTab().exists()).toBe(true);
         expect(findStatisticsTab().exists()).toBe(true);
       });
 
       it('does not show the network policy list', () => {
-        expect(findNetworkPolicyList().exists()).toBe(false);
+        expect(findPolicyList().exists()).toBe(false);
       });
 
       it('does not show the threat monitoring section', () => {
-        expect(findNetworkPolicySection().exists()).toBe(false);
+        expect(findPolicySection().exists()).toBe(false);
       });
     },
   );
@@ -115,11 +115,11 @@ describe('ThreatMonitoringApp component', () => {
     });
 
     it('renders the network policy section', () => {
-      expect(findNetworkPolicySection().element).toMatchSnapshot();
+      expect(findPolicySection().element).toMatchSnapshot();
     });
 
     it('renders the network policy tab', () => {
-      expect(findNetworkPolicyTab().element).toMatchSnapshot();
+      expect(findPolicyTab().element).toMatchSnapshot();
     });
   });
 

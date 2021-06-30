@@ -7,6 +7,7 @@ RSpec.describe QualityManagement::TestCases::CreateService do
   let_it_be_with_refind(:project) { create(:project, :empty_repo) }
   let(:description) { 'test case description' }
   let_it_be(:label) { create(:label, project: project) }
+
   let(:service) { described_class.new(project, user, title: title, description: description, label_ids: [label.id]) }
 
   describe '#execute' do

@@ -152,7 +152,10 @@ describe('Status checks form', () => {
     });
 
     it('sends the error to sentry', () => {
-      findProtectedBranchesSelector().vm.$emit('apiError', true, sentryError);
+      findProtectedBranchesSelector().vm.$emit('apiError', {
+        hasErrored: true,
+        error: sentryError,
+      });
 
       expect(Sentry.captureException.mock.calls[0][0]).toStrictEqual(sentryError);
     });
@@ -160,22 +163,34 @@ describe('Status checks form', () => {
     it('shows the alert', async () => {
       expect(findBranchesErrorAlert().exists()).toBe(false);
 
-      await findProtectedBranchesSelector().vm.$emit('apiError', true, sentryError);
+      await findProtectedBranchesSelector().vm.$emit('apiError', {
+        hasErrored: true,
+        error: sentryError,
+      });
 
       expect(findBranchesErrorAlert().exists()).toBe(true);
     });
 
     it('hides the alert if the apiError is reset', async () => {
-      await findProtectedBranchesSelector().vm.$emit('apiError', true, sentryError);
+      await findProtectedBranchesSelector().vm.$emit('apiError', {
+        hasErrored: true,
+        error: sentryError,
+      });
       expect(findBranchesErrorAlert().exists()).toBe(true);
 
-      await findProtectedBranchesSelector().vm.$emit('apiError', false);
+      await findProtectedBranchesSelector().vm.$emit('apiError', { hasErrored: false });
       expect(findBranchesErrorAlert().exists()).toBe(false);
     });
 
     it('only calls sentry once while the branches api is failing', () => {
-      findProtectedBranchesSelector().vm.$emit('apiError', true, sentryError);
-      findProtectedBranchesSelector().vm.$emit('apiError', true, sentryError);
+      findProtectedBranchesSelector().vm.$emit('apiError', {
+        hasErrored: true,
+        error: sentryError,
+      });
+      findProtectedBranchesSelector().vm.$emit('apiError', {
+        hasErrored: true,
+        error: sentryError,
+      });
 
       expect(Sentry.captureException.mock.calls).toEqual([[sentryError]]);
     });

@@ -749,6 +749,7 @@ RSpec.describe Gitlab::GitAccess do
     let_it_be(:user) { create(:user, :two_factor_via_otp)}
     let_it_be(:key) { create(:key, user: user) }
     let_it_be(:actor) { key }
+
     let(:protocol) { 'ssh' }
 
     before do

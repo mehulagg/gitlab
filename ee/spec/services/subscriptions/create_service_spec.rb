@@ -25,7 +25,8 @@ RSpec.describe Subscriptions::CreateService do
     {
       plan_id: 'Plan ID',
       payment_method_id: 'Payment method ID',
-      quantity: 123
+      quantity: 123,
+      source: 'some_source'
     }
   end
 

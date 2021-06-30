@@ -16,10 +16,8 @@
     = form_for @application_setting, url: ci_cd_admin_application_settings_path(anchor: 'js-required-pipeline-settings'), html: { class: 'fieldset-form' } do |f|
       = form_errors(@application_setting)
 
-      %fieldset
-        .form-group
-          = f.label :required_instance_ci_template, s_('AdminSettings|Select a CI/CD template'), class: 'text-muted'
-          = dropdown_tag(s_('AdminSettings|No required pipeline'), options: { toggle_class: 'js-ci-template-dropdown dropdown-select', title: s_('AdminSettings|Select a CI/CD template'), filter: true, placeholder: _("Filter"), data: { data: gitlab_ci_ymls(nil) } } )
-          = f.text_field :required_instance_ci_template, value: @application_setting.required_instance_ci_template, id: 'required_instance_ci_template_name', class: 'hidden'
+      .form-group.col-md-9.gl-p-0
+        = f.label :required_instance_ci_template, s_('AdminSettings|Select a CI/CD template')
+        .js-ci-template-dropdown{ data: { gitlab_ci_ymls: gitlab_ci_ymls(@project).to_json, value: @application_setting.required_instance_ci_template } }
 
       = f.submit _('Save changes'), class: "gl-button btn btn-confirm"

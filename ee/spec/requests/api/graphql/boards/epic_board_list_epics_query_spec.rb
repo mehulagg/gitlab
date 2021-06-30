@@ -19,6 +19,7 @@ RSpec.describe 'get list of epics for an epic  board list' do
 
   let_it_be(:epic_pos1) { create(:epic_board_position, epic: epic1, epic_board: board, relative_position: 20) }
   let_it_be(:epic_pos2) { create(:epic_board_position, epic: epic2, epic_board: board, relative_position: 10) }
+
   let(:data_path) { [:group, :epicBoard, :lists, :nodes, 0, :epics] }
 
   def pagination_query(params = {})

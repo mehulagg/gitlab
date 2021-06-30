@@ -3,6 +3,7 @@
 class EpicIssue < ApplicationRecord
   include EpicTreeSorting
   include EachBatch
+  include AfterCommitQueue
 
   validates :epic, :issue, presence: true
   validates :issue, uniqueness: true

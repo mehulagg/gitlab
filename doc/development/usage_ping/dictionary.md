@@ -5676,7 +5676,7 @@ Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.secret_detection_jobs`
 
-Count of 'secret-detection' CI jobs fro the month.
+Count of all 'secret-detection' CI jobs.
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216182114_secret_detection_jobs.yml)
 
@@ -16332,6 +16332,18 @@ Status: `data_available`
 
 Tiers: `free`
 
+### `usage_activity_by_stage.manage.compliance_frameworks_with_pipeline`
+
+Count of compliance frameworks that have a pipeline configuration
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_all/20210622123800_compliance_frameworks_with_pipeline.yml)
+
+Group: `compliance`
+
+Status: `implemented`
+
+Tiers: `ultimate`
+
 ### `usage_activity_by_stage.manage.custom_compliance_frameworks`
 
 Total count of all custom compliance framework labels
@@ -17312,11 +17324,11 @@ Counts dast jobs
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_all/20210216182122_dast_scans.yml)
 
-Group: `group::static analysis`
+Group: `group::dynamic analysis`
 
 Status: `data_available`
 
-Tiers:
+Tiers: `ultimate`
 
 ### `usage_activity_by_stage.secure.dependency_scanning_scans`
 
@@ -17352,11 +17364,11 @@ Group: `group::static analysis`
 
 Status: `data_available`
 
-Tiers:
+Tiers: `ultimate`
 
 ### `usage_activity_by_stage.secure.secret_detection_scans`
 
-Counts secret detection jobs
+counts secret detection jobs
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_all/20210216182123_secret_detection_scans.yml)
 
@@ -17364,7 +17376,7 @@ Group: `group::static analysis`
 
 Status: `data_available`
 
-Tiers:
+Tiers: `ultimate`
 
 ### `usage_activity_by_stage.secure.user_api_fuzzing_dnd_jobs`
 
@@ -17524,7 +17536,7 @@ Tiers: `ultimate`
 
 ### `usage_activity_by_stage.secure.user_sast_jobs`
 
-Count of SAST jobs
+Count of SAST jobs per user
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216182116_user_sast_jobs.yml)
 
@@ -17548,7 +17560,7 @@ Tiers: `ultimate`
 
 ### `usage_activity_by_stage.secure.user_secret_detection_jobs`
 
-Count of Secret Detection Jobs
+Count of Secret Detection Jobs per user
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216182118_user_secret_detection_jobs.yml)
 
@@ -18397,6 +18409,18 @@ Group: ``
 Status: `data_available`
 
 Tiers: `free`
+
+### `usage_activity_by_stage_monthly.manage.compliance_frameworks_with_pipeline`
+
+Count of compliance frameworks that have a pipeline configuration
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210622091519_compliance_frameworks_with_pipeline.yml)
+
+Group: `compliance`
+
+Status: `implemented`
+
+Tiers: `ultimate`
 
 ### `usage_activity_by_stage_monthly.manage.custom_compliance_frameworks`
 

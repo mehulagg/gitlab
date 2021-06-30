@@ -202,9 +202,6 @@ describe('ValueStreamSelect', () => {
       it('displays a toast message', () => {
         expect(mockToastShow).toHaveBeenCalledWith(
           `'${selectedValueStream.name}' Value Stream deleted`,
-          {
-            position: 'top-center',
-          },
         );
       });
 

@@ -43,18 +43,18 @@ export default {
       <div
         v-if="policyDescription"
         v-safe-html:[$options.safeHtmlConfig]="policyDescription"
-        class="gl-bg-white gl-rounded-top-left-none gl-rounded-top-right-none gl-rounded-bottom-left-base gl-rounded-bottom-right-base gl-py-3 gl-px-4 gl-border-1 gl-border-solid gl-border-gray-100"
+        class="gl-bg-white gl-rounded-top-left-none gl-rounded-top-right-none gl-rounded-bottom-left-base gl-rounded-bottom-right-base gl-py-3 gl-px-4 gl-border-1 gl-border-solid gl-border-gray-100 gl-border-t-none!"
       ></div>
       <div v-else>
-        <gl-alert variant="info" :dismissible="false"
-          >{{ $options.i18n.PARSING_ERROR_MESSAGE }}
+        <gl-alert variant="info" :dismissible="false">
+          {{ $options.i18n.PARSING_ERROR_MESSAGE }}
         </gl-alert>
       </div>
     </gl-tab>
     <gl-tab :title="s__('NetworkPolicies|.yaml')">
-      <pre class="gl-bg-white gl-rounded-top-left-none gl-rounded-top-right-none">{{
-        policyYaml
-      }}</pre>
+      <pre class="gl-bg-white gl-rounded-top-left-none gl-rounded-top-right-none gl-border-t-none"
+        >{{ policyYaml }}
+      </pre>
     </gl-tab>
   </gl-tabs>
 </template>

@@ -167,7 +167,7 @@ describe('timeframeEndDate', () => {
 
       The same is true of quarterly timeframes generated with getTimeframeForQuarterlyView
       E.g., [ ..., { range: [ Oct 1, Nov 1, Dec 31 ] }]
-    
+
     In comparison, a weekly timeframe won't have its last item set to the ending date for the week.
       E.g., [ Oct 25, Nov 1, Nov 8 ]
 
@@ -185,4 +185,22 @@ describe('timeframeEndDate', () => {
       expect(roadmapItemUtils.timeframeEndDate(presetType, timeframe)).toEqual(endDate);
     },
   );
+});
+
+describe('transformFetchEpicFilterParams', () => {
+  it('should return congregated `not[]` params in a single key', () => {
+    const filterParams = {
+      'not[authorUsername]': 'foo',
+      'not[myReactionEmoji]': ':emoji:',
+      authorUsername: 'baz',
+    };
+
+    expect(roadmapItemUtils.transformFetchEpicFilterParams(filterParams)).toEqual({
+      not: {
+        authorUsername: 'foo',
+        myReactionEmoji: ':emoji:',
+      },
+      authorUsername: 'baz',
+    });
+  });
 });

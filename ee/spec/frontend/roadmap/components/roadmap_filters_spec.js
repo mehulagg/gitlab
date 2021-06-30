@@ -19,7 +19,6 @@ import {
 
 import { TEST_HOST } from 'helpers/test_constants';
 import { visitUrl, mergeUrlParams, updateHistory } from '~/lib/utils/url_utility';
-
 import FilteredSearchBar from '~/vue_shared/components/filtered_search_bar/filtered_search_bar_root.vue';
 
 jest.mock('~/lib/utils/url_utility', () => ({
@@ -151,11 +150,19 @@ describe('RoadmapFilters', () => {
       const mockInitialFilterValue = [
         {
           type: 'author_username',
-          value: { data: 'root' },
+          value: { data: 'root', operator: '=' },
+        },
+        {
+          type: 'author_username',
+          value: { data: 'John', operator: '!=' },
         },
         {
           type: 'label_name',
-          value: { data: 'Bug' },
+          value: { data: 'Bug', operator: '=' },
+        },
+        {
+          type: 'label_name',
+          value: { data: 'Feature', operator: '!=' },
         },
         {
           type: 'milestone_title',
@@ -164,6 +171,10 @@ describe('RoadmapFilters', () => {
         {
           type: 'confidential',
           value: { data: true },
+        },
+        {
+          type: 'my_reaction_emoji',
+          value: { data: 'thumbs_up', operator: '!=' },
         },
       ];
       let filteredSearchBar;
@@ -215,6 +226,9 @@ describe('RoadmapFilters', () => {
           labelName: ['Bug'],
           milestoneTitle: '4.0',
           confidential: true,
+          'not[authorUsername]': 'John',
+          'not[labelName]': ['Feature'],
+          'not[myReactionEmoji]': 'thumbs_up',
         });
 
         await wrapper.vm.$nextTick();
@@ -237,6 +251,9 @@ describe('RoadmapFilters', () => {
           labelName: ['Bug'],
           milestoneTitle: '4.0',
           confidential: true,
+          'not[authorUsername]': 'John',
+          'not[labelName]': ['Feature'],
+          'not[myReactionEmoji]': 'thumbs_up',
         });
         expect(wrapper.vm.fetchEpics).toHaveBeenCalled();
       });

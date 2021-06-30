@@ -180,7 +180,7 @@ describe('Test coverage table component', () => {
 
       expect(Api.trackRedisHllUserEvent).toHaveBeenCalledTimes(1);
       expect(Api.trackRedisHllUserEvent).toHaveBeenCalledWith(
-        wrapper.vm.$options.usagePingProjectEvent,
+        wrapper.vm.$options.servicePingProjectEvent,
       );
     });
   });

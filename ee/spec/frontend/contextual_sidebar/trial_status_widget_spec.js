@@ -11,15 +11,15 @@ describe('TrialStatusWidget component', () => {
 
   const findGlLink = () => wrapper.findComponent(GlLink);
 
-  const createComponent = (props = {}) => {
+  const createComponent = (providers = {}) => {
     return shallowMount(TrialStatusWidget, {
-      propsData: {
+      provide: {
         daysRemaining: 20,
         navIconImagePath: 'illustrations/golden_tanuki.svg',
         percentageComplete: 10,
         planName: 'Ultimate',
         plansHref: 'billing/path-for/group',
-        ...props,
+        ...providers,
       },
     });
   };

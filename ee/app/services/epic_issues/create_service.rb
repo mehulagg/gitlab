@@ -8,35 +8,22 @@ module EpicIssues
     def relate_issuables(referenced_issue)
       link = EpicIssue.find_or_initialize_by(issue: referenced_issue)
 
-      params = if link.persisted?
-                 { issue_moved: true, original_epic: link.epic }
-               else
-                 {}
-               end
+      params = { user_id: current_user.id }
+      params[:original_epic_id] = link.epic_id if link.persisted?
 
       link.epic = issuable
       link.move_to_start
 
-      if link.save
-        create_notes(referenced_issue, params)
-        usage_ping_record_epic_issue_added
+      link.run_after_commit do
+        params.merge!(epic_id: link.epic.id, issue_id: referenced_issue.id)
+        Epics::NewEpicIssueWorker.perform_async(params)
       end
+
+      link.save
 
       link
     end
     # rubocop: enable CodeReuse/ActiveRecord
-
-    def create_notes(referenced_issue, params)
-      if params[:issue_moved]
-        SystemNoteService.epic_issue_moved(
-          params[:original_epic], referenced_issue, issuable, current_user
-        )
-        SystemNoteService.issue_epic_change(referenced_issue, issuable, current_user)
-      else
-        SystemNoteService.epic_issue(issuable, referenced_issue, current_user, :added)
-        SystemNoteService.issue_on_epic(referenced_issue, issuable, current_user, :added)
-      end
-    end
 
     def extractor_context
       { group: issuable.group }
@@ -64,10 +51,6 @@ module EpicIssues
 
     def issuable_group_descendants
       @descendants ||= issuable.group.self_and_descendants
-    end
-
-    def usage_ping_record_epic_issue_added
-      ::Gitlab::UsageDataCounters::EpicActivityUniqueCounter.track_epic_issue_added(author: current_user)
     end
   end
 end

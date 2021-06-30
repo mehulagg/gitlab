@@ -5,12 +5,22 @@ require 'spec_helper'
 RSpec.describe 'layouts/header/_new_dropdown' do
   let_it_be(:user) { create(:user) }
 
+  before do
+    allow(view).to receive(:current_user).and_return(user)
+  end
+
+  context 'general menu links' do
+    it "renders a 'New project/repository' link" do
+      render
+
+      expect(rendered).to have_link('New project/repository', href: new_project_path)
+    end
+  end
+
   context 'group-specific links' do
     let_it_be(:group) { create(:group) }
 
     before do
-      allow(view).to receive(:current_user).and_return(user)
-
       assign(:group, group)
     end
 

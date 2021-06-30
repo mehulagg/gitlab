@@ -8,6 +8,7 @@ RSpec.describe IncidentManagement::Incidents::UploadMetricService do
   let_it_be_with_refind(:project) { create(:project) }
   let_it_be_with_refind(:issuable) { create(:incident, project: project) }
   let_it_be_with_refind(:current_user) { create(:user) }
+
   let(:params) do
     {
       file: fixture_file_upload('spec/fixtures/rails_sample.jpg', 'image/jpg'),

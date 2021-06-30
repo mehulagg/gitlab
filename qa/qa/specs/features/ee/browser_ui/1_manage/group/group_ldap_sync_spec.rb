@@ -14,11 +14,12 @@ module QA
       before(:all) do
         @original_personal_access_token = Runtime::Env.personal_access_token
 
-        # Todo: Remove the 5 lines below when invite_members_group_modal feature flag is enabled by default or removed
-        # We need to nil out any existing personal token generated for the non-admin LDAP user and also set Runtime::Env.ldap_username=nil so that a new admin token is created for use to enable the feature flag.
+        # We need to nil out any existing personal token generated for the non-admin LDAP user and also set
+        # Runtime::Env.ldap_username=nil so that it is not used to create the api client.
         Runtime::Env.personal_access_token = nil
         ldap_username = Runtime::Env.ldap_username
         Runtime::Env.ldap_username = nil
+        @admin_api_client = Runtime::API::Client.as_admin
         Runtime::Feature.enable(:invite_members_group_modal)
         Runtime::Env.ldap_username = ldap_username
 
@@ -168,6 +169,7 @@ module QA
             resource.email = user[:email]
             resource.extern_uid = user[:extern_uid]
             resource.provider = user[:provider]
+            resource.api_client = @admin_api_client
           end
         end
         created_users

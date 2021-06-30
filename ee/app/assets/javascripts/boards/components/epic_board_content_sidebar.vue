@@ -48,7 +48,7 @@ export default {
     <gl-drawer
       v-if="showSidebar"
       v-bind="$attrs"
-      class="gl-absolute"
+      class="boards-sidebar gl-absolute"
       :open="isSidebarOpen"
       @close="handleClose"
     >

@@ -1,4 +1,4 @@
-import { GlSprintf } from '@gitlab/ui';
+import { GlSprintf, GlModal } from '@gitlab/ui';
 import { shallowMount, createLocalVue } from '@vue/test-utils';
 import Vuex from 'vuex';
 import LicenseComplianceModal from 'ee/approvals/components/license_compliance/modal.vue';
@@ -57,6 +57,7 @@ describe('EE Approvals LicenseCompliance Modal', () => {
       stubs: {
         GlModalVuex,
         GlSprintf,
+        GlModal,
         RuleForm: mocks.RuleForm,
       },
     });

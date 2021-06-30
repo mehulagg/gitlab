@@ -23,7 +23,7 @@ describe('ScanExecutionPolicy component', () => {
 
   describe('supported YAML', () => {
     beforeEach(() => {
-      factory({ propsData: { value: mockScanExecutionPolicy.manifest } });
+      factory({ propsData: { value: mockScanExecutionPolicy.yaml } });
     });
 
     it('does render the policy description', () => {

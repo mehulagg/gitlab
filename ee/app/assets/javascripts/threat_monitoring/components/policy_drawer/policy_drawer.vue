@@ -33,7 +33,7 @@ export default {
   },
   computed: {
     policyKind() {
-      return getPolicyKind(this.policy);
+      return getPolicyKind(this.policy?.yaml);
     },
     policyComponent() {
       return policyComponent[this.policyKind] || null;
@@ -72,7 +72,7 @@ export default {
       </div>
     </template>
     <div v-if="policy">
-      <component :is="policyComponent" v-if="policyComponent" :value="policy.manifest" />
+      <component :is="policyComponent" v-if="policyComponent" :value="policy.yaml" />
       <div v-else>
         <h5>{{ s__('NetworkPolicies|Policy definition') }}</h5>
         <p>
@@ -80,7 +80,7 @@ export default {
         </p>
         <div class="gl-p-3 gl-bg-gray-50">
           <policy-yaml-editor
-            :value="policy.manifest"
+            :value="policy.yaml"
             data-testid="policy-yaml-editor"
             class="network-policy-editor"
           />

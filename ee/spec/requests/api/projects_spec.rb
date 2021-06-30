@@ -7,6 +7,7 @@ RSpec.describe API::Projects do
 
   let(:user) { create(:user) }
   let_it_be(:another_user) { create(:user) }
+
   let(:project) { create(:project, namespace: user.namespace) }
 
   shared_examples 'inaccessable by reporter role and lower' do
@@ -603,6 +604,7 @@ RSpec.describe API::Projects do
   describe 'GET projects/:id/audit_events' do
     let_it_be(:user) { create(:user) }
     let_it_be(:project) { create(:project, :public, namespace: user.namespace) }
+
     let(:path) { "/projects/#{project.id}/audit_events" }
 
     it_behaves_like 'inaccessable by reporter role and lower'

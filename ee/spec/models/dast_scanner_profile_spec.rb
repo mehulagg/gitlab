@@ -35,6 +35,25 @@ RSpec.describe DastScannerProfile, type: :model do
     end
   end
 
+  describe '.names' do
+    it 'returns the names for the DAST scanner profiles with the given IDs' do
+      first_profile = create(:dast_scanner_profile, name: 'First profile')
+      second_profile = create(:dast_scanner_profile, name: 'Second profile')
+
+      names = described_class.names([first_profile.id, second_profile.id])
+
+      expect(names).to contain_exactly('First profile', 'Second profile')
+    end
+
+    context 'when a profile is not found' do
+      it 'rescues the error and returns an empty array' do
+        names = described_class.names([0])
+
+        expect(names).to be_empty
+      end
+    end
+  end
+
   describe '#ci_variables' do
     let(:collection) { subject.ci_variables }
 

@@ -269,18 +269,43 @@ RSpec.describe 'Admin updates settings' do
     end
 
     context 'Integrations page' do
+      let(:mailgun_events_receiver_enabled) { true }
+
       before do
+        stub_feature_flags(mailgun_events_receiver: mailgun_events_receiver_enabled)
         visit general_admin_application_settings_path
       end
 
       it 'enable hiding third party offers' do
         page.within('.as-third-party-offers') do
-          check 'Do not display offers from third parties within GitLab'
+          check 'Do not display offers from third parties'
           click_button 'Save changes'
         end
 
         expect(page).to have_content "Application settings saved successfully"
         expect(current_settings.hide_third_party_offers).to be true
+      end
+
+      context 'when mailgun_events_receiver feature flag is enabled' do
+        it 'enabling Mailgun events', :aggregate_failures do
+          page.within('.as-mailgun') do
+            check 'Enable Mailgun event receiver'
+            fill_in 'Mailgun HTTP webhook signing key', with: 'MAILGUN_SIGNING_KEY'
+            click_button 'Save changes'
+          end
+
+          expect(page).to have_content 'Application settings saved successfully'
+          expect(current_settings.mailgun_events_enabled).to be true
+          expect(current_settings.mailgun_signing_key).to eq 'MAILGUN_SIGNING_KEY'
+        end
+      end
+
+      context 'when mailgun_events_receiver feature flag is disabled' do
+        let(:mailgun_events_receiver_enabled) { false }
+
+        it 'does not have mailgun' do
+          expect(page).not_to have_selector('.as-mailgun')
+        end
       end
     end
 
@@ -567,7 +592,7 @@ RSpec.describe 'Admin updates settings' do
 
           wait_for_requests
 
-          expect(page).to have_selector '.js-usage-ping-payload'
+          expect(page).to have_selector '.js-service-ping-payload'
           expect(page).to have_button 'Hide payload'
           expect(page).to have_content expected_payload_content
         end

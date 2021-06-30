@@ -98,6 +98,7 @@ RSpec.describe Gitlab::ImportExport::Project::TreeRestorer do
 
   describe 'security_settings' do
     let_it_be(:project) { create(:project, name: 'project', path: 'project') }
+
     let(:user) { create(:user)}
 
     before do
@@ -113,6 +114,7 @@ RSpec.describe Gitlab::ImportExport::Project::TreeRestorer do
 
   describe 'push_rules' do
     let_it_be(:project) { create(:project, name: 'project', path: 'project') }
+
     let(:user) { create(:user)}
 
     before do

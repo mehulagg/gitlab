@@ -1,4 +1,5 @@
 ---
+data_category: Optional
 key_path: counts_monthly.aggregated_metrics.i_testing_paid_monthly_active_user_total
 description: Aggregated count of users who have engaged with a Premium or Ultimate tier testing feature per month.
 product_section: ops

@@ -53,7 +53,7 @@ RSpec.describe 'Multiple Issue Boards', :js do
     end
   end
 
-  context 'with multiple group issue boards enabled' do
+  context 'with multiple group issue boards enabled', quarantine: 'https://gitlab.com/gitlab-org/gitlab/-/issues/334552' do
     let!(:board2) { create(:board, group: group) }
 
     before do

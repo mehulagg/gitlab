@@ -7,6 +7,7 @@ RSpec.describe 'callout alerts' do
 
   describe 'new_user_signups_cap_reached' do
     let_it_be(:user) { create(:admin) }
+
     let(:billable_users) { [double(:billable_user)] }
     let(:help_page_href) { help_page_path('user/admin_area/settings/sign_up_restrictions.md') }
     let(:expected_content) { 'Your instance has reached its user cap' }

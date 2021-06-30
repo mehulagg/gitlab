@@ -1,4 +1,5 @@
 ---
+data_category: Optional
 key_path: analytics_unique_visits.g_analytics_productivity
 description: Unique visitors to /groups/:group/-/analytics/productivity_analytics
 product_section: dev

@@ -12,6 +12,7 @@ RSpec.describe QuickActions::InterpretService do
   let_it_be_with_refind(:group) { create(:group) }
   let_it_be_with_refind(:project) { create(:project, :repository, :public, group: group) }
   let_it_be_with_reload(:issue) { create(:issue, project: project) }
+
   let(:service) { described_class.new(project, current_user) }
 
   before do

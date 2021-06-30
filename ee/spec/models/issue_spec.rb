@@ -14,6 +14,29 @@ RSpec.describe Issue do
     it { is_expected.to have_many(:resource_iteration_events) }
     it { is_expected.to have_one(:issuable_sla) }
     it { is_expected.to have_many(:metric_images) }
+
+    it { is_expected.to have_one(:requirement) }
+    it { is_expected.to have_many(:test_reports) }
+
+    context 'for an issue with associated test report' do
+      let_it_be(:requirement_issue) do
+        ri = create(:requirement_issue)
+        create(:test_report, requirement_issue: ri, requirement: nil)
+        ri
+      end
+
+      context 'for an issue of type Requirement' do
+        specify { expect(requirement_issue.test_reports.count).to eq(1) }
+      end
+
+      context 'for an issue of a different type' do
+        before do
+          requirement_issue.update_attribute(:issue_type, :incident)
+        end
+
+        specify { expect(requirement_issue.test_reports.count).to eq(0) }
+      end
+    end
   end
 
   describe 'modules' do

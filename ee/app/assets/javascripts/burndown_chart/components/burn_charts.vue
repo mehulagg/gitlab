@@ -338,12 +338,9 @@ export default {
         :namespace-type="namespaceType"
         :display-value="displayValue"
       >
-        <timebox-summary-cards
-          slot-scope="{ columns: openColumns, loading: summaryLoading, total }"
-          :columns="openColumns"
-          :loading="summaryLoading"
-          :total="total"
-        />
+        <template #default="{ columns: openColumns, loading: summaryLoading, total }">
+          <timebox-summary-cards :columns="openColumns" :loading="summaryLoading" :total="total" />
+        </template>
       </open-timebox-summary>
     </template>
     <div class="row">

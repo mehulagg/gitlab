@@ -1,5 +1,6 @@
 import { GlAlert, GlSprintf } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
+import AccountVerificationModal from 'ee/billings/components/account_verification_modal.vue';
 import CreditCardValidationRequiredAlert from 'ee/billings/components/cc_validation_required_alert.vue';
 import { TEST_HOST } from 'helpers/test_constants';
 
@@ -26,6 +27,7 @@ describe('CreditCardValidationRequiredAlert', () => {
     };
 
     wrapper = createComponent();
+    wrapper.vm.$refs.modal.hide = jest.fn();
   });
 
   afterEach(() => {
@@ -48,5 +50,12 @@ describe('CreditCardValidationRequiredAlert', () => {
     wrapper = createComponent({ shouldRenderSuccess: true });
 
     expect(findGlAlert().attributes('variant')).toBe('success');
+  });
+
+  it('hides the modal and emits a verifiedCreditCard event upon success', () => {
+    wrapper.findComponent(AccountVerificationModal).vm.$emit('success');
+
+    expect(wrapper.vm.$refs.modal.hide).toHaveBeenCalled();
+    expect(wrapper.emitted('verifiedCreditCard')).toBeDefined();
   });
 });

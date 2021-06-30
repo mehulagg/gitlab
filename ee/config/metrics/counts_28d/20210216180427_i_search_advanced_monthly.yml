@@ -1,4 +1,5 @@
 ---
+data_category: Optional
 key_path: redis_hll_counters.search.i_search_advanced_monthly
 description: Calculated unique users to perform Advanced searches by month
 product_section: enablement

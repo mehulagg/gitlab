@@ -11,8 +11,7 @@ const TEST_ATTRS = {
   'data-foo': 'bar',
 };
 const profiles = scannerProfiles.map((x) => {
-  const suffix = x.scanType === 'ACTIVE' ? 'Active' : 'Passive';
-  return { ...x, dropdownLabel: `${x.profileName} (${suffix})` };
+  return { ...x, dropdownLabel: x.profileName };
 });
 
 describe('OnDemandScansScannerProfileSelector', () => {
@@ -90,7 +89,6 @@ describe('OnDemandScansScannerProfileSelector', () => {
         propsData: { profiles },
       });
       const sel = findProfileSelector();
-
       expect(sel.props()).toEqual({
         libraryPath: TEST_LIBRARY_PATH,
         newProfilePath: TEST_NEW_PATH,

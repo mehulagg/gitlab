@@ -2,7 +2,7 @@
 
 exports[`ee/BoardContentSidebar matches the snapshot 1`] = `
 <div
-  class="gl-absolute"
+  class="boards-sidebar gl-absolute"
 >
   Issue details
   <boardsidebartitle-stub />

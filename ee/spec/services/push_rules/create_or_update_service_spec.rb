@@ -5,6 +5,7 @@ require 'spec_helper'
 RSpec.describe PushRules::CreateOrUpdateService, '#execute' do
   let_it_be_with_reload(:project) { create(:project) }
   let_it_be(:user) { create(:user) }
+
   let(:params) { { max_file_size: 28 } }
 
   subject { described_class.new(container: project, current_user: user, params: params) }

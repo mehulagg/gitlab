@@ -5,16 +5,17 @@ import BlobContent from '~/blob/components/blob_content.vue';
 import BlobHeader from '~/blob/components/blob_header.vue';
 import { SIMPLE_BLOB_VIEWER, RICH_BLOB_VIEWER } from '~/blob/components/constants';
 import createFlash from '~/flash';
+import { isLoggedIn } from '~/lib/utils/common_utils';
 import { __ } from '~/locale';
 import blobInfoQuery from '../queries/blob_info.query.graphql';
+import BlobButtonGroup from './blob_button_group.vue';
 import BlobEdit from './blob_edit.vue';
-import BlobReplace from './blob_replace.vue';
 
 export default {
   components: {
     BlobHeader,
     BlobEdit,
-    BlobReplace,
+    BlobButtonGroup,
     BlobContent,
     GlLoadingIcon,
   },
@@ -90,7 +91,7 @@ export default {
   },
   computed: {
     isLoggedIn() {
-      return Boolean(gon.current_user_id);
+      return isLoggedIn();
     },
     isLoading() {
       return this.$apollo.queries.project.loading;
@@ -132,7 +133,7 @@ export default {
       >
         <template #actions>
           <blob-edit :edit-path="blobInfo.editBlobPath" :web-ide-path="blobInfo.ideEditPath" />
-          <blob-replace
+          <blob-button-group
             v-if="isLoggedIn"
             :path="path"
             :name="blobInfo.name"

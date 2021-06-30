@@ -10,6 +10,7 @@ RSpec.describe 'Update list limit metrics' do
   let_it_be(:user)  { create(:user) }
   let_it_be(:list)  { create(:list, board: board) }
   let_it_be(:forbidden_user) { create(:user) }
+
   let(:current_user) { user }
 
   let(:mutation_class) { Mutations::Boards::Lists::UpdateLimitMetrics }

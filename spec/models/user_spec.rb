@@ -991,6 +991,7 @@ RSpec.describe User do
       let_it_be(:valid_token_and_notified) { create(:personal_access_token, user: user2, expires_at: 2.days.from_now, expire_notification_delivered: true) }
       let_it_be(:valid_token1) { create(:personal_access_token, user: user2, expires_at: 2.days.from_now) }
       let_it_be(:valid_token2) { create(:personal_access_token, user: user2, expires_at: 2.days.from_now) }
+
       let(:users) { described_class.with_expiring_and_not_notified_personal_access_tokens(from) }
 
       context 'in one day' do
@@ -2812,6 +2813,14 @@ RSpec.describe User do
       end
     end
 
+    describe '#matches_identity?' do
+      it 'finds the identity when the DN is formatted differently' do
+        user = create(:omniauth_user, provider: 'ldapmain', extern_uid: 'uid=john smith,ou=people,dc=example,dc=com')
+
+        expect(user.matches_identity?('ldapmain', 'uid=John Smith, ou=People, dc=example, dc=com')).to eq(true)
+      end
+    end
+
     describe '#ldap_block' do
       let(:user) { create(:omniauth_user, provider: 'ldapmain', name: 'John Smith') }
 
@@ -4208,6 +4217,7 @@ RSpec.describe User do
 
   describe '#source_groups_of_two_factor_authentication_requirement' do
     let_it_be(:group_not_requiring_2FA) { create :group }
+
     let(:user) { create :user }
 
     before do
@@ -5751,6 +5761,20 @@ RSpec.describe User do
           expect(find_or_initialize_callout).not_to be_valid
         end
       end
+    end
+  end
+
+  describe '#default_dashboard?' do
+    it 'is the default dashboard' do
+      user = build(:user)
+
+      expect(user.default_dashboard?).to be true
+    end
+
+    it 'is not the default dashboard' do
+      user = build(:user, dashboard: 'stars')
+
+      expect(user.default_dashboard?).to be false
     end
   end
 

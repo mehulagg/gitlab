@@ -113,11 +113,14 @@ export default {
       this.emitUpdate();
     },
     emitUpdate() {
-      this.$emit('update-escalation-rule', this.index, {
-        oncallScheduleIid: parseInt(this.oncallScheduleIid, 10),
-        action: this.action,
-        status: this.status,
-        elapsedTimeSeconds: parseInt(this.elapsedTimeSeconds, 10),
+      this.$emit('update-escalation-rule', {
+        index: this.index,
+        rule: {
+          oncallScheduleIid: parseInt(this.oncallScheduleIid, 10),
+          action: this.action,
+          status: this.status,
+          elapsedTimeSeconds: parseInt(this.elapsedTimeSeconds, 10),
+        },
       });
     },
   },

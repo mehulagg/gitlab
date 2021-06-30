@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`DastSiteProfileSummary renders properly 1`] = `
+exports[`DastSiteProfileSummary renders properly profile 0 1`] = `
 <div>
   <div
     class="row"
@@ -65,6 +65,59 @@ exports[`DastSiteProfileSummary renders properly 1`] = `
     <profile-selector-summary-cell-stub
       label="Request headers"
       value="[Redacted]"
+    />
+  </div>
+   
+  <div
+    class="row"
+  >
+    <profile-selector-summary-cell-stub
+      label="Validation status"
+      value="Not Validated"
+    />
+  </div>
+</div>
+`;
+
+exports[`DastSiteProfileSummary renders properly profile 1 1`] = `
+<div>
+  <div
+    class="row"
+  >
+    <profile-selector-summary-cell-stub
+      class=""
+      label="Target URL"
+      value="https://bar.com"
+    />
+     
+    <profile-selector-summary-cell-stub
+      label="Site type"
+      value="Rest API"
+    />
+  </div>
+   
+  <!---->
+   
+  <div
+    class="row"
+  >
+    <profile-selector-summary-cell-stub
+      label="Excluded URLs"
+      value="https://bar.com/logout"
+    />
+     
+    <profile-selector-summary-cell-stub
+      label="Request headers"
+      value="[Redacted]"
+    />
+  </div>
+   
+  <div
+    class="row"
+  >
+    <profile-selector-summary-cell-stub
+      label="Validation status"
+      value="Validated"
     />
   </div>
 </div>

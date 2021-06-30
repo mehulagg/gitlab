@@ -5,6 +5,7 @@ require 'spec_helper'
 RSpec.describe 'Jira issues list' do
   let_it_be(:project, refind: true) { create(:project) }
   let_it_be(:jira_integration) { create(:jira_integration, project: project, issues_enabled: true, project_key: 'GL') }
+
   let(:user) { create(:user) }
 
   before do

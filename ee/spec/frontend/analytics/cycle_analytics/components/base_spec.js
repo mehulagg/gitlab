@@ -156,6 +156,9 @@ describe('EE Value Stream Analytics component', () => {
     return comp;
   }
 
+  const findPathNavigation = () => wrapper.findComponent(PathNavigation);
+  const findStageTable = () => wrapper.findComponent(StageTable);
+
   const displaysProjectsDropdownFilter = (flag) => {
     expect(wrapper.findComponent(ProjectsDropdownFilter).exists()).toBe(flag);
   };
@@ -169,7 +172,7 @@ describe('EE Value Stream Analytics component', () => {
   };
 
   const displaysStageTable = (flag) => {
-    expect(wrapper.findComponent(StageTable).exists()).toBe(flag);
+    expect(findStageTable().exists()).toBe(flag);
   };
 
   const displaysDurationChart = (flag) => {
@@ -179,8 +182,6 @@ describe('EE Value Stream Analytics component', () => {
   const displaysTypeOfWork = (flag) => {
     expect(wrapper.findComponent(TypeOfWorkCharts).exists()).toBe(flag);
   };
-
-  const findPathNavigation = () => wrapper.findComponent(PathNavigation);
 
   const displaysPathNavigation = (flag) => {
     expect(findPathNavigation().exists()).toBe(flag);
@@ -368,7 +369,6 @@ describe('EE Value Stream Analytics component', () => {
     beforeEach(async () => {
       mock = new MockAdapter(axios);
       mockRequiredRoutes(mock);
-      wrapper = await createComponent();
     });
 
     afterEach(() => {
@@ -397,7 +397,7 @@ describe('EE Value Stream Analytics component', () => {
         .onGet(mockData.endpoints.stageData)
         .reply(httpStatusCodes.NOT_FOUND, { response: { status: httpStatusCodes.NOT_FOUND } });
 
-      await createComponent({ selectedStage: mockData.issueStage });
+      wrapper = await createComponent({ selectedStage: mockData.issueStage });
 
       expect(createFlash).toHaveBeenCalledWith({
         message: 'There was an error fetching data for the selected stage',
@@ -410,7 +410,7 @@ describe('EE Value Stream Analytics component', () => {
       mock
         .onGet(mockData.endpoints.tasksByTypeTopLabelsData)
         .reply(httpStatusCodes.NOT_FOUND, { response: { status: httpStatusCodes.NOT_FOUND } });
-      await createComponent();
+      wrapper = await createComponent();
       await waitForPromises();
 
       expect(createFlash).toHaveBeenCalledWith({
@@ -424,7 +424,7 @@ describe('EE Value Stream Analytics component', () => {
       mock
         .onGet(mockData.endpoints.tasksByTypeData)
         .reply(httpStatusCodes.NOT_FOUND, { response: { status: httpStatusCodes.NOT_FOUND } });
-      await createComponent();
+      wrapper = await createComponent();
       await waitForPromises();
 
       expect(createFlash).toHaveBeenCalledWith({
@@ -438,12 +438,25 @@ describe('EE Value Stream Analytics component', () => {
       mock
         .onGet(mockData.endpoints.stageMedian)
         .reply(httpStatusCodes.NOT_FOUND, { response: { status: httpStatusCodes.NOT_FOUND } });
-      await createComponent();
+      wrapper = await createComponent();
 
-      await waitForPromises();
       expect(createFlash).toHaveBeenCalledWith({
         message: 'There was an error fetching median data for stages',
       });
+    });
+
+    it('will display an error if the fetchStageData request is successful but has an embedded error', async () => {
+      const tooMuchDataError = 'There is too much data to calculate. Please change your selection.';
+      mock
+        .onGet(mockData.endpoints.stageData)
+        .reply(httpStatusCodes.OK, { error: tooMuchDataError });
+
+      wrapper = await createComponent({ selectedStage: mockData.issueStage });
+
+      displaysStageTable(true);
+      expect(findStageTable().props('emptyStateMessage')).toBe(tooMuchDataError);
+      expect(findStageTable().props('stageEvents')).toEqual([]);
+      expect(findStageTable().props('pagination')).toEqual({});
     });
   });
 

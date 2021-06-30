@@ -13,6 +13,7 @@ query groupEpics(
   $confidential: Boolean
   $search: String = ""
   $first: Int = 1001
+  $not: NegatedEpicFilterInput
 ) {
   group(fullPath: $fullPath) {
     id
@@ -29,6 +30,7 @@ query groupEpics(
       search: $search
       first: $first
       timeframe: $timeframe
+      not: $not
     ) {
       edges {
         node {

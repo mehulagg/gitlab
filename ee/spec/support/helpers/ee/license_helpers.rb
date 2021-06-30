@@ -43,11 +43,12 @@ module EE
         ::Gitlab::CurrentSettings.update!(check_namespace_plan: true)
       end
 
-      def create_current_license(options = {})
+      def create_current_license(gitlab_license_options = {}, license_options = {})
         License.current.destroy!
 
-        gl_license = create(:gitlab_license, options)
-        create(:license, data: gl_license.export)
+        gl_license = create(:gitlab_license, gitlab_license_options)
+
+        create(:license, license_options.merge(data: gl_license.export))
       end
 
       ::Project.prepend ClearLicensedFeatureAvailableCache

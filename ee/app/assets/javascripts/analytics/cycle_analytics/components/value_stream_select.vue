@@ -84,7 +84,7 @@ export default {
   methods: {
     ...mapActions(['setSelectedValueStream', 'deleteValueStream']),
     onSuccess(message) {
-      this.$toast.show(message, { position: 'top-center' });
+      this.$toast.show(message);
     },
     isSelected(id) {
       return Boolean(this.selectedValueStreamId && this.selectedValueStreamId === id);

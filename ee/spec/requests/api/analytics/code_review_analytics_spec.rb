@@ -31,6 +31,7 @@ RSpec.describe API::Analytics::CodeReviewAnalytics do
     context 'with merge requests present' do
       let_it_be(:label) { create :label, project: project }
       let_it_be(:milestone) { create :milestone, project: project }
+
       let!(:merge_request_1) { create(:merge_request, :opened, source_project: project, target_branch: 'mr1') }
       let!(:merge_request_2) { create(:labeled_merge_request, :opened, source_project: project, labels: [label], target_branch: 'mr2') }
       let!(:merge_request_3) { create(:labeled_merge_request, :opened, source_project: project, labels: [label], milestone: milestone, target_branch: 'mr3') }

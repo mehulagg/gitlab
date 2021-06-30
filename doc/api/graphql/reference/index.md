@@ -52,6 +52,7 @@ Returns [`CiConfig`](#ciconfig).
 | <a id="queryciconfigcontent"></a>`content` | [`String!`](#string) | Contents of `.gitlab-ci.yml`. |
 | <a id="queryciconfigdryrun"></a>`dryRun` | [`Boolean`](#boolean) | Run pipeline creation simulation, or only do static check. |
 | <a id="queryciconfigprojectpath"></a>`projectPath` | [`ID!`](#id) | The project of the CI config. |
+| <a id="queryciconfigsha"></a>`sha` | [`String`](#string) | Sha for the pipeline. |
 
 ### `Query.containerRepository`
 
@@ -1834,6 +1835,24 @@ Input type: `DestroyNoteInput`
 | <a id="mutationdestroynoteerrors"></a>`errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 | <a id="mutationdestroynotenote"></a>`note` | [`Note`](#note) | The note after mutation. |
 
+### `Mutation.destroyPackage`
+
+Input type: `DestroyPackageInput`
+
+#### Arguments
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| <a id="mutationdestroypackageclientmutationid"></a>`clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
+| <a id="mutationdestroypackageid"></a>`id` | [`PackagesPackageID!`](#packagespackageid) | ID of the Package. |
+
+#### Fields
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| <a id="mutationdestroypackageclientmutationid"></a>`clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
+| <a id="mutationdestroypackageerrors"></a>`errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
+
 ### `Mutation.destroySnippet`
 
 Input type: `DestroySnippetInput`
@@ -3571,6 +3590,65 @@ Input type: `RunnersRegistrationTokenResetInput`
 | <a id="mutationrunnersregistrationtokenresetclientmutationid"></a>`clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 | <a id="mutationrunnersregistrationtokenreseterrors"></a>`errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 | <a id="mutationrunnersregistrationtokenresettoken"></a>`token` | [`String`](#string) | The runner token after mutation. |
+
+### `Mutation.scanExecutionPolicyCommit`
+
+Input type: `ScanExecutionPolicyCommitInput`
+
+#### Arguments
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| <a id="mutationscanexecutionpolicycommitclientmutationid"></a>`clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
+| <a id="mutationscanexecutionpolicycommitoperationmode"></a>`operationMode` | [`MutationOperationMode!`](#mutationoperationmode) | Changes the operation mode. |
+| <a id="mutationscanexecutionpolicycommitpolicyyaml"></a>`policyYaml` | [`String!`](#string) | YAML snippet of the policy. |
+| <a id="mutationscanexecutionpolicycommitprojectpath"></a>`projectPath` | [`ID!`](#id) | Full path of the project. |
+
+#### Fields
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| <a id="mutationscanexecutionpolicycommitbranch"></a>`branch` | [`String`](#string) | Name of the branch to which the policy changes are committed. |
+| <a id="mutationscanexecutionpolicycommitclientmutationid"></a>`clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
+| <a id="mutationscanexecutionpolicycommiterrors"></a>`errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
+
+### `Mutation.securityPolicyProjectAssign`
+
+Input type: `SecurityPolicyProjectAssignInput`
+
+#### Arguments
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| <a id="mutationsecuritypolicyprojectassignclientmutationid"></a>`clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
+| <a id="mutationsecuritypolicyprojectassignprojectpath"></a>`projectPath` | [`ID!`](#id) | Full path of the project. |
+| <a id="mutationsecuritypolicyprojectassignsecuritypolicyprojectid"></a>`securityPolicyProjectId` | [`ProjectID!`](#projectid) | ID of the security policy project. |
+
+#### Fields
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| <a id="mutationsecuritypolicyprojectassignclientmutationid"></a>`clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
+| <a id="mutationsecuritypolicyprojectassignerrors"></a>`errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
+
+### `Mutation.securityPolicyProjectCreate`
+
+Input type: `SecurityPolicyProjectCreateInput`
+
+#### Arguments
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| <a id="mutationsecuritypolicyprojectcreateclientmutationid"></a>`clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
+| <a id="mutationsecuritypolicyprojectcreateprojectpath"></a>`projectPath` | [`ID!`](#id) | Full path of the project. |
+
+#### Fields
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| <a id="mutationsecuritypolicyprojectcreateclientmutationid"></a>`clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
+| <a id="mutationsecuritypolicyprojectcreateerrors"></a>`errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
+| <a id="mutationsecuritypolicyprojectcreateproject"></a>`project` | [`Project`](#project) | Security Policy Project that was created. |
 
 ### `Mutation.terraformStateDelete`
 
@@ -7321,6 +7399,7 @@ four standard [pagination arguments](#connection-pagination-arguments):
 | <a id="boardepicancestorsiid"></a>`iid` | [`ID`](#id) | IID of the epic, e.g., "1". |
 | <a id="boardepicancestorsiidstartswith"></a>`iidStartsWith` | [`String`](#string) | Filter epics by IID for autocomplete. |
 | <a id="boardepicancestorsiids"></a>`iids` | [`[ID!]`](#id) | List of IIDs of epics, e.g., `[1, 2]`. |
+| <a id="boardepicancestorsin"></a>`in` | [`[IssuableSearchableField!]`](#issuablesearchablefield) | Specify the fields to perform the search in. Defaults to `[TITLE, DESCRIPTION]`. Requires the `search` argument. |
 | <a id="boardepicancestorsincludeancestorgroups"></a>`includeAncestorGroups` | [`Boolean`](#boolean) | Include epics from ancestor groups. |
 | <a id="boardepicancestorsincludedescendantgroups"></a>`includeDescendantGroups` | [`Boolean`](#boolean) | Include epics from descendant groups. |
 | <a id="boardepicancestorslabelname"></a>`labelName` | [`[String!]`](#string) | Filter epics by labels. |
@@ -7353,6 +7432,7 @@ four standard [pagination arguments](#connection-pagination-arguments):
 | <a id="boardepicchildreniid"></a>`iid` | [`ID`](#id) | IID of the epic, e.g., "1". |
 | <a id="boardepicchildreniidstartswith"></a>`iidStartsWith` | [`String`](#string) | Filter epics by IID for autocomplete. |
 | <a id="boardepicchildreniids"></a>`iids` | [`[ID!]`](#id) | List of IIDs of epics, e.g., `[1, 2]`. |
+| <a id="boardepicchildrenin"></a>`in` | [`[IssuableSearchableField!]`](#issuablesearchablefield) | Specify the fields to perform the search in. Defaults to `[TITLE, DESCRIPTION]`. Requires the `search` argument. |
 | <a id="boardepicchildrenincludeancestorgroups"></a>`includeAncestorGroups` | [`Boolean`](#boolean) | Include epics from ancestor groups. |
 | <a id="boardepicchildrenincludedescendantgroups"></a>`includeDescendantGroups` | [`Boolean`](#boolean) | Include epics from descendant groups. |
 | <a id="boardepicchildrenlabelname"></a>`labelName` | [`[String!]`](#string) | Filter epics by labels. |
@@ -7589,7 +7669,7 @@ Represents the total number of issues and their weights for a particular day.
 | <a id="cijobrefpath"></a>`refPath` | [`String`](#string) | Path to the ref. |
 | <a id="cijobretryable"></a>`retryable` | [`Boolean!`](#boolean) | Indicates the job can be retried. |
 | <a id="cijobscheduledat"></a>`scheduledAt` | [`Time`](#time) | Schedule for the build. |
-| <a id="cijobschedulingtype"></a>`schedulingType` | [`String`](#string) | Type of pipeline scheduling. Value is `dag` if the pipeline uses the `needs` keyword, and `stage` otherwise. |
+| <a id="cijobschedulingtype"></a>`schedulingType` | [`String`](#string) | Type of job scheduling. Value is `dag` if the job uses the `needs` keyword, and `stage` otherwise. |
 | <a id="cijobshortsha"></a>`shortSha` | [`String!`](#string) | Short SHA1 ID of the commit. |
 | <a id="cijobstage"></a>`stage` | [`CiStage`](#cistage) | Stage of the job. |
 | <a id="cijobstartedat"></a>`startedAt` | [`Time`](#time) | When the job was started. |
@@ -8543,6 +8623,7 @@ four standard [pagination arguments](#connection-pagination-arguments):
 | <a id="epicancestorsiid"></a>`iid` | [`ID`](#id) | IID of the epic, e.g., "1". |
 | <a id="epicancestorsiidstartswith"></a>`iidStartsWith` | [`String`](#string) | Filter epics by IID for autocomplete. |
 | <a id="epicancestorsiids"></a>`iids` | [`[ID!]`](#id) | List of IIDs of epics, e.g., `[1, 2]`. |
+| <a id="epicancestorsin"></a>`in` | [`[IssuableSearchableField!]`](#issuablesearchablefield) | Specify the fields to perform the search in. Defaults to `[TITLE, DESCRIPTION]`. Requires the `search` argument. |
 | <a id="epicancestorsincludeancestorgroups"></a>`includeAncestorGroups` | [`Boolean`](#boolean) | Include epics from ancestor groups. |
 | <a id="epicancestorsincludedescendantgroups"></a>`includeDescendantGroups` | [`Boolean`](#boolean) | Include epics from descendant groups. |
 | <a id="epicancestorslabelname"></a>`labelName` | [`[String!]`](#string) | Filter epics by labels. |
@@ -8575,6 +8656,7 @@ four standard [pagination arguments](#connection-pagination-arguments):
 | <a id="epicchildreniid"></a>`iid` | [`ID`](#id) | IID of the epic, e.g., "1". |
 | <a id="epicchildreniidstartswith"></a>`iidStartsWith` | [`String`](#string) | Filter epics by IID for autocomplete. |
 | <a id="epicchildreniids"></a>`iids` | [`[ID!]`](#id) | List of IIDs of epics, e.g., `[1, 2]`. |
+| <a id="epicchildrenin"></a>`in` | [`[IssuableSearchableField!]`](#issuablesearchablefield) | Specify the fields to perform the search in. Defaults to `[TITLE, DESCRIPTION]`. Requires the `search` argument. |
 | <a id="epicchildrenincludeancestorgroups"></a>`includeAncestorGroups` | [`Boolean`](#boolean) | Include epics from ancestor groups. |
 | <a id="epicchildrenincludedescendantgroups"></a>`includeDescendantGroups` | [`Boolean`](#boolean) | Include epics from descendant groups. |
 | <a id="epicchildrenlabelname"></a>`labelName` | [`[String!]`](#string) | Filter epics by labels. |
@@ -8727,6 +8809,7 @@ Relationship between an epic and an issue.
 | <a id="epicissuemovedto"></a>`movedTo` | [`Issue`](#issue) | Updated Issue after it got moved to another project. |
 | <a id="epicissuenotes"></a>`notes` | [`NoteConnection!`](#noteconnection) | All notes on this noteable. (see [Connections](#connections)) |
 | <a id="epicissueparticipants"></a>`participants` | [`UserCoreConnection`](#usercoreconnection) | List of participants in the issue. (see [Connections](#connections)) |
+| <a id="epicissueprojectid"></a>`projectId` | [`Int!`](#int) | ID of the issue project. |
 | <a id="epicissuerelationpath"></a>`relationPath` | [`String`](#string) | URI path of the epic-issue relation. |
 | <a id="epicissuerelativeposition"></a>`relativePosition` | [`Int`](#int) | Relative position of the issue (used for positioning in epic tree and issue boards). |
 | <a id="epicissueseverity"></a>`severity` | [`IssuableSeverity`](#issuableseverity) | Severity level of the incident. |
@@ -9178,6 +9261,7 @@ Returns [`Epic`](#epic).
 | <a id="groupepiciid"></a>`iid` | [`ID`](#id) | IID of the epic, e.g., "1". |
 | <a id="groupepiciidstartswith"></a>`iidStartsWith` | [`String`](#string) | Filter epics by IID for autocomplete. |
 | <a id="groupepiciids"></a>`iids` | [`[ID!]`](#id) | List of IIDs of epics, e.g., `[1, 2]`. |
+| <a id="groupepicin"></a>`in` | [`[IssuableSearchableField!]`](#issuablesearchablefield) | Specify the fields to perform the search in. Defaults to `[TITLE, DESCRIPTION]`. Requires the `search` argument. |
 | <a id="groupepicincludeancestorgroups"></a>`includeAncestorGroups` | [`Boolean`](#boolean) | Include epics from ancestor groups. |
 | <a id="groupepicincludedescendantgroups"></a>`includeDescendantGroups` | [`Boolean`](#boolean) | Include epics from descendant groups. |
 | <a id="groupepiclabelname"></a>`labelName` | [`[String!]`](#string) | Filter epics by labels. |
@@ -9222,6 +9306,7 @@ four standard [pagination arguments](#connection-pagination-arguments):
 | <a id="groupepicsiid"></a>`iid` | [`ID`](#id) | IID of the epic, e.g., "1". |
 | <a id="groupepicsiidstartswith"></a>`iidStartsWith` | [`String`](#string) | Filter epics by IID for autocomplete. |
 | <a id="groupepicsiids"></a>`iids` | [`[ID!]`](#id) | List of IIDs of epics, e.g., `[1, 2]`. |
+| <a id="groupepicsin"></a>`in` | [`[IssuableSearchableField!]`](#issuablesearchablefield) | Specify the fields to perform the search in. Defaults to `[TITLE, DESCRIPTION]`. Requires the `search` argument. |
 | <a id="groupepicsincludeancestorgroups"></a>`includeAncestorGroups` | [`Boolean`](#boolean) | Include epics from ancestor groups. |
 | <a id="groupepicsincludedescendantgroups"></a>`includeDescendantGroups` | [`Boolean`](#boolean) | Include epics from descendant groups. |
 | <a id="groupepicslabelname"></a>`labelName` | [`[String!]`](#string) | Filter epics by labels. |
@@ -9775,6 +9860,7 @@ Returns [`VulnerabilitySeveritiesCount`](#vulnerabilityseveritiescount).
 | <a id="issuemovedto"></a>`movedTo` | [`Issue`](#issue) | Updated Issue after it got moved to another project. |
 | <a id="issuenotes"></a>`notes` | [`NoteConnection!`](#noteconnection) | All notes on this noteable. (see [Connections](#connections)) |
 | <a id="issueparticipants"></a>`participants` | [`UserCoreConnection`](#usercoreconnection) | List of participants in the issue. (see [Connections](#connections)) |
+| <a id="issueprojectid"></a>`projectId` | [`Int!`](#int) | ID of the issue project. |
 | <a id="issuerelativeposition"></a>`relativePosition` | [`Int`](#int) | Relative position of the issue (used for positioning in epic tree and issue boards). |
 | <a id="issueseverity"></a>`severity` | [`IssuableSeverity`](#issuableseverity) | Severity level of the incident. |
 | <a id="issuesladueat"></a>`slaDueAt` | [`Time`](#time) | Timestamp of when the issue SLA expires. |
@@ -12181,6 +12267,7 @@ Represents an asset link associated with a release.
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
+| <a id="releaseassetlinkdirectassetpath"></a>`directAssetPath` | [`String`](#string) | Relative path for the direct asset link. |
 | <a id="releaseassetlinkdirectasseturl"></a>`directAssetUrl` | [`String`](#string) | Direct asset URL of the link. |
 | <a id="releaseassetlinkexternal"></a>`external` | [`Boolean`](#boolean) | Indicates the link points to an external resource. |
 | <a id="releaseassetlinkid"></a>`id` | [`ID!`](#id) | ID of the link. |
@@ -12802,6 +12889,7 @@ Represents the snippet blob.
 | <a id="snippetblobpath"></a>`path` | [`String`](#string) | Blob path. |
 | <a id="snippetblobplaindata"></a>`plainData` | [`String`](#string) | Blob plain highlighted data. |
 | <a id="snippetblobrawpath"></a>`rawPath` | [`String!`](#string) | Blob raw content endpoint path. |
+| <a id="snippetblobrawplaindata"></a>`rawPlainData` | [`String`](#string) | The raw content of the blob, if the blob is text data. |
 | <a id="snippetblobrenderedastext"></a>`renderedAsText` | [`Boolean!`](#boolean) | Shows whether the blob is rendered as text. |
 | <a id="snippetblobrichdata"></a>`richData` | [`String`](#string) | Blob highlighted data. |
 | <a id="snippetblobrichviewer"></a>`richViewer` | [`SnippetBlobViewer`](#snippetblobviewer) | Blob content rich viewer. |
@@ -14296,7 +14384,6 @@ Event action.
 | Value | Description |
 | ----- | ----------- |
 | <a id="eventactionapproved"></a>`APPROVED` | Approved action. |
-| <a id="eventactionarchived"></a>`ARCHIVED` | Archived action. |
 | <a id="eventactionclosed"></a>`CLOSED` | Closed action. |
 | <a id="eventactioncommented"></a>`COMMENTED` | Commented action. |
 | <a id="eventactioncreated"></a>`CREATED` | Created action. |
@@ -14328,6 +14415,15 @@ Health status of an issue or epic.
 | <a id="healthstatusatrisk"></a>`atRisk` |  |
 | <a id="healthstatusneedsattention"></a>`needsAttention` |  |
 | <a id="healthstatusontrack"></a>`onTrack` |  |
+
+### `IssuableSearchableField`
+
+Fields to perform the search in.
+
+| Value | Description |
+| ----- | ----------- |
+| <a id="issuablesearchablefielddescription"></a>`DESCRIPTION` | Search in description field. |
+| <a id="issuablesearchablefieldtitle"></a>`TITLE` | Search in title field. |
 
 ### `IssuableSeverity`
 

@@ -1,4 +1,5 @@
 ---
+data_category: Optional
 key_path: counts.template_repositories
 description: Count of total repo templates used to aggregate all file templates
 product_section: dev

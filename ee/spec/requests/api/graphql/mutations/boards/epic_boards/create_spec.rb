@@ -7,6 +7,7 @@ RSpec.describe Mutations::Boards::EpicBoards::Create do
 
   let_it_be(:current_user) { create(:user) }
   let_it_be(:group) { create(:group) }
+
   let(:name) { 'board name' }
   let(:mutation) { graphql_mutation(:epic_board_create, params) }
   let(:label) { create(:group_label, group: group) }

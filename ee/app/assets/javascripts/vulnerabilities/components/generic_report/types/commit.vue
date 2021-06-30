@@ -1,12 +1,11 @@
 <script>
 import { GlLink } from '@gitlab/ui';
-import { isRootRelative } from '~/lib/utils/url_utility';
 
 export default {
   components: {
     GlLink,
   },
-  inject: ['projectFullPath'],
+  inject: ['commitPathTemplate'],
   props: {
     value: {
       type: String,
@@ -15,14 +14,10 @@ export default {
   },
   computed: {
     commitPath() {
-      const { projectFullPath, value } = this;
-      // `projectFullPath` comes in two flavors: relative (e.g.: `group/project`) and  absolute (e.g.: `/group/project`)
-      // adding a leading slash to the relative path makes sure we always link to an absolute path
-      const absoluteProjectPath = isRootRelative(projectFullPath)
-        ? projectFullPath
-        : `/${projectFullPath}`;
-
-      return `${absoluteProjectPath}/-/commit/${value}`;
+      // Search for all occurences of "$COMMIT_SHA" within the given template, eg.: "/base/project/path/-/commit/$COMMIT_SHA"
+      // NOTE: This should be swapped to using `String.prototype.replaceAll` and a raw string, once browser supported is wider (https://caniuse.com/?search=replaceAll)
+      const allCommitShaPlaceHolders = /\$COMMIT_SHA/g;
+      return this.commitPathTemplate.replace(allCommitShaPlaceHolders, this.value);
     },
   },
 };

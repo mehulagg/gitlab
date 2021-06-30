@@ -60,6 +60,27 @@ RSpec.describe AppSec::Dast::Profiles::DestroyService do
           expect(subject.payload).to be_a(Dast::Profile)
         end
 
+        it 'audits the deletion' do
+          profile = subject.payload
+
+          audit_event = AuditEvent.find_by(author_id: user.id)
+
+          aggregate_failures do
+            expect(audit_event.author).to eq(user)
+            expect(audit_event.entity).to eq(project)
+            expect(audit_event.target_id).to eq(profile.id)
+            expect(audit_event.target_type).to eq('Dast::Profile')
+            expect(audit_event.target_details).to eq(profile.name)
+            expect(audit_event.details).to eq({
+              author_name: user.name,
+              custom_message: 'Removed DAST profile',
+              target_id: profile.id,
+              target_type: 'Dast::Profile',
+              target_details: profile.name
+            })
+          end
+        end
+
         context 'when the dast_profile fails to destroy' do
           it 'communicates failure' do
             allow(dast_profile).to receive(:destroy).and_return(false)

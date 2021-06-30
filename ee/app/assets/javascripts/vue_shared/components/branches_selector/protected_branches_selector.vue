@@ -52,11 +52,11 @@ export default {
 
       return Api.projectProtectedBranches(this.projectId, term)
         .then((branches) => {
-          this.$emit('apiError', false);
+          this.$emit('apiError', { hasErrored: false });
           this.branches = excludeAnyBranch ? branches : [ANY_BRANCH, ...branches];
         })
         .catch((error) => {
-          this.$emit('apiError', true, error);
+          this.$emit('apiError', { hasErrored: true, error });
           this.branches = excludeAnyBranch ? [] : [ANY_BRANCH];
         })
         .finally(() => {

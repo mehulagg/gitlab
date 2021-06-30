@@ -17,11 +17,11 @@ Project access tokens are supported for self-managed instances on Free and above
 WARNING:
 This feature might not be available to you. Check the **version history** note above for details.
 
-Project access tokens are scoped to a project and can be used to authenticate with the [GitLab API](../../../api/README.md#personalproject-access-tokens). You can also use project access tokens with Git to authenticate over HTTP.
+Project access tokens are scoped to a project and can be used to authenticate with the [GitLab API](../../../api/index.md#personalproject-access-tokens). You can also use project access tokens with Git to authenticate over HTTP.
 
 Project access tokens expire on the date you define, at midnight UTC.
 
-For examples of how you can use a project access token to authenticate with the API, see the following section from our [API Docs](../../../api/README.md#personalproject-access-tokens).
+For examples of how you can use a project access token to authenticate with the API, see the following section from our [API Docs](../../../api/index.md#personalproject-access-tokens).
 
 ## Creating a project access token
 
@@ -29,6 +29,7 @@ For examples of how you can use a project access token to authenticate with the 
 1. Navigate to the project you would like to create an access token for.
 1. In the **Settings** menu choose **Access Tokens**.
 1. Choose a name and optional expiry date for the token.
+1. Choose the access level the token should have in the project.
 1. Choose the [desired scopes](#limiting-scopes-of-a-project-access-token).
 1. Click the **Create project access token** button.
 1. Save the project access token somewhere safe. Once you leave or refresh
@@ -42,7 +43,7 @@ For examples of how you can use a project access token to authenticate with the 
 Project bot users are [GitLab-created service accounts](../../../subscriptions/self_managed/index.md#billable-users) and do not count as licensed seats.
 
 For each project access token created, a bot user is created and added to the project with
-[Maintainer level permissions](../../permissions.md#project-members-permissions).
+the [specified level permissions](../../permissions.md#project-members-permissions).
 
 For the bot:
 

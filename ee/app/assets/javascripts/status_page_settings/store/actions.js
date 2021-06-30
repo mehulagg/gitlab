@@ -52,6 +52,5 @@ export const receiveStatusPageSettingsUpdateError = (_, error) => {
 
   createFlash({
     message: `${__('There was an error saving your changes.')} ${message}`,
-    type: 'alert',
   });
 };

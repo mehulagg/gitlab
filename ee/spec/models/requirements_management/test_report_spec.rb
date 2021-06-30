@@ -54,21 +54,7 @@ RSpec.describe RequirementsManagement::TestReport do
       context 'when only requirement issue is set' do
         let(:requirement_arg) { nil }
 
-        context 'when the requirement issue is of type requirement' do
-          let(:requirement_issue_arg) { requirement_issue }
-
-          specify { expect(subject).to be_valid }
-        end
-
-        context 'when requirement issue is non-requirement issue' do
-          let(:invalid_issue) { build(:issue) }
-          let(:requirement_issue_arg) { invalid_issue }
-
-          specify do
-            expect(subject).not_to be_valid
-            expect(subject.errors.messages[:requirement_issue]).to include(/must be an issue of type `Requirement`/)
-          end
-        end
+        it_behaves_like 'a model with a requirement issue association'
       end
     end
   end

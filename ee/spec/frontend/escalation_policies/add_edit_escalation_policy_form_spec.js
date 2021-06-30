@@ -85,7 +85,7 @@ describe('AddEscalationPolicyForm', () => {
         elapsedTimeSeconds: 30,
         oncallScheduleIid: 2,
       };
-      findRules().at(0).vm.$emit('update-escalation-rule', 0, updatedRule);
+      findRules().at(0).vm.$emit('update-escalation-rule', { index: 0, rule: updatedRule });
       expect(wrapper.emitted('update-escalation-policy-form')[0]).toEqual([
         { field: 'rules', value: [expect.objectContaining(updatedRule)] },
       ]);

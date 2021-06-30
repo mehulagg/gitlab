@@ -31,6 +31,7 @@ RSpec.describe AlertManagement::ProcessPrometheusAlertService do
         let_it_be(:schedule) { create(:incident_management_oncall_schedule, project: project) }
         let_it_be(:rotation) { create(:incident_management_oncall_rotation, schedule: schedule) }
         let_it_be(:participant) { create(:incident_management_oncall_participant, :with_developer_access, rotation: rotation) }
+
         let(:users) { [participant.user] }
 
         before do

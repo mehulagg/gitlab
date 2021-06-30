@@ -105,7 +105,7 @@ export default {
         this.$emit('submit', { branches, name, url });
       }
     },
-    setBranchApiError(hasErrored, error) {
+    setBranchApiError({ hasErrored, error }) {
       if (!this.branchesApiFailed && error) {
         Sentry.captureException(error);
       }

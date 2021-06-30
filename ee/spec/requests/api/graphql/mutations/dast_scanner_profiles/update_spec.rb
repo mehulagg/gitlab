@@ -9,6 +9,7 @@ RSpec.describe 'Update a DAST Scanner Profile' do
   let!(:dast_scanner_profile_1) { create(:dast_scanner_profile, project: project) }
 
   let_it_be(:new_profile_name) { SecureRandom.hex }
+
   let(:new_target_timeout) { dast_scanner_profile.target_timeout + 1 }
   let(:new_spider_timeout) { dast_scanner_profile.spider_timeout + 1 }
   let(:new_scan_type) { (DastScannerProfile.scan_types.keys - [DastScannerProfile.last.scan_type]).first }

@@ -4,6 +4,7 @@ require 'spec_helper'
 
 RSpec.describe API::Epics do
   let_it_be(:user) { create(:user) }
+
   let(:group) { create(:group) }
   let(:project) { create(:project, :public, group: group) }
   let(:label) { create(:group_label, group: group) }

@@ -124,7 +124,7 @@ gem 'fog-aws', '~> 3.9'
 # Locked until fog-google resolves https://github.com/fog/fog-google/issues/421.
 # Also see config/initializers/fog_core_patch.rb.
 gem 'fog-core', '= 2.1.0'
-gem 'gitlab-fog-google', '~> 1.13', require: 'fog/google'
+gem 'fog-google', '~> 1.15', require: 'fog/google'
 gem 'fog-local', '~> 0.6'
 gem 'fog-openstack', '~> 1.0'
 gem 'fog-rackspace', '~> 0.1.1'
@@ -480,7 +480,7 @@ end
 gem 'spamcheck', '~> 0.1.0'
 
 # Gitaly GRPC protocol definitions
-gem 'gitaly', '~> 14.0.0.pre.rc2'
+gem 'gitaly', '~> 14.1.0.pre.rc1'
 
 # KAS GRPC protocol definitions
 gem 'kas-grpc', '~> 0.0.2'
@@ -496,7 +496,7 @@ gem 'flipper', '~> 0.21.0'
 gem 'flipper-active_record', '~> 0.21.0'
 gem 'flipper-active_support_cache_store', '~> 0.21.0'
 gem 'unleash', '~> 0.1.5'
-gem 'gitlab-experiment', '~> 0.5.4'
+gem 'gitlab-experiment', '~> 0.6.1'
 
 # Structured logging
 gem 'lograge', '~> 0.5'

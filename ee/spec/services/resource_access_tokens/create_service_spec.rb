@@ -86,7 +86,7 @@ RSpec.describe ResourceAccessTokens::CreateService do
           audit_event = AuditEvent.where(author_id: user.id).last
           access_token = response.payload[:access_token]
           custom_message = <<~MESSAGE.squish
-            Created project access token with token_id: #{access_token.id} with scopes: #{access_token.scopes}
+            Created project access token with token_id: #{access_token.id} with scopes: #{access_token.scopes} and Maintainer access level.
           MESSAGE
 
           expect(audit_event.details).to include(

@@ -12,6 +12,7 @@ RSpec.describe API::MergeRequests do
   let_it_be(:milestone1) { create(:milestone, title: '0.9', project: project) }
   let_it_be(:label)      { create(:label, title: 'label', color: '#FFAABB', project: project) }
   let_it_be(:label2)     { create(:label, title: 'a-test', color: '#FFFFFF', project: project) }
+
   let(:base_time)        { Time.now }
   let!(:merge_request)   { create(:merge_request, :simple, milestone: milestone1, author: user, assignees: [user, user2], source_project: project, target_project: project, title: "Test", created_at: base_time) }
 

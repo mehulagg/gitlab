@@ -111,6 +111,7 @@ RSpec.describe MergeRequestDiff do
     let(:closed_recently) { recently_closed_mr.merge_request_diff }
 
     let_it_be(:recently_merged_mr) { create(:merge_request, :merged) }
+
     let(:merged_recently) { recently_merged_mr.merge_request_diff }
 
     before do
@@ -432,9 +433,7 @@ RSpec.describe MergeRequestDiff do
         it 'returns empty pagination data' do
           diffs = diff_with_commits.diffs_in_batch(1, 10, diff_options: diff_options)
 
-          expect(diffs.pagination_data).to eq(current_page: nil,
-                                              next_page: nil,
-                                              total_pages: nil)
+          expect(diffs.pagination_data).to eq(total_pages: nil)
         end
       end
 
@@ -460,9 +459,7 @@ RSpec.describe MergeRequestDiff do
 
           expect(diffs).to be_a(Gitlab::Diff::FileCollection::MergeRequestDiffBatch)
           expect(diffs.diff_files.size).to eq(10)
-          expect(diffs.pagination_data).to eq(current_page: nil,
-                                              next_page: nil,
-                                              total_pages: 20)
+          expect(diffs.pagination_data).to eq(total_pages: 20)
         end
 
         it 'sorts diff files directory first' do
@@ -493,7 +490,7 @@ RSpec.describe MergeRequestDiff do
 
             expect(diffs).to be_a(Gitlab::Diff::FileCollection::Compare)
             expect(diffs.diff_files.size).to eq 10
-            expect(diffs.pagination_data).to eq(current_page: nil, next_page: nil, total_pages: file_count)
+            expect(diffs.pagination_data).to eq(total_pages: file_count)
           end
 
           it 'returns an empty MergeRequestBatch with empty pagination data when the batch is empty' do
@@ -501,7 +498,7 @@ RSpec.describe MergeRequestDiff do
 
             expect(diffs).to be_a(Gitlab::Diff::FileCollection::MergeRequestDiffBatch)
             expect(diffs.diff_files.size).to eq 0
-            expect(diffs.pagination_data).to eq(current_page: nil, next_page: nil, total_pages: nil)
+            expect(diffs.pagination_data).to eq(total_pages: nil)
           end
         end
       end

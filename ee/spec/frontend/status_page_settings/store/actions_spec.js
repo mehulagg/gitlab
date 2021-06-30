@@ -112,7 +112,6 @@ describe('Status Page actions', () => {
       testAction(actions.receiveStatusPageSettingsUpdateError, error, null, [], [], () => {
         expect(createFlash).toHaveBeenCalledWith({
           message: `There was an error saving your changes. ${error.response.data.message}`,
-          type: 'alert',
         });
         done();
       });

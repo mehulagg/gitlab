@@ -384,7 +384,7 @@ export default {
 
     <gl-button
       type="submit"
-      variant="success"
+      variant="confirm"
       class="js-no-auto-disable"
       data-testid="dast-scanner-profile-form-submit-button"
       :disabled="isSubmitDisabled"

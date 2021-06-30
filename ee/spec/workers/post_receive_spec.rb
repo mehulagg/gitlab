@@ -4,7 +4,6 @@ require 'spec_helper'
 
 RSpec.describe PostReceive do
   include AfterNextHelpers
-  include ServicesHelper
 
   let(:changes) { "123456 789012 refs/heads/tést\n654321 210987 refs/tags/tag" }
   let(:changes_with_master) { "#{changes}\n423423 797823 refs/heads/master" }
@@ -77,7 +76,7 @@ RSpec.describe PostReceive do
       it 'calls Geo::RepositoryUpdatedService when running on a Geo primary node' do
         allow(Gitlab::Geo).to receive(:primary?) { true }
 
-        expect_execution_of(::Geo::RepositoryUpdatedService)
+        expect(::Geo::RepositoryUpdatedService).to get_executed
 
         described_class.new.perform(gl_repository, key_id, base64_changes)
       end
@@ -113,7 +112,7 @@ RSpec.describe PostReceive do
       it 'calls Geo::RepositoryUpdatedService when running on a Geo primary node' do
         allow(Gitlab::Geo).to receive(:primary?) { true }
 
-        expect_execution_of(::Geo::RepositoryUpdatedService)
+        expect(::Geo::RepositoryUpdatedService).to get_executed
 
         described_class.new.perform(gl_repository, key_id, base64_changes)
       end

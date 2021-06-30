@@ -136,7 +136,6 @@ export const receiveCreateIssueError = ({ commit }, { flashError }) => {
   if (flashError) {
     createFlash({
       message: s__('SecurityReports|There was an error creating the issue.'),
-      type: 'alert',
       parent: document.querySelector('.ci-table'),
     });
   }
@@ -208,7 +207,6 @@ export const receiveDismissSelectedVulnerabilitiesError = ({ commit }, { flashEr
   if (flashError) {
     createFlash({
       message: s__('SecurityReports|There was an error dismissing the vulnerabilities.'),
-      type: 'alert',
       parent: document.querySelector('.ci-table'),
     });
   }
@@ -243,7 +241,7 @@ export const dismissVulnerability = (
               dispatch('revertDismissVulnerability', { vulnerability })
                 .then(() => dispatch('fetchVulnerabilities', { page }))
                 .catch(() => {});
-              toastObject.goAway(0);
+              toastObject.hide();
             }
           },
         },
@@ -295,7 +293,6 @@ export const receiveDismissVulnerabilityError = ({ commit }, { flashError }) => 
   if (flashError) {
     createFlash({
       message: s__('SecurityReports|There was an error dismissing the vulnerability.'),
-      type: 'alert',
       parent: document.querySelector('.ci-table'),
     });
   }
@@ -418,7 +415,6 @@ export const receiveUndoDismissError = ({ commit }, { flashError }) => {
   if (flashError) {
     createFlash({
       message: s__('SecurityReports|There was an error reverting this dismissal.'),
-      type: 'alert',
       parent: document.querySelector('.ci-table'),
     });
   }
@@ -486,7 +482,6 @@ export const receiveCreateMergeRequestError = ({ commit }, { flashError }) => {
   if (flashError) {
     createFlash({
       message: s__('SecurityReports|There was an error creating the merge request.'),
-      type: 'alert',
       parent: document.querySelector('.ci-table'),
     });
   }

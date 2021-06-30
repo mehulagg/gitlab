@@ -55,6 +55,7 @@ RSpec.describe 'Reposition and move issue within board lists' do
 
     context 'when user sets nil epic' do
       let_it_be(:epic_issue) { create(:epic_issue, issue: issue1, epic: epic) }
+
       let(:issue_move_params) do
         {
           epic_id: nil,

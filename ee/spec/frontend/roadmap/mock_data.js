@@ -6,7 +6,10 @@ import {
 } from 'ee/roadmap/utils/roadmap_utils';
 
 import { dateFromString } from 'helpers/datetime_helpers';
-import { OPERATOR_IS_ONLY } from '~/vue_shared/components/filtered_search_bar/constants';
+import {
+  OPERATOR_IS_ONLY,
+  OPERATOR_IS_AND_IS_NOT,
+} from '~/vue_shared/components/filtered_search_bar/constants';
 
 import AuthorToken from '~/vue_shared/components/filtered_search_bar/tokens/author_token.vue';
 import EmojiToken from '~/vue_shared/components/filtered_search_bar/tokens/emoji_token.vue';
@@ -774,7 +777,7 @@ export const mockAuthorTokenConfig = {
   unique: true,
   symbol: '@',
   token: AuthorToken,
-  operators: OPERATOR_IS_ONLY,
+  operators: OPERATOR_IS_AND_IS_NOT,
   recentSuggestionsStorageKey: 'gitlab-org-epics-recent-tokens-author_username',
   fetchAuthors: expect.any(Function),
   preloadedAuthors: [],
@@ -787,7 +790,7 @@ export const mockLabelTokenConfig = {
   unique: false,
   symbol: '~',
   token: LabelToken,
-  operators: OPERATOR_IS_ONLY,
+  operators: OPERATOR_IS_AND_IS_NOT,
   recentSuggestionsStorageKey: 'gitlab-org-epics-recent-tokens-label_name',
   fetchLabels: expect.any(Function),
 };
@@ -834,6 +837,6 @@ export const mockReactionEmojiTokenConfig = {
   title: 'My-Reaction',
   unique: true,
   token: EmojiToken,
-  operators: OPERATOR_IS_ONLY,
+  operators: OPERATOR_IS_AND_IS_NOT,
   fetchEmojis: expect.any(Function),
 };

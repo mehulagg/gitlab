@@ -5,40 +5,39 @@ import Commit from 'ee/vulnerabilities/components/generic_report/types/commit.vu
 const TEST_DATA = {
   value: '24922148',
 };
+const TEST_COMMIT_PATH_BASE = `/foo/bar`;
+const TEST_COMMIT_PATH_PARAMETERS = '?baz=quz';
+const TEST_COMMIT_PATH_TEMPLATE = `${TEST_COMMIT_PATH_BASE}/$COMMIT_SHA/${TEST_COMMIT_PATH_PARAMETERS}`;
 
 describe('ee/vulnerabilities/components/generic_report/types/commit.vue', () => {
   let wrapper;
 
-  const createWrapper = ({ provide } = {}) => {
+  const createWrapper = () => {
     return shallowMount(Commit, {
       propsData: TEST_DATA,
       provide: {
-        projectFullPath: '',
-        ...provide,
+        commitPathTemplate: TEST_COMMIT_PATH_TEMPLATE,
       },
     });
   };
 
   const findLink = () => wrapper.findComponent(GlLink);
 
+  beforeEach(() => {
+    wrapper = createWrapper();
+  });
+
   afterEach(() => {
     wrapper.destroy();
   });
 
-  it.each(['/foo/bar', 'foo/bar'])(
-    'given `projectFullPath` is "%s" it links to the absolute path of the commit',
-    (projectFullPath) => {
-      const absoluteCommitPath = `/foo/bar/-/commit/${TEST_DATA.value}`;
-
-      wrapper = createWrapper({ provide: { projectFullPath } });
-
-      expect(findLink().attributes('href')).toBe(absoluteCommitPath);
-    },
-  );
+  it('links to the given commit hash', () => {
+    expect(findLink().attributes('href')).toBe(
+      `${TEST_COMMIT_PATH_BASE}/${TEST_DATA.value}/${TEST_COMMIT_PATH_PARAMETERS}`,
+    );
+  });
 
   it('shows the value as the link-text', () => {
-    wrapper = createWrapper();
-
     expect(findLink().text()).toBe(TEST_DATA.value);
   });
 });

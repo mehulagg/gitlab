@@ -96,13 +96,13 @@ export default {
         // no needs to reload the iframe and emit the failure event
         this.error = event.data.msg;
         this.isAlertDismissed = false;
-        this.nextTick(() => {
-          this.$refs.zuora.src = this.iframeSrc;
-        });
+        window.removeEventListener('message', this.handleFrameMessages, true);
+        this.$refs.zuora.src = this.iframeSrc;
         this.$emit('failure', { msg: this.error });
       }
 
       this.isLoading = false;
+      this.$refs.zuora.contentWindow.postMessage('resize', this.allowedOrigin);
     },
     isEventAllowedForOrigin(event) {
       try {

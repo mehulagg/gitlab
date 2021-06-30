@@ -9,6 +9,8 @@
       %span.term.str-truncated.gl-font-weight-bold.gl-ml-2= epic.title
   .gl-text-gray-500.gl-my-3
     = sprintf(s_('%{group_name}&%{epic_iid} &middot; created %{epic_created} by %{author}'), { group_name: epic.group.full_name, epic_iid: epic.iid, epic_created: time_ago_with_tooltip(epic.created_at, placement: 'bottom'), author: link_to_member(@project, epic.author, avatar: false) }).html_safe
+    &middot;
+    = _('updated %{time_ago}').html_safe % { time_ago: time_ago_with_tooltip(epic.updated_at, placement: 'bottom') }
   - if epic.description.present?
     .description.term.col-sm-10.gl-px-0
       = truncate(epic.description, length: 200)

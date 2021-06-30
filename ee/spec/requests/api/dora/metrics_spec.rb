@@ -10,6 +10,7 @@ RSpec.describe API::Dora::Metrics do
     let_it_be(:production) { create(:environment, :production, project: project) }
     let_it_be(:maintainer) { create(:user) }
     let_it_be(:guest) { create(:user) }
+
     let(:url) { "/projects/#{project.id}/dora/metrics" }
     let(:params) { { metric: :deployment_frequency } }
     let(:user) { maintainer }
@@ -59,6 +60,7 @@ RSpec.describe API::Dora::Metrics do
     let_it_be(:production) { create(:environment, :production, project: project) }
     let_it_be(:maintainer) { create(:user) }
     let_it_be(:guest) { create(:user) }
+
     let(:url) { "/groups/#{group.id}/dora/metrics" }
     let(:params) { { metric: :deployment_frequency } }
     let(:user) { maintainer }

@@ -12,6 +12,7 @@ RSpec.describe API::Geo do
   let_it_be(:user) { create(:user) }
   let_it_be(:primary_node) { create(:geo_node, :primary) }
   let_it_be(:secondary_node) { create(:geo_node) }
+
   let(:geo_token_header) do
     { 'X-Gitlab-Token' => secondary_node.system_hook.token }
   end
@@ -46,6 +47,7 @@ RSpec.describe API::Geo do
     end
 
     let_it_be(:resource) { create(:package_file, :npm) }
+
     let(:replicator) { Geo::PackageFileReplicator.new(model_record_id: resource.id) }
 
     context 'valid requests' do

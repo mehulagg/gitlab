@@ -13,32 +13,13 @@ export default {
     GlProgressBar,
   },
   mixins: [trackingMixin],
-  props: {
-    containerId: {
-      type: [String, null],
-      required: false,
-      default: null,
-    },
-    daysRemaining: {
-      type: Number,
-      required: true,
-    },
-    navIconImagePath: {
-      type: String,
-      required: true,
-    },
-    percentageComplete: {
-      type: Number,
-      required: true,
-    },
-    planName: {
-      type: String,
-      required: true,
-    },
-    plansHref: {
-      type: String,
-      required: true,
-    },
+  inject: {
+    containerId: { default: null },
+    daysRemaining: {},
+    navIconImagePath: {},
+    percentageComplete: {},
+    planName: {},
+    plansHref: {},
   },
   i18n,
   trackingEvents,

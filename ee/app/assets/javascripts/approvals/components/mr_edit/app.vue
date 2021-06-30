@@ -115,35 +115,43 @@ export default {
     <gl-accordion :header-level="3">
       <gl-accordion-item :title="accordionTitle">
         <app>
-          <mr-rules slot="rules" />
-          <div slot="footer">
-            <mr-rules-hidden-inputs />
-            <div
-              v-if="canUpdateApprovers && showCodeOwnerTip"
-              class="form-text text-muted"
-              data-testid="codeowners-tip"
-            >
-              <gl-sprintf
-                :message="
-                  __(
-                    'Tip: add a %{linkStart}CODEOWNERS%{linkEnd} to automatically add approvers based on file paths and file types.',
-                  )
-                "
+          <template #rules>
+            <mr-rules />
+          </template>
+          <template #footer>
+            <div>
+              <mr-rules-hidden-inputs />
+              <div
+                v-if="canUpdateApprovers && showCodeOwnerTip"
+                class="form-text text-muted"
+                data-testid="codeowners-tip"
               >
-                <template #link="{ content }">
-                  <gl-link :href="$options.codeOwnerHelpPage" target="_blank">{{
-                    content
-                  }}</gl-link>
-                </template>
-              </gl-sprintf>
+                <gl-sprintf
+                  :message="
+                    __(
+                      'Tip: add a %{linkStart}CODEOWNERS%{linkEnd} to automatically add approvers based on file paths and file types.',
+                    )
+                  "
+                >
+                  <template #link="{ content }">
+                    <gl-link :href="$options.codeOwnerHelpPage" target="_blank">{{
+                      content
+                    }}</gl-link>
+                  </template>
+                </gl-sprintf>
+              </div>
             </div>
-          </div>
+          </template>
         </app>
       </gl-accordion-item>
     </gl-accordion>
   </div>
   <app v-else>
-    <mr-rules slot="rules" />
-    <mr-rules-hidden-inputs slot="footer" />
+    <template #rules>
+      <mr-rules />
+    </template>
+    <template #footer>
+      <mr-rules-hidden-inputs />
+    </template>
   </app>
 </template>
