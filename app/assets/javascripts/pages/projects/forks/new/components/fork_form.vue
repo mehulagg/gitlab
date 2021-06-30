@@ -188,6 +188,9 @@ export default {
         },
       ];
     },
+    sortedNamespaces() {
+      return this.namespaces.sort((a, b) => a.full_name.localeCompare(b.full_name));
+    },
   },
   watch: {
     // eslint-disable-next-line func-names
@@ -304,8 +307,8 @@ export default {
               <template #first>
                 <option :value="null" disabled>{{ s__('ForkProject|Select a namespace') }}</option>
               </template>
-              <option v-for="namespace in namespaces" :key="namespace.id" :value="namespace">
-                {{ namespace.name }}
+              <option v-for="namespace in sortedNamespaces" :key="namespace.id" :value="namespace">
+                {{ namespace.full_name }}
               </option>
             </gl-form-select>
           </gl-form-input-group>
