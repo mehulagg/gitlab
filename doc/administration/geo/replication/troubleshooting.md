@@ -614,7 +614,7 @@ puts "\nCounts:", counts
 
 Example output:
 
-```
+```plaintext
 Design ID#5: started
 Design ID#6: synced
 Design ID#7: failed
@@ -627,7 +627,7 @@ Counts:
 
 Example output if there are actually zero design repository replication failures:
 
-```
+```plaintext
 Design ID#5: synced
 Design ID#6: synced
 Design ID#7: synced
