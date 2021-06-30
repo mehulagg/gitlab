@@ -21,6 +21,8 @@ export const initStaticSecurityConfiguration = (el) => {
   const {
     projectPath,
     upgradePath,
+    autoDevopsDocsPath,
+    enableAutoDevopsPath,
     features,
     latestPipelinePath,
     gitlabCiHistoryPath,
@@ -39,6 +41,8 @@ export const initStaticSecurityConfiguration = (el) => {
       provide: {
         projectPath,
         upgradePath,
+        autoDevopsDocsPath,
+        enableAutoDevopsPath,
       },
       render(createElement) {
         return createElement(RedesignedSecurityConfigurationApp, {
