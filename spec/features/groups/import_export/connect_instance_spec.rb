@@ -60,6 +60,8 @@ RSpec.describe 'Import/Export - Connect to another instance', :js do
       expect(page).to have_content stub_path
 
       wait_for_all_requests
+
+      visit '/'
     end
   end
 
