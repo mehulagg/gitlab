@@ -46,11 +46,14 @@ RSpec.describe SyncSeatLinkRequestWorker, type: :worker do
 
       shared_examples 'successful license creation' do
         it 'persists the new license' do
-          expect { sync_seat_link }.to change(License, :count).by(1)
-          expect(License.last).to have_attributes(
-            data: license_key,
-            cloud: true
-          )
+          freeze_time do
+            expect { sync_seat_link }.to change(License, :count).by(1)
+            expect(License.last).to have_attributes(
+              data: license_key,
+              cloud: true,
+              last_synced_at: Time.current
+            )
+          end
         end
       end
 

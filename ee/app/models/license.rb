@@ -177,6 +177,7 @@ class License < ApplicationRecord
     requirements
     sast
     sast_custom_rulesets
+    sast_fp_reduction
     secret_detection
     security_dashboard
     security_on_demand_scans

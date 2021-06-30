@@ -3,12 +3,12 @@ import PolicyDrawer from 'ee/threat_monitoring/components/policy_drawer/policy_d
 import ScanExecutionPolicy from 'ee/threat_monitoring/components/policy_drawer/scan_execution_policy.vue';
 import { mountExtended } from 'helpers/vue_test_utils_helper';
 import {
-  mockPoliciesResponse,
+  mockNetworkPoliciesResponse,
   mockCiliumPolicy,
   mockScanExecutionPolicy,
 } from '../../mocks/mock_data';
 
-const [mockGenericPolicy] = mockPoliciesResponse;
+const [mockGenericPolicy] = mockNetworkPoliciesResponse;
 
 describe('PolicyDrawer component', () => {
   let wrapper;

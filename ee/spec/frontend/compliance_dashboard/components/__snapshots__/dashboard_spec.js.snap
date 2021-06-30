@@ -47,6 +47,8 @@ exports[`ComplianceDashboard component when there are merge requests and the sho
       </template>
     </b-tab-stub>
   </gl-tabs-stub>
+   
+  <!---->
 </div>
 `;
 
@@ -77,6 +79,8 @@ exports[`ComplianceDashboard component when there are merge requests matches the
   <merge-requests-grid-stub
     mergerequests="[object Object],[object Object]"
   />
+   
+  <!---->
 </div>
 `;
 

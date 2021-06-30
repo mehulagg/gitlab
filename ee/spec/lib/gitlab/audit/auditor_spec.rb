@@ -7,8 +7,7 @@ RSpec.describe Gitlab::Audit::Auditor do
   let(:author) { build_stubbed(:user) }
   let(:scope) { build_stubbed(:group) }
   let(:target) { build_stubbed(:project) }
-  let(:ip_address) { '192.168.8.8' }
-  let(:context) { { name: name, author: author, scope: scope, target: target, ip_address: ip_address } }
+  let(:context) { { name: name, author: author, scope: scope, target: target } }
   let(:add_message) { 'Added an interesting field from project Gotham' }
   let(:remove_message) { 'Removed an interesting field from project Gotham' }
   let(:operation) do
@@ -85,7 +84,7 @@ RSpec.describe Gitlab::Audit::Auditor do
       let(:audit!) { auditor.audit(context) }
       let(:context) do
         {
-          name: name, author: author, scope: scope, target: target, ip_address: ip_address,
+          name: name, author: author, scope: scope, target: target,
           message: 'Project has been deleted'
         }
       end

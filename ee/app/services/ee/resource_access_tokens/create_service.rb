@@ -11,9 +11,17 @@ module EE
 
       private
 
+      def success_message(token)
+        if resource_type == 'project'
+          "Created project access token with token_id: #{token.id} with scopes: #{token.scopes} and #{resource.project_member(token.user).human_access} access level."
+        else
+          "Created #{resource_type} token with token_id: #{token.id} with scopes: #{token.scopes}."
+        end
+      end
+
       def audit_event_service(token, response)
         message = if response.success?
-                    "Created #{resource_type} access token with token_id: #{token.id} with scopes: #{token.scopes}"
+                    success_message(token)
                   else
                     "Attempted to create #{resource_type} access token but failed with message: #{response.message}"
                   end
@@ -25,8 +33,7 @@ module EE
           target_type: token&.class&.name,
           target_details: token&.user&.name,
           action: :custom,
-          custom_message: message,
-          ip_address: current_user.current_sign_in_ip
+          custom_message: message
         ).security_event
       end
     end

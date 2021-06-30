@@ -12,7 +12,17 @@ module EE
       validate :expiration, if: -> { ::Key.expiration_enforced? }
 
       def expiration
-        errors.add(:key, 'has expired and the instance administrator has enforced expiration') if expired?
+        errors.add(:key, :expired_and_enforced, message: 'has expired and the instance administrator has enforced expiration') if expired?
+      end
+
+      # Returns true if the key is:
+      # - Expired
+      # - Expiration is enforced
+      # - Not invalid for any other reason
+      def only_expired_and_enforced?
+        return false unless ::Key.expiration_enforced? && expired?
+
+        errors.map(&:type).reject { |t| t.eql?(:expired_and_enforced) }.empty?
       end
     end
 

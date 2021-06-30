@@ -123,6 +123,14 @@ export default {
         },
       };
     },
+    newIteration() {
+      return {
+        name: 'newIteration',
+        params: {
+          cadenceId: getIdFromGraphQLId(this.cadenceId),
+        },
+      };
+    },
   },
   methods: {
     fetchMore() {
@@ -204,6 +212,10 @@ export default {
         text-sr-only
         no-caret
       >
+        <gl-dropdown-item v-if="!durationInWeeks" :to="newIteration">
+          {{ s__('Iterations|Add iteration') }}
+        </gl-dropdown-item>
+
         <gl-dropdown-item :to="editCadence">
           {{ s__('Iterations|Edit cadence') }}
         </gl-dropdown-item>

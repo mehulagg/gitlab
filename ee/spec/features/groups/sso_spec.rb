@@ -18,7 +18,7 @@ RSpec.describe 'Group SAML SSO', :js do
     Hash[*saml_response.attributes.to_h.flatten(2)]
   end
 
-  around(:all) do |example|
+  around do |example|
     with_omniauth_full_host { example.run }
   end
 

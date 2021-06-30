@@ -5,6 +5,7 @@ import Vue from 'vue';
 import { POPOVER, TRACKING_PROPERTY } from 'ee/contextual_sidebar/components/constants';
 import TrialStatusPopover from 'ee/contextual_sidebar/components/trial_status_popover.vue';
 import { mockTracking, unmockTracking } from 'helpers/tracking_helper';
+import { extendedWrapper } from 'helpers/vue_test_utils_helper';
 
 Vue.config.ignoredElements = ['gl-emoji'];
 
@@ -14,7 +15,6 @@ describe('TrialStatusPopover component', () => {
 
   const { trackingEvents } = POPOVER;
 
-  const findByTestId = (testId) => wrapper.find(`[data-testid="${testId}"]`);
   const findGlPopover = () => wrapper.findComponent(GlPopover);
 
   const expectTracking = ({ action, ...options } = {}) => {
@@ -24,17 +24,20 @@ describe('TrialStatusPopover component', () => {
     });
   };
 
-  const createComponent = (mountFn = shallowMount) => {
-    return mountFn(TrialStatusPopover, {
-      provide: {
-        groupName: 'Some Test Group',
-        planName: 'Ultimate',
-        plansHref: 'billing/path-for/group',
-        purchaseHref: 'transactions/new',
-        targetId: 'target-element-identifier',
-        trialEndDate: new Date('2021-02-28'),
-      },
-    });
+  const createComponent = (providers = {}, mountFn = shallowMount) => {
+    return extendedWrapper(
+      mountFn(TrialStatusPopover, {
+        provide: {
+          groupName: 'Some Test Group',
+          planName: 'Ultimate',
+          plansHref: 'billing/path-for/group',
+          purchaseHref: 'transactions/new',
+          targetId: 'target-element-identifier',
+          trialEndDate: new Date('2021-02-28'),
+          ...providers,
+        },
+      }),
+    );
   };
 
   beforeEach(() => {
@@ -60,15 +63,82 @@ describe('TrialStatusPopover component', () => {
   });
 
   it('tracks when the upgrade button is clicked', () => {
-    findByTestId('upgradeBtn').vm.$emit('click');
+    wrapper.findByTestId('upgradeBtn').vm.$emit('click');
 
     expectTracking(trackingEvents.upgradeBtnClick);
   });
 
   it('tracks when the compare button is clicked', () => {
-    findByTestId('compareBtn').vm.$emit('click');
+    wrapper.findByTestId('compareBtn').vm.$emit('click');
 
     expectTracking(trackingEvents.compareBtnClick);
+  });
+
+  describe('startInitiallyShown', () => {
+    describe('when set to true', () => {
+      beforeEach(() => {
+        wrapper = createComponent({ startInitiallyShown: true });
+      });
+
+      it('causes the popover to be shown by default', () => {
+        expect(findGlPopover().attributes('show')).toBeTruthy();
+      });
+
+      it('removes the popover triggers', () => {
+        expect(findGlPopover().attributes('triggers')).toBe('');
+      });
+    });
+
+    describe('when set to false', () => {
+      beforeEach(() => {
+        wrapper = createComponent({ startInitiallyShown: false });
+      });
+
+      it('does not cause the popover to be shown by default', () => {
+        expect(findGlPopover().attributes('show')).toBeFalsy();
+      });
+
+      it('uses the standard triggers for the popover', () => {
+        expect(findGlPopover().attributes('triggers')).toBe('hover focus');
+      });
+    });
+  });
+
+  describe('close button', () => {
+    describe('when the popover starts off forcibly shown', () => {
+      beforeEach(() => {
+        wrapper = createComponent({ startInitiallyShown: true }, mount);
+      });
+
+      it('is rendered', () => {
+        expect(wrapper.findByTestId('closeBtn').exists()).toBeTruthy();
+      });
+
+      describe('when clicked', () => {
+        beforeEach(async () => {
+          wrapper.findByTestId('closeBtn').trigger('click');
+          await wrapper.vm.$nextTick();
+        });
+
+        it('closes the popover component', () => {
+          expect(findGlPopover().props('show')).toBeFalsy();
+        });
+
+        it('tracks an event', () => {
+          expectTracking(trackingEvents.closeBtnClick);
+        });
+
+        it('continues to be shown in the popover', () => {
+          expect(wrapper.findByTestId('closeBtn').exists()).toBeTruthy();
+        });
+      });
+    });
+
+    describe('when the popover does not start off forcibly shown', () => {
+      it('is not rendered', () => {
+        expect(wrapper.findByTestId('closeBtn').exists()).toBeFalsy();
+      });
+    });
   });
 
   describe('methods', () => {

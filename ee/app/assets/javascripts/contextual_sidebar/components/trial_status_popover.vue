@@ -29,12 +29,16 @@ export default {
     planName: {},
     plansHref: {},
     purchaseHref: {},
+    startInitiallyShown: { default: false },
     targetId: {},
     trialEndDate: {},
   },
   data() {
     return {
       disabled: false,
+      forciblyShowing: false,
+      showCloseButton: false,
+      show: false,
     };
   },
   i18n,
@@ -53,6 +57,12 @@ export default {
   created() {
     this.debouncedResize = debounce(() => this.onResize(), resizeEventDebounceMS);
     window.addEventListener(RESIZE_EVENT, this.debouncedResize);
+
+    if (this.startInitiallyShown) {
+      this.forciblyShowing = true;
+      this.showCloseButton = true;
+      this.show = true;
+    }
   },
   mounted() {
     this.onResize();
@@ -61,6 +71,13 @@ export default {
     window.removeEventListener(RESIZE_EVENT, this.debouncedResize);
   },
   methods: {
+    onClose() {
+      this.forciblyShowing = false;
+      this.show = false;
+
+      const { action, ...options } = this.$options.trackingEvents.closeBtnClick;
+      this.track(action, options);
+    },
     onResize() {
       this.updateDisabledState();
     },
@@ -85,17 +102,30 @@ export default {
 
 <template>
   <gl-popover
+    ref="popover"
     :container="containerId"
     :target="targetId"
     :disabled="disabled"
     placement="rightbottom"
     boundary="viewport"
     :delay="{ hide: 400 }"
+    :show.sync="show"
+    :triggers="forciblyShowing ? '' : 'hover focus'"
     @shown="onShown"
   >
     <template #title>
+      <gl-button
+        v-if="showCloseButton"
+        category="tertiary"
+        class="close"
+        data-testid="closeBtn"
+        :aria-label="$options.i18n.close"
+        @click.prevent="onClose"
+      >
+        <span class="gl-display-inline-block" aria-hidden="true">&times;</span>
+      </gl-button>
       {{ $options.i18n.popoverTitle }}
-      <gl-emoji class="gl-vertical-align-baseline font-size-inherit gl-ml-1" data-name="wave" />
+      <gl-emoji class="gl-vertical-align-baseline gl-font-size-inherit gl-ml-1" data-name="wave" />
     </template>
 
     <gl-sprintf :message="$options.i18n.popoverContent">

@@ -10,9 +10,7 @@ export default {
 </script>
 
 <template>
-  <p
-    class="grid-column-heading gl-text-gray-500 gl-border-b-solid gl-border-b-2 gl-border-b-gray-100 gl-mb-0 gl-p-5"
-  >
+  <p class="gl-text-gray-500 gl-border-b-solid gl-border-b-2 gl-border-b-gray-100 gl-mb-0 gl-p-5">
     {{ heading }}
   </p>
 </template>

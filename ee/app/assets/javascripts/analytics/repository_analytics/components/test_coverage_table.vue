@@ -122,7 +122,7 @@ export default {
       this.hasError = true;
     },
     onProjectClick() {
-      api.trackRedisHllUserEvent(this.$options.usagePingProjectEvent);
+      api.trackRedisHllUserEvent(this.$options.servicePingProjectEvent);
     },
     selectAllProjects() {
       this.allProjectsSelected = true;
@@ -179,7 +179,7 @@ export default {
     totalHeight: 15,
   },
   averageCoverageFormatter: getFormatter(SUPPORTED_FORMATS.percentHundred),
-  usagePingProjectEvent: 'i_testing_group_code_coverage_project_click_total',
+  servicePingProjectEvent: 'i_testing_group_code_coverage_project_click_total',
 };
 </script>
 <template>

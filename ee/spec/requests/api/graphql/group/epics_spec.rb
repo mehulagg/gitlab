@@ -213,6 +213,17 @@ RSpec.describe 'Epics through GroupQuery' do
           expect_array_response([epic.to_global_id.to_s])
         end
       end
+
+      context 'with search params' do
+        it 'returns only matching epics' do
+          filter_params = { search: 'bar', in: [:DESCRIPTION] }
+          graphql_query = query(filter_params)
+
+          post_graphql(graphql_query, current_user: user)
+
+          expect_array_response([epic2.to_global_id.to_s])
+        end
+      end
     end
 
     context 'when error requests' do

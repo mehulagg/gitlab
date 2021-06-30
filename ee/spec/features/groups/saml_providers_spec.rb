@@ -3,19 +3,21 @@
 require 'spec_helper'
 
 RSpec.describe 'SAML provider settings' do
-  include CookieHelper
+  let_it_be_with_refind(:user) { create(:user) }
+  let_it_be_with_refind(:group) { create(:group) }
 
-  let(:user) { create(:user) }
-  let(:group) { create(:group) }
   let(:callback_path) { "/groups/#{group.path}/-/saml/callback" }
+
+  before_all do
+    group.add_owner(user)
+  end
 
   before do
     stub_default_url_options(protocol: "https")
     stub_saml_config
-    group.add_owner(user)
   end
 
-  around(:all) do |example|
+  around do |example|
     with_omniauth_full_host { example.run }
   end
 
@@ -29,7 +31,7 @@ RSpec.describe 'SAML provider settings' do
 
   def stub_saml_config
     stub_licensed_features(group_saml: true)
-    allow(Devise).to receive(:omniauth_providers).and_return(%i(group_saml))
+    allow(Devise).to receive(:omniauth_providers).and_return(%i[group_saml])
   end
 
   describe 'settings' do
@@ -164,22 +166,22 @@ RSpec.describe 'SAML provider settings' do
 
       before do
         mock_group_saml(uid: '123')
-
-        allow_any_instance_of(Gitlab::Auth::GroupSaml::ResponseStore).to receive(:get_raw).and_return(raw_saml_response)
-
-        allow_any_instance_of(OmniAuth::Strategies::GroupSaml).to receive(:mock_callback_call) do
-          response = Rack::Response.new
-          response.redirect(group_saml_providers_path(group))
-          response.finish
+        allow_next_instance_of(Gitlab::Auth::GroupSaml::ResponseStore) do |instance|
+          allow(instance).to receive(:get_raw).and_return(raw_saml_response)
         end
+
+        stub_const(
+          '::OmniAuth::Strategies::GroupSaml::VERIFY_SAML_RESPONSE',
+          group_saml_providers_path(group)
+        )
       end
 
-      it 'displays XML validation errors' do
+      it 'displays XML validation errors', :aggregate_failures do
         visit group_saml_providers_path(group)
 
         test_sso
 
-        expect(current_path).to eq group_saml_providers_path(group)
+        expect(page).to have_current_path(group_saml_providers_path(group))
         expect(page).to have_content("Fingerprint mismatch")
         expect(page).to have_content("The attributes have expired, based on the SessionNotOnOrAfter")
       end
@@ -199,7 +201,7 @@ RSpec.describe 'SAML provider settings' do
       it 'acts as if the group was not found' do
         visit sso_group_saml_providers_path(group)
 
-        expect(current_path).to eq(new_user_session_path)
+        expect(page).to have_current_path(new_user_session_path)
       end
 
       context 'as owner' do
@@ -210,7 +212,7 @@ RSpec.describe 'SAML provider settings' do
         it 'redirects to settings page with warning' do
           visit sso_group_saml_providers_path(group)
 
-          expect(current_path).to eq group_saml_providers_path(group)
+          expect(page).to have_current_path(group_saml_providers_path(group))
           expect(page).to have_content 'SAML sign on has not been configured for this group'
         end
       end

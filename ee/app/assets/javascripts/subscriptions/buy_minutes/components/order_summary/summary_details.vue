@@ -39,12 +39,14 @@ export default {
       default: null,
     },
   },
+  data() {
+    return {
+      startDate: new Date(),
+    };
+  },
   computed: {
-    startDate() {
-      return new Date(Date.now());
-    },
     endDate() {
-      return new Date(this.startDate).setFullYear(this.startDate.getFullYear() + 1);
+      return this.startDate.setFullYear(this.startDate.getFullYear() + 1);
     },
   },
   i18n: {

@@ -29,7 +29,7 @@ export default {
 </script>
 
 <template>
-  <div class="gl-display-flex gl-align-items-center gl-justify-content-end">
+  <div class="gl-display-flex gl-align-items-center gl-justify-content-end gl-text-gray-900">
     <gl-sprintf :message="this.$options.strings.branchDetails">
       <template #sourceBranch>
         <span class="gl-mr-2 gl-min-w-0">

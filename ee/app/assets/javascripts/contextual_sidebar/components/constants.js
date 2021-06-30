@@ -25,6 +25,7 @@ export const WIDGET = {
 
 export const POPOVER = {
   i18n: {
+    close: s__('Modal|Close'),
     compareAllButtonTitle: s__('Trials|Compare all plans'),
     popoverTitle: s__('Trials|Hey there'),
     popoverContent: s__(`Trials|Your trial ends on
@@ -36,6 +37,7 @@ export const POPOVER = {
   },
   trackingEvents: {
     popoverShown: { action: 'popover_shown', label: 'trial_status_popover' },
+    closeBtnClick: { action: CLICK_BUTTON_ACTION, label: 'close_popover' },
     upgradeBtnClick: { action: CLICK_BUTTON_ACTION, label: 'upgrade_to_ultimate' },
     compareBtnClick: { action: CLICK_BUTTON_ACTION, label: 'compare_all_plans' },
   },

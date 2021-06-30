@@ -7399,6 +7399,7 @@ four standard [pagination arguments](#connection-pagination-arguments):
 | <a id="boardepicancestorsiid"></a>`iid` | [`ID`](#id) | IID of the epic, e.g., "1". |
 | <a id="boardepicancestorsiidstartswith"></a>`iidStartsWith` | [`String`](#string) | Filter epics by IID for autocomplete. |
 | <a id="boardepicancestorsiids"></a>`iids` | [`[ID!]`](#id) | List of IIDs of epics, e.g., `[1, 2]`. |
+| <a id="boardepicancestorsin"></a>`in` | [`[IssuableSearchableField!]`](#issuablesearchablefield) | Specify the fields to perform the search in. Defaults to `[TITLE, DESCRIPTION]`. Requires the `search` argument. |
 | <a id="boardepicancestorsincludeancestorgroups"></a>`includeAncestorGroups` | [`Boolean`](#boolean) | Include epics from ancestor groups. |
 | <a id="boardepicancestorsincludedescendantgroups"></a>`includeDescendantGroups` | [`Boolean`](#boolean) | Include epics from descendant groups. |
 | <a id="boardepicancestorslabelname"></a>`labelName` | [`[String!]`](#string) | Filter epics by labels. |
@@ -7431,6 +7432,7 @@ four standard [pagination arguments](#connection-pagination-arguments):
 | <a id="boardepicchildreniid"></a>`iid` | [`ID`](#id) | IID of the epic, e.g., "1". |
 | <a id="boardepicchildreniidstartswith"></a>`iidStartsWith` | [`String`](#string) | Filter epics by IID for autocomplete. |
 | <a id="boardepicchildreniids"></a>`iids` | [`[ID!]`](#id) | List of IIDs of epics, e.g., `[1, 2]`. |
+| <a id="boardepicchildrenin"></a>`in` | [`[IssuableSearchableField!]`](#issuablesearchablefield) | Specify the fields to perform the search in. Defaults to `[TITLE, DESCRIPTION]`. Requires the `search` argument. |
 | <a id="boardepicchildrenincludeancestorgroups"></a>`includeAncestorGroups` | [`Boolean`](#boolean) | Include epics from ancestor groups. |
 | <a id="boardepicchildrenincludedescendantgroups"></a>`includeDescendantGroups` | [`Boolean`](#boolean) | Include epics from descendant groups. |
 | <a id="boardepicchildrenlabelname"></a>`labelName` | [`[String!]`](#string) | Filter epics by labels. |
@@ -8621,6 +8623,7 @@ four standard [pagination arguments](#connection-pagination-arguments):
 | <a id="epicancestorsiid"></a>`iid` | [`ID`](#id) | IID of the epic, e.g., "1". |
 | <a id="epicancestorsiidstartswith"></a>`iidStartsWith` | [`String`](#string) | Filter epics by IID for autocomplete. |
 | <a id="epicancestorsiids"></a>`iids` | [`[ID!]`](#id) | List of IIDs of epics, e.g., `[1, 2]`. |
+| <a id="epicancestorsin"></a>`in` | [`[IssuableSearchableField!]`](#issuablesearchablefield) | Specify the fields to perform the search in. Defaults to `[TITLE, DESCRIPTION]`. Requires the `search` argument. |
 | <a id="epicancestorsincludeancestorgroups"></a>`includeAncestorGroups` | [`Boolean`](#boolean) | Include epics from ancestor groups. |
 | <a id="epicancestorsincludedescendantgroups"></a>`includeDescendantGroups` | [`Boolean`](#boolean) | Include epics from descendant groups. |
 | <a id="epicancestorslabelname"></a>`labelName` | [`[String!]`](#string) | Filter epics by labels. |
@@ -8653,6 +8656,7 @@ four standard [pagination arguments](#connection-pagination-arguments):
 | <a id="epicchildreniid"></a>`iid` | [`ID`](#id) | IID of the epic, e.g., "1". |
 | <a id="epicchildreniidstartswith"></a>`iidStartsWith` | [`String`](#string) | Filter epics by IID for autocomplete. |
 | <a id="epicchildreniids"></a>`iids` | [`[ID!]`](#id) | List of IIDs of epics, e.g., `[1, 2]`. |
+| <a id="epicchildrenin"></a>`in` | [`[IssuableSearchableField!]`](#issuablesearchablefield) | Specify the fields to perform the search in. Defaults to `[TITLE, DESCRIPTION]`. Requires the `search` argument. |
 | <a id="epicchildrenincludeancestorgroups"></a>`includeAncestorGroups` | [`Boolean`](#boolean) | Include epics from ancestor groups. |
 | <a id="epicchildrenincludedescendantgroups"></a>`includeDescendantGroups` | [`Boolean`](#boolean) | Include epics from descendant groups. |
 | <a id="epicchildrenlabelname"></a>`labelName` | [`[String!]`](#string) | Filter epics by labels. |
@@ -8805,6 +8809,7 @@ Relationship between an epic and an issue.
 | <a id="epicissuemovedto"></a>`movedTo` | [`Issue`](#issue) | Updated Issue after it got moved to another project. |
 | <a id="epicissuenotes"></a>`notes` | [`NoteConnection!`](#noteconnection) | All notes on this noteable. (see [Connections](#connections)) |
 | <a id="epicissueparticipants"></a>`participants` | [`UserCoreConnection`](#usercoreconnection) | List of participants in the issue. (see [Connections](#connections)) |
+| <a id="epicissueprojectid"></a>`projectId` | [`Int!`](#int) | ID of the issue project. |
 | <a id="epicissuerelationpath"></a>`relationPath` | [`String`](#string) | URI path of the epic-issue relation. |
 | <a id="epicissuerelativeposition"></a>`relativePosition` | [`Int`](#int) | Relative position of the issue (used for positioning in epic tree and issue boards). |
 | <a id="epicissueseverity"></a>`severity` | [`IssuableSeverity`](#issuableseverity) | Severity level of the incident. |
@@ -9256,6 +9261,7 @@ Returns [`Epic`](#epic).
 | <a id="groupepiciid"></a>`iid` | [`ID`](#id) | IID of the epic, e.g., "1". |
 | <a id="groupepiciidstartswith"></a>`iidStartsWith` | [`String`](#string) | Filter epics by IID for autocomplete. |
 | <a id="groupepiciids"></a>`iids` | [`[ID!]`](#id) | List of IIDs of epics, e.g., `[1, 2]`. |
+| <a id="groupepicin"></a>`in` | [`[IssuableSearchableField!]`](#issuablesearchablefield) | Specify the fields to perform the search in. Defaults to `[TITLE, DESCRIPTION]`. Requires the `search` argument. |
 | <a id="groupepicincludeancestorgroups"></a>`includeAncestorGroups` | [`Boolean`](#boolean) | Include epics from ancestor groups. |
 | <a id="groupepicincludedescendantgroups"></a>`includeDescendantGroups` | [`Boolean`](#boolean) | Include epics from descendant groups. |
 | <a id="groupepiclabelname"></a>`labelName` | [`[String!]`](#string) | Filter epics by labels. |
@@ -9300,6 +9306,7 @@ four standard [pagination arguments](#connection-pagination-arguments):
 | <a id="groupepicsiid"></a>`iid` | [`ID`](#id) | IID of the epic, e.g., "1". |
 | <a id="groupepicsiidstartswith"></a>`iidStartsWith` | [`String`](#string) | Filter epics by IID for autocomplete. |
 | <a id="groupepicsiids"></a>`iids` | [`[ID!]`](#id) | List of IIDs of epics, e.g., `[1, 2]`. |
+| <a id="groupepicsin"></a>`in` | [`[IssuableSearchableField!]`](#issuablesearchablefield) | Specify the fields to perform the search in. Defaults to `[TITLE, DESCRIPTION]`. Requires the `search` argument. |
 | <a id="groupepicsincludeancestorgroups"></a>`includeAncestorGroups` | [`Boolean`](#boolean) | Include epics from ancestor groups. |
 | <a id="groupepicsincludedescendantgroups"></a>`includeDescendantGroups` | [`Boolean`](#boolean) | Include epics from descendant groups. |
 | <a id="groupepicslabelname"></a>`labelName` | [`[String!]`](#string) | Filter epics by labels. |
@@ -9853,6 +9860,7 @@ Returns [`VulnerabilitySeveritiesCount`](#vulnerabilityseveritiescount).
 | <a id="issuemovedto"></a>`movedTo` | [`Issue`](#issue) | Updated Issue after it got moved to another project. |
 | <a id="issuenotes"></a>`notes` | [`NoteConnection!`](#noteconnection) | All notes on this noteable. (see [Connections](#connections)) |
 | <a id="issueparticipants"></a>`participants` | [`UserCoreConnection`](#usercoreconnection) | List of participants in the issue. (see [Connections](#connections)) |
+| <a id="issueprojectid"></a>`projectId` | [`Int!`](#int) | ID of the issue project. |
 | <a id="issuerelativeposition"></a>`relativePosition` | [`Int`](#int) | Relative position of the issue (used for positioning in epic tree and issue boards). |
 | <a id="issueseverity"></a>`severity` | [`IssuableSeverity`](#issuableseverity) | Severity level of the incident. |
 | <a id="issuesladueat"></a>`slaDueAt` | [`Time`](#time) | Timestamp of when the issue SLA expires. |
@@ -14376,7 +14384,6 @@ Event action.
 | Value | Description |
 | ----- | ----------- |
 | <a id="eventactionapproved"></a>`APPROVED` | Approved action. |
-| <a id="eventactionarchived"></a>`ARCHIVED` | Archived action. |
 | <a id="eventactionclosed"></a>`CLOSED` | Closed action. |
 | <a id="eventactioncommented"></a>`COMMENTED` | Commented action. |
 | <a id="eventactioncreated"></a>`CREATED` | Created action. |
@@ -14408,6 +14415,15 @@ Health status of an issue or epic.
 | <a id="healthstatusatrisk"></a>`atRisk` |  |
 | <a id="healthstatusneedsattention"></a>`needsAttention` |  |
 | <a id="healthstatusontrack"></a>`onTrack` |  |
+
+### `IssuableSearchableField`
+
+Fields to perform the search in.
+
+| Value | Description |
+| ----- | ----------- |
+| <a id="issuablesearchablefielddescription"></a>`DESCRIPTION` | Search in description field. |
+| <a id="issuablesearchablefieldtitle"></a>`TITLE` | Search in title field. |
 
 ### `IssuableSeverity`
 

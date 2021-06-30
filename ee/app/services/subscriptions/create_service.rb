@@ -84,7 +84,8 @@ module Subscriptions
         },
         gl_namespace_id: @group.id,
         gl_namespace_name: @group.name,
-        preview: 'false'
+        preview: 'false',
+        source: subscription_params[:source]
       }
     end
 

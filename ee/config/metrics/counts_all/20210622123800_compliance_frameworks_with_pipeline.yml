@@ -1,0 +1,19 @@
+---
+key_path: usage_activity_by_stage.manage.compliance_frameworks_with_pipeline
+name: "count_distinct_pipeline_containing_compliance_management_frameworks"
+description: "Count of compliance frameworks that have a pipeline configuration"
+product_section: dev
+product_stage: manage
+product_group: compliance
+product_category: "Compliance management"
+value_type: number
+status: implemented
+milestone: "14.1"
+introduced_by_url: https://gitlab.com/gitlab-org/gitlab/-/merge_requests/64601
+time_frame: all
+data_source: database
+data_category: Optional
+distribution:
+  - ee
+tier:
+  - ultimate

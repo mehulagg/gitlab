@@ -6,6 +6,6 @@
     = form.label :merge_trains_enabled, class: 'form-check-label' do
       = s_('ProjectSettings|Enable merge trains')
       .text-secondary.mb-2
-        - merge_trains_help_link_url = help_page_path('ci/merge_request_pipelines/pipelines_for_merged_results/merge_trains/index.md')
+        - merge_trains_help_link_url = help_page_path('ci/pipelines/merge_trains.md')
         - merge_trains_help_link_start = '<a href="%{url}" target="_blank" rel="noopener noreferrer">'.html_safe % { url: merge_trains_help_link_url }
         = s_('ProjectSettings|Merge requests approved for merge are queued, and pipelines validate the combined results of the source and target branches before merge. %{link_start}What are merge trains?%{link_end}').html_safe % { link_start: merge_trains_help_link_start, link_end: '</a>'.html_safe }

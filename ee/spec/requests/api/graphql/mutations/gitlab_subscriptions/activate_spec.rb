@@ -63,7 +63,7 @@ RSpec.describe 'Activate a subscription' do
         'expiresAt' => created_license.expires_at.to_s,
         'blockChangesAt' => created_license.block_changes_at.to_s,
         'activatedAt' => created_license.created_at.to_date.to_s,
-        'lastSync' => nil,
+        'lastSync' => created_license.last_synced_at.iso8601,
         'usersInLicenseCount' => nil,
         'billableUsersCount' => 1,
         'maximumUserCount' => 1,
