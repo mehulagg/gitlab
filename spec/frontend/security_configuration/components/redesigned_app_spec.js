@@ -2,6 +2,7 @@ import { GlTab } from '@gitlab/ui';
 import { mount } from '@vue/test-utils';
 import { makeMockUserCalloutDismisser } from 'helpers/mock_user_callout_dismisser';
 import { extendedWrapper } from 'helpers/vue_test_utils_helper';
+import AutoDevopsAlert from '~/security_configuration/components/auto_dev_ops_alert.vue';
 import {
   SAST_NAME,
   SAST_SHORT_NAME,
@@ -13,6 +14,7 @@ import {
   LICENSE_COMPLIANCE_HELP_PATH,
 } from '~/security_configuration/components/constants';
 import FeatureCard from '~/security_configuration/components/feature_card.vue';
+
 import RedesignedSecurityConfigurationApp, {
   i18n,
 } from '~/security_configuration/components/redesigned_app.vue';
@@ -23,6 +25,8 @@ import {
 } from '~/vue_shared/security_reports/constants';
 
 const upgradePath = '/upgrade';
+const autoDevopsDocsPath = '/autoDevopsDocsPath';
+const enableAutoDevopsPath = '/enableAutoDevopsPath';
 const gitlabCiHistoryPath = 'test/historyPath';
 
 describe('redesigned App component', () => {
@@ -37,6 +41,8 @@ describe('redesigned App component', () => {
         propsData,
         provide: {
           upgradePath,
+          autoDevopsDocsPath,
+          enableAutoDevopsPath,
         },
         stubs: {
           UserCalloutDismisser: makeMockUserCalloutDismisser({
@@ -76,6 +82,7 @@ describe('redesigned App component', () => {
       container: findByTestId('compliance-testing-tab'),
     });
   const findUpgradeBanner = () => wrapper.findComponent(UpgradeBanner);
+  const findAutoDevopsAlert = () => wrapper.findComponent(AutoDevopsAlert);
 
   const securityFeaturesMock = [
     {
@@ -151,6 +158,10 @@ describe('redesigned App component', () => {
     it('should not show configuration History Link when gitlabCiPresent & gitlabCiHistoryPath are not defined', () => {
       expect(findComplianceViewHistoryLink().exists()).toBe(false);
       expect(findSecurityViewHistoryLink().exists()).toBe(false);
+    });
+
+    it('should show AutoDevopsAlert', () => {
+      expect(findAutoDevopsAlert().exists()).toBe(true);
     });
   });
 

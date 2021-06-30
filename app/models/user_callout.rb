@@ -32,7 +32,8 @@ class UserCallout < ApplicationRecord
     pipeline_needs_hover_tip: 30,
     web_ide_ci_environments_guidance: 31,
     security_configuration_upgrade_banner: 32,
-    cloud_licensing_subscription_activation_banner: 33  # EE-only
+    cloud_licensing_subscription_activation_banner: 33,  # EE-only
+    security_configuration_devops_alert: 34
   }
 
   validates :user, presence: true
