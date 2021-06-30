@@ -1,5 +1,14 @@
 = email_default_heading(_('Hello %{name},') % { name: @name })
 %p
-  = _('Your account has been deactivated. If you log back in, your account will reactivate as a fully active account.')
+  = _('Your account has been deactivated. You will not be able to: ')
+%ul
+  %li
+    = _('Access Git repositories or the API.')
+  %li
+    = _('Receive any notifications from GitLab.')
+  %li
+    = _('Use slash commands.')
+%p
+  = _('If you log back in, your account will reactivate as a fully active account.')
 %p
   = _('Please contact your GitLab administrator if you think this is an error.')
