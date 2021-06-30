@@ -9,6 +9,7 @@ query IterationCadences(
 ) {
   group(fullPath: $fullPath) {
     iterationCadences(
+      includeAncestorGroups: true
       before: $beforeCursor
       after: $afterCursor
       first: $firstPageSize
