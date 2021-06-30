@@ -18,11 +18,6 @@ export default {
       default: false,
     },
   },
-  computed: {
-    complianceFramework() {
-      return this.mergeRequest.compliance_management_framework || null;
-    },
-  },
   methods: {
     getDrawerHeaderHeight() {
       const wrapperEl = document.querySelector('.content-wrapper');
@@ -52,7 +47,7 @@ export default {
     <template v-if="showDrawer" #default>
       <project
         :avatar-url="mergeRequest.project.avatar_url"
-        :compliance-framework="complianceFramework"
+        :compliance-framework="mergeRequest.compliance_management_framework"
         :name="mergeRequest.project.name"
         :url="mergeRequest.project.web_url"
       />
