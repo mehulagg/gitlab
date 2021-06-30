@@ -95,7 +95,7 @@ module Gitlab
           end
 
           def mirror_status_value
-            { bridge: [{ pipeline: status_value[:project] }] }
+            { bridge: [{ pipeline: status_value[:project] }] } if status_value
           end
 
           def mirror_status

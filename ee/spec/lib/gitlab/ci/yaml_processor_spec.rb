@@ -185,7 +185,7 @@ RSpec.describe Gitlab::Ci::YamlProcessor do
 
       it 'returns errors' do
         expect(subject.errors).to include(
-          'jobs:bridge config should contain either a trigger or a needs:pipeline')
+          'jobs:bridge config should contain either a trigger or a status mirror / needs:pipeline')
       end
     end
 
