@@ -43,7 +43,7 @@ RSpec.describe 'User views iteration cadences', :js do
     expect(page).to have_content(closed_iteration_in_cadence.title)
   end
 
-  it 'shows inherited cadences in subgroup' do
+  it 'shows inherited cadences in subgroup', :aggregate_failures do
     visit group_iteration_cadences_path(subgroup)
 
     expect(page).to have_content(cadence.title)
