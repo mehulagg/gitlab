@@ -107,6 +107,22 @@ diagnosis and resolution of the incident much harder to achieve, and
 also will largely invalidate your rollout process as you will be unable
 to assess whether the rollout was without problems or not.
 
+The system will automatically block the chatops command from enabling a feature
+flag rollout if there are active incidents, for example:
+
+```shell
+/chatops run feature set gitaly_lfs_pointers_pipeline true
+
+- Production checks fail!
+- active incidents
+
+  2021-06-29 Canary deployment failing QA tests
+```
+
+If there are no ongoing incidents, but enabling the feature flag might
+introduce a risk to the system, you can ping `@sre-oncall` in the internal GitLab
+Slack to make sure they're around to help keep an eye on things.
+
 If there is any doubt, ask in `#production`.
 
 The following `/chatops` commands should be performed in the Slack
