@@ -1119,16 +1119,36 @@ open /opt/gitlab/embedded/ssl/certs/cacert.pem: no such file or directory
 x509: certificate signed by unknown authority
 ```
 
-The reason for those errors is that the files `resolv.conf` and `ca-bundle.pem` are missing inside the `chroot`.
-The fix is to copy the host's `/etc/resolv.conf` and the GitLab certificate bundle inside the `chroot`:
+The reason for those errors is that the files `resolv.conf`, `/etc/hosts/`, `/etc/nsswitch.conf` and `ca-bundle.pem` are missing inside the `chroot`.
+The fix is to copy these files inside the `chroot`:
 
 ```shell
 sudo mkdir -p /var/opt/gitlab/gitlab-rails/shared/pages/etc/ssl
 sudo mkdir -p /var/opt/gitlab/gitlab-rails/shared/pages/opt/gitlab/embedded/ssl/certs/
 
-sudo cp /etc/resolv.conf /var/opt/gitlab/gitlab-rails/shared/pages/etc
+sudo cp /etc/resolv.conf /var/opt/gitlab/gitlab-rails/shared/pages/etc/
+sudo cp /etc/hosts /var/opt/gitlab/gitlab-rails/shared/pages/etc/
+sudo cp /etc/nsswitch.conf /var/opt/gitlab/gitlab-rails/shared/pages/etc/
 sudo cp /opt/gitlab/embedded/ssl/certs/cacert.pem /var/opt/gitlab/gitlab-rails/shared/pages/opt/gitlab/embedded/ssl/certs/
 sudo cp /opt/gitlab/embedded/ssl/certs/cacert.pem /var/opt/gitlab/gitlab-rails/shared/pages/etc/ssl/ca-bundle.pem
+```
+
+### `unsupported protocol scheme \"\""`
+
+If you see the following error:
+
+```plaintext
+{"error":"failed to connect to internal Pages API: Get \"/api/v4/internal/pages/status\": unsupported protocol scheme \"\"","level":"warning","msg":"attempted to connect to the API","time":"2021-06-23T20:03:30Z"}
+```
+
+It means that you didn't set schema for `gitlab-server` or `gitlab-internal-server` parameters.
+To fix add the proper schema in `gitlab.rb`:
+
+```diff
+-gitlab_pages['gitlab_server'] = "gitlab.OURDOMAIN.COM"
+-gitlab_pages['internal_gitlab_server'] = "gitlab.OURDOMAIN.COM"
++gitlab_pages['gitlab_server'] = "https://gitlab.OURDOMAIN.COM"
++gitlab_pages['internal_gitlab_server'] = "https://gitlab.OURDOMAIN.COM"
 ```
 
 ### 502 error when connecting to GitLab Pages proxy when server does not listen over IPv6
@@ -1338,6 +1358,9 @@ GitLab 14.0 introduces a number of changes to GitLab Pages which may require man
 
 1. Firstly [follow the migration guide](#migrate-gitlab-pages-to-140).
 1. If it doesn't work, see [GitLab Pages logs](#how-to-see-gitlab-pages-logs), and if you see any errors there then search them on this page.
+
+The most common problem is using `inplace_chroot`,
+please follow [these instructions](#dial-tcp-lookup-gitlabexamplecom-and-x509-certificate-signed-by-unknown-authority) if you use it.
 
 WARNING:
 As the last resort you can temporarily enable legacy storage and configuration mechanisms. Support for them [will be removed in GitLab 14.3](https://gitlab.com/gitlab-org/omnibus-gitlab/-/issues/6166), so GitLab Pages will stop working if don't resolve the underlying issue.
