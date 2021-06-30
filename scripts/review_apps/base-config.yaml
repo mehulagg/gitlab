@@ -22,7 +22,7 @@ gitlab:
         cpu: 3600m
         memory: 1500M
     persistence:
-      size: 10G
+      size: 10G # change to trigger review app
       storageClass: ssd
   gitlab-exporter:
     enabled: false
