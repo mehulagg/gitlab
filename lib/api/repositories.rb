@@ -55,7 +55,7 @@ module API
         use :pagination
       end
       get ':id/repository/tree' do
-        ref = params[:ref] || user_project.default_branch
+        ref = params[:ref] || user_project.default_branch_or_main
         path = params[:path] || nil
 
         commit = user_project.commit(ref)
