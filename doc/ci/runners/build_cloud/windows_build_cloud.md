@@ -9,7 +9,7 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 The Windows shared runners are in [beta](https://about.gitlab.com/handbook/product/gitlab-the-product/#beta)
 and shouldn't be used for production workloads.
 
-During this beta period, the [shared runner pipeline quota](../../user/admin_area/settings/continuous_integration.md#shared-runners-pipeline-minutes-quota)
+During this beta period, the [shared runner pipeline quota](../../../user/admin_area/settings/continuous_integration.md#shared-runners-pipeline-minutes-quota)
 applies for groups and projects in the same manner as Linux runners. This may
 change when the beta period ends, as discussed in this [related issue](https://gitlab.com/gitlab-org/gitlab/-/issues/30834).
 
@@ -140,12 +140,12 @@ test:
   for maintenance or updates.
 - The Windows shared runner virtual machine instances do not use the
   GitLab Docker executor. This means that you can't specify
-  [`image`](../../ci/yaml/index.md#image) or [`services`](../../ci/yaml/index.md#services) in
+  [`image`](../../../ci/yaml/index.md#image) or [`services`](../../../ci/yaml/index.md#services) in
   your pipeline configuration.
 - For the beta release, we have included a set of software packages in
   the base VM image. If your CI job requires additional software that's
   not included in this list, then you must add installation
-  commands to [`before_script`](../../ci/yaml/index.md#before_script) or [`script`](../../ci/yaml/index.md#script) to install the required
+  commands to [`before_script`](../../../ci/yaml/index.md#before_script) or [`script`](../../../ci/yaml/index.md#script) to install the required
   software. Note that each job runs on a new VM instance, so the
   installation of additional software packages needs to be repeated for
   each job in your pipeline.
