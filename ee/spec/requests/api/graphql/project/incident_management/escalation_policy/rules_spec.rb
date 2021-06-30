@@ -50,7 +50,7 @@ RSpec.describe 'getting Incident Management escalation policies' do
     post_graphql(query, current_user: current_user)
 
     expect(escalation_rules_response).to eq([{
-      'id' => rule.to_global_id.to_s,
+      'id' => global_id(rule),
       'elapsedTimeSeconds' => rule.elapsed_time_seconds, # 5 min
       'status' => rule.status.upcase, # 'ACKNOWLEDGED'
       'oncallSchedule' => {
@@ -69,8 +69,12 @@ RSpec.describe 'getting Incident Management escalation policies' do
       post_graphql(query, current_user: current_user)
 
       expect(escalation_rules_response.length).to eq(4)
-      expect(pluck_from_rules_response('elapsedTimeSeconds')).to eq([1.minute, 5.minutes, 5.minutes, 10.minutes])
-      expect(pluck_from_rules_response('status')).to eq(%w(RESOLVED ACKNOWLEDGED RESOLVED ACKNOWLEDGED))
+      expect(escalation_rules_response.map { |rule| rule['id'] }).to eq([
+        global_id(earlier_resolved_rule),
+        global_id(rule),
+        global_id(equivalent_resolved_rule),
+        global_id(later_acknowledged_rule)
+      ])
     end
   end
 
@@ -88,7 +92,7 @@ RSpec.describe 'getting Incident Management escalation policies' do
 
   private
 
-  def pluck_from_rules_response(attribute)
-    escalation_rules_response.map { |rule| rule[attribute] }
+  def global_id(object)
+    object.to_global_id.to_s
   end
 end
