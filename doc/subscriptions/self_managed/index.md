@@ -376,5 +376,5 @@ Cloud license data is encrypted via SSL/TLS and transmitted to `customers.gitlab
 
 If Cloud Licensing is not working as expected, verify that:
 
-- `customers.gitlab.com` address resolves and is accessible from your Gitlab instance
+- `customers.gitlab.com` address resolves and is accessible from your GitLab instance
 - `104.46.106.135` port 443 is not blocked by your firewall or network restrictions
