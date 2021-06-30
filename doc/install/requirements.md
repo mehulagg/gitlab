@@ -189,6 +189,7 @@ For example ( # CPU / # Memory)
 
 - 2 CPU / 8 GB is configured with 2 Puma workers ( > 2 workers exceeds CPU limit)
 - 4 CPU / 4 GB is configured with 2 Puma workers ( > 2 workers exceeds Memory limit)
+
 Take for example the following scenarios:
 
 - A node with 2 cores / 8 GB memory should be configured with **2 Puma workers**.
