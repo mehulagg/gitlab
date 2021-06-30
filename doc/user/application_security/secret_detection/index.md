@@ -139,11 +139,8 @@ always take the latest Secret Detection artifact available.
 
 ### Enable Secret Detection via an automatic merge request **(ULTIMATE SELF)**
 
-> - [Introduced](https://gitlab.com/groups/gitlab-org/-/epics/4496) in GitLab 13.11.
+> - [Introduced](https://gitlab.com/groups/gitlab-org/-/epics/4496) in GitLab 13.11, behind a feature flag, enabled by default.
 > - [Feature flag removed](https://gitlab.com/gitlab-org/gitlab/-/issues/329886) in GitLab 14.1.
-
-WARNING:
-This feature might not be available to you. Check the **version history** note above for details.
 
 To enable Secret Detection in a project, you can create a merge request
 from the Security Configuration page.
