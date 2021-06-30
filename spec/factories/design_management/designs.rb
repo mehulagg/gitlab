@@ -111,7 +111,7 @@ FactoryBot.define do
         commit_version = ->(action) do
           repository.multi_action(
             evaluator.author,
-            branch_name: 'master',
+            branch_name: 'main',
             message: "#{action.action} for #{design.filename}",
             actions: [action.gitaly_action]
           )
