@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
-module ProductIntelligence
-  class CollectServicePingService
+module ServicePing
+  class BuildPayloadService
     STANDARD_CATEGORY = 'Standard'
     SUBSCRIPTION_CATEGORY = 'Subscription'
     OPTIONAL_CATEGORY = 'Optional'
@@ -62,4 +62,4 @@ module ProductIntelligence
   end
 end
 
-ProductIntelligence::CollectServicePingService.prepend_mod_with('ProductIntelligence::CollectServicePingService')
+ServicePing::BuildPayloadService.prepend_mod_with('ServicePing::BuildPayloadService')

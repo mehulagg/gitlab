@@ -1,14 +1,14 @@
 # frozen_string_literal: true
 
 module EE
-  module ProductIntelligence
-    module CollectServicePingService
+  module ServicePing
+    module BuildPayloadService
       extend ::Gitlab::Utils::Override
 
-      STANDARD_CATEGORY = ::ProductIntelligence::CollectServicePingService::STANDARD_CATEGORY
-      SUBSCRIPTION_CATEGORY = ::ProductIntelligence::CollectServicePingService::SUBSCRIPTION_CATEGORY
-      OPTIONAL_CATEGORY = ::ProductIntelligence::CollectServicePingService::OPTIONAL_CATEGORY
-      OPERATIONAL_CATEGORY = ::ProductIntelligence::CollectServicePingService::OPERATIONAL_CATEGORY
+      STANDARD_CATEGORY = ::ServicePing::BuildPayloadService::STANDARD_CATEGORY
+      SUBSCRIPTION_CATEGORY = ::ServicePing::BuildPayloadService::SUBSCRIPTION_CATEGORY
+      OPTIONAL_CATEGORY = ::ServicePing::BuildPayloadService::OPTIONAL_CATEGORY
+      OPERATIONAL_CATEGORY = ::ServicePing::BuildPayloadService::OPERATIONAL_CATEGORY
 
       private
 

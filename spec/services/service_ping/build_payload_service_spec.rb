@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe ProductIntelligence::CollectServicePingService do
+RSpec.describe ServicePing::BuildPayloadService do
   describe '#execute' do
     subject(:service_ping_payload) { described_class.new.execute }
 
