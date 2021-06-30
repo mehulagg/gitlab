@@ -21,10 +21,9 @@ consumption of your instance. Keep this in mind when adjusting the maximum.
 To speed the loading time of merge request views and branch comparison views
 on your instance, you can configure three instance-level maximum values for diffs:
 
-- **Maximum diff patch size**: The total size, in bytes, of the entire diff.
-- **Maximum diff files**: The total number of files changed in a diff.
-- **Maximum diff files**: The total number of files changed in a diff. The default value is 1000.
-- **Maximum diff lines**: The total number of lines changed in a diff. The default value is 50,000.
+- **Maximum diff patch size**: The total size, in bytes, of the entire diff. The default value is 200 Kilobytes. The max value is 500 Kilobytes.
+- **Maximum diff files**: The total number of files changed in a diff. The default value is 1000. The max vlaue is 3000.
+- **Maximum diff lines**: The total number of lines changed in a diff. The default value is 50,000. The max value is 100,000.
 
 When a diff reaches 10% of any of these values, the files are shown in a
 collapsed view, with a link to expand the diff. Diffs that exceed any of the
@@ -35,7 +34,7 @@ To configure these values:
 1. On the top bar, select **Menu >** **{admin}** **Admin**.
 1. In the left sidebar, select **Settings > General**.
 1. Expand **Diff limits**.
-1. Enter a value for **Maximum diff patch size**, measured in bytes.
+1. Enter a value for the diff limit.
 1. Select **Save changes**.
 
 <!-- ## Troubleshooting
