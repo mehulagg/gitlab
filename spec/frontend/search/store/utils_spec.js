@@ -46,7 +46,7 @@ describe('Global Search Store Utils', () => {
     describe('with existing data', () => {
       describe(`when frequency is less than ${MAX_FREQUENCY}`, () => {
         beforeEach(() => {
-          frequentItems[MOCK_LS_KEY] = [{ id: MOCK_GROUPS[0].id, frequency: 1 }];
+          frequentItems[MOCK_LS_KEY] = [{ ...MOCK_GROUPS[0], frequency: 1 }];
           setFrequentItemToLS(MOCK_LS_KEY, frequentItems, MOCK_GROUPS[0]);
         });
 
@@ -60,7 +60,7 @@ describe('Global Search Store Utils', () => {
 
       describe(`when frequency is equal to ${MAX_FREQUENCY}`, () => {
         beforeEach(() => {
-          frequentItems[MOCK_LS_KEY] = [{ id: MOCK_GROUPS[0].id, frequency: MAX_FREQUENCY }];
+          frequentItems[MOCK_LS_KEY] = [{ ...MOCK_GROUPS[0], frequency: MAX_FREQUENCY }];
           setFrequentItemToLS(MOCK_LS_KEY, frequentItems, MOCK_GROUPS[0]);
         });
 
@@ -90,8 +90,8 @@ describe('Global Search Store Utils', () => {
     describe('with multiple entries', () => {
       beforeEach(() => {
         frequentItems[MOCK_LS_KEY] = [
-          { id: MOCK_GROUPS[0].id, frequency: 1 },
-          { id: MOCK_GROUPS[1].id, frequency: 1 },
+          { ...MOCK_GROUPS[0], frequency: 1 },
+          { ...MOCK_GROUPS[1], frequency: 1 },
         ];
         setFrequentItemToLS(MOCK_LS_KEY, frequentItems, MOCK_GROUPS[1]);
       });

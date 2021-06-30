@@ -21,7 +21,9 @@ export const setFrequentItemToLS = (key, data, item) => {
   }
 
   try {
-    const frequentItems = data[key];
+    const frequentItems = data[key].map(({ id, frequency }) => {
+      return { id, frequency };
+    });
     const existingItemIndex = frequentItems.findIndex((i) => i.id === item.id);
 
     if (existingItemIndex >= 0) {
