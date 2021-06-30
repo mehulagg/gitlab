@@ -207,9 +207,9 @@ end
 
 **Multiple changes on the same table:**
 
-The helper `with_lock_retries` wraps all operations into a single transaction. Once we have the lock
-we better do as much as possible inside the transaction than trying to get another lock later.
-Be careful about running long database statements within the block. The acquired locks will be kept until the transaction (block) finishes and depending on the lock type it might block other database operations.
+The helper `with_lock_retries` wraps all operations into a single transaction. When you have the lock,
+you should do as much as possible inside the transaction rather than trying to get another lock later.
+Be careful about running long database statements within the block. The acquired locks are kept until the transaction (block) finishes and depending on the lock type, it might block other database operations.
 
 ```ruby
 include Gitlab::Database::MigrationHelpers
@@ -227,6 +227,7 @@ def down
     remove_column :users, :bio
   end
 end
+```
 
 **Removing a foreign key:**
 
