@@ -119,10 +119,6 @@ flag rollout if there are active incidents, for example:
   2021-06-29 Canary deployment failing QA tests
 ```
 
-If there are no ongoing incidents, but enabling the feature flag might
-introduce a risk to the system, you can ping `@sre-oncall` in the internal GitLab
-Slack to make sure they're around to help keep an eye on things.
-
 If there is any doubt, ask in `#production`.
 
 The following `/chatops` commands should be performed in the Slack
