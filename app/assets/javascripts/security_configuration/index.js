@@ -11,7 +11,6 @@ export const initStaticSecurityConfiguration = (el) => {
   if (!el) {
     return null;
   }
-
   Vue.use(VueApollo);
 
   const apolloProvider = new VueApollo({
@@ -26,7 +25,11 @@ export const initStaticSecurityConfiguration = (el) => {
     gitlabCiHistoryPath,
   } = el.dataset;
 
-  if (gon.features.securityConfigurationRedesign) {
+  if (
+    gon.features.securityConfigurationRedesign ||
+    (gon.features.securityConfigurationRedesignEE &&
+      el.getAttribute('id') === 'js-security-configuration')
+  ) {
     const { augmentedSecurityFeatures, augmentedComplianceFeatures } = augmentFeatures(
       securityFeatures,
       complianceFeatures,
