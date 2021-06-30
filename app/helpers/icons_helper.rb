@@ -4,6 +4,7 @@ require 'json'
 
 module IconsHelper
   extend self
+  include ActionView::Helpers::AssetTagHelper
 
   DEFAULT_ICON_SIZE = 16
 
@@ -42,9 +43,15 @@ module IconsHelper
       css_classes << "s#{size}" if size
       css_classes << "#{css_class}" unless css_class.blank?
 
+      #image_tag(
+      #  "/-/icons/#{icon_name}.svg",
+      #  class: css_classes.empty? ? nil : css_classes.join(' '),
+      #  data: { testid: "#{icon_name}-icon" }
+      #)
+
       content_tag(
         :svg,
-        content_tag(:use, '', { 'xlink:href' => "#{sprite_icon_path}##{icon_name}" } ),
+        content_tag(:use, '', { 'xlink:href' => "/-/icons/#{icon_name}.svg#icon" } ),
         class: css_classes.empty? ? nil : css_classes.join(' '),
         data: { testid: "#{icon_name}-icon" }
       )
