@@ -362,6 +362,15 @@ RSpec.describe Projects::UpdateService, '#execute' do
         }.from(nil).to(framework)
       end
 
+      it 'audits the assignment' do
+        expect { update_project(project, user, opts) }.to change { AuditEvent.count }.by 1
+        event = AuditEvent.last
+
+        expect(event.author).to eq(user)
+        expect(event.target_id).to eq(framework.id)
+        expect(event.details[:custom_message]).to eq('Assigned compliance framework to project')
+      end
+
       it 'unassigns a framework from a project' do
         project.compliance_management_framework = framework
 
@@ -370,6 +379,14 @@ RSpec.describe Projects::UpdateService, '#execute' do
             .reload
             .compliance_management_framework
         }.from(framework).to(nil)
+      end
+
+      it 'audits the unassignment' do
+        expect { update_project(project, user, { compliance_framework_setting_attributes: { framework: nil } }) }.to change { AuditEvent.count }.by 1
+        event = AuditEvent.last
+
+        expect(event.author).to eq(user)
+        expect(event.details[:custom_message]).to eq('Unassigned compliance framework from project')
       end
     end
 

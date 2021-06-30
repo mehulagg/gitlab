@@ -90,13 +90,37 @@ module EE
         if can?(current_user, :admin_compliance_framework, project)
           framework_identifier = settings.delete(:framework)
           if framework_identifier.blank?
-            settings.merge!(_destroy: true)
+            settings[:_destroy] = true
+            audit_framework_removal
           else
             settings[:compliance_management_framework] = project.namespace.root_ancestor.compliance_management_frameworks.find(framework_identifier)
+            audit_framework_assignment(settings[:compliance_management_framework])
           end
         else
           params.delete(:compliance_framework_setting_attributes)
         end
+      end
+
+      def audit_framework_assignment(framework)
+        audit_context = {
+          author: current_user,
+          scope: project,
+          target: framework,
+          message: 'Assigned compliance framework to project'
+        }
+
+        ::Gitlab::Audit::Auditor.audit(audit_context)
+      end
+
+      def audit_framework_removal
+        audit_context = {
+          author: current_user,
+          scope: project,
+          target: project,
+          message: 'Unassigned compliance framework from project'
+        }
+
+        ::Gitlab::Audit::Auditor.audit(audit_context)
       end
 
       def log_audit_events
