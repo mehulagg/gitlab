@@ -92,9 +92,9 @@ const Api = {
   groupNotificationSettingsPath: '/api/:version/groups/:id/notification_settings',
   notificationSettingsPath: '/api/:version/notification_settings',
 
-  group(groupId, callback = () => {}) {
+  group(groupId, options, callback = () => {}) {
     const url = Api.buildUrl(Api.groupPath).replace(':id', groupId);
-    return axios.get(url).then(({ data }) => {
+    return axios.get(url, { params: { ...options } }).then(({ data }) => {
       callback(data);
 
       return data;

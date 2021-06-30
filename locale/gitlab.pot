@@ -32754,6 +32754,12 @@ msgstr ""
 msgid "There was a problem fetching project users."
 msgstr ""
 
+msgid "There was a problem fetching recent groups."
+msgstr ""
+
+msgid "There was a problem fetching recent projects."
+msgstr ""
+
 msgid "There was a problem fetching the keep latest artifacts setting."
 msgstr ""
 
