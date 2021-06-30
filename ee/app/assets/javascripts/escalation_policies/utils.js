@@ -29,9 +29,7 @@ export const getRulesValidationState = (rules) => {
  *
  * @returns {Object} rule
  */
-export const serializeRule = (rule) => {
-  const { elapsedTimeMinutes, ...ruleParams } = rule;
-
+export const serializeRule = ({ elapsedTimeMinutes, ...ruleParams }) => {
   return {
     ...ruleParams,
     elapsedTimeSeconds: rule.elapsedTimeMinutes * 60,
@@ -46,8 +44,7 @@ export const serializeRule = (rule) => {
  */
 export const parsePolicy = (policy) => ({
   ...policy,
-  rules: policy.rules.map((rule) => {
-    const { elapsedTimeSeconds, ...ruleParams } = rule;
+  rules: policy.rules.map(({ elapsedTimeSeconds, ...ruleParams }) => {
 
     return {
       ...ruleParams,
