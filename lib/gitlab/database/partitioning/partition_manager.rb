@@ -46,6 +46,8 @@ module Gitlab
         end
 
         def detach_partitions
+          return unless Feature.enabled?(:partition_pruning_dry_run)
+
           models.each do |model|
             next if extra_partitions(model).empty?
 
