@@ -12,6 +12,8 @@ query devopsAdoptionEnabledNamespaces($displayNamespaceId: NamespaceID) {
         securityScanSucceeded
         recordedAt
         codeOwnersUsedCount
+        sastEnabledCount
+        dastEnabledCount
       }
       namespace {
         fullName

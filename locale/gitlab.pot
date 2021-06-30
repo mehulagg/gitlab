@@ -11135,6 +11135,12 @@ msgstr ""
 msgid "DevopsAdoption|Confirm remove Group"
 msgstr ""
 
+msgid "DevopsAdoption|DAST"
+msgstr ""
+
+msgid "DevopsAdoption|DAST enabled for at least one project"
+msgstr ""
+
 msgid "DevopsAdoption|Deploys"
 msgstr ""
 
@@ -11184,6 +11190,12 @@ msgid "DevopsAdoption|Runner configured for project/group"
 msgstr ""
 
 msgid "DevopsAdoption|Runners"
+msgstr ""
+
+msgid "DevopsAdoption|SAST"
+msgstr ""
+
+msgid "DevopsAdoption|SAST enabled for at least one project"
 msgstr ""
 
 msgid "DevopsAdoption|Save changes"

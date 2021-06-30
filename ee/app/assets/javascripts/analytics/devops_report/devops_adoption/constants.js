@@ -106,18 +106,6 @@ export const DEVOPS_ADOPTION_TABLE_CONFIGURATION = [
     tab: 'dev',
     cols: [
       {
-        key: 'issueOpened',
-        label: s__('DevopsAdoption|Issues'),
-        tooltip: s__('DevopsAdoption|At least one issue opened'),
-        testId: 'issuesCol',
-      },
-      {
-        key: 'mergeRequestOpened',
-        label: s__('DevopsAdoption|MRs'),
-        tooltip: s__('DevopsAdoption|At least one MR opened'),
-        testId: 'mrsCol',
-      },
-      {
         key: 'mergeRequestApproved',
         label: s__('DevopsAdoption|Approvals'),
         tooltip: s__('DevopsAdoption|At least one approval on an MR'),
@@ -129,12 +117,36 @@ export const DEVOPS_ADOPTION_TABLE_CONFIGURATION = [
         tooltip: s__('DevopsAdoption|Code owners enabled for at least one project'),
         testId: 'codeownersCol',
       },
+      {
+        key: 'issueOpened',
+        label: s__('DevopsAdoption|Issues'),
+        tooltip: s__('DevopsAdoption|At least one issue opened'),
+        testId: 'issuesCol',
+      },
+      {
+        key: 'mergeRequestOpened',
+        label: s__('DevopsAdoption|MRs'),
+        tooltip: s__('DevopsAdoption|At least one MR opened'),
+        testId: 'mrsCol',
+      },
     ],
   },
   {
     title: s__('DevopsAdoption|Sec'),
     tab: 'sec',
     cols: [
+      {
+        key: 'dastEnabledCount',
+        label: s__('DevopsAdoption|DAST'),
+        tooltip: s__('DevopsAdoption|DAST enabled for at least one project'),
+        testId: 'dastCol',
+      },
+      {
+        key: 'sastEnabledCount',
+        label: s__('DevopsAdoption|SAST'),
+        tooltip: s__('DevopsAdoption|SAST enabled for at least one project'),
+        testId: 'sastCol',
+      },
       {
         key: 'securityScanSucceeded',
         label: s__('DevopsAdoption|Scanning'),
@@ -148,10 +160,10 @@ export const DEVOPS_ADOPTION_TABLE_CONFIGURATION = [
     tab: 'ops',
     cols: [
       {
-        key: 'runnerConfigured',
-        label: s__('DevopsAdoption|Runners'),
-        tooltip: s__('DevopsAdoption|Runner configured for project/group'),
-        testId: 'runnersCol',
+        key: 'deploySucceeded',
+        label: s__('DevopsAdoption|Deploys'),
+        tooltip: s__('DevopsAdoption|At least one deploy'),
+        testId: 'deploysCol',
       },
       {
         key: 'pipelineSucceeded',
@@ -160,10 +172,10 @@ export const DEVOPS_ADOPTION_TABLE_CONFIGURATION = [
         testId: 'pipelinesCol',
       },
       {
-        key: 'deploySucceeded',
-        label: s__('DevopsAdoption|Deploys'),
-        tooltip: s__('DevopsAdoption|At least one deploy'),
-        testId: 'deploysCol',
+        key: 'runnerConfigured',
+        label: s__('DevopsAdoption|Runners'),
+        tooltip: s__('DevopsAdoption|Runner configured for project/group'),
+        testId: 'runnersCol',
       },
     ],
   },

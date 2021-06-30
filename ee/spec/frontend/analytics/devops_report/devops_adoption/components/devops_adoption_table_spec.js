@@ -234,7 +234,7 @@ describe('DevopsAdoptionTable', () => {
 
       await nextTick();
 
-      expect(findSortByLocalStorageSync().props('value')).toBe('issueOpened');
+      expect(findSortByLocalStorageSync().props('value')).toBe('mergeRequestApproved');
     });
 
     it('should update local storage when the sort direction changes', async () => {
