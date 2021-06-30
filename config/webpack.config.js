@@ -5,6 +5,7 @@ const SOURCEGRAPH_VERSION = require('@sourcegraph/code-host-integration/package.
 
 const CompressionPlugin = require('compression-webpack-plugin');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
+const { ESBuildMinifyPlugin } = require('esbuild-loader');
 const glob = require('glob');
 const VueLoaderPlugin = require('vue-loader/lib/plugin');
 const VUE_LOADER_VERSION = require('vue-loader/package.json').version;
@@ -368,6 +369,12 @@ module.exports = {
         },
       },
     },
+    minimizer: [
+      new ESBuildMinifyPlugin({
+        // We could potentially build this based on .browserslistrc
+        target: ['chrome84', 'edge84', 'firefox78', 'safari13'],
+      }),
+    ],
   },
 
   plugins: [

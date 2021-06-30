@@ -122,6 +122,8 @@
     "editorconfig": "^0.15.3",
     "emoji-regex": "^7.0.3",
     "emoji-unicode-version": "^0.2.1",
+    "esbuild": "^0.12.12",
+    "esbuild-loader": "^2.13.1",
     "fast-mersenne-twister": "1.0.2",
     "file-loader": "^6.2.0",
     "fuzzaldrin-plus": "^0.6.0",
@@ -262,6 +264,7 @@
     "bootstrap-vue": "https://docs.gitlab.com/ee/development/fe_guide/dependencies.html#bootstrapvue"
   },
   "resolutions": {
+    "esbuild": "^0.12.12",
     "chokidar": "^3.4.0",
     "monaco-editor": "0.20.0"
   },
