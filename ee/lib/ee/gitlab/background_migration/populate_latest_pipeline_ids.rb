@@ -199,7 +199,7 @@ module EE
 
           def root_ref
             raw_repository&.root_ref
-          rescue Gitlab::Git::Repository::NoRepository
+          rescue ::Gitlab::Git::Repository::NoRepository
           end
 
           def empty?
