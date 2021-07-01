@@ -8,6 +8,7 @@ import {
   GlSprintf,
   GlButton,
   GlFormInput,
+  GlFormRadioGroup,
 } from '@gitlab/ui';
 import { partition, isString } from 'lodash';
 import Api from '~/api';
@@ -30,6 +31,7 @@ export default {
     GlSprintf,
     GlButton,
     GlFormInput,
+    GlFormRadioGroup,
     MembersTokenSelect,
     GroupSelect,
   },
@@ -68,6 +70,10 @@ export default {
       type: String,
       required: true,
     },
+    areasOfFocusOptions: {
+      type: Array,
+      required: true,
+    },
   },
   data() {
     return {
@@ -77,6 +83,7 @@ export default {
       inviteeType: 'members',
       newUsersToInvite: [],
       selectedDate: undefined,
+      selectedAreaOfFocus: undefined,
       groupToBeSharedWith: {},
       source: 'unknown',
     };
@@ -207,6 +214,7 @@ export default {
         email: usersToInviteByEmail,
         access_level: this.selectedAccessLevel,
         invite_source: this.source,
+        area_of_focus: this.selectedAreaOfFocus,
       };
     },
     addByUserIdPostData(usersToAddById) {
@@ -215,6 +223,7 @@ export default {
         user_id: usersToAddById,
         access_level: this.selectedAccessLevel,
         invite_source: this.source,
+        area_of_focus: this.selectedAreaOfFocus,
       };
     },
     shareWithGroupPostData(groupToBeSharedWith) {
@@ -272,6 +281,9 @@ export default {
     inviteButtonText: s__('InviteMembersModal|Invite'),
     cancelButtonText: s__('InviteMembersModal|Cancel'),
     headerCloseLabel: s__('InviteMembersModal|Close invite team members'),
+    areasOfFocusLabel: s__(
+      'InviteMembersModal|What would you like new member(s) to focus on? (optional)',
+    ),
   },
   membersTokenSelectLabelId: 'invite-members-input',
 };
@@ -360,6 +372,10 @@ export default {
           </template>
         </gl-datepicker>
       </div>
+      <label class="gl-font-weight-bold gl-mt-5 gl-display-block">
+        {{ $options.labels.areasOfFocusLabel }}
+      </label>
+      <gl-form-radio-group v-model="selectedAreaOfFocus" :options="areasOfFocusOptions" />
     </div>
 
     <template #modal-footer>

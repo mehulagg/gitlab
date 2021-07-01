@@ -15,6 +15,14 @@ class Member < ApplicationRecord
 
   AVATAR_SIZE = 40
   ACCESS_REQUEST_APPROVERS_TO_BE_NOTIFIED_LIMIT = 10
+  AREAS_OF_FOCUS = [
+    'Contribute to the codebase',
+    'Collaborate on open issues and merge requests',
+    'Configure CI/CD',
+    'Configure security features',
+    'Other',
+    'no_selection'
+  ].freeze
 
   attr_accessor :raw_invite_token
 

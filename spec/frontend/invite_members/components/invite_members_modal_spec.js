@@ -17,6 +17,7 @@ const accessLevels = { Guest: 10, Reporter: 20, Developer: 30, Maintainer: 40, O
 const defaultAccessLevel = 10;
 const inviteSource = 'unknown';
 const helpLink = 'https://example.com';
+const areasOfFocusOptions = ['area1', 'area2'];
 
 const user1 = { id: 1, name: 'Name One', username: 'one_1', avatar_url: '' };
 const user2 = { id: 2, name: 'Name Two', username: 'one_2', avatar_url: '' };
@@ -36,6 +37,7 @@ const createComponent = (data = {}, props = {}) => {
       isProject,
       inviteeType,
       accessLevels,
+      areasOfFocusOptions,
       defaultAccessLevel,
       helpLink,
       ...props,

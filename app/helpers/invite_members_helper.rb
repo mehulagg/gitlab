@@ -39,4 +39,19 @@ module InviteMembersHelper
       {}
     end
   end
+
+  def common_invite_modal_dataset(source)
+    {
+      id: source.id,
+      name: source.name,
+      default_access_level: Gitlab::Access::GUEST,
+      areas_of_focus_options: selectable_areas_of_focus
+    }
+  end
+
+  private
+
+  def selectable_areas_of_focus
+    ::Member::AREAS_OF_FOCUS.reject { |x| x == 'no_selection' }
+  end
 end
