@@ -12,6 +12,8 @@ module Gitlab
         TRANSMIT_SUBSCRIPTION_CONFIRMATION = :action_cable_subscription_confirmations_total
         TRANSMIT_SUBSCRIPTION_REJECTION = :action_cable_subscription_rejections_total
         BROADCAST = :action_cable_broadcasts_total
+        DATA_TRANSMITTED_BYTES = :action_cable_data_transmitted_bytes
+        DATA_BROADCASTED_BYTES = :action_cable_data_broadcasted_bytes # Is this needed? Or each broadcast triggers n transmits?
 
         def transmit_subscription_confirmation(event)
           confirm_subscription_counter.increment
@@ -23,6 +25,9 @@ module Gitlab
 
         def transmit(event)
           transmit_counter.increment
+
+          # Maybe get the encoder
+          transmitted_bytes_histogram.observe(::ActiveSupport::JSON.encode(event.payload[:data]).bytesize)
         end
 
         def broadcast(event)
@@ -64,6 +69,12 @@ module Gitlab
               TRANSMIT_SUBSCRIPTION_REJECTION,
               'The number of ActionCable subscriptions from clients rejected'
             )
+          end
+        end
+
+        def transmitted_bytes_histogram
+          strong_memoize("transmitted_bytes_histogram") do
+            ::Gitlab::Metrics.histogram(DATA_TRANSMITTED_BYTES,'Size of data, in bytes, transmitted over action cable')
           end
         end
       end
