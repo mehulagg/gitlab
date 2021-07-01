@@ -5,19 +5,21 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 description: What to include in GitLab documentation pages.
 ---
 
-# Documentation content types
+# Documentation topic types
 
 At GitLab, we have not traditionally used types for our content. However, we are starting to
-move in this direction, and we now use four primary content types:
+move in this direction, and we now use four primary topic types:
 
 - [Concept](#concept)
 - [Task](#task)
 - [Reference](#reference)
 - [Troubleshooting](#troubleshooting)
 
-Each page can contain multiple types. For example,
-a page with the title `Pipelines` can include a concept and multiple tasks.
-A page might also contain only one type. These pages are generally one of our
+In general, each page in our docset contains multiple topics. (Each heading indicates a new topic.)
+Each topic on a page should be a specific topic type. For example,
+a page with the title `Pipelines` can include topics that are concepts and tasks.
+
+A page might also contain only one type of information. These pages are generally one of our
 [other content types](#other-types-of-content).
 
 ## Concept
@@ -150,14 +152,14 @@ If you do not put the full error in the title, include it in the body text.
 ## Other types of content
 
 There are other types of content in the GitLab documentation that don't
-classify as one of the four primary [content types](#documentation-content-types).
+classify as one of the four primary [topic types](#documentation-topic-types).
 These include:
 
 - [Tutorials](#tutorials)
 - [Get started pages](#get-started)
 - [Topics and resources pages](#topics-and-resources-pages)
 
-In most cases, these content types are on their own standalone page.
+In most cases, these pages are standalone.
 
 ### Tutorials
 
