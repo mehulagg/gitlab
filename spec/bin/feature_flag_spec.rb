@@ -42,7 +42,7 @@ RSpec.describe 'bin/feature-flag' do
 
     context 'when running on master' do
       it 'requires feature branch' do
-        expect(creator).to receive(:branch_name) { 'master' }
+        expect(creator).to receive(:branch_name) { project.default_branch }
 
         expect { subject }.to raise_error(FeatureFlagHelpers::Abort, /Create a branch first/)
       end

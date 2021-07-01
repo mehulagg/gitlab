@@ -89,7 +89,7 @@ RSpec.describe API::MergeRequests do
       defaults = {
           title: 'Test merge_request',
           source_branch: 'feature_conflict',
-          target_branch: 'master',
+          target_branch: project.default_branch,
           author: user,
           labels: 'label, label2',
           milestone_id: milestone.id

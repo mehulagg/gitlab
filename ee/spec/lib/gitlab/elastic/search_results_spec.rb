@@ -807,7 +807,7 @@ RSpec.describe Gitlab::Elastic::SearchResults, :elastic, :clean_gitlab_redis_sha
           'test.txt',
           ' function writeStringToFile(){} ',
           message: 'added test file',
-          branch_name: 'master')
+          branch_name: project.default_branch)
 
         project_1.repository.index_commits_and_blobs
 
@@ -879,7 +879,7 @@ RSpec.describe Gitlab::Elastic::SearchResults, :elastic, :clean_gitlab_redis_sha
       let(:file_name) { 'elastic_specialchars_test.md' }
 
       before do
-        project_1.repository.create_file(user, file_name, file_content, message: 'Some commit message', branch_name: 'master')
+        project_1.repository.create_file(user, file_name, file_content, message: 'Some commit message', branch_name: project.default_branch)
         project_1.repository.index_commits_and_blobs
         ensure_elasticsearch_index!
       end
@@ -1343,7 +1343,7 @@ RSpec.describe Gitlab::Elastic::SearchResults, :elastic, :clean_gitlab_redis_sha
             'test-file',
             'search test',
             message: 'search test',
-            branch_name: 'master'
+            branch_name: project.default_branch
           )
 
           project.repository.index_commits_and_blobs
@@ -1375,7 +1375,7 @@ RSpec.describe Gitlab::Elastic::SearchResults, :elastic, :clean_gitlab_redis_sha
             'test-file',
             'tesla',
             message: 'search test',
-            branch_name: 'master'
+            branch_name: project.default_branch
           )
 
           project.repository.index_commits_and_blobs

@@ -9,7 +9,7 @@ RSpec.describe Ci::CreatePipelineService, '#execute' do
   let_it_be(:project, reload: true) { create(:project, :repository, namespace: namespace) }
   let_it_be(:user) { create(:user) }
 
-  let(:ref_name) { 'master' }
+  let(:ref_name) { project.default_branch }
 
   let(:service) do
     params = { ref: ref_name,

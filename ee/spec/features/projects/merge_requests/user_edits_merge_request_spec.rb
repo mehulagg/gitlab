@@ -25,7 +25,7 @@ RSpec.describe 'Projects > Merge Requests > User edits a merge request' do
       create(:merge_request,
              source_project: project,
              target_project: project,
-             target_branch: 'master',
+             target_branch: project.default_branch,
              source_branch: 'feature')
     end
 
@@ -38,7 +38,7 @@ RSpec.describe 'Projects > Merge Requests > User edits a merge request' do
                                      branch_name: 'feature')
 
       create(:protected_branch,
-        name: 'master',
+        name: project.default_branch,
         code_owner_approval_required: true,
         project: project)
 

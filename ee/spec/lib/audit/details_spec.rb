@@ -255,7 +255,7 @@ RSpec.describe Audit::Details do
     context 'updated ref' do
       let(:action) do
         {
-          updated_ref: 'master',
+          updated_ref: project.default_branch,
           author_name: 'Hackerman',
           from: 'b6bce79c',
           to: 'a7bce79c',

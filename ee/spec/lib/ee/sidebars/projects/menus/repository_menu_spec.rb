@@ -6,7 +6,7 @@ RSpec.describe Sidebars::Projects::Menus::RepositoryMenu do
   let_it_be(:project) { create(:project, :repository) }
 
   let(:user) { project.owner }
-  let(:context) { Sidebars::Projects::Context.new(current_user: user, container: project, current_ref: 'master') }
+  let(:context) { Sidebars::Projects::Context.new(current_user: user, container: project, current_ref: project.default_branch) }
 
   describe 'File Locks' do
     subject { described_class.new(context).renderable_items.index { |e| e.item_id == :file_locks} }

@@ -388,7 +388,7 @@ RSpec.describe Projects::IssuesController do
       let(:missing_branch) { "#{issue.to_branch_name}-missing" }
       let(:unreadable_branch) { "#{issue.to_branch_name}-unreadable" }
       let(:pipeline) { build(:ci_pipeline, :success, project: project) }
-      let(:master_branch) { 'master' }
+      let(:master_branch) { project.default_branch }
 
       let(:related_branches) do
         [
@@ -1605,8 +1605,8 @@ RSpec.describe Projects::IssuesController do
           :create_merge_request,
           params: {
             target_project_id: nil,
-            branch_name: 'master',
-            ref: 'master',
+            branch_name: project.default_branch,
+            ref: project.default_branch,
             namespace_id: project.namespace.to_param,
             project_id: project.to_param,
             id: issue.to_param

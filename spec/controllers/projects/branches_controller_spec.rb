@@ -10,7 +10,7 @@ RSpec.describe Projects::BranchesController do
   before do
     project.add_developer(developer)
 
-    allow(project).to receive(:branches).and_return(['master', 'foo/bar/baz'])
+    allow(project).to receive(:branches).and_return([project.default_branch, 'foo/bar/baz'])
     allow(project).to receive(:tags).and_return(['v1.0.0', 'v2.0.0'])
     controller.instance_variable_set(:@project, project)
   end
@@ -268,13 +268,13 @@ RSpec.describe Projects::BranchesController do
 
     context 'with valid params' do
       it 'returns a successful 200 response' do
-        create_branch name: 'my-branch', ref: 'master'
+        create_branch name: 'my-branch', ref: project.default_branch
 
         expect(response).to have_gitlab_http_status(:ok)
       end
 
       it 'returns the created branch' do
-        create_branch name: 'my-branch', ref: 'master'
+        create_branch name: 'my-branch', ref: project.default_branch
 
         expect(response).to match_response_schema('branch')
       end
@@ -478,17 +478,17 @@ RSpec.describe Projects::BranchesController do
             params: {
               namespace_id: project.namespace,
               project_id: project,
-              search: 'master'
+              search: project.default_branch
             }
 
         expect(json_response.length).to eq 1
-        expect(json_response.first).to eq 'master'
+        expect(json_response.first).to eq project.default_branch
       end
     end
 
     context 'when a branch has multiple pipelines' do
       it 'chooses the latest to determine status' do
-        sha = project.repository.create_file(developer, generate(:branch), 'content', message: 'message', branch_name: 'master')
+        sha = project.repository.create_file(developer, generate(:branch), 'content', message: 'message', branch_name: project.default_branch)
         create(:ci_pipeline,
           project: project,
           user: developer,
@@ -519,7 +519,7 @@ RSpec.describe Projects::BranchesController do
 
     context 'when multiple branches exist' do
       it 'all relevant commit statuses are received' do
-        master_sha = project.repository.create_file(developer, generate(:branch), 'content', message: 'message', branch_name: 'master')
+        master_sha = project.repository.create_file(developer, generate(:branch), 'content', message: 'message', branch_name: project.default_branch)
         create(:ci_pipeline,
           project: project,
           user: developer,

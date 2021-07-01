@@ -33,7 +33,7 @@ RSpec.describe Projects::MergeRequests::DiffsController do
 
     let(:project) { create(:project, :repository) }
     let(:forked_project) { fork_project_with_submodules(project) }
-    let(:merge_request) { create(:merge_request_with_diffs, source_project: forked_project, source_branch: 'add-submodule-version-bump', target_branch: 'master', target_project: project) }
+    let(:merge_request) { create(:merge_request_with_diffs, source_project: forked_project, source_branch: 'add-submodule-version-bump', target_branch: project.default_branch, target_project: project) }
 
     before do
       project.add_developer(user)

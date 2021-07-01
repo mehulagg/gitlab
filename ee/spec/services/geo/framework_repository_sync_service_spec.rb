@@ -54,7 +54,7 @@ RSpec.describe Geo::FrameworkRepositorySyncService, :geo do
       allow_any_instance_of(Repository)
         .to receive(:find_remote_root_ref)
         .with('geo')
-        .and_return('master')
+        .and_return(project.default_branch)
     end
 
     include_context 'lease handling'

@@ -136,7 +136,7 @@ RSpec.describe Gitlab::Elastic::Indexer do
       it_behaves_like 'index up to the specified commit'
 
       context 'after reverting a change' do
-        let!(:initial_commit) { project.repository.commit('master').sha }
+        let!(:initial_commit) { project.repository.commit(project.default_branch).sha }
 
         def change_repository_and_index(project, &blk)
           yield blk if blk
@@ -160,8 +160,8 @@ RSpec.describe Gitlab::Elastic::Indexer do
             sha_for_reset = nil
 
             change_repository_and_index(project) do
-              sha_for_reset = project.repository.create_file(user, '12', '', message: '12', branch_name: 'master')
-              project.repository.create_file(user, '23', '', message: '23', branch_name: 'master')
+              sha_for_reset = project.repository.create_file(user, '12', '', message: '12', branch_name: project.default_branch)
+              project.repository.create_file(user, '23', '', message: '23', branch_name: project.default_branch)
             end
 
             expect(indexed_file_paths_for('12')).to include('12')
@@ -170,7 +170,7 @@ RSpec.describe Gitlab::Elastic::Indexer do
             project.index_status.update!(last_commit: '____________')
 
             change_repository_and_index(project) do
-              project.repository.write_ref('master', sha_for_reset)
+              project.repository.write_ref(project.default_branch, sha_for_reset)
             end
 
             expect(indexed_file_paths_for('12')).to include('12')
@@ -181,7 +181,7 @@ RSpec.describe Gitlab::Elastic::Indexer do
         context 'when branch is reset to an earlier commit' do
           it 'reverses already indexed commits' do
             change_repository_and_index(project) do
-              project.repository.create_file(user, '12', '', message: '12', branch_name: 'master')
+              project.repository.create_file(user, '12', '', message: '12', branch_name: project.default_branch)
             end
 
             head = project.repository.commit.sha
@@ -191,7 +191,7 @@ RSpec.describe Gitlab::Elastic::Indexer do
 
             # resetting the repository should purge the index of the outstanding commits
             change_repository_and_index(project) do
-              project.repository.write_ref('master', initial_commit)
+              project.repository.write_ref(project.default_branch, initial_commit)
             end
 
             expect(indexed_commits_for('12')).not_to include(head)
@@ -204,7 +204,7 @@ RSpec.describe Gitlab::Elastic::Indexer do
     context "when indexing a project's wiki", :elastic, :clean_gitlab_redis_shared_state do
       let(:project) { create(:project, :wiki_repo) }
       let(:indexer) { described_class.new(project, wiki: true) }
-      let(:to_sha) { project.wiki.repository.commit('master').sha }
+      let(:to_sha) { project.wiki.repository.commit(project.default_branch).sha }
 
       before do
         project.wiki.create_page('test.md', '# term')
@@ -237,7 +237,7 @@ RSpec.describe Gitlab::Elastic::Indexer do
         def change_wiki_and_index(project, &blk)
           yield blk if blk
 
-          current_commit = project.wiki.repository.commit('master').sha
+          current_commit = project.wiki.repository.commit(project.default_branch).sha
 
           described_class.new(project, wiki: true).run(current_commit)
           ensure_elasticsearch_index!
@@ -258,8 +258,8 @@ RSpec.describe Gitlab::Elastic::Indexer do
           sha_for_reset = nil
 
           change_wiki_and_index(project) do
-            sha_for_reset = project.wiki.repository.create_file(user, '12', '', message: '12', branch_name: 'master')
-            project.wiki.repository.create_file(user, '23', '', message: '23', branch_name: 'master')
+            sha_for_reset = project.wiki.repository.create_file(user, '12', '', message: '12', branch_name: project.default_branch)
+            project.wiki.repository.create_file(user, '23', '', message: '23', branch_name: project.default_branch)
           end
 
           expect(indexed_wiki_paths_for('12')).to include('12')
@@ -268,7 +268,7 @@ RSpec.describe Gitlab::Elastic::Indexer do
           project.index_status.update!(last_wiki_commit: '____________')
 
           change_wiki_and_index(project) do
-            project.wiki.repository.write_ref('master', sha_for_reset)
+            project.wiki.repository.write_ref(project.default_branch, sha_for_reset)
           end
 
           expect(indexed_wiki_paths_for('12')).to include('12')
@@ -364,8 +364,8 @@ RSpec.describe Gitlab::Elastic::Indexer do
     before do
       stub_ee_application_setting(elasticsearch_indexed_file_size_limit_kb: 1) # 1 KiB limit
 
-      project.repository.create_file(user, 'small_file.txt', 'Small file contents', message: 'small_file.txt', branch_name: 'master')
-      project.repository.create_file(user, 'large_file.txt', 'Large file' * 1000, message: 'large_file.txt', branch_name: 'master')
+      project.repository.create_file(user, 'small_file.txt', 'Small file contents', message: 'small_file.txt', branch_name: project.default_branch)
+      project.repository.create_file(user, 'large_file.txt', 'Large file' * 1000, message: 'large_file.txt', branch_name: project.default_branch)
 
       index_repository(project)
     end
@@ -381,7 +381,7 @@ RSpec.describe Gitlab::Elastic::Indexer do
     let(:long_path) { "#{'a' * 1000}_file.txt" }
 
     before do
-      project.repository.create_file(user, long_path, 'Large path file contents', message: 'long_path.txt', branch_name: 'master')
+      project.repository.create_file(user, long_path, 'Large path file contents', message: 'long_path.txt', branch_name: project.default_branch)
 
       index_repository(project)
     end
@@ -449,7 +449,7 @@ RSpec.describe Gitlab::Elastic::Indexer do
   end
 
   def index_repository(project)
-    current_commit = project.repository.commit('master').sha
+    current_commit = project.repository.commit(project.default_branch).sha
 
     described_class.new(project).run(current_commit)
     ensure_elasticsearch_index!

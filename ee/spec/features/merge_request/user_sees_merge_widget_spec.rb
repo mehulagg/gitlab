@@ -24,7 +24,7 @@ RSpec.describe 'Merge request > User sees merge widget', :js do
         source_project: source_project,
         source_branch: 'feature',
         target_project: target_project,
-        target_branch: 'master',
+        target_branch: project.default_branch,
         **options)
     end
 

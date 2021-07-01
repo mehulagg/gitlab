@@ -150,7 +150,7 @@ RSpec.describe Repository do
 
   describe '#upstream_branches' do
     it 'returns branches from the upstream remote' do
-      masterrev = repository.find_branch('master').dereferenced_target
+      masterrev = repository.find_branch(project.default_branch).dereferenced_target
       create_remote_branch('upstream', 'upstream_branch', masterrev)
 
       expect(repository.upstream_branches.size).to eq(1)
@@ -199,7 +199,7 @@ RSpec.describe Repository do
 
   describe '#code_owners_blob' do
     it 'returns nil if there is no codeowners file' do
-      expect(repository.code_owners_blob(ref: 'master')).to be_nil
+      expect(repository.code_owners_blob(ref: project.default_branch)).to be_nil
     end
 
     it 'returns the content of the codeowners file when it is found' do
@@ -213,7 +213,7 @@ RSpec.describe Repository do
                                      %w(master .gitlab/CODEOWNERS)])
                               .and_call_original
 
-      repository.code_owners_blob(ref: 'master')
+      repository.code_owners_blob(ref: project.default_branch)
     end
   end
 

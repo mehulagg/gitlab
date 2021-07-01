@@ -26,7 +26,7 @@ RSpec.describe 'Jobs/Browser-Performance-Testing.gitlab-ci.yml' do
     end
 
     let(:user) { project.owner }
-    let(:default_branch) { 'master' }
+    let(:default_branch) { project.default_branch }
     let(:pipeline_ref) { default_branch }
     let(:service) { Ci::CreatePipelineService.new(project, user, ref: pipeline_ref) }
     let(:pipeline) { service.execute!(:push) }

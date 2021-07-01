@@ -2,7 +2,7 @@
 
 FactoryBot.define do
   factory :merge_train do
-    target_branch { 'master' }
+    target_branch { target_project.default_branch }
     target_project factory: :project
     merge_request
     user

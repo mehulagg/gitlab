@@ -21,7 +21,7 @@ RSpec.shared_examples "protected branches > access control > EE" do
     it "allows creating protected branches that roles, users, and groups can #{git_operation} to" do
       visit project_protected_branches_path(project)
 
-      set_protected_branch_name('master')
+      set_protected_branch_name(project.default_branch)
       set_allowed_to(git_operation, users.map(&:name))
       set_allowed_to(git_operation, groups.map(&:name))
       roles_except_noone.each { |(_, access_type_name)| set_allowed_to(git_operation, access_type_name) }
@@ -29,7 +29,7 @@ RSpec.shared_examples "protected branches > access control > EE" do
 
       click_on "Protect"
 
-      within(".protected-branches-list") { expect(page).to have_content('master') }
+      within(".protected-branches-list") { expect(page).to have_content(project.default_branch) }
       expect(ProtectedBranch.count).to eq(1)
 
       access_levels = last_access_levels(git_operation)
@@ -40,7 +40,7 @@ RSpec.shared_examples "protected branches > access control > EE" do
 
     it "allows updating protected branches so that roles and users can #{git_operation} to it" do
       visit project_protected_branches_path(project)
-      set_protected_branch_name('master')
+      set_protected_branch_name(project.default_branch)
       set_allowed_to('merge')
       set_allowed_to('push')
 
@@ -62,7 +62,7 @@ RSpec.shared_examples "protected branches > access control > EE" do
 
     it "allows updating protected branches so that roles and users cannot #{git_operation} to it" do
       visit project_protected_branches_path(project)
-      set_protected_branch_name('master')
+      set_protected_branch_name(project.default_branch)
 
       users.each { |user| set_allowed_to(git_operation, user.name) }
       roles_except_noone.each { |(_, access_type_name)| set_allowed_to(git_operation, access_type_name) }
@@ -90,7 +90,7 @@ RSpec.shared_examples "protected branches > access control > EE" do
       visit project_protected_branches_path(project)
 
       # Create Protected Branch
-      set_protected_branch_name('master')
+      set_protected_branch_name(project.default_branch)
       roles_except_noone.each { |(_, access_type_name)| set_allowed_to(git_operation, access_type_name) }
       set_allowed_to(other_git_operation)
 
@@ -155,7 +155,7 @@ RSpec.shared_examples "protected branches > access control > EE" do
     it 'discards other roles when choosing "No one"' do
       roles = ProtectedRefAccess::HUMAN_ACCESS_LEVELS.except(0)
       visit project_protected_branches_path(project)
-      set_protected_branch_name('master')
+      set_protected_branch_name(project.default_branch)
       set_allowed_to('merge')
       set_allowed_to('push', ProtectedRefAccess::HUMAN_ACCESS_LEVELS.values) # Last item (No one) should deselect the other ones
       click_on "Protect"

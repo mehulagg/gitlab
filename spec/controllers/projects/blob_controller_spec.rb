@@ -257,7 +257,7 @@ RSpec.describe Projects::BlobController do
         namespace_id: project.namespace,
         project_id: project,
         id: 'master/CHANGELOG',
-        branch_name: 'master',
+        branch_name: project.default_branch,
         content: 'Added changes',
         commit_message: 'Update CHANGELOG'
       }
@@ -358,7 +358,7 @@ RSpec.describe Projects::BlobController do
 
   describe 'DELETE destroy' do
     let(:user) { create(:user) }
-    let(:project_root_path) { project_tree_path(project, 'master') }
+    let(:project_root_path) { project_tree_path(project, project.default_branch) }
 
     before do
       project.add_maintainer(user)
@@ -372,8 +372,8 @@ RSpec.describe Projects::BlobController do
           namespace_id: project.namespace,
           project_id: project,
           id: 'master/files/whitespace',
-          original_branch: 'master',
-          branch_name: 'master',
+          original_branch: project.default_branch,
+          branch_name: project.default_branch,
           commit_message: 'Delete whitespace'
         }
       end
@@ -409,8 +409,8 @@ RSpec.describe Projects::BlobController do
           namespace_id: project.namespace,
           project_id: project,
           id: 'master/bar/branch-test.txt',
-          original_branch: 'master',
-          branch_name: 'master',
+          original_branch: project.default_branch,
+          branch_name: project.default_branch,
           commit_message: 'Delete whitespace'
         }
       end
@@ -484,8 +484,8 @@ RSpec.describe Projects::BlobController do
       {
         namespace_id: project.namespace,
         project_id: project,
-        id: 'master',
-        branch_name: 'master',
+        id: project.default_branch,
+        branch_name: project.default_branch,
         file_name: 'docs/EXAMPLE_FILE',
         content: 'Added changes',
         commit_message: 'Create CHANGELOG'

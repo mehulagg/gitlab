@@ -14,7 +14,7 @@ RSpec.describe ScheduleMergeRequestAnyApprovalRuleMigration do
     default_options = {
       id: id,
       target_project_id: project.id,
-      target_branch: 'master',
+      target_branch: project.default_branch,
       source_project_id: project.id,
       source_branch: 'mr name',
       title: "mr name#{id}",

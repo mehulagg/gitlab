@@ -46,7 +46,7 @@ RSpec.shared_examples 'Deploy keys with protected branches' do
       end
 
       it "shows all sections in the 'Allowed to push' update dropdown" do
-        create(:protected_branch, :no_one_can_push, project: project, name: 'master')
+        create(:protected_branch, :no_one_can_push, project: project, name: project.default_branch)
 
         visit project_protected_branches_path(project)
 
@@ -76,7 +76,7 @@ RSpec.shared_examples 'Deploy keys with protected branches' do
       end
 
       it "just shows all sections but not deploy keys in the 'Allowed to push' update dropdown" do
-        create(:protected_branch, :no_one_can_push, project: project, name: 'master')
+        create(:protected_branch, :no_one_can_push, project: project, name: project.default_branch)
 
         visit project_protected_branches_path(project)
 

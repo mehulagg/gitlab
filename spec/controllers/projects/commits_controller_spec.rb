@@ -90,7 +90,7 @@ RSpec.describe Projects::CommitsController do
 
         context "when the ref exists with the suffix" do
           before do
-            commit = project.repository.commit('master')
+            commit = project.repository.commit(project.default_branch)
 
             allow_any_instance_of(Repository).to receive(:commit).and_call_original
             allow_any_instance_of(Repository).to receive(:commit).with('master.atom').and_return(commit)
@@ -127,7 +127,7 @@ RSpec.describe Projects::CommitsController do
       end
 
       context "valid branch" do
-        let(:id) { 'master' }
+        let(:id) { project.default_branch }
 
         it { is_expected.to respond_with(:success) }
       end

@@ -38,7 +38,7 @@ RSpec.describe Gitlab::BackgroundMigration::UpdateVulnerabilitiesFromDismissalFe
 
   context 'vulnerability has been dismissed' do
     let!(:vulnerability) { vulnerabilities.create!(vuln_params) }
-    let!(:pipeline) { pipelines.create!(project_id: project.id, ref: 'master', sha: 'adf43c3a', status: :success, user_id: user.id) }
+    let!(:pipeline) { pipelines.create!(project_id: project.id, ref: project.default_branch, sha: 'adf43c3a', status: :success, user_id: user.id) }
 
     let!(:vulnerability_occurrence) do
       vulnerability_occurrences.create!(

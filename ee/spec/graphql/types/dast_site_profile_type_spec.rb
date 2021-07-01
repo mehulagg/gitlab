@@ -174,7 +174,7 @@ RSpec.describe GitlabSchema.types['DastSiteProfile'] do
 
       before do
         create_list(:dast_site_profile, 30, project: project)
-        create_file_in_repo(policies_project, 'master', 'master', Security::OrchestrationPolicyConfiguration::POLICY_PATH, policy_yml)
+        create_file_in_repo(policies_project, project.default_branch, 'master', Security::OrchestrationPolicyConfiguration::POLICY_PATH, policy_yml)
       end
 
       it 'only calls Gitaly twice when multiple profiles are present', :request_store do

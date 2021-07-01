@@ -6,7 +6,7 @@ RSpec.describe AppSec::Dast::ScanConfigs::BuildService do
   let_it_be(:project) { create(:project, :repository) }
   let_it_be(:dast_site_profile) { create(:dast_site_profile, project: project) }
   let_it_be(:dast_scanner_profile) { create(:dast_scanner_profile, project: project, spider_timeout: 5, target_timeout: 20) }
-  let_it_be(:dast_profile) { create(:dast_profile, project: project, dast_site_profile: dast_site_profile, dast_scanner_profile: dast_scanner_profile, branch_name: 'master') }
+  let_it_be(:dast_profile) { create(:dast_profile, project: project, dast_site_profile: dast_site_profile, dast_scanner_profile: dast_scanner_profile, branch_name: project.default_branch) }
 
   let(:dast_website) { dast_site_profile.dast_site.url }
   let(:dast_exclude_urls) { dast_site_profile.excluded_urls.join(',') }

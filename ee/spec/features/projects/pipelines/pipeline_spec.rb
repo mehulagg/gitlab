@@ -15,7 +15,7 @@ RSpec.describe 'Pipeline', :js do
   end
 
   describe 'GET /:project/-/pipelines/:id' do
-    let(:pipeline) { create(:ci_pipeline, :with_job, project: project, ref: 'master', sha: project.commit.id, user: user) }
+    let(:pipeline) { create(:ci_pipeline, :with_job, project: project, ref: project.default_branch, sha: project.commit.id, user: user) }
 
     subject { visit project_pipeline_path(project, pipeline) }
 
@@ -168,7 +168,7 @@ RSpec.describe 'Pipeline', :js do
             create(
               :ci_empty_pipeline,
               project: project,
-              ref: 'master',
+              ref: project.default_branch,
               status: 'failed',
               failure_reason: 'user_not_verified',
               sha: project.commit.id,
@@ -187,7 +187,7 @@ RSpec.describe 'Pipeline', :js do
   end
 
   describe 'GET /:project/-/pipelines/:id/security' do
-    let(:pipeline) { create(:ci_pipeline, project: project, ref: 'master', sha: project.commit.id) }
+    let(:pipeline) { create(:ci_pipeline, project: project, ref: project.default_branch, sha: project.commit.id) }
 
     before do
       stub_licensed_features(sast: true, security_dashboard: true)
@@ -224,7 +224,7 @@ RSpec.describe 'Pipeline', :js do
   end
 
   describe 'GET /:project/-/pipelines/:id/licenses' do
-    let(:pipeline) { create(:ci_pipeline, project: project, ref: 'master', sha: project.commit.id) }
+    let(:pipeline) { create(:ci_pipeline, project: project, ref: project.default_branch, sha: project.commit.id) }
 
     before do
       stub_licensed_features(license_scanning: true)
@@ -315,7 +315,7 @@ RSpec.describe 'Pipeline', :js do
     end
 
     context 'for a branch pipeline' do
-      let(:pipeline) { create(:ci_pipeline, project: project, ref: 'master', sha: project.commit.id) }
+      let(:pipeline) { create(:ci_pipeline, project: project, ref: project.default_branch, sha: project.commit.id) }
 
       it_behaves_like 'full codequality report'
     end

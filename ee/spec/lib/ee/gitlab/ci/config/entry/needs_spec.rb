@@ -55,7 +55,7 @@ RSpec.describe ::Gitlab::Ci::Config::Entry::Needs do
               {
                 project: "project-#{index}",
                 job: 'job-1',
-                ref: 'master',
+                ref: project.default_branch,
                 artifacts: true
               }
             end
@@ -79,7 +79,7 @@ RSpec.describe ::Gitlab::Ci::Config::Entry::Needs do
               {
                 project: "project-#{index}",
                 job: 'job-1',
-                ref: 'master',
+                ref: project.default_branch,
                 artifacts: true
               }
             end + [
@@ -104,7 +104,7 @@ RSpec.describe ::Gitlab::Ci::Config::Entry::Needs do
               {
                 project: 'org/the-project',
                 job: 'build',
-                ref: 'master',
+                ref: project.default_branch,
                 artifacts: true
               }
             ]

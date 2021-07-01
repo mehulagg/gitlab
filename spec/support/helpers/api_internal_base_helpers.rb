@@ -72,7 +72,7 @@ module APIInternalBaseHelpers
     post(
       api("/internal/allowed"),
       params: {
-        ref: 'master',
+        ref: project.default_branch,
         key_id: key.id,
         project: full_path_for(container),
         gl_repository: gl_repository_for(container),

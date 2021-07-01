@@ -118,7 +118,7 @@ RSpec.describe Projects::Ci::LintsController do
         it 'runs validations through Ci::CreatePipelineService' do
           expect(Ci::CreatePipelineService)
             .to receive(:new)
-            .with(project, user, ref: 'master')
+            .with(project, user, ref: project.default_branch)
             .and_call_original
 
           subject

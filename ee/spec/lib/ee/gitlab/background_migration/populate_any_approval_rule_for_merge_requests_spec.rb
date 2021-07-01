@@ -13,7 +13,7 @@ RSpec.describe Gitlab::BackgroundMigration::PopulateAnyApprovalRuleForMergeReque
   def create_merge_request(id, params = {})
     params.merge!(id: id,
                   target_project_id: project.id,
-                  target_branch: 'master',
+                  target_branch: project.default_branch,
                   source_project_id: project.id,
                   source_branch: 'mr name',
                   title: "mr name#{id}")

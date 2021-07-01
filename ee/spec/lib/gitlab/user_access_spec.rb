@@ -16,7 +16,7 @@ RSpec.describe Gitlab::UserAccess do
         project.add_maintainer(user)
         external_service_deny_access(user, project)
 
-        expect(access.can_push_to_branch?('master')).to be_falsey
+        expect(access.can_push_to_branch?(project.default_branch)).to be_falsey
       end
     end
   end

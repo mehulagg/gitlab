@@ -792,7 +792,7 @@ RSpec.describe Projects::JobsController, :clean_gitlab_redis_shared_state do
       project.add_developer(user)
 
       create(:protected_branch, :developers_can_merge,
-             name: 'master', project: project)
+             name: project.default_branch, project: project)
 
       sign_in(user)
     end
@@ -941,7 +941,7 @@ RSpec.describe Projects::JobsController, :clean_gitlab_redis_shared_state do
       project.add_developer(user)
 
       create(:protected_branch, :developers_can_merge,
-             name: 'master', project: project)
+             name: project.default_branch, project: project)
 
       sign_in(user)
 

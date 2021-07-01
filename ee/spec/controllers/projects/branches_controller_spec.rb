@@ -8,7 +8,7 @@ RSpec.describe Projects::BranchesController do
   let(:user) { project.owner }
 
   before do
-    allow(project).to receive(:branches).and_return(['master'])
+    allow(project).to receive(:branches).and_return([project.default_branch])
     controller.instance_variable_set(:@project, project)
 
     sign_in(user)

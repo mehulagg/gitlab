@@ -62,8 +62,8 @@ RSpec.describe Projects::BlobController do
       {
         namespace_id: project.namespace,
         project_id: project,
-        id: 'master',
-        branch_name: 'master',
+        id: project.default_branch,
+        branch_name: project.default_branch,
         file_name: 'docs/EXAMPLE_FILE',
         content: 'Added changes',
         commit_message: 'Create CHANGELOG'
@@ -96,7 +96,7 @@ RSpec.describe Projects::BlobController do
         namespace_id: project.namespace,
         project_id: project,
         id: 'master/CHANGELOG',
-        branch_name: 'master',
+        branch_name: project.default_branch,
         content: 'Added changes',
         commit_message: 'Update CHANGELOG'
       }

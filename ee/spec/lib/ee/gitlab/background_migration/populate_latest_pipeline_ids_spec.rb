@@ -32,14 +32,14 @@ RSpec.describe Gitlab::BackgroundMigration::PopulateLatestPipelineIds do
   let!(:project_3) { projects.create!(namespace_id: namespace.id, name: 'Foo 3') }
   let!(:project_4) { projects.create!(namespace_id: namespace.id, name: 'Foo 4') }
 
-  let!(:project_1_pipeline) { pipelines.create!(project_id: project_1.id, ref: 'master', sha: 'adf43c3a', status: 'success') }
-  let!(:project_1_latest_pipeline) { pipelines.create!(project_id: project_1.id, ref: 'master', sha: 'adf43c3a', status: 'failed') }
-  let!(:project_2_pipeline) { pipelines.create!(project_id: project_2.id, ref: 'master', sha: 'adf43c3a', status: 'success') }
-  let!(:project_2_latest_pipeline) { pipelines.create!(project_id: project_2.id, ref: 'master', sha: 'adf43c3a', status: 'success') }
-  let!(:project_3_pipeline) { pipelines.create!(project_id: project_3.id, ref: 'master', sha: 'adf43c3a', status: 'success') }
-  let!(:project_4_pipeline) { pipelines.create!(project_id: project_4.id, ref: 'master', sha: 'adf43c3a', status: 'canceled') }
-  let!(:project_4_pipeline_with_wrong_status) { pipelines.create!(project_id: project_4.id, ref: 'master', sha: 'adf43c3a', status: 'running') }
-  let!(:project_4_pipeline_without_security_builds) { pipelines.create!(project_id: project_4.id, ref: 'master', sha: 'adf43c3a', status: 'success') }
+  let!(:project_1_pipeline) { pipelines.create!(project_id: project_1.id, ref: project.default_branch, sha: 'adf43c3a', status: 'success') }
+  let!(:project_1_latest_pipeline) { pipelines.create!(project_id: project_1.id, ref: project.default_branch, sha: 'adf43c3a', status: 'failed') }
+  let!(:project_2_pipeline) { pipelines.create!(project_id: project_2.id, ref: project.default_branch, sha: 'adf43c3a', status: 'success') }
+  let!(:project_2_latest_pipeline) { pipelines.create!(project_id: project_2.id, ref: project.default_branch, sha: 'adf43c3a', status: 'success') }
+  let!(:project_3_pipeline) { pipelines.create!(project_id: project_3.id, ref: project.default_branch, sha: 'adf43c3a', status: 'success') }
+  let!(:project_4_pipeline) { pipelines.create!(project_id: project_4.id, ref: project.default_branch, sha: 'adf43c3a', status: 'canceled') }
+  let!(:project_4_pipeline_with_wrong_status) { pipelines.create!(project_id: project_4.id, ref: project.default_branch, sha: 'adf43c3a', status: 'running') }
+  let!(:project_4_pipeline_without_security_builds) { pipelines.create!(project_id: project_4.id, ref: project.default_branch, sha: 'adf43c3a', status: 'success') }
 
   let!(:project_2_stats) { vulnerability_statistics.create!(project_id: project_2.id, letter_grade: letter_grade_a, latest_pipeline_id: project_2_pipeline.id) }
   let!(:project_4_stats) { vulnerability_statistics.create!(project_id: project_4.id, letter_grade: letter_grade_a) }

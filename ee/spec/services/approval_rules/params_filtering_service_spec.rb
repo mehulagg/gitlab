@@ -63,7 +63,7 @@ RSpec.describe ApprovalRules::ParamsFilteringService do
           title: 'Awesome merge_request',
           description: 'please fix',
           source_branch: 'feature',
-          target_branch: 'master',
+          target_branch: project.default_branch,
           force_remove_source_branch: '1',
           approval_rules_attributes: approval_rules_attributes
         }

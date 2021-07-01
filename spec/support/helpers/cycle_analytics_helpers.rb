@@ -67,7 +67,7 @@ module CycleAnalyticsHelpers
   end
 
   def create_commit_referencing_issue(issue, branch_name: generate(:branch))
-    project.repository.add_branch(user, branch_name, 'master')
+    project.repository.add_branch(user, branch_name, project.default_branch)
     create_commit("Commit for ##{issue.iid}", issue.project, user, branch_name)
   end
 
@@ -114,7 +114,7 @@ module CycleAnalyticsHelpers
   def create_merge_request_closing_issue(user, project, issue, message: nil, source_branch: nil, commit_message: 'commit message')
     if !source_branch || project.repository.commit(source_branch).blank?
       source_branch = generate(:branch)
-      project.repository.add_branch(user, source_branch, 'master')
+      project.repository.add_branch(user, source_branch, project.default_branch)
     end
 
     # Cycle analytic specs often test with frozen times, which causes metrics to be
@@ -127,7 +127,7 @@ module CycleAnalyticsHelpers
       title: 'Awesome merge_request',
       description: message || "Fixes #{issue.to_reference}",
       source_branch: source_branch,
-      target_branch: 'master'
+      target_branch: project.default_branch
     }
 
     mr = MergeRequests::CreateService.new(project: project, current_user: user, params: opts).execute
@@ -167,8 +167,8 @@ module CycleAnalyticsHelpers
 
   def dummy_pipeline(project)
     create(:ci_pipeline,
-      sha: project.repository.commit('master').sha,
-      ref: 'master',
+      sha: project.repository.commit(project.default_branch).sha,
+      ref: project.default_branch,
       source: :push,
       project: project,
       protected: false)
@@ -180,7 +180,7 @@ module CycleAnalyticsHelpers
       project: project,
       user: user,
       environment: environment,
-      ref: 'master',
+      ref: project.default_branch,
       tag: false,
       name: 'dummy',
       stage: 'dummy',

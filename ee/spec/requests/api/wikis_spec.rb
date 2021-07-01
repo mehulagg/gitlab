@@ -609,7 +609,7 @@ RSpec.describe API::Wikis do
       {
         file_name: 'dk.png',
         file_path: file_path,
-        branch: 'master',
+        branch: project.default_branch,
         link: {
           url: file_path,
           markdown: "![dk](#{file_path})"

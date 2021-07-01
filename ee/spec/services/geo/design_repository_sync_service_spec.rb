@@ -41,7 +41,7 @@ RSpec.describe Geo::DesignRepositorySyncService do
       allow_any_instance_of(Repository)
         .to receive(:find_remote_root_ref)
         .with('geo')
-        .and_return('master')
+        .and_return(project.default_branch)
 
       allow_any_instance_of(Geo::ProjectHousekeepingService).to receive(:execute)
         .and_return(nil)

@@ -77,7 +77,7 @@ RSpec.describe 'Query.project(fullPath).dastProfiles' do
     it 'includes branch information' do
       subject
 
-      expect(graphql_data_at(:project, :dast_profiles, :nodes, 0, 'branch')).to eq('name' => 'master', 'exists' => true)
+      expect(graphql_data_at(:project, :dast_profiles, :nodes, 0, 'branch')).to eq('name' => project.default_branch, 'exists' => true)
     end
 
     it 'avoids N+1 queries' do

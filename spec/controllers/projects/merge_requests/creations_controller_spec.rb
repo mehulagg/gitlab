@@ -12,7 +12,7 @@ RSpec.describe Projects::MergeRequests::CreationsController do
       project_id: fork_project,
       merge_request: {
         source_branch: 'remove-submodule',
-        target_branch: 'master'
+        target_branch: project.default_branch
       }
     }
   end
@@ -40,7 +40,7 @@ RSpec.describe Projects::MergeRequests::CreationsController do
           namespace_id: fork_project.namespace.to_param,
           project_id: fork_project,
           merge_request: {
-            source_branch: 'master',
+            source_branch: project.default_branch,
             target_branch: 'fix'
           }
         }
@@ -128,7 +128,7 @@ RSpec.describe Projects::MergeRequests::CreationsController do
 
     context 'when both branches are in the same project' do
       it 'disables diff notes' do
-        diff_for_path(old_path: existing_path, new_path: existing_path, merge_request: { source_branch: 'feature', target_branch: 'master' })
+        diff_for_path(old_path: existing_path, new_path: existing_path, merge_request: { source_branch: 'feature', target_branch: project.default_branch })
 
         expect(assigns(:diff_notes_disabled)).to be_truthy
       end
@@ -139,7 +139,7 @@ RSpec.describe Projects::MergeRequests::CreationsController do
           meth.call(diffs)
         end
 
-        diff_for_path(old_path: existing_path, new_path: existing_path, merge_request: { source_branch: 'feature', target_branch: 'master' })
+        diff_for_path(old_path: existing_path, new_path: existing_path, merge_request: { source_branch: 'feature', target_branch: project.default_branch })
       end
     end
 
@@ -152,7 +152,7 @@ RSpec.describe Projects::MergeRequests::CreationsController do
 
       context 'when the path exists in the diff' do
         it 'disables diff notes' do
-          diff_for_path(old_path: existing_path, new_path: existing_path, merge_request: { source_project: other_project, source_branch: 'feature', target_branch: 'master' })
+          diff_for_path(old_path: existing_path, new_path: existing_path, merge_request: { source_project: other_project, source_branch: 'feature', target_branch: project.default_branch })
 
           expect(assigns(:diff_notes_disabled)).to be_truthy
         end
@@ -163,13 +163,13 @@ RSpec.describe Projects::MergeRequests::CreationsController do
             meth.call(diffs)
           end
 
-          diff_for_path(old_path: existing_path, new_path: existing_path, merge_request: { source_project: other_project, source_branch: 'feature', target_branch: 'master' })
+          diff_for_path(old_path: existing_path, new_path: existing_path, merge_request: { source_project: other_project, source_branch: 'feature', target_branch: project.default_branch })
         end
       end
 
       context 'when the path does not exist in the diff' do
         before do
-          diff_for_path(old_path: 'files/ruby/nopen.rb', new_path: 'files/ruby/nopen.rb', merge_request: { source_project: other_project, source_branch: 'feature', target_branch: 'master' })
+          diff_for_path(old_path: 'files/ruby/nopen.rb', new_path: 'files/ruby/nopen.rb', merge_request: { source_project: other_project, source_branch: 'feature', target_branch: project.default_branch })
         end
 
         it 'returns a 404' do
@@ -192,7 +192,7 @@ RSpec.describe Projects::MergeRequests::CreationsController do
             namespace_id: fork_project.namespace,
             project_id: fork_project,
             target_project_id: project.id,
-            ref: 'master'
+            ref: project.default_branch
           }
 
       expect(assigns(:commit)).not_to be_nil
@@ -207,7 +207,7 @@ RSpec.describe Projects::MergeRequests::CreationsController do
             namespace_id: fork_project.namespace,
             project_id: fork_project,
             target_project_id: project.id,
-            ref: 'master'
+            ref: project.default_branch
           }
 
       expect(assigns(:commit)).to be_nil
@@ -224,7 +224,7 @@ RSpec.describe Projects::MergeRequests::CreationsController do
           params: {
           namespace_id: project.namespace,
           project_id: project,
-          ref: 'master'
+          ref: project.default_branch
         }
 
         expect(assigns(:target_project)).to eq(project)
@@ -237,7 +237,7 @@ RSpec.describe Projects::MergeRequests::CreationsController do
             params: {
             namespace_id: fork_project.namespace,
             project_id: fork_project,
-            ref: 'master'
+            ref: project.default_branch
           }
 
           expect(assigns(:target_project)).to eq(project)
@@ -255,7 +255,7 @@ RSpec.describe Projects::MergeRequests::CreationsController do
         merge_request: {
           title: 'Test merge request',
           source_branch: 'remove-submodule',
-          target_branch: 'master'
+          target_branch: project.default_branch
         }
       }
     end

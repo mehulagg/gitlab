@@ -23,7 +23,7 @@ RSpec.describe Resolvers::ScanExecutionPolicyResolver do
     }
   end
 
-  let(:repository) { instance_double(Repository, root_ref: 'master') }
+  let(:repository) { instance_double(Repository, root_ref: project.default_branch) }
 
   describe '#resolve' do
     subject(:resolve_scan_policies) { resolve(described_class, obj: project, ctx: { current_user: user }) }

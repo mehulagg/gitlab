@@ -390,7 +390,7 @@ RSpec.describe Projects::MergeRequestsController do
 
     context 'there is no source project' do
       let(:forked_project) { fork_project_with_submodules(project) }
-      let!(:merge_request) { create(:merge_request, source_project: forked_project, source_branch: 'add-submodule-version-bump', target_branch: 'master', target_project: project) }
+      let!(:merge_request) { create(:merge_request, source_project: forked_project, source_branch: 'add-submodule-version-bump', target_branch: project.default_branch, target_project: project) }
 
       before do
         forked_project.destroy!
@@ -1819,7 +1819,7 @@ RSpec.describe Projects::MergeRequestsController do
       merge_request.update!(description: "Closes #{issue1.to_reference} and #{issue2.to_reference}",
                             author: user,
                             source_branch: 'feature',
-                            target_branch: 'master')
+                            target_branch: project.default_branch)
 
       post :assign_related_issues,
            params: {

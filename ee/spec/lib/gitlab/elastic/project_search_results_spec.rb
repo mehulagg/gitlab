@@ -20,7 +20,7 @@ RSpec.describe Gitlab::Elastic::ProjectSearchResults, :elastic, :clean_gitlab_re
     let(:repository_ref) { '' }
 
     it { expect(results.project).to eq(project) }
-    it { expect(results.repository_ref).to eq('master') }
+    it { expect(results.repository_ref).to eq(project.default_branch) }
     it { expect(results.query).to eq('hello world') }
   end
 

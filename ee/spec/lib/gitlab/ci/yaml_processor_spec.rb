@@ -118,7 +118,7 @@ RSpec.describe Gitlab::Ci::YamlProcessor do
           },
           {
             project: 'project',
-            ref: 'master',
+            ref: project.default_branch,
             job: 'build4'
           }
         ]
@@ -150,7 +150,7 @@ RSpec.describe Gitlab::Ci::YamlProcessor do
                 artifacts: true,
                 job: 'build4',
                 project: 'project',
-                ref: 'master'
+                ref: project.default_branch
               }
             ]
           },
@@ -243,7 +243,7 @@ RSpec.describe Gitlab::Ci::YamlProcessor do
             script: 'rspec',
             needs: [
               { pipeline: '$UPSTREAM_PIPELINE_ID', job: 'test' },
-              { project: 'org/the-project', ref: 'master', job: 'build', artifacts: true }
+              { project: 'org/the-project', ref: project.default_branch, job: 'build', artifacts: true }
             ]
           }
         }
@@ -255,7 +255,7 @@ RSpec.describe Gitlab::Ci::YamlProcessor do
         rspec = subject.builds.last
         expect(rspec.dig(:options, :cross_dependencies)).to eq([
           { pipeline: '$UPSTREAM_PIPELINE_ID', job: 'test', artifacts: true },
-          { project: 'org/the-project', ref: 'master', job: 'build', artifacts: true }
+          { project: 'org/the-project', ref: project.default_branch, job: 'build', artifacts: true }
         ])
       end
     end

@@ -12,7 +12,7 @@ RSpec.describe 'File blob > Code owners', :js do
     project.add_developer(code_owner)
   end
 
-  def visit_blob(path, anchor: nil, ref: 'master')
+  def visit_blob(path, anchor: nil, ref: project.default_branch)
     visit project_blob_path(project, File.join(ref, path), anchor: anchor)
 
     wait_for_requests

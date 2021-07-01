@@ -160,7 +160,7 @@ RSpec.describe Projects::CommitController do
             id: commit.id
           })
 
-      expect(assigns(:branches)).to include('master', 'feature_conflict')
+      expect(assigns(:branches)).to include(project.default_branch, 'feature_conflict')
       expect(assigns(:branches_limit_exceeded)).to be_falsey
       expect(assigns(:tags)).to include('v1.1.0')
       expect(assigns(:tags_limit_exceeded)).to be_falsey
@@ -206,11 +206,11 @@ RSpec.describe Projects::CommitController do
             params: {
               namespace_id: project.namespace,
               project_id: project,
-              start_branch: 'master',
+              start_branch: project.default_branch,
               id: commit.id
             })
 
-        expect(response).to redirect_to project_commits_path(project, 'master')
+        expect(response).to redirect_to project_commits_path(project, project.default_branch)
         expect(flash[:notice]).to eq('The commit has been successfully reverted.')
       end
     end
@@ -221,7 +221,7 @@ RSpec.describe Projects::CommitController do
             params: {
               namespace_id: project.namespace,
               project_id: project,
-              start_branch: 'master',
+              start_branch: project.default_branch,
               id: commit.id
             })
       end
@@ -232,7 +232,7 @@ RSpec.describe Projects::CommitController do
             params: {
               namespace_id: project.namespace,
               project_id: project,
-              start_branch: 'master',
+              start_branch: project.default_branch,
               id: commit.id
             })
 
@@ -263,11 +263,11 @@ RSpec.describe Projects::CommitController do
             params: {
               namespace_id: project.namespace,
               project_id: project,
-              start_branch: 'master',
+              start_branch: project.default_branch,
               id: master_pickable_commit.id
             })
 
-        expect(response).to redirect_to project_commits_path(project, 'master')
+        expect(response).to redirect_to project_commits_path(project, project.default_branch)
         expect(flash[:notice]).to eq('The commit has been successfully cherry-picked into master.')
       end
     end
@@ -278,7 +278,7 @@ RSpec.describe Projects::CommitController do
             params: {
               namespace_id: project.namespace,
               project_id: project,
-              start_branch: 'master',
+              start_branch: project.default_branch,
               id: master_pickable_commit.id
             })
       end
@@ -289,7 +289,7 @@ RSpec.describe Projects::CommitController do
             params: {
               namespace_id: project.namespace,
               project_id: project,
-              start_branch: 'master',
+              start_branch: project.default_branch,
               id: master_pickable_commit.id
             })
 

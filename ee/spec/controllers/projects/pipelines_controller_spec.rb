@@ -5,7 +5,7 @@ require 'spec_helper'
 RSpec.describe Projects::PipelinesController do
   let_it_be(:user) { create(:user) }
   let_it_be(:project) { create(:project, :repository) }
-  let_it_be(:pipeline) { create(:ci_pipeline, project: project, ref: 'master', sha: project.commit.id) }
+  let_it_be(:pipeline) { create(:ci_pipeline, project: project, ref: project.default_branch, sha: project.commit.id) }
 
   before do
     project.add_developer(user)

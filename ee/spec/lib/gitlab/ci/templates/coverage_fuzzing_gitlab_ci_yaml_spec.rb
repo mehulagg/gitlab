@@ -8,9 +8,9 @@ RSpec.describe 'Coverage-Fuzzing.gitlab-ci.yml' do
   describe 'the created pipeline' do
     let_it_be(:project) { create(:project, :custom_repo, files: { 'README.txt' => '' }) }
 
-    let(:default_branch) { 'master' }
+    let(:default_branch) { project.default_branch }
     let(:user) { project.owner }
-    let(:service) { Ci::CreatePipelineService.new(project, user, ref: 'master' ) }
+    let(:service) { Ci::CreatePipelineService.new(project, user, ref: project.default_branch ) }
     let(:pipeline) { service.execute!(:push) }
     let(:build_names) { pipeline.builds.pluck(:name) }
 

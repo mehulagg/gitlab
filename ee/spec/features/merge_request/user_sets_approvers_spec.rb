@@ -62,7 +62,7 @@ RSpec.describe 'Merge request > User sets approvers', :js do
       project.add_developer(other_user)
 
       sign_in(user)
-      visit project_new_merge_request_path(forked_project, merge_request: { target_branch: 'master', source_branch: 'feature' })
+      visit project_new_merge_request_path(forked_project, merge_request: { target_branch: project.default_branch, source_branch: 'feature' })
     end
 
     it 'allows setting other users as approvers but does not allow setting the current user as an approver, and filters non members from approvers list', :sidekiq_might_not_need_inline do
@@ -89,7 +89,7 @@ RSpec.describe 'Merge request > User sets approvers', :js do
         group = create :group
         group.add_developer(other_user)
 
-        visit project_new_merge_request_path(project, merge_request: { target_branch: 'master', source_branch: 'feature' })
+        visit project_new_merge_request_path(project, merge_request: { target_branch: project.default_branch, source_branch: 'feature' })
 
         open_modal(text: 'Add approval rule')
         open_approver_select
@@ -124,7 +124,7 @@ RSpec.describe 'Merge request > User sets approvers', :js do
         group.add_developer(approver)
         create :approval_project_rule, project: project, users: [approver], groups: [group], approvals_required: 1
 
-        visit project_new_merge_request_path(project, merge_request: { target_branch: 'master', source_branch: 'feature' })
+        visit project_new_merge_request_path(project, merge_request: { target_branch: project.default_branch, source_branch: 'feature' })
 
         open_modal
         remove_approver(group.name)

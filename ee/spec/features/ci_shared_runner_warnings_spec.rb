@@ -9,7 +9,7 @@ RSpec.describe 'CI shared runner limits' do
 
   let(:project) { create(:project, :repository, namespace: group, shared_runners_enabled: true) }
   let(:group) { create(:group) }
-  let(:pipeline) { create(:ci_empty_pipeline, project: project, sha: project.commit.sha, ref: 'master') }
+  let(:pipeline) { create(:ci_empty_pipeline, project: project, sha: project.commit.sha, ref: project.default_branch) }
   let!(:job) { create(:ci_build, pipeline: pipeline) }
 
   before do

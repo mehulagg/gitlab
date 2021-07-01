@@ -12,8 +12,8 @@ RSpec.describe 'Repository index', :elastic, :clean_gitlab_redis_shared_state do
     end
 
     it 'indexes initial push' do
-      sha1 = project.repository.create_file(user, '12', '', message: '12', branch_name: 'master')
-      project.repository.create_file(user, '23', '', message: '23', branch_name: 'master')
+      sha1 = project.repository.create_file(user, '12', '', message: '12', branch_name: project.default_branch)
+      project.repository.create_file(user, '23', '', message: '23', branch_name: project.default_branch)
 
       Gitlab::Elastic::Indexer.new(project).run(sha1)
       ensure_elasticsearch_index!

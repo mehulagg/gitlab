@@ -227,7 +227,7 @@ RSpec.describe Gitlab::GitAccess do
 
       context 'when pushing a new branch' do
         it 'accepts the push' do
-          master_sha = project.commit('master').id
+          master_sha = project.commit(project.default_branch).id
 
           expect do
             push_changes("#{Gitlab::Git::BLANK_SHA} #{master_sha} refs/heads/my_branch")

@@ -9,7 +9,7 @@ RSpec.describe Gitlab::Ci::Pipeline::Seed::Build do
   let(:pipeline) { build(:ci_empty_pipeline, project: project, user: user) }
   let(:seed_context) { double(pipeline: pipeline, root_variables: []) }
   let(:stage) { 'dast' }
-  let(:attributes) { { name: 'rspec', ref: 'master', scheduling_type: :stage, stage: stage, options: { dast_configuration: dast_configuration } } }
+  let(:attributes) { { name: 'rspec', ref: project.default_branch, scheduling_type: :stage, stage: stage, options: { dast_configuration: dast_configuration } } }
 
   let(:seed_build) { described_class.new(seed_context, attributes, []) }
 

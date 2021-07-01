@@ -8,7 +8,7 @@ RSpec.describe MergeRequests::BuildService do
   let(:user) { create(:user) }
   let(:description) { nil }
   let(:source_branch) { 'feature' }
-  let(:target_branch) { 'master' }
+  let(:target_branch) { project.default_branch }
   let(:merge_request) { service.execute }
   let(:compare) { double(:compare, commits: commits) }
   let(:commit_1) { double(:commit_1, safe_message: "Initial commit\n\nCreate the app") }

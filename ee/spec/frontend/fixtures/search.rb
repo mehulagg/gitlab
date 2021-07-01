@@ -25,7 +25,7 @@ RSpec.describe SearchController, '(JavaScript fixtures)', type: :controller do
         Gitlab::Search::FoundBlob.new(
           path: 'CHANGELOG',
           basename: 'CHANGELOG',
-          ref: 'master',
+          ref: project.default_branch,
           data: "hello\nworld\nfoo\nbar # this is the highlight\nbaz\nboo\nbat",
           project: project,
           project_id: project.id,
@@ -34,7 +34,7 @@ RSpec.describe SearchController, '(JavaScript fixtures)', type: :controller do
         Gitlab::Search::FoundBlob.new(
           path: 'CONTRIBUTING',
           basename: 'CONTRIBUTING',
-          ref: 'master',
+          ref: project.default_branch,
           data: "hello\nworld\nfoo\nbar # this is the highlight\nbaz\nboo\nbat",
           project: project,
           project_id: project.id,
@@ -43,7 +43,7 @@ RSpec.describe SearchController, '(JavaScript fixtures)', type: :controller do
         Gitlab::Search::FoundBlob.new(
           path: 'README',
           basename: 'README',
-          ref: 'master',
+          ref: project.default_branch,
           data: "foo\nbar # this is the highlight\nbaz\nboo\nbat",
           project: project,
           project_id: project.id,

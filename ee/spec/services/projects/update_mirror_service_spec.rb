@@ -320,7 +320,7 @@ RSpec.describe Projects::UpdateMirrorService do
 
           service.execute
 
-          expect(repository.branch_names).not_to include('master')
+          expect(repository.branch_names).not_to include(project.default_branch)
         end
       end
 
@@ -472,7 +472,7 @@ RSpec.describe Projects::UpdateMirrorService do
 
   def modify_tag(repository, tag_name)
     rugged = rugged_repo(repository)
-    masterrev = repository.find_branch('master').dereferenced_target.id
+    masterrev = repository.find_branch(project.default_branch).dereferenced_target.id
 
     # Modify tag
     rugged.references.update("refs/tags/#{tag_name}", masterrev)
@@ -481,7 +481,7 @@ RSpec.describe Projects::UpdateMirrorService do
 
   def modify_branch(repository, branch_name)
     rugged = rugged_repo(repository)
-    masterrev = repository.find_branch('master').dereferenced_target.id
+    masterrev = repository.find_branch(project.default_branch).dereferenced_target.id
 
     # Modify branch
     rugged.references.update("refs/heads/#{branch_name}", masterrev)

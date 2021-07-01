@@ -14,7 +14,7 @@ RSpec.describe API::Branches do
 
       context 'when protected branch already exists' do
         before do
-          project.repository.add_branch(user, protected_branch.name, 'master')
+          project.repository.add_branch(user, protected_branch.name, project.default_branch)
         end
 
         context "when no one can push" do

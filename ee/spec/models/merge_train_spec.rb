@@ -71,8 +71,8 @@ RSpec.describe MergeTrain do
   describe '.by_id' do
     subject { described_class.by_id }
 
-    let!(:merge_train_1) { create(:merge_train, target_project: project, target_branch: 'master') }
-    let!(:merge_train_2) { create(:merge_train, target_project: project, target_branch: 'master') }
+    let!(:merge_train_1) { create(:merge_train, target_project: project, target_branch: project.default_branch) }
+    let!(:merge_train_2) { create(:merge_train, target_project: project, target_branch: project.default_branch) }
 
     it 'returns merge trains by id ASC' do
       is_expected.to eq([merge_train_1, merge_train_2])
@@ -148,8 +148,8 @@ RSpec.describe MergeTrain do
   end
 
   describe '.first_cars_in_trains' do
-    let!(:first_on_master) { create_merge_request_on_train(target_branch: 'master', source_branch: 'feature-1') }
-    let!(:second_on_master) { create_merge_request_on_train(target_branch: 'master', source_branch: 'feature-2') }
+    let!(:first_on_master) { create_merge_request_on_train(target_branch: project.default_branch, source_branch: 'feature-1') }
+    let!(:second_on_master) { create_merge_request_on_train(target_branch: project.default_branch, source_branch: 'feature-2') }
 
     let!(:first_on_stable) { create_merge_request_on_train(target_branch: 'stable', source_branch: 'feature-1-backport') }
     let!(:second_on_stable) { create_merge_request_on_train(target_branch: 'stable', source_branch: 'feature-2-backport') }
@@ -161,7 +161,7 @@ RSpec.describe MergeTrain do
     end
 
     context 'when first_on_master has already been merged' do
-      let!(:first_on_master) { create_merge_request_on_train(target_branch: 'master', source_branch: 'feature-1', status: :merged) }
+      let!(:first_on_master) { create_merge_request_on_train(target_branch: project.default_branch, source_branch: 'feature-1', status: :merged) }
 
       it 'returns second on master as active MR' do
         is_expected.to contain_exactly(second_on_master.merge_train, first_on_stable.merge_train)
@@ -173,7 +173,7 @@ RSpec.describe MergeTrain do
     subject { described_class.sha_exists_in_history?(target_project_id, target_branch, target_sha, limit: limit) }
 
     let(:target_project_id) { project.id }
-    let(:target_branch) { 'master' }
+    let(:target_branch) { project.default_branch }
     let(:target_sha) { '' }
     let(:limit) { 20 }
 
@@ -647,7 +647,7 @@ RSpec.describe MergeTrain do
     end
   end
 
-  def create_merge_request_on_train(target_project: project, target_branch: 'master', source_project: project, source_branch: 'feature', status: :idle)
+  def create_merge_request_on_train(target_project: project, target_branch: project.default_branch, source_project: project, source_branch: 'feature', status: :idle)
     create(:merge_request,
       :on_train,
       target_branch: target_branch,

@@ -38,7 +38,7 @@ RSpec.describe Gitlab::Ci::Config do
   describe 'with security orchestration policy' do
     let(:source) { 'push' }
 
-    let_it_be(:ref) { 'master' }
+    let_it_be(:ref) { project.default_branch }
     let_it_be_with_refind(:project) { create(:project, :repository) }
 
     let_it_be(:policies_repository) { create(:project, :repository) }

@@ -5,7 +5,7 @@ require 'spec_helper'
 RSpec.describe Commits::CreateService do
   let(:project) { create(:project) }
   let(:user) { create(:user) }
-  let(:branch_name) { 'master' }
+  let(:branch_name) { project.default_branch }
   let(:extra_params) { {} }
 
   before do

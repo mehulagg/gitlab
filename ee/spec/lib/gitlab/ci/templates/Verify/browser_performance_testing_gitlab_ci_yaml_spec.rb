@@ -22,7 +22,7 @@ RSpec.describe 'Verify/Browser-Performance.gitlab-ci.yml' do
     let_it_be(:project) { create(:project, :repository) }
 
     let(:user) { project.owner }
-    let(:default_branch) { 'master' }
+    let(:default_branch) { project.default_branch }
     let(:pipeline_ref) { default_branch }
     let(:service) { Ci::CreatePipelineService.new(project, user, ref: pipeline_ref) }
     let(:pipeline) { service.execute!(:push) }

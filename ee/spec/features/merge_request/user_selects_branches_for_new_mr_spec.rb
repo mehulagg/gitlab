@@ -19,7 +19,7 @@ RSpec.describe 'Merge request > User selects branches for new MR', :js do
 
   context 'create a merge request for the selected branches' do
     before do
-      visit project_new_merge_request_path(project, merge_request: { target_branch: 'master', source_branch: 'feature_conflict' })
+      visit project_new_merge_request_path(project, merge_request: { target_branch: project.default_branch, source_branch: 'feature_conflict' })
     end
 
     context 'saving the MR' do

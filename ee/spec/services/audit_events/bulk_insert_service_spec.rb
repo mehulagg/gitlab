@@ -23,7 +23,7 @@ RSpec.describe AuditEvents::BulkInsertService do
       entity_type: entity_type,
       created_at: timestamp,
       details: {
-        updated_ref: 'master',
+        updated_ref: project.default_branch,
         author_name: user.name,
         from: 'b6bce79c',
         to: 'a7bce79c',

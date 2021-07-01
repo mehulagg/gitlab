@@ -117,7 +117,7 @@ eos
     ).reverse # last commit is recent one
 
     OpenStruct.new(
-      source_branch: 'master',
+      source_branch: project.default_branch,
       target_branch: 'feature',
       changes: changes,
       commits: commits

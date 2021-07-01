@@ -9,7 +9,7 @@ RSpec.describe 'User adds to merge train when pipeline succeeds', :js do
   let!(:merge_request) do
     create(:merge_request, :with_merge_request_pipeline,
       source_project: project, source_branch: 'feature',
-      target_project: project, target_branch: 'master')
+      target_project: project, target_branch: project.default_branch)
   end
 
   let(:pipeline) { merge_request.all_pipelines.first }
@@ -94,7 +94,7 @@ RSpec.describe 'User adds to merge train when pipeline succeeds', :js do
     before do
       create(:merge_request, :on_train,
         source_project: project, source_branch: 'signed-commits',
-        target_project: project, target_branch: 'master')
+        target_project: project, target_branch: project.default_branch)
     end
 
     it 'shows Add to merge train when pipeline succeeds button' do

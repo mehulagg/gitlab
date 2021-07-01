@@ -1334,7 +1334,7 @@ RSpec.describe Project do
     end
 
     context 'when branch is provided' do
-      let(:branch) { 'master' }
+      let(:branch) { project.default_branch }
 
       it 'caches the rules' do
         expect(project).to receive(:user_defined_rules).and_call_original
@@ -2071,20 +2071,20 @@ RSpec.describe Project do
 
       expect { project.update_root_ref('origin', url, auth) }
         .to change { project.default_branch }
-        .from('master')
+        .from(project.default_branch)
         .to('feature')
     end
 
     it 'always updates the default branch even when HEAD does not change' do
-      stub_find_remote_root_ref(project, ref: 'master')
+      stub_find_remote_root_ref(project, ref: project.default_branch)
 
-      expect(project).to receive(:change_head).with('master').and_call_original
+      expect(project).to receive(:change_head).with(project.default_branch).and_call_original
 
       project.update_root_ref('origin', url, auth)
 
       # For good measure, expunge the root ref cache and reload.
       project.repository.expire_all_method_caches
-      expect(project.reload.default_branch).to eq('master')
+      expect(project.reload.default_branch).to eq(project.default_branch)
     end
 
     it 'does not update the default branch when HEAD does not exist' do

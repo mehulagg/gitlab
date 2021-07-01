@@ -22,7 +22,7 @@ RSpec.describe 'Merge request > User sets approval rules', :js do
         sign_in(author)
         visit project_new_merge_request_path(
           forked_project,
-          merge_request: { target_branch: 'master', target_project_id: project.id, source_branch: 'feature' }
+          merge_request: { target_branch: project.default_branch, target_project_id: project.id, source_branch: 'feature' }
         )
         wait_for_requests
       end
@@ -51,7 +51,7 @@ RSpec.describe 'Merge request > User sets approval rules', :js do
         sign_in(author)
         visit project_new_merge_request_path(
           project,
-          merge_request: { target_branch: 'master', source_branch: 'feature' }
+          merge_request: { target_branch: project.default_branch, source_branch: 'feature' }
         )
         wait_for_requests
       end

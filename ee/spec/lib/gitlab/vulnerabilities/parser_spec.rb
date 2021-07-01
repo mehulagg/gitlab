@@ -6,7 +6,7 @@ RSpec.describe Gitlab::Vulnerabilities::Parser do
   describe '.fabricate' do
     let(:params) do
       {
-        target_branch: 'master'
+        target_branch: project.default_branch
       }
     end
 
@@ -25,7 +25,7 @@ RSpec.describe Gitlab::Vulnerabilities::Parser do
         categories.each do |category|
           params[:category] = category
           expect(subject).to be_a(Gitlab::Vulnerabilities::StandardVulnerability)
-          expect(subject.target_branch).to eq('master')
+          expect(subject.target_branch).to eq(project.default_branch)
         end
       end
     end
@@ -35,7 +35,7 @@ RSpec.describe Gitlab::Vulnerabilities::Parser do
         params[:category] = 'container_scanning'
 
         expect(subject).to be_a(Gitlab::Vulnerabilities::ContainerScanningVulnerability)
-        expect(subject.target_branch).to eq('master')
+        expect(subject.target_branch).to eq(project.default_branch)
       end
     end
 

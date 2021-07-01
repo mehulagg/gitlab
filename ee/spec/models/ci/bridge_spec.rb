@@ -14,7 +14,7 @@ RSpec.describe Ci::Bridge do
   end
 
   let(:options) do
-    { trigger: { project: 'my/project', branch: 'master' } }
+    { trigger: { project: 'my/project', branch: project.default_branch } }
   end
 
   it 'belongs to an upstream pipeline' do

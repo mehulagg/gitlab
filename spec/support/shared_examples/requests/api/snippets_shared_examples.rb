@@ -5,7 +5,7 @@ RSpec.shared_examples 'raw snippet files' do
   let(:snippet_id) { snippet.id }
   let(:user)       { snippet.author }
   let(:file_path)  { '%2Egitattributes' }
-  let(:ref)        { 'master' }
+  let(:ref)        { project.default_branch }
 
   subject { get api(api_path, personal_access_token: user_token) }
 

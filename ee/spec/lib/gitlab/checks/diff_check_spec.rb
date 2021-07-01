@@ -89,7 +89,7 @@ RSpec.describe Gitlab::Checks::DiffCheck do
           source_project: project,
           source_branch: 'feature',
           target_project: project,
-          target_branch: 'master'
+          target_branch: project.default_branch
         )
       end
 
@@ -101,7 +101,7 @@ RSpec.describe Gitlab::Checks::DiffCheck do
 
       context 'the MR contains a renamed file matching a file path' do
         let(:diff_check) { described_class.new(change_access) }
-        let(:protected_branch) { build(:protected_branch, name: 'master', project: project) }
+        let(:protected_branch) { build(:protected_branch, name: project.default_branch, project: project) }
 
         before do
           expect(project).to receive(:branch_requires_code_owner_approval?)

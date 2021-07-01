@@ -8,7 +8,7 @@ RSpec.describe Ci::ProcessPipelineService, '#execute' do
   let_it_be(:downstream) { create(:project, :repository) }
 
   let_it_be(:pipeline) do
-    create(:ci_empty_pipeline, ref: 'master', project: project, user: user)
+    create(:ci_empty_pipeline, ref: project.default_branch, project: project, user: user)
   end
 
   let(:service) { described_class.new(pipeline) }

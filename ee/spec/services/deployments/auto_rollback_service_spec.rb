@@ -6,7 +6,7 @@ RSpec.describe Deployments::AutoRollbackService, :clean_gitlab_redis_cache do
   let_it_be(:maintainer) { create(:user) }
   let_it_be(:project, refind: true) { create(:project, :repository) }
   let_it_be(:environment, refind: true) { create(:environment, project: project) }
-  let_it_be(:commits) { project.repository.commits('master', limit: 2) }
+  let_it_be(:commits) { project.repository.commits(project.default_branch, limit: 2) }
 
   let(:service) { described_class.new(project, nil) }
 
@@ -120,7 +120,7 @@ RSpec.describe Deployments::AutoRollbackService, :clean_gitlab_redis_cache do
     end
 
     def create_deployment(commit_id)
-      attributes = { project: project, ref: 'master', user: maintainer }
+      attributes = { project: project, ref: project.default_branch, user: maintainer }
       pipeline = create(:ci_pipeline, :success, sha: commit_id, **attributes)
       build = create(:ci_build, :success, pipeline: pipeline, environment: environment.name, **attributes)
       create(:deployment, :success, environment: environment, deployable: build, sha: commit_id, **attributes)

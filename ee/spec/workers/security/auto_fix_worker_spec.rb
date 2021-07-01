@@ -6,7 +6,7 @@ RSpec.describe Security::AutoFixWorker do
   describe '#perform' do
     subject(:perform) { described_class.new.perform(pipeline.id) }
 
-    let_it_be(:pipeline) { create(:ci_pipeline, ref: 'master') }
+    let_it_be(:pipeline) { create(:ci_pipeline, ref: project.default_branch) }
 
     let(:project) { pipeline.project }
 

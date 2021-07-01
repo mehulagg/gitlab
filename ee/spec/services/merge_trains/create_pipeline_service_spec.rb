@@ -23,7 +23,7 @@ RSpec.describe MergeTrains::CreatePipelineService do
     let!(:merge_request) do
       create(:merge_request, :on_train, train_creator: maintainer,
         source_branch: 'feature', source_project: project,
-        target_branch: 'master', target_project: project,
+        target_branch: project.default_branch, target_project: project,
         merge_status: 'unchecked')
     end
 
@@ -60,7 +60,7 @@ RSpec.describe MergeTrains::CreatePipelineService do
       let!(:merge_request) do
         create(:merge_request,
           source_branch: 'feature', source_project: project,
-          target_branch: 'master', target_project: project)
+          target_branch: project.default_branch, target_project: project)
       end
 
       it_behaves_like 'returns an error' do
@@ -116,7 +116,7 @@ RSpec.describe MergeTrains::CreatePipelineService do
 
           context 'when previous_ref exists' do
             before do
-              project.repository.create_ref('master', previous_ref)
+              project.repository.create_ref(project.default_branch, previous_ref)
             end
 
             it 'creates train ref with the specified ref' do

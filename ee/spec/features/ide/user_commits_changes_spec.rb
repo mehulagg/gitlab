@@ -15,7 +15,7 @@ RSpec.describe 'EE IDE user commits changes', :js do
     project.add_developer(ruby_owner)
 
     create(:protected_branch,
-      name: 'master',
+      name: project.default_branch,
       code_owner_approval_required: true,
       project: project)
 

@@ -14,7 +14,7 @@ RSpec.describe ScheduleUuidPopulationForSecurityFindings2 do
 
   let(:namespace) { namespaces.create!(name: 'gitlab', path: 'gitlab-org') }
   let(:project) { projects.create!(namespace_id: namespace.id, name: 'foo') }
-  let(:ci_pipeline) { ci_pipelines.create!(project_id: project.id, ref: 'master', sha: 'adf43c3a', status: 'success') }
+  let(:ci_pipeline) { ci_pipelines.create!(project_id: project.id, ref: project.default_branch, sha: 'adf43c3a', status: 'success') }
   let(:ci_build) { ci_builds.create!(commit_id: ci_pipeline.id, retried: false, type: 'Ci::Build') }
   let(:scanner) { scanners.create!(project_id: project.id, external_id: 'bandit', name: 'Bandit') }
   let(:security_scan_1) { security_scans.create!(build_id: ci_build.id, scan_type: 0) }

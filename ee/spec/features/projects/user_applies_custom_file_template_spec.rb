@@ -19,7 +19,7 @@ RSpec.describe 'Project', :js do
       stub_licensed_features(custom_file_templates: true)
       stub_ee_application_setting(file_template_project: template_project)
 
-      visit project_new_blob_path(project, 'master', file_name: 'LICENSE.txt')
+      visit project_new_blob_path(project, project.default_branch, file_name: 'LICENSE.txt')
 
       select_template_type('LICENSE')
       select_template('license', 'custom')
@@ -33,7 +33,7 @@ RSpec.describe 'Project', :js do
       stub_licensed_features(custom_file_templates_for_namespace: true)
       group.update_columns(file_template_project_id: template_project.id)
 
-      visit project_new_blob_path(project, 'master', file_name: 'LICENSE.txt')
+      visit project_new_blob_path(project, project.default_branch, file_name: 'LICENSE.txt')
 
       select_template_type('LICENSE')
       select_template('license', 'custom')

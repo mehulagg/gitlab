@@ -12,7 +12,7 @@ RSpec.describe MergeRequests::CreateService do
       title: 'Awesome merge_request',
       description: 'please fix',
       source_branch: 'feature',
-      target_branch: 'master',
+      target_branch: project.default_branch,
       force_remove_source_branch: '1'
     }
   end
@@ -55,7 +55,7 @@ RSpec.describe MergeRequests::CreateService do
   end
 
   describe '#execute with blocking merge requests', :clean_gitlab_redis_shared_state do
-    let(:opts) { { title: 'Blocked MR', source_branch: 'feature', target_branch: 'master' } }
+    let(:opts) { { title: 'Blocked MR', source_branch: 'feature', target_branch: project.default_branch } }
     let(:user) { project.owner }
 
     it 'delegates to MergeRequests::UpdateBlocksService' do

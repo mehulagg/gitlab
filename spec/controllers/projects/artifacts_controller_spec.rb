@@ -448,10 +448,10 @@ RSpec.describe Projects::ArtifactsController do
 
       context 'with regular branch' do
         before do
-          pipeline.update!(ref: 'master',
-                          sha: project.commit('master').sha)
+          pipeline.update!(ref: project.default_branch,
+                          sha: project.commit(project.default_branch).sha)
 
-          get :latest_succeeded, params: params_from_ref('master')
+          get :latest_succeeded, params: params_from_ref(project.default_branch)
         end
 
         it_behaves_like 'redirect to the job'
@@ -485,7 +485,7 @@ RSpec.describe Projects::ArtifactsController do
 
       context 'with a failed pipeline on an updated master' do
         before do
-          create_file_in_repo(project, 'master', 'master', 'test.txt', 'This is test')
+          create_file_in_repo(project, project.default_branch, 'master', 'test.txt', 'This is test')
 
           create(:ci_pipeline,
             project: project,

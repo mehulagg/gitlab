@@ -207,7 +207,7 @@ RSpec.describe API::Commits do
 
     let(:commit_id) { 'b83d6e391c22777fca1ed3012fce84f633d7fed0' }
     let(:commit)    { project.commit(commit_id) }
-    let(:branch)    { 'master' }
+    let(:branch)    { project.default_branch }
     let(:route)     { "/projects/#{project_id}/repository/commits/#{commit_id}/revert" }
 
     subject(:request) { post api(route, user), params: { branch: branch } }

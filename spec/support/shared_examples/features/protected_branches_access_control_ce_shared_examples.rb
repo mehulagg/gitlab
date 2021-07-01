@@ -5,7 +5,7 @@ RSpec.shared_examples "protected branches > access control > CE" do
     it "allows creating protected branches that #{access_type_name} can push to" do
       visit project_protected_branches_path(project)
 
-      set_protected_branch_name('master')
+      set_protected_branch_name(project.default_branch)
 
       find(".js-allowed-to-merge").click
       within('.rspec-allowed-to-merge-dropdown') do
@@ -31,7 +31,7 @@ RSpec.shared_examples "protected branches > access control > CE" do
     it "allows updating protected branches so that #{access_type_name} can push to them" do
       visit project_protected_branches_path(project)
 
-      set_protected_branch_name('master')
+      set_protected_branch_name(project.default_branch)
 
       find(".js-allowed-to-merge").click
       within('.rspec-allowed-to-merge-dropdown') do
@@ -70,7 +70,7 @@ RSpec.shared_examples "protected branches > access control > CE" do
     it "allows creating protected branches that #{access_type_name} can merge to" do
       visit project_protected_branches_path(project)
 
-      set_protected_branch_name('master')
+      set_protected_branch_name(project.default_branch)
 
       within('.js-new-protected-branch') do
         allowed_to_merge_button = find(".js-allowed-to-merge")
@@ -96,7 +96,7 @@ RSpec.shared_examples "protected branches > access control > CE" do
     it "allows updating protected branches so that #{access_type_name} can merge to them" do
       visit project_protected_branches_path(project)
 
-      set_protected_branch_name('master')
+      set_protected_branch_name(project.default_branch)
 
       find(".js-allowed-to-merge").click
       within('.rspec-allowed-to-merge-dropdown') do

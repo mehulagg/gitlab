@@ -12,7 +12,7 @@ RSpec.describe MergeRequests::ResetApprovalsService do
   let(:merge_request) do
     create(:merge_request,
       source_project: project,
-      source_branch: 'master',
+      source_branch: project.default_branch,
       target_branch: 'feature',
       target_project: project,
       merge_when_pipeline_succeeds: true,

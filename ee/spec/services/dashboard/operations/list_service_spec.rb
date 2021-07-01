@@ -50,7 +50,7 @@ RSpec.describe Dashboard::Operations::ListService do
       let(:staging) { create(:environment, project: project, name: 'staging') }
 
       let(:production_deployment) do
-        create(:deployment, :success, project: project, environment: production, ref: 'master')
+        create(:deployment, :success, project: project, environment: production, ref: project.default_branch)
       end
 
       let(:staging_deployment) do

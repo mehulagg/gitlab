@@ -9,7 +9,7 @@ RSpec.describe Integrations::Github::StatusNotifier do
   subject { described_class.new(access_token, repo_path) }
 
   describe '#notify' do
-    let(:ref) { 'master' }
+    let(:ref) { project.default_branch }
     let(:state) { 'pending' }
     let(:params) { { context: 'Gitlab' } }
     let(:github_status_api) { "https://api.github.com/repos/#{repo_path}/statuses/#{ref}" }

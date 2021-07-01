@@ -6,7 +6,7 @@ RSpec.describe 'DAST.gitlab-ci.yml' do
   subject(:template) { Gitlab::Template::GitlabCiYmlTemplate.find('DAST') }
 
   describe 'the created pipeline' do
-    let(:default_branch) { 'master' }
+    let(:default_branch) { project.default_branch }
     let(:pipeline_branch) { default_branch }
     let(:project) { create(:project, :custom_repo, files: { 'README.txt' => '' }) }
     let(:user) { project.owner }

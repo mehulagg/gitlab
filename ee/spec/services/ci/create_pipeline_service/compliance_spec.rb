@@ -28,7 +28,7 @@ RSpec.describe Ci::CreatePipelineService do
     EOY
   end
 
-  let(:service) { described_class.new(project, user, { ref: 'master' }) }
+  let(:service) { described_class.new(project, user, { ref: project.default_branch }) }
 
   before do
     stub_feature_flags(ff_evaluate_group_level_compliance_pipeline: true)

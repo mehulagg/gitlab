@@ -22,7 +22,7 @@ RSpec.describe Projects::MergeRequests::CreationsController do
         merge_request: {
           title: 'Test',
           source_branch: 'feature_conflict',
-          target_branch: 'master',
+          target_branch: project.default_branch,
           author: user
         }.merge(overrides)
       }

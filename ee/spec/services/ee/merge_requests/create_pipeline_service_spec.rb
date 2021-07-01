@@ -17,7 +17,7 @@ RSpec.describe MergeRequests::CreatePipelineService, :clean_gitlab_redis_shared_
     let(:source_project) { project }
     let(:source_branch) { 'feature' }
     let(:target_project) { project }
-    let(:target_branch) { 'master' }
+    let(:target_branch) { project.default_branch }
 
     let(:merge_request) do
       create(:merge_request,

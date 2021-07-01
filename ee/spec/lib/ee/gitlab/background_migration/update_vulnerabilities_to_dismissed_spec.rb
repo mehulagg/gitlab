@@ -34,7 +34,7 @@ RSpec.describe Gitlab::BackgroundMigration::UpdateVulnerabilitiesToDismissed, :m
 
   context 'vulnerability_occurrence has an associated vulnerability' do
     let!(:vulnerability) { vulnerabilities.create!(vuln_params) }
-    let!(:pipeline) { pipelines.create!(id: 234, project_id: project.id, ref: 'master', sha: 'adf43c3a', status: :success, user_id: user.id) }
+    let!(:pipeline) { pipelines.create!(id: 234, project_id: project.id, ref: project.default_branch, sha: 'adf43c3a', status: :success, user_id: user.id) }
 
     let!(:vulnerability_occurrence) do
       vulnerability_occurrences.create!(

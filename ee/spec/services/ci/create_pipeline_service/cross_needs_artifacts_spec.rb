@@ -145,7 +145,7 @@ RSpec.describe Ci::CreatePipelineService do
       deps = test_job.options['cross_dependencies']
       result = {
         job: 'dependency',
-        ref: 'master',
+        ref: project.default_branch,
         project: other_project.full_path,
         artifacts: true
       }

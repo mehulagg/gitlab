@@ -30,7 +30,7 @@ RSpec.describe API::Deployments do
           params: {
             environment: environment.name,
             sha: 'b83d6e391c22777fca1ed3012fce84f633d7fed0',
-            ref: 'master',
+            ref: project.default_branch,
             tag: false,
             status: 'success'
           }
@@ -47,7 +47,7 @@ RSpec.describe API::Deployments do
           params: {
             environment: environment.name,
             sha: 'b83d6e391c22777fca1ed3012fce84f633d7fed0',
-            ref: 'master',
+            ref: project.default_branch,
             tag: false,
             status: 'success'
           }
@@ -75,7 +75,7 @@ RSpec.describe API::Deployments do
           params: {
             environment: environment.name,
             sha: 'b83d6e391c22777fca1ed3012fce84f633d7fed0',
-            ref: 'master',
+            ref: project.default_branch,
             tag: false,
             status: 'success'
           }
@@ -92,7 +92,7 @@ RSpec.describe API::Deployments do
           params: {
             environment: environment.name,
             sha: 'b83d6e391c22777fca1ed3012fce84f633d7fed0',
-            ref: 'master',
+            ref: project.default_branch,
             tag: false,
             status: 'success'
           }

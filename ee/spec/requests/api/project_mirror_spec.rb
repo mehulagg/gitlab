@@ -59,7 +59,7 @@ RSpec.describe API::ProjectMirror do
                   repo: { full_name: 'the-repo' }
                 },
                 base: {
-                  ref: 'master',
+                  ref: project.default_branch,
                   sha: 'a09386439ca39abe575675ffd4b89ae824fec22f',
                   repo: { full_name: 'the-repo' }
                 }

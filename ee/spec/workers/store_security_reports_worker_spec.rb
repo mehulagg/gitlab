@@ -44,7 +44,7 @@ RSpec.describe StoreSecurityReportsWorker do
   describe '#perform' do
     let(:group)   { create(:group) }
     let(:project) { create(:project, namespace: group) }
-    let(:pipeline) { create(:ci_pipeline, ref: 'master', project: project) }
+    let(:pipeline) { create(:ci_pipeline, ref: project.default_branch, project: project) }
 
     before do
       allow(Ci::Pipeline).to receive(:find).with(pipeline.id) { pipeline }

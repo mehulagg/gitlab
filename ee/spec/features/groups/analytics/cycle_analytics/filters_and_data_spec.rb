@@ -39,7 +39,7 @@ RSpec.describe 'Group value stream analytics filters and data', :js do
   def create_merge_request(id, extra_params = {})
     params = {
       id: id,
-      target_branch: 'master',
+      target_branch: project.default_branch,
       source_project: project2,
       source_branch: "feature-branch-#{id}",
       title: "mr name#{id}",

@@ -6,7 +6,7 @@ RSpec.describe Projects::Security::ScannedResourcesController do
   let_it_be(:user) { create(:user) }
   let_it_be(:project) { create(:project, :repository) }
 
-  let(:pipeline) { create(:ci_pipeline, project: project, ref: 'master', sha: project.commit.id) }
+  let(:pipeline) { create(:ci_pipeline, project: project, ref: project.default_branch, sha: project.commit.id) }
   let(:action_params) { { project_id: project, namespace_id: project.namespace, pipeline_id: pipeline } }
 
   before do
@@ -45,7 +45,7 @@ RSpec.describe Projects::Security::ScannedResourcesController do
           create(:ci_pipeline,
             source: :ondemand_dast_scan,
             project: project,
-            ref: 'master',
+            ref: project.default_branch,
             sha: project.commit.id)
         end
 

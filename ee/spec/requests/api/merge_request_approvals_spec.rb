@@ -201,7 +201,7 @@ RSpec.describe API::MergeRequestApprovals do
     end
 
     context 'when target_branch is specified' do
-      let(:protected_branch) { create(:protected_branch, project: project, name: 'master') }
+      let(:protected_branch) { create(:protected_branch, project: project, name: project.default_branch) }
       let(:another_protected_branch) { create(:protected_branch, project: project, name: 'test') }
 
       let(:project_rule) do

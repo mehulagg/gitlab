@@ -100,7 +100,7 @@ RSpec.describe AutoMerge::MergeTrainService do
     let(:merge_request) do
       create(:merge_request, :on_train,
         source_project: project, source_branch: 'feature',
-        target_project: project, target_branch: 'master')
+        target_project: project, target_branch: project.default_branch)
     end
 
     it 'calls RefreshWorker' do
@@ -131,7 +131,7 @@ RSpec.describe AutoMerge::MergeTrainService do
     let!(:merge_request) do
       create(:merge_request, :on_train,
         source_project: project, source_branch: 'feature',
-        target_project: project, target_branch: 'master')
+        target_project: project, target_branch: project.default_branch)
     end
 
     it 'cancels auto merge on the merge request' do
@@ -189,7 +189,7 @@ RSpec.describe AutoMerge::MergeTrainService do
       let!(:merge_request_2) do
         create(:merge_request, :on_train,
           source_project: project, source_branch: 'signed-commits',
-          target_project: project, target_branch: 'master',
+          target_project: project, target_branch: project.default_branch,
           status: status)
       end
 
@@ -250,7 +250,7 @@ RSpec.describe AutoMerge::MergeTrainService do
     let!(:merge_request) do
       create(:merge_request, :on_train,
         source_project: project, source_branch: 'feature',
-        target_project: project, target_branch: 'master')
+        target_project: project, target_branch: project.default_branch)
     end
 
     let(:args) { {} }
@@ -279,7 +279,7 @@ RSpec.describe AutoMerge::MergeTrainService do
       let!(:merge_request_2) do
         create(:merge_request, :on_train,
           source_project: project, source_branch: 'signed-commits',
-          target_project: project, target_branch: 'master',
+          target_project: project, target_branch: project.default_branch,
           status: MergeTrain.state_machines[:status].states[:fresh].value)
       end
 

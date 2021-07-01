@@ -59,7 +59,7 @@ RSpec.describe ::Gitlab::BackgroundMigration::PopulateResolvedOnDefaultBranchCol
     describe '#perform' do
       let(:user) { users.create!(name: 'John Doe', email: 'test@example.com', projects_limit: 5) }
       let(:project) { projects.create!(namespace_id: namespace.id) }
-      let(:pipeline) { pipelines.create!(project_id: project.id, ref: 'master', sha: 'adf43c3a', status: 'success') }
+      let(:pipeline) { pipelines.create!(project_id: project.id, ref: project.default_branch, sha: 'adf43c3a', status: 'success') }
       let(:utility_object) { described_class.new(project.id) }
       let(:scanner) { scanners.create!(project_id: project.id, external_id: 'bandit', name: 'Bandit') }
       let(:sha_attribute) { Gitlab::Database::ShaAttribute.new }

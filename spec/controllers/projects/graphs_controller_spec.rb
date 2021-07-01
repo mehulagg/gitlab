@@ -13,7 +13,7 @@ RSpec.describe Projects::GraphsController do
 
   describe 'GET languages' do
     it "redirects_to action charts" do
-      get(:commits, params: { namespace_id: project.namespace.path, project_id: project.path, id: 'master' })
+      get(:commits, params: { namespace_id: project.namespace.path, project_id: project.path, id: project.default_branch })
 
       expect(response).to redirect_to action: :charts
     end
@@ -21,7 +21,7 @@ RSpec.describe Projects::GraphsController do
 
   describe 'GET commits' do
     it "redirects_to action charts" do
-      get(:commits, params: { namespace_id: project.namespace.path, project_id: project.path, id: 'master' })
+      get(:commits, params: { namespace_id: project.namespace.path, project_id: project.path, id: project.default_branch })
 
       expect(response).to redirect_to action: :charts
     end
@@ -36,7 +36,7 @@ RSpec.describe Projects::GraphsController do
       end
 
       it 'renders charts with 200 status code' do
-        get(:charts, params: { namespace_id: project.namespace.path, project_id: project.path, id: 'master' })
+        get(:charts, params: { namespace_id: project.namespace.path, project_id: project.path, id: project.default_branch })
 
         expect(response).to have_gitlab_http_status(:ok)
         expect(response).to render_template(:charts)
@@ -45,13 +45,13 @@ RSpec.describe Projects::GraphsController do
       context 'when anonymous users can read build report results' do
         it 'sets the daily coverage options' do
           freeze_time do
-            get(:charts, params: { namespace_id: project.namespace.path, project_id: project.path, id: 'master' })
+            get(:charts, params: { namespace_id: project.namespace.path, project_id: project.path, id: project.default_branch })
 
             expect(assigns[:daily_coverage_options]).to eq(
               base_params: {
                 start_date: Date.current - 90.days,
                 end_date: Date.current,
-                ref_path: project.repository.expand_ref('master'),
+                ref_path: project.repository.expand_ref(project.default_branch),
                 param_type: 'coverage'
               },
               download_path: namespace_project_ci_daily_build_group_report_results_path(
@@ -73,7 +73,7 @@ RSpec.describe Projects::GraphsController do
         before do
           project.update_column(:public_builds, false)
 
-          get(:charts, params: { namespace_id: project.namespace.path, project_id: project.path, id: 'master' })
+          get(:charts, params: { namespace_id: project.namespace.path, project_id: project.path, id: project.default_branch })
         end
 
         it 'does not set daily coverage options' do
@@ -86,7 +86,7 @@ RSpec.describe Projects::GraphsController do
           sign_in(user)
         end
 
-        let(:request_params) { { namespace_id: project.namespace.path, project_id: project.path, id: 'master' } }
+        let(:request_params) { { namespace_id: project.namespace.path, project_id: project.path, id: project.default_branch } }
         let(:target_id) { 'p_analytics_repo' }
       end
     end
@@ -96,7 +96,7 @@ RSpec.describe Projects::GraphsController do
       let!(:repository_language) { create(:repository_language, project: project) }
 
       it 'sets the languages properly' do
-        get(:charts, params: { namespace_id: project.namespace.path, project_id: project.path, id: 'master' })
+        get(:charts, params: { namespace_id: project.namespace.path, project_id: project.path, id: project.default_branch })
 
         expect(assigns[:languages]).to eq(
           [value: repository_language.share,

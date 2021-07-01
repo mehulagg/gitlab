@@ -10,7 +10,7 @@ RSpec.describe API::Ci::Runner do
 
     describe 'POST /api/v4/jobs/request' do
       context 'secrets management' do
-        let(:pipeline) { create(:ci_pipeline, project: project, ref: 'master') }
+        let(:pipeline) { create(:ci_pipeline, project: project, ref: project.default_branch) }
         let(:valid_secrets) do
           {
             DATABASE_PASSWORD: {

@@ -18,21 +18,21 @@ RSpec.describe MergeTrains::CheckStatusService do
     subject { service.execute(target_project, target_branch, newrev) }
 
     let(:target_project) { project }
-    let(:target_branch) { 'master' }
+    let(:target_branch) { project.default_branch }
     let(:newrev) { Digest::SHA1.hexdigest 'test' }
 
     context 'when there is at least one merge request on the train' do
       let!(:merged_merge_request) do
         create(:merge_request, :on_train, train_creator: maintainer,
           source_branch: 'feature', source_project: project,
-          target_branch: 'master', target_project: project,
+          target_branch: project.default_branch, target_project: project,
           merge_status: 'unchecked', status: MergeTrain.state_machines[:status].states[:merged].value)
       end
 
       let!(:active_merge_request) do
         create(:merge_request, :on_train, train_creator: maintainer,
           source_branch: 'improve/awesome', source_project: project,
-          target_branch: 'master', target_project: project,
+          target_branch: project.default_branch, target_project: project,
           merge_status: 'unchecked')
       end
 

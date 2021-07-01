@@ -37,7 +37,7 @@ RSpec.describe AuditEvents::RepositoryPushAuditEventService do
 
     context 'when branch push' do
       let(:target_ref) { 'refs/heads/master' }
-      let(:updated_ref) { 'master' }
+      let(:updated_ref) { project.default_branch }
 
       it 'returns audit event attributes' do
         travel_to(timestamp) do

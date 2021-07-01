@@ -184,7 +184,7 @@ RSpec.describe 'Global elastic search', :elastic, :sidekiq_inline do
         'thing.txt',
         ' function application.js ',
         message: 'supercalifragilisticexpialidocious',
-        branch_name: 'master')
+        branch_name: project.default_branch)
 
       project_2.repository.index_commits_and_blobs
 

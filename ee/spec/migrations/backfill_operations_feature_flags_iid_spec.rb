@@ -76,8 +76,8 @@ RSpec.describe BackfillOperationsFeatureFlagsIid do
     project_a = setup
     project_b = setup
     flag = flags.create!(project_id: project_a.id, active: true, name: 'test_flag')
-    merge_request_a = merge_requests.create!(target_project_id: project_b.id, target_branch: 'master', source_branch: 'feature-1', title: 'merge request', iid: 1)
-    merge_request_b = merge_requests.create!(target_project_id: project_b.id, target_branch: 'master', source_branch: 'feature-2', title: 'merge request', iid: 2)
+    merge_request_a = merge_requests.create!(target_project_id: project_b.id, target_branch: project.default_branch, source_branch: 'feature-1', title: 'merge request', iid: 1)
+    merge_request_b = merge_requests.create!(target_project_id: project_b.id, target_branch: project.default_branch, source_branch: 'feature-2', title: 'merge request', iid: 2)
     internal_id = internal_ids.create!(project_id: project_b.id, usage: 1, last_value: merge_request_b.iid)
 
     disable_migrations_output { migrate! }

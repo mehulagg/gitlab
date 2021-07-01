@@ -18,7 +18,7 @@ RSpec.describe MergeRequests::RefreshService do
     create(:merge_request,
       source_project: project,
       source_branch: source_branch,
-      target_branch: 'master',
+      target_branch: project.default_branch,
       target_project: project)
   end
 
@@ -34,7 +34,7 @@ RSpec.describe MergeRequests::RefreshService do
     create(:merge_request,
       source_project: forked_project,
       source_branch: source_branch,
-      target_branch: 'master',
+      target_branch: project.default_branch,
       target_project: project)
   end
 
@@ -75,7 +75,7 @@ RSpec.describe MergeRequests::RefreshService do
       subject { service.execute(oldrev, newrev, "refs/heads/master") }
 
       let(:enable_code_owner) { true }
-      let!(:protected_branch) { create(:protected_branch, name: 'master', project: project, code_owner_approval_required: true) }
+      let!(:protected_branch) { create(:protected_branch, name: project.default_branch, project: project, code_owner_approval_required: true) }
       let(:newrev) { TestEnv::BRANCH_SHA['with-codeowners'] }
 
       before do
@@ -109,7 +109,7 @@ RSpec.describe MergeRequests::RefreshService do
                    :on_train,
                    source_project: project,
                    source_branch: source_branch,
-                   target_branch: 'master',
+                   target_branch: project.default_branch,
                    target_project: project)
               end
 
@@ -308,7 +308,7 @@ RSpec.describe MergeRequests::RefreshService do
       let(:merge_request) do
         create(:merge_request,
           source_project: project,
-          source_branch: 'master',
+          source_branch: project.default_branch,
           target_branch: 'feature',
           target_project: project,
           merge_when_pipeline_succeeds: true,
@@ -319,7 +319,7 @@ RSpec.describe MergeRequests::RefreshService do
       let(:forked_merge_request) do
         create(:merge_request,
           source_project: forked_project,
-          source_branch: 'master',
+          source_branch: project.default_branch,
           target_branch: 'feature',
           target_project: project)
       end
@@ -539,7 +539,7 @@ RSpec.describe MergeRequests::RefreshService do
              author: author,
              source_project: project,
              source_branch: 'feature',
-             target_branch: 'master',
+             target_branch: project.default_branch,
              target_project: project,
              auto_merge_enabled: true,
              merge_user: user)
@@ -549,7 +549,7 @@ RSpec.describe MergeRequests::RefreshService do
       project
         .repository
         .create_file(user, 'test1.txt', 'Test data',
-                     message: 'Test commit', branch_name: 'master')
+                     message: 'Test commit', branch_name: project.default_branch)
     end
 
     let_it_be(:oldrev) do

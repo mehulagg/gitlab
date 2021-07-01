@@ -27,7 +27,7 @@ RSpec.describe Projects::FindFileController do
     end
 
     context "valid branch" do
-      let(:id) { 'master' }
+      let(:id) { project.default_branch }
 
       it { is_expected.to respond_with(:success) }
     end
@@ -51,7 +51,7 @@ RSpec.describe Projects::FindFileController do
     end
 
     context "valid branch" do
-      let(:id) { 'master' }
+      let(:id) { project.default_branch }
 
       it 'returns an array of file path list' do
         go

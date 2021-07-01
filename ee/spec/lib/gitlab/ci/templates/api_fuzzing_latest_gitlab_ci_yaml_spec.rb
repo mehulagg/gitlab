@@ -31,7 +31,7 @@ RSpec.describe 'API-Fuzzing.latest.gitlab-ci.yml' do
   describe 'the created pipeline' do
     let_it_be(:project) { create(:project, :custom_repo, files: { 'README.txt' => '' }) }
 
-    let(:default_branch) { 'master' }
+    let(:default_branch) { project.default_branch }
     let(:pipeline_branch) { default_branch }
     let(:user) { project.owner }
     let(:service) { Ci::CreatePipelineService.new(project, user, ref: pipeline_branch) }

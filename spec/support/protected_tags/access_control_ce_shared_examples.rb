@@ -26,7 +26,7 @@ RSpec.shared_examples "protected tags > access control > CE" do
     it "allows updating protected tags so that #{access_type_name} can create them" do
       visit project_protected_tags_path(project)
 
-      set_protected_tag_name('master')
+      set_protected_tag_name(project.default_branch)
 
       click_on "Protect"
 

@@ -6,7 +6,7 @@ RSpec.describe Projects::Security::ScannedResourcesController, type: :request do
   describe 'GET #index' do
     let_it_be(:user) { create(:user) }
     let_it_be(:project) { create(:project, :repository) }
-    let_it_be(:pipeline) { create(:ci_pipeline, project: project, ref: 'master', sha: project.commit.id) }
+    let_it_be(:pipeline) { create(:ci_pipeline, project: project, ref: project.default_branch, sha: project.commit.id) }
     let_it_be(:pipeline_without_scan) { create(:ci_pipeline, project: project) }
     let_it_be(:pipeline_on_another_project) { create(:ci_pipeline) }
     let_it_be(:pipeline_id) { pipeline.id }

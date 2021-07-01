@@ -23,7 +23,7 @@ module MetricsDashboardHelpers
     project.repository.delete_file(
       user,
       dashboard_path,
-      branch_name: 'master',
+      branch_name: project.default_branch,
       message: 'Delete dashboard'
     )
 

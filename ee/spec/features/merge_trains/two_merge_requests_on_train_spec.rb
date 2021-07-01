@@ -12,14 +12,14 @@ RSpec.describe 'Two merge requests on a merge train' do
   let(:merge_request_1) do
     create(:merge_request,
       source_branch: 'feature', source_project: project,
-      target_branch: 'master', target_project: project,
+      target_branch: project.default_branch, target_project: project,
       merge_status: 'unchecked')
   end
 
   let(:merge_request_2) do
     create(:merge_request,
       source_branch: 'signed-commits', source_project: project,
-      target_branch: 'master', target_project: project,
+      target_branch: project.default_branch, target_project: project,
       merge_status: 'unchecked')
   end
 
@@ -270,7 +270,7 @@ RSpec.describe 'Two merge requests on a merge train' do
     end
 
     def push_commit_to_master
-      create_file_in_repo(project, 'master', 'master', 'test.txt', 'This is test')
+      create_file_in_repo(project, project.default_branch, 'master', 'test.txt', 'This is test')
       changes = Base64.encode64("123456 789012 refs/heads/master")
       key_id = create(:key, user: project.owner).shell_id
       PostReceive.new.perform("project-#{project.id}", key_id, changes)

@@ -22,7 +22,7 @@ RSpec.describe MergeTrains::RefreshMergeRequestService do
     let!(:merge_request) do
       create(:merge_request, :on_train, train_creator: maintainer,
         source_branch: 'feature', source_project: project,
-        target_branch: 'master', target_project: project)
+        target_branch: project.default_branch, target_project: project)
     end
 
     shared_examples_for 'drops the merge request from the merge train' do

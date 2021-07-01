@@ -10,7 +10,7 @@ RSpec.describe Security::OrchestrationPolicyConfiguration do
   end
 
   let(:default_branch) { security_policy_management_project.default_branch }
-  let(:repository) { instance_double(Repository, root_ref: 'master') }
+  let(:repository) { instance_double(Repository, root_ref: project.default_branch) }
 
   describe 'associations' do
     it { is_expected.to belong_to(:project).inverse_of(:security_orchestration_policy_configuration) }

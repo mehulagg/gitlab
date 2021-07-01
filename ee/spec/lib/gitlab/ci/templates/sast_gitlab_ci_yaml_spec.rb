@@ -6,11 +6,11 @@ RSpec.describe 'SAST.gitlab-ci.yml' do
   subject(:template) { Gitlab::Template::GitlabCiYmlTemplate.find('SAST') }
 
   describe 'the created pipeline' do
-    let(:default_branch) { 'master' }
+    let(:default_branch) { project.default_branch }
     let(:files) { { 'README.txt' => '' } }
     let(:project) { create(:project, :custom_repo, files: files) }
     let(:user) { project.owner }
-    let(:service) { Ci::CreatePipelineService.new(project, user, ref: 'master') }
+    let(:service) { Ci::CreatePipelineService.new(project, user, ref: project.default_branch) }
     let(:pipeline) { service.execute!(:push) }
     let(:build_names) { pipeline.builds.pluck(:name) }
 

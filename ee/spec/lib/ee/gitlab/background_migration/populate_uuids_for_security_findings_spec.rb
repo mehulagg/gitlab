@@ -25,7 +25,7 @@ RSpec.describe ::Gitlab::BackgroundMigration::PopulateUuidsForSecurityFindings d
   let(:user) { users.create!(email: 'test@gitlab.com', projects_limit: 5) }
   let(:namespace) { namespaces.create!(name: 'gitlab', path: 'gitlab-org') }
   let(:project) { projects.create!(namespace_id: namespace.id, name: 'foo') }
-  let(:ci_pipeline) { ci_pipelines.create!(project_id: project.id, ref: 'master', sha: 'adf43c3a', status: 'success') }
+  let(:ci_pipeline) { ci_pipelines.create!(project_id: project.id, ref: project.default_branch, sha: 'adf43c3a', status: 'success') }
   let(:ci_build_1) { ci_builds.create!(commit_id: ci_pipeline.id, retried: false, type: 'Ci::Build') }
   let(:ci_build_2) { ci_builds.create!(commit_id: ci_pipeline.id, retried: false, type: 'Ci::Build') }
   let(:ci_build_3) { ci_builds.create!(commit_id: ci_pipeline.id, retried: false, type: 'Ci::Build') }

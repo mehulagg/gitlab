@@ -16,7 +16,7 @@ RSpec.describe Gitlab::Ci::Pipeline::Chain::Validate::AfterConfig do
   end
 
   let(:step) { described_class.new(pipeline, command) }
-  let(:ref) { 'master' }
+  let(:ref) { project.default_branch }
 
   describe '#perform!' do
     before do

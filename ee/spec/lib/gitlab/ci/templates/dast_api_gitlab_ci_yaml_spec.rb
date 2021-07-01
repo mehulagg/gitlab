@@ -29,7 +29,7 @@ RSpec.describe 'DAST-API.gitlab-ci.yml' do
   end
 
   describe 'the created pipeline' do
-    let(:default_branch) { 'master' }
+    let(:default_branch) { project.default_branch }
     let(:pipeline_branch) { default_branch }
     let_it_be(:project) { create(:project, :custom_repo, files: { 'README.txt' => '' }) }
 

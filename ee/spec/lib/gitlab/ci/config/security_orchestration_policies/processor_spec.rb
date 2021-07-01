@@ -7,7 +7,7 @@ RSpec.describe Gitlab::Ci::Config::SecurityOrchestrationPolicies::Processor do
 
   let_it_be(:config) { { image: 'ruby:3.0.1' } }
 
-  let(:ref) { 'master' }
+  let(:ref) { project.default_branch }
   let(:source) { 'pipeline' }
 
   let_it_be_with_refind(:project) { create(:project, :repository) }

@@ -37,7 +37,7 @@ RSpec.describe Geo::RepositorySyncService, :geo do
       allow_any_instance_of(Repository)
         .to receive(:find_remote_root_ref)
         .with('geo', url_to_repo, anything)
-        .and_return('master')
+        .and_return(project.default_branch)
 
       allow_any_instance_of(Geo::ProjectHousekeepingService).to receive(:execute)
         .and_return(nil)
@@ -278,7 +278,7 @@ RSpec.describe Geo::RepositorySyncService, :geo do
                   .and_call_original
                   .once
 
-                expect(project).to receive(:change_head).with('master').once
+                expect(project).to receive(:change_head).with(project.default_branch).once
 
                 subject.execute
               end
