@@ -65,6 +65,7 @@ review-deploy:
     - echo "${CI_ENVIRONMENT_URL}" > environment_url.txt
     - *base-before_script
   script:
+    - delete_failed_release
     - check_kube_domain
     - download_chart
     - date
