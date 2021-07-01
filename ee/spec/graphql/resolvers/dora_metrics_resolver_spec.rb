@@ -7,7 +7,8 @@ RSpec.describe Resolvers::DoraMetricsResolver do
 
   let_it_be(:guest) { create(:user) }
   let_it_be(:reporter) { create(:user) }
-  let_it_be(:project) { create(:project) }
+  let_it_be(:group) { create(:group) }
+  let_it_be(:project) { create(:project, group: group) }
   let_it_be(:production) { create(:environment, :production, project: project) }
   let_it_be(:staging) { create(:environment, :staging, project: project) }
 
@@ -21,8 +22,8 @@ RSpec.describe Resolvers::DoraMetricsResolver do
   end
 
   before_all do
-    project.add_guest(guest)
-    project.add_reporter(reporter)
+    group.add_guest(guest)
+    group.add_maintainer(reporter)
 
     create(:dora_daily_metrics, deployment_frequency: 20, lead_time_for_changes_in_seconds: nil, environment: production, date: '2020-01-01')
     create(:dora_daily_metrics, deployment_frequency: 19, lead_time_for_changes_in_seconds: nil, environment: production, date: '2021-01-01')
@@ -44,176 +45,190 @@ RSpec.describe Resolvers::DoraMetricsResolver do
     stub_licensed_features(dora4_analytics: true)
   end
 
-  describe '#resolve' do
-    context 'when the current users does not have access to query DORA metrics' do
-      let(:current_user) { guest }
+  shared_examples 'dora metrics' do
+    describe '#resolve' do
+      context 'when the current users does not have access to query DORA metrics' do
+        let(:current_user) { guest }
 
-      it 'returns no metrics' do
-        expect(resolve_metrics).to be_nil
-      end
-    end
-
-    context 'when DORA metrics are not licensed' do
-      before do
-        stub_licensed_features(dora4_analytics: false)
+        it 'returns no metrics' do
+          expect(resolve_metrics).to be_nil
+        end
       end
 
-      it 'returns no metrics' do
-        expect(resolve_metrics).to be_nil
+      context 'when DORA metrics are not licensed' do
+        before do
+          stub_licensed_features(dora4_analytics: false)
+        end
+
+        it 'returns no metrics' do
+          expect(resolve_metrics).to be_nil
+        end
+      end
+
+      context 'with metric: "deployment_frequency"' do
+        let(:args) { { metric: 'deployment_frequency' } }
+
+        it 'returns metrics from production for the last 3 months from the production environment, grouped by day' do
+          expect(resolve_metrics).to eq([
+            { 'date' => '2021-03-01', 'value' => 18 },
+            { 'date' => '2021-04-01', 'value' => 17 },
+            { 'date' => '2021-04-02', 'value' => 16 },
+            { 'date' => '2021-04-03', 'value' => 15 },
+            { 'date' => '2021-04-04', 'value' => 14 },
+            { 'date' => '2021-04-05', 'value' => 13 },
+            { 'date' => '2021-04-06', 'value' => 12 },
+            { 'date' => '2021-04-07', 'value' => nil }
+          ])
+        end
+      end
+
+      context 'with interval: "daily"' do
+        let(:args) { { metric: 'deployment_frequency', interval: 'daily' } }
+
+        it 'returns the metrics grouped by day (the default)' do
+          expect(resolve_metrics).to eq([
+            { 'date' => '2021-03-01', 'value' => 18 },
+            { 'date' => '2021-04-01', 'value' => 17 },
+            { 'date' => '2021-04-02', 'value' => 16 },
+            { 'date' => '2021-04-03', 'value' => 15 },
+            { 'date' => '2021-04-04', 'value' => 14 },
+            { 'date' => '2021-04-05', 'value' => 13 },
+            { 'date' => '2021-04-06', 'value' => 12 },
+            { 'date' => '2021-04-07', 'value' => nil }
+          ])
+        end
+      end
+
+      context 'with interval: "monthly"' do
+        let(:args) { { metric: 'deployment_frequency', interval: 'monthly' } }
+
+        it 'returns the metrics grouped by month' do
+          expect(resolve_metrics).to eq([
+            { 'date' => '2021-03-01', 'value' => 18 },
+            { 'date' => '2021-04-01', 'value' => 87 }
+          ])
+        end
+      end
+
+      context 'with interval: "all"' do
+        let(:args) { { metric: 'deployment_frequency', interval: 'all' } }
+
+        it 'returns the metrics grouped into a single bucket with a nil date' do
+          expect(resolve_metrics).to eq([
+            { 'date' => nil, 'value' => 105 }
+          ])
+        end
+      end
+
+      context 'with a start_date' do
+        let(:args) { { metric: 'deployment_frequency', start_date: '2021-04-03'.to_datetime } }
+
+        it 'returns metrics for data on or after the provided date' do
+          expect(resolve_metrics).to eq([
+            { 'date' => '2021-04-03', 'value' => 15 },
+            { 'date' => '2021-04-04', 'value' => 14 },
+            { 'date' => '2021-04-05', 'value' => 13 },
+            { 'date' => '2021-04-06', 'value' => 12 },
+            { 'date' => '2021-04-07', 'value' => nil }
+          ])
+        end
+      end
+
+      context 'with an end_date' do
+        let(:args) { { metric: 'deployment_frequency', end_date: '2021-04-03'.to_datetime } }
+
+        it 'returns metrics for data on or before the provided date' do
+          expect(resolve_metrics).to eq([
+            { 'date' => '2021-03-01', 'value' => 18 },
+            { 'date' => '2021-04-01', 'value' => 17 },
+            { 'date' => '2021-04-02', 'value' => 16 },
+            { 'date' => '2021-04-03', 'value' => 15 }
+          ])
+        end
+      end
+
+      context 'with both a start_date and an end_date' do
+        let(:args) { { metric: 'deployment_frequency', start_date: '2021-04-01'.to_datetime, end_date: '2021-04-03'.to_datetime } }
+
+        it 'returns metrics between the provided dates (inclusive)' do
+          expect(resolve_metrics).to eq([
+            { 'date' => '2021-04-01', 'value' => 17 },
+            { 'date' => '2021-04-02', 'value' => 16 },
+            { 'date' => '2021-04-03', 'value' => 15 }
+          ])
+        end
+      end
+
+      context 'when the requested date range is too large' do
+        let(:args) { { metric: 'deployment_frequency', start_date: '2020-01-01'.to_datetime, end_date: '2021-05-01'.to_datetime } }
+
+        it 'raises an error' do
+          expect { resolve_metrics }.to raise_error('Date range must be shorter than 92 days.')
+        end
+      end
+
+      context 'when the start date equal to or later than the end date' do
+        let(:args) { { metric: 'deployment_frequency', start_date: '2021-04-01'.to_datetime, end_date: '2021-03-01'.to_datetime } }
+
+        it 'raises an error' do
+          expect { resolve_metrics }.to raise_error('The start date must be ealier than the end date.')
+        end
+      end
+
+      context 'with no metric parameter' do
+        let(:args) { {} }
+
+        it 'raises an error' do
+          expect { resolve_metrics }.to raise_error(/wrong number of arguments/)
+        end
+      end
+
+      context 'with metric: "lead_time_for_changes"' do
+        let(:args) { { metric: 'lead_time_for_changes' } }
+
+        it 'returns lead time metrics' do
+          expect(resolve_metrics).to eq([
+            { 'date' => '2021-03-01', 'value' => nil },
+            { 'date' => '2021-04-01', 'value' => 99 },
+            { 'date' => '2021-04-02', 'value' => 98 },
+            { 'date' => '2021-04-03', 'value' => 97 },
+            { 'date' => '2021-04-04', 'value' => nil },
+            { 'date' => '2021-04-05', 'value' => nil },
+            { 'date' => '2021-04-06', 'value' => nil },
+            { 'date' => '2021-04-07', 'value' => nil }
+          ])
+        end
+      end
+
+      context 'with environment_tier: "staging"' do
+        let(:args) { { metric: 'deployment_frequency', environment_tier: 'staging' } }
+
+        it 'returns metrics for the staging environment' do
+          expect(resolve_metrics).to eq([
+            { 'date' => '2021-04-01', 'value' => 10 },
+            { 'date' => '2021-04-02', 'value' => nil }
+          ])
+        end
       end
     end
   end
 
-  context 'with metric: "deployment_frequency"' do
-    let(:args) { { metric: 'deployment_frequency' } }
+  context 'when the user is querying for project-level metrics' do
+    let(:obj) { project }
 
-    it 'returns metrics from production for the last 3 months from the production environment, grouped by day' do
-      expect(resolve_metrics).to eq([
-        { 'date' => '2021-03-01', 'value' => 18 },
-        { 'date' => '2021-04-01', 'value' => 17 },
-        { 'date' => '2021-04-02', 'value' => 16 },
-        { 'date' => '2021-04-03', 'value' => 15 },
-        { 'date' => '2021-04-04', 'value' => 14 },
-        { 'date' => '2021-04-05', 'value' => 13 },
-        { 'date' => '2021-04-06', 'value' => 12 },
-        { 'date' => '2021-04-07', 'value' => nil }
-      ])
-    end
+    it_behaves_like 'dora metrics'
   end
 
-  context 'with interval: "daily"' do
-    let(:args) { { metric: 'deployment_frequency', interval: 'daily' } }
+  context 'when the user is querying for group-level metrics' do
+    let(:obj) { group }
 
-    it 'returns the metrics grouped by day (the default)' do
-      expect(resolve_metrics).to eq([
-        { 'date' => '2021-03-01', 'value' => 18 },
-        { 'date' => '2021-04-01', 'value' => 17 },
-        { 'date' => '2021-04-02', 'value' => 16 },
-        { 'date' => '2021-04-03', 'value' => 15 },
-        { 'date' => '2021-04-04', 'value' => 14 },
-        { 'date' => '2021-04-05', 'value' => 13 },
-        { 'date' => '2021-04-06', 'value' => 12 },
-        { 'date' => '2021-04-07', 'value' => nil }
-      ])
-    end
-  end
-
-  context 'with interval: "monthly"' do
-    let(:args) { { metric: 'deployment_frequency', interval: 'monthly' } }
-
-    it 'returns the metrics grouped by month' do
-      expect(resolve_metrics).to eq([
-        { 'date' => '2021-03-01', 'value' => 18 },
-        { 'date' => '2021-04-01', 'value' => 87 }
-      ])
-    end
-  end
-
-  context 'with interval: "all"' do
-    let(:args) { { metric: 'deployment_frequency', interval: 'all' } }
-
-    it 'returns the metrics grouped into a single bucket with a nil date' do
-      expect(resolve_metrics).to eq([
-        { 'date' => nil, 'value' => 105 }
-      ])
-    end
-  end
-
-  context 'with a start_date' do
-    let(:args) { { metric: 'deployment_frequency', start_date: '2021-04-03'.to_datetime } }
-
-    it 'returns metrics for data on or after the provided date' do
-      expect(resolve_metrics).to eq([
-        { 'date' => '2021-04-03', 'value' => 15 },
-        { 'date' => '2021-04-04', 'value' => 14 },
-        { 'date' => '2021-04-05', 'value' => 13 },
-        { 'date' => '2021-04-06', 'value' => 12 },
-        { 'date' => '2021-04-07', 'value' => nil }
-      ])
-    end
-  end
-
-  context 'with an end_date' do
-    let(:args) { { metric: 'deployment_frequency', end_date: '2021-04-03'.to_datetime } }
-
-    it 'returns metrics for data on or before the provided date' do
-      expect(resolve_metrics).to eq([
-        { 'date' => '2021-03-01', 'value' => 18 },
-        { 'date' => '2021-04-01', 'value' => 17 },
-        { 'date' => '2021-04-02', 'value' => 16 },
-        { 'date' => '2021-04-03', 'value' => 15 }
-      ])
-    end
-  end
-
-  context 'with both a start_date and an end_date' do
-    let(:args) { { metric: 'deployment_frequency', start_date: '2021-04-01'.to_datetime, end_date: '2021-04-03'.to_datetime } }
-
-    it 'returns metrics between the provided dates (inclusive)' do
-      expect(resolve_metrics).to eq([
-        { 'date' => '2021-04-01', 'value' => 17 },
-        { 'date' => '2021-04-02', 'value' => 16 },
-        { 'date' => '2021-04-03', 'value' => 15 }
-      ])
-    end
-  end
-
-  context 'when the requested date range is too large' do
-    let(:args) { { metric: 'deployment_frequency', start_date: '2020-01-01'.to_datetime, end_date: '2021-05-01'.to_datetime } }
-
-    it 'raises an error' do
-      expect { resolve_metrics }.to raise_error('Date range must be shorter than 92 days.')
-    end
-  end
-
-  context 'when the start date equal to or later than the end date' do
-    let(:args) { { metric: 'deployment_frequency', start_date: '2021-04-01'.to_datetime, end_date: '2021-03-01'.to_datetime } }
-
-    it 'raises an error' do
-      expect { resolve_metrics }.to raise_error('The start date must be ealier than the end date.')
-    end
-  end
-
-  context 'with no metric parameter' do
-    let(:args) { {} }
-
-    it 'raises an error' do
-      expect { resolve_metrics }.to raise_error(/wrong number of arguments/)
-    end
-  end
-
-  context 'with metric: "lead_time_for_changes"' do
-    let(:args) { { metric: 'lead_time_for_changes' } }
-
-    it 'returns lead time metrics' do
-      expect(resolve_metrics).to eq([
-        { 'date' => '2021-03-01', 'value' => nil },
-        { 'date' => '2021-04-01', 'value' => 99 },
-        { 'date' => '2021-04-02', 'value' => 98 },
-        { 'date' => '2021-04-03', 'value' => 97 },
-        { 'date' => '2021-04-04', 'value' => nil },
-        { 'date' => '2021-04-05', 'value' => nil },
-        { 'date' => '2021-04-06', 'value' => nil },
-        { 'date' => '2021-04-07', 'value' => nil }
-      ])
-    end
-  end
-
-  context 'with environment_tier: "staging"' do
-    let(:args) { { metric: 'deployment_frequency', environment_tier: 'staging' } }
-
-    it 'returns metrics for the staging environment' do
-      expect(resolve_metrics).to eq([
-        { 'date' => '2021-04-01', 'value' => 10 },
-        { 'date' => '2021-04-02', 'value' => nil }
-      ])
-    end
+    it_behaves_like 'dora metrics'
   end
 
   private
 
   def resolve_metrics
     context = { current_user: current_user }
-    resolve(described_class, obj: project, args: args, ctx: context)
+    resolve(described_class, obj: obj, args: args, ctx: context)
   end
 end
