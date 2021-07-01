@@ -1,8 +1,13 @@
 <script>
 import chartEmptyStateIllustration from '@gitlab/svgs/dist/illustrations/chart-empty-state.svg';
-import { GlCard, GlSprintf, GlSafeHtmlDirective as SafeHtml } from '@gitlab/ui';
+import {
+  GlCard,
+  GlSprintf,
+  GlDeprecatedSkeletonLoading as GlSkeletonLoading,
+  GlSafeHtmlDirective as SafeHtml,
+} from '@gitlab/ui';
+import { GlSingleStat } from '@gitlab/ui/dist/charts';
 import { GlAreaChart } from '@gitlab/ui/dist/charts';
-import MetricCard from '~/analytics/shared/components/metric_card.vue';
 import { formatDate } from '~/lib/utils/datetime_utility';
 import { SUPPORTED_FORMATS, getFormatter } from '~/lib/utils/unit_format';
 import { __, s__ } from '~/locale';
@@ -18,7 +23,8 @@ export default {
     GlAreaChart,
     GlCard,
     GlSprintf,
-    MetricCard,
+    GlSkeletonLoading,
+    GlSingleStat,
   },
   directives: {
     SafeHtml,
@@ -155,11 +161,24 @@ export default {
 </script>
 <template>
   <div>
-    <metric-card
-      :title="$options.i18n.metrics.cardTitle"
-      :metrics="metrics"
-      :is-loading="isLoading"
-    />
+    <div
+      class="gl-display-flex gl-flex-direction-column gl-md-flex-direction-row gl-my-6 gl-align-items-flex-start"
+    >
+      <div class="gl-pr-9 gl-flex-shrink-0">
+        <span class="gl-font-weight-bold">{{ $options.i18n.metrics.cardTitle }}</span>
+      </div>
+      <gl-skeleton-loading v-if="$apollo.queries.group.loading" />
+      <template v-else>
+        <gl-single-stat
+          v-for="metric in metrics"
+          :key="metric.key"
+          class="gl-pr-9 gl-my-4 gl-md-mt-0 gl-md-mb-0"
+          :value="`${metric.value}`"
+          :title="metric.label"
+          :should-animate="true"
+        />
+      </template>
+    </div>
 
     <gl-card>
       <template #header>
