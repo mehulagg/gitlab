@@ -8,6 +8,9 @@ import { mockRegularLabel, mockScopedLabel } from './mock_data';
 describe('DropdownValue', () => {
   let wrapper;
 
+  const findRegularLabel = () => wrapper.findAllComponents(GlLabel).at(0);
+  const findScopedLabel = () => wrapper.findAllComponents(GlLabel).at(1);
+
   const createComponent = (props = {}, slots = {}) => {
     wrapper = shallowMount(DropdownValue, {
       slots,
@@ -24,7 +27,6 @@ describe('DropdownValue', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   describe('methods', () => {
@@ -32,7 +34,7 @@ describe('DropdownValue', () => {
       it('returns a label filter URL based on provided label param', () => {
         createComponent();
 
-        expect(wrapper.vm.labelFilterUrl(mockRegularLabel)).toBe(
+        expect(findRegularLabel().props('target')).toBe(
           '/gitlab-org/my-project/issues?label_name[]=Foo%20Label',
         );
       });
