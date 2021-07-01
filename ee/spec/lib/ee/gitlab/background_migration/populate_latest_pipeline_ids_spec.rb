@@ -31,6 +31,8 @@ RSpec.describe Gitlab::BackgroundMigration::PopulateLatestPipelineIds do
   let!(:project_2) { projects.create!(namespace_id: namespace.id, name: 'Foo 2') }
   let!(:project_3) { projects.create!(namespace_id: namespace.id, name: 'Foo 3') }
   let!(:project_4) { projects.create!(namespace_id: namespace.id, name: 'Foo 4') }
+  let!(:project_5) { projects.create!(namespace_id: namespace.id, name: 'Foo 5') }
+  let!(:project_6) { projects.create!(namespace_id: namespace.id, name: 'Foo 6') }
 
   let!(:project_1_pipeline) { pipelines.create!(project_id: project_1.id, ref: 'master', sha: 'adf43c3a', status: 'success') }
   let!(:project_1_latest_pipeline) { pipelines.create!(project_id: project_1.id, ref: 'master', sha: 'adf43c3a', status: 'failed') }
@@ -51,6 +53,8 @@ RSpec.describe Gitlab::BackgroundMigration::PopulateLatestPipelineIds do
     project_settings.create!(project_id: project_2.id, has_vulnerabilities: true)
     project_settings.create!(project_id: project_3.id)
     project_settings.create!(project_id: project_4.id, has_vulnerabilities: true)
+    project_settings.create!(project_id: project_5.id, has_vulnerabilities: true)
+    project_settings.create!(project_id: project_6.id, has_vulnerabilities: true)
 
     # Create security builds
     create_security_build_for(project_1_pipeline, file_type: file_types[:sast])
@@ -63,7 +67,27 @@ RSpec.describe Gitlab::BackgroundMigration::PopulateLatestPipelineIds do
   end
 
   describe '#perform' do
-    subject(:populate_latest_pipeline_ids) { migrator.perform(project_1.id, project_4.id) }
+    subject(:populate_latest_pipeline_ids) { migrator.perform(project_1.id, project_6.id) }
+
+    before do
+      allow(Gitlab::ErrorTracking).to receive(:track_and_raise_for_dev_exception)
+
+      # Raise an error while retreiving the `root_ref` for the `project_5`
+      mock_raw_repository = instance_double(::Gitlab::Git::Repository)
+      allow(mock_raw_repository).to receive(:root_ref).and_raise(::Gitlab::Git::Repository::NoRepository.new)
+
+      call_count = 0
+
+      allow_next_instance_of(described_class::Repository) do |repository_instance|
+        original_raw_repository = repository_instance.method(:raw_repository)
+
+        allow(repository_instance).to receive(:raw_repository) do
+          call_count += 1
+
+          call_count == 3 ? mock_raw_repository : original_raw_repository.call
+        end
+      end
+    end
 
     it 'sets the latest_pipeline_id' do
       expect { populate_latest_pipeline_ids }.to change { project_4_stats.reload.latest_pipeline_id }.from(nil).to(project_4_pipeline.id)
