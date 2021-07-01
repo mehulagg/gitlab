@@ -149,6 +149,9 @@ export default {
     },
   },
   methods: {
+    epicDatePopoverEl() {
+      return this.$refs?.epicDatePopover?.$el;
+    },
     closeForm() {
       this.$refs.editable.collapse();
       this.$el.dispatchEvent(hideDropdownEvent);
@@ -250,7 +253,7 @@ export default {
         data-testid="inherit-date-popover"
       />
       <gl-popover
-        :target="() => $refs.epicDatePopover.$el"
+        :target="epicDatePopoverEl"
         triggers="focus"
         placement="left"
         boundary="viewport"
