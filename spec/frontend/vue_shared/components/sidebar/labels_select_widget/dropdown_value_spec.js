@@ -10,6 +10,7 @@ describe('DropdownValue', () => {
 
   const findRegularLabel = () => wrapper.findAllComponents(GlLabel).at(0);
   const findScopedLabel = () => wrapper.findAllComponents(GlLabel).at(1);
+  const findWrapper = () => wrapper.find('.js-value');
 
   const createComponent = (props = {}, slots = {}) => {
     wrapper = shallowMount(DropdownValue, {
@@ -27,6 +28,33 @@ describe('DropdownValue', () => {
 
   afterEach(() => {
     wrapper.destroy();
+  });
+
+  describe('when there are no labels', () => {
+    beforeEach(() => {
+      createComponent(
+        {
+          selectedLabels: [],
+        },
+        {
+          default: 'None',
+        },
+      );
+    });
+
+    it('does not apply `has-labels` class to the wrapping container', () => {
+      expect(findWrapper().classes()).not.toContain('has-labels');
+    });
+  });
+
+  describe('when there are labels', () => {
+    beforeEach(() => {
+      createComponent();
+    });
+
+    it('applies `has-labels` class to the wrapping container', () => {
+      expect(findWrapper().classes()).toContain('has-labels');
+    });
   });
 
   describe('methods', () => {
