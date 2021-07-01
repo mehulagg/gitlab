@@ -6,8 +6,7 @@ import {
   GlDeprecatedSkeletonLoading as GlSkeletonLoading,
   GlSafeHtmlDirective as SafeHtml,
 } from '@gitlab/ui';
-import { GlSingleStat } from '@gitlab/ui/dist/charts';
-import { GlAreaChart } from '@gitlab/ui/dist/charts';
+import { GlSingleStat, GlAreaChart } from '@gitlab/ui/dist/charts';
 import { formatDate } from '~/lib/utils/datetime_utility';
 import { SUPPORTED_FORMATS, getFormatter } from '~/lib/utils/unit_format';
 import { __, s__ } from '~/locale';
@@ -171,7 +170,7 @@ export default {
           :key="metric.key"
           class="gl-pr-9 gl-my-4 gl-md-mt-0 gl-md-mb-0"
           :value="`${metric.value || '-'}`"
-          :unit="metric.unit"
+          :unit="metric.value ? metric.unit : null"
           :title="metric.label"
           :should-animate="true"
         />
