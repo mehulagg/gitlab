@@ -25140,7 +25140,7 @@ CREATE UNIQUE INDEX index_vulnerability_occurrences_on_uuid ON vulnerability_occ
 
 CREATE INDEX index_vulnerability_occurrences_on_vulnerability_id ON vulnerability_occurrences USING btree (vulnerability_id);
 
-CREATE INDEX index_vulnerability_reads_on_vulnerabilities_id ON vulnerability_reads USING btree (vulnerabilities_id);
+CREATE UNIQUE INDEX index_vulnerability_reads_on_vulnerabilities_id ON vulnerability_reads USING btree (vulnerabilities_id);
 
 CREATE UNIQUE INDEX index_vulnerability_remediations_on_project_id_and_checksum ON vulnerability_remediations USING btree (project_id, checksum);
 
