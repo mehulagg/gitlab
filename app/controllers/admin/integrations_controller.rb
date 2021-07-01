@@ -8,6 +8,12 @@ class Admin::IntegrationsController < Admin::ApplicationController
 
   feature_category :integrations
 
+  def overrides
+    collection = Project.with_active_integration(integration.class).merge(::Integration.not_inheriting)
+
+    render json: collection.page(params[:page]).per(20).to_json
+  end
+
   private
 
   def find_or_initialize_non_project_specific_integration(name)
