@@ -250,13 +250,18 @@ Tutorials should be in this format:
 
 A paragraph that explains what the tutorial does, and the expected outcome.
 
+The steps in this tutorial are as follows:
+
+- [Step 1: do the first task](#do-the-first-task)
+- [Step 2: do the second task](#do-the-second-task)
+
 Prerequisites (optional):
 
 - Thing 1
 - Thing 2
 - Thing 3
 
-## Step 1: do the first task
+## Do the first task
 
 To do step 1:
 
@@ -264,7 +269,9 @@ To do step 1:
 2. Another step.
 3. Another step.
 
-## Step 2: do the second task
+## Do the second task
+
+Before you begin, make sure you have [done the first task](#do-the-first-task).
 
 To do step 2:
 
