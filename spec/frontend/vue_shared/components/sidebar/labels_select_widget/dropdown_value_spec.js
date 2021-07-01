@@ -8,9 +8,11 @@ import { mockRegularLabel, mockScopedLabel } from './mock_data';
 describe('DropdownValue', () => {
   let wrapper;
 
-  const findRegularLabel = () => wrapper.findAllComponents(GlLabel).at(0);
-  const findScopedLabel = () => wrapper.findAllComponents(GlLabel).at(1);
-  const findWrapper = () => wrapper.find('.js-value');
+  const findAllLabels = () => wrapper.findAllComponents(GlLabel);
+  const findRegularLabel = () => findAllLabels().at(0);
+  const findScopedLabel = () => findAllLabels().at(1);
+  const findWrapper = () => wrapper.find('[data-testid="value-wrapper"]');
+  const findEmptyPlaceholder = () => wrapper.find('[data-testid="empty-placeholder"]');
 
   const createComponent = (props = {}, slots = {}) => {
     wrapper = shallowMount(DropdownValue, {
@@ -45,6 +47,15 @@ describe('DropdownValue', () => {
     it('does not apply `has-labels` class to the wrapping container', () => {
       expect(findWrapper().classes()).not.toContain('has-labels');
     });
+
+    it('renders an empty placeholder', () => {
+      expect(findEmptyPlaceholder().exists()).toBe(true);
+      expect(findEmptyPlaceholder().text()).toBe('None');
+    });
+
+    it('does not render any labels', () => {
+      expect(findAllLabels().length).toBe(0);
+    });
   });
 
   describe('when there are labels', () => {
@@ -55,60 +66,27 @@ describe('DropdownValue', () => {
     it('applies `has-labels` class to the wrapping container', () => {
       expect(findWrapper().classes()).toContain('has-labels');
     });
-  });
 
-  describe('methods', () => {
-    describe('labelFilterUrl', () => {
-      it('returns a label filter URL based on provided label param', () => {
-        createComponent();
-
-        expect(findRegularLabel().props('target')).toBe(
-          '/gitlab-org/my-project/issues?label_name[]=Foo%20Label',
-        );
-      });
+    it('does not render an empty placeholder', () => {
+      expect(findEmptyPlaceholder().exists()).toBe(false);
     });
 
-    describe('scopedLabel', () => {
-      beforeEach(() => {
-        createComponent();
-      });
-
-      it('returns `true` when provided label param is a scoped label', () => {
-        expect(wrapper.vm.scopedLabel(mockScopedLabel)).toBe(true);
-      });
-
-      it('returns `false` when provided label param is a regular label', () => {
-        expect(wrapper.vm.scopedLabel(mockRegularLabel)).toBe(false);
-      });
-    });
-  });
-
-  describe('template', () => {
-    it('renders class `has-labels` on component container element when `selectedLabels` is not empty', () => {
-      createComponent();
-
-      expect(wrapper.attributes('class')).toContain('has-labels');
+    it('renders a list of two labels', () => {
+      expect(findAllLabels().length).toBe(2);
     });
 
-    it('renders element containing `None` when `selectedLabels` is empty', () => {
-      createComponent(
-        {
-          selectedLabels: [],
-        },
-        {
-          default: 'None',
-        },
+    it('passes correct props to the regular label', () => {
+      expect(findRegularLabel().props('target')).toBe(
+        '/gitlab-org/my-project/issues?label_name[]=Foo%20Label',
       );
-      const noneEl = wrapper.find('span.text-secondary');
-
-      expect(noneEl.exists()).toBe(true);
-      expect(noneEl.text()).toBe('None');
+      expect(findRegularLabel().props('scoped')).toBe(false);
     });
 
-    it('renders labels when `selectedLabels` is not empty', () => {
-      createComponent();
-
-      expect(wrapper.findAll(GlLabel).length).toBe(2);
+    it('passes correct props to the scoped label', () => {
+      expect(findScopedLabel().props('target')).toBe(
+        '/gitlab-org/my-project/issues?label_name[]=Foo%3A%3ABar',
+      );
+      expect(findScopedLabel().props('scoped')).toBe(true);
     });
   });
 });

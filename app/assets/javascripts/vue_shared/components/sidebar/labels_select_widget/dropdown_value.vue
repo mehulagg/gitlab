@@ -56,12 +56,14 @@ export default {
       'has-labels': selectedLabels.length,
     }"
     class="hide-collapsed value issuable-show-labels js-value"
+    data-testid="value-wrapper"
   >
-    <span v-if="!selectedLabels.length" class="text-secondary">
+    <span v-if="!selectedLabels.length" class="text-secondary" data-testid="empty-placeholder">
       <slot></slot>
     </span>
-    <template v-for="label in selectedLabels" v-else>
+    <template v-else>
       <gl-label
+        v-for="label in selectedLabels"
         :key="label.id"
         data-qa-selector="selected_label_content"
         :data-qa-label-name="label.title"
