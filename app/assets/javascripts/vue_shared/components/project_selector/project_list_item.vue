@@ -49,7 +49,7 @@ export default {
       class="gl-display-flex gl-align-items-center gl-flex-wrap project-namespace-name-container"
     >
       <gl-icon v-if="selected" class="js-selected-icon" name="mobile-issue-close" />
-      <project-avatar class="gl-flex-shrink-0 js-project-avatar" :project="project" :size="32" />
+      <project-avatar :project="project" />
       <div
         v-if="truncatedNamespace"
         :title="projectNameWithNamespace"

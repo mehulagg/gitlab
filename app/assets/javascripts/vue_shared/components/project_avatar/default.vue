@@ -1,11 +1,9 @@
 <script>
-import Identicon from '../identicon.vue';
-import ProjectAvatarImage from './image.vue';
+import { GlAvatar } from '@gitlab/ui';
 
 export default {
   components: {
-    Identicon,
-    ProjectAvatarImage,
+    GlAvatar,
   },
   props: {
     project: {
@@ -14,7 +12,7 @@ export default {
     },
     size: {
       type: Number,
-      default: 40,
+      default: 32,
       required: false,
     },
   },
@@ -27,20 +25,12 @@ export default {
 </script>
 
 <template>
-  <span :class="sizeClass" class="avatar-container rect-avatar project-avatar">
-    <project-avatar-image
-      v-if="project.avatar_url"
-      :link-href="project.path"
-      :img-src="project.avatar_url"
-      :img-alt="project.name"
-      :img-size="size"
-    />
-    <identicon
-      v-else
-      :entity-id="project.id"
-      :entity-name="project.name"
-      :size-class="sizeClass"
-      class="rect-avatar"
-    />
-  </span>
+  <gl-avatar
+    class="gl-mr-5 gl-float-left"
+    shape="rect"
+    :src="project.avatar_url"
+    :alt="project.name"
+    :entity-name="project.name"
+    :size="size"
+  />
 </template>
