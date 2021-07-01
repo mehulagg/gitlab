@@ -51,15 +51,45 @@ class Groups::Analytics::CycleAnalytics::ValueStreamsController < Groups::Analyt
   end
 
   def create_params
-    params.require(:value_stream).permit(:name, stages: stage_create_params)
+    params.require(:value_stream).permit(:name, stages: stage_create_params).tap do |permitted_params|
+      transform_stage_params(permitted_params)
+    end
   end
 
   def update_params
-    params.require(:value_stream).permit(:name, stages: stage_update_params)
+    params.require(:value_stream).permit(:name, stages: stage_update_params).tap do |permitted_params|
+      transform_stage_params(permitted_params)
+    end
+  end
+
+  def transform_stage_params(permitted_params)
+    Array(permitted_params[:stages]).each do |stage_params|
+      # supporting the new API
+      if stage_params[:start_event] && stage_params[:end_event]
+        start_event = stage_params.delete(:start_event)
+        end_event = stage_params.delete(:end_event)
+        stage_params[:start_event_identifier] = start_event[:identifier]
+        stage_params[:start_event_label_id] = start_event[:label_id]
+
+        stage_params[:end_event_identifier] = end_event[:identifier]
+        stage_params[:end_event_label_id] = end_event[:label_id]
+      end
+    end
   end
 
   def stage_create_params
-    [:name, :start_event_identifier, :end_event_identifier, :start_event_label_id, :end_event_label_id, :custom]
+    [
+      :name, 
+      :start_event_identifier, 
+      :start_event_label_id, 
+      :end_event_identifier, 
+      :end_event_label_id, 
+      :custom,
+      { 
+        start_event: [:identifier, :label_id], 
+        end_event: [:identifier, :label_id] 
+      }
+    ]
   end
 
   def stage_update_params
