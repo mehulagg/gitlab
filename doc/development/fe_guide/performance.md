@@ -255,7 +255,7 @@ We support two types of prefetching for the chunks:
 
 - The [`prefetch` link type](https://developer.mozilla.org/en-US/docs/Web/HTML/Link_types/prefetch)
   is used to prefetch a chunk for the future navigation
-- The [`preload` link type](https://developer.mozilla.org/en-US/docs/Web/HTML/Link_types/preloadh)
+- The [`preload` link type](https://developer.mozilla.org/en-US/docs/Web/HTML/Link_types/preload)
   is used to prefetch a chunk that is crucial for the current navigation but is not
   discovered until later in the rendering process
 
