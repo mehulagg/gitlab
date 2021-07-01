@@ -1,5 +1,5 @@
-import groupBoardAssignees from '~/boards/graphql/group_board_assignees.query.graphql'; // cannot resolve
-import projectBoardAssignees from '~/boards/graphql/project_board_assignees.query.graphql';
+import groupBoardMembers from '~/boards/graphql/group_board_members.query.graphql';
+import projectBoardMembers from '~/boards/graphql/project_board_members.query.graphql';
 import { BoardType } from './constants';
 import boardLabels from './graphql/board_labels.query.graphql';
 
@@ -11,7 +11,7 @@ export default function issueBoardFilters(apollo, fullPath, boardType) {
   };
 
   const boardAssigneesQuery = () => {
-    return boardType === BoardType.group ? groupBoardAssignees : projectBoardAssignees;
+    return boardType === BoardType.group ? groupBoardMembers : projectBoardMembers;
   };
 
   const fetchAuthors = (authorsSearchTerm) => {
