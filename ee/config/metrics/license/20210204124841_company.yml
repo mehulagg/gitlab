@@ -1,5 +1,4 @@
 ---
-data_category: Optional
 key_path: licensee.Company
 description: Company on the GitLab license
 product_section: fulfillment
@@ -10,6 +9,7 @@ value_type: string
 status: data_available
 time_frame: none
 data_source: license
+data_category: Subscription
 distribution:
 - ee
 tier:
