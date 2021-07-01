@@ -16,7 +16,7 @@ export default {
   },
 
   activeBoardItem: (state) => {
-    return state.boardItems[state.activeId] || {};
+    return state.boardItems[state.activeId] || { iid: '', id: '' };
   },
 
   groupPathForActiveIssue: (_, getters) => {
