@@ -16,11 +16,11 @@ We offer extensive integrations to help you connect and manage your Kubernetes c
 
 Read through this document to get started.
 
-## Clusters infrastructure
+## Generic infrastructure management **(FREE)**
 
-Use [Infrastructure as Code](../../infrastructure) to create and manage your clusters with the GitLab integration with Terraform.
+Use [Infrastructure as Code](../../infrastructure) to create and manage your clusters with the GitLab integration with Terraform. 
 
-## Benefit from the GitLab-Kubernetes integration
+## Kubernetes specific GitLab integrations
 
 Using the GitLab-Kubernetes integration, you can benefit of GitLab
 features such as:
@@ -34,6 +34,8 @@ features such as:
 - Use [Canary deployments](../canary_deployments.md) to update only a portion of your fleet with the latest version of your application.
 - View your [Kubernetes podlogs](kubernetes_pod_logs.md) directly in GitLab.
 - Connect to your cluster through GitLab [web terminals](deploy_to_cluster.md#web-terminals-for-kubernetes-clusters).
+
+The recommended way to connect a Kubernetes cluster to GitLab is [useing the GitLab Kubernetes Agent](https://docs.gitlab.com/ee/user/clusters/agent/).
 
 ## Supported cluster versions
 
