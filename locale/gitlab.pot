@@ -6934,9 +6934,6 @@ msgstr ""
 msgid "ClusterAgent|This feature is only available for premium plans"
 msgstr ""
 
-msgid "ClusterAgent|This project is not included in the GitLab.com rollout for Kubernetes agent"
-msgstr ""
-
 msgid "ClusterAgent|User has insufficient permissions to create a token for this project"
 msgstr ""
 
@@ -11075,6 +11072,9 @@ msgstr ""
 msgid "DevOps adoption"
 msgstr ""
 
+msgid "DevopsAdoption|%{adoptedCount}/%{featuresCount} %{title} features adopted"
+msgstr ""
+
 msgid "DevopsAdoption|Add Group"
 msgstr ""
 
@@ -11177,6 +11177,9 @@ msgstr ""
 msgid "DevopsAdoption|Ops"
 msgstr ""
 
+msgid "DevopsAdoption|Overall adoption"
+msgstr ""
+
 msgid "DevopsAdoption|Pipelines"
 msgstr ""
 
@@ -11232,6 +11235,9 @@ msgid "DevopsReport|Low"
 msgstr ""
 
 msgid "DevopsReport|Moderate"
+msgstr ""
+
+msgid "DevopsReport|Overview"
 msgstr ""
 
 msgid "DevopsReport|Score"
@@ -13820,6 +13826,9 @@ msgid "File name"
 msgstr ""
 
 msgid "File renamed with no changes."
+msgstr ""
+
+msgid "File suppressed by a .gitattributes entry or the file's encoding is unsupported."
 msgstr ""
 
 msgid "File synchronization concurrency limit"
@@ -18397,7 +18406,13 @@ msgstr ""
 msgid "JiraService|Events for %{noteable_model_name} are disabled."
 msgstr ""
 
+msgid "JiraService|Failed to load Jira issue statuses. View the issue in Jira, or reload the page."
+msgstr ""
+
 msgid "JiraService|Failed to load Jira issue. View the issue in Jira, or reload the page."
+msgstr ""
+
+msgid "JiraService|Failed to update Jira issue status. View the issue in Jira, or reload the page."
 msgstr ""
 
 msgid "JiraService|Fetch issue types for this Jira project"
@@ -18446,6 +18461,9 @@ msgid "JiraService|Leave blank to use your current password or API token."
 msgstr ""
 
 msgid "JiraService|Move to Done"
+msgstr ""
+
+msgid "JiraService|No available statuses"
 msgstr ""
 
 msgid "JiraService|Not all data may be displayed here. To view more details or make changes to this issue, go to %{linkStart}Jira%{linkEnd}."
@@ -28823,6 +28841,12 @@ msgstr ""
 msgid "SecurityPolicies|Latest scan"
 msgstr ""
 
+msgid "SecurityPolicies|Network"
+msgstr ""
+
+msgid "SecurityPolicies|Policy type"
+msgstr ""
+
 msgid "SecurityPolicies|Scan execution"
 msgstr ""
 
@@ -31500,9 +31524,6 @@ msgstr ""
 msgid "SuperSonics|There is a connectivity issue."
 msgstr ""
 
-msgid "SuperSonics|This field is required."
-msgstr ""
-
 msgid "SuperSonics|This is the highest peak of users on your installation since the license started."
 msgstr ""
 
@@ -33097,9 +33118,6 @@ msgid "This device has not been registered with us."
 msgstr ""
 
 msgid "This diff is collapsed."
-msgstr ""
-
-msgid "This diff was suppressed by a .gitattributes entry."
 msgstr ""
 
 msgid "This directory"
@@ -35863,6 +35881,9 @@ msgstr ""
 msgid "View full log"
 msgstr ""
 
+msgid "View group in admin area"
+msgstr ""
+
 msgid "View group labels"
 msgstr ""
 
@@ -35912,6 +35933,9 @@ msgid "View performance dashboard."
 msgstr ""
 
 msgid "View project"
+msgstr ""
+
+msgid "View project in admin area"
 msgstr ""
 
 msgid "View project labels"
@@ -38404,6 +38428,9 @@ msgstr ""
 msgid "encrypted: needs to be a :required, :optional or :migrating!"
 msgstr ""
 
+msgid "ending with MIME type format is not allowed."
+msgstr ""
+
 msgid "entries cannot be larger than 255 characters"
 msgstr ""
 
@@ -38967,7 +38994,7 @@ msgstr ""
 msgid "mrWidget|The source branch has been deleted"
 msgstr ""
 
-msgid "mrWidget|The source branch is %{commitsBehindLinkStart}%{commitsBehind}%{commitsBehindLinkEnd} the target branch"
+msgid "mrWidget|The source branch is %{link} the target branch"
 msgstr ""
 
 msgid "mrWidget|The source branch is being deleted"

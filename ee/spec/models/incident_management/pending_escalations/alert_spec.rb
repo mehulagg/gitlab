@@ -11,6 +11,7 @@ RSpec.describe IncidentManagement::PendingEscalations::Alert do
     it { is_expected.to validate_presence_of(:process_at) }
     it { is_expected.to validate_presence_of(:status) }
     it { is_expected.to delegate_method(:project).to(:alert) }
+    it { is_expected.to delegate_method(:policy).to(:rule).allow_nil }
     it { is_expected.to validate_uniqueness_of(:rule_id).scoped_to([:alert_id]) }
   end
 

@@ -11682,9 +11682,7 @@ CREATE TABLE clusters_applications_ingress (
     cluster_ip character varying,
     status_reason text,
     external_ip character varying,
-    external_hostname character varying,
-    modsecurity_enabled boolean,
-    modsecurity_mode smallint DEFAULT 0 NOT NULL
+    external_hostname character varying
 );
 
 CREATE SEQUENCE clusters_applications_ingress_id_seq
@@ -16352,7 +16350,8 @@ CREATE TABLE plan_limits (
     ci_registered_project_runners integer DEFAULT 1000 NOT NULL,
     web_hook_calls integer DEFAULT 0 NOT NULL,
     ci_daily_pipeline_schedule_triggers integer DEFAULT 0 NOT NULL,
-    ci_max_artifact_size_running_container_scanning integer DEFAULT 0 NOT NULL
+    ci_max_artifact_size_running_container_scanning integer DEFAULT 0 NOT NULL,
+    ci_max_artifact_size_cluster_image_scanning integer DEFAULT 0 NOT NULL
 );
 
 CREATE SEQUENCE plan_limits_id_seq
@@ -22890,8 +22889,6 @@ CREATE INDEX index_ci_builds_on_stage_id ON ci_builds USING btree (stage_id);
 
 CREATE INDEX index_ci_builds_on_status_and_type_and_runner_id ON ci_builds USING btree (status, type, runner_id);
 
-CREATE UNIQUE INDEX index_ci_builds_on_token ON ci_builds USING btree (token);
-
 CREATE UNIQUE INDEX index_ci_builds_on_token_encrypted ON ci_builds USING btree (token_encrypted) WHERE (token_encrypted IS NOT NULL);
 
 CREATE UNIQUE INDEX index_ci_builds_on_token_partial ON ci_builds USING btree (token) WHERE (token IS NOT NULL);
@@ -23167,8 +23164,6 @@ CREATE UNIQUE INDEX index_clusters_applications_elastic_stacks_on_cluster_id ON 
 CREATE UNIQUE INDEX index_clusters_applications_helm_on_cluster_id ON clusters_applications_helm USING btree (cluster_id);
 
 CREATE UNIQUE INDEX index_clusters_applications_ingress_on_cluster_id ON clusters_applications_ingress USING btree (cluster_id);
-
-CREATE INDEX index_clusters_applications_ingress_on_modsecurity ON clusters_applications_ingress USING btree (modsecurity_enabled, modsecurity_mode, cluster_id);
 
 CREATE UNIQUE INDEX index_clusters_applications_jupyter_on_cluster_id ON clusters_applications_jupyter USING btree (cluster_id);
 

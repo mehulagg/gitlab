@@ -5,6 +5,7 @@ import Vue from 'vue';
 import VueApollo from 'vue-apollo';
 import DevopsAdoptionAddDropdown from 'ee/analytics/devops_report/devops_adoption/components/devops_adoption_add_dropdown.vue';
 import DevopsAdoptionApp from 'ee/analytics/devops_report/devops_adoption/components/devops_adoption_app.vue';
+import DevopsAdoptionOverview from 'ee/analytics/devops_report/devops_adoption/components/devops_adoption_overview.vue';
 import DevopsAdoptionSection from 'ee/analytics/devops_report/devops_adoption/components/devops_adoption_section.vue';
 import {
   DEVOPS_ADOPTION_STRINGS,
@@ -101,6 +102,7 @@ describe('DevopsAdoptionApp', () => {
   }
 
   const findDevopsScoreTab = () => wrapper.findByTestId('devops-score-tab');
+  const findOverviewTab = () => wrapper.findByTestId('devops-overview-tab');
 
   afterEach(() => {
     wrapper.destroy();
@@ -142,7 +144,7 @@ describe('DevopsAdoptionApp', () => {
       });
 
       it('displays the error message and calls Sentry', () => {
-        const alert = wrapper.find(GlAlert);
+        const alert = wrapper.findComponent(GlAlert);
         expect(alert.exists()).toBe(true);
         expect(alert.text()).toBe(DEVOPS_ADOPTION_STRINGS.app.groupsError);
         expect(Sentry.captureException.mock.calls[0][0].networkError).toBe(error);
@@ -239,11 +241,11 @@ describe('DevopsAdoptionApp', () => {
             });
 
             it('does not render the devops section', () => {
-              expect(wrapper.find(DevopsAdoptionSection).exists()).toBe(false);
+              expect(wrapper.findComponent(DevopsAdoptionSection).exists()).toBe(false);
             });
 
             it('displays the error message ', () => {
-              const alert = wrapper.find(GlAlert);
+              const alert = wrapper.findComponent(GlAlert);
               expect(alert.exists()).toBe(true);
               expect(alert.text()).toBe(DEVOPS_ADOPTION_STRINGS.app.addSegmentsError);
             });
@@ -270,11 +272,11 @@ describe('DevopsAdoptionApp', () => {
       });
 
       it('does not render the devops section', () => {
-        expect(wrapper.find(DevopsAdoptionSection).exists()).toBe(false);
+        expect(wrapper.findComponent(DevopsAdoptionSection).exists()).toBe(false);
       });
 
       it('displays the error message ', () => {
-        const alert = wrapper.find(GlAlert);
+        const alert = wrapper.findComponent(GlAlert);
         expect(alert.exists()).toBe(true);
         expect(alert.text()).toBe(DEVOPS_ADOPTION_STRINGS.app.segmentsError);
       });
@@ -344,6 +346,16 @@ describe('DevopsAdoptionApp', () => {
     };
 
     const defaultDevopsAdoptionTabBehavior = () => {
+      describe('overview tab', () => {
+        it('displays the overview tab', () => {
+          expect(findOverviewTab().exists()).toBe(true);
+        });
+
+        it('displays the devops adoption overview component', () => {
+          expect(findOverviewTab().findComponent(DevopsAdoptionOverview).exists()).toBe(true);
+        });
+      });
+
       describe('devops adoption tabs', () => {
         it('displays the configured number of tabs', () => {
           expect(wrapper.findAllByTestId('devops-adoption-tab')).toHaveLength(
@@ -353,12 +365,15 @@ describe('DevopsAdoptionApp', () => {
 
         it('displays the devops section component with the tab', () => {
           expect(
-            wrapper.findByTestId('devops-adoption-tab').find(DevopsAdoptionSection).exists(),
+            wrapper
+              .findByTestId('devops-adoption-tab')
+              .findComponent(DevopsAdoptionSection)
+              .exists(),
           ).toBe(true);
         });
 
         it('displays the DevopsAdoptionAddDropdown as the last tab', () => {
-          expect(wrapper.find(DevopsAdoptionAddDropdown).exists()).toBe(true);
+          expect(wrapper.findComponent(DevopsAdoptionAddDropdown).exists()).toBe(true);
         });
 
         eventTrackingBehaviour('devops-adoption-tab', 'i_analytics_dev_ops_adoption');
@@ -379,7 +394,7 @@ describe('DevopsAdoptionApp', () => {
         });
 
         it('displays the devops score component', () => {
-          expect(findDevopsScoreTab().find(DevopsScore).exists()).toBe(true);
+          expect(findDevopsScoreTab().findComponent(DevopsScore).exists()).toBe(true);
         });
 
         eventTrackingBehaviour('devops-score-tab', 'i_analytics_dev_ops_score');

@@ -77,23 +77,23 @@ export const devopsAdoptionTableHeaders = [
   },
   {
     index: 1,
-    label: 'Issues',
-    tooltip: 'At least one issue opened',
-  },
-  {
-    index: 2,
-    label: 'MRs',
-    tooltip: 'At least one MR opened',
-  },
-  {
-    index: 3,
     label: 'Approvals',
     tooltip: 'At least one approval on an MR',
   },
   {
-    index: 4,
+    index: 2,
     label: 'Code owners',
     tooltip: 'Code owners enabled for at least one project',
+  },
+  {
+    index: 3,
+    label: 'Issues',
+    tooltip: 'At least one issue opened',
+  },
+  {
+    index: 4,
+    label: 'MRs',
+    tooltip: 'At least one MR opened',
   },
   {
     index: 5,
@@ -110,3 +110,44 @@ export const dataErrorMessage = 'Name already taken.';
 
 export const genericDeleteErrorMessage =
   'An error occurred while removing the group. Please try again.';
+
+export const overallAdoptionData = {
+  displayMeta: false,
+  featureMeta: [
+    {
+      adopted: false,
+      title: 'Approvals',
+    },
+    {
+      adopted: false,
+      title: 'Code owners',
+    },
+    {
+      adopted: true,
+      title: 'Issues',
+    },
+    {
+      adopted: true,
+      title: 'MRs',
+    },
+    {
+      adopted: false,
+      title: 'Scanning',
+    },
+    {
+      adopted: false,
+      title: 'Deploys',
+    },
+    {
+      adopted: false,
+      title: 'Pipelines',
+    },
+    {
+      adopted: true,
+      title: 'Runners',
+    },
+  ],
+  icon: 'tanuki',
+  title: 'Overall adoption',
+  variant: 'primary',
+};

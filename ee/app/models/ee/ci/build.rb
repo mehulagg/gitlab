@@ -184,7 +184,7 @@ module EE
 
       def dast_configuration_variables
         ::Gitlab::Ci::Variables::Collection.new.tap do |collection|
-          break collection unless ::Feature.enabled?(:dast_configuration_ui, project)
+          break collection unless ::Feature.enabled?(:dast_configuration_ui, project, default_enabled: :yaml)
           break collection unless (dast_configuration = options[:dast_configuration])
 
           if dast_configuration[:site_profile] && dast_site_profile

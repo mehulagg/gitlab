@@ -37,6 +37,13 @@ const approvers = {
     icon: 'approval',
     tag: '@approver',
   },
+  tokenAlternative: {
+    formattedKey: __('Approver'),
+    key: 'approver',
+    type: 'string',
+    param: 'usernames',
+    symbol: '@',
+  },
 };
 
 export default (IssuableTokenKeys, disableTargetBranchFilter = false) => {
@@ -44,6 +51,10 @@ export default (IssuableTokenKeys, disableTargetBranchFilter = false) => {
   const tokenPosition = 3;
 
   IssuableTokenKeys.tokenKeys.splice(tokenPosition, 0, ...[approvers.token]);
-  IssuableTokenKeys.tokenKeysWithAlternative.splice(tokenPosition, 0, ...[approvers.token]);
+  IssuableTokenKeys.tokenKeysWithAlternative.splice(
+    tokenPosition,
+    0,
+    ...[approvers.token, approvers.tokenAlternative],
+  );
   IssuableTokenKeys.conditions.push(...approvers.condition);
 };

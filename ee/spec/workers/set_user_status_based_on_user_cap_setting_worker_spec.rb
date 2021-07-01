@@ -67,6 +67,30 @@ RSpec.describe SetUserStatusBasedOnUserCapSettingWorker, type: :worker do
       include_examples 'does not send emails to active admins'
     end
 
+    context 'when the auto-creation of an omniauth user is blocked' do
+      before do
+        allow(Gitlab.config.omniauth).to receive(:block_auto_created_users).and_return(true)
+      end
+
+      context 'when the user is an omniauth user' do
+        let!(:user) { create(:omniauth_user, :blocked_pending_approval) }
+
+        it 'does not activate this user' do
+          subject
+
+          expect(user.reload).to be_blocked
+        end
+      end
+
+      context 'when the user is not an omniauth user' do
+        it 'activates this user' do
+          subject
+
+          expect(user.reload).to be_active
+        end
+      end
+    end
+
     context 'when current billable user count is less than user cap' do
       it 'activates the user' do
         subject

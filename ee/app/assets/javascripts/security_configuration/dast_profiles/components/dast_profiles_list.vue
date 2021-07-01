@@ -193,10 +193,11 @@ export default {
             <gl-dropdown
               v-gl-tooltip
               class="gl-display-none gl-md-display-inline-flex!"
-              toggle-class="gl-border-0! gl-shadow-none!"
+              toggle-class="gl-border-0! gl-shadow-none! gl-pl-2!"
               no-caret
               right
               category="tertiary"
+              size="small"
               :title="__('More actions')"
             >
               <template #button-content>

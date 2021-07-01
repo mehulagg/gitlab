@@ -112,6 +112,10 @@ module EE
       issuables_service(noteable, project, author).publish_issue_to_status_page
     end
 
+    def notify_via_escalation(noteable, project, recipients, escalation_policy, oncall_schedule)
+      escalations_service(noteable, project).notify_via_escalation(recipients, escalation_policy: escalation_policy, oncall_schedule: oncall_schedule)
+    end
+
     private
 
     def issuables_service(noteable, project, author)
@@ -128,6 +132,10 @@ module EE
 
     def vulnerabilities_service(noteable, project, author)
       ::SystemNotes::VulnerabilitiesService.new(noteable: noteable, project: project, author: author)
+    end
+
+    def escalations_service(noteable, project)
+      ::SystemNotes::EscalationsService.new(noteable: noteable, project: project)
     end
   end
 end

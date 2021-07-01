@@ -36,20 +36,6 @@ RSpec.describe Ci::RetryPipelineService do
       expect(build('rspec 2')).to be_pending
       expect(pipeline.reload).to be_running
     end
-
-    context 'when the feature flag is disabled' do
-      before do
-        stub_feature_flags(ci_quota_check_on_retries: false)
-      end
-
-      it 'enqueues all builds' do
-        service.execute(pipeline)
-
-        expect(build('rspec 1')).to be_pending
-        expect(build('rspec 2')).to be_pending
-        expect(pipeline.reload).to be_running
-      end
-    end
   end
 
   def build(name)

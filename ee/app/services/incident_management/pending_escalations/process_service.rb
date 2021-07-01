@@ -3,6 +3,8 @@
 module IncidentManagement
   module PendingEscalations
     class ProcessService < BaseService
+      include Gitlab::Utils::StrongMemoize
+
       def initialize(escalation)
         @escalation = escalation
         @project = escalation.project
@@ -17,6 +19,7 @@ module IncidentManagement
         return if target_status_exceeded_rule?
 
         notify_recipients
+        create_system_notes
         destroy_escalation!
       end
 
@@ -42,11 +45,17 @@ module IncidentManagement
         NotificationService
           .new
           .async
-          .notify_oncall_users_of_alert(oncall_notification_recipients.to_a, target)
+          .notify_oncall_users_of_alert(oncall_notification_recipients, target)
+      end
+
+      def create_system_notes
+        SystemNoteService.notify_via_escalation(target, project, oncall_notification_recipients, escalation.policy, oncall_schedule)
       end
 
       def oncall_notification_recipients
-        ::IncidentManagement::OncallUsersFinder.new(project, schedule: oncall_schedule).execute
+        strong_memoize(:oncall_notification_recipients) do
+          ::IncidentManagement::OncallUsersFinder.new(project, schedule: oncall_schedule).execute.to_a
+        end
       end
 
       def destroy_escalation!

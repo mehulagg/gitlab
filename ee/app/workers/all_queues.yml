@@ -424,7 +424,7 @@
   :tags: []
 - :name: cronjob:update_max_seats_used_for_gitlab_com_subscriptions
   :worker_name: UpdateMaxSeatsUsedForGitlabComSubscriptionsWorker
-  :feature_category: :license
+  :feature_category: :utilization
   :has_external_dependencies:
   :urgency: :low
   :resource_boundary: :cpu

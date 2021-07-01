@@ -780,6 +780,46 @@ Input type: `CiCdSettingsUpdateInput`
 | <a id="mutationcicdsettingsupdateclientmutationid"></a>`clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 | <a id="mutationcicdsettingsupdateerrors"></a>`errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 
+### `Mutation.ciJobTokenScopeAddProject`
+
+Input type: `CiJobTokenScopeAddProjectInput`
+
+#### Arguments
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| <a id="mutationcijobtokenscopeaddprojectclientmutationid"></a>`clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
+| <a id="mutationcijobtokenscopeaddprojectprojectpath"></a>`projectPath` | [`ID!`](#id) | The project that the CI job token scope belongs to. |
+| <a id="mutationcijobtokenscopeaddprojecttargetprojectpath"></a>`targetProjectPath` | [`ID!`](#id) | The project to be added to the CI job token scope. |
+
+#### Fields
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| <a id="mutationcijobtokenscopeaddprojectcijobtokenscope"></a>`ciJobTokenScope` | [`CiJobTokenScopeType`](#cijobtokenscopetype) | The CI job token's scope of access. |
+| <a id="mutationcijobtokenscopeaddprojectclientmutationid"></a>`clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
+| <a id="mutationcijobtokenscopeaddprojecterrors"></a>`errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
+
+### `Mutation.ciJobTokenScopeRemoveProject`
+
+Input type: `CiJobTokenScopeRemoveProjectInput`
+
+#### Arguments
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| <a id="mutationcijobtokenscoperemoveprojectclientmutationid"></a>`clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
+| <a id="mutationcijobtokenscoperemoveprojectprojectpath"></a>`projectPath` | [`ID!`](#id) | The project that the CI job token scope belongs to. |
+| <a id="mutationcijobtokenscoperemoveprojecttargetprojectpath"></a>`targetProjectPath` | [`ID!`](#id) | The project to be removed from the CI job token scope. |
+
+#### Fields
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| <a id="mutationcijobtokenscoperemoveprojectcijobtokenscope"></a>`ciJobTokenScope` | [`CiJobTokenScopeType`](#cijobtokenscopetype) | The CI job token's scope of access. |
+| <a id="mutationcijobtokenscoperemoveprojectclientmutationid"></a>`clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
+| <a id="mutationcijobtokenscoperemoveprojecterrors"></a>`errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
+
 ### `Mutation.clusterAgentDelete`
 
 Input type: `ClusterAgentDeleteInput`
@@ -1913,6 +1953,31 @@ Input type: `DiscussionToggleResolveInput`
 | <a id="mutationdiscussiontoggleresolveclientmutationid"></a>`clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 | <a id="mutationdiscussiontoggleresolvediscussion"></a>`discussion` | [`Discussion`](#discussion) | The discussion after mutation. |
 | <a id="mutationdiscussiontoggleresolveerrors"></a>`errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
+
+### `Mutation.echoCreate`
+
+A mutation that does not perform any changes.
+
+This is expected to be used for testing of endpoints, to verify
+that a user has mutation access.
+
+Input type: `EchoCreateInput`
+
+#### Arguments
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| <a id="mutationechocreateclientmutationid"></a>`clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
+| <a id="mutationechocreateerrors"></a>`errors` | [`[String!]`](#string) | Errors to return to the user. |
+| <a id="mutationechocreatemessages"></a>`messages` | [`[String!]`](#string) | Messages to return to the user. |
+
+#### Fields
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| <a id="mutationechocreateclientmutationid"></a>`clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
+| <a id="mutationechocreateechoes"></a>`echoes` | [`[String!]`](#string) | Messages returned to the user. |
+| <a id="mutationechocreateerrors"></a>`errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 
 ### `Mutation.enableDevopsAdoptionNamespace`
 
@@ -7710,9 +7775,11 @@ Represents the total number of issues and their weights for a particular day.
 | <a id="cirunnerdescription"></a>`description` | [`String`](#string) | Description of the runner. |
 | <a id="cirunnerid"></a>`id` | [`CiRunnerID!`](#cirunnerid) | ID of the runner. |
 | <a id="cirunneripaddress"></a>`ipAddress` | [`String!`](#string) | IP address of the runner. |
+| <a id="cirunnerjobcount"></a>`jobCount` | [`Int`](#int) | Number of jobs processed by the runner (limited to 1000, plus one to indicate that more items exist). |
 | <a id="cirunnerlocked"></a>`locked` | [`Boolean`](#boolean) | Indicates the runner is locked. |
 | <a id="cirunnermaximumtimeout"></a>`maximumTimeout` | [`Int`](#int) | Maximum timeout (in seconds) for jobs processed by the runner. |
 | <a id="cirunnerprivateprojectsminutescostfactor"></a>`privateProjectsMinutesCostFactor` | [`Float`](#float) | Private projects' "minutes cost factor" associated with the runner (GitLab.com only). |
+| <a id="cirunnerprojectcount"></a>`projectCount` | [`Int`](#int) | Number of projects that the runner is associated with. |
 | <a id="cirunnerpublicprojectsminutescostfactor"></a>`publicProjectsMinutesCostFactor` | [`Float`](#float) | Public projects' "minutes cost factor" associated with the runner (GitLab.com only). |
 | <a id="cirunnerrevision"></a>`revision` | [`String!`](#string) | Revision of the runner. |
 | <a id="cirunnerrununtagged"></a>`runUntagged` | [`Boolean!`](#boolean) | Indicates the runner is able to run untagged jobs. |
@@ -11158,6 +11225,7 @@ four standard [pagination arguments](#connection-pagination-arguments):
 | <a id="pipelinesecurityreportfindingsreporttype"></a>`reportType` | [`[String!]`](#string) | Filter vulnerability findings by report type. |
 | <a id="pipelinesecurityreportfindingsscanner"></a>`scanner` | [`[String!]`](#string) | Filter vulnerability findings by Scanner.externalId. |
 | <a id="pipelinesecurityreportfindingsseverity"></a>`severity` | [`[String!]`](#string) | Filter vulnerability findings by severity. |
+| <a id="pipelinesecurityreportfindingsstate"></a>`state` | [`[VulnerabilityState!]`](#vulnerabilitystate) | Filter vulnerability findings by state. |
 
 ##### `Pipeline.testSuite`
 
@@ -12625,11 +12693,11 @@ Represents summary of a security report.
 | Name | Type | Description |
 | ---- | ---- | ----------- |
 | <a id="securityreportsummaryapifuzzing"></a>`apiFuzzing` | [`SecurityReportSummarySection`](#securityreportsummarysection) | Aggregated counts for the `api_fuzzing` scan. |
+| <a id="securityreportsummaryclusterimagescanning"></a>`clusterImageScanning` | [`SecurityReportSummarySection`](#securityreportsummarysection) | Aggregated counts for the `cluster_image_scanning` scan. |
 | <a id="securityreportsummarycontainerscanning"></a>`containerScanning` | [`SecurityReportSummarySection`](#securityreportsummarysection) | Aggregated counts for the `container_scanning` scan. |
 | <a id="securityreportsummarycoveragefuzzing"></a>`coverageFuzzing` | [`SecurityReportSummarySection`](#securityreportsummarysection) | Aggregated counts for the `coverage_fuzzing` scan. |
 | <a id="securityreportsummarydast"></a>`dast` | [`SecurityReportSummarySection`](#securityreportsummarysection) | Aggregated counts for the `dast` scan. |
 | <a id="securityreportsummarydependencyscanning"></a>`dependencyScanning` | [`SecurityReportSummarySection`](#securityreportsummarysection) | Aggregated counts for the `dependency_scanning` scan. |
-| <a id="securityreportsummaryrunningcontainerscanning"></a>`runningContainerScanning` | [`SecurityReportSummarySection`](#securityreportsummarysection) | Aggregated counts for the `running_container_scanning` scan. |
 | <a id="securityreportsummarysast"></a>`sast` | [`SecurityReportSummarySection`](#securityreportsummarysection) | Aggregated counts for the `sast` scan. |
 | <a id="securityreportsummarysecretdetection"></a>`secretDetection` | [`SecurityReportSummarySection`](#securityreportsummarysection) | Aggregated counts for the `secret_detection` scan. |
 
@@ -13484,7 +13552,7 @@ Represents a vulnerability.
 | <a id="vulnerabilitynotes"></a>`notes` | [`NoteConnection!`](#noteconnection) | All notes on this noteable. (see [Connections](#connections)) |
 | <a id="vulnerabilityprimaryidentifier"></a>`primaryIdentifier` | [`VulnerabilityIdentifier`](#vulnerabilityidentifier) | Primary identifier of the vulnerability. |
 | <a id="vulnerabilityproject"></a>`project` | [`Project`](#project) | The project on which the vulnerability was found. |
-| <a id="vulnerabilityreporttype"></a>`reportType` | [`VulnerabilityReportType`](#vulnerabilityreporttype) | Type of the security report that found the vulnerability (SAST, DEPENDENCY_SCANNING, CONTAINER_SCANNING, DAST, SECRET_DETECTION, COVERAGE_FUZZING, API_FUZZING, RUNNING_CONTAINER_SCANNING). `Scan Type` in the UI. |
+| <a id="vulnerabilityreporttype"></a>`reportType` | [`VulnerabilityReportType`](#vulnerabilityreporttype) | Type of the security report that found the vulnerability (SAST, DEPENDENCY_SCANNING, CONTAINER_SCANNING, DAST, SECRET_DETECTION, COVERAGE_FUZZING, API_FUZZING, CLUSTER_IMAGE_SCANNING). `Scan Type` in the UI. |
 | <a id="vulnerabilityresolvedat"></a>`resolvedAt` | [`Time`](#time) | Timestamp of when the vulnerability state was changed to resolved. |
 | <a id="vulnerabilityresolvedby"></a>`resolvedBy` | [`UserCore`](#usercore) | The user that resolved the vulnerability. |
 | <a id="vulnerabilityresolvedondefaultbranch"></a>`resolvedOnDefaultBranch` | [`Boolean!`](#boolean) | Indicates whether the vulnerability is fixed on the default branch or not. |
@@ -15160,11 +15228,11 @@ The type of the security scan that found the vulnerability.
 | Value | Description |
 | ----- | ----------- |
 | <a id="vulnerabilityreporttypeapi_fuzzing"></a>`API_FUZZING` |  |
+| <a id="vulnerabilityreporttypecluster_image_scanning"></a>`CLUSTER_IMAGE_SCANNING` |  |
 | <a id="vulnerabilityreporttypecontainer_scanning"></a>`CONTAINER_SCANNING` |  |
 | <a id="vulnerabilityreporttypecoverage_fuzzing"></a>`COVERAGE_FUZZING` |  |
 | <a id="vulnerabilityreporttypedast"></a>`DAST` |  |
 | <a id="vulnerabilityreporttypedependency_scanning"></a>`DEPENDENCY_SCANNING` |  |
-| <a id="vulnerabilityreporttyperunning_container_scanning"></a>`RUNNING_CONTAINER_SCANNING` |  |
 | <a id="vulnerabilityreporttypesast"></a>`SAST` |  |
 | <a id="vulnerabilityreporttypesecret_detection"></a>`SECRET_DETECTION` |  |
 
