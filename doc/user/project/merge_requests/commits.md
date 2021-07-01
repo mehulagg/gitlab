@@ -26,3 +26,56 @@ To seamlessly navigate among commits in a merge request:
    - Using the <kbd>X</kbd> and <kbd>C</kbd> keyboard shortcuts.
 
 ![Merge requests commit navigation](img/commit_nav_v13_11.png)
+
+## Merge requests context commits
+
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/29274) in GitLab 13.12.
+> - [Deployed behind a feature flag](../../feature_flags.md), disabled by default.
+> - Disabled on GitLab.com.
+> - Not recommended for production use.
+> - To use in GitLab self-managed instances, ask a GitLab administrator to [enable it](#enable-or-disable-merge-request-context-commits). **(FREE SELF)**
+
+This in-development feature might not be available for your use. There can be
+[risks when enabling features still in development](../../feature_flags.md#risks-when-enabling-features-still-in-development).
+Refer to this feature's version history for more details.
+
+When reviewing a merge request, it helps to have more context about the changes
+made. That includes unchanged lines in unchanged files, and previous commits
+that have already merged that the change is built on.
+
+To add previously merged commits to a merge request for more context:
+
+1. Select the **Commits** tab.
+1. Click **Add previously merged commits**.
+
+   ![Add previously merged commits button](img/add_previously_merged_commits_button_v14_1.png)
+
+1. Check the commits that you want to add and click **Save changes**.
+
+   ![Add previously merged commits modal](img/add_previously_merged_commits_modal_v14_1.png)
+
+To view the changes done on those previously merged commits:
+
+1. Select the **Changes** tab.
+1. Compare with **previously merged commits**.
+
+![Previously merged commits](img/previously_merged_commits_v14_1.png)
+
+### Enable or disable merge request context commits **(FREE SELF)**
+
+Merge request context commits is under development and not ready for production use. It is
+deployed behind a feature flag that is **disabled by default**.
+[GitLab administrators with access to the GitLab Rails console](../../../administration/feature_flags.md)
+can enable it.
+
+To enable it:
+
+```ruby
+Feature.enable(:context_commits)
+```
+
+To disable it:
+
+```ruby
+Feature.disable(:context_commits)
+```
