@@ -125,6 +125,17 @@ module EE
           sortable: false,
           sortParam: 'relevant'
         }
+
+        if search_service.scope == 'issues' && Feature.enabled?(:search_sort_issues_by_popularity) && Elastic::DataMigrationService.migration_has_finished?(:add_upvotes_to_issues)
+          options << {
+            title: _('Popularity'),
+            sortable: true,
+            sortParam: {
+              asc: 'popularity_asc',
+              desc: 'popularity_desc'
+            }
+          }
+        end
       end
 
       options + super

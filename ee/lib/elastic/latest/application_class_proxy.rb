@@ -204,6 +204,18 @@ module Elastic
               order: 'desc'
             }
           })
+        when :popularity_asc
+          query_hash.merge(sort: {
+            upvotes: {
+              order: 'asc'
+            }
+          })
+        when :popularity_desc
+          query_hash.merge(sort: {
+            upvotes: {
+              order: 'desc'
+            }
+          })
         else
           query_hash
         end
