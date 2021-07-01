@@ -1,28 +1,24 @@
 import { GlLabel } from '@gitlab/ui';
-import { shallowMount, createLocalVue } from '@vue/test-utils';
-import Vuex from 'vuex';
+import { shallowMount } from '@vue/test-utils';
 
 import DropdownValue from '~/vue_shared/components/sidebar/labels_select_widget/dropdown_value.vue';
 
-import labelsSelectModule from '~/vue_shared/components/sidebar/labels_select_widget/store';
-
-import { mockConfig, mockRegularLabel, mockScopedLabel } from './mock_data';
-
-const localVue = createLocalVue();
-localVue.use(Vuex);
+import { mockRegularLabel, mockScopedLabel } from './mock_data';
 
 describe('DropdownValue', () => {
   let wrapper;
 
-  const createComponent = (initialState = {}, slots = {}) => {
-    const store = new Vuex.Store(labelsSelectModule());
-
-    store.dispatch('setInitialState', { ...mockConfig, ...initialState });
-
+  const createComponent = (props = {}, slots = {}) => {
     wrapper = shallowMount(DropdownValue, {
-      localVue,
-      store,
       slots,
+      propsData: {
+        selectedLabels: [mockRegularLabel, mockScopedLabel],
+        allowLabelRemove: true,
+        allowScopedLabels: true,
+        labelsFilterBasePath: '/gitlab-org/my-project/issues',
+        labelsFilterParam: 'label_name',
+        ...props,
+      },
     });
   };
 
