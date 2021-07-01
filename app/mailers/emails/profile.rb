@@ -31,7 +31,7 @@ module Emails
 
       profile_email_with_layout(
         to: email,
-        subject: subject(_("Your account has been deactivated")))
+        subject: subject(_('Your account has been deactivated')))
     end
 
     # rubocop: disable CodeReuse/ActiveRecord
