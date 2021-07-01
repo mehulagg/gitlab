@@ -126,9 +126,9 @@ At the top of the page, the number of unresolved threads is updated.
 If you have multiple unresolved threads in a merge request, you can
 create an issue to resolve them separately.
 
-1. In the merge request, at the top of the page, select **Resolve all threads in new issue**.
+- In the merge request, at the top of the page, select **Resolve all threads in new issue**.
 
-   ![Open new issue for all unresolved threads](img/btn_new_issue_for_all_threads.png)
+  ![Open new issue for all unresolved threads](img/btn_new_issue_for_all_threads.png)
 
 All threads are marked as resolved and a link is added from the merge request to
 the newly created issue.
@@ -138,44 +138,39 @@ the newly created issue.
 If you have one specific unresolved thread in a merge request, you can
 create an issue to resolve it separately.
 
-1. In the merge request, under the last reply to the thread, next to the
-   **Resolve thread** button, select **Resolve this thread in a new issue**.
+- In the merge request, under the last reply to the thread, next to the
+  **Resolve thread** button, select **Resolve this thread in a new issue**.
 
-   ![Create issue for thread](img/new_issue_for_thread.png)
+  ![Create issue for thread](img/new_issue_for_thread.png)
 
 The thread is marked as resolved and a link is added from the merge request to
 the newly created issue.
 
-### Only allow merge requests to be merged if all threads are resolved
+### Prevent merge unless all threads are resolved
 
 You can prevent merge requests from being merged until all threads are
 resolved.
 
-Navigate to your project's settings page, select the
-**Only allow merge requests to be merged if all threads are resolved** check
-box and hit **Save** for the changes to take effect.
-
-![Only allow merge if all the threads are resolved settings](img/only_allow_merge_if_all_threads_are_resolved.png)
-
-From now on, you can't merge from the UI until all threads
-are resolved.
-
-![Only allow merge if all the threads are resolved message](img/resolve_thread_open_issue_v13_9.png)
+1. On the top bar, select **Menu > Projects** and find your project.
+1. On the left sidebar, select **Settings > General**.
+1. Expand **Merge requests**.
+1. Under **Merge checks**, select the **All discussions must be resolved** checkbox.
+1. Select **Save changes**.
 
 ### Automatically resolve merge request diff threads when they become outdated
 
-You can automatically resolve merge request diff threads on lines modified
+You can set merge requests to automatically resolve threads when lines are modified
 with a new push.
 
-Navigate to your project's settings page, select the **Automatically resolve
-merge request diffs threads on lines changed with a push** check box and hit
-**Save** for the changes to take effect.
+1. On the top bar, select **Menu > Projects** and find your project.
+1. On the left sidebar, select **Settings > General**.
+1. Expand **Merge requests**.
+1. Under **Merge options**, select the
+   **Automatically resolve merge request diff discussions when they become outdated** checkbox.
+1. Select **Save changes**.
 
-![Automatically resolve merge request diff threads when they become outdated](img/automatically_resolve_outdated_discussions.png)
-
-From now on, any threads on a diff are resolved by default if a push
-makes that diff section outdated. Threads on lines that don't change and
-top-level resolvable threads are not automatically resolved.
+Threads are now resolved if a push makes a diff section outdated.
+Threads on lines that don't change and top-level resolvable threads are not resolved.
 
 ## Add a comment to a commit
 
