@@ -16,5 +16,5 @@ export default () => ({
   },
   filter: FILTER.all,
   sortField: 'severity',
-  sortOrder: SORT_ORDER.ascending,
+  sortOrder: SORT_ORDER.descending,
 });
