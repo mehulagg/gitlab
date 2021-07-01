@@ -79,8 +79,7 @@ Example response:
 ]
 ```
 
-Users of GitLab Premium SaaS may also see the `plan` parameter associated with
-a namespace:
+Owners also see the `plan` property associated with a namespace:
 
 ```json
 [
@@ -114,8 +113,7 @@ once a day.
 ```
 
 NOTE:
-Only group maintainers or owners are presented with `members_count_with_descendants`
-and `plan` **(PREMIUM SAAS)**.
+Only group owners are presented with `members_count_with_descendants` and `plan`. **(PREMIUM SAAS)**
 
 ## Search for namespace
 
