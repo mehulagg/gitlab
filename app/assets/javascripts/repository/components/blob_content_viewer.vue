@@ -10,6 +10,7 @@ import { __ } from '~/locale';
 import blobInfoQuery from '../queries/blob_info.query.graphql';
 import BlobButtonGroup from './blob_button_group.vue';
 import BlobEdit from './blob_edit.vue';
+import { loadViewer } from './blob_viewers';
 
 export default {
   components: {
@@ -111,6 +112,10 @@ export default {
     hasRenderError() {
       return Boolean(this.viewer.renderError);
     },
+    blobViewer() {
+      const { fileType } = this.viewer;
+      return () => loadViewer(fileType);
+    },
   },
   methods: {
     switchViewer(newViewer) {
@@ -143,12 +148,14 @@ export default {
         </template>
       </blob-header>
       <blob-content
+        v-if="!blobViewer()"
         :blob="blobInfo"
         :content="blobInfo.rawTextBlob"
         :is-raw-content="true"
         :active-viewer="viewer"
         :loading="false"
       />
+      <component :is="blobViewer" v-else class="blob-viewer" />
     </div>
   </div>
 </template>
