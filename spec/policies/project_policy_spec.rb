@@ -795,6 +795,45 @@ RSpec.describe ProjectPolicy do
     end
   end
 
+  context 'deploy key access' do
+    context 'private project' do
+      let(:project) { private_project }
+      let!(:deploy_key) { create(:deploy_key, user: owner) }
+
+      subject { described_class.new(deploy_key, project) }
+
+      context 'when a read deploy key is enabled in the project' do
+        let!(:deploy_keys_project) { create(:deploy_keys_project, project: project, deploy_key: deploy_key) }
+
+        it 'allows download access' do
+          expect(subject).to be_allowed(:download_code)
+        end
+
+        it 'does not allow write access' do
+          expect(subject).not_to be_allowed(:push_code)
+        end
+      end
+
+      context 'when a write deploy key is enabled in the project' do
+        let!(:deploy_keys_project) { create(:deploy_keys_project, :write_access, project: project, deploy_key: deploy_key) }
+
+        it 'allows download access' do
+          expect(subject).to be_allowed(:download_code)
+        end
+
+        it 'allows write access' do
+          expect(subject).to be_allowed(:push_code)
+        end
+      end
+
+      context 'when the deploy key is not enabled in the project' do
+        it 'does not allow access when a user has read access to the repo' do
+          expect(subject).not_to be_allowed(:download_code)
+        end
+      end
+    end
+  end
+
   context 'deploy token access' do
     let!(:project_deploy_token) do
       create(:project_deploy_token, project: project, deploy_token: deploy_token)

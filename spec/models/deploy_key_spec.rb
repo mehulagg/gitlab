@@ -93,4 +93,16 @@ RSpec.describe DeployKey, :mailer do
       end
     end
   end
+
+  describe 'PolicyActor methods' do
+    let(:deploy_key) { create(:deploy_key) }
+    let(:user) { create(:user) }
+    let(:methods) { PolicyActor.instance_methods }
+
+    it 'responds to all PolicyActor methods' do
+      methods.each do |method|
+        expect(deploy_key.respond_to?(method)).to be true
+      end
+    end
+  end
 end
