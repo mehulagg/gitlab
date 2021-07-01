@@ -10,7 +10,7 @@ module EE
         override :builds_for_shared_runner
         def builds_for_shared_runner
           # if disaster recovery is enabled, we disable quota
-          if ::Feature.enabled?(:ci_queueing_disaster_recovery, runner, type: :ops, default_enabled: :yaml)
+          if ::Feature.enabled?(:ci_queueing_disaster_recovery_disable_quota, runner, type: :ops, default_enabled: :yaml)
             super
           else
             enforce_minutes_based_on_cost_factors(super)
