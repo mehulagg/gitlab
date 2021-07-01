@@ -34,6 +34,8 @@ module Registrations
         experiment(:jobs_to_be_done, user: current_user)
           .track(:create_project, project: @project)
 
+        #track project create here
+
         if helpers.in_trial_onboarding_flow?
           record_experiment_user(:trial_onboarding_issues, onboarding_context)
           record_experiment_conversion_event(:trial_onboarding_issues)

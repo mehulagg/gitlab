@@ -23,6 +23,8 @@ module Registrations
       if @group.persisted?
         experiment(:jobs_to_be_done, user: current_user)
           .track(:create_group, namespace: @group)
+
+        # track group create here
         create_successful_flow
       else
         render action: :new
