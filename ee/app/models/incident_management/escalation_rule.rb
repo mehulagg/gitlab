@@ -7,7 +7,8 @@ module IncidentManagement
     MAX_RULE_PER_POLICY_COUNT = 10
 
     belongs_to :policy, class_name: 'EscalationPolicy', inverse_of: 'rules', foreign_key: 'policy_id'
-    belongs_to :oncall_schedule, class_name: 'OncallSchedule', inverse_of: 'rotations', foreign_key: 'oncall_schedule_id'
+    belongs_to :oncall_schedule, class_name: 'OncallSchedule', foreign_key: 'oncall_schedule_id', optional: true
+    belongs_to :user, optional: true
 
     enum status: AlertManagement::Alert::STATUSES.slice(:acknowledged, :resolved)
 

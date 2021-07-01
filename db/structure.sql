@@ -13861,7 +13861,8 @@ CREATE TABLE incident_management_escalation_rules (
     policy_id bigint NOT NULL,
     oncall_schedule_id bigint NOT NULL,
     status smallint NOT NULL,
-    elapsed_time_seconds integer NOT NULL
+    elapsed_time_seconds integer NOT NULL,
+    user_id integer
 );
 
 CREATE SEQUENCE incident_management_escalation_rules_id_seq
@@ -25589,6 +25590,9 @@ ALTER TABLE ONLY epics
 
 ALTER TABLE ONLY clusters_applications_runners
     ADD CONSTRAINT fk_02de2ded36 FOREIGN KEY (runner_id) REFERENCES ci_runners(id) ON DELETE SET NULL;
+
+ALTER TABLE ONLY incident_management_escalation_rules
+    ADD CONSTRAINT fk_0314ee86eb FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL;
 
 ALTER TABLE ONLY design_management_designs_versions
     ADD CONSTRAINT fk_03c671965c FOREIGN KEY (design_id) REFERENCES design_management_designs(id) ON DELETE CASCADE;
