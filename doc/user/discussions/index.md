@@ -112,99 +112,39 @@ Prerequisites:
 To resolve a thread:
 
 1. Go to the thread.
-1. Below the last reply, in the **Reply** field, either:
-   - Select **Resolve thread**.
-   - Enter text, select the **Resolve thread** checkbox, and select **Add comment now**.
+1. Do one of the following:
+   - In the top right of the original comment, select the **Resolve thread** (**{check-circle}**) icon.
+   - Below the last reply, in the **Reply** field, select **Resolve thread**.
+   - Below the last reply, in the **Reply** field, enter text, select the **Resolve thread** checkbox, and select **Add comment now**.
 
 At the top of the page, the number of unresolved threads is updated.
 
 ![Count of unresolved threads](img/unresolved_threads_v14_1.png)
 
-### Commit threads in the context of a merge request
-
-For reviewers with commit-based workflow, it may be useful to add threads to
-specific commit diffs in the context of a merge request. These threads
-persist through a commit ID change when:
-
-- force-pushing after a rebase
-- amending a commit
-
-To create a commit diff thread:
-
-1. Navigate to the merge request **Commits** tab. A list of commits that
-   constitute the merge request are shown.
-
-   ![Merge request commits tab](img/merge_request_commits_tab.png)
-
-1. Navigate to a specific commit, select the **Changes** tab (where you
-   are only be presented diffs from the selected commit), and leave a comment.
-
-   ![Commit diff discussion in merge request context](img/commit_comment_mr_context.png)
-
-1. Any threads created this way are shown in the merge request's
-   **Discussions** tab and are resolvable.
-
-   ![Merge request Discussions tab](img/commit_comment_mr_discussions_tab.png)
-
-Threads created this way only appear in the original merge request
-and not when navigating to that commit under your project's
-**Repository > Commits** page.
-
-NOTE:
-When a link of a commit reference is found in a thread inside a merge
-request, it is automatically converted to a link in the context of the
-current merge request.
-
-### Marking a comment or thread as resolved
-
-You can mark a thread as resolved by selecting the **Resolve thread**
-button at the bottom of the thread.
-
-!["Resolve thread" button](img/resolve_thread_button_v13_3.png)
-
-Alternatively, you can mark each comment as resolved individually.
-
-!["Resolve comment" button](img/resolve_comment_button.png)
-
 ### Move all unresolved threads in a merge request to an issue
 
-To continue all open threads from a merge request in a new issue, select
-**Resolve all threads in new issue**.
+If you have multiple unresolved threads in a merge request, you can
+create an issue to resolve them separately.
 
-![Open new issue for all unresolved threads](img/btn_new_issue_for_all_threads.png)
+1. In the merge request, at the top of the page, select **Resolve all threads in new issue**.
 
-Alternatively, when your project only accepts merge requests [when all threads
-are resolved](#only-allow-merge-requests-to-be-merged-if-all-threads-are-resolved),
-an **open an issue to resolve them later** link displays in the merge
-request widget.
+   ![Open new issue for all unresolved threads](img/btn_new_issue_for_all_threads.png)
 
-![Link in merge request widget](img/resolve_thread_open_issue_v13_9.png)
+All threads are marked as resolved and a link is added from the merge request to
+the newly created issue.
 
-This prepares an issue with its content referring to the merge request and
-the unresolved threads.
+### Move one unresolved thread in a merge request to an issue
 
-![Issue mentioning threads in a merge request](img/preview_issue_for_threads.png)
+If you have one specific unresolved thread in a merge request, you can
+create an issue to resolve it separately.
 
-Hitting **Create issue** causes all threads to be marked as resolved and
-add a note referring to the newly created issue.
+1. In the merge request, under the last reply to the thread, next to the
+   **Resolve thread** button, select **Resolve this thread in a new issue**.
 
-![Mark threads as resolved notice](img/resolve_thread_issue_notice.png)
+   ![Create issue for thread](img/new_issue_for_thread.png)
 
-You can now proceed to merge the merge request from the UI.
-
-### Moving a single thread to a new issue
-
-To create a new issue for a single thread, you can use the **Resolve this
-thread in a new issue** button.
-
-![Create issue for thread](img/new_issue_for_thread.png)
-
-This directs you to a new issue prefilled with the content of the
-thread, similar to the issues created for delegating multiple
-threads at once. Saving the issue marks the thread as resolved and
-add a note to the merge request thread referencing the new issue.
-
-![New issue for a single thread](img/preview_issue_for_thread.png)
+The thread is marked as resolved and a link is added from the merge request to
+the newly created issue.
 
 ### Only allow merge requests to be merged if all threads are resolved
 
@@ -249,6 +189,41 @@ You can add comments and threads to a particular commit.
 WARNING:
 Threads created this way are lost if the commit ID changes after a
 force push.
+
+### Commit threads in the context of a merge request
+
+For reviewers with commit-based workflow, it may be useful to add threads to
+specific commit diffs in the context of a merge request. These threads
+persist through a commit ID change when:
+
+- force-pushing after a rebase
+- amending a commit
+
+To create a commit diff thread:
+
+1. Navigate to the merge request **Commits** tab. A list of commits that
+   constitute the merge request are shown.
+
+   ![Merge request commits tab](img/merge_request_commits_tab.png)
+
+1. Navigate to a specific commit, select the **Changes** tab (where you
+   are only be presented diffs from the selected commit), and leave a comment.
+
+   ![Commit diff discussion in merge request context](img/commit_comment_mr_context.png)
+
+1. Any threads created this way are shown in the merge request's
+   **Discussions** tab and are resolvable.
+
+   ![Merge request Discussions tab](img/commit_comment_mr_discussions_tab.png)
+
+Threads created this way only appear in the original merge request
+and not when navigating to that commit under your project's
+**Repository > Commits** page.
+
+NOTE:
+When a link of a commit reference is found in a thread inside a merge
+request, it is automatically converted to a link in the context of the
+current merge request.
 
 ## Image threads
 
