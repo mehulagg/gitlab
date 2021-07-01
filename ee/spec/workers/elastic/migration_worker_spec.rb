@@ -125,21 +125,31 @@ RSpec.describe Elastic::MigrationWorker, :elastic do
 
         context 'indexing pause' do
           before do
-            allow(migration).to receive(:pause_indexing?).and_return(true)
+            allow(migration).to receive(:pause_indexing?).and_return(migration_pause_indexing)
+            stub_ee_application_setting(elasticsearch_pause_indexing: indexing_paused)
           end
 
           let(:batched) { true }
 
-          where(:started, :completed, :expected) do
-            false | false | false
-            true  | false | false
-            true  | true  | true
+          where(:indexing_paused, :migration_pause_indexing, :started, :completed) do
+            true  | true  | false | false
+            true  | true  | true  | false
+            true  | true  | true  | true
+            false | true  | false | false
+            false | true  | true  | false
+            false | true  | true  | true
+            true  | false | false | false
+            true  | false | true  | false
+            true  | false | true  | true
+            false | false | false | false
+            false | false | true  | false
+            false | false | true  | true
           end
 
           with_them do
             it 'pauses and unpauses indexing' do
-              expect(Gitlab::CurrentSettings).to receive(:update!).with(elasticsearch_pause_indexing: true)
-              expect(Gitlab::CurrentSettings).to receive(:update!).with(elasticsearch_pause_indexing: false) if expected
+              expect(Gitlab::CurrentSettings).to receive(:update!).with(elasticsearch_pause_indexing: migration_pause_indexing)
+              expect(Gitlab::CurrentSettings).to receive(:update!).with(elasticsearch_pause_indexing: indexing_paused) if completed
 
               subject.perform
             end
