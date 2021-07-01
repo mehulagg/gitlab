@@ -88,5 +88,10 @@ describe('DropdownValue', () => {
       );
       expect(findScopedLabel().props('scoped')).toBe(true);
     });
+
+    it('emits `onLabelRemove` event with the correct ID', () => {
+      findRegularLabel().vm.$emit('close');
+      expect(wrapper.emitted('onLabelRemove')).toEqual([[mockRegularLabel.id]]);
+    });
   });
 });
