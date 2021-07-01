@@ -570,7 +570,7 @@ dast:
   variables:
     DAST_WEBSITE: "https://example.com"
     DAST_AUTH_URL: "https://login.example.com/"
-    DAST_BROWSER_PATH_TO_LOGIN_FORM: "css:.navigation-menu,css:.login-menu-item" # optional list of selectors that should be clicked on prior to attempting to input username/password into the sign-in HTML form 
+    DAST_BROWSER_PATH_TO_LOGIN_FORM: "css:.navigation-menu,css:.login-menu-item" # optional list of selectors that should be clicked on prior to attempting to input username/password into the sign-in HTML form
     DAST_USERNAME: "admin"
     DAST_PASSWORD: "P@55w0rd!"
     DAST_USERNAME_FIELD: "name:username" # a selector describing the element containing the username field at the sign-in HTML form
@@ -647,7 +647,7 @@ dast:
     DAST_WEBSITE: "https://example.com"
     ...
     DAST_AUTH_VERIFICATION_URL: "https://example.com/user/welcome"
-```  
+```
 
 #### Verify based on presence of an element
 
@@ -665,7 +665,7 @@ dast:
     DAST_WEBSITE: "https://example.com"
     ...
     DAST_AUTH_VERIFICATION_SELECTOR: "css:.welcome-user"
-```  
+```
 
 #### Verify based on presence of a login form
 
@@ -683,19 +683,17 @@ dast:
     DAST_WEBSITE: "https://example.com"
     ...
     DAST_AUTH_VERIFICATION_LOGIN_FORM: "true"
-```  
+```
 
-### Navigating to the login form
+### View the login form
 
-Many web applications show the user the login form in a pop-up/modal window.
-For these applications, navigating to the form requires both a starting URL and a list of elements to click on to make the modal window appear.
+Many web applications show the user the login form in a pop-up (modal) window.
+For these applications, navigating to the form requires both:
 
-When `DAST_BROWSER_PATH_TO_LOGIN_FORM` is present, DAST will first load the page at `DAST_AUTH_URL`. Once the page has loaded, DAST will click
-on elements found by the selectors described in `DAST_BROWSER_PATH_TO_LOGIN_FORM`. DAST will then continue the authentication process by filling 
-in the username/password on the login form.
+- A starting URL.
+- A list of elements to click to display the modal window.
 
-In the following example, `https://my.site.com/admin` will be loaded by DAST. The navigation menu will be opened and the login menu item clicked, showing the
-login modal window. DAST will continue authentication using the form in the login modal window.
+When `DAST_BROWSER_PATH_TO_LOGIN_FORM` is present, like in this example:
 
 ```yaml
 include:
@@ -707,7 +705,16 @@ dast:
     ...
     DAST_AUTH_URL: "https://my.site.com/admin"
     DAST_BROWSER_PATH_TO_LOGIN_FORM: "css:.navigation-menu,css:.login-menu-item"
-```  
+```
+
+DAST performs these actions:
+
+1. Load the `DAST_AUTH_URL` page, such as `https://my.site.com/admin`.
+1. After the page loads, DAST selects elements found by the selectors described
+   in `DAST_BROWSER_PATH_TO_LOGIN_FORM`. This example opens the navigation menu
+   and selects the login menu, to display the login modal window.
+1. To continue the authentication process, DAST fills in the username and password
+   on the login form.
 
 ### Configure the authentication debug output
 
@@ -817,9 +824,9 @@ In order of preference, it is recommended to choose as selectors:
 
 - `id` fields. These are generally unique on a page, and rarely change.
 - `name` fields. These are generally unique on a page, and rarely change.
-- `class` values specific to the field, such as the selector `"css:.username"` for the `username` class on the username field.   
+- `class` values specific to the field, such as the selector `"css:.username"` for the `username` class on the username field.
 - Presence of field specific data attributes, such as the selector, `"css:[data-username]"` when the `data-username` field has any value on the username field.
-- Multiple `class` hierarchy values, such as the selector `"css:.login-form .username"` when there are multiple elements with class `username` but only one nested inside the element with the class `login-form`.   
+- Multiple `class` hierarchy values, such as the selector `"css:.login-form .username"` when there are multiple elements with class `username` but only one nested inside the element with the class `login-form`.
 
 When using selectors to locate specific fields we recommend you avoid searching on:
 
