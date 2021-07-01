@@ -76,15 +76,28 @@ RSpec.describe Gitlab::BackgroundMigration::PopulateLatestPipelineIds do
       mock_raw_repository = instance_double(::Gitlab::Git::Repository)
       allow(mock_raw_repository).to receive(:root_ref).and_raise(::Gitlab::Git::Repository::NoRepository.new)
 
-      call_count = 0
+      raw_repository_call_count = 0
 
       allow_next_instance_of(described_class::Repository) do |repository_instance|
         original_raw_repository = repository_instance.method(:raw_repository)
 
         allow(repository_instance).to receive(:raw_repository) do
-          call_count += 1
+          raw_repository_call_count += 1
 
-          call_count == 3 ? mock_raw_repository : original_raw_repository.call
+          raw_repository_call_count == 3 ? mock_raw_repository : original_raw_repository.call
+        end
+      end
+
+      # Raise a RuntimeError while retreiving the `latest_pipeline_id` for the `project_6`
+      latest_pipeline_id_call_count = 0
+
+      allow_next_found_instance_of(described_class::Project) do |project_instance|
+        original_latest_pipeline_id = project_instance.method(:latest_pipeline_id)
+
+        allow(project_instance).to receive(:latest_pipeline_id) do
+          latest_pipeline_id_call_count += 1
+
+          latest_pipeline_id_call_count == 4 ? raise("Foo") : original_latest_pipeline_id.call
         end
       end
     end
