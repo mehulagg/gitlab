@@ -5390,6 +5390,29 @@ The edge type for [`Event`](#event).
 | <a id="eventedgecursor"></a>`cursor` | [`String!`](#string) | A cursor for use in pagination. |
 | <a id="eventedgenode"></a>`node` | [`Event`](#event) | The item at the end of the edge. |
 
+#### `GroupConnection`
+
+The connection type for [`Group`](#group).
+
+##### Fields
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| <a id="groupconnectionedges"></a>`edges` | [`[GroupEdge]`](#groupedge) | A list of edges. |
+| <a id="groupconnectionnodes"></a>`nodes` | [`[Group]`](#group) | A list of nodes. |
+| <a id="groupconnectionpageinfo"></a>`pageInfo` | [`PageInfo!`](#pageinfo) | Information to aid in pagination. |
+
+#### `GroupEdge`
+
+The edge type for [`Group`](#group).
+
+##### Fields
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| <a id="groupedgecursor"></a>`cursor` | [`String!`](#string) | A cursor for use in pagination. |
+| <a id="groupedgenode"></a>`node` | [`Group`](#group) | The item at the end of the edge. |
+
 #### `GroupMemberConnection`
 
 The connection type for [`GroupMember`](#groupmember).
@@ -9248,6 +9271,22 @@ four standard [pagination arguments](#connection-pagination-arguments):
 | ---- | ---- | ----------- |
 | <a id="groupcontainerrepositoriesname"></a>`name` | [`String`](#string) | Filter the container repositories by their name. |
 | <a id="groupcontainerrepositoriessort"></a>`sort` | [`ContainerRepositorySort`](#containerrepositorysort) | Sort container repositories by this criteria. |
+
+##### `Group.descendantGroups`
+
+List of descendant groups of this group.
+
+Returns [`GroupConnection`](#groupconnection).
+
+This field returns a [connection](#connections). It accepts the
+four standard [pagination arguments](#connection-pagination-arguments):
+`before: String`, `after: String`, `first: Int`, `last: Int`.
+
+###### Arguments
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| <a id="groupdescendantgroupsincludeparentdescendants"></a>`includeParentDescendants` | [`Boolean`](#boolean) | List of descendant groups of the parent group. |
 
 ##### `Group.epic`
 
