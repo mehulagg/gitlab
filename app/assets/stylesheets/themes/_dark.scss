@@ -184,6 +184,13 @@ body.gl-dark {
       }
     }
   }
+
+  .gl-datepicker-theme {
+    .pika-prev,
+    .pika-next {
+      filter: invert(0.9);
+    }
+  }
 }
 
 $border-white-light: $gray-900;
@@ -253,3 +260,35 @@ $well-inner-border: $gray-200;
   color: $gray-900;
   border-color: $gray-800;
 }
+
+// pikaday colors override
+$pd-text-color: $gray-900;
+$pd-title-color: $gray-900;
+$pd-title-bg: $gray-50;
+$pd-picker-bg: $gray-50;
+$pd-picker-border: $border-color;
+$pd-picker-border-bottom: $border-color;
+$pd-picker-shadow: rgba(0,0,0,.5) !default;
+$pd-th-color: $gray-500;
+
+// overridden in gitlab/ui
+$pd-day-color: #666 !default;
+$pd-day-bg: #f5f5f5 !default;
+$pd-day-hover-color: $gray-50;
+$pd-day-hover-bg: #ff8000 !default;
+$pd-day-today-color: #33aaff !default;
+$pd-day-selected-color: $gray-50;
+$pd-day-selected-bg: $blue-500;
+$pd-day-selected-shadow: $blue-500;
+$pd-day-disabled-color: $gray-500;
+
+// not sure if we even use this
+$pd-week-color: $gray-500;
+$pd-inrange-color: #666 !default;
+$pd-inrange-bg: #D5E9F7 !default;
+$pd-startrange-color: $gray-50;
+$pd-startrange-bg: #6CB31D !default;
+$pd-endrange-color: $gray-50;
+$pd-endrange-bg: #33aaff !default;
+$pd-event-color: $gray-50;
+$pd-event-bg: #33aaff !default;
