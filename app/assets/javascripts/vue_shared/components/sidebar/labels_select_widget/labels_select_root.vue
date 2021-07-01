@@ -11,9 +11,8 @@ import DropdownContents from './dropdown_contents.vue';
 import DropdownTitle from './dropdown_title.vue';
 import DropdownValue from './dropdown_value.vue';
 import DropdownValueCollapsed from './dropdown_value_collapsed.vue';
-import labelsSelectModule from './store';
-
 import issueLabelsQuery from './graphql/issue_labels.query.graphql';
+import labelsSelectModule from './store';
 
 Vue.use(Vuex);
 
@@ -321,6 +320,10 @@ export default {
       <dropdown-value
         :disable-labels="labelsSelectInProgress"
         :selected-labels="issueLabels"
+        :allow-label-remove="allowLabelRemove"
+        :allow-scoped-labels="allowScopedLabels"
+        :labels-filter-base-path="labelsFilterBasePath"
+        :labels-filter-param="labelsFilterParam"
         @onLabelRemove="$emit('onLabelRemove', $event)"
       >
         <slot></slot>

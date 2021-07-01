@@ -1,6 +1,5 @@
 <script>
 import { GlLabel } from '@gitlab/ui';
-import { mapState } from 'vuex';
 import { getIdFromGraphQLId } from '~/graphql_shared/utils';
 import { isScopedLabel } from '~/lib/utils/common_utils';
 
@@ -18,14 +17,22 @@ export default {
       type: Array,
       required: true,
     },
-  },
-  computed: {
-    ...mapState([
-      'allowLabelRemove',
-      'allowScopedLabels',
-      'labelsFilterBasePath',
-      'labelsFilterParam',
-    ]),
+    allowLabelRemove: {
+      type: Boolean,
+      required: true,
+    },
+    allowScopedLabels: {
+      type: Boolean,
+      required: true,
+    },
+    labelsFilterBasePath: {
+      type: String,
+      required: true,
+    },
+    labelsFilterParam: {
+      type: String,
+      required: true,
+    },
   },
   methods: {
     labelFilterUrl(label) {
