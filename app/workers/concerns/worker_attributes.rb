@@ -103,6 +103,19 @@ module WorkerAttributes
       if idempotent? && utilizes_load_balancing_capabilities?
         raise ArgumentError, "Class can't be marked as idempotent if data_consistency is not set to :always"
       end
+
+      # Since the delayed data_consistency will use sidekiq built in retry mechanism, it is required that this mechanism
+      # is not disabled.
+      if retry_disabled? && get_data_consistency == :delayed
+        raise ArgumentError, "Retry support cannot be disabled if data_consistency is set to :delayed"
+      end
+    end
+
+    # Checks if sidekiq retry support is disabled
+    #
+    # This must be overridden by the including class.
+    def retry_disabled?
+      raise NotImplementedError, "#{self.name} does not implement #{__method__}"
     end
 
     # If data_consistency is not set to :always, worker will try to utilize load balancing capabilities and use the replica

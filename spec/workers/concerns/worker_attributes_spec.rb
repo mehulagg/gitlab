@@ -59,6 +59,22 @@ RSpec.describe WorkerAttributes do
         end
       end
     end
+
+    context 'when job does not include ApplicationWorker' do
+      let(:worker) do
+        Class.new do
+          def self.name
+            "TestWorker"
+          end
+
+          include WorkerAttributes
+        end
+      end
+
+      it 'raises NotImplementedError' do
+        expect { worker.data_consistency :always}.to raise_error(NotImplementedError, "TestWorker does not implement retry_disabled?")
+      end
+    end
   end
 
   describe '.idempotent!' do

@@ -176,6 +176,104 @@ RSpec.describe ApplicationWorker do
     end
   end
 
+  describe '.data_consistency' do
+    shared_examples_for 'worker data_consistency validation' do |sidekiq_retry, validation_fails|
+      before do
+        worker.sidekiq_options retry: sidekiq_retry unless sidekiq_retry.nil?
+      end
+
+      context 'when workers data consistency is :delayed' do
+        if validation_fails
+          it 'raise exception' do
+            expect { worker.data_consistency :delayed }
+              .to raise_error("Retry support cannot be disabled if data_consistency is set to :delayed")
+          end
+        else
+          it 'not to raise an exception' do
+            expect { worker.data_consistency :sticky }
+              .not_to raise_error
+          end
+        end
+      end
+
+      context 'when workers data consistency is :sticky' do
+        it 'not to raise an exception' do
+          expect { worker.data_consistency :sticky }
+            .not_to raise_error
+        end
+      end
+
+      context 'when workers data consistency is :always' do
+        it 'not to raise an exception' do
+          expect { worker.data_consistency :always }
+            .not_to raise_error
+        end
+      end
+    end
+
+    context 'when retry support is disabled' do
+      include_examples 'worker data_consistency validation', false, true
+    end
+
+    context 'when retry is skipped' do
+      include_examples 'worker data_consistency validation', 0, true
+    end
+
+    context 'when retry support is not disabled' do
+      include_examples 'worker data_consistency validation', 3, false
+    end
+
+    context 'when retry support is not set' do
+      include_examples 'worker data_consistency validation', nil, false
+    end
+  end
+
+  describe '.retry' do
+    shared_examples_for 'worker sidekiq options validation' do |data_consistency, validation_fails|
+      before do
+        worker.data_consistency(data_consistency)
+      end
+
+      shared_examples_for 'worker attributes validation' do |sidekiq_retry, validation_fails|
+        if validation_fails
+          it 'raise exception' do
+            expect { worker.sidekiq_options retry: sidekiq_retry }
+              .to raise_error("Retry support cannot be disabled if data_consistency is set to :delayed")
+          end
+        else
+          it 'not to raise an exception' do
+            expect { worker.sidekiq_options retry: sidekiq_retry }
+              .not_to raise_error
+          end
+        end
+      end
+
+      context 'when retry support is disabled' do
+        include_examples 'worker attributes validation', false, validation_fails
+      end
+
+      context 'when retry is skipped' do
+        include_examples 'worker attributes validation', 0, validation_fails
+      end
+
+      context 'when retry support is not disabled' do
+        include_examples 'worker attributes validation', 3, false
+      end
+    end
+
+    context 'when workers data consistency is :delayed' do
+      include_examples 'worker sidekiq options validation', :delayed, true
+    end
+
+    context 'when workers data consistency is :sticky' do
+      include_examples 'worker sidekiq options validation', :sticky, false
+    end
+
+    context 'when workers data consistency is :always' do
+      include_examples 'worker sidekiq options validation', :always, false
+    end
+  end
+
   describe '.perform_async' do
     shared_examples_for 'worker utilizes load balancing capabilities' do |data_consistency|
       before do
