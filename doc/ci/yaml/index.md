@@ -3113,7 +3113,7 @@ There are a couple of exceptions to the [original dotenv rules](https://github.c
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/20390) in GitLab 11.2.
 > - Requires GitLab Runner 11.2 and above.
 
-The `junit` report collects [JUnit report format XML files](https://www.ibm.com/support/knowledgecenter/en/SSQ2R2_14.1.0/com.ibm.rsar.analysis.codereview.cobol.doc/topics/cac_useresults_junit.html)
+The `junit` report collects [JUnit report format XML files](https://www.ibm.com/docs/en/adfz/developer-for-zos/14.1.0?topic=formats-junit-xml-format)
 as artifacts. Although JUnit was originally developed in Java, there are many
 third party ports for other
 languages like JavaScript, Python, Ruby, and so on.
