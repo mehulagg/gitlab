@@ -29,6 +29,48 @@ RSpec.describe Security::SecurityOrchestrationPolicies::ProjectCreateService do
       end
     end
 
+    context 'when protected branch already exists' do
+      let_it_be(:project) { create(:project) }
+      let_it_be(:current_user) { project.owner }
+      let_it_be(:maintainer) { create(:user) }
+
+      before do
+        project.add_maintainer(maintainer)
+
+        allow_next_instance_of(Project) do |instance|
+          allow(instance).to receive_message_chain(:protected_branches, :find_by_name).and_return([ProtectedBranch.new])
+        end
+
+        protected_branch_service = instance_spy(ProtectedBranches::UpdateService)
+        allow(ProtectedBranches::UpdateService).to receive(:new).and_return(protected_branch_service)
+      end
+
+      it 'updates protected branch' do
+        service.execute
+
+        expect(ProtectedBranches::UpdateService).to have_received(:new)
+      end
+    end
+
+    context 'when protected branch does not exist' do
+      let_it_be(:project) { create(:project) }
+      let_it_be(:current_user) { project.owner }
+      let_it_be(:maintainer) { create(:user) }
+
+      before do
+        project.add_maintainer(maintainer)
+
+        protected_branch_service = instance_spy(ProtectedBranches::UpdateService)
+        allow(ProtectedBranches::CreateService).to receive(:new).and_return(protected_branch_service)
+      end
+
+      it 'creates protected branch' do
+        service.execute
+
+        expect(ProtectedBranches::CreateService).to have_received(:new)
+      end
+    end
+
     context 'when adding users to security policy project fails' do
       let_it_be(:project) { create(:project) }
       let_it_be(:current_user) { project.owner }
