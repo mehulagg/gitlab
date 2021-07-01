@@ -2,7 +2,7 @@
 
 module Ci
   module ResourceGroups
-    class AssignResourceFromResourceGroupWorker # rubocop:disable Scalability/IdempotentWorker
+    class AssignResourceFromResourceGroupWorker
       include ApplicationWorker
 
       sidekiq_options retry: 3
@@ -10,6 +10,9 @@ module Ci
 
       queue_namespace :pipeline_processing
       feature_category :continuous_delivery
+
+      deduplicate :until_executed
+      idempotent!
 
       def perform(resource_group_id)
         ::Ci::ResourceGroup.find_by_id(resource_group_id).try do |resource_group|
