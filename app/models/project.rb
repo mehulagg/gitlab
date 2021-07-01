@@ -2573,12 +2573,6 @@ class Project < ApplicationRecord
       .exists?
   end
 
-  def default_branch_or_main
-    return default_branch if default_branch
-
-    Gitlab::DefaultBranch.value(object: self)
-  end
-
   def ci_config_path_or_default
     ci_config_path.presence || Ci::Pipeline::DEFAULT_CONFIG_PATH
   end

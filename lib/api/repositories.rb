@@ -224,7 +224,7 @@ module API
           desc: 'The commit message to use when committing the changelog'
       end
       post ':id/repository/changelog' do
-        branch = params[:branch] || user_project.default_branch_or_main
+        branch = params[:branch] || user_project.default_branch
         access = Gitlab::UserAccess.new(current_user, container: user_project)
 
         unless access.can_push_to_branch?(branch)

@@ -33,7 +33,7 @@ module Branches
         '/README.md',
         '',
         message: 'Add README.md',
-        branch_name: project.default_branch_or_main
+        branch_name: project.default_branch
       )
     end
   end

@@ -143,7 +143,7 @@ module Projects
       end
 
       def define_badges_variables
-        @ref = params[:ref] || @project.default_branch_or_main
+        @ref = params[:ref] || @project.default_branch
 
         @badges = [Gitlab::Ci::Badge::Pipeline::Status,
                    Gitlab::Ci::Badge::Coverage::Report]

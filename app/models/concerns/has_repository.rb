@@ -70,8 +70,8 @@ module HasRepository
     repository.empty?
   end
 
-  def default_branch
-    @default_branch ||= repository.root_ref || default_branch_from_preferences
+  def default_branch(object: nil)
+    @default_branch ||= repository.root_ref || default_branch_from_preferences || Gitlab::DefaultBranch.value(object: object)
   end
 
   def default_branch_from_preferences

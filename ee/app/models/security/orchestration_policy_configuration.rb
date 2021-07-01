@@ -81,13 +81,13 @@ module Security
 
     def policy_last_updated_by
       strong_memoize(:policy_last_updated_by) do
-        policy_repo.last_commit_for_path(default_branch_or_main, POLICY_PATH)&.author
+        policy_repo.last_commit_for_path(default_branch, POLICY_PATH)&.author
       end
     end
 
     def policy_last_updated_at
       strong_memoize(:policy_last_updated_at) do
-        policy_repo.last_commit_for_path(default_branch_or_main, POLICY_PATH)&.committed_date
+        policy_repo.last_commit_for_path(default_branch, POLICY_PATH)&.committed_date
       end
     end
 
@@ -101,8 +101,8 @@ module Security
       policy_hash.fetch(:scan_execution_policy, [])
     end
 
-    def default_branch_or_main
-      security_policy_management_project.default_branch_or_main
+    def default_branch
+      security_policy_management_project.default_branch
     end
 
     private
@@ -130,7 +130,7 @@ module Security
 
     def policy_blob
       strong_memoize(:policy_blob) do
-        policy_repo.blob_data_at(default_branch_or_main, POLICY_PATH)
+        policy_repo.blob_data_at(default_branch, POLICY_PATH)
       end
     end
 

@@ -15,7 +15,7 @@ module Gitlab
             @version = attributes[:version]
           end
 
-          def blob_path_for(project, sha: project&.default_branch_or_main)
+          def blob_path_for(project, sha: project&.default_branch)
             return if path.blank?
             return path if sha.blank?
 

@@ -26,9 +26,9 @@ module Security
       private
 
       def create_or_update_protected_branch(policy_project)
-        protected_branch = policy_project.protected_branches.find_by_name(policy_project.default_branch_or_main)
+        protected_branch = policy_project.protected_branches.find_by_name(policy_project.default_branch)
         params = {
-          name: policy_project.default_branch_or_main,
+          name: policy_project.default_branch,
           push_access_levels_attributes: [{ access_level: Gitlab::Access::NO_ACCESS }],
           merge_access_levels_attributes: [{ access_level: Gitlab::Access::DEVELOPER }]
         }

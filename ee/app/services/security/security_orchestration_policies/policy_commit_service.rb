@@ -45,7 +45,7 @@ module Security
           file_path: Security::OrchestrationPolicyConfiguration::POLICY_PATH,
           file_content: policy_yaml,
           branch_name: branch_name,
-          start_branch: policy_configuration.default_branch_or_main
+          start_branch: policy_configuration.default_branch
         }
       end
 

@@ -148,7 +148,7 @@ module Projects
 
     def create_readme
       commit_attrs = {
-        branch_name: @default_branch.presence || @project.default_branch_or_main,
+        branch_name: @default_branch.presence || @project.default_branch,
         commit_message: 'Initial commit',
         file_path: 'README.md',
         file_content: experiment(:new_project_readme_content, namespace: @project.namespace).run_with(@project)

@@ -85,7 +85,7 @@ module MergeRequests
     end
 
     def default_branch
-      target_project.default_branch_or_main
+      target_project.default_branch
     end
 
     def merge_request

@@ -5,7 +5,7 @@
   = _("Compare Git revisions")
 .sub-header-block
   - example_branch = capture do
-    %code.ref-name= @project.default_branch_or_main
+    %code.ref-name= @project.default_branch
   - example_sha = capture do
     %code.ref-name 4eedf23
   = html_escape(_("Choose a branch/tag (e.g. %{branch}) or enter a commit (e.g. %{sha}) to see what's changed or to create a merge request.")) % { branch: example_branch.html_safe, sha: example_sha.html_safe }

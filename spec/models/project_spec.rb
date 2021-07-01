@@ -5329,12 +5329,13 @@ RSpec.describe Project, factory_default: :keep do
       let_it_be_with_refind(:project_group) { create(:group, parent: root_group) }
       let_it_be_with_refind(:project) { create(:project, path: 'avatar', namespace: project_group) }
 
-      where(:instance_branch, :root_group_branch, :project_group_branch, :project_branch) do
-        ''      | nil           | nil            | nil
-        nil     | nil           | nil            | nil
-        'main'  | nil           | nil            | 'main'
-        'main'  | 'root_branch' | nil            | 'root_branch'
-        'main'  | 'root_branch' | 'group_branch' | 'group_branch'
+      where(:instance_branch, :root_group_branch, :project_group_branch, :main_branch_over_master_enabled, :project_branch) do
+        ''      | nil           | nil            | true  | 'main'
+        nil     | nil           | nil            | true  | 'main'
+        nil     | nil           | nil            | false | 'master'
+        'main'  | nil           | nil            | true  | 'main'
+        'main'  | 'root_branch' | nil            | true  | 'root_branch'
+        'main'  | 'root_branch' | 'group_branch' | true  | 'group_branch'
       end
 
       with_them do
@@ -5342,6 +5343,7 @@ RSpec.describe Project, factory_default: :keep do
           allow(Gitlab::CurrentSettings).to receive(:default_branch_name).and_return(instance_branch)
           root_group.namespace_settings.update!(default_branch_name: root_group_branch)
           project_group.namespace_settings.update!(default_branch_name: project_group_branch)
+          stub_feature_flags(main_branch_over_master: main_branch_over_master_enabled)
         end
 
         it { expect(project.default_branch).to eq(project_branch) }
@@ -7012,22 +7014,6 @@ RSpec.describe Project, factory_default: :keep do
         expected_path = "/#{project.namespace.path}/#{project.name}/activity"
 
         expect(project.activity_path).to eq(expected_path)
-      end
-    end
-  end
-
-  describe '#default_branch_or_main' do
-    let(:project) { create(:project, :repository) }
-
-    it 'returns default branch' do
-      expect(project.default_branch_or_main).to eq(project.default_branch)
-    end
-
-    context 'when default branch is nil' do
-      let(:project) { create(:project, :empty_repo) }
-
-      it 'returns Gitlab::DefaultBranch.value' do
-        expect(project.default_branch_or_main).to eq(Gitlab::DefaultBranch.value)
       end
     end
   end

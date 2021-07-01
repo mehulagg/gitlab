@@ -10,10 +10,10 @@ RSpec.describe API::Entities::BasicProjectDetails do
   subject(:output) { described_class.new(project, current_user: current_user).as_json }
 
   describe '#default_branch' do
-    it 'delegates to Project#default_branch_or_main' do
-      expect(project).to receive(:default_branch_or_main).twice.and_call_original
+    it 'delegates to Project#default_branch' do
+      expect(project).to receive(:default_branch).twice.and_call_original
 
-      expect(output).to include(default_branch: project.default_branch_or_main)
+      expect(output).to include(default_branch: project.default_branch)
     end
 
     context 'anonymous user' do
