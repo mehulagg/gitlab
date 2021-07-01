@@ -23,7 +23,6 @@ import DevopsScore from '~/analytics/devops_report/components/devops_score.vue';
 import API from '~/api';
 import {
   groupNodes,
-  groupPageInfo,
   devopsAdoptionNamespaceData,
   devopsAdoptionNamespaceDataEmpty,
 } from '../mock_data';
@@ -35,16 +34,59 @@ jest.mock('ee/analytics/devops_report/devops_adoption/utils/cache_updates', () =
 const localVue = createLocalVue();
 Vue.use(VueApollo);
 
+const RESOURCE_TYPE_GROUP = 'groups';
+const RESOURCE_TYPE_ENABLED_NAMESPACE = 'enabledNamespaces';
+
+const STATE_EMPTY = 'empty';
+const STATE_WITH_DATA = 'withData';
+const STATE_LOADING = 'loading';
+
+const groupsFactory = (state) => {
+  switch (state) {
+    case STATE_EMPTY:
+      return jest.fn().mockResolvedValue({ __typename: 'Groups', nodes: [] });
+    case STATE_WITH_DATA:
+      return jest.fn();
+    case STATE_LOADING:
+      return jest.fn();
+    default:
+      return jest.fn();
+  }
+};
+
+const enabledNamespaceFactory = (state) => {
+  switch (state) {
+    case STATE_EMPTY:
+      return jest.fn();
+    case STATE_WITH_DATA:
+      return jest.fn();
+    case STATE_LOADING:
+      return jest.fn();
+    default:
+      return jest.fn();
+  }
+};
+
+const apolloFactory = (resource, state) => {
+  switch (resource) {
+    case RESOURCE_TYPE_GROUP:
+      return groupsFactory(state);
+    case RESOURCE_TYPE_ENABLED_NAMESPACE:
+      return enabledNamespaceFactory(state);
+    default:
+      return jest.fn();
+  }
+};
 const initialResponse = {
   __typename: 'Groups',
   nodes: groupNodes,
-  pageInfo: groupPageInfo,
 };
 
 describe('DevopsAdoptionApp', () => {
   let wrapper;
 
-  const groupsEmpty = jest.fn().mockResolvedValue({ __typename: 'Groups', nodes: [] });
+  const groupsEmpty = apolloFactory(RESOURCE_TYPE_GROUP, STATE_EMPTY);
+
   const segmentsEmpty = jest.fn().mockResolvedValue({
     data: { devopsAdoptionEnabledNamespaces: devopsAdoptionNamespaceDataEmpty },
   });
@@ -117,7 +159,7 @@ describe('DevopsAdoptionApp', () => {
 
     describe('when group data is present', () => {
       beforeEach(async () => {
-        groupsSpy = jest.fn().mockResolvedValueOnce({ ...initialResponse, pageInfo: null });
+        groupsSpy = jest.fn().mockResolvedValueOnce({ ...initialResponse });
         const mockApollo = createMockApolloProvider({ groupsSpy });
         wrapper = createComponent({ mockApollo });
         await waitForPromises();
@@ -295,7 +337,7 @@ describe('DevopsAdoptionApp', () => {
 
         wrapper = createComponent({
           mockApollo: createMockApolloProvider({
-            groupsSpy: jest.fn().mockResolvedValueOnce({ ...initialResponse, pageInfo: null }),
+            groupsSpy: jest.fn().mockResolvedValueOnce({ ...initialResponse }),
           }),
         });
 

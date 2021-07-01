@@ -25,10 +25,6 @@ export const groupIds = [1, 2];
 
 export const groupGids = ['gid://gitlab/Group/1', 'gid://gitlab/Group/2'];
 
-export const groupPageInfo = {
-  nextPage: 2,
-};
-
 export const devopsAdoptionNamespaceData = {
   nodes: [
     {
