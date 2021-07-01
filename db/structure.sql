@@ -19362,6 +19362,15 @@ CREATE SEQUENCE vulnerability_occurrences_id_seq
 
 ALTER SEQUENCE vulnerability_occurrences_id_seq OWNED BY vulnerability_occurrences.id;
 
+CREATE TABLE vulnerability_reads (
+    vulnerabilities_id bigint,
+    projects_id bigint NOT NULL,
+    scanner_id bigint NOT NULL,
+    severity smallint NOT NULL,
+    status smallint NOT NULL,
+    activity smallint NOT NULL
+);
+
 CREATE TABLE vulnerability_remediations (
     id bigint NOT NULL,
     created_at timestamp with time zone NOT NULL,
@@ -25131,6 +25140,8 @@ CREATE UNIQUE INDEX index_vulnerability_occurrences_on_uuid ON vulnerability_occ
 
 CREATE INDEX index_vulnerability_occurrences_on_vulnerability_id ON vulnerability_occurrences USING btree (vulnerability_id);
 
+CREATE INDEX index_vulnerability_reads_on_vulnerabilities_id ON vulnerability_reads USING btree (vulnerabilities_id);
+
 CREATE UNIQUE INDEX index_vulnerability_remediations_on_project_id_and_checksum ON vulnerability_remediations USING btree (project_id, checksum);
 
 CREATE UNIQUE INDEX index_vulnerability_scanners_on_project_id_and_external_id ON vulnerability_scanners USING btree (project_id, external_id);
@@ -27807,6 +27818,9 @@ ALTER TABLE ONLY iterations_cadences
 
 ALTER TABLE ONLY dast_profiles
     ADD CONSTRAINT fk_rails_ed1e66fbbf FOREIGN KEY (dast_site_profile_id) REFERENCES dast_site_profiles(id) ON DELETE CASCADE;
+
+ALTER TABLE ONLY vulnerability_reads
+    ADD CONSTRAINT fk_rails_ed451fca86 FOREIGN KEY (vulnerabilities_id) REFERENCES vulnerabilities(id) ON DELETE CASCADE;
 
 ALTER TABLE ONLY project_security_settings
     ADD CONSTRAINT fk_rails_ed4abe1338 FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE;
