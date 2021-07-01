@@ -105,11 +105,7 @@ export default {
         :selected="showTreeList"
         @click="setShowTreeList({ showTreeList: !showTreeList })"
       />
-      <div v-if="commit">
-        {{ __('Viewing commit') }}
-        <gl-link :href="commit.commit_url" class="monospace">{{ commit.short_id }}</gl-link>
-      </div>
-      <div v-if="hasNeighborCommits" class="commit-nav-buttons ml-3">
+      <div v-if="commit" class="commit-nav-buttons">
         <gl-button-group>
           <gl-button
             :href="previousCommitUrl"
@@ -124,6 +120,12 @@ export default {
             ></span>
             <gl-icon name="chevron-left" />
             {{ __('Prev') }}
+          </gl-button>
+          <gl-button
+            :href="commit.commit_url"
+            class="monospace"
+          >
+            {{ commit.short_id }}
           </gl-button>
           <gl-button
             :href="nextCommitUrl"
@@ -141,39 +143,35 @@ export default {
           </gl-button>
         </gl-button-group>
       </div>
-      <gl-sprintf
+      <div
         v-else-if="!commit && hasSourceVersions"
         class="d-flex align-items-center compare-versions-container"
-        :message="s__('MergeRequest|Compare %{target} and %{source}')"
       >
-        <template #target>
-          <compare-dropdown-layout
-            :versions="diffCompareDropdownTargetVersions"
-            class="mr-version-compare-dropdown"
-            data-qa-selector="target_version_dropdown"
+        <compare-dropdown-layout
+          :versions="diffCompareDropdownTargetVersions"
+          data-qa-selector="target_version_dropdown"
           />
-        </template>
-        <template #source>
-          <compare-dropdown-layout
-            :versions="diffCompareDropdownSourceVersions"
-            class="mr-version-dropdown"
-          />
-        </template>
-      </gl-sprintf>
+        <gl-icon
+          name="comparison"
+          class="text-secondary gl-ml-3 gl-mr-3" />
+        <compare-dropdown-layout
+          :versions="diffCompareDropdownSourceVersions"
+        />
+      </div>
+      <gl-button
+        v-if="commit || startVersion"
+        :href="latestVersionPath"
+        variant="default"
+        class="gl-ml-3 js-latest-version"
+        >
+        {{ __('Show latest version') }}
+      </gl-button>
       <div v-if="hasChanges" class="inline-parallel-buttons d-none d-md-flex ml-auto">
         <diff-stats
           :diff-files-count-text="diffFilesCountText"
           :added-lines="addedLines"
           :removed-lines="removedLines"
         />
-        <gl-button
-          v-if="commit || startVersion"
-          :href="latestVersionPath"
-          variant="default"
-          class="gl-mr-3 js-latest-version"
-        >
-          {{ __('Show latest version') }}
-        </gl-button>
         <gl-button
           v-show="whichCollapsedTypes.any"
           variant="default"

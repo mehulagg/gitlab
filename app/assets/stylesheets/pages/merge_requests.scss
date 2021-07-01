@@ -704,18 +704,13 @@ $tabs-holder-z-index: 250;
     border-bottom: 0;
   }
 
-  .mr-version-dropdown,
-  .mr-version-compare-dropdown {
-    margin: 0 7px;
-  }
-
   .dropdown-title {
     color: $gl-text-color;
   }
 
   // Shortening button height by 1px to make compare-versions
   // header 56px and fit into our 8px design grid
-  button {
+  .btn {
     height: 34px;
   }
 
