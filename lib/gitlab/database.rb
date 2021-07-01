@@ -76,11 +76,7 @@ module Gitlab
       # The database is `main` if it is a first entry in `database.yml`
       # Rails internally names them `primary` to avoid confusion
       # with broad `primary` usage we use `main` instead
-      #
-      # TODO: The explicit `== 'main'` is needed in a transition period till
-      # the `database.yml` is not migrated into `main:` syntax
-      # https://gitlab.com/gitlab-org/gitlab/-/merge_requests/65243
-      ActiveRecord::Base.configurations.primary?(name.to_s) || name.to_s == 'main'
+      ActiveRecord::Base.configurations.primary?(name.to_s)
     end
 
     def self.ci_database?(name)
