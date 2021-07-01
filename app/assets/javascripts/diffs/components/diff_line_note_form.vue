@@ -1,5 +1,6 @@
 <script>
 import { mapState, mapGetters, mapActions } from 'vuex';
+import { IdState } from 'vendor/vue-virtual-scroller';
 import { s__ } from '~/locale';
 import diffLineNoteFormMixin from '~/notes/mixins/diff_line_note_form';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
@@ -22,7 +23,12 @@ export default {
     noteForm,
     MultilineCommentForm,
   },
-  mixins: [autosave, diffLineNoteFormMixin, glFeatureFlagsMixin()],
+  mixins: [
+    autosave,
+    diffLineNoteFormMixin,
+    glFeatureFlagsMixin(),
+    IdState({ idProp: (vm) => vm.diffFileHash }),
+  ],
   props: {
     diffFileHash: {
       type: String,
@@ -47,7 +53,7 @@ export default {
       default: '',
     },
   },
-  data() {
+  idState() {
     return {
       commentLineStart: {
         line_code: this.line.line_code,
@@ -83,7 +89,7 @@ export default {
         diffViewType: this.diffViewType,
         diffFile: this.diffFile,
         linePosition: this.linePosition,
-        lineRange: formatLineRange(this.commentLineStart, this.line),
+        lineRange: formatLineRange(this.idState.commentLineStart, this.line),
       };
     },
     diffFile() {
@@ -157,7 +163,7 @@ export default {
     }
 
     if (this.selectedCommentPosition) {
-      this.commentLineStart = this.selectedCommentPosition.start;
+      this.idState.commentLineStart = this.selectedCommentPosition.start;
     }
   },
   methods: {
@@ -197,7 +203,7 @@ export default {
   <div class="content discussion-form discussion-form-container discussion-notes">
     <div class="gl-mb-3 gl-text-gray-500 gl-pb-3">
       <multiline-comment-form
-        v-model="commentLineStart"
+        v-model="idState.commentLineStart"
         :line="line"
         :comment-line-options="commentLineOptions"
       />

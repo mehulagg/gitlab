@@ -1,6 +1,7 @@
 <script>
 import { GlAlert, GlLink, GlLoadingIcon, GlSprintf } from '@gitlab/ui';
 import { mapActions } from 'vuex';
+import { IdState } from 'vendor/vue-virtual-scroller';
 
 import {
   TRANSITION_LOAD_START,
@@ -31,13 +32,14 @@ export default {
     GlLoadingIcon,
     GlSprintf,
   },
+  mixins: [IdState({ idProp: (vm) => vm.diffFile.file_hash })],
   props: {
     diffFile: {
       type: Object,
       required: true,
     },
   },
-  data() {
+  idState() {
     return {
       state: STATE_IDLING,
     };
@@ -47,20 +49,20 @@ export default {
       return truncateSha(this.diffFile.content_sha);
     },
     canLoadFullDiff() {
-      return this.diffFile.alternate_viewer.name === 'text';
+      return this.diffFile.alternate_viewer?.name === 'text';
     },
   },
   methods: {
     ...mapActions('diffs', ['switchToFullDiffFromRenamedFile']),
     transition(transitionEvent) {
-      const key = `${this.state}:${transitionEvent}`;
+      const key = `${this.idState.state}:${transitionEvent}`;
 
       if (this.$options.TRANSITIONS[key]) {
-        this.state = this.$options.TRANSITIONS[key];
+        this.idState.state = this.$options.TRANSITIONS[key];
       }
     },
     is(state) {
-      return this.state === state;
+      return this.idState.state === state;
     },
     switchToFull() {
       this.transition(TRANSITION_LOAD_START);
