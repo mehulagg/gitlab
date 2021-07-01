@@ -429,3 +429,16 @@ should fit comfortably within the delay time for a few reasons:
 
 Never try to optimize by fully filling the delay window even if you are confident
 the queries themselves have no timing variance.
+
+### Background jobs tracking
+
+`queue_background_migration_jobs_by_range_at_intervals` has the ability to create records for each jobs that is scheduled to run
+you can turn this behavior on by passing `track_jobs: true`. Make sure that your worker marks the job as done by calling `Gitlab::Database::BackgroundMigrationJob.mark_all_as_succeeded` in `perform` method of your background migration.
+
+See [`lib/gitlab/background_migration/drop_invalid_vulnerabilities.rb`](https://gitlab.com/gitlab-org/gitlab/blob/master/lib/gitlab/background_migration/drop_invalid_vulnerabilities.rb) for a full example.
+
+### Rescheduling pending jobs
+
+You can reschedule pending migrations from `background_migration_jobs` table by creating a post-deployment migration and calling `requeue_background_migration_jobs_by_range_at_intervals` with the migration name and delay interval.
+
+See [`db/post_migrate/20210604070207_retry_backfill_traversal_ids.rb`](https://gitlab.com/gitlab-org/gitlab/blob/master/db/post_migrate/20210604070207_retry_backfill_traversal_ids.rb) for a full example.
