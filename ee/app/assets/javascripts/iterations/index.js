@@ -104,6 +104,7 @@ export function initCadenceApp({ namespaceType }) {
 
   const {
     groupFullPath: groupPath,
+    fullPath,
     cadencesListPath,
     canCreateCadence,
     canEditCadence,
@@ -129,7 +130,7 @@ export function initCadenceApp({ namespaceType }) {
     router,
     apolloProvider,
     provide: {
-      fullPath: groupPath,
+      fullPath: fullPath || groupPath,
       groupPath,
       cadencesListPath,
       canCreateCadence: parseBoolean(canCreateCadence),

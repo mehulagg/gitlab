@@ -11,7 +11,7 @@ class Projects::IterationCadencesController < Projects::ApplicationController
   private
 
   def check_cadences_available!
-    render_404 unless project.group.iteration_cadences_feature_flag_enabled?
+    render_404 unless project.group&.iteration_cadences_feature_flag_enabled?
   end
 
   def authorize_show_cadence!

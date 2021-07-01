@@ -824,6 +824,10 @@ module EE
       ci_cd_settings.auto_rollback_enabled?
     end
 
+    def iteration_cadences_feature_flag_enabled?
+      ::Feature.enabled?(:iteration_cadences, self, default_enabled: :yaml)
+    end
+
     private
 
     def github_integration_enabled?

@@ -19,15 +19,19 @@ module EE
           private
 
           def iterations_menu_item
-            if !context.project.licensed_feature_available?(:iterations) ||
+            if !context.project.group ||
+              !context.project.licensed_feature_available?(:iterations) ||
               !can?(context.current_user, :read_iteration, context.project)
               return ::Sidebars::NilMenuItem.new(item_id: :iterations)
             end
 
+            link = context.project.iteration_cadences_feature_flag_enabled? ? project_iteration_cadences_path(context.project) : project_iterations_path(context.project)
+            controller = context.project.iteration_cadences_feature_flag_enabled? ? :iteration_cadences : :iterations
+
             ::Sidebars::MenuItem.new(
               title: _('Iterations'),
-              link: project_iterations_path(context.project),
-              active_routes: { controller: :iterations },
+              link: link,
+              active_routes: { controller: controller },
               item_id: :iterations
             )
           end

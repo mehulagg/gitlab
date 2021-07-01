@@ -127,7 +127,9 @@ constraints(::Constraints::ProjectUrlConstrainer.new) do
 
         resources :iterations, only: [:index, :show], constraints: { id: /\d+/ }
 
-        resources :iteration_cadences, path: 'cadences(/*vueroute)', action: :index
+        resources :iteration_cadences, path: 'cadences(/*vueroute)', action: :index do
+          resources :iterations, only: [:index, :show], constraints: { id: /\d+/ }, controller: :iteration_cadences, action: :index
+        end
 
         namespace :incident_management, path: '' do
           resources :oncall_schedules, only: [:index], path: 'oncall_schedules'
