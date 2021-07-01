@@ -56,9 +56,14 @@ module Types
 
       # rubocop: disable CodeReuse/ActiveRecord
       def jobs_for_pipeline(pipeline, stage_ids, include_needs)
-        results = pipeline.latest_statuses.where(stage_id: stage_ids)
-        results = results.preload(:project)
-        results = results.preload(:needs) if include_needs
+        builds_results = pipeline.latest_builds.where(stage_id: stage_ids)
+        bridges_results = pipeline.bridges.where(stage_id: stage_ids)
+        builds_results = builds_results.preload(:job_artifacts, :project)
+        bridges_results = bridges_results.preload(:project)
+        builds_results = builds_results.preload(:needs) if include_needs
+        bridges_results = bridges_results.preload(:needs) if include_needs
+
+        results = builds_results | bridges_results
 
         results.group_by(&:stage_id)
       end
