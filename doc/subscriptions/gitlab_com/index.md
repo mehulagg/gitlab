@@ -91,8 +91,10 @@ The following table describes details of your subscription:
 > - [Updated](https://gitlab.com/gitlab-org/gitlab/-/issues/292086) in GitLab 13.8 to include public
     email address.
 
-To view a list of seats being used, go to **Settings > Billing**.
-Under **Seats currently in use**, select **See usage**.
+To view a list of seats being used:
+
+1. Go to **Settings > Billing**.
+1. Under **Seats currently in use**, select **See usage**.
 
 The **Seat usage** page lists all users occupying seats. Details for each user include:
 
@@ -103,6 +105,19 @@ The **Seat usage** page lists all users occupying seats. Details for each user i
 The Seat usage listing is updated live, but the usage statistics on the billing page are updated
 only once per day. For this reason there can be a minor difference between the seat usage listing
 and the billing page.
+
+### Seat usage pending approval
+
+Members that are added to a project must be approved by someone assigned the project Owner role.
+
+To approve a member who is pending approval:
+
+1. Go to **Settings > Billing**.
+1. Under **Seats currently in use**, select **See usage**.
+1. Select the **Pending members** tab.
+1. To the right of the user you want to approve, select **Approve**.
+
+The user is added to the **Billable members** tab.
 
 ### Search seat usage
 
