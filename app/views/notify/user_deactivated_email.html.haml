@@ -9,6 +9,7 @@
   %li
     = _('Use slash commands.')
 %p
-  = _('If you log back in, your account will reactivate as a fully active account.')
+  = _('To reactivate your account, %{link_to_gitlab}.').html_safe % { link_to_gitlab: link_to('sign in to GitLab', Gitlab.config.gitlab.url) }
+
 %p
   = _('Please contact your GitLab administrator if you think this is an error.')
