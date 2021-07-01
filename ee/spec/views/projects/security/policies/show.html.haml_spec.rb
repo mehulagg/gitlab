@@ -14,10 +14,15 @@ RSpec.describe "projects/security/policies/show", type: :view do
     render
   end
 
-  it 'renders the default state' do
-    expect(rendered).to have_selector('h2')
-    expect(rendered).to have_selector('h4')
-    expect(response).to have_css('input[id=orchestration_policy_project_id]', visible: false)
-    expect(rendered).to have_button('Save changes')
+  it 'renders Vue app root' do
+    expect(rendered).to have_selector('#js-security-policies-list')
+  end
+
+  it 'passes project\'s full path' do
+    expect(rendered).to include project.path_with_namespace
+  end
+
+  it 'passes documentation URL' do
+    expect(rendered).to include '"/help/user/project/clusters/protect/container_network_security/quick_start_guide'
   end
 end

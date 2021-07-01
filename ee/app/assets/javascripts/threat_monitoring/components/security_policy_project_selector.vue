@@ -25,7 +25,7 @@ export default {
     GlSprintf,
     ProjectSelector,
   },
-  inject: ['documentationPath', 'projectPath', 'selectProjectPath'],
+  inject: ['documentationPath', 'projectPath'],
   props: {
     assignedPolicyProject: {
       type: Object,
@@ -117,7 +117,7 @@ export default {
             securityPolicyProjectId: id,
           },
         });
-        if (data.securityPolicyProjectAssign.errors.length) {
+        if (data?.securityPolicyProjectAssign?.errors?.length) {
           this.assignError = true;
         } else {
           this.showAssignSuccess = true;
@@ -166,6 +166,7 @@ export default {
     <gl-alert
       v-if="assignError"
       class="gl-mt-3"
+      data-testid="policy-project-assign-error"
       variant="danger"
       :dismissible="true"
       @dismiss="dismissAlert('assignError')"
@@ -175,6 +176,7 @@ export default {
     <gl-alert
       v-else-if="showAssignSuccess"
       class="gl-mt-3"
+      data-testid="policy-project-assign-success"
       variant="success"
       :dismissible="true"
       @dismiss="dismissAlert('showAssignSuccess')"
@@ -218,6 +220,7 @@ export default {
       </div>
       <gl-button
         class="gl-display-block"
+        data-testid="save-policy-project"
         variant="success"
         :disabled="!isNewProject"
         :loading="isAssigningProject"

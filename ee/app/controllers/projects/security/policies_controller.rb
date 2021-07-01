@@ -15,8 +15,7 @@ module Projects
       def show
         assigned_policy_id = project&.security_orchestration_policy_configuration&.security_policy_management_project_id
         assigned_policy_name = assigned_policy_id ? Project.find(assigned_policy_id)&.name : ''
-        assigned_policy_gid = "gid://gitlab/Project/#{assigned_policy_id}"
-        @assigned_policy_project = { id: assigned_policy_gid, name: assigned_policy_name }
+        @assigned_policy_project = { id: assigned_policy_id, name: assigned_policy_name }
 
         render :show
       end

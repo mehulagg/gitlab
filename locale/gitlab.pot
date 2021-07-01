@@ -22940,9 +22940,6 @@ msgstr ""
 msgid "Opens in a new window"
 msgstr ""
 
-msgid "Operation completed"
-msgstr ""
-
 msgid "Operation failed. Check pod logs for %{pod_name} for more details."
 msgstr ""
 
@@ -28817,7 +28814,13 @@ msgstr ""
 msgid "SecurityConfiguration|You can quickly enable all security scanning tools by enabling %{linkStart}Auto DevOps%{linkEnd}."
 msgstr ""
 
-msgid "SecurityOrchestration|A security policy project can be used enforce policies for a given project, group, or instance. It allows you to specify security policies that are important to you  and enforce them with every commit."
+msgid "SecurityOrchestration|A security policy project can be used enforce policies for a given project, group, or instance. It allows you to specify security policies that are important to you  and enforce them with every commit. %{linkStart}More information%{linkEnd}"
+msgstr ""
+
+msgid "SecurityOrchestration|A security policy project was successfully linked"
+msgstr ""
+
+msgid "SecurityOrchestration|An error has occured when assigning your security policy project"
 msgstr ""
 
 msgid "SecurityOrchestration|Create a policy"

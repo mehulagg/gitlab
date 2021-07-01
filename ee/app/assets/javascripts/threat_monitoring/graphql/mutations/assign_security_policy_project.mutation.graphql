@@ -2,7 +2,6 @@ mutation assignSecurityPolicyProject($projectPath: ID!, $securityPolicyProjectId
   securityPolicyProjectAssign(
     input: { projectPath: $projectPath, securityPolicyProjectId: $securityPolicyProjectId }
   ) {
-    clientMutationId
     errors
   }
 }
