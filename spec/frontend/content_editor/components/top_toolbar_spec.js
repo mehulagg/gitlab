@@ -48,7 +48,7 @@ describe('content_editor/components/top_toolbar', () => {
     ${'bullet-list'}     | ${{ contentType: 'bulletList', iconName: 'list-bulleted', label: 'Add a bullet list', editorCommand: 'toggleBulletList' }}
     ${'ordered-list'}    | ${{ contentType: 'orderedList', iconName: 'list-numbered', label: 'Add a numbered list', editorCommand: 'toggleOrderedList' }}
     ${'horizontal-rule'} | ${{ contentType: 'horizontalRule', iconName: 'dash', label: 'Add a horizontal rule', editorCommand: 'setHorizontalRule' }}
-    ${'code-block'}      | ${{ contentType: 'codeBlock', iconName: 'doc-code', label: 'Insert a code block', editorCommand: 'toggleCodeBlock' }}
+    ${'code-block'}      | ${{ contentType: 'codeBlock', iconName: 'doc-code', label: 'Insert a code block', editorCommand: 'toggleCodeBlockAndAppendParagraph' }}
     ${'text-styles'}     | ${{}}
     ${'link'}            | ${{}}
   `('given a $testId toolbar control', ({ testId, controlProps }) => {

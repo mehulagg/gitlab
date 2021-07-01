@@ -100,7 +100,7 @@ export default {
       data-testid="code-block"
       content-type="codeBlock"
       icon-name="doc-code"
-      editor-command="toggleCodeBlock"
+      editor-command="toggleCodeBlockAndAppendParagraph"
       :label="__('Insert a code block')"
       :tiptap-editor="contentEditor.tiptapEditor"
       @execute="trackToolbarControlExecution"

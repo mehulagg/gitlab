@@ -42,7 +42,7 @@ export default {
       const { contentType } = this;
 
       if (this.editorCommand) {
-        this.tiptapEditor.chain()[this.editorCommand]().focus().run();
+        this.tiptapEditor.chain().focus()[this.editorCommand]().run();
       }
 
       this.$emit('execute', { contentType });
