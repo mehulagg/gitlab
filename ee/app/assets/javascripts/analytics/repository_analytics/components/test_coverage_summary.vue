@@ -164,16 +164,14 @@ export default {
     <div
       class="gl-display-flex gl-flex-direction-column gl-md-flex-direction-row gl-my-6 gl-align-items-flex-start"
     >
-      <div class="gl-pr-9 gl-flex-shrink-0">
-        <span class="gl-font-weight-bold">{{ $options.i18n.metrics.cardTitle }}</span>
-      </div>
-      <gl-skeleton-loading v-if="$apollo.queries.group.loading" />
+      <gl-skeleton-loading v-if="isLoading" />
       <template v-else>
         <gl-single-stat
           v-for="metric in metrics"
           :key="metric.key"
           class="gl-pr-9 gl-my-4 gl-md-mt-0 gl-md-mb-0"
-          :value="`${metric.value}`"
+          :value="`${metric.value || '-'}`"
+          :unit="metric.unit"
           :title="metric.label"
           :should-animate="true"
         />
