@@ -11,6 +11,7 @@ module QA
         let(:wiki) { Resource::Wiki::ProjectPage.fabricate_via_api! }
 
         before do
+          Runtime::Feature.enable(:wiki_uses_default_branch)
           Flow::Login.sign_in
         end
 
