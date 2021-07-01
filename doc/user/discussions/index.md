@@ -157,7 +157,7 @@ resolved.
 1. Under **Merge checks**, select the **All discussions must be resolved** checkbox.
 1. Select **Save changes**.
 
-### Automatically resolve merge request diff threads when they become outdated
+### Automatically resolve threads in a merge request when they become outdated
 
 You can set merge requests to automatically resolve threads when lines are modified
 with a new push.
@@ -172,20 +172,7 @@ with a new push.
 Threads are now resolved if a push makes a diff section outdated.
 Threads on lines that don't change and top-level resolvable threads are not resolved.
 
-## Add a comment to a commit
-
-You can add comments and threads to a particular commit.
-
-1. On the top bar, select **Menu > Projects** and find your project.
-1. On the left sidebar, select **Repository > Commits**.
-1. Below the commits, in the **Comment** field, enter a comment.
-1. Select **Comment** or select the down arrow (**{chevron-down}**) to select **Start thread**.
-
-WARNING:
-Threads created this way are lost if the commit ID changes after a
-force push.
-
-### Commit threads in the context of a merge request
+## Commit threads in the context of a merge request
 
 For reviewers with commit-based workflow, it may be useful to add threads to
 specific commit diffs in the context of a merge request. These threads
@@ -219,6 +206,19 @@ NOTE:
 When a link of a commit reference is found in a thread inside a merge
 request, it is automatically converted to a link in the context of the
 current merge request.
+
+## Add a comment to a commit
+
+You can add comments and threads to a particular commit.
+
+1. On the top bar, select **Menu > Projects** and find your project.
+1. On the left sidebar, select **Repository > Commits**.
+1. Below the commits, in the **Comment** field, enter a comment.
+1. Select **Comment** or select the down arrow (**{chevron-down}**) to select **Start thread**.
+
+WARNING:
+Threads created this way are lost if the commit ID changes after a
+force push.
 
 ## Image threads
 
