@@ -27,6 +27,8 @@ module IntegrationsHelper
       s_("ProjectService|Trigger event when a deployment starts or finishes.")
     when "alert"
       s_("ProjectService|Trigger event when a new, unique alert is recorded.")
+    when "vulnerability"
+      s_("ProjectService|Trigger event when a new, unique vulnerability is recorded.")
     end
   end
 

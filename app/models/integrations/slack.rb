@@ -34,7 +34,7 @@ module Integrations
 
     def supported_events
       additional = []
-      additional << 'alert'
+      additional << 'alert' << 'vulnerability'
 
       super + additional
     end

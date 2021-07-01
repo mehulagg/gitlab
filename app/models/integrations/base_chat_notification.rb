@@ -200,6 +200,8 @@ module Integrations
         Integrations::ChatMessage::WikiPageMessage.new(data)
       when "deployment"
         Integrations::ChatMessage::DeploymentMessage.new(data)
+      when "vulnerability"
+        Integrations::ChatMessage::VulnerabilityMessage.new(data)
       end
     end
 

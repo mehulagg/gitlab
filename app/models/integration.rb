@@ -55,6 +55,7 @@ class Integration < ApplicationRecord
   default_value_for :pipeline_events, true
   default_value_for :push_events, true
   default_value_for :tag_push_events, true
+  default_value_for :vulnerability_events, true
   default_value_for :wiki_page_events, true
 
   after_initialize :initialize_properties
@@ -100,6 +101,7 @@ class Integration < ApplicationRecord
   scope :deployment_hooks, -> { where(deployment_events: true, active: true) }
   scope :alert_hooks, -> { where(alert_events: true, active: true) }
   scope :deployment, -> { where(category: 'deployment') }
+  scope :vulnerability_hooks, -> { where(vulnerability_events: true, active: true) }
 
   # Provide convenient accessor methods for each serialized property.
   # Also keep track of updated properties in a similar way as ActiveModel::Dirty

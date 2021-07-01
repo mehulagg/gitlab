@@ -20,6 +20,8 @@ module Vulnerabilities
         save_vulnerability(vulnerability, finding)
         Statistics::UpdateService.update_for(vulnerability)
         HistoricalStatistics::UpdateService.update_for(@project)
+
+        execute_vulnerability_hooks(vulnerability)
       rescue ActiveRecord::RecordNotFound
         vulnerability.errors.add(:base, _('finding is not found or is already attached to a vulnerability'))
         raise ActiveRecord::Rollback
@@ -29,6 +31,16 @@ module Vulnerabilities
     end
 
     private
+
+    def execute_vulnerability_hooks(vulnerability)
+      vulnerability_data = hook_data(vulnerability)
+
+      vulnerability.project.execute_integrations(vulnerability_data, :vulnerability_hooks)
+    end
+
+    def hook_data(vulnerability)
+      Gitlab::DataBuilder::Vulnerability.build(vulnerability)
+    end
 
     def save_vulnerability(vulnerability, finding)
       vulnerability.assign_attributes(

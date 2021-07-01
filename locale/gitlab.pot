@@ -25469,6 +25469,9 @@ msgstr ""
 msgid "ProjectService|Trigger event when a new, unique alert is recorded."
 msgstr ""
 
+msgid "ProjectService|Trigger event when a new, unique vulnerability is recorded."
+msgstr ""
+
 msgid "ProjectService|Trigger event when a pipeline status changes."
 msgstr ""
 
