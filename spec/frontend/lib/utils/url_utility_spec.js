@@ -91,6 +91,57 @@ describe('URL utility', () => {
     });
   });
 
+  describe('getParameterByName', () => {
+    beforeEach(() => {
+      setWindowLocation({ href: 'https://gitlab.com?scope=all&p=2' });
+    });
+
+    it('should return valid parameter', () => {
+      setWindowLocation({ href: 'https://gitlab.com?scope=all&p=2' });
+
+      const value = urlUtils.getParameterByName('scope');
+
+      expect(urlUtils.getParameterByName('p')).toEqual('2');
+      expect(value).toBe('all');
+    });
+
+    it('should return invalid parameter', () => {
+      setWindowLocation({ href: 'https://gitlab.com?scope=all&p=2' });
+
+      const value = urlUtils.getParameterByName('fakeParameter');
+
+      expect(value).toBe(null);
+    });
+
+    it('should return a parameter with spaces', () => {
+      setWindowLocation({ href: 'https://gitlab.com?search=my terms' });
+
+      expect(urlUtils.getParameterByName('search')).toBe('my terms');
+    });
+
+    it('should return a parameter with encoded spaces', () => {
+      setWindowLocation({ href: 'https://gitlab.com?search=my%20terms' });
+
+      expect(urlUtils.getParameterByName('search')).toBe('my terms');
+    });
+
+    it('should return a parameter with plus signs as spaces', () => {
+      setWindowLocation({ href: 'https://gitlab.com?search=my+terms' });
+
+      expect(urlUtils.getParameterByName('search')).toBe('my terms');
+    });
+
+    it('should return valid parameters if URL is provided', () => {
+      let value = urlUtils.getParameterByName('foo', 'http://cocteau.twins/?foo=bar');
+
+      expect(value).toBe('bar');
+
+      value = urlUtils.getParameterByName('manan', 'http://cocteau.twins/?foo=bar&manan=canchu');
+
+      expect(value).toBe('canchu');
+    });
+  });
+
   describe('mergeUrlParams', () => {
     const { mergeUrlParams } = urlUtils;
 
