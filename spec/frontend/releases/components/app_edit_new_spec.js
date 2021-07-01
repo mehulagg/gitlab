@@ -5,6 +5,7 @@ import { merge } from 'lodash';
 import Vuex from 'vuex';
 import { getJSONFixture } from 'helpers/fixtures';
 import * as commonUtils from '~/lib/utils/common_utils';
+import * as urlUtils from '~/lib/utils/url_utility';
 import ReleaseEditNewApp from '~/releases/components/app_edit_new.vue';
 import AssetLinksForm from '~/releases/components/asset_links_form.vue';
 import { BACK_URL_PARAM } from '~/releases/constants';
@@ -150,7 +151,7 @@ describe('Release edit/new component', () => {
     const backUrl = 'https://example.gitlab.com/back/url';
 
     beforeEach(async () => {
-      commonUtils.getParameterByName = jest
+      urlUtils.getParameterByName = jest
         .fn()
         .mockImplementation((paramToGet) => ({ [BACK_URL_PARAM]: backUrl }[paramToGet]));
 

@@ -8,7 +8,7 @@ import EmptyState from '~/environments/components/empty_state.vue';
 import EnableReviewAppModal from '~/environments/components/enable_review_app_modal.vue';
 import EnvironmentsApp from '~/environments/components/environments_app.vue';
 import axios from '~/lib/utils/axios_utils';
-import * as utils from '~/lib/utils/common_utils';
+import * as utils from '~/lib/utils/url_utility';
 import { environment, folder } from './mock_data';
 
 describe('Environment', () => {
