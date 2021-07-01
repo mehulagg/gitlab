@@ -135,6 +135,10 @@ module EE
             return unless latest_pipeline_id
 
             [id, DEFAULT_LETTER_GRADE, latest_pipeline_id, quoted_time, quoted_time].join(', ').then { |s| "(#{s})" }
+          rescue StandardError => e
+            ::Gitlab::ErrorTracking.track_and_raise_for_dev_exception(e)
+
+            nil
           end
 
           private

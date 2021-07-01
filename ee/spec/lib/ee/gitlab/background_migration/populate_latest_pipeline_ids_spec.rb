@@ -88,16 +88,16 @@ RSpec.describe Gitlab::BackgroundMigration::PopulateLatestPipelineIds do
         end
       end
 
-      # Raise a RuntimeError while retreiving the `latest_pipeline_id` for the `project_6`
-      latest_pipeline_id_call_count = 0
+      # Raise a RuntimeError while retreiving the `pipeline_with_reports` for the `project_6`
+      pipeline_with_reports_call_count = 0
 
       allow_next_found_instance_of(described_class::Project) do |project_instance|
-        original_latest_pipeline_id = project_instance.method(:latest_pipeline_id)
+        original_pipeline_with_reports = project_instance.method(:pipeline_with_reports)
 
-        allow(project_instance).to receive(:latest_pipeline_id) do
-          latest_pipeline_id_call_count += 1
+        allow(project_instance).to receive(:pipeline_with_reports) do
+          pipeline_with_reports_call_count += 1
 
-          latest_pipeline_id_call_count == 4 ? raise("Foo") : original_latest_pipeline_id.call
+          pipeline_with_reports_call_count == 4 ? raise("Foo") : original_pipeline_with_reports.call
         end
       end
     end
@@ -108,6 +108,8 @@ RSpec.describe Gitlab::BackgroundMigration::PopulateLatestPipelineIds do
                                              .and change { vulnerability_statistics.find_by(project_id: project_1.id) }.from(nil)
                                              .and change { vulnerability_statistics.find_by(project_id: project_1.id)&.latest_pipeline_id }.from(nil).to(project_1_latest_pipeline.id)
                                              .and not_change { project_2_stats.reload.latest_pipeline_id }.from(project_2_pipeline.id)
+
+      expect(Gitlab::ErrorTracking).to have_received(:track_and_raise_for_dev_exception).once
     end
   end
 
