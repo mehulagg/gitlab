@@ -64,4 +64,4 @@ Due to the bi-directional relationship, the relationship no longer appears in ei
 ![Removing a related issue](img/related_issues_remove_v12_8.png)
 
 Access our [permissions](../../permissions.md) page for more information.
-NOTE: A user must have a minimum of Developer access in each projects in order to link them together. 
+NOTE: A user must have a minimum level of Developer access in each projects in order to link them together. 
