@@ -10,14 +10,14 @@ RSpec.describe Branches::CreateService do
 
   describe '#execute' do
     context 'when repository is empty' do
-      it 'creates master branch' do
-        service.execute('my-feature', 'master')
+      it 'creates default branch' do
+        service.execute('my-feature', project.default_branch)
 
-        expect(project.repository.branch_exists?('master')).to be_truthy
+        expect(project.repository.branch_exists?(project.default_branch)).to be_truthy
       end
 
       it 'creates another-feature branch' do
-        service.execute('another-feature', 'master')
+        service.execute('another-feature', project.default_branch)
 
         expect(project.repository.branch_exists?('another-feature')).to be_truthy
       end
@@ -25,7 +25,7 @@ RSpec.describe Branches::CreateService do
 
     context 'when branch already exists' do
       it 'returns an error' do
-        result = service.execute('master', 'master')
+        result = service.execute(project.default_branch, project.default_branch)
 
         expect(result[:status]).to eq(:error)
         expect(result[:message]).to eq('Branch already exists')

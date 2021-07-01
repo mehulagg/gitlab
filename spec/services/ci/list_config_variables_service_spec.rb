@@ -17,7 +17,7 @@ RSpec.describe Ci::ListConfigVariablesService, :use_clean_rails_memory_store_cac
   end
 
   context 'when sending a valid sha' do
-    let(:sha) { 'master' }
+    let(:sha) { project.default_branch }
     let(:ci_config) do
       {
         variables: {
@@ -46,7 +46,7 @@ RSpec.describe Ci::ListConfigVariablesService, :use_clean_rails_memory_store_cac
   end
 
   context 'when config has includes' do
-    let(:sha) { 'master' }
+    let(:sha) { project.default_branch }
     let(:ci_config) do
       {
         include: [{ local: 'other_file.yml' }],
@@ -95,7 +95,7 @@ RSpec.describe Ci::ListConfigVariablesService, :use_clean_rails_memory_store_cac
   end
 
   context 'when sending an invalid config' do
-    let(:sha) { 'master' }
+    let(:sha) { project.default_branch }
     let(:ci_config) do
       {
         variables: {
@@ -118,7 +118,7 @@ RSpec.describe Ci::ListConfigVariablesService, :use_clean_rails_memory_store_cac
   end
 
   context 'when reading from cache' do
-    let(:sha) { 'master' }
+    let(:sha) { project.default_branch }
     let(:ci_config) { {} }
     let(:reactive_cache_params) { [sha] }
     let(:return_value) { { 'KEY1' => { value: 'val 1', description: 'description 1' } } }
@@ -133,7 +133,7 @@ RSpec.describe Ci::ListConfigVariablesService, :use_clean_rails_memory_store_cac
   end
 
   context 'when the cache is empty' do
-    let(:sha) { 'master' }
+    let(:sha) { project.default_branch }
     let(:ci_config) { {} }
     let(:reactive_cache_params) { [sha] }
 

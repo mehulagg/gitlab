@@ -53,7 +53,7 @@ RSpec.describe Ci::CreatePipelineService do
 
       let(:pipeline_on_previous_commit) do
         execute_service(
-          after: previous_commit_sha_from_ref('master')
+          after: previous_commit_sha_from_ref(project.default_branch)
         )
       end
 
@@ -113,7 +113,7 @@ RSpec.describe Ci::CreatePipelineService do
 
         context 'when related merge request is already merged' do
           let!(:merged_merge_request) do
-            create(:merge_request, source_branch: 'master', target_branch: "branch_2", source_project: project, state: 'merged')
+            create(:merge_request, source_branch: project.default_branch, target_branch: "branch_2", source_project: project, state: 'merged')
           end
 
           it 'does not schedule update head pipeline job' do
@@ -186,7 +186,7 @@ RSpec.describe Ci::CreatePipelineService do
 
         context 'when the pipeline is not the latest for the branch' do
           it 'does not update merge request head pipeline' do
-            merge_request = create(:merge_request, source_branch: 'master',
+            merge_request = create(:merge_request, source_branch: project.default_branch,
                                                    target_branch: "branch_1",
                                                    source_project: project)
 
@@ -205,7 +205,7 @@ RSpec.describe Ci::CreatePipelineService do
           end
 
           it 'updates merge request head pipeline reference', :sidekiq_might_not_need_inline do
-            merge_request = create(:merge_request, source_branch: 'master',
+            merge_request = create(:merge_request, source_branch: project.default_branch,
                                                    target_branch: 'feature',
                                                    source_project: project)
 
@@ -226,7 +226,7 @@ RSpec.describe Ci::CreatePipelineService do
           end
 
           it 'updates merge request head pipeline', :sidekiq_might_not_need_inline do
-            merge_request = create(:merge_request, source_branch: 'master',
+            merge_request = create(:merge_request, source_branch: project.default_branch,
                                                    target_branch: 'feature',
                                                    source_project: project)
 
@@ -1125,7 +1125,7 @@ RSpec.describe Ci::CreatePipelineService do
 
     context 'when ref is a protected branch' do
       before do
-        create(:protected_branch, project: project, name: 'master')
+        create(:protected_branch, project: project, name: project.default_branch)
       end
 
       it_behaves_like 'when ref is protected'
@@ -1259,7 +1259,7 @@ RSpec.describe Ci::CreatePipelineService do
           end
 
           context 'when external pull request is specified' do
-            let(:pull_request) { create(:external_pull_request, project: project, source_branch: 'feature', target_branch: 'master') }
+            let(:pull_request) { create(:external_pull_request, project: project, source_branch: 'feature', target_branch: project.default_branch) }
             let(:ref_name) { pull_request.source_ref }
 
             it 'creates an external pull request pipeline' do
@@ -1336,7 +1336,7 @@ RSpec.describe Ci::CreatePipelineService do
               create(:external_pull_request,
                 project: project,
                 source_branch: Gitlab::Git.ref_name(ref_name),
-                target_branch: 'master')
+                target_branch: project.default_branch)
             end
 
             it 'creates an external pull request pipeline' do
@@ -1410,7 +1410,7 @@ RSpec.describe Ci::CreatePipelineService do
                 source_project: project,
                 source_branch: 'feature',
                 target_project: project,
-                target_branch: 'master')
+                target_branch: project.default_branch)
             end
 
             let(:ref_name) { merge_request.ref_path }
@@ -1467,7 +1467,7 @@ RSpec.describe Ci::CreatePipelineService do
                   source_project: project,
                   source_branch: 'feature',
                   target_project: target_project,
-                  target_branch: 'master')
+                  target_branch: project.default_branch)
               end
 
               let(:ref_name) { 'refs/heads/feature' }
@@ -1529,7 +1529,7 @@ RSpec.describe Ci::CreatePipelineService do
                 source_project: project,
                 source_branch: Gitlab::Git.ref_name(ref_name),
                 target_project: project,
-                target_branch: 'master')
+                target_branch: project.default_branch)
             end
 
             it 'does not create a detached merge request pipeline' do
@@ -1558,7 +1558,7 @@ RSpec.describe Ci::CreatePipelineService do
                 source_project: project,
                 source_branch: Gitlab::Git.ref_name(ref_name),
                 target_project: project,
-                target_branch: 'master')
+                target_branch: project.default_branch)
             end
 
             it 'does not create a detached merge request pipeline' do
@@ -1589,7 +1589,7 @@ RSpec.describe Ci::CreatePipelineService do
                 source_project: project,
                 source_branch: Gitlab::Git.ref_name(ref_name),
                 target_project: project,
-                target_branch: 'master')
+                target_branch: project.default_branch)
             end
 
             it 'does not create a detached merge request pipeline' do
@@ -1618,7 +1618,7 @@ RSpec.describe Ci::CreatePipelineService do
                 source_project: project,
                 source_branch: Gitlab::Git.ref_name(ref_name),
                 target_project: project,
-                target_branch: 'master')
+                target_branch: project.default_branch)
             end
 
             it 'does not create a detached merge request pipeline' do

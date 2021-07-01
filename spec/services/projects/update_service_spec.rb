@@ -210,7 +210,7 @@ RSpec.describe Projects::UpdateService do
         # The branch 'unexisted-branch' does not exist.
         update_project(project, admin, default_branch: 'unexisted-branch')
 
-        expect(Project.find(project.id).default_branch).to eq 'master'
+        expect(Project.find(project.id).default_branch).to eq project.default_branch
       end
     end
 

@@ -25,7 +25,7 @@ RSpec.describe Branches::ValidateNewService do
 
     context 'branch exist' do
       it 'returns error when branch exists' do
-        result = service.execute('master')
+        result = service.execute(project.default_branch)
 
         expect(result[:status]).to eq(:error)
         expect(result[:message]).to eq('Branch already exists')

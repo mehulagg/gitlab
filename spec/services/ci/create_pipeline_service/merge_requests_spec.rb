@@ -34,7 +34,7 @@ RSpec.describe Ci::CreatePipelineService do
                  source_project: project,
                  source_branch: 'feature',
                  target_project: project,
-                 target_branch: 'master')
+                 target_branch: project.default_branch)
         end
 
         it 'does not create a pipeline' do

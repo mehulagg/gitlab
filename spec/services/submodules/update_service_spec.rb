@@ -201,7 +201,7 @@ RSpec.describe Submodules::UpdateService do
 
       context 'when repository is empty' do
         let(:project) { create(:project, :empty_repo) }
-        let(:branch_name) { 'master' }
+        let(:branch_name) { project.default_branch }
 
         it_behaves_like 'returns error result' do
           let(:error_message) { 'The repository is empty' }

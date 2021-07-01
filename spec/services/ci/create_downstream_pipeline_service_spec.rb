@@ -148,7 +148,7 @@ RSpec.describe Ci::CreateDownstreamPipelineService, '#execute' do
       it 'is using default branch name' do
         pipeline = service.execute(bridge)
 
-        expect(pipeline.ref).to eq 'master'
+        expect(pipeline.ref).to eq downstream_project.default_branch
       end
     end
 
@@ -249,7 +249,7 @@ RSpec.describe Ci::CreateDownstreamPipelineService, '#execute' do
 
         before do
           upstream_project.repository.create_file(
-            user, 'child-pipeline.yml', file_content, message: 'message', branch_name: 'master')
+            user, 'child-pipeline.yml', file_content, message: 'message', branch_name: upstream_project.default_branch)
 
           upstream_pipeline.update!(sha: upstream_project.commit.id)
         end
@@ -283,7 +283,7 @@ RSpec.describe Ci::CreateDownstreamPipelineService, '#execute' do
         context 'when latest sha for the ref changed in the meantime' do
           before do
             upstream_project.repository.create_file(
-              user, 'another-change', 'test', message: 'message', branch_name: 'master')
+              user, 'another-change', 'test', message: 'message', branch_name: upstream_project.default_branch)
           end
 
           # it does not auto-cancel pipelines from the same family
@@ -622,7 +622,7 @@ RSpec.describe Ci::CreateDownstreamPipelineService, '#execute' do
       end
 
       let(:primary_pipeline) do
-        Ci::CreatePipelineService.new(upstream_project, upstream_project.owner, { ref: 'master' })
+        Ci::CreatePipelineService.new(upstream_project, upstream_project.owner, { ref: upstream_project.default_branch })
           .execute(:push, save_on_errors: false)
       end
 

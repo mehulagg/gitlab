@@ -17,19 +17,19 @@ RSpec.describe MergeRequests::SquashService do
   let(:merge_request_with_one_commit) do
     create(:merge_request,
            source_branch: 'feature', source_project: project,
-           target_branch: 'master', target_project: project)
+           target_branch: project.default_branch, target_project: project)
   end
 
   let(:merge_request_with_only_new_files) do
     create(:merge_request,
            source_branch: 'video', source_project: project,
-           target_branch: 'master', target_project: project)
+           target_branch: project.default_branch, target_project: project)
   end
 
   let(:merge_request_with_large_files) do
     create(:merge_request,
            source_branch: 'squash-large-files', source_project: project,
-           target_branch: 'master', target_project: project)
+           target_branch: project.default_branch, target_project: project)
   end
 
   shared_examples 'the squash succeeds' do

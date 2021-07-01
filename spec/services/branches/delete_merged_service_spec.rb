@@ -25,7 +25,7 @@ RSpec.describe Branches::DeleteMergedService do
     it 'keeps "master"' do
       service.execute
 
-      expect(project.repository.branch_names).to include('master')
+      expect(project.repository.branch_names).to include(project.default_branch)
     end
 
     it 'keeps protected branches' do
@@ -63,8 +63,8 @@ RSpec.describe Branches::DeleteMergedService do
     context 'open merge requests' do
       it 'does not delete branches from open merge requests' do
         forked_project = fork_project(project)
-        create(:merge_request, :opened, source_project: project, target_project: project, source_branch: 'branch-merged', target_branch: 'master')
-        create(:merge_request, :opened, source_project: forked_project, target_project: project, target_branch: 'improve/awesome', source_branch: 'master')
+        create(:merge_request, :opened, source_project: project, target_project: project, source_branch: 'branch-merged', target_branch: project.default_branch)
+        create(:merge_request, :opened, source_project: forked_project, target_project: project, target_branch: 'improve/awesome', source_branch: forked_project.default_branch)
 
         service.execute
 

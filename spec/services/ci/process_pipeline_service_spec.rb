@@ -6,7 +6,7 @@ RSpec.describe Ci::ProcessPipelineService do
   let_it_be(:project) { create(:project) }
 
   let(:pipeline) do
-    create(:ci_empty_pipeline, ref: 'master', project: project)
+    create(:ci_empty_pipeline, ref: project.default_branch, project: project)
   end
 
   let(:pipeline_processing_events_counter) { double(increment: true) }

@@ -11,14 +11,14 @@ RSpec.describe Packages::Go::SyncPackagesService do
     it 'schedules a package refresh' do
       expect(::Packages::Go::SyncPackagesWorker).to receive(:perform_async).once
 
-      described_class.new(project, 'master').execute_async
+      described_class.new(project, project.default_branch).execute_async
     end
   end
 
   describe '#initialize' do
     context 'without a project' do
       it 'raises an error' do
-        expect { described_class.new(nil, 'master') }
+        expect { described_class.new(nil, project.default_branch) }
           .to raise_error(ArgumentError, 'project is required')
       end
     end

@@ -55,7 +55,7 @@ RSpec.describe Releases::CreateService do
     end
 
     context 'when ref is provided' do
-      let(:ref) { 'master' }
+      let(:ref) { project.default_branch }
       let(:tag_name) { 'foobar' }
 
       it_behaves_like 'a successful release creation'
@@ -213,11 +213,11 @@ RSpec.describe Releases::CreateService do
   end
 
   context 'Evidence collection' do
-    let(:sha) { project.repository.commit('master').sha }
+    let(:sha) { project.repository.commit(project.default_branch).sha }
     let(:params) do
       {
         name: 'New release',
-        ref: 'master',
+        ref: project.default_branch,
         tag: 'v0.1',
         description: 'Super nice release',
         released_at: released_at
@@ -310,7 +310,7 @@ RSpec.describe Releases::CreateService do
       end
 
       it 'uses the last pipeline for evidence when tag is already created', :sidekiq_inline do
-        Tags::CreateService.new(project, user).execute('v0.1', 'master', nil)
+        Tags::CreateService.new(project, user).execute('v0.1', project.default_branch, nil)
 
         expect(project.repository.find_tag('v0.1')).to be_present
 

@@ -21,7 +21,7 @@ RSpec.describe MergeRequests::RefreshService do
 
       @merge_request = create(:merge_request,
                               source_project: @project,
-                              source_branch: 'master',
+                              source_branch: project.default_branch,
                               target_branch: 'feature',
                               target_project: @project,
                               auto_merge_enabled: true,
@@ -30,7 +30,7 @@ RSpec.describe MergeRequests::RefreshService do
 
       @another_merge_request = create(:merge_request,
                                       source_project: @project,
-                                      source_branch: 'master',
+                                      source_branch: project.default_branch,
                                       target_branch: 'test',
                                       target_project: @project,
                                       auto_merge_enabled: true,
@@ -39,7 +39,7 @@ RSpec.describe MergeRequests::RefreshService do
 
       @fork_merge_request = create(:merge_request,
                                    source_project: @fork_project,
-                                   source_branch: 'master',
+                                   source_branch: project.default_branch,
                                    target_branch: 'feature',
                                    target_project: @project)
 
@@ -116,7 +116,7 @@ RSpec.describe MergeRequests::RefreshService do
           @merge_request = create(:merge_request,
             source_project: @project,
             source_branch: 'feature',
-            target_branch: 'master',
+            target_branch: project.default_branch,
             target_project: @project,
             merge_error: error_message)
         end
@@ -304,7 +304,7 @@ RSpec.describe MergeRequests::RefreshService do
           it 'saves a skipped detached merge request pipeline' do
             project.repository.create_file(@user, 'new-file.txt', 'A new file',
                                            message: '[skip ci] This is a test',
-                                           branch_name: 'master')
+                                           branch_name: project.default_branch)
 
             expect { subject }
               .to change { @merge_request.pipelines_for_merge_request.count }.by(1)
@@ -345,7 +345,7 @@ RSpec.describe MergeRequests::RefreshService do
           YAML.dump({
             build: {
               script: 'echo "Valid yaml syntax, but..."',
-              only: ['master']
+              only: [project.default_branch]
             },
             test: {
               script: 'echo "... I depend on build, which does not run."',
@@ -416,8 +416,8 @@ RSpec.describe MergeRequests::RefreshService do
         let!(:empty_fork_merge_request) do
           create(:merge_request,
                   source_project: @fork_project,
-                  source_branch: 'master',
-                  target_branch: 'master',
+                  source_branch: project.default_branch,
+                  target_branch: project.default_branch,
                   target_project: @project)
         end
 
@@ -561,20 +561,20 @@ RSpec.describe MergeRequests::RefreshService do
       let!(:first_commit) do
         @fork_project.repository.create_file(@user, 'test1.txt', 'Test data',
                                              message: 'Test commit',
-                                             branch_name: 'master')
+                                             branch_name: project.default_branch)
       end
 
       let!(:second_commit) do
         @fork_project.repository.create_file(@user, 'test2.txt', 'More test data',
                                              message: 'Second test commit',
-                                             branch_name: 'master')
+                                             branch_name: project.default_branch)
       end
 
       let!(:forked_master_mr) do
         create(:merge_request,
                source_project: @fork_project,
-               source_branch: 'master',
-               target_branch: 'master',
+               source_branch: project.default_branch,
+               target_branch: project.default_branch,
                target_project: @project)
       end
 
@@ -611,7 +611,7 @@ RSpec.describe MergeRequests::RefreshService do
       it 'does not increase the diff count for a new push to target branch' do
         new_commit = @project.repository.create_file(@user, 'new-file.txt', 'A new file',
                                                      message: 'This is a test',
-                                                     branch_name: 'master')
+                                                     branch_name: project.default_branch)
 
         expect do
           service.new(project: @project, current_user: @user).execute(@newrev, new_commit, 'refs/heads/master')
@@ -684,7 +684,7 @@ RSpec.describe MergeRequests::RefreshService do
           )
 
           merge_request = create(:merge_request,
-                                 target_branch: 'master',
+                                 target_branch: project.default_branch,
                                  source_branch: 'close-by-commit',
                                  source_project: project)
 
@@ -706,7 +706,7 @@ RSpec.describe MergeRequests::RefreshService do
           )
 
           merge_request = create(:merge_request,
-                                 target_branch: 'master',
+                                 target_branch: project.default_branch,
                                  target_project: project,
                                  source_branch: 'close-by-commit',
                                  source_project: forked_project)
@@ -732,7 +732,7 @@ RSpec.describe MergeRequests::RefreshService do
         fixup_merge_request = create(:merge_request,
                                      source_project: @project,
                                      source_branch: 'wip',
-                                     target_branch: 'master',
+                                     target_branch: project.default_branch,
                                      target_project: @project)
         commits = fixup_merge_request.commits
         oldrev = commits.last.id
@@ -751,7 +751,7 @@ RSpec.describe MergeRequests::RefreshService do
         wip_merge_request = create(:merge_request,
                                    source_project: @project,
                                    source_branch: 'wip',
-                                   target_branch: 'master',
+                                   target_branch: project.default_branch,
                                    target_project: @project)
 
         commits = wip_merge_request.commits
@@ -868,7 +868,7 @@ RSpec.describe MergeRequests::RefreshService do
              author: author,
              source_project: source_project,
              source_branch: 'feature',
-             target_branch: 'master',
+             target_branch: project.default_branch,
              target_project: target_project,
              auto_merge_enabled: true,
              auto_merge_strategy: AutoMergeService::STRATEGY_MERGE_WHEN_PIPELINE_SUCCEEDS,
@@ -879,7 +879,7 @@ RSpec.describe MergeRequests::RefreshService do
       target_project
         .repository
         .create_file(user, 'test1.txt', 'Test data',
-                     message: 'Test commit', branch_name: 'master')
+                     message: 'Test commit', branch_name: project.default_branch)
     end
 
     let_it_be(:oldrev) do

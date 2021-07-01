@@ -138,7 +138,7 @@ RSpec.describe Suggestions::ApplyService do
   let(:merge_request) do
     create(:merge_request, source_project: project,
            target_project: project,
-           source_branch: 'master')
+           source_branch: project.default_branch)
   end
 
   let(:position) { build_position }

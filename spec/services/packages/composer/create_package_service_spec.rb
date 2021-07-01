@@ -26,7 +26,7 @@ RSpec.describe Packages::Composer::CreatePackageService do
 
     context 'without an existing package' do
       context 'with a branch' do
-        let(:branch) { project.repository.find_branch('master') }
+        let(:branch) { project.repository.find_branch(project.default_branch) }
 
         it 'creates the package' do
           expect(::Packages::Composer::CacheUpdateWorker).to receive(:perform_async).with(project.id, package_name, nil)
@@ -53,7 +53,7 @@ RSpec.describe Packages::Composer::CreatePackageService do
         let(:tag) { project.repository.find_tag('v1.2.3') }
 
         before(:all) do
-          project.repository.add_tag(user, 'v1.2.3', 'master')
+          project.repository.add_tag(user, 'v1.2.3', project.default_branch)
         end
 
         it 'creates the package' do
@@ -77,7 +77,7 @@ RSpec.describe Packages::Composer::CreatePackageService do
     end
 
     context 'with an existing package' do
-      let(:branch) { project.repository.find_branch('master') }
+      let(:branch) { project.repository.find_branch(project.default_branch) }
 
       context 'belonging to the same project' do
         before do

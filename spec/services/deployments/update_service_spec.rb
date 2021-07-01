@@ -45,7 +45,7 @@ RSpec.describe Deployments::UpdateService do
         :merged,
         target_project: deploy.project,
         source_project: deploy.project,
-        target_branch: 'master',
+        target_branch: project.default_branch,
         source_branch: 'foo'
       )
 

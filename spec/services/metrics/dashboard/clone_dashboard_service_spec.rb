@@ -100,7 +100,7 @@ RSpec.describe Metrics::Dashboard::CloneDashboardService, :use_clean_rails_memor
           let(:branch) { 'existing_branch' }
 
           before do
-            project.repository.add_branch(user, branch, 'master')
+            project.repository.add_branch(user, branch, project.default_branch)
           end
 
           it_behaves_like 'misconfigured dashboard service response with stepable', :bad_request, 'There was an error creating the dashboard, branch named: existing_branch already exists.'
@@ -133,8 +133,8 @@ RSpec.describe Metrics::Dashboard::CloneDashboardService, :use_clean_rails_memor
               project,
               user,
               commit_message: 'Create custom dashboard custom_dashboard.yml',
-              branch_name: 'master',
-              start_branch: 'master',
+              branch_name: project.default_branch,
+              start_branch: project.default_branch,
               file_path: ".gitlab/dashboards/custom_dashboard.yml",
               file_content: File.read('config/prometheus/common_metrics.yml')
             ).execute

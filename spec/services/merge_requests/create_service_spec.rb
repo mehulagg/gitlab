@@ -16,7 +16,7 @@ RSpec.describe MergeRequests::CreateService, :clean_gitlab_redis_shared_state do
           title: 'Awesome merge_request',
           description: 'please fix',
           source_branch: 'feature',
-          target_branch: 'master',
+          target_branch: project.default_branch,
           force_remove_source_branch: '1'
         }
       end
@@ -68,7 +68,7 @@ RSpec.describe MergeRequests::CreateService, :clean_gitlab_redis_shared_state do
               title: 'WIP: Awesome merge_request',
               description: "well this is not done yet\n/wip",
               source_branch: 'feature',
-              target_branch: 'master',
+              target_branch: project.default_branch,
               assignees: [user2]
             }
           end
@@ -84,7 +84,7 @@ RSpec.describe MergeRequests::CreateService, :clean_gitlab_redis_shared_state do
               title: 'Awesome merge_request',
               description: "well this is not done yet\n/draft",
               source_branch: 'feature',
-              target_branch: 'master',
+              target_branch: project.default_branch,
               assignees: [user2]
             }
           end
@@ -101,7 +101,7 @@ RSpec.describe MergeRequests::CreateService, :clean_gitlab_redis_shared_state do
             title: 'Awesome merge_request',
             description: 'please fix',
             source_branch: 'feature',
-            target_branch: 'master',
+            target_branch: project.default_branch,
             assignees: [user2]
           }
         end
@@ -115,7 +115,7 @@ RSpec.describe MergeRequests::CreateService, :clean_gitlab_redis_shared_state do
             title: 'Awesome merge_request',
             description: 'please fix',
             source_branch: 'feature',
-            target_branch: 'master',
+            target_branch: project.default_branch,
             reviewers: [user2]
           }
         end
@@ -206,7 +206,7 @@ RSpec.describe MergeRequests::CreateService, :clean_gitlab_redis_shared_state do
               {
                 title: 'Awesome merge_request',
                 source_branch: 'feature',
-                target_branch: 'master',
+                target_branch: project.default_branch,
                 target_project_id: target_project.id
               }
             end
@@ -232,7 +232,7 @@ RSpec.describe MergeRequests::CreateService, :clean_gitlab_redis_shared_state do
                 title: 'Awesome merge_request',
                 description: 'please fix',
                 source_branch: 'not-merged-branch',
-                target_branch: 'master'
+                target_branch: project.default_branch
               }
             end
 
@@ -297,7 +297,7 @@ RSpec.describe MergeRequests::CreateService, :clean_gitlab_redis_shared_state do
       context 'after_save callback to store_mentions' do
         let(:labels) { create_pair(:label, project: project) }
         let(:milestone) { create(:milestone, project: project) }
-        let(:req_opts) { { source_branch: 'feature', target_branch: 'master' } }
+        let(:req_opts) { { source_branch: 'feature', target_branch: project.default_branch } }
 
         context 'when mentionable attributes change' do
           let(:opts) { { title: 'Title', description: "Description with #{user.to_reference}" }.merge(req_opts) }
@@ -343,7 +343,7 @@ RSpec.describe MergeRequests::CreateService, :clean_gitlab_redis_shared_state do
       let(:default_params) do
         {
           source_branch: 'feature',
-          target_branch: 'master'
+          target_branch: project.default_branch
         }
       end
 
@@ -362,7 +362,7 @@ RSpec.describe MergeRequests::CreateService, :clean_gitlab_redis_shared_state do
             title: 'Title',
             description: %(/assign @#{user2.username}\n/milestone %"#{milestone.name}"),
             source_branch: 'feature',
-            target_branch: 'master'
+            target_branch: project.default_branch
           }
         end
 
@@ -419,7 +419,7 @@ RSpec.describe MergeRequests::CreateService, :clean_gitlab_redis_shared_state do
               description: 'Description',
               assignee_ids: [user2.id],
               source_branch: 'feature',
-              target_branch: 'master'
+              target_branch: project.default_branch
             }
           end
 
@@ -461,7 +461,7 @@ RSpec.describe MergeRequests::CreateService, :clean_gitlab_redis_shared_state do
         {
           title: 'Awesome merge_request',
           source_branch: 'feature',
-          target_branch: 'master',
+          target_branch: project.default_branch,
           target_project_id: target_project.id
         }
       end
@@ -518,7 +518,7 @@ RSpec.describe MergeRequests::CreateService, :clean_gitlab_redis_shared_state do
         {
           title: 'Awesome merge_request',
           source_branch: 'feature',
-          target_branch: 'master',
+          target_branch: project.default_branch,
           source_project_id: another_project.id
         }
       end

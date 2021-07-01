@@ -6,7 +6,7 @@ RSpec.describe Ci::CreatePipelineService do
   let_it_be(:project) { create(:project, :repository) }
   let_it_be(:developer) { create(:user) }
 
-  let(:service) { described_class.new(project, user, ref: 'master') }
+  let(:service) { described_class.new(project, user, ref: project.default_branch) }
   let(:user) { developer }
 
   before_all do

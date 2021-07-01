@@ -32,7 +32,7 @@ RSpec.describe MergeRequests::CreatePipelineService do
       create(:merge_request,
         source_branch: 'feature',
         source_project: source_project,
-        target_branch: 'master',
+        target_branch: project.default_branch,
         target_project: project)
     end
 

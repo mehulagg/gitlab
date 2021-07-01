@@ -12,7 +12,7 @@ RSpec.describe Ci::UnlockArtifactsService do
 
     [true, false].each do |tag|
       context "when tag is #{tag}" do
-        let(:ref) { 'master' }
+        let(:ref) { project.default_branch }
         let(:ref_path) { tag ? "#{::Gitlab::Git::TAG_REF_PREFIX}#{ref}" : "#{::Gitlab::Git::BRANCH_REF_PREFIX}#{ref}" }
         let(:ci_ref) { create(:ci_ref, ref_path: ref_path) }
 

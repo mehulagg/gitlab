@@ -74,7 +74,7 @@ RSpec.describe Repositories::ChangelogService do
         .new(project, creator, version: '1.0.0', from: sha1, to: sha3)
 
       recorder = ActiveRecord::QueryRecorder.new { service.execute }
-      changelog = project.repository.blob_at('master', 'CHANGELOG.md')&.data
+      changelog = project.repository.blob_at(project.default_branch, 'CHANGELOG.md')&.data
 
       expect(recorder.count).to eq(11)
       expect(changelog).to include('Title 1', 'Title 2')
@@ -92,7 +92,7 @@ RSpec.describe Repositories::ChangelogService do
         .new(project, creator, version: '1.0.0', from: sha1)
         .execute
 
-      changelog = project.repository.blob_at('master', 'CHANGELOG.md')&.data
+      changelog = project.repository.blob_at(project.default_branch, 'CHANGELOG.md')&.data
 
       expect(changelog).to include('Title 1', 'Title 2')
       expect(changelog).not_to include('Title 3', 'Title 4')
@@ -110,7 +110,7 @@ RSpec.describe Repositories::ChangelogService do
         .new(project, creator, version: '1.0.0', from: sha1)
         .execute
 
-      changelog = project.repository.blob_at('master', 'CHANGELOG.md')&.data
+      changelog = project.repository.blob_at(project.default_branch, 'CHANGELOG.md')&.data
 
       expect(changelog).to include('Title 1', 'Title 2', 'Title 4')
       expect(changelog).not_to include('Title 3')
@@ -121,7 +121,7 @@ RSpec.describe Repositories::ChangelogService do
         .new(project, creator, version: '1.0.0', from: sha1)
         .execute
 
-      changelog = project.repository.blob_at('master', 'CHANGELOG.md')&.data
+      changelog = project.repository.blob_at(project.default_branch, 'CHANGELOG.md')&.data
 
       expect(changelog).to include('Title 1', 'Title 2', 'Title 3')
     end
@@ -185,7 +185,7 @@ RSpec.describe Repositories::ChangelogService do
   end
 
   def create_commit(project, user, params)
-    params = { start_branch: 'master', branch_name: 'master' }.merge(params)
+    params = { start_branch: project.default_branch, branch_name: 'master' }.merge(params)
     Files::MultiService.new(project, user, params).execute.fetch(:result)
   end
 end

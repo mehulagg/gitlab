@@ -7,7 +7,7 @@ RSpec.describe StaticSiteEditor::ConfigService do
   let_it_be(:user) { create(:user) }
 
   # params
-  let(:ref) { 'master' }
+  let(:ref) { project.default_branch }
   let(:path) { 'README.md' }
   let(:return_url) { double(:return_url) }
 

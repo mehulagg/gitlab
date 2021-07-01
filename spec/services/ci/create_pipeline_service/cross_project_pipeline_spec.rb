@@ -10,7 +10,7 @@ RSpec.describe Ci::CreatePipelineService, '#execute' do
   let(:user) { create(:user) }
 
   let(:service) do
-    described_class.new(upstream_project, user, ref: 'master')
+    described_class.new(upstream_project, user, ref: upstream_project.default_branch)
   end
 
   before do
@@ -83,6 +83,6 @@ RSpec.describe Ci::CreatePipelineService, '#execute' do
   end
 
   def create_gitlab_ci_yml(project, content)
-    project.repository.create_file(user, '.gitlab-ci.yml', content, branch_name: 'master', message: 'test')
+    project.repository.create_file(user, '.gitlab-ci.yml', content, branch_name: project.default_branch, message: 'test')
   end
 end

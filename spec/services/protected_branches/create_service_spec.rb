@@ -7,7 +7,7 @@ RSpec.describe ProtectedBranches::CreateService do
   let(:user) { project.owner }
   let(:params) do
     {
-      name: 'master',
+      name: project.default_branch,
       merge_access_levels_attributes: [{ access_level: Gitlab::Access::MAINTAINER }],
       push_access_levels_attributes: [{ access_level: Gitlab::Access::MAINTAINER }]
     }

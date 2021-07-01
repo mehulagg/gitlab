@@ -14,7 +14,7 @@ RSpec.describe Deployments::CreateService do
         environment,
         user,
         sha: 'b83d6e391c22777fca1ed3012fce84f633d7fed0',
-        ref: 'master',
+        ref: project.default_branch,
         tag: false,
         status: 'success'
       )
@@ -31,7 +31,7 @@ RSpec.describe Deployments::CreateService do
         environment,
         user,
         sha: 'b83d6e391c22777fca1ed3012fce84f633d7fed0',
-        ref: 'master',
+        ref: project.default_branch,
         tag: false
       )
 
@@ -46,7 +46,7 @@ RSpec.describe Deployments::CreateService do
       let(:params) do
         {
           sha: 'b83d6e391c22777fca1ed3012fce84f633d7fed0',
-          ref: 'master',
+          ref: project.default_branch,
           tag: false,
           status: 'success'
         }
@@ -78,7 +78,7 @@ RSpec.describe Deployments::CreateService do
       service = described_class.new(
         environment,
         user,
-        ref: 'master',
+        ref: project.default_branch,
         tag: true,
         sha: '123',
         foo: 'bar',
@@ -89,7 +89,7 @@ RSpec.describe Deployments::CreateService do
         cluster_id: 1,
         project_id: 2,
         environment_id: 3,
-        ref: 'master',
+        ref: project.default_branch,
         tag: true,
         sha: '123',
         user: user,

@@ -7,7 +7,7 @@ RSpec.describe ProtectedTags::CreateService do
   let(:user) { project.owner }
   let(:params) do
     {
-      name: 'master',
+      name: project.default_branch,
       create_access_levels_attributes: [{ access_level: Gitlab::Access::MAINTAINER }]
     }
   end

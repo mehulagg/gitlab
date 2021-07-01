@@ -18,7 +18,7 @@ RSpec.describe Deployments::UpdateEnvironmentService do
     create(:ci_build,
       :with_deployment,
       pipeline: pipeline,
-      ref: 'master',
+      ref: project.default_branch,
       tag: false,
       environment: environment_name,
       options: { environment: options },
@@ -229,7 +229,7 @@ RSpec.describe Deployments::UpdateEnvironmentService do
         create(:ci_build,
                :with_deployment,
                pipeline: pipeline,
-               ref: 'master',
+               ref: project.default_branch,
                environment: 'production',
                project: project,
                options: { environment: { name: 'production', url: 'http://review/$CI_COMMIT_REF_NAME' } })
@@ -243,7 +243,7 @@ RSpec.describe Deployments::UpdateEnvironmentService do
         create(:ci_build,
                :with_deployment,
                pipeline: pipeline,
-               ref: 'master',
+               ref: project.default_branch,
                environment: 'prod-slug',
                project: project,
                options: { environment: { name: 'prod-slug', url: 'http://review/$CI_ENVIRONMENT_SLUG' } })
@@ -296,7 +296,7 @@ RSpec.describe Deployments::UpdateEnvironmentService do
   end
 
   describe "merge request metrics" do
-    let(:merge_request) { create(:merge_request, target_branch: 'master', source_branch: 'feature', source_project: project) }
+    let(:merge_request) { create(:merge_request, target_branch: project.default_branch, source_branch: 'feature', source_project: project) }
 
     context "while updating the 'first_deployed_to_production_at' time" do
       before do
@@ -315,7 +315,7 @@ RSpec.describe Deployments::UpdateEnvironmentService do
             create(:ci_build,
               :with_deployment,
               pipeline: pipeline,
-              ref: 'master',
+              ref: project.default_branch,
               tag: false,
               environment: 'staging',
               options: { environment: { name: 'staging' } },

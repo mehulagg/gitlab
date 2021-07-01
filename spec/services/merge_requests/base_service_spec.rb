@@ -13,7 +13,7 @@ RSpec.describe MergeRequests::BaseService do
       title: title,
       description: 'please fix',
       source_branch: 'feature',
-      target_branch: 'master'
+      target_branch: project.default_branch
     }
   end
 

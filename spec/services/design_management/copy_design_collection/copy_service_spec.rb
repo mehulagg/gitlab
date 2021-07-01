@@ -192,7 +192,7 @@ RSpec.describe DesignManagement::CopyDesignCollection::CopyService, :clean_gitla
           end
 
           it 'creates a master branch if none previously existed' do
-            expect { subject }.to change { target_repository.branch_names }.from([]).to(['master'])
+            expect { subject }.to change { target_repository.branch_names }.from([]).to([project.default_branch])
           end
 
           it 'does not create default branch when one exists' do
@@ -255,7 +255,7 @@ RSpec.describe DesignManagement::CopyDesignCollection::CopyService, :clean_gitla
           end
 
           def commits_on_master(limit: 10)
-            target_repository.commits('master', limit: limit).map(&:id)
+            target_repository.commits(project.default_branch, limit: limit).map(&:id)
           end
         end
       end

@@ -5,7 +5,7 @@ RSpec.shared_examples 'Pipeline Processing Service' do
   let(:user)    { project.owner }
 
   let(:pipeline) do
-    create(:ci_empty_pipeline, ref: 'master', project: project)
+    create(:ci_empty_pipeline, ref: project.default_branch, project: project)
   end
 
   context 'when simple pipeline is defined' do
@@ -563,7 +563,7 @@ RSpec.shared_examples 'Pipeline Processing Service' do
         # protected manual actions.
         #
         create(:protected_branch, :developers_can_merge,
-                name: 'master', project: project)
+                name: project.default_branch, project: project)
       end
 
       it 'properly processes entire pipeline' do
@@ -871,7 +871,7 @@ RSpec.shared_examples 'Pipeline Processing Service' do
     end
 
     let(:pipeline) do
-      Ci::CreatePipelineService.new(project, user, { ref: 'master' }).execute(:push)
+      Ci::CreatePipelineService.new(project, user, { ref: project.default_branch }).execute(:push)
     end
 
     before do

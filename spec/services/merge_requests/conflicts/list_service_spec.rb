@@ -15,14 +15,14 @@ RSpec.describe MergeRequests::Conflicts::ListService do
     end
 
     it 'returns a falsey value when the MR can be merged without conflicts' do
-      merge_request = create_merge_request('master')
+      merge_request = create_merge_request(project.default_branch)
       merge_request.mark_as_mergeable
 
       expect(conflicts_service(merge_request).can_be_resolved_in_ui?).to be_falsey
     end
 
     it 'returns a falsey value when the MR is marked as having conflicts, but has none' do
-      merge_request = create_merge_request('master')
+      merge_request = create_merge_request(project.default_branch)
 
       expect(conflicts_service(merge_request).can_be_resolved_in_ui?).to be_falsey
     end

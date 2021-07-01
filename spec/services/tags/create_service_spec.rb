@@ -10,7 +10,7 @@ RSpec.describe Tags::CreateService do
 
   describe '#execute' do
     it 'creates the tag and returns success' do
-      response = service.execute('v42.42.42', 'master', 'Foo')
+      response = service.execute('v42.42.42', project.default_branch, 'Foo')
 
       expect(response[:status]).to eq(:success)
       expect(response[:tag]).to be_a Gitlab::Git::Tag
@@ -30,10 +30,10 @@ RSpec.describe Tags::CreateService do
     context 'when tag already exists' do
       it 'returns an error' do
         expect(repository).to receive(:add_tag)
-          .with(user, 'v1.1.0', 'master', 'Foo')
+          .with(user, 'v1.1.0', project.default_branch, 'Foo')
           .and_raise(Gitlab::Git::Repository::TagExistsError)
 
-        response = service.execute('v1.1.0', 'master', 'Foo')
+        response = service.execute('v1.1.0', project.default_branch, 'Foo')
 
         expect(response[:status]).to eq(:error)
         expect(response[:http_status]).to eq(409)
@@ -43,7 +43,7 @@ RSpec.describe Tags::CreateService do
 
     context 'when tag name is invalid' do
       it 'returns an error' do
-        response = service.execute('HEAD', 'master', 'Foo')
+        response = service.execute('HEAD', project.default_branch, 'Foo')
 
         expect(response[:status]).to eq(:error)
         expect(response[:http_status]).to eq(400)
@@ -54,10 +54,10 @@ RSpec.describe Tags::CreateService do
     context 'when pre-receive hook fails' do
       it 'returns an error' do
         expect(repository).to receive(:add_tag)
-          .with(user, 'v1.1.0', 'master', 'Foo')
+          .with(user, 'v1.1.0', project.default_branch, 'Foo')
           .and_raise(Gitlab::Git::PreReceiveError, 'GitLab: something went wrong')
 
-        response = service.execute('v1.1.0', 'master', 'Foo')
+        response = service.execute('v1.1.0', project.default_branch, 'Foo')
 
         expect(response[:status]).to eq(:error)
         expect(response[:message]).to eq('something went wrong')

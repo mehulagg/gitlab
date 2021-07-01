@@ -343,7 +343,7 @@ RSpec.describe DesignManagement::SaveDesignsService do
           path = File.join(build(:design, issue: issue, filename: filename).full_path)
           design_repository.create_if_not_exists
           design_repository.create_file(user, path, 'something fake',
-                                        branch_name: 'master',
+                                        branch_name: project.default_branch,
                                         message: 'Somehow created without being tracked in db')
         end
 

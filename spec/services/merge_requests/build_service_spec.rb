@@ -14,7 +14,7 @@ RSpec.describe MergeRequests::BuildService do
   let(:issue) { create(:issue, project: project, title: 'A bug', confidential: issue_confidential) }
   let(:description) { nil }
   let(:source_branch) { 'feature-branch' }
-  let(:target_branch) { 'master' }
+  let(:target_branch) { project.default_branch }
   let(:milestone_id) { nil }
   let(:label_ids) { [] }
   let(:merge_request) { service.execute }
@@ -168,7 +168,7 @@ RSpec.describe MergeRequests::BuildService do
         end
 
         context 'the repository default branch' do
-          let(:source_branch) { 'master' }
+          let(:source_branch) { project.default_branch }
 
           it_behaves_like 'forbids the merge request from being created' do
             let(:error_message) { 'You must select source and target branch' }
@@ -191,7 +191,7 @@ RSpec.describe MergeRequests::BuildService do
     end
 
     context 'same source and target branch' do
-      let(:source_branch) { 'master' }
+      let(:source_branch) { project.default_branch }
 
       it_behaves_like 'forbids the merge request from being created' do
         let(:error_message) { 'You must select different branches' }

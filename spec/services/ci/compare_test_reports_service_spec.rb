@@ -73,8 +73,8 @@ RSpec.describe Ci::CompareTestReportsService do
       it 'loads recent failures on limited test cases to avoid building up a huge DB query', :aggregate_failures do
         expect(comparison[:data]).to match_schema('entities/test_reports_comparer')
         expect(recent_failures_per_test_case).to eq([
-          { 'count' => 1, 'base_branch' => 'master' },
-          { 'count' => 1, 'base_branch' => 'master' }
+          { 'count' => 1, 'base_branch' => project.default_branch },
+          { 'count' => 1, 'base_branch' => project.default_branch }
         ])
         expect(new_failures.count).to eq(2)
       end

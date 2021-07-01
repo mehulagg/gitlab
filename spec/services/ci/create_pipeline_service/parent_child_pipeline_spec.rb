@@ -6,7 +6,7 @@ RSpec.describe Ci::CreatePipelineService, '#execute' do
   let_it_be(:project) { create(:project, :repository) }
   let_it_be(:user) { create(:user) }
 
-  let(:ref_name) { 'master' }
+  let(:ref_name) { project.default_branch }
 
   let(:service) do
     params = { ref: ref_name,
@@ -288,7 +288,7 @@ RSpec.describe Ci::CreatePipelineService, '#execute' do
               include:
                 - project: my-namespace/my-project
                   file: 'path/to/child.yml'
-                  ref: 'master'
+                  ref: #{project.default_branch}
           YAML
         end
 
@@ -300,7 +300,7 @@ RSpec.describe Ci::CreatePipelineService, '#execute' do
                   {
                     'file' => 'path/to/child.yml',
                     'project' => 'my-namespace/my-project',
-                    'ref' => 'master'
+                    'ref' => project.default_branch
                   }
                 ]
               }
@@ -321,7 +321,7 @@ RSpec.describe Ci::CreatePipelineService, '#execute' do
             trigger:
               include:
                 - project: my-namespace/my-project
-                  ref: 'master'
+                  ref: #{project.default_branch}
           YAML
         end
 

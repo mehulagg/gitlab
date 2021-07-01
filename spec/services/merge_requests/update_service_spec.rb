@@ -438,7 +438,7 @@ RSpec.describe MergeRequests::UpdateService, :mailer do
       let(:merge_request) { create(:merge_request, title: 'Old title', description: "simple description", source_branch: 'test', source_project: project, author: user) }
       let(:labels) { create_pair(:label, project: project) }
       let(:milestone) { create(:milestone, project: project) }
-      let(:req_opts) { { source_branch: 'feature', target_branch: 'master' } }
+      let(:req_opts) { { source_branch: 'feature', target_branch: project.default_branch } }
 
       subject { MergeRequests::UpdateService.new(project: project, current_user: user, params: opts).execute(merge_request) }
 
@@ -1163,20 +1163,20 @@ RSpec.describe MergeRequests::UpdateService, :mailer do
 
       it 'updates to master' do
         expect(SystemNoteService).to receive(:change_branch).with(
-          merge_request, project, user, 'target', 'update', 'mr-a', 'master'
+          merge_request, project, user, 'target', 'update', 'mr-a', project.default_branch
         )
 
-        expect { update_merge_request(target_branch: 'master') }
-          .to change { merge_request.reload.target_branch }.from('mr-a').to('master')
+        expect { update_merge_request(target_branch: project.default_branch) }
+          .to change { merge_request.reload.target_branch }.from('mr-a').to(project.default_branch)
       end
 
       it 'updates to master because of branch deletion' do
         expect(SystemNoteService).to receive(:change_branch).with(
-          merge_request, project, user, 'target', 'delete', 'mr-a', 'master'
+          merge_request, project, user, 'target', 'delete', 'mr-a', project.default_branch
         )
 
-        expect { update_merge_request(target_branch: 'master', target_branch_was_deleted: true) }
-          .to change { merge_request.reload.target_branch }.from('mr-a').to('master')
+        expect { update_merge_request(target_branch: project.default_branch, target_branch_was_deleted: true) }
+          .to change { merge_request.reload.target_branch }.from('mr-a').to(project.default_branch)
       end
     end
 

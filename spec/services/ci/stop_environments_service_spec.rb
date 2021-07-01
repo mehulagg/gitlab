@@ -30,7 +30,7 @@ RSpec.describe Ci::StopEnvironmentsService do
 
         context 'when environment is associated with different branch' do
           it 'does not stop environment' do
-            expect_environment_not_stopped_on('master')
+            expect_environment_not_stopped_on(project.default_branch)
           end
         end
 
@@ -65,7 +65,7 @@ RSpec.describe Ci::StopEnvironmentsService do
           end
 
           it 'does not stop environment' do
-            expect_environment_not_stopped_on('master')
+            expect_environment_not_stopped_on(project.default_branch)
           end
         end
       end
@@ -74,11 +74,11 @@ RSpec.describe Ci::StopEnvironmentsService do
         before do
           project.add_developer(user)
           create(:protected_branch, :no_one_can_push,
-                 name: 'master', project: project)
+                 name: project.default_branch, project: project)
         end
 
         it 'does not stop environment' do
-          expect_environment_not_stopped_on('master')
+          expect_environment_not_stopped_on(project.default_branch)
         end
       end
     end
@@ -94,14 +94,14 @@ RSpec.describe Ci::StopEnvironmentsService do
         end
 
         it 'does not stop environment' do
-          expect_environment_not_stopped_on('master')
+          expect_environment_not_stopped_on(project.default_branch)
         end
       end
     end
 
     context 'when environment does not exist' do
       it 'does not raise error' do
-        expect { service.execute('master') }
+        expect { service.execute(project.default_branch) }
           .not_to raise_error
       end
     end
@@ -110,7 +110,7 @@ RSpec.describe Ci::StopEnvironmentsService do
   describe '#execute_for_merge_request' do
     subject { service.execute_for_merge_request(merge_request) }
 
-    let(:merge_request) { create(:merge_request, source_branch: 'feature', target_branch: 'master') }
+    let(:merge_request) { create(:merge_request, source_branch: 'feature', target_branch: project.default_branch) }
     let(:project) { merge_request.project }
     let(:user) { create(:user) }
 
@@ -193,8 +193,8 @@ RSpec.describe Ci::StopEnvironmentsService do
 
     before_all do
       project.add_developer(user)
-      project.repository.add_branch(user, 'review/feature-1', 'master')
-      project.repository.add_branch(user, 'review/feature-2', 'master')
+      project.repository.add_branch(user, 'review/feature-1', project.default_branch)
+      project.repository.add_branch(user, 'review/feature-2', project.default_branch)
     end
 
     before do

@@ -107,7 +107,7 @@ RSpec.describe Git::BranchHooksService, :clean_gitlab_redis_shared_state do
         expect(event.push_event_payload.commit_from).to eq(oldrev)
         expect(event.push_event_payload.commit_to).to eq(newrev)
         expect(event.push_event_payload.commit_title).to eq('Change some files')
-        expect(event.push_event_payload.ref).to eq('master')
+        expect(event.push_event_payload.ref).to eq(project.default_branch)
         expect(event.push_event_payload.commit_count).to eq(1)
       end
 
@@ -184,7 +184,7 @@ RSpec.describe Git::BranchHooksService, :clean_gitlab_redis_shared_state do
         expect(event.push_event_payload.commit_from).to be_nil
         expect(event.push_event_payload.commit_to).to eq(newrev)
         expect(event.push_event_payload.commit_title).to eq('Initial commit')
-        expect(event.push_event_payload.ref).to eq('master')
+        expect(event.push_event_payload.ref).to eq(project.default_branch)
         expect(event.push_event_payload.commit_count).to be > 1
       end
     end
@@ -201,7 +201,7 @@ RSpec.describe Git::BranchHooksService, :clean_gitlab_redis_shared_state do
         expect(event.push_event_payload).to be_an_instance_of(PushEventPayload)
         expect(event.push_event_payload.commit_from).to eq(oldrev)
         expect(event.push_event_payload.commit_to).to be_nil
-        expect(event.push_event_payload.ref).to eq('master')
+        expect(event.push_event_payload.ref).to eq(project.default_branch)
         expect(event.push_event_payload.commit_count).to eq(0)
       end
     end

@@ -19,7 +19,7 @@ RSpec.describe Projects::UpdateRemoteMirrorService do
 
     before do
       stub_feature_flags(update_remote_mirror_inmemory: inmemory)
-      project.repository.add_branch(project.owner, 'existing-branch', 'master')
+      project.repository.add_branch(project.owner, 'existing-branch', project.default_branch)
 
       allow(remote_mirror)
         .to receive(:update_repository)

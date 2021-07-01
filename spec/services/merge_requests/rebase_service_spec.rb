@@ -10,7 +10,7 @@ RSpec.describe MergeRequests::RebaseService do
   let(:merge_request) do
     create :merge_request,
            source_branch: 'feature_conflict',
-           target_branch: 'master',
+           target_branch: project.default_branch,
            rebase_jid: rebase_jid
   end
 
@@ -168,11 +168,11 @@ RSpec.describe MergeRequests::RebaseService do
               'new-file-to-target',
               '',
               message: 'Add new file to target',
-              branch_name: 'master')
+              branch_name: project.default_branch)
 
             create(:merge_request,
-                  source_branch: 'master', source_project: forked_project,
-                  target_branch: 'master', target_project: project)
+                  source_branch: project.default_branch, source_project: forked_project,
+                  target_branch: project.default_branch, target_project: project)
           end
 
           it 'rebases source branch', :sidekiq_might_not_need_inline do

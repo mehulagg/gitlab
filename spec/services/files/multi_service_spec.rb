@@ -243,7 +243,7 @@ RSpec.describe Files::MultiService do
         {
           commit_message: commit_message,
           branch_name: 'feature',
-          start_branch: 'master',
+          start_branch: project.default_branch,
           actions: actions,
           force: true
         }

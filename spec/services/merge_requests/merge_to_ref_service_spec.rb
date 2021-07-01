@@ -233,7 +233,7 @@ RSpec.describe MergeRequests::MergeToRefService do
       context 'when first merge happens' do
         let(:merge_request) do
           create(:merge_request, source_project: project, source_branch: 'feature',
-                                 target_project: project, target_branch: 'master')
+                                 target_project: project, target_branch: project.default_branch)
         end
 
         it_behaves_like 'successfully merges to ref with merge method' do
@@ -244,7 +244,7 @@ RSpec.describe MergeRequests::MergeToRefService do
         context 'when second merge happens' do
           let(:merge_request) do
             create(:merge_request, source_project: project, source_branch: 'improve/awesome',
-                                   target_project: project, target_branch: 'master')
+                                   target_project: project, target_branch: project.default_branch)
           end
 
           it_behaves_like 'successfully merges to ref with merge method' do

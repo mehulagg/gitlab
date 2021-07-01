@@ -46,7 +46,7 @@ RSpec.describe Ci::PipelineTriggerService do
       let(:trigger) { create(:ci_trigger, project: project, owner: user) }
 
       context 'when trigger belongs to a different project' do
-        let(:params) { { token: trigger.token, ref: 'master', variables: nil } }
+        let(:params) { { token: trigger.token, ref: project.default_branch, variables: nil } }
         let(:trigger) { create(:ci_trigger, project: create(:project), owner: user) }
 
         it 'does nothing' do
@@ -56,11 +56,11 @@ RSpec.describe Ci::PipelineTriggerService do
 
       context 'when params have an existing trigger token' do
         context 'when params have an existing ref' do
-          let(:params) { { token: trigger.token, ref: 'master', variables: nil } }
+          let(:params) { { token: trigger.token, ref: project.default_branch, variables: nil } }
 
           it 'triggers a pipeline' do
             expect { result }.to change { Ci::Pipeline.count }.by(1)
-            expect(result[:pipeline].ref).to eq('master')
+            expect(result[:pipeline].ref).to eq(project.default_branch)
             expect(result[:pipeline].project).to eq(project)
             expect(result[:pipeline].user).to eq(trigger.owner)
             expect(result[:pipeline].trigger_requests.to_a)
@@ -90,7 +90,7 @@ RSpec.describe Ci::PipelineTriggerService do
           end
 
           context 'when params have a variable' do
-            let(:params) { { token: trigger.token, ref: 'master', variables: variables } }
+            let(:params) { { token: trigger.token, ref: project.default_branch, variables: variables } }
             let(:variables) { { 'AAA' => 'AAA123' } }
 
             it 'has variables' do
@@ -130,7 +130,7 @@ RSpec.describe Ci::PipelineTriggerService do
       let(:job) { create(:ci_build, :running, pipeline: pipeline, user: user) }
 
       context 'when job user does not have a permission to read a project' do
-        let(:params) { { token: job.token, ref: 'master', variables: nil } }
+        let(:params) { { token: job.token, ref: project.default_branch, variables: nil } }
         let(:job) { create(:ci_build, pipeline: pipeline, user: create(:user)) }
 
         it 'does nothing' do
@@ -139,7 +139,7 @@ RSpec.describe Ci::PipelineTriggerService do
       end
 
       context 'when job is not running' do
-        let(:params) { { token: job.token, ref: 'master', variables: nil } }
+        let(:params) { { token: job.token, ref: project.default_branch, variables: nil } }
         let(:job) { create(:ci_build, :success, pipeline: pipeline, user: user) }
 
         it 'does nothing', :aggregate_failures do
@@ -150,7 +150,7 @@ RSpec.describe Ci::PipelineTriggerService do
       end
 
       context 'when job does not have a project' do
-        let(:params) { { token: job.token, ref: 'master', variables: nil } }
+        let(:params) { { token: job.token, ref: project.default_branch, variables: nil } }
         let(:job) { create(:ci_build, status: :running, pipeline: pipeline, user: user) }
 
         it 'does nothing', :aggregate_failures do
@@ -164,11 +164,11 @@ RSpec.describe Ci::PipelineTriggerService do
 
       context 'when params have an existsed job token' do
         context 'when params have an existsed ref' do
-          let(:params) { { token: job.token, ref: 'master', variables: nil } }
+          let(:params) { { token: job.token, ref: project.default_branch, variables: nil } }
 
           it 'triggers a pipeline' do
             expect { result }.to change { Ci::Pipeline.count }.by(1)
-            expect(result[:pipeline].ref).to eq('master')
+            expect(result[:pipeline].ref).to eq(project.default_branch)
             expect(result[:pipeline].project).to eq(project)
             expect(result[:pipeline].user).to eq(job.user)
             expect(result[:status]).to eq(:success)
@@ -188,7 +188,7 @@ RSpec.describe Ci::PipelineTriggerService do
           end
 
           context 'when params have a variable' do
-            let(:params) { { token: job.token, ref: 'master', variables: variables } }
+            let(:params) { { token: job.token, ref: project.default_branch, variables: variables } }
             let(:variables) { { 'AAA' => 'AAA123' } }
 
             it 'has variables' do

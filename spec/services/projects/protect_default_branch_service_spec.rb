@@ -29,7 +29,7 @@ RSpec.describe Projects::ProtectDefaultBranchService do
       it 'protects the default branch' do
         allow(service)
           .to receive(:default_branch)
-          .and_return('master')
+          .and_return(project.default_branch)
 
         service.execute
 
@@ -43,11 +43,11 @@ RSpec.describe Projects::ProtectDefaultBranchService do
     before do
       allow(service)
         .to receive(:default_branch)
-        .and_return('master')
+        .and_return(project.default_branch)
 
       allow(project)
         .to receive(:change_head)
-        .with('master')
+        .with(project.default_branch)
 
       allow(service)
         .to receive(:create_protected_branch)
@@ -154,7 +154,7 @@ RSpec.describe Projects::ProtectDefaultBranchService do
       create_service = instance_spy(ProtectedBranches::CreateService)
       access_level = Gitlab::Access::DEVELOPER
       params = {
-        name: 'master',
+        name: project.default_branch,
         push_access_levels_attributes: [{ access_level: access_level }],
         merge_access_levels_attributes: [{ access_level: access_level }]
       }
@@ -178,7 +178,7 @@ RSpec.describe Projects::ProtectDefaultBranchService do
 
       allow(service)
         .to receive(:default_branch)
-        .and_return('master')
+        .and_return(project.default_branch)
 
       allow(create_service)
         .to receive(:execute)
@@ -210,13 +210,13 @@ RSpec.describe Projects::ProtectDefaultBranchService do
 
         allow(service)
           .to receive(:default_branch)
-          .and_return('master')
+          .and_return(project.default_branch)
       end
 
       it 'returns false if the branch is already protected' do
         allow(ProtectedBranch)
           .to receive(:protected?)
-          .with(project, 'master')
+          .with(project, project.default_branch)
           .and_return(true)
 
         expect(service.protect_branch?).to eq(false)
@@ -225,7 +225,7 @@ RSpec.describe Projects::ProtectDefaultBranchService do
       it 'returns true if the branch is not yet protected' do
         allow(ProtectedBranch)
           .to receive(:protected?)
-          .with(project, 'master')
+          .with(project, project.default_branch)
           .and_return(false)
 
         expect(service.protect_branch?).to eq(true)
@@ -237,9 +237,9 @@ RSpec.describe Projects::ProtectDefaultBranchService do
     it 'returns the default branch of the project' do
       allow(project)
         .to receive(:default_branch)
-        .and_return('master')
+        .and_return(project.default_branch)
 
-      expect(service.default_branch).to eq('master')
+      expect(service.default_branch).to eq(project.default_branch)
     end
   end
 

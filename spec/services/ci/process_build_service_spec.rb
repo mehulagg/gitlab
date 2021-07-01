@@ -126,7 +126,7 @@ RSpec.describe Ci::ProcessBuildService, '#execute' do
   context 'when build is scheduled with DAG' do
     using RSpec::Parameterized::TableSyntax
 
-    let(:pipeline) { create(:ci_pipeline, ref: 'master', project: project) }
+    let(:pipeline) { create(:ci_pipeline, ref: project.default_branch, project: project) }
     let!(:build) { create(:ci_build, :created, when: build_when, pipeline: pipeline, scheduling_type: :dag) }
     let!(:other_build) { create(:ci_build, :created, when: :on_success, pipeline: pipeline) }
     let!(:build_on_other_build) { create(:ci_build_need, build: build, name: other_build.name) }

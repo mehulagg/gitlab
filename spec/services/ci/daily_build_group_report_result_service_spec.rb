@@ -165,7 +165,7 @@ RSpec.describe Ci::DailyBuildGroupReportResultService, '#execute' do
   end
 
   context 'when pipeline ref_path is the project default branch' do
-    let(:default_branch) { 'master' }
+    let(:default_branch) { pipeline.project.default_branch }
 
     before do
       allow(pipeline.project).to receive(:default_branch).and_return(default_branch)

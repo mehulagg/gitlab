@@ -101,7 +101,7 @@ RSpec.describe PostReceiveService do
     end
 
     it 'returns the link to an existing merge request when it exists' do
-      merge_request = create(:merge_request, source_project: project, source_branch: branch_name, target_branch: 'master')
+      merge_request = create(:merge_request, source_project: project, source_branch: branch_name, target_branch: project.default_branch)
       message = <<~MESSAGE.strip
         View merge request for feature:
           #{project_merge_request_url(project, merge_request)}
@@ -185,7 +185,7 @@ RSpec.describe PostReceiveService do
     end
 
     it 'does not return the link to an existing merge request when it exists' do
-      create(:merge_request, source_project: project, source_branch: branch_name, target_branch: 'master')
+      create(:merge_request, source_project: project, source_branch: branch_name, target_branch: project.default_branch)
 
       expect(subject).to be_empty
     end
@@ -202,7 +202,7 @@ RSpec.describe PostReceiveService do
     end
 
     it 'does not return the link to an existing merge request when it exists' do
-      create(:merge_request, source_project: project, source_branch: branch_name, target_branch: 'master')
+      create(:merge_request, source_project: project, source_branch: branch_name, target_branch: project.default_branch)
 
       expect(subject).to be_empty
     end

@@ -343,7 +343,7 @@ RSpec.describe Git::WikiPushService, services: true do
   end
 
   def current_sha
-    repository.commit('master')&.id || Gitlab::Git::BLANK_SHA
+    repository.commit(project.default_branch)&.id || Gitlab::Git::BLANK_SHA
   end
 
   # It is important not to re-use the WikiPage services here, since they create
@@ -361,7 +361,7 @@ RSpec.describe Git::WikiPushService, services: true do
     params = {
       file_name: 'attachment.log',
       file_content: 'some stuff',
-      branch_name: 'master'
+      branch_name: project.default_branch
     }
     ::Wikis::CreateAttachmentService.new(container: wiki.container, current_user: current_user, params: params).execute
   end

@@ -11,7 +11,7 @@ RSpec.describe MergeRequests::MergeOrchestrationService do
 
   let!(:merge_request) do
     create(:merge_request, source_project: project, source_branch: 'feature',
-                           target_project: project, target_branch: 'master')
+                           target_project: project, target_branch: project.default_branch)
   end
 
   shared_context 'fresh repository' do

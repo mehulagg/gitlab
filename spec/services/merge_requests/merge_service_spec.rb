@@ -103,7 +103,7 @@ RSpec.describe MergeRequests::MergeService do
         expect(merge_request).to be_valid
         expect(merge_request).to be_merged
 
-        commit_messages = project.repository.commits('master', limit: 2).map(&:message)
+        commit_messages = project.repository.commits(project.default_branch, limit: 2).map(&:message)
         expect(commit_messages.uniq.size).to eq(2)
         expect(merge_request.in_progress_merge_commit_sha).to be_nil
       end
@@ -364,7 +364,7 @@ RSpec.describe MergeRequests::MergeService do
 
       context 'when squashing is required' do
         before do
-          merge_request.update!(source_branch: 'master', target_branch: 'feature')
+          merge_request.update!(source_branch: project.default_branch, target_branch: 'feature')
           merge_request.target_project.project_setting.squash_always!
         end
 
@@ -384,7 +384,7 @@ RSpec.describe MergeRequests::MergeService do
 
       context 'when squashing' do
         before do
-          merge_request.update!(source_branch: 'master', target_branch: 'feature')
+          merge_request.update!(source_branch: project.default_branch, target_branch: 'feature')
         end
 
         it 'logs and saves error if there is an error when squashing' do

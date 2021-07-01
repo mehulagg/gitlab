@@ -62,7 +62,7 @@ RSpec.describe AutoMerge::MergeWhenPipelineSucceedsService do
   describe "#execute" do
     let(:merge_request) do
       create(:merge_request, target_project: project, source_project: project,
-                             source_branch: "feature", target_branch: 'master')
+                             source_branch: "feature", target_branch: project.default_branch)
     end
 
     context 'first time enabling' do

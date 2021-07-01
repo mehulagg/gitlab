@@ -57,7 +57,7 @@ RSpec.describe Metrics::Dashboard::UpdateDashboardService, :use_clean_rails_memo
         let(:branch) { 'existing_branch' }
 
         before do
-          project.repository.add_branch(user, branch, 'master')
+          project.repository.add_branch(user, branch, project.default_branch)
         end
 
         it_behaves_like 'misconfigured dashboard service response with stepable', :bad_request, 'There was an error updating the dashboard, branch named: existing_branch already exists.'
@@ -126,7 +126,7 @@ RSpec.describe Metrics::Dashboard::UpdateDashboardService, :use_clean_rails_memo
         end
 
         context 'when pushing to the default branch' do
-          let(:branch) { 'master' }
+          let(:branch) { project.default_branch }
 
           it 'does not create a merge request', :aggregate_failures do
             dashboard_details = {

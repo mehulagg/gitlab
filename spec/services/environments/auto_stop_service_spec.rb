@@ -25,8 +25,8 @@ RSpec.describe Environments::AutoStopService, :clean_gitlab_redis_shared_state d
 
     before_all do
       project.add_developer(user)
-      project.repository.add_branch(user, 'review/feature-1', 'master')
-      project.repository.add_branch(user, 'review/feature-2', 'master')
+      project.repository.add_branch(user, 'review/feature-1', project.default_branch)
+      project.repository.add_branch(user, 'review/feature-2', project.default_branch)
     end
 
     before do

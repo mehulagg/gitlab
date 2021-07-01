@@ -11,7 +11,7 @@ RSpec.describe Git::BranchPushService, services: true do
   let(:blankrev) { Gitlab::Git::BLANK_SHA }
   let(:oldrev)   { sample_commit.parent_id }
   let(:newrev)   { sample_commit.id }
-  let(:branch)   { 'master' }
+  let(:branch)   { project.default_branch }
   let(:ref)      { "refs/heads/#{branch}" }
   let(:push_options) { nil }
 
@@ -30,7 +30,7 @@ RSpec.describe Git::BranchPushService, services: true do
       it { is_expected.to be_truthy }
 
       it 'calls the after_push_commit hook' do
-        expect(project.repository).to receive(:after_push_commit).with('master')
+        expect(project.repository).to receive(:after_push_commit).with(project.default_branch)
 
         subject
       end
@@ -46,7 +46,7 @@ RSpec.describe Git::BranchPushService, services: true do
       it { is_expected.to be_truthy }
 
       it 'calls the after_push_commit hook' do
-        expect(project.repository).to receive(:after_push_commit).with('master')
+        expect(project.repository).to receive(:after_push_commit).with(project.default_branch)
 
         subject
       end
@@ -58,7 +58,7 @@ RSpec.describe Git::BranchPushService, services: true do
       it { is_expected.to be_truthy }
 
       it 'calls the after_push_commit hook' do
-        expect(project.repository).to receive(:after_push_commit).with('master')
+        expect(project.repository).to receive(:after_push_commit).with(project.default_branch)
 
         subject
       end
@@ -160,7 +160,7 @@ RSpec.describe Git::BranchPushService, services: true do
   describe "Updates git attributes" do
     context "for default branch" do
       it "calls the copy attributes method for the first push to the default branch" do
-        expect(project.repository).to receive(:copy_gitattributes).with('master')
+        expect(project.repository).to receive(:copy_gitattributes).with(project.default_branch)
 
         execute_service(project, user, oldrev: blankrev, newrev: 'newrev', ref: ref)
       end
@@ -226,7 +226,7 @@ RSpec.describe Git::BranchPushService, services: true do
       it "when pushing a branch for the first time with an existing branch permission configured" do
         expect(project.namespace).to receive(:default_branch_protection).and_return(Gitlab::Access::PROTECTION_DEV_CAN_PUSH)
 
-        create(:protected_branch, :no_one_can_push, :developers_can_merge, project: project, name: 'master')
+        create(:protected_branch, :no_one_can_push, :developers_can_merge, project: project, name: project.default_branch)
         expect(project).to receive(:execute_hooks)
         expect(project.default_branch).to eq("master")
         expect(ProtectedBranches::CreateService).not_to receive(:new)

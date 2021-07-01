@@ -3,7 +3,7 @@ require 'spec_helper'
 
 RSpec.describe Packages::Composer::ComposerJsonService do
   describe '#execute' do
-    let(:branch) { project.repository.find_branch('master') }
+    let(:branch) { project.repository.find_branch(project.default_branch) }
     let(:target) { branch.target }
 
     subject { described_class.new(project, target).execute }
