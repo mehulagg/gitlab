@@ -1884,6 +1884,14 @@ RSpec.describe User do
 
         expect(user.deactivated?).to be_truthy
       end
+
+      it "sends deactivated user an email" do
+        expect_next_instance_of(NotificationService) do |notification|
+          allow(notification).to receive(:user_deactivated).with(user.name, user.notification_email)
+        end
+
+        user.deactivate
+      end
     end
 
     context "a user who is blocked" do
