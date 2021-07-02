@@ -126,8 +126,9 @@ export default {
       <slot name="collapsed-right"></slot>
       <gl-button
         v-if="canUpdate && !initialLoading && canEdit"
-        variant="link"
-        class="gl-text-gray-900! gl-hover-text-blue-800! gl-ml-auto hide-collapsed"
+        category="tertiary"
+        size="small"
+        class="gl-text-gray-900! gl-ml-auto hide-collapsed"
         data-testid="edit-button"
         :data-track-event="tracking.event"
         :data-track-label="tracking.label"

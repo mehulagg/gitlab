@@ -469,12 +469,21 @@
 }
 
 .boards-sidebar {
+  width: $gutter-width;
+  background-color: var(--gray-10, $gray-10);
+
   .sidebar-collapsed-icon {
     display: none;
   }
 
   .gl-drawer-header {
     align-items: flex-start;
+  }
+
+  .gl-drawer-header,
+  .gl-drawer-body > * {
+    padding: 16px 0;
+    margin:  0 20px;
   }
 }
 

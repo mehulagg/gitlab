@@ -97,7 +97,8 @@ export default {
       </span>
       <gl-button
         v-if="canUpdate"
-        variant="link"
+        category="tertiary"
+        size="small"
         class="gl-text-gray-900! gl-ml-5 js-sidebar-dropdown-toggle edit-link"
         data-testid="edit-button"
         @click="toggle"
