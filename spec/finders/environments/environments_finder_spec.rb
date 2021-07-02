@@ -58,5 +58,16 @@ RSpec.describe Environments::EnvironmentsFinder do
         expect(result).to contain_exactly(environment3)
       end
     end
+
+    context 'with id' do
+      let_it_be(:environment2) { create(:environment, :stopped, name: 'test2', project: project) }
+      let_it_be(:environment3) { create(:environment, :available, name: 'test3', project: project) }
+
+      it 'searches environments by name and state' do
+        result = described_class.new(project, user, search: 'test', environment_ids: [environment3.id]).execute
+
+        expect(result).to contain_exactly(environment3)
+      end
+    end
   end
 end

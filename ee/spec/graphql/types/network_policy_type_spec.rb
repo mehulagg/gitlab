@@ -12,7 +12,8 @@ RSpec.describe GitlabSchema.types['NetworkPolicy'] do
       :enabled,
       :from_auto_devops,
       :yaml,
-      :updated_at
+      :updated_at,
+      :environments
     )
   end
 end
