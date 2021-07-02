@@ -50,10 +50,10 @@ export default {
   data() {
     return {
       commentLineStart: {
-        line_code: this.line.line_code,
-        type: this.line.type,
-        old_line: this.line.old_line,
-        new_line: this.line.new_line,
+        line_code: this.line.constants.line_code,
+        type: this.line.constants.type,
+        old_line: this.line.constants.old_line,
+        new_line: this.line.constants.new_line,
       },
     };
   },
@@ -95,13 +95,13 @@ export default {
         if (left) acc.push(left);
         // if the line_codes are identically, return to avoid duplicates
         if (
-          left?.line_code === right?.line_code ||
-          left?.type === 'old-nonewline' ||
-          right?.type === 'new-nonewline'
+          left?.constants?.line_code === right?.constants?.line_code ||
+          left?.constants?.type === 'old-nonewline' ||
+          right?.constants?.type === 'new-nonewline'
         ) {
           return acc;
         }
-        if (right && right.type !== 'match') acc.push(right);
+        if (right && right.constants.type !== 'match') acc.push(right);
         return acc;
       };
       const getDiffLines = () => {
@@ -111,9 +111,9 @@ export default {
 
         return this.diffFile[INLINE_DIFF_LINES_KEY];
       };
-      const side = this.line.type === 'new' ? 'right' : 'left';
+      const side = this.line.constants.type === 'new' ? 'right' : 'left';
       const lines = getDiffLines();
-      return commentLineOptions(lines, this.line, this.line.line_code, side);
+      return commentLineOptions(lines, this.line, this.line.constants.line_code, side);
     },
     commentLines() {
       if (!this.selectedCommentPosition) return [];
@@ -126,16 +126,16 @@ export default {
       for (let i = 0, diffLinesLength = diffLines.length - 1; i <= diffLinesLength; i += 1) {
         const line = diffLines[i];
 
-        if (start.line_code === line.line_code) {
+        if (start.line_code === line.constants.line_code) {
           isAdding = true;
         }
 
         if (isAdding) {
-          if (line.type !== OLD_LINE_TYPE) {
+          if (line.constants.type !== OLD_LINE_TYPE) {
             lines.push(line);
           }
 
-          if (end.line_code === line.line_code) {
+          if (end.line_code === line.constants.line_code) {
             break;
           }
         }
@@ -150,7 +150,7 @@ export default {
         this.noteableData.diff_head_sha,
         DIFF_NOTE_TYPE,
         this.noteableData.source_project_id,
-        this.line.line_code,
+        this.line.constants.line_code,
       ];
 
       this.initAutoSave(this.noteableData, keys);
@@ -177,7 +177,7 @@ export default {
       }
 
       this.cancelCommentForm({
-        lineCode: this.line.line_code,
+        lineCode: this.line.constants.line_code,
         fileHash: this.diffFileHash,
       });
       this.$nextTick(() => {
@@ -205,7 +205,7 @@ export default {
     <note-form
       ref="noteForm"
       :is-editing="false"
-      :line-code="line.line_code"
+      :line-code="line.constants.line_code"
       :line="line"
       :lines="commentLines"
       :help-page-path="helpPagePath"

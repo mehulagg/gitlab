@@ -170,7 +170,7 @@ export default {
       const params = previewSuggestions
         ? {
             preview_suggestions: previewSuggestions,
-            line: this.line.new_line,
+            line: this.line.constants.new_line,
             file_path: this.diffParams.filePath,
             base_sha: this.diffParams.refs.base_sha,
             start_sha: this.diffParams.refs.start_sha,
@@ -200,7 +200,9 @@ export default {
     },
     canSuggest() {
       return (
-        this.getNoteableData.can_receive_suggestion && this.line && this.line.can_receive_suggestion
+        this.getNoteableData.can_receive_suggestion &&
+        this.line &&
+        this.line.constants.can_receive_suggestion
       );
     },
     changedCommentText() {

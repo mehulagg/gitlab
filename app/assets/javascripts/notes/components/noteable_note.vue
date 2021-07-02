@@ -169,13 +169,13 @@ export default {
     },
     commentLineOptions() {
       const lines = this.diffFile[INLINE_DIFF_LINES_KEY].length;
-      return commentLineOptions(lines, this.commentLineStart, this.line.line_code);
+      return commentLineOptions(lines, this.commentLineStart, this.line.constants.line_code);
     },
     diffFile() {
       let fileResolvedFromAvailableSource;
 
-      if (this.commentLineStart.line_code) {
-        const lineCode = this.commentLineStart.line_code.split('_')[0];
+      if (this.commentLineStart.constants?.line_code) {
+        const lineCode = this.commentLineStart.constants.line_code.split('_')[0];
         fileResolvedFromAvailableSource = this.getDiffFileByHash(lineCode);
       }
 

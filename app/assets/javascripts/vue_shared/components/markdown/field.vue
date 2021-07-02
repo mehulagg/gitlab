@@ -123,7 +123,7 @@ export default {
       if (this.lines.length) {
         return this.lines
           .map((line) => {
-            const { rich_text: richText, text } = line;
+            const { rich_text: richText, text } = line.constants;
 
             if (text) {
               return text;
@@ -135,7 +135,7 @@ export default {
       }
 
       if (this.line) {
-        const { rich_text: richText, text } = this.line;
+        const { rich_text: richText, text } = this.line.constants;
 
         if (text) {
           return text;
@@ -155,7 +155,7 @@ export default {
       return lineNumber;
     },
     lineType() {
-      return this.line ? this.line.type : '';
+      return this.line ? this.line.constants.type : '';
     },
     addMultipleToDiscussionWarning() {
       return sprintf(

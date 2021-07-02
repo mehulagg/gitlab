@@ -110,8 +110,8 @@ export default {
       const endpoint = this.contextLinesPath;
       const { fileHash } = this;
       const view = INLINE_DIFF_VIEW_TYPE;
-      const oldLineNumber = this.line.meta_data.old_pos || 0;
-      const newLineNumber = this.line.meta_data.new_pos || 0;
+      const oldLineNumber = this.line.constants.meta_data.old_pos || 0;
+      const newLineNumber = this.line.constants.meta_data.new_pos || 0;
       const offset = newLineNumber - oldLineNumber;
 
       const expandOptions = { endpoint, fileHash, view, oldLineNumber, newLineNumber, offset };

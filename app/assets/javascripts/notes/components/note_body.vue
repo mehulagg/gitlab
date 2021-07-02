@@ -69,7 +69,7 @@ export default {
       return this.note.suggestions && this.note.suggestions.length;
     },
     lineType() {
-      return this.line ? this.line.type : null;
+      return this.line ? this.line.constants.type : null;
     },
     commitMessage() {
       // Please see this issue comment for why these

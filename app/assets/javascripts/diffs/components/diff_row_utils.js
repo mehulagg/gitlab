@@ -15,7 +15,7 @@ import {
 export const isHighlighted = (highlightedRow, line, isCommented) => {
   if (isCommented) return true;
 
-  const lineCode = line?.line_code;
+  const lineCode = line?.constants?.line_code;
   return lineCode ? lineCode === highlightedRow : false;
 };
 
@@ -32,24 +32,26 @@ export const shouldRenderCommentButton = (isLoggedIn, isCommentButtonRendered) =
 
 export const hasDiscussions = (line) => line?.discussions?.length > 0;
 
-export const lineHref = (line) => `#${line?.line_code || ''}`;
+export const lineHref = (line) => `#${line?.constants?.line_code || ''}`;
 
 export const lineCode = (line) => {
   if (!line) return undefined;
-  return line.line_code || line.left?.line_code || line.right?.line_code;
+  return (
+    line.constants?.line_code || line.left?.constants?.line_code || line.right?.constants?.line_code
+  );
 };
 
 export const classNameMapCell = ({ line, hll, isLoggedIn, isHover }) => {
   if (!line) return [];
-  const { type } = line;
+  const { type } = line.constants;
 
   return [
     type,
     {
       hll,
       [LINE_HOVER_CLASS_NAME]: isLoggedIn && isHover && !isContextLine(type) && !isMetaLine(type),
-      old_line: line.type === 'old',
-      new_line: line.type === 'new',
+      old_line: line.constants.type === 'old',
+      new_line: line.constants.type === 'new',
     },
   ];
 };
@@ -59,7 +61,7 @@ export const addCommentTooltip = (line) => {
   if (!line) return tooltip;
 
   tooltip = __('Add a comment to this line or drag for multiple lines');
-  const brokenSymlinks = line.commentsDisabled;
+  const brokenSymlinks = line.constants.commentsDisabled;
 
   if (brokenSymlinks) {
     if (brokenSymlinks.wasSymbolic || brokenSymlinks.isSymbolic) {
@@ -77,11 +79,11 @@ export const addCommentTooltip = (line) => {
 };
 
 export const parallelViewLeftLineType = (line, hll) => {
-  if (line?.right?.type === NEW_NO_NEW_LINE_TYPE) {
+  if (line?.right?.constants.type === NEW_NO_NEW_LINE_TYPE) {
     return OLD_NO_NEW_LINE_TYPE;
   }
 
-  const lineTypeClass = line?.left ? line.left.type : EMPTY_CELL_TYPE;
+  const lineTypeClass = line?.left ? line.left.constants.type : EMPTY_CELL_TYPE;
 
   return [lineTypeClass, { hll }];
 };
@@ -110,19 +112,20 @@ export const mapParallel = (content) => (line) => {
       lineDraft: content.draftForLine(content.diffFile.file_hash, line, 'left'),
       hasCommentForm: left.hasForm,
       isConflictMarker:
-        line.left.type === CONFLICT_MARKER_OUR || line.left.type === CONFLICT_MARKER_THEIR,
-      emptyCellClassMap: { conflict_our: line.right?.type === CONFLICT_THEIR },
+        line.left.constants.type === CONFLICT_MARKER_OUR ||
+        line.left.constants.type === CONFLICT_MARKER_THEIR,
+      emptyCellClassMap: { conflict_our: line.right?.constants.type === CONFLICT_THEIR },
       addCommentTooltip: addCommentTooltip(line.left),
     };
   }
   if (right) {
     right = {
       ...right,
-      renderDiscussion: Boolean(hasExpandedDiscussionOnRight && right.type),
+      renderDiscussion: Boolean(hasExpandedDiscussionOnRight && right.constants.type),
       hasDraft: content.hasParallelDraftRight(content.diffFile.file_hash, line),
       lineDraft: content.draftForLine(content.diffFile.file_hash, line, 'right'),
-      hasCommentForm: Boolean(right.hasForm && right.type),
-      emptyCellClassMap: { conflict_their: line.left?.type === CONFLICT_OUR },
+      hasCommentForm: Boolean(right.hasForm && right.constants.type),
+      emptyCellClassMap: { conflict_their: line.left?.constants.type === CONFLICT_OUR },
       addCommentTooltip: addCommentTooltip(line.right),
     };
   }
@@ -131,17 +134,17 @@ export const mapParallel = (content) => (line) => {
     ...line,
     left,
     right,
-    isMatchLineLeft: isMatchLine(left?.type),
-    isMatchLineRight: isMatchLine(right?.type),
-    isContextLineLeft: isContextLine(left?.type),
-    isContextLineRight: isContextLine(right?.type),
+    isMatchLineLeft: isMatchLine(left?.constants.type),
+    isMatchLineRight: isMatchLine(right?.constants.type),
+    isContextLineLeft: isContextLine(left?.constants.type),
+    isContextLineRight: isContextLine(right?.constants.type),
     hasDiscussionsLeft: hasDiscussions(left),
     hasDiscussionsRight: hasDiscussions(right),
     lineHrefOld: lineHref(left),
     lineHrefNew: lineHref(right),
     lineCode: lineCode(line),
-    isMetaLineLeft: isMetaLine(left?.type),
-    isMetaLineRight: isMetaLine(right?.type),
+    isMetaLineLeft: isMetaLine(left?.constants.type),
+    isMetaLineRight: isMetaLine(right?.constants.type),
     draftRowClasses: left?.lineDraft > 0 || right?.lineDraft > 0 ? '' : 'js-temp-notes-holder',
     renderCommentRow,
     commentRowClasses: hasDiscussions(left) || hasDiscussions(right) ? '' : 'js-temp-notes-holder',

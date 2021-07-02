@@ -120,7 +120,8 @@ export const fetchDiffFilesBatch = ({ commit, state, dispatch }) => {
         if (window.gon?.features?.diffsVirtualScrolling && !scrolledVirtualScroller) {
           const index = state.diffFiles.findIndex(
             (f) =>
-              f.file_hash === hash || f[INLINE_DIFF_LINES_KEY].find((l) => l.line_code === hash),
+              f.file_hash === hash ||
+              f[INLINE_DIFF_LINES_KEY].find((l) => l.constants.line_code === hash),
           );
 
           if (index >= 0) {
@@ -416,7 +417,7 @@ export const loadMoreLines = ({ commit }, options) => {
 export const scrollToLineIfNeededInline = (_, line) => {
   const hash = getLocationHash();
 
-  if (hash && line.line_code === hash) {
+  if (hash && line.constants.line_code === hash) {
     handleLocationHash();
   }
 };
@@ -426,7 +427,8 @@ export const scrollToLineIfNeededParallel = (_, line) => {
 
   if (
     hash &&
-    ((line.left && line.left.line_code === hash) || (line.right && line.right.line_code === hash))
+    ((line.left && line.left.constants.line_code === hash) ||
+      (line.right && line.right.constants.line_code === hash))
   ) {
     handleLocationHash();
   }
@@ -478,7 +480,7 @@ export const toggleFileDiscussionWrappers = ({ commit }, diff) => {
   const discussionWrappersExpanded = allDiscussionWrappersExpanded(diff);
   const lineCodesWithDiscussions = new Set();
   const lineHasDiscussion = (line) => Boolean(line?.discussions.length);
-  const registerDiscussionLine = (line) => lineCodesWithDiscussions.add(line.line_code);
+  const registerDiscussionLine = (line) => lineCodesWithDiscussions.add(line.constants.line_code);
 
   diff[INLINE_DIFF_LINES_KEY].filter(lineHasDiscussion).forEach(registerDiscussionLine);
 

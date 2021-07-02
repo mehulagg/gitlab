@@ -23,7 +23,7 @@ export default {
   data() {
     return {
       commentLineStart: {},
-      commentLineEndType: this.lineRange?.end?.line_type || this.line.type,
+      commentLineEndType: this.lineRange?.end?.constants?.line_type || this.line.constants.type,
     };
   },
   computed: {
@@ -36,10 +36,10 @@ export default {
     const line = this.selectedCommentPosition?.start || this.lineRange?.start || this.line;
 
     this.commentLineStart = {
-      line_code: line.line_code,
-      type: line.type,
-      old_line: line.old_line,
-      new_line: line.new_line,
+      line_code: line.constants.line_code,
+      type: line.constants.type,
+      old_line: line.constants.old_line,
+      new_line: line.constants.new_line,
     };
 
     if (this.selectedCommentPosition) return;

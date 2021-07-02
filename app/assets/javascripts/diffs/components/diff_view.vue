@@ -104,7 +104,7 @@ export default {
     },
     onStopDragging() {
       this.showCommentForm({
-        lineCode: this.idState.updatedLineRange?.end?.line_code,
+        lineCode: this.idState.updatedLineRange?.end?.constants?.line_code,
         fileHash: this.diffFile.file_hash,
       });
       this.idState.dragStart = null;
@@ -112,7 +112,7 @@ export default {
     isHighlighted(line) {
       return isHighlighted(
         this.highlightedRow,
-        line.left?.line_code ? line.left : line.right,
+        line.left?.constants?.line_code ? line.left : line.right,
         false,
       );
     },

@@ -53,7 +53,9 @@ export default {
       v-if="!hasDraft"
       :has-form="line.hasCommentForm"
       :render-reply-placeholder="Boolean(line.discussions.length)"
-      @showNewDiscussionForm="showCommentForm({ lineCode: line.line_code, fileHash: diffFileHash })"
+      @showNewDiscussionForm="
+        showCommentForm({ lineCode: line.constants.line_code, fileHash: diffFileHash })
+      "
     >
       <template #form>
         <diff-line-note-form

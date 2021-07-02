@@ -12,15 +12,15 @@ export const getInteropInlineAttributes = (line) => {
     return null;
   }
 
-  const interopType = line.type?.startsWith(OLD) ? OLD : NEW;
+  const interopType = line.constants.type?.startsWith(OLD) ? OLD : NEW;
 
-  const interopLine = interopType === OLD ? line.old_line : line.new_line;
+  const interopLine = interopType === OLD ? line.constants.old_line : line.constants.new_line;
 
   return {
     [ATTR_TYPE]: interopType,
     [ATTR_LINE]: interopLine,
-    [ATTR_NEW_LINE]: line.new_line,
-    [ATTR_OLD_LINE]: line.old_line,
+    [ATTR_NEW_LINE]: line.constants.new_line,
+    [ATTR_OLD_LINE]: line.constants.old_line,
   };
 };
 

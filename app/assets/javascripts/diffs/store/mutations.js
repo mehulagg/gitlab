@@ -108,7 +108,9 @@ export default {
 
     if (!diffFile) return;
 
-    diffFile[INLINE_DIFF_LINES_KEY].find((l) => l.line_code === lineCode).hasForm = hasForm;
+    diffFile[INLINE_DIFF_LINES_KEY].find(
+      (l) => l.constants.line_code === lineCode,
+    ).hasForm = hasForm;
   },
 
   [types.ADD_CONTEXT_LINES](state, options) {
@@ -126,9 +128,10 @@ export default {
       nextLineNumbers,
     ).map((line) => {
       const lineCode =
-        line.type === 'match'
-          ? `${fileHash}_${line.meta_data.old_pos}_${line.meta_data.new_pos}_match`
-          : line.line_code || `${fileHash}_${line.old_line}_${line.new_line}`;
+        line.constants.type === 'match'
+          ? `${fileHash}_${line.constants.meta_data.old_pos}_${line.constants.meta_data.new_pos}_match`
+          : line.constants.line_code ||
+            `${fileHash}_${line.constants.old_line}_${line.constants.new_line}`;
       return {
         ...line,
         line_code: lineCode,
@@ -166,10 +169,10 @@ export default {
     const lineCheck = (line) =>
       discussionLineCodes.some(
         (discussionLineCode) =>
-          line.line_code === discussionLineCode &&
+          line.constants.line_code === discussionLineCode &&
           isDiscussionApplicableToLine({
             discussion,
-            diffPosition: diffPositionByLineCode[line.line_code],
+            diffPosition: diffPositionByLineCode[line.constants.line_code],
             latestDiff,
           }),
       );

@@ -70,23 +70,26 @@ export default {
       return utils.parallelViewLeftLineType(props.line, props.isHighlighted || props.isCommented);
     },
     (props) =>
-      [props.line.left?.type, props.line.right?.type, props.isHighlighted, props.isCommented].join(
-        ':',
-      ),
+      [
+        props.line.left?.constants.type,
+        props.line.right?.constants.type,
+        props.isHighlighted,
+        props.isCommented,
+      ].join(':'),
   ),
   coverageStateLeft: memoize(
     (props) => {
       if (!props.inline || !props.line.left) return {};
-      return props.fileLineCoverage(props.filePath, props.line.left.new_line);
+      return props.fileLineCoverage(props.filePath, props.line.left.constants.new_line);
     },
-    (props) => [props.inline, props.filePath, props.line.left?.new_line].join(':'),
+    (props) => [props.inline, props.filePath, props.line.left?.constants.new_line].join(':'),
   ),
   coverageStateRight: memoize(
     (props) => {
       if (!props.line.right) return {};
-      return props.fileLineCoverage(props.filePath, props.line.right.new_line);
+      return props.fileLineCoverage(props.filePath, props.line.right.constants.new_line);
     },
-    (props) => [props.line.right?.new_line, props.filePath].join(':'),
+    (props) => [props.line.right?.constants.new_line, props.filePath].join(':'),
   ),
   showCodequalityLeft: memoize(
     (props) => {
@@ -115,7 +118,7 @@ export default {
         hll: props.isHighlighted || props.isCommented,
       });
     },
-    (props) => [props.line.left.type, props.isHighlighted, props.isCommented].join(':'),
+    (props) => [props.line.left.constants.type, props.isHighlighted, props.isCommented].join(':'),
   ),
   classNameMapCellRight: memoize(
     (props) => {
@@ -124,7 +127,7 @@ export default {
         hll: props.isHighlighted || props.isCommented,
       });
     },
-    (props) => [props.line.right.type, props.isHighlighted, props.isCommented].join(':'),
+    (props) => [props.line.right.constants.type, props.isHighlighted, props.isCommented].join(':'),
   ),
   shouldRenderCommentButton: memoize(
     (props) => {
@@ -144,9 +147,11 @@ export default {
   },
   conflictText: memoize(
     (line) => {
-      return line.type === CONFLICT_MARKER_THEIR ? 'HEAD//our changes' : 'origin//their changes';
+      return line.constants.type === CONFLICT_MARKER_THEIR
+        ? 'HEAD//our changes'
+        : 'origin//their changes';
     },
-    (line) => line.type,
+    (line) => line.constants.type,
   ),
   CONFLICT_MARKER,
   CONFLICT_MARKER_THEIR,
@@ -159,7 +164,7 @@ export default {
 <template functional>
   <div :class="$options.classNameMap(props)" class="diff-grid-row diff-tr line_holder">
     <div
-      :id="props.line.left && props.line.left.line_code"
+      :id="props.line.left && props.line.left.constants.line_code"
       data-testid="left-side"
       class="diff-grid-left left-side"
       v-bind="$options.interopLeftAttributes(props)"
@@ -167,7 +172,9 @@ export default {
       @dragenter="listeners.enterdragging({ ...props.line.left, index: props.index })"
       @dragend="listeners.stopdragging"
     >
-      <template v-if="props.line.left && props.line.left.type !== $options.CONFLICT_MARKER">
+      <template
+        v-if="props.line.left && props.line.left.constants.type !== $options.CONFLICT_MARKER"
+      >
         <div
           :class="$options.classNameMapCellLeft(props)"
           data-testid="left-line-number"
@@ -187,26 +194,26 @@ export default {
               data-testid="left-comment-button"
               role="button"
               tabindex="0"
-              :draggable="!props.line.left.commentsDisabled"
+              :draggable="!props.line.left.constants.commentsDisabled"
               type="button"
               class="add-diff-note unified-diff-components-diff-note-button note-button js-add-diff-note-button"
               data-qa-selector="diff_comment_button"
-              :disabled="props.line.left.commentsDisabled"
-              :aria-disabled="props.line.left.commentsDisabled"
+              :disabled="props.line.left.constants.commentsDisabled"
+              :aria-disabled="props.line.left.constants.commentsDisabled"
               @click="
-                !props.line.left.commentsDisabled &&
-                  listeners.showCommentForm(props.line.left.line_code)
+                !props.line.left.constants.commentsDisabled &&
+                  listeners.showCommentForm(props.line.left.constants.line_code)
               "
               @keydown.enter="
-                !props.line.left.commentsDisabled &&
-                  listeners.showCommentForm(props.line.left.line_code)
+                !props.line.left.constants.commentsDisabled &&
+                  listeners.showCommentForm(props.line.left.constants.line_code)
               "
               @keydown.space="
-                !props.line.left.commentsDisabled &&
-                  listeners.showCommentForm(props.line.left.line_code)
+                !props.line.left.constants.commentsDisabled &&
+                  listeners.showCommentForm(props.line.left.constants.line_code)
               "
               @dragstart="
-                !props.line.left.commentsDisabled &&
+                !props.line.left.constants.commentsDisabled &&
                   listeners.startdragging({
                     event: $event,
                     line: { ...props.line.left, index: props.index },
@@ -215,8 +222,11 @@ export default {
             ></div>
           </span>
           <a
-            v-if="props.line.left.old_line && props.line.left.type !== $options.CONFLICT_THEIR"
-            :data-linenumber="props.line.left.old_line"
+            v-if="
+              props.line.left.constants.old_line &&
+              props.line.left.constants.type !== $options.CONFLICT_THEIR
+            "
+            :data-linenumber="props.line.left.constants.old_line"
             :href="props.line.lineHrefOld"
             @click="listeners.setHighlightedRow(props.line.lineCode)"
           >
@@ -229,7 +239,7 @@ export default {
             data-testid="left-discussions"
             @toggleLineDiscussions="
               listeners.toggleLineDiscussions({
-                lineCode: props.line.left.line_code,
+                lineCode: props.line.left.constants.line_code,
                 expanded: !props.line.left.discussionsExpanded,
               })
             "
@@ -241,8 +251,11 @@ export default {
           class="diff-td diff-line-num"
         >
           <a
-            v-if="props.line.left.new_line && props.line.left.type !== $options.CONFLICT_OUR"
-            :data-linenumber="props.line.left.new_line"
+            v-if="
+              props.line.left.constants.new_line &&
+              props.line.left.constants.type !== $options.CONFLICT_OUR
+            "
+            :data-linenumber="props.line.left.constants.new_line"
             :href="props.line.lineHrefOld"
             @click="listeners.setHighlightedRow(props.line.lineCode)"
           >
@@ -268,7 +281,7 @@ export default {
           />
         </div>
         <div
-          :key="props.line.left.line_code"
+          :key="props.line.left.constants.line_code"
           :class="[$options.parallelViewLeftLineType(props), { parallel: !props.inline }]"
           class="diff-td line_content with-coverage left-side"
           data-testid="left-content"
@@ -276,12 +289,13 @@ export default {
           <strong v-if="props.line.left.isConflictMarker">{{
             $options.conflictText(props.line.left)
           }}</strong>
-          <span v-else v-html="props.line.left.rich_text"></span>
+          <span v-else v-html="props.line.left.constants.rich_text"></span>
         </div>
       </template>
       <template
         v-else-if="
-          !props.inline || (props.line.left && props.line.left.type === $options.CONFLICT_MARKER)
+          !props.inline ||
+          (props.line.left && props.line.left.constants.type === $options.CONFLICT_MARKER)
         "
       >
         <div data-testid="left-empty-cell" class="diff-td diff-line-num old_line empty-cell">
@@ -298,7 +312,7 @@ export default {
     </div>
     <div
       v-if="!props.inline"
-      :id="props.line.right && props.line.right.line_code"
+      :id="props.line.right && props.line.right.constants.line_code"
       data-testid="right-side"
       class="diff-grid-right right-side"
       v-bind="$options.interopRightAttributes(props)"
@@ -308,7 +322,7 @@ export default {
     >
       <template v-if="props.line.right">
         <div :class="$options.classNameMapCellRight(props)" class="diff-td diff-line-num new_line">
-          <template v-if="props.line.right.type !== $options.CONFLICT_MARKER_THEIR">
+          <template v-if="props.line.right.constants.type !== $options.CONFLICT_MARKER_THEIR">
             <span
               v-if="$options.shouldRenderCommentButton(props) && !props.line.hasDiscussionsRight"
               class="add-diff-note tooltip-wrapper has-tooltip"
@@ -318,25 +332,25 @@ export default {
                 data-testid="right-comment-button"
                 role="button"
                 tabindex="0"
-                :draggable="!props.line.right.commentsDisabled"
+                :draggable="!props.line.right.constants.commentsDisabled"
                 type="button"
                 class="add-diff-note unified-diff-components-diff-note-button note-button js-add-diff-note-button"
-                :disabled="props.line.right.commentsDisabled"
-                :aria-disabled="props.line.right.commentsDisabled"
+                :disabled="props.line.right.constants.commentsDisabled"
+                :aria-disabled="props.line.right.constants.commentsDisabled"
                 @click="
-                  !props.line.right.commentsDisabled &&
-                    listeners.showCommentForm(props.line.right.line_code)
+                  !props.line.right.constants.commentsDisabled &&
+                    listeners.showCommentForm(props.line.right.constants.line_code)
                 "
                 @keydown.enter="
-                  !props.line.right.commentsDisabled &&
-                    listeners.showCommentForm(props.line.right.line_code)
+                  !props.line.right.constants.commentsDisabled &&
+                    listeners.showCommentForm(props.line.right.constants.line_code)
                 "
                 @keydown.space="
-                  !props.line.right.commentsDisabled &&
-                    listeners.showCommentForm(props.line.right.line_code)
+                  !props.line.right.constants.commentsDisabled &&
+                    listeners.showCommentForm(props.line.right.constants.line_code)
                 "
                 @dragstart="
-                  !props.line.right.commentsDisabled &&
+                  !props.line.right.constants.commentsDisabled &&
                     listeners.startdragging({
                       event: $event,
                       line: { ...props.line.right, index: props.index },
@@ -346,8 +360,8 @@ export default {
             </span>
           </template>
           <a
-            v-if="props.line.right.new_line"
-            :data-linenumber="props.line.right.new_line"
+            v-if="props.line.right.constants.new_line"
+            :data-linenumber="props.line.right.constants.new_line"
             :href="props.line.lineHrefNew"
             @click="listeners.setHighlightedRow(props.line.lineCode)"
           >
@@ -360,7 +374,7 @@ export default {
             data-testid="right-discussions"
             @toggleLineDiscussions="
               listeners.toggleLineDiscussions({
-                lineCode: props.line.right.line_code,
+                lineCode: props.line.right.constants.line_code,
                 expanded: !props.line.right.discussionsExpanded,
               })
             "
@@ -369,7 +383,7 @@ export default {
         <div
           :title="$options.coverageStateRight(props).text"
           :class="[
-            props.line.right.type,
+            props.line.right.constants.type,
             $options.coverageStateRight(props).class,
             { hll: props.isHighlighted, hll: props.isCommented },
           ]"
@@ -377,7 +391,10 @@ export default {
         ></div>
         <div
           class="diff-td line-codequality right-side"
-          :class="[props.line.right.type, { hll: props.isHighlighted, hll: props.isCommented }]"
+          :class="[
+            props.line.right.constants.type,
+            { hll: props.isHighlighted, hll: props.isCommented },
+          ]"
         >
           <component
             :is="$options.CodeQualityGutterIcon"
@@ -388,9 +405,8 @@ export default {
           />
         </div>
         <div
-          :key="props.line.right.rich_text"
           :class="[
-            props.line.right.type,
+            props.line.right.constants.type,
             {
               hll: props.isHighlighted,
               hll: props.isCommented,
@@ -398,10 +414,10 @@ export default {
           ]"
           class="diff-td line_content with-coverage right-side parallel"
         >
-          <strong v-if="props.line.right.type === $options.CONFLICT_MARKER_THEIR">{{
+          <strong v-if="props.line.right.constants.type === $options.CONFLICT_MARKER_THEIR">{{
             $options.conflictText(props.line.right)
           }}</strong>
-          <span v-else v-html="props.line.right.rich_text"></span>
+          <span v-else v-html="props.line.right.constants.rich_text"></span>
         </div>
       </template>
       <template v-else>

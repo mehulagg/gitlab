@@ -78,7 +78,7 @@ export default {
           if (positionType === IMAGE_DIFF_POSITION_TYPE) {
             this.closeDiffFileCommentForm(this.diffFileHash);
           } else {
-            this.handleClearForm(this.line.line_code);
+            this.handleClearForm(this.line.constants.line_code);
           }
         })
         .catch(() => {

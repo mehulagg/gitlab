@@ -154,8 +154,8 @@ export function getFormData(params) {
     old_path: diffFile.old_path,
     new_path: diffFile.new_path,
     position_type: positionType || TEXT_DIFF_POSITION_TYPE,
-    old_line: noteTargetLine ? noteTargetLine.old_line : null,
-    new_line: noteTargetLine ? noteTargetLine.new_line : null,
+    old_line: noteTargetLine ? noteTargetLine.constants.old_line : null,
+    new_line: noteTargetLine ? noteTargetLine.constants.new_line : null,
     x: params.x,
     y: params.y,
     width: params.width,
@@ -202,7 +202,8 @@ export const findIndexInInlineLines = (lines, lineNumbers) => {
   const { oldLineNumber, newLineNumber } = lineNumbers;
 
   return lines.findIndex(
-    (line) => line.old_line === oldLineNumber && line.new_line === newLineNumber,
+    (line) =>
+      line.constants.old_line === oldLineNumber && line.constants.new_line === newLineNumber,
   );
 };
 
@@ -250,8 +251,8 @@ export function addLineReferences(lines, lineNumbers, bottom, isExpandDown, next
 
     Object.assign(line, {
       meta_data: {
-        old_pos: targetLine.old_line,
-        new_pos: targetLine.new_line,
+        old_pos: targetLine.constants.old_line,
+        new_pos: targetLine.constants.new_line,
       },
     });
   }
@@ -286,12 +287,17 @@ export function trimFirstCharOfLineContent(line = {}) {
   delete line.text;
 
   const parsedLine = { ...line };
+  const richText = line.constants?.rich_text || line.rich_text;
 
-  if (line.rich_text) {
-    const firstChar = parsedLine.rich_text.charAt(0);
+  if (richText) {
+    const firstChar = (parsedLine.constants?.rich_text || parsedLine.rich_text).charAt(0);
 
     if (firstChar === ' ' || firstChar === '+' || firstChar === '-') {
-      parsedLine.rich_text = line.rich_text.substring(1);
+      if (parsedLine.constants) {
+        parsedLine.constants.rich_text = richText.substring(1);
+      } else {
+        parsedLine.rich_text = richText.substring(1);
+      }
     }
   }
 
@@ -331,17 +337,31 @@ function cleanRichText(text) {
 }
 
 function prepareLine(line, file) {
-  if (!line.alreadyPrepared) {
-    Object.assign(line, {
-      commentsDisabled: file.brokenSymlink,
-      rich_text: cleanRichText(line.rich_text),
+  if (!line.constants?.alreadyPrepared) {
+    return {
+      constants: Object.freeze({
+        can_receive_suggestion: line.can_receive_suggestion,
+        commentsDisabled: file.brokenSymlink,
+        rich_text: cleanRichText(line.rich_text),
+        text: undefined,
+        alreadyPrepared: true,
+        line_code: line.line_code,
+        new_line: line.new_line,
+        old_line: line.old_line,
+        type: line.type,
+        meta_data:
+          line.meta_data &&
+          Object.freeze({
+            ...line.meta_data,
+          }),
+      }),
       discussionsExpanded: true,
       discussions: [],
       hasForm: false,
-      text: undefined,
-      alreadyPrepared: true,
-    });
+    };
   }
+
+  return line;
 }
 
 export function prepareLineForRenamedFile({ line, diffFile, index = 0 }) {
@@ -360,14 +380,14 @@ export function prepareLineForRenamedFile({ line, diffFile, index = 0 }) {
     ==> https://gitlab.com/groups/gitlab-org/-/epics/2852#note_304803402
   */
   const lineNumber = index + 1;
-  const cleanLine = {
+  let cleanLine = {
     ...line,
     line_code: `${diffFile.file_hash}_${lineNumber}_${lineNumber}`,
     new_line: lineNumber,
     old_line: lineNumber,
   };
 
-  prepareLine(cleanLine, diffFile); // WARNING: In-Place Mutations!
+  cleanLine = prepareLine(cleanLine, diffFile);
 
   return cleanLine;
 }
@@ -375,7 +395,9 @@ export function prepareLineForRenamedFile({ line, diffFile, index = 0 }) {
 function prepareDiffFileLines(file) {
   const inlineLines = file[INLINE_DIFF_LINES_KEY];
 
-  inlineLines.forEach((line) => prepareLine(line, file)); // WARNING: In-Place Mutations!
+  Object.assign(file, {
+    [INLINE_DIFF_LINES_KEY]: inlineLines.map((line) => prepareLine(line, file)),
+  });
 
   return file;
 }
@@ -434,17 +456,17 @@ export function getDiffPositionByLineCode(diffFiles) {
   }, []);
 
   return lines.reduce((acc, { file, line }) => {
-    if (line.line_code) {
-      acc[line.line_code] = {
+    if (line.constants.line_code) {
+      acc[line.constants.line_code] = {
         base_sha: file.diff_refs.base_sha,
         head_sha: file.diff_refs.head_sha,
         start_sha: file.diff_refs.start_sha,
         new_path: file.new_path,
         old_path: file.old_path,
-        old_line: line.old_line,
-        new_line: line.new_line,
+        old_line: line.constants.old_line,
+        new_line: line.constants.new_line,
         line_range: null,
-        line_code: line.line_code,
+        line_code: line.constants.line_code,
         position_type: 'text',
       };
     }
@@ -540,7 +562,7 @@ export const idleCallback = (cb) => requestIdleCallback(cb);
 
 function getLinesFromFileByLineCode(file, lineCode) {
   const inlineLines = file[INLINE_DIFF_LINES_KEY];
-  const matchesCode = (line) => line.line_code === lineCode;
+  const matchesCode = (line) => line.constants.line_code === lineCode;
 
   return inlineLines.filter(matchesCode);
 }

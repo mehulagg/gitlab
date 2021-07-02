@@ -50,9 +50,9 @@ export function commentLineOptions(diffLines, startingLine, lineCode, side = 'le
   const fallbackSide = preferredSide === 'new_line' ? 'old_line' : 'new_line';
   const notMatchType = (l) => l.type !== 'match';
   const linesCopy = [...diffLines]; // don't mutate the argument
-  const startingLineCode = startingLine.line_code;
+  const startingLineCode = startingLine.constants.line_code;
 
-  const currentIndex = linesCopy.findIndex((line) => line.line_code === lineCode);
+  const currentIndex = linesCopy.findIndex((line) => line.constants.line_code === lineCode);
 
   // We're limiting adding comments to only lines above the current line
   // to make rendering simpler. Future interations will use a more
@@ -66,14 +66,14 @@ export function commentLineOptions(diffLines, startingLine, lineCode, side = 'le
   // If the selected line is "hidden" in an unchanged line block
   // or "above" the current group of lines add it to the array so
   // that the drop down is not defaulted to empty
-  const selectedIndex = lines.findIndex((line) => line.line_code === startingLineCode);
+  const selectedIndex = lines.findIndex((line) => line.constants.line_code === startingLineCode);
   if (selectedIndex < 0) lines.unshift(startingLine);
 
   return lines.map((l) => {
-    const { line_code, type, old_line, new_line } = l;
+    const { line_code, type, old_line, new_line } = l.constants;
     return {
       value: { line_code, type, old_line, new_line },
-      text: `${getSymbol(type)}${l[preferredSide] || l[fallbackSide]}`,
+      text: `${getSymbol(type)}${l.constants[preferredSide] || l.constants[fallbackSide]}`,
     };
   });
 }
