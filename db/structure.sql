@@ -12016,6 +12016,29 @@ CREATE SEQUENCE custom_emoji_id_seq
 
 ALTER SEQUENCE custom_emoji_id_seq OWNED BY custom_emoji.id;
 
+CREATE TABLE dast_profile_schedules (
+    id bigint NOT NULL,
+    dast_profile_id bigint NOT NULL,
+    owner_id bigint,
+    next_run_at timestamp without time zone,
+    cron text,
+    cron_timezone text,
+    active boolean DEFAULT true,
+    created_at timestamp(6) without time zone NOT NULL,
+    updated_at timestamp(6) without time zone NOT NULL
+);
+
+COMMENT ON TABLE dast_profile_schedules IS '{"owner":"group::dynamic analysis","description":"Table to store DAST Profile schedules"}';
+
+CREATE SEQUENCE dast_profile_schedules_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE dast_profile_schedules_id_seq OWNED BY dast_profile_schedules.id;
+
 CREATE TABLE dast_profiles (
     id bigint NOT NULL,
     project_id bigint NOT NULL,
@@ -19813,6 +19836,8 @@ ALTER TABLE ONLY csv_issue_imports ALTER COLUMN id SET DEFAULT nextval('csv_issu
 
 ALTER TABLE ONLY custom_emoji ALTER COLUMN id SET DEFAULT nextval('custom_emoji_id_seq'::regclass);
 
+ALTER TABLE ONLY dast_profile_schedules ALTER COLUMN id SET DEFAULT nextval('dast_profile_schedules_id_seq'::regclass);
+
 ALTER TABLE ONLY dast_profiles ALTER COLUMN id SET DEFAULT nextval('dast_profiles_id_seq'::regclass);
 
 ALTER TABLE ONLY dast_scanner_profiles ALTER COLUMN id SET DEFAULT nextval('dast_scanner_profiles_id_seq'::regclass);
@@ -21060,6 +21085,9 @@ ALTER TABLE ONLY csv_issue_imports
 
 ALTER TABLE ONLY custom_emoji
     ADD CONSTRAINT custom_emoji_pkey PRIMARY KEY (id);
+
+ALTER TABLE ONLY dast_profile_schedules
+    ADD CONSTRAINT dast_profile_schedules_pkey PRIMARY KEY (id);
 
 ALTER TABLE ONLY dast_profiles_pipelines
     ADD CONSTRAINT dast_profiles_pipelines_pkey PRIMARY KEY (dast_profile_id, ci_pipeline_id);

@@ -702,6 +702,9 @@ Gitlab.ee do
   Settings.cron_jobs['security_orchestration_policy_rule_schedule_worker'] ||= Settingslogic.new({})
   Settings.cron_jobs['security_orchestration_policy_rule_schedule_worker']['cron'] ||= '*/15 * * * *'
   Settings.cron_jobs['security_orchestration_policy_rule_schedule_worker']['job_class'] = 'Security::OrchestrationPolicyRuleScheduleWorker'
+  Settings.cron_jobs['dast_profile_schedule_worker'] ||= Settingslogic.new({})
+  Settings.cron_jobs['dast_profile_schedule_worker']['cron'] ||= '*/10 * * * *'
+  Settings.cron_jobs['dast_profile_schedule_worker']['job_class'] = 'Dast::ProfileScheduleWorker'
 end
 
 #
