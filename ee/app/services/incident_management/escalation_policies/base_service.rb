@@ -11,6 +11,10 @@ module IncidentManagement
         params[:rules_attributes]&.any? { |attrs| attrs[:oncall_schedule]&.project != project }
       end
 
+      def duplicate_rules?
+        # TODO ruby check?
+      end
+
       def error(message)
         ServiceResponse.error(message: message)
       end

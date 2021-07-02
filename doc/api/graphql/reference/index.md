@@ -16374,6 +16374,7 @@ Represents an escalation rule.
 | Name | Type | Description |
 | ---- | ---- | ----------- |
 | <a id="escalationruleinputelapsedtimeseconds"></a>`elapsedTimeSeconds` | [`Int!`](#int) | The time in seconds before the rule is activated. |
+| <a id="escalationruleinputid"></a>`id` | [`IncidentManagementEscalationRuleID`](#incidentmanagementescalationruleid) | TThe escalation rule id. |
 | <a id="escalationruleinputoncallscheduleiid"></a>`oncallScheduleIid` | [`ID!`](#id) | The on-call schedule to notify. |
 | <a id="escalationruleinputstatus"></a>`status` | [`EscalationRuleStatus!`](#escalationrulestatus) | The status required to prevent the rule from activating. |
 

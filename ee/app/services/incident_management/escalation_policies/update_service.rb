@@ -26,6 +26,7 @@ module IncidentManagement
       def execute
         return error_no_permissions unless allowed?
         return error_no_rules if empty_rules?
+        return error_no_rules if duplicate_rules?
         return error_bad_schedules if invalid_schedules?
 
         reconcile_rules!
@@ -75,7 +76,7 @@ module IncidentManagement
       end
 
       def normalize(rule)
-        rule.slice(:oncall_schedule_id, :elapsed_time_seconds, :status)
+        rule.slice(:id, :oncall_schedule_id, :elapsed_time_seconds, :status)
       end
     end
   end

@@ -76,8 +76,9 @@ export default {
     },
   },
   data() {
-    const { status, elapsedTimeMinutes, action, oncallScheduleIid } = this.rule;
+    const { id, status, elapsedTimeMinutes, action, oncallScheduleIid } = this.rule;
     return {
+      id,
       status,
       elapsedTimeMinutes,
       action,
@@ -116,6 +117,7 @@ export default {
       this.$emit('update-escalation-rule', {
         index: this.index,
         rule: {
+          id: this.id,
           oncallScheduleIid: parseInt(this.oncallScheduleIid, 10),
           action: this.action,
           status: this.status,

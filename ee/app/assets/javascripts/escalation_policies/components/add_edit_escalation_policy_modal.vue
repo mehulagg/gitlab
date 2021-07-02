@@ -186,7 +186,8 @@ export default {
     },
     getRules(rules) {
       return rules.map(
-        ({ status, elapsedTimeMinutes, oncallScheduleIid, oncallSchedule: { iid } = {} }) => ({
+        ({ id, status, elapsedTimeMinutes, oncallScheduleIid, oncallSchedule: { iid } = {} }) => ({
+          id,
           status,
           elapsedTimeMinutes,
           oncallScheduleIid: oncallScheduleIid || iid,

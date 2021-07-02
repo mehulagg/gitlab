@@ -75,12 +75,14 @@ export default {
   mounted() {
     this.rules = this.form.rules.map((rule) => {
       const {
+        id,
         status,
         elapsedTimeMinutes,
         oncallSchedule: { iid: oncallScheduleIid },
       } = rule;
 
       return {
+        id,
         status,
         elapsedTimeMinutes,
         action: DEFAULT_ACTION,

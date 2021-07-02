@@ -46,6 +46,7 @@ module Mutations
           iids = rules.collect { |rule| rule[:oncall_schedule_iid] }
           found_schedules = schedules_for_iids(project, iids)
           rules_attributes = rules.map { |rule| prepare_rule(found_schedules, rule.to_h) }
+          rules_attributes.map! { |rule| rule.merge(id: rule.delete(:id)&.model_id)  }
 
           args.merge(rules_attributes: rules_attributes)
         end
