@@ -116,7 +116,11 @@ constraints(::Constraints::ProjectUrlConstrainer.new) do
 
         namespace :integrations do
           namespace :jira do
-            resources :issues, only: [:index, :show]
+            resources :issues, only: [:index, :show] do
+              member do
+                get :labels
+              end
+            end
           end
         end
 

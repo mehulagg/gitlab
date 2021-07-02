@@ -45,6 +45,10 @@ module Projects
           end
         end
 
+        def labels
+          render json: issue_json[:labels]
+        end
+
         private
 
         def visitor_id

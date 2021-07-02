@@ -32,6 +32,7 @@ module Integrations
       expose :labels do |jira_issue|
         jira_issue.labels.map do |name|
           {
+            id: name,
             title: name,
             name: name,
             color: '#0052CC',
