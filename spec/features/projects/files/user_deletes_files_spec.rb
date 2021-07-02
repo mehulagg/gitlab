@@ -25,10 +25,13 @@ RSpec.describe 'Projects > Files > User deletes files', :js do
       wait_for_requests
     end
 
+    # SAM: remove comment
     it 'deletes the file', :js do
       click_link('.gitignore')
 
       expect(page).to have_content('.gitignore')
+
+      # binding.pry
 
       click_on('Delete')
       fill_in(:commit_message, with: 'New commit message', visible: true)

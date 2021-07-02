@@ -3,6 +3,7 @@ import { GlButtonGroup, GlButton, GlModalDirective } from '@gitlab/ui';
 import { uniqueId } from 'lodash';
 import { sprintf, __ } from '~/locale';
 import getRefMixin from '../mixins/get_ref';
+import DeleteBlobModal from './delete_blob_modal.vue';
 import UploadBlobModal from './upload_blob_modal.vue';
 
 export default {
@@ -14,6 +15,7 @@ export default {
   components: {
     GlButtonGroup,
     GlButton,
+    DeleteBlobModal,
     UploadBlobModal,
   },
   directives: {
@@ -37,7 +39,15 @@ export default {
       type: String,
       required: true,
     },
+    projectPath: {
+      type: String,
+      required: true,
+    },
     replacePath: {
+      type: String,
+      required: true,
+    },
+    deletePath: {
       type: String,
       required: true,
     },
@@ -53,6 +63,12 @@ export default {
     replaceModalTitle() {
       return sprintf(__('Replace %{name}'), { name: this.name });
     },
+    deleteModalId() {
+      return uniqueId('delete-modal');
+    },
+    deleteModalTitle() {
+      return sprintf(__('Delete %{name}'), { name: this.name });
+    },
   },
 };
 </script>
@@ -63,7 +79,9 @@ export default {
       <gl-button v-gl-modal="replaceModalId">
         {{ $options.i18n.replace }}
       </gl-button>
-      <gl-button>{{ $options.i18n.delete }}</gl-button>
+      <gl-button v-gl-modal="deleteModalId">
+        {{ $options.i18n.delete }}
+      </gl-button>
     </gl-button-group>
     <upload-blob-modal
       :modal-id="replaceModalId"
@@ -75,6 +93,17 @@ export default {
       :path="path"
       :replace-path="replacePath"
       :primary-btn-text="$options.i18n.replacePrimaryBtnText"
+    />
+    <delete-blob-modal
+      :modal-id="deleteModalId"
+      :modal-title="deleteModalTitle"
+      :commit-message="deleteModalTitle"
+      :target-branch="targetBranch || ref"
+      :original-branch="originalBranch || ref"
+      :can-push-code="canPushCode"
+      :path="path"
+      :delete-path="deletePath"
+      :project-path="projectPath"
     />
   </div>
 </template>

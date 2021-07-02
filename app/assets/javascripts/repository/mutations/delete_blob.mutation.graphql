@@ -1,0 +1,25 @@
+mutation deleteBlob(
+  $project: ID!
+  $branch: String!
+  $startBranch: String
+  $message: String!
+  $file: String!
+) {
+  commitCreate(
+    input: {
+      projectPath: $project
+      branch: $branch
+      startBranch: $startBranch
+      message: $message
+      actions: [{ action: DELETE, filePath: $file }]
+    }
+  ) {
+    commit {
+      authorName
+      message
+      title
+      webPath
+    }
+    errors
+  }
+}

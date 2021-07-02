@@ -61,6 +61,7 @@ export default {
           blobs: {
             nodes: [
               {
+                webPath: '',
                 name: '',
                 size: '',
                 rawTextBlob: '',
@@ -135,10 +136,12 @@ export default {
           <blob-edit :edit-path="blobInfo.editBlobPath" :web-ide-path="blobInfo.ideEditPath" />
           <blob-button-group
             v-if="isLoggedIn"
+            :project-path="projectPath"
             :path="path"
             :name="blobInfo.name"
             :replace-path="blobInfo.replacePath"
             :can-push-code="blobInfo.canModifyBlob"
+            :delete-path="blobInfo.webPath"
           />
         </template>
       </blob-header>
