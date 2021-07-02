@@ -82,13 +82,14 @@ The "Time" metrics near the top of the page are measured as follows:
 The "Recent Activity" metrics near the top of the page are measured as follows:
 
 - **New Issues:** the number of issues created in the date range.
-- **Deploys:** the number of deployments to production (1) in the date range.
-- **Deployment Frequency:** the average number of deployments to production (1) per day in the date range.
+- **Deploys:** the number of deployments to production (1)(2) in the date range.
+- **Deployment Frequency:** the average number of deployments to production (1)(2) per day in the date range.
 
 (1) To give a more accurate representation of deployments that actually completed successfully,
 the calculation for these two metrics changed in GitLab 13.9 from using the time a deployment was
 created to the time a deployment finished. If you were referencing this metric prior to 13.9, please
 keep this slight change in mind.
+(2) To see deployment metrics, you must have a [production environment configured](https://docs.gitlab.com/ee/ci/environments/index.html#deployment-tier-of-environments).
 
 You can learn more about these metrics in our [analytics definitions](../../analytics/index.md).
 
