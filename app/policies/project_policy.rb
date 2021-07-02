@@ -148,6 +148,10 @@ class ProjectPolicy < BasePolicy
     ::Feature.enabled?(:build_service_proxy, @subject)
   end
 
+  condition(:respect_protected_tag_for_release_permissions) do
+    ::Feature.enabled?(:evalute_protected_tag_for_release_permissions, @subject, default_enabled: :yaml)
+  end
+
   condition(:user_defined_variables_allowed) do
     !@subject.restrict_user_defined_variables?
   end
@@ -630,6 +634,14 @@ class ProjectPolicy < BasePolicy
   rule { can?(:create_pipeline) & can?(:maintainer_access) }.enable :create_web_ide_terminal
 
   rule { build_service_proxy_enabled }.enable :build_service_proxy_enabled
+
+  # NOTE: Developer role (or above) can create, update and destroy release entries.
+  # When we remove the `evalute_protected_tag_for_release_permissions` feature flag,
+  # we should move `enable :destroy_release` to ProjectPolicy alongside with .
+  # See https://gitlab.com/gitlab-org/gitlab/-/issues/327505 for more information.
+  rule { respect_protected_tag_for_release_permissions & can?(:developer_access) }.policy do
+    enable :destroy_release
+  end
 
   rule { can?(:download_code) }.policy do
     enable :read_repository_graphs
