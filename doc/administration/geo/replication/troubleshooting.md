@@ -590,14 +590,15 @@ to start again from scratch, there are a few steps that can help you:
 
 ### Design repository failures on mirrored projects and project imports
 
-In `Admin Area > Geo > Nodes` if the Design repositories progress bar shows
+On the top bar, under **Menu >** **{admin}** **Admin > Geo > Nodes**,
+if the Design repositories progress bar shows
 `Synced` and `Failed` greater than 100%, and negative `Queued`, then the instance
 is likely affected by
 [a bug in GitLab 13.2 and 13.3](https://gitlab.com/gitlab-org/gitlab/-/issues/241668).
 It was [fixed in 13.4+](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/40643).
 
 To determine the actual replication status of design repositories in
-[Rails console](../../operations/rails_console.md):
+a [Rails console](../../operations/rails_console.md):
 
 ```ruby
 secondary = Gitlab::Geo.current_node
@@ -639,18 +640,21 @@ Counts:
 #### If you are promoting a Geo secondary site running on a single server
 
 `gitlab-ctl promotion-preflight-checks` will fail due to the existence of
-`failed` rows in the `geo_design_registry` table. Use the above snippet to
+`failed` rows in the `geo_design_registry` table. Use the
+[previous snippet](#design-repository-failures-on-mirrored-projects-and-project-imports) to
 determine the actual replication status of Design repositories.
 
 `gitlab-ctl promote-to-primary-node` will fail since it runs preflight checks.
-If the above snippet shows that all designs are synced, then you can use the
+If the [previous snippet](#design-repository-failures-on-mirrored-projects-and-project-imports)
+shows that all designs are synced, then you can use the
 `--skip-preflight-checks` option or the `--force` option to move forward with
 promotion.
 
 #### If you are promoting a Geo secondary site running on multiple servers
 
 `gitlab-ctl promotion-preflight-checks` will fail due to the existence of
-`failed` rows in the `geo_design_registry` table. Use the above snippet to
+`failed` rows in the `geo_design_registry` table. Use the 
+[previous snippet](#design-repository-failures-on-mirrored-projects-and-project-imports) to
 determine the actual replication status of Design repositories.
 
 ## Fixing errors during a failover or when promoting a secondary to a primary node
