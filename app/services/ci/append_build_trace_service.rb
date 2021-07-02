@@ -32,10 +32,16 @@ module Ci
         return Result.new(status: 416, stream_size: stream_size)
       end
 
+      if trace_size_exceeded?(stream_size)
+        build.drop!(:trace_size_exceeded)
+      end
+
       Result.new(status: 202, stream_size: stream_size)
     end
 
     private
+
+    delegate :project, to: :build
 
     def stream_range
       params.fetch(:content_range)
@@ -60,6 +66,11 @@ module Ci
 
       ::Gitlab::ErrorTracking
         .log_exception(TraceRangeError.new, extra)
+    end
+
+    def trace_size_exceeded?(size)
+      Feature.enabled?(:ci_job_trace_size_limit, project, default_enabled: :yaml) &&
+        project.actual_limits.exceeded?(:ci_job_trace_size, size / 1.megabyte)
     end
   end
 end

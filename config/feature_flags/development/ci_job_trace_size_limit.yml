@@ -1,0 +1,8 @@
+---
+name: ci_job_trace_size_limit
+introduced_by_url:
+rollout_issue_url: https://gitlab.com/gitlab-org/gitlab/-/issues/new?issue%5Btitle%5D=%5BFeature+flag%5D+Rollout+of+%60ci_job_trace_size_limit%60&issuable_template=Feature+Flag+Roll+Out
+milestone: '14.1'
+type: development
+group: group::pipeline execution
+default_enabled: false
