@@ -15,6 +15,7 @@ module Projects
         before_action :check_feature_enabled!
         before_action only: :show do
           push_frontend_feature_flag(:jira_issue_details_edit_status, project, default_enabled: :yaml)
+          push_frontend_feature_flag(:jira_issue_details_edit_labels, project, default_enabled: :yaml)
         end
 
         rescue_from ::Projects::Integrations::Jira::IssuesFinder::IntegrationError, with: :render_integration_error
