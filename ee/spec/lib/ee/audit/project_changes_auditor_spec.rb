@@ -33,6 +33,50 @@ RSpec.describe EE::Audit::ProjectChangesAuditor do
       end
     end
 
+    describe 'auditing compliance framework changes' do
+      context 'when a project has no compliance framework' do
+        context 'when the framework is changed' do
+          before do
+            project.update!(compliance_management_framework: create(:compliance_framework, namespace: project.namespace))
+          end
+
+          it 'adds an audit event' do
+            expect { foo_instance.execute }.to change { AuditEvent.count }.by(1)
+            expect(AuditEvent.last.details).to include({
+               change: 'compliance framework',
+               from: 'None',
+               to: 'GDPR'
+             })
+          end
+
+          context 'when the framework is changed again' do
+            before do
+              project.update!(compliance_management_framework: create(:compliance_framework, namespace: project.namespace, name: 'SOX'))
+            end
+
+            it 'adds an audit event' do
+              expect { foo_instance.execute }.to change { AuditEvent.count }.by(1)
+              expect(AuditEvent.last.details).to include({
+                 change: 'compliance framework',
+                 from: 'GDPR',
+                 to: 'SOX'
+               })
+            end
+          end
+        end
+
+        context 'when the framework is not changed' do
+          before do
+            project.update!(description: 'This is a description of a project')
+          end
+
+          it 'does not add an audit event' do
+            expect { foo_instance.execute }.not_to change { AuditEvent.count }
+          end
+        end
+      end
+    end
+
     describe 'audit changes' do
       it 'creates an event when the visibility change' do
         project.update!(visibility_level: 20)

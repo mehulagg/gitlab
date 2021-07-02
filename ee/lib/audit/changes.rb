@@ -42,11 +42,11 @@ module Audit
     end
 
     def not_recently_created?
-      !model.previous_changes.has_key?(:id)
+      !model&.previous_changes&.has_key?(:id)
     end
 
     def changed?(column)
-      model.previous_changes.has_key?(column)
+      model&.previous_changes&.has_key?(column)
     end
 
     def changes(column)
