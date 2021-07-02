@@ -16,12 +16,12 @@ module AuthorizedProjectUpdate
 
     data_consistency :delayed
 
-    def perform(user_id)
+    def perform(user_id, caller_id = nil)
       user = User.find_by_id(user_id)
       return unless user
 
       if Feature.enabled?(:user_refresh_from_replica_worker_uses_replica_db)
-        enqueue_project_authorizations_refresh(user) if project_authorizations_needs_refresh?(user)
+        enqueue_project_authorizations_refresh(user, caller_id) if project_authorizations_needs_refresh?(user)
       else
         use_primary_database
         user.refresh_authorized_projects(source: self.class.name)
@@ -40,16 +40,10 @@ module AuthorizedProjectUpdate
       AuthorizedProjectUpdate::FindRecordsDueForRefreshService.new(user).needs_refresh?
     end
 
-    def enqueue_project_authorizations_refresh(user)
-      with_context(user: user, related_class: current_caller_id) do
+    def enqueue_project_authorizations_refresh(user, caller_id)
+      with_context(user: user, related_class: caller_id) do
         AuthorizedProjectUpdate::UserRefreshWithLowUrgencyWorker.perform_async(user.id)
       end
-    end
-
-    # We use this so that we can obtain the details of the original caller
-    # in the enqueued `AuthorizedProjectUpdate::UserRefreshWithLowUrgencyWorker` job.
-    def current_caller_id
-      Gitlab::ApplicationContext.current_context_attribute('meta.caller_id').presence
     end
   end
 end
