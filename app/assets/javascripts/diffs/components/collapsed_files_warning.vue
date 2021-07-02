@@ -50,7 +50,7 @@ export default {
       this.dismiss();
     },
     showGlobalWarning() {
-      !this.isDismissed && (this.diffFilesCount > 1  && !this.showWhitespace)
+      return !this.isDismissed && (this.diffFilesCount > 1  && !this.showWhitespace);
     }
   },
 };
