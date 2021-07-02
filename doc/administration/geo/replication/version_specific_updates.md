@@ -15,10 +15,10 @@ for updating Geo nodes.
 
 We found an issue where [secondary nodes re-download all LFS files](https://gitlab.com/gitlab-org/gitlab/-/issues/334550) upon update. This bug:
 
-- only applies to Geo secondary sites that have replicated LFS objects.
-- is _not_ a data loss risk.
-- causes churn and wasted bandwidth re-downloading all LFS objects.
-- may impact performance for GitLab installations with a large number of LFS files.
+- Only applies to Geo secondary sites that have replicated LFS objects.
+- Is _not_ a data loss risk.
+- Causes churn and wasted bandwidth re-downloading all LFS objects.
+- May impact performance for GitLab installations with a large number of LFS files.
 
 If you don't have many LFS objects or can stand a bit of churn, then it is safe to let the secondary sites re-download LFS objects.
 If you do have many LFS objects, and/or many Geo secondary sites, and/or limited bandwidth, then we recommend you skip GitLab 13.12.0 through 13.12.6 and update to GitLab 13.12.7 or newer.
