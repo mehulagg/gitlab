@@ -202,7 +202,8 @@ module QA
 
         def has_pipeline_status?(text)
           # Pipelines can be slow, so we wait a bit longer than the usual 10 seconds
-          has_element?(:merge_request_pipeline_info_content, text: text, wait: 60)
+          # Having page reload logic here until https://gitlab.com/gitlab-org/gitlab/-/issues/335124 is addressed
+          wait_until(reload: true, sleep_interval: 5) { has_element?(:merge_request_pipeline_info_content) }
         end
 
         def has_title?(title)
