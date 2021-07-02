@@ -8,16 +8,15 @@ import instanceProjectsQuery from 'ee/security_dashboard/graphql/queries/instanc
 import { createInvalidProjectMessage } from 'ee/security_dashboard/utils/project_manager_utils';
 import createFlash from '~/flash';
 import { __, s__, sprintf } from '~/locale';
-import ProjectSelector from '~/vue_shared/components/project_selector/project_selector.vue';
+import AllProjectsSelector from '~/vue_shared/components/project_selector/all_projects_selector.vue';
 import ProjectList from './project_list.vue';
 
 export default {
-  MINIMUM_QUERY_LENGTH: 3,
-  PROJECTS_PER_PAGE: 20,
+  PROJECT_QUERY: getProjects,
   components: {
     GlButton,
     ProjectList,
-    ProjectSelector,
+    AllProjectsSelector,
   },
   props: {
     isAuditor: {
@@ -27,27 +26,12 @@ export default {
   },
   data() {
     return {
-      searchQuery: '',
-      projectSearchResults: [],
       selectedProjects: [],
-      messages: {
-        noResults: false,
-        searchError: false,
-        minimumQuery: false,
-      },
-      searchCount: 0,
-      pageInfo: {
-        endCursor: '',
-        hasNextPage: true,
-      },
     };
   },
   computed: {
     canAddProjects() {
       return this.selectedProjects.length > 0;
-    },
-    isSearchingProjects() {
-      return this.searchCount > 0;
     },
   },
   methods: {
@@ -170,75 +154,6 @@ export default {
           }),
         );
     },
-    searched(query) {
-      this.searchQuery = query;
-      this.pageInfo = { endCursor: '', hasNextPage: true };
-      this.messages.minimumQuery = false;
-      this.searchCount += 1;
-      this.fetchSearchResults(true);
-    },
-    fetchSearchResults(isFirstSearch) {
-      if (!this.pageInfo.hasNextPage) {
-        return Promise.resolve();
-      }
-
-      if (!this.searchQuery || this.searchQuery.length < this.$options.MINIMUM_QUERY_LENGTH) {
-        return this.cancelSearch();
-      }
-
-      return this.searchProjects(this.searchQuery, this.pageInfo)
-        .then((payload) => {
-          const {
-            data: {
-              projects: { nodes, pageInfo },
-            },
-          } = payload;
-
-          if (isFirstSearch) {
-            this.projectSearchResults = nodes;
-            this.updateMessagesData(this.projectSearchResults.length === 0, false, false);
-            this.searchCount = Math.max(0, this.searchCount - 1);
-          } else {
-            this.projectSearchResults = this.projectSearchResults.concat(nodes);
-          }
-          this.pageInfo = pageInfo;
-        })
-        .catch(this.fetchSearchResultsError);
-    },
-    cancelSearch() {
-      this.projectSearchResults = [];
-      this.pageInfo = {
-        endCursor: '',
-        hasNextPage: true,
-      };
-      this.updateMessagesData(false, false, true);
-      this.searchCount = Math.max(0, this.searchCount - 1);
-    },
-    searchProjects(searchQuery, pageInfo) {
-      return this.$apollo.query({
-        query: getProjects,
-        variables: {
-          search: searchQuery,
-          first: this.$options.PROJECTS_PER_PAGE,
-          after: pageInfo.endCursor,
-          searchNamespaces: true,
-          sort: 'similarity',
-          membership: !this.isAuditor,
-        },
-      });
-    },
-    fetchSearchResultsError() {
-      this.projectSearchResults = [];
-      this.updateMessagesData(false, true, false);
-      this.searchCount = Math.max(0, this.searchCount - 1);
-    },
-    updateMessagesData(noResults, searchError, minimumQuery) {
-      this.messages = {
-        noResults,
-        searchError,
-        minimumQuery,
-      };
-    },
   },
 };
 </script>
@@ -258,17 +173,11 @@ export default {
           }}
         </p>
         <div class="d-flex flex-column flex-md-row">
-          <project-selector
+          <all-projects-selector
             class="flex-grow mr-md-2"
-            :project-search-results="projectSearchResults"
+            :project-query="$options.PROJECT_QUERY"
             :selected-projects="selectedProjects"
-            :show-no-results-message="messages.noResults"
-            :show-loading-indicator="isSearchingProjects"
-            :show-minimum-search-query-message="messages.minimumQuery"
-            :show-search-error-message="messages.searchError"
-            @searched="searched"
             @projectClicked="toggleSelectedProject"
-            @bottomReached="fetchSearchResults"
           />
           <div class="mb-3">
             <gl-button
