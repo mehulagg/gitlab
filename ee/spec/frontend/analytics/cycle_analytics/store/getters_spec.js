@@ -9,8 +9,8 @@ import {
   getFilterValues,
 } from 'jest/vue_shared/components/filtered_search_bar/store/modules/filters/test_helper';
 import {
-  startDate,
-  endDate,
+  createdAfter,
+  createdBefore,
   allowedStages,
   selectedProjects,
   issueStage,
@@ -97,8 +97,8 @@ describe('Value Stream Analytics getters', () => {
         currentGroup: {
           fullPath,
         },
-        startDate,
-        endDate,
+        createdAfter,
+        createdBefore,
         selectedProjects,
         filters: {
           authors: { selected: selectedUserParams[0] },

@@ -11,8 +11,8 @@ import {
   codeStage,
   stagingStage,
   reviewStage,
-  startDate,
-  endDate,
+  createdAfter,
+  createdBefore,
   selectedProjects,
   customizableStagesAndEvents,
   valueStreams,
@@ -91,7 +91,7 @@ describe('Value Stream Analytics mutations', () => {
     mutation                                     | payload                                                  | expectedState
     ${types.SET_FEATURE_FLAGS}                   | ${{ hasDurationChart: true }}                            | ${{ featureFlags: { hasDurationChart: true } }}
     ${types.SET_SELECTED_PROJECTS}               | ${selectedProjects}                                      | ${{ selectedProjects }}
-    ${types.SET_DATE_RANGE}                      | ${{ startDate, endDate }}                                | ${{ startDate, endDate }}
+    ${types.SET_DATE_RANGE}                      | ${{ createdAfter, createdBefore }}                       | ${{ createdAfter, createdBefore }}
     ${types.SET_SELECTED_STAGE}                  | ${{ id: 'first-stage' }}                                 | ${{ selectedStage: { id: 'first-stage' } }}
     ${types.RECEIVE_CREATE_VALUE_STREAM_ERROR}   | ${valueStreamErrors}                                     | ${{ createValueStreamErrors: expectedValueStreamErrors, isCreatingValueStream: false }}
     ${types.RECEIVE_UPDATE_VALUE_STREAM_ERROR}   | ${valueStreamErrors}                                     | ${{ createValueStreamErrors: expectedValueStreamErrors, isEditingValueStream: false }}
@@ -235,8 +235,8 @@ describe('Value Stream Analytics mutations', () => {
       stateKey              | expectedState
       ${'isLoading'}        | ${true}
       ${'selectedProjects'} | ${initialData.selectedProjects}
-      ${'startDate'}        | ${initialData.createdAfter}
-      ${'endDate'}          | ${initialData.createdBefore}
+      ${'createdAfter'}     | ${initialData.createdAfter}
+      ${'createdBefore'}    | ${initialData.createdBefore}
     `('$stateKey will be set to $expectedState', ({ stateKey, expectedState }) => {
       state = {};
       mutations[types.INITIALIZE_VSA](state, initialData);

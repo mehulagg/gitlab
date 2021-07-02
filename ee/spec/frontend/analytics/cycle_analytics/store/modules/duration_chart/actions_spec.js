@@ -10,8 +10,8 @@ import httpStatusCodes from '~/lib/utils/http_status';
 import {
   group,
   allowedStages as stages,
-  startDate,
-  endDate,
+  createdAfter,
+  createdBefore,
   rawDurationData,
   transformedDurationData,
   endpoints,
@@ -27,8 +27,8 @@ const [selectedValueStream] = valueStreams;
 const error = new Error(`Request failed with status code ${httpStatusCodes.BAD_REQUEST}`);
 
 const rootState = {
-  startDate,
-  endDate,
+  createdAfter,
+  createdBefore,
   stages: [...activeStages, hiddenStage],
   selectedGroup,
   selectedValueStream,
