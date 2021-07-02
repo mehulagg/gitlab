@@ -23,7 +23,7 @@ You can configure the integration at the project, group, or instance level:
    1. Go to the **Integrations** section.
    1. Generate an API key in the [APIs tab](https://app.datadoghq.com/account/settings#api).
       Copy this value, as you need it in a later step.
-1. *For project- or group-level integrations:* In GitLab, go to your project or group.
+1. *For project-level or group-level integrations:* In GitLab, go to your project or group.
 1. *For instance-level integrations:*
    1. Sign in to GitLab as a user with the [Administrator role](../user/permissions.md).
    1. On the top bar, select **Menu >** **{admin}** **Admin**.
@@ -47,4 +47,4 @@ section of your Datadog account.
 
 ## Related links
 
-- [Datadog's CI Visibility](https://docs.datadoghq.com/continuous_integration/) documentation
+- [Datadog's CI Visibility](https://docs.datadoghq.com/continuous_integration/) documentation.
