@@ -56,6 +56,11 @@ export default {
       default: () => [],
     },
   },
+  data() {
+    return {
+      isEditingLabels: false,
+    };
+  },
   computed: {
     assignee() {
       // Jira issues have at most 1 assignee
@@ -104,6 +109,19 @@ export default {
         );
       }
     },
+    onIssueLabelsClose() {
+      this.isEditingLabels = false;
+    },
+    onIssueLabelsToggle() {
+      this.expandSidebarAndOpenDropdown();
+      this.sidebarEl.addEventListener(
+        'transitionend',
+        () => {
+          this.isEditingLabels = true;
+        },
+        { once: true },
+      );
+    },
     onIssueLabelsUpdated(labels) {
       this.$emit('issue-labels-updated', labels);
     },
@@ -143,8 +161,11 @@ export default {
       :labels-filter-base-path="issuesListPath"
       :labels-filter-param="$options.labelsFilterParam"
       :labels-select-in-progress="isUpdatingLabels"
+      :is-editing="isEditingLabels"
       variant="sidebar"
       class="block labels js-labels-block"
+      @onDropdownClose="onIssueLabelsClose"
+      @toggleCollapse="onIssueLabelsToggle"
       @updateSelectedLabels="onIssueLabelsUpdated"
     >
       {{ __('None') }}
