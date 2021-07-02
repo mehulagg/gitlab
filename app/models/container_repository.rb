@@ -154,6 +154,8 @@ class ContainerRepository < ApplicationRecord
 
   def self.create_from_path!(path)
     build_from_path(path).tap(&:save!)
+  rescue ActiveRecord::RecordNotUnique, ActiveRecord::RecordInvalid
+    self.find_by_path!(path)
   end
 
   def self.build_root_repository(project)
