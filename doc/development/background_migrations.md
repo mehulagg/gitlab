@@ -487,4 +487,22 @@ See [`lib/gitlab/background_migration/drop_invalid_vulnerabilities.rb`](https://
 
 You can reschedule pending migrations from `background_migration_jobs` table by creating a post-deployment migration and calling `requeue_background_migration_jobs_by_range_at_intervals` with the migration name and delay interval.
 
+```ruby
+# Post deployment migration
+include Gitlab::Database::MigrationHelpers
+
+MIGRATION = 'YourBackgroundMigrationName'
+DELAY_INTERVAL = 2.minutes
+
+disable_ddl_transaction!
+
+def up
+  requeue_background_migration_jobs_by_range_at_intervals(MIGRATION, DELAY_INTERVAL)
+end
+
+def down
+  # no-op
+end
+```
+
 See [`db/post_migrate/20210604070207_retry_backfill_traversal_ids.rb`](https://gitlab.com/gitlab-org/gitlab/blob/master/db/post_migrate/20210604070207_retry_backfill_traversal_ids.rb) for a full example.
