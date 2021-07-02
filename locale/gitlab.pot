@@ -33979,7 +33979,7 @@ msgstr ""
 msgid "To protect this issue's confidentiality, a private fork of this project was selected."
 msgstr ""
 
-msgid "To reactivate your account, %{link_to_gitlab}."
+msgid "To reactivate your account, %{gitlab_link_start}sign in to GitLab.%{link_end}"
 msgstr ""
 
 msgid "To reactivate your account, sign in to GitLab at %{gitlab_url}."
