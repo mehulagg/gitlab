@@ -154,14 +154,14 @@ trigger-downstream:
   trigger: my/project
 ```
 
-Global variables can be stopped from reaching the downstream pipeline by using the `inherit` keyword.
-In the following configuration, the `MY_GLOBAL_VAR` variable is not available in the triggered pipeline.
+You can stop global variables from reaching the downstream pipeline by using the [`inherit` keyword](../yaml/index.md#inherit).
+In this example, the `MY_GLOBAL_VAR` variable is not available in the triggered pipeline:
 
 ```yaml
 variables:
   MY_GLOBAL_VAR: value
 
-trigger-child:
+trigger-downstream:
   inherit:
     variables: false
   variables:
