@@ -269,7 +269,7 @@ after the limits change in January, 2021:
 |:--------------------------------------------------------------------------|:------------------------------|:------------------------------|
 | **Protected paths** (for a given **IP address**)                          | **10** requests per minute    | **10** requests per minute    |
 | **Raw endpoint** traffic (for a given **project, commit, and file path**) | **300** requests per minute   | **300** requests per minute   |
-| **Unauthenticated** traffic (from a given **IP address**)                 | **500** requests per minute   | **60** requests per hour      |
+| **Unauthenticated** traffic (from a given **IP address**)                 | **500** requests per minute   | **500** requests per minute   |
 | **Authenticated** API traffic (for a given **user**)                      | **2,000** requests per minute | **5,000** requests per hour   |
 | **Authenticated** non-API HTTP traffic (for a given **user**)             | **1,000** requests per minute | **1,000** requests per minute |
 | **All** traffic (from a given **IP address**)                             | **2,000** requests per minute | **2,000** requests per minute |
