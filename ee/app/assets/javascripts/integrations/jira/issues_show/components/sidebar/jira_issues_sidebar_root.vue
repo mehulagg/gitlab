@@ -40,6 +40,11 @@ export default {
       required: false,
       default: false,
     },
+    isUpdatingLabels: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
     isUpdatingStatus: {
       type: Boolean,
       required: false,
@@ -99,6 +104,9 @@ export default {
         );
       }
     },
+    onIssueLabelsUpdated(labels) {
+      this.$emit('issue-labels-updated', labels);
+    },
     onIssueStatusFetch() {
       this.$emit('issue-status-fetch');
     },
@@ -134,8 +142,10 @@ export default {
       :labels-fetch-path="issueLabelsPath"
       :labels-filter-base-path="issuesListPath"
       :labels-filter-param="$options.labelsFilterParam"
+      :labels-select-in-progress="isUpdatingLabels"
       variant="sidebar"
       class="block labels js-labels-block"
+      @updateSelectedLabels="onIssueLabelsUpdated"
     >
       {{ __('None') }}
     </labels-select>
