@@ -66,9 +66,10 @@ export const subscriptionTable = {
   type: s__('SuperSonics|Type'),
 };
 export const connectivityIssue = s__('SuperSonics|There is a connectivity issue.');
-export const manualSyncSuccessfulTitle = s__(
-  'SuperSonics|The subscription details synced successfully.',
+export const manualSyncSuccessfulText = s__(
+  'SuperSonics|Your subscription details will sync shortly.',
 );
+export const manualSyncSuccessfulTitle = s__('SuperSonics|Sync subscription request.');
 export const manualSyncFailureText = s__(
   'SuperSonics|You can no longer sync your subscription details with GitLab. Get help for the most common connectivity issues by %{connectivityHelpLinkStart}troubleshooting the activation code%{connectivityHelpLinkEnd}.',
 );

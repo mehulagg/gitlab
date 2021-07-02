@@ -5,6 +5,7 @@ import {
   connectivityIssue,
   manualSyncSuccessfulTitle,
   subscriptionSyncStatus,
+  manualSyncSuccessfulText,
 } from '../constants';
 
 export const SUCCESS_ALERT_DISMISSED_EVENT = 'success-alert-dismissed';
@@ -15,6 +16,7 @@ const subscriptionSyncStatusValidator = (value) =>
 export default {
   name: 'SubscriptionSyncNotifications',
   i18n: {
+    manualSyncSuccessfulText,
     manualSyncSuccessfulTitle,
     manualSyncFailureText,
     connectivityIssue,
@@ -56,7 +58,8 @@ export default {
       :title="$options.i18n.manualSyncSuccessfulTitle"
       data-testid="sync-success-alert"
       @dismiss="didDismissSuccessAlert"
-    />
+      >{{ $options.i18n.manualSyncSuccessfulText }}</gl-alert
+    >
     <gl-alert
       v-else-if="syncDidFail"
       variant="danger"
