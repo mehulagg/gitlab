@@ -24,7 +24,7 @@ module QA
           end
 
           def fork_namespace_dropdown_values
-            find_element(:fork_namespace_dropdown).all(:option).map{|option| option.text}
+            find_element(:fork_namespace_dropdown).all(:option).map { |option| option.text.tr("\n", '').strip }
           end
         end
       end
