@@ -198,7 +198,7 @@ These are the three screenshots that are needed to qualify you for the GitLab fo
 - [OSI-approved license file](#screenshot-2-license-file)
 - [Publicly visible settings](#screenshot-3-publicly-visible-settings)
 
-##### OSI-approved license
+##### Screenshots 1 & 2: OSI-approved license
 
 You must apply an [OSI-approved license](https://opensource.org/licenses/) to each project in your group before you can be verified.
 
