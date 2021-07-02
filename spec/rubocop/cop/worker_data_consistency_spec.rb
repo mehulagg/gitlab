@@ -16,6 +16,8 @@ RSpec.describe RuboCop::Cop::WorkerDataConsistency do
     expect_offense(<<~CODE)
       class SomeWorker
       ^^^^^^^^^^^^^^^^ Must define data_consistency expectation.[...]
+        include ApplicationWorker
+
         queue_namespace :pipeline_hooks
         feature_category :continuous_integration
         urgency :high
@@ -26,9 +28,21 @@ RSpec.describe RuboCop::Cop::WorkerDataConsistency do
   it 'adds no offense when defining data_consistency' do
     expect_no_offenses(<<~CODE)
       class SomeWorker
+        include ApplicationWorker
+
         queue_namespace :pipeline_hooks
         feature_category :continuous_integration
         data_consistency :delayed
+        urgency :high
+      end
+    CODE
+  end
+
+  it 'adds no offense when worker is not an ApplicationWorker' do
+    expect_no_offenses(<<~CODE)
+      class SomeWorker
+        queue_namespace :pipeline_hooks
+        feature_category :continuous_integration
         urgency :high
       end
     CODE

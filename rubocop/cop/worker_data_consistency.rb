@@ -44,12 +44,16 @@ module RuboCop
         See #{HELP_LINK} for a more detailed explanation of these settings.
       MSG
 
+      def_node_search :application_worker?, <<~PATTERN
+      `(send nil? :include (const nil? :ApplicationWorker))
+      PATTERN
+
       def_node_search :data_consistency_defined?, <<~PATTERN
         `(send nil? :data_consistency ...)
       PATTERN
 
       def on_class(node)
-        return unless in_worker?(node)
+        return unless in_worker?(node) && application_worker?(node)
         return if data_consistency_defined?(node)
 
         add_offense(node, location: :expression)
