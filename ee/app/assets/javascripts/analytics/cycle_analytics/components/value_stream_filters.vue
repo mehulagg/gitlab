@@ -38,11 +38,13 @@ export default {
     },
     startDate: {
       type: Date,
-      required: true,
+      required: false,
+      default: null,
     },
     endDate: {
       type: Date,
-      required: true,
+      required: false,
+      default: null,
     },
   },
   computed: {
