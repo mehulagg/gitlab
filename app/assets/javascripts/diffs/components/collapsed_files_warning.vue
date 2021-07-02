@@ -1,10 +1,10 @@
 <script>
 import { GlAlert, GlButton } from '@gitlab/ui';
+import { isNumber } from 'lodash';
+import { mapState } from 'vuex';
 
 import { CENTERED_LIMITED_CONTAINER_CLASSES, EVT_EXPAND_ALL_FILES } from '../constants';
 import eventHub from '../event_hub';
-import { mapState } from 'vuex';
-import { isNumber } from 'lodash';
 
 export default {
   components: {
@@ -51,7 +51,7 @@ export default {
     },
     showGlobalWarning() {
       return !this.isDismissed && this.diffFilesCount > 1;
-    }
+    },
   },
 };
 </script>
