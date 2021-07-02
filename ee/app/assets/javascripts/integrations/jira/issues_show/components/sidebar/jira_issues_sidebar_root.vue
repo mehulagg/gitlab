@@ -19,6 +19,9 @@ export default {
   },
   mixins: [glFeatureFlagsMixin()],
   inject: {
+    issueLabelsPath: {
+      default: null,
+    },
     issuesListPath: {
       default: null,
     },
@@ -55,6 +58,9 @@ export default {
     },
     reference() {
       return this.issue.references?.relative;
+    },
+    canUpdateLabels() {
+      return this.glFeatures.jiraIssueDetailsEditLabels;
     },
     canUpdateStatus() {
       return this.glFeatures.jiraIssueDetailsEditStatus;
@@ -122,7 +128,10 @@ export default {
       @issue-field-updated="onIssueStatusUpdated"
     />
     <labels-select
+      :allow-label-edit="canUpdateLabels"
+      :allow-multiselect="true"
       :selected-labels="issue.labels"
+      :labels-fetch-path="issueLabelsPath"
       :labels-filter-base-path="issuesListPath"
       :labels-filter-param="$options.labelsFilterParam"
       variant="sidebar"
