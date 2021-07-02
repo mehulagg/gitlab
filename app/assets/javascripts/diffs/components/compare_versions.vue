@@ -160,20 +160,20 @@ export default {
           />
         </template>
       </gl-sprintf>
+      <gl-button
+        v-if="commit || startVersion"
+        :href="latestVersionPath"
+        variant="default"
+        class="gl-ml-3 js-latest-version"
+      >
+        {{ __('Show latest version') }}
+      </gl-button>
       <div v-if="hasChanges" class="inline-parallel-buttons d-none d-md-flex ml-auto">
         <diff-stats
           :diff-files-count-text="diffFilesCountText"
           :added-lines="addedLines"
           :removed-lines="removedLines"
         />
-        <gl-button
-          v-if="commit || startVersion"
-          :href="latestVersionPath"
-          variant="default"
-          class="gl-mr-3 js-latest-version"
-        >
-          {{ __('Show latest version') }}
-        </gl-button>
         <gl-button
           v-show="whichCollapsedTypes.any"
           variant="default"
