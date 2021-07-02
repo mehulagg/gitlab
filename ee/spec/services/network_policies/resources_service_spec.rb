@@ -17,7 +17,7 @@ RSpec.describe NetworkPolicies::ResourcesService do
       namespace: 'another',
       selector: { matchLabels: { role: 'db' } },
       ingress: [{ from: [{ namespaceSelector: { matchLabels: { project: 'myproject' } } }] }],
-      environment_ids: [environment_id]
+      environment_ids: [environment.id]
     )
   end
 
