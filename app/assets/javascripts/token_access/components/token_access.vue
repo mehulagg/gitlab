@@ -101,6 +101,8 @@ export default {
         }
       } catch (error) {
         createFlash({ message: error });
+      } finally {
+        this.getProjects();
       }
     },
     async addProject() {

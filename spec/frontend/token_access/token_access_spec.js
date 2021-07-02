@@ -108,7 +108,7 @@ describe('TokenAccess component', () => {
       expect(findTokenSection().exists()).toBe(false);
     });
 
-    it('switching the toggle calls the mutation', async () => {
+    it('switching the toggle calls the mutation and fetches the projects again', async () => {
       createComponent([
         [getCIJobTokenScopeQuery, disabledJobTokenScopeHandler],
         [updateCIJobTokenScopeMutation, updateJobTokenScopeHandler],
@@ -119,9 +119,12 @@ describe('TokenAccess component', () => {
 
       findToggle().vm.$emit('change', true);
 
+      await waitForPromises();
+
       expect(updateJobTokenScopeHandler).toHaveBeenCalledWith({
         input: { fullPath: projectPath, jobTokenScopeEnabled: true },
       });
+      expect(getProjectsWithScope).toHaveBeenCalledTimes(2);
     });
   });
 
