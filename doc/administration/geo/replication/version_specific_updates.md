@@ -25,7 +25,7 @@ If you do have many LFS objects, and/or many Geo secondary sites, and/or limited
 
 ### If you already updated to an affected version, and the resync is ongoing
 
-You can manually migrate legacy sync state to the new state column by running the following command in Rails console. It should take under a minute:
+You can manually migrate the legacy sync state to the new state column by running the following command in a [Rails console](../../operations/rails_console.md). It should take under a minute:
 
 ```ruby
 Geo::LfsObjectRegistry.where(state: 0, success: true).update_all(state: 2)
