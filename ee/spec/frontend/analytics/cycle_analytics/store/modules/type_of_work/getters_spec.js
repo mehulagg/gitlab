@@ -2,13 +2,13 @@ import { tasksByTypeChartData } from 'ee/analytics/cycle_analytics/store/modules
 import {
   rawTasksByTypeData,
   transformedTasksByTypeData,
-  startDate,
-  endDate,
+  createdAfter,
+  createdBefore,
 } from '../../../mock_data';
 
 describe('Type of work getters', () => {
   describe('tasksByTypeChartData', () => {
-    const rootState = { startDate, endDate };
+    const rootState = { createdAfter, createdBefore };
     describe('with data', () => {
       it('correctly transforms the raw task by type data', () => {
         expect(tasksByTypeChartData(rawTasksByTypeData, null, rootState)).toEqual(

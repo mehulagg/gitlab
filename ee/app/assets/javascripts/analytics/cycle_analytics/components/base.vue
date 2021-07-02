@@ -181,8 +181,8 @@ export default {
         :selected-projects="selectedProjects"
         :start-date="createdAfter"
         :end-date="createdBefore"
-        @onSelectProject="onProjectsSelect"
-        @onSetDateRange="onSetDateRange"
+        @selectProject="onProjectsSelect"
+        @setDateRange="onSetDateRange"
       />
     </div>
     <div v-if="!shouldRenderEmptyState" class="cycle-analytics gl-mt-2">

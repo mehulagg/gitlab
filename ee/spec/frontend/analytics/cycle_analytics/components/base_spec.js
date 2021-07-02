@@ -11,8 +11,6 @@ import TypeOfWorkCharts from 'ee/analytics/cycle_analytics/components/type_of_wo
 import ValueStreamFilters from 'ee/analytics/cycle_analytics/components/value_stream_filters.vue';
 import ValueStreamSelect from 'ee/analytics/cycle_analytics/components/value_stream_select.vue';
 import createStore from 'ee/analytics/cycle_analytics/store';
-import Daterange from 'ee/analytics/shared/components/daterange.vue';
-import ProjectsDropdownFilter from 'ee/analytics/shared/components/projects_dropdown_filter.vue';
 import { toYmd } from 'ee/analytics/shared/utils';
 import waitForPromises from 'helpers/wait_for_promises';
 import PathNavigation from '~/cycle_analytics/components/path_navigation.vue';

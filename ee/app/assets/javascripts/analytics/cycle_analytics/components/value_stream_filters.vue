@@ -76,7 +76,7 @@ export default {
         :query-params="projectsQueryParams"
         :multi-select="$options.multiProjectSelect"
         :default-projects="selectedProjects"
-        @selected="$emit('onSelectProject', $event)"
+        @selected="$emit('selectProject', $event)"
       />
       <date-range
         v-if="hasDateRangeFilter"
@@ -85,7 +85,7 @@ export default {
         :max-date-range="$options.maxDateRange"
         :include-selected-date="true"
         class="js-daterange-picker"
-        @change="$emit('onSetDateRange', $event)"
+        @change="$emit('setDateRange', $event)"
       />
     </div>
   </div>
