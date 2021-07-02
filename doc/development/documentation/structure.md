@@ -250,10 +250,10 @@ Tutorials should be in this format:
 
 A paragraph that explains what the tutorial does, and the expected outcome.
 
-The steps in this tutorial are as follows:
+To create a website:
 
-- [Step 1: do the first task](#do-the-first-task)
-- [Step 2: do the second task](#do-the-second-task)
+- [Step 1: Do the first task](#do-the-first-task)
+- [Step 2: Do the second task](#do-the-second-task)
 
 Prerequisites (optional):
 
