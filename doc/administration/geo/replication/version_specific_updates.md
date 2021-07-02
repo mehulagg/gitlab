@@ -13,7 +13,7 @@ for updating Geo nodes.
 
 ## Updating to GitLab 13.12
 
-We found an issue where [secondary nodes will re-download all LFS files](https://gitlab.com/gitlab-org/gitlab/-/issues/334550). This bug:
+We found an issue where [secondary nodes re-download all LFS files](https://gitlab.com/gitlab-org/gitlab/-/issues/334550) upon update. This bug:
 
 - only applies to Geo secondary sites that have replicated LFS objects.
 - is _not_ a data loss risk.
