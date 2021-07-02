@@ -44,13 +44,39 @@ RSpec.describe 'admin/application_settings/_elasticsearch_form' do
       end
 
       context 'pending migrations' do
+        using RSpec::Parameterized::TableSyntax
+
         let(:pending_migrations) { true }
-        let(:pause_indexing) { true }
+        let(:migration) { Elastic::DataMigrationService.migrations.first }
 
-        it 'renders a disabled pause checkbox' do
-          render
+        before do
+          allow(Elastic::DataMigrationService).to receive(:pending_migrations).and_return([migration])
+          allow(migration).to receive(:started?).and_return(started)
+          allow(migration).to receive(:completed?).and_return(completed)
+          allow(migration).to receive(:pause_indexing?).and_return(pause_indexing)
+        end
 
-          expect(rendered).to have_css('input[id=application_setting_elasticsearch_pause_indexing][disabled="disabled"]')
+        where(:started, :pause_indexing, :completed, :disabled) do
+          false | false | false | false
+          false | true  | false | false
+          true  | false | false | false
+          true  | true  | false | true
+          false | false | true  | false
+          false | true  | true  | false
+          true  | false | true  | false
+          true  | true  | true  | false
+        end
+
+        with_them do
+          it 'renders pause checkbox with disabled set appropriately' do
+            render
+
+            if disabled
+              expect(rendered).to have_css('input[id=application_setting_elasticsearch_pause_indexing][disabled="disabled"]')
+            else
+              expect(rendered).not_to have_css('input[id=application_setting_elasticsearch_pause_indexing][disabled="disabled"]')
+            end
+          end
         end
       end
     end

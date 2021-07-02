@@ -49,16 +49,17 @@
             .gl-card-body
               .form-group
                 .form-check
-                - pending_migrations = elasticsearch_available && Elastic::DataMigrationService.pending_migrations? && Gitlab::CurrentSettings.elasticsearch_pause_indexing?
-                - disable_checkbox = !Gitlab::CurrentSettings.elasticsearch_indexing? || pending_migrations || @last_elasticsearch_reindexing_task&.in_progress?
+                - first_pending_migration = Elastic::DataMigrationService.pending_migrations.first if elasticsearch_available
+                - pending_migration_running_and_pauses_indexing = first_pending_migration&.started? && first_pending_migration&.pause_indexing? && !first_pending_migration&.completed?
+                - disable_checkbox = !Gitlab::CurrentSettings.elasticsearch_indexing? || pending_migration_running_and_pauses_indexing || @last_elasticsearch_reindexing_task&.in_progress?
                 = f.check_box :elasticsearch_pause_indexing, class: 'form-check-input', data: { qa_selector: 'pause_checkbox' }, disabled: disable_checkbox
                 = f.label :elasticsearch_pause_indexing, class: 'form-check-label' do
                   = _('Pause Elasticsearch indexing')
                 .form-text.gl-text-gray-600.gl-mt-0
                   = _('Changes are still tracked. Useful for cluster/index migrations.')
-                - if pending_migrations
+                - if pending_migration_running_and_pauses_indexing
                   .form-text.text-warning
-                    = _('There are pending advanced search migrations. Indexing must remain paused until the migrations are completed.')
+                    = _('There are pending advanced search migrations which require indexing to be paused. Indexing must remain paused until the migrations are completed.')
 
             .form-group
               .form-check
