@@ -115,12 +115,15 @@ For major or minor version updates of Rails or Puma:
 
 ### Feature flags
 
-One way to handle this is to use a feature flag that is disabled by
-default. The feature flag can be enabled when the deployment is in a
-consistent state. However, this method of synchronization **does not
-guarantee** that customers with on-premise instances can [update with
-zero downtime](https://docs.gitlab.com/omnibus/update/#zero-downtime-updates)
-because point releases bundle many changes together.
+Feature flags are a tool, not a strategy, for handling backwards compatibility problems.
+
+For example, it is safe to add a new feature with frontend and API changes, if both frontend and API code are disabled by default. This can be done with multiple merge requests, merged in any order. After all the changes are deployed to GitLab.com, the feature can be toggled on and validated on GitLab.com. Great!
+
+**However, it is not necessarily safe to enable the feature by default.** If the feature flag is removed, or the default is flipped to enabled, in the same release where the code was merged, then customers performing [zero-downtime updates](https://docs.gitlab.com/omnibus/update/#zero-downtime-updates) will end up running the new frontend code against the previous release's API.
+
+The easiest next step is to enable the feature in the **next** release. This is a form of the [Expand and contract pattern](#expand-and-contract-pattern).
+
+Or you may be able to avoid delaying by a release by modifying the frontend to [degrade gracefully](#graceful-degradation) against the previous release's API.
 
 ### Graceful degradation
 
