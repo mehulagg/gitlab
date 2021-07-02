@@ -141,4 +141,40 @@ RSpec.describe AwardEmoji do
       expect(awards).to eq('thumbsup' => 2)
     end
   end
+
+  describe 'updating upvotes_count' do
+    context 'on an issue' do
+      let(:issue) { create(:issue) }
+      let(:award_emoji) { build(:award_emoji, user: build(:user), awardable: issue) }
+
+      it 'updates upvotes_count on the issue when saved' do
+        expect(issue).to receive(:update_column).with(:upvotes_count, 1)
+
+        award_emoji.save!
+      end
+
+      it 'updates upvotes_count on the issue when destroyed' do
+        expect(issue).to receive(:update_column).with(:upvotes_count, 0)
+
+        award_emoji.destroy!
+      end
+    end
+
+    context 'on another awardable' do
+      let(:merge_request) { create(:merge_request) }
+      let(:award_emoji) { build(:award_emoji, user: build(:user), awardable: merge_request) }
+
+      it 'does not update upvotes_count on the merge_request when saved' do
+        expect(merge_request).not_to receive(:update_column)
+
+        award_emoji.save!
+      end
+
+      it 'does not update upvotes_count on the merge_request when destroyed' do
+        expect(merge_request).not_to receive(:update_column)
+
+        award_emoji.destroy!
+      end
+    end
+  end
 end
