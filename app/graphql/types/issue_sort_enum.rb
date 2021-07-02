@@ -10,6 +10,8 @@ module Types
     value 'RELATIVE_POSITION_ASC', 'Relative position by ascending order.', value: :relative_position_asc
     value 'SEVERITY_ASC', 'Severity from less critical to more critical.', value: :severity_asc
     value 'SEVERITY_DESC', 'Severity from more critical to less critical.', value: :severity_desc
+    value 'BLOCKING_ISSUES_ASC', 'Blocking issues count by ascending order.', value: :blocking_issues_asc
+    value 'BLOCKING_ISSUES_DESC', 'Blocking issues count by descending order.', value: :blocking_issues_desc
   end
 end
 

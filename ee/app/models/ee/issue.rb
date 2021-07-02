@@ -21,7 +21,6 @@ module EE
       # widget supporting custom issue types - see https://gitlab.com/gitlab-org/gitlab/-/issues/292035
       include IssueWidgets::ActsLikeRequirement
 
-      scope :order_blocking_issues_desc, -> { reorder(blocking_issues_count: :desc) }
       scope :order_weight_desc, -> { reorder ::Gitlab::Database.nulls_last_order('weight', 'DESC') }
       scope :order_weight_asc, -> { reorder ::Gitlab::Database.nulls_last_order('weight') }
       scope :order_status_page_published_first, -> { includes(:status_page_published_incident).order('status_page_published_incidents.id ASC NULLS LAST') }
@@ -71,12 +70,6 @@ module EE
 
       validates :weight, allow_nil: true, numericality: { greater_than_or_equal_to: 0 }
       validate :validate_confidential_epic
-
-      state_machine :state_id do
-        after_transition do |issue|
-          issue.refresh_blocking_and_blocked_issues_cache!
-        end
-      end
     end
 
     class_methods do
@@ -98,24 +91,6 @@ module EE
     # override
     def allows_multiple_assignees?
       project.feature_available?(:multiple_issue_assignees)
-    end
-
-    def blocked?
-      blocking_issues_ids.any?
-    end
-
-    def blocked_by_issues
-      self.class.where(id: blocking_issues_ids)
-    end
-
-    # Used on EE::IssueEntity to expose blocking issues URLs
-    def blocked_by_issues_for(user)
-      return ::Issue.none unless blocked?
-
-      issues =
-        ::IssuesFinder.new(user).execute.where(id: blocking_issues_ids)
-
-      issues.preload(project: [:route, { namespace: [:route] }])
     end
 
     # override
@@ -186,7 +161,6 @@ module EE
       override :sort_by_attribute
       def sort_by_attribute(method, excluded_labels: [])
         case method.to_s
-        when 'blocking_issues_desc' then order_blocking_issues_desc.with_order_id_desc
         when 'weight', 'weight_asc' then order_weight_asc.with_order_id_desc
         when 'weight_desc'          then order_weight_desc.with_order_id_desc
         when 'published_asc'        then order_status_page_published_last.with_order_id_desc
@@ -201,24 +175,6 @@ module EE
       def weight_options
         [WEIGHT_NONE] + WEIGHT_RANGE.to_a
       end
-    end
-
-    def update_blocking_issues_count!
-      blocking_count = ::IssueLink.blocking_issues_count_for(self)
-
-      update!(blocking_issues_count: blocking_count)
-    end
-
-    def refresh_blocking_and_blocked_issues_cache!
-      self_and_blocking_issues_ids = [self.id] + blocking_issues_ids
-      blocking_issues_count_by_id = ::IssueLink.blocking_issues_for_collection(self_and_blocking_issues_ids).to_sql
-
-      self.class.connection.execute <<~SQL
-        UPDATE issues
-        SET blocking_issues_count = grouped_counts.count
-        FROM (#{blocking_issues_count_by_id}) AS grouped_counts
-        WHERE issues.id = grouped_counts.blocking_issue_id
-      SQL
     end
 
     def related_feature_flags(current_user, preload: nil)
@@ -246,10 +202,6 @@ module EE
     end
 
     private
-
-    def blocking_issues_ids
-      @blocking_issues_ids ||= ::IssueLink.blocking_issue_ids_for(self)
-    end
 
     def validate_confidential_epic
       return unless epic

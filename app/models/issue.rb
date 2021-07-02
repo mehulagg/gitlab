@@ -116,6 +116,8 @@ class Issue < ApplicationRecord
   scope :order_created_at_desc, -> { reorder(created_at: :desc) }
   scope :order_severity_asc, -> { includes(:issuable_severity).order('issuable_severities.severity ASC NULLS FIRST') }
   scope :order_severity_desc, -> { includes(:issuable_severity).order('issuable_severities.severity DESC NULLS LAST') }
+  scope :order_blocking_issues_asc, -> { reorder(blocking_issues_count: :asc) }
+  scope :order_blocking_issues_desc, -> { reorder(blocking_issues_count: :desc) }
 
   scope :preload_associated_models, -> { preload(:assignees, :labels, project: :namespace) }
   scope :with_web_entity_associations, -> { preload(:author, project: [:project_feature, :route, namespace: :route]) }
@@ -194,6 +196,10 @@ class Issue < ApplicationRecord
       issue.closed_at = nil
       issue.closed_by = nil
     end
+
+    after_transition do |issue|
+      issue.refresh_blocking_and_blocked_issues_cache!
+    end
   end
 
   # Alias to state machine .with_state_id method
@@ -260,6 +266,7 @@ class Issue < ApplicationRecord
     when 'relative_position', 'relative_position_asc'     then order_relative_position_asc.with_order_id_desc
     when 'severity_asc'                                   then order_severity_asc.with_order_id_desc
     when 'severity_desc'                                  then order_severity_desc.with_order_id_desc
+    when 'blocking_issues_desc'                           then order_blocking_issues_desc.with_order_id_desc
     else
       super
     end
@@ -482,6 +489,60 @@ class Issue < ApplicationRecord
     issue_assignees.pluck(:user_id)
   end
 
+  def update_blocking_issues_count!
+    blocking_count = ::IssueLink.blocking_issues_count_for(self)
+
+    update!(blocking_issues_count: blocking_count)
+  end
+
+  def refresh_blocking_and_blocked_issues_cache!
+    self_and_blocking_issues_ids = [self.id] + blocking_issues_ids
+    blocking_issues_count_by_id = ::IssueLink.blocking_issues_for_collection(self_and_blocking_issues_ids).to_sql
+
+    self.class.connection.execute <<~SQL
+      UPDATE issues
+      SET blocking_issues_count = grouped_counts.count
+      FROM (#{blocking_issues_count_by_id}) AS grouped_counts
+      WHERE issues.id = grouped_counts.blocking_issue_id
+    SQL
+  end
+
+  def update_blocking_issues_count!
+    blocking_count = ::IssueLink.blocking_issues_count_for(self)
+
+    update!(blocking_issues_count: blocking_count)
+  end
+
+  def refresh_blocking_and_blocked_issues_cache!
+    self_and_blocking_issues_ids = [self.id] + blocking_issues_ids
+    blocking_issues_count_by_id = ::IssueLink.blocking_issues_for_collection(self_and_blocking_issues_ids).to_sql
+
+    self.class.connection.execute <<~SQL
+      UPDATE issues
+      SET blocking_issues_count = grouped_counts.count
+      FROM (#{blocking_issues_count_by_id}) AS grouped_counts
+      WHERE issues.id = grouped_counts.blocking_issue_id
+    SQL
+  end
+
+  def blocked?
+    blocking_issues_ids.any?
+  end
+
+  def blocked_by_issues
+    self.class.where(id: blocking_issues_ids)
+  end
+
+  # Used on EE::IssueEntity to expose blocking issues URLs
+  def blocked_by_issues_for(user)
+    return ::Issue.none unless blocked?
+
+    issues =
+      ::IssuesFinder.new(user).execute.where(id: blocking_issues_ids)
+
+    issues.preload(project: [:route, { namespace: [:route] }])
+  end
+
   private
 
   # Ensure that the metrics association is safely created and respecting the unique constraint on issue_id
@@ -531,6 +592,10 @@ class Issue < ApplicationRecord
   def could_not_move(exception)
     # Symptom of running out of space - schedule rebalancing
     IssueRebalancingWorker.perform_async(nil, *project.self_or_root_group_ids)
+  end
+
+  def blocking_issues_ids
+    @blocking_issues_ids ||= ::IssueLink.blocking_issue_ids_for(self)
   end
 end
 
