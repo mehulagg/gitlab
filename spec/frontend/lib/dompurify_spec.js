@@ -95,4 +95,24 @@ describe('~/lib/dompurify', () => {
       expect(sanitize(htmlXlink)).toBe(expectedSanitized);
     });
   });
+
+  describe('handle data attributes correctly', () => {
+    it('removes data-remote attribute', () => {
+      const htmlHref = `<a data-remote="true">hello</a>`;
+      expect(sanitize(htmlHref)).toBe('<a>hello</a>');
+    });
+
+    it('removes data-url attribute', () => {
+      const htmlHref = `<a data-url="true">hello</a>`;
+      expect(sanitize(htmlHref)).toBe('<a>hello</a>');
+    });
+
+    it('removes data-type as script attribute', () => {
+      const htmlHref = `<a data-type="script">hello</a>`;
+      expect(sanitize(htmlHref)).toBe('<a>hello</a>');
+
+      const htmlWithVariation = `<a data-type="SCRIPT">hello</a>`;
+      expect(sanitize(htmlWithVariation)).toBe('<a>hello</a>');
+    });
+  });
 });

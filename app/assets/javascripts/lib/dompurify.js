@@ -48,6 +48,15 @@ addHook('afterSanitizeAttributes', (node) => {
   if (node.tagName.toLowerCase() === 'use') {
     sanitizeSvgIcon(node);
   }
+  if (node.hasAttribute('data-remote')) {
+    node.removeAttribute('data-remote');
+  }
+  if (node.hasAttribute('data-url')) {
+    node.removeAttribute('data-url');
+  }
+  if (node.hasAttribute('data-type') && node.getAttribute('data-type').toLowerCase() === 'script') {
+    node.removeAttribute('data-type');
+  }
 });
 
 export const sanitize = (val, config = defaultConfig) => dompurifySanitize(val, config);
