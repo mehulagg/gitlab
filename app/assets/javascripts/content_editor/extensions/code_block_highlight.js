@@ -32,6 +32,30 @@ const ExtendedCodeBlockLowlight = CodeBlockLowlight.extend({
       },
     };
   },
+  addCommands() {
+    return {
+      ...this.parent?.(),
+      toggleCodeBlockAndAppendParagraph: () => ({ chain }) => {
+        const { $from } = this.editor.state.selection;
+        const chainedCommands = chain();
+        const isLastChild = this.editor.state.doc.lastChild === $from.parent;
+
+        chainedCommands.toggleCodeBlock();
+
+        if (isLastChild) {
+          chainedCommands
+            .insertContent({ type: 'paragraph', content: [] })
+            .setTextSelection($from.pos);
+        }
+      },
+    };
+  },
+  addKeyboardShortcuts() {
+    return {
+      ...this.parent?.(),
+      'Mod-Alt-c': () => this.editor.commands.toggleCodeBlockAndAppendParagraph(),
+    };
+  },
   renderHTML({ HTMLAttributes }) {
     return ['pre', HTMLAttributes, ['code', {}, 0]];
   },
