@@ -10,6 +10,8 @@ global:
       secretName: review-apps-tls
   initialRootPassword:
     secret: shared-gitlab-initial-root-password
+  grafana:
+    enabled: true
 certmanager:
   install: false
 gitlab:
@@ -144,7 +146,13 @@ postgresql:
       cpu: 1300m
       memory: 1500M
 prometheus:
-  install: false
+  server:
+    persistentVolume:
+      size: 2Gi
+  alertmanager:
+    enabled: true
+    persistentVolume:
+      size: 250Mi
 redis:
   metrics:
     enabled: false
