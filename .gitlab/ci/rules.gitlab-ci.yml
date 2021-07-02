@@ -1049,6 +1049,8 @@
 
 .reports:rules:package_hunter-bundler:
   rules:
+    - if: "$PACKAGE_HUNTER_USER == null || $PACKAGE_HUNTER_USER == ''"
+      when: never
     - <<: *if-default-branch-schedule-2-hourly
     - <<: *if-merge-request
       changes: ["Gemfile.lock"]
