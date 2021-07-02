@@ -53,7 +53,7 @@ constraints(::Constraints::ProjectUrlConstrainer.new) do
         resources :audit_events, only: [:index]
 
         namespace :security do
-          resources :network_policies, only: [:index, :create, :update, :destroy] do
+          resources :network_policies, only: [:index, :create, :update, :destroy], constraints: { id: %r{[^/]+} } do
             get :summary, on: :collection
           end
 
