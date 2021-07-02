@@ -16,11 +16,11 @@ spent in each stage defined in the process.
 
 Value Stream Analytics can help you quickly determine the velocity of a given
 group. It points to bottlenecks in the development process, enabling management
-to uncover, triage, and identify the root cause of slowdowns in the software development life cycle.
+to uncover, triage, and identify the root cause of slowdowns in the software development life cycle. 
 
 For information on how to contribute to the development of Value Stream Analytics, see our [contributor documentation](../../../development/value_stream_analytics.md).
 
-Group-level Value Stream Analytics is available via **Group > Analytics > Value Stream**.
+Group-level Value Stream Analytics is available via **Group > Analytics > Value Stream**. When viewing Value Stream Analytics at the group level, data is shown for the selected group as well as all sub groups.
 
 [Project-level Value Stream Analytics](../../analytics/value_stream_analytics.md) is also available.
 
