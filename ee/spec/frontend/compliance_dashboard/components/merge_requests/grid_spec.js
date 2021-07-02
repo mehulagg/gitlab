@@ -9,8 +9,10 @@ import { createMergeRequests, mergedAt } from '../../mock_data';
 describe('MergeRequestsGrid component', () => {
   let wrapper;
 
-  const findMergeRequestLinks = () => wrapper.findAllByTestId('merge-request-link');
+  const findMergeRequestDrawerToggles = () =>
+    wrapper.findAllByTestId('merge-request-drawer-toggle');
   const findMergeRequests = () => wrapper.findAllByTestId('merge-request');
+  const findMergeRequestLinks = () => wrapper.findAllByTestId('merge-request-link');
   const findTime = () => wrapper.findComponent(TimeAgoTooltip);
   const findStatuses = () => wrapper.findAllComponents(Status);
   const findApprovers = () => wrapper.findComponent(Approvers);
@@ -26,7 +28,7 @@ describe('MergeRequestsGrid component', () => {
       stubs: {
         MergeRequest: {
           props: { mergeRequest: Object },
-          template: `<div data-testid="merge-request">{{ mergeRequest.title }}</div>`,
+          template: `<div data-testid="merge-request"><a href="" data-testid="merge-request-link">{{ mergeRequest.title }}</a></div>`,
         },
       },
     });
@@ -116,10 +118,16 @@ describe('MergeRequestsGrid component', () => {
       wrapper = createComponent(mergeRequest, true);
     });
 
-    it('toggles the drawer when a merge request link is clicked', () => {
-      findMergeRequestLinks().at(0).trigger('click');
+    it('toggles the drawer when a merge request drawer toggle is clicked', () => {
+      findMergeRequestDrawerToggles().at(0).trigger('click');
 
       expect(wrapper.emitted('toggleDrawer')[0][0]).toStrictEqual(mergeRequests[0]);
+    });
+
+    it('does not toggle the drawer if an inner link is clicked', () => {
+      findMergeRequestLinks().at(0).trigger('click');
+
+      expect(wrapper.emitted('toggleDrawer')).toBe(undefined);
     });
   });
 });

@@ -118,12 +118,17 @@ exports[`MergeRequestsGrid component when drawer enabled is true when initialize
      
     <a
       class="dashboard-merge-request dashboard-grid gl-display-grid gl-grid-tpl-rows-auto gl-hover-bg-blue-50 gl-hover-text-decoration-none gl-hover-cursor-pointer"
-      data-testid="merge-request-link"
+      data-testid="merge-request-drawer-toggle"
     >
       <div
         data-testid="merge-request"
       >
-        Merge request 0
+        <a
+          data-testid="merge-request-link"
+          href=""
+        >
+          Merge request 0
+        </a>
       </div>
        
       <status-stub
@@ -153,12 +158,17 @@ exports[`MergeRequestsGrid component when drawer enabled is true when initialize
     </a>
     <a
       class="dashboard-merge-request dashboard-grid gl-display-grid gl-grid-tpl-rows-auto gl-hover-bg-blue-50 gl-hover-text-decoration-none gl-hover-cursor-pointer"
-      data-testid="merge-request-link"
+      data-testid="merge-request-drawer-toggle"
     >
       <div
         data-testid="merge-request"
       >
-        Merge request 1
+        <a
+          data-testid="merge-request-link"
+          href=""
+        >
+          Merge request 1
+        </a>
       </div>
        
       <status-stub

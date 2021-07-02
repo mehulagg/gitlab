@@ -45,6 +45,15 @@ export default {
     hasBranchDetails(mergeRequest) {
       return mergeRequest.target_branch && mergeRequest.source_branch;
     },
+    openDrawer(e, mergeRequest) {
+      const link = e.target.closest('a');
+
+      // Only toggle the drawer if the element isn't a link or the link is the row wrapping link
+      // Don't toggle the drawer with any other the link as it will redirect to a different page
+      if (!link || link.classList.contains('dashboard-merge-request')) {
+        this.$emit('toggleDrawer', mergeRequest);
+      }
+    },
   },
   strings: {
     approvalStatusLabel: __('Approval Status'),
@@ -76,8 +85,8 @@ export default {
           v-for="mergeRequest in mergeRequests"
           :key="mergeRequest.id"
           class="dashboard-merge-request dashboard-grid gl-display-grid gl-grid-tpl-rows-auto gl-hover-bg-blue-50 gl-hover-text-decoration-none gl-hover-cursor-pointer"
-          data-testid="merge-request-link"
-          @click="$emit('toggleDrawer', mergeRequest)"
+          data-testid="merge-request-drawer-toggle"
+          @click="openDrawer($event, mergeRequest)"
         >
           <merge-request
             :key="key(mergeRequest.id, $options.keyTypes.mergeRequest)"
