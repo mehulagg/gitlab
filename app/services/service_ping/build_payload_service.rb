@@ -2,10 +2,6 @@
 
 module ServicePing
   class BuildPayloadService
-    STANDARD_CATEGORY = 'Standard'
-    SUBSCRIPTION_CATEGORY = 'Subscription'
-    OPTIONAL_CATEGORY = 'Optional'
-    OPERATIONAL_CATEGORY = 'Operational'
     EMPTY_PAYLOAD = {}.freeze
 
     def execute
@@ -33,17 +29,11 @@ module ServicePing
 
     def metric_category(key, parent_keys)
       key_path = parent_keys.dup.append(key).join('.')
-      metric_definitions[key_path]&.attributes&.fetch(:data_category, OPTIONAL_CATEGORY)
+      metric_definitions[key_path]&.attributes&.fetch(:data_category, PermitDataCategoriesService::OPTIONAL_CATEGORY)
     end
 
     def permitted_categories
-      @permitted_categories ||= filter_permitted_categories
-    end
-
-    def filter_permitted_categories
-      return [] unless ::Gitlab::CurrentSettings.usage_ping_enabled?
-
-      [STANDARD_CATEGORY, SUBSCRIPTION_CATEGORY, OPTIONAL_CATEGORY, OPERATIONAL_CATEGORY]
+      @permitted_categories ||= PermitDataCategoriesService.new.execute
     end
 
     def raw_payload
