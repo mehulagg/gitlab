@@ -115,7 +115,7 @@ For major or minor version updates of Rails or Puma:
 
 ### Feature flags
 
-Feature flags are a tool, not a strategy, for handling backwards compatibility problems.
+[Feature flags](./feature_flags/index.md) are a tool, not a strategy, for handling backwards compatibility problems.
 
 For example, it is safe to add a new feature with frontend and API changes, if both frontend and API code are disabled by default. This can be done with multiple merge requests, merged in any order. After all the changes are deployed to GitLab.com, the feature can be toggled on and validated on GitLab.com. Great!
 
