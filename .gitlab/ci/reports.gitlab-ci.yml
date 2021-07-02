@@ -95,9 +95,9 @@ gemnasium-python-dependency_scanning:
     name: registry.gitlab.com/gitlab-com/gl-security/security-research/package-hunter-cli:latest
     entrypoint: [""]
   variables:
-    - DEBUG: '*'
-    - HTR_user: '$PACKAGE_HUNTER_USER'
-    - HTR_pass: '$PACKAGE_HUNTER_PASS'
+    DEBUG: '*'
+    HTR_user: '$PACKAGE_HUNTER_USER'
+    HTR_pass: '$PACKAGE_HUNTER_PASS'
   needs: []
   allow_failure: true
   before_script:
