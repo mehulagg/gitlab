@@ -190,7 +190,7 @@ export default {
       </p>
     </template>
     <template v-else-if="hasPipeline">
-      <a :href="status.details_path" class="align-self-start gl-mr-3">
+      <a :href="status.details_path" class="gl-align-self-center gl-mr-3">
         <ci-icon :status="status" :size="24" />
       </a>
       <div class="ci-widget-container d-flex">
