@@ -1,6 +1,5 @@
 <script>
 import { GlAlert, GlButton } from '@gitlab/ui';
-import { isNumber } from 'lodash';
 import { mapState } from 'vuex';
 
 import { CENTERED_LIMITED_CONTAINER_CLASSES, EVT_EXPAND_ALL_FILES } from '../constants';
@@ -29,14 +28,14 @@ export default {
     };
   },
   computed: {
-    ...mapState('diffs', ['diffFiles', 'showWhitespace']),
-    diffFilesCount() {
-      return isNumber(this.diffFiles.length) ? this.diffFiles.length : 0;
-    },
+    ...mapState('diffs', ['diffFiles']),
     containerClasses() {
       return {
         [CENTERED_LIMITED_CONTAINER_CLASSES]: this.limited,
       };
+    },
+    shouldDisplay() {
+      return !this.isDismissed && this.diffFiles.length > 1;
     },
   },
 
@@ -49,15 +48,12 @@ export default {
       eventHub.$emit(EVT_EXPAND_ALL_FILES);
       this.dismiss();
     },
-    showGlobalWarning() {
-      return !this.isDismissed && this.diffFilesCount > 1;
-    },
   },
 };
 </script>
 
 <template>
-  <div v-if="showGlobalWarning()" data-testid="root" :class="containerClasses" class="col-12">
+  <div v-if="shouldDisplay" data-testid="root" :class="containerClasses" class="col-12">
     <gl-alert
       :dismissible="true"
       :title="__('Some changes are not shown')"
