@@ -10,11 +10,11 @@ class LfsDownloadObject
   validates :size, numericality: { greater_than_or_equal_to: 0 }
   validates :link, public_url: { protocols: %w(http https) }
 
-  def initialize(oid:, size:, link:, headers:)
+  def initialize(oid:, size:, link:, headers: {})
     @oid = oid
     @size = size
     @link = link
-    @headers = headers || {}
+    @headers = headers
   end
 
   def sanitized_uri

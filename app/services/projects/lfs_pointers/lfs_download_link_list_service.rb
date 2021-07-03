@@ -81,14 +81,14 @@ module Projects
       def parse_response_links(objects_response)
         objects_response.each_with_object([]) do |entry, link_list|
           link = entry.dig('actions', DOWNLOAD_ACTION, 'href')
-          headers = entry.dig('actions', DOWNLOAD_ACTION, 'header')
+          headers = entry.dig('actions', DOWNLOAD_ACTION, 'header') || {}
 
           raise DownloadLinkNotFound unless link
 
           link_list << LfsDownloadObject.new(oid: entry['oid'],
                                              size: entry['size'],
                                              headers: headers,
-                                             link: add_credentials(link))
+                                             link: add_credentials(link, headers))
         rescue DownloadLinkNotFound, Addressable::URI::InvalidURIError
           log_error("Link for Lfs Object with oid #{entry['oid']} not found or invalid.")
         end
@@ -108,10 +108,10 @@ module Projects
         }.freeze
       end
 
-      def add_credentials(link)
+      def add_credentials(link, headers)
         uri = Addressable::URI.parse(link)
 
-        if should_add_credentials?(uri)
+        if should_add_credentials?(uri, headers)
           uri.user = remote_uri.user
           uri.password = remote_uri.password
         end
@@ -122,7 +122,9 @@ module Projects
       # The download link can be a local url or an object storage url
       # If the download link has the some host as the import url then
       # we add the same credentials because we may need them
-      def should_add_credentials?(link_uri)
+      def should_add_credentials?(link_uri, headers)
+        return false if headers['Authorization'].present?
+
         url_credentials? && link_uri.host == remote_uri.host
       end
 

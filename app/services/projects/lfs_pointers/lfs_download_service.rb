@@ -72,9 +72,9 @@ module Projects
       end
 
       def download_options
-        { stream_body: true }.tap do |options|
-          break options if lfs_headers['Authorization'].present?
+        http_options = { headers: lfs_headers, stream_body: true }
 
+        http_options.tap do |options|
           if lfs_credentials[:user].present? || lfs_credentials[:password].present?
             # Using authentication headers in the request
             options[:basic_auth] = { username: lfs_credentials[:user], password: lfs_credentials[:password] }
@@ -82,12 +82,8 @@ module Projects
         end
       end
 
-      def options
-        { headers: lfs_headers }.merge(download_options)
-      end
-
       def fetch_file(&block)
-        response = Gitlab::HTTP.get(lfs_sanitized_url, options, &block)
+        response = Gitlab::HTTP.get(lfs_sanitized_url, download_options, &block)
 
         raise ResponseError, "Received error code #{response.code}" unless response.success?
       end
