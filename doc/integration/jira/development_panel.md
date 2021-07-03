@@ -107,10 +107,10 @@ To enable the integration in your GitLab project, after you
      Defaults to the **Web URL** value if not set. Leave blank if using **Jira on Atlassian cloud**.
    - **Username or Email**:
      For **Jira Server**, use `username`. For **Jira on Atlassian cloud**, use `email`.
-     See [Jira Server credentials](jira_server_configuration.html).
+     See [authentication in Jira](index.md#direct-feature-comparison).
    - **Password/API token**:
      Use `password` for **Jira Server** or `API token` for **Jira on Atlassian cloud**.
-     See [Jira Server credentials](jira_server_configuration.html).
+     See [authentication in Jira](index.md#direct-feature-comparison).
 1. To enable users to view Jira issues inside the GitLab project **(PREMIUM)**, select **Enable Jira issues** and
    enter a Jira project key.
 
