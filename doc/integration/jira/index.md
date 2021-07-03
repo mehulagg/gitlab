@@ -22,7 +22,8 @@ For an overview, see [Agile Management - GitLab-Jira Basic Integration](https://
 
 ### Per-project Jira integration
 
-This integration connects a single GitLab project to a Jira instance. The Jira instance
+This integration connects a single GitLab project to a Jira instance. The supported Jira versions are `v6.x`, `v7.x`, and `v8.x`.
+The Jira instance
 can be hosted by you or in [Atlassian cloud](https://www.atlassian.com/cloud):
 
 - *If your installation uses Jira Cloud,* use the
