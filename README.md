@@ -1,6 +1,7 @@
 # GitLab
 
 test1
+test2
 
 ## Canonical source
 
