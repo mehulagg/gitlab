@@ -23,13 +23,13 @@ For an overview, see [Agile Management - GitLab-Jira Basic Integration](https://
 ### Per-project Jira integration
 
 This integration connects a single GitLab project to a Jira instance. The supported Jira versions are `v6.x`, `v7.x`, and `v8.x`.
-The Jira instance
-can be hosted by you or in [Atlassian cloud](https://www.atlassian.com/cloud):
+To simplify administration, we recommend that a GitLab group maintainer or group owner
+(or instance administrator in the case of self-managed GitLab) set up the integration.
 
-- *If your installation uses Jira Cloud,* use the
-  [GitLab.com for Jira Cloud app](connect-app.md).
-- *If your installation uses self-hosted Jira,* use the
-  [Jira DVCS Connector](dvcs.md).
+| Jira usage | GitLab.com customers need | GitLab self-managed customers need |
+|------------|---------------------------|------------------------------------|
+| [Atlassian cloud](https://www.atlassian.com/cloud) | The [GitLab.com for Jira Cloud](https://marketplace.atlassian.com/apps/1221011/gitlab-com-for-jira-cloud?hosting=cloud&tab=overview) application installed from the [Atlassian Marketplace](https://marketplace.atlassian.com). This offers real-time sync between GitLab and Jira. | The [GitLab.com for Jira Cloud](https://marketplace.atlassian.com/apps/1221011/gitlab-com-for-jira-cloud?hosting=cloud&tab=overview) application, using a workaround process. This offers real-time sync between GitLab and Jira. See the documentation for [installing the GitLab.com for Jira Cloud application for self-managed instances](connect-app.md#install-the-gitlabcom-for-jira-cloud-application-for-self-managed-instances) for more information.<br><br>Alternatively the [Jira DVCS (distributed version control system) connector](dvcs.md) can be used. This syncs data hourly. |
+| Your own server | The [Jira DVCS (distributed version control system) connector](dvcs.md). This syncs data hourly. | The [Jira DVCS (distributed version control system) connector](dvcs.md). This syncs data hourly. |
 
 ### Jira development panel integration
 
