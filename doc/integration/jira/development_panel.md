@@ -94,7 +94,7 @@ To enable the Jira service in GitLab, you must:
 ### Configure GitLab
 
 To enable the integration in your GitLab project, after you
-[configure your Jira project](dvcs.md#configure-jira-for-dvcs):
+[configure your Jira project](index.md#per-project-jira-integration):
 
 1. Ensure your GitLab installation does not use a relative URL, as described in
    [Limitations](#limitations).
@@ -113,12 +113,14 @@ To enable the integration in your GitLab project, after you
      this GitLab project, such as `https://jira.example.com`.
    - **Jira API URL**: The base URL to the Jira instance API, such as `https://jira-api.example.com`.
      Defaults to the **Web URL** value if not set. Leave blank if using **Jira on Atlassian cloud**.
-   - **Username or Email**: Created when you [configured Jira](dvcs.md#configure-jira-for-dvcs).
+   - **Username or Email**:
      For **Jira Server**, use `username`. For **Jira on Atlassian cloud**, use `email`.
-   - **Password/API token**: Created when you [configured Jira](dvcs.md#configure-jira-for-dvcs).
+     See [Jira Server credentials](jira_server_configuration.html).
+   - **Password/API token**:
      Use `password` for **Jira Server** or `API token` for **Jira on Atlassian cloud**.
-1. To enable users to view Jira issues inside the GitLab project, select **Enable Jira issues** and
-   enter a Jira project key. **(PREMIUM)**
+     See [Jira Server credentials](jira_server_configuration.html).
+1. To enable users to view Jira issues inside the GitLab project **(PREMIUM)**, select **Enable Jira issues** and
+   enter a Jira project key.
 
    You can display issues only from a single Jira project in a given GitLab project.
 
@@ -126,7 +128,7 @@ To enable the integration in your GitLab project, after you
    If you enable Jira issues with this setting, all users with access to this GitLab project
    can view all issues from the specified Jira project.
 
-1. To enable issue creation for vulnerabilities, select **Enable Jira issues creation from vulnerabilities**.
+1. To enable issue creation for vulnerabilities **(ULTIMATE)**, select **Enable Jira issues creation from vulnerabilities**.
 1. Select the **Jira issue type**. If the dropdown is empty, select refresh (**{retry}**) and try again.
 1. To verify the Jira connection is working, select **Test settings**.
 1. Select **Save changes**.
