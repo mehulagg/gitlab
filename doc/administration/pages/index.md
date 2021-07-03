@@ -1037,12 +1037,10 @@ and you will not notice any problem after upgrading.
 Regardless, we recommend everyone follow the migration steps to ensure a successful upgrade.
 If at any point you run into issues, consult the [troubleshooting section](#troubleshooting).
 
-To migrate GitLab Pages to GitLab 14.0:
-
-1. If your current GitLab version is lower than 13.12, then you first need to upgrade to 13.12.
-Upgrading directly to 14.0 is [not supported](../../update/index.md#user-content-upgrade-paths)
-and may cause downtime for some web-sites hosted on GitLab Pages
-until you finish the following steps:
+If your current GitLab version is lower than 13.12, then you first need to update to 13.12.
+Updating directly to 14.0 is [not supported](../../update/index.md#upgrade-paths)
+and may cause downtime for some web-sites hosted on GitLab Pages. Once you update to 13.12,
+migrate GitLab Pages to prepare them for GitLab 14.0:
 1. Set [`domain_config_source` to `gitlab`](#domain-source-configuration-before-140), which
 is the default starting from GitLab 14.0. Skip this step if you're already running GitLab 14.0 or above.
 1. If you want to store your pages content in [object storage](#using-object-storage), make sure to configure it.
