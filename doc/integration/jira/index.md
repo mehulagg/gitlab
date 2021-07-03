@@ -10,9 +10,9 @@ If your organization uses [Jira](https://www.atlassian.com/software/jira) issues
 you can [migrate your issues from Jira](../../user/project/import/jira.md) **(PREMIUM)** and work
 exclusively in GitLab. However, if you'd like to continue to use Jira, you can
 integrate it with GitLab. GitLab offers two types of Jira integrations, and you
-can use one or both depending on the capabilities you need.
+can use one or both depending on the capabilities you need. It is recommended that you enable both.
 
-## Compare Jira integrations
+## Compare integrations
 
 After you set up one or both of these integrations, you can cross-reference activity
 in your GitLab project with any of your projects in Jira.
@@ -20,9 +20,10 @@ in your GitLab project with any of your projects in Jira.
 <i class="fa fa-youtube-play youtube" aria-hidden="true"></i>
 For an overview, see [Agile Management - GitLab-Jira Basic Integration](https://www.youtube.com/watch?v=fWvwkx5_00E&feature=youtu.be).
 
-### Per-project Jira integration
+### Jira integration
 
-This integration connects a single GitLab project to a Jira instance. The supported Jira versions are `v6.x`, `v7.x`, and `v8.x`.
+This integration connects one more GitLab projects to a Jira instance depending on permissions and how it is setup.
+The supported Jira versions are `v6.x`, `v7.x`, and `v8.x`.
 To simplify administration, we recommend that a GitLab group maintainer or group owner
 (or instance administrator in the case of self-managed GitLab) set up the integration.
 
@@ -49,7 +50,7 @@ displays in the [development panel](https://support.atlassian.com/jira-software-
 | Add Jira time tracking to an issue. | No. | Yes. Time can be specified using Jira Smart Commits. |
 | Use a Git commit or merge request to transition or close a Jira issue. | Yes. Only a single transition type, typically configured to close the issue by setting it to Done. | Yes. Transition to any state using Jira Smart Commits. |
 | Display a list of Jira issues. | Yes. **(PREMIUM)** | No. |
-| Create a Jira issue from a vulnerability or finding. **(ULTIMATE)** | Yes. | No. |
+| Create a Jira issue from a vulnerability or finding. | Yes. **(ULTIMATE)** | No. |
 
 ## Authentication in Jira
 
