@@ -111,18 +111,25 @@ due to the issue ["User with permissions cannot retrieve `share_with_groups` fro
 This results in an error when running `terraform apply` because Terraform attempts to recreate an
 existing resource. 
 
-The issue occurs when:
+For example, consider the following group/subgroup configuration:
 
-- Terraform is used to manage subgroups that already exist in GitLab.
-- subgroup A is shared to another subgroup B
-- The user running `terraform plan/apply` is not the creator of subgroup B.
-- The Terraform user has inherited their access to subgroup B from a parent group.
-- There are no projects in subgroup B.
+```
+parent-group
+├── subgroup-A
+└── subgroup-B
+```
 
-The result is that the `GET /groups/:id_A` query issued by the provider when refreshing state will not return details of the share with subgroup B in the `shared_with_groups` array, despite the Terraform user having full access to manage all resources.
+where 
 
-There are three workarounds available:
+- User `user-1` creates `parent-group`, `subgroup-A` and `subgroup-B`
+- `subgroup-A` is shared with `subgroup-B`
+- User `terraform-user` is member of `parent-group` with inherited `owner` access to both subgroups
 
-1. ensure all subgroup resources are created by the Terraform user
-1. grant direct access to the Terraform user on all subgroup resources
-1. ensure at least one project exists in each subgroup
+When the Terraform state is refreshed, the API query `GET /groups/:subgroup-A_id` issued by the provider does not return the
+details of `subgroup-B` in the `shared_with_groups` array.
+
+To workaround this issue ensure one of the following conditions applies:
+
+1. All subgroup resources are created by the `terraform-user` user.
+1. Direct access is granted on `subgroup-B` to the `terraform-user` user.
+1. `subgroup-B` contains at least one project and `terraform-user` has inherited access to `subgroup-B`.
