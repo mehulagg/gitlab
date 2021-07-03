@@ -38,6 +38,7 @@ RSpec.shared_context 'GroupPolicy context' do
         delete_metrics_dashboard_annotation
         update_metrics_dashboard_annotation
         create_custom_emoji
+        delete_custom_emoji
         create_package_settings
       ]
   end
