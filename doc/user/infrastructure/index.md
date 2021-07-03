@@ -104,7 +104,7 @@ is available as part of the official Terraform provider documentations.
 
 ## Troubleshooting
 
-### GitLab Terraform provider gitlab_group_share_group resources not detected when subgroup state refreshed
+### `gitlab_group_share_group` resources not detected when subgroup state is refreshed
 
 The GitLab Terraform provider can fail to detect existing `gitlab_group_share_group resources` due to an issue [User with permissions cannot retrieve share_with_groups from API](https://gitlab.com/gitlab-org/gitlab/-/issues/328428). This results in an error when `terraform apply` is run and Terraform attempts to recreate an existing resource. 
 
