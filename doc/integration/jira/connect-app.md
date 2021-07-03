@@ -18,7 +18,7 @@ This integration method supports [smart commits](dvcs.md#smart-commits).
 This method is recommended when using GitLab.com and Jira Cloud because data is
 synchronized in real-time. The DVCS connector updates data only once per hour.
 If you are not using both of these environments, use the [Jira DVCS Connector](dvcs.md) method or
-[steps to install GitLab.com for Jira Cloud app for self-managed instances](#install-the-gitlabcom-for-jira-cloud-application-for-self-managed-instances).
+[steps to install GitLab.com for Jira Cloud app for self-managed instances](#install-the-gitlabcom-for-jira-cloud-app-for-self-managed-instances).
 
 <i class="fa fa-youtube-play youtube" aria-hidden="true"></i>
 For a walkthrough of the integration with GitLab.com for Jira Cloud app, watch
