@@ -121,9 +121,9 @@ parent-group
 
 where 
 
-- User `user-1` creates `parent-group`, `subgroup-A` and `subgroup-B`
-- `subgroup-A` is shared with `subgroup-B`
-- User `terraform-user` is member of `parent-group` with inherited `owner` access to both subgroups
+- User `user-1` creates `parent-group`, `subgroup-A` and `subgroup-B`.
+- `subgroup-A` is shared with `subgroup-B`.
+- User `terraform-user` is member of `parent-group` with inherited `owner` access to both subgroups.
 
 When the Terraform state is refreshed, the API query `GET /groups/:subgroup-A_id` issued by the provider does not return the
 details of `subgroup-B` in the `shared_with_groups` array.
@@ -131,5 +131,5 @@ details of `subgroup-B` in the `shared_with_groups` array.
 To workaround this issue ensure one of the following conditions applies:
 
 1. All subgroup resources are created by the `terraform-user` user.
-1. Direct access is granted on `subgroup-B` to the `terraform-user` user.
+1. `maintainer` or `owner` access is granted directly to the `terraform-user` user  on `subgroup-B`.
 1. `subgroup-B` contains at least one project and `terraform-user` has inherited access to `subgroup-B`.
