@@ -43,7 +43,7 @@ If your merge request description does not include these items, the review will 
 
 If new migrations are introduced, in the MR **you are required to provide**:
 
-- The output of both migrating (`db:migrate`) and rolling back (`db:rollback`) for all migrations
+- The output of both migrating (`db:migrate`) and rolling back (`db:rollback`) for all migrations.
 
 If new queries have been introduced or existing queries have been updated, **you are required to provide**:
 
