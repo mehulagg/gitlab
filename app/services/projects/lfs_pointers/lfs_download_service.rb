@@ -87,7 +87,7 @@ module Projects
       end
 
       def fetch_file(&block)
-        response = Gitlab::HTTP.get(lfs_sanitized_url, options), &block)
+        response = Gitlab::HTTP.get(lfs_sanitized_url, options, &block)
 
         raise ResponseError, "Received error code #{response.code}" unless response.success?
       end
