@@ -240,7 +240,7 @@ export default {
   },
 
   updateList: (
-    { commit, state: { issuableType } },
+    { commit, state: { issuableType, boardItemsByListId = {} }, dispatch },
     { listId, position, collapsed, backupList },
   ) => {
     gqlClient
@@ -255,6 +255,11 @@ export default {
       .then(({ data }) => {
         if (data?.updateBoardList?.errors.length) {
           commit(types.UPDATE_LIST_FAILURE, backupList);
+        }
+
+        // Only fetch when board items havent been fetched on a collapsed list
+        if (!Object.prototype.hasOwnProperty.call(boardItemsByListId, listId)) {
+          dispatch('fetchItemsForList', { listId: data.updateBoardList.list.id });
         }
       })
       .catch(() => {

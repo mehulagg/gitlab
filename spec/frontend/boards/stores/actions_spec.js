@@ -492,6 +492,60 @@ describe('moveList', () => {
 });
 
 describe('updateList', () => {
+  const listId = 'gid://gitlab/List/1';
+  const state = (boardItemsByListId = {}) => ({
+    fullPath: 'gitlab-org',
+    fullBoardId: 'gid://gitlab/Board/1',
+    boardType: 'group',
+    disabled: false,
+    boardLists: [{ type: 'closed' }],
+    issuableType: issuableTypes.issue,
+    boardItemsByListId,
+  });
+
+  describe('when state doesnt have list items', () => {
+    it('calls fetchItemsByList', async () => {
+      const dispatch = jest.fn();
+
+      jest.spyOn(gqlClient, 'mutate').mockResolvedValue({
+        data: {
+          updateBoardList: {
+            errors: [],
+            list: {
+              id: listId,
+            },
+          },
+        },
+      });
+
+      await actions.updateList({ commit: () => {}, state: state(), dispatch }, { listId });
+
+      expect(dispatch.mock.calls).toEqual([['fetchItemsForList', { listId }]]);
+    });
+  });
+
+  describe('when state has list items', () => {
+    it('doesnt call fetchItemsByList', async () => {
+      const commit = jest.fn();
+      const dispatch = jest.fn();
+
+      jest.spyOn(gqlClient, 'mutate').mockResolvedValue({
+        data: {
+          updateBoardList: {
+            errors: [],
+            list: {
+              id: listId,
+            },
+          },
+        },
+      });
+
+      await actions.updateList({ commit, state: state({ [listId]: [] }), dispatch }, { listId });
+
+      expect(dispatch.mock.calls).toEqual([]);
+    });
+  });
+
   it('should commit UPDATE_LIST_FAILURE mutation when API returns an error', (done) => {
     jest.spyOn(gqlClient, 'mutate').mockResolvedValue({
       data: {
@@ -502,19 +556,10 @@ describe('updateList', () => {
       },
     });
 
-    const state = {
-      fullPath: 'gitlab-org',
-      fullBoardId: 'gid://gitlab/Board/1',
-      boardType: 'group',
-      disabled: false,
-      boardLists: [{ type: 'closed' }],
-      issuableType: issuableTypes.issue,
-    };
-
     testAction(
       actions.updateList,
       { listId: 'gid://gitlab/List/1', position: 1 },
-      state,
+      state(),
       [{ type: types.UPDATE_LIST_FAILURE }],
       [],
       done,
