@@ -7,7 +7,7 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 # Jira integrations **(FREE)**
 
 If your organization uses [Jira](https://www.atlassian.com/software/jira) issues,
-you can [migrate](../../user/project/import/jira.md) your issues from Jira and work
+you can [migrate](../../user/project/import/jira.md) **(PREMIUM)** your issues from Jira and work
 exclusively in GitLab. However, if you'd like to continue to use Jira, you can
 integrate it with GitLab. GitLab offers two types of Jira integrations, and you
 can use one or both depending on the capabilities you need.
