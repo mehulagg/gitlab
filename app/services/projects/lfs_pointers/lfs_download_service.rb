@@ -11,7 +11,7 @@ module Projects
       LARGE_FILE_SIZE = 1.megabytes
 
       attr_reader :lfs_download_object
-      delegate :oid, :size, :credentials, :sanitized_url, to: :lfs_download_object, prefix: :lfs
+      delegate :oid, :size, :credentials, :sanitized_url, :headers, to: :lfs_download_object, prefix: :lfs
 
       def initialize(project, lfs_download_object)
         super(project)
@@ -71,17 +71,23 @@ module Projects
         raise_oid_error! if digester.hexdigest != lfs_oid
       end
 
-      def download_headers
-        { stream_body: true }.tap do |headers|
+      def download_options
+        { stream_body: true }.tap do |options|
+          break options if lfs_headers['Authorization'].present?
+
           if lfs_credentials[:user].present? || lfs_credentials[:password].present?
             # Using authentication headers in the request
-            headers[:basic_auth] = { username: lfs_credentials[:user], password: lfs_credentials[:password] }
+            options[:basic_auth] = { username: lfs_credentials[:user], password: lfs_credentials[:password] }
           end
         end
       end
 
+      def options
+        { headers: lfs_headers }.merge(download_options)
+      end
+
       def fetch_file(&block)
-        response = Gitlab::HTTP.get(lfs_sanitized_url, download_headers, &block)
+        response = Gitlab::HTTP.get(lfs_sanitized_url, options), &block)
 
         raise ResponseError, "Received error code #{response.code}" unless response.success?
       end
