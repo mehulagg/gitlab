@@ -27,7 +27,7 @@ can be hosted by you or in [Atlassian cloud](https://www.atlassian.com/cloud):
 
 - *If your installation uses Jira Cloud,* use the
   [GitLab.com for Jira Cloud app](connect-app.md).
-- *If either your Jira or GitLab installation is self-managed,* use the
+- *If your installation uses self-hosted Jira,* use the
   [Jira DVCS Connector](dvcs.md).
 
 ### Jira development panel integration
