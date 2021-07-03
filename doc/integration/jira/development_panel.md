@@ -31,11 +31,6 @@ This integration connects all GitLab projects to projects in the Jira instance i
   including the projects in its subgroups.
 - A personal namespace: Connects the projects in that personal namespace to Jira.
 
-This differs from the [Jira integration](index.md#per-project-jira-integration),
-where the mapping is between one GitLab project and the entire Jira instance.
-You can install both integrations to take advantage of both sets of features.
-A [feature comparison](index.md#direct-feature-comparison) is available.
-
 ## Use the integration
 
 After the integration is [set up on GitLab and Jira](#configure-the-integration), you can:
