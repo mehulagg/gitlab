@@ -113,7 +113,7 @@ existing resource.
 
 For example, consider the following group/subgroup configuration:
 
-```
+```plaintext
 parent-group
 ├── subgroup-A
 └── subgroup-B
