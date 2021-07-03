@@ -26,7 +26,7 @@ This integration connects a single GitLab project to a Jira instance. The Jira i
 can be hosted by you or in [Atlassian cloud](https://www.atlassian.com/cloud):
 
 - *If your installation uses Jira Cloud,* use the
-  [GitLab for Jira app](connect-app.md).
+  [GitLab.com for Jira Cloud app](connect-app.md).
 - *If either your Jira or GitLab installation is self-managed,* use the
   [Jira DVCS Connector](dvcs.md).
 
