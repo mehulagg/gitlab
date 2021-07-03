@@ -1,5 +1,6 @@
 import { mount } from '@vue/test-utils';
 import { extendedWrapper } from 'helpers/vue_test_utils_helper';
+import FormattedStageCount from '~/cycle_analytics/components/formatted_stage_count.vue';
 import Component from '~/cycle_analytics/components/path_navigation.vue';
 import { OVERVIEW_STAGE_ID } from '~/cycle_analytics/constants';
 import { transformedStagePathData, issueStage } from '../mock_data';
@@ -26,6 +27,7 @@ describe('Group PathNavigation', () => {
 
   const pathItemContent = () => pathNavigationItems().wrappers.map(extendedWrapper);
   const firstPopover = () => wrapper.findAllByTestId('stage-item-popover').at(0);
+  const findStageCountAtIndex = (index) => wrapper.findAllComponents(FormattedStageCount).at(index);
 
   const stagesWithCounts = transformedStagePathData.filter(
     (stage) => stage.id !== OVERVIEW_STAGE_ID,
@@ -76,7 +78,9 @@ describe('Group PathNavigation', () => {
       popoverStages.forEach((stage, index) => {
         const content = stage.findByTestId('stage-item-popover').html();
         expect(content).toContain('Items in stage');
-        expect(content).toContain(`${stagesWithCounts[index].stageCount} items`);
+        expect(findStageCountAtIndex(index).props('stageCount')).toBe(
+          stagesWithCounts[index].stageCount,
+        );
       });
     });
   });

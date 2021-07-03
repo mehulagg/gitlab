@@ -42,17 +42,9 @@ module Gitlab
           end
         end
 
-        def metrics_params
-          super.merge(project: project&.full_path)
-        end
-
         def metrics_event
           :receive_email_service_desk
         end
-
-        private
-
-        attr_reader :project_id, :project_path, :service_desk_key
 
         def project
           strong_memoize(:project) do
@@ -61,6 +53,10 @@ module Gitlab
             @project
           end
         end
+
+        private
+
+        attr_reader :project_id, :project_path, :service_desk_key
 
         def project_from_key
           return unless match = service_desk_key.match(PROJECT_KEY_PATTERN)

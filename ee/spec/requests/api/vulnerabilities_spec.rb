@@ -10,6 +10,7 @@ RSpec.describe API::Vulnerabilities do
   end
 
   let_it_be(:user) { create(:user) }
+
   let(:project_vulnerabilities_path) { "/projects/#{project.id}/vulnerabilities" }
 
   describe 'GET /projects/:id/vulnerabilities' do
@@ -62,6 +63,7 @@ RSpec.describe API::Vulnerabilities do
     let_it_be(:project) { create(:project, :with_vulnerabilities) }
     let_it_be(:vulnerability) { project.vulnerabilities.first }
     let_it_be(:finding) { create(:vulnerabilities_finding, vulnerability: vulnerability) }
+
     let(:vulnerability_id) { vulnerability.id }
 
     subject(:get_vulnerability) { get api("/vulnerabilities/#{vulnerability_id}", user) }
@@ -106,6 +108,7 @@ RSpec.describe API::Vulnerabilities do
 
   describe 'POST /projects/:id/vulnerabilities' do
     let_it_be(:project) { create(:project) }
+
     let(:finding) { create(:vulnerabilities_finding, project: project) }
     let(:finding_id) { finding.id }
     let(:expected_error_messages) { { 'base' => ['finding is not found or is already attached to a vulnerability'] } }
@@ -181,6 +184,7 @@ RSpec.describe API::Vulnerabilities do
     end
 
     let_it_be(:project) { create(:project, :with_vulnerabilities) }
+
     let(:vulnerability) { project.vulnerabilities.first }
     let(:vulnerability_id) { vulnerability.id }
 
@@ -268,6 +272,7 @@ RSpec.describe API::Vulnerabilities do
     end
 
     let_it_be(:project) { create(:project, :with_vulnerabilities) }
+
     let(:vulnerability) { project.vulnerabilities.first }
     let(:vulnerability_id) { vulnerability.id }
 
@@ -325,6 +330,7 @@ RSpec.describe API::Vulnerabilities do
     end
 
     let_it_be(:project) { create(:project, :with_vulnerabilities) }
+
     let(:vulnerability) { project.vulnerabilities.first }
     let(:vulnerability_id) { vulnerability.id }
 

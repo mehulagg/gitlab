@@ -1,4 +1,5 @@
 ---
+data_category: Optional
 key_path: redis_hll_counters.analytics.p_analytics_issues_weekly
 description: Unique visitors to /:group/:project/-/analytics/issues_analytics by week
 product_section: dev

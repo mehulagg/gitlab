@@ -5,6 +5,7 @@ require 'spec_helper'
 RSpec.describe PersonalAccessTokens::CreateService do
   describe '#execute' do
     let_it_be(:user) { create(:user) }
+
     let(:params) { { name: 'admin-token', impersonation: true, scopes: [:api], expires_at: Date.today + 1.month } }
 
     context 'when non-admin user' do

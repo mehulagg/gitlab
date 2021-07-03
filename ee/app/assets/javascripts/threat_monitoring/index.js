@@ -30,7 +30,6 @@ export default () => {
   const {
     networkPolicyStatisticsEndpoint,
     environmentsEndpoint,
-    networkPoliciesEndpoint,
     emptyStateSvgPath,
     networkPolicyNoDataSvgPath,
     newPolicyPath,
@@ -43,9 +42,6 @@ export default () => {
   store.dispatch('threatMonitoring/setEndpoints', {
     networkPolicyStatisticsEndpoint,
     environmentsEndpoint,
-  });
-  store.dispatch('networkPolicies/setEndpoints', {
-    networkPoliciesEndpoint,
   });
 
   return new Vue({

@@ -1,66 +1,87 @@
 <script>
-import { GlButton, GlForm, GlFormInput } from '@gitlab/ui';
+import { GlAlert, GlButton, GlForm, GlFormInput } from '@gitlab/ui';
 import initDatePicker from '~/behaviors/date_picker';
 import createFlash from '~/flash';
-import { visitUrl } from '~/lib/utils/url_utility';
-import { __ } from '~/locale';
+import { convertToGraphQLId, getIdFromGraphQLId } from '~/graphql_shared/utils';
+import { __, s__ } from '~/locale';
 import MarkdownField from '~/vue_shared/components/markdown/field.vue';
-import createIteration from '../queries/create_iteration.mutation.graphql';
+import readIteration from '../queries/iteration.query.graphql';
+import createIteration from '../queries/iteration_create.mutation.graphql';
 import updateIteration from '../queries/update_iteration.mutation.graphql';
 
 export default {
+  cadencesList: {
+    name: 'index',
+  },
   components: {
+    GlAlert,
     GlButton,
     GlForm,
     GlFormInput,
     MarkdownField,
   },
-  props: {
-    groupPath: {
-      type: String,
-      required: true,
-    },
-    previewMarkdownPath: {
-      type: String,
-      required: false,
-      default: '',
-    },
-    iterationsListPath: {
-      type: String,
-      required: false,
-      default: '',
-    },
-    isEditing: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
-    iteration: {
-      type: Object,
-      required: false,
-      default: () => ({}),
+  apollo: {
+    group: {
+      query: readIteration,
+      skip() {
+        return !this.iterationId;
+      },
+      /* eslint-disable @gitlab/require-i18n-strings */
+      variables() {
+        return {
+          fullPath: this.fullPath,
+          id: convertToGraphQLId('Iteration', this.iterationId),
+          isGroup: true,
+        };
+      },
+      /* eslint-enable @gitlab/require-i18n-strings */
+      result({ data }) {
+        const iteration = data.group.iterations?.nodes[0];
+
+        if (!iteration) {
+          this.error = s__('Iterations|Unable to find iteration.');
+          return;
+        }
+
+        this.title = iteration.title;
+        this.description = iteration.description;
+        this.startDate = iteration.startDate;
+        this.dueDate = iteration.dueDate;
+      },
+      error(err) {
+        this.error = err.message;
+      },
     },
   },
+  inject: ['fullPath', 'previewMarkdownPath'],
   data() {
     return {
-      iterations: [],
       loading: false,
-      title: this.iteration.title,
-      description: this.iteration.description,
-      startDate: this.iteration.startDate,
-      dueDate: this.iteration.dueDate,
+      error: '',
+      group: { iteration: {} },
+      title: '',
+      description: '',
+      startDate: '',
+      dueDate: '',
     };
   },
   computed: {
+    cadenceId() {
+      return this.$router.currentRoute.params.cadenceId;
+    },
+    iterationId() {
+      return this.$router.currentRoute.params.iterationId;
+    },
+    isEditing() {
+      return Boolean(this.iterationId);
+    },
     variables() {
       return {
-        input: {
-          groupPath: this.groupPath,
-          title: this.title,
-          description: this.description,
-          startDate: this.startDate,
-          dueDate: this.dueDate,
-        },
+        groupPath: this.fullPath,
+        title: this.title,
+        description: this.description,
+        startDate: this.startDate,
+        dueDate: this.dueDate,
       };
     },
   },
@@ -73,21 +94,18 @@ export default {
       this.loading = true;
       return this.isEditing ? this.updateIteration() : this.createIteration();
     },
-    cancel() {
-      if (this.iterationsListPath) {
-        visitUrl(this.iterationsListPath);
-      } else {
-        this.$emit('cancel');
-      }
-    },
     createIteration() {
       return this.$apollo
         .mutate({
           mutation: createIteration,
-          variables: this.variables,
+          variables: {
+            ...this.variables,
+            iterationsCadenceId: convertToGraphQLId('Iterations::Cadence', this.cadenceId),
+          },
         })
         .then(({ data }) => {
-          const { errors, iteration } = data.createIteration;
+          const { iteration, errors } = data.iterationCreate;
+
           if (errors.length > 0) {
             this.loading = false;
             createFlash({
@@ -96,7 +114,13 @@ export default {
             return;
           }
 
-          visitUrl(iteration.webUrl);
+          this.$router.push({
+            name: 'iteration',
+            params: {
+              cadenceId: this.cadenceId,
+              iterationId: getIdFromGraphQLId(iteration.id),
+            },
+          });
         })
         .catch(() => {
           this.loading = false;
@@ -111,8 +135,8 @@ export default {
           mutation: updateIteration,
           variables: {
             input: {
-              ...this.variables.input,
-              id: this.iteration.id,
+              ...this.variables,
+              id: this.iterationId,
             },
           },
         })
@@ -125,7 +149,13 @@ export default {
             return;
           }
 
-          this.$emit('updated');
+          this.$router.push({
+            name: 'iteration',
+            params: {
+              cadenceId: this.cadenceId,
+              iterationId: this.iterationId,
+            },
+          });
         })
         .catch(() => {
           createFlash({
@@ -154,6 +184,10 @@ export default {
       </h3>
     </div>
     <hr class="gl-mt-0" />
+
+    <gl-alert v-if="error" class="gl-mb-5" variant="danger" @dismiss="error = ''">{{
+      error
+    }}</gl-alert>
     <gl-form class="row common-note-form">
       <div class="col-md-6">
         <div class="form-group row">
@@ -248,13 +282,13 @@ export default {
       <gl-button
         :loading="loading"
         data-testid="save-iteration"
-        variant="success"
+        variant="confirm"
         data-qa-selector="save_iteration_button"
         @click="save"
       >
         {{ isEditing ? __('Update iteration') : __('Create iteration') }}
       </gl-button>
-      <gl-button class="ml-auto" data-testid="cancel-iteration" @click="cancel">
+      <gl-button class="gl-ml-3" data-testid="cancel-iteration" :to="$options.cadencesList">
         {{ __('Cancel') }}
       </gl-button>
     </div>

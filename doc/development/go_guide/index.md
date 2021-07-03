@@ -436,7 +436,7 @@ and the version being used for [CNG](https://gitlab.com/gitlab-org/build/cng/blo
 
 ### Updating Go version
 
-We should always use a [supported version](https://golang.org/doc/devel/release.html#policy)
+We should always use a [supported version](https://golang.org/doc/devel/release#policy)
 of Go, i.e., one of the three most recent minor releases, and should always use
 the most recent patch-level for that version, as it may contain security fixes.
 
@@ -507,4 +507,4 @@ If the scanner report is small, less than 35 lines, then feel free to [inline th
 
 ---
 
-[Return to Development documentation](../README.md).
+[Return to Development documentation](../index.md).

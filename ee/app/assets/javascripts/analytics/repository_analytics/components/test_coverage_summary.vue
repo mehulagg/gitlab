@@ -1,8 +1,12 @@
 <script>
 import chartEmptyStateIllustration from '@gitlab/svgs/dist/illustrations/chart-empty-state.svg';
-import { GlCard, GlSprintf, GlSafeHtmlDirective as SafeHtml } from '@gitlab/ui';
-import { GlAreaChart } from '@gitlab/ui/dist/charts';
-import MetricCard from '~/analytics/shared/components/metric_card.vue';
+import {
+  GlCard,
+  GlSprintf,
+  GlDeprecatedSkeletonLoading as GlSkeletonLoading,
+  GlSafeHtmlDirective as SafeHtml,
+} from '@gitlab/ui';
+import { GlSingleStat, GlAreaChart } from '@gitlab/ui/dist/charts';
 import { formatDate } from '~/lib/utils/datetime_utility';
 import { SUPPORTED_FORMATS, getFormatter } from '~/lib/utils/unit_format';
 import { __, s__ } from '~/locale';
@@ -18,7 +22,8 @@ export default {
     GlAreaChart,
     GlCard,
     GlSprintf,
-    MetricCard,
+    GlSkeletonLoading,
+    GlSingleStat,
   },
   directives: {
     SafeHtml,
@@ -144,7 +149,6 @@ export default {
     graphName: s__('RepositoriesAnalytics|Average coverage'),
     graphTooltipMessage: __('Code Coverage: %{coveragePercentage}'),
     metrics: {
-      cardTitle: s__('RepositoriesAnalytics|Overall activity'),
       projectCountLabel: s__('RepositoriesAnalytics|Projects with Coverage'),
       averageCoverageLabel: s__('RepositoriesAnalytics|Average Coverage by Job'),
       coverageCountLabel: s__('RepositoriesAnalytics|Jobs with Coverage'),
@@ -155,11 +159,21 @@ export default {
 </script>
 <template>
   <div>
-    <metric-card
-      :title="$options.i18n.metrics.cardTitle"
-      :metrics="metrics"
-      :is-loading="isLoading"
-    />
+    <div
+      class="gl-display-flex gl-flex-direction-column gl-md-flex-direction-row gl-my-6 gl-align-items-flex-start"
+    >
+      <gl-skeleton-loading v-if="isLoading" />
+      <gl-single-stat
+        v-for="metric in metrics"
+        v-else
+        :key="metric.key"
+        class="gl-pr-9 gl-my-4 gl-md-mt-0 gl-md-mb-0"
+        :value="`${metric.value || '-'}`"
+        :unit="metric.value ? metric.unit : null"
+        :title="metric.label"
+        :should-animate="true"
+      />
+    </div>
 
     <gl-card>
       <template #header>

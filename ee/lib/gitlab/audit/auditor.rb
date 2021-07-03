@@ -10,7 +10,6 @@ module Gitlab
       # @option context [User] :author the user who authors the change
       # @option context [User, Project, Group] :scope the scope which audit event belongs to
       # @option context [Object] :target the target object being audited
-      # @option context [Object] :ip_address the request IP address
       # @option context [String] :message the message describing the action
       #
       # @example Using block (useful when events are emitted deep in the call stack)
@@ -21,7 +20,6 @@ module Gitlab
       #     author: current_user,
       #     scope: project_alpha,
       #     target: merge_approval_rule,
-      #     ip_address: request.remote_ip
       #     message: 'a user has attempted to update an approval rule'
       #   }
       #
@@ -58,7 +56,6 @@ module Gitlab
         @author = @context.fetch(:author)
         @scope = @context.fetch(:scope)
         @target = @context.fetch(:target)
-        @ip_address = @context.fetch(:ip_address, nil)
         @message = @context.fetch(:message, '')
       end
 
@@ -91,7 +88,6 @@ module Gitlab
           author: @author,
           scope: @scope,
           target: @target,
-          ip_address: @ip_address,
           message: message
         ).execute
       end

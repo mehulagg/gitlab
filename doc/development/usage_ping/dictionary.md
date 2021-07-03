@@ -288,87 +288,87 @@ Tiers: `free`, `premium`, `ultimate`
 
 ### `compliance_unique_visits.a_compliance_audit_events_api`
 
-Missing description
+Unique users that have used the Audit Events API.
 
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216183912_a_compliance_audit_events_api.yml)
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_all/20210216183912_a_compliance_audit_events_api.yml)
 
-Group: ``
+Group: `group::compliance`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `premium`, `ultimate`
 
 ### `compliance_unique_visits.compliance_unique_visits_for_any_target`
 
-Missing description
+Number of unique visits to any compliance page
 
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216183914_compliance_unique_visits_for_any_target.yml)
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_all/20210216183914_compliance_unique_visits_for_any_target.yml)
 
-Group: ``
+Group: `group::compliance`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `premium`, `ultimate`
 
 ### `compliance_unique_visits.compliance_unique_visits_for_any_target_monthly`
 
-Missing description
+Number of unique visits to any compliance page over a given month
 
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216183916_compliance_unique_visits_for_any_target_monthly.yml)
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210216183916_compliance_unique_visits_for_any_target_monthly.yml)
 
-Group: ``
+Group: `group::compliance`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `premium`, `ultimate`
 
 ### `compliance_unique_visits.g_compliance_audit_events`
 
-Missing description
+Unique users who have viewed audit events
 
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216183906_g_compliance_audit_events.yml)
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_all/20210216183906_g_compliance_audit_events.yml)
 
-Group: ``
+Group: `group::compliance`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `premium`, `ultimate`
 
 ### `compliance_unique_visits.g_compliance_dashboard`
 
-Missing description
+Number of unique visitors to the compliance dashboard.
 
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216183904_g_compliance_dashboard.yml)
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_all/20210216183904_g_compliance_dashboard.yml)
 
-Group: ``
+Group: `group::compliance`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `premium`, `ultimate`
 
 ### `compliance_unique_visits.i_compliance_audit_events`
 
-Missing description
+Unique users that have viewed the instance-level audit events screen
 
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216183908_i_compliance_audit_events.yml)
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_all/20210216183908_i_compliance_audit_events.yml)
 
-Group: ``
+Group: `group::compliance`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `premium`, `ultimate`
 
 ### `compliance_unique_visits.i_compliance_credential_inventory`
 
-Missing description
+Unique users who have viewed the credential inventory
 
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216183910_i_compliance_credential_inventory.yml)
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_all/20210216183910_i_compliance_credential_inventory.yml)
 
-Group: ``
+Group: `group::compliance`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `ultimate`
 
 ### `container_registry_enabled`
 
@@ -5676,7 +5676,7 @@ Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.secret_detection_jobs`
 
-Count of 'secret-detection' CI jobs fro the month.
+Count of all 'secret-detection' CI jobs.
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216182114_secret_detection_jobs.yml)
 
@@ -6600,15 +6600,15 @@ Tiers: `free`, `premium`, `ultimate`
 
 ### `counts_monthly.aggregated_metrics.compliance_features_track_unique_visits_union`
 
-Missing description
+Unique users that have used audit event screen, audit event API, compliance dashboard, or credential inventory
 
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216183201_compliance_features_track_unique_visits_union.yml)
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210216183201_compliance_features_track_unique_visits_union.yml)
 
-Group: ``
+Group: `group::compliance`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `premium`, `ultimate`
 
 ### `counts_monthly.aggregated_metrics.i_testing_paid_monthly_active_user_total`
 
@@ -6816,15 +6816,15 @@ Tiers: `free`, `premium`, `ultimate`
 
 ### `counts_weekly.aggregated_metrics.compliance_features_track_unique_visits_union`
 
-Missing description
+Unique users that have used audit event screen, audit event API, compliance dashboard, or credential inventory
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_7d/20210216183211_compliance_features_track_unique_visits_union.yml)
 
-Group: ``
+Group: `group::compliance`
 
 Status: `data_available`
 
-Tiers:
+Tiers: `premium`, `ultimate`
 
 ### `counts_weekly.aggregated_metrics.i_testing_paid_monthly_active_user_total`
 
@@ -9936,147 +9936,147 @@ Tiers: `free`, `premium`, `ultimate`
 
 ### `redis_hll_counters.compliance.a_compliance_audit_events_api_monthly`
 
-Missing description
+Unique users that have used the Audit Events API in a given month.
 
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216183942_a_compliance_audit_events_api_monthly.yml)
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210216183942_a_compliance_audit_events_api_monthly.yml)
 
-Group: ``
+Group: `group::compliance`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `premium`, `ultimate`
 
 ### `redis_hll_counters.compliance.a_compliance_audit_events_api_weekly`
 
-Missing description
+Unique users that have used the Audit Events API in a given week.
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_7d/20210216183940_a_compliance_audit_events_api_weekly.yml)
 
-Group: ``
+Group: `group::compliance`
 
 Status: `data_available`
 
-Tiers:
+Tiers: `premium`, `ultimate`
 
 ### `redis_hll_counters.compliance.compliance_total_unique_counts_monthly`
 
-Missing description
+Unique count of compliance actions in a given month
 
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216183946_compliance_total_unique_counts_monthly.yml)
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210216183946_compliance_total_unique_counts_monthly.yml)
 
-Group: ``
+Group: `group::compliance`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `premium`, `ultimate`
 
 ### `redis_hll_counters.compliance.compliance_total_unique_counts_weekly`
 
-Missing description
+Unique count of compliance actions in a given week
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_7d/20210216183944_compliance_total_unique_counts_weekly.yml)
 
-Group: ``
+Group: `group::compliance`
 
 Status: `data_available`
 
-Tiers:
+Tiers: `premium`, `ultimate`
 
 ### `redis_hll_counters.compliance.g_compliance_audit_events_monthly`
 
-Missing description
+Unique users who have viewed the audit event screen in a given month.
 
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216183930_g_compliance_audit_events_monthly.yml)
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210216183930_g_compliance_audit_events_monthly.yml)
 
-Group: ``
+Group: `group::compliance`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `premium`, `ultimate`
 
 ### `redis_hll_counters.compliance.g_compliance_audit_events_weekly`
 
-Missing description
+Number of unique visitors to group-level audit events screen in a given week
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_7d/20210216183928_g_compliance_audit_events_weekly.yml)
 
-Group: ``
+Group: `group::compliance`
 
 Status: `data_available`
 
-Tiers:
+Tiers: `premium`, `ultimate`
 
 ### `redis_hll_counters.compliance.g_compliance_dashboard_monthly`
 
-Missing description
+Unique users who have viewed the compliance dashboard in a given month.
 
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216183926_g_compliance_dashboard_monthly.yml)
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210216183926_g_compliance_dashboard_monthly.yml)
 
-Group: ``
+Group: `group::compliance`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `premium`, `ultimate`
 
 ### `redis_hll_counters.compliance.g_compliance_dashboard_weekly`
 
-Missing description
+Unique users who have looked at the compliance dashboard in a given week
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_7d/20210216183924_g_compliance_dashboard_weekly.yml)
 
-Group: ``
+Group: `group::compliance`
 
 Status: `data_available`
 
-Tiers:
+Tiers: `premium`, `ultimate`
 
 ### `redis_hll_counters.compliance.i_compliance_audit_events_monthly`
 
-Missing description
+Unique users that have viewed the instance-level audit events screen
 
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216183934_i_compliance_audit_events_monthly.yml)
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210216183934_i_compliance_audit_events_monthly.yml)
 
-Group: ``
+Group: `group::compliance`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `premium`, `ultimate`
 
 ### `redis_hll_counters.compliance.i_compliance_audit_events_weekly`
 
-Missing description
+Unique users that have viewed the instance-level audit events screen
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_7d/20210216183932_i_compliance_audit_events_weekly.yml)
 
-Group: ``
+Group: `group::compliance`
 
 Status: `data_available`
 
-Tiers:
+Tiers: `premium`, `ultimate`
 
 ### `redis_hll_counters.compliance.i_compliance_credential_inventory_monthly`
 
-Missing description
+Unique users who have viewed the credential inventory in a given month.
 
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216183938_i_compliance_credential_inventory_monthly.yml)
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210216183938_i_compliance_credential_inventory_monthly.yml)
 
-Group: ``
+Group: `group::compliance`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `ultimate`
 
 ### `redis_hll_counters.compliance.i_compliance_credential_inventory_weekly`
 
-Missing description
+Unique visitors to the credential inventory screen in a given week
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_7d/20210216183936_i_compliance_credential_inventory_weekly.yml)
 
-Group: ``
+Group: `group::compliance`
 
 Status: `data_available`
 
-Tiers:
+Tiers: `ultimate`
 
 ### `redis_hll_counters.deploy_token_packages.deploy_token_packages_total_unique_counts_monthly`
 
@@ -11712,7 +11712,7 @@ Tiers: `free`, `premium`, `ultimate`
 
 ### `redis_hll_counters.incident_management.incident_management_alert_assigned_monthly`
 
-Count of an alert's assignments per month
+Count of unique users assigning an alert per month
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216180533_incident_management_alert_assigned_monthly.yml)
 
@@ -11724,7 +11724,7 @@ Tiers: `free`, `premium`, `ultimate`
 
 ### `redis_hll_counters.incident_management.incident_management_alert_assigned_weekly`
 
-Count of an alert's assignments per week
+Count of unique users assigning an alert per week
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_7d/20210216180532_incident_management_alert_assigned_weekly.yml)
 
@@ -11736,7 +11736,7 @@ Tiers: `free`, `premium`, `ultimate`
 
 ### `redis_hll_counters.incident_management.incident_management_alert_status_changed_monthly`
 
-Count of an alert's status changes per month
+Count of unique users changing alert's status changes per month
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216180530_incident_management_alert_status_changed_monthly.yml)
 
@@ -11748,7 +11748,7 @@ Tiers: `free`, `premium`, `ultimate`
 
 ### `redis_hll_counters.incident_management.incident_management_alert_status_changed_weekly`
 
-Count of an alert's status changes per week
+Count of unique users changing alert's status per week
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_7d/20210216180528_incident_management_alert_status_changed_weekly.yml)
 
@@ -11760,7 +11760,7 @@ Tiers: `free`, `premium`, `ultimate`
 
 ### `redis_hll_counters.incident_management.incident_management_alert_todo_monthly`
 
-Count of alerts added to the TODO list per month
+Count of unique users adding alerts to the TODO list per month
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216180537_incident_management_alert_todo_monthly.yml)
 
@@ -11772,7 +11772,7 @@ Tiers: `free`, `premium`, `ultimate`
 
 ### `redis_hll_counters.incident_management.incident_management_alert_todo_weekly`
 
-Count of alerts added to the TODO list per week
+Count of unique users adding alerts to the TODO list per week
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_7d/20210216180535_incident_management_alert_todo_weekly.yml)
 
@@ -11784,7 +11784,7 @@ Tiers: `free`, `premium`, `ultimate`
 
 ### `redis_hll_counters.incident_management.incident_management_incident_assigned_monthly`
 
-Count of an incidents's assignments per month
+Count of users assigning incidents per month
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216180552_incident_management_incident_assigned_monthly.yml)
 
@@ -11796,7 +11796,7 @@ Tiers: `free`, `premium`, `ultimate`
 
 ### `redis_hll_counters.incident_management.incident_management_incident_assigned_weekly`
 
-Count of an incidents's assignments per week
+Count of unique users assiging incidents per week
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_7d/20210216180550_incident_management_incident_assigned_weekly.yml)
 
@@ -11808,7 +11808,7 @@ Tiers: `free`, `premium`, `ultimate`
 
 ### `redis_hll_counters.incident_management.incident_management_incident_change_confidential_monthly`
 
-Count of incidents changed to confidential per month
+Count of users changing incidents to confidential per month
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216180618_incident_management_incident_change_confidential_monthly.yml)
 
@@ -11820,7 +11820,7 @@ Tiers: `free`, `premium`, `ultimate`
 
 ### `redis_hll_counters.incident_management.incident_management_incident_change_confidential_weekly`
 
-Count of incidents changed to confidential per week
+Count of unique users changing incidents to confidential per week
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_7d/20210216180616_incident_management_incident_change_confidential_weekly.yml)
 
@@ -11832,7 +11832,7 @@ Tiers: `free`, `premium`, `ultimate`
 
 ### `redis_hll_counters.incident_management.incident_management_incident_closed_monthly`
 
-Count of incidents closed per month
+Count of users closing incidents per month
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216180548_incident_management_incident_closed_monthly.yml)
 
@@ -11844,7 +11844,7 @@ Tiers: `free`, `premium`, `ultimate`
 
 ### `redis_hll_counters.incident_management.incident_management_incident_closed_weekly`
 
-Count of incidents closed per week
+Count of users closing incidents per week
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_7d/20210216180546_incident_management_incident_closed_weekly.yml)
 
@@ -11856,7 +11856,7 @@ Tiers: `free`, `premium`, `ultimate`
 
 ### `redis_hll_counters.incident_management.incident_management_incident_comment_monthly`
 
-Count of comments per month on incidents
+Count of unique users adding comments per month on incidents
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216180559_incident_management_incident_comment_monthly.yml)
 
@@ -11868,7 +11868,7 @@ Tiers: `free`, `premium`, `ultimate`
 
 ### `redis_hll_counters.incident_management.incident_management_incident_comment_weekly`
 
-Count of comments per week on incidents
+Count of unique users adding comments on incidents per week
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_7d/20210216180558_incident_management_incident_comment_weekly.yml)
 
@@ -11880,7 +11880,7 @@ Tiers: `free`, `premium`, `ultimate`
 
 ### `redis_hll_counters.incident_management.incident_management_incident_created_monthly`
 
-Count of incidents created per month
+Count of unique users creating incidents per month
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216180541_incident_management_incident_created_monthly.yml)
 
@@ -11892,7 +11892,7 @@ Tiers: `free`, `premium`, `ultimate`
 
 ### `redis_hll_counters.incident_management.incident_management_incident_created_weekly`
 
-Count of incidents created per week
+Count of unique users creating incidents  per week
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_7d/20210216180539_incident_management_incident_created_weekly.yml)
 
@@ -11904,7 +11904,7 @@ Tiers: `free`, `premium`, `ultimate`
 
 ### `redis_hll_counters.incident_management.incident_management_incident_published_monthly`
 
-Count of published incidents per month
+Count of unique users that published incidents per month
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210216180607_incident_management_incident_published_monthly.yml)
 
@@ -11916,7 +11916,7 @@ Tiers: `free`, `premium`, `ultimate`
 
 ### `redis_hll_counters.incident_management.incident_management_incident_published_weekly`
 
-Count of published incidents per week
+Count of unique users that published incidents per week
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_7d/20210216180605_incident_management_incident_published_weekly.yml)
 
@@ -11928,7 +11928,7 @@ Tiers: `free`, `premium`, `ultimate`
 
 ### `redis_hll_counters.incident_management.incident_management_incident_relate_monthly`
 
-Count of issues added per month that are related to an incident
+Count of unique users adding issues per month that are related to an incident
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216180611_incident_management_incident_relate_monthly.yml)
 
@@ -11940,7 +11940,7 @@ Tiers: `free`, `premium`, `ultimate`
 
 ### `redis_hll_counters.incident_management.incident_management_incident_relate_weekly`
 
-Count of issues added per week that are related to an incident
+Count of unique users adding issues per that are related to an incident week
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_7d/20210216180609_incident_management_incident_relate_weekly.yml)
 
@@ -11952,7 +11952,7 @@ Tiers: `free`, `premium`, `ultimate`
 
 ### `redis_hll_counters.incident_management.incident_management_incident_reopened_monthly`
 
-Count of incidents reopened per month
+Count of unique users reopening incidents per month
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216180545_incident_management_incident_reopened_monthly.yml)
 
@@ -11964,7 +11964,7 @@ Tiers: `free`, `premium`, `ultimate`
 
 ### `redis_hll_counters.incident_management.incident_management_incident_reopened_weekly`
 
-Count of incidents reopened per week
+Count of unique users reopening incidents per week
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_7d/20210216180543_incident_management_incident_reopened_weekly.yml)
 
@@ -11976,7 +11976,7 @@ Tiers: `free`, `premium`, `ultimate`
 
 ### `redis_hll_counters.incident_management.incident_management_incident_todo_monthly`
 
-Count of incidents added to the TODO list per month
+Count of unique users adding incidents to the TODO list per month
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216180556_incident_management_incident_todo_monthly.yml)
 
@@ -11988,7 +11988,7 @@ Tiers: `free`, `premium`, `ultimate`
 
 ### `redis_hll_counters.incident_management.incident_management_incident_todo_weekly`
 
-Count of incidents added to the TODO list per week
+Count of unique users adding incidents to the TODO list per week
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_7d/20210216180554_incident_management_incident_todo_weekly.yml)
 
@@ -12000,7 +12000,7 @@ Tiers: `free`, `premium`, `ultimate`
 
 ### `redis_hll_counters.incident_management.incident_management_incident_unrelate_monthly`
 
-Count of issues removed per month that are related to an incident
+Count of users removing issues that are related to an incident per month
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216180614_incident_management_incident_unrelate_monthly.yml)
 
@@ -12012,7 +12012,7 @@ Tiers: `free`, `premium`, `ultimate`
 
 ### `redis_hll_counters.incident_management.incident_management_incident_unrelate_weekly`
 
-Count of issues removed per week that are related to an incident
+Count of unique users removing issue that are related to an incident per week
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_7d/20210216180612_incident_management_incident_unrelate_weekly.yml)
 
@@ -12024,7 +12024,7 @@ Tiers: `free`, `premium`, `ultimate`
 
 ### `redis_hll_counters.incident_management.incident_management_incident_zoom_meeting_monthly`
 
-Count of Zoom meetings about incidents per month
+Count of users creating Zoom meetings about incidents per month
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216180603_incident_management_incident_zoom_meeting_monthly.yml)
 
@@ -12036,7 +12036,7 @@ Tiers: `free`, `premium`, `ultimate`
 
 ### `redis_hll_counters.incident_management.incident_management_incident_zoom_meeting_weekly`
 
-Count of Zoom meetings about incidents per week
+Count of unique users creating Zoom meetings about incidents per week
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_7d/20210216180601_incident_management_incident_zoom_meeting_weekly.yml)
 
@@ -12048,7 +12048,7 @@ Tiers: `free`, `premium`, `ultimate`
 
 ### `redis_hll_counters.incident_management.incident_management_total_unique_counts_monthly`
 
-Count of total unique incidents per month
+Count of unique users performing events related with incidents per month
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216180622_incident_management_total_unique_counts_monthly.yml)
 
@@ -12060,7 +12060,7 @@ Tiers: `free`, `premium`, `ultimate`
 
 ### `redis_hll_counters.incident_management.incident_management_total_unique_counts_weekly`
 
-Count of total unique incidents per week
+Count of unique users performing events related to the incident management
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_7d/20210216180620_incident_management_total_unique_counts_weekly.yml)
 
@@ -12933,6 +12933,30 @@ Group: `group::project management`
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
+
+### `redis_hll_counters.network_policies.clusters_using_network_policies_ui_monthly`
+
+Monthly number of distinct clusters with network policies using the network policies UI
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210623202402_clusters_using_network_policies_ui_monthly.yml)
+
+Group: `group::container security`
+
+Status: `implemented`
+
+Tiers: `ultimate`
+
+### `redis_hll_counters.network_policies.clusters_using_network_policies_ui_weekly`
+
+Weekly number of distinct clusters with network policies using the network policies UI
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_7d/20210623202358_clusters_using_network_policies_ui_weekly.yml)
+
+Group: `group::container security`
+
+Status: `implemented`
+
+Tiers: `ultimate`
 
 ### `redis_hll_counters.pipeline_authoring.o_pipeline_authoring_unique_users_committing_ciconfigfile_monthly`
 
@@ -16332,6 +16356,18 @@ Status: `data_available`
 
 Tiers: `free`
 
+### `usage_activity_by_stage.manage.compliance_frameworks_with_pipeline`
+
+Count of compliance frameworks that have a pipeline configuration
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_all/20210622123800_compliance_frameworks_with_pipeline.yml)
+
+Group: `compliance`
+
+Status: `implemented`
+
+Tiers: `ultimate`
+
 ### `usage_activity_by_stage.manage.custom_compliance_frameworks`
 
 Total count of all custom compliance framework labels
@@ -17282,6 +17318,18 @@ Status: `data_available`
 
 Tiers:
 
+### `usage_activity_by_stage.secure.cluster_image_scanning_scans`
+
+Counts cluster image scanning jobs
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_all/20210618124854_cluster_image_scanning_scans.yml)
+
+Group: `group::container security`
+
+Status: `implemented`
+
+Tiers: `ultimate`
+
 ### `usage_activity_by_stage.secure.container_scanning_scans`
 
 Counts container scanning jobs
@@ -17312,11 +17360,11 @@ Counts dast jobs
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_all/20210216182122_dast_scans.yml)
 
-Group: `group::static analysis`
+Group: `group::dynamic analysis`
 
 Status: `data_available`
 
-Tiers:
+Tiers: `ultimate`
 
 ### `usage_activity_by_stage.secure.dependency_scanning_scans`
 
@@ -17325,18 +17373,6 @@ Total number of users running Dependency Scanning Scans
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_all/20210216175220_dependency_scanning_scans.yml)
 
 Group: `group::composition analysis`
-
-Status: `data_available`
-
-Tiers: `ultimate`
-
-### `usage_activity_by_stage.secure.running_container_scanning_scans`
-
-Counts running container scanning jobs
-
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_all/20210618124854_running_container_scanning_scans.yml)
-
-Group: `group::container security`
 
 Status: `data_available`
 
@@ -17352,11 +17388,11 @@ Group: `group::static analysis`
 
 Status: `data_available`
 
-Tiers:
+Tiers: `ultimate`
 
 ### `usage_activity_by_stage.secure.secret_detection_scans`
 
-Counts secret detection jobs
+counts secret detection jobs
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_all/20210216182123_secret_detection_scans.yml)
 
@@ -17364,7 +17400,7 @@ Group: `group::static analysis`
 
 Status: `data_available`
 
-Tiers:
+Tiers: `ultimate`
 
 ### `usage_activity_by_stage.secure.user_api_fuzzing_dnd_jobs`
 
@@ -17524,7 +17560,7 @@ Tiers: `ultimate`
 
 ### `usage_activity_by_stage.secure.user_sast_jobs`
 
-Count of SAST jobs
+Count of SAST jobs per user
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216182116_user_sast_jobs.yml)
 
@@ -17548,7 +17584,7 @@ Tiers: `ultimate`
 
 ### `usage_activity_by_stage.secure.user_secret_detection_jobs`
 
-Count of Secret Detection Jobs
+Count of Secret Detection Jobs per user
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216182118_user_secret_detection_jobs.yml)
 
@@ -18397,6 +18433,18 @@ Group: ``
 Status: `data_available`
 
 Tiers: `free`
+
+### `usage_activity_by_stage_monthly.manage.compliance_frameworks_with_pipeline`
+
+Count of compliance frameworks that have a pipeline configuration
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210622091519_compliance_frameworks_with_pipeline.yml)
+
+Group: `compliance`
+
+Status: `implemented`
+
+Tiers: `ultimate`
 
 ### `usage_activity_by_stage_monthly.manage.custom_compliance_frameworks`
 
@@ -19346,6 +19394,30 @@ Status: `data_available`
 
 Tiers: `free`
 
+### `usage_activity_by_stage_monthly.secure.cluster_image_scanning_pipeline`
+
+Pipelines containing a Cluster Image Scanning job
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210618125224_cluster_image_scanning_pipeline.yml)
+
+Group: `group::container security`
+
+Status: `implemented`
+
+Tiers: `ultimate`
+
+### `usage_activity_by_stage_monthly.secure.cluster_image_scanning_scans`
+
+Counts cluster image scanning jobs
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210618101233_cluster_image_scanning_scans.yml)
+
+Group: `group::container security`
+
+Status: `implemented`
+
+Tiers: `ultimate`
+
 ### `usage_activity_by_stage_monthly.secure.container_scanning_pipeline`
 
 Pipelines containing a Container Scanning job
@@ -19437,30 +19509,6 @@ Monthly number of users running Dependency Scanning Scans
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210216183828_dependency_scanning_scans.yml)
 
 Group: `group::composition analysis`
-
-Status: `data_available`
-
-Tiers: `ultimate`
-
-### `usage_activity_by_stage_monthly.secure.running_container_scanning_pipeline`
-
-Pipelines containing a Running Container Scanning job
-
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210618125224_running_container_scanning_pipeline.yml)
-
-Group: `group::container security`
-
-Status: `data_available`
-
-Tiers: `ultimate`
-
-### `usage_activity_by_stage_monthly.secure.running_container_scanning_scans`
-
-Counts running container scanning jobs
-
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210618101233_running_container_scanning_scans.yml)
-
-Group: `group::container security`
 
 Status: `data_available`
 

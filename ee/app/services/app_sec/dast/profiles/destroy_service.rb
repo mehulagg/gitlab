@@ -9,6 +9,8 @@ module AppSec
           return ServiceResponse.error(message: 'Profile parameter missing') unless dast_profile
           return ServiceResponse.error(message: 'Profile failed to delete') unless dast_profile.destroy
 
+          create_audit_event
+
           ServiceResponse.success(payload: dast_profile)
         end
 
@@ -27,6 +29,16 @@ module AppSec
 
         def dast_profile
           params[:dast_profile]
+        end
+
+        def create_audit_event
+          ::Gitlab::Audit::Auditor.audit(
+            name: 'dast_profile_destroy',
+            author: current_user,
+            scope: container,
+            target: dast_profile,
+            message: "Removed DAST profile"
+          )
         end
       end
     end

@@ -20,6 +20,7 @@ const state = {
   organizationName: 'Organization name',
   paymentMethodId: 'Payment method ID',
   numberOfUsers: 1,
+  source: 'some_source',
 };
 
 describe('Subscriptions Getters', () => {
@@ -245,6 +246,7 @@ describe('Subscriptions Getters', () => {
           plan_id: 'firstPlan',
           payment_method_id: 'Payment method ID',
           quantity: 1,
+          source: 'some_source',
         },
       });
     });

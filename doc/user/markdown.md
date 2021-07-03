@@ -31,7 +31,7 @@ and the [main GitLab website](https://about.gitlab.com) use [Kramdown](https://k
 You should not view this page in the documentation, but instead [view these styles as they appear on GitLab](https://gitlab.com/gitlab-org/gitlab/-/blob/master/doc/user/markdown.md).
 
 GitLab Flavored Markdown extends the [CommonMark specification](https://spec.commonmark.org/current/).
-It was inspired by [GitHub Flavored Markdown](https://docs.github.com/en/github/writing-on-github/basic-writing-and-formatting-syntax).
+It was inspired by [GitHub Flavored Markdown](https://docs.github.com/en/github/writing-on-github/getting-started-with-writing-and-formatting-on-github/basic-writing-and-formatting-syntax).
 
 ## Where you can use GitLab Flavored Markdown
 
@@ -507,7 +507,8 @@ This example links to `<wiki_root>/miscellaneous.md`:
 
 GitLab Flavored Markdown renders GitLab-specific references. For example, you can reference
 an issue, a commit, a team member, or even an entire project team. GitLab Flavored Markdown turns
-that reference into a link so you can navigate between them.
+that reference into a link so you can navigate between them. All references to namespaces or 
+projects must use lower-case characters.
 
 Additionally, GitLab Flavored Markdown recognizes certain cross-project references and also has a shorthand
 version to reference other projects from the same namespace.
@@ -1181,7 +1182,7 @@ Do not edit the following codeblock. It uses HTML to skip the Vale ReferenceLink
 
 <pre class="highlight"><code>- This is an [inline-style link](https://www.google.com)
 - This is a [link to a repository file in the same directory](index.md)
-- This is a [relative link to a readme one directory higher](../README.md)
+- This is a [relative link to a readme one directory higher](../index.md)
 - This is a [link that also has title text](https://www.google.com "This link takes you to Google!")
 
 Using header ID anchors:
@@ -1204,7 +1205,7 @@ Some text to show that the reference links can follow later.
 
 - This is an [inline-style link](https://www.google.com)
 - This is a [link to a repository file in the same directory](index.md)
-- This is a [relative link to a README one directory higher](../README.md)
+- This is a [relative link to a README one directory higher](../index.md)
 - This is a [link that also has title text](https://www.google.com "This link takes you to Google!")
 
 Using header ID anchors:

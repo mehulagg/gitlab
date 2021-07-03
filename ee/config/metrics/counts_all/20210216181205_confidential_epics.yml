@@ -1,4 +1,5 @@
 ---
+data_category: Optional
 key_path: counts.confidential_epics
 description: Count of confidential epics
 product_section: dev

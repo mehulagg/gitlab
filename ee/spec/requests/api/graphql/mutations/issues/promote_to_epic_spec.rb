@@ -12,6 +12,7 @@ RSpec.describe 'Setting the epic of an issue' do
   let_it_be(:project) { create(:project, group: group) }
   let_it_be(:issue) { create(:issue, project: project) }
   let_it_be(:user) { create(:user) }
+
   let(:input) { { group_path: new_epic_group&.full_path } }
 
   let(:mutation) do

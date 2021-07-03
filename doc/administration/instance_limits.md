@@ -192,7 +192,7 @@ The number of pipelines that can be created in a single push is 4.
 This is to prevent the accidental creation of pipelines when `git push --all`
 or `git push --mirror` is used.
 
-Read more in the [CI documentation](../ci/yaml/README.md#processing-git-pushes).
+Read more in the [CI documentation](../ci/yaml/index.md#processing-git-pushes).
 
 ## Retention of activity history
 
@@ -264,7 +264,7 @@ and to limit memory consumption.
 When using offset-based pagination in the REST API, there is a limit to the maximum
 requested offset into the set of results. This limit is only applied to endpoints that
 support keyset-based pagination. More information about pagination options can be
-found in the [API docs section on pagination](../api/README.md#pagination).
+found in the [API docs section on pagination](../api/index.md#pagination).
 
 To set this limit for a self-managed installation, run the following in the
 [GitLab Rails console](operations/rails_console.md#starting-a-rails-console-session):
@@ -407,7 +407,7 @@ Plan.default.actual_limits.update!(ci_instance_level_variables: 30)
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/37226) in GitLab 13.3.
 
-Job artifacts defined with [`artifacts:reports`](../ci/yaml/README.md#artifactsreports)
+Job artifacts defined with [`artifacts:reports`](../ci/yaml/index.md#artifactsreports)
 that are uploaded by the runner are rejected if the file size exceeds the maximum
 file size limit. The limit is determined by comparing the project's
 [maximum artifact size setting](../user/admin_area/settings/continuous_integration.md#maximum-artifacts-size)
@@ -426,6 +426,7 @@ setting is used:
 | `ci_max_artifact_size_archive`                    | 0             |
 | `ci_max_artifact_size_browser_performance`        | 0             |
 | `ci_max_artifact_size_cluster_applications`       | 0             |
+| `ci_max_artifact_size_cluster_image_scanning`     | 0             |
 | `ci_max_artifact_size_cobertura`                  | 0             |
 | `ci_max_artifact_size_codequality`                | 0             |
 | `ci_max_artifact_size_container_scanning`         | 0             |
@@ -444,7 +445,6 @@ setting is used:
 | `ci_max_artifact_size_network_referee`            | 0             |
 | `ci_max_artifact_size_performance`                | 0             |
 | `ci_max_artifact_size_requirements`               | 0             |
-| `ci_max_artifact_size_running_container_scanning` | 0             |
 | `ci_max_artifact_size_sast`                       | 0             |
 | `ci_max_artifact_size_secret_detection`           | 0             |
 | `ci_max_artifact_size_terraform`                  | 5 MB ([introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/37018) in GitLab 13.3) |
@@ -576,7 +576,7 @@ prevent any more changes from rendering. For more information about these limits
 Reports that go over the 20 MB limit won't be loaded. Affected reports:
 
 - [Merge request security reports](../user/project/merge_requests/testing_and_reports_in_merge_requests.md#security-reports)
-- [CI/CD parameter `artifacts:expose_as`](../ci/yaml/README.md#artifactsexpose_as)
+- [CI/CD parameter `artifacts:expose_as`](../ci/yaml/index.md#artifactsexpose_as)
 - [Unit test reports](../ci/unit_test_reports.md)
 
 ## Advanced Search limits

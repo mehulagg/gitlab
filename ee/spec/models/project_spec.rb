@@ -62,6 +62,32 @@ RSpec.describe Project do
     it { is_expected.to have_many(:incident_management_oncall_rotations).through(:incident_management_oncall_schedules).source(:rotations) }
     it { is_expected.to have_many(:incident_management_escalation_policies).class_name('IncidentManagement::EscalationPolicy') }
 
+    include_examples 'ci_cd_settings delegation'
+
+    describe '#merge_pipelines_enabled?' do
+      it_behaves_like 'a ci_cd_settings predicate method' do
+        let(:delegated_method) { :merge_pipelines_enabled? }
+      end
+    end
+
+    describe '#merge_pipelines_were_disabled?' do
+      it_behaves_like 'a ci_cd_settings predicate method' do
+        let(:delegated_method) { :merge_pipelines_were_disabled? }
+      end
+    end
+
+    describe '#merge_trains_enabled?' do
+      it_behaves_like 'a ci_cd_settings predicate method' do
+        let(:delegated_method) { :merge_trains_enabled? }
+      end
+    end
+
+    describe '#auto_rollback_enabled?' do
+      it_behaves_like 'a ci_cd_settings predicate method' do
+        let(:delegated_method) { :auto_rollback_enabled? }
+      end
+    end
+
     describe '#jira_vulnerabilities_integration_enabled?' do
       context 'when project lacks a jira_integration relation' do
         it 'returns false' do
@@ -252,16 +278,6 @@ RSpec.describe Project do
 
         expect(described_class.with_wiki_enabled).to include(project)
         expect(described_class.with_wiki_enabled).not_to include(project1)
-      end
-    end
-
-    describe '.with_active_services' do
-      it 'returns the correct project' do
-        active_service = create(:service, active: true)
-        inactive_service = create(:service, active: false)
-
-        expect(described_class.with_active_services).to include(active_service.project)
-        expect(described_class.with_active_services).not_to include(inactive_service.project)
       end
     end
 
@@ -913,14 +929,14 @@ RSpec.describe Project do
         before do
           stub_licensed_features(group_webhooks: true)
         end
-        let(:fake_service) { double }
+        let(:fake_integration) { double }
 
         shared_examples 'triggering group webhook' do
           it 'executes the hook' do
-            expect(fake_service).to receive(:async_execute).once
+            expect(fake_integration).to receive(:async_execute).once
 
-            expect(WebHookService).to receive(:new)
-                                        .with(group_hook, { some: 'info' }, 'push_hooks') { fake_service }
+            expect(WebHookService)
+              .to receive(:new).with(group_hook, { some: 'info' }, 'push_hooks') { fake_integration }
 
             project.execute_hooks(some: 'info')
           end

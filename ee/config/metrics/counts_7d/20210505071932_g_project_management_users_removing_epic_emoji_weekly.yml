@@ -1,4 +1,5 @@
 ---
+data_category: Optional
 key_path: redis_hll_counters.epics_usage.g_project_management_users_removing_epic_emoji_weekly
 description: Counts of WAU removing emoji on epic
 product_section: dev

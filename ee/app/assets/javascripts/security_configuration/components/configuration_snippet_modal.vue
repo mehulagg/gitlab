@@ -17,6 +17,7 @@ export default {
     helpText: s__(
       'This code snippet contains everything reflected in the configuration form. Copy and paste it into %{linkStart}.gitlab-ci.yml%{linkEnd} file and save your changes. Future %{scanType} scans will use these settings.',
     ),
+    modalTitle: s__('SecurityConfiguration|%{scanType} configuration code snippet'),
     primaryText: s__('SecurityConfiguration|Copy code and open .gitlab-ci.yml file'),
     secondaryText: s__('SecurityConfiguration|Copy code only'),
     cancelText: __('Cancel'),
@@ -41,7 +42,7 @@ export default {
   },
   computed: {
     modalTitle() {
-      return sprintf(s__('SecurityConfiguration|Code snippet for the %{scanType} configuration'), {
+      return sprintf(this.$options.i18n.modalTitle, {
         scanType: this.scanType,
       });
     },

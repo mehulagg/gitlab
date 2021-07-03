@@ -7,6 +7,7 @@ RSpec.describe AppSec::Dast::Profiles::BuildConfigService do
   let_it_be(:dast_site_profile) { create(:dast_site_profile, project: project) }
   let_it_be(:dast_scanner_profile) { create(:dast_scanner_profile, project: project) }
   let_it_be(:user) { create(:user, developer_projects: [project] ) }
+  let_it_be(:outsider) { create(:user) }
 
   let(:dast_site_profile_name) { dast_site_profile.name }
   let(:dast_scanner_profile_name) { dast_scanner_profile.name }
@@ -20,7 +21,17 @@ RSpec.describe AppSec::Dast::Profiles::BuildConfigService do
       stub_licensed_features(security_on_demand_scans: true)
     end
 
+    shared_examples 'an error occurred' do
+      it 'communicates failure', :aggregate_failures do
+        expect(subject).to be_error
+        expect(subject.payload[profile.class.underscore.to_sym]).to be_nil
+        expect(subject.errors).to include(error_message)
+      end
+    end
+
     shared_examples 'a fetch operation' do |dast_profile_name_key|
+      let(:profile_name) { public_send(dast_profile_name_key) }
+
       context 'when licensed' do
         context 'when the profile exists' do
           it 'includes the profile in the payload', :aggregate_failures do
@@ -41,18 +52,31 @@ RSpec.describe AppSec::Dast::Profiles::BuildConfigService do
         context 'when the profile does not exist' do
           let(dast_profile_name_key) { SecureRandom.hex }
 
-          it 'does not include the profile in the payload', :aggregate_failures do
-            expect(subject).to be_success
-            expect(subject.payload[profile.class.underscore.to_sym]).to be_nil
+          it_behaves_like 'an error occurred' do
+            let(:error_message) { "DAST profile not found: #{profile_name}" }
           end
         end
 
-        context 'when the user does not have access to the profile' do
+        context 'when the profile cannot be read' do
+          let_it_be(:user) { outsider }
+
+          before do
+            allow_next_instance_of(AppSec::Dast::Profiles::BuildConfigService) do |service|
+              allow(service).to receive(:can?).and_call_original
+              allow(service).to receive(:can?).with(user, :create_on_demand_dast_scan, project).and_return(true)
+            end
+          end
+
+          it_behaves_like 'an error occurred' do
+            let(:error_message) { "DAST profile not found: #{profile_name}" }
+          end
+        end
+
+        context 'when the user cannot create dast scans' do
           let_it_be(:user) { build(:user) }
 
-          it 'does not include the profile in the payload', :aggregate_failures do
-            expect(subject).to be_success
-            expect(subject.payload[profile.class.underscore.to_sym]).to be_nil
+          it_behaves_like 'an error occurred' do
+            let(:error_message) { 'Insufficient permissions for dast_configuration keyword' }
           end
         end
       end
@@ -62,8 +86,8 @@ RSpec.describe AppSec::Dast::Profiles::BuildConfigService do
           stub_licensed_features(security_on_demand_scans: false)
         end
 
-        it 'communicates failure' do
-          expect(subject).to have_attributes(status: :error, message: 'Insufficient permissions')
+        it_behaves_like 'an error occurred' do
+          let(:error_message) { 'Insufficient permissions for dast_configuration keyword' }
         end
       end
     end

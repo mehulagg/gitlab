@@ -1,4 +1,5 @@
 ---
+data_category: Operational
 key_path: counts.container_scanning_jobs
 description: Count of Container Scanning jobs run
 product_section: sec

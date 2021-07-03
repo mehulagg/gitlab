@@ -54,39 +54,7 @@ RSpec.describe RequirementsManagement::TestReport do
       context 'when only requirement issue is set' do
         let(:requirement_arg) { nil }
 
-        context 'when the requirement issue is of type requirement' do
-          let(:requirement_issue_arg) { requirement_issue }
-
-          specify { expect(subject).to be_valid }
-        end
-
-        context 'when requirement issue is not of requirement type' do
-          let(:invalid_issue) { create(:issue) }
-          let(:requirement_issue_arg) { invalid_issue }
-
-          specify do
-            expect(subject).not_to be_valid
-            expect(subject.errors.messages[:requirement_issue]).to include(/You cannot associate a Test Report with a issue/)
-          end
-
-          context 'when requirement issue is invalid but the type field is not dirty' do
-            let(:requirement_arg) { nil }
-            let(:requirement_issue_arg) { requirement_issue }
-
-            before do
-              subject.save!
-
-              # simulate the issue type changing in the background, which will be allowed
-              # the state is technically "invalid" (there are test reports associated with a non-requirement issue)
-              # but we don't want to prevent updating other fields
-              requirement_issue.update_attribute(:issue_type, :incident)
-            end
-
-            specify do
-              expect(subject).to be_valid
-            end
-          end
-        end
+        it_behaves_like 'a model with a requirement issue association'
       end
     end
   end

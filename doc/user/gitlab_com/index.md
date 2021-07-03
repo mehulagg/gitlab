@@ -104,14 +104,14 @@ which is part of [GitLab CI/CD](#gitlab-cicd).
 
 ## GitLab CI/CD
 
-Below are the current settings regarding [GitLab CI/CD](../../ci/README.md).
+Below are the current settings regarding [GitLab CI/CD](../../ci/index.md).
 Any settings or feature limits not listed here are using the defaults listed in
 the related documentation.
 
 | Setting                             | GitLab.com | Default |
 |-------------------------------------|------------|---------|
 | Artifacts maximum size (compressed) | 1 GB       | 100 MB  |
-| Artifacts [expiry time](../../ci/yaml/README.md#artifactsexpire_in)   | From June 22, 2020, deleted after 30 days unless otherwise specified (artifacts created before that date have no expiry).           | deleted after 30 days unless otherwise specified    |
+| Artifacts [expiry time](../../ci/yaml/index.md#artifactsexpire_in)   | From June 22, 2020, deleted after 30 days unless otherwise specified (artifacts created before that date have no expiry).           | deleted after 30 days unless otherwise specified    |
 | Scheduled Pipeline Cron | `*/5 * * * *` | `3-59/10 * * * *` |
 | [Max jobs in active pipelines](../../administration/instance_limits.md#number-of-jobs-in-active-pipelines) | `500` for Free tier, unlimited otherwise | Unlimited |
 | [Max CI/CD subscriptions to a project](../../administration/instance_limits.md#number-of-cicd-subscriptions-to-a-project) | `2` | Unlimited |
@@ -181,7 +181,7 @@ The following limits apply for [Webhooks](../project/integrations/webhooks.md):
 
 GitLab has shared runners on GitLab.com that you can use to run your CI jobs.
 
-For more information, see [choosing a runner](../../ci/runners/README.md).
+For more information, see [choosing a runner](../../ci/runners/index.md).
 
 ## Sidekiq
 

@@ -1,4 +1,5 @@
 ---
+data_category: Optional
 key_path: counts.epic_issues
 description: Count of issues that are assigned to an epic
 product_section: dev

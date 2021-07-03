@@ -1,6 +1,6 @@
 <script>
 import { GlButton, GlForm, GlFormInput, GlFormGroup, GlFormRadioGroup, GlModal } from '@gitlab/ui';
-import { cloneDeep } from 'lodash';
+import { cloneDeep, uniqueId } from 'lodash';
 import Vue from 'vue';
 import { mapState, mapActions } from 'vuex';
 import { filterStagesByHiddenStatus } from '~/cycle_analytics/utils';
@@ -26,10 +26,14 @@ import {
 const initializeStageErrors = (defaultStageConfig, selectedPreset = PRESET_OPTIONS_DEFAULT) =>
   selectedPreset === PRESET_OPTIONS_DEFAULT ? defaultStageConfig.map(() => ({})) : [{}];
 
-const initializeStages = (defaultStageConfig, selectedPreset = PRESET_OPTIONS_DEFAULT) =>
-  selectedPreset === PRESET_OPTIONS_DEFAULT
-    ? defaultStageConfig
-    : [{ ...defaultCustomStageFields }];
+const initializeStages = (defaultStageConfig, selectedPreset = PRESET_OPTIONS_DEFAULT) => {
+  const stages =
+    selectedPreset === PRESET_OPTIONS_DEFAULT
+      ? defaultStageConfig
+      : [{ ...defaultCustomStageFields }];
+
+  return stages.map((stage) => ({ ...stage, transitionKey: uniqueId('stage-') }));
+};
 
 export default {
   name: 'ValueStreamForm',
@@ -85,6 +89,7 @@ export default {
       stageErrors:
         cloneDeep(stageErrors) || initializeStageErrors(defaultStageConfig, initialPreset),
     };
+
     return {
       hiddenStages: filterStagesByHiddenStatus(initialStages),
       selectedPreset: initialPreset,
@@ -179,11 +184,6 @@ export default {
         }
       });
     },
-    stageKey(index) {
-      return this.selectedPreset === PRESET_OPTIONS_DEFAULT
-        ? `default-template-stage-${index}`
-        : `custom-template-stage-${index}`;
-    },
     stageGroupLabel(index) {
       return sprintf(this.$options.i18n.STAGE_INDEX, { index: index + 1 });
     },
@@ -249,7 +249,10 @@ export default {
     addNewStage() {
       // validate previous stages only and add a new stage
       this.validate();
-      Vue.set(this, 'stages', [...this.stages, { ...defaultCustomStageFields }]);
+      Vue.set(this, 'stages', [
+        ...this.stages,
+        { ...defaultCustomStageFields, transitionKey: uniqueId('stage-') },
+      ]);
       Vue.set(this, 'stageErrors', [...this.stageErrors, {}]);
     },
     onAddStage() {
@@ -351,39 +354,41 @@ export default {
         @input="onSelectPreset"
       />
       <div data-testid="extended-form-fields">
-        <div
-          v-for="(stage, activeStageIndex) in stages"
-          ref="formStages"
-          :key="stageKey(activeStageIndex)"
-        >
-          <hr class="gl-my-3" />
-          <span
-            class="gl-display-flex gl-m-0 gl-vertical-align-middle gl-mr-2 gl-font-weight-bold gl-display-flex gl-pb-3"
-            >{{ stageGroupLabel(activeStageIndex) }}</span
+        <transition-group name="stage-list" tag="div">
+          <div
+            v-for="(stage, activeStageIndex) in stages"
+            ref="formStages"
+            :key="stage.id || stage.transitionKey"
           >
-          <custom-stage-fields
-            v-if="stage.custom"
-            :stage="stage"
-            :stage-events="formEvents"
-            :index="activeStageIndex"
-            :total-stages="stages.length"
-            :errors="fieldErrors(activeStageIndex)"
-            @move="handleMove"
-            @remove="onRemove"
-            @input="onFieldInput(activeStageIndex, $event)"
-          />
-          <default-stage-fields
-            v-else
-            :stage="stage"
-            :stage-events="formEvents"
-            :index="activeStageIndex"
-            :total-stages="stages.length"
-            :errors="fieldErrors(activeStageIndex)"
-            @move="handleMove"
-            @hide="onHide"
-            @input="validateStageFields(activeStageIndex)"
-          />
-        </div>
+            <hr class="gl-my-3" />
+            <span
+              class="gl-display-flex gl-m-0 gl-vertical-align-middle gl-mr-2 gl-font-weight-bold gl-display-flex gl-pb-3"
+              >{{ stageGroupLabel(activeStageIndex) }}</span
+            >
+            <custom-stage-fields
+              v-if="stage.custom"
+              :stage="stage"
+              :stage-events="formEvents"
+              :index="activeStageIndex"
+              :total-stages="stages.length"
+              :errors="fieldErrors(activeStageIndex)"
+              @move="handleMove"
+              @remove="onRemove"
+              @input="onFieldInput(activeStageIndex, $event)"
+            />
+            <default-stage-fields
+              v-else
+              :stage="stage"
+              :stage-events="formEvents"
+              :index="activeStageIndex"
+              :total-stages="stages.length"
+              :errors="fieldErrors(activeStageIndex)"
+              @move="handleMove"
+              @hide="onHide"
+              @input="validateStageFields(activeStageIndex)"
+            />
+          </div>
+        </transition-group>
         <div v-if="hiddenStages.length">
           <hr />
           <gl-form-group

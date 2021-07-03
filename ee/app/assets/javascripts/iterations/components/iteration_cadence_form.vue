@@ -10,6 +10,7 @@ import {
   GlFormSelect,
   GlFormTextarea,
 } from '@gitlab/ui';
+import { TYPE_ITERATIONS_CADENCE } from '~/graphql_shared/constants';
 import { convertToGraphQLId } from '~/graphql_shared/utils';
 import { s__, __ } from '~/locale';
 import createCadence from '../queries/cadence_create.mutation.graphql';
@@ -130,7 +131,7 @@ export default {
     },
     variables() {
       const id = this.isEdit
-        ? convertToGraphQLId('Iterations::Cadence', this.cadenceId)
+        ? convertToGraphQLId(TYPE_ITERATIONS_CADENCE, this.cadenceId)
         : undefined;
       const groupPath = this.isEdit ? undefined : this.groupPath;
 

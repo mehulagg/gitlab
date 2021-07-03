@@ -6,6 +6,7 @@ RSpec.describe 'CI shared runner limits' do
   using RSpec::Parameterized::TableSyntax
 
   let_it_be(:user) { create(:user) }
+
   let(:project) { create(:project, :repository, namespace: group, shared_runners_enabled: true) }
   let(:group) { create(:group) }
   let(:pipeline) { create(:ci_empty_pipeline, project: project, sha: project.commit.sha, ref: 'master') }

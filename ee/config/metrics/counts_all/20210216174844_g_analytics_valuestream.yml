@@ -1,4 +1,5 @@
 ---
+data_category: Optional
 key_path: analytics_unique_visits.g_analytics_valuestream
 description: Unique visitors to /groups/:group/-/analytics/value_stream_analytics
 product_section: dev

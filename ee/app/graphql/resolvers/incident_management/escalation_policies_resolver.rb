@@ -25,7 +25,7 @@ module Resolvers
 
       def preloads
         {
-          rules: [{ rules: :oncall_schedule }]
+          rules: [:ordered_rules]
         }
       end
     end

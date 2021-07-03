@@ -5,7 +5,7 @@ require 'spec_helper'
 RSpec.describe 'User searches for epics', :js do
   let!(:user) { create(:user) }
   let!(:group) { create(:group) }
-  let!(:epic1) { create(:epic, title: 'Foo', group: group) }
+  let!(:epic1) { create(:epic, title: 'Foo', group: group, updated_at: 6.days.ago) }
   let!(:epic2) { create(:epic, :closed, :confidential, title: 'Bar', group: group) }
 
   def search_for_epic(search)
@@ -30,6 +30,7 @@ RSpec.describe 'User searches for epics', :js do
 
     page.within('.results') do
       expect(page).to have_link(epic1.title)
+      expect(page).to have_text('updated 6 days ago')
       expect(page).not_to have_link(epic2.title)
     end
   end

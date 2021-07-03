@@ -1,4 +1,5 @@
 ---
+data_category: Optional
 key_path: geo_enabled
 description: Is Geo enabled?
 product_section: enablement

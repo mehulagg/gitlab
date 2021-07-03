@@ -7,7 +7,7 @@
     = sprite_icon("retry", css_class: 'spin gl-mr-2')
     = _('Pending sync…')
 - else
-  = link_to sync_group_ldap_path(@group), method: :put, class: 'btn btn-default gl-button qa-sync-now-button' do
+  %button.js-ldap-sync-now-button.btn.btn-default.gl-button.qa-sync-now-button{ data: ldap_sync_now_button_data(@group) }
     = sprite_icon("retry", css_class: "gl-mr-2")
     = _('Sync now')
 - if @group.ldap_sync_ready? && @group.ldap_sync_last_successful_update_at

@@ -9,7 +9,16 @@ module AppSec
         def execute
           return unauthorized unless allowed?
           return error('Profile parameter missing') unless dast_profile
+
+          auditor = AppSec::Dast::Profiles::Audit::UpdateService.new(container: container, current_user: current_user, params: {
+            dast_profile: dast_profile,
+            new_params: dast_profile_params,
+            old_params: dast_profile.attributes.symbolize_keys
+          })
+
           return error(dast_profile.errors.full_messages) unless dast_profile.update(dast_profile_params)
+
+          auditor.execute
 
           return success(dast_profile: dast_profile, pipeline_url: nil) unless params[:run_after_update]
 

@@ -1,4 +1,5 @@
 ---
+data_category: Optional
 key_path: counts.requirement_test_reports_ci
 description: Count of requirement test reports created from CI
 product_section: dev

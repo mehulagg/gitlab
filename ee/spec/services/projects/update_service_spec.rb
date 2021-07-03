@@ -70,7 +70,7 @@ RSpec.describe Projects::UpdateService, '#execute' do
 
           project.reload
 
-          expect(result).to eq(status: :error, message: 'Shared runners enabled cannot be enabled until a valid credit credit is on file')
+          expect(result).to eq(status: :error, message: 'Shared runners enabled cannot be enabled until a valid credit card is on file')
           expect(project.shared_runners_enabled).to eq(false)
         end
       end

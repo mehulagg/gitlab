@@ -76,9 +76,6 @@ require_relative '../tooling/quality/test_level'
 quality_level = Quality::TestLevel.new
 
 RSpec.configure do |config|
-  config.filter_run focus: true
-  config.run_all_when_everything_filtered = true
-
   config.use_transactional_fixtures = true
   config.use_instantiated_fixtures = false
   config.fixture_path = Rails.root
@@ -113,6 +110,11 @@ RSpec.configure do |config|
   end
 
   unless ENV['CI']
+    # Allow running `:focus` examples locally,
+    # falling back to all tests when there is no `:focus` example.
+    config.filter_run focus: true
+    config.run_all_when_everything_filtered = true
+
     # Re-run failures locally with `--only-failures`
     config.example_status_persistence_file_path = './spec/examples.txt'
   end
@@ -258,8 +260,9 @@ RSpec.configure do |config|
       # tests, until we introduce it in user settings
       stub_feature_flags(forti_token_cloud: false)
 
-      # This feature flag is by default disabled and used in disaster recovery mode
-      stub_feature_flags(ci_queueing_disaster_recovery: false)
+      # These feature flag are by default disabled and used in disaster recovery mode
+      stub_feature_flags(ci_queueing_disaster_recovery_disable_fair_scheduling: false)
+      stub_feature_flags(ci_queueing_disaster_recovery_disable_quota: false)
 
       enable_rugged = example.metadata[:enable_rugged].present?
 

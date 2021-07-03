@@ -17,11 +17,10 @@ module GitlabSubscriptions
 
       return response unless response[:success]
 
-      license = License.new(data: response[:license_key], cloud: true)
+      license = find_or_initialize_cloud_license(response[:license_key])
+      license.last_synced_at = Time.current
 
       if license.save
-        License.cloud.id_not_in(license.id).delete_all
-
         { success: true, license: license }
       else
         error(license.errors.full_messages)
@@ -42,6 +41,12 @@ module GitlabSubscriptions
 
     def application_settings
       Gitlab::CurrentSettings.current_application_settings
+    end
+
+    def find_or_initialize_cloud_license(license_key)
+      return License.current.reset if License.current_cloud_license?(license_key)
+
+      License.new(data: license_key, cloud: true)
     end
   end
 end

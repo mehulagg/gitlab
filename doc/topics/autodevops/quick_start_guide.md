@@ -14,7 +14,7 @@ to create a Kubernetes cluster manually using the Google Cloud Platform console.
 You are creating and deploying a simple application that you create from a GitLab template.
 
 These instructions also work for a self-managed GitLab instance;
-ensure your own [runners are configured](../../ci/runners/README.md) and
+ensure your own [runners are configured](../../ci/runners/index.md) and
 [Google OAuth is enabled](../../integration/google.md).
 
 ## Configure your Google account
@@ -131,7 +131,7 @@ Follow these steps to configure the Base Domain where your apps will be accessib
 
 1. A few minutes after you install NGINX, the load balancer obtains an IP address, and you can
    get the external IP address with the following command:
-   
+
    ```shell
    kubectl get service ingress-nginx-ingress-controller -n gitlab-managed-apps -ojson | jq -r '.status.loadBalancer.ingress[].ip'
    ```

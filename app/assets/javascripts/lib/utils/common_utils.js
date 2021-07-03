@@ -371,17 +371,6 @@ export const parseIntPagination = (paginationInformation) => ({
   previousPage: parseInt(paginationInformation['X-PREV-PAGE'], 10),
 });
 
-/**
- * Converts object with key-value pairs
- * into query-param string
- *
- * @param {Object} params
- */
-export const objectToQueryString = (params = {}) =>
-  Object.keys(params)
-    .map((param) => `${param}=${params[param]}`)
-    .join('&');
-
 export const buildUrlWithCurrentLocation = (param) => {
   if (param) return `${window.location.pathname}${param}`;
 
@@ -763,3 +752,5 @@ export const isFeatureFlagEnabled = (flag) => window.gon.features?.[flag];
  * @returns {Array[String]} Converted array
  */
 export const convertArrayToCamelCase = (array) => array.map((i) => convertToCamelCase(i));
+
+export const isLoggedIn = () => Boolean(window.gon?.current_user_id);

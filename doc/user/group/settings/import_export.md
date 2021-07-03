@@ -70,7 +70,7 @@ For more details on the specific data persisted in a group export, see the
 
    ![Export group panel](img/export_panel_v13_0.png)
 
-1. After the export is generated, you should receive an e-mail with a link to the [exported contents](#exported-contents)
+1. After the export is generated, you should receive an email with a link to the [exported contents](#exported-contents)
    in a compressed tar archive, with contents in NDJSON format.
 
 1. Alternatively, you can come back to the project settings and download the
@@ -84,7 +84,7 @@ As an administrator, you can modify the maximum import file size. To do so, use 
 
 You can export groups from the [Community Edition to the Enterprise Edition](https://about.gitlab.com/install/ce-or-ee/) and vice versa.
 
-The Enterprise Edition retains some group data that isn't part of the Community Edition. If you're exporting a group from the Enterprise Edition to the Community Edition, you may lose this data. For more information, see [downgrading from EE to CE](../../../README.md).
+The Enterprise Edition retains some group data that isn't part of the Community Edition. If you're exporting a group from the Enterprise Edition to the Community Edition, you may lose this data. For more information, see [downgrading from EE to CE](../../../index.md).
 
 ## Importing the group
 

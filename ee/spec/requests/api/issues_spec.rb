@@ -673,6 +673,7 @@ RSpec.describe API::Issues, :mailer do
     end
 
     let_it_be(:issue) { create(:incident, project: project) }
+
     let!(:image) { create(:issuable_metric_image, issue: issue) }
 
     subject { get api("/projects/#{project.id}/issues/#{issue.iid}/metric_images", user2) }

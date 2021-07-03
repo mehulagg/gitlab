@@ -10,7 +10,7 @@ module Projects
       push_frontend_feature_flag(:scan_execution_policy_ui, @project)
     end
 
-    feature_category :web_firewall
+    feature_category :not_owned
 
     # rubocop: disable CodeReuse/ActiveRecord
     def alert_details

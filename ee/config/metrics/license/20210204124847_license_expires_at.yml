@@ -1,4 +1,5 @@
 ---
+data_category: Optional
 key_path: license_expires_at
 description: The date the license ends
 product_section: fulfillment

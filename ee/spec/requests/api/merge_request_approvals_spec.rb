@@ -9,6 +9,7 @@ RSpec.describe API::MergeRequestApprovals do
   let_it_be(:project, reload: true) { create(:project, :public, :repository, creator: user, namespace: user.namespace, only_allow_merge_if_pipeline_succeeds: false) }
   let_it_be(:approver) { create :user }
   let_it_be(:group) { create :group }
+
   let(:merge_request) { create(:merge_request, :simple, author: user, assignees: [user], source_project: project, target_project: project, title: "Test", created_at: Time.now) }
 
   shared_examples_for 'an API endpoint for getting merge request approval state' do

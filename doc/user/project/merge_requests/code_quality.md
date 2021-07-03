@@ -10,7 +10,7 @@ type: reference, howto
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/1984) in GitLab 9.3.
 > - Made [available in all tiers](https://gitlab.com/gitlab-org/gitlab/-/issues/212499) in 13.2.
 
-Ensuring your project's code stays simple, readable and easy to contribute to can be problematic. With the help of [GitLab CI/CD](../../../ci/README.md), you can analyze your
+Ensuring your project's code stays simple, readable and easy to contribute to can be problematic. With the help of [GitLab CI/CD](../../../ci/index.md), you can analyze your
 source code quality using GitLab Code Quality.
 
 Code Quality:
@@ -111,7 +111,7 @@ include:
 
 The above example creates a `code_quality` job in your CI/CD pipeline which
 scans your source code for code quality issues. The report is saved as a
-[Code Quality report artifact](../../../ci/yaml/README.md#artifactsreportscodequality)
+[Code Quality report artifact](../../../ci/yaml/index.md#artifactsreportscodequality)
 that you can later download and analyze.
 
 It's also possible to override the URL to the Code Quality image by
@@ -262,13 +262,13 @@ was chosen as an operational decision by the runner team, instead of exposing `d
 ### Disabling the code quality job
 
 The `code_quality` job doesn't run if the `$CODE_QUALITY_DISABLED` CI/CD variable
-is present. Please refer to the CI/CD variables [documentation](../../../ci/variables/README.md)
+is present. Please refer to the CI/CD variables [documentation](../../../ci/variables/index.md)
 to learn more about how to define one.
 
 To disable the `code_quality` job, add `CODE_QUALITY_DISABLED` as a custom CI/CD variable.
 This can be done:
 
-- For [the whole project](../../../ci/variables/README.md#custom-cicd-variables).
+- For [the whole project](../../../ci/variables/index.md#custom-cicd-variables).
 - For a single pipeline run:
 
   1. Go to **CI/CD > Pipelines**
@@ -278,11 +278,11 @@ This can be done:
 ### Using with merge request pipelines
 
 The configuration provided by the Code Quality template does not let the `code_quality` job
-run on [pipelines for merge requests](../../../ci/merge_request_pipelines/index.md).
+run on [pipelines for merge requests](../../../ci/pipelines/merge_request_pipelines.md).
 
 If pipelines for merge requests is enabled, the `code_quality:rules` must be redefined.
 
-The template has these [`rules`](../../../ci/yaml/README.md#rules) for the `code quality` job:
+The template has these [`rules`](../../../ci/yaml/index.md#rules) for the `code quality` job:
 
 ```yaml
 code_quality:
@@ -292,7 +292,7 @@ code_quality:
     - if: '$CI_COMMIT_TAG || $CI_COMMIT_BRANCH'
 ```
 
-If you are using merge request pipelines, your `rules` (or [`workflow: rules`](../../../ci/yaml/README.md#workflow))
+If you are using merge request pipelines, your `rules` (or [`workflow: rules`](../../../ci/yaml/index.md#workflow))
 might look like this example:
 
 ```yaml
@@ -334,7 +334,7 @@ do this:
 
 1. Define a job in your `.gitlab-ci.yml` file that generates the
    [Code Quality report
-   artifact](../../../ci/yaml/README.md#artifactsreportscodequality).
+   artifact](../../../ci/yaml/index.md#artifactsreportscodequality).
 1. Configure your tool to generate the Code Quality report artifact as a JSON
    file that implements a subset of the [Code Climate
    spec](https://github.com/codeclimate/platform/blob/master/spec/analyzers/SPEC.md#data-types).
@@ -535,7 +535,7 @@ This can be due to multiple reasons:
 - Your pipeline is not set to run the code quality job on your target branch. If there is no report generated from the target branch, your MR branch reports have nothing to compare to.
 - If no [degradation or error is detected](https://docs.codeclimate.com/docs/maintainability#section-checks),
   nothing is displayed.
-- The [`artifacts:expire_in`](../../../ci/yaml/README.md#artifactsexpire_in) CI/CD
+- The [`artifacts:expire_in`](../../../ci/yaml/index.md#artifactsexpire_in) CI/CD
   setting can cause the Code Quality artifact(s) to expire faster than desired.
 - The widgets use the pipeline of the latest commit to the target branch. If commits are made to the default branch that do not run the code quality job, this may cause the merge request widget to have no base report for comparison.
 - If you use the [`REPORT_STDOUT` environment variable](https://gitlab.com/gitlab-org/ci-cd/codequality#environment-variables), no report file is generated and nothing displays in the merge request.

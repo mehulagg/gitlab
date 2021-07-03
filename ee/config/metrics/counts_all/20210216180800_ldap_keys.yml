@@ -1,4 +1,5 @@
 ---
+data_category: Optional
 key_path: usage_activity_by_stage.manage.ldap_keys
 description: Number of users creating keys synced as part of LDAP
 product_section: dev

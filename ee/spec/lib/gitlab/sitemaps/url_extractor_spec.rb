@@ -69,6 +69,7 @@ RSpec.describe Gitlab::Sitemaps::UrlExtractor do
 
   describe '.extract_from_project' do
     let_it_be_with_reload(:project) { create(:project) }
+
     let(:project_feature) { project.project_feature }
 
     subject { described_class.extract_from_project(project) }

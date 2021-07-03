@@ -132,6 +132,25 @@ RSpec.describe DastSiteProfile, type: :model do
     it { is_expected.to define_enum_for(:target_type).with_values(**target_types) }
   end
 
+  describe '.names' do
+    it 'returns the names for the DAST site profiles with the given IDs' do
+      first_profile = create(:dast_site_profile, name: 'First profile')
+      second_profile = create(:dast_site_profile, name: 'Second profile')
+
+      names = described_class.names([first_profile.id, second_profile.id])
+
+      expect(names).to contain_exactly('First profile', 'Second profile')
+    end
+
+    context 'when a profile is not found' do
+      it 'rescues the error and returns an empty array' do
+        names = described_class.names([0])
+
+        expect(names).to be_empty
+      end
+    end
+  end
+
   describe 'instance methods' do
     describe '#destroy!' do
       context 'when the associated dast_site has no dast_site_profiles' do

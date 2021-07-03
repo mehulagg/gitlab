@@ -1,4 +1,5 @@
 ---
+data_category: Optional
 key_path: counts.ldap_users
 description: Number of users that are linked to LDAP
 product_section: dev

@@ -1,4 +1,5 @@
 ---
+data_category: Optional
 key_path: historical_max_users
 description: The peak active user count. Active is defined in UsersStatistics model.
 product_section: fulfillment

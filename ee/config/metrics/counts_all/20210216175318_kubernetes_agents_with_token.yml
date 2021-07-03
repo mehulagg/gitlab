@@ -1,4 +1,5 @@
 ---
+data_category: Optional
 key_path: counts.kubernetes_agents_with_token
 description: Count of Kubernetes agents with at least one token
 product_section: ops

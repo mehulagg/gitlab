@@ -1,10 +1,11 @@
-import { GlIcon } from '@gitlab/ui';
-import { shallowMount } from '@vue/test-utils';
+import { GlButton, GlIcon } from '@gitlab/ui';
 
 import IssueField from 'ee/integrations/jira/issues_show/components/sidebar/issue_field.vue';
 
 import { createMockDirective, getBinding } from 'helpers/vue_mock_directive';
-import { extendedWrapper } from 'helpers/vue_test_utils_helper';
+import { shallowMountExtended } from 'helpers/vue_test_utils_helper';
+
+import SidebarEditableItem from '~/sidebar/components/sidebar_editable_item.vue';
 
 describe('IssueField', () => {
   let wrapper;
@@ -15,37 +16,44 @@ describe('IssueField', () => {
   };
 
   const createComponent = ({ props = {} } = {}) => {
-    wrapper = extendedWrapper(
-      shallowMount(IssueField, {
-        propsData: { ...defaultProps, ...props },
-        directives: {
-          GlTooltip: createMockDirective(),
-        },
-      }),
-    );
+    wrapper = shallowMountExtended(IssueField, {
+      directives: {
+        GlTooltip: createMockDirective(),
+      },
+      propsData: { ...defaultProps, ...props },
+      stubs: {
+        SidebarEditableItem,
+      },
+    });
   };
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
-  const findFieldTitle = () => wrapper.findByTestId('field-title');
-  const findFieldValue = () => wrapper.findByTestId('field-value');
+  const findEditableItem = () => wrapper.findComponent(SidebarEditableItem);
+  const findEditButton = () => wrapper.findComponent(GlButton);
   const findFieldCollapsed = () => wrapper.findByTestId('field-collapsed');
   const findFieldCollapsedTooltip = () => getBinding(findFieldCollapsed().element, 'gl-tooltip');
+  const findFieldValue = () => wrapper.findByTestId('field-value');
   const findGlIcon = () => wrapper.findComponent(GlIcon);
 
-  it('renders title', () => {
-    createComponent();
+  describe('template', () => {
+    beforeEach(() => {
+      createComponent();
+    });
 
-    expect(findFieldTitle().text()).toBe(defaultProps.title);
-  });
+    it('renders title', () => {
+      expect(findEditableItem().props('title')).toBe(defaultProps.title);
+    });
 
-  it('renders GlIcon (when collapsed)', () => {
-    createComponent();
+    it('renders GlIcon (when collapsed)', () => {
+      expect(findGlIcon().props('name')).toBe(defaultProps.icon);
+    });
 
-    expect(findGlIcon().props('name')).toBe(defaultProps.icon);
+    it('does not render "Edit" button', () => {
+      expect(findEditButton().exists()).toBe(false);
+    });
   });
 
   describe('without value prop', () => {
@@ -53,7 +61,7 @@ describe('IssueField', () => {
       createComponent();
     });
 
-    it('renders fallback value with "no-value" class', () => {
+    it('falls back to "None"', () => {
       expect(findFieldValue().text()).toBe('None');
     });
 
@@ -74,7 +82,7 @@ describe('IssueField', () => {
       });
     });
 
-    it('renders value', () => {
+    it('renders the value', () => {
       expect(findFieldValue().text()).toBe(value);
     });
 
@@ -83,6 +91,27 @@ describe('IssueField', () => {
 
       expect(tooltip).toBeDefined();
       expect(tooltip.value.title).toBe(value);
+    });
+  });
+
+  describe('with canUpdate = true', () => {
+    beforeEach(() => {
+      createComponent({
+        props: { canUpdate: true },
+      });
+    });
+
+    it('renders "Edit" button', () => {
+      expect(findEditButton().text()).toBe('Edit');
+    });
+
+    it('emits "issue-field-fetch" when dropdown is opened', () => {
+      wrapper.vm.$refs.dropdown.showDropdown = jest.fn();
+
+      findEditableItem().vm.$emit('open');
+
+      expect(wrapper.vm.$refs.dropdown.showDropdown).toHaveBeenCalled();
+      expect(wrapper.emitted('issue-field-fetch')).toHaveLength(1);
     });
   });
 });

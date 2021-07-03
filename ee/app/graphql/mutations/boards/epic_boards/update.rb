@@ -24,10 +24,6 @@ module Mutations
         def resolve(**args)
           board = authorized_find!(id: args[:id])
 
-          unless Feature.enabled?(:epic_boards, board.resource_parent, default_enabled: :yaml)
-            raise Gitlab::Graphql::Errors::ResourceNotAvailable, 'epic_boards feature is disabled'
-          end
-
           ::Boards::EpicBoards::UpdateService.new(board.resource_parent, current_user, args).execute(board)
 
           {

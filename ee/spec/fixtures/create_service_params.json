@@ -30,6 +30,7 @@
     },
     "gl_namespace_id": 222,
     "gl_namespace_name": "Group name",
-    "preview": "false"
+    "preview": "false",
+    "source": "some_source"
   }
 }

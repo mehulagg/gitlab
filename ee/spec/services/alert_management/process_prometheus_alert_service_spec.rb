@@ -13,7 +13,8 @@ RSpec.describe AlertManagement::ProcessPrometheusAlertService do
     context 'when alert payload is valid' do
       let_it_be(:starts_at) { '2020-04-27T10:10:22.265949279Z' }
       let_it_be(:title) { 'Alert title' }
-      let_it_be(:gitlab_fingerprint) { Digest::SHA1.hexdigest([starts_at, title, 'vector(1)'].join('/')) }
+      let_it_be(:plain_fingerprint) { [starts_at, title, 'vector(1)'].join('/') }
+      let_it_be(:gitlab_fingerprint) { Digest::SHA1.hexdigest(plain_fingerprint) }
 
       let(:payload) { raw_payload }
       let(:raw_payload) do
@@ -31,6 +32,7 @@ RSpec.describe AlertManagement::ProcessPrometheusAlertService do
         let_it_be(:schedule) { create(:incident_management_oncall_schedule, project: project) }
         let_it_be(:rotation) { create(:incident_management_oncall_rotation, schedule: schedule) }
         let_it_be(:participant) { create(:incident_management_oncall_participant, :with_developer_access, rotation: rotation) }
+
         let(:users) { [participant.user] }
 
         before do
@@ -43,6 +45,35 @@ RSpec.describe AlertManagement::ProcessPrometheusAlertService do
           let(:payload) { raw_payload.merge('status' => 'resolved') }
 
           include_examples 'oncall users are correctly notified of recovery alert'
+        end
+
+        context 'with escalation policies ready' do
+          let_it_be(:project) { schedule.project }
+          let_it_be(:policy) { create(:incident_management_escalation_policy, project: project) }
+
+          before do
+            stub_licensed_features(oncall_schedules: true, escalation_policies: true)
+            stub_feature_flags(escalation_policies_mvc: project)
+          end
+
+          it_behaves_like 'does not send on-call notification'
+          include_examples 'creates an escalation', 1
+
+          context 'existing alert is now resolved' do
+            let(:payload) { raw_payload.merge('status' => 'resolved') }
+            let!(:target) { create(:alert_management_alert, :from_payload, project: project, payload: payload, fingerprint: gitlab_fingerprint) }
+            let!(:pending_escalation) { create(:incident_management_pending_alert_escalation, alert: target) }
+
+            include_examples "deletes the target's escalations"
+
+            context 'with escalation policy feature disabled' do
+              before do
+                stub_feature_flags(escalation_policies_mvc: false)
+              end
+
+              include_examples "deletes the target's escalations"
+            end
+          end
         end
       end
     end

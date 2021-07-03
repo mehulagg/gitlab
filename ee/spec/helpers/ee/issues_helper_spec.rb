@@ -145,9 +145,9 @@ RSpec.describe EE::IssuesHelper do
           has_blocked_issues_feature: 'true',
           has_issuable_health_status_feature: 'true',
           has_issue_weights_feature: 'true',
+          has_iterations_feature: 'true',
           has_multiple_issue_assignees_feature: 'true',
-          group_epics_path: group_epics_path(project.group, format: :json),
-          project_iterations_path: api_v4_projects_iterations_path(id: project.id)
+          group_epics_path: group_epics_path(project.group, format: :json)
         }
 
         expect(helper.issues_list_data(project, current_user, finder)).to include(expected)
@@ -172,6 +172,7 @@ RSpec.describe EE::IssuesHelper do
           has_blocked_issues_feature: 'false',
           has_issuable_health_status_feature: 'false',
           has_issue_weights_feature: 'false',
+          has_iterations_feature: 'false',
           has_multiple_issue_assignees_feature: 'false'
         }
 
@@ -179,7 +180,6 @@ RSpec.describe EE::IssuesHelper do
 
         expect(result).to include(expected)
         expect(result).not_to include(:group_epics_path)
-        expect(result).not_to include(:project_iterations_path)
       end
     end
   end

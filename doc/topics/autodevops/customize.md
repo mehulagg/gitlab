@@ -146,7 +146,7 @@ repository or by specifying a project CI/CD variable:
   file in it, Auto DevOps detects the chart and uses it instead of the
   [default chart](https://gitlab.com/gitlab-org/cluster-integration/auto-deploy-image/-/tree/master/assets/auto-deploy-app), enabling
   you to control exactly how your application is deployed.
-- **Project variable** - Create a [project CI/CD variable](../../ci/variables/README.md)
+- **Project variable** - Create a [project CI/CD variable](../../ci/variables/index.md)
   `AUTO_DEVOPS_CHART` with the URL of a custom chart to use, or create two project
   variables: `AUTO_DEVOPS_CHART_REPOSITORY` with the URL of a custom chart repository,
   and `AUTO_DEVOPS_CHART` with the path to the chart.
@@ -181,17 +181,17 @@ list of options.
 ## Custom Helm chart per environment
 
 You can specify the use of a custom Helm chart per environment by scoping the CI/CD variable
-to the desired environment. See [Limit environment scope of CI/CD variables](../../ci/variables/README.md#limit-the-environment-scope-of-a-cicd-variable).
+to the desired environment. See [Limit environment scope of CI/CD variables](../../ci/variables/index.md#limit-the-environment-scope-of-a-cicd-variable).
 
 ## Customizing `.gitlab-ci.yml`
 
 Auto DevOps is completely customizable because the
 [Auto DevOps template](https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/Auto-DevOps.gitlab-ci.yml)
-is just an implementation of a [`.gitlab-ci.yml`](../../ci/yaml/README.md) file,
+is just an implementation of a [`.gitlab-ci.yml`](../../ci/yaml/index.md) file,
 and uses only features available to any implementation of `.gitlab-ci.yml`.
 
 To modify the CI/CD pipeline used by Auto DevOps,
-[`include` the template](../../ci/yaml/README.md#includetemplate), and customize
+[`include` the template](../../ci/yaml/index.md#includetemplate), and customize
 it as needed by adding a `.gitlab-ci.yml` file to the root of your repository
 containing the following:
 
@@ -202,7 +202,7 @@ include:
 
 Add your changes, and your additions are merged with the
 [Auto DevOps template](https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/Auto-DevOps.gitlab-ci.yml)
-using the behavior described for [`include`](../../ci/yaml/README.md#include).
+using the behavior described for [`include`](../../ci/yaml/index.md#include).
 
 If you need to specifically remove a part of the file, you can also copy and paste the contents of the
 [Auto DevOps template](https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/Auto-DevOps.gitlab-ci.yml)
@@ -254,13 +254,13 @@ include:
 See the [Auto DevOps template](https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/Auto-DevOps.gitlab-ci.yml) for information on available jobs.
 
 WARNING:
-Auto DevOps templates using the [`only`](../../ci/yaml/README.md#only--except) or
-[`except`](../../ci/yaml/README.md#only--except) syntax have switched
-to the [`rules`](../../ci/yaml/README.md#rules) syntax, starting in
+Auto DevOps templates using the [`only`](../../ci/yaml/index.md#only--except) or
+[`except`](../../ci/yaml/index.md#only--except) syntax have switched
+to the [`rules`](../../ci/yaml/index.md#rules) syntax, starting in
 [GitLab 13.0](https://gitlab.com/gitlab-org/gitlab/-/issues/213336).
 If your `.gitlab-ci.yml` extends these Auto DevOps templates and override the `only` or
 `except` keywords, you must migrate your templates to use the
-[`rules`](../../ci/yaml/README.md#rules) syntax after the
+[`rules`](../../ci/yaml/index.md#rules) syntax after the
 base template is migrated to use the `rules` syntax.
 For users who cannot migrate just yet, you can alternatively pin your templates to
 the [GitLab 12.10 based templates](https://gitlab.com/gitlab-org/auto-devops-v12-10).
@@ -387,7 +387,7 @@ applications.
 
 NOTE:
 After you set up your replica variables using a
-[project CI/CD variable](../../ci/variables/README.md),
+[project CI/CD variable](../../ci/variables/index.md),
 you can scale your application by redeploying it.
 
 WARNING:
@@ -406,7 +406,7 @@ The following table lists CI/CD variables related to the database.
 | `POSTGRES_ENABLED`                      | Whether PostgreSQL is enabled. Defaults to `true`. Set to `false` to disable the automatic deployment of PostgreSQL. |
 | `POSTGRES_USER`                         | The PostgreSQL user. Defaults to `user`. Set it to use a custom username. |
 | `POSTGRES_PASSWORD`                     | The PostgreSQL password. Defaults to `testing-password`. Set it to use a custom password. |
-| `POSTGRES_DB`                           | The PostgreSQL database name. Defaults to the value of [`$CI_ENVIRONMENT_SLUG`](../../ci/variables/README.md#predefined-cicd-variables). Set it to use a custom database name. |
+| `POSTGRES_DB`                           | The PostgreSQL database name. Defaults to the value of [`$CI_ENVIRONMENT_SLUG`](../../ci/variables/index.md#predefined-cicd-variables). Set it to use a custom database name. |
 | `POSTGRES_VERSION`                      | Tag for the [`postgres` Docker image](https://hub.docker.com/_/postgres) to use. Defaults to `9.6.16` for tests and deployments as of GitLab 13.0 (previously `9.6.2`). If `AUTO_DEVOPS_POSTGRES_CHANNEL` is set to `1`, deployments uses the default version `9.6.2`. |
 
 ### Disable jobs

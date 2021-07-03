@@ -4,6 +4,7 @@ require 'spec_helper'
 
 RSpec.describe API::Branches do
   let_it_be(:user) { create(:user) }
+
   let(:project) { create(:project, :repository, creator: user, path: 'my.project') }
   let(:guest) { create(:user).tap { |u| project.add_guest(u) } }
   let(:branch_name) { 'feature' }
@@ -73,6 +74,14 @@ RSpec.describe API::Branches do
             expect(json_response.first['name']).to eq(expected_first_branch_name)
 
             check_merge_status(json_response)
+          end
+
+          it 'recovers pagination headers from cache between consecutive requests' do
+            2.times do
+              get api(route, current_user), params: base_params
+
+              expect(response.headers).to include('X-Page')
+            end
           end
         end
 

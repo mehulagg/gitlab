@@ -12,17 +12,4 @@ RSpec.describe Boards::EpicLists::CreateService do
       create(:epic_list, params.merge(epic_board: board))
     end
   end
-
-  context 'when epic_boards feature flag is disabled' do
-    before do
-      stub_feature_flags(epic_boards: false)
-    end
-
-    it 'returns an error' do
-      response = described_class.new(parent, nil).execute(board)
-
-      expect(response.success?).to eq(false)
-      expect(response.errors).to include("Epic boards feature is not enabled.")
-    end
-  end
 end

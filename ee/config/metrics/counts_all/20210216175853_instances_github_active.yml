@@ -1,4 +1,5 @@
 ---
+data_category: Optional
 key_path: counts.instances_github_active
 description: Count of active instance-level integrations for GitHub
 product_section: dev

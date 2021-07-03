@@ -235,7 +235,7 @@ export default {
         </h2>
         <gl-dropdown
           :text="$options.i18n.newProfileDropdownLabel"
-          variant="success"
+          variant="confirm"
           right
           class="gl-ml-auto"
         >

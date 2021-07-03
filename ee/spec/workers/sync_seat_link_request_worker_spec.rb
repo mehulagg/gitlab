@@ -41,67 +41,84 @@ RSpec.describe SyncSeatLinkRequestWorker, type: :worker do
           body: body,
           headers: { content_type: 'application/json' }
         )
-        allow(License).to receive(:current).and_return(current_license)
       end
 
       shared_examples 'successful license creation' do
         it 'persists the new license' do
-          expect { sync_seat_link }.to change(License, :count).by(1)
-          expect(License.last).to have_attributes(
-            data: license_key,
-            cloud: true
-          )
+          freeze_time do
+            expect { sync_seat_link }.to change(License, :count).by(1)
+            expect(License.current).to have_attributes(
+              data: license_key,
+              cloud: true,
+              last_synced_at: Time.current
+            )
+          end
         end
       end
 
       context 'when there is no previous license' do
-        let(:current_license) { nil }
+        before do
+          License.delete_all
+        end
 
         it_behaves_like 'successful license creation'
       end
 
       context 'when there is a previous license' do
         context 'when it is a cloud license' do
-          let(:current_license) { create(:license, cloud: true) }
+          context 'when the current license key does not match the one returned from sync' do
+            it 'creates a new license' do
+              freeze_time do
+                current_license = create(:license, cloud: true, last_synced_at: 1.day.ago)
 
-          it 'persists the new license and deletes any existing cloud licenses' do
-            previous_license = create(:license, cloud: true)
+                expect { sync_seat_link }.to change(License.cloud, :count).by(1)
 
-            expect { sync_seat_link }.to change(License.cloud, :count).to(1)
+                new_current_license = License.current
+                expect(new_current_license).not_to eq(current_license.id)
+                expect(new_current_license).to have_attributes(
+                  data: license_key,
+                  cloud: true,
+                  last_synced_at: Time.current
+                )
+              end
+            end
+          end
 
-            expect(License.last).to have_attributes(data: license_key, cloud: true)
-            expect(License.cloud).not_to include(previous_license, current_license)
+          context 'when the current license key matches the one returned from sync' do
+            it 'reuses the current license and updates the last_synced_at', :request_store do
+              freeze_time do
+                current_license = create(:license, cloud: true, data: license_key, last_synced_at: 1.day.ago)
+
+                expect { sync_seat_link }.not_to change(License.cloud, :count)
+
+                expect(License.current).to have_attributes(
+                  id: current_license.id,
+                  data: license_key,
+                  cloud: true,
+                  last_synced_at: Time.current
+                )
+              end
+            end
           end
 
           context 'when persisting fails' do
             let(:license_key) { 'invalid-key' }
 
             it 'does not delete the current license and logs error' do
+              current_license = License.current
               expect(Gitlab::ErrorTracking).to receive(:track_and_raise_for_dev_exception).and_call_original
 
               expect { sync_seat_link }.to raise_error
+
               expect(License).to exist(current_license.id)
-            end
-          end
-
-          context 'when deleting fails' do
-            it 'does not create a new license and logs error' do
-              last_license = License.last
-
-              relation = instance_double(ActiveRecord::Relation)
-              allow(License).to receive(:cloud).and_return(relation)
-              allow(relation).to receive(:delete_all).and_raise
-
-              expect(Gitlab::ErrorTracking).to receive(:track_and_raise_for_dev_exception).and_call_original
-
-              expect { sync_seat_link }.to raise_error
-              expect(License.last).to eq(last_license)
             end
           end
         end
 
         context 'when it is not a cloud license' do
-          let(:current_license) { create(:license) }
+          before do
+            create(:license)
+          end
 
           it_behaves_like 'successful license creation'
         end

@@ -1,4 +1,5 @@
 ---
+data_category: Optional
 key_path: analytics_unique_visits.g_analytics_insights
 description: Unique visitors to /groups/:group/-/insights
 product_section: dev

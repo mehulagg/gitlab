@@ -392,8 +392,12 @@ end
 If a large number of background jobs get scheduled at once, queueing of jobs may
 occur while jobs wait for a worker node to be become available. This is normal
 and gives the system resilience by allowing it to gracefully handle spikes in
-traffic. Some jobs, however, are more sensitive to latency than others. Examples
-of these jobs include:
+traffic. Some jobs, however, are more sensitive to latency than others.
+
+In general, latency-sensitive jobs perform operations that a user could
+reasonably expect to happen synchronously, rather than asynchronously in a
+background worker. A common example is a write following an action. Examples of
+these jobs include:
 
 1. A job which updates a merge request following a push to a branch.
 1. A job which invalidates a cache of known branches for a project after a push
@@ -968,8 +972,8 @@ Sidekiq jobs, please consider removing the worker in a major release only.
 For the same reasons that removing workers is dangerous, care should be taken
 when renaming queues.
 
-When renaming queues, use the `sidekiq_queue_migrate` helper migration method,
-as shown in this example:
+When renaming queues, use the `sidekiq_queue_migrate` helper migration method
+in a **post-deployment migration**:
 
 ```ruby
 class MigrateTheRenamedSidekiqQueue < ActiveRecord::Migration[5.0]
@@ -985,3 +989,7 @@ class MigrateTheRenamedSidekiqQueue < ActiveRecord::Migration[5.0]
 end
 
 ```
+
+You must rename the queue in a post-deployment migration not in a normal
+migration. Otherwise, it runs too early, before all the workers that
+schedule these jobs have stopped running. See also [other examples](post_deployment_migrations.md#use-cases).

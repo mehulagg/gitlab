@@ -96,9 +96,8 @@ export default {
         // no needs to reload the iframe and emit the failure event
         this.error = event.data.msg;
         this.isAlertDismissed = false;
-        this.nextTick(() => {
-          this.$refs.zuora.src = this.iframeSrc;
-        });
+        window.removeEventListener('message', this.handleFrameMessages, true);
+        this.$refs.zuora.src = this.iframeSrc;
         this.$emit('failure', { msg: this.error });
       }
 
@@ -143,7 +142,6 @@ export default {
     <gl-loading-icon v-if="isLoading" size="lg" />
     <!-- eslint-disable @gitlab/vue-require-i18n-strings -->
     <iframe
-      v-show="!isLoading"
       ref="zuora"
       :src="iframeSrc"
       style="border: none"

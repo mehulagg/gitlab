@@ -64,7 +64,7 @@ Before proceeding with the Pages configuration, you must:
 1. Configure a **wildcard DNS record**.
 1. (Optional) Have a **wildcard certificate** for that domain if you decide to
    serve Pages under HTTPS.
-1. (Optional but recommended) Enable [Shared runners](../../ci/runners/README.md)
+1. (Optional but recommended) Enable [Shared runners](../../ci/runners/index.md)
    so that your users don't have to bring their own.
 1. (Only for custom domains) Have a **secondary IP**.
 
@@ -693,22 +693,13 @@ database encryption. Proceed with caution.
    gitlab_pages['access_control'] = true
    ```
 
+1. Configure [the object storage and migrate pages data to it](#using-object-storage).
+
 1. [Reconfigure the **GitLab server**](../restart_gitlab.md#omnibus-gitlab-reconfigure) for the
    changes to take effect. The `gitlab-secrets.json` file is now updated with the
    new configuration.
 
 1. Set up a new server. This becomes the **Pages server**.
-
-1. Create an [NFS share](../nfs.md)
-   on the **Pages server** and configure this share to
-   allow access from your main **GitLab server**.
-   Note that the example there is more general and
-   shares several sub-directories from `/home` to several `/nfs/home` mount points.
-   For our Pages-specific example here, we instead share only the
-   default GitLab Pages folder `/var/opt/gitlab/gitlab-rails/shared/pages`
-   from the **Pages server** and we mount it to `/mnt/pages`
-   on the **GitLab server**.
-   Therefore, omit "Step 4" there.
 
 1. On the **Pages server**, install Omnibus GitLab and modify `/etc/gitlab/gitlab.rb`
    to include:
@@ -728,7 +719,7 @@ database encryption. Proceed with caution.
    ```
 
 1. Copy the `/etc/gitlab/gitlab-secrets.json` file from the **GitLab server**
-   to the **Pages server**, for example via the NFS share.
+   to the **Pages server**.
 
    ```shell
    # On the GitLab server
@@ -746,7 +737,6 @@ database encryption. Proceed with caution.
    pages_external_url "http://<pages_server_URL>"
    gitlab_pages['enable'] = false
    pages_nginx['enable'] = false
-   gitlab_rails['pages_path'] = "/mnt/pages"
    ```
 
 1. [Reconfigure GitLab](../restart_gitlab.md#omnibus-gitlab-reconfigure) for the changes to take effect.
@@ -1129,17 +1119,43 @@ open /opt/gitlab/embedded/ssl/certs/cacert.pem: no such file or directory
 x509: certificate signed by unknown authority
 ```
 
-The reason for those errors is that the files `resolv.conf` and `ca-bundle.pem` are missing inside the `chroot`.
-The fix is to copy the host's `/etc/resolv.conf` and the GitLab certificate bundle inside the `chroot`:
+The reason for those errors is that the files `resolv.conf`, `/etc/hosts/`, `/etc/nsswitch.conf` and `ca-bundle.pem` are missing inside the `chroot`.
+The fix is to copy these files inside the `chroot`:
 
 ```shell
 sudo mkdir -p /var/opt/gitlab/gitlab-rails/shared/pages/etc/ssl
 sudo mkdir -p /var/opt/gitlab/gitlab-rails/shared/pages/opt/gitlab/embedded/ssl/certs/
 
-sudo cp /etc/resolv.conf /var/opt/gitlab/gitlab-rails/shared/pages/etc
+sudo cp /etc/resolv.conf /var/opt/gitlab/gitlab-rails/shared/pages/etc/
+sudo cp /etc/hosts /var/opt/gitlab/gitlab-rails/shared/pages/etc/
+sudo cp /etc/nsswitch.conf /var/opt/gitlab/gitlab-rails/shared/pages/etc/
 sudo cp /opt/gitlab/embedded/ssl/certs/cacert.pem /var/opt/gitlab/gitlab-rails/shared/pages/opt/gitlab/embedded/ssl/certs/
 sudo cp /opt/gitlab/embedded/ssl/certs/cacert.pem /var/opt/gitlab/gitlab-rails/shared/pages/etc/ssl/ca-bundle.pem
 ```
+
+### `unsupported protocol scheme \"\""`
+
+If you see the following error:
+
+```plaintext
+{"error":"failed to connect to internal Pages API: Get \"/api/v4/internal/pages/status\": unsupported protocol scheme \"\"","level":"warning","msg":"attempted to connect to the API","time":"2021-06-23T20:03:30Z"}
+```
+
+It means you didn't set the HTTP(S) protocol scheme in the Pages server settings.
+To fix it:
+
+1. Edit `/etc/gitlab/gitlab.rb`:
+
+   ```ruby
+   gitlab_pages['gitlab_server'] = "https://<your_pages_domain_name>"
+   gitlab_pages['internal_gitlab_server'] = "https://<your_pages_domain_name>"
+   ```
+
+1. Reconfigure GitLab:
+
+   ```shell
+   sudo gitlab-ctl reconfigure
+   ```
 
 ### 502 error when connecting to GitLab Pages proxy when server does not listen over IPv6
 
@@ -1324,12 +1340,32 @@ To enable disk access:
 
 1. [Reconfigure GitLab](../restart_gitlab.md#omnibus-gitlab-reconfigure).
 
+### `httprange: new resource 403`
+
+If you see an error similar to:
+
+```plaintext
+{"error":"httprange: new resource 403: \"403 Forbidden\"","host":"root.pages.example.com","level":"error","msg":"vfs.Root","path":"/pages1/","time":"2021-06-10T08:45:19Z"}
+```
+
+And you run pages on the separate server syncing files via NFS, it may mean that
+the shared pages directory is mounted on a different path on the main GitLab server and the
+GitLab Pages server.
+
+In that case, it's highly recommended you to configure
+[object storage and migrate any existing pages data to it](#using-object-storage).
+
+Alternatively, you can mount the GitLab Pages shared directory to the same path on
+both servers.
+
 ### GitLab Pages doesn't work after upgrading to GitLab 14.0 or above
 
 GitLab 14.0 introduces a number of changes to GitLab Pages which may require manual intervention.
 
 1. Firstly [follow the migration guide](#migrate-gitlab-pages-to-140).
 1. If it doesn't work, see [GitLab Pages logs](#how-to-see-gitlab-pages-logs), and if you see any errors there then search them on this page.
+
+The most common problem is when using [`inplace_chroot`](#dial-tcp-lookup-gitlabexamplecom-and-x509-certificate-signed-by-unknown-authority).
 
 WARNING:
 As the last resort you can temporarily enable legacy storage and configuration mechanisms. Support for them [will be removed in GitLab 14.3](https://gitlab.com/gitlab-org/omnibus-gitlab/-/issues/6166), so GitLab Pages will stop working if don't resolve the underlying issue.

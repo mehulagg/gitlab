@@ -314,6 +314,15 @@
   :idempotent: true
   :tags:
   - :exclude_from_kubernetes
+- :name: cronjob:incident_management_pending_escalations_schedule_check_cron
+  :worker_name: IncidentManagement::PendingEscalations::ScheduleCheckCronWorker
+  :feature_category: :incident_management
+  :has_external_dependencies:
+  :urgency: :low
+  :resource_boundary: :unknown
+  :weight: 1
+  :idempotent: true
+  :tags: []
 - :name: cronjob:iterations_cadences_create_iterations
   :worker_name: Iterations::Cadences::CreateIterationsWorker
   :feature_category: :issue_tracking
@@ -415,7 +424,7 @@
   :tags: []
 - :name: cronjob:update_max_seats_used_for_gitlab_com_subscriptions
   :worker_name: UpdateMaxSeatsUsedForGitlabComSubscriptionsWorker
-  :feature_category: :license
+  :feature_category: :utilization
   :has_external_dependencies:
   :urgency: :low
   :resource_boundary: :cpu
@@ -986,6 +995,15 @@
   :weight: 1
   :idempotent:
   :tags: []
+- :name: epics_new_epic_issue
+  :worker_name: Epics::NewEpicIssueWorker
+  :feature_category: :epics
+  :has_external_dependencies:
+  :urgency: :low
+  :resource_boundary: :unknown
+  :weight: 1
+  :idempotent:
+  :tags: []
 - :name: group_saml_group_sync
   :worker_name: GroupSamlGroupSyncWorker
   :feature_category: :authentication_and_authorization
@@ -1054,6 +1072,24 @@
   :idempotent: true
   :tags:
   - :exclude_from_kubernetes
+- :name: incident_management_pending_escalations_alert_check
+  :worker_name: IncidentManagement::PendingEscalations::AlertCheckWorker
+  :feature_category: :incident_management
+  :has_external_dependencies:
+  :urgency: :high
+  :resource_boundary: :unknown
+  :weight: 1
+  :idempotent: true
+  :tags: []
+- :name: incident_management_pending_escalations_alert_create
+  :worker_name: IncidentManagement::PendingEscalations::AlertCreateWorker
+  :feature_category: :incident_management
+  :has_external_dependencies:
+  :urgency: :high
+  :resource_boundary: :unknown
+  :weight: 1
+  :idempotent: true
+  :tags: []
 - :name: ldap_group_sync
   :worker_name: LdapGroupSyncWorker
   :feature_category: :authentication_and_authorization

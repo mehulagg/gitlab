@@ -172,16 +172,16 @@ both a [custom mailbox](#configuring-a-custom-mailbox) and a
 #### Configuring a custom mailbox
 
 NOTE:
-On GitLab.com a custom mailbox is already configured with `contact-project+%{key}@incoming.gitlab.com` as the email address, so you only have to configure the 
+On GitLab.com a custom mailbox is already configured with `contact-project+%{key}@incoming.gitlab.com` as the email address, so you only have to configure the
 [custom suffix](#configuring-a-custom-email-address-suffix) in project settings.
 
 Using the `service_desk_email` configuration, you can customize the mailbox
-used by Service Desk. This allows you to have a separate email address for 
+used by Service Desk. This allows you to have a separate email address for
 Service Desk by also configuring a [custom suffix](#configuring-a-custom-email-address-suffix)
 in project settings.
 
-The `address` must include the `+%{key}` placeholder within the 'user' 
-portion of the address, before the `@`. This is used to identify the project 
+The `address` must include the `+%{key}` placeholder within the 'user'
+portion of the address, before the `@`. This is used to identify the project
 where the issue should be created.
 
 NOTE:
@@ -234,7 +234,7 @@ The configuration options are the same as for configuring
 > Introduced in [GitLab 13.11](https://gitlab.com/gitlab-org/gitlab/-/issues/214900)
 
 Service Desk can be configured to read Microsoft Exchange Online mailboxes with the Microsoft
-Graph API instead of IMAP. Follow the [documentation in the incoming e-mail section for setting up an OAuth2 application for Microsoft Graph](../../administration/incoming_email.md#microsoft-graph).
+Graph API instead of IMAP. Follow the [documentation in the incoming email section for setting up an OAuth2 application for Microsoft Graph](../../administration/incoming_email.md#microsoft-graph).
 
 - Example for Omnibus GitLab installations:
 

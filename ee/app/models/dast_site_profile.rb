@@ -31,6 +31,12 @@ class DastSiteProfile < ApplicationRecord
 
   delegate :dast_site_validation, to: :dast_site, allow_nil: true
 
+  def self.names(site_profile_ids)
+    find(*site_profile_ids).pluck(:name)
+  rescue ActiveRecord::RecordNotFound
+    []
+  end
+
   def ci_variables
     url = dast_site.url
 

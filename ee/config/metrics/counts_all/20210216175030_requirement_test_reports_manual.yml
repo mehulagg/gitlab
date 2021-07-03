@@ -1,4 +1,5 @@
 ---
+data_category: Optional
 key_path: counts.requirement_test_reports_manual
 description: Count of requirement test reports created manually
 product_section: dev

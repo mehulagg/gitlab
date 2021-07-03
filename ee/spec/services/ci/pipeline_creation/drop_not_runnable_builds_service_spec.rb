@@ -77,14 +77,6 @@ RSpec.describe Ci::PipelineCreation::DropNotRunnableBuildsService do
         it_behaves_like 'jobs allowed to run'
       end
 
-      context 'when the feature flag is disabled' do
-        before do
-          stub_feature_flags(ci_drop_new_builds_when_ci_quota_exceeded: false)
-        end
-
-        it_behaves_like 'jobs allowed to run'
-      end
-
       context 'when the pipeline status is running' do
         before do
           pipeline.update!(status: :running)

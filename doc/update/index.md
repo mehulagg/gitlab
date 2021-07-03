@@ -371,11 +371,12 @@ and [Helm Chart deployments](https://docs.gitlab.com/charts/). They come with ap
 
 ### 14.0.0
 
-In GitLab 13.3 some [pipeline processing methods were deprecated](https://gitlab.com/gitlab-org/gitlab/-/issues/218536)
-and this code was completely removed in GitLab 14.0. If you plan to upgrade from
-**GitLab 13.2 or older** directly to 14.0 ([unsupported](#upgrading-to-a-new-major-version)), you should not have any pipelines running
-when you upgrade or the pipelines might report the wrong status when the upgrade completes.
-You should instead follow a [supported upgrade path](#upgrade-paths).
+- In GitLab 13.3 some [pipeline processing methods were deprecated](https://gitlab.com/gitlab-org/gitlab/-/issues/218536)
+  and this code was completely removed in GitLab 14.0. If you plan to upgrade from
+  **GitLab 13.2 or older** directly to 14.0 ([unsupported](#upgrading-to-a-new-major-version)), you should not have any pipelines running
+  when you upgrade or the pipelines might report the wrong status when the upgrade completes.
+  You should instead follow a [supported upgrade path](#upgrade-paths).
+- The support of PostgreSQL 11 [has been dropped](../install/requirements.md#database). Make sure to [update your database](https://docs.gitlab.com/omnibus/settings/database.html#upgrade-packaged-postgresql-server) to version 12 before updating to GitLab 14.0.
 
 ### 13.11.0
 
@@ -385,9 +386,8 @@ Git 2.31.x and later is required. We recommend you use the
 ### 13.9.0
 
 We've detected an issue [with a column rename](https://gitlab.com/gitlab-org/gitlab/-/issues/324160)
-that may prevent upgrades to GitLab 13.9.0, 13.9.1, 13.9.2 and 13.9.3.
-We are working on a patch, but until a fixed version is released, you can manually complete
-the zero-downtime upgrade:
+that will prevent upgrades to GitLab 13.9.0, 13.9.1, 13.9.2 and 13.9.3 when following the zero-downtime steps. It is necessary
+to perform the following additional steps for the zero-downtime upgrade:
 
 1. Before running the final `sudo gitlab-rake db:migrate` command on the deploy node,
    execute the following queries using the PostgreSQL console (or `sudo gitlab-psql`)
@@ -407,9 +407,18 @@ the zero-downtime upgrade:
    ```
 
 If you have already run the final `sudo gitlab-rake db:migrate` command on the deploy node and have
-encountered the [column rename issue](https://gitlab.com/gitlab-org/gitlab/-/issues/324160), you can still
-follow the previous steps to complete the update.
+encountered the [column rename issue](https://gitlab.com/gitlab-org/gitlab/-/issues/324160), you will
+see the following error:
 
+```shell
+-- remove_column(:application_settings, :asset_proxy_whitelist)
+rake aborted!
+StandardError: An error has occurred, all later migrations canceled:
+PG::DependentObjectsStillExist: ERROR: cannot drop column asset_proxy_whitelist of table application_settings because other objects depend on it
+DETAIL: trigger trigger_0d588df444c8 on table application_settings depends on column asset_proxy_whitelist of table application_settings
+```
+
+To work around this bug, follow the previous steps to complete the update.
 More details are available [in this issue](https://gitlab.com/gitlab-org/gitlab/-/issues/324160).
 
 ### 13.6.0

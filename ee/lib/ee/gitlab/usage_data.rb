@@ -308,6 +308,7 @@ module EE
             value_stream_management_customized_group_stages: count(::Analytics::CycleAnalytics::GroupStage.where(custom: true)),
             projects_with_compliance_framework: count(::ComplianceManagement::ComplianceFramework::ProjectSettings),
             custom_compliance_frameworks: count(::ComplianceManagement::Framework),
+            compliance_frameworks_with_pipeline: count(::ComplianceManagement::Framework.where.not(pipeline_configuration_full_path: nil)),
             ldap_servers: ldap_available_servers.size,
             ldap_group_sync_enabled: ldap_config_present_for_any_provider?(:group_base),
             ldap_admin_sync_enabled: ldap_config_present_for_any_provider?(:admin_group),

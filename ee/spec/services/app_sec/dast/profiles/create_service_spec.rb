@@ -48,6 +48,27 @@ RSpec.describe AppSec::Dast::Profiles::CreateService do
         expect { subject }.to change { Dast::Profile.count }.by(1)
       end
 
+      it 'audits the creation' do
+        profile = subject.payload[:dast_profile]
+
+        audit_event = AuditEvent.find_by(author_id: developer.id)
+
+        aggregate_failures do
+          expect(audit_event.author).to eq(developer)
+          expect(audit_event.entity).to eq(project)
+          expect(audit_event.target_id).to eq(profile.id)
+          expect(audit_event.target_type).to eq('Dast::Profile')
+          expect(audit_event.target_details).to eq(profile.name)
+          expect(audit_event.details).to eq({
+            author_name: developer.name,
+            custom_message: 'Added DAST profile',
+            target_id: profile.id,
+            target_type: 'Dast::Profile',
+            target_details: profile.name
+          })
+        end
+      end
+
       context 'when param run_after_create: true' do
         let(:params) { default_params.merge(run_after_create: true) }
 

@@ -7,8 +7,7 @@ RSpec.describe Gitlab::Audit::Auditor do
   let(:author) { build_stubbed(:user) }
   let(:scope) { build_stubbed(:group) }
   let(:target) { build_stubbed(:project) }
-  let(:ip_address) { '192.168.8.8' }
-  let(:context) { { name: name, author: author, scope: scope, target: target, ip_address: ip_address } }
+  let(:context) { { name: name, author: author, scope: scope, target: target } }
   let(:add_message) { 'Added an interesting field from project Gotham' }
   let(:remove_message) { 'Removed an interesting field from project Gotham' }
   let(:operation) do
@@ -47,7 +46,7 @@ RSpec.describe Gitlab::Audit::Auditor do
       it 'records audit events in correct order', :aggregate_failures do
         expect { audit! }.to change(AuditEvent, :count).by(2)
 
-        event_messages = AuditEvent.all.map { |event| event.details[:custom_message] }
+        event_messages = AuditEvent.order(:id).map { |event| event.details[:custom_message] }
 
         expect(event_messages).to eq([add_message, remove_message])
       end
@@ -85,7 +84,7 @@ RSpec.describe Gitlab::Audit::Auditor do
       let(:audit!) { auditor.audit(context) }
       let(:context) do
         {
-          name: name, author: author, scope: scope, target: target, ip_address: ip_address,
+          name: name, author: author, scope: scope, target: target,
           message: 'Project has been deleted'
         }
       end

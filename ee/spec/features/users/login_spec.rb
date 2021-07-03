@@ -207,7 +207,7 @@ RSpec.describe 'Login' do
       stub_licensed_features(group_saml: true)
     end
 
-    around(:all) do |example|
+    around do |example|
       with_omniauth_full_host { example.run }
     end
 

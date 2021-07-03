@@ -25,8 +25,8 @@ To enable Docker commands for your CI/CD jobs, you can use:
 If you don't want to execute a runner in privileged mode,
 but want to use `docker build`, you can also [use kaniko](using_kaniko.md).
 
-If you are using shared runners on GitLab.com, 
-[learn more about how these runners are configured](../runners/README.md).
+If you are using shared runners on GitLab.com,
+[learn more about how these runners are configured](../runners/index.md).
 
 ### Use the shell executor
 
@@ -90,7 +90,7 @@ The Docker image has all of the `docker` tools installed and can run
 the job script in context of the image in privileged mode.
 
 We recommend you use [Docker-in-Docker with TLS enabled](#docker-in-docker-with-tls-enabled),
-which is supported by [GitLab.com shared runners](../runners/README.md).
+which is supported by [GitLab.com shared runners](../runners/index.md).
 
 You should always specify a specific version of the image, like `docker:19.03.12`.
 If you use a tag like `docker:stable`, you have no control over which version is used.
@@ -577,7 +577,7 @@ don't work because a fresh Docker daemon is started with the service.
 
 ### Option 1: Run `docker login`
 
-In [`before_script`](../yaml/README.md#before_script), run `docker
+In [`before_script`](../yaml/index.md#before_script), run `docker
 login`:
 
 ```yaml
@@ -682,10 +682,10 @@ There are multiple ways to define this authentication:
 
 - In [`pre_build_script`](https://docs.gitlab.com/runner/configuration/advanced-configuration.html#the-runners-section)
   in the runner configuration file.
-- In [`before_script`](../yaml/README.md#before_script).
-- In [`script`](../yaml/README.md#script).
+- In [`before_script`](../yaml/index.md#before_script).
+- In [`script`](../yaml/index.md#script).
 
-The following example shows [`before_script`](../yaml/README.md#before_script).
+The following example shows [`before_script`](../yaml/index.md#before_script).
 The same commands apply for any solution you implement.
 
 ```yaml
@@ -798,7 +798,7 @@ which can be avoided if a different driver is used, for example `overlay2`.
 ### Use the OverlayFS driver per project
 
 You can enable the driver for each project individually by using the `DOCKER_DRIVER`
-[CI/CD variable](../yaml/README.md#variables) in `.gitlab-ci.yml`:
+[CI/CD variable](../yaml/index.md#variables) in `.gitlab-ci.yml`:
 
 ```yaml
 variables:

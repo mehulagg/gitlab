@@ -145,35 +145,29 @@ RSpec.describe Integration do
     describe '#can_test?' do
       subject { integration.can_test? }
 
-      context 'when repository is not empty' do
-        let(:project) { build(:project, :repository) }
+      context 'when project-level integration' do
+        let(:project) { create(:project) }
 
         it { is_expected.to be true }
       end
 
-      context 'when repository is empty' do
-        let(:project) { build(:project) }
-
-        it { is_expected.to be true }
-      end
-
-      context 'when instance-level service' do
+      context 'when instance-level integration' do
         Integration.available_integration_types.each do |type|
           let(:integration) do
             described_class.send(:integration_type_to_model, type).new(instance: true)
           end
 
-          it { is_expected.to be_falsey }
+          it { is_expected.to be false }
         end
       end
 
-      context 'when group-level service' do
+      context 'when group-level integration' do
         Integration.available_integration_types.each do |type|
           let(:integration) do
             described_class.send(:integration_type_to_model, type).new(group_id: group.id)
           end
 
-          it { is_expected.to be_falsey }
+          it { is_expected.to be false }
         end
       end
     end
@@ -921,7 +915,7 @@ RSpec.describe Integration do
       described_class.available_integration_names(include_project_specific: false)
     end
 
-    it 'does not call dev_services_names with include_dev false' do
+    it 'does not call dev_integration_names with include_dev false' do
       expect(described_class).to receive(:integration_names).and_call_original
       expect(described_class).not_to receive(:dev_integration_names)
       expect(described_class).to receive(:project_specific_integration_names).and_call_original

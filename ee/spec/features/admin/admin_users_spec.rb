@@ -28,12 +28,44 @@ RSpec.describe "Admin::Users", :js do
       context 'when `send_emails_from_admin_area` feature is disabled' do
         before do
           stub_licensed_features(send_emails_from_admin_area: false)
+          stub_application_setting(usage_ping_enabled: false)
         end
 
         it "does not show the 'Send email to users' link" do
           visit admin_users_path
 
           expect(page).not_to have_link(href: admin_email_path)
+        end
+      end
+
+      context 'when usage ping is enabled' do
+        before do
+          stub_licensed_features(send_emails_from_admin_area: false)
+          stub_application_setting(usage_ping_enabled: true)
+        end
+
+        context 'when feature is activated' do
+          before do
+            stub_application_setting(usage_ping_features_enabled: true)
+          end
+
+          it "shows the 'Send email to users' link" do
+            visit admin_users_path
+
+            expect(page).to have_link(href: admin_email_path)
+          end
+        end
+
+        context 'when feature is disabled' do
+          before do
+            stub_application_setting(usage_ping_features_enabled: false)
+          end
+
+          it "does not show the 'Send email to users' link" do
+            visit admin_users_path
+
+            expect(page).not_to have_link(href: admin_email_path)
+          end
         end
       end
     end

@@ -40,10 +40,10 @@ RSpec.describe Ci::PipelineEditorHelper do
       it 'returns pipeline editor data' do
         expect(pipeline_editor_data).to eq({
           "ci-config-path": project.ci_config_path_or_default,
-          "ci-examples-help-page-path" => help_page_path('ci/examples/README'),
-          "ci-help-page-path" => help_page_path('ci/README'),
+          "ci-examples-help-page-path" => help_page_path('ci/examples/index'),
+          "ci-help-page-path" => help_page_path('ci/index'),
           "commit-sha" => project.commit.sha,
-          "default-branch" => project.default_branch,
+          "default-branch" => project.default_branch_or_main,
           "empty-state-illustration-path" => 'foo',
           "initial-branch-name": nil,
           "lint-help-page-path" => help_page_path('ci/lint', anchor: 'validate-basic-logic-and-syntax'),
@@ -54,7 +54,7 @@ RSpec.describe Ci::PipelineEditorHelper do
           "project-path" => project.path,
           "project-full-path" => project.full_path,
           "project-namespace" => project.namespace.full_path,
-          "runner-help-page-path" => help_page_path('ci/runners/README'),
+          "runner-help-page-path" => help_page_path('ci/runners/index'),
           "total-branches" => project.repository.branches.length,
           "yml-help-page-path" => help_page_path('ci/yaml/README')
         })
@@ -67,10 +67,10 @@ RSpec.describe Ci::PipelineEditorHelper do
       it 'returns pipeline editor data' do
         expect(pipeline_editor_data).to eq({
           "ci-config-path": project.ci_config_path_or_default,
-          "ci-examples-help-page-path" => help_page_path('ci/examples/README'),
-          "ci-help-page-path" => help_page_path('ci/README'),
+          "ci-examples-help-page-path" => help_page_path('ci/examples/index'),
+          "ci-help-page-path" => help_page_path('ci/index'),
           "commit-sha" => '',
-          "default-branch" => project.default_branch,
+          "default-branch" => project.default_branch_or_main,
           "empty-state-illustration-path" => 'foo',
           "initial-branch-name": nil,
           "lint-help-page-path" => help_page_path('ci/lint', anchor: 'validate-basic-logic-and-syntax'),
@@ -81,7 +81,7 @@ RSpec.describe Ci::PipelineEditorHelper do
           "project-path" => project.path,
           "project-full-path" => project.full_path,
           "project-namespace" => project.namespace.full_path,
-          "runner-help-page-path" => help_page_path('ci/runners/README'),
+          "runner-help-page-path" => help_page_path('ci/runners/index'),
           "total-branches" => 0,
           "yml-help-page-path" => help_page_path('ci/yaml/README')
         })

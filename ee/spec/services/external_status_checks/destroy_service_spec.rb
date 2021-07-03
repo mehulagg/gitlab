@@ -5,6 +5,7 @@ require 'spec_helper'
 RSpec.describe ExternalStatusChecks::DestroyService do
   let_it_be(:project) { create(:project) }
   let_it_be(:rule) { create(:external_status_check, project: project) }
+
   let(:current_user) { project.owner }
 
   subject { described_class.new(container: project, current_user: current_user).execute(rule) }

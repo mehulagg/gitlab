@@ -35,9 +35,11 @@ export default {
   [types.REQUEST_STAGE_DATA](state) {
     state.isLoadingStage = true;
     state.selectedStageError = '';
+    state.selectedStageEvents = [];
+    state.pagination = {};
   },
   [types.RECEIVE_STAGE_DATA_SUCCESS](state, events = []) {
-    state.currentStageEvents = events.map((fields) =>
+    state.selectedStageEvents = events.map((fields) =>
       convertObjectPropsToCamelCase(fields, { deep: true }),
     );
     state.isLoadingStage = false;
@@ -46,6 +48,8 @@ export default {
   [types.RECEIVE_STAGE_DATA_ERROR](state, message) {
     state.isLoadingStage = false;
     state.selectedStageError = message;
+    state.selectedStageEvents = [];
+    state.pagination = {};
   },
   [types.REQUEST_STAGE_MEDIANS](state) {
     state.medians = {};

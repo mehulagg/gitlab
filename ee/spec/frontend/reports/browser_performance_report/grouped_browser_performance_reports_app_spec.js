@@ -35,7 +35,7 @@ describe('Grouped test reports app', () => {
     wrapper = null;
   });
 
-  describe('usage ping events', () => {
+  describe('service ping events', () => {
     describe('when feature flag is enabled', () => {
       beforeEach(() => {
         mountComponent({ usageDataITestingWebPerformanceWidgetTotal: true });

@@ -12,7 +12,8 @@ import SidebarConfidentialityWidget from '~/sidebar/components/confidential/side
 import SidebarDateWidget from '~/sidebar/components/date/sidebar_date_widget.vue';
 import SidebarParticipantsWidget from '~/sidebar/components/participants/sidebar_participants_widget.vue';
 import SidebarSubscriptionsWidget from '~/sidebar/components/subscriptions/sidebar_subscriptions_widget.vue';
-import { mockEpic } from '../mock_data';
+import SidebarTodoWidget from '~/sidebar/components/todo_toggle/sidebar_todo_widget.vue';
+import { mockFormattedBoardEpic } from '../mock_data';
 
 describe('EpicBoardContentSidebar', () => {
   let wrapper;
@@ -22,14 +23,14 @@ describe('EpicBoardContentSidebar', () => {
     store = new Vuex.Store({
       state: {
         sidebarType: ISSUABLE,
-        boardItems: { [mockEpic.id]: mockEpic },
-        activeId: mockEpic.id,
+        boardItems: { [mockFormattedBoardEpic.id]: mockFormattedBoardEpic },
+        activeId: mockFormattedBoardEpic.id,
         issuableType: 'epic',
         fullPath: 'gitlab-org',
       },
       getters: {
         activeBoardItem: () => {
-          return mockEpic;
+          return mockFormattedBoardEpic;
         },
         isSidebarOpen: () => true,
         ...mockGetters,
@@ -86,6 +87,10 @@ describe('EpicBoardContentSidebar', () => {
     expect(wrapper.findComponent(GlDrawer).props('open')).toBe(true);
   });
 
+  it('renders SidebarTodoWidget', () => {
+    expect(wrapper.findComponent(SidebarTodoWidget).exists()).toBe(true);
+  });
+
   it('renders BoardSidebarLabelsSelect', () => {
     expect(wrapper.findComponent(BoardSidebarLabelsSelect).exists()).toBe(true);
   });
@@ -127,7 +132,7 @@ describe('EpicBoardContentSidebar', () => {
 
       expect(toggleBoardItem).toHaveBeenCalledTimes(1);
       expect(toggleBoardItem).toHaveBeenCalledWith(expect.any(Object), {
-        boardItem: mockEpic,
+        boardItem: mockFormattedBoardEpic,
         sidebarType: ISSUABLE,
       });
     });

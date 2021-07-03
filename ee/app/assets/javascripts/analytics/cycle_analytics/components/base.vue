@@ -54,7 +54,7 @@ export default {
       'selectedProjects',
       'selectedStage',
       'stages',
-      'currentStageEvents',
+      'selectedStageEvents',
       'errorCode',
       'startDate',
       'endDate',
@@ -239,7 +239,7 @@ export default {
         <stage-table
           v-else
           :is-loading="isLoading || isLoadingStage"
-          :stage-events="currentStageEvents"
+          :stage-events="selectedStageEvents"
           :selected-stage="selectedStage"
           :stage-count="selectedStageCount"
           :empty-state-message="selectedStageError"

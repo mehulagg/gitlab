@@ -17,7 +17,7 @@
 
 - [ ] Follow the [Documentation Guidelines](https://docs.gitlab.com/ee/development/documentation/) and [Style Guide](https://docs.gitlab.com/ee/development/documentation/styleguide/).
 - [ ] Ensure that the [product tier badge](https://docs.gitlab.com/ee/development/documentation/styleguide/index.html#product-tier-badges) is added to doc's `h1`.
-- [ ] [Request a review](https://docs.gitlab.com/ee/development/code_review.html#dogfooding-the-reviewers-feature) based on the documentation page's metadata and [associated Technical Writer](https://about.gitlab.com/handbook/product/categories/#devops-stages).
+- [ ] [Request a review](https://docs.gitlab.com/ee/development/code_review.html#dogfooding-the-reviewers-feature) based on the documentation page's metadata and [associated Technical Writer](https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments).
 
 To avoid having this MR be added to code verification QA issues, don't add these labels: ~"feature", ~"frontend", ~"backend", ~"bug", or ~"database"
 
@@ -33,6 +33,7 @@ Documentation-related MRs should be reviewed by a Technical Writer for a non-blo
     - [ ] The headings should be something you'd do a Google search for. Instead of `Default behavior`, say something like `Default behavior when you close an issue`.
     - [ ] The headings (other than the page title) should be active. Instead of `Configuring GDK`, say something like `Configure GDK`.
     - [ ] Any task steps should be written as a numbered list.
+    - If the content still needs to be edited for topic types, you can create a follow-up issue with the ~"docs-technical-debt" label.
 - [ ] Review by assigned maintainer, who can always request/require the above reviews. Maintainer's review can occur before or after a technical writer review.
 - [ ] Ensure a release milestone is set.
 

@@ -22,6 +22,7 @@ import getGroupsQuery from '../graphql/queries/get_groups.query.graphql';
 import { addSegmentsToCache, deleteSegmentsFromCache } from '../utils/cache_updates';
 import { shouldPollTableData } from '../utils/helpers';
 import DevopsAdoptionAddDropdown from './devops_adoption_add_dropdown.vue';
+import DevopsAdoptionOverview from './devops_adoption_overview.vue';
 import DevopsAdoptionSection from './devops_adoption_section.vue';
 
 export default {
@@ -30,6 +31,7 @@ export default {
     GlAlert,
     DevopsAdoptionAddDropdown,
     DevopsAdoptionSection,
+    DevopsAdoptionOverview,
     DevopsScore,
     GlTabs,
     GlTab,
@@ -140,7 +142,10 @@ export default {
       );
     },
     tabIndexValues() {
-      const tabs = this.$options.devopsAdoptionTableConfiguration.map((item) => item.tab);
+      const tabs = [
+        'overview',
+        ...this.$options.devopsAdoptionTableConfiguration.map((item) => item.tab),
+      ];
 
       return this.isGroup ? tabs : [...tabs, 'devops-score'];
     },
@@ -178,6 +183,7 @@ export default {
           mutation: bulkEnableDevopsAdoptionNamespacesMutation,
           variables: {
             namespaceIds: [this.groupGid],
+            displayNamespaceId: this.groupGid,
           },
           update: (store, { data }) => {
             const {
@@ -294,6 +300,15 @@ export default {
 <template>
   <div>
     <gl-tabs :value="selectedTab" @input="onTabChange">
+      <gl-tab data-testid="devops-overview-tab">
+        <template #title>{{ s__('DevopsReport|Overview') }}</template>
+        <devops-adoption-overview
+          :loading="isLoadingAdoptionData"
+          :data="devopsAdoptionEnabledNamespaces"
+          :timestamp="timestamp"
+        />
+      </gl-tab>
+
       <gl-tab
         v-for="tab in $options.devopsAdoptionTableConfiguration"
         :key="tab.title"

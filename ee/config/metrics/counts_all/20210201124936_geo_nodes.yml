@@ -1,4 +1,5 @@
 key_path: counts.geo_nodes
+data_category: Optional
 description: Total number of sites in a Geo deployment
 product_section: enablement
 product_stage: enablement

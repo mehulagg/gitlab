@@ -32,7 +32,8 @@ export const createMergeRequest = ({ id = 1, props } = {}) => {
   const mergeRequest = {
     id,
     approved_by_users: [],
-    issuable_reference: '!1',
+    issuable_reference: 'project!1',
+    reference: '!1',
     merged_at: mergedAt(),
     milestone: null,
     path: `/h5bp/html5-boilerplate/-/merge_requests/${id}`,
@@ -40,6 +41,11 @@ export const createMergeRequest = ({ id = 1, props } = {}) => {
     author: createUser(id),
     pipeline_status: createPipelineStatus('success'),
     approval_status: 'success',
+    project: {
+      avatar_url: '/foo/bar.png',
+      name: 'Foo',
+      web_url: 'https://foo.com/project',
+    },
   };
 
   return { ...mergeRequest, ...props };

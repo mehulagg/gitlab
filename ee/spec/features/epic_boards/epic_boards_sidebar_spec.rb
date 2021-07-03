@@ -81,6 +81,33 @@ RSpec.describe 'Epic boards sidebar', :js do
     end
   end
 
+  context 'todo' do
+    it 'creates todo when clicking button' do
+      click_card(card)
+      wait_for_requests
+
+      page.within '[data-testid="sidebar-todo"]' do
+        click_button 'Add a to do'
+        wait_for_requests
+
+        expect(page).to have_content 'Mark as done'
+      end
+    end
+
+    it 'marks a todo as done' do
+      click_card(card)
+      wait_for_requests
+
+      page.within '[data-testid="sidebar-todo"]' do
+        click_button 'Add a to do'
+        wait_for_requests
+        click_button 'Mark as done'
+        wait_for_requests
+        expect(page).to have_content 'Add a to do'
+      end
+    end
+  end
+
   context 'start date' do
     it 'edits fixed start date' do
       click_card(card)

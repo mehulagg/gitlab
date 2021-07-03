@@ -1,4 +1,5 @@
 ---
+data_category: Optional
 key_path: analytics_unique_visits.p_analytics_code_reviews
 description: Unique visitors to /:group/:project/-/analytics/code_reviews
 product_section: dev

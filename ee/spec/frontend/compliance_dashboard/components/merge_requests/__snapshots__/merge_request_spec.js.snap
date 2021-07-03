@@ -5,19 +5,21 @@ exports[`MergeRequest component when there is a merge request matches the snapsh
   class="gl-grid-col-start-1 gl-border-b-solid gl-border-b-1 gl-border-b-gray-100 gl-p-5"
   data-testid="merge-request"
 >
-  <a
-    class="gl-display-block gl-text-gray-900 gl-font-weight-bold"
-    href="/h5bp/html5-boilerplate/-/merge_requests/1"
-  >
+  <div>
+    <a
+      class="gl-text-gray-900 gl-font-weight-bold"
+      href="/h5bp/html5-boilerplate/-/merge_requests/1"
+    >
+      
+      Merge request 1
     
-    Merge request 1
-  
-  </a>
+    </a>
+  </div>
    
   <span
     class="gl-text-gray-500"
   >
-    !1
+    project!1
   </span>
    
   <span

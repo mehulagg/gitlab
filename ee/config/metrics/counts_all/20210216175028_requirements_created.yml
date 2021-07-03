@@ -1,4 +1,5 @@
 ---
+data_category: Optional
 key_path: counts.requirements_created
 description: Count of requirements created
 product_section: dev

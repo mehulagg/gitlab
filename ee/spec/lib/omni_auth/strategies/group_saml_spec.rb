@@ -18,21 +18,13 @@ RSpec.describe OmniAuth::Strategies::GroupSaml, type: :strategy do
 
   before do
     stub_licensed_features(group_saml: true)
-    fake_actiondispatch_request_session
-  end
-
-  def fake_actiondispatch_request_session
-    session = {}
-    session_id = 123
-    allow(session).to receive(:id).and_return(session_id)
-    env('rack.session', session)
   end
 
   describe 'callback_path option' do
     let(:callback_path) { OmniAuth::Strategies::GroupSaml.default_options[:callback_path] }
 
     def check(path)
-      callback_path.call( "PATH_INFO" => path )
+      callback_path.call("PATH_INFO" => path)
     end
 
     it 'dynamically detects /groups/:group_path/-/saml/callback' do
@@ -51,10 +43,12 @@ RSpec.describe OmniAuth::Strategies::GroupSaml, type: :strategy do
   describe 'POST /groups/:group_path/-/saml/callback' do
     context 'with valid SAMLResponse' do
       before do
-        allow_any_instance_of(OneLogin::RubySaml::Response).to receive(:validate_signature) { true }
-        allow_any_instance_of(OneLogin::RubySaml::Response).to receive(:validate_session_expiration) { true }
-        allow_any_instance_of(OneLogin::RubySaml::Response).to receive(:validate_subject_confirmation) { true }
-        allow_any_instance_of(OneLogin::RubySaml::Response).to receive(:validate_conditions) { true }
+        allow_next_instance_of(OneLogin::RubySaml::Response) do |instance|
+          allow(instance).to receive(:validate_signature) { true }
+          allow(instance).to receive(:validate_session_expiration) { true }
+          allow(instance).to receive(:validate_subject_confirmation) { true }
+          allow(instance).to receive(:validate_conditions) { true }
+        end
       end
 
       it 'sets the auth hash based on the response' do
@@ -80,15 +74,25 @@ RSpec.describe OmniAuth::Strategies::GroupSaml, type: :strategy do
 
       context 'user is testing SAML response' do
         let(:relay_state) { ::OmniAuth::Strategies::GroupSaml::VERIFY_SAML_RESPONSE }
+        let(:mock_session) do
+          rack_session = Rack::Session::SessionId.new('6919a6f1bb119dd7396fadc38fd18d0d')
+          instance_spy(ActionDispatch::Request::Session, id: rack_session, '[]': {})
+        end
 
         it 'stores the saml response for retrieval after redirect' do
-          expect_any_instance_of(::Gitlab::Auth::GroupSaml::ResponseStore).to receive(:set_raw).with(saml_response)
+          expect_next_instance_of(::Gitlab::Auth::GroupSaml::ResponseStore) do |instance|
+            allow(instance).to receive(:set_raw).with(saml_response)
+          end
 
-          post "/groups/my-group/-/saml/callback", SAMLResponse: saml_response, RelayState: relay_state
+          post "/groups/my-group/-/saml/callback",
+               { SAMLResponse: saml_response, RelayState: relay_state },
+               'rack.session' => mock_session
         end
 
         it 'redirects back to the settings page' do
-          post "/groups/my-group/-/saml/callback", SAMLResponse: saml_response, RelayState: relay_state
+          post "/groups/my-group/-/saml/callback",
+               { SAMLResponse: saml_response, RelayState: relay_state },
+               'rack.session' => mock_session
 
           expect(last_response.location).to eq(group_saml_providers_path(group, anchor: 'response'))
         end
@@ -123,10 +127,11 @@ RSpec.describe OmniAuth::Strategies::GroupSaml, type: :strategy do
   end
 
   describe 'POST /users/auth/group_saml' do
-    it 'redirects to the provider login page' do
+    it 'redirects to the provider login page', :aggregate_failures do
       post '/users/auth/group_saml', group_path: 'my-group'
 
-      expect(last_response).to redirect_to(/#{Regexp.quote(idp_sso_url)}/)
+      expect(last_response.status).to eq(302)
+      expect(last_response.location).to match(/\A#{Regexp.quote(idp_sso_url)}/)
     end
 
     it 'returns 404 for groups without SAML configured' do
@@ -149,7 +154,9 @@ RSpec.describe OmniAuth::Strategies::GroupSaml, type: :strategy do
 
     it "stores request ID during request phase" do
       request_id = double
-      allow_any_instance_of(OneLogin::RubySaml::Authrequest).to receive(:uuid).and_return(request_id)
+      allow_next_instance_of(OneLogin::RubySaml::Authrequest) do |instance|
+        allow(instance).to receive(:uuid).and_return(request_id)
+      end
 
       post '/users/auth/group_saml', group_path: 'my-group'
 

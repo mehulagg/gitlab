@@ -1,4 +1,5 @@
 import { masks } from 'dateformat';
+import { DEFAULT_DEBOUNCE_AND_THROTTLE_MS } from '~/lib/utils/constants';
 
 const { isoDate, mediumDate } = masks;
 
@@ -24,4 +25,4 @@ export const OFFSET_DATE_BY_ONE = 1;
 
 export const NO_DRAG_CLASS = 'no-drag';
 
-export const DATA_REFETCH_DELAY = 250;
+export const DATA_REFETCH_DELAY = DEFAULT_DEBOUNCE_AND_THROTTLE_MS;

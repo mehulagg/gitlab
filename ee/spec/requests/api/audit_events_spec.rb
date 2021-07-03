@@ -156,6 +156,7 @@ RSpec.describe API::AuditEvents do
 
   describe 'GET /audit_events/:id' do
     let_it_be(:user_audit_event) { create(:user_audit_event, created_at: Date.new(2000, 1, 10)) }
+
     let(:url) { "/audit_events/#{user_audit_event.id}" }
 
     context 'when authenticated, as a user' do

@@ -37,8 +37,8 @@ export default {
 </script>
 
 <template>
-  <span :is="tag" v-if="showBlockingIssuesCount" v-gl-tooltip :title="__('Blocking issues')">
+  <component :is="tag" v-if="showBlockingIssuesCount" v-gl-tooltip :title="__('Blocking issues')">
     <gl-icon name="issue-block" />
     {{ blockingIssuesCount }}
-  </span>
+  </component>
 </template>

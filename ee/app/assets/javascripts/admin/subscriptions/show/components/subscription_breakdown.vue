@@ -66,6 +66,7 @@ export default {
       shouldShowNotifications: false,
       subscriptionSyncStatus: null,
       subscriptionDetailsFields,
+      activationModalVisible: false,
     };
   },
   computed: {
@@ -138,7 +139,11 @@ export default {
 
 <template>
   <div>
-    <subscription-activation-modal v-if="hasSubscription" :modal-id="$options.modal.id" />
+    <subscription-activation-modal
+      v-if="hasSubscription"
+      v-model="activationModalVisible"
+      :modal-id="$options.modal.id"
+    />
     <subscription-sync-notifications
       v-if="shouldShowNotifications"
       class="mb-4"

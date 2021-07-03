@@ -6,6 +6,7 @@ RSpec.describe 'Delete a compliance framework' do
   include GraphqlHelpers
 
   let_it_be(:framework) { create(:compliance_framework) }
+
   let(:mutation) { graphql_mutation(:destroy_compliance_framework, { id: global_id_of(framework) }) }
 
   subject { post_graphql_mutation(mutation, current_user: current_user) }

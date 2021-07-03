@@ -110,6 +110,11 @@ module EE
       end
     end
 
+    override :predefined_variables
+    def predefined_variables
+      super.concat(merge_request_approval_variables)
+    end
+
     override :mergeable?
     def mergeable?(skip_ci_check: false, skip_discussions_check: false)
       return false unless approved?
@@ -296,6 +301,16 @@ module EE
     def has_approved_license_check?
       if rule = approval_rules.license_compliance.last
         ApprovalWrappedRule.wrap(self, rule).approved?
+      end
+    end
+
+    def merge_request_approval_variables
+      return unless approval_feature_available?
+
+      strong_memoize(:merge_request_approval_variables) do
+        ::Gitlab::Ci::Variables::Collection.new.tap do |variables|
+          variables.append(key: 'CI_MERGE_REQUEST_APPROVED', value: approved?.to_s) if approved?
+        end
       end
     end
   end

@@ -6,6 +6,7 @@ RSpec.describe EE::Gitlab::Ci::Pipeline::Quota::Activity do
   let_it_be(:namespace) { create(:namespace) }
   let_it_be(:project, reload: true) { create(:project, namespace: namespace) }
   let_it_be(:ultimate_plan, reload: true) { create(:ultimate_plan) }
+
   let(:plan_limits) { create(:plan_limits, plan: ultimate_plan) }
   let!(:subscription) { create(:gitlab_subscription, namespace: namespace, hosted_plan: ultimate_plan) }
 

@@ -124,7 +124,7 @@ gem 'fog-aws', '~> 3.9'
 # Locked until fog-google resolves https://github.com/fog/fog-google/issues/421.
 # Also see config/initializers/fog_core_patch.rb.
 gem 'fog-core', '= 2.1.0'
-gem 'gitlab-fog-google', '~> 1.13', require: 'fog/google'
+gem 'fog-google', '~> 1.15', require: 'fog/google'
 gem 'fog-local', '~> 0.6'
 gem 'fog-openstack', '~> 1.0'
 gem 'fog-rackspace', '~> 0.1.1'
@@ -157,7 +157,7 @@ gem 'github-markup', '~> 1.7.0', require: 'github/markup'
 gem 'commonmarker', '~> 0.21'
 gem 'kramdown', '~> 2.3.1'
 gem 'RedCloth', '~> 4.3.2'
-gem 'rdoc', '~> 6.1.2'
+gem 'gitlab-rdoc', '~> 6.3.2', require: 'rdoc' # We need this fork until rdoc releases a new version. See https://gitlab.com/gitlab-org/gitlab/-/issues/334695
 gem 'org-ruby', '~> 0.9.12'
 gem 'creole', '~> 0.5.0'
 gem 'wikicloth', '0.8.1'
@@ -168,7 +168,7 @@ gem 'asciidoctor-kroki', '~> 0.4.0', require: false
 gem 'rouge', '~> 3.26.0'
 gem 'truncato', '~> 0.7.11'
 gem 'bootstrap_form', '~> 4.2.0'
-gem 'nokogiri', '~> 1.11.1'
+gem 'nokogiri', '~> 1.11.4'
 gem 'escape_utils', '~> 1.1'
 
 # Calendar rendering
@@ -335,13 +335,9 @@ gem 'peek', '~> 1.1'
 gem 'snowplow-tracker', '~> 0.6.1'
 
 # Metrics
-group :metrics do
-  gem 'method_source', '~> 1.0', require: false
-  gem 'webrick', '~> 1.6.1', require: false
-
-  # Prometheus
-  gem 'prometheus-client-mmap', '~> 0.12.0'
-end
+gem 'method_source', '~> 1.0', require: false
+gem 'webrick', '~> 1.6.1', require: false
+gem 'prometheus-client-mmap', '~> 0.12.0', require: 'prometheus/client'
 
 group :development do
   gem 'lefthook', '~> 0.7.0', require: false
@@ -480,7 +476,7 @@ end
 gem 'spamcheck', '~> 0.1.0'
 
 # Gitaly GRPC protocol definitions
-gem 'gitaly', '~> 14.1.0.pre.rc1'
+gem 'gitaly', '~> 14.1.0.pre.rc2'
 
 # KAS GRPC protocol definitions
 gem 'kas-grpc', '~> 0.0.2'
@@ -496,7 +492,7 @@ gem 'flipper', '~> 0.21.0'
 gem 'flipper-active_record', '~> 0.21.0'
 gem 'flipper-active_support_cache_store', '~> 0.21.0'
 gem 'unleash', '~> 0.1.5'
-gem 'gitlab-experiment', '~> 0.5.4'
+gem 'gitlab-experiment', '~> 0.6.1'
 
 # Structured logging
 gem 'lograge', '~> 0.5'

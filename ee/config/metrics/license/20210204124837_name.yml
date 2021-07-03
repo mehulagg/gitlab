@@ -1,4 +1,5 @@
 ---
+data_category: Optional
 key_path: licensee.Name
 description: Name on the GitLab license
 product_section: fulfillment
