@@ -4,7 +4,9 @@ group: Ecosystem
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
-# GitLab.com for Jira Cloud app **(FREE SAAS)**
+# GitLab.com for Jira Cloud app **(FREE)**
+
+## GitLab.com for Jira Cloud app **(FREE SAAS)**
 
 You can integrate GitLab.com and Jira Cloud using the
 [GitLab.com for Jira Cloud](https://marketplace.atlassian.com/apps/1221011/gitlab-com-for-jira-cloud)
@@ -123,7 +125,7 @@ DVCS means distributed version control system.
 
 ## Troubleshooting GitLab.com for Jira Cloud
 
-The GitLab.com for Jira Cloud app uses an iframe to add namespaces on the settings page. Some browsers block cross-site cookies. This can lead to a message saying that the user needs to log in on GitLab.com even though the user is already logged in.
+The GitLab.com for Jira Cloud app uses an iframe to add namespaces on the settings page. Some browsers block cross-site cookies which can lead to a message saying that the user needs to log in on GitLab.com even though the user is already logged in.
 
 > "You need to sign in or sign up before continuing."
 
