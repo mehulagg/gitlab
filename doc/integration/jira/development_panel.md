@@ -39,7 +39,8 @@ After the integration is [set up on GitLab and Jira](#configure-the-integration)
   commit messages, and merge request titles.
 - See the linked branches, commits, and merge requests in Jira issues:
 
-Merge requests are called "pull requests" in Jira issues.
+At this time merge requests are called "pull requests" in Jira issues,
+this may change in a future Jira release.
 
 Select the links to see your GitLab repository data.
 
