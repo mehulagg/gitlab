@@ -76,13 +76,13 @@ documentation for [central administration of project integrations](../../user/ad
 
 To enable the integration in GitLab, you must:
 
-1. [Configure the project in Jira](index.md#per-project-jira-integration).
+1. [Configure the project in Jira](index.md#jira-integration).
 1. [Enter the correct values in GitLab](#configure-gitlab).
 
 ### Configure GitLab
 
 To enable the integration in your GitLab project, after you
-[configure your Jira project](index.md#per-project-jira-integration):
+[configure your Jira project](index.md#jira-integration):
 
 1. Ensure your GitLab installation does not use a relative URL, as described in
    [Limitations](#limitations).
