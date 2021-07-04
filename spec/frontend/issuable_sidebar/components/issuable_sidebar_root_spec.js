@@ -27,25 +27,6 @@ describe('IssuableSidebarRoot', () => {
     wrapper.destroy();
   });
 
-  describe('watch', () => {
-    describe('isExpanded', () => {
-      it('emits `sidebar-toggle` event on component', async () => {
-        wrapper.setData({
-          isExpanded: false,
-        });
-
-        await wrapper.vm.$nextTick();
-
-        expect(wrapper.emitted('sidebar-toggle')).toBeTruthy();
-        expect(wrapper.emitted('sidebar-toggle')[0]).toEqual([
-          {
-            expanded: false,
-          },
-        ]);
-      });
-    });
-  });
-
   describe('methods', () => {
     describe('updatePageContainerClass', () => {
       beforeEach(() => {
@@ -110,7 +91,7 @@ describe('IssuableSidebarRoot', () => {
       });
     });
 
-    describe('handleToggleSidebarClick', () => {
+    describe('toggleSidebar', () => {
       beforeEach(async () => {
         jest.spyOn(Cookies, 'set').mockImplementation(jest.fn());
         wrapper.setData({
@@ -121,14 +102,14 @@ describe('IssuableSidebarRoot', () => {
       });
 
       it('flips value of `isExpanded`', () => {
-        wrapper.vm.handleToggleSidebarClick();
+        wrapper.vm.toggleSidebar();
 
         expect(wrapper.vm.isExpanded).toBe(false);
         expect(wrapper.vm.userExpanded).toBe(false);
       });
 
       it('updates "collapsed_gutter" cookie value', () => {
-        wrapper.vm.handleToggleSidebarClick();
+        wrapper.vm.toggleSidebar();
 
         expect(Cookies.set).toHaveBeenCalledWith('collapsed_gutter', true);
       });
