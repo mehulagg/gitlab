@@ -139,6 +139,8 @@ module Gitlab
 
           verify_incoming_values!(values)
 
+          return use_composite_row_comparison(values) if compoite_row_comparison_possible?
+
           where_values = []
 
           reversed_column_definitions = column_definitions.reverse
@@ -186,6 +188,34 @@ module Gitlab
         alias_method :to_sql, :to_s
 
         private
+
+        def compoite_row_comparison_possible?
+          !column_definitions.one? &&
+            column_definitions.all?(&:not_nullable?) &&
+            column_definitions.map(&:order_direction).uniq.one? # all columns uses the same order direction
+        end
+
+        # composite row comparison works with NOT NULL columns and requires only one ondex scan
+        # Example: (created_at, id) > ('2012-09-18 01:40:01+00', 15)
+        def use_composite_row_comparison(values)
+          column_expressions = []
+          value_expressions = []
+          column_definitions.each do |column_definition|
+            column_expressions << column_definition.column_expression
+
+            value = values[column_definition.attribute_name]
+            value_expressions << Arel::Nodes.build_quoted(value, column_definition.column_expression)
+          end
+
+          column_expression_grouping = Arel::Nodes::Grouping.new(column_expressions)
+          value_expression_grouping = Arel::Nodes::Grouping.new(value_expressions)
+
+          if column_definitions.first.ascending_order?
+            [column_expression_grouping.gt(value_expression_grouping)]
+          else
+            [column_expression_grouping.lt(value_expression_grouping)]
+          end
+        end
 
         # Adds extra columns to the SELECT clause
         def apply_custom_projections(scope)
