@@ -29,9 +29,10 @@ module Gitlab
           end
 
           user = Representation::User.from_api_response(note.user) if note.user
+          noteable_id = matches[:iid].to_i
           hash = {
             noteable_type: 'MergeRequest',
-            noteable_id: matches[:iid].to_i,
+            noteable_id: noteable_id,
             file_path: note.path,
             commit_id: note.commit_id,
             diff_hunk: note.diff_hunk,
@@ -39,7 +40,10 @@ module Gitlab
             note: note.body,
             created_at: note.created_at,
             updated_at: note.updated_at,
-            github_id: note.id
+            github_id: {
+              note_id: note.id,
+              merge_request_iid: noteable_id
+            }
           }
 
           new(hash)

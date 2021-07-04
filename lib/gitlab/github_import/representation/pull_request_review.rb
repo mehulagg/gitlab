@@ -20,7 +20,10 @@ module Gitlab
             note: review.body,
             review_type: review.state,
             submitted_at: review.submitted_at,
-            github_id: review.id
+            github_id: {
+              review_id: review.id,
+              merge_request_id: review.merge_request_id
+            }
           )
         end
 
