@@ -156,7 +156,7 @@ export default {
       >
         <template #status-badge>{{ statusBadgeText }}</template>
 
-        <template #right-sidebar-items="{ sidebarExpanded }">
+        <template #right-sidebar-items="{ sidebarExpanded, toggleSidebar }">
           <jira-issue-sidebar
             :sidebar-expanded="sidebarExpanded"
             :issue="issue"
@@ -165,6 +165,7 @@ export default {
             :statuses="statuses"
             @issue-status-fetch="onIssueStatusFetch"
             @issue-status-updated="onIssueStatusUpdated"
+            @sidebar-toggle="toggleSidebar"
           />
         </template>
 

@@ -69,11 +69,10 @@ export default {
   },
   mounted() {
     this.sidebarEl = document.querySelector('aside.right-sidebar');
-    this.sidebarToggleEl = document.querySelector('.js-toggle-right-sidebar-button');
   },
   methods: {
     toggleSidebar() {
-      this.sidebarToggleEl.dispatchEvent(new Event('click'));
+      this.$emit('sidebar-toggle');
     },
     expandSidebarAndOpenDropdown(dropdownRef = null) {
       // Expand the sidebar if not already expanded.

@@ -139,17 +139,9 @@ describe('TestCaseSidebar', () => {
       });
 
       it('dispatches click event on sidebar toggle button', () => {
-        const buttonEl = document.querySelector('.js-toggle-right-sidebar-button');
-
-        jest.spyOn(buttonEl, 'dispatchEvent');
-
         wrapper.vm.toggleSidebar();
 
-        expect(buttonEl.dispatchEvent).toHaveBeenCalledWith(
-          expect.objectContaining({
-            type: 'click',
-          }),
-        );
+        expect(wrapper.emitted('sidebar-toggle')).toBeDefined();
       });
     });
 

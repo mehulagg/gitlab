@@ -91,7 +91,7 @@ export default {
       }
     },
     toggleSidebar() {
-      document.querySelector('.js-toggle-right-sidebar-button').dispatchEvent(new Event('click'));
+      this.$emit('sidebar-toggle');
     },
     expandSidebarAndOpenDropdown(dropdownButtonSelector) {
       // Expand the sidebar if not already expanded.
