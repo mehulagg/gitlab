@@ -42,7 +42,7 @@ start_sidekiq()
     cmd="${cmd} ${chpst} -P"
   fi
 
-  ${cmd} bundle exec sidekiq -C "${sidekiq_config}" -e $RAILS_ENV "$@"
+  ${cmd} bundle exec sidekiq $@ -C "${sidekiq_config}" -e $RAILS_ENV "$@"
 }
 
 case "$1" in
@@ -57,7 +57,7 @@ case "$1" in
     start_silent
     ;;
   start_foreground)
-    start_sidekiq
+    start_sidekiq $@
     ;;
   restart)
     restart
