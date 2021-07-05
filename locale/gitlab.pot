@@ -2365,6 +2365,9 @@ msgstr ""
 msgid "AdminSettings|Feed token"
 msgstr ""
 
+msgid "AdminSettings|If not specified at the group or instance level, the default is %{default_initial_branch_name}. Does not affect existing repositories."
+msgstr ""
+
 msgid "AdminSettings|Keep the latest artifacts for all jobs in the latest successful pipelines"
 msgstr ""
 
@@ -2405,6 +2408,9 @@ msgid "AdminSettings|Set a CI/CD template as the required pipeline configuration
 msgstr ""
 
 msgid "AdminSettings|Specify a domain to use by default for every project's Auto Review Apps and Auto Deploy stages."
+msgstr ""
+
+msgid "AdminSettings|The default name for the initial branch of new repositories created in the instance."
 msgstr ""
 
 msgid "AdminSettings|The latest artifacts for all jobs in the most recent successful pipelines in each project are stored and do not expire."
@@ -15763,6 +15769,9 @@ msgstr ""
 msgid "GroupSettings|Export group"
 msgstr ""
 
+msgid "GroupSettings|If not specified at the group or instance level, the default is %{default_initial_branch_name}. Does not affect existing repositories."
+msgstr ""
+
 msgid "GroupSettings|If the parent group's visibility is lower than the group current visibility, visibility levels for subgroups and projects will be changed to match the new parent group's visibility."
 msgstr ""
 
@@ -15800,6 +15809,9 @@ msgid "GroupSettings|Select a sub-group as the custom project template source fo
 msgstr ""
 
 msgid "GroupSettings|The Auto DevOps pipeline runs if no alternative CI configuration file is found."
+msgstr ""
+
+msgid "GroupSettings|The default name for the initial branch of new repositories created in the group."
 msgstr ""
 
 msgid "GroupSettings|There was a problem updating Auto DevOps pipeline: %{error_messages}."
@@ -16401,9 +16413,6 @@ msgid "If enabled, only protected branches will be mirrored."
 msgstr ""
 
 msgid "If no options are selected, only administrators can register runners."
-msgstr ""
-
-msgid "If not specified at the group or instance level, the default is %{branch_name_default}. Does not affect existing repositories."
 msgstr ""
 
 msgid "If the YouTube URL is https://www.youtube.com/watch?v=0t1DgySidms then the video ID is %{id}"
@@ -32324,12 +32333,6 @@ msgid "The data source is connected, but there is no data to display. %{document
 msgstr ""
 
 msgid "The default CI/CD configuration file and path for new projects."
-msgstr ""
-
-msgid "The default name for the initial branch of new repositories created in the group."
-msgstr ""
-
-msgid "The default name for the initial branch of new repositories created in the instance."
 msgstr ""
 
 msgid "The dependency list details information about the components used within your project."
