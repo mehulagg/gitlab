@@ -21,6 +21,7 @@ import {
   issuableAttributesQueries,
   noAttributeId,
   defaultEpicSort,
+  epicIidPattern,
 } from '../constants';
 
 export default {
@@ -115,12 +116,20 @@ export default {
       },
       debounce: 250,
       variables() {
-        return {
+        const variables = {
           fullPath: this.attrWorkspacePath,
           title: this.searchTerm,
           state: this.$options.IssuableAttributeState[this.issuableAttribute],
           sort: this.issuableAttribute === IssuableType.Epic ? defaultEpicSort : null,
-        };
+        }
+
+        if (IssuableType.Epic && epicIidPattern.test(this.searchTerm)) {
+          const matches = this.searchTerm.match(epicIidPattern);
+          variables.iidStartsWith = matches.groups.iid;
+          variables.title = null;
+        }
+
+        return variables;
       },
       update(data) {
         if (data?.workspace) {

@@ -1,12 +1,18 @@
 #import "./epic.fragment.graphql"
 
-query issueEpics($fullPath: ID!, $title: String, $state: EpicState) {
+query issueEpics(
+  $fullPath: ID!,
+  $title: String,
+  $state: EpicState,
+  $iidStartsWith: String
+) {
   workspace: group(fullPath: $fullPath) {
     attributes: epics(
       search: $title
       state: $state
       includeAncestorGroups: true
       includeDescendantGroups: false
+      iidStartsWith: $iidStartsWith
     ) {
       nodes {
         ...EpicFragment

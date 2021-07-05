@@ -159,15 +159,9 @@ class EpicsFinder < IssuableFinder
   end
 
   def starts_with_iid(items)
-    query = params[:iid_starts_with].present? ? params[:iid_starts_with] : nil
+    return items unless params[:iid_starts_with].present?
 
-    if /^\&\d+$/.match(search)
-      query = search[1..]
-      search = nil
-    end
-
-    return items if query.nil?
-
+    query = params[:iid_starts_with]
     raise ArgumentError unless self.class.valid_iid_query?(query)
 
     items.iid_starts_with(query)
