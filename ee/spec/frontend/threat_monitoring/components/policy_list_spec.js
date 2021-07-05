@@ -2,6 +2,7 @@ import { GlTable, GlDrawer } from '@gitlab/ui';
 import { createLocalVue } from '@vue/test-utils';
 import { merge } from 'lodash';
 import VueApollo from 'vue-apollo';
+import { POLICY_TYPE_OPTIONS } from 'ee/threat_monitoring/components/constants';
 import PolicyList from 'ee/threat_monitoring/components/policy_list.vue';
 import networkPoliciesQuery from 'ee/threat_monitoring/graphql/queries/network_policies.query.graphql';
 import scanExecutionPoliciesQuery from 'ee/threat_monitoring/graphql/queries/scan_execution_policies.query.graphql';
@@ -75,6 +76,7 @@ describe('PolicyList component', () => {
   const mountShallowWrapper = factory(shallowMountExtended);
   const mountWrapper = factory();
 
+  const findPolicyTypeFilter = () => wrapper.findByTestId('policy-type-filter');
   const findEnvironmentsPicker = () => wrapper.find({ ref: 'environmentsPicker' });
   const findPoliciesTable = () => wrapper.findComponent(GlTable);
   const findPolicyStatusCells = () => wrapper.findAllByTestId('policy-status-cell');
@@ -165,6 +167,20 @@ describe('PolicyList component', () => {
 
       it(`renders ${expectedPolicyType} in the policy type cell`, () => {
         expect(row.findAll('td').at(2).text()).toBe(expectedPolicyType);
+      });
+    });
+
+    it.each`
+      description         | filterBy                                          | hiddenTypes
+      ${'network'}        | ${POLICY_TYPE_OPTIONS.POLICY_TYPE_NETWORK}        | ${[POLICY_TYPE_OPTIONS.POLICY_TYPE_SCAN_EXECUTION]}
+      ${'scan execution'} | ${POLICY_TYPE_OPTIONS.POLICY_TYPE_SCAN_EXECUTION} | ${[POLICY_TYPE_OPTIONS.POLICY_TYPE_NETWORK]}
+    `('policies filtered by $description type', async ({ filterBy, hiddenTypes }) => {
+      findPolicyTypeFilter().vm.$emit('input', filterBy.value);
+      await wrapper.vm.$nextTick();
+
+      expect(findPoliciesTable().text()).toContain(filterBy.text);
+      hiddenTypes.forEach((hiddenType) => {
+        expect(findPoliciesTable().text()).not.toContain(hiddenType.text);
       });
     });
   });

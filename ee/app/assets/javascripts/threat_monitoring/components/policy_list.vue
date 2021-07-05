@@ -17,7 +17,9 @@ import { setUrlFragment, mergeUrlParams } from '~/lib/utils/url_utility';
 import { __, s__ } from '~/locale';
 import networkPoliciesQuery from '../graphql/queries/network_policies.query.graphql';
 import scanExecutionPoliciesQuery from '../graphql/queries/scan_execution_policies.query.graphql';
+import { POLICY_TYPE_NETWORK, POLICY_TYPE_SCAN_EXECUTION, POLICY_TYPE_OPTIONS } from './constants';
 import EnvironmentPicker from './filters/environment_picker.vue';
+import PolicyTypeFilter from './filters/policy_type_filter.vue';
 import PolicyDrawer from './policy_drawer/policy_drawer.vue';
 
 const createPolicyFetchError = ({ gqlError, networkError }) => {
@@ -46,6 +48,7 @@ export default {
     GlLink,
     GlIcon,
     EnvironmentPicker,
+    PolicyTypeFilter,
     PolicyDrawer,
   },
   directives: {
@@ -103,6 +106,7 @@ export default {
       initialEnforcementStatus: null,
       networkPolicies: [],
       scanExecutionPolicies: [],
+      selectedPolicyType: POLICY_TYPE_OPTIONS.ALL.value,
     };
   },
   computed: {
@@ -115,10 +119,26 @@ export default {
     documentationFullPath() {
       return setUrlFragment(this.documentationPath, 'container-network-policy');
     },
+    shouldShowNetworkPolicies() {
+      return [
+        POLICY_TYPE_OPTIONS.ALL.value,
+        POLICY_TYPE_OPTIONS.POLICY_TYPE_NETWORK.value,
+      ].includes(this.selectedPolicyType);
+    },
+    shouldShowScanExecutionPolicies() {
+      return [
+        POLICY_TYPE_OPTIONS.ALL.value,
+        POLICY_TYPE_OPTIONS.POLICY_TYPE_SCAN_EXECUTION.value,
+      ].includes(this.selectedPolicyType);
+    },
     policies() {
       return [
-        ...getPoliciesWithType(this.networkPolicies, s__('SecurityPolicies|Network')),
-        ...getPoliciesWithType(this.scanExecutionPolicies, s__('SecurityPolicies|Scan execution')),
+        ...(this.shouldShowNetworkPolicies
+          ? getPoliciesWithType(this.networkPolicies, POLICY_TYPE_NETWORK)
+          : []),
+        ...(this.shouldShowScanExecutionPolicies
+          ? getPoliciesWithType(this.scanExecutionPolicies, POLICY_TYPE_SCAN_EXECUTION)
+          : []),
       ];
     },
     isLoadingPolicies() {
@@ -235,8 +255,15 @@ export default {
     </gl-alert>
 
     <div class="pt-3 px-3 bg-gray-light">
-      <div class="row justify-content-between align-items-center">
-        <environment-picker ref="environmentsPicker" :include-all="true" />
+      <div class="row gl-justify-content-space-between gl-align-items-center">
+        <div class="col-12 col-sm-8 col-md-6 col-lg-5 row">
+          <policy-type-filter
+            v-model="selectedPolicyType"
+            class="col-6"
+            data-testid="policy-type-filter"
+          />
+          <environment-picker ref="environmentsPicker" class="col-6" :include-all="true" />
+        </div>
         <div class="col-sm-auto">
           <gl-button
             category="secondary"
