@@ -71,6 +71,9 @@ export default {
     schedulesLoading() {
       return this.$apollo.queries.schedules.loading;
     },
+    hasMaxRules() {
+      return this?.rules?.length === 10;
+    },
   },
   mounted() {
     this.rules = this.form.rules.map((rule) => {
@@ -164,7 +167,7 @@ export default {
         @remove-escalation-rule="removeEscalationRule"
       />
     </gl-form-group>
-    <gl-link @click="addRule">
+    <gl-link v-if="!hasMaxRules" @click="addRule">
       <span>{{ $options.i18n.addRule }}</span>
     </gl-link>
   </gl-form>
