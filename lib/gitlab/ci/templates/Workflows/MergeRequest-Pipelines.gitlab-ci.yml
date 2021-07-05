@@ -1,3 +1,22 @@
+---
+Type: Template
+Name: Accessibility testing
+Description: |
+  The template to start off CI workflow for the ruby based project.
+  Read more about the feature here: https://docs.gitlab.com/ee/user/project/merge_requests/accessibility_testing.html
+Icon: gitlab.svg
+Maintainers:
+  - group::verify
+Authors:
+  - Shinya Maeda
+Categories:
+  - Workflow Enhancement
+File_patterns:
+  - *
+Usage: inclusion
+Inclusion-Purpose: workflow-extension
+---
+
 # To contribute improvements to CI/CD templates, please follow the Development guide at:
 # https://docs.gitlab.com/ee/development/cicd/templates.html
 # This specific template is located at:

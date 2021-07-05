@@ -5,6 +5,19 @@
 
 # Read more about the feature here: https://docs.gitlab.com/ee/user/project/merge_requests/accessibility_testing.html
 
+template:
+  name: Accessibility testing
+  description: |
+    The template to start off CI workflow for the ruby based project.
+    Read more about the feature here: https://docs.gitlab.com/ee/user/project/merge_requests/accessibility_testing.html
+  icon: ruby.svg
+  maintainers: [Shinya Maeda]
+  authors: [Shinya Maeda]
+  categories: [Verify,Testing,GitLab]
+  file_patterns: [*]
+  usage: inclusion
+  purpose: other
+
 stages:
   - build
   - test

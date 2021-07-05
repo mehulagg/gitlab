@@ -5,6 +5,17 @@
 
 # Official language image. Look for the different tagged releases at:
 # https://hub.docker.com/r/library/ruby/tags/
+
+template:
+  name: Ruby
+  description: The template to start off CI workflow for the ruby based project
+  icon: ruby.svg
+  maintainers: Shinya Maeda
+  authors: 
+  categories: [Ruby,Continuous Integration]
+  file_patterns: [*.rb,Gemfile]
+  interface: copy-paste
+
 image: ruby:latest
 
 # Pick zero or more services to be used on all builds.

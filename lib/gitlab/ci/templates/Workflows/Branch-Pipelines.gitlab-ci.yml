@@ -6,6 +6,19 @@
 # Read more on when to use this template at
 # https://docs.gitlab.com/ee/ci/yaml/#workflowrules
 
+template:
+  name: Accessibility testing
+  description: |
+    The template to start off CI workflow for the ruby based project.
+    Read more about the feature here: https://docs.gitlab.com/ee/user/project/merge_requests/accessibility_testing.html
+  icon: gitlab.svg
+  maintainers: [group::verify]
+  authors: [Shinya Maeda]
+  categories: [Workflow Enhancement]
+  file_patterns: [*]
+  usage: inclusion
+  inclusion_purpose: workflow-extension
+
 workflow:
   rules:
     - if: $CI_COMMIT_TAG
