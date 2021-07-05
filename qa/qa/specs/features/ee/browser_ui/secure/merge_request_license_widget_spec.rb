@@ -103,7 +103,7 @@ module QA
         Page::MergeRequest::Show.perform do |show|
           # Give time for the runner to complete pipeline
           show.has_pipeline_status?('passed')
-          Support::Retrier.retry_until(max_attempts: 5, sleep_interval: 5, reload_page: show) do
+          Support::Retrier.retry_until(max_attempts: 5, sleep_interval: 5) do
             show.wait_for_license_compliance_report
           end
           show.click_manage_licenses_button
