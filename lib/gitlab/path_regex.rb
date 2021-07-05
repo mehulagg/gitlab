@@ -181,7 +181,7 @@ module Gitlab
     end
 
     def repository_git_route_regex
-      @repository_git_route_regex ||= /#{repository_route_regex}\.git/.freeze
+      @repository_git_route_regex ||= /#{repository_route_regex}.*\.git/.freeze
     end
 
     def repository_wiki_git_route_regex
