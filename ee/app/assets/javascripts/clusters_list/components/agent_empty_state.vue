@@ -24,7 +24,7 @@ export default {
     },
   },
   computed: {
-    getProjectPath() {
+    repositoryPath() {
       return `/${this.projectPath}`;
     },
   },
@@ -95,7 +95,7 @@ export default {
           >
             {{ s__('ClusterAgents|Read more about getting started') }}
           </gl-button>
-          <gl-button category="secondary" variant="info" :href="getProjectPath">
+          <gl-button category="secondary" variant="info" :href="repositoryPath">
             {{ s__('ClusterAgents|Go to the repository') }}
           </gl-button>
         </template>
