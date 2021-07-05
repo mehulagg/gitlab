@@ -102,7 +102,6 @@ export default {
       }
 
       this.isLoading = false;
-      this.$refs.zuora.contentWindow.postMessage('resize', this.allowedOrigin);
     },
     isEventAllowedForOrigin(event) {
       try {
@@ -143,7 +142,6 @@ export default {
     <gl-loading-icon v-if="isLoading" size="lg" />
     <!-- eslint-disable @gitlab/vue-require-i18n-strings -->
     <iframe
-      v-show="!isLoading"
       ref="zuora"
       :src="iframeSrc"
       style="border: none"

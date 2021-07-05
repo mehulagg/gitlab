@@ -33,8 +33,8 @@ RSpec.describe Gitlab::Elastic::ProjectSearchResults, :elastic, :clean_gitlab_re
   end
 
   describe "search", :sidekiq_inline do
-    let_it_be(:project) { create(:project, :public, :repository, :wiki_repo) }
-    let_it_be(:private_project) { create(:project, :repository, :wiki_repo) }
+    let(:project) { create(:project, :public, :repository, :wiki_repo) }
+    let(:private_project) { create(:project, :repository, :wiki_repo) }
 
     before do
       [project, private_project].each do |p|

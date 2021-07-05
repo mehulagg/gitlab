@@ -6,7 +6,7 @@ class UpdateMaxSeatsUsedForGitlabComSubscriptionsWorker # rubocop:disable Scalab
   sidekiq_options retry: 3
   include CronjobQueue # rubocop:disable Scalability/CronWorkerContext
 
-  feature_category :license
+  feature_category :utilization
   worker_resource_boundary :cpu
 
   # rubocop: disable CodeReuse/ActiveRecord

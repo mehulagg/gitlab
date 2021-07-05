@@ -83,6 +83,7 @@ RSpec.describe Projects::Security::ConfigurationPresenter do
           security_scan(:dast, configured: true),
           security_scan(:sast, configured: true),
           security_scan(:container_scanning, configured: false),
+          security_scan(:cluster_image_scanning, configured: false),
           security_scan(:dependency_scanning, configured: false),
           security_scan(:license_scanning, configured: false),
           security_scan(:secret_detection, configured: true),
@@ -107,6 +108,7 @@ RSpec.describe Projects::Security::ConfigurationPresenter do
           security_scan(:dast, configured: false),
           security_scan(:sast, configured: false),
           security_scan(:container_scanning, configured: false),
+          security_scan(:cluster_image_scanning, configured: false),
           security_scan(:dependency_scanning, configured: false),
           security_scan(:license_scanning, configured: false),
           security_scan(:secret_detection, configured: false),
@@ -139,6 +141,7 @@ RSpec.describe Projects::Security::ConfigurationPresenter do
           security_scan(:dast_profiles, configured: true),
           security_scan(:sast, configured: true),
           security_scan(:container_scanning, configured: false),
+          security_scan(:cluster_image_scanning, configured: false),
           security_scan(:dependency_scanning, configured: false),
           security_scan(:license_scanning, configured: false),
           security_scan(:secret_detection, configured: true),
@@ -157,6 +160,7 @@ RSpec.describe Projects::Security::ConfigurationPresenter do
           security_scan(:dast_profiles, configured: true),
           security_scan(:sast, configured: true),
           security_scan(:container_scanning, configured: false),
+          security_scan(:cluster_image_scanning, configured: false),
           security_scan(:dependency_scanning, configured: false),
           security_scan(:license_scanning, configured: false),
           security_scan(:secret_detection, configured: false),
@@ -167,8 +171,7 @@ RSpec.describe Projects::Security::ConfigurationPresenter do
 
       it 'detects security jobs even when the job has more than one report' do
         config = { artifacts: { reports: { other_job: ['gl-other-report.json'], sast: ['gl-sast-report.json'] } } }
-        complicated_metadata = double(:complicated_metadata, config_options: config)
-        complicated_job = double(:complicated_job, metadata: complicated_metadata)
+        complicated_job = build_stubbed(:ci_build, options: config)
 
         allow_next_instance_of(::Security::SecurityJobsFinder) do |finder|
           allow(finder).to receive(:execute).and_return([complicated_job])
@@ -181,6 +184,7 @@ RSpec.describe Projects::Security::ConfigurationPresenter do
           security_scan(:dast_profiles, configured: true),
           security_scan(:sast, configured: true),
           security_scan(:container_scanning, configured: false),
+          security_scan(:cluster_image_scanning, configured: false),
           security_scan(:dependency_scanning, configured: false),
           security_scan(:license_scanning, configured: false),
           security_scan(:secret_detection, configured: false),
@@ -197,6 +201,7 @@ RSpec.describe Projects::Security::ConfigurationPresenter do
           security_scan(:dast_profiles, configured: true),
           security_scan(:sast, configured: true),
           security_scan(:container_scanning, configured: false),
+          security_scan(:cluster_image_scanning, configured: false),
           security_scan(:dependency_scanning, configured: false),
           security_scan(:license_scanning, configured: true),
           security_scan(:secret_detection, configured: true),

@@ -30,7 +30,7 @@ RSpec.describe 'Project active tab' do
     end
 
     it_behaves_like 'page has active tab', _('Analytics')
-    it_behaves_like 'page has active sub tab', _('Code Review')
+    it_behaves_like 'page has active sub tab', _('Code review')
   end
 
   context 'on project CI/CD' do

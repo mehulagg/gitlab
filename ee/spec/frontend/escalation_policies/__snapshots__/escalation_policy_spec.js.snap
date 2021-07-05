@@ -38,7 +38,7 @@ exports[`EscalationPolicy renders policy with rules 1`] = `
             class="gl-font-weight-bold"
           >
             
-                10 mins
+                1 mins
               
           </span>
            
@@ -81,7 +81,7 @@ exports[`EscalationPolicy renders policy with rules 1`] = `
             class="gl-font-weight-bold"
           >
             
-                20 mins
+                2 mins
               
           </span>
            

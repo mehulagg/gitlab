@@ -6,7 +6,7 @@ RSpec.describe Integrations::Github::StatusMessage do
   include Rails.application.routes.url_helpers
 
   let(:project) { double(:project, namespace: "me", to_s: 'example_project') }
-  let(:service) { double(:service, static_context?: false) }
+  let(:integration) { double(:integration, static_context?: false) }
 
   before do
     stub_config_setting(host: 'instance-host')
@@ -14,14 +14,14 @@ RSpec.describe Integrations::Github::StatusMessage do
 
   describe '#description' do
     it 'includes human readable gitlab status' do
-      subject = described_class.new(project, service, detailed_status: 'passed')
+      subject = described_class.new(project, integration, detailed_status: 'passed')
 
       expect(subject.description).to eq "Pipeline passed on GitLab"
     end
 
     it 'gets truncated to 140 chars' do
       dummy_text = 'a' * 500
-      subject = described_class.new(project, service, detailed_status: dummy_text)
+      subject = described_class.new(project, integration, detailed_status: dummy_text)
 
       expect(subject.description.length).to eq 140
     end
@@ -43,7 +43,7 @@ RSpec.describe Integrations::Github::StatusMessage do
 
     with_them do
       it 'transforms status' do
-        subject = described_class.new(project, service, status: gitlab_status)
+        subject = described_class.new(project, integration, status: gitlab_status)
 
         expect(subject.status).to eq github_status
       end
@@ -51,7 +51,7 @@ RSpec.describe Integrations::Github::StatusMessage do
   end
 
   describe '#status_options' do
-    let(:subject) { described_class.new(project, service, id: 1) }
+    let(:subject) { described_class.new(project, integration, id: 1) }
 
     it 'includes context' do
       expect(subject.status_options[:context]).to be_a String
@@ -68,12 +68,12 @@ RSpec.describe Integrations::Github::StatusMessage do
 
   describe '#context' do
     subject do
-      described_class.new(project, service, ref: 'some-ref')
+      described_class.new(project, integration, ref: 'some-ref')
     end
 
     context 'when status context is supposed to be dynamic' do
       before do
-        allow(service).to receive(:static_context?).and_return(false)
+        allow(integration).to receive(:static_context?).and_return(false)
       end
 
       it 'appends pipeline reference to the status context' do
@@ -83,7 +83,7 @@ RSpec.describe Integrations::Github::StatusMessage do
 
     context 'when status context is supposed to be static' do
       before do
-        allow(service).to receive(:static_context?).and_return(true)
+        allow(integration).to receive(:static_context?).and_return(true)
       end
 
       it 'appends instance hostname to the status context' do
@@ -98,7 +98,7 @@ RSpec.describe Integrations::Github::StatusMessage do
     let(:sample_data) { Gitlab::DataBuilder::Pipeline.build(pipeline) }
 
     subject do
-      described_class.from_pipeline_data(project, service, sample_data)
+      described_class.from_pipeline_data(project, integration, sample_data)
     end
 
     it 'builds an instance of Integrations::Github::StatusMessage' do
@@ -136,11 +136,11 @@ RSpec.describe Integrations::Github::StatusMessage do
 
       context 'when static context has been configured' do
         before do
-          allow(service).to receive(:static_context?).and_return(true)
+          allow(integration).to receive(:static_context?).and_return(true)
         end
 
         subject do
-          described_class.from_pipeline_data(project, service, sample_data)
+          described_class.from_pipeline_data(project, integration, sample_data)
         end
 
         it 'appends instance name to the context name' do

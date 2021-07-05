@@ -44,7 +44,7 @@ module EE
             end
 
             ::Sidebars::MenuItem.new(
-              title: _('Code Review'),
+              title: _('Code review'),
               link: project_analytics_code_reviews_path(context.project),
               active_routes: { path: 'projects/analytics/code_reviews#index' },
               item_id: :code_review
@@ -76,7 +76,7 @@ module EE
             end
 
             ::Sidebars::MenuItem.new(
-              title: _('Merge Request'),
+              title: _('Merge request'),
               link: project_analytics_merge_request_analytics_path(context.project),
               active_routes: { path: 'projects/analytics/merge_request_analytics#show' },
               item_id: :merge_requests

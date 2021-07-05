@@ -3,7 +3,6 @@ import activateSubscriptionMutation from './graphql/mutations/activate_subscript
 import getCurrentLicense from './graphql/queries/get_current_license.query.graphql';
 import getLicenseHistory from './graphql/queries/get_license_history.query.graphql';
 
-export const fieldRequiredMessage = s__('SuperSonics|This field is required.');
 export const subscriptionMainTitle = s__('SuperSonics|Your subscription');
 export const subscriptionActivationNotificationText = s__(
   `SuperSonics|Your subscription was successfully activated. You can see the details below.`,
@@ -137,3 +136,7 @@ export const connectivityErrorAlert = {
   ),
 };
 export const supportLink = 'https://about.gitlab.com/support/#contact-support';
+export const subscriptionBannerTitle = s__('SuperSonics|Cloud licensing');
+export const subscriptionBannerText = s__(
+  "SuperSonics|Cloud licensing is now available. It's an easier way to activate instances and manage subscriptions. Read more about it in our %{blogPostLinkStart}blog post%{blogPostLinkEnd}. Activation codes are available in the %{portalLinkStart}Customers Portal%{portalLinkEnd}.",
+);

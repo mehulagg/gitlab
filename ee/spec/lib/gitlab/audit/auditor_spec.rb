@@ -46,7 +46,7 @@ RSpec.describe Gitlab::Audit::Auditor do
       it 'records audit events in correct order', :aggregate_failures do
         expect { audit! }.to change(AuditEvent, :count).by(2)
 
-        event_messages = AuditEvent.all.map { |event| event.details[:custom_message] }
+        event_messages = AuditEvent.order(:id).map { |event| event.details[:custom_message] }
 
         expect(event_messages).to eq([add_message, remove_message])
       end

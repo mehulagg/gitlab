@@ -107,13 +107,22 @@ export function initCadenceApp({ namespaceType }) {
     cadencesListPath,
     canCreateCadence,
     canEditCadence,
+    canCreateIteration,
     canEditIteration,
     hasScopedLabelsFeature,
     labelsFetchPath,
     previewMarkdownPath,
     noIssuesSvgPath,
   } = el.dataset;
-  const router = createRouter({ base: cadencesListPath });
+  const router = createRouter({
+    base: cadencesListPath,
+    permissions: {
+      canCreateCadence: parseBoolean(canCreateCadence),
+      canEditCadence: parseBoolean(canEditCadence),
+      canCreateIteration: parseBoolean(canCreateIteration),
+      canEditIteration: parseBoolean(canEditIteration),
+    },
+  });
 
   return new Vue({
     el,
@@ -126,6 +135,7 @@ export function initCadenceApp({ namespaceType }) {
       canCreateCadence: parseBoolean(canCreateCadence),
       canEditCadence: parseBoolean(canEditCadence),
       namespaceType,
+      canCreateIteration: parseBoolean(canCreateIteration),
       canEditIteration: parseBoolean(canEditIteration),
       hasScopedLabelsFeature: parseBoolean(hasScopedLabelsFeature),
       labelsFetchPath,

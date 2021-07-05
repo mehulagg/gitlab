@@ -25,10 +25,7 @@ describe('JiraIssuesSidebar', () => {
   };
 
   afterEach(() => {
-    if (wrapper) {
-      wrapper.destroy();
-      wrapper = null;
-    }
+    wrapper.destroy();
   });
 
   const findLabelsSelect = () => wrapper.findComponent(LabelsSelect);

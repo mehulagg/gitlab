@@ -7,7 +7,7 @@
       {
         "id": "gid://gitlab/IncidentManagement::EscalationRule/22",
         "status": "ACKNOWLEDGED",
-        "elapsedTimeSeconds": 10,
+        "elapsedTimeSeconds": 60,
         "oncallSchedule": {
           "iid": "3",
           "name": "Schedule to fill in"
@@ -16,7 +16,7 @@
       {
         "id": "gid://gitlab/IncidentManagement::EscalationRule/23",
         "status": "RESOLVED",
-        "elapsedTimeSeconds": 20,
+        "elapsedTimeSeconds": 120,
         "oncallSchedule": {
           "iid": "4",
           "name": "Monitor schedule"
@@ -32,7 +32,7 @@
       {
         "id": "gid://gitlab/IncidentManagement::EscalationRule/48",
         "status": "ACKNOWLEDGED",
-        "elapsedTimeSeconds": 30,
+        "elapsedTimeSeconds": 180,
         "oncallSchedule": {
           "iid": "3",
           "name": "Schedule to fill in"

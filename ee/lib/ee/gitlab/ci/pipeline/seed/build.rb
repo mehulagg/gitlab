@@ -17,29 +17,32 @@ module EE
 
             override :attributes
             def attributes
-              super.deep_merge(dast_attributes)
+              super.deep_merge(dast_configuration.payload)
+            end
+
+            override :errors
+            def errors
+              strong_memoize(:errors) do
+                super.concat(dast_configuration.errors)
+              end
             end
 
             private
 
             # rubocop:disable Gitlab/ModuleWithInstanceVariables
-            def dast_attributes
-              return {} unless @dast_configuration
-              return {} unless @seed_attributes[:stage] == 'dast'
-              return {} unless ::Feature.enabled?(:dast_configuration_ui, @pipeline.project, default_enabled: :yaml)
+            def dast_configuration
+              return ServiceResponse.success unless @dast_configuration && @seed_attributes[:stage] == 'dast'
 
-              result = AppSec::Dast::Profiles::BuildConfigService.new(
-                project: @pipeline.project,
-                current_user: @pipeline.user,
-                params: {
-                  dast_site_profile: @dast_configuration[:site_profile],
-                  dast_scanner_profile: @dast_configuration[:scanner_profile]
-                }
-              ).execute
-
-              return {} unless result.success?
-
-              result.payload
+              strong_memoize(:dast_attributes) do
+                AppSec::Dast::Profiles::BuildConfigService.new(
+                  project: @pipeline.project,
+                  current_user: @pipeline.user,
+                  params: {
+                    dast_site_profile: @dast_configuration[:site_profile],
+                    dast_scanner_profile: @dast_configuration[:scanner_profile]
+                  }
+                ).execute
+              end
             end
             # rubocop:enable Gitlab/ModuleWithInstanceVariables
           end

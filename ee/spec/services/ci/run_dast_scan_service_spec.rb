@@ -83,15 +83,15 @@ RSpec.describe Ci::RunDastScanService do
       it 'creates a build with appropriate options' do
         build = pipeline.builds.first
         expected_options = {
-          'image' => {
-            'name' => '$SECURE_ANALYZERS_PREFIX/dast:$DAST_VERSION'
+          image: {
+            name: '$SECURE_ANALYZERS_PREFIX/dast:$DAST_VERSION'
           },
-          'script' => [
+          script: [
             '/analyze'
           ],
-          'artifacts' => {
-            'reports' => {
-              'dast' => ['gl-dast-report.json']
+          artifacts: {
+            reports: {
+              dast: ['gl-dast-report.json']
             }
           }
         }
@@ -103,61 +103,61 @@ RSpec.describe Ci::RunDastScanService do
 
         expected_variables = [
           {
-            'key' => 'DAST_AUTH_URL',
-            'value' => dast_site_profile.auth_url,
-            'public' => true
+            key: 'DAST_AUTH_URL',
+            value: dast_site_profile.auth_url,
+            public: true
           }, {
-            'key' => 'DAST_DEBUG',
-            'value' => String(dast_scanner_profile.show_debug_messages?),
-            'public' => true
+            key: 'DAST_DEBUG',
+            value: String(dast_scanner_profile.show_debug_messages?),
+            public: true
           }, {
-            'key' => 'DAST_EXCLUDE_URLS',
-            'value' => dast_site_profile.excluded_urls.join(','),
-            'public' => true
+            key: 'DAST_EXCLUDE_URLS',
+            value: dast_site_profile.excluded_urls.join(','),
+            public: true
           }, {
-            'key' => 'DAST_FULL_SCAN_ENABLED',
-            'value' => String(dast_scanner_profile.full_scan_enabled?),
-            'public' => true
+            key: 'DAST_FULL_SCAN_ENABLED',
+            value: String(dast_scanner_profile.full_scan_enabled?),
+            public: true
           }, {
-            'key' => 'DAST_PASSWORD_FIELD',
-            'value' => dast_site_profile.auth_password_field,
-            'public' => true
+            key: 'DAST_PASSWORD_FIELD',
+            value: dast_site_profile.auth_password_field,
+            public: true
           }, {
-            'key' => 'DAST_SPIDER_MINS',
-            'value' => String(dast_scanner_profile.spider_timeout),
-            'public' => true
+            key: 'DAST_SPIDER_MINS',
+            value: String(dast_scanner_profile.spider_timeout),
+            public: true
           }, {
-            'key' => 'DAST_TARGET_AVAILABILITY_TIMEOUT',
-            'value' => String(dast_scanner_profile.target_timeout),
-            'public' => true
+            key: 'DAST_TARGET_AVAILABILITY_TIMEOUT',
+            value: String(dast_scanner_profile.target_timeout),
+            public: true
           }, {
-            'key' => 'DAST_USERNAME',
-            'value' => dast_site_profile.auth_username,
-            'public' => true
+            key: 'DAST_USERNAME',
+            value: dast_site_profile.auth_username,
+            public: true
           }, {
-            'key' => 'DAST_USERNAME_FIELD',
-            'value' => dast_site_profile.auth_username_field,
-            'public' => true
+            key: 'DAST_USERNAME_FIELD',
+            value: dast_site_profile.auth_username_field,
+            public: true
           }, {
-            'key' => 'DAST_USE_AJAX_SPIDER',
-            'value' => String(dast_scanner_profile.use_ajax_spider?),
-            'public' => true
+            key: 'DAST_USE_AJAX_SPIDER',
+            value: String(dast_scanner_profile.use_ajax_spider?),
+            public: true
           }, {
-            'key' => 'DAST_VERSION',
-            'value' => '1',
-            'public' => true
+            key: 'DAST_VERSION',
+            value: '1',
+            public: true
           }, {
-            'key' => 'DAST_WEBSITE',
-            'value' => dast_site_profile.dast_site.url,
-            'public' => true
+            key: 'DAST_WEBSITE',
+            value: dast_site_profile.dast_site.url,
+            public: true
           }, {
-            'key' => 'GIT_STRATEGY',
-            'value' => 'none',
-            'public' => true
+            key: 'GIT_STRATEGY',
+            value: 'none',
+            public: true
           }, {
-            'key' => 'SECURE_ANALYZERS_PREFIX',
-            'value' => 'registry.gitlab.com/gitlab-org/security-products/analyzers',
-            'public' => true
+            key: 'SECURE_ANALYZERS_PREFIX',
+            value: 'registry.gitlab.com/gitlab-org/security-products/analyzers',
+            public: true
           }
         ]
 

@@ -17,7 +17,7 @@ RSpec.describe 'SAML provider settings' do
     stub_saml_config
   end
 
-  around(:all) do |example|
+  around do |example|
     with_omniauth_full_host { example.run }
   end
 

@@ -28,7 +28,7 @@ RSpec.describe 'Group navbar' do
       insert_after_sub_nav_item(
         _('Contribution'),
         within: _('Analytics'),
-        new_sub_nav_item_name: _('DevOps Adoption')
+        new_sub_nav_item_name: _('DevOps adoption')
       )
 
       visit group_path(group)
@@ -60,7 +60,7 @@ RSpec.describe 'Group navbar' do
       insert_after_sub_nav_item(
         _('Contribution'),
         within: _('Analytics'),
-        new_sub_nav_item_name: _('Value Stream')
+        new_sub_nav_item_name: _('Value stream')
       )
 
       visit group_path(group)
@@ -80,28 +80,6 @@ RSpec.describe 'Group navbar' do
   end
 
   context 'when epics are available' do
-    before do
-      stub_licensed_features(epics: true)
-      stub_feature_flags(epic_boards: false)
-
-      insert_after_nav_item(
-        _('Group information'),
-        new_nav_item: {
-          nav_item: _('Epics'),
-          nav_sub_items: [
-            _('List'),
-            _('Roadmap')
-          ]
-        }
-      )
-
-      visit group_path(group)
-    end
-
-    it_behaves_like 'verified navigation bar'
-  end
-
-  context 'when epics and epic boards are available' do
     before do
       stub_licensed_features(epics: true)
 

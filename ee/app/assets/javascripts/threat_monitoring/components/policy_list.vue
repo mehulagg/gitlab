@@ -1,11 +1,20 @@
 <script>
-import { GlTable, GlEmptyState, GlButton, GlAlert, GlSprintf, GlLink } from '@gitlab/ui';
+import {
+  GlTable,
+  GlEmptyState,
+  GlButton,
+  GlAlert,
+  GlSprintf,
+  GlLink,
+  GlIcon,
+  GlTooltipDirective,
+} from '@gitlab/ui';
 import { mapState, mapGetters } from 'vuex';
 import { PREDEFINED_NETWORK_POLICIES } from 'ee/threat_monitoring/constants';
 import createFlash from '~/flash';
 import { getTimeago } from '~/lib/utils/datetime_utility';
 import { setUrlFragment, mergeUrlParams } from '~/lib/utils/url_utility';
-import { s__ } from '~/locale';
+import { __, s__ } from '~/locale';
 import networkPoliciesQuery from '../graphql/queries/network_policies.query.graphql';
 import scanExecutionPoliciesQuery from '../graphql/queries/scan_execution_policies.query.graphql';
 import EnvironmentPicker from './environment_picker.vue';
@@ -21,6 +30,12 @@ const createPolicyFetchError = ({ gqlError, networkError }) => {
   });
 };
 
+const getPoliciesWithType = (policies, policyType) =>
+  policies.map((policy) => ({
+    ...policy,
+    policyType,
+  }));
+
 export default {
   components: {
     GlTable,
@@ -29,8 +44,12 @@ export default {
     GlAlert,
     GlSprintf,
     GlLink,
+    GlIcon,
     EnvironmentPicker,
     PolicyDrawer,
+  },
+  directives: {
+    GlTooltip: GlTooltipDirective,
   },
   inject: ['projectPath'],
   props: {
@@ -97,7 +116,10 @@ export default {
       return setUrlFragment(this.documentationPath, 'container-network-policy');
     },
     policies() {
-      return [...this.networkPolicies, ...this.scanExecutionPolicies];
+      return [
+        ...getPoliciesWithType(this.networkPolicies, s__('SecurityPolicies|Network')),
+        ...getPoliciesWithType(this.scanExecutionPolicies, s__('SecurityPolicies|Scan execution')),
+      ];
     },
     isLoadingPolicies() {
       return (
@@ -131,21 +153,31 @@ export default {
       };
       const fields = [
         {
+          key: 'status',
+          label: '',
+          thClass: 'gl-w-3',
+          tdAttr: {
+            'data-testid': 'policy-status-cell',
+          },
+        },
+        {
           key: 'name',
           label: s__('NetworkPolicies|Name'),
           thClass: 'gl-w-half',
         },
         {
-          key: 'status',
-          label: s__('NetworkPolicies|Status'),
+          key: 'policyType',
+          label: s__('SecurityPolicies|Policy type'),
+          sortable: true,
         },
         {
           key: 'updatedAt',
           label: s__('NetworkPolicies|Last modified'),
+          sortable: true,
         },
       ];
       // Adds column 'namespace' only while 'all environments' option is selected
-      if (this.allEnvironments) fields.splice(1, 0, namespace);
+      if (this.allEnvironments) fields.splice(2, 0, namespace);
 
       return fields;
     },
@@ -170,12 +202,16 @@ export default {
       bTable.clearSelected();
     },
   },
-  emptyStateDescription: s__(
-    `NetworkPolicies|Policies are a specification of how groups of pods are allowed to communicate with each other's network endpoints.`,
-  ),
-  autodevopsNoticeDescription: s__(
-    `NetworkPolicies|If you are using Auto DevOps, your %{monospacedStart}auto-deploy-values.yaml%{monospacedEnd} file will not be updated if you change a policy in this section. Auto DevOps users should make changes by following the %{linkStart}Container Network Policy documentation%{linkEnd}.`,
-  ),
+  i18n: {
+    emptyStateDescription: s__(
+      `NetworkPolicies|Policies are a specification of how groups of pods are allowed to communicate with each other's network endpoints.`,
+    ),
+    autodevopsNoticeDescription: s__(
+      `NetworkPolicies|If you are using Auto DevOps, your %{monospacedStart}auto-deploy-values.yaml%{monospacedEnd} file will not be updated if you change a policy in this section. Auto DevOps users should make changes by following the %{linkStart}Container Network Policy documentation%{linkEnd}.`,
+    ),
+    statusEnabled: __('Enabled'),
+    statusDisabled: __('Disabled'),
+  },
 };
 </script>
 
@@ -188,7 +224,7 @@ export default {
       :dismissible="false"
       class="gl-mb-3"
     >
-      <gl-sprintf :message="$options.autodevopsNoticeDescription">
+      <gl-sprintf :message="$options.i18n.autodevopsNoticeDescription">
         <template #monospaced="{ content }">
           <span class="gl-font-monospace">{{ content }}</span>
         </template>
@@ -218,6 +254,9 @@ export default {
       :busy="isLoadingPolicies"
       :items="policies"
       :fields="fields"
+      sort-icon-left
+      sort-by="updatedAt"
+      sort-desc
       head-variant="white"
       stacked="md"
       thead-class="gl-text-gray-900 border-bottom"
@@ -230,7 +269,14 @@ export default {
       @row-selected="presentPolicyDrawer"
     >
       <template #cell(status)="value">
-        {{ value.item.enabled ? __('Enabled') : __('Disabled') }}
+        <gl-icon
+          v-if="value.item.enabled"
+          v-gl-tooltip="$options.i18n.statusEnabled"
+          :aria-label="$options.i18n.statusEnabled"
+          name="check-circle-filled"
+          class="gl-text-green-700"
+        />
+        <span v-else class="gl-sr-only">{{ $options.i18n.statusDisabled }}</span>
       </template>
 
       <template #cell(updatedAt)="value">
@@ -242,7 +288,7 @@ export default {
           <gl-empty-state
             ref="tableEmptyState"
             :title="s__('NetworkPolicies|No policies detected')"
-            :description="$options.emptyStateDescription"
+            :description="$options.i18n.emptyStateDescription"
             :primary-button-link="documentationFullPath"
             :primary-button-text="__('Learn more')"
           />

@@ -42,7 +42,6 @@ RSpec.describe ::Mutations::Boards::EpicBoards::EpicMoveList do
   describe '#resolve' do
     before do
       stub_licensed_features(epics: true)
-      stub_feature_flags(epic_boards: true)
     end
 
     context 'when user does not have permissions' do

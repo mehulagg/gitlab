@@ -56,6 +56,10 @@ RSpec.describe 'creating escalation policy' do
     expect(first_rule['status']).to eq(create_params.dig(:rules, 0, :status))
   end
 
+  include_examples 'correctly reorders escalation rule inputs' do
+    let(:variables) { params }
+  end
+
   context 'errors' do
     context 'user does not have permission' do
       subject(:resolve) { post_graphql_mutation(mutation, current_user: create(:user)) }

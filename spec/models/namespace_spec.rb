@@ -996,6 +996,36 @@ RSpec.describe Namespace do
     end
   end
 
+  describe '#use_traversal_ids_for_ancestors?' do
+    let_it_be(:namespace, reload: true) { create(:namespace) }
+
+    subject { namespace.use_traversal_ids_for_ancestors? }
+
+    context 'when use_traversal_ids_for_ancestors? feature flag is true' do
+      before do
+        stub_feature_flags(use_traversal_ids_for_ancestors: true)
+      end
+
+      it { is_expected.to eq true }
+    end
+
+    context 'when use_traversal_ids_for_ancestors? feature flag is false' do
+      before do
+        stub_feature_flags(use_traversal_ids_for_ancestors: false)
+      end
+
+      it { is_expected.to eq false }
+    end
+
+    context 'when use_traversal_ids? feature flag is false' do
+      before do
+        stub_feature_flags(use_traversal_ids: false)
+      end
+
+      it { is_expected.to eq false }
+    end
+  end
+
   describe '#users_with_descendants' do
     let(:user_a) { create(:user) }
     let(:user_b) { create(:user) }
@@ -1053,12 +1083,28 @@ RSpec.describe Namespace do
   end
 
   describe '#all_projects' do
+    context 'when recursive approach is disabled' do
+      before do
+        stub_feature_flags(recursive_approach_for_all_projects: false)
+      end
+
+      include_examples '#all_projects'
+    end
+
     context 'with use_traversal_ids feature flag enabled' do
       before do
         stub_feature_flags(use_traversal_ids: true)
       end
 
       include_examples '#all_projects'
+
+      # Using #self_and_descendant instead of #self_and_descendant_ids can produce
+      # very slow queries.
+      it 'calls self_and_descendant_ids' do
+        namespace = create(:group)
+        expect(namespace).to receive(:self_and_descendant_ids)
+        namespace.all_projects
+      end
     end
 
     context 'with use_traversal_ids feature flag disabled' do

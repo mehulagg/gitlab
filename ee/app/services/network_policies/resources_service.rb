@@ -3,6 +3,7 @@
 module NetworkPolicies
   class ResourcesService
     include NetworkPolicies::Responses
+    include Gitlab::Utils::UsageData
 
     LIMIT = 100
 
@@ -26,6 +27,12 @@ module NetworkPolicies
 
     private
 
+    def track_usage_data_for_cluster(platform, policies)
+      return if policies.empty?
+
+      track_usage_event(:clusters_using_network_policies_ui, platform.cluster_id)
+    end
+
     def execute_per_environment(platform, namespace)
       policies = platform.kubeclient
         .get_network_policies(namespace: namespace)
@@ -33,6 +40,7 @@ module NetworkPolicies
       policies += platform.kubeclient
         .get_cilium_network_policies(namespace: namespace)
         .map { |resource| Gitlab::Kubernetes::CiliumNetworkPolicy.from_resource(resource) }
+      track_usage_data_for_cluster(platform, policies)
       [policies, nil]
     rescue Kubeclient::HttpError => e
       [policies, e]

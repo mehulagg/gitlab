@@ -24,6 +24,7 @@ module EE
         audit_changes(:email, as: 'email address')
         audit_changes(:encrypted_password, as: 'password', skip_changes: true)
         audit_changes(:username, as: 'username')
+        audit_changes(:admin, as: 'admin status')
 
         success
       end

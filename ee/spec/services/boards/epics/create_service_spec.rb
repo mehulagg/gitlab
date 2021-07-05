@@ -76,13 +76,5 @@ RSpec.describe Boards::Epics::CreateService do
     context 'when epics feature is not available' do
       it_behaves_like 'epic creation error', /does not exist or you don't have permission/
     end
-
-    context 'when epic boards feature flag is not enabled' do
-      before do
-        stub_feature_flags(epic_boards: false)
-      end
-
-      it_behaves_like 'epic creation error', /not available/
-    end
   end
 end

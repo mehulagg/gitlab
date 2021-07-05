@@ -139,8 +139,11 @@ describe('BoardsSelector', () => {
       await wrapper.setData({
         loadingBoards: false,
       });
-      await Promise.all([allBoardsResponse, recentBoardsResponse]);
-      return nextTick();
+      // NOTE: Due to timing issues, this `return` of `Promise.all` is required because
+      // `app/assets/javascripts/boards/components/boards_selector.vue` does a `$nextTick()` in
+      // loadRecentBoards. For some unknown reason it doesn't work with `await`, the `return`
+      // is required.
+      return Promise.all([allBoardsResponse, recentBoardsResponse]).then(() => nextTick());
     });
 
     it('hides loading spinner', async () => {

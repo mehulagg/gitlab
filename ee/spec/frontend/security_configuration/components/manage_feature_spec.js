@@ -22,7 +22,6 @@ describe('ManageFeature component', () => {
       provide: {
         glFeatures: {
           secDependencyScanningUiEnable: true,
-          secSecretDetectionUiEnable: true,
         },
       },
       ...options,
@@ -80,7 +79,6 @@ describe('ManageFeature component', () => {
   it.each`
     type                               | featureFlag
     ${REPORT_TYPE_DEPENDENCY_SCANNING} | ${'secDependencyScanningUiEnable'}
-    ${REPORT_TYPE_SECRET_DETECTION}    | ${'secSecretDetectionUiEnable'}
   `('renders generic component for $type if $featureFlag is disabled', ({ type, featureFlag }) => {
     const [feature] = generateFeatures(1, { type });
     createComponent({

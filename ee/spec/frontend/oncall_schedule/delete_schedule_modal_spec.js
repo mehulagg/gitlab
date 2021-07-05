@@ -4,7 +4,7 @@ import VueApollo from 'vue-apollo';
 import DeleteScheduleModal, {
   i18n,
 } from 'ee/oncall_schedules/components/delete_schedule_modal.vue';
-import { deleteScheduleModalId } from 'ee/oncall_schedules/components/oncall_schedule';
+import { deleteScheduleModalId } from 'ee/oncall_schedules/components/oncall_schedule.vue';
 import destroyOncallScheduleMutation from 'ee/oncall_schedules/graphql/mutations/destroy_oncall_schedule.mutation.graphql';
 import getOncallSchedulesQuery from 'ee/oncall_schedules/graphql/queries/get_oncall_schedules.query.graphql';
 import createMockApollo from 'helpers/mock_apollo_helper';

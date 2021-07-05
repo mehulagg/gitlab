@@ -27,10 +27,9 @@ RSpec.describe ::Mutations::Boards::EpicBoards::Update do
     it { is_expected.to have_graphql_fields(:epic_board).at_least }
   end
 
-  context 'with epic feature enabled and epic_boards feature flag enabled' do
+  context 'with epic feature enabled' do
     before do
       stub_licensed_features(epics: true)
-      stub_feature_flags(epic_boards: true)
     end
 
     context 'when user does not have permission to update epic board' do
@@ -49,14 +48,6 @@ RSpec.describe ::Mutations::Boards::EpicBoards::Update do
         expect(result[:epic_board].name).to eq('new name')
         expect(result[:epic_board].hide_backlog_list).to be_truthy
       end
-    end
-
-    context 'with epic_boards feature flag disabled' do
-      before do
-        stub_feature_flags(epic_boards: false)
-      end
-
-      it_behaves_like 'epic board update error'
     end
   end
 

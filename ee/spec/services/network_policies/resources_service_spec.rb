@@ -9,7 +9,7 @@ RSpec.describe NetworkPolicies::ResourcesService do
   let(:project) { create(:project) }
   let(:cluster) { create(:cluster, :instance) }
   let!(:cluster_kubernetes_namespace) { create(:cluster_kubernetes_namespace, project: project, cluster: cluster, environment: environment, namespace: 'namespace') }
-  let(:platform) { double('Clusters::Platforms::Kubernetes', kubeclient: kubeclient) }
+  let(:platform) { double('Clusters::Platforms::Kubernetes', kubeclient: kubeclient, cluster_id: cluster.id) }
   let(:kubeclient) { double('Kubeclient::Client') }
   let(:policy) do
     Gitlab::Kubernetes::NetworkPolicy.new(
@@ -44,6 +44,23 @@ RSpec.describe NetworkPolicies::ResourcesService do
       expect(subject.payload.count).to eq(2)
       expect(subject.payload.first.as_json).to eq(policy.as_json)
       expect(subject.payload.last.as_json).to eq(cilium_policy.as_json)
+    end
+
+    it_behaves_like 'tracking unique hll events' do
+      subject(:request) { service.execute }
+
+      let(:target_id) { 'clusters_using_network_policies_ui' }
+      let(:expected_type) { instance_of(Integer) }
+
+      before do
+        allow(kubeclient).to receive(:get_network_policies)
+          .with(namespace: cluster_kubernetes_namespace.namespace)
+          .and_return [policy.generate]
+
+        allow(kubeclient).to receive(:get_cilium_network_policies)
+          .with(namespace: cluster_kubernetes_namespace.namespace)
+          .and_return [cilium_policy.generate]
+      end
     end
 
     context 'without deployment_platform' do

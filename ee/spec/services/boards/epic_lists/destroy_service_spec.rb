@@ -18,7 +18,6 @@ RSpec.describe Boards::EpicLists::DestroyService do
 
   before do
     stub_licensed_features(epics: true)
-    stub_feature_flags(epic_boards: true)
   end
 
   context 'when user does not have permission' do
@@ -48,19 +47,6 @@ RSpec.describe Boards::EpicLists::DestroyService do
 
         expect(response).to be_error
         expect(response.errors).to include("Epics feature is not available.")
-      end
-    end
-
-    context 'when epic_boards feature flag is disabled' do
-      before do
-        stub_feature_flags(epic_boards: false)
-      end
-
-      it 'returns an error' do
-        response = described_class.new(parent, nil).execute(list)
-
-        expect(response).to be_error
-        expect(response.errors).to include("Epic boards feature is not enabled.")
       end
     end
   end
