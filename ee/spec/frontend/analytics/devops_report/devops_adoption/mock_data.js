@@ -95,8 +95,6 @@ export const devopsAdoptionTableHeaders = [
   },
 ];
 
-export const segmentName = 'Foooo';
-
 export const genericErrorMessage = 'An error occurred while saving changes. Please try again.';
 
 export const dataErrorMessage = 'Name already taken.';

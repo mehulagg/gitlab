@@ -8,14 +8,14 @@ export const DEBOUNCE_DELAY = 500;
 
 export const DEVOPS_ADOPTION_PROGRESS_BAR_HEIGHT = '8px';
 
-export const DEVOPS_ADOPTION_SEGMENT_DELETE_MODAL_ID = 'devopsSegmentDeleteModal';
+export const DEVOPS_ADOPTION_DELETE_MODAL_ID = 'devopsDeleteModal';
 
 export const DATE_TIME_FORMAT = 'yyyy-mm-dd HH:MM';
 
 export const DEVOPS_ADOPTION_ERROR_KEYS = {
   groups: 'groupsError',
-  segments: 'segmentsError',
-  addSegment: 'addSegmentsError',
+  enabledNamespaces: 'enabledNamespacesError',
+  addEnabledNamespaces: 'addEnabledNamespacesError',
 };
 
 export const TABLE_HEADER_TEXT = s__(
@@ -46,10 +46,10 @@ export const DEVOPS_ADOPTION_STRINGS = {
     [DEVOPS_ADOPTION_ERROR_KEYS.groups]: s__(
       'DevopsAdoption|There was an error fetching Groups. Please refresh the page.',
     ),
-    [DEVOPS_ADOPTION_ERROR_KEYS.segments]: s__(
+    [DEVOPS_ADOPTION_ERROR_KEYS.enabledNamespaces]: s__(
       'DevopsAdoption|There was an error fetching Group adoption data. Please refresh the page.',
     ),
-    [DEVOPS_ADOPTION_ERROR_KEYS.addSegment]: s__(
+    [DEVOPS_ADOPTION_ERROR_KEYS.addEnabledNamespaces]: s__(
       'DevopsAdoption|There was an error enabling the current group. Please refresh the page.',
     ),
     tableHeader: {
@@ -92,17 +92,15 @@ export const DEVOPS_ADOPTION_STRINGS = {
 
 export const DEVOPS_ADOPTION_TABLE_TEST_IDS = {
   TABLE_HEADERS: 'header',
-  SEGMENT: 'segmentCol',
+  NAMESPACE: 'namespaceCol',
   ACTIONS: 'actionsCol',
   LOCAL_STORAGE_SORT_BY: 'localStorageSortBy',
   LOCAL_STORAGE_SORT_DESC: 'localStorageSortDesc',
 };
 
-export const DEVOPS_ADOPTION_SEGMENTS_TABLE_SORT_BY_STORAGE_KEY =
-  'devops_adoption_segments_table_sort_by';
+export const DEVOPS_ADOPTION_TABLE_SORT_BY_STORAGE_KEY = 'devops_adoption_table_sort_by';
 
-export const DEVOPS_ADOPTION_SEGMENTS_TABLE_SORT_DESC_STORAGE_KEY =
-  'devops_adoption_segments_table_sort_desc';
+export const DEVOPS_ADOPTION_TABLE_SORT_DESC_STORAGE_KEY = 'devops_adoption_table_sort_desc';
 
 export const DEVOPS_ADOPTION_GROUP_COL_LABEL = __('Group');
 

@@ -15,7 +15,7 @@ import {
 import bulkEnableDevopsAdoptionNamespacesMutation from 'ee/analytics/devops_report/devops_adoption/graphql/mutations/bulk_enable_devops_adoption_namespaces.mutation.graphql';
 import devopsAdoptionEnabledNamespaces from 'ee/analytics/devops_report/devops_adoption/graphql/queries/devops_adoption_enabled_namespaces.query.graphql';
 import getGroupsQuery from 'ee/analytics/devops_report/devops_adoption/graphql/queries/get_groups.query.graphql';
-import { addSegmentsToCache } from 'ee/analytics/devops_report/devops_adoption/utils/cache_updates';
+import { addEnabledNamespacesToCache } from 'ee/analytics/devops_report/devops_adoption/utils/cache_updates';
 import createMockApollo from 'helpers/mock_apollo_helper';
 import { shallowMountExtended } from 'helpers/vue_test_utils_helper';
 import waitForPromises from 'helpers/wait_for_promises';
@@ -24,7 +24,7 @@ import API from '~/api';
 import { groupNodes, devopsAdoptionNamespaceData } from '../mock_data';
 
 jest.mock('ee/analytics/devops_report/devops_adoption/utils/cache_updates', () => ({
-  addSegmentsToCache: jest.fn(),
+  addEnabledNamespacesToCache: jest.fn(),
 }));
 
 const localVue = createLocalVue();
@@ -234,9 +234,9 @@ describe('DevopsAdoptionApp', () => {
             );
           });
 
-          it('calls addSegmentsToCache with the correct variables', () => {
-            expect(addSegmentsToCache).toHaveBeenCalledTimes(1);
-            expect(addSegmentsToCache).toHaveBeenCalledWith(
+          it('calls addEnabledNamespacesToCache with the correct variables', () => {
+            expect(addEnabledNamespacesToCache).toHaveBeenCalledTimes(1);
+            expect(addEnabledNamespacesToCache).toHaveBeenCalledWith(
               expect.anything(),
               [devopsAdoptionNamespaceData.nodes[0]],
               {
@@ -270,7 +270,7 @@ describe('DevopsAdoptionApp', () => {
             it('displays the error message ', () => {
               const alert = wrapper.findComponent(GlAlert);
               expect(alert.exists()).toBe(true);
-              expect(alert.text()).toBe(DEVOPS_ADOPTION_STRINGS.app.addSegmentsError);
+              expect(alert.text()).toBe(DEVOPS_ADOPTION_STRINGS.app.addEnabledNamespacesError);
             });
 
             it('calls Sentry', () => {
@@ -301,7 +301,7 @@ describe('DevopsAdoptionApp', () => {
       it('displays the error message ', () => {
         const alert = wrapper.findComponent(GlAlert);
         expect(alert.exists()).toBe(true);
-        expect(alert.text()).toBe(DEVOPS_ADOPTION_STRINGS.app.segmentsError);
+        expect(alert.text()).toBe(DEVOPS_ADOPTION_STRINGS.app.enabledNamespacesError);
       });
 
       it('calls Sentry', () => {
