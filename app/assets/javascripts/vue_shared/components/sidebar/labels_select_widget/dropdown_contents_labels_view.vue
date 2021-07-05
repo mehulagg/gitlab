@@ -15,10 +15,17 @@ export default {
     LabelItem,
   },
   inject: ['projectPath'],
+  props: {
+    selectedLabelsList: {
+      type: Array,
+      required: true,
+    },
+  },
   data() {
     return {
       searchKey: '',
       currentHighlightItem: -1,
+      localSelectedLabels: [...this.selectedLabelsList],
     };
   },
   apollo: {
@@ -46,7 +53,7 @@ export default {
       'footerCreateLabelTitle',
       'footerManageLabelTitle',
     ]),
-    ...mapGetters(['selectedLabelsList', 'isDropdownVariantSidebar', 'isDropdownVariantEmbedded']),
+    ...mapGetters(['isDropdownVariantSidebar', 'isDropdownVariantEmbedded']),
     labelsFetchInProgress() {
       return this.$apollo.queries.labels.loading;
     },
@@ -73,13 +80,9 @@ export default {
     },
   },
   methods: {
-    ...mapActions([
-      'toggleDropdownContents',
-      'toggleDropdownContentsCreateView',
-      'updateSelectedLabels',
-    ]),
+    ...mapActions(['toggleDropdownContents', 'toggleDropdownContentsCreateView']),
     isLabelSelected(label) {
-      return this.selectedLabelsList.includes(getIdFromGraphQLId(label.id));
+      return this.localSelectedLabels.includes(getIdFromGraphQLId(label.id));
     },
     /**
      * This method scrolls item from dropdown into
@@ -128,7 +131,13 @@ export default {
       }
     },
     handleLabelClick(label) {
-      this.updateSelectedLabels([label]);
+      if (this.isLabelSelected(label)) {
+        this.localSelectedLabels = this.localSelectedLabels.filter(
+          (id) => id !== getIdFromGraphQLId(label.id),
+        );
+      } else {
+        this.localSelectedLabels.push(getIdFromGraphQLId(label.id));
+      }
       if (!this.allowMultiselect) this.toggleDropdownContents();
     },
   },

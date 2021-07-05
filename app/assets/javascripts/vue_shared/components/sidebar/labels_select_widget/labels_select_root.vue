@@ -334,6 +334,7 @@ export default {
         ref="dropdownContents"
         :render-on-top="!contentIsOnViewport"
         :labels-create-title="labelsCreateTitle"
+        :selected-labels-list="selectedLabels.map((label) => label.id)"
       />
     </template>
     <template v-if="isDropdownVariantStandalone || isDropdownVariantEmbedded">
@@ -342,6 +343,7 @@ export default {
         v-if="dropdownButtonVisible && showDropdownContents"
         ref="dropdownContents"
         :render-on-top="!contentIsOnViewport"
+        :selected-labels-list="selectedLabels.map((label) => label.id)"
       />
     </template>
   </div>

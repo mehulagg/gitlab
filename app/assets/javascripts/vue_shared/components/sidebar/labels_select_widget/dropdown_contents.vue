@@ -21,6 +21,10 @@ export default {
       type: String,
       required: true,
     },
+    selectedLabelsList: {
+      type: Array,
+      required: true,
+    },
   },
   computed: {
     ...mapState(['showDropdownContentsCreateView', 'labelsListTitle']),
@@ -75,6 +79,10 @@ export default {
         @click="toggleDropdownContents"
       />
     </div>
-    <component :is="dropdownContentsView" @hideCreateView="toggleDropdownContentsCreateView" />
+    <component
+      :is="dropdownContentsView"
+      :selected-labels-list="selectedLabelsList"
+      @hideCreateView="toggleDropdownContentsCreateView"
+    />
   </div>
 </template>
