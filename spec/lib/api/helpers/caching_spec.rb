@@ -81,7 +81,7 @@ RSpec.describe API::Helpers::Caching, :use_clean_rails_redis_caching do
       expected_kwargs = described_class::DEFAULT_CACHE_OPTIONS.merge(kwargs)
 
       expect(expensive_thing).to receive(:do_very_expensive_action).once
-      expect(instance.cache).to receive(:fetch).with([cache_key, 1], **expected_kwargs).exactly(5).times.and_call_original
+      expect(instance.cache).to receive(:fetch).with(cache_key, **expected_kwargs).exactly(5).times.and_call_original
 
       5.times { perform }
     end
