@@ -53,6 +53,14 @@ module API
           result
         end
       end
+
+      desc 'List error tracking errors of the project' do
+        detail 'This feature was introduced in GitLab 14.1.'
+      end
+
+      get ':id/error_tracking/errors' do
+        raise 'Not implemented'
+      end
     end
   end
 end

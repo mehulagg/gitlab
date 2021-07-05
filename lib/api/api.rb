@@ -166,6 +166,7 @@ module API
       mount ::API::Deployments
       mount ::API::Environments
       mount ::API::ErrorTracking
+      mount ::API::ErrorTrackingCollector
       mount ::API::Events
       mount ::API::FeatureFlags
       mount ::API::FeatureFlagsUserLists
