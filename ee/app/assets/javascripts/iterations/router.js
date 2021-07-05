@@ -1,6 +1,6 @@
 import Vue from 'vue';
 import VueRouter from 'vue-router';
-import { __ } from '~/locale';
+import { __, s__ } from '~/locale';
 import IterationCadenceForm from './components/iteration_cadence_form.vue';
 import IterationCadenceList from './components/iteration_cadences_list.vue';
 import IterationForm from './components/iteration_form.vue';
@@ -57,7 +57,7 @@ export default function createRouter({ base, permissions = {} }) {
           component: IterationCadenceForm,
           beforeEnter: checkPermission(permissions.canCreateCadence),
           meta: {
-            breadcrumb: __('New cadence'),
+            breadcrumb: s__('Iterations|New iteration cadence'),
           },
         },
         {
