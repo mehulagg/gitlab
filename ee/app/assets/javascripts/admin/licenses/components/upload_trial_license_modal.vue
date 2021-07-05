@@ -66,8 +66,8 @@ export default {
       }}
     </p>
     <form
-      ref="form"
       id="new_license"
+      ref="form"
       :action="adminLicensePath"
       enctype="multipart/form-data"
       method="post"
@@ -80,8 +80,8 @@ export default {
           >{{ __('Show license key') }}<gl-icon name="chevron-down"
         /></gl-link>
         <gl-link
-          href="#show-license"
           id="show-license"
+          href="#show-license"
           class="show-license gl-text-gray-600 text-center"
           >{{ __('Hide license key') }}<gl-icon name="chevron-up"
         /></gl-link>
@@ -90,7 +90,7 @@ export default {
         </div>
       </div>
       <input :value="$options.csrf.token" type="hidden" name="authenticity_token" />
-      <input :value="licenseKey" id="license_data" type="hidden" name="license[data]" />
+      <input id="license_data" :value="licenseKey" type="hidden" name="license[data]" />
     </form>
     <template #modal-footer>
       <gl-button @click="closeModal">
