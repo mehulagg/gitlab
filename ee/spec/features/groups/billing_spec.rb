@@ -68,7 +68,7 @@ RSpec.describe 'Groups > Billing', :js do
       let(:plan) { 'bronze' }
 
       let_it_be(:subscription) do
-        create(:gitlab_subscription, namespace: group, hosted_plan: bronze_plan, seats: 15)
+        create(:gitlab_subscription, end_date: Date.tomorrow, namespace: group, hosted_plan: bronze_plan, seats: 15)
       end
 
       it_behaves_like 'hides search settings'
@@ -89,6 +89,22 @@ RSpec.describe 'Groups > Billing', :js do
           expect(page).to have_link("Add seats", href: extra_seats_url)
           expect(page).to have_link("Renew", href: renew_url)
           expect(page).to have_link("See usage", href: group_seat_usage_path(group))
+        end
+      end
+
+      context 'when gitlab subscription has end date more than 15 days' do
+        before do
+          subscription.update!(end_date: Date.tomorrow + 1.year)
+        end
+
+        it 'does not display renew button' do
+          renew_url = "#{EE::SUBSCRIPTIONS_URL}/gitlab/namespaces/#{group.id}/renew"
+
+          visit group_billings_path(group)
+
+          within subscription_table do
+            expect(page).not_to have_link("Renew", href: renew_url)
+          end
         end
       end
     end
