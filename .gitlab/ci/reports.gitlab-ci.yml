@@ -85,16 +85,16 @@ retire-js-dependency_scanning:
 gemnasium-python-dependency_scanning:
   rules: !reference [".reports:rules:gemnasium-python-dependency_scanning", rules]
 
-include:
-  - project: 'gitlab-com/gl-security/security-research/package-hunter-cli'
-    ref: 'da/create-ci-template'
-    file: '.gitlab-ci-template.yml'
+# include:
+#   - project: 'gitlab-com/gl-security/security-research/package-hunter-cli'
+#     ref: 'da/create-ci-template'
+#     file: '.gitlab-ci-template.yml'
 
-.package_hunter-base:
-  variables:
-    HTR_user: '$PACKAGE_HUNTER_USER'
-    HTR_pass: '$PACKAGE_HUNTER_PASS'
-    HTR_host: 'https://api.package-hunter.xyz'
+# .package_hunter-base:
+#   variables:
+#     HTR_user: '$PACKAGE_HUNTER_USER'
+#     HTR_pass: '$PACKAGE_HUNTER_PASS'
+#     HTR_host: 'https://api.package-hunter.xyz'
 
 license_scanning:
   extends: .default-retry
