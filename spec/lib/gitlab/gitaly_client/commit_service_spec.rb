@@ -287,6 +287,30 @@ RSpec.describe Gitlab::GitalyClient::CommitService do
     end
   end
 
+  describe '#list_new_commits' do
+    let(:revisions) { ['master', 'feature'] }
+    let(:expected_params) do
+      { revisions: ["master", 'feature', "--not", "--all"]}
+    end
+
+    before do
+      ::Gitlab::GitalyClient::clear_stubs!
+    end
+
+    subject { client.list_new_commits(revisions) }
+
+    it 'sends a list_commits message' do
+      expect_next_instance_of(Gitaly::CommitService::Stub) do |service|
+        expect(service)
+          .to receive(:list_commits)
+          .with(gitaly_request_with_params(expected_params), kind_of(Hash))
+          .and_return([])
+      end
+
+      subject
+    end
+  end
+
   describe '#commit_stats' do
     let(:request) do
       Gitaly::CommitStatsRequest.new(
