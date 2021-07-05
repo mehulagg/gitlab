@@ -95,13 +95,16 @@ After the extra Sidekiq processes are added, navigate to
 ## Negate settings
 
 To have the additional Sidekiq processes work on every queue **except** the ones
-you list:
+you list. In this example, we exclude all import-related jobs from a Sidekiq node:
 
 1. After you follow the steps for [starting extra processes](#start-multiple-processes),
    edit `/etc/gitlab/gitlab.rb` and add:
 
    ```ruby
    sidekiq['negate'] = true
+   sidekiq['queue_groups'] = [
+      "feature_category=importers"
+   ]
    ```
 
 1. Save the file and reconfigure GitLab for the changes to take effect:
