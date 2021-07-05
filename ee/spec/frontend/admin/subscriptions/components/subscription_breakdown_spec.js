@@ -12,7 +12,7 @@ import SubscriptionDetailsCard from 'ee/admin/subscriptions/show/components/subs
 import SubscriptionDetailsHistory from 'ee/admin/subscriptions/show/components/subscription_details_history.vue';
 import SubscriptionDetailsUserInfo from 'ee/admin/subscriptions/show/components/subscription_details_user_info.vue';
 import SubscriptionSyncNotifications, {
-  SUCCESS_ALERT_DISMISSED_EVENT,
+  INFO_ALERT_DISMISSED_EVENT,
 } from 'ee/admin/subscriptions/show/components/subscription_sync_notifications.vue';
 import {
   licensedToHeaderText,
@@ -303,7 +303,7 @@ describe('Subscription Breakdown', () => {
 
       it('shows a success notification', () => {
         expect(findSubscriptionSyncNotifications().props('syncStatus')).toBe(
-          subscriptionSyncStatus.SYNC_SUCCESS,
+          subscriptionSyncStatus.SYNC_PENDING,
         );
       });
 
@@ -312,7 +312,7 @@ describe('Subscription Breakdown', () => {
       });
 
       it('dismisses the success notification', async () => {
-        findSubscriptionSyncNotifications().vm.$emit(SUCCESS_ALERT_DISMISSED_EVENT);
+        findSubscriptionSyncNotifications().vm.$emit(INFO_ALERT_DISMISSED_EVENT);
         await nextTick();
 
         expect(findSubscriptionSyncNotifications().exists()).toBe(false);
