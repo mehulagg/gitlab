@@ -1,5 +1,5 @@
 <script>
-import { GlIntersectionObserver, GlLoadingIcon, GlSearchBoxByType, GlLink } from '@gitlab/ui';
+import { GlLoadingIcon, GlSearchBoxByType, GlLink } from '@gitlab/ui';
 import fuzzaldrinPlus from 'fuzzaldrin-plus';
 import { mapState, mapGetters, mapActions } from 'vuex';
 
@@ -7,10 +7,10 @@ import { UP_KEY_CODE, DOWN_KEY_CODE, ENTER_KEY_CODE, ESC_KEY_CODE } from '~/lib/
 
 import LabelItem from './label_item.vue';
 import projectLabelsQuery from './graphql/project_labels.query.graphql';
+import { getIdFromGraphQLId } from '~/graphql_shared/utils';
 
 export default {
   components: {
-    GlIntersectionObserver,
     GlLoadingIcon,
     GlSearchBoxByType,
     GlLink,
@@ -29,8 +29,13 @@ export default {
       variables() {
         return {
           fullPath: this.projectPath,
+          searchTerm: this.searchKey,
         };
       },
+      skip() {
+        return this.searchKey.length === 1;
+      },
+      debounce: 250,
       update: (data) => data.workspace.labels.nodes,
     },
   },
@@ -76,10 +81,9 @@ export default {
       'fetchLabels',
       'receiveLabelsSuccess',
       'updateSelectedLabels',
-      'toggleDropdownContents',
     ]),
     isLabelSelected(label) {
-      return this.selectedLabelsList.includes(label.id);
+      return this.selectedLabelsList.includes(getIdFromGraphQLId(label.id));
     },
     /**
      * This method scrolls item from dropdown into
@@ -167,7 +171,7 @@ export default {
           v-for="(label, index) in visibleLabels"
           :key="label.id"
           :label="label"
-          :is-label-set="label.set"
+          :is-label-set="isLabelSelected(label)"
           :highlight="index === currentHighlightItem"
           @clickLabel="handleLabelClick(label)"
         />
