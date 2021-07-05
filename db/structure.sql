@@ -15092,6 +15092,7 @@ CREATE TABLE namespace_settings (
     resource_access_token_creation_allowed boolean DEFAULT true NOT NULL,
     lock_delayed_project_removal boolean DEFAULT false NOT NULL,
     prevent_sharing_groups_outside_hierarchy boolean DEFAULT false NOT NULL,
+    user_cap integer,
     CONSTRAINT check_0ba93c78c7 CHECK ((char_length(default_branch_name) <= 255))
 );
 
