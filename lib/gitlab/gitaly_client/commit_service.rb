@@ -197,13 +197,25 @@ module Gitlab
       end
 
       def between(from, to)
-        request = Gitaly::CommitsBetweenRequest.new(
-          repository: @gitaly_repo,
-          from: from,
-          to: to
-        )
+        reuqest, rpc =
+          if Feature.enabled?(:list_commits)
+            request = Gitaly::ListCommitsRequest.new(
+              repository: @gitaly_repo,
+              revisions: [to, "--not", from]
+            )
 
-        response = GitalyClient.call(@repository.storage, :commit_service, :commits_between, request, timeout: GitalyClient.medium_timeout)
+            [request, :list_commits]
+          else
+            request = Gitaly::CommitsBetweenRequest.new(
+              repository: @gitaly_repo,
+              from: from,
+              to: to
+            )
+
+            [request, :commits_between]
+          end
+
+        response = GitalyClient.call(@repository.storage, :commit_service, rpc, request, timeout: GitalyClient.medium_timeout)
         consume_commits_response(response)
       end
 
