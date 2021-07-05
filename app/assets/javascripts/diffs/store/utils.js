@@ -412,7 +412,7 @@ function deduplicateFilesList(files) {
   return Object.values(dedupedFiles);
 }
 
-export const memInMBytes = bytes => bytes / Math.pow(1000, 2);
+export const memInMBytes = bytes => bytes / 1000**2;
 
 export const memBefore = () => {
   window.prevMem = performance.memory.usedJSHeapSize;
@@ -420,16 +420,19 @@ export const memBefore = () => {
 
 export const memAfter = (name = '') => {
   if (window.prevMem) {
-    let delta = performance.memory.usedJSHeapSize - prevMem;
+    const delta = performance.memory.usedJSHeapSize - window.prevMem;
+    // eslint-disable-next-line no-console
     console.log(`${name || ''}: ${memInMBytes(delta)} MB (current: ${memInMBytes(performance.memory.usedJSHeapSize)})`);
 
     // if (delta > 0 ) { debugger; }
   } else {
+    // eslint-disable-next-line no-console
     console.log(`${name || ''}: No previous amount of memory used. Current: ${memInMBytes(performance.memory.usedJSHeapSize)}`);
   }
 }
 
 export function prepareDiffData({ diff, priorFiles = [], meta = false }) {
+  // eslint-disable-next-line no-console
   console.time('prepareDiffData');
   const cleanedFiles = (diff.diff_files || [])
     .map((file, index, allFiles) => prepareRawDiffFile({ file, allFiles, meta }))
@@ -437,7 +440,8 @@ export function prepareDiffData({ diff, priorFiles = [], meta = false }) {
     .map(prepareDiffFileLines)
     .map((file, index) => finalizeDiffFile(file, priorFiles.length + index));
 
-  let dedup = deduplicateFilesList([...priorFiles, ...cleanedFiles]);
+  const dedup = deduplicateFilesList([...priorFiles, ...cleanedFiles]);
+  // eslint-disable-next-line no-console
   console.timeEnd('prepareDiffData');
 
   return dedup;

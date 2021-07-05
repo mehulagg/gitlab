@@ -86,7 +86,7 @@ export default {
       diff: data,
       priorFiles: state.diffFiles,
     });
-    memAfter('SET_DIFF_DATA_BATCH (mutation)');
+    memAfter(`SET_DIFF_DATA_BATCH (mutation)`);
   },
 
   [types.SET_COVERAGE_DATA](state, coverageFiles) {
