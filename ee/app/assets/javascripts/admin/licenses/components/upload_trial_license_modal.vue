@@ -1,6 +1,6 @@
 <script>
-import trialLicenseActivatedSvg from 'ee_icons/_ee_trial_license_activated.svg';
 import { GlModal, GlLink, GlIcon, GlButton, GlSafeHtmlDirective as SafeHtml } from '@gitlab/ui';
+import trialLicenseActivatedSvg from 'ee_icons/_ee_trial_license_activated.svg';
 import csrf from '~/lib/utils/csrf';
 
 export default {
@@ -67,15 +67,15 @@ export default {
     </p>
     <form
       ref="form"
+      id="new_license"
       :action="adminLicensePath"
       enctype="multipart/form-data"
       method="post"
-      id="new_license"
     >
       <div class="gl-mt-5">
         <gl-link
-          href="#hide-license"
           id="hide-license"
+          href="#hide-license"
           class="hide-license gl-text-gray-600 text-center"
           >{{ __('Show license key') }}<gl-icon name="chevron-down"
         /></gl-link>
@@ -90,7 +90,7 @@ export default {
         </div>
       </div>
       <input :value="$options.csrf.token" type="hidden" name="authenticity_token" />
-      <input :value="licenseKey" type="hidden" name="license[data]" id="license_data" />
+      <input :value="licenseKey" id="license_data" type="hidden" name="license[data]" />
     </form>
     <template #modal-footer>
       <gl-button @click="closeModal">
