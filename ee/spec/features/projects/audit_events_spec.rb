@@ -60,10 +60,10 @@ RSpec.describe 'Projects > Audit Events', :js do
       expect(page).to have_link('Audit Events')
     end
 
-    it 'does not have Project Audit Events in the header' do
+    it 'does not have Project audit events in the header' do
       visit project_audit_events_path(project)
 
-      expect(page).not_to have_content('Project Audit Events')
+      expect(page).not_to have_content('Project audit events')
     end
   end
 
@@ -73,10 +73,10 @@ RSpec.describe 'Projects > Audit Events', :js do
     expect(page).to have_link('Audit Events')
   end
 
-  it 'has Project Audit Events in the header' do
+  it 'has Project audit events in the header' do
     visit project_audit_events_path(project)
 
-    expect(page).to have_content('Project Audit Events')
+    expect(page).to have_content('Project audit events')
   end
 
   describe 'adding an SSH key' do

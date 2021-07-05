@@ -1,0 +1,16 @@
+---
+key_path: usage_activity_by_stage.secure.cluster_image_scanning_scans
+description: 'Counts cluster image scanning jobs'
+product_section: sec
+product_stage: protect
+product_group: group::container security
+product_category: container_scanning
+value_type: number
+status: implemented
+time_frame: all
+data_source: database
+data_category: Optional
+distribution:
+- ee
+tier:
+- ultimate

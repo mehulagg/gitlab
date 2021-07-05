@@ -25,6 +25,7 @@ export default () => {
 
   const {
     buySubscriptionPath,
+    congratulationSvgPath,
     customersPortalUrl,
     freeTrialPath,
     hasActiveLicense,
@@ -41,6 +42,7 @@ export default () => {
     apolloProvider,
     provide: {
       buySubscriptionPath,
+      congratulationSvgPath,
       connectivityHelpURL,
       customersPortalUrl,
       freeTrialPath,

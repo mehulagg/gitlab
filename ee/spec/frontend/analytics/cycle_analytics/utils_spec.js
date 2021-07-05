@@ -32,8 +32,8 @@ import {
   transformedDurationData,
   flattenedDurationData,
   durationChartPlottableData,
-  startDate,
-  endDate,
+  createdAfter,
+  createdBefore,
   issueStage,
   rawCustomStage,
   rawTasksByTypeData,
@@ -141,7 +141,11 @@ describe('Value Stream Analytics utils', () => {
 
   describe('cycleAnalyticsDurationChart', () => {
     it('computes the plottable data as expected', () => {
-      const plottableData = getDurationChartData(transformedDurationData, startDate, endDate);
+      const plottableData = getDurationChartData(
+        transformedDurationData,
+        createdAfter,
+        createdBefore,
+      );
 
       expect(plottableData).toStrictEqual(durationChartPlottableData);
     });
@@ -251,7 +255,7 @@ describe('Value Stream Analytics utils', () => {
 
   describe('getTasksByTypeData', () => {
     let transformed = {};
-    const groupBy = getDatesInRange(startDate, endDate, toYmd);
+    const groupBy = getDatesInRange(createdAfter, createdBefore, toYmd);
     // only return the values, drop the date which is the first paramater
     const extractSeriesValues = ({ label: { title: name }, series }) => {
       return {
@@ -268,17 +272,23 @@ describe('Value Stream Analytics utils', () => {
     });
 
     it('will return blank arrays if given no data', () => {
-      [{ data: [], startDate, endDate }, [], {}].forEach((chartData) => {
-        transformed = getTasksByTypeData(chartData);
-        ['data', 'groupBy'].forEach((key) => {
-          expect(transformed[key]).toEqual([]);
-        });
-      });
+      [{ data: [], startDate: createdAfter, endDate: createdBefore }, [], {}].forEach(
+        (chartData) => {
+          transformed = getTasksByTypeData(chartData);
+          ['data', 'groupBy'].forEach((key) => {
+            expect(transformed[key]).toEqual([]);
+          });
+        },
+      );
     });
 
     describe('with data', () => {
       beforeEach(() => {
-        transformed = getTasksByTypeData({ data: rawTasksByTypeData, startDate, endDate });
+        transformed = getTasksByTypeData({
+          data: rawTasksByTypeData,
+          startDate: createdAfter,
+          endDate: createdBefore,
+        });
       });
 
       it('will return an object with the properties needed for the chart', () => {
@@ -293,11 +303,11 @@ describe('Value Stream Analytics utils', () => {
         });
 
         it('the start date is the first element', () => {
-          expect(transformed.groupBy[0]).toEqual(toYmd(startDate));
+          expect(transformed.groupBy[0]).toEqual(toYmd(createdAfter));
         });
 
         it('the end date is the last element', () => {
-          expect(transformed.groupBy[transformed.groupBy.length - 1]).toEqual(toYmd(endDate));
+          expect(transformed.groupBy[transformed.groupBy.length - 1]).toEqual(toYmd(createdBefore));
         });
       });
 

@@ -59,16 +59,9 @@ const testRules = () => [testRuleApproved(), testRuleUnapproved(), testRuleOptio
 describe('EE MRWidget approvals list', () => {
   let wrapper;
 
-  const createComponent = (props = {}, options = {}) => {
-    const { approvalsCommentedBy = true } = options;
-
+  const createComponent = (props = {}) => {
     wrapper = shallowMount(ApprovalsList, {
       propsData: props,
-      provide: {
-        glFeatures: {
-          approvalsCommentedBy,
-        },
-      },
     });
   };
 
@@ -359,37 +352,6 @@ describe('EE MRWidget approvals list', () => {
 
       expect(ruleSection.at(0).text()).toEqual(ruleDocsSection.section);
       expect(ruleSection.at(1).text()).toEqual(rule.section);
-    });
-  });
-
-  describe('approvalsCommentedBy feature flag is off', () => {
-    let row;
-
-    beforeEach(() => {
-      const rule = testRuleApproved();
-      createComponent(
-        {
-          approvalRules: [rule],
-        },
-        { approvalsCommentedBy: false },
-      );
-      row = findRows().at(0);
-    });
-
-    it('does not render commented by in table head', () => {
-      expect(wrapper.find('thead').text()).not.toContain('Commented by');
-    });
-
-    it('does not render commented by in summary text', () => {
-      const summary = findRowElement(row, 'summary');
-
-      expect(summary.findAll(UserAvatarList).length).toBe(2);
-    });
-
-    it('does not render commented by in user avatar list', () => {
-      const commentedBy = findRowElement(row, 'commented-by');
-
-      expect(commentedBy.exists()).toBe(false);
     });
   });
 });

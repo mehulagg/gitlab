@@ -282,7 +282,7 @@ RSpec.describe 'layouts/nav/sidebar/_project' do
       it 'has a link to the Code Review analytics page' do
         render
 
-        expect(rendered).to have_link('Code Review', href: project_analytics_code_reviews_path(project))
+        expect(rendered).to have_link('Code review', href: project_analytics_code_reviews_path(project))
       end
 
       context 'when user does not have access' do
@@ -291,7 +291,7 @@ RSpec.describe 'layouts/nav/sidebar/_project' do
         it 'does not have a link to the Code Review analytics page' do
           render
 
-          expect(rendered).not_to have_link('Code Review', href: project_analytics_code_reviews_path(project))
+          expect(rendered).not_to have_link('Code review', href: project_analytics_code_reviews_path(project))
         end
       end
     end
@@ -340,7 +340,7 @@ RSpec.describe 'layouts/nav/sidebar/_project' do
       end
     end
 
-    describe 'Merge Request' do
+    describe 'Merge request' do
       before do
         stub_licensed_features(project_merge_request_analytics: true)
       end
@@ -348,7 +348,7 @@ RSpec.describe 'layouts/nav/sidebar/_project' do
       it 'has a link to the merge request analytics page' do
         render
 
-        expect(rendered).to have_link('Merge Request', href: project_analytics_merge_request_analytics_path(project))
+        expect(rendered).to have_link('Merge request', href: project_analytics_merge_request_analytics_path(project))
       end
 
       context 'when user does not have access' do
@@ -357,7 +357,7 @@ RSpec.describe 'layouts/nav/sidebar/_project' do
         it 'does not have a link to the merge request analytics page' do
           render
 
-          expect(rendered).not_to have_link('Merge Request', href: project_analytics_merge_request_analytics_path(project))
+          expect(rendered).not_to have_link('Merge request', href: project_analytics_merge_request_analytics_path(project))
         end
       end
     end

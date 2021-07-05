@@ -1,17 +1,18 @@
 import { GlDeprecatedSkeletonLoading as GlSkeletonLoading } from '@gitlab/ui';
+import { GlSingleStat } from '@gitlab/ui/dist/charts';
 import { shallowMount, createLocalVue } from '@vue/test-utils';
 import TestCoverageSummary from 'ee/analytics/repository_analytics/components/test_coverage_summary.vue';
 import { extendedWrapper } from 'helpers/vue_test_utils_helper';
-import MetricCard from '~/analytics/shared/components/metric_card.vue';
 
 const localVue = createLocalVue();
 
 describe('Test coverage table component', () => {
   let wrapper;
 
-  const findProjectsWithTests = () => wrapper.find('.js-metric-card-item:nth-child(1) h3');
-  const findAverageCoverage = () => wrapper.find('.js-metric-card-item:nth-child(2) h3');
-  const findTotalCoverages = () => wrapper.find('.js-metric-card-item:nth-child(3) h3');
+  const findAllSingleStats = () => wrapper.findAllComponents(GlSingleStat);
+  const findProjectsWithTests = () => findAllSingleStats().at(0);
+  const findAverageCoverage = () => findAllSingleStats().at(1);
+  const findTotalCoverages = () => findAllSingleStats().at(2);
   const findGroupCoverageChart = () => wrapper.findByTestId('group-coverage-chart');
   const findChartLoadingState = () => wrapper.findByTestId('group-coverage-chart-loading');
   const findChartEmptyState = () => wrapper.findByTestId('group-coverage-chart-empty');
@@ -41,7 +42,7 @@ describe('Test coverage table component', () => {
           },
         },
         stubs: {
-          MetricCard,
+          GlSingleStat,
         },
       }),
     );
@@ -56,9 +57,9 @@ describe('Test coverage table component', () => {
     it('renders empty metrics', () => {
       createComponent();
 
-      expect(findProjectsWithTests().text()).toBe('-');
-      expect(findAverageCoverage().text()).toBe('-');
-      expect(findTotalCoverages().text()).toBe('-');
+      expect(findProjectsWithTests().text()).toContain('-');
+      expect(findAverageCoverage().text()).toContain('-');
+      expect(findTotalCoverages().text()).toContain('-');
     });
 
     it('renders empty chart state', () => {
@@ -92,9 +93,10 @@ describe('Test coverage table component', () => {
         },
       });
 
-      expect(findProjectsWithTests().text()).toBe(projectCount);
-      expect(findAverageCoverage().text()).toBe(`${averageCoverage} %`);
-      expect(findTotalCoverages().text()).toBe(coverageCount);
+      expect(findProjectsWithTests().props('value')).toBe(projectCount);
+      expect(findAverageCoverage().props('value')).toBe(`${averageCoverage}`);
+      expect(findAverageCoverage().props('unit')).toBe('%');
+      expect(findTotalCoverages().props('value')).toBe(coverageCount);
     });
 
     it('renders area chart with correct data', () => {

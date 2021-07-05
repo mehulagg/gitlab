@@ -281,16 +281,6 @@ RSpec.describe Project do
       end
     end
 
-    describe '.with_active_integrations' do
-      it 'returns the correct project' do
-        active = create(:service, active: true)
-        inactive = create(:service, active: false)
-
-        expect(described_class.with_active_integrations).to include(active.project)
-        expect(described_class.with_active_integrations).not_to include(inactive.project)
-      end
-    end
-
     describe '.github_imported' do
       it 'returns the correct project' do
         project_imported_from_github = create(:project, :github_imported)

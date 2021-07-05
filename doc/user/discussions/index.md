@@ -52,7 +52,7 @@ To create a thread by replying to a comment:
    ![Reply to comment button](img/reply_to_comment_button.png)
 
    The reply area is displayed.
-   
+
 1. Type your reply.
 1. Select **Comment** or **Add comment now** (depending on where in the UI you are replying).
 
@@ -65,7 +65,7 @@ You can create a thread without replying to a standard comment.
 Prerequisites:
 
 - You must have at least the [Guest role](../permissions.md#project-members-permissions).
-- You must be in an issue, commit, snippet, or merge request.
+- You must be in an issue, merge request, commit, or snippet.
 
 To create a thread:
 
@@ -81,7 +81,7 @@ A threaded comment is created.
 ## Reply to a comment by sending email
 
 If you have ["reply by email"](../../administration/reply_by_email.md) configured,
-you can reply to comments by sending an email. 
+you can reply to comments by sending an email.
 
 - When you reply to a standard comment, another standard comment is created.
 - When you reply to a threaded comment, it creates a reply in the thread.
@@ -95,25 +95,30 @@ You can edit your own comment at any time.
 Anyone with the [Maintainer role](../permissions.md) or
 higher can also edit a comment made by someone else.
 
-## Resolvable comments and threads
+## Resolve a thread
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/5022) in GitLab 8.11.
 > - Resolvable threads can be added only to merge request diffs.
 > - Resolving comments individually was [removed](https://gitlab.com/gitlab-org/gitlab/-/issues/28750) in GitLab 13.6.
 
-Thread resolution helps keep track of progress during planning or code review.
+You can resolve a thread when you want to finish a conversation.
 
-Every thread in merge requests, commits, commit diffs, and
-snippets is initially displayed as unresolved. They can then be individually resolved by anyone
-with at least the Developer role to the project or by the author of the change being reviewed.
-If the thread has been resolved and a non-member un-resolves their own response,
-this also unresolves the discussion thread.
-If the non-member then resolves this same response, this resolves the discussion thread.
+Prerequisites:
 
-The need to resolve threads prevents you from forgetting to address feedback and lets you
-hide threads that are no longer relevant.
+- You must have at least the [Developer role](../permissions.md#project-members-permissions)
+  or be the author of the change being reviewed.
+- You must be in an issue, merge request, commit, or snippet.
 
-!["A thread between two people on a piece of code"](img/thread_view.png)
+To resolve a thread:
+
+1. Go to the thread.
+1. Below the last reply, in the **Reply** field, either:
+   - Select **Resolve thread**.
+   - Enter text, select the **Resolve thread** checkbox, and select **Add comment now**.
+
+At the top of the page, the number of unresolved threads is updated.
+
+![Count of unresolved threads](img/unresolved_threads_v14_1.png)
 
 ### Commit threads in the context of a merge request
 

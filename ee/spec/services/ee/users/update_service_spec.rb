@@ -101,6 +101,26 @@ RSpec.describe Users::UpdateService do
           stub_licensed_features(admin_audit_log: true)
         end
 
+        context 'updating administrator status' do
+          let_it_be(:admin_user) { create(:admin) }
+
+          it 'logs making a user an administrator' do
+            expect do
+              update_user_as(admin_user, user, admin: true)
+            end.to change { AuditEvent.count }.by(1)
+
+            expect(AuditEvent.last.present.action).to eq('Changed admin status from false to true')
+          end
+
+          it 'logs making an administrator a user' do
+            expect do
+              update_user_as(admin_user, create(:admin), admin: false)
+            end.to change { AuditEvent.count }.by(1)
+
+            expect(AuditEvent.last.present.action).to eq('Changed admin status from true to false')
+          end
+        end
+
         context 'updating username' do
           it 'logs audit event' do
             previous_username = user.username

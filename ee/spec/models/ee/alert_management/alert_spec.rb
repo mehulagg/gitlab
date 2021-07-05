@@ -2,9 +2,13 @@
 
 require 'spec_helper'
 
-RSpec.describe EE::AlertManagement::Alert do
+RSpec.describe AlertManagement::Alert do
   let_it_be(:project, refind: true) { create(:project) }
   let_it_be(:environment, refind: true) { create(:environment, project: project) }
+
+  describe 'associations' do
+    it { is_expected.to have_many(:pending_escalations).class_name('IncidentManagement::PendingEscalations::Alert') }
+  end
 
   describe 'after_create' do
     it 'attempts to trigger auto rollback' do

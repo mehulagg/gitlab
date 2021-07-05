@@ -71,6 +71,10 @@ to execute scripts. Each shell has its own set of reserved variable names.
 
 Make sure each variable is defined for the [scope you want to use it in](where_variables_can_be_used.md).
 
+By default, pipelines from forked projects can't access CI/CD variables in the parent project.
+If you [run a merge request pipeline in the parent project for a merge request from a fork](../pipelines/merge_request_pipelines.md#run-pipelines-in-the-parent-project-for-merge-requests-from-a-forked-project),
+all variables become available to the pipeline.
+
 ### Create a custom CI/CD variable in the `.gitlab-ci.yml` file
 
 To create a custom variable in the [`.gitlab-ci.yml`](../yaml/index.md#variables) file,
@@ -302,6 +306,10 @@ The value of the variable must:
   - The `.` character ([In GitLab 12.10](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/29022) and later).
   - The `~` character ([In GitLab 13.12](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/61517) and later).
 - Not match the name of an existing predefined or custom CI/CD variable.
+
+NOTE:
+Masking a CI/CD variable is not a guaranteed way to prevent malicious users from accessing
+variable values. To make variables more secure, you can [use external secrets](../secrets/index.md).
 
 ### Protect a CI/CD variable
 
@@ -581,8 +589,8 @@ You can override the value of a variable when you:
 1. Run a job manually in the UI.
 1. Use [push options](../../user/project/push_options.md#push-options-for-gitlab-cicd).
 1. Trigger a pipeline by using [the API](../triggers/index.md#making-use-of-trigger-variables).
-1. Pass variables to a downstream pipeline [by using the `variable` keyword](../multi_project_pipelines.md#pass-cicd-variables-to-a-downstream-pipeline-by-using-the-variables-keyword)
-   or [by using variable inheritance](../multi_project_pipelines.md#pass-cicd-variables-to-a-downstream-pipeline-by-using-variable-inheritance).
+1. Pass variables to a downstream pipeline [by using the `variable` keyword](../pipelines/multi_project_pipelines.md#pass-cicd-variables-to-a-downstream-pipeline-by-using-the-variables-keyword)
+   or [by using variable inheritance](../pipelines/multi_project_pipelines.md#pass-cicd-variables-to-a-downstream-pipeline-by-using-variable-inheritance).
 
 The pipeline variables declared in these events take [priority over other variables](#cicd-variable-precedence).
 

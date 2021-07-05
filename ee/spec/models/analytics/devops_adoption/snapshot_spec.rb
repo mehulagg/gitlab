@@ -11,7 +11,7 @@ RSpec.describe Analytics::DevopsAdoption::Snapshot, type: :model do
 
   describe '.latest_for_namespace_ids' do
     it 'returns for previous month finalized snapshot for the given namespace ids based on snapshot end_time' do
-      freeze_time do
+      travel_to(Date.new(2021, 07, 15)) do
         group1 = create(:group)
         group1_latest_snapshot = create(:devops_adoption_snapshot, namespace: group1, end_time: 1.month.ago.end_of_month, recorded_at: 1.day.ago)
         create(:devops_adoption_snapshot, namespace: group1, end_time: 2.months.ago.end_of_month, recorded_at: 1.day.ago)

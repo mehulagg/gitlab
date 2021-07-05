@@ -47,7 +47,7 @@ RSpec.describe Ci::CreatePipelineService do
     end
 
     it 'persists cross_dependencies' do
-      deps = build_job.options['cross_dependencies']
+      deps = build_job.options[:cross_dependencies]
       result = [
         { job: "job-1", ref: "ref-1", project: "project-1", artifacts: true },
         { job: "job-2", ref: "ref-2", project: "project-2", artifacts: false },
@@ -142,7 +142,7 @@ RSpec.describe Ci::CreatePipelineService do
     end
 
     it 'persists cross_dependencies' do
-      deps = test_job.options['cross_dependencies']
+      deps = test_job.options[:cross_dependencies]
       result = {
         job: 'dependency',
         ref: 'master',

@@ -135,6 +135,7 @@ The following metrics are available:
 | `gitlab_spamcheck_request_duration_seconds`                      | Histogram   | 13.12   | The duration for requests between Rails and the anti-spam engine                                                        |                                                           |
 | `service_desk_thank_you_email`                                   | Counter     | 14.0    | Total number of email responses to new service desk emails                                                            |                                                           |
 | `service_desk_new_note_email`                                    | Counter     | 14.0    | Total number of email notifications on new service desk comment                                                       |                                                           |
+| `email_receiver_error`                                           | Counter     | 14.1    | Total number of errors when processing incoming emails                                                                |                                                           |
 
 ## Metrics controlled by a feature flag
 
@@ -264,10 +265,11 @@ configuration option in `gitlab.yml`. These metrics are served from the
 
 The following metrics are available:
 
-| Metric                            | Type      | Since                                                         | Description                            | Labels                                                    |
-|:--------------------------------- |:--------- |:------------------------------------------------------------- |:-------------------------------------- |:--------------------------------------------------------- |
-| `db_load_balancing_hosts`         | Gauge     | [12.3](https://gitlab.com/gitlab-org/gitlab/-/issues/13630)   | Current number of load balancing hosts | |
-| `sidekiq_load_balancing_count`    | Counter   | 13.11                                                         | Sidekiq jobs using load balancing with data consistency set to :sticky or :delayed | `queue`, `boundary`, `external_dependencies`, `feature_category`, `job_status`, `urgency`, `data_consistency`, `load_balancing_strategy` |
+| Metric                                                   | Type      | Since                                                         | Description                                                                        | Labels                                                                                                                                   |
+|:-------------------------------------------------------- |:--------- |:------------------------------------------------------------- |:---------------------------------------------------------------------------------- |:---------------------------------------------------------------------------------------------------------------------------------------- |
+| `db_load_balancing_hosts`                                | Gauge     | [12.3](https://gitlab.com/gitlab-org/gitlab/-/issues/13630)   | Current number of load balancing hosts                                             |                                                                                                                                          |
+| `sidekiq_load_balancing_count`                           | Counter   | 13.11                                                         | Sidekiq jobs using load balancing with data consistency set to :sticky or :delayed | `queue`, `boundary`, `external_dependencies`, `feature_category`, `job_status`, `urgency`, `data_consistency`, `load_balancing_strategy` |
+| `gitlab_transaction_caught_up_replica_pick_count_total`  | Counter   | 14.1                                                          | Number of search attempts for caught up replica                                    | `result`                                                                                                                                 |
 
 ## Database partitioning metrics **(PREMIUM SELF)**
 

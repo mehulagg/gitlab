@@ -23,14 +23,14 @@ describe('SubscriptionActivationModal', () => {
     wrapper.findComponent(SubscriptionActivationErrors);
   const findSubscriptionActivationForm = () => wrapper.findComponent(SubscriptionActivationForm);
 
-  const createComponent = ({ props = {}, stubs = {} } = {}) => {
+  const createComponent = ({ props = {} } = {}) => {
     wrapper = extendedWrapper(
       shallowMount(SubscriptionActivationModal, {
         propsData: {
           modalId,
+          visible: false,
           ...props,
         },
-        stubs,
       }),
     );
   };
@@ -67,11 +67,18 @@ describe('SubscriptionActivationModal', () => {
     it('does not show any error', () => {
       expect(findSubscriptionActivationErrors().exists()).toBe(false);
     });
+
+    it('emits a change event', () => {
+      expect(wrapper.emitted('change')).toBeUndefined();
+
+      findGlModal().vm.$emit('change', false);
+
+      expect(wrapper.emitted('change')).toEqual([[false]]);
+    });
   });
 
   describe('subscription activation', () => {
     const fakeEvent = 'fake-modal-event';
-    const hiddenEven = 'hidden';
 
     describe('when submitting the form', () => {
       beforeEach(() => {
@@ -89,15 +96,19 @@ describe('SubscriptionActivationModal', () => {
 
     describe('successful activation', () => {
       beforeEach(() => {
-        createComponent({ stubs: { GlModal } });
-        jest
-          .spyOn(wrapper.vm.$refs.modal, 'hide')
-          .mockImplementation(() => wrapper.vm.$emit(hiddenEven));
-        findSubscriptionActivationForm().vm.$emit(SUBSCRIPTION_ACTIVATION_SUCCESS_EVENT);
+        createComponent({ props: { visible: true } });
       });
 
-      it('it emits a hidden event', () => {
-        expect(wrapper.emitted(hiddenEven)).toEqual([[]]);
+      it('provides the correct prop to the modal', () => {
+        expect(findGlModal().props('visible')).toBe(true);
+      });
+
+      it('hides the modal', () => {
+        expect(wrapper.emitted('change')).toBeUndefined();
+
+        findSubscriptionActivationForm().vm.$emit(SUBSCRIPTION_ACTIVATION_SUCCESS_EVENT);
+
+        expect(wrapper.emitted('change')).toEqual([[false]]);
       });
     });
 

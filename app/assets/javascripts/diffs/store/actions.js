@@ -118,7 +118,10 @@ export const fetchDiffFilesBatch = ({ commit, state, dispatch }) => {
         commit(types.SET_BATCH_LOADING, false);
 
         if (window.gon?.features?.diffsVirtualScrolling && !scrolledVirtualScroller) {
-          const index = state.diffFiles.findIndex((f) => f.file_hash === hash);
+          const index = state.diffFiles.findIndex(
+            (f) =>
+              f.file_hash === hash || f[INLINE_DIFF_LINES_KEY].find((l) => l.line_code === hash),
+          );
 
           if (index >= 0) {
             eventHub.$emit('scrollToIndex', index);
@@ -577,7 +580,7 @@ export const setShowWhitespace = async (
   { state, commit },
   { url, showWhitespace, updateDatabase = true },
 ) => {
-  if (updateDatabase) {
+  if (updateDatabase && Boolean(window.gon?.current_user_id)) {
     await axios.put(url || state.endpointUpdateUser, { show_whitespace_in_diffs: showWhitespace });
   }
 

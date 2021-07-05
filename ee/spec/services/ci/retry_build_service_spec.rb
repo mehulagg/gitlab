@@ -153,14 +153,6 @@ RSpec.describe Ci::RetryBuildService do
 
           it { expect(new_build).not_to be_failed }
         end
-
-        context 'when the feature is disabled' do
-          before do
-            stub_feature_flags(ci_quota_check_on_retries: false)
-          end
-
-          it { expect(new_build).not_to be_failed }
-        end
       end
     end
   end

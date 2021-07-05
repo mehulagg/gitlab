@@ -76,13 +76,13 @@ export default {
     this.rules = this.form.rules.map((rule) => {
       const {
         status,
-        elapsedTimeSeconds,
+        elapsedTimeMinutes,
         oncallSchedule: { iid: oncallScheduleIid },
       } = rule;
 
       return {
         status,
-        elapsedTimeSeconds,
+        elapsedTimeMinutes,
         action: DEFAULT_ACTION,
         oncallScheduleIid,
         key: uniqueId(),

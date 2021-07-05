@@ -5,14 +5,12 @@ import MockAdapter from 'axios-mock-adapter';
 import Vuex from 'vuex';
 import Component from 'ee/analytics/cycle_analytics/components/base.vue';
 import DurationChart from 'ee/analytics/cycle_analytics/components/duration_chart.vue';
-import FilterBar from 'ee/analytics/cycle_analytics/components/filter_bar.vue';
 import Metrics from 'ee/analytics/cycle_analytics/components/metrics.vue';
 import StageTable from 'ee/analytics/cycle_analytics/components/stage_table.vue';
 import TypeOfWorkCharts from 'ee/analytics/cycle_analytics/components/type_of_work_charts.vue';
+import ValueStreamFilters from 'ee/analytics/cycle_analytics/components/value_stream_filters.vue';
 import ValueStreamSelect from 'ee/analytics/cycle_analytics/components/value_stream_select.vue';
 import createStore from 'ee/analytics/cycle_analytics/store';
-import Daterange from 'ee/analytics/shared/components/daterange.vue';
-import ProjectsDropdownFilter from 'ee/analytics/shared/components/projects_dropdown_filter.vue';
 import { toYmd } from 'ee/analytics/shared/utils';
 import waitForPromises from 'helpers/wait_for_promises';
 import PathNavigation from '~/cycle_analytics/components/path_navigation.vue';
@@ -55,8 +53,8 @@ const [selectedValueStream] = mockData.valueStreams;
 
 const initialCycleAnalyticsState = {
   selectedValueStream,
-  createdAfter: mockData.startDate,
-  createdBefore: mockData.endDate,
+  createdAfter: mockData.createdAfter,
+  createdBefore: mockData.createdBefore,
   group: currentGroup,
   stage,
 };
@@ -159,14 +157,6 @@ describe('EE Value Stream Analytics component', () => {
   const findPathNavigation = () => wrapper.findComponent(PathNavigation);
   const findStageTable = () => wrapper.findComponent(StageTable);
 
-  const displaysProjectsDropdownFilter = (flag) => {
-    expect(wrapper.findComponent(ProjectsDropdownFilter).exists()).toBe(flag);
-  };
-
-  const displaysDateRangePicker = (flag) => {
-    expect(wrapper.findComponent(Daterange).exists()).toBe(flag);
-  };
-
   const displaysMetrics = (flag) => {
     expect(wrapper.findComponent(Metrics).exists()).toBe(flag);
   };
@@ -187,8 +177,8 @@ describe('EE Value Stream Analytics component', () => {
     expect(findPathNavigation().exists()).toBe(flag);
   };
 
-  const displaysFilterBar = (flag) => {
-    expect(wrapper.findComponent(FilterBar).exists()).toBe(flag);
+  const displaysFilters = (flag) => {
+    expect(wrapper.findComponent(ValueStreamFilters).exists()).toBe(flag);
   };
 
   const displaysValueStreamSelect = (flag) => {
@@ -213,14 +203,6 @@ describe('EE Value Stream Analytics component', () => {
 
       expect(emptyState.exists()).toBe(true);
       expect(emptyState.props('svgPath')).toBe(emptyStateSvgPath);
-    });
-
-    it('does not display the projects filter', () => {
-      displaysProjectsDropdownFilter(false);
-    });
-
-    it('does not display the date range picker', () => {
-      displaysDateRangePicker(false);
     });
 
     it('does not display the metrics cards', () => {
@@ -263,14 +245,6 @@ describe('EE Value Stream Analytics component', () => {
       expect(emptyState.props('svgPath')).toBe(noAccessSvgPath);
     });
 
-    it('does not display the projects filter', () => {
-      displaysProjectsDropdownFilter(false);
-    });
-
-    it('does not display the date range picker', () => {
-      displaysDateRangePicker(false);
-    });
-
     it('does not display the metrics', () => {
       displaysMetrics(false);
     });
@@ -309,27 +283,12 @@ describe('EE Value Stream Analytics component', () => {
       expect(wrapper.findComponent(GlEmptyState).exists()).toBe(false);
     });
 
-    it('displays the projects filter', () => {
-      displaysProjectsDropdownFilter(true);
-
-      expect(wrapper.findComponent(ProjectsDropdownFilter).props()).toEqual(
-        expect.objectContaining({
-          queryParams: wrapper.vm.projectsQueryParams,
-          multiSelect: wrapper.vm.$options.multiProjectSelect,
-        }),
-      );
-    });
-
     it('displays the value stream select component', () => {
       displaysValueStreamSelect(true);
     });
 
-    it('displays the date range picker', () => {
-      displaysDateRangePicker(true);
-    });
-
     it('displays the filter bar', () => {
-      displaysFilterBar(true);
+      displaysFilters(true);
     });
 
     it('displays the metrics', () => {
@@ -505,8 +464,8 @@ describe('EE Value Stream Analytics component', () => {
   describe('Url parameters', () => {
     const defaultParams = {
       value_stream_id: selectedValueStream.id,
-      created_after: toYmd(mockData.startDate),
-      created_before: toYmd(mockData.endDate),
+      created_after: toYmd(mockData.createdAfter),
+      created_before: toYmd(mockData.createdBefore),
       stage_id: null,
       project_ids: null,
       sort: null,
@@ -556,8 +515,8 @@ describe('EE Value Stream Analytics component', () => {
       it('sets the value_stream_id url parameter', async () => {
         await shouldMergeUrlParams(wrapper, {
           ...defaultParams,
-          created_after: toYmd(mockData.startDate),
-          created_before: toYmd(mockData.endDate),
+          created_after: toYmd(mockData.createdAfter),
+          created_before: toYmd(mockData.createdBefore),
           project_ids: null,
         });
       });
@@ -573,8 +532,8 @@ describe('EE Value Stream Analytics component', () => {
       it('sets the project_ids url parameter', async () => {
         await shouldMergeUrlParams(wrapper, {
           ...defaultParams,
-          created_after: toYmd(mockData.startDate),
-          created_before: toYmd(mockData.endDate),
+          created_after: toYmd(mockData.createdAfter),
+          created_before: toYmd(mockData.createdBefore),
           project_ids: selectedProjectIds,
           stage_id: null,
         });

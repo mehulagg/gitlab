@@ -158,8 +158,8 @@ export const stageCounts = rawStageMedians.reduce((acc, { id, value }) => {
   return { ...acc, [stageId]: value };
 }, {});
 
-export const endDate = new Date(2019, 0, 14);
-export const startDate = getDateInPast(endDate, DEFAULT_DAYS_IN_PAST);
+export const createdBefore = new Date(2019, 0, 14);
+export const createdAfter = getDateInPast(createdBefore, DEFAULT_DAYS_IN_PAST);
 
 export const issueEvents = deepCamelCase(stageFixtures.issue);
 export const planEvents = deepCamelCase(stageFixtures.plan);
@@ -204,7 +204,7 @@ export const labelEndEvent = customStageLabelEvents.find(
   (ev) => ev.identifier === labelStartEvent.allowedEndEvents[0],
 );
 
-const dateRange = getDatesInRange(startDate, endDate, toYmd);
+const dateRange = getDatesInRange(createdAfter, createdBefore, toYmd);
 
 export const apiTasksByTypeData = getJSONFixture(
   'analytics/charts/type_of_work/tasks_by_type.json',

@@ -11,7 +11,13 @@ import * as types from 'ee/analytics/cycle_analytics/store/modules/type_of_work/
 import testAction from 'helpers/vuex_action_helper';
 import createFlash from '~/flash';
 import httpStatusCodes from '~/lib/utils/http_status';
-import { groupLabels, endpoints, startDate, endDate, rawTasksByTypeData } from '../../../mock_data';
+import {
+  groupLabels,
+  endpoints,
+  createdAfter,
+  createdBefore,
+  rawTasksByTypeData,
+} from '../../../mock_data';
 
 jest.mock('~/flash');
 
@@ -33,7 +39,7 @@ describe('Type of work actions', () => {
     ...rootGetters,
     ...getters,
     ...state,
-    rootState: { startDate, endDate },
+    rootState: { createdAfter, createdBefore },
   };
 
   beforeEach(() => {

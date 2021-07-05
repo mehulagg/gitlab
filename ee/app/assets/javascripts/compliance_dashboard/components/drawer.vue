@@ -1,9 +1,15 @@
 <script>
 import { GlDrawer } from '@gitlab/ui';
+import BranchPath from './drawer_sections/branch_path.vue';
+import Project from './drawer_sections/project.vue';
+import Reference from './drawer_sections/reference.vue';
 
 export default {
   components: {
     GlDrawer,
+    BranchPath,
+    Reference,
+    Project,
   },
   props: {
     mergeRequest: {
@@ -14,6 +20,11 @@ export default {
       type: Boolean,
       required: false,
       default: false,
+    },
+  },
+  computed: {
+    hasBranchDetails() {
+      return this.mergeRequest.source_branch && this.mergeRequest.target_branch;
     },
   },
   methods: {
@@ -41,6 +52,22 @@ export default {
   >
     <template #header>
       <h4 data-testid="dashboard-drawer-title">{{ mergeRequest.title }}</h4>
+    </template>
+    <template v-if="showDrawer" #default>
+      <project
+        :avatar-url="mergeRequest.project.avatar_url"
+        :compliance-framework="mergeRequest.compliance_management_framework"
+        :name="mergeRequest.project.name"
+        :url="mergeRequest.project.web_url"
+      />
+      <reference :path="mergeRequest.path" :reference="mergeRequest.reference" />
+      <branch-path
+        v-if="hasBranchDetails"
+        :source-branch="mergeRequest.source_branch"
+        :source-branch-uri="mergeRequest.source_branch_uri"
+        :target-branch="mergeRequest.target_branch"
+        :target-branch-uri="mergeRequest.target_branch_uri"
+      />
     </template>
   </gl-drawer>
 </template>
