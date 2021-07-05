@@ -22,7 +22,7 @@ class Projects::BlobController < Projects::ApplicationController
 
   # We need to assign the blob vars before `authorize_edit_tree!` so we can
   # validate access to a specific ref.
-  before_action :assign_blob_vars
+  before_action :assign_ref_vars
   before_action :authorize_edit_tree!, only: [:new, :create, :update, :destroy]
 
   before_action :commit, except: [:new, :create]
@@ -145,10 +145,11 @@ class Projects::BlobController < Projects::ApplicationController
     return render_404 unless @commit
   end
 
-  def assign_blob_vars
-    @id = params[:id]
-    @ref, @path = extract_ref(@id)
-  rescue InvalidPathError
+  def get_id
+    params[:id]
+  end
+
+  rescue_from InvalidPathError do
     render_404
   end
 
