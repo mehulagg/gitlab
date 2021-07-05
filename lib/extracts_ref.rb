@@ -68,6 +68,17 @@ module ExtractsRef
     raise InvalidPathError if @ref.match?(/\s/)
 
     @commit = @repo.commit(@ref) if @ref.present?
+
+    # If the ref doesn't exist, check whether we're trying to access a renamed
+    # default branch. If we are, we can redirect to the current default branch
+    Rails.logger.warn("*** HERE: #{@id.inspect} #{@ref.inspect} #{@path.inspect} #{@commit.inspect}")
+    if !@commit && repository_container&.previous_default_branch == @ref
+      flash[:notice] = _('The default branch for this project has been changed. Please update your bookmarks.')
+
+      redirect_to '/todo/redirect'
+
+      throw :halt
+    end
   end
   # rubocop:enable Gitlab/ModuleWithInstanceVariables
 
