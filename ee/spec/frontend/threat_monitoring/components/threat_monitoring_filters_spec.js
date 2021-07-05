@@ -1,5 +1,5 @@
 import { shallowMount } from '@vue/test-utils';
-import EnvironmentPicker from 'ee/threat_monitoring/components/environment_picker.vue';
+import EnvironmentPicker from 'ee/threat_monitoring/components/filters/environment_picker.vue';
 import ThreatMonitoringFilters from 'ee/threat_monitoring/components/threat_monitoring_filters.vue';
 import createStore from 'ee/threat_monitoring/store';
 import DateTimePicker from '~/vue_shared/components/date_time_picker/date_time_picker.vue';

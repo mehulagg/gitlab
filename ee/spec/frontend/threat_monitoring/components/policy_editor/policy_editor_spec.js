@@ -1,6 +1,6 @@
 import { GlFormSelect } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
-import EnvironmentPicker from 'ee/threat_monitoring/components/environment_picker.vue';
+import EnvironmentPicker from 'ee/threat_monitoring/components/filters/environment_picker.vue';
 import { POLICY_KIND_OPTIONS } from 'ee/threat_monitoring/components/policy_editor/constants';
 import NetworkPolicyEditor from 'ee/threat_monitoring/components/policy_editor/network_policy/network_policy_editor.vue';
 import PolicyEditor from 'ee/threat_monitoring/components/policy_editor/policy_editor.vue';

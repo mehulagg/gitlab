@@ -17,7 +17,7 @@ import { setUrlFragment, mergeUrlParams } from '~/lib/utils/url_utility';
 import { __, s__ } from '~/locale';
 import networkPoliciesQuery from '../graphql/queries/network_policies.query.graphql';
 import scanExecutionPoliciesQuery from '../graphql/queries/scan_execution_policies.query.graphql';
-import EnvironmentPicker from './environment_picker.vue';
+import EnvironmentPicker from './filters/environment_picker.vue';
 import PolicyDrawer from './policy_drawer/policy_drawer.vue';
 
 const createPolicyFetchError = ({ gqlError, networkError }) => {

@@ -1,7 +1,7 @@
 <script>
 import { GlFormGroup, GlDropdown, GlDropdownItem } from '@gitlab/ui';
 import { mapActions, mapGetters, mapState } from 'vuex';
-import { ALL_ENVIRONMENT_NAME } from '../constants';
+import { ALL_ENVIRONMENT_NAME } from '../../constants';
 
 export default {
   components: {

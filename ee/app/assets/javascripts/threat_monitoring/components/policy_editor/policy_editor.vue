@@ -2,7 +2,7 @@
 import { GlFormGroup, GlFormSelect } from '@gitlab/ui';
 import { mapActions } from 'vuex';
 import glFeatureFlagMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
-import EnvironmentPicker from '../environment_picker.vue';
+import EnvironmentPicker from '../filters/environment_picker.vue';
 import { POLICY_KIND_OPTIONS } from './constants';
 import NetworkPolicyEditor from './network_policy/network_policy_editor.vue';
 import ScanExecutionPolicyEditor from './scan_execution_policy/scan_execution_policy_editor.vue';

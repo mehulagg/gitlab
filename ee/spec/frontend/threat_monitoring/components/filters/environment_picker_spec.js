@@ -1,12 +1,12 @@
 import { GlDropdown, GlDropdownItem } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
-import EnvironmentPicker from 'ee/threat_monitoring/components/environment_picker.vue';
+import EnvironmentPicker from 'ee/threat_monitoring/components/filters/environment_picker.vue';
 import {
   INVALID_CURRENT_ENVIRONMENT_NAME,
   ALL_ENVIRONMENT_NAME,
 } from 'ee/threat_monitoring/constants';
 import createStore from 'ee/threat_monitoring/store';
-import { mockEnvironmentsResponse } from '../mocks/mock_data';
+import { mockEnvironmentsResponse } from '../../mocks/mock_data';
 
 const mockEnvironments = mockEnvironmentsResponse.environments;
 const currentEnvironment = mockEnvironments[1];
