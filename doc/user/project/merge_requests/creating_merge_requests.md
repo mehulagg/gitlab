@@ -72,7 +72,7 @@ You can create a merge request by running Git commands on your local machine.
 
    GitLab prompts you with a direct link for creating a merge request:
 
-   ```shell
+   ```plaintext
    ...
    remote: To create a merge request for docs-new-merge-request, visit:
    remote:   https://gitlab.example.com/my-group/my-project/merge_requests/new?merge_request%5Bsource_branch%5D=my-new-branch
@@ -108,7 +108,7 @@ For more information, [see the forking workflow documentation](../repository/for
 ## By sending an email **(FREE SELF)**
 
 > The format of the generated email address changed in GitLab 11.7.
-  The older format is still supported so existing aliases
+  The earlier format is still supported so existing aliases
   or contacts still work.
 
 You can create a merge request by sending an email message to GitLab.
