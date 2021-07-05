@@ -34,6 +34,9 @@ class MergeRequestComplianceEntity < Grape::Entity
 
   expose :author, using: API::Entities::UserBasic
   expose :approved_by_users, using: API::Entities::UserBasic
+  expose :committers, using: API::Entities::UserBasic
+  expose :participants, using: API::Entities::UserBasic
+  expose :merged_by, using: API::Entities::UserBasic
 
   expose :pipeline_status, if: -> (*) { can_read_pipeline? }, with: DetailedStatusEntity
   expose :approval_status
@@ -69,6 +72,10 @@ class MergeRequestComplianceEntity < Grape::Entity
     return WARNING_APPROVAL_STATUS if checks.any?
 
     SUCCESS_APPROVAL_STATUS
+  end
+
+  def merged_by
+    merge_request.metrics.merged_by
   end
 
   def target_branch_uri

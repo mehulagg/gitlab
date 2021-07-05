@@ -1,14 +1,18 @@
 <script>
 import { GlDrawer } from '@gitlab/ui';
 import BranchPath from './drawer_sections/branch_path.vue';
+import Committers from './drawer_sections/committers.vue';
 import Project from './drawer_sections/project.vue';
 import Reference from './drawer_sections/reference.vue';
+import Reviewers from './drawer_sections/reviewers.vue';
 
 export default {
   components: {
-    GlDrawer,
     BranchPath,
+    Committers,
+    GlDrawer,
     Reference,
+    Reviewers,
     Project,
   },
   props: {
@@ -25,6 +29,16 @@ export default {
   computed: {
     hasBranchDetails() {
       return this.mergeRequest.source_branch && this.mergeRequest.target_branch;
+    },
+    hasCommitters() {
+      return this.mergeRequest.committers.length > 0;
+    },
+    hasReviewers() {
+      return (
+        this.mergeRequest.participants.length > 0 ||
+        this.mergeRequest.approved_by_users.length > 0 ||
+        Boolean(this.mergeRequest.merged_by?.name)
+      );
     },
   },
   methods: {
@@ -67,6 +81,13 @@ export default {
         :source-branch-uri="mergeRequest.source_branch_uri"
         :target-branch="mergeRequest.target_branch"
         :target-branch-uri="mergeRequest.target_branch_uri"
+      />
+      <committers v-if="hasCommitters" :committers="mergeRequest.committers" />
+      <reviewers
+        v-if="hasReviewers"
+        :approvers="mergeRequest.approved_by_users"
+        :commenters="mergeRequest.participants"
+        :merged-by="mergeRequest.merged_by"
       />
     </template>
   </gl-drawer>
