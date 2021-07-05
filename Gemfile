@@ -197,7 +197,7 @@ gem 'acts-as-taggable-on', '~> 7.0'
 # Background jobs
 gem 'sidekiq', '~> 5.2.7'
 gem 'sidekiq-cron', '~> 1.0'
-gem 'redis-namespace', '~> 1.7.0'
+gem 'redis-namespace', '~> 1.8.1'
 gem 'gitlab-sidekiq-fetcher', '0.5.6', require: 'sidekiq-reliable-fetch'
 
 # Cron Parser
@@ -229,7 +229,7 @@ gem 'js_regex', '~> 3.4'
 gem 'device_detector'
 
 # Redis
-gem 'redis', '~> 4.0'
+gem 'redis', '~> 4.1.4'
 gem 'connection_pool', '~> 2.0'
 
 # Redis session store
