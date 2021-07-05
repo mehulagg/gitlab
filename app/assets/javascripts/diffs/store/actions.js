@@ -59,6 +59,8 @@ import {
   idleCallback,
   allDiscussionWrappersExpanded,
   prepareLineForRenamedFile,
+  memBefore,
+  memAfter,
 } from './utils';
 
 export const setBaseConfig = ({ commit }, options) => {
@@ -114,7 +116,9 @@ export const fetchDiffFilesBatch = ({ commit, state, dispatch }) => {
       .then(({ data: { pagination, diff_files } }) => {
         totalLoaded += diff_files.length;
 
+        memBefore();
         commit(types.SET_DIFF_DATA_BATCH, { diff_files });
+        memAfter('actions.js: getBatch() diff batch mutation');
         commit(types.SET_BATCH_LOADING, false);
 
         if (window.gon?.features?.diffsVirtualScrolling && !scrolledVirtualScroller) {

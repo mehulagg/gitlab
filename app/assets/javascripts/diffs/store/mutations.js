@@ -14,6 +14,8 @@ import {
   prepareDiffData,
   isDiscussionApplicableToLine,
   updateLineInFile,
+  memBefore,
+  memAfter
 } from './utils';
 
 function updateDiffFilesInState(state, files) {
@@ -79,10 +81,12 @@ export default {
   },
 
   [types.SET_DIFF_DATA_BATCH](state, data) {
+    memBefore();
     state.diffFiles = prepareDiffData({
       diff: data,
       priorFiles: state.diffFiles,
     });
+    memAfter('SET_DIFF_DATA_BATCH (mutation)');
   },
 
   [types.SET_COVERAGE_DATA](state, coverageFiles) {
