@@ -35,7 +35,7 @@ For GitLab.com, please take into consideration that regular migrations (under `d
 are run before [Canary is deployed](https://gitlab.com/gitlab-com/gl-infra/readiness/-/tree/master/library/canary/#configuration-and-deployment),
 and post-deployment migrations (`db/post_migrate`) are run after the deployment to production has finished.
 
-## Creating Migrations
+## Create database migrations
 
 To create a migration you can use the following Rails generator:
 
