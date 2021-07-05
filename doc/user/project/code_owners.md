@@ -94,7 +94,7 @@ without using [Approval Rules](merge_requests/approvals/rules.md):
 1. Create the file in one of the three locations specified above.
 1. Set the code owners as required approvers for
    [protected branches](protected_branches.md#require-code-owner-approval-on-a-protected-branch).
-1. Use [the syntax of Code Owners files](code_owners.md#the-syntax-of-code-owners-files)
+1. Use [the syntax of Code Owners files](code_owners.md)
    to specify the actual owners and granular permissions.
 
 Using Code Owners in conjunction with [protected branches](protected_branches.md#require-code-owner-approval-on-a-protected-branch)
