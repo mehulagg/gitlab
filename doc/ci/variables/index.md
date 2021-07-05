@@ -71,7 +71,7 @@ to execute scripts. Each shell has its own set of reserved variable names.
 
 Make sure each variable is defined for the [scope you want to use it in](where_variables_can_be_used.md).
 
-By default, pipelines from fork projects can't access CI/CD variables in the parent project.
+By default, pipelines from forked projects can't access CI/CD variables in the parent project.
 If you [run a merge request pipeline in the parent project for a merge request from a fork](../pipelines/merge_request_pipelines.md#run-pipelines-in-the-parent-project-for-merge-requests-from-a-forked-project),
 all variables become available to the pipeline.
 
