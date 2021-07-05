@@ -11,6 +11,11 @@ module Types
           null: false,
           description: 'Name of the policy.'
 
+    field :kind,
+          GraphQL::STRING_TYPE,
+          null: false,
+          description: 'Kind of the policy.'
+
     field :namespace,
           GraphQL::STRING_TYPE,
           null: false,
