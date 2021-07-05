@@ -121,7 +121,7 @@ export default {
           title: this.searchTerm,
           state: this.$options.IssuableAttributeState[this.issuableAttribute],
           sort: this.issuableAttribute === IssuableType.Epic ? defaultEpicSort : null,
-        }
+        };
 
         if (IssuableType.Epic && epicIidPattern.test(this.searchTerm)) {
           const matches = this.searchTerm.match(epicIidPattern);
