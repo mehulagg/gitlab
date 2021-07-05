@@ -2,12 +2,10 @@
 import { GlLoadingIcon, GlSearchBoxByType, GlLink } from '@gitlab/ui';
 import fuzzaldrinPlus from 'fuzzaldrin-plus';
 import { mapState, mapGetters, mapActions } from 'vuex';
-
-import { UP_KEY_CODE, DOWN_KEY_CODE, ENTER_KEY_CODE, ESC_KEY_CODE } from '~/lib/utils/keycodes';
-
-import LabelItem from './label_item.vue';
-import projectLabelsQuery from './graphql/project_labels.query.graphql';
 import { getIdFromGraphQLId } from '~/graphql_shared/utils';
+import { UP_KEY_CODE, DOWN_KEY_CODE, ENTER_KEY_CODE, ESC_KEY_CODE } from '~/lib/utils/keycodes';
+import projectLabelsQuery from './graphql/project_labels.query.graphql';
+import LabelItem from './label_item.vue';
 
 export default {
   components: {
@@ -78,8 +76,6 @@ export default {
     ...mapActions([
       'toggleDropdownContents',
       'toggleDropdownContentsCreateView',
-      'fetchLabels',
-      'receiveLabelsSuccess',
       'updateSelectedLabels',
     ]),
     isLabelSelected(label) {
@@ -103,17 +99,6 @@ export default {
           this.$refs.labelsListContainer.scrollTop -= container.top - label.top;
         }
       }
-    },
-    handleComponentAppear() {
-      // We can avoid putting `catch` block here
-      // as failure is handled within actions.js already.
-      return this.fetchLabels().then(() => {
-        this.$refs.searchInput.focusInput();
-      });
-    },
-    handleCreateLabelClick() {
-      this.receiveLabelsSuccess([]);
-      this.toggleDropdownContentsCreateView();
     },
     /**
      * This method enables keyboard navigation support for
@@ -189,7 +174,7 @@ export default {
         <li v-if="allowLabelCreate">
           <gl-link
             class="gl-display-flex w-100 flex-row text-break-word label-item"
-            @click="handleCreateLabelClick"
+            @click="toggleDropdownContentsCreateView"
           >
             {{ footerCreateLabelTitle }}
           </gl-link>
