@@ -430,13 +430,17 @@ export const memAfter = (name = '') => {
 }
 
 export function prepareDiffData({ diff, priorFiles = [], meta = false }) {
+  console.time('prepareDiffData');
   const cleanedFiles = (diff.diff_files || [])
     .map((file, index, allFiles) => prepareRawDiffFile({ file, allFiles, meta }))
     .map(ensureBasicDiffFileLines)
     .map(prepareDiffFileLines)
     .map((file, index) => finalizeDiffFile(file, priorFiles.length + index));
 
-  return deduplicateFilesList([...priorFiles, ...cleanedFiles]);
+  let dedup = deduplicateFilesList([...priorFiles, ...cleanedFiles]);
+  console.timeEnd('prepareDiffData');
+
+  return dedup;
 }
 
 export function getDiffPositionByLineCode(diffFiles) {
