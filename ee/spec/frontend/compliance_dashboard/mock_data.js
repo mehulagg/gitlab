@@ -32,7 +32,8 @@ export const createMergeRequest = ({ id = 1, props } = {}) => {
   const mergeRequest = {
     id,
     approved_by_users: [],
-    issuable_reference: '!1',
+    issuable_reference: 'project!1',
+    reference: '!1',
     merged_at: mergedAt(),
     milestone: null,
     path: `/h5bp/html5-boilerplate/-/merge_requests/${id}`,

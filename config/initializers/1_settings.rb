@@ -576,12 +576,9 @@ Settings.cron_jobs['users_deactivate_dormant_users_worker']['job_class'] = 'User
 Settings.cron_jobs['ci_delete_unit_tests_worker'] ||= Settingslogic.new({})
 Settings.cron_jobs['ci_delete_unit_tests_worker']['cron'] ||= '0 0 * * *'
 Settings.cron_jobs['ci_delete_unit_tests_worker']['job_class'] = 'Ci::DeleteUnitTestsWorker'
-
-Gitlab.com do
-  Settings.cron_jobs['batched_background_migrations_worker'] ||= Settingslogic.new({})
-  Settings.cron_jobs['batched_background_migrations_worker']['cron'] ||= '* * * * *'
-  Settings.cron_jobs['batched_background_migrations_worker']['job_class'] = 'Database::BatchedBackgroundMigrationWorker'
-end
+Settings.cron_jobs['batched_background_migrations_worker'] ||= Settingslogic.new({})
+Settings.cron_jobs['batched_background_migrations_worker']['cron'] ||= '* * * * *'
+Settings.cron_jobs['batched_background_migrations_worker']['job_class'] = 'Database::BatchedBackgroundMigrationWorker'
 
 Gitlab.ee do
   Settings.cron_jobs['analytics_devops_adoption_create_all_snapshots_worker'] ||= Settingslogic.new({})
@@ -644,6 +641,9 @@ Gitlab.ee do
   Settings.cron_jobs['incident_management_persist_oncall_rotation_worker'] ||= Settingslogic.new({})
   Settings.cron_jobs['incident_management_persist_oncall_rotation_worker']['cron'] ||= '*/5 * * * *'
   Settings.cron_jobs['incident_management_persist_oncall_rotation_worker']['job_class'] = 'IncidentManagement::OncallRotations::PersistAllRotationsShiftsJob'
+  Settings.cron_jobs['incident_management_schedule_escalation_check_worker'] ||= Settingslogic.new({})
+  Settings.cron_jobs['incident_management_schedule_escalation_check_worker']['cron'] ||= '*/1 * * * *'
+  Settings.cron_jobs['incident_management_schedule_escalation_check_worker']['job_class'] = 'IncidentManagement::PendingEscalations::ScheduleCheckCronWorker'
   Settings.cron_jobs['import_software_licenses_worker'] ||= Settingslogic.new({})
   Settings.cron_jobs['import_software_licenses_worker']['cron'] ||= '0 3 * * 0'
   Settings.cron_jobs['import_software_licenses_worker']['job_class'] = 'ImportSoftwareLicensesWorker'
@@ -793,6 +793,7 @@ Settings.backup['upload']['multipart_chunk_size'] ||= 104857600
 Settings.backup['upload']['encryption'] ||= nil
 Settings.backup['upload']['encryption_key'] ||= ENV['GITLAB_BACKUP_ENCRYPTION_KEY']
 Settings.backup['upload']['storage_class'] ||= nil
+Settings.backup['gitaly_backup_path'] ||= Gitlab::Utils.which('gitaly-backup')
 
 #
 # Pseudonymizer

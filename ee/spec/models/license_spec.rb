@@ -342,6 +342,46 @@ RSpec.describe License do
   end
 
   describe 'Callbacks' do
+    describe '#reset_current', :request_store do
+      def current_license_cached_value
+        License.cache.read(License::CACHE_KEY, License)
+      end
+
+      before do
+        License.current # Set cache up front
+      end
+
+      context 'when a license is created' do
+        it 'expires the current_license cached value' do
+          expect(current_license_cached_value).to be_present
+
+          create(:license)
+
+          expect(current_license_cached_value).to be_nil
+        end
+      end
+
+      context 'when a license is updated' do
+        it 'expires the current_license cached value' do
+          expect(current_license_cached_value).to be_present
+
+          License.last.update!(updated_at: Time.current)
+
+          expect(current_license_cached_value).to be_nil
+        end
+      end
+
+      context 'when a license is destroyed' do
+        it 'expires the current_license cached value' do
+          expect(current_license_cached_value).to be_present
+
+          License.last.destroy!
+
+          expect(current_license_cached_value).to be_nil
+        end
+      end
+    end
+
     describe '#reset_future_dated', :request_store do
       let!(:future_dated_license) { create(:license, data: create(:gitlab_license, starts_at: Date.current + 1.month).export) }
 
@@ -765,6 +805,41 @@ RSpec.describe License do
         it 'yields block' do
           expect { |b| License.with_valid_license(&b) }.to yield_with_args(license)
         end
+      end
+    end
+
+    describe '.current_cloud_license?' do
+      subject { described_class.current_cloud_license?(license_key) }
+
+      let(:license_key) { 'test-key' }
+
+      before do
+        allow(License).to receive(:current).and_return(current_license)
+      end
+
+      context 'when current license is not set' do
+        let(:current_license) { nil }
+
+        it { is_expected.to be(false) }
+      end
+
+      context 'when current license is not a cloud license' do
+        let(:current_license) { create(:license) }
+
+        it { is_expected.to be(false) }
+      end
+
+      context 'when current license is a cloud license but key does not match current' do
+        let(:current_license) { create_current_license(cloud_licensing_enabled: true) }
+
+        it { is_expected.to be(false) }
+      end
+
+      context 'when current license is a cloud license and key matches current' do
+        let(:current_license) { create_current_license(cloud_licensing_enabled: true) }
+        let(:license_key) { current_license.data }
+
+        it { is_expected.to be(true) }
       end
     end
   end

@@ -7,7 +7,6 @@ import SubscriptionActivationForm, {
 } from 'ee/admin/subscriptions/show/components/subscription_activation_form.vue';
 import {
   CONNECTIVITY_ERROR,
-  fieldRequiredMessage,
   INVALID_CODE_ERROR,
   subscriptionQueries,
 } from 'ee/admin/subscriptions/show/constants';
@@ -20,11 +19,11 @@ import { activateLicenseMutationResponse } from '../mock_data';
 const localVue = createLocalVue();
 localVue.use(VueApollo);
 
-describe('CloudLicenseApp', () => {
+describe('SubscriptionActivationForm', () => {
   let wrapper;
 
-  const fakeActivationCode = 'gEg959hDCkvM2d4Der5RyktT ';
-  const fakeActivationCodeTrimmed = 'gEg959hDCkvM2d4Der5RyktT';
+  const fakeActivationCodeTrimmed = 'aaasddfffdddas';
+  const fakeActivationCode = `${fakeActivationCodeTrimmed}   `;
 
   const createMockApolloProvider = (resolverMock) => {
     localVue.use(VueApollo);
@@ -34,7 +33,8 @@ describe('CloudLicenseApp', () => {
   const findActivateButton = () => wrapper.findByTestId('activate-button');
   const findAgreementCheckbox = () => wrapper.findComponent(GlFormCheckbox);
   const findAgreementCheckboxInput = () => findAgreementCheckbox().find('input');
-  const findAgreementCheckboxFormGroup = () => wrapper.findByTestId('form-group-terms');
+  const findAgreementCheckboxFormGroupSpan = () =>
+    wrapper.findByTestId('form-group-terms').find('span');
   const findActivationCodeFormGroup = () => wrapper.findByTestId('form-group-activation-code');
   const findActivationCodeInput = () => wrapper.findComponent(GlFormInput);
   const findActivateSubscriptionForm = () => wrapper.findComponent(GlForm);
@@ -67,7 +67,7 @@ describe('CloudLicenseApp', () => {
     wrapper.destroy();
   });
 
-  describe('Subscription Activation Form', () => {
+  describe('component setup', () => {
     beforeEach(() => createComponentWithApollo());
 
     it('presents a form', () => {
@@ -76,6 +76,10 @@ describe('CloudLicenseApp', () => {
 
     it('has an input', () => {
       expect(findActivationCodeInput().exists()).toBe(true);
+    });
+
+    it('applies a class to the checkbox', () => {
+      expect(findAgreementCheckboxFormGroupSpan().attributes('class')).toBe('gl-text-gray-900!');
     });
 
     it('has an `Activate` button', () => {
@@ -91,26 +95,20 @@ describe('CloudLicenseApp', () => {
     });
   });
 
-  describe('form errors', () => {
+  describe('form validation', () => {
     const mutationMock = jest.fn();
-    beforeEach(() => {
-      createComponentWithApollo({ mutationMock });
+    beforeEach(async () => {
+      createComponentWithApollo({ mutationMock, mountMethod: mount });
+      await findAgreementCheckbox().vm.$emit('input', false);
+      findActivateSubscriptionForm().vm.$emit('submit', createFakeEvent());
     });
 
-    it('shows an error for the text field', async () => {
-      await findActivateSubscriptionForm().vm.$emit('submit', createFakeEvent());
-
-      expect(findActivationCodeFormGroup().attributes('invalid-feedback')).toBe(
-        'Please fill out this field.',
-      );
+    it('shows an error for the text field', () => {
+      expect(findActivationCodeFormGroup().text()).toContain('Please fill out this field.');
     });
 
-    it('shows an error for the checkbox field', async () => {
-      await findActivationCodeInput().vm.$emit('input', fakeActivationCode);
-
-      expect(findAgreementCheckboxFormGroup().attributes('invalid-feedback')).toBe(
-        fieldRequiredMessage,
-      );
+    it('applies the correct class', () => {
+      expect(findAgreementCheckboxFormGroupSpan().attributes('class')).toBe('');
     });
 
     it('does not perform any mutation', () => {

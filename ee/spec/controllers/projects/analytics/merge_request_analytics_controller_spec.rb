@@ -52,7 +52,7 @@ RSpec.describe Projects::Analytics::MergeRequestAnalyticsController do
       end
 
       it 'renders the side navigation with the correct submenu set as active' do
-        expect(response.body).to have_active_sub_navigation('Merge Request')
+        expect(response.body).to have_active_sub_navigation('Merge request')
       end
     end
   end

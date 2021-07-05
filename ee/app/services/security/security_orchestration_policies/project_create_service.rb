@@ -13,7 +13,7 @@ module Security
         project.create_security_orchestration_policy_configuration! do |p|
           p.security_policy_management_project_id = policy_project.id
         end
-        create_protected_branch(policy_project)
+        create_or_update_protected_branch(policy_project)
 
         members = add_members(policy_project)
         errors = members.flat_map { |member| member.errors.full_messages }
@@ -25,12 +25,20 @@ module Security
 
       private
 
-      def create_protected_branch(policy_project)
+      def create_or_update_protected_branch(policy_project)
+        protected_branch = policy_project.protected_branches.find_by_name(policy_project.default_branch_or_main)
         params = {
           name: policy_project.default_branch_or_main,
           push_access_levels_attributes: [{ access_level: Gitlab::Access::NO_ACCESS }],
           merge_access_levels_attributes: [{ access_level: Gitlab::Access::DEVELOPER }]
         }
+
+        if protected_branch.present?
+          ProtectedBranch::UpdateService
+            .new(policy_project, current_user, params)
+            .execute(protected_branch)
+          return
+        end
 
         ProtectedBranches::CreateService
           .new(policy_project, current_user, params)

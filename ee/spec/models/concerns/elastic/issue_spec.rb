@@ -109,6 +109,7 @@ RSpec.describe Issue, :elastic do
     assignee = create(:user)
     project = create(:project, :internal)
     issue = create :issue, project: project, assignees: [assignee]
+    create(:award_emoji, :upvote, awardable: issue)
 
     expected_hash = issue.attributes.extract!(
       'id',
@@ -122,7 +123,8 @@ RSpec.describe Issue, :elastic do
       'confidential'
     ).merge({
       'type' => issue.es_type,
-      'state' => issue.state
+      'state' => issue.state,
+      'upvotes' => 1
     })
 
     expected_hash['assignee_id'] = [assignee.id]

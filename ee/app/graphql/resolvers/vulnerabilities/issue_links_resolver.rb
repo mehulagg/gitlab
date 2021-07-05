@@ -35,7 +35,7 @@ module Resolvers
       end
 
       def valid_link_type?(args)
-        if args[:link_type].class == String
+        if args[:link_type].instance_of?(String)
           link_type = args[:link_type].downcase
           link_types = ::Vulnerabilities::IssueLink.link_types.keys
 

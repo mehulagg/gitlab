@@ -4,6 +4,7 @@ import * as Sentry from '@sentry/browser';
 import { s__ } from '~/locale';
 import { addEscalationPolicyModalId } from '../constants';
 import getEscalationPoliciesQuery from '../graphql/queries/get_escalation_policies.query.graphql';
+import { parsePolicy } from '../utils';
 import AddEscalationPolicyModal from './add_edit_escalation_policy_modal.vue';
 import EscalationPolicy from './escalation_policy.vue';
 
@@ -47,7 +48,7 @@ export default {
         };
       },
       update({ project }) {
-        return project?.incidentManagementEscalationPolicies?.nodes ?? [];
+        return project?.incidentManagementEscalationPolicies?.nodes.map(parsePolicy) ?? [];
       },
       error(error) {
         Sentry.captureException(error);

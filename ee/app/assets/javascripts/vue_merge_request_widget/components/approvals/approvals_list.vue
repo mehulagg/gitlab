@@ -94,15 +94,12 @@ export default {
 <template>
   <table class="table m-0">
     <thead class="thead-white text-nowrap">
-      <tr
-        :class="glFeatures.approvalsCommentedBy ? 'd-md-table-row' : 'd-sm-table-row'"
-        class="d-none"
-      >
+      <tr class="d-md-table-row d-none">
         <th class="w-0"></th>
         <th class="w-25 gl-pl-0!">{{ s__('MRApprovals|Approvers') }}</th>
         <th class="w-50"></th>
         <th>{{ s__('MRApprovals|Approvals') }}</th>
-        <th v-if="glFeatures.approvalsCommentedBy">{{ s__('MRApprovals|Commented by') }}</th>
+        <th>{{ s__('MRApprovals|Commented by') }}</th>
         <th>{{ s__('MRApprovals|Approved by') }}</th>
       </tr>
     </thead>
@@ -116,10 +113,7 @@ export default {
       <tr v-for="rule in rules" :key="rule.id">
         <td class="w-0 gl-pr-4!"><approved-icon class="gl-pl-2" :is-approved="rule.approved" /></td>
         <td :colspan="rule.rule_type === $options.ruleTypeAnyApprover ? 2 : 1" class="gl-pl-0!">
-          <div
-            :class="glFeatures.approvalsCommentedBy ? 'd-md-flex' : 'd-sm-flex'"
-            class="d-none js-name align-items-center"
-          >
+          <div class="d-md-flex d-none js-name align-items-center">
             <empty-rule-name
               v-if="rule.rule_type === $options.ruleTypeAnyApprover"
               :eligible-approvers-docs-path="eligibleApproversDocsPath"
@@ -140,10 +134,7 @@ export default {
               :security-approvals-help-page-path="securityApprovalsHelpPagePath"
             />
           </div>
-          <div
-            :class="glFeatures.approvalsCommentedBy ? 'd-md-none' : 'd-sm-none'"
-            class="d-flex flex-column js-summary"
-          >
+          <div class="d-md-none d-flex flex-column js-summary">
             <empty-rule-name
               v-if="rule.rule_type === $options.ruleTypeAnyApprover"
               :eligible-approvers-docs-path="eligibleApproversDocsPath"
@@ -156,10 +147,7 @@ export default {
               :img-size="24"
               empty-text=""
             />
-            <div
-              v-if="glFeatures.approvalsCommentedBy && rule.commented_by.length > 0"
-              class="mt-2"
-            >
+            <div v-if="rule.commented_by.length > 0" class="mt-2">
               <span>{{ s__('MRApprovals|Commented by') }}</span>
               <user-avatar-list
                 class="d-inline-block align-middle"
@@ -179,22 +167,14 @@ export default {
         </td>
         <td
           v-if="rule.rule_type !== $options.ruleTypeAnyApprover"
-          :class="glFeatures.approvalsCommentedBy ? 'd-md-table-cell' : 'd-sm-table-cell'"
-          class="d-none js-approvers"
+          class="d-md-table-cell d-none js-approvers"
         >
           <div><user-avatar-list :items="rule.approvers" :img-size="24" empty-text="" /></div>
         </td>
-        <td
-          :class="glFeatures.approvalsCommentedBy ? 'd-md-table-cell' : 'd-sm-table-cell'"
-          class="w-0 d-none text-nowrap js-pending"
-        >
+        <td class="d-md-table-cell w-0 d-none text-nowrap js-pending">
           {{ pendingApprovalsText(rule) }}
         </td>
-        <td
-          v-if="glFeatures.approvalsCommentedBy"
-          :class="glFeatures.approvalsCommentedBy ? 'd-md-table-cell' : 'd-sm-table-cell'"
-          class="d-none js-commented-by"
-        >
+        <td class="d-md-table-cell d-none js-commented-by">
           <user-avatar-list :items="rule.commented_by" :img-size="24" empty-text="" />
         </td>
         <td class="d-none d-md-table-cell js-approved-by">

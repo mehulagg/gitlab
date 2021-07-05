@@ -21,8 +21,8 @@ export const selectedProjectIds = ({ selectedProjects }) =>
 
 export const cycleAnalyticsRequestParams = (state, getters) => {
   const {
-    startDate = null,
-    endDate = null,
+    createdAfter = null,
+    createdBefore = null,
     filters: {
       authors: { selected: selectedAuthor },
       milestones: { selected: selectedMilestone },
@@ -40,8 +40,8 @@ export const cycleAnalyticsRequestParams = (state, getters) => {
 
   return {
     project_ids: getters.selectedProjectIds,
-    created_after: startDate ? dateFormat(startDate, dateFormats.isoDate) : null,
-    created_before: endDate ? dateFormat(endDate, dateFormats.isoDate) : null,
+    created_after: createdAfter ? dateFormat(createdAfter, dateFormats.isoDate) : null,
+    created_before: createdBefore ? dateFormat(createdBefore, dateFormats.isoDate) : null,
     ...filterBarQuery,
   };
 };

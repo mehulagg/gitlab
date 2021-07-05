@@ -13,9 +13,6 @@
       .form-group
         = f.label :deploy_access_levels_attributes, class: 'label-bold' do
           = s_('ProtectedEnvironment|Allowed to deploy')
-        - if Feature.enabled?(:feature_flag_permissions, @project)
-          .text-muted.mb-2
-            = s_('ProtectedEnvironment|Select users to deploy and manage Feature Flag settings')
         = render partial: 'projects/protected_environments/deploy_access_levels_dropdown', locals: { f: f }
 
     .card-footer

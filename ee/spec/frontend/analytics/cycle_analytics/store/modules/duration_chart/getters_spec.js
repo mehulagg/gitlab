@@ -1,14 +1,10 @@
 import * as getters from 'ee/analytics/cycle_analytics/store/modules/duration_chart/getters';
-import {
-  startDate,
-  endDate,
-  transformedDurationData,
-  durationChartPlottableData,
-} from '../../../mock_data';
+import { createdAfter, createdBefore } from 'jest/cycle_analytics/mock_data';
+import { transformedDurationData, durationChartPlottableData } from '../../../mock_data';
 
 const rootState = {
-  startDate,
-  endDate,
+  createdAfter,
+  createdBefore,
 };
 
 describe('DurationChart getters', () => {

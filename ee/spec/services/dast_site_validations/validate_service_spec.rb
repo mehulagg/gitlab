@@ -35,7 +35,7 @@ RSpec.describe DastSiteValidations::ValidateService do
 
         aggregate_failures do
           expect(Gitlab::UrlBlocker).to receive(:validate!).with(uri, opt).and_call_original
-          expect(Gitlab::HTTP).to receive(:get).with(dast_site_validation.validation_url).and_call_original
+          expect(Gitlab::HTTP).to receive(:get).with(dast_site_validation.validation_url, use_read_total_timeout: true).and_call_original
         end
 
         subject

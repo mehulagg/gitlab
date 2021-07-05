@@ -146,18 +146,27 @@ describe('PolicyList component', () => {
       rows = wrapper.findAll('tr');
     });
 
-    it.each`
-      rowIndex | expectedPolicyName
-      ${1}     | ${mockNetworkPoliciesResponse[0].name}
-      ${2}     | ${'drop-outbound'}
-      ${3}     | ${'allow-inbound-http'}
-      ${4}     | ${mockScanExecutionPoliciesResponse[0].name}
-    `(
-      'renders "$expectedPolicyName" policy in row #$rowIndex',
-      ({ expectedPolicyName, rowIndex }) => {
-        expect(rows.at(rowIndex).text()).toContain(expectedPolicyName);
-      },
-    );
+    describe.each`
+      rowIndex | expectedPolicyName                           | expectedPolicyType
+      ${1}     | ${mockScanExecutionPoliciesResponse[0].name} | ${'Scan execution'}
+      ${2}     | ${mockNetworkPoliciesResponse[0].name}       | ${'Network'}
+      ${3}     | ${'drop-outbound'}                           | ${'Network'}
+      ${4}     | ${'allow-inbound-http'}                      | ${'Network'}
+    `('policy in row #$rowIndex', ({ rowIndex, expectedPolicyName, expectedPolicyType }) => {
+      let row;
+
+      beforeEach(() => {
+        row = rows.at(rowIndex);
+      });
+
+      it(`renders ${expectedPolicyName} in the name cell`, () => {
+        expect(row.findAll('td').at(1).text()).toBe(expectedPolicyName);
+      });
+
+      it(`renders ${expectedPolicyType} in the policy type cell`, () => {
+        expect(row.findAll('td').at(2).text()).toBe(expectedPolicyType);
+      });
+    });
   });
 
   describe('status column', () => {
@@ -166,7 +175,7 @@ describe('PolicyList component', () => {
     });
 
     it('renders a checkmark icon for enabled policies', () => {
-      const icon = findPolicyStatusCells().at(0).find('svg');
+      const icon = findPolicyStatusCells().at(1).find('svg');
 
       expect(icon.exists()).toBe(true);
       expect(icon.props('name')).toBe('check-circle-filled');
@@ -174,7 +183,7 @@ describe('PolicyList component', () => {
     });
 
     it('renders a "Disabled" label for screen readers for disabled policies', () => {
-      const span = findPolicyStatusCells().at(1).find('span');
+      const span = findPolicyStatusCells().at(2).find('span');
 
       expect(span.exists()).toBe(true);
       expect(span.attributes('class')).toBe('gl-sr-only');
@@ -190,7 +199,7 @@ describe('PolicyList component', () => {
 
     it('renders namespace column', () => {
       const namespaceHeader = findPoliciesTable().findAll('[role="columnheader"]').at(2);
-      expect(namespaceHeader.text()).toBe('Namespace');
+      expect(namespaceHeader.text()).toContain('Namespace');
     });
   });
 

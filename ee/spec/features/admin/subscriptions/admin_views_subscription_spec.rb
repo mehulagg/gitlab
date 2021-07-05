@@ -31,7 +31,7 @@ RSpec.describe 'Admin views Subscription', :js do
         page.within(find('#content-body', match: :first)) do
           click_button('Sync subscription details')
 
-          expect(page).to have_content('The subscription details synced successfully')
+          expect(page).to have_content('Your subscription details will sync shortly.')
         end
       end
 

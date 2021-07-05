@@ -12,7 +12,7 @@ module ExternalStatusChecks
     end
 
     def execute
-      response = Gitlab::HTTP.post(rule.external_url, body: Gitlab::Json::LimitedEncoder.encode(data, limit: REQUEST_BODY_SIZE_LIMIT))
+      response = Gitlab::HTTP.post(rule.external_url, body: Gitlab::Json::LimitedEncoder.encode(data, limit: REQUEST_BODY_SIZE_LIMIT), use_read_total_timeout: true)
 
       if response.success?
         ServiceResponse.success(payload: { rule: rule }, http_status: response.code)

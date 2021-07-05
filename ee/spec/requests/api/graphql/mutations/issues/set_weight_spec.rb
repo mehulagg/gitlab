@@ -6,7 +6,7 @@ RSpec.describe 'Setting weight of an issue' do
   include GraphqlHelpers
 
   let(:current_user) { create(:user) }
-  let(:issue) { create(:issue) }
+  let(:issue) { create(:issue, weight: 1) }
   let(:project) { issue.project }
   let(:input) { { weight: 2 } }
 
@@ -44,11 +44,34 @@ RSpec.describe 'Setting weight of an issue' do
     expect(graphql_errors).to include(a_hash_including('message' => error))
   end
 
-  it 'updates the issue weight' do
-    post_graphql_mutation(mutation, current_user: current_user)
+  context 'when weight is a number' do
+    it 'updates the issue weight' do
+      post_graphql_mutation(mutation, current_user: current_user)
 
-    expect(response).to have_gitlab_http_status(:success)
-    expect(mutation_response['issue']['weight']).to eq(2)
+      expect(response).to have_gitlab_http_status(:success)
+      expect(mutation_response['issue']['weight']).to eq(2)
+    end
+  end
+
+  context 'when weight is null' do
+    let(:input) { { weight: nil } }
+
+    it 'updates the issue weight' do
+      post_graphql_mutation(mutation, current_user: current_user)
+
+      expect(response).to have_gitlab_http_status(:success)
+      expect(mutation_response['issue']['weight']).to eq(nil)
+    end
+  end
+
+  context 'when weight is not given' do
+    let(:input) { {} }
+
+    it 'returns an error' do
+      post_graphql_mutation(mutation, current_user: current_user)
+
+      expect(graphql_errors).to include(a_hash_including('message' => /The `weight` argument is required \(`null` accepted\)/))
+    end
   end
 
   context 'when weight is not an integer' do
