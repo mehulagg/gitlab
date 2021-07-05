@@ -1,5 +1,5 @@
 query projectLabels($fullPath: ID!, $searchTerm: String) {
-  project(fullPath: $fullPath) {
+  workspace: project(fullPath: $fullPath) {
     labels(searchTerm: $searchTerm, includeAncestorGroups: true) {
       nodes {
         id
