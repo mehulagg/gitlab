@@ -15,7 +15,14 @@ module Gitlab
 
           context_for_args = worker_class.context_for_arguments(job['args'])
 
-          wrap_in_optional_context(context_for_args, &block)
+          # This should be inside the context for the arguments so that
+          # we don't override the feature category on the worker with
+          # the one from the caller.
+          feature_category_context = Gitlab::ApplicationContext.new(feature_category: worker_class.get_feature_category.to_s)
+
+          wrap_in_optional_context(context_for_args) do
+            feature_category_context.use(&block)
+          end
         end
       end
     end
