@@ -4,6 +4,8 @@ require 'spec_helper'
 
 RSpec.describe 'layouts/nav/sidebar/_project' do
   let_it_be_with_refind(:project) { create(:project, :repository) }
+  let_it_be(:group) { create(:group) }
+  let_it_be(:group_project) { create(:project, group: group) }
 
   let(:user) { project.owner }
 
@@ -28,13 +30,31 @@ RSpec.describe 'layouts/nav/sidebar/_project' do
 
   describe 'Issues' do
     describe 'Iterations' do
-      it 'has a link to the issue iterations path' do
-        allow(view).to receive(:current_user).and_return(user)
-        stub_licensed_features(iterations: true)
+      describe 'Project in a group' do
+        before do
+          group.add_guest(user)
+          assign(:project, group_project)
+        end
 
-        render
+        it 'has a link to the issue iterations path' do
+          allow(view).to receive(:current_user).and_return(user)
+          stub_licensed_features(iterations: true)
 
-        expect(rendered).to have_link('Iterations', href: project_iterations_path(project))
+          render
+
+          expect(rendered).to have_link('Iterations', href: project_iteration_cadences_path(group_project))
+        end
+      end
+
+      describe 'Project not in a group' do
+        it 'does not have link to the iterations path' do
+          allow(view).to receive(:current_user).and_return(user)
+          stub_licensed_features(iterations: true)
+
+          render
+
+          expect(rendered).not_to have_link('Iterations')
+        end
       end
     end
   end
