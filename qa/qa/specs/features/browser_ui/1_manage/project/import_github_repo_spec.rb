@@ -12,13 +12,14 @@ module QA
         end
       end
 
-      let(:imported_project) do
-        Resource::ProjectImportedFromGithub.fabricate_via_browser_ui! do |project|
+      let(:imported_project_args) do
+        lambda do |project|
           project.name = 'imported-project'
           project.group = group
           project.github_personal_access_token = Runtime::Env.github_access_token
           project.github_repository_path = 'gitlab-qa-github/test-project'
           project.api_client = api_client
+          project.github_repo_id = '310217317'
         end
       end
 
@@ -30,19 +31,37 @@ module QA
         user.remove_via_api!
       end
 
-      it 'imports a GitHub repo', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/1762' do
-        Flow::Login.sign_in(as: user)
+      context 'with ui' do
+        let(:imported_project) do
+          Resource::ProjectImportedFromGithub.fabricate_via_browser_ui!(&imported_project_args)
+        end
 
-        imported_project.reload! # import the project and reload all fields
+        it 'imports a GitHub repo', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/1762' do
+          Flow::Login.sign_in(as: user)
 
-        aggregate_failures do
-          verify_repository_import
-          verify_commits_import
-          verify_labels_import
-          verify_issues_import
-          verify_milestones_import
-          verify_wikis_import
-          verify_merge_requests_import
+          imported_project.reload! # import the project and reload all fields
+
+          aggregate_failures do
+            verify_repository_import
+            verify_commits_import
+            verify_labels_import
+            verify_issues_import
+            verify_milestones_import
+            verify_wikis_import
+            verify_merge_requests_import
+          end
+        end
+      end
+
+      context 'with api' do
+        let(:imported_project) do
+          Resource::ProjectImportedFromGithub.fabricate_via_api!(&imported_project_args)
+        end
+
+        it 'imports Github repo via api' do
+          imported_project.reload! # import the project and reload all fields
+
+          expect { imported_project.reload!.import_status }.to eventually_eq('finished').within(duration: 90)
         end
       end
 
