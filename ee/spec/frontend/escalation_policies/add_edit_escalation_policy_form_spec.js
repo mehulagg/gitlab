@@ -65,6 +65,17 @@ describe('AddEscalationPolicyForm', () => {
       expect(link.text()).toMatchInterpolatedText(i18n.addRule);
     });
 
+    it('should hide the add link when at max rules capacity', async () => {
+      // Create 10 rules
+      const rules = new Array(10).fill(0).map(() => mockPolicies[1].rules[0]);
+      createComponent({ props: { form: { rules } } });
+
+      await wrapper.vm.$nextTick();
+      const link = findAddRuleLink();
+      expect(findRules()).toHaveLength(10);
+      expect(link.exists()).toBe(false);
+    });
+
     it('should add an empty rule to the rules list on click', async () => {
       findAddRuleLink().vm.$emit('click');
       await wrapper.vm.$nextTick();
