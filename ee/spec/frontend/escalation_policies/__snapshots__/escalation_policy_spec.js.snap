@@ -99,15 +99,24 @@ exports[`EscalationPolicy renders policy with rules 1`] = `
             size="16"
           />
            THEN 
-              email on-call user in schedule
+              email user
              
-          <span
-            class="gl-font-weight-bold"
+          <gl-token-stub
+            variant="default"
+            viewonly="true"
           >
+            <gl-avatar-stub
+              alt="avatar"
+              entityid="0"
+              entityname=""
+              shape="circle"
+              size="16"
+              src="avatar.com/lena.png"
+            />
             
-                Monitor schedule
+                Lena
               
-          </span>
+          </gl-token-stub>
         </div>
       </div>
     </gl-collapse-stub>

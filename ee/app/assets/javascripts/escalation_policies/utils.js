@@ -15,10 +15,11 @@ export const isNameFieldValid = (name) => {
  * @returns {Array}
  */
 export const getRulesValidationState = (rules) => {
-  return rules.map((rule) => {
+  return rules.map(({ elapsedTimeMinutes, oncallScheduleIid, username }) => {
     return {
-      isTimeValid: parseInt(rule.elapsedTimeMinutes, 10) >= 0,
-      isScheduleValid: Boolean(rule.oncallScheduleIid),
+      isTimeValid: parseInt(elapsedTimeMinutes, 10) >= 0,
+      isScheduleValid: Boolean(oncallScheduleIid),
+      isUserValid: Boolean(username),
     };
   });
 };
@@ -29,10 +30,14 @@ export const getRulesValidationState = (rules) => {
  *
  * @returns {Object} rule
  */
-export const serializeRule = ({ elapsedTimeMinutes, ...ruleParams }) => ({
-  ...ruleParams,
-  elapsedTimeSeconds: elapsedTimeMinutes * 60,
-});
+export const serializeRule = ({ elapsedTimeMinutes, ...ruleParams }) => {
+  const params = { ...ruleParams };
+  delete params.action;
+  return {
+    ...params,
+    elapsedTimeSeconds: elapsedTimeMinutes * 60,
+  };
+};
 
 /**
  * Parses a policy by converting elapsed seconds to minutes

@@ -11,13 +11,14 @@ import {
   GlTooltipDirective as GlTooltip,
 } from '@gitlab/ui';
 import { s__ } from '~/locale';
-import { ACTIONS, ALERT_STATUSES } from '../constants';
+import { ACTIONS, ALERT_STATUSES, EMAIL_ONCALL_SCHEDULE_USER, EMAIL_USER } from '../constants';
+import UserSelect from './user_select.vue';
 
 export const i18n = {
   fields: {
     rules: {
       condition: s__('EscalationPolicies|IF alert is not %{alertStatus} in %{minutes} minutes'),
-      action: s__('EscalationPolicies|THEN %{doAction} %{schedule}'),
+      action: s__('EscalationPolicies|THEN %{doAction} %{scheduleOrUser}'),
       selectSchedule: s__('EscalationPolicies|Select schedule'),
       noSchedules: s__(
         'EscalationPolicies|A schedule is required for adding an escalation policy. Please create an on-call schedule first.',
@@ -29,6 +30,9 @@ export const i18n = {
       invalidTimeValidationMsg: s__(
         'EscalationPolicies|Elapsed time must be greater than or equal to zero.',
       ),
+      invalidUserValidationMsg: s__(
+        'EscalationPolicies|A user is required for adding an escalation policy.',
+      ),
     },
   },
 };
@@ -37,6 +41,8 @@ export default {
   i18n,
   ALERT_STATUSES,
   ACTIONS,
+  EMAIL_ONCALL_SCHEDULE_USER,
+  EMAIL_USER,
   components: {
     GlFormGroup,
     GlFormInput,
@@ -46,6 +52,7 @@ export default {
     GlButton,
     GlIcon,
     GlSprintf,
+    UserSelect,
   },
   directives: {
     GlTooltip,
@@ -76,12 +83,14 @@ export default {
     },
   },
   data() {
-    const { status, elapsedTimeMinutes, action, oncallScheduleIid } = this.rule;
+    const { status, elapsedTimeMinutes, oncallScheduleIid, username, action } = this.rule;
+
     return {
       status,
-      elapsedTimeMinutes,
       action,
+      elapsedTimeMinutes,
       oncallScheduleIid,
+      username,
     };
   },
   computed: {
@@ -94,7 +103,7 @@ export default {
       return !this.schedulesLoading && !this.schedules.length;
     },
     isValid() {
-      return this.isTimeValid && this.isScheduleValid;
+      return this.isTimeValid && (this.isScheduleValid || this.isUserValid);
     },
     isTimeValid() {
       return this.validationState?.isTimeValid;
@@ -102,21 +111,50 @@ export default {
     isScheduleValid() {
       return this.validationState?.isScheduleValid;
     },
+    isUserValid() {
+      return this.validationState?.isUserValid;
+    },
+    actionBasedRequestParams() {
+      if (this.action === EMAIL_ONCALL_SCHEDULE_USER) {
+        return { oncallScheduleIid: parseInt(this.oncallScheduleIid, 10) };
+      }
+
+      return { username: this.username };
+    },
+    showEmptyScheduleValidationMsg() {
+      return this.action === EMAIL_ONCALL_SCHEDULE_USER && !this.isScheduleValid;
+    },
+    showNoUserValidationMsg() {
+      return this.action === EMAIL_USER && !this.isUserValid;
+    },
   },
   methods: {
     setOncallSchedule({ iid }) {
       this.oncallScheduleIid = this.oncallScheduleIid === iid ? null : iid;
       this.emitUpdate();
     },
+    setAction(action) {
+      this.action = action;
+      if (this.action === EMAIL_ONCALL_SCHEDULE_USER) {
+        this.username = null;
+      } else {
+        this.oncallScheduleIid = null;
+      }
+      this.emitUpdate();
+    },
     setStatus(status) {
       this.status = status;
+      this.emitUpdate();
+    },
+    setSelectedUser(username) {
+      this.username = username;
       this.emitUpdate();
     },
     emitUpdate() {
       this.$emit('update-escalation-rule', {
         index: this.index,
         rule: {
-          oncallScheduleIid: parseInt(this.oncallScheduleIid, 10),
+          ...this.actionBasedRequestParams,
           action: this.action,
           status: this.status,
           elapsedTimeMinutes: this.elapsedTimeMinutes,
@@ -140,8 +178,11 @@ export default {
     />
     <gl-form-group :state="isValid" class="gl-mb-0">
       <template #invalid-feedback>
-        <div v-if="!isScheduleValid">
+        <div v-if="showEmptyScheduleValidationMsg">
           {{ $options.i18n.fields.rules.emptyScheduleValidationMsg }}
+        </div>
+        <div v-if="showNoUserValidationMsg" class="gl-display-inline-block gl-mt-2">
+          {{ $options.i18n.fields.rules.invalidUserValidationMsg }}
         </div>
         <div v-if="!isTimeValid" class="gl-display-inline-block gl-mt-2">
           {{ $options.i18n.fields.rules.invalidTimeValidationMsg }}
@@ -183,49 +224,53 @@ export default {
           <template #doAction>
             <gl-dropdown
               class="rule-control gl-mx-3"
-              :text="$options.ACTIONS[rule.action]"
+              :text="$options.ACTIONS[action]"
               data-testid="action-dropdown"
             >
               <gl-dropdown-item
                 v-for="(label, ruleAction) in $options.ACTIONS"
                 :key="ruleAction"
-                :is-checked="rule.action === ruleAction"
+                :is-checked="action === ruleAction"
                 is-check-item
+                @click="setAction(ruleAction)"
               >
                 {{ label }}
               </gl-dropdown-item>
             </gl-dropdown>
           </template>
-          <template #schedule>
-            <gl-dropdown
-              :disabled="noSchedules"
-              class="rule-control"
-              :text="scheduleDropdownTitle"
-              data-testid="schedules-dropdown"
-            >
-              <template #button-text>
-                <span :class="{ 'gl-text-gray-400': !oncallScheduleIid }">
-                  {{ scheduleDropdownTitle }}
-                </span>
-              </template>
-              <gl-dropdown-item
-                v-for="schedule in schedules"
-                :key="schedule.iid"
-                :is-checked="schedule.iid === oncallScheduleIid"
-                is-check-item
-                @click="setOncallSchedule(schedule)"
+          <template #scheduleOrUser>
+            <template v-if="action === $options.EMAIL_ONCALL_SCHEDULE_USER">
+              <gl-dropdown
+                :disabled="noSchedules"
+                class="rule-control"
+                :text="scheduleDropdownTitle"
+                data-testid="schedules-dropdown"
               >
-                {{ schedule.name }}
-              </gl-dropdown-item>
-            </gl-dropdown>
-            <gl-icon
-              v-if="noSchedules"
-              v-gl-tooltip
-              :title="$options.i18n.fields.rules.noSchedules"
-              name="information-o"
-              class="gl-text-gray-500 gl-ml-3"
-              data-testid="no-schedules-info-icon"
-            />
+                <template #button-text>
+                  <span :class="{ 'gl-text-gray-400': !oncallScheduleIid }">
+                    {{ scheduleDropdownTitle }}
+                  </span>
+                </template>
+                <gl-dropdown-item
+                  v-for="schedule in schedules"
+                  :key="schedule.iid"
+                  :is-checked="schedule.iid === oncallScheduleIid"
+                  is-check-item
+                  @click="setOncallSchedule(schedule)"
+                >
+                  {{ schedule.name }}
+                </gl-dropdown-item>
+              </gl-dropdown>
+              <gl-icon
+                v-if="noSchedules"
+                v-gl-tooltip
+                :title="$options.i18n.fields.rules.noSchedules"
+                name="information-o"
+                class="gl-text-gray-500 gl-ml-3"
+                data-testid="no-schedules-info-icon"
+              />
+            </template>
+            <user-select v-else :selected-user-name="username" @select-user="setSelectedUser" />
           </template>
         </gl-sprintf>
       </div>

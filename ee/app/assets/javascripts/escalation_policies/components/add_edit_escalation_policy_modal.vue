@@ -78,7 +78,8 @@ export default {
         this.validationState.name &&
         (this.isEditMode ? true : this.validationState.rules.length) &&
         this.validationState.rules.every(
-          ({ isTimeValid, isScheduleValid }) => isTimeValid && isScheduleValid,
+          ({ isTimeValid, isScheduleValid, isUserValid }) =>
+            isTimeValid && (isScheduleValid || isUserValid),
         )
       );
     },
@@ -186,10 +187,11 @@ export default {
     },
     getRules(rules) {
       return rules.map(
-        ({ status, elapsedTimeMinutes, oncallScheduleIid, oncallSchedule: { iid } = {} }) => ({
+        ({ status, elapsedTimeMinutes, oncallScheduleIid, oncallSchedule, user, username }) => ({
           status,
           elapsedTimeMinutes,
-          oncallScheduleIid: oncallScheduleIid || iid,
+          oncallScheduleIid: oncallScheduleIid ?? oncallSchedule?.iid,
+          username: username ?? user?.username,
         }),
       );
     },
