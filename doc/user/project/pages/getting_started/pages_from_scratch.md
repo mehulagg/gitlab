@@ -4,40 +4,54 @@ group: Release
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#assignments
 ---
 
-# Create a GitLab Pages website from scratch **(FREE)**
+# Tutorial: Create a GitLab Pages website from scratch **(FREE)**
 
-This tutorial shows you how to create a Pages site from scratch. You start with
-a blank project and create your own CI file, which gives instruction to
-a [runner](https://docs.gitlab.com/runner/). When your CI/CD
+This tutorial shows you how to create a Pages site from scratch using
+the [Jekyll](https://jekyllrb.com/) Static Site Generator (SSG). You start with
+a blank project and create your own CI/CD configuration file, which gives
+instructions to a [runner](https://docs.gitlab.com/runner/). When your CI/CD
 [pipeline](../../../../ci/pipelines/index.md) runs, the Pages site is created.
 
-This example uses the [Jekyll](https://jekyllrb.com/) Static Site Generator (SSG).
-Other SSGs follow similar steps. You do not need to be familiar with Jekyll or SSGs
+This example uses Jekyll, but other SSGs follow similar steps.
+You do not need to be familiar with Jekyll or SSGs
 to complete this tutorial.
+
+To create a GitLab Pages website:
+
+- [Step 1: Create the project files](#create-the-project-files)
+- [Step 2: Choose a Docker image](#choose-a-docker-image)
+- [Step 3: Install Jekyll](#install-jekyll)
+- [Step 4: Specify the `public` directory for output](#specify-the-public-directory-for-output)
+- [Step 5: Specify the `public` directory for artifacts](#specify-the-public-directory-for-artifacts)
+- [Step 6: Deploy and view your website](#deploy-and-view-your-website)
 
 ## Prerequisites
 
-To follow along with this example, start with a blank project in GitLab.
-Create three files in the root (top-level) directory.
+You must have a [blank project](../../working_with_projects.md#blank-projects) in GitLab.
 
-- `.gitlab-ci.yml` A YAML file that contains the commands you want to run.
-  For now, leave the file's contents blank.
+## Create the project files
 
-- `index.html` An HTML file you can populate with whatever HTML content you'd like,
-  for example:
+Create three files in the root (top-level) directory:
 
-  ```html
-  <html>
-  <head>
-    <title>Home</title>
-  </head>
-  <body>
-    <h1>Hello World!</h1>
-  </body>
-  </html>
-  ```
+- `.gitlab-ci.yml`: A YAML file that contains the commands you want to run.
+   For now, leave the file's contents blank.
 
-- [`Gemfile`](https://bundler.io/gemfile.html) A file that describes dependencies for Ruby programs.
+- `index.html`: An HTML file you can populate with whatever HTML content
+   you'd like, for example:
+
+   ```html
+   <html>
+   <head>
+     <title>Home</title>
+   </head>
+   <body>
+     <h1>Hello World!</h1>
+   </body>
+   </html>
+   ```
+
+- [`Gemfile`](https://bundler.io/gemfile.html): A file that describes dependencies for Ruby programs.
+
   Populate it with this content:
 
   ```ruby
@@ -53,7 +67,7 @@ to run scripts and deploy the site.
 
 This specific Ruby image is maintained on [DockerHub](https://hub.docker.com/_/ruby).
 
-Edit your `.gitlab-ci.yml` and add this text as the first line.
+Edit your `.gitlab-ci.yml` file and add this text as the first line:
 
 ```yaml
 image: ruby:2.7
@@ -65,13 +79,15 @@ image that contains NodeJS as part of its file system. For example, for a
 
 ## Install Jekyll
 
-To run [Jekyll](https://jekyllrb.com/) locally, you would open your terminal and:
+To run [Jekyll](https://jekyllrb.com/) locally, you must install it:
 
-- Install [Bundler](https://bundler.io/) by running `gem install bundler`.
-- Create `Gemfile.lock` by running `bundle install`.
-- Install Jekyll by running `bundle exec jekyll build`.
+1. Open your terminal.
+1. Install [Bundler](https://bundler.io/) by running `gem install bundler`.
+1. Create `Gemfile.lock` by running `bundle install`.
+1. Install Jekyll by running `bundle exec jekyll build`.
 
-In the `.gitlab-ci.yml` file, this is written as:
+To run Jekyll in your project, edit the `.gitlab-ci.yml` file
+and add the installation commands:
 
 ```yaml
 script:
@@ -109,7 +125,8 @@ pages:
 Jekyll needs to know where to generate its output.
 GitLab Pages only considers files in a directory called `public`.
 
-Jekyll uses destination (`-d`) to specify an output directory for the built website:
+Jekyll uses a destination flag (`-d`) to specify an output directory for the built website.
+Add the destination to your `.gitlab-ci.yml` file:
 
 ```yaml
 pages:
@@ -136,7 +153,7 @@ pages:
       - public
 ```
 
-Paste this into `.gitlab-ci.yml` file, so it now looks like this:
+Your `.gitlab-ci.yml` file should now look like this:
 
 ```yaml
 image: ruby:2.7
@@ -151,23 +168,29 @@ pages:
       - public
 ```
 
-Now save and commit the `.gitlab-ci.yml` file. You can watch the pipeline run
-by going to **CI/CD > Pipelines**.
+## Deploy and view your website
 
-When it succeeds, go to **Settings > Pages** to view the URL where your site
-is now available.
+After you have completed the preceding steps,
+deploy your website:
+
+1. Save and commit the `.gitlab-ci.yml` file.
+1. Go to **CI/CD > Pipelines** to watch the pipeline.
+1. When the pipeline succeeds, go to **Settings > Pages**
+   to view the URL where your site is now available.
+
+When this `pages` job completes successfully, a special `pages:deploy` job
+appears in the pipeline view. It prepares the content of the website for the
+GitLab Pages daemon. GitLab runs it in the background and doesn't use a runner.
+
+## Other options for your CI/CD file
 
 If you want to do more advanced tasks, you can update your `.gitlab-ci.yml` file
 with [any of the available settings](../../../../ci/yaml/index.md). You can validate
 your `.gitlab-ci.yml` file with the [CI Lint](../../../../ci/lint.md) tool that's included with GitLab.
 
-After successful execution of this `pages` job, a special `pages:deploy` job appears in the
-pipeline view. It prepares the content of the website for GitLab Pages daemon. GitLab executes it in
-the background and doesn't use runner.
-
 The following topics show other examples of other options you can add to your CI/CD file.
 
-## Deploy specific branches to a Pages site
+### Deploy specific branches to a Pages site
 
 You may want to deploy to a Pages site only from specific branches.
 
@@ -212,7 +235,7 @@ pages:
     - if: '$CI_COMMIT_BRANCH == "master"'
 ```
 
-## Specify a stage to deploy
+### Specify a stage to deploy
 
 There are three default stages for GitLab CI/CD: build, test,
 and deploy.
@@ -288,7 +311,7 @@ stage builds in parallel. If your web application needs more than
 one test before being deployed, you can run all your tests at the
 same time.
 
-## Remove duplicate commands
+### Remove duplicate commands
 
 To avoid duplicating the same scripts in every job, you can add them
 to a `before_script` section.
@@ -330,7 +353,7 @@ test:
     - if: '$CI_COMMIT_BRANCH != "master"'
 ```
 
-## Build faster with cached dependencies
+### Build faster with cached dependencies
 
 To build faster, you can cache the installation files for your
 project's dependencies by using the `cache` parameter.
