@@ -4,7 +4,7 @@ require 'spec_helper'
 
 RSpec.describe API::AwardEmoji do
   let_it_be(:user)        { create(:user) }
-  let_it_be(:project)     { create(:project) }
+  let_it_be(:project)     { create(:project, :public) }
   let_it_be(:issue)       { create(:issue, project: project) }
   let_it_be(:award_emoji) { create(:award_emoji, awardable: issue, user: user) }
   let_it_be(:note)        { create(:note, project: project, noteable: issue) }
@@ -20,6 +20,14 @@ RSpec.describe API::AwardEmoji do
     context 'on an issue' do
       it "returns an array of award_emoji" do
         get api("/projects/#{project.id}/issues/#{issue.iid}/award_emoji", user)
+
+        expect(response).to have_gitlab_http_status(:ok)
+        expect(json_response).to be_an Array
+        expect(json_response.first['name']).to eq(award_emoji.name)
+      end
+
+      it "returns an array of award_emoji when logged out" do
+        get api("/projects/#{project.id}/issues/#{issue.iid}/award_emoji")
 
         expect(response).to have_gitlab_http_status(:ok)
         expect(json_response).to be_an Array

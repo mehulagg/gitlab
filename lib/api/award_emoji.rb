@@ -6,7 +6,7 @@ module API
 
     helpers ::API::Helpers::AwardEmoji
 
-    before { authenticate! }
+    before { authenticate! unless route.settings[:skip_authentication] }
 
     Helpers::AwardEmoji.awardables.each do |awardable_params|
       resource awardable_params[:resource], requirements: API::NAMESPACE_OR_PROJECT_REQUIREMENTS do
@@ -29,6 +29,7 @@ module API
           params do
             use :pagination
           end
+          route_setting :skip_authentication, true
           get endpoint, feature_category: awardable_params[:feature_category] do
             if can_read_awardable?
               awards = awardable.award_emoji
