@@ -5,8 +5,8 @@ include:
   - template: Security/Dependency-Scanning.gitlab-ci.yml
   - template: Security/License-Scanning.gitlab-ci.yml
   - project: 'gitlab-com/gl-security/security-research/package-hunter-cli'
-  ref: 'da/create-ci-template'
-  file: '.gitlab-ci-template.yml'
+    ref: 'da/create-ci-template'
+    file: '.gitlab-ci-template.yml'
 
 code_quality:
   extends:
