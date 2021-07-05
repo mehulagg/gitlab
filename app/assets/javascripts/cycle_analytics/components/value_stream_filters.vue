@@ -1,8 +1,7 @@
 <script>
-import DateRange from '../../shared/components/daterange.vue';
-import ProjectsDropdownFilter from '../../shared/components/projects_dropdown_filter.vue';
-import { DATE_RANGE_LIMIT } from '../../shared/constants';
-import { PROJECTS_PER_PAGE } from '../constants';
+import DateRange from '~/analytics/shared/components/daterange.vue';
+import ProjectsDropdownFilter from '~/analytics/shared/components/projects_dropdown_filter.vue';
+import { DATE_RANGE_LIMIT, PROJECTS_PER_PAGE } from '~/analytics/shared/constants';
 import FilterBar from './filter_bar.vue';
 
 export default {

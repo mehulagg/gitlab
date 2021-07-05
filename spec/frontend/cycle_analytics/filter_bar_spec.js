@@ -2,12 +2,12 @@ import { createLocalVue, shallowMount } from '@vue/test-utils';
 import axios from 'axios';
 import MockAdapter from 'axios-mock-adapter';
 import Vuex from 'vuex';
-import FilterBar from 'ee/analytics/cycle_analytics/components/filter_bar.vue';
 import storeConfig from 'ee/analytics/cycle_analytics/store';
 import {
   filterMilestones,
   filterLabels,
 } from 'jest/vue_shared/components/filtered_search_bar/store/modules/filters/mock_data';
+import FilterBar from '~/cycle_analytics/components/filter_bar.vue';
 import * as commonUtils from '~/lib/utils/common_utils';
 import * as urlUtils from '~/lib/utils/url_utility';
 import FilteredSearchBar from '~/vue_shared/components/filtered_search_bar/filtered_search_bar_root.vue';

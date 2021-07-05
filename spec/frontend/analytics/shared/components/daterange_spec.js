@@ -1,8 +1,8 @@
 import { GlDaterangePicker } from '@gitlab/ui';
 import { mount } from '@vue/test-utils';
-import Daterange from 'ee/analytics/shared/components/daterange.vue';
 import { useFakeDate } from 'helpers/fake_date';
 import { createMockDirective, getBinding } from 'helpers/vue_mock_directive';
+import Daterange from '~/analytics/shared/components/daterange.vue';
 
 const defaultProps = {
   startDate: new Date(2019, 8, 1),

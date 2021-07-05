@@ -9,11 +9,11 @@ import {
   GlSearchBoxByType,
 } from '@gitlab/ui';
 import { debounce } from 'lodash';
+import { filterBySearchTerm } from '~/analytics/shared/utils';
 import { getIdFromGraphQLId } from '~/graphql_shared/utils';
+import { DEFAULT_DEBOUNCE_AND_THROTTLE_MS } from '~/lib/utils/constants';
 import { n__, s__, __ } from '~/locale';
-import { DATA_REFETCH_DELAY } from '../constants';
 import getProjects from '../graphql/projects.query.graphql';
-import { filterBySearchTerm } from '../utils';
 
 export default {
   name: 'ProjectsDropdownFilter',
@@ -106,7 +106,7 @@ export default {
   methods: {
     search: debounce(function debouncedSearch() {
       this.fetchData();
-    }, DATA_REFETCH_DELAY),
+    }, DEFAULT_DEBOUNCE_AND_THROTTLE_MS),
     getSelectedProjects(selectedProject, isMarking) {
       return isMarking
         ? this.selectedProjects.concat([selectedProject])
