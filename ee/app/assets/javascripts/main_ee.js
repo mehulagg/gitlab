@@ -8,7 +8,7 @@ $(() => {
   /**
    * EE specific scripts
    */
-  $('#modal-upload-trial-license').modal('show');
+  // $('#modal-upload-trial-license').modal('show');
 
   // EE specific calls
   initEETrialBanner();
