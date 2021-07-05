@@ -37,8 +37,8 @@ module QA
             choose_test_namespace(full_path)
             set_path(full_path, name)
             import_project(full_path)
+
             wait_for_success
-            go_to_project(name)
           end
 
           private
