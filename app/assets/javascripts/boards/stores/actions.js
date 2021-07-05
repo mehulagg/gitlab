@@ -328,6 +328,7 @@ export default {
       .then(({ data }) => {
         const { lists } = data[boardType]?.board;
         const listItems = formatListIssues(lists);
+        console.log(listItems);
         const listPageInfo = formatListsPageInfo(lists);
         commit(types.RECEIVE_ITEMS_FOR_LIST_SUCCESS, { listItems, listPageInfo, listId });
       })

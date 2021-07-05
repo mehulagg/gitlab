@@ -4,14 +4,14 @@ import { BoardType } from './constants';
 import boardLabels from './graphql/board_labels.query.graphql';
 
 export default function issueBoardFilters(apollo, fullPath, boardType) {
+  const isGroupBoard = boardType === BoardType.group;
+  const isProjectBoard = boardType === BoardType.project;
   const transformLabels = ({ data }) => {
-    return boardType === BoardType.group
-      ? data.group?.labels.nodes || []
-      : data.project?.labels.nodes || [];
+    return isGroupBoard ? data.group?.labels.nodes || [] : data.project?.labels.nodes || [];
   };
 
   const boardAssigneesQuery = () => {
-    return boardType === BoardType.group ? groupBoardMembers : projectBoardMembers;
+    return isGroupBoard ? groupBoardMembers : projectBoardMembers;
   };
 
   const fetchAuthors = (authorsSearchTerm) => {
@@ -40,8 +40,8 @@ export default function issueBoardFilters(apollo, fullPath, boardType) {
         variables: {
           fullPath,
           searchTerm: labelSearchTerm,
-          isGroup: boardType === BoardType.group,
-          isProject: boardType === BoardType.project,
+          isGroup: isGroupBoard,
+          isProject: isProjectBoard,
         },
       })
       .then(transformLabels);
