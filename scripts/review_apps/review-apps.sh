@@ -48,7 +48,9 @@ function delete_release() {
     return
   fi
 
-  helm uninstall --namespace="${namespace}" "${release}"
+  if deploy_exists "${namespace}" "${release}"; then
+    helm uninstall --namespace="${namespace}" "${release}"
+  fi
 }
 
 function delete_failed_release() {
