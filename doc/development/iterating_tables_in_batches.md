@@ -394,4 +394,4 @@ end
 
 ### `EachBatch` vs `BatchCount`
 
-When adding new counters for usage ping, the preferred way to count records is using the `Gitlab::Database::BatchCount` class. The iteration logic implemented in `BatchCount` has similar performance characteristics like `EachBatch`. Most of the tips and suggestions for improving `BatchCount` mentioned above applies to `BatchCount` as well.
+When adding new counters for service ping, the preferred way to count records is using the `Gitlab::Database::BatchCount` class. The iteration logic implemented in `BatchCount` has similar performance characteristics like `EachBatch`. Most of the tips and suggestions for improving `BatchCount` mentioned above applies to `BatchCount` as well.
