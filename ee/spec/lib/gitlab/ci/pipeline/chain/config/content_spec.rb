@@ -8,9 +8,6 @@ RSpec.describe ::Gitlab::Ci::Pipeline::Chain::Config::Content do
   let(:content) { nil }
   let(:source) { :push }
   let(:command) { Gitlab::Ci::Pipeline::Chain::Command.new(project: project, content: content, source: source) }
-
-  subject { described_class.new(pipeline, command) }
-
   let(:content_result) do
     <<~EOY
     ---
@@ -19,6 +16,8 @@ RSpec.describe ::Gitlab::Ci::Pipeline::Chain::Config::Content do
       file: ".compliance-gitlab-ci.yml"
     EOY
   end
+
+  subject { described_class.new(pipeline, command) }
 
   shared_examples 'does not include compliance pipeline configuration content' do
     it do
@@ -30,13 +29,10 @@ RSpec.describe ::Gitlab::Ci::Pipeline::Chain::Config::Content do
     end
   end
 
-  context 'when project has compliance pipeline configuration defined' do
+  context 'when project has compliance label defined' do
     let(:project) { create(:project, ci_config_path: ci_config_path) }
     let(:compliance_group) { create(:group, :private, name: "compliance") }
     let(:compliance_project) { create(:project, namespace: compliance_group, name: "hippa") }
-
-    let(:framework) { create(:compliance_framework, namespace_id: compliance_group.id, pipeline_configuration_full_path: ".compliance-gitlab-ci.yml@compliance/hippa") }
-    let!(:framework_project_setting) { create(:compliance_framework_project_setting, project: project, framework_id: framework.id) }
 
     context 'when feature is available' do
       before do
@@ -44,12 +40,45 @@ RSpec.describe ::Gitlab::Ci::Pipeline::Chain::Config::Content do
         stub_licensed_features(evaluate_group_level_compliance_pipeline: true)
       end
 
-      it 'includes compliance pipeline configuration content' do
-        subject.perform!
+      context 'when compliance pipeline configuration is defined' do
+        let(:framework) do
+          create(:compliance_framework,
+                 namespace: compliance_group,
+                 pipeline_configuration_full_path: ".compliance-gitlab-ci.yml@compliance/hippa")
+        end
 
-        expect(pipeline.config_source).to eq 'compliance_source'
-        expect(pipeline.pipeline_config.content).to eq(content_result)
-        expect(command.config_content).to eq(content_result)
+        let!(:framework_project_setting) do
+          create(:compliance_framework_project_setting, project: project, compliance_management_framework: framework)
+        end
+
+        it 'includes compliance pipeline configuration content' do
+          subject.perform!
+
+          expect(pipeline.config_source).to eq 'compliance_source'
+          expect(pipeline.pipeline_config.content).to eq(content_result)
+          expect(command.config_content).to eq(content_result)
+        end
+      end
+
+      context 'when compliance pipeline configuration is not defined' do
+        let(:framework) { create(:compliance_framework, namespace: compliance_group) }
+        let!(:framework_project_setting) do
+          create(:compliance_framework_project_setting, project: project, compliance_management_framework: framework)
+        end
+
+        it_behaves_like 'does not include compliance pipeline configuration content'
+      end
+
+      context 'when compliance pipeline configuration is empty' do
+        let(:framework) do
+          create(:compliance_framework, namespace: compliance_group, pipeline_configuration_full_path: '')
+        end
+
+        let!(:framework_project_setting) do
+          create(:compliance_framework_project_setting, project: project, compliance_management_framework: framework)
+        end
+
+        it_behaves_like 'does not include compliance pipeline configuration content'
       end
     end
 

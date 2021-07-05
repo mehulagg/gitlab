@@ -22,6 +22,10 @@ module Types
       field :status, Types::IncidentManagement::EscalationRuleStatusEnum,
             null: true,
             description: 'The status required to prevent the rule from activating.'
+
+      def oncall_schedule
+        Gitlab::Graphql::Loaders::BatchModelLoader.new(::IncidentManagement::OncallSchedule, object.oncall_schedule_id).find
+      end
     end
     # rubocop: enable Graphql/AuthorizeTypes
   end

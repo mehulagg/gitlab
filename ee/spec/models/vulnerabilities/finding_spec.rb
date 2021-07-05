@@ -521,7 +521,7 @@ RSpec.describe Vulnerabilities::Finding do
     describe 'feedback' do
       let_it_be(:project) { create(:project) }
 
-      let(:finding) do
+      let_it_be(:finding) do
         create(
           :vulnerabilities_finding,
           report_type: :dependency_scanning,
@@ -530,8 +530,8 @@ RSpec.describe Vulnerabilities::Finding do
       end
 
       describe '#issue_feedback' do
-        let(:issue) { create(:issue, project: project) }
-        let!(:issue_feedback) do
+        let_it_be(:issue) { create(:issue, project: project) }
+        let_it_be(:issue_feedback) do
           create(
             :vulnerability_feedback,
             :dependency_scanning,
@@ -543,35 +543,35 @@ RSpec.describe Vulnerabilities::Finding do
         end
 
         let(:vulnerability) { create(:vulnerability, findings: [finding]) }
-        let!(:issue_link) { create(:vulnerabilities_issue_link, vulnerability: vulnerability, issue: issue)}
 
-        it 'returns associated feedback' do
-          feedback = finding.issue_feedback
+        context 'when there is issue link present' do
+          let!(:issue_link) { create(:vulnerabilities_issue_link, vulnerability: vulnerability, issue: issue)}
 
-          expect(feedback).to be_present
-          expect(feedback[:project_id]).to eq project.id
-          expect(feedback[:feedback_type]).to eq 'issue'
-          expect(feedback[:issue_id]).to eq issue.id
-        end
+          it 'returns associated feedback' do
+            expect(finding.issue_feedback).to eq(issue_feedback)
+          end
 
-        context 'when there is no feedback for the vulnerability' do
-          let(:vulnerability_no_feedback) { create(:vulnerability, findings: [finding_no_feedback]) }
-          let!(:finding_no_feedback) { create(:vulnerabilities_finding, :dependency_scanning, project: project) }
+          context 'when there is no feedback for the vulnerability' do
+            let(:vulnerability_no_feedback) { create(:vulnerability, findings: [finding_no_feedback]) }
+            let!(:finding_no_feedback) { create(:vulnerabilities_finding, :dependency_scanning, project: project) }
 
-          it 'does not return unassociated feedback' do
-            feedback = finding_no_feedback.issue_feedback
+            it 'does not return unassociated feedback' do
+              expect(finding_no_feedback.issue_feedback).to be_nil
+            end
+          end
 
-            expect(feedback).not_to be_present
+          context 'when there is no vulnerability associated with the finding' do
+            let!(:finding_no_vulnerability) { create(:vulnerabilities_finding, :dependency_scanning, project: project) }
+
+            it 'does not return feedback' do
+              expect(finding_no_vulnerability.issue_feedback).to be_nil
+            end
           end
         end
 
-        context 'when there is no vulnerability associated with the finding' do
-          let!(:finding_no_vulnerability) { create(:vulnerabilities_finding, :dependency_scanning, project: project) }
-
-          it 'does not return feedback' do
-            feedback = finding_no_vulnerability.issue_feedback
-
-            expect(feedback).not_to be_present
+        context 'when there is no issue link present' do
+          it 'returns associated feedback' do
+            expect(finding.issue_feedback).to eq(issue_feedback)
           end
         end
       end

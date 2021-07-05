@@ -65,15 +65,15 @@ export default {
 <template>
   <gl-loading-icon v-if="isLoading" size="md" class="gl-my-5" />
   <div v-else-if="hasSegmentsData" class="gl-mt-3">
-    <div class="gl-my-3" data-testid="tableHeader">
-      <span class="gl-text-gray-400">
+    <div class="gl-mb-3" data-testid="tableHeader">
+      <p class="gl-text-gray-400">
         <gl-sprintf :message="$options.i18n.tableHeaderText">
           <template #timestamp>{{ timestamp }}</template>
         </gl-sprintf>
-      </span>
+      </p>
 
       <devops-adoption-add-dropdown
-        class="gl-mt-4 gl-mb-3 gl-md-display-none"
+        class="gl-mb-3 gl-md-display-none"
         :search-term="searchTerm"
         :groups="disabledGroupNodes"
         :is-loading-groups="isLoadingGroups"

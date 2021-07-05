@@ -66,6 +66,7 @@ describe('formatListEpics', () => {
         1: {
           assignees: [],
           id: 1,
+          fullId: 'gid://gitlab/Epic/1',
           labels: [mockLabel],
           title: 'epic title',
         },

@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module QA
-  RSpec.describe 'Plan', :reliable, quarantine: { issue: 'https://gitlab.com/gitlab-org/gitlab/-/issues/334767', type: :investigating } do
+  RSpec.describe 'Plan', :reliable do
     describe 'Epics Management' do
       before do
         Flow::Login.sign_in

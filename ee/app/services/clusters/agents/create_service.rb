@@ -4,7 +4,6 @@ module Clusters
   module Agents
     class CreateService < BaseService
       def execute(name:)
-        return error_rollout_gitlab_com unless included_in_gitlab_com_rollout?
         return error_not_premium_plan unless project.feature_available?(:cluster_agents)
         return error_no_permissions unless cluster_agent_permissions?
 
@@ -18,14 +17,6 @@ module Clusters
       end
 
       private
-
-      def included_in_gitlab_com_rollout?
-        Gitlab::Kas.included_in_gitlab_com_rollout?(project)
-      end
-
-      def error_rollout_gitlab_com
-        error(s_('ClusterAgent|This project is not included in the GitLab.com rollout for Kubernetes agent'))
-      end
 
       def cluster_agent_permissions?
         current_user.can?(:admin_pipeline, project) && current_user.can?(:create_cluster, project)

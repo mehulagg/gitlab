@@ -9,7 +9,7 @@ import {
 import createEscalationPolicyMutation from '../graphql/mutations/create_escalation_policy.mutation.graphql';
 import updateEscalationPolicyMutation from '../graphql/mutations/update_escalation_policy.mutation.graphql';
 import getEscalationPoliciesQuery from '../graphql/queries/get_escalation_policies.query.graphql';
-import { isNameFieldValid, getRulesValidationState } from '../utils';
+import { isNameFieldValid, getRulesValidationState, serializeRule } from '../utils';
 import AddEditEscalationPolicyForm from './add_edit_escalation_policy_form.vue';
 
 export const i18n = {
@@ -91,7 +91,7 @@ export default {
     },
     requestParams() {
       const id = this.isEditMode ? { id: this.escalationPolicy.id } : {};
-      return { ...this.form, ...id, rules: this.getRules(this.form.rules) };
+      return { ...this.form, ...id, rules: this.getRules(this.form.rules).map(serializeRule) };
     },
   },
   methods: {
@@ -186,9 +186,9 @@ export default {
     },
     getRules(rules) {
       return rules.map(
-        ({ status, elapsedTimeSeconds, oncallScheduleIid, oncallSchedule: { iid } = {} }) => ({
+        ({ status, elapsedTimeMinutes, oncallScheduleIid, oncallSchedule: { iid } = {} }) => ({
           status,
-          elapsedTimeSeconds,
+          elapsedTimeMinutes,
           oncallScheduleIid: oncallScheduleIid || iid,
         }),
       );

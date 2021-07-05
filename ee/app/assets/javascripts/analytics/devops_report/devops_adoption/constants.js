@@ -6,6 +6,8 @@ export const PER_PAGE = 20;
 
 export const DEBOUNCE_DELAY = 500;
 
+export const DEVOPS_ADOPTION_PROGRESS_BAR_HEIGHT = '8px';
+
 export const DEVOPS_ADOPTION_SEGMENT_DELETE_MODAL_ID = 'devopsSegmentDeleteModal';
 
 export const DATE_TIME_FORMAT = 'yyyy-mm-dd HH:MM';
@@ -34,6 +36,10 @@ export const DEVOPS_ADOPTION_ADMIN_DROPDOWN_HEADER = s__('DevopsAdoption|Add gro
 export const DEVOPS_ADOPTION_NO_RESULTS = s__('DevopsAdoption|No results…');
 
 export const DEVOPS_ADOPTION_NO_SUB_GROUPS = s__('DevopsAdoption|This group has no sub-groups');
+
+export const DEVOPS_ADOPTION_FEATURES_ADOPTED_TEXT = s__(
+  'DevopsAdoption|%{adoptedCount}/%{featuresCount} %{title} features adopted',
+);
 
 export const DEVOPS_ADOPTION_STRINGS = {
   app: {
@@ -100,11 +106,32 @@ export const DEVOPS_ADOPTION_SEGMENTS_TABLE_SORT_DESC_STORAGE_KEY =
 
 export const DEVOPS_ADOPTION_GROUP_COL_LABEL = __('Group');
 
+export const DEVOPS_ADOPTION_OVERALL_CONFIGURATION = {
+  title: s__('DevopsAdoption|Overall adoption'),
+  icon: 'tanuki',
+  variant: 'primary',
+  cols: [],
+};
+
 export const DEVOPS_ADOPTION_TABLE_CONFIGURATION = [
   {
     title: s__('DevopsAdoption|Dev'),
     tab: 'dev',
+    icon: 'code',
+    variant: 'warning',
     cols: [
+      {
+        key: 'mergeRequestApproved',
+        label: s__('DevopsAdoption|Approvals'),
+        tooltip: s__('DevopsAdoption|At least one approval on a merge request'),
+        testId: 'approvalsCol',
+      },
+      {
+        key: 'codeOwnersUsedCount',
+        label: s__('DevopsAdoption|Code owners'),
+        tooltip: s__('DevopsAdoption|Code owners enabled for at least one project'),
+        testId: 'codeownersCol',
+      },
       {
         key: 'issueOpened',
         label: s__('DevopsAdoption|Issues'),
@@ -114,27 +141,29 @@ export const DEVOPS_ADOPTION_TABLE_CONFIGURATION = [
       {
         key: 'mergeRequestOpened',
         label: s__('DevopsAdoption|MRs'),
-        tooltip: s__('DevopsAdoption|At least one MR opened'),
+        tooltip: s__('DevopsAdoption|At least one merge request opened'),
         testId: 'mrsCol',
-      },
-      {
-        key: 'mergeRequestApproved',
-        label: s__('DevopsAdoption|Approvals'),
-        tooltip: s__('DevopsAdoption|At least one approval on an MR'),
-        testId: 'approvalsCol',
-      },
-      {
-        key: 'codeOwnersUsedCount',
-        label: s__('DevopsAdoption|Code owners'),
-        tooltip: s__('DevopsAdoption|Code owners enabled for at least one project'),
-        testId: 'codeownersCol',
       },
     ],
   },
   {
     title: s__('DevopsAdoption|Sec'),
     tab: 'sec',
+    icon: 'shield',
+    variant: 'info',
     cols: [
+      {
+        key: 'dastEnabledCount',
+        label: s__('DevopsAdoption|DAST'),
+        tooltip: s__('DevopsAdoption|DAST enabled for at least one project'),
+        testId: 'dastCol',
+      },
+      {
+        key: 'sastEnabledCount',
+        label: s__('DevopsAdoption|SAST'),
+        tooltip: s__('DevopsAdoption|SAST enabled for at least one project'),
+        testId: 'sastCol',
+      },
       {
         key: 'securityScanSucceeded',
         label: s__('DevopsAdoption|Scanning'),
@@ -146,12 +175,14 @@ export const DEVOPS_ADOPTION_TABLE_CONFIGURATION = [
   {
     title: s__('DevopsAdoption|Ops'),
     tab: 'ops',
+    icon: 'rocket',
+    variant: 'success',
     cols: [
       {
-        key: 'runnerConfigured',
-        label: s__('DevopsAdoption|Runners'),
-        tooltip: s__('DevopsAdoption|Runner configured for project/group'),
-        testId: 'runnersCol',
+        key: 'deploySucceeded',
+        label: s__('DevopsAdoption|Deploys'),
+        tooltip: s__('DevopsAdoption|At least one deploy'),
+        testId: 'deploysCol',
       },
       {
         key: 'pipelineSucceeded',
@@ -160,10 +191,10 @@ export const DEVOPS_ADOPTION_TABLE_CONFIGURATION = [
         testId: 'pipelinesCol',
       },
       {
-        key: 'deploySucceeded',
-        label: s__('DevopsAdoption|Deploys'),
-        tooltip: s__('DevopsAdoption|At least one deploy'),
-        testId: 'deploysCol',
+        key: 'runnerConfigured',
+        label: s__('DevopsAdoption|Runners'),
+        tooltip: s__('DevopsAdoption|Runner configured for project/group'),
+        testId: 'runnersCol',
       },
     ],
   },

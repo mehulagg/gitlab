@@ -23,7 +23,7 @@ RSpec.describe 'Project navbar' do
       stub_licensed_features(issues_analytics: true)
 
       insert_after_sub_nav_item(
-        _('Code Review'),
+        _('Code review'),
         within: _('Analytics'),
         new_sub_nav_item_name: _('Issue')
       )

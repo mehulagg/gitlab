@@ -501,15 +501,15 @@ export function queryToObject(query, { gatherArrays = false, legacySpacesDecode 
 /**
  * Convert search query object back into a search query
  *
- * @param {Object} obj that needs to be converted
+ * @param {Object?} params that needs to be converted
  * @returns {String}
  *
  * ex: {one: 1, two: 2} into "one=1&two=2"
  *
  */
-export function objectToQuery(obj) {
-  return Object.keys(obj)
-    .map((k) => `${encodeURIComponent(k)}=${encodeURIComponent(obj[k])}`)
+export function objectToQuery(params = {}) {
+  return Object.keys(params)
+    .map((k) => `${encodeURIComponent(k)}=${encodeURIComponent(params[k])}`)
     .join('&');
 }
 
@@ -592,5 +592,29 @@ export function getURLOrigin(url) {
     return new URL(url).origin;
   } catch (e) {
     return null;
+  }
+}
+
+/**
+ * Returns `true` if the given `url` resolves to the same origin the page is served
+ * from; otherwise, returns `false`.
+ *
+ * The `url` may be absolute or relative.
+ *
+ * @param {string} url The URL to check.
+ * @returns {boolean}
+ */
+export function isSameOriginUrl(url) {
+  if (typeof url !== 'string') {
+    return false;
+  }
+
+  const { origin } = window.location;
+
+  try {
+    return new URL(url, origin).origin === origin;
+  } catch {
+    // Invalid URLs cannot have the same origin
+    return false;
   }
 }

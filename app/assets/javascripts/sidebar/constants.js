@@ -1,9 +1,11 @@
 import { IssuableType } from '~/issue_show/constants';
+import { DEFAULT_DEBOUNCE_AND_THROTTLE_MS } from '~/lib/utils/constants';
 import epicConfidentialQuery from '~/sidebar/queries/epic_confidential.query.graphql';
 import epicDueDateQuery from '~/sidebar/queries/epic_due_date.query.graphql';
 import epicParticipantsQuery from '~/sidebar/queries/epic_participants.query.graphql';
 import epicStartDateQuery from '~/sidebar/queries/epic_start_date.query.graphql';
 import epicSubscribedQuery from '~/sidebar/queries/epic_subscribed.query.graphql';
+import epicTodoQuery from '~/sidebar/queries/epic_todo.query.graphql';
 import issuableAssigneesSubscription from '~/sidebar/queries/issuable_assignees.subscription.graphql';
 import issueConfidentialQuery from '~/sidebar/queries/issue_confidential.query.graphql';
 import issueDueDateQuery from '~/sidebar/queries/issue_due_date.query.graphql';
@@ -13,6 +15,8 @@ import issueTimeTrackingQuery from '~/sidebar/queries/issue_time_tracking.query.
 import mergeRequestReferenceQuery from '~/sidebar/queries/merge_request_reference.query.graphql';
 import mergeRequestSubscribed from '~/sidebar/queries/merge_request_subscribed.query.graphql';
 import mergeRequestTimeTrackingQuery from '~/sidebar/queries/merge_request_time_tracking.query.graphql';
+import todoCreateMutation from '~/sidebar/queries/todo_create.mutation.graphql';
+import todoMarkDoneMutation from '~/sidebar/queries/todo_mark_done.mutation.graphql';
 import updateEpicConfidentialMutation from '~/sidebar/queries/update_epic_confidential.mutation.graphql';
 import updateEpicDueDateMutation from '~/sidebar/queries/update_epic_due_date.mutation.graphql';
 import updateEpicStartDateMutation from '~/sidebar/queries/update_epic_start_date.mutation.graphql';
@@ -35,7 +39,7 @@ import projectIssueMilestoneMutation from './queries/project_issue_milestone.mut
 import projectIssueMilestoneQuery from './queries/project_issue_milestone.query.graphql';
 import projectMilestonesQuery from './queries/project_milestones.query.graphql';
 
-export const ASSIGNEES_DEBOUNCE_DELAY = 250;
+export const ASSIGNEES_DEBOUNCE_DELAY = DEFAULT_DEBOUNCE_AND_THROTTLE_MS;
 
 export const defaultEpicSort = 'TITLE_ASC';
 
@@ -188,4 +192,20 @@ export const issuableAttributesQueries = {
     current: issuableMilestoneQueries,
     list: milestonesQueries,
   },
+};
+
+export const todoQueries = {
+  [IssuableType.Epic]: {
+    query: epicTodoQuery,
+  },
+};
+
+export const TodoMutationTypes = {
+  Create: 'create',
+  MarkDone: 'mark-done',
+};
+
+export const todoMutations = {
+  [TodoMutationTypes.Create]: todoCreateMutation,
+  [TodoMutationTypes.MarkDone]: todoMarkDoneMutation,
 };

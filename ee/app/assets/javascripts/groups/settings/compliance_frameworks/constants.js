@@ -1,3 +1,4 @@
+import { DEFAULT_DEBOUNCE_AND_THROTTLE_MS } from '~/lib/utils/constants';
 import { s__ } from '~/locale';
 
 export const DANGER = 'danger';
@@ -18,4 +19,4 @@ export const EDIT_PATH_ID_FORMAT = /\/id\//;
 // Check that it matches the format [FILE].y(a)ml@[GROUP]/[PROJECT]
 export const PIPELINE_CONFIGURATION_PATH_FORMAT = /^([^@]*\.ya?ml)@([^/]*)\/(.*)$/;
 
-export const DEBOUNCE_DELAY = 250;
+export const DEBOUNCE_DELAY = DEFAULT_DEBOUNCE_AND_THROTTLE_MS;

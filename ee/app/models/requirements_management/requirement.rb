@@ -20,7 +20,11 @@ module RequirementsManagement
 
     belongs_to :author, inverse_of: :requirements, class_name: 'User'
     belongs_to :project, inverse_of: :requirements
-    belongs_to :requirement_issue, class_name: 'Issue', foreign_key: :issue_id
+    # deleting an issue would result in deleting requirement record due to cascade delete via foreign key
+    # but to sync the other way around, we require a temporary `dependent: :destroy`
+    # See https://gitlab.com/gitlab-org/gitlab/-/issues/323779 for details.
+    # This will be removed in https://gitlab.com/gitlab-org/gitlab/-/issues/329432
+    belongs_to :requirement_issue, class_name: 'Issue', foreign_key: :issue_id, dependent: :destroy # rubocop:disable Cop/ActiveRecordDependent
 
     validates :issue_id, uniqueness: true, allow_nil: true
 

@@ -153,7 +153,6 @@ $badge-height: $gl-spacing-scale-7;
       @include gl-flex-grow-1;
       @include gl-mb-0;
       @include gl-overflow-hidden;
-      @include gl-w-auto;
     }
   }
 }

@@ -1,24 +1,20 @@
 <script>
-/* eslint-disable vue/no-v-html */
-import { sanitize } from '~/lib/dompurify';
-
-const ALLOWED_TAGS = ['strong'];
+import { GlSafeHtmlDirective as SafeHtml } from '@gitlab/ui';
 
 export default {
+  directives: {
+    SafeHtml,
+  },
   props: {
     html: {
       type: String,
       required: true,
     },
   },
-  computed: {
-    sanitizedHtml() {
-      return sanitize(this.html, { ALLOWED_TAGS });
-    },
-  },
+  safeHtmlConfig: { ALLOWED_TAGS: [] },
 };
 </script>
 
 <template>
-  <span v-html="sanitizedHtml"></span>
+  <span v-safe-html:[$options.safeHtmlConfig]="html"></span>
 </template>

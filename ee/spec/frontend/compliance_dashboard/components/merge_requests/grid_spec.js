@@ -1,7 +1,7 @@
 import Approvers from 'ee/compliance_dashboard/components/merge_requests/approvers.vue';
-import BranchDetails from 'ee/compliance_dashboard/components/merge_requests/branch_details.vue';
 import MergeRequestsGrid from 'ee/compliance_dashboard/components/merge_requests/grid.vue';
 import Status from 'ee/compliance_dashboard/components/merge_requests/status.vue';
+import BranchDetails from 'ee/compliance_dashboard/components/shared/branch_details.vue';
 import { shallowMountExtended } from 'helpers/vue_test_utils_helper';
 import TimeAgoTooltip from '~/vue_shared/components/time_ago_tooltip.vue';
 import { createMergeRequests, mergedAt } from '../../mock_data';

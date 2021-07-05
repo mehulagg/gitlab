@@ -256,9 +256,8 @@ class License < ApplicationRecord
 
   before_validation :reset_license, if: :data_changed?
 
-  after_create :reset_current
   after_create :update_trial_setting
-  after_destroy :reset_current
+  after_commit :reset_current
   after_commit :reset_future_dated, on: [:create, :destroy]
   after_commit :reset_previous, on: [:create, :destroy]
 
@@ -282,7 +281,7 @@ class License < ApplicationRecord
     end
 
     def features_with_usage_ping
-      return FEATURES_WITH_USAGE_PING if Gitlab::CurrentSettings.usage_ping_enabled?
+      return FEATURES_WITH_USAGE_PING if Gitlab::CurrentSettings.usage_ping_features_enabled?
 
       []
     end
@@ -362,6 +361,13 @@ class License < ApplicationRecord
       return if current_license.trial?
 
       yield(current_license) if block_given?
+    end
+
+    def current_cloud_license?(key)
+      current_license = License.current
+      return false unless current_license&.cloud_license?
+
+      current_license.data == key
     end
 
     private

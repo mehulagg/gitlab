@@ -10,6 +10,7 @@ import {
   GlLoadingIcon,
 } from '@gitlab/ui';
 import BurnCharts from 'ee/burndown_chart/components/burn_charts.vue';
+import { TYPE_ITERATION } from '~/graphql_shared/constants';
 import { convertToGraphQLId } from '~/graphql_shared/utils';
 import { formatDate } from '~/lib/utils/datetime_utility';
 import { __ } from '~/locale';
@@ -39,15 +40,13 @@ export default {
   apollo: {
     iteration: {
       query,
-      /* eslint-disable @gitlab/require-i18n-strings */
       variables() {
         return {
           fullPath: this.fullPath,
-          id: convertToGraphQLId('Iteration', this.iterationId),
+          id: convertToGraphQLId(TYPE_ITERATION, this.iterationId),
           isGroup: this.namespaceType === Namespace.Group,
         };
       },
-      /* eslint-enable @gitlab/require-i18n-strings */
       update(data) {
         return data[this.namespaceType]?.iterations?.nodes[0] || {};
       },

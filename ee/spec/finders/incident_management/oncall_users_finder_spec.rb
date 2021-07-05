@@ -54,9 +54,10 @@ RSpec.describe IncidentManagement::OncallUsersFinder do
   let_it_be(:proj2_s1_r1_shift2) { create(:incident_management_oncall_shift, participant: proj2_s1_r1_p2, starts_at: proj2_s1_r1_shift1.ends_at) }
 
   let(:oncall_at) { Time.current }
+  let(:schedule) { nil }
 
   describe '#execute' do
-    subject(:execute) { described_class.new(project, oncall_at: oncall_at).execute }
+    subject(:execute) { described_class.new(project, oncall_at: oncall_at, schedule: schedule).execute }
 
     context 'when feature is available' do
       before do
@@ -67,6 +68,12 @@ RSpec.describe IncidentManagement::OncallUsersFinder do
         subject(:execute) { described_class.new(project).execute }
 
         it { is_expected.to contain_exactly(user_1, user_2, user_4) }
+      end
+
+      context 'with :schedule paramater specified' do
+        let(:schedule) { s1 }
+
+        it { is_expected.to contain_exactly(user_1, user_2) }
       end
 
       context 'with :oncall_at parameter specified' do

@@ -12,8 +12,9 @@ class SetUserStatusBasedOnUserCapSettingWorker
   idempotent!
 
   def perform(user_id)
-    user = User.find_by_id(user_id)
+    user = User.includes(:identities).find_by_id(user_id) # rubocop: disable CodeReuse/ActiveRecord
 
+    return if blocked_auto_created_omniauth_user?(user)
     return unless user.blocked_pending_approval?
     return if user_cap_max.nil?
 
@@ -53,5 +54,9 @@ class SetUserStatusBasedOnUserCapSettingWorker
     User.admins.active.each do |user|
       ::Notify.user_cap_reached(user.id).deliver_later
     end
+  end
+
+  def blocked_auto_created_omniauth_user?(user)
+    ::Gitlab.config.omniauth.block_auto_created_users && user.identities.any?
   end
 end
