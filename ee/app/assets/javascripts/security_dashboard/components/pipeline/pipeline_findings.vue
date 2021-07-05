@@ -105,6 +105,13 @@ export default {
       this.sortDirection = sortDesc ? 'desc' : 'asc';
       this.sortBy = sortBy;
     },
+    handleVulnerabilityClicked(clickedVulnerabilityId) {
+      const vulnerabilityToShow = this.findings.find(
+        (finding) => finding.id === clickedVulnerabilityId,
+      );
+
+      // @TODO: Open modal that shows the
+    },
   },
 };
 </script>
@@ -129,6 +136,7 @@ export default {
       :is-loading="isLoadingFirstResult"
       :vulnerabilities="findings"
       @sort-changed="handleSortChange"
+      @vulnerability-clicked="handleVulnerabilityClicked"
     />
     <gl-intersection-observer
       v-if="pageInfo.hasNextPage"
