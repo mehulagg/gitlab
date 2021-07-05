@@ -15,7 +15,7 @@ import {
   isDiscussionApplicableToLine,
   updateLineInFile,
   memBefore,
-  memAfter
+  memAfter,
 } from './utils';
 
 function updateDiffFilesInState(state, files) {

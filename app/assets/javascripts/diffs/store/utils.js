@@ -412,7 +412,7 @@ function deduplicateFilesList(files) {
   return Object.values(dedupedFiles);
 }
 
-export const memInMBytes = bytes => bytes / 1000**2;
+export const memInMBytes = (bytes) => bytes / 1000 ** 2;
 
 export const memBefore = () => {
   window.prevMem = performance.memory.usedJSHeapSize;
@@ -422,14 +422,22 @@ export const memAfter = (name = '') => {
   if (window.prevMem) {
     const delta = performance.memory.usedJSHeapSize - window.prevMem;
     // eslint-disable-next-line no-console
-    console.log(`${name || ''}: ${memInMBytes(delta)} MB (current: ${memInMBytes(performance.memory.usedJSHeapSize)})`);
+    console.log(
+      `${name || ''}: ${memInMBytes(delta)} MB (current: ${memInMBytes(
+        performance.memory.usedJSHeapSize,
+      )})`,
+    );
 
     // if (delta > 0 ) { debugger; }
   } else {
     // eslint-disable-next-line no-console
-    console.log(`${name || ''}: No previous amount of memory used. Current: ${memInMBytes(performance.memory.usedJSHeapSize)}`);
+    console.log(
+      `${name || ''}: No previous amount of memory used. Current: ${memInMBytes(
+        performance.memory.usedJSHeapSize,
+      )}`,
+    );
   }
-}
+};
 
 export function prepareDiffData({ diff, priorFiles = [], meta = false }) {
   // eslint-disable-next-line no-console
