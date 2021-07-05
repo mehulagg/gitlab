@@ -16,11 +16,17 @@ module Analytics
 
       WORKERS_GAP = 5.seconds
 
-      # rubocop: disable CodeReuse/ActiveRecord
       def perform
-        ::Analytics::DevopsAdoption::EnabledNamespace.all.pluck(:id).each.with_index do |enabled_namespace_id, i|
+        pending_enabled_namespace_ids.each.with_index do |enabled_namespace_id, i|
           CreateSnapshotWorker.perform_in(i * WORKERS_GAP, enabled_namespace_id)
         end
+      end
+
+      private
+
+      # rubocop: disable CodeReuse/ActiveRecord
+      def pending_enabled_namespace_ids
+        ::Analytics::DevopsAdoption::EnabledNamespace.pending_calculation.pluck(:id)
       end
       # rubocop: enable CodeReuse/ActiveRecord
     end
