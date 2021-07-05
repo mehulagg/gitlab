@@ -412,6 +412,23 @@ function deduplicateFilesList(files) {
   return Object.values(dedupedFiles);
 }
 
+export const memInMBytes = bytes => bytes / Math.pow(1000, 2);
+
+export const memBefore = () => {
+  window.prevMem = performance.memory.usedJSHeapSize;
+};
+
+export const memAfter = (name = '') => {
+  if (window.prevMem) {
+    let delta = performance.memory.usedJSHeapSize - prevMem;
+    console.log(`${name || ''}: ${memInMBytes(delta)} MB (current: ${memInMBytes(performance.memory.usedJSHeapSize)})`);
+
+    // if (delta > 0 ) { debugger; }
+  } else {
+    console.log(`${name || ''}: No previous amount of memory used. Current: ${memInMBytes(performance.memory.usedJSHeapSize)}`);
+  }
+}
+
 export function prepareDiffData({ diff, priorFiles = [], meta = false }) {
   const cleanedFiles = (diff.diff_files || [])
     .map((file, index, allFiles) => prepareRawDiffFile({ file, allFiles, meta }))
