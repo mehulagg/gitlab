@@ -11,6 +11,8 @@ import createMockApollo from 'helpers/mock_apollo_helper';
 import waitForPromises from 'helpers/wait_for_promises';
 import BranchSwitcher from '~/pipeline_editor/components/file_nav/branch_switcher.vue';
 import { DEFAULT_FAILURE } from '~/pipeline_editor/constants';
+import updateCurrentBranchMutation from '~/pipeline_editor/graphql/mutations/update_current_branch.mutation.graphql';
+import updateLastCommitBranchMutation from '~/pipeline_editor/graphql/mutations/update_last_commit_branch.mutation.graphql';
 import getAvailableBranchesQuery from '~/pipeline_editor/graphql/queries/available_branches.graphql';
 import {
   mockBranchPaginationLimit,
@@ -74,12 +76,8 @@ describe('Pipeline editor branch switcher', () => {
     const handlers = [[getAvailableBranchesQuery, mockAvailableBranchQuery]];
     const resolvers = {
       Query: {
-        currentBranch() {
-          return mockCurrentBranchQuery();
-        },
-        lastCommitBranch() {
-          return mockLastCommitBranchQuery();
-        },
+        currentBranch: mockCurrentBranchQuery,
+        lastCommitBranch: mockLastCommitBranchQuery,
       },
     };
     mockApollo = createMockApollo(handlers, resolvers);
@@ -412,12 +410,15 @@ describe('Pipeline editor branch switcher', () => {
 
   describe('when committing a new branch', () => {
     const createNewBranch = async () => {
-      setMockResolvedValues({
-        currentBranch: mockNewBranch,
-        lastCommitBranch: mockNewBranch,
+      await mockApollo.clients.defaultClient.mutate({
+        mutation: updateLastCommitBranchMutation,
+        data: { updateLastCommitBranch: mockNewBranch },
       });
-      await wrapper.vm.$apollo.queries.currentBranch.refetch();
-      await wrapper.vm.$apollo.queries.lastCommitBranch.refetch();
+
+      await mockApollo.clients.defaultClient.mutate({
+        mutation: updateCurrentBranchMutation,
+        data: { currentBranch: mockNewBranch },
+      });
     };
 
     beforeEach(async () => {
