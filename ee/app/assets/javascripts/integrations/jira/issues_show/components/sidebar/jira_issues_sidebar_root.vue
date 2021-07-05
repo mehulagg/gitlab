@@ -67,29 +67,18 @@ export default {
     statusDropdownTitle: __('Change status'),
     referenceName: __('Reference'),
   },
-  mounted() {
-    this.sidebarEl = document.querySelector('aside.right-sidebar');
-  },
   methods: {
-    toggleSidebar() {
-      this.$emit('sidebar-toggle');
+    toggleSidebar(payload) {
+      this.$emit('sidebar-toggle', payload);
     },
     expandSidebarAndOpenDropdown(dropdownRef = null) {
       // Expand the sidebar if not already expanded.
       if (!this.sidebarExpanded) {
-        this.toggleSidebar();
-      }
-
-      if (dropdownRef) {
-        // Wait for sidebar expand animation to complete
-        // before revealing the dropdown.
-        this.sidebarEl.addEventListener(
-          'transitionend',
-          () => {
-            dropdownRef.expand();
+        this.toggleSidebar({
+          transitionendCallback() {
+            dropdownRef?.expand();
           },
-          { once: true },
-        );
+        });
       }
     },
     onIssueStatusFetch() {

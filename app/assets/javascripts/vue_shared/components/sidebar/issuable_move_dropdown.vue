@@ -123,6 +123,9 @@ export default {
       this.$refs.dropdown.hide();
       this.$emit('move-issuable', this.selectedProject);
     },
+    handleCollapsedSidebarDropdownClick() {
+      this.$emit('toggle-collapse', { expandDropdownFn: () => this.$refs.dropdown.show() });
+    },
   },
 };
 </script>
@@ -134,7 +137,7 @@ export default {
       data-testid="move-collapsed"
       :title="dropdownButtonTitle"
       class="sidebar-collapsed-icon"
-      @click="$emit('toggle-collapse')"
+      @click="handleCollapsedSidebarDropdownClick"
     >
       <gl-icon name="arrow-right" />
     </div>

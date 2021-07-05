@@ -269,7 +269,9 @@ export default {
       this.$emit('onDropdownClose');
     },
     handleCollapsedValueClick() {
-      this.$emit('toggleCollapse');
+      this.$emit('toggleCollapse', {
+        expandDropdownFn: () => this.toggleDropdownContents(),
+      });
     },
     setContentIsOnViewport(showDropdownContents) {
       if (!showDropdownContents) {

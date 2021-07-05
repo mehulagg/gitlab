@@ -42,7 +42,13 @@ export default {
         this.updatePageContainerClass();
       }
     },
-    toggleSidebar() {
+    toggleSidebar(ev) {
+      if (typeof ev?.transitionendCallback === 'function') {
+        this.$refs.sidebar.addEventListener('transitionend', ev.transitionendCallback, {
+          once: true,
+        });
+      }
+
       this.isExpanded = !this.isExpanded;
       this.userExpanded = this.isExpanded;
 
@@ -55,6 +61,7 @@ export default {
 
 <template>
   <aside
+    ref="sidebar"
     :class="{ 'right-sidebar-expanded': isExpanded, 'right-sidebar-collapsed': !isExpanded }"
     class="right-sidebar"
     aria-live="polite"

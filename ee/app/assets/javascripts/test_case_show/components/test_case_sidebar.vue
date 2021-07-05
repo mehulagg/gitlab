@@ -76,7 +76,6 @@ export default {
     },
   },
   mounted() {
-    this.sidebarEl = document.querySelector('aside.right-sidebar');
     Mousetrap.bind(keysFor(ISSUABLE_CHANGE_LABEL), this.handleLabelsCollapsedButtonClick);
   },
   beforeDestroy() {
@@ -90,41 +89,25 @@ export default {
         this.addTestCaseAsTodo();
       }
     },
-    toggleSidebar() {
-      this.$emit('sidebar-toggle');
+    toggleSidebar(payload) {
+      this.$emit('sidebar-toggle', payload);
     },
-    expandSidebarAndOpenDropdown(dropdownButtonSelector) {
-      // Expand the sidebar if not already expanded.
-      if (!this.sidebarExpanded) {
-        this.toggleSidebar();
-        this.sidebarExpandedOnClick = true;
-      }
-
-      this.$nextTick(() => {
-        // Wait for sidebar expand animation to complete
-        // before revealing the dropdown.
-        this.sidebarEl.addEventListener(
-          'transitionend',
-          () => {
-            document
-              .querySelector(dropdownButtonSelector)
-              .dispatchEvent(new Event('click', { bubbles: true, cancelable: false }));
-          },
-          { once: true },
-        );
+    expandSidebarAndOpenDropdown({ expandDropdownFn } = {}) {
+      this.toggleSidebar({
+        transitionendCallback() {
+          if (typeof expandDropdownFn === 'function') {
+            expandDropdownFn();
+          }
+        },
       });
+
+      this.sidebarExpandedOnClick = true;
     },
     handleSidebarDropdownClose() {
       if (this.sidebarExpandedOnClick) {
         this.sidebarExpandedOnClick = false;
         this.toggleSidebar();
       }
-    },
-    handleLabelsCollapsedButtonClick() {
-      this.expandSidebarAndOpenDropdown('.js-labels-block .js-sidebar-dropdown-toggle');
-    },
-    handleProjectsCollapsedButtonClick() {
-      this.expandSidebarAndOpenDropdown('.js-issuable-move-block .js-sidebar-dropdown-toggle');
     },
     handleUpdateSelectedLabels(labels) {
       // Iterate over selection and check if labels which were
@@ -199,7 +182,7 @@ export default {
       class="block labels js-labels-block"
       @updateSelectedLabels="handleUpdateSelectedLabels"
       @onDropdownClose="handleSidebarDropdownClose"
-      @toggleCollapse="handleLabelsCollapsedButtonClick"
+      @toggleCollapse="expandSidebarAndOpenDropdown"
       >{{ __('None') }}</labels-select
     >
     <project-select
@@ -209,7 +192,7 @@ export default {
       :dropdown-header-title="__('Move test case')"
       :move-in-progress="testCaseMoveInProgress"
       @dropdown-close="handleSidebarDropdownClose"
-      @toggle-collapse="handleProjectsCollapsedButtonClick"
+      @toggle-collapse="expandSidebarAndOpenDropdown"
       @move-issuable="moveTestCase"
     />
   </div>
