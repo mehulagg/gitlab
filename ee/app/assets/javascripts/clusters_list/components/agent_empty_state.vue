@@ -23,7 +23,7 @@ export default {
       required: true,
     },
   },
-  methods: {
+  computed: {
     getProjectPath() {
       return `/${this.projectPath}`;
     },
@@ -91,10 +91,11 @@ export default {
             variant="info"
             href="https://docs.gitlab.com/ee/user/clusters/agent/#define-a-configuration-repository"
             target="_blank"
+            class="gl-ml-0!"
           >
             {{ s__('ClusterAgents|Read more about getting started') }}
           </gl-button>
-          <gl-button category="secondary" variant="info" :href="getProjectPath()">
+          <gl-button category="secondary" variant="info" :href="getProjectPath">
             {{ s__('ClusterAgents|Go to the repository') }}
           </gl-button>
         </template>

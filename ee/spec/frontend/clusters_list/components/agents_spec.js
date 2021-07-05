@@ -139,7 +139,7 @@ describe('Agents', () => {
       expect(findEmptyState().exists()).toBe(true);
     });
 
-    it('should the correct pass project path to empty state component', () => {
+    it('should pass the correct project path to empty state component', () => {
       expect(findEmptyState().props('projectPath')).toEqual('path/to/project');
     });
   });

@@ -11,8 +11,9 @@ describe('AgentEmptyStateComponent', () => {
     hasConfigurations: false,
   };
 
-  const findConfigurationsAlert = () => wrapper.find(GlAlert);
+  const findConfigurationsAlert = () => wrapper.findComponent(GlAlert);
   const findIntegrationButton = () => wrapper.findByTestId('integration-primary-button');
+  const findEmptyState = () => wrapper.findComponent(GlEmptyState);
 
   beforeEach(() => {
     wrapper = shallowMountExtended(AgentEmptyState, {
@@ -39,13 +40,16 @@ describe('AgentEmptyStateComponent', () => {
   });
 
   describe('when there is a list of agent configurations', () => {
-    it('should render content without notification message box', () => {
-      wrapper.setProps({ hasConfigurations: true });
-      wrapper.vm.$nextTick(() => {
-        expect(wrapper.find(GlEmptyState).exists()).toBe(true);
-        expect(findConfigurationsAlert().exists()).toBe(false);
-        expect(findIntegrationButton().attributes('disabled')).toBeUndefined();
+    beforeEach(() => {
+      propsData.hasConfigurations = true;
+      wrapper = shallowMountExtended(AgentEmptyState, {
+        propsData,
       });
+    });
+    it('should render content without notification message box', () => {
+      expect(findEmptyState().exists()).toBe(true);
+      expect(findConfigurationsAlert().exists()).toBe(false);
+      expect(findIntegrationButton().attributes('disabled')).toBeUndefined();
     });
   });
 });

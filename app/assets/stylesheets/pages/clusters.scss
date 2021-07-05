@@ -89,19 +89,15 @@
 
   .empty-state--agent {
     .text-content {
-      max-width: 100%;
+      @include gl-max-w-full;
       @include media-breakpoint-up(lg) {
         max-width: 70%;
       }
     }
 
     .gl-alert-actions {
-      margin-top: 0;
-      flex-wrap: wrap;
-
-      .btn:first-child {
-        margin-left: 0;
-      }
+      @include gl-mt-0;
+      @include gl-flex-wrap;
     }
   }
 

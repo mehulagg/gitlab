@@ -1,9 +1,0 @@
-query agentConfigurations($projectPath: ID!) {
-  project(fullPath: $projectPath) {
-    agentConfigurations {
-      nodes {
-        agentName
-      }
-    }
-  }
-}
