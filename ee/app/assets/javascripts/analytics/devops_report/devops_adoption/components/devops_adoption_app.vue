@@ -253,10 +253,10 @@ export default {
         })
         .catch((error) => this.handleError(DEVOPS_ADOPTION_ERROR_KEYS.groups, error));
     },
-    addEnabledNamespacesToCache(segments) {
+    addEnabledNamespacesToCache(enabledNamespaces) {
       const { cache } = this.$apollo.getClient();
 
-      addEnabledNamespacesToCache(cache, segments, this.enabledNamespaceQueryVariables);
+      addEnabledNamespacesToCache(cache, enabledNamespaces, this.enabledNamespaceQueryVariables);
     },
     deleteEnabledNamespacesFromCache(ids) {
       const { cache } = this.$apollo.getClient();
