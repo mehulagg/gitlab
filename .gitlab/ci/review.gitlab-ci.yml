@@ -70,7 +70,7 @@ review-deploy:
     - date
     - deploy || (display_deployment_debug && exit 1)
     - verify_deploy || exit 1
-    - disable_sign_ups || (delete_release && exit 1)
+    - disable_sign_ups || (delete_k8s_release_namespace && exit 1)
   after_script:
     # Run seed-dast-test-data.sh only when DAST_RUN is set to true. This is to pupulate review app with data for DAST scan.
     # Set DAST_RUN to true when jobs are manually scheduled.
@@ -95,13 +95,13 @@ review-deploy:
   before_script:
     - *base-before_script
 
-review-stop-failed-deployment:
+review-delete-deployment:
   extends:
     - .review-stop-base
-    - .review:rules:review-stop-failed-deployment
+    - .review:rules:review-delete-deployment
   stage: prepare
   script:
-    - delete_failed_release
+    - delete_release
 
 review-stop:
   extends:
@@ -109,7 +109,7 @@ review-stop:
     - .review:rules:review-stop
   stage: post-qa
   script:
-    - delete_release
+    - delete_k8s_release_namespace
 
 .review-qa-base:
   extends:

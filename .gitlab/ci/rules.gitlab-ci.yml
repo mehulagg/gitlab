@@ -1170,7 +1170,7 @@
     - <<: *if-dot-com-gitlab-org-schedule
       allow_failure: true
 
-.review:rules:review-stop-failed-deployment:
+.review:rules:review-delete-deployment:
   rules:
     - <<: *if-not-ee
       when: never

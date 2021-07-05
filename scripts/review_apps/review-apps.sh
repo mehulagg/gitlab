@@ -48,7 +48,7 @@ function delete_release() {
     return
   fi
 
-  delete_k8s_release_namespace
+  helm uninstall --namespace="${namespace}" "${release}"
 }
 
 function delete_failed_release() {
@@ -66,7 +66,7 @@ function delete_failed_release() {
     # Cleanup and previous installs, as FAILED and PENDING_UPGRADE will cause errors with `upgrade`
     if previous_deploy_failed "${namespace}" "${release}" ; then
       echoinfo "Review App deployment in bad state, cleaning up namespace ${release}"
-      delete_release
+      delete_k8s_release_namespace
     else
       echoinfo "Review App deployment in good state"
     fi
@@ -75,6 +75,12 @@ function delete_failed_release() {
 
 function delete_k8s_release_namespace() {
   local namespace="${CI_ENVIRONMENT_SLUG}"
+  local release="${CI_ENVIRONMENT_SLUG}"
+
+  if [ -z "${release}" ]; then
+    echoerr "No release given, aborting the delete!"
+    return
+  fi
 
   kubectl delete namespace "${namespace}" --wait
 }
