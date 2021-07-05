@@ -100,3 +100,4 @@ license_scanning:
   artifacts:
     expire_in: 1 week  # GitLab-specific
   rules: !reference [".reports:rules:license_scanning", rules]
+
