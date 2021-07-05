@@ -287,12 +287,6 @@ RSpec.configure do |config|
       # https://gitlab.com/groups/gitlab-org/-/epics/5531
       stub_feature_flags(refactor_blob_viewer: false)
 
-      # Disable `main_branch_over_master` as we migrate
-      # from `master` to `main` accross our codebase.
-      # It's done in order to preserve the concistency in tests
-      # As we're ready to change `master` usages to `main`, let's enable it
-      stub_feature_flags(main_branch_over_master: false)
-
       # Disable issue respositioning to avoid heavy load on database when importing big projects.
       # This is only turned on when app is handling heavy project imports.
       # Can be removed when we find a better way to deal with the problem.
