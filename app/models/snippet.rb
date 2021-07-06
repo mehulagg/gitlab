@@ -339,7 +339,7 @@ class Snippet < ApplicationRecord
   def create_repository
     return if repository_exists? && snippet_repository
 
-    repository.create_if_not_exists
+    change_head_to_default_branch if repository.create_if_not_exists
     track_snippet_repository(repository.storage)
   end
 

@@ -604,6 +604,14 @@ RSpec.describe Snippet do
       expect(snippet.snippet_repository.shard_name).to eq 'picked'
     end
 
+    it 'updates HEAD to match the default branch' do
+      allow(Gitlab::CurrentSettings).to receive(:default_branch_name).and_return('default')
+
+      expect(snippet.repository.raw_repository).to receive(:write_ref).with('HEAD', 'refs/heads/default')
+
+      subject
+    end
+
     context 'when repository exists' do
       let!(:snippet) { create(:snippet, :repository) }
 
@@ -823,15 +831,13 @@ RSpec.describe Snippet do
     context 'when repository is empty' do
       let(:snippet) { create(:snippet, :empty_repo) }
 
-      before do
-        allow(Gitlab::CurrentSettings).to receive(:default_branch_name).and_return(default_branch)
-      end
-
       context 'when default branch in settings is different from "master"' do
-        let(:default_branch) { 'main' }
+        let(:default_branch) { 'stable' }
 
         it 'changes the HEAD reference to the default branch' do
-          expect(File.read(head_path).squish).to eq 'ref: refs/heads/master'
+          expect(File.read(head_path).squish).to eq "ref: refs/heads/#{snippet.default_branch}"
+
+          allow(Gitlab::CurrentSettings).to receive(:default_branch_name).and_return(default_branch)
 
           subject
 
