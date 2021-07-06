@@ -10,7 +10,8 @@ class Route < ApplicationRecord
   validates :path,
     length: { within: 1..255 },
     presence: true,
-    uniqueness: { case_sensitive: false }
+    uniqueness: { case_sensitive: false },
+    unless: ->(n) { source.is_a?(ProjectNamespace) }
 
   before_validation :delete_conflicting_orphaned_routes
   after_create :delete_conflicting_redirects
