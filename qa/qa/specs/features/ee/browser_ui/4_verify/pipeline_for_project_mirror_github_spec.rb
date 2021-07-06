@@ -27,7 +27,7 @@ module QA
       end
 
       let(:import_project) do
-        EE::Resource::ImportRepoWithCICD.fabricate_via_browser_ui! do |project|
+        EE::Resource::ImportRepoWithCiCd.fabricate_via_browser_ui! do |project|
           project.import = true
           project.name = project_name
           project.github_personal_access_token = github_data[:access_token]

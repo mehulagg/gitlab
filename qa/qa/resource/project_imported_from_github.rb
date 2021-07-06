@@ -24,6 +24,7 @@ module QA
         Page::Project::Import::Github.perform do |import_page|
           import_page.add_personal_access_token(github_personal_access_token)
           import_page.import!(github_repository_path, name)
+          import_page.go_to_project(name)
         end
       end
 

@@ -18,7 +18,6 @@ module QA
           project.group = group
           project.github_personal_access_token = Runtime::Env.github_access_token
           project.github_repository_path = 'gitlab-qa-github/test-project'
-          project.api_client = api_client
         end
       end
 
@@ -33,8 +32,7 @@ module QA
       it 'imports a GitHub repo', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/1762' do
         Flow::Login.sign_in(as: user)
 
-        # import the project and reload all fields
-        imported_project.reload!.visit!
+        imported_project # import the project
 
         Page::Project::Show.perform do |project|
           expect(project).to have_content(imported_project.name)

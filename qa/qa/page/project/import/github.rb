@@ -41,6 +41,14 @@ module QA
             wait_for_success
           end
 
+          # TODO: refactor to use 'go to project' button instead of generic main menu
+          def go_to_project(name)
+            Page::Main::Menu.perform(&:go_to_projects)
+            Page::Dashboard::Projects.perform do |dashboard|
+              dashboard.go_to_project(name)
+            end
+          end
+
           private
 
           def within_repo_path(full_path, &block)
@@ -81,13 +89,6 @@ module QA
               # TODO: Refactor to explicitly wait for specific project import successful status
               # This check can create false positive if main importing message appears with delay and check exits early
               page.has_no_content?('Importing 1 repository', wait: 3)
-            end
-          end
-
-          def go_to_project(name)
-            Page::Main::Menu.perform(&:go_to_projects)
-            Page::Dashboard::Projects.perform do |dashboard|
-              dashboard.go_to_project(name)
             end
           end
 
