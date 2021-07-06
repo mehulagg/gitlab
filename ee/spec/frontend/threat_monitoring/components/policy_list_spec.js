@@ -2,11 +2,13 @@ import { GlTable, GlDrawer } from '@gitlab/ui';
 import { createLocalVue } from '@vue/test-utils';
 import { merge } from 'lodash';
 import VueApollo from 'vue-apollo';
+import PolicyDrawer from 'ee/threat_monitoring/components/policy_drawer/policy_drawer.vue';
 import PolicyList from 'ee/threat_monitoring/components/policy_list.vue';
 import networkPoliciesQuery from 'ee/threat_monitoring/graphql/queries/network_policies.query.graphql';
 import scanExecutionPoliciesQuery from 'ee/threat_monitoring/graphql/queries/scan_execution_policies.query.graphql';
 import createStore from 'ee/threat_monitoring/store';
 import createMockApolloProvider from 'helpers/mock_apollo_helper';
+import { stubComponent } from 'helpers/stub_component';
 import { mountExtended, shallowMountExtended } from 'helpers/vue_test_utils_helper';
 import waitForPromises from 'helpers/wait_for_promises';
 import { networkPolicies, scanExecutionPolicies } from '../mocks/mock_apollo';
@@ -64,7 +66,12 @@ describe('PolicyList component', () => {
             [scanExecutionPoliciesQuery, requestHandlers.scanExecutionPolicies],
           ]),
           stubs: {
-            PolicyDrawer: GlDrawer,
+            PolicyDrawer: stubComponent(PolicyDrawer, {
+              props: {
+                ...PolicyDrawer.props,
+                ...GlDrawer.props,
+              },
+            }),
           },
           localVue,
         },
@@ -203,16 +210,21 @@ describe('PolicyList component', () => {
     });
   });
 
-  describe('given there is a selected policy', () => {
+  describe.each`
+    description         | policy
+    ${'network'}        | ${mockNetworkPoliciesResponse[0]}
+    ${'scan execution'} | ${mockScanExecutionPoliciesResponse[0]}
+  `('given there is a $description policy selected', ({ policy }) => {
     beforeEach(() => {
       mountShallowWrapper();
-      findPoliciesTable().vm.$emit('row-selected', [mockNetworkPoliciesResponse[0]]);
+      findPoliciesTable().vm.$emit('row-selected', [policy]);
     });
 
     it('renders opened editor drawer', () => {
       const editorDrawer = findPolicyDrawer();
       expect(editorDrawer.exists()).toBe(true);
       expect(editorDrawer.props('open')).toBe(true);
+      expect(editorDrawer.props('policy')).toBe(policy);
     });
   });
 
