@@ -15,6 +15,7 @@ module NamespaceSettings
     def execute
       validate_resource_access_token_creation_allowed_param
       validate_prevent_sharing_groups_outside_hierarchy_param
+      validate_user_cap_param
 
       if group.namespace_settings
         group.namespace_settings.attributes = settings_params
@@ -45,6 +46,20 @@ module NamespaceSettings
       unless group.root?
         settings_params.delete(:prevent_sharing_groups_outside_hierarchy)
         group.namespace_settings.errors.add(:prevent_sharing_groups_outside_hierarchy, _('only available on top-level groups.'))
+      end
+    end
+
+    def validate_user_cap_param
+      return if setting_params[:user_cap].nil?
+
+      unless can?(current_user, :change_user_cap, group)
+        settings_params.delete(:user_cap)
+        group.namespace_settings.errors.add(:user_cap, _('can only be changed by a group admin.'))
+      end
+
+      unless group.root?
+        settings_params.delete(:user_cap)
+        group.namespace_settings.errors.add(:user_cap, _('only available on top-level groups.'))
       end
     end
   end
