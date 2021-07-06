@@ -330,4 +330,22 @@ RSpec.describe CommitsHelper do
 
     it { is_expected.to eq(expected_path) }
   end
+
+  describe '#project_commits_atom_path' do
+    let(:project) { build(:project) }
+    let(:ref) { 'main' }
+    let(:token) { 'feedtoken' }
+    let(:expected_path) { "/#{project.full_path}/-/commits/#{ref}?feed_token=#{token}&format=atom" }
+
+    subject { helper.project_commits_atom_path(project, ref) }
+
+    before do
+      allow(project.owner).to receive(:feed_token).and_return(token)
+      allow(helper).to receive(:current_user).and_return(project.owner)
+    end
+
+    it do
+      expect(subject).to eq(expected_path)
+    end
+  end
 end
