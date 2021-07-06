@@ -17,11 +17,11 @@ describe('DevopsAdoptionSection', () => {
       shallowMount(DevopsAdoptionSection, {
         propsData: {
           isLoading: false,
-          hasSegmentsData: true,
+          hasEnabledNamespaceData: true,
           timestamp: '2020-10-31 23:59',
           hasGroupData: true,
           cols: DEVOPS_ADOPTION_TABLE_CONFIGURATION[0].cols,
-          segments: devopsAdoptionNamespaceData,
+          enabledNamespaces: devopsAdoptionNamespaceData,
           disabledGroupNodes: groupNodes,
           searchTerm: '',
           isLoadingGroups: false,
@@ -59,7 +59,7 @@ describe('DevopsAdoptionSection', () => {
     });
   });
 
-  describe('with segment data', () => {
+  describe('with enabledNamespace data', () => {
     beforeEach(() => {
       createComponent();
     });
@@ -81,9 +81,9 @@ describe('DevopsAdoptionSection', () => {
     });
   });
 
-  describe('with no segment data', () => {
+  describe('with no enabledNamespace data', () => {
     beforeEach(() => {
-      createComponent({ hasSegmentsData: false });
+      createComponent({ hasEnabledNamespaceData: false });
     });
 
     it('displays an empty state', () => {

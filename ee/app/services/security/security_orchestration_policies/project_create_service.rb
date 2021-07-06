@@ -34,7 +34,7 @@ module Security
         }
 
         if protected_branch.present?
-          ProtectedBranch::UpdateService
+          ProtectedBranches::UpdateService
             .new(policy_project, current_user, params)
             .execute(protected_branch)
           return

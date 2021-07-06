@@ -4,7 +4,7 @@ import { createLocalVue, shallowMount } from '@vue/test-utils';
 import Vue from 'vue';
 import VueApollo from 'vue-apollo';
 import DevopsAdoptionDeleteModal from 'ee/analytics/devops_report/devops_adoption/components/devops_adoption_delete_modal.vue';
-import { DEVOPS_ADOPTION_SEGMENT_DELETE_MODAL_ID } from 'ee/analytics/devops_report/devops_adoption/constants';
+import { DEVOPS_ADOPTION_DELETE_MODAL_ID } from 'ee/analytics/devops_report/devops_adoption/constants';
 import disableDevopsAdoptionNamespaceMutation from 'ee/analytics/devops_report/devops_adoption/graphql/mutations/disable_devops_adoption_namespace.mutation.graphql';
 import createMockApollo from 'helpers/mock_apollo_helper';
 import waitForPromises from 'helpers/wait_for_promises';
@@ -38,16 +38,16 @@ const mutateWithErrors = jest.fn().mockRejectedValue(genericDeleteErrorMessage);
 describe('DevopsAdoptionDeleteModal', () => {
   let wrapper;
 
-  const createComponent = ({ deleteSegmentsSpy = mutate, props = {} } = {}) => {
+  const createComponent = ({ deleteEnabledNamespacesSpy = mutate, props = {} } = {}) => {
     const mockApollo = createMockApollo([
-      [disableDevopsAdoptionNamespaceMutation, deleteSegmentsSpy],
+      [disableDevopsAdoptionNamespaceMutation, deleteEnabledNamespacesSpy],
     ]);
 
     wrapper = shallowMount(DevopsAdoptionDeleteModal, {
       localVue,
       apolloProvider: mockApollo,
       propsData: {
-        segment: devopsAdoptionNamespaceData.nodes[0],
+        namespace: devopsAdoptionNamespaceData.nodes[0],
         ...props,
       },
       stubs: {
@@ -63,7 +63,6 @@ describe('DevopsAdoptionDeleteModal', () => {
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
   });
 
   describe('default display', () => {
@@ -73,7 +72,7 @@ describe('DevopsAdoptionDeleteModal', () => {
       const modal = findModal();
 
       expect(modal.exists()).toBe(true);
-      expect(modal.props('modalId')).toBe(DEVOPS_ADOPTION_SEGMENT_DELETE_MODAL_ID);
+      expect(modal.props('modalId')).toBe(DEVOPS_ADOPTION_DELETE_MODAL_ID);
     });
 
     it('displays the confirmation message', () => {
@@ -104,7 +103,7 @@ describe('DevopsAdoptionDeleteModal', () => {
 
   describe('submitting the form', () => {
     describe('while waiting for the mutation', () => {
-      beforeEach(() => createComponent({ deleteSegmentsSpy: mutateLoading }));
+      beforeEach(() => createComponent({ deleteEnabledNamespacesSpy: mutateLoading }));
 
       it('disables the cancel button', async () => {
         expect(cancelButtonDisabledState()).toBe(false);
@@ -142,8 +141,8 @@ describe('DevopsAdoptionDeleteModal', () => {
         });
       });
 
-      it('emits segmentsRemoved with the correct variables', () => {
-        const [params] = wrapper.emitted().segmentsRemoved[0];
+      it('emits dNamespacesRemoved with the correct variables', () => {
+        const [params] = wrapper.emitted().enabledNamespacesRemoved[0];
 
         expect(params).toStrictEqual([devopsAdoptionNamespaceData.nodes[0].id]);
       });
@@ -161,7 +160,7 @@ describe('DevopsAdoptionDeleteModal', () => {
       `(
         'displays a $errorType error if the mutation has a $errorLocation error',
         async ({ mutationSpy, message }) => {
-          createComponent({ deleteSegmentsSpy: mutationSpy });
+          createComponent({ deleteEnabledNamespacesSpy: mutationSpy });
 
           findModal().vm.$emit('primary', mockEvent);
 
@@ -178,7 +177,7 @@ describe('DevopsAdoptionDeleteModal', () => {
       it('calls sentry on top level error', async () => {
         jest.spyOn(Sentry, 'captureException');
 
-        createComponent({ deleteSegmentsSpy: mutateWithErrors });
+        createComponent({ deleteEnabledNamespacesSpy: mutateWithErrors });
 
         findModal().vm.$emit('primary', mockEvent);
 

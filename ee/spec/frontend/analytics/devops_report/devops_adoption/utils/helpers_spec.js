@@ -8,15 +8,15 @@ describe('shouldPollTableData', () => {
   const previousDay = '2020-07-05T00:00:00.000Z';
 
   it.each`
-    scenario                                                       | segments         | timestamp      | openModal | expected
-    ${'no segment data'}                                           | ${[]}            | ${mockDate}    | ${false}  | ${true}
-    ${'no timestamp'}                                              | ${comepleteData} | ${null}        | ${false}  | ${true}
-    ${'open modal'}                                                | ${comepleteData} | ${mockDate}    | ${true}   | ${false}
-    ${'segment data, timestamp is today, modal is closed'}         | ${comepleteData} | ${mockDate}    | ${false}  | ${false}
-    ${'segment data, timestamp is yesterday, modal is closed'}     | ${comepleteData} | ${previousDay} | ${false}  | ${true}
-    ${'segment data, timestamp is today, modal is open'}           | ${comepleteData} | ${mockDate}    | ${true}   | ${false}
-    ${'pending segment data, timestamp is today, modal is closed'} | ${pendingData}   | ${mockDate}    | ${false}  | ${true}
-  `('returns $expected when $scenario', ({ segments, timestamp, openModal, expected }) => {
-    expect(shouldPollTableData({ segments, timestamp, openModal })).toBe(expected);
+    scenario                                                          | enabledNamespaces | timestamp      | openModal | expected
+    ${'no namespaces data'}                                           | ${[]}             | ${mockDate}    | ${false}  | ${true}
+    ${'no timestamp'}                                                 | ${comepleteData}  | ${null}        | ${false}  | ${true}
+    ${'open modal'}                                                   | ${comepleteData}  | ${mockDate}    | ${true}   | ${false}
+    ${'namespaces data, timestamp is today, modal is closed'}         | ${comepleteData}  | ${mockDate}    | ${false}  | ${false}
+    ${'namespaces data, timestamp is yesterday, modal is closed'}     | ${comepleteData}  | ${previousDay} | ${false}  | ${true}
+    ${'namespaces data, timestamp is today, modal is open'}           | ${comepleteData}  | ${mockDate}    | ${true}   | ${false}
+    ${'pending namespaces data, timestamp is today, modal is closed'} | ${pendingData}    | ${mockDate}    | ${false}  | ${true}
+  `('returns $expected when $scenario', ({ enabledNamespaces, timestamp, openModal, expected }) => {
+    expect(shouldPollTableData({ enabledNamespaces, timestamp, openModal })).toBe(expected);
   });
 });

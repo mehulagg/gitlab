@@ -93,7 +93,7 @@ exports[`DependenciesActions component matches the snapshot 1`] = `
       variant="default"
     >
       <gl-icon-stub
-        name="sort-lowest"
+        name="sort-highest"
         size="16"
       />
     </gl-button-stub>

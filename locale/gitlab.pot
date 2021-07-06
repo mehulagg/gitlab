@@ -2368,6 +2368,9 @@ msgstr ""
 msgid "AdminSettings|Feed token"
 msgstr ""
 
+msgid "AdminSettings|If not specified at the group or instance level, the default is %{default_initial_branch_name}. Does not affect existing repositories."
+msgstr ""
+
 msgid "AdminSettings|Keep the latest artifacts for all jobs in the latest successful pipelines"
 msgstr ""
 
@@ -2408,6 +2411,9 @@ msgid "AdminSettings|Set a CI/CD template as the required pipeline configuration
 msgstr ""
 
 msgid "AdminSettings|Specify a domain to use by default for every project's Auto Review Apps and Auto Deploy stages."
+msgstr ""
+
+msgid "AdminSettings|The default name for the initial branch of new repositories created in the instance."
 msgstr ""
 
 msgid "AdminSettings|The latest artifacts for all jobs in the most recent successful pipelines in each project are stored and do not expire."
@@ -6220,12 +6226,6 @@ msgstr ""
 msgid "Changes"
 msgstr ""
 
-msgid "Changes affect new repositories only. If not specified, Git's default name %{branch_name_default} will be used."
-msgstr ""
-
-msgid "Changes affect new repositories only. If not specified, either the configured application-wide default or Git's default name %{branch_name_default} will be used."
-msgstr ""
-
 msgid "Changes are shown as if the %{b_open}source%{b_close} revision was being merged into the %{b_open}target%{b_close} revision."
 msgstr ""
 
@@ -6958,6 +6958,9 @@ msgstr ""
 msgid "ClusterAgents|Description"
 msgstr ""
 
+msgid "ClusterAgents|Go to the repository"
+msgstr ""
+
 msgid "ClusterAgents|Integrate Kubernetes with a GitLab Agent"
 msgstr ""
 
@@ -6979,6 +6982,9 @@ msgstr ""
 msgid "ClusterAgents|Never"
 msgstr ""
 
+msgid "ClusterAgents|Read more about getting started"
+msgstr ""
+
 msgid "ClusterAgents|The GitLab Agent also requires %{linkStart}enabling the Agent Server%{linkEnd}"
 msgstr ""
 
@@ -6986,6 +6992,9 @@ msgid "ClusterAgents|The GitLab Kubernetes Agent allows an Infrastructure as Cod
 msgstr ""
 
 msgid "ClusterAgents|This agent has no tokens"
+msgstr ""
+
+msgid "ClusterAgents|To install an Agent you should create an agent directory in the Repository first. We recommend that you add the Agent configuration to the directory before you start the installation process."
 msgstr ""
 
 msgid "ClusterAgents|Unknown user"
@@ -8275,6 +8284,9 @@ msgid "Configure storage path settings."
 msgstr ""
 
 msgid "Configure the %{link} integration."
+msgstr ""
+
+msgid "Configure the default first day of the week and time tracking units."
 msgstr ""
 
 msgid "Configure the way a user creates a new account."
@@ -11524,6 +11536,9 @@ msgstr ""
 msgid "Display source"
 msgstr ""
 
+msgid "Display time tracking in issues in total hours only."
+msgstr ""
+
 msgid "Do not display offers from third parties"
 msgstr ""
 
@@ -12815,6 +12830,9 @@ msgid "Error occurred when saving assignees"
 msgstr ""
 
 msgid "Error occurred when saving reviewers"
+msgstr ""
+
+msgid "Error occurred while updating the %{issuableType} status"
 msgstr ""
 
 msgid "Error occurred while updating the issue status"
@@ -15760,6 +15778,9 @@ msgstr ""
 msgid "GroupSettings|Export group"
 msgstr ""
 
+msgid "GroupSettings|If not specified at the group or instance level, the default is %{default_initial_branch_name}. Does not affect existing repositories."
+msgstr ""
+
 msgid "GroupSettings|If the parent group's visibility is lower than the group current visibility, visibility levels for subgroups and projects will be changed to match the new parent group's visibility."
 msgstr ""
 
@@ -15797,6 +15818,9 @@ msgid "GroupSettings|Select a sub-group as the custom project template source fo
 msgstr ""
 
 msgid "GroupSettings|The Auto DevOps pipeline runs if no alternative CI configuration file is found."
+msgstr ""
+
+msgid "GroupSettings|The default name for the initial branch of new repositories created in the group."
 msgstr ""
 
 msgid "GroupSettings|There was a problem updating Auto DevOps pipeline: %{error_messages}."
@@ -29696,9 +29720,6 @@ msgstr ""
 msgid "Set the default expiration time for each job's artifacts. 0 for unlimited. The default unit is in seconds, but you can define an alternative. For example: %{code_open}4 mins 2 sec%{code_close}, %{code_open}2h42min%{code_close}."
 msgstr ""
 
-msgid "Set the default name of the initial branch when creating new repositories through the user interface."
-msgstr ""
-
 msgid "Set the due date to %{due_date}."
 msgstr ""
 
@@ -30451,6 +30472,9 @@ msgid "Something went wrong while setting %{issuableType} %{dateType} date."
 msgstr ""
 
 msgid "Something went wrong while setting %{issuableType} confidentiality."
+msgstr ""
+
+msgid "Something went wrong while setting %{issuableType} health status."
 msgstr ""
 
 msgid "Something went wrong while setting %{issuableType} notifications."
@@ -32802,7 +32826,7 @@ msgstr ""
 msgid "There are no variables yet."
 msgstr ""
 
-msgid "There are pending advanced search migrations. Indexing must remain paused until the migrations are completed."
+msgid "There are pending advanced search migrations which require indexing to be paused. Indexing must remain paused until the migrations are completed."
 msgstr ""
 
 msgid "There are running deployments on the environment. Please retry later."
@@ -35016,9 +35040,6 @@ msgstr ""
 msgid "UpdateProject|Project could not be updated!"
 msgstr ""
 
-msgid "UpdateRepositoryStorage|Error moving repository storage for %{container_full_path} - %{message}"
-msgstr ""
-
 msgid "UpdateRepositoryStorage|Failed to verify %{type} repository checksum from %{old} to %{new}"
 msgstr ""
 
@@ -35895,9 +35916,6 @@ msgstr ""
 msgid "Various email settings."
 msgstr ""
 
-msgid "Various localization settings."
-msgstr ""
-
 msgid "Various settings that affect GitLab performance."
 msgstr ""
 
@@ -36719,6 +36737,9 @@ msgid "What is repository mirroring?"
 msgstr ""
 
 msgid "What is squashing?"
+msgstr ""
+
+msgid "What is time tracking?"
 msgstr ""
 
 msgid "What is your job title? (optional)"

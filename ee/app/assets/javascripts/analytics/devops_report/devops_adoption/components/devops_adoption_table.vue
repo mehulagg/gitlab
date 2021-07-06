@@ -11,9 +11,9 @@ import LocalStorageSync from '~/vue_shared/components/local_storage_sync.vue';
 import {
   DEVOPS_ADOPTION_TABLE_TEST_IDS,
   DEVOPS_ADOPTION_STRINGS,
-  DEVOPS_ADOPTION_SEGMENT_DELETE_MODAL_ID,
-  DEVOPS_ADOPTION_SEGMENTS_TABLE_SORT_BY_STORAGE_KEY,
-  DEVOPS_ADOPTION_SEGMENTS_TABLE_SORT_DESC_STORAGE_KEY,
+  DEVOPS_ADOPTION_DELETE_MODAL_ID,
+  DEVOPS_ADOPTION_TABLE_SORT_BY_STORAGE_KEY,
+  DEVOPS_ADOPTION_TABLE_SORT_DESC_STORAGE_KEY,
   DEVOPS_ADOPTION_TABLE_REMOVE_BUTTON_DISABLED,
   DEVOPS_ADOPTION_GROUP_COL_LABEL,
 } from '../constants';
@@ -70,12 +70,12 @@ export default {
     ...i18n,
     removeButtonDisabled: DEVOPS_ADOPTION_TABLE_REMOVE_BUTTON_DISABLED,
   },
-  devopsSegmentDeleteModalId: DEVOPS_ADOPTION_SEGMENT_DELETE_MODAL_ID,
+  deleteModalId: DEVOPS_ADOPTION_DELETE_MODAL_ID,
   testids: DEVOPS_ADOPTION_TABLE_TEST_IDS,
-  sortByStorageKey: DEVOPS_ADOPTION_SEGMENTS_TABLE_SORT_BY_STORAGE_KEY,
-  sortDescStorageKey: DEVOPS_ADOPTION_SEGMENTS_TABLE_SORT_DESC_STORAGE_KEY,
+  sortByStorageKey: DEVOPS_ADOPTION_TABLE_SORT_BY_STORAGE_KEY,
+  sortDescStorageKey: DEVOPS_ADOPTION_TABLE_SORT_DESC_STORAGE_KEY,
   props: {
-    segments: {
+    enabledNamespaces: {
       type: Array,
       required: true,
     },
@@ -88,7 +88,7 @@ export default {
     return {
       sortBy: NAME_HEADER,
       sortDesc: false,
-      selectedSegment: null,
+      selectedNamespace: null,
     };
   },
   computed: {
@@ -113,8 +113,8 @@ export default {
     },
   },
   methods: {
-    setSelectedSegment(segment) {
-      this.selectedSegment = segment;
+    setSelectedNamespace(namespace) {
+      this.selectedNamespace = namespace;
     },
     headerSlotName(key) {
       return `head(${key})`;
@@ -149,7 +149,7 @@ export default {
     />
     <gl-table
       :fields="tableHeaderFields"
-      :items="segments"
+      :items="enabledNamespaces"
       :sort-by.sync="sortBy"
       :sort-desc.sync="sortDesc"
       thead-class="gl-border-t-0 gl-border-b-solid gl-border-b-1 gl-border-b-gray-100"
@@ -169,7 +169,7 @@ export default {
       </template>
 
       <template #cell(name)="{ item }">
-        <div :data-testid="$options.testids.SEGMENT">
+        <div :data-testid="$options.testids.NAMESPACE">
           <strong v-if="item.latestSnapshot">{{ item.namespace.fullName }}</strong>
           <template v-else>
             <span class="gl-text-gray-400">{{ item.namespace.fullName }}</span>
@@ -196,20 +196,20 @@ export default {
           :data-testid="$options.testids.ACTIONS"
         >
           <gl-button
-            v-gl-modal="$options.devopsSegmentDeleteModalId"
+            v-gl-modal="$options.deleteModalId"
             :disabled="isCurrentGroup(item)"
             category="tertiary"
             icon="remove"
             :aria-label="$options.i18n.removeButton"
-            @click="setSelectedSegment(item)"
+            @click="setSelectedNamespace(item)"
           />
         </span>
       </template>
     </gl-table>
     <devops-adoption-delete-modal
-      v-if="selectedSegment"
-      :segment="selectedSegment"
-      @segmentsRemoved="$emit('segmentsRemoved', $event)"
+      v-if="selectedNamespace"
+      :namespace="selectedNamespace"
+      @enabledNamespacesRemoved="$emit('enabledNamespacesRemoved', $event)"
       @trackModalOpenState="$emit('trackModalOpenState', $event)"
     />
   </div>

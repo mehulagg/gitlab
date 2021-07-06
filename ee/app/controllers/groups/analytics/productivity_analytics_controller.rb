@@ -16,9 +16,6 @@ class Groups::Analytics::ProductivityAnalyticsController < Groups::Analytics::Ap
   before_action -> {
     authorize_view_by_action!(:view_productivity_analytics)
   }
-  before_action -> {
-    push_frontend_feature_flag(:productivity_analytics_scatterplot_enabled, default_enabled: true)
-  }
 
   before_action :validate_params, only: :show, if: -> { request.format.json? }
 

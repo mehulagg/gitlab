@@ -66,7 +66,7 @@
     %p
       = _('Configure Gitaly timeouts.')
       %span
-        = link_to _('Learn more.'), help_page_path('user/admin_area/settings/gitaly_timeouts.md'), target: '_blank'
+        = link_to _('Learn more.'), help_page_path('user/admin_area/settings/gitaly_timeouts.md'), target: '_blank', rel: 'noopener noreferrer'
   .settings-content
     = render 'gitaly'
 
@@ -77,6 +77,6 @@
     %button.btn.gl-button.btn-default.js-settings-toggle{ type: 'button' }
       = expanded_by_default? ? _('Collapse') : _('Expand')
     %p
-      = _('Various localization settings.')
+      = _('Configure the default first day of the week and time tracking units.')
   .settings-content
     = render 'localization'

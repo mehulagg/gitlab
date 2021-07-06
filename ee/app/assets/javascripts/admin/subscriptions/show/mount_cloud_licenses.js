@@ -31,6 +31,7 @@ export default () => {
     hasActiveLicense,
     licenseRemovePath,
     licenseUploadPath,
+    subscriptionActivationBannerCalloutName,
     subscriptionSyncPath,
   } = el.dataset;
   const connectivityHelpURL = helpPagePath('/user/admin_area/license.html', {
@@ -48,6 +49,7 @@ export default () => {
       freeTrialPath,
       licenseRemovePath,
       licenseUploadPath,
+      subscriptionActivationBannerCalloutName,
       subscriptionSyncPath,
     },
     render: (h) =>
