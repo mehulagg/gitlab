@@ -11,6 +11,7 @@ import { __ } from '~/locale';
 import blobInfoQuery from '../queries/blob_info.query.graphql';
 import BlobButtonGroup from './blob_button_group.vue';
 import BlobEdit from './blob_edit.vue';
+import { loadViewer } from './blob_viewers';
 
 export default {
   components: {
@@ -30,7 +31,7 @@ export default {
         };
       },
       result() {
-        if (this.hasRichViewer) {
+        if (this.hasRichViewer && !this.blobViewer) {
           this.loadLegacyViewer();
         }
         this.switchViewer(
@@ -64,6 +65,9 @@ export default {
       isLoadingLegacyViewer: false,
       activeViewerType: SIMPLE_BLOB_VIEWER,
       project: {
+        userPermissions: {
+          pushCode: false,
+        },
         repository: {
           blobs: {
             nodes: [
@@ -85,7 +89,6 @@ export default {
                 canLock: false,
                 isLocked: false,
                 lockLink: '',
-                canModifyBlob: true,
                 forkPath: '',
                 simpleViewer: {},
                 richViewer: null,
@@ -117,6 +120,10 @@ export default {
     },
     hasRenderError() {
       return Boolean(this.viewer.renderError);
+    },
+    blobViewer() {
+      const { fileType } = this.viewer;
+      return loadViewer(fileType);
     },
   },
   methods: {
@@ -163,11 +170,12 @@ export default {
             :path="path"
             :name="blobInfo.name"
             :replace-path="blobInfo.replacePath"
-            :can-push-code="blobInfo.canModifyBlob"
+            :can-push-code="project.userPermissions.pushCode"
           />
         </template>
       </blob-header>
       <blob-content
+        v-if="!blobViewer"
         :rich-viewer="legacyRichViewer"
         :blob="blobInfo"
         :content="blobInfo.rawTextBlob"
@@ -175,6 +183,7 @@ export default {
         :active-viewer="viewer"
         :loading="false"
       />
+      <component :is="blobViewer" v-else class="blob-viewer" />
     </div>
   </div>
 </template>

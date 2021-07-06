@@ -50,5 +50,5 @@ RSpec.describe ElasticIndexBulkCronWorker do
 
   it_behaves_like 'worker with data consistency',
                   described_class,
-                  data_consistency: :delayed
+                  data_consistency: :sticky
 end

@@ -22,10 +22,13 @@ const addScheduleToStore = (store, query, { oncallScheduleCreate }, variables) =
   });
 
   const data = produce(sourceData, (draftData) => {
-    draftData.project.incidentManagementOncallSchedules.nodes.push({
-      ...schedule,
-      rotations: { nodes: [], __typename: ROTATION_CONNECTION_TYPE },
-    });
+    draftData.project.incidentManagementOncallSchedules.nodes = [
+      ...draftData.project.incidentManagementOncallSchedules.nodes,
+      {
+        ...schedule,
+        rotations: { nodes: [], __typename: ROTATION_CONNECTION_TYPE },
+      },
+    ];
   });
 
   store.writeQuery({

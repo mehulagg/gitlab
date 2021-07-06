@@ -13,7 +13,7 @@ module Types
 
     present_using EpicPresenter
 
-    implements(Types::Notes::NoteableType)
+    implements(Types::Notes::NoteableInterface)
     implements(Types::CurrentUserTodos)
     implements(Types::EventableType)
 

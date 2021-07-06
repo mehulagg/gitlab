@@ -1,9 +1,0 @@
-- group  = local_assigns.fetch(:group)
-- member = local_assigns.fetch(:member)
-- can_override = local_assigns.fetch(:can_override, false)
-
-- if can_override
-  %li.divider
-  %li
-    = link_to 'Revert to LDAP group sync settings', '#',
-      data: { revert: 'true', endpoint: override_group_group_member_path(group, member), el_id: dom_id(member) }

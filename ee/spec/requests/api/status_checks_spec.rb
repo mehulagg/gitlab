@@ -276,7 +276,7 @@ RSpec.describe API::StatusChecks do
     it 'paginates correctly' do
       get api(collection_url, project.owner), params: { per_page: 1 }
 
-      expect_paginated_array_response([1])
+      expect_paginated_array_response([rule.id])
     end
 
     context 'when feature is disabled, unlicensed or user has permission' do

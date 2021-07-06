@@ -1,0 +1,8 @@
+---
+name: analytics_devops_adoption_dependency_scanning
+introduced_by_url: https://gitlab.com/gitlab-org/gitlab/-/merge_requests/64624
+rollout_issue_url: https://gitlab.com/gitlab-org/gitlab/-/issues/335083
+milestone: '14.1'
+type: development
+group: group::optimize
+default_enabled: false

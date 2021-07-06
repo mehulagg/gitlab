@@ -3,7 +3,7 @@ import Vuex from 'vuex';
 import FilterDropdowns from 'ee/analytics/productivity_analytics/components/filter_dropdowns.vue';
 import { getStoreConfig } from 'ee/analytics/productivity_analytics/store';
 import GroupsDropdownFilter from 'ee/analytics/shared/components/groups_dropdown_filter.vue';
-import ProjectsDropdownFilter from 'ee/analytics/shared/components/projects_dropdown_filter.vue';
+import ProjectsDropdownFilter from '~/analytics/shared/components/projects_dropdown_filter.vue';
 import resetStore from '../helpers';
 
 const localVue = createLocalVue();

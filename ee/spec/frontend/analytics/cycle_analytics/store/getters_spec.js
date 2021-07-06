@@ -1,4 +1,5 @@
 import * as getters from 'ee/analytics/cycle_analytics/store/getters';
+import { createdAfter, createdBefore, selectedProjects } from 'jest/cycle_analytics/mock_data';
 import {
   filterMilestones,
   filterUsers,
@@ -9,10 +10,7 @@ import {
   getFilterValues,
 } from 'jest/vue_shared/components/filtered_search_bar/store/modules/filters/test_helper';
 import {
-  startDate,
-  endDate,
   allowedStages,
-  selectedProjects,
   issueStage,
   stageMedians,
   stageCounts,
@@ -97,8 +95,8 @@ describe('Value Stream Analytics getters', () => {
         currentGroup: {
           fullPath,
         },
-        startDate,
-        endDate,
+        createdAfter,
+        createdBefore,
         selectedProjects,
         filters: {
           authors: { selected: selectedUserParams[0] },

@@ -16,6 +16,7 @@ module EE
         secret_detection: :secret_detection,
         dependency_scanning: :dependency_scanning,
         container_scanning: :container_scanning,
+        cluster_image_scanning: :cluster_image_scanning,
         dast: :dast,
         coverage_fuzzing: :coverage_fuzzing,
         api_fuzzing: :api_fuzzing

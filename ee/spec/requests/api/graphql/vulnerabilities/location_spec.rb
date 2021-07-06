@@ -110,6 +110,45 @@ RSpec.describe 'Query.vulnerabilities.location' do
     end
   end
 
+  context 'when the vulnerability was found by a cluster image scan' do
+    let_it_be(:vulnerability) do
+      create(:vulnerability, project: project, report_type: :cluster_image_scanning)
+    end
+
+    let_it_be(:metadata) do
+      {
+        location: {
+          image: 'vulnerable_image',
+          operating_system: 'vulnerable_os',
+          dependency: {
+            version: '6.6.6',
+            package: {
+              name: 'vulnerable_container'
+            }
+          }
+        }
+      }
+    end
+
+    let_it_be(:finding) do
+      create(
+        :vulnerabilities_finding,
+        vulnerability: vulnerability,
+        raw_metadata: metadata.to_json
+      )
+    end
+
+    it 'returns a container location' do
+      location = subject.first['location']
+
+      expect(location['__typename']).to eq('VulnerabilityLocationContainerScanning')
+      expect(location['image']).to eq('vulnerable_image')
+      expect(location['operatingSystem']).to eq('vulnerable_os')
+      expect(location['dependency']['version']).to eq('6.6.6')
+      expect(location['dependency']['package']['name']).to eq('vulnerable_container')
+    end
+  end
+
   context 'when the vulnerability was found by a dependency scan' do
     let_it_be(:vulnerability) do
       create(:vulnerability, project: project, report_type: :dependency_scanning)

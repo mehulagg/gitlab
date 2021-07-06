@@ -1,10 +1,6 @@
 import { OVERVIEW_STAGE_ID } from '~/cycle_analytics/constants';
 import { __, s__ } from '~/locale';
 
-export const PROJECTS_PER_PAGE = 50;
-
-export const DEFAULT_DAYS_IN_PAST = 30;
-
 export const EVENTS_LIST_ITEM_LIMIT = 50;
 
 export const TASKS_BY_TYPE_SUBJECT_ISSUE = 'Issue';

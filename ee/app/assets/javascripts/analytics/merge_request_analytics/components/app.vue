@@ -1,7 +1,7 @@
 <script>
 import dateFormat from 'dateformat';
+import DateRange from '~/analytics/shared/components/daterange.vue';
 import UrlSync from '~/vue_shared/components/url_sync.vue';
-import DateRange from '../../shared/components/daterange.vue';
 import { dateFormats } from '../../shared/constants';
 import { DEFAULT_NUMBER_OF_DAYS } from '../constants';
 import FilterBar from './filter_bar.vue';
