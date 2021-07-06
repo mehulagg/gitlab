@@ -29609,7 +29609,7 @@ msgstr ""
 msgid "Service URL"
 msgstr ""
 
-msgid "Service ping is disabled, and cannot be configured through this form."
+msgid "Service ping is disabled using a configuration file, and cannot be enabled through this form."
 msgstr ""
 
 msgid "ServiceDesk|Enable Service Desk"
