@@ -2,7 +2,9 @@
 # rubocop:disable Style/SignalException
 
 CHANGED_SCHEMA_MESSAGE = <<~MSG
-Mentioning @gitlab-data/engineers to notify the team about changes to the db/structure.sql file.
+To notify the Data Team about changes to the db/structure.sql file, add label `tbd`
+
+/label ~"tbd"
 
 MSG
 
