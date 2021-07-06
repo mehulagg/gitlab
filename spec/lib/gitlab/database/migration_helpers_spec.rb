@@ -2017,11 +2017,16 @@ RSpec.describe Gitlab::Database::MigrationHelpers do
       create(:batched_background_migration, configuration.merge(status: :active))
 
       expect { ensure_batched_background_migration_is_finished }
-        .to raise_error "Expected batched background migration for the given configuration to be marked as 'finished', but it is 'active': #{configuration}" \
+        .to raise_error "Expected batched background migration for the given configuration to be marked as 'finished', but it is 'active':" \
+            "\t#{configuration}" \
             "\n\n" \
             "Finalize it manualy by running" \
             "\n\n" \
-            "\tgitlab-rake gitlab:background_migrations:finalize[CopyColumnUsingBackgroundMigrationJob,events,id,'[[\"id\"]\\, [\"id_convert_to_bigint\"]]']"
+            "\tgitlab-rake gitlab:background_migrations:finalize[CopyColumnUsingBackgroundMigrationJob,events,id,'[[\"id\"]\\, [\"id_convert_to_bigint\"]]']" \
+            "\n\n" \
+            "For more information, check the documentation" \
+            "\n\n" \
+            "\thttps://docs.gitlab.com/ee/user/admin_area/monitoring/background_migrations.html#database-migrations-failing-when-upgrading-to-gitlab-142-and-higher"
     end
 
     it 'does not raise error when migration exists and is marked as finished' do

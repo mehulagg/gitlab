@@ -1108,11 +1108,16 @@ module Gitlab
           Gitlab::AppLogger.warn "Could not find batched background migration for the given configuration: #{configuration}"
         elsif !migration.finished?
           raise "Expected batched background migration for the given configuration to be marked as 'finished', " \
-            "but it is '#{migration.status}': #{configuration}" \
+            "but it is '#{migration.status}':" \
+            "\t#{configuration}" \
             "\n\n" \
             "Finalize it manualy by running" \
             "\n\n" \
-            "\tgitlab-rake gitlab:background_migrations:finalize[#{job_class_name},#{table_name},#{column_name},'#{job_arguments.inspect.gsub(',', '\,')}']"
+            "\tgitlab-rake gitlab:background_migrations:finalize[#{job_class_name},#{table_name},#{column_name},'#{job_arguments.inspect.gsub(',', '\,')}']" \
+            "\n\n" \
+            "For more information, check the documentation" \
+            "\n\n" \
+            "\thttps://docs.gitlab.com/ee/user/admin_area/monitoring/background_migrations.html#database-migrations-failing-when-upgrading-to-gitlab-142-and-higher"
         end
       end
 

@@ -21,12 +21,15 @@ are created by GitLab developers and run automatically on upgrade. However, such
 limited in scope to help with migrating some `integer` database columns to `bigint`. This is needed to
 prevent integer overflow for some tables.
 
-All migrations must be finished before upgrading GitLab. To check the status of the existing
-migrations, execute this command:
+## Check the status of Batched Background Migrations **(FREE SELF)**
 
-```ruby
-Gitlab::Database::BackgroundMigration::BatchedMigration.pluck(:id, :table_name, :status)
-```
+All migrations must be finished before upgrading GitLab. To check the status of the existing
+migrations:
+
+1. On the top bar, select **Menu >** **{admin}** **Admin**.
+1. On the left sidebar, select **Monitoring > Background Migrations**
+
+![batched background migrations](img/batched_background_migrations_queued_v14_0.png)
 
 ## Enable or disable Batched Background Migrations **(FREE SELF)**
 
@@ -36,9 +39,8 @@ It is deployed behind a feature flag that is **enabled by default**.
 can opt to disable it.
 
 To enable it:
-
-```ruby
-Feature.enable(:execute_batched_migrations_on_schedule)
+```
+ture.enable(:execute_batched_migrations_on_schedule)
 ```
 
 To disable it:
@@ -78,4 +80,27 @@ To disable it:
 
 ```ruby
 Feature.disable(:optimize_batched_migrations)
+```
+
+## Troubleshooting
+
+### Database migrations failing when upgrading to GitLab 14.2 and higher
+
+In case there is a database migration failing with a message like
+
+```plaintext
+== 20210622041846 FinalizePushEventPayloadsBigintConversion: migrating ========
+rake aborted!
+StandardError: An error has occurred, all later migrations canceled:
+
+Expected batched background migration for the given configuration to be marked as 'finished', but it is 'active':
+	{:job_class_name=>"CopyColumnUsingBackgroundMigrationJob", :table_name=>"push_event_payloads", :column_name=>"event_id", :job_arguments=>[["event_id"], ["event_id_convert_to_bigint"]]}
+```
+
+when upgrading to GitLab 14.2 or higher, first upgrade to either 14.0.3 or 14.1.
+
+Before proceeding with the upgrade to 14.2 (or higher version), [check the status](#check-the-status-of-batched-background-migrations) of the batched background migration from the error message, and make sure it is listed as finished. In case it is still active, either wait until it is done, or finalize it manually using the command suggested in the error, for example
+
+```plaintext
+gitlab-rake gitlab:background_migrations:finalize[CopyColumnUsingBackgroundMigrationJob,push_event_payloads,event_id,'[["event_id"]\, ["event_id_convert_to_bigint"]]']
 ```
