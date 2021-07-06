@@ -10183,6 +10183,9 @@ msgstr ""
 msgid "DastProfiles|Website"
 msgstr ""
 
+msgid "DastProfiles|You cannot run an active scan against an unvalidated site."
+msgstr ""
+
 msgid "DastSiteValidation|Copy HTTP header to clipboard"
 msgstr ""
 
