@@ -181,6 +181,12 @@ module EE
               null: true,
               description: 'Network Policies of the project',
               resolver: ::Resolvers::NetworkPolicyResolver
+
+        field :dora,
+              ::Types::DoraType,
+              null: true,
+              method: :itself,
+              description: "The project's DORA metrics."
       end
 
       def api_fuzzing_ci_configuration

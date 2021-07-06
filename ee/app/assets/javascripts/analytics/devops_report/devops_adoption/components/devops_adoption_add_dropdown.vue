@@ -100,7 +100,7 @@ export default {
               bulkEnableDevopsAdoptionNamespaces: { enabledNamespaces, errors: requestErrors },
             } = data;
 
-            if (!requestErrors.length) this.$emit('segmentsAdded', enabledNamespaces);
+            if (!requestErrors.length) this.$emit('enabledNamespacesAdded', enabledNamespaces);
           },
         })
         .catch((error) => {

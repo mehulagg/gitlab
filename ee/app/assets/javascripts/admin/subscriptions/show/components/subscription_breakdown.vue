@@ -1,6 +1,7 @@
 <script>
 import { GlButton, GlModalDirective } from '@gitlab/ui';
 import axios from '~/lib/utils/axios_utils';
+import UserCalloutDismisser from '~/vue_shared/components/user_callout_dismisser.vue';
 import {
   activateCloudLicense,
   licensedToHeaderText,
@@ -13,6 +14,7 @@ import {
   syncSubscriptionButtonText,
   uploadLicense,
 } from '../constants';
+import SubscriptionActivationBanner from './subscription_activation_banner.vue';
 import SubscriptionActivationModal from './subscription_activation_modal.vue';
 import SubscriptionDetailsCard from './subscription_details_card.vue';
 import SubscriptionDetailsHistory from './subscription_details_history.vue';
@@ -41,14 +43,22 @@ export default {
     GlModal: GlModalDirective,
   },
   components: {
+    SubscriptionActivationBanner,
     GlButton,
     SubscriptionActivationModal,
     SubscriptionDetailsCard,
     SubscriptionDetailsHistory,
     SubscriptionDetailsUserInfo,
     SubscriptionSyncNotifications: () => import('./subscription_sync_notifications.vue'),
+    UserCalloutDismisser,
   },
-  inject: ['customersPortalUrl', 'licenseRemovePath', 'licenseUploadPath', 'subscriptionSyncPath'],
+  inject: [
+    'customersPortalUrl',
+    'licenseRemovePath',
+    'licenseUploadPath',
+    'subscriptionSyncPath',
+    'subscriptionActivationBannerCalloutName',
+  ],
   props: {
     subscription: {
       type: Object,
@@ -117,6 +127,9 @@ export default {
     didDismissSuccessAlert() {
       this.shouldShowNotifications = false;
     },
+    showActivationModal() {
+      this.activationModalVisible = true;
+    },
     syncSubscription() {
       this.hasAsyncActivity = true;
       this.shouldShowNotifications = false;
@@ -144,6 +157,19 @@ export default {
       v-model="activationModalVisible"
       :modal-id="$options.modal.id"
     />
+    <user-callout-dismisser
+      v-if="canActivateSubscription"
+      :feature-name="subscriptionActivationBannerCalloutName"
+    >
+      <template #default="{ dismiss, shouldShowCallout }">
+        <subscription-activation-banner
+          v-if="shouldShowCallout"
+          class="mb-4"
+          @activate-subscription="showActivationModal"
+          @close="dismiss"
+        />
+      </template>
+    </user-callout-dismisser>
     <subscription-sync-notifications
       v-if="shouldShowNotifications"
       class="mb-4"
@@ -158,6 +184,7 @@ export default {
           :header-text="$options.i18n.subscriptionDetailsHeaderText"
           :subscription="subscription"
           :sync-did-fail="syncDidFail"
+          data-testid="subscription-details"
         >
           <template v-if="shouldShowFooter" #footer>
             <gl-button

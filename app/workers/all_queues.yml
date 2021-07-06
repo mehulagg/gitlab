@@ -267,7 +267,7 @@
   :tags: []
 - :name: cronjob:gitlab_usage_ping
   :worker_name: GitlabUsagePingWorker
-  :feature_category: :usage_ping
+  :feature_category: :service_ping
   :has_external_dependencies:
   :urgency: :low
   :resource_boundary: :unknown
@@ -1619,7 +1619,7 @@
   :urgency: :low
   :resource_boundary: :unknown
   :weight: 5
-  :idempotent:
+  :idempotent: true
   :tags: []
 - :name: pipeline_processing:pipeline_process
   :worker_name: PipelineProcessWorker

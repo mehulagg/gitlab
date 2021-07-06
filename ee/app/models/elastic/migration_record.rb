@@ -68,6 +68,10 @@ module Elastic
       []
     end
 
+    def running?
+      started? && !halted? && !completed?
+    end
+
     private
 
     def timestamps(completed:)

@@ -21,7 +21,7 @@ describe('DevopsAdoptionTable', () => {
     wrapper = mount(DevopsAdoptionTable, {
       propsData: {
         cols: DEVOPS_ADOPTION_TABLE_CONFIGURATION[0].cols,
-        segments: devopsAdoptionNamespaceData.nodes,
+        enabledNamespaces: devopsAdoptionNamespaceData.nodes,
       },
       provide,
       directives: {
@@ -100,15 +100,15 @@ describe('DevopsAdoptionTable', () => {
   });
 
   describe('table fields', () => {
-    describe('segment name', () => {
+    describe('enabled namespace name', () => {
       beforeEach(() => {
         createComponent();
       });
 
-      it('displays the correct segment name', () => {
+      it('displays the correct name', () => {
         createComponent();
 
-        expect(findCol(TEST_IDS.SEGMENT).text()).toBe('Group 1');
+        expect(findCol(TEST_IDS.NAMESPACE).text()).toBe('Group 1');
       });
 
       describe('"This group" badge', () => {
@@ -122,7 +122,7 @@ describe('DevopsAdoptionTable', () => {
         `('$scenario', ({ expected, provide }) => {
           createComponent({ provide });
 
-          const badge = findColSubComponent(TEST_IDS.SEGMENT, GlBadge);
+          const badge = findColSubComponent(TEST_IDS.NAMESPACE, GlBadge);
 
           expect(badge.exists()).toBe(expected);
         });
@@ -134,7 +134,7 @@ describe('DevopsAdoptionTable', () => {
         });
 
         it('grays the text out', () => {
-          const name = findColRowChild(TEST_IDS.SEGMENT, 1, 'span');
+          const name = findColRowChild(TEST_IDS.NAMESPACE, 1, 'span');
 
           expect(name.classes()).toStrictEqual(['gl-text-gray-400']);
         });
@@ -143,7 +143,7 @@ describe('DevopsAdoptionTable', () => {
           let icon;
 
           beforeEach(() => {
-            icon = findColRowChild(TEST_IDS.SEGMENT, 1, GlIcon);
+            icon = findColRowChild(TEST_IDS.NAMESPACE, 1, GlIcon);
           });
 
           it('displays the icon', () => {
@@ -198,7 +198,7 @@ describe('DevopsAdoptionTable', () => {
       createComponent();
 
       wrapper.setData({
-        selectedSegment: devopsAdoptionNamespaceData.nodes[0],
+        selectedNamespace: devopsAdoptionNamespaceData.nodes[0],
       });
     });
 
@@ -217,14 +217,14 @@ describe('DevopsAdoptionTable', () => {
       headers = findTable().findAll(`[data-testid="${TEST_IDS.TABLE_HEADERS}"]`);
     });
 
-    it('sorts the segments by name', async () => {
-      expect(findCol(TEST_IDS.SEGMENT).text()).toBe('Group 1');
+    it('sorts the namespaces by name', async () => {
+      expect(findCol(TEST_IDS.NAMESPACE).text()).toBe('Group 1');
 
       headers.at(0).trigger('click');
 
       await nextTick();
 
-      expect(findCol(TEST_IDS.SEGMENT).text()).toBe('Group 2');
+      expect(findCol(TEST_IDS.NAMESPACE).text()).toBe('Group 2');
     });
 
     it('should update local storage when the sort column changes', async () => {

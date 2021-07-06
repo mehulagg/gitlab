@@ -51,25 +51,33 @@ module Security
     end
 
     def sort(collection)
+      default_sort_order = 'asc'
+
       case params[:sort_by]
       when 'packager'
         collection.sort_by! { |a| a[:packager] }
       when 'severity'
+        default_sort_order = 'desc'
         sort_dependency_vulnerabilities_by_severity!(collection)
         sort_dependencies_by_severity!(collection)
       else
         collection.sort_by! { |a| a[:name] }
       end
 
-      collection.reverse! if params[:sort] == 'desc'
+      if params[:sort] && params[:sort] != default_sort_order
+        collection.reverse!
+      end
 
       collection
     end
 
     def compare_severity_levels(level1, level2)
+      # level2 appears before level1 because we want the default sort order to be in descending
+      # order of severity level, for example "critical, high, medium, low"
       ::Enums::Vulnerability.severity_levels[level2] <=> ::Enums::Vulnerability.severity_levels[level1]
     end
 
+    # sort dependency vulnerabilities in descending order by severity level
     def sort_dependency_vulnerabilities_by_severity!(collection)
       collection.each do |dependency|
         dependency[:vulnerabilities].sort! do |vulnerability1, vulnerability2|
@@ -78,8 +86,8 @@ module Security
       end
     end
 
-    # vulnerabilities are already sorted by severity level so we can assume that first vulnerability in
-    # vulnerabilities array will have highest severity
+    # vulnerabilities are already sorted in descending order by severity level so we can assume that
+    # first vulnerability in the vulnerabilities array will have the highest severity
     def sort_dependencies_by_severity!(collection)
       collection.sort! do |dep_i, dep_j|
         level_i = dep_i.dig(:vulnerabilities, 0, :severity) || :info

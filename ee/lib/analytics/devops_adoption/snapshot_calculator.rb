@@ -113,6 +113,10 @@ module Analytics
         projects_count_with_artifact(Ci::JobArtifact.dependency_list_reports)
       end
 
+      def coverage_fuzzing_enabled_count
+        projects_count_with_artifact(Ci::JobArtifact.coverage_fuzzing_reports)
+      end
+
       # rubocop: disable CodeReuse/ActiveRecord
       def projects_count_with_artifact(artifacts_scope)
         subquery = artifacts_scope.created_in_time_range(from: range_start, to: range_end)
