@@ -96,20 +96,14 @@ module Analytics
       end
 
       def sast_enabled_count
-        return unless Feature.enabled?(:analytics_devops_adoption_sastdast, enabled_namespace.namespace, default_enabled: :yaml)
-
         projects_count_with_artifact(Ci::JobArtifact.sast_reports)
       end
 
       def dast_enabled_count
-        return unless Feature.enabled?(:analytics_devops_adoption_sastdast, enabled_namespace.namespace, default_enabled: :yaml)
-
         projects_count_with_artifact(Ci::JobArtifact.dast_reports)
       end
 
       def dependency_scanning_enabled_count
-        return unless Feature.enabled?(:analytics_devops_adoption_dependency_scanning, enabled_namespace.namespace, default_enabled: :yaml)
-
         projects_count_with_artifact(Ci::JobArtifact.dependency_list_reports)
       end
 
