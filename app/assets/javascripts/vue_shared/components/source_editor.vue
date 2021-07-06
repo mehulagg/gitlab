@@ -95,6 +95,7 @@ export default {
   <div
     :id="`source-editor-${fileGlobalId}`"
     ref="editor"
+    data-qa-selector="source_editor_content"
     data-editor-loading
     @[$options.readyEvent]="$emit($options.readyEvent)"
   >

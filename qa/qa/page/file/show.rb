@@ -9,6 +9,14 @@ module QA
         include Project::SubMenus::Common
         include Layout::Flash
 
+        view 'app/assets/javascripts/blob/components/blob_header_filepath.vue' do
+          element :file_title_content
+        end
+
+        view 'app/assets/javascripts/vue_shared/components/source_editor.vue' do
+          element :source_editor_content
+        end
+
         view 'app/helpers/blob_helper.rb' do
           element :edit_button, "_('Edit')" # rubocop:disable QA/ElementWithPattern
           element :delete_button, '_("Delete")' # rubocop:disable QA/ElementWithPattern
@@ -39,20 +47,20 @@ module QA
         end
 
         def has_file?(name)
-          has_element?(:file_name_content, text: name)
+          has_element?(:file_title_content, text: name)
         end
 
         def has_no_file?(name)
-          has_no_element?(:file_name_content, text: name)
+          has_no_element?(:file_title_content, text: name)
         end
 
         def has_file_content?(file_content, file_number = nil)
           if file_number
-            within_element_by_index(:file_content, file_number - 1) do
+            within_element_by_index(:source_editor_content, file_number - 1) do
               has_text?(file_content)
             end
           else
-            within_element(:file_content) do
+            within_element(:source_editor_content) do
               has_text?(file_content)
             end
           end
