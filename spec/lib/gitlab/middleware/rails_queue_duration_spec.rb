@@ -37,10 +37,9 @@ RSpec.describe Gitlab::Middleware::RailsQueueDuration do
         env['HTTP_GITLAB_WORKHORSE_PROXY_START'] = '2000000000'
 
         expect(transaction).to receive(:observe).with(:gitlab_rails_queue_duration_seconds, 1)
+        expect(Gitlab::Metrics::System).to receive(:monotonic_time).and_return(3.0)
 
-        travel_to(Time.at(3)) do
-          expect(middleware.call(env)).to eq('yay')
-        end
+        expect(middleware.call(env)).to eq('yay')
       end
     end
   end
