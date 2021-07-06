@@ -1886,7 +1886,7 @@ class User < ApplicationRecord
   end
 
   def password_expired_if_applicable?
-    return false unless password_expired?
+    return false unless password_expired? && password_automatically_set?
     return false unless allow_password_authentication?
 
     true
