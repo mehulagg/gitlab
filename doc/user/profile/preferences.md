@@ -165,6 +165,15 @@ You can choose one of the following options as the first day of the week:
 
 If you select **System Default**, the [instance default](../admin_area/settings/index.md#default-first-day-of-the-week) setting is used.
 
+## Time Preferences
+
+### Use relative times
+
+This allows you to choose between relative dates e.g. `30 minutes ago` and absolute dates e.g. `May 18, 2021, 3:57 PM`.
+The dates are formatted depending on your chosen language.
+
+*This feature is experimental, so choosing absolute dates might break certain layouts. Please report an issue if you find absolute dates to break layouts.* 
+
 ## Integrations
 
 Configure your preferences with third-party services which provide enhancements to your GitLab experience.
