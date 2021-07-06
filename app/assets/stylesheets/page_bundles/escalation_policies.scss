@@ -35,3 +35,8 @@ $stroke-size: 1px;
     transform: rotate(-45deg);
   }
 }
+
+.rule-condition {
+  flex-basis: 25%;
+  flex-shrink: 0;
+}

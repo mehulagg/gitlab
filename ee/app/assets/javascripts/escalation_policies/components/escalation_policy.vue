@@ -23,11 +23,16 @@ import {
 import EditEscalationPolicyModal from './add_edit_escalation_policy_modal.vue';
 import DeleteEscalationPolicyModal from './delete_escalation_policy_modal.vue';
 
+const BASE_ARROW_LENGTH = 40; // px
+
 export const i18n = {
   editPolicy: s__('EscalationPolicies|Edit escalation policy'),
   deletePolicy: s__('EscalationPolicies|Delete escalation policy'),
-  escalationRule: s__(
-    'EscalationPolicies|IF alert is not %{alertStatus} in %{minutes} %{then} THEN %{doAction} %{scheduleOrUser}',
+  escalationRuleCondition: s__(
+    'EscalationPolicies|%{clockIcon} IF alert is not %{alertStatus} in %{minutes}',
+  ),
+  escalationRuleAction: s__(
+    'EscalationPolicies|%{notificationIcon} THEN %{doAction} %{forScheduleOrUser}',
   ),
   minutes: s__('EscalationPolicies|mins'),
 };
@@ -74,9 +79,19 @@ export default {
   data() {
     return {
       isPolicyVisible: this.index === 0,
+      ruleContainerWidth: 0,
     };
   },
   computed: {
+    baseArrowLength() {
+      if (this.ruleContainerWidth) {
+        const halfContainerSize = this.ruleContainerWidth / 2;
+        const maxRules = 10;
+        const baseArrowLength = halfContainerSize / maxRules;
+        return baseArrowLength > BASE_ARROW_LENGTH ? BASE_ARROW_LENGTH : baseArrowLength;
+      }
+      return BASE_ARROW_LENGTH;
+    },
     policyVisibleAngleIcon() {
       return this.isPolicyVisible ? 'angle-down' : 'angle-right';
     },
@@ -90,6 +105,9 @@ export default {
       return `${deleteEscalationPolicyModalId}-${this.policy.id}`;
     },
   },
+  mounted() {
+    this.ruleContainerWidth = this.$refs.ruleContainer?.clientWidth;
+  },
   methods: {
     hasEscalationSchedule(rule) {
       return rule.oncallSchedule?.iid;
@@ -102,6 +120,10 @@ export default {
         ? ACTIONS[EMAIL_ONCALL_SCHEDULE_USER]
         : ACTIONS[EMAIL_USER]
       ).toLowerCase();
+    },
+    getArrowLength(index) {
+      const length = (index + 1) * this.baseArrowLength;
+      return `${length}px`;
     },
   },
 };
@@ -151,41 +173,54 @@ export default {
         <p v-if="policy.description" class="gl-text-gray-500 gl-mb-5">
           {{ policy.description }}
         </p>
-        <div class="gl-border-solid gl-border-1 gl-border-gray-100 gl-rounded-base gl-p-5">
+        <div
+          ref="ruleContainer"
+          class="gl-border-solid gl-border-1 gl-border-gray-100 gl-rounded-base gl-p-5"
+        >
           <div
             v-for="(rule, ruleIndex) in policy.rules"
             :key="rule.id"
             :class="{ 'gl-mb-5': ruleIndex !== policy.rules.length - 1 }"
+            class="gl-display-flex gl-align-items-center gl-flex-wrap"
           >
-            <gl-icon name="clock" class="gl-mr-3" />
-            <gl-sprintf :message="$options.i18n.escalationRule">
-              <template #alertStatus>
-                {{ $options.ALERT_STATUSES[rule.status].toLowerCase() }}
-              </template>
-              <template #minutes>
-                <span class="gl-font-weight-bold">
-                  {{ rule.elapsedTimeMinutes }} {{ $options.i18n.minutes }}
-                </span>
-              </template>
-              <template #then>
-                <span class="right-arrow">
-                  <i class="right-arrow-head"></i>
-                </span>
-                <gl-icon name="notifications" class="gl-mr-3" />
-              </template>
-              <template #doAction>
-                {{ getActionName(rule) }}
-              </template>
-              <template #scheduleOrUser>
-                <span v-if="hasEscalationSchedule(rule)" class="gl-font-weight-bold">
-                  {{ rule.oncallSchedule.name }}
-                </span>
-                <gl-token v-else-if="hasEscalationUser(rule)" view-only>
-                  <gl-avatar :src="rule.user.avatarUrl" :size="16" />
-                  {{ rule.user.name }}
-                </gl-token>
-              </template>
-            </gl-sprintf>
+            <span class="rule-condition">
+              <gl-sprintf :message="$options.i18n.escalationRuleCondition">
+                <template #clockIcon>
+                  <gl-icon name="clock" class="gl-mr-3" />
+                </template>
+                <template #alertStatus>
+                  {{ $options.ALERT_STATUSES[rule.status].toLowerCase() }}
+                </template>
+                <template #minutes>
+                  <span class="gl-font-weight-bold">
+                    {{ rule.elapsedTimeMinutes }} {{ $options.i18n.minutes }}
+                  </span>
+                </template>
+              </gl-sprintf>
+            </span>
+            <span class="right-arrow" :style="{ width: getArrowLength(ruleIndex) }">
+              <i class="right-arrow-head"></i>
+            </span>
+
+            <span>
+              <gl-sprintf :message="$options.i18n.escalationRuleAction">
+                <template #notificationIcon>
+                  <gl-icon name="notifications" class="gl-mr-3" />
+                </template>
+                <template #doAction>
+                  {{ getActionName(rule) }}
+                </template>
+                <template #forScheduleOrUser>
+                  <span v-if="hasEscalationSchedule(rule)" class="gl-font-weight-bold">
+                    {{ rule.oncallSchedule.name }}
+                  </span>
+                  <gl-token v-else-if="hasEscalationUser(rule)" view-only>
+                    <gl-avatar :src="rule.user.avatarUrl" :size="16" />
+                    {{ rule.user.name }}
+                  </gl-token>
+                </template>
+              </gl-sprintf>
+            </span>
           </div>
         </div>
       </gl-collapse>
