@@ -21,9 +21,7 @@ export const setFrequentItemToLS = (key, data, item) => {
   }
 
   try {
-    const frequentItems = data[key].map(({ id, frequency }) => {
-      return { id, frequency };
-    });
+    const frequentItems = data[key];
     const existingItemIndex = frequentItems.findIndex((i) => i.id === item.id);
 
     if (existingItemIndex >= 0) {
@@ -36,7 +34,7 @@ export const setFrequentItemToLS = (key, data, item) => {
         frequentItems.pop();
       }
 
-      frequentItems.push({ id: item.id, frequency: 1 });
+      frequentItems.push({ ...item, frequency: 1 });
     }
 
     // Sort by frequency
@@ -49,4 +47,11 @@ export const setFrequentItemToLS = (key, data, item) => {
     // The LS got in a bad state, let's wipe it
     localStorage.removeItem(key);
   }
+};
+
+export const mergeById = (inflatedData, storedData) => {
+  return inflatedData.map((data) => {
+    const stored = storedData?.find((d) => d.id === data.id) || {};
+    return { ...stored, ...data };
+  });
 };

@@ -13,15 +13,7 @@ export default {
     state.fetchingGroups = false;
     state.groups = [];
   },
-  [types.REQUEST_FREQUENT_GROUPS](state) {
-    state.fetchingFrequentGroups = true;
-  },
-  [types.RECEIVE_FREQUENT_GROUPS_SUCCESS](state, data) {
-    state.fetchingFrequentGroups = false;
-    state.frequentItems[GROUPS_LOCAL_STORAGE_KEY] = data;
-  },
   [types.RECEIVE_FREQUENT_GROUPS_ERROR](state) {
-    state.fetchingFrequentGroups = false;
     state.frequentItems[GROUPS_LOCAL_STORAGE_KEY] = [];
   },
   [types.REQUEST_PROJECTS](state) {
@@ -35,18 +27,13 @@ export default {
     state.fetchingProjects = false;
     state.projects = [];
   },
-  [types.REQUEST_FREQUENT_PROJECTS](state) {
-    state.fetchingFrequentProjects = true;
-  },
-  [types.RECEIVE_FREQUENT_PROJECTS_SUCCESS](state, data) {
-    state.fetchingFrequentProjects = false;
-    state.frequentItems[PROJECTS_LOCAL_STORAGE_KEY] = data;
-  },
   [types.RECEIVE_FREQUENT_PROJECTS_ERROR](state) {
-    state.fetchingFrequentProjects = false;
     state.frequentItems[PROJECTS_LOCAL_STORAGE_KEY] = [];
   },
   [types.SET_QUERY](state, { key, value }) {
     state.query[key] = value;
+  },
+  [types.LOAD_FREQUENT_ITEMS](state, { key, data }) {
+    state.frequentItems[key] = data;
   },
 };

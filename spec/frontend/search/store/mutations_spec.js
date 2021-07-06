@@ -37,28 +37,10 @@ describe('Global Search Store Mutations', () => {
     });
   });
 
-  describe('REQUEST_FREQUENT_GROUPS', () => {
-    it('sets fetchingGroups to true', () => {
-      mutations[types.REQUEST_FREQUENT_GROUPS](state);
-
-      expect(state.fetchingFrequentGroups).toBe(true);
-    });
-  });
-
-  describe('RECEIVE_FREQUENT_GROUPS_SUCCESS', () => {
-    it('sets fetchingGroups to false and sets groups', () => {
-      mutations[types.RECEIVE_FREQUENT_GROUPS_SUCCESS](state, MOCK_GROUPS);
-
-      expect(state.fetchingFrequentGroups).toBe(false);
-      expect(state.frequentItems[GROUPS_LOCAL_STORAGE_KEY]).toStrictEqual(MOCK_GROUPS);
-    });
-  });
-
   describe('RECEIVE_FREQUENT_GROUPS_ERROR', () => {
-    it('sets fetchingGroups to false and clears groups', () => {
+    it('clears groups', () => {
       mutations[types.RECEIVE_FREQUENT_GROUPS_ERROR](state);
 
-      expect(state.fetchingFrequentGroups).toBe(false);
       expect(state.frequentItems[GROUPS_LOCAL_STORAGE_KEY]).toStrictEqual([]);
     });
   });
@@ -89,28 +71,10 @@ describe('Global Search Store Mutations', () => {
     });
   });
 
-  describe('REQUEST_FREQUENT_PROJECTS', () => {
-    it('sets fetchingGroups to true', () => {
-      mutations[types.REQUEST_FREQUENT_PROJECTS](state);
-
-      expect(state.fetchingFrequentProjects).toBe(true);
-    });
-  });
-
-  describe('RECEIVE_FREQUENT_PROJECTS_SUCCESS', () => {
-    it('sets fetchingGroups to false and sets groups', () => {
-      mutations[types.RECEIVE_FREQUENT_PROJECTS_SUCCESS](state, MOCK_PROJECTS);
-
-      expect(state.fetchingFrequentProjects).toBe(false);
-      expect(state.frequentItems[PROJECTS_LOCAL_STORAGE_KEY]).toStrictEqual(MOCK_PROJECTS);
-    });
-  });
-
   describe('RECEIVE_FREQUENT_PROJECTS_ERROR', () => {
-    it('sets fetchingGroups to false and clears groups', () => {
+    it('clears projects', () => {
       mutations[types.RECEIVE_FREQUENT_PROJECTS_ERROR](state);
 
-      expect(state.fetchingFrequentProjects).toBe(false);
       expect(state.frequentItems[PROJECTS_LOCAL_STORAGE_KEY]).toStrictEqual([]);
     });
   });
@@ -122,6 +86,15 @@ describe('Global Search Store Mutations', () => {
       mutations[types.SET_QUERY](state, payload);
 
       expect(state.query[payload.key]).toBe(payload.value);
+    });
+  });
+
+  describe('LOAD_FREQUENT_ITEMS', () => {
+    it('sets frequentItems[key] to data', () => {
+      const payload = { key: 'test-key', data: [1, 2, 3] };
+      mutations[types.LOAD_FREQUENT_ITEMS](state, payload);
+
+      expect(state.frequentItems[payload.key]).toStrictEqual(payload.data);
     });
   });
 });

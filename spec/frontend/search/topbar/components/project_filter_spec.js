@@ -34,9 +34,6 @@ describe('ProjectFilter', () => {
         query: MOCK_QUERY,
         ...initialState,
       },
-      getters: {
-        loadingProjects: () => false,
-      },
       actions: actionSpies,
     });
 

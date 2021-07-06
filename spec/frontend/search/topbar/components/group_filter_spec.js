@@ -34,9 +34,6 @@ describe('GroupFilter', () => {
         query: MOCK_QUERY,
         ...initialState,
       },
-      getters: {
-        loadingGroups: () => false,
-      },
       actions: actionSpies,
     });
 

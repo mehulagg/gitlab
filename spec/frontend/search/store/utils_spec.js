@@ -1,6 +1,6 @@
 import { useLocalStorageSpy } from 'helpers/local_storage_helper';
 import { MAX_FREQUENCY } from '~/search/store/constants';
-import { loadDataFromLS, setFrequentItemToLS } from '~/search/store/utils';
+import { loadDataFromLS, setFrequentItemToLS, mergeById } from '~/search/store/utils';
 import { MOCK_LS_KEY, MOCK_GROUPS } from '../mock_data';
 
 useLocalStorageSpy();
@@ -53,7 +53,7 @@ describe('Global Search Store Utils', () => {
         it('adds 1 to the frequency and calls localStorage.setItem', () => {
           expect(localStorage.setItem).toHaveBeenCalledWith(
             MOCK_LS_KEY,
-            JSON.stringify([{ id: MOCK_GROUPS[0].id, frequency: 2 }]),
+            JSON.stringify([{ ...MOCK_GROUPS[0], frequency: 2 }]),
           );
         });
       });
@@ -67,7 +67,7 @@ describe('Global Search Store Utils', () => {
         it(`does not further increase frequency past ${MAX_FREQUENCY} and calls localStorage.setItem`, () => {
           expect(localStorage.setItem).toHaveBeenCalledWith(
             MOCK_LS_KEY,
-            JSON.stringify([{ id: MOCK_GROUPS[0].id, frequency: MAX_FREQUENCY }]),
+            JSON.stringify([{ ...MOCK_GROUPS[0], frequency: MAX_FREQUENCY }]),
           );
         });
       });
@@ -82,7 +82,7 @@ describe('Global Search Store Utils', () => {
       it('adds a new entry with frequency 1 and calls localStorage.setItem', () => {
         expect(localStorage.setItem).toHaveBeenCalledWith(
           MOCK_LS_KEY,
-          JSON.stringify([{ id: MOCK_GROUPS[0].id, frequency: 1 }]),
+          JSON.stringify([{ ...MOCK_GROUPS[0], frequency: 1 }]),
         );
       });
     });
@@ -100,8 +100,8 @@ describe('Global Search Store Utils', () => {
         expect(localStorage.setItem).toHaveBeenCalledWith(
           MOCK_LS_KEY,
           JSON.stringify([
-            { id: MOCK_GROUPS[1].id, frequency: 2 },
-            { id: MOCK_GROUPS[0].id, frequency: 1 },
+            { ...MOCK_GROUPS[1], frequency: 2 },
+            { ...MOCK_GROUPS[0], frequency: 1 },
           ]),
         );
       });
@@ -141,6 +141,26 @@ describe('Global Search Store Utils', () => {
 
       it('wipes local storage', () => {
         expect(localStorage.removeItem).toHaveBeenCalledWith(MOCK_LS_KEY);
+      });
+    });
+  });
+
+  describe.each`
+    description    | inflatedData                                              | storedData                                                                            | response
+    ${'identical'} | ${[{ id: 1, name: 'test 1' }, { id: 2, name: 'test 2' }]} | ${[{ id: 1, name: 'test 1', frequency: 1 }, { id: 2, name: 'test 2', frequency: 2 }]} | ${[{ id: 1, name: 'test 1', frequency: 1 }, { id: 2, name: 'test 2', frequency: 2 }]}
+    ${'stale'}     | ${[{ id: 1, name: 'test 1' }, { id: 2, name: 'test 2' }]} | ${[{ id: 1, name: 'blah 1', frequency: 1 }, { id: 2, name: 'blah 2', frequency: 2 }]} | ${[{ id: 1, name: 'test 1', frequency: 1 }, { id: 2, name: 'test 2', frequency: 2 }]}
+    ${'empty'}     | ${[{ id: 1, name: 'test 1' }, { id: 2, name: 'test 2' }]} | ${[]}                                                                                 | ${[{ id: 1, name: 'test 1' }, { id: 2, name: 'test 2' }]}
+    ${'null'}      | ${[{ id: 1, name: 'test 1' }, { id: 2, name: 'test 2' }]} | ${null}                                                                               | ${[{ id: 1, name: 'test 1' }, { id: 2, name: 'test 2' }]}
+  `('mergeById', ({ description, inflatedData, storedData, response }) => {
+    describe(`with ${description} storedData`, () => {
+      let res;
+
+      beforeEach(() => {
+        res = mergeById(inflatedData, storedData);
+      });
+
+      it('prioritizes inflatedData and preserves frequency count', () => {
+        expect(response).toStrictEqual(res);
       });
     });
   });

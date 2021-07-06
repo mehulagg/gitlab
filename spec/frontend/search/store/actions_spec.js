@@ -59,19 +59,22 @@ describe('Global Search Store Actions', () => {
   });
 
   describe.each`
-    action                          | axiosMock                         | type         | expectedMutations                                                                                                                                | flashCallCount | lsKey
-    ${actions.loadFrequentGroups}   | ${{ method: 'onGet', code: 200 }} | ${'success'} | ${[{ type: types.REQUEST_FREQUENT_GROUPS }, { type: types.RECEIVE_FREQUENT_GROUPS_SUCCESS, payload: [{ name: 'test' }, { name: 'test' }] }]}     | ${0}           | ${GROUPS_LOCAL_STORAGE_KEY}
-    ${actions.loadFrequentGroups}   | ${{ method: 'onGet', code: 500 }} | ${'error'}   | ${[{ type: types.REQUEST_FREQUENT_GROUPS }, { type: types.RECEIVE_FREQUENT_GROUPS_ERROR }]}                                                      | ${1}           | ${GROUPS_LOCAL_STORAGE_KEY}
-    ${actions.loadFrequentProjects} | ${{ method: 'onGet', code: 200 }} | ${'success'} | ${[{ type: types.REQUEST_FREQUENT_PROJECTS }, { type: types.RECEIVE_FREQUENT_PROJECTS_SUCCESS, payload: [{ name: 'test' }, { name: 'test' }] }]} | ${0}           | ${PROJECTS_LOCAL_STORAGE_KEY}
-    ${actions.loadFrequentProjects} | ${{ method: 'onGet', code: 500 }} | ${'error'}   | ${[{ type: types.REQUEST_FREQUENT_PROJECTS }, { type: types.RECEIVE_FREQUENT_PROJECTS_ERROR }]}                                                  | ${1}           | ${PROJECTS_LOCAL_STORAGE_KEY}
+    action                          | axiosMock                         | type         | expectedMutations                                                                                                                                                                                                                                                                       | flashCallCount | lsKey
+    ${actions.loadFrequentGroups}   | ${{ method: 'onGet', code: 200 }} | ${'success'} | ${[{ type: types.LOAD_FREQUENT_ITEMS, payload: { key: GROUPS_LOCAL_STORAGE_KEY, data: [{ id: 1, name: 'stale 1' }, { id: 2, name: 'stale 2' }] } }, { type: types.LOAD_FREQUENT_ITEMS, payload: { key: GROUPS_LOCAL_STORAGE_KEY, data: [{ name: 'fresh' }, { name: 'fresh' }] } }]}     | ${0}           | ${GROUPS_LOCAL_STORAGE_KEY}
+    ${actions.loadFrequentGroups}   | ${{ method: 'onGet', code: 500 }} | ${'error'}   | ${[{ type: types.LOAD_FREQUENT_ITEMS, payload: { key: GROUPS_LOCAL_STORAGE_KEY, data: [{ id: 1, name: 'stale 1' }, { id: 2, name: 'stale 2' }] } }, { type: types.RECEIVE_FREQUENT_GROUPS_ERROR }]}                                                                                     | ${1}           | ${GROUPS_LOCAL_STORAGE_KEY}
+    ${actions.loadFrequentProjects} | ${{ method: 'onGet', code: 200 }} | ${'success'} | ${[{ type: types.LOAD_FREQUENT_ITEMS, payload: { key: PROJECTS_LOCAL_STORAGE_KEY, data: [{ id: 1, name: 'stale 1' }, { id: 2, name: 'stale 2' }] } }, { type: types.LOAD_FREQUENT_ITEMS, payload: { key: PROJECTS_LOCAL_STORAGE_KEY, data: [{ name: 'fresh' }, { name: 'fresh' }] } }]} | ${0}           | ${PROJECTS_LOCAL_STORAGE_KEY}
+    ${actions.loadFrequentProjects} | ${{ method: 'onGet', code: 500 }} | ${'error'}   | ${[{ type: types.LOAD_FREQUENT_ITEMS, payload: { key: PROJECTS_LOCAL_STORAGE_KEY, data: [{ id: 1, name: 'stale 1' }, { id: 2, name: 'stale 2' }] } }, { type: types.RECEIVE_FREQUENT_PROJECTS_ERROR }]}                                                                                 | ${1}           | ${PROJECTS_LOCAL_STORAGE_KEY}
   `(
     'Promise.all calls',
     ({ action, axiosMock, type, expectedMutations, flashCallCount, lsKey }) => {
       describe(action.name, () => {
         describe(`on ${type}`, () => {
           beforeEach(() => {
-            storeUtils.loadDataFromLS = jest.fn().mockReturnValue([{ id: 1 }, { id: 2 }]);
-            mock[axiosMock.method]().reply(axiosMock.code, { name: 'test' });
+            storeUtils.loadDataFromLS = jest.fn().mockReturnValue([
+              { id: 1, name: 'stale 1' },
+              { id: 2, name: 'stale 2' },
+            ]);
+            mock[axiosMock.method]().reply(axiosMock.code, { name: 'fresh' });
           });
 
           it(`should dispatch the correct mutations`, () => {

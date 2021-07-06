@@ -1,5 +1,5 @@
 <script>
-import { mapState, mapActions, mapGetters } from 'vuex';
+import { mapState, mapActions } from 'vuex';
 import { visitUrl, setUrlParams } from '~/lib/utils/url_utility';
 import { ANY_OPTION, GROUP_DATA, PROJECT_DATA } from '../constants';
 import SearchableDropdown from './searchable_dropdown.vue';
@@ -17,8 +17,7 @@ export default {
     },
   },
   computed: {
-    ...mapState(['projects']),
-    ...mapGetters(['loadingProjects']),
+    ...mapState(['projects', 'fetchingProjects']),
     selectedProject() {
       return this.initialData ? this.initialData : ANY_OPTION;
     },
@@ -53,7 +52,7 @@ export default {
     :header-text="$options.PROJECT_DATA.headerText"
     :name="$options.PROJECT_DATA.name"
     :full-name="$options.PROJECT_DATA.fullName"
-    :loading="loadingProjects"
+    :loading="fetchingProjects"
     :selected-item="selectedProject"
     :items="projects"
     @search="fetchProjects"
