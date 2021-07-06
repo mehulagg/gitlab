@@ -50,7 +50,7 @@ The following table lists project permissions available for each role:
 | View License Compliance reports **(ULTIMATE)**    | ✓ (*1*) | ✓          | ✓           | ✓        | ✓      |
 | View Security reports **(ULTIMATE)**              | ✓ (*3*) | ✓          | ✓           | ✓        | ✓      |
 | View Dependency list **(ULTIMATE)**               |         |            | ✓           | ✓        | ✓      |
-| View License list **(ULTIMATE)**                  |         |            | ✓           | ✓        | ✓      |
+| View License list **(ULTIMATE)**                  |         | ✓          | ✓           | ✓        | ✓      |
 | View [Threats list](application_security/threat_monitoring/#threat-monitoring) **(ULTIMATE)** |         |            | ✓           | ✓        | ✓      |
 | Create and run [on-demand DAST scans](application_security/dast/#on-demand-scans) |         |            | ✓           | ✓        | ✓      |
 | View licenses in Dependency list **(ULTIMATE)**   | ✓ (*1*) | ✓          | ✓           | ✓        | ✓      |
