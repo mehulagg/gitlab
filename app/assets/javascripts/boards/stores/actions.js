@@ -255,6 +255,7 @@ export default {
       .then(({ data }) => {
         if (data?.updateBoardList?.errors.length) {
           commit(types.UPDATE_LIST_FAILURE, backupList);
+          return;
         }
 
         // Only fetch when board items havent been fetched on a collapsed list
