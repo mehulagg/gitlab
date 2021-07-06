@@ -39,6 +39,8 @@ class Namespace < ApplicationRecord
   # `user.namespace` when this user creates a group with themselves as `owner`.
   belongs_to :owner, class_name: "User"
 
+  belongs_to :project
+
   belongs_to :parent, class_name: "Namespace"
   has_many :children, class_name: "Namespace", foreign_key: :parent_id
   has_many :custom_emoji, inverse_of: :namespace
