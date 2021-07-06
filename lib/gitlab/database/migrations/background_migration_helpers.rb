@@ -170,6 +170,23 @@ module Gitlab
           duration
         end
 
+        # Deletes tracking records created by #queue_background_migration_jobs_by_range_at_intervals when the
+        # track_jobs: true option is given.
+        #
+        # ** NOTE ** This method only deletes tracking records that are marked with a status of `succeeded`.
+        # Typically cleanup of the tracking records would only occur after the migration has fully run to completion,
+        # or the jobs would be rescheduled. In case there are some `pending` jobs remaining, we won't delete those
+        # records.
+        #
+        # job_class_name - The background migration job class as a string
+        def cleanup_background_migration_tracking_records(job_class_name, batch_size: BATCH_SIZE)
+          relation_for_job = Gitlab::Database::BackgroundMigrationJob.for_migration_class(job_class_name)
+
+          relation_for_job.succeeded.each_batch(of: batch_size) do |batch|
+            batch.delete_all
+          end
+        end
+
         # Creates a batched background migration for the given table. A batched migration runs one job
         # at a time, computing the bounds of the next batch based on the current migration settings and the previous
         # batch bounds. Each job's execution status is tracked in the database as the migration runs. The given job

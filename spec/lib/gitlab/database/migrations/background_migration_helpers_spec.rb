@@ -334,6 +334,29 @@ RSpec.describe Gitlab::Database::Migrations::BackgroundMigrationHelpers do
     end
   end
 
+  describe '#cleanup_background_migration_tracking_records' do
+    let(:job_class_name) { 'TestJob' }
+    let(:relation_for_job) { Gitlab::Database::BackgroundMigrationJob.for_migration_class(job_class_name) }
+
+    before do
+      create(:background_migration_job, class_name: job_class_name, status: :pending, arguments: [1, 2])
+      create(:background_migration_job, class_name: job_class_name, status: :succeeded, arguments: [3, 4])
+      create(:background_migration_job, class_name: job_class_name, status: :succeeded, arguments: [5, 6])
+    end
+
+    it 'deletes all succeeded tracking records in batches' do
+      expect do
+        model.cleanup_background_migration_tracking_records(job_class_name, batch_size: 1)
+      end.to change { relation_for_job.succeeded.count }.from(2).to(0)
+    end
+
+    it 'does not delete pending tracking records' do
+      expect do
+        model.cleanup_background_migration_tracking_records(job_class_name)
+      end.not_to change { relation_for_job.pending.count }
+    end
+  end
+
   describe '#perform_background_migration_inline?' do
     it 'returns true in a test environment' do
       stub_rails_env('test')
