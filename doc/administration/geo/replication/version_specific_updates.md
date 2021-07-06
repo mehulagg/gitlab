@@ -23,7 +23,7 @@ We found an issue where [secondary nodes re-download all LFS files](https://gitl
 If you don't have many LFS objects or can stand a bit of churn, then it is safe to let the secondary sites re-download LFS objects.
 If you do have many LFS objects, or many Geo secondary sites, or limited bandwidth, or a combination of them all, then we recommend you skip GitLab 13.12.0 through 13.12.6 and update to GitLab 13.12.7 or newer.
 
-### If you already updated to an affected version, and the resync is ongoing
+### If you have already updated to an affected version, and the re-sync is ongoing
 
 You can manually migrate the legacy sync state to the new state column by running the following command in a [Rails console](../../operations/rails_console.md). It should take under a minute:
 
