@@ -38,7 +38,7 @@ function renderChildren(children) {
 export default function createRouter({ base, permissions = {} }) {
   const routes = [
     {
-      path: '',
+      path: '/',
       meta: {
         breadcrumb: __('Iteration cadences'),
       },
@@ -47,9 +47,6 @@ export default function createRouter({ base, permissions = {} }) {
           name: 'index',
           path: '',
           component: IterationCadenceList,
-          meta: {
-            breadcrumb: false,
-          },
         },
         {
           name: 'new',

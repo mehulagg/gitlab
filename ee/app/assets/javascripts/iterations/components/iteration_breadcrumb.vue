@@ -14,7 +14,7 @@ export default {
       const breadcrumbs = [];
 
       pathArray.forEach((path, index) => {
-        const text = this.$route.matched[index].meta?.breadcrumb ?? path;
+        const text = this.$route.matched[index].meta?.breadcrumb || path;
         if (text) {
           const prevPath = breadcrumbs[index - 1]?.to;
           const to = (prevPath ? `${prevPath}/${path}` : `/${path}`).replace('//', '/');
