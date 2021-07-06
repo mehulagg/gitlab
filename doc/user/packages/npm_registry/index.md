@@ -455,6 +455,12 @@ Due to a bug in npm 6.9.0, deleting distribution tags fails. Make sure your npm 
 When troubleshooting npm issues, first run the same command with the `--verbose` flag to confirm
 what registry you are hitting.
 
+npm will cache files related to a package to help improve performance. npm will not remove data by itself: the cache will grow as new packages are installed. If you are running into issues, consider clearing the cache by running:
+
+```shell
+npm cache clean --force
+```
+
 ### Error running Yarn with the Package Registry for npm registry
 
 If you are using [Yarn](https://classic.yarnpkg.com/en/) with the npm registry, you may get

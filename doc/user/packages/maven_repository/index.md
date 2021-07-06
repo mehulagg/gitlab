@@ -813,6 +813,18 @@ You can play around with the regex and try your version strings on [this regular
 
 ## Troubleshooting
 
+Maven will cache files related to a package to help improve performance. If you are running into issues, consider clearing the cache by running:
+
+```shell
+rm -rf ~/.m2/repository
+```
+
+Or the below for Gradle:
+
+```shell
+rm -rf ~/.gradle/caches
+```
+
 ### Review network trace logs
 
 If you are having issues with the Maven Repository, you may want to review network trace logs.

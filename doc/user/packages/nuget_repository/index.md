@@ -422,3 +422,12 @@ CLI (`dotnet`):
 - `dotnet nuget push`: Upload a package to the registry.
 - `nuget install`: Install a package from the registry.
 - `dotnet add`: Install a package from the registry.
+
+## Troubleshooting
+
+NuGet will cache files related to a package to help improve performance. If you are running into issues, consider clearing the cache by running:
+
+```shell
+nuget locals all -clear
+```
+
