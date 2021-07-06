@@ -13,10 +13,4 @@ RSpec.describe 'Group value stream analytics' do
 
     sign_in(user)
   end
-
-  it 'pushes frontend feature flags' do
-    visit group_analytics_cycle_analytics_path(group)
-
-    expect(page).to have_pushed_frontend_feature_flags(cycleAnalyticsScatterplotEnabled: true)
-  end
 end

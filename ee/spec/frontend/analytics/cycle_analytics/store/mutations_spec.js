@@ -86,7 +86,6 @@ describe('Value Stream Analytics mutations', () => {
 
   it.each`
     mutation                                     | payload                                                  | expectedState
-    ${types.SET_FEATURE_FLAGS}                   | ${{ hasDurationChart: true }}                            | ${{ featureFlags: { hasDurationChart: true } }}
     ${types.SET_SELECTED_PROJECTS}               | ${selectedProjects}                                      | ${{ selectedProjects }}
     ${types.SET_DATE_RANGE}                      | ${{ createdAfter, createdBefore }}                       | ${{ createdAfter, createdBefore }}
     ${types.SET_SELECTED_STAGE}                  | ${{ id: 'first-stage' }}                                 | ${{ selectedStage: { id: 'first-stage' } }}
