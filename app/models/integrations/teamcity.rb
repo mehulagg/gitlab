@@ -18,7 +18,6 @@ module Integrations
 
     attr_accessor :response
 
-    after_save :compose_service_hook, if: :activated?
     before_update :reset_password
 
     class << self
@@ -38,11 +37,6 @@ module Integrations
           'TeamCity CI will be triggered after a merge request has been created or updated'
         end
       end
-    end
-
-    def compose_service_hook
-      hook = service_hook || build_service_hook
-      hook.save
     end
 
     def reset_password

@@ -5,11 +5,6 @@ require 'spec_helper'
 RSpec.describe Integrations::DroneCi, :use_clean_rails_memory_store_caching do
   include ReactiveCachingHelpers
 
-  describe 'associations' do
-    it { is_expected.to belong_to(:project) }
-    it { is_expected.to have_one(:service_hook) }
-  end
-
   describe 'validations' do
     context 'active' do
       before do
@@ -32,7 +27,15 @@ RSpec.describe Integrations::DroneCi, :use_clean_rails_memory_store_caching do
   end
 
   shared_context :drone_ci_integration do
-    let(:drone)      { described_class.new }
+    subject(:drone) do
+      described_class.new(
+        project: project,
+        active: true,
+        drone_url: drone_url,
+        token: token
+      )
+    end
+
     let(:project)    { create(:project, :repository, name: 'project') }
     let(:path)       { project.full_path }
     let(:drone_url)  { 'http://drone.example.com' }
@@ -45,16 +48,6 @@ RSpec.describe Integrations::DroneCi, :use_clean_rails_memory_store_caching do
     let(:build_page) { "#{drone_url}/gitlab/#{path}/redirect/commits/#{sha}?branch=#{branch}" }
     let(:commit_status_path) { "#{drone_url}/gitlab/#{path}/commits/#{sha}?branch=#{branch}&access_token=#{token}" }
 
-    before do
-      allow(drone).to receive_messages(
-        project_id: project.id,
-        project: project,
-        active: true,
-        drone_url: drone_url,
-        token: token
-      )
-    end
-
     def stub_request(status: 200, body: nil)
       body ||= %q({"status":"success"})
 
@@ -64,6 +57,13 @@ RSpec.describe Integrations::DroneCi, :use_clean_rails_memory_store_caching do
         body: body
       )
     end
+  end
+
+  it_behaves_like Integrations::HasWebHook do
+    include_context :drone_ci_integration
+
+    let(:integration) { drone }
+    let(:hook_url) { "#{drone_url}/hook?owner=#{project.namespace.full_path}&name=#{project.path}&access_token=#{token}" }
   end
 
   describe "integration page/path methods" do

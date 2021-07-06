@@ -2,6 +2,7 @@
 
 module Integrations
   class Jenkins < BaseCi
+    include HasWebHook
     include ActionView::Helpers::UrlHelper
 
     prop_accessor :jenkins_url, :project_name, :username, :password
@@ -16,8 +17,6 @@ module Integrations
     default_value_for :merge_requests_events, false
     default_value_for :tag_push_events, false
 
-    after_save :compose_service_hook, if: :activated?
-
     def reset_password
       # don't reset the password if a new one is provided
       if (jenkins_url_changed? || username.blank?) && !password_touched?
@@ -25,10 +24,11 @@ module Integrations
       end
     end
 
-    def compose_service_hook
-      hook = service_hook || build_service_hook
-      hook.url = hook_url
-      hook.save
+    override :compose_web_hook
+    def compose_web_hook
+      super do |hook|
+        hook.url = hook_url
+      end
     end
 
     def execute(data)

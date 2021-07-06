@@ -4,6 +4,7 @@ require "addressable/uri"
 
 module Integrations
   class Buildkite < BaseCi
+    include HasWebHook
     include ReactiveService
 
     ENDPOINT = "https://buildkite.com"
@@ -12,8 +13,6 @@ module Integrations
 
     validates :project_url, presence: true, public_url: true, if: :activated?
     validates :token, presence: true, if: :activated?
-
-    after_save :compose_service_hook, if: :activated?
 
     def self.supported_events
       %w(push merge_request tag_push)
@@ -39,11 +38,12 @@ module Integrations
       "#{buildkite_endpoint('webhook')}/deliver/#{webhook_token}"
     end
 
-    def compose_service_hook
-      hook = service_hook || build_service_hook
-      hook.url = webhook_url
-      hook.enable_ssl_verification = true
-      hook.save
+    override :compose_web_hook
+    def compose_web_hook
+      super do |hook|
+        hook.url = webhook_url
+        hook.enable_ssl_verification = true
+      end
     end
 
     def execute(data)

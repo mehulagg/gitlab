@@ -9,6 +9,7 @@ class Integration < ApplicationRecord
   include Integrations::HasDataFields
   include FromUnion
   include EachBatch
+  extend Gitlab::Utils::Override
 
   # TODO Rename the table: https://gitlab.com/gitlab-org/gitlab/-/issues/201856
   self.table_name = 'services'

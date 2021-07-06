@@ -2,6 +2,8 @@
 
 module Integrations
   class Datadog < Integration
+    include HasWebHook
+
     DEFAULT_SITE = 'datadoghq.com'
     URL_TEMPLATE = 'https://webhooks-http-intake.logs.%{datadog_site}/v1/input/'
     URL_TEMPLATE_API_KEYS = 'https://app.%{datadog_site}/account/settings#api'
@@ -20,8 +22,6 @@ module Integrations
       validates :datadog_site, presence: true, unless: -> (obj) { obj.api_url.present? }
       validates :api_url, presence: true, unless: -> (obj) { obj.datadog_site.present? }
     end
-
-    after_save :compose_service_hook, if: :activated?
 
     def initialize_properties
       super
@@ -98,10 +98,11 @@ module Integrations
       ]
     end
 
-    def compose_service_hook
-      hook = service_hook || build_service_hook
-      hook.url = hook_url
-      hook.save
+    override :compose_web_hook
+    def compose_web_hook
+      super do |hook|
+        hook.url = hook_url
+      end
     end
 
     def hook_url

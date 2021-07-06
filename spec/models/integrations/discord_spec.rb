@@ -33,7 +33,6 @@ RSpec.describe Integrations::Discord do
       allow(subject).to receive_messages(
         project: project,
         project_id: project.id,
-        service_hook: true,
         webhook: webhook_url
       )
 

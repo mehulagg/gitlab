@@ -2,6 +2,8 @@
 
 module Integrations
   class Packagist < Integration
+    include HasWebHook
+
     prop_accessor :username, :token, :server
 
     validates :username, presence: true, if: :activated?
@@ -9,8 +11,6 @@ module Integrations
 
     default_value_for :push_events, true
     default_value_for :tag_push_events, true
-
-    after_save :compose_service_hook, if: :activated?
 
     def title
       'Packagist'
@@ -53,10 +53,11 @@ module Integrations
       { success: true, result: result[:message] }
     end
 
-    def compose_service_hook
-      hook = service_hook || build_service_hook
-      hook.url = hook_url
-      hook.save
+    override :compose_web_hook
+    def compose_web_hook
+      super do |hook|
+        hook.url = hook_url
+      end
     end
 
     def hook_url

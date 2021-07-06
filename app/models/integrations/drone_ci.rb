@@ -2,6 +2,7 @@
 
 module Integrations
   class DroneCi < BaseCi
+    include HasWebHook
     include ReactiveService
     include ServicePushDataValidations
 
@@ -11,14 +12,15 @@ module Integrations
     validates :drone_url, presence: true, public_url: true, if: :activated?
     validates :token, presence: true, if: :activated?
 
-    after_save :compose_service_hook, if: :activated?
-
-    def compose_service_hook
-      hook = service_hook || build_service_hook
+    override :compose_web_hook
+    def compose_web_hook
       # If using a service template, project may not be available
-      hook.url = [drone_url, "/hook", "?owner=#{project.namespace.full_path}", "&name=#{project.path}", "&access_token=#{token}"].join if project
-      hook.enable_ssl_verification = !!enable_ssl_verification
-      hook.save
+      return unless project
+
+      super do |hook|
+        hook.url = [drone_url, "/hook", "?owner=#{project.namespace.full_path}", "&name=#{project.path}", "&access_token=#{token}"].join
+        hook.enable_ssl_verification = !!enable_ssl_verification
+      end
     end
 
     def execute(data)
