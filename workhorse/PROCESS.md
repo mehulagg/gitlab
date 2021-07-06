@@ -45,7 +45,7 @@ maintainers. The release process is:
 -   push the branch and the tag to gitlab.com
 -   the new version will only be deployed to `gitlab.com` if [`GITLAB_WORKHORSE_VERSION`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/GITLAB_WORKHORSE_VERSION) is updated accordingly;
     if applicable, please remind the person who originally asked for a new release to make this change
-    (the MR should include a link back to the [version tag](https://gitlab.com/gitlab-org/gitlab-workhorse/-/tags) and a copy of the changelog)
+    (the MR should include a link back to the [version tag](https://gitlab.com/gitlab-org/gitlab/workhorse/-/tags) and a copy of the changelog)
 -   the person who updates GITLAB_WORKHORSE_VERSION should also run `scripts/update-workhorse` after commiting the new GITLAB_WORKHORSE_VERSION. If they forget they will be reminded by CI.
 
 ## Security releases
@@ -128,7 +128,7 @@ The release managers merge the GitLab MRs, tag GitLab releases that reference
 the new Workhorse tags, and release them in the usual way.
 
 Once the security release is done, the Workhorse maintainer is responsible for
-syncing the changes to the `gitlab-org/gitlab-workhorse` repository. Push the
+syncing the changes to the `gitlab-org/gitlab/workhorse` repository. Push the
 changes to `master`, the new tags, and all the changes to the stable branches.
 
 This process is quite involved, very manual, and extremely error-prone; work is

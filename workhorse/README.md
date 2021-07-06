@@ -12,7 +12,7 @@ GitLab](doc/architecture/gitlab_features.md) that would not work efficiently wit
 The canonical source for Workhorse is
 [gitlab-org/gitlab/workhorse](https://gitlab.com/gitlab-org/gitlab/tree/master/workhorse).
 Prior to https://gitlab.com/groups/gitlab-org/-/epics/4826, it was
-[gitlab-org/gitlab-workhorse](https://gitlab.com/gitlab-org/gitlab-workhorse/tree/master),
+[gitlab-org/gitlab/workhorse](https://gitlab.com/gitlab-org/gitlab/workhorse/tree/master),
 but that repository is no longer used for development.
 
 ## Documentation
