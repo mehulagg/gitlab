@@ -42,7 +42,10 @@ module EE
       end
 
       belongs_to :assignee, class_name: "User"
-      belongs_to :group
+
+      belongs_to :namespace
+      alias_attribute :group,:namespace
+
       belongs_to :start_date_sourcing_milestone, class_name: 'Milestone'
       belongs_to :due_date_sourcing_milestone, class_name: 'Milestone'
       belongs_to :start_date_sourcing_epic, class_name: 'Epic'
@@ -51,7 +54,7 @@ module EE
       has_many :children, class_name: "Epic", foreign_key: :parent_id
       has_many :events, as: :target, dependent: :delete_all # rubocop:disable Cop/ActiveRecordDependent
 
-      has_internal_id :iid, scope: :group
+      has_internal_id :iid, scope: :namespace
 
       has_many :epic_issues
       has_many :issues, through: :epic_issues
@@ -59,7 +62,7 @@ module EE
       has_many :boards_epic_user_preferences, class_name: 'Boards::EpicUserPreference', inverse_of: :epic
       has_many :epic_board_positions, class_name: 'Boards::EpicBoardPosition', inverse_of: :epic_board
 
-      validates :group, presence: true
+      #validates :group, presence: true
       validate :validate_parent, on: :create
       validate :validate_confidential_issues_and_subepics
       validate :validate_confidential_parent

@@ -3,7 +3,7 @@
 FactoryBot.define do
   factory :epic, traits: [:has_internal_id] do
     title { generate(:title) }
-    group
+    namespace { association(:group) }
     author
 
     trait :use_fixed_dates do
