@@ -38,7 +38,7 @@ module Types
 
     field :environments,
           Types::EnvironmentType.connection_type,
-          null: false,
+          null: true,
           description: 'Environments where this policy is applied.'
 
     def environments
