@@ -38,6 +38,12 @@ RSpec.describe Gitlab::Database::PostgresIndex do
     it 'only non-expression indexes' do
       expect(described_class.regular).to all(have_attributes(expression: false))
     end
+
+    it 'only btree and gist indexes' do
+      types = described_class.regular.map(&:type).uniq
+
+      expect(types & %w(btree gist)).to eq(types)
+    end
   end
 
   describe '.reindexing_support' do
@@ -51,6 +57,12 @@ RSpec.describe Gitlab::Database::PostgresIndex do
 
     it 'only non-expression indexes' do
       expect(described_class.reindexing_support).to all(have_attributes(expression: false))
+    end
+
+    it 'only btree and gist indexes' do
+      types = described_class.reindexing_support.map(&:type).uniq
+
+      expect(types & %w(btree gist)).to eq(types)
     end
   end
 
