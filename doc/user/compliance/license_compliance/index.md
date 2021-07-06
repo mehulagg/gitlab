@@ -72,7 +72,7 @@ The reported licenses might be incomplete or inaccurate.
 
 | Language   | Package managers                                                                                              |
 |------------|---------------------------------------------------------------------------------------------------------------|
-| JavaScript | [Yarn](https://yarnpkg.com/)                                                                                  |
+| JavaScript | [Yarn](https://yarnpkg.com/) (only lock file format v1)                                                                                  |
 | Go         | `go get`, `gvt`, `glide`, `dep`, `trash`, `govendor`                                                          |
 | Erlang     | [Rebar](https://rebar3.org/)                                                                              |
 | Objective-C, Swift | [Carthage](https://github.com/Carthage/Carthage), [CocoaPods](https://cocoapods.org/) v0.39 and below |
