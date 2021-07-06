@@ -37,7 +37,7 @@ and sales teams understand how GitLab is used. For example, the data helps to:
 Service Ping information is not anonymous. It's linked to the instance's hostname. However, it does
 not contain project names, usernames, or any other specific data.
 
-Sending a Service Ping payload is optional and can be [disabled](#disable-usage-ping) on any self-managed instance.
+Sending a Service Ping payload is optional and can be [disabled](#disable-service-ping) on any self-managed instance.
 When Service Ping is enabled, GitLab gathers data from the other instances
 and can show your instance's usage statistics to your users.
 
