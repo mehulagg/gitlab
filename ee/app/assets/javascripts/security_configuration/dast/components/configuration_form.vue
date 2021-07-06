@@ -89,7 +89,7 @@ export default {
       variant="danger"
       class="gl-mb-5"
       data-testid="dast-configuration-error"
-      dismissible="false"
+      :dismissible="false"
     >
       {{ errorMessage }}
     </gl-alert>
