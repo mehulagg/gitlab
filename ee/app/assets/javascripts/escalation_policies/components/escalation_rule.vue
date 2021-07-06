@@ -76,10 +76,10 @@ export default {
     },
   },
   data() {
-    const { status, elapsedTimeSeconds, action, oncallScheduleIid } = this.rule;
+    const { status, elapsedTimeMinutes, action, oncallScheduleIid } = this.rule;
     return {
       status,
-      elapsedTimeSeconds,
+      elapsedTimeMinutes,
       action,
       oncallScheduleIid,
     };
@@ -119,7 +119,7 @@ export default {
           oncallScheduleIid: parseInt(this.oncallScheduleIid, 10),
           action: this.action,
           status: this.status,
-          elapsedTimeSeconds: parseInt(this.elapsedTimeSeconds, 10),
+          elapsedTimeMinutes: this.elapsedTimeMinutes,
         },
       });
     },
@@ -169,9 +169,9 @@ export default {
           </template>
           <template #minutes>
             <gl-form-input
-              v-model="elapsedTimeSeconds"
+              v-model="elapsedTimeMinutes"
               class="gl-mx-3 gl-inset-border-1-gray-200! gl-w-12"
-              type="number"
+              number
               min="0"
               @input="emitUpdate"
             />

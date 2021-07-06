@@ -1,0 +1,91 @@
+{
+  "version": "2.3",
+  "vulnerabilities": [
+    {
+      "category": "cluster_image_scanning",
+      "message": "CVE-2017-18269 in glibc",
+      "description": "An SSE2-optimized memmove implementation for i386 in sysdeps/i386/i686/multiarch/memcpy-sse2-unaligned.S in the GNU C Library (aka glibc or libc6) 2.21 through 2.27 does not correctly perform the overlapping memory check if the source memory range spans the middle of the address space, resulting in corrupt data being produced by the copy operation. This may disclose information to context-dependent attackers, or result in a denial of service, or, possibly, code execution.",
+      "cve": "debian:9:glibc:CVE-2017-18269",
+      "severity": "Critical",
+      "confidence": "Unknown",
+      "solution": "Upgrade glibc from 2.24-11+deb9u3 to 2.24-11+deb9u4",
+      "scanner": {
+        "id": "starboard",
+        "name": "Starboard"
+      },
+      "location": {
+        "dependency": {
+          "package": {
+            "name": "glibc"
+          },
+          "version": "2.24-11+deb9u3"
+        },
+        "operating_system": "debian:9",
+        "image": "registry.gitlab.com/gitlab-org/security-products/dast/webgoat-8.0@sha256:bc09fe2e0721dfaeee79364115aeedf2174cce0947b9ae5fe7c33312ee019a4e"
+      },
+      "identifiers": [
+        {
+          "type": "cve",
+          "name": "CVE-2017-18269",
+          "value": "CVE-2017-18269",
+          "url": "https://security-tracker.debian.org/tracker/CVE-2017-18269"
+        }
+      ],
+      "links": [
+        {
+          "url": "https://security-tracker.debian.org/tracker/CVE-2017-18269"
+        }
+      ]
+    },
+    {
+      "category": "cluster_image_scanning",
+      "message": "CVE-2017-16997 in glibc",
+      "description": "elf/dl-load.c in the GNU C Library (aka glibc or libc6) 2.19 through 2.26 mishandles RPATH and RUNPATH containing $ORIGIN for a privileged (setuid or AT_SECURE) program, which allows local users to gain privileges via a Trojan horse library in the current working directory, related to the fillin_rpath and decompose_rpath functions. This is associated with misinterpretion of an empty RPATH/RUNPATH token as the \"./\" directory. NOTE: this configuration of RPATH/RUNPATH for a privileged program is apparently very uncommon; most likely, no such program is shipped with any common Linux distribution.",
+      "cve": "debian:9:glibc:CVE-2017-16997",
+      "severity": "Critical",
+      "confidence": "Unknown",
+      "solution": "Upgrade glibc from 2.24-11+deb9u3 to 2.24-11+deb9u4",
+      "scanner": {
+        "id": "starboard",
+        "name": "Starboard"
+      },
+      "location": {
+        "dependency": {
+          "package": {
+            "name": "glibc"
+          },
+          "version": "2.24-11+deb9u3"
+        },
+        "operating_system": "debian:9",
+        "image": "registry.gitlab.com/gitlab-org/security-products/dast/webgoat-8.0@sha256:bc09fe2e0721dfaeee79364115aeedf2174cce0947b9ae5fe7c33312ee019a4e"
+      },
+      "identifiers": [
+        {
+          "type": "cve",
+          "name": "CVE-2017-16997",
+          "value": "CVE-2017-16997",
+          "url": "https://security-tracker.debian.org/tracker/CVE-2017-16997"
+        }
+      ],
+      "links": [
+        {
+          "url": "https://security-tracker.debian.org/tracker/CVE-2017-16997"
+        }
+      ]
+    }
+  ],
+  "remediations": [],
+  "scan": {
+    "scanner": {
+      "id": "starboard",
+      "name": "Starboard",
+      "url": "https://github.com/aquasecurity/starboard",
+      "vendor": {
+        "name": "GitLab"
+      },
+      "version": "0.10.0"
+    },
+    "type": "cluster_image_scanning",
+    "status": "success"
+  }
+}

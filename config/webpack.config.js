@@ -398,7 +398,9 @@ module.exports = {
     new VueLoaderPlugin(),
 
     // automatically configure monaco editor web workers
-    new MonacoWebpackPlugin(),
+    new MonacoWebpackPlugin({
+      globalAPI: true,
+    }),
 
     // fix legacy jQuery plugins which depend on globals
     new webpack.ProvidePlugin({
@@ -422,7 +424,7 @@ module.exports = {
             );
 
             // eslint-disable-next-line global-require
-            const dllConfig = require('./webpack.vendor.config.js');
+            const dllConfig = require('./webpack.vendor.config');
             const dllCompiler = webpack(dllConfig);
 
             dllCompiler.run((err, stats) => {

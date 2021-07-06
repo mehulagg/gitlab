@@ -1,16 +1,16 @@
 <script>
 import { GlModal, GlSprintf, GlAlert } from '@gitlab/ui';
 import * as Sentry from '@sentry/browser';
-import { DEVOPS_ADOPTION_STRINGS, DEVOPS_ADOPTION_SEGMENT_DELETE_MODAL_ID } from '../constants';
+import { DEVOPS_ADOPTION_STRINGS, DEVOPS_ADOPTION_DELETE_MODAL_ID } from '../constants';
 import disableDevopsAdoptionNamespaceMutation from '../graphql/mutations/disable_devops_adoption_namespace.mutation.graphql';
 
 export default {
   name: 'DevopsAdoptionDeleteModal',
   components: { GlModal, GlSprintf, GlAlert },
   i18n: DEVOPS_ADOPTION_STRINGS.deleteModal,
-  devopsSegmentDeleteModalId: DEVOPS_ADOPTION_SEGMENT_DELETE_MODAL_ID,
+  deleteModalId: DEVOPS_ADOPTION_DELETE_MODAL_ID,
   props: {
-    segment: {
+    namespace: {
       type: Object,
       required: true,
     },
@@ -43,14 +43,14 @@ export default {
       return this.errors[0];
     },
     displayName() {
-      return this.segment.namespace?.fullName;
+      return this.namespace.namespace?.fullName;
     },
   },
   methods: {
-    async deleteSegment() {
+    async deleteEnabledNamespace() {
       try {
         const {
-          segment: { id },
+          namespace: { id },
         } = this;
 
         this.loading = true;
@@ -65,7 +65,7 @@ export default {
             id: [id],
           },
           update: () => {
-            this.$emit('segmentsRemoved', [id]);
+            this.$emit('enabledNamespacesRemoved', [id]);
           },
         });
 
@@ -90,11 +90,11 @@ export default {
 <template>
   <gl-modal
     ref="modal"
-    :modal-id="$options.devopsSegmentDeleteModalId"
+    :modal-id="$options.deleteModalId"
     size="sm"
     :action-primary="primaryOptions"
     :action-cancel="cancelOptions"
-    @primary.prevent="deleteSegment"
+    @primary.prevent="deleteEnabledNamespace"
     @hide="$emit('trackModalOpenState', false)"
     @show="$emit('trackModalOpenState', true)"
   >

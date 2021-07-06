@@ -1,5 +1,6 @@
 import { GlTabs, GlTab } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
+import { merge } from 'lodash';
 import CiCdAnalyticsApp from 'ee/analytics/group_ci_cd_analytics/components/app.vue';
 import ReleaseStatsCard from 'ee/analytics/group_ci_cd_analytics/components/release_stats_card.vue';
 import DeploymentFrequencyCharts from 'ee/dora/components/deployment_frequency_charts.vue';
@@ -17,8 +18,18 @@ describe('ee/analytics/group_ci_cd_analytics/components/app.vue', () => {
     getParameterValues.mockReturnValue([]);
   });
 
-  const createComponent = () => {
-    wrapper = shallowMount(CiCdAnalyticsApp);
+  const createComponent = (mountOptions = {}) => {
+    wrapper = shallowMount(
+      CiCdAnalyticsApp,
+      merge(
+        {
+          provide: {
+            shouldRenderDoraCharts: true,
+          },
+        },
+        mountOptions,
+      ),
+    );
   };
 
   const findGlTabs = () => wrapper.findComponent(GlTabs);
@@ -26,15 +37,32 @@ describe('ee/analytics/group_ci_cd_analytics/components/app.vue', () => {
   const findGlTabAtIndex = (index) => findAllGlTabs().at(index);
 
   describe('tabs', () => {
-    beforeEach(() => {
-      createComponent();
+    describe('when the DORA charts are available', () => {
+      beforeEach(() => {
+        createComponent();
+      });
+
+      it('renders tabs in the correct order', () => {
+        expect(findGlTabs().exists()).toBe(true);
+        expect(findAllGlTabs().length).toBe(3);
+        expect(findGlTabAtIndex(0).attributes('title')).toBe('Release statistics');
+        expect(findGlTabAtIndex(1).attributes('title')).toBe('Deployment frequency');
+        expect(findGlTabAtIndex(2).attributes('title')).toBe('Lead time');
+      });
     });
 
-    it('renders tabs in the correct order', () => {
-      expect(findGlTabs().exists()).toBe(true);
+    describe('when the DORA charts are not available', () => {
+      beforeEach(() => {
+        createComponent({ provide: { shouldRenderDoraCharts: false } });
+      });
 
-      expect(findGlTabAtIndex(0).attributes('title')).toBe('Release statistics');
-      expect(findGlTabAtIndex(1).attributes('title')).toBe('Deployment frequency');
+      it('does not render any tabs', () => {
+        expect(findGlTabs().exists()).toBe(false);
+      });
+
+      it('renders the release statistics component', () => {
+        expect(wrapper.findComponent(ReleaseStatsCard).exists()).toBe(true);
+      });
     });
   });
 

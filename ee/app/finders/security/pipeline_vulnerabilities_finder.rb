@@ -10,6 +10,10 @@
 #   params:
 #     report_type: Array<String>
 
+# DEPRECATED: This finder class is deprecated and will be removed
+# by https://gitlab.com/gitlab-org/gitlab/-/issues/334488.
+# Please inform us by adding a comment to aforementioned issue,
+# if you need to add an extra feature to this class.
 module Security
   class PipelineVulnerabilitiesFinder
     include Gitlab::Utils::StrongMemoize
@@ -24,18 +28,18 @@ module Security
     end
 
     def execute
-      findings = requested_reports.each_with_object([]) do |(type, report), findings|
+      findings = requested_reports.each_with_object([]) do |report, findings|
         raise ParseError, 'JSON parsing failed' if report.errored?
 
         normalized_findings = normalize_report_findings(
           report.findings,
-          vulnerabilities_by_finding_fingerprint(type, report))
+          vulnerabilities_by_finding_fingerprint(report))
         filtered_findings = filter(normalized_findings)
 
         findings.concat(filtered_findings)
       end
 
-      Gitlab::Ci::Reports::Security::AggregatedReport.new(requested_reports.values, sort_findings(findings))
+      Gitlab::Ci::Reports::Security::AggregatedReport.new(requested_reports, sort_findings(findings))
     end
 
     private
@@ -53,18 +57,21 @@ module Security
     end
 
     def requested_reports
-      @requested_reports ||= pipeline&.security_reports(report_types: report_types)&.reports || {}
+      @requested_reports ||= pipeline&.security_reports(report_types: report_types)&.reports&.values || []
     end
 
-    def vulnerabilities_by_finding_fingerprint(report_type, report)
-      Vulnerabilities::Finding
-        .by_project_fingerprints(report.findings.map(&:project_fingerprint))
-        .by_projects(pipeline.project)
-        .by_report_types(report_type)
-        .select(:vulnerability_id, :project_fingerprint)
-       .each_with_object({}) do |finding, hash|
-        hash[finding.project_fingerprint] = finding.vulnerability_id
+    def vulnerabilities_by_finding_fingerprint(report)
+      existing_findings_for(report).each_with_object({}) do |finding, memo|
+        memo[finding.project_fingerprint] = finding.vulnerability
       end
+    end
+
+    def existing_findings_for(report)
+      Vulnerabilities::Finding.by_project_fingerprints(report.findings.map(&:project_fingerprint))
+                              .by_projects(pipeline.project)
+                              .by_report_types(report.type)
+                              .includes(:vulnerability) # rubocop:disable CodeReuse/ActiveRecord (We will remove this class)
+                              .select(:vulnerability_id, :project_fingerprint)
     end
 
     # This finder is used for fetching vulnerabilities for any pipeline, if we used it to fetch
@@ -80,7 +87,7 @@ module Security
         finding = Vulnerabilities::Finding.new(finding_hash)
         # assigning Vulnerabilities to Findings to enable the computed state
         finding.location_fingerprint = report_finding.location.fingerprint
-        finding.vulnerability_id = vulnerabilities[finding.project_fingerprint]
+        finding.vulnerability = vulnerabilities[finding.project_fingerprint]
         finding.project = pipeline.project
         finding.sha = pipeline.sha
         finding.build_scanner(report_finding.scanner&.to_hash)
@@ -100,6 +107,7 @@ module Security
 
     def filter(findings)
       findings.select do |finding|
+        next unless in_selected_state?(finding)
         next if !include_dismissed? && dismissal_feedback?(finding)
         next unless confidence_levels.include?(finding.confidence)
         next unless severity_levels.include?(finding.severity)
@@ -109,8 +117,26 @@ module Security
       end
     end
 
+    def in_selected_state?(finding)
+      params[:state].blank? || states.include?(computed_finding_state(finding))
+    end
+
+    # Here we are checking the state of the `vulnerability` and preloaded `feedback` records
+    # instead of checking the `finding.state` as the `state` method of the `finding` fires
+    # an additional database query to load the `feedback` record for each `finding`.
+    def computed_finding_state(finding)
+      finding.vulnerability&.state ||
+        (dismissal_feedback?(finding) ? 'dismissed' : 'detected')
+    end
+
     def include_dismissed?
-      params[:scope] == 'all'
+      skip_scope_parameter? || params[:scope] == 'all'
+    end
+
+    # If the client explicitly asks for the dismissed findings, we shouldn't
+    # filter by the `scope` parameter as it's `skip_dismissed` by default.
+    def skip_scope_parameter?
+      params[:state].present? && states.include?('dismissed')
     end
 
     def dismissal_feedback?(finding)
@@ -145,19 +171,23 @@ module Security
     end
 
     def confidence_levels
-      Array(params.fetch(:confidence, Vulnerabilities::Finding.confidences.keys))
+      @confidence_levels ||= Array(params.fetch(:confidence, Vulnerabilities::Finding.confidences.keys))
     end
 
     def report_types
-      Array(params.fetch(:report_type, Vulnerabilities::Finding.report_types.keys))
+      @report_types ||= Array(params.fetch(:report_type, Vulnerabilities::Finding.report_types.keys))
     end
 
     def severity_levels
-      Array(params.fetch(:severity, Vulnerabilities::Finding.severities.keys))
+      @severity_levels ||= Array(params.fetch(:severity, Vulnerabilities::Finding.severities.keys))
     end
 
     def scanners
-      Array(params.fetch(:scanner, []))
+      @scanners ||= Array(params.fetch(:scanner, []))
+    end
+
+    def states
+      @state ||= Array(params.fetch(:state, Vulnerability.states.keys))
     end
   end
 end

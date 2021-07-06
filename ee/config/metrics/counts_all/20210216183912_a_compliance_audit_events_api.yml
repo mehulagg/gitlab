@@ -1,0 +1,17 @@
+---
+data_category: Optional
+key_path: compliance_unique_visits.a_compliance_audit_events_api
+description: 'Unique users that have used the Audit Events API.'
+product_section: 'dev'
+product_stage: 'manage'
+product_group: 'group::compliance'
+product_category: 'audit_events'
+value_type: number
+status: data_available
+time_frame: all
+data_source: database
+distribution:
+- ee
+tier:
+- premium
+- ultimate

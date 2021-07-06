@@ -5,13 +5,11 @@ import * as actions from 'ee/analytics/cycle_analytics/store/actions';
 import * as getters from 'ee/analytics/cycle_analytics/store/getters';
 import * as types from 'ee/analytics/cycle_analytics/store/mutation_types';
 import testAction from 'helpers/vuex_action_helper';
+import { createdAfter, createdBefore, currentGroup } from 'jest/cycle_analytics/mock_data';
 import createFlash from '~/flash';
 import httpStatusCodes from '~/lib/utils/http_status';
 import {
-  currentGroup,
   allowedStages as stages,
-  startDate,
-  endDate,
   customizableStagesAndEvents,
   endpoints,
   valueStreams,
@@ -53,8 +51,8 @@ describe('Value Stream Analytics actions', () => {
 
   beforeEach(() => {
     state = {
-      startDate,
-      endDate,
+      createdAfter,
+      createdBefore,
       stages: [],
       featureFlags: {
         hasDurationChart: true,
@@ -269,7 +267,7 @@ describe('Value Stream Analytics actions', () => {
     }
 
     beforeEach(() => {
-      state = { ...state, currentGroup, startDate, endDate };
+      state = { ...state, currentGroup, createdAfter, createdBefore };
     });
 
     it(`dispatches actions for required value stream analytics analytics data`, () => {
@@ -961,9 +959,9 @@ describe('Value Stream Analytics actions', () => {
   });
 
   describe.each`
-    targetAction            | payload                   | mutations
-    ${actions.setDateRange} | ${{ startDate, endDate }} | ${[{ type: 'SET_DATE_RANGE', payload: { startDate, endDate } }]}
-    ${actions.setFilters}   | ${''}                     | ${[]}
+    targetAction            | payload                            | mutations
+    ${actions.setDateRange} | ${{ createdAfter, createdBefore }} | ${[{ type: 'SET_DATE_RANGE', payload: { createdAfter, createdBefore } }]}
+    ${actions.setFilters}   | ${''}                              | ${[]}
   `('$action', ({ targetAction, payload, mutations }) => {
     let stateWithOverview = null;
 

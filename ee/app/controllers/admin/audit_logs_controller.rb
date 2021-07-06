@@ -32,7 +32,7 @@ class Admin::AuditLogsController < Admin::ApplicationController
                 nil
               end
 
-    Gitlab::Tracking.event(self.class.name, 'search_audit_event')
+    Gitlab::Tracking.event(self.class.name, 'search_audit_event', user: current_user)
   end
 
   private

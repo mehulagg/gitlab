@@ -37,7 +37,7 @@ RSpec.describe Ci::RegisterJobService, '#execute' do
         end
 
         it 'when in disaster recovery it ignores quota and returns anyway' do
-          stub_feature_flags(ci_queueing_disaster_recovery: true)
+          stub_feature_flags(ci_queueing_disaster_recovery_disable_quota: true)
 
           is_expected.to be_kind_of(Ci::Build)
         end
@@ -67,7 +67,7 @@ RSpec.describe Ci::RegisterJobService, '#execute' do
         end
 
         it 'when in disaster recovery it ignores quota and returns anyway' do
-          stub_feature_flags(ci_queueing_disaster_recovery: true)
+          stub_feature_flags(ci_queueing_disaster_recovery_disable_quota: true)
 
           is_expected.to be_kind_of(Ci::Build)
         end

@@ -780,6 +780,46 @@ Input type: `CiCdSettingsUpdateInput`
 | <a id="mutationcicdsettingsupdateclientmutationid"></a>`clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 | <a id="mutationcicdsettingsupdateerrors"></a>`errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 
+### `Mutation.ciJobTokenScopeAddProject`
+
+Input type: `CiJobTokenScopeAddProjectInput`
+
+#### Arguments
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| <a id="mutationcijobtokenscopeaddprojectclientmutationid"></a>`clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
+| <a id="mutationcijobtokenscopeaddprojectprojectpath"></a>`projectPath` | [`ID!`](#id) | The project that the CI job token scope belongs to. |
+| <a id="mutationcijobtokenscopeaddprojecttargetprojectpath"></a>`targetProjectPath` | [`ID!`](#id) | The project to be added to the CI job token scope. |
+
+#### Fields
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| <a id="mutationcijobtokenscopeaddprojectcijobtokenscope"></a>`ciJobTokenScope` | [`CiJobTokenScopeType`](#cijobtokenscopetype) | The CI job token's scope of access. |
+| <a id="mutationcijobtokenscopeaddprojectclientmutationid"></a>`clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
+| <a id="mutationcijobtokenscopeaddprojecterrors"></a>`errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
+
+### `Mutation.ciJobTokenScopeRemoveProject`
+
+Input type: `CiJobTokenScopeRemoveProjectInput`
+
+#### Arguments
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| <a id="mutationcijobtokenscoperemoveprojectclientmutationid"></a>`clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
+| <a id="mutationcijobtokenscoperemoveprojectprojectpath"></a>`projectPath` | [`ID!`](#id) | The project that the CI job token scope belongs to. |
+| <a id="mutationcijobtokenscoperemoveprojecttargetprojectpath"></a>`targetProjectPath` | [`ID!`](#id) | The project to be removed from the CI job token scope. |
+
+#### Fields
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| <a id="mutationcijobtokenscoperemoveprojectcijobtokenscope"></a>`ciJobTokenScope` | [`CiJobTokenScopeType`](#cijobtokenscopetype) | The CI job token's scope of access. |
+| <a id="mutationcijobtokenscoperemoveprojectclientmutationid"></a>`clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
+| <a id="mutationcijobtokenscoperemoveprojecterrors"></a>`errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
+
 ### `Mutation.clusterAgentDelete`
 
 Input type: `ClusterAgentDeleteInput`
@@ -1914,6 +1954,31 @@ Input type: `DiscussionToggleResolveInput`
 | <a id="mutationdiscussiontoggleresolvediscussion"></a>`discussion` | [`Discussion`](#discussion) | The discussion after mutation. |
 | <a id="mutationdiscussiontoggleresolveerrors"></a>`errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 
+### `Mutation.echoCreate`
+
+A mutation that does not perform any changes.
+
+This is expected to be used for testing of endpoints, to verify
+that a user has mutation access.
+
+Input type: `EchoCreateInput`
+
+#### Arguments
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| <a id="mutationechocreateclientmutationid"></a>`clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
+| <a id="mutationechocreateerrors"></a>`errors` | [`[String!]`](#string) | Errors to return to the user. |
+| <a id="mutationechocreatemessages"></a>`messages` | [`[String!]`](#string) | Messages to return to the user. |
+
+#### Fields
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| <a id="mutationechocreateclientmutationid"></a>`clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
+| <a id="mutationechocreateechoes"></a>`echoes` | [`[String!]`](#string) | Messages returned to the user. |
+| <a id="mutationechocreateerrors"></a>`errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
+
 ### `Mutation.enableDevopsAdoptionNamespace`
 
 **BETA** This endpoint is subject to change without notice.
@@ -2548,7 +2613,7 @@ Input type: `IssueSetWeightInput`
 | <a id="mutationissuesetweightclientmutationid"></a>`clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 | <a id="mutationissuesetweightiid"></a>`iid` | [`String!`](#string) | The IID of the issue to mutate. |
 | <a id="mutationissuesetweightprojectpath"></a>`projectPath` | [`ID!`](#id) | The project the issue to mutate is in. |
-| <a id="mutationissuesetweightweight"></a>`weight` | [`Int!`](#int) | The desired weight for the issue. |
+| <a id="mutationissuesetweightweight"></a>`weight` | [`Int`](#int) | The desired weight for the issue. If set to null, weight is removed. |
 
 #### Fields
 
@@ -7710,9 +7775,11 @@ Represents the total number of issues and their weights for a particular day.
 | <a id="cirunnerdescription"></a>`description` | [`String`](#string) | Description of the runner. |
 | <a id="cirunnerid"></a>`id` | [`CiRunnerID!`](#cirunnerid) | ID of the runner. |
 | <a id="cirunneripaddress"></a>`ipAddress` | [`String!`](#string) | IP address of the runner. |
+| <a id="cirunnerjobcount"></a>`jobCount` | [`Int`](#int) | Number of jobs processed by the runner (limited to 1000, plus one to indicate that more items exist). |
 | <a id="cirunnerlocked"></a>`locked` | [`Boolean`](#boolean) | Indicates the runner is locked. |
 | <a id="cirunnermaximumtimeout"></a>`maximumTimeout` | [`Int`](#int) | Maximum timeout (in seconds) for jobs processed by the runner. |
 | <a id="cirunnerprivateprojectsminutescostfactor"></a>`privateProjectsMinutesCostFactor` | [`Float`](#float) | Private projects' "minutes cost factor" associated with the runner (GitLab.com only). |
+| <a id="cirunnerprojectcount"></a>`projectCount` | [`Int`](#int) | Number of projects that the runner is associated with. |
 | <a id="cirunnerpublicprojectsminutescostfactor"></a>`publicProjectsMinutesCostFactor` | [`Float`](#float) | Public projects' "minutes cost factor" associated with the runner (GitLab.com only). |
 | <a id="cirunnerrevision"></a>`revision` | [`String!`](#string) | Revision of the runner. |
 | <a id="cirunnerrununtagged"></a>`runUntagged` | [`Boolean!`](#boolean) | Indicates the runner is able to run untagged jobs. |
@@ -8439,7 +8506,9 @@ Snapshot.
 | Name | Type | Description |
 | ---- | ---- | ----------- |
 | <a id="devopsadoptionsnapshotcodeownersusedcount"></a>`codeOwnersUsedCount` | [`Int`](#int) | Total number of projects with existing CODEOWNERS file. |
+| <a id="devopsadoptionsnapshotcoveragefuzzingenabledcount"></a>`coverageFuzzingEnabledCount` | [`Int`](#int) | Total number of projects with enabled coverage fuzzing. |
 | <a id="devopsadoptionsnapshotdastenabledcount"></a>`dastEnabledCount` | [`Int`](#int) | Total number of projects with enabled DAST. |
+| <a id="devopsadoptionsnapshotdependencyscanningenabledcount"></a>`dependencyScanningEnabledCount` | [`Int`](#int) | Total number of projects with enabled dependency scanning. |
 | <a id="devopsadoptionsnapshotdeploysucceeded"></a>`deploySucceeded` | [`Boolean!`](#boolean) | At least one deployment succeeded. |
 | <a id="devopsadoptionsnapshotendtime"></a>`endTime` | [`Time!`](#time) | The end time for the snapshot where the data points were collected. |
 | <a id="devopsadoptionsnapshotissueopened"></a>`issueOpened` | [`Boolean!`](#boolean) | At least one issue was opened. |
@@ -8514,12 +8583,44 @@ Aggregated summary of changes.
 | ---- | ---- | ----------- |
 | <a id="discussioncreatedat"></a>`createdAt` | [`Time!`](#time) | Timestamp of the discussion's creation. |
 | <a id="discussionid"></a>`id` | [`DiscussionID!`](#discussionid) | ID of this discussion. |
+| <a id="discussionnoteable"></a>`noteable` | [`NoteableType`](#noteabletype) | Object which the discussion belongs to. |
 | <a id="discussionnotes"></a>`notes` | [`NoteConnection!`](#noteconnection) | All notes in the discussion. (see [Connections](#connections)) |
 | <a id="discussionreplyid"></a>`replyId` | [`DiscussionID!`](#discussionid) | ID used to reply to this discussion. |
 | <a id="discussionresolvable"></a>`resolvable` | [`Boolean!`](#boolean) | Indicates if the object can be resolved. |
 | <a id="discussionresolved"></a>`resolved` | [`Boolean!`](#boolean) | Indicates if the object is resolved. |
 | <a id="discussionresolvedat"></a>`resolvedAt` | [`Time`](#time) | Timestamp of when the object was resolved. |
 | <a id="discussionresolvedby"></a>`resolvedBy` | [`UserCore`](#usercore) | User who resolved the object. |
+
+### `Dora`
+
+All information related to DORA metrics.
+
+#### Fields with arguments
+
+##### `Dora.metrics`
+
+DORA metrics for the current group or project.
+
+Returns [`[DoraMetric!]`](#dorametric).
+
+###### Arguments
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| <a id="dorametricsenddate"></a>`endDate` | [`Date`](#date) | Date range to end at. Default is the current date. |
+| <a id="dorametricsenvironmenttier"></a>`environmentTier` | [`DeploymentTier`](#deploymenttier) | The deployment tier of the environments to return. Defaults to `PRODUCTION`. |
+| <a id="dorametricsinterval"></a>`interval` | [`DoraMetricBucketingInterval`](#dorametricbucketinginterval) | How the metric should be aggregrated. Defaults to `DAILY`. In the case of `ALL`, the `date` field in the response will be `null`. |
+| <a id="dorametricsmetric"></a>`metric` | [`DoraMetricType!`](#dorametrictype) | The type of metric to return. |
+| <a id="dorametricsstartdate"></a>`startDate` | [`Date`](#date) | Date range to start from. Default is 3 months ago. |
+
+### `DoraMetric`
+
+#### Fields
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| <a id="dorametricdate"></a>`date` | [`String`](#string) | Date of the data point. |
+| <a id="dorametricvalue"></a>`value` | [`Int`](#int) | Value of the data point. |
 
 ### `Environment`
 
@@ -9137,6 +9238,7 @@ four standard [pagination arguments](#connection-pagination-arguments):
 | <a id="groupcustomemoji"></a>`customEmoji` | [`CustomEmojiConnection`](#customemojiconnection) | Custom emoji within this namespace. Available only when feature flag `custom_emoji` is enabled. (see [Connections](#connections)) |
 | <a id="groupdescription"></a>`description` | [`String`](#string) | Description of the namespace. |
 | <a id="groupdescriptionhtml"></a>`descriptionHtml` | [`String`](#string) | The GitLab Flavored Markdown rendering of `description`. |
+| <a id="groupdora"></a>`dora` | [`Dora`](#dora) | The group's DORA metrics. |
 | <a id="groupemailsdisabled"></a>`emailsDisabled` | [`Boolean`](#boolean) | Indicates if a group has email notifications disabled. |
 | <a id="groupepicboards"></a>`epicBoards` | [`EpicBoardConnection`](#epicboardconnection) | Find epic boards. (see [Connections](#connections)) |
 | <a id="groupepicsenabled"></a>`epicsEnabled` | [`Boolean`](#boolean) | Indicates if Epics are enabled for namespace. |
@@ -9501,6 +9603,7 @@ four standard [pagination arguments](#connection-pagination-arguments):
 | <a id="groupmilestonesincludeancestors"></a>`includeAncestors` | [`Boolean`](#boolean) | Include milestones from all parent groups. |
 | <a id="groupmilestonesincludedescendants"></a>`includeDescendants` | [`Boolean`](#boolean) | Include milestones from all subgroups and subprojects. |
 | <a id="groupmilestonessearchtitle"></a>`searchTitle` | [`String`](#string) | A search string for the title. |
+| <a id="groupmilestonessort"></a>`sort` | [`MilestoneSort`](#milestonesort) | Sort milestones by this criteria. |
 | <a id="groupmilestonesstartdate"></a>`startDate` **{warning-solid}** | [`Time`](#time) | **Deprecated** in 13.5. Use timeframe.start. |
 | <a id="groupmilestonesstate"></a>`state` | [`MilestoneStateEnum`](#milestonestateenum) | Filter milestones by state. |
 | <a id="groupmilestonestimeframe"></a>`timeframe` | [`Timeframe`](#timeframe) | List items overlapping the given timeframe. |
@@ -10745,6 +10848,7 @@ Represents a milestone.
 | <a id="milestonecreatedat"></a>`createdAt` | [`Time!`](#time) | Timestamp of milestone creation. |
 | <a id="milestonedescription"></a>`description` | [`String`](#string) | Description of the milestone. |
 | <a id="milestoneduedate"></a>`dueDate` | [`Time`](#time) | Timestamp of the milestone due date. |
+| <a id="milestoneexpired"></a>`expired` | [`Boolean!`](#boolean) | Expired state of the milestone (a milestone is expired when the due date is past the current date). Defaults to `false` when due date has not been set. |
 | <a id="milestonegroupmilestone"></a>`groupMilestone` | [`Boolean!`](#boolean) | Indicates if milestone is at group level. |
 | <a id="milestoneid"></a>`id` | [`ID!`](#id) | ID of the milestone. |
 | <a id="milestoneiid"></a>`iid` | [`ID!`](#id) | Internal ID of the milestone. |
@@ -11158,6 +11262,7 @@ four standard [pagination arguments](#connection-pagination-arguments):
 | <a id="pipelinesecurityreportfindingsreporttype"></a>`reportType` | [`[String!]`](#string) | Filter vulnerability findings by report type. |
 | <a id="pipelinesecurityreportfindingsscanner"></a>`scanner` | [`[String!]`](#string) | Filter vulnerability findings by Scanner.externalId. |
 | <a id="pipelinesecurityreportfindingsseverity"></a>`severity` | [`[String!]`](#string) | Filter vulnerability findings by severity. |
+| <a id="pipelinesecurityreportfindingsstate"></a>`state` | [`[VulnerabilityState!]`](#vulnerabilitystate) | Filter vulnerability findings by state. |
 
 ##### `Pipeline.testSuite`
 
@@ -11265,6 +11370,7 @@ Represents vulnerability finding of a security report on the pipeline.
 | <a id="projectdastsiteprofiles"></a>`dastSiteProfiles` | [`DastSiteProfileConnection`](#dastsiteprofileconnection) | DAST Site Profiles associated with the project. (see [Connections](#connections)) |
 | <a id="projectdescription"></a>`description` | [`String`](#string) | Short description of the project. |
 | <a id="projectdescriptionhtml"></a>`descriptionHtml` | [`String`](#string) | The GitLab Flavored Markdown rendering of `description`. |
+| <a id="projectdora"></a>`dora` | [`Dora`](#dora) | The project's DORA metrics. |
 | <a id="projectforkscount"></a>`forksCount` | [`Int!`](#int) | Number of times the project has been forked. |
 | <a id="projectfullpath"></a>`fullPath` | [`ID!`](#id) | Full path of the project. |
 | <a id="projectgrafanaintegration"></a>`grafanaIntegration` | [`GrafanaIntegration`](#grafanaintegration) | Grafana integration details for the project. |
@@ -11824,6 +11930,7 @@ four standard [pagination arguments](#connection-pagination-arguments):
 | <a id="projectmilestonesids"></a>`ids` | [`[ID!]`](#id) | Array of global milestone IDs, e.g., `"gid://gitlab/Milestone/1"`. |
 | <a id="projectmilestonesincludeancestors"></a>`includeAncestors` | [`Boolean`](#boolean) | Also return milestones in the project's parent group and its ancestors. |
 | <a id="projectmilestonessearchtitle"></a>`searchTitle` | [`String`](#string) | A search string for the title. |
+| <a id="projectmilestonessort"></a>`sort` | [`MilestoneSort`](#milestonesort) | Sort milestones by this criteria. |
 | <a id="projectmilestonesstartdate"></a>`startDate` **{warning-solid}** | [`Time`](#time) | **Deprecated** in 13.5. Use timeframe.start. |
 | <a id="projectmilestonesstate"></a>`state` | [`MilestoneStateEnum`](#milestonestateenum) | Filter milestones by state. |
 | <a id="projectmilestonestimeframe"></a>`timeframe` | [`Timeframe`](#timeframe) | List items overlapping the given timeframe. |
@@ -12625,11 +12732,11 @@ Represents summary of a security report.
 | Name | Type | Description |
 | ---- | ---- | ----------- |
 | <a id="securityreportsummaryapifuzzing"></a>`apiFuzzing` | [`SecurityReportSummarySection`](#securityreportsummarysection) | Aggregated counts for the `api_fuzzing` scan. |
+| <a id="securityreportsummaryclusterimagescanning"></a>`clusterImageScanning` | [`SecurityReportSummarySection`](#securityreportsummarysection) | Aggregated counts for the `cluster_image_scanning` scan. |
 | <a id="securityreportsummarycontainerscanning"></a>`containerScanning` | [`SecurityReportSummarySection`](#securityreportsummarysection) | Aggregated counts for the `container_scanning` scan. |
 | <a id="securityreportsummarycoveragefuzzing"></a>`coverageFuzzing` | [`SecurityReportSummarySection`](#securityreportsummarysection) | Aggregated counts for the `coverage_fuzzing` scan. |
 | <a id="securityreportsummarydast"></a>`dast` | [`SecurityReportSummarySection`](#securityreportsummarysection) | Aggregated counts for the `dast` scan. |
 | <a id="securityreportsummarydependencyscanning"></a>`dependencyScanning` | [`SecurityReportSummarySection`](#securityreportsummarysection) | Aggregated counts for the `dependency_scanning` scan. |
-| <a id="securityreportsummaryrunningcontainerscanning"></a>`runningContainerScanning` | [`SecurityReportSummarySection`](#securityreportsummarysection) | Aggregated counts for the `running_container_scanning` scan. |
 | <a id="securityreportsummarysast"></a>`sast` | [`SecurityReportSummarySection`](#securityreportsummarysection) | Aggregated counts for the `sast` scan. |
 | <a id="securityreportsummarysecretdetection"></a>`secretDetection` | [`SecurityReportSummarySection`](#securityreportsummarysection) | Aggregated counts for the `secret_detection` scan. |
 
@@ -13484,7 +13591,7 @@ Represents a vulnerability.
 | <a id="vulnerabilitynotes"></a>`notes` | [`NoteConnection!`](#noteconnection) | All notes on this noteable. (see [Connections](#connections)) |
 | <a id="vulnerabilityprimaryidentifier"></a>`primaryIdentifier` | [`VulnerabilityIdentifier`](#vulnerabilityidentifier) | Primary identifier of the vulnerability. |
 | <a id="vulnerabilityproject"></a>`project` | [`Project`](#project) | The project on which the vulnerability was found. |
-| <a id="vulnerabilityreporttype"></a>`reportType` | [`VulnerabilityReportType`](#vulnerabilityreporttype) | Type of the security report that found the vulnerability (SAST, DEPENDENCY_SCANNING, CONTAINER_SCANNING, DAST, SECRET_DETECTION, COVERAGE_FUZZING, API_FUZZING, RUNNING_CONTAINER_SCANNING). `Scan Type` in the UI. |
+| <a id="vulnerabilityreporttype"></a>`reportType` | [`VulnerabilityReportType`](#vulnerabilityreporttype) | Type of the security report that found the vulnerability (SAST, DEPENDENCY_SCANNING, CONTAINER_SCANNING, DAST, SECRET_DETECTION, COVERAGE_FUZZING, API_FUZZING, CLUSTER_IMAGE_SCANNING). `Scan Type` in the UI. |
 | <a id="vulnerabilityresolvedat"></a>`resolvedAt` | [`Time`](#time) | Timestamp of when the vulnerability state was changed to resolved. |
 | <a id="vulnerabilityresolvedby"></a>`resolvedBy` | [`UserCore`](#usercore) | The user that resolved the vulnerability. |
 | <a id="vulnerabilityresolvedondefaultbranch"></a>`resolvedOnDefaultBranch` | [`Boolean!`](#boolean) | Indicates whether the vulnerability is fixed on the default branch or not. |
@@ -14285,6 +14392,18 @@ Weight of the data visualization palette.
 | <a id="datavisualizationweightenumweight_900"></a>`WEIGHT_900` | 900 weight. |
 | <a id="datavisualizationweightenumweight_950"></a>`WEIGHT_950` | 950 weight. |
 
+### `DeploymentTier`
+
+All environment deployment tiers.
+
+| Value | Description |
+| ----- | ----------- |
+| <a id="deploymenttierdevelopment"></a>`DEVELOPMENT` | Development. |
+| <a id="deploymenttierother"></a>`OTHER` | Other. |
+| <a id="deploymenttierproduction"></a>`PRODUCTION` | Production. |
+| <a id="deploymenttierstaging"></a>`STAGING` | Staging. |
+| <a id="deploymenttiertesting"></a>`TESTING` | Testing. |
+
 ### `DesignCollectionCopyState`
 
 Copy state of a DesignCollection.
@@ -14314,6 +14433,25 @@ Type of file the position refers to.
 | ----- | ----------- |
 | <a id="diffpositiontypeimage"></a>`image` | An image. |
 | <a id="diffpositiontypetext"></a>`text` | A text file. |
+
+### `DoraMetricBucketingInterval`
+
+All possible ways that DORA metrics can be aggregated.
+
+| Value | Description |
+| ----- | ----------- |
+| <a id="dorametricbucketingintervalall"></a>`ALL` | All data points are combined into a single value. |
+| <a id="dorametricbucketingintervaldaily"></a>`DAILY` | Data points are combined into chunks by day. |
+| <a id="dorametricbucketingintervalmonthly"></a>`MONTHLY` | Data points are combined into chunks by month. |
+
+### `DoraMetricType`
+
+All supported DORA metric types.
+
+| Value | Description |
+| ----- | ----------- |
+| <a id="dorametrictypedeployment_frequency"></a>`DEPLOYMENT_FREQUENCY` | Deployment frequency. |
+| <a id="dorametrictypelead_time_for_changes"></a>`LEAD_TIME_FOR_CHANGES` | Lead time for changes. |
 
 ### `EntryType`
 
@@ -14545,6 +14683,7 @@ Iteration ID wildcard values.
 | <a id="jobartifactfiletypearchive"></a>`ARCHIVE` | ARCHIVE job artifact file type. |
 | <a id="jobartifactfiletypebrowser_performance"></a>`BROWSER_PERFORMANCE` | BROWSER PERFORMANCE job artifact file type. |
 | <a id="jobartifactfiletypecluster_applications"></a>`CLUSTER_APPLICATIONS` | CLUSTER APPLICATIONS job artifact file type. |
+| <a id="jobartifactfiletypecluster_image_scanning"></a>`CLUSTER_IMAGE_SCANNING` | CLUSTER IMAGE SCANNING job artifact file type. |
 | <a id="jobartifactfiletypecobertura"></a>`COBERTURA` | COBERTURA job artifact file type. |
 | <a id="jobartifactfiletypecodequality"></a>`CODEQUALITY` | CODE QUALITY job artifact file type. |
 | <a id="jobartifactfiletypecontainer_scanning"></a>`CONTAINER_SCANNING` | CONTAINER SCANNING job artifact file type. |
@@ -14666,6 +14805,25 @@ Representation of whether a GitLab merge request can be merged.
 | <a id="mergestrategyenumadd_to_merge_train_when_pipeline_succeeds"></a>`ADD_TO_MERGE_TRAIN_WHEN_PIPELINE_SUCCEEDS` | Use the add_to_merge_train_when_pipeline_succeeds merge strategy. |
 | <a id="mergestrategyenummerge_train"></a>`MERGE_TRAIN` | Use the merge_train merge strategy. |
 | <a id="mergestrategyenummerge_when_pipeline_succeeds"></a>`MERGE_WHEN_PIPELINE_SUCCEEDS` | Use the merge_when_pipeline_succeeds merge strategy. |
+
+### `MilestoneSort`
+
+Values for sorting milestones.
+
+| Value | Description |
+| ----- | ----------- |
+| <a id="milestonesortcreated_asc"></a>`CREATED_ASC` | Created at ascending order. |
+| <a id="milestonesortcreated_desc"></a>`CREATED_DESC` | Created at descending order. |
+| <a id="milestonesortdue_date_asc"></a>`DUE_DATE_ASC` | Milestone due date by ascending order. |
+| <a id="milestonesortdue_date_desc"></a>`DUE_DATE_DESC` | Milestone due date by descending order. |
+| <a id="milestonesortexpired_last_due_date_asc"></a>`EXPIRED_LAST_DUE_DATE_ASC` | Group milestones in this order: non-expired milestones with due dates, non-expired milestones without due dates and expired milestones then sort by due date in ascending order. |
+| <a id="milestonesortexpired_last_due_date_desc"></a>`EXPIRED_LAST_DUE_DATE_DESC` | Group milestones in this order: non-expired milestones with due dates, non-expired milestones without due dates and expired milestones then sort by due date in descending order. |
+| <a id="milestonesortupdated_asc"></a>`UPDATED_ASC` | Updated at ascending order. |
+| <a id="milestonesortupdated_desc"></a>`UPDATED_DESC` | Updated at descending order. |
+| <a id="milestonesortcreated_asc"></a>`created_asc` **{warning-solid}** | **Deprecated** in 13.5. This was renamed. Use: `CREATED_ASC`. |
+| <a id="milestonesortcreated_desc"></a>`created_desc` **{warning-solid}** | **Deprecated** in 13.5. This was renamed. Use: `CREATED_DESC`. |
+| <a id="milestonesortupdated_asc"></a>`updated_asc` **{warning-solid}** | **Deprecated** in 13.5. This was renamed. Use: `UPDATED_ASC`. |
+| <a id="milestonesortupdated_desc"></a>`updated_desc` **{warning-solid}** | **Deprecated** in 13.5. This was renamed. Use: `UPDATED_DESC`. |
 
 ### `MilestoneStateEnum`
 
@@ -14888,6 +15046,7 @@ Size of UI component in SAST configuration page.
 | Value | Description |
 | ----- | ----------- |
 | <a id="securityreporttypeenumapi_fuzzing"></a>`API_FUZZING` | API FUZZING scan report. |
+| <a id="securityreporttypeenumcluster_image_scanning"></a>`CLUSTER_IMAGE_SCANNING` | CLUSTER IMAGE SCANNING scan report. |
 | <a id="securityreporttypeenumcontainer_scanning"></a>`CONTAINER_SCANNING` | CONTAINER SCANNING scan report. |
 | <a id="securityreporttypeenumcoverage_fuzzing"></a>`COVERAGE_FUZZING` | COVERAGE FUZZING scan report. |
 | <a id="securityreporttypeenumdast"></a>`DAST` | DAST scan report. |
@@ -14902,6 +15061,7 @@ The type of the security scanner.
 | Value | Description |
 | ----- | ----------- |
 | <a id="securityscannertypeapi_fuzzing"></a>`API_FUZZING` |  |
+| <a id="securityscannertypecluster_image_scanning"></a>`CLUSTER_IMAGE_SCANNING` |  |
 | <a id="securityscannertypecontainer_scanning"></a>`CONTAINER_SCANNING` |  |
 | <a id="securityscannertypecoverage_fuzzing"></a>`COVERAGE_FUZZING` |  |
 | <a id="securityscannertypedast"></a>`DAST` |  |
@@ -15053,6 +15213,7 @@ Name of the feature that the callout is for.
 | <a id="usercalloutfeaturenameenumactive_user_count_threshold"></a>`ACTIVE_USER_COUNT_THRESHOLD` | Callout feature name for active_user_count_threshold. |
 | <a id="usercalloutfeaturenameenumbuy_pipeline_minutes_notification_dot"></a>`BUY_PIPELINE_MINUTES_NOTIFICATION_DOT` | Callout feature name for buy_pipeline_minutes_notification_dot. |
 | <a id="usercalloutfeaturenameenumcanary_deployment"></a>`CANARY_DEPLOYMENT` | Callout feature name for canary_deployment. |
+| <a id="usercalloutfeaturenameenumcloud_licensing_subscription_activation_banner"></a>`CLOUD_LICENSING_SUBSCRIPTION_ACTIVATION_BANNER` | Callout feature name for cloud_licensing_subscription_activation_banner. |
 | <a id="usercalloutfeaturenameenumcluster_security_warning"></a>`CLUSTER_SECURITY_WARNING` | Callout feature name for cluster_security_warning. |
 | <a id="usercalloutfeaturenameenumcustomize_homepage"></a>`CUSTOMIZE_HOMEPAGE` | Callout feature name for customize_homepage. |
 | <a id="usercalloutfeaturenameenumeoa_bronze_plan_banner"></a>`EOA_BRONZE_PLAN_BANNER` | Callout feature name for eoa_bronze_plan_banner. |
@@ -15160,11 +15321,11 @@ The type of the security scan that found the vulnerability.
 | Value | Description |
 | ----- | ----------- |
 | <a id="vulnerabilityreporttypeapi_fuzzing"></a>`API_FUZZING` |  |
+| <a id="vulnerabilityreporttypecluster_image_scanning"></a>`CLUSTER_IMAGE_SCANNING` |  |
 | <a id="vulnerabilityreporttypecontainer_scanning"></a>`CONTAINER_SCANNING` |  |
 | <a id="vulnerabilityreporttypecoverage_fuzzing"></a>`COVERAGE_FUZZING` |  |
 | <a id="vulnerabilityreporttypedast"></a>`DAST` |  |
 | <a id="vulnerabilityreporttypedependency_scanning"></a>`DEPENDENCY_SCANNING` |  |
-| <a id="vulnerabilityreporttyperunning_container_scanning"></a>`RUNNING_CONTAINER_SCANNING` |  |
 | <a id="vulnerabilityreporttypesast"></a>`SAST` |  |
 | <a id="vulnerabilityreporttypesecret_detection"></a>`SECRET_DETECTION` |  |
 
@@ -15727,6 +15888,16 @@ One of:
 - [`Issue`](#issue)
 - [`MergeRequest`](#mergerequest)
 
+#### `NoteableType`
+
+Represents an object that supports notes.
+
+One of:
+
+- [`Design`](#design)
+- [`Issue`](#issue)
+- [`MergeRequest`](#mergerequest)
+
 #### `PackageMetadata`
 
 Represents metadata associated with a Package.
@@ -15895,7 +16066,7 @@ Implementations:
 | <a id="memberinterfaceupdatedat"></a>`updatedAt` | [`Time`](#time) | Date and time the membership was last updated. |
 | <a id="memberinterfaceuser"></a>`user` | [`UserCore`](#usercore) | User that is associated with the member object. |
 
-#### `Noteable`
+#### `NoteableInterface`
 
 Implementations:
 
@@ -15913,8 +16084,8 @@ Implementations:
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
-| <a id="noteablediscussions"></a>`discussions` | [`DiscussionConnection!`](#discussionconnection) | All discussions on this noteable. (see [Connections](#connections)) |
-| <a id="noteablenotes"></a>`notes` | [`NoteConnection!`](#noteconnection) | All notes on this noteable. (see [Connections](#connections)) |
+| <a id="noteableinterfacediscussions"></a>`discussions` | [`DiscussionConnection!`](#discussionconnection) | All discussions on this noteable. (see [Connections](#connections)) |
+| <a id="noteableinterfacenotes"></a>`notes` | [`NoteConnection!`](#noteconnection) | All notes on this noteable. (see [Connections](#connections)) |
 
 #### `PackageFileMetadata`
 

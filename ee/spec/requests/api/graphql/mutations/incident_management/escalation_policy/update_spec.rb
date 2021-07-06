@@ -84,4 +84,8 @@ RSpec.describe 'Updating an escalation policy' do
       ]
     )
   end
+
+  include_examples 'correctly reorders escalation rule inputs' do
+    let(:resolve) { post_graphql_mutation(mutation, current_user: user) }
+  end
 end

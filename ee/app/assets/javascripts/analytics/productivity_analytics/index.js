@@ -1,10 +1,10 @@
 import Vue from 'vue';
 import VueApollo from 'vue-apollo';
 import { mapState, mapActions } from 'vuex';
+import DateRange from '~/analytics/shared/components/daterange.vue';
 import { getIdFromGraphQLId } from '~/graphql_shared/utils';
 import createDefaultClient from '~/lib/graphql';
 import { parseBoolean } from '~/lib/utils/common_utils';
-import DateRange from '../shared/components/daterange.vue';
 import { buildGroupFromDataset, buildProjectFromDataset } from '../shared/utils';
 import ProductivityAnalyticsApp from './components/app.vue';
 import FilterDropdowns from './components/filter_dropdowns.vue';

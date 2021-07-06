@@ -1,6 +1,8 @@
 <script>
 import { GlIcon, GlTooltipDirective } from '@gitlab/ui';
 import { __ } from '~/locale';
+import SidebarEditableItem from '~/sidebar/components/sidebar_editable_item.vue';
+import IssueFieldDropdown from './issue_field_dropdown.vue';
 
 export default {
   directives: {
@@ -8,11 +10,49 @@ export default {
   },
   components: {
     GlIcon,
+    IssueFieldDropdown,
+    SidebarEditableItem,
+  },
+  provide() {
+    return {
+      isClassicSidebar: true,
+      canUpdate: this.canUpdate,
+    };
   },
   props: {
+    canUpdate: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
+    dropdownEmpty: {
+      type: String,
+      required: false,
+      default: null,
+    },
+    dropdownTitle: {
+      type: String,
+      required: false,
+      default: null,
+    },
     icon: {
       type: String,
       required: true,
+    },
+    items: {
+      type: Array,
+      required: false,
+      default: () => [],
+    },
+    loading: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
+    updating: {
+      type: Boolean,
+      required: false,
+      default: false,
     },
     title: {
       type: String,
@@ -44,20 +84,58 @@ export default {
   i18n: {
     none: __('None'),
   },
+  methods: {
+    showDropdown() {
+      this.$refs.dropdown.showDropdown();
+      this.$emit('issue-field-fetch');
+    },
+    expandSidebarAndOpenDropdown() {
+      this.$emit('expand-sidebar', this.$refs.editableItem);
+    },
+    onIssueFieldUpdated(value) {
+      this.$emit('issue-field-updated', value);
+    },
+  },
 };
 </script>
 
 <template>
   <div class="block">
-    <div v-gl-tooltip="tooltipProps" class="sidebar-collapsed-icon" data-testid="field-collapsed">
-      <gl-icon :name="icon" />
-    </div>
+    <sidebar-editable-item
+      ref="editableItem"
+      :loading="updating"
+      :title="title"
+      @open="showDropdown"
+    >
+      <template #collapsed>
+        <div
+          v-gl-tooltip="tooltipProps"
+          class="sidebar-collapsed-icon"
+          data-testid="field-collapsed"
+          @click="expandSidebarAndOpenDropdown"
+        >
+          <gl-icon :name="icon" />
+        </div>
 
-    <div class="hide-collapsed">
-      <div class="title" data-testid="field-title">{{ title }}</div>
-      <div class="value">
-        <span :class="valueClass" data-testid="field-value">{{ valueWithFallback }}</span>
-      </div>
-    </div>
+        <div class="hide-collapsed">
+          <div class="value" data-testid="field-value">
+            <span :class="valueClass">{{ valueWithFallback }}</span>
+          </div>
+        </div>
+      </template>
+
+      <template #default>
+        <issue-field-dropdown
+          v-if="canUpdate"
+          ref="dropdown"
+          :empty-text="dropdownEmpty"
+          :items="items"
+          :loading="loading"
+          :text="valueWithFallback"
+          :title="dropdownTitle"
+          @issue-field-updated="onIssueFieldUpdated"
+        />
+      </template>
+    </sidebar-editable-item>
   </div>
 </template>

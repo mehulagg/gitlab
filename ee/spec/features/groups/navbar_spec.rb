@@ -28,7 +28,7 @@ RSpec.describe 'Group navbar' do
       insert_after_sub_nav_item(
         _('Contribution'),
         within: _('Analytics'),
-        new_sub_nav_item_name: _('DevOps Adoption')
+        new_sub_nav_item_name: _('DevOps adoption')
       )
 
       visit group_path(group)
@@ -60,7 +60,7 @@ RSpec.describe 'Group navbar' do
       insert_after_sub_nav_item(
         _('Contribution'),
         within: _('Analytics'),
-        new_sub_nav_item_name: _('Value Stream')
+        new_sub_nav_item_name: _('Value stream')
       )
 
       visit group_path(group)

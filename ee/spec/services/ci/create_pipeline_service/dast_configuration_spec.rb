@@ -79,7 +79,9 @@ RSpec.describe Ci::CreatePipelineService do
         stub_feature_flags(dast_configuration_ui: false)
       end
 
-      it_behaves_like 'it does not expand the dast variables'
+      it 'communicates failure' do
+        expect(subject.yaml_errors).to eq('Insufficient permissions for dast_configuration keyword')
+      end
     end
 
     context 'when the feature is enabled' do
@@ -100,6 +102,26 @@ RSpec.describe Ci::CreatePipelineService do
           it 'expands the secret dast variables' do
             expect(dast_variables).to include(*dast_secret_variables)
           end
+        end
+
+        shared_examples 'a missing profile' do
+          it 'communicates failure' do
+            expect(subject.yaml_errors).to eq("DAST profile not found: #{profile.name}")
+          end
+        end
+
+        context 'when the site profile does not exist' do
+          let(:dast_site_profile) { double(DastSiteProfile, name: SecureRandom.hex) }
+          let(:profile) { dast_site_profile }
+
+          it_behaves_like 'a missing profile'
+        end
+
+        context 'when the scanner profile does not exist' do
+          let(:dast_scanner_profile) { double(DastScannerProfile, name: SecureRandom.hex) }
+          let(:profile) { dast_scanner_profile }
+
+          it_behaves_like 'a missing profile'
         end
       end
 

@@ -3,8 +3,9 @@ import { shallowMount } from '@vue/test-utils';
 import { nextTick } from 'vue';
 import Metrics from 'ee/analytics/cycle_analytics/components/metrics.vue';
 import Api from 'ee/api';
+import { group } from 'jest/cycle_analytics/mock_data';
 import createFlash from '~/flash';
-import { group, timeMetricsData, recentActivityData } from '../mock_data';
+import { timeMetricsData, recentActivityData } from '../mock_data';
 
 jest.mock('~/flash');
 

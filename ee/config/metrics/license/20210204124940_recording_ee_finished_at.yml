@@ -1,5 +1,4 @@
 ---
-data_category: Optional
 key_path: recording_ee_finished_at
 description: When the EE-specific features were computed
 product_section: growth
@@ -10,6 +9,7 @@ value_type: string
 status: data_available
 time_frame: none
 data_source: system
+data_category: Subscription
 distribution:
 - ee
 tier:

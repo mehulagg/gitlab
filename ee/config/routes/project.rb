@@ -41,7 +41,7 @@ constraints(::Constraints::ProjectUrlConstrainer.new) do
 
         resource :threat_monitoring, only: [:show], controller: :threat_monitoring do
           get '/alerts/:iid', action: 'alert_details', constraints: { iid: /\d+/ }, as: :threat_monitoring_alert
-          resources :policies, only: [:new, :edit], controller: :threat_monitoring
+          resources :policies, only: [:new, :edit], controller: :threat_monitoring, constraints: { id: %r{[^/]+} }
         end
 
         resources :protected_environments, only: [:create, :update, :destroy], constraints: { id: /\d+/ } do
@@ -53,7 +53,7 @@ constraints(::Constraints::ProjectUrlConstrainer.new) do
         resources :audit_events, only: [:index]
 
         namespace :security do
-          resources :network_policies, only: [:index, :create, :update, :destroy] do
+          resources :network_policies, only: [:index, :create, :update, :destroy], constraints: { id: %r{[^/]+} } do
             get :summary, on: :collection
           end
 

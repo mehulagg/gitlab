@@ -11,7 +11,6 @@ import {
 import validation from '~/vue_shared/directives/validation';
 import {
   activateLabel,
-  fieldRequiredMessage,
   INVALID_CODE_ERROR,
   INVALID_CODE_ERROR_MESSAGE,
   subscriptionActivationForm,
@@ -37,7 +36,6 @@ export default {
     acceptTerms: subscriptionActivationForm.acceptTerms,
     activateLabel,
     activationCode: subscriptionActivationForm.activationCode,
-    fieldRequiredMessage,
     pasteActivationCode: subscriptionActivationForm.pasteActivationCode,
   },
   directives: {
@@ -74,6 +72,10 @@ export default {
     };
   },
   computed: {
+    checkboxLabelClass() {
+      // by default, if the value is not false the text will look green, therefore we force it to gray-900
+      return this.form.fields.terms.state === false ? '' : 'gl-text-gray-900!';
+    },
     isRequestingActivation() {
       return this.isLoading;
     },
@@ -142,11 +144,7 @@ export default {
         />
       </gl-form-group>
 
-      <gl-form-group
-        class="gl-mb-0"
-        :invalid-feedback="$options.i18n.fieldRequiredMessage"
-        data-testid="form-group-terms"
-      >
+      <gl-form-group class="gl-mb-0" data-testid="form-group-terms">
         <gl-form-checkbox
           id="subscription-form-terms-check"
           v-model="form.fields.terms.value"
@@ -155,7 +153,7 @@ export default {
           name="terms"
           required
         >
-          <span class="gl-text-gray-900!">
+          <span :class="checkboxLabelClass">
             <gl-sprintf :message="$options.i18n.acceptTerms">
               <template #link="{ content }">
                 <gl-link href="https://about.gitlab.com/terms/" target="_blank">{{

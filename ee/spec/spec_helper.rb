@@ -21,6 +21,14 @@ RSpec.configure do |config|
     TestLicense.init
   end
 
+  config.before(:context, :without_license) do
+    License.destroy_all # rubocop: disable Cop/DestroyAll
+  end
+
+  config.after(:context, :without_license) do
+    TestLicense.init
+  end
+
   config.around(:each, :geo_tracking_db) do |example|
     example.run if Gitlab::Geo.geo_database_configured?
   end

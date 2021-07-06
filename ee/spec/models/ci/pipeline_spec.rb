@@ -109,7 +109,7 @@ RSpec.describe Ci::Pipeline do
     subject { pipeline.security_reports }
 
     before do
-      stub_licensed_features(sast: true, dependency_scanning: true, container_scanning: true)
+      stub_licensed_features(sast: true, dependency_scanning: true, container_scanning: true, cluster_image_scanning: true)
     end
 
     context 'when pipeline has multiple builds with security reports' do
@@ -119,12 +119,16 @@ RSpec.describe Ci::Pipeline do
       let(:build_ds_2) { create(:ci_build, :success, name: 'ds_2', pipeline: pipeline, project: project) }
       let(:build_cs_1) { create(:ci_build, :success, name: 'cs_1', pipeline: pipeline, project: project) }
       let(:build_cs_2) { create(:ci_build, :success, name: 'cs_2', pipeline: pipeline, project: project) }
+      let(:build_cis_1) { create(:ci_build, :success, name: 'cis_1', pipeline: pipeline, project: project) }
+      let(:build_cis_2) { create(:ci_build, :success, name: 'cis_2', pipeline: pipeline, project: project) }
       let!(:sast1_artifact) { create(:ee_ci_job_artifact, :sast, job: build_sast_1, project: project) }
       let!(:sast2_artifact) { create(:ee_ci_job_artifact, :sast, job: build_sast_2, project: project) }
       let!(:ds1_artifact) { create(:ee_ci_job_artifact, :dependency_scanning, job: build_ds_1, project: project) }
       let!(:ds2_artifact) { create(:ee_ci_job_artifact, :dependency_scanning, job: build_ds_2, project: project) }
       let!(:cs1_artifact) { create(:ee_ci_job_artifact, :container_scanning, job: build_cs_1, project: project) }
       let!(:cs2_artifact) { create(:ee_ci_job_artifact, :container_scanning, job: build_cs_2, project: project) }
+      let!(:cis1_artifact) { create(:ee_ci_job_artifact, :cluster_image_scanning, job: build_cis_1, project: project) }
+      let!(:cis2_artifact) { create(:ee_ci_job_artifact, :cluster_image_scanning, job: build_cis_2, project: project) }
 
       it 'assigns pipeline to the reports' do
         expect(subject.pipeline).to eq(pipeline)
@@ -132,12 +136,13 @@ RSpec.describe Ci::Pipeline do
       end
 
       it 'returns security reports with collected data grouped as expected' do
-        expect(subject.reports.keys).to contain_exactly('sast', 'dependency_scanning', 'container_scanning')
+        expect(subject.reports.keys).to contain_exactly('sast', 'dependency_scanning', 'container_scanning', 'cluster_image_scanning')
 
         # for each of report categories, we have merged 2 reports with the same data (fixture)
         expect(subject.get_report('sast', sast1_artifact).findings.size).to eq(5)
         expect(subject.get_report('dependency_scanning', ds1_artifact).findings.size).to eq(4)
         expect(subject.get_report('container_scanning', cs1_artifact).findings.size).to eq(8)
+        expect(subject.get_report('cluster_image_scanning', cis1_artifact).findings.size).to eq(2)
       end
 
       context 'when builds are retried' do
@@ -147,6 +152,7 @@ RSpec.describe Ci::Pipeline do
           expect(subject.get_report('sast', sast1_artifact).findings.size).to eq(5)
           expect(subject.get_report('dependency_scanning', ds1_artifact).findings.size).to eq(4)
           expect(subject.get_report('container_scanning', cs1_artifact).findings.size).to eq(8)
+          expect(subject.get_report('cluster_image_scanning', cis1_artifact).findings.size).to eq(2)
         end
       end
 
@@ -535,18 +541,22 @@ RSpec.describe Ci::Pipeline do
     where(:pipeline_status, :build_types, :expected_status) do
       [
         [:blocked, [:container_scanning], false],
+        [:blocked, [:cluster_image_scanning], false],
         [:blocked, [:license_scan_v2_1, :container_scanning], true],
         [:blocked, [:license_scan_v2_1], true],
         [:blocked, [], false],
         [:failed, [:container_scanning], false],
+        [:failed, [:cluster_image_scanning], false],
         [:failed, [:license_scan_v2_1, :container_scanning], true],
         [:failed, [:license_scan_v2_1], true],
         [:failed, [], false],
         [:running, [:container_scanning], false],
+        [:running, [:cluster_image_scanning], false],
         [:running, [:license_scan_v2_1, :container_scanning], true],
         [:running, [:license_scan_v2_1], true],
         [:running, [], false],
         [:success, [:container_scanning], false],
+        [:success, [:cluster_image_scanning], false],
         [:success, [:license_scan_v2_1, :container_scanning], true],
         [:success, [:license_scan_v2_1], true],
         [:success, [], false]

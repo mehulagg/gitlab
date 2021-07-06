@@ -1,6 +1,8 @@
 import { GlDrawer } from '@gitlab/ui';
 import MergeRequestDrawer from 'ee/compliance_dashboard/components/drawer.vue';
+import BranchPath from 'ee/compliance_dashboard/components/drawer_sections/branch_path.vue';
 import Project from 'ee/compliance_dashboard/components/drawer_sections/project.vue';
+import Reference from 'ee/compliance_dashboard/components/drawer_sections/reference.vue';
 import { complianceFramework } from 'ee_jest/vue_shared/components/compliance_framework_label/mock_data';
 import { shallowMountExtended } from 'helpers/vue_test_utils_helper';
 import { createMergeRequests } from '../mock_data';
@@ -17,6 +19,8 @@ describe('MergeRequestDrawer component', () => {
   const findTitle = () => wrapper.findByTestId('dashboard-drawer-title');
   const findDrawer = () => wrapper.findComponent(GlDrawer);
   const findProject = () => wrapper.findComponent(Project);
+  const findReference = () => wrapper.findComponent(Reference);
+  const findBranchPath = () => wrapper.findComponent(BranchPath);
 
   const createComponent = (props) => {
     return shallowMountExtended(MergeRequestDrawer, {
@@ -64,6 +68,42 @@ describe('MergeRequestDrawer component', () => {
         complianceFramework,
         name: mergeRequest.project.name,
         url: mergeRequest.project.web_url,
+      });
+    });
+
+    it('has the reference section', () => {
+      expect(findReference().props()).toStrictEqual({
+        path: mergeRequest.path,
+        reference: mergeRequest.reference,
+      });
+    });
+  });
+
+  describe('when the branch details are given', () => {
+    const sourceBranch = 'feature-branch';
+    const sourceBranchUri = '/project/feature-branch';
+    const targetBranch = 'main';
+    const targetBranchUri = '/project/main';
+
+    beforeEach(() => {
+      wrapper = createComponent({
+        showDrawer: true,
+        mergeRequest: {
+          ...mergeRequest,
+          source_branch: sourceBranch,
+          source_branch_uri: sourceBranchUri,
+          target_branch: targetBranch,
+          target_branch_uri: targetBranchUri,
+        },
+      });
+    });
+
+    it('has the branch path section', () => {
+      expect(findBranchPath().props()).toStrictEqual({
+        sourceBranch,
+        sourceBranchUri,
+        targetBranch,
+        targetBranchUri,
       });
     });
   });

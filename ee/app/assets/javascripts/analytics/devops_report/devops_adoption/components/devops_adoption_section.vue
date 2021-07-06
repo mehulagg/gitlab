@@ -21,7 +21,7 @@ export default {
       type: Boolean,
       required: true,
     },
-    hasSegmentsData: {
+    hasEnabledNamespaceData: {
       type: Boolean,
       required: true,
     },
@@ -37,7 +37,7 @@ export default {
       type: Array,
       required: true,
     },
-    segments: {
+    enabledNamespaces: {
       type: Object,
       required: false,
       default: () => {},
@@ -64,29 +64,29 @@ export default {
 </script>
 <template>
   <gl-loading-icon v-if="isLoading" size="md" class="gl-my-5" />
-  <div v-else-if="hasSegmentsData" class="gl-mt-3">
-    <div class="gl-my-3" data-testid="tableHeader">
-      <span class="gl-text-gray-400">
+  <div v-else-if="hasEnabledNamespaceData" class="gl-mt-3">
+    <div class="gl-mb-3" data-testid="tableHeader">
+      <p class="gl-text-gray-400">
         <gl-sprintf :message="$options.i18n.tableHeaderText">
           <template #timestamp>{{ timestamp }}</template>
         </gl-sprintf>
-      </span>
+      </p>
 
       <devops-adoption-add-dropdown
-        class="gl-mt-4 gl-mb-3 gl-md-display-none"
+        class="gl-mb-3 gl-md-display-none"
         :search-term="searchTerm"
         :groups="disabledGroupNodes"
         :is-loading-groups="isLoadingGroups"
         :has-subgroups="hasSubgroups"
         @fetchGroups="$emit('fetchGroups', $event)"
-        @segmentsAdded="$emit('segmentsAdded', $event)"
+        @enabledNamespacesAdded="$emit('enabledNamespacesAdded', $event)"
         @trackModalOpenState="$emit('trackModalOpenState', $event)"
       />
     </div>
     <devops-adoption-table
       :cols="cols"
-      :segments="segments.nodes"
-      @segmentsRemoved="$emit('segmentsRemoved', $event)"
+      :enabled-namespaces="enabledNamespaces.nodes"
+      @enabledNamespacesRemoved="$emit('enabledNamespacesRemoved', $event)"
       @trackModalOpenState="$emit('trackModalOpenState', $event)"
     />
   </div>

@@ -3,7 +3,7 @@
 require "spec_helper"
 
 RSpec.describe API::Helpers::Caching, :use_clean_rails_redis_caching do
-  subject(:instance) { Class.new.include(described_class).new }
+  subject(:instance) { Class.new.include(described_class, Grape::DSL::Headers).new }
 
   let_it_be(:project) { create(:project) }
   let_it_be(:user) { create(:user) }
@@ -94,6 +94,42 @@ RSpec.describe API::Helpers::Caching, :use_clean_rails_redis_caching do
       end
 
       expect(nested_call.to_s).to eq(subject.to_s)
+    end
+
+    context 'Cache versioning' do
+      it 'returns cache based on version parameter' do
+        result_1 = instance.cache_action(cache_key, **kwargs.merge(version: 1)) { 'Cache 1' }
+        result_2 = instance.cache_action(cache_key, **kwargs.merge(version: 2)) { 'Cache 2' }
+
+        expect(result_1.to_s).to eq('Cache 1'.to_json)
+        expect(result_2.to_s).to eq('Cache 2'.to_json)
+      end
+    end
+
+    context 'Cache for pagination headers' do
+      described_class::PAGINATION_HEADERS.each do |pagination_header|
+        context pagination_header do
+          before do
+            instance.header(pagination_header, 100)
+          end
+
+          it 'stores and recovers pagination headers from cache' do
+            expect { perform }.not_to change { instance.header[pagination_header] }
+
+            instance.header.delete(pagination_header)
+
+            expect { perform }.to change { instance.header[pagination_header] }.from(nil).to(100)
+          end
+
+          it 'prefers headers from request than from cache' do
+            expect { perform }.not_to change { instance.header[pagination_header] }
+
+            instance.header(pagination_header, 50)
+
+            expect { perform }.not_to change { instance.header[pagination_header] }.from(50)
+          end
+        end
+      end
     end
   end
 

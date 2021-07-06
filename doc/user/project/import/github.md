@@ -60,7 +60,7 @@ For this association to succeed, each GitHub author and assignee in the reposito
 must meet one of the following conditions prior to the import:
 
 - Have previously logged in to a GitLab account using the GitHub icon.
-- Have a GitHub account with a [public-facing email address](https://docs.github.com/en/github/setting-up-and-managing-your-github-user-account/setting-your-commit-email-address)
+- Have a GitHub account with a [public-facing email address](https://docs.github.com/en/github/setting-up-and-managing-your-github-user-account/managing-email-preferences/setting-your-commit-email-address)
   that matches their GitLab account's email address.
 
   NOTE:
@@ -159,6 +159,9 @@ Additionally, you can configure GitLab to send pipeline status updates back GitH
 
 If you import your project using [CI/CD for external repository](../../../ci/ci_cd_for_external_repos/index.md), then both
 of the above are automatically configured. **(PREMIUM)**
+
+NOTE:
+Mirroring does not sync any new or updated pull requests from your GitHub project.
 
 ## Improve the speed of imports on self-managed instances
 

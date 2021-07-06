@@ -19,7 +19,7 @@ exports[`MergeRequest component when there is a merge request matches the snapsh
   <span
     class="gl-text-gray-500"
   >
-    !1
+    project!1
   </span>
    
   <span

@@ -6,9 +6,11 @@ module EE
 
     override :should_render_dora_charts
     def should_render_dora_charts
-      return false unless @project.feature_available?(:dora4_analytics)
+      container = @project || @group
 
-      can?(current_user, :read_dora4_analytics, @project)
+      return false unless container.feature_available?(:dora4_analytics)
+
+      can?(current_user, :read_dora4_analytics, container)
     end
   end
 end

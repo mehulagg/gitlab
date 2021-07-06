@@ -1,14 +1,17 @@
 import { GlToggle } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
+import MockAxiosAdapter from 'axios-mock-adapter';
 import CcValidationRequiredAlert from 'ee_component/billings/components/cc_validation_required_alert.vue';
 import { TEST_HOST } from 'helpers/test_constants';
 import waitForPromises from 'helpers/wait_for_promises';
+import axios from '~/lib/utils/axios_utils';
 import SharedRunnersToggleComponent from '~/projects/settings/components/shared_runners_toggle.vue';
 
 const TEST_UPDATE_PATH = '/test/update_shared_runners';
 
 describe('projects/settings/components/shared_runners', () => {
   let wrapper;
+  let mockAxios;
 
   const createComponent = (props = {}) => {
     wrapper = shallowMount(SharedRunnersToggleComponent, {
@@ -27,6 +30,11 @@ describe('projects/settings/components/shared_runners', () => {
   const findCcValidationRequiredAlert = () => wrapper.findComponent(CcValidationRequiredAlert);
   const getToggleValue = () => findSharedRunnersToggle().props('value');
   const isToggleDisabled = () => findSharedRunnersToggle().props('disabled');
+
+  beforeEach(() => {
+    mockAxios = new MockAxiosAdapter(axios);
+    mockAxios.onPost(TEST_UPDATE_PATH).reply(200);
+  });
 
   afterEach(() => {
     wrapper.destroy();
@@ -57,13 +65,30 @@ describe('projects/settings/components/shared_runners', () => {
     });
 
     describe('when credit card is validated', () => {
-      it('should show the toggle button', async () => {
+      beforeEach(() => {
         findCcValidationRequiredAlert().vm.$emit('verifiedCreditCard');
-        await waitForPromises();
+      });
 
+      it('should show the toggle button', () => {
         expect(findSharedRunnersToggle().exists()).toBe(true);
         expect(getToggleValue()).toBe(false);
         expect(isToggleDisabled()).toBe(false);
+      });
+
+      it('should not show credit card alert after toggling on and off', async () => {
+        findSharedRunnersToggle().vm.$emit('change', true);
+        await waitForPromises();
+
+        expect(mockAxios.history.post[0].data).toBeUndefined();
+        expect(mockAxios.history.post).toHaveLength(1);
+        expect(findCcValidationRequiredAlert().exists()).toBe(false);
+
+        findSharedRunnersToggle().vm.$emit('change', false);
+        await waitForPromises();
+
+        expect(mockAxios.history.post[1].data).toBeUndefined();
+        expect(mockAxios.history.post).toHaveLength(2);
+        expect(findCcValidationRequiredAlert().exists()).toBe(false);
       });
     });
   });
