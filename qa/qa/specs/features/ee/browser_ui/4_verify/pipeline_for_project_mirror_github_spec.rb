@@ -5,7 +5,7 @@ require 'faker'
 require 'base64'
 
 module QA
-  context 'Verify', :github, :requires_admin, only: { subdomain: :staging }, quarantine: { issue: 'https://gitlab.com/gitlab-org/gitlab/-/issues/335045', type: :bug } do
+  context 'Verify', :github, :requires_admin, only: { subdomain: :staging } do
     include Support::Api
 
     describe 'Pipeline for project mirrors Github' do
@@ -44,7 +44,6 @@ module QA
         Flow::Login.sign_in(as: user)
         group.visit!
         import_project
-        Page::Project::Menu.perform(&:click_ci_cd_pipelines)
       end
 
       after do
@@ -54,6 +53,16 @@ module QA
       end
 
       it 'user commits to GitHub triggers CI pipeline', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/144' do
+        Page::Project::Menu.perform(&:go_to_repository_settings)
+        Page::Project::Settings::Repository.perform do |settings|
+          settings.expand_mirroring_repositories do |mirror_settings|
+            mirror_settings.repository_url = 'https://github.com/gitlab-qa-github/test-project.git'
+            mirror_settings.select_mirror_trigger_option
+            mirror_settings.mirror_repository
+          end
+        end
+
+        Page::Project::Menu.perform(&:click_ci_cd_pipelines)
         Page::Project::Pipeline::Index.perform do |index|
           expect(index).to have_no_pipeline, 'Expect to have NO pipeline before mirroring.'
 
@@ -100,7 +109,7 @@ module QA
       end
 
       def trigger_project_mirror
-        Runtime::Logger.info "Triggering pull mirror request."
+        Runtime::Logger.info "Triggering pull mirror request. Project id - #{import_project_id}"
 
         request = Runtime::API::Request.new(user_api_client, "/projects/#{import_project_id}/mirror/pull")
         Support::Retrier.retry_until(max_attempts: 6, sleep_interval: 10) do
