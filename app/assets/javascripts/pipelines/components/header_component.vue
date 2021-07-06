@@ -31,7 +31,7 @@ export default {
   errorTexts: {
     [LOAD_FAILURE]: __('We are currently unable to fetch data for the pipeline header.'),
     [POST_FAILURE]: __('An error occurred while making the request.'),
-    [DELETE_FAILURE]: __('An error occurred while deleting the pipeline.'),
+    [DELETE_FAILURE]: __('An error occurred while deleting the pipeline. Note: Running pipelines cannot be deleted.'),
     [DEFAULT]: __('An unknown error occurred.'),
   },
   inject: {

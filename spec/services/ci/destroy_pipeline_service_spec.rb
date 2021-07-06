@@ -9,14 +9,22 @@ RSpec.describe ::Ci::DestroyPipelineService do
 
   subject { described_class.new(project, user).execute(pipeline) }
 
-  context 'user is owner' do
-    let(:user) { project.owner }
+  before do
+    allow(pipeline).to receive(:running?).and_return(false)
+  end
 
+  shared_examples 'destroys pipeline' do
     it 'destroys the pipeline' do
       subject
 
       expect { pipeline.reload }.to raise_error(ActiveRecord::RecordNotFound)
     end
+  end
+
+  context 'user is owner' do
+    let(:user) { project.owner }
+
+    include_examples 'destroys pipeline'
 
     it 'clears the cache', :use_clean_rails_redis_caching do
       create(:commit_status, :success, pipeline: pipeline, ref: pipeline.ref)
@@ -34,6 +42,26 @@ RSpec.describe ::Ci::DestroyPipelineService do
 
     it 'does not log an audit event' do
       expect { subject }.not_to change { AuditEvent.count }
+    end
+
+    context 'when pipeline is running' do
+      before do
+        allow(pipeline).to receive(:running?).and_return(true)
+      end
+
+      it 'does not destroy the project' do
+        expect(subject.errors.first).to eq(described_class::PIPELINE_RUNNING_ERROR_MSG)
+
+        expect { pipeline.reload }.not_to raise_error
+      end
+
+      context 'when destroy_only_cancelled_pipelines is disabled' do
+        before do
+          stub_feature_flags(destroy_only_cancelled_pipelines: false)
+        end
+
+        include_examples 'destroys pipeline'
+      end
     end
 
     context 'when the pipeline has jobs' do
