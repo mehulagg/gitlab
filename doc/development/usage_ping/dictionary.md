@@ -576,7 +576,7 @@ Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.ci_runners`
 
-Total configured Runners in project
+Total configured Runners of all types
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216175520_ci_runners.yml)
 
@@ -588,7 +588,7 @@ Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.ci_runners_group_type_active`
 
-Total active instance Runners
+Total active Group Runners
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210502050341_ci_runners_group_type_active.yml)
 
@@ -600,7 +600,7 @@ Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.ci_runners_group_type_active_online`
 
-Total active and online group Runners
+Total active and online Group Runners
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210502051922_ci_runners_group_type_active_online.yml)
 
@@ -612,7 +612,7 @@ Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.ci_runners_instance_type_active`
 
-Total active group Runners
+Total active Shared (Instance) Runners
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210502045402_ci_runners_instance_type_active.yml)
 
@@ -624,7 +624,7 @@ Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.ci_runners_instance_type_active_online`
 
-Total active and online instance Runners
+Total active and online Shared (Instance) Runners
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210502051651_ci_runners_instance_type_active_online.yml)
 
@@ -636,7 +636,7 @@ Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.ci_runners_online`
 
-Total online Runners
+Total online Runners of all types
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210502050942_ci_runners_online.yml)
 
@@ -648,7 +648,7 @@ Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.ci_runners_project_type_active`
 
-Total active project Runners
+Total active Specific (Project) Runners
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210502050834_ci_runners_project_type_active.yml)
 
@@ -660,7 +660,7 @@ Tiers: `free`, `premium`, `ultimate`
 
 ### `counts.ci_runners_project_type_active_online`
 
-Total active and online project Runners
+Total active and online Specific (Project) Runners
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210502052036_ci_runners_project_type_active_online.yml)
 
