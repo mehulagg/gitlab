@@ -29,7 +29,7 @@ function renderChildren(children) {
       ...children,
       {
         path: '*',
-        redirect: 'index',
+        redirect: '/',
       },
     ],
   };
@@ -61,7 +61,7 @@ export default function createRouter({ base, permissions = {} }) {
           },
         },
         {
-          path: ':cadenceId',
+          path: '/:cadenceId',
           ...renderChildren([
             {
               name: 'cadence',
