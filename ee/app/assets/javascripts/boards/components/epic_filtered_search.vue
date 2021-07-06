@@ -1,6 +1,8 @@
 <script>
 import BoardFilteredSearch from '~/boards/components/board_filtered_search.vue';
 import issueBoardFilter from '~/boards/issue_board_filters';
+import { TYPE_USER } from '~/graphql_shared/constants';
+import { convertToGraphQLId } from '~/graphql_shared/utils';
 import { __ } from '~/locale';
 import AuthorToken from '~/vue_shared/components/filtered_search_bar/tokens/author_token.vue';
 import LabelToken from '~/vue_shared/components/filtered_search_bar/tokens/label_token.vue';
@@ -60,6 +62,12 @@ export default {
           token: AuthorToken,
           unique: true,
           fetchAuthors,
+          preloadedAuthors: [{
+            id: convertToGraphQLId(TYPE_USER, gon.current_user_id),
+            name: gon.current_user_fullname,
+            username: gon.current_username,
+            avatarUrl: gon.current_user_avatar_url,
+          }],
         },
       ];
     },

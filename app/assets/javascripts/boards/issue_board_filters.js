@@ -24,11 +24,6 @@ export default function issueBoardFilters(apollo, fullPath, boardType) {
         },
       })
       .then(({ data }) =>
-        /*
-         * we need to filter this is only for graphql when bc we
-         * are putting the current_user on top of the list to avoid duplicates
-         */
-
         data.workspace?.assignees.nodes.map(({ user }) => user),
       );
   };
