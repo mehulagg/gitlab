@@ -3839,6 +3839,9 @@ msgstr ""
 msgid "An error occurred while updating the notification settings. Please try again."
 msgstr ""
 
+msgid "An error occurred while uploading the image. Please try again."
+msgstr ""
+
 msgid "An error occurred while validating group path"
 msgstr ""
 
@@ -17417,6 +17420,9 @@ msgid "Input host keys manually"
 msgstr ""
 
 msgid "Input the remote repository URL"
+msgstr ""
+
+msgid "Insert"
 msgstr ""
 
 msgid "Insert a code block"
@@ -35163,6 +35169,9 @@ msgid "Upload an image"
 msgstr ""
 
 msgid "Upload file"
+msgstr ""
+
+msgid "Upload image"
 msgstr ""
 
 msgid "Upload license"
