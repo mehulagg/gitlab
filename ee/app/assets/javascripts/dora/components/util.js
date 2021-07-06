@@ -116,6 +116,9 @@ export const buildNullSeriesForLeadTimeChart = (seriesData) => {
   });
 
   merge(nonNullSeries, {
+    showSymbol: true,
+    showAllSymbol: true,
+    symbolSize: 12,
     lineStyle: {
       color: dataVizBlue500,
     },
