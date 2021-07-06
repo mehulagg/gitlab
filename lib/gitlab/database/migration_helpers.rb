@@ -1140,6 +1140,8 @@ module Gitlab
         new = new.to_s
 
         indexes_for(table, old).each do |index|
+          next if index.name == 'index_epics_on_group_id_and_iid_varchar_pattern'
+
           new_columns = index.columns.map do |column|
             column == old ? new : column
           end
