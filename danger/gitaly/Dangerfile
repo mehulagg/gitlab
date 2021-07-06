@@ -14,8 +14,8 @@ during canary depoyment that can cause an incident.
 1. Verify that the environment widget contains a `gprd` deployment
 MSG
 
-diff = git.diff_for_file('Gemfile.lock')
-if diff && diff.patch =~ /^\+.+\bgitaly\b/
+changed_lines = helper.changed_lines('Gemfile.lock')
+if changed_lines.any? { |line| line =~ /^\+.+\bgitaly\b/ }
   warn 'Changing gitaly gem can cause a multi-version incompatibility incident'
 
   markdown(TEMPLATE_MESSAGE)
