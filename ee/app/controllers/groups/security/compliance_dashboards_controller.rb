@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 class Groups::Security::ComplianceDashboardsController < Groups::ApplicationController
   include Groups::SecurityFeaturesHelper
-  include Analytics::UniqueVisitsHelper
+  include RedisTracking
 
   layout 'group'
 
@@ -10,7 +10,7 @@ class Groups::Security::ComplianceDashboardsController < Groups::ApplicationCont
     push_frontend_feature_flag(:compliance_dashboard_drawer, @group, default_enabled: :yaml)
   end
 
-  track_unique_visits :show, target_id: 'g_compliance_dashboard'
+  track_redis_hll_event :show, name: 'g_compliance_dashboard'
 
   feature_category :compliance_management
 
