@@ -54,11 +54,7 @@ module API
       expose(:jobs_enabled) { |project, options| project.feature_available?(:builds, options[:current_user]) }
       expose(:snippets_enabled) { |project, options| project.feature_available?(:snippets, options[:current_user]) }
       expose(:container_registry_enabled) do |project, options|
-        if ::Feature.enabled?(:read_container_registry_access_level, project.namespace, default_enabled: :yaml)
-          project.feature_available?(:container_registry, options[:current_user])
-        else
-          project.read_attribute(:container_registry_enabled)
-        end
+        project.feature_available?(:container_registry, options[:current_user])
       end
       expose :service_desk_enabled
       expose :service_desk_address
