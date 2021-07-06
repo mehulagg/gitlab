@@ -142,7 +142,7 @@ export default {
     editPolicyPath() {
       return this.hasSelectedPolicy
         ? mergeUrlParams(
-            { environment_id: this.currentEnvironmentId, kind: this.selectedPolicyKind },
+            this.selectedPolicyKind == null ? { environment_id: this.currentEnvironmentId } : { environment_id: this.currentEnvironmentId, kind: this.selectedPolicyKind },
             this.newPolicyPath.replace('new', `${this.selectedPolicyName}/edit`),
           )
         : '';
