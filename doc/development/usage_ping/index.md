@@ -59,14 +59,14 @@ We use the following terminology to describe the Service Ping components:
 - You get better, more proactive support. (assuming that our TAMs and support organization used the data to deliver more value)
 - You get insight and advice into how to get the most value out of your investment in GitLab. Wouldn't you want to know that a number of features or values are not being adopted in your organization?
 - You get a report that illustrates how you compare against other similar organizations (anonymized), with specific advice and recommendations on how to improve your DevOps processes.
-- Service Ping is enabled by default. To disable it, see [Disable Service Ping](#disable-usage-ping).
+- Service Ping is enabled by default. To disable it, see [Disable Service Ping](#disable-service-ping).
 - When Service Ping is enabled, you have the option to participate in our [Registration Features Program](#registration-features-program) and receive free paid features.
 
 #### Registration Features Program
 
 > Introduced in GitLab 14.1.
 
-Starting with GitLab version 14.1, free self-managed users running [GitLab EE](../ee_features.md) can receive paid features by registering with GitLab and sending us activity data via [Service Ping](#what-is-usage-ping).
+Starting with GitLab version 14.1, free self-managed users running [GitLab EE](../ee_features.md) can receive paid features by registering with GitLab and sending us activity data via [Service Ping](#what-is-service-ping).
 
 The paid feature available in this offering is [Email from GitLab](../../tools/email.md).
 Administrators can use this [Premium](https://about.gitlab.com/pricing/premium/) feature to streamline
@@ -90,13 +90,13 @@ You can view the exact JSON payload sent to GitLab Inc. in the administration pa
 1. Expand the **Usage statistics** section.
 1. Select **Preview payload**.
 
-For an example payload, see [Example Service Ping payload](#example-usage-ping-payload).
+For an example payload, see [Example Service Ping payload](#example-service-ping-payload).
 
 ## Disable Service Ping **(FREE SELF)**
 
 NOTE:
 The method to disable Service Ping in the GitLab configuration file does not work in
-GitLab versions 9.3 to 13.12.3. See the [troubleshooting section](#cannot-disable-usage-ping-using-the-configuration-file)
+GitLab versions 9.3 to 13.12.3. See the [troubleshooting section](#cannot-disable-service-ping-using-the-configuration-file)
 on how to disable it.
 
 You can disable the service ping either using the GitLab UI, or editing the GitLab
@@ -198,7 +198,7 @@ sequenceDiagram
 
 ### 1. New metrics addition
 
-Please follow the [Implementing Service Ping](#implementing-usage-ping) guide.
+Please follow the [Implementing Service Ping](#implementing-service-ping) guide.
 
 ### 2. Existing metric change
 
@@ -960,7 +960,7 @@ alt_usage_data(999)
 ### Adding counters to build new metrics
 
 When adding the results of two counters, use the `add` usage data method that
-handles fallback values and exceptions. It also generates a valid [SQL export](#exporting-usage-ping-sql-queries-and-definitions).
+handles fallback values and exceptions. It also generates a valid [SQL export](#exporting-service-ping-sql-queries-and-definitions).
 
 Example usage:
 
@@ -1103,7 +1103,7 @@ To set up Service Ping locally, you must:
 
 1. [Set up local repositories](#set-up-local-repositories).
 1. [Test local setup](#test-local-setup).
-1. (Optional) [Test Prometheus-based service ping](#test-prometheus-based-usage-ping).
+1. (Optional) [Test Prometheus-based service ping](#test-prometheus-based-service-ping).
 
 #### Set up local repositories
 
@@ -1649,7 +1649,7 @@ checking the configuration file of your GitLab instance:
 
      - If _yes_, your GitLab instance is not affected by this bug.
      - If you can't check/uncheck the checkbox, you are affected by this bug.
-       Read below [how to fix this](#how-to-fix-the-cannot-disable-usage-ping-bug).
+       Read below [how to fix this](#how-to-fix-the-cannot-disable-service-ping-bug).
 
 - Checking your GitLab instance configuration file:
 

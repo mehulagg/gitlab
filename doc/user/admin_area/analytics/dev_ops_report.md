@@ -20,12 +20,12 @@ To see DevOps Report:
 ## DevOps Score
 
 NOTE:
-Your GitLab instance's [usage ping](../settings/usage_statistics.md#usage-ping) must be activated in order to use this feature.
+Your GitLab instance's [usage ping](../settings/usage_statistics.md#service-ping) must be activated in order to use this feature.
 
 The DevOps Score tab displays the usage of major GitLab features on your instance over
 the last 30 days, averaged over the number of billable users in that time period. It also
 provides a Lead score per feature, which is calculated based on GitLab analysis
-of top-performing instances based on [usage ping data](../settings/usage_statistics.md#usage-ping) that GitLab has
+of top-performing instances based on [usage ping data](../settings/usage_statistics.md#service-ping) that GitLab has
 collected. Your score is compared to the lead score of each feature and then expressed as a percentage at the bottom of said feature.
 Your overall **DevOps Score** is an average of your feature scores. You can use this score to compare your DevOps status to other organizations.
 

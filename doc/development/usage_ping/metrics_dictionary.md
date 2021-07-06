@@ -99,7 +99,7 @@ should be changed.
 We use the following categories to classify a metric:
 
 - `Operational`: Required data for operational purposes.
-- `Optional`: Data that is optional to collect. This can be [enabled or disabled](../usage_ping/index.md#disable-usage-ping) in the Admin Area.
+- `Optional`: Data that is optional to collect. This can be [enabled or disabled](../usage_ping/index.md#disable-service-ping) in the Admin Area.
 - `Subscription`: Data related to licensing.
 - `Standard`: Standard set of identifiers that are included when collecting data.
 
