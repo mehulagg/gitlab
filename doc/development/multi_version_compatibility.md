@@ -121,7 +121,7 @@ For example, it is safe to add a new feature with frontend and API changes, if b
 
 **However, it is not necessarily safe to enable the feature by default.** If the feature flag is removed, or the default is flipped to enabled, in the same release where the code was merged, then customers performing [zero-downtime updates](https://docs.gitlab.com/omnibus/update/#zero-downtime-updates) will end up running the new frontend code against the previous release's API.
 
-The easiest next step is to enable the API in the **current** release and enable the frontend change in the **next** release. This is a form of the [Expand and contract pattern](#expand-and-contract-pattern).
+The easiest next step is to enable the API in the **current** release and enable the frontend change in the **next** release. This is an example of the [Expand and contract pattern](#expand-and-contract-pattern).
 
 Or you may be able to avoid delaying by a release by modifying the frontend to [degrade gracefully](#graceful-degradation) against the previous release's API.
 
