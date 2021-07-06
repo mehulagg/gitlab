@@ -23,7 +23,11 @@ module MergeRequests
       end
 
       def conflicts
-        @conflicts ||= Gitlab::Conflict::FileCollection.new(merge_request)
+        @conflicts ||=
+          Gitlab::Conflict::FileCollection.new(
+          merge_request,
+          allow_missing_side: params[:allow_missing_side]
+        )
       end
     end
   end

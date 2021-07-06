@@ -94,6 +94,10 @@ module Gitlab
 
           resolution
         end
+
+        def path
+          our_path.presence || their_path
+        end
       end
     end
   end

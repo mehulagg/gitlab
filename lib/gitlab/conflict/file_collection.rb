@@ -7,14 +7,14 @@ module Gitlab
 
       attr_reader :merge_request, :resolver
 
-      def initialize(merge_request)
+      def initialize(merge_request, allow_missing_side: false)
         our_commit = merge_request.source_branch_head.raw
         their_commit = merge_request.target_branch_head.raw
         @target_repo = merge_request.target_project.repository
         @source_repo = merge_request.source_project.repository.raw
         @our_commit_id = our_commit.id
         @their_commit_id = their_commit.id
-        @resolver = Gitlab::Git::Conflict::Resolver.new(@target_repo.raw, @our_commit_id, @their_commit_id)
+        @resolver = Gitlab::Git::Conflict::Resolver.new(@target_repo.raw, @our_commit_id, @their_commit_id, allow_missing_side: allow_missing_side)
         @merge_request = merge_request
       end
 
