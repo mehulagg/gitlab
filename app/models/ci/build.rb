@@ -327,6 +327,14 @@ module Ci
           build.run_status_commit_hooks!
 
           BuildFinishedWorker.perform_async(id)
+
+          next unless build.shared_runners_minutes_limit_enabled?
+          next unless build.complete?
+          next unless build.duration&.positive?
+
+          consumption = ::Gitlab::Ci::Minutes::BuildConsumption.new(build, build.duration).amount
+
+          Ci::Minutes::UpdateBuildMinutesWorker.perform_async(consumption, project_id, project.root_namespace.id)
         end
       end
 

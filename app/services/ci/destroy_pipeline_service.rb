@@ -7,6 +7,8 @@ module Ci
 
       Ci::ExpirePipelineCacheService.new.execute(pipeline, delete: true)
 
+      pipeline.cancel_running if pipeline.cancelable?
+
       pipeline.destroy!
 
       ServiceResponse.success(message: 'Pipeline not found')
