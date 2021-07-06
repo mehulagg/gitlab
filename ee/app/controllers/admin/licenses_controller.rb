@@ -82,7 +82,7 @@ class Admin::LicensesController < Admin::ApplicationController
   end
 
   def check_cloud_license
-    redirect_to admin_subscription_path if Gitlab::CurrentSettings.cloud_license_enabled?
+    redirect_to admin_subscription_path
   end
 
   def license_params

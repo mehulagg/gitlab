@@ -25,10 +25,6 @@ RSpec.describe GitlabSchema.types['CurrentLicense'], :enable_admin_mode do
     %w[last_sync billable_users_count maximum_user_count users_over_license_count]
   end
 
-  before do
-    stub_application_setting(cloud_license_enabled: true)
-  end
-
   it { expect(described_class.graphql_name).to eq('CurrentLicense') }
   it { expect(described_class).to include_graphql_fields(*fields) }
 

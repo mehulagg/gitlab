@@ -9,8 +9,6 @@ module Resolvers
         type [::Types::Admin::CloudLicenses::LicenseHistoryEntryType], null: true
 
         def resolve
-          return unless application_settings.cloud_license_enabled?
-
           authorize!
 
           License.history

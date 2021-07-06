@@ -10,8 +10,6 @@ module Resolvers
         type ::Types::Admin::CloudLicenses::CurrentLicenseType, null: true
 
         def resolve
-          return unless application_settings.cloud_license_enabled?
-
           authorize!
 
           license
