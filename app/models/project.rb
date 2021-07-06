@@ -140,6 +140,7 @@ class Project < ApplicationRecord
   belongs_to :creator, class_name: 'User'
   belongs_to :group, -> { where(type: 'Group') }, foreign_key: 'namespace_id'
   belongs_to :namespace
+  has_one :project_namespace
   alias_method :parent, :namespace
   alias_attribute :parent_id, :namespace_id
 
