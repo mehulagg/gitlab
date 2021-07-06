@@ -86,6 +86,9 @@ Array [
       "color": "#5772ff",
     },
     "name": "Lead time",
+    "showAllSymbol": true,
+    "showSymbol": true,
+    "symbolSize": 12,
   },
 ]
 `;
