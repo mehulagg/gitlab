@@ -1,11 +1,15 @@
 # frozen_string_literal: true
 
-require 'securerandom'
+require 'github_api'
 
 module QA
   module Resource
     class ProjectImportedFromGithub < Resource::Project
-      attribute :github_repo_id
+      attribute :github_repo_id do
+        github_repository_path.split('/').yield_self do |path|
+          github_repos.get(user: path[0], repo: path[1]).id
+        end
+      end
 
       def fabricate!
         self.import = true
@@ -45,6 +49,15 @@ module QA
 
       def transform_api_resource(api_resource)
         api_resource
+      end
+
+      private
+
+      # Github repos client
+      #
+      # @return [Github::Client::Repos]
+      def github_repos
+        @github_repo ||= Github::Client::Repos.new(oauth_token: github_personal_access_token)
       end
     end
   end

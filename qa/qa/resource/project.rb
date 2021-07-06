@@ -24,7 +24,8 @@ module QA
                  :visibility,
                  :template_name,
                  :import,
-                 :import_status
+                 :import_status,
+                 :import_error
 
       attribute :group do
         Group.fabricate!

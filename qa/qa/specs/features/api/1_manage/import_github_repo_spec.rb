@@ -3,6 +3,9 @@
 module QA
   RSpec.describe 'Manage', :github, :requires_admin do
     describe 'Project import' do
+      let!(:github_user) { 'gitlab-qa-github' }
+      let!(:github_repo) { 'test-project' }
+
       let!(:api_client) { Runtime::API::Client.as_admin }
       let!(:group) { Resource::Group.fabricate_via_api! { |resource| resource.api_client = api_client } }
       let!(:user) do
@@ -17,9 +20,8 @@ module QA
           project.name = 'imported-project'
           project.group = group
           project.github_personal_access_token = Runtime::Env.github_access_token
-          project.github_repository_path = 'gitlab-qa-github/test-project'
+          project.github_repository_path = "#{github_user}/#{github_repo}"
           project.api_client = api_client
-          project.github_repo_id = '310217317' # id of 'test-project'
         end
       end
 
@@ -50,7 +52,6 @@ module QA
       def verify_repository_import
         expect(imported_project.api_response).to include(
           description: 'A new repo for test',
-          import_status: 'finished',
           import_error: nil
         )
       end
