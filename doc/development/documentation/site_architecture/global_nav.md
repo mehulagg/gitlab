@@ -113,7 +113,7 @@ for clarity.
 To see the improvements planned, check the
 [global nav epic](https://gitlab.com/groups/gitlab-org/-/epics/1599).
 
-**Do not** [add items](#adding-new-items) to the global nav without
+**Do not** [add items](#add-a-navigation-entry) to the global nav without
 the consent of one of the technical writers.
 
 ## Composition
