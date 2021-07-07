@@ -6,7 +6,7 @@ module Vulnerabilities
       class Request < ApplicationRecord
         self.table_name = 'vulnerability_finding_evidence_requests'
 
-        belongs_to :evidence, class_name: 'Vulnerabilities::Finding::Evidence', inverse_of: :request, foreign_key: 'vulnerability_finding_evidence_id', optional: false
+        belongs_to :evidence, class_name: 'Vulnerabilities::Finding::Evidence', inverse_of: :request, foreign_key: 'vulnerability_finding_evidence_id'
         has_many :headers, class_name: 'Vulnerabilities::Finding::Evidence::Header', inverse_of: :request, foreign_key: 'vulnerability_finding_evidence_request_id'
 
         validates :method, length: { maximum: 32 }
