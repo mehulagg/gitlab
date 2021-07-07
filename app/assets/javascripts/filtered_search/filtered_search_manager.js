@@ -553,6 +553,7 @@ export default class FilteredSearchManager {
 
   handleFormSubmit(e) {
     e.preventDefault();
+    e.stopImmediatePropagation();
     this.search();
   }
 
