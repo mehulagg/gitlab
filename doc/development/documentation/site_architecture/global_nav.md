@@ -15,19 +15,18 @@ description: "Learn how GitLab docs' global navigation works and how to add new 
 Global navigation is the left-most pane in the documentation. You can use the
 "global nav" to browse the content.
 
-Research shows that most users come to the content through search. When they land on a result,
-we want them to find topics nearby that are related to the content they're reading.
+Research shows that people use Google to search for a GitLab docs topic. When they land on a result,
+we want them to find topics nearby that are related to the content they're reading. The global nav provides this information.
 
-At the highest level, our global nav is workflow-based. We want our
-navigation to help users build a mental model of how to use GitLab.
-Under each of the higher workflow-based topics are the names of features.
+At the highest level, our global nav is workflow-based. Navigation needs to help users build a mental model of how to use GitLab.
+The levels under each of the higher workflow-based topics are the names of features.
 For example:
 
-**Use GitLab** (workflow) **> Build your application** (workflow) **> CI/CD** (feature) **> Pipelines** (feature)
+**Use GitLab** (_workflow_) **> Build your application** (_workflow_) **> CI/CD** (_feature_) **> Pipelines** (_feature)
 
-## Choose the right language for your navigation entry
+## Choose the right words for your navigation entry
 
-Before you add an item to the left nav, choose the language you want to use.
+Before you add an item to the left nav, choose the parts of speech you want to use.
 
 The nav entry should match the page title. However, if the title is too long,
 when you shorten the phrase, use either:
