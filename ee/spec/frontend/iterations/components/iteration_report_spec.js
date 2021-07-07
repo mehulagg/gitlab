@@ -5,6 +5,7 @@ import IterationReport from 'ee/iterations/components/iteration_report.vue';
 import IterationReportTabs from 'ee/iterations/components/iteration_report_tabs.vue';
 import { Namespace } from 'ee/iterations/constants';
 import query from 'ee/iterations/queries/iteration.query.graphql';
+import deleteIteration from 'ee/iterations/queries/destroy_iteration.mutation.graphql';
 import createMockApollo from 'helpers/mock_apollo_helper';
 import waitForPromises from 'helpers/wait_for_promises';
 import { getIdFromGraphQLId } from '~/graphql_shared/utils';
@@ -12,6 +13,7 @@ import { mockIterationNode, mockGroupIterations, mockProjectIterations } from '.
 
 const localVue = createLocalVue();
 const $router = {
+  push: jest.fn(),
   currentRoute: {
     params: {
       iterationId: String(getIdFromGraphQLId(mockIterationNode.id)),
@@ -40,9 +42,14 @@ describe('Iterations report', () => {
   const mountComponent = ({
     props = defaultProps,
     iterationQueryHandler = jest.fn().mockResolvedValue(mockGroupIterations),
+    deleteMutationResponse = { data: { iterationDelete: { errors: [] } } },
+    deleteMutationMock = jest.fn().mockResolvedValue(deleteMutationResponse),
   } = {}) => {
     localVue.use(VueApollo);
-    mockApollo = createMockApollo([[query, iterationQueryHandler]]);
+    mockApollo = createMockApollo([
+      [query, iterationQueryHandler],
+      [deleteIteration, deleteMutationMock],
+    ]);
 
     wrapper = shallowMount(IterationReport, {
       localVue,
@@ -129,6 +136,60 @@ describe('Iterations report', () => {
   afterEach(() => {
     wrapper.destroy();
     wrapper = null;
+  });
+
+  describe('delete iteration', () => {
+    it('deletes iteration', async () => {
+      mountComponent();
+
+      wrapper.vm.deleteIteration();
+
+      await waitForPromises();
+
+      expect($router.push).toHaveBeenCalledWith('/');
+    });
+
+    it('shows error when delete fails', async () => {
+      mountComponent({
+        deleteMutationResponse: {
+          data: {
+            iterationDelete: {
+              errors: [
+                "upcoming/current iterations can't be deleted unless they are the last one in the cadence",
+              ],
+              __typename: 'IterationDeletePayload',
+            },
+          },
+        },
+      });
+
+      wrapper.vm.deleteIteration();
+
+      await waitForPromises();
+
+      expect($router.push).not.toHaveBeenCalled();
+    });
+
+    it('shows error when delete rejects', async () => {
+      mountComponent({
+        deleteMutationMock: jest.fn().mockRejectedValue({
+          data: {
+            iterationDelete: {
+              errors: [
+                "upcoming/current iterations can't be deleted unless they are the last one in the cadence",
+              ],
+              __typename: 'IterationDeletePayload',
+            },
+          },
+        }),
+      });
+
+      wrapper.vm.deleteIteration();
+
+      await waitForPromises();
+
+      expect($router.push).not.toHaveBeenCalled();
+    });
   });
 
   describe('empty state', () => {

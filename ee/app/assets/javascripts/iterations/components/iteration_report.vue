@@ -8,7 +8,9 @@ import {
   GlEmptyState,
   GlIcon,
   GlLoadingIcon,
+  GlModal,
 } from '@gitlab/ui';
+import produce from 'immer';
 import BurnCharts from 'ee/burndown_chart/components/burn_charts.vue';
 import { TYPE_ITERATION } from '~/graphql_shared/constants';
 import { convertToGraphQLId } from '~/graphql_shared/utils';
@@ -16,6 +18,7 @@ import { formatDate } from '~/lib/utils/datetime_utility';
 import { __ } from '~/locale';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import { Namespace } from '../constants';
+import deleteIteration from '../queries/destroy_iteration.mutation.graphql';
 import query from '../queries/iteration.query.graphql';
 import IterationReportTabs from './iteration_report_tabs.vue';
 
@@ -35,6 +38,7 @@ export default {
     GlDropdownItem,
     GlEmptyState,
     GlLoadingIcon,
+    GlModal,
     IterationReportTabs,
   },
   apollo: {
@@ -108,6 +112,49 @@ export default {
     formatDate(date) {
       return formatDate(date, 'mmm d, yyyy', true);
     },
+    showModal() {
+      this.$refs.modal.show();
+    },
+    focusMenu() {
+      this.$refs.menu.$el.focus();
+    },
+    deleteIteration() {
+      this.$apollo
+        .mutate({
+          mutation: deleteIteration,
+          variables: {
+            id: this.iteration.id,
+          },
+          update: (store, { data: { iterationDelete } }) => {
+            if (iterationDelete.errors?.length) {
+              throw iterationDelete.errors[0];
+            }
+
+            this.$router.push('/');
+
+            // TODO: update iterations list
+            // const sourceData = store.readQuery({
+            //   query,
+            //   variables: this.queryVariables,
+            // });
+
+            // const data = produce(sourceData, (draftData) => {
+            //   draftData.group.iterations.nodes = draftData.group.iterationCadences.nodes.filter(
+            //     ({ id }) => id !== this.iterationId,
+            //   );
+            // });
+
+            // store.writeQuery({
+            //   query,
+            //   variables: this.queryVariables,
+            //   data,
+            // });
+          },
+        })
+        .catch((err) => {
+          this.error = err;
+        });
+    },
   },
 };
 </script>
@@ -136,6 +183,7 @@ export default {
         >
         <gl-dropdown
           v-if="canEdit"
+          ref="menu"
           data-testid="actions-dropdown"
           variant="default"
           toggle-class="gl-text-decoration-none gl-border-0! gl-shadow-none!"
@@ -144,10 +192,25 @@ export default {
           no-caret
         >
           <template #button-content>
-            <gl-icon name="ellipsis_v" /><span class="gl-sr-only">{{ __('Actions') }}</span>
+            <span class="gl-sr-only">{{ __('Actions') }}</span
+            ><gl-icon name="ellipsis_v" />
           </template>
-          <gl-dropdown-item :to="editPage">{{ __('Edit iteration') }}</gl-dropdown-item>
+          <gl-dropdown-item :to="editPage">{{ __('Edit') }}</gl-dropdown-item>
+          <gl-dropdown-item data-testid="delete-iteration" @click="showModal">
+            {{ __('Delete') }}
+          </gl-dropdown-item>
         </gl-dropdown>
+        <gl-modal
+          ref="modal"
+          :modal-id="`${iteration.id}-delete-modal`"
+          :title="s__('Iterations|Delete iteration?')"
+          :ok-title="__('Delete')"
+          ok-variant="danger"
+          @hidden="focusMenu"
+          @ok="deleteIteration"
+        >
+          {{ s__('Iterations|This will remove the iteration from any issues that are in it.') }}
+        </gl-modal>
       </div>
       <h3 ref="title" class="page-title">{{ iteration.title }}</h3>
       <div ref="description" v-html="iteration.descriptionHtml"></div>
