@@ -12,11 +12,12 @@ import { DASHBOARD_TYPES } from 'ee/security_dashboard/store/constants';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import ActivityFilter from './activity_filter.vue';
 import ProjectFilter from './project_filter.vue';
+import ProjectFilterOld from './project_filter_old.vue';
 import ScannerFilter from './scanner_filter.vue';
 import StandardFilter from './standard_filter.vue';
 
 export default {
-  components: { StandardFilter, ScannerFilter, ActivityFilter, ProjectFilter },
+  components: { StandardFilter, ScannerFilter, ActivityFilter, ProjectFilter, ProjectFilterOld },
   mixins: [glFeatureFlagsMixin()],
   inject: ['dashboardType'],
   props: {
@@ -108,10 +109,9 @@ export default {
       :filter="projectFilter"
       @filter-changed="updateFilterQuery"
     />
-    <standard-filter
+    <project-filter-old
       v-else-if="shouldShowProjectFilter"
       :filter="projectFilter"
-      :data-testid="projectFilter.id"
       @filter-changed="updateFilterQuery"
     />
   </div>
