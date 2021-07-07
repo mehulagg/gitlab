@@ -1,6 +1,6 @@
 <script>
 import BoardFilteredSearch from '~/boards/components/board_filtered_search.vue';
-import issueBoardFilter from '~/boards/issue_board_filters';
+import issueBoardFilters from '~/boards/issue_board_filters'
 import { TYPE_USER } from '~/graphql_shared/constants';
 import { convertToGraphQLId } from '~/graphql_shared/utils';
 import { __ } from '~/locale';
@@ -12,9 +12,16 @@ export default {
     search: __('Search'),
     label: __('Label'),
     author: __('Author'),
+    assignee: __('Assignee'),
     is: __('is'),
     isNot: __('is not'),
   },
+  preloadedAuthors: [{
+    id: convertToGraphQLId(TYPE_USER, gon.current_user_id),
+            name: gon.current_user_fullname,
+            username: gon.current_username,
+            avatarUrl: gon.current_user_avatar_url,
+  }],
   components: { BoardFilteredSearch },
   props: {
     fullPath: {
@@ -28,13 +35,13 @@ export default {
   },
   computed: {
     tokens() {
-      const { fetchLabels, fetchAuthors } = issueBoardFilter(
+      const { label, is, isNot, author, assignee } = this.$options.i18n;
+      const { fetchAuthors, fetchLabels } = issueBoardFilters(
         this.$apollo,
         this.fullPath,
         this.boardType,
       );
 
-      const { label, is, isNot, author } = this.$options.i18n;
       return [
         {
           icon: 'labels',
@@ -47,7 +54,6 @@ export default {
           token: LabelToken,
           unique: false,
           symbol: '~',
-          defaultLabels: [{ value: __('No label'), text: __('No label') }],
           fetchLabels,
         },
         {
@@ -62,12 +68,20 @@ export default {
           token: AuthorToken,
           unique: true,
           fetchAuthors,
-          preloadedAuthors: [{
-            id: convertToGraphQLId(TYPE_USER, gon.current_user_id),
-            name: gon.current_user_fullname,
-            username: gon.current_username,
-            avatarUrl: gon.current_user_avatar_url,
-          }],
+          preloadedAuthors: this.$options.preloadedAuthors,
+        },
+        {
+          icon: 'user',
+          title: assignee,
+          type: 'assignee_username',
+          operators: [
+            { value: '=', description: is },
+            { value: '!=', description: isNot },
+          ],
+          token: AuthorToken,
+          unique: true,
+          fetchAuthors,
+          preloadedAuthors: this.$options.preloadedAuthors,
         },
       ];
     },
@@ -76,5 +90,5 @@ export default {
 </script>
 
 <template>
-  <board-filtered-search data-testid="epic-filtered-search" :tokens="tokens" />
+  <board-filtered-search data-testid="issue-board-filtered-search" :tokens="tokens" />
 </template>

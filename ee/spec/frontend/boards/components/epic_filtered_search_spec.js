@@ -1,18 +1,22 @@
 import { shallowMount } from '@vue/test-utils';
 import EpicFilteredSearch from 'ee_component/boards/components/epic_filtered_search.vue';
 import BoardFilteredSearch from '~/boards/components/board_filtered_search.vue';
+import issueBoardFilters from '~/boards/issue_board_filters';
 import { __ } from '~/locale';
 import AuthorToken from '~/vue_shared/components/filtered_search_bar/tokens/author_token.vue';
 import LabelToken from '~/vue_shared/components/filtered_search_bar/tokens/label_token.vue';
 
 describe('EpicFilteredSearch', () => {
   let wrapper;
-  let store;
+  const { fetchAuthors, fetchLabels } = issueBoardFilters({}, '', 'group');
 
   const createComponent = ({ initialFilterParams = {} } = {}) => {
     wrapper = shallowMount(EpicFilteredSearch, {
-      provide: { initialFilterParams, fullPath: '' },
-      store,
+      provide: { initialFilterParams },
+      props: {
+        fullPath: '',
+        boardType: '',
+      },
     });
   };
 
@@ -41,8 +45,8 @@ describe('EpicFilteredSearch', () => {
           ],
           token: LabelToken,
           unique: false,
-          defaultLabels: [{ value: 'No label', text: 'No label' }],
-          fetchLabels: wrapper.vm.fetchLabels,
+          symbol: '~',
+          fetchLabels,
         },
         {
           icon: 'pencil',
@@ -55,10 +59,10 @@ describe('EpicFilteredSearch', () => {
           symbol: '@',
           token: AuthorToken,
           unique: true,
-          fetchAuthors: wrapper.vm.fetchAuthors,
+          fetchAuthors,
         },
       ];
-      expect(wrapper.find(BoardFilteredSearch).props('tokens')).toEqual(tokens);
+      expect(wrapper.find(BoardFilteredSearch).props('tokens').toString()).toBe(tokens.toString());
     });
   });
 });
