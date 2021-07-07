@@ -8,7 +8,11 @@ module Types
 
       argument :oncall_schedule_iid, GraphQL::ID_TYPE, # rubocop: disable Graphql/IDType
         description: 'The on-call schedule to notify.',
-        required: true
+        required: false
+
+      argument :username, GraphQL::STRING_TYPE,
+        description: 'The username of the user to notify.',
+        required: false
 
       argument :elapsed_time_seconds, GraphQL::INT_TYPE,
         description: 'The time in seconds before the rule is activated.',

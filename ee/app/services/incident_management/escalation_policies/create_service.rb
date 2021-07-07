@@ -21,7 +21,7 @@ module IncidentManagement
       def execute
         return error_no_permissions unless allowed?
         return error_no_rules if params[:rules_attributes].blank?
-        return error_bad_schedules if invalid_schedules?
+        return error_user_without_permission if users_without_permissions?
 
         escalation_policy = project.incident_management_escalation_policies.create(params)
 

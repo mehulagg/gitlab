@@ -14,5 +14,10 @@ FactoryBot.define do
     trait :resolved do
       status { IncidentManagement::EscalationRule.statuses[:resolved] }
     end
+
+    trait :with_user do
+      oncall_schedule { nil }
+      user
+    end
   end
 end

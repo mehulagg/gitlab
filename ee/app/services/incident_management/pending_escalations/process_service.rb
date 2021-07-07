@@ -8,7 +8,7 @@ module IncidentManagement
       def initialize(escalation)
         @escalation = escalation
         @project = escalation.project
-        @oncall_schedule = escalation.rule.oncall_schedule
+        @rule = escalation.rule
         @target = escalation.target
       end
 
@@ -25,7 +25,7 @@ module IncidentManagement
 
       private
 
-      attr_reader :escalation, :project, :target, :oncall_schedule
+      attr_reader :escalation, :project, :target, :rule
 
       def target_already_resolved?
         return false unless target.resolved?
@@ -34,7 +34,7 @@ module IncidentManagement
       end
 
       def target_status_exceeded_rule?
-        target.status >= escalation.rule.status_before_type_cast
+        target.status >= rule.status_before_type_cast
       end
 
       def too_early_to_process?
@@ -49,11 +49,13 @@ module IncidentManagement
       end
 
       def create_system_notes
-        SystemNoteService.notify_via_escalation(target, project, oncall_notification_recipients, escalation.policy, oncall_schedule)
+        SystemNoteService.notify_via_escalation(target, project, oncall_notification_recipients, rule.policy, rule.oncall_schedule)
       end
 
       def oncall_notification_recipients
         strong_memoize(:oncall_notification_recipients) do
+          next [rule.user] if rule.user_id
+
           ::IncidentManagement::OncallUsersFinder.new(project, schedule: oncall_schedule).execute.to_a
         end
       end

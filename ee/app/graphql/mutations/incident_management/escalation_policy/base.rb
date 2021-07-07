@@ -43,23 +43,42 @@ module Mutations
         def prepare_rules_attributes(project, args)
           return args unless rules = args.delete(:rules)
 
-          iids = rules.collect { |rule| rule[:oncall_schedule_iid] }
-          found_schedules = schedules_for_iids(project, iids)
-          rules_attributes = rules.map { |rule| prepare_rule(found_schedules, rule.to_h) }
+          schedules = collect_schedules(project, rules)
+          users = collect_users(project, rules)
+          rules_attributes = rules.map { |rule| prepare_rule(rule.to_h, schedules, users) }
 
           args.merge(rules_attributes: rules_attributes)
         end
 
-        def prepare_rule(schedules, rule)
-          iid = rule.delete(:oncall_schedule_iid).to_i
+        def prepare_rule(rule, schedules, users)
+          schedule_iid = rule.delete(:oncall_schedule_iid).to_i
+          username = rule.delete(:username)
 
-          rule.merge(oncall_schedule: schedules[iid])
+          rule.merge(oncall_schedule: schedules[schedule_iid], user: users[username])
         end
 
-        def schedules_for_iids(project, iids)
-          schedules = ::IncidentManagement::OncallSchedulesFinder.new(current_user, project, iid: iids).execute
+        def collect_schedules(project, rules)
+          iids = rules.filter_map { |rule| rule[:oncall_schedule_iid]&.to_i }
 
-          schedules.index_by(&:iid)
+          schedules = ::IncidentManagement::OncallSchedulesFinder
+            .new(current_user, project, iid: iids)
+            .execute
+            .index_by(&:iid)
+
+          if missing_iids = (iids - schedules.keys).presence
+            raise_resource_not_available_error! "On-call schedules unavailable for iids #{missing_iids.join(', ')}"
+          end
+
+          schedules
+        end
+
+        def collect_users(project, rules)
+          usernames = rules.filter_map { |rule| rule[:username] }
+
+          UsersFinder
+            .new(current_user, username: usernames)
+            .execute
+            .index_by(&:username)
         end
       end
     end
