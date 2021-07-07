@@ -46,7 +46,8 @@ module BillingPlansHelper
       customer_portal_url: "#{EE::SUBSCRIPTIONS_URL}/subscriptions",
       billable_seats_href: billable_seats_href(namespace),
       plan_name: plan&.name,
-      free_personal_namespace: namespace.free_personal?.to_s
+      free_personal_namespace: namespace.free_personal?.to_s,
+      refresh_seats_href: refresh_seats_group_billings_url(namespace)
     }
   end
 

@@ -40,6 +40,9 @@ export default {
     freePersonalNamespace: {
       default: false,
     },
+    refreshSeatsHref: {
+      default: '',
+    }
   },
   computed: {
     ...mapState(['isLoadingSubscription', 'hasErrorSubscription', 'plan', 'tables', 'endpoint']),
@@ -52,6 +55,9 @@ export default {
       const suffix = this.isSubscription && this.plan.trial ? s__('SubscriptionTable|Trial') : '';
 
       return `${this.namespaceName}: ${planName} ${suffix}`;
+    },
+    canRefreshSeats() {
+      return true;
     },
     canRenew() {
       return this.isSubscription && !this.plan.trial;
@@ -83,6 +89,9 @@ export default {
     upgradeButtonHref() {
       return this.canUpgradeEEPlan ? this.planUpgradeHref : this.customerPortalUrl;
     },
+    refreshSeatsButton() {
+      return createButtonProps(s__('Refresh Seats'), this.refreshSeatsHref, 'refresh-seats-button')
+    },
     renewButton() {
       return this.canRenew
         ? createButtonProps(s__('SubscriptionTable|Renew'), this.planRenewHref, 'renew-button')
@@ -98,7 +107,7 @@ export default {
         : null;
     },
     buttons() {
-      return [this.upgradeButton, this.addSeatsButton, this.renewButton, this.manageButton].filter(
+      return [this.upgradeButton, this.addSeatsButton, this.renewButton, this.manageButton, this.refreshSeatsButton].filter(
         Boolean,
       );
     },
