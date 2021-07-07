@@ -12840,6 +12840,9 @@ msgstr ""
 msgid "Error occurred when saving reviewers"
 msgstr ""
 
+msgid "Error occurred while updating the %{issuableType} status"
+msgstr ""
+
 msgid "Error occurred while updating the issue status"
 msgstr ""
 
@@ -30477,6 +30480,9 @@ msgid "Something went wrong while setting %{issuableType} %{dateType} date."
 msgstr ""
 
 msgid "Something went wrong while setting %{issuableType} confidentiality."
+msgstr ""
+
+msgid "Something went wrong while setting %{issuableType} health status."
 msgstr ""
 
 msgid "Something went wrong while setting %{issuableType} notifications."

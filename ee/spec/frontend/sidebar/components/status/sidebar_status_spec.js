@@ -1,49 +1,54 @@
 import { shallowMount } from '@vue/test-utils';
-import Vue from 'vue';
-import Vuex from 'vuex';
+import { ApolloMutation, ApolloQuery } from 'vue-apollo';
 import SidebarStatus from 'ee/sidebar/components/status/sidebar_status.vue';
 import Status from 'ee/sidebar/components/status/status.vue';
+import { healthStatusQueries } from 'ee/sidebar/constants';
 
-Vue.use(Vuex);
+const mutate = jest.fn().mockResolvedValue();
 
 describe('SidebarStatus', () => {
-  let mediator;
   let wrapper;
 
-  const createMediator = (states) => {
-    mediator = {
-      updateStatus: jest.fn().mockResolvedValue(),
-      store: {
-        isFetching: {
-          status: true,
+  const createWrapper = ({
+    issuableType = 'issue',
+    state = 'opened',
+    healthStatus = 'onTrack',
+    loading = false,
+  } = {}) => {
+    const $apollo = {
+      queries: {
+        issuableData: {
+          loading,
         },
-        status: '',
-        ...states,
       },
+      mutate,
     };
-  };
-
-  const createWrapper = ({ noteableState } = {}) => {
-    const store = new Vuex.Store({
-      getters: {
-        getNoteableData: () => ({ state: noteableState }),
-      },
-    });
     wrapper = shallowMount(SidebarStatus, {
       propsData: {
-        mediator,
+        issuableType,
+        iid: '1',
+        fullPath: 'foo/bar',
+        canUpdate: true,
       },
-      store,
+      data() {
+        return {
+          issuableData: {
+            state,
+            healthStatus,
+          },
+        };
+      },
+      sync: false,
+      mocks: { $apollo },
+      stubs: {
+        ApolloMutation,
+        ApolloQuery,
+      },
     });
   };
 
   beforeEach(() => {
-    createMediator();
-    createWrapper({
-      getters: {
-        getNoteableData: {},
-      },
-    });
+    createWrapper();
   });
 
   afterEach(() => {
@@ -53,17 +58,16 @@ describe('SidebarStatus', () => {
 
   describe('computed', () => {
     describe.each`
-      noteableState | isOpen
+      state         | isOpen
       ${'opened'}   | ${true}
       ${'reopened'} | ${true}
       ${'closed'}   | ${false}
-    `('isOpen', ({ noteableState, isOpen }) => {
+    `('isOpen', ({ state, isOpen }) => {
       beforeEach(() => {
-        createMediator({ editable: true });
-        createWrapper({ noteableState });
+        createWrapper({ state });
       });
 
-      it(`returns ${isOpen} when issue is ${noteableState}`, () => {
+      it(`returns ${isOpen} when issue is ${state}`, () => {
         expect(wrapper.vm.isOpen).toBe(isOpen);
       });
     });
@@ -76,10 +80,19 @@ describe('SidebarStatus', () => {
       expect(wrapper.find(Status).exists()).toBe(true);
     });
 
-    it('calls mediator status update when receiving an onDropdownClick event from Status component', () => {
+    it('calls apollo mutate when receiving an onDropdownClick event from Status component', () => {
       wrapper.find(Status).vm.$emit('onDropdownClick', 'onTrack');
 
-      expect(mediator.updateStatus).toHaveBeenCalledWith('onTrack');
+      const mutationVariables = {
+        mutation: healthStatusQueries.issue.mutation,
+        variables: {
+          projectPath: 'foo/bar',
+          iid: '1',
+          healthStatus: 'onTrack',
+        },
+      };
+
+      expect(mutate).toHaveBeenCalledWith(mutationVariables);
     });
   });
 });
