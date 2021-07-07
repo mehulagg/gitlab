@@ -135,7 +135,7 @@
       %h4.gl-mt-0
         = s_('Preferences|Time preferences')
       %p
-        = s_('Preferences|These settings will update how dates and times are displayed for you.')
+        = s_('Preferences|Configure how dates and times display for you.')
         = succeed '.' do
           = link_to _('Learn more'), help_page_path('user/profile/preferences', anchor: 'time-preferences'), target: '_blank'
     .col-lg-8
@@ -144,7 +144,7 @@
         = f.label :time_display_relative, class: 'form-check-label' do
           = s_('Preferences|Use relative times')
         .form-text.text-muted
-          = s_('Preferences|For example: 30 mins ago.')
+          = s_('Preferences|For example: 30 minutes ago.')
       - if Feature.enabled?(:user_time_settings)
         .form-group.form-check
           = f.check_box :time_format_in_24h, class: 'form-check-input'
