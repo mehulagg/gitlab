@@ -10,7 +10,6 @@ import Step from 'ee/vue_shared/purchase_flow/components/step.vue';
 import purchaseFlowResolvers from 'ee/vue_shared/purchase_flow/graphql/resolvers';
 import {
   stateData as initialStateData,
-  mockCiMinutesPlans,
 } from 'ee_jest/subscriptions/buy_minutes/mock_data';
 import createMockApollo from 'helpers/mock_apollo_helper';
 
@@ -40,9 +39,6 @@ describe('AddonPurchaseDetails', () => {
     return mount(AddonPurchaseDetails, {
       localVue,
       apolloProvider,
-      propsData: {
-        plans: mockCiMinutesPlans,
-      },
       stubs: {
         Step,
       },
