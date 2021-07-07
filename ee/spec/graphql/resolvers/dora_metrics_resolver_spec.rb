@@ -198,6 +198,18 @@ RSpec.describe Resolvers::DoraMetricsResolver do
             { 'date' => '2021-04-07', 'value' => nil }
           ])
         end
+
+        # Testing this combination of arguments explicitly since it previously
+        # caused a bug: https://gitlab.com/gitlab-org/gitlab/-/merge_requests/65653
+        context 'with interval: "all"' do
+          let(:args) { { metric: 'lead_time_for_changes', interval: 'all' } }
+
+          it 'returns the metrics grouped into a single bucket with a nil date' do
+            expect(resolve_metrics).to eq([
+              { 'date' => nil, 'value' => 98 }
+            ])
+          end
+        end
       end
 
       context 'with environment_tier: "staging"' do
