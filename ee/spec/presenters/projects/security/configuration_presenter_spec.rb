@@ -17,6 +17,7 @@ RSpec.describe Projects::Security::ConfigurationPresenter do
 
   before do
     project.add_maintainer(current_user)
+    stub_licensed_features(licensed_scan_types.to_h { |type| [type, true] })
   end
 
   describe '#to_h' do
@@ -265,7 +266,8 @@ RSpec.describe Projects::Security::ConfigurationPresenter do
     {
       "type" => type.to_s,
       "configured" => configured,
-      "configuration_path" => configuration_path
+      "configuration_path" => configuration_path,
+      "available" => licensed_scan_types.include?(type)
     }
   end
 
@@ -276,5 +278,9 @@ RSpec.describe Projects::Security::ConfigurationPresenter do
       sast: project_security_configuration_sast_path(project),
       api_fuzzing: project_security_configuration_api_fuzzing_path(project)
     }[type]
+  end
+
+  def licensed_scan_types
+    ::Security::SecurityJobsFinder.allowed_job_types + ::Security::LicenseComplianceJobsFinder.allowed_job_types - [:cluster_image_scanning]
   end
 end

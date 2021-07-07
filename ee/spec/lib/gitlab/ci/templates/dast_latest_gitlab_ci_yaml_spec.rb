@@ -18,7 +18,7 @@ RSpec.describe 'DAST.latest.gitlab-ci.yml' do
   subject(:template) { Gitlab::Template::GitlabCiYmlTemplate.find('DAST.latest') }
 
   describe 'the created pipeline' do
-    let(:default_branch) { 'master' }
+    let(:default_branch) { project.default_branch_or_main }
     let(:pipeline_branch) { default_branch }
     let(:project) { create(:project, :custom_repo, files: { 'README.txt' => '' }) }
     let(:user) { project.owner }
@@ -143,7 +143,7 @@ RSpec.describe 'DAST.latest.gitlab-ci.yml' do
                 let(:pipeline_branch) { 'patch-1' }
 
                 before do
-                  project.repository.create_branch(pipeline_branch)
+                  project.repository.create_branch(pipeline_branch, default_branch)
                 end
 
                 it 'includes dast job' do
@@ -167,7 +167,7 @@ RSpec.describe 'DAST.latest.gitlab-ci.yml' do
                 let(:pipeline_branch) { 'patch-1' }
 
                 before do
-                  project.repository.create_branch(pipeline_branch)
+                  project.repository.create_branch(pipeline_branch, default_branch)
                 end
 
                 include_examples 'includes no jobs'

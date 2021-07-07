@@ -197,6 +197,12 @@ RSpec.describe Analytics::DevopsAdoption::SnapshotCalculator do
     include_examples 'calculates artifact type count', :dependency_scanning
   end
 
+  describe 'coverage_fuzzing_enabled_count' do
+    subject { data[:coverage_fuzzing_enabled_count] }
+
+    include_examples 'calculates artifact type count', :coverage_fuzzing
+  end
+
   context 'when snapshot already exists' do
     subject(:data) { described_class.new(enabled_namespace: enabled_namespace, range_end: range_end, snapshot: snapshot).calculate }
 

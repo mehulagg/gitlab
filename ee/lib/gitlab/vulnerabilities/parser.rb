@@ -25,7 +25,7 @@ module Gitlab
         end
 
         def standard_vulnerability?(category)
-          (valid_categories.keys - ['container_scanning']).include?(category)
+          (valid_categories.keys - %w[container_scanning cluster_image_scanning]).include?(category)
         end
       end
     end

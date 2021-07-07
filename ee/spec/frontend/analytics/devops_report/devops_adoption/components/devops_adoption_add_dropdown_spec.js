@@ -149,8 +149,8 @@ describe('DevopsAdoptionAddDropdown', () => {
             });
           });
 
-          it('emits the segmentsAdded event', () => {
-            const [params] = wrapper.emitted().segmentsAdded[0];
+          it('emits the enabledNamespacesAdded event', () => {
+            const [params] = wrapper.emitted().enabledNamespacesAdded[0];
 
             expect(params).toStrictEqual([devopsAdoptionNamespaceData.nodes[0]]);
           });
@@ -174,8 +174,8 @@ describe('DevopsAdoptionAddDropdown', () => {
             );
           });
 
-          it('does not emit the segmentsAdded event', () => {
-            expect(wrapper.emitted().segmentsAdded).not.toBeDefined();
+          it('does not emit the enabledNamespacesAdded event', () => {
+            expect(wrapper.emitted().enabledNamespacesAdded).not.toBeDefined();
           });
         });
       });

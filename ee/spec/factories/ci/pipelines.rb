@@ -2,7 +2,7 @@
 
 FactoryBot.define do
   factory :ee_ci_pipeline, class: 'Ci::Pipeline', parent: :ci_pipeline do
-    %i[api_fuzzing browser_performance codequality container_scanning coverage_fuzzing dast dependency_list dependency_scanning license_scanning load_performance sast secret_detection].each do |report_type|
+    %i[api_fuzzing browser_performance codequality container_scanning cluster_image_scanning coverage_fuzzing dast dependency_list dependency_scanning license_scanning load_performance sast secret_detection].each do |report_type|
       trait "with_#{report_type}_report".to_sym do
         status { :success }
 
@@ -25,6 +25,22 @@ FactoryBot.define do
 
       after(:build) do |pipeline, evaluator|
         pipeline.builds << build(:ee_ci_build, :corrupted_container_scanning_report, pipeline: pipeline, project: pipeline.project)
+      end
+    end
+
+    trait :with_cluster_image_scanning_feature_branch do
+      status { :success }
+
+      after(:build) do |pipeline, evaluator|
+        pipeline.builds << build(:ee_ci_build, :cluster_image_scanning_feature_branch, pipeline: pipeline, project: pipeline.project)
+      end
+    end
+
+    trait :with_corrupted_cluster_image_scanning_report do
+      status { :success }
+
+      after(:build) do |pipeline, evaluator|
+        pipeline.builds << build(:ee_ci_build, :corrupted_cluster_image_scanning_report, pipeline: pipeline, project: pipeline.project)
       end
     end
 

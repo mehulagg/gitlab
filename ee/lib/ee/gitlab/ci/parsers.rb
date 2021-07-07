@@ -12,6 +12,7 @@ module EE
                 license_scanning: ::Gitlab::Ci::Parsers::LicenseCompliance::LicenseScanning,
                 dependency_scanning: ::Gitlab::Ci::Parsers::Security::DependencyScanning,
                 container_scanning: ::Gitlab::Ci::Parsers::Security::ContainerScanning,
+                cluster_image_scanning: ::Gitlab::Ci::Parsers::Security::ContainerScanning,
                 dast: ::Gitlab::Ci::Parsers::Security::Dast,
                 sast: ::Gitlab::Ci::Parsers::Security::Sast,
                 api_fuzzing: ::Gitlab::Ci::Parsers::Security::Dast,

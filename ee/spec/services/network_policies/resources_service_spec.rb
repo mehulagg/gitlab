@@ -16,7 +16,8 @@ RSpec.describe NetworkPolicies::ResourcesService do
       name: 'policy',
       namespace: 'another',
       selector: { matchLabels: { role: 'db' } },
-      ingress: [{ from: [{ namespaceSelector: { matchLabels: { project: 'myproject' } } }] }]
+      ingress: [{ from: [{ namespaceSelector: { matchLabels: { project: 'myproject' } } }] }],
+      environment_ids: [environment.id]
     )
   end
 
@@ -26,7 +27,8 @@ RSpec.describe NetworkPolicies::ResourcesService do
       namespace: 'another',
       resource_version: '102',
       selector: { matchLabels: { role: 'db' } },
-      ingress: [{ endpointFrom: [{ matchLabels: { project: 'myproject' } }] }]
+      ingress: [{ endpointFrom: [{ matchLabels: { project: 'myproject' } }] }],
+      environment_ids: [environment.id]
     )
   end
 
@@ -109,7 +111,8 @@ RSpec.describe NetworkPolicies::ResourcesService do
           name: 'policy_2',
           namespace: 'another_2',
           selector: { matchLabels: { role: 'db' } },
-          ingress: [{ from: [{ namespaceSelector: { matchLabels: { project: 'myproject' } } }] }]
+          ingress: [{ from: [{ namespaceSelector: { matchLabels: { project: 'myproject' } } }] }],
+          environment_ids: [environment.id]
         )
       end
 

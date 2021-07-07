@@ -309,6 +309,12 @@ RSpec.describe GitlabSchema.types['Project'] do
     end
   end
 
+  describe 'dora field' do
+    subject { described_class.fields['dora'] }
+
+    it { is_expected.to have_graphql_type(Types::DoraType) }
+  end
+
   private
 
   def query_for_project(project)

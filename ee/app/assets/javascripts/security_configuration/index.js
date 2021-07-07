@@ -1,10 +1,15 @@
 import Vue from 'vue';
 import { parseBooleanDataAttributes } from '~/lib/utils/dom_utils';
+import { initRedesignedSecurityConfiguration } from '~/security_configuration';
 import SecurityConfigurationApp from './components/app.vue';
 
 export const initSecurityConfiguration = (el) => {
   if (!el) {
     return null;
+  }
+
+  if (gon.features?.securityConfigurationRedesignEE) {
+    return initRedesignedSecurityConfiguration(el);
   }
 
   const {

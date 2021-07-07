@@ -18,6 +18,7 @@ class Analytics::DevopsAdoption::Snapshot < ApplicationRecord
     :sast_enabled_count,
     :dast_enabled_count,
     :dependency_scanning_enabled_count,
+    :coverage_fuzzing_enabled_count,
     :total_projects_count
   ].freeze
 

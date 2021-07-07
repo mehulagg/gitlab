@@ -67,7 +67,7 @@ export default {
 </script>
 
 <template>
-  <section>
+  <section data-qa-selector="threat_monitoring_container">
     <header class="my-3">
       <h2 class="h3 mb-1 gl-display-flex gl-align-items-center">
         {{ s__('ThreatMonitoring|Threat Monitoring') }}
@@ -94,7 +94,11 @@ export default {
       >
         <alerts />
       </gl-tab>
-      <gl-tab ref="policyTab" :title="s__('ThreatMonitoring|Policies')">
+      <gl-tab
+        ref="policyTab"
+        :title="s__('ThreatMonitoring|Policies')"
+        data-qa-selector="policies_tab"
+      >
         <no-environment-empty-state v-if="!isSetUpMaybe" />
         <policy-list
           v-else

@@ -1,7 +1,7 @@
 import produce from 'immer';
 import devopsAdoptionEnabledNamespacesQuery from '../graphql/queries/devops_adoption_enabled_namespaces.query.graphql';
 
-export const addSegmentsToCache = (store, segments, variables) => {
+export const addEnabledNamespacesToCache = (store, enabledNamespaces, variables) => {
   const sourceData = store.readQuery({
     query: devopsAdoptionEnabledNamespacesQuery,
     variables,
@@ -10,7 +10,7 @@ export const addSegmentsToCache = (store, segments, variables) => {
   const data = produce(sourceData, (draftData) => {
     draftData.devopsAdoptionEnabledNamespaces.nodes = [
       ...draftData.devopsAdoptionEnabledNamespaces.nodes,
-      ...segments,
+      ...enabledNamespaces,
     ];
   });
 
@@ -21,7 +21,7 @@ export const addSegmentsToCache = (store, segments, variables) => {
   });
 };
 
-export const deleteSegmentsFromCache = (store, segmentIds, variables) => {
+export const deleteEnabledNamespacesFromCache = (store, enabledNamespaceIds, variables) => {
   const sourceData = store.readQuery({
     query: devopsAdoptionEnabledNamespacesQuery,
     variables,
@@ -29,7 +29,7 @@ export const deleteSegmentsFromCache = (store, segmentIds, variables) => {
 
   const updatedData = produce(sourceData, (draftData) => {
     draftData.devopsAdoptionEnabledNamespaces.nodes = draftData.devopsAdoptionEnabledNamespaces.nodes.filter(
-      ({ id }) => !segmentIds.includes(id),
+      ({ id }) => !enabledNamespaceIds.includes(id),
     );
   });
 

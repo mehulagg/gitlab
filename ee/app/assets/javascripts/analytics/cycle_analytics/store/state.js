@@ -4,8 +4,8 @@ export default () => ({
   featureFlags: {},
   defaultStageConfig: [],
 
-  startDate: null,
-  endDate: null,
+  createdAfter: null,
+  createdBefore: null,
 
   isLoading: false,
   isLoadingStage: false,

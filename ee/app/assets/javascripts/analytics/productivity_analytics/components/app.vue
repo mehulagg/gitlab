@@ -118,19 +118,12 @@ export default {
       };
     },
   },
-  mounted() {
-    this.setChartEnabled({
-      chartKey: chartKeys.scatterplot,
-      isEnabled: this.isScatterplotFeatureEnabled(),
-    });
-  },
   methods: {
     ...mapActions('charts', [
       'fetchChartData',
       'setMetricType',
       'updateSelectedItems',
       'resetMainChartSelection',
-      'setChartEnabled',
     ]),
     ...mapActions('table', ['setSortField', 'setPage', 'toggleSortOrder', 'setColumnMetric']),
     onMainChartItemClicked({ params }) {
@@ -147,9 +140,6 @@ export default {
         },
         ...this.getColumnChartDatazoomOption(chartKey),
       };
-    },
-    isScatterplotFeatureEnabled() {
-      return this.glFeatures.productivityAnalyticsScatterplotEnabled;
     },
   },
 };

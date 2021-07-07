@@ -281,7 +281,7 @@ export default {
     },
     handleResetBlank() {
       this.name = '';
-      Vue.set(this, 'stages', [{ ...defaultCustomStageFields }]);
+      Vue.set(this, 'stages', initializeStages(this.defaultStageConfig, this.selectedPreset));
     },
     onSelectPreset() {
       if (this.selectedPreset === PRESET_OPTIONS_DEFAULT) {

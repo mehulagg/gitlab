@@ -25,10 +25,6 @@ export const groupIds = [1, 2];
 
 export const groupGids = ['gid://gitlab/Group/1', 'gid://gitlab/Group/2'];
 
-export const groupPageInfo = {
-  nextPage: 2,
-};
-
 export const devopsAdoptionNamespaceData = {
   nodes: [
     {
@@ -66,11 +62,6 @@ export const devopsAdoptionNamespaceData = {
   __typename: 'devopsAdoptionEnabledNamespaces',
 };
 
-export const devopsAdoptionNamespaceDataEmpty = {
-  nodes: [],
-  __typename: 'devopsAdoptionSegments',
-};
-
 export const devopsAdoptionTableHeaders = [
   {
     index: 0,
@@ -103,8 +94,6 @@ export const devopsAdoptionTableHeaders = [
     tooltip: null,
   },
 ];
-
-export const segmentName = 'Foooo';
 
 export const genericErrorMessage = 'An error occurred while saving changes. Please try again.';
 

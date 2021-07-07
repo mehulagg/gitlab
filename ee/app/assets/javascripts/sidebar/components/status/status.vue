@@ -166,7 +166,7 @@ export default {
           <gl-button
             ref="editButton"
             variant="link"
-            class="edit-link btn-link-hover gl-text-black-normal!"
+            class="edit-link btn-link-hover gl-text-gray-900! gl-hover-text-blue-800!"
             :disabled="!isOpen"
             @click.stop="toggleFormDropdown"
             @keydown.esc="hideDropdown"

@@ -1,5 +1,4 @@
 ---
-data_category: Optional
 key_path: license_trial_ends_on
 description: Date the trial license ends on
 product_section: fulfillment
@@ -10,6 +9,7 @@ value_type: string
 status: data_available
 time_frame: none
 data_source: database
+data_category: Subscription
 distribution:
 - ee
 tier:

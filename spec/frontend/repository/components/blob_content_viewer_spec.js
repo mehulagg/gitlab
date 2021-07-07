@@ -11,7 +11,10 @@ import BlobHeader from '~/blob/components/blob_header.vue';
 import BlobButtonGroup from '~/repository/components/blob_button_group.vue';
 import BlobContentViewer from '~/repository/components/blob_content_viewer.vue';
 import BlobEdit from '~/repository/components/blob_edit.vue';
+import { loadViewer } from '~/repository/components/blob_viewers';
 import blobInfoQuery from '~/repository/queries/blob_info.query.graphql';
+
+jest.mock('~/repository/components/blob_viewers');
 
 let wrapper;
 const simpleMockData = {
@@ -34,7 +37,6 @@ const simpleMockData = {
   canLock: true,
   isLocked: false,
   lockLink: 'some_file.js/lock',
-  canModifyBlob: true,
   forkPath: 'some_file.js/fork',
   simpleViewer: {
     fileType: 'text',
@@ -53,16 +55,26 @@ const richMockData = {
     renderError: null,
   },
 };
+const userPermissionsMockData = {
+  userPermissions: {
+    pushCode: true,
+  },
+};
 
 const localVue = createLocalVue();
 const mockAxios = new MockAdapter(axios);
 
-const createComponentWithApollo = (mockData) => {
+const createComponentWithApollo = (mockData, mockPermissionData = true) => {
   localVue.use(VueApollo);
 
-  const mockResolver = jest
-    .fn()
-    .mockResolvedValue({ data: { project: { repository: { blobs: { nodes: [mockData] } } } } });
+  const mockResolver = jest.fn().mockResolvedValue({
+    data: {
+      project: {
+        userPermissions: { pushCode: mockPermissionData },
+        repository: { blobs: { nodes: [mockData] } },
+      },
+    },
+  });
 
   const fakeApollo = createMockApollo([[blobInfoQuery, mockResolver]]);
 
@@ -208,6 +220,19 @@ describe('Blob content viewer component', () => {
     });
   });
 
+  describe('Blob viewer', () => {
+    beforeEach(() => {
+      loadViewer.mockClear();
+    });
+
+    it('does not render a BlobContent component if a Blob viewer is available', () => {
+      loadViewer.mockReturnValueOnce(() => true);
+      factory({ mockData: { blobInfo: richMockData } });
+
+      expect(findBlobContent().exists()).toBe(false);
+    });
+  });
+
   describe('BlobHeader action slot', () => {
     const { ideEditPath, editBlobPath } = simpleMockData;
 
@@ -260,13 +285,16 @@ describe('Blob content viewer component', () => {
     });
 
     describe('BlobButtonGroup', () => {
-      const { name, path } = simpleMockData;
+      const { name, path, replacePath } = simpleMockData;
+      const {
+        userPermissions: { pushCode },
+      } = userPermissionsMockData;
 
       it('renders component', async () => {
         window.gon.current_user_id = 1;
 
         fullFactory({
-          mockData: { blobInfo: simpleMockData },
+          mockData: { blobInfo: simpleMockData, project: userPermissionsMockData },
           stubs: {
             BlobContent: true,
             BlobButtonGroup: true,
@@ -278,6 +306,8 @@ describe('Blob content viewer component', () => {
         expect(findBlobButtonGroup().props()).toMatchObject({
           name,
           path,
+          replacePath,
+          canPushCode: pushCode,
         });
       });
 
