@@ -56,23 +56,36 @@ const richMockData = {
     renderError: null,
   },
 };
-const userPermissionsMockData = {
+
+const projectMockData = {
   userPermissions: {
     pushCode: true,
+  },
+  repository: {
+    empty: false,
   },
 };
 
 const localVue = createLocalVue();
 const mockAxios = new MockAdapter(axios);
 
-const createComponentWithApollo = (mockData, mockPermissionData = true) => {
+const createComponentWithApollo = (mockData = {}) => {
   localVue.use(VueApollo);
+
+  const defaultPushCode = projectMockData.userPermissions.pushCode;
+  const defaultEmptyRepo = projectMockData.repository.empty;
+  const { blobs, emptyRepo = defaultEmptyRepo, canPushCode = defaultPushCode } = mockData;
 
   const mockResolver = jest.fn().mockResolvedValue({
     data: {
       project: {
-        userPermissions: { pushCode: mockPermissionData },
-        repository: { blobs: { nodes: [mockData] } },
+        userPermissions: { pushCode: canPushCode },
+        repository: {
+          empty: emptyRepo,
+          blobs: {
+            nodes: [blobs],
+          },
+        },
       },
     },
   });
@@ -208,14 +221,14 @@ describe('Blob content viewer component', () => {
 
   describe('legacy viewers', () => {
     it('does not load a legacy viewer when a rich viewer is not available', async () => {
-      createComponentWithApollo(simpleMockData);
+      createComponentWithApollo({ blobs: simpleMockData });
       await waitForPromises();
 
       expect(mockAxios.history.get).toHaveLength(0);
     });
 
     it('loads a legacy viewer when a rich viewer is available', async () => {
-      createComponentWithApollo(richMockData);
+      createComponentWithApollo({ blobs: richMockData });
       await waitForPromises();
 
       expect(mockAxios.history.get).toHaveLength(1);
@@ -296,16 +309,20 @@ describe('Blob content viewer component', () => {
     });
 
     describe('BlobButtonGroup', () => {
-      const { name, path, replacePath } = simpleMockData;
+      const { name, path, replacePath, webPath } = simpleMockData;
       const {
         userPermissions: { pushCode },
-      } = userPermissionsMockData;
+        repository: { empty },
+      } = projectMockData;
 
       it('renders component', async () => {
         window.gon.current_user_id = 1;
 
         fullFactory({
-          mockData: { blobInfo: simpleMockData, project: userPermissionsMockData },
+          mockData: {
+            blobInfo: simpleMockData,
+            project: { userPermissions: { pushCode }, repository: { empty } },
+          },
           stubs: {
             BlobContent: true,
             BlobButtonGroup: true,
@@ -318,7 +335,9 @@ describe('Blob content viewer component', () => {
           name,
           path,
           replacePath,
+          deletePath: webPath,
           canPushCode: pushCode,
+          emptyRepo: empty,
         });
       });
 

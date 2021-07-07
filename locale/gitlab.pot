@@ -12795,6 +12795,9 @@ msgstr ""
 msgid "Error deleting %{issuableType}"
 msgstr ""
 
+msgid "Error deleting file. Please try again."
+msgstr ""
+
 msgid "Error deleting project. Check logs for error details."
 msgstr ""
 
