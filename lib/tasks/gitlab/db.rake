@@ -128,7 +128,7 @@ namespace :gitlab do
     end
 
     desc 'Create missing dynamic database partitions'
-    task :create_dynamic_partitions: :environment do
+    task create_dynamic_partitions: :environment do
       # TODO: CI Vertical: Debug creation of partitions
       # TODO: These models are not properly registered via initializer
       ActiveRecord::Base.logger = Logger.new(STDOUT)
