@@ -13,7 +13,7 @@ module AuditEvents
 
       @author = build_author(author)
       @scope = scope
-      @target = target
+      @target = build_target(target)
       @ip_address = build_ip_address
       @message = build_message(message)
     end
@@ -60,14 +60,18 @@ module AuditEvents
       {
         author_name: @author.name,
         target_id: @target.id,
-        target_type: @target.class.name,
-        target_details: @target.name,
+        target_type: @target.type,
+        target_details: @target.details,
         custom_message: @message
       }
     end
 
     def build_author(author)
       author.impersonated? ? ::Gitlab::Audit::ImpersonatedAuthor.new(author) : author
+    end
+
+    def build_target(target)
+      ::Gitlab::Audit::Target.new(target)
     end
 
     def build_message(message)
