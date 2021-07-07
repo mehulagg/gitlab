@@ -10,8 +10,11 @@ module Ci
     scope :ref_protected, -> { where(protected: true) }
     scope :queued_before, ->(time) { where(arel_table[:created_at].lt(time)) }
 
+    # TODO refactor
     def self.upsert_from_build!(build)
-      entry = self.new(build: build, project: build.project, protected: build.protected?)
+      tags = build.tags.first(100).map(&:id).uniq
+
+      entry = self.new(build: build, project: build.project, protected: build.protected?, tags: tags)
 
       entry.validate!
 
