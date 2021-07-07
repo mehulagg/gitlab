@@ -1,4 +1,5 @@
 <script>
+import axios from '~/lib/utils/axios_utils';
 import { GlButton, GlLoadingIcon } from '@gitlab/ui';
 import { escape } from 'lodash';
 import { mapActions, mapState, mapGetters } from 'vuex';
@@ -107,7 +108,7 @@ export default {
         : null;
     },
     buttons() {
-      return [this.upgradeButton, this.addSeatsButton, this.renewButton, this.manageButton, this.refreshSeatsButton].filter(
+      return [this.upgradeButton, this.addSeatsButton, this.renewButton, this.manageButton].filter(
         Boolean,
       );
     },
@@ -131,6 +132,9 @@ export default {
     isLast(index) {
       return index === this.visibleRows.length - 1;
     },
+    refreshSeats() {
+      axios.get(this.refreshSeatsHref);
+    }
   },
 };
 </script>
@@ -158,6 +162,12 @@ export default {
             variant="info"
             >{{ button.text }}</gl-button
           >
+          <gl-button
+            :v-if="canRefreshSeats"
+            @click="refreshSeats"
+            category="secondary"
+            variant="info"
+          >Refresh Seats</gl-button>
         </div>
       </div>
       <div

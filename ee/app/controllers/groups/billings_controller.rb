@@ -24,4 +24,12 @@ class Groups::BillingsController < Groups::ApplicationController
       render 'shared/billings/customers_dot_unavailable'
     end
   end
+
+  def refresh_seats
+    gitlab_subscription = group.gitlab_subscription
+    gitlab_subscription.refresh_seat_attributes!
+    gitlab_subscription.save!
+
+    render json: { success: true }
+  end
 end
