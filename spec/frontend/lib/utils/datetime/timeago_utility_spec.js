@@ -69,13 +69,15 @@ describe('TimeAgo utils', () => {
 
   describe('localTimeAgo', () => {
     beforeEach(() => {
-      document.body.innerHTML = `<time title="some time" datetime="2020-02-18T22:22:32Z">1 hour ago</time>`;
+      document.body.innerHTML =
+        '<time title="some time" datetime="2020-02-18T22:22:32Z">1 hour ago</time>';
     });
 
-    describe.each([
-      { timeDisplayRelative: true, text: '4 months ago' },
-      { timeDisplayRelative: false, text: 'Feb 18, 2020, 10:22 PM' },
-    ])(
+    describe.each`
+      timeDisplayRelative | text
+      ${true}             | ${'4 months ago'}
+      ${false}            | ${'Feb 18, 2020, 10:22 PM'}
+    `(
       `With User Setting timeDisplayRelative: $timeDisplayRelative`,
       ({ timeDisplayRelative, text }) => {
         it.each`
