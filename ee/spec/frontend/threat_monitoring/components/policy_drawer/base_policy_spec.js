@@ -31,15 +31,15 @@ describe('BasePolicy component', () => {
   });
 
   it.each`
-    description   | isEnabled | expectedLabel
-    ${'enabled'}  | ${true}   | ${'Enabled'}
-    ${'disabled'} | ${false}  | ${'Disabled'}
+    description   | enabled  | expectedLabel
+    ${'enabled'}  | ${true}  | ${'Enabled'}
+    ${'disabled'} | ${false} | ${'Disabled'}
   `(
     'renders the enforcement status label when policy is $description',
-    ({ isEnabled, expectedLabel }) => {
+    ({ enabled, expectedLabel }) => {
       factory({
         policy: {
-          isEnabled,
+          enabled,
         },
       });
 

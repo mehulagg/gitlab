@@ -197,9 +197,9 @@ describe('PolicyList component', () => {
       wrapper.vm.$store.state.threatMonitoring.allEnvironments = true;
     });
 
-    it('renders namespace column', () => {
-      const namespaceHeader = findPoliciesTable().findAll('[role="columnheader"]').at(2);
-      expect(namespaceHeader.text()).toContain('Namespace');
+    it('renders environments column', () => {
+      const environmentsHeader = findPoliciesTable().findAll('[role="columnheader"]').at(2);
+      expect(environmentsHeader.text()).toContain('Environments');
     });
   });
 

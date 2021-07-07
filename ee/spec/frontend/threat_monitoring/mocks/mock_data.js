@@ -38,6 +38,9 @@ spec:
     updatedAt: '2020-04-14T00:08:30Z',
     enabled: true,
     fromAutoDevops: false,
+    environments: {
+      nodes: [],
+    },
   },
 ];
 

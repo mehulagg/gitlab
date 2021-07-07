@@ -1,3 +1,4 @@
+import { GlIntersperse } from '@gitlab/ui';
 import BasePolicy from 'ee/threat_monitoring/components/policy_drawer/base_policy.vue';
 import CiliumNetworkPolicy from 'ee/threat_monitoring/components/policy_drawer/cilium_network_policy.vue';
 import { toYaml } from 'ee/threat_monitoring/components/policy_editor/network_policy/lib';
@@ -6,16 +7,17 @@ import { shallowMountExtended } from 'helpers/vue_test_utils_helper';
 
 describe('CiliumNetworkPolicy component', () => {
   let wrapper;
-  const policy = {
+  const supportedYaml = toYaml({
     name: 'test-policy',
     description: 'test description',
     endpointLabels: '',
     rules: [],
-  };
+  });
   const unsupportedYaml = 'unsupportedPrimaryKey: test';
 
   const findPolicyPreview = () => wrapper.findComponent(PolicyPreview);
   const findDescription = () => wrapper.findByTestId('description');
+  const findEnvironments = () => wrapper.findByTestId('environments');
 
   const factory = ({ propsData } = {}) => {
     wrapper = shallowMountExtended(CiliumNetworkPolicy, {
@@ -24,6 +26,7 @@ describe('CiliumNetworkPolicy component', () => {
       },
       stubs: {
         BasePolicy,
+        GlIntersperse,
       },
     });
   };
@@ -34,7 +37,7 @@ describe('CiliumNetworkPolicy component', () => {
 
   describe('supported YAML', () => {
     beforeEach(() => {
-      factory({ propsData: { value: toYaml(policy) } });
+      factory({ propsData: { policy: { yaml: supportedYaml } } });
     });
 
     it('renders policy preview tabs', () => {
@@ -51,14 +54,14 @@ describe('CiliumNetworkPolicy component', () => {
       expect(findPolicyPreview().props()).toStrictEqual({
         initialTab: 0,
         policyDescription: 'Deny all traffic',
-        policyYaml: toYaml(policy),
+        policyYaml: supportedYaml,
       });
     });
   });
 
   describe('unsupported YAML', () => {
     beforeEach(() => {
-      factory({ propsData: { value: unsupportedYaml } });
+      factory({ propsData: { policy: { yaml: unsupportedYaml } } });
     });
 
     it('renders policy preview tabs', () => {
@@ -76,6 +79,37 @@ describe('CiliumNetworkPolicy component', () => {
         policyDescription: null,
         policyYaml: unsupportedYaml,
       });
+    });
+  });
+
+  describe('environments', () => {
+    it('renders environments if any', () => {
+      factory({
+        propsData: {
+          policy: {
+            environments: {
+              nodes: [{ name: 'production' }, { name: 'local' }],
+            },
+            yaml: supportedYaml,
+          },
+        },
+      });
+      expect(findEnvironments().exists()).toBe(true);
+      expect(findEnvironments().text()).toContain('production, local');
+    });
+
+    it("does not render environments row if there aren't any", () => {
+      factory({
+        propsData: {
+          policy: {
+            environments: {
+              nodes: [],
+            },
+            yaml: supportedYaml,
+          },
+        },
+      });
+      expect(findEnvironments().exists()).toBe(false);
     });
   });
 });

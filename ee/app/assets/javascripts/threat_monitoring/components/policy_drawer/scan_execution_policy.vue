@@ -11,14 +11,14 @@ export default {
     PolicyInfoRow,
   },
   props: {
-    value: {
-      type: String,
+    policy: {
+      type: Object,
       required: true,
     },
   },
   computed: {
-    policy() {
-      return fromYaml(this.value);
+    parsedYaml() {
+      return fromYaml(this.policy.yaml);
     },
   },
 };
@@ -29,12 +29,12 @@ export default {
     <template #type>{{ s__('SecurityPolicies|Scan execution') }}</template>
 
     <template #default="{ enforcementStatusLabel }">
-      <div v-if="policy">
+      <div v-if="parsedYaml">
         <policy-info-row
-          v-if="policy.description"
+          v-if="parsedYaml.description"
           data-testid="description"
           :label="s__('SecurityPolicies|Description')"
-          >{{ policy.description }}</policy-info-row
+          >{{ parsedYaml.description }}</policy-info-row
         >
 
         <!-- TODO: humanize policy rules -->
@@ -58,11 +58,11 @@ export default {
         }}</policy-info-row>
 
         <policy-info-row
-          v-if="policy.latestScan"
+          v-if="parsedYaml.latestScan"
           data-testid="latest-scan"
           :label="s__('SecurityPolicies|Latest scan')"
-          >{{ policy.latestScan.date }}
-          <gl-link :href="policy.latestScan.pipelineUrl">{{
+          >{{ parsedYaml.latestScan.date }}
+          <gl-link :href="parsedYaml.latestScan.pipelineUrl">{{
             s__('SecurityPolicies|view results')
           }}</gl-link></policy-info-row
         >
