@@ -39,9 +39,8 @@ describe('Action components', () => {
 
       await nextTick();
 
-      const div = wrapper.find('div');
-      expect(div.attributes('data-path')).toBe('/test');
-      expect(div.attributes('data-modal-attributes')).toContain('John Doe');
+      expect(wrapper.attributes('data-path')).toBe('/test');
+      expect(wrapper.attributes('data-modal-attributes')).toContain('John Doe');
       expect(findDropdownItem().exists()).toBe(true);
     });
   });
@@ -57,15 +56,15 @@ describe('Action components', () => {
         initComponent({
           component: Actions[action],
           props: {
+            username: 'John Doe',
             path: '/test',
           },
         });
 
         await nextTick();
 
-        const item = wrapper.find(GlDropdownItem);
-        expect(item.attributes('href')).toBe('/test');
-        expect(item.attributes('data-method')).toContain(method);
+        expect(wrapper.attributes('data-path')).toBe('/test');
+        expect(wrapper.attributes('data-modal-attributes')).toContain('John Doe');
       },
     );
   });
