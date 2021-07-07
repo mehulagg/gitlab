@@ -1051,23 +1051,32 @@ RSpec.describe Issue do
 
   describe '#check_for_spam?' do
     using RSpec::Parameterized::TableSyntax
+    let_it_be(:support_bot) { ::User.support_bot }
 
-    where(:visibility_level, :confidential, :new_attributes, :check_for_spam?) do
-      Gitlab::VisibilityLevel::PUBLIC   | false | { description: 'woo' } | true
-      Gitlab::VisibilityLevel::PUBLIC   | false | { title: 'woo' } | true
-      Gitlab::VisibilityLevel::PUBLIC   | true  | { confidential: false } | true
-      Gitlab::VisibilityLevel::PUBLIC   | true  | { description: 'woo' } | false
-      Gitlab::VisibilityLevel::PUBLIC   | false | { title: 'woo', confidential: true } | false
-      Gitlab::VisibilityLevel::PUBLIC   | false | { description: 'original description' } | false
-      Gitlab::VisibilityLevel::INTERNAL | false | { description: 'woo' } | false
-      Gitlab::VisibilityLevel::PRIVATE  | false | { description: 'woo' } | false
+    where(:support_bot?, :visibility_level, :confidential, :new_attributes, :check_for_spam?) do
+      false | Gitlab::VisibilityLevel::PUBLIC   | false | { description: 'new' } | true
+      false | Gitlab::VisibilityLevel::PUBLIC   | false | { title: 'new' } | true
+      false | Gitlab::VisibilityLevel::PUBLIC   | true  | { confidential: false } | true
+      false | Gitlab::VisibilityLevel::PUBLIC   | true  | { description: 'new' } | false
+      false | Gitlab::VisibilityLevel::PUBLIC   | false | { title: 'new', confidential: true } | false
+      false | Gitlab::VisibilityLevel::PUBLIC   | false | { description: 'original description' } | false
+      false | Gitlab::VisibilityLevel::PUBLIC   | false | { weight: 3 } | false
+      false | Gitlab::VisibilityLevel::INTERNAL | false | { description: 'new' } | false
+      false | Gitlab::VisibilityLevel::PRIVATE  | false | { description: 'new' } | false
+      true  | Gitlab::VisibilityLevel::PUBLIC   | true  | { description: 'new' } | true
+      true  | Gitlab::VisibilityLevel::PUBLIC   | false | { title: 'new', confidential: true } | true
+      true  | Gitlab::VisibilityLevel::PUBLIC   | false | { description: 'original description' } | false
+      true  | Gitlab::VisibilityLevel::INTERNAL | false | { description: 'new' } | true
+      true  | Gitlab::VisibilityLevel::PRIVATE  | true  | { description: 'new' } | true
+      true  | Gitlab::VisibilityLevel::PRIVATE  | true  | { weight: 3 } | false
     end
 
     with_them do
-      it 'checks for spam on issues that can be seen anonymously' do
+      it 'checks for spam when necessary' do
+        author = support_bot? ? support_bot : user
         project = reusable_project
         project.update!(visibility_level: visibility_level)
-        issue = create(:issue, project: project, confidential: confidential, description: 'original description')
+        issue = create(:issue, project: project, confidential: confidential, description: 'original description', author: author)
 
         issue.assign_attributes(new_attributes)
 

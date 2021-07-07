@@ -446,38 +446,6 @@ RSpec.describe Issue do
     end
   end
 
-  describe '#check_for_spam?' do
-    using RSpec::Parameterized::TableSyntax
-    let_it_be(:reusable_project) { create(:project) }
-    let_it_be(:author) { ::User.support_bot }
-
-    where(:visibility_level, :confidential, :new_attributes, :check_for_spam?) do
-      Gitlab::VisibilityLevel::PUBLIC   | false | { description: 'woo' } | true
-      Gitlab::VisibilityLevel::PUBLIC   | false | { title: 'woo' } | true
-      Gitlab::VisibilityLevel::PUBLIC   | true  | { confidential: false } | true
-      Gitlab::VisibilityLevel::PUBLIC   | true  | { description: 'woo' } | true
-      Gitlab::VisibilityLevel::PUBLIC   | false | { title: 'woo', confidential: true } | true
-      Gitlab::VisibilityLevel::INTERNAL | false | { description: 'woo' } | true
-      Gitlab::VisibilityLevel::PRIVATE  | true  | { description: 'woo' } | true
-      Gitlab::VisibilityLevel::PUBLIC   | false | { description: 'original description' } | false
-      Gitlab::VisibilityLevel::PRIVATE  | true  | { weight: 3 } | false
-    end
-
-    with_them do
-      context 'when author is a bot' do
-        it 'only checks for spam when description, title, or confidential status is updated' do
-          project = reusable_project
-          project.update(visibility_level: visibility_level)
-          issue = create(:issue, project: project, confidential: confidential, description: 'original description', author: author)
-
-          issue.assign_attributes(new_attributes)
-
-          expect(issue.check_for_spam?).to eq(check_for_spam?)
-        end
-      end
-    end
-  end
-
   describe '#weight' do
     where(:license_value, :database_value, :expected) do
       true  | 5   | 5

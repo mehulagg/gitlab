@@ -91,11 +91,6 @@ module EE
     end
 
     # override
-    def check_for_spam?
-      author.bot? && (title_changed? || description_changed? || confidential_changed?) || super
-    end
-
-    # override
     def allows_multiple_assignees?
       project.feature_available?(:multiple_issue_assignees)
     end
