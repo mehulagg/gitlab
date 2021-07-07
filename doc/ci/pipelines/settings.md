@@ -25,8 +25,7 @@ For public and internal projects, you can change who can see your:
 
 However:
 
-- Job output logs and artifacts are [not visible for Guest users and non-project members](https://gitlab.com/gitlab-org/gitlab/-/issues/25649).
-- This setting has no effect on public projects.
+- Job output logs and artifacts are [never visible for Guest users and non-project members](https://gitlab.com/gitlab-org/gitlab/-/issues/25649).
 
 To change the visibility of your pipelines and related features:
 
@@ -34,22 +33,19 @@ To change the visibility of your pipelines and related features:
 1. On the left sidebar, select **Settings > CI/CD**.
 1. Expand **General pipelines**.
 1. Select or clear the **Public pipelines** checkbox.
-   When it is selected:
+   When it is selected, pipelines and related features are visible:
 
-   - For **public** projects, anyone can view the pipelines and related features.
-   - For **internal** projects, any logged in user except [external users](../../user/permissions.md#external-users) can view the pipelines
-     and related features.
-   - For **private** projects, any project member (Guest or higher) can view the pipelines
-     and related features.
+   - For **public** projects, to everyone.
+   - For **internal** projects, to all logged-in users except [external users](../../user/permissions.md#external-users).
+   - For **private** projects, to all project members (Guest or higher).
 
    When it is cleared:
 
-   - For **public** projects, anyone can view the pipelines, but only members
-     (Reporter or higher) can access the related features.
-   - For **internal** projects, any logged in user except [external users](../../user/permissions.md#external-users) can view the pipelines.
-     However, only members (Reporter or higher) can access the job related features.
-   - For **private** projects, only project members (Reporter or higher)
-     can view the pipelines or access the related features.
+   - For **public** projects, pipelines are visible to everyone. Related features are visible
+     only to project members (Reporter or higher).
+   - For **internal** projects, pipelines are visible to all logged in users except [external users](../../user/permissions.md#external-users).
+     Related features are visible only to project members (Reporter or higher).
+   - For **private** projects, pipelines and related features are visible to project members (Reporter or higher) only.
 
 ## Auto-cancel redundant pipelines
 
