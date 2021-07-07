@@ -8,6 +8,7 @@ module IncidentManagement
 
     belongs_to :policy, class_name: 'EscalationPolicy', inverse_of: 'rules', foreign_key: 'policy_id'
     belongs_to :oncall_schedule, class_name: 'OncallSchedule', inverse_of: 'rotations', foreign_key: 'oncall_schedule_id'
+    has_many :pending_alert_escalations, class_name: 'PendingEscalations::Alert', inverse_of: :rule, foreign_key: :rule_id
 
     enum status: AlertManagement::Alert::STATUSES.slice(:acknowledged, :resolved)
 
@@ -20,6 +21,9 @@ module IncidentManagement
     validates :policy_id, uniqueness: { scope: [:oncall_schedule_id, :status, :elapsed_time_seconds], message: _('must have a unique schedule, status, and elapsed time') }
 
     validate :rules_count_not_exceeded, on: :create, if: :policy
+
+    scope :for_project, ->(project) { where(policy: IncidentManagement::EscalationPolicy.where(project: project)) }
+    scope :with_elapsed_time_over, ->(min_elapsed_time) { where(elapsed_time_seconds: min_elapsed_time..) }
 
     private
 

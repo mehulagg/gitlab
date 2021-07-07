@@ -7,7 +7,7 @@ RSpec.describe IncidentManagement::PendingEscalations::ProcessService do
   let_it_be(:schedule_1) { create(:incident_management_oncall_schedule, :with_rotation, project: project) }
   let_it_be(:schedule_1_users) { schedule_1.participants.map(&:user) }
 
-  let(:escalation_rule) { build(:incident_management_escalation_rule, oncall_schedule: schedule_1 ) }
+  let(:escalation_rule) { build(:incident_management_escalation_rule, project: project, oncall_schedule: schedule_1 ) }
   let!(:escalation_policy) { create(:incident_management_escalation_policy, project: project, rules: [escalation_rule]) }
 
   let(:alert) { create(:alert_management_alert, project: project, **alert_params) }
@@ -15,7 +15,7 @@ RSpec.describe IncidentManagement::PendingEscalations::ProcessService do
 
   let(:target) { alert }
   let(:process_at) { 5.minutes.ago }
-  let(:escalation) { create(:incident_management_pending_alert_escalation, rule: escalation_rule, oncall_schedule: schedule_1, target: target, status: IncidentManagement::EscalationRule.statuses[:acknowledged], process_at: process_at) }
+  let(:escalation) { create(:incident_management_pending_alert_escalation, rule: escalation_rule, target: target, process_at: process_at) }
 
   let(:service) { described_class.new(escalation) }
 

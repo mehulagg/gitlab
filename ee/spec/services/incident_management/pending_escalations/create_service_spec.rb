@@ -35,14 +35,13 @@ RSpec.describe IncidentManagement::PendingEscalations::CreateService do
     end
 
     it 'creates an escalation for each rule for the policy' do
-      execution_time = Time.current
       expect { execute }.to change { IncidentManagement::PendingEscalations::Alert.count }.by(rule_count)
 
       first_escalation, second_escalation = target.pending_escalations.order(created_at: :asc)
       first_rule, second_rule = rules
 
-      expect_escalation_attributes_with(escalation: first_escalation, target: target, rule: first_rule, execution_time: execution_time)
-      expect_escalation_attributes_with(escalation: second_escalation, target: target, rule: second_rule, execution_time: execution_time)
+      expect_escalation_attributes_with(escalation: first_escalation, target: target, rule: first_rule)
+      expect_escalation_attributes_with(escalation: second_escalation, target: target, rule: second_rule)
     end
 
     context 'when there is no escalation policy for the project' do
@@ -61,13 +60,25 @@ RSpec.describe IncidentManagement::PendingEscalations::CreateService do
       expect { execute }.to change { IncidentManagement::PendingEscalations::Alert.count }.by(rule_count)
     end
 
-    def expect_escalation_attributes_with(escalation:, target:, rule:, execution_time: Time.current)
+    context 'when reset time is provided' do
+      let!(:later_escalation_rule) { create(:incident_management_escalation_rule, project: project, policy: escalation_policy, elapsed_time_seconds: 10.minutes) }
+
+      let(:service) { described_class.new(target, reset_time: 7.minutes.from_now) }
+
+      it 'creates an escalation for each rule for the policy' do
+        expect { execute }.to change { IncidentManagement::PendingEscalations::Alert.count }.by(1)
+
+        escalation = target.pending_escalations.last
+
+        expect_escalation_attributes_with(escalation: escalation, target: target, rule: later_escalation_rule)
+      end
+    end
+
+    def expect_escalation_attributes_with(escalation:, target:, rule:)
       expect(escalation).to have_attributes(
         rule_id: rule.id,
         alert_id: target.id,
-        schedule_id: rule.oncall_schedule_id,
-        status: rule.status,
-        process_at: be_within(1.minute).of(rule.elapsed_time_seconds.seconds.after(execution_time))
+        process_at: rule.elapsed_time_seconds.seconds.after(target.triggered_at)
       )
     end
   end

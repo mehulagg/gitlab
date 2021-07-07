@@ -3,52 +3,45 @@
 module IncidentManagement
   module PendingEscalations
     class CreateService < BaseService
-      def initialize(target)
+      def initialize(target, reset_time: nil)
         @target = target
         @project = target.project
-        @process_time = Time.current
+        @reset_time = reset_time
       end
 
       def execute
         return unless ::Gitlab::IncidentManagement.escalation_policies_available?(project) && !target.resolved?
 
-        policy = escalation_policies.first
-
-        return unless policy
-
-        create_escalations(policy.rules)
+        create_escalations(escalation_rules)
       end
 
       private
 
-      attr_reader :target, :project, :escalation, :process_time
+      attr_reader :target, :project, :escalation, :reset_time
 
-      def escalation_policies
-        project.incident_management_escalation_policies.with_rules
+      def escalation_rules
+        min_elapsed_time = reset_time - target.triggered_at if reset_time
+
+        IncidentManagement::EscalationRulesFinder.new(project, min_elapsed_time: min_elapsed_time).execute
       end
 
       def create_escalations(rules)
-        escalation_ids = rules.map do |rule|
-          escalaton = create_escalation(rule)
-          escalaton.id
-        end
+        return unless rules
 
-        process_escalations(escalation_ids)
+        escalation_id_args = rules.map { |rule| [create_escalation(rule).id] }
+
+        process_escalations(escalation_id_args)
       end
 
       def create_escalation(rule)
         IncidentManagement::PendingEscalations::Alert.create!(
           target: target,
           rule: rule,
-          schedule_id: rule.oncall_schedule_id,
-          status: rule.status,
-          process_at: rule.elapsed_time_seconds.seconds.after(process_time)
+          process_at: rule.elapsed_time_seconds.seconds.after(target.triggered_at)
         )
       end
 
-      def process_escalations(escalation_ids)
-        args = escalation_ids.map { |id| [id] }
-
+      def process_escalations(args)
         ::IncidentManagement::PendingEscalations::AlertCheckWorker.bulk_perform_async(args) # rubocop:disable Scalability/BulkPerformWithContext
       end
     end

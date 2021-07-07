@@ -9,6 +9,7 @@ RSpec.describe IncidentManagement::EscalationPolicies::UpdateService do
   let_it_be(:oncall_schedule) { create(:incident_management_oncall_schedule, project: project) }
   let_it_be_with_reload(:escalation_policy) { create(:incident_management_escalation_policy, project: project, rule_count: 2) }
   let_it_be_with_reload(:escalation_rules) { escalation_policy.rules }
+  let_it_be_with_reload(:pending_alert_escalation) { create(:incident_management_pending_alert_escalation, project: project, rule: escalation_rules.last) }
 
   let(:service) { described_class.new(escalation_policy, current_user, params) }
   let(:current_user) { user_with_permissions }
@@ -67,6 +68,28 @@ RSpec.describe IncidentManagement::EscalationPolicies::UpdateService do
       end
     end
 
+    shared_examples 'does not reset pending escalations' do
+      specify do
+        expect(::IncidentManagement::PendingEscalations::AlertCreateWorker).not_to receive(:bulk_perform_async)
+
+        execute
+      end
+    end
+
+    shared_examples 'resets pending escalations' do
+      let!(:expected_args) { [[pending_alert_escalation.alert_id, reset_time: Time.current]] }
+
+      around do |example|
+        freeze_time { example.run }
+      end
+
+      specify do
+        expect(::IncidentManagement::PendingEscalations::AlertCreateWorker).to receive(:bulk_perform_async).with(expected_args)
+
+        execute
+      end
+    end
+
     subject(:execute) { service.execute }
 
     context 'when the current_user is anonymous' do
@@ -101,6 +124,7 @@ RSpec.describe IncidentManagement::EscalationPolicies::UpdateService do
       let(:expected_rules) { [*escalation_rules, new_rule] }
 
       it_behaves_like 'successful update with no errors'
+      it_behaves_like 'resets pending escalations'
     end
 
     context 'when all old rules are replaced' do
@@ -108,6 +132,7 @@ RSpec.describe IncidentManagement::EscalationPolicies::UpdateService do
       let(:expected_rules) { [new_rule] }
 
       it_behaves_like 'successful update with no errors'
+      it_behaves_like 'resets pending escalations'
     end
 
     context 'when some rules are preserved, added, and deleted' do
@@ -115,6 +140,15 @@ RSpec.describe IncidentManagement::EscalationPolicies::UpdateService do
       let(:expected_rules) { [escalation_rules.first, new_rule] }
 
       it_behaves_like 'successful update with no errors'
+      it_behaves_like 'resets pending escalations'
+    end
+
+    context 'when rules are only deleted' do
+      let(:rule_params) { [existing_rules_params.first] }
+      let(:expected_rules) { [escalation_rules.first] }
+
+      it_behaves_like 'successful update with no errors'
+      it_behaves_like 'does not reset pending escalations'
     end
 
     context 'when rules are unchanged' do
@@ -122,6 +156,7 @@ RSpec.describe IncidentManagement::EscalationPolicies::UpdateService do
       let(:expected_rules) { escalation_rules }
 
       it_behaves_like 'successful update with no errors'
+      it_behaves_like 'does not reset pending escalations'
     end
 
     context 'when rules are excluded' do
@@ -132,6 +167,7 @@ RSpec.describe IncidentManagement::EscalationPolicies::UpdateService do
       end
 
       it_behaves_like 'successful update with no errors'
+      it_behaves_like 'does not reset pending escalations'
     end
 
     context 'when rules are explicitly nil' do
@@ -139,6 +175,7 @@ RSpec.describe IncidentManagement::EscalationPolicies::UpdateService do
       let(:expected_rules) { escalation_rules }
 
       it_behaves_like 'successful update with no errors'
+      it_behaves_like 'does not reset pending escalations'
     end
 
     context 'when rules are explicitly empty' do

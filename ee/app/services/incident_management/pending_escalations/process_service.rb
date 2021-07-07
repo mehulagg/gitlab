@@ -8,7 +8,7 @@ module IncidentManagement
       def initialize(escalation)
         @escalation = escalation
         @project = escalation.project
-        @oncall_schedule = escalation.oncall_schedule
+        @oncall_schedule = escalation.rule.oncall_schedule
         @target = escalation.target
       end
 
@@ -34,7 +34,7 @@ module IncidentManagement
       end
 
       def target_status_exceeded_rule?
-        target.status >= escalation.status_before_type_cast
+        target.status >= escalation.rule.status_before_type_cast
       end
 
       def too_early_to_process?

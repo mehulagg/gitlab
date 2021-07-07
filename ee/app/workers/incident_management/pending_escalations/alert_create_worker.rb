@@ -10,10 +10,10 @@ module IncidentManagement
       idempotent!
       feature_category :incident_management
 
-      def perform(alert_id)
+      def perform(alert_id, service_kwargs = {})
         alert = ::AlertManagement::Alert.find(alert_id)
 
-        ::IncidentManagement::PendingEscalations::CreateService.new(alert).execute
+        ::IncidentManagement::PendingEscalations::CreateService.new(alert, **service_kwargs.symbolize_keys).execute
       end
     end
   end

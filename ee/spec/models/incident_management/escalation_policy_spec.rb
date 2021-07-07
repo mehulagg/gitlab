@@ -3,8 +3,6 @@
 require 'spec_helper'
 
 RSpec.describe IncidentManagement::EscalationPolicy do
-  let_it_be(:project) { create(:project) }
-
   subject { build(:incident_management_escalation_policy) }
 
   it { is_expected.to be_valid }
@@ -22,5 +20,16 @@ RSpec.describe IncidentManagement::EscalationPolicy do
     it { is_expected.to validate_uniqueness_of(:name).scoped_to(:project_id) }
     it { is_expected.to validate_length_of(:name).is_at_most(72) }
     it { is_expected.to validate_length_of(:description).is_at_most(160) }
+  end
+
+  describe '#pending_escalation_alert_ids' do
+    let_it_be(:policy) { create(:incident_management_escalation_policy, rule_count: 2) }
+    let_it_be(:escalation_1) { create(:incident_management_pending_alert_escalation, rule: policy.rules.first, project: policy.project) }
+    let_it_be(:escalation_2) { create(:incident_management_pending_alert_escalation, rule: policy.rules.last, project: policy.project) }
+    let_it_be(:escalation_from_other_policy) { create(:incident_management_pending_alert_escalation) }
+
+    subject { policy.pending_escalation_alert_ids }
+
+    it { is_expected.to contain_exactly(escalation_1.alert_id, escalation_2.alert_id) }
   end
 end

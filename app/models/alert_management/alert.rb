@@ -119,6 +119,10 @@ module AlertManagement
         ended_at = transition.args.first
         alert.ended_at = ended_at || Time.current
       end
+
+      after_transition to: :triggered do |alert, _transition|
+        alert.touch(:triggered_at)
+      end
     end
 
     delegate :iid, to: :issue, prefix: true, allow_nil: true
@@ -264,6 +268,10 @@ module AlertManagement
       strong_memoize(:parsed_payload) do
         Gitlab::AlertManagement::Payload.parse(project, payload, monitoring_tool: monitoring_tool)
       end
+    end
+
+    def triggered_at
+      self[:triggered_at] || created_at
     end
 
     private

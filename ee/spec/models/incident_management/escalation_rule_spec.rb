@@ -13,6 +13,7 @@ RSpec.describe IncidentManagement::EscalationRule do
   describe 'associations' do
     it { is_expected.to belong_to(:policy) }
     it { is_expected.to belong_to(:oncall_schedule) }
+    it { is_expected.to have_many(:pending_alert_escalations) }
   end
 
   describe 'validations' do

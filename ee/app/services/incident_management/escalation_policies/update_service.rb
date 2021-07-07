@@ -31,6 +31,8 @@ module IncidentManagement
         reconcile_rules!
 
         if escalation_policy.update(params)
+          reset_escalations!
+
           success(escalation_policy)
         else
           error_in_save(escalation_policy)
@@ -47,7 +49,8 @@ module IncidentManagement
 
       # Limits rules_attributes to only new records & prepares
       # to delete existing rules which are no longer needed
-      # when the policy is saved.
+      # when the policy is saved. Collects impacted escalations
+      # to be updated after save.
       #
       # Context: Rules are managed via `accepts_nested_attributes_for`
       # on the IncidentManagement::EscalationPolicy.
@@ -64,6 +67,7 @@ module IncidentManagement
 
       def remove_obsolete_rules(rules_attrs)
         expected_rules = rules_attrs.to_set { |attrs| normalize(::IncidentManagement::EscalationRule.new(**attrs)) }
+        @impacted_alert_ids = escalation_policy.pending_escalation_alert_ids
 
         escalation_policy.rules.each_with_object(expected_rules) do |existing_rule, new_rules|
           # Exclude an expected rule which already corresponds to a persisted record - it's a no-op.
@@ -76,6 +80,17 @@ module IncidentManagement
 
       def normalize(rule)
         rule.slice(:oncall_schedule_id, :elapsed_time_seconds, :status)
+      end
+
+      # Queues escalation creation for affected alerts if needed.
+      # Rules corresponding to changed escalations will be removed.
+      def reset_escalations!
+        return unless params[:rules_attributes].present? && @impacted_alert_ids
+
+        policy_updated_at = Time.current
+        args = @impacted_alert_ids.map { |id| [id, { reset_time: policy_updated_at }] }
+
+        IncidentManagement::PendingEscalations::AlertCreateWorker.bulk_perform_async(args) # rubocop:disable Scalability/BulkPerformWithContext
       end
     end
   end

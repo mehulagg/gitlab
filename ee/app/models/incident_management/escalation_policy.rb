@@ -15,6 +15,8 @@ module IncidentManagement
 
     accepts_nested_attributes_for :rules
 
-    scope :with_rules, -> { includes(:rules) }
+    def pending_escalation_alert_ids
+      rules.joins(:pending_alert_escalations).pluck(:alert_id)
+    end
   end
 end

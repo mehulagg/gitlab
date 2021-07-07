@@ -15,7 +15,7 @@ FactoryBot.define do
 
     after(:build) do |policy, evaluator|
       evaluator.rule_count.times do
-        policy.rules << build(:incident_management_escalation_rule, policy: policy)
+        policy.rules << build(:incident_management_escalation_rule, policy: policy, project: policy.project)
       end
     end
   end
