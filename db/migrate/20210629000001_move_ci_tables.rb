@@ -68,7 +68,7 @@ class MoveCiTables < ActiveRecord::Migration[6.1]
 
   def down
     TABLES.each do |table|
-      execute "ALTER TABLE #{table} SET SCHEMA public"
+      execute "ALTER TABLE gitlab_ci.#{table} SET SCHEMA public"
     end
   end
 end
