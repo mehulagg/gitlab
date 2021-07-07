@@ -1,0 +1,55 @@
+# frozen_string_literal: true
+
+require 'spec_helper'
+
+RSpec.describe 'User creates iteration in a cadence', :js do
+  let_it_be(:now) { Time.now }
+  let_it_be(:group) { create(:group) }
+  let_it_be(:user) { create(:group_member, :maintainer, user: create(:user), group: group ).user }
+  let_it_be(:cadence) { create(:iterations_cadence, group: group, automatic: false, duration_in_weeks: 0) }
+
+  before do
+    stub_licensed_features(iterations: true)
+    sign_in(user)
+
+    visit new_group_iteration_cadence_iteration_path(group, iteration_cadence_id: cadence.id)
+  end
+
+  it 'prefills fields and allows updating all values' do
+    title = 'Iteration title'
+    desc = 'Iteration desc'
+    start_date = now + 4.days
+    due_date = now + 5.days
+
+    fill_in('Title', with: title)
+    fill_in('Description', with: desc)
+    fill_in('Start date', with: start_date.strftime('%Y-%m-%d'))
+    fill_in('Due date', with: due_date.strftime('%Y-%m-%d'))
+    click_button('Create iteration')
+
+    wait_for_requests
+
+    aggregate_failures do
+      expect(page).to have_content(title)
+      expect(page).to have_content(desc)
+      expect(page).to have_content(start_date.strftime('%b %-d, %Y'))
+      expect(page).to have_content(due_date.strftime('%b %-d, %Y'))
+    end
+  end
+
+  def title_input
+    page.find('#iteration-title')
+  end
+
+  def description_input
+    page.find('#iteration-description')
+  end
+
+  def start_date_input
+    page.find('#iteration-start-date')
+  end
+
+  def due_date_input
+    page.find('#iteration-due-date')
+  end
+end
