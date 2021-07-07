@@ -8446,6 +8446,9 @@ msgstr ""
 msgid "ContainerRegistry|Cleanup is disabled for this project"
 msgstr ""
 
+msgid "ContainerRegistry|Cleanup is ongoing"
+msgstr ""
+
 msgid "ContainerRegistry|Cleanup pending"
 msgstr ""
 
@@ -8459,6 +8462,9 @@ msgid "ContainerRegistry|Cleanup policy successfully saved."
 msgstr ""
 
 msgid "ContainerRegistry|Cleanup ran but some tags were not removed"
+msgstr ""
+
+msgid "ContainerRegistry|Cleanup timed out"
 msgstr ""
 
 msgid "ContainerRegistry|Cleanup timed out before it could delete all tags"
