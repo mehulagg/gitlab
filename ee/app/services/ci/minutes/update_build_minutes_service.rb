@@ -3,6 +3,9 @@
 module Ci
   module Minutes
     class UpdateBuildMinutesService < BaseService
+      # Calculates consumption and updates the project and namespace minutes based on the passed build
+      # Calculating the consumption syncronously before triggering an async job to update
+      # ensures the pipeline data still exists in the case where minutes are updated prior to pipeline deletion
       def execute(build)
         return unless build.shared_runners_minutes_limit_enabled?
         return unless build.complete?
@@ -10,37 +13,18 @@ module Ci
 
         consumption = ::Gitlab::Ci::Minutes::BuildConsumption.new(build, build.duration).amount
 
-        return unless consumption > 0
-
-        consumption_in_seconds = consumption.minutes.to_i
-        legacy_track_usage_of_monthly_minutes(consumption_in_seconds)
-
-        track_usage_of_monthly_minutes(consumption)
+        Ci::Minutes::UpdateMinutesByConsumptionService.new(project, namespace).execute(consumption)
+        # TODO(Issue #335338): Introduce async worker UpdateMinutesByConsumptionWorker, example:
+        # if ::Feature.enabled?(:cancel_pipelines_prior_to_destroy, default_enabled: :yaml)
+        #   Ci::Minutes::UpdateMinutesByConsumptionService.new(project, namespace).execute_async(consumption)
+        # else
+        #   Ci::Minutes::UpdateMinutesByConsumptionService.new(project, namespace).execute(consumption)
+        # end
 
         compare_with_live_consumption(build, consumption)
       end
 
       private
-
-      def legacy_track_usage_of_monthly_minutes(consumption)
-        ProjectStatistics.update_counters(project_statistics,
-          shared_runners_seconds: consumption)
-
-        NamespaceStatistics.update_counters(namespace_statistics,
-          shared_runners_seconds: consumption)
-      end
-
-      def track_usage_of_monthly_minutes(consumption)
-        return unless Feature.enabled?(:ci_minutes_monthly_tracking, project, default_enabled: :yaml)
-
-        namespace_usage = ::Ci::Minutes::NamespaceMonthlyUsage.find_or_create_current(namespace)
-        project_usage = ::Ci::Minutes::ProjectMonthlyUsage.find_or_create_current(project)
-
-        ActiveRecord::Base.transaction do
-          ::Ci::Minutes::NamespaceMonthlyUsage.increase_usage(namespace_usage, consumption)
-          ::Ci::Minutes::ProjectMonthlyUsage.increase_usage(project_usage, consumption)
-        end
-      end
 
       def compare_with_live_consumption(build, consumption)
         live_consumption = ::Ci::Minutes::TrackLiveConsumptionService.new(build).live_consumption
@@ -48,14 +32,6 @@ module Ci
 
         difference = consumption.to_f - live_consumption.to_f
         observe_ci_minutes_difference(difference, plan: namespace.actual_plan_name)
-      end
-
-      def namespace_statistics
-        namespace.namespace_statistics || namespace.create_namespace_statistics
-      end
-
-      def project_statistics
-        project.statistics || project.create_statistics(namespace: project.namespace)
       end
 
       def namespace
