@@ -12,7 +12,7 @@ query groupEpics(
   $myReactionEmoji: String
   $confidential: Boolean
   $search: String = ""
-  $first: Int = 1001
+  $first: Int = 50
   $not: NegatedEpicFilterInput
 ) {
   group(fullPath: $fullPath) {

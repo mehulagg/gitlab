@@ -1,7 +1,7 @@
 import createFlash from '~/flash';
 import { s__ } from '~/locale';
 
-import { EXTEND_AS } from '../constants';
+import { EXTEND_AS, ROADMAP_PAGE_SIZE } from '../constants';
 import epicChildEpics from '../queries/epicChildEpics.query.graphql';
 import groupEpics from '../queries/groupEpics.query.graphql';
 import groupMilestones from '../queries/groupMilestones.query.graphql';
@@ -45,7 +45,7 @@ const fetchGroupEpics = (
     variables = {
       ...variables,
       ...transformedFilterParams,
-      first: gon.roadmap_epics_limit + 1,
+      first: ROADMAP_PAGE_SIZE,
     };
 
     if (transformedFilterParams?.epicIid) {
