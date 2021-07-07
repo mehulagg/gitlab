@@ -88,7 +88,7 @@
     = render_if_exists "projects/home_mirror"
 
   - if @project.badges.present?
-    = cache_if(cache_enabled, [@project, :badges], expires_in: 1.day) do
+    = cache_if(cache_enabled, [@project, @project.namespace.self_and_ancestors, :badges], expires_in: 1.day) do
       .project-badges.mb-2
         - @project.badges.each do |badge|
           %a.gl-mr-3{ href: badge.rendered_link_url(@project),

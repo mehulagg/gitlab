@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 class ProjectBadge < Badge
-  belongs_to :project
+  belongs_to :project, touch: true
 
   validates :project, presence: true
 

@@ -6,7 +6,7 @@ RSpec.describe ProjectBadge do
   let(:placeholder_url) { 'http://www.example.com/%{project_path}/%{project_id}/%{default_branch}/%{commit_sha}' }
 
   describe 'associations' do
-    it { is_expected.to belong_to(:project) }
+    it { is_expected.to belong_to(:project).touch(true) }
   end
 
   describe 'validations' do

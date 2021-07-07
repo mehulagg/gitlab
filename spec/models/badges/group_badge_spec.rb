@@ -4,7 +4,7 @@ require 'spec_helper'
 
 RSpec.describe GroupBadge do
   describe 'associations' do
-    it { is_expected.to belong_to(:group) }
+    it { is_expected.to belong_to(:group).touch(true) }
   end
 
   describe 'validations' do
