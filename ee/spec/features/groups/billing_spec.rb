@@ -68,7 +68,7 @@ RSpec.describe 'Groups > Billing', :js do
       let(:plan) { 'bronze' }
 
       let_it_be(:subscription) do
-        create(:gitlab_subscription, end_date: Date.tomorrow, namespace: group, hosted_plan: bronze_plan, seats: 15)
+        create(:gitlab_subscription, end_date: Date.today + 14.days, namespace: group, hosted_plan: bronze_plan, seats: 15)
       end
 
       it_behaves_like 'hides search settings'
@@ -94,7 +94,7 @@ RSpec.describe 'Groups > Billing', :js do
 
       context 'when gitlab subscription has end date more than 15 days' do
         before do
-          subscription.update!(end_date: Date.tomorrow + 1.year)
+          subscription.update!(end_date: Date.tomorrow + 15.days)
         end
 
         it 'does not display renew button' do
