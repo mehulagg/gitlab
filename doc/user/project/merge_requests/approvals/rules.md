@@ -203,7 +203,7 @@ on a merge request, you can either add or remove approvers:
 Administrators can change the [merge request approvals settings](settings.md#prevent-overrides-of-default-approvals)
 to prevent users from overriding approval rules for merge requests.
 
-## Configure optional approval rules **(FREE)**
+## Configure optional approval rules **(PREMIUM)**
 
 Merge request approvals can be optional for projects where approvals are
 appreciated, but not required. To make an approval rule optional:
