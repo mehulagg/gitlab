@@ -4,13 +4,13 @@ import { xor, remove } from 'lodash';
 import { activityOptions } from 'ee/security_dashboard/helpers';
 import FilterBody from './filter_body.vue';
 import FilterItem from './filter_item.vue';
-import StandardFilter from './standard_filter.vue';
+import SimpleFilter from './simple_filter.vue';
 
 const { NO_ACTIVITY, WITH_ISSUES, NO_LONGER_DETECTED } = activityOptions;
 
 export default {
   components: { FilterBody, FilterItem, GlDropdownDivider },
-  extends: StandardFilter,
+  extends: SimpleFilter,
   computed: {
     filterObject() {
       // This is the object used to update the GraphQL query.
