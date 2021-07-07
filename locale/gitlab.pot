@@ -24647,6 +24647,9 @@ msgstr ""
 msgid "Preferences|Choose what content you want to see on your homepage."
 msgstr ""
 
+msgid "Preferences|Configure how dates and times display for you."
+msgstr ""
+
 msgid "Preferences|Customize integrations with third party services."
 msgstr ""
 
@@ -24665,7 +24668,7 @@ msgstr ""
 msgid "Preferences|Failed to save preferences."
 msgstr ""
 
-msgid "Preferences|For example: 30 mins ago."
+msgid "Preferences|For example: 30 minutes ago."
 msgstr ""
 
 msgid "Preferences|Gitpod"
@@ -24713,9 +24716,6 @@ msgstr ""
 msgid "Preferences|Tab width"
 msgstr ""
 
-msgid "Preferences|These settings will update how dates and times are displayed for you."
-msgstr ""
-
 msgid "Preferences|This feature is experimental and translations are not complete yet"
 msgstr ""
 
@@ -24723,12 +24723,6 @@ msgid "Preferences|This setting allows you to customize the appearance of the sy
 msgstr ""
 
 msgid "Preferences|This setting allows you to customize the behavior of the system layout and default views."
-msgstr ""
-
-msgid "Preferences|Time display"
-msgstr ""
-
-msgid "Preferences|Time format"
 msgstr ""
 
 msgid "Preferences|Time preferences"
