@@ -5,7 +5,7 @@
     = render_if_exists 'admin/application_settings/help_text_setting', form: f
 
     .form-group
-      = f.label :help_page_text, _('Additional text shown on the Help page'), class: 'label-bold'
+      = f.label :help_page_text, _('Additional text to show on the Help page'), class: 'label-bold'
       = f.text_area :help_page_text, class: 'form-control gl-form-input', rows: 4
       .form-text.text-muted= _('Markdown enabled')
     .form-group
