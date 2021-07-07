@@ -21,7 +21,7 @@ class ChangelogEntry
   def to_s
     str = ""
     str << "- #{title}\n"
-    str << "  https://gitlab.com/gitlab-org/gitlab/workhorse/-/merge_requests/#{merge_request}\n"
+    str << "  https://gitlab.com/gitlab-org/gitlab-workhorse/-/merge_requests/#{merge_request}\n"
     str << "  Contributed by #{author}\n" if author
 
     str

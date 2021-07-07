@@ -81,7 +81,7 @@ func newUpstream(cfg config.Config, accessLogger *logrus.Logger, routesCallback 
 	}
 
 	handler := correlation.InjectCorrelationID(&up, correlationOpts...)
-	// TODO: move to LabKit https://gitlab.com/gitlab-org/gitlab/workhorse/-/issues/339
+	// TODO: move to LabKit https://gitlab.com/gitlab-org/gitlab/-/issues/324823
 	handler = rejectmethods.NewMiddleware(handler)
 	return handler
 }
