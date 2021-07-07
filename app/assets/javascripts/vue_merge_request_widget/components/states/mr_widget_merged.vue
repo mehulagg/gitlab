@@ -169,6 +169,15 @@ export default {
         >
           {{ cherryPickLabel }}
         </gl-button>
+        <gl-button
+          v-if="shouldShowRemoveSourceBranch"
+          :disabled="isMakingRequest"
+          size="small"
+          class="js-remove-branch-button"
+          @click="removeSourceBranch"
+        >
+          {{ s__('mrWidget|Delete source branch') }}
+        </gl-button>
       </div>
       <section class="mr-info-list" data-qa-selector="merged_status_content">
         <p>
@@ -195,17 +204,6 @@ export default {
         </p>
         <p v-if="mr.sourceBranchRemoved">
           {{ s__('mrWidget|The source branch has been deleted') }}
-        </p>
-        <p v-if="shouldShowRemoveSourceBranch" class="space-children">
-          <span>{{ s__('mrWidget|You can delete the source branch now') }}</span>
-          <gl-button
-            :disabled="isMakingRequest"
-            size="small"
-            class="js-remove-branch-button"
-            @click="removeSourceBranch"
-          >
-            {{ s__('mrWidget|Delete source branch') }}
-          </gl-button>
         </p>
         <p v-if="shouldShowSourceBranchRemoving">
           <gl-loading-icon :inline="true" />
