@@ -9867,6 +9867,8 @@ CREATE TABLE background_migration_jobs (
     status smallint DEFAULT 0 NOT NULL,
     class_name text NOT NULL,
     arguments jsonb NOT NULL,
+    error_message text,
+    CONSTRAINT check_91c0cdd13e CHECK ((char_length(error_message) <= 1000)),
     CONSTRAINT check_b0de0a5852 CHECK ((char_length(class_name) <= 200))
 );
 

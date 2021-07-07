@@ -98,6 +98,38 @@ RSpec.describe Gitlab::Database::BackgroundMigrationJob do
     end
   end
 
+  describe '.track_error' do
+    let!(:job1) { create(:background_migration_job, arguments: [1, 100]) }
+    let!(:job2) { create(:background_migration_job, arguments: [1, 100]) }
+    let!(:job3) { create(:background_migration_job, arguments: [101, 200]) }
+    let!(:job4) { create(:background_migration_job, class_name: 'OtherJob', arguments: [1, 100]) }
+
+    it 'saves the error message on the matching tracking records' do
+      error_message = 'My error message'
+
+      expect { described_class.track_error('TestJob', [1, 100], error_message) }
+        .to change { described_class.where.not(error_message: nil).count }.by(2)
+
+      expect(job1.reload.error_message).to eq(error_message)
+      expect(job2.reload.error_message).to eq(error_message)
+      expect(job3.reload.error_message).to be_nil
+      expect(job4.reload.error_message).to be_nil
+    end
+
+    context 'when the error message is too long' do
+      let(:message_limit) { described_class::ERROR_MESSAGE_LIMIT }
+
+      it 'truncates the message to fit' do
+        error_message = 'e' * (message_limit + 1)
+
+        expect { described_class.track_error('OtherJob', [1, 100], error_message) }
+          .to change { described_class.where.not(error_message: nil).count }.by(1)
+
+        expect(job4.reload.error_message).to eq(error_message[0, message_limit])
+      end
+    end
+  end
+
   describe '#class_name=' do
     context 'when the class_name is given without the leading ::' do
       it 'sets the class_name to the given value' do

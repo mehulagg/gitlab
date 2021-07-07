@@ -5,6 +5,8 @@ module Gitlab
     class BackgroundMigrationJob < ActiveRecord::Base # rubocop:disable Rails/ApplicationRecord
       include EachBatch
 
+      ERROR_MESSAGE_LIMIT = 1000
+
       self.table_name = :background_migration_jobs
 
       scope :for_migration_class, -> (class_name) { where(class_name: normalize_class_name(class_name)) }
@@ -24,6 +26,13 @@ module Gitlab
       def self.mark_all_as_succeeded(class_name, arguments)
         self.pending.for_migration_execution(class_name, arguments)
           .update_all("status = #{statuses[:succeeded]}, updated_at = NOW()")
+      end
+
+      def self.track_error(class_name, arguments, error_message)
+        error_message = error_message[0, ERROR_MESSAGE_LIMIT]
+
+        self.for_migration_execution(class_name, arguments)
+          .update_all(error_message: error_message, updated_at: Time.current)
       end
 
       def self.normalize_class_name(class_name)
