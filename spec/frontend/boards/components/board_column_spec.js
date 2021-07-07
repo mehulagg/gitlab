@@ -33,8 +33,6 @@ describe('Board Column Component', () => {
       listMock.assignee = {};
     }
 
-    // store = createStore();
-
     wrapper = shallowMount(BoardColumn, {
       store,
       propsData: {
