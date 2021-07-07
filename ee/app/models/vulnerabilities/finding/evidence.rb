@@ -9,6 +9,7 @@ module Vulnerabilities
 
       has_one :request, class_name: 'Vulnerabilities::Finding::Evidence::Request', inverse_of: :evidence, foreign_key: 'vulnerability_finding_evidence_id'
       has_one :response, class_name: 'Vulnerabilities::Finding::Evidence::Response', inverse_of: :evidence, foreign_key: 'vulnerability_finding_evidence_id'
+      has_one :source, class_name: 'Vulnerabilities::Finding::Evidence::Source', inverse_of: :evidence, foreign_key: 'vulnerability_finding_evidence_id'
 
       validates :summary, length: { maximum: 8_000_000 }
     end
