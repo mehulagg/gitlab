@@ -61,7 +61,7 @@ module Gitlab
           project.merge_requests.find_each do |merge_request|
             next if already_imported?(merge_request)
 
-            Gitlab::GithubImport::ObjectCounter.increment(project, object_type, :fetched)
+            increment_counters(project, importer_metadata)
 
             client
               .pull_request_reviews(project.import_source, merge_request.iid)
@@ -87,7 +87,7 @@ module Gitlab
             page.objects.each do |review|
               next if already_imported?(review)
 
-              Gitlab::GithubImport::ObjectCounter.increment(project, object_type, :fetched)
+              increment_counters(project, importer_metadata)
 
               review.merge_request_id = merge_request.id
               yield(review)

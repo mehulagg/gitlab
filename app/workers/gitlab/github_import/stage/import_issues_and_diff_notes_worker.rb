@@ -26,7 +26,11 @@ module Gitlab
             hash[waiter.key] = waiter.jobs_remaining
           end
 
-          AdvanceStageWorker.perform_async(project.id, waiters, :notes)
+          AdvanceStageWorker.perform_async(
+            project.id,
+            waiters,
+            :notes
+          )
         end
       end
     end

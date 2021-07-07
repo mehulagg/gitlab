@@ -6,24 +6,13 @@ module Gitlab
       class PullRequestsImporter
         include ParallelScheduling
 
-        def importer_class
-          PullRequestImporter
-        end
-
-        def representation_class
-          Gitlab::GithubImport::Representation::PullRequest
-        end
-
-        def sidekiq_worker_class
-          ImportPullRequestWorker
-        end
+        define_metadata object_type: :pull_request,
+          importer_class: PullRequestImporter,
+          sidekiq_worker_class: ImportPullRequestWorker,
+          representation_class: Gitlab::GithubImport::Representation::PullRequest
 
         def id_for_already_imported_cache(pr)
           pr.number
-        end
-
-        def object_type
-          :pull_request
         end
 
         def each_object_to_import

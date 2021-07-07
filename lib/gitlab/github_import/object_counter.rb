@@ -19,6 +19,7 @@ module Gitlab
           add_counter_to_list(project, operation, counter_key)
 
           CACHING.increment(counter_key)
+          increment_global_counter(object_type, operation)
         end
 
         def summary(project)
@@ -49,6 +50,13 @@ module Gitlab
           unless operation.to_s.presence_in(OPERATIONS)
             raise ArgumentError, "Operation must be #{OPERATIONS.join(' or ')}"
           end
+        end
+
+        def increment_global_counter(object_type, operation)
+          Gitlab::Metrics.counter(
+            "github_importer_#{operation}_#{object_type}",
+            "The number of #{operation} Github #{object_type.humanize}"
+          ).increment
         end
       end
     end

@@ -3,6 +3,19 @@
 module Gitlab
   module GithubImport
     module ParallelScheduling
+      extend ActiveSupport::Concern
+      include Gitlab::ClassAttributes
+
+      class_methods do
+        def define_metadata(**data)
+          set_class_attribute(:importer_metadata, ImporterMetadata.new(data))
+        end
+
+        def importer_metadata
+          get_class_attribute(:importer_metadata)
+        end
+      end
+
       attr_reader :project, :client, :page_counter, :already_imported_cache_key
 
       # The base cache key to use for tracking already imported objects.
@@ -103,7 +116,7 @@ module Gitlab
           page.objects.each do |object|
             next if already_imported?(object)
 
-            Gitlab::GithubImport::ObjectCounter.increment(project, object_type, :fetched)
+            increment_counters(project, importer_metadata)
 
             yield object
 
@@ -112,6 +125,14 @@ module Gitlab
             mark_as_imported(object)
           end
         end
+      end
+
+      def increment_counters(project, importer_metadata)
+        Gitlab::GithubImport::ObjectCounter.increment(
+          project,
+          importer_metadata.object_type,
+          :imported
+        )
       end
 
       # Returns true if the given object has already been imported, false
@@ -131,8 +152,8 @@ module Gitlab
         Gitlab::Cache::Import::Caching.set_add(already_imported_cache_key, id)
       end
 
-      def object_type
-        raise NotImplementedError
+      def importer_metadata
+        @importer_metadata ||= self.class.importer_metadata
       end
 
       # Returns the ID to use for the cache used for checking if an object has
@@ -146,18 +167,18 @@ module Gitlab
       # The class used for converting API responses to Hashes when performing
       # the import.
       def representation_class
-        raise NotImplementedError
+        importer_metadata.representation_class
       end
 
       # The class to use for importing objects when importing them sequentially.
       def importer_class
-        raise NotImplementedError
+        improter_metadata.importer_class
       end
 
       # The Sidekiq worker class used for scheduling the importing of objects in
       # parallel.
       def sidekiq_worker_class
-        raise NotImplementedError
+        improter_metadata.sidekiq_worker_class
       end
 
       # The name of the method to call to retrieve the data to import.

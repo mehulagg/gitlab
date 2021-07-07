@@ -30,7 +30,7 @@ module Gitlab
           lfs_objects = Projects::LfsPointers::LfsObjectDownloadListService.new(project).execute
 
           lfs_objects.each do |object|
-            Gitlab::GithubImport::ObjectCounter.increment(project, object_type, :fetched)
+            increment_counters(project, importer_metadata)
 
             yield object
           end

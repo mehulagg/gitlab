@@ -4,26 +4,6 @@ module Gitlab
   module GithubImport
     class ImportDiffNoteWorker # rubocop:disable Scalability/IdempotentWorker
       include ObjectImporter
-
-      def representation_class
-        Representation::DiffNote
-      end
-
-      def importer_class
-        Importer::DiffNoteImporter
-      end
-
-      def object_type
-        :diff_note
-      end
-
-      def counter_name
-        :github_importer_imported_diff_notes
-      end
-
-      def counter_description
-        'The number of imported GitHub pull request review comments'
-      end
     end
   end
 end

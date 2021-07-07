@@ -36,48 +36,30 @@ module Gitlab
 
         importer_class.new(object, project, client).execute
 
-        increment_counters(project)
+        increment_counters(project, importer_metadata)
 
         info(project.id, message: 'importer finished')
       rescue StandardError => e
         error(project.id, e, hash)
       end
 
-      # Counters incremented:
-      # - global (prometheus): for metrics in Grafana
-      # - project (redis): used in FinishImportWorker to report number of objects imported
-      def increment_counters(project)
-        counter.increment
-        Gitlab::GithubImport::ObjectCounter.increment(project, object_type, :imported)
-      end
-
-      def counter
-        @counter ||= Gitlab::Metrics.counter(counter_name, counter_description)
-      end
-
-      def object_type
-        raise NotImplementedError
+      def increment_counters(project, importer_metadata)
+        Gitlab::GithubImport::ObjectCounter.increment(
+          project,
+          importer_metadata.object_type,
+          :imported
+        )
       end
 
       # Returns the representation class to use for the object. This class must
       # define the class method `from_json_hash`.
       def representation_class
-        raise NotImplementedError
+        importer_metadata.representation_class
       end
 
       # Returns the class to use for importing the object.
       def importer_class
-        raise NotImplementedError
-      end
-
-      # Returns the name (as a Symbol) of the Prometheus counter.
-      def counter_name
-        raise NotImplementedError
-      end
-
-      # Returns the description (as a String) of the Prometheus counter.
-      def counter_description
-        raise NotImplementedError
+        importer_metadata.importer_class
       end
 
       private
