@@ -14,12 +14,7 @@ module Ci
         consumption = ::Gitlab::Ci::Minutes::BuildConsumption.new(build, build.duration).amount
 
         Ci::Minutes::UpdateMinutesByConsumptionService.new(project, namespace).execute(consumption)
-        # TODO(Issue #335338): Introduce async worker UpdateMinutesByConsumptionWorker, example:
-        # if ::Feature.enabled?(:cancel_pipelines_prior_to_destroy, default_enabled: :yaml)
-        #   Ci::Minutes::UpdateMinutesByConsumptionService.new(project, namespace).execute_async(consumption)
-        # else
-        #   Ci::Minutes::UpdateMinutesByConsumptionService.new(project, namespace).execute(consumption)
-        # end
+        # TODO(Issue #335338): Introduce async worker UpdateMinutesByConsumptionWorker
 
         compare_with_live_consumption(build, consumption)
       end

@@ -3,15 +3,15 @@
 require 'spec_helper'
 
 RSpec.describe Ci::Minutes::UpdateMinutesByConsumptionService do
+  let_it_be(:namespace) { create(:namespace, shared_runners_minutes_limit: 100) }
+  let_it_be(:project) { create(:project, :private, namespace: namespace) }
+
+  let(:consumption_minutes) { 120 }
+  let(:consumption_seconds) { consumption_minutes * 60 }
+  let(:namespace_amount_used) { Ci::Minutes::NamespaceMonthlyUsage.find_or_create_current(namespace).amount_used }
+  let(:project_amount_used) { Ci::Minutes::ProjectMonthlyUsage.find_or_create_current(project).amount_used }
+
   describe '#execute' do
-    let_it_be(:namespace) { create(:namespace, shared_runners_minutes_limit: 100) }
-    let_it_be(:project) { create(:project, :private, namespace: namespace) }
-
-    let(:consumption_minutes) { 120 }
-    let(:consumption_seconds) { 120 * 60 }
-    let(:namespace_amount_used) { Ci::Minutes::NamespaceMonthlyUsage.find_or_create_current(namespace).amount_used }
-    let(:project_amount_used) { Ci::Minutes::ProjectMonthlyUsage.find_or_create_current(project).amount_used }
-
     subject { described_class.new(project, namespace).execute(consumption_minutes) }
 
     context 'with shared runner' do
