@@ -58,7 +58,7 @@ Java 8 and Gradle 1.x projects are not supported. The minimum supported version 
 
 | Language   | Package managers                                                                             | Notes |
 |------------|----------------------------------------------------------------------------------------------|-------|
-| JavaScript | [Bower](https://bower.io/), [npm](https://www.npmjs.com/)                                    |       |
+| JavaScript | [Bower](https://bower.io/), [npm](https://www.npmjs.com/) (7 and earlier)                    |       |
 | Go         | [Godep](https://github.com/tools/godep), [go mod](https://github.com/golang/go/wiki/Modules) |       |
 | Java       | [Gradle](https://gradle.org/), [Maven](https://maven.apache.org/)                            |       |
 | .NET       | [NuGet](https://www.nuget.org/)                                                              | The .NET Framework is supported via the [mono project](https://www.mono-project.com/). There are, however, some limitations. The scanner doesn't support Windows-specific dependencies and doesn't report dependencies of your project's listed dependencies. Also, the scanner always marks detected licenses for all dependencies as `unknown`. |
@@ -72,7 +72,7 @@ The reported licenses might be incomplete or inaccurate.
 
 | Language   | Package managers                                                                                              |
 |------------|---------------------------------------------------------------------------------------------------------------|
-| JavaScript | [Yarn](https://yarnpkg.com/) (only lock file format v1)                                                       |
+| JavaScript | [Yarn](https://yarnpkg.com/)                                                                                  |
 | Go         | `go get`, `gvt`, `glide`, `dep`, `trash`, `govendor`                                                          |
 | Erlang     | [Rebar](https://rebar3.org/)                                                                                  |
 | Objective-C, Swift | [Carthage](https://github.com/Carthage/Carthage), [CocoaPods](https://cocoapods.org/) v0.39 and below |
