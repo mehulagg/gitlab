@@ -13,6 +13,7 @@ module DynamicShards
           config["schema_search_paths"] ||= "public,ci"
         elsif config_name == 'ci'
           config["schema_search_paths"] ||= "ci"
+          config["migrations_paths"] ||= "db/ci_migrate"
         end
 
         # Hack for CI tests to ensure that we always have `gitlabhq_test` since code depends on it...
