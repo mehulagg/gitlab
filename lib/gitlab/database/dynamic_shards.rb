@@ -10,9 +10,9 @@ module DynamicShards
 
       configs.each do |config_name, config|
         if config_name == 'main'
-          config["schema_search_paths"] ||= "public,ci"
+          config["schema_search_paths"] ||= "public,gitlab_ci"
         elsif config_name == 'ci'
-          config["schema_search_paths"] ||= "ci"
+          #config["schema_search_paths"] ||= "gitlab_ci"
           config["migrations_paths"] ||= "db/ci_migrate"
         end
 
