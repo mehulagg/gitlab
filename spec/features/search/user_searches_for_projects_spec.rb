@@ -6,25 +6,13 @@ RSpec.describe 'User searches for projects', :js do
   let!(:project) { create(:project, :public, name: 'Shop') }
   let(:user) { create(:user) }
 
-  context 'when search times out' do
+  context 'when signed in' do
     before do
       project.add_maintainer(user)
       sign_in(user)
-
-      allow_next_instance_of(SearchService) do |service|
-        allow(service).to receive(:search_objects).and_raise(ActiveRecord::QueryCanceled)
-      end
-
-      visit(search_path(search: 'test', scope: 'projects'))
     end
 
-    it 'renders timeout information' do
-      expect(page).to have_content('Your search timed out')
-    end
-
-    it 'sets tab count to 0' do
-      expect(page.find('.search-filter .active')).to have_text('0')
-    end
+    include_examples 'search timeouts', 'projects'
   end
 
   context 'when signed out' do
