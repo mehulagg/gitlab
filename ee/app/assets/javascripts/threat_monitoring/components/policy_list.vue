@@ -99,7 +99,6 @@ export default {
   data() {
     return {
       selectedPolicyName: null,
-      selectedPolicyKind: null,
       initialManifest: null,
       initialEnforcementStatus: null,
       networkPolicies: [],
@@ -142,9 +141,7 @@ export default {
     editPolicyPath() {
       return this.hasSelectedPolicy
         ? mergeUrlParams(
-            !this.selectedPolicyKind
-              ? { environment_id: this.currentEnvironmentId }
-              : { environment_id: this.currentEnvironmentId, kind: this.selectedPolicyKind },
+            { environment_id: this.currentEnvironmentId },
             this.newPolicyPath.replace('new', `${this.selectedPolicyName}/edit`),
           )
         : '';
@@ -195,13 +192,11 @@ export default {
 
       const [selectedPolicy] = rows;
       this.selectedPolicyName = selectedPolicy?.name;
-      this.selectedPolicyKind = selectedPolicy?.kind;
       this.initialManifest = selectedPolicy?.yaml;
       this.initialEnforcementStatus = selectedPolicy?.enabled;
     },
     deselectPolicy() {
       this.selectedPolicyName = null;
-      this.selectedPolicyKind = null;
 
       const bTable = this.$refs.policiesTable.$children[0];
       bTable.clearSelected();

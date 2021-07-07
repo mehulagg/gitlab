@@ -12,7 +12,7 @@ module Types
           description: 'Name of the policy.'
 
     field :kind,
-          GraphQL::STRING_TYPE,
+          NetworkPolicyKindEnum,
           null: false,
           description: 'Kind of the policy.'
 

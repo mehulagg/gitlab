@@ -37,14 +37,12 @@ spec:
           project: myproject`,
     updatedAt: '2020-04-14T00:08:30Z',
     enabled: true,
-    kind: 'NetworkPolicy',
     fromAutoDevops: false,
   },
 ];
 
 export const mockCiliumPolicy = {
   name: 'policy',
-  kind: 'CiliumNetworkPolicy',
   updatedAt: new Date('2021-06-07T00:00:00.000Z'),
   yaml: `apiVersion: cilium.io/v2
 kind: CiliumNetworkPolicy

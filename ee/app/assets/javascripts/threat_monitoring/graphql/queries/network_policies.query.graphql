@@ -3,7 +3,6 @@ query networkPolicies($fullPath: ID!, $environmentId: EnvironmentID) {
     networkPolicies(environmentId: $environmentId) {
       nodes {
         name
-        kind
         yaml
         enabled
         fromAutoDevops

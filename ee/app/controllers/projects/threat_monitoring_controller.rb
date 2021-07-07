@@ -24,7 +24,7 @@ module Projects
       response = NetworkPolicies::FindResourceService.new(
         resource_name: @policy_name,
         environment: @environment,
-        kind: params[:kind]
+        kind: params[:kind].presence || Gitlab::Kubernetes::CiliumNetworkPolicy::KIND
       ).execute
 
       if response.success?
