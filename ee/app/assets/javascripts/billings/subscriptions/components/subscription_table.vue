@@ -58,7 +58,7 @@ export default {
       return `${this.namespaceName}: ${planName} ${suffix}`;
     },
     canRefreshSeats() {
-      return true;
+      return !!gon.features.refreshBillingsSeats
     },
     canRenew() {
       return this.isSubscription && !this.plan.trial;
@@ -130,7 +130,11 @@ export default {
       return index === this.visibleRows.length - 1;
     },
     refreshSeats() {
-      axios.get(this.refreshSeatsHref);
+      this.isLoadingSubscription = true;
+
+      axios.get(this.refreshSeatsHref)
+        .then(this.fetchSubscription())
+        .then(this.isLoadingSubscription = false)
     }
   },
 };
@@ -160,7 +164,7 @@ export default {
             >{{ button.text }}</gl-button
           >
           <gl-button
-            :v-if="canRefreshSeats"
+            v-if="canRefreshSeats"
             @click="refreshSeats"
             category="secondary"
             variant="info"

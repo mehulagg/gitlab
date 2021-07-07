@@ -4,6 +4,10 @@ class Groups::BillingsController < Groups::ApplicationController
   before_action :authorize_admin_group!
   before_action :verify_namespace_plan_check_enabled
 
+  before_action do
+    push_frontend_feature_flag(:refresh_billings_seats)
+  end
+
   layout 'group_settings'
 
   feature_category :purchase
@@ -26,10 +30,14 @@ class Groups::BillingsController < Groups::ApplicationController
   end
 
   def refresh_seats
-    gitlab_subscription = group.gitlab_subscription
-    gitlab_subscription.refresh_seat_attributes!
-    gitlab_subscription.save!
+    if Feature.enabled?(:refresh_billings_seats)
+      gitlab_subscription = group.gitlab_subscription
+      gitlab_subscription.refresh_seat_attributes!
+      gitlab_subscription.save!
 
-    render json: { success: true }
+      render json: { success: true }
+    else
+      render json: { success: false }
+    end
   end
 end
