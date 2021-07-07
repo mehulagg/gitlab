@@ -49,4 +49,4 @@ export async function initJiraConnect() {
   });
 }
 
-document.addEventListener('DOMContentLoaded', initJiraConnect);
+initJiraConnect();
