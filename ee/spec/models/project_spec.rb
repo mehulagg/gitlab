@@ -1804,6 +1804,14 @@ RSpec.describe Project do
       it "returns the latest pipeline with reports of right type" do
         is_expected.to eq(pipeline_2)
       end
+
+      context 'and one of the pipelines has not yet completed'  do
+        let!(:pipeline_4) { create(:ee_ci_pipeline, :with_sast_report, project: project, status: :running) }
+
+        it 'returns the latest successful pipeline with reports' do
+          is_expected.to eq(pipeline_2)
+        end
+      end
     end
 
     context 'when reports are not found' do
