@@ -39,7 +39,7 @@ module Resolvers
       data = result[:data]
 
       if data.is_a? Numeric
-        # When interval=ALL, the service above returns a single number
+        # When interval=ALL, the service above returns a single number (float or integer)
         # instead of an array of hashes, like it does otherwise.
         # To keep the return value of this resolver consistent, we wrap
         # it in the structure we expect.
