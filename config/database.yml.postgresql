@@ -9,7 +9,6 @@ production:
     username: git
     password: "secure password"
     host: localhost
-    schema_search_path: public
     # load_balancing:
     #   hosts:
     #     - host1.example.com
@@ -26,7 +25,6 @@ production:
     username: git
     password: "secure password"
     host: localhost
-    schema_search_path: gitlab_ci
 
 #
 # Development specific
@@ -39,7 +37,6 @@ development:
     username: postgres
     password: "secure password"
     host: localhost
-    schema_search_path: public
     variables:
       statement_timeout: 15s
   ci:
@@ -49,7 +46,6 @@ development:
     username: postgres
     password: "secure password"
     host: localhost
-    schema_search_path: gitlab_ci
     variables:
       statement_timeout: 15s
 
@@ -64,7 +60,6 @@ staging:
     username: git
     password: "secure password"
     host: localhost
-    schema_search_path: public
   ci:
     adapter: postgresql
     encoding: unicode
@@ -72,7 +67,6 @@ staging:
     username: git
     password: "secure password"
     host: localhost
-    schema_search_path: gitlab_ci
 
 # Warning: The database defined as "test" will be erased and
 # re-generated from your development database when you run "rake".
@@ -86,7 +80,6 @@ test: &test
     password:
     host: localhost
     prepared_statements: false
-    schema_search_path: public
     variables:
       statement_timeout: 15s
   ci:
@@ -97,6 +90,5 @@ test: &test
     password:
     host: localhost
     prepared_statements: false
-    schema_search_path: gitlab_ci
     variables:
       statement_timeout: 15s
