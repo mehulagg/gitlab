@@ -19,7 +19,7 @@ Public projects can be cloned **without any** authentication over HTTPS.
 
 They are listed in the public access directory (`/public`) for all users.
 
-**Any logged in user** has [Guest permissions](../user/permissions.md)
+**Any logged in user** has the [Guest role](../user/permissions.md)
 on the repository.
 
 ### Internal projects
@@ -29,7 +29,7 @@ Internal projects can be cloned by any logged in user except [external users](..
 They are also listed in the public access directory (`/public`), but only for logged
 in users.
 
-Any logged in users except [external users](../user/permissions.md#external-users) have [Guest permissions](../user/permissions.md)
+Any logged in users except [external users](../user/permissions.md#external-users) have the [Guest role](../user/permissions.md)
 on the repository.
 
 NOTE:
