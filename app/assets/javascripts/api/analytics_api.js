@@ -42,10 +42,14 @@ export const getProjectValueStreamMetrics = (requestPath, params) =>
 /**
  * Shared group VSA paths
  * We share some endpoints across and group and project level VSA
- * the project level requests should include the `project_id` as part of the params object
+ * When used for project level VSA, requests should include the `project_id` in the params object
  */
 export const getValueStreamStagesAndEvents = ({ groupId, valueStreamId, stageId, params = {} }) => {
   const stageBase = buildGroupValueStreamPath({ groupId, valueStreamId, stageId });
-  const url = `${stageBase}/records`;
-  return axios.get(url, { params });
+  return axios.get(`${stageBase}/records`, { params });
+};
+
+export const getValueStreamStageMedian = ({ groupId, valueStreamId, stageId, params = {} }) => {
+  const stageBase = buildGroupValueStreamPath({ groupId, valueStreamId, stageId });
+  return axios.get(`${stageBase}/median`, { params });
 };
