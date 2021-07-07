@@ -44,6 +44,10 @@ module Gitlab
         strong_memoize(:bloat_size) { bloat_estimate&.bloat_size || 0 }
       end
 
+      def relative_bloat_level
+        bloat_size / ondisk_size_bytes.to_f
+      end
+
       def to_s
         name
       end

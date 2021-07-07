@@ -97,6 +97,16 @@ RSpec.describe Gitlab::Database::PostgresIndex do
     end
   end
 
+  describe '#relative_bloat_level' do
+    subject { build(:postgres_index, bloat_estimate: bloat_estimate, ondisk_size_bytes: 1024) }
+
+    let(:bloat_estimate) { build(:postgres_index_bloat_estimate, bloat_size: 256) }
+
+    it 'calculates the relative bloat level' do
+      expect(subject.relative_bloat_level).to eq(0.25)
+    end
+  end
+
   describe '#unique?' do
     it 'returns true for a unique index' do
       expect(find('public.bar_key')).to be_unique
