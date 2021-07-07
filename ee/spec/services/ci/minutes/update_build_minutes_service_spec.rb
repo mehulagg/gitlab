@@ -3,34 +3,34 @@
 require 'spec_helper'
 
 RSpec.describe Ci::Minutes::UpdateBuildMinutesService do
-  describe '#perform' do
-    let(:namespace) { create(:namespace, shared_runners_minutes_limit: 100) }
-    let(:project) { create(:project, :private, namespace: namespace) }
-    let(:pipeline) { create(:ci_pipeline, project: project) }
+  let(:namespace) { create(:namespace, shared_runners_minutes_limit: 100) }
+  let(:project) { create(:project, :private, namespace: namespace) }
+  let(:pipeline) { create(:ci_pipeline, project: project) }
 
-    let(:build) do
-      create(:ci_build, :success,
-        runner: runner, pipeline: pipeline,
-        started_at: 2.hours.ago, finished_at: 1.hour.ago)
+  let(:build) do
+    create(:ci_build, :success,
+      runner: runner, pipeline: pipeline,
+      started_at: 2.hours.ago, finished_at: 1.hour.ago)
+  end
+
+  let(:namespace_amount_used) { Ci::Minutes::NamespaceMonthlyUsage.find_or_create_current(namespace).amount_used }
+  let(:project_amount_used) { Ci::Minutes::ProjectMonthlyUsage.find_or_create_current(project).amount_used }
+
+  subject { described_class.new(project, nil).execute(build) }
+
+  shared_examples 'new tracking matches legacy tracking' do
+    it 'stores the same information in both legacy and new tracking' do
+      subject
+
+      expect(namespace_amount_used)
+        .to eq((namespace.reload.namespace_statistics.shared_runners_seconds.to_f / 60).round(2))
+
+      expect(project_amount_used)
+        .to eq((project.reload.statistics.shared_runners_seconds.to_f / 60).round(2))
     end
+  end
 
-    let(:namespace_amount_used) { Ci::Minutes::NamespaceMonthlyUsage.find_or_create_current(namespace).amount_used }
-    let(:project_amount_used) { Ci::Minutes::ProjectMonthlyUsage.find_or_create_current(project).amount_used }
-
-    subject { described_class.new(project, nil).execute(build) }
-
-    shared_examples 'new tracking matches legacy tracking' do
-      it 'stores the same information in both legacy and new tracking' do
-        subject
-
-        expect(namespace_amount_used)
-          .to eq((namespace.namespace_statistics.reload.shared_runners_seconds.to_f / 60).round(2))
-
-        expect(project_amount_used)
-          .to eq((project.statistics.reload.shared_runners_seconds.to_f / 60).round(2))
-      end
-    end
-
+  shared_examples 'execute service' do
     context 'with shared runner' do
       let(:cost_factor) { 2.0 }
       let(:runner) { create(:ci_runner, :instance, private_projects_minutes_cost_factor: cost_factor) }
@@ -38,10 +38,10 @@ RSpec.describe Ci::Minutes::UpdateBuildMinutesService do
       it 'creates a statistics and sets duration with applied cost factor' do
         subject
 
-        expect(project.statistics.reload.shared_runners_seconds)
+        expect(project.reload.statistics.shared_runners_seconds)
           .to eq(build.duration.to_i * 2)
 
-        expect(namespace.namespace_statistics.reload.shared_runners_seconds)
+        expect(namespace.reload.namespace_statistics.shared_runners_seconds)
           .to eq(build.duration.to_i * 2)
       end
 
@@ -79,10 +79,10 @@ RSpec.describe Ci::Minutes::UpdateBuildMinutesService do
         it 'updates statistics and adds duration with applied cost factor' do
           subject
 
-          expect(project.statistics.reload.shared_runners_seconds)
+          expect(project.reload.statistics.shared_runners_seconds)
             .to eq(usage_in_seconds + build.duration.to_i * 2)
 
-          expect(namespace.namespace_statistics.reload.shared_runners_seconds)
+          expect(namespace.reload.namespace_statistics.shared_runners_seconds)
             .to eq(usage_in_seconds + build.duration.to_i * 2)
         end
 
@@ -118,7 +118,7 @@ RSpec.describe Ci::Minutes::UpdateBuildMinutesService do
         it 'creates a statistics in root group' do
           subject
 
-          expect(root_ancestor.namespace_statistics.reload.shared_runners_seconds)
+          expect(root_ancestor.reload.namespace_statistics.shared_runners_seconds)
             .to eq(build.duration.to_i * 2)
         end
 
@@ -133,10 +133,10 @@ RSpec.describe Ci::Minutes::UpdateBuildMinutesService do
           subject
 
           expect(namespace_amount_used)
-            .to eq((root_ancestor.namespace_statistics.reload.shared_runners_seconds.to_f / 60).round(2))
+            .to eq((root_ancestor.reload.namespace_statistics.shared_runners_seconds.to_f / 60).round(2))
 
           expect(project_amount_used)
-            .to eq((project.statistics.reload.shared_runners_seconds.to_f / 60).round(2))
+            .to eq((project.reload.statistics.shared_runners_seconds.to_f / 60).round(2))
         end
       end
 
@@ -195,6 +195,20 @@ RSpec.describe Ci::Minutes::UpdateBuildMinutesService do
       it 'does not track project monthly usage' do
         expect { subject }.not_to change { Ci::Minutes::ProjectMonthlyUsage.count }
       end
+    end
+  end
+
+  describe '#execute' do
+    context 'when cancel_pipelines_prior_to_destroy enabled', :sidekiq_inline do
+      include_examples 'execute service'
+    end
+
+    context 'when cancel_pipelines_prior_to_destroy disabled' do
+      before_all do
+        stub_feature_flags(cancel_pipelines_prior_to_destroy: false)
+      end
+
+      include_examples 'execute service'
     end
   end
 end
