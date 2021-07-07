@@ -16,6 +16,13 @@ describe('EpicFilteredSearch', () => {
     });
   };
 
+  window.gon = {
+    current_user_id: '4',
+    current_username: 'root',
+    current_user_avatar_url: 'url',
+    current_user_fullname: 'Admin',
+  };
+
   afterEach(() => {
     wrapper.destroy();
   });
@@ -56,6 +63,9 @@ describe('EpicFilteredSearch', () => {
           token: AuthorToken,
           unique: true,
           fetchAuthors: wrapper.vm.fetchAuthors,
+          preloadedAuthors: [
+            { id: 'gid://gitlab/User/4', name: 'Admin', username: 'root', avatarUrl: 'url' },
+          ],
         },
       ];
       expect(wrapper.find(BoardFilteredSearch).props('tokens')).toEqual(tokens);
