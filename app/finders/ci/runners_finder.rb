@@ -7,9 +7,8 @@ module Ci
     ALLOWED_SORTS = %w[contacted_asc contacted_desc created_at_asc created_at_desc created_date].freeze
     DEFAULT_SORT = 'created_at_desc'
 
-    def initialize(current_user:, group: nil, params:)
+    def initialize(current_user:, params:)
       @params = params
-      @group = group
       @current_user = current_user
     end
 
@@ -34,7 +33,7 @@ module Ci
     private
 
     def search!
-      @group ? group_runners : all_runners
+      @params.has_key?(:group) ? group_runners : all_runners
 
       @runners = @runners.search(@params[:search]) if @params[:search].present?
     end
@@ -46,12 +45,19 @@ module Ci
     end
 
     def group_runners
-      raise Gitlab::Access::AccessDeniedError unless can?(@current_user, :admin_group, @group)
+      group = @params[:group]
 
-      # Getting all runners from the group itself and all its descendants
-      descendant_projects = Project.for_group_and_its_subgroups(@group)
+      raise Gitlab::Access::AccessDeniedError unless can?(@current_user, :admin_group, group)
 
-      @runners = Ci::Runner.belonging_to_group_or_project(@group.self_and_descendants, descendant_projects)
+      case @params[:membership]
+      when :direct
+        @runners = Ci::Runner.belonging_to_group(group.id)
+      else
+        # Getting all runners from the group itself and all its descendants
+        descendant_projects = Project.for_group_and_its_subgroups(group)
+
+        @runners = Ci::Runner.belonging_to_group_or_project(group.self_and_descendants, descendant_projects)
+      end
     end
 
     def filter_by_status!

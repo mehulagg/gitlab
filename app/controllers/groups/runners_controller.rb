@@ -58,7 +58,7 @@ class Groups::RunnersController < Groups::ApplicationController
   private
 
   def runner
-    @runner ||= Ci::RunnersFinder.new(current_user: current_user, group: @group, params: {}).execute
+    @runner ||= Ci::RunnersFinder.new(current_user: current_user, params: { group: @group }).execute
                                                                                             .except(:limit, :offset)
                                                                                             .find(params[:id])
   end
