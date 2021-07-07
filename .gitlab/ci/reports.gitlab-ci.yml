@@ -41,7 +41,7 @@ nodejs-scan-sast:
 semgrep-sast:
   rules: !reference [".reports:rules:sast", rules]
 
-go-sast:
+gosec-sast:
   rules: !reference [".reports:rules:sast", rules]
 
 .secret-analyzer:
