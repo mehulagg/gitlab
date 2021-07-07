@@ -90,9 +90,6 @@ export default {
     upgradeButtonHref() {
       return this.canUpgradeEEPlan ? this.planUpgradeHref : this.customerPortalUrl;
     },
-    refreshSeatsButton() {
-      return createButtonProps(s__('Refresh Seats'), this.refreshSeatsHref, 'refresh-seats-button')
-    },
     renewButton() {
       return this.canRenew
         ? createButtonProps(s__('SubscriptionTable|Renew'), this.planRenewHref, 'renew-button')
