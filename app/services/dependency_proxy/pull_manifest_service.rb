@@ -14,8 +14,8 @@ module DependencyProxy
       response = Gitlab::HTTP.get(manifest_url, headers: auth_headers.merge(Accept: ::ContainerRegistry::Client::ACCEPTED_TYPES.join(',')))
 
       if response.success?
-        file = Tempfile.new
-
+        file = Tempfile.new('dependency_proxy_manifest:')
+        file.unlink
         begin
           file.write(response)
           file.flush
@@ -23,7 +23,6 @@ module DependencyProxy
           yield(success(file: file, digest: response.headers['docker-content-digest'], content_type: response.headers['content-type']))
         ensure
           file.close
-          file.unlink
         end
       else
         yield(error(response.body, response.code))
