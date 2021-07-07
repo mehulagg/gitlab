@@ -74,14 +74,14 @@ export default {
       @hide="$emit('dropdown-hide')"
     >
       <template #button-text>
-        <gl-truncate
-          :text="firstSelectedOption"
-          class="gl-min-w-0 gl-mr-2"
-          :data-qa-selector="qaSelector"
-        />
-        <span v-if="extraOptionCount" class="gl-mr-2">
-          {{ n__('+%d more', '+%d more', extraOptionCount) }}
-        </span>
+        <div class="gl-display-flex">
+          <gl-truncate
+            :text="firstSelectedOption"
+            class="gl-min-w-0 gl-mr-3"
+            :data-qa-selector="qaSelector"
+          />
+          <span v-if="extraOptionCount">{{ n__('+%d more', '+%d more', extraOptionCount) }}</span>
+        </div>
       </template>
 
       <template v-if="showSearchBox" #header>
