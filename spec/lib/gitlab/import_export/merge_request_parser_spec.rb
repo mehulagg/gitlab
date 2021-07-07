@@ -38,10 +38,8 @@ RSpec.describe Gitlab::ImportExport::MergeRequestParser do
 
   # Source and target branch are only created when: fork_merge_request
   context 'Fork merge request' do
-    before do
-      allow_next_instance_of(described_class) do |instance|
-        allow(instance).to receive(:fork_merge_request?).and_return(true)
-      end
+    before(:each) do
+      allow_any_instance_of(described_class).to receive(:fork_merge_request?).and_return(true)
     end
     
     it 'parses a MR that has no source branch' do
@@ -58,6 +56,7 @@ RSpec.describe Gitlab::ImportExport::MergeRequestParser do
     end
 
     it 'parses a MR that is merged' do
+      allow(described_class).to receive(:fork_merge_request?).and_return(true)
       merge_request.update!(state: :merged, source_branch: 'new_branch')
       expect(project.repository.branch_exists?(parsed_merge_request.source_branch)).to be false
     end
