@@ -23860,6 +23860,9 @@ msgstr ""
 msgid "Pipeline Schedules"
 msgstr ""
 
+msgid "Pipeline URL"
+msgstr ""
+
 msgid "Pipeline durations for the last 30 commits"
 msgstr ""
 
@@ -25561,6 +25564,9 @@ msgstr ""
 msgid "ProjectService|Perform common operations on GitLab project: %{project_name}"
 msgstr ""
 
+msgid "ProjectService|Run CI/CD pipelines with Buildkite."
+msgstr ""
+
 msgid "ProjectService|Run CI/CD pipelines with Drone."
 msgstr ""
 
@@ -25571,6 +25577,9 @@ msgid "ProjectService|TeamCity server URL"
 msgstr ""
 
 msgid "ProjectService|The build configuration ID of the TeamCity project."
+msgstr ""
+
+msgid "ProjectService|This is the token you get after you create a Buildkite pipeline with a GitLab repository."
 msgstr ""
 
 msgid "ProjectService|To configure this integration, you should:"
