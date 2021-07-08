@@ -132,8 +132,6 @@ RSpec.describe Projects::ServicesController do
       context 'with the Slack integration' do
         let_it_be(:integration) { build(:integrations_slack) }
 
-        let(:service) { integration } # TODO: remove when https://gitlab.com/gitlab-org/gitlab/-/issues/330300 is complete
-
         it 'returns an error response when the URL is blocked' do
           put :test, params: project_params(service: { webhook: 'http://127.0.0.1' })
 
