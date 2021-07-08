@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe Gitlab::Database::SchemaCacheWithRenamedTable do
+RSpec.describe Gitlab::Database::RenameTablePatch do
   let(:old_model) do
     Class.new(ActiveRecord::Base) do
       self.table_name = 'projects'
@@ -64,6 +64,29 @@ RSpec.describe Gitlab::Database::SchemaCacheWithRenamedTable do
       columns_hash_for_new_table = ActiveRecord::Base.connection.schema_cache.columns_hash('projects_new')
 
       expect(columns_hash_for_old_table).to eq(columns_hash_for_new_table)
+    end
+
+    context 'when calling methods on the connection' do
+      let(:connection) { ActiveRecord::Base.connection }
+
+      it 'returns the correct primary key' do
+        expect(connection.primary_key('projects')).to eq('id')
+      end
+
+      it 'returns the correct indexes' do
+        index_names = connection.indexes('projects').map(&:name)
+        expected_index_names = connection.indexes('projects_new').map(&:name)
+
+        expect(index_names).to eq(expected_index_names)
+      end
+
+      it 'returns the correct foreign keys' do
+        expect(connection.foreign_keys('projects')).to eq(connection.foreign_keys('projects_new'))
+      end
+
+      it 'returns the correct columns' do
+        expect(connection.columns('projects')).to eq(connection.columns('projects_new'))
+      end
     end
 
     describe 'when the table behind a model is actually a view' do
