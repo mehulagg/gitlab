@@ -10,6 +10,23 @@ CREATE EXTENSION IF NOT EXISTS btree_gist;
 
 CREATE EXTENSION IF NOT EXISTS pg_trgm;
 
+CREATE FUNCTION projects_search_tokens() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+IF (TG_OP = 'INSERT') THEN
+  INSERT INTO project_search_tokens (project_id, tokens)
+  VALUES (NEW.id, (setweight(to_tsvector(NEW.path), 'A') || setweight(to_tsvector(NEW.name), 'B')));
+ELSEIF (TG_OP = 'UPDATE') THEN
+  UPDATE project_search_tokens
+  SET (tokens) = (setweight(to_tsvector(NEW.path), 'A') || setweight(to_tsvector(NEW.name), 'B'))
+  WHERE project_id = NEW.id;
+END IF;
+RETURN NULL;
+
+END
+$$;
+
 CREATE FUNCTION set_has_external_issue_tracker() RETURNS trigger
     LANGUAGE plpgsql
     AS $$
@@ -16984,6 +17001,11 @@ CREATE SEQUENCE project_repository_storage_moves_id_seq
 
 ALTER SEQUENCE project_repository_storage_moves_id_seq OWNED BY project_repository_storage_moves.id;
 
+CREATE TABLE project_search_tokens (
+    project_id bigint NOT NULL,
+    tokens tsvector
+);
+
 CREATE TABLE project_security_settings (
     project_id bigint NOT NULL,
     created_at timestamp with time zone NOT NULL,
@@ -21906,6 +21928,9 @@ ALTER TABLE ONLY project_repository_states
 ALTER TABLE ONLY project_repository_storage_moves
     ADD CONSTRAINT project_repository_storage_moves_pkey PRIMARY KEY (id);
 
+ALTER TABLE ONLY project_search_tokens
+    ADD CONSTRAINT project_search_tokens_pkey PRIMARY KEY (project_id);
+
 ALTER TABLE ONLY project_security_settings
     ADD CONSTRAINT project_security_settings_pkey PRIMARY KEY (project_id);
 
@@ -24409,6 +24434,8 @@ CREATE UNIQUE INDEX index_project_repository_states_on_project_id ON project_rep
 
 CREATE INDEX index_project_repository_storage_moves_on_project_id ON project_repository_storage_moves USING btree (project_id);
 
+CREATE INDEX index_project_search_tokens_token ON project_search_tokens USING gin (tokens);
+
 CREATE INDEX index_project_settings_on_project_id_partially ON project_settings USING btree (project_id) WHERE (has_vulnerabilities IS TRUE);
 
 CREATE UNIQUE INDEX index_project_settings_on_push_rule_id ON project_settings USING btree (push_rule_id);
@@ -25591,6 +25618,8 @@ CREATE TRIGGER trigger_has_external_wiki_on_insert AFTER INSERT ON services FOR 
 
 CREATE TRIGGER trigger_has_external_wiki_on_update AFTER UPDATE ON services FOR EACH ROW WHEN ((((new.type)::text = 'ExternalWikiService'::text) AND (old.active <> new.active) AND (new.project_id IS NOT NULL))) EXECUTE FUNCTION set_has_external_wiki();
 
+CREATE TRIGGER trigger_project_search_tokens_on_insert_or_update AFTER INSERT OR UPDATE ON projects FOR EACH ROW EXECUTE FUNCTION projects_search_tokens();
+
 ALTER TABLE ONLY chat_names
     ADD CONSTRAINT fk_00797a2bf9 FOREIGN KEY (service_id) REFERENCES services(id) ON DELETE CASCADE;
 
@@ -26379,6 +26408,9 @@ ALTER TABLE ONLY path_locks
 
 ALTER TABLE ONLY personal_access_tokens
     ADD CONSTRAINT fk_personal_access_tokens_user_id FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE;
+
+ALTER TABLE ONLY project_search_tokens
+    ADD CONSTRAINT fk_project FOREIGN KEY (project_id) REFERENCES projects(id);
 
 ALTER TABLE ONLY project_settings
     ADD CONSTRAINT fk_project_settings_push_rule_id FOREIGN KEY (push_rule_id) REFERENCES push_rules(id) ON DELETE SET NULL;
