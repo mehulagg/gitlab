@@ -567,8 +567,8 @@ gitlab_rails['auto_migrate'] = false
 
 postgresql['pgbouncer_user_password'] = '771a8625958a529132abe6f1a4acb19c'
 postgresql['sql_user_password'] = '450409b85a0223a214b5fb1484f34d0f'
-patroni['username'] = 'patroni_api'
-patroni['password'] = 'example-password'
+patroni['username'] = 'PATRONI_API_USERNAME'
+patroni['password'] = 'PATRONI_API_PASSWORD'
 patroni['postgresql']['max_replication_slots'] = 6
 patroni['postgresql']['max_wal_senders'] = 7
 
@@ -656,8 +656,8 @@ postgresql['sql_user_password'] = '450409b85a0223a214b5fb1484f34d0f'
 # Patroni uses one extra slot per node when initiating the replication.
 patroni['postgresql']['max_replication_slots'] = 6
 
-patroni['username'] = 'patroni_api'
-patroni['password'] = 'example-password'
+patroni['username'] = 'PATRONI_API_USERNAME'
+patroni['password'] = 'PATRONI_API_PASSWORD'
 
 # Set `max_wal_senders` to one more than the number of replication slots in the cluster.
 # This is used to prevent replication from using up all of the
