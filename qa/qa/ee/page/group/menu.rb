@@ -152,14 +152,6 @@ module QA
               end
             end
           end
-
-          # def hover_group_information
-          #   within_sidebar do
-          #     find_element(:sidebar_menu_link, menu_item: 'Group information').hover
-
-          #     yield
-          #   end
-          # end
         end
       end
     end
