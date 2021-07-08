@@ -1,5 +1,5 @@
 ---
-data_category: Operational
+data_category: Optional
 key_path: usage_activity_by_stage.secure.user_coverage_fuzzing_jobs
 description: Usage count of coverage-guided fuzz testing jobs
 product_section: sec
