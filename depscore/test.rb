@@ -14,6 +14,7 @@ require "json"
          "name":"Unreliable libraries",
          "message":"Libraries that are not frequently mantained detected",
          "description":"Based on the score calculated from the librariy metadata the below libraries seems to have less frequent maintance",
+         "cve":"yarn.lock:execa:gemnasium:05cfa2e8-2d0c-42c1-8894-638e2f12ff3d",
          "severity":"Info",
          "solution":"Upgrade to version 2.0.0 or above.",
          "scanner":{
@@ -31,10 +32,16 @@ require "json"
          },
          "identifiers":[
             {
-               "type":"CWE",
+               "type":"gemnasium",
+               "name":"Gemnasium-4f3402a7-97dd-45fc-9ed5-f49e707020c3",
+               "value":"4f3402a7-97dd-45fc-9ed5-f49e707020c3",
+               "url":"https://gitlab.com/gitlab-org/security-products/gemnasium-db/-/blob/master/npm/postcss/CVE-2021-23382.yml"
+            },
+            {
+               "type":"cve",
                "name":"CVE-2021-23382",
-               "value":"Use of Unmaintained Third Party Components",
-               "url":"https://cwe.mitre.org/data/definitions/1104.html"
+               "value":"CVE-2021-23382",
+               "url":"https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2021-23382"
             }
          ]
       }
@@ -46,3 +53,4 @@ require "json"
   File.open("gl-depscore-report.json", "w") do |f|
     f.write(summary_json.to_json)
   end
+  exit(0)
