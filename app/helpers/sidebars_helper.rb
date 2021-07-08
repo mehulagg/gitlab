@@ -14,6 +14,17 @@ module SidebarsHelper
     end
   end
 
+  def sidebar_qa_selector(object)
+    case object
+    when Project
+      'qa-project-sidebar'
+    when Group
+      'qa-group-sidebar'
+    when User
+      'qa-profile-sidebar'
+    end
+  end
+
   def project_sidebar_context(project, user, current_ref)
     context_data = project_sidebar_context_data(project, user, current_ref)
 
