@@ -15,7 +15,7 @@ require "json"
          "message":"Libraries that are not frequently mantained detected",
          "description":"Based on the score calculated from the librariy metadata the below libraries seems to have less frequent maintance",
          "severity":"Info",
-         "solution":"Check for alternate libraries",
+         "solution":"Upgrade to version 2.0.0 or above.",
          "scanner":{
             "id":"depscore",
             "name":"depscore"
@@ -24,12 +24,18 @@ require "json"
             "file":"client/package.json",
             "dependency":{
                "package":{
-                  "name":"handlebars,handlebars,handlebars,handlebars,handlebars,handlebars,handlebars,handlebars,handlebars,handlebars,handlebars,handlebars,handlebars"
-               }
+                  "name":"handlebars"
+               },
+               "version":"4.0.11"
             }
          },
          "identifiers":[
-           
+            {
+               "type":"CWE",
+               "name":"CVE-2021-23382",
+               "value":"Use of Unmaintained Third Party Components",
+               "url":"https://cwe.mitre.org/data/definitions/1104.html"
+            }
          ]
       }
    ]
