@@ -69,7 +69,6 @@ The browser-based crawler can be configured using CI/CD variables.
 | `DAST_BROWSER_EXTRACT_ELEMENT_TIMEOUT`       | [Duration string](https://golang.org/pkg/time/#ParseDuration) | `5s`    | The maximum amount of time to allow the browser to extract newly found elements or navigations |
 | `DAST_BROWSER_ELEMENT_TIMEOUT`               | [Duration string](https://golang.org/pkg/time/#ParseDuration) | `600ms` | The maximum amount of time to wait for an element before determining it is ready for analysis |
 
-
 The [DAST variables](index.md#available-cicd-variables) `SECURE_ANALYZERS_PREFIX`, `DAST_FULL_SCAN_ENABLED`, `DAST_AUTO_UPDATE_ADDONS`, `DAST_EXCLUDE_RULES`, `DAST_REQUEST_HEADERS`, `DAST_HTML_REPORT`, `DAST_MARKDOWN_REPORT`, `DAST_XML_REPORT`,
 `DAST_AUTH_URL`, `DAST_USERNAME`, `DAST_PASSWORD`, `DAST_USERNAME_FIELD`, `DAST_PASSWORD_FIELD`, `DAST_FIRST_SUBMIT_FIELD`, `DAST_SUBMIT_FIELD`, `DAST_EXCLUDE_URLS`, `DAST_AUTH_VERIFICATION_URL`, `DAST_BROWSER_AUTH_VERIFICATION_SELECTOR`, `DAST_BROWSER_AUTH_VERIFICATION_LOGIN_FORM`, `DAST_BROWSER_AUTH_REPORT`,
 `DAST_INCLUDE_ALPHA_VULNERABILITIES`, `DAST_PATHS_FILE`, `DAST_PATHS`, `DAST_ZAP_CLI_OPTIONS`, and `DAST_ZAP_LOG_CONFIGURATION` are also compatible with browser-based crawler scans.
@@ -99,7 +98,9 @@ You can manage the trade-off between coverage and scan time with the following m
 
 Due to poor network conditions or heavy application load, the default timeouts may not be applicable to your application.
 
-Browser based scans offer the ability to adjust various timeouts to ensure it continues smoothly as it transitions from one page to the next. Navigations, or the act of loading a new page, usually require the most amount of time as they are 
+Browser based scans offer the ability to adjust various timeouts to ensure it continues smoothly as it transitions from one page to the next. These values are configured using a [Duration string](https://golang.org/pkg/time/#ParseDuration) which allow you to configure durations with a prefix: `m` for minutes, `s` for seconds, and `ms` for milliseconds. 
+
+Navigations, or the act of loading a new page, usually require the most amount of time as they are 
 loading multiple new resources such as JavaScript or CSS files. Depending on the size of these resources, or the speed at which they are returned, the default `DAST_BROWSER_NAVIGATION_TIMEOUT` may not be sufficient. 
 
 Stability timeouts, such as those configurable with `DAST_BROWSER_NAVIGATION_STABILITY_TIMEOUT`, `DAST_BROWSER_STABILITY_TIMEOUT`, and `DAST_BROWSER_ACTION_STABILITY_TIMEOUT` can also be configured. Stability timeouts determine when browser based scans consider
@@ -108,7 +109,8 @@ a page fully loaded. Browser based scans consider a page loaded when:
 1. The [DOMContentLoaded](https://developer.mozilla.org/en-US/docs/Web/API/Window/DOMContentLoaded_event) event has fired
 1. There are no open or outstanding requests that are deemed important, such as JavaScript and CSS. Media files are usually deemed unimportant.
 1. Depending on whether the browser executed a navigation, was forcibly transitioned, or action: 
-  - There are no new Document Object Model (DOM) modification events after the `DAST_BROWSER_NAVIGATION_STABILITY_TIMEOUT`, `DAST_BROWSER_STABILITY_TIMEOUT` or `DAST_BROWSER_ACTION_STABILITY_TIMEOUT` durations
+  
+   - There are no new Document Object Model (DOM) modification events after the `DAST_BROWSER_NAVIGATION_STABILITY_TIMEOUT`, `DAST_BROWSER_STABILITY_TIMEOUT` or `DAST_BROWSER_ACTION_STABILITY_TIMEOUT` durations
 
 After these events have occurred, browser based scans consider the page loaded and ready and will attempt the next action.
 
