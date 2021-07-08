@@ -11,20 +11,20 @@ require 'securerandom'
 
   foo = '{"version":"14.0.0",
   "vulnerabilities":[{
-         "id":"038e8cggg96a16af7zzz12dfdhhzzzc9a4fa164e9da70123sd6ce95",
+         "id":"038e8cggg96a16af7zzzzzzzzzc9a4fa164e9da70123sd6ce95",
          "category":"dependency_scanning",
          "name":"Unreliable libraries",
          "message":"Libraries that are not frequently mantained detected",
          "description":"Based on the score calculated from the librariy metadata the below libraries seems to have less frequent maintance",
+         "cve":"package.json:kind-of::execa:depscore:CWE-1104",
          "severity":"Info",
-         "cwe": "CWE-1104",
          "solution":"Upgrade to version 2.0.0 or above.",
          "scanner":{
             "id":"depscore",
             "name":"depscore"
          },
          "location":{
-            "file":"client/package.json",
+            "file":"package.json",
             "dependency":{
                "package":{
                   "name":"handlebars"
@@ -44,10 +44,6 @@ require 'securerandom'
    ]
 }
 '
-
-foo2 = {
-    version: "14.0.0"
-}
 
   summary_json = JSON(foo)
   File.open("gl-depscore-report.json", "w") do |f|
