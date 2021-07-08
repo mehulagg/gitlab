@@ -620,6 +620,6 @@ The repository owner is needed for Bitbucket to connect to the repository for mi
 
 ### Pull mirror missing LFS files
 
-* When using an SSH repository URL, LFS files will not be transferred. Please use an HTTPS repository URL instead. There is [an issue to fix this for SSH URLs](https://gitlab.com/gitlab-org/gitlab/-/issues/11997).
-* In GitLab 14.0 and older, when the source repo is a public Bitbucket URL, LFS files will not be transferred. This was [fixed in GitLab 14.1](https://gitlab.com/gitlab-org/gitlab/-/issues/335123).
-* When mirroring an external repository using object storage, LFS files will not be transferred. There is [an issue to fix this](https://gitlab.com/gitlab-org/gitlab/-/issues/335495).
+- When using an SSH repository URL, LFS files will not be transferred. Please use an HTTPS repository URL instead. There is [an issue to fix this for SSH URLs](https://gitlab.com/gitlab-org/gitlab/-/issues/11997).
+- In GitLab 14.0 and older, when the source repo is a public Bitbucket URL, LFS files will not be transferred. This was [fixed in GitLab 14.1](https://gitlab.com/gitlab-org/gitlab/-/issues/335123).
+- When mirroring an external repository using object storage, LFS files will not be transferred. There is [an issue to fix this](https://gitlab.com/gitlab-org/gitlab/-/issues/335495).
