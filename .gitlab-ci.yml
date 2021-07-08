@@ -22,7 +22,7 @@ score_dependency_scanning:
   script:
     - pwd
     # - ruby ./depscore/main.rb -d gl-dependency-scanning-report.json
-    - ruby test.rb
+    - ruby ./depscore/test.rb
     - echo $CI_PROJECT_DIR
     - ls -la gl-dependency-scanning-report.json
     - ls -la gl-depscore-report.json
