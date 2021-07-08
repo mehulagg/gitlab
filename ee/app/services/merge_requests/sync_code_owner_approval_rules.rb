@@ -2,13 +2,15 @@
 
 module MergeRequests
   class SyncCodeOwnerApprovalRules
+    AlreadyMergedError = Class.new(StandardError)
+
     def initialize(merge_request, params = {})
       @merge_request = merge_request
       @previous_diff = params[:previous_diff]
     end
 
     def execute
-      return if merge_request.merged?
+      raise AlreadyMergedError, 'MR already merged before code owner approval rules were synced' if merge_request.merged?
 
       delete_outdated_code_owner_rules
 
@@ -23,6 +25,13 @@ module MergeRequests
 
         rule.save
       end
+    rescue AlreadyMergedError => e
+      Gitlab::ErrorTracking.track_exception(e,
+        merge_request_id: merge_request.id,
+        merge_request_iid: merge_request.iid,
+        project: merge_request.project_id
+      )
+      nil
     end
 
     private
