@@ -14,9 +14,8 @@ require "json"
          "name":"Unreliable libraries",
          "message":"Libraries that are not frequently mantained detected",
          "description":"Based on the score calculated from the librariy metadata the below libraries seems to have less frequent maintance",
-         "cve":"yarn.lock:execa:gemnasium:05cfa2e8-2d0c-42c1-8894-638e2f12ff3d",
          "severity":"Info",
-         "solution":"Upgrade to version 2.0.0 or above.",
+         "solution":"Check for alternate libraries",
          "scanner":{
             "id":"depscore",
             "name":"depscore"
@@ -25,9 +24,8 @@ require "json"
             "file":"client/package.json",
             "dependency":{
                "package":{
-                  "name":"handlebars"
-               },
-               "version":"4.0.11"
+                  "name":"handlebars,handlebars,handlebars,handlebars,handlebars,handlebars,handlebars,handlebars,handlebars,handlebars,handlebars,handlebars,handlebars"
+               }
             }
          },
          "identifiers":[
