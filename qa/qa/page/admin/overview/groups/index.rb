@@ -10,7 +10,7 @@ module QA
               element :group_search_field, required: true
             end
 
-            view 'app/views/admin/groups/_group.html.haml' do
+            view 'app/views/admin/groups/_group_menus.html.haml' do
               element :group_row_content
               element :group_name_link
             end

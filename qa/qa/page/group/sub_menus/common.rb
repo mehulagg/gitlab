@@ -12,7 +12,7 @@ module QA
             super
 
             base.class_eval do
-              view 'app/views/layouts/nav/sidebar/_group.html.haml' do
+              view 'app/views/layouts/nav/sidebar/_group_menus.html.haml' do
                 element :group_sidebar
               end
             end
