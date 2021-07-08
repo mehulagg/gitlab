@@ -14,8 +14,6 @@ module Ci
 
         return unless consumption > 0
 
-        # TODO(Issue #335338): Introduce async worker UpdateMinutesByConsumptionWorker
-        # Ci::Minutes::UpdateProjectAndNamespaceUsage.new(project, namespace).execute(consumption)
         update_minutes(consumption)
 
         compare_with_live_consumption(build, consumption)
@@ -25,9 +23,9 @@ module Ci
 
       def update_minutes(consumption)
         if ::Feature.enabled?(:cancel_pipelines_prior_to_destroy, default_enabled: :yaml)
-          ::Ci::Minutes::UpdateMinutesByConsumptionWorker.perform_async(consumption, project.id, namespace.id)
+          ::Ci::Minutes::UpdateProjectAndNamespaceUsageWorker.perform_async(consumption, project.id, namespace.id)
         else
-          ::Ci::Minutes::UpdateMinutesByConsumptionService.new(project, namespace).execute(consumption)
+          ::Ci::Minutes::UpdateProjectAndNamespaceUsageService.new(project, namespace).execute(consumption)
         end
       end
 

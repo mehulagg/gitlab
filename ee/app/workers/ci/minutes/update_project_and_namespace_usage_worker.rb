@@ -2,7 +2,7 @@
 
 module Ci
   module Minutes
-    class UpdateMinutesByConsumptionWorker
+    class UpdateProjectAndNamespaceUsageWorker
       include ApplicationWorker
 
       sidekiq_options retry: 10
@@ -13,7 +13,7 @@ module Ci
         project = Project.find_by_id(project_id)
         namespace = Namespace.find_by_id(namespace_id)
 
-        ::Ci::Minutes::UpdateMinutesByConsumptionService.new(project, namespace).execute(consumption)
+        ::Ci::Minutes::UpdateProjectAndNamespaceUsageService.new(project, namespace).execute(consumption)
       end
     end
   end

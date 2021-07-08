@@ -2,7 +2,7 @@
 
 module Ci
   module Minutes
-    class UpdateProjectAndNamespaceUsage
+    class UpdateProjectAndNamespaceUsageService
       def initialize(project, namespace)
         @project = project
         @namespace = namespace
