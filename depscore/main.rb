@@ -56,7 +56,7 @@ def dreport_summary()
             'scanner':
             {
                 'id': 'depscore',
-                'name': 'depscore',
+                'name': 'depscore'
             },
             'location':
             {
@@ -65,10 +65,10 @@ def dreport_summary()
                 {
                     'package':
                     {
-                        'name': 'handlebars',
+                        'name': 'handlebars'
                     },
-                    'version': '4.0.11',
-                },
+                    'version': '4.0.11'
+                }
             },
             'identifiers':[
             {
