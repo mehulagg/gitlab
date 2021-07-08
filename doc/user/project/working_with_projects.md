@@ -21,8 +21,9 @@ projects with the most [stars](#star-a-project), click **Most stars**. To view
 projects with the largest number of comments in the past month, click **Trending**.
 
 NOTE:
-By default, the `/explore` is visible to unauthenticated users. However, if the access level of
-`/public` is restricted, `/explore` is visible only to signed-in users.
+By default, `/explore` is visible to unauthenticated users. However, if the
+[**Public** visibility level](../user/admin_area/settings/visibility_and_access_controls.md#restricted-visibility-levels)
+is restricted, `/explore` is visible only to signed-in users.
 
 ## Create a project
 

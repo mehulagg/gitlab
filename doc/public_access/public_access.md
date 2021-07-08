@@ -25,8 +25,9 @@ They are listed in the public access directory (`/public`) for all users.
 **Any signed-in user** has the [Guest role](../user/permissions.md) on the repository.
 
 NOTE:
-By default, `/public` is visible to unauthenticated users. However, if the access level of
-`/public` is restricted, it is visible only to signed-in users.
+By default, `/public` is visible to unauthenticated users. However, if the
+[**Public** visibility level](../user/admin_area/settings/visibility_and_access_controls.md#restricted-visibility-levels)
+is restricted, `/public` is visible only to signed-in users.
 
 ## Internal projects
 
