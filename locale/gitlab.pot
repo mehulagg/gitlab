@@ -5919,6 +5919,30 @@ msgstr ""
 msgid "Callback URL"
 msgstr ""
 
+msgid "Campfire room ID (optional)"
+msgstr ""
+
+msgid "Campfire subdomain (optional)"
+msgstr ""
+
+msgid "Campfire token"
+msgstr ""
+
+msgid "CampfireService|Send notifications about push events to Campfire chat rooms. Note that %{campfire_retired_link}."
+msgstr ""
+
+msgid "CampfireService|The Campfire API authentication token. To find it, log into Campfire and select \"My info\"."
+msgstr ""
+
+msgid "CampfireService|The last part of the URL when you're in a room."
+msgstr ""
+
+msgid "CampfireService|What's between %{url_part_1} and %{url_part_2} when you're logged in."
+msgstr ""
+
+msgid "CampfireService|new users can no longer sign up for Campfire"
+msgstr ""
+
 msgid "Can be manually deployed to"
 msgstr ""
 
