@@ -8225,13 +8225,13 @@ msgstr ""
 msgid "Configuration help"
 msgstr ""
 
-msgid "Configure"
-msgstr ""
-
 msgid "Configure %{italic_start}What's new%{italic_end} drawer and content."
 msgstr ""
 
 msgid "Configure %{link} to track events. %{link_start}Learn more.%{link_end}"
+msgstr ""
+
+msgid "Configure %{repository_checks_link_start}repository checks%{link_end} and %{housekeeping_link_start}housekeeping%{link_end} on repositories."
 msgstr ""
 
 msgid "Configure GitLab runners to start using the Web Terminal. %{helpStart}Learn more.%{helpEnd}"
@@ -22586,13 +22586,13 @@ msgstr ""
 msgid "Number of Elasticsearch shards and replicas (per index)"
 msgstr ""
 
-msgid "Number of Git pushes after which"
+msgid "Number of Git pushes after which %{code_start}git gc%{code_end} is run."
 msgstr ""
 
-msgid "Number of Git pushes after which a full"
+msgid "Number of Git pushes after which a full %{code_start}git repack%{code_end} is run."
 msgstr ""
 
-msgid "Number of Git pushes after which an incremental"
+msgid "Number of Git pushes after which an incremental %{code_start}git repack%{code_end} is run."
 msgstr ""
 
 msgid "Number of LOCs per commit"
@@ -38674,12 +38674,6 @@ msgstr[1] ""
 msgid "git fsck"
 msgstr ""
 
-msgid "git gc"
-msgstr ""
-
-msgid "git repack"
-msgstr ""
-
 msgid "group"
 msgstr ""
 
@@ -38711,9 +38705,6 @@ msgid "help"
 msgstr ""
 
 msgid "here"
-msgstr ""
-
-msgid "housekeeping"
 msgstr ""
 
 msgid "http:"
@@ -38809,9 +38800,6 @@ msgid "is not valid. The iteration group has to match the iteration cadence grou
 msgstr ""
 
 msgid "is read-only"
-msgstr ""
-
-msgid "is run."
 msgstr ""
 
 msgid "is too long (%{current_value}). The maximum size is %{max_size}."
@@ -39314,9 +39302,6 @@ msgstr ""
 msgid "nounSeries|%{item}, and %{lastItem}"
 msgstr ""
 
-msgid "on repositories."
-msgstr ""
-
 msgid "on track"
 msgstr ""
 
@@ -39467,9 +39452,6 @@ msgid "reply"
 msgid_plural "replies"
 msgstr[0] ""
 msgstr[1] ""
-
-msgid "repository checks"
-msgstr ""
 
 msgid "repository:"
 msgstr ""

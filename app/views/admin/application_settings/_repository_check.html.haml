@@ -41,22 +41,16 @@
         = f.label :housekeeping_incremental_repack_period, 'Incremental repack period', class: 'label-bold'
         = f.number_field :housekeeping_incremental_repack_period, class: 'form-control gl-form-input'
         .form-text.text-muted
-          = _("Number of Git pushes after which an incremental")
-          %code= _("git repack")
-          = _("is run.")
+          = html_escape(s_('Number of Git pushes after which an incremental %{code_start}git repack%{code_end} is run.')) % { code_start: '<code>'.html_safe, code_end: '</code>'.html_safe }
       .form-group
         = f.label :housekeeping_full_repack_period, 'Full repack period', class: 'label-bold'
         = f.number_field :housekeeping_full_repack_period, class: 'form-control gl-form-input'
         .form-text.text-muted
-          = _("Number of Git pushes after which a full")
-          %code= _("git repack")
-          = _("is run.")
+          = html_escape(s_('Number of Git pushes after which a full %{code_start}git repack%{code_end} is run.')) % { code_start: '<code>'.html_safe, code_end: '</code>'.html_safe }
       .form-group
         = f.label :housekeeping_gc_period, _('Git GC period'), class: 'label-bold'
         = f.number_field :housekeeping_gc_period, class: 'form-control gl-form-input'
         .form-text.text-muted
-          = _("Number of Git pushes after which")
-          %code= _("git gc")
-          = _("is run.")
+          = html_escape(s_('Number of Git pushes after which %{code_start}git gc%{code_end} is run.')) % { code_start: '<code>'.html_safe, code_end: '</code>'.html_safe }
 
   = f.submit _('Save changes'), class: "gl-button btn btn-confirm"
