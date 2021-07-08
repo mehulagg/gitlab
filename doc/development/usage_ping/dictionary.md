@@ -500,29 +500,29 @@ Tiers: `free`, `premium`, `ultimate`
 
 Count of API Fuzzing `docker-in-docker` jobs run by job name
 
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216180346_api_fuzzing_dnd_jobs.yml)
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_all/20210216180346_api_fuzzing_dnd_jobs.yml)
 
-Group: `group::fuzz testing`
+Group: `group::dynamic analysis`
 
 Data Category: `Optional`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `ultimate`
 
 ### `counts.api_fuzzing_jobs`
 
 Count of API Fuzzing jobs run by job name
 
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216180344_api_fuzzing_jobs.yml)
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_all/20210216180344_api_fuzzing_jobs.yml)
 
-Group: `group::fuzz testing`
+Group: `group::dynamic analysis`
 
 Data Category: `Optional`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `ultimate`
 
 ### `counts.assignee_lists`
 
@@ -1072,17 +1072,17 @@ Tiers: `ultimate`
 
 ### `counts.coverage_fuzzing_jobs`
 
-Missing description
+Count of coverage-guided Fuzz testing jobs
 
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216183146_coverage_fuzzing_jobs.yml)
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_all/20210216183146_coverage_fuzzing_jobs.yml)
 
-Group: ``
+Group: `group::dynamic analysis`
 
 Data Category: `Optional`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `ultimate`
 
 ### `counts.cycle_analytics_views`
 
@@ -1102,29 +1102,29 @@ Tiers: `free`, `premium`, `ultimate`
 
 Count of DAST jobs run
 
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216175612_dast_jobs.yml)
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_all/20210216175612_dast_jobs.yml)
 
 Group: `group::dynamic analysis`
-
-Data Category: `Operational`
-
-Status: `data_available`
-
-Tiers: `free`
-
-### `counts.dast_on_demand_pipelines`
-
-Missing description
-
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216183149_dast_on_demand_pipelines.yml)
-
-Group: ``
 
 Data Category: `Optional`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `ultimate`
+
+### `counts.dast_on_demand_pipelines`
+
+Count of on-demand DAST pipelines
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_all/20210216183149_dast_on_demand_pipelines.yml)
+
+Group: `group::dynamic analysis`
+
+Data Category: `Optional`
+
+Status: `data_available`
+
+Tiers: `ultimate`
 
 ### `counts.dependency_list_usages_total`
 
@@ -20202,13 +20202,13 @@ Counts API fuzzing jobs
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_all/20210216180353_api_fuzzing_scans.yml)
 
-Group: `group::fuzz testing`
+Group: `group::dynamic analysis`
 
-Data Category: `Operational`
+Data Category: `Optional`
 
 Status: `data_available`
 
-Tiers:
+Tiers: `ultimate`
 
 ### `usage_activity_by_stage.secure.cluster_image_scanning_scans`
 
@@ -20240,17 +20240,17 @@ Tiers: `ultimate`
 
 ### `usage_activity_by_stage.secure.coverage_fuzzing_scans`
 
-Counts fuzzing jobs
+Count of coverage-guided fuzz testing jobs
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_all/20210216180352_coverage_fuzzing_scans.yml)
 
-Group: `group::fuzz testing`
+Group: `group::dynamic analysis`
 
-Data Category: `Operational`
+Data Category: `Optional`
 
 Status: `data_available`
 
-Tiers:
+Tiers: `ultimate`
 
 ### `usage_activity_by_stage.secure.dast_scans`
 
@@ -20260,7 +20260,7 @@ Counts dast jobs
 
 Group: `group::dynamic analysis`
 
-Data Category: `Operational`
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -20312,29 +20312,29 @@ Tiers: `ultimate`
 
 Count of API Fuzzing `docker-in-docker` jobs by job name
 
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216180350_user_api_fuzzing_dnd_jobs.yml)
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_all/20210216180350_user_api_fuzzing_dnd_jobs.yml)
 
-Group: `group::fuzz testing`
+Group: `group::dynamic analysis`
 
-Data Category: `Operational`
+Data Category: `Optional`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `ultimate`
 
 ### `usage_activity_by_stage.secure.user_api_fuzzing_jobs`
 
 Count of API Fuzzing jobs by job name
 
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216180348_user_api_fuzzing_jobs.yml)
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_all/20210216180348_user_api_fuzzing_jobs.yml)
 
-Group: `group::fuzz testing`
+Group: `group::dynamic analysis`
 
-Data Category: `Operational`
+Data Category: `Optional`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `ultimate`
 
 ### `usage_activity_by_stage.secure.user_api_fuzzing_scans`
 
@@ -20342,7 +20342,9 @@ Number of users who have run a API Fuzzing scan
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_all/20210607044126_user_api_fuzzing_scans.yml)
 
-Group: `category::fuzz testing`
+Group: `group::dynamic analysis`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -20376,25 +20378,27 @@ Tiers: `ultimate`
 
 ### `usage_activity_by_stage.secure.user_coverage_fuzzing_jobs`
 
-Missing description
+Distinct count per user of coverage-guided Fuzz testing job run
 
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216183514_user_coverage_fuzzing_jobs.yml)
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_all/20210216183514_user_coverage_fuzzing_jobs.yml)
 
-Group: ``
+Group: `group::dynamic analysis`
 
-Data Category: `Operational`
+Data Category: `Optional`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `ultimate`
 
 ### `usage_activity_by_stage.secure.user_coverage_fuzzing_scans`
 
-Number of users who have run a Coverage Fuzzing scan
+Number of users who have run a coverage-guided Fuzz testing scan
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_all/20210607044040_user_coverage_fuzzing_scans.yml)
 
-Group: `category::fuzz testing`
+Group: `group::dynamic analysis`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -20404,15 +20408,15 @@ Tiers: `ultimate`
 
 Count of DAST jobs
 
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216175614_user_dast_jobs.yml)
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_all/20210216175614_user_dast_jobs.yml)
 
 Group: `group::dynamic analysis`
 
-Data Category: `Operational`
+Data Category: `Optional`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `ultimate`
 
 ### `usage_activity_by_stage.secure.user_dast_scans`
 
@@ -20421,6 +20425,8 @@ Number of users who have run a DAST scan
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_all/20210607043109_user_dast_scans.yml)
 
 Group: `group::dynamic analysis`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -22596,9 +22602,9 @@ Counts of Pipelines that have at least 1 API Fuzzing Testing job
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210216180401_api_fuzzing_pipeline.yml)
 
-Group: `group::fuzz testing`
+Group: `group::dynamic analysis`
 
-Data Category: `Operational`
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -22608,15 +22614,15 @@ Tiers: `ultimate`
 
 Missing description
 
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216183838_api_fuzzing_scans.yml)
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210216183838_api_fuzzing_scans.yml)
 
-Group: ``
+Group: `group::dynamic analysis`
 
-Data Category: `Operational`
+Data Category: `Optional`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `ultimate`
 
 ### `usage_activity_by_stage_monthly.secure.cluster_image_scanning_pipeline`
 
@@ -22680,9 +22686,9 @@ Counts of Pipelines that have at least 1 coverage-guided Fuzz Testing job
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210216180359_coverage_fuzzing_pipeline.yml)
 
-Group: `group::fuzz testing`
+Group: `group::dynamic analysis`
 
-Data Category: `Operational`
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -22690,27 +22696,27 @@ Tiers: `ultimate`
 
 ### `usage_activity_by_stage_monthly.secure.coverage_fuzzing_scans`
 
-Missing description
+Count of coverage-guided Fuzz Testing scans
 
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216183836_coverage_fuzzing_scans.yml)
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210216183836_coverage_fuzzing_scans.yml)
 
-Group: ``
+Group: `group::dynamic analysis`
 
-Data Category: `Operational`
+Data Category: `Optional`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `ultimate`
 
 ### `usage_activity_by_stage_monthly.secure.dast_pipeline`
 
 Count of pipelines that have at least 1 DAST job
 
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216175618_dast_pipeline.yml)
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210216175618_dast_pipeline.yml)
 
 Group: `group::dynamic analysis`
 
-Data Category: `Operational`
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -22718,17 +22724,17 @@ Tiers: `ultimate`
 
 ### `usage_activity_by_stage_monthly.secure.dast_scans`
 
-Missing description
+Count of DAST scans
 
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216183832_dast_scans.yml)
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210216183832_dast_scans.yml)
 
-Group: ``
+Group: `group::dynamic analysis`
 
-Data Category: `Operational`
+Data Category: `Optional`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `ultimate`
 
 ### `usage_activity_by_stage_monthly.secure.dependency_scanning_pipeline`
 
@@ -22818,29 +22824,29 @@ Tiers: `free`
 
 Count of API Fuzzing `docker-in-docker` jobs by job names
 
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216180357_user_api_fuzzing_dnd_jobs.yml)
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210216180357_user_api_fuzzing_dnd_jobs.yml)
 
-Group: `group::fuzz testing`
+Group: `group::dynamic analysis`
 
-Data Category: `Operational`
+Data Category: `Optional`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `ultimate`
 
 ### `usage_activity_by_stage_monthly.secure.user_api_fuzzing_jobs`
 
 Count of API Fuzzing jobs by job name
 
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216180355_user_api_fuzzing_jobs.yml)
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210216180355_user_api_fuzzing_jobs.yml)
 
-Group: `group::fuzz testing`
+Group: `group::dynamic analysis`
 
-Data Category: `Operational`
+Data Category: `Optional`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `ultimate`
 
 ### `usage_activity_by_stage_monthly.secure.user_api_fuzzing_scans`
 
@@ -22848,9 +22854,9 @@ Number of users who have run a API Fuzzing scan
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210607043622_user_api_fuzzing_scans.yml)
 
-Group: `category::fuzz testing`
+Group: `group::dynamic analysis`
 
-Data Category: `Operational`
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -22888,15 +22894,15 @@ Tiers: `ultimate`
 
 Missing description
 
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216183817_user_coverage_fuzzing_jobs.yml)
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210216183817_user_coverage_fuzzing_jobs.yml)
 
-Group: ``
+Group: `group::dynamic analysis`
 
-Data Category: `Operational`
+Data Category: `Optional`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `ultimate`
 
 ### `usage_activity_by_stage_monthly.secure.user_coverage_fuzzing_scans`
 
@@ -22904,9 +22910,9 @@ Number of users who have run a Coverage Fuzzing scan
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210607043509_user_coverage_fuzzing_scans.yml)
 
-Group: `category::fuzz testing`
+Group: `group::dynamic analysis`
 
-Data Category: `Operational`
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -22916,15 +22922,15 @@ Tiers: `ultimate`
 
 Users who run a DAST job
 
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216175616_user_dast_jobs.yml)
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210216175616_user_dast_jobs.yml)
 
 Group: `group::dynamic analysis`
 
-Data Category: `Operational`
+Data Category: `Optional`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `ultimate`
 
 ### `usage_activity_by_stage_monthly.secure.user_dast_scans`
 
@@ -22934,7 +22940,7 @@ Number of users who have run a DAST scan
 
 Group: `group::dynamic analysis`
 
-Data Category: `Operational`
+Data Category: `Optional`
 
 Status: `data_available`
 
