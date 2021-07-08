@@ -3,9 +3,8 @@
 module Ci
   module Minutes
     class UpdateBuildMinutesService < BaseService
-      # Calculates consumption and updates the project and namespace minutes based on the passed build
-      # Calculating the consumption syncronously before triggering an async job to update
-      # ensures the pipeline data still exists in the case where minutes are updated prior to pipeline deletion
+      # Calculates consumption and updates the project and namespace statistics(legacy)
+      # or ProjectMonthlyUsage and NamespaceMonthlyUsage(not legacy) based on the passed build.
       def execute(build)
         return unless build.shared_runners_minutes_limit_enabled?
         return unless build.complete?
@@ -13,8 +12,10 @@ module Ci
 
         consumption = ::Gitlab::Ci::Minutes::BuildConsumption.new(build, build.duration).amount
 
-        Ci::Minutes::UpdateMinutesByConsumptionService.new(project, namespace).execute(consumption)
+        return unless consumption > 0
+
         # TODO(Issue #335338): Introduce async worker UpdateMinutesByConsumptionWorker
+        Ci::Minutes::UpdateProjectAndNamespaceUsage.new(project, namespace).execute(consumption)
 
         compare_with_live_consumption(build, consumption)
       end
