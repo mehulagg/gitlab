@@ -1,4 +1,6 @@
 require "json"  
+require 'securerandom'
+
   summary = ""
   # all_gems = LibData.all_instances
   # all_gems.each do |gem|
@@ -9,12 +11,11 @@ require "json"
 
   foo = '{"version":"14.0.0",
   "vulnerabilities":[{
-         "id":"038e8c173096a16af7zzzzzzzzzc9a4fa164e9da701046ce95",
+         "id":"038e8cggg96a16af7zzz12dfdhhzzzc9a4fa164e9da70123sd6ce95",
          "category":"dependency_scanning",
          "name":"Unreliable libraries",
          "message":"Libraries that are not frequently mantained detected",
          "description":"Based on the score calculated from the librariy metadata the below libraries seems to have less frequent maintance",
-         "cve":"yarn.lock:execa:gemnasium:05cfa2e8-2d0c-42c1-8894-638e2f12ff3d",
          "severity":"Info",
          "solution":"Upgrade to version 2.0.0 or above.",
          "scanner":{
