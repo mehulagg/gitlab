@@ -1,6 +1,6 @@
-import { initJiraConnect } from '~/jira_connect';
+import { initJiraConnect } from '~/jira_connect/jira_connect_app';
 
-jest.mock('~/jira_connect/utils', () => ({
+jest.mock('~/jira_connect/jira_connect_app/utils', () => ({
   getLocation: jest.fn().mockResolvedValue('test/location'),
 }));
 

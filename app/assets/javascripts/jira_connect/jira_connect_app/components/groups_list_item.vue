@@ -1,8 +1,8 @@
 <script>
 import { GlButton } from '@gitlab/ui';
 import { helpPagePath } from '~/helpers/help_page_helper';
-import { addSubscription } from '~/jira_connect/api';
-import { persistAlert, reloadPage } from '~/jira_connect/utils';
+import { addSubscription } from '~/jira_connect/jira_connect_app/api';
+import { persistAlert, reloadPage } from '~/jira_connect/jira_connect_app/utils';
 import { s__ } from '~/locale';
 import GroupItemName from './group_item_name.vue';
 

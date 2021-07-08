@@ -1,10 +1,14 @@
 import MockAdapter from 'axios-mock-adapter';
-import { addSubscription, removeSubscription, fetchGroups } from '~/jira_connect/api';
-import { getJwt } from '~/jira_connect/utils';
+import {
+  addSubscription,
+  removeSubscription,
+  fetchGroups,
+} from '~/jira_connect/jira_connect_app/api';
+import { getJwt } from '~/jira_connect/jira_connect_app/utils';
 import axios from '~/lib/utils/axios_utils';
 import httpStatus from '~/lib/utils/http_status';
 
-jest.mock('~/jira_connect/utils', () => ({
+jest.mock('~/jira_connect/jira_connect_app/utils', () => ({
   getJwt: jest.fn().mockResolvedValue('jwt'),
 }));
 

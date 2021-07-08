@@ -2,8 +2,8 @@
 import { GlButton, GlEmptyState, GlTable } from '@gitlab/ui';
 import { isEmpty } from 'lodash';
 import { mapMutations } from 'vuex';
-import { removeSubscription } from '~/jira_connect/api';
-import { reloadPage } from '~/jira_connect/utils';
+import { removeSubscription } from '~/jira_connect/jira_connect_app/api';
+import { reloadPage } from '~/jira_connect/jira_connect_app/utils';
 import { __, s__ } from '~/locale';
 import TimeagoTooltip from '~/vue_shared/components/time_ago_tooltip.vue';
 import { SET_ALERT } from '../store/mutation_types';

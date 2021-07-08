@@ -126,7 +126,7 @@ function generateEntries() {
     default: defaultEntries,
     sentry: './sentry/index.js',
     performance_bar: './performance_bar/index.js',
-    jira_connect_app: './jira_connect/index.js',
+    jira_connect_app: './jira_connect/jira_connect_app/index.js',
   };
 
   return Object.assign(manualEntries, incrementalCompiler.filterEntryPoints(autoEntries));

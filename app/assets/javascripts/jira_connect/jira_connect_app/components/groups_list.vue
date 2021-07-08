@@ -1,7 +1,10 @@
 <script>
 import { GlLoadingIcon, GlPagination, GlAlert, GlSearchBoxByType } from '@gitlab/ui';
-import { fetchGroups } from '~/jira_connect/api';
-import { DEFAULT_GROUPS_PER_PAGE, MINIMUM_SEARCH_TERM_LENGTH } from '~/jira_connect/constants';
+import { fetchGroups } from '~/jira_connect/jira_connect_app/api';
+import {
+  DEFAULT_GROUPS_PER_PAGE,
+  MINIMUM_SEARCH_TERM_LENGTH,
+} from '~/jira_connect/jira_connect_app/constants';
 import { parseIntPagination, normalizeHeaders } from '~/lib/utils/common_utils';
 import { s__ } from '~/locale';
 import GroupsListItem from './groups_list_item.vue';
