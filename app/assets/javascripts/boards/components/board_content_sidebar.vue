@@ -11,6 +11,7 @@ import SidebarAssigneesWidget from '~/sidebar/components/assignees/sidebar_assig
 import SidebarConfidentialityWidget from '~/sidebar/components/confidential/sidebar_confidentiality_widget.vue';
 import SidebarDateWidget from '~/sidebar/components/date/sidebar_date_widget.vue';
 import SidebarSubscriptionsWidget from '~/sidebar/components/subscriptions/sidebar_subscriptions_widget.vue';
+import SidebarTodoWidget from '~/sidebar/components/todo_toggle/sidebar_todo_widget.vue';
 import glFeatureFlagMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 
 export default {
@@ -24,6 +25,7 @@ export default {
     BoardSidebarLabelsSelect,
     SidebarSubscriptionsWidget,
     SidebarDropdownWidget,
+    SidebarTodoWidget,
     MountingPortal,
     SidebarWeightWidget: () =>
       import('ee_component/sidebar/components/weight/sidebar_weight_widget.vue'),
@@ -88,7 +90,13 @@ export default {
       @close="handleClose"
     >
       <template #header>
-        <h2 class="gl-my-0 gl-font-size-h2 gl-line-height-24">{{ __('Issue details') }}</h2>
+        <h2 class="gl-mt-0 gl-mb-3 gl-font-size-h2 gl-line-height-24">{{ __('Issue details') }}</h2>
+        <sidebar-todo-widget
+          :issuable-id="activeBoardItem.fullId"
+          :issuable-iid="activeBoardItem.iid"
+          :full-path="fullPath"
+          :issuable-type="issuableType"
+        />
       </template>
       <template #default>
         <board-sidebar-title />
