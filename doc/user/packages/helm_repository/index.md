@@ -18,24 +18,6 @@ packages whenever you need to use them as a dependency.
 For documentation of the specific API endpoints that Helm package manager
 clients use, see the [Helm API documentation](../../../api/packages/helm.md).
 
-## Enable the Helm repository feature
-
-Helm repository support is still a work in progress. It's gated behind a feature flag that's
-**disabled by default**. [GitLab administrators with access to the GitLab Rails console](../../../administration/feature_flags.md)
-can opt to enable it.
-
-To enable it:
-
-```ruby
-Feature.enable(:helm_packages)
-```
-
-To disable it:
-
-```ruby
-Feature.disable(:helm_packages)
-```
-
 ## Build a Helm package
 
 Creating a Helm package is documented [in the Helm documentation](https://helm.sh/docs/intro/using_helm/#creating-your-own-charts).

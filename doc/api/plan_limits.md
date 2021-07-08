@@ -38,6 +38,7 @@ Example response:
 {
   "conan_max_file_size": 3221225472,
   "generic_packages_max_file_size": 5368709120,
+  "helm_max_file_size": 5242880,
   "maven_max_file_size": 3221225472,
   "npm_max_file_size": 524288000,
   "nuget_max_file_size": 524288000,

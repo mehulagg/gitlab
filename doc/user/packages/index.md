@@ -17,6 +17,7 @@ The Package Registry supports the following formats:
 | [Composer](composer_repository/index.md) | 13.2+ |
 | [Conan](conan_repository/index.md) | 12.6+ |
 | [Go](go_proxy/index.md) | 13.1+ |
+| [Helm charts](helm_repository/index.md) | 14.1+ |
 | [Maven](maven_repository/index.md) | 11.3+ |
 | [npm](npm_registry/index.md) | 11.7+ |
 | [NuGet](nuget_repository/index.md) | 12.8+ |
