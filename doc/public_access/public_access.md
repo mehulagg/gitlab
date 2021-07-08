@@ -5,11 +5,7 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 type: reference
 ---
 
-# Resource visibility
-
-GitLab provides access to different resources depending on configuration.
-
-## Project visibility
+# Project visibility
 
 GitLab allows [Owners](../user/permissions.md) to set a project's visibility as:
 
@@ -20,7 +16,7 @@ GitLab allows [Owners](../user/permissions.md) to set a project's visibility as:
 These visibility levels affect who can see the project in the public access directory (`/public`
 for your GitLab instance). For example, <https://gitlab.com/public>.
 
-### Public projects
+## Public projects
 
 Public projects can be cloned **without any** authentication over HTTPS.
 
@@ -28,7 +24,11 @@ They are listed in the public access directory (`/public`) for all users.
 
 **Any signed-in user** has the [Guest role](../user/permissions.md) on the repository.
 
-### Internal projects
+NOTE:
+By default, `/public` is visible to unauthenticated users. However, if the access level of
+`/public` is restricted, it is visible only to signed-in users.
+
+## Internal projects
 
 Internal projects can be cloned by any signed-in user except
 [external users](../user/permissions.md#external-users).
@@ -44,51 +44,16 @@ and snippets on GitLab.com. Existing projects, groups, and snippets using the `I
 visibility setting keep this setting. You can read more about the change in the
 [relevant issue](https://gitlab.com/gitlab-org/gitlab/-/issues/12388).
 
-### Private projects
+## Private projects
 
 Private projects can only be cloned and viewed by project members (except for guests).
 
 They appear in the public access directory (`/public`) for project members only.
 
-### Change project visibility
+## Change project visibility
 
 1. Go to your project's **Settings**.
 1. Change **Visibility Level** to either Public, Internal, or Private.
-
-## Group visibility
-
-Like projects, a group can be configured to limit the visibility of it to:
-
-- Anonymous users.
-- All signed-in users.
-- Only explicit group members.
-
-The restriction for visibility levels on the application setting level also applies to groups. If
-set to internal, the explore page is empty for anonymous users. The group page has a visibility
-level icon.
-
-Administrator users cannot create a subgroup or project with a higher visibility level than that of
-the immediate parent group.
-
-## User visibility
-
-The public page of a user, located at `/username`, is always visible whether you are signed-in or
-not.
-
-When visiting the public page of a user, you can only see the projects which you have privileges to.
-
-If the public level is restricted, user profiles are only visible to signed-in users.
-
-## Page visibility
-
-By default, the following directories are visible to unauthenticated users:
-
-- Public access (`/public`).
-- Explore (`/explore`).
-- Help (`/help`).
-
-However, if the access level of the `/public` directory is restricted, these directories are visible
-only to signed-in users.
 
 ## Restrict use of public or internal projects
 

@@ -14,11 +14,15 @@ code are saved in projects, and most features are in the scope of projects.
 You can explore other popular projects available on GitLab. To explore projects:
 
 1. On the top bar, select **Menu > Project**.
-1. Select **Explore Projects**.
+1. Select **Explore projects**.
 
 GitLab displays a list of projects, sorted by last updated date. To view
 projects with the most [stars](#star-a-project), click **Most stars**. To view
 projects with the largest number of comments in the past month, click **Trending**.
+
+NOTE:
+By default, the `/explore` is visible to unauthenticated users. However, if the access level of
+`/public` is restricted, `/explore` is visible only to signed-in users.
 
 ## Create a project
 
