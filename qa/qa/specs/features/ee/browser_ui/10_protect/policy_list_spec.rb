@@ -35,7 +35,7 @@ module QA
         end
       end
 
-      context 'with k8s cluster', :require_admin, :kubernetes, :orchestrated, :runner do
+      context 'with k8s cluster', :require_admin, :runner do
         let(:policy_name) { 'l3-rule' }
         let!(:cluster) { Service::KubernetesCluster.new(provider_class: Service::ClusterProvider::K3sCilium).create! }
         let!(:runner) do
@@ -60,8 +60,9 @@ module QA
         end
 
         after do
-          runner.remove_via_api!
-          cluster.remove!
+          runner&.remove_via_api!
+        ensure
+          cluster&.remove!
         end
 
         it 'loads a sample network policy under policies tab on the Threat Monitoring page', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/1855' do
