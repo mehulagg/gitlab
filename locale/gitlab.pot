@@ -15828,7 +15828,7 @@ msgstr ""
 msgid "GroupSettings|The default name for the initial branch of new repositories created in the group."
 msgstr ""
 
-msgid "GroupSettings|The projects in this subgroup can be selected as templates for new projects created in the group. %{link_start}Learn more.%{link_end} "
+msgid "GroupSettings|The projects in this subgroup can be selected as templates for new projects created in the group. %{link_start}Learn more%{link_end}."
 msgstr ""
 
 msgid "GroupSettings|There was a problem updating Auto DevOps pipeline: %{error_messages}."
