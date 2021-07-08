@@ -289,6 +289,29 @@ RSpec.shared_examples 'timebox chart' do |timebox_type|
         }
       ])
     end
+
+    context 'when timebox is removed and then added back' do
+      using RSpec::Parameterized::TableSyntax
+
+      where(:event_types, :scope_count) do
+        [:add, :add]                        | 1
+        [:remove, :remove]                  | 0
+        [:add, :add, :remove]               | 0
+        [:add, :remove, :remove]            | 0
+        [:add, :remove, :add]               | 1
+        [:add, :remove, :remove, :add]      | 1
+        [:add, :add, :remove, :add, :add]   | 1
+      end
+
+      with_them do
+        it "updates the counts correspondingly" do
+          cleanup_events(timebox_type)
+          create_events(event_types, timebox_type)
+
+          expect(response.payload[:burnup_time_series].first&.dig(:scope_count).to_i).to eq(scope_count)
+        end
+      end
+    end
   end
 end
 
@@ -316,5 +339,16 @@ RSpec.describe TimeboxReportService do
     let(:timebox_without_dates) { build(:iteration, group: group, start_date: nil, due_date: nil) }
 
     it_behaves_like 'timebox chart', 'iteration'
+  end
+
+  def cleanup_events(timebox_type)
+    klass = timebox_type == 'iteration' ? ResourceIterationEvent : ResourceMilestoneEvent
+    klass.delete_all
+  end
+
+  def create_events(event_types, timebox_type)
+    event_types.each_with_index do |event_type, index|
+      create(:"resource_#{timebox_type}_event", issue: issues[0], "#{timebox_type}" => timebox, action: event_type, created_at: timebox_start_date + 4.days + (index + 1).seconds)
+    end
   end
 end
