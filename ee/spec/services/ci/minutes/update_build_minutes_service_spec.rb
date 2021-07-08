@@ -221,9 +221,9 @@ RSpec.describe Ci::Minutes::UpdateBuildMinutesService do
   end
 
   describe '#execute' do
-    context 'when cancel_pipelines_prior_to_destroy enabled', :sidekiq_inline do
-      include_examples 'execute service'
-    end
+    # context 'when cancel_pipelines_prior_to_destroy enabled', :sidekiq_inline do
+    #   include_examples 'execute service'
+    # end
 
     context 'when cancel_pipelines_prior_to_destroy disabled' do
       before_all do
