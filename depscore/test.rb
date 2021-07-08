@@ -17,6 +17,7 @@ require 'securerandom'
          "message":"Libraries that are not frequently mantained detected",
          "description":"Based on the score calculated from the librariy metadata the below libraries seems to have less frequent maintance",
          "severity":"Info",
+         "cwe": "CWE-1104",
          "solution":"Upgrade to version 2.0.0 or above.",
          "scanner":{
             "id":"depscore",
@@ -43,6 +44,10 @@ require 'securerandom'
    ]
 }
 '
+
+foo2 = {
+    version: "14.0.0"
+}
 
   summary_json = JSON(foo)
   File.open("gl-depscore-report.json", "w") do |f|
