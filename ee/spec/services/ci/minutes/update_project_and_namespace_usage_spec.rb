@@ -45,6 +45,32 @@ RSpec.describe Ci::Minutes::UpdateProjectAndNamespaceUsage do
             expect(project_amount_used).to eq(0)
           end
         end
+
+        context 'when on .com' do
+          before do
+            allow(Gitlab).to receive(:com?).and_return(true)
+          end
+
+          it 'sends a minute notification email' do
+            expect_next_instance_of(Ci::Minutes::EmailNotificationService) do |service|
+              expect(service).to receive(:execute)
+            end
+
+            subject
+          end
+        end
+
+        context 'when not on .com' do
+          before do
+            allow(Gitlab).to receive(:com?).and_return(false)
+          end
+
+          it 'does not send a minute notification email' do
+            expect(Ci::Minutes::EmailNotificationService).not_to receive(:new)
+
+            subject
+          end
+        end
       end
 
       context 'when statistics and usage have existing values' do
