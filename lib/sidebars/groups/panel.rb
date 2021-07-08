@@ -3,7 +3,7 @@
 module Sidebars
   module Groups
     class Panel < ::Sidebars::Panel
-      override :render_raw_menus_partial
+      override :render_raw_scope_menu_partial
       def render_raw_scope_menu_partial
         'layouts/nav/sidebar/group_scope_menu'
       end
