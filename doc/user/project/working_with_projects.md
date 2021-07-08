@@ -148,7 +148,7 @@ and then [cloning the repository](../../gitlab-basics/start-using-git.md#clone-a
 locally, you can directly push it to GitLab to create the new project, all without leaving
 your terminal. If you have access rights to the associated namespace, GitLab
 automatically creates a new project under that GitLab namespace with its visibility
-set to Private by default (you can later change it in the [project's settings](../../public_access/public_access.md#how-to-change-project-visibility)).
+set to Private by default (you can later change it in the [project's settings](../../public_access/public_access.md#change-project-visibility)).
 
 This can be done by using either SSH or HTTPS:
 
