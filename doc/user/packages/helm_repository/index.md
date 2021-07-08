@@ -50,7 +50,7 @@ To authenticate to the Helm repository, you need either:
 
 ## Publish a package
 
-Once built, a chart can be uploaded to the `stable` channel with `curl` or `helm-push`:
+Once built, a chart can be uploaded to the `stable` channel with `curl`:
 
 - With `curl`:
 
@@ -59,28 +59,6 @@ Once built, a chart can be uploaded to the `stable` channel with `curl` or `helm
        --form 'chart=@mychart.tgz' \
        --user <username>:<personal_access_token> \
        https://gitlab.example.com/api/v4/projects/1/packages/helm/api/stable/charts
-  ```
-
-- With the [`helm-push`](https://github.com/chartmuseum/helm-push/#readme) plugin:
-
-  First add the repo:
-
-  ```shell
-  helm repo add --username <username> --password <personal_access_token> project-1 https://gitlab.example.com/api/v4/projects/1/packages/helm/stable
-  ```
-
-  When pushing, the [context path](https://github.com/chartmuseum/helm-push/#context-path) must be set to `/api/v4/projects/<project_id>/packages/helm`.
-
-  If passed as an option, it will be automatically added to the `index.yaml` so it will not need to be included in future pushes:
-
-  ```shell
-  helm push --context-path=/api/v4/projects/1/packages/helm mychart.tgz project-1
-  ```
-
-  Or it can be defined in an environment variable, which will not add it to the `index.yaml`:
-
-  ```shell
-  HELM_REPO_CONTEXT_PATH=/api/v4/projects/1/packages/helm helm push mychart.tgz project-1
   ```
 
 ## Install a package
