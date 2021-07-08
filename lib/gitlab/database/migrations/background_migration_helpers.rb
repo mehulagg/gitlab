@@ -264,6 +264,32 @@ module Gitlab
           migration
         end
 
+        # Force a background migration to complete.
+        #
+        # WARNING: This method will block the caller and move the background migration from an
+        # asynchronous migration to a synchronous migration.
+        #
+        # 1. Process any pending tracked jobs.
+        # 2. Steal work from sidekiq, including scheduled jobs, and perform immediately.
+        # 3. Optionally remove job tracking information.
+        #
+        # This method does not garauntee that all jobs completed successfully.
+        def finalize_background_migration(class_name, delete_tracking_jobs: false)
+          # Process pending tracked jobs.
+          jobs = Gitlab::Database::BackgroundMigrationJob.pending.for_migration_class(class_name)
+          jobs.find_each do |job|
+            with_migration_context do
+              BackgroundMigrationWorker.new.perform(job.class_name, job.arguments)
+            end
+          end
+
+          # Empty the sidekiq queue.
+          Gitlab::BackgroundMigration.steal(class_name)
+
+          # Delete job tracking rows.
+          delete_job_tracking(class_name) if delete_tracking_jobs
+        end
+
         def perform_background_migration_inline?
           Rails.env.test? || Rails.env.development?
         end
@@ -302,6 +328,14 @@ module Gitlab
 
             false
           end
+        end
+
+        def delete_job_tracking(class_name, status: 'succeeded')
+          status = Array(status).map { |s| Gitlab::Database::BackgroundMigrationJob.statuses[s] }
+          Gitlab::Database::BackgroundMigrationJob.
+            where(status: status).
+            for_migration_class(class_name).
+            delete_all
         end
 
         private

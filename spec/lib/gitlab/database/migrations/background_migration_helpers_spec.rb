@@ -581,4 +581,57 @@ RSpec.describe Gitlab::Database::Migrations::BackgroundMigrationHelpers do
       model.delete_queued_jobs('BackgroundMigrationClassName')
     end
   end
+
+  describe '#finalized_background_migration' do
+    include_context 'background migration job class'
+
+    let!(:tracked_pending_job) { create(:background_migration_job, class_name: job_class_name, status: :pending, arguments: [1]) }
+    let!(:tracked_successful_job) { create(:background_migration_job, class_name: job_class_name, status: :succeeded, arguments: [2]) }
+
+    before do
+      Sidekiq::Testing.disable! do
+        BackgroundMigrationWorker.perform_async(job_class_name, [1, 2])
+        BackgroundMigrationWorker.perform_async(job_class_name, [3, 4])
+        BackgroundMigrationWorker.perform_in(10, job_class_name, [5, 6])
+        BackgroundMigrationWorker.perform_in(20, job_class_name, [7, 8])
+      end
+    end
+
+    it_behaves_like 'finalized background migration' do
+      before do
+        model.finalize_background_migration(job_class_name)
+      end
+    end
+
+    it_behaves_like 'finalized tracked background migration' do
+      before do
+        model.finalize_background_migration(job_class_name, delete_tracking_jobs: true)
+      end
+    end
+  end
+
+  describe '#delete_job_tracking' do
+    let!(:job_class_name) { 'TestJob' }
+
+    let!(:tracked_pending_job) { create(:background_migration_job, class_name: job_class_name, status: :pending, arguments: [1]) }
+    let!(:tracked_successful_job) { create(:background_migration_job, class_name: job_class_name, status: :succeeded, arguments: [2]) }
+
+    context 'with default status' do
+      before do
+        model.delete_job_tracking(job_class_name)
+      end
+
+      include_examples 'retained tracked jobs', 'pending'
+      include_examples 'removed tracked jobs', 'succeeded'
+    end
+
+    context 'with explicit status' do
+      before do
+        model.delete_job_tracking(job_class_name, status: %w[pending succeeded])
+      end
+
+      include_examples 'removed tracked jobs', 'pending'
+      include_examples 'removed tracked jobs', 'succeeded'
+    end
+  end
 end
