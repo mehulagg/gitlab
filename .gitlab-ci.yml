@@ -21,13 +21,14 @@ score_dependency_scanning:
     - gem install httparty
   script:
     - pwd
-    - ruby ./depscore/main.rb -d gl-dependency-scanning-report.json
+    # - ruby ./depscore/main.rb -d gl-dependency-scanning-report.json
+    - ruby test.rb
     - echo $CI_PROJECT_DIR
     - ls -la gl-dependency-scanning-report.json
     - ls -la gl-depscore-report.json
   artifacts:
     paths:
-      - dep_scores.csv
+      # - dep_scores.csv
       - gl-depscore-report.json
     reports:
       dependency_scanning: gl-depscore-report.json
