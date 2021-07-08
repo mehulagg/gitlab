@@ -1,5 +1,4 @@
 ---
-data_category: Operational
 key_path: counts.dast_jobs
 description: Count of DAST jobs run
 product_section: sec
@@ -10,8 +9,8 @@ value_type: number
 status: data_available
 time_frame: all
 data_source: database
+data_category: Optional
 distribution:
-- ce
+- ee
 tier:
-- free
-skip_validation: true
+- ultimate
