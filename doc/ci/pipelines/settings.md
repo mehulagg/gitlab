@@ -236,7 +236,7 @@ you can view a graph or download a CSV file with this data. From your project:
 
 1. On the top bar, select **Menu > Projects** and find your project.
 1. On the left sidebar, select **Analytics > Repository**.
-1. To see the historic data for each job listed in the dropdown above the graph.
+The historic data for each job is listed in the dropdown above the graph.
 
 To view a CSV file of the data, select **Download raw data (`.csv`)**.
 
