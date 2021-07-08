@@ -31,7 +31,7 @@
     %button.btn.gl-button.btn-default.js-settings-toggle{ type: 'button' }
       = expanded_by_default? ? _('Collapse') : _('Expand')
     %p
-      = _('Additional text to the sign-in and Help page.')
+      = _('Additional text for the sign-in and Help page.')
       = link_to s_('Learn more.'), help_page_path('user/admin_area/settings/help_page.md'), target: '_blank', rel: 'noopener noreferrer'
   .settings-content
     = render 'help_page'
