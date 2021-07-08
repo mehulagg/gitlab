@@ -2,8 +2,6 @@
 
 module Integrations
   class Campfire < Integration
-    include ActionView::Helpers::UrlHelper
-
     prop_accessor :token, :subdomain, :room
     validates :token, presence: true, if: :activated?
 
@@ -16,8 +14,9 @@ module Integrations
     end
 
     def help
-      campfire_retired_link = link_to s_('CampfireService|new users can no longer sign up for Campfire'), Rails.application.routes.url_helpers.help_page_url('https://basecamp.com/retired/campfire'), target: '_blank', rel: 'noopener noreferrer'
-      s_('CampfireService|Send notifications about push events to Campfire chat rooms. Note that %{campfire_retired_link}.').html_safe % { campfire_retired_link: campfire_retired_link.html_safe }
+      campfire_retired_url = 'https://basecamp.com/retired/campfire'
+      campfire_retired_link_start = '<a href="%{url}" target="_blank" rel="noopener noreferrer">'.html_safe % { url: campfire_retired_url }
+      s_('CampfireService|Send notifications about push events to Campfire chat rooms. Note that %{campfire_retired_link_start}new users can no longer sign up for Campfire%{campfire_retired_link_end}.') % { campfire_retired_link_start: campfire_retired_link_start, campfire_retired_link_end: '</a>'.html_safe }
     end
 
     def self.to_param
@@ -39,7 +38,7 @@ module Integrations
           name: 'subdomain',
           title: _('Campfire subdomain (optional)'),
           placeholder: '',
-          help: s_('CampfireService|What\'s between %{url_part_1} and %{url_part_2} when you\'re logged in.') % { url_part_1: '<code>https://</code>'.html_safe, url_part_2: '<code>.campfirenow.com</code>'.html_safe }
+          help: s_('CampfireService|What\'s between %{code_open}https://%{code_close} and %{code_open}.campfirenow.com%{code_close} when you\'re logged in.') % { code_open: '<code>'.html_safe, code_close: '</code>'.html_safe }
         },
         {
           type: 'text',
