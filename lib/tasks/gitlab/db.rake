@@ -217,7 +217,7 @@ namespace :gitlab do
       instrumentation = Gitlab::Database::Migrations::Instrumentation.new
 
       pending_migrations.each do |migration|
-        instrumentation.observe(migration.version) do
+        instrumentation.observe(migration) do
           ActiveRecord::Migrator.new(:up, ctx.migrations, ctx.schema_migration, migration.version).run
         end
       end
