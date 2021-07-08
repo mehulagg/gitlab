@@ -1,4 +1,3 @@
-import { GROUPS_LOCAL_STORAGE_KEY, PROJECTS_LOCAL_STORAGE_KEY } from './constants';
 import * as types from './mutation_types';
 
 export default {
@@ -13,9 +12,6 @@ export default {
     state.fetchingGroups = false;
     state.groups = [];
   },
-  [types.RECEIVE_FREQUENT_GROUPS_ERROR](state) {
-    state.frequentItems[GROUPS_LOCAL_STORAGE_KEY] = [];
-  },
   [types.REQUEST_PROJECTS](state) {
     state.fetchingProjects = true;
   },
@@ -26,9 +22,6 @@ export default {
   [types.RECEIVE_PROJECTS_ERROR](state) {
     state.fetchingProjects = false;
     state.projects = [];
-  },
-  [types.RECEIVE_FREQUENT_PROJECTS_ERROR](state) {
-    state.frequentItems[PROJECTS_LOCAL_STORAGE_KEY] = [];
   },
   [types.SET_QUERY](state, { key, value }) {
     state.query[key] = value;

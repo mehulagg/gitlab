@@ -1,4 +1,3 @@
-import { GROUPS_LOCAL_STORAGE_KEY, PROJECTS_LOCAL_STORAGE_KEY } from '~/search/store/constants';
 import * as types from '~/search/store/mutation_types';
 import mutations from '~/search/store/mutations';
 import createState from '~/search/store/state';
@@ -37,14 +36,6 @@ describe('Global Search Store Mutations', () => {
     });
   });
 
-  describe('RECEIVE_FREQUENT_GROUPS_ERROR', () => {
-    it('clears groups', () => {
-      mutations[types.RECEIVE_FREQUENT_GROUPS_ERROR](state);
-
-      expect(state.frequentItems[GROUPS_LOCAL_STORAGE_KEY]).toStrictEqual([]);
-    });
-  });
-
   describe('REQUEST_PROJECTS', () => {
     it('sets fetchingProjects to true', () => {
       mutations[types.REQUEST_PROJECTS](state);
@@ -68,14 +59,6 @@ describe('Global Search Store Mutations', () => {
 
       expect(state.fetchingProjects).toBe(false);
       expect(state.projects).toEqual([]);
-    });
-  });
-
-  describe('RECEIVE_FREQUENT_PROJECTS_ERROR', () => {
-    it('clears projects', () => {
-      mutations[types.RECEIVE_FREQUENT_PROJECTS_ERROR](state);
-
-      expect(state.frequentItems[PROJECTS_LOCAL_STORAGE_KEY]).toStrictEqual([]);
     });
   });
 

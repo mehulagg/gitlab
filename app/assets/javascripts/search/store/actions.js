@@ -51,7 +51,6 @@ export const loadFrequentGroups = async ({ commit }) => {
     commit(types.LOAD_FREQUENT_ITEMS, { key: GROUPS_LOCAL_STORAGE_KEY, data: inflatedData });
   } catch {
     createFlash({ message: __('There was a problem fetching recent groups.') });
-    commit(types.RECEIVE_FREQUENT_GROUPS_ERROR);
   }
 };
 
@@ -65,7 +64,6 @@ export const loadFrequentProjects = async ({ commit }) => {
     commit(types.LOAD_FREQUENT_ITEMS, { key: PROJECTS_LOCAL_STORAGE_KEY, data: inflatedData });
   } catch {
     createFlash({ message: __('There was a problem fetching recent projects.') });
-    commit(types.RECEIVE_FREQUENT_PROJECTS_ERROR);
   }
 };
 

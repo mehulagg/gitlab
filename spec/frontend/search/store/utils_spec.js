@@ -1,7 +1,13 @@
 import { useLocalStorageSpy } from 'helpers/local_storage_helper';
 import { MAX_FREQUENCY } from '~/search/store/constants';
 import { loadDataFromLS, setFrequentItemToLS, mergeById } from '~/search/store/utils';
-import { MOCK_LS_KEY, MOCK_GROUPS } from '../mock_data';
+import {
+  MOCK_LS_KEY,
+  MOCK_GROUPS,
+  MOCK_INFLATED_DATA,
+  FRESH_STORED_DATA,
+  STALE_STORED_DATA,
+} from '../mock_data';
 
 useLocalStorageSpy();
 jest.mock('~/lib/utils/accessor', () => ({
@@ -143,14 +149,29 @@ describe('Global Search Store Utils', () => {
         expect(localStorage.removeItem).toHaveBeenCalledWith(MOCK_LS_KEY);
       });
     });
+
+    describe('with additional data', () => {
+      beforeEach(() => {
+        const MOCK_ADDITIONAL_DATA_GROUP = { ...MOCK_GROUPS[0], extraData: 'test' };
+        frequentItems[MOCK_LS_KEY] = [];
+        setFrequentItemToLS(MOCK_LS_KEY, frequentItems, MOCK_ADDITIONAL_DATA_GROUP);
+      });
+
+      it('parses out extra data for LS', () => {
+        expect(localStorage.setItem).toHaveBeenCalledWith(
+          MOCK_LS_KEY,
+          JSON.stringify([{ ...MOCK_GROUPS[0], frequency: 1 }]),
+        );
+      });
+    });
   });
 
   describe.each`
-    description    | inflatedData                                              | storedData                                                                            | response
-    ${'identical'} | ${[{ id: 1, name: 'test 1' }, { id: 2, name: 'test 2' }]} | ${[{ id: 1, name: 'test 1', frequency: 1 }, { id: 2, name: 'test 2', frequency: 2 }]} | ${[{ id: 1, name: 'test 1', frequency: 1 }, { id: 2, name: 'test 2', frequency: 2 }]}
-    ${'stale'}     | ${[{ id: 1, name: 'test 1' }, { id: 2, name: 'test 2' }]} | ${[{ id: 1, name: 'blah 1', frequency: 1 }, { id: 2, name: 'blah 2', frequency: 2 }]} | ${[{ id: 1, name: 'test 1', frequency: 1 }, { id: 2, name: 'test 2', frequency: 2 }]}
-    ${'empty'}     | ${[{ id: 1, name: 'test 1' }, { id: 2, name: 'test 2' }]} | ${[]}                                                                                 | ${[{ id: 1, name: 'test 1' }, { id: 2, name: 'test 2' }]}
-    ${'null'}      | ${[{ id: 1, name: 'test 1' }, { id: 2, name: 'test 2' }]} | ${null}                                                                               | ${[{ id: 1, name: 'test 1' }, { id: 2, name: 'test 2' }]}
+    description    | inflatedData          | storedData           | response
+    ${'identical'} | ${MOCK_INFLATED_DATA} | ${FRESH_STORED_DATA} | ${FRESH_STORED_DATA}
+    ${'stale'}     | ${MOCK_INFLATED_DATA} | ${STALE_STORED_DATA} | ${FRESH_STORED_DATA}
+    ${'empty'}     | ${MOCK_INFLATED_DATA} | ${[]}                | ${MOCK_INFLATED_DATA}
+    ${'null'}      | ${MOCK_INFLATED_DATA} | ${null}              | ${MOCK_INFLATED_DATA}
   `('mergeById', ({ description, inflatedData, storedData, response }) => {
     describe(`with ${description} storedData`, () => {
       let res;
