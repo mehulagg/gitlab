@@ -32,16 +32,10 @@ require "json"
          },
          "identifiers":[
             {
-               "type":"gemnasium",
-               "name":"Gemnasium-4f3402a7-97dd-45fc-9ed5-f49e707020c3",
-               "value":"4f3402a7-97dd-45fc-9ed5-f49e707020c3",
-               "url":"https://gitlab.com/gitlab-org/security-products/gemnasium-db/-/blob/master/npm/postcss/CVE-2021-23382.yml"
-            },
-            {
-               "type":"cve",
-               "name":"CVE-2021-23382",
-               "value":"CVE-2021-23382",
-               "url":"https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2021-23382"
+               "type":"cwe",
+               "name":"CWE-1104",
+               "value":"Use of Unmaintained Third Party Components",
+               "url":"https://cwe.mitre.org/data/definitions/1104.html"
             }
          ]
       }
