@@ -285,7 +285,7 @@ RSpec.describe Integrations::Github do
     end
   end
 
-  describe '#can_test?' do
+  describe '#testable?' do
     it 'is false if there are no pipelines' do
       project.ci_pipelines.delete_all
 

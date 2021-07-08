@@ -139,7 +139,7 @@ RSpec.describe Integration do
     end
   end
 
-  describe '#can_test?' do
+  describe '#testable?' do
     subject { integration.can_test? }
 
     context 'when integration is project-level' do
