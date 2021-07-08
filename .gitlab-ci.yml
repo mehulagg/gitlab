@@ -14,7 +14,8 @@ gemnasium-dependency_scanning:
 
 score_dependency_scanning:
   image: ruby:2.6-alpine3.13
-  stage: depscore
+  # stage: depscore
+  stage: test
   # needs: ["gemnasium-dependency_scanning"]
   before_script:
     - echo "Running before_script"
