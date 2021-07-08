@@ -28,18 +28,15 @@ const mountWeightComponent = () => {
   });
 };
 
-const mountStatusComponent = () => {
+const mountStatusComponent = (mediator) => {
   const el = document.querySelector('.js-sidebar-status-entry-point');
 
   if (!el) {
     return false;
   }
 
-  const { iid, fullPath, issuableType, canEdit } = el.dataset;
-
   return new Vue({
     el,
-    apolloProvider,
     store,
     components: {
       SidebarStatus,
@@ -47,10 +44,7 @@ const mountStatusComponent = () => {
     render: (createElement) =>
       createElement('sidebar-status', {
         props: {
-          issuableType,
-          iid,
-          fullPath,
-          canUpdate: parseBoolean(canEdit),
+          mediator,
         },
       }),
   });

@@ -1,4 +1,5 @@
 import Store from 'ee/sidebar/stores/sidebar_store';
+import updateStatusMutation from '~/sidebar/queries/updateStatus.mutation.graphql';
 import CESidebarMediator from '~/sidebar/sidebar_mediator';
 
 export default class SidebarMediator extends CESidebarMediator {
@@ -26,5 +27,21 @@ export default class SidebarMediator extends CESidebarMediator {
         this.store.setLoadingState('weight', false);
         throw err;
       });
+  }
+
+  updateStatus(healthStatus) {
+    this.store.setFetchingState('status', true);
+    return this.service
+      .updateWithGraphQl(updateStatusMutation, { healthStatus })
+      .then(({ data }) => {
+        if (data?.updateIssue?.errors?.length > 0) {
+          throw data.updateIssue.errors[0];
+        }
+        this.store.setStatus(data?.updateIssue?.issue?.healthStatus);
+      })
+      .catch((error) => {
+        throw error;
+      })
+      .finally(() => this.store.setFetchingState('status', false));
   }
 }
