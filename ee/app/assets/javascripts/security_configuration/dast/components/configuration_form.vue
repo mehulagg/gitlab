@@ -99,7 +99,13 @@ export default {
       @profiles="updateProfiles"
       @error="showErrors"
       @hasProfilesConflict="hasProfilesConflict = $event"
-    />
+    >
+      <template #no-profiles>{{
+        s__(
+          'DastConfig|In order to configure DAST, you must have at least one %{profileType} profile',
+        )
+      }}</template>
+    </dast-profiles-selector>
 
     <gl-button
       :disabled="isSubmitDisabled"

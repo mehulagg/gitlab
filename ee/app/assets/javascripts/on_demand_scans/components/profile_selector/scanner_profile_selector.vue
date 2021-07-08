@@ -1,4 +1,5 @@
 <script>
+import { s__, sprintf } from '~/locale';
 import ProfileSelector from './profile_selector.vue';
 import ScannerProfileSummary from './scanner_profile_summary.vue';
 
@@ -42,6 +43,16 @@ export default {
         };
       });
     },
+    noProfilesHelpText() {
+      if (this.$slots?.noDastProfiles) {
+        return sprintf(this.$slots.noDastProfiles, {
+          profileType: 'scanner',
+        });
+      }
+      return s__(
+        'OnDemandScans|No profile yet. In order to create a new scan, you need to have at least one completed scanner profile.',
+      );
+    },
   },
 };
 </script>
@@ -56,11 +67,7 @@ export default {
   >
     <template #title>{{ s__('OnDemandScans|Scanner profile') }}</template>
     <template #label>{{ s__('OnDemandScans|Use existing scanner profile') }}</template>
-    <template #no-profiles>{{
-      s__(
-        'OnDemandScans|No profile yet. In order to create a new scan, you need to have at least one completed scanner profile.',
-      )
-    }}</template>
+    <template #no-profiles>{{ noProfilesHelpText }} }}</template>
     <template #new-profile>{{ s__('OnDemandScans|Create new scanner profile') }}</template>
     <template #manage-profile>{{ s__('OnDemandScans|Manage scanner profiles') }}</template>
     <template #summary>
