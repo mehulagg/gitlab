@@ -15,7 +15,7 @@ module Ci
         return unless consumption > 0
 
         # TODO(Issue #335338): Introduce async worker UpdateMinutesByConsumptionWorker
-        Ci::Minutes::UpdateProjectAndNamespaceUsage.new(project, namespace).execute(consumption)
+        Ci::Minutes::UpdateProjectAndNamespaceUsageService.new(project, namespace).execute(consumption)
 
         compare_with_live_consumption(build, consumption)
       end

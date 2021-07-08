@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe Ci::Minutes::UpdateProjectAndNamespaceUsage do
+RSpec.describe Ci::Minutes::UpdateProjectAndNamespaceUsageService do
   let_it_be(:namespace) { create(:namespace, shared_runners_minutes_limit: 100) }
   let_it_be(:project) { create(:project, :private, namespace: namespace) }
 
