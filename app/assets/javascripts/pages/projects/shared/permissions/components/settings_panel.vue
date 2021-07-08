@@ -221,7 +221,7 @@ export default {
         }
 
         if (this.visibilityLevel !== visibilityOptions.PUBLIC) {
-          options.push([30, PAGE_FEATURE_ACCESS_LEVEL]);
+          options.push([20, PAGE_FEATURE_ACCESS_LEVEL]);
         }
       }
       return options;
