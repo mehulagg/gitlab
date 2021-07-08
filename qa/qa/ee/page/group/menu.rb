@@ -110,13 +110,13 @@ module QA
             end
           end
 
-          def click_group_members_item
-            hover_element(:group_information_link) do
-              within_submenu(:group_information_submenu) do
-                click_element(:group_members_item)
-              end
-            end
-          end
+          # def click_group_members_item
+          #   hover_group_information do
+          #     within_submenu do
+          #       click_element(:sidebar_menu_item_link, menu_item: 'Members')
+          #     end
+          #   end
+          # end
 
           def click_group_general_settings_item
             hover_element(:group_settings) do
@@ -169,6 +169,14 @@ module QA
               end
             end
           end
+
+          # def hover_group_information
+          #   within_sidebar do
+          #     find_element(:sidebar_menu_link, menu_item: 'Group information').hover
+
+          #     yield
+          #   end
+          # end
         end
       end
     end
