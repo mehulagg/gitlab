@@ -11,12 +11,12 @@ require 'securerandom'
 
   foo = '{"version":"14.0.0",
   "vulnerabilities":[{
-         "id":"038e8cggg96a16af7zzzzzzzzzc9a4fa164e9da70123sd6ce95",
+         "id":"038e8c1296a16af7zzzzzzzzzc9a4fa164e9da70123sd6ce95",
          "category":"dependency_scanning",
          "name":"Unreliable libraries",
          "message":"Libraries that are not frequently mantained detected",
          "description":"Based on the score calculated from the librariy metadata the below libraries seems to have less frequent maintance",
-         "cve":"package.json:kind-of::execa:depscore:CWE-1104",
+         "cve":"038e8c1296a16af7zzzzzzzzzc9a4fa164e9da70123sd6ce95",
          "severity":"Info",
          "solution":"Upgrade to version 2.0.0 or above.",
          "scanner":{
@@ -39,7 +39,13 @@ require 'securerandom'
                "value":"Use of Unmaintained Third Party Components",
                "url":"https://cwe.mitre.org/data/definitions/1104.html"
             }
-         ]
+         ],
+         "links": [
+        {
+          "url": "https://cwe.mitre.org/data/definitions/1104.html"
+        }
+      ]
+
       }
    ]
 }
