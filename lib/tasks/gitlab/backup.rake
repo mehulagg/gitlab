@@ -287,10 +287,9 @@ namespace :gitlab do
 
     def progress
       if ENV['CRON']
-        # We need an object we can say 'puts' and 'print' to; let's use a
-        # StringIO.
-        require 'stringio'
-        StringIO.new
+        @progress ||= Tempfile.new.tap do |progress|
+          progress.unlink
+        end
       else
         $stdout
       end
