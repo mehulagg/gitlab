@@ -50,6 +50,10 @@ module Gitlab
         def description_for(release)
           release.body.presence || "Release for tag #{release.tag_name}"
         end
+
+        def object_type
+          :release
+        end
       end
     end
   end

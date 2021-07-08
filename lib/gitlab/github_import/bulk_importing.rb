@@ -9,16 +9,44 @@ module Gitlab
       # enum - An Enumerable that returns the objects to turn into database
       #        rows.
       def build_database_rows(enum)
-        enum.each_with_object([]) do |(object, _), rows|
-          rows << build(object) unless already_imported?(object)
+        rows = enum.each_with_object([]) do |(object, _), result|
+          result << build(object) unless already_imported?(object)
         end
+
+        log_and_increment_counter(rows.size, :fetched)
+
+        rows
       end
 
       # Bulk inserts the given rows into the database.
       def bulk_insert(model, rows, batch_size: 100)
         rows.each_slice(batch_size) do |slice|
           Gitlab::Database.bulk_insert(model.table_name, slice) # rubocop:disable Gitlab/BulkInsert
+
+          log_and_increment_counter(slice.size, :imported)
         end
+      end
+
+      def object_type
+        raise NotImplementedError
+      end
+
+      private
+
+      def log_and_increment_counter(value, operation)
+        Gitlab::Import::Logger.info(
+          import_source: :github,
+          project_id: project.id,
+          importer: self.class.name,
+          message: "#{value} #{object_type.to_s.pluralize} #{operation}"
+        )
+
+        Gitlab::GithubImport::ObjectCounter.increment(
+          project,
+          object_type,
+          operation,
+          value: value
+        )
       end
     end
   end

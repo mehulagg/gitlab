@@ -51,6 +51,10 @@ module Gitlab
         def each_label
           client.labels(project.import_source)
         end
+
+        def object_type
+          :label
+        end
       end
     end
   end

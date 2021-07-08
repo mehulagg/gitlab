@@ -55,6 +55,10 @@ module Gitlab
         def each_milestone
           client.milestones(project.import_source, state: 'all')
         end
+
+        def object_type
+          :milestone
+        end
       end
     end
   end

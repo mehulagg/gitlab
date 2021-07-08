@@ -85,6 +85,22 @@ module Gitlab
           end
         end
 
+        # Increment the integer value of a key by the given value.
+        # Sets the value to zero if missing before incrementing
+        #
+        # key - The cache key to increment.
+        # value - The valud to increment the key
+        # timeout - The time after which the cache key should expire.
+        # @return - the incremented value
+        def self.increment_by(raw_key, value, timeout: TIMEOUT)
+          key = cache_key_for(raw_key)
+
+          Redis::Cache.with do |redis|
+            redis.incrby(key, value)
+            redis.expire(key, timeout)
+          end
+        end
+
         # Adds a value to a set.
         #
         # raw_key - The key of the set to add the value to.
