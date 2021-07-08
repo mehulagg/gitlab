@@ -5653,6 +5653,9 @@ msgstr ""
 msgid "BulkImport|Existing groups"
 msgstr ""
 
+msgid "BulkImport|Filter by source group"
+msgstr ""
+
 msgid "BulkImport|From source group"
 msgstr ""
 
