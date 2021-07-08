@@ -1,7 +1,6 @@
 ---
-data_category: Operational
-key_path: usage_activity_by_stage.secure.user_dast_jobs
-description: Count of DAST jobs
+key_path: counts.dast_on_demand_pipelines
+description: Count of all on-demand DAST pipelines
 product_section: sec
 product_stage: secure
 product_group: group::dynamic analysis
@@ -9,9 +8,9 @@ product_category: dynamic_application_security_testing
 value_type: number
 status: data_available
 time_frame: all
-data_source:
+data_source: database
+data_category: Optional
 distribution:
-- ce
+- ee
 tier:
-- free
-skip_validation: true
+- ultimate
