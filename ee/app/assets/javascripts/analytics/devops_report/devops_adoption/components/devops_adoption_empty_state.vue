@@ -1,6 +1,6 @@
 <script>
 import { GlEmptyState, GlModalDirective } from '@gitlab/ui';
-import { DEVOPS_ADOPTION_STRINGS } from '../constants';
+import { DA_EMPTY_STATE_TITLE, DA_EMPTY_STATE_DESCRIPTION } from '../constants';
 
 export default {
   name: 'DevopsAdoptionEmptyState',
@@ -11,7 +11,10 @@ export default {
     GlModal: GlModalDirective,
   },
   inject: ['emptyStateSvgPath'],
-  i18n: DEVOPS_ADOPTION_STRINGS.emptyState,
+  i18n: {
+    title: DA_EMPTY_STATE_TITLE,
+    description: DA_EMPTY_STATE_DESCRIPTION,
+  },
   props: {
     hasGroupsData: {
       type: Boolean,

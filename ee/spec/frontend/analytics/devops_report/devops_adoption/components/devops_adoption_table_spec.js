@@ -5,7 +5,9 @@ import DevopsAdoptionDeleteModal from 'ee/analytics/devops_report/devops_adoptio
 import DevopsAdoptionTable from 'ee/analytics/devops_report/devops_adoption/components/devops_adoption_table.vue';
 import DevopsAdoptionTableCellFlag from 'ee/analytics/devops_report/devops_adoption/components/devops_adoption_table_cell_flag.vue';
 import {
-  DEVOPS_ADOPTION_TABLE_TEST_IDS as TEST_IDS,
+  DA_TABLE_TEST_IDS_NAMESPACE,
+  DA_TABLE_TEST_IDS_ACTIONS,
+  DA_TABLE_TEST_IDS_HEADERS,
   DEVOPS_ADOPTION_TABLE_CONFIGURATION,
 } from 'ee/analytics/devops_report/devops_adoption/constants';
 import { createMockDirective, getBinding } from 'helpers/vue_mock_directive';
@@ -58,7 +60,7 @@ describe('DevopsAdoptionTable', () => {
 
     beforeEach(() => {
       createComponent();
-      headers = findTable().findAll(`[data-testid="${TEST_IDS.TABLE_HEADERS}"]`);
+      headers = findTable().findAll(`[data-testid="${DA_TABLE_TEST_IDS_HEADERS}"]`);
     });
 
     it('displays the correct number of headings', () => {
@@ -108,7 +110,7 @@ describe('DevopsAdoptionTable', () => {
       it('displays the correct name', () => {
         createComponent();
 
-        expect(findCol(TEST_IDS.NAMESPACE).text()).toBe('Group 1');
+        expect(findCol(DA_TABLE_TEST_IDS_NAMESPACE).text()).toBe('Group 1');
       });
 
       describe('"This group" badge', () => {
@@ -122,7 +124,7 @@ describe('DevopsAdoptionTable', () => {
         `('$scenario', ({ expected, provide }) => {
           createComponent({ provide });
 
-          const badge = findColSubComponent(TEST_IDS.NAMESPACE, GlBadge);
+          const badge = findColSubComponent(DA_TABLE_TEST_IDS_NAMESPACE, GlBadge);
 
           expect(badge.exists()).toBe(expected);
         });
@@ -134,7 +136,7 @@ describe('DevopsAdoptionTable', () => {
         });
 
         it('grays the text out', () => {
-          const name = findColRowChild(TEST_IDS.NAMESPACE, 1, 'span');
+          const name = findColRowChild(DA_TABLE_TEST_IDS_NAMESPACE, 1, 'span');
 
           expect(name.classes()).toStrictEqual(['gl-text-gray-400']);
         });
@@ -143,7 +145,7 @@ describe('DevopsAdoptionTable', () => {
           let icon;
 
           beforeEach(() => {
-            icon = findColRowChild(TEST_IDS.NAMESPACE, 1, GlIcon);
+            icon = findColRowChild(DA_TABLE_TEST_IDS_NAMESPACE, 1, GlIcon);
           });
 
           it('displays the icon', () => {
@@ -174,7 +176,7 @@ describe('DevopsAdoptionTable', () => {
       });
 
       it('displays the actions icon', () => {
-        const button = findColSubComponent(TEST_IDS.ACTIONS, GlButton);
+        const button = findColSubComponent(DA_TABLE_TEST_IDS_ACTIONS, GlButton);
 
         expect(button.exists()).toBe(true);
         expect(button.props('disabled')).toBe(disabled);
@@ -183,7 +185,7 @@ describe('DevopsAdoptionTable', () => {
       });
 
       it('wraps the icon in an element with a tooltip', () => {
-        const iconWrapper = findCol(TEST_IDS.ACTIONS);
+        const iconWrapper = findCol(DA_TABLE_TEST_IDS_ACTIONS);
         const tooltip = getBinding(iconWrapper.element, 'gl-tooltip');
 
         expect(iconWrapper.exists()).toBe(true);
@@ -214,17 +216,17 @@ describe('DevopsAdoptionTable', () => {
 
     beforeEach(() => {
       createComponent();
-      headers = findTable().findAll(`[data-testid="${TEST_IDS.TABLE_HEADERS}"]`);
+      headers = findTable().findAll(`[data-testid="${DA_TABLE_TEST_IDS_HEADERS}"]`);
     });
 
     it('sorts the namespaces by name', async () => {
-      expect(findCol(TEST_IDS.NAMESPACE).text()).toBe('Group 1');
+      expect(findCol(DA_TABLE_TEST_IDS_NAMESPACE).text()).toBe('Group 1');
 
       headers.at(0).trigger('click');
 
       await nextTick();
 
-      expect(findCol(TEST_IDS.NAMESPACE).text()).toBe('Group 2');
+      expect(findCol(DA_TABLE_TEST_IDS_NAMESPACE).text()).toBe('Group 2');
     });
 
     it('should update local storage when the sort column changes', async () => {

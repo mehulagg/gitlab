@@ -1,6 +1,6 @@
 <script>
 import { GlLoadingIcon, GlSprintf } from '@gitlab/ui';
-import { TABLE_HEADER_TEXT } from '../constants';
+import { DA_TABLE_HEADER_TEXT } from '../constants';
 import DevopsAdoptionAddDropdown from './devops_adoption_add_dropdown.vue';
 import DevopsAdoptionEmptyState from './devops_adoption_empty_state.vue';
 import DevopsAdoptionTable from './devops_adoption_table.vue';
@@ -14,7 +14,7 @@ export default {
     DevopsAdoptionAddDropdown,
   },
   i18n: {
-    tableHeaderText: TABLE_HEADER_TEXT,
+    tableHeaderText: DA_TABLE_HEADER_TEXT,
   },
   props: {
     isLoading: {

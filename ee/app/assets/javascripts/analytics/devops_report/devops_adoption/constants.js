@@ -1,108 +1,74 @@
 import { s__, __ } from '~/locale';
 
 export const DEFAULT_POLLING_INTERVAL = 30000;
-
 export const PER_PAGE = 20;
-
 export const DEBOUNCE_DELAY = 500;
-
-export const DEVOPS_ADOPTION_PROGRESS_BAR_HEIGHT = '8px';
-
-export const DEVOPS_ADOPTION_DELETE_MODAL_ID = 'devopsDeleteModal';
-
+export const DA_PROGRESS_BAR_HEIGHT = '8px';
 export const DATE_TIME_FORMAT = 'yyyy-mm-dd HH:MM';
+export const DA_DELETE_MODAL_ID = 'devopsDeleteModal';
 
-export const DEVOPS_ADOPTION_ERROR_KEYS = {
-  groups: 'groupsError',
-  enabledNamespaces: 'enabledNamespacesError',
-  addEnabledNamespaces: 'addEnabledNamespacesError',
-};
+export const DA_TABLE_SORT_BY_STORAGE_KEY = 'devops_adoption_table_sort_by';
+export const DA_TABLE_SORT_DESC_STORAGE_KEY = 'devops_adoption_table_sort_desc';
 
-export const TABLE_HEADER_TEXT = s__(
-  'DevopsAdoption|Feature adoption is based on usage in the previous calendar month. Last updated: %{timestamp}.',
+export const TRACK_ADOPTION_TAB_CLICK_EVENT = 'i_analytics_dev_ops_adoption';
+export const TRACK_DEVOPS_SCORE_TAB_CLICK_EVENT = 'i_analytics_dev_ops_score';
+
+export const DA_GROUPS_QUERY_ERROR = s__(
+  'DevopsAdoption|There was an error fetching Groups. Please refresh the page.',
+);
+export const DA_ENABLED_NAMESPACE_QUERY_ERROR = s__(
+  'DevopsAdoption|There was an error fetching Group adoption data. Please refresh the page.',
+);
+export const DA_ENABLE_NAMESPACE_MUTATION_ERROR = s__(
+  'DevopsAdoption|There was an error enabling the current group. Please refresh the page.',
 );
 
-export const DEVOPS_ADOPTION_GROUP_LEVEL_LABEL = s__('DevopsAdoption|Add/remove sub-groups');
-
-export const DEVOPS_ADOPTION_TABLE_REMOVE_BUTTON_DISABLED = s__(
+export const DA_TABLE_REMOVE_BUTTON = s__('DevopsAdoption|Remove Group from the table.');
+export const DA_TABLE_REMOVE_BUTTON_DISABLED = s__(
   'DevopsAdoption|You cannot remove the group you are currently in.',
 );
 
-export const DEVOPS_ADOPTION_GROUP_DROPDOWN_TEXT = s__('DevopsAdoption|Add sub-group to table');
-export const DEVOPS_ADOPTION_GROUP_DROPDOWN_HEADER = s__('DevopsAdoption|Add sub-group');
-export const DEVOPS_ADOPTION_ADMIN_DROPDOWN_TEXT = s__('DevopsAdoption|Add group to table');
-export const DEVOPS_ADOPTION_ADMIN_DROPDOWN_HEADER = s__('DevopsAdoption|Add group');
+export const DA_GROUP_DROPDOWN_TEXT = s__('DevopsAdoption|Add sub-group to table');
+export const DA_GROUP_DROPDOWN_HEADER = s__('DevopsAdoption|Add sub-group');
+export const DA_ADMIN_DROPDOWN_TEXT = s__('DevopsAdoption|Add group to table');
+export const DA_ADMIN_DROPDOWN_HEADER = s__('DevopsAdoption|Add group');
 
-export const DEVOPS_ADOPTION_NO_RESULTS = s__('DevopsAdoption|No results…');
+export const DA_NO_RESULTS = s__('DevopsAdoption|No results…');
+export const DA_NO_SUB_GROUPS = s__('DevopsAdoption|This group has no sub-groups');
 
-export const DEVOPS_ADOPTION_NO_SUB_GROUPS = s__('DevopsAdoption|This group has no sub-groups');
-
-export const DEVOPS_ADOPTION_FEATURES_ADOPTED_TEXT = s__(
+export const DA_FEATURES_ADOPTED_TEXT = s__(
   'DevopsAdoption|%{adoptedCount}/%{featuresCount} %{title} features adopted',
 );
 
-export const DEVOPS_ADOPTION_STRINGS = {
-  app: {
-    [DEVOPS_ADOPTION_ERROR_KEYS.groups]: s__(
-      'DevopsAdoption|There was an error fetching Groups. Please refresh the page.',
-    ),
-    [DEVOPS_ADOPTION_ERROR_KEYS.enabledNamespaces]: s__(
-      'DevopsAdoption|There was an error fetching Group adoption data. Please refresh the page.',
-    ),
-    [DEVOPS_ADOPTION_ERROR_KEYS.addEnabledNamespaces]: s__(
-      'DevopsAdoption|There was an error enabling the current group. Please refresh the page.',
-    ),
-    tableHeader: {
-      button: s__('DevopsAdoption|Add/remove groups'),
-    },
-  },
-  emptyState: {
-    title: s__('DevopsAdoption|Add a group to get started'),
-    description: s__(
-      'DevopsAdoption|DevOps adoption tracks the use of key features across your favorite groups. Add a group to the table to begin.',
-    ),
-    button: s__('DevopsAdoption|Add Group'),
-  },
-  modal: {
-    addingTitle: s__('DevopsAdoption|Add/remove groups'),
-    addingButton: s__('DevopsAdoption|Save changes'),
-    cancel: __('Cancel'),
-    namePlaceholder: s__('DevopsAdoption|My group'),
-    filterPlaceholder: s__('DevopsAdoption|Filter by name'),
-    error: s__('DevopsAdoption|An error occurred while saving changes. Please try again.'),
-    noResults: s__('DevopsAdoption|No filter results.'),
-  },
-  table: {
-    removeButton: s__('DevopsAdoption|Remove Group from the table.'),
-  },
-  deleteModal: {
-    title: s__('DevopsAdoption|Confirm remove Group'),
-    confirmationMessage: s__(
-      'DevopsAdoption|Are you sure that you would like to remove %{name} from the table?',
-    ),
-    cancel: __('Cancel'),
-    confirm: s__('DevopsAdoption|Remove Group'),
-    error: s__('DevopsAdoption|An error occurred while removing the group. Please try again.'),
-  },
-  tableCell: {
-    trueText: s__('DevopsAdoption|Adopted'),
-    falseText: s__('DevopsAdoption|Not adopted'),
-  },
-};
+export const DA_EMPTY_STATE_TITLE = s__('DevopsAdoption|Add a group to get started');
+export const DA_EMPTY_STATE_DESCRIPTION = s__(
+  'DevopsAdoption|DevOps adoption tracks the use of key features across your favorite groups. Add a group to the table to begin.',
+);
 
-export const DEVOPS_ADOPTION_TABLE_TEST_IDS = {
-  TABLE_HEADERS: 'header',
-  NAMESPACE: 'namespaceCol',
-  ACTIONS: 'actionsCol',
-  LOCAL_STORAGE_SORT_BY: 'localStorageSortBy',
-  LOCAL_STORAGE_SORT_DESC: 'localStorageSortDesc',
-};
+export const DA_DELETE_MODAL_TITLE = s__('DevopsAdoption|Confirm remove Group');
+export const DA_DELETE_MODAL_CONFIRMATION_MESSAGE = s__(
+  'DevopsAdoption|Are you sure that you would like to remove %{name} from the table?',
+);
+export const DA_DELETE_MODAL_CANCEL = __('Cancel');
+export const DA_DELETE_MODAL_CONFIRM = s__('DevopsAdoption|Remove Group');
+export const DA_DELETE_MODAL_ERROR = s__(
+  'DevopsAdoption|An error occurred while removing the group. Please try again.',
+);
 
-export const DEVOPS_ADOPTION_TABLE_SORT_BY_STORAGE_KEY = 'devops_adoption_table_sort_by';
+export const DA_TABLE_HEADER_TEXT = s__(
+  'DevopsAdoption|Feature adoption is based on usage in the previous calendar month. Last updated: %{timestamp}.',
+);
 
-export const DEVOPS_ADOPTION_TABLE_SORT_DESC_STORAGE_KEY = 'devops_adoption_table_sort_desc';
+export const DA_TABLE_TEST_IDS_HEADERS = 'header';
+export const DA_TABLE_TEST_IDS_NAMESPACE = 'namespaceCol';
+export const DA_TABLE_TEST_IDS_ACTIONS = 'actionsCol';
+export const DA_TABLE_TEST_IDS_LOCAL_STORAGE_SORT_BY = 'localStorageSortBy';
+export const DA_TABLE_TEST_IDS_LOCAL_STORAGE_SORT_DESC = 'localStorageSortDesc';
 
-export const DEVOPS_ADOPTION_GROUP_COL_LABEL = __('Group');
+export const DA_CELL_FLAG_TRUE_TEXT = s__('DevopsAdoption|Adopted');
+export const DA_CELL_FLAG_FALSE_TEXT = s__('DevopsAdoption|Not adopted');
+
+export const DA_GROUP_COL_LABEL = __('Group');
 
 export const DEVOPS_ADOPTION_OVERALL_CONFIGURATION = {
   title: s__('DevopsAdoption|Overall adoption'),
@@ -197,7 +163,3 @@ export const DEVOPS_ADOPTION_TABLE_CONFIGURATION = [
     ],
   },
 ];
-
-export const TRACK_ADOPTION_TAB_CLICK_EVENT = 'i_analytics_dev_ops_adoption';
-
-export const TRACK_DEVOPS_SCORE_TAB_CLICK_EVENT = 'i_analytics_dev_ops_score';

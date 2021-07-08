@@ -1,7 +1,10 @@
 import { GlEmptyState } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
 import DevopsAdoptionEmptyState from 'ee/analytics/devops_report/devops_adoption/components/devops_adoption_empty_state.vue';
-import { DEVOPS_ADOPTION_STRINGS } from 'ee/analytics/devops_report/devops_adoption/constants';
+import {
+  DA_EMPTY_STATE_TITLE,
+  DA_EMPTY_STATE_DESCRIPTION,
+} from 'ee/analytics/devops_report/devops_adoption/constants';
 
 const emptyStateSvgPath = 'illustrations/monitoring/getting_started.svg';
 
@@ -40,7 +43,7 @@ describe('DevopsAdoptionEmptyState', () => {
 
     const emptyState = findEmptyState();
 
-    expect(emptyState.props('title')).toBe(DEVOPS_ADOPTION_STRINGS.emptyState.title);
-    expect(emptyState.props('description')).toBe(DEVOPS_ADOPTION_STRINGS.emptyState.description);
+    expect(emptyState.props('title')).toBe(DA_EMPTY_STATE_TITLE);
+    expect(emptyState.props('description')).toBe(DA_EMPTY_STATE_DESCRIPTION);
   });
 });

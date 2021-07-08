@@ -4,7 +4,7 @@ import { sprintf } from '~/locale';
 import {
   DEVOPS_ADOPTION_TABLE_CONFIGURATION,
   DEVOPS_ADOPTION_OVERALL_CONFIGURATION,
-  TABLE_HEADER_TEXT,
+  DA_TABLE_HEADER_TEXT,
 } from '../constants';
 import DevopsAdoptionOverviewCard from './devops_adoption_overview_card.vue';
 
@@ -56,7 +56,7 @@ export default {
       return [this.overallData, ...this.featuresData];
     },
     headerText() {
-      return sprintf(TABLE_HEADER_TEXT, { timestamp: this.timestamp });
+      return sprintf(DA_TABLE_HEADER_TEXT, { timestamp: this.timestamp });
     },
   },
 };

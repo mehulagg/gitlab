@@ -11167,9 +11167,6 @@ msgstr ""
 msgid "DevopsAdoption|%{adoptedCount}/%{featuresCount} %{title} features adopted"
 msgstr ""
 
-msgid "DevopsAdoption|Add Group"
-msgstr ""
-
 msgid "DevopsAdoption|Add a group to get started"
 msgstr ""
 
@@ -11185,19 +11182,10 @@ msgstr ""
 msgid "DevopsAdoption|Add sub-group to table"
 msgstr ""
 
-msgid "DevopsAdoption|Add/remove groups"
-msgstr ""
-
-msgid "DevopsAdoption|Add/remove sub-groups"
-msgstr ""
-
 msgid "DevopsAdoption|Adopted"
 msgstr ""
 
 msgid "DevopsAdoption|An error occurred while removing the group. Please try again."
-msgstr ""
-
-msgid "DevopsAdoption|An error occurred while saving changes. Please try again."
 msgstr ""
 
 msgid "DevopsAdoption|Approvals"
@@ -11251,19 +11239,10 @@ msgstr ""
 msgid "DevopsAdoption|Feature adoption is based on usage in the previous calendar month. Last updated: %{timestamp}."
 msgstr ""
 
-msgid "DevopsAdoption|Filter by name"
-msgstr ""
-
 msgid "DevopsAdoption|Issues"
 msgstr ""
 
 msgid "DevopsAdoption|MRs"
-msgstr ""
-
-msgid "DevopsAdoption|My group"
-msgstr ""
-
-msgid "DevopsAdoption|No filter results."
 msgstr ""
 
 msgid "DevopsAdoption|No results…"
@@ -11297,9 +11276,6 @@ msgid "DevopsAdoption|SAST"
 msgstr ""
 
 msgid "DevopsAdoption|SAST enabled for at least one project"
-msgstr ""
-
-msgid "DevopsAdoption|Save changes"
 msgstr ""
 
 msgid "DevopsAdoption|Scanning"
