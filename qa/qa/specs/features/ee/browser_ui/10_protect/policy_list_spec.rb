@@ -35,15 +35,9 @@ module QA
         end
       end
 
-      context 'with k8s cluster', :require_admin, :kubernetes, :orchestrated, :runner do
+      context 'with k8s cluster', :require_admin, :kubernetes, :orchestrated do
         let(:policy_name) { 'l3-rule' }
         let!(:cluster) { Service::KubernetesCluster.new(provider_class: Service::ClusterProvider::K3sCilium).create! }
-        let!(:runner) do
-          Resource::Runner.fabricate_via_api! do |resource|
-            resource.project = project
-            resource.executor = :docker
-          end
-        end
 
         let(:optional_jobs) do
           %w[
@@ -60,7 +54,6 @@ module QA
         end
 
         after do
-          runner.remove_via_api!
           cluster.remove!
         end
 
@@ -69,6 +62,7 @@ module QA
             k8s_cluster.project = project
             k8s_cluster.cluster = cluster
             k8s_cluster.install_ingress = true
+            k8s_cluster.install_runner = true
           end.project.visit!
 
           Resource::Pipeline.fabricate_via_api! do |pipeline|
