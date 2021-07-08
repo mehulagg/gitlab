@@ -12767,6 +12767,7 @@ CREATE TABLE error_tracking_errors (
     platform text,
     created_at timestamp with time zone NOT NULL,
     updated_at timestamp with time zone NOT NULL,
+    events_count integer,
     CONSTRAINT check_18a758e537 CHECK ((char_length(name) <= 255)),
     CONSTRAINT check_b5cb4d3888 CHECK ((char_length(actor) <= 255)),
     CONSTRAINT check_c739788b12 CHECK ((char_length(description) <= 1024)),
