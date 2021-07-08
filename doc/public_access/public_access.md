@@ -5,13 +5,11 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 type: reference
 ---
 
-# Public access
+# Project visibility
 
 GitLab allows [Owners](../user/permissions.md) to set a project's visibility as **public**, **internal**,
 or **private**. These visibility levels affect who can see the project in the
-public access directory (`/public` under your GitLab instance), like at <https://gitlab.com/public>
-
-## Visibility of projects
+public access directory (`/public` under your GitLab instance), like at <https://gitlab.com/public>.
 
 ### Public projects
 
