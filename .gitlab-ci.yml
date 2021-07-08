@@ -12,7 +12,7 @@ gemnasium-dependency_scanning:
     reports:
       dependency_scanning: gl-dependency-scanning-report.json
 
-run_depscore:
+score_dependency_scanning:
   image: ruby:2.6-alpine3.13
   stage: depscore
   needs: ["gemnasium-dependency_scanning"]
@@ -20,10 +20,12 @@ run_depscore:
     - echo "Running before_script"
     - gem install httparty
     - ruby -v
+    - echo $CI_PROJECT_DIR
   script:
     - ruby -v
     - ls -la
     - ruby ./depscore/main.rb -d gl-dependency-scanning-report.json
+    - ls
   artifacts:
     paths:
       - dep_scores.csv
