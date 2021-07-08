@@ -64,8 +64,8 @@ export default {
     return {
       scannerProfiles: [],
       siteProfiles: [],
-      selectedScannerProfileId: this.dastScan?.scannerProfileId || null,
-      selectedSiteProfileId: this.dastScan?.siteProfileId || null,
+      selectedScannerProfileId: null,
+      selectedSiteProfileId: null,
       errorType: null,
       errors: [],
       dastSiteValidationDocsPath: helpPagePath('user/application_security/dast/index', {
