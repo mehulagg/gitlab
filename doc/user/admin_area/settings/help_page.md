@@ -23,7 +23,7 @@ You can add a help message, which is shown on the GitLab `/help` page (for examp
 
 NOTE:
 By default, `/help` is visible to unauthenticated users. However, if the
-[**Public** visibility level](../user/admin_area/settings/visibility_and_access_controls.md#restricted-visibility-levels)
+[**Public** visibility level](visibility_and_access_controls.md#restricted-visibility-levels)
 is restricted, `/help` is visible only to signed-in users.
 
 ## Adding a help message to the login page **(STARTER)**
