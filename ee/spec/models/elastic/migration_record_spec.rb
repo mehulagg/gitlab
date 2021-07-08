@@ -41,6 +41,20 @@ RSpec.describe Elastic::MigrationRecord, :elastic do
     end
   end
 
+  describe '#load_from_index' do
+    it 'does not raise an exeption when connection refused' do
+      allow(Gitlab::Elastic::Helper.default).to receive(:get).and_raise(Faraday::ConnectionFailed)
+
+      expect(record.load_from_index).to be_nil
+    end
+
+    it 'does not raise an exeption when record does not exist' do
+      allow(Gitlab::Elastic::Helper.default).to receive(:get).and_raise(Elasticsearch::Transport::Transport::Errors::NotFound)
+
+      expect(record.load_from_index).to be_nil
+    end
+  end
+
   describe '#halt!' do
     it 'sets state for halted and halted_indexing_unpaused' do
       record.halt!

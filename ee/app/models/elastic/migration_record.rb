@@ -37,7 +37,7 @@ module Elastic
 
     def load_from_index
       client.get(index: index_name, id: version)
-    rescue Elasticsearch::Transport::Transport::Errors::NotFound
+    rescue StandardError
       nil
     end
 
@@ -64,7 +64,7 @@ module Elastic
             .search(index: helper.migrations_index_name, body: { query: { term: { completed: completed } }, size: ELASTICSEARCH_SIZE })
             .dig('hits', 'hits')
             .map { |v| v['_id'].to_i }
-    rescue Elasticsearch::Transport::Transport::Errors::NotFound
+    rescue StandardError
       []
     end
 
