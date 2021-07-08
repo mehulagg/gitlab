@@ -27,6 +27,7 @@ export const i18n = {
     'EscalationPolicies|IF alert is not %{alertStatus} in %{minutes} %{then} THEN %{doAction} %{schedule}',
   ),
   minutes: s__('EscalationPolicies|mins'),
+  noRules: s__('EscalationPolicies|This policy has no escalation rules.'),
 };
 
 const isRuleValid = ({ status, elapsedTimeMinutes, oncallSchedule: { name } }) =>
@@ -133,37 +134,42 @@ export default {
           {{ policy.description }}
         </p>
         <div class="gl-border-solid gl-border-1 gl-border-gray-100 gl-rounded-base gl-p-5">
-          <div
-            v-for="(rule, ruleIndex) in policy.rules"
-            :key="rule.id"
-            :class="{ 'gl-mb-5': ruleIndex !== policy.rules.length - 1 }"
-          >
-            <gl-icon name="clock" class="gl-mr-3" />
-            <gl-sprintf :message="$options.i18n.escalationRule">
-              <template #alertStatus>
-                {{ $options.ALERT_STATUSES[rule.status].toLowerCase() }}
-              </template>
-              <template #minutes>
-                <span class="gl-font-weight-bold">
-                  {{ rule.elapsedTimeMinutes }} {{ $options.i18n.minutes }}
-                </span>
-              </template>
-              <template #then>
-                <span class="right-arrow">
-                  <i class="right-arrow-head"></i>
-                </span>
-                <gl-icon name="notifications" class="gl-mr-3" />
-              </template>
-              <template #doAction>
-                {{ $options.ACTIONS[$options.DEFAULT_ACTION].toLowerCase() }}
-              </template>
-              <template #schedule>
-                <span class="gl-font-weight-bold">
-                  {{ rule.oncallSchedule.name }}
-                </span>
-              </template>
-            </gl-sprintf>
+          <div v-if="!policy.rules.length" class="gl-text-red-500">
+            <gl-icon name="status_warning" class="gl-mr-3" /> {{ $options.i18n.noRules }}
           </div>
+          <template v-else>
+            <div
+              v-for="(rule, ruleIndex) in policy.rules"
+              :key="rule.id"
+              :class="{ 'gl-mb-5': ruleIndex !== policy.rules.length - 1 }"
+            >
+              <gl-icon name="clock" class="gl-mr-3" />
+              <gl-sprintf :message="$options.i18n.escalationRule">
+                <template #alertStatus>
+                  {{ $options.ALERT_STATUSES[rule.status].toLowerCase() }}
+                </template>
+                <template #minutes>
+                  <span class="gl-font-weight-bold">
+                    {{ rule.elapsedTimeMinutes }} {{ $options.i18n.minutes }}
+                  </span>
+                </template>
+                <template #then>
+                  <span class="right-arrow">
+                    <i class="right-arrow-head"></i>
+                  </span>
+                  <gl-icon name="notifications" class="gl-mr-3" />
+                </template>
+                <template #doAction>
+                  {{ $options.ACTIONS[$options.DEFAULT_ACTION].toLowerCase() }}
+                </template>
+                <template #schedule>
+                  <span class="gl-font-weight-bold">
+                    {{ rule.oncallSchedule.name }}
+                  </span>
+                </template>
+              </gl-sprintf>
+            </div>
+          </template>
         </div>
       </gl-collapse>
     </gl-card>

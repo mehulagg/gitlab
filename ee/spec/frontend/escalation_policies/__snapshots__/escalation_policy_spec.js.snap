@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`EscalationPolicy renders policy with rules 1`] = `
+exports[`EscalationPolicy renders a policy with rules 1`] = `
 <div>
   <gl-card-stub
     bodyclass="[object Object]"
@@ -32,8 +32,8 @@ exports[`EscalationPolicy renders policy with rules 1`] = `
             size="16"
           />
            IF alert is not 
-              acknowledged
-             in 
+                acknowledged
+               in 
           <span
             class="gl-font-weight-bold"
           >
@@ -56,8 +56,8 @@ exports[`EscalationPolicy renders policy with rules 1`] = `
             size="16"
           />
            THEN 
-              email on-call user in schedule
-             
+                email on-call user in schedule
+               
           <span
             class="gl-font-weight-bold"
           >
@@ -75,8 +75,8 @@ exports[`EscalationPolicy renders policy with rules 1`] = `
             size="16"
           />
            IF alert is not 
-              resolved
-             in 
+                resolved
+               in 
           <span
             class="gl-font-weight-bold"
           >
@@ -99,8 +99,8 @@ exports[`EscalationPolicy renders policy with rules 1`] = `
             size="16"
           />
            THEN 
-              email on-call user in schedule
-             
+                email on-call user in schedule
+               
           <span
             class="gl-font-weight-bold"
           >
