@@ -64,7 +64,9 @@ describe('Order Summary', () => {
     });
 
     it('displays the chosen plan', () => {
-      expect(wrapper.find('.js-selected-plan').text()).toMatchInterpolatedText('1000 CI minutes pack plan (x1)');
+      expect(wrapper.find('.js-selected-plan').text()).toMatchInterpolatedText(
+        '1000 CI minutes pack plan (x1)',
+      );
     });
 
     it('displays the correct formatted amount price per pack', () => {
