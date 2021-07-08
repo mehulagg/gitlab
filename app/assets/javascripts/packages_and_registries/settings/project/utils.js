@@ -1,4 +1,4 @@
-import { n__, __ } from '~/locale';
+import { n__ } from '~/locale';
 import { KEEP_N_OPTIONS, CADENCE_OPTIONS, OLDER_THAN_OPTIONS } from './constants';
 
 export const findDefaultOption = (options) => {
