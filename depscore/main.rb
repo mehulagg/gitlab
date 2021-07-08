@@ -6,10 +6,9 @@ require_relative "rubytoolbox"
 require "csv"
 require "date"
 require "optparse"
-require 'json'
+require "json"
 
 gem_hash = {}
-
 
 def write_csv(csv_data)
   CSV.open("dep_scores.csv", "a+") do |csv|
@@ -32,7 +31,6 @@ def dreport_csvprep()
   end
 end
 
-
 def dreport_summary()
   summary = ""
   all_gems = LibData.all_instances
@@ -42,61 +40,58 @@ def dreport_summary()
     end
   end
 
-  foo = {
-    "version": "14.0.0",
-    "vulnerabilities": [
-      {
-        "id": "038e8c173096a16af7zzzzzzzzzc9a4fa164e9da701046ce95",
-        "category": "dependency_scanning",
-        "name": "Unreliable libraries",
-        "message": "Libraries that are not frequently mantained detected",
-        "description": "Based on the score calculated from the librariy metadata the below libraries seems to have less frequent maintance",
-        "cve": "yarn.lock:execa:gemnasium:05cfa2e8-2d0c-42c1-8894-638e2f12ff3d",
-        "severity": "Info",
-        "solution": "Upgrade to version 2.0.0 or above.",
-        "scanner": {
-          "id": "depscore",
-          "name": "depscore",
-        },
-        "location": {
-          "file": "Gemfile.lock",
-          "dependency": {
-            "iid": 333,
-            "package": {
-              "name": "abstract_type"
+  foo = "
+  {
+    'version': '14.0.0',
+    'vulnerabilities': [
+        {
+            'id': '038e8c173096a16af7zzzzzzzzzc9a4fa164e9da701046ce95',
+            'category': 'dependency_scanning',
+            'name': 'Unreliable libraries',
+            'message': 'Libraries that are not frequently mantained detected',
+            'description': 'Based on the score calculated from the librariy metadata the below libraries seems to have less frequent maintance',
+            'cve': 'yarn.lock:execa:gemnasium:05cfa2e8-2d0c-42c1-8894-638e2f12ff3d',
+            'severity': 'Info',
+            'solution': 'Upgrade to version 2.0.0 or above.',
+            'scanner':
+            {
+                'id': 'depscore',
+                'name': 'depscore',
             },
-            "version": "1.0.0",
-          },
-        },
-        "identifiers": [],
-        "links": [],
-      },
-    ],
-    "remediations": [],
-    "dependency_files": [],
-    "scan": {
-      "scanner": {
-        "id": "depscore",
-        "name": "Depscore",
-        "url": "https://gitlab.com/gitlab-org/tbd/analyzers/tbd",
-        "vendor": {
-          "name": "GitLab",
-        },
-        "version": "2.29.7",
-      },
-      "type": "dependency_scanning",
-      "start_time": "2021-06-16T06:58:17",
-      "end_time": "2021-06-16T06:58:18",
-      "status": "success",
-    },
-  }
+            'location':
+            {
+                'file': 'client/package.json',
+                'dependency':
+                {
+                    'package':
+                    {
+                        'name': 'handlebars',
+                    },
+                    'version': '4.0.11',
+                },
+            },
+            'identifiers':[
+            {
+                'type': 'gemnasium',
+                'name': 'Gemnasium-4f3402a7-97dd-45fc-9ed5-f49e707020c3',
+                'value': '4f3402a7-97dd-45fc-9ed5-f49e707020c3',
+                'url': 'https://gitlab.com/gitlab-org/security-products/gemnasium-db/-/blob/master/npm/postcss/CVE-2021-23382.yml'
+            },
+            {
+                'type': 'cve',
+                'name': 'CVE-2021-23382',
+                'value': 'CVE-2021-23382',
+                'url': 'https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2021-23382'
+            }]
+    }]
+}
+"
 
   summary_json = JSON(foo)
-  File.open("gl-dependency-scanning-report.json", "w") do |f|
+  File.open("gl-depscore-report.json", "w") do |f|
     f.write(summary_json)
   end
 end
-
 
 def dreport_readgems(dependencies)
   puts "[*] Reading all gems"
@@ -141,8 +136,6 @@ def dreport_read(dreport_path)
     end
   end
 end
-
-
 
 def gofor_gemfile
   gemscore = GemScore.new
