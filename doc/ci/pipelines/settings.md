@@ -232,7 +232,7 @@ averaged.
 > - [Graph introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/33743) in GitLab 13.1.
 
 To see the evolution of your project code coverage over time,
-you can view a graph or download a CSV file with this data. From your project:
+you can view a graph or download a CSV file with this data.
 
 1. On the top bar, select **Menu > Projects** and find your project.
 1. On the left sidebar, select **Analytics > Repository**.
