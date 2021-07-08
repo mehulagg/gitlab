@@ -107,6 +107,7 @@ export default {
       :items="runners"
       :fields="$options.fields"
       :tbody-tr-attr="runnerTrAttr"
+      data-testid="runner-list"
       stacked="md"
       fixed
     >

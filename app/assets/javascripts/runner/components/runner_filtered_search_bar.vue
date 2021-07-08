@@ -153,6 +153,7 @@ export default {
     :initial-sort-by="initialSortBy"
     :tokens="searchTokens"
     :search-input-placeholder="__('Search or filter results...')"
+    data-testid="runners-filtered-search"
     @onFilter="onFilter"
     @onSort="onSort"
   />
