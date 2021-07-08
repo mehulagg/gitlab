@@ -267,7 +267,7 @@ in issues or merge requests in these scenarios:
 - The people participating in the thread are trolling, abusive, or otherwise
   being unproductive.
 
-In these cases, a user with Developer permissions or higher in the project can lock (and unlock)
+In these cases, a user with the Developer role or higher in the project can lock (and unlock)
 an issue or a merge request, using the "Lock" section in the sidebar. For issues,
 a user with Reporter permissions can lock (and unlock).
 
