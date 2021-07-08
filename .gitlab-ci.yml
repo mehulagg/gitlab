@@ -15,7 +15,7 @@ gemnasium-dependency_scanning:
 score_dependency_scanning:
   image: ruby:2.6-alpine3.13
   stage: depscore
-  needs: ["gemnasium-dependency_scanning"]
+  # needs: ["gemnasium-dependency_scanning"]
   before_script:
     - echo "Running before_script"
     - gem install httparty
