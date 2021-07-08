@@ -4,7 +4,7 @@
 CHANGED_SCHEMA_MESSAGE = <<~MSG
 To notify the Data Team about changes to the db/structure.sql file, add label `tbd`
 
-/label ~"tbd"
+/label ~"Data Warehouse::Impact Check"
 
 MSG
 
