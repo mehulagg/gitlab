@@ -208,6 +208,10 @@ If you need to specifically remove a part of the file, you can also copy and pas
 [Auto DevOps template](https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/Auto-DevOps.gitlab-ci.yml)
 into your project and edit it as needed.
 
+## Use multiple Kubernetes clusters
+
+See [Multiple Kubernetes clusters for Auto DevOps](multiple_clusters_auto_devops.md).
+
 ## Customizing the Kubernetes namespace
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/27630) in GitLab 12.6.
