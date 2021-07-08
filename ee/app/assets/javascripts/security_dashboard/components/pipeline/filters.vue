@@ -1,22 +1,22 @@
 <script>
 import { GlToggle } from '@gitlab/ui';
 import { mapState, mapActions } from 'vuex';
-import { severityFilter, standardScannerFilter } from 'ee/security_dashboard/helpers';
+import { severityFilter, simpleScannerFilter } from 'ee/security_dashboard/helpers';
 import { DISMISSAL_STATES } from 'ee/security_dashboard/store/modules/filters/constants';
 import { s__ } from '~/locale';
-import StandardFilter from '../shared/filters/standard_filter.vue';
+import SimpleFilter from '../shared/filters/simple_filter.vue';
 
 export default {
   i18n: {
     toggleLabel: s__('SecurityReports|Hide dismissed'),
   },
   components: {
-    StandardFilter,
+    SimpleFilter,
     GlToggle,
   },
   data() {
     return {
-      filterConfigs: [severityFilter, standardScannerFilter],
+      filterConfigs: [severityFilter, simpleScannerFilter],
     };
   },
   computed: {
@@ -39,7 +39,7 @@ export default {
 <template>
   <div class="dashboard-filters border-bottom bg-gray-light">
     <div class="row mx-0 p-2">
-      <standard-filter
+      <simple-filter
         v-for="filter in filterConfigs"
         :key="filter.id"
         class="col-sm-6 col-md-4 col-lg-2 p-2 js-filter"

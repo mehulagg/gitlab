@@ -4,17 +4,17 @@ import {
   stateFilter,
   severityFilter,
   vendorScannerFilter,
-  standardScannerFilter,
+  simpleScannerFilter,
   activityFilter,
   getProjectFilter,
 } from 'ee/security_dashboard/helpers';
 import { DASHBOARD_TYPES } from 'ee/security_dashboard/store/constants';
 import ActivityFilter from './activity_filter.vue';
 import ScannerFilter from './scanner_filter.vue';
-import StandardFilter from './standard_filter.vue';
+import SimpleFilter from './simple_filter.vue';
 
 export default {
-  components: { StandardFilter, ScannerFilter, ActivityFilter },
+  components: { SimpleFilter, ScannerFilter, ActivityFilter },
   inject: ['dashboardType'],
   props: {
     projects: { type: Array, required: false, default: undefined },
@@ -22,7 +22,6 @@ export default {
   data() {
     return {
       filterQuery: {},
-      standardFilters: [stateFilter, severityFilter],
     };
   },
   computed: {
@@ -44,14 +43,16 @@ export default {
       this.filterQuery = { ...this.filterQuery, ...query };
       this.emitFilterChange();
     },
-    // When this component is first shown, every filter will emit its own @filter-changed event at,
-    // which will trigger this method multiple times. We'll debounce it so that it only runs once.
+    // When this component is first shown, every filter will emit its own @filter-changed event at
+    // the same time, which will trigger this method multiple times. We'll debounce it so that it
+    // only runs once.
     emitFilterChange: debounce(function emit() {
       this.$emit('filterChange', this.filterQuery);
     }),
   },
+  simpleFilters: [stateFilter, severityFilter],
   vendorScannerFilter,
-  standardScannerFilter,
+  simpleScannerFilter,
   activityFilter,
 };
 </script>
@@ -60,8 +61,8 @@ export default {
   <div
     class="vulnerability-report-filters gl-p-5 gl-bg-gray-10 gl-border-b-1 gl-border-b-solid gl-border-b-gray-100"
   >
-    <standard-filter
-      v-for="filter in standardFilters"
+    <simple-filter
+      v-for="filter in $options.simpleFilters"
       :key="filter.id"
       :filter="filter"
       :data-testid="filter.id"
@@ -73,10 +74,10 @@ export default {
       :filter="$options.vendorScannerFilter"
       @filter-changed="updateFilterQuery"
     />
-    <standard-filter
+    <simple-filter
       v-else
-      :filter="$options.standardScannerFilter"
-      :data-testid="$options.standardScannerFilter.id"
+      :filter="$options.simpleScannerFilter"
+      :data-testid="$options.simpleScannerFilter.id"
       @filter-changed="updateFilterQuery"
     />
 
@@ -85,7 +86,7 @@ export default {
       :filter="$options.activityFilter"
       @filter-changed="updateFilterQuery"
     />
-    <standard-filter
+    <simple-filter
       v-if="shouldShowProjectFilter"
       :filter="projectFilter"
       :data-testid="projectFilter.id"

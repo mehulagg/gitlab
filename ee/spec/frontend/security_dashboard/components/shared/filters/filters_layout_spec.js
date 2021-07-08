@@ -2,8 +2,8 @@ import { shallowMount } from '@vue/test-utils';
 import ActivityFilter from 'ee/security_dashboard/components/shared/filters/activity_filter.vue';
 import Filters from 'ee/security_dashboard/components/shared/filters/filters_layout.vue';
 import ScannerFilter from 'ee/security_dashboard/components/shared/filters/scanner_filter.vue';
-import StandardFilter from 'ee/security_dashboard/components/shared/filters/standard_filter.vue';
-import { getProjectFilter, standardScannerFilter } from 'ee/security_dashboard/helpers';
+import SimpleFilter from 'ee/security_dashboard/components/shared/filters/simple_filter.vue';
+import { getProjectFilter, simpleScannerFilter } from 'ee/security_dashboard/helpers';
 import { DASHBOARD_TYPES } from 'ee/security_dashboard/store/constants';
 import { extendedWrapper } from 'helpers/vue_test_utils_helper';
 
@@ -15,8 +15,8 @@ describe('First class vulnerability filters component', () => {
     { id: 'gid://gitlab/Project/12', name: 'GitLab Com' },
   ];
 
-  const findStandardFilters = () => wrapper.findAllComponents(StandardFilter);
-  const findStandardScannerFilter = () => wrapper.findByTestId(standardScannerFilter.id);
+  const findSimpleFilters = () => wrapper.findAllComponents(SimpleFilter);
+  const findSimpleScannerFilter = () => wrapper.findByTestId(simpleScannerFilter.id);
   const findVendorScannerFilter = () => wrapper.findComponent(ScannerFilter);
   const findActivityFilter = () => wrapper.findComponent(ActivityFilter);
   const findProjectFilter = () => wrapper.findByTestId(getProjectFilter([]).id);
@@ -43,7 +43,7 @@ describe('First class vulnerability filters component', () => {
     });
 
     it('should render the default filters', () => {
-      expect(findStandardFilters()).toHaveLength(2);
+      expect(findSimpleFilters()).toHaveLength(2);
       expect(findActivityFilter().exists()).toBe(true);
       expect(findProjectFilter().exists()).toBe(false);
     });
@@ -85,15 +85,15 @@ describe('First class vulnerability filters component', () => {
 
   describe('scanner filter', () => {
     it.each`
-      type          | dashboardType
-      ${'vendor'}   | ${DASHBOARD_TYPES.PROJECT}
-      ${'standard'} | ${DASHBOARD_TYPES.GROUP}
-      ${'standard'} | ${DASHBOARD_TYPES.INSTANCE}
-      ${'standard'} | ${DASHBOARD_TYPES.PIPELINE}
+      type        | dashboardType
+      ${'vendor'} | ${DASHBOARD_TYPES.PROJECT}
+      ${'simple'} | ${DASHBOARD_TYPES.GROUP}
+      ${'simple'} | ${DASHBOARD_TYPES.INSTANCE}
+      ${'simple'} | ${DASHBOARD_TYPES.PIPELINE}
     `('shows the $type scanner filter on the $dashboardType report', ({ type, dashboardType }) => {
       wrapper = createComponent({ provide: { dashboardType } });
 
-      expect(findStandardScannerFilter().exists()).toBe(type === 'standard');
+      expect(findSimpleScannerFilter().exists()).toBe(type === 'simple');
       expect(findVendorScannerFilter().exists()).toBe(type === 'vendor');
     });
   });

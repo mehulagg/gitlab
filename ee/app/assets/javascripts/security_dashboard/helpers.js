@@ -46,7 +46,7 @@ export const createScannerOption = (vendor, reportType) => {
 // This is used on the pipeline security tab, group-level report, and instance-level report. It's
 // used by the scanner filter that shows a flat list of scan types (DAST, SAST, etc) with no vendor
 // grouping.
-export const standardScannerFilter = {
+export const simpleScannerFilter = {
   name: s__('SecurityReports|Scanner'),
   id: 'reportType',
   options: parseOptions(REPORT_TYPES),

@@ -12,14 +12,14 @@ RSpec.describe EE::Gitlab::Checks::PushRules::CommitCheck do
       it_behaves_like 'check ignored when push rule unlicensed'
 
       it 'returns an error if the rule fails due to missing required characters' do
-        expect { subject.validate! }.to raise_error(Gitlab::GitAccess::ForbiddenError, "Commit rejected: Commit message of 54fcc214 does not follow the pattern '#{push_rule.commit_message_regex}'. See https://docs.gitlab.com/ee/push_rules/push_rules.html#commit-messages-with-a-specific-reference for advice.")
+        expect { subject.validate! }.to raise_error(Gitlab::GitAccess::ForbiddenError, "Commit message does not follow the pattern '#{push_rule.commit_message_regex}'")
       end
 
       it 'returns an error if the rule fails due to forbidden characters' do
         push_rule.commit_message_regex = nil
         push_rule.commit_message_negative_regex = '.*'
 
-        expect { subject.validate! }.to raise_error(Gitlab::GitAccess::ForbiddenError, "Commit rejected: Commit message of 54fcc214 contains the forbidden pattern '#{push_rule.commit_message_negative_regex}'. See https://docs.gitlab.com/ee/push_rules/push_rules.html#commit-messages-with-a-specific-reference for advice.")
+        expect { subject.validate! }.to raise_error(Gitlab::GitAccess::ForbiddenError, "Commit message contains the forbidden pattern '#{push_rule.commit_message_negative_regex}'")
       end
 
       it 'returns an error if the regex is invalid' do
