@@ -446,60 +446,6 @@ RSpec.describe Gitlab::Database::LoadBalancing::LoadBalancer, :request_store do
     end
   end
 
-  describe '#select_caught_up_hosts' do
-    let(:location) { 'AB/12345'}
-    let(:hosts) { lb.host_list.hosts }
-    let(:valid_host_list) { RequestStore[described_class::VALID_HOSTS_CACHE_KEY] }
-    let(:valid_hosts) { valid_host_list.hosts }
-
-    subject { lb.select_caught_up_hosts(location) }
-
-    context 'when all replicas are caught up' do
-      before do
-        expect(hosts).to all(receive(:caught_up?).with(location).and_return(true))
-      end
-
-      it 'returns true and sets all hosts to valid' do
-        expect(subject).to be true
-        expect(valid_host_list).to be_a(Gitlab::Database::LoadBalancing::HostList)
-        expect(valid_hosts).to contain_exactly(*hosts)
-      end
-    end
-
-    context 'when none of the replicas are caught up' do
-      before do
-        expect(hosts).to all(receive(:caught_up?).with(location).and_return(false))
-      end
-
-      it 'returns false and does not set the valid hosts' do
-        expect(subject).to be false
-        expect(valid_host_list).to be_nil
-      end
-    end
-
-    context 'when one of the replicas is caught up' do
-      before do
-        expect(hosts[0]).to receive(:caught_up?).with(location).and_return(false)
-        expect(hosts[1]).to receive(:caught_up?).with(location).and_return(true)
-      end
-
-      it 'returns true and sets one host to valid' do
-        expect(subject).to be true
-        expect(valid_host_list).to be_a(Gitlab::Database::LoadBalancing::HostList)
-        expect(valid_hosts).to contain_exactly(hosts[1])
-      end
-
-      it 'host always returns the caught-up replica' do
-        subject
-
-        3.times do
-          expect(lb.host).to eq(hosts[1])
-          RequestStore.delete(described_class::CACHE_KEY)
-        end
-      end
-    end
-  end
-
   describe '#select_up_to_date_host' do
     let(:location) { 'AB/12345'}
     let(:hosts) { lb.host_list.hosts }
