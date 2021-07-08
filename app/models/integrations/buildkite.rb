@@ -85,7 +85,7 @@ module Integrations
         { type: 'text',
           name: 'token',
           title: _('Token'),
-          help: s_('ProjectService|This is the token you get after you create a Buildkite pipeline with a GitLab repository.'),
+          help: s_('ProjectService|The token you get after you create a Buildkite pipeline with a GitLab repository.'),
           required: true },
 
         { type: 'text',

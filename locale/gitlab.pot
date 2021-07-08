@@ -25579,7 +25579,7 @@ msgstr ""
 msgid "ProjectService|The build configuration ID of the TeamCity project."
 msgstr ""
 
-msgid "ProjectService|This is the token you get after you create a Buildkite pipeline with a GitLab repository."
+msgid "ProjectService|The token you get after you create a Buildkite pipeline with a GitLab repository."
 msgstr ""
 
 msgid "ProjectService|To configure this integration, you should:"
