@@ -5928,7 +5928,7 @@ msgstr ""
 msgid "Campfire token"
 msgstr ""
 
-msgid "CampfireService|Send notifications about push events to Campfire chat rooms. Note that %{campfire_retired_link}."
+msgid "CampfireService|Send notifications about push events to Campfire chat rooms. Note that %{campfire_retired_link_start}new users can no longer sign up for Campfire%{campfire_retired_link_end}."
 msgstr ""
 
 msgid "CampfireService|The Campfire API authentication token. To find it, log into Campfire and select \"My info\"."
@@ -5937,10 +5937,7 @@ msgstr ""
 msgid "CampfireService|The last part of the URL when you're in a room."
 msgstr ""
 
-msgid "CampfireService|What's between %{url_part_1} and %{url_part_2} when you're logged in."
-msgstr ""
-
-msgid "CampfireService|new users can no longer sign up for Campfire"
+msgid "CampfireService|What's between %{code_open}https://%{code_close} and %{code_open}.campfirenow.com%{code_close} when you're logged in."
 msgstr ""
 
 msgid "Can be manually deployed to"
