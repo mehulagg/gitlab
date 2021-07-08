@@ -41,6 +41,7 @@ export default {
     return {
       isLoading: true,
       isLoadingStatus: false,
+      isUpdatingLabels: false,
       isUpdatingStatus: false,
       errorMessage: null,
       issue: {},
@@ -84,6 +85,23 @@ export default {
       return `jira_note_${id}`;
     },
 
+    onIssueLabelsUpdated(labels) {
+      this.isUpdatingLabels = true;
+      updateIssue(this.issue, { labels })
+        .then((response) => {
+          this.issue.labels = response.labels;
+        })
+        .catch(() => {
+          createFlash({
+            message: s__(
+              'JiraService|Failed to update Jira issue labels. View the issue in Jira, or reload the page.',
+            ),
+          });
+        })
+        .finally(() => {
+          this.isUpdatingLabels = false;
+        });
+    },
     onIssueStatusFetch() {
       this.isLoadingStatus = true;
       fetchIssueStatuses()
@@ -104,8 +122,8 @@ export default {
     onIssueStatusUpdated(status) {
       this.isUpdatingStatus = true;
       updateIssue(this.issue, { status })
-        .then(() => {
-          this.issue = { ...this.issue, status };
+        .then((response) => {
+          this.issue.status = response.status;
         })
         .catch(() => {
           createFlash({
@@ -161,8 +179,10 @@ export default {
             :sidebar-expanded="sidebarExpanded"
             :issue="issue"
             :is-loading-status="isLoadingStatus"
+            :is-updating-labels="isUpdatingLabels"
             :is-updating-status="isUpdatingStatus"
             :statuses="statuses"
+            @issue-labels-updated="onIssueLabelsUpdated"
             @issue-status-fetch="onIssueStatusFetch"
             @issue-status-updated="onIssueStatusUpdated"
           />

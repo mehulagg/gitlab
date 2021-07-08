@@ -4,7 +4,7 @@ import projectsQuery from 'ee/security_dashboard/graphql/queries/instance_projec
 import { PROJECT_LOADING_ERROR_MESSAGE } from 'ee/security_dashboard/helpers';
 import createFlash from '~/flash';
 import { s__ } from '~/locale';
-import ProjectAvatar from '~/vue_shared/components/project_avatar/default.vue';
+import ProjectAvatar from '~/vue_shared/components/deprecated_project_avatar/default.vue';
 
 export default {
   i18n: {

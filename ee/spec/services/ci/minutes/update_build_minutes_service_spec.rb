@@ -31,6 +31,30 @@ RSpec.describe Ci::Minutes::UpdateBuildMinutesService do
   end
 
   shared_examples 'execute service' do
+    shared_examples 'does nothing' do
+      it 'does not update legacy statistics' do
+        subject
+
+        expect(project.statistics.reload.shared_runners_seconds).to eq(0)
+        expect(namespace.namespace_statistics).to be_nil
+      end
+
+      it 'does not update namespace monthly usage' do
+        expect { subject }.not_to change { Ci::Minutes::NamespaceMonthlyUsage.count }
+      end
+
+      it 'does not update project monthly usage' do
+        expect { subject }.not_to change { Ci::Minutes::ProjectMonthlyUsage.count }
+      end
+
+      it 'does not observe the difference between actual vs live consumption' do
+        expect(::Gitlab::Ci::Pipeline::Metrics)
+          .not_to receive(:gitlab_ci_difference_live_vs_actual_minutes)
+
+        subject
+      end
+    end
+
     context 'with shared runner' do
       let(:cost_factor) { 2.0 }
       let(:runner) { create(:ci_runner, :instance, private_projects_minutes_cost_factor: cost_factor) }
@@ -65,7 +89,17 @@ RSpec.describe Ci::Minutes::UpdateBuildMinutesService do
         end
       end
 
-      context 'when statistics are created' do
+      context 'when consumption is 0' do
+        let(:build) do
+          create(:ci_build, :success,
+            runner: runner, pipeline: pipeline,
+            started_at: Time.current, finished_at: Time.current)
+        end
+
+        it_behaves_like 'does nothing'
+      end
+
+      context 'when statistics and usage have existing amounts' do
         let(:usage_in_seconds) { 100 }
         let(:usage_in_minutes) { (100.to_f / 60).round(2) }
 
@@ -182,19 +216,7 @@ RSpec.describe Ci::Minutes::UpdateBuildMinutesService do
     context 'for specific runner' do
       let(:runner) { create(:ci_runner, :project) }
 
-      it 'does not create statistics' do
-        subject
-
-        expect(namespace.namespace_statistics).to be_nil
-      end
-
-      it 'does not track namespace monthly usage' do
-        expect { subject }.not_to change { Ci::Minutes::NamespaceMonthlyUsage.count }
-      end
-
-      it 'does not track project monthly usage' do
-        expect { subject }.not_to change { Ci::Minutes::ProjectMonthlyUsage.count }
-      end
+      it_behaves_like 'does nothing'
     end
   end
 

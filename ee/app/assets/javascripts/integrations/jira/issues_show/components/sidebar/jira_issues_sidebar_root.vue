@@ -19,6 +19,9 @@ export default {
   },
   mixins: [glFeatureFlagsMixin()],
   inject: {
+    issueLabelsPath: {
+      default: null,
+    },
     issuesListPath: {
       default: null,
     },
@@ -37,6 +40,11 @@ export default {
       required: false,
       default: false,
     },
+    isUpdatingLabels: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
     isUpdatingStatus: {
       type: Boolean,
       required: false,
@@ -48,6 +56,11 @@ export default {
       default: () => [],
     },
   },
+  data() {
+    return {
+      isEditingLabels: false,
+    };
+  },
   computed: {
     assignee() {
       // Jira issues have at most 1 assignee
@@ -55,6 +68,9 @@ export default {
     },
     reference() {
       return this.issue.references?.relative;
+    },
+    canUpdateLabels() {
+      return this.glFeatures.jiraIssueDetailsEditLabels;
     },
     canUpdateStatus() {
       return this.glFeatures.jiraIssueDetailsEditStatus;
@@ -75,6 +91,10 @@ export default {
     toggleSidebar() {
       this.sidebarToggleEl.dispatchEvent(new Event('click'));
     },
+    afterSidebarTransitioned(callback) {
+      // Wait for sidebar expand animation to complete
+      this.sidebarEl.addEventListener('transitionend', callback, { once: true });
+    },
     expandSidebarAndOpenDropdown(dropdownRef = null) {
       // Expand the sidebar if not already expanded.
       if (!this.sidebarExpanded) {
@@ -82,16 +102,22 @@ export default {
       }
 
       if (dropdownRef) {
-        // Wait for sidebar expand animation to complete
-        // before revealing the dropdown.
-        this.sidebarEl.addEventListener(
-          'transitionend',
-          () => {
-            dropdownRef.expand();
-          },
-          { once: true },
-        );
+        this.afterSidebarTransitioned(() => {
+          dropdownRef.expand();
+        });
       }
+    },
+    onIssueLabelsClose() {
+      this.isEditingLabels = false;
+    },
+    onIssueLabelsToggle() {
+      this.expandSidebarAndOpenDropdown();
+      this.afterSidebarTransitioned(() => {
+        this.isEditingLabels = true;
+      });
+    },
+    onIssueLabelsUpdated(labels) {
+      this.$emit('issue-labels-updated', labels);
     },
     onIssueStatusFetch() {
       this.$emit('issue-status-fetch');
@@ -122,11 +148,19 @@ export default {
       @issue-field-updated="onIssueStatusUpdated"
     />
     <labels-select
+      :allow-label-edit="canUpdateLabels"
+      :allow-multiselect="true"
       :selected-labels="issue.labels"
+      :labels-fetch-path="issueLabelsPath"
       :labels-filter-base-path="issuesListPath"
       :labels-filter-param="$options.labelsFilterParam"
+      :labels-select-in-progress="isUpdatingLabels"
+      :is-editing="isEditingLabels"
       variant="sidebar"
       class="block labels js-labels-block"
+      @onDropdownClose="onIssueLabelsClose"
+      @toggleCollapse="onIssueLabelsToggle"
+      @updateSelectedLabels="onIssueLabelsUpdated"
     >
       {{ __('None') }}
     </labels-select>

@@ -110,6 +110,7 @@ describe('AddEditsEscalationPolicyModal', () => {
 
     it('clears the form on modal cancel', async () => {
       updateForm();
+      await wrapper.vm.$nextTick();
       expect(findEscalationPolicyForm().props('form')).toMatchObject({
         name: updatedName,
         description: updatedDescription,
@@ -180,6 +181,7 @@ describe('AddEditsEscalationPolicyModal', () => {
 
     it('clears the form on modal cancel', async () => {
       updateForm();
+      await wrapper.vm.$nextTick();
       const getForm = () => findEscalationPolicyForm().props('form');
       expect(getForm()).toMatchObject({
         name: updatedName,

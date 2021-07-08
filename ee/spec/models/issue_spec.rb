@@ -434,10 +434,17 @@ RSpec.describe Issue do
     end
 
     context 'by blocking issues' do
-      it 'orders by descending blocking issues count' do
-        issue_1 = create(:issue, blocking_issues_count: 3)
-        issue_2 = create(:issue, blocking_issues_count: 2)
+      let_it_be(:issue_1) { create(:issue, blocking_issues_count: 3) }
+      let_it_be(:issue_2) { create(:issue, blocking_issues_count: 1) }
 
+      it 'orders by ascending blocking issues count', :aggregate_failures do
+        results = described_class.sort_by_attribute('blocking_issues_asc')
+
+        expect(results.first).to eq(issue_2)
+        expect(results.second).to eq(issue_1)
+      end
+
+      it 'orders by descending blocking issues count', :aggregate_failures do
         results = described_class.sort_by_attribute('blocking_issues_desc')
 
         expect(results.first).to eq(issue_1)

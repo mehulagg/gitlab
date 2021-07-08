@@ -135,12 +135,13 @@ RSpec.describe Projects::ThreatMonitoringController do
 
   describe 'GET edit' do
     subject do
-      get :edit, params: { namespace_id: project.namespace, project_id: project, id: 'policy', environment_id: environment_id }
+      get :edit, params: { namespace_id: project.namespace, project_id: project, id: 'policy', environment_id: environment_id, kind: kind }
     end
 
     let_it_be(:environment) { create(:environment, :with_review_app, project: project) }
 
     let(:environment_id) { environment.id }
+    let(:kind) { 'CiliumNetworkPolicy' }
 
     context 'with authorized user' do
       before do
@@ -174,6 +175,32 @@ RSpec.describe Projects::ThreatMonitoringController do
 
           expect(response).to have_gitlab_http_status(:ok)
           expect(response).to render_template(:edit)
+        end
+
+        context 'when different policy kind is requested' do
+          let(:policy) do
+            Gitlab::Kubernetes::NetworkPolicy.new(
+              name: 'not-cilium-policy',
+              namespace: 'another',
+              selector: { matchLabels: { role: 'db' } },
+              ingress: [{ from: [{ namespaceSelector: { matchLabels: { project: 'myproject' } } }] }]
+            )
+          end
+
+          before do
+            allow(NetworkPolicies::FindResourceService).to(
+              receive(:new)
+                .with(resource_name: 'policy', environment: environment, kind: Gitlab::Kubernetes::NetworkPolicy::KIND)
+                .and_return(service)
+            )
+          end
+
+          it 'renders the new template' do
+            subject
+
+            expect(response).to have_gitlab_http_status(:ok)
+            expect(response).to render_template(:edit)
+          end
         end
 
         context 'when environment is missing' do

@@ -7,7 +7,8 @@ RSpec.describe 'Pipeline', :js do
   include ProjectForksHelper
   include ::ExclusiveLeaseHelpers
 
-  let(:project) { create(:project) }
+  let_it_be(:project) { create(:project) }
+
   let(:user) { create(:user) }
   let(:role) { :developer }
 
@@ -59,8 +60,9 @@ RSpec.describe 'Pipeline', :js do
   describe 'GET /:project/-/pipelines/:id' do
     include_context 'pipeline builds'
 
-    let(:group) { create(:group) }
-    let(:project) { create(:project, :repository, group: group) }
+    let_it_be(:group) { create(:group) }
+    let_it_be(:project, reload: true) { create(:project, :repository, group: group) }
+
     let(:pipeline) { create(:ci_pipeline, project: project, ref: 'master', sha: project.commit.id, user: user) }
 
     subject(:visit_pipeline) { visit project_pipeline_path(project, pipeline) }
@@ -246,6 +248,8 @@ RSpec.describe 'Pipeline', :js do
       end
 
       context 'when pipeline has a delayed job' do
+        let(:project) { create(:project, :repository, group: group) }
+
         it 'shows the scheduled icon and an unschedule action for the delayed job' do
           page.within('#ci-badge-delayed-job') do
             expect(page).to have_selector('.js-ci-status-icon-scheduled')
@@ -564,6 +568,7 @@ RSpec.describe 'Pipeline', :js do
     end
 
     context 'when pipeline is merge request pipeline' do
+      let(:project) { create(:project, :repository, group: group) }
       let(:source_project) { project }
       let(:target_project) { project }
 
@@ -648,7 +653,8 @@ RSpec.describe 'Pipeline', :js do
     describe 'GET /:project/-/pipelines/:id' do
       include_context 'pipeline builds'
 
-      let(:project) { create(:project, :repository) }
+      let_it_be(:project) { create(:project, :repository) }
+
       let(:pipeline) { create(:ci_pipeline, project: project, ref: 'master', sha: project.commit.id, user: user) }
 
       before do
@@ -1011,7 +1017,8 @@ RSpec.describe 'Pipeline', :js do
   describe 'GET /:project/-/pipelines/:id/builds' do
     include_context 'pipeline builds'
 
-    let(:project) { create(:project, :repository) }
+    let_it_be(:project) { create(:project, :repository) }
+
     let(:pipeline) { create(:ci_pipeline, project: project, ref: 'master', sha: project.commit.id) }
 
     before do
@@ -1248,7 +1255,8 @@ RSpec.describe 'Pipeline', :js do
   describe 'GET /:project/-/pipelines/:id/dag' do
     include_context 'pipeline builds'
 
-    let(:project) { create(:project, :repository) }
+    let_it_be(:project) { create(:project, :repository) }
+
     let(:pipeline) { create(:ci_pipeline, project: project, ref: 'master', sha: project.commit.id) }
 
     before do
@@ -1277,7 +1285,7 @@ RSpec.describe 'Pipeline', :js do
   end
 
   context 'when user sees pipeline flags in a pipeline detail page' do
-    let(:project) { create(:project, :repository) }
+    let_it_be(:project) { create(:project, :repository) }
 
     context 'when pipeline is latest' do
       include_context 'pipeline builds'

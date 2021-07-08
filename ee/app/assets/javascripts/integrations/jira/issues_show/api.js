@@ -16,11 +16,22 @@ export const fetchIssueStatuses = () => {
   });
 };
 
-export const updateIssue = (issue, { status }) => {
+export const updateIssue = (issue, { labels = [], status = undefined }) => {
   // We are using mock call here which should become a backend call
   return new Promise((resolve) => {
     setTimeout(() => {
-      resolve({ ...issue, status });
+      const addedLabels = labels.filter((label) => label.set);
+      const removedLabelsIds = labels.filter((label) => !label.set).map((label) => label.id);
+
+      const finalLabels = [...issue.labels, ...addedLabels].filter(
+        (label) => !removedLabelsIds.includes(label.id),
+      );
+
+      resolve({
+        ...issue,
+        ...(status ? { status } : {}),
+        labels: finalLabels,
+      });
     }, 1000);
   });
 };

@@ -63,7 +63,15 @@ RSpec.describe BuildFinishedWorker do
       end
     end
 
-    it 'processes requirements reports' do
+    it 'does not schedule processing of requirement reports by default' do
+      expect(RequirementsManagement::ProcessRequirementsReportsWorker).not_to receive(:perform_async)
+
+      subject
+    end
+
+    it 'schedules processing of requirement reports if project has requirements' do
+      create(:requirement, project: project)
+
       expect(RequirementsManagement::ProcessRequirementsReportsWorker).to receive(:perform_async)
 
       subject

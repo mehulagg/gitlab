@@ -6996,6 +6996,12 @@ msgstr ""
 msgid "ClusterAgents|Read more about getting started"
 msgstr ""
 
+msgid "ClusterAgents|Registering Agent"
+msgstr ""
+
+msgid "ClusterAgents|Select an Agent"
+msgstr ""
+
 msgid "ClusterAgents|The GitLab Agent also requires %{linkStart}enabling the Agent Server%{linkEnd}"
 msgstr ""
 
@@ -8285,13 +8291,13 @@ msgstr ""
 msgid "Configure repository mirroring."
 msgstr ""
 
+msgid "Configure repository storage."
+msgstr ""
+
 msgid "Configure settings for Advanced Search with Elasticsearch."
 msgstr ""
 
 msgid "Configure specific limits for Packages API requests that supersede the general user and IP rate limits."
-msgstr ""
-
-msgid "Configure storage path settings."
 msgstr ""
 
 msgid "Configure the %{link} integration."
@@ -12270,6 +12276,9 @@ msgstr ""
 msgid "Ensure your %{linkStart}environment is part of the deploy stage%{linkEnd} of your CI pipeline to track deployments to your cluster."
 msgstr ""
 
+msgid "Enter %{weights_link_start}weights%{weights_link_end} for storages for new repositories. Configured storages appear below."
+msgstr ""
+
 msgid "Enter 2FA for Admin Mode"
 msgstr ""
 
@@ -12325,9 +12334,6 @@ msgid "Enter the name of your application, and we'll return a unique %{type}."
 msgstr ""
 
 msgid "Enter the number of seconds, or other human-readable input, like \"1 hour\". This timeout takes precedence over lower timeouts set for the project."
-msgstr ""
-
-msgid "Enter weights for storages for new repositories."
 msgstr ""
 
 msgid "Enter your password to approve"
@@ -16181,6 +16187,9 @@ msgstr ""
 msgid "Hide host keys manual input"
 msgstr ""
 
+msgid "Hide license key"
+msgstr ""
+
 msgid "Hide list"
 msgstr ""
 
@@ -17455,6 +17464,9 @@ msgstr ""
 msgid "Install GitLab Runner on Kubernetes"
 msgstr ""
 
+msgid "Install license"
+msgstr ""
+
 msgid "Install on clusters"
 msgstr ""
 
@@ -18505,6 +18517,9 @@ msgid "JiraService|Failed to load Jira issue statuses. View the issue in Jira, o
 msgstr ""
 
 msgid "JiraService|Failed to load Jira issue. View the issue in Jira, or reload the page."
+msgstr ""
+
+msgid "JiraService|Failed to update Jira issue labels. View the issue in Jira, or reload the page."
 msgstr ""
 
 msgid "JiraService|Failed to update Jira issue status. View the issue in Jira, or reload the page."
@@ -21652,6 +21667,9 @@ msgstr ""
 msgid "NetworkPolicies|Invalid or empty policy"
 msgstr ""
 
+msgid "NetworkPolicies|Invalid or unsupported policy kind"
+msgstr ""
+
 msgid "NetworkPolicies|Kubernetes error: %{error}"
 msgstr ""
 
@@ -22027,6 +22045,9 @@ msgid "No %{header} for this request."
 msgstr ""
 
 msgid "No %{providerTitle} repositories found"
+msgstr ""
+
+msgid "No CSV data to display."
 msgstr ""
 
 msgid "No Epic"
@@ -23365,6 +23386,9 @@ msgstr ""
 msgid "PackageRegistry|Gradle Kotlin DSL install command"
 msgstr ""
 
+msgid "PackageRegistry|Helm"
+msgstr ""
+
 msgid "PackageRegistry|If you haven't already done so, you will need to add the below to your %{codeStart}.pypirc%{codeEnd} file."
 msgstr ""
 
@@ -23852,6 +23876,9 @@ msgid "Pipeline Schedule"
 msgstr ""
 
 msgid "Pipeline Schedules"
+msgstr ""
+
+msgid "Pipeline URL"
 msgstr ""
 
 msgid "Pipeline durations for the last 30 commits"
@@ -24655,6 +24682,9 @@ msgstr ""
 msgid "Preferences|Choose what content you want to see on your homepage."
 msgstr ""
 
+msgid "Preferences|Configure how dates and times display for you."
+msgstr ""
+
 msgid "Preferences|Customize integrations with third party services."
 msgstr ""
 
@@ -24673,7 +24703,7 @@ msgstr ""
 msgid "Preferences|Failed to save preferences."
 msgstr ""
 
-msgid "Preferences|For example: 30 mins ago."
+msgid "Preferences|For example: 30 minutes ago."
 msgstr ""
 
 msgid "Preferences|Gitpod"
@@ -24721,9 +24751,6 @@ msgstr ""
 msgid "Preferences|Tab width"
 msgstr ""
 
-msgid "Preferences|These settings will update how dates and times are displayed for you."
-msgstr ""
-
 msgid "Preferences|This feature is experimental and translations are not complete yet"
 msgstr ""
 
@@ -24731,12 +24758,6 @@ msgid "Preferences|This setting allows you to customize the appearance of the sy
 msgstr ""
 
 msgid "Preferences|This setting allows you to customize the behavior of the system layout and default views."
-msgstr ""
-
-msgid "Preferences|Time display"
-msgstr ""
-
-msgid "Preferences|Time format"
 msgstr ""
 
 msgid "Preferences|Time preferences"
@@ -25555,6 +25576,9 @@ msgstr ""
 msgid "ProjectService|Perform common operations on GitLab project: %{project_name}"
 msgstr ""
 
+msgid "ProjectService|Run CI/CD pipelines with Buildkite."
+msgstr ""
+
 msgid "ProjectService|Run CI/CD pipelines with Drone."
 msgstr ""
 
@@ -25565,6 +25589,9 @@ msgid "ProjectService|TeamCity server URL"
 msgstr ""
 
 msgid "ProjectService|The build configuration ID of the TeamCity project."
+msgstr ""
+
+msgid "ProjectService|The token you get after you create a Buildkite pipeline with a GitLab repository."
 msgstr ""
 
 msgid "ProjectService|To configure this integration, you should:"
@@ -29993,6 +30020,9 @@ msgid "Show labels"
 msgstr ""
 
 msgid "Show latest version"
+msgstr ""
+
+msgid "Show license key"
 msgstr ""
 
 msgid "Show links anyways"
@@ -35435,7 +35465,7 @@ msgstr ""
 msgid "Use hashed storage"
 msgstr ""
 
-msgid "Use hashed storage paths for newly created and renamed repositories. Enable immutable, hash-based paths and repository names to store repositories on disk. This prevents repositories from having to be moved or renamed when the Repository URL changes and may improve disk I/O performance. (Always enabled since 13.0)"
+msgid "Use hashed storage paths for newly created and renamed repositories. Always enabled since 13.0."
 msgstr ""
 
 msgid "Use one line per URI"
@@ -38016,6 +38046,12 @@ msgid "Your subscription has been downgraded."
 msgstr ""
 
 msgid "Your subscription will expire in %{remaining_days}."
+msgstr ""
+
+msgid "Your trial license was issued and activated. Install it to enjoy GitLab Ultimate for 30 days."
+msgstr ""
+
+msgid "Your trial license was issued!"
 msgstr ""
 
 msgid "Your username is %{username}."

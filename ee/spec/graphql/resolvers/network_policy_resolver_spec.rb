@@ -95,6 +95,7 @@ RSpec.describe Resolvers::NetworkPolicyResolver do
           expected_resolved = [
             {
               name: 'policy',
+              kind: 'NetworkPolicy',
               namespace: 'another',
               enabled: true,
               yaml: policy.as_json[:manifest],
@@ -105,6 +106,7 @@ RSpec.describe Resolvers::NetworkPolicyResolver do
             },
             {
               name: 'cilium_policy',
+              kind: 'CiliumNetworkPolicy',
               namespace: 'another',
               enabled: true,
               yaml: cilium_policy.as_json[:manifest],
