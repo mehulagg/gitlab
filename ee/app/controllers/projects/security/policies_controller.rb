@@ -5,9 +5,12 @@ module Projects
     class PoliciesController < Projects::ApplicationController
       include SecurityAndCompliancePermissions
 
+      before_action :authorize_security_orchestration_policies!
+      before_action :authorize_update_security_orchestration_policy_project!, only: [:assign]
+
       before_action do
         push_frontend_feature_flag(:security_orchestration_policies_configuration, project)
-        check_permissions!
+        check_feature_flag!
       end
 
       feature_category :security_orchestration
@@ -32,8 +35,8 @@ module Projects
 
       private
 
-      def check_permissions!
-        render_404 unless Feature.enabled?(:security_orchestration_policies_configuration, project) && can?(current_user, :security_orchestration_policies, project)
+      def check_feature_flag!
+        render_404 if Feature.disabled?(:security_orchestration_policies_configuration, project)
       end
 
       def policy_project_params

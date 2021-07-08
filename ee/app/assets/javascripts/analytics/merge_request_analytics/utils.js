@@ -1,11 +1,11 @@
 import dateFormat from 'dateformat';
+import { dateFormats } from '~/analytics/shared/constants';
 import {
   getMonthNames,
   getDateInPast,
   getDayDifference,
   secondsToDays,
 } from '~/lib/utils/datetime_utility';
-import { dateFormats } from '../shared/constants';
 import { THROUGHPUT_CHART_STRINGS, DEFAULT_NUMBER_OF_DAYS, UNITS } from './constants';
 
 /**

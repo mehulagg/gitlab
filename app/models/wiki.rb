@@ -249,8 +249,6 @@ class Wiki
 
   override :default_branch
   def default_branch
-    return 'master' if Feature.disabled?(:wiki_uses_default_branch, user, default_enabled: :yaml)
-
     super || wiki.class.default_ref(container)
   end
 
@@ -276,6 +274,19 @@ class Wiki
 
   def cleanup
     @repository = nil
+  end
+
+  def capture_git_error(action, &block)
+    yield block
+  rescue Gitlab::Git::Index::IndexError,
+         Gitlab::Git::CommitError,
+         Gitlab::Git::PreReceiveError,
+         Gitlab::Git::CommandError,
+         ArgumentError => error
+
+    Gitlab::ErrorTracking.log_exception(error, action: action, wiki_id: id)
+
+    false
   end
 
   private
@@ -309,19 +320,6 @@ class Wiki
 
   def default_message(action, title)
     "#{user.username} #{action} page: #{title}"
-  end
-
-  def capture_git_error(action, &block)
-    yield block
-  rescue Gitlab::Git::Index::IndexError,
-         Gitlab::Git::CommitError,
-         Gitlab::Git::PreReceiveError,
-         Gitlab::Git::CommandError,
-         ArgumentError => error
-
-    Gitlab::ErrorTracking.log_exception(error, action: action, wiki_id: id)
-
-    false
   end
 
   def change_head_to_default_branch

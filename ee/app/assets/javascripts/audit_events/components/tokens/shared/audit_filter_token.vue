@@ -158,7 +158,7 @@ export default {
     </template>
     <template #suggestions>
       <template v-if="suggestionsLoading">
-        <gl-loading-icon />
+        <gl-loading-icon size="sm" />
       </template>
       <template v-else-if="hasSuggestions">
         <gl-filtered-search-suggestion

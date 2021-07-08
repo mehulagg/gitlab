@@ -155,7 +155,7 @@ module Integrations
     end
 
     def web_url(path = nil, **params)
-      return unless url.present?
+      return '' unless url.present?
 
       if Gitlab.com?
         params.merge!(ATLASSIAN_REFERRER_GITLAB_COM) unless Gitlab.staging?
@@ -575,15 +575,6 @@ module Integrations
         data_fields.deployment_cloud!
       else
         data_fields.deployment_server!
-      end
-    end
-
-    def self.event_description(event)
-      case event
-      when "merge_request", "merge_request_events"
-        s_("JiraService|Jira comments are created when an issue is referenced in a merge request.")
-      when "commit", "commit_events"
-        s_("JiraService|Jira comments are created when an issue is referenced in a commit.")
       end
     end
   end

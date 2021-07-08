@@ -19,11 +19,11 @@ RSpec.describe 'Issue weight', :js do
     page.within('.weight') do
       expect(page).to have_content "None"
 
-      click_link 'Edit'
+      click_button 'Edit'
 
       find('.block.weight input').send_keys 1, :enter
 
-      page.within('.value') do
+      page.within('[data-testid="sidebar-weight-value"]') do
         expect(page).to have_content "1"
       end
     end
@@ -37,11 +37,11 @@ RSpec.describe 'Issue weight', :js do
     page.within('.weight') do
       expect(page).to have_content "2"
 
-      click_link 'Edit'
+      click_button 'Edit'
 
       find('.block.weight input').send_keys 3, :enter
 
-      page.within('.value') do
+      page.within('[data-testid="sidebar-weight-value"]') do
         expect(page).to have_content "3"
       end
     end
@@ -55,9 +55,9 @@ RSpec.describe 'Issue weight', :js do
     page.within('.weight') do
       expect(page).to have_content "5"
 
-      click_link 'remove weight'
+      click_button 'remove weight'
 
-      page.within('.value') do
+      page.within('[data-testid="sidebar-weight-value"]') do
         expect(page).to have_content "None"
       end
     end

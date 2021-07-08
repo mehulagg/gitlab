@@ -42,11 +42,11 @@ module EE
           # In case of errors - all other checks will be canceled and push will be rejected.
           def check_commit(commit)
             unless push_rule.commit_message_allowed?(commit.safe_message)
-              return "Commit message does not follow the pattern '#{push_rule.commit_message_regex}'"
+              return "Commit rejected: Commit message of #{Commit.truncate_sha(commit.id)} does not follow the pattern '#{push_rule.commit_message_regex}'. See https://docs.gitlab.com/ee/push_rules/push_rules.html#commit-messages-with-a-specific-reference for advice."
             end
 
             if push_rule.commit_message_blocked?(commit.safe_message)
-              return "Commit message contains the forbidden pattern '#{push_rule.commit_message_negative_regex}'"
+              return "Commit rejected: Commit message of #{Commit.truncate_sha(commit.id)} contains the forbidden pattern '#{push_rule.commit_message_negative_regex}'. See https://docs.gitlab.com/ee/push_rules/push_rules.html#commit-messages-with-a-specific-reference for advice."
             end
 
             unless push_rule.author_email_allowed?(commit.committer_email)

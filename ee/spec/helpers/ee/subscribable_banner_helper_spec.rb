@@ -188,7 +188,8 @@ RSpec.describe EE::SubscribableBannerHelper do
             expect(Gitlab::ExpiringSubscriptionMessage).to receive(:new).with(
               subscribable: license,
               signed_in: true,
-              is_admin: false
+              is_admin: false,
+              force_notification: false
             ).and_return(message_mock)
 
             expect(message_mock).to receive(:message)

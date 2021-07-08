@@ -186,15 +186,12 @@ RSpec.describe MergeRequestPresenter do
 
     let(:exposed_path) { expose_path("/api/v4/projects/#{merge_request.project.id}/merge_requests/#{merge_request.iid}/status_checks") }
 
-    where(:feature_flag_enabled?, :authenticated?, :has_status_checks?, :exposes_path?) do
-      false | false | false | false
-      false | false | true  | false
-      false | true  | true  | false
-      false | true  | false | false
-      true  | false | false | false
-      true  | true  | false | false
-      true  | false | true  | false
-      true  | true  | true  | true
+    where(:authenticated?, :has_status_checks?, :exposes_path?) do
+      false | false | false
+      false | true  | false
+      true  | true  | true
+      true  | false | false
+      true  | true  | true
     end
 
     with_them do
@@ -202,7 +199,6 @@ RSpec.describe MergeRequestPresenter do
       let(:path) { exposes_path? ? exposed_path : nil }
 
       before do
-        stub_feature_flags(ff_external_status_checks: feature_flag_enabled?)
         allow(project.external_status_checks).to receive(:applicable_to_branch).and_return([{ branch: 'foo' }])
         allow(project.external_status_checks.applicable_to_branch).to receive(:any?).and_return(has_status_checks?)
       end
@@ -210,12 +206,8 @@ RSpec.describe MergeRequestPresenter do
       it { is_expected.to eq(path) }
     end
 
-    context 'with the feature flag enabled and user authenticated' do
+    context 'with the user authenticated' do
       let(:presenter) { described_class.new(merge_request, current_user: user) }
-
-      before do
-        stub_feature_flags(ff_external_status_checks: true)
-      end
 
       context 'without applicable branches' do
         before do

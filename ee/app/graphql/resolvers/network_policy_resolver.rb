@@ -29,7 +29,9 @@ module Resolvers
           updated_at: Time.iso8601(policy_json[:creation_timestamp]),
           yaml: policy_json[:manifest],
           from_auto_devops: policy_json[:is_autodevops],
-          enabled: policy_json[:is_enabled]
+          enabled: policy_json[:is_enabled],
+          environment_ids: policy_json[:environment_ids],
+          project: project
         }
       end
     end

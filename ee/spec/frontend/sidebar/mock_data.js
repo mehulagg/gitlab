@@ -166,3 +166,21 @@ export const epicAncestorsResponse = () => ({
     },
   },
 });
+
+export const issueNoWeightResponse = () => ({
+  data: {
+    workspace: {
+      issuable: { id: mockIssueId, weight: null, __typename: 'Issue' },
+      __typename: 'Project',
+    },
+  },
+});
+
+export const issueWeightResponse = () => ({
+  data: {
+    workspace: {
+      issuable: { id: mockIssueId, weight: 1, __typename: 'Issue' },
+      __typename: 'Project',
+    },
+  },
+});

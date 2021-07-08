@@ -45,6 +45,14 @@ export default {
     hasBranchDetails(mergeRequest) {
       return mergeRequest.target_branch && mergeRequest.source_branch;
     },
+    onRowClick(e, mergeRequest) {
+      const link = e.target.closest('a');
+
+      // Only toggle the drawer if the element isn't a link
+      if (!link) {
+        this.$emit('toggleDrawer', mergeRequest);
+      }
+    },
   },
   strings: {
     approvalStatusLabel: __('Approval Status'),
@@ -72,12 +80,14 @@ export default {
 
       <!-- TODO: Remove the if/else and duplicate components with https://gitlab.com/gitlab-org/gitlab/-/issues/334682 -->
       <template v-if="drawerEnabled">
-        <a
+        <div
           v-for="mergeRequest in mergeRequests"
           :key="mergeRequest.id"
           class="dashboard-merge-request dashboard-grid gl-display-grid gl-grid-tpl-rows-auto gl-hover-bg-blue-50 gl-hover-text-decoration-none gl-hover-cursor-pointer"
-          data-testid="merge-request-link"
-          @click="$emit('toggleDrawer', mergeRequest)"
+          data-testid="merge-request-drawer-toggle"
+          tabindex="0"
+          @click="onRowClick($event, mergeRequest)"
+          @keypress.enter="onRowClick($event, mergeRequest)"
         >
           <merge-request
             :key="key(mergeRequest.id, $options.keyTypes.mergeRequest)"
@@ -123,7 +133,7 @@ export default {
               </template>
             </time-ago-tooltip>
           </div>
-        </a>
+        </div>
       </template>
       <template v-else>
         <template v-for="mergeRequest in mergeRequests">

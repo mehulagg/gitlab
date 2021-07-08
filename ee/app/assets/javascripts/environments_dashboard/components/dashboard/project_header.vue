@@ -1,7 +1,7 @@
 <script>
 import { GlDropdown, GlDropdownItem, GlTooltipDirective, GlLink, GlIcon } from '@gitlab/ui';
 import { s__ } from '~/locale';
-import ProjectAvatar from '~/vue_shared/components/project_avatar/default.vue';
+import ProjectAvatar from '~/vue_shared/components/deprecated_project_avatar/default.vue';
 
 export default {
   components: {

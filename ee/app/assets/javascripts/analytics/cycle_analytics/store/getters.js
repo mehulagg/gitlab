@@ -1,12 +1,12 @@
 import dateFormat from 'dateformat';
 import { isNumber } from 'lodash';
+import { dateFormats } from '~/analytics/shared/constants';
 import { OVERVIEW_STAGE_ID } from '~/cycle_analytics/constants';
 import { pathNavigationData as basePathNavigationData } from '~/cycle_analytics/store/getters';
 import { filterStagesByHiddenStatus } from '~/cycle_analytics/utils';
 import { getIdFromGraphQLId } from '~/graphql_shared/utils';
 import httpStatus from '~/lib/utils/http_status';
 import { filterToQueryObject } from '~/vue_shared/components/filtered_search_bar/filtered_search_utils';
-import { dateFormats } from '../../shared/constants';
 import { DEFAULT_VALUE_STREAM_ID, OVERVIEW_STAGE_CONFIG, PAGINATION_TYPE } from '../constants';
 
 export const hasNoAccessError = (state) => state.errorCode === httpStatus.FORBIDDEN;

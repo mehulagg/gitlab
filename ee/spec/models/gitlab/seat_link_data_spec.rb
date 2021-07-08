@@ -89,7 +89,6 @@ RSpec.describe Gitlab::SeatLinkData do
         {
           gitlab_version: Gitlab::VERSION,
           timestamp: timestamp.iso8601,
-          date: timestamp.to_date.iso8601,
           license_key: key,
           max_historical_user_count: max_users,
           billable_users_count: billable_users_count,
@@ -108,7 +107,6 @@ RSpec.describe Gitlab::SeatLinkData do
           {
             gitlab_version: Gitlab::VERSION,
             timestamp: timestamp.iso8601,
-            date: timestamp.to_date.iso8601,
             license_key: key,
             max_historical_user_count: max_users,
             billable_users_count: billable_users_count,

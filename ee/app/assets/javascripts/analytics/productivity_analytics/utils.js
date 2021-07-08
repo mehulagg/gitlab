@@ -1,8 +1,8 @@
 import dateFormat from 'dateformat';
 import { flatten } from 'lodash';
+import { dateFormats } from '~/analytics/shared/constants';
 import { getDayDifference, getDateInPast } from '~/lib/utils/datetime_utility';
 import { median } from '~/lib/utils/number_utils';
-import { dateFormats } from '../shared/constants';
 
 /**
  * Gets the labels endpoint for a given group or project

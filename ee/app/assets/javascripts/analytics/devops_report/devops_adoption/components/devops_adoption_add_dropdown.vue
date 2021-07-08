@@ -125,7 +125,7 @@ export default {
         @input="$emit('fetchGroups', $event)"
       />
     </template>
-    <gl-loading-icon v-if="isLoadingGroups" />
+    <gl-loading-icon v-if="isLoadingGroups" size="sm" />
     <template v-else>
       <gl-dropdown-item
         v-for="group in groups"

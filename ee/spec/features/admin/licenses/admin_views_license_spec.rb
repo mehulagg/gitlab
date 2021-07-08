@@ -48,7 +48,7 @@ RSpec.describe "Admin views license" do
           travel_to(reference_date) do
             visit(admin_license_path)
 
-            expect(page).to have_content "You have 7 days to renew your subscription."
+            expect(page).to have_content 'You have 7 days to renew your subscription.'
             expect(page).to have_link 'Renew subscription', href: "#{EE::SUBSCRIPTIONS_URL}/subscriptions"
           end
         end
@@ -61,7 +61,7 @@ RSpec.describe "Admin views license" do
           travel_to(reference_date) do
             visit(admin_license_path)
 
-            expect(page).to have_content "You didn't renew your subscription so it was downgraded to the GitLab Core Plan"
+            expect(page).to have_content 'Please delete your current license if you want to downgrade to the free plan'
             expect(page).to have_link 'Upgrade your plan', href: "#{EE::SUBSCRIPTIONS_URL}/subscriptions"
           end
         end

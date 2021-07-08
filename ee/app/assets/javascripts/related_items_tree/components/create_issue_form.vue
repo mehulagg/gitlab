@@ -19,7 +19,7 @@ import { STORAGE_KEY } from '~/frequent_items/constants';
 import { getTopFrequentItems } from '~/frequent_items/utils';
 import AccessorUtilities from '~/lib/utils/accessor';
 import { __ } from '~/locale';
-import ProjectAvatar from '~/vue_shared/components/project_avatar/default.vue';
+import ProjectAvatar from '~/vue_shared/components/deprecated_project_avatar/default.vue';
 import { SEARCH_DEBOUNCE } from '../constants';
 
 export default {

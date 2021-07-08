@@ -13,7 +13,6 @@ class Groups::Analytics::CycleAnalyticsController < Groups::Analytics::Applicati
   before_action :request_params, only: :show
 
   before_action do
-    push_frontend_feature_flag(:cycle_analytics_scatterplot_enabled, default_enabled: true)
     render_403 unless can?(current_user, :read_group_cycle_analytics, @group)
   end
 

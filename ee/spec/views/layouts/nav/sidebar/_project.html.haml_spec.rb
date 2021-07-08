@@ -123,37 +123,6 @@ RSpec.describe 'layouts/nav/sidebar/_project' do
     end
   end
 
-  describe 'Monitor main link' do
-    let_it_be(:user) { create(:user) }
-
-    before do
-      project.project_feature.update!(builds_access_level: feature)
-
-      project.team.add_developer(user)
-      sign_in(user)
-    end
-
-    context 'when ci/cd is disabled' do
-      let(:feature) { ProjectFeature::DISABLED }
-
-      it 'links to feature flags page' do
-        render
-
-        expect(rendered).to have_link('Monitor', href: project_feature_flags_path(project))
-      end
-    end
-
-    context 'when ci/cd is enabled' do
-      let(:feature) { ProjectFeature::ENABLED }
-
-      it 'links to metrics page' do
-        render
-
-        expect(rendered).to have_link('Monitor', href: metrics_project_environments_path(project))
-      end
-    end
-  end
-
   describe 'Security and Compliance' do
     context 'when user does not have permissions' do
       before do

@@ -195,6 +195,10 @@ module EE
       end
     end
 
+    def can_update_security_orchestration_policy_project?(project)
+      can?(current_user, :update_security_orchestration_policy_project, project)
+    end
+
     def can_create_feedback?(project, feedback_type)
       feedback = Vulnerabilities::Feedback.new(project: project, feedback_type: feedback_type)
       can?(current_user, :create_vulnerability_feedback, feedback)

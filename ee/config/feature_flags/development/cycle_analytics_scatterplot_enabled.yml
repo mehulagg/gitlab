@@ -1,8 +1,0 @@
----
-name: cycle_analytics_scatterplot_enabled
-introduced_by_url: https://gitlab.com/gitlab-org/gitlab/-/merge_requests/20290
-rollout_issue_url: 
-milestone: '12.6'
-type: development
-group: group::optimize
-default_enabled: true

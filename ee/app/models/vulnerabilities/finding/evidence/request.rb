@@ -4,6 +4,8 @@ module Vulnerabilities
   class Finding
     class Evidence
       class Request < ApplicationRecord
+        include WithBody
+
         self.table_name = 'vulnerability_finding_evidence_requests'
 
         belongs_to :evidence, class_name: 'Vulnerabilities::Finding::Evidence', inverse_of: :request, foreign_key: 'vulnerability_finding_evidence_id', optional: false
@@ -11,7 +13,6 @@ module Vulnerabilities
 
         validates :method, length: { maximum: 32 }
         validates :url, length: { maximum: 2048 }
-        validates :body, length: { maximum: 2048 }
       end
     end
   end

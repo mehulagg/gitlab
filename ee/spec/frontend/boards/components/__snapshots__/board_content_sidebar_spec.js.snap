@@ -64,8 +64,10 @@ exports[`ee/BoardContentSidebar matches the snapshot 1`] = `
     class="labels"
   />
    
-  <boardsidebarweightinput-stub
-    class="weight"
+  <sidebarweightwidget-stub
+    full-path="gitlab-org/gitlab-test"
+    iid="27"
+    issuable-type="issue"
   />
    
   <sidebarconfidentialitywidget-stub

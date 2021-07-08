@@ -69,7 +69,7 @@ describe('ee/BoardContentSidebar', () => {
         SidebarConfidentialityWidget: true,
         SidebarDateWidget: true,
         SidebarSubscriptionsWidget: true,
-        BoardSidebarWeightInput: true,
+        SidebarWeightWidget: true,
         SidebarDropdownWidget: true,
         MountingPortal: true,
       },

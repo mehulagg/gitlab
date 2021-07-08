@@ -6,7 +6,7 @@ import PolicyList from 'ee/threat_monitoring/components/policy_list.vue';
 import networkPoliciesQuery from 'ee/threat_monitoring/graphql/queries/network_policies.query.graphql';
 import scanExecutionPoliciesQuery from 'ee/threat_monitoring/graphql/queries/scan_execution_policies.query.graphql';
 import createStore from 'ee/threat_monitoring/store';
-import createMockApolloProvider from 'helpers/mock_apollo_helper';
+import createMockApollo from 'helpers/mock_apollo_helper';
 import { mountExtended, shallowMountExtended } from 'helpers/vue_test_utils_helper';
 import waitForPromises from 'helpers/wait_for_promises';
 import { networkPolicies, scanExecutionPolicies } from '../mocks/mock_apollo';
@@ -59,7 +59,7 @@ describe('PolicyList component', () => {
           provide: {
             projectPath: fullPath,
           },
-          apolloProvider: createMockApolloProvider([
+          apolloProvider: createMockApollo([
             [networkPoliciesQuery, requestHandlers.networkPolicies],
             [scanExecutionPoliciesQuery, requestHandlers.scanExecutionPolicies],
           ]),

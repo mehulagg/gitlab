@@ -120,13 +120,6 @@ RSpec.describe Security::DependencyListService do
             expect(dependencies).to eq([{ name: "saml2-js", vulnerabilities: %w(critical medium unknown) },
                                         { name: "nokogiri", vulnerabilities: ["high"] }])
           end
-
-          it 'returns array of data with package vulnerabilities sorted in descending order' do
-            saml2js_dependency = subject.find { |dep| dep[:name] == 'saml2-js' }
-            saml2js_severities = saml2js_dependency[:vulnerabilities].map {|v| v[:severity] }
-
-            expect(saml2js_severities).to eq(%w(critical medium unknown))
-          end
         end
 
         context 'in ascending order' do
@@ -144,13 +137,6 @@ RSpec.describe Security::DependencyListService do
 
             expect(dependencies).to eq([{ name: "nokogiri", vulnerabilities: ["high"] },
                                         { name: "saml2-js", vulnerabilities: %w(critical medium unknown) }])
-          end
-
-          it 'returns array of data with package vulnerabilities sorted in descending order' do
-            saml2js_dependency = subject.find { |dep| dep[:name] == 'saml2-js' }
-            saml2js_severities = saml2js_dependency[:vulnerabilities].map {|v| v[:severity] }
-
-            expect(saml2js_severities).to eq(%w(critical medium unknown))
           end
         end
       end
