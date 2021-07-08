@@ -45,7 +45,7 @@ module Integrations
           name: 'room',
           title: _('Campfire room ID (optional)'),
           placeholder: '123456',
-          help: s_('CampfireService|The last part of the URL when you\'re in a room.'),
+          help: s_('CampfireService|The last part of the URL when you\'re in a room.')
         }
       ]
     end
