@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module Database
-  class PartitionDetachWorker
+  class PartitionManagementWorker
     include ApplicationWorker
 
     sidekiq_options retry: 3
@@ -11,7 +11,7 @@ module Database
     idempotent!
 
     def perform
-      Gitlab::Database::Partitioning::PartitionManager.new.detach_partitions
+      Gitlab::Database::Partitioning::PartitionManager.new.sync_partitions
     ensure
       Gitlab::Database::Partitioning::PartitionMonitoring.new.report_metrics
     end

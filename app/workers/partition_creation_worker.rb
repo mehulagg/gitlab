@@ -10,8 +10,6 @@ class PartitionCreationWorker
   idempotent!
 
   def perform
-    Gitlab::Database::Partitioning::PartitionManager.new.create_partitions
-  ensure
-    Gitlab::Database::Partitioning::PartitionMonitoring.new.report_metrics
+    # Removed in favor of Database::PartitionManagementWorker
   end
 end

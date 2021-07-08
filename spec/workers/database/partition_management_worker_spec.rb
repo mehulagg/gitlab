@@ -2,11 +2,11 @@
 
 require "spec_helper"
 
-RSpec.describe PartitionCreationWorker do
+RSpec.describe Database::PartitionManagementWorker do
   describe '#perform' do
     subject { described_class.new.perform }
 
-    let(:manager) {  instance_double('PartitionManager', create_partitions: nil) }
+    let(:manager) {  instance_double('PartitionManager', sync_partitions: nil) }
     let(:monitoring) { instance_double('PartitionMonitoring', report_metrics: nil) }
 
     before do
@@ -14,8 +14,8 @@ RSpec.describe PartitionCreationWorker do
       allow(Gitlab::Database::Partitioning::PartitionMonitoring).to receive(:new).and_return(monitoring)
     end
 
-    it 'delegates to PartitionCreator' do
-      expect(manager).to receive(:create_partitions)
+    it 'delegates to PartitionManager' do
+      expect(manager).to receive(:sync_partitions)
 
       subject
     end

@@ -15,12 +15,12 @@ RSpec.describe Gitlab::Database::Partitioning::PartitionManager do
     end
   end
 
-  describe '#create_partitions (mocked)' do
-    subject { described_class.new(models).create_partitions }
+  context 'creating partitions (mocked)' do
+    subject { described_class.new(models).sync_partitions }
 
     let(:models) { [model] }
     let(:model) { double(partitioning_strategy: partitioning_strategy, table_name: table) }
-    let(:partitioning_strategy) { double(missing_partitions: partitions) }
+    let(:partitioning_strategy) { double(missing_partitions: partitions, extra_partitions: []) }
     let(:table) { "some_table" }
 
     before do
@@ -28,7 +28,7 @@ RSpec.describe Gitlab::Database::Partitioning::PartitionManager do
       allow(ActiveRecord::Base.connection).to receive(:table_exists?).with(table).and_return(true)
       allow(ActiveRecord::Base.connection).to receive(:execute).and_call_original
 
-      stub_exclusive_lease(described_class::LEASE_KEY % table, timeout: described_class::LEASE_TIMEOUT)
+      stub_exclusive_lease(described_class::MANAGEMENT_LEASE_KEY % table, timeout: described_class::LEASE_TIMEOUT)
     end
 
     let(:partitions) do
@@ -53,8 +53,8 @@ RSpec.describe Gitlab::Database::Partitioning::PartitionManager do
         ]
       end
 
-      let(:strategy1) { double('strategy1', missing_partitions: nil) }
-      let(:strategy2) { double('strategy2', missing_partitions: partitions) }
+      let(:strategy1) { double('strategy1', missing_partitions: nil, extra_partitions: []) }
+      let(:strategy2) { double('strategy2', missing_partitions: partitions, extra_partitions: []) }
 
       it 'still creates partitions for the second table' do
         expect(strategy1).to receive(:missing_partitions).and_raise('this should never happen (tm)')
@@ -66,8 +66,8 @@ RSpec.describe Gitlab::Database::Partitioning::PartitionManager do
     end
   end
 
-  describe '#create_partitions' do
-    subject { described_class.new([my_model]).create_partitions }
+  context 'creating partitions' do
+    subject { described_class.new([my_model]).sync_partitions }
 
     let(:connection) { ActiveRecord::Base.connection }
     let(:my_model) do
@@ -95,20 +95,20 @@ RSpec.describe Gitlab::Database::Partitioning::PartitionManager do
     end
   end
 
-  describe '#detach_partitions (mocked)' do
-    subject { manager.detach_partitions }
+  context 'detaching partitions (mocked)' do
+    subject { manager.sync_partitions }
 
     let(:manager) { described_class.new(models) }
     let(:models) { [model] }
     let(:model) { double(partitioning_strategy: partitioning_strategy, table_name: table)}
-    let(:partitioning_strategy) { double(extra_partitions: extra_partitions) }
+    let(:partitioning_strategy) { double(extra_partitions: extra_partitions, missing_partitions: []) }
     let(:table) { "foo" }
 
     before do
       allow(ActiveRecord::Base.connection).to receive(:table_exists?).and_call_original
       allow(ActiveRecord::Base.connection).to receive(:table_exists?).with(table).and_return(true)
 
-      stub_exclusive_lease(described_class::LEASE_KEY % table, timeout: described_class::LEASE_TIMEOUT)
+      stub_exclusive_lease(described_class::MANAGEMENT_LEASE_KEY % table, timeout: described_class::LEASE_TIMEOUT)
     end
 
     let(:extra_partitions) do
@@ -136,7 +136,7 @@ RSpec.describe Gitlab::Database::Partitioning::PartitionManager do
           ]
         end
 
-        let(:error_strategy) { double }
+        let(:error_strategy) { double(extra_partitions: nil, missing_partitions: []) }
 
         it 'still drops partitions for the other model' do
           expect(error_strategy).to receive(:extra_partitions).and_raise('injected error!')
