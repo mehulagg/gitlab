@@ -247,11 +247,11 @@ tries to steal tokens from other jobs.
 
 #### Limit GitLab CI/CD job token access
 
-> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/328553) in GitLab 14.1.
-> [Deployed behind a feature flag](../user/feature_flags.md), disabled by default.
-> Disabled on GitLab.com.
-> Not recommended for production use.
-> To use in GitLab self-managed instances, ask a GitLab administrator to [enable it](#enable-or-disable-ci-job-token-scope-limit). **(FREE SELF)**
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/328553) in GitLab 14.1.
+> - [Deployed behind a feature flag](../user/feature_flags.md), disabled by default.
+> - Disabled on GitLab.com.
+> - Not recommended for production use.
+> - To use in GitLab self-managed instances, ask a GitLab administrator to [enable it](#enable-or-disable-ci-job-token-scope-limit). **(FREE SELF)**
 
 This in-development feature might not be available for your use. There can be
 [risks when enabling features still in development](../user/feature_flags.md#risks-when-enabling-features-still-in-development).
