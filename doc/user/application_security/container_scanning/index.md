@@ -176,7 +176,7 @@ Support depends on the scanner:
 
 GitLab also offers [Red Hat UBI](https://www.redhat.com/en/blog/introducing-red-hat-universal-base-image) version of container-scanning images
 allowing you to replace standard images with UBI-based images. The images can be configured by setting `CS_ANALYZER_IMAGE` configuration variable
-using the same tag as standard images with `-ubi` extension.
+using the same tag as standard images but with the `-ubi` extension added at the end of the tag.
 
 | Scanner name | `CS_ANALYZER_IMAGE` |
 | ------------ | ------------------- |
