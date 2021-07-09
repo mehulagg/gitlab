@@ -19241,6 +19241,9 @@ msgstr ""
 msgid "Learn more about Auto DevOps"
 msgstr ""
 
+msgid "Learn more about GitLab's Backend State"
+msgstr ""
+
 msgid "Learn more about License-Check"
 msgstr ""
 
@@ -32382,6 +32385,9 @@ msgstr ""
 msgid "The Compliance Report captures merged changes that violate compliance best practices."
 msgstr ""
 
+msgid "The GitLab managed Terraform state backend can store your Terraform state easily and securely, and spares you from setting up additional remote resources. Its features include: versioning, encryption of the state file both in transit and at rest, locking, and remote Terraform plan/apply execution."
+msgstr ""
+
 msgid "The GitLab subscription service (customers.gitlab.com) is currently experiencing an outage. You can monitor the status and get updates at %{linkStart}status.gitlab.com%{linkEnd}."
 msgstr ""
 
@@ -35919,6 +35925,9 @@ msgid "UsersSelect|Unassigned"
 msgstr ""
 
 msgid "Using %{code_start}::%{code_end} denotes a %{link_start}scoped label set%{link_end}"
+msgstr ""
+
+msgid "Using Terraform? Try the GitLab Managed Terraform State"
 msgstr ""
 
 msgid "Using additional formats requires starting the companion containers. Make sure that all %{kroki_images} are running."
