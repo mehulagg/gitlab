@@ -29039,6 +29039,12 @@ msgstr ""
 msgid "SecurityOrchestration|Security policy project was linked successfully"
 msgstr ""
 
+msgid "SecurityOrchestration|There was a problem creating the new security policy"
+msgstr ""
+
+msgid "SecurityOrchestration|Update scan execution policies"
+msgstr ""
+
 msgid "SecurityPolicies|+%{count} more"
 msgstr ""
 
