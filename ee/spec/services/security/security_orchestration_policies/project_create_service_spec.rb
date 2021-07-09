@@ -23,7 +23,7 @@ RSpec.describe Security::SecurityOrchestrationPolicies::ProjectCreateService do
         expect(project.security_orchestration_policy_configuration.security_policy_management_project).to eq(policy_project)
         expect(policy_project.namespace).to eq(project.namespace)
         expect(policy_project.protected_branches.map(&:name)).to contain_exactly(project.default_branch_or_main)
-        expect(policy_project.protected_branches.first.merge_access_levels.map(&:access_level)).to eq([Gitlab::Access::DEVELOPER])
+        expect(policy_project.protected_branches.first.merge_access_levels.map(&:access_level)).to eq([Gitlab::Access::MAINTAINER])
         expect(policy_project.protected_branches.first.push_access_levels.map(&:access_level)).to eq([Gitlab::Access::NO_ACCESS])
         expect(policy_project.team.developers).to contain_exactly(maintainer)
       end
@@ -32,42 +32,41 @@ RSpec.describe Security::SecurityOrchestrationPolicies::ProjectCreateService do
     context 'when protected branch already exists' do
       let_it_be(:project) { create(:project) }
       let_it_be(:current_user) { project.owner }
-      let_it_be(:maintainer) { create(:user) }
+      let_it_be(:policy_project) { create(:project, namespace: current_user.namespace) }
+      let_it_be(:protected_branch) { create(:protected_branch, project: policy_project, name: 'master') }
 
       before do
-        project.add_maintainer(maintainer)
-
-        allow_next_instance_of(Project) do |instance|
-          allow(instance).to receive_message_chain(:protected_branches, :find_by_name).and_return([ProtectedBranch.new])
+        expect_next_instance_of(::Projects::CreateService) do |instance|
+          expect(instance).to receive(:execute).and_return(policy_project)
         end
-
-        protected_branch_service = instance_spy(ProtectedBranches::UpdateService)
-        allow(ProtectedBranches::UpdateService).to receive(:new).and_return(protected_branch_service)
       end
 
-      it 'updates protected branch' do
+      it 'deletes and recreate protected branch' do
         service.execute
 
-        expect(ProtectedBranches::UpdateService).to have_received(:new)
+        expect(policy_project.protected_branches).not_to eq([protected_branch])
+        expect(policy_project.protected_branches.count).to eq(1)
+        expect(policy_project.protected_branches.first.merge_access_levels.map(&:access_level)).to eq([Gitlab::Access::MAINTAINER])
+        expect(policy_project.protected_branches.first.push_access_levels.map(&:access_level)).to eq([Gitlab::Access::NO_ACCESS])
       end
     end
 
     context 'when protected branch does not exist' do
       let_it_be(:project) { create(:project) }
       let_it_be(:current_user) { project.owner }
-      let_it_be(:maintainer) { create(:user) }
+      let_it_be(:policy_project) { create(:project, namespace: current_user.namespace) }
 
       before do
-        project.add_maintainer(maintainer)
-
-        protected_branch_service = instance_spy(ProtectedBranches::CreateService)
-        allow(ProtectedBranches::CreateService).to receive(:new).and_return(protected_branch_service)
+        expect_next_instance_of(::Projects::CreateService) do |instance|
+          expect(instance).to receive(:execute).and_return(policy_project)
+        end
       end
 
       it 'creates protected branch' do
-        service.execute
+        expect { service.execute }.to change { policy_project.protected_branches.count }.from(0).to(1)
 
-        expect(ProtectedBranches::CreateService).to have_received(:new)
+        expect(policy_project.protected_branches.first.merge_access_levels.map(&:access_level)).to eq([Gitlab::Access::MAINTAINER])
+        expect(policy_project.protected_branches.first.push_access_levels.map(&:access_level)).to eq([Gitlab::Access::NO_ACCESS])
       end
     end
 

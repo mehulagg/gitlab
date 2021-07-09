@@ -13,7 +13,7 @@ module Security
         project.create_security_orchestration_policy_configuration! do |p|
           p.security_policy_management_project_id = policy_project.id
         end
-        create_or_update_protected_branch(policy_project)
+        create_protected_branch(policy_project)
 
         members = add_members(policy_project)
         errors = members.flat_map { |member| member.errors.full_messages }
@@ -25,24 +25,18 @@ module Security
 
       private
 
-      def create_or_update_protected_branch(policy_project)
-        protected_branch = policy_project.protected_branches.find_by_name(policy_project.default_branch_or_main)
+      def create_protected_branch(policy_project)
         params = {
           name: policy_project.default_branch_or_main,
           push_access_levels_attributes: [{ access_level: Gitlab::Access::NO_ACCESS }],
-          merge_access_levels_attributes: [{ access_level: Gitlab::Access::DEVELOPER }]
+          merge_access_levels_attributes: [{ access_level: Gitlab::Access::MAINTAINER }]
         }
 
-        if protected_branch.present?
-          ProtectedBranches::UpdateService
-            .new(policy_project, current_user, params)
-            .execute(protected_branch)
-          return
+        ActiveRecord::Base.transaction do
+          protected_branch = policy_project.protected_branches.find_by_name(policy_project.default_branch_or_main)
+          ProtectedBranches::DestroyService.new(policy_project, current_user).execute(protected_branch) if protected_branch.present?
+          ProtectedBranches::CreateService.new(policy_project, current_user, params).execute(skip_authorization: true)
         end
-
-        ProtectedBranches::CreateService
-          .new(policy_project, current_user, params)
-          .execute(skip_authorization: true)
       end
 
       def add_members(policy_project)
