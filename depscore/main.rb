@@ -126,10 +126,10 @@ def dreport_read(dreport_path)
       # utils = Utils.new
       # utils.debug_libdata
     end
-    if need_report
-      dreport_csvprep()
-      dreport_summary()
-    end
+  end
+  if need_report
+    dreport_csvprep()
+    dreport_summary()
   end
 end
 
