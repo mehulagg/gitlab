@@ -12,6 +12,18 @@ FactoryBot.define do
       filename { PagesDeployment::MIGRATED_FILE_NAME }
     end
 
+    trait(:verification_succeeded) do
+      with_file
+      verification_checksum { 'abc' }
+      verification_state { PagesDeployment.verification_state_value(:verification_succeeded) }
+    end
+
+    trait(:verification_failed) do
+      with_file
+      verification_failure { 'Could not calculate the checksum' }
+      verification_state { PagesDeployment.verification_state_value(:verification_failed) }
+    end
+
     after(:build) do |deployment, evaluator|
       file = UploadedFile.new("spec/fixtures/pages.zip", filename: evaluator.filename)
 
