@@ -75,7 +75,7 @@ module Gitlab
         end
 
         def load_balancer
-          LoadBalancing.proxy.load_balancer
+          ::ActiveRecord::Base.proxy.load_balancer
         end
 
         # Determines the sticking namespace and identifier based on the Rack

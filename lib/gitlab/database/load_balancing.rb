@@ -19,21 +19,6 @@ module Gitlab
                             [].freeze
                           end
 
-      ProxyNotConfiguredError = Class.new(StandardError)
-
-      # The connection proxy to use for load balancing (if enabled).
-      def self.proxy
-        unless @proxy
-          Gitlab::ErrorTracking.track_exception(
-            ProxyNotConfiguredError.new(
-              "Attempting to access the database load balancing proxy, but it wasn't configured.\n" \
-              "Did you forget to call '#{self.name}.configure_proxy'?"
-            ))
-        end
-
-        @proxy
-      end
-
       # Returns a Hash containing the load balancing configuration.
       def self.configuration
         Gitlab::Database.config[:load_balancing] || {}
@@ -108,12 +93,7 @@ module Gitlab
 
       # Configures proxying of requests.
       def self.configure_proxy(proxy = ConnectionProxy.new(hosts))
-        @proxy = proxy
-
-        # This hijacks the "connection" method to ensure both
-        # `ActiveRecord::Base.connection` and all models use the same load
-        # balancing proxy.
-        ActiveRecord::Base.singleton_class.prepend(ActiveRecordProxy)
+        ActiveRecord::Base.proxy = proxy
       end
 
       def self.active_record_models
@@ -133,9 +113,9 @@ module Gitlab
       # recognize the connection, this method returns the primary role
       # directly. In future, we may need to check for other sources.
       def self.db_role_for_connection(connection)
-        return ROLE_PRIMARY if !enable? || @proxy.blank?
+        return ROLE_PRIMARY if !enable? || ActiveRecord::Base.proxy.blank?
 
-        proxy.load_balancer.db_role_for_connection(connection)
+        ActiveRecord::Base.proxy.load_balancer.db_role_for_connection(connection)
       end
     end
   end

@@ -64,7 +64,7 @@ module Gitlab
         end
 
         def load_balancer
-          LoadBalancing.proxy.load_balancer
+          ::ActiveRecord::Base.proxy.load_balancer
         end
 
         def replica_caught_up?(location)

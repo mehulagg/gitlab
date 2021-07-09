@@ -7,6 +7,11 @@ if Gitlab::Database::LoadBalancing.enable?
     config.middleware.use(Gitlab::Database::LoadBalancing::RackMiddleware)
   end
 
+  # This hijacks the "connection" method to ensure both
+  # `ActiveRecord::Base.connection` and all models use the same load
+  # balancing proxy.
+  ActiveRecord::Base.singleton_class.prepend(Gitlab::Database::LoadBalancing::ActiveRecordProxy)
+
   Gitlab::Database::LoadBalancing.configure_proxy
 
   # This needs to be executed after fork of clustered processes
