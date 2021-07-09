@@ -93,7 +93,7 @@ export default {
       return this.noteableData.noteableType;
     },
     allDiscussions() {
-      if (this.isLoading) {
+      if (!this.shouldShow || this.isLoading) {
         const prerenderedNotesCount = parseInt(this.notesData.prerenderedNotesCount, 10) || 0;
 
         return new Array(prerenderedNotesCount).fill({
