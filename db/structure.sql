@@ -16230,8 +16230,16 @@ CREATE TABLE pages_deployments (
     file_count integer NOT NULL,
     file_sha256 bytea NOT NULL,
     size bigint,
+    verification_state smallint DEFAULT 0 NOT NULL,
+    verification_started_at timestamp with time zone,
+    verification_retry_count smallint DEFAULT 0 NOT NULL,
+    verification_retry_at timestamp with time zone,
+    verified_at timestamp with time zone,
+    verification_checksum bytea,
+    verification_failure text,
     CONSTRAINT check_5f9132a958 CHECK ((size IS NOT NULL)),
-    CONSTRAINT check_f0fe8032dd CHECK ((char_length(file) <= 255))
+    CONSTRAINT check_f0fe8032dd CHECK ((char_length(file) <= 255)),
+    CONSTRAINT pages_deployments_verification_failure_text_limit CHECK ((char_length(verification_failure) <= 255))
 );
 
 CREATE SEQUENCE pages_deployments_id_seq
@@ -24340,11 +24348,19 @@ CREATE INDEX index_packages_tags_on_package_id ON packages_tags USING btree (pac
 
 CREATE INDEX index_packages_tags_on_package_id_and_updated_at ON packages_tags USING btree (package_id, updated_at DESC);
 
+CREATE INDEX index_pages_deployments_failed_verification ON pages_deployments USING btree (verification_retry_at NULLS FIRST) WHERE (verification_state = 3);
+
+CREATE INDEX index_pages_deployments_needs_verification ON pages_deployments USING btree (verification_state) WHERE ((verification_state = 0) OR (verification_state = 3));
+
 CREATE INDEX index_pages_deployments_on_ci_build_id ON pages_deployments USING btree (ci_build_id);
 
 CREATE INDEX index_pages_deployments_on_file_store_and_id ON pages_deployments USING btree (file_store, id);
 
 CREATE INDEX index_pages_deployments_on_project_id ON pages_deployments USING btree (project_id);
+
+CREATE INDEX index_pages_deployments_on_verification_state ON pages_deployments USING btree (verification_state);
+
+CREATE INDEX index_pages_deployments_pending_verification ON pages_deployments USING btree (verified_at NULLS FIRST) WHERE (verification_state = 0);
 
 CREATE INDEX index_pages_domain_acme_orders_on_challenge_token ON pages_domain_acme_orders USING btree (challenge_token);
 
