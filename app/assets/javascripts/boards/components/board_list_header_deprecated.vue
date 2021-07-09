@@ -329,7 +329,7 @@ export default {
           </template>
         </span>
       </div>
-      <gl-button-group v-if="showListHeaderActions" class="board-list-button-group pl-2">
+      <gl-button-group v-if="showListHeaderActions" class="board-list-button-group gl-pl-3">
         <gl-button
           v-if="isNewIssueShown"
           ref="newIssueBtn"
