@@ -47,6 +47,7 @@ class Utils
       puts "version: #{gem.signals[:version]}" if gem.signals[:version]
       puts "lang: #{gem.signals[:lang]}" if gem.signals[:lang]
       puts "rel_freq_last_4quater: #{gem.signals[:rel_freq_last_4quater]}" if gem.signals[:rel_freq_last_4quater]
+      puts "file: #{gem.signals[:file]}" if gem.signals[:file]
       puts "score: #{gem.signals[:score]}" if gem.signals[:score]
       puts "----"
     end

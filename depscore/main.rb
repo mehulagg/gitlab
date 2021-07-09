@@ -20,7 +20,7 @@ def write_csv(csv_data)
 end
 
 def dreport_csvprep()
-  puts "[*]  Constructing csv report data"
+  puts "[*] Constructing csv report data"
 
   headers = ["Name", "Type", "tot_downloads", "reverse_dep_count", "latest_vesion_age(in Months)",
              "latest_release_on", "rel_freq_last_4quater", "score"]
@@ -116,7 +116,7 @@ def dreport_read(dreport_path)
   #  # Get gems
   need_report = false
   data_hash["dependency_files"].each do |dep_file|
-    puts "[*] Dependency list from #{dep_file["path"]} found"
+    puts "\n[*] Dependency list from #{dep_file["path"]} found"
     if dep_file["path"].include? "Gemfile.lock"
       need_report = true
       puts "[*] Checking score for dependencies in #{dep_file["path"]}"

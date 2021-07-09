@@ -21,6 +21,6 @@ class LibData
   def initialize (name, opts)
     @@array << self
     @name = name
-    @signals = Signals.new(opts[:tot_downloads],opts[:reverse_dep_count],opts[:latest_vesion_age],opts[:version],opts[:lang],opts[:latest_release_on],opts[:rel_freq_last_4quater],opts[:score])
+    @signals = Signals.new(opts[:tot_downloads],opts[:reverse_dep_count],opts[:latest_vesion_age],opts[:version],opts[:lang],opts[:latest_release_on],opts[:rel_freq_last_4quater],opts[:file],opts[:score])
   end
 end
