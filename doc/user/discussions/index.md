@@ -55,7 +55,7 @@ The comment is displayed on the merge request's **Discussions** tab.
 The comment is not displayed on your project's **Repository > Commits** page.
 
 NOTE:
-When your comment contains a reference of a commit included in the merge request,
+When your comment contains a reference to a commit included in the merge request,
 it's automatically converted to a link in the context of the current merge request.
 For example, `28719b171a056960dfdc0012b625d0b47b123196` becomes
 `https://gitlab.example.com/example-group/example-project/-/merge_requests/12345/diffs?commit_id=28719b171a056960dfdc0012b625d0b47b123196`.
