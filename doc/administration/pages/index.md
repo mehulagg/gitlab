@@ -219,10 +219,19 @@ The [GitLab Pages README](https://gitlab.com/gitlab-org/gitlab-pages#caveats) ha
 ### Jailing mechanism disabled by default
 
 Starting from GitLab 14.1 the [jailing/chroot mechanism is disabled by default](https://gitlab.com/gitlab-org/gitlab-pages/-/issues/589).
-If you are using the API-based configuration and using the new [Zip storage architecture](#zip-storage)
+If you are using API-based configuration and the new [Zip storage architecture](#zip-storage)
 there is nothing you need to do. However, if you are still using `use_legacy_storage=true` 
 you may want to enable the jailing mechanism to ensure the Pages daemon does not have 
-access to files outside the `pages_path`.
+access to files outside the `pages_path`:
+
+1. Edit `/etc/gitlab/gitlab.rb`.
+1. Set the `DAEMON_ENABLE_JAIL` environment variable to `true` for GitLab Pages:
+
+   ```ruby
+   gitlab_pages['env']['DAEMON_ENABLE_JAIL'] = "true"
+   ```
+
+1. [Reconfigure GitLab](../restart_gitlab.md#omnibus-gitlab-reconfigure).
 
 ### Global settings
 
