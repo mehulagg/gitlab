@@ -13,22 +13,21 @@ module AppSec
           container.licensed_feature_available?(:security_on_demand_scans)
         end
 
-
         def ci_config
           {
-            'stages' => ['dast'],
-            'dast-runner-validation' =>  {
-              'stage' => 'dast',
-              'image' => '192.168.99.103:5001/root/dast-validation-runner:latest',
-              'variables'  =>  {
-                'GIT_STRATEGY' => 'none',
-                'DAST_SITE_VALIDATION_ID' => 4,
-                'DAST_SITE_VALIDATION_HEADER' => 'Gitlab-On-Demand-DAST',
-                'DAST_SITE_VALIDATION_STRATEGY' => 'header',
-                'DAST_SITE_VALIDATION_TOKEN' => 'ad568ddc-eecc-4d06-85ee-147489b1ee2d',
-                'DAST_SITE_VALIDATION_URL' => 'https://2ecd79974152.ngrok.io:443/validate'
-              },
-              'script' => ['~/validate.sh']
+            stages: [:dast],
+            validation: {
+              stage: :dast,
+              image: '192.168.99.103:5001/root/dast-validation-runner:latest',
+              script: ['~/validate.sh'],
+              variables: {
+                GIT_STRATEGY => 'none',
+                DAST_SITE_VALIDATION_ID: dast_site_validation.id,
+                DAST_SITE_VALIDATION_HEADER: ::DastSiteValidation::HEADER,
+                DAST_SITE_VALIDATION_STRATEGY: dast_site_validation.validation_strategy,
+                DAST_SITE_VALIDATION_TOKEN: dast_site_validation.dast_site_token.token,
+                DAST_SITE_VALIDATION_URL: dast_site_validation.validation_url
+              }
             }
           }
         end
