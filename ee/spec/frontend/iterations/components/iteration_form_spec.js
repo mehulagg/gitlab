@@ -120,12 +120,14 @@ describe('Iteration Form', () => {
         await clickSave();
 
         expect(resolverMock).toHaveBeenCalledWith({
-          groupPath,
-          title,
-          description,
-          iterationsCadenceId: convertToGraphQLId('Iterations::Cadence', cadenceId),
-          startDate,
-          dueDate,
+          input: {
+            groupPath,
+            title,
+            description,
+            iterationsCadenceId: convertToGraphQLId('Iterations::Cadence', cadenceId),
+            startDate,
+            dueDate,
+          },
         });
       });
 

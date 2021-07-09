@@ -2,6 +2,7 @@ import { GlBanner, GlLink, GlSprintf } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
 import SubscriptionActivationBanner, {
   ACTIVATE_SUBSCRIPTION_EVENT,
+  CLOSE_ACTIVATE_SUBSCRIPTION_BANNER_EVENT,
 } from 'ee/admin/subscriptions/show/components/subscription_activation_banner.vue';
 import {
   activateCloudLicense,
@@ -62,6 +63,14 @@ describe('SubscriptionActivationBanner', () => {
 
     findBanner().vm.$emit('primary');
 
-    expect(wrapper.emitted(ACTIVATE_SUBSCRIPTION_EVENT)).toEqual([[]]);
+    expect(wrapper.emitted(ACTIVATE_SUBSCRIPTION_EVENT)).toHaveLength(1);
+  });
+
+  it('emits an event when the close button is clicked', () => {
+    expect(wrapper.emitted(CLOSE_ACTIVATE_SUBSCRIPTION_BANNER_EVENT)).toBeUndefined();
+
+    findBanner().vm.$emit('close');
+
+    expect(wrapper.emitted(CLOSE_ACTIVATE_SUBSCRIPTION_BANNER_EVENT)).toHaveLength(1);
   });
 });

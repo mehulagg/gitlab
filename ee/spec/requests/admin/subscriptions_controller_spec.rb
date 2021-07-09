@@ -26,29 +26,11 @@ RSpec.describe Admin::SubscriptionsController, :cloud_licenses do
         enable_admin_mode!(admin)
       end
 
-      context 'when the application setting is not active' do
-        before do
-          stub_application_setting(cloud_license_enabled: false)
-        end
+      it 'renders the Activation Form' do
+        send_request
 
-        it 'redirects to admin license path when the setting is not active' do
-          send_request
-
-          expect(response).to redirect_to admin_license_path
-        end
-      end
-
-      context 'when the application setting is active' do
-        before do
-          stub_application_setting(cloud_license_enabled: true)
-        end
-
-        it 'renders the Activation Form' do
-          send_request
-
-          expect(response).to render_template(:show)
-          expect(response.body).to include('js-show-subscription-page')
-        end
+        expect(response).to render_template(:show)
+        expect(response.body).to include('js-show-subscription-page')
       end
     end
   end

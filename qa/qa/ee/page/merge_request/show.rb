@@ -78,7 +78,7 @@ module QA
           end
 
           def wait_for_license_compliance_report
-            has_no_text?('Loading License Compliance report', wait: QA::Support::Repeater::DEFAULT_MAX_WAIT_TIME)
+            has_text?('License Compliance detected', wait: QA::Support::Repeater::DEFAULT_MAX_WAIT_TIME)
           end
 
           def approvals_required_from

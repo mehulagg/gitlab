@@ -66,6 +66,9 @@ describe('ee/dora/components/util.js', () => {
         },
         {
           name: 'Chart title',
+          showAllSymbol: true,
+          showSymbol: true,
+          symbolSize: 8,
           data: expect.any(Array),
           lineStyle: {
             color: expect.any(String),

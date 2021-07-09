@@ -34,6 +34,36 @@ RSpec.describe Gitlab::Database::PostgresIndex do
     it 'only indexes that dont serve an exclusion constraint' do
       expect(described_class.regular).to all(have_attributes(exclusion: false))
     end
+
+    it 'only non-expression indexes' do
+      expect(described_class.regular).to all(have_attributes(expression: false))
+    end
+
+    it 'only btree and gist indexes' do
+      types = described_class.regular.map(&:type).uniq
+
+      expect(types & %w(btree gist)).to eq(types)
+    end
+  end
+
+  describe '.reindexing_support' do
+    it 'only non partitioned indexes' do
+      expect(described_class.reindexing_support).to all(have_attributes(partitioned: false))
+    end
+
+    it 'only indexes that dont serve an exclusion constraint' do
+      expect(described_class.reindexing_support).to all(have_attributes(exclusion: false))
+    end
+
+    it 'only non-expression indexes' do
+      expect(described_class.reindexing_support).to all(have_attributes(expression: false))
+    end
+
+    it 'only btree and gist indexes' do
+      types = described_class.reindexing_support.map(&:type).uniq
+
+      expect(types & %w(btree gist)).to eq(types)
+    end
   end
 
   describe '.not_match' do
@@ -64,6 +94,16 @@ RSpec.describe Gitlab::Database::PostgresIndex do
       it 'returns 0' do
         expect(subject.bloat_size).to eq(0)
       end
+    end
+  end
+
+  describe '#relative_bloat_level' do
+    subject { build(:postgres_index, bloat_estimate: bloat_estimate, ondisk_size_bytes: 1024) }
+
+    let(:bloat_estimate) { build(:postgres_index_bloat_estimate, bloat_size: 256) }
+
+    it 'calculates the relative bloat level' do
+      expect(subject.relative_bloat_level).to eq(0.25)
     end
   end
 

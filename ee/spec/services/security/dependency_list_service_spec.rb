@@ -97,38 +97,47 @@ RSpec.describe Security::DependencyListService do
         end
       end
 
-      # this test ensures the dependency list severity sort order is `info, unknown, low, medium, high, critical`
-      # which is asending severity order, however, the UI label for this sort order is currently `desc`.
-      # TODO: change the UI label to use `asc` for this sort order and use `desc` for the default sort order
-      # of `critical, high, medium, low, unknown, info`
-      # See https://gitlab.com/gitlab-org/gitlab/-/issues/332653
-      context 'sorted by asc severity' do
+      context 'sorted by severity' do
         let(:params) do
           {
-            sort: 'desc',
             sort_by: 'severity'
           }
         end
 
-        it 'returns array of data sorted by package severity level in ascending order' do
-          dependencies = subject.last(2).map do |dependency|
-            {
-              name: dependency[:name],
-              vulnerabilities: dependency[:vulnerabilities].map do |vulnerability|
-                vulnerability[:severity]
-              end
-            }
+        context 'in descending order' do
+          before do
+            params[:sort] = 'desc'
           end
 
-          expect(dependencies).to eq([{ name: "nokogiri", vulnerabilities: ["high"] },
-                                      { name: "saml2-js", vulnerabilities: %w(critical medium unknown) }])
+          it 'returns array of data sorted by package severity level in descending order' do
+            dependencies = subject.first(2).map do |dependency|
+              {
+                name: dependency[:name],
+                vulnerabilities: dependency[:vulnerabilities].pluck(:severity)
+              }
+            end
+
+            expect(dependencies).to eq([{ name: "saml2-js", vulnerabilities: %w(critical medium unknown) },
+                                        { name: "nokogiri", vulnerabilities: ["high"] }])
+          end
         end
 
-        it 'returns array of data with package vulnerabilities sorted in descending order' do
-          saml2js_dependency = subject.find { |dep| dep[:name] == 'saml2-js' }
-          saml2js_severities = saml2js_dependency[:vulnerabilities].map {|v| v[:severity] }
+        context 'in ascending order' do
+          before do
+            params[:sort] = 'asc'
+          end
 
-          expect(saml2js_severities).to eq(%w(critical medium unknown))
+          it 'returns array of data sorted by package severity level in ascending order' do
+            dependencies = subject.last(2).map do |dependency|
+              {
+                name: dependency[:name],
+                vulnerabilities: dependency[:vulnerabilities].pluck(:severity)
+              }
+            end
+
+            expect(dependencies).to eq([{ name: "nokogiri", vulnerabilities: ["high"] },
+                                        { name: "saml2-js", vulnerabilities: %w(critical medium unknown) }])
+          end
         end
       end
     end

@@ -13,10 +13,10 @@ import {
 } from '@gitlab/ui';
 import dateFormat from 'dateformat';
 import { mapState } from 'vuex';
+import { dateFormats } from '~/analytics/shared/constants';
 import { approximateDuration, differenceInSeconds } from '~/lib/utils/datetime_utility';
 import { s__, n__ } from '~/locale';
 import { filterToQueryObject } from '~/vue_shared/components/filtered_search_bar/filtered_search_utils';
-import { dateFormats } from '../../shared/constants';
 import {
   THROUGHPUT_TABLE_STRINGS,
   MERGE_REQUEST_ID_PREFIX,

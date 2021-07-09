@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 module ProtectedEnvironments
-  class SearchService < BaseService
+  class SearchService < ::ProtectedEnvironments::BaseService
     # Returns unprotected environments filtered by name
     # Limited to 20 per performance reasons
     # rubocop: disable CodeReuse/ActiveRecord

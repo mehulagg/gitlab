@@ -38,7 +38,7 @@ RSpec.describe Jira::Requests::Issues::ListService do
         let(:jira_integration) { create(:jira_integration, url: 'https://jira.example.com') }
         let(:response_body) { '' }
         let(:response_headers) { { 'content-type' => 'application/json' } }
-        let(:expected_url_pattern) { /.*jira.example.com\/rest\/api\/2\/search.*/ }
+        let(:expected_url_pattern) { %r{.*jira.example.com/rest/api/2/search.*} }
 
         before do
           stub_request(:get, expected_url_pattern).to_return(status: 200, body: response_body, headers: response_headers)
@@ -57,7 +57,7 @@ RSpec.describe Jira::Requests::Issues::ListService do
 
         context 'when jira runs on a subpath' do
           let(:jira_integration) { create(:jira_integration, url: 'http://jira.example.com/jira') }
-          let(:expected_url_pattern) { /.*jira.example.com\/jira\/rest\/api\/2\/search.*/ }
+          let(:expected_url_pattern) { %r{.*jira.example.com/jira/rest/api/2/search.*} }
 
           it 'takes the subpath into account' do
             expect(subject.success?).to be_truthy

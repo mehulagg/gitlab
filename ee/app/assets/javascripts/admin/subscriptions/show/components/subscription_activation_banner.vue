@@ -7,6 +7,7 @@ import {
 } from '../constants';
 
 export const ACTIVATE_SUBSCRIPTION_EVENT = 'activate-subscription';
+export const CLOSE_ACTIVATE_SUBSCRIPTION_BANNER_EVENT = 'close';
 
 export default {
   name: 'SubscriptionActivationBanner',
@@ -22,6 +23,9 @@ export default {
   },
   inject: ['congratulationSvgPath', 'customersPortalUrl'],
   methods: {
+    handleClose() {
+      this.$emit(CLOSE_ACTIVATE_SUBSCRIPTION_BANNER_EVENT);
+    },
     handlePrimary() {
       this.$emit(ACTIVATE_SUBSCRIPTION_EVENT);
     },
@@ -35,6 +39,7 @@ export default {
     :title="$options.i18n.title"
     variant="promotion"
     :svg-path="congratulationSvgPath"
+    @close="handleClose"
     @primary="handlePrimary"
   >
     <p>

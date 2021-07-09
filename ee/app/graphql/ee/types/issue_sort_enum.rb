@@ -12,6 +12,8 @@ module EE
         value 'PUBLISHED_DESC', 'Published issues shown first.', value: :published_desc
         value 'SLA_DUE_AT_ASC', 'Issues with earliest SLA due time shown first.', value: :sla_due_at_asc
         value 'SLA_DUE_AT_DESC', 'Issues with latest SLA due time shown first.', value: :sla_due_at_desc
+        value 'BLOCKING_ISSUES_ASC', 'Blocking issues count by ascending order.', value: :blocking_issues_asc
+        value 'BLOCKING_ISSUES_DESC', 'Blocking issues count by descending order.', value: :blocking_issues_desc
       end
     end
   end

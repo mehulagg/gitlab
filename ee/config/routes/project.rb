@@ -53,7 +53,7 @@ constraints(::Constraints::ProjectUrlConstrainer.new) do
         resources :audit_events, only: [:index]
 
         namespace :security do
-          resources :network_policies, only: [:index, :create, :update, :destroy] do
+          resources :network_policies, only: [:index, :create, :update, :destroy], constraints: { id: %r{[^/]+} } do
             get :summary, on: :collection
           end
 
@@ -116,7 +116,11 @@ constraints(::Constraints::ProjectUrlConstrainer.new) do
 
         namespace :integrations do
           namespace :jira do
-            resources :issues, only: [:index, :show]
+            resources :issues, only: [:index, :show] do
+              member do
+                get :labels
+              end
+            end
           end
         end
 

@@ -4,7 +4,7 @@
   = s_('License|Your License')
   = render "upload_buy_license"
 - if params[:trial_key].present?
-  = render "upload_trial_license"
+  .js-upload-trial-license-modal{ data: { license_key: params[:trial_key], admin_license_path: admin_license_path } }
 
 %hr
   - if params.key?(:trial_key) && params[:trial_key].blank?

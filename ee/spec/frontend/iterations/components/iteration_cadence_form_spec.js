@@ -193,20 +193,23 @@ describe('Iteration cadence form', () => {
     });
 
     describe('automated scheduling disabled', () => {
-      it('disables future iterations', async () => {
+      it('disables future iterations and duration in weeks', async () => {
         setAutomaticValue(false);
 
         await nextTick();
 
         expect(findFutureIterations().attributes('disabled')).toBe('disabled');
+        expect(findFutureIterations().attributes('required')).toBeUndefined();
+        expect(findDuration().attributes('disabled')).toBe('disabled');
+        expect(findDuration().attributes('required')).toBeUndefined();
       });
 
-      it('sets future iterations to 0', async () => {
+      it('sets future iterations and cadence duration to 0', async () => {
         const title = 'Iteration 5';
         const startDate = '2020-05-05';
-        const durationInWeeks = 2;
 
         setFutureIterations(10);
+        setDuration(2);
 
         setAutomaticValue(false);
 
@@ -214,7 +217,6 @@ describe('Iteration cadence form', () => {
 
         setTitle(title);
         setStartDate(startDate);
-        setDuration(durationInWeeks);
 
         clickSave();
 
@@ -224,7 +226,7 @@ describe('Iteration cadence form', () => {
             title,
             automatic: false,
             startDate,
-            durationInWeeks,
+            durationInWeeks: 0,
             iterationsInAdvance: 0,
             description: '',
             active: true,

@@ -1,6 +1,6 @@
 import dateFormat from 'dateformat';
+import { dateFormats } from '~/analytics/shared/constants';
 import { getDateInPast, beginOfDayTime, endOfDayTime } from '~/lib/utils/datetime_utility';
-import { dateFormats } from '../../../../shared/constants';
 import { chartKeys, scatterPlotAddonQueryDays } from '../../../constants';
 
 /**

@@ -3,7 +3,7 @@ import { shallowMount } from '@vue/test-utils';
 import ApproversListItem from 'ee/approvals/components/approvers_list_item.vue';
 import HiddenGroupsItem from 'ee/approvals/components/hidden_groups_item.vue';
 import { TYPE_USER, TYPE_GROUP, TYPE_HIDDEN_GROUPS } from 'ee/approvals/constants';
-import Avatar from '~/vue_shared/components/project_avatar/default.vue';
+import Avatar from '~/vue_shared/components/deprecated_project_avatar/default.vue';
 
 const TEST_USER = {
   id: 1,

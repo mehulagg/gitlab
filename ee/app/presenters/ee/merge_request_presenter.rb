@@ -69,8 +69,7 @@ module EE
     private
 
     def expose_mr_status_checks?
-      ::Feature.enabled?(:ff_external_status_checks, project, default_enabled: :yaml) &&
-        current_user.present? &&
+      current_user.present? &&
         project.external_status_checks.applicable_to_branch(merge_request.target_branch).any?
     end
 

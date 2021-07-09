@@ -1,7 +1,7 @@
 <script>
 import { GlLink, GlIcon, GlButton } from '@gitlab/ui';
 import { mapState, mapGetters, mapActions } from 'vuex';
-import { componentNames } from 'ee/reports/components/issue_body';
+import { componentNames, iconComponentNames } from 'ee/reports/components/issue_body';
 import { LICENSE_MANAGEMENT } from 'ee/vue_shared/license_compliance/store/constants';
 import reportsMixin from 'ee/vue_shared/security_reports/mixins/reports_mixin';
 import ReportItem from '~/reports/components/report_item.vue';
@@ -14,6 +14,7 @@ const store = createStore();
 export default {
   name: 'MrWidgetLicenses',
   componentNames,
+  iconComponentNames,
   store,
   components: {
     GlButton,
@@ -156,10 +157,12 @@ export default {
               v-for="license in licenseReportGroup.licenses"
               :key="license.name"
               :issue="license"
+              :status-icon-size="12"
               :status="license.status"
               :component="$options.componentNames.LicenseIssueBody"
+              :icon-component="$options.iconComponentNames.LicenseStatusIcon"
               :show-report-section-status-icon="true"
-              class="my-1"
+              class="gl-m-2"
             />
           </template>
         </smart-virtual-list>

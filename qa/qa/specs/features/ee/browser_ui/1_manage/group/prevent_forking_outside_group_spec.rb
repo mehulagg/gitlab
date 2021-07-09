@@ -26,10 +26,13 @@ module QA
         end
 
         it 'allows forking outside of group', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/1774' do
-          visit_project_and_search_group_for_fork
+          project.visit!
 
-          expect(page).to have_text(group_for_fork.path)
-          expect(page).to have_text('Select a namespace to fork the project')
+          Page::Project::Show.perform(&:fork_project)
+
+          all_namespaces_for_fork = Page::Project::Fork::New.perform(&:fork_namespace_dropdown_values)
+
+          expect(all_namespaces_for_fork).to include(group_for_fork.path)
         end
       end
 
@@ -39,10 +42,13 @@ module QA
         end
 
         it 'does not allow forking outside of group', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/1775' do
-          visit_project_and_search_group_for_fork
+          project.visit!
 
-          expect(page).not_to have_text(group_for_fork.path)
-          expect(page).not_to have_text('Select a namespace to fork the project')
+          Page::Project::Show.perform(&:fork_project)
+
+          all_namespaces_for_fork = Page::Project::Fork::New.perform(&:fork_namespace_dropdown_values)
+
+          expect(all_namespaces_for_fork).not_to include(group_for_fork.path)
         end
       end
 
@@ -58,15 +64,6 @@ module QA
         Page::Group::Menu.perform(&:click_group_general_settings_item)
         Page::Group::Settings::General.perform do |general_setting|
           general_setting.send("set_prevent_forking_outside_group_#{enabled_or_disabled}")
-        end
-      end
-
-      def visit_project_and_search_group_for_fork
-        project.visit!
-        Page::Project::Show.perform(&:fork_project)
-
-        Page::Project::Fork::New.perform do |fork_new|
-          fork_new.search_for_group(group_for_fork.path)
         end
       end
     end

@@ -86,6 +86,7 @@ RSpec.describe Integrations::JiraSerializers::IssueDetailEntity do
       state: 'closed',
       labels: [
         {
+          id: 'backend',
           title: 'backend',
           name: 'backend',
           color: '#0052CC',

@@ -44,7 +44,7 @@ Learn how to install, configure, update, and maintain your GitLab instance.
 - [Adjust your instance's timezone](timezone.md): Customize the default time zone of GitLab.
 - [System hooks](../system_hooks/system_hooks.md): Notifications when users, projects and keys are changed.
 - [Security](../security/index.md): Learn what you can do to further secure your GitLab instance.
-- [Usage statistics, version check, and usage ping](../user/admin_area/settings/usage_statistics.md): Enable or disable information about your instance to be sent to GitLab, Inc.
+- [Usage statistics, version check, and Service Ping](../user/admin_area/settings/usage_statistics.md): Enable or disable information about your instance to be sent to GitLab, Inc.
 - [Global user settings](user_settings.md): Configure instance-wide user permissions.
 - [Polling](polling.md): Configure how often the GitLab UI polls for updates.
 - [GitLab Pages configuration](pages/index.md): Enable and configure GitLab Pages.
@@ -134,7 +134,7 @@ Learn how to install, configure, update, and maintain your GitLab instance.
 - [Auditor users](auditor_users.md): Users with read-only access to all projects, groups, and other resources on the GitLab instance.
 - [Incoming email](incoming_email.md): Configure incoming emails to allow
   users to [reply by email](reply_by_email.md), create [issues by email](../user/project/issues/managing_issues.md#new-issue-via-email) and
-  [merge requests by email](../user/project/merge_requests/creating_merge_requests.md#new-merge-request-by-email), and to enable [Service Desk](../user/project/service_desk.md).
+  [merge requests by email](../user/project/merge_requests/creating_merge_requests.md#by-sending-an-email), and to enable [Service Desk](../user/project/service_desk.md).
   - [Postfix for incoming email](reply_by_email_postfix_setup.md): Set up a
   basic Postfix mail server with IMAP authentication on Ubuntu for incoming
   emails.

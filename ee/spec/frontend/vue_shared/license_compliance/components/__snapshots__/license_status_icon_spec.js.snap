@@ -1,0 +1,40 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`LicenseStatusIcon renders "failed" state correctly 1`] = `
+<div
+  class="report-block-list-icon failed"
+>
+  <gl-icon-stub
+    class="gl-mb-1"
+    data-qa-selector="status_failed_icon"
+    name="status-failed"
+    size="12"
+  />
+</div>
+`;
+
+exports[`LicenseStatusIcon renders "neutral" state correctly 1`] = `
+<div
+  class="report-block-list-icon neutral"
+>
+  <gl-icon-stub
+    class="gl-mb-1"
+    data-qa-selector="status_neutral_icon"
+    name="status-alert"
+    size="12"
+  />
+</div>
+`;
+
+exports[`LicenseStatusIcon renders "success" state correctly 1`] = `
+<div
+  class="report-block-list-icon success"
+>
+  <gl-icon-stub
+    class="gl-mb-1"
+    data-qa-selector="status_success_icon"
+    name="status-success"
+    size="12"
+  />
+</div>
+`;

@@ -1,5 +1,6 @@
 import dateFormat from 'dateformat';
 import { isNumber } from 'lodash';
+import { dateFormats } from '~/analytics/shared/constants';
 import { OVERVIEW_STAGE_ID } from '~/cycle_analytics/constants';
 import { medianTimeToParsedSeconds } from '~/cycle_analytics/utils';
 import createFlash, { hideFlash } from '~/flash';
@@ -7,7 +8,6 @@ import { convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
 import { newDate, dayAfter, secondsToDays, getDatesInRange } from '~/lib/utils/datetime_utility';
 import httpStatus from '~/lib/utils/http_status';
 import { convertToSnakeCase, slugify } from '~/lib/utils/text_utility';
-import { dateFormats } from '../shared/constants';
 import { toYmd } from '../shared/utils';
 
 const EVENT_TYPE_LABEL = 'label';

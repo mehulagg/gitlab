@@ -85,6 +85,34 @@ RSpec.describe Groups::Analytics::CycleAnalytics::ValueStreamsController do
         expect(stage_response['title']).to eq('My Stage')
       end
 
+      context 'when using the new start and end event params format' do
+        let(:value_stream_params) do
+          {
+            name: 'test',
+            stages: [
+              {
+                name: 'My Stage',
+                start_event: {
+                  identifier: 'issue_created'
+                },
+                end_event: {
+                  identifier: 'issue_closed'
+                },
+                custom: true
+              }
+            ]
+          }
+        end
+
+        it 'succeeds' do
+          post :create, params: { group_id: group, value_stream: value_stream_params }
+
+          expect(response).to have_gitlab_http_status(:created)
+          stage_response = json_response['stages'].first
+          expect(stage_response['title']).to eq('My Stage')
+        end
+      end
+
       context 'when invalid stage is given' do
         before do
           value_stream_params[:stages].first[:name] = ''
@@ -157,6 +185,39 @@ RSpec.describe Groups::Analytics::CycleAnalytics::ValueStreamsController do
           expect(json_response['name']).to eq('updated name')
           expect(json_response['id']).to eq(value_stream.id)
           expect(json_response['stages'].first['title']).to eq('updated stage name')
+        end
+
+        context 'when using the new start and end event params format' do
+          let(:value_stream_params) do
+            {
+              name: 'test',
+              id: value_stream.id,
+              stages: [
+                {
+                  id: stage.id,
+                  name: 'updated stage name',
+                  start_event: {
+                    identifier: 'issue_created'
+                  },
+                  end_event: {
+                    identifier: 'issue_closed'
+                  },
+                  custom: true
+                }
+              ]
+            }
+          end
+
+          it 'succeeds' do
+            put :update, params: { id: value_stream.id, group_id: group, value_stream: value_stream_params }
+
+            expect(response).to have_gitlab_http_status(:ok)
+            start_event_identifier = json_response['stages'].first['start_event']['identifier']
+            end_event_identifier = json_response['stages'].first['end_event']['identifier']
+
+            expect(start_event_identifier).to eq('issue_created')
+            expect(end_event_identifier).to eq('issue_closed')
+          end
         end
 
         context 'when deleting the stage by excluding it from the stages array' do

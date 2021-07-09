@@ -22,7 +22,10 @@ const addEscalationPolicyToStore = (store, query, { escalationPolicyCreate }, va
   });
 
   const data = produce(sourceData, (draftData) => {
-    draftData.project.incidentManagementEscalationPolicies.nodes.push(policy);
+    draftData.project.incidentManagementEscalationPolicies.nodes = [
+      ...draftData.project.incidentManagementEscalationPolicies.nodes,
+      policy,
+    ];
   });
 
   store.writeQuery({

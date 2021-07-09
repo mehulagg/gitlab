@@ -147,16 +147,6 @@ module Gitlab
           raise 'Failed to determine the write location of the primary database'
         end
 
-        # FF disabled: Returns true if all hosts have caught up to the given transaction write location.
-        # FF enabled: Returns true if there was at least one host that has caught up with the given transaction and sets it.
-        def all_caught_up?(location)
-          if ::Feature.enabled?(:load_balancing_improved_caught_up_hosts_check)
-            select_up_to_date_host(location)
-          else
-            @host_list.hosts.all? { |host| host.caught_up?(location) }
-          end
-        end
-
         # Returns true if there was at least one host that has caught up with the given transaction.
         #
         # In case of a retry, this method also stores the set of hosts that have caught up.
@@ -165,6 +155,7 @@ module Gitlab
         # while we only need a single host: https://gitlab.com/gitlab-org/gitlab/-/issues/326125#note_615271604
         # Also, shuffling the list afterwards doesn't seem to be necessary.
         # This may be improved by merging this method with `select_up_to_date_host`.
+        # Could be removed when `:load_balancing_refine_load_balancer_methods` FF is rolled out
         def select_caught_up_hosts(location)
           all_hosts = @host_list.hosts
           valid_hosts = all_hosts.select { |host| host.caught_up?(location) }
@@ -201,6 +192,7 @@ module Gitlab
           true
         end
 
+        # Could be removed when `:load_balancing_refine_load_balancer_methods` FF is rolled out
         def set_consistent_hosts_for_request(hosts)
           RequestStore[VALID_HOSTS_CACHE_KEY] = hosts
         end

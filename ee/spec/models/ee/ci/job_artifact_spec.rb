@@ -31,6 +31,14 @@ RSpec.describe Ci::JobArtifact do
     it { is_expected.to eq([artifact]) }
   end
 
+  describe '.cluster_image_scanning_reports' do
+    subject { Ci::JobArtifact.cluster_image_scanning_reports }
+
+    let_it_be(:artifact) { create(:ee_ci_job_artifact, :cluster_image_scanning) }
+
+    it { is_expected.to eq([artifact]) }
+  end
+
   describe '.metrics_reports' do
     subject { Ci::JobArtifact.metrics_reports }
 
@@ -226,13 +234,14 @@ RSpec.describe Ci::JobArtifact do
 
     context 'for different types' do
       where(:file_type, :security_report?) do
-        :performance         | false
-        :sast                | true
-        :secret_detection    | true
-        :dependency_scanning | true
-        :container_scanning  | true
-        :dast                | true
-        :coverage_fuzzing    | true
+        :performance            | false
+        :sast                   | true
+        :secret_detection       | true
+        :dependency_scanning    | true
+        :container_scanning     | true
+        :cluster_image_scanning | true
+        :dast                   | true
+        :coverage_fuzzing       | true
       end
 
       with_them do

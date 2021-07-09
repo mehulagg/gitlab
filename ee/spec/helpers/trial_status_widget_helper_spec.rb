@@ -33,6 +33,7 @@ RSpec.describe TrialStatusWidgetHelper do
 
     before do
       travel_to today_for_specs
+      stub_experiments(forcibly_show_trial_status_popover: :candidate)
     end
 
     describe '#trial_status_popover_data_attrs' do
@@ -95,6 +96,18 @@ RSpec.describe TrialStatusWidgetHelper do
 
         with_them do
           include_examples 'returned data attributes'
+        end
+      end
+
+      context 'when not part of the experiment' do
+        before do
+          stub_experiments(forcibly_show_trial_status_popover: :control)
+        end
+
+        where trial_days_remaining: [2, 5, 9, 14, 20]
+
+        with_them do
+          include_examples 'returned data attributes', shown: false
         end
       end
     end

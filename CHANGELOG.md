@@ -2,6 +2,42 @@
 documentation](doc/development/changelog.md) for instructions on adding your own
 entry.
 
+## 14.0.5 (2021-07-08)
+
+### Fixed (4 changes)
+
+- [Return empty strings for Jira links when URL is not set](gitlab-org/gitlab@6da7890d8137b1879297ad81c6737312d6f672b3) ([merge request](gitlab-org/gitlab!65728))
+- [Add prefix to autocomplete path](gitlab-org/gitlab@5256ab7db346610a816ebb975ae9a6ce0d853435) ([merge request](gitlab-org/gitlab!65728))
+- [Do not create audit event for failed logins on read-only DB](gitlab-org/gitlab@30c7944ddddfe92566b3f66a7f549bef3ffd8d82) ([merge request](gitlab-org/gitlab!65728)) **GitLab Enterprise Edition**
+- [Fix git clone for projects with a trailing dot over HTTP](gitlab-org/gitlab@a91be9412a09b069390cc33c14d1bc72216cdbf0) ([merge request](gitlab-org/gitlab!65728))
+
+### Other (1 change)
+
+- [Initialize conversion of ci_builds_metadata.id for bigint migration](gitlab-org/gitlab@34522b102be43118063aa3245d23af313173700d) ([merge request](gitlab-org/gitlab!65728))
+
+## 14.0.4 (2021-07-07)
+
+### Security (1 change)
+
+- [Disable file and network premailer strategies](gitlab-org/security/gitlab@4af58e3d8ee1b25048f34208db6e685cf0bf1411) ([merge request](gitlab-org/security/gitlab!1544))
+
+## 14.0.3 (2021-07-06)
+
+### Fixed (7 changes)
+
+- [Fix deploy keys not working with LFS auth check](gitlab-org/gitlab@134b244c7f59f8a20cb191bc0d2aaa43171f3d6e) ([merge request](gitlab-org/gitlab!65498))
+- [DevOps Adoption - ensure displayNamespaceId is included](gitlab-org/gitlab@1166130f1e6786a8c96735b6518241fb704047b1) ([merge request](gitlab-org/gitlab!65498)) **GitLab Enterprise Edition**
+- [Geo - Fix state value in the lfs_object_registry table](gitlab-org/gitlab@b6f30299d255949b79d149ee71ee50025ac0c8c2) ([merge request](gitlab-org/gitlab!65498)) **GitLab Enterprise Edition**
+- [Fix broken Time Tracking Reports on Issuable sidebar](gitlab-org/gitlab@da0b4a92f791a3f621ec8da8e2fbb0ad4e39d399) ([merge request](gitlab-org/gitlab!65498))
+- [Fix bug where Milestone page led to console error](gitlab-org/gitlab@179948d489ed92f5d8158c23190430e819941a29) ([merge request](gitlab-org/gitlab!65498))
+- [Fix frequent items timestamps not updated](gitlab-org/gitlab@481d4d36252dc91291afe9dacd7d48558878d27f) ([merge request](gitlab-org/gitlab!65498))
+- [Fix pages deployment storage migration](gitlab-org/gitlab@0eab6e579890c557bf97dd48dd6a2a7adaf97358) ([merge request](gitlab-org/gitlab!65498))
+
+### Changed (2 changes)
+
+- [Geo - Move migration to a pre-deployment migration](gitlab-org/gitlab@84327652855cafe36c574df798322b63d0649561) ([merge request](gitlab-org/gitlab!65498)) **GitLab Enterprise Edition**
+- [Reintroduce recursive_approach_for_all_projects default-enabled](gitlab-org/gitlab@14b3aa69cad85541ae6b845b346c80d1eaea099b) ([merge request](gitlab-org/gitlab!65498))
+
 ## 14.0.2 (2021-07-01)
 
 ### Added (1 change)
@@ -667,6 +703,23 @@ entry.
 - [Add missing metrics information](gitlab-org/gitlab@89cd7fe3b95323e635b2d73e08549b2e6153dc4d) ([merge request](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/61772/edit))
 - [Track usage of the resolve UI](gitlab-org/gitlab@35c8e30fce288cecefcf2f7c0077d4608e696519) ([merge request](gitlab-org/gitlab!61654))
 
+## 13.12.8 (2021-07-07)
+
+### Security (1 change)
+
+- [Disable file and network premailer strategies](gitlab-org/security/gitlab@ee69d6d6950bb116cb31523ca805e78af431c25c) ([merge request](gitlab-org/security/gitlab!1545))
+
+## 13.12.7 (2021-07-05)
+
+### Fixed (2 changes)
+
+- [Fix state value in the lfs_object_registry table](gitlab-org/gitlab@feca70558108299a9b7b499e4461b59b7c140ef7) ([merge request](gitlab-org/gitlab!65466)) **GitLab Enterprise Edition**
+- [Fix pages deployment storage migration](gitlab-org/gitlab@4e806a7b5e0eef8d88bcdb68724c6b7bf3c08293) ([merge request](gitlab-org/gitlab!65366))
+
+### Changed (1 change)
+
+- [Move migration to a pre-deployment migration](gitlab-org/gitlab@d02fcd44b3dd797e18221e4e91ab913372bdf18a) ([merge request](gitlab-org/gitlab!65466)) **GitLab Enterprise Edition**
+
 ## 13.12.6 (2021-07-01)
 
 ### Added (1 change)
@@ -1328,6 +1381,12 @@ entry.
 - Remove issuable destroy service related FFs. !61764
 - Change wording for design management upload. !61782
 
+
+## 13.11.7 (2021-07-07)
+
+### Security (1 change)
+
+- [Disable file and network premailer strategies](gitlab-org/security/gitlab@511ed3746b48a26e95c851f76ac6fdcd44c28fd8) ([merge request](gitlab-org/security/gitlab!1546))
 
 ## 13.11.6 (2021-07-01)
 

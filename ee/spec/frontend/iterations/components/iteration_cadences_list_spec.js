@@ -34,16 +34,19 @@ describe('Iteration cadences list', () => {
       id: 'gid://gitlab/Iterations::Cadence/561',
       title: 'A eligendi molestias temporibus maiores architecto ut facilis autem.',
       durationInWeeks: 3,
+      automatic: true,
     },
     {
       id: 'gid://gitlab/Iterations::Cadence/392',
       title: 'A quam repellat omnis eum veritatis voluptas voluptatem consequuntur est.',
       durationInWeeks: 4,
+      automatic: true,
     },
     {
       id: 'gid://gitlab/Iterations::Cadence/152',
       title: 'A repudiandae ut eligendi quae et ducimus porro nam sint perferendis.',
       durationInWeeks: 1,
+      automatic: true,
     },
   ];
 

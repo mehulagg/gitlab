@@ -19,6 +19,7 @@ export default {
     let tableKey = TABLE_TYPE_DEFAULT;
 
     state.plan = plan;
+    state.billing = billing;
 
     if (state.plan.code === null) {
       tableKey = TABLE_TYPE_FREE;

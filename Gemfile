@@ -157,14 +157,14 @@ gem 'github-markup', '~> 1.7.0', require: 'github/markup'
 gem 'commonmarker', '~> 0.21'
 gem 'kramdown', '~> 2.3.1'
 gem 'RedCloth', '~> 4.3.2'
-gem 'gitlab-rdoc', '~> 6.3.2', require: 'rdoc' # We need this fork until rdoc releases a new version. See https://gitlab.com/gitlab-org/gitlab/-/issues/334695
+gem 'rdoc', '~> 6.3.2'
 gem 'org-ruby', '~> 0.9.12'
 gem 'creole', '~> 0.5.0'
 gem 'wikicloth', '0.8.1'
 gem 'asciidoctor', '~> 2.0.10'
 gem 'asciidoctor-include-ext', '~> 0.3.1', require: false
 gem 'asciidoctor-plantuml', '~> 0.0.12'
-gem 'asciidoctor-kroki', '~> 0.4.0', require: false
+gem 'asciidoctor-kroki', '~> 0.5.0', require: false
 gem 'rouge', '~> 3.26.0'
 gem 'truncato', '~> 0.7.11'
 gem 'bootstrap_form', '~> 4.2.0'
@@ -197,7 +197,7 @@ gem 'acts-as-taggable-on', '~> 7.0'
 # Background jobs
 gem 'sidekiq', '~> 5.2.7'
 gem 'sidekiq-cron', '~> 1.0'
-gem 'redis-namespace', '~> 1.7.0'
+gem 'redis-namespace', '~> 1.8.1'
 gem 'gitlab-sidekiq-fetcher', '0.5.6', require: 'sidekiq-reliable-fetch'
 
 # Cron Parser
@@ -229,7 +229,7 @@ gem 'js_regex', '~> 3.4'
 gem 'device_detector'
 
 # Redis
-gem 'redis', '~> 4.0'
+gem 'redis', '~> 4.1.4'
 gem 'connection_pool', '~> 2.0'
 
 # Redis session store
@@ -286,7 +286,7 @@ gem 'gitlab_chronic_duration', '~> 0.10.6.2'
 gem 'rack-proxy', '~> 0.6.0'
 
 gem 'sassc-rails', '~> 2.1.0'
-gem 'autoprefixer-rails', '10.2.0.0'
+gem 'autoprefixer-rails', '10.2.5.1'
 gem 'terser', '1.0.2'
 
 gem 'addressable', '~> 2.7'
@@ -305,11 +305,7 @@ gem 'sentry-raven', '~> 3.1'
 
 # PostgreSQL query parsing
 #
-# We need this fork until https://github.com/pganalyze/pg_query/pull/212
-# and https://github.com/pganalyze/pg_query/pull/213 are
-# released. gitlab-labkit will need to be updated to use the pg_query
-# version.
-gem 'gitlab-pg_query', '~> 2.0.4', require: 'pg_query'
+gem 'pg_query', '~> 2.1'
 
 gem 'premailer-rails', '~> 1.10.3'
 
@@ -398,7 +394,7 @@ group :development, :test do
 end
 
 group :development, :test, :danger do
-  gem 'gitlab-dangerfiles', '~> 2.1.2', require: false
+  gem 'gitlab-dangerfiles', '~> 2.2.1', require: false
 end
 
 group :development, :test, :coverage do
@@ -485,7 +481,7 @@ gem 'grpc', '~> 1.30.2'
 
 gem 'google-protobuf', '~> 3.17.1'
 
-gem 'toml-rb', '~> 1.0.0'
+gem 'toml-rb', '~> 2.0'
 
 # Feature toggles
 gem 'flipper', '~> 0.21.0'

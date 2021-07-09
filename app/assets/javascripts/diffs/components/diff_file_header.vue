@@ -207,6 +207,19 @@ export default {
       return this.codequalityDiff?.length > 0 && !this.glFeatures.codequalityMrDiffAnnotations;
     },
   },
+  watch: {
+    'idState.moreActionsShown': {
+      handler(val) {
+        const el = this.$el.closest('.vue-recycle-scroller__item-view');
+
+        if (this.glFeatures.diffsVirtualScrolling && el) {
+          // We can't add a style with Vue because of the way the virtual
+          // scroller library renders the diff files
+          el.style.zIndex = val ? '1' : null;
+        }
+      },
+    },
+  },
   methods: {
     ...mapActions('diffs', [
       'toggleFileDiscussions',
@@ -454,7 +467,7 @@ export default {
               :disabled="diffFile.isLoadingFullFile"
               @click="toggleFullDiff(diffFile.file_path)"
             >
-              <gl-loading-icon v-if="diffFile.isLoadingFullFile" inline />
+              <gl-loading-icon v-if="diffFile.isLoadingFullFile" size="sm" inline />
               {{ expandDiffToFullFileTitle }}
             </gl-dropdown-item>
           </template>

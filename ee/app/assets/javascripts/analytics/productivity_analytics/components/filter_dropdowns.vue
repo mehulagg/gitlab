@@ -1,8 +1,8 @@
 <script>
 import { mapState, mapActions } from 'vuex';
+import ProjectsDropdownFilter from '~/analytics/shared/components/projects_dropdown_filter.vue';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import GroupsDropdownFilter from '../../shared/components/groups_dropdown_filter.vue';
-import ProjectsDropdownFilter from '../../shared/components/projects_dropdown_filter.vue';
 import { accessLevelReporter, projectsPerPage } from '../constants';
 
 export default {

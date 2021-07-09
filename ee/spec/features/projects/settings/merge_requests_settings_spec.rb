@@ -17,9 +17,9 @@ RSpec.describe 'Project settings > [EE] Merge Requests', :js do
   end
 
   context 'Status checks' do
-    context 'Feature is not available' do
+    context 'Feature flag is disabled' do
       before do
-        stub_licensed_features(external_status_checks: false)
+        stub_feature_flags(ff_external_status_checks: false)
       end
 
       it 'does not render the status checks area' do
@@ -27,67 +27,83 @@ RSpec.describe 'Project settings > [EE] Merge Requests', :js do
       end
     end
 
-    context 'Feature is available' do
+    context 'Feature flag is enabled' do
       before do
-        stub_licensed_features(external_status_checks: true)
+        stub_feature_flags(ff_external_status_checks: true)
       end
 
-      it 'adds a status check' do
-        visit edit_project_path(project)
+      context 'Feature is not available' do
+        before do
+          stub_licensed_features(external_status_checks: false)
+        end
 
-        click_button 'Add status check'
+        it 'does not render the status checks area' do
+          expect(page).not_to have_selector('[data-testid="status-checks-table"]')
+        end
+      end
 
-        within('.modal-content') do
-          find('[data-testid="name"]').set('My new check')
-          find('[data-testid="url"]').set('https://api.gitlab.com')
+      context 'Feature is available' do
+        before do
+          stub_licensed_features(external_status_checks: true)
+        end
+
+        it 'adds a status check' do
+          visit edit_project_path(project)
 
           click_button 'Add status check'
-        end
-
-        wait_for_requests
-
-        expect(find('[data-testid="status-checks-table"]')).to have_content('My new check')
-      end
-
-      context 'with a status check' do
-        let_it_be(:rule) { create(:external_status_check, project: project) }
-
-        it 'updates the status check' do
-          visit edit_project_path(project)
-
-          expect(find('[data-testid="status-checks-table"]')).to have_content(rule.name)
-
-          within('[data-testid="status-checks-table"]') do
-            click_button 'Edit'
-          end
 
           within('.modal-content') do
-            find('[data-testid="name"]').set('Something new')
+            find('[data-testid="name"]').set('My new check')
+            find('[data-testid="url"]').set('https://api.gitlab.com')
 
-            click_button 'Update status check'
+            click_button 'Add status check'
           end
 
           wait_for_requests
 
-          expect(find('[data-testid="status-checks-table"]')).to have_content('Something new')
+          expect(find('[data-testid="status-checks-table"]')).to have_content('My new check')
         end
 
-        it 'removes the status check' do
-          visit edit_project_path(project)
+        context 'with a status check' do
+          let_it_be(:rule) { create(:external_status_check, project: project) }
 
-          expect(find('[data-testid="status-checks-table"]')).to have_content(rule.name)
+          it 'updates the status check' do
+            visit edit_project_path(project)
 
-          within('[data-testid="status-checks-table"]') do
-            click_button 'Remove...'
+            expect(find('[data-testid="status-checks-table"]')).to have_content(rule.name)
+
+            within('[data-testid="status-checks-table"]') do
+              click_button 'Edit'
+            end
+
+            within('.modal-content') do
+              find('[data-testid="name"]').set('Something new')
+
+              click_button 'Update status check'
+            end
+
+            wait_for_requests
+
+            expect(find('[data-testid="status-checks-table"]')).to have_content('Something new')
           end
 
-          within('.modal-content') do
-            click_button 'Remove status check'
+          it 'removes the status check' do
+            visit edit_project_path(project)
+
+            expect(find('[data-testid="status-checks-table"]')).to have_content(rule.name)
+
+            within('[data-testid="status-checks-table"]') do
+              click_button 'Remove...'
+            end
+
+            within('.modal-content') do
+              click_button 'Remove status check'
+            end
+
+            wait_for_requests
+
+            expect(find('[data-testid="status-checks-table"]')).not_to have_content(rule.name)
           end
-
-          wait_for_requests
-
-          expect(find('[data-testid="status-checks-table"]')).not_to have_content(rule.name)
         end
       end
     end

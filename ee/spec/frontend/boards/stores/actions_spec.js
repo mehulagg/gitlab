@@ -608,27 +608,13 @@ describe('resetEpics', () => {
   });
 });
 
-describe('setActiveIssueWeight', () => {
+describe('setActiveItemWeight', () => {
   const state = { boardItems: { [mockIssue.id]: mockIssue } };
   const getters = { activeBoardItem: mockIssue };
   const testWeight = mockIssue.weight + 1;
-  const input = {
-    weight: testWeight,
-    projectPath: 'h/b',
-  };
+  const input = testWeight;
 
-  it('should commit weight after setting the issue', (done) => {
-    jest.spyOn(gqlClient, 'mutate').mockResolvedValue({
-      data: {
-        issueSetWeight: {
-          issue: {
-            weight: testWeight,
-          },
-          errors: [],
-        },
-      },
-    });
-
+  it('should commit weight', (done) => {
     const payload = {
       itemId: getters.activeBoardItem.id,
       prop: 'weight',
@@ -636,7 +622,7 @@ describe('setActiveIssueWeight', () => {
     };
 
     testAction(
-      actions.setActiveIssueWeight,
+      actions.setActiveItemWeight,
       input,
       { ...state, ...getters },
       [
@@ -655,7 +641,7 @@ describe('setActiveIssueWeight', () => {
       .spyOn(gqlClient, 'mutate')
       .mockResolvedValue({ data: { issueSetWeight: { errors: ['failed mutation'] } } });
 
-    await expect(actions.setActiveIssueWeight({ getters }, input)).rejects.toThrow(Error);
+    await expect(actions.setActiveItemWeight({ getters }, input)).rejects.toThrow(Error);
   });
 });
 

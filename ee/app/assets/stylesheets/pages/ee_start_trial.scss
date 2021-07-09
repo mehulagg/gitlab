@@ -38,34 +38,13 @@
 
 /* Trial License Install Modal */
 .modal-upload-trial-license {
-  .modal-body-contents {
-    .trial-activated-graphic {
-      display: flex;
-      justify-content: center;
+  .svg-container {
+    width: 90px;
+    height: 90px;
+  }
 
-      svg {
-        width: 90px;
-        height: 90px;
-      }
-    }
-
-    .confirmation-title,
-    .confirmation-desc {
-      text-align: center;
-    }
-
-    .confirmation-desc {
-      max-width: 80%;
-      margin: auto;
-      color: $gl-text-color-secondary;
-    }
-
-    .trial-license-preview {
-      max-height: 300px;
-      word-wrap: break-word;
-      word-break: break-all;
-      overflow-y: auto;
-    }
+  .trial-license-preview {
+    max-height: 300px;
   }
 
   /* Pure CSS License Key Preview Toggle */
@@ -83,11 +62,6 @@
 
   .show-license,
   .hide-license {
-    margin-top: 10px;
-    text-align: center;
-    font-size: 18px;
-    color: $gray-600;
-
     &:hover {
       text-decoration: none;
       color: $gray-900;

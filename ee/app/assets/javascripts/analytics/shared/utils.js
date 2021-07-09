@@ -1,7 +1,7 @@
 import dateFormat from 'dateformat';
+import { dateFormats } from '~/analytics/shared/constants';
 import { convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
 import { capitalizeFirstCharacter } from '~/lib/utils/text_utility';
-import { dateFormats } from './constants';
 
 export const toYmd = (date) => dateFormat(date, dateFormats.isoDate);
 
@@ -135,8 +135,3 @@ export const buildCycleAnalyticsInitialData = ({
     : [],
   stage: JSON.parse(stage),
 });
-
-export const filterBySearchTerm = (data = [], searchTerm = '', filterByKey = 'name') => {
-  if (!searchTerm?.length) return data;
-  return data.filter((item) => item[filterByKey].toLowerCase().includes(searchTerm.toLowerCase()));
-};

@@ -25,7 +25,7 @@ review-build-cng:
   extends:
     - .default-retry
     - .review:rules:review-build-cng
-  image: ${GITLAB_DEPENDENCY_PROXY}ruby:2.7-alpine
+  image: ${GITLAB_DEPENDENCY_PROXY}ruby:2.7
   stage: review-prepare
   before_script:
     - source ./scripts/utils.sh
@@ -54,7 +54,6 @@ review-deploy:
   extends:
     - .review-workflow-base
     - .review:rules:review-deploy
-  retry: 2
   stage: review
   needs: ["review-build-cng"]
   resource_group: "review/${CI_COMMIT_REF_NAME}"

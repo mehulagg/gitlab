@@ -100,7 +100,7 @@ export default {
               bulkEnableDevopsAdoptionNamespaces: { enabledNamespaces, errors: requestErrors },
             } = data;
 
-            if (!requestErrors.length) this.$emit('segmentsAdded', enabledNamespaces);
+            if (!requestErrors.length) this.$emit('enabledNamespacesAdded', enabledNamespaces);
           },
         })
         .catch((error) => {
@@ -125,7 +125,7 @@ export default {
         @input="$emit('fetchGroups', $event)"
       />
     </template>
-    <gl-loading-icon v-if="isLoadingGroups" />
+    <gl-loading-icon v-if="isLoadingGroups" size="sm" />
     <template v-else>
       <gl-dropdown-item
         v-for="group in groups"

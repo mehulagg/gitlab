@@ -11,7 +11,7 @@ module Projects
       LARGE_FILE_SIZE = 1.megabytes
 
       attr_reader :lfs_download_object
-      delegate :oid, :size, :credentials, :sanitized_url, to: :lfs_download_object, prefix: :lfs
+      delegate :oid, :size, :credentials, :sanitized_url, :headers, to: :lfs_download_object, prefix: :lfs
 
       def initialize(project, lfs_download_object)
         super(project)
@@ -22,7 +22,7 @@ module Projects
       def execute
         return unless project&.lfs_enabled? && lfs_download_object
         return error("LFS file with oid #{lfs_oid} has invalid attributes") unless lfs_download_object.valid?
-        return link_existing_lfs_object! if lfs_size > LARGE_FILE_SIZE && lfs_object
+        return link_existing_lfs_object! if Feature.enabled?(:lfs_link_existing_object, project, default_enabled: :yaml) && lfs_size > LARGE_FILE_SIZE && lfs_object
 
         wrap_download_errors do
           download_lfs_file!
@@ -71,17 +71,21 @@ module Projects
         raise_oid_error! if digester.hexdigest != lfs_oid
       end
 
-      def download_headers
-        { stream_body: true }.tap do |headers|
+      def download_options
+        http_options = { headers: lfs_headers, stream_body: true }
+
+        return http_options if lfs_download_object.has_authorization_header?
+
+        http_options.tap do |options|
           if lfs_credentials[:user].present? || lfs_credentials[:password].present?
             # Using authentication headers in the request
-            headers[:basic_auth] = { username: lfs_credentials[:user], password: lfs_credentials[:password] }
+            options[:basic_auth] = { username: lfs_credentials[:user], password: lfs_credentials[:password] }
           end
         end
       end
 
       def fetch_file(&block)
-        response = Gitlab::HTTP.get(lfs_sanitized_url, download_headers, &block)
+        response = Gitlab::HTTP.get(lfs_sanitized_url, download_options, &block)
 
         raise ResponseError, "Received error code #{response.code}" unless response.success?
       end

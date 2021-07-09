@@ -56,6 +56,7 @@ RSpec.describe 'Database schema' do
     ldap_group_links: %w[group_id],
     members: %w[source_id created_by_id],
     merge_requests: %w[last_edited_by_id state_id],
+    merge_request_diff_commits: %w[commit_author_id committer_id],
     namespaces: %w[owner_id parent_id],
     notes: %w[author_id commit_id noteable_id updated_by_id resolved_by_id confirmed_by_id discussion_id],
     notification_settings: %w[source_id],
@@ -261,6 +262,18 @@ RSpec.describe 'Database schema' do
       end.map(&:to_sym)
 
       expect(problematic_tables - exceptions).to be_empty
+    end
+  end
+
+  context 'index names' do
+    it 'disallows index names with a _ccnew[0-9]* suffix' do
+      # During REINDEX operations, Postgres generates a temporary index with a _ccnew[0-9]* suffix
+      # Since indexes are being considered temporary and subject to removal if they stick around for longer. See Gitlab::Database::Reindexing.
+      #
+      # Hence we disallow adding permanent indexes with this suffix.
+      problematic_indexes = Gitlab::Database::PostgresIndex.match("#{Gitlab::Database::Reindexing::ReindexConcurrently::TEMPORARY_INDEX_PATTERN}$").all
+
+      expect(problematic_indexes).to be_empty
     end
   end
 

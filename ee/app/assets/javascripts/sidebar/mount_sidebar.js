@@ -9,7 +9,7 @@ import CveIdRequest from './components/cve_id_request/cve_id_request_sidebar.vue
 import IterationSidebarDropdownWidget from './components/iteration_sidebar_dropdown_widget.vue';
 import SidebarDropdownWidget from './components/sidebar_dropdown_widget.vue';
 import SidebarStatus from './components/status/sidebar_status.vue';
-import SidebarWeight from './components/weight/sidebar_weight.vue';
+import SidebarWeightWidget from './components/weight/sidebar_weight_widget.vue';
 import { IssuableAttributeType } from './constants';
 
 Vue.use(VueApollo);
@@ -19,12 +19,26 @@ const mountWeightComponent = () => {
 
   if (!el) return false;
 
+  const { canEdit, projectPath, issueIid } = el.dataset;
+
   return new Vue({
     el,
+    apolloProvider,
     components: {
-      SidebarWeight,
+      SidebarWeightWidget,
     },
-    render: (createElement) => createElement('sidebar-weight'),
+    provide: {
+      canUpdate: parseBoolean(canEdit),
+      isClassicSidebar: true,
+    },
+    render: (createElement) =>
+      createElement('sidebar-weight-widget', {
+        props: {
+          fullPath: projectPath,
+          iid: issueIid,
+          issuableType: IssuableType.Issue,
+        },
+      }),
   });
 };
 

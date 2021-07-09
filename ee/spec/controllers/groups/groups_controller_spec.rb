@@ -90,7 +90,7 @@ RSpec.describe GroupsController do
         get :show, params: { id: group }
 
         expect(response).to have_gitlab_http_status(:found)
-        expect(response.location).to match(/groups\/#{group.to_param}\/-\/saml\/sso\?redirect=.+&token=/)
+        expect(response.location).to match(%r{groups/#{group.to_param}/-/saml/sso\?redirect=.+&token=})
       end
     end
 

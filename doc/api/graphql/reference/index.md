@@ -286,6 +286,12 @@ four standard [pagination arguments](#connection-pagination-arguments):
 | <a id="queryprojectssort"></a>`sort` | [`String`](#string) | Sort order of results. |
 | <a id="queryprojectstopics"></a>`topics` | [`[String!]`](#string) | Filters projects by topics. |
 
+### `Query.queryComplexity`
+
+Information about the complexity of the GraphQL query.
+
+Returns [`QueryComplexity`](#querycomplexity).
+
 ### `Query.runner`
 
 Find a runner. Available only when feature flag `runner_graphql_query` is enabled.
@@ -8506,7 +8512,9 @@ Snapshot.
 | Name | Type | Description |
 | ---- | ---- | ----------- |
 | <a id="devopsadoptionsnapshotcodeownersusedcount"></a>`codeOwnersUsedCount` | [`Int`](#int) | Total number of projects with existing CODEOWNERS file. |
+| <a id="devopsadoptionsnapshotcoveragefuzzingenabledcount"></a>`coverageFuzzingEnabledCount` | [`Int`](#int) | Total number of projects with enabled coverage fuzzing. |
 | <a id="devopsadoptionsnapshotdastenabledcount"></a>`dastEnabledCount` | [`Int`](#int) | Total number of projects with enabled DAST. |
+| <a id="devopsadoptionsnapshotdependencyscanningenabledcount"></a>`dependencyScanningEnabledCount` | [`Int`](#int) | Total number of projects with enabled dependency scanning. |
 | <a id="devopsadoptionsnapshotdeploysucceeded"></a>`deploySucceeded` | [`Boolean!`](#boolean) | At least one deployment succeeded. |
 | <a id="devopsadoptionsnapshotendtime"></a>`endTime` | [`Time!`](#time) | The end time for the snapshot where the data points were collected. |
 | <a id="devopsadoptionsnapshotissueopened"></a>`issueOpened` | [`Boolean!`](#boolean) | At least one issue was opened. |
@@ -8581,12 +8589,44 @@ Aggregated summary of changes.
 | ---- | ---- | ----------- |
 | <a id="discussioncreatedat"></a>`createdAt` | [`Time!`](#time) | Timestamp of the discussion's creation. |
 | <a id="discussionid"></a>`id` | [`DiscussionID!`](#discussionid) | ID of this discussion. |
+| <a id="discussionnoteable"></a>`noteable` | [`NoteableType`](#noteabletype) | Object which the discussion belongs to. |
 | <a id="discussionnotes"></a>`notes` | [`NoteConnection!`](#noteconnection) | All notes in the discussion. (see [Connections](#connections)) |
 | <a id="discussionreplyid"></a>`replyId` | [`DiscussionID!`](#discussionid) | ID used to reply to this discussion. |
 | <a id="discussionresolvable"></a>`resolvable` | [`Boolean!`](#boolean) | Indicates if the object can be resolved. |
 | <a id="discussionresolved"></a>`resolved` | [`Boolean!`](#boolean) | Indicates if the object is resolved. |
 | <a id="discussionresolvedat"></a>`resolvedAt` | [`Time`](#time) | Timestamp of when the object was resolved. |
 | <a id="discussionresolvedby"></a>`resolvedBy` | [`UserCore`](#usercore) | User who resolved the object. |
+
+### `Dora`
+
+All information related to DORA metrics.
+
+#### Fields with arguments
+
+##### `Dora.metrics`
+
+DORA metrics for the current group or project.
+
+Returns [`[DoraMetric!]`](#dorametric).
+
+###### Arguments
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| <a id="dorametricsenddate"></a>`endDate` | [`Date`](#date) | Date range to end at. Default is the current date. |
+| <a id="dorametricsenvironmenttier"></a>`environmentTier` | [`DeploymentTier`](#deploymenttier) | The deployment tier of the environments to return. Defaults to `PRODUCTION`. |
+| <a id="dorametricsinterval"></a>`interval` | [`DoraMetricBucketingInterval`](#dorametricbucketinginterval) | How the metric should be aggregrated. Defaults to `DAILY`. In the case of `ALL`, the `date` field in the response will be `null`. |
+| <a id="dorametricsmetric"></a>`metric` | [`DoraMetricType!`](#dorametrictype) | The type of metric to return. |
+| <a id="dorametricsstartdate"></a>`startDate` | [`Date`](#date) | Date range to start from. Default is 3 months ago. |
+
+### `DoraMetric`
+
+#### Fields
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| <a id="dorametricdate"></a>`date` | [`String`](#string) | Date of the data point. |
+| <a id="dorametricvalue"></a>`value` | [`Int`](#int) | Value of the data point. |
 
 ### `Environment`
 
@@ -8851,6 +8891,7 @@ Relationship between an epic and an issue.
 | <a id="epicissueblocked"></a>`blocked` | [`Boolean!`](#boolean) | Indicates the issue is blocked. |
 | <a id="epicissueblockedbycount"></a>`blockedByCount` | [`Int`](#int) | Count of issues blocking this issue. |
 | <a id="epicissueblockedbyissues"></a>`blockedByIssues` | [`IssueConnection`](#issueconnection) | Issues blocking this issue. (see [Connections](#connections)) |
+| <a id="epicissueblockingcount"></a>`blockingCount` | [`Int!`](#int) | Count of issues this issue is blocking. |
 | <a id="epicissueclosedat"></a>`closedAt` | [`Time`](#time) | Timestamp of when the issue was closed. |
 | <a id="epicissueconfidential"></a>`confidential` | [`Boolean!`](#boolean) | Indicates the issue is confidential. |
 | <a id="epicissuecreatenoteemail"></a>`createNoteEmail` | [`String`](#string) | User specific email address for the issue. |
@@ -9204,6 +9245,7 @@ four standard [pagination arguments](#connection-pagination-arguments):
 | <a id="groupcustomemoji"></a>`customEmoji` | [`CustomEmojiConnection`](#customemojiconnection) | Custom emoji within this namespace. Available only when feature flag `custom_emoji` is enabled. (see [Connections](#connections)) |
 | <a id="groupdescription"></a>`description` | [`String`](#string) | Description of the namespace. |
 | <a id="groupdescriptionhtml"></a>`descriptionHtml` | [`String`](#string) | The GitLab Flavored Markdown rendering of `description`. |
+| <a id="groupdora"></a>`dora` | [`Dora`](#dora) | The group's DORA metrics. |
 | <a id="groupemailsdisabled"></a>`emailsDisabled` | [`Boolean`](#boolean) | Indicates if a group has email notifications disabled. |
 | <a id="groupepicboards"></a>`epicBoards` | [`EpicBoardConnection`](#epicboardconnection) | Find epic boards. (see [Connections](#connections)) |
 | <a id="groupepicsenabled"></a>`epicsEnabled` | [`Boolean`](#boolean) | Indicates if Epics are enabled for namespace. |
@@ -9904,6 +9946,7 @@ Returns [`VulnerabilitySeveritiesCount`](#vulnerabilityseveritiescount).
 | <a id="issueblocked"></a>`blocked` | [`Boolean!`](#boolean) | Indicates the issue is blocked. |
 | <a id="issueblockedbycount"></a>`blockedByCount` | [`Int`](#int) | Count of issues blocking this issue. |
 | <a id="issueblockedbyissues"></a>`blockedByIssues` | [`IssueConnection`](#issueconnection) | Issues blocking this issue. (see [Connections](#connections)) |
+| <a id="issueblockingcount"></a>`blockingCount` | [`Int!`](#int) | Count of issues this issue is blocking. |
 | <a id="issueclosedat"></a>`closedAt` | [`Time`](#time) | Timestamp of when the issue was closed. |
 | <a id="issueconfidential"></a>`confidential` | [`Boolean!`](#boolean) | Indicates the issue is confidential. |
 | <a id="issuecreatenoteemail"></a>`createNoteEmail` | [`String`](#string) | User specific email address for the issue. |
@@ -10914,7 +10957,9 @@ Represents the network policy.
 | Name | Type | Description |
 | ---- | ---- | ----------- |
 | <a id="networkpolicyenabled"></a>`enabled` | [`Boolean!`](#boolean) | Indicates whether this policy is enabled. |
+| <a id="networkpolicyenvironments"></a>`environments` | [`EnvironmentConnection`](#environmentconnection) | Environments where this policy is applied. (see [Connections](#connections)) |
 | <a id="networkpolicyfromautodevops"></a>`fromAutoDevops` | [`Boolean!`](#boolean) | Indicates whether this policy is created from AutoDevops. |
+| <a id="networkpolicykind"></a>`kind` | [`NetworkPolicyKind!`](#networkpolicykind) | Kind of the policy. |
 | <a id="networkpolicyname"></a>`name` | [`String!`](#string) | Name of the policy. |
 | <a id="networkpolicynamespace"></a>`namespace` | [`String!`](#string) | Namespace of the policy. |
 | <a id="networkpolicyupdatedat"></a>`updatedAt` | [`Time!`](#time) | Timestamp of when the policy YAML was last updated. |
@@ -11335,6 +11380,7 @@ Represents vulnerability finding of a security report on the pipeline.
 | <a id="projectdastsiteprofiles"></a>`dastSiteProfiles` | [`DastSiteProfileConnection`](#dastsiteprofileconnection) | DAST Site Profiles associated with the project. (see [Connections](#connections)) |
 | <a id="projectdescription"></a>`description` | [`String`](#string) | Short description of the project. |
 | <a id="projectdescriptionhtml"></a>`descriptionHtml` | [`String`](#string) | The GitLab Flavored Markdown rendering of `description`. |
+| <a id="projectdora"></a>`dora` | [`Dora`](#dora) | The project's DORA metrics. |
 | <a id="projectforkscount"></a>`forksCount` | [`Int!`](#int) | Number of times the project has been forked. |
 | <a id="projectfullpath"></a>`fullPath` | [`ID!`](#id) | Full path of the project. |
 | <a id="projectgrafanaintegration"></a>`grafanaIntegration` | [`GrafanaIntegration`](#grafanaintegration) | Grafana integration details for the project. |
@@ -12297,6 +12343,15 @@ Pypi metadata.
 | ---- | ---- | ----------- |
 | <a id="pypimetadataid"></a>`id` | [`PackagesPypiMetadatumID!`](#packagespypimetadatumid) | ID of the metadatum. |
 | <a id="pypimetadatarequiredpython"></a>`requiredPython` | [`String`](#string) | Required Python version of the Pypi package. |
+
+### `QueryComplexity`
+
+#### Fields
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| <a id="querycomplexitylimit"></a>`limit` | [`Int`](#int) | GraphQL query complexity limit. See [GitLab documentation on this limit](https://docs.gitlab.com/ee/api/graphql/index.html#max-query-complexity). |
+| <a id="querycomplexityscore"></a>`score` | [`Int`](#int) | GraphQL query complexity score. |
 
 ### `RecentFailures`
 
@@ -14356,6 +14411,18 @@ Weight of the data visualization palette.
 | <a id="datavisualizationweightenumweight_900"></a>`WEIGHT_900` | 900 weight. |
 | <a id="datavisualizationweightenumweight_950"></a>`WEIGHT_950` | 950 weight. |
 
+### `DeploymentTier`
+
+All environment deployment tiers.
+
+| Value | Description |
+| ----- | ----------- |
+| <a id="deploymenttierdevelopment"></a>`DEVELOPMENT` | Development. |
+| <a id="deploymenttierother"></a>`OTHER` | Other. |
+| <a id="deploymenttierproduction"></a>`PRODUCTION` | Production. |
+| <a id="deploymenttierstaging"></a>`STAGING` | Staging. |
+| <a id="deploymenttiertesting"></a>`TESTING` | Testing. |
+
 ### `DesignCollectionCopyState`
 
 Copy state of a DesignCollection.
@@ -14385,6 +14452,25 @@ Type of file the position refers to.
 | ----- | ----------- |
 | <a id="diffpositiontypeimage"></a>`image` | An image. |
 | <a id="diffpositiontypetext"></a>`text` | A text file. |
+
+### `DoraMetricBucketingInterval`
+
+All possible ways that DORA metrics can be aggregated.
+
+| Value | Description |
+| ----- | ----------- |
+| <a id="dorametricbucketingintervalall"></a>`ALL` | All data points are combined into a single value. |
+| <a id="dorametricbucketingintervaldaily"></a>`DAILY` | Data points are combined into chunks by day. |
+| <a id="dorametricbucketingintervalmonthly"></a>`MONTHLY` | Data points are combined into chunks by month. |
+
+### `DoraMetricType`
+
+All supported DORA metric types.
+
+| Value | Description |
+| ----- | ----------- |
+| <a id="dorametrictypedeployment_frequency"></a>`DEPLOYMENT_FREQUENCY` | Deployment frequency. |
+| <a id="dorametrictypelead_time_for_changes"></a>`LEAD_TIME_FOR_CHANGES` | Lead time for changes. |
 
 ### `EntryType`
 
@@ -14527,6 +14613,8 @@ Values for sorting issues.
 
 | Value | Description |
 | ----- | ----------- |
+| <a id="issuesortblocking_issues_asc"></a>`BLOCKING_ISSUES_ASC` | Blocking issues count by ascending order. |
+| <a id="issuesortblocking_issues_desc"></a>`BLOCKING_ISSUES_DESC` | Blocking issues count by descending order. |
 | <a id="issuesortcreated_asc"></a>`CREATED_ASC` | Created at ascending order. |
 | <a id="issuesortcreated_desc"></a>`CREATED_DESC` | Created at descending order. |
 | <a id="issuesortdue_date_asc"></a>`DUE_DATE_ASC` | Due date by ascending order. |
@@ -14535,6 +14623,8 @@ Values for sorting issues.
 | <a id="issuesortlabel_priority_desc"></a>`LABEL_PRIORITY_DESC` | Label priority by descending order. |
 | <a id="issuesortmilestone_due_asc"></a>`MILESTONE_DUE_ASC` | Milestone due date by ascending order. |
 | <a id="issuesortmilestone_due_desc"></a>`MILESTONE_DUE_DESC` | Milestone due date by descending order. |
+| <a id="issuesortpopularity_asc"></a>`POPULARITY_ASC` | Number of upvotes (awarded "thumbs up" emoji) by ascending order. |
+| <a id="issuesortpopularity_desc"></a>`POPULARITY_DESC` | Number of upvotes (awarded "thumbs up" emoji) by descending order. |
 | <a id="issuesortpriority_asc"></a>`PRIORITY_ASC` | Priority by ascending order. |
 | <a id="issuesortpriority_desc"></a>`PRIORITY_DESC` | Priority by descending order. |
 | <a id="issuesortpublished_asc"></a>`PUBLISHED_ASC` | Published issues shown last. |
@@ -14616,6 +14706,7 @@ Iteration ID wildcard values.
 | <a id="jobartifactfiletypearchive"></a>`ARCHIVE` | ARCHIVE job artifact file type. |
 | <a id="jobartifactfiletypebrowser_performance"></a>`BROWSER_PERFORMANCE` | BROWSER PERFORMANCE job artifact file type. |
 | <a id="jobartifactfiletypecluster_applications"></a>`CLUSTER_APPLICATIONS` | CLUSTER APPLICATIONS job artifact file type. |
+| <a id="jobartifactfiletypecluster_image_scanning"></a>`CLUSTER_IMAGE_SCANNING` | CLUSTER IMAGE SCANNING job artifact file type. |
 | <a id="jobartifactfiletypecobertura"></a>`COBERTURA` | COBERTURA job artifact file type. |
 | <a id="jobartifactfiletypecodequality"></a>`CODEQUALITY` | CODE QUALITY job artifact file type. |
 | <a id="jobartifactfiletypecontainer_scanning"></a>`CONTAINER_SCANNING` | CONTAINER SCANNING job artifact file type. |
@@ -14801,6 +14892,15 @@ Negated Iteration ID wildcard values.
 | Value | Description |
 | ----- | ----------- |
 | <a id="negatediterationwildcardidcurrent"></a>`CURRENT` | Current iteration. |
+
+### `NetworkPolicyKind`
+
+Kind of the network policy.
+
+| Value | Description |
+| ----- | ----------- |
+| <a id="networkpolicykindciliumnetworkpolicy"></a>`CiliumNetworkPolicy` | The policy kind of Cilium Network Policy. |
+| <a id="networkpolicykindnetworkpolicy"></a>`NetworkPolicy` | The policy kind of Network Policy. |
 
 ### `OncallRotationUnitEnum`
 
@@ -15145,6 +15245,7 @@ Name of the feature that the callout is for.
 | <a id="usercalloutfeaturenameenumactive_user_count_threshold"></a>`ACTIVE_USER_COUNT_THRESHOLD` | Callout feature name for active_user_count_threshold. |
 | <a id="usercalloutfeaturenameenumbuy_pipeline_minutes_notification_dot"></a>`BUY_PIPELINE_MINUTES_NOTIFICATION_DOT` | Callout feature name for buy_pipeline_minutes_notification_dot. |
 | <a id="usercalloutfeaturenameenumcanary_deployment"></a>`CANARY_DEPLOYMENT` | Callout feature name for canary_deployment. |
+| <a id="usercalloutfeaturenameenumcloud_licensing_subscription_activation_banner"></a>`CLOUD_LICENSING_SUBSCRIPTION_ACTIVATION_BANNER` | Callout feature name for cloud_licensing_subscription_activation_banner. |
 | <a id="usercalloutfeaturenameenumcluster_security_warning"></a>`CLUSTER_SECURITY_WARNING` | Callout feature name for cluster_security_warning. |
 | <a id="usercalloutfeaturenameenumcustomize_homepage"></a>`CUSTOMIZE_HOMEPAGE` | Callout feature name for customize_homepage. |
 | <a id="usercalloutfeaturenameenumeoa_bronze_plan_banner"></a>`EOA_BRONZE_PLAN_BANNER` | Callout feature name for eoa_bronze_plan_banner. |
@@ -15819,6 +15920,16 @@ One of:
 - [`Issue`](#issue)
 - [`MergeRequest`](#mergerequest)
 
+#### `NoteableType`
+
+Represents an object that supports notes.
+
+One of:
+
+- [`Design`](#design)
+- [`Issue`](#issue)
+- [`MergeRequest`](#mergerequest)
+
 #### `PackageMetadata`
 
 Represents metadata associated with a Package.
@@ -15987,7 +16098,7 @@ Implementations:
 | <a id="memberinterfaceupdatedat"></a>`updatedAt` | [`Time`](#time) | Date and time the membership was last updated. |
 | <a id="memberinterfaceuser"></a>`user` | [`UserCore`](#usercore) | User that is associated with the member object. |
 
-#### `Noteable`
+#### `NoteableInterface`
 
 Implementations:
 
@@ -16005,8 +16116,8 @@ Implementations:
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
-| <a id="noteablediscussions"></a>`discussions` | [`DiscussionConnection!`](#discussionconnection) | All discussions on this noteable. (see [Connections](#connections)) |
-| <a id="noteablenotes"></a>`notes` | [`NoteConnection!`](#noteconnection) | All notes on this noteable. (see [Connections](#connections)) |
+| <a id="noteableinterfacediscussions"></a>`discussions` | [`DiscussionConnection!`](#discussionconnection) | All discussions on this noteable. (see [Connections](#connections)) |
+| <a id="noteableinterfacenotes"></a>`notes` | [`NoteConnection!`](#noteconnection) | All notes on this noteable. (see [Connections](#connections)) |
 
 #### `PackageFileMetadata`
 

@@ -3,6 +3,8 @@
 require 'spec_helper'
 
 RSpec.describe Gitlab::Ci::Config::SecurityOrchestrationPolicies::Processor do
+  include Ci::TemplateHelpers
+
   subject { described_class.new(config, project, ref, source).perform }
 
   let_it_be(:config) { { image: 'ruby:3.0.1' } }
@@ -131,7 +133,7 @@ RSpec.describe Gitlab::Ci::Config::SecurityOrchestrationPolicies::Processor do
                 variables: {
                   DAST_AUTH_URL: dast_site_profile.auth_url,
                   DAST_VERSION: 1,
-                  SECURE_ANALYZERS_PREFIX: 'registry.gitlab.com/gitlab-org/security-products/analyzers',
+                  SECURE_ANALYZERS_PREFIX: secure_analyzers_prefix,
                   DAST_WEBSITE: dast_site_profile.dast_site.url,
                   DAST_FULL_SCAN_ENABLED: 'false',
                   DAST_USE_AJAX_SPIDER: 'false',

@@ -1314,7 +1314,7 @@ RSpec.describe Namespace do
     subject { namespace.store_security_reports_available? }
 
     context 'when at least one security report feature is enabled' do
-      where(report_type: [:sast, :secret_detection, :dast, :dependency_scanning, :container_scanning])
+      where(report_type: [:sast, :secret_detection, :dast, :dependency_scanning, :container_scanning, :cluster_image_scanning])
 
       with_them do
         before do

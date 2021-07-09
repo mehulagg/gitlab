@@ -5,17 +5,29 @@ require 'faker'
 require 'base64'
 
 module QA
-  context 'Verify', :github, only: { subdomain: :staging } do
+  context 'Verify', :github, :requires_admin, only: { subdomain: :staging } do
     include Support::Api
 
     describe 'Pipeline for project mirrors Github' do
       let(:commit_message) { "Update #{github_data[:file_name]} - #{Time.now}" }
       let(:project_name) { 'github-project-with-pipeline' }
-      let(:api_client) { Runtime::API::Client.new(:gitlab) }
       let(:github_client) { Github::Client::Repos::Contents.new oauth_token: github_data[:access_token] }
+      let(:admin_api_client) { Runtime::API::Client.as_admin }
+      let(:user_api_client) { Runtime::API::Client.new(:gitlab, user: user) }
+
+      let(:group) do
+        Resource::Group.fabricate_via_api!
+      end
+
+      let(:user) do
+        Resource::User.fabricate_via_api! do |resource|
+          resource.api_client = admin_api_client
+          resource.hard_delete_on_api_removal = true
+        end
+      end
 
       let(:import_project) do
-        EE::Resource::ImportRepoWithCICD.fabricate_via_browser_ui! do |project|
+        EE::Resource::ImportRepoWithCiCd.fabricate_via_browser_ui! do |project|
           project.import = true
           project.name = project_name
           project.github_personal_access_token = github_data[:access_token]
@@ -24,16 +36,33 @@ module QA
       end
 
       before do
-        Flow::Login.sign_in
+        # Create both tokens before logging in the first time so that we don't need to log out in the middle of the test
+        admin_api_client.personal_access_token
+        user_api_client.personal_access_token
+
+        group.add_member(user, Resource::Members::AccessLevel::OWNER)
+        Flow::Login.sign_in(as: user)
+        group.visit!
         import_project
-        Page::Project::Menu.perform(&:click_ci_cd_pipelines)
       end
 
       after do
         remove_project
+        group.remove_via_api!
+        user.remove_via_api!
       end
 
       it 'user commits to GitHub triggers CI pipeline', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/144' do
+        Page::Project::Menu.perform(&:go_to_repository_settings)
+        Page::Project::Settings::Repository.perform do |settings|
+          settings.expand_mirroring_repositories do |mirror_settings|
+            mirror_settings.repository_url = 'https://github.com/gitlab-qa-github/test-project.git'
+            mirror_settings.select_mirror_trigger_option
+            mirror_settings.mirror_repository
+          end
+        end
+
+        Page::Project::Menu.perform(&:click_ci_cd_pipelines)
         Page::Project::Pipeline::Index.perform do |index|
           expect(index).to have_no_pipeline, 'Expect to have NO pipeline before mirroring.'
 
@@ -57,6 +86,8 @@ module QA
       end
 
       def edit_github_file
+        Runtime::Logger.info "Making changes to Github file."
+
         file = github_client.get github_data[:repo_owner], github_data[:repo_name], github_data[:file_name]
         file_sha = file.body['sha']
         file_path = file.body['path']
@@ -73,17 +104,23 @@ module QA
       end
 
       def import_project_id
-        request = Runtime::API::Request.new(api_client, import_project.api_get_path)
+        request = Runtime::API::Request.new(user_api_client, import_project.api_get_path)
         JSON.parse(get(request.url))['id']
       end
 
       def trigger_project_mirror
-        request = Runtime::API::Request.new(api_client, "/projects/#{import_project_id}/mirror/pull")
-        post(request.url, nil)
+        Runtime::Logger.info "Triggering pull mirror request."
+
+        request = Runtime::API::Request.new(user_api_client, "/projects/#{import_project_id}/mirror/pull")
+        Support::Retrier.retry_until(max_attempts: 6, sleep_interval: 10) do
+          response = post(request.url, nil)
+          Runtime::Logger.info "Mirror pull request response: #{response}"
+          response.code == Support::Api::HTTP_STATUS_OK
+        end
       end
 
       def remove_project
-        delete_project_request = Runtime::API::Request.new(api_client, "/projects/#{CGI.escape("#{Runtime::Namespace.path}/#{import_project.name}")}")
+        delete_project_request = Runtime::API::Request.new(user_api_client, "/projects/#{CGI.escape("#{Runtime::Namespace.path}/#{import_project.name}")}")
         delete delete_project_request.url
       end
     end

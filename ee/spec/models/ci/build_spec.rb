@@ -88,17 +88,31 @@ RSpec.describe Ci::Build do
     it_behaves_like 'depends on runner presence and type'
   end
 
-  context 'updates pipeline minutes' do
-    let(:job) { create(:ci_build, :running, pipeline: pipeline) }
+  shared_context 'updates minutes' do
+    context 'updates pipeline minutes' do
+      let(:job) { create(:ci_build, :running, pipeline: pipeline) }
 
-    %w(success drop cancel).each do |event|
-      it "for event #{event}", :sidekiq_might_not_need_inline do
-        expect(Ci::Minutes::UpdateBuildMinutesService)
-          .to receive(:new).and_call_original
+      %w(success drop cancel).each do |event|
+        it "for event #{event}" do
+          expect(Ci::Minutes::UpdateBuildMinutesService)
+            .to receive(:new).and_call_original
 
-        job.public_send(event)
+          job.public_send(event)
+        end
       end
     end
+  end
+
+  context 'when cancel_pipelines_prior_to_destroy is enabled' do
+    include_context 'updates minutes'
+  end
+
+  context 'when cancel_pipelines_prior_to_destroy is disabled', :sidekiq_inline do
+    before do
+      stub_feature_flags(cancel_pipelines_prior_to_destroy: false)
+    end
+
+    include_context 'updates minutes'
   end
 
   describe '#variables' do

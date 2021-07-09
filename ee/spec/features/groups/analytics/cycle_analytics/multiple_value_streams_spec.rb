@@ -15,6 +15,7 @@ RSpec.describe 'Multiple value streams', :js do
   end
 
   let(:extended_form_fields_selector) { '[data-testid="extended-form-fields"]' }
+  let(:preset_selector) { '[data-testid="vsa-preset-selector"]' }
   let!(:default_value_stream) { create(:cycle_analytics_group_value_stream, group: group, name: 'default') }
 
   3.times do |i|
@@ -53,6 +54,15 @@ RSpec.describe 'Multiple value streams', :js do
     end
 
     it 'can create a value stream' do
+      save_value_stream(custom_value_stream_name)
+
+      expect(page).to have_text(_("'%{name}' Value Stream created") % { name: custom_value_stream_name })
+    end
+
+    it 'can create a value stream with only custom stages' do
+      page.find(preset_selector).choose("Create from no template")
+
+      fill_in_custom_stage_fields
       save_value_stream(custom_value_stream_name)
 
       expect(page).to have_text(_("'%{name}' Value Stream created") % { name: custom_value_stream_name })

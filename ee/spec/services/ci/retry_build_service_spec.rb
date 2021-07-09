@@ -4,7 +4,8 @@ require 'spec_helper'
 RSpec.describe Ci::RetryBuildService do
   let_it_be(:user) { create(:user) }
 
-  let(:build) { create(:ci_build, project: project) }
+  let(:pipeline) { create(:ci_pipeline, project: project) }
+  let(:build) { create(:ci_build, pipeline: pipeline) }
 
   subject(:service) { described_class.new(project, user) }
 

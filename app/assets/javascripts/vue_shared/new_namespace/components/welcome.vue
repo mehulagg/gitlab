@@ -30,7 +30,7 @@ export default {
 };
 </script>
 <template>
-  <div class="container">
+  <div class="container gl-display-flex gl-flex-direction-column">
     <h2 class="gl-my-7 gl-font-size-h1 gl-text-center">
       {{ title }}
     </h2>
@@ -38,7 +38,7 @@ export default {
       <div
         v-for="panel in panels"
         :key="panel.name"
-        class="new-namespace-panel-wrapper gl-display-inline-block gl-px-3 gl-mb-5"
+        class="new-namespace-panel-wrapper gl-display-inline-block gl-float-left gl-px-3 gl-mb-5"
       >
         <a
           :href="`#${panel.name}`"

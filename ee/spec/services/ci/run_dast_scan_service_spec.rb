@@ -3,6 +3,8 @@
 require 'spec_helper'
 
 RSpec.describe Ci::RunDastScanService do
+  include Ci::TemplateHelpers
+
   let_it_be(:user) { create(:user) }
   let_it_be(:project) { create(:project, :repository, creator: user) }
   let_it_be(:dast_site_profile) { create(:dast_site_profile, project: project) }
@@ -156,7 +158,7 @@ RSpec.describe Ci::RunDastScanService do
             public: true
           }, {
             key: 'SECURE_ANALYZERS_PREFIX',
-            value: 'registry.gitlab.com/gitlab-org/security-products/analyzers',
+            value: secure_analyzers_prefix,
             public: true
           }
         ]

@@ -25,7 +25,8 @@ If you are using a continuous deployment workflow and want to ensure that concur
 
 ## Restrict write access to a critical environment
 
-By default, environments can be modified by any team member that has [Developer permission or higher](../../user/permissions.md#project-members-permissions).
+By default, environments can be modified by any team member that has the
+[Developer role or higher](../../user/permissions.md#project-members-permissions).
 If you want to restrict write access to a critical environment (for example a `production` environment),
 you can set up [protected environments](protected_environments.md).
 
@@ -141,7 +142,7 @@ reference a file in another project with a completely different set of permissio
 In this scenario, the `gitlab-ci.yml` is publicly accessible, but can only be edited by users with
 appropriate permissions in the other project.
 
-For more information, see [Custom CI/CD configuration path](../pipelines/settings.md#custom-cicd-configuration-file).
+For more information, see [Custom CI/CD configuration path](../pipelines/settings.md#specify-a-custom-cicd-configuration-file).
 
 ## Troubleshooting
 

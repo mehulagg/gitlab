@@ -112,15 +112,67 @@ Prerequisites:
 To resolve a thread:
 
 1. Go to the thread.
-1. Below the last reply, in the **Reply** field, either:
-   - Select **Resolve thread**.
-   - Enter text, select the **Resolve thread** checkbox, and select **Add comment now**.
+1. Do one of the following:
+   - In the top right of the original comment, select the **Resolve thread** (**{check-circle}**) icon.
+   - Below the last reply, in the **Reply** field, select **Resolve thread**.
+   - Below the last reply, in the **Reply** field, enter text, select the **Resolve thread** checkbox, and select **Add comment now**.
 
 At the top of the page, the number of unresolved threads is updated.
 
 ![Count of unresolved threads](img/unresolved_threads_v14_1.png)
 
-### Commit threads in the context of a merge request
+### Move all unresolved threads in a merge request to an issue
+
+If you have multiple unresolved threads in a merge request, you can
+create an issue to resolve them separately.
+
+- In the merge request, at the top of the page, select **Resolve all threads in new issue**.
+
+  ![Open new issue for all unresolved threads](img/btn_new_issue_for_all_threads.png)
+
+All threads are marked as resolved and a link is added from the merge request to
+the newly created issue.
+
+### Move one unresolved thread in a merge request to an issue
+
+If you have one specific unresolved thread in a merge request, you can
+create an issue to resolve it separately.
+
+- In the merge request, under the last reply to the thread, next to the
+  **Resolve thread** button, select **Resolve this thread in a new issue**.
+
+  ![Create issue for thread](img/new_issue_for_thread.png)
+
+The thread is marked as resolved and a link is added from the merge request to
+the newly created issue.
+
+### Prevent merge unless all threads are resolved
+
+You can prevent merge requests from being merged until all threads are
+resolved.
+
+1. On the top bar, select **Menu > Projects** and find your project.
+1. On the left sidebar, select **Settings > General**.
+1. Expand **Merge requests**.
+1. Under **Merge checks**, select the **All discussions must be resolved** checkbox.
+1. Select **Save changes**.
+
+### Automatically resolve threads in a merge request when they become outdated
+
+You can set merge requests to automatically resolve threads when lines are modified
+with a new push.
+
+1. On the top bar, select **Menu > Projects** and find your project.
+1. On the left sidebar, select **Settings > General**.
+1. Expand **Merge requests**.
+1. Under **Merge options**, select the
+   **Automatically resolve merge request diff discussions when they become outdated** checkbox.
+1. Select **Save changes**.
+
+Threads are now resolved if a push makes a diff section outdated.
+Threads on lines that don't change and top-level resolvable threads are not resolved.
+
+## Commit threads in the context of a merge request
 
 For reviewers with commit-based workflow, it may be useful to add threads to
 specific commit diffs in the context of a merge request. These threads
@@ -155,88 +207,6 @@ When a link of a commit reference is found in a thread inside a merge
 request, it is automatically converted to a link in the context of the
 current merge request.
 
-### Marking a comment or thread as resolved
-
-You can mark a thread as resolved by selecting the **Resolve thread**
-button at the bottom of the thread.
-
-!["Resolve thread" button](img/resolve_thread_button_v13_3.png)
-
-Alternatively, you can mark each comment as resolved individually.
-
-!["Resolve comment" button](img/resolve_comment_button.png)
-
-### Move all unresolved threads in a merge request to an issue
-
-To continue all open threads from a merge request in a new issue, select
-**Resolve all threads in new issue**.
-
-![Open new issue for all unresolved threads](img/btn_new_issue_for_all_threads.png)
-
-Alternatively, when your project only accepts merge requests [when all threads
-are resolved](#only-allow-merge-requests-to-be-merged-if-all-threads-are-resolved),
-an **open an issue to resolve them later** link displays in the merge
-request widget.
-
-![Link in merge request widget](img/resolve_thread_open_issue_v13_9.png)
-
-This prepares an issue with its content referring to the merge request and
-the unresolved threads.
-
-![Issue mentioning threads in a merge request](img/preview_issue_for_threads.png)
-
-Hitting **Create issue** causes all threads to be marked as resolved and
-add a note referring to the newly created issue.
-
-![Mark threads as resolved notice](img/resolve_thread_issue_notice.png)
-
-You can now proceed to merge the merge request from the UI.
-
-### Moving a single thread to a new issue
-
-To create a new issue for a single thread, you can use the **Resolve this
-thread in a new issue** button.
-
-![Create issue for thread](img/new_issue_for_thread.png)
-
-This directs you to a new issue prefilled with the content of the
-thread, similar to the issues created for delegating multiple
-threads at once. Saving the issue marks the thread as resolved and
-add a note to the merge request thread referencing the new issue.
-
-![New issue for a single thread](img/preview_issue_for_thread.png)
-
-### Only allow merge requests to be merged if all threads are resolved
-
-You can prevent merge requests from being merged until all threads are
-resolved.
-
-Navigate to your project's settings page, select the
-**Only allow merge requests to be merged if all threads are resolved** check
-box and hit **Save** for the changes to take effect.
-
-![Only allow merge if all the threads are resolved settings](img/only_allow_merge_if_all_threads_are_resolved.png)
-
-From now on, you can't merge from the UI until all threads
-are resolved.
-
-![Only allow merge if all the threads are resolved message](img/resolve_thread_open_issue_v13_9.png)
-
-### Automatically resolve merge request diff threads when they become outdated
-
-You can automatically resolve merge request diff threads on lines modified
-with a new push.
-
-Navigate to your project's settings page, select the **Automatically resolve
-merge request diffs threads on lines changed with a push** check box and hit
-**Save** for the changes to take effect.
-
-![Automatically resolve merge request diff threads when they become outdated](img/automatically_resolve_outdated_discussions.png)
-
-From now on, any threads on a diff are resolved by default if a push
-makes that diff section outdated. Threads on lines that don't change and
-top-level resolvable threads are not automatically resolved.
-
 ## Add a comment to a commit
 
 You can add comments and threads to a particular commit.
@@ -250,75 +220,36 @@ WARNING:
 Threads created this way are lost if the commit ID changes after a
 force push.
 
-## Image threads
+## Add a comment to an image
 
-Sometimes a thread is revolved around an image. With image threads,
-you can easily target a specific coordinate of an image and start a thread
-around it. Image threads are available in merge requests and commit detail views.
+In merge requests and commit detail views, you can add a comment to an image.
+This comment can also be a thread.
 
-To start an image thread, hover your mouse over the image. Your mouse pointer
-should convert into an icon, indicating that the image is available for commenting.
-Simply click anywhere on the image to create a new thread.
+1. Hover your mouse over the image.
+1. Select the location where you want to comment.
+
+An icon is displayed on the image and a comment field is displayed.
 
 ![Start image thread](img/start_image_discussion.gif)
 
-After you select the image, a comment form is displayed that would be the start
-of your thread. After you save your comment, a new badge is displayed on
-top of your image. This badge represents your thread.
+## Prevent comments by locking an issue
 
-NOTE:
-This thread badge is typically associated with a number that is only used as a visual
-reference for each thread. In the merge request thread tab,
-this badge is indicated with a comment icon, because each thread renders a new
-image section.
+You can prevent public comments in an issue or merge request.
+When you do, only project members can add and edit comments.
 
-Image threads also work on diffs that replace an existing image. In this diff view
-mode, you can toggle the different view modes and still see the thread point badges.
+Prerequisite:
 
-| 2-up        | Swipe      | Onion Skin |
-|:-----------:|:----------:|:----------:|
-| ![2-up view](img/two_up_view.png) | ![swipe view](img/swipe_view.png) | ![onion skin view](img/onion_skin_view.png) |
+- In merge requests, you must have the Developer role or higher.
+- In issues, you must have the Reporter role or higher.
 
-Image threads also work well with resolvable threads. Resolved threads
-on diffs (not on the merge request discussion tab) appear collapsed on page
-load and have a corresponding badge counter to match the counter on the image.
+1. On the right sidebar, next to **Lock issue** or **Lock merge request**, select **Edit**.
+1. On the confirmation dialog, select **Lock**.
 
-![Image resolved thread](img/image_resolved_discussion.png)
+Notes are added to the page details.
 
-## Lock discussions
+If an issue or merge request is locked and closed, you cannot reopen it.
 
-For large projects with many contributors, it may be useful to stop threads
-in issues or merge requests in these scenarios:
-
-- The project maintainer has already resolved the thread and it is not helpful
-  for continued feedback.
-- The project maintainer has already directed new conversation
-  to newer issues or merge requests.
-- The people participating in the thread are trolling, abusive, or otherwise
-  being unproductive.
-
-In these cases, a user with Developer permissions or higher in the project can lock (and unlock)
-an issue or a merge request, using the "Lock" section in the sidebar. For issues,
-a user with Reporter permissions can lock (and unlock).
-
-| Unlock | Lock |
-| :-----------: | :----------: |
-| ![Turn off discussion lock](img/turn_off_lock.png) | ![Turn on discussion lock](img/turn_on_lock.png) |
-
-System notes indicate locking and unlocking.
-
-![Discussion lock system notes](img/discussion_lock_system_notes.png)
-
-In a locked issue or merge request, only team members can add new comments and
-edit existing comments. Non-team members are restricted from adding or editing comments.
-
-| Team member | Non-team member |
-| :-----------: | :----------: |
-| ![Comment form member](img/lock_form_member.png) | ![Comment form non-member](img/lock_form_non_member.png) |
-
-Additionally, locked issues and merge requests can't be reopened.
-
-## Confidential Comments
+## Mark a comment as confidential
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/207473) in GitLab 13.9.
 > - [Deployed behind a feature flag](../feature_flags.md), disabled by default.
@@ -329,30 +260,30 @@ Additionally, locked issues and merge requests can't be reopened.
 WARNING:
 This feature might not be available to you. Check the **version history** note above for details.
 
-When creating a comment, you can make it visible only to the project members (users with Reporter and higher permissions).
+You can make a comment confidential, so that it is visible only to project members
+who have the Reporter role or higher.
 
-To create a confidential comment, select the **Make this comment confidential** check box before you submit it.
+1. Below the comment, select the **Make this comment confidential** checkbox.
+1. Select **Comment**.
 
 ![Confidential comments](img/confidential_comments_v13_9.png)
 
-## Filtering notes
+## Show only comments
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/issues/26723) in GitLab 11.5.
 
-For issues with many comments like activity notes and user comments, sometimes
-finding useful information can be hard. There is a way to filter comments from single notes and threads for merge requests and issues.
+For issues and merge requests with many comments, you can filter the page to show comments only.
 
-From a merge request's **Discussion** tab, or from an epic/issue overview, find the filter's dropdown menu on the right side of the page, from which you can choose one of the following options:
-
-- **Show all activity**: displays all user comments and system notes
-  (issue updates, mentions from other issues, changes to the description, etc).
-- **Show comments only**: only displays user comments in the list.
-- **Show history only**: only displays activity notes.
+1. Open a merge request's **Discussion** tab, or epic or issue's **Overview** tab.
+1. On the right side of the page, select from the filter:
+   - **Show all activity**: Display all user comments and system notes
+     (issue updates, mentions from other issues, changes to the description, and so on).
+   - **Show comments only**: Display only user comments.
+   - **Show history only**: Display only activity notes.
 
 ![Notes filters dropdown options](img/index_notes_filters.png)
 
-After you select one of the filters in a given issue or merge request, GitLab saves
-your preference, so that it persists when you visit the same page again
+GitLab saves your preference, so it persists when you visit the same page again
 from any device you're logged into.
 
 ## Assign an issue to the commenting user
@@ -361,15 +292,16 @@ from any device you're logged into.
 
 You can assign an issue to a user who made a comment.
 
-In the comment, select the **More Actions** menu, and then select **Assign to commenting user**.
-
-Select the button again to unassign the commenter.
+1. In the comment, select the **More Actions** menu.
+1. Select **Assign to commenting user**.
 
 ![Assign to commenting user](img/quickly_assign_commenter_v13_1.png)
 
-## Enable or disable Confidential Comments **(FREE SELF)**
+Select the button again to unassign the commenter.
 
-Confidential Comments is under development and not ready for production use. It is
+## Enable or disable confidential comments **(FREE SELF)**
+
+Confidential comments are under development and not ready for production use. The feature is
 deployed behind a feature flag that is **disabled by default**.
 [GitLab administrators with access to the GitLab Rails console](../../administration/feature_flags.md)
 can enable it.

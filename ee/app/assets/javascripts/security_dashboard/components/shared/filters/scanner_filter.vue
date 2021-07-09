@@ -5,7 +5,7 @@ import { DEFAULT_SCANNER, SCANNER_ID_PREFIX } from 'ee/security_dashboard/consta
 import { createScannerOption } from 'ee/security_dashboard/helpers';
 import FilterBody from './filter_body.vue';
 import FilterItem from './filter_item.vue';
-import StandardFilter from './standard_filter.vue';
+import SimpleFilter from './simple_filter.vue';
 
 export default {
   components: {
@@ -15,7 +15,7 @@ export default {
     FilterBody,
     FilterItem,
   },
-  extends: StandardFilter,
+  extends: SimpleFilter,
   inject: ['scanners'],
   computed: {
     options() {

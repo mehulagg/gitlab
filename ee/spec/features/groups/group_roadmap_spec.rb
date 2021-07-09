@@ -7,14 +7,16 @@ RSpec.describe 'group epic roadmap', :js do
   include MobileHelpers
 
   let(:user) { create(:user) }
+  let(:user_dev) { create(:user) }
   let(:group) { create(:group) }
+  let(:milestone) { create(:milestone, group: group) }
   let(:filtered_search) { find('.filtered-search') }
   let(:js_dropdown_label) { '#js-dropdown-label' }
   let(:filter_dropdown) { find("#{js_dropdown_label} .filter-dropdown") }
   let(:state_dropdown) { find('.dropdown-epics-state') }
 
-  let(:bug_label) { create(:group_label, group: group, title: 'Bug') }
-  let(:critical_label) { create(:group_label, group: group, title: 'Critical') }
+  let!(:bug_label) { create(:group_label, group: group, title: 'Bug') }
+  let!(:critical_label) { create(:group_label, group: group, title: 'Critical') }
 
   def search_for_label(label)
     init_label_search
@@ -188,6 +190,43 @@ RSpec.describe 'group epic roadmap', :js do
 
         expect(page).not_to have_selector('[data-testid="epics_limit_callout"]')
       end
+    end
+  end
+
+  context 'async filtered search' do
+    available_tokens = %w[Author Label Milestone Epic My-Reaction]
+
+    before do
+      stub_feature_flags(async_filtering: true)
+    end
+
+    describe 'within a group' do
+      let!(:epic1) { create(:epic, group: group, end_date: 10.days.ago) }
+      let!(:epic2) { create(:epic, group: group, start_date: 2.days.ago) }
+      let!(:award_emoji_star) { create(:award_emoji, name: 'star', user: user, awardable: epic1) }
+
+      before do
+        group.add_developer(user_dev)
+        visit group_roadmap_path(group)
+        wait_for_requests
+      end
+
+      it_behaves_like 'filtered search bar', available_tokens
+    end
+
+    describe 'within a sub-group group' do
+      let!(:subgroup) { create(:group, parent: group, name: 'subgroup') }
+      let!(:sub_epic1) { create(:epic, group: subgroup, end_date: 10.days.ago) }
+      let!(:sub_epic2) { create(:epic, group: subgroup, start_date: 2.days.ago) }
+      let!(:award_emoji_star) { create(:award_emoji, name: 'star', user: user, awardable: sub_epic1) }
+
+      before do
+        subgroup.add_developer(user_dev)
+        visit group_roadmap_path(subgroup)
+        wait_for_requests
+      end
+
+      it_behaves_like 'filtered search bar', available_tokens
     end
   end
 end

@@ -10,6 +10,10 @@ export default () => ({
     trial: false,
     upgradable: false,
   },
+  billing: {
+    subscriptionStartDate: null,
+    subscriptionEndDate: null,
+  },
   tables: {
     free: {
       rows: [

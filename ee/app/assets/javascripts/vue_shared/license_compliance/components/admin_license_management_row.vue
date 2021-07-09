@@ -86,7 +86,11 @@ export default {
     <span class="js-license-name">{{ license.name }}</span>
     <div class="float-right">
       <div class="d-flex">
-        <gl-loading-icon v-if="loading" class="js-loading-icon d-flex align-items-center mr-2" />
+        <gl-loading-icon
+          v-if="loading"
+          size="sm"
+          class="js-loading-icon d-flex align-items-center mr-2"
+        />
         <gl-dropdown
           :text="dropdownText"
           :disabled="loading"

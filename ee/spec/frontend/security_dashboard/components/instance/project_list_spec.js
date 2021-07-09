@@ -5,7 +5,7 @@ import ProjectList from 'ee/security_dashboard/components/instance/project_list.
 import projectsQuery from 'ee/security_dashboard/graphql/queries/instance_projects.query.graphql';
 import createMockApollo from 'helpers/mock_apollo_helper';
 import { extendedWrapper } from 'helpers/vue_test_utils_helper';
-import ProjectAvatar from '~/vue_shared/components/project_avatar/default.vue';
+import ProjectAvatar from '~/vue_shared/components/deprecated_project_avatar/default.vue';
 
 const localVue = createLocalVue();
 localVue.use(VueApollo);

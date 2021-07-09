@@ -81,4 +81,24 @@ RSpec.describe Analytics::DevopsAdoption::EnabledNamespace, type: :model do
       expect(enabled_namespace.latest_snapshot).to eq(latest_snapshot)
     end
   end
+
+  describe '.pending_calculation' do
+    let!(:enabled_namespace_without_snasphot) { create :devops_adoption_enabled_namespace }
+
+    let!(:enabled_namespace_with_not_finalized) do
+      create(:devops_adoption_enabled_namespace).tap do |enabled_namespace|
+        create(:devops_adoption_snapshot, namespace: enabled_namespace.namespace, recorded_at: 1.year.ago)
+      end
+    end
+
+    let!(:enabled_namespace_with_finalized) do
+      create(:devops_adoption_enabled_namespace).tap do |enabled_namespace|
+        create(:devops_adoption_snapshot, namespace: enabled_namespace.namespace)
+      end
+    end
+
+    it 'returns all namespaces without finalized snapshot for previous month' do
+      expect(described_class.pending_calculation).to match_array([enabled_namespace_without_snasphot, enabled_namespace_with_not_finalized])
+    end
+  end
 end

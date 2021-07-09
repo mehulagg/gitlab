@@ -20,6 +20,24 @@ RSpec.describe ProjectsHelper do
     end
   end
 
+  describe '#can_update_security_orchestration_policy_project?' do
+    let(:owner) { project.owner }
+
+    before do
+      allow(helper).to receive(:current_user) { owner }
+    end
+
+    it 'returns false when user cannot update security orchestration policy project' do
+      allow(helper).to receive(:can?).with(owner, :update_security_orchestration_policy_project, project) { false }
+      expect(helper.can_update_security_orchestration_policy_project?(project)).to eq false
+    end
+
+    it 'returns true when user can update security orchestration policy project' do
+      allow(helper).to receive(:can?).with(owner, :update_security_orchestration_policy_project, project) { true }
+      expect(helper.can_update_security_orchestration_policy_project?(project)).to eq true
+    end
+  end
+
   describe '#can_import_members?' do
     let(:owner) { project.owner }
 

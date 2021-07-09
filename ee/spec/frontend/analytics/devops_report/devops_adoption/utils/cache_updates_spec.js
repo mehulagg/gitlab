@@ -1,17 +1,17 @@
 import {
-  deleteSegmentsFromCache,
-  addSegmentsToCache,
+  deleteEnabledNamespacesFromCache,
+  addEnabledNamespacesToCache,
 } from 'ee/analytics/devops_report/devops_adoption/utils/cache_updates';
 import { devopsAdoptionNamespaceData } from '../mock_data';
 
-describe('addSegmentsToCache', () => {
+describe('addEnabledNamespacesToCache', () => {
   const store = {
     readQuery: jest.fn(() => ({ devopsAdoptionEnabledNamespaces: { nodes: [] } })),
     writeQuery: jest.fn(),
   };
 
   it('calls writeQuery with the correct response', () => {
-    addSegmentsToCache(store, devopsAdoptionNamespaceData.nodes);
+    addEnabledNamespacesToCache(store, devopsAdoptionNamespaceData.nodes);
 
     expect(store.writeQuery).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -25,7 +25,7 @@ describe('addSegmentsToCache', () => {
   });
 });
 
-describe('deleteSegmentsFromCache', () => {
+describe('deleteEnabledNamespacesFromCache', () => {
   const store = {
     readQuery: jest.fn(() => ({ devopsAdoptionEnabledNamespaces: devopsAdoptionNamespaceData })),
     writeQuery: jest.fn(),
@@ -33,7 +33,7 @@ describe('deleteSegmentsFromCache', () => {
 
   it('calls writeQuery with the correct response', () => {
     // Remove the item at the first index
-    deleteSegmentsFromCache(store, [devopsAdoptionNamespaceData.nodes[0].id]);
+    deleteEnabledNamespacesFromCache(store, [devopsAdoptionNamespaceData.nodes[0].id]);
 
     expect(store.writeQuery).toHaveBeenCalledWith(
       expect.not.objectContaining({

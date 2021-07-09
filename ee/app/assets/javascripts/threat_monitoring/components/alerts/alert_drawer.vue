@@ -141,9 +141,11 @@ export default {
     :open="isAlertDrawerOpen"
     @close="$emit('deselect-alert')"
   >
+    <template #title>
+      <h5 class="gl-my-0">{{ selectedAlert.title }}</h5>
+    </template>
     <template #header>
-      <h5 class="gl-mt-2 gl-mb-5">{{ selectedAlert.title }}</h5>
-      <div>
+      <div class="gl-mt-5">
         <gl-link v-if="hasIssue" :href="alertIssuePath" data-testid="issue-link">
           {{ issueText }}
         </gl-link>
