@@ -55,14 +55,16 @@ RSpec.describe 'User edits iteration cadence', :js do
       it 'redirects to list page when loading edit cadence page' do
         visit edit_group_iteration_cadence_path(cadence.group, id: cadence.id)
 
-        # vue-router has trailing slash but _path helper doesn't
+        # vue-router has trailing slash which apparently cannot be removed
+        # until version 4 - https://github.com/vuejs/vue-router/issues/2945
         expect(page).to have_current_path("#{group_iteration_cadences_path(cadence.group)}/")
       end
 
       it 'redirects to list page when loading new cadence page' do
         visit new_group_iteration_cadence_path(cadence.group)
 
-        # vue-router has trailing slash but _path helper doesn't
+        # vue-router has trailing slash which apparently cannot be removed
+        # until version 4 - https://github.com/vuejs/vue-router/issues/2945
         expect(page).to have_current_path("#{group_iteration_cadences_path(cadence.group)}/")
       end
     end

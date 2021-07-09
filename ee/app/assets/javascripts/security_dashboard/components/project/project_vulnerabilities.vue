@@ -8,7 +8,7 @@ import vulnerabilitiesQuery from 'ee/security_dashboard/graphql/queries/project_
 import { preparePageInfo } from 'ee/security_dashboard/helpers';
 import { VULNERABILITIES_PER_PAGE } from 'ee/security_dashboard/store/constants';
 import { parseBoolean } from '~/lib/utils/common_utils';
-import { __ } from '~/locale';
+import { __, s__ } from '~/locale';
 import LocalStorageSync from '~/vue_shared/components/local_storage_sync.vue';
 import VulnerabilityList from '../shared/vulnerability_list.vue';
 import SecurityScannerAlert from './security_scanner_alert.vue';
@@ -163,7 +163,7 @@ export default {
   i18n: {
     API_FUZZING: __('API Fuzzing'),
     CONTAINER_SCANNING: __('Container Scanning'),
-    CLUSTER_IMAGE_SCANNING: __('ciReport|Cluster Image Scanning'),
+    CLUSTER_IMAGE_SCANNING: s__('ciReport|Cluster Image Scanning'),
     COVERAGE_FUZZING: __('Coverage Fuzzing'),
     SECRET_DETECTION: __('Secret Detection'),
     DEPENDENCY_SCANNING: __('Dependency Scanning'),

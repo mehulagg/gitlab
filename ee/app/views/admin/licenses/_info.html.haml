@@ -62,4 +62,4 @@
         %p= _('If you remove this license, GitLab will fall back on the previous license, if any.')
         %p= _('If there is no previous license or if the previous license has expired, some GitLab functionality will be blocked until a new, valid license is uploaded.')
         %br
-        = link_to _('Remove license'), admin_license_path, data: { confirm: _('Are you sure you want to remove the license?'), qa_selector: 'remove_license_link' }, method: :delete, class: 'gl-button btn btn-danger'
+        = link_to _('Remove license'), admin_license_path, data: { confirm: _('Are you sure you want to remove the license?') }, method: :delete, class: 'gl-button btn btn-danger'

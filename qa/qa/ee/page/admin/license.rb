@@ -9,11 +9,11 @@ module QA
             element :missing_license_content
           end
 
-          view 'ee/app/views/admin/licenses/show.html.haml' do
+          view 'ee/app/assets/javascripts/admin/subscriptions/show/components/subscription_activation_card.vue' do
             element :license_upload_link
           end
 
-          view 'ee/app/views/admin/licenses/_info.html.haml' do
+          view 'ee/app/assets/javascripts/admin/subscriptions/show/components/subscription_breakdown.vue' do
             element :remove_license_link
           end
 
@@ -25,7 +25,7 @@ module QA
           end
 
           def license?
-            has_element?(:remove_license_link) || !has_element?(:missing_license_content)
+            has_element?(:remove_license_link)
           end
 
           def add_new_license(key)
