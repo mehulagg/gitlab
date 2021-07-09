@@ -85,11 +85,10 @@ export default {
   },
   mounted() {
     this.sidebarEl = document.querySelector('aside.right-sidebar');
-    this.sidebarToggleEl = document.querySelector('.js-toggle-right-sidebar-button');
   },
   methods: {
     toggleSidebar() {
-      this.sidebarToggleEl.dispatchEvent(new Event('click'));
+      this.$emit('sidebar-toggle');
     },
     afterSidebarTransitioned(callback) {
       // Wait for sidebar expand animation to complete

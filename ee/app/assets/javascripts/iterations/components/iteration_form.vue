@@ -99,8 +99,10 @@ export default {
         .mutate({
           mutation: createIteration,
           variables: {
-            ...this.variables,
-            iterationsCadenceId: convertToGraphQLId('Iterations::Cadence', this.cadenceId),
+            input: {
+              ...this.variables,
+              iterationsCadenceId: convertToGraphQLId('Iterations::Cadence', this.cadenceId),
+            },
           },
         })
         .then(({ data }) => {

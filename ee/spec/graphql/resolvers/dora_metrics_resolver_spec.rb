@@ -28,9 +28,9 @@ RSpec.describe Resolvers::DoraMetricsResolver do
     create(:dora_daily_metrics, deployment_frequency: 20, lead_time_for_changes_in_seconds: nil, environment: production, date: '2020-01-01')
     create(:dora_daily_metrics, deployment_frequency: 19, lead_time_for_changes_in_seconds: nil, environment: production, date: '2021-01-01')
     create(:dora_daily_metrics, deployment_frequency: 18, lead_time_for_changes_in_seconds: nil, environment: production, date: '2021-03-01')
-    create(:dora_daily_metrics, deployment_frequency: 17, lead_time_for_changes_in_seconds: 99, environment: production, date: '2021-04-01')
-    create(:dora_daily_metrics, deployment_frequency: 16, lead_time_for_changes_in_seconds: 98, environment: production, date: '2021-04-02')
-    create(:dora_daily_metrics, deployment_frequency: 15, lead_time_for_changes_in_seconds: 97, environment: production, date: '2021-04-03')
+    create(:dora_daily_metrics, deployment_frequency: 17, lead_time_for_changes_in_seconds: 99.0, environment: production, date: '2021-04-01')
+    create(:dora_daily_metrics, deployment_frequency: 16, lead_time_for_changes_in_seconds: 98.0, environment: production, date: '2021-04-02')
+    create(:dora_daily_metrics, deployment_frequency: 15, lead_time_for_changes_in_seconds: 97.0, environment: production, date: '2021-04-03')
     create(:dora_daily_metrics, deployment_frequency: 14, lead_time_for_changes_in_seconds: nil, environment: production, date: '2021-04-04')
     create(:dora_daily_metrics, deployment_frequency: 13, lead_time_for_changes_in_seconds: nil, environment: production, date: '2021-04-05')
     create(:dora_daily_metrics, deployment_frequency: 12, lead_time_for_changes_in_seconds: nil, environment: production, date: '2021-04-06')
@@ -38,7 +38,7 @@ RSpec.describe Resolvers::DoraMetricsResolver do
     create(:dora_daily_metrics, deployment_frequency: 11, lead_time_for_changes_in_seconds: nil, environment: production, date: '2021-05-06')
 
     create(:dora_daily_metrics, deployment_frequency: 10, lead_time_for_changes_in_seconds: nil, environment: staging, date: '2021-04-01')
-    create(:dora_daily_metrics, deployment_frequency: nil, lead_time_for_changes_in_seconds: 99, environment: staging, date: '2021-04-02')
+    create(:dora_daily_metrics, deployment_frequency: nil, lead_time_for_changes_in_seconds: 99.0, environment: staging, date: '2021-04-02')
   end
 
   before do
@@ -189,14 +189,26 @@ RSpec.describe Resolvers::DoraMetricsResolver do
         it 'returns lead time metrics' do
           expect(resolve_metrics).to eq([
             { 'date' => '2021-03-01', 'value' => nil },
-            { 'date' => '2021-04-01', 'value' => 99 },
-            { 'date' => '2021-04-02', 'value' => 98 },
-            { 'date' => '2021-04-03', 'value' => 97 },
+            { 'date' => '2021-04-01', 'value' => 99.0 },
+            { 'date' => '2021-04-02', 'value' => 98.0 },
+            { 'date' => '2021-04-03', 'value' => 97.0 },
             { 'date' => '2021-04-04', 'value' => nil },
             { 'date' => '2021-04-05', 'value' => nil },
             { 'date' => '2021-04-06', 'value' => nil },
             { 'date' => '2021-04-07', 'value' => nil }
           ])
+        end
+
+        # Testing this combination of arguments explicitly since it previously
+        # caused a bug: https://gitlab.com/gitlab-org/gitlab/-/merge_requests/65653
+        context 'with interval: "all"' do
+          let(:args) { { metric: 'lead_time_for_changes', interval: 'all' } }
+
+          it 'returns the metrics grouped into a single bucket with a nil date' do
+            expect(resolve_metrics).to eq([
+              { 'date' => nil, 'value' => 98.0 }
+            ])
+          end
         end
       end
 

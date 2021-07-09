@@ -2409,6 +2409,9 @@ msgstr ""
 msgid "AdminSettings|Select a CI/CD template"
 msgstr ""
 
+msgid "AdminSettings|Select a group to use as the source for instance-level project templates."
+msgstr ""
+
 msgid "AdminSettings|Service template allows you to set default values for integrations"
 msgstr ""
 
@@ -2428,6 +2431,9 @@ msgid "AdminSettings|The default name for the initial branch of new repositories
 msgstr ""
 
 msgid "AdminSettings|The latest artifacts for all jobs in the most recent successful pipelines in each project are stored and do not expire."
+msgstr ""
+
+msgid "AdminSettings|The projects in this group can be selected as templates for new projects created on the instance. %{link_start}Learn more.%{link_end} "
 msgstr ""
 
 msgid "AdminSettings|The template for the required pipeline configuration can be one of the GitLab-provided templates, or a custom template added to an instance template repository. %{link_start}How do I create an instance template repository?%{link_end}"
@@ -2527,6 +2533,9 @@ msgid "AdminUsers|Approve"
 msgstr ""
 
 msgid "AdminUsers|Approve user"
+msgstr ""
+
+msgid "AdminUsers|Approve user %{username}?"
 msgstr ""
 
 msgid "AdminUsers|Approved users can:"
@@ -2694,6 +2703,9 @@ msgstr ""
 msgid "AdminUsers|Reject request"
 msgstr ""
 
+msgid "AdminUsers|Reject user %{username}?"
+msgstr ""
+
 msgid "AdminUsers|Rejected users:"
 msgstr ""
 
@@ -2755,9 +2767,6 @@ msgid "AdminUsers|Unblock user"
 msgstr ""
 
 msgid "AdminUsers|Unblock user %{username}?"
-msgstr ""
-
-msgid "AdminUsers|Unlock"
 msgstr ""
 
 msgid "AdminUsers|Unlock user %{username}?"
@@ -6334,6 +6343,9 @@ msgid "Check the elasticsearch.log file to debug why the migration was halted an
 msgstr ""
 
 msgid "Check your Docker images for known vulnerabilities."
+msgstr ""
+
+msgid "Check your Kubernetes cluster images for known vulnerabilities."
 msgstr ""
 
 msgid "Check your source instance permissions."
@@ -10218,6 +10230,12 @@ msgstr ""
 msgid "DastProfiles|Website"
 msgstr ""
 
+msgid "DastProfiles|You can either choose a passive scan or validate the target site in your chosen site profile. %{docsLinkStart}Learn more about site validation.%{docsLinkEnd}"
+msgstr ""
+
+msgid "DastProfiles|You cannot run an active scan against an unvalidated site."
+msgstr ""
+
 msgid "DastSiteValidation|Copy HTTP header to clipboard"
 msgstr ""
 
@@ -12855,6 +12873,9 @@ msgstr ""
 msgid "Error occurred when saving reviewers"
 msgstr ""
 
+msgid "Error occurred while updating the %{issuableType} status"
+msgstr ""
+
 msgid "Error occurred while updating the issue status"
 msgstr ""
 
@@ -12991,6 +13012,9 @@ msgid "Escalation Policies"
 msgstr ""
 
 msgid "Escalation policies"
+msgstr ""
+
+msgid "Escalation policies may not have more than %{rule_count} rules"
 msgstr ""
 
 msgid "Escalation policies must have at least one rule"
@@ -15801,9 +15825,6 @@ msgstr ""
 msgid "GroupSettings|If the parent group's visibility is lower than the group current visibility, visibility levels for subgroups and projects will be changed to match the new parent group's visibility."
 msgstr ""
 
-msgid "GroupSettings|Learn more about group-level project templates."
-msgstr ""
-
 msgid "GroupSettings|New runners registration token has been generated!"
 msgstr ""
 
@@ -15831,13 +15852,16 @@ msgstr ""
 msgid "GroupSettings|Projects will be permanently deleted after a %{waiting_period}-day delay. This delay can be %{link_start}customized by an admin%{link_end} in instance settings. Inherited by subgroups."
 msgstr ""
 
-msgid "GroupSettings|Select a sub-group as the custom project template source for this group."
+msgid "GroupSettings|Select a subgroup to use as the source for custom project templates for this group."
 msgstr ""
 
 msgid "GroupSettings|The Auto DevOps pipeline runs if no alternative CI configuration file is found."
 msgstr ""
 
 msgid "GroupSettings|The default name for the initial branch of new repositories created in the group."
+msgstr ""
+
+msgid "GroupSettings|The projects in this subgroup can be selected as templates for new projects created in the group. %{link_start}Learn more.%{link_end}"
 msgstr ""
 
 msgid "GroupSettings|There was a problem updating Auto DevOps pipeline: %{error_messages}."
@@ -15895,9 +15919,6 @@ msgid "GroupSettings|cannot change when group contains projects with NPM package
 msgstr ""
 
 msgid "GroupSettings|remove the share with group lock from %{ancestor_group_name}"
-msgstr ""
-
-msgid "GroupTemplate|The selected group's repositories and databases are copied into the projects created in this group. %{link_start}What should I add to my template group?%{link_end} "
 msgstr ""
 
 msgid "Groups"
@@ -16191,6 +16212,9 @@ msgid "Hide group projects"
 msgstr ""
 
 msgid "Hide host keys manual input"
+msgstr ""
+
+msgid "Hide license key"
 msgstr ""
 
 msgid "Hide list"
@@ -17465,6 +17489,9 @@ msgid "Install GitLab Runner and ensure it's running."
 msgstr ""
 
 msgid "Install GitLab Runner on Kubernetes"
+msgstr ""
+
+msgid "Install license"
 msgstr ""
 
 msgid "Install on clusters"
@@ -21667,6 +21694,9 @@ msgstr ""
 msgid "NetworkPolicies|Invalid or empty policy"
 msgstr ""
 
+msgid "NetworkPolicies|Invalid or unsupported policy kind"
+msgstr ""
+
 msgid "NetworkPolicies|Kubernetes error: %{error}"
 msgstr ""
 
@@ -23383,6 +23413,9 @@ msgstr ""
 msgid "PackageRegistry|Gradle Kotlin DSL install command"
 msgstr ""
 
+msgid "PackageRegistry|Helm"
+msgstr ""
+
 msgid "PackageRegistry|If you haven't already done so, you will need to add the below to your %{codeStart}.pypirc%{codeEnd} file."
 msgstr ""
 
@@ -23870,6 +23903,9 @@ msgid "Pipeline Schedule"
 msgstr ""
 
 msgid "Pipeline Schedules"
+msgstr ""
+
+msgid "Pipeline URL"
 msgstr ""
 
 msgid "Pipeline durations for the last 30 commits"
@@ -25567,6 +25603,9 @@ msgstr ""
 msgid "ProjectService|Perform common operations on GitLab project: %{project_name}"
 msgstr ""
 
+msgid "ProjectService|Run CI/CD pipelines with Buildkite."
+msgstr ""
+
 msgid "ProjectService|Run CI/CD pipelines with Drone."
 msgstr ""
 
@@ -25577,6 +25616,9 @@ msgid "ProjectService|TeamCity server URL"
 msgstr ""
 
 msgid "ProjectService|The build configuration ID of the TeamCity project."
+msgstr ""
+
+msgid "ProjectService|The token you get after you create a Buildkite pipeline with a GitLab repository."
 msgstr ""
 
 msgid "ProjectService|To configure this integration, you should:"
@@ -26927,6 +26969,9 @@ msgid "Reference"
 msgstr ""
 
 msgid "References"
+msgstr ""
+
+msgid "Refine your search criteria (select a %{strong_open}group%{strong_close} and %{strong_open}project%{strong_close} when possible)"
 msgstr ""
 
 msgid "Refresh"
@@ -29317,9 +29362,6 @@ msgstr ""
 msgid "Select a shared template repository for all projects on this instance."
 msgstr ""
 
-msgid "Select a subgroup to use as a template when creating new projects in the group."
-msgstr ""
-
 msgid "Select a template repository"
 msgstr ""
 
@@ -29354,6 +29396,9 @@ msgid "Select epic"
 msgstr ""
 
 msgid "Select file"
+msgstr ""
+
+msgid "Select group"
 msgstr ""
 
 msgid "Select group or project"
@@ -29414,6 +29459,9 @@ msgid "Select status"
 msgstr ""
 
 msgid "Select strategy activation method"
+msgstr ""
+
+msgid "Select subgroup"
 msgstr ""
 
 msgid "Select subscription"
@@ -30007,6 +30055,9 @@ msgstr ""
 msgid "Show latest version"
 msgstr ""
 
+msgid "Show license key"
+msgstr ""
+
 msgid "Show links anyways"
 msgstr ""
 
@@ -30503,6 +30554,9 @@ msgstr ""
 msgid "Something went wrong while setting %{issuableType} confidentiality."
 msgstr ""
 
+msgid "Something went wrong while setting %{issuableType} health status."
+msgstr ""
+
 msgid "Something went wrong while setting %{issuableType} notifications."
 msgstr ""
 
@@ -30621,6 +30675,15 @@ msgid "SortOptions|Less weight"
 msgstr ""
 
 msgid "SortOptions|Manual"
+msgstr ""
+
+msgid "SortOptions|Merged date"
+msgstr ""
+
+msgid "SortOptions|Merged earlier"
+msgstr ""
+
+msgid "SortOptions|Merged recently"
 msgstr ""
 
 msgid "SortOptions|Milestone due date"
@@ -34188,6 +34251,9 @@ msgstr ""
 msgid "To receive alerts from manually configured Prometheus services, add the following URL and Authorization key to your Prometheus webhook config file. Learn more about %{linkStart}configuring Prometheus%{linkEnd} to send alerts to GitLab."
 msgstr ""
 
+msgid "To resolve this, try to:"
+msgstr ""
+
 msgid "To run CI/CD pipelines with JetBrains TeamCity, input the GitLab project details in the TeamCity project Version Control Settings."
 msgstr ""
 
@@ -35442,6 +35508,9 @@ msgid "Use cURL"
 msgstr ""
 
 msgid "Use custom color #FF0000"
+msgstr ""
+
+msgid "Use double quotes for multiple keywords, such as %{code_open}\"your search\"%{code_close}"
 msgstr ""
 
 msgid "Use hashed storage"
@@ -38018,6 +38087,9 @@ msgstr ""
 msgid "Your search didn't match any commits. Try a different query."
 msgstr ""
 
+msgid "Your search timed out"
+msgstr ""
+
 msgid "Your sign-in page is %{url}."
 msgstr ""
 
@@ -38028,6 +38100,12 @@ msgid "Your subscription has been downgraded."
 msgstr ""
 
 msgid "Your subscription will expire in %{remaining_days}."
+msgstr ""
+
+msgid "Your trial license was issued and activated. Install it to enjoy GitLab Ultimate for 30 days."
+msgstr ""
+
+msgid "Your trial license was issued!"
 msgstr ""
 
 msgid "Your username is %{username}."
@@ -38279,6 +38357,9 @@ msgid "ciReport|Browser performance test metrics: No changes"
 msgstr ""
 
 msgid "ciReport|Checks"
+msgstr ""
+
+msgid "ciReport|Cluster Image Scanning"
 msgstr ""
 
 msgid "ciReport|Code quality"

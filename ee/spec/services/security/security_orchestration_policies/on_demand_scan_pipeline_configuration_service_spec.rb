@@ -3,6 +3,8 @@
 require 'spec_helper'
 
 RSpec.describe Security::SecurityOrchestrationPolicies::OnDemandScanPipelineConfigurationService do
+  include Ci::TemplateHelpers
+
   describe '#execute' do
     let_it_be_with_reload(:project) { create(:project, :repository) }
 
@@ -70,7 +72,7 @@ RSpec.describe Security::SecurityOrchestrationPolicies::OnDemandScanPipelineConf
             DAST_USE_AJAX_SPIDER: 'false',
             DAST_VERSION: 1,
             DAST_WEBSITE: site_profile.dast_site.url,
-            SECURE_ANALYZERS_PREFIX: 'registry.gitlab.com/gitlab-org/security-products/analyzers'
+            SECURE_ANALYZERS_PREFIX: secure_analyzers_prefix
           },
           allow_failure: true,
           script: ['/analyze'],

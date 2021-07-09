@@ -167,5 +167,15 @@ describe('JiraIssuesShow', () => {
 
       expect(findJiraIssueSidebar().props('isUpdatingStatus')).toBe(false);
     });
+
+    it('updates `sidebarExpanded` prop on `sidebar-toggle` event', async () => {
+      const jiraIssueSidebar = findJiraIssueSidebar();
+      expect(jiraIssueSidebar.props('sidebarExpanded')).toBe(true);
+
+      jiraIssueSidebar.vm.$emit('sidebar-toggle');
+      await wrapper.vm.$nextTick();
+
+      expect(jiraIssueSidebar.props('sidebarExpanded')).toBe(false);
+    });
   });
 });

@@ -54,6 +54,32 @@ RSpec.describe Ci::Minutes::UpdateBuildMinutesService do
 
       it_behaves_like 'new tracking matches legacy tracking'
 
+      context 'when on .com' do
+        before do
+          allow(Gitlab).to receive(:com?).and_return(true)
+        end
+
+        it 'sends an email' do
+          expect_next_instance_of(Ci::Minutes::EmailNotificationService) do |service|
+            expect(service).to receive(:execute)
+          end
+
+          subject
+        end
+      end
+
+      context 'when not on .com' do
+        before do
+          allow(Gitlab).to receive(:com?).and_return(false)
+        end
+
+        it 'does not send an email' do
+          expect(Ci::Minutes::EmailNotificationService).not_to receive(:new)
+
+          subject
+        end
+      end
+
       context 'when feature flag ci_minutes_monthly_tracking is disabled' do
         before do
           stub_feature_flags(ci_minutes_monthly_tracking: false)

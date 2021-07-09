@@ -148,6 +148,21 @@ RSpec.describe IncidentManagement::EscalationPolicies::UpdateService do
       it_behaves_like 'error response', 'Escalation policies must have at least one rule'
     end
 
+    context 'when too many rules are given' do
+      let(:rule_params) { [*existing_rules_params, *new_rule_params] }
+      let(:new_rule_params) do
+        (0..9).map do |idx|
+          {
+            oncall_schedule: oncall_schedule,
+            elapsed_time_seconds: idx,
+            status: :acknowledged
+          }
+        end
+      end
+
+      it_behaves_like 'error response', 'Escalation policies may not have more than 10 rules'
+    end
+
     context 'when the on-call schedule is not present on the rule' do
       let(:rule_params) { [new_rule_params.except(:oncall_schedule)] }
 

@@ -17,10 +17,17 @@ module Ci
 
         track_usage_of_monthly_minutes(consumption)
 
+        send_minutes_email_notification
+
         compare_with_live_consumption(build, consumption)
       end
 
       private
+
+      def send_minutes_email_notification
+        # `perform reset` on `project` because otherwise `Namespace#namespace_statistics` will return stale data.
+        ::Ci::Minutes::EmailNotificationService.new(@project.reset).execute if ::Gitlab.com?
+      end
 
       def legacy_track_usage_of_monthly_minutes(consumption)
         ProjectStatistics.update_counters(project_statistics,

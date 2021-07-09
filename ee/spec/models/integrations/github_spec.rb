@@ -285,17 +285,17 @@ RSpec.describe Integrations::Github do
     end
   end
 
-  describe '#can_test?' do
+  describe '#testable?' do
     it 'is false if there are no pipelines' do
       project.ci_pipelines.delete_all
 
-      expect(subject.can_test?).to eq false
+      expect(subject).not_to be_testable
     end
 
     it 'is true if the project has a pipeline' do
       pipeline
 
-      expect(subject.can_test?).to eq true
+      expect(subject).to be_testable
     end
   end
 

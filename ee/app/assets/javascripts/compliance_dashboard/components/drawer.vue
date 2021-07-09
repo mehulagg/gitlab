@@ -50,7 +50,7 @@ export default {
     :z-index="$options.Z_INDEX"
     @close="$emit('close')"
   >
-    <template #header>
+    <template #title>
       <h4 data-testid="dashboard-drawer-title">{{ mergeRequest.title }}</h4>
     </template>
     <template v-if="showDrawer" #default>

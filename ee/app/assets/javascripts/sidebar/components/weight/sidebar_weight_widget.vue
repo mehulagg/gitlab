@@ -10,13 +10,14 @@ import {
 import createFlash from '~/flash';
 import { __, sprintf } from '~/locale';
 import SidebarEditableItem from '~/sidebar/components/sidebar_editable_item.vue';
+import { Tracking } from '~/sidebar/constants';
 import autofocusonshow from '~/vue_shared/directives/autofocusonshow';
 import { weightQueries, MAX_DISPLAY_WEIGHT } from '../../constants';
 
 export default {
   tracking: {
-    event: 'click_edit_button',
-    label: 'right_sidebar',
+    event: Tracking.editEvent,
+    label: Tracking.rightSidebarLabel,
     property: 'weight',
   },
   components: {

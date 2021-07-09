@@ -156,6 +156,7 @@ export default {
             :key="cadence.id"
             :cadence-id="cadence.id"
             :duration-in-weeks="cadence.durationInWeeks"
+            :automatic="cadence.automatic"
             :title="cadence.title"
             :iteration-state="state"
             @delete-cadence="deleteCadence"

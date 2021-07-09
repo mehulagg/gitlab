@@ -434,46 +434,21 @@ RSpec.describe Issue do
     end
 
     context 'by blocking issues' do
-      it 'orders by descending blocking issues count' do
-        issue_1 = create(:issue, blocking_issues_count: 3)
-        issue_2 = create(:issue, blocking_issues_count: 2)
+      let_it_be(:issue_1) { create(:issue, blocking_issues_count: 3) }
+      let_it_be(:issue_2) { create(:issue, blocking_issues_count: 1) }
 
+      it 'orders by ascending blocking issues count', :aggregate_failures do
+        results = described_class.sort_by_attribute('blocking_issues_asc')
+
+        expect(results.first).to eq(issue_2)
+        expect(results.second).to eq(issue_1)
+      end
+
+      it 'orders by descending blocking issues count', :aggregate_failures do
         results = described_class.sort_by_attribute('blocking_issues_desc')
 
         expect(results.first).to eq(issue_1)
         expect(results.second).to eq(issue_2)
-      end
-    end
-  end
-
-  describe '#check_for_spam?' do
-    using RSpec::Parameterized::TableSyntax
-    let_it_be(:reusable_project) { create(:project) }
-    let_it_be(:author) { ::User.support_bot }
-
-    where(:visibility_level, :confidential, :new_attributes, :check_for_spam?) do
-      Gitlab::VisibilityLevel::PUBLIC   | false | { description: 'woo' } | true
-      Gitlab::VisibilityLevel::PUBLIC   | false | { title: 'woo' } | true
-      Gitlab::VisibilityLevel::PUBLIC   | true  | { confidential: false } | true
-      Gitlab::VisibilityLevel::PUBLIC   | true  | { description: 'woo' } | true
-      Gitlab::VisibilityLevel::PUBLIC   | false | { title: 'woo', confidential: true } | true
-      Gitlab::VisibilityLevel::INTERNAL | false | { description: 'woo' } | true
-      Gitlab::VisibilityLevel::PRIVATE  | true  | { description: 'woo' } | true
-      Gitlab::VisibilityLevel::PUBLIC   | false | { description: 'original description' } | false
-      Gitlab::VisibilityLevel::PRIVATE  | true  | { weight: 3 } | false
-    end
-
-    with_them do
-      context 'when author is a bot' do
-        it 'only checks for spam when description, title, or confidential status is updated' do
-          project = reusable_project
-          project.update(visibility_level: visibility_level)
-          issue = create(:issue, project: project, confidential: confidential, description: 'original description', author: author)
-
-          issue.assign_attributes(new_attributes)
-
-          expect(issue.check_for_spam?).to eq(check_for_spam?)
-        end
       end
     end
   end

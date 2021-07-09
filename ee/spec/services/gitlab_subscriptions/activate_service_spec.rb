@@ -7,12 +7,10 @@ RSpec.describe GitlabSubscriptions::ActivateService do
 
   let!(:application_settings) do
     stub_env('IN_MEMORY_APPLICATION_SETTINGS', 'false')
-    create(:application_setting, cloud_license_enabled: cloud_license_enabled)
   end
 
   let_it_be(:license_key) { build(:gitlab_license, :cloud).export }
 
-  let(:cloud_license_enabled) { true }
   let(:activation_code) { 'activation_code' }
 
   def stub_client_activate
@@ -109,17 +107,6 @@ RSpec.describe GitlabSubscriptions::ActivateService do
 
     it 'returns error' do
       allow(Gitlab).to receive(:com?).and_return(true)
-      expect(Gitlab::SubscriptionPortal::Client).not_to receive(:activate)
-
-      expect(execute_service).to eq(customer_dot_response)
-    end
-  end
-
-  context 'when cloud licensing disabled' do
-    let(:customer_dot_response) { { success: false, errors: [described_class::ERROR_MESSAGES[:disabled]] }}
-    let(:cloud_license_enabled) { false }
-
-    it 'returns error' do
       expect(Gitlab::SubscriptionPortal::Client).not_to receive(:activate)
 
       expect(execute_service).to eq(customer_dot_response)

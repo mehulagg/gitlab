@@ -1,7 +1,7 @@
 import { createLocalVue, shallowMount } from '@vue/test-utils';
 import VueRouter from 'vue-router';
 import FilterBody from 'ee/security_dashboard/components/shared/filters/filter_body.vue';
-import StandardFilter from 'ee/security_dashboard/components/shared/filters/standard_filter.vue';
+import SimpleFilter from 'ee/security_dashboard/components/shared/filters/simple_filter.vue';
 
 const localVue = createLocalVue();
 localVue.use(VueRouter);
@@ -20,11 +20,11 @@ const filter = {
 const optionsAt = (indexes) => filter.options.filter((x) => indexes.includes(x.index));
 const optionIdsAt = (indexes) => optionsAt(indexes).map((x) => x.id);
 
-describe('Standard Filter component', () => {
+describe('Simple Filter component', () => {
   let wrapper;
 
   const createWrapper = (filterOptions, props) => {
-    wrapper = shallowMount(StandardFilter, {
+    wrapper = shallowMount(SimpleFilter, {
       localVue,
       router,
       propsData: { filter: { ...filter, ...filterOptions }, ...props },

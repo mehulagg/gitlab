@@ -8,7 +8,6 @@ RSpec.describe 'Admin views Subscription', :js do
   before do
     sign_in(admin)
     gitlab_enable_admin_mode_sign_in(admin)
-    stub_application_setting(cloud_license_enabled: true)
   end
 
   context 'with a cloud license' do
