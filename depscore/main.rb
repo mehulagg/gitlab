@@ -48,14 +48,15 @@ def dreport_summary()
   all_gems = LibData.all_instances
   all_gems.each do |gem|
     if gem.signals[:score].to_i == 0
-       summary = summary + "From the following metadata, the thirdparty component "+gem.name \
+       summary = summary + "Use of unmaintained third-party component. Library name:  " +gem.name \
+        + " version: "+ gem.signals[:version] \
         + " looks not well maintaned" \
-        + ".Total download:" + (gem.signals[:tot_downloads]|| "").to_s \
-        + ".Number of reverse dependency:"+  (gem.signals[:reverse_dep_count]|| "").to_s \
-        + ".Latest version age:"+ (gem.signals[:latest_vesion_age] || "").to_s \
-        + ".Latest release on:"+ (gem.signals[:latest_release_on] || "") \
-        + ".Number of releases last year:"+ (gem.signals[:rel_freq_last_4quater]|| "").to_s \
-        + ".Score: "+gem.signals[:score].to_s
+        + ". Evidance metadata: Total download:" + (gem.signals[:tot_downloads]|| "").to_s \
+        + ". Number of reverse dependency:"+  (gem.signals[:reverse_dep_count]|| "").to_s \
+        + ". Latest version age:"+ (gem.signals[:latest_vesion_age] || "").to_s \
+        + ". Latest release on:"+ (gem.signals[:latest_release_on] || "") \
+        + ". Number of releases last year:"+ (gem.signals[:rel_freq_last_4quater]|| "").to_s \
+        + ". Score: "+gem.signals[:score].to_s
 
         # puts summary
 
@@ -63,8 +64,8 @@ def dreport_summary()
         vul = {
           id: vul_id,
           category: "dependency_scanning",
-          name: "Use of Unmaintained Third Party Components",
-          message: "Use of Unmaintained Third Party Components",
+          name: "Use of Unmaintained Third Party Component " + gem.name + "-"++ gem.signals[:version],
+          message: "Use of Unmaintained Third Party Component " + gem.name + "-"+ gem.signals[:version],
           description: summary,
           cve: vul_id,
           severity: "Info",
