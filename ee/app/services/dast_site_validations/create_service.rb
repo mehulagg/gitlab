@@ -12,7 +12,7 @@ module DastSiteValidations
 
       associate_dast_site!(dast_site_validation)
 
-      run_validation(dast_site_validation)
+      perform_async_validation(dast_site_validation)
     rescue ActiveRecord::RecordInvalid => err
       ServiceResponse.error(message: err.record.errors.full_messages)
     rescue KeyError => err
