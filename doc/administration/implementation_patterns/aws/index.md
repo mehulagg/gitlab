@@ -10,19 +10,18 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 
 ## GitLab Services and additional Services Handled by AWS PaaS
 
-For both GitLab Omnibus or Cloud Native Hybrid implementations, the following GitLab Service roles can be performed by AWS Services (PaaS).
+For both Omnibus GitLab or Cloud Native Hybrid implementations, the following GitLab Service roles can be performed by AWS Services (PaaS).
 
 These services have been tested with GitLab.
 
 Some services, such as log aggregation are not specified by GitLab - but where provided are noted.
-
 
 | GitLab Services                                              | AWS PaaS (Tested)              | Provided by AWS Cloud <br />Native Hybrid Quick Start        |
 | ------------------------------------------------------------ | ------------------------------ | ------------------------------------------------------------ |
 | <u>Tested PaaS Mentioned in Reference Architectures</u>      |                                |                                                              |
 | **PostgreSQL Database**                                      | Aurora RDS                     | Yes.                                                         |
 | **Redis Caching**                                            | Redis Elasticache              | Yes.                                                         |
-| **Gitaly Cluster  (Git Repository Storage)**<br />(Including Praefect and PostgreSQL) | ASG and Instances              | Yes - ASG and Instances<br />**Note: Gitaly cannot be put into a Kubernetes Cluster.** |
+| **Gitaly Cluster (Git Repository Storage)**<br />(Including Praefect and PostgreSQL) | ASG and Instances              | Yes - ASG and Instances<br />**Note: Gitaly cannot be put into a Kubernetes Cluster.** |
 | **All GitLab storages besides Git Repository Storage**<br />(Includes Git-LFS which is S3 Compatible) | AWS S3                         | Yes                                                          |
 |                                                              |                                |                                                              |
 | <u>Tested PaaS Not Referenced in Ref Archs</u>               |                                |                                                              |
@@ -43,7 +42,6 @@ Some services, such as log aggregation are not specified by GitLab - but where p
 | **Configuration Data for Provisioning**                      | AWS Parameter Store            | Yes                                                          |
 | **AutoScaling Kubernetes**                                   | EKS AutoScaling Agent          | Yes                                                          |
 |                                                              |                                |                                                              |
-
 
 ## GitLab Cloud Native Hybrid on AWS EKS
 
@@ -139,12 +137,14 @@ Picking more of a smaller size instance allows scaling costs to be more granular
 <details>
 <summary>Click to Expand and See 10K Cloud Native Hybrid on EKS Test Results </summary>
 
-* Environment:                Gl-cloudnative-10k-rds-graviton
-* Environment Version:        13.12.3-ee `9d9769ba2ad`
-* Option:                     60s_200rps
-* Date:                       2021-07-08
-* Run Time:                   1h 6m 21.52s (Start: 19:46:47 UTC, End: 20:53:09 UTC)
-* GPT Version:                v2.8.0
+Attribute                  | Value                                                   
+---------------------------|---------------------------------------------------------
+Environment:               | Gl-cloudnative-10k-rds-graviton                         
+Environment Version:       | 13.12.3-ee `9d9769ba2ad`                                
+Option:                    | 60s_200rps                                              
+Date:                      | 2021-07-08                                              
+Run Time:                  | 1h 6m 21.52s (Start: 19:46:47 UTC, End: 20:53:09 UTC)   
+GPT Version:               | v2.8.0                                                  
 
 ❯ Overall Results Score: 97.8%
 
@@ -223,12 +223,14 @@ This test:
 - Started with 5 webservice pods (out of 20 for 10k test) and 5 hosts instead of 10. 
 - It has scaled both pods (to 20) and hosts (to 7) smoothly over 11 minutes.
 
-* Environment:                Gl-cloudnative-10k-autoscaling-test
-* Environment Version:        13.12.3-ee `9d9769ba2ad`
-* Option:                     60s_200rps
-* Date:                       2021-07-09
-* Run Time:                   1h 17m 19.04s (Start: 11:51:39 UTC, End: 13:08:58 UTC)
-* GPT Version:                v2.8.0
+Attribute                  | Value                                                   
+---------------------------|---------------------------------------------------------
+Environment:               | Gl-cloudnative-10k-autoscaling-test
+Environment Version:       | 13.12.3-ee `9d9769ba2ad`
+Option:                    | 60s_200rps
+Date:                      | 2021-07-09
+Run Time:                  | 1h 17m 19.04s (Start: 11:51:39 UTC, End: 13:08:58 UTC)
+GPT Version:               | v2.8.0
 
 ❯ Overall Results Score: 97.46%
 
