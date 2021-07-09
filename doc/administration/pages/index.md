@@ -215,6 +215,15 @@ NOTE:
 `inplace_chroot` option might not work with the other features, such as [Pages Access Control](#access-control).
 The [GitLab Pages README](https://gitlab.com/gitlab-org/gitlab-pages#caveats) has more information about caveats and workarounds.
 
+
+### Jailing mechanism disabled by default
+
+Starting from GitLab 14.1 the [jailing/chroot mechanism is disabled by default](https://gitlab.com/gitlab-org/gitlab-pages/-/issues/589).
+If you are using the API-based configuration and using the new [Zip storage architecture](#zip-storage)
+there is nothing you need to do. However, if you are still using `use_legacy_storage=true` 
+you may want to enable the jailing mechanism to ensure the Pages daemon does not have 
+access to files outside the `pages_path`.
+
 ### Global settings
 
 Below is a table of all configuration settings known to Pages in Omnibus GitLab,
@@ -1377,6 +1386,12 @@ To do that:
 
    ```ruby
    gitlab_pages['use_legacy_storage'] = true
+   ```
+
+1. Optionally, enable the legacy jailing mechanism as it is now [disabled by default](#jailing-mechanism-disabled-by-default):
+
+   ```ruby
+   gitlab_pages['env']['DAEMON_ENABLE_JAIL'] = "true"
    ```
 
 1. [Reconfigure GitLab](../restart_gitlab.md#omnibus-gitlab-reconfigure).
