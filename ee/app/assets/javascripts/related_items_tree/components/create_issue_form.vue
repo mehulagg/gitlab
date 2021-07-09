@@ -19,7 +19,7 @@ import { STORAGE_KEY } from '~/frequent_items/constants';
 import { getTopFrequentItems } from '~/frequent_items/utils';
 import AccessorUtilities from '~/lib/utils/accessor';
 import { __ } from '~/locale';
-import ProjectAvatar from '~/vue_shared/components/deprecated_project_avatar/default.vue';
+import ProjectAvatar from '~/vue_shared/components/project_avatar.vue';
 import { SEARCH_DEBOUNCE } from '../constants';
 
 export default {
@@ -199,7 +199,11 @@ export default {
                 class="gl-w-full select-project-dropdown"
                 @click="() => handleRecentItemSelection(project)"
               >
-                <span><project-avatar :project="project" :size="32" /></span>
+                <project-avatar
+                  :project-avatar-url="project.avatar_url"
+                  :project-name="project.name"
+                  :size="32"
+                />
                 <span
                   ><span class="block">{{ project.name }}</span>
                   <span class="block text-secondary">{{ project.namespace }}</span></span
@@ -218,7 +222,11 @@ export default {
                 class="gl-w-full select-project-dropdown"
                 @click="selectedProject = project"
               >
-                <span><project-avatar :project="project" :size="32" /></span>
+                <project-avatar
+                  :project-avatar-url="project.avatar_url"
+                  :project-name="project.name"
+                  :size="32"
+                />
                 <span
                   ><span class="block">{{ project.name }}</span>
                   <span class="block text-secondary">{{ project.namespace.name }}</span></span
