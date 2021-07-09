@@ -39,6 +39,10 @@ module AppSec
             }
           }
         end
+
+        def dast_site_validation
+          @dast_site_validation ||= params[:dast_site_validation]
+        end
       end
     end
   end
