@@ -18,12 +18,12 @@ class DastSiteValidationWorker
   end
 
   def perform(dast_site_validation_id)
-    # dast_site_validation = DastSiteValidation.find(dast_site_validation_id)
-    # project = dast_site_validation.project
+    dast_site_validation = DastSiteValidation.find(dast_site_validation_id)
+    project = dast_site_validation.project
 
-    # DastSiteValidations::ValidateService.new(
-    #   container: project,
-    #   params: { dast_site_validation: dast_site_validation }
-    # ).execute!
+    DastSiteValidations::ValidateService.new(
+      container: project,
+      params: { dast_site_validation: dast_site_validation }
+    ).execute!
   end
 end

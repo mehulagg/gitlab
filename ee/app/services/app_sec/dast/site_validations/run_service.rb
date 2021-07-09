@@ -5,15 +5,23 @@ module AppSec
     module SiteValidations
       class RunService < BaseContainerService
         def execute
+          service = Ci::CreatePipelineService.new(project, current_user, ref: project.default_branch_or_main)
+          pipeline = service.execute(:ondemand_dast_scan, content: ci_configuration)
+
+          if pipeline.created_successfully?
+            ServiceResponse.success(payload: dast_site_validation)
+          else
+            ServiceResponse.error(message: pipeline.full_error_messages)
+          end
         end
 
         private
 
         def allowed?
-          container.licensed_feature_available?(:security_on_demand_scans)
+          can?(current_user, :create_on_demand_dast_scan, project)
         end
 
-        def ci_config
+        def ci_configuration
           {
             stages: [:dast],
             validation: {
