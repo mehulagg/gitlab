@@ -109,7 +109,9 @@ Sidekiq::ScheduledSet.new.select { |r| r.klass == 'BackgroundMigrationWorker' }.
 
 ### Batched background migrations
 
-See the documentation on [batched background migrations](../user/admin_area/monitoring/background_migrations.md).
+Batched background migrations need to finish before you update to a newer version.
+
+Read more about [batched background migrations](../user/admin_area/monitoring/background_migrations.md).
 
 ### What do I do if my background migrations are stuck?
 
@@ -194,7 +196,7 @@ Find where your version sits in the upgrade path below, and upgrade GitLab
 accordingly, while also consulting the
 [version-specific upgrade instructions](#version-specific-upgrading-instructions):
 
-`8.11.Z` -> [`8.12.0`](#upgrades-from-versions-earlier-than-812) -> `8.17.7` -> `9.5.10` -> `10.8.7` -> [`11.11.8`](#1200) -> `12.0.12` -> [`12.1.17`](#1210) -> `12.10.14` -> `13.0.14` -> [`13.1.11`](#1310) -> [latest `13.12.Z`](https://about.gitlab.com/releases/categories/releases/) -> [latest `14.0.Z`](https://about.gitlab.com/releases/categories/releases/) -> [latest `14.Y.Z`](https://about.gitlab.com/releases/categories/releases/)
+`8.11.Z` -> [`8.12.0`](#upgrades-from-versions-earlier-than-812) -> `8.17.7` -> `9.5.10` -> `10.8.7` -> [`11.11.8`](#1200) -> `12.0.12` -> [`12.1.17`](#1210) -> `12.10.14` -> `13.0.14` -> [`13.1.11`](#1310) -> [latest `13.12.Z`](https://about.gitlab.com/releases/categories/releases/) -> [`14.0.3`](#1410) -> [latest `14.Y.Z`](https://about.gitlab.com/releases/categories/releases/)
 
 The following table, while not exhaustive, shows some examples of the supported
 upgrade paths.
@@ -368,6 +370,21 @@ installation-specific upgrade instructions, based on how you installed GitLab:
 NOTE:
 Specific information that follow related to Ruby and Git versions do not apply to [Omnibus installations](https://docs.gitlab.com/omnibus/)
 and [Helm Chart deployments](https://docs.gitlab.com/charts/). They come with appropriate Ruby and Git versions and are not using system binaries for Ruby and Git. There is no need to install Ruby or Git when utilizing these two approaches.
+
+### 14.1.0
+
+- Batched background migrations need to finish after you update to 14.1.0 (or 14.0.3)
+  and before you update to a later version.
+  [Check the status of batched background migrations](../user/admin_area/monitoring/background_migrations.md#check-the-status-of-batched-background-migrations).
+
+  If the migrations are not finished and you try to update to a later version,
+  you'll see an error like:
+
+  ```plaintext
+  Expected batched background migration for the given configuration to be marked as 'finished', but it is 'active':
+  ```
+
+  See how to [resolve this error](../user/admin_area/monitoring/background_migrations.md#database-migrations-failing-because-of-batched-background-migration-not-finished).
 
 ### 14.0.0
 
