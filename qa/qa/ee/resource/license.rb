@@ -10,7 +10,6 @@ module QA
           QA::Page::Admin::Menu.perform(&:click_subscription_menu_link)
 
           EE::Page::Admin::License.perform do |license_page|
-
             license_page.add_new_license(license) unless license_page.license?
           end
 

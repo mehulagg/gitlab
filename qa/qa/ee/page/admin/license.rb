@@ -32,7 +32,6 @@ module QA
             raise 'License key empty!' if key.to_s.empty?
 
             click_element(:license_upload_link)
-
             choose_element(:license_type_key_radio)
             fill_element(:license_key_field, key)
             check_element(:accept_eula_checkbox)
