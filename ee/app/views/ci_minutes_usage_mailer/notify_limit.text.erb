@@ -1,4 +1,4 @@
-<%= _('%{name}(%{url}) has %{percent} or less Shared Runner Pipeline minutes remaining. Once it runs out, no new jobs or pipelines in its projects will run.') % { name: @namespace.name, url: group_url(@namespace), percent: "#{@percentage_of_available_mins}%" } %>
+<%= _('%{name}(%{url}) namespace has %{percent} or less Shared Runner Pipeline minutes remaining. After it runs out, no new jobs or pipelines in its projects will run.') % { name: @namespace.name, url: group_url(@namespace), percent: "#{@percentage_of_available_mins}%" } %>
 
 <%= _('We recommend that you buy more Pipeline minutes to avoid any interruption of service.') %>
 
