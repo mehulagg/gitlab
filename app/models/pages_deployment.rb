@@ -38,3 +38,5 @@ class PagesDeployment < ApplicationRecord
     self.size = file.size
   end
 end
+
+PagesDeployment.prepend_mod

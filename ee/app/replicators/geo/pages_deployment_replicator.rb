@@ -16,7 +16,7 @@ module Geo
     # The feature flag follows the format `geo_#{replicable_name}_replication`,
     # so here it would be `geo_pages_deployment_replication`
     def self.replication_enabled_by_default?
-      Feature.enabled?(:geo_pages_deployment_replication, default_enabled: :yaml)
+      false
     end
 
     override :verification_feature_flag_enabled?
