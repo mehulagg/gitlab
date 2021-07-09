@@ -126,4 +126,52 @@ RSpec.describe Projects::TransferService do
       end
     end
   end
+
+  describe 'personal access tokens' do
+    let_it_be(:premium_group) { create(:group_with_plan, plan: :premium_plan) }
+    let_it_be(:free_group) { create(:group) }
+
+    before do
+      premium_group.add_owner(user)
+      free_group.add_owner(user)
+
+      ResourceAccessTokens::CreateService.new(user, project).execute
+    end
+
+    context 'with a self managed instance' do
+      before do
+        allow(Gitlab::CurrentSettings.current_application_settings)
+          .to receive(:should_check_namespace_plan?) { false }
+      end
+
+      it 'does not delete PATs' do
+        subject.execute(group)
+
+        expect(PersonalAccessToken.count).to eq(1)
+      end
+    end
+
+    context 'with GL.com' do
+      before do
+        allow(Gitlab::CurrentSettings.current_application_settings)
+          .to receive(:should_check_namespace_plan?) { true }
+      end
+
+      context 'when target namespace has a premium plan' do
+        it 'does not delete PATs' do
+          subject.execute(premium_group)
+
+          expect(PersonalAccessToken.count).to eq(1)
+        end
+      end
+
+      context 'when target namespace has a free plan' do
+        it 'deletes PATs' do
+          subject.execute(free_group)
+
+          expect(PersonalAccessToken.count).to eq(0)
+        end
+      end
+    end
+  end
 end

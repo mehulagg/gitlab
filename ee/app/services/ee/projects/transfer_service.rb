@@ -45,6 +45,20 @@ module EE
           ::Elastic::ProcessInitialBookkeepingService.backfill_projects!(project) if project.maintaining_elasticsearch?
         end
       end
+
+      override :remove_paid_features
+      def remove_paid_features
+        delete_personal_access_tokens
+      end
+
+      def delete_personal_access_tokens
+        return if new_namespace.feature_available_non_trial?(:resource_access_token)
+
+        PersonalAccessTokensFinder
+          .new(user: project.bots, impersonation: false)
+          .execute
+          .destroy_all
+      end
     end
   end
 end
