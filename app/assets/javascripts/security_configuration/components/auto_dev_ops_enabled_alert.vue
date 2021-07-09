@@ -11,9 +11,7 @@ export default {
   inject: ['autoDevopsDocsPath', 'enableAutoDevopsPath'],
   i18n: {
     primaryButtonText: s__('AutoDevopsAlert|Enable Auto DevOps'),
-    body: s__(
-      'AutoDevopsAlert|Quickly enable all continuous testing and compliance tools by enabling %{linkStart}Auto DevOps%{linkEnd}',
-    ),
+    body: s__('AutoDevopsAlert|I am the enabeld alert!%{linkStart}Auto DevOps%{linkEnd}'),
   },
 };
 </script>
@@ -27,7 +25,7 @@ export default {
   >
     <gl-sprintf :message="$options.i18n.body">
       <template #link="{ content }">
-        <gl-link data-testid="auto-devops-alert-link" :href="autoDevopsDocsPath">
+        <gl-link :href="autoDevopsDocsPath">
           {{ content }}
         </gl-link>
       </template>
