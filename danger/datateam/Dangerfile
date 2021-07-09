@@ -6,8 +6,9 @@ DATA_WAREHOUSE_LABELS = [
   "Data Warehouse::Impacted",
   "Data Warehouse::Not Impacted"
 ].freeze
+
 CHANGED_SCHEMA_MESSAGE = <<~MSG
-To notify the Data Team about changes to the db/structure.sql file, add label `tbd`
+To notify the Data Team about changes to the db/structure.sql file, add label `Data Warehouse::Impact Check`
 
 /label ~"Data Warehouse::Impact Check"
 
