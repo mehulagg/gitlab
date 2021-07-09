@@ -406,13 +406,6 @@ can also push them manually:
 nuget push My.Package.snupkg -Source <source_name>
 ```
 
-Consuming symbol packages is not yet guaranteed using clients such as Visual Studio or
-dotnet-symbol. The `.snupkg` files are available for download through the UI or the
-[API](../../../api/packages/nuget.md#download-a-package-file).
-
-Follow the [NuGet symbol package issue](https://gitlab.com/gitlab-org/gitlab/-/issues/262081)
-for further updates.
-
 ## Supported CLI commands
 
 The GitLab NuGet repository supports the following commands for the NuGet CLI (`nuget`) and the .NET
