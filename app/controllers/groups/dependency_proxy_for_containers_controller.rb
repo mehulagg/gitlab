@@ -4,6 +4,7 @@ class Groups::DependencyProxyForContainersController < Groups::ApplicationContro
   include DependencyProxy::Auth
   include DependencyProxy::GroupAccess
   include SendFileUpload
+  include ::PackagesHelper # for event tracking
 
   before_action :ensure_token_granted!
   before_action :ensure_feature_enabled!
@@ -22,6 +23,7 @@ class Groups::DependencyProxyForContainersController < Groups::ApplicationContro
       response.headers['Etag'] = "\"#{result[:manifest].digest}\""
       content_type = result[:manifest].content_type
 
+      track_package_event('pull_manifest', :dependency_proxy, namespace: group, user: current_user)
       send_upload(
         result[:manifest].file,
         proxy: true,
@@ -38,6 +40,7 @@ class Groups::DependencyProxyForContainersController < Groups::ApplicationContro
       .new(group, image, token, params[:sha]).execute
 
     if result[:status] == :success
+      track_package_event('pull_blob', :dependency_proxy, namespace: group, user: current_user)
       send_upload(result[:blob].file)
     else
       head result[:http_status]

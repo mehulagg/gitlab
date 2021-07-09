@@ -115,6 +115,8 @@ RSpec.describe Groups::DependencyProxyForContainersController do
     subject { get_manifest }
 
     context 'feature enabled' do
+      let(:snowplow_gitlab_standard_context) { { namespace: group, user: user } }
+
       before do
         enable_dependency_proxy
       end
@@ -122,6 +124,7 @@ RSpec.describe Groups::DependencyProxyForContainersController do
       it_behaves_like 'without a token'
       it_behaves_like 'without permission'
       it_behaves_like 'feature flag disabled with private group'
+      it_behaves_like 'a package tracking event', described_class.name, 'pull_manifest'
 
       context 'remote token request fails' do
         let(:token_response) do
