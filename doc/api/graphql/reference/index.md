@@ -7809,7 +7809,7 @@ Represents the total number of issues and their weights for a particular day.
 
 ### `CiTemplate`
 
-GitLab CI/CD configuration template.
+Name of the CI template, formatted as `Name.gitlab-ci.yml.`.
 
 #### Fields
 
