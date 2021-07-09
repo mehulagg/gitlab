@@ -1066,7 +1066,7 @@ Parameters:
 }
 ```
 
-## C r e a t e MR
+## C r e a t e M R
 
 Creates a new merge request.
 
