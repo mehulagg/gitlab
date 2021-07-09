@@ -22612,7 +22612,7 @@ Tiers: `ultimate`
 
 ### `usage_activity_by_stage_monthly.secure.api_fuzzing_scans`
 
-Missing description
+Count of API fuzz test scans
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210216183838_api_fuzzing_scans.yml)
 
