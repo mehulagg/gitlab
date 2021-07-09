@@ -42,20 +42,23 @@ def dreport_summary()
   all_gems = LibData.all_instances
   all_gems.each do |gem|
     if gem.signals[:score].to_i == 0
-       summary = summary + gem.name 
-        + "Total download: " + (gem.signals[:tot_downloads]|| "").to_s
-        + " .Number of reverse dependency: "+  (gem.signals[:reverse_dep_count]|| "").to_s
-        + " .Latest version age: "+ (gem.signals[:latest_vesion_age] || "").to_s
-        + " .Latest release on: "+ (gem.signals[:latest_release_on] || "")
-        + " .Number of releases last year: "+ (gem.signals[:rel_freq_last_4quater]|| "").to_s
-        + " .Score: "+gem.signals[:score].to_s
+       summary = summary + "From the following metadata, the thirdparty component "+gem.name \
+        + " looks not well maintaned" \
+        + ".Total download:" + (gem.signals[:tot_downloads]|| "").to_s \
+        + ".Number of reverse dependency:"+  (gem.signals[:reverse_dep_count]|| "").to_s \
+        + ".Latest version age:"+ (gem.signals[:latest_vesion_age] || "").to_s \
+        + ".Latest release on:"+ (gem.signals[:latest_release_on] || "") \
+        + ".Number of releases last year:"+ (gem.signals[:rel_freq_last_4quater]|| "").to_s \
+        + ".Score: "+gem.signals[:score].to_s
+
+        # puts summary
 
         vul_id = SecureRandom.uuid
         vul = {
           id: vul_id,
           category: "dependency_scanning",
           name: "Use of Unmaintained Third Party Components",
-          message: "Third party component which is not frequently mantained detected",
+          message: "Use of Unmaintained Third Party Components",
           description: summary,
           cve: vul_id,
           severity: "Info",
@@ -65,6 +68,7 @@ def dreport_summary()
           identifiers: [{type:"cwe",name:"CWE-1104",value: "Use of Unmaintained Third Party Components",url: "https://cwe.mitre.org/data/definitions/1104.html" }],
           links: [{url: "https://cwe.mitre.org/data/definitions/1104.html"}]
         }
+        puts vul.to_json
         report[:vulnerabilities].append(vul)
         summary = ""
     end #if score = 0
