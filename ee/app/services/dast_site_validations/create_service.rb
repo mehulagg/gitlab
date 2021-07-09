@@ -67,7 +67,7 @@ module DastSiteValidations
     end
 
     def perform_async_validation(dast_site_validation)
-      if Feature.enabled?(:dast_runner_site_validation, validation.project, default_enabled: :yaml)
+      if Feature.enabled?(:dast_runner_site_validation, dast_site_validation.project, default_enabled: :yaml)
         runner_validation(dast_site_validation)
       else
         worker_validation(dast_site_validation)
@@ -89,8 +89,8 @@ module DastSiteValidations
     end
 
     def runner_validation(dast_site_validation)
-      AppSec::Dast::SiteValidations.new(
-        project: project,
+      AppSec::Dast::SiteValidations::RunService.new(
+        project: dast_site_validation.project,
         current_user: current_user,
         params: { dast_site_validation: dast_site_validation }
       ).execute

@@ -3,10 +3,10 @@
 module AppSec
   module Dast
     module SiteValidations
-      class RunService < BaseContainerService
+      class RunService < BaseProjectService
         def execute
           service = Ci::CreatePipelineService.new(project, current_user, ref: project.default_branch_or_main)
-          pipeline = service.execute(:ondemand_dast_scan, content: ci_configuration)
+          pipeline = service.execute(:ondemand_dast_scan, content: ci_configuration.to_yaml)
 
           if pipeline.created_successfully?
             ServiceResponse.success(payload: dast_site_validation)
@@ -23,13 +23,13 @@ module AppSec
 
         def ci_configuration
           {
-            stages: [:dast],
+            stages: ['dast'],
             validation: {
-              stage: :dast,
+              stage: 'dast',
               image: '192.168.99.103:5001/root/dast-validation-runner:latest',
               script: ['~/validate.sh'],
               variables: {
-                GIT_STRATEGY => 'none',
+                GIT_STRATEGY: 'none',
                 DAST_SITE_VALIDATION_ID: dast_site_validation.id,
                 DAST_SITE_VALIDATION_HEADER: ::DastSiteValidation::HEADER,
                 DAST_SITE_VALIDATION_STRATEGY: dast_site_validation.validation_strategy,
