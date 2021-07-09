@@ -199,7 +199,7 @@ module Gitlab
 
         return unless valid_scoped_token?(token, all_available_scopes)
 
-        return if project && token.user.project_bot? && !project.bots.include?(token.user)
+        return if token.user.project_bot? && ((project && !project.bots.include?(token.user)) || (project.group && !project.group.group_member(token.user)))
 
         if can_user_login_with_non_expired_password?(token.user) || token.user.project_bot?
           Gitlab::Auth::Result.new(token.user, nil, :personal_access_token, abilities_for_scopes(token.scopes))
