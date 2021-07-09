@@ -2,6 +2,8 @@
 
 module Integrations
   class Campfire < Integration
+    include ActionView::Helpers::UrlHelper
+
     prop_accessor :token, :subdomain, :room
     validates :token, presence: true, if: :activated?
 
@@ -14,9 +16,8 @@ module Integrations
     end
 
     def help
-      campfire_retired_url = 'https://basecamp.com/retired/campfire'
-      campfire_retired_link_start = '<a href="%{url}" target="_blank" rel="noopener noreferrer">'.html_safe % { url: campfire_retired_url }
-      s_('CampfireService|Send notifications about push events to Campfire chat rooms. Note that %{campfire_retired_link_start}new users can no longer sign up for Campfire%{campfire_retired_link_end}.') % { campfire_retired_link_start: campfire_retired_link_start, campfire_retired_link_end: '</a>'.html_safe }
+      docs_link = link_to _('Learn more.'), Rails.application.routes.url_helpers.help_page_url('api/services', anchor: 'campfire'), target: '_blank', rel: 'noopener noreferrer'
+      s_('CampfireService|Send notifications about push events to Campfire chat rooms. %{docs_link}').html_safe % { docs_link: docs_link.html_safe }
     end
 
     def self.to_param
@@ -30,7 +31,7 @@ module Integrations
           name: 'token',
           title: _('Campfire token'),
           placeholder: '',
-          help: s_('CampfireService|The Campfire API authentication token. To find it, log into Campfire and select "My info".'),
+          help: s_('CampfireService|API authentication token from Campfire.'),
           required: true
         },
         {
@@ -38,14 +39,14 @@ module Integrations
           name: 'subdomain',
           title: _('Campfire subdomain (optional)'),
           placeholder: '',
-          help: s_('CampfireService|What\'s between %{code_open}https://%{code_close} and %{code_open}.campfirenow.com%{code_close} when you\'re logged in.') % { code_open: '<code>'.html_safe, code_close: '</code>'.html_safe }
+          help: s_('CampfireService|The %{code_open}.campfirenow.com%{code_close} subdomain.') % { code_open: '<code>'.html_safe, code_close: '</code>'.html_safe }
         },
         {
           type: 'text',
           name: 'room',
           title: _('Campfire room ID (optional)'),
           placeholder: '123456',
-          help: s_('CampfireService|The last part of the URL when you\'re in a room.')
+          help: s_('CampfireService|From the end of the room URL.')
         }
       ]
     end
