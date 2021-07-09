@@ -9,7 +9,6 @@ import OrderedLayout from '~/vue_shared/components/ordered_layout.vue';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import draftNote from '../../batch_comments/components/draft_note.vue';
 import { getLocationHash, doesHashExistInUrl } from '../../lib/utils/url_utility';
-import placeholderNote from '../../vue_shared/components/notes/placeholder_note.vue';
 import placeholderSystemNote from '../../vue_shared/components/notes/placeholder_system_note.vue';
 import skeletonLoadingContainer from '../../vue_shared/components/notes/skeleton_note.vue';
 import systemNote from '../../vue_shared/components/notes/system_note.vue';
@@ -28,7 +27,7 @@ export default {
     noteableDiscussion,
     systemNote,
     commentForm,
-    placeholderNote,
+    placeholderNote: () => import('../../vue_shared/components/notes/placeholder_note.vue'),
     placeholderSystemNote,
     skeletonLoadingContainer,
     discussionFilterNote,

@@ -1,7 +1,6 @@
 <script>
 import { mapGetters, mapActions } from 'vuex';
 import { __ } from '~/locale';
-import PlaceholderNote from '~/vue_shared/components/notes/placeholder_note.vue';
 import PlaceholderSystemNote from '~/vue_shared/components/notes/placeholder_system_note.vue';
 import SystemNote from '~/vue_shared/components/notes/system_note.vue';
 import { SYSTEM_NOTE } from '../constants';
@@ -16,6 +15,7 @@ export default {
     ToggleRepliesWidget,
     NoteEditedText,
     DiscussionNotesRepliesWrapper,
+    PlaceholderNote: () => import('~/vue_shared/components/notes/placeholder_note.vue'),
   },
   props: {
     discussion: {
@@ -81,7 +81,7 @@ export default {
           return PlaceholderSystemNote;
         }
 
-        return PlaceholderNote;
+        return 'placeholder-note';
       }
 
       if (note.system) {

@@ -16,12 +16,21 @@
  *   :note="{body: 'This is a note'}"
  *   />
  */
+import { GlSafeHtmlDirective as SafeHtml } from '@gitlab/ui';
+import marked from 'marked';
 import { mapGetters } from 'vuex';
+import { sanitize } from '~/lib/dompurify';
 import TimelineEntryItem from '~/vue_shared/components/notes/timeline_entry_item.vue';
 import userAvatarLink from '../user_avatar/user_avatar_link.vue';
 
+const renderer = new marked.Renderer();
+marked.setOptions({
+  renderer,
+});
+
 export default {
   name: 'PlaceholderNote',
+  directives: { SafeHtml },
   components: {
     userAvatarLink,
     TimelineEntryItem,
@@ -34,6 +43,65 @@ export default {
   },
   computed: {
     ...mapGetters(['getUserData']),
+    renderedNote() {
+      return sanitize(marked(this.note.body), {
+        // allowedTags from GitLab's inline HTML guidelines
+        // https://docs.gitlab.com/ee/user/markdown.html#inline-html
+        ALLOWED_TAGS: [
+          'a',
+          'abbr',
+          'b',
+          'blockquote',
+          'br',
+          'code',
+          'dd',
+          'del',
+          'div',
+          'dl',
+          'dt',
+          'em',
+          'h1',
+          'h2',
+          'h3',
+          'h4',
+          'h5',
+          'h6',
+          'hr',
+          'i',
+          'img',
+          'ins',
+          'kbd',
+          'li',
+          'ol',
+          'p',
+          'pre',
+          'q',
+          'rp',
+          'rt',
+          'ruby',
+          's',
+          'samp',
+          'span',
+          'strike',
+          'strong',
+          'sub',
+          'summary',
+          'sup',
+          'table',
+          'tbody',
+          'td',
+          'tfoot',
+          'th',
+          'thead',
+          'tr',
+          'tt',
+          'ul',
+          'var',
+        ],
+        ALLOWED_ATTR: ['class', 'style', 'href', 'src'],
+        ALLOW_DATA_ATTR: false,
+      });
+    },
   },
 };
 </script>
@@ -57,9 +125,7 @@ export default {
         </div>
       </div>
       <div class="note-body">
-        <div class="note-text md">
-          <p>{{ note.body }}</p>
-        </div>
+        <div v-safe-html="renderedNote" class="note-text md"></div>
       </div>
     </div>
   </timeline-entry-item>
