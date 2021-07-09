@@ -74,8 +74,13 @@ function install_gitlab_gem() {
 
 function install_tff_gem() {
   whoami
+  echo "======================"
   gem env
+  echo "======================"
   ls -al /usr/local
+  echo "======================"
+  mount
+  echo "======================"
   gem install test_file_finder --version 0.1.1
 }
 
