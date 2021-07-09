@@ -269,9 +269,9 @@ Other projects can be added and removed by maintainers with access to both proje
 
 This setting is enabled by default for all new projects, and disabled by default in projects
 created before GitLab 14.1. It is strongly recommended that project maintainers enable this
-feature at all times, and configure the allowlist for cross-project access if needed.
+setting at all times, and configure the allowlist for cross-project access if needed.
 
-For example, when the feature is enabled, jobs in a pipeline in project `A` have
+For example, when the setting is enabled, jobs in a pipeline in project `A` have
 a `CI_JOB_TOKEN` scope limited to project `A`. If the job needs to use the token
 to make an API request to project `B`, then `B` must be added to the allowlist for `A`.
 
