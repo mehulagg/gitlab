@@ -3,6 +3,8 @@ import { s__, __ } from '~/locale';
 export const EDITOR_MODE_RULE = 'rule';
 export const EDITOR_MODE_YAML = 'yaml';
 
+export const DEFAULT_ASSIGNED_POLICY_PROJECT = { path: '', branch: '' };
+
 export const PARSING_ERROR_MESSAGE = s__(
   'NetworkPolicies|Rule mode is unavailable for this policy. In some cases, we cannot parse the YAML file back into the rules editor.',
 );

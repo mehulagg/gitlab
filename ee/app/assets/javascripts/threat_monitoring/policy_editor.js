@@ -1,18 +1,21 @@
 import Vue from 'vue';
 import VueApollo from 'vue-apollo';
-import createDefaultClient from '~/lib/graphql';
+import { parseBoolean } from '~/lib/utils/common_utils';
 import PolicyEditorApp from './components/policy_editor/policy_editor.vue';
 import createStore from './store';
+import { gqClient } from './utils';
 
 Vue.use(VueApollo);
 
 const apolloProvider = new VueApollo({
-  defaultClient: createDefaultClient(),
+  defaultClient: gqClient,
 });
 
 export default () => {
   const el = document.querySelector('#js-policy-builder-app');
   const {
+    assignedPolicyProject,
+    disableScanExecutionUpdate,
     environmentsEndpoint,
     configureAgentHelpPath,
     createAgentHelpPath,
@@ -36,7 +39,15 @@ export default () => {
     store.dispatch('threatMonitoring/setCurrentEnvironmentId', parseInt(environmentId, 10));
   }
 
-  const props = policy ? { existingPolicy: JSON.parse(policy) } : {};
+  const props = {};
+
+  if (assignedPolicyProject) {
+    props.assignedPolicyProject = JSON.parse(assignedPolicyProject) || undefined;
+  }
+
+  if (policy) {
+    props.existingPolicy = JSON.parse(policy);
+  }
 
   return new Vue({
     el,
@@ -44,6 +55,7 @@ export default () => {
     provide: {
       configureAgentHelpPath,
       createAgentHelpPath,
+      disableScanExecutionUpdate: parseBoolean(disableScanExecutionUpdate),
       projectId,
       projectPath,
       threatMonitoringPath,
