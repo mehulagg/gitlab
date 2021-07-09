@@ -39,10 +39,10 @@ The newly created epic opens.
 
 If you select **Inherited**:
 
-- For the **start date**: GitLab scans all child epics and issues assigned to the epic,
+- For the **start date**: GitLab scans all child epics assigned to the epic,
   and sets the start date to match the earliest found start date or milestone.
 - For the **due date**: GitLab sets the due date to match the latest due date or
-  milestone found among its child epics and issues.
+  milestone found among its child epics.
 
 These are dynamic dates and recalculated if any of the following occur:
 
