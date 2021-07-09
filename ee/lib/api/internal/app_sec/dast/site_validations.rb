@@ -34,7 +34,7 @@ module API
 
                   success = case params[:event]
                             when :start
-                              validation.start
+                              validation.start || true
                             when :fail_op
                               validation.fail_op
                             when :retry
