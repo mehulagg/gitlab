@@ -2,15 +2,15 @@
 # of editing this file, please use the migrations feature of Active Record to
 # incrementally modify your database, and then regenerate this schema definition.
 #
-# This file is the source Rails uses to define your schema when running `rails
-# db:schema:load`. When creating a new database, `rails db:schema:load` tends to
+# This file is the source Rails uses to define your schema when running `bin/rails
+# db:schema:load`. When creating a new database, `bin/rails db:schema:load` tends to
 # be faster and is potentially less error prone than running all of your
 # migrations from scratch. Old migrations may fail to apply correctly if those
 # migrations use external dependencies or application code.
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2021_06_24_160455) do
+ActiveRecord::Schema.define(version: 2021_07_09_162057) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -158,6 +158,31 @@ ActiveRecord::Schema.define(version: 2021_06_24_160455) do
     t.index ["verification_retry_at"], name: "package_file_registry_failed_verification", order: "NULLS FIRST", where: "((state = 2) AND (verification_state = 3))"
     t.index ["verification_state"], name: "package_file_registry_needs_verification", where: "((state = 2) AND (verification_state = ANY (ARRAY[0, 3])))"
     t.index ["verified_at"], name: "package_file_registry_pending_verification", order: "NULLS FIRST", where: "((state = 2) AND (verification_state = 0))"
+  end
+
+  create_table "pages_deployment_registry", force: :cascade do |t|
+    t.bigint "pages_deployment_id", null: false
+    t.datetime_with_timezone "created_at", null: false
+    t.datetime_with_timezone "last_synced_at"
+    t.datetime_with_timezone "retry_at"
+    t.datetime_with_timezone "verified_at"
+    t.datetime_with_timezone "verification_started_at"
+    t.datetime_with_timezone "verification_retry_at"
+    t.integer "state", limit: 2, default: 0, null: false
+    t.integer "verification_state", limit: 2, default: 0, null: false
+    t.integer "retry_count", limit: 2, default: 0, null: false
+    t.integer "verification_retry_count", limit: 2, default: 0, null: false
+    t.boolean "checksum_mismatch", default: false, null: false
+    t.binary "verification_checksum"
+    t.binary "verification_checksum_mismatched"
+    t.string "verification_failure", limit: 255
+    t.string "last_sync_failure", limit: 255
+    t.index ["pages_deployment_id"], name: "index_pages_deployment_registry_on_pages_deployment_id", unique: true
+    t.index ["retry_at"], name: "index_pages_deployment_registry_on_retry_at"
+    t.index ["state"], name: "index_pages_deployment_registry_on_state"
+    t.index ["verification_retry_at"], name: "pages_deployment_registry_failed_verification", order: "NULLS FIRST", where: "((state = 2) AND (verification_state = 3))"
+    t.index ["verification_state"], name: "pages_deployment_registry_needs_verification", where: "((state = 2) AND (verification_state = ANY (ARRAY[0, 3])))"
+    t.index ["verified_at"], name: "pages_deployment_registry_pending_verification", order: "NULLS FIRST", where: "((state = 2) AND (verification_state = 0))"
   end
 
   create_table "pipeline_artifact_registry", force: :cascade do |t|
