@@ -249,12 +249,11 @@ example [`resources.yml` file](#example-resourcesyml-file) in the following ways
   - Specify the `grpc` scheme if both Agent and Server are installed in one cluster.
     In this case, you may specify `kas-address` value as
     `grpc://gitlab-kas.<your-namespace>:8150`) to use gRPC directly, where `gitlab-kas`
-    is the name of the service created by `gitlab-kas` chart, and `your-namespace`
-    is the namespace where the chart was installed. Encrypted gRPC is not supported yet.
-    Follow the
-    [Support TLS for gRPC communication issue](https://gitlab.com/gitlab-org/cluster-integration/gitlab-agent/-/issues/7)
-    for progress updates.
-  - When deploying KAS through the [GitLab chart](https://docs.gitlab.com/charts/), it's possible to customize the `kas-address` for `wss` and `ws` schemes to whatever you need.
+    is the name of the service created by `gitlab-kas` chart, and `<your-namespace>`
+    is the namespace where the chart was installed.
+  - Specify the `grpcs` scheme to use an encrypted gRPC connection.
+  - When deploying KAS through the [GitLab chart](https://docs.gitlab.com/charts/), it's possible to customize the
+    `kas-address` for `wss` and `ws` schemes to whatever you need.
     Check the [chart's KAS Ingress documentation](https://docs.gitlab.com/charts/charts/gitlab/kas/#ingress)
     to learn more about it.
   - In the near future, Omnibus GitLab intends to provision `gitlab-kas` under a sub-domain by default, instead of the `/-/kubernetes-agent/` path. Please follow [this issue](https://gitlab.com/gitlab-org/omnibus-gitlab/-/issues/5784) for details.
