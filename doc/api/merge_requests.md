@@ -1071,7 +1071,7 @@ Parameters:
 Creates a new merge request.
 
 ```plaintext
-POST /projects/:id/merge_requests
+POST /pro j ects/:id/merge_requests
 ```
 
 | Attribute                  | Type    | Required | Description                                                                     |
