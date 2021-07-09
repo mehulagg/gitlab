@@ -9,6 +9,7 @@ class LibData
   :lang,
   :latest_release_on,
   :rel_freq_last_4quater,
+  :file,
   :score
   )
 

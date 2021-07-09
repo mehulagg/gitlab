@@ -7,20 +7,16 @@ require "csv"
 require "date"
 require "optparse"
 require "json"
-require 'securerandom'
-
+require "securerandom"
 
 gem_hash = {}
 
 def write_csv(csv_data)
-  puts "[*]  Writing csv report file"
   CSV.open("dep_scores.csv", "a+") do |csv|
     # p "Wriritng csv"
     # p csv_data
     csv << csv_data
   end
-  puts "[*]  Finished writing csv report file"
-
 end
 
 def dreport_csvprep()
@@ -40,44 +36,44 @@ end
 
 def dreport_summary()
   report = {
- version:"14.0.0",
- vulnerabilities: []
+    version: "14.0.0",
+    vulnerabilities: [],
   }
   puts "[*] Constructing json report data"
   summary = ""
   all_gems = LibData.all_instances
   all_gems.each do |gem|
     if gem.signals[:score].to_i == 0
-       summary = summary + "Use of unmaintained third-party component. Library name:  " +gem.name \
-        + " version: "+ gem.signals[:version] \
+      summary = summary + "Use of unmaintained third-party component. Library name:  " + gem.name \
+        + " version: " + gem.signals[:version] \
         + " looks not well maintaned" \
-        + ". Evidance metadata: Total download:" + (gem.signals[:tot_downloads]|| "").to_s \
-        + ". Number of reverse dependency:"+  (gem.signals[:reverse_dep_count]|| "").to_s \
-        + ". Latest version age:"+ (gem.signals[:latest_vesion_age] || "").to_s \
-        + ". Latest release on:"+ (gem.signals[:latest_release_on] || "") \
-        + ". Number of releases last year:"+ (gem.signals[:rel_freq_last_4quater]|| "").to_s \
-        + ". Score: "+gem.signals[:score].to_s
+        + ". Evidance metadata: Total download:" + (gem.signals[:tot_downloads] || "").to_s \
+        + ". Number of reverse dependency:" + (gem.signals[:reverse_dep_count] || "").to_s \
+        + ". Latest version age:" + (gem.signals[:latest_vesion_age] || "").to_s \
+        + ". Latest release on:" + (gem.signals[:latest_release_on] || "") \
+        + ". Number of releases last year:" + (gem.signals[:rel_freq_last_4quater] || "").to_s \
+        + ". Score: " + gem.signals[:score].to_s
 
-        # puts summary
+      # puts summary
 
-        vul_id = SecureRandom.uuid
-        vul = {
-          id: vul_id,
-          category: "dependency_scanning",
-          name: "Use of Unmaintained Third Party Component " + gem.name + "-"++ gem.signals[:version],
-          message: "Use of Unmaintained Third Party Component " + gem.name + "-"+ gem.signals[:version],
-          description: summary,
-          cve: vul_id,
-          severity: "Info",
-          solution: "Find an alternate third party library.",
-          scanner:{id: "depscore", name: "depscore"},
-          location: {file:"Gemfile",dependency:{package:{name:gem.name},version:gem.signals[:version]}},
-          identifiers: [{type:"cwe",name:"CWE-1104",value: "Use of Unmaintained Third Party Components",url: "https://cwe.mitre.org/data/definitions/1104.html" }],
-          links: [{url: "https://cwe.mitre.org/data/definitions/1104.html"}]
-        }
-        # puts vul.to_json
-        report[:vulnerabilities].append(vul)
-        summary = ""
+      vul_id = SecureRandom.uuid
+      vul = {
+        id: vul_id,
+        category: "dependency_scanning",
+        name: "Use of unmaintained third party component " + gem.name,
+        message: "Use of unmaintained third party component " + gem.name,
+        description: summary,
+        cve: vul_id,
+        severity: "Info",
+        solution: "Find an alternate third party library.",
+        scanner: { id: "depscore", name: "depscore" },
+        location: { file: gem.signals[:file], dependency: { package: { name: gem.name }, version: gem.signals[:version] } },
+        identifiers: [{ type: "cwe", name: "CWE-1104", value: "Use of Unmaintained Third Party Components", url: "https://cwe.mitre.org/data/definitions/1104.html" }],
+        links: [{ url: "https://cwe.mitre.org/data/definitions/1104.html" }],
+      }
+      # puts vul.to_json
+      report[:vulnerabilities].append(vul)
+      summary = ""
     end #if score = 0
   end
   # summary_json = JSON(vul)
@@ -88,17 +84,17 @@ def dreport_summary()
   puts "[*] Finished writing report file"
 end
 
-def dreport_readgems(dependencies)
-  puts "[*] Reading all gems"
+def dreport_readgems(dependencies, file_path)
+  puts "[*] Extracting gem details from #{file_path} "
   # puts dependencies
   count = 0
   dependencies.each do |lib|
     count += 1
     name = lib["package"]["name"]
     version = lib["version"]
-    LibData.new(name, { version: version, lang: "ruby" })
+    LibData.new(name, { version: version, lang: "ruby", file: file_path })
   end
-  puts "[*] Total gems = #{count}"
+  puts "[*] Total gems in file #{file_path}: #{count}"
   # utils = Utils.new
   # utils.debug_libdata
 end
@@ -118,15 +114,19 @@ def dreport_read(dreport_path)
   #  # Get all dependencies
 
   #  # Get gems
+  need_report = false
   data_hash["dependency_files"].each do |dep_file|
-    puts dep_file["path"]
-    if dep_file["path"] == "Gemfile.lock"
-      dreport_readgems(dep_file["dependencies"])
-      
+    puts "[*] Dependency list from #{dep_file["path"]} found"
+    if dep_file["path"].include? "Gemfile.lock"
+      need_report = true
+      puts "[*] Checking score for dependencies in #{dep_file["path"]}"
+      dreport_readgems(dep_file["dependencies"], dep_file["path"])
       rubytoolbox = RubyToolbox.new
       rubytoolbox.fetch_metadata
       # utils = Utils.new
       # utils.debug_libdata
+    end
+    if need_report
       dreport_csvprep()
       dreport_summary()
     end
