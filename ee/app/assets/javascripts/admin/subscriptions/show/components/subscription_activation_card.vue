@@ -57,8 +57,8 @@ export default {
             data-testid="activate-subscription-link"
             :href="$options.links.activateSubscriptionUrl"
             target="_blank"
-            >{{ content }}</gl-link
-          >
+            >{{ content }}
+          </gl-link>
         </template>
       </gl-sprintf>
     </p>
@@ -67,7 +67,11 @@ export default {
       @subscription-activation-failure="handleFormActivationFailure"
     />
     <template #footer>
-      <gl-link v-if="licenseUploadPath" data-testid="upload-license-link" data-qa-selector="license_upload_link" :href="licenseUploadPath"
+      <gl-link
+        v-if="licenseUploadPath"
+        data-testid="upload-license-link"
+        data-qa-selector="license_upload_link"
+        :href="licenseUploadPath"
         >{{ $options.i18n.uploadLicenseFile }}
       </gl-link>
     </template>
