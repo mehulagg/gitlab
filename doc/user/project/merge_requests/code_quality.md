@@ -361,7 +361,7 @@ Example:
 NOTE:
 Although the Code Climate spec supports more properties, those are ignored by
 GitLab.
-The GitLab parser does not allow a BOM at the beginning of the file.
+The GitLab parser does not allow a [BOM](https://en.wikipedia.org/wiki/Byte_order_mark) at the beginning of the file.
 
 ## Code Quality reports **(PREMIUM)**
 
