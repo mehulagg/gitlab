@@ -31,7 +31,11 @@ module QA
         end.project.visit!
       end
 
-      it 'tests reindexing after push', retry: 3, testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/679' do
+      after do
+        Page::Main::Menu.perform(&:sign_out)
+      end
+
+      it 'tests reindexing after push', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/679' do
         expect { Runtime::Search.find_code(project_file_name, project_file_content) }.not_to raise_error
 
         QA::Page::Main::Menu.perform do |menu|
@@ -45,7 +49,7 @@ module QA
         end
       end
 
-      it 'tests reindexing after webIDE', retry: 3, testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/680' do
+      it 'tests reindexing after webIDE', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/680' do
         template = {
             file_name: 'LICENSE',
             name: 'Mozilla Public License 2.0',
@@ -68,7 +72,7 @@ module QA
           menu.search_for content[0..33]
         end
 
-        QA::Support::Retrier.retry_on_exception(max_attempts: 10, sleep_interval: 12) do
+        QA::Support::Retrier.retry_on_exception(max_attempts: 10, sleep_interval: 18) do
           Page::Search::Results.perform do |search|
             search.switch_to_code
             aggregate_failures "testing expectations" do

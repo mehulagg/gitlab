@@ -85,7 +85,7 @@ module QA
       private
 
       def find_target_in_scope(scope, search_term)
-        QA::Support::Retrier.retry_until(max_attempts: 10, sleep_interval: 10, raise_on_failure: true, retry_on_exception: true) do
+        QA::Support::Retrier.retry_until(max_attempts: 10, sleep_interval: 18, raise_on_failure: true, retry_on_exception: true) do
           result = search(scope, search_term)
           result && result.any? { |record| yield record }
         end
