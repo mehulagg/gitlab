@@ -50,6 +50,10 @@ class SoftwareLicensePolicy < ApplicationRecord
   delegate :name, :spdx_identifier, to: :software_license
 
   def approval_status
+    classification
+  end
+
+  def legacy_approval_status
     LEGACY_CLASSIFICATION_STATUS.key(classification) || classification
   end
 
