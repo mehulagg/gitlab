@@ -25,6 +25,7 @@ module EE
         to: :merge_request_diff_detail, allow_nil: true
 
       scope :has_external_diffs, -> { with_files.where(stored_externally: true) }
+      scope :with_files_stored_locally, -> { where(external_diff_store: ::ObjectStorage::Store::LOCAL) }
       scope :project_id_in, ->(ids) { where(merge_request_id: ::MergeRequest.where(target_project_id: ids)) }
       scope :available_replicables, -> { has_external_diffs }
       scope :with_verification_state, ->(state) { joins(:merge_request_diff_detail).where(merge_request_diff_details: { verification_state: verification_state_value(state) }) }
