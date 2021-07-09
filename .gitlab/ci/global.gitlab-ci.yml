@@ -110,6 +110,18 @@
   # for keeping only the N latest cache files, so we take advantage of it with `pull-push`.
   policy: push
 
+.test-metadata-cache: &test-metadata-cache
+  key: "test-metadata-v1"
+  paths:
+    - crystalball/
+    - knapsack/
+    - rspec_flaky/
+  policy: pull
+
+.test-metadata-cache-push: &test-metadata-cache-push
+  <<: *test-metadata-cache
+  policy: push
+
 .qa-ruby-gems-cache: &qa-ruby-gems-cache
   key: "qa-ruby-gems-v1"
   paths:
@@ -142,6 +154,7 @@
   cache:
     - *ruby-gems-cache
     - *gitaly-ruby-gems-cache
+    - *test-metadata-cache
 
 .static-analysis-cache:
   cache:
@@ -153,6 +166,10 @@
   cache:
     - *ruby-gems-cache  # We don't push this cache as it's already rebuilt by `update-setup-test-env-cache`
     - *rubocop-cache-push
+
+.test-metadata-cache-push:
+  cache:
+    - *test-metadata-cache-push
 
 .coverage-cache:
   cache:

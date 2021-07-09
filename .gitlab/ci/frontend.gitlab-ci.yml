@@ -100,7 +100,7 @@ update-storybook-yarn-cache:
     - .rails-cache
     - .use-pg12
   stage: fixtures
-  needs: ["setup-test-env", "retrieve-tests-metadata", "compile-test-assets"]
+  needs: ["setup-test-env", "compile-test-assets"]
   variables:
     WEBPACK_VENDOR_DLL: "true"
   script:

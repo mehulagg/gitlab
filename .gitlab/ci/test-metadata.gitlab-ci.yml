@@ -1,32 +1,10 @@
-.tests-metadata-state:
-  image: ${GITLAB_DEPENDENCY_PROXY}ruby:2.7
-  before_script:
-    - source scripts/utils.sh
-  artifacts:
-    expire_in: 31d
-    paths:
-      - knapsack/
-      - rspec_flaky/
-      - rspec_profiling/
-      - crystalball/packed-mapping.json.gz
-
-retrieve-tests-metadata:
-  extends:
-    - .tests-metadata-state
-    - .test-metadata:rules:retrieve-tests-metadata
-  stage: prepare
-  script:
-    - install_gitlab_gem
-    - source ./scripts/rspec_helpers.sh
-    - retrieve_tests_metadata
-
 update-tests-metadata:
   extends:
-    - .tests-metadata-state
     - .test-metadata:rules:update-tests-metadata
+    - .test-metadata-cache-push
   stage: post-test
+  image: ${GITLAB_DEPENDENCY_PROXY}ruby:2.7
   dependencies:
-    - setup-test-env
     - rspec migration pg12
     - rspec frontend_fixture
     - rspec-ee frontend_fixture
@@ -40,8 +18,17 @@ update-tests-metadata:
     - rspec-ee unit pg12 geo
     - rspec-ee integration pg12 geo
     - rspec-ee system pg12 geo
-  script:
+  before_script:
+    - source scripts/utils.sh
     - run_timed_command "retry gem install fog-aws mime-types activesupport rspec_profiling postgres-copy --no-document"
     - source ./scripts/rspec_helpers.sh
+  script:
     - update_tests_metadata
     - update_tests_mapping
+  artifacts:
+    expire_in: 31d
+    paths:
+      - knapsack/
+      - rspec_flaky/
+      - rspec_profiling/
+      - crystalball/packed-mapping.json.gz

@@ -1,26 +1,5 @@
 #!/usr/bin/env bash
 
-function retrieve_tests_metadata() {
-  mkdir -p knapsack/ rspec_flaky/ rspec_profiling/
-
-  # ${CI_DEFAULT_BRANCH} might not be master in other forks but we want to
-  # always target the canonical project here, so the branch must be hardcoded
-  local project_path="gitlab-org/gitlab"
-  local artifact_branch="master"
-  local test_metadata_job_id
-
-  # Ruby
-  test_metadata_job_id=$(scripts/api/get_job_id.rb --project "${project_path}" -q "status=success" -q "ref=${artifact_branch}" -q "username=gitlab-bot" -Q "scope=success" --job-name "update-tests-metadata")
-
-  if [[ ! -f "${KNAPSACK_RSPEC_SUITE_REPORT_PATH}" ]]; then
-    scripts/api/download_job_artifact.rb --project "${project_path}" --job-id "${test_metadata_job_id}" --artifact-path "${KNAPSACK_RSPEC_SUITE_REPORT_PATH}" || echo "{}" > "${KNAPSACK_RSPEC_SUITE_REPORT_PATH}"
-  fi
-
-  if [[ ! -f "${FLAKY_RSPEC_SUITE_REPORT_PATH}" ]]; then
-    scripts/api/download_job_artifact.rb --project "${project_path}" --job-id "${test_metadata_job_id}" --artifact-path "${FLAKY_RSPEC_SUITE_REPORT_PATH}" || echo "{}" > "${FLAKY_RSPEC_SUITE_REPORT_PATH}"
-  fi
-}
-
 function update_tests_metadata() {
   echo "{}" > "${KNAPSACK_RSPEC_SUITE_REPORT_PATH}"
 
@@ -37,24 +16,6 @@ function update_tests_metadata() {
   else
     echo "Not inserting profiling data as the pipeline is not a scheduled one."
   fi
-}
-
-function retrieve_tests_mapping() {
-  mkdir -p crystalball/
-
-  # ${CI_DEFAULT_BRANCH} might not be master in other forks but we want to
-  # always target the canonical project here, so the branch must be hardcoded
-  local project_path="gitlab-org/gitlab"
-  local artifact_branch="master"
-  local test_metadata_with_mapping_job_id
-
-  test_metadata_with_mapping_job_id=$(scripts/api/get_job_id.rb --project "${project_path}" -q "status=success" -q "ref=${artifact_branch}" -q "username=gitlab-bot" -Q "scope=success" --job-name "update-tests-metadata" --artifact-path "${RSPEC_PACKED_TESTS_MAPPING_PATH}.gz")
-
-  if [[ ! -f "${RSPEC_PACKED_TESTS_MAPPING_PATH}" ]]; then
-   (scripts/api/download_job_artifact.rb --project "${project_path}" --job-id "${test_metadata_with_mapping_job_id}" --artifact-path "${RSPEC_PACKED_TESTS_MAPPING_PATH}.gz" && gzip -d "${RSPEC_PACKED_TESTS_MAPPING_PATH}.gz") || echo "{}" > "${RSPEC_PACKED_TESTS_MAPPING_PATH}"
-  fi
-
-  scripts/unpack-test-mapping "${RSPEC_PACKED_TESTS_MAPPING_PATH}" "${RSPEC_TESTS_MAPPING_PATH}"
 }
 
 function update_tests_mapping() {

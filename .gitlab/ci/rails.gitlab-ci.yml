@@ -31,7 +31,7 @@
     RUBY_GC_MALLOC_LIMIT_MAX: 134217728
     CRYSTALBALL: "true"
     RECORD_DEPRECATIONS: "true"
-  needs: ["setup-test-env", "retrieve-tests-metadata", "compile-test-assets", "detect-tests"]
+  needs: ["setup-test-env", "compile-test-assets", "detect-tests"]
   script:
     - !reference [.base-script, script]
     - rspec_paralellized_job "--tag ~quarantine --tag ~geo --tag ~level:migration"
@@ -72,7 +72,7 @@
     - .rspec-base
     - .as-if-foss
     - .use-pg12
-  needs: ["setup-test-env", "retrieve-tests-metadata", "compile-test-assets as-if-foss", "detect-tests"]
+  needs: ["setup-test-env", "compile-test-assets as-if-foss", "detect-tests"]
 
 .rspec-base-pg13:
   extends:
@@ -837,7 +837,7 @@ rspec fail-fast:
     - .rspec-ee-base-pg12  # This job also runs EE spec which needs elasticsearch
     - .rails:rules:rspec fail-fast
   stage: test
-  needs: ["setup-test-env", "retrieve-tests-metadata", "compile-test-assets", "detect-tests"]
+  needs: ["setup-test-env", "compile-test-assets", "detect-tests"]
   script:
     - !reference [.base-script, script]
     - rspec_fail_fast tmp/matching_tests.txt "--tag ~quarantine"
@@ -850,7 +850,7 @@ rspec foss-impact:
   extends:
     - .rspec-base-pg12-as-if-foss
     - .rails:rules:rspec-foss-impact
-  needs: ["setup-test-env", "retrieve-tests-metadata", "compile-test-assets as-if-foss", "detect-tests as-if-foss"]
+  needs: ["setup-test-env", "compile-test-assets as-if-foss", "detect-tests as-if-foss"]
   script:
     - !reference [.base-script, script]
     - rspec_matched_foss_tests tmp/matching_foss_tests.txt "--tag ~quarantine"
