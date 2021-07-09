@@ -1,6 +1,11 @@
 # frozen_string_literal: true
 # rubocop:disable Style/SignalException
 
+DATA_WAREHOUSE_LABELS = [
+  "Data Warehouse::Impact Check",
+  "Data Warehouse::Impacted",
+  "Data Warehouse::Not Impacted"
+].freeze
 CHANGED_SCHEMA_MESSAGE = <<~MSG
 To notify the Data Team about changes to the db/structure.sql file, add label `tbd`
 
