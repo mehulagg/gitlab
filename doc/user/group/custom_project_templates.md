@@ -12,7 +12,7 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 [Group owners](../permissions.md#group-members-permissions) can set a subgroup to
 be the source of project templates that are selectable when a new project is created
 in the group. These templates can be selected when you go to **New project > Create from template**
-in the group and select the **group** tab.
+in the group and select the **Group** tab.
 
 Every project in the subgroup, but not nested subgroups, can be selected by members
 of the group when a new project is created.
