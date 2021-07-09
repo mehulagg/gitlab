@@ -249,14 +249,8 @@ tries to steal tokens from other jobs.
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/328553) in GitLab 14.1.
 
-- [Deployed behind a feature flag](../user/feature_flags.md), disabled by default.
-- Disabled on GitLab.com.
-- Not recommended for production use.
-- To use in GitLab self-managed instances, ask a GitLab administrator to [enable it](#enable-or-disable-ci-job-token-scope). **(FREE SELF)**
-
-This in-development feature might not be available for your use. There can be
-[risks when enabling features still in development](../user/feature_flags.md#risks-when-enabling-features-still-in-development).
-Refer to this feature's version history for more details.
+- [Deployed behind a feature flag](../user/feature_flags.md), enabled by default.
+- Enabled on GitLab.com.
 
 CI job token can access only projects that are defined in its scope.
 You can configure the scope via project settings.
@@ -290,21 +284,19 @@ for more strategic control of the access permissions.
 
 #### Enable or disable CI Job Token Scope **(FREE SELF)**
 
-This is under development and not ready for production use. It is
-deployed behind a feature flag that is **disabled by default**.
 [GitLab administrators with access to the GitLab Rails console](../administration/feature_flags.md)
-can enable it.
-
-To enable it:
-
-```ruby
-Feature.enable(:ci_scoped_job_token)
-```
+can disable the feature.
 
 To disable it:
 
 ```ruby
 Feature.disable(:ci_scoped_job_token)
+```
+
+To enable it:
+
+```ruby
+Feature.enable(:ci_scoped_job_token)
 ```
 
 ### Impersonation tokens
