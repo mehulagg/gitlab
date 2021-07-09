@@ -1,14 +1,12 @@
 # frozen_string_literal: true
 
-require 'github_api'
+require 'octokit'
 
 module QA
   module Resource
     class ProjectImportedFromGithub < Resource::Project
       attribute :github_repo_id do
-        github_repository_path.split('/').yield_self do |path|
-          github_client.repos.get(user: path[0], repo: path[1]).id
-        end
+        github_client.repository(github_repository_path).id
       end
 
       def fabricate!
@@ -56,9 +54,9 @@ module QA
 
       # Github client
       #
-      # @return [Github::Client]
+      # @return [Octokit::Client]
       def github_client
-        @github_client ||= Github.new(oauth_token: github_personal_access_token)
+        @github_client ||= Octokit::Client.new(access_token: github_personal_access_token)
       end
     end
   end
