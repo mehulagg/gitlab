@@ -199,24 +199,20 @@ module Gitlab
 
         return unless valid_scoped_token?(token, all_available_scopes)
 
-        if can_user_login_with_non_expired_password?(token.user) || bot_in_resource(token.user, project)
+        # rubocop: disable CodeReuse/ActiveRecord
+        if project && token.user.project_bot?
+          if project.group
+            return unless project.bots.include?(token.user) || GroupMembersFinder.new(project.group).execute(include_relations: [:inherited, :direct]).pluck(:user_id).include?(token.user.id)
+          else
+            return unless project.bots.include?(token.user)
+          end
+        end
+        # rubocop: enable CodeReuse/ActiveRecord
+
+        if can_user_login_with_non_expired_password?(token.user) || token.user.project_bot?
           Gitlab::Auth::Result.new(token.user, nil, :personal_access_token, abilities_for_scopes(token.scopes))
         end
       end
-
-      # rubocop: disable CodeReuse/ActiveRecord
-      def bot_in_resource(user, project)
-        return false unless project
-
-        return false unless user.project_bot?
-
-        return true if project.bots.include?(user)
-
-        return true if GroupMembersFinder.new(project.group).execute(include_relations: [:inherited, :direct]).pluck(:user_id).include?(user.id)
-
-        false
-      end
-      # rubocop: enable CodeReuse/ActiveRecord
 
       def valid_oauth_token?(token)
         token && token.accessible? && valid_scoped_token?(token, [:api])
