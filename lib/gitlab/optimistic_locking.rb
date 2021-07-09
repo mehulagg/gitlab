@@ -11,7 +11,7 @@ module Gitlab
       retry_attempts = 0
 
       begin
-        ActiveRecord::Base.transaction do
+        subject.class.transaction do
           yield(subject)
         end
       rescue ActiveRecord::StaleObjectError

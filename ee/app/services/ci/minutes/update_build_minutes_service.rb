@@ -36,7 +36,7 @@ module Ci
         namespace_usage = ::Ci::Minutes::NamespaceMonthlyUsage.find_or_create_current(namespace)
         project_usage = ::Ci::Minutes::ProjectMonthlyUsage.find_or_create_current(project)
 
-        ActiveRecord::Base.transaction do
+        ApplicationRecord.transaction do
           ::Ci::Minutes::NamespaceMonthlyUsage.increase_usage(namespace_usage, consumption)
           ::Ci::Minutes::ProjectMonthlyUsage.increase_usage(project_usage, consumption)
         end
