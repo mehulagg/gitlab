@@ -425,7 +425,8 @@ CLI (`dotnet`):
 
 ## Troubleshooting
 
-NuGet will cache files related to a package to help improve performance. If you are running into issues, consider clearing the cache by running:
+To improve performance, NuGet caches files related to a package. If you encounter issues, clear the
+cache with this command:
 
 ```shell
 nuget locals all -clear

@@ -455,7 +455,9 @@ Due to a bug in npm 6.9.0, deleting distribution tags fails. Make sure your npm 
 When troubleshooting npm issues, first run the same command with the `--verbose` flag to confirm
 what registry you are hitting.
 
-npm will cache files related to a package to help improve performance. npm will not remove data by itself: the cache will grow as new packages are installed. If you are running into issues, consider clearing the cache by running:
+To improve performance, npm caches files related to a package. Note that npm doesn't remove data by
+itself. The cache grows as new packages are installed. If you encounter issues, clear the cache with
+this command:
 
 ```shell
 npm cache clean --force
