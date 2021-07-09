@@ -199,12 +199,24 @@ module Gitlab
 
         return unless valid_scoped_token?(token, all_available_scopes)
 
-        return if token.user.project_bot? && ((project && !project.bots.include?(token.user)) || (project.group && !project.group.group_member(token.user)))
-
-        if can_user_login_with_non_expired_password?(token.user) || token.user.project_bot?
+        if can_user_login_with_non_expired_password?(token.user) || bot_in_resource(token.user, project)
           Gitlab::Auth::Result.new(token.user, nil, :personal_access_token, abilities_for_scopes(token.scopes))
         end
       end
+
+      # rubocop: disable CodeReuse/ActiveRecord
+      def bot_in_resource(user, project)
+        return false unless project
+
+        return false unless user.project_bot?
+
+        return true if project.bots.include?(user)
+
+        return true if GroupMembersFinder.new(project.group).execute(include_relations: [:inherited, :direct]).pluck(:user_id).include?(user.id)
+
+        false
+      end
+      # rubocop: enable CodeReuse/ActiveRecord
 
       def valid_oauth_token?(token)
         token && token.accessible? && valid_scoped_token?(token, [:api])
