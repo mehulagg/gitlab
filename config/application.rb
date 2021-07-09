@@ -168,6 +168,10 @@ module Gitlab
     # This is necessary if your schema can't be completely dumped by the schema dumper,
     # like if you have constraints or database-specific column types
     config.active_record.schema_format = :sql
+    # Dump everything even if schema_search_path is defined. There are distinct
+    # disadvantages to pg_dump's --schema, such as extensions not being dumped.
+    # See also https://www.postgresql.org/docs/12/app-pgdump.html
+    config.active_record.dump_schemas = :all
 
     # Use new connection handling so that we can use Rails 6.1+ multiple
     # database support.
