@@ -44,8 +44,8 @@ persist, even when you:
 
 To add a commit diff comment:
 
-1. On the merge request, select the **Commits** tab.
-1. To select a specific commit, click the commit message. To view the latest commit, select the **Changes** tab.
+1. To select a specific commit, on the merge request, select the **Commits** tab, select the commit
+   message. To view the latest commit, select the **Changes** tab.
 1. By the line you want to comment on, hover over the line number and select **{comment}**.
    You can select multiple lines by dragging the **{comment}** icon.
 1. Type your comment and select **Start a review** or **Add comment now**.
