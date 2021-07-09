@@ -7,7 +7,7 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 
 # Implementation patterns **(FREE SELF)**
 
-> Should this be the new landing page for https://docs.gitlab.com/ee/install/#install-gitlab-on-cloud-providers
+[comment]: # (Should this be the new landing page for https://docs.gitlab.com/ee/install/#install-gitlab-on-cloud-providers)
 
 GitLab Reference Architectures give qualified guidance on the recommended ways GitLab can be configured to meet the performance requirements of various workloads. Reference Architectures are purpose-designed to be as non-implementation specific as possible to apply to the most different types of implementations possible. This generally means they have a highly granular "machine" to "server role" specification and focus on system elements that impact performance. Reference Architectures can be adapted to the broadest number of supported implementations.
 
@@ -34,7 +34,7 @@ Testing-backed architectural qualification is a fundamental concept behind imple
 - Implementation patterns maintain Reference Architecture compliance and provide [GitLab Performance Tool](https://gitlab.com/gitlab-org/quality/performance) (gpt) reports to demonstrate adherance to them.
 - Implementation patterns may be qualified by and/or contributed to by the technology vendor - for instance, an implementation pattern for AWS may be officially reviewed by AWS.
 - Implementation patterns may specify and test Cloud Platform PaaS services for suitability for GitLab - this testing can be coordinated and help qualify these technologies for Reference Architectures. For instance qualifying compatibility with and availability of runtime versions of top level PaaS such as those for PostgreSQL and Redis.
-- - Implementation patterns can provided qualified testing for platform limitations, for example, ensuring Gitaly Cluster can work correctly on specific Cloud Platform availability zone latency and throughput characteristics or qualifying what levels of available platform partner local disk performance is workable for Gitaly server to operate with integrity.
+- Implementation patterns can provided qualified testing for platform limitations, for example, ensuring Gitaly Cluster can work correctly on specific Cloud Platform availability zone latency and throughput characteristics or qualifying what levels of available platform partner local disk performance is workable for Gitaly server to operate with integrity.
 
 ## Platform Partner Specificity
 
@@ -68,6 +68,7 @@ Implementation patterns are one step closer to specifics that can be used as a s
 
 - Implementation patterns enable builders to generate a list of vendor specific resources required to implement GitLab for a given Reference Architecture.
 - Implementation patterns enable builders to use manual instructions or to create automation to build out the reference implementation.
+
 ### Complimentary Implementation Patterns
 
 Implementation patterns may also provide specialized implementations beyond the scope of reference architecture compliance, especially where the cost of enablement can be more appropriately managed.
@@ -79,7 +80,7 @@ For example:
 
 ### Example Platform Implementation Pattern Subsections
 
-- [Amazon Web Service (AWS)](/aws /index.md) - MVC of this type of documentation.
+- [Amazon Web Service (AWS)](aws/index.md) - MVC of this type of documentation.
 - Google Cloud (GCP) (Coming Soon)
 - IBM (Coming Soon)
 

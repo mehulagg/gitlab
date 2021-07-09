@@ -30,7 +30,7 @@ Some services, such as log aggregation are not specified by GitLab - but where p
 | **Outbound Email Services**                                  | AWS Simple Email Service (SES) | Yes                                                          |
 | **Certificate Authority and Management**                     | AWS Certificate Manager (ACM)  | Yes                                                          |
 | **DNS**                                                      | AWS Route53 (tested)           | Yes                                                          |
-| **GItLab and Infrastructure Log Aggregation**                | AWS CloudWatch Logs            | Yes (ContainerInsights Agent for EKS)                        |
+| **GitLab and Infrastructure Log Aggregation**                | AWS CloudWatch Logs            | Yes (ContainerInsights Agent for EKS)                        |
 | **Infrastructure Performance Metrics**                       | AWS CloudWatch Metrics         | Yes                                                          |
 |                                                              |                                |                                                              |
 | <u>Additional Tested Services and Configurations</u>         |                                |                                                              |
@@ -220,6 +220,7 @@ web_user                                                 | 20/s  | 19.85/s (>9.6
 <summary>Click to Expand and See **AutoScaling** 10K Cloud Native Hybrid on EKS Test Results </summary>
 
 This test:
+
 - Started with 5 webservice pods (out of 20 for 10k test) and 5 hosts instead of 10. 
 - It has scaled both pods (to 20) and hosts (to 7) smoothly over 11 minutes.
 
