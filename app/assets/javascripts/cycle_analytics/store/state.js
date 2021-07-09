@@ -19,4 +19,6 @@ export default () => ({
   isLoadingStage: false,
   isEmptyStage: false,
   permissions: {},
+  parentId: null,
+  parentPath: null,
 });

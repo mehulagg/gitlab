@@ -3,6 +3,7 @@ import {
   getProjectValueStreams,
   getProjectValueStreamStageData,
   getProjectValueStreamMetrics,
+  getValueStreamStageMedian,
 } from '~/api/analytics_api';
 import createFlash from '~/flash';
 import { __ } from '~/locale';
@@ -40,7 +41,7 @@ export const fetchValueStreams = ({ commit, dispatch, state }) => {
 
   return getProjectValueStreams(fullPath)
     .then(({ data }) => dispatch('receiveValueStreamsSuccess', data))
-    .then(() => dispatch('setSelectedStage'))
+    .then(() => Promise.all([dispatch('setSelectedStage'), dispatch('fetchStageMedians')]))
     .catch(({ response: { status } }) => {
       commit(types.RECEIVE_VALUE_STREAMS_ERROR, status);
     });
@@ -76,6 +77,31 @@ export const fetchStageData = ({ state: { requestPath, selectedStage, startDate 
       }
     })
     .catch(() => commit(types.RECEIVE_STAGE_DATA_ERROR));
+};
+
+const getStageMedians = ({ stageId, vsaParams, queryParams = {} }) => {
+  console.log('getStageMedians', stageId, vsaParams, queryParams);
+  return getValueStreamStageMedian({ ...vsaParams, stageId }, queryParams);
+};
+
+export const fetchStageMedians = ({
+  state: { stages },
+  getters: { vsaRequestParams: vsaParams },
+  commit,
+}) => {
+  commit(types.REQUEST_STAGE_MEDIANS);
+  console.log('fetchStageMedians::stages', stages);
+  console.log('fetchStageMedians::vsaRequestParams', vsaParams);
+  return Promise.all(
+    stages.map(({ id: stageId }) =>
+      getStageMedians({
+        vsaParams,
+        stageId,
+      }),
+    ),
+  )
+    .then((data) => commit(types.RECEIVE_STAGE_MEDIANS_SUCCESS, data))
+    .catch((error) => commit(types.RECEIVE_STAGE_MEDIANS_ERROR, error));
 };
 
 export const setSelectedStage = ({ dispatch, commit, state: { stages } }, selectedStage = null) => {

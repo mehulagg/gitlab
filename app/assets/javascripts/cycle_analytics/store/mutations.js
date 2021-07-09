@@ -3,9 +3,11 @@ import { decorateData, decorateEvents, formatMedianValues } from '../utils';
 import * as types from './mutation_types';
 
 export default {
-  [types.INITIALIZE_VSA](state, { requestPath, fullPath }) {
+  [types.INITIALIZE_VSA](state, { requestPath, fullPath, parentId, parentPath }) {
     state.requestPath = requestPath;
     state.fullPath = fullPath;
+    state.parentId = parentId;
+    state.parentPath = parentPath;
   },
   [types.SET_LOADING](state, loadingState) {
     state.isLoading = loadingState;
@@ -48,6 +50,8 @@ export default {
     state.hasError = false;
   },
   [types.RECEIVE_CYCLE_ANALYTICS_DATA_SUCCESS](state, data) {
+    console.log('RECEIVE_CYCLE_ANALYTICS_DATA_SUCCESS::data', data);
+
     const { summary, medians } = decorateData(data);
     state.permissions = data.permissions;
     state.summary = summary;
@@ -77,5 +81,14 @@ export default {
     state.selectedStageEvents = [];
     state.hasError = true;
     state.selectedStageError = error;
+  },
+  [types.REQUEST_STAGE_MEDIANS](state) {
+    state.medians = {};
+  },
+  [types.RECEIVE_STAGE_MEDIANS_SUCCESS](state, medians) {
+    state.medians = medians;
+  },
+  [types.RECEIVE_STAGE_MEDIANS_ERROR](state, error) {
+    state.medians = {};
   },
 };

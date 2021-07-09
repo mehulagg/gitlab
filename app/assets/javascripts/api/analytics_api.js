@@ -21,6 +21,11 @@ const buildGroupValueStreamPath = ({ groupId, valueStreamId = null, stageId = nu
     .replace(':value_stream_id', valueStreamId)
     .replace(':stage_id', stageId);
 
+const buildProjectDefaultValueStreamPath = ({ groupId, stageId = null }) =>
+  buildApiUrl('/groups/:id/-/analytics/value_stream_analytics/stages/:stage_id')
+    .replace(':id', groupId)
+    .replace(':stage_id', stageId);
+
 export const getProjectValueStreams = (projectPath) => {
   const url = buildProjectValueStreamPath(projectPath);
   return axios.get(url);
@@ -44,12 +49,9 @@ export const getProjectValueStreamMetrics = (requestPath, params) =>
  * We share some endpoints across and group and project level VSA
  * When used for project level VSA, requests should include the `project_id` in the params object
  */
-export const getValueStreamStagesAndEvents = ({ groupId, valueStreamId, stageId, params = {} }) => {
-  const stageBase = buildGroupValueStreamPath({ groupId, valueStreamId, stageId });
-  return axios.get(`${stageBase}/records`, { params });
-};
-
-export const getValueStreamStageMedian = ({ groupId, valueStreamId, stageId, params = {} }) => {
-  const stageBase = buildGroupValueStreamPath({ groupId, valueStreamId, stageId });
-  return axios.get(`${stageBase}/median`, { params });
+export const getValueStreamStageMedian = ({ groupId, valueStreamId, stageId }, params = {}) => {
+  // const stageBase = buildGroupValueStreamPath({ groupId, valueStreamId, stageId });
+  // return axios.get(`${stageBase}/summary`, { params });
+  const stageBase = buildProjectDefaultValueStreamPath  ({ groupId, valueStreamId, stageId });
+  return axios.get(`${stageBase}/summary`, { params });
 };
