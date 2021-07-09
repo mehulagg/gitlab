@@ -13,14 +13,19 @@ require 'securerandom'
 gem_hash = {}
 
 def write_csv(csv_data)
+  puts "[*]  Writing csv report file"
   CSV.open("dep_scores.csv", "a+") do |csv|
     # p "Wriritng csv"
     # p csv_data
     csv << csv_data
   end
+  puts "[*]  Finished writing csv report file"
+
 end
 
 def dreport_csvprep()
+  puts "[*]  Constructing csv report data"
+
   headers = ["Name", "Type", "tot_downloads", "reverse_dep_count", "latest_vesion_age(in Months)",
              "latest_release_on", "rel_freq_last_4quater", "score"]
   write_csv(headers)
@@ -38,6 +43,7 @@ def dreport_summary()
  version:"14.0.0",
  vulnerabilities: []
   }
+  puts "[*] Constructing json report data"
   summary = ""
   all_gems = LibData.all_instances
   all_gems.each do |gem|
@@ -68,15 +74,17 @@ def dreport_summary()
           identifiers: [{type:"cwe",name:"CWE-1104",value: "Use of Unmaintained Third Party Components",url: "https://cwe.mitre.org/data/definitions/1104.html" }],
           links: [{url: "https://cwe.mitre.org/data/definitions/1104.html"}]
         }
-        puts vul.to_json
+        # puts vul.to_json
         report[:vulnerabilities].append(vul)
         summary = ""
     end #if score = 0
   end
   # summary_json = JSON(vul)
   File.open("gl-depscore-report.json", "w") do |f|
+    puts "[*] Writing report file"
     f.write(report.to_json)
   end
+  puts "[*] Finished writing report file"
 end
 
 def dreport_readgems(dependencies)
@@ -96,7 +104,7 @@ end
 
 def dreport_read(dreport_path)
   if (!File.exist?(dreport_path))
-    puts "Gemfile #{dreport_path} do not exist."
+    puts "[*] Gemfile #{dreport_path} do not exist."
     exit(0)
   end
 
@@ -113,6 +121,7 @@ def dreport_read(dreport_path)
     puts dep_file["path"]
     if dep_file["path"] == "Gemfile.lock"
       dreport_readgems(dep_file["dependencies"])
+      
       rubytoolbox = RubyToolbox.new
       rubytoolbox.fetch_metadata
       # utils = Utils.new

@@ -60,7 +60,7 @@ class RubyToolbox
   end # endof parse_api_response()
 
   def fetch_metadata
-    puts "[*] Fetching metadata from rubytoolbox"
+    puts "[*] Fetching gem metadata from rubytoolbox"
     # read libdata obj
     all_gems = LibData.all_instances
     gem_counter = 0
