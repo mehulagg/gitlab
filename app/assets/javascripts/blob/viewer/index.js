@@ -47,6 +47,9 @@ export const handleBlobRichViewer = (viewer, type) => {
 
 export default class BlobViewer {
   constructor() {
+    performanceMarkAndMeasure({
+      mark: 'start',
+    });
     const viewer = document.querySelector('.blob-viewer[data-type="rich"]');
     const type = viewer?.dataset?.richType;
     BlobViewer.initAuxiliaryViewer();
@@ -169,17 +172,21 @@ export default class BlobViewer {
     BlobViewer.loadViewer(newViewer)
       .then((viewer) => {
         $(viewer).renderGFM();
+        window.requestIdleCallback(() => {
+          this.$fileHolder.trigger('highlight:line');
+          handleLocationHash();
 
-        this.$fileHolder.trigger('highlight:line');
-        handleLocationHash();
+          this.toggleCopyButtonState();
+          viewer.setAttribute('data-loaded', 'true');
+          eventHub.$emit('showBlobInteractionZones', viewer.dataset.path);
+        });
 
-        this.toggleCopyButtonState();
         performanceMarkAndMeasure({
           mark: REPO_BLOB_LOAD_VIEWER_FINISH,
           measures: [
             {
               name: REPO_BLOB_LOAD_VIEWER,
-              start: REPO_BLOB_LOAD_VIEWER_START,
+              start: 'start',
             },
           ],
         });
@@ -203,9 +210,10 @@ export default class BlobViewer {
 
     return axios.get(url).then(({ data }) => {
       viewer.innerHTML = data.html;
-      viewer.setAttribute('data-loaded', 'true');
 
-      eventHub.$emit('showBlobInteractionZones', viewer.dataset.path);
+      window.requestIdleCallback(() => {
+        viewer.removeAttribute('data-loading');
+      });
 
       return viewer;
     });
