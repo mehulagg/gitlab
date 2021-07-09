@@ -29812,6 +29812,9 @@ msgstr ""
 msgid "Set the maximum number of pipeline minutes that a group can use on shared Runners per month. 0 for unlimited."
 msgstr ""
 
+msgid "Set the maximum size of GitLab Pages for this group. %{link_start}Learn more.%{link_end}"
+msgstr ""
+
 msgid "Set the milestone to %{milestone_reference}."
 msgstr ""
 
@@ -30279,9 +30282,6 @@ msgid "Size and domain settings for static websites"
 msgstr ""
 
 msgid "Size limit per repository (MB)"
-msgstr ""
-
-msgid "Size settings for static websites"
 msgstr ""
 
 msgid "Skip outdated deployment jobs"
