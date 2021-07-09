@@ -24,6 +24,8 @@ module Gitlab
         #
         # The intention here is to not introduce an assumption about the standard schema,
         # unless we have a good reason to do so.
+        structure.gsub!(/^CREATE SCHEMA public;.*/, '')
+        structure.gsub!(/^COMMENT ON SCHEMA public IS.*/, '')
         structure.gsub!(/public\.(\w+)/, '\1')
         structure.gsub!(/CREATE EXTENSION IF NOT EXISTS (\w+) WITH SCHEMA public;/, 'CREATE EXTENSION IF NOT EXISTS \1;')
 
