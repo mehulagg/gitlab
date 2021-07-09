@@ -67,11 +67,13 @@ function install_api_client_dependencies_with_apk() {
 }
 
 function install_gitlab_gem() {
+  whoami
   gem install httparty --no-document --version 0.18.1
   gem install gitlab --no-document --version 4.17.0
 }
 
 function install_tff_gem() {
+  whoami
   gem install test_file_finder --version 0.1.1
 }
 
