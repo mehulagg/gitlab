@@ -7,7 +7,7 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 
 # Implementation patterns **(FREE SELF)**
 
-[comment]: # (Should this be the new landing page for https://docs.gitlab.com/ee/install/#install-gitlab-on-cloud-providers)
+<!--- (Should this be the new landing page for https://docs.gitlab.com/ee/install/#install-gitlab-on-cloud-providers) -->
 
 GitLab Reference Architectures give qualified guidance on the recommended ways GitLab can be configured to meet the performance requirements of various workloads. Reference Architectures are purpose-designed to be as non-implementation specific as possible to apply to the most different types of implementations possible. This generally means they have a highly granular "machine" to "server role" specification and focus on system elements that impact performance. Reference Architectures can be adapted to the broadest number of supported implementations.
 
