@@ -18,7 +18,7 @@ variables:
     bandit, brakeman, gosec, spotbugs, flawfinder, phpcs-security-audit, security-code-scan, nodejs-scan, eslint, secrets, sobelow, pmd-apex, kubesec, semgrep,
     bundler-audit, retire.js, gemnasium, gemnasium-maven, gemnasium-python,
     license-finder,
-    dast, api-fuzzing
+    dast, api-security
 
   SECURE_BINARIES_DOWNLOAD_IMAGES: "true"
   SECURE_BINARIES_PUSH_IMAGES: "true"
@@ -230,11 +230,16 @@ dast:
       - $SECURE_BINARIES_DOWNLOAD_IMAGES == "true" &&
           $SECURE_BINARIES_ANALYZERS =~ /\bdast\b/
 
-api-fuzzing:
+#
+# API Fuzzing, DAST API
+#
+
+api-security:
   extends: .download_images
   variables:
     SECURE_BINARIES_ANALYZER_VERSION: "1"
+    SECURE_BINARIES_IMAGE: registry.gitlab.com/security-products/api-security:1
   only:
     variables:
       - $SECURE_BINARIES_DOWNLOAD_IMAGES == "true" &&
-          $SECURE_BINARIES_ANALYZERS =~ /\bapi-fuzzing\b/
+          $SECURE_BINARIES_ANALYZERS =~ /\bapi-security\b/
