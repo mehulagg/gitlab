@@ -1520,8 +1520,8 @@ RSpec.describe License do
     end
   end
 
-  describe '#usage_ping?' do
-    subject { license.usage_ping? }
+  describe '#operational_metrics?' do
+    subject { license.operational_metrics? }
 
     context 'when no license provided' do
       before do
@@ -1532,13 +1532,13 @@ RSpec.describe License do
     end
 
     context 'when the license has usage ping required metrics disabled' do
-      let(:gl_license) { build(:gitlab_license, usage_ping_required_metrics_enabled: false) }
+      let(:gl_license) { build(:gitlab_license, operational_metrics: false) }
 
       it { is_expected.to be false }
     end
 
     context 'when the license has usage ping required metrics enabled' do
-      let(:gl_license) { build(:gitlab_license, usage_ping_required_metrics_enabled: true) }
+      let(:gl_license) { build(:gitlab_license, operational_metrics: true) }
 
       it { is_expected.to be true }
     end

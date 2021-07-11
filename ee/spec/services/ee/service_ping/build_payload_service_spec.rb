@@ -28,8 +28,8 @@ RSpec.describe ServicePing::BuildPayloadService do
 
         context 'Instance subscribes to free TAM service' do
           before do
-            # License.current.usage_ping? == true
-            create_current_license(usage_ping_required_metrics_enabled: true)
+            # License.current.operational_metrics? == true
+            create_current_license(operational_metrics: true)
           end
 
           it_behaves_like 'complete service ping payload'
@@ -37,8 +37,8 @@ RSpec.describe ServicePing::BuildPayloadService do
 
         context 'Instance does NOT subscribe to free TAM service' do
           before do
-            # License.current.usage_ping? == false
-            create_current_license(usage_ping_required_metrics_enabled: false)
+            # License.current.operational_metrics? == false
+            create_current_license(operational_metrics: false)
           end
 
           it_behaves_like 'service ping payload with all expected metrics' do
@@ -59,8 +59,8 @@ RSpec.describe ServicePing::BuildPayloadService do
 
         context 'Instance subscribes to free TAM service' do
           before do
-            # License.current.usage_ping? == true
-            create_current_license(usage_ping_required_metrics_enabled: true)
+            # License.current.operational_metrics? == true
+            create_current_license(operational_metrics: true)
           end
 
           it_behaves_like 'service ping payload with all expected metrics' do
@@ -74,8 +74,8 @@ RSpec.describe ServicePing::BuildPayloadService do
 
         context 'Instance does NOT subscribe to free TAM service' do
           before do
-            # License.current.usage_ping? == false
-            create_current_license(usage_ping_required_metrics_enabled: false)
+            # License.current.operational_metrics? == false
+            create_current_license(operational_metrics: false)
           end
 
           it 'returns empty service ping payload' do

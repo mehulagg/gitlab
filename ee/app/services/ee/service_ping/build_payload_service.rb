@@ -21,7 +21,7 @@ module EE
 
       override :product_intelligence_enabled?
       def product_intelligence_enabled?
-        ::License.current&.usage_ping? || super
+        ::License.current&.operational_metrics? || super
       end
 
       def filtered_usage_data(payload = raw_payload, parents = [])
@@ -41,7 +41,7 @@ module EE
       def collect_permitted_categories
         categories = [STANDARD_CATEGORY, SUBSCRIPTION_CATEGORY]
         categories << OPTIONAL_CATEGORY if ::Gitlab::CurrentSettings.usage_ping_enabled?
-        categories << OPERATIONAL_CATEGORY if ::License.current.usage_ping?
+        categories << OPERATIONAL_CATEGORY if ::License.current.operational_metrics?
         categories
       end
 
