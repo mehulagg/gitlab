@@ -43,7 +43,7 @@ RSpec.describe 'Multi Select Issue', :js do
 
     # Multi select drag&drop support is temporarily disabled
     # https://gitlab.com/gitlab-org/gitlab/-/issues/289797
-    stub_feature_flags(graphql_board_lists: false, board_multi_select: project)
+    stub_feature_flags(board_multi_select: project)
 
     sign_in(user)
   end

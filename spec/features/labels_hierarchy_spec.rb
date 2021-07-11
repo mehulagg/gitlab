@@ -17,7 +17,6 @@ RSpec.describe 'Labels Hierarchy', :js do
   let!(:project_label_1) { create(:label, project: project_1, title: 'Label_4') }
 
   before do
-    stub_feature_flags(graphql_board_lists: false)
     stub_feature_flags(board_new_list: false)
     grandparent.add_owner(user)
 
@@ -302,7 +301,6 @@ RSpec.describe 'Labels Hierarchy', :js do
       let(:board) { create(:board, group: parent) }
 
       before do
-        stub_feature_flags(graphql_board_lists: false)
         parent.add_developer(user)
         visit group_board_path(parent, board)
         find('.js-new-board-list').click

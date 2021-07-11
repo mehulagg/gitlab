@@ -20,7 +20,6 @@ RSpec.describe 'Group Issue Boards', :js do
 
   before do
     # stubbing until sidebar work is done: https://gitlab.com/gitlab-org/gitlab/-/issues/230711
-    stub_feature_flags(graphql_board_lists: false)
     sign_in(user)
 
     visit group_board_path(group, board)

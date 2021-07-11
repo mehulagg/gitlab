@@ -25,15 +25,11 @@ RSpec.describe 'User adds lists', :js do
     group.add_owner(user)
   end
 
-  where(:board_type, :graphql_board_lists_enabled, :board_new_list_enabled) do
-    :project | true  | true
-    :project | false | true
-    :project | true  | false
-    :project | false | false
-    :group   | true  | true
-    :group   | false | true
-    :group   | true  | false
-    :group   | false | false
+  where(:board_type, :board_new_list_enabled) do
+    :project | true
+    :project | false
+    :group   | true
+    :group   | false
   end
 
   with_them do
@@ -42,10 +38,7 @@ RSpec.describe 'User adds lists', :js do
 
       set_cookie('sidebar_collapsed', 'true')
 
-      stub_feature_flags(
-        graphql_board_lists: graphql_board_lists_enabled,
-        board_new_list: board_new_list_enabled
-      )
+      stub_feature_flags(board_new_list: board_new_list_enabled)
 
       if board_type == :project
         visit project_board_path(project, project_board)

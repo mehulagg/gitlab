@@ -25,11 +25,9 @@ RSpec.describe 'User adds milestone lists', :js do
     group.add_owner(user)
   end
 
-  where(:board_type, :graphql_board_lists_enabled) do
+  where(:board_type) do
     :project | true
-    :project | false
     :group   | true
-    :group   | false
   end
 
   with_them do
@@ -43,10 +41,7 @@ RSpec.describe 'User adds milestone lists', :js do
 
       set_cookie('sidebar_collapsed', 'true')
 
-      stub_feature_flags(
-        graphql_board_lists: graphql_board_lists_enabled,
-        board_new_list: true
-      )
+      stub_feature_flags(board_new_list: true)
 
       if board_type == :project
         visit project_board_path(project, project_board)

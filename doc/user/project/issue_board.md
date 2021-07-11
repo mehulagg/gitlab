@@ -676,29 +676,6 @@ A few things to remember:
   by default. If you have more than 20 issues, start scrolling down and the next
   20 appear.
 
-### Enable or disable GraphQL-based issue boards **(FREE SELF)**
-
-NOTE:
-When enabling GraphQL-based issue boards, you must also enable the
-[new add list form](#enable-or-disable-new-add-list-form).
-
-GraphQL-based issue boards is not ready for production use.
-It is deployed behind a feature flag that is **disabled by default** as of GitLab 13.12.
-[GitLab administrators with access to the GitLab Rails console](../../administration/feature_flags.md)
-can enable it.
-
-To enable it:
-
-```ruby
-Feature.enable(:graphql_board_lists)
-```
-
-To disable it:
-
-```ruby
-Feature.disable(:graphql_board_lists)
-```
-
 ### Enable or disable new add list form **(FREE SELF)**
 
 The new form for adding lists is under development but ready for production use. It is
