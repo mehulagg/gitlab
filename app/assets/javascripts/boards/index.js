@@ -78,10 +78,8 @@ export default () => {
     issueBoardsApp.$destroy(true);
   }
 
-  if (!gon?.features?.graphqlBoardLists) {
-    boardsStore.create();
-    boardsStore.setTimeTrackingLimitToHours($boardApp.dataset.timeTrackingLimitToHours);
-  }
+  boardsStore.create();
+  boardsStore.setTimeTrackingLimitToHours($boardApp.dataset.timeTrackingLimitToHours);
 
   // eslint-disable-next-line @gitlab/no-runtime-template-compiler
   issueBoardsApp = new Vue({

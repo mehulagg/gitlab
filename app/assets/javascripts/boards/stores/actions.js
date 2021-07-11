@@ -80,10 +80,8 @@ export default {
       convertObjectPropsToCamelCase(urlParamsToObject(window.location.search)),
     );
 
-    if (gon.features.graphqlBoardLists) {
-      dispatch('fetchLists');
-      dispatch('resetIssues');
-    }
+    dispatch('fetchLists');
+    dispatch('resetIssues');
   },
 
   fetchLists: ({ commit, state, dispatch }) => {

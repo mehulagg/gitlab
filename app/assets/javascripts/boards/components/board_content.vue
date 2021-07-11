@@ -36,19 +36,14 @@ export default {
   computed: {
     ...mapState(['boardLists', 'error', 'addColumnForm']),
     ...mapGetters(['isSwimlanesOn', 'isEpicBoard']),
-    useNewBoardColumnComponent() {
-      return this.glFeatures.graphqlBoardLists || this.isSwimlanesOn || this.isEpicBoard;
-    },
     addColumnFormVisible() {
       return this.addColumnForm?.visible;
     },
     boardListsToUse() {
-      return this.useNewBoardColumnComponent
-        ? sortBy([...Object.values(this.boardLists)], 'position')
-        : this.lists;
+      return sortBy([...Object.values(this.boardLists)], 'position');
     },
     canDragColumns() {
-      return (this.isEpicBoard || this.glFeatures.graphqlBoardLists) && this.canAdminList;
+      return this.canAdminList;
     },
     boardColumnWrapper() {
       return this.canDragColumns ? Draggable : 'div';
@@ -128,11 +123,9 @@ export default {
       :disabled="disabled"
     />
 
-    <board-content-sidebar
-      v-if="isSwimlanesOn || glFeatures.graphqlBoardLists"
+    <epic-board-content-sidebar v-if="isEpicBoard" data-testid="epic-boards-sidebar" />
+    <board-content-sidebar v-else
       data-testid="issue-boards-sidebar"
     />
-
-    <epic-board-content-sidebar v-else-if="isEpicBoard" data-testid="epic-boards-sidebar" />
   </div>
 </template>

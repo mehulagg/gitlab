@@ -128,10 +128,12 @@ export default {
       dispatch('resetIssues');
       dispatch('fetchEpicsSwimlanes');
       dispatch('fetchLists');
-    } else if (gon.features.graphqlBoardLists || getters.isEpicBoard) {
-      dispatch('fetchLists');
-      dispatch('resetIssues');
+
+      return;
     }
+
+    dispatch('fetchLists');
+    dispatch('resetIssues');
   },
 
   fetchEpicsSwimlanes({ state, commit, dispatch }, { endCursor = null } = {}) {
