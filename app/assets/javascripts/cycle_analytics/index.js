@@ -14,14 +14,17 @@ export default () => {
     noDataSvgPath,
     requestPath,
     fullPath,
+    projectId,
     parentId,
     parentPath,
   } = el.dataset;
+  console.log('projectId', parseInt(projectId, 10));
   console.log('parentId', parseInt(parentId, 10));
   console.log('parentPath', parentPath);
 
   store.dispatch('initializeVsa', {
     parentId: parseInt(parentId, 10),
+    projectId: parseInt(projectId, 10),
     parentPath,
     requestPath,
     fullPath,

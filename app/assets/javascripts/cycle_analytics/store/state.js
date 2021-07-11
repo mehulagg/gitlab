@@ -1,6 +1,7 @@
 import { DEFAULT_DAYS_TO_DISPLAY } from '../constants';
 
 export default () => ({
+  id: null,
   requestPath: '',
   fullPath: '',
   startDate: DEFAULT_DAYS_TO_DISPLAY,

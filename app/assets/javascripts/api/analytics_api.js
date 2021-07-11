@@ -52,6 +52,13 @@ export const getProjectValueStreamMetrics = (requestPath, params) =>
 export const getValueStreamStageMedian = ({ groupId, valueStreamId, stageId }, params = {}) => {
   // const stageBase = buildGroupValueStreamPath({ groupId, valueStreamId, stageId });
   // return axios.get(`${stageBase}/summary`, { params });
-  const stageBase = buildProjectDefaultValueStreamPath  ({ groupId, valueStreamId, stageId });
-  return axios.get(`${stageBase}/summary`, { params });
+  // buildGroupValueStreamPath
+  // buildProjectDefaultValueStreamPath
+
+  console.log('getValueStreamStageMedian::params', params);
+
+  const stageBase = buildGroupValueStreamPath({ groupId, valueStreamId, stageId });
+  return axios.get(`${stageBase}/median`, { params });
+  // const stageBase = buildProjectDefaultValueStreamPath({ groupId, valueStreamId, stageId });
+  // return axios.get(`${stageBase}/median`, {});
 };

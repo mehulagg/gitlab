@@ -9,8 +9,8 @@ export const pathNavigationData = ({ stages, medians, stageCounts, selectedStage
   });
 };
 
-export const vsaRequestParams = (state) => {
-  console.log('vsaRequestParams::state', state);
+export const requestParams = (state) => {
+  console.log('requestParams::state', state);
   const {
     selectedStage: { id: stageId = null },
     // parentId: groupId,
@@ -18,4 +18,10 @@ export const vsaRequestParams = (state) => {
     selectedValueStream: { id: valueStreamId },
   } = state;
   return { valueStreamId, groupId, stageId };
+};
+
+export const queryParams = ({ id }) => {
+  return {
+    project_id: id,
+  };
 };
