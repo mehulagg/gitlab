@@ -11,7 +11,7 @@ In large organizations, it is useful to have information about who to contact or
 to go for help. You can customize and display this information on the GitLab  `/help` page and on
 the GitLab sign-in page.
 
-## Add a help message to the help page
+## Add a help message to the Help page
 
 You can add a help message, which is shown at the top of the GitLab `/help` page (for example,
 <https://gitlab.com/help>):
@@ -29,12 +29,12 @@ section titled **Need Help?**, located below the sign-in page message:
 1. On the top bar, select **Menu** > **{admin}** **Admin**.
 1. In the left sidebar, select **Settings > Preferences**, then expand **Help page**.
 1. Under **Additional text to show on the sign-in page**, fill in the information you wish to
-   display on the login page.
+   display on the sign-in page.
 1. Select **Save changes**. You can now see the message on the sign-in page.
 
 ## Hide marketing-related entries from the Help page
 
-GitLab marketing-related entries are occasionally shown in the Help page. To hide these entries:
+GitLab marketing-related entries are occasionally shown on the Help page. To hide these entries:
 
 1. On the top bar, select **Menu** > **{admin}** **Admin**.
 1. In the left sidebar, select **Settings > Preferences**, then expand **Help page**.
