@@ -137,4 +137,3 @@ To workaround this issue ensure one of the following conditions applies:
 1. All subgroup resources are created by the `terraform-user` user.
 1. `maintainer` or `owner` access is granted directly to the `terraform-user` user on `subgroup-B`.
 1. `subgroup-B` contains at least one project and `terraform-user` has inherited access to `subgroup-B`.
-
