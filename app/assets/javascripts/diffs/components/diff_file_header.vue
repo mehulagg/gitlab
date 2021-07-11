@@ -106,6 +106,7 @@ export default {
   idState() {
     return {
       moreActionsShown: false,
+      renderCsvAsTable: false,
     };
   },
   computed: {
@@ -206,6 +207,9 @@ export default {
     showCodequalityBadge() {
       return this.codequalityDiff?.length > 0 && !this.glFeatures.codequalityMrDiffAnnotations;
     },
+    showRenderCsvAsTableToggle() {
+      return this.filePath?.endsWith('.csv');
+    },
   },
   watch: {
     'idState.moreActionsShown': {
@@ -274,6 +278,10 @@ export default {
       if ((open && reviewed) || (closed && !reviewed)) {
         this.$emit('toggleFile');
       }
+    },
+    toggleRenderCsvAsTable(value) {
+      this.idState.renderCsvAsTable = value;
+      this.$emit('toggleRenderCsvAsTable', value);
     },
   },
 };
@@ -362,6 +370,13 @@ export default {
       </small>
 
       <span v-if="isUsingLfs" class="badge label label-lfs gl-mr-2"> {{ __('LFS') }} </span>
+    </div>
+
+    <div v-if="showRenderCsvAsTableToggle">
+      <span v-if="idState.renderCsvAsTable" @click="toggleRenderCsvAsTable(false)">{{
+        __('Raw')
+      }}</span>
+      <span v-else @click="toggleRenderCsvAsTable(true)">{{ __('Table') }}</span>
     </div>
 
     <div

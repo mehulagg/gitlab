@@ -85,6 +85,7 @@ export default {
       isLoadingCollapsedDiff: false,
       forkMessageVisible: false,
       isCollapsed: isCollapsed(this.file),
+      renderCsvAsTable: false,
     };
   },
   i18n: {
@@ -307,6 +308,9 @@ export default {
         this.idState.isCollapsed = manualValue;
       }
     },
+    handleToggleRenderCsvAsTable(value) {
+      this.idState.renderCsvAsTable = value;
+    },
   },
 };
 </script>
@@ -337,6 +341,7 @@ export default {
       :class="hasBodyClasses.header"
       @toggleFile="handleToggle({ viaUserInteraction: true })"
       @showForkMessage="showForkMessage"
+      @toggleRenderCsvAsTable="handleToggleRenderCsvAsTable"
     />
 
     <div
@@ -407,6 +412,7 @@ export default {
             :class="hasBodyClasses.content"
             :diff-file="file"
             :help-page-path="helpPagePath"
+            :render-csv-as-table="idState.renderCsvAsTable"
           />
         </template>
       </div>

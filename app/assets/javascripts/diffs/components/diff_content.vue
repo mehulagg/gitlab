@@ -14,6 +14,7 @@ import eventHub from '../../notes/event_hub';
 import userAvatarLink from '../../vue_shared/components/user_avatar/user_avatar_link.vue';
 import { IMAGE_DIFF_POSITION_TYPE } from '../constants';
 import { getDiffMode } from '../store/utils';
+import DiffCsvViewer from './diff_csv_viewer.vue';
 import DiffDiscussions from './diff_discussions.vue';
 import DiffView from './diff_view.vue';
 import ImageDiffOverlay from './image_diff_overlay.vue';
@@ -21,6 +22,7 @@ import ImageDiffOverlay from './image_diff_overlay.vue';
 export default {
   components: {
     GlLoadingIcon,
+    DiffCsvViewer,
     DiffView,
     DiffViewer,
     NoteForm,
@@ -41,6 +43,11 @@ export default {
       type: String,
       required: false,
       default: '',
+    },
+    renderCsvAsTable: {
+      type: Boolean,
+      required: false,
+      default: false,
     },
   },
   computed: {
@@ -113,7 +120,8 @@ export default {
 <template>
   <div class="diff-content">
     <div class="diff-viewer">
-      <template v-if="isTextFile">
+      <diff-csv-viewer v-if="renderCsvAsTable" :diff-file="diffFile" />
+      <template v-else-if="isTextFile">
         <diff-view
           :diff-file="diffFile"
           :diff-lines="mappedLines"
