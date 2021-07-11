@@ -10,14 +10,48 @@ module EE
 
     prepended do
       include ::Gitlab::SQL::Pattern
+      include ::Gitlab::Geo::ReplicableModel
+      include ::Gitlab::Geo::VerificationState
+
+      with_replicator Geo::UploadReplicator
 
       after_destroy :log_geo_deleted_event
 
       scope :for_model, ->(model) { where(model_id: model.id, model_type: model.class.name) }
       scope :syncable, -> { with_files_stored_locally }
+
+      delegate :verification_retry_at, :verification_retry_at=,
+               :verified_at, :verified_at=,
+               :verification_checksum, :verification_checksum=,
+               :verification_failure, :verification_failure=,
+               :verification_retry_count, :verification_retry_count=,
+               :verification_state=, :verification_state,
+               :verification_started_at=, :verification_started_at,
+               to: :upload_state
+
+      scope :with_verification_state, ->(state) { joins(:upload_state).where(upload_states: { verification_state: verification_state_value(state) }) }
+      scope :checksummed, -> { joins(:upload_state).where.not(upload_states: { verification_checksum: nil } ) }
+      scope :not_checksummed, -> { joins(:upload_state).where(upload_states: { verification_checksum: nil } ) }
     end
 
     class_methods do
+      extend ::Gitlab::Utils::Override
+
+      override :verification_state_table_name
+      def verification_state_table_name
+        'upload_states'
+      end
+
+      override :verification_state_model_key
+      def verification_state_model_key
+        'upload_id'
+      end
+
+      override :verification_arel_table
+      def verification_arel_table
+        UploadState.arel_table
+      end
+
       # @param primary_key_in [Range, Upload] arg to pass to primary_key_in scope
       # @return [ActiveRecord::Relation<Upload>] everything that should be synced to this node, restricted by primary key
       def replicables_for_current_secondary(primary_key_in)
@@ -74,6 +108,10 @@ module EE
 
     def log_geo_deleted_event
       ::Geo::UploadDeletedEventStore.new(self).create!
+    end
+
+    def upload_state
+      super || build_upload_state
     end
   end
 end

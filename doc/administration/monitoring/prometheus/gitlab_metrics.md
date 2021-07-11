@@ -260,6 +260,16 @@ configuration option in `gitlab.yml`. These metrics are served from the
 | `destroyed_job_artifacts_count_total`          | Counter | 13.6  | Number of destroyed expired job artifacts | |
 | `destroyed_pipeline_artifacts_count_total`     | Counter | 13.8  | Number of destroyed expired pipeline artifacts | |
 | `gitlab_optimistic_locking_retries`            | Histogram | 13.10  | Number of retry attempts to execute optimistic retry lock | |
+| `geo_uploads`                      | Gauge   | 14.1  | Number of uploads on primary | `url` |
+| `geo_uploads_checksum_total`       | Gauge   | 14.1 | Number of uploads tried to checksum on primary | `url` |
+| `geo_uploads_checksummed`          | Gauge   | 14.1  | Number of uploads successfully checksummed on primary | `url` |
+| `geo_uploads_checksum_failed`      | Gauge   | 14.1  | Number of uploads failed to calculate the checksum on primary | `url` |
+| `geo_uploads_synced`               | Gauge   | 14.1  | Number of uploads synced on secondary | `url` |
+| `geo_uploads_failed`               | Gauge   | 14.1  | Number of syncable uploads failed to sync on secondary | `url` |
+| `geo_uploads_registry`             | Gauge   | 14.1  | Number of uploads in the registry | `url` |
+| `geo_uploads_verification_total`   | Gauge   | 14.1 | Number of uploads verifications tried on secondary | `url` |
+| `geo_uploads_verified`             | Gauge   | 14.1 | Number of uploads verified on secondary | `url` |
+| `geo_uploads_verification_failed`  | Gauge   | 14.1 | Number of uploads verifications failed on secondary | `url` |
 
 ## Database load balancing metrics **(PREMIUM SELF)**
 

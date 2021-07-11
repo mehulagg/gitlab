@@ -2,6 +2,8 @@
 
 class Geo::UploadRegistry < Geo::BaseRegistry
   include Geo::Syncable
+  include ::Geo::ReplicableRegistry
+  include ::Geo::VerifiableRegistry
 
   MODEL_CLASS = ::Upload
   MODEL_FOREIGN_KEY = :file_id
