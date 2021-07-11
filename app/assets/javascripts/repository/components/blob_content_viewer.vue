@@ -5,11 +5,13 @@ import BlobContent from '~/blob/components/blob_content.vue';
 import BlobHeader from '~/blob/components/blob_header.vue';
 import { SIMPLE_BLOB_VIEWER, RICH_BLOB_VIEWER } from '~/blob/components/constants';
 import createFlash from '~/flash';
+import axios from '~/lib/utils/axios_utils';
 import { isLoggedIn } from '~/lib/utils/common_utils';
 import { __ } from '~/locale';
 import blobInfoQuery from '../queries/blob_info.query.graphql';
 import BlobButtonGroup from './blob_button_group.vue';
 import BlobEdit from './blob_edit.vue';
+import { loadViewer, viewerProps } from './blob_viewers';
 
 export default {
   components: {
@@ -32,9 +34,12 @@ export default {
         this.switchViewer(
           this.hasRichViewer && !window.location.hash ? RICH_BLOB_VIEWER : SIMPLE_BLOB_VIEWER,
         );
+        if (this.hasRichViewer && !this.blobViewer) {
+          this.loadLegacyViewer();
+        }
       },
       error() {
-        createFlash({ message: __('An error occurred while loading the file. Please try again.') });
+        this.displayError();
       },
     },
   },
@@ -55,8 +60,14 @@ export default {
   },
   data() {
     return {
+      legacyRichViewer: null,
+      isBinary: false,
+      isLoadingLegacyViewer: false,
       activeViewerType: SIMPLE_BLOB_VIEWER,
       project: {
+        userPermissions: {
+          pushCode: false,
+        },
         repository: {
           blobs: {
             nodes: [
@@ -78,7 +89,6 @@ export default {
                 canLock: false,
                 isLocked: false,
                 lockLink: '',
-                canModifyBlob: true,
                 forkPath: '',
                 simpleViewer: {},
                 richViewer: null,
@@ -94,7 +104,7 @@ export default {
       return isLoggedIn();
     },
     isLoading() {
-      return this.$apollo.queries.project.loading;
+      return this.$apollo.queries.project.loading || this.isLoadingLegacyViewer;
     },
     blobInfo() {
       const nodes = this.project?.repository?.blobs?.nodes;
@@ -111,8 +121,30 @@ export default {
     hasRenderError() {
       return Boolean(this.viewer.renderError);
     },
+    blobViewer() {
+      const { fileType } = this.viewer;
+      return loadViewer(fileType);
+    },
+    viewerProps() {
+      const { fileType } = this.viewer;
+      return viewerProps(fileType, this.blobInfo);
+    },
   },
   methods: {
+    loadLegacyViewer() {
+      this.isLoadingLegacyViewer = true;
+      axios
+        .get(`${this.blobInfo.webPath}?format=json&viewer=rich`)
+        .then(({ data: { html, binary } }) => {
+          this.legacyRichViewer = html;
+          this.isBinary = binary;
+          this.isLoadingLegacyViewer = false;
+        })
+        .catch(() => this.displayError());
+    },
+    displayError() {
+      createFlash({ message: __('An error occurred while loading the file. Please try again.') });
+    },
     switchViewer(newViewer) {
       this.activeViewerType = newViewer || SIMPLE_BLOB_VIEWER;
     },
@@ -122,33 +154,40 @@ export default {
 
 <template>
   <div>
-    <gl-loading-icon v-if="isLoading" />
+    <gl-loading-icon v-if="isLoading" size="sm" />
     <div v-if="blobInfo && !isLoading" class="file-holder">
       <blob-header
         :blob="blobInfo"
-        :hide-viewer-switcher="!hasRichViewer"
+        :hide-viewer-switcher="!hasRichViewer || isBinary"
         :active-viewer-type="viewer.type"
         :has-render-error="hasRenderError"
         @viewer-changed="switchViewer"
       >
         <template #actions>
-          <blob-edit :edit-path="blobInfo.editBlobPath" :web-ide-path="blobInfo.ideEditPath" />
+          <blob-edit
+            v-if="!isBinary"
+            :edit-path="blobInfo.editBlobPath"
+            :web-ide-path="blobInfo.ideEditPath"
+          />
           <blob-button-group
             v-if="isLoggedIn"
             :path="path"
             :name="blobInfo.name"
             :replace-path="blobInfo.replacePath"
-            :can-push-code="blobInfo.canModifyBlob"
+            :can-push-code="project.userPermissions.pushCode"
           />
         </template>
       </blob-header>
       <blob-content
+        v-if="!blobViewer"
+        :rich-viewer="legacyRichViewer"
         :blob="blobInfo"
         :content="blobInfo.rawTextBlob"
         :is-raw-content="true"
         :active-viewer="viewer"
         :loading="false"
       />
+      <component :is="blobViewer" v-else v-bind="viewerProps" class="blob-viewer" />
     </div>
   </div>
 </template>

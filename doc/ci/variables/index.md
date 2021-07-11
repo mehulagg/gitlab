@@ -71,6 +71,10 @@ to execute scripts. Each shell has its own set of reserved variable names.
 
 Make sure each variable is defined for the [scope you want to use it in](where_variables_can_be_used.md).
 
+By default, pipelines from forked projects can't access CI/CD variables in the parent project.
+If you [run a merge request pipeline in the parent project for a merge request from a fork](../pipelines/merge_request_pipelines.md#run-pipelines-in-the-parent-project-for-merge-requests-from-a-forked-project),
+all variables become available to the pipeline.
+
 ### Create a custom CI/CD variable in the `.gitlab-ci.yml` file
 
 To create a custom variable in the [`.gitlab-ci.yml`](../yaml/index.md#variables) file,
@@ -303,6 +307,10 @@ The value of the variable must:
   - The `~` character ([In GitLab 13.12](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/61517) and later).
 - Not match the name of an existing predefined or custom CI/CD variable.
 
+NOTE:
+Masking a CI/CD variable is not a guaranteed way to prevent malicious users from accessing
+variable values. To make variables more secure, you can [use external secrets](../secrets/index.md).
+
 ### Protect a CI/CD variable
 
 You can protect a project, group or instance CI/CD variable so it is only passed
@@ -328,7 +336,7 @@ runs on a [protected branch](../../user/project/protected_branches.md) or
 
 Review all merge requests that introduce changes to the `.gitlab-ci.yml` file before you:
 
-- [Run a pipeline in the parent project for a merge request submitted from a forked project](../merge_request_pipelines/index.md#run-pipelines-in-the-parent-project-for-merge-requests-from-a-forked-project).
+- [Run a pipeline in the parent project for a merge request submitted from a forked project](../pipelines/merge_request_pipelines.md#run-pipelines-in-the-parent-project-for-merge-requests-from-a-forked-project).
 - Merge the changes.
 
 The following example shows malicious code in a `.gitlab-ci.yml` file:
@@ -581,8 +589,8 @@ You can override the value of a variable when you:
 1. Run a job manually in the UI.
 1. Use [push options](../../user/project/push_options.md#push-options-for-gitlab-cicd).
 1. Trigger a pipeline by using [the API](../triggers/index.md#making-use-of-trigger-variables).
-1. Pass variables to a downstream pipeline [by using the `variable` keyword](../multi_project_pipelines.md#pass-cicd-variables-to-a-downstream-pipeline-by-using-the-variables-keyword)
-   or [by using variable inheritance](../multi_project_pipelines.md#pass-cicd-variables-to-a-downstream-pipeline-by-using-variable-inheritance).
+1. Pass variables to a downstream pipeline [by using the `variable` keyword](../pipelines/multi_project_pipelines.md#pass-cicd-variables-to-a-downstream-pipeline-by-using-the-variables-keyword)
+   or [by using variable inheritance](../pipelines/multi_project_pipelines.md#pass-cicd-variables-to-a-downstream-pipeline-by-using-variable-inheritance).
 
 The pipeline variables declared in these events take [priority over other variables](#cicd-variable-precedence).
 
@@ -603,7 +611,7 @@ You can grant permission to override variables to [maintainers](../../user/permi
 with overridden variables, they receive the `Insufficient permissions to set pipeline variables`
 error message.
 
-If you [store your CI/CD configurations in a different repository](../../ci/pipelines/settings.md#custom-cicd-configuration-file),
+If you [store your CI/CD configurations in a different repository](../../ci/pipelines/settings.md#specify-a-custom-cicd-configuration-file),
 use this setting for control over the environment the pipeline runs in.
 
 You can enable this feature by using [the projects API](../../api/projects.md#edit-project)

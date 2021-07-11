@@ -1,5 +1,8 @@
+import { shallowMount } from '@vue/test-utils';
 import Vue from 'vue';
-import { componentNames } from 'ee/reports/components/issue_body';
+import { componentNames, iconComponentNames } from 'ee/reports/components/issue_body';
+import LicenseIssueBody from 'ee/vue_shared/license_compliance/components/license_issue_body.vue';
+import LicenseStatusIcon from 'ee/vue_shared/license_compliance/components/license_status_icon.vue';
 import store from 'ee/vue_shared/security_reports/store';
 import { codequalityParsedIssues } from 'ee_jest/vue_mr_widget/mock_data';
 import {
@@ -7,13 +10,15 @@ import {
   dockerReportParsed,
   parsedDast,
   secretScanningParsedIssues,
+  licenseComplianceParsedIssues,
 } from 'ee_jest/vue_shared/security_reports/mock_data';
 import mountComponent, { mountComponentWithStore } from 'helpers/vue_mount_component_helper';
 import reportIssue from '~/reports/components/report_item.vue';
-import { STATUS_FAILED, STATUS_SUCCESS } from '~/reports/constants';
+import { STATUS_FAILED, STATUS_SUCCESS, STATUS_NEUTRAL } from '~/reports/constants';
 
 describe('Report issue', () => {
   let vm;
+  let wrapper;
   let ReportIssue;
 
   beforeEach(() => {
@@ -146,6 +151,22 @@ describe('Report issue', () => {
       expect(vm.$el.querySelector('button').textContent.trim()).toEqual(
         secretScanningParsedIssues[0].title,
       );
+    });
+  });
+
+  describe('for license compliance issue', () => {
+    it('renders LicenseIssueBody & LicenseStatusIcon', () => {
+      wrapper = shallowMount(ReportIssue, {
+        propsData: {
+          issue: licenseComplianceParsedIssues[0],
+          component: componentNames.LicenseIssueBody,
+          iconComponent: iconComponentNames.LicenseStatusIcon,
+          status: STATUS_NEUTRAL,
+        },
+      });
+
+      expect(wrapper.findComponent(LicenseIssueBody).exists()).toBe(true);
+      expect(wrapper.findComponent(LicenseStatusIcon).exists()).toBe(true);
     });
   });
 

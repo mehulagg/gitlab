@@ -6,6 +6,7 @@ RSpec.describe Gitlab::Ci::Pipeline::Chain::Validate::External do
   let_it_be(:project) { create(:project) }
   let_it_be(:user) { create(:user) }
   let_it_be(:subscription) { create(:gitlab_subscription, :default, namespace: user.namespace) }
+
   let(:pipeline) { build(:ci_empty_pipeline, user: user, project: project) }
 
   let(:ci_yaml) do

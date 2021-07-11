@@ -32,9 +32,11 @@ export default {
     class="gl-grid-col-start-1 gl-border-b-solid gl-border-b-1 gl-border-b-gray-100 gl-p-5"
     data-testid="merge-request"
   >
-    <a :href="mergeRequest.path" class="gl-display-block gl-text-gray-900 gl-font-weight-bold">
-      {{ mergeRequest.title }}
-    </a>
+    <div>
+      <a :href="mergeRequest.path" class="gl-text-gray-900 gl-font-weight-bold">
+        {{ mergeRequest.title }}
+      </a>
+    </div>
     <span class="gl-text-gray-500">{{ mergeRequest.issuable_reference }}</span>
     <span class="issuable-authored gl-text-gray-500 gl-display-inline-flex gl-align-items-center">
       - {{ $options.strings.createdBy }}

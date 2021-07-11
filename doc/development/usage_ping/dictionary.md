@@ -42,6 +42,8 @@ The number of active users existing in the instance. This is named the instance_
 
 Group: `group::product intelligence`
 
+Data Category: `Subscription`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -53,6 +55,8 @@ Unique visitors to any analytics feature by week
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216174908_analytics_unique_visits_for_any_target.yml)
 
 Group: `group::optimize`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -66,6 +70,8 @@ Unique visitors to any analytics feature by month
 
 Group: `group::optimize`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`
@@ -77,6 +83,8 @@ Unique visitors to /groups/:group/-/contribution_analytics
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_all/20210216174836_g_analytics_contribution.yml)
 
 Group: `group::optimize`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -90,6 +98,8 @@ Unique visitors to /groups/:group/-/insights
 
 Group: `group::optimize`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`
@@ -101,6 +111,8 @@ Unique visitors to /groups/:group/-/issues_analytics
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_all/20210216174840_g_analytics_issues.yml)
 
 Group: `group::optimize`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -114,6 +126,8 @@ Unique visitors to /groups/:group/-/analytics/merge_request_analytics
 
 Group: `group::optimize`
 
+Data Category: `Optional`
+
 Status: `removed`
 
 Tiers: `free`
@@ -125,6 +139,8 @@ Unique visitors to /groups/:group/-/analytics/productivity_analytics
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_all/20210216174842_g_analytics_productivity.yml)
 
 Group: `group::optimize`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -138,6 +154,8 @@ Unique visitors to /groups/:group/-/analytics/value_stream_analytics
 
 Group: `group::optimize`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`
@@ -149,6 +167,8 @@ Unique visitors to /-/instance_statistics/cohorts
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216174858_i_analytics_cohorts.yml)
 
 Group: `group::optimize`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -162,6 +182,8 @@ Missing description
 
 Group: ``
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers:
@@ -173,6 +195,8 @@ Unique visitors to /-/instance_statistics/dev_ops_score
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216174900_i_analytics_dev_ops_score.yml)
 
 Group: `group::optimize`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -186,6 +210,8 @@ Unique visitors to/admin/usage_trends
 
 Group: `group::optimize`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`
@@ -197,6 +223,8 @@ Unique visitors to /:group/:project/-/analytics/code_reviews
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_all/20210216174848_p_analytics_code_reviews.yml)
 
 Group: `group::optimize`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -210,6 +238,8 @@ Unique visitors to /:group/:project/insights
 
 Group: `group::optimize`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`
@@ -221,6 +251,8 @@ Unique visitors to /:group/:project/-/analytics/issues_analytics
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_all/20210216174854_p_analytics_issues.yml)
 
 Group: `group::optimize`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -234,6 +266,8 @@ Unique visitors to /:group/:project/-/analytics/merge_request_analytics
 
 Group: `group::optimize`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`
@@ -245,6 +279,8 @@ Unique visitors to /:group/:project/pipelines/charts
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216174846_p_analytics_pipelines.yml)
 
 Group: `group::optimize`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -258,6 +294,8 @@ Unique visitors to /:group/:project/-/graphs/master/charts
 
 Group: `group::optimize`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`
@@ -269,6 +307,8 @@ Unique visitors to /:group/:project/-/value_stream_analytics
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216174850_p_analytics_valuestream.yml)
 
 Group: `group::optimize`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -282,93 +322,109 @@ Missing description
 
 Group: ``
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
 
 ### `compliance_unique_visits.a_compliance_audit_events_api`
 
-Missing description
+Unique users that have used the Audit Events API.
 
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216183912_a_compliance_audit_events_api.yml)
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_all/20210216183912_a_compliance_audit_events_api.yml)
 
-Group: ``
+Group: `group::compliance`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `premium`, `ultimate`
 
 ### `compliance_unique_visits.compliance_unique_visits_for_any_target`
 
-Missing description
+Number of unique visits to any compliance page
 
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216183914_compliance_unique_visits_for_any_target.yml)
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_all/20210216183914_compliance_unique_visits_for_any_target.yml)
 
-Group: ``
+Group: `group::compliance`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `premium`, `ultimate`
 
 ### `compliance_unique_visits.compliance_unique_visits_for_any_target_monthly`
 
-Missing description
+Number of unique visits to any compliance page over a given month
 
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216183916_compliance_unique_visits_for_any_target_monthly.yml)
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210216183916_compliance_unique_visits_for_any_target_monthly.yml)
 
-Group: ``
+Group: `group::compliance`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `premium`, `ultimate`
 
 ### `compliance_unique_visits.g_compliance_audit_events`
 
-Missing description
+Unique users who have viewed audit events
 
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216183906_g_compliance_audit_events.yml)
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_all/20210216183906_g_compliance_audit_events.yml)
 
-Group: ``
+Group: `group::compliance`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `premium`, `ultimate`
 
 ### `compliance_unique_visits.g_compliance_dashboard`
 
-Missing description
+Number of unique visitors to the compliance dashboard.
 
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216183904_g_compliance_dashboard.yml)
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_all/20210216183904_g_compliance_dashboard.yml)
 
-Group: ``
+Group: `group::compliance`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `premium`, `ultimate`
 
 ### `compliance_unique_visits.i_compliance_audit_events`
 
-Missing description
+Unique users that have viewed the instance-level audit events screen
 
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216183908_i_compliance_audit_events.yml)
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_all/20210216183908_i_compliance_audit_events.yml)
 
-Group: ``
+Group: `group::compliance`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `premium`, `ultimate`
 
 ### `compliance_unique_visits.i_compliance_credential_inventory`
 
-Missing description
+Unique users who have viewed the credential inventory
 
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216183910_i_compliance_credential_inventory.yml)
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_all/20210216183910_i_compliance_credential_inventory.yml)
 
-Group: ``
+Group: `group::compliance`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `ultimate`
 
 ### `container_registry_enabled`
 
@@ -377,6 +433,8 @@ A count of projects where the container registry is enabled
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/settings/20210204124858_container_registry_enabled.yml)
 
 Group: `group::package`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -390,6 +448,8 @@ Identifies if a user is using an external container registry and what type
 
 Group: `group::package`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -401,6 +461,8 @@ Identifies the version of the external registry being used
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/license/20210216181053_version.yml)
 
 Group: `group::package`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -414,6 +476,8 @@ Count of issues created by the alert bot automatically
 
 Group: `group::monitor`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -425,6 +489,8 @@ Total Searches for All Basic Search and Advanced Search in self-managed and SaaS
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216180413_all_searches.yml)
 
 Group: `group::global search`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -438,6 +504,8 @@ Count of API Fuzzing `docker-in-docker` jobs run by job name
 
 Group: `group::fuzz testing`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`
@@ -449,6 +517,8 @@ Count of API Fuzzing jobs run by job name
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216180344_api_fuzzing_jobs.yml)
 
 Group: `group::fuzz testing`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -462,6 +532,8 @@ Count of assignee lists created on Boards
 
 Group: `group::project management`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `premium`, `ultimate`
@@ -473,6 +545,8 @@ Projects with Auto DevOps template disabled
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216175231_auto_devops_disabled.yml)
 
 Group: `group::configure`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -486,6 +560,8 @@ Projects with Auto DevOps template enabled (excluding implicit Auto DevOps enabl
 
 Group: `group::configure`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -497,6 +573,8 @@ Count of Boards created
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216181252_boards.yml)
 
 Group: `group::project management`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -510,6 +588,8 @@ Unique builds in project
 
 Group: `group::pipeline execution`
 
+Data Category: `Operational`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -521,6 +601,8 @@ Total pipelines in external repositories
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216175514_ci_external_pipelines.yml)
 
 Group: `group::pipeline execution`
+
+Data Category: `Operational`
 
 Status: `data_available`
 
@@ -534,6 +616,8 @@ Total pipelines in GitLab repositories
 
 Group: `group::pipeline execution`
 
+Data Category: `Operational`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -545,6 +629,8 @@ Total pipelines from an Auto DevOps template
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216175516_ci_pipeline_config_auto_devops.yml)
 
 Group: `group::configure`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -558,6 +644,8 @@ Total Pipelines from templates in repository
 
 Group: `group::pipeline execution`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -569,6 +657,8 @@ Pipeline schedules in GitLab
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216175523_ci_pipeline_schedules.yml)
 
 Group: `group::pipeline execution`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -582,6 +672,8 @@ Total configured Runners in project
 
 Group: `group::pipeline execution`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -593,6 +685,8 @@ Total active instance Runners
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210502050341_ci_runners_group_type_active.yml)
 
 Group: `group::pipeline execution`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -606,6 +700,8 @@ Total active and online group Runners
 
 Group: `group::pipeline execution`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -617,6 +713,8 @@ Total active group Runners
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210502045402_ci_runners_instance_type_active.yml)
 
 Group: `group::pipeline execution`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -630,6 +728,8 @@ Total active and online instance Runners
 
 Group: `group::pipeline execution`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -641,6 +741,8 @@ Total online Runners
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210502050942_ci_runners_online.yml)
 
 Group: `group::pipeline execution`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -654,6 +756,8 @@ Total active project Runners
 
 Group: `group::pipeline execution`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -665,6 +769,8 @@ Total active and online project Runners
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210502052036_ci_runners_project_type_active_online.yml)
 
 Group: `group::pipeline execution`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -678,6 +784,8 @@ Total configured Triggers in project
 
 Group: `group::pipeline execution`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -689,6 +797,8 @@ Total GitLab Managed clusters both enabled and disabled
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216175232_clusters.yml)
 
 Group: `group::configure`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -702,6 +812,8 @@ Total GitLab Managed clusters with GitLab Managed App:Cert Manager installed
 
 Group: `group::configure`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -713,6 +825,8 @@ Total GitLab Managed clusters with GitLab Managed App:Cilium installed
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216175312_clusters_applications_cilium.yml)
 
 Group: `group::configure`
+
+Data Category: `Operational`
 
 Status: `data_available`
 
@@ -726,6 +840,8 @@ Total GitLab Managed clusters with GitLab Managed App:Crossplane installed
 
 Group: `group::configure`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -737,6 +853,8 @@ Total GitLab Managed clusters with GitLab Managed App:Elastic Stack installed
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216175309_clusters_applications_elastic_stack.yml)
 
 Group: `group::configure`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -750,6 +868,8 @@ Total GitLab Managed clusters with GitLab Managed App:Helm enabled
 
 Group: `group::configure`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -761,6 +881,8 @@ Total GitLab Managed clusters with GitLab Managed App:Ingress installed
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216175257_clusters_applications_ingress.yml)
 
 Group: `group::configure`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -774,6 +896,8 @@ Total GitLab Managed clusters with GitLab Managed App:Jupyter installed
 
 Group: `group::configure`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -785,6 +909,8 @@ Total GitLab Managed clusters with GitLab Managed App:Knative installed
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216175307_clusters_applications_knative.yml)
 
 Group: `group::configure`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -798,6 +924,8 @@ Total GitLab Managed clusters with GitLab Managed App:Prometheus installed
 
 Group: `group::configure`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -809,6 +937,8 @@ Total GitLab Managed clusters with GitLab Managed App:Runner installed
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216175305_clusters_applications_runner.yml)
 
 Group: `group::configure`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -822,6 +952,8 @@ Number of Kubernetes clusters attached to GitLab currently disabled
 
 Group: `group::configure`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -833,6 +965,8 @@ Number of Kubernetes clusters attached to GitLab currently enabled
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216175234_clusters_enabled.yml)
 
 Group: `group::configure`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -846,6 +980,8 @@ Total GitLab Managed clusters with defined cluster management project
 
 Group: `group::configure`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -857,6 +993,8 @@ Total GitLab Managed clusters provisioned with GitLab on AWS EKS
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216175250_clusters_platforms_eks.yml)
 
 Group: `group::configure`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -870,6 +1008,8 @@ Total GitLab Managed clusters provisioned with GitLab on GCE GKE
 
 Group: `group::configure`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -881,6 +1021,8 @@ Total GitLab Managed clusters that are user provisioned
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216175253_clusters_platforms_user.yml)
 
 Group: `group::configure`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -894,6 +1036,8 @@ Count of total unique commit comments. Does not include MR diff comments
 
 Group: `group::source code`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -905,6 +1049,8 @@ Count of confidential epics
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_all/20210216181205_confidential_epics.yml)
 
 Group: `group::product planning`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -918,6 +1064,8 @@ Count of Container Scanning jobs run
 
 Group: `group::container security`
 
+Data Category: `Operational`
+
 Status: `data_available`
 
 Tiers: `ultimate`
@@ -929,6 +1077,8 @@ Missing description
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216183146_coverage_fuzzing_jobs.yml)
 
 Group: ``
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -942,6 +1092,8 @@ Total visits to VSA (both group- and project-level) all time
 
 Group: `group::optimize`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -953,6 +1105,8 @@ Count of DAST jobs run
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216175612_dast_jobs.yml)
 
 Group: `group::dynamic analysis`
+
+Data Category: `Operational`
 
 Status: `data_available`
 
@@ -966,6 +1120,8 @@ Missing description
 
 Group: ``
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`
@@ -977,6 +1133,8 @@ Count to Dependency List page views
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_all/20210216175211_dependency_list_usages_total.yml)
 
 Group: `group::composition analysis`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -990,6 +1148,8 @@ Count of Dependency Scanning jobs run
 
 Group: `group::composition analysis`
 
+Data Category: `Operational`
+
 Status: `data_available`
 
 Tiers: `ultimate`
@@ -1001,6 +1161,8 @@ Missing description
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216181908_deploy_keys.yml)
 
 Group: `group::release`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -1014,6 +1176,8 @@ Total deployments count
 
 Group: `group::ops release`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -1025,6 +1189,8 @@ Number of designs that were created
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216180740_design_management_designs_create.yml)
 
 Group: `group::product planning`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -1038,6 +1204,8 @@ Number of designs that were deleted
 
 Group: `group::product planning`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -1049,6 +1217,8 @@ Number of updates to designs
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216180741_design_management_designs_update.yml)
 
 Group: `group::product planning`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -1062,6 +1232,8 @@ Total available and stopped environments
 
 Group: `group::release`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`
@@ -1073,6 +1245,8 @@ Count of issues that are assigned to an epic
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_all/20210216181208_epic_issues.yml)
 
 Group: `group::product planning`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -1086,6 +1260,8 @@ Count of all epics
 
 Group: `group::product planning`
 
+Data Category: `Operational`
+
 Status: `data_available`
 
 Tiers: `premium`, `ultimate`
@@ -1097,6 +1273,8 @@ Count of the deepest relationship level for epics
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_all/20210216181212_epics_deepest_relationship_level.yml)
 
 Group: `group::product planning`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -1110,6 +1288,8 @@ Total failed deployments
 
 Group: `group::release`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`
@@ -1121,6 +1301,8 @@ Number of feature flag toggles
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216181249_feature_flags.yml)
 
 Group: `group::progressive delivery`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -1134,6 +1316,8 @@ Number of replication events on a Geo primary
 
 Group: `group::geo`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `premium`, `ultimate`
@@ -1145,6 +1329,8 @@ Total number of sites in a Geo deployment
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_all/20210201124936_geo_nodes.yml)
 
 Group: `group::geo`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -1158,6 +1344,8 @@ Total Grafana integrations attached to projects
 
 Group: `group::monitor`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`
@@ -1169,6 +1357,8 @@ Total GitLab Managed disabled clusters previously attached to groups
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216175246_group_clusters_disabled.yml)
 
 Group: `group::configure`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -1182,6 +1372,8 @@ Total GitLab Managed clusters attached to groups
 
 Group: `group::configure`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -1193,6 +1385,8 @@ Total count of groups as of usage ping snapshot
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216180750_groups.yml)
 
 Group: `group::access`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -1206,6 +1400,8 @@ Count of groups with active integrations for Asana
 
 Group: `group::ecosystem`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -1217,6 +1413,8 @@ Count of groups with active integrations for Assembla
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216175636_groups_assembla_active.yml)
 
 Group: `group::ecosystem`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -1230,6 +1428,8 @@ Count of groups with active integrations for Bamboo CI
 
 Group: `group::ecosystem`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -1241,6 +1441,8 @@ Count of groups with active integrations for Bugzilla
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216175659_groups_bugzilla_active.yml)
 
 Group: `group::ecosystem`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -1254,6 +1456,8 @@ Count of groups with active integrations for Buildkite
 
 Group: `group::ecosystem`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -1265,6 +1469,8 @@ Count of groups with active integrations for Campfire
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216175721_groups_campfire_active.yml)
 
 Group: `group::ecosystem`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -1278,6 +1484,8 @@ Count of groups with active integrations for Confluence
 
 Group: `group::ecosystem`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -1289,6 +1497,8 @@ Count of groups with active integrations for a Custom Issue Tracker
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216175744_groups_custom_issue_tracker_active.yml)
 
 Group: `group::ecosystem`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -1302,6 +1512,8 @@ Count of groups with active integrations for Datadog
 
 Group: `group::ecosystem`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -1313,6 +1525,8 @@ Count of groups with active integrations for Discord
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216175755_groups_discord_active.yml)
 
 Group: `group::ecosystem`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -1326,6 +1540,8 @@ Count of groups with active integrations for Drone CI
 
 Group: `group::ecosystem`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -1337,6 +1553,8 @@ Count of groups with active integrations for Emails on Push
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216175817_groups_emails_on_push_active.yml)
 
 Group: `group::ecosystem`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -1350,6 +1568,8 @@ Count of groups with active integrations for EWM
 
 Group: `group::ecosystem`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -1361,6 +1581,8 @@ Count of groups with active integrations for External Wiki
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216175828_groups_external_wiki_active.yml)
 
 Group: `group::ecosystem`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -1374,6 +1596,8 @@ Count of groups with active integrations for Flowdock
 
 Group: `group::ecosystem`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -1385,6 +1609,8 @@ Count of groups with active integrations for GitHub
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_all/20210216175850_groups_github_active.yml)
 
 Group: `group::ecosystem`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -1398,6 +1624,8 @@ Count of groups with active integrations for Hangouts Chat
 
 Group: `group::ecosystem`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -1409,6 +1637,8 @@ Count of groups with active integrations for HipChat
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216175912_groups_hipchat_active.yml)
 
 Group: `group::ecosystem`
+
+Data Category: `Optional`
 
 Status: `removed`
 
@@ -1422,6 +1652,8 @@ Count of active groups inheriting integrations for Asana
 
 Group: `group::ecosystem`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -1433,6 +1665,8 @@ Count of active groups inheriting integrations for Assembla
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216175644_groups_inheriting_assembla_active.yml)
 
 Group: `group::ecosystem`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -1446,6 +1680,8 @@ Count of active groups inheriting integrations for Bamboo CI
 
 Group: `group::ecosystem`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -1457,6 +1693,8 @@ Count of active groups inheriting integrations for Bugzilla
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216175706_groups_inheriting_bugzilla_active.yml)
 
 Group: `group::ecosystem`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -1470,6 +1708,8 @@ Count of active groups inheriting integrations for Buildkite
 
 Group: `group::ecosystem`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -1481,6 +1721,8 @@ Count of active groups inheriting integrations for Campfire
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216175729_groups_inheriting_campfire_active.yml)
 
 Group: `group::ecosystem`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -1494,6 +1736,8 @@ Count of active groups inheriting integrations for Confluence
 
 Group: `group::ecosystem`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -1505,6 +1749,8 @@ Count of active groups inheriting integrations for a Custom Issue Tracker
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216175751_groups_inheriting_custom_issue_tracker_active.yml)
 
 Group: `group::ecosystem`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -1518,6 +1764,8 @@ Count of active groups inheriting integrations for Datadog
 
 Group: `group::ecosystem`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -1529,6 +1777,8 @@ Count of active groups inheriting integrations for Discord
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216175802_groups_inheriting_discord_active.yml)
 
 Group: `group::ecosystem`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -1542,6 +1792,8 @@ Count of active groups inheriting integrations for Drone CI
 
 Group: `group::ecosystem`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -1553,6 +1805,8 @@ Count of active groups inheriting integrations for Emails on Push
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216175824_groups_inheriting_emails_on_push_active.yml)
 
 Group: `group::ecosystem`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -1566,6 +1820,8 @@ Count of active groups inheriting integrations for EWM
 
 Group: `group::ecosystem`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -1577,6 +1833,8 @@ Count of active groups inheriting integrations for External Wiki
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216175835_groups_inheriting_external_wiki_active.yml)
 
 Group: `group::ecosystem`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -1590,6 +1848,8 @@ Count of active groups inheriting integrations for Flowdock
 
 Group: `group::ecosystem`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -1601,6 +1861,8 @@ Count of active groups inheriting integrations for GitHub
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_all/20210216175857_groups_inheriting_github_active.yml)
 
 Group: `group::ecosystem`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -1614,6 +1876,8 @@ Count of active groups inheriting integrations for Hangouts Chat
 
 Group: `group::ecosystem`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -1625,6 +1889,8 @@ Count of active groups inheriting integrations for HipChat
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216175919_groups_inheriting_hipchat_active.yml)
 
 Group: `group::ecosystem`
+
+Data Category: `Optional`
 
 Status: `removed`
 
@@ -1638,6 +1904,8 @@ Count of active groups inheriting integrations for Irker
 
 Group: `group::ecosystem`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -1649,6 +1917,8 @@ Count of active groups inheriting integrations for Jenkins
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216175941_groups_inheriting_jenkins_active.yml)
 
 Group: `group::ecosystem`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -1662,6 +1932,8 @@ Count of active groups inheriting integrations for Jira
 
 Group: `group::ecosystem`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -1673,6 +1945,8 @@ Count of active groups inheriting integrations for Mattermost
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216180003_groups_inheriting_mattermost_active.yml)
 
 Group: `group::ecosystem`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -1686,6 +1960,8 @@ Count of active groups inheriting integrations for Mattermost (slash commands)
 
 Group: `group::ecosystem`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -1697,6 +1973,8 @@ Count of active groups inheriting integrations for Microsoft Teams
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216180025_groups_inheriting_microsoft_teams_active.yml)
 
 Group: `group::ecosystem`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -1710,6 +1988,8 @@ Count of active groups inheriting integrations for Mock CI
 
 Group: `group::ecosystem`
 
+Data Category: `Optional`
+
 Status: `removed`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -1721,6 +2001,8 @@ Count of active groups inheriting integrations for Mock Monitoring
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216182743_groups_inheriting_mock_monitoring_active.yml)
 
 Group: `group::ecosystem`
+
+Data Category: `Optional`
 
 Status: `removed`
 
@@ -1734,6 +2016,8 @@ Count of active groups inheriting integrations for Packagist
 
 Group: `group::ecosystem`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -1745,6 +2029,8 @@ Count of active groups inheriting integrations for Pipeline Emails
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216180047_groups_inheriting_pipelines_email_active.yml)
 
 Group: `group::ecosystem`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -1758,6 +2044,8 @@ Count of active groups inheriting integrations for Pivotal Tracker
 
 Group: `group::ecosystem`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -1769,6 +2057,8 @@ Count of active groups inheriting integrations for Prometheus
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216180940_groups_inheriting_prometheus_active.yml)
 
 Group: `group::monitor`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -1782,6 +2072,8 @@ Count of active groups inheriting integrations for Pushover
 
 Group: `group::ecosystem`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -1793,6 +2085,8 @@ Count of active groups inheriting integrations for Redmine
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216180120_groups_inheriting_redmine_active.yml)
 
 Group: `group::ecosystem`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -1806,6 +2100,8 @@ Count of active groups inheriting integrations for Slack
 
 Group: `group::ecosystem`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -1817,6 +2113,8 @@ Count of active groups inheriting integrations for Slack (slash commands)
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216180142_groups_inheriting_slack_slash_commands_active.yml)
 
 Group: `group::ecosystem`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -1830,6 +2128,8 @@ Count of active groups inheriting integrations for Teamcity CI
 
 Group: `group::ecosystem`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -1841,6 +2141,8 @@ Count of active groups inheriting integrations for Unifiy Circuit
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216180204_groups_inheriting_unify_circuit_active.yml)
 
 Group: `group::ecosystem`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -1854,6 +2156,8 @@ Count of active groups inheriting integrations for Webex Teams
 
 Group: `group::ecosystem`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -1865,6 +2169,8 @@ Count of active groups inheriting integrations for YouTrack
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216180226_groups_inheriting_youtrack_active.yml)
 
 Group: `group::ecosystem`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -1878,6 +2184,8 @@ Count of groups with active integrations for Irker
 
 Group: `group::ecosystem`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -1889,6 +2197,8 @@ Count of groups with active integrations for Jenkins
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216175934_groups_jenkins_active.yml)
 
 Group: `group::ecosystem`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -1902,6 +2212,8 @@ Count of groups with active integrations for Jira
 
 Group: `group::ecosystem`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -1913,6 +2225,8 @@ Count of groups with active integrations for Mattermost
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216175956_groups_mattermost_active.yml)
 
 Group: `group::ecosystem`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -1926,6 +2240,8 @@ Count of groups with active integrations for Mattermost (slash commands)
 
 Group: `group::ecosystem`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -1937,6 +2253,8 @@ Count of groups with active integrations for Microsoft Teams
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216180018_groups_microsoft_teams_active.yml)
 
 Group: `group::ecosystem`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -1950,6 +2268,8 @@ Count of groups with active integrations for Mock CI
 
 Group: `group::ecosystem`
 
+Data Category: `Optional`
+
 Status: `removed`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -1961,6 +2281,8 @@ Count of groups with active integrations for Mock Monitoring
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216182736_groups_mock_monitoring_active.yml)
 
 Group: `group::ecosystem`
+
+Data Category: `Optional`
 
 Status: `removed`
 
@@ -1974,6 +2296,8 @@ Count of groups with active integrations for Packagist
 
 Group: `group::ecosystem`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -1985,6 +2309,8 @@ Count of groups with active integrations for Pipeline Emails
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216180040_groups_pipelines_email_active.yml)
 
 Group: `group::ecosystem`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -1998,6 +2324,8 @@ Count of groups with active integrations for Pivotal Tracker
 
 Group: `group::ecosystem`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -2009,6 +2337,8 @@ Count of groups with active integrations for Prometheus
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216180933_groups_prometheus_active.yml)
 
 Group: `group::monitor`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -2022,6 +2352,8 @@ Count of groups with active integrations for Pushover
 
 Group: `group::ecosystem`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -2033,6 +2365,8 @@ Count of groups with active integrations for Redmine
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216180113_groups_redmine_active.yml)
 
 Group: `group::ecosystem`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -2046,6 +2380,8 @@ Count of groups with active integrations for Slack
 
 Group: `group::ecosystem`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -2057,6 +2393,8 @@ Count of groups with active integrations for Slack (slash commands)
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216180135_groups_slack_slash_commands_active.yml)
 
 Group: `group::ecosystem`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -2070,6 +2408,8 @@ Count of groups with active integrations for Teamcity CI
 
 Group: `group::ecosystem`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -2081,6 +2421,8 @@ Count of groups with active integrations for Unifiy Circuit
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216180157_groups_unify_circuit_active.yml)
 
 Group: `group::ecosystem`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -2094,6 +2436,8 @@ Count of groups with active integrations for Webex Teams
 
 Group: `group::ecosystem`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -2105,6 +2449,8 @@ Count of groups with active integrations for YouTrack
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216180219_groups_youtrack_active.yml)
 
 Group: `group::ecosystem`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -2118,6 +2464,8 @@ Total clicks on the create track's first email
 
 Group: `group::activation`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -2129,6 +2477,8 @@ Total sent emails of the create track's first email
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210510201537_in_product_marketing_email_create_0_sent.yml)
 
 Group: `group::activation`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -2142,6 +2492,8 @@ Total clicks on the create track's second email
 
 Group: `group::activation`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -2153,6 +2505,8 @@ Total sent emails of the create track's second email
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210510202148_in_product_marketing_email_create_1_sent.yml)
 
 Group: `group::activation`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -2166,6 +2520,8 @@ Total clicks on the create track's third email
 
 Group: `group::activation`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -2177,6 +2533,8 @@ Total sent emails of the create track's third email
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210510202604_in_product_marketing_email_create_2_sent.yml)
 
 Group: `group::activation`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -2190,6 +2548,8 @@ Total sent emails of the experience track's first email
 
 Group: `group::activation`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -2201,6 +2561,8 @@ Total clicks on the team track's first email
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210510203143_in_product_marketing_email_team_0_cta_clicked.yml)
 
 Group: `group::activation`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -2214,6 +2576,8 @@ Total sent emails of the team track's first email
 
 Group: `group::activation`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -2225,6 +2589,8 @@ Total clicks on the team track's second email
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210510203203_in_product_marketing_email_team_1_cta_clicked.yml)
 
 Group: `group::activation`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -2238,6 +2604,8 @@ Total sent emails of the team track's second email
 
 Group: `group::activation`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -2249,6 +2617,8 @@ Total clicks on the team track's third email
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210510203223_in_product_marketing_email_team_2_cta_clicked.yml)
 
 Group: `group::activation`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -2262,6 +2632,8 @@ Total sent emails of the team track's third email
 
 Group: `group::activation`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -2273,6 +2645,8 @@ Total clicks on the verify trial's first email
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210510203044_in_product_marketing_email_trial_0_cta_clicked.yml)
 
 Group: `group::activation`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -2286,6 +2660,8 @@ Total sent emails of the trial track's first email
 
 Group: `group::activation`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -2297,6 +2673,8 @@ Total clicks on the trial track's second email
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210510203104_in_product_marketing_email_trial_1_cta_clicked.yml)
 
 Group: `group::activation`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -2310,6 +2688,8 @@ Total sent emails of the trial track's second email
 
 Group: `group::activation`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -2321,6 +2701,8 @@ Total clicks on the trial track's third email
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210510203124_in_product_marketing_email_trial_2_cta_clicked.yml)
 
 Group: `group::activation`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -2334,6 +2716,8 @@ Total sent emails of the trial track's third email
 
 Group: `group::activation`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -2345,6 +2729,8 @@ Total clicks on the verify track's first email
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210510202943_in_product_marketing_email_verify_0_cta_clicked.yml)
 
 Group: `group::activation`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -2358,6 +2744,8 @@ Total sent emails of the verify track's first email
 
 Group: `group::activation`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -2369,6 +2757,8 @@ Total clicks on the verify track's second email
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210510203005_in_product_marketing_email_verify_1_cta_clicked.yml)
 
 Group: `group::activation`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -2382,6 +2772,8 @@ Total sent emails of the verify track's second email
 
 Group: `group::activation`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -2393,6 +2785,8 @@ Total clicks on the verify track's third email
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210510203025_in_product_marketing_email_verify_2_cta_clicked.yml)
 
 Group: `group::activation`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -2406,6 +2800,8 @@ Total sent emails of the verify track's third email
 
 Group: `group::activation`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -2417,6 +2813,8 @@ Missing description
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216181916_in_review_folder.yml)
 
 Group: `group::release`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -2430,6 +2828,8 @@ Count of incidents (issues where issue_type=incident)
 
 Group: `group::monitor`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -2441,6 +2841,8 @@ Count of all issues with the label=incident
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216180451_incident_labeled_issues.yml)
 
 Group: `group::monitor`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -2454,6 +2856,8 @@ Whether or not ModSecurity is set to blocking mode
 
 Group: `group::container security`
 
+Data Category: `Operational`
+
 Status: `removed`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -2465,6 +2869,8 @@ Whether or not ModSecurity is disabled within Ingress
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216175454_ingress_modsecurity_disabled.yml)
 
 Group: `group::container security`
+
+Data Category: `Operational`
 
 Status: `removed`
 
@@ -2478,6 +2884,8 @@ Whether or not ModSecurity is set to logging mode
 
 Group: `group::container security`
 
+Data Category: `Operational`
+
 Status: `removed`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -2489,6 +2897,8 @@ Whether or not ModSecurity has not been installed into the cluster
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216175456_ingress_modsecurity_not_installed.yml)
 
 Group: `group::container security`
+
+Data Category: `Operational`
 
 Status: `removed`
 
@@ -2502,6 +2912,8 @@ Cumulative count of packets identified as anomalous by ModSecurity since Usage P
 
 Group: `group::container security`
 
+Data Category: `Operational`
+
 Status: `removed`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -2513,6 +2925,8 @@ Cumulative count of packets processed by ModSecurity since Usage Ping was last r
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216175442_ingress_modsecurity_packets_processed.yml)
 
 Group: `group::container security`
+
+Data Category: `Operational`
 
 Status: `removed`
 
@@ -2526,6 +2940,8 @@ Whether or not ModSecurity statistics are unavailable
 
 Group: `group::container security`
 
+Data Category: `Operational`
+
 Status: `removed`
 
 Tiers: `ultimate`
@@ -2537,6 +2953,8 @@ Total GitLab Managed disabled clusters previously attached to the instance
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216175248_instance_clusters_disabled.yml)
 
 Group: `group::configure`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -2550,6 +2968,8 @@ Total GitLab Managed clusters attached to the instance
 
 Group: `group::configure`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -2561,6 +2981,8 @@ Count of active instance-level integrations for Asana
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216175628_instances_asana_active.yml)
 
 Group: `group::ecosystem`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -2574,6 +2996,8 @@ Count of active instance-level integrations for Assembla
 
 Group: `group::ecosystem`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -2585,6 +3009,8 @@ Count of active instance-level integrations for Bamboo CI
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216175651_instances_bamboo_active.yml)
 
 Group: `group::ecosystem`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -2598,6 +3024,8 @@ Count of active instance-level integrations for Bugzilla
 
 Group: `group::ecosystem`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -2609,6 +3037,8 @@ Count of active instance-level integrations for Buildkite
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216175714_instances_buildkite_active.yml)
 
 Group: `group::ecosystem`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -2622,6 +3052,8 @@ Count of active instance-level integrations for Campfire
 
 Group: `group::ecosystem`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -2633,6 +3065,8 @@ Count of active instance-level integrations for Confluence
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216175736_instances_confluence_active.yml)
 
 Group: `group::ecosystem`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -2646,6 +3080,8 @@ Count of active instance-level integrations for a Custom Issue Tracker
 
 Group: `group::ecosystem`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -2657,6 +3093,8 @@ Count of active instance-level integrations for Datadog
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216182553_instances_datadog_active.yml)
 
 Group: `group::ecosystem`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -2670,6 +3108,8 @@ Count of active instance-level integrations for Discord
 
 Group: `group::ecosystem`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -2681,6 +3121,8 @@ Count of active instance-level integrations for Drone CI
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216175809_instances_drone_ci_active.yml)
 
 Group: `group::ecosystem`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -2694,6 +3136,8 @@ Count of active instance-level integrations for Emails on Push
 
 Group: `group::ecosystem`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -2705,6 +3149,8 @@ Count of active instance-level integrations for EWM
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216182620_instances_ewm_active.yml)
 
 Group: `group::ecosystem`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -2718,6 +3164,8 @@ Count of active instance-level integrations for External Wiki
 
 Group: `group::ecosystem`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -2729,6 +3177,8 @@ Count of active instance-level integrations for Flowdock
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216175842_instances_flowdock_active.yml)
 
 Group: `group::ecosystem`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -2742,6 +3192,8 @@ Count of active instance-level integrations for GitHub
 
 Group: `group::ecosystem`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `premium`, `ultimate`
@@ -2753,6 +3205,8 @@ Count of active instance-level integrations for Hangouts Chat
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216175904_instances_hangouts_chat_active.yml)
 
 Group: `group::ecosystem`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -2766,6 +3220,8 @@ Count of active instance-level integrations for HipChat
 
 Group: `group::ecosystem`
 
+Data Category: `Optional`
+
 Status: `removed`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -2777,6 +3233,8 @@ Count of active instance-level integrations for Irker
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216175926_instances_irker_active.yml)
 
 Group: `group::ecosystem`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -2790,6 +3248,8 @@ Count of active instance-level integrations for Jenkins
 
 Group: `group::ecosystem`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -2801,6 +3261,8 @@ Count of active instance-level integrations for Jira
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216175948_instances_jira_active.yml)
 
 Group: `group::ecosystem`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -2814,6 +3276,8 @@ Count of active instance-level integrations for Mattermost
 
 Group: `group::ecosystem`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -2825,6 +3289,8 @@ Count of active instance-level integrations for Mattermost (slash commands)
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216180010_instances_mattermost_slash_commands_active.yml)
 
 Group: `group::ecosystem`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -2838,6 +3304,8 @@ Count of active instance-level integrations for Microsoft Teams
 
 Group: `group::ecosystem`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -2849,6 +3317,8 @@ Count of active instance-level integrations for  Mock CI
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216182728_instances_mock_ci_active.yml)
 
 Group: `group::ecosystem`
+
+Data Category: `Optional`
 
 Status: `removed`
 
@@ -2862,6 +3332,8 @@ Count of active instance-level integrations for  Mock Monitoring
 
 Group: `group::ecosystem`
 
+Data Category: `Optional`
+
 Status: `removed`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -2873,6 +3345,8 @@ Count of active instance-level integrations for Packagist
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216180032_instances_packagist_active.yml)
 
 Group: `group::ecosystem`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -2886,6 +3360,8 @@ Count of active instance-level integrations for Pipeline Emails
 
 Group: `group::ecosystem`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -2897,6 +3373,8 @@ Count of active instance-level integrations for Pivotal Tracker
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216180054_instances_pivotaltracker_active.yml)
 
 Group: `group::ecosystem`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -2910,6 +3388,8 @@ Count of active instance-level integrations for Prometheus
 
 Group: `group::monitor`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -2921,6 +3401,8 @@ Count of active instance-level integrations for Pushover
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216180105_instances_pushover_active.yml)
 
 Group: `group::ecosystem`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -2934,6 +3416,8 @@ Count of active instance-level integrations for Redmine
 
 Group: `group::ecosystem`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -2945,6 +3429,8 @@ Count of active instance-level integrations for Slack
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216180127_instances_slack_active.yml)
 
 Group: `group::ecosystem`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -2958,6 +3444,8 @@ Count of active instance-level integrations for Slack (slash commands)
 
 Group: `group::ecosystem`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -2969,6 +3457,8 @@ Count of active instance-level integrations for Teamcity CI
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216180149_instances_teamcity_active.yml)
 
 Group: `group::ecosystem`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -2982,6 +3472,8 @@ Count of active instance-level integrations for Unifiy Circuit
 
 Group: `group::ecosystem`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -2993,6 +3485,8 @@ Count of active instance-level integrations for Webex Teams
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216180212_instances_webex_teams_active.yml)
 
 Group: `group::ecosystem`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -3006,6 +3500,8 @@ Count of active instance-level integrations for YouTrack
 
 Group: `group::ecosystem`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -3017,6 +3513,8 @@ Count of Issues created
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216181102_issues.yml)
 
 Group: `group::plan`
+
+Data Category: `Operational`
 
 Status: `data_available`
 
@@ -3030,6 +3528,8 @@ Count of issues created automatically on alerts from GitLab-Managed Prometheus
 
 Group: `group::monitor`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -3041,6 +3541,8 @@ Count of issues manually created from the GitLab UI on Sentry errors
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216180434_issues_created_from_gitlab_error_tracking_ui.yml)
 
 Group: `group::monitor`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -3054,6 +3556,8 @@ Count of all issues created from GitLab alerts (bot and non-bot)
 
 Group: `group::monitor`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -3065,6 +3569,8 @@ Count of issues created manually by non-bot users from GitLab alerts
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216180445_issues_created_manually_from_alerts.yml)
 
 Group: `group::monitor`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -3078,6 +3584,8 @@ Count of issues where a user have added AND removed a zoom meeting using slash c
 
 Group: `group::monitor`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -3089,6 +3597,8 @@ Count of issues where a user has linked a Zoom meeting
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216180436_issues_with_associated_zoom_link.yml)
 
 Group: `group::monitor`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -3102,6 +3612,8 @@ Count of issues where a user has embedded a Grafana chart
 
 Group: `group::monitor`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -3113,6 +3625,8 @@ Count of issues with health status
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_all/20210216181210_issues_with_health_status.yml)
 
 Group: `group::product planning`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -3126,6 +3640,8 @@ Count of Projects that imported Issues from Jira
 
 Group: `group::ecosystem`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -3137,6 +3653,8 @@ Count of Jira imports completed
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216181258_jira_imports_total_imported_count.yml)
 
 Group: `group::ecosystem`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -3150,6 +3668,8 @@ Count of total issues imported via the Jira Importer
 
 Group: `group::ecosystem`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -3161,6 +3681,8 @@ Number of keys.
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216180752_keys.yml)
 
 Group: `group::access`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -3174,6 +3696,8 @@ Count of events when an Agent is asked to synchronize the manifests or its confi
 
 Group: `group::configure`
 
+Data Category: `Operational`
+
 Status: `data_available`
 
 Tiers: `premium`, `ultimate`
@@ -3185,6 +3709,8 @@ Count of Kubernetes API proxy requests
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_all/20210505015532_kubernetes_agent_k8s_api_proxy_request.yml)
 
 Group: `group::configure`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -3198,6 +3724,8 @@ Count of Kubernetes registered agents
 
 Group: `group::configure`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `premium`, `ultimate`
@@ -3209,6 +3737,8 @@ Count of Kubernetes agents with at least one token
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_all/20210216175318_kubernetes_agents_with_token.yml)
 
 Group: `group::configure`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -3222,6 +3752,8 @@ Count of label lists created on Boards
 
 Group: `group::project management`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -3233,6 +3765,8 @@ Count of Labels
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216181111_labels.yml)
 
 Group: `group::project management`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -3246,6 +3780,8 @@ Number of groups that are synced via LDAP group sync `https://docs.gitlab.com/ee
 
 Group: `group::access`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `premium`, `ultimate`
@@ -3257,6 +3793,8 @@ Number of keys synced as part of LDAP `https://docs.gitlab.com/ee/administration
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_all/20210216174824_ldap_keys.yml)
 
 Group: `group::access`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -3270,6 +3808,8 @@ Number of users that are linked to LDAP
 
 Group: `group::access`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `premium`, `ultimate`
@@ -3281,6 +3821,8 @@ Missing description
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216181009_lfs_objects.yml)
 
 Group: `group::create`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -3294,6 +3836,8 @@ Count of License Scanning jobs run
 
 Group: `group::composition analysis`
 
+Data Category: `Subscription`
+
 Status: `data_available`
 
 Tiers: `ultimate`
@@ -3305,6 +3849,8 @@ Count to License List page views
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/license/20210216175210_licenses_list_views.yml)
 
 Group: `group::composition analysis`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -3318,6 +3864,8 @@ Count of the number of merge request comments
 
 Group: `group::code review`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -3329,6 +3877,8 @@ Count of the number of merge requests created
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216175043_merge_request_create.yml)
 
 Group: `group::code review`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -3342,6 +3892,8 @@ Count of the number of merge requests
 
 Group: `group::code review`
 
+Data Category: `Operational`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -3353,6 +3905,8 @@ Count of merge requests merged using approval rules
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216175206_merged_merge_requests_using_approval_rules.yml)
 
 Group: `group::compliance`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -3366,6 +3920,8 @@ Count of milestone lists created on Boards
 
 Group: `group::project management`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `premium`, `ultimate`
@@ -3377,6 +3933,8 @@ Count of milestones created
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216181108_milestones.yml)
 
 Group: `group::project management`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -3390,6 +3948,8 @@ Total Searches using the navbar for All Basic Search and Advanced Search in self
 
 Group: `group::global search`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -3401,6 +3961,8 @@ Cumulative count of packets dropped by Cilium (Container Network Security) since
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216175448_network_policy_drops.yml)
 
 Group: `group::container security`
+
+Data Category: `Operational`
 
 Status: `data_available`
 
@@ -3414,6 +3976,8 @@ Cumulative count of packets forwarded by Cilium (Container Network Security) sin
 
 Group: `group::container security`
 
+Data Category: `Operational`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -3425,6 +3989,8 @@ Count of Notes across all objects that use them
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216181113_notes.yml)
 
 Group: `group::project management`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -3438,6 +4004,8 @@ Active users with enabled operations dashboard
 
 Group: `group::monitor`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -3449,6 +4017,8 @@ Active users with projects on operations dashboard
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216180944_operations_dashboard_users_with_projects_added.yml)
 
 Group: `group::monitor`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -3462,6 +4032,8 @@ A count of Composer packages that have been deleted
 
 Group: `group::package`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -3473,6 +4045,8 @@ A count of Composer packages that have been downloaded
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216182857_package_events_i_package_composer_pull_package.yml)
 
 Group: `group::package`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -3486,6 +4060,8 @@ A count of Composer packages that have been published
 
 Group: `group::package`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -3497,6 +4073,8 @@ A count of Conan packages that have been deleted
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216182901_package_events_i_package_conan_delete_package.yml)
 
 Group: `group::package`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -3510,6 +4088,8 @@ A count of Conan packages that have been downloaded
 
 Group: `group::package`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -3521,6 +4101,8 @@ A count of Conan packages that have been published
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216182905_package_events_i_package_conan_push_package.yml)
 
 Group: `group::package`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -3534,6 +4116,8 @@ A count of container images that have been deleted
 
 Group: `group::package`
 
+Data Category: `Optional`
+
 Status: `deprecated`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -3545,6 +4129,8 @@ A count of container images that have been downloaded
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216182909_package_events_i_package_container_pull_package.yml)
 
 Group: `group::package`
+
+Data Category: `Optional`
 
 Status: `deprecated`
 
@@ -3558,6 +4144,8 @@ A count of container images that have been published
 
 Group: `group::package`
 
+Data Category: `Optional`
+
 Status: `deprecated`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -3569,6 +4157,8 @@ A count of Debian packages that have been deleted
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216182913_package_events_i_package_debian_delete_package.yml)
 
 Group: `group::package`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -3582,6 +4172,8 @@ A count of Debian packages that have been downloaded
 
 Group: `group::package`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -3593,6 +4185,8 @@ A count of Debian packages that have been published
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216182917_package_events_i_package_debian_push_package.yml)
 
 Group: `group::package`
+
+Data Category: `Optional`
 
 Status: `deprecated`
 
@@ -3606,6 +4200,8 @@ A count of packages that have been deleted
 
 Group: `group::package`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -3617,6 +4213,8 @@ A count of packages that have been deleted using a Deploy Token
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216182921_package_events_i_package_delete_package_by_deploy_token.yml)
 
 Group: `group::package`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -3630,6 +4228,8 @@ A count of packages that have been deleted using a Guest
 
 Group: `group::package`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -3641,6 +4241,8 @@ A count of packages that have been deleted using a logged in user
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216182925_package_events_i_package_delete_package_by_user.yml)
 
 Group: `group::package`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -3654,6 +4256,8 @@ A count of generic packages that have been deleted
 
 Group: `group::package`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -3665,6 +4269,8 @@ A count of generic packages that have been downloaded
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216182929_package_events_i_package_generic_pull_package.yml)
 
 Group: `group::package`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -3678,6 +4284,8 @@ A count of generic packages that have been published
 
 Group: `group::package`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -3689,6 +4297,8 @@ A count of Go modules that have been deleted
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216182933_package_events_i_package_golang_delete_package.yml)
 
 Group: `group::package`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -3702,6 +4312,8 @@ A count of Go modules that have been downloaded
 
 Group: `group::package`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -3714,6 +4326,8 @@ A count of Go modules that have been published
 
 Group: `group::package`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -3723,6 +4337,20 @@ Tiers: `free`, `premium`, `ultimate`
 Total count of pull Helm packages events
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210517073546_package_events_i_package_helm_pull_package.yml)
+
+Group: `group::package`
+
+Data Category: `Optional`
+
+Status: `implemented`
+
+Tiers: `free`, `premium`, `ultimate`
+
+### `counts.package_events_i_package_helm_push_package`
+
+The total count of Helm packages that have been published.
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210625095025_package_events_i_package_helm_push_package.yml)
 
 Group: `group::package`
 
@@ -3738,6 +4366,8 @@ A count of Maven packages that have been deleted
 
 Group: `group::package`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -3749,6 +4379,8 @@ A count of Maven packages that have been downloaded
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216182940_package_events_i_package_maven_pull_package.yml)
 
 Group: `group::package`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -3762,6 +4394,8 @@ A count of Maven packages that have been published
 
 Group: `group::package`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -3773,6 +4407,8 @@ A count of npm packages that have been deleted
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216182944_package_events_i_package_npm_delete_package.yml)
 
 Group: `group::package`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -3786,6 +4422,8 @@ A count of npm packages that have been downloaded
 
 Group: `group::package`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -3797,6 +4435,8 @@ A count of npm packages that have been published
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216182948_package_events_i_package_npm_push_package.yml)
 
 Group: `group::package`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -3810,6 +4450,8 @@ A count of NuGet packages that have been deleted
 
 Group: `group::package`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -3821,6 +4463,8 @@ A count of NuGet packages that have been downloaded
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216182952_package_events_i_package_nuget_pull_package.yml)
 
 Group: `group::package`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -3834,6 +4478,8 @@ A count of NuGet packages that have been published
 
 Group: `group::package`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -3845,6 +4491,8 @@ A count of packages that have been downloaded from the package registry
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216182956_package_events_i_package_pull_package.yml)
 
 Group: `group::package`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -3858,6 +4506,8 @@ A count of packages that have been downloaded from the package registry using a 
 
 Group: `group::package`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -3869,6 +4519,8 @@ A count of packages that have been downloaded from the package registry by a gue
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216183000_package_events_i_package_pull_package_by_guest.yml)
 
 Group: `group::package`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -3882,6 +4534,8 @@ A count of packages that have been downloaded from the package registry by a use
 
 Group: `group::package`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -3893,6 +4547,8 @@ A count of packages that have been published to the package registry
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216183004_package_events_i_package_push_package.yml)
 
 Group: `group::package`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -3906,6 +4562,8 @@ A count of packages that have been published to the package registry using a dep
 
 Group: `group::package`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -3917,6 +4575,8 @@ A count of packages that have been published to the package registry by a Guest
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216183007_package_events_i_package_push_package_by_guest.yml)
 
 Group: `group::package`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -3930,6 +4590,8 @@ A count of packages that have been published to the package registry by a user
 
 Group: `group::package`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -3941,6 +4603,8 @@ A count of Python packages that have been deleted from the package registry
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216183011_package_events_i_package_pypi_delete_package.yml)
 
 Group: `group::package`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -3954,6 +4618,8 @@ A count of Python packages that have been downloaded from the package registry
 
 Group: `group::package`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -3965,6 +4631,8 @@ A count of Python packages that have been published to the package registry
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216183015_package_events_i_package_pypi_push_package.yml)
 
 Group: `group::package`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -3978,6 +4646,8 @@ Total count of RubyGems packages delete events
 
 Group: `group::package`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -3989,6 +4659,8 @@ Total count of pull RubyGems packages events
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210303153002_package_events_i_package_rubygems_pull_package.yml)
 
 Group: `group::package`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -4002,6 +4674,8 @@ Total count of push RubyGems packages events
 
 Group: `group::package`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -4013,6 +4687,8 @@ A count of package tags that have been deleted from the package registry
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216183017_package_events_i_package_tag_delete_package.yml)
 
 Group: `group::package`
+
+Data Category: `Optional`
 
 Status: `deprecated`
 
@@ -4026,6 +4702,8 @@ A count of package tags that have been downloaded from the package registry
 
 Group: `group::package`
 
+Data Category: `Optional`
+
 Status: `deprecated`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -4037,6 +4715,8 @@ A count of package tags that have been published to the package registry
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216183021_package_events_i_package_tag_push_package.yml)
 
 Group: `group::package`
+
+Data Category: `Optional`
 
 Status: `deprecated`
 
@@ -4050,6 +4730,8 @@ Total count of Terraform Module packages delete events
 
 Group: `group::configure`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -4061,6 +4743,8 @@ Total count of pull Terraform Module packages events
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210410012202_package_events_i_package_terraform_module_pull_package.yml)
 
 Group: `group::configure`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -4074,6 +4758,8 @@ Total count of push Terraform Module packages events
 
 Group: `group::configure`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -4085,6 +4771,8 @@ The total number of packages published to the registry
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216181012_packages.yml)
 
 Group: `group::package`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -4098,6 +4786,8 @@ Total GitLab Pages domains
 
 Group: `group::release management`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`
@@ -4109,6 +4799,8 @@ Count of personal Snippets
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216180239_personal_snippets.yml)
 
 Group: `group::editor`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -4122,6 +4814,8 @@ Count the total number of log views
 
 Group: `group::monitor`
 
+Data Category: `Optional`
+
 Status: `removed`
 
 Tiers: `free`
@@ -4133,6 +4827,8 @@ Count of unique object pool repositories for fork deduplication
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216180410_pool_repositories.yml)
 
 Group: `group::gitaly`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -4146,6 +4842,8 @@ Total visits to /groups/:group/-/analytics/productivity_analytics all time
 
 Group: `group::optimize`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -4157,6 +4855,8 @@ Total GitLab Managed disabled clusters previously attached to projects
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216175244_project_clusters_disabled.yml)
 
 Group: `group::configure`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -4170,6 +4870,8 @@ Total GitLab Managed clusters attached to projects
 
 Group: `group::configure`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -4181,6 +4883,8 @@ Count of project Snippets
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216180241_project_snippets.yml)
 
 Group: `group::editor`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -4194,6 +4898,8 @@ Count of Projects created
 
 Group: `group::project management`
 
+Data Category: `Operational`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -4205,6 +4911,8 @@ Count of projects with active integrations for Asana
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216175623_projects_asana_active.yml)
 
 Group: `group::ecosystem`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -4218,6 +4926,8 @@ Count of projects with active integrations for Assembla
 
 Group: `group::ecosystem`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -4229,6 +4939,8 @@ Count of projects with active integrations for Bamboo CI
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216175645_projects_bamboo_active.yml)
 
 Group: `group::ecosystem`
+
+Data Category: `Operational`
 
 Status: `data_available`
 
@@ -4242,6 +4954,8 @@ Count of projects with active integrations for Bugzilla
 
 Group: `group::ecosystem`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -4253,6 +4967,8 @@ Count of projects with active integrations for Buildkite
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216175708_projects_buildkite_active.yml)
 
 Group: `group::ecosystem`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -4266,6 +4982,8 @@ Count of projects with active integrations for Campfire
 
 Group: `group::ecosystem`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -4277,6 +4995,8 @@ Count of projects with active integrations for Confluence
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216175731_projects_confluence_active.yml)
 
 Group: `group::ecosystem`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -4290,6 +5010,8 @@ Counts of Projects that have incident issues, regardless of status.
 
 Group: `group::monitor`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -4301,6 +5023,8 @@ Count of projects with active integrations for a Custom Issue Tracker
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216175742_projects_custom_issue_tracker_active.yml)
 
 Group: `group::ecosystem`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -4314,6 +5038,8 @@ Count of projects with active integrations for Datadog
 
 Group: `group::ecosystem`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -4325,6 +5051,8 @@ Count of projects with active integrations for Discord
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216175753_projects_discord_active.yml)
 
 Group: `group::ecosystem`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -4338,6 +5066,8 @@ Count of projects with active integrations for Drone CI
 
 Group: `group::ecosystem`
 
+Data Category: `Operational`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -4349,6 +5079,8 @@ Count of projects with active integrations for Emails on Push
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216175815_projects_emails_on_push_active.yml)
 
 Group: `group::ecosystem`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -4362,6 +5094,8 @@ Count of projects with active integrations for EWM
 
 Group: `group::ecosystem`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -4373,6 +5107,8 @@ Count of projects with active integrations for External Wiki
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216175826_projects_external_wiki_active.yml)
 
 Group: `group::ecosystem`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -4386,6 +5122,8 @@ Count of projects with active integrations for Flowdock
 
 Group: `group::ecosystem`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -4397,6 +5135,8 @@ Count of projects with active integrations for GitHub
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_all/20210216175848_projects_github_active.yml)
 
 Group: `group::ecosystem`
+
+Data Category: `Operational`
 
 Status: `data_available`
 
@@ -4410,6 +5150,8 @@ Count of projects with active integrations for Hangouts Chat
 
 Group: `group::ecosystem`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -4421,6 +5163,8 @@ Count of projects with active integrations for HipChat
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216175910_projects_hipchat_active.yml)
 
 Group: `group::ecosystem`
+
+Data Category: `Optional`
 
 Status: `removed`
 
@@ -4434,6 +5178,8 @@ Missing description
 
 Group: `group::import`
 
+Data Category: `Operational`
+
 Status: `data_available`
 
 Tiers: `free`
@@ -4445,6 +5191,8 @@ Count of active projects inheriting integrations for Asana
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216175630_projects_inheriting_asana_active.yml)
 
 Group: `group::ecosystem`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -4458,6 +5206,8 @@ Count of active projects inheriting integrations for Assembla
 
 Group: `group::ecosystem`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -4469,6 +5219,8 @@ Count of active projects inheriting integrations for Bamboo CI
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216175653_projects_inheriting_bamboo_active.yml)
 
 Group: `group::ecosystem`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -4482,6 +5234,8 @@ Count of active projects inheriting integrations for Bugzilla
 
 Group: `group::ecosystem`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -4493,6 +5247,8 @@ Count of active projects inheriting integrations for Buildkite
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216175716_projects_inheriting_buildkite_active.yml)
 
 Group: `group::ecosystem`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -4506,6 +5262,8 @@ Count of active projects inheriting integrations for Campfire
 
 Group: `group::ecosystem`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -4517,6 +5275,8 @@ Count of active projects inheriting integrations for Confluence
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216175738_projects_inheriting_confluence_active.yml)
 
 Group: `group::ecosystem`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -4530,6 +5290,8 @@ Count of active projects inheriting integrations for a Custom Issue Tracker
 
 Group: `group::ecosystem`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -4541,6 +5303,8 @@ Count of active projects inheriting integrations for Datadog
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216182555_projects_inheriting_datadog_active.yml)
 
 Group: `group::ecosystem`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -4554,6 +5318,8 @@ Count of active projects inheriting integrations for Discord
 
 Group: `group::ecosystem`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -4565,6 +5331,8 @@ Count of active projects inheriting integrations for Drone CI
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216175811_projects_inheriting_drone_ci_active.yml)
 
 Group: `group::ecosystem`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -4578,6 +5346,8 @@ Count of active projects inheriting integrations for Emails on Push
 
 Group: `group::ecosystem`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -4589,6 +5359,8 @@ Count of active projects inheriting integrations for EWM
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216182622_projects_inheriting_ewm_active.yml)
 
 Group: `group::ecosystem`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -4602,6 +5374,8 @@ Count of active projects inheriting integrations for External Wiki
 
 Group: `group::ecosystem`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -4613,6 +5387,8 @@ Count of active projects inheriting integrations for Flowdock
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216175844_projects_inheriting_flowdock_active.yml)
 
 Group: `group::ecosystem`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -4626,6 +5402,8 @@ Count of active projects inheriting integrations for GitHub
 
 Group: `group::ecosystem`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `premium`, `ultimate`
@@ -4637,6 +5415,8 @@ Count of active projects inheriting integrations for Hangouts Chat
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216175906_projects_inheriting_hangouts_chat_active.yml)
 
 Group: `group::ecosystem`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -4650,6 +5430,8 @@ Count of active projects inheriting integrations for HipChat
 
 Group: `group::ecosystem`
 
+Data Category: `Optional`
+
 Status: `removed`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -4661,6 +5443,8 @@ Count of active projects inheriting integrations for Irker
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216175928_projects_inheriting_irker_active.yml)
 
 Group: `group::ecosystem`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -4674,6 +5458,8 @@ Count of active projects inheriting integrations for Jenkins
 
 Group: `group::ecosystem`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -4685,6 +5471,8 @@ Count of active projects inheriting integrations for Jira
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216175950_projects_inheriting_jira_active.yml)
 
 Group: `group::ecosystem`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -4698,6 +5486,8 @@ Count of active projects inheriting integrations for Mattermost
 
 Group: `group::ecosystem`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -4709,6 +5499,8 @@ Count of active projects inheriting integrations for Mattermost (slash commands)
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216180012_projects_inheriting_mattermost_slash_commands_active.yml)
 
 Group: `group::ecosystem`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -4722,6 +5514,8 @@ Count of active projects inheriting integrations for Microsoft Teams
 
 Group: `group::ecosystem`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -4733,6 +5527,8 @@ Count of active projects inheriting integrations for Mock CI
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216182730_projects_inheriting_mock_ci_active.yml)
 
 Group: `group::ecosystem`
+
+Data Category: `Optional`
 
 Status: `removed`
 
@@ -4746,6 +5542,8 @@ Count of active projects inheriting integrations for Mock Monitoring
 
 Group: `group::ecosystem`
 
+Data Category: `Optional`
+
 Status: `removed`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -4757,6 +5555,8 @@ Count of active projects inheriting integrations for Packagist
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216180034_projects_inheriting_packagist_active.yml)
 
 Group: `group::ecosystem`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -4770,6 +5570,8 @@ Count of active projects inheriting integrations for Pipeline Emails
 
 Group: `group::ecosystem`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -4781,6 +5583,8 @@ Count of active projects inheriting integrations for Pivotal Tracker
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216180056_projects_inheriting_pivotaltracker_active.yml)
 
 Group: `group::ecosystem`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -4794,6 +5598,8 @@ Count of active projects inheriting integrations for Prometheus
 
 Group: `group::monitor`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -4805,6 +5611,8 @@ Count of active projects inheriting integrations for Pushover
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216180107_projects_inheriting_pushover_active.yml)
 
 Group: `group::ecosystem`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -4818,6 +5626,8 @@ Count of active projects inheriting integrations for Redmine
 
 Group: `group::ecosystem`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -4829,6 +5639,8 @@ Count of active projects inheriting integrations for Slack
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216180129_projects_inheriting_slack_active.yml)
 
 Group: `group::ecosystem`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -4842,6 +5654,8 @@ Count of active projects inheriting integrations for Slack (slash commands)
 
 Group: `group::ecosystem`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -4853,6 +5667,8 @@ Count of active projects inheriting integrations for Teamcity CI
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216180151_projects_inheriting_teamcity_active.yml)
 
 Group: `group::ecosystem`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -4866,6 +5682,8 @@ Count of active projects inheriting integrations for Unifiy Circuit
 
 Group: `group::ecosystem`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -4877,6 +5695,8 @@ Count of active projects inheriting integrations for Webex Teams
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216180214_projects_inheriting_webex_teams_active.yml)
 
 Group: `group::ecosystem`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -4890,6 +5710,8 @@ Count of active projects inheriting integrations for YouTrack
 
 Group: `group::ecosystem`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -4901,6 +5723,8 @@ Count of projects with active integrations for Irker
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216175921_projects_irker_active.yml)
 
 Group: `group::ecosystem`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -4914,6 +5738,8 @@ Count of projects with active integrations for Jenkins
 
 Group: `group::ecosystem`
 
+Data Category: `Operational`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -4925,6 +5751,8 @@ Count of projects with active integrations for Jira
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216175943_projects_jira_active.yml)
 
 Group: `group::ecosystem`
+
+Data Category: `Operational`
 
 Status: `data_available`
 
@@ -4938,6 +5766,8 @@ Count of active integrations with Jira Cloud (Saas)
 
 Group: `group::ecosystem`
 
+Data Category: `Operational`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -4949,6 +5779,8 @@ Count of active integrations with Jira Cloud (DVCS Connector)
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216180232_projects_jira_dvcs_cloud_active.yml)
 
 Group: `group::ecosystem`
+
+Data Category: `Operational`
 
 Status: `data_available`
 
@@ -4962,6 +5794,8 @@ Count of active integrations with Jira Software (DVCS connector)
 
 Group: `group::ecosystem`
 
+Data Category: `Operational`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -4973,6 +5807,8 @@ Total Jira Issue feature enabled
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_all/20210216180236_projects_jira_issuelist_active.yml)
 
 Group: `group::ecosystem`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -4986,6 +5822,8 @@ Count of active integrations with Jira Software (server)
 
 Group: `group::ecosystem`
 
+Data Category: `Operational`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -4997,6 +5835,8 @@ Count of projects with active integrations for Mattermost
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216175954_projects_mattermost_active.yml)
 
 Group: `group::ecosystem`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -5010,6 +5850,8 @@ Count of projects with active integrations for Mattermost (slash commands)
 
 Group: `group::ecosystem`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -5021,6 +5863,8 @@ Count of projects with active integrations for Microsoft Teams
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216180016_projects_microsoft_teams_active.yml)
 
 Group: `group::ecosystem`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -5034,6 +5878,8 @@ Projects with repository mirroring enabled
 
 Group: `group::pipeline execution`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `premium`, `ultimate`
@@ -5045,6 +5891,8 @@ Count of projects with active integrations for Mock CI
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216182722_projects_mock_ci_active.yml)
 
 Group: `group::ecosystem`
+
+Data Category: `Optional`
 
 Status: `removed`
 
@@ -5058,6 +5906,8 @@ Count of projects with active integrations for Mock Monitoring
 
 Group: `group::ecosystem`
 
+Data Category: `Optional`
+
 Status: `removed`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -5069,6 +5919,8 @@ Count of projects with active integrations for Packagist
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216180027_projects_packagist_active.yml)
 
 Group: `group::ecosystem`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -5082,6 +5934,8 @@ Count of projects with active integrations for Pipeline Emails
 
 Group: `group::ecosystem`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -5093,6 +5947,8 @@ Count of projects with active integrations for Pivotal Tracker
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216180049_projects_pivotaltracker_active.yml)
 
 Group: `group::ecosystem`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -5106,6 +5962,8 @@ Count of projects with active integrations for Prometheus
 
 Group: `group::monitor`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -5117,6 +5975,8 @@ Count of projects with active integrations for Pushover
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216180100_projects_pushover_active.yml)
 
 Group: `group::ecosystem`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -5130,6 +5990,8 @@ Count of projects with active integrations for Redmine
 
 Group: `group::ecosystem`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -5141,6 +6003,8 @@ Projects with a GitHub service pipeline enabled
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_all/20210216182212_projects_reporting_ci_cd_back_to_github.yml)
 
 Group: `group::continuous_integration`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -5154,6 +6018,8 @@ Count of projects with active integrations for Slack
 
 Group: `group::ecosystem`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -5165,6 +6031,8 @@ Count of projects with active integrations for Slack (slash commands)
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216180133_projects_slack_slash_commands_active.yml)
 
 Group: `group::ecosystem`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -5178,6 +6046,8 @@ Count of projects with active integrations for Teamcity CI
 
 Group: `group::ecosystem`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -5189,6 +6059,8 @@ Count of projects with active integrations for Unifiy Circuit
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216180155_projects_unify_circuit_active.yml)
 
 Group: `group::ecosystem`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -5202,6 +6074,8 @@ Count of projects with active integrations for Webex Teams
 
 Group: `group::ecosystem`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -5213,6 +6087,8 @@ Count of projects with alerts created in given time period
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216180458_projects_with_alerts_created.yml)
 
 Group: `group::monitor`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -5226,6 +6102,8 @@ Count of projects that have enabled the Alerts service
 
 Group: `group::monitor`
 
+Data Category: `Optional`
+
 Status: `removed`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -5237,6 +6115,8 @@ Count of projects with at least 1 enabled integration
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216180500_projects_with_enabled_alert_integrations.yml)
 
 Group: `group::monitor`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -5250,6 +6130,8 @@ Count of projects that have enabled Error tracking via Sentry
 
 Group: `group::monitor`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -5261,6 +6143,8 @@ The number of projects with cleanup policy for tags turned off
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216181014_projects_with_expiration_policy_disabled.yml)
 
 Group: `group::package`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -5274,6 +6158,8 @@ A count of projects with the cleanup policy for tags turned on
 
 Group: `group::package`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -5285,6 +6171,8 @@ A count of projects with the cleanup policy set to run every 14 days
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216181033_projects_with_expiration_policy_enabled_with_cadence_set_to_14d.yml)
 
 Group: `group::package`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -5298,6 +6186,8 @@ A count of projects with the cleanup policy set to run every day
 
 Group: `group::package`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -5309,6 +6199,8 @@ A count of projects with the cleanup policy set to run monthly
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216181035_projects_with_expiration_policy_enabled_with_cadence_set_to_1month.yml)
 
 Group: `group::package`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -5322,6 +6214,8 @@ A count of projects with the cleanup policy set to run every 3 months
 
 Group: `group::package`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -5333,6 +6227,8 @@ A count of projects with the cleanup policy set to run every 7 days
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216181031_projects_with_expiration_policy_enabled_with_cadence_set_to_7d.yml)
 
 Group: `group::package`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -5346,6 +6242,8 @@ A count of projects with the cleanup policy set to keep 1 tag
 
 Group: `group::package`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -5357,6 +6255,8 @@ A count of projects with the cleanup policy set to keep 10 tags
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216181022_projects_with_expiration_policy_enabled_with_keep_n_set_to_10.yml)
 
 Group: `group::package`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -5370,6 +6270,8 @@ A count of projects with the cleanup policy set to keep 100 tags
 
 Group: `group::package`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -5381,6 +6283,8 @@ A count of projects with the cleanup policy set to keep 25 tags
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216181024_projects_with_expiration_policy_enabled_with_keep_n_set_to_25.yml)
 
 Group: `group::package`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -5394,6 +6298,8 @@ A count of projects with the cleanup policy set to keep 5 tags
 
 Group: `group::package`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -5405,6 +6311,8 @@ A count of projects with the cleanup policy set to keep 50 tags
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216181025_projects_with_expiration_policy_enabled_with_keep_n_set_to_50.yml)
 
 Group: `group::package`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -5418,6 +6326,8 @@ A count of projects with the cleanup policy with the number of tags to keep unse
 
 Group: `group::package`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -5429,6 +6339,8 @@ A count of projects with the cleanup policy set delete tags older than 14 days
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216181040_projects_with_expiration_policy_enabled_with_older_than_set_to_14d.yml)
 
 Group: `group::package`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -5442,6 +6354,8 @@ A count of projects with the cleanup policy set delete tags older than 30 days
 
 Group: `group::package`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -5453,6 +6367,8 @@ A count of projects with the cleanup policy set delete tags older than 7 days
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216181038_projects_with_expiration_policy_enabled_with_older_than_set_to_7d.yml)
 
 Group: `group::package`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -5466,6 +6382,8 @@ A count of projects with the cleanup policy set delete tags older than 90 days
 
 Group: `group::package`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -5477,6 +6395,8 @@ A count of projects with the cleanup policy with the number of tags to delete un
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216181048_projects_with_expiration_policy_enabled_with_older_than_unset.yml)
 
 Group: `group::package`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -5490,6 +6410,8 @@ Projects with package registry enabled
 
 Group: `group::package`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -5501,6 +6423,8 @@ Projects with Prometheus alerting enabled
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216175019_projects_with_prometheus_alerts.yml)
 
 Group: `group::monitor`
+
+Data Category: `Optional`
 
 Status: `removed`
 
@@ -5514,6 +6438,8 @@ Count of users creating projects that have a matching Git repository, result of 
 
 Group: `group::source code`
 
+Data Category: `Operational`
+
 Status: `data_available`
 
 Tiers: `premium`, `ultimate`
@@ -5525,6 +6451,8 @@ Count of projects with Terraform MR reports
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216175320_projects_with_terraform_reports.yml)
 
 Group: `group::configure`
+
+Data Category: `Operational`
 
 Status: `data_available`
 
@@ -5538,6 +6466,8 @@ Count of projects with GitLab Managed Terraform State
 
 Group: `group::configure`
 
+Data Category: `Operational`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -5549,6 +6479,8 @@ Projects with tracing enabled
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216180929_projects_with_tracing_enabled.yml)
 
 Group: `group::monitor`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -5562,6 +6494,8 @@ Count of projects with active integrations for YouTrack
 
 Group: `group::ecosystem`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -5573,6 +6507,8 @@ Count of total protected branches
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_all/20210216182001_protected_branches.yml)
 
 Group: `group::source code`
+
+Data Category: `Operational`
 
 Status: `data_available`
 
@@ -5586,6 +6522,8 @@ Count of branches that have been protected and are not the default branch
 
 Group: `group::source code`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -5597,6 +6535,8 @@ Unique release tags
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216181918_releases.yml)
 
 Group: `group::release`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -5610,6 +6550,8 @@ Count of total remote mirrors. Includes both push and pull mirrors
 
 Group: `group::source code`
 
+Data Category: `Operational`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -5621,6 +6563,8 @@ Count of requirement test reports created from CI
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_all/20210216175032_requirement_test_reports_ci.yml)
 
 Group: `group::certify`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -5634,6 +6578,8 @@ Count of requirement test reports created manually
 
 Group: `group::certify`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `ultimate`
@@ -5645,6 +6591,8 @@ Count of requirements created
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_all/20210216175028_requirements_created.yml)
 
 Group: `group::certify`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -5658,6 +6606,8 @@ Count of requirements having a test report
 
 Group: `group::certify`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `ultimate`
@@ -5669,6 +6619,8 @@ Count of SAST CI jobs for the month. Job names ending in '-sast'
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216182112_sast_jobs.yml)
 
 Group: `group::static analysis`
+
+Data Category: `Operational`
 
 Status: `data_available`
 
@@ -5682,6 +6634,8 @@ Count of all 'secret-detection' CI jobs.
 
 Group: `group::static analysis`
 
+Data Category: `Operational`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -5693,6 +6647,8 @@ Count of service desk enabled projects
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216175024_service_desk_enabled_projects.yml)
 
 Group: `group::certify`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -5706,6 +6662,8 @@ Count of service desk issues
 
 Group: `group::certify`
 
+Data Category: `Operational`
+
 Status: `data_available`
 
 Tiers: `free`
@@ -5717,6 +6675,8 @@ Count of comments on Snippets
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216180253_snippet_comment.yml)
 
 Group: `group::editor`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -5730,6 +6690,8 @@ Count of newly created Snippets
 
 Group: `group::editor`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -5741,6 +6703,8 @@ Count of updates to existing Snippets
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216180257_snippet_update.yml)
 
 Group: `group::editor`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -5754,6 +6718,8 @@ Count of all Snippets
 
 Group: `group::editor`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -5765,6 +6731,8 @@ Count of total Git push operations
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216182006_source_code_pushes.yml)
 
 Group: `group::source code`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -5778,6 +6746,8 @@ Count of commits created from the Static Site Editor
 
 Group: `group::editor`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -5789,6 +6759,8 @@ Count of merge requests created via Static Site Editor
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216180303_static_site_editor_merge_requests.yml)
 
 Group: `group::editor`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -5802,6 +6774,8 @@ Count of Static Site Editor views
 
 Group: `group::editor`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -5813,6 +6787,8 @@ Cumulative count of usages of publish operation
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_all/20210216180502_status_page_incident_publishes.yml)
 
 Group: `group::monitor`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -5826,6 +6802,8 @@ Cumulative count of usages of unpublish operation
 
 Group: `group::monitor`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `ultimate`
@@ -5837,6 +6815,8 @@ Issues published to a Status Page
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_all/20210216180507_status_page_issues.yml)
 
 Group: `group::monitor`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -5850,6 +6830,8 @@ Projects with status page enabled
 
 Group: `group::monitor`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `ultimate`
@@ -5861,6 +6843,8 @@ Total successful deployments
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216181911_successful_deployments.yml)
 
 Group: `group::release`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -5874,6 +6858,8 @@ Count of all comments that contain suggested changes
 
 Group: `group::code review`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -5885,6 +6871,8 @@ Count of total repo templates used to aggregate all file templates
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_all/20210216182008_template_repositories.yml)
 
 Group: `group::source code`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -5898,6 +6886,8 @@ Count of active service templates for Asana
 
 Group: `group::ecosystem`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -5909,6 +6899,8 @@ Count of active service templates for Assembla
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216175638_templates_assembla_active.yml)
 
 Group: `group::ecosystem`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -5922,6 +6914,8 @@ Count of active service templates for Bamboo CI
 
 Group: `group::ecosystem`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -5933,6 +6927,8 @@ Count of active service templates for Bugzilla
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216175701_templates_bugzilla_active.yml)
 
 Group: `group::ecosystem`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -5946,6 +6942,8 @@ Count of active service templates for Buildkite
 
 Group: `group::ecosystem`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -5957,6 +6955,8 @@ Count of active service templates for Campfire
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216175723_templates_campfire_active.yml)
 
 Group: `group::ecosystem`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -5970,6 +6970,8 @@ Count of active service templates for Confluence
 
 Group: `group::ecosystem`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -5981,6 +6983,8 @@ Count of active service templates for a Custom Issue Tracker
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216175745_templates_custom_issue_tracker_active.yml)
 
 Group: `group::ecosystem`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -5994,6 +6998,8 @@ Count of active service templates for Datadog
 
 Group: `group::ecosystem`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -6005,6 +7011,8 @@ Count of active service templates for Discord
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216175756_templates_discord_active.yml)
 
 Group: `group::ecosystem`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -6018,6 +7026,8 @@ Count of active service templates for Drone CI
 
 Group: `group::ecosystem`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -6029,6 +7039,8 @@ Count of active service templates for Emails on Push
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216175818_templates_emails_on_push_active.yml)
 
 Group: `group::ecosystem`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -6042,6 +7054,8 @@ Count of active service templates for EWM
 
 Group: `group::ecosystem`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -6053,6 +7067,8 @@ Count of active service templates for External Wiki
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216175829_templates_external_wiki_active.yml)
 
 Group: `group::ecosystem`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -6066,6 +7082,8 @@ Count of active service templates for Flowdock
 
 Group: `group::ecosystem`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -6077,6 +7095,8 @@ Count of active service templates for GitHub
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_all/20210216175851_templates_github_active.yml)
 
 Group: `group::ecosystem`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -6090,6 +7110,8 @@ Count of active service templates for Hangouts Chat
 
 Group: `group::ecosystem`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -6101,6 +7123,8 @@ Count of active service templates for HipChat
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216175913_templates_hipchat_active.yml)
 
 Group: `group::ecosystem`
+
+Data Category: `Optional`
 
 Status: `removed`
 
@@ -6114,6 +7138,8 @@ Count of active service templates for Irker
 
 Group: `group::ecosystem`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -6125,6 +7151,8 @@ Count of active service templates for Jenkins
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216175935_templates_jenkins_active.yml)
 
 Group: `group::ecosystem`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -6138,6 +7166,8 @@ Count of active service templates for Jira
 
 Group: `group::ecosystem`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -6149,6 +7179,8 @@ Count of active service templates for Mattermost
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216175957_templates_mattermost_active.yml)
 
 Group: `group::ecosystem`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -6162,6 +7194,8 @@ Count of active service templates for Mattermost (slash commands)
 
 Group: `group::ecosystem`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -6173,6 +7207,8 @@ Count of active service templates for Microsoft Teams
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216180019_templates_microsoft_teams_active.yml)
 
 Group: `group::ecosystem`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -6186,6 +7222,8 @@ Count of active service templates for Mock CI
 
 Group: `group::ecosystem`
 
+Data Category: `Optional`
+
 Status: `removed`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -6197,6 +7235,8 @@ Count of active service templates for Mock Monitoring
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216182738_templates_mock_monitoring_active.yml)
 
 Group: `group::ecosystem`
+
+Data Category: `Optional`
 
 Status: `removed`
 
@@ -6210,6 +7250,8 @@ Count of active service templates for Packagist
 
 Group: `group::ecosystem`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -6221,6 +7263,8 @@ Count of active service templates for Pipeline Emails
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216180041_templates_pipelines_email_active.yml)
 
 Group: `group::ecosystem`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -6234,6 +7278,8 @@ Count of active service templates for Pivotal Tracker
 
 Group: `group::ecosystem`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -6245,6 +7291,8 @@ Count of active service templates for Prometheus
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216180934_templates_prometheus_active.yml)
 
 Group: `group::monitor`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -6258,6 +7306,8 @@ Count of active service templates for Pushover
 
 Group: `group::ecosystem`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -6269,6 +7319,8 @@ Count of active service templates for Redmine
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216180115_templates_redmine_active.yml)
 
 Group: `group::ecosystem`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -6282,6 +7334,8 @@ Count of active service templates for Slack
 
 Group: `group::ecosystem`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -6293,6 +7347,8 @@ Count of active service templates for Slack (slash commands)
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216180137_templates_slack_slash_commands_active.yml)
 
 Group: `group::ecosystem`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -6306,6 +7362,8 @@ Count of active service templates for Teamcity CI
 
 Group: `group::ecosystem`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -6317,6 +7375,8 @@ Count of active service templates for Unifiy Circuit
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216180159_templates_unify_circuit_active.yml)
 
 Group: `group::ecosystem`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -6330,6 +7390,8 @@ Count of active service templates for Webex Teams
 
 Group: `group::ecosystem`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -6341,6 +7403,8 @@ Count of active service templates for YouTrack
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216180221_templates_youtrack_active.yml)
 
 Group: `group::ecosystem`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -6354,6 +7418,8 @@ Count of Terraform MR reports generated
 
 Group: `group::configure`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -6365,6 +7431,8 @@ Count of GitLab Managed Terraform States
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216175326_terraform_states.yml)
 
 Group: `group::configure`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -6378,6 +7446,8 @@ Count of todos created
 
 Group: `group::project management`
 
+Data Category: `Operational`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -6389,6 +7459,8 @@ Count of Uploads via Notes and Descriptions
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216181109_uploads.yml)
 
 Group: `group::project management`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -6402,6 +7474,8 @@ Count of users who set personal preference to see Details on Group information p
 
 Group: `group::threat insights`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `ultimate`
@@ -6413,6 +7487,8 @@ Count of users who set personal preference to see Security Dashboard on Group in
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_all/20210216182205_user_preferences_group_overview_security_dashboard.yml)
 
 Group: `group::threat insights`
+
+Data Category: `Operational`
 
 Status: `data_available`
 
@@ -6426,6 +7502,8 @@ Count of users with the GitPod integration enabled
 
 Group: `group::editor`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -6437,6 +7515,8 @@ Missing description
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216175621_web_hooks.yml)
 
 Group: `group::ecosystem`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -6450,6 +7530,8 @@ Count of commits made from the Web IDE
 
 Group: `group::editor`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -6461,6 +7543,8 @@ Count of merge requests created from the Web IDE
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216180246_web_ide_merge_requests.yml)
 
 Group: `group::editor`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -6474,6 +7558,8 @@ Count of Pipeline tab views in the Web IDE
 
 Group: `group::editor`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -6485,6 +7571,8 @@ Count of Live Preview tab views in the Web IDE
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216180248_web_ide_previews.yml)
 
 Group: `group::editor`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -6498,6 +7586,8 @@ Count of Web Terminal tab views in the Web IDE
 
 Group: `group::editor`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -6509,6 +7599,8 @@ Count of views of the Web IDE
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216180244_web_ide_views.yml)
 
 Group: `group::editor`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -6522,6 +7614,8 @@ Count of all Wiki pages created
 
 Group: `group::editor`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -6533,6 +7627,8 @@ Count of all Wiki pages deleted
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216180738_wiki_pages_delete.yml)
 
 Group: `group::editor`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -6546,6 +7642,8 @@ Count of all Wiki page updates
 
 Group: `group::editor`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -6557,6 +7655,8 @@ Missing description
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216183023_wiki_pages_view.yml)
 
 Group: ``
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -6570,6 +7670,8 @@ Missing description
 
 Group: ``
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -6581,6 +7683,8 @@ Missing description
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210427103010_code_review_extension_category_monthly_active_users.yml)
 
 Group: ``
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -6594,21 +7698,25 @@ Missing description
 
 Group: ``
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
 
 ### `counts_monthly.aggregated_metrics.compliance_features_track_unique_visits_union`
 
-Missing description
+Unique users that have used audit event screen, audit event API, compliance dashboard, or credential inventory
 
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216183201_compliance_features_track_unique_visits_union.yml)
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210216183201_compliance_features_track_unique_visits_union.yml)
 
-Group: ``
+Group: `group::compliance`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `premium`, `ultimate`
 
 ### `counts_monthly.aggregated_metrics.i_testing_paid_monthly_active_user_total`
 
@@ -6617,6 +7725,8 @@ Aggregated count of users who have engaged with a Premium or Ultimate tier testi
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210216183209_i_testing_paid_monthly_active_user_total.yml)
 
 Group: `group::testing`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -6630,6 +7740,8 @@ Count of unique users per month to take an action on an alert
 
 Group: `group::monitor`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -6641,6 +7753,8 @@ Count of unique users per month to take an action on an incident
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216180511_incident_management_incidents_total_unique_counts.yml)
 
 Group: `group::monitor`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -6654,6 +7768,8 @@ This was test metric used for purpose of assuring correct implementation of aggr
 
 Group: `group::product intelligence`
 
+Data Category: `Optional`
+
 Status: `removed`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -6665,6 +7781,8 @@ This was test metric used for purpose of assuring correct implementation of aggr
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216183203_product_analytics_test_metrics_union.yml)
 
 Group: `group::product intelligence`
+
+Data Category: `Optional`
 
 Status: `removed`
 
@@ -6678,6 +7796,8 @@ Total deployments count for recent 28 days
 
 Group: `group::ops release`
 
+Data Category: `Operational`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -6689,6 +7809,8 @@ Total failed deployments
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216181924_failed_deployments.yml)
 
 Group: `group::release`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -6702,6 +7824,8 @@ A monthly count of packages published to the registry
 
 Group: `group::package`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -6713,6 +7837,8 @@ Monthly count of personal Snippets
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216180308_personal_snippets.yml)
 
 Group: `group::editor`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -6726,6 +7852,8 @@ Monthly count of project Snippets
 
 Group: `group::editor`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -6737,6 +7865,8 @@ Count number of projects created monthly
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210514141518_monthly_projects_creation.yml)
 
 Group: `group::project management`
+
+Data Category: `Optional`
 
 Status: `implemented`
 
@@ -6750,6 +7880,8 @@ Monthly count of unique projects with HTTP alerting enabled
 
 Group: `group::monitor`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -6761,6 +7893,8 @@ Monthly count of All Snippets
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216180312_snippets.yml)
 
 Group: `group::editor`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -6774,6 +7908,8 @@ Total successful deployments
 
 Group: `group::release`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`
@@ -6785,6 +7921,8 @@ Missing description
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_7d/20210427103407_code_review_category_monthly_active_users.yml)
 
 Group: ``
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -6798,6 +7936,8 @@ Missing description
 
 Group: ``
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -6810,21 +7950,25 @@ Missing description
 
 Group: ``
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
 
 ### `counts_weekly.aggregated_metrics.compliance_features_track_unique_visits_union`
 
-Missing description
+Unique users that have used audit event screen, audit event API, compliance dashboard, or credential inventory
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_7d/20210216183211_compliance_features_track_unique_visits_union.yml)
 
-Group: ``
+Group: `group::compliance`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
-Tiers:
+Tiers: `premium`, `ultimate`
 
 ### `counts_weekly.aggregated_metrics.i_testing_paid_monthly_active_user_total`
 
@@ -6833,6 +7977,8 @@ Aggregated count of users who have engaged with a Premium or Ultimate tier testi
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_7d/20210216183219_i_testing_paid_monthly_active_user_total.yml)
 
 Group: `group::testing`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -6846,6 +7992,8 @@ Count of unique users per week to take an action on an alert
 
 Group: `group::monitor`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -6857,6 +8005,8 @@ Count of unique users per week to take an action on an incident
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_7d/20210216180515_incident_management_incidents_total_unique_counts.yml)
 
 Group: `group::monitor`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -6870,6 +8020,8 @@ This was test metric used for purpose of assuring correct implementation of aggr
 
 Group: `group::product intelligence`
 
+Data Category: `Optional`
+
 Status: `removed`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -6881,6 +8033,8 @@ This was test metric used for purpose of assuring correct implementation of aggr
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_7d/20210216183213_product_analytics_test_metrics_union.yml)
 
 Group: `group::product intelligence`
+
+Data Category: `Optional`
 
 Status: `removed`
 
@@ -6894,6 +8048,8 @@ This metric only returns a value of PostgreSQL in supported versions of GitLab. 
 
 Group: `group::enablement distribution`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -6905,6 +8061,8 @@ TBD
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/settings/20210216183248_pg_system_id.yml)
 
 Group: `group::distribution`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -6918,6 +8076,8 @@ The version of the PostgreSQL database.
 
 Group: `group::distribution`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -6929,6 +8089,8 @@ A count of projects where the dependency proxy is enabled
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/settings/20210204124900_dependency_proxy_enabled.yml)
 
 Group: `group::package`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -6942,6 +8104,8 @@ Edition of GitLab such as EE or CE
 
 Group: `group::distribution`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -6953,6 +8117,8 @@ Whether Elasticsearch is enabled
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/settings/20210204124924_elasticsearch_enabled.yml)
 
 Group: `group::global search`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -6966,6 +8132,8 @@ Is Geo enabled?
 
 Group: `group::geo`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `premium`, `ultimate`
@@ -6977,6 +8145,8 @@ Information about Git version
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/license/20210216183237_version.yml)
 
 Group: `group::distribution`
+
+Data Category: `Operational`
 
 Status: `data_available`
 
@@ -6990,6 +8160,8 @@ Total GitLab Managed clusters both enabled and disabled
 
 Group: `group::product intelligence`
 
+Data Category: `Operational`
+
 Status: `data_available`
 
 Tiers: `free`
@@ -7001,6 +8173,8 @@ Missing description
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/settings/20210216183241_filesystems.yml)
 
 Group: ``
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -7014,6 +8188,8 @@ Total Gitalty Servers
 
 Group: `group::product intelligence`
 
+Data Category: `Operational`
+
 Status: `data_available`
 
 Tiers: `free`
@@ -7025,6 +8201,8 @@ Version of Gitaly
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/license/20210204124928_version.yml)
 
 Group: `group::product intelligence`
+
+Data Category: `Operational`
 
 Status: `data_available`
 
@@ -7038,6 +8216,8 @@ Whether GitLab Pages is enabled
 
 Group: `group::product intelligence`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`
@@ -7049,6 +8229,8 @@ The version number of GitLab Pages
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/license/20210204124936_version.yml)
 
 Group: `group::product intelligence`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -7062,6 +8244,8 @@ Whether shared runners is enabled
 
 Group: `group::runner`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -7073,6 +8257,8 @@ Whether Gitpod is enabled in the instance
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/settings/20210216180314_gitpod_enabled.yml)
 
 Group: `group::editor`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -7086,6 +8272,8 @@ Whether Grafana is enabled
 
 Group: `group::product intelligence`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`
@@ -7097,6 +8285,8 @@ Whether gravatar is enabled
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/settings/20210204124904_gravatar_enabled.yml)
 
 Group: `group::access`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -7110,6 +8300,8 @@ The peak active user count. Active is defined in UsersStatistics model.
 
 Group: `group::license`
 
+Data Category: `Subscription`
+
 Status: `data_available`
 
 Tiers: `premium`, `ultimate`
@@ -7121,6 +8313,8 @@ Host name of GitLab instance
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/license/20210204124827_hostname.yml)
 
 Group: `group::product intelligence`
+
+Data Category: `Standard`
 
 Status: `data_available`
 
@@ -7134,6 +8328,8 @@ Whether or not ModSecurity is enabled within Ingress
 
 Group: `group::container security`
 
+Data Category: `Operational`
+
 Status: `removed`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -7145,6 +8341,8 @@ The installation method used to install GitLab (Omnibus, Helm, etc)
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/license/20210216175602_installation_type.yml)
 
 Group: `group::distribution`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -7158,6 +8356,8 @@ Whether auto DevOps is enabled
 
 Group: `group::configure`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -7169,6 +8369,8 @@ Whether LDAP is enabled
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/settings/20210204124906_ldap_enabled.yml)
 
 Group: `group::product intelligence`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -7182,6 +8384,8 @@ Number of all billable users (active users excluding bots and guests).
 
 Group: `group::product intelligence`
 
+Data Category: `Optional`
+
 Status: `implemented`
 
 Tiers: `premium`, `ultimate`
@@ -7193,6 +8397,8 @@ The date the license ends
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/license/20210204124847_license_expires_at.yml)
 
 Group: `group::license`
+
+Data Category: `Subscription`
 
 Status: `data_available`
 
@@ -7206,6 +8412,8 @@ The ID of the license
 
 Group: `group::license`
 
+Data Category: `Subscription`
+
 Status: `data_available`
 
 Tiers: `premium`, `ultimate`
@@ -7217,6 +8425,8 @@ The MD5 hash of license key of the GitLab instance
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/license/20210204124831_license_md5.yml)
 
 Group: `group::license`
+
+Data Category: `Standard`
 
 Status: `data_available`
 
@@ -7230,6 +8440,8 @@ The plan of the GitLab license
 
 Group: `group::license`
 
+Data Category: `Subscription`
+
 Status: `data_available`
 
 Tiers: `premium`, `ultimate`
@@ -7241,6 +8453,8 @@ The date the license starts
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/license/20210204124845_license_starts_at.yml)
 
 Group: `group::license`
+
+Data Category: `Subscription`
 
 Status: `data_available`
 
@@ -7254,6 +8468,8 @@ Licese zuora_subscription_id
 
 Group: `group::license`
 
+Data Category: `Standard`
+
 Status: `data_available`
 
 Tiers: `premium`, `ultimate`
@@ -7265,6 +8481,8 @@ Whether this is a trial license or not
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/license/20210204124851_license_trial.yml)
 
 Group: `group::license`
+
+Data Category: `Subscription`
 
 Status: `data_available`
 
@@ -7278,6 +8496,8 @@ Date the trial license ends on
 
 Group: `group::license`
 
+Data Category: `Subscription`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -7289,6 +8509,8 @@ The number of seats included in the license
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/license/20210204124843_license_user_count.yml)
 
 Group: `group::license`
+
+Data Category: `Subscription`
 
 Status: `data_available`
 
@@ -7302,6 +8524,8 @@ Company on the GitLab license
 
 Group: `group::license`
 
+Data Category: `Subscription`
+
 Status: `data_available`
 
 Tiers: `premium`, `ultimate`
@@ -7313,6 +8537,8 @@ Email on the GitLab license
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/license/20210204124839_email.yml)
 
 Group: `group::license`
+
+Data Category: `Subscription`
 
 Status: `data_available`
 
@@ -7326,6 +8552,8 @@ Name on the GitLab license
 
 Group: `group::license`
 
+Data Category: `Subscription`
+
 Status: `data_available`
 
 Tiers: `premium`, `ultimate`
@@ -7337,6 +8565,8 @@ The value of the SMTP server that is used
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/settings/20210216174829_smtp_server.yml)
 
 Group: `group::activation`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -7350,6 +8580,8 @@ Whether Mattermost is enabled
 
 Group: `group::ecosystem`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -7361,6 +8593,8 @@ Whether Object Storage is enabled for Artifacts
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/settings/20210216180836_enabled.yml)
 
 Group: `group::memory`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -7374,6 +8608,8 @@ Whether Background Upload for Object Storage is enabled for Artifacts
 
 Group: `group::memory`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -7385,6 +8621,8 @@ Whether Direct Upload for Object Storage is enabled for Artifacts
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/settings/20210216180840_direct_upload.yml)
 
 Group: `group::memory`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -7398,6 +8636,8 @@ Whether Object Storage is enabled for Artifacts
 
 Group: `group::memory`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -7409,6 +8649,8 @@ What Object Storage provider has been configured for Artifacts
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/settings/20210216180843_provider.yml)
 
 Group: `group::memory`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -7422,6 +8664,8 @@ Whether Object Storage is enabled for External Diffs
 
 Group: `group::memory`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -7433,6 +8677,8 @@ Whether Background Upload for Object Storage is enabled for External Diffs
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/settings/20210216180851_background_upload.yml)
 
 Group: `group::memory`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -7446,6 +8692,8 @@ Whether Direct Upload for Object Storage is enabled for External Diffs
 
 Group: `group::memory`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -7457,6 +8705,8 @@ Whether Object Storage is enabled for External Diffs
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/settings/20210216180847_enabled.yml)
 
 Group: `group::memory`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -7470,6 +8720,8 @@ What Object Storage provider has been configured for External Diffs
 
 Group: `group::memory`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -7481,6 +8733,8 @@ Whether Object Storage is enabled for LFS
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/settings/20210216180854_enabled.yml)
 
 Group: `group::memory`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -7494,6 +8748,8 @@ Whether Background Upload for Object Storage is enabled for LFS
 
 Group: `group::memory`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -7505,6 +8761,8 @@ Whether Direct Upload for Object Storage is enabled for LFS
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/settings/20210216180858_direct_upload.yml)
 
 Group: `group::memory`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -7518,6 +8776,8 @@ Whether Object Storage is enabled for LFS
 
 Group: `group::memory`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -7529,6 +8789,8 @@ What Object Storage provider has been configured for LFS
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/settings/20210216180902_provider.yml)
 
 Group: `group::memory`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -7542,6 +8804,8 @@ Whether Object Storage is enabled for Uploads
 
 Group: `group::memory`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -7553,6 +8817,8 @@ Whether Background Upload for Object Storage is enabled for Packages
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/settings/20210216180918_background_upload.yml)
 
 Group: `group::memory`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -7566,6 +8832,8 @@ Whether Direct Upload for Object Storage is enabled for Packages
 
 Group: `group::memory`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -7577,6 +8845,8 @@ Whether Object Storage is enabled for Packages
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/settings/20210216180915_enabled.yml)
 
 Group: `group::memory`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -7590,6 +8860,8 @@ What Object Storage provider has been configured for Packages
 
 Group: `group::memory`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -7601,6 +8873,8 @@ Whether Object Storage is enabled for Uploads
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/settings/20210216180903_enabled.yml)
 
 Group: `group::memory`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -7614,6 +8888,8 @@ Whether Background Upload for Object Storage is enabled for Uploads
 
 Group: `group::memory`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -7625,6 +8901,8 @@ Whether Direct Upload for Object Storage is enabled for Uploads
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/settings/20210216180907_direct_upload.yml)
 
 Group: `group::memory`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -7638,6 +8916,8 @@ Whether Object Storage is enabled for Uploads
 
 Group: `group::memory`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -7649,6 +8929,8 @@ What Object Storage provider has been configured for Uploads
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/settings/20210216180911_provider.yml)
 
 Group: `group::memory`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -7662,6 +8944,8 @@ Whether OmniAuth is enabled
 
 Group: `group::product intelligence`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`
@@ -7673,6 +8957,8 @@ Whether the bundled Prometheus is enabled
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/settings/20210204124912_prometheus_enabled.yml)
 
 Group: `group::product intelligence`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -7686,6 +8972,8 @@ Whether Prometheus Metrics endpoint is enabled
 
 Group: `group::product intelligence`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -7697,6 +8985,8 @@ When the Usage Ping computation was started
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/license/20210201124932_recorded_at.yml)
 
 Group: `group::product intelligence`
+
+Data Category: `Standard`
 
 Status: `data_available`
 
@@ -7710,6 +9000,8 @@ When the core features were computed
 
 Group: `group::product intelligence`
 
+Data Category: `Standard`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -7721,6 +9013,8 @@ When the EE-specific features were computed
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/license/20210204124940_recording_ee_finished_at.yml)
 
 Group: `group::product intelligence`
+
+Data Category: `Standard`
 
 Status: `data_available`
 
@@ -7734,6 +9028,8 @@ The number of unique users who visited any analytics feature by month
 
 Group: `group::optimize`
 
+Data Category: `Operational`
+
 Status: `data_available`
 
 Tiers: `free`
@@ -7745,6 +9041,8 @@ The number of unique users who visited any analytics feature by week
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_7d/20210216175014_analytics_total_unique_counts_weekly.yml)
 
 Group: `group::optimize`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -7758,6 +9056,8 @@ Unique visitors to /groups/:group/-/contribution_analytics by month
 
 Group: `group::optimize`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`
@@ -7769,6 +9069,8 @@ Unique visitors to /groups/:group/-/contribution_analytics by week
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_7d/20210216174912_g_analytics_contribution_weekly.yml)
 
 Group: `group::optimize`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -7782,6 +9084,8 @@ Unique visitors to /groups/:group/-/insights/ by month
 
 Group: `group::optimize`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`
@@ -7793,6 +9097,8 @@ Unique visitors to /groups/:group/-/insights/ by week
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_7d/20210216174916_g_analytics_insights_weekly.yml)
 
 Group: `group::optimize`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -7806,6 +9112,8 @@ Unique visitors to /groups/:group/-/issues_analytics by month
 
 Group: `group::optimize`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`
@@ -7817,6 +9125,8 @@ Unique visitors to /groups/:group/-/issues_analytics by week
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_7d/20210216174919_g_analytics_issues_weekly.yml)
 
 Group: `group::optimize`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -7830,6 +9140,8 @@ Missing description
 
 Group: `group::optimize`
 
+Data Category: `Optional`
+
 Status: `removed`
 
 Tiers: `free`
@@ -7841,6 +9153,8 @@ Missing description
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_7d/20210216175002_g_analytics_merge_request_weekly.yml)
 
 Group: `group::optimize`
+
+Data Category: `Optional`
 
 Status: `removed`
 
@@ -7854,6 +9168,8 @@ Unique visitors to /groups/:group/-/analytics/productivity_analytics by month
 
 Group: `group::optimize`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`
@@ -7865,6 +9181,8 @@ Unique visitors to /groups/:group/-/analytics/productivity_analytics by week
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_7d/20210216174923_g_analytics_productivity_weekly.yml)
 
 Group: `group::optimize`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -7878,6 +9196,8 @@ Unique visitors to /groups/:group/-/analytics/value_stream_analytics by month
 
 Group: `group::optimize`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`
@@ -7889,6 +9209,8 @@ Unique visitors to /groups/:group/-/analytics/value_stream_analytics by week
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_7d/20210216174927_g_analytics_valuestream_weekly.yml)
 
 Group: `group::optimize`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -7902,6 +9224,8 @@ Missing description
 
 Group: `group::utilization`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`
@@ -7913,6 +9237,8 @@ Missing description
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_7d/20210216174955_i_analytics_cohorts_weekly.yml)
 
 Group: `group::utilization`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -7926,6 +9252,8 @@ Counts visits to DevOps Adoption page per month
 
 Group: `group::optimize`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `premium`, `ultimate`
@@ -7937,6 +9265,8 @@ Counts visits to DevOps Adoption page per week
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_7d/20210401092244_i_analytics_dev_ops_adoption_weekly.yml)
 
 Group: `group::optimize`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -7950,6 +9280,8 @@ Unique visitors to /admin/dev_ops_report by month
 
 Group: `group::optimize`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`
@@ -7961,6 +9293,8 @@ Unique visitors to /admin/dev_ops_report by week
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_7d/20210216174958_i_analytics_dev_ops_score_weekly.yml)
 
 Group: `group::optimize`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -7974,6 +9308,8 @@ Unique visitors to /admin/usage_trends by month
 
 Group: `group::optimize`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`
@@ -7985,6 +9321,8 @@ Unique visitors to /admin/usage_trends by week
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_7d/20210216175010_i_analytics_instance_statistics_weekly.yml)
 
 Group: `group::optimize`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -7998,6 +9336,8 @@ Unique visitors to /:group/:project/-/analytics/code_reviews by month
 
 Group: `group::optimize`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`
@@ -8009,6 +9349,8 @@ Unique visitors to /:group/:project/-/analytics/code_reviews by week
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_7d/20210216174935_p_analytics_code_reviews_weekly.yml)
 
 Group: `group::optimize`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -8022,6 +9364,8 @@ Unique visitors to /:group/:project/insights/ by month
 
 Group: `group::optimize`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`
@@ -8033,6 +9377,8 @@ Unique visitors to /:group/:project/insights/ by week
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_7d/20210216174943_p_analytics_insights_weekly.yml)
 
 Group: `group::optimize`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -8046,6 +9392,8 @@ Unique visitors to /:group/:project/-/analytics/issues_analytics by week
 
 Group: `group::optimize`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`
@@ -8057,6 +9405,8 @@ Unique visitors to /:group/:project/-/analytics/issues_analytics by week
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_7d/20210216174947_p_analytics_issues_weekly.yml)
 
 Group: `group::optimize`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -8070,6 +9420,8 @@ Unique visitors to /:group/:project/-/analytics/merge_request_analytics by month
 
 Group: `group::optimize`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`
@@ -8081,6 +9433,8 @@ Unique visitors to /:group/:project/-/analytics/merge_request_analytics by week
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_7d/20210216175006_p_analytics_merge_request_weekly.yml)
 
 Group: `group::optimize`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -8094,6 +9448,8 @@ Unique visitors to /groups/:group/-/analytics/ci_cd by month
 
 Group: `group::optimize`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`
@@ -8105,6 +9461,8 @@ Unique visitors to /groups/:group/-/analytics/ci_cd by week
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_7d/20210216174931_p_analytics_pipelines_weekly.yml)
 
 Group: `group::optimize`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -8118,6 +9476,8 @@ Unique visitors to /:group/:project/-/graphs/master/charts by month
 
 Group: `group::optimize`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`
@@ -8129,6 +9489,8 @@ Unique visitors to /:group/:project/-/graphs/master/charts by week
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_7d/20210216174951_p_analytics_repo_weekly.yml)
 
 Group: `group::optimize`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -8142,6 +9504,8 @@ Unique visitors to /:group/:project/-/value_stream_analytics by month
 
 Group: `group::optimize`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`
@@ -8153,6 +9517,8 @@ Unique visitors to /:group/:project/-/value_stream_analytics by week
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_7d/20210216174939_p_analytics_valuestream_weekly.yml)
 
 Group: `group::optimize`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -8166,6 +9532,8 @@ Counts visits to DevOps Adoption page per month
 
 Group: `group::optimize`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `premium`, `ultimate`
@@ -8177,6 +9545,8 @@ Counts visits to DevOps Adoption page per week
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_7d/20210419105408_users_viewing_analytics_group_devops_adoption_weekly.yml)
 
 Group: `group::optimize`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -8190,6 +9560,8 @@ Monthly active users creating pipelines that that have the Vault JWT with it.'
 
 Group: `group::configure`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `premium`, `ultimate`
@@ -8201,6 +9573,8 @@ Missing description
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_7d/20210216184249_i_ci_secrets_management_vault_build_created_weekly.yml)
 
 Group: ``
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -8214,6 +9588,8 @@ Total count of pipelines runs
 
 Group: `group::configure`
 
+Data Category: `Optional`
+
 Status: `broken`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -8225,6 +9601,8 @@ Total count of pipelines runs
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_7d/20210216184557_ci_templates_total_unique_counts_weekly.yml)
 
 Group: `group::configure`
+
+Data Category: `Optional`
 
 Status: `broken`
 
@@ -8238,6 +9616,8 @@ Number of projects using 5 min production app CI template in last 7 days.
 
 Group: `group::5-min-app`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -8249,6 +9629,8 @@ Number of projects using 5 min production app CI template in last 7 days.
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_7d/20210216184515_p_ci_templates_5_min_production_app_weekly.yml)
 
 Group: `group::5-min-app`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -8262,6 +9644,8 @@ Count of pipelines using the Auto Build template
 
 Group: `group::configure`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -8273,6 +9657,8 @@ Missing description
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_7d/20210216184532_p_ci_templates_auto_devops_build_weekly.yml)
 
 Group: ``
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -8286,6 +9672,8 @@ Count of pipelines using the latest Auto Deploy template
 
 Group: `group::configure`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -8297,6 +9685,8 @@ Missing description
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_7d/20210216184540_p_ci_templates_auto_devops_deploy_latest_weekly.yml)
 
 Group: ``
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -8310,6 +9700,8 @@ Count of pipelines using the stable Auto Deploy template
 
 Group: `group::configure`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -8321,6 +9713,8 @@ Missing description
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_7d/20210216184536_p_ci_templates_auto_devops_deploy_weekly.yml)
 
 Group: ``
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -8334,6 +9728,8 @@ Count of pipelines using the Auto DevOps template
 
 Group: `group::configure`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -8345,6 +9741,8 @@ Missing description
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_7d/20210216184520_p_ci_templates_auto_devops_weekly.yml)
 
 Group: ``
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -8358,6 +9756,8 @@ Count of projects using `AWS/CF-Provision-and-Deploy-EC2.gitlab-ci.yml` template
 
 Group: `group::release`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -8369,6 +9769,8 @@ Count of projects using `AWS/CF-Provision-and-Deploy-EC2.gitlab-ci.yml` template
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_7d/20210216184524_p_ci_templates_aws_cf_deploy_ec2_weekly.yml)
 
 Group: `group::release`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -8382,6 +9784,8 @@ Count of projects using `AWS/Deploy-ECS.gitlab-ci.yml` template in last 28 days.
 
 Group: `group::release`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -8393,6 +9797,8 @@ Count of projects using `AWS/Deploy-ECS.gitlab-ci.yml` template in last 7 days.
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_7d/20210216184528_p_ci_templates_aws_deploy_ecs_weekly.yml)
 
 Group: `group::release`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -8406,6 +9812,8 @@ Count of pipelines with implicit Auto Build runs
 
 Group: `group::configure`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -8417,6 +9825,8 @@ Missing description
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_7d/20210216184500_p_ci_templates_implicit_auto_devops_build_weekly.yml)
 
 Group: ``
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -8430,6 +9840,8 @@ Count of pipelines with implicit Auto Deploy runs
 
 Group: `group::configure`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -8441,6 +9853,8 @@ Missing description
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_7d/20210216184504_p_ci_templates_implicit_auto_devops_deploy_weekly.yml)
 
 Group: ``
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -8454,6 +9868,8 @@ Count of pipelines with implicit Auto DevOps runs
 
 Group: `group::configure`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -8465,6 +9881,8 @@ Missing description
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_7d/20210216184456_p_ci_templates_implicit_auto_devops_weekly.yml)
 
 Group: ``
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -8478,6 +9896,8 @@ Missing description
 
 Group: ``
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`
@@ -8489,6 +9909,8 @@ Missing description
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_7d/20210216184508_p_ci_templates_implicit_security_sast_weekly.yml)
 
 Group: ``
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -8502,6 +9924,8 @@ Missing description
 
 Group: ``
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`
@@ -8513,6 +9937,8 @@ Missing description
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_7d/20210216184512_p_ci_templates_implicit_security_secret_detection_weekly.yml)
 
 Group: ``
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -8526,6 +9952,8 @@ Missing description
 
 Group: ``
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`
@@ -8537,6 +9965,8 @@ Missing description
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_7d/20210216184544_p_ci_templates_security_sast_weekly.yml)
 
 Group: ``
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -8550,6 +9980,8 @@ Missing description
 
 Group: ``
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`
@@ -8561,6 +9993,8 @@ Missing description
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_7d/20210216184549_p_ci_templates_security_secret_detection_weekly.yml)
 
 Group: ``
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -8574,6 +10008,8 @@ Count of pipelines that include the terraform base template from GitLab
 
 Group: `group::configure`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -8585,6 +10021,8 @@ Missing description
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_7d/20210216184553_p_ci_templates_terraform_base_latest_weekly.yml)
 
 Group: ``
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -8598,6 +10036,8 @@ Count of unique users per month who interact with a merge request
 
 Group: `group::code review`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -8609,6 +10049,8 @@ Count of unique users per week who interact with a merge request
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_7d/20210216184452_code_review_total_unique_counts_weekly.yml)
 
 Group: `group::code review`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -8622,6 +10064,8 @@ Count of users clicking diff view setting
 
 Group: `group::code review`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -8633,6 +10077,8 @@ Count of users clicking diff view setting
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_7d/20210607113552_i_code_review_click_diff_view_setting_weekly.yml)
 
 Group: `group::code review`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -8646,6 +10092,8 @@ Count of users clicking merge request file browser setting
 
 Group: `group::code review`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -8657,6 +10105,8 @@ Count of users with merge request file list setting
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_7d/20210421145814_i_code_review_click_file_browser_setting_weekly.yml)
 
 Group: `group::code review`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -8670,6 +10120,8 @@ Count of users clicking single file mode setting
 
 Group: `group::code review`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -8681,6 +10133,8 @@ Count of users clicking single file mode setting
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_7d/20210421144349_i_code_review_click_single_file_mode_setting_weekly.yml)
 
 Group: `group::code review`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -8694,6 +10148,8 @@ Count of users clicking merge request whitespae setting
 
 Group: `group::code review`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -8705,6 +10161,8 @@ Count of users clicking merge request whitespae setting
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_7d/20210421145942_i_code_review_click_whitespace_setting_weekly.yml)
 
 Group: `group::code review`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -8718,6 +10176,8 @@ Count of users with show whitespace disabled
 
 Group: `group::code review`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -8729,6 +10189,8 @@ Count of users with show whitespace disabled
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_7d/20210422102007_i_code_review_diff_hide_whitespace_weekly.yml)
 
 Group: `group::code review`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -8742,6 +10204,8 @@ Count of users with single mode disabled
 
 Group: `group::code review`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -8753,6 +10217,8 @@ Count of users with single mode disabled
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_7d/20210422102159_i_code_review_diff_multiple_files_weekly.yml)
 
 Group: `group::code review`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -8766,6 +10232,8 @@ Count of users with show whitespace enabled
 
 Group: `group::code review`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -8777,6 +10245,8 @@ Count of users with show whitespace enabled
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_7d/20210422101925_i_code_review_diff_show_whitespace_weekly.yml)
 
 Group: `group::code review`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -8790,6 +10260,8 @@ Count of users with single file mode enabled
 
 Group: `group::code review`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -8801,6 +10273,8 @@ Count of users with single file mode enabled
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_7d/20210422102118_i_code_review_diff_single_file_weekly.yml)
 
 Group: `group::code review`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -8814,6 +10288,8 @@ Count of users with merge request view type as inline
 
 Group: `group::code review`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -8825,6 +10301,8 @@ Count of users with merge request view type as inline
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_7d/20210422101512_i_code_review_diff_view_inline_weekly.yml)
 
 Group: `group::code review`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -8838,6 +10316,8 @@ Count of users with merge request view type as parallel
 
 Group: `group::code review`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -8849,6 +10329,8 @@ Count of users with merge request view type as parallel
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_7d/20210422101609_i_code_review_diff_view_parallel_weekly.yml)
 
 Group: `group::code review`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -8862,6 +10344,8 @@ Count of unique users per month who edit the description of a merge request
 
 Group: `group::code review`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -8873,6 +10357,8 @@ Count of unique users per week who edit the description of a merge request
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_7d/20210216184340_i_code_review_edit_mr_desc_weekly.yml)
 
 Group: `group::code review`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -8886,6 +10372,8 @@ Count of unique users per month who edit the title of a merge request
 
 Group: `group::code review`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -8897,6 +10385,8 @@ Count of unique users per week who edit the title of a merge request
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_7d/20210216184336_i_code_review_edit_mr_title_weekly.yml)
 
 Group: `group::code review`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -8910,6 +10400,8 @@ Count of users with merge request file list setting
 
 Group: `group::code review`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -8921,6 +10413,8 @@ Count of users with merge request file list setting
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_7d/20210422101849_i_code_review_file_browser_list_view_weekly.yml)
 
 Group: `group::code review`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -8934,6 +10428,8 @@ Count of users with merge request file tree setting
 
 Group: `group::code review`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -8945,6 +10441,8 @@ Count of users with merge request file tree setting
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_7d/20210422101750_i_code_review_file_browser_tree_view_weekly.yml)
 
 Group: `group::code review`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -8958,6 +10456,8 @@ Count of unique merge requests per month with diffs viewed
 
 Group: `group::code review`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -8969,6 +10469,8 @@ Count of unique merge requests per week with diffs viewed
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_7d/20210216175118_i_code_review_mr_diffs_weekly.yml)
 
 Group: `group::code review`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -8982,6 +10484,8 @@ Count of unique merge requests per month with diffs viewed file by file
 
 Group: `group::code review`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -8993,6 +10497,8 @@ Count of unique merge requests per week with diffs viewed file by file
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_7d/20210216175126_i_code_review_mr_single_file_diffs_weekly.yml)
 
 Group: `group::code review`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -9006,6 +10512,8 @@ Count of unique users per month who added a suggestion
 
 Group: `group::code review`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -9017,6 +10525,8 @@ Count of unique users per week who added a suggestion
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_7d/20210216175158_i_code_review_user_add_suggestion_weekly.yml)
 
 Group: `group::code review`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -9030,6 +10540,8 @@ Count of unique users per month who applied a suggestion
 
 Group: `group::code review`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -9041,6 +10553,8 @@ Count of unique users per week who applied a suggestion
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_7d/20210216175201_i_code_review_user_apply_suggestion_weekly.yml)
 
 Group: `group::code review`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -9054,6 +10568,8 @@ Count of unique users per month who add an approval rule to a merge request
 
 Group: `group::code review`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -9065,6 +10581,8 @@ Count of unique users per week who add an approval rule to a merge request
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_7d/20210216184432_i_code_review_user_approval_rule_added_weekly.yml)
 
 Group: `group::code review`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -9078,6 +10596,8 @@ Count of unique users per month who delete an approval rule to a merge request
 
 Group: `group::code review`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -9089,6 +10609,8 @@ Count of unique users per week who delete an approval rule to a merge request
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_7d/20210216184436_i_code_review_user_approval_rule_deleted_weekly.yml)
 
 Group: `group::code review`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -9102,6 +10624,8 @@ Count of unique users per month who delete an approval rule to a merge request
 
 Group: `group::code review`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -9113,6 +10637,8 @@ Count of unique users per week who edit an approval rule to a merge request
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_7d/20210216184440_i_code_review_user_approval_rule_edited_weekly.yml)
 
 Group: `group::code review`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -9126,6 +10652,8 @@ Count of unique users per month who approve a merge request
 
 Group: `group::code review`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -9137,6 +10665,8 @@ Count of unique users per week who approve a merge request
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_7d/20210216184320_i_code_review_user_approve_mr_weekly.yml)
 
 Group: `group::code review`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -9150,6 +10680,8 @@ Count of unique users per month who are assigned to a merge request
 
 Group: `group::code review`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -9161,6 +10693,8 @@ Count of unique users per week who are assigned to a merge request
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_7d/20210216184416_i_code_review_user_assigned_weekly.yml)
 
 Group: `group::code review`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -9174,6 +10708,8 @@ Count of unique users per month who changed assignees of a MR
 
 Group: `group::code review`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -9185,6 +10721,8 @@ Count of unique users per week who changed assignees of a MR
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_7d/20210302114202_i_code_review_user_assignees_changed_weekly.yml)
 
 Group: `group::code review`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -9198,6 +10736,8 @@ Count of unique users per month who closed a MR
 
 Group: `group::code review`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -9209,6 +10749,8 @@ Count of unique users per week who closed a MR
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_7d/20210216175134_i_code_review_user_close_mr_weekly.yml)
 
 Group: `group::code review`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -9222,6 +10764,8 @@ Count of unique users per month who commented on a MR
 
 Group: `group::code review`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -9233,6 +10777,8 @@ Count of unique users per week who commented on a MR
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_7d/20210216175146_i_code_review_user_create_mr_comment_weekly.yml)
 
 Group: `group::code review`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -9246,6 +10792,8 @@ Count of unique users per month who create a merge request from an issue
 
 Group: `group::code review`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -9257,6 +10805,8 @@ Count of unique users per week who create a merge request from an issue
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_7d/20210216184448_i_code_review_user_create_mr_from_issue_weekly.yml)
 
 Group: `group::code review`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -9270,6 +10820,8 @@ Count of unique users per month who created a MR
 
 Group: `group::code review`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -9281,6 +10833,8 @@ Count of unique users per week who created a MR
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_7d/20210216175130_i_code_review_user_create_mr_weekly.yml)
 
 Group: `group::code review`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -9294,6 +10848,8 @@ Count of unique users per month who create a multiline comment in a merge reques
 
 Group: `group::code review`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -9305,6 +10861,8 @@ Count of unique users per week who create a multiline comment in a merge request
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_7d/20210216184359_i_code_review_user_create_multiline_mr_comment_weekly.yml)
 
 Group: `group::code review`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -9318,6 +10876,8 @@ Count of unique users per month who create a note as part of a merge request rev
 
 Group: `group::code review`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -9329,6 +10889,8 @@ Count of unique users per week who create a note as part of a merge request revi
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_7d/20210216184351_i_code_review_user_create_review_note_weekly.yml)
 
 Group: `group::code review`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -9342,6 +10904,8 @@ Count of unique users per month who edited a comment on a MR
 
 Group: `group::code review`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -9353,6 +10917,8 @@ Count of unique users per week who edited a comment on a MR
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_7d/20210216175150_i_code_review_user_edit_mr_comment_weekly.yml)
 
 Group: `group::code review`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -9366,6 +10932,8 @@ Count of unique users per week who edit a multiline comment in a merge request
 
 Group: `group::code review`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -9377,6 +10945,8 @@ Count of unique users per week who edit a multiline comment in a merge request
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_7d/20210216184403_i_code_review_user_edit_multiline_mr_comment_weekly.yml)
 
 Group: `group::code review`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -9390,6 +10960,8 @@ Count of unique users per month who changed labels of a MR
 
 Group: `group::code review`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -9401,6 +10973,8 @@ Count of unique users per week who changed labels of a MR
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_7d/20210302110548_i_code_review_user_labels_changed_weekly.yml)
 
 Group: `group::code review`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -9414,6 +10988,8 @@ Count of unique users per week who load the conflict resolution page
 
 Group: `group::code review`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -9425,6 +11001,8 @@ Count of unique users per week who load the conflict resolution page
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_7d/20210514013544_i_code_review_user_load_conflict_ui_weekly.yml)
 
 Group: `group::code review`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -9438,6 +11016,8 @@ Count of unique users per month who mark a merge request as a draft
 
 Group: `group::code review`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -9449,6 +11029,8 @@ Count of unique users per week who mark a merge request as a draft
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_7d/20210216184420_i_code_review_user_marked_as_draft_weekly.yml)
 
 Group: `group::code review`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -9462,6 +11044,8 @@ Count of unique users per month who merged a MR
 
 Group: `group::code review`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -9473,6 +11057,8 @@ Count of unique users per week who merged a MR
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_7d/20210216175142_i_code_review_user_merge_mr_weekly.yml)
 
 Group: `group::code review`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -9486,6 +11072,8 @@ Count of unique users per month who changed milestone of a MR
 
 Group: `group::code review`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -9497,6 +11085,8 @@ Count of unique users per week who changed milestone of a MR
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_7d/20210302110403_i_code_review_user_milestone_changed_weekly.yml)
 
 Group: `group::code review`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -9510,6 +11100,8 @@ Count of unique users per month who locked a MR
 
 Group: `group::code review`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -9521,6 +11113,8 @@ Count of unique users per week who locked a MR
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_7d/20210302105318_i_code_review_user_mr_discussion_locked_weekly.yml)
 
 Group: `group::code review`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -9534,6 +11128,8 @@ Count of unique users per month who unlocked a MR
 
 Group: `group::code review`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -9545,6 +11141,8 @@ Count of unique users per week who unlocked a MR
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_7d/20210302105258_i_code_review_user_mr_discussion_unlocked_weekly.yml)
 
 Group: `group::code review`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -9558,6 +11156,8 @@ Count of unique users per month who publish their review as part of a merge requ
 
 Group: `group::code review`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -9569,6 +11169,8 @@ Count of unique users per week who publish their review as part of a merge reque
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_7d/20210216184355_i_code_review_user_publish_review_weekly.yml)
 
 Group: `group::code review`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -9582,6 +11184,8 @@ Count of unique users per month who removed a comment on a MR
 
 Group: `group::code review`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -9593,6 +11197,8 @@ Count of unique users per month who removed a comment on a MR
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_7d/20210216175154_i_code_review_user_remove_mr_comment_weekly.yml)
 
 Group: `group::code review`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -9606,6 +11212,8 @@ Count of unique users per month who remove a multiline comment in a merge reques
 
 Group: `group::code review`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -9617,6 +11225,8 @@ Count of unique users per week who remove a multiline comment in a merge request
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_7d/20210216184407_i_code_review_user_remove_multiline_mr_comment_weekly.yml)
 
 Group: `group::code review`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -9630,6 +11240,8 @@ Count of unique users per month who reopened a MR
 
 Group: `group::code review`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -9641,6 +11253,8 @@ Count of unique users per week who reopened a MR
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_7d/20210216175138_i_code_review_user_reopen_mr_weekly.yml)
 
 Group: `group::code review`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -9654,6 +11268,8 @@ Count of unique users per week who attempt to resolve a conflict through the ui
 
 Group: `group::code review`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -9665,6 +11281,8 @@ Count of unique users per week who attempt to resolve a conflict through the ui
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_7d/20210514013545_i_code_review_user_resolve_conflict_weekly.yml)
 
 Group: `group::code review`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -9678,6 +11296,8 @@ Count of unique users per month who resolve a thread in a merge request
 
 Group: `group::code review`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -9689,6 +11309,8 @@ Count of unique users per week who resolve a thread in a merge request
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_7d/20210216184328_i_code_review_user_resolve_thread_weekly.yml)
 
 Group: `group::code review`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -9702,6 +11324,8 @@ Count of unique users per month who request a review of a merge request
 
 Group: `group::code review`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -9713,6 +11337,8 @@ Count of unique users per week who request a review of a merge request
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_7d/20210216184428_i_code_review_user_review_requested_weekly.yml)
 
 Group: `group::code review`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -9726,6 +11352,8 @@ Count of unique users per month who changed reviewers of a MR
 
 Group: `group::code review`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -9737,6 +11365,8 @@ Count of unique users per week who changed reviewers of a MR
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_7d/20210302114235_i_code_review_user_reviewers_changed_weekly.yml)
 
 Group: `group::code review`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -9750,6 +11380,8 @@ Count of unique users per month with diffs viewed file by file
 
 Group: `group::code review`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -9761,6 +11393,8 @@ Count of unique users per week with diffs viewed file by file
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_7d/20210216175122_i_code_review_user_single_file_diffs_weekly.yml)
 
 Group: `group::code review`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -9774,6 +11408,8 @@ Count of unique users per month who changed time estimate of a MR
 
 Group: `group::code review`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -9785,6 +11421,8 @@ Count of unique users per week who changed time estimate of a MR
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_7d/20210302103539_i_code_review_user_time_estimate_changed_weekly.yml)
 
 Group: `group::code review`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -9798,6 +11436,8 @@ Count of unique users per month who changed time spent on a MR
 
 Group: `group::code review`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -9809,6 +11449,8 @@ Count of unique users per week who changed time spent on a MR
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_7d/20210302103615_i_code_review_user_time_spent_changed_weekly.yml)
 
 Group: `group::code review`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -9822,6 +11464,8 @@ Count of unique users per month who toggled a task item in a merge request
 
 Group: `group::code review`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -9833,6 +11477,8 @@ Count of unique users per week who toggled a task item in a merge request
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_7d/20210216184310_i_code_review_user_toggled_task_item_status_weekly.yml)
 
 Group: `group::code review`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -9846,6 +11492,8 @@ Count of unique users per month who unapprove a merge request
 
 Group: `group::code review`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -9857,6 +11505,8 @@ Count of unique users per week who unapprove a merge request
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_7d/20210216184324_i_code_review_user_unapprove_mr_weekly.yml)
 
 Group: `group::code review`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -9870,6 +11520,8 @@ Count of unique users per month who unmark a merge request as a draft
 
 Group: `group::code review`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -9881,6 +11533,8 @@ Count of unique users per week who unmark a merge request as a draft
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_7d/20210216184424_i_code_review_user_unmarked_as_draft_weekly.yml)
 
 Group: `group::code review`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -9894,6 +11548,8 @@ Count of unique users per month who unresolve a thread in a merge request
 
 Group: `group::code review`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -9905,6 +11561,8 @@ Count of unique users per week who unresolve a thread in a merge request
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_7d/20210216184332_i_code_review_user_unresolve_thread_weekly.yml)
 
 Group: `group::code review`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -9918,6 +11576,8 @@ Count of unique users per month who use GitLab Workflow for VS Code
 
 Group: `group::code review`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -9930,153 +11590,179 @@ Count of unique users per week who use GitLab Workflow for VS Code
 
 Group: `group::code review`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
 
 ### `redis_hll_counters.compliance.a_compliance_audit_events_api_monthly`
 
-Missing description
+Unique users that have used the Audit Events API in a given month.
 
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216183942_a_compliance_audit_events_api_monthly.yml)
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210216183942_a_compliance_audit_events_api_monthly.yml)
 
-Group: ``
+Group: `group::compliance`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `premium`, `ultimate`
 
 ### `redis_hll_counters.compliance.a_compliance_audit_events_api_weekly`
 
-Missing description
+Unique users that have used the Audit Events API in a given week.
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_7d/20210216183940_a_compliance_audit_events_api_weekly.yml)
 
-Group: ``
+Group: `group::compliance`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
-Tiers:
+Tiers: `premium`, `ultimate`
 
 ### `redis_hll_counters.compliance.compliance_total_unique_counts_monthly`
 
-Missing description
+Unique count of compliance actions in a given month
 
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216183946_compliance_total_unique_counts_monthly.yml)
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210216183946_compliance_total_unique_counts_monthly.yml)
 
-Group: ``
+Group: `group::compliance`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `premium`, `ultimate`
 
 ### `redis_hll_counters.compliance.compliance_total_unique_counts_weekly`
 
-Missing description
+Unique count of compliance actions in a given week
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_7d/20210216183944_compliance_total_unique_counts_weekly.yml)
 
-Group: ``
+Group: `group::compliance`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
-Tiers:
+Tiers: `premium`, `ultimate`
 
 ### `redis_hll_counters.compliance.g_compliance_audit_events_monthly`
 
-Missing description
+Unique users who have viewed the audit event screen in a given month.
 
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216183930_g_compliance_audit_events_monthly.yml)
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210216183930_g_compliance_audit_events_monthly.yml)
 
-Group: ``
+Group: `group::compliance`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `premium`, `ultimate`
 
 ### `redis_hll_counters.compliance.g_compliance_audit_events_weekly`
 
-Missing description
+Number of unique visitors to group-level audit events screen in a given week
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_7d/20210216183928_g_compliance_audit_events_weekly.yml)
 
-Group: ``
+Group: `group::compliance`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
-Tiers:
+Tiers: `premium`, `ultimate`
 
 ### `redis_hll_counters.compliance.g_compliance_dashboard_monthly`
 
-Missing description
+Unique users who have viewed the compliance dashboard in a given month.
 
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216183926_g_compliance_dashboard_monthly.yml)
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210216183926_g_compliance_dashboard_monthly.yml)
 
-Group: ``
+Group: `group::compliance`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `premium`, `ultimate`
 
 ### `redis_hll_counters.compliance.g_compliance_dashboard_weekly`
 
-Missing description
+Unique users who have looked at the compliance dashboard in a given week
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_7d/20210216183924_g_compliance_dashboard_weekly.yml)
 
-Group: ``
+Group: `group::compliance`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
-Tiers:
+Tiers: `premium`, `ultimate`
 
 ### `redis_hll_counters.compliance.i_compliance_audit_events_monthly`
 
-Missing description
+Unique users that have viewed the instance-level audit events screen
 
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216183934_i_compliance_audit_events_monthly.yml)
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210216183934_i_compliance_audit_events_monthly.yml)
 
-Group: ``
+Group: `group::compliance`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `premium`, `ultimate`
 
 ### `redis_hll_counters.compliance.i_compliance_audit_events_weekly`
 
-Missing description
+Unique users that have viewed the instance-level audit events screen
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_7d/20210216183932_i_compliance_audit_events_weekly.yml)
 
-Group: ``
+Group: `group::compliance`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
-Tiers:
+Tiers: `premium`, `ultimate`
 
 ### `redis_hll_counters.compliance.i_compliance_credential_inventory_monthly`
 
-Missing description
+Unique users who have viewed the credential inventory in a given month.
 
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216183938_i_compliance_credential_inventory_monthly.yml)
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210216183938_i_compliance_credential_inventory_monthly.yml)
 
-Group: ``
+Group: `group::compliance`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
-Tiers: `free`
+Tiers: `ultimate`
 
 ### `redis_hll_counters.compliance.i_compliance_credential_inventory_weekly`
 
-Missing description
+Unique visitors to the credential inventory screen in a given week
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_7d/20210216183936_i_compliance_credential_inventory_weekly.yml)
 
-Group: ``
+Group: `group::compliance`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
-Tiers:
+Tiers: `ultimate`
 
 ### `redis_hll_counters.deploy_token_packages.deploy_token_packages_total_unique_counts_monthly`
 
@@ -10085,6 +11771,8 @@ A monthly count of packages published to the registry using a deploy token
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216184850_deploy_token_packages_total_unique_counts_monthly.yml)
 
 Group: `group::package`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -10098,6 +11786,8 @@ A weekly count of packages published to the registry using a deploy token
 
 Group: `group::package`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -10109,6 +11799,8 @@ A monthly count of Composer packages published to the registry using a deploy to
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216184806_i_package_composer_deploy_token_monthly.yml)
 
 Group: `group::package`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -10122,6 +11814,8 @@ A weekly count of Composer packages published to the registry using a deploy tok
 
 Group: `group::package`
 
+Data Category: `Optional`
+
 Status: `deprecated`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -10133,6 +11827,8 @@ A monthly count of Conan packages published to the registry using a deploy token
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216184810_i_package_conan_deploy_token_monthly.yml)
 
 Group: `group::package`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -10146,6 +11842,8 @@ A weekly count of Conan packages published to the registry using a deploy token
 
 Group: `group::package`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -10157,6 +11855,8 @@ A monthly count of container images published to the registry using a deploy tok
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216184814_i_package_container_deploy_token_monthly.yml)
 
 Group: `group::package`
+
+Data Category: `Optional`
 
 Status: `deprecated`
 
@@ -10170,6 +11870,8 @@ A weekly count of container images published to the registry using a deploy toke
 
 Group: `group::package`
 
+Data Category: `Optional`
+
 Status: `deprecated`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -10181,6 +11883,8 @@ A monthly count of Debian packages published to the registry using a deploy toke
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216184818_i_package_debian_deploy_token_monthly.yml)
 
 Group: `group::package`
+
+Data Category: `Optional`
 
 Status: `deprecated`
 
@@ -10194,6 +11898,8 @@ A weekly count of Debian packages published to the registry using a deploy token
 
 Group: `group::package`
 
+Data Category: `Optional`
+
 Status: `deprecated`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -10205,6 +11911,8 @@ A monthly count of generic packages published to the registry using a deploy tok
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216184822_i_package_generic_deploy_token_monthly.yml)
 
 Group: `group::package`
+
+Data Category: `Optional`
 
 Status: `broken`
 
@@ -10218,6 +11926,8 @@ A weekly count of generic packages published to the registry using a deploy toke
 
 Group: `group::package`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -10229,6 +11939,8 @@ A monthly count of Go modules published to the registry using a deploy token
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216184826_i_package_golang_deploy_token_monthly.yml)
 
 Group: `group::package`
+
+Data Category: `Optional`
 
 Status: `deprecated`
 
@@ -10242,6 +11954,8 @@ A weekly count of Go modules published to the registry using a deploy token
 
 Group: `group::package`
 
+Data Category: `Optional`
+
 Status: `deprecated`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -10253,6 +11967,8 @@ Distinct Helm pakages deployed in recent 28 days
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210517074859_i_package_helm_deploy_token_monthly.yml)
 
 Group: `group::package`
+
+Data Category: `Optional`
 
 Status: `implemented`
 
@@ -10266,6 +11982,8 @@ Distinct Helm pakages deployed in recent 7 days
 
 Group: `group::package`
 
+Data Category: `Optional`
+
 Status: `implemented`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -10277,6 +11995,8 @@ A monthly count of Maven packages published to the registry using a deploy token
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216184830_i_package_maven_deploy_token_monthly.yml)
 
 Group: `group::package`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -10290,6 +12010,8 @@ A weekly count of Maven packages published to the registry using a deploy token
 
 Group: `group::package`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -10301,6 +12023,8 @@ A monthly count of npm packages published to the registry using a deploy token
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216184834_i_package_npm_deploy_token_monthly.yml)
 
 Group: `group::package`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -10314,6 +12038,8 @@ A weekly count of npm packages published to the registry using a deploy token
 
 Group: `group::package`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -10325,6 +12051,8 @@ A monthly count of NuGet packages published to the registry using a deploy token
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216184838_i_package_nuget_deploy_token_monthly.yml)
 
 Group: `group::package`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -10338,6 +12066,8 @@ A weekly count of NuGet packages published to the registry using a deploy token
 
 Group: `group::package`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -10349,6 +12079,8 @@ A monthly count of PyPI packages published to the registry using a deploy token
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216184842_i_package_pypi_deploy_token_monthly.yml)
 
 Group: `group::package`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -10362,6 +12094,8 @@ A weekly count of Python packages published to the registry using a deploy token
 
 Group: `group::package`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -10373,6 +12107,8 @@ Distinct count events for RubyGems packages published using a Deploy token in re
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210303154626_i_package_rubygems_deploy_token_monthly.yml)
 
 Group: `group::package`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -10386,6 +12122,8 @@ A weekly count of distinct RubyGems packages published using a deploy token
 
 Group: `group::package`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -10397,6 +12135,8 @@ A monthly count of package tags published to the registry using a deploy token
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216184846_i_package_tag_deploy_token_monthly.yml)
 
 Group: `group::package`
+
+Data Category: `Optional`
 
 Status: `deprecated`
 
@@ -10410,6 +12150,8 @@ A weekly count of users that have published a package tag to the registry using 
 
 Group: `group::package`
 
+Data Category: `Optional`
+
 Status: `deprecated`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -10421,6 +12163,8 @@ Number of distinct users authorized via deploy token creating Terraform Module p
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210410012206_i_package_terraform_module_deploy_token_monthly.yml)
 
 Group: `group::configure`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -10434,6 +12178,8 @@ Number of distinct users authorized via deploy token creating Terraform Module p
 
 Group: `group::configure`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -10445,6 +12191,8 @@ Number of users performing actions on Jira issues by month
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216184957_ecosystem_total_unique_counts_monthly.yml)
 
 Group: `group::ecosystem`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -10458,6 +12206,8 @@ Number of users performing actions on Jira issues by week
 
 Group: `group::ecosystem`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -10469,6 +12219,8 @@ Number of users closing Jira issues by month
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216184941_i_ecosystem_jira_service_close_issue_monthly.yml)
 
 Group: `group::ecosystem`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -10482,6 +12234,8 @@ Number of users closing Jira issues by week
 
 Group: `group::ecosystem`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -10493,6 +12247,8 @@ Number of users creating Jira issues by month
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210216184953_i_ecosystem_jira_service_create_issue_monthly.yml)
 
 Group: `group::ecosystem`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -10506,6 +12262,8 @@ Number of users creating Jira issues by week
 
 Group: `group::ecosystem`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `premium`, `ultimate`
@@ -10517,6 +12275,8 @@ Number of users that cross-referenced Jira issues by month
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216184945_i_ecosystem_jira_service_cross_reference_monthly.yml)
 
 Group: `group::ecosystem`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -10530,6 +12290,8 @@ Number of users that cross-referenced Jira issues by week
 
 Group: `group::ecosystem`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -10541,6 +12303,8 @@ Count of Jira Issue List visits by month
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210216184949_i_ecosystem_jira_service_list_issues_monthly.yml)
 
 Group: `group::ecosystem`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -10554,6 +12318,8 @@ Count of Jira Issue List visits by week
 
 Group: `group::ecosystem`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `premium`, `ultimate`
@@ -10565,6 +12331,8 @@ Calculated unique users to trigger a Slack message by performing an action on a 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210303152233_i_ecosystem_slack_service_confidential_issue_notification_monthly.yml)
 
 Group: `group::ecosystem`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -10578,6 +12346,8 @@ Calculated unique users to trigger a Slack message by performing an action on a 
 
 Group: `group::ecosystem`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -10589,6 +12359,8 @@ Calculated unique users to trigger a Slack message by creating a confidential no
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210303152144_i_ecosystem_slack_service_confidential_note_notification_monthly.yml)
 
 Group: `group::ecosystem`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -10602,6 +12374,8 @@ Calculated unique users to trigger a Slack message by creating a confidential no
 
 Group: `group::ecosystem`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -10613,6 +12387,8 @@ Calculated unique users to trigger a Slack message by performing a deployment by
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210303150912_i_ecosystem_slack_service_deployment_notification_monthly.yml)
 
 Group: `group::ecosystem`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -10626,6 +12402,8 @@ Calculated unique users to trigger a Slack message by performing a deployment by
 
 Group: `group::ecosystem`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -10637,6 +12415,8 @@ Calculated unique users to trigger a Slack message by performing an action on an
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210303150507_i_ecosystem_slack_service_issue_notification_monthly.yml)
 
 Group: `group::ecosystem`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -10650,6 +12430,8 @@ Calculated unique users to trigger a Slack message by performing an action on an
 
 Group: `group::ecosystem`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -10661,6 +12443,8 @@ Calculated unique users to trigger a Slack message by performing an action on a 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210303151831_i_ecosystem_slack_service_merge_request_notification_monthly.yml)
 
 Group: `group::ecosystem`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -10674,6 +12458,8 @@ Calculated unique users to trigger a Slack message by performing an action on a 
 
 Group: `group::ecosystem`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -10685,6 +12471,8 @@ Calculated unique users to trigger a Slack message by creating a note by month
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210303151946_i_ecosystem_slack_service_note_notification_monthly.yml)
 
 Group: `group::ecosystem`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -10698,6 +12486,8 @@ Calculated unique users to trigger a Slack message by creating a note by week
 
 Group: `group::ecosystem`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -10709,6 +12499,8 @@ Calculated unique users to trigger a Slack message by performing a Git push by m
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210303150654_i_ecosystem_slack_service_push_notification_monthly.yml)
 
 Group: `group::ecosystem`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -10722,6 +12514,8 @@ Calculated unique users to trigger a Slack message by performing a Git push by w
 
 Group: `group::ecosystem`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -10733,6 +12527,8 @@ Calculated unique users to trigger a Slack message by performing a tag push by m
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210303152049_i_ecosystem_slack_service_tag_push_notification_monthly.yml)
 
 Group: `group::ecosystem`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -10746,6 +12542,8 @@ Calculated unique users to trigger a Slack message by performing a tag push by w
 
 Group: `group::ecosystem`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -10757,6 +12555,8 @@ Calculated unique users to trigger a Slack message by performing an action on a 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210303151609_i_ecosystem_slack_service_wiki_page_notification_monthly.yml)
 
 Group: `group::ecosystem`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -10770,6 +12570,8 @@ Calculated unique users to trigger a Slack message by performing an action on a 
 
 Group: `group::ecosystem`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -10781,6 +12583,8 @@ Missing description
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210507171840_epic_boards_usage_total_unique_counts_monthly.yml)
 
 Group: ``
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -10794,6 +12598,8 @@ Missing description
 
 Group: ``
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `ultimate`
@@ -10805,6 +12611,8 @@ Count of MAU creating epic boards
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210428072511_g_project_management_users_creating_epic_boards_monthly.yml)
 
 Group: `group::product planning`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -10818,6 +12626,8 @@ Count of WAU creating epic boards
 
 Group: `group::product planning`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `premium`, `ultimate`
@@ -10829,6 +12639,8 @@ Count of MAU updating epic board names
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210428073607_g_project_management_users_updating_epic_board_names_monthly.yml)
 
 Group: `group::product planning`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -10842,6 +12654,8 @@ Count of WAU updating epic board names
 
 Group: `group::product planning`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `premium`, `ultimate`
@@ -10853,6 +12667,8 @@ Count of MAU viewing epic boards
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210428073329_g_project_management_users_viewing_epic_boards_monthly.yml)
 
 Group: `group::product planning`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -10866,6 +12682,8 @@ Count of WAU viewing epic boards
 
 Group: `group::product planning`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `premium`, `ultimate`
@@ -10877,6 +12695,8 @@ Total monthly users count for epics_usage
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210318183733_epics_usage_total_unique_counts_monthly.yml)
 
 Group: `group::product planning`
+
+Data Category: `Operational`
 
 Status: `data_available`
 
@@ -10890,6 +12710,8 @@ Total weekly users count for epics_usage
 
 Group: `group::product planning`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `premium`, `ultimate`
@@ -10901,6 +12723,8 @@ Counts of MAU closing epics
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210310163213_g_project_management_epic_closed_monthly.yml)
 
 Group: `group::product planning`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -10914,6 +12738,8 @@ Counts of WAU closing epics
 
 Group: `group::product planning`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `premium`, `ultimate`
@@ -10925,6 +12751,8 @@ Count of MAU creating epics
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210305144719_g_product_planning_epic_created_monthly.yml)
 
 Group: `group::product planning`
+
+Data Category: `Operational`
 
 Status: `data_available`
 
@@ -10938,6 +12766,8 @@ Count of WAU creating epics
 
 Group: `group::product planning`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `premium`, `ultimate`
@@ -10949,6 +12779,8 @@ Count of MAU cross referencing epics
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210430174100_g_project_management_epic_cross_referenced_monthly.yml)
 
 Group: `group::product planning`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -10962,6 +12794,8 @@ Counts of WAU cross referencing epics
 
 Group: `group::product planning`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `premium`, `ultimate`
@@ -10973,6 +12807,8 @@ Count of MAU destroying epics
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210413174710_g_project_management_epic_destroyed_monthly.yml)
 
 Group: `group::product planning`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -10986,6 +12822,8 @@ Count of WAU destroying epics
 
 Group: `group::product planning`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `premium`, `ultimate`
@@ -10997,6 +12835,8 @@ Count of MAU adding issues to epics
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210312144719_g_product_planning_epic_issue_added_monthly.yml)
 
 Group: `group::product planning`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -11010,6 +12850,8 @@ Count of WAU adding issues to epics
 
 Group: `group::product planning`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `premium`, `ultimate`
@@ -11021,6 +12863,8 @@ Counts of MAU moving epic issues between projects
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210405190240_g_project_management_epic_issue_moved_from_project_monthly.yml)
 
 Group: `group::product planning`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -11034,6 +12878,8 @@ Counts of WAU moving epic issues between projects
 
 Group: `group::product planning`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `premium`, `ultimate`
@@ -11045,6 +12891,8 @@ Count of MAU removing issues from epics
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210401183230_g_project_management_epic_issue_removed_monthly.yml)
 
 Group: `group::product planning`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -11058,6 +12906,8 @@ Counts of WAU removing issues from epics
 
 Group: `group::product planning`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `premium`, `ultimate`
@@ -11069,6 +12919,8 @@ Counts of MAU closing epics
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210310164247_g_project_management_epic_reopened_monthly.yml)
 
 Group: `group::product planning`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -11082,6 +12934,8 @@ Counts of WAU re-opening epics
 
 Group: `group::product planning`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `premium`, `ultimate`
@@ -11093,6 +12947,8 @@ Count of MAU chaging the epic lables
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210312195730_g_project_management_epic_labels_monthly.yml)
 
 Group: `group::product planning`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -11106,6 +12962,8 @@ Count of WAU chaging the epic lables
 
 Group: `group::product planning`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `premium`, `ultimate`
@@ -11117,6 +12975,8 @@ Count of MAU promoting issues to epics
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210331193236_g_project_management_issue_promoted_to_epic_monthly.yml)
 
 Group: `group::product planning`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -11130,6 +12990,8 @@ Counts of WAU promoting issues to epics
 
 Group: `group::product planning`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `premium`, `ultimate`
@@ -11141,6 +13003,8 @@ Counts of MAU awarding emoji on epic
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210503011217_g_project_management_users_awarding_epic_emoji_monthly.yml)
 
 Group: `group::product planning`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -11154,6 +13018,8 @@ Counts of WAU awarding emoji on epic
 
 Group: `group::product planning`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `premium`, `ultimate`
@@ -11165,6 +13031,8 @@ Counts of MAU adding epic notes
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210314215451_g_project_management_users_creating_epic_notes_monthly.yml)
 
 Group: `group::product planning`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -11178,6 +13046,8 @@ Counts of WAU adding epic notes
 
 Group: `group::product planning`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `premium`, `ultimate`
@@ -11189,6 +13059,8 @@ Counts of MAU destroying epic notes
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210315034808_g_project_management_users_destroying_epic_notes_monthly.yml)
 
 Group: `group::product planning`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -11202,6 +13074,8 @@ Counts of WAU destroying epic notes
 
 Group: `group::product planning`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `premium`, `ultimate`
@@ -11213,6 +13087,8 @@ Number of users creating an issue from an epic
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210608191652_g_project_management_users_epic_issue_added_from_epic_monthly.yml)
 
 Group: `group::product planning`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -11226,6 +13102,8 @@ Number of users creating an issue from an epic
 
 Group: `group::product planning`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `premium`
@@ -11237,6 +13115,8 @@ Counts of MAU removing emoji on epic
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210505071850_g_project_management_users_removing_epic_emoji_monthly.yml)
 
 Group: `group::product planning`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -11250,6 +13130,8 @@ Counts of WAU removing emoji on epic
 
 Group: `group::product planning`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `premium`, `ultimate`
@@ -11261,6 +13143,8 @@ Count of MAU making epics confidential
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210310203049_g_project_management_epic_confidential_monthly.yml)
 
 Group: `group::product planning`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -11274,6 +13158,8 @@ Count of WAU making epics confidential
 
 Group: `group::product planning`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `premium`, `ultimate`
@@ -11285,6 +13171,8 @@ Counts of MAU setting epic due date as inherited
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210325060507_g_project_management_users_setting_epic_due_date_as_fixed_monthly.yml)
 
 Group: `group::product planning`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -11298,6 +13186,8 @@ Counts of WAU setting epic due date as fixed
 
 Group: `group::product planning`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `premium`, `ultimate`
@@ -11309,6 +13199,8 @@ Counts of MAU setting epic due date as inherited
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210325060315_g_project_management_users_setting_epic_due_date_as_inherited_monthly.yml)
 
 Group: `group::product planning`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -11322,6 +13214,8 @@ Counts of WAU setting epic due date as inherited
 
 Group: `group::product planning`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `premium`, `ultimate`
@@ -11333,6 +13227,8 @@ Counts of MAU setting epic start date as fixed
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210315055624_g_project_management_users_setting_epic_start_date_as_fixed_monthly.yml)
 
 Group: `group::product planning`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -11346,6 +13242,8 @@ Counts of WAU setting epic start date as fixed
 
 Group: `group::product planning`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `premium`, `ultimate`
@@ -11357,6 +13255,8 @@ Counts of MAU setting epic start date as inherited
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210315055439_g_project_management_users_setting_epic_start_date_as_inherited_monthly.yml)
 
 Group: `group::product planning`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -11370,6 +13270,8 @@ Counts of WAU setting epic start date as inherited
 
 Group: `group::product planning`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `premium`, `ultimate`
@@ -11381,6 +13283,8 @@ Count of MAU making epics visible
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210312093611_g_project_management_epic_visible_monthly.yml)
 
 Group: `group::product planning`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -11394,6 +13298,8 @@ Count of WAU making epics visible
 
 Group: `group::product planning`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `premium`, `ultimate`
@@ -11405,6 +13311,8 @@ Counts of MAU changing epic descriptions
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210312102051_g_project_management_users_updating_epic_descriptions_monthly.yml)
 
 Group: `group::product planning`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -11418,6 +13326,8 @@ Counts of WAU changing epic descriptions
 
 Group: `group::product planning`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `premium`, `ultimate`
@@ -11429,6 +13339,8 @@ Counts of MAU updating epic notes
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210314234202_g_project_management_users_updating_epic_notes_monthly.yml)
 
 Group: `group::product planning`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -11442,6 +13354,8 @@ Counts of WAU updating epic notes
 
 Group: `group::product planning`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `premium`, `ultimate`
@@ -11453,6 +13367,8 @@ Counts of MAU updating parent on epic
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210423011841_g_project_management_users_updating_epic_parent_monthly.yml)
 
 Group: `group::product planning`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -11466,6 +13382,8 @@ Counts of WAU updating parent on epic
 
 Group: `group::product planning`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `premium`, `ultimate`
@@ -11477,6 +13395,8 @@ Counts of MAU changing epic titles
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210312101935_g_project_management_users_updating_epic_titles_monthly.yml)
 
 Group: `group::product planning`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -11490,6 +13410,8 @@ Counts of WAU changing epic titles
 
 Group: `group::product planning`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `premium`, `ultimate`
@@ -11501,6 +13423,8 @@ Counts of MAU manually updating fixed due date
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210329043548_g_project_management_users_updating_fixed_epic_due_date_monthly.yml)
 
 Group: `group::product planning`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -11514,6 +13438,8 @@ Counts of WAU manually updating fixed due date
 
 Group: `group::product planning`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `premium`, `ultimate`
@@ -11525,6 +13451,8 @@ Counts of MAU manually updating fixed start date
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210329043509_g_project_management_users_updating_fixed_epic_start_date_monthly.yml)
 
 Group: `group::product planning`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -11538,6 +13466,8 @@ Counts of WAU manually updating fixed start date
 
 Group: `group::product planning`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `premium`, `ultimate`
@@ -11549,6 +13479,8 @@ Counts of MAU checking epic task
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210421080207_g_project_management_users_checking_epic_task_monthly.yml)
 
 Group: `group::product planning`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -11562,6 +13494,8 @@ Counts of WAU checking epic task
 
 Group: `group::product planning`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `premium`, `ultimate`
@@ -11573,6 +13507,8 @@ Counts of MAU unchecking epic task
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210421102516_g_project_management_users_unchecking_epic_task_monthly.yml)
 
 Group: `group::product planning`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -11586,6 +13522,8 @@ Counts of WAU unchecking epic task
 
 Group: `group::product planning`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `premium`, `ultimate`
@@ -11597,6 +13535,8 @@ Number of users editing a file from the single file editor
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216180334_g_edit_by_sfe_monthly.yml)
 
 Group: `group::editor`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -11610,6 +13550,8 @@ Weekly number of users editing from the single file editor
 
 Group: `group::editor`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -11621,6 +13563,8 @@ Count of monthly edits to a snippet
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216180338_g_edit_by_snippet_ide_monthly.yml)
 
 Group: `group::editor`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -11634,6 +13578,8 @@ Weekly number of users editing Snippets
 
 Group: `group::editor`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -11645,6 +13591,8 @@ Number of user editing files using the Static Site Editor
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216184024_g_edit_by_sse_monthly.yml)
 
 Group: `group::editor`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -11658,6 +13606,8 @@ Weekly number of users editing using the Static Site Editor
 
 Group: `group::editor`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -11669,6 +13619,8 @@ Number of users editing a file from the Web IDE
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216180330_g_edit_by_web_ide_monthly.yml)
 
 Group: `group::editor`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -11682,6 +13634,8 @@ Weekly number of users editing using the Web IDE
 
 Group: `group::editor`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -11693,6 +13647,8 @@ Count of unique users per month who edited a file from the Web IDE
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216180341_ide_edit_total_unique_counts_monthly.yml)
 
 Group: `group::editor`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -11706,17 +13662,21 @@ Weekly number of users editing a file using the Web IDE
 
 Group: `group::editor`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
 
 ### `redis_hll_counters.incident_management.incident_management_alert_assigned_monthly`
 
-Count of an alert's assignments per month
+Count of unique users assigning an alert per month
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216180533_incident_management_alert_assigned_monthly.yml)
 
 Group: `group::monitor`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -11724,11 +13684,13 @@ Tiers: `free`, `premium`, `ultimate`
 
 ### `redis_hll_counters.incident_management.incident_management_alert_assigned_weekly`
 
-Count of an alert's assignments per week
+Count of unique users assigning an alert per week
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_7d/20210216180532_incident_management_alert_assigned_weekly.yml)
 
 Group: `group::monitor`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -11736,11 +13698,13 @@ Tiers: `free`, `premium`, `ultimate`
 
 ### `redis_hll_counters.incident_management.incident_management_alert_status_changed_monthly`
 
-Count of an alert's status changes per month
+Count of unique users changing alert's status changes per month
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216180530_incident_management_alert_status_changed_monthly.yml)
 
 Group: `group::monitor`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -11748,11 +13712,13 @@ Tiers: `free`, `premium`, `ultimate`
 
 ### `redis_hll_counters.incident_management.incident_management_alert_status_changed_weekly`
 
-Count of an alert's status changes per week
+Count of unique users changing alert's status per week
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_7d/20210216180528_incident_management_alert_status_changed_weekly.yml)
 
 Group: `group::monitor`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -11760,11 +13726,13 @@ Tiers: `free`, `premium`, `ultimate`
 
 ### `redis_hll_counters.incident_management.incident_management_alert_todo_monthly`
 
-Count of alerts added to the TODO list per month
+Count of unique users adding alerts to the TODO list per month
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216180537_incident_management_alert_todo_monthly.yml)
 
 Group: `group::monitor`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -11772,11 +13740,13 @@ Tiers: `free`, `premium`, `ultimate`
 
 ### `redis_hll_counters.incident_management.incident_management_alert_todo_weekly`
 
-Count of alerts added to the TODO list per week
+Count of unique users adding alerts to the TODO list per week
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_7d/20210216180535_incident_management_alert_todo_weekly.yml)
 
 Group: `group::monitor`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -11784,11 +13754,13 @@ Tiers: `free`, `premium`, `ultimate`
 
 ### `redis_hll_counters.incident_management.incident_management_incident_assigned_monthly`
 
-Count of an incidents's assignments per month
+Count of users assigning incidents per month
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216180552_incident_management_incident_assigned_monthly.yml)
 
 Group: `group::monitor`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -11796,11 +13768,13 @@ Tiers: `free`, `premium`, `ultimate`
 
 ### `redis_hll_counters.incident_management.incident_management_incident_assigned_weekly`
 
-Count of an incidents's assignments per week
+Count of unique users assiging incidents per week
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_7d/20210216180550_incident_management_incident_assigned_weekly.yml)
 
 Group: `group::monitor`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -11808,11 +13782,13 @@ Tiers: `free`, `premium`, `ultimate`
 
 ### `redis_hll_counters.incident_management.incident_management_incident_change_confidential_monthly`
 
-Count of incidents changed to confidential per month
+Count of users changing incidents to confidential per month
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216180618_incident_management_incident_change_confidential_monthly.yml)
 
 Group: `group::monitor`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -11820,11 +13796,13 @@ Tiers: `free`, `premium`, `ultimate`
 
 ### `redis_hll_counters.incident_management.incident_management_incident_change_confidential_weekly`
 
-Count of incidents changed to confidential per week
+Count of unique users changing incidents to confidential per week
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_7d/20210216180616_incident_management_incident_change_confidential_weekly.yml)
 
 Group: `group::monitor`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -11832,11 +13810,13 @@ Tiers: `free`, `premium`, `ultimate`
 
 ### `redis_hll_counters.incident_management.incident_management_incident_closed_monthly`
 
-Count of incidents closed per month
+Count of users closing incidents per month
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216180548_incident_management_incident_closed_monthly.yml)
 
 Group: `group::monitor`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -11844,11 +13824,13 @@ Tiers: `free`, `premium`, `ultimate`
 
 ### `redis_hll_counters.incident_management.incident_management_incident_closed_weekly`
 
-Count of incidents closed per week
+Count of users closing incidents per week
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_7d/20210216180546_incident_management_incident_closed_weekly.yml)
 
 Group: `group::monitor`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -11856,11 +13838,13 @@ Tiers: `free`, `premium`, `ultimate`
 
 ### `redis_hll_counters.incident_management.incident_management_incident_comment_monthly`
 
-Count of comments per month on incidents
+Count of unique users adding comments per month on incidents
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216180559_incident_management_incident_comment_monthly.yml)
 
 Group: `group::monitor`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -11868,11 +13852,13 @@ Tiers: `free`, `premium`, `ultimate`
 
 ### `redis_hll_counters.incident_management.incident_management_incident_comment_weekly`
 
-Count of comments per week on incidents
+Count of unique users adding comments on incidents per week
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_7d/20210216180558_incident_management_incident_comment_weekly.yml)
 
 Group: `group::monitor`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -11880,11 +13866,13 @@ Tiers: `free`, `premium`, `ultimate`
 
 ### `redis_hll_counters.incident_management.incident_management_incident_created_monthly`
 
-Count of incidents created per month
+Count of unique users creating incidents per month
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216180541_incident_management_incident_created_monthly.yml)
 
 Group: `group::monitor`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -11892,11 +13880,13 @@ Tiers: `free`, `premium`, `ultimate`
 
 ### `redis_hll_counters.incident_management.incident_management_incident_created_weekly`
 
-Count of incidents created per week
+Count of unique users creating incidents  per week
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_7d/20210216180539_incident_management_incident_created_weekly.yml)
 
 Group: `group::monitor`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -11904,11 +13894,13 @@ Tiers: `free`, `premium`, `ultimate`
 
 ### `redis_hll_counters.incident_management.incident_management_incident_published_monthly`
 
-Count of published incidents per month
+Count of unique users that published incidents per month
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210216180607_incident_management_incident_published_monthly.yml)
 
 Group: `group::monitor`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -11916,11 +13908,13 @@ Tiers: `free`, `premium`, `ultimate`
 
 ### `redis_hll_counters.incident_management.incident_management_incident_published_weekly`
 
-Count of published incidents per week
+Count of unique users that published incidents per week
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_7d/20210216180605_incident_management_incident_published_weekly.yml)
 
 Group: `group::monitor`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -11928,11 +13922,13 @@ Tiers: `free`, `premium`, `ultimate`
 
 ### `redis_hll_counters.incident_management.incident_management_incident_relate_monthly`
 
-Count of issues added per month that are related to an incident
+Count of unique users adding issues per month that are related to an incident
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216180611_incident_management_incident_relate_monthly.yml)
 
 Group: `group::monitor`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -11940,11 +13936,13 @@ Tiers: `free`, `premium`, `ultimate`
 
 ### `redis_hll_counters.incident_management.incident_management_incident_relate_weekly`
 
-Count of issues added per week that are related to an incident
+Count of unique users adding issues per that are related to an incident week
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_7d/20210216180609_incident_management_incident_relate_weekly.yml)
 
 Group: `group::monitor`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -11952,11 +13950,13 @@ Tiers: `free`, `premium`, `ultimate`
 
 ### `redis_hll_counters.incident_management.incident_management_incident_reopened_monthly`
 
-Count of incidents reopened per month
+Count of unique users reopening incidents per month
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216180545_incident_management_incident_reopened_monthly.yml)
 
 Group: `group::monitor`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -11964,11 +13964,13 @@ Tiers: `free`, `premium`, `ultimate`
 
 ### `redis_hll_counters.incident_management.incident_management_incident_reopened_weekly`
 
-Count of incidents reopened per week
+Count of unique users reopening incidents per week
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_7d/20210216180543_incident_management_incident_reopened_weekly.yml)
 
 Group: `group::monitor`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -11976,11 +13978,13 @@ Tiers: `free`, `premium`, `ultimate`
 
 ### `redis_hll_counters.incident_management.incident_management_incident_todo_monthly`
 
-Count of incidents added to the TODO list per month
+Count of unique users adding incidents to the TODO list per month
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216180556_incident_management_incident_todo_monthly.yml)
 
 Group: `group::monitor`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -11988,11 +13992,13 @@ Tiers: `free`, `premium`, `ultimate`
 
 ### `redis_hll_counters.incident_management.incident_management_incident_todo_weekly`
 
-Count of incidents added to the TODO list per week
+Count of unique users adding incidents to the TODO list per week
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_7d/20210216180554_incident_management_incident_todo_weekly.yml)
 
 Group: `group::monitor`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -12000,11 +14006,13 @@ Tiers: `free`, `premium`, `ultimate`
 
 ### `redis_hll_counters.incident_management.incident_management_incident_unrelate_monthly`
 
-Count of issues removed per month that are related to an incident
+Count of users removing issues that are related to an incident per month
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216180614_incident_management_incident_unrelate_monthly.yml)
 
 Group: `group::monitor`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -12012,11 +14020,13 @@ Tiers: `free`, `premium`, `ultimate`
 
 ### `redis_hll_counters.incident_management.incident_management_incident_unrelate_weekly`
 
-Count of issues removed per week that are related to an incident
+Count of unique users removing issue that are related to an incident per week
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_7d/20210216180612_incident_management_incident_unrelate_weekly.yml)
 
 Group: `group::monitor`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -12024,11 +14034,13 @@ Tiers: `free`, `premium`, `ultimate`
 
 ### `redis_hll_counters.incident_management.incident_management_incident_zoom_meeting_monthly`
 
-Count of Zoom meetings about incidents per month
+Count of users creating Zoom meetings about incidents per month
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216180603_incident_management_incident_zoom_meeting_monthly.yml)
 
 Group: `group::monitor`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -12036,11 +14048,13 @@ Tiers: `free`, `premium`, `ultimate`
 
 ### `redis_hll_counters.incident_management.incident_management_incident_zoom_meeting_weekly`
 
-Count of Zoom meetings about incidents per week
+Count of unique users creating Zoom meetings about incidents per week
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_7d/20210216180601_incident_management_incident_zoom_meeting_weekly.yml)
 
 Group: `group::monitor`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -12048,11 +14062,13 @@ Tiers: `free`, `premium`, `ultimate`
 
 ### `redis_hll_counters.incident_management.incident_management_total_unique_counts_monthly`
 
-Count of total unique incidents per month
+Count of unique users performing events related with incidents per month
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216180622_incident_management_total_unique_counts_monthly.yml)
 
 Group: `group::monitor`
+
+Data Category: `Operational`
 
 Status: `data_available`
 
@@ -12060,11 +14076,13 @@ Tiers: `free`, `premium`, `ultimate`
 
 ### `redis_hll_counters.incident_management.incident_management_total_unique_counts_weekly`
 
-Count of total unique incidents per week
+Count of unique users performing events related to the incident management
 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_7d/20210216180620_incident_management_total_unique_counts_weekly.yml)
 
 Group: `group::monitor`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -12078,6 +14096,8 @@ Count of unique users per month to create an incident corresponding to an alert
 
 Group: `group::monitor`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -12089,6 +14109,8 @@ Count of unique users per week to create an incident corresponding to an alert
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_7d/20210216180623_incident_management_alert_create_incident_weekly.yml)
 
 Group: `group::monitor`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -12102,6 +14124,8 @@ Count of unique users to receive a notification while on-call
 
 Group: `group::monitor`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `premium`, `ultimate`
@@ -12113,6 +14137,8 @@ Count of unique users to receive a notification while on-call
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_7d/20210405220139_i_incident_management_oncall_notification_sent_weekly.yml)
 
 Group: `group::monitor`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -12126,6 +14152,8 @@ Count of MAU adding an issue to an epic
 
 Group: `group::project management`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `premium`, `ultimate`
@@ -12137,6 +14165,8 @@ Count of WAU adding an issue to an epic
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_7d/20210216181413_g_project_management_issue_added_to_epic_weekly.yml)
 
 Group: `group::project management`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -12150,6 +14180,8 @@ Count of MAU changing issue assignees
 
 Group: `group::project management`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -12161,6 +14193,8 @@ Count of WAU changing issue assignees
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_7d/20210216181310_g_project_management_issue_assignee_changed_weekly.yml)
 
 Group: `group::project management`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -12174,6 +14208,8 @@ Count of MAU changing the epic on an issue
 
 Group: `group::project management`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `premium`, `ultimate`
@@ -12185,6 +14221,8 @@ Count of WAU changing the epic on an issue
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_7d/20210216181418_g_project_management_issue_changed_epic_weekly.yml)
 
 Group: `group::project management`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -12198,6 +14236,8 @@ Count of MAU cloning an issue
 
 Group: `group::project management`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -12209,6 +14249,8 @@ Count of WAU cloning an issue
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_7d/20210216181459_g_project_management_issue_cloned_weekly.yml)
 
 Group: `group::project management`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -12222,6 +14264,8 @@ Count of MAU closing an issue
 
 Group: `group::project management`
 
+Data Category: `Operational`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -12233,6 +14277,8 @@ Count of WAU closing an issue
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_7d/20210216181324_g_project_management_issue_closed_weekly.yml)
 
 Group: `group::project management`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -12246,6 +14292,8 @@ Count of MAU commenting on an issue
 
 Group: `group::project management`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -12257,6 +14305,8 @@ Count of WAU commenting on an issue
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_7d/20210216181444_g_project_management_issue_comment_added_weekly.yml)
 
 Group: `group::project management`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -12270,6 +14320,8 @@ Count of MAU editing a comment on an issue
 
 Group: `group::project management`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -12281,6 +14333,8 @@ Count of WAU editing a comment on an issue
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_7d/20210216181448_g_project_management_issue_comment_edited_weekly.yml)
 
 Group: `group::project management`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -12294,6 +14348,8 @@ Count of MAU deleting a comment from an issue
 
 Group: `group::project management`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -12305,6 +14361,8 @@ Count of WAU deleting a comment from an issue
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_7d/20210216181451_g_project_management_issue_comment_removed_weekly.yml)
 
 Group: `group::project management`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -12318,6 +14376,8 @@ Count of MAU creating new issues
 
 Group: `group::project management`
 
+Data Category: `Operational`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -12329,6 +14389,8 @@ Count of WAU creating issues
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_7d/20210216181321_g_project_management_issue_created_weekly.yml)
 
 Group: `group::project management`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -12342,6 +14404,8 @@ Count of MAU referencing an issue from somewhere else
 
 Group: `group::project management`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -12353,6 +14417,8 @@ Count of WAU referencing an issue from somewhere else
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_7d/20210216181347_g_project_management_issue_cross_referenced_weekly.yml)
 
 Group: `group::project management`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -12366,6 +14432,8 @@ Count of MAU editing an issue description
 
 Group: `group::project management`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -12377,6 +14445,8 @@ Count of WAU editing an issue description
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_7d/20210216181306_g_project_management_issue_description_changed_weekly.yml)
 
 Group: `group::project management`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -12390,6 +14460,8 @@ Count of MAU adding a design to an issue
 
 Group: `group::project management`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -12401,6 +14473,8 @@ Count of WAU adding a design to an issue
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_7d/20210216181422_g_project_management_issue_designs_added_weekly.yml)
 
 Group: `group::project management`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -12414,6 +14488,8 @@ Count of MAU modifying a design on an issue
 
 Group: `group::project management`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -12425,6 +14501,8 @@ Count of WAU modifying a design on an issue
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_7d/20210216181425_g_project_management_issue_designs_modified_weekly.yml)
 
 Group: `group::project management`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -12438,6 +14516,8 @@ Count of MAU removing a design from an issue
 
 Group: `group::project management`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -12449,6 +14529,8 @@ Count of WAU removing a design from an issue
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_7d/20210216181429_g_project_management_issue_designs_removed_weekly.yml)
 
 Group: `group::project management`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -12462,6 +14544,8 @@ Count of MAU changing an issue due date
 
 Group: `group::project management`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -12473,6 +14557,8 @@ Count of WAU changing an issue due date
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_7d/20210216181433_g_project_management_issue_due_date_changed_weekly.yml)
 
 Group: `group::project management`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -12486,6 +14572,8 @@ Count of MAU changing the health status on an issue
 
 Group: `group::product planning`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `ultimate`
@@ -12497,6 +14585,8 @@ Count of WAU changing the health status on an issue
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_7d/20210216181455_g_project_management_issue_health_status_changed_weekly.yml)
 
 Group: `group::product planning`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -12510,6 +14600,8 @@ Count of MAU changing an issue's iteration
 
 Group: `group::project management`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `premium`, `ultimate`
@@ -12521,6 +14613,8 @@ Count of WAU changing an issue's iteration
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_7d/20210216181339_g_project_management_issue_iteration_changed_weekly.yml)
 
 Group: `group::project management`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -12534,6 +14628,8 @@ Count of MAU changing an issue's label
 
 Group: `group::project management`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -12545,6 +14641,8 @@ Count of WAU changing an issue's label
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_7d/20210216181332_g_project_management_issue_label_changed_weekly.yml)
 
 Group: `group::project management`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -12558,6 +14656,8 @@ Count of MAU locking an issue
 
 Group: `group::project management`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -12569,6 +14669,8 @@ Count of WAU locking an issue
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_7d/20210216181405_g_project_management_issue_locked_weekly.yml)
 
 Group: `group::project management`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -12582,6 +14684,8 @@ Count of MAU making an issue confidential
 
 Group: `group::project management`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -12593,6 +14697,8 @@ Count of WAU making an issue confidential
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_7d/20210216181313_g_project_management_issue_made_confidential_weekly.yml)
 
 Group: `group::project management`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -12606,6 +14712,8 @@ Count of MAU making an issue not confidential
 
 Group: `group::project management`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -12617,6 +14725,8 @@ Count of WAU making an issue not confidential
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_7d/20210216181317_g_project_management_issue_made_visible_weekly.yml)
 
 Group: `group::project management`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -12630,6 +14740,8 @@ Count of MAU marking an issue as a duplicate
 
 Group: `group::project management`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -12641,6 +14753,8 @@ Count of WAU marking an issue as a duplicate
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_7d/20210216181401_g_project_management_issue_marked_as_duplicate_weekly.yml)
 
 Group: `group::project management`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -12654,6 +14768,8 @@ Count of MAU changing an issue's milestone
 
 Group: `group::project management`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -12665,6 +14781,8 @@ Count of WAU changing an issue's milestone
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_7d/20210216181336_g_project_management_issue_milestone_changed_weekly.yml)
 
 Group: `group::project management`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -12678,6 +14796,8 @@ Count of MAU moving an issue to another project
 
 Group: `group::project management`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -12689,6 +14809,8 @@ Count of WAU moving an issue to another project
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_7d/20210216181350_g_project_management_issue_moved_weekly.yml)
 
 Group: `group::project management`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -12702,6 +14824,8 @@ Count of MAU relating an issue to another issue
 
 Group: `group::project management`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -12713,6 +14837,8 @@ Count of WAU relating an issue to another issue
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_7d/20210216181354_g_project_management_issue_related_weekly.yml)
 
 Group: `group::project management`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -12726,6 +14852,8 @@ Count of MAU removing an issue from an epic
 
 Group: `group::project management`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `premium`, `ultimate`
@@ -12737,6 +14865,8 @@ Missing description
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_7d/20210216184221_g_project_management_issue_removed_from_epic_weekly.yml)
 
 Group: ``
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -12750,6 +14880,8 @@ Count of MAU re-opening a closed issue
 
 Group: `group::project management`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -12761,6 +14893,8 @@ Count of WAU re-opening a closed issue
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_7d/20210216181328_g_project_management_issue_reopened_weekly.yml)
 
 Group: `group::project management`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -12774,6 +14908,8 @@ Count of MAU changing an issue time estimate
 
 Group: `group::project management`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -12785,6 +14921,8 @@ Count of WAU changing an issue time estimate
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_7d/20210216181437_g_project_management_issue_time_estimate_changed_weekly.yml)
 
 Group: `group::project management`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -12798,6 +14936,8 @@ Count of MAU recording time spent on an issue
 
 Group: `group::project management`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -12809,6 +14949,8 @@ Count of WAU recording time spent on an issue
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_7d/20210216181440_g_project_management_issue_time_spent_changed_weekly.yml)
 
 Group: `group::project management`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -12822,6 +14964,8 @@ Count of MAU editing an issue title
 
 Group: `group::project management`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -12833,6 +14977,8 @@ Count of WAU editing an issue title
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_7d/20210201124931_g_project_management_issue_title_changed_weekly.yml)
 
 Group: `group::project management`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -12846,6 +14992,8 @@ Count of MAU unlocking an issue
 
 Group: `group::project management`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -12857,6 +15005,8 @@ Count of WAU unlocking an issue
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_7d/20210216181409_g_project_management_issue_unlocked_weekly.yml)
 
 Group: `group::project management`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -12870,6 +15020,8 @@ Count of MAU unrelating an issue to another issue
 
 Group: `group::project management`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -12881,6 +15033,8 @@ Count of WAU unrelating an issue to another issue
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_7d/20210216181358_g_project_management_issue_unrelated_weekly.yml)
 
 Group: `group::project management`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -12894,6 +15048,8 @@ Count of MAU changing an issue's weight
 
 Group: `group::project management`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `premium`, `ultimate`
@@ -12905,6 +15061,8 @@ Count of WAU changing an issue's weight
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_7d/20210216181343_g_project_management_issue_weight_changed_weekly.yml)
 
 Group: `group::project management`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -12918,6 +15076,8 @@ Aggregate count of MAU taking an action related to an issue
 
 Group: `group::project management`
 
+Data Category: `Operational`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -12930,9 +15090,39 @@ Aggregate count of WAU taking an action related to an issue
 
 Group: `group::project management`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
+
+### `redis_hll_counters.network_policies.clusters_using_network_policies_ui_monthly`
+
+Monthly number of distinct clusters with network policies using the network policies UI
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210623202402_clusters_using_network_policies_ui_monthly.yml)
+
+Group: `group::container security`
+
+Data Category: `Operational`
+
+Status: `implemented`
+
+Tiers: `ultimate`
+
+### `redis_hll_counters.network_policies.clusters_using_network_policies_ui_weekly`
+
+Weekly number of distinct clusters with network policies using the network policies UI
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_7d/20210623202358_clusters_using_network_policies_ui_weekly.yml)
+
+Group: `group::container security`
+
+Data Category: `Operational`
+
+Status: `implemented`
+
+Tiers: `ultimate`
 
 ### `redis_hll_counters.pipeline_authoring.o_pipeline_authoring_unique_users_committing_ciconfigfile_monthly`
 
@@ -12941,6 +15131,8 @@ Monthly unique user count doing commits which contains the CI config file
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216184303_o_pipeline_authoring_unique_users_committing_ciconfigfile_monthly.yml)
 
 Group: `group::pipeline authoring`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -12954,6 +15146,8 @@ Weekly unique user count doing commits which contains the CI config file
 
 Group: `group::pipeline authoring`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -12965,6 +15159,8 @@ Monthly unique user count having merge requests which contains the CI config fil
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210301144228_o_pipeline_authoring_unique_users_pushing_mr_ciconfigfile_monthly.yml)
 
 Group: `group::pipeline authoring`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -12978,6 +15174,8 @@ Weekly unique user count having merge requests which contains the CI config file
 
 Group: `group::pipeline authoring`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -12989,6 +15187,8 @@ Missing description
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210427105033_pipeline_authoring_total_unique_counts_monthly.yml)
 
 Group: ``
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -13002,6 +15202,8 @@ Missing description
 
 Group: ``
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -13013,6 +15215,8 @@ Count of MAU using the `/approve` quick action
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216181508_i_quickactions_approve_monthly.yml)
 
 Group: `group::code review`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -13026,6 +15230,8 @@ Count of WAU using the `/approve` quick action
 
 Group: `group::code review`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -13037,6 +15243,8 @@ Count of MAU using the `/assign @user1 @user2` quick action
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210216181516_i_quickactions_assign_multiple_monthly.yml)
 
 Group: `group::project management`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -13050,6 +15258,8 @@ Count of WAU using the `/assign @user1 @user2` quick action
 
 Group: `group::project management`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `premium`, `ultimate`
@@ -13061,6 +15271,8 @@ Count of MAU using the `/assign_reviewer` or `request_reviewer` quick action
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216181523_i_quickactions_assign_reviewer_monthly.yml)
 
 Group: `group::code review`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -13074,6 +15286,8 @@ Count of WAU using the `/assign_reviewer` or `request_reviewer` quick action
 
 Group: `group::code review`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -13085,6 +15299,8 @@ Count of MAU using the `/assign me` quick action to assign self to an issuable
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216181519_i_quickactions_assign_self_monthly.yml)
 
 Group: `group::project management`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -13098,6 +15314,8 @@ Count of WAU using the `/assign me` quick action to assign self to an issuable
 
 Group: `group::project management`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -13109,6 +15327,8 @@ Count of MAU using the `/assign @user1` quick action to assign a single individu
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216181512_i_quickactions_assign_single_monthly.yml)
 
 Group: `group::project management`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -13122,6 +15342,8 @@ Count of WAU using the `/assign @user1` quick action to assign a single individu
 
 Group: `group::project management`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -13133,6 +15355,8 @@ Count of MAU using the `/award` quick action to set an award emoji on an issuabl
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216181527_i_quickactions_award_monthly.yml)
 
 Group: `group::project management`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -13146,6 +15370,8 @@ Count of WAU using the `/award` quick action to set an award emoji on an issuabl
 
 Group: `group::project management`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -13157,6 +15383,8 @@ Count of MAU using the `/board_move` quick action
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216181530_i_quickactions_board_move_monthly.yml)
 
 Group: `group::project management`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -13170,6 +15398,8 @@ Count of WAU using the `/board_move` quick action
 
 Group: `group::project management`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -13181,6 +15411,8 @@ Count of MAU using the `/child_epic` quick action
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210216181534_i_quickactions_child_epic_monthly.yml)
 
 Group: `group::product planning`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -13194,6 +15426,8 @@ Count of WAU using the `/child_epic` quick action
 
 Group: `group::product planning`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `ultimate`
@@ -13205,6 +15439,8 @@ Count of MAU using the `/clear_weight` quick action
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210216181538_i_quickactions_clear_weight_monthly.yml)
 
 Group: `group::project management`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -13218,6 +15454,8 @@ Count of WAU using the `/clear_weight` quick action
 
 Group: `group::project management`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `premium`, `ultimate`
@@ -13229,6 +15467,8 @@ Count of MAU using the `/clone` quick action to clone an issue.
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216181541_i_quickactions_clone_monthly.yml)
 
 Group: `group::project management`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -13242,6 +15482,8 @@ Count of WAU using the `/clone` quick action to clone an issue.
 
 Group: `group::project management`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -13253,6 +15495,8 @@ Count of MAU using the `/close` quick action to close an issuable
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216181545_i_quickactions_close_monthly.yml)
 
 Group: `group::project management`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -13266,6 +15510,8 @@ Count of WAU using the `/close` quick action to close an issuable
 
 Group: `group::project management`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -13277,6 +15523,8 @@ Count of MAU using the `/confidential` quick action to set an issue as confident
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216181549_i_quickactions_confidential_monthly.yml)
 
 Group: `group::project management`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -13290,6 +15538,8 @@ Count of WAU using the `/confidential` quick action to set an issue as confident
 
 Group: `group::project management`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -13301,6 +15551,8 @@ Count of MAU using the `/copy_metadata` quick action on an issue
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216181556_i_quickactions_copy_metadata_issue_monthly.yml)
 
 Group: `group::project management`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -13314,6 +15566,8 @@ Count of WAU using the `/copy_metadata` quick action on an issue
 
 Group: `group::project management`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -13325,6 +15579,8 @@ Count of MAU using the `/copy_metadata` quick action on a Merge Request
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216181553_i_quickactions_copy_metadata_merge_request_monthly.yml)
 
 Group: `group::source code`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -13338,6 +15594,8 @@ Count of WAU using the `/copy_metadata` quick action on a Merge Request
 
 Group: `group::source code`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -13349,6 +15607,8 @@ Count of MAU using the `/create_merge_request` quick action
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216181600_i_quickactions_create_merge_request_monthly.yml)
 
 Group: `group::project management`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -13362,6 +15622,8 @@ Count of WAU using the `/create_merge_request` quick action
 
 Group: `group::project management`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -13373,6 +15635,8 @@ Count of MAU using the `/done` quick action to mark a todo as done
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216181604_i_quickactions_done_monthly.yml)
 
 Group: `group::project management`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -13386,6 +15650,8 @@ Count of WAU using the `/done` quick action to mark a todo as done
 
 Group: `group::project management`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -13397,6 +15663,8 @@ Count of MAU using the `/draft` quick action on a Merge Request
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216181607_i_quickactions_draft_monthly.yml)
 
 Group: `group::source code`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -13410,6 +15678,8 @@ Count of WAU using the `/draft` quick action on a Merge Request
 
 Group: `group::source code`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -13421,6 +15691,8 @@ Count of MAU using the `/due` quick action to change the due date on an issuable
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216181611_i_quickactions_due_monthly.yml)
 
 Group: `group::project management`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -13434,6 +15706,8 @@ Count of WAU using the `/due` quick action to change the due date on an issuable
 
 Group: `group::project management`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -13445,6 +15719,8 @@ Count of MAU using the `/duplicate` quick action to mark an issue as a duplicate
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216181615_i_quickactions_duplicate_monthly.yml)
 
 Group: `group::project management`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -13458,6 +15734,8 @@ Count of WAU using the `/duplicate` quick action to mark an issue as a duplicate
 
 Group: `group::project management`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -13469,6 +15747,8 @@ Count of MAU using the `/epic` quick action
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210216181618_i_quickactions_epic_monthly.yml)
 
 Group: `group::project management`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -13482,6 +15762,8 @@ Count of WAU using the `/epic` quick action
 
 Group: `group::project management`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `premium`, `ultimate`
@@ -13493,6 +15775,8 @@ Count of MAU using the `/estimate` quick action to set a time estimate on an iss
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216181622_i_quickactions_estimate_monthly.yml)
 
 Group: `group::project management`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -13506,6 +15790,8 @@ Count of WAU using the `/estimate` quick action to set a time estimate on an iss
 
 Group: `group::project management`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -13517,6 +15803,8 @@ Unique users using the /invite_email quick action to add a multiple email partic
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210222041235_i_quickactions_invite_email_multiple_monthly.yml)
 
 Group: `group::product planning`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -13530,6 +15818,8 @@ Unique users using the /invite_email quick action to add a multiple email partic
 
 Group: `group::product planning`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -13541,6 +15831,8 @@ Unique users using the /invite_email quick action to add a single email particip
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210222041219_i_quickactions_invite_email_single_monthly.yml)
 
 Group: `group::product planning`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -13554,6 +15846,8 @@ Unique users using the /invite_email quick action to add a single email particip
 
 Group: `group::product planning`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -13565,6 +15859,8 @@ Count of MAU using the `/iteration` quick action
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210216181626_i_quickactions_iteration_monthly.yml)
 
 Group: `group::project management`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -13578,6 +15874,8 @@ Count of WAU using the `/iteration` quick action
 
 Group: `group::project management`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `premium`, `ultimate`
@@ -13589,6 +15887,8 @@ Count of MAU using the `/label` quick action
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216181629_i_quickactions_label_monthly.yml)
 
 Group: `group::project management`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -13602,6 +15902,8 @@ Count of WAU using the `/label` quick action
 
 Group: `group::project management`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -13613,6 +15915,8 @@ Count of MAU using the `/lock` quick action
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216181633_i_quickactions_lock_monthly.yml)
 
 Group: `group::project management`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -13626,6 +15930,8 @@ Count of WAU using the `/lock` quick action
 
 Group: `group::project management`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -13637,6 +15943,8 @@ Count of MAU using the `/merge` quick action
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216181637_i_quickactions_merge_monthly.yml)
 
 Group: `group::source code`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -13650,6 +15958,8 @@ Count of WAU using the `/merge` quick action
 
 Group: `group::source code`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -13661,6 +15971,8 @@ Count of MAU using the `/milestone` quick action
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216181641_i_quickactions_milestone_monthly.yml)
 
 Group: `group::project management`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -13674,6 +15986,8 @@ Count of WAU using the `/milestone` quick action
 
 Group: `group::project management`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -13685,6 +15999,8 @@ Count of MAU using the `/move` quick action
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216181644_i_quickactions_move_monthly.yml)
 
 Group: `group::project management`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -13698,6 +16014,8 @@ Count of WAU using the `/move` quick action
 
 Group: `group::project management`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -13709,6 +16027,8 @@ Count of MAU using the `/parent_epic` quick action
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210216181648_i_quickactions_parent_epic_monthly.yml)
 
 Group: `group::product planning`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -13722,6 +16042,8 @@ Count of WAU using the `/parent_epic` quick action
 
 Group: `group::product planning`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `ultimate`
@@ -13733,6 +16055,8 @@ Count of MAU using the `/promote` quick action
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210216181652_i_quickactions_promote_monthly.yml)
 
 Group: `group::project management`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -13746,6 +16070,8 @@ Count of WAU using the `/promote` quick action
 
 Group: `group::project management`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `premium`, `ultimate`
@@ -13757,6 +16083,8 @@ Count of MAU using the `/publish` quick action
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210216181655_i_quickactions_publish_monthly.yml)
 
 Group: `group::monitor`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -13770,6 +16098,8 @@ Count of WAU using the `/publish` quick action
 
 Group: `group::monitor`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `ultimate`
@@ -13781,6 +16111,8 @@ Count of MAU using the `/reassign @user1` quick action
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216181659_i_quickactions_reassign_monthly.yml)
 
 Group: `group::project management`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -13794,6 +16126,8 @@ Count of MAU using the `/reassign_reviewer` quick action
 
 Group: `group::code review`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -13805,6 +16139,8 @@ Count of WAU using the `/reassign_reviewer` quick action
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_7d/20210216181701_i_quickactions_reassign_reviewer_weekly.yml)
 
 Group: `group::code review`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -13818,6 +16154,8 @@ Count of WAU using the `/reassign @user1` quick action
 
 Group: `group::project management`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -13829,6 +16167,8 @@ Count of MAU using the `/rebase` quick action on a Merge Request
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216181707_i_quickactions_rebase_monthly.yml)
 
 Group: `group::source code`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -13842,6 +16182,8 @@ Count of WAU using the `/rebase` quick action on a Merge Request
 
 Group: `group::source code`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -13853,6 +16195,8 @@ Count of MAU using the `/relabel` quick action
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216181710_i_quickactions_relabel_monthly.yml)
 
 Group: `group::project management`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -13866,6 +16210,8 @@ Count of WAU using the `/relabel` quick action
 
 Group: `group::project management`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -13877,6 +16223,8 @@ Count of MAU using the `/relate` quick action
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216181714_i_quickactions_relate_monthly.yml)
 
 Group: `group::project management`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -13890,6 +16238,8 @@ Count of WAU using the `/relate` quick action
 
 Group: `group::project management`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -13901,6 +16251,8 @@ Count of MAU using the `/remove_child_epic` quick action
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210216181718_i_quickactions_remove_child_epic_monthly.yml)
 
 Group: `group::product planning`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -13914,6 +16266,8 @@ Count of WAU using the `/remove_child_epic` quick action
 
 Group: `group::product planning`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `ultimate`
@@ -13925,6 +16279,8 @@ Count of MAU using the `/remove_due_date` quick action
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216181721_i_quickactions_remove_due_date_monthly.yml)
 
 Group: `group::project management`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -13938,6 +16294,8 @@ Count of WAU using the `/remove_due_date` quick action
 
 Group: `group::project management`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -13949,6 +16307,8 @@ Count of MAU using the `/remove_epic` quick action
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210216181725_i_quickactions_remove_epic_monthly.yml)
 
 Group: `group::project management`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -13962,6 +16322,8 @@ Count of WAU using the `/remove_epic` quick action
 
 Group: `group::project management`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `premium`, `ultimate`
@@ -13973,6 +16335,8 @@ Count of MAU using the `/remove_estimate` quick action
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216181729_i_quickactions_remove_estimate_monthly.yml)
 
 Group: `group::project management`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -13986,6 +16350,8 @@ Count of WAU using the `/remove_estimate` quick action
 
 Group: `group::project management`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -13997,6 +16363,8 @@ Count of MAU using the `/remove_iteration` quick action
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210216181732_i_quickactions_remove_iteration_monthly.yml)
 
 Group: `group::project management`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -14010,6 +16378,8 @@ Count of WAU using the `/remove_iteration` quick action
 
 Group: `group::project management`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `premium`, `ultimate`
@@ -14021,6 +16391,8 @@ Count of MAU using the `/remove_milestone` quick action
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216181736_i_quickactions_remove_milestone_monthly.yml)
 
 Group: `group::project management`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -14034,6 +16406,8 @@ Count of WAU using the `/remove_milestone` quick action
 
 Group: `group::project management`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -14045,6 +16419,8 @@ Count of MAU using the `/remove_parent_epic` quick action
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210216181740_i_quickactions_remove_parent_epic_monthly.yml)
 
 Group: `group::product planning`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -14058,6 +16434,8 @@ Count of WAU using the `/remove_parent_epic` quick action
 
 Group: `group::product planning`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `ultimate`
@@ -14069,6 +16447,8 @@ Count of MAU using the `/remove_time_spent` quick action
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216181744_i_quickactions_remove_time_spent_monthly.yml)
 
 Group: `group::project management`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -14082,6 +16462,8 @@ Count of WAU using the `/remove_time_spent` quick action
 
 Group: `group::project management`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -14093,6 +16475,8 @@ Count of MAU using the `/remove_zoom` quick action
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216181747_i_quickactions_remove_zoom_monthly.yml)
 
 Group: `group::project management`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -14106,6 +16490,8 @@ Count of WAU using the `/remove_zoom` quick action
 
 Group: `group::project management`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -14117,6 +16503,8 @@ Count of MAU using the `/reopen` quick action
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216181751_i_quickactions_reopen_monthly.yml)
 
 Group: `group::project management`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -14130,6 +16518,8 @@ Count of WAU using the `/reopen` quick action
 
 Group: `group::project management`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -14141,6 +16531,8 @@ Count of MAU using the `/shrug` quick action
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216181755_i_quickactions_shrug_monthly.yml)
 
 Group: `group::project management`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -14154,6 +16546,8 @@ Count of WAU using the `/shrug` quick action
 
 Group: `group::project management`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -14165,6 +16559,8 @@ Count of MAU using the `/spend` quick action to add time spent
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216181802_i_quickactions_spend_add_monthly.yml)
 
 Group: `group::project management`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -14178,6 +16574,8 @@ Count of WAU using the `/spend` quick action to add time spent
 
 Group: `group::project management`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -14189,6 +16587,8 @@ Count of MAU using the `/spend` quick action to subtract time spent
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216181758_i_quickactions_spend_subtract_monthly.yml)
 
 Group: `group::project management`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -14202,6 +16602,8 @@ Count of WAU using the `/spend` quick action to subtract time spent
 
 Group: `group::project management`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -14213,6 +16615,8 @@ Count of MAU using the `/submit_review` quick action on Merge Requests
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216181806_i_quickactions_submit_review_monthly.yml)
 
 Group: `group::code review`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -14226,6 +16630,8 @@ Count of WAU using the `/submit_review` quick action on Merge Requests
 
 Group: `group::code review`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -14237,6 +16643,8 @@ Count of MAU using the `/subscribe` quick action
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216181809_i_quickactions_subscribe_monthly.yml)
 
 Group: `group::project management`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -14250,6 +16658,8 @@ Count of WAU using the `/subscribe` quick action
 
 Group: `group::project management`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -14261,6 +16671,8 @@ Count of MAU using the `/tableflip` quick action
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216181813_i_quickactions_tableflip_monthly.yml)
 
 Group: `group::project management`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -14274,6 +16686,8 @@ Count of WAU using the `/tableflip` quick action
 
 Group: `group::project management`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -14285,6 +16699,8 @@ Count of MAU using the `/tag` quick action
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216181817_i_quickactions_tag_monthly.yml)
 
 Group: `group::source code`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -14298,6 +16714,8 @@ Count of WAU using the `/tag` quick action
 
 Group: `group::source code`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -14309,6 +16727,8 @@ Count of MAU using the `/target_branch` quick action on Merge Requests
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216181821_i_quickactions_target_branch_monthly.yml)
 
 Group: `group::source code`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -14322,6 +16742,8 @@ Count of WAU using the `/target_branch` quick action on Merge Requests
 
 Group: `group::source code`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -14333,6 +16755,8 @@ Count of MAU using the `/title` quick action
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216181824_i_quickactions_title_monthly.yml)
 
 Group: `group::project management`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -14346,6 +16770,8 @@ Count of WAU using the `/title` quick action
 
 Group: `group::project management`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -14357,6 +16783,8 @@ Count of MAU using the `/todo` quick action
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216181828_i_quickactions_todo_monthly.yml)
 
 Group: `group::project management`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -14370,6 +16798,8 @@ Count of WAU using the `/todo` quick action
 
 Group: `group::project management`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -14381,6 +16811,8 @@ Count of MAU using the `/unassign` quick action on Merge Requests
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216181835_i_quickactions_unassign_all_monthly.yml)
 
 Group: `group::source code`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -14394,6 +16826,8 @@ Count of WAU using the `/unassign` quick action on Merge Requests
 
 Group: `group::source code`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -14405,6 +16839,8 @@ Count of MAU using the `/unassign_reviewer` or `/remove_reviewer` quick action o
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216181839_i_quickactions_unassign_reviewer_monthly.yml)
 
 Group: `group::code review`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -14418,6 +16854,8 @@ Count of WAU using the `/unassign_reviewer` or `/remove_reviewer` quick action o
 
 Group: `group::code review`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -14429,6 +16867,8 @@ Count of MAU using the `/unassign @user1` quick action on Merge Requests
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216181832_i_quickactions_unassign_specific_monthly.yml)
 
 Group: `group::source code`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -14442,6 +16882,8 @@ Count of WAU using the `/unassign @user1` quick action on Merge Requests
 
 Group: `group::source code`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -14453,6 +16895,8 @@ Count of MAU using the `/unlabel` quick action to remove all labels
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216181846_i_quickactions_unlabel_all_monthly.yml)
 
 Group: `group::project management`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -14466,6 +16910,8 @@ Count of WAU using the `/unlabel` quick action to remove all labels
 
 Group: `group::project management`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -14477,6 +16923,8 @@ Count of MAU using the `/unlabel` or `/remove_label` quick action to remove one 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216181843_i_quickactions_unlabel_specific_monthly.yml)
 
 Group: `group::project management`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -14490,6 +16938,8 @@ Count of WAU using the `/unlabel` or `/remove_label` quick action to remove one 
 
 Group: `group::project management`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -14501,6 +16951,8 @@ Count of MAU using the `/unlock` quick action
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216181850_i_quickactions_unlock_monthly.yml)
 
 Group: `group::project management`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -14514,6 +16966,8 @@ Count of WAU using the `/unlock` quick action
 
 Group: `group::project management`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -14525,6 +16979,8 @@ Count of MAU using the `/unsubscribe` quick action
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216181854_i_quickactions_unsubscribe_monthly.yml)
 
 Group: `group::project management`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -14538,6 +16994,8 @@ Count of WAU using the `/unsubscribe` quick action
 
 Group: `group::project management`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -14549,6 +17007,8 @@ Count of MAU using the `/weight` quick action
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210216181857_i_quickactions_weight_monthly.yml)
 
 Group: `group::project management`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -14562,6 +17022,8 @@ Count of WAU using the `/weight` quick action
 
 Group: `group::project management`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `premium`, `ultimate`
@@ -14573,6 +17035,8 @@ Count of MAU using the `/wip` quick action on Merge Requests
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216181901_i_quickactions_wip_monthly.yml)
 
 Group: `group::source code`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -14586,6 +17050,8 @@ Count of WAU using the `/wip` quick action on Merge Requests
 
 Group: `group::source code`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -14597,6 +17063,8 @@ Count of MAU using the `/zoom` quick action on Issues
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216181905_i_quickactions_zoom_monthly.yml)
 
 Group: `group::project management`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -14610,6 +17078,8 @@ Count of WAU using the `/zoom` quick action on Issues
 
 Group: `group::project management`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -14621,6 +17091,8 @@ Count of MAU using one or more quick actions
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216184803_quickactions_total_unique_counts_monthly.yml)
 
 Group: `group::project management`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -14634,6 +17106,8 @@ Missing description
 
 Group: ``
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers:
@@ -14645,6 +17119,8 @@ Calculated unique users to perform Advanced searches by month
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210216180427_i_search_advanced_monthly.yml)
 
 Group: `group::global search`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -14658,6 +17134,8 @@ Calculated unique users to perform Advanced searches by week
 
 Group: `group::global search`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `premium`, `ultimate`
@@ -14669,6 +17147,8 @@ Calculated unique users to perform a search with a paid license enabled by month
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_all/20210216184035_i_search_paid_monthly.yml)
 
 Group: `group::global search`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -14682,6 +17162,8 @@ Calculated unique users to perform a search with a paid license enabled by week
 
 Group: `group::global search`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `premium`, `ultimate`
@@ -14693,6 +17175,8 @@ Calculated unique users to perform Basic or Advanced searches by month
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216180424_i_search_total_monthly.yml)
 
 Group: `group::global search`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -14706,6 +17190,8 @@ Calculated unique users to perform Basic or Advanced searches by week
 
 Group: `group::global search`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -14717,6 +17203,8 @@ Total unique users for i_search_total, i_search_advanced, i_search_paid for rece
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216180431_search_total_unique_counts_monthly.yml)
 
 Group: `group::global search`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -14730,6 +17218,8 @@ Calculated unique users to perform Basic or Advanced searches by week
 
 Group: `group::global search`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -14741,6 +17231,8 @@ Count of expanding the security report widget
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210409095855_users_expanding_secure_security_report_monthly.yml)
 
 Group: `group::static analysis`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -14754,6 +17246,8 @@ Count of expanding the security report widget
 
 Group: `group::static analysis`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -14765,6 +17259,8 @@ Monthly number of users viewing snippets
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216184255_i_snippets_show_monthly.yml)
 
 Group: `group::editor`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -14778,6 +17274,8 @@ Weekly number of users viewing snippets
 
 Group: `group::editor`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -14789,6 +17287,8 @@ Count of total design actions (upload, delete, comment, reply)
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216182106_design_action_monthly.yml)
 
 Group: `group::source code`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -14802,6 +17302,8 @@ Count of total design actions (upload, delete, comment, reply)
 
 Group: `group::source code`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -14813,6 +17315,8 @@ Count of unique Git write actions
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216184047_git_write_action_monthly.yml)
 
 Group: `group::source code`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -14826,6 +17330,8 @@ Count of unique Git write actions
 
 Group: `group::source code`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -14837,6 +17343,8 @@ Count of unique users who use code intelligence
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216175117_i_source_code_code_intelligence_monthly.yml)
 
 Group: `group::source code`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -14850,6 +17358,8 @@ Count of unique users who use code intelligence
 
 Group: `group::source code`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -14861,6 +17371,8 @@ Count of unique users who perform an action on a merge request
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216175113_merge_request_action_monthly.yml)
 
 Group: `group::code review`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -14874,6 +17386,8 @@ Count of unique users who perform an action on a merge request
 
 Group: `group::code review`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -14885,6 +17399,8 @@ Count of unique actions done on projects and related resources (create, edit, de
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216182109_project_action_monthly.yml)
 
 Group: `group::source code`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -14898,6 +17414,8 @@ Count of unique actions done on projects and related resources (create, edit, de
 
 Group: `group::source code`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -14909,6 +17427,8 @@ Count of unique actions done on a wiki (create, edit, delete)
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216182102_wiki_action_monthly.yml)
 
 Group: `group::source code`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -14922,6 +17442,8 @@ Count of unique actions done on a wiki (create, edit, delete)
 
 Group: `group::source code`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -14933,6 +17455,8 @@ Monthly active users of GitLab Managed Terraform states
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216184259_p_terraform_state_api_unique_users_monthly.yml)
 
 Group: `group::configure`
+
+Data Category: `Operational`
 
 Status: `data_available`
 
@@ -14946,6 +17470,8 @@ Missing description
 
 Group: ``
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers:
@@ -14957,6 +17483,8 @@ Count of unique users per week|month who visit the full code quality report
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210216182147_i_testing_full_code_quality_report_total_monthly.yml)
 
 Group: `group::testing`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -14970,6 +17498,8 @@ Count of unique users per week who visit the full code quality report
 
 Group: `group::testing`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `premium`, `ultimate`
@@ -14981,6 +17511,8 @@ Aggregated count of unique users who have clicked from group code coverage page 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210216182153_i_testing_group_code_coverage_project_click_total_monthly.yml)
 
 Group: `group::testing`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -14994,6 +17526,8 @@ Aggregated count of unique users who have clicked from group code coverage page 
 
 Group: `group::testing`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `premium`, `ultimate`
@@ -15005,6 +17539,8 @@ Count of unique users per month who visited the group code coverage page
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210216182143_i_testing_group_code_coverage_visit_total_monthly.yml)
 
 Group: `group::testing`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -15018,6 +17554,8 @@ Count of unique users per week who visited the group code coverage page
 
 Group: `group::testing`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `premium`, `ultimate`
@@ -15029,6 +17567,8 @@ Count of unique users per month who expanded the load performance report MR widg
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210216182156_i_testing_load_performance_widget_total_monthly.yml)
 
 Group: `group::testing`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -15042,6 +17582,8 @@ Count of unique users per week who expanded the load performance report MR widge
 
 Group: `group::testing`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `premium`, `ultimate`
@@ -15053,6 +17595,8 @@ Tracks number of metrics reports uploaded monthly.
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210216182200_i_testing_metrics_report_artifact_uploaders_monthly.yml)
 
 Group: `group::testing`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -15066,6 +17610,8 @@ Count of unique users per week who trigger a pipeline that uploads a metrics rep
 
 Group: `group::testing`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `premium`, `ultimate`
@@ -15077,6 +17623,8 @@ Count of unique users per month who expanded the metrics report MR widget
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210216182139_i_testing_metrics_report_widget_total_monthly.yml)
 
 Group: `group::testing`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -15090,6 +17638,8 @@ Count of unique users per week who expanded the metrics report MR widget
 
 Group: `group::testing`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `premium`, `ultimate`
@@ -15101,6 +17651,8 @@ Unique users that expand the test summary merge request widget by month
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210413205507_i_testing_summary_widget_total_monthly.yml)
 
 Group: `group::testing`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -15114,6 +17666,8 @@ Unique users that expand the test summary merge request widget by week
 
 Group: `group::testing`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -15125,6 +17679,8 @@ Internal Tracking to count number of unit tests parsed for planning of future co
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216182136_i_testing_test_case_parsed_monthly.yml)
 
 Group: `group::testing`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -15138,6 +17694,8 @@ Internal Tracking to count number of unit tests parsed for planning of future co
 
 Group: `group::testing`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -15149,6 +17707,8 @@ Count of unique users per month who expanded the browser performance report MR w
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210216182151_i_testing_web_performance_widget_total_monthly.yml)
 
 Group: `group::testing`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -15162,6 +17722,8 @@ Count of unique users per week who expanded the browser performance report MR wi
 
 Group: `group::testing`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `premium`, `ultimate`
@@ -15173,6 +17735,8 @@ Missing description
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216184140_testing_total_unique_counts_monthly.yml)
 
 Group: ``
+
+Data Category: `Optional`
 
 Status: `removed`
 
@@ -15186,6 +17750,8 @@ Missing description
 
 Group: ``
 
+Data Category: `Optional`
+
 Status: `removed`
 
 Tiers: `premium`, `ultimate`
@@ -15197,6 +17763,8 @@ Count of expanding the accessibility report widget
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210409100628_users_expanding_testing_accessibility_report_monthly.yml)
 
 Group: `group::testing`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -15210,6 +17778,8 @@ Count of expanding the accessibility report widget
 
 Group: `group::testing`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -15221,6 +17791,8 @@ Count of expanding the code quality widget
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210409100451_users_expanding_testing_code_quality_report_monthly.yml)
 
 Group: `group::testing`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -15234,6 +17806,8 @@ Count of expanding the code quality widget
 
 Group: `group::testing`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -15245,6 +17819,8 @@ A monthly count of users that have published a Composer package to the registry
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216184854_i_package_composer_user_monthly.yml)
 
 Group: `group::package`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -15258,6 +17834,8 @@ A weekly count of users that have published a Composer package to the registry
 
 Group: `group::package`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -15269,6 +17847,8 @@ A monthly count of users that have published a Conan package to the registry
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216184858_i_package_conan_user_monthly.yml)
 
 Group: `group::package`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -15282,6 +17862,8 @@ A weekly count of users that have published a Conan package to the registry
 
 Group: `group::package`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -15293,6 +17875,8 @@ A monthly count of users that have published a container image to the registry
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216184902_i_package_container_user_monthly.yml)
 
 Group: `group::package`
+
+Data Category: `Optional`
 
 Status: `deprecated`
 
@@ -15306,6 +17890,8 @@ A weekly count of users that have published a container image to the registry
 
 Group: `group::package`
 
+Data Category: `Optional`
+
 Status: `deprecated`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -15317,6 +17903,8 @@ A monthly count of users that have published a Debian package to the registry
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216184906_i_package_debian_user_monthly.yml)
 
 Group: `group::package`
+
+Data Category: `Optional`
 
 Status: `deprecated`
 
@@ -15330,6 +17918,8 @@ A weekly count of users that have published a Debian package to the registry
 
 Group: `group::package`
 
+Data Category: `Optional`
+
 Status: `deprecated`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -15341,6 +17931,8 @@ A monthly count of users that have published a generic package to the registry
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216184910_i_package_generic_user_monthly.yml)
 
 Group: `group::package`
+
+Data Category: `Optional`
 
 Status: `broken`
 
@@ -15354,6 +17946,8 @@ A weekly count of users that have published a generic package to the registry
 
 Group: `group::package`
 
+Data Category: `Optional`
+
 Status: `broken`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -15365,6 +17959,8 @@ A monthly count of users that have published a Go moduleto the registry
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216184913_i_package_golang_user_monthly.yml)
 
 Group: `group::package`
+
+Data Category: `Optional`
 
 Status: `deprecated`
 
@@ -15378,6 +17974,8 @@ A weekly count of users that have published a Go module to the registry
 
 Group: `group::package`
 
+Data Category: `Optional`
+
 Status: `deprecated`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -15389,6 +17987,8 @@ Distinct user count events for Helm packages in recent 28 days
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210517075259_i_package_helm_user_monthly.yml)
 
 Group: `group::package`
+
+Data Category: `Optional`
 
 Status: `implemented`
 
@@ -15402,6 +18002,8 @@ Distinct user count events for Helm packages in recent 7 days
 
 Group: `group::package`
 
+Data Category: `Optional`
+
 Status: `implemented`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -15413,6 +18015,8 @@ A monthly count of users that have published a Maven package to the registry
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216184917_i_package_maven_user_monthly.yml)
 
 Group: `group::package`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -15426,6 +18030,8 @@ A weekly count of users that have published a Maven package to the registry
 
 Group: `group::package`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -15437,6 +18043,8 @@ A monthly count of users that have published an npm package to the registry
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216184921_i_package_npm_user_monthly.yml)
 
 Group: `group::package`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -15450,6 +18058,8 @@ A weekly count of users that have published an npm package to the registry
 
 Group: `group::package`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -15461,6 +18071,8 @@ A monthly count of users that have published a NuGet package to the registry
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216184925_i_package_nuget_user_monthly.yml)
 
 Group: `group::package`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -15474,6 +18086,8 @@ A weekly count of users that have published a NuGet package to the registry
 
 Group: `group::package`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -15485,6 +18099,8 @@ A monthly count of users that have published a PyPI package to the registry
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216184929_i_package_pypi_user_monthly.yml)
 
 Group: `group::package`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -15498,6 +18114,8 @@ A weekly count of users that have published a Python package to the registry
 
 Group: `group::package`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -15509,6 +18127,8 @@ Distinct user count of RubyGems packages published in recent 28 days
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210303154654_i_package_rubygems_user_monthly.yml)
 
 Group: `group::package`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -15522,6 +18142,8 @@ A weekly count of distinct RubyGems packages published by a user
 
 Group: `group::package`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -15533,6 +18155,8 @@ A monthly count of users that have published a package tag to the registry
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216184933_i_package_tag_user_monthly.yml)
 
 Group: `group::package`
+
+Data Category: `Optional`
 
 Status: `deprecated`
 
@@ -15546,6 +18170,8 @@ A weekly count of users that have published a package with a tag to the registry
 
 Group: `group::package`
 
+Data Category: `Optional`
+
 Status: `deprecated`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -15557,6 +18183,8 @@ Number of distinct users creating Terraform Module packages in recent 28 days
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210410012208_i_package_terraform_module_user_monthly.yml)
 
 Group: `group::configure`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -15570,6 +18198,8 @@ Number of distinct users creating Terraform Module packages in recent 7 days
 
 Group: `group::configure`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -15581,6 +18211,8 @@ A monthly count of users that have published a package to the registry
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216184937_user_packages_total_unique_counts_monthly.yml)
 
 Group: `group::package`
+
+Data Category: `Operational`
 
 Status: `data_available`
 
@@ -15594,6 +18226,8 @@ A weekly count of users that have published a package to the registry
 
 Group: `group::package`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -15605,6 +18239,8 @@ Whether incoming email is setup
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/settings/20210204124916_reply_by_email_enabled.yml)
 
 Group: `group::certify`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -15618,6 +18254,8 @@ Calculated unique users to perform Advanced searches by week
 
 Group: `group::global search`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `premium`, `ultimate`
@@ -15629,6 +18267,8 @@ Calculated unique users to perform a search with a paid license enabled by week
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_all/20210216180420_i_search_paid.yml)
 
 Group: `group::global search`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -15642,6 +18282,8 @@ Calculated unique users to perform Basic or Advanced searches by week
 
 Group: `group::global search`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -15653,6 +18295,8 @@ Total unique users for i_search_total, i_search_advanced, i_search_paid for rece
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216183922_search_unique_visits_for_any_target_monthly.yml)
 
 Group: `group::global search`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -15666,6 +18310,8 @@ Total unique users for i_search_total, i_search_advanced, i_search_paid for rece
 
 Group: `group::global search`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -15677,6 +18323,8 @@ Gitaly application performance
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/settings/20210321224827_gitaly_apdex.yml)
 
 Group: `group::gitaly`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -15690,6 +18338,8 @@ Is encrypted LDAP secrets configured?
 
 Group: `group::distribution`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -15702,6 +18352,8 @@ Information about the operating system running GitLab
 
 Group: `group::distribution`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -15713,6 +18365,8 @@ Whether public signup is enabled
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/settings/20210204124918_signup_enabled.yml)
 
 Group: `group::access`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -15728,6 +18382,8 @@ Topology data
 
 Group: `group::memory`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -15739,6 +18395,8 @@ Total GitLab Managed clusters with GitLab Managed App:Cert Manager installed
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216175329_clusters_applications_cert_managers.yml)
 
 Group: `group::configure`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -15752,6 +18410,8 @@ Total GitLab Managed clusters with GitLab Managed App:Helm enabled
 
 Group: `group::configure`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -15763,6 +18423,8 @@ Total GitLab Managed clusters with GitLab Managed App:Ingress installed
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216175333_clusters_applications_ingress.yml)
 
 Group: `group::configure`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -15776,6 +18438,8 @@ Total GitLab Managed clusters with GitLab Managed App:Knative installed
 
 Group: `group::configure`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -15787,6 +18451,8 @@ Total GitLab Managed disabled clusters
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216175339_clusters_disabled.yml)
 
 Group: `group::configure`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -15800,6 +18466,8 @@ Total GitLab Managed clusters currently enabled
 
 Group: `group::configure`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -15811,6 +18479,8 @@ Total GitLab Managed clusters with defined cluster management project
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216175337_clusters_management_project.yml)
 
 Group: `group::configure`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -15824,6 +18494,8 @@ Total GitLab Managed clusters provisioned with GitLab on AWS EKS
 
 Group: `group::configure`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -15835,6 +18507,8 @@ Total GitLab Managed clusters provisioned with GitLab on GCE GKE
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216175343_clusters_platforms_gke.yml)
 
 Group: `group::configure`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -15848,6 +18522,8 @@ Total GitLab Managed clusters that are user provisioned
 
 Group: `group::configure`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -15859,6 +18535,8 @@ Total GitLab Managed disabled clusters attached to groups
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216175352_group_clusters_disabled.yml)
 
 Group: `group::configure`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -15872,6 +18550,8 @@ Total GitLab Managed enabled clusters attached to groups
 
 Group: `group::configure`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -15883,6 +18563,8 @@ Total GitLab Managed disabled clusters attached to the instance
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216175348_instance_clusters_disabled.yml)
 
 Group: `group::configure`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -15896,6 +18578,8 @@ Total GitLab Managed enabled clusters attached to the instance
 
 Group: `group::configure`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -15907,6 +18591,8 @@ Total GitLab Managed disabled clusters attached to projects
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216175356_project_clusters_disabled.yml)
 
 Group: `group::configure`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -15920,6 +18606,8 @@ Total GitLab Managed enabled clusters attached to projects
 
 Group: `group::configure`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -15931,6 +18619,8 @@ Unique projects with Slack webhook enabled
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_all/20210216175400_projects_slack_notifications_active.yml)
 
 Group: `group::configure`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -15944,6 +18634,8 @@ Unique projects with Slack ‘/’ commands enabled
 
 Group: `group::configure`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers:
@@ -15955,6 +18647,8 @@ Projects with Prometheus alerting enabled
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216175403_projects_with_prometheus_alerts.yml)
 
 Group: `group::configure`
+
+Data Category: `Optional`
 
 Status: `removed`
 
@@ -15968,6 +18662,8 @@ Total number of project approval rules
 
 Group: `group::source code`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `premium`, `ultimate`
@@ -15979,6 +18675,8 @@ Number of approval rules with the exact number of required approvers.
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_all/20210216183355_approval_project_rules_with_exact_required_approvers.yml)
 
 Group: `group::source code`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -15992,6 +18690,8 @@ Number of approval rules with fewer approvers than required.
 
 Group: `group::source code`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `premium`, `ultimate`
@@ -16003,6 +18703,8 @@ Number of approval rules with more approvers than required.
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_all/20210216183352_approval_project_rules_with_more_approvers_than_required.yml)
 
 Group: `group::source code`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -16016,6 +18718,8 @@ Number of project approval rules scoped to a specific repo branch.
 
 Group: `group::source code`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `premium`, `ultimate`
@@ -16027,6 +18731,8 @@ Count of users creating deploy keys.
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216182010_deploy_keys.yml)
 
 Group: `group::source code`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -16040,6 +18746,8 @@ Count of users creating regular keys.
 
 Group: `group::source code`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -16051,6 +18759,8 @@ Count of the number of users creating merge requests
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216175045_merge_requests.yml)
 
 Group: `group::code review`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -16064,6 +18774,8 @@ Merge requests with added rules
 
 Group: `group::code review`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `premium`, `ultimate`
@@ -16075,6 +18787,8 @@ Count of merge requests with optional codeowner approval rules
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_all/20210216175049_merge_requests_with_optional_codeowners.yml)
 
 Group: `group::source code`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -16088,6 +18802,8 @@ Number of merge requests that have overridden rules created at the project level
 
 Group: `group::source code`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `premium`, `ultimate`
@@ -16099,6 +18815,8 @@ Count of merge requests with required codeowner approval rules
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_all/20210216175051_merge_requests_with_required_codeowners.yml)
 
 Group: `group::source code`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -16112,6 +18830,8 @@ Count of users creating projects that require approval by code owners for code c
 
 Group: `group::source code`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `premium`, `ultimate`
@@ -16123,6 +18843,8 @@ Missing description
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216180630_projects_imported_from_github.yml)
 
 Group: `group::import`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -16136,6 +18858,8 @@ Total count of projects that do not allow overriding approvers on discrete merge
 
 Group: `group::source code`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -16147,6 +18871,8 @@ Count of projects that have a matching Git repository, result of a Git push acti
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_all/20210216182023_projects_with_repositories_enabled.yml)
 
 Group: `group::source code`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -16160,6 +18886,8 @@ Count of projects using code owners with code owners section feature
 
 Group: `group::source code`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `premium`, `ultimate`
@@ -16171,6 +18899,8 @@ Count of total projects that do not disable overriding approvers per discrete me
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216182015_projects_without_disable_overriding_approvers_per_merge_request.yml)
 
 Group: `group::source code`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -16184,6 +18914,8 @@ Count of users creating projects with repositories making use of at least one pr
 
 Group: `group::source code`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `premium`, `ultimate`
@@ -16195,6 +18927,8 @@ Count of users creating projects with remote mirrors.
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216182017_remote_mirrors.yml)
 
 Group: `group::source code`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -16208,6 +18942,8 @@ Count of distinct author_id from snippets
 
 Group: `group::editor`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -16219,6 +18955,8 @@ Count of unique users who create suggestions in merge request comments
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216175053_suggestions.yml)
 
 Group: `group::code review`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -16232,6 +18970,8 @@ The total number of files which have been locked via the GitLab UI
 
 Group: `group::source code`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `premium`, `ultimate`
@@ -16243,6 +18983,8 @@ Number of paths/directories manually locked through the UI
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_all/20210216182027_total_number_of_path_locks.yml)
 
 Group: `group::source code`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -16256,6 +18998,8 @@ Number of unique users who have locked files or directories using LFS via the co
 
 Group: `group::source code`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `premium`, `ultimate`
@@ -16267,6 +19011,8 @@ Number of users who have manually locked paths/directories through the UI
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_all/20210216183344_users_using_path_locks.yml)
 
 Group: `group::source code`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -16280,6 +19026,8 @@ Number of Git fetch events from Prometheus on the Geo secondary
 
 Group: `group::geo`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `premium`, `ultimate`
@@ -16291,6 +19039,8 @@ Number of Git push events from Prometheus on the Geo secondary
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_7d/20210604110603_git_push_event_count_weekly.yml)
 
 Group: `group::geo`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -16304,6 +19054,8 @@ Missing description
 
 Group: ``
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -16315,6 +19067,8 @@ Distinct count of users that triggered an import using the Group Migration tool
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216180634_gitlab.yml)
 
 Group: `group::import`
+
+Data Category: `Optional`
 
 Status: `deprecated`
 
@@ -16328,9 +19082,25 @@ Count of imports using GitLab Migration
 
 Group: `group::import`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`
+
+### `usage_activity_by_stage.manage.compliance_frameworks_with_pipeline`
+
+Count of compliance frameworks that have a pipeline configuration
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_all/20210622123800_compliance_frameworks_with_pipeline.yml)
+
+Group: `compliance`
+
+Data Category: `Optional`
+
+Status: `implemented`
+
+Tiers: `ultimate`
 
 ### `usage_activity_by_stage.manage.custom_compliance_frameworks`
 
@@ -16339,6 +19109,8 @@ Total count of all custom compliance framework labels
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_all/20210430081610_custom_compliance_frameworks.yml)
 
 Group: `compliance`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -16352,6 +19124,8 @@ Missing description
 
 Group: `group::manage`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`
@@ -16363,6 +19137,8 @@ Count of groups imported using GitLab Migration
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216180703_gitlab_migration.yml)
 
 Group: `group::import`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -16376,6 +19152,8 @@ Count of group imports using Group Import/Export
 
 Group: `group::import`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`
@@ -16387,6 +19165,8 @@ Has the instance enabled Group SAML SSO `https://docs.gitlab.com/ee/user/group/s
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/settings/20210216180813_group_saml_enabled.yml)
 
 Group: `group::manage`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -16400,6 +19180,8 @@ Number of users who are group members.
 
 Group: `group::access`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -16411,6 +19193,8 @@ Distinct count of users that imported groups using Group Import
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216180729_groups_imported.yml)
 
 Group: `group::import`
+
+Data Category: `Optional`
 
 Status: `deprecated`
 
@@ -16424,6 +19208,8 @@ Count of (attempted) imports from csv files
 
 Group: `group::import`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`
@@ -16435,6 +19221,8 @@ Count of projects imported from fogbugz
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216180656_fogbugz.yml)
 
 Group: `group::import`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -16448,6 +19236,8 @@ Count of projects imported from Jira
 
 Group: `group::import`
 
+Data Category: `Operational`
+
 Status: `data_available`
 
 Tiers: `free`
@@ -16459,6 +19249,8 @@ Count of projects imported from phabricator
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216180658_phabricator.yml)
 
 Group: `group::import`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -16472,6 +19264,8 @@ Distinct count of users that imported issues into projects using CSV upload
 
 Group: `group::import`
 
+Data Category: `Optional`
+
 Status: `deprecated`
 
 Tiers: `free`
@@ -16483,6 +19277,8 @@ Distinct count of users that imported issues into projects using FogBugz
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216180724_fogbugz.yml)
 
 Group: `group::import`
+
+Data Category: `Optional`
 
 Status: `deprecated`
 
@@ -16496,6 +19292,8 @@ Distinct count of users that imported issues into projects using Jira
 
 Group: `group::import`
 
+Data Category: `Optional`
+
 Status: `deprecated`
 
 Tiers: `free`
@@ -16507,6 +19305,8 @@ Distinct count of users that imported issues into projects using Phabricator
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216180726_phabricator.yml)
 
 Group: `group::import`
+
+Data Category: `Optional`
 
 Status: `deprecated`
 
@@ -16520,6 +19320,8 @@ Has the instance configured [LDAP Admin Sync](https://docs.gitlab.com/ee/adminis
 
 Group: `group::access`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `premium`, `ultimate`
@@ -16531,6 +19333,8 @@ Has the instance configured [LDAP Group Sync](https://docs.gitlab.com/ee/adminis
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/settings/20210216180809_ldap_group_sync_enabled.yml)
 
 Group: `group::access`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -16544,6 +19348,8 @@ Number of users creating keys synced as part of LDAP
 
 Group: `group::access`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `premium`, `ultimate`
@@ -16555,6 +19361,8 @@ Number of [LDAP servers configured for the instance](https://docs.gitlab.com/ee/
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_all/20210216180807_ldap_servers.yml)
 
 Group: `group::access`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -16568,6 +19376,8 @@ Number of users that are linked to LDAP
 
 Group: `group::access`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `premium`, `ultimate`
@@ -16579,6 +19389,8 @@ Number of unique user logins using an OmniAuth provider
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216183400_omniauth_providers.yml)
 
 Group: `group::access`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -16592,6 +19404,8 @@ Count of projects imported from Bitbucket
 
 Group: `group::import`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -16603,6 +19417,8 @@ Count of projects imported from Bitbucket Server
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216180645_bitbucket_server.yml)
 
 Group: `group::import`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -16616,6 +19432,8 @@ Count of projects imported by URL
 
 Group: `group::import`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -16627,6 +19445,8 @@ Count of projects imported from Gitea
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216180647_gitea.yml)
 
 Group: `group::import`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -16640,6 +19460,8 @@ Count of projects imported from GitHub
 
 Group: `group::import`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -16651,6 +19473,8 @@ Count of projects imported from GitLab.com
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216180639_gitlab.yml)
 
 Group: `group::import`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -16664,6 +19488,8 @@ Count of projects imported using GitLab Migration
 
 Group: `group::import`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -16675,6 +19501,8 @@ Count of projects imported using Project Import/Export
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216180638_gitlab_project.yml)
 
 Group: `group::import`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -16688,6 +19516,8 @@ Count of projects imported using manifst file
 
 Group: `group::import`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -16699,6 +19529,8 @@ Count number of projects imported monthly
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210514141520_project_imports_total.yml)
 
 Group: `group::import`
+
+Data Category: `Optional`
 
 Status: `implemented`
 
@@ -16712,6 +19544,8 @@ Distinct count of users that imported projects from Bitbucket Cloud
 
 Group: `group::import`
 
+Data Category: `Optional`
+
 Status: `deprecated`
 
 Tiers: `free`
@@ -16723,6 +19557,8 @@ Distinct count of users that imported projects from Bitbucket Server
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216180715_bitbucket_server.yml)
 
 Group: `group::import`
+
+Data Category: `Optional`
 
 Status: `deprecated`
 
@@ -16736,6 +19572,8 @@ Distinct count of users that imported projects using Import by URL
 
 Group: `group::import`
 
+Data Category: `Optional`
+
 Status: `deprecated`
 
 Tiers: `free`
@@ -16747,6 +19585,8 @@ Distinct count of users that imported projects from Gitea
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216180716_gitea.yml)
 
 Group: `group::import`
+
+Data Category: `Optional`
 
 Status: `deprecated`
 
@@ -16760,6 +19600,8 @@ Distinct count of users that imported projects from GitHub
 
 Group: `group::import`
 
+Data Category: `Optional`
+
 Status: `deprecated`
 
 Tiers: `free`
@@ -16771,6 +19613,8 @@ Distinct count of users that imported projects from GitLab.com
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216180709_gitlab.yml)
 
 Group: `group::import`
+
+Data Category: `Optional`
 
 Status: `deprecated`
 
@@ -16784,6 +19628,8 @@ Distinct count of users that imported projects using Project Import/Export
 
 Group: `group::import`
 
+Data Category: `Optional`
+
 Status: `deprecated`
 
 Tiers: `free`
@@ -16795,6 +19641,8 @@ Distinct count of users that imported projects using Manifest file
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216180720_manifest.yml)
 
 Group: `group::import`
+
+Data Category: `Optional`
 
 Status: `deprecated`
 
@@ -16808,6 +19656,8 @@ Total count of all projects imported with import_source NOT NULL
 
 Group: `group::import`
 
+Data Category: `Optional`
+
 Status: `deprecated`
 
 Tiers: `free`
@@ -16819,6 +19669,8 @@ Number of projects labeled with a compliance framework label [see](https://gitla
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_all/20210216180805_projects_with_compliance_framework.yml)
 
 Group: `group::manage`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -16832,6 +19684,8 @@ Distinct count of users that triggered any kind of import
 
 Group: `group::import`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`
@@ -16843,6 +19697,8 @@ Number of unique user logins using Google OAuth authentication
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216183410_google_oauth2.yml)
 
 Group: `group::access`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -16856,6 +19712,8 @@ Number of unique user logins using password authentication
 
 Group: `group::access`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -16867,6 +19725,8 @@ Number of unique user logins using two factor authentication
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216183402_two-factor.yml)
 
 Group: `group::access`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -16880,6 +19740,8 @@ Number of unique user logins using two factor via a U2F device
 
 Group: `group::access`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -16891,6 +19753,8 @@ Number of unique user logins using two factor via a WebAuthn device
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216183406_two-factor-via-webauthn-device.yml)
 
 Group: `group::access`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -16904,6 +19768,8 @@ Number of users
 
 Group: `group::access`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -16915,6 +19781,8 @@ Number of custom value stream analytics stages.
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_all/20210216180803_value_stream_management_customized_group_stages.yml)
 
 Group: `group::optimize`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -16928,6 +19796,8 @@ Users creating clusters.
 
 Group: `group::monitor`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -16939,6 +19809,8 @@ Users creating clusters with Prometheus enabled.
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216180947_clusters_applications_prometheus.yml)
 
 Group: `group::monitor`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -16952,6 +19824,8 @@ Active users with enabled operations dashboard
 
 Group: `group::monitor`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`
@@ -16963,6 +19837,8 @@ Active users with projects on operations dashboard
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216180953_operations_dashboard_users_with_projects_added.yml)
 
 Group: `group::monitor`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -16976,6 +19852,8 @@ Projects where Incident SLA is enabled
 
 Group: `group::monitor`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `premium`, `ultimate`
@@ -16987,6 +19865,8 @@ Count of unique projects with an incident from an alert
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216180520_projects_with_alert_incidents.yml)
 
 Group: `group::monitor`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -17002,6 +19882,8 @@ Histogram (buckets 1 to 100) of projects with at least 1 enabled integration.
 
 Group: `group::monitor`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -17013,6 +19895,8 @@ Projects where error tracking is enabled
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216180517_projects_with_error_tracking_enabled.yml)
 
 Group: `group::monitor`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -17026,6 +19910,8 @@ Count of unique projects with an incident
 
 Group: `group::monitor`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -17037,6 +19923,8 @@ Projects with tracing enabled
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216180951_projects_with_tracing_enabled.yml)
 
 Group: `group::monitor`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -17050,6 +19938,8 @@ Projects with package registry enabled
 
 Group: `group::package`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -17061,6 +19951,8 @@ Count of users creating assignee lists on Boards
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_all/20210216181132_assignee_lists.yml)
 
 Group: `group::project management`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -17074,6 +19966,8 @@ Missing description
 
 Group: `group::plan`
 
+Data Category: `Operational`
+
 Status: `data_available`
 
 Tiers: `free`
@@ -17085,6 +19979,8 @@ Count of users creating Issues
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216181115_issues.yml)
 
 Group: `group::project management`
+
+Data Category: `Operational`
 
 Status: `data_available`
 
@@ -17098,6 +19994,8 @@ Count of users creating label lists on Boards
 
 Group: `group::project management`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -17109,6 +20007,8 @@ Count of users creating milestone lists on Boards
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_all/20210216181137_milestone_lists.yml)
 
 Group: `group::project management`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -17122,6 +20022,8 @@ Count of users creating Notes on Issues
 
 Group: `group::project management`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -17133,6 +20035,8 @@ Count of users creating projects
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216181119_projects.yml)
 
 Group: `group::project management`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -17146,6 +20050,8 @@ Missing description
 
 Group: `group::plan`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`
@@ -17157,6 +20063,8 @@ Missing description
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216181128_projects_jira_dvcs_cloud_active.yml)
 
 Group: `group::plan`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -17170,6 +20078,8 @@ Missing description
 
 Group: `group::plan`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`
@@ -17181,6 +20091,8 @@ Missing description
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216181122_service_desk_enabled_projects.yml)
 
 Group: `group::plan`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -17194,6 +20106,8 @@ Missing description
 
 Group: `group::plan`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`
@@ -17205,6 +20119,8 @@ Count of users todos created
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216181121_todos.yml)
 
 Group: `group::project management`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -17218,6 +20134,8 @@ Unique users triggering deployments
 
 Group: `group::release`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`
@@ -17229,6 +20147,8 @@ Total failed deployments
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216181928_failed_deployments.yml)
 
 Group: `group::release`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -17242,6 +20162,8 @@ Count creator_id from projects with repository mirroring enabled.
 
 Group: `group::pipeline execution`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `premium`, `ultimate`
@@ -17253,6 +20175,8 @@ Unique users creating release tags
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216181930_releases.yml)
 
 Group: `group::release`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -17266,6 +20190,8 @@ Total successful deployments
 
 Group: `group::release`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`
@@ -17278,9 +20204,25 @@ Counts API fuzzing jobs
 
 Group: `group::fuzz testing`
 
+Data Category: `Operational`
+
 Status: `data_available`
 
 Tiers:
+
+### `usage_activity_by_stage.secure.cluster_image_scanning_scans`
+
+Counts cluster image scanning jobs
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_all/20210618124854_cluster_image_scanning_scans.yml)
+
+Group: `group::container security`
+
+Data Category: `Optional`
+
+Status: `implemented`
+
+Tiers: `ultimate`
 
 ### `usage_activity_by_stage.secure.container_scanning_scans`
 
@@ -17289,6 +20231,8 @@ Counts container scanning jobs
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_all/20210216175503_container_scanning_scans.yml)
 
 Group: `group::container security`
+
+Data Category: `Operational`
 
 Status: `data_available`
 
@@ -17302,6 +20246,8 @@ Counts fuzzing jobs
 
 Group: `group::fuzz testing`
 
+Data Category: `Operational`
+
 Status: `data_available`
 
 Tiers:
@@ -17313,6 +20259,8 @@ Counts dast jobs
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_all/20210216182122_dast_scans.yml)
 
 Group: `group::dynamic analysis`
+
+Data Category: `Operational`
 
 Status: `data_available`
 
@@ -17326,17 +20274,7 @@ Total number of users running Dependency Scanning Scans
 
 Group: `group::composition analysis`
 
-Status: `data_available`
-
-Tiers: `ultimate`
-
-### `usage_activity_by_stage.secure.running_container_scanning_scans`
-
-Counts running container scanning jobs
-
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_all/20210618124854_running_container_scanning_scans.yml)
-
-Group: `group::container security`
+Data Category: `Operational`
 
 Status: `data_available`
 
@@ -17350,6 +20288,8 @@ Counts sast jobs
 
 Group: `group::static analysis`
 
+Data Category: `Operational`
+
 Status: `data_available`
 
 Tiers: `ultimate`
@@ -17361,6 +20301,8 @@ counts secret detection jobs
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_all/20210216182123_secret_detection_scans.yml)
 
 Group: `group::static analysis`
+
+Data Category: `Operational`
 
 Status: `data_available`
 
@@ -17374,6 +20316,8 @@ Count of API Fuzzing `docker-in-docker` jobs by job name
 
 Group: `group::fuzz testing`
 
+Data Category: `Operational`
+
 Status: `data_available`
 
 Tiers: `free`
@@ -17385,6 +20329,8 @@ Count of API Fuzzing jobs by job name
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216180348_user_api_fuzzing_jobs.yml)
 
 Group: `group::fuzz testing`
+
+Data Category: `Operational`
 
 Status: `data_available`
 
@@ -17410,6 +20356,8 @@ Distinct count per user of Container Scanning jobs run
 
 Group: `group::container security`
 
+Data Category: `Operational`
+
 Status: `data_available`
 
 Tiers: `ultimate`
@@ -17433,6 +20381,8 @@ Missing description
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216183514_user_coverage_fuzzing_jobs.yml)
 
 Group: ``
+
+Data Category: `Operational`
 
 Status: `data_available`
 
@@ -17458,6 +20408,8 @@ Count of DAST jobs
 
 Group: `group::dynamic analysis`
 
+Data Category: `Operational`
+
 Status: `data_available`
 
 Tiers: `free`
@@ -17481,6 +20433,8 @@ Total number of users running Dependency Scanning jobs
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_all/20210216175216_user_dependency_scanning_jobs.yml)
 
 Group: `group::composition analysis`
+
+Data Category: `Operational`
 
 Status: `data_available`
 
@@ -17506,6 +20460,8 @@ Total number of users running License Scanning jobs
 
 Group: `group::composition analysis`
 
+Data Category: `Operational`
+
 Status: `data_available`
 
 Tiers: `ultimate`
@@ -17518,6 +20474,8 @@ Users who set personal preference to see Details on Group information page
 
 Group: `group::threat insights`
 
+Data Category: `Operational`
+
 Status: `data_available`
 
 Tiers: `ultimate`
@@ -17529,6 +20487,8 @@ Count of SAST jobs per user
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216182116_user_sast_jobs.yml)
 
 Group: `group::static analysis`
+
+Data Category: `Operational`
 
 Status: `data_available`
 
@@ -17554,6 +20514,8 @@ Count of Secret Detection Jobs per user
 
 Group: `group::static analysis`
 
+Data Category: `Operational`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -17578,6 +20540,8 @@ Missing description
 
 Group: `group::secure`
 
+Data Category: `Operational`
+
 Status: `data_available`
 
 Tiers: `free`
@@ -17589,6 +20553,8 @@ Unique count of builds in project
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216175525_ci_builds.yml)
 
 Group: `group::pipeline execution`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -17602,6 +20568,8 @@ Total pipelines in external repositories
 
 Group: `group::pipeline execution`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -17613,6 +20581,8 @@ Total pipelines in GitLab repositories
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216175529_ci_internal_pipelines.yml)
 
 Group: `group::pipeline execution`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -17626,6 +20596,8 @@ Total pipelines from an Auto DevOps template
 
 Group: `group::configure`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -17637,6 +20609,8 @@ Total Pipelines from templates in repository
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216175533_ci_pipeline_config_repository.yml)
 
 Group: `group::pipeline execution`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -17650,6 +20624,8 @@ Pipeline schedules in GitLab
 
 Group: `group::pipeline execution`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -17661,6 +20637,8 @@ Distinct Users triggering Total pipelines
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216175537_ci_pipelines.yml)
 
 Group: `group::pipeline execution`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -17674,6 +20652,8 @@ Total configured Triggers in project
 
 Group: `group::pipeline execution`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -17685,6 +20665,8 @@ Count of users creating managed clusters with Runner enabled
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_all/20210216181949_clusters_applications_runner.yml)
 
 Group: `group::configure`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -17698,6 +20680,8 @@ Projects with a GitHub service pipeline enabled
 
 Group: `group::pipeline execution`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `premium`, `ultimate`
@@ -17709,6 +20693,8 @@ Total GitLab Managed clusters with Cert Manager enabled
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216175405_clusters_applications_cert_managers.yml)
 
 Group: `group::configure`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -17722,6 +20708,8 @@ Total GitLab Managed clusters with Helm enabled
 
 Group: `group::configure`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -17733,6 +20721,8 @@ Total GitLab Managed clusters with Ingress enabled
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216175409_clusters_applications_ingress.yml)
 
 Group: `group::configure`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -17746,6 +20736,8 @@ Total GitLab Managed clusters with Knative enabled
 
 Group: `group::configure`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -17757,6 +20749,8 @@ Total GitLab Managed disabled clusters
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216175415_clusters_disabled.yml)
 
 Group: `group::configure`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -17770,6 +20764,8 @@ Total GitLab Managed clusters currently enabled
 
 Group: `group::configure`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -17781,6 +20777,8 @@ Number of Kubernetes clusters with clusters management project being set
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216175413_clusters_management_project.yml)
 
 Group: `group::configure`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -17794,6 +20792,8 @@ Total GitLab Managed clusters provisioned with GitLab on AWS EKS
 
 Group: `group::configure`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -17805,6 +20805,8 @@ Total GitLab Managed clusters provisioned with GitLab on GCE GKE
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216175419_clusters_platforms_gke.yml)
 
 Group: `group::configure`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -17818,6 +20820,8 @@ Total GitLab Managed clusters that are user provisioned
 
 Group: `group::configure`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -17829,6 +20833,8 @@ Total GitLab Managed disabled clusters attached to groups
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216175428_group_clusters_disabled.yml)
 
 Group: `group::configure`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -17842,6 +20848,8 @@ Total GitLab Managed enabled clusters attached to groups
 
 Group: `group::configure`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -17853,6 +20861,8 @@ Total GitLab Managed disabled clusters attached to the instance
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216175424_instance_clusters_disabled.yml)
 
 Group: `group::configure`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -17866,6 +20876,8 @@ Total GitLab Managed enabled clusters attached to the instance
 
 Group: `group::configure`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -17877,6 +20889,8 @@ Total GitLab Managed disabled clusters attached to projects
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216175432_project_clusters_disabled.yml)
 
 Group: `group::configure`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -17890,6 +20904,8 @@ Total GitLab Managed enabled clusters attached to projects
 
 Group: `group::configure`
 
+Data Category: `Operational`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -17901,6 +20917,8 @@ Unique projects created in the past 28 days that have Slack notifications enable
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210216175436_projects_slack_notifications_active.yml)
 
 Group: `group::configure`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -17914,6 +20932,8 @@ Unique projects created in the past 28 days that have Slack ‘/’ commands ena
 
 Group: `group::configure`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -17925,6 +20945,8 @@ Projects with Prometheus alerting enabled
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216180955_projects_with_prometheus_alerts.yml)
 
 Group: `group::monitor`
+
+Data Category: `Optional`
 
 Status: `removed`
 
@@ -17938,6 +20960,8 @@ Monthly active users for design management
 
 Group: `group::product planning`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -17949,6 +20973,8 @@ Aggregated value for wiki, design, and project repo Git write actions
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216182041_action_monthly_active_users_git_write.yml)
 
 Group: `group::source code`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -17962,6 +20988,8 @@ Number of unique users per month who edited a file from any web editor
 
 Group: `group::editor`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -17973,6 +21001,8 @@ Count of monthly active users who have performed any Git operation (read/write/p
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216182040_action_monthly_active_users_project_repo.yml)
 
 Group: `group::source code`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -17986,6 +21016,8 @@ Number of users using single file editor
 
 Group: `group::editor`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -17997,6 +21029,8 @@ Number of users using the snippet editor
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216180323_action_monthly_active_users_snippet_editor_edit.yml)
 
 Group: `group::editor`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -18010,6 +21044,8 @@ Number of users using the static site editor
 
 Group: `group::editor`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -18021,6 +21057,8 @@ Number of users editing using web IDE
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216180319_action_monthly_active_users_web_ide_edit.yml)
 
 Group: `group::editor`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -18034,6 +21072,8 @@ Unique monthly active users of the Wiki
 
 Group: `group::editor`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -18045,6 +21085,8 @@ Total number of project approval rules
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210216182056_approval_project_rules.yml)
 
 Group: `group::source code`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -18058,6 +21100,8 @@ Number of approval rules with the exact number of required approvers.
 
 Group: `group::source code`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `premium`, `ultimate`
@@ -18069,6 +21113,8 @@ Number of approval rules with fewer approvers than required.
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210216183620_approval_project_rules_with_less_approvers_than_required.yml)
 
 Group: `group::source code`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -18082,6 +21128,8 @@ Number of approval rules with more approvers than required.
 
 Group: `group::source code`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `premium`, `ultimate`
@@ -18093,6 +21141,8 @@ Number of project approval rules scoped to a specific repo branch.
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210216182058_approval_project_rules_with_target_branch.yml)
 
 Group: `group::source code`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -18106,6 +21156,8 @@ Count of users creating deploy keys in last 28 days.
 
 Group: `group::source code`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -18117,6 +21169,8 @@ Count of users creating regular keys in last 28 days.
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216182036_keys.yml)
 
 Group: `group::source code`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -18130,6 +21184,8 @@ Count of the number of users creating merge requests
 
 Group: `group::code review`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -18141,6 +21197,8 @@ Monthly count of the number of merge request users
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216175101_merge_requests_users.yml)
 
 Group: `group::code review`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -18154,6 +21212,8 @@ Merge requests with added rules
 
 Group: `group::code review`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `premium`, `ultimate`
@@ -18165,6 +21225,8 @@ Count of merge requests with optional codeowner approval rules
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210216175105_merge_requests_with_optional_codeowners.yml)
 
 Group: `group::source code`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -18178,6 +21240,8 @@ Number of merge requests which have overriden rules created at the project level
 
 Group: `group::source code`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `premium`, `ultimate`
@@ -18189,6 +21253,8 @@ Count of merge requests with required codeowner approval rules
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210216175107_merge_requests_with_required_codeowners.yml)
 
 Group: `group::source code`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -18202,6 +21268,8 @@ Count of total projects that require approval by code owners for code changes
 
 Group: `group::source code`
 
+Data Category: `Operational`
+
 Status: `data_available`
 
 Tiers: `premium`, `ultimate`
@@ -18213,6 +21281,8 @@ Missing description
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216180731_projects_imported_from_github.yml)
 
 Group: `group::import`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -18226,6 +21296,8 @@ Count of the number of projects with setting to disable overriding approvers per
 
 Group: `group::source code`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -18237,6 +21309,8 @@ Count of users creating projects that have a matching Git repository, result of 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210216182049_projects_with_repositories_enabled.yml)
 
 Group: `group::source code`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -18250,6 +21324,8 @@ Count of projects using code owners with code owners section feature
 
 Group: `group::source code`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `premium`, `ultimate`
@@ -18261,6 +21337,8 @@ Count of the number of projects without setting to disable overriding approvers 
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216175059_projects_without_disable_overriding_approvers_per_merge_request.yml)
 
 Group: `group::source code`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -18274,6 +21352,8 @@ Count of users creating projects with repositories making use of at least one pr
 
 Group: `group::source code`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -18285,6 +21365,8 @@ Count of users creating projects with remote mirrors. Includes both push and pul
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216182038_remote_mirrors.yml)
 
 Group: `group::source code`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -18298,6 +21380,8 @@ Count of distinct author_id from snippets for last 28 days
 
 Group: `group::editor`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -18309,6 +21393,8 @@ Count of unique users per month who create suggestions in merge request comments
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216175109_suggestions.yml)
 
 Group: `group::code review`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -18322,6 +21408,8 @@ The total number of files which have been locked via the GitLab UI
 
 Group: `group::source code`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `premium`, `ultimate`
@@ -18333,6 +21421,8 @@ Number of paths/directories manually locked through the UI
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210216183613_total_number_of_path_locks.yml)
 
 Group: `group::source code`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -18346,6 +21436,8 @@ Number of unique users who have locked files or directories using LFS via the co
 
 Group: `group::source code`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `premium`, `ultimate`
@@ -18357,6 +21449,8 @@ Number of users creating path_locks in last 28 days.
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210216182053_users_using_path_locks.yml)
 
 Group: `group::source code`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -18370,6 +21464,8 @@ Missing description
 
 Group: ``
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -18381,6 +21477,8 @@ Missing description
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216183640_gitlab.yml)
 
 Group: ``
+
+Data Category: `Optional`
 
 Status: `deprecated`
 
@@ -18394,9 +21492,25 @@ Missing description
 
 Group: ``
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`
+
+### `usage_activity_by_stage_monthly.manage.compliance_frameworks_with_pipeline`
+
+Count of compliance frameworks that have a pipeline configuration
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210622091519_compliance_frameworks_with_pipeline.yml)
+
+Group: `compliance`
+
+Data Category: `Optional`
+
+Status: `implemented`
+
+Tiers: `ultimate`
 
 ### `usage_activity_by_stage_monthly.manage.custom_compliance_frameworks`
 
@@ -18405,6 +21519,8 @@ Monthly count of all custom compliance framework labels
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210507165054_custom_compliance_frameworks.yml)
 
 Group: `compliance`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -18418,6 +21534,8 @@ Missing description
 
 Group: `group::manage`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`
@@ -18429,6 +21547,8 @@ Missing description
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216183711_gitlab_migration.yml)
 
 Group: ``
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -18442,6 +21562,8 @@ Number of group import states
 
 Group: `group::import`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -18453,6 +21575,8 @@ Whether group SAML is enabled
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/settings/20210216180833_group_saml_enabled.yml)
 
 Group: `group:access`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -18466,6 +21590,8 @@ Number of users who are group members for last 28 days
 
 Group: `group::access`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -18477,6 +21603,8 @@ Missing description
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216183737_groups_imported.yml)
 
 Group: `group::import`
+
+Data Category: `Optional`
 
 Status: `deprecated`
 
@@ -18490,6 +21618,8 @@ Missing description
 
 Group: ``
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`
@@ -18501,6 +21631,8 @@ Missing description
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216183703_fogbugz.yml)
 
 Group: ``
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -18514,6 +21646,8 @@ Missing description
 
 Group: ``
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`
@@ -18525,6 +21659,8 @@ Missing description
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216183705_phabricator.yml)
 
 Group: ``
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -18538,6 +21674,8 @@ Missing description
 
 Group: ``
 
+Data Category: `Optional`
+
 Status: `deprecated`
 
 Tiers: `free`
@@ -18549,6 +21687,8 @@ Missing description
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216183731_fogbugz.yml)
 
 Group: ``
+
+Data Category: `Optional`
 
 Status: `deprecated`
 
@@ -18562,6 +21702,8 @@ Missing description
 
 Group: ``
 
+Data Category: `Optional`
+
 Status: `deprecated`
 
 Tiers: `free`
@@ -18573,6 +21715,8 @@ Missing description
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216183733_phabricator.yml)
 
 Group: ``
+
+Data Category: `Optional`
 
 Status: `deprecated`
 
@@ -18586,6 +21730,8 @@ Whether LDAP admin sync is enabled
 
 Group: `group::access`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `premium`, `ultimate`
@@ -18597,6 +21743,8 @@ Has the instance configured [LDAP Group Sync](https://docs.gitlab.com/ee/adminis
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/settings/20210216180829_ldap_group_sync_enabled.yml)
 
 Group: `group::acess`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -18610,6 +21758,8 @@ Number of users creating keys synced as part of LDAP for last 28 days.
 
 Group: `group::acess`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `premium`, `ultimate`
@@ -18621,6 +21771,8 @@ Number of LDAP servers configured
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210216180827_ldap_servers.yml)
 
 Group: `group::manage`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -18634,6 +21786,8 @@ Number of users that are linked to LDAP
 
 Group: `group::access`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `premium`, `ultimate`
@@ -18645,6 +21799,8 @@ Number of unique user logins using an OmniAuth provider
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216183627_omniauth_providers.yml)
 
 Group: `group::access`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -18658,6 +21814,8 @@ Count of projects imported from Bitbucket
 
 Group: `group::import`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -18669,6 +21827,8 @@ Count of projects imported from Bitbucket Server
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216183652_bitbucket_server.yml)
 
 Group: `group::import`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -18682,6 +21842,8 @@ Count of projects imported from Git
 
 Group: `group::import`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -18693,6 +21855,8 @@ Count of projects imported from Gitea
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216183653_gitea.yml)
 
 Group: `group::import`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -18706,6 +21870,8 @@ Count of projects imported from GitHub
 
 Group: `group::import`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -18717,6 +21883,8 @@ Count of projects imported from GitLab using Project Export/Import
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216183646_gitlab.yml)
 
 Group: `group::import`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -18730,6 +21898,8 @@ Missing description
 
 Group: `group::import`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -18741,6 +21911,8 @@ Missing description
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216183644_gitlab_project.yml)
 
 Group: `group::import`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -18754,6 +21926,8 @@ Missing description
 
 Group: `group::import`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -18765,6 +21939,8 @@ Total count of projects imported
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210520111133_total.yml)
 
 Group: `group::import`
+
+Data Category: `Optional`
 
 Status: `implemented`
 
@@ -18778,6 +21954,8 @@ Count of projects imported from Bitbucket
 
 Group: `group::import`
 
+Data Category: `Optional`
+
 Status: `deprecated`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -18789,6 +21967,8 @@ Count of projects imported from Bitbucket Server
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216183722_bitbucket_server.yml)
 
 Group: `group::import`
+
+Data Category: `Optional`
 
 Status: `deprecated`
 
@@ -18802,6 +21982,8 @@ Missing description
 
 Group: ``
 
+Data Category: `Optional`
+
 Status: `deprecated`
 
 Tiers: `free`
@@ -18813,6 +21995,8 @@ Missing description
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216183724_gitea.yml)
 
 Group: ``
+
+Data Category: `Optional`
 
 Status: `deprecated`
 
@@ -18826,6 +22010,8 @@ Missing description
 
 Group: ``
 
+Data Category: `Optional`
+
 Status: `deprecated`
 
 Tiers: `free`
@@ -18837,6 +22023,8 @@ Missing description
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216183716_gitlab.yml)
 
 Group: ``
+
+Data Category: `Optional`
 
 Status: `deprecated`
 
@@ -18850,6 +22038,8 @@ Missing description
 
 Group: ``
 
+Data Category: `Optional`
+
 Status: `deprecated`
 
 Tiers: `free`
@@ -18861,6 +22051,8 @@ Missing description
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216183728_manifest.yml)
 
 Group: ``
+
+Data Category: `Optional`
 
 Status: `deprecated`
 
@@ -18874,6 +22066,8 @@ Missing description
 
 Group: ``
 
+Data Category: `Optional`
+
 Status: `deprecated`
 
 Tiers: `free`
@@ -18885,6 +22079,8 @@ Missing description
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210216180825_projects_with_compliance_framework.yml)
 
 Group: `group::manage`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -18898,6 +22094,8 @@ Number of users from projects imported
 
 Group: `group::import`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -18909,6 +22107,8 @@ Number of unique user logins using Google OAuth authentication
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216183636_google_oauth2.yml)
 
 Group: `group::access`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -18922,6 +22122,8 @@ Number of unique user logins using password authentication
 
 Group: `group::access`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -18933,6 +22135,8 @@ Number of unique user logins using two factor authentication
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216183629_two-factor.yml)
 
 Group: `group::access`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -18946,6 +22150,8 @@ Number of unique user logins using two factor via a U2F device
 
 Group: `group::access`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -18957,6 +22163,8 @@ Number of unique user logins using two factor via a WebAuthn device
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216183633_two-factor-via-webauthn-device.yml)
 
 Group: `group::access`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -18970,6 +22178,8 @@ Number of users created in the month
 
 Group: `group::access`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -18981,6 +22191,8 @@ Missing description
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210216180824_value_stream_management_customized_group_stages.yml)
 
 Group: `group::manage`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -18994,6 +22206,8 @@ Count users creating clusters in last 28 days.
 
 Group: `group::monitor`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -19005,6 +22219,8 @@ Users creating clusters with Prometheus enabled in last 28 days.
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216180958_clusters_applications_prometheus.yml)
 
 Group: `group::monitor`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -19018,6 +22234,8 @@ Active users with enabled operations dashboard
 
 Group: `group::monitor`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -19029,6 +22247,8 @@ Active users with projects on operations dashboard
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216181006_operations_dashboard_users_with_projects_added.yml)
 
 Group: `group::monitor`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -19042,6 +22262,8 @@ Count of projects with Incident SLA enabled
 
 Group: `group::monitor`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `premium`, `ultimate`
@@ -19053,6 +22275,8 @@ Count of unique projects with an incident from an alert created in the last mont
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216180526_projects_with_alert_incidents.yml)
 
 Group: `group::monitor`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -19066,6 +22290,8 @@ Count of users creating projects with error tracking enabled.
 
 Group: `group::monitor`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -19077,6 +22303,8 @@ Count of unique projects with an incident created in the last month
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216180524_projects_with_incidents.yml)
 
 Group: `group::monitor`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -19090,6 +22318,8 @@ Projects with tracing enabled
 
 Group: `group::monitor`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -19101,6 +22331,8 @@ The total number of projects in a given month with at least one package
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216181057_projects_with_packages.yml)
 
 Group: `group::package`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -19114,6 +22346,8 @@ Count of MAU creating assignee lists on Boards
 
 Group: `group::project management`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `premium`, `ultimate`
@@ -19125,6 +22359,8 @@ Missing description
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216181158_epics.yml)
 
 Group: `group::plan`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -19138,6 +22374,8 @@ Count of users creating Issues in last 28 days.
 
 Group: `group::project management`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -19149,6 +22387,8 @@ Count of MAU creating label lists on Boards
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216181200_label_lists.yml)
 
 Group: `group::project management`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -19162,6 +22402,8 @@ Count of MAU created milestone lists on Boards
 
 Group: `group::project management`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `premium`, `ultimate`
@@ -19173,6 +22415,8 @@ Count of MAU commenting on an issuable
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216181141_notes.yml)
 
 Group: `group::project management`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -19186,6 +22430,8 @@ Count of MAU creating projects
 
 Group: `group::project management`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -19197,6 +22443,8 @@ Missing description
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216181150_projects_jira_active.yml)
 
 Group: `group::plan`
+
+Data Category: `Operational`
 
 Status: `data_available`
 
@@ -19210,6 +22458,8 @@ Missing description
 
 Group: `group::plan`
 
+Data Category: `Operational`
+
 Status: `data_available`
 
 Tiers: `free`
@@ -19221,6 +22471,8 @@ Missing description
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216181154_projects_jira_dvcs_server_active.yml)
 
 Group: `group::plan`
+
+Data Category: `Operational`
 
 Status: `data_available`
 
@@ -19234,6 +22486,8 @@ Missing description
 
 Group: `group::plan`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`
@@ -19245,6 +22499,8 @@ Missing description
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216181148_service_desk_issues.yml)
 
 Group: `group::plan`
+
+Data Category: `Operational`
 
 Status: `data_available`
 
@@ -19258,6 +22514,8 @@ Count of MAU creating todos
 
 Group: `group::project management`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -19269,6 +22527,8 @@ Unique users triggering deployments
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216181935_deployments.yml)
 
 Group: `group::release`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -19282,6 +22542,8 @@ Total failed deployments
 
 Group: `group::release`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`
@@ -19293,6 +22555,8 @@ Count creator_id from projects with repository mirroring enabled.
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210216181943_projects_mirrored_with_pipelines_enabled.yml)
 
 Group: `group::pipeline execution`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -19306,6 +22570,8 @@ Unique users creating release tags
 
 Group: `group::release`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`
@@ -19317,6 +22583,8 @@ Total successful deployments
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216181941_successful_deployments.yml)
 
 Group: `group::release`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -19330,6 +22598,8 @@ Counts of Pipelines that have at least 1 API Fuzzing Testing job
 
 Group: `group::fuzz testing`
 
+Data Category: `Operational`
+
 Status: `data_available`
 
 Tiers: `ultimate`
@@ -19342,9 +22612,39 @@ Missing description
 
 Group: ``
 
+Data Category: `Operational`
+
 Status: `data_available`
 
 Tiers: `free`
+
+### `usage_activity_by_stage_monthly.secure.cluster_image_scanning_pipeline`
+
+Pipelines containing a Cluster Image Scanning job
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210618125224_cluster_image_scanning_pipeline.yml)
+
+Group: `group::container security`
+
+Data Category: `Optional`
+
+Status: `implemented`
+
+Tiers: `ultimate`
+
+### `usage_activity_by_stage_monthly.secure.cluster_image_scanning_scans`
+
+Counts cluster image scanning jobs
+
+[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210618101233_cluster_image_scanning_scans.yml)
+
+Group: `group::container security`
+
+Data Category: `Optional`
+
+Status: `implemented`
+
+Tiers: `ultimate`
 
 ### `usage_activity_by_stage_monthly.secure.container_scanning_pipeline`
 
@@ -19353,6 +22653,8 @@ Pipelines containing a Container Scanning job
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210216175507_container_scanning_pipeline.yml)
 
 Group: `group::container security`
+
+Data Category: `Operational`
 
 Status: `data_available`
 
@@ -19366,6 +22668,8 @@ Missing description
 
 Group: ``
 
+Data Category: `Operational`
+
 Status: `data_available`
 
 Tiers: `free`
@@ -19377,6 +22681,8 @@ Counts of Pipelines that have at least 1 coverage-guided Fuzz Testing job
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210216180359_coverage_fuzzing_pipeline.yml)
 
 Group: `group::fuzz testing`
+
+Data Category: `Operational`
 
 Status: `data_available`
 
@@ -19390,6 +22696,8 @@ Missing description
 
 Group: ``
 
+Data Category: `Operational`
+
 Status: `data_available`
 
 Tiers: `free`
@@ -19401,6 +22709,8 @@ Count of pipelines that have at least 1 DAST job
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216175618_dast_pipeline.yml)
 
 Group: `group::dynamic analysis`
+
+Data Category: `Operational`
 
 Status: `data_available`
 
@@ -19414,6 +22724,8 @@ Missing description
 
 Group: ``
 
+Data Category: `Operational`
+
 Status: `data_available`
 
 Tiers: `free`
@@ -19425,6 +22737,8 @@ Count of pipelines with successful Dependency Scanning jobs
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210216175226_dependency_scanning_pipeline.yml)
 
 Group: `group::composition analysis`
+
+Data Category: `Operational`
 
 Status: `data_available`
 
@@ -19438,29 +22752,7 @@ Monthly number of users running Dependency Scanning Scans
 
 Group: `group::composition analysis`
 
-Status: `data_available`
-
-Tiers: `ultimate`
-
-### `usage_activity_by_stage_monthly.secure.running_container_scanning_pipeline`
-
-Pipelines containing a Running Container Scanning job
-
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210618125224_running_container_scanning_pipeline.yml)
-
-Group: `group::container security`
-
-Status: `data_available`
-
-Tiers: `ultimate`
-
-### `usage_activity_by_stage_monthly.secure.running_container_scanning_scans`
-
-Counts running container scanning jobs
-
-[YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210618101233_running_container_scanning_scans.yml)
-
-Group: `group::container security`
+Data Category: `Operational`
 
 Status: `data_available`
 
@@ -19474,6 +22766,8 @@ Counts of Pipelines that have at least 1 SAST job
 
 Group: `group::static analysis`
 
+Data Category: `Operational`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -19485,6 +22779,8 @@ Missing description
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216183826_sast_scans.yml)
 
 Group: ``
+
+Data Category: `Operational`
 
 Status: `data_available`
 
@@ -19498,6 +22794,8 @@ Counts of Pipelines that have at least 1 Secret Detection job
 
 Group: `group::static analysis`
 
+Data Category: `Operational`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -19509,6 +22807,8 @@ Missing description
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216183834_secret_detection_scans.yml)
 
 Group: ``
+
+Data Category: `Operational`
 
 Status: `data_available`
 
@@ -19522,6 +22822,8 @@ Count of API Fuzzing `docker-in-docker` jobs by job names
 
 Group: `group::fuzz testing`
 
+Data Category: `Operational`
+
 Status: `data_available`
 
 Tiers: `free`
@@ -19533,6 +22835,8 @@ Count of API Fuzzing jobs by job name
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216180355_user_api_fuzzing_jobs.yml)
 
 Group: `group::fuzz testing`
+
+Data Category: `Operational`
 
 Status: `data_available`
 
@@ -19546,6 +22850,8 @@ Number of users who have run a API Fuzzing scan
 
 Group: `category::fuzz testing`
 
+Data Category: `Operational`
+
 Status: `data_available`
 
 Tiers: `ultimate`
@@ -19557,6 +22863,8 @@ Distinct count per user of Container Scanning jobs run monthly
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210216175505_user_container_scanning_jobs.yml)
 
 Group: `group::container security`
+
+Data Category: `Operational`
 
 Status: `data_available`
 
@@ -19570,6 +22878,8 @@ Number of users who have run a Container Scanning scan
 
 Group: `group::composition analysis`
 
+Data Category: `Operational`
+
 Status: `data_available`
 
 Tiers: `ultimate`
@@ -19581,6 +22891,8 @@ Missing description
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216183817_user_coverage_fuzzing_jobs.yml)
 
 Group: ``
+
+Data Category: `Operational`
 
 Status: `data_available`
 
@@ -19594,6 +22906,8 @@ Number of users who have run a Coverage Fuzzing scan
 
 Group: `category::fuzz testing`
 
+Data Category: `Operational`
+
 Status: `data_available`
 
 Tiers: `ultimate`
@@ -19605,6 +22919,8 @@ Users who run a DAST job
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216175616_user_dast_jobs.yml)
 
 Group: `group::dynamic analysis`
+
+Data Category: `Operational`
 
 Status: `data_available`
 
@@ -19618,6 +22934,8 @@ Number of users who have run a DAST scan
 
 Group: `group::dynamic analysis`
 
+Data Category: `Operational`
+
 Status: `data_available`
 
 Tiers: `ultimate`
@@ -19629,6 +22947,8 @@ Monthly number of users creating Dependency Scanning jobs
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210216175222_user_dependency_scanning_jobs.yml)
 
 Group: `group::composition analysis`
+
+Data Category: `Operational`
 
 Status: `data_available`
 
@@ -19642,6 +22962,8 @@ Number of users who have run a Dependency Scanning scan
 
 Group: `group::composition analysis`
 
+Data Category: `Operational`
+
 Status: `data_available`
 
 Tiers: `ultimate`
@@ -19653,6 +22975,8 @@ Monthly number of users running License Scanning jobs
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210216175224_user_license_management_jobs.yml)
 
 Group: `group::composition analysis`
+
+Data Category: `Operational`
 
 Status: `data_available`
 
@@ -19666,6 +22990,8 @@ Users who set personal preference to see Security Dashboard on Group information
 
 Group: `group::threat insights`
 
+Data Category: `Operational`
+
 Status: `data_available`
 
 Tiers: `ultimate`
@@ -19677,6 +23003,8 @@ Users who run a SAST job
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216182125_user_sast_jobs.yml)
 
 Group: `group::static analysis`
+
+Data Category: `Operational`
 
 Status: `data_available`
 
@@ -19690,6 +23018,8 @@ Number of users who have run a SAST scan
 
 Group: `group::static analysis`
 
+Data Category: `Operational`
+
 Status: `data_available`
 
 Tiers: `ultimate`
@@ -19701,6 +23031,8 @@ Users who run a Secret Detection job
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216182127_user_secret_detection_jobs.yml)
 
 Group: `group::static analysis`
+
+Data Category: `Operational`
 
 Status: `data_available`
 
@@ -19714,6 +23046,8 @@ Number of users who have run a Secret Detection scan
 
 Group: `group::static analysis`
 
+Data Category: `Operational`
+
 Status: `data_available`
 
 Tiers: `ultimate`
@@ -19725,6 +23059,8 @@ Missing description
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216181956_user_unique_users_all_secure_scanners.yml)
 
 Group: `group::secure`
+
+Data Category: `Operational`
 
 Status: `data_available`
 
@@ -19738,6 +23074,8 @@ Unique monthly builds in project
 
 Group: `group::pipeline execution`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -19749,6 +23087,8 @@ Total pipelines in external repositories in a month
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216175544_ci_external_pipelines.yml)
 
 Group: `group::pipeline execution`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -19762,6 +23102,8 @@ Total pipelines in GitLab repositories in a month
 
 Group: `group::pipeline execution`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -19773,6 +23115,8 @@ Total pipelines from an Auto DevOps template
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216175548_ci_pipeline_config_auto_devops.yml)
 
 Group: `group::configure`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -19786,6 +23130,8 @@ Total Monthly Pipelines from templates in repository
 
 Group: `group::pipeline execution`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -19797,6 +23143,8 @@ Total monthly Pipeline schedules in GitLab
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216175552_ci_pipeline_schedules.yml)
 
 Group: `group::pipeline execution`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -19810,6 +23158,8 @@ Distinct users triggering pipelines in a month
 
 Group: `group::pipeline execution`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`, `free`
@@ -19821,6 +23171,8 @@ Total configured Triggers in project
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/counts_28d/20210216175556_ci_triggers.yml)
 
 Group: `group::pipeline execution`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -19834,6 +23186,8 @@ Total GitLab Managed clusters with Runner enabled
 
 Group: `group::runner`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -19845,6 +23199,8 @@ Projects with a GitHub repository mirror pipeline enabled
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/config/metrics/counts_28d/20210216175558_projects_reporting_ci_cd_back_to_github.yml)
 
 Group: `group::pipeline execution`
+
+Data Category: `Optional`
 
 Status: `data_available`
 
@@ -19858,6 +23214,8 @@ GitLab instance unique identifier
 
 Group: `group::product intelligence`
 
+Data Category: `Standard`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -19870,6 +23228,8 @@ Version of GitLab instance
 
 Group: `group::distribution`
 
+Data Category: `Optional`
+
 Status: `data_available`
 
 Tiers: `free`, `premium`, `ultimate`
@@ -19881,6 +23241,8 @@ Whether Web IDE clientside preview is enabled
 [YAML definition](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/settings/20210204124920_web_ide_clientside_preview_enabled.yml)
 
 Group: `group::editor`
+
+Data Category: `Optional`
 
 Status: `data_available`
 

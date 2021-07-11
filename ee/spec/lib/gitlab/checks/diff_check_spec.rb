@@ -32,6 +32,7 @@ RSpec.describe Gitlab::Checks::DiffCheck do
 
     describe '#validate_code_owners?' do
       let_it_be(:push_rule) { create(:push_rule, file_name_regex: 'READ*') }
+
       let(:validate_code_owners) { subject.send(:validate_code_owners?) }
       let(:protocol) { 'ssh' }
       let(:push_allowed) { false }
@@ -256,6 +257,7 @@ RSpec.describe Gitlab::Checks::DiffCheck do
     context 'file lock rules' do
       let_it_be(:push_rule) { create(:push_rule) }
       let_it_be(:owner) { create(:user) }
+
       let(:path_lock) { create(:path_lock, path: 'README', project: project) }
 
       before do

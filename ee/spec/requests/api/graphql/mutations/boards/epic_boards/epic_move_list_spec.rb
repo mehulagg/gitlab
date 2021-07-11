@@ -34,24 +34,9 @@ RSpec.describe 'Reposition and move epic between board lists' do
 
   subject { post_graphql_mutation(mutation(params), current_user: current_user) }
 
-  context 'when epic_boards are disabled' do
+  context 'when epics are available' do
     before do
       stub_licensed_features(epics: true)
-      stub_feature_flags(epic_boards: false)
-      group.add_developer(current_user)
-    end
-
-    it 'raises feature not available error' do
-      subject
-
-      expect(graphql_errors).to include(a_hash_including('message' => 'epic_boards feature is disabled'))
-    end
-  end
-
-  context 'when epic_boards are enabled' do
-    before do
-      stub_licensed_features(epics: true)
-      stub_feature_flags(epic_boards: true)
     end
 
     context 'when user does not have permissions to admin the board' do

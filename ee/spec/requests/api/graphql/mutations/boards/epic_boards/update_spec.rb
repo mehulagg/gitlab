@@ -8,6 +8,7 @@ RSpec.describe Mutations::Boards::EpicBoards::Update do
   let_it_be(:current_user) { create(:user) }
   let_it_be(:group) { create(:group) }
   let_it_be_with_reload(:board) { create(:epic_board, group: group, name: 'orig name') }
+
   let(:name) { 'board name' }
   let(:mutation) { graphql_mutation(:epic_board_update, params) }
   let(:label) { create(:group_label, group: group) }

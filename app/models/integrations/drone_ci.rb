@@ -16,7 +16,7 @@ module Integrations
     def compose_service_hook
       hook = service_hook || build_service_hook
       # If using a service template, project may not be available
-      hook.url = [drone_url, "/api/hook", "?owner=#{project.namespace.full_path}", "&name=#{project.path}", "&access_token=#{token}"].join if project
+      hook.url = [drone_url, "/hook", "?owner=#{project.namespace.full_path}", "&name=#{project.path}", "&access_token=#{token}"].join if project
       hook.enable_ssl_verification = !!enable_ssl_verification
       hook.save
     end
@@ -51,9 +51,12 @@ module Integrations
     end
 
     def calculate_reactive_cache(sha, ref)
-      response = Gitlab::HTTP.try_get(commit_status_path(sha, ref),
+      response = Gitlab::HTTP.try_get(
+        commit_status_path(sha, ref),
         verify: enable_ssl_verification,
-        extra_log_info: { project_id: project_id })
+        extra_log_info: { project_id: project_id },
+        use_read_total_timeout: true
+      )
 
       status =
         if response && response.code == 200 && response['status']

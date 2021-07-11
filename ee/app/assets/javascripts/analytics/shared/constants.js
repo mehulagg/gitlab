@@ -1,12 +1,4 @@
-import { masks } from 'dateformat';
-
-const { isoDate, mediumDate } = masks;
-
-export const dateFormats = {
-  isoDate,
-  defaultDate: mediumDate,
-  defaultDateTime: 'mmm d, yyyy h:MMtt',
-};
+import { DEFAULT_DEBOUNCE_AND_THROTTLE_MS } from '~/lib/utils/constants';
 
 export const scatterChartLineProps = {
   default: {
@@ -18,10 +10,6 @@ export const scatterChartLineProps = {
   },
 };
 
-export const DATE_RANGE_LIMIT = 180;
-
-export const OFFSET_DATE_BY_ONE = 1;
-
 export const NO_DRAG_CLASS = 'no-drag';
 
-export const DATA_REFETCH_DELAY = 250;
+export const DATA_REFETCH_DELAY = DEFAULT_DEBOUNCE_AND_THROTTLE_MS;

@@ -8,6 +8,7 @@ RSpec.describe 'Create test case' do
   let_it_be_with_refind(:project) { create(:project, :private) }
   let_it_be(:current_user) { create(:user) }
   let_it_be(:label) { create(:label, project: project) }
+
   let(:variables) { { project_path: project.full_path, title: 'foo', description: 'bar', label_ids: [label.id] } }
 
   let(:mutation) do

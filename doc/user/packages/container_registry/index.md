@@ -332,7 +332,7 @@ If you forget to set the service alias, the `docker:19.03.12` image is unable to
 error during connect: Get http://docker:2376/v1.39/info: dial tcp: lookup docker on 192.168.0.1:53: no such host
 ```
 
-### Using a Docker-in-Docker image with Dependency Proxy 
+### Using a Docker-in-Docker image with Dependency Proxy
 
 To use your own Docker images with Dependency Proxy, follow these steps
 in addition to the steps in the
@@ -345,7 +345,7 @@ Below is an example of what your `.gitlab-ci.yml` should look like:
 
 ```yaml
 build:
-  image: ${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}/group/project/docker:19.03.12
+  image: ${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}/docker:19.03.12
   services:
     - name: ${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}/docker:18.09.7-dind
       alias: docker
@@ -563,7 +563,7 @@ You can create a cleanup policy in [the API](#use-the-cleanup-policy-api) or the
 
 To create a cleanup policy in the UI:
 
-1. For your project, go to **Settings > CI/CD**.
+1. For your project, go to **Settings > Packages & Registries**.
 1. Expand the **Clean up image tags** section.
 1. Complete the fields.
 

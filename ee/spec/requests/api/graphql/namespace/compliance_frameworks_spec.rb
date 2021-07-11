@@ -8,6 +8,7 @@ RSpec.describe 'getting a list of compliance frameworks for a root namespace' do
   let_it_be(:namespace) { create(:namespace) }
   let_it_be(:compliance_framework_1) { create(:compliance_framework, namespace: namespace, name: 'Test1') }
   let_it_be(:compliance_framework_2) { create(:compliance_framework, namespace: namespace, name: 'Test2') }
+
   let(:path) { %i[namespace compliance_frameworks nodes] }
 
   let!(:query) do

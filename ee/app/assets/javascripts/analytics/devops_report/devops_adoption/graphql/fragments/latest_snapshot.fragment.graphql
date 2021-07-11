@@ -1,0 +1,13 @@
+fragment LatestSnapshot on DevopsAdoptionSnapshot {
+  issueOpened
+  mergeRequestOpened
+  mergeRequestApproved
+  runnerConfigured
+  pipelineSucceeded
+  deploySucceeded
+  securityScanSucceeded
+  recordedAt
+  codeOwnersUsedCount
+  sastEnabledCount
+  dastEnabledCount
+}

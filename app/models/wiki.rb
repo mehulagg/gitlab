@@ -87,7 +87,7 @@ class Wiki
   end
 
   def create_wiki_repository
-    repository.create_if_not_exists
+    change_head_to_default_branch if repository.create_if_not_exists
 
     raise CouldNotCreateWikiError unless repository_exists?
   rescue StandardError => err
@@ -174,6 +174,7 @@ class Wiki
     commit = commit_details(:created, message, title)
 
     wiki.write_page(title, format.to_sym, content, commit)
+    repository.expire_status_cache if repository.empty?
     after_wiki_activity
 
     true
@@ -248,7 +249,7 @@ class Wiki
 
   override :default_branch
   def default_branch
-    wiki.class.default_ref
+    super || wiki.class.default_ref(container)
   end
 
   def wiki_base_path
@@ -273,6 +274,19 @@ class Wiki
 
   def cleanup
     @repository = nil
+  end
+
+  def capture_git_error(action, &block)
+    yield block
+  rescue Gitlab::Git::Index::IndexError,
+         Gitlab::Git::CommitError,
+         Gitlab::Git::PreReceiveError,
+         Gitlab::Git::CommandError,
+         ArgumentError => error
+
+    Gitlab::ErrorTracking.log_exception(error, action: action, wiki_id: id)
+
+    false
   end
 
   private
@@ -308,17 +322,8 @@ class Wiki
     "#{user.username} #{action} page: #{title}"
   end
 
-  def capture_git_error(action, &block)
-    yield block
-  rescue Gitlab::Git::Index::IndexError,
-         Gitlab::Git::CommitError,
-         Gitlab::Git::PreReceiveError,
-         Gitlab::Git::CommandError,
-         ArgumentError => error
-
-    Gitlab::ErrorTracking.log_exception(error, action: action, wiki_id: id)
-
-    false
+  def change_head_to_default_branch
+    repository.raw_repository.write_ref('HEAD', "refs/heads/#{default_branch}")
   end
 end
 

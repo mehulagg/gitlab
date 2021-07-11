@@ -62,6 +62,11 @@ export default {
       type: String,
       required: true,
     },
+    automatic: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
     durationInWeeks: {
       type: Number,
       required: false,
@@ -118,6 +123,14 @@ export default {
     editCadence() {
       return {
         name: 'edit',
+        params: {
+          cadenceId: getIdFromGraphQLId(this.cadenceId),
+        },
+      };
+    },
+    newIteration() {
+      return {
+        name: 'newIteration',
         params: {
           cadenceId: getIdFromGraphQLId(this.cadenceId),
         },
@@ -204,6 +217,10 @@ export default {
         text-sr-only
         no-caret
       >
+        <gl-dropdown-item v-if="!automatic" :to="newIteration">
+          {{ s__('Iterations|Add iteration') }}
+        </gl-dropdown-item>
+
         <gl-dropdown-item :to="editCadence">
           {{ s__('Iterations|Edit cadence') }}
         </gl-dropdown-item>

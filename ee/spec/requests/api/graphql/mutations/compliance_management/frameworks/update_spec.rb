@@ -6,6 +6,7 @@ RSpec.describe 'Update a compliance framework' do
   include GraphqlHelpers
 
   let_it_be(:framework) { create(:compliance_framework) }
+
   let(:mutation) { graphql_mutation(:update_compliance_framework, { id: global_id_of(framework), **params }) }
   let(:current_user) { framework.namespace.owner }
   let(:params) do

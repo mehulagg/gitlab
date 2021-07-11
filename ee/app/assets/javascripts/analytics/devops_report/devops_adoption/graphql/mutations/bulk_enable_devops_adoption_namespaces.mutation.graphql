@@ -1,3 +1,5 @@
+#import "../fragments/latest_snapshot.fragment.graphql"
+
 mutation($namespaceIds: [NamespaceID!]!, $displayNamespaceId: NamespaceID) {
   bulkEnableDevopsAdoptionNamespaces(
     input: { namespaceIds: $namespaceIds, displayNamespaceId: $displayNamespaceId }
@@ -5,15 +7,7 @@ mutation($namespaceIds: [NamespaceID!]!, $displayNamespaceId: NamespaceID) {
     enabledNamespaces {
       id
       latestSnapshot {
-        issueOpened
-        mergeRequestOpened
-        mergeRequestApproved
-        runnerConfigured
-        pipelineSucceeded
-        deploySucceeded
-        securityScanSucceeded
-        recordedAt
-        codeOwnersUsedCount
+        ...LatestSnapshot
       }
       namespace {
         fullName

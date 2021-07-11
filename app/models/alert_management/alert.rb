@@ -225,6 +225,10 @@ module AlertManagement
       open_statuses.include?(status)
     end
 
+    def open?
+      self.class.open_status?(status_name)
+    end
+
     def status_event_for(status)
       self.class.state_machines[:status].events.transitions_for(self, to: status.to_s.to_sym).first&.event
     end
@@ -248,10 +252,10 @@ module AlertManagement
       "#{project.to_reference_base(from, full: full)}#{reference}"
     end
 
-    def execute_services
-      return unless project.has_active_services?(:alert_hooks)
+    def execute_integrations
+      return unless project.has_active_integrations?(:alert_hooks)
 
-      project.execute_services(hook_data, :alert_hooks)
+      project.execute_integrations(hook_data, :alert_hooks)
     end
 
     # Representation of the alert's payload. Avoid accessing

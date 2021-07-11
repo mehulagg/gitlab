@@ -75,7 +75,8 @@ module Projects
         {
           type: type,
           configured: configured,
-          configuration_path: configuration_path(type)
+          configuration_path: configuration_path(type),
+          available: feature_available(type)
         }
       end
 
@@ -94,6 +95,13 @@ module Projects
           dast_profiles: project_security_configuration_dast_scans_path(project),
           api_fuzzing: project_security_configuration_api_fuzzing_path(project)
         }[type]
+      end
+
+      def feature_available(type)
+        # SAST and Secret Detection are always available, but this isn't
+        # reflected by our license model yet.
+        # TODO: https://gitlab.com/gitlab-org/gitlab/-/issues/333113
+        %w[sast secret_detection].include?(type) || project.licensed_feature_available?(type)
       end
     end
   end

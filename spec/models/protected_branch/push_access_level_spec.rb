@@ -40,11 +40,12 @@ RSpec.describe ProtectedBranch::PushAccessLevel do
     let_it_be(:protected_branch) { create(:protected_branch, :no_one_can_push, project: project) }
     let_it_be(:user) { create(:user) }
     let_it_be(:deploy_key) { create(:deploy_key, user: user) }
+
     let!(:deploy_keys_project) { create(:deploy_keys_project, project: project, deploy_key: deploy_key, can_push: can_push) }
     let(:can_push) { true }
 
     before_all do
-      project.add_guest(user)
+      project.add_maintainer(user)
     end
 
     context 'when this push_access_level is tied to a deploy key' do

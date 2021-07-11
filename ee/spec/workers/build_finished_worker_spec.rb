@@ -27,21 +27,27 @@ RSpec.describe BuildFinishedWorker do
         allow_any_instance_of(EE::Project).to receive(:shared_runners_minutes_limit_enabled?).and_return(true)
       end
 
-      it 'updates the project stats' do
-        expect { subject }.to change { project_stats.reload.shared_runners_seconds }
-      end
+      context 'when cancel_pipelines_prior_to_destroy is disabled' do
+        before do
+          stub_feature_flags(cancel_pipelines_prior_to_destroy: false)
+        end
 
-      it 'updates the namespace stats' do
-        expect { subject }.to change { namespace_stats.reload.shared_runners_seconds }
-      end
+        it 'updates the project stats' do
+          expect { subject }.to change { project_stats.reload.shared_runners_seconds }
+        end
 
-      it 'notifies the owners of Groups' do
-        namespace.update_attribute(:shared_runners_minutes_limit, 2000)
-        namespace_stats.update_attribute(:shared_runners_seconds, 2100 * 60)
+        it 'updates the namespace stats' do
+          expect { subject }.to change { namespace_stats.reload.shared_runners_seconds }
+        end
 
-        expect(CiMinutesUsageMailer).to receive(:notify).once.with(namespace, [namespace.owner.email]).and_return(spy)
+        it 'notifies the owners of Groups' do
+          namespace.update_attribute(:shared_runners_minutes_limit, 2000)
+          namespace_stats.update_attribute(:shared_runners_seconds, 2100 * 60)
 
-        subject
+          expect(CiMinutesUsageMailer).to receive(:notify).once.with(namespace, [namespace.owner.email]).and_return(spy)
+
+          subject
+        end
       end
     end
 
@@ -57,7 +63,15 @@ RSpec.describe BuildFinishedWorker do
       end
     end
 
-    it 'processes requirements reports' do
+    it 'does not schedule processing of requirement reports by default' do
+      expect(RequirementsManagement::ProcessRequirementsReportsWorker).not_to receive(:perform_async)
+
+      subject
+    end
+
+    it 'schedules processing of requirement reports if project has requirements' do
+      create(:requirement, project: project)
+
       expect(RequirementsManagement::ProcessRequirementsReportsWorker).to receive(:perform_async)
 
       subject

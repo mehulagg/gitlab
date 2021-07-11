@@ -7,7 +7,7 @@ RSpec.shared_examples 'an auditable failed authentication' do
 
     operation
 
-    expect(AuditEventService).to have_received(:new).with(user, user, ip_address: '0.0.0.0', with: method)
+    expect(AuditEventService).to have_received(:new).with(user, user, with: method)
     expect(audit_event_service).to have_received(:for_failed_login)
     expect(audit_event_service).to have_received(:unauth_security_event)
   end

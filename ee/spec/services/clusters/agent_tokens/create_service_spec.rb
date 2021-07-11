@@ -6,6 +6,7 @@ RSpec.describe Clusters::AgentTokens::CreateService do
   subject(:service) { described_class.new(container: project, current_user: user, params: params) }
 
   let_it_be(:user) { create(:user) }
+
   let(:cluster_agent) { create(:cluster_agent) }
   let(:project) { cluster_agent.project }
   let(:params) { { agent_id: cluster_agent.id, description: 'token description', name: 'token name' } }

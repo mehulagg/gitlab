@@ -15,6 +15,7 @@ export default () => {
   }
 
   const defaultClient = createDefaultClient(resolvers, {
+    assumeImmutableResults: true,
     cacheConfig: {
       dataIdFromObject: (object) => {
         return object.id || defaultDataIdFromObject(object);

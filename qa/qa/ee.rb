@@ -183,6 +183,7 @@ module QA
         end
 
         module ThreatMonitoring
+          autoload :Index, 'qa/ee/page/project/threat_monitoring/index'
           autoload :AlertsList, 'qa/ee/page/project/threat_monitoring/alerts_list'
         end
       end
@@ -216,7 +217,7 @@ module QA
       autoload :License, 'qa/ee/resource/license'
       autoload :Epic, 'qa/ee/resource/epic'
       autoload :GroupIteration, 'qa/ee/resource/group_iteration'
-      autoload :ImportRepoWithCICD, 'qa/ee/resource/import_repo_with_ci_cd'
+      autoload :ImportRepoWithCiCd, 'qa/ee/resource/import_repo_with_ci_cd'
       autoload :PipelineSubscriptions, 'qa/ee/resource/pipeline_subscriptions'
 
       module Board

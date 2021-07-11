@@ -7,19 +7,18 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 # Epic Boards **(PREMIUM)**
 
 > - [Introduced](https://gitlab.com/groups/gitlab-org/-/epics/5067) in GitLab 13.10.
-> - [Deployed behind a feature flag](../../feature_flags.md), disabled by default.
-> - [Enabled by default](https://gitlab.com/gitlab-org/gitlab/-/issues/290039) in GitLab 14.0.
-> - Enabled on GitLab.com.
-> - Recommended for production use.
-> - For GitLab self-managed instances, GitLab administrators can opt to [disable it](../../../administration/feature_flags.md).
+> - [Feature flag removed](https://gitlab.com/gitlab-org/gitlab/-/issues/290039) in GitLab 14.1.
 
 Epic boards build on the existing [epic tracking functionality](index.md) and
 [labels](../../project/labels.md). Your epics appear as cards in vertical lists, organized by their assigned
 labels.
 
-To view an epic board, in a group, select **Epics > Boards**.
+To view an epic board:
 
-![GitLab epic board - Premium](img/epic_board_v14_0.png)
+1. On the top bar, select **Menu > Groups** and find your group.
+1. On the left sidebar, select **Epics > Boards**.
+
+![GitLab epic board - Premium](img/epic_board_v14_1.png)
 
 ## Create an epic board
 
@@ -29,7 +28,8 @@ Prerequisites:
 
 To create a new epic board:
 
-1. Go to your group and select **Epics > Boards**.
+1. On the top bar, select **Menu > Groups** and find your group.
+1. On the left sidebar, select **Epics > Boards**.
 1. In the upper left corner, select the dropdown with the current board name.
 1. Select **Create new board**.
 1. Enter the new board's title.
@@ -77,7 +77,8 @@ Prerequisites:
 
 To create a new list:
 
-1. Go to your group and select **Epics > Boards**.
+1. On the top bar, select **Menu > Groups** and find your group.
+1. On the left sidebar, select **Epics > Boards**.
 1. In the upper-right corner, select **Create list**.
 1. In the **New list** column expand the **Select a label** dropdown and select the label to use as
    list scope.
@@ -98,6 +99,23 @@ To remove a list from an epic board:
    The list settings sidebar opens on the right.
 1. Select **Remove list**. A confirmation dialog appears.
 1. Select **OK**.
+
+## Create an epic from an epic board
+
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/233568) in GitLab 14.0.
+
+Prerequisites:
+
+- You must have at least the [Reporter role](../../permissions.md#group-members-permissions) for a group.
+- You must have [created a list](#create-a-new-list) first.
+
+To create an epic from a list in epic board:
+
+1. On the top of a list, select the **New epic** (**{plus}**) icon.
+1. Enter the new epic's title.
+1. Select **Create epic**.
+
+![Create a GitLab epic from an epic board](img/epic_board_epic_create_v14_1.png)
 
 ### Filter epics
 
@@ -161,22 +179,3 @@ To edit the scope of an epic board:
    - Show or hide the Open and Closed columns.
    - Select other labels as the board's scope.
 1. Select **Save changes**.
-
-## Enable or disable epic boards
-
-Epic boards are under development but ready for production use.
-It is deployed behind a feature flag that is **enabled by default**.
-[GitLab administrators with access to the GitLab Rails console](../../../administration/feature_flags.md)
-can disable it.
-
-To disable it:
-
-```ruby
-Feature.disable(:epic_boards)
-```
-
-To enable it:
-
-```ruby
-Feature.enable(:epic_boards)
-```

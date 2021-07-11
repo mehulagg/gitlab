@@ -10,7 +10,7 @@ type: reference
 If you have installed your own runners, you can configure and secure them in GitLab.
 
 If you need to configure runners on the machine where you installed GitLab Runner, see
-[the GitLab Runner documentation](https://docs.gitlab.com/runner/configuration).
+[the GitLab Runner documentation](https://docs.gitlab.com/runner/configuration/).
 
 ## Manually clear the runner cache
 
@@ -258,7 +258,7 @@ variables:
 ```
 
 There are three possible values: `clone`, `fetch`, and `none`. If left unspecified,
-jobs use the [project's pipeline setting](../pipelines/settings.md#git-strategy).
+jobs use the [project's pipeline setting](../pipelines/settings.md#choose-the-default-git-strategy).
 
 `clone` is the slowest option. It clones the repository from scratch for every
 job, ensuring that the local working copy is always pristine.
@@ -428,7 +428,7 @@ It can be helpful for repositories with a large number of commits or old, large 
 passed to `git fetch` and `git clone`.
 
 In GitLab 12.0 and later, newly-created projects automatically have a
-[default `git depth` value of `50`](../pipelines/settings.md#git-shallow-clone).
+[default `git depth` value of `50`](../pipelines/settings.md#limit-the-number-of-changes-fetched-during-clone).
 
 If you use a depth of `1` and have a queue of jobs or retry
 jobs, jobs may fail.

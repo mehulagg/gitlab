@@ -1,11 +1,15 @@
 import { GlAlert, GlLoadingIcon } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
 import MockAdapter from 'axios-mock-adapter';
+
+import * as JiraIssuesShowApi from 'ee/integrations/jira/issues_show/api';
 import JiraIssuesShow from 'ee/integrations/jira/issues_show/components/jira_issues_show_root.vue';
+import JiraIssueSidebar from 'ee/integrations/jira/issues_show/components/sidebar/jira_issues_sidebar_root.vue';
 import { issueStates } from 'ee/integrations/jira/issues_show/constants';
 import waitForPromises from 'helpers/wait_for_promises';
 import IssuableHeader from '~/issuable_show/components/issuable_header.vue';
 import IssuableShow from '~/issuable_show/components/issuable_show_root.vue';
+import IssuableSidebar from '~/issuable_sidebar/components/issuable_sidebar_root.vue';
 import axios from '~/lib/utils/axios_utils';
 import { mockJiraIssue } from '../mock_data';
 
@@ -18,14 +22,16 @@ describe('JiraIssuesShow', () => {
   const findGlAlert = () => wrapper.findComponent(GlAlert);
   const findGlLoadingIcon = () => wrapper.findComponent(GlLoadingIcon);
   const findIssuableShow = () => wrapper.findComponent(IssuableShow);
+  const findJiraIssueSidebar = () => wrapper.findComponent(JiraIssueSidebar);
   const findIssuableShowStatusBadge = () =>
     wrapper.findComponent(IssuableHeader).find('[data-testid="status"]');
 
   const createComponent = () => {
     wrapper = shallowMount(JiraIssuesShow, {
       stubs: {
-        IssuableShow,
         IssuableHeader,
+        IssuableShow,
+        IssuableSidebar,
       },
       provide: {
         issuesShowPath: mockJiraIssuesShowPath,
@@ -39,11 +45,7 @@ describe('JiraIssuesShow', () => {
 
   afterEach(() => {
     mockAxios.restore();
-
-    if (wrapper) {
-      wrapper.destroy();
-      wrapper = null;
-    }
+    wrapper.destroy();
   });
 
   describe('when issue is loading', () => {
@@ -107,6 +109,73 @@ describe('JiraIssuesShow', () => {
 
     it('renders correct status badge text', () => {
       expect(findIssuableShowStatusBadge().text()).toBe(badgeText);
+    });
+  });
+
+  describe('JiraIssueSidebar events', () => {
+    beforeEach(async () => {
+      mockAxios.onGet(mockJiraIssuesShowPath).replyOnce(200, mockJiraIssue);
+      createComponent();
+
+      await waitForPromises();
+    });
+
+    it('updates issue labels on issue-labels-updated', async () => {
+      const updateIssueSpy = jest.spyOn(JiraIssuesShowApi, 'updateIssue').mockResolvedValue();
+
+      const labels = [{ id: 'ecosystem' }];
+
+      findJiraIssueSidebar().vm.$emit('issue-labels-updated', labels);
+      await wrapper.vm.$nextTick();
+
+      expect(updateIssueSpy).toHaveBeenCalledWith(expect.any(Object), { labels });
+      expect(findJiraIssueSidebar().props('isUpdatingLabels')).toBe(true);
+
+      await waitForPromises();
+
+      expect(findJiraIssueSidebar().props('isUpdatingLabels')).toBe(false);
+    });
+
+    it('fetches issue statuses on issue-status-fetch', async () => {
+      const fetchIssueStatusesSpy = jest
+        .spyOn(JiraIssuesShowApi, 'fetchIssueStatuses')
+        .mockResolvedValue();
+
+      findJiraIssueSidebar().vm.$emit('issue-status-fetch');
+      await wrapper.vm.$nextTick();
+
+      expect(fetchIssueStatusesSpy).toHaveBeenCalled();
+      expect(findJiraIssueSidebar().props('isLoadingStatus')).toBe(true);
+
+      await waitForPromises();
+
+      expect(findJiraIssueSidebar().props('isLoadingStatus')).toBe(false);
+    });
+
+    it('updates issue status on issue-status-updated', async () => {
+      const updateIssueSpy = jest.spyOn(JiraIssuesShowApi, 'updateIssue').mockResolvedValue();
+
+      const status = 'In Review';
+
+      findJiraIssueSidebar().vm.$emit('issue-status-updated', status);
+      await wrapper.vm.$nextTick();
+
+      expect(updateIssueSpy).toHaveBeenCalledWith(expect.any(Object), { status });
+      expect(findJiraIssueSidebar().props('isUpdatingStatus')).toBe(true);
+
+      await waitForPromises();
+
+      expect(findJiraIssueSidebar().props('isUpdatingStatus')).toBe(false);
+    });
+
+    it('updates `sidebarExpanded` prop on `sidebar-toggle` event', async () => {
+      const jiraIssueSidebar = findJiraIssueSidebar();
+      expect(jiraIssueSidebar.props('sidebarExpanded')).toBe(true);
+
+      jiraIssueSidebar.vm.$emit('sidebar-toggle');
+      await wrapper.vm.$nextTick();
+
+      expect(jiraIssueSidebar.props('sidebarExpanded')).toBe(false);
     });
   });
 });

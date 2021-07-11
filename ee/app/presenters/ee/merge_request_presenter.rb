@@ -26,11 +26,11 @@ module EE
     end
 
     def merge_train_when_pipeline_succeeds_docs_path
-      help_page_path('ci/merge_request_pipelines/pipelines_for_merged_results/merge_trains/index.md', anchor: 'add-a-merge-request-to-a-merge-train')
+      help_page_path('ci/pipelines/merge_trains.md', anchor: 'add-a-merge-request-to-a-merge-train')
     end
 
     def merge_immediately_docs_path
-      help_page_path('ci/merge_request_pipelines/pipelines_for_merged_results/merge_trains/index.md', anchor: 'immediately-merge-a-merge-request-with-a-merge-train')
+      help_page_path('ci/pipelines/merge_trains.md', anchor: 'immediately-merge-a-merge-request-with-a-merge-train')
     end
 
     def target_project
@@ -69,8 +69,7 @@ module EE
     private
 
     def expose_mr_status_checks?
-      ::Feature.enabled?(:ff_external_status_checks, project, default_enabled: :yaml) &&
-        current_user.present? &&
+      current_user.present? &&
         project.external_status_checks.applicable_to_branch(merge_request.target_branch).any?
     end
 

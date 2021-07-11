@@ -236,6 +236,7 @@ class User < ApplicationRecord
   validate :owns_commit_email, if: :commit_email_changed?
   validate :signup_domain_valid?, on: :create, if: ->(user) { !user.created_by_id }
   validate :check_email_restrictions, on: :create, if: ->(user) { !user.created_by_id }
+  validate :check_username_format, if: :username_changed?
 
   validates :theme_id, allow_nil: true, inclusion: { in: Gitlab::Themes.valid_ids,
     message: _("%{placeholder} is not a valid theme") % { placeholder: '%{value}' } }
@@ -374,6 +375,10 @@ class User < ApplicationRecord
       Ci::DropPipelineService.new.execute_async_for_all(user.pipelines, :user_blocked, user)
       Ci::DisableUserPipelineSchedulesService.new.execute(user)
     end
+
+    after_transition any => :deactivated do |user|
+      NotificationService.new.user_deactivated(user.name, user.notification_email)
+    end
     # rubocop: enable CodeReuse/ServiceClass
   end
 
@@ -429,6 +434,7 @@ class User < ApplicationRecord
   scope :by_id_and_login, ->(id, login) { where(id: id).where('username = LOWER(:login) OR email = LOWER(:login)', login: login) }
   scope :dormant, -> { active.where('last_activity_on <= ?', MINIMUM_INACTIVE_DAYS.day.ago.to_date) }
   scope :with_no_activity, -> { active.where(last_activity_on: nil) }
+  scope :by_provider_and_extern_uid, ->(provider, extern_uid) { joins(:identities).merge(Identity.with_extern_uid(provider, extern_uid)) }
 
   def preferred_language
     read_attribute('preferred_language') ||
@@ -551,10 +557,6 @@ class User < ApplicationRecord
       else
         order_by(order_method)
       end
-    end
-
-    def for_github_id(id)
-      joins(:identities).merge(Identity.with_extern_uid(:github, id))
     end
 
     # Find a User by their primary email or any associated secondary email
@@ -807,6 +809,10 @@ class User < ApplicationRecord
   #
   # Instance methods
   #
+
+  def default_dashboard?
+    dashboard == self.class.column_defaults['dashboard']
+  end
 
   def full_path
     username
@@ -1230,7 +1236,7 @@ class User < ApplicationRecord
   end
 
   def matches_identity?(provider, extern_uid)
-    identities.where(provider: provider, extern_uid: extern_uid).exists?
+    identities.with_extern_uid(provider, extern_uid).exists?
   end
 
   def project_deploy_keys
@@ -1257,10 +1263,21 @@ class User < ApplicationRecord
   end
 
   def sanitize_attrs
+    sanitize_links
+    sanitize_name
+  end
+
+  def sanitize_links
     %i[skype linkedin twitter].each do |attr|
       value = self[attr]
       self[attr] = Sanitize.clean(value) if value.present?
     end
+  end
+
+  def sanitize_name
+    return unless self.name
+
+    self.name = self.name.gsub(%r{</?[^>]*>}, '')
   end
 
   def set_notification_email
@@ -1870,7 +1887,8 @@ class User < ApplicationRecord
   end
 
   def password_expired_if_applicable?
-    return false unless password_expired?
+    return false if bot?
+    return false unless password_expired? && password_automatically_set?
     return false unless allow_password_authentication?
 
     true
@@ -2081,6 +2099,12 @@ class User < ApplicationRecord
     if Gitlab::UntrustedRegexp.new(restrictions).match?(email)
       errors.add(:email, _('is not allowed. Try again with a different email address, or contact your GitLab admin.'))
     end
+  end
+
+  def check_username_format
+    return if username.blank? || Mime::EXTENSION_LOOKUP.keys.none? { |type| username.end_with?(type) }
+
+    errors.add(:username, _('ending with MIME type format is not allowed.'))
   end
 
   def groups_with_developer_maintainer_project_access

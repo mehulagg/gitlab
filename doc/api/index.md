@@ -61,7 +61,7 @@ version number.
 
 New features and bug fixes are released in tandem with GitLab. Apart
 from incidental patch and security releases, GitLab is released on the 22nd of each
-month. Major API version changes, and removal of entire API versions, are done in tandem 
+month. Major API version changes, and removal of entire API versions, are done in tandem
 with major GitLab releases.
 
 All deprecations and changes between versions are in the documentation.
@@ -105,7 +105,7 @@ This request can help you investigate an unexpected response.
 
 If you want to expose the HTTP exit code, include the `--fail` option:
 
-```shell script
+```shell
 curl --fail "https://gitlab.example.com/api/v4/does-not-exist"
 curl: (22) The requested URL returned error: 404
 ```
@@ -244,6 +244,70 @@ your [runners](../ci/runners/README.md) to be secure. Avoid:
 
 If you have an insecure GitLab Runner configuration, you increase the risk that someone
 tries to steal tokens from other jobs.
+
+#### Limit GitLab CI/CD job token access
+
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/328553) in GitLab 14.1.
+> - [Deployed behind a feature flag](../user/feature_flags.md), disabled by default.
+> - Disabled on GitLab.com.
+> - Not recommended for production use.
+> - To use in GitLab self-managed instances, ask a GitLab administrator to [enable it](#enable-or-disable-ci-job-token-scope-limit). **(FREE SELF)**
+
+This in-development feature might not be available for your use. There can be
+[risks when enabling features still in development](../user/feature_flags.md#risks-when-enabling-features-still-in-development).
+Refer to this feature's version history for more details.
+
+You can limit the access scope of a project's CI/CD job token to increase the
+job token's security. A job token might give extra permissions that aren't necessary
+to access specific resources. Limiting the job token access scope reduces the risk of a leaked
+token being used to access private data that the user associated to the job can access.
+
+Control the job token access scope with an allowlist of other projects authorized
+to be accessed by authenticating with the current project's job token. By default
+the token scope only allows access to the same project where the token comes from.
+Other projects can be added and removed by maintainers with access to both projects.
+
+This setting is enabled by default for all new projects, and disabled by default in projects
+created before GitLab 14.1. It is strongly recommended that project maintainers enable this
+setting at all times, and configure the allowlist for cross-project access if needed.
+
+For example, when the setting is enabled, jobs in a pipeline in project `A` have
+a `CI_JOB_TOKEN` scope limited to project `A`. If the job needs to use the token
+to make an API request to project `B`, then `B` must be added to the allowlist for `A`.
+
+To enable and configure the job token scope limit:
+
+1. On the top bar, select **Menu > Projects** and find your project.
+1. On the left sidebar, select **Settings > CI/CD**.
+1. Expand **Token Access**.
+1. Toggle **Limit CI_JOB_TOKEN access** to enabled.
+1. (Optional) Add existing projects to the token's access scope. The user adding a
+   project must have the [maintainer role](../user/permissions.md) in both projects.
+
+If the job token scope limit is disabled, the token can potentially be used to authenticate
+API requests to all projects accessible to the user that triggered the job.
+
+There is [a proposal](https://gitlab.com/groups/gitlab-org/-/epics/3559) to improve
+the feature with more strategic control of the access permissions.
+
+##### Enable or disable CI job token scope limit **(FREE SELF)**
+
+The GitLab CI/CD job token access scope limit is under development and not ready for production
+use. It is deployed behind a feature flag that is **disabled by default**.
+[GitLab administrators with access to the GitLab Rails console](../administration/feature_flags.md)
+can enable it.
+
+To enable it:
+
+```ruby
+Feature.enable(:ci_scoped_job_token)
+```
+
+To disable it:
+
+```ruby
+Feature.disable(:ci_scoped_job_token)
+```
 
 ### Impersonation tokens
 

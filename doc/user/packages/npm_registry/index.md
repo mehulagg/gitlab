@@ -90,7 +90,7 @@ To use the GitLab endpoint for npm packages, choose an option:
 
 - **Project-level**: Use when you have few npm packages and they are not in
   the same GitLab group. The [package naming convention](#package-naming-convention) is not enforced at this level.
-  Instead, you should use a [scope](https://docs.npmjs.com/cli/v6/using-npm/scope) for your package.
+  Instead, you should use a [scope](https://docs.npmjs.com/cli/v6/using-npm/scope/) for your package.
   When you use a scope, the registry URL is [updated](#authenticate-to-the-package-registry) only for that scope.
 - **Instance-level**: Use when you have many npm packages in different
   GitLab groups or in their own namespace. Be sure to comply with the [package naming convention](#package-naming-convention).
@@ -311,8 +311,7 @@ step-by-step guide and demo project for a complete example.
 
 ## Configure the GitLab npm registry with Yarn 2
 
-You can get started with Yarn 2 by following the documentation at
-[https://yarnpkg.com/getting-started/install](https://yarnpkg.com/getting-started/install).
+You can get started with Yarn 2 by following the [Yarn documentation](https://yarnpkg.com/getting-started/install/).
 
 To publish and install with the project-level npm endpoint, set the following configuration in
 `.yarnrc.yml`:
@@ -456,6 +455,14 @@ Due to a bug in npm 6.9.0, deleting distribution tags fails. Make sure your npm 
 When troubleshooting npm issues, first run the same command with the `--verbose` flag to confirm
 what registry you are hitting.
 
+To improve performance, npm caches files related to a package. Note that npm doesn't remove data by
+itself. The cache grows as new packages are installed. If you encounter issues, clear the cache with
+this command:
+
+```shell
+npm cache clean --force
+```
+
 ### Error running Yarn with the Package Registry for npm registry
 
 If you are using [Yarn](https://classic.yarnpkg.com/en/) with the npm registry, you may get
@@ -532,11 +539,23 @@ If you get this error, ensure that:
 
 ### `npm publish` returns `npm ERR! 400 Bad Request`
 
-If you get this error, your package name may not meet the
+If you get this error, one of the following problems could be causing it.
+
+#### Package name does not meet the naming convention
+
+Your package name may not meet the
 [`@scope/package-name` package naming convention](#package-naming-convention).
 
 Ensure the name meets the convention exactly, including the case.
 Then try to publish again.
+
+#### Package already exists
+
+Your package has already been published to another project in the same
+root namespace and therefore cannot be published again using the same name.
+
+This is also true even if the prior published package shares the same name,
+but not the version.
 
 ### `npm publish` returns `npm ERR! 500 Internal Server Error - PUT`
 

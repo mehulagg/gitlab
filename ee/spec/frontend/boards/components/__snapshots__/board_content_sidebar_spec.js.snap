@@ -4,7 +4,12 @@ exports[`ee/BoardContentSidebar matches the snapshot 1`] = `
 <div
   class="boards-sidebar gl-absolute"
 >
-  Issue details
+  <h2
+    class="gl-my-0 gl-font-size-h2 gl-line-height-24"
+  >
+    Issue details
+  </h2>
+    
   <boardsidebartitle-stub />
    
   <sidebarassigneeswidget-stub
@@ -60,8 +65,10 @@ exports[`ee/BoardContentSidebar matches the snapshot 1`] = `
     class="labels"
   />
    
-  <boardsidebarweightinput-stub
-    class="weight"
+  <sidebarweightwidget-stub
+    full-path="gitlab-org/gitlab-test"
+    iid="27"
+    issuable-type="issue"
   />
    
   <sidebarconfidentialitywidget-stub

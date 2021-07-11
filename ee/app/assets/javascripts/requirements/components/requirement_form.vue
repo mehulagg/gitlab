@@ -233,7 +233,7 @@ export default {
     class="requirement-form-drawer"
     @close="handleDrawerClose"
   >
-    <template #header>
+    <template #title>
       <h4 v-if="isCreate" class="gl-m-0">{{ __('New Requirement') }}</h4>
       <div v-else class="gl-display-flex gl-align-items-center">
         <strong class="gl-text-gray-500">{{ reference }}</strong>

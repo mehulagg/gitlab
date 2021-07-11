@@ -78,6 +78,9 @@ export default {
     treePageInfo() {
       return this.agents?.project?.repository?.tree?.trees?.pageInfo || {};
     },
+    hasConfigurations() {
+      return Boolean(this.agents?.project?.repository?.tree?.trees?.nodes?.length);
+    },
   },
   methods: {
     nextPage() {
@@ -121,7 +124,12 @@ export default {
       </div>
     </div>
 
-    <AgentEmptyState v-else :image="emptyStateImage" />
+    <AgentEmptyState
+      v-else
+      :image="emptyStateImage"
+      :project-path="projectPath"
+      :has-configurations="hasConfigurations"
+    />
   </section>
 
   <gl-alert v-else variant="danger" :dismissible="false">

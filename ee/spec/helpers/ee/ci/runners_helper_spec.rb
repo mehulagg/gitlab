@@ -81,6 +81,30 @@ RSpec.describe EE::Ci::RunnersHelper do
     end
   end
 
+  describe '#toggle_shared_runners_settings_data' do
+    let(:valid_card) { true }
+
+    subject { helper.toggle_shared_runners_settings_data(project) }
+
+    before do
+      expect(user).to receive(:has_required_credit_card_to_enable_shared_runners?).with(project).and_return(valid_card)
+    end
+
+    context 'when user has a valid credit card' do
+      it 'return is_credit_card_validation_required as "false"' do
+        expect(subject[:is_credit_card_validation_required]).to eq('false')
+      end
+    end
+
+    context 'when user does not have a valid credit card' do
+      let(:valid_card) { false }
+
+      it 'return is_credit_card_validation_required as "true"' do
+        expect(subject[:is_credit_card_validation_required]).to eq('true')
+      end
+    end
+  end
+
   context 'with notifications' do
     let(:dev_env_or_com) { true }
 

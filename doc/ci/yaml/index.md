@@ -298,9 +298,9 @@ makes your pipelines run for branches and tags.
 
 Branch pipeline status is displayed in merge requests that use the branch
 as a source. However, this pipeline type does not support any features offered by
-[merge request pipelines](../merge_request_pipelines/), like
-[pipelines for merged results](../merge_request_pipelines/pipelines_for_merged_results/index.md)
-or [merge trains](../merge_request_pipelines/pipelines_for_merged_results/merge_trains/).
+[merge request pipelines](../pipelines/merge_request_pipelines.md), like
+[pipelines for merged results](../pipelines/pipelines_for_merged_results.md)
+or [merge trains](../pipelines/merge_trains.md).
 This template intentionally avoids those features.
 
 To [include](#include) it:
@@ -313,7 +313,7 @@ include:
 The [`MergeRequest-Pipelines` template](https://gitlab.com/gitlab-org/gitlab/-/tree/master/lib/gitlab/ci/templates/Workflows/MergeRequest-Pipelines.gitlab-ci.yml)
 makes your pipelines run for the default branch, tags, and
 all types of merge request pipelines. Use this template if you use any of the
-the [pipelines for merge requests features](../merge_request_pipelines/).
+the [pipelines for merge requests features](../pipelines/merge_request_pipelines.md).
 
 To [include](#include) it:
 
@@ -1335,8 +1335,8 @@ pipeline based on branch names or pipeline types.
   | `chat`                   | For pipelines created by using a [GitLab ChatOps](../chatops/index.md) command. |
   | `external`               | When you use CI services other than GitLab. |
   | `external_pull_requests` | When an external pull request on GitHub is created or updated (See [Pipelines for external pull requests](../ci_cd_for_external_repos/index.md#pipelines-for-external-pull-requests)). |
-  | `merge_requests`         | For pipelines created when a merge request is created or updated. Enables [merge request pipelines](../merge_request_pipelines/index.md), [merged results pipelines](../merge_request_pipelines/pipelines_for_merged_results/index.md), and [merge trains](../merge_request_pipelines/pipelines_for_merged_results/merge_trains/index.md). |
-  | `pipelines`              | For [multi-project pipelines](../multi_project_pipelines.md) created by [using the API with `CI_JOB_TOKEN`](../multi_project_pipelines.md#create-multi-project-pipelines-by-using-the-api), or the [`trigger`](#trigger) keyword. |
+  | `merge_requests`         | For pipelines created when a merge request is created or updated. Enables [merge request pipelines](../pipelines/merge_request_pipelines.md), [merged results pipelines](../pipelines/pipelines_for_merged_results.md), and [merge trains](../pipelines/merge_trains.md). |
+  | `pipelines`              | For [multi-project pipelines](../pipelines/multi_project_pipelines.md) created by [using the API with `CI_JOB_TOKEN`](../pipelines/multi_project_pipelines.md#create-multi-project-pipelines-by-using-the-api), or the [`trigger`](#trigger) keyword. |
   | `pushes`                 | For pipelines triggered by a `git push` event, including for branches and tags. |
   | `schedules`              | For [scheduled pipelines](../pipelines/schedules.md). |
   | `tags`                   | When the Git reference for a pipeline is a tag. |
@@ -1710,17 +1710,17 @@ build_job:
 
 You can't download artifacts from jobs that run in [`parallel:`](#parallel).
 
-To download artifacts between [parent-child pipelines](../parent_child_pipelines.md),
+To download artifacts between [parent-child pipelines](../pipelines/parent_child_pipelines.md),
 use [`needs:pipeline`](#artifact-downloads-to-child-pipelines).
 
 You should not download artifacts from the same ref as a running pipeline. Concurrent
 pipelines running on the same ref could override the artifacts.
 
-##### Artifact downloads to child pipelines
+#### Artifact downloads to child pipelines
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/255983) in GitLab v13.7.
 
-A [child pipeline](../parent_child_pipelines.md) can download artifacts from a job in
+A [child pipeline](../pipelines/parent_child_pipelines.md) can download artifacts from a job in
 its parent pipeline or another child pipeline in the same parent-child pipeline hierarchy.
 
 For example, with the following parent pipeline that has a job that creates some artifacts:
@@ -3064,6 +3064,18 @@ as artifacts.
 The collected coverage fuzzing report uploads to GitLab as an artifact and is summarized in merge
 requests and the pipeline view. It's also used to provide data for security dashboards.
 
+##### `artifacts:reports:cluster_image_scanning` **(ULTIMATE)**
+
+> - Introduced in GitLab 14.1.
+> - Requires GitLab Runner 14.1 and above.
+
+The `cluster_image_scanning` report collects `CLUSTER_IMAGE_SCANNING` vulnerabilities
+as artifacts.
+
+The collected `CLUSTER_IMAGE_SCANNING` report uploads to GitLab as an artifact and
+is summarized in the pipeline view. It's also used to provide data for security
+dashboards.
+
 ##### `artifacts:reports:dast` **(ULTIMATE)**
 
 > - Introduced in GitLab 11.5.
@@ -3113,7 +3125,7 @@ There are a couple of exceptions to the [original dotenv rules](https://github.c
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/20390) in GitLab 11.2.
 > - Requires GitLab Runner 11.2 and above.
 
-The `junit` report collects [JUnit report format XML files](https://www.ibm.com/support/knowledgecenter/en/SSQ2R2_14.1.0/com.ibm.rsar.analysis.codereview.cobol.doc/topics/cac_useresults_junit.html)
+The `junit` report collects [JUnit report format XML files](https://www.ibm.com/docs/en/adfz/developer-for-zos/14.1.0?topic=formats-junit-xml-format)
 as artifacts. Although JUnit was originally developed in Java, there are many
 third party ports for other
 languages like JavaScript, Python, Ruby, and so on.
@@ -3305,7 +3317,7 @@ If there is more than one matched line in the job output, the last line is used.
 For the matched line, the first occurrence of `\d+(\.\d+)?` is the code coverage.
 Leading zeros are removed.
 
-Coverage output from [child pipelines](../parent_child_pipelines.md) is not recorded
+Coverage output from [child pipelines](../pipelines/parent_child_pipelines.md) is not recorded
 or displayed. Check [the related issue](https://gitlab.com/gitlab-org/gitlab/-/issues/280818)
 for more details.
 
@@ -3561,14 +3573,14 @@ deploystacks: [vultr, data]
 Use `trigger` to define a downstream pipeline trigger. When GitLab starts a `trigger` job,
 a downstream pipeline is created.
 
-Jobs with `trigger` can only use a [limited set of keywords](../multi_project_pipelines.md#define-multi-project-pipelines-in-your-gitlab-ciyml-file).
+Jobs with `trigger` can only use a [limited set of keywords](../pipelines/multi_project_pipelines.md#define-multi-project-pipelines-in-your-gitlab-ciyml-file).
 For example, you can't run commands with [`script`](#script), [`before_script`](#before_script),
 or [`after_script`](#after_script).
 
 You can use this keyword to create two different types of downstream pipelines:
 
-- [Multi-project pipelines](../multi_project_pipelines.md#define-multi-project-pipelines-in-your-gitlab-ciyml-file)
-- [Child pipelines](../parent_child_pipelines.md)
+- [Multi-project pipelines](../pipelines/multi_project_pipelines.md#define-multi-project-pipelines-in-your-gitlab-ciyml-file)
+- [Child pipelines](../pipelines/parent_child_pipelines.md)
 
 [In GitLab 13.2](https://gitlab.com/gitlab-org/gitlab/-/issues/197140/) and later, you can
 view which job triggered a downstream pipeline. In the [pipeline graph](../pipelines/index.md#visualize-pipelines),
@@ -3633,7 +3645,7 @@ upstream_bridge:
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/16094) in GitLab 12.7.
 
-To create a [child pipeline](../parent_child_pipelines.md), specify the path to the
+To create a [child pipeline](../pipelines/parent_child_pipelines.md), specify the path to the
 YAML file that contains the configuration of the child pipeline:
 
 ```yaml
@@ -3642,7 +3654,7 @@ trigger_job:
     include: path/to/child-pipeline.yml
 ```
 
-Similar to [multi-project pipelines](../multi_project_pipelines.md#mirror-status-of-a-triggered-pipeline-in-the-trigger-job),
+Similar to [multi-project pipelines](../pipelines/multi_project_pipelines.md#mirror-status-of-a-triggered-pipeline-in-the-trigger-job),
 it's possible to mirror the status from a triggered pipeline:
 
 ```yaml
@@ -3657,7 +3669,7 @@ trigger_job:
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/35632) in GitLab 12.9.
 
-You can also trigger a child pipeline from a [dynamically generated configuration file](../parent_child_pipelines.md#dynamic-child-pipelines):
+You can also trigger a child pipeline from a [dynamically generated configuration file](../pipelines/parent_child_pipelines.md#dynamic-child-pipelines):
 
 ```yaml
 generate-config:
@@ -4230,7 +4242,7 @@ variables.
 
 #### `secrets:vault` **(PREMIUM)**
 
-> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/28321) in GitLab 13.4.
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/28321) in GitLab 13.4 and GitLab Runner 13.4.
 
 Use `vault` to specify secrets provided by [Hashicorp's Vault](https://www.vaultproject.io/).
 
@@ -4268,6 +4280,31 @@ job:
         path: production/db
         field: password
 ```
+
+#### `secrets:file` **(PREMIUM)**
+
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/250695) in GitLab 14.1 and GitLab Runner 14.1.
+
+By default, the secret is passed to the job context as a variable of type
+[`file`](../variables/index.md#cicd-variable-types). The value of the
+secret is stored in a file and the variable `DATABASE_PASSWORD` contains a path to the file.
+
+However, some software does not work with file variables and might require the secret value to be stored
+directly in the environment variable. For that case, define a `file` setting:
+
+```yaml
+job:
+  secrets:
+    DATABASE_PASSWORD:
+      vault: production/db/password@ops
+      file: false
+```
+
+When you set `file: false`, no files are created for that variable. It contains the secret
+itself instead.
+
+The `file` is a setting of the secret, so it belongs directly under the variable
+name level and not in the `vault` section.
 
 ### `pages`
 
@@ -4776,7 +4813,7 @@ pushing multiple changes in a single `git push` invocation.
 
 This limitation does not affect any of the updated merge request pipelines.
 All updated merge requests have a pipeline created when using
-[pipelines for merge requests](../merge_request_pipelines/index.md).
+[pipelines for merge requests](../pipelines/merge_request_pipelines.md).
 
 ## Deprecated keywords
 

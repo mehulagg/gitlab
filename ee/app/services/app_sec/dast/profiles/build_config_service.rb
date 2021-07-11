@@ -5,26 +5,35 @@ module AppSec
     module Profiles
       class BuildConfigService < BaseProjectService
         def execute
-          return ServiceResponse.error(message: 'Insufficient permissions') unless allowed?
+          return ServiceResponse.error(message: 'Insufficient permissions for dast_configuration keyword') unless allowed?
 
-          ServiceResponse.success(payload: { dast_site_profile: site_profile, dast_scanner_profile: scanner_profile })
+          build_config = { dast_site_profile: site_profile, dast_scanner_profile: scanner_profile }
+
+          return ServiceResponse.error(message: errors) unless errors.empty?
+
+          ServiceResponse.success(payload: build_config)
         end
 
         private
 
         def allowed?
-          container.licensed_feature_available?(:security_on_demand_scans)
+          can?(current_user, :create_on_demand_dast_scan, project) &&
+            ::Feature.enabled?(:dast_configuration_ui, project, default_enabled: :yaml)
+        end
+
+        def errors
+          @errors ||= []
         end
 
         def site_profile
           fetch_profile(params[:dast_site_profile]) do |name|
-            DastSiteProfilesFinder.new(project_id: container.id, name: name)
+            DastSiteProfilesFinder.new(project_id: project.id, name: name)
           end
         end
 
         def scanner_profile
           fetch_profile(params[:dast_scanner_profile]) do |name|
-            DastScannerProfilesFinder.new(project_ids: [container.id], name: name)
+            DastScannerProfilesFinder.new(project_ids: [project.id], name: name)
           end
         end
 
@@ -33,7 +42,10 @@ module AppSec
 
           profile = yield(name).execute.first
 
-          return unless can?(current_user, :read_on_demand_scans, profile)
+          unless profile && can?(current_user, :read_on_demand_scans, profile)
+            errors.append("DAST profile not found: #{name}")
+            return
+          end
 
           profile
         end

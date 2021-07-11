@@ -361,6 +361,7 @@ RSpec.describe NotificationService, :mailer do
       let_it_be_with_reload(:issue) { create(:issue, project: project, assignees: [assignee]) }
       let_it_be(:mentioned_issue) { create(:issue, assignees: issue.assignees) }
       let_it_be_with_reload(:author) { create(:user) }
+
       let(:note) { create(:note_on_issue, author: author, noteable: issue, project_id: issue.project_id, note: '@mention referenced, @unsubscribed_mentioned and @outsider also') }
 
       subject { notification.new_note(note) }
@@ -641,6 +642,7 @@ RSpec.describe NotificationService, :mailer do
       let_it_be(:issue) { create(:issue, project: project, assignees: [assignee]) }
       let_it_be(:mentioned_issue) { create(:issue, assignees: issue.assignees) }
       let_it_be(:author) { create(:user) }
+
       let(:note) { create(:note_on_issue, author: author, noteable: issue, project_id: issue.project_id, note: '@all mentioned') }
 
       before_all do
@@ -927,6 +929,10 @@ RSpec.describe NotificationService, :mailer do
       end
 
       context 'design management is disabled' do
+        before do
+          enable_design_management(false)
+        end
+
         it 'does not notify anyone' do
           notification.new_note(note)
 
@@ -2608,6 +2614,16 @@ RSpec.describe NotificationService, :mailer do
 
     it 'sends the user a rejection email' do
       notification.user_admin_rejection(user.name, user.email)
+
+      should_only_email(user)
+    end
+  end
+
+  describe '#user_deactivated', :deliver_mails_inline do
+    let_it_be(:user) { create(:user) }
+
+    it 'sends the user an email' do
+      notification.user_deactivated(user.name, user.notification_email)
 
       should_only_email(user)
     end

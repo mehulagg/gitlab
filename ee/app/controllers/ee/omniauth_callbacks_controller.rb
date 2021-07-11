@@ -21,7 +21,6 @@ module EE
       ::AuditEventService.new(
         author,
         nil,
-        ip_address: request.remote_ip,
         with: provider
       ).for_failed_login.unauth_security_event
     end

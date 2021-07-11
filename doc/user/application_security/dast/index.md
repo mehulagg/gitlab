@@ -752,6 +752,7 @@ You can use CI/CD variables to customize DAST.
 | `DAST_AUTH_REPORT`                  | boolean       | Used in combination with exporting the `gl-dast-debug-auth-report.html` artifact to aid in debugging authentication issues. |
 | `DAST_AUTH_VERIFICATION_SELECTOR`   | selector      | Verifies successful authentication by checking for presence of a selector once the login form has been submitted. Example: `css:.user-photo` |
 | `DAST_AUTH_VERIFICATION_LOGIN_FORM` | boolean       | Verifies successful authentication by checking for the lack of a login form once the login form has been submitted. |
+| `DAST_ADVERTISE_SCAN`               | boolean       | Set to `true` to add a `Via` header to every request sent, advertising that the request was sent as part of a GitLab DAST scan. [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/334947) in GitLab 14.1. |
 
 1. Available to an on-demand DAST scan.
 
@@ -791,9 +792,9 @@ In order of preference, it is recommended to choose as selectors:
 
 - `id` fields. These are generally unique on a page, and rarely change.
 - `name` fields. These are generally unique on a page, and rarely change.
-- `class` values specific to the field, such as the selector `"css:.username"` for the `username` class on the username field.   
+- `class` values specific to the field, such as the selector `"css:.username"` for the `username` class on the username field.
 - Presence of field specific data attributes, such as the selector, `"css:[data-username]"` when the `data-username` field has any value on the username field.
-- Multiple `class` hierarchy values, such as the selector `"css:.login-form .username"` when there are multiple elements with class `username` but only one nested inside the element with the class `login-form`.   
+- Multiple `class` hierarchy values, such as the selector `"css:.login-form .username"` when there are multiple elements with class `username` but only one nested inside the element with the class `login-form`.
 
 When using selectors to locate specific fields we recommend you avoid searching on:
 

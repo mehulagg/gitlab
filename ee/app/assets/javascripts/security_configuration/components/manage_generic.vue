@@ -32,7 +32,7 @@ export default {
 
   <gl-button
     v-else-if="canEnable"
-    variant="success"
+    variant="confirm"
     category="primary"
     :href="feature.configuration_path"
     data-testid="enable-button"

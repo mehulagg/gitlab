@@ -5,13 +5,17 @@ import {
   IssuableAttributeState as IssuableAttributeStateFoss,
   issuableAttributesQueries as issuableAttributesQueriesFoss,
 } from '~/sidebar/constants';
+import updateStatusMutation from '~/sidebar/queries/updateStatus.mutation.graphql';
 import epicAncestorsQuery from './queries/epic_ancestors.query.graphql';
 import groupEpicsQuery from './queries/group_epics.query.graphql';
 import groupIterationsQuery from './queries/group_iterations.query.graphql';
+import issueHealthStatusQuery from './queries/issue_health_status.query.graphql';
+import issueWeightQuery from './queries/issue_weight.query.graphql';
 import projectIssueEpicMutation from './queries/project_issue_epic.mutation.graphql';
 import projectIssueEpicQuery from './queries/project_issue_epic.query.graphql';
 import projectIssueIterationMutation from './queries/project_issue_iteration.mutation.graphql';
 import projectIssueIterationQuery from './queries/project_issue_iteration.query.graphql';
+import updateIssueWeightMutation from './queries/update_issue_weight.mutation.graphql';
 
 export const healthStatus = {
   ON_TRACK: 'onTrack',
@@ -126,5 +130,23 @@ export const issuableAttributesQueries = {
 export const ancestorsQueries = {
   [IssuableType.Epic]: {
     query: epicAncestorsQuery,
+  },
+};
+
+export const weightQueries = {
+  [IssuableType.Issue]: {
+    query: issueWeightQuery,
+    mutation: updateIssueWeightMutation,
+  },
+};
+
+export const healthStatusQueries = {
+  [IssuableType.Issue]: {
+    mutation: updateStatusMutation,
+    query: issueHealthStatusQuery,
+  },
+  [IssuableType.Epic]: {
+    mutation: updateStatusMutation,
+    query: issueHealthStatusQuery,
   },
 };

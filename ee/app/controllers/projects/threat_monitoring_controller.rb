@@ -10,7 +10,7 @@ module Projects
       push_frontend_feature_flag(:scan_execution_policy_ui, @project)
     end
 
-    feature_category :web_firewall
+    feature_category :not_owned
 
     # rubocop: disable CodeReuse/ActiveRecord
     def alert_details
@@ -24,7 +24,7 @@ module Projects
       response = NetworkPolicies::FindResourceService.new(
         resource_name: @policy_name,
         environment: @environment,
-        kind: Gitlab::Kubernetes::CiliumNetworkPolicy::KIND
+        kind: params[:kind].presence || Gitlab::Kubernetes::CiliumNetworkPolicy::KIND
       ).execute
 
       if response.success?

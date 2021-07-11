@@ -11,7 +11,8 @@ module SubscriptionsHelper
       plan_id: params[:plan_id],
       namespace_id: params[:namespace_id],
       new_user: new_user?.to_s,
-      group_data: present_groups(eligible_groups).to_json
+      group_data: present_groups(eligible_groups).to_json,
+      source: params[:source]
     }
   end
 

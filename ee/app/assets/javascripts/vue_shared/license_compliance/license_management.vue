@@ -76,7 +76,7 @@ export default {
 };
 </script>
 <template>
-  <gl-loading-icon v-if="showLoadingSpinner" />
+  <gl-loading-icon v-if="showLoadingSpinner" size="sm" />
   <div v-else class="license-management">
     <delete-confirmation-modal v-if="isAdmin" />
 

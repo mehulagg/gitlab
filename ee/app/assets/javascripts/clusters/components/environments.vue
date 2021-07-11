@@ -127,6 +127,7 @@ export default {
         <!-- Loading Rollout -->
         <gl-loading-icon
           v-if="isLoadingRollout(row.item.rolloutStatus)"
+          size="sm"
           class="d-inline-flex mt-1"
         />
 

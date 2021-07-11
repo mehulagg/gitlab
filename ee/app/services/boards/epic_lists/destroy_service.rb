@@ -11,10 +11,6 @@ module Boards
           return ServiceResponse.error(message: 'Epics feature is not available.')
         end
 
-        unless Feature.enabled?(:epic_boards, list.board.group, default_enabled: :yaml)
-          return ServiceResponse.error(message: 'Epic boards feature is not enabled.')
-        end
-
         unless can?(current_user, :admin_epic_board_list, list)
           return ServiceResponse.error(message: 'The epic board list that you are attempting to destroy does not '\
                   'exist or you don\'t have permission to perform this action')

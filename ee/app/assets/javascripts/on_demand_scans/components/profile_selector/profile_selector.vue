@@ -143,7 +143,7 @@ export default {
       </p>
       <gl-button
         :href="newProfilePath"
-        variant="success"
+        variant="confirm"
         category="secondary"
         data-testid="create-profile-link"
       >

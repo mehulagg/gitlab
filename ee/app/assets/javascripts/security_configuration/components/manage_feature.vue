@@ -25,9 +25,6 @@ export default {
       if (!this.glFeatures.secDependencyScanningUiEnable) {
         delete scannerComponentMapCopy[REPORT_TYPE_DEPENDENCY_SCANNING];
       }
-      if (!this.glFeatures.secSecretDetectionUiEnable) {
-        delete scannerComponentMapCopy[REPORT_TYPE_SECRET_DETECTION];
-      }
       return scannerComponentMapCopy;
     },
     manageComponent() {

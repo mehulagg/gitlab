@@ -1,8 +1,0 @@
-mutation issueSetWeight($input: IssueSetWeightInput!) {
-  issueSetWeight(input: $input) {
-    issue {
-      weight
-    }
-    errors
-  }
-}

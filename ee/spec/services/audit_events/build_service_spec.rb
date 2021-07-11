@@ -14,13 +14,16 @@ RSpec.describe AuditEvents::BuildService do
       author: author,
       scope: scope,
       target: target,
-      ip_address: ip_address,
       message: message
     )
   end
 
-  describe '#execute' do
+  describe '#execute', :request_store do
     subject(:event) { service.execute }
+
+    before do
+      allow(Gitlab::RequestContext.instance).to receive(:client_ip).and_return(ip_address)
+    end
 
     context 'when licensed' do
       before do

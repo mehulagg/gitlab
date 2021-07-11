@@ -10,6 +10,7 @@ import {
   GlFormSelect,
   GlFormTextarea,
 } from '@gitlab/ui';
+import { TYPE_ITERATIONS_CADENCE } from '~/graphql_shared/constants';
 import { convertToGraphQLId } from '~/graphql_shared/utils';
 import { s__, __ } from '~/locale';
 import createCadence from '../queries/cadence_create.mutation.graphql';
@@ -130,7 +131,7 @@ export default {
     },
     variables() {
       const id = this.isEdit
-        ? convertToGraphQLId('Iterations::Cadence', this.cadenceId)
+        ? convertToGraphQLId(TYPE_ITERATIONS_CADENCE, this.cadenceId)
         : undefined;
       const groupPath = this.isEdit ? undefined : this.groupPath;
 
@@ -199,7 +200,7 @@ export default {
           if (this.automatic) {
             return true;
           }
-          const requiredFieldsForAutomatedScheduling = ['iterationsInAdvance'];
+          const requiredFieldsForAutomatedScheduling = ['iterationsInAdvance', 'durationInWeeks'];
           return !requiredFieldsForAutomatedScheduling.includes(field);
         })
         .forEach((field) => {
@@ -215,6 +216,7 @@ export default {
       this.clearValidation();
       if (!value) {
         this.iterationsInAdvance = 0;
+        this.durationInWeeks = 0;
       }
     },
     save() {
@@ -352,9 +354,9 @@ export default {
           v-model.number="durationInWeeks"
           :options="$options.availableDurations"
           class="gl-form-input-md"
-          required
+          :required="automatic"
           data-qa-selector="iteration_cadence_name_field"
-          :disabled="loadingCadence"
+          :disabled="loadingCadence || !automatic"
           @change="validate('durationInWeeks')"
         />
       </gl-form-group>

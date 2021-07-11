@@ -74,4 +74,10 @@ RSpec.describe GitlabSchema.types['Group'] do
       expect(vulnerabilities.first['severity']).to eq('CRITICAL')
     end
   end
+
+  describe 'dora field' do
+    subject { described_class.fields['dora'] }
+
+    it { is_expected.to have_graphql_type(Types::DoraType) }
+  end
 end

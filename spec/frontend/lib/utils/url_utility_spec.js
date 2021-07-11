@@ -1,3 +1,4 @@
+import { TEST_HOST } from 'helpers/test_constants';
 import * as urlUtils from '~/lib/utils/url_utility';
 
 const shas = {
@@ -23,6 +24,16 @@ const setWindowLocation = (value) => {
 };
 
 describe('URL utility', () => {
+  let originalLocation;
+
+  beforeAll(() => {
+    originalLocation = window.location;
+  });
+
+  afterAll(() => {
+    window.location = originalLocation;
+  });
+
   describe('webIDEUrl', () => {
     afterEach(() => {
       gon.relative_url_root = '';
@@ -87,6 +98,48 @@ describe('URL utility', () => {
       const url = 'https://gitlab.com?everything=works';
       expect(urlUtils.getParameterValues('everything', url)).toEqual(['works']);
       expect(urlUtils.getParameterValues('test', url)).toEqual([]);
+    });
+  });
+
+  describe('getParameterByName', () => {
+    const { getParameterByName } = urlUtils;
+
+    it('should return valid parameter', () => {
+      setWindowLocation({ href: 'https://gitlab.com?scope=all&p=2' });
+
+      expect(getParameterByName('p')).toEqual('2');
+      expect(getParameterByName('scope')).toBe('all');
+    });
+
+    it('should return invalid parameter', () => {
+      setWindowLocation({ href: 'https://gitlab.com?scope=all&p=2' });
+
+      expect(getParameterByName('fakeParameter')).toBe(null);
+    });
+
+    it('should return a parameter with spaces', () => {
+      setWindowLocation({ href: 'https://gitlab.com?search=my terms' });
+
+      expect(getParameterByName('search')).toBe('my terms');
+    });
+
+    it('should return a parameter with encoded spaces', () => {
+      setWindowLocation({ href: 'https://gitlab.com?search=my%20terms' });
+
+      expect(getParameterByName('search')).toBe('my terms');
+    });
+
+    it('should return a parameter with plus signs as spaces', () => {
+      setWindowLocation({ href: 'https://gitlab.com?search=my+terms' });
+
+      expect(getParameterByName('search')).toBe('my terms');
+    });
+
+    it('should return valid parameters if URL is provided', () => {
+      expect(getParameterByName('foo', 'http://cocteau.twins?foo=bar')).toBe('bar');
+      expect(getParameterByName('manan', 'http://cocteau.twins?foo=bar&manan=canchu')).toBe(
+        'canchu',
+      );
     });
   });
 
@@ -717,6 +770,19 @@ describe('URL utility', () => {
 
       expect(urlUtils.objectToQuery(searchQueryObject)).toEqual('one=1&two=2');
     });
+
+    it('returns empty string when `params` is undefined, null or empty string', () => {
+      expect(urlUtils.objectToQuery()).toBe('');
+      expect(urlUtils.objectToQuery('')).toBe('');
+    });
+
+    it('returns query string with values of `params`', () => {
+      const singleQueryParams = { foo: true };
+      const multipleQueryParams = { foo: true, bar: true };
+
+      expect(urlUtils.objectToQuery(singleQueryParams)).toBe('foo=true');
+      expect(urlUtils.objectToQuery(multipleQueryParams)).toBe('foo=true&bar=true');
+    });
   });
 
   describe('cleanLeadingSeparator', () => {
@@ -960,6 +1026,39 @@ describe('URL utility', () => {
       ${'_'}    | ${'/url/hello_123.png'}
     `('makes no changes to unproblematic characters ($character)', ({ input }) => {
       expect(urlUtils.encodeSaferUrl(input)).toBe(input);
+    });
+  });
+
+  describe('isSameOriginUrl', () => {
+    // eslint-disable-next-line no-script-url
+    const javascriptUrl = 'javascript:alert(1)';
+
+    beforeEach(() => {
+      setWindowLocation({ origin: TEST_HOST });
+    });
+
+    it.each`
+      url                                | expected
+      ${TEST_HOST}                       | ${true}
+      ${`${TEST_HOST}/a/path`}           | ${true}
+      ${'//test.host/no-protocol'}       | ${true}
+      ${'/a/root/relative/path'}         | ${true}
+      ${'a/relative/path'}               | ${true}
+      ${'#hash'}                         | ${true}
+      ${'?param=foo'}                    | ${true}
+      ${''}                              | ${true}
+      ${'../../../'}                     | ${true}
+      ${`${TEST_HOST}:8080/wrong-port`}  | ${false}
+      ${'ws://test.host/wrong-protocol'} | ${false}
+      ${'http://phishing.test'}          | ${false}
+      ${'//phishing.test'}               | ${false}
+      ${'//invalid:url'}                 | ${false}
+      ${javascriptUrl}                   | ${false}
+      ${'data:,Hello%2C%20World%21'}     | ${false}
+      ${null}                            | ${false}
+      ${undefined}                       | ${false}
+    `('returns $expected given $url', ({ url, expected }) => {
+      expect(urlUtils.isSameOriginUrl(url)).toBe(expected);
     });
   });
 });

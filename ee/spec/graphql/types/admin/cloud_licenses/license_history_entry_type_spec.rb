@@ -30,10 +30,6 @@ RSpec.describe GitlabSchema.types['LicenseHistoryEntry'], :enable_admin_mode do
     GitlabSchema.execute(query(field_name), context: { current_user: admin }).as_json
   end
 
-  before do
-    stub_application_setting(cloud_license_enabled: true)
-  end
-
   it { expect(described_class.graphql_name).to eq('LicenseHistoryEntry') }
 
   include_examples 'license type fields', ['data', 'licenseHistoryEntries', 'nodes', -1]

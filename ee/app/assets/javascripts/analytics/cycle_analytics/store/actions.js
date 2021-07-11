@@ -34,9 +34,9 @@ export const setSelectedStage = ({ commit }, stage) => commit(types.SET_SELECTED
 
 export const setDateRange = (
   { commit, dispatch, getters: { isOverviewStageSelected }, state: { selectedStage } },
-  { startDate, endDate },
+  { createdAfter, createdBefore },
 ) => {
-  commit(types.SET_DATE_RANGE, { startDate, endDate });
+  commit(types.SET_DATE_RANGE, { createdBefore, createdAfter });
   if (selectedStage && !isOverviewStageSelected) dispatch('fetchStageData', selectedStage.id);
   return dispatch('fetchCycleAnalyticsData');
 };

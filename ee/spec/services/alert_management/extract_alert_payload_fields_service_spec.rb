@@ -7,6 +7,7 @@ RSpec.describe AlertManagement::ExtractAlertPayloadFieldsService do
   let_it_be(:user_with_permissions) { create(:user) }
   let_it_be(:user_without_permissions) { create(:user) }
   let_it_be(:user) { user_with_permissions }
+
   let(:payload) { { foo: 'bar' } }
   let(:payload_json) { Gitlab::Json.generate(payload) }
   let(:params) { { payload: payload_json } }

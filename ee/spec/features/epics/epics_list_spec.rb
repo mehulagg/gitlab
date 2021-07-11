@@ -5,6 +5,9 @@ require 'spec_helper'
 RSpec.describe 'epics list', :js do
   let(:group) { create(:group, :public) }
   let(:user) { create(:user) }
+  let(:user_dev) { create(:user) }
+  let!(:bug_label) { create(:group_label, group: group, title: 'Bug') }
+  let!(:critical_label) { create(:group_label, group: group, title: 'Critical') }
 
   before do
     stub_licensed_features(epics: true)
@@ -215,43 +218,68 @@ RSpec.describe 'epics list', :js do
   end
 
   context 'vue epics list' do
-    let!(:epic1) { create(:epic, group: group, start_date: '2020-12-15', end_date: '2021-1-15') }
-    let!(:epic2) { create(:epic, group: group, start_date: '2020-12-15') }
-    let!(:epic3) { create(:epic, group: group, end_date: '2021-1-15') }
+    available_tokens = %w[Author Label My-Reaction]
 
     before do
       stub_feature_flags(vue_epics_list: true)
-      group.add_developer(user)
-
-      visit group_epics_path(group)
-
-      wait_for_requests
     end
 
-    it 'renders epics list' do
-      page.within('.issuable-list-container') do
-        expect(page).to have_selector('.gl-tabs')
-        expect(page).to have_link('New epic')
-        expect(page).to have_selector('.vue-filtered-search-bar-container')
-        expect(page.find('.issuable-list')).to have_selector('li.issue', count: 3)
+    describe 'within a group' do
+      let!(:epic1) { create(:epic, group: group, start_date: '2020-12-15', end_date: '2021-1-15') }
+      let!(:epic2) { create(:epic, group: group, start_date: '2020-12-15') }
+      let!(:epic3) { create(:epic, group: group, end_date: '2021-1-15') }
+      let!(:award_emoji_star) { create(:award_emoji, name: 'star', user: user, awardable: epic1) }
+
+      before do
+        group.add_developer(user)
+        group.add_developer(user_dev)
+        visit group_epics_path(group)
+        wait_for_requests
       end
+
+      it 'renders epics list', :aggregate_failures do
+        page.within('.issuable-list-container') do
+          expect(page).to have_selector('.gl-tabs')
+          expect(page).to have_link('New epic')
+          expect(page).to have_selector('.vue-filtered-search-bar-container')
+          expect(page.find('.issuable-list')).to have_selector('li.issue', count: 3)
+        end
+      end
+
+      it 'renders epics item with metadata', :aggregate_failures do
+        page.within('.issuable-list-container .issuable-list') do
+          expect(page.all('.issuable-info-container')[0].find('.issue-title')).to have_content(epic2.title)
+          expect(page.all('.issuable-info-container')[0].find('.issuable-reference')).to have_content("&#{epic2.iid}")
+          expect(page.all('.issuable-info-container')[0].find('.issuable-authored')).to have_content('created')
+          expect(page.all('.issuable-info-container')[0].find('.issuable-authored')).to have_content("by #{epic2.author.name}")
+        end
+      end
+
+      it 'renders epic item timeframe', :aggregate_failures do
+        page.within('.issuable-list-container .issuable-list') do
+          expect(page.all('.issuable-info-container')[0].find('.issuable-info')).to have_content('Dec 15, 2020 – No due date')
+          expect(page.all('.issuable-info-container')[1].find('.issuable-info')).to have_content('Dec 15, 2020 – Jan 15, 2021')
+          expect(page.all('.issuable-info-container')[2].find('.issuable-info')).to have_content('No start date – Jan 15, 2021')
+        end
+      end
+
+      it_behaves_like 'filtered search bar', available_tokens
     end
 
-    it 'renders epics item with metadata' do
-      page.within('.issuable-list-container .issuable-list') do
-        expect(page.all('.issuable-info-container')[0].find('.issue-title')).to have_content(epic2.title)
-        expect(page.all('.issuable-info-container')[0].find('.issuable-reference')).to have_content("&#{epic2.iid}")
-        expect(page.all('.issuable-info-container')[0].find('.issuable-authored')).to have_content('created')
-        expect(page.all('.issuable-info-container')[0].find('.issuable-authored')).to have_content("by #{epic2.author.name}")
-      end
-    end
+    describe 'within a sub-group group' do
+      let!(:subgroup) { create(:group, parent: group, name: 'subgroup') }
+      let!(:sub_epic1) { create(:epic, group: subgroup, start_date: '2020-12-15', end_date: '2021-1-15') }
+      let!(:sub_epic2) { create(:epic, group: subgroup, start_date: '2020-12-15') }
+      let!(:award_emoji_star) { create(:award_emoji, name: 'star', user: user, awardable: sub_epic1) }
 
-    it 'renders epic item timeframe' do
-      page.within('.issuable-list-container .issuable-list') do
-        expect(page.all('.issuable-info-container')[0].find('.issuable-info')).to have_content('Dec 15, 2020 – No due date')
-        expect(page.all('.issuable-info-container')[1].find('.issuable-info')).to have_content('Dec 15, 2020 – Jan 15, 2021')
-        expect(page.all('.issuable-info-container')[2].find('.issuable-info')).to have_content('No start date – Jan 15, 2021')
+      before do
+        subgroup.add_developer(user)
+        subgroup.add_developer(user_dev)
+        visit group_epics_path(subgroup)
+        wait_for_requests
       end
+
+      it_behaves_like 'filtered search bar', available_tokens
     end
   end
 end

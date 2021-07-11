@@ -3,11 +3,12 @@ import { GlAlert, GlLink, GlSprintf } from '@gitlab/ui';
 import {
   manualSyncFailureText,
   connectivityIssue,
-  manualSyncSuccessfulTitle,
+  manualSyncPendingTitle,
   subscriptionSyncStatus,
+  manualSyncPendingText,
 } from '../constants';
 
-export const SUCCESS_ALERT_DISMISSED_EVENT = 'success-alert-dismissed';
+export const INFO_ALERT_DISMISSED_EVENT = 'info-alert-dismissed';
 
 const subscriptionSyncStatusValidator = (value) =>
   !value || Object.values(subscriptionSyncStatus).includes(value);
@@ -15,7 +16,8 @@ const subscriptionSyncStatusValidator = (value) =>
 export default {
   name: 'SubscriptionSyncNotifications',
   i18n: {
-    manualSyncSuccessfulTitle,
+    manualSyncPendingText,
+    manualSyncPendingTitle,
     manualSyncFailureText,
     connectivityIssue,
   },
@@ -33,16 +35,16 @@ export default {
     },
   },
   computed: {
-    syncDidSuccess() {
-      return this.syncStatus === subscriptionSyncStatus.SYNC_SUCCESS;
+    isSyncPending() {
+      return this.syncStatus === subscriptionSyncStatus.SYNC_PENDING;
     },
     syncDidFail() {
       return this.syncStatus === subscriptionSyncStatus.SYNC_FAILURE;
     },
   },
   methods: {
-    didDismissSuccessAlert() {
-      this.$emit(SUCCESS_ALERT_DISMISSED_EVENT);
+    didDismissInfoAlert() {
+      this.$emit(INFO_ALERT_DISMISSED_EVENT);
     },
   },
 };
@@ -51,12 +53,13 @@ export default {
 <template>
   <div>
     <gl-alert
-      v-if="syncDidSuccess"
-      variant="success"
-      :title="$options.i18n.manualSyncSuccessfulTitle"
-      data-testid="sync-success-alert"
-      @dismiss="didDismissSuccessAlert"
-    />
+      v-if="isSyncPending"
+      variant="info"
+      :title="$options.i18n.manualSyncPendingTitle"
+      data-testid="sync-info-alert"
+      @dismiss="didDismissInfoAlert"
+      >{{ $options.i18n.manualSyncPendingText }}</gl-alert
+    >
     <gl-alert
       v-else-if="syncDidFail"
       variant="danger"

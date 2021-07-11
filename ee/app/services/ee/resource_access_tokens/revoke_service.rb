@@ -26,8 +26,7 @@ module EE
           target_type: token.class.name,
           target_details: token.user.name,
           action: :custom,
-          custom_message: message,
-          ip_address: current_user.current_sign_in_ip
+          custom_message: message
         ).security_event
       end
     end

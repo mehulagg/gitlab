@@ -13,9 +13,13 @@ module IncidentManagement
     # @option oncall_at [ActiveSupport::TimeWithZone]
     #                   Limits users to only those
     #                   on-call at the specified time.
-    def initialize(project, oncall_at: Time.current)
+    # @option schedule [IncidentManagement::OncallSchedule]
+    #                   Limits the users to rotations within a
+    #                   specific schedule
+    def initialize(project, oncall_at: Time.current, schedule: nil)
       @project = project
       @oncall_at = oncall_at
+      @schedule = schedule
     end
 
     # @return [User::ActiveRecord_Relation]
@@ -28,7 +32,7 @@ module IncidentManagement
 
     private
 
-    attr_reader :project, :oncall_at
+    attr_reader :project, :oncall_at, :schedule
 
     def user_ids
       strong_memoize(:user_ids) do
@@ -44,11 +48,17 @@ module IncidentManagement
       ids_for_persisted_shifts.flat_map(&:first)
     end
 
+    def rotations
+      strong_memoize(:rotations) do
+        schedule ? schedule.rotations : project.incident_management_oncall_rotations
+      end
+    end
+
     # @return [Array<[rotation_id, user_id]>]
     # @example - [ [1, 16], [2, 200] ]
     def ids_for_persisted_shifts
       strong_memoize(:ids_for_persisted_shifts) do
-        project.incident_management_oncall_rotations
+        rotations
           .merge(IncidentManagement::OncallShift.for_timestamp(oncall_at))
           .pluck_id_and_user_id
       end
@@ -63,7 +73,7 @@ module IncidentManagement
     end
 
     def rotations_without_persisted_shifts
-      project.incident_management_oncall_rotations
+      rotations
         .except_ids(rotation_ids_for_persisted_shifts)
         .with_shift_generation_associations
     end

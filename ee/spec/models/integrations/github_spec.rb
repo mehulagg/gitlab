@@ -11,7 +11,7 @@ RSpec.describe Integrations::Github do
   let(:repository_name) { 'my-project' }
   let(:base_url) { 'https://github.com' }
   let(:repository_url) { "#{base_url}/#{owner}/#{repository_name}" }
-  let(:service_params) do
+  let(:integration_params) do
     {
       active: true,
       project: project,
@@ -22,7 +22,7 @@ RSpec.describe Integrations::Github do
     }
   end
 
-  subject { described_class.create!(service_params) }
+  subject { described_class.create!(integration_params) }
 
   before do
     stub_licensed_features(github_project_service_integration: true)
@@ -38,7 +38,7 @@ RSpec.describe Integrations::Github do
 
       describe '#valid?' do
         it 'is not valid' do
-          expect(described_class.new(service_params)).not_to be_valid
+          expect(described_class.new(integration_params)).not_to be_valid
         end
       end
     end
@@ -80,14 +80,14 @@ RSpec.describe Integrations::Github do
     let(:properties) { subject.reload.properties.symbolize_keys }
 
     it 'does not overwrite existing integrations' do
-      subject.update!(service_params.slice(:properties))
+      subject.update!(integration_params.slice(:properties))
 
-      expect(properties).to match(service_params[:properties])
+      expect(properties).to match(integration_params[:properties])
       expect(subject.static_context).to be_nil
     end
 
     context 'when initialized without properties' do
-      let(:service_params) do
+      let(:integration_params) do
         {
           active: false,
           project: project
@@ -100,7 +100,7 @@ RSpec.describe Integrations::Github do
     end
 
     context 'when initialized with static_context as false' do
-      let(:service_params) do
+      let(:integration_params) do
         {
           active: false,
           project: project,
@@ -114,7 +114,7 @@ RSpec.describe Integrations::Github do
     end
 
     context 'when initialized with static_context as false' do
-      let(:service_params) do
+      let(:integration_params) do
         {
           active: false,
           project: project,
@@ -135,7 +135,7 @@ RSpec.describe Integrations::Github do
     let(:status_message) { double(sha: sha, status: :success, status_options: status_options) }
     let(:notifier) { instance_double(Integrations::Github::StatusNotifier) }
 
-    context 'the service is invalid' do
+    context 'the integration is invalid' do
       it 'does not notify GitHub of a status change' do
         allow(subject).to receive(:invalid?).and_return(true)
 
@@ -285,17 +285,17 @@ RSpec.describe Integrations::Github do
     end
   end
 
-  describe '#can_test?' do
+  describe '#testable?' do
     it 'is false if there are no pipelines' do
       project.ci_pipelines.delete_all
 
-      expect(subject.can_test?).to eq false
+      expect(subject).not_to be_testable
     end
 
     it 'is true if the project has a pipeline' do
       pipeline
 
-      expect(subject.can_test?).to eq true
+      expect(subject).to be_testable
     end
   end
 

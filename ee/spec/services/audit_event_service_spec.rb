@@ -2,14 +2,19 @@
 
 require 'spec_helper'
 
-RSpec.describe AuditEventService do
+RSpec.describe AuditEventService, :request_store do
   let(:project) { build_stubbed(:project) }
   let_it_be(:user) { create(:user, current_sign_in_ip: '192.168.68.104') }
   let_it_be(:project_member) { create(:project_member, user: user, expires_at: 1.day.from_now) }
+
   let(:request_ip_address) { '127.0.0.1' }
 
-  let(:details) { { action: :destroy, ip_address: request_ip_address } }
+  let(:details) { { action: :destroy } }
   let(:service) { described_class.new(user, project, details) }
+
+  before do
+    allow(Gitlab::RequestContext.instance).to receive(:client_ip).and_return(request_ip_address)
+  end
 
   describe '#for_member' do
     let(:event) { service.for_member(project_member).security_event }
@@ -102,36 +107,59 @@ RSpec.describe AuditEventService do
       end
 
       context 'for an unauthenticated user' do
-        let(:details) { { ip_address: '10.11.12.13' } }
         let(:user) { Gitlab::Audit::UnauthenticatedAuthor.new }
 
-        it 'defaults to the IP address in the details hash' do
-          event = service.security_event
+        context 'when request IP address is present' do
+          it 'has the request IP address' do
+            event = service.security_event
 
-          expect(event.ip_address).to eq('10.11.12.13')
-          expect(event.details[:ip_address]).to eq('10.11.12.13')
+            expect(event.details[:ip_address]).to eq(request_ip_address)
+            expect(event.ip_address).to eq(request_ip_address)
+          end
+        end
+
+        context 'when request IP address is not present' do
+          let(:request_ip_address) { nil }
+
+          it 'has the user IP address' do
+            event = service.security_event
+
+            expect(event.details[:ip_address]).to eq(user.current_sign_in_ip)
+            expect(event.ip_address).to eq(user.current_sign_in_ip)
+          end
         end
       end
 
       context 'for an authenticated user' do
-        let(:details) { {} }
+        context 'when request IP address is present' do
+          it 'has the request IP address' do
+            event = service.security_event
 
-        it 'has the user IP address' do
-          event = service.security_event
-
-          expect(event.ip_address).to eq(user.current_sign_in_ip)
-          expect(event.details[:ip_address]).to eq(user.current_sign_in_ip)
+            expect(event.details[:ip_address]).to eq(request_ip_address)
+            expect(event.ip_address).to eq(request_ip_address)
+          end
         end
 
-        it 'tracks exceptions when the event cannot be created' do
-          allow(user).to receive_messages(current_sign_in_ip: 'invalid IP')
+        context 'when request IP address is not present' do
+          let(:request_ip_address) { nil }
 
-          expect(Gitlab::ErrorTracking).to(
-            receive(:track_exception)
-              .with(ActiveRecord::RecordInvalid, audit_event_type: 'AuditEvent').and_call_original
-          )
+          it 'has the user IP address' do
+            event = service.security_event
 
-          service.security_event
+            expect(event.details[:ip_address]).to eq(user.current_sign_in_ip)
+            expect(event.ip_address).to eq(user.current_sign_in_ip)
+          end
+
+          it 'tracks exceptions when the event cannot be created' do
+            allow(user).to receive_messages(current_sign_in_ip: 'invalid IP')
+
+            expect(Gitlab::ErrorTracking).to(
+              receive(:track_exception)
+                .with(ActiveRecord::RecordInvalid, audit_event_type: 'AuditEvent').and_call_original
+            )
+
+            service.security_event
+          end
         end
       end
 
@@ -140,11 +168,24 @@ RSpec.describe AuditEventService do
         let(:impersonator) { build(:user, name: 'Donald Duck', current_sign_in_ip: '192.168.88.88') }
         let(:user) { create(:user, impersonator: impersonator) }
 
-        it 'has the impersonator IP address' do
-          event = service.security_event
+        context 'when request IP address is present' do
+          it 'has the request IP address' do
+            event = service.security_event
 
-          expect(event.details[:ip_address]).to eq('192.168.88.88')
-          expect(event.ip_address).to eq('192.168.88.88')
+            expect(event.details[:ip_address]).to eq(request_ip_address)
+            expect(event.ip_address).to eq(request_ip_address)
+          end
+        end
+
+        context 'when request IP address is not present' do
+          let(:request_ip_address) { nil }
+
+          it 'has the impersonator IP address' do
+            event = service.security_event
+
+            expect(event.details[:ip_address]).to eq(impersonator.current_sign_in_ip)
+            expect(event.ip_address).to eq(impersonator.current_sign_in_ip)
+          end
         end
 
         it 'has the impersonator name' do
@@ -244,7 +285,7 @@ RSpec.describe AuditEventService do
 
   describe '#for_failed_login' do
     let(:author_name) { 'testuser' }
-    let(:service) { described_class.new(author_name, nil, ip_address: request_ip_address) }
+    let(:service) { described_class.new(author_name, nil) }
     let(:event) { service.for_failed_login.unauth_security_event }
 
     before do
@@ -290,6 +331,16 @@ RSpec.describe AuditEventService do
       it 'does not have the ip_address' do
         expect(event.ip_address).to be_nil
         expect(event.details).not_to have_key(:ip_address)
+      end
+    end
+
+    context 'on a read-only instance' do
+      before do
+        allow(Gitlab::Database).to receive(:read_only?).and_return(true)
+      end
+
+      it 'does not create an event record in the database' do
+        expect { service.for_failed_login.unauth_security_event }.not_to change(AuditEvent, :count)
       end
     end
   end
@@ -453,6 +504,7 @@ RSpec.describe AuditEventService do
   describe '#for_project' do
     let_it_be(:current_user) { create(:user, name: 'Test User') }
     let_it_be(:project) { create(:project) }
+
     let(:action) { :destroy }
     let(:options) { { action: action } }
 
@@ -476,6 +528,7 @@ RSpec.describe AuditEventService do
   describe '#for_group' do
     let_it_be(:user) { create(:user, name: 'Test User') }
     let_it_be(:group) { create(:group) }
+
     let(:action) { :destroy }
     let(:options) { { action: action } }
     let(:service) { described_class.new(user, group, options).for_group }
@@ -517,9 +570,7 @@ RSpec.describe AuditEventService do
         expect(event.details[:entity_path]).to eq(project.full_path)
       end
 
-      context 'request IP address is provided' do
-        let(:details) { { action: :destroy, ip_address: request_ip_address } }
-
+      context 'request IP address is present' do
         it 'has the IP address in the details hash' do
           expect(event.details[:ip_address]).to eq(request_ip_address)
         end
@@ -529,8 +580,8 @@ RSpec.describe AuditEventService do
         end
       end
 
-      context 'request IP address is not provided' do
-        let(:details) { { action: :destroy } }
+      context 'request IP address is not present' do
+        let(:request_ip_address) { nil }
 
         it 'has the IP address in the details hash' do
           expect(event.details[:ip_address]).to eq(user.current_sign_in_ip)

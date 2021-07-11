@@ -1,7 +1,10 @@
 import { GlCard } from '@gitlab/ui';
-import { shallowMount } from '@vue/test-utils';
+import { mount, shallowMount } from '@vue/test-utils';
 import AxiosMockAdapter from 'axios-mock-adapter';
 import { nextTick } from 'vue';
+import SubscriptionActivationBanner, {
+  ACTIVATE_SUBSCRIPTION_EVENT,
+} from 'ee/admin/subscriptions/show/components/subscription_activation_banner.vue';
 import SubscriptionActivationModal from 'ee/admin/subscriptions/show/components/subscription_activation_modal.vue';
 import SubscriptionBreakdown, {
   licensedToFields,
@@ -12,7 +15,7 @@ import SubscriptionDetailsCard from 'ee/admin/subscriptions/show/components/subs
 import SubscriptionDetailsHistory from 'ee/admin/subscriptions/show/components/subscription_details_history.vue';
 import SubscriptionDetailsUserInfo from 'ee/admin/subscriptions/show/components/subscription_details_user_info.vue';
 import SubscriptionSyncNotifications, {
-  SUCCESS_ALERT_DISMISSED_EVENT,
+  INFO_ALERT_DISMISSED_EVENT,
 } from 'ee/admin/subscriptions/show/components/subscription_sync_notifications.vue';
 import {
   licensedToHeaderText,
@@ -20,6 +23,7 @@ import {
   subscriptionDetailsHeaderText,
   subscriptionTypes,
 } from 'ee/admin/subscriptions/show/constants';
+import { makeMockUserCalloutDismisser } from 'helpers/mock_user_callout_dismisser';
 import { extendedWrapper } from 'helpers/vue_test_utils_helper';
 import waitForPromises from 'helpers/wait_for_promises';
 import axios from '~/lib/utils/axios_utils';
@@ -29,12 +33,15 @@ describe('Subscription Breakdown', () => {
   let axiosMock;
   let wrapper;
   let glModalDirective;
+  let userCalloutDismissSpy;
 
   const [, licenseFile] = subscriptionHistory;
+  const congratulationSvgPath = '/path/to/svg';
   const connectivityHelpURL = 'connectivity/help/url';
   const customersPortalUrl = 'customers.dot';
   const licenseRemovePath = '/license/remove/';
   const licenseUploadPath = '/license/upload/';
+  const subscriptionActivationBannerCalloutName = 'banner_callout_name';
   const subscriptionSyncPath = '/sync/path/';
 
   const findDetailsCards = () => wrapper.findAllComponents(SubscriptionDetailsCard);
@@ -47,14 +54,23 @@ describe('Subscription Breakdown', () => {
     wrapper.findByTestId('subscription-activate-subscription-action');
   const findSubscriptionMangeAction = () => wrapper.findByTestId('subscription-manage-action');
   const findSubscriptionSyncAction = () => wrapper.findByTestId('subscription-sync-action');
+  const findSubscriptionActivationBanner = () =>
+    wrapper.findComponent(SubscriptionActivationBanner);
   const findSubscriptionActivationModal = () => wrapper.findComponent(SubscriptionActivationModal);
   const findSubscriptionSyncNotifications = () =>
     wrapper.findComponent(SubscriptionSyncNotifications);
 
-  const createComponent = ({ props = {}, provide = {}, stubs = {} } = {}) => {
+  const createComponent = ({
+    props = {},
+    provide = {},
+    stubs = {},
+    mountMethod = shallowMount,
+    shouldShowCallout = true,
+  } = {}) => {
     glModalDirective = jest.fn();
+    userCalloutDismissSpy = jest.fn();
     wrapper = extendedWrapper(
-      shallowMount(SubscriptionBreakdown, {
+      mountMethod(SubscriptionBreakdown, {
         directives: {
           glModal: {
             bind(_, { value }) {
@@ -63,10 +79,12 @@ describe('Subscription Breakdown', () => {
           },
         },
         provide: {
+          congratulationSvgPath,
           connectivityHelpURL,
           customersPortalUrl,
           licenseUploadPath,
           licenseRemovePath,
+          subscriptionActivationBannerCalloutName,
           subscriptionSyncPath,
           ...provide,
         },
@@ -75,7 +93,13 @@ describe('Subscription Breakdown', () => {
           subscriptionList: subscriptionHistory,
           ...props,
         },
-        stubs,
+        stubs: {
+          UserCalloutDismisser: makeMockUserCalloutDismisser({
+            dismiss: userCalloutDismissSpy,
+            shouldShowCallout,
+          }),
+          ...stubs,
+        },
       }),
     );
   };
@@ -138,11 +162,22 @@ describe('Subscription Breakdown', () => {
     });
 
     it('presents a subscription activation modal', () => {
-      expect(findSubscriptionActivationModal().exists()).toBe(true);
+      expect(findSubscriptionActivationModal().props()).toMatchObject({
+        modalId,
+        visible: false,
+      });
     });
 
-    it('passes the correct modal id', () => {
-      expect(findSubscriptionActivationModal().attributes('modalid')).toBe(modalId);
+    it('updates visible of subscription activation modal when change emitted', async () => {
+      findSubscriptionActivationModal().vm.$emit('change', true);
+
+      await wrapper.vm.$nextTick();
+
+      expect(findSubscriptionActivationModal().props('visible')).toBe(true);
+    });
+
+    it('does not present a subscription activation banner', () => {
+      expect(findSubscriptionActivationBanner().exists()).toBe(false);
     });
 
     describe('footer buttons', () => {
@@ -263,7 +298,10 @@ describe('Subscription Breakdown', () => {
       beforeEach(() => {
         createComponent({
           props: { subscription: licenseFile },
-          stubs: { GlCard, SubscriptionDetailsCard },
+          stubs: {
+            GlCard,
+            SubscriptionDetailsCard,
+          },
         });
       });
 
@@ -279,12 +317,46 @@ describe('Subscription Breakdown', () => {
         expect(findSubscriptionSyncNotifications().exists()).toBe(false);
       });
 
-      it('shows a modal', () => {
-        const props = { subscription: { ...licenseFile } };
-        createComponent({ props, stubs: { GlCard, SubscriptionDetailsCard } });
+      it('shows modal when active subscription action clicked', () => {
         findActivateSubscriptionAction().vm.$emit('click');
 
         expect(glModalDirective).toHaveBeenCalledWith(modalId);
+      });
+
+      describe('subscription activation banner', () => {
+        beforeEach(() => {
+          createComponent({
+            props: { subscription: licenseFile },
+          });
+        });
+
+        it('presents a subscription activation banner', () => {
+          expect(findSubscriptionActivationBanner().exists()).toBe(true);
+        });
+
+        it('calls the dismiss callback when closing the banner', () => {
+          findSubscriptionActivationBanner().vm.$emit('close');
+
+          expect(userCalloutDismissSpy).toHaveBeenCalledTimes(1);
+        });
+
+        it('shows a modal', async () => {
+          expect(findSubscriptionActivationModal().props('visible')).toBe(false);
+
+          await findSubscriptionActivationBanner().vm.$emit(ACTIVATE_SUBSCRIPTION_EVENT);
+
+          expect(findSubscriptionActivationModal().props('visible')).toBe(true);
+        });
+
+        it('hides the banner when the proper condition applies', () => {
+          createComponent({
+            mountMethod: mount,
+            props: { subscription: licenseFile },
+            shouldShowCallout: false,
+          });
+
+          expect(findSubscriptionActivationBanner().exists()).toBe(false);
+        });
       });
     });
 
@@ -298,7 +370,7 @@ describe('Subscription Breakdown', () => {
 
       it('shows a success notification', () => {
         expect(findSubscriptionSyncNotifications().props('syncStatus')).toBe(
-          subscriptionSyncStatus.SYNC_SUCCESS,
+          subscriptionSyncStatus.SYNC_PENDING,
         );
       });
 
@@ -307,7 +379,7 @@ describe('Subscription Breakdown', () => {
       });
 
       it('dismisses the success notification', async () => {
-        findSubscriptionSyncNotifications().vm.$emit(SUCCESS_ALERT_DISMISSED_EVENT);
+        findSubscriptionSyncNotifications().vm.$emit(INFO_ALERT_DISMISSED_EVENT);
         await nextTick();
 
         expect(findSubscriptionSyncNotifications().exists()).toBe(false);

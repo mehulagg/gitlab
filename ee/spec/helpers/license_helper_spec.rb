@@ -99,7 +99,9 @@ RSpec.describe LicenseHelper do
                                                        buy_subscription_path: 'subscriptions_plans_url',
                                                        subscription_sync_path: sync_seat_link_admin_license_path,
                                                        license_upload_path: new_admin_license_path,
-                                                       license_remove_path: admin_license_path })
+                                                       license_remove_path: admin_license_path,
+                                                       congratulation_svg_path: helper.image_path('illustrations/illustration-congratulation-purchase.svg'),
+                                                       subscription_activation_banner_callout_name: ::EE::UserCalloutsHelper::CL_SUBSCRIPTION_ACTIVATION })
       end
     end
 
@@ -113,7 +115,9 @@ RSpec.describe LicenseHelper do
                                                        buy_subscription_path: 'subscriptions_plans_url',
                                                        subscription_sync_path: sync_seat_link_admin_license_path,
                                                        license_upload_path: new_admin_license_path,
-                                                       license_remove_path: admin_license_path })
+                                                       license_remove_path: admin_license_path,
+                                                       congratulation_svg_path: helper.image_path('illustrations/illustration-congratulation-purchase.svg'),
+                                                       subscription_activation_banner_callout_name: ::EE::UserCalloutsHelper::CL_SUBSCRIPTION_ACTIVATION })
       end
     end
   end

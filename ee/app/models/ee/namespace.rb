@@ -332,6 +332,7 @@ module EE
       feature_available?(:secret_detection) ||
       feature_available?(:dependency_scanning) ||
       feature_available?(:container_scanning) ||
+      feature_available?(:cluster_image_scanning) ||
       feature_available?(:dast) ||
       feature_available?(:coverage_fuzzing) ||
       feature_available?(:api_fuzzing)

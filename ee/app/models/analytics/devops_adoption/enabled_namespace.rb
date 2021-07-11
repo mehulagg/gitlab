@@ -3,6 +3,7 @@
 class Analytics::DevopsAdoption::EnabledNamespace < ApplicationRecord
   self.table_name = 'analytics_devops_adoption_segments'
 
+  include EachBatch
   include IgnorableColumns
 
   belongs_to :namespace
@@ -16,6 +17,13 @@ class Analytics::DevopsAdoption::EnabledNamespace < ApplicationRecord
   scope :for_display_namespaces, -> (namespaces) { where(display_namespace_id: namespaces) }
   scope :for_namespaces, -> (namespaces) { where(namespace_id: namespaces) }
   scope :for_parent, -> (namespace) { for_namespaces(namespace.self_and_descendants) }
+  scope :pending_calculation, -> {
+    subquery = Analytics::DevopsAdoption::Snapshot.finalized.for_month(1.month.before(Time.zone.now))
+      .where(Analytics::DevopsAdoption::Snapshot.arel_table[:namespace_id].eq(arel_table[:namespace_id]))
+      .arel.exists
+
+    where.not(subquery)
+  }
 
   ignore_column :last_recorded_at, remove_with: '14.2', remove_after: '2021-07-22'
 

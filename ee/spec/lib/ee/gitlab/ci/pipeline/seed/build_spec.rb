@@ -5,6 +5,7 @@ require 'spec_helper'
 RSpec.describe Gitlab::Ci::Pipeline::Seed::Build do
   let_it_be(:project) { create(:project, :repository) }
   let_it_be(:user) { create(:user, developer_projects: [project]) }
+  let_it_be(:outsider) { create(:user) }
 
   let(:pipeline) { build(:ci_empty_pipeline, project: project, user: user) }
   let(:seed_context) { double(pipeline: pipeline, root_variables: []) }
@@ -31,13 +32,30 @@ RSpec.describe Gitlab::Ci::Pipeline::Seed::Build do
         end
       end
 
+      shared_examples 'an insufficient permissions error' do
+        it 'communicates failure' do
+          expect(seed_build.errors).to include('Insufficient permissions for dast_configuration keyword')
+        end
+      end
+
       context 'when the feature is not licensed' do
         it_behaves_like 'it does not change build attributes'
+
+        it 'communicates failure' do
+          expect(seed_build.errors).to contain_exactly('Insufficient permissions for dast_configuration keyword')
+        end
       end
 
       context 'when the feature is licensed' do
         before do
           stub_licensed_features(security_on_demand_scans: true)
+        end
+
+        context 'when the user cannot create dast scans' do
+          let_it_be(:user) { outsider }
+
+          it_behaves_like 'it does not change build attributes'
+          it_behaves_like 'an insufficient permissions error'
         end
 
         context 'when the feature is not enabled' do
@@ -46,6 +64,7 @@ RSpec.describe Gitlab::Ci::Pipeline::Seed::Build do
           end
 
           it_behaves_like 'it does not change build attributes'
+          it_behaves_like 'an insufficient permissions error'
         end
 
         context 'when the feature is enabled' do
@@ -53,7 +72,9 @@ RSpec.describe Gitlab::Ci::Pipeline::Seed::Build do
             stub_feature_flags(dast_configuration_ui: true)
           end
 
-          shared_examples 'it looks up dast profiles in the database' do |key|
+          shared_examples 'it looks up dast profiles in the database' do |dast_profile_name_key|
+            let(:profile_name) { public_send(dast_profile_name_key) }
+
             context 'when the profile exists' do
               it 'adds the profile to the build attributes' do
                 expect(subject).to include(profile.class.underscore.to_sym => profile)
@@ -67,13 +88,7 @@ RSpec.describe Gitlab::Ci::Pipeline::Seed::Build do
             end
 
             context 'when the profile is not provided' do
-              let(key) { nil }
-
-              it_behaves_like 'it has no effect'
-            end
-
-            context 'when the profile does not exist' do
-              let(key) { SecureRandom.hex }
+              let(dast_profile_name_key) { nil }
 
               it_behaves_like 'it has no effect'
             end
@@ -82,6 +97,29 @@ RSpec.describe Gitlab::Ci::Pipeline::Seed::Build do
               let(:stage) { 'test' }
 
               it_behaves_like 'it has no effect'
+            end
+
+            context 'when the profile does not exist' do
+              let(dast_profile_name_key) { SecureRandom.hex }
+
+              it 'communicates failure' do
+                expect(seed_build.errors).to contain_exactly("DAST profile not found: #{profile_name}")
+              end
+            end
+
+            context 'when the profile cannot be read' do
+              let_it_be(:user) { outsider }
+
+              before do
+                allow_next_instance_of(AppSec::Dast::Profiles::BuildConfigService) do |service|
+                  allow(service).to receive(:can?).and_call_original
+                  allow(service).to receive(:can?).with(user, :create_on_demand_dast_scan, project).and_return(true)
+                end
+              end
+
+              it 'communicates failure' do
+                expect(seed_build.errors).to include("DAST profile not found: #{profile_name}")
+              end
             end
           end
 

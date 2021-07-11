@@ -24,7 +24,15 @@ module QA
                   element :updating_button
                   element :copy_public_key_button
                 end
+
+                view 'ee/app/views/shared/_mirror_trigger_builds_setting.html.haml' do
+                  element :mirror_trigger_builds_label
+                end
               end
+            end
+
+            def select_mirror_trigger_option
+              click_element(:mirror_trigger_builds_label)
             end
           end
         end

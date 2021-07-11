@@ -30,6 +30,7 @@ RSpec.describe Member do
 
     context "when an invite email is provided" do
       let_it_be(:project) { create(:project) }
+
       let(:member) { build(:project_member, source: project, invite_email: "user@example.com", user: nil) }
 
       it "doesn't require a user" do
@@ -98,6 +99,7 @@ RSpec.describe Member do
 
     context 'project bots' do
       let_it_be(:project_bot) { create(:user, :project_bot) }
+
       let(:new_member) { build(:project_member, user_id: project_bot.id) }
 
       context 'not a member of any group or project' do
@@ -704,7 +706,8 @@ RSpec.describe Member do
   end
 
   context 'when after_commit :update_highest_role' do
-    let!(:user) { create(:user) }
+    let_it_be(:user) { create(:user) }
+
     let(:user_id) { user.id }
 
     where(:member_type, :source_type) do
@@ -739,7 +742,7 @@ RSpec.describe Member do
         end
 
         describe 'destroy member' do
-          subject { member.destroy! }
+          subject { member.reload.destroy! }
 
           include_examples 'update highest role with exclusive lease'
         end

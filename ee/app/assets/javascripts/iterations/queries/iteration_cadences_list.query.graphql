@@ -9,6 +9,7 @@ query IterationCadences(
 ) {
   group(fullPath: $fullPath) {
     iterationCadences(
+      includeAncestorGroups: true
       before: $beforeCursor
       after: $afterCursor
       first: $firstPageSize
@@ -18,6 +19,7 @@ query IterationCadences(
         id
         title
         durationInWeeks
+        automatic
       }
       pageInfo {
         ...PageInfo

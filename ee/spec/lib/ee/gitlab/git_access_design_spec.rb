@@ -7,6 +7,7 @@ RSpec.describe Gitlab::GitAccessDesign do
 
   let_it_be(:project) { create(:project) }
   let_it_be(:user) { project.owner }
+
   let(:actor) { :geo }
 
   subject(:access) do

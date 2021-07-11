@@ -15,12 +15,44 @@ module EE
         audit_changes(:merge_requests_disable_committers_approval, as: 'prevent merge request approval from reviewers', model: model)
 
         audit_project_feature_changes
+        audit_compliance_framework_changes
       end
 
       private
 
+      def audit_compliance_framework_changes
+        setting = model.compliance_framework_setting
+
+        return if setting.blank?
+
+        if setting.destroyed?
+          audit_context = {
+            author: @current_user,
+            scope: model,
+            target: model,
+            message: "Unassigned project compliance framework"
+          }
+
+          ::Gitlab::Audit::Auditor.audit(audit_context)
+        else
+          audit_changes(:framework_id, as: 'compliance framework', model: model.compliance_framework_setting, entity: model)
+        end
+      end
+
       def audit_project_feature_changes
         ::EE::Audit::ProjectFeatureChangesAuditor.new(@current_user, model.project_feature, model).execute
+      end
+
+      def framework_changes
+        model.previous_changes["framework_id"]
+      end
+
+      def old_framework_name
+        ComplianceManagement::Framework.find_by_id(framework_changes.first)&.name || "None"
+      end
+
+      def new_framework_name
+        ComplianceManagement::Framework.find_by_id(framework_changes.last)&.name || "None"
       end
 
       def attributes_from_auditable_model(column)
@@ -49,6 +81,11 @@ module EE
           {
             from: !model.previous_changes[column].first,
             to: !model.previous_changes[column].last
+          }
+        when :framework_id
+          {
+            from: old_framework_name,
+            to: new_framework_name
           }
         else
           {

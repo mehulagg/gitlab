@@ -19,8 +19,7 @@ module EE
       end
 
       def ci_minutes_exceeded?(build)
-        ::Feature.enabled?(:ci_quota_check_on_retries, project, default_enabled: :yaml) &&
-          !runner_minutes.available?(build.build_matcher)
+        !runner_minutes.available?(build.build_matcher)
       end
 
       def runner_minutes

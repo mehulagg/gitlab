@@ -16,7 +16,8 @@ RSpec.describe Resolvers::NetworkPolicyResolver do
       namespace: 'another',
       creation_timestamp: time_now.iso8601,
       selector: { matchLabels: { role: 'db' } },
-      ingress: [{ from: [{ namespaceSelector: { matchLabels: { project: 'myproject' } } }] }]
+      ingress: [{ from: [{ namespaceSelector: { matchLabels: { project: 'myproject' } } }] }],
+      environment_ids: [1, 2]
     )
   end
 
@@ -27,7 +28,8 @@ RSpec.describe Resolvers::NetworkPolicyResolver do
       creation_timestamp: time_now.iso8601,
       resource_version: '102',
       selector: { matchLabels: { role: 'db' } },
-      ingress: [{ endpointFrom: [{ matchLabels: { project: 'myproject' } }] }]
+      ingress: [{ endpointFrom: [{ matchLabels: { project: 'myproject' } }] }],
+      environment_ids: [3, 4]
     )
   end
 
@@ -93,19 +95,25 @@ RSpec.describe Resolvers::NetworkPolicyResolver do
           expected_resolved = [
             {
               name: 'policy',
+              kind: 'NetworkPolicy',
               namespace: 'another',
               enabled: true,
               yaml: policy.as_json[:manifest],
               updated_at: time_now,
-              from_auto_devops: false
+              from_auto_devops: false,
+              environment_ids: [1, 2],
+              project: project
             },
             {
               name: 'cilium_policy',
+              kind: 'CiliumNetworkPolicy',
               namespace: 'another',
               enabled: true,
               yaml: cilium_policy.as_json[:manifest],
               updated_at: time_now,
-              from_auto_devops: false
+              from_auto_devops: false,
+              environment_ids: [3, 4],
+              project: project
             }
           ]
           expect(resolve_network_policies).to eq(expected_resolved)

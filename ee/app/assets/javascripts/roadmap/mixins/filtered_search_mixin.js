@@ -101,7 +101,7 @@ export default {
               params.search = search;
             }
 
-            return Api.groupLabels(this.groupFullPath, {
+            return Api.groupLabels(encodeURIComponent(this.groupFullPath), {
               params,
             });
           },

@@ -25,11 +25,13 @@ export default () => {
 
   const {
     buySubscriptionPath,
+    congratulationSvgPath,
     customersPortalUrl,
     freeTrialPath,
     hasActiveLicense,
     licenseRemovePath,
     licenseUploadPath,
+    subscriptionActivationBannerCalloutName,
     subscriptionSyncPath,
   } = el.dataset;
   const connectivityHelpURL = helpPagePath('/user/admin_area/license.html', {
@@ -41,11 +43,13 @@ export default () => {
     apolloProvider,
     provide: {
       buySubscriptionPath,
+      congratulationSvgPath,
       connectivityHelpURL,
       customersPortalUrl,
       freeTrialPath,
       licenseRemovePath,
       licenseUploadPath,
+      subscriptionActivationBannerCalloutName,
       subscriptionSyncPath,
     },
     render: (h) =>

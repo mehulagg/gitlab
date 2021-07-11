@@ -4,7 +4,8 @@ require 'spec_helper'
 RSpec.describe Ci::RetryBuildService do
   let_it_be(:user) { create(:user) }
 
-  let(:build) { create(:ci_build, project: project) }
+  let(:pipeline) { create(:ci_pipeline, project: project) }
+  let(:build) { create(:ci_build, pipeline: pipeline) }
 
   subject(:service) { described_class.new(project, user) }
 
@@ -149,14 +150,6 @@ RSpec.describe Ci::RetryBuildService do
         context 'with private runners' do
           let_it_be(:private_runner) do
             create(:ci_runner, :project, :online, projects: [project])
-          end
-
-          it { expect(new_build).not_to be_failed }
-        end
-
-        context 'when the feature is disabled' do
-          before do
-            stub_feature_flags(ci_quota_check_on_retries: false)
           end
 
           it { expect(new_build).not_to be_failed }

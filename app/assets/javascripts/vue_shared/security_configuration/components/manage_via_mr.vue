@@ -19,7 +19,7 @@ export default {
     variant: {
       type: String,
       required: false,
-      default: 'success',
+      default: 'confirm',
     },
     category: {
       type: String,
@@ -74,6 +74,7 @@ export default {
 <template>
   <gl-button
     v-if="!feature.configured"
+    data-testid="configure-via-mr-button"
     :loading="isLoading"
     :variant="variant"
     :category="category"

@@ -108,6 +108,25 @@ export function getParameterValues(sParam, url = window.location) {
 }
 
 /**
+ * This function accepts the `name` of the param to parse in the url
+ * if the name does not exist this function will return `null`
+ * otherwise it will return the value of the param key provided
+ *
+ * @param {String} name
+ * @param {String?} urlToParse
+ * @returns value of the parameter as string
+ */
+export const getParameterByName = (name, urlToParse) => {
+  const url = urlToParse || window.location.href;
+  const parsedName = name.replace(/[[\]]/g, '\\$&');
+  const regex = new RegExp(`[?&]${parsedName}(=([^&#]*)|&|#|$)`);
+  const results = regex.exec(url);
+  if (!results) return null;
+  if (!results[2]) return '';
+  return decodeUrlParameter(results[2]);
+};
+
+/**
  * Merges a URL to a set of params replacing value for
  * those already present.
  *
@@ -501,15 +520,15 @@ export function queryToObject(query, { gatherArrays = false, legacySpacesDecode 
 /**
  * Convert search query object back into a search query
  *
- * @param {Object} obj that needs to be converted
+ * @param {Object?} params that needs to be converted
  * @returns {String}
  *
  * ex: {one: 1, two: 2} into "one=1&two=2"
  *
  */
-export function objectToQuery(obj) {
-  return Object.keys(obj)
-    .map((k) => `${encodeURIComponent(k)}=${encodeURIComponent(obj[k])}`)
+export function objectToQuery(params = {}) {
+  return Object.keys(params)
+    .map((k) => `${encodeURIComponent(k)}=${encodeURIComponent(params[k])}`)
     .join('&');
 }
 
@@ -592,5 +611,29 @@ export function getURLOrigin(url) {
     return new URL(url).origin;
   } catch (e) {
     return null;
+  }
+}
+
+/**
+ * Returns `true` if the given `url` resolves to the same origin the page is served
+ * from; otherwise, returns `false`.
+ *
+ * The `url` may be absolute or relative.
+ *
+ * @param {string} url The URL to check.
+ * @returns {boolean}
+ */
+export function isSameOriginUrl(url) {
+  if (typeof url !== 'string') {
+    return false;
+  }
+
+  const { origin } = window.location;
+
+  try {
+    return new URL(url, origin).origin === origin;
+  } catch {
+    // Invalid URLs cannot have the same origin
+    return false;
   }
 }

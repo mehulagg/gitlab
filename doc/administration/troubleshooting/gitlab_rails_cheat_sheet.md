@@ -279,6 +279,23 @@ p.each do |project|
 end
 ```
 
+### Bulk update push rules for _all_ projects
+
+For example, enable **Check whether the commit author is a GitLab user** and **Do not allow users to remove Git tags with `git push`** checkboxes, and create a filter for allowing commits from a specific e-mail domain only:
+
+``` ruby
+Project.find_each do |p|
+  pr = p.push_rule || PushRule.new(project: p)
+  # Check whether the commit author is a GitLab user
+  pr.member_check = true
+  # Do not allow users to remove Git tags with `git push`
+  pr.deny_delete_tag = true
+  # Commit author's email
+  pr.author_email_regex = '@domain\.com$'
+  pr.save!
+end
+```
+
 ## Bulk update to change all the Jira integrations to Jira instance-level values
 
 To change all Jira project to use the instance-level integration settings:
@@ -331,10 +348,10 @@ end
 puts "#{artifact_storage} bytes"
 ```
 
-### Identify deploy keys associated with blocked and non-member users 
+### Identify deploy keys associated with blocked and non-member users
 
-When the user who created a deploy key is blocked or removed from the project, the key 
-can no longer be used to push to protected branches in a private project (see [issue #329742](https://gitlab.com/gitlab-org/gitlab/-/issues/329742)). 
+When the user who created a deploy key is blocked or removed from the project, the key
+can no longer be used to push to protected branches in a private project (see [issue #329742](https://gitlab.com/gitlab-org/gitlab/-/issues/329742)).
 The following script identifies unusable deploy keys:
 
 ```ruby
@@ -814,12 +831,12 @@ build.dependencies.each do |d| { puts "status: #{d.status}, finished at: #{d.fin
   completed: #{d.complete?}, artifacts_expired: #{d.artifacts_expired?}, erased: #{d.erased?}" }
 ```
 
-### Try CI service
+### Try CI integration
 
 ```ruby
 p = Project.find_by_full_path('<project_path>')
 m = project.merge_requests.find_by(iid: )
-m.project.try(:ci_service)
+m.project.try(:ci_integration)
 ```
 
 ### Validate the `.gitlab-ci.yml`
@@ -1155,17 +1172,17 @@ registry = Geo::SnippetRepositoryRegistry.find(registry_id)
 registry.replicator.send(:sync_repository)
 ```
 
-### Generate usage ping
+### Generate Service Ping
 
-#### Generate or get the cached usage ping
+#### Generate or get the cached Service Ping
 
 ```ruby
 Gitlab::UsageData.to_json
 ```
 
-#### Generate a fresh new usage ping
+#### Generate a fresh new Service Ping
 
-This will also refresh the cached usage ping displayed in the admin area
+This will also refresh the cached Service Ping displayed in the admin area
 
 ```ruby
 Gitlab::UsageData.to_json(force_refresh: true)
@@ -1173,13 +1190,13 @@ Gitlab::UsageData.to_json(force_refresh: true)
 
 #### Generate and print
 
-Generates usage ping data in JSON format.
+Generates Service Ping data in JSON format.
 
 ```shell
 rake gitlab:usage_data:generate
 ```
 
-#### Generate and send usage ping
+#### Generate and send Service Ping
 
 Prints the metrics saved in `conversational_development_index_metrics`.
 

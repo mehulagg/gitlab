@@ -3,6 +3,7 @@ import VueApollo from 'vue-apollo';
 import createDefaultClient from '~/lib/graphql';
 import { parseBoolean } from '~/lib/utils/common_utils';
 import App from './components/app.vue';
+import IterationBreadcrumb from './components/iteration_breadcrumb.vue';
 import IterationForm from './components/iteration_form_without_vue_router.vue';
 import IterationReport from './components/iteration_report_without_vue_router.vue';
 import Iterations from './components/iterations.vue';
@@ -95,6 +96,32 @@ export function initIterationReport({ namespaceType, initiallyEditing } = {}) {
   });
 }
 
+function injectVueRouterIntoBreadcrumbs(router) {
+  const breadCrumbEls = document.querySelectorAll('nav .js-breadcrumbs-list li');
+  const breadCrumbEl = breadCrumbEls[breadCrumbEls.length - 1];
+  const crumbs = [breadCrumbEl.querySelector('h2')];
+  const nestedBreadcrumbEl = document.createElement('div');
+  breadCrumbEl.replaceChild(nestedBreadcrumbEl, crumbs[0]);
+  return new Vue({
+    el: nestedBreadcrumbEl,
+    router,
+    apolloProvider,
+    components: {
+      IterationBreadcrumb,
+    },
+    render(createElement) {
+      // workaround pending https://gitlab.com/gitlab-org/gitlab/-/merge_requests/48115
+      const parentEl = breadCrumbEl.parentElement.parentElement;
+      if (parentEl) {
+        parentEl.classList.remove('breadcrumbs-container');
+        parentEl.classList.add('gl-display-flex');
+        parentEl.classList.add('w-100');
+      }
+      return createElement('iteration-breadcrumb');
+    },
+  });
+}
+
 export function initCadenceApp({ namespaceType }) {
   const el = document.querySelector('.js-iteration-cadence-app');
 
@@ -107,13 +134,24 @@ export function initCadenceApp({ namespaceType }) {
     cadencesListPath,
     canCreateCadence,
     canEditCadence,
+    canCreateIteration,
     canEditIteration,
     hasScopedLabelsFeature,
     labelsFetchPath,
     previewMarkdownPath,
     noIssuesSvgPath,
   } = el.dataset;
-  const router = createRouter({ base: cadencesListPath });
+  const router = createRouter({
+    base: cadencesListPath,
+    permissions: {
+      canCreateCadence: parseBoolean(canCreateCadence),
+      canEditCadence: parseBoolean(canEditCadence),
+      canCreateIteration: parseBoolean(canCreateIteration),
+      canEditIteration: parseBoolean(canEditIteration),
+    },
+  });
+
+  injectVueRouterIntoBreadcrumbs(router);
 
   return new Vue({
     el,
@@ -126,6 +164,7 @@ export function initCadenceApp({ namespaceType }) {
       canCreateCadence: parseBoolean(canCreateCadence),
       canEditCadence: parseBoolean(canEditCadence),
       namespaceType,
+      canCreateIteration: parseBoolean(canCreateIteration),
       canEditIteration: parseBoolean(canEditIteration),
       hasScopedLabelsFeature: parseBoolean(hasScopedLabelsFeature),
       labelsFetchPath,

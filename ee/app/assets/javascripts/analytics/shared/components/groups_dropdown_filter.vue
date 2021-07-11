@@ -10,10 +10,10 @@ import {
   GlSafeHtmlDirective as SafeHtml,
 } from '@gitlab/ui';
 import { debounce } from 'lodash';
+import { filterBySearchTerm } from '~/analytics/shared/utils';
 import Api from '~/api';
 import { s__, __ } from '~/locale';
 import { DATA_REFETCH_DELAY } from '../constants';
-import { filterBySearchTerm } from '../utils';
 
 export default {
   name: 'GroupsDropdownFilter',

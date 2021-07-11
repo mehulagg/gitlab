@@ -5,6 +5,7 @@ require 'spec_helper'
 RSpec.describe MergeRequestApprovalSettings::UpdateService do
   let_it_be_with_reload(:group) { create(:group) }
   let_it_be(:user) { create(:user) }
+
   let(:params) { { allow_author_approval: true } }
 
   subject(:service) do

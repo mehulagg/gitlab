@@ -43,7 +43,7 @@ RSpec.describe RoutableActions do
           get :show, params: request_params(routable)
 
           expect(response).to have_gitlab_http_status(:found)
-          expect(response.location).to match(/groups\/.*\/-\/saml\/sso\?redirect=.+&token=/)
+          expect(response.location).to match(%r{groups/.*/-/saml/sso\?redirect=.+&token=})
         end
 
         it 'does not redirect on POST requests' do

@@ -27,10 +27,10 @@ On the left side we have the events that can trigger a pipeline based on various
 - A `git push` is the most common event that triggers a pipeline.
 - The [Web API](../../api/pipelines.md#create-a-new-pipeline).
 - A user clicking the "Run pipeline" button in the UI.
-- When a [merge request is created or updated](../../ci/merge_request_pipelines/index.md#pipelines-for-merge-requests).
-- When an MR is added to a [Merge Train](../../ci/merge_request_pipelines/pipelines_for_merged_results/merge_trains/index.md#merge-trains).
+- When a [merge request is created or updated](../../ci/pipelines/merge_request_pipelines.md#pipelines-for-merge-requests).
+- When an MR is added to a [Merge Train](../../ci/pipelines/merge_trains.md#merge-trains).
 - A [scheduled pipeline](../../ci/pipelines/schedules.md#pipeline-schedules).
-- When project is [subscribed to an upstream project](../../ci/multi_project_pipelines.md#trigger-a-pipeline-when-an-upstream-project-is-rebuilt).
+- When project is [subscribed to an upstream project](../../ci/pipelines/multi_project_pipelines.md#trigger-a-pipeline-when-an-upstream-project-is-rebuilt).
 - When [Auto DevOps](../../topics/autodevops/index.md) is enabled.
 - When GitHub integration is used with [external pull requests](../../ci/ci_cd_for_external_repos/index.md#pipelines-for-external-pull-requests).
 - When an upstream pipeline contains a [bridge job](../../ci/yaml/index.md#trigger) which triggers a downstream pipeline.

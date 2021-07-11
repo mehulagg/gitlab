@@ -4,6 +4,7 @@ require 'spec_helper'
 
 RSpec.describe Boards::EpicBoards::DestroyService do
   let_it_be(:parent) { create(:group) }
+
   let(:boards) { parent.epic_boards }
   let(:board_factory) { :epic_board }
 

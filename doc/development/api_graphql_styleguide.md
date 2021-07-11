@@ -68,9 +68,7 @@ Complexity is explained [on our client-facing API page](../api/graphql/index.md#
 Fields default to adding `1` to a query's complexity score, but developers can
 [specify a custom complexity](#field-complexity) when defining a field.
 
-To estimate the complexity of a query, you can run the
-[`gitlab:graphql:analyze`](rake_tasks.md#analyze-graphql-queries)
-Rake task.
+The complexity score of a query [can itself be queried for](../api/graphql/getting_started.md#query-complexity).
 
 ### Request timeout
 
@@ -207,7 +205,7 @@ Further reading:
 - [GraphQL Best Practices Guide](https://graphql.org/learn/best-practices/#nullability).
 - GraphQL documentation on [Object types and fields](https://graphql.org/learn/schema/#object-types-and-fields).
 - [GraphQL Best Practices Guide](https://graphql.org/learn/best-practices/#nullability)
-- [Using nullability in GraphQL](https://www.apollographql.com/blog/using-nullability-in-graphql-2254f84c4ed7)
+- [Using nullability in GraphQL](https://www.apollographql.com/blog/graphql/basics/using-nullability-in-graphql/)
 
 ### Exposing Global IDs
 
@@ -685,7 +683,7 @@ The API will also accept these types in the query signature for the argument:
 - `IntegrationsPrometheusID`
 
 NOTE:
-Although queries that use the old type (`PrometheusServiceID` in this example) will be 
+Although queries that use the old type (`PrometheusServiceID` in this example) will be
 considered valid and executable by the API, validator tools will consider them to be invalid.
 This is because we are deprecating using a bespoke method outside of the
 [`@deprecated` directive](https://spec.graphql.org/June2018/#sec--deprecated), so validators are not

@@ -48,15 +48,12 @@ module EE
         has_blocked_issues_feature: project.feature_available?(:blocked_issues).to_s,
         has_issuable_health_status_feature: project.feature_available?(:issuable_health_status).to_s,
         has_issue_weights_feature: project.feature_available?(:issue_weights).to_s,
+        has_iterations_feature: project.feature_available?(:iterations).to_s,
         has_multiple_issue_assignees_feature: project.feature_available?(:multiple_issue_assignees).to_s
       )
 
       if project.feature_available?(:epics) && project.group
         data[:group_epics_path] = group_epics_path(project.group, format: :json)
-      end
-
-      if project.feature_available?(:iterations)
-        data[:project_iterations_path] = api_v4_projects_iterations_path(id: project.id)
       end
 
       data

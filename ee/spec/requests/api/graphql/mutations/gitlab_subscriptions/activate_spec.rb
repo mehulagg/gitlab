@@ -7,6 +7,7 @@ RSpec.describe 'Activate a subscription' do
 
   let_it_be(:current_user) { create(:admin) }
   let_it_be(:license_key) { build(:gitlab_license).export }
+
   let(:activation_code) { 'activation_code' }
   let(:mutation) do
     graphql_mutation(:gitlab_subscription_activate, { activation_code: activation_code })
@@ -14,7 +15,7 @@ RSpec.describe 'Activate a subscription' do
 
   let!(:application_setting) do
     stub_env('IN_MEMORY_APPLICATION_SETTINGS', 'false')
-    create(:application_setting, cloud_license_enabled: true)
+    create(:application_setting)
   end
 
   let(:remote_response) do
@@ -62,7 +63,7 @@ RSpec.describe 'Activate a subscription' do
         'expiresAt' => created_license.expires_at.to_s,
         'blockChangesAt' => created_license.block_changes_at.to_s,
         'activatedAt' => created_license.created_at.to_date.to_s,
-        'lastSync' => nil,
+        'lastSync' => created_license.last_synced_at.iso8601,
         'usersInLicenseCount' => nil,
         'billableUsersCount' => 1,
         'maximumUserCount' => 1,

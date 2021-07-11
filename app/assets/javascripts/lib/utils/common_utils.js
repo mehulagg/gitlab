@@ -11,29 +11,8 @@ import { isObject } from './type_utility';
 import { getLocationHash } from './url_utility';
 
 export const getPagePath = (index = 0) => {
-  const page = $('body').attr('data-page') || '';
-
+  const { page = '' } = document?.body?.dataset;
   return page.split(':')[index];
-};
-
-export const getDashPath = (path = window.location.pathname) => path.split('/-/')[1] || null;
-
-export const isInGroupsPage = () => getPagePath() === 'groups';
-
-export const isInProjectPage = () => getPagePath() === 'projects';
-
-export const getProjectSlug = () => {
-  if (isInProjectPage()) {
-    return $('body').data('project');
-  }
-  return null;
-};
-
-export const getGroupSlug = () => {
-  if (isInProjectPage() || isInGroupsPage()) {
-    return $('body').data('group');
-  }
-  return null;
 };
 
 export const checkPageAndAction = (page, action) => {
@@ -48,6 +27,8 @@ export const isInIssuePage = () => checkPageAndAction('issues', 'show');
 export const isInDesignPage = () => checkPageAndAction('issues', 'designs');
 export const isInMRPage = () => checkPageAndAction('merge_requests', 'show');
 export const isInEpicPage = () => checkPageAndAction('epics', 'show');
+
+export const getDashPath = (path = window.location.pathname) => path.split('/-/')[1] || null;
 
 export const getCspNonceValue = () => {
   const metaTag = document.querySelector('meta[name=csp-nonce]');
@@ -254,21 +235,6 @@ export const debounceByAnimationFrame = (fn) => {
   };
 };
 
-/**
-  this will take in the `name` of the param you want to parse in the url
-  if the name does not exist this function will return `null`
-  otherwise it will return the value of the param key provided
-*/
-export const getParameterByName = (name, urlToParse) => {
-  const url = urlToParse || window.location.href;
-  const parsedName = name.replace(/[[\]]/g, '\\$&');
-  const regex = new RegExp(`[?&]${parsedName}(=([^&#]*)|&|#|$)`);
-  const results = regex.exec(url);
-  if (!results) return null;
-  if (!results[2]) return '';
-  return decodeURIComponent(results[2].replace(/\+/g, ' '));
-};
-
 const handleSelectedRange = (range, restrictToNode) => {
   // Make sure this range is within the restricting container
   if (restrictToNode && !range.intersectsNode(restrictToNode)) return null;
@@ -343,8 +309,8 @@ export const insertText = (target, text) => {
 };
 
 /**
-  this will take in the headers from an API response and normalize them
-  this way we don't run into production issues when nginx gives us lowercased header keys
+   this will take in the headers from an API response and normalize them
+   this way we don't run into production issues when nginx gives us lowercased header keys
 */
 export const normalizeHeaders = (headers) => {
   const upperCaseHeaders = {};
@@ -370,17 +336,6 @@ export const parseIntPagination = (paginationInformation) => ({
   nextPage: parseInt(paginationInformation['X-NEXT-PAGE'], 10),
   previousPage: parseInt(paginationInformation['X-PREV-PAGE'], 10),
 });
-
-/**
- * Converts object with key-value pairs
- * into query-param string
- *
- * @param {Object} params
- */
-export const objectToQueryString = (params = {}) =>
-  Object.keys(params)
-    .map((param) => `${param}=${params[param]}`)
-    .join('&');
 
 export const buildUrlWithCurrentLocation = (param) => {
   if (param) return `${window.location.pathname}${param}`;

@@ -3,8 +3,14 @@
 module IncidentManagement
   module EscalationPolicies
     class BaseService
+      MAX_RULE_COUNT = 10
+
       def allowed?
         user&.can?(:admin_incident_management_escalation_policy, project)
+      end
+
+      def too_many_rules?
+        params[:rules_attributes] && params[:rules_attributes].size > MAX_RULE_COUNT
       end
 
       def invalid_schedules?
@@ -25,6 +31,10 @@ module IncidentManagement
 
       def error_no_rules
         error(_('Escalation policies must have at least one rule'))
+      end
+
+      def error_too_many_rules
+        error(_('Escalation policies may not have more than %{rule_count} rules') % { rule_count: MAX_RULE_COUNT })
       end
 
       def error_bad_schedules

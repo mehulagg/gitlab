@@ -22,7 +22,7 @@ module Integrations
       update(active: !!slack_integration)
     end
 
-    def can_test?
+    def testable?
       false
     end
 

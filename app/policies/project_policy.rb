@@ -51,11 +51,7 @@ class ProjectPolicy < BasePolicy
 
   desc "Container registry is disabled"
   condition(:container_registry_disabled, scope: :subject) do
-    if ::Feature.enabled?(:read_container_registry_access_level, @subject&.namespace, default_enabled: :yaml)
-      !access_allowed_to?(:container_registry)
-    else
-      !project.container_registry_enabled
-    end
+    !access_allowed_to?(:container_registry)
   end
 
   desc "Project has an external wiki"
@@ -67,6 +63,16 @@ class ProjectPolicy < BasePolicy
   desc "Has merge requests allowing pushes to user"
   condition(:has_merge_requests_allowing_pushes) do
     project.merge_requests_allowing_push_to_user(user).any?
+  end
+
+  desc "Deploy key with read access"
+  condition(:download_code_deploy_key) do
+    user.is_a?(DeployKey) && user.has_access_to?(project)
+  end
+
+  desc "Deploy key with write access"
+  condition(:push_code_deploy_key) do
+    user.is_a?(DeployKey) && user.can_push_to?(project)
   end
 
   desc "Deploy token with read_package_registry scope"
@@ -146,6 +152,10 @@ class ProjectPolicy < BasePolicy
 
   condition(:build_service_proxy_enabled) do
     ::Feature.enabled?(:build_service_proxy, @subject)
+  end
+
+  condition(:respect_protected_tag_for_release_permissions) do
+    ::Feature.enabled?(:evalute_protected_tag_for_release_permissions, @subject, default_enabled: :yaml)
   end
 
   condition(:user_defined_variables_allowed) do
@@ -616,6 +626,14 @@ class ProjectPolicy < BasePolicy
     prevent :move_design
   end
 
+  rule { download_code_deploy_key }.policy do
+    enable :download_code
+  end
+
+  rule { push_code_deploy_key }.policy do
+    enable :push_code
+  end
+
   rule { read_package_registry_deploy_token }.policy do
     enable :read_package
     enable :read_project
@@ -630,6 +648,10 @@ class ProjectPolicy < BasePolicy
   rule { can?(:create_pipeline) & can?(:maintainer_access) }.enable :create_web_ide_terminal
 
   rule { build_service_proxy_enabled }.enable :build_service_proxy_enabled
+
+  rule { respect_protected_tag_for_release_permissions & can?(:developer_access) }.policy do
+    enable :destroy_release
+  end
 
   rule { can?(:download_code) }.policy do
     enable :read_repository_graphs

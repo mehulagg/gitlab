@@ -193,7 +193,7 @@ included in backticks. For example:
 
 We include concept and task topic types in the same larger topic.
 
-In general, we have one topic that's a [landing page](../structure.md#landing-pages).
+In general, we have one topic that's a landing page.
 Below that topic in the left nav are individual topics. Each of these include a concept
 and multiple related tasks, reference, and troubleshooting topics.
 
@@ -499,7 +499,7 @@ Follow these guidelines for punctuation:
 | Do not use tabs for indentation. Use spaces instead. You can configure your code editor to output spaces instead of tabs when pressing the tab key. | --- |
 | Use serial commas (_Oxford commas_) before the final _and_ or _or_ in a list of three or more items. (Tested in [`OxfordComma.yml`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/doc/.vale/gitlab/OxfordComma.yml).) | _You can create new issues, merge requests, and milestones._ |
 | Always add a space before and after dashes when using it in a sentence (for replacing a comma, for example). | _You should try this - or not._ |
-| Always use lowercase after a colon.                              | Linked issues: a way to create a relationship between issues._ |
+| When a colon is part of a sentence, always use lowercase after the colon. | _Linked issues: a way to create a relationship between issues._ |
 
 <!-- vale gitlab.Repetition = YES -->
 
@@ -750,7 +750,7 @@ For example:
 | App name | Description                      |
 |:---------|:---------------------------------|
 | App A    | Description text. <sup>1</sup>   |
-| App B    | Description text. <sup>2</sup>   | 
+| App B    | Description text. <sup>2</sup>   |
 
 1. This is the footnote.
 1. This is the other footnote.
@@ -1531,7 +1531,8 @@ the section. The version information must:
 - Be surrounded by blank lines.
 - Start with `>`. If there are multiple bullets, each line must start with `> -`.
 - The string must include these words in this order (capitalization doesn't matter):
-  - `introduced`, `deprecated`, `moved`
+  - `introduced`, `deprecated`, `changed`, `moved`, `recommended` (as in the
+  [feature flag documentation](../feature_flags.md)), `removed`, or `renamed`
   - `in` or `to`
   - `GitLab`
 - Whenever possible, include a link to the completed issue, merge request, or epic

@@ -38,7 +38,8 @@ RSpec.describe Admin::AuditLogsController do
 
         expect_snowplow_event(
           category: 'Admin::AuditLogsController',
-          action: 'search_audit_event'
+          action: 'search_audit_event',
+          user: admin
         )
       end
     end

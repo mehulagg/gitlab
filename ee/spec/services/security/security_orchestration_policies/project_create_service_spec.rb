@@ -23,7 +23,51 @@ RSpec.describe Security::SecurityOrchestrationPolicies::ProjectCreateService do
         expect(project.security_orchestration_policy_configuration.security_policy_management_project).to eq(policy_project)
         expect(policy_project.namespace).to eq(project.namespace)
         expect(policy_project.protected_branches.map(&:name)).to contain_exactly(project.default_branch_or_main)
+        expect(policy_project.protected_branches.first.merge_access_levels.map(&:access_level)).to eq([Gitlab::Access::DEVELOPER])
+        expect(policy_project.protected_branches.first.push_access_levels.map(&:access_level)).to eq([Gitlab::Access::NO_ACCESS])
         expect(policy_project.team.developers).to contain_exactly(maintainer)
+      end
+    end
+
+    context 'when protected branch already exists' do
+      let_it_be(:project) { create(:project) }
+      let_it_be(:current_user) { project.owner }
+      let_it_be(:maintainer) { create(:user) }
+
+      before do
+        project.add_maintainer(maintainer)
+
+        allow_next_instance_of(Project) do |instance|
+          allow(instance).to receive_message_chain(:protected_branches, :find_by_name).and_return([ProtectedBranch.new])
+        end
+
+        protected_branch_service = instance_spy(ProtectedBranches::UpdateService)
+        allow(ProtectedBranches::UpdateService).to receive(:new).and_return(protected_branch_service)
+      end
+
+      it 'updates protected branch' do
+        service.execute
+
+        expect(ProtectedBranches::UpdateService).to have_received(:new)
+      end
+    end
+
+    context 'when protected branch does not exist' do
+      let_it_be(:project) { create(:project) }
+      let_it_be(:current_user) { project.owner }
+      let_it_be(:maintainer) { create(:user) }
+
+      before do
+        project.add_maintainer(maintainer)
+
+        protected_branch_service = instance_spy(ProtectedBranches::CreateService)
+        allow(ProtectedBranches::CreateService).to receive(:new).and_return(protected_branch_service)
+      end
+
+      it 'creates protected branch' do
+        service.execute
+
+        expect(ProtectedBranches::CreateService).to have_received(:new)
       end
     end
 

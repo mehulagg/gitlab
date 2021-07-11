@@ -37,7 +37,7 @@ RSpec.describe SubscriptionsHelper do
     let_it_be(:group) { create(:group, name: 'My Namespace') }
 
     before do
-      allow(helper).to receive(:params).and_return(plan_id: 'bronze_id', namespace_id: group.id.to_s)
+      allow(helper).to receive(:params).and_return(plan_id: 'bronze_id', namespace_id: group.id.to_s, source: 'some_source')
       allow(helper).to receive(:current_user).and_return(user)
       group.add_owner(user)
       group.add_guest(user2)
@@ -50,6 +50,7 @@ RSpec.describe SubscriptionsHelper do
     it { is_expected.to include(available_plans: '[{"id":"bronze_id","code":"bronze","price_per_year":48.0,"name":"Bronze Plan"}]') }
     it { is_expected.to include(plan_id: 'bronze_id') }
     it { is_expected.to include(namespace_id: group.id.to_s) }
+    it { is_expected.to include(source: 'some_source') }
     it { is_expected.to include(group_data: %Q{[{"id":#{group.id},"name":"My Namespace","users":2,"guests":1}]}) }
 
     describe 'new_user' do

@@ -1,5 +1,5 @@
 import { shallowMount } from '@vue/test-utils';
-import App from 'ee/on_demand_scans/components/profile_selector/site_profile_summary';
+import App from 'ee/on_demand_scans/components/profile_selector/site_profile_summary.vue';
 import { siteProfiles } from 'ee_jest/on_demand_scans/mocks/mock_data';
 
 describe('DastSiteProfileSummary', () => {

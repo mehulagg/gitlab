@@ -23,7 +23,8 @@ describe('AddEditsEscalationPolicyModal', () => {
   const mockEscalationPolicy = cloneDeep(mockPolicies[0]);
   const updatedName = 'Policy name';
   const updatedDescription = 'Policy description';
-  const updatedRules = [{ status: 'RESOLVED', elapsedTimeSeconds: 10, oncallScheduleIid: 1 }];
+  const updatedRules = [{ status: 'RESOLVED', elapsedTimeMinutes: 1, oncallScheduleIid: 1 }];
+  const serializedRules = [{ status: 'RESOLVED', elapsedTimeSeconds: 60, oncallScheduleIid: 1 }];
 
   const createComponent = ({ escalationPolicy, isEditMode = false, modalId, data } = {}) => {
     wrapper = shallowMount(AddEscalationPolicyModal, {
@@ -99,7 +100,7 @@ describe('AddEditsEscalationPolicyModal', () => {
               projectPath,
               name: updatedName,
               description: updatedDescription,
-              rules: updatedRules,
+              rules: serializedRules,
             },
           },
           update: expect.any(Function),
@@ -109,6 +110,7 @@ describe('AddEditsEscalationPolicyModal', () => {
 
     it('clears the form on modal cancel', async () => {
       updateForm();
+      await wrapper.vm.$nextTick();
       expect(findEscalationPolicyForm().props('form')).toMatchObject({
         name: updatedName,
         description: updatedDescription,
@@ -168,7 +170,7 @@ describe('AddEditsEscalationPolicyModal', () => {
             input: {
               name: updatedName,
               description: updatedDescription,
-              rules: updatedRules,
+              rules: serializedRules,
               id: mockEscalationPolicy.id,
             },
           },
@@ -179,6 +181,7 @@ describe('AddEditsEscalationPolicyModal', () => {
 
     it('clears the form on modal cancel', async () => {
       updateForm();
+      await wrapper.vm.$nextTick();
       const getForm = () => findEscalationPolicyForm().props('form');
       expect(getForm()).toMatchObject({
         name: updatedName,
@@ -264,7 +267,7 @@ describe('AddEditsEscalationPolicyModal', () => {
       });
       form.vm.$emit('update-escalation-policy-form', {
         field: 'rules',
-        value: [{ status: 'RESOLVED', elapsedTimeSeconds: 10, oncallScheduleIid: 1 }],
+        value: [{ status: 'RESOLVED', elapsedTimeMinutes: 1, oncallScheduleIid: 1 }],
       });
       await wrapper.vm.$nextTick();
       expect(findModal().props('actionPrimary').attributes).toContainEqual({ disabled: false });

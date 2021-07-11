@@ -34,19 +34,17 @@ exports[`ComplianceDashboard component when there are merge requests and the sho
       title=""
       titlelinkclass="gl-tab-nav-item"
     >
-      <template>
-         
-        <merge-requests-grid-stub
-          mergerequests="[object Object],[object Object]"
-        />
-      </template>
-      <template>
-        <span>
-          Merge Requests
-        </span>
-      </template>
+       
+      <merge-requests-grid-stub
+        mergerequests="[object Object],[object Object]"
+      />
+      <span>
+        Merge Requests
+      </span>
     </b-tab-stub>
   </gl-tabs-stub>
+   
+  <!---->
 </div>
 `;
 
@@ -77,6 +75,8 @@ exports[`ComplianceDashboard component when there are merge requests matches the
   <merge-requests-grid-stub
     mergerequests="[object Object],[object Object]"
   />
+   
+  <!---->
 </div>
 `;
 

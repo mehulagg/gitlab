@@ -5,23 +5,20 @@
 module GitlabSubscriptions
   class ActivateService
     ERROR_MESSAGES = {
-      not_self_managed: 'Not self-managed instance',
-      disabled: 'Cloud licensing is disabled'
+      not_self_managed: 'Not self-managed instance'
     }.freeze
 
     def execute(activation_code)
       return error(ERROR_MESSAGES[:not_self_managed]) if Gitlab.com?
-      return error(ERROR_MESSAGES[:disabled]) unless application_settings.cloud_license_enabled?
 
       response = client.activate(activation_code)
 
       return response unless response[:success]
 
-      license = License.new(data: response[:license_key], cloud: true)
+      license = find_or_initialize_cloud_license(response[:license_key])
+      license.last_synced_at = Time.current
 
       if license.save
-        License.cloud.id_not_in(license.id).delete_all
-
         { success: true, license: license }
       else
         error(license.errors.full_messages)
@@ -40,8 +37,10 @@ module GitlabSubscriptions
       { success: false, errors: Array(message) }
     end
 
-    def application_settings
-      Gitlab::CurrentSettings.current_application_settings
+    def find_or_initialize_cloud_license(license_key)
+      return License.current.reset if License.current_cloud_license?(license_key)
+
+      License.new(data: license_key, cloud: true)
     end
   end
 end

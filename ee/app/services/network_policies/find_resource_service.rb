@@ -14,7 +14,10 @@ module NetworkPolicies
     def execute
       return no_platform_response unless @platform
 
-      ServiceResponse.success(payload: get_policy)
+      policy = get_policy
+      return unsupported_policy_kind if policy.blank?
+
+      ServiceResponse.success(payload: policy)
     rescue Kubeclient::HttpError => e
       kubernetes_error_response(e.message)
     end
@@ -26,7 +29,7 @@ module NetworkPolicies
       if @kind == Gitlab::Kubernetes::CiliumNetworkPolicy::KIND
         resource = client.get_cilium_network_policy(@resource_name, @kubernetes_namespace)
         Gitlab::Kubernetes::CiliumNetworkPolicy.from_resource(resource)
-      else
+      elsif @kind == Gitlab::Kubernetes::NetworkPolicy::KIND
         resource = client.get_network_policy(@resource_name, @kubernetes_namespace)
         Gitlab::Kubernetes::NetworkPolicy.from_resource(resource)
       end

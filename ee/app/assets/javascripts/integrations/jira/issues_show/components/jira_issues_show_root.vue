@@ -7,9 +7,11 @@ import {
   GlBadge,
   GlTooltipDirective as GlTooltip,
 } from '@gitlab/ui';
-import { fetchIssue } from 'ee/integrations/jira/issues_show/api';
+import { fetchIssue, fetchIssueStatuses, updateIssue } from 'ee/integrations/jira/issues_show/api';
+
 import JiraIssueSidebar from 'ee/integrations/jira/issues_show/components/sidebar/jira_issues_sidebar_root.vue';
 import { issueStates, issueStateLabels } from 'ee/integrations/jira/issues_show/constants';
+import createFlash from '~/flash';
 import IssuableShow from '~/issuable_show/components/issuable_show_root.vue';
 import { convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
 import { s__ } from '~/locale';
@@ -38,8 +40,12 @@ export default {
   data() {
     return {
       isLoading: true,
+      isLoadingStatus: false,
+      isUpdatingLabels: false,
+      isUpdatingStatus: false,
       errorMessage: null,
       issue: {},
+      statuses: [],
     };
   },
   computed: {
@@ -77,6 +83,58 @@ export default {
 
     jiraIssueCommentId(id) {
       return `jira_note_${id}`;
+    },
+
+    onIssueLabelsUpdated(labels) {
+      this.isUpdatingLabels = true;
+      updateIssue(this.issue, { labels })
+        .then((response) => {
+          this.issue.labels = response.labels;
+        })
+        .catch(() => {
+          createFlash({
+            message: s__(
+              'JiraService|Failed to update Jira issue labels. View the issue in Jira, or reload the page.',
+            ),
+          });
+        })
+        .finally(() => {
+          this.isUpdatingLabels = false;
+        });
+    },
+    onIssueStatusFetch() {
+      this.isLoadingStatus = true;
+      fetchIssueStatuses()
+        .then((response) => {
+          this.statuses = response;
+        })
+        .catch(() => {
+          createFlash({
+            message: s__(
+              'JiraService|Failed to load Jira issue statuses. View the issue in Jira, or reload the page.',
+            ),
+          });
+        })
+        .finally(() => {
+          this.isLoadingStatus = false;
+        });
+    },
+    onIssueStatusUpdated(status) {
+      this.isUpdatingStatus = true;
+      updateIssue(this.issue, { status })
+        .then((response) => {
+          this.issue.status = response.status;
+        })
+        .catch(() => {
+          createFlash({
+            message: s__(
+              'JiraService|Failed to update Jira issue status. View the issue in Jira, or reload the page.',
+            ),
+          });
+        })
+        .finally(() => {
+          this.isUpdatingStatus = false;
+        });
     },
   },
 };
@@ -116,8 +174,19 @@ export default {
       >
         <template #status-badge>{{ statusBadgeText }}</template>
 
-        <template #right-sidebar-items="{ sidebarExpanded }">
-          <jira-issue-sidebar :sidebar-expanded="sidebarExpanded" :issue="issue" />
+        <template #right-sidebar-items="{ sidebarExpanded, toggleSidebar }">
+          <jira-issue-sidebar
+            :sidebar-expanded="sidebarExpanded"
+            :issue="issue"
+            :is-loading-status="isLoadingStatus"
+            :is-updating-labels="isUpdatingLabels"
+            :is-updating-status="isUpdatingStatus"
+            :statuses="statuses"
+            @issue-labels-updated="onIssueLabelsUpdated"
+            @issue-status-fetch="onIssueStatusFetch"
+            @issue-status-updated="onIssueStatusUpdated"
+            @sidebar-toggle="toggleSidebar"
+          />
         </template>
 
         <template #discussion>

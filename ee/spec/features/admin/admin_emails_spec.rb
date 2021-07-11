@@ -14,7 +14,7 @@ RSpec.describe 'Admin::Emails', :clean_gitlab_redis_shared_state do
   context 'when `send_emails_from_admin_area` feature is not licensed' do
     before do
       stub_licensed_features(send_emails_from_admin_area: false)
-      allow(Gitlab::CurrentSettings).to receive(:usage_ping_enabled?).and_return(false)
+      stub_application_setting(usage_ping_enabled: false)
     end
 
     it 'returns 404' do
@@ -27,13 +27,31 @@ RSpec.describe 'Admin::Emails', :clean_gitlab_redis_shared_state do
   context 'when usage ping is enabled' do
     before do
       stub_licensed_features(send_emails_from_admin_area: false)
-      allow(Gitlab::CurrentSettings).to receive(:usage_ping_enabled?).and_return(true)
+      stub_application_setting(usage_ping_enabled: true)
     end
 
-    it 'returns 200' do
-      visit admin_email_path
+    context 'when feature is activated' do
+      before do
+        stub_application_setting(usage_ping_features_enabled: true)
+      end
 
-      expect(page.status_code).to eq(200)
+      it 'returns 200' do
+        visit admin_email_path
+
+        expect(page.status_code).to eq(200)
+      end
+    end
+
+    context 'when feature is deactivated' do
+      before do
+        stub_application_setting(usage_ping_features_enabled: false)
+      end
+
+      it 'returns 404' do
+        visit admin_email_path
+
+        expect(page.status_code).to eq(404)
+      end
     end
   end
 

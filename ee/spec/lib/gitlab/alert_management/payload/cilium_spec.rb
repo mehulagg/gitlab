@@ -4,6 +4,7 @@ require 'spec_helper'
 
 RSpec.describe Gitlab::AlertManagement::Payload::Cilium do
   let_it_be(:project) { build_stubbed(:project) }
+
   let(:raw_payload) { build(:network_alert_payload) }
 
   let(:parsed_payload) do

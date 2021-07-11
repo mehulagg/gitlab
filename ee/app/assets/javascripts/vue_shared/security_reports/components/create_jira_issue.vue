@@ -1,6 +1,7 @@
 <script>
 import { GlButton } from '@gitlab/ui';
 import vulnerabilityExternalIssueLinkCreate from 'ee/vue_shared/security_reports/graphql/vulnerabilityExternalIssueLinkCreate.mutation.graphql';
+import { TYPE_VULNERABILITY } from '~/graphql_shared/constants';
 import { convertToGraphQLId } from '~/graphql_shared/utils';
 import { s__ } from '~/locale';
 
@@ -33,18 +34,17 @@ export default {
     async createJiraIssue() {
       this.isLoading = true;
       try {
-        /* eslint-disable @gitlab/require-i18n-strings */
         const { data } = await this.$apollo.mutate({
           mutation: vulnerabilityExternalIssueLinkCreate,
           variables: {
             input: {
               externalTracker: 'JIRA',
               linkType: 'CREATED',
-              id: convertToGraphQLId('Vulnerability', this.vulnerabilityId),
+              id: convertToGraphQLId(TYPE_VULNERABILITY, this.vulnerabilityId),
             },
           },
         });
-        /* eslint-enable @gitlab/require-i18n-strings */
+
         const { errors } = data.vulnerabilityExternalIssueLinkCreate;
 
         if (errors.length > 0) {

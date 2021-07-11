@@ -10,6 +10,7 @@ import {
   GlLoadingIcon,
 } from '@gitlab/ui';
 import BurnCharts from 'ee/burndown_chart/components/burn_charts.vue';
+import { TYPE_ITERATION } from '~/graphql_shared/constants';
 import { convertToGraphQLId } from '~/graphql_shared/utils';
 import { formatDate } from '~/lib/utils/datetime_utility';
 import { __ } from '~/locale';
@@ -39,15 +40,13 @@ export default {
   apollo: {
     iteration: {
       query,
-      /* eslint-disable @gitlab/require-i18n-strings */
       variables() {
         return {
           fullPath: this.fullPath,
-          id: convertToGraphQLId('Iteration', this.iterationId),
+          id: convertToGraphQLId(TYPE_ITERATION, this.iterationId),
           isGroup: this.namespaceType === Namespace.Group,
         };
       },
-      /* eslint-enable @gitlab/require-i18n-strings */
       update(data) {
         return data[this.namespaceType]?.iterations?.nodes[0] || {};
       },
@@ -147,7 +146,7 @@ export default {
           <template #button-content>
             <gl-icon name="ellipsis_v" /><span class="gl-sr-only">{{ __('Actions') }}</span>
           </template>
-          <gl-dropdown-item :to="editPage">{{ __('Edit iteration') }}</gl-dropdown-item>
+          <gl-dropdown-item :to="editPage">{{ __('Edit') }}</gl-dropdown-item>
         </gl-dropdown>
       </div>
       <h3 ref="title" class="page-title">{{ iteration.title }}</h3>

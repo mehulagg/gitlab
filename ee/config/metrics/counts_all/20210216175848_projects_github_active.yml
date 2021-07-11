@@ -1,5 +1,5 @@
 ---
-data_category: Optional
+data_category: Operational
 key_path: counts.projects_github_active
 description: Count of projects with active integrations for GitHub
 product_section: dev

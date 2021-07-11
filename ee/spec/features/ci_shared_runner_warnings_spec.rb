@@ -6,6 +6,7 @@ RSpec.describe 'CI shared runner limits' do
   using RSpec::Parameterized::TableSyntax
 
   let_it_be(:user) { create(:user) }
+
   let(:project) { create(:project, :repository, namespace: group, shared_runners_enabled: true) }
   let(:group) { create(:group) }
   let(:pipeline) { create(:ci_empty_pipeline, project: project, sha: project.commit.sha, ref: 'master') }
@@ -28,8 +29,8 @@ RSpec.describe 'CI shared runner limits' do
     with_them do
       context "when there is a notification and minutes still exist", :js do
         let(:message) do
-          "Group #{group.name} has #{percent_threshold}% or less Shared Runner Pipeline minutes remaining. " \
-            "Once it runs out, no new jobs or pipelines in its projects will run."
+          "#{group.name} namespace has #{percent_threshold}% or less Shared Runner Pipeline minutes remaining. " \
+            "After it runs out, no new jobs or pipelines in its projects will run."
         end
 
         before do
@@ -60,8 +61,8 @@ RSpec.describe 'CI shared runner limits' do
     context 'when limit is exceeded', :js do
       let(:group) { create(:group, :with_used_build_minutes_limit) }
       let(:message) do
-        "Group #{group.name} has exceeded its pipeline minutes quota. " \
-          "Unless you buy additional pipeline minutes, no new jobs or pipelines in its projects will run."
+        "#{group.name} namespace has exceeded its pipeline minutes quota. " \
+          "Buy additional pipeline minutes, or no new jobs or pipelines in its projects will run."
       end
 
       it 'displays a warning message on project homepage' do
@@ -119,8 +120,8 @@ RSpec.describe 'CI shared runner limits' do
     with_them do
       context "when there is a notification and minutes still exist", :js do
         let(:message) do
-          "Group #{group.name} has #{percent_threshold}% or less Shared Runner Pipeline minutes remaining. " \
-            "Once it runs out, no new jobs or pipelines in its projects will run."
+          "#{group.name} namespace has #{percent_threshold}% or less Shared Runner Pipeline minutes remaining. " \
+            "After it runs out, no new jobs or pipelines in its projects will run."
         end
 
         before do
@@ -139,8 +140,8 @@ RSpec.describe 'CI shared runner limits' do
     context 'when limit is exceeded', :js do
       let(:group) { create(:group, :with_used_build_minutes_limit) }
       let(:message) do
-        "Group #{group.name} has exceeded its pipeline minutes quota. " \
-          "Unless you buy additional pipeline minutes, no new jobs or pipelines in its projects will run."
+        "#{group.name} namespace has exceeded its pipeline minutes quota. " \
+          "Buy additional pipeline minutes, or no new jobs or pipelines in its projects will run."
       end
 
       it 'displays a warning message on group information page' do

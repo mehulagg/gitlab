@@ -56,7 +56,7 @@ RSpec.describe StoreSecurityReportsWorker do
     end
 
     context 'when at least one security report feature is enabled' do
-      where(report_type: [:sast, :dast, :dependency_scanning, :container_scanning])
+      where(report_type: [:sast, :dast, :dependency_scanning, :container_scanning, :cluster_image_scanning])
 
       with_them do
         before do

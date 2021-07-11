@@ -387,6 +387,19 @@ RSpec.describe User do
           expect(user.errors.full_messages).to eq(['Username has already been taken'])
         end
       end
+
+      it 'validates format' do
+        Mime::EXTENSION_LOOKUP.keys.each do |type|
+          user = build(:user, username: "test.#{type}")
+
+          expect(user).not_to be_valid
+          expect(user.errors.full_messages).to include('Username ending with MIME type format is not allowed.')
+        end
+      end
+
+      it 'validates format on updated record' do
+        expect(create(:user).update(username: 'profile.html')).to be_falsey
+      end
     end
 
     it 'has a DB-level NOT NULL constraint on projects_limit' do
@@ -991,6 +1004,7 @@ RSpec.describe User do
       let_it_be(:valid_token_and_notified) { create(:personal_access_token, user: user2, expires_at: 2.days.from_now, expire_notification_delivered: true) }
       let_it_be(:valid_token1) { create(:personal_access_token, user: user2, expires_at: 2.days.from_now) }
       let_it_be(:valid_token2) { create(:personal_access_token, user: user2, expires_at: 2.days.from_now) }
+
       let(:users) { described_class.with_expiring_and_not_notified_personal_access_tokens(from) }
 
       context 'in one day' do
@@ -1883,6 +1897,14 @@ RSpec.describe User do
         user.deactivate
 
         expect(user.deactivated?).to be_truthy
+      end
+
+      it 'sends deactivated user an email' do
+        expect_next_instance_of(NotificationService) do |notification|
+          allow(notification).to receive(:user_deactivated).with(user.name, user.notification_email)
+        end
+
+        user.deactivate
       end
     end
 
@@ -2812,6 +2834,14 @@ RSpec.describe User do
       end
     end
 
+    describe '#matches_identity?' do
+      it 'finds the identity when the DN is formatted differently' do
+        user = create(:omniauth_user, provider: 'ldapmain', extern_uid: 'uid=john smith,ou=people,dc=example,dc=com')
+
+        expect(user.matches_identity?('ldapmain', 'uid=John Smith, ou=People, dc=example, dc=com')).to eq(true)
+      end
+    end
+
     describe '#ldap_block' do
       let(:user) { create(:omniauth_user, provider: 'ldapmain', name: 'John Smith') }
 
@@ -2882,7 +2912,7 @@ RSpec.describe User do
   end
 
   describe '#sanitize_attrs' do
-    let(:user) { build(:user, name: 'test & user', skype: 'test&user') }
+    let(:user) { build(:user, name: 'test <& user', skype: 'test&user') }
 
     it 'encodes HTML entities in the Skype attribute' do
       expect { user.sanitize_attrs }.to change { user.skype }.to('test&amp;user')
@@ -2890,6 +2920,25 @@ RSpec.describe User do
 
     it 'does not encode HTML entities in the name attribute' do
       expect { user.sanitize_attrs }.not_to change { user.name }
+    end
+
+    it 'sanitizes attr from html tags' do
+      user = create(:user, name: '<a href="//example.com">Test<a>', twitter: '<a href="//evil.com">https://twitter.com<a>')
+
+      expect(user.name).to eq('Test')
+      expect(user.twitter).to eq('https://twitter.com')
+    end
+
+    it 'sanitizes attr from js scripts' do
+      user = create(:user, name: '<script>alert("Test")</script>')
+
+      expect(user.name).to eq("alert(\"Test\")")
+    end
+
+    it 'sanitizes attr from iframe scripts' do
+      user = create(:user, name: 'User"><iframe src=javascript:alert()><iframe>')
+
+      expect(user.name).to eq('User">')
     end
   end
 
@@ -4208,6 +4257,7 @@ RSpec.describe User do
 
   describe '#source_groups_of_two_factor_authentication_requirement' do
     let_it_be(:group_not_requiring_2FA) { create :group }
+
     let(:user) { create :user }
 
     before do
@@ -5225,11 +5275,43 @@ RSpec.describe User do
   end
 
   describe '#password_expired_if_applicable?' do
-    let(:user) { build(:user, password_expires_at: password_expires_at) }
+    let(:user) { build(:user, password_expires_at: password_expires_at, password_automatically_set: set_automatically?) }
 
     subject { user.password_expired_if_applicable? }
 
     context 'when user is not ldap user' do
+      context 'when user has password set automatically' do
+        let(:set_automatically?) { true }
+
+        context 'when password_expires_at is not set' do
+          let(:password_expires_at) {}
+
+          it 'returns false' do
+            is_expected.to be_falsey
+          end
+        end
+
+        context 'when password_expires_at is in the past' do
+          let(:password_expires_at) { 1.minute.ago }
+
+          it 'returns true' do
+            is_expected.to be_truthy
+          end
+        end
+
+        context 'when password_expires_at is in the future' do
+          let(:password_expires_at) { 1.minute.from_now }
+
+          it 'returns false' do
+            is_expected.to be_falsey
+          end
+        end
+      end
+    end
+
+    context 'when user has password not set automatically' do
+      let(:set_automatically?) { false }
+
       context 'when password_expires_at is not set' do
         let(:password_expires_at) {}
 
@@ -5241,8 +5323,8 @@ RSpec.describe User do
       context 'when password_expires_at is in the past' do
         let(:password_expires_at) { 1.minute.ago }
 
-        it 'returns true' do
-          is_expected.to be_truthy
+        it 'returns false' do
+          is_expected.to be_falsey
         end
       end
 
@@ -5261,6 +5343,34 @@ RSpec.describe User do
       before do
         allow(user).to receive(:ldap_user?).and_return(true)
       end
+
+      context 'when password_expires_at is not set' do
+        let(:password_expires_at) {}
+
+        it 'returns false' do
+          is_expected.to be_falsey
+        end
+      end
+
+      context 'when password_expires_at is in the past' do
+        let(:password_expires_at) { 1.minute.ago }
+
+        it 'returns false' do
+          is_expected.to be_falsey
+        end
+      end
+
+      context 'when password_expires_at is in the future' do
+        let(:password_expires_at) { 1.minute.from_now }
+
+        it 'returns false' do
+          is_expected.to be_falsey
+        end
+      end
+    end
+
+    context 'when user is a project bot' do
+      let(:user) { build(:user, :project_bot, password_expires_at: password_expires_at) }
 
       context 'when password_expires_at is not set' do
         let(:password_expires_at) {}
@@ -5754,6 +5864,20 @@ RSpec.describe User do
     end
   end
 
+  describe '#default_dashboard?' do
+    it 'is the default dashboard' do
+      user = build(:user)
+
+      expect(user.default_dashboard?).to be true
+    end
+
+    it 'is not the default dashboard' do
+      user = build(:user, dashboard: 'stars')
+
+      expect(user.default_dashboard?).to be false
+    end
+  end
+
   describe '.dormant' do
     it 'returns dormant users' do
       freeze_time do
@@ -5794,6 +5918,19 @@ RSpec.describe User do
 
         expect(described_class.with_no_activity).to contain_exactly(user_with_no_activity)
       end
+    end
+  end
+
+  describe '.by_provider_and_extern_uid' do
+    it 'calls Identity model scope to ensure case-insensitive query', :aggregate_failures do
+      expected_user = create(:user)
+      create(:identity, extern_uid: 'some-other-name-id', provider: :github)
+      create(:identity, extern_uid: 'my_github_id', provider: :gitlab)
+      create(:identity)
+      create(:identity, user: expected_user, extern_uid: 'my_github_id', provider: :github)
+
+      expect(Identity).to receive(:with_extern_uid).and_call_original
+      expect(described_class.by_provider_and_extern_uid(:github, 'my_github_id')).to match_array([expected_user])
     end
   end
 end

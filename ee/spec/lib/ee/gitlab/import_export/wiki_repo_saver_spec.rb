@@ -4,11 +4,7 @@ require 'spec_helper'
 
 RSpec.describe Gitlab::ImportExport::WikiRepoSaver do
   let_it_be(:user) { create(:user) }
-  let_it_be(:group) do
-    create(:group, :wiki_repo).tap do |g|
-      g.add_owner(user)
-    end
-  end
+  let_it_be(:group) { create(:group) }
 
   let(:exportable) { group }
   let(:shared) { Gitlab::ImportExport::Shared.new(group) }
@@ -16,15 +12,19 @@ RSpec.describe Gitlab::ImportExport::WikiRepoSaver do
   subject { described_class.new(exportable: exportable, shared: shared) }
 
   describe 'bundles a group wiki Git repo' do
-    let!(:group_wiki) { GroupWiki.new(group, user) }
+    let_it_be(:group_wiki) do
+      create(:group_wiki, user: user).tap do |wiki|
+        wiki.create_page('index', 'test content')
+      end
+    end
+
+    let(:group) { group_wiki.group }
     let(:export_path) { "#{Dir.tmpdir}/group_tree_saver_spec" }
 
     before do
       allow_next_instance_of(Gitlab::ImportExport) do |instance|
         allow(instance).to receive(:storage_path).and_return(export_path)
       end
-
-      group_wiki.create_page('index', 'test content')
     end
 
     after do
@@ -37,8 +37,6 @@ RSpec.describe Gitlab::ImportExport::WikiRepoSaver do
     end
 
     context 'when the repo is empty' do
-      let!(:group) { create(:group) }
-
       it 'bundles the repo successfully' do
         expect(subject.save).to be true
       end

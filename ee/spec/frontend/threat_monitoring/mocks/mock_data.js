@@ -15,9 +15,10 @@ export const mockEnvironmentsResponse = {
   stopped_count: 5,
 };
 
-export const mockPoliciesResponse = [
+export const mockNetworkPoliciesResponse = [
   {
     name: 'policy',
+    kind: 'NetworkPolicy',
     yaml: `---
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
@@ -68,7 +69,10 @@ actions:
   scanner_profile: Scanner Profile
   site_profile: Site Profile
 `,
+  enabled: true,
 };
+
+export const mockScanExecutionPoliciesResponse = [mockScanExecutionPolicy];
 
 export const mockNominalHistory = [
   ['2019-12-04T00:00:00.000Z', 56],

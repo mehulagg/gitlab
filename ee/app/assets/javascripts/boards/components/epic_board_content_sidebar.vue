@@ -10,10 +10,12 @@ import SidebarConfidentialityWidget from '~/sidebar/components/confidential/side
 import SidebarDateWidget from '~/sidebar/components/date/sidebar_date_widget.vue';
 import SidebarParticipantsWidget from '~/sidebar/components/participants/sidebar_participants_widget.vue';
 import SidebarSubscriptionsWidget from '~/sidebar/components/subscriptions/sidebar_subscriptions_widget.vue';
+import SidebarTodoWidget from '~/sidebar/components/todo_toggle/sidebar_todo_widget.vue';
 
 export default {
   components: {
     GlDrawer,
+    SidebarTodoWidget,
     BoardSidebarLabelsSelect,
     BoardSidebarTitle,
     SidebarConfidentialityWidget,
@@ -52,7 +54,18 @@ export default {
       :open="isSidebarOpen"
       @close="handleClose"
     >
-      <template #header>{{ __('Epic details') }}</template>
+      <template #title>
+        <h2 class="gl-my-0 gl-font-size-h2 gl-line-height-24">{{ __('Epic details') }}</h2>
+      </template>
+      <template #header>
+        <sidebar-todo-widget
+          class="gl-mt-3"
+          :issuable-id="activeBoardItem.fullId"
+          :issuable-iid="activeBoardItem.iid"
+          :full-path="fullPath"
+          :issuable-type="issuableType"
+        />
+      </template>
       <template #default>
         <board-sidebar-title data-testid="sidebar-title" />
         <sidebar-date-widget

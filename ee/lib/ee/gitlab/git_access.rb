@@ -157,7 +157,7 @@ module EE
 
       def check_if_license_blocks_changes!
         if ::License.block_changes?
-          message = license_message(signed_in: true, is_admin: (user && user.admin?))
+          message = license_message(signed_in: true, is_admin: (user && user.admin?), force_notification: true)
           raise ::Gitlab::GitAccess::ForbiddenError, strip_tags(message)
         end
       end

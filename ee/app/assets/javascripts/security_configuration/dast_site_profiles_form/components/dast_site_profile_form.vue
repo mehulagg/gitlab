@@ -414,7 +414,7 @@ export default {
     <gl-button
       :disabled="isPolicyProfile"
       type="submit"
-      variant="success"
+      variant="confirm"
       class="js-no-auto-disable"
       data-testid="dast-site-profile-form-submit-button"
       :loading="isLoading"

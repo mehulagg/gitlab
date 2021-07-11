@@ -13,7 +13,7 @@ export const ACTIONS = {
 
 export const DEFAULT_ESCALATION_RULE = {
   status: 'ACKNOWLEDGED',
-  elapsedTimeSeconds: 0,
+  elapsedTimeMinutes: 0,
   action: 'EMAIL_ONCALL_SCHEDULE_USER',
   oncallScheduleIid: null,
 };

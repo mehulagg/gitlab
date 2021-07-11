@@ -1,11 +1,8 @@
 import Vue from 'vue';
-import Vuex from 'vuex';
 import { parseBoolean } from '~/lib/utils/common_utils';
 import ProjectSettingsApp from './components/project_settings/app.vue';
 import createStore from './stores';
 import projectSettingsModule from './stores/modules/project_settings';
-
-Vue.use(Vuex);
 
 export default function mountProjectSettingsApprovals(el) {
   if (!el) {

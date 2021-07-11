@@ -795,6 +795,37 @@ RSpec.describe ProjectPolicy do
     end
   end
 
+  context 'deploy key access' do
+    context 'private project' do
+      let(:project) { private_project }
+      let!(:deploy_key) { create(:deploy_key, user: owner) }
+
+      subject { described_class.new(deploy_key, project) }
+
+      context 'when a read deploy key is enabled in the project' do
+        let!(:deploy_keys_project) { create(:deploy_keys_project, project: project, deploy_key: deploy_key) }
+
+        it { is_expected.to be_allowed(:download_code) }
+        it { is_expected.to be_disallowed(:push_code) }
+        it { is_expected.to be_disallowed(:read_project) }
+      end
+
+      context 'when a write deploy key is enabled in the project' do
+        let!(:deploy_keys_project) { create(:deploy_keys_project, :write_access, project: project, deploy_key: deploy_key) }
+
+        it { is_expected.to be_allowed(:download_code) }
+        it { is_expected.to be_allowed(:push_code) }
+        it { is_expected.to be_disallowed(:read_project) }
+      end
+
+      context 'when the deploy key is not enabled in the project' do
+        it { is_expected.to be_disallowed(:download_code) }
+        it { is_expected.to be_disallowed(:push_code) }
+        it { is_expected.to be_disallowed(:read_project) }
+      end
+    end
+  end
+
   context 'deploy token access' do
     let!(:project_deploy_token) do
       create(:project_deploy_token, project: project, deploy_token: deploy_token)
@@ -1524,73 +1555,6 @@ RSpec.describe ProjectPolicy do
           guest_operations_permissions
         else
           raise "Unknown role #{role}"
-        end
-      end
-    end
-
-    context 'with read_container_registry_access_level disabled' do
-      before do
-        stub_feature_flags(read_container_registry_access_level: false)
-      end
-
-      where(:project_visibility, :container_registry_enabled, :role, :allowed) do
-        :public   | true   | :maintainer | true
-        :public   | true   | :developer  | true
-        :public   | true   | :reporter   | true
-        :public   | true   | :guest      | true
-        :public   | true   | :anonymous  | true
-        :public   | false  | :maintainer | false
-        :public   | false  | :developer  | false
-        :public   | false  | :reporter   | false
-        :public   | false  | :guest      | false
-        :public   | false  | :anonymous  | false
-        :internal | true   | :maintainer | true
-        :internal | true   | :developer  | true
-        :internal | true   | :reporter   | true
-        :internal | true   | :guest      | true
-        :internal | true   | :anonymous  | false
-        :internal | false  | :maintainer | false
-        :internal | false  | :developer  | false
-        :internal | false  | :reporter   | false
-        :internal | false  | :guest      | false
-        :internal | false  | :anonymous  | false
-        :private  | true   | :maintainer | true
-        :private  | true   | :developer  | true
-        :private  | true   | :reporter   | true
-        :private  | true   | :guest      | false
-        :private  | true   | :anonymous  | false
-        :private  | false  | :maintainer | false
-        :private  | false  | :developer  | false
-        :private  | false  | :reporter   | false
-        :private  | false  | :guest      | false
-        :private  | false  | :anonymous  | false
-      end
-
-      with_them do
-        let(:current_user) { send(role) }
-        let(:project) { send("#{project_visibility}_project") }
-
-        it 'allows/disallows the abilities based on container_registry_enabled' do
-          project.update_column(:container_registry_enabled, container_registry_enabled)
-
-          if allowed
-            expect_allowed(*permissions_abilities(role))
-          else
-            expect_disallowed(*permissions_abilities(role))
-          end
-        end
-
-        def permissions_abilities(role)
-          case role
-          when :maintainer
-            maintainer_operations_permissions
-          when :developer
-            developer_operations_permissions
-          when :reporter, :guest, :anonymous
-            guest_operations_permissions
-          else
-            raise "Unknown role #{role}"
-          end
         end
       end
     end

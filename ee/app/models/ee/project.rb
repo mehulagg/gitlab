@@ -144,7 +144,6 @@ module EE
       scope :for_plan_name, -> (name) { joins(namespace: { gitlab_subscription: :hosted_plan }).where(plans: { name: name }) }
       scope :requiring_code_owner_approval,
             -> { joins(:protected_branches).where(protected_branches: { code_owner_approval_required: true }) }
-      scope :with_active_services, -> { joins(:integrations).merge(::Integration.active) }
       scope :github_imported, -> { where(import_type: 'github') }
       scope :with_protected_branches, -> { joins(:protected_branches) }
       scope :with_repositories_enabled, -> { joins(:project_feature).where(project_features: { repository_access_level: ::ProjectFeature::ENABLED }) }
@@ -199,10 +198,10 @@ module EE
 
       delegate :ci_minutes_quota, to: :shared_runners_limit_namespace
 
-      delegate :merge_pipelines_enabled, :merge_pipelines_enabled=, :merge_pipelines_enabled?, :merge_pipelines_were_disabled?, to: :ci_cd_settings
-      delegate :merge_trains_enabled, :merge_trains_enabled=, :merge_trains_enabled?, to: :ci_cd_settings
+      delegate :merge_pipelines_enabled, :merge_pipelines_enabled=, to: :ci_cd_settings, allow_nil: true
+      delegate :merge_trains_enabled, :merge_trains_enabled=, to: :ci_cd_settings, allow_nil: true
 
-      delegate :auto_rollback_enabled, :auto_rollback_enabled=, :auto_rollback_enabled?, to: :ci_cd_settings
+      delegate :auto_rollback_enabled, :auto_rollback_enabled=, to: :ci_cd_settings, allow_nil: true
       delegate :closest_gitlab_subscription, to: :namespace
 
       delegate :requirements_access_level, to: :project_feature, allow_nil: true
@@ -293,8 +292,12 @@ module EE
       end
 
       def with_slack_application_disabled
-        joins('LEFT JOIN services ON services.project_id = projects.id AND services.type = \'GitlabSlackApplicationService\' AND services.active IS true')
-          .where(services: { id: nil })
+        joins(<<~SQL)
+          LEFT JOIN #{::Integration.table_name} ON #{::Integration.table_name}.project_id = projects.id
+            AND #{::Integration.table_name}.type = 'GitlabSlackApplicationService'
+            AND #{::Integration.table_name}.active IS true
+        SQL
+          .where(integrations: { id: nil })
       end
 
       override :with_web_entity_associations
@@ -798,6 +801,30 @@ module EE
       end
 
       available_features[feature]
+    end
+
+    def merge_pipelines_enabled?
+      return false unless ci_cd_settings
+
+      ci_cd_settings.merge_pipelines_enabled?
+    end
+
+    def merge_pipelines_were_disabled?
+      return false unless ci_cd_settings
+
+      ci_cd_settings.merge_pipelines_were_disabled?
+    end
+
+    def merge_trains_enabled?
+      return false unless ci_cd_settings
+
+      ci_cd_settings.merge_trains_enabled?
+    end
+
+    def auto_rollback_enabled?
+      return false unless ci_cd_settings
+
+      ci_cd_settings.auto_rollback_enabled?
     end
 
     private

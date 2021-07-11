@@ -54,16 +54,16 @@ RSpec.describe 'DevOps Report page', :js do
       visit admin_dev_ops_report_path
 
       within tabs_selector do
-        expect(page.all(:css, tab_item_selector).length).to be(5)
-        expect(page).to have_text 'Dev Sec Ops DevOps Score'
+        expect(page.all(:css, tab_item_selector).length).to be(6)
+        expect(page).to have_text 'Overview Dev Sec Ops DevOps Score'
       end
     end
 
-    it 'defaults to the Dev tab' do
+    it 'defaults to the Overview tab' do
       visit admin_dev_ops_report_path
 
       within tabs_selector do
-        expect(page).to have_selector active_tab_selector, text: 'Dev'
+        expect(page).to have_selector active_tab_selector, text: 'Overview'
       end
     end
 
@@ -83,10 +83,12 @@ RSpec.describe 'DevOps Report page', :js do
       it_behaves_like 'displays tab content', tab[:text]
     end
 
-    it 'does not add the tab param when the Dev tab is selected' do
+    it 'does not add the tab param when the Overview tab is selected' do
       visit admin_dev_ops_report_path
 
-      click_link 'Dev'
+      within tabs_selector do
+        click_link 'Overview'
+      end
 
       expect(page).to have_current_path(admin_dev_ops_report_path)
     end

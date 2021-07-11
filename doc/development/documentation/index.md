@@ -476,11 +476,11 @@ If you want to know the in-depth details, here's what's really happening:
 The following GitLab features are used among others:
 
 - [Manual actions](../../ci/yaml/index.md#whenmanual)
-- [Multi project pipelines](../../ci/multi_project_pipelines.md)
+- [Multi project pipelines](../../ci/pipelines/multi_project_pipelines.md)
 - [Review Apps](../../ci/review_apps/index.md)
 - [Artifacts](../../ci/yaml/index.md#artifacts)
 - [Specific runner](../../ci/runners/runners_scope.md#prevent-a-specific-runner-from-being-enabled-for-other-projects)
-- [Pipelines for merge requests](../../ci/merge_request_pipelines/index.md)
+- [Pipelines for merge requests](../../ci/pipelines/merge_request_pipelines.md)
 
 ## Testing
 

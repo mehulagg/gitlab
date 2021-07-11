@@ -88,4 +88,28 @@ RSpec.describe Elastic::MigrationRecord, :elastic do
       expect(described_class.load_versions(completed: false)).to eq([])
     end
   end
+
+  describe '#running?' do
+    using RSpec::Parameterized::TableSyntax
+
+    before do
+      allow(record).to receive(:halted?).and_return(halted)
+      allow(record).to receive(:started?).and_return(started)
+      allow(record).to receive(:completed?).and_return(completed)
+    end
+
+    where(:started, :halted, :completed, :expected) do
+      false | false | false | false
+      true  | false | false | true
+      true  | true  | false | false
+      true  | true  | true  | false
+      true  | false | true  | false
+    end
+
+    with_them do
+      it 'returns the expected result' do
+        expect(record.running?).to eq(expected)
+      end
+    end
+  end
 end

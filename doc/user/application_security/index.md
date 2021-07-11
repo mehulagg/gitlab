@@ -33,16 +33,17 @@ GitLab uses the following tools to scan and report known vulnerabilities found i
 
 | Secure scanning tool                                                         | Description                                                            |
 |:-----------------------------------------------------------------------------|:-----------------------------------------------------------------------|
-| [Container Scanning](container_scanning/index.md) **(ULTIMATE)**             | Scan Docker containers for known vulnerabilities.                      |
-| [Dependency List](dependency_list/index.md) **(ULTIMATE)**                   | View your project's dependencies and their known vulnerabilities.      |
-| [Dependency Scanning](dependency_scanning/index.md) **(ULTIMATE)**           | Analyze your dependencies for known vulnerabilities.                   |
-| [Dynamic Application Security Testing (DAST)](dast/index.md) **(ULTIMATE)**  | Analyze running web applications for known vulnerabilities.            |
-| [DAST API](dast_api/index.md) **(ULTIMATE)**  | Analyze running web APIs for known vulnerabilities.            |
-| [API fuzzing](api_fuzzing/index.md) **(ULTIMATE)**                           | Find unknown bugs and vulnerabilities in web APIs with fuzzing.        |
-| [Secret Detection](secret_detection/index.md)                                | Analyze Git history for leaked secrets.                                |
-| [Security Dashboard](security_dashboard/index.md) **(ULTIMATE)**             | View vulnerabilities in all your projects and groups.                  |
-| [Static Application Security Testing (SAST)](sast/index.md)                  | Analyze source code for known vulnerabilities.                         |
-| [Coverage fuzzing](coverage_fuzzing/index.md) **(ULTIMATE)**                 | Find unknown bugs and vulnerabilities with coverage-guided fuzzing.    |
+| [Container Scanning](container_scanning/index.md) **(ULTIMATE)**                 | Scan Docker containers for known vulnerabilities.                      |
+| [Dependency List](dependency_list/index.md) **(ULTIMATE)**                       | View your project's dependencies and their known vulnerabilities.      |
+| [Dependency Scanning](dependency_scanning/index.md) **(ULTIMATE)**               | Analyze your dependencies for known vulnerabilities.                   |
+| [Dynamic Application Security Testing (DAST)](dast/index.md) **(ULTIMATE)**      | Analyze running web applications for known vulnerabilities.            |
+| [DAST API](dast_api/index.md) **(ULTIMATE)**                                     | Analyze running web APIs for known vulnerabilities.            |
+| [API fuzzing](api_fuzzing/index.md) **(ULTIMATE)**                               | Find unknown bugs and vulnerabilities in web APIs with fuzzing.        |
+| [Secret Detection](secret_detection/index.md)                                    | Analyze Git history for leaked secrets.                                |
+| [Security Dashboard](security_dashboard/index.md) **(ULTIMATE)**                 | View vulnerabilities in all your projects and groups.                  |
+| [Static Application Security Testing (SAST)](sast/index.md)                      | Analyze source code for known vulnerabilities.                         |
+| [Coverage fuzzing](coverage_fuzzing/index.md) **(ULTIMATE)**                     | Find unknown bugs and vulnerabilities with coverage-guided fuzzing.    |
+| [Cluster Image Scanning](cluster_image_scanning/index.md) **(ULTIMATE)**         | Scan Kubernetes clusters for known vulnerabilities.                      |
 
 ## Security scanning with Auto DevOps
 
@@ -99,7 +100,7 @@ the container-scanning analyzer which uses
 ### Use security scanning tools with Pipelines for Merge Requests
 
 By default, the application security jobs are configured to run for branch pipelines only.
-To use them with [pipelines for merge requests](../../ci/merge_request_pipelines/index.md),
+To use them with [pipelines for merge requests](../../ci/pipelines/merge_request_pipelines.md),
 you may need to override the default `rules:` configuration to add:
 
 ```yaml

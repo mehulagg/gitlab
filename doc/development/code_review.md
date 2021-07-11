@@ -74,6 +74,7 @@ page, with these behaviors:
 1. It doesn't pick people whose Slack or [GitLab status](../user/profile/index.md#set-your-current-status):
     - contains the string 'OOO', 'PTO', 'Parental Leave', or 'Friends and Family'
     - emoji is `:palm_tree:`, `:beach:`, `:beach_umbrella:`, `:beach_with_umbrella:`, `:ferris_wheel:`, `:thermometer:`, `:face_with_thermometer:`, `:red_circle:`, `:bulb:`, `:sun_with_face:`.
+    - GitLab user busy indicator is set to true
 1. [Trainee maintainers](https://about.gitlab.com/handbook/engineering/workflow/code-review/#trainee-maintainer)
    are three times as likely to be picked as other reviewers.
 1. Team members whose Slack or [GitLab status](../user/profile/index.md#set-your-current-status) emoji
@@ -422,7 +423,7 @@ WARNING:
     do not merge the merge request** except for
     [very specific cases](https://about.gitlab.com/handbook/engineering/workflow/#criteria-for-merging-during-broken-master).
     For other cases, follow these [handbook instructions](https://about.gitlab.com/handbook/engineering/workflow/#merging-during-broken-master).
-  - If the **latest [Pipeline for Merged Results](../ci/merge_request_pipelines/pipelines_for_merged_results/#pipelines-for-merged-results)** finished less than 2 hours ago, you
+  - If the **latest [Pipeline for Merged Results](../ci/pipelines/pipelines_for_merged_results.md)** finished less than 2 hours ago, you
     might merge without starting a new pipeline as the merge request is close
     enough to `main`.
 - When you set the MR to "Merge When Pipeline Succeeds", you should take over
@@ -444,7 +445,7 @@ Merge Results against the latest `main` at the time of the pipeline creation.
 
 WARNING:
 **Review all changes thoroughly for malicious code before starting a
-[Pipeline for Merged Results](../ci/merge_request_pipelines/index.md#run-pipelines-in-the-parent-project-for-merge-requests-from-a-forked-project).**
+[Pipeline for Merged Results](../ci/pipelines/merge_request_pipelines.md#run-pipelines-in-the-parent-project-for-merge-requests-from-a-forked-project).**
 
 When reviewing merge requests added by wider community contributors:
 

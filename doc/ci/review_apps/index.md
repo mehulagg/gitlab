@@ -224,7 +224,7 @@ To see Visual reviews in action, see the [Visual Reviews Walk through](https://y
 ### Configure Review Apps for Visual Reviews
 
 The feedback form is served through a script you add to pages in your Review App.
-If you have [Developer permissions](../../user/permissions.md) to the project,
+If you have the [Developer role](../../user/permissions.md) in the project,
 you can access it by clicking the **Review** button in the **Pipeline** section
 of the merge request. The form modal also shows a dropdown for changed pages
 if [route maps](#route-maps) are configured in the project.
@@ -254,7 +254,7 @@ to replace those values at runtime when each review app is created:
   variable.
 - `data-merge-request-id` is the merge request ID, which can be found by the
   `CI_MERGE_REQUEST_IID` variable. `CI_MERGE_REQUEST_IID` is available only if
-  [`only: [merge_requests]`](../merge_request_pipelines/index.md)
+  [`only: [merge_requests]`](../pipelines/merge_request_pipelines.md)
   is used and the merge request is created.
 - `data-mr-url` is the URL of the GitLab instance and is the same for all
   review apps.

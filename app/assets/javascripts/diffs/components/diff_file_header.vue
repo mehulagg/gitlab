@@ -13,6 +13,7 @@ import {
 } from '@gitlab/ui';
 import { escape } from 'lodash';
 import { mapActions, mapGetters, mapState } from 'vuex';
+import { IdState } from 'vendor/vue-virtual-scroller';
 import { diffViewerModes } from '~/ide/constants';
 import { scrollToElement } from '~/lib/utils/common_utils';
 import { truncateSha } from '~/lib/utils/text_utility';
@@ -47,7 +48,7 @@ export default {
     GlTooltip: GlTooltipDirective,
     SafeHtml: GlSafeHtmlDirective,
   },
-  mixins: [glFeatureFlagsMixin()],
+  mixins: [glFeatureFlagsMixin(), IdState({ idProp: (vm) => vm.diffFile.file_hash })],
   i18n: {
     ...DIFF_FILE_HEADER,
     compareButtonLabel: s__('Compare submodule commit revisions'),
@@ -102,7 +103,7 @@ export default {
       default: () => [],
     },
   },
-  data() {
+  idState() {
     return {
       moreActionsShown: false,
     };
@@ -206,6 +207,19 @@ export default {
       return this.codequalityDiff?.length > 0 && !this.glFeatures.codequalityMrDiffAnnotations;
     },
   },
+  watch: {
+    'idState.moreActionsShown': {
+      handler(val) {
+        const el = this.$el.closest('.vue-recycle-scroller__item-view');
+
+        if (this.glFeatures.diffsVirtualScrolling && el) {
+          // We can't add a style with Vue because of the way the virtual
+          // scroller library renders the diff files
+          el.style.zIndex = val ? '1' : null;
+        }
+      },
+    },
+  },
   methods: {
     ...mapActions('diffs', [
       'toggleFileDiscussions',
@@ -239,7 +253,7 @@ export default {
       }
     },
     setMoreActionsShown(val) {
-      this.moreActionsShown = val;
+      this.idState.moreActionsShown = val;
     },
     toggleReview(newReviewedStatus) {
       const autoCollapsed =
@@ -268,7 +282,7 @@ export default {
 <template>
   <div
     ref="header"
-    :class="{ 'gl-z-dropdown-menu!': moreActionsShown }"
+    :class="{ 'gl-z-dropdown-menu!': idState.moreActionsShown }"
     class="js-file-title file-title file-title-flex-parent"
     data-qa-selector="file_title_container"
     :data-qa-file-name="filePath"
@@ -292,7 +306,7 @@ export default {
       >
         <file-icon
           :file-name="filePath"
-          :size="18"
+          :size="16"
           aria-hidden="true"
           css-classes="gl-mr-2"
           :submodule="diffFile.submodule"
@@ -453,7 +467,7 @@ export default {
               :disabled="diffFile.isLoadingFullFile"
               @click="toggleFullDiff(diffFile.file_path)"
             >
-              <gl-loading-icon v-if="diffFile.isLoadingFullFile" inline />
+              <gl-loading-icon v-if="diffFile.isLoadingFullFile" size="sm" inline />
               {{ expandDiffToFullFileTitle }}
             </gl-dropdown-item>
           </template>

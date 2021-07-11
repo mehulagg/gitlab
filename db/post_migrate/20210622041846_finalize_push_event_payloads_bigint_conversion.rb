@@ -9,6 +9,8 @@ class FinalizePushEventPayloadsBigintConversion < ActiveRecord::Migration[6.1]
   INDEX_NAME = 'index_push_event_payloads_on_event_id_convert_to_bigint'
 
   def up
+    return unless should_run?
+
     ensure_batched_background_migration_is_finished(
       job_class_name: 'CopyColumnUsingBackgroundMigrationJob',
       table_name: TABLE_NAME,
@@ -20,10 +22,16 @@ class FinalizePushEventPayloadsBigintConversion < ActiveRecord::Migration[6.1]
   end
 
   def down
+    return unless should_run?
+
     swap_columns
   end
 
   private
+
+  def should_run?
+    Gitlab.dev_or_test_env? || Gitlab.com?
+  end
 
   def swap_columns
     add_concurrent_index TABLE_NAME, :event_id_convert_to_bigint, unique: true, name: INDEX_NAME
@@ -37,6 +45,12 @@ class FinalizePushEventPayloadsBigintConversion < ActiveRecord::Migration[6.1]
       execute "ALTER TABLE #{quote_table_name(TABLE_NAME)} RENAME COLUMN #{quote_column_name(:event_id)} TO #{quote_column_name(temp_name)}"
       execute "ALTER TABLE #{quote_table_name(TABLE_NAME)} RENAME COLUMN #{quote_column_name(:event_id_convert_to_bigint)} TO #{quote_column_name(:event_id)}"
       execute "ALTER TABLE #{quote_table_name(TABLE_NAME)} RENAME COLUMN #{quote_column_name(temp_name)} TO #{quote_column_name(:event_id_convert_to_bigint)}"
+
+      # We need to update the trigger function in order to make PostgreSQL to
+      # regenerate the execution plan for it. This is to avoid type mismatch errors like
+      # "type of parameter 15 (bigint) does not match that when preparing the plan (integer)"
+      function_name = Gitlab::Database::UnidirectionalCopyTrigger.on_table(TABLE_NAME).name(:event_id, :event_id_convert_to_bigint)
+      execute "ALTER FUNCTION #{quote_table_name(function_name)} RESET ALL"
 
       # Swap defaults
       change_column_default TABLE_NAME, :event_id, nil

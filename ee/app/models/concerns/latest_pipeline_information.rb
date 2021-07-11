@@ -11,13 +11,9 @@ module LatestPipelineInformation
     strong_memoize("latest_builds_reports_#{only_successful_builds}" ) do
       builds = latest_security_builds
       builds = builds.select { |build| build.status == 'success' } if only_successful_builds
-      builds.map do |build|
-        if Feature.enabled?(:ci_build_metadata_config)
-          build.metadata.config_options[:artifacts][:reports].keys.map(&:to_sym)
-        else
-          build.options[:artifacts][:reports].keys
-        end
-      end.flatten
+      builds.flat_map do |build|
+        build.options[:artifacts][:reports].keys
+      end
     end
   end
 

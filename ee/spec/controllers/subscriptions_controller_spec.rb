@@ -177,7 +177,7 @@ RSpec.describe SubscriptionsController do
       {
         setup_for_company: setup_for_company,
         customer: { company: 'My company', country: 'NL' },
-        subscription: { plan_id: 'x', quantity: 2 }
+        subscription: { plan_id: 'x', quantity: 2, source: 'some_source' }
       }
     end
 
@@ -215,7 +215,7 @@ RSpec.describe SubscriptionsController do
           {
             setup_for_company: setup_for_company,
             customer: { country: 'NL' },
-            subscription: { plan_id: 'x', quantity: 1 }
+            subscription: { plan_id: 'x', quantity: 1, source: 'some_source' }
           }
         end
 
@@ -282,7 +282,7 @@ RSpec.describe SubscriptionsController do
           {
             selected_group: selected_group.id,
             customer: { country: 'NL' },
-            subscription: { plan_id: 'x', quantity: 1 }
+            subscription: { plan_id: 'x', quantity: 1, source: 'another_source' }
           }
         end
 
@@ -357,7 +357,7 @@ RSpec.describe SubscriptionsController do
           {
             selected_group: non_existing_record_id,
             customer: { country: 'NL' },
-            subscription: { plan_id: 'x', quantity: 1 }
+            subscription: { plan_id: 'x', quantity: 1, source: 'new_source' }
           }
         end
 

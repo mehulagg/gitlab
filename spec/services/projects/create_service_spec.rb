@@ -190,6 +190,7 @@ RSpec.describe Projects::CreateService, '#execute' do
     let_it_be(:group) { create(:group) }
     let_it_be(:shared_group) { create(:group) }
     let_it_be(:shared_group_user) { create(:user) }
+
     let(:opts) do
       {
         name: 'GitLab',
@@ -221,6 +222,7 @@ RSpec.describe Projects::CreateService, '#execute' do
     let_it_be(:subgroup_for_projects) { create(:group, :private, parent: group) }
     let_it_be(:subgroup_for_access) { create(:group, :private, parent: group) }
     let_it_be(:group_maintainer) { create(:user) }
+
     let(:group_access_level) { Gitlab::Access::REPORTER }
     let(:subgroup_access_level) { Gitlab::Access::DEVELOPER }
     let(:share_max_access_level) { Gitlab::Access::MAINTAINER }
@@ -701,69 +703,6 @@ RSpec.describe Projects::CreateService, '#execute' do
     expect(Projects::PostCreationWorker).to receive(:perform_async).with(a_kind_of(Integer))
 
     create_project(user, opts)
-  end
-
-  context 'when project has access to shared integration' do
-    before do
-      stub_feature_flags(projects_post_creation_worker: false)
-    end
-
-    context 'Prometheus integration is shared via group cluster' do
-      let(:cluster) { create(:cluster, :group, groups: [group]) }
-      let(:group) do
-        create(:group).tap do |group|
-          group.add_owner(user)
-        end
-      end
-
-      before do
-        create(:clusters_integrations_prometheus, cluster: cluster)
-      end
-
-      it 'creates Integrations::Prometheus record', :aggregate_failures do
-        project = create_project(user, opts.merge!(namespace_id: group.id))
-        integration = project.prometheus_integration
-
-        expect(integration.active).to be true
-        expect(integration.manual_configuration?).to be false
-        expect(integration.persisted?).to be true
-      end
-    end
-
-    context 'Prometheus integration is shared via instance cluster' do
-      let(:cluster) { create(:cluster, :instance) }
-
-      before do
-        create(:clusters_integrations_prometheus, cluster: cluster)
-      end
-
-      it 'creates Integrations::Prometheus record', :aggregate_failures do
-        project = create_project(user, opts)
-        integration = project.prometheus_integration
-
-        expect(integration.active).to be true
-        expect(integration.manual_configuration?).to be false
-        expect(integration.persisted?).to be true
-      end
-
-      it 'cleans invalid record and logs warning', :aggregate_failures do
-        invalid_integration_record = build(:prometheus_integration, properties: { api_url: nil, manual_configuration: true }.to_json)
-        allow(::Integrations::Prometheus).to receive(:new).and_return(invalid_integration_record)
-
-        expect(Gitlab::ErrorTracking).to receive(:track_exception).with(an_instance_of(ActiveRecord::RecordInvalid), include(extra: { project_id: a_kind_of(Integer) }))
-        project = create_project(user, opts)
-
-        expect(project.prometheus_integration).to be_nil
-      end
-    end
-
-    context 'shared Prometheus integration is not available' do
-      it 'does not persist Integrations::Prometheus record' do
-        project = create_project(user, opts)
-
-        expect(project.prometheus_integration).to be_nil
-      end
-    end
   end
 
   context 'with external authorization enabled' do

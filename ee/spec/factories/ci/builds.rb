@@ -6,7 +6,7 @@ FactoryBot.define do
       failure_reason { Ci::Build.failure_reasons[:protected_environment_failure] }
     end
 
-    %i[api_fuzzing codequality container_scanning dast dependency_scanning license_scanning performance browser_performance load_performance sast secret_detection coverage_fuzzing].each do |report_type|
+    %i[api_fuzzing codequality container_scanning cluster_image_scanning dast dependency_scanning license_scanning performance browser_performance load_performance sast secret_detection coverage_fuzzing].each do |report_type|
       trait "legacy_#{report_type}".to_sym do
         success
         artifacts
@@ -81,6 +81,18 @@ FactoryBot.define do
     trait :corrupted_container_scanning_report do
       after(:build) do |build|
         build.job_artifacts << create(:ee_ci_job_artifact, :corrupted_container_scanning_report, job: build)
+      end
+    end
+
+    trait :cluster_image_scanning_feature_branch do
+      after(:build) do |build|
+        build.job_artifacts << create(:ee_ci_job_artifact, :cluster_image_scanning_feature_branch, job: build)
+      end
+    end
+
+    trait :corrupted_cluster_image_scanning_report do
+      after(:build) do |build|
+        build.job_artifacts << create(:ee_ci_job_artifact, :corrupted_cluster_image_scanning_report, job: build)
       end
     end
 

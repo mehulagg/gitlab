@@ -3,6 +3,7 @@
 module NetworkPolicies
   class ResourcesService
     include NetworkPolicies::Responses
+    include Gitlab::Utils::UsageData
 
     LIMIT = 100
 
@@ -16,8 +17,8 @@ module NetworkPolicies
       policies = []
       errors = []
 
-      @kubeclient_info.each do |platform, namespace|
-        policies_per_environment, error_per_environment = execute_per_environment(platform, namespace)
+      @kubeclient_info.each do |platform, (namespace, environment_ids)|
+        policies_per_environment, error_per_environment = execute_per_environment(platform, namespace, environment_ids)
         policies += policies_per_environment if policies_per_environment
         errors << error_per_environment if error_per_environment
       end
@@ -26,20 +27,27 @@ module NetworkPolicies
 
     private
 
-    def execute_per_environment(platform, namespace)
+    def track_usage_data_for_cluster(platform, policies)
+      return if policies.empty?
+
+      track_usage_event(:clusters_using_network_policies_ui, platform.cluster_id)
+    end
+
+    def execute_per_environment(platform, namespace, environment_ids)
       policies = platform.kubeclient
         .get_network_policies(namespace: namespace)
-        .map { |resource| Gitlab::Kubernetes::NetworkPolicy.from_resource(resource) }
+        .map { |resource| Gitlab::Kubernetes::NetworkPolicy.from_resource(resource, environment_ids) }
       policies += platform.kubeclient
         .get_cilium_network_policies(namespace: namespace)
-        .map { |resource| Gitlab::Kubernetes::CiliumNetworkPolicy.from_resource(resource) }
+        .map { |resource| Gitlab::Kubernetes::CiliumNetworkPolicy.from_resource(resource, environment_ids) }
+      track_usage_data_for_cluster(platform, policies)
       [policies, nil]
     rescue Kubeclient::HttpError => e
       [policies, e]
     end
 
     def has_deployment_platform?(kubeclient_info)
-      kubeclient_info.any? { |platform, namespace| platform.present? }
+      kubeclient_info.any? { |platform, _| platform.present? }
     end
 
     # rubocop: disable CodeReuse/ActiveRecord
@@ -55,7 +63,7 @@ module NetworkPolicies
         .order(updated_at: :desc)
         .preload(:platform_kubernetes)
         .group_by(&:namespace)
-        .map { |namespace, kubernetes_namespaces| [kubernetes_namespaces.first.platform_kubernetes, namespace] }
+        .map { |namespace, kubernetes_namespaces| [kubernetes_namespaces.first.platform_kubernetes, [namespace, kubernetes_namespaces.map(&:environment_id)]] }
     end
     # rubocop: enable CodeReuse/ActiveRecord
   end

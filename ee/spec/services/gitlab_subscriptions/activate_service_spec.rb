@@ -7,11 +7,10 @@ RSpec.describe GitlabSubscriptions::ActivateService do
 
   let!(:application_settings) do
     stub_env('IN_MEMORY_APPLICATION_SETTINGS', 'false')
-    create(:application_setting, cloud_license_enabled: cloud_license_enabled)
   end
 
-  let_it_be(:license_key) { build(:gitlab_license).export }
-  let(:cloud_license_enabled) { true }
+  let_it_be(:license_key) { build(:gitlab_license, :cloud).export }
+
   let(:activation_code) { 'activation_code' }
 
   def stub_client_activate
@@ -32,21 +31,54 @@ RSpec.describe GitlabSubscriptions::ActivateService do
     end
 
     it 'persists license' do
-      result = execute_service
-      created_license = License.last
+      freeze_time do
+        result = execute_service
+        created_license = License.current
 
-      expect(result).to eq({ success: true, license: created_license })
+        expect(result).to eq({ success: true, license: created_license })
 
-      expect(created_license.data).to eq(license_key)
-      expect(created_license.cloud).to eq(true)
+        expect(created_license).to have_attributes(
+          data: license_key,
+          cloud: true,
+          last_synced_at: Time.current
+        )
+      end
     end
 
-    it 'deletes any existing cloud licenses' do
-      previous_1 = create(:license, cloud: true)
-      previous_2 = create(:license, cloud: true)
+    context 'when the current license key does not match the one returned from activation' do
+      it 'creates a new license' do
+        previous_license = create(:license, cloud: true, last_synced_at: 3.days.ago)
 
-      expect { execute_service }.to change(License.cloud, :count).to(1)
-      expect(License.cloud).not_to include(previous_1, previous_2)
+        freeze_time do
+          expect { execute_service }.to change(License.cloud, :count).by(1)
+
+          current_license = License.current
+          expect(current_license.id).not_to eq(previous_license.id)
+          expect(current_license).to have_attributes(
+            data: license_key,
+            cloud: true,
+            last_synced_at: Time.current
+          )
+        end
+      end
+    end
+
+    context 'when the current license key matches the one returned from activation' do
+      it 'reuses the current license and updates the last_synced_at' do
+        create(:license, cloud: true, last_synced_at: 3.days.ago)
+        current_license = create(:license, cloud: true, data: license_key, last_synced_at: 1.day.ago)
+
+        freeze_time do
+          expect { execute_service }.not_to change(License.cloud, :count)
+
+          expect(License.current).to have_attributes(
+            id: current_license.id,
+            data: license_key,
+            cloud: true,
+            last_synced_at: Time.current
+          )
+        end
+      end
     end
 
     context 'when persisting fails' do
@@ -66,7 +98,7 @@ RSpec.describe GitlabSubscriptions::ActivateService do
 
       expect(execute_service).to eq(customer_dot_response)
 
-      expect(License.last&.data).not_to eq(license_key)
+      expect(License.current&.data).not_to eq(license_key)
     end
   end
 
@@ -75,17 +107,6 @@ RSpec.describe GitlabSubscriptions::ActivateService do
 
     it 'returns error' do
       allow(Gitlab).to receive(:com?).and_return(true)
-      expect(Gitlab::SubscriptionPortal::Client).not_to receive(:activate)
-
-      expect(execute_service).to eq(customer_dot_response)
-    end
-  end
-
-  context 'when cloud licensing disabled' do
-    let(:customer_dot_response) { { success: false, errors: [described_class::ERROR_MESSAGES[:disabled]] }}
-    let(:cloud_license_enabled) { false }
-
-    it 'returns error' do
       expect(Gitlab::SubscriptionPortal::Client).not_to receive(:activate)
 
       expect(execute_service).to eq(customer_dot_response)

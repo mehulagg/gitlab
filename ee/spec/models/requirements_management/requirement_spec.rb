@@ -184,4 +184,21 @@ RSpec.describe RequirementsManagement::Requirement do
       end
     end
   end
+
+  describe 'sync with requirement issues' do
+    let_it_be_with_reload(:requirement) { create(:requirement) }
+    let_it_be_with_reload(:requirement_issue) { create(:requirement_issue, requirement: requirement) }
+
+    context 'when destroying a requirement' do
+      it 'also destroys the associated requirement issue' do
+        expect { requirement.destroy! }.to change { Issue.where(issue_type: 'requirement').count }.by(-1)
+      end
+    end
+
+    context 'when destroying a requirement issue' do
+      it 'also destroys the associated requirement' do
+        expect { requirement_issue.destroy! }.to change { RequirementsManagement::Requirement.count }.by(-1)
+      end
+    end
+  end
 end

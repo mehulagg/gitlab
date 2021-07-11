@@ -8,7 +8,6 @@ RSpec.describe 'Admin views Subscription', :js do
   before do
     sign_in(admin)
     gitlab_enable_admin_mode_sign_in(admin)
-    stub_application_setting(cloud_license_enabled: true)
   end
 
   context 'with a cloud license' do
@@ -31,7 +30,7 @@ RSpec.describe 'Admin views Subscription', :js do
         page.within(find('#content-body', match: :first)) do
           click_button('Sync subscription details')
 
-          expect(page).to have_content('The subscription details synced successfully')
+          expect(page).to have_content('Your subscription details will sync shortly.')
         end
       end
 
@@ -70,7 +69,9 @@ RSpec.describe 'Admin views Subscription', :js do
 
     context 'when activating another subscription' do
       before do
-        click_button('Activate cloud license')
+        page.within(find('[data-testid="subscription-details"]', match: :first)) do
+          click_button('Activate cloud license')
+        end
       end
 
       it 'shows the activation modal' do

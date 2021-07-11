@@ -139,67 +139,38 @@ RSpec.describe Integration do
     end
   end
 
-  describe "Test Button" do
-    let(:integration) { build(:service, project: project) }
+  describe '#testable?' do
+    context 'when integration is project-level' do
+      subject { build(:service, project: project) }
 
-    describe '#can_test?' do
-      subject { integration.can_test? }
-
-      context 'when repository is not empty' do
-        let(:project) { build(:project, :repository) }
-
-        it { is_expected.to be true }
-      end
-
-      context 'when repository is empty' do
-        let(:project) { build(:project) }
-
-        it { is_expected.to be true }
-      end
-
-      context 'when instance-level service' do
-        Integration.available_integration_types.each do |type|
-          let(:integration) do
-            described_class.send(:integration_type_to_model, type).new(instance: true)
-          end
-
-          it { is_expected.to be_falsey }
-        end
-      end
-
-      context 'when group-level service' do
-        Integration.available_integration_types.each do |type|
-          let(:integration) do
-            described_class.send(:integration_type_to_model, type).new(group_id: group.id)
-          end
-
-          it { is_expected.to be_falsey }
-        end
-      end
+      it { is_expected.to be_testable }
     end
 
-    describe '#test' do
-      let(:data) { 'test' }
+    context 'when integration is not project-level' do
+      subject { build(:service, project: nil) }
 
-      context 'when repository is not empty' do
-        let(:project) { build(:project, :repository) }
+      it { is_expected.not_to be_testable }
+    end
+  end
 
-        it 'test runs execute' do
-          expect(integration).to receive(:execute).with(data)
+  describe '#test' do
+    let(:integration) { build(:service, project: project) }
+    let(:data) { 'test' }
 
-          integration.test(data)
-        end
-      end
+    it 'calls #execute' do
+      expect(integration).to receive(:execute).with(data)
 
-      context 'when repository is empty' do
-        let(:project) { build(:project) }
+      integration.test(data)
+    end
 
-        it 'test runs execute' do
-          expect(integration).to receive(:execute).with(data)
+    it 'returns a result' do
+      result = 'foo'
+      allow(integration).to receive(:execute).with(data).and_return(result)
 
-          integration.test(data)
-        end
-      end
+      expect(integration.test(data)).to eq(
+        success: true,
+        result: result
+      )
     end
   end
 
@@ -921,7 +892,7 @@ RSpec.describe Integration do
       described_class.available_integration_names(include_project_specific: false)
     end
 
-    it 'does not call dev_services_names with include_dev false' do
+    it 'does not call dev_integration_names with include_dev false' do
       expect(described_class).to receive(:integration_names).and_call_original
       expect(described_class).not_to receive(:dev_integration_names)
       expect(described_class).to receive(:project_specific_integration_names).and_call_original

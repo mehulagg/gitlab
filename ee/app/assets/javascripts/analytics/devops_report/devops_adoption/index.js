@@ -1,5 +1,6 @@
 import Vue from 'vue';
-import { convertToGraphQLId, TYPE_GROUP } from '~/graphql_shared/utils';
+import { TYPE_GROUP } from '~/graphql_shared/constants';
+import { convertToGraphQLId } from '~/graphql_shared/utils';
 import DevopsAdoptionApp from './components/devops_adoption_app.vue';
 import { createApolloProvider } from './graphql';
 

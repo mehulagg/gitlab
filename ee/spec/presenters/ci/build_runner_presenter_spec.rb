@@ -19,6 +19,7 @@ RSpec.describe Ci::BuildRunnerPresenter do
       let(:secrets) do
         {
           DATABASE_PASSWORD: {
+            file: true,
             vault: {
               engine: { name: 'kv-v2', path: 'kv-v2' },
               path: 'production/db',
@@ -79,6 +80,14 @@ RSpec.describe Ci::BuildRunnerPresenter do
           it 'contains the default auth path' do
             expect(vault_auth.fetch('path')).to eq('jwt')
           end
+        end
+      end
+
+      context 'File variable configuration' do
+        subject { presenter.secrets_configuration.dig('DATABASE_PASSWORD') }
+
+        it 'contains the file configuration directive' do
+          expect(subject.fetch('file')).to be_truthy
         end
       end
     end
