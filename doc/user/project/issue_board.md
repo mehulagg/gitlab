@@ -228,20 +228,13 @@ and vice versa.
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/285074) in GitLab 13.9.
 > - [Deployed behind a feature flag](../feature_flags.md), disabled by default.
-> - Disabled on GitLab.com.
-> - Not recommended for production use.
+> - [Enabled by default](https://gitlab.com/gitlab-org/gitlab/-/issues/248908) in GitLab 14.1
+> - Recommended for production use.
 > - To use it in GitLab self-managed instances, ask a GitLab administrator to [enable it](#enable-or-disable-graphql-based-issue-boards). **(FREE SELF)**
-
-This in-development feature might not be available for your use. There can be
-[risks when enabling features still in development](../feature_flags.md#risks-when-enabling-features-still-in-development).
-Refer to this feature's version history for more details.
-
-The work-in-progress GraphQL-based boards come with these features:
 
 - [Edit more issue attributes](#edit-an-issue)
 - [View blocked issues](#blocked-issues)
 
-The GraphQL-based Issue Board is a work in progress.
 Learn more about the known issues in [epic 5596](https://gitlab.com/groups/gitlab-org/-/epics/5596).
 
 ## GitLab Enterprise features for issue boards
