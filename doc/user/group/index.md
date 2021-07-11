@@ -37,9 +37,9 @@ Like projects, a group can be configured to limit the visibility of it to:
 - All signed-in users.
 - Only explicit group members.
 
-The restriction for visibility levels on the application setting level also applies to groups. If
-set to internal, the explore page is empty for anonymous users. The group page has a visibility
-level icon.
+The restriction for [visibility levels](../admin_area/settings/visibility_and_access_controls.md#restricted-visibility-levels)
+on the application setting level also applies to groups. If set to internal, the explore page is
+empty for anonymous users. The group page has a visibility level icon.
 
 Administrator users cannot create a subgroup or project with a higher visibility level than that of
 the immediate parent group.
