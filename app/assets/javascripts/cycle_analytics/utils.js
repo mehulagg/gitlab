@@ -22,13 +22,10 @@ const mapToEvent = (event, stage) => {
 export const decorateEvents = (events, stage) => events.map((event) => mapToEvent(event, stage));
 
 const mapToSummary = ({ value, ...rest }) => ({ ...rest, value: value || '-' });
-const mapToMedians = ({ name: id, value }) => ({ id, value });
 
-export const decorateData = (data = {}) => {
-  const { stats: stages, summary } = data;
+export const decorateData = ({ summary }) => {
   return {
     summary: summary?.map((item) => mapToSummary(item)) || [],
-    medians: stages?.map((item) => mapToMedians(item)) || [],
   };
 };
 

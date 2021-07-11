@@ -82,7 +82,7 @@ export const fetchStageData = ({ state: { requestPath, selectedStage, startDate 
 const getStageMedians = ({ stageId, vsaParams, queryParams = {} }) => {
   console.log('getStageMedians', stageId, vsaParams, queryParams);
   return getValueStreamStageMedian({ ...vsaParams, stageId }, queryParams)
-    .then(({ data }) => ({ stageId, value: data?.value || null }))
+    .then(({ data }) => ({ id: stageId, value: data?.value || null }))
     .catch((err) => ({ stageId, value: null }));
 };
 

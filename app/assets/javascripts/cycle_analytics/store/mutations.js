@@ -51,12 +51,9 @@ export default {
     state.hasError = false;
   },
   [types.RECEIVE_CYCLE_ANALYTICS_DATA_SUCCESS](state, data) {
-    console.log('RECEIVE_CYCLE_ANALYTICS_DATA_SUCCESS::data', data);
-
-    const { summary, medians } = decorateData(data);
+    const { summary } = decorateData(data);
     state.permissions = data.permissions;
     state.summary = summary;
-    state.medians = formatMedianValues(medians);
     state.hasError = false;
   },
   [types.RECEIVE_CYCLE_ANALYTICS_DATA_ERROR](state) {
@@ -87,15 +84,7 @@ export default {
     state.medians = {};
   },
   [types.RECEIVE_STAGE_MEDIANS_SUCCESS](state, medians) {
-    const m = medians.reduce(
-      (acc, { stageId, value }) => ({
-        ...acc,
-        [stageId]: value,
-      }),
-      {},
-    );
-    console.log('medians::m', m);
-    state.medians = m;
+    state.medians = formatMedianValues(medians);
   },
   [types.RECEIVE_STAGE_MEDIANS_ERROR](state, error) {
     state.medians = {};
