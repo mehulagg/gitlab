@@ -73,63 +73,20 @@ module Security
       entity_params = Gitlab::Json.parse(vulnerability_params&.dig(:raw_metadata)).slice('description', 'message', 'solution', 'cve', 'location')
       # Vulnerabilities::Finding (`vulnerability_occurrences`)
       vulnerability_finding = vulnerability_findings_by_uuid[finding.uuid] ||
-        find_or_create_vulnerability_finding(finding, vulnerability_params.merge(entity_params))
+        find_or_create_vulnerability_finding_with_signatures(finding, vulnerability_params.merge(entity_params))
 
       vulnerability_finding_to_finding_map[vulnerability_finding] = finding
 
       update_vulnerability_finding(vulnerability_finding, vulnerability_params)
       reset_remediations_for(vulnerability_finding, finding)
 
-      if ::Feature.enabled?(:vulnerability_finding_tracking_signatures, project) && project.licensed_feature_available?(:vulnerability_finding_signatures)
-        update_feedbacks(vulnerability_finding, vulnerability_params[:uuid])
-        update_finding_signatures(finding, vulnerability_finding)
-      end
+      update_feedbacks(vulnerability_finding, vulnerability_params[:uuid])
+      update_finding_signatures(finding, vulnerability_finding)
 
       create_vulnerability(vulnerability_finding, pipeline)
     end
 
-    def find_or_create_vulnerability_finding(finding, create_params)
-      if ::Feature.enabled?(:vulnerability_finding_tracking_signatures, project) && project.licensed_feature_available?(:vulnerability_finding_signatures)
-        find_or_create_vulnerability_finding_with_signatures(finding, create_params)
-      else
-        find_or_create_vulnerability_finding_with_location(finding, create_params)
-      end
-    end
-
     # rubocop: disable CodeReuse/ActiveRecord
-    def find_or_create_vulnerability_finding_with_location(finding, create_params)
-      find_params = {
-        scanner: scanners_objects[finding.scanner.key],
-        primary_identifier: identifiers_objects[finding.primary_identifier.key],
-        location_fingerprint: finding.location.fingerprint
-      }
-
-      begin
-        # If there's no Finding then we're dealing with one of two cases:
-        # 1. The Finding is a new one
-        # 2. The Finding is already saved but has UUIDv4
-        project.vulnerability_findings
-          .create_with(create_params)
-          .find_or_initialize_by(find_params).tap do |f|
-          f.uuid = finding.uuid
-          f.save!
-        end
-      rescue ActiveRecord::RecordNotUnique => e
-        # This might happen if we're processing another report in parallel and it finds the same Finding
-        # faster. In that case we need to perform the lookup again
-
-        vulnerability_finding = project.vulnerability_findings.reset.find_by(uuid: finding.uuid)
-        return vulnerability_finding if vulnerability_finding
-
-        vulnerability_finding = project.vulnerability_findings.reset.find_by(find_params)
-        return vulnerability_finding if vulnerability_finding
-
-        Gitlab::ErrorTracking.track_and_raise_exception(e, find_params: find_params, uuid: finding.uuid)
-      rescue ActiveRecord::ActiveRecordError => e
-        Gitlab::ErrorTracking.track_and_raise_exception(e, create_params: create_params&.dig(:raw_metadata))
-      end
-    end
-
     def get_matched_findings(finding, normalized_signatures, find_params)
       project.vulnerability_findings.where(**find_params).filter do |vf|
         vf.matches_signatures(normalized_signatures, finding.uuid)

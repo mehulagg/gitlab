@@ -11,78 +11,71 @@ RSpec.describe Ci::CompareSecurityReportsService do
     collection.map { |t| t['identifiers'].first['external_id'] }
   end
 
-  where(vulnerability_finding_tracking_signatures_enabled: [true, false])
-  with_them do
+  describe '#execute DS' do
     before do
-      stub_feature_flags(vulnerability_finding_tracking_signatures: vulnerability_finding_tracking_signatures_enabled)
+      stub_licensed_features(dependency_scanning: true)
     end
 
-    describe '#execute DS' do
-      before do
-        stub_licensed_features(dependency_scanning: true)
+    let(:service) { described_class.new(project, current_user, report_type: 'dependency_scanning') }
+
+    subject { service.execute(base_pipeline, head_pipeline) }
+
+    context 'when head pipeline has dependency scanning reports' do
+      let!(:base_pipeline) { create(:ee_ci_pipeline) }
+      let!(:head_pipeline) { create(:ee_ci_pipeline, :with_dependency_scanning_report, project: project) }
+
+      it 'reports new vulnerabilities' do
+        expect(subject[:status]).to eq(:parsed)
+        expect(subject[:data]['added'].count).to eq(4)
+        expect(subject[:data]['fixed'].count).to eq(0)
+      end
+    end
+
+    context 'when base and head pipelines have dependency scanning reports' do
+      let_it_be(:base_pipeline) { create(:ee_ci_pipeline, :with_dependency_scanning_report, project: project) }
+      let_it_be(:head_pipeline) { create(:ee_ci_pipeline, :with_dependency_scanning_feature_branch, project: project) }
+
+      it 'reports status as parsed' do
+        expect(subject[:status]).to eq(:parsed)
       end
 
-      let(:service) { described_class.new(project, current_user, report_type: 'dependency_scanning') }
+      it 'populates fields based on current_user' do
+        payload = subject[:data]['added'].first
 
-      subject { service.execute(base_pipeline, head_pipeline) }
-
-      context 'when head pipeline has dependency scanning reports' do
-        let!(:base_pipeline) { create(:ee_ci_pipeline) }
-        let!(:head_pipeline) { create(:ee_ci_pipeline, :with_dependency_scanning_report, project: project) }
-
-        it 'reports new vulnerabilities' do
-          expect(subject[:status]).to eq(:parsed)
-          expect(subject[:data]['added'].count).to eq(4)
-          expect(subject[:data]['fixed'].count).to eq(0)
-        end
+        expect(payload['create_vulnerability_feedback_issue_path']).to be_present
+        expect(payload['create_vulnerability_feedback_merge_request_path']).to be_present
+        expect(payload['create_vulnerability_feedback_dismissal_path']).to be_present
+        expect(payload['create_vulnerability_feedback_issue_path']).to be_present
+        expect(service.current_user).to eq(current_user)
       end
 
-      context 'when base and head pipelines have dependency scanning reports' do
-        let_it_be(:base_pipeline) { create(:ee_ci_pipeline, :with_dependency_scanning_report, project: project) }
-        let_it_be(:head_pipeline) { create(:ee_ci_pipeline, :with_dependency_scanning_feature_branch, project: project) }
-
-        it 'reports status as parsed' do
-          expect(subject[:status]).to eq(:parsed)
-        end
-
-        it 'populates fields based on current_user' do
-          payload = subject[:data]['added'].first
-
-          expect(payload['create_vulnerability_feedback_issue_path']).to be_present
-          expect(payload['create_vulnerability_feedback_merge_request_path']).to be_present
-          expect(payload['create_vulnerability_feedback_dismissal_path']).to be_present
-          expect(payload['create_vulnerability_feedback_issue_path']).to be_present
-          expect(service.current_user).to eq(current_user)
-        end
-
-        it 'reports fixed vulnerability' do
-          expect(subject[:data]['added'].count).to eq(1)
-          expect(subject[:data]['added'].first['identifiers']).to include(a_hash_including('external_id' => 'CVE-2017-5946'))
-        end
-
-        it 'reports fixed dependency scanning vulnerabilities' do
-          expect(subject[:data]['fixed'].count).to eq(1)
-          compare_keys = collect_ids(subject[:data]['fixed'])
-          expected_keys = %w(06565b64-486d-4326-b906-890d9915804d)
-          expect(compare_keys).to match_array(expected_keys)
-        end
+      it 'reports fixed vulnerability' do
+        expect(subject[:data]['added'].count).to eq(1)
+        expect(subject[:data]['added'].first['identifiers']).to include(a_hash_including('external_id' => 'CVE-2017-5946'))
       end
 
-      context 'when head pipeline has corrupted dependency scanning vulnerability reports' do
-        let_it_be(:base_pipeline) { build(:ee_ci_pipeline, :with_corrupted_dependency_scanning_report, project: project) }
-        let_it_be(:head_pipeline) { build(:ee_ci_pipeline, :with_corrupted_dependency_scanning_report, project: project) }
+      it 'reports fixed dependency scanning vulnerabilities' do
+        expect(subject[:data]['fixed'].count).to eq(1)
+        compare_keys = collect_ids(subject[:data]['fixed'])
+        expected_keys = %w(06565b64-486d-4326-b906-890d9915804d)
+        expect(compare_keys).to match_array(expected_keys)
+      end
+    end
 
-        it 'returns status and error message' do
-          expect(subject[:status]).to eq(:error)
-          expect(subject[:status_reason]).to include('JSON parsing failed')
-        end
+    context 'when head pipeline has corrupted dependency scanning vulnerability reports' do
+      let_it_be(:base_pipeline) { build(:ee_ci_pipeline, :with_corrupted_dependency_scanning_report, project: project) }
+      let_it_be(:head_pipeline) { build(:ee_ci_pipeline, :with_corrupted_dependency_scanning_report, project: project) }
 
-        it 'returns status and error message when pipeline is nil' do
-          result = service.execute(nil, head_pipeline)
+      it 'returns status and error message' do
+        expect(subject[:status]).to eq(:error)
+        expect(subject[:status_reason]).to include('JSON parsing failed')
+      end
 
-          expect(result[:status]).to eq(:error)
-          expect(result[:status_reason]).to include('JSON parsing failed')
-        end
+      it 'returns status and error message when pipeline is nil' do
+        result = service.execute(nil, head_pipeline)
+
+        expect(result[:status]).to eq(:error)
+        expect(result[:status_reason]).to include('JSON parsing failed')
       end
     end
 

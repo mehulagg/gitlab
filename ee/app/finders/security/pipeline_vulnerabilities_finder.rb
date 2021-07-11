@@ -139,14 +139,6 @@ module Security
       params[:state].present? && states.include?('dismissed')
     end
 
-    def dismissal_feedback?(finding)
-      if ::Feature.enabled?(:vulnerability_finding_tracking_signatures, pipeline.project) && pipeline.project.licensed_feature_available?(:vulnerability_finding_signatures) && !finding.signatures.empty?
-        dismissal_feedback_by_finding_signatures(finding)
-      else
-        dismissal_feedback_by_project_fingerprint(finding)
-      end
-    end
-
     def all_dismissal_feedbacks
       strong_memoize(:all_dismissal_feedbacks) do
         pipeline.project
@@ -155,19 +147,9 @@ module Security
       end
     end
 
-    def dismissal_feedback_by_finding_signatures(finding)
+    def dismissal_feedback?(finding)
       potential_uuids = Set.new([*finding.signature_uuids, finding.uuid].compact)
       all_dismissal_feedbacks.any? { |dismissal| potential_uuids.include?(dismissal.finding_uuid) }
-    end
-
-    def dismissal_feedback_by_fingerprint
-      strong_memoize(:dismissal_feedback_by_fingerprint) do
-        all_dismissal_feedbacks.group_by(&:project_fingerprint)
-      end
-    end
-
-    def dismissal_feedback_by_project_fingerprint(finding)
-      dismissal_feedback_by_fingerprint[finding.project_fingerprint]
     end
 
     def confidence_levels

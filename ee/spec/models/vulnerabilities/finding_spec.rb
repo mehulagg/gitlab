@@ -8,90 +8,82 @@ RSpec.describe Vulnerabilities::Finding do
   it { is_expected.to define_enum_for(:severity) }
   it { is_expected.to define_enum_for(:detection_method) }
 
-  where(vulnerability_finding_signatures_enabled: [true, false])
-  with_them do
-    before do
-      stub_feature_flags(vulnerability_finding_tracking_signatures: vulnerability_finding_signatures_enabled)
-      stub_licensed_features(vulnerability_finding_signatures: vulnerability_finding_signatures_enabled)
-    end
+  describe 'associations' do
+    it { is_expected.to belong_to(:project) }
+    it { is_expected.to belong_to(:primary_identifier).class_name('Vulnerabilities::Identifier') }
+    it { is_expected.to belong_to(:scanner).class_name('Vulnerabilities::Scanner') }
+    it { is_expected.to belong_to(:vulnerability).inverse_of(:findings) }
+    it { is_expected.to have_many(:pipelines).class_name('Ci::Pipeline') }
+    it { is_expected.to have_many(:finding_pipelines).class_name('Vulnerabilities::FindingPipeline').with_foreign_key('occurrence_id') }
+    it { is_expected.to have_many(:identifiers).class_name('Vulnerabilities::Identifier') }
+    it { is_expected.to have_many(:finding_identifiers).class_name('Vulnerabilities::FindingIdentifier').with_foreign_key('occurrence_id') }
+    it { is_expected.to have_many(:finding_links).class_name('Vulnerabilities::FindingLink').with_foreign_key('vulnerability_occurrence_id') }
+    it { is_expected.to have_many(:finding_remediations).class_name('Vulnerabilities::FindingRemediation').with_foreign_key('vulnerability_occurrence_id') }
+    it { is_expected.to have_many(:remediations).through(:finding_remediations) }
+    it { is_expected.to have_one(:evidence).class_name('Vulnerabilities::Finding::Evidence').with_foreign_key('vulnerability_occurrence_id') }
+  end
 
-    describe 'associations' do
-      it { is_expected.to belong_to(:project) }
-      it { is_expected.to belong_to(:primary_identifier).class_name('Vulnerabilities::Identifier') }
-      it { is_expected.to belong_to(:scanner).class_name('Vulnerabilities::Scanner') }
-      it { is_expected.to belong_to(:vulnerability).inverse_of(:findings) }
-      it { is_expected.to have_many(:pipelines).class_name('Ci::Pipeline') }
-      it { is_expected.to have_many(:finding_pipelines).class_name('Vulnerabilities::FindingPipeline').with_foreign_key('occurrence_id') }
-      it { is_expected.to have_many(:identifiers).class_name('Vulnerabilities::Identifier') }
-      it { is_expected.to have_many(:finding_identifiers).class_name('Vulnerabilities::FindingIdentifier').with_foreign_key('occurrence_id') }
-      it { is_expected.to have_many(:finding_links).class_name('Vulnerabilities::FindingLink').with_foreign_key('vulnerability_occurrence_id') }
-      it { is_expected.to have_many(:finding_remediations).class_name('Vulnerabilities::FindingRemediation').with_foreign_key('vulnerability_occurrence_id') }
-      it { is_expected.to have_many(:remediations).through(:finding_remediations) }
-      it { is_expected.to have_one(:evidence).class_name('Vulnerabilities::Finding::Evidence').with_foreign_key('vulnerability_occurrence_id') }
-    end
+  describe 'validations' do
+    let(:finding) { build(:vulnerabilities_finding) }
 
-    describe 'validations' do
-      let(:finding) { build(:vulnerabilities_finding) }
+    it { is_expected.to validate_presence_of(:scanner) }
+    it { is_expected.to validate_presence_of(:project) }
+    it { is_expected.to validate_presence_of(:uuid) }
+    it { is_expected.to validate_presence_of(:project_fingerprint) }
+    it { is_expected.to validate_presence_of(:primary_identifier) }
+    it { is_expected.to validate_presence_of(:location_fingerprint) }
+    it { is_expected.to validate_presence_of(:name) }
+    it { is_expected.to validate_presence_of(:report_type) }
+    it { is_expected.to validate_presence_of(:metadata_version) }
+    it { is_expected.to validate_presence_of(:raw_metadata) }
+    it { is_expected.to validate_presence_of(:severity) }
+    it { is_expected.to validate_presence_of(:confidence) }
+    it { is_expected.to validate_presence_of(:detection_method) }
 
-      it { is_expected.to validate_presence_of(:scanner) }
-      it { is_expected.to validate_presence_of(:project) }
-      it { is_expected.to validate_presence_of(:uuid) }
-      it { is_expected.to validate_presence_of(:project_fingerprint) }
-      it { is_expected.to validate_presence_of(:primary_identifier) }
-      it { is_expected.to validate_presence_of(:location_fingerprint) }
-      it { is_expected.to validate_presence_of(:name) }
-      it { is_expected.to validate_presence_of(:report_type) }
-      it { is_expected.to validate_presence_of(:metadata_version) }
-      it { is_expected.to validate_presence_of(:raw_metadata) }
-      it { is_expected.to validate_presence_of(:severity) }
-      it { is_expected.to validate_presence_of(:confidence) }
-      it { is_expected.to validate_presence_of(:detection_method) }
+    it { is_expected.to validate_length_of(:description).is_at_most(15000) }
+    it { is_expected.to validate_length_of(:message).is_at_most(3000) }
+    it { is_expected.to validate_length_of(:solution).is_at_most(7000) }
+    it { is_expected.to validate_length_of(:cve).is_at_most(48400) }
 
-      it { is_expected.to validate_length_of(:description).is_at_most(15000) }
-      it { is_expected.to validate_length_of(:message).is_at_most(3000) }
-      it { is_expected.to validate_length_of(:solution).is_at_most(7000) }
-      it { is_expected.to validate_length_of(:cve).is_at_most(48400) }
+    context 'when value for details field is valid' do
+      it 'is valid' do
+        finding.details = {}
 
-      context 'when value for details field is valid' do
-        it 'is valid' do
-          finding.details = {}
-
-          expect(finding).to be_valid
-        end
-      end
-
-      context 'when value for details field is invalid' do
-        it 'returns errors' do
-          finding.details = { invalid: 'data' }
-
-          expect(finding).to be_invalid
-          expect(finding.errors.full_messages).to eq(["Details must be a valid json schema"])
-        end
+        expect(finding).to be_valid
       end
     end
 
-    context 'database uniqueness' do
-      let(:finding) { create(:vulnerabilities_finding) }
-      let(:new_finding) { finding.dup.tap { |o| o.cve = SecureRandom.uuid } }
+    context 'when value for details field is invalid' do
+      it 'returns errors' do
+        finding.details = { invalid: 'data' }
 
-      it "when all index attributes are identical" do
-        expect { new_finding.save! }.to raise_error(ActiveRecord::RecordNotUnique)
+        expect(finding).to be_invalid
+        expect(finding.errors.full_messages).to eq(["Details must be a valid json schema"])
+      end
+    end
+  end
+
+  context 'database uniqueness' do
+    let(:finding) { create(:vulnerabilities_finding) }
+    let(:new_finding) { finding.dup.tap { |o| o.cve = SecureRandom.uuid } }
+
+    it "when all index attributes are identical" do
+      expect { new_finding.save! }.to raise_error(ActiveRecord::RecordNotUnique)
+    end
+
+    describe 'when some parameters are changed' do
+      using RSpec::Parameterized::TableSyntax
+
+      # we use block to delay object creations
+      where(:key, :factory_name) do
+        :primary_identifier | :vulnerabilities_identifier
+        :scanner | :vulnerabilities_scanner
+        :project | :project
       end
 
-      describe 'when some parameters are changed' do
-        using RSpec::Parameterized::TableSyntax
-
-        # we use block to delay object creations
-        where(:key, :factory_name) do
-          :primary_identifier | :vulnerabilities_identifier
-          :scanner | :vulnerabilities_scanner
-          :project | :project
-        end
-
-        with_them do
-          it "is valid" do
-            expect { new_finding.update!({ key => create(factory_name), 'uuid' => SecureRandom.uuid }) }.not_to raise_error
-          end
+      with_them do
+        it "is valid" do
+          expect { new_finding.update!({ key => create(factory_name), 'uuid' => SecureRandom.uuid }) }.not_to raise_error
         end
       end
     end
@@ -1054,7 +1046,7 @@ RSpec.describe Vulnerabilities::Finding do
         expect(signature1.eql?(signature2)).to be(true)
 
         # now verify that the correct matching method was used for eql?
-        expect(finding1.eql?(finding2)).to be(vulnerability_finding_signatures_enabled)
+        expect(finding1.eql?(finding2)).to be(true)
       end
 
       it 'wont match other record types' do
@@ -1123,8 +1115,6 @@ RSpec.describe Vulnerabilities::Finding do
         end
         with_them do
           it 'matches correctly' do
-            next unless vulnerability_finding_signatures_enabled
-
             create_signatures
             expect(finding1.eql?(finding2)).to be(should_match)
           end

@@ -394,31 +394,6 @@ RSpec.describe Ci::Build do
           expect(security_reports.get_report('sast', artifact)).to be_errored
         end
       end
-
-      context 'vulnerability_finding_tracking_signatures' do
-        let!(:artifact) { create(:ee_ci_job_artifact, :sast, job: job, project: job.project) }
-
-        where(vulnerability_finding_signatures_enabled: [true, false])
-        with_them do
-          it 'parses the report' do
-            stub_licensed_features(
-              sast: true,
-              vulnerability_finding_signatures: vulnerability_finding_signatures_enabled
-            )
-            stub_feature_flags(
-              vulnerability_finding_tracking_signatures: vulnerability_finding_signatures_enabled
-            )
-
-            expect(::Gitlab::Ci::Parsers::Security::Sast).to receive(:new).with(
-              artifact.file.read,
-              kind_of(::Gitlab::Ci::Reports::Security::Report),
-              vulnerability_finding_signatures_enabled
-            )
-
-            subject
-          end
-        end
-      end
     end
 
     context 'when there is unsupported file type' do

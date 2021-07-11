@@ -15,241 +15,233 @@ RSpec.describe Security::StoreReportService, '#execute' do
 
   subject { described_class.new(pipeline, report).execute }
 
-  where(:vulnerability_finding_signatures_enabled) do
-    [true, false]
+  before do
+    stub_licensed_features(
+      sast: true,
+      dependency_scanning: true,
+      container_scanning: true,
+      security_dashboard: true,
+      vulnerability_finding_signatures: true
+    )
+    allow(Security::AutoFixWorker).to receive(:perform_async)
   end
 
-  with_them do
-    before do
-      stub_feature_flags(vulnerability_finding_tracking_signatures: vulnerability_finding_signatures_enabled)
-      stub_licensed_features(
-        sast: true,
-        dependency_scanning: true,
-        container_scanning: true,
-        security_dashboard: true,
-        vulnerability_finding_signatures: vulnerability_finding_signatures_enabled
-      )
-      allow(Security::AutoFixWorker).to receive(:perform_async)
+  context 'without existing data' do
+    before(:all) do
+      checksum = 'f00bc6261fa512f0960b7fc3bfcce7fb31997cf32b96fa647bed5668b2c77fee'
+      create(:vulnerabilities_remediation, checksum: checksum)
     end
 
-    context 'without existing data' do
-      before(:all) do
-        checksum = 'f00bc6261fa512f0960b7fc3bfcce7fb31997cf32b96fa647bed5668b2c77fee'
-        create(:vulnerabilities_remediation, checksum: checksum)
+    before do
+      project.add_developer(user)
+      allow(pipeline).to receive(:user).and_return(user)
+    end
+
+    context 'for different security reports' do
+      where(:case_name, :trait, :scanners, :identifiers, :findings, :finding_identifiers, :finding_pipelines, :remediations, :signatures, :finding_links) do
+        'with SAST report'                | :sast                            | 1 | 6  | 5  | 7  | 5  | 0 | 2 | 0
+        'with exceeding identifiers'      | :with_exceeding_identifiers      | 1 | 20 | 1  | 20 | 1  | 0 | 0 | 0
+        'with Dependency Scanning report' | :dependency_scanning_remediation | 1 | 3  | 2  | 3  | 2  | 1 | 0 | 6
+        'with Container Scanning report'  | :container_scanning              | 1 | 8  | 8  | 8  | 8  | 0 | 0 | 8
       end
+
+      with_them do
+        it 'inserts all scanners' do
+          expect { subject }.to change { Vulnerabilities::Scanner.count }.by(scanners)
+        end
+
+        it 'inserts all identifiers' do
+          expect { subject }.to change { Vulnerabilities::Identifier.count }.by(identifiers)
+        end
+
+        it 'inserts all findings' do
+          expect { subject }.to change { Vulnerabilities::Finding.count }.by(findings)
+        end
+
+        it 'inserts all finding links' do
+          expect { subject }.to change { Vulnerabilities::FindingLink.count }.by(finding_links)
+        end
+
+        it 'inserts all finding identifiers (join model)' do
+          expect { subject }.to change { Vulnerabilities::FindingIdentifier.count }.by(finding_identifiers)
+        end
+
+        it 'inserts all finding pipelines (join model)' do
+          expect { subject }.to change { Vulnerabilities::FindingPipeline.count }.by(finding_pipelines)
+        end
+
+        it 'inserts all remediations' do
+          expect { subject }.to change { project.vulnerability_remediations.count }.by(remediations)
+        end
+
+        it 'inserts all vulnerabilities' do
+          expect { subject }.to change { Vulnerability.count }.by(findings)
+        end
+
+        it 'inserts all signatures' do
+          expect { subject }.to change { Vulnerabilities::FindingSignature.count }.by(signatures)
+        end
+      end
+    end
+
+    context 'when there is an exception' do
+      let(:trait) { :sast }
+
+      subject { described_class.new(pipeline, report) }
+
+      it 'does not insert any scanner' do
+        allow(Vulnerabilities::Scanner).to receive(:insert_all).with(anything).and_raise(StandardError)
+        expect { subject.send(:update_vulnerability_scanners!, report.findings) }.to change { Vulnerabilities::Scanner.count }.by(0)
+      end
+    end
+
+    context 'when some attributes are missing in the identifiers' do
+      let(:trait) { :sast }
+      let(:other_params) {{ external_type: 'find_sec_bugs_type', external_id: 'PREDICTABLE_RANDOM', name: 'Find Security Bugs-PREDICTABLE_RANDOM', url: 'https://find-sec-bugs.github.io/bugs.htm#PREDICTABLE_RANDOM', created_at: Time.current, updated_at: Time.current }}
+      let(:record_1) {{ id: 4, project_id: 2, fingerprint: '5848739446034d982ef7beece3bb19bff4044ffb', **other_params }}
+      let(:record_2) {{ project_id: 2, fingerprint: '5848739446034d982ef7beece3bb19bff4044ffb', **other_params }}
+      let(:record_3) {{ id: 4, fingerprint: '5848739446034d982ef7beece3bb19bff4044ffb', **other_params }}
+      let(:record_4) {{ id: 5, fingerprint: '6848739446034d982ef7beece3bb19bff4044ffb', **other_params }}
+      let(:record_5) {{ fingerprint: '5848739446034d982ef7beece3bb19bff4044ffb', **other_params }}
+      let(:record_6) {{ fingerprint: '6848739446034d982ef7beece3bb19bff4044ffb', **other_params }}
+
+      subject { described_class.new(pipeline, report) }
+
+      it 'updates existing vulnerability identifiers in groups' do
+        expect(Vulnerabilities::Identifier).to receive(:upsert_all).with([record_1])
+        expect(Vulnerabilities::Identifier).to receive(:upsert_all).with([record_3, record_4])
+
+        subject.send(:update_existing_vulnerability_identifiers_for, [record_1, record_3, record_4])
+      end
+
+      it 'does not update any identifier for an empty list of records' do
+        expect(Vulnerabilities::Identifier).not_to receive(:upsert_all)
+
+        subject.send(:update_existing_vulnerability_identifiers_for, [])
+      end
+
+      it 'inserts new vulnerability identifiers in groups' do
+        expect(Vulnerabilities::Identifier).to receive(:insert_all).with([record_2])
+        expect(Vulnerabilities::Identifier).to receive(:insert_all).with([record_5, record_6])
+
+        subject.send(:insert_new_vulnerability_identifiers_for, [record_2, record_5, record_6])
+      end
+
+      it 'does not insert any identifier for an empty list of records' do
+        expect(Vulnerabilities::Identifier).not_to receive(:insert_all)
+
+        subject.send(:insert_new_vulnerability_identifiers_for, [])
+      end
+    end
+
+    context 'when N+1 database queries have been removed' do
+      let(:trait) { :sast }
+      let(:bandit_scanner) { build(:ci_reports_security_scanner, external_id: 'bandit', name: 'Bandit') }
+      let(:link) { build(:ci_reports_security_link) }
+      let(:bandit_finding) { build(:ci_reports_security_finding, scanner: bandit_scanner, links: [link]) }
+      let(:vulnerability_findings) { [] }
+
+      subject { described_class.new(pipeline, report) }
+
+      it "avoids N+1 database queries for updating vulnerability scanners", :use_sql_query_cache do
+        report.add_scanner(bandit_scanner)
+
+        control_count = ActiveRecord::QueryRecorder.new(skip_cached: false) { subject.send(:update_vulnerability_scanners!, report.findings) }.count
+
+        2.times { add_finding_to_report }
+
+        expect { subject.send(:update_vulnerability_scanners!, report.findings) }.not_to exceed_query_limit(control_count)
+      end
+
+      it "avoids N+1 database queries for updating finding_links", :use_sql_query_cache do
+        report.add_scanner(bandit_scanner)
+        add_finding_to_report
+
+        stub_vulnerability_finding_id_to_finding_map
+        control_count = ActiveRecord::QueryRecorder.new(skip_cached: false) { subject.send(:update_vulnerability_links_info) }.count
+
+        2.times { add_finding_to_report }
+
+        stub_vulnerability_finding_id_to_finding_map
+        expect { subject.send(:update_vulnerability_links_info) }.not_to exceed_query_limit(control_count)
+      end
+
+      it "avoids N+1 database queries for updating vulnerabilities_identifiers", :use_sql_query_cache do
+        report.add_scanner(bandit_scanner)
+        add_finding_to_report
+
+        stub_vulnerability_finding_id_to_finding_map
+        stub_vulnerability_findings
+        control_count = ActiveRecord::QueryRecorder.new(skip_cached: false) { subject.send(:update_vulnerabilities_identifiers) }.count
+
+        2.times { add_finding_to_report }
+
+        stub_vulnerability_finding_id_to_finding_map
+        stub_vulnerability_findings
+        expect { subject.send(:update_vulnerabilities_identifiers) }.not_to exceed_query_limit(control_count)
+      end
+
+      def add_finding_to_report
+        report.add_finding(bandit_finding)
+      end
+
+      def stub_vulnerability_findings
+        allow(subject).to receive(:vulnerability_findings)
+          .and_return(vulnerability_findings)
+      end
+
+      def stub_vulnerability_finding_id_to_finding_map
+        allow(subject).to receive(:vulnerability_finding_id_to_finding_map)
+          .and_return(vulnerability_finding_id_to_finding_map)
+      end
+
+      def vulnerability_finding_id_to_finding_map
+        vulnerability_findings.clear
+        report.findings.to_h do |finding|
+          vulnerability_finding = create(:vulnerabilities_finding)
+          vulnerability_findings << vulnerability_finding
+          [vulnerability_finding.id, finding]
+        end
+      end
+    end
+
+    context 'when report data includes all raw_metadata' do
+      let(:trait) { :dependency_scanning_remediation }
+
+      it 'inserts top level finding data', :aggregate_failures do
+        subject
+
+        finding = Vulnerabilities::Finding.last
+        finding.raw_metadata = nil
+
+        expect(finding.metadata).to be_blank
+        expect(finding.cve).not_to be_nil
+        expect(finding.description).not_to be_nil
+        expect(finding.location).not_to be_nil
+        expect(finding.message).not_to be_nil
+        expect(finding.solution).not_to be_nil
+      end
+    end
+
+    context 'invalid data' do
+      let(:artifact) { create(:ee_ci_job_artifact, :sast) }
+      let(:finding_without_name) { build(:ci_reports_security_finding, name: nil) }
+      let(:report) { Gitlab::Ci::Reports::Security::Report.new('container_scanning', nil, nil) }
 
       before do
-        project.add_developer(user)
-        allow(pipeline).to receive(:user).and_return(user)
+        allow(Gitlab::ErrorTracking).to receive(:track_and_raise_exception).and_call_original
+        report.add_finding(finding_without_name)
       end
 
-      context 'for different security reports' do
-        where(:case_name, :trait, :scanners, :identifiers, :findings, :finding_identifiers, :finding_pipelines, :remediations, :signatures, :finding_links) do
-          'with SAST report'                | :sast                            | 1 | 6  | 5  | 7  | 5  | 0 | 2 | 0
-          'with exceeding identifiers'      | :with_exceeding_identifiers      | 1 | 20 | 1  | 20 | 1  | 0 | 0 | 0
-          'with Dependency Scanning report' | :dependency_scanning_remediation | 1 | 3  | 2  | 3  | 2  | 1 | 0 | 6
-          'with Container Scanning report'  | :container_scanning              | 1 | 8  | 8  | 8  | 8  | 0 | 0 | 8
-        end
-
-        with_them do
-          it 'inserts all scanners' do
-            expect { subject }.to change { Vulnerabilities::Scanner.count }.by(scanners)
-          end
-
-          it 'inserts all identifiers' do
-            expect { subject }.to change { Vulnerabilities::Identifier.count }.by(identifiers)
-          end
-
-          it 'inserts all findings' do
-            expect { subject }.to change { Vulnerabilities::Finding.count }.by(findings)
-          end
-
-          it 'inserts all finding links' do
-            expect { subject }.to change { Vulnerabilities::FindingLink.count }.by(finding_links)
-          end
-
-          it 'inserts all finding identifiers (join model)' do
-            expect { subject }.to change { Vulnerabilities::FindingIdentifier.count }.by(finding_identifiers)
-          end
-
-          it 'inserts all finding pipelines (join model)' do
-            expect { subject }.to change { Vulnerabilities::FindingPipeline.count }.by(finding_pipelines)
-          end
-
-          it 'inserts all remediations' do
-            expect { subject }.to change { project.vulnerability_remediations.count }.by(remediations)
-          end
-
-          it 'inserts all vulnerabilities' do
-            expect { subject }.to change { Vulnerability.count }.by(findings)
-          end
-
-          it 'inserts all signatures' do
-            signatures_count = vulnerability_finding_signatures_enabled ? signatures : 0
-            expect { subject }.to change { Vulnerabilities::FindingSignature.count }.by(signatures_count)
-          end
-        end
+      it 'raises invalid record error' do
+        expect { subject.execute }.to raise_error(ActiveRecord::RecordInvalid)
       end
 
-      context 'when there is an exception' do
-        let(:trait) { :sast }
-
-        subject { described_class.new(pipeline, report) }
-
-        it 'does not insert any scanner' do
-          allow(Vulnerabilities::Scanner).to receive(:insert_all).with(anything).and_raise(StandardError)
-          expect { subject.send(:update_vulnerability_scanners!, report.findings) }.to change { Vulnerabilities::Scanner.count }.by(0)
-        end
-      end
-
-      context 'when some attributes are missing in the identifiers' do
-        let(:trait) { :sast }
-        let(:other_params) {{ external_type: 'find_sec_bugs_type', external_id: 'PREDICTABLE_RANDOM', name: 'Find Security Bugs-PREDICTABLE_RANDOM', url: 'https://find-sec-bugs.github.io/bugs.htm#PREDICTABLE_RANDOM', created_at: Time.current, updated_at: Time.current }}
-        let(:record_1) {{ id: 4, project_id: 2, fingerprint: '5848739446034d982ef7beece3bb19bff4044ffb', **other_params }}
-        let(:record_2) {{ project_id: 2, fingerprint: '5848739446034d982ef7beece3bb19bff4044ffb', **other_params }}
-        let(:record_3) {{ id: 4, fingerprint: '5848739446034d982ef7beece3bb19bff4044ffb', **other_params }}
-        let(:record_4) {{ id: 5, fingerprint: '6848739446034d982ef7beece3bb19bff4044ffb', **other_params }}
-        let(:record_5) {{ fingerprint: '5848739446034d982ef7beece3bb19bff4044ffb', **other_params }}
-        let(:record_6) {{ fingerprint: '6848739446034d982ef7beece3bb19bff4044ffb', **other_params }}
-
-        subject { described_class.new(pipeline, report) }
-
-        it 'updates existing vulnerability identifiers in groups' do
-          expect(Vulnerabilities::Identifier).to receive(:upsert_all).with([record_1])
-          expect(Vulnerabilities::Identifier).to receive(:upsert_all).with([record_3, record_4])
-
-          subject.send(:update_existing_vulnerability_identifiers_for, [record_1, record_3, record_4])
-        end
-
-        it 'does not update any identifier for an empty list of records' do
-          expect(Vulnerabilities::Identifier).not_to receive(:upsert_all)
-
-          subject.send(:update_existing_vulnerability_identifiers_for, [])
-        end
-
-        it 'inserts new vulnerability identifiers in groups' do
-          expect(Vulnerabilities::Identifier).to receive(:insert_all).with([record_2])
-          expect(Vulnerabilities::Identifier).to receive(:insert_all).with([record_5, record_6])
-
-          subject.send(:insert_new_vulnerability_identifiers_for, [record_2, record_5, record_6])
-        end
-
-        it 'does not insert any identifier for an empty list of records' do
-          expect(Vulnerabilities::Identifier).not_to receive(:insert_all)
-
-          subject.send(:insert_new_vulnerability_identifiers_for, [])
-        end
-      end
-
-      context 'when N+1 database queries have been removed' do
-        let(:trait) { :sast }
-        let(:bandit_scanner) { build(:ci_reports_security_scanner, external_id: 'bandit', name: 'Bandit') }
-        let(:link) { build(:ci_reports_security_link) }
-        let(:bandit_finding) { build(:ci_reports_security_finding, scanner: bandit_scanner, links: [link]) }
-        let(:vulnerability_findings) { [] }
-
-        subject { described_class.new(pipeline, report) }
-
-        it "avoids N+1 database queries for updating vulnerability scanners", :use_sql_query_cache do
-          report.add_scanner(bandit_scanner)
-
-          control_count = ActiveRecord::QueryRecorder.new(skip_cached: false) { subject.send(:update_vulnerability_scanners!, report.findings) }.count
-
-          2.times { add_finding_to_report }
-
-          expect { subject.send(:update_vulnerability_scanners!, report.findings) }.not_to exceed_query_limit(control_count)
-        end
-
-        it "avoids N+1 database queries for updating finding_links", :use_sql_query_cache do
-          report.add_scanner(bandit_scanner)
-          add_finding_to_report
-
-          stub_vulnerability_finding_id_to_finding_map
-          control_count = ActiveRecord::QueryRecorder.new(skip_cached: false) { subject.send(:update_vulnerability_links_info) }.count
-
-          2.times { add_finding_to_report }
-
-          stub_vulnerability_finding_id_to_finding_map
-          expect { subject.send(:update_vulnerability_links_info) }.not_to exceed_query_limit(control_count)
-        end
-
-        it "avoids N+1 database queries for updating vulnerabilities_identifiers", :use_sql_query_cache do
-          report.add_scanner(bandit_scanner)
-          add_finding_to_report
-
-          stub_vulnerability_finding_id_to_finding_map
-          stub_vulnerability_findings
-          control_count = ActiveRecord::QueryRecorder.new(skip_cached: false) { subject.send(:update_vulnerabilities_identifiers) }.count
-
-          2.times { add_finding_to_report }
-
-          stub_vulnerability_finding_id_to_finding_map
-          stub_vulnerability_findings
-          expect { subject.send(:update_vulnerabilities_identifiers) }.not_to exceed_query_limit(control_count)
-        end
-
-        def add_finding_to_report
-          report.add_finding(bandit_finding)
-        end
-
-        def stub_vulnerability_findings
-          allow(subject).to receive(:vulnerability_findings)
-            .and_return(vulnerability_findings)
-        end
-
-        def stub_vulnerability_finding_id_to_finding_map
-          allow(subject).to receive(:vulnerability_finding_id_to_finding_map)
-            .and_return(vulnerability_finding_id_to_finding_map)
-        end
-
-        def vulnerability_finding_id_to_finding_map
-          vulnerability_findings.clear
-          report.findings.to_h do |finding|
-            vulnerability_finding = create(:vulnerabilities_finding)
-            vulnerability_findings << vulnerability_finding
-            [vulnerability_finding.id, finding]
-          end
-        end
-      end
-
-      context 'when report data includes all raw_metadata' do
-        let(:trait) { :dependency_scanning_remediation }
-
-        it 'inserts top level finding data', :aggregate_failures do
-          subject
-
-          finding = Vulnerabilities::Finding.last
-          finding.raw_metadata = nil
-
-          expect(finding.metadata).to be_blank
-          expect(finding.cve).not_to be_nil
-          expect(finding.description).not_to be_nil
-          expect(finding.location).not_to be_nil
-          expect(finding.message).not_to be_nil
-          expect(finding.solution).not_to be_nil
-        end
-      end
-
-      context 'invalid data' do
-        let(:artifact) { create(:ee_ci_job_artifact, :sast) }
-        let(:finding_without_name) { build(:ci_reports_security_finding, name: nil) }
-        let(:report) { Gitlab::Ci::Reports::Security::Report.new('container_scanning', nil, nil) }
-
-        before do
-          allow(Gitlab::ErrorTracking).to receive(:track_and_raise_exception).and_call_original
-          report.add_finding(finding_without_name)
-        end
-
-        it 'raises invalid record error' do
-          expect { subject.execute }.to raise_error(ActiveRecord::RecordInvalid)
-        end
-
-        it 'reports the error correctly' do
-          expected_params = finding_without_name.to_hash.dig(:raw_metadata)
-          expect { subject.execute }.to raise_error { |error|
-            expect(Gitlab::ErrorTracking).to have_received(:track_and_raise_exception).with(error, create_params: expected_params)
-          }
-        end
+      it 'reports the error correctly' do
+        expected_params = finding_without_name.to_hash.dig(:raw_metadata)
+        expect { subject.execute }.to raise_error { |error|
+          expect(Gitlab::ErrorTracking).to have_received(:track_and_raise_exception).with(error, create_params: expected_params)
+        }
       end
     end
 
@@ -391,8 +383,6 @@ RSpec.describe Security::StoreReportService, '#execute' do
         end
 
         it 'handles the error correctly' do
-          next unless vulnerability_finding_signatures_enabled
-
           report_finding = report.findings.find { |f| f.location.fingerprint == finding.location_fingerprint}
 
           store_report_service.execute
@@ -401,8 +391,6 @@ RSpec.describe Security::StoreReportService, '#execute' do
         end
 
         it 'raises the error if there exists no vulnerability finding' do
-          next unless vulnerability_finding_signatures_enabled
-
           allow(store_report_service).to receive(:sync_vulnerability_finding).and_raise(ActiveRecord::RecordNotUnique)
 
           expect { store_report_service.execute }.to raise_error { |error|
@@ -412,8 +400,6 @@ RSpec.describe Security::StoreReportService, '#execute' do
       end
 
       it 'updates signatures to match new values' do
-        next unless vulnerability_finding_signatures_enabled
-
         expect(finding.signatures.count).to eq(1)
         expect(finding.signatures.first.algorithm_type).to eq('hash')
 
@@ -658,35 +644,15 @@ RSpec.describe Security::StoreReportService, '#execute' do
       allow(pipeline).to receive(:user).and_return(user)
     end
 
-    # This spec runs three pipelines, ensuring findings are tracked as expected:
-    #  1. pipeline creates initial findings without tracking signatures
-    #  2. pipeline creates identical findings with tracking signatures
-    #  3. pipeline updates previous findings using tracking signatures
+    # This spec runs two pipelines, ensuring findings are tracked as expected:
+    #  1. pipeline creates identical findings with tracking signatures
+    #  2. pipeline updates previous findings using tracking signatures
     it 'remaps findings across pipeline executions', :aggregate_failures do
-      stub_licensed_features(
-        sast: true,
-        security_dashboard: true,
-        vulnerability_finding_signatures: false
-      )
-      stub_feature_flags(
-        vulnerability_finding_tracking_signatures: false
-      )
-
-      expect do
-        expect do
-          described_class.new(pipeline, report).execute
-        end.not_to(raise_error)
-      end.to change { Vulnerabilities::FindingPipeline.count }.by(1)
-        .and change { Vulnerability.count }.by(1)
-        .and change { Vulnerabilities::Finding.count }.by(1)
-        .and change { Vulnerabilities::FindingSignature.count }.by(0)
-
       stub_licensed_features(
         sast: true,
         security_dashboard: true,
         vulnerability_finding_signatures: true
       )
-      stub_feature_flags(vulnerability_finding_tracking_signatures: true)
 
       pipeline, report = generate_new_pipeline
 
