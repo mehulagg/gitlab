@@ -1,4 +1,4 @@
-import { GlIcon } from '@gitlab/ui';
+import { GlLink, GlIcon } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
 import { numberToHumanSize } from '~/lib/utils/number_utils';
 import DownloadViewer from '~/repository/components/blob_viewers/download_viewer.vue';
@@ -47,10 +47,22 @@ describe('Text Viewer', () => {
     expect(wrapper.text()).toBe('Download');
   });
 
+  it('renders download link', () => {
+    createComponent();
+    const { filePath, fileName } = DEFAULT_PROPS;
+
+    expect(wrapper.findComponent(GlLink).attributes()).toMatchObject({
+      rel: 'nofollow',
+      target: '_blank',
+      href: filePath,
+      download: fileName,
+    });
+  });
+
   it('renders download icon', () => {
     createComponent();
 
-    expect(wrapper.find(GlIcon).props()).toMatchObject({
+    expect(wrapper.findComponent(GlIcon).props()).toMatchObject({
       name: 'download',
       size: 16,
     });
