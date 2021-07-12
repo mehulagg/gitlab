@@ -25,6 +25,8 @@ module EE
       end
 
       def filtered_usage_data(payload = raw_payload, parents = [])
+        return if payload.nil?
+
         payload.keep_if do |label, node|
           if leaf?(node)
             permitted_categories.include?(metric_category(label, parents))
