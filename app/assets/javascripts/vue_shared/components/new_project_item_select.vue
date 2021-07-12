@@ -1,8 +1,13 @@
 <script>
-import { GlDropdown } from '@gitlab/ui';
+import { GlDropdown, GlDropdownItem, GlSearchBoxByType } from '@gitlab/ui';
 
 export default {
   name: 'NewProjectItemSelect',
+  components: {
+    GlDropdown,
+    GlDropdownItem,
+    GlSearchBoxByType,
+  },
   props: {
     type: {
       type: String,
@@ -24,20 +29,29 @@ export default {
       required: false,
       default: '',
     },
+    frequentProjects: {
+      type: Array,
+      required: false,
+    },
+  },
+  data() {
+    return {
+      searchTerm: '',
+    }
   },
   computed: {
     text() {
       return `Create ${this.label.toLowerCase()} in...`
     },
   },
-  components: {
-    GlDropdown,
-  },
 };
 </script>
 
 <template>
-  <gl-dropdown
-    :text="text"
-  />
+  <gl-dropdown :text="text">
+    <gl-search-box-by-type v-model.trim="searchTerm" />
+    <gl-dropdown-item v-for="project in frequentProjects" :key="project.id">
+      {{ project.name }}
+    </gl-dropdown-item>
+  </gl-dropdown>
 </template>
