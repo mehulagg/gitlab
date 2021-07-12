@@ -10,6 +10,7 @@ import epicUtils from 'ee/epic/utils/epic_utils';
 
 import { parsePikadayDate } from '~/lib/utils/datetime_utility';
 
+import SidebarReferenceWidget from '~/sidebar/components/reference/sidebar_reference_widget.vue';
 import SidebarSubscriptionsWidget from '~/sidebar/components/subscriptions/sidebar_subscriptions_widget.vue';
 
 import { mockEpicMeta, mockEpicData, mockAncestors } from '../mock_data';
@@ -211,6 +212,10 @@ describe('EpicSidebarComponent', () => {
 
     it('renders SidebarSubscriptionsWidget', () => {
       expect(wrapper.find(SidebarSubscriptionsWidget).exists()).toBe(true);
+    });
+
+    it('renders SidebarReferenceWidget', () => {
+      expect(wrapper.find(SidebarReferenceWidget).exists()).toBe(true);
     });
 
     describe('when sub-epics feature is available', () => {

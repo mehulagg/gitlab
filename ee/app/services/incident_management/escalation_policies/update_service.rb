@@ -26,6 +26,7 @@ module IncidentManagement
       def execute
         return error_no_permissions unless allowed?
         return error_no_rules if empty_rules?
+        return error_too_many_rules if too_many_rules?
         return error_bad_schedules if invalid_schedules?
 
         reconcile_rules!

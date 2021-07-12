@@ -150,7 +150,7 @@ export default {
   <div>
     <div class="gl-display-flex">
       <h3 ref="pageTitle" class="page-title">
-        {{ isEditing ? __('Edit iteration') : __('New iteration') }}
+        {{ isEditing ? s__('Iterations|Edit iteration') : s__('Iterations|New iteration') }}
       </h3>
     </div>
     <hr class="gl-mt-0" />

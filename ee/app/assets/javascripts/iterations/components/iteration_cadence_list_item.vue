@@ -62,6 +62,11 @@ export default {
       type: String,
       required: true,
     },
+    automatic: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
     durationInWeeks: {
       type: Number,
       required: false,
@@ -212,7 +217,7 @@ export default {
         text-sr-only
         no-caret
       >
-        <gl-dropdown-item v-if="!durationInWeeks" :to="newIteration">
+        <gl-dropdown-item v-if="!automatic" :to="newIteration">
           {{ s__('Iterations|Add iteration') }}
         </gl-dropdown-item>
 

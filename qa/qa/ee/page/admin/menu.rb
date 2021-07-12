@@ -21,7 +21,7 @@ module QA
               end
 
               view 'ee/app/views/layouts/nav/sidebar/_licenses_link.html.haml' do
-                element :link_license_menu
+                element :link_subscription_menu
               end
 
               view 'ee/app/views/layouts/nav/ee/admin/_new_monitoring_sidebar.html.haml' do
@@ -42,8 +42,8 @@ module QA
             click_element :link_geo_menu
           end
 
-          def click_license_menu_link
-            click_element :link_license_menu
+          def click_subscription_menu_link
+            click_element :link_subscription_menu
           end
 
           def go_to_template_settings

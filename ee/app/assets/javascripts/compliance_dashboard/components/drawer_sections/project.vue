@@ -2,6 +2,7 @@
 import { GlAvatarLabeled, GlAvatarLink } from '@gitlab/ui';
 import ComplianceFrameworkLabel from 'ee/vue_shared/components/compliance_framework_label/compliance_framework_label.vue';
 import { __ } from '~/locale';
+import { DRAWER_AVATAR_SIZE } from '../../constants';
 import DrawerSectionHeader from '../shared/drawer_section_header.vue';
 
 export default {
@@ -34,6 +35,7 @@ export default {
   i18n: {
     header: __('Project'),
   },
+  DRAWER_AVATAR_SIZE,
 };
 </script>
 <template>
@@ -42,7 +44,7 @@ export default {
     <div class="gl-display-flex gl-align-items-center">
       <gl-avatar-link :title="name" :href="url">
         <gl-avatar-labeled
-          :size="16"
+          :size="$options.DRAWER_AVATAR_SIZE"
           :entity-name="name"
           label=""
           :sub-label="name"

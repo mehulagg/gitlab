@@ -55,6 +55,8 @@ const createComponent = ({ testCase, testCaseQueryLoading = false } = {}) =>
 describe('TestCaseShowRoot', () => {
   let wrapper;
 
+  const findTestCaseSidebar = () => wrapper.findComponent(TestCaseSidebar);
+
   beforeEach(() => {
     wrapper = createComponent();
   });
@@ -361,7 +363,17 @@ describe('TestCaseShowRoot', () => {
     });
 
     it('renders test-case-sidebar', async () => {
-      expect(wrapper.find(TestCaseSidebar).exists()).toBe(true);
+      expect(findTestCaseSidebar().exists()).toBe(true);
+    });
+
+    it('updates `sidebarExpanded` prop on `sidebar-toggle` event', async () => {
+      const testCaseSidebar = findTestCaseSidebar();
+      expect(testCaseSidebar.props('sidebarExpanded')).toBe(true);
+
+      testCaseSidebar.vm.$emit('sidebar-toggle');
+      await wrapper.vm.$nextTick();
+
+      expect(testCaseSidebar.props('sidebarExpanded')).toBe(false);
     });
   });
 });

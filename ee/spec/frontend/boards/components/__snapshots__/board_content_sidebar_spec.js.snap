@@ -9,6 +9,7 @@ exports[`ee/BoardContentSidebar matches the snapshot 1`] = `
   >
     Issue details
   </h2>
+    
   <boardsidebartitle-stub />
    
   <sidebarassigneeswidget-stub

@@ -24,6 +24,7 @@ RSpec.describe 'User searches for epics', :js do
   end
 
   include_examples 'top right search form'
+  include_examples 'search timeouts', 'epics'
 
   it 'finds an epic' do
     search_for_epic(epic1.title)

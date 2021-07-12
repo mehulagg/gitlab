@@ -15,7 +15,7 @@ RSpec.describe 'Activate a subscription' do
 
   let!(:application_setting) do
     stub_env('IN_MEMORY_APPLICATION_SETTINGS', 'false')
-    create(:application_setting, cloud_license_enabled: true)
+    create(:application_setting)
   end
 
   let(:remote_response) do

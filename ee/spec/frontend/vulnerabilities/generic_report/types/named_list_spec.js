@@ -5,8 +5,8 @@ import { extendedWrapper } from 'helpers/vue_test_utils_helper';
 
 const TEST_DATA = {
   items: [
-    { label: 'url1', type: REPORT_TYPES.url, href: 'http://foo.bar' },
-    { label: 'url2', type: REPORT_TYPES.url, href: 'http://bar.baz' },
+    { label: 'comment_1', name: 'url1', type: REPORT_TYPES.url, href: 'http://foo.bar' },
+    { label: 'comment_2', name: 'url2', type: REPORT_TYPES.url, href: 'http://bar.baz' },
   ],
 };
 
@@ -47,8 +47,8 @@ describe('ee/vulnerabilities/components/generic_report/types/named_list.vue', ()
   });
 
   describe.each(TEST_DATA.items)('list item: %s', (item) => {
-    it(`renders the item's label`, () => {
-      expect(wrapper.findByText(item.label).exists()).toBe(true);
+    it(`renders the item's name`, () => {
+      expect(wrapper.findByText(item.name).exists()).toBe(true);
     });
 
     it('renders a report-item', () => {

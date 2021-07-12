@@ -200,7 +200,7 @@ export default {
           if (this.automatic) {
             return true;
           }
-          const requiredFieldsForAutomatedScheduling = ['iterationsInAdvance'];
+          const requiredFieldsForAutomatedScheduling = ['iterationsInAdvance', 'durationInWeeks'];
           return !requiredFieldsForAutomatedScheduling.includes(field);
         })
         .forEach((field) => {
@@ -216,6 +216,7 @@ export default {
       this.clearValidation();
       if (!value) {
         this.iterationsInAdvance = 0;
+        this.durationInWeeks = 0;
       }
     },
     save() {
@@ -353,9 +354,9 @@ export default {
           v-model.number="durationInWeeks"
           :options="$options.availableDurations"
           class="gl-form-input-md"
-          required
+          :required="automatic"
           data-qa-selector="iteration_cadence_name_field"
-          :disabled="loadingCadence"
+          :disabled="loadingCadence || !automatic"
           @change="validate('durationInWeeks')"
         />
       </gl-form-group>

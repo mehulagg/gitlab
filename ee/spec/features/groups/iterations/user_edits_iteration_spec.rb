@@ -73,7 +73,7 @@ RSpec.describe 'User edits iteration' do
 
           it 'prefills fields and updates URL' do
             find(dropdown_selector).click
-            click_link_or_button('Edit iteration')
+            click_link_or_button('Edit')
 
             aggregate_failures do
               expect(title_input.value).to eq(iteration.title)

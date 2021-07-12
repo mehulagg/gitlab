@@ -126,7 +126,7 @@ RSpec.describe 'Git LFS API and storage' do
             it_behaves_like 'LFS http 200 blob response'
 
             context 'when user password is expired' do
-              let_it_be(:user) { create(:user, password_expires_at: 1.minute.ago)}
+              let_it_be(:user) { create(:user, password_expires_at: 1.minute.ago, password_automatically_set: true)}
 
               it_behaves_like 'LFS http 401 response'
             end
@@ -344,7 +344,7 @@ RSpec.describe 'Git LFS API and storage' do
             end
 
             context 'when user password is expired' do
-              let_it_be(:user) { create(:user, password_expires_at: 1.minute.ago)}
+              let_it_be(:user) { create(:user, password_expires_at: 1.minute.ago, password_automatically_set: true)}
 
               let(:role) { :reporter}
 
@@ -574,7 +574,7 @@ RSpec.describe 'Git LFS API and storage' do
                   let(:pipeline) { create(:ci_empty_pipeline, project: other_project) }
 
                   # I'm not sure what this tests that is different from the previous test
-                  it_behaves_like 'LFS http 404 response'
+                  it_behaves_like 'LFS http 403 response'
                 end
               end
 
@@ -958,7 +958,7 @@ RSpec.describe 'Git LFS API and storage' do
               it_behaves_like 'LFS http 200 workhorse response'
 
               context 'when user password is expired' do
-                let_it_be(:user) { create(:user, password_expires_at: 1.minute.ago)}
+                let_it_be(:user) { create(:user, password_expires_at: 1.minute.ago, password_automatically_set: true) }
 
                 it_behaves_like 'LFS http 401 response'
               end
@@ -1049,7 +1049,7 @@ RSpec.describe 'Git LFS API and storage' do
                 let(:pipeline) { create(:ci_empty_pipeline, project: other_project) }
 
                 # I'm not sure what this tests that is different from the previous test
-                it_behaves_like 'LFS http 404 response'
+                it_behaves_like 'LFS http 403 response'
               end
             end
 

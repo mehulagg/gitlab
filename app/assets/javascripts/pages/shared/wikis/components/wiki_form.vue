@@ -264,6 +264,7 @@ export default {
         this.contentEditor ||
         createContentEditor({
           renderMarkdown: (markdown) => this.getContentHTML(markdown),
+          uploadsPath: this.pageInfo.uploadsPath,
           tiptapOptions: {
             onUpdate: () => this.handleContentChange(),
           },
@@ -461,7 +462,7 @@ export default {
         </markdown-field>
 
         <div v-if="isContentEditorActive">
-          <gl-alert class="gl-mb-6" variant="tip" :dismissable="false">
+          <gl-alert class="gl-mb-6" variant="tip" :dismissible="false">
             <gl-sprintf :message="$options.i18n.contentEditor.feedbackTip">
               <template
                 #link="// eslint-disable-next-line vue/no-template-shadow

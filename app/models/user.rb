@@ -434,6 +434,7 @@ class User < ApplicationRecord
   scope :by_id_and_login, ->(id, login) { where(id: id).where('username = LOWER(:login) OR email = LOWER(:login)', login: login) }
   scope :dormant, -> { active.where('last_activity_on <= ?', MINIMUM_INACTIVE_DAYS.day.ago.to_date) }
   scope :with_no_activity, -> { active.where(last_activity_on: nil) }
+  scope :by_provider_and_extern_uid, ->(provider, extern_uid) { joins(:identities).merge(Identity.with_extern_uid(provider, extern_uid)) }
 
   def preferred_language
     read_attribute('preferred_language') ||
@@ -556,10 +557,6 @@ class User < ApplicationRecord
       else
         order_by(order_method)
       end
-    end
-
-    def for_github_id(id)
-      joins(:identities).merge(Identity.with_extern_uid(:github, id))
     end
 
     # Find a User by their primary email or any associated secondary email
@@ -1308,6 +1305,10 @@ class User < ApplicationRecord
     save if notification_email_changed? || public_email_changed? || commit_email_changed?
   end
 
+  def admin_unsubscribe!
+    update_column :admin_email_unsubscribed_at, Time.current
+  end
+
   def set_projects_limit
     # `User.select(:id)` raises
     # `ActiveModel::MissingAttributeError: missing attribute: projects_limit`
@@ -1890,7 +1891,8 @@ class User < ApplicationRecord
   end
 
   def password_expired_if_applicable?
-    return false unless password_expired?
+    return false if bot?
+    return false unless password_expired? && password_automatically_set?
     return false unless allow_password_authentication?
 
     true

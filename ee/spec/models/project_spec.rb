@@ -1791,18 +1791,26 @@ RSpec.describe Project do
   end
 
   describe '#latest_pipeline_with_reports' do
-    let(:project) { create(:project) }
-    let!(:pipeline_1) { create(:ee_ci_pipeline, :with_sast_report, project: project) }
-    let!(:pipeline_2) { create(:ee_ci_pipeline, :with_sast_report, project: project) }
-    let!(:pipeline_3) { create(:ee_ci_pipeline, :with_dependency_scanning_report, project: project) }
+    let_it_be(:project) { create(:project) }
+    let_it_be(:pipeline_1) { create(:ee_ci_pipeline, :with_sast_report, project: project) }
+    let_it_be(:pipeline_2) { create(:ee_ci_pipeline, :with_sast_report, project: project) }
+    let_it_be(:pipeline_3) { create(:ee_ci_pipeline, :with_dependency_scanning_report, project: project) }
 
     subject { project.latest_pipeline_with_reports(reports) }
 
     context 'when reports are found' do
-      let(:reports) { ::Ci::JobArtifact.sast_reports }
+      let_it_be(:reports) { ::Ci::JobArtifact.sast_reports }
 
       it "returns the latest pipeline with reports of right type" do
         is_expected.to eq(pipeline_2)
+      end
+
+      context 'and one of the pipelines has not yet completed' do
+        let_it_be(:pipeline_4) { create(:ee_ci_pipeline, :with_sast_report, project: project, status: :running) }
+
+        it 'returns the latest successful pipeline with reports' do
+          is_expected.to eq(pipeline_2)
+        end
       end
     end
 

@@ -25,3 +25,18 @@ export const POLICY_KINDS = {
   ciliumNetwork: 'CiliumNetworkPolicy',
   scanExecution: 'scanner_profile',
 };
+
+export const POLICY_TYPE_OPTIONS = {
+  POLICY_TYPE_NETWORK: {
+    value: 'POLICY_TYPE_NETWORK',
+    text: s__('SecurityPolicies|Network'),
+  },
+  POLICY_TYPE_SCAN_EXECUTION: {
+    value: 'POLICY_TYPE_SCAN_EXECUTION',
+    text: s__('SecurityPolicies|Scan execution'),
+  },
+  ALL: {
+    value: '',
+    text: s__('SecurityPolicies|All policies'),
+  },
+};

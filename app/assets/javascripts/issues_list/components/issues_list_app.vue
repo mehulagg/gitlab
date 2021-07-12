@@ -50,8 +50,8 @@ import {
   getSortOptions,
 } from '~/issues_list/utils';
 import axios from '~/lib/utils/axios_utils';
-import { getParameterByName } from '~/lib/utils/common_utils';
 import { scrollUp } from '~/lib/utils/scroll_utils';
+import { getParameterByName } from '~/lib/utils/url_utility';
 import {
   DEFAULT_NONE_ANY,
   OPERATOR_IS_ONLY,
@@ -664,7 +664,7 @@ export default {
           v-gl-tooltip
           class="gl-display-none gl-sm-display-block"
           :title="$options.i18n.relatedMergeRequests"
-          data-testid="issuable-mr"
+          data-testid="merge-requests"
         >
           <gl-icon name="merge-request" />
           {{ issuable.mergeRequestsCount }}
@@ -672,7 +672,7 @@ export default {
         <li
           v-if="issuable.upvotes"
           v-gl-tooltip
-          class="gl-display-none gl-sm-display-block"
+          class="issuable-upvotes gl-display-none gl-sm-display-block"
           :title="$options.i18n.upvotes"
           data-testid="issuable-upvotes"
         >
@@ -682,7 +682,7 @@ export default {
         <li
           v-if="issuable.downvotes"
           v-gl-tooltip
-          class="gl-display-none gl-sm-display-block"
+          class="issuable-downvotes gl-display-none gl-sm-display-block"
           :title="$options.i18n.downvotes"
           data-testid="issuable-downvotes"
         >
@@ -690,7 +690,7 @@ export default {
           {{ issuable.downvotes }}
         </li>
         <blocking-issues-count
-          class="gl-display-none gl-sm-display-block"
+          class="blocking-issues gl-display-none gl-sm-display-block"
           :blocking-issues-count="issuable.blockedByCount"
           :is-list-item="true"
         />

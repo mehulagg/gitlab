@@ -1,14 +1,20 @@
 <script>
 import { GlDrawer } from '@gitlab/ui';
 import BranchPath from './drawer_sections/branch_path.vue';
+import Committers from './drawer_sections/committers.vue';
+import MergedBy from './drawer_sections/merged_by.vue';
 import Project from './drawer_sections/project.vue';
 import Reference from './drawer_sections/reference.vue';
+import Reviewers from './drawer_sections/reviewers.vue';
 
 export default {
   components: {
-    GlDrawer,
     BranchPath,
+    Committers,
+    GlDrawer,
+    MergedBy,
     Reference,
+    Reviewers,
     Project,
   },
   props: {
@@ -50,7 +56,7 @@ export default {
     :z-index="$options.Z_INDEX"
     @close="$emit('close')"
   >
-    <template #header>
+    <template #title>
       <h4 data-testid="dashboard-drawer-title">{{ mergeRequest.title }}</h4>
     </template>
     <template v-if="showDrawer" #default>
@@ -68,6 +74,12 @@ export default {
         :target-branch="mergeRequest.target_branch"
         :target-branch-uri="mergeRequest.target_branch_uri"
       />
+      <committers :committers="mergeRequest.committers" />
+      <reviewers
+        :approvers="mergeRequest.approved_by_users"
+        :commenters="mergeRequest.participants"
+      />
+      <merged-by :merged-by="mergeRequest.merged_by" />
     </template>
   </gl-drawer>
 </template>

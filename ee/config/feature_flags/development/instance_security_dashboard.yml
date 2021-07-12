@@ -1,7 +1,7 @@
 ---
 name: instance_security_dashboard
 introduced_by_url: https://gitlab.com/gitlab-org/gitlab/-/merge_requests/24505
-rollout_issue_url: 
+rollout_issue_url: https://gitlab.com/gitlab-org/gitlab/-/issues/259285
 milestone: '12.8'
 type: development
 group: group::threat insights

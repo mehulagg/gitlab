@@ -9215,7 +9215,7 @@ ALTER SEQUENCE appearances_id_seq OWNED BY appearances.id;
 CREATE TABLE application_setting_terms (
     id integer NOT NULL,
     cached_markdown_version integer,
-    terms text NOT NULL,
+    terms text,
     terms_html text
 );
 
@@ -12790,6 +12790,7 @@ CREATE TABLE error_tracking_errors (
     platform text,
     created_at timestamp with time zone NOT NULL,
     updated_at timestamp with time zone NOT NULL,
+    events_count bigint DEFAULT 0 NOT NULL,
     CONSTRAINT check_18a758e537 CHECK ((char_length(name) <= 255)),
     CONSTRAINT check_b5cb4d3888 CHECK ((char_length(actor) <= 255)),
     CONSTRAINT check_c739788b12 CHECK ((char_length(description) <= 1024)),
@@ -14267,6 +14268,7 @@ CREATE TABLE issues (
     sprint_id bigint,
     issue_type smallint DEFAULT 0 NOT NULL,
     blocking_issues_count integer DEFAULT 0 NOT NULL,
+    upvotes_count integer DEFAULT 0 NOT NULL,
     CONSTRAINT check_fba63f706d CHECK ((lock_version IS NOT NULL))
 );
 
@@ -14760,6 +14762,24 @@ CREATE SEQUENCE merge_request_context_commits_id_seq
 
 ALTER SEQUENCE merge_request_context_commits_id_seq OWNED BY merge_request_context_commits.id;
 
+CREATE TABLE merge_request_diff_commit_users (
+    id bigint NOT NULL,
+    name text,
+    email text,
+    CONSTRAINT check_147358fc42 CHECK ((char_length(name) <= 512)),
+    CONSTRAINT check_f5fa206cf7 CHECK ((char_length(email) <= 512)),
+    CONSTRAINT merge_request_diff_commit_users_name_or_email_existence CHECK (((COALESCE(name, ''::text) <> ''::text) OR (COALESCE(email, ''::text) <> ''::text)))
+);
+
+CREATE SEQUENCE merge_request_diff_commit_users_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE merge_request_diff_commit_users_id_seq OWNED BY merge_request_diff_commit_users.id;
+
 CREATE TABLE merge_request_diff_commits (
     authored_date timestamp without time zone,
     committed_date timestamp without time zone,
@@ -14771,7 +14791,9 @@ CREATE TABLE merge_request_diff_commits (
     committer_name text,
     committer_email text,
     message text,
-    trailers jsonb DEFAULT '{}'::jsonb NOT NULL
+    trailers jsonb DEFAULT '{}'::jsonb NOT NULL,
+    commit_author_id bigint,
+    committer_id bigint
 );
 
 CREATE TABLE merge_request_diff_details (
@@ -15142,6 +15164,7 @@ CREATE TABLE namespace_settings (
     resource_access_token_creation_allowed boolean DEFAULT true NOT NULL,
     lock_delayed_project_removal boolean DEFAULT false NOT NULL,
     prevent_sharing_groups_outside_hierarchy boolean DEFAULT false NOT NULL,
+    new_user_signups_cap integer,
     CONSTRAINT check_0ba93c78c7 CHECK ((char_length(default_branch_name) <= 255))
 );
 
@@ -16562,23 +16585,25 @@ END AS attrelname
   ORDER BY relation_stats.nspname, relation_stats.tblname, relation_stats.idxname;
 
 CREATE VIEW postgres_indexes AS
- SELECT (((pg_namespace.nspname)::text || '.'::text) || (pg_class.relname)::text) AS identifier,
+ SELECT (((pg_namespace.nspname)::text || '.'::text) || (i.relname)::text) AS identifier,
     pg_index.indexrelid,
     pg_namespace.nspname AS schema,
-    pg_class.relname AS name,
+    i.relname AS name,
     pg_indexes.tablename,
+    a.amname AS type,
     pg_index.indisunique AS "unique",
     pg_index.indisvalid AS valid_index,
-    pg_class.relispartition AS partitioned,
+    i.relispartition AS partitioned,
     pg_index.indisexclusion AS exclusion,
     (pg_index.indexprs IS NOT NULL) AS expression,
     (pg_index.indpred IS NOT NULL) AS partial,
     pg_indexes.indexdef AS definition,
-    pg_relation_size((pg_class.oid)::regclass) AS ondisk_size_bytes
-   FROM (((pg_index
-     JOIN pg_class ON ((pg_class.oid = pg_index.indexrelid)))
-     JOIN pg_namespace ON ((pg_class.relnamespace = pg_namespace.oid)))
-     JOIN pg_indexes ON ((pg_class.relname = pg_indexes.indexname)))
+    pg_relation_size((i.oid)::regclass) AS ondisk_size_bytes
+   FROM ((((pg_index
+     JOIN pg_class i ON ((i.oid = pg_index.indexrelid)))
+     JOIN pg_namespace ON ((i.relnamespace = pg_namespace.oid)))
+     JOIN pg_indexes ON ((i.relname = pg_indexes.indexname)))
+     JOIN pg_am a ON ((i.relam = a.oid)))
   WHERE ((pg_namespace.nspname <> 'pg_catalog'::name) AND (pg_namespace.nspname = ANY (ARRAY["current_schema"(), 'gitlab_partitions_dynamic'::name, 'gitlab_partitions_static'::name])));
 
 CREATE VIEW postgres_partitioned_tables AS
@@ -19166,6 +19191,44 @@ CREATE SEQUENCE vulnerability_finding_evidence_responses_id_seq
 
 ALTER SEQUENCE vulnerability_finding_evidence_responses_id_seq OWNED BY vulnerability_finding_evidence_responses.id;
 
+CREATE TABLE vulnerability_finding_evidence_sources (
+    id bigint NOT NULL,
+    created_at timestamp with time zone NOT NULL,
+    updated_at timestamp with time zone NOT NULL,
+    vulnerability_finding_evidence_id bigint NOT NULL,
+    name text,
+    url text,
+    CONSTRAINT check_0fe01298d6 CHECK ((char_length(url) <= 2048)),
+    CONSTRAINT check_86b537ba1a CHECK ((char_length(name) <= 2048))
+);
+
+CREATE SEQUENCE vulnerability_finding_evidence_sources_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE vulnerability_finding_evidence_sources_id_seq OWNED BY vulnerability_finding_evidence_sources.id;
+
+CREATE TABLE vulnerability_finding_evidence_supporting_messages (
+    id bigint NOT NULL,
+    created_at timestamp with time zone NOT NULL,
+    updated_at timestamp with time zone NOT NULL,
+    vulnerability_finding_evidence_id bigint NOT NULL,
+    name text,
+    CONSTRAINT check_fa33b9ae85 CHECK ((char_length(name) <= 2048))
+);
+
+CREATE SEQUENCE vulnerability_finding_evidence_supporting_messages_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE vulnerability_finding_evidence_supporting_messages_id_seq OWNED BY vulnerability_finding_evidence_supporting_messages.id;
+
 CREATE TABLE vulnerability_finding_evidences (
     id bigint NOT NULL,
     created_at timestamp with time zone NOT NULL,
@@ -20160,6 +20223,8 @@ ALTER TABLE ONLY merge_request_cleanup_schedules ALTER COLUMN merge_request_id S
 
 ALTER TABLE ONLY merge_request_context_commits ALTER COLUMN id SET DEFAULT nextval('merge_request_context_commits_id_seq'::regclass);
 
+ALTER TABLE ONLY merge_request_diff_commit_users ALTER COLUMN id SET DEFAULT nextval('merge_request_diff_commit_users_id_seq'::regclass);
+
 ALTER TABLE ONLY merge_request_diff_details ALTER COLUMN merge_request_diff_id SET DEFAULT nextval('merge_request_diff_details_merge_request_diff_id_seq'::regclass);
 
 ALTER TABLE ONLY merge_request_diffs ALTER COLUMN id SET DEFAULT nextval('merge_request_diffs_id_seq'::regclass);
@@ -20503,6 +20568,10 @@ ALTER TABLE ONLY vulnerability_finding_evidence_headers ALTER COLUMN id SET DEFA
 ALTER TABLE ONLY vulnerability_finding_evidence_requests ALTER COLUMN id SET DEFAULT nextval('vulnerability_finding_evidence_requests_id_seq'::regclass);
 
 ALTER TABLE ONLY vulnerability_finding_evidence_responses ALTER COLUMN id SET DEFAULT nextval('vulnerability_finding_evidence_responses_id_seq'::regclass);
+
+ALTER TABLE ONLY vulnerability_finding_evidence_sources ALTER COLUMN id SET DEFAULT nextval('vulnerability_finding_evidence_sources_id_seq'::regclass);
+
+ALTER TABLE ONLY vulnerability_finding_evidence_supporting_messages ALTER COLUMN id SET DEFAULT nextval('vulnerability_finding_evidence_supporting_messages_id_seq'::regclass);
 
 ALTER TABLE ONLY vulnerability_finding_evidences ALTER COLUMN id SET DEFAULT nextval('vulnerability_finding_evidences_id_seq'::regclass);
 
@@ -21600,6 +21669,9 @@ ALTER TABLE ONLY merge_request_context_commit_diff_files
 ALTER TABLE ONLY merge_request_context_commits
     ADD CONSTRAINT merge_request_context_commits_pkey PRIMARY KEY (id);
 
+ALTER TABLE ONLY merge_request_diff_commit_users
+    ADD CONSTRAINT merge_request_diff_commit_users_pkey PRIMARY KEY (id);
+
 ALTER TABLE ONLY merge_request_diff_commits
     ADD CONSTRAINT merge_request_diff_commits_pkey PRIMARY KEY (merge_request_diff_id, relative_order);
 
@@ -22218,6 +22290,12 @@ ALTER TABLE ONLY vulnerability_finding_evidence_requests
 ALTER TABLE ONLY vulnerability_finding_evidence_responses
     ADD CONSTRAINT vulnerability_finding_evidence_responses_pkey PRIMARY KEY (id);
 
+ALTER TABLE ONLY vulnerability_finding_evidence_sources
+    ADD CONSTRAINT vulnerability_finding_evidence_sources_pkey PRIMARY KEY (id);
+
+ALTER TABLE ONLY vulnerability_finding_evidence_supporting_messages
+    ADD CONSTRAINT vulnerability_finding_evidence_supporting_messages_pkey PRIMARY KEY (id);
+
 ALTER TABLE ONLY vulnerability_finding_evidences
     ADD CONSTRAINT vulnerability_finding_evidences_pkey PRIMARY KEY (id);
 
@@ -22463,6 +22541,10 @@ CREATE INDEX finding_evidence_requests_on_finding_evidence_id ON vulnerability_f
 
 CREATE INDEX finding_evidence_responses_on_finding_evidences_id ON vulnerability_finding_evidence_responses USING btree (vulnerability_finding_evidence_id);
 
+CREATE INDEX finding_evidence_sources_on_finding_evidence_id ON vulnerability_finding_evidence_sources USING btree (vulnerability_finding_evidence_id);
+
+CREATE INDEX finding_evidence_supporting_messages_on_finding_evidence_id ON vulnerability_finding_evidence_supporting_messages USING btree (vulnerability_finding_evidence_id);
+
 CREATE INDEX finding_evidences_on_vulnerability_occurrence_id ON vulnerability_finding_evidences USING btree (vulnerability_occurrence_id);
 
 CREATE INDEX finding_links_on_vulnerability_occurrence_id ON vulnerability_finding_links USING btree (vulnerability_occurrence_id);
@@ -22470,6 +22552,8 @@ CREATE INDEX finding_links_on_vulnerability_occurrence_id ON vulnerability_findi
 CREATE UNIQUE INDEX i_ci_job_token_project_scope_links_on_source_and_target_project ON ci_job_token_project_scope_links USING btree (source_project_id, target_project_id);
 
 CREATE INDEX idx_analytics_devops_adoption_segments_on_namespace_id ON analytics_devops_adoption_segments USING btree (namespace_id);
+
+CREATE INDEX idx_analytics_devops_adoption_snapshots_finalized ON analytics_devops_adoption_snapshots USING btree (namespace_id, end_time) WHERE (recorded_at >= end_time);
 
 CREATE INDEX idx_audit_events_part_on_entity_id_desc_author_id_created_at ON ONLY audit_events USING btree (entity_id, entity_type, id DESC, author_id, created_at);
 
@@ -22481,7 +22565,7 @@ CREATE INDEX idx_container_exp_policies_on_project_id_next_run_at ON container_e
 
 CREATE INDEX idx_container_exp_policies_on_project_id_next_run_at_enabled ON container_expiration_policies USING btree (project_id, next_run_at, enabled);
 
-CREATE INDEX idx_container_repositories_on_exp_cleanup_status_and_start_date ON container_repositories USING btree (expiration_policy_cleanup_status, expiration_policy_started_at);
+CREATE INDEX idx_container_repos_on_exp_cleanup_status_project_id_start_date ON container_repositories USING btree (expiration_policy_cleanup_status, project_id, expiration_policy_started_at);
 
 CREATE INDEX idx_deployment_clusters_on_cluster_id_and_kubernetes_namespace ON deployment_clusters USING btree (cluster_id, kubernetes_namespace);
 
@@ -23903,6 +23987,8 @@ CREATE INDEX index_merge_request_blocks_on_blocked_merge_request_id ON merge_req
 
 CREATE UNIQUE INDEX index_merge_request_cleanup_schedules_on_merge_request_id ON merge_request_cleanup_schedules USING btree (merge_request_id);
 
+CREATE UNIQUE INDEX index_merge_request_diff_commit_users_on_name_and_email ON merge_request_diff_commit_users USING btree (name, email);
+
 CREATE INDEX index_merge_request_diff_commits_on_sha ON merge_request_diff_commits USING btree (sha);
 
 CREATE INDEX index_merge_request_diff_details_failed_verification ON merge_request_diff_details USING btree (verification_retry_at NULLS FIRST) WHERE (verification_state = 3);
@@ -24740,6 +24826,8 @@ CREATE INDEX index_security_findings_on_scanner_id ON security_findings USING bt
 CREATE INDEX index_security_findings_on_severity ON security_findings USING btree (severity);
 
 CREATE UNIQUE INDEX index_security_findings_on_uuid_and_scan_id ON security_findings USING btree (uuid, scan_id);
+
+CREATE INDEX index_security_scans_on_created_at ON security_scans USING btree (created_at);
 
 CREATE INDEX index_security_scans_on_date_created_at_and_id ON security_scans USING btree (date(timezone('UTC'::text, created_at)), id);
 
@@ -27178,6 +27266,9 @@ ALTER TABLE ONLY terraform_states
 ALTER TABLE ONLY analytics_cycle_analytics_project_stages
     ADD CONSTRAINT fk_rails_796a7dbc9c FOREIGN KEY (project_value_stream_id) REFERENCES analytics_cycle_analytics_project_value_streams(id) ON DELETE CASCADE;
 
+ALTER TABLE ONLY vulnerability_finding_evidence_supporting_messages
+    ADD CONSTRAINT fk_rails_79e77f6c5c FOREIGN KEY (vulnerability_finding_evidence_id) REFERENCES vulnerability_finding_evidences(id) ON DELETE CASCADE;
+
 ALTER TABLE ONLY software_license_policies
     ADD CONSTRAINT fk_rails_7a7a2a92de FOREIGN KEY (software_license_id) REFERENCES software_licenses(id) ON DELETE CASCADE;
 
@@ -27807,6 +27898,9 @@ ALTER TABLE ONLY vulnerability_issue_links
 
 ALTER TABLE ONLY merge_request_blocks
     ADD CONSTRAINT fk_rails_e9387863bc FOREIGN KEY (blocking_merge_request_id) REFERENCES merge_requests(id) ON DELETE CASCADE;
+
+ALTER TABLE ONLY vulnerability_finding_evidence_sources
+    ADD CONSTRAINT fk_rails_e9761bed4c FOREIGN KEY (vulnerability_finding_evidence_id) REFERENCES vulnerability_finding_evidences(id) ON DELETE CASCADE;
 
 ALTER TABLE ONLY protected_branch_unprotect_access_levels
     ADD CONSTRAINT fk_rails_e9eb8dc025 FOREIGN KEY (protected_branch_id) REFERENCES protected_branches(id) ON DELETE CASCADE;

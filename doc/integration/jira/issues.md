@@ -6,7 +6,7 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 
 # Jira integration issue management **(FREE)**
 
-Integrating issue management with Jira requires you to [configure Jira](development_panel.md#configure-the-integration)
+Integrating issue management with Jira requires you to [configure Jira](index.md#jira-integration)
 and [enable the Jira service](development_panel.md#configure-gitlab) in GitLab.
 After you configure and enable the integration, you can reference and close Jira
 issues by mentioning the Jira ID in GitLab commits and merge requests.
@@ -53,10 +53,6 @@ You can [disable comments](#disable-comments-on-jira-issues) on issues.
 > - Enabled on GitLab.com.
 > - Recommended for production use.
 > - For GitLab self-managed instances, GitLab administrators can opt to [disable it](#enable-or-disable-the-ability-to-require-an-associated-jira-issue-on-merge-requests). **(ULTIMATE SELF)**
-
-This in-development feature might not be available for your use. There can be
-[risks when enabling features still in development](../../user/application_security/index.md#security-approvals-in-merge-requests).
-Refer to this feature's version history for more details.
 
 You can prevent merge requests from being merged if they do not refer to a Jira issue.
 To enforce this:
@@ -126,7 +122,7 @@ Issues are grouped into tabs based on their
 - **Closed** tab: All issues with a Jira status categorized as Done.
 - **All** tab: All issues of any status.
 
-## Search and filter the issues list
+### Search and filter the issues list **(PREMIUM)**
 
 To refine the list of issues, use the search bar to search for any text
 contained in an issue summary (title) or description. Use any combination

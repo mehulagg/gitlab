@@ -6,7 +6,7 @@
       %button.btn.gl-button.btn-default.js-settings-toggle{ type: 'button' }
         = expanded ? _('Collapse') : _('Expand')
       %p
-        = _('Select a subgroup to use as a template when creating new projects in the group.')
+        = s_('AdminSettings|Select a group to use as the source for instance-level project templates.')
     .settings-content
 
       = form_for @application_setting, url: templates_admin_application_settings_path(anchor: 'js-custom-project-templates-settings') do |f|
@@ -17,9 +17,9 @@
 
             = f.label :file_template_project_id, class: 'label-bold' do
               .form-text
-                = _('Search for a group')
+                = _('Select group')
             = groups_select_tag('application_setting[custom_project_templates_group_id]', selected: @application_setting.custom_project_templates_group_id, class: 'input-clamp allowClear qa-custom-project-template-select', multiple: false)
-            - link_start = '<a href="%{url}">'.html_safe % { url: help_page_path('user/group/custom_project_templates') }
-            = s_("GroupTemplate|The selected group's repositories and databases are copied into the projects created in this group. %{link_start}What should I add to my template group?%{link_end} ").html_safe % { link_start: link_start, link_end: "</a>".html_safe }
+            - link_start = '<a href="%{url}">'.html_safe % { url: help_page_path('user/admin_area/custom_project_templates.md') }
+            = s_("AdminSettings|The projects in this group can be selected as templates for new projects created on the instance. %{link_start}Learn more.%{link_end} ").html_safe % { link_start: link_start, link_end: "</a>".html_safe }
 
         = f.submit _('Save changes'), class: "gl-button btn btn-confirm qa-save-changes-button"

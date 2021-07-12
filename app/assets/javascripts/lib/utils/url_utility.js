@@ -209,11 +209,7 @@ export function removeParams(params, url = window.location.href, skipEncoding = 
   return `${root}${writableQuery}${writableFragment}`;
 }
 
-export function getLocationHash(url = window.location.href) {
-  const hashIndex = url.indexOf('#');
-
-  return hashIndex === -1 ? null : url.substring(hashIndex + 1);
-}
+export const getLocationHash = (hash = window.location.hash) => hash.split('#')[1];
 
 /**
  * Returns a boolean indicating whether the URL hash contains the given string value
@@ -497,6 +493,19 @@ export function queryToObject(query, { gatherArrays = false, legacySpacesDecode 
     return accumulator;
   }, {});
 }
+
+/**
+ * This function accepts the `name` of the param to parse in the url
+ * if the name does not exist this function will return `null`
+ * otherwise it will return the value of the param key provided
+ *
+ * @param {String} name
+ * @param {String?} urlToParse
+ * @returns value of the parameter as string
+ */
+export const getParameterByName = (name, query = window.location.search) => {
+  return queryToObject(query)[name] || null;
+};
 
 /**
  * Convert search query object back into a search query

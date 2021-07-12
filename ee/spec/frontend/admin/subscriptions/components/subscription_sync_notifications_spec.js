@@ -1,11 +1,12 @@
 import { GlAlert, GlLink, GlSprintf } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
 import SubscriptionSyncNotifications, {
-  SUCCESS_ALERT_DISMISSED_EVENT,
+  INFO_ALERT_DISMISSED_EVENT,
 } from 'ee/admin/subscriptions/show/components/subscription_sync_notifications.vue';
 import {
   connectivityIssue,
-  manualSyncSuccessfulTitle,
+  manualSyncPendingText,
+  manualSyncPendingTitle,
   subscriptionSyncStatus,
 } from 'ee/admin/subscriptions/show/constants';
 import { extendedWrapper } from 'helpers/vue_test_utils_helper';
@@ -17,7 +18,7 @@ describe('Subscription Sync Notifications', () => {
 
   const finAllAlerts = () => wrapper.findAllComponents(GlAlert);
   const findFailureAlert = () => wrapper.findByTestId('sync-failure-alert');
-  const findSuccessAlert = () => wrapper.findByTestId('sync-success-alert');
+  const findInfoAlert = () => wrapper.findByTestId('sync-info-alert');
   const findLink = () => wrapper.findComponent(GlLink);
 
   const createComponent = ({ props, stubs } = {}) => {
@@ -45,21 +46,29 @@ describe('Subscription Sync Notifications', () => {
     });
   });
 
-  describe('sync success notification', () => {
+  describe('sync info notification', () => {
     beforeEach(() => {
       createComponent({
-        props: { syncStatus: subscriptionSyncStatus.SYNC_SUCCESS },
+        props: { syncStatus: subscriptionSyncStatus.SYNC_PENDING },
       });
     });
 
-    it('displays an alert with success message', () => {
-      expect(findSuccessAlert().props('title')).toBe(manualSyncSuccessfulTitle);
+    it('displays an info alert', () => {
+      expect(findInfoAlert().props('variant')).toBe('info');
+    });
+
+    it('displays an alert with a title', () => {
+      expect(findInfoAlert().props('title')).toBe(manualSyncPendingTitle);
+    });
+
+    it('displays an alert with a message', () => {
+      expect(findInfoAlert().text()).toBe(manualSyncPendingText);
     });
 
     it('emits an event when dismissed', () => {
-      findSuccessAlert().vm.$emit('dismiss');
+      findInfoAlert().vm.$emit('dismiss');
 
-      expect(wrapper.emitted(SUCCESS_ALERT_DISMISSED_EVENT)).toEqual([[]]);
+      expect(wrapper.emitted(INFO_ALERT_DISMISSED_EVENT)).toHaveLength(1);
     });
   });
 

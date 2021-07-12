@@ -347,32 +347,6 @@ RSpec.describe Notify do
     end
   end
 
-  describe 'admin notification' do
-    let(:example_site_path) { root_path }
-    let(:user) { create(:user) }
-
-    subject { @email = described_class.send_admin_notification(user.id, 'Admin announcement', 'Text') }
-
-    it 'is sent as the author' do
-      sender = subject.header[:from].addrs[0]
-      expect(sender.display_name).to eq("GitLab")
-      expect(sender.address).to eq(gitlab_sender)
-    end
-
-    it 'is sent to recipient' do
-      is_expected.to deliver_to user.email
-    end
-
-    it 'has the correct subject' do
-      is_expected.to have_subject 'Admin announcement'
-    end
-
-    it 'includes unsubscribe link' do
-      unsubscribe_link = "http://localhost/unsubscribes/#{Base64.urlsafe_encode64(user.email)}"
-      is_expected.to have_body_text(unsubscribe_link)
-    end
-  end
-
   describe 'new user was created via saml' do
     let(:group_member) { create(:group_member, user: create(:user, :unconfirmed)) }
     let(:group) { group_member.source }

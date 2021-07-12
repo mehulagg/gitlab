@@ -1,6 +1,6 @@
 <script>
 import { GlModal, GlAlert } from '@gitlab/ui';
-import { set, isEqual } from 'lodash';
+import { isEqual } from 'lodash';
 import { s__, __ } from '~/locale';
 import {
   updateStoreOnEscalationPolicyCreate,
@@ -103,7 +103,7 @@ export default {
       };
     },
     updateForm({ field, value }) {
-      set(this.form, field, value);
+      this.form = { ...this.form, [field]: value };
       this.validateForm(field);
     },
     createEscalationPolicy() {

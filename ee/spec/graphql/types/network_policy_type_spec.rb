@@ -8,6 +8,7 @@ RSpec.describe GitlabSchema.types['NetworkPolicy'] do
   it 'has the expected fields' do
     expect(described_class).to have_graphql_fields(
       :name,
+      :kind,
       :namespace,
       :enabled,
       :from_auto_devops,

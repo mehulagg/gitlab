@@ -1,11 +1,14 @@
 import { GlDrawer } from '@gitlab/ui';
 import MergeRequestDrawer from 'ee/compliance_dashboard/components/drawer.vue';
 import BranchPath from 'ee/compliance_dashboard/components/drawer_sections/branch_path.vue';
+import Committers from 'ee/compliance_dashboard/components/drawer_sections/committers.vue';
+import MergedBy from 'ee/compliance_dashboard/components/drawer_sections/merged_by.vue';
 import Project from 'ee/compliance_dashboard/components/drawer_sections/project.vue';
 import Reference from 'ee/compliance_dashboard/components/drawer_sections/reference.vue';
+import Reviewers from 'ee/compliance_dashboard/components/drawer_sections/reviewers.vue';
 import { complianceFramework } from 'ee_jest/vue_shared/components/compliance_framework_label/mock_data';
 import { shallowMountExtended } from 'helpers/vue_test_utils_helper';
-import { createMergeRequests } from '../mock_data';
+import { createApprovers, createMergeRequests } from '../mock_data';
 
 describe('MergeRequestDrawer component', () => {
   let wrapper;
@@ -13,6 +16,9 @@ describe('MergeRequestDrawer component', () => {
     count: 1,
     props: {
       compliance_management_framework: complianceFramework,
+      committers: createApprovers(3),
+      approved_by_users: createApprovers(2),
+      participants: createApprovers(3),
     },
   })[0];
 
@@ -21,6 +27,9 @@ describe('MergeRequestDrawer component', () => {
   const findProject = () => wrapper.findComponent(Project);
   const findReference = () => wrapper.findComponent(Reference);
   const findBranchPath = () => wrapper.findComponent(BranchPath);
+  const findCommitters = () => wrapper.findComponent(Committers);
+  const findReviewers = () => wrapper.findComponent(Reviewers);
+  const findMergedBy = () => wrapper.findComponent(MergedBy);
 
   const createComponent = (props) => {
     return shallowMountExtended(MergeRequestDrawer, {
@@ -75,6 +84,29 @@ describe('MergeRequestDrawer component', () => {
       expect(findReference().props()).toStrictEqual({
         path: mergeRequest.path,
         reference: mergeRequest.reference,
+      });
+    });
+
+    it('does not have the branch section', () => {
+      expect(findBranchPath().exists()).toBe(false);
+    });
+
+    it('has the committers section', () => {
+      expect(findCommitters().props()).toStrictEqual({
+        committers: mergeRequest.committers,
+      });
+    });
+
+    it('has the reviewers section', () => {
+      expect(findReviewers().props()).toStrictEqual({
+        approvers: mergeRequest.approved_by_users,
+        commenters: mergeRequest.participants,
+      });
+    });
+
+    it('has the merged by section', () => {
+      expect(findMergedBy().props()).toStrictEqual({
+        mergedBy: mergeRequest.merged_by,
       });
     });
   });

@@ -54,9 +54,12 @@ export default {
       :open="isSidebarOpen"
       @close="handleClose"
     >
+      <template #title>
+        <h2 class="gl-my-0 gl-font-size-h2 gl-line-height-24">{{ __('Epic details') }}</h2>
+      </template>
       <template #header>
-        <h2 class="gl-mt-0 gl-mb-3 gl-font-size-h2 gl-line-height-24">{{ __('Epic details') }}</h2>
         <sidebar-todo-widget
+          class="gl-mt-3"
           :issuable-id="activeBoardItem.fullId"
           :issuable-iid="activeBoardItem.iid"
           :full-path="fullPath"

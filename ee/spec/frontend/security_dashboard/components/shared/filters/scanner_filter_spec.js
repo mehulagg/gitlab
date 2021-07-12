@@ -26,13 +26,14 @@ const defaultScanners = [
   createScannerConfig(DEFAULT_SCANNER, 'CONTAINER_SCANNING', 6),
   createScannerConfig(DEFAULT_SCANNER, 'DAST', 7),
   createScannerConfig(DEFAULT_SCANNER, 'DAST', 8),
+  createScannerConfig(DEFAULT_SCANNER, 'CLUSTER_IMAGE_SCANNING', 9),
 ];
 
 const customScanners = [
   ...defaultScanners,
-  createScannerConfig('Custom', 'SAST', 9),
   createScannerConfig('Custom', 'SAST', 10),
-  createScannerConfig('Custom', 'DAST', 11),
+  createScannerConfig('Custom', 'SAST', 11),
+  createScannerConfig('Custom', 'DAST', 12),
 ];
 
 describe('Scanner Filter component', () => {

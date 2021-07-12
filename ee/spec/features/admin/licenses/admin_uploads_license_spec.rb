@@ -36,50 +36,6 @@ RSpec.describe "Admin uploads license", :js do
     end
   end
 
-  context "when license key is provided in the query string" do
-    before do
-      License.destroy_all # rubocop: disable Cop/DestroyAll
-
-      visit(admin_license_path(trial_key: license.data))
-
-      page.within("#modal-upload-trial-license") do
-        expect(page).to have_content("Your trial license was issued").and have_button("Install license")
-      end
-
-      click_button("Install license")
-    end
-
-    context "when license is active immediately" do
-      let_it_be(:license) { build(:license, data: build(:gitlab_license, restrictions: { active_user_count: 2000 }).export) }
-
-      it "installs license" do
-        expect(page).to have_content("The license was successfully uploaded and is now active")
-      end
-    end
-
-    context "when license starts in the future" do
-      let_it_be(:license) { build(:license, data: build(:gitlab_license, restrictions: { active_user_count: 2000 }, starts_at: Date.current + 1.month).export) }
-
-      it "installs license" do
-        expect(page).to have_content("The license was successfully uploaded and will be active from #{license.starts_at}. You can see the details below.")
-        .and have_content("You have a license that activates at a future date. Please see the License History table below.")
-      end
-    end
-  end
-
-  context "when license key is not provided in the query string, as it is a repeat trial" do
-    before do
-      License.destroy_all # rubocop: disable Cop/DestroyAll
-
-      visit(admin_license_path(trial_key: ""))
-    end
-
-    it "shows an info banner for repeat trial" do
-      expect(page).to have_selector('div#repeat-trial-info')
-      expect(page).to have_selector('div.bs-callout-info')
-    end
-  end
-
   context "uploading license" do
     before do
       visit(new_admin_license_path)
@@ -122,8 +78,6 @@ RSpec.describe "Admin uploads license", :js do
             attach_and_upload(path)
 
             expect(page).to have_content("The license was successfully uploaded and will be active from #{license.starts_at}. You can see the details below.")
-                      .and have_content(license.licensee.each_value.first)
-                      .and have_content("You have a license that activates at a future date. Please see the License History table below.")
           end
         end
       end

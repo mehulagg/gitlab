@@ -57,19 +57,18 @@ export default {
     v-bind="$attrs"
     v-on="$listeners"
   >
+    <template v-if="policy" #title>
+      <h3 class="gl-my-0">{{ policy.name }}</h3>
+    </template>
     <template v-if="policy" #header>
-      <div>
-        <h3 class="gl-mb-5 gl-mt-0">{{ policy.name }}</h3>
-        <div>
-          <gl-button
-            data-testid="edit-button"
-            category="primary"
-            variant="info"
-            :href="editPolicyPath"
-            >{{ s__('NetworkPolicies|Edit policy') }}</gl-button
-          >
-        </div>
-      </div>
+      <gl-button
+        class="gl-mt-5"
+        data-testid="edit-button"
+        category="primary"
+        variant="info"
+        :href="editPolicyPath"
+        >{{ s__('NetworkPolicies|Edit policy') }}</gl-button
+      >
     </template>
     <div v-if="policy">
       <component :is="policyComponent" v-if="policyComponent" :value="policy.yaml" />
