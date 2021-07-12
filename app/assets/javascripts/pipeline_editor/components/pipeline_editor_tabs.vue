@@ -15,6 +15,7 @@ import {
   VISUALIZE_TAB,
 } from '../constants';
 import getAppStatus from '../graphql/queries/client/app_status.graphql';
+import getCurrentBranch from '../graphql/queries/client/current_branch.graphql';
 import CiConfigMergedPreview from './editor/ci_config_merged_preview.vue';
 import CiEditorHeader from './editor/ci_editor_header.vue';
 import TextEditor from './editor/text_editor.vue';
@@ -60,6 +61,7 @@ export default {
     TextEditor,
   },
   mixins: [glFeatureFlagsMixin()],
+  inject: ['defaultBranch'],
   props: {
     ciConfigData: {
       type: Object,
@@ -73,6 +75,9 @@ export default {
   apollo: {
     appStatus: {
       query: getAppStatus,
+    },
+    currentBranch: {
+      query: getCurrentBranch,
     },
   },
   computed: {
@@ -91,6 +96,9 @@ export default {
     },
     isLoading() {
       return this.appStatus === EDITOR_APP_STATUS_LOADING;
+    },
+    isOnDefaultBranch() {
+      return this.currentBranch === this.defaultBranch;
     },
   },
   methods: {
@@ -138,6 +146,7 @@ export default {
       <ci-lint v-else :is-valid="isValid" :ci-config="ciConfigData" />
     </editor-tab>
     <editor-tab
+      v-if="isOnDefaultBranch"
       class="gl-mb-3"
       :empty-message="$options.i18n.empty.merge"
       :keep-component-mounted="false"

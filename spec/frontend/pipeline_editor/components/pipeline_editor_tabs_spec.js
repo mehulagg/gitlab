@@ -15,6 +15,8 @@ import {
 import PipelineGraph from '~/pipelines/components/pipeline_graph/pipeline_graph.vue';
 import { mockLintResponse, mockCiYml } from '../mock_data';
 
+const DEFAULT_BRANCH = 'main';
+
 describe('Pipeline editor tabs component', () => {
   let wrapper;
   const MockTextEditor = {
@@ -23,8 +25,11 @@ describe('Pipeline editor tabs component', () => {
 
   const createComponent = ({
     props = {},
-    provide = {},
+    provide = {
+      defaultBranch: DEFAULT_BRANCH,
+    },
     appStatus = EDITOR_APP_STATUS_VALID,
+    currentBranch = DEFAULT_BRANCH,
     mountFn = shallowMount,
   } = {}) => {
     wrapper = mountFn(PipelineEditorTabs, {
@@ -36,6 +41,7 @@ describe('Pipeline editor tabs component', () => {
       data() {
         return {
           appStatus,
+          currentBranch,
         };
       },
       provide: { ...provide },
@@ -158,6 +164,16 @@ describe('Pipeline editor tabs component', () => {
       it('display the tab and the merged preview component', () => {
         expect(findMergedTab().exists()).toBe(true);
         expect(findMergedPreview().exists()).toBe(true);
+      });
+    });
+
+    describe('on a non-default branch', () => {
+      beforeEach(() => {
+        createComponent({ currentBranch: 'feature' });
+      });
+
+      it('does not display the merged YAML tab', () => {
+        expect(findMergedTab().exists()).toBe(false);
       });
     });
   });
