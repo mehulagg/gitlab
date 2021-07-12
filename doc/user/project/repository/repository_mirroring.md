@@ -618,8 +618,13 @@ Check if the repository owner is specified in the URL of your mirrored repositor
 
 The repository owner is needed for Bitbucket to connect to the repository for mirroring.
 
-### Pull mirror missing LFS files
+### Pull mirror is missing LFS files
 
-- When using an SSH repository URL, LFS files will not be transferred. Please use an HTTPS repository URL instead. There is [an issue to fix this for SSH URLs](https://gitlab.com/gitlab-org/gitlab/-/issues/11997).
-- In GitLab 14.0 and older, when the source repo is a public Bitbucket URL, LFS files will not be transferred. This was [fixed in GitLab 14.1](https://gitlab.com/gitlab-org/gitlab/-/issues/335123).
-- When mirroring an external repository using object storage, LFS files will not be transferred. There is [an issue to fix this](https://gitlab.com/gitlab-org/gitlab/-/issues/335495).
+In some cases, pull mirroring does not transfer LFS files. This issue occurs when:
+
+- You use an SSH repository URL. The workaround is to use an HTTPS repository URL instead.
+  There is [an issue to fix this for SSH URLs](https://gitlab.com/gitlab-org/gitlab/-/issues/11997).
+- You're using GitLab 14.0 and older, and the source repository is a public Bitbucket URL.
+  This was [fixed in GitLab 14.1](https://gitlab.com/gitlab-org/gitlab/-/issues/335123).
+- You mirror an external repository using object storage.
+  There is [an issue to fix this](https://gitlab.com/gitlab-org/gitlab/-/issues/335495).
