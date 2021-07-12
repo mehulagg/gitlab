@@ -47,7 +47,7 @@ query getProjectIssues(
       }
       nodes {
         ...IssueFragment
-        blockedByCount
+        blockingCount
         healthStatus
         weight
       }

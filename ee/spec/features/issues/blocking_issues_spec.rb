@@ -21,12 +21,8 @@ RSpec.describe 'Blocking issues count' do
   end
 
   it 'sorts by blocking', :js do
-    find('.filter-dropdown-container .dropdown').click
-
-    page.within('ul.dropdown-menu.dropdown-menu-right li') do
-      expect(page).to have_content('Blocking')
-      click_link("Blocking")
-    end
+    click_button 'Created date'
+    click_on 'Blocking'
 
     page.within(".issues-list") do
       page.within("li.issue:nth-child(1)") do
